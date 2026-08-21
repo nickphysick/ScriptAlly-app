@@ -514,3 +514,143 @@ test("phase 3 — a slot whose material is gone says so", async ({ page }) => {
   expect(flat(after), "a slot with a missing material said nothing").toContain("No longer available");
   expect(flat(restored), "the fixture was not put back").toEqual(flat(before));
 });
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   PHASE 4 — PACKAGES, TRACKING AND FOOTNOTE BANDS; THE RAIL REMOVED
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+export const BANDS = `(() => {
+  const root = document.querySelector(".pkg-root");
+  if (!root) return { error: "no .pkg-root" };
+  const rect = (el) => { const b = el.getBoundingClientRect();
+    return { x: Math.round(b.x), w: Math.round(b.width), h: Math.round(b.height) }; };
+  const txt = (el, s) => (el.querySelector(s)?.textContent || "").replace(/\\s+/g, " ").trim();
+  const bands = Array.from(root.querySelectorAll(".pkgb-band"));
+  const cards = Array.from(root.querySelectorAll(".pkgb-pkgcard"));
+  const scroller = root.querySelector(".wpg-scroll");
+  return {
+    /* ⚠️ THE RAIL, ASSERTED GONE FROM THE RENDERED PAGE — a source lock proves it was deleted from
+       a file, never that no file renders it. */
+    railPresent: !!root.querySelector(".pkgo-rail"),
+    railRows: root.querySelectorAll(".pkgo-row").length,
+    bandHeads: bands.map((b) => txt(b, ".pkgb-bandhead h2")),
+    bandTags: bands.map((b) => txt(b, ".pkgb-bandhead .pkgb-tag")),
+    bandWidths: bands.map((b) => rect(b).w),
+    cards: cards.map((c) => ({
+      name: txt(c, ".pkgb-pkgname"),
+      stamp: (c.querySelector(".pkgb-plate--stamp")?.getAttribute("data-slot") || ""),
+      stampBox: c.querySelector(".pkgb-plate--stamp") ? rect(c.querySelector(".pkgb-plate--stamp")) : null,
+      slots: Array.from(c.querySelectorAll(".pkgb-slot")).map((sl) => ({
+        label: (sl.querySelector(".pkgb-slt")?.textContent || "").trim(),
+        name: (sl.querySelector(".pkgb-sln")?.textContent || "").trim(),
+        gone: !!sl.querySelector(".pkgb-sln--gone"),
+        none: !!sl.querySelector(".pkgb-sln--none"),
+      })),
+      foot: txt(c, ".pkgb-pkgfoot"),
+      bin: c.querySelectorAll(".pkgb-rem").length,
+      box: rect(c),
+    })),
+    ghostCard: {
+      present: !!root.querySelector(".pkgb-pkgghost"),
+      slot: (root.querySelector(".pkgb-pkgghost .pkgb-plate")?.getAttribute("data-slot") || ""),
+    },
+    stats: Array.from(root.querySelectorAll(".pkgb-stat")).map((s) => ({
+      n: (s.querySelector(".pkgb-statn")?.textContent || "").trim(),
+      label: (s.querySelector(".pkgb-statl")?.textContent || "").replace(/\\s+/g, " ").trim(),
+      slot: (s.querySelector(".pkgb-plate")?.getAttribute("data-slot") || ""),
+    })),
+    barPanels: Array.from(root.querySelectorAll(".pkgb-panel")).map((p) => ({
+      label: txt(p, ".pkgb-eyebrow"),
+      rows: Array.from(p.querySelectorAll(".pkgb-drow")).map((r) => ({
+        name: txt(r, ".pkgb-drname"), meta: txt(r, ".pkgb-drmeta"),
+        sentPct: r.querySelector(".pkgb-bsent")?.style.width,
+        inPct: r.querySelector(".pkgb-bin")?.style.width,
+      })),
+    })),
+    ledger: Array.from(root.querySelectorAll(".pkgb-lrow")).map((r) => ({
+      date: txt(r, ".pkgb-ldate"), dir: txt(r, ".pkgb-ldir"),
+      what: txt(r, ".pkgb-lwhat"), pkg: txt(r, ".pkgb-lpkg"),
+    })),
+    footnote: Array.from(root.querySelectorAll(".pkgb-hncell")).map((c) => ({
+      title: txt(c, ".pkgb-hnt"), body: txt(c, "p").slice(0, 46),
+      slot: (c.querySelector(".pkgb-plate")?.getAttribute("data-slot") || ""),
+    })),
+    /* the page must not scroll sideways at any width */
+    pageOverflowPx: scroller ? scroller.scrollWidth - scroller.clientWidth : null,
+  };
+})()`;
+
+for (const vp of [{ w: 1440, h: 900 }, { w: 1920, h: 1200 }]) {
+  test(`phase 4 — the three bands at ${vp.w}`, async ({ page }) => {
+    await openRoute(page, ROUTE, { width: vp.w, height: vp.h });
+    await liftMotionSuppression(page);
+    const r: any = await page.evaluate(BANDS);
+    writeFileSync(`${ART}/p4-bands-${vp.w}.txt`, JSON.stringify(r, null, 2) + "\n");
+    console.log(`── ${vp.w} ──\n` + JSON.stringify(r, null, 2));
+    await page.screenshot({ path: `${OUT}/p4-bands-${vp.w}.png`, fullPage: true });
+
+    /* ⚠️ THE POPULATION FLOOR FIRST, or every property below is satisfied by an empty page.
+       FOUR bands: the footnote is one too, and it carries an `aria-label` rather than an `h2`
+       because "How these figures are counted" is a caption, not a section anyone navigates to.
+       A first draft listed three heads and failed on a page that was entirely correct. */
+    expect(r.bandHeads.filter(Boolean), "the three headed bands")
+      .toEqual(["Your materials", "Your packages", "Tracking"]);
+    expect(r.bandHeads.length, "the footnote band is missing").toBe(4);
+    expect(r.cards.length, "package cards to measure").toBeGreaterThan(0);
+    expect(r.footnote.length, "footnote cells").toBe(3);
+
+    expect(r.railPresent, "the rail is still rendered").toBe(false);
+    expect(r.railRows, "register rows survive somewhere").toBe(0);
+
+    /* Every band takes the same measure — none is inset or bleeding past the others. */
+    expect(new Set(r.bandWidths).size, `band widths ${r.bandWidths}`).toBe(1);
+    expect(r.pageOverflowPx, "the page scrolls sideways").toBeLessThanOrEqual(0);
+
+    for (const c of r.cards) {
+      expect(c.slots.length, `${c.name} lost a slot row`).toBe(3);
+      expect(c.stampBox, `${c.name} has no stamp`).toBeTruthy();
+      expect(c.bin, `${c.name} has no removal control`).toBe(1);
+      /* ⚠️ THE STAMP MUST NOT SIT ON THE TITLE. It is absolutely placed in the corner and the title
+         reserves its width — a claim about the arrangement, so it is measured as an intersection
+         rather than read off either element. */
+      const title = c.box;
+      expect(c.stampBox.x + c.stampBox.w, `${c.name}'s stamp escapes its card`)
+        .toBeLessThanOrEqual(title.x + title.w);
+    }
+
+    expect(r.ghostCard.present, "no ghost card to build another package").toBe(true);
+    expect(r.ghostCard.slot, "the ghost lost its illustration slot").toBe("pkg-ghost");
+    for (const f of r.footnote) expect(f.slot, "a footnote cell lost its slot").toBeTruthy();
+  });
+}
+
+/**
+ * The ledger, and the join behind it.
+ *
+ * ⚠️ ITS ROWS ARE PROVED AGAINST THE STORES THEY CAME FROM, not against a fixture. Every row must
+ * name a package the page also lists, and the panel must not exist while the counts above it are
+ * zero — the two claims that make "Latest activity" mean what its heading says.
+ */
+test("phase 4 — the ledger names real packages and real agents", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  await liftMotionSuppression(page);
+  const r: any = await page.evaluate(BANDS);
+  writeFileSync(`${ART}/p4-ledger.txt`, JSON.stringify({ ledger: r.ledger, cards: r.cards.map((c: any) => c.name), stats: r.stats }, null, 2) + "\n");
+  console.log(JSON.stringify({ ledger: r.ledger, stats: r.stats }, null, 2));
+
+  const sent = Number(r.stats.find((s: any) => /SENT/i.test(s.label))?.n ?? 0);
+  if (sent === 0) {
+    expect(r.ledger.length, "a ledger under zero counts").toBe(0);
+    return;
+  }
+  expect(r.ledger.length, "figures but no activity behind them").toBeGreaterThan(0);
+  const names = new Set(r.cards.map((c: any) => c.name));
+  for (const row of r.ledger) {
+    expect(names.has(row.pkg), `${row.pkg} is not a package on this page`).toBe(true);
+    expect(row.what.length, "a ledger row said nothing").toBeGreaterThan(0);
+    expect(row.dir, "a ledger row has no direction").toMatch(/[→←]/);
+    /* ⚠️ NEVER A PRONOUN FOR AN AGENT — the app does not know, and guessing is a 50% error rate on
+       a real person's name. */
+    expect(row.what.toLowerCase()).not.toMatch(/\\b(his|her|hers|he|she)\\b/);
+  }
+});

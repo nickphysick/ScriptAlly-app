@@ -25,9 +25,14 @@
  *
  * Pure: no Firestore, no React, no clock.
  */
-import { ManuscriptVersion, SubmissionPackage, Query } from "../types";
-import { packageMetrics, isRequest, isSlotFilled } from "./packageMetrics";
-import { TYPE_META, BUILDER_TYPES, SLOT_FIELD } from "../components/packages/typeMeta";
+import { ActivityType, Agent, Activity, ManuscriptVersion, QueryStatus, SubmissionPackage, Query } from "../types";
+import { packageMetrics, isRequest, isSlotFilled, packagesUsingVersion } from "./packageMetrics";
+import { TYPE_META } from "../components/packages/typeMeta";
+/* ⚠️ THE APP'S ONE EVENT LABELLER, NOT A SECOND ONE. Its own docstring says why: "a second labeller
+   for the dock is how two surfaces come to call one event different things". The ledger has no hero
+   row above it, so it passes `includeSend` — the option that exists for exactly this case. */
+import { activityEventLabel } from "./activityEvent";
+import { normalizeResultingStatus } from "./queryDerivation";
 
 /* ══════════════════════════════════════════════════════════════════════════════
    THE STAT STRIP
@@ -103,12 +108,21 @@ export function repliesByPackage(packages: SubmissionPackage[], queries: Query[]
    REQUESTS BY MATERIAL
    ══════════════════════════════════════════════════════════════════════════════ */
 
-/** Every package a material appears in, by any slot. */
+/**
+ * Every package a material appears in, by any slot.
+ *
+ * ⚠️ THE THIRD COPY OF ONE PREDICATE, NOW DELEGATED. This filter, `packagesOverview.packagesUsing`
+ * and `packageMetrics.packagesUsingVersion` were three implementations of "does this package
+ * reference this material" — driving the requests-by-material panel, the sheet's usage line and
+ * `componentMetrics`/`materialUsage` respectively. Three answers to one question, agreeing on every
+ * input the app can produce, which is how such a set survives until somebody edits one of them.
+ *
+ * ⚠️ AND THE NAME STAYS, because the panel reads better for it. Delegating is what matters; keeping
+ * a local alias with a docstring costs nothing and renaming every call site would touch a locked
+ * module's vocabulary for no gain.
+ */
 export const packagesContaining = (versionId: string, packages: SubmissionPackage[]): SubmissionPackage[] =>
-  packages.filter((p) => BUILDER_TYPES.some((t) => {
-    const id = p[SLOT_FIELD[t]];
-    return isSlotFilled(id) && id === versionId;
-  }));
+  isSlotFilled(versionId) ? packagesUsingVersion(versionId, packages) : [];
 
 /**
  * One row per material that has travelled, aggregating across EVERY sent package containing it.
@@ -163,4 +177,145 @@ export function trackingNudge(packages: SubmissionPackage[], queries: Query[]): 
   if (packages.length === 0) return null;
   if (trackingTotals(packages, queries).sent > 0) return null;
   return { packageName: packages[0].packageName };
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE STAMP (broadsheet D7) — a package card's illustration slot
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * The ref gives three distinct stamps so a grid of cards does not read as a repeating pattern.
+ *
+ * ⚠️ DERIVED FROM THE ID, NOT FROM THE INDEX. An index-based choice re-stamps every card below a
+ * deleted one, so archiving your first package would silently redraw the rest — a change with no
+ * cause the writer can see. A hash of the id is stable for the life of the record.
+ *
+ * ⚠️ AND NOTHING IS STORED. A `stamp` field would be a decoration in the data model, and the first
+ * thing anyone would ask is why it cannot be chosen.
+ */
+export const STAMP_BRIEFS = ["stamp:\nparcel", "stamp:\ntypewriter", "stamp:\ninkwell"] as const;
+
+export function packageStamp(packageId: string): string {
+  let h = 0;
+  for (let i = 0; i < packageId.length; i++) h = (h * 31 + packageId.charCodeAt(i)) >>> 0;
+  return STAMP_BRIEFS[h % STAMP_BRIEFS.length];
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   LATEST ACTIVITY — the ledger
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+export interface LedgerRow {
+  id: string;
+  /** `18 AUG` — mono, uppercase, no year unless it is not this one. */
+  date: string;
+  /** Which way the envelope went. `out` is the writer's act, `in` is the agency's. */
+  direction: "out" | "in";
+  /** The event, in the app's ONE event vocabulary — "Query sent", "Full requested". */
+  what: string;
+  /** "to Jonathan Fairfax" / "from R. Osei" — never a pronoun, and never a guess. */
+  who: string | null;
+  /** The package that travelled. Always present: a row without one is not in this ledger. */
+  packageName: string;
+}
+
+/**
+ * ⚠️ THE WRITER'S ACTS AND THE AGENCY'S, SEPARATED BY WHAT PRODUCED THE EVENT — and closed with the
+ * house `never` idiom so a new QueryStatus fails to compile rather than defaulting to a direction.
+ * A default here would be wrong in the expensive direction: an incoming event drawn as outgoing
+ * tells the writer they did something they did not.
+ */
+function directionOf(act: Pick<Activity, "activityType" | "resultingStatus">): "out" | "in" | null {
+  if (act.activityType === ActivityType.QUERY_SENT) return "out";
+  if (act.activityType === ActivityType.NUDGE_SENT) return "out";
+  /* The offer decisions are the writer's, and neither is a thing the agency did. */
+  if (act.activityType === ActivityType.OFFER_ACCEPTED) return "out";
+  if (act.activityType === ActivityType.OFFER_DECLINED) return "out";
+
+  const rs = normalizeResultingStatus(act.resultingStatus);
+  if (!rs) return null;
+  switch (rs) {
+    case QueryStatus.QUERIED: return "out";
+    case QueryStatus.PARTIAL_SENT: return "out";
+    case QueryStatus.FULL_SENT: return "out";
+    case QueryStatus.WITHDRAWN: return "out";
+    case QueryStatus.PARTIAL_REQUESTED: return "in";
+    case QueryStatus.FULL_REQUESTED: return "in";
+    case QueryStatus.REVISE_RESUBMIT: return "in";
+    case QueryStatus.OFFER: return "in";
+    case QueryStatus.REJECTED: return "in";
+    case QueryStatus.NO_RESPONSE: return "in";
+    default: {
+      const unhandled: never = rs;
+      return unhandled;
+    }
+  }
+}
+
+/** `18 AUG`, and the year only when it is not the one we are in. */
+function ledgerDate(iso: string, now: number): string {
+  const ms = Date.parse(iso);
+  if (Number.isNaN(ms)) return "";
+  const d = new Date(ms);
+  const day = String(d.getDate()).padStart(2, "0");
+  const mon = d.toLocaleString("en-GB", { month: "short" }).toUpperCase();
+  return d.getFullYear() === new Date(now).getFullYear() ? `${day} ${mon}` : `${day} ${mon} ${d.getFullYear()}`;
+}
+
+/**
+ * The ledger — recent events on queries that carried a package.
+ *
+ * ⚠️ IT JOINS THREE STORES AND EVERY HOP IS A REAL REFERENCE. `Activity.queryId` → `Query.agentId`
+ * → `Agent`, and `Query.packageId` → the package. Nothing is parsed out of `description` prose,
+ * which is the rule `activityEvent.ts` exists to enforce: the old inline mapper substring-matched
+ * descriptions and broke the day any copy was reworded.
+ *
+ * ⚠️ A ROW WITH NO PACKAGE IS NOT IN THIS LEDGER, and that is the panel's whole claim. It is headed
+ * "Latest activity" inside a Tracking band about packages; listing an event from an unpackaged query
+ * would put a figure on this page that none of the counts above it include.
+ *
+ * ⚠️ AND THE AGENT MAY BE UNRESOLVABLE — `who` is null rather than "Unknown agent". A deleted agent
+ * leaves a query with a dangling `agentId`, and inventing a name for it is the one thing worse than
+ * omitting the clause.
+ */
+export function ledgerRows(
+  activities: Activity[],
+  queries: Query[],
+  agents: Agent[],
+  packages: SubmissionPackage[],
+  now: number,
+  limit = 5,
+): LedgerRow[] {
+  const queryById = new Map(queries.map((q) => [q.id, q]));
+  const agentById = new Map(agents.map((a) => [a.id, a]));
+  const pkgById = new Map(packages.map((p) => [p.id, p]));
+
+  return activities
+    .map((a) => {
+      const q = queryById.get(a.queryId);
+      if (!q || !q.packageId) return null;
+      const pkg = pkgById.get(q.packageId);
+      if (!pkg) return null;
+      const direction = directionOf(a);
+      if (!direction) return null;
+      /* `includeSend` because this panel has no hero row — the option activityEvent.ts added after
+         the dock silently dropped the send for exactly this reason. */
+      const what = activityEventLabel(a, { includeSend: true });
+      if (!what) return null;
+      const agent = agentById.get(q.agentId);
+      const name = agent ? [agent.name, agent.agency].find((x) => !!x?.trim()) ?? null : null;
+      return {
+        id: a.id,
+        date: ledgerDate(a.date, now),
+        direction,
+        what,
+        who: name ? `${direction === "out" ? "to" : "from"} ${name}` : null,
+        packageName: pkg.packageName,
+        _ms: Date.parse(a.date),
+      };
+    })
+    .filter((r): r is LedgerRow & { _ms: number } => r !== null && !Number.isNaN(r._ms))
+    .sort((a, b) => b._ms - a._ms)
+    .slice(0, limit)
+    .map(({ _ms, ...row }) => row);
 }

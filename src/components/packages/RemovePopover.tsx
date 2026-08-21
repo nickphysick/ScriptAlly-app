@@ -20,16 +20,21 @@
  * "Archive" and run a delete, because the label and the handler come from the same object.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { SubmissionPackage } from "../../types";
 import { removalChoice, type RemovalChoice } from "../../lib/packagesOverview";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import "./packagesBroadsheet.css";
 
-/** The list of holders, as prose. Two are named; three or more become a count. */
-const holderPhrase = (names: string[]): string => {
+/**
+ * The list of holders, as prose. Two are named; three or more become a count.
+ *
+ * ⚠️ THE PLURAL NOUN IS THE CALLER'S, because "3 packages" and "3 queries" are different sentences
+ * and this function knows only the names. A hardcoded "packages" here read correctly for materials
+ * and was wrong the moment a package used the same popover.
+ */
+const holderPhrase = (names: string[], plural: string): string => {
   if (names.length === 1) return names[0];
   if (names.length === 2) return `${names[0]} and ${names[1]}`;
-  return `${names.length} packages`;
+  return `${names.length} ${plural}`;
 };
 
 export interface RemovalCopy {
@@ -44,20 +49,48 @@ export interface RemovalCopy {
  * no "permanently", no warning adjective — the archive branch is genuinely undoable in the data
  * sense (the record survives) and the delete branch says plainly that it is not.
  */
-export function removalCopy(name: string, typeLabel: string, choice: RemovalChoice): RemovalCopy {
+/**
+ * ⚠️ TWO SUBJECTS, TWO SENTENCES, ONE DECISION. The branch is `removalChoice`'s and is identical for
+ * both; only the wording differs, because what a material is held BY and what a package is held BY
+ * are different relationships. Writing one generic sentence for both would have produced "It stays
+ * in R. Osei" about a package, which is not a place a package can stay.
+ */
+export type RemovalSubject = "material" | "package";
+
+export function removalCopy(
+  name: string, typeLabel: string, choice: RemovalChoice, subject: RemovalSubject,
+): RemovalCopy {
   if (choice.kind === "delete") {
     return {
       heading: `Delete ${name}?`,
-      body: <>No package holds this {typeLabel.toLowerCase()}, so it can go for good. This can&rsquo;t be undone.</>,
+      body: subject === "material"
+        ? <>No package holds this {typeLabel.toLowerCase()}, so it can go for good. This can&rsquo;t be undone.</>
+        : <>Nothing has been sent with this package, so it can go for good. This can&rsquo;t be undone.</>,
       verb: "Delete",
     };
   }
+  if (subject === "material") {
+    return {
+      heading: `Archive ${name}?`,
+      body: (
+        <>
+          It leaves your materials list and stays in <b>{holderPhrase(choice.holderNames, "packages")}</b>
+          {choice.holderNames.length > 2 ? " that hold it" : ""}. Nothing you have already sent changes.
+        </>
+      ),
+      verb: "Archive",
+    };
+  }
+  /* ⚠️ THE PACKAGE'S SENTENCE NAMES WHAT IS BEING PROTECTED, WHICH IS THE CORRESPONDENCE. A package
+     you have sent is the record of what was in the envelope; the queries keep pointing at it, so
+     "what did I actually send them" still has an answer. */
   return {
     heading: `Archive ${name}?`,
     body: (
       <>
-        It leaves your materials list and stays in <b>{holderPhrase(choice.packageNames)}</b>
-        {choice.packageNames.length > 2 ? " that hold it" : ""}. Nothing you have already sent changes.
+        It leaves your packages list. The {choice.usedIn === 1 ? "query" : `${choice.usedIn} queries`} sent
+        with it{choice.holderNames.length ? <> — {holderPhrase(choice.holderNames, "agents")} — </> : " "}
+        keep it on record, so what you sent stays answerable.
       </>
     ),
     verb: "Archive",
@@ -65,11 +98,18 @@ export function removalCopy(name: string, typeLabel: string, choice: RemovalChoi
 }
 
 export interface RemovePopoverProps {
-  /** The record being removed — its id decides the branch, its name and type write the copy. */
+  /** The record being removed. */
   id: string;
   name: string;
   typeLabel: string;
-  packages: SubmissionPackage[];
+  /**
+   * ⚠️ WHAT HOLDS IT, COMPUTED BY THE CALLER AND COUNTED HERE. The caller knows the relationship —
+   * packages for a material, queries for a package — and this component knows what a non-empty
+   * holder list MEANS. Splitting it that way is what lets one popover serve both without either
+   * caller being able to offer "Archive" and perform a delete.
+   */
+  holders: string[];
+  subject: RemovalSubject;
   /**
    * ⚠️ `onDelete` MAY REPORT A REFUSAL. `db.deleteVersion` returns `false` without writing when a
    * package holds the material — a last check before an irreversible act, which can only disagree
@@ -85,7 +125,7 @@ export interface RemovePopoverProps {
 }
 
 export const RemovePopover: React.FC<RemovePopoverProps> = ({
-  id, name, typeLabel, packages, onDelete, onArchive, label,
+  id, name, typeLabel, holders, subject, onDelete, onArchive, label,
 }) => {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLSpanElement>(null);
@@ -110,8 +150,8 @@ export const RemovePopover: React.FC<RemovePopoverProps> = ({
     };
   }, [open]);
 
-  const choice = removalChoice(id, packages);
-  const copy = removalCopy(name, typeLabel, choice);
+  const choice = removalChoice(holders);
+  const copy = removalCopy(name, typeLabel, choice, subject);
 
   return (
     <span className="pkgb-remwrap" ref={wrapRef}>

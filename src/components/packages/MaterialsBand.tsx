@@ -23,7 +23,7 @@
  */
 import React from "react";
 import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../../types";
-import { materialColumns } from "../../lib/packagesOverview";
+import { materialColumns, materialHolders } from "../../lib/packagesOverview";
 import { IllustrationSlot } from "./IllustrationSlot";
 import { RemovePopover } from "./RemovePopover";
 import "./packagesBroadsheet.css";
@@ -120,7 +120,9 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
                   id={s.id}
                   name={s.name}
                   typeLabel={s.typeLabel}
-                  packages={packages}
+                  subject="material"
+                  /* The packages that hold it — the same derivation the usage line above prints. */
+                  holders={materialHolders(s.id, packages)}
                   onDelete={onDeleteMaterial}
                   onArchive={onArchiveMaterial}
                 />

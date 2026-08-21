@@ -11,12 +11,15 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
+import { sliceBetween } from "../test/sliceBetween";
 import {
   trackingTotals, repliesByPackage, requestsByMaterial, packagesContaining, trackingNudge, STAT_CELLS,
+  ledgerRows, packageStamp, STAMP_BRIEFS,
 } from "./packageTracking";
 import { packageMetrics, UNFILLED_SLOT } from "./packageMetrics";
-import { ComponentType, QueryStatus } from "../types";
-import type { ManuscriptVersion, SubmissionPackage, Query } from "../types";
+import { activityEventLabel } from "./activityEvent";
+import { ActivityType, ComponentType, QueryStatus } from "../types";
+import type { Activity, Agent, ManuscriptVersion, SubmissionPackage, Query } from "../types";
 
 const v = (id: string, type: ComponentType, name: string): ManuscriptVersion => ({
   id, manuscriptId: "m1", userId: "u1", componentType: type, versionName: name,
@@ -185,6 +188,119 @@ describe("trackingNudge", () => {
   });
 });
 
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE LEDGER (broadsheet §4)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+const NOW = Date.parse("2026-08-21T12:00:00.000Z");
+const agent = (id: string, name: string, agency = "Some Agency"): Agent =>
+  ({ id, userId: "u1", name, agency } as Agent);
+const AGENTS = [
+  agent("a-1", "Jonathan Fairfax"), agent("a-2", "R. Osei"),
+  agent("a-4", "A. Whitmore"), agent("a-5", "M. Okonkwo"),
+];
+const act = (id: string, queryId: string, date: string, over: Partial<Activity> = {}): Activity => ({
+  id, userId: "u1", queryId, manuscriptId: "m1",
+  activityType: ActivityType.STATUS_CHANGED, description: "prose nothing reads",
+  date, details: "", ...over,
+});
+
+describe("ledgerRows — three stores joined by real references", () => {
+  const ACTS = [
+    act("e1", "1", "2026-08-12T09:00:00.000Z", { activityType: ActivityType.QUERY_SENT, resultingStatus: QueryStatus.QUERIED }),
+    act("e2", "2", "2026-08-18T09:00:00.000Z", { resultingStatus: QueryStatus.FULL_REQUESTED }),
+    act("e3", "5", "2026-08-14T09:00:00.000Z", { resultingStatus: QueryStatus.PARTIAL_REQUESTED }),
+    /* on a query with NO package — must never appear in a panel about packages */
+    act("e4", "6", "2026-08-20T09:00:00.000Z", { resultingStatus: QueryStatus.FULL_REQUESTED }),
+  ];
+
+  it("lists newest first", () => {
+    expect(ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW).map((r) => r.id)).toEqual(["e2", "e3", "e1"]);
+  });
+
+  /**
+   * ⚠️ THE ONE THE PANEL'S HEADING DEPENDS ON. It sits inside a Tracking band whose every count
+   * excludes unpackaged queries; an event from one would put a figure on the page that none of the
+   * numbers above it include.
+   */
+  it("excludes an event on a query that carried no package", () => {
+    expect(ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW).map((r) => r.id)).not.toContain("e4");
+  });
+
+  it("names the agent and the direction together", () => {
+    const [full, partial, sent] = ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW);
+    expect(full.direction).toBe("in");
+    expect(full.who).toBe("from R. Osei");
+    expect(partial.direction).toBe("in");
+    expect(sent.direction).toBe("out");
+    expect(sent.who).toBe("to Jonathan Fairfax");
+  });
+
+  /**
+   * ⚠️ THE LABEL IS `activityEventLabel`'s, ASSERTED AGAINST IT rather than typed here. A literal
+   * would be a second copy of a vocabulary whose own module exists to stop exactly that — and it
+   * would pass on the day the labeller changed and this panel stopped matching the timeline.
+   */
+  it("speaks the app's one event vocabulary", () => {
+    for (const row of ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW)) {
+      const source = ACTS.find((a) => a.id === row.id)!;
+      expect(row.what).toBe(activityEventLabel(source, { includeSend: true }));
+    }
+  });
+
+  /** ⚠️ AND THE SEND IS INCLUDED — this panel has no hero row, which is what `includeSend` is for. */
+  it("draws the query going out, which a hero-row surface suppresses", () => {
+    const rows = ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW);
+    expect(rows.find((r) => r.id === "e1")?.what).toBe("Query sent");
+  });
+
+  /** A deleted agent leaves a dangling id; inventing a name for it is worse than omitting it. */
+  it("omits the clause rather than naming an agent it cannot resolve", () => {
+    const row = ledgerRows(ACTS, QUERIES, [], PACKAGES, NOW)[0];
+    expect(row.who).toBeNull();
+    expect(row.what).toBeTruthy();
+  });
+
+  it("names the package that travelled", () => {
+    const rows = ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW);
+    expect(rows.map((r) => r.packageName)).toEqual(["Standard UK", "Comps-led", "Standard UK"]);
+  });
+
+  it("drops the year in the current one and keeps it otherwise", () => {
+    const old = [act("e9", "1", "2025-03-04T09:00:00.000Z", { resultingStatus: QueryStatus.FULL_REQUESTED })];
+    expect(ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW)[0].date).toBe("18 AUG");
+    expect(ledgerRows(old, QUERIES, AGENTS, PACKAGES, NOW)[0].date).toBe("04 MAR 2025");
+  });
+
+  it("caps at the limit it is given", () => {
+    expect(ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW, 2)).toHaveLength(2);
+  });
+
+  /** An event with no typed signal is inert — never mis-mapped from its description prose. */
+  it("drops an event with no typed status signal", () => {
+    const untyped = [act("e8", "1", "2026-08-19T09:00:00.000Z")];
+    expect(ledgerRows(untyped, QUERIES, AGENTS, PACKAGES, NOW)).toEqual([]);
+  });
+});
+
+describe("packageStamp — decorative, derived, stable", () => {
+  /**
+   * ⚠️ STABLE ACROSS A DELETION, which is the whole reason it hashes the id rather than taking an
+   * index. An index-based stamp re-draws every card below a deleted one — a change with no cause
+   * the writer can see.
+   */
+  it("gives one package the same stamp however the list is ordered", () => {
+    const a = packageStamp("pk1");
+    expect(packageStamp("pk1")).toBe(a);
+    expect(STAMP_BRIEFS).toContain(a);
+  });
+
+  it("does not give every package the same one", () => {
+    const seen = new Set(["pk1", "pk2", "pk3", "pk4", "pk5", "pk6"].map(packageStamp));
+    expect(seen.size).toBeGreaterThan(1);
+  });
+});
+
 describe("D8 — the adapter is the only thing reading query data, and it reaches into nothing", () => {
   const src = readFileSync(new URL("./packageTracking.ts", import.meta.url), "utf8");
   /* ⚠️ COMMENTS STRIPPED. This module's own docstring names Query Centre twice, explaining what it
@@ -192,8 +308,28 @@ describe("D8 — the adapter is the only thing reading query data, and it reache
   const decls = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
   const imports = [...decls.matchAll(/from\s+"([^"]+)"/g)].map((m) => m[1]);
 
-  it("imports only types, packageMetrics and typeMeta", () => {
-    expect(imports.sort()).toEqual(["../components/packages/typeMeta", "../types", "./packageMetrics"]);
+  /**
+   * ⚠️ THE BOUNDARY IS STATED AS WHAT IT FORBIDS, NOT AS A LIST OF WHAT IT ALLOWS — REWRITTEN in
+   * broadsheet §4. This was `toEqual([...three modules])`, which is the whitelist shape: it goes red
+   * on every honest addition, and the reflex is to append the new name, which is not review. The
+   * ledger legitimately needs `activityEvent` (the app's ONE event labeller, whose own docstring
+   * forbids writing a second) and `queryDerivation` (the normaliser `recomputeQuery` uses). Neither
+   * is a component and neither is the Query Centre, so D8's actual constraint is untouched — but
+   * only a rule phrased as a constraint could say so.
+   */
+  it("imports no component file except typeMeta", () => {
+    for (const i of imports) {
+      if (!i.includes("components/")) continue;
+      expect(i, `${i} is a component import`).toBe("../components/packages/typeMeta");
+    }
+  });
+
+  /** Everything else it reads is a pure lib module — nothing with a surface of its own. */
+  it("imports only pure lib modules besides that", () => {
+    for (const i of imports) {
+      if (i.includes("components/")) continue;
+      expect(i, `${i} is not a sibling lib module`).toMatch(/^\.\.?\/(types|[a-zA-Z]+)$/);
+    }
   });
 
   /* the brief's constraint, stated as the thing it forbids rather than the list it allows */
@@ -209,12 +345,49 @@ describe("D8 — the adapter is the only thing reading query data, and it reache
     expect(imports.some((i) => i.startsWith("firebase/"))).toBe(false);
   });
 
-  /* ⚠️ AND IT DOES NOT READ THE ACTIVITY LOG. recomputeQuery is the single writer that turns
-     activities into query state; deriving replies from the log again would be a second
-     implementation of something it owns. */
-  it("derives from queries, never from the activity log", () => {
-    expect(decls).not.toContain("ActivityType");
-    expect(decls).not.toMatch(/\bactivities\b/);
+  /**
+   * ⚠️ THE RULE SPLIT RATHER THAN LAPSED (broadsheet §4). It read "derives from queries, never from
+   * the activity log", banning `ActivityType` and `activities` outright — right for a module that
+   * only ever counted, and wrong the moment it gained the Latest-activity ledger. An EVENT LIST is
+   * the one thing query state cannot express: a query holds its current status, not the sequence
+   * that produced it. So the ban moves to where the reason still applies.
+   *
+   * ⚠️ THE REASON, RESTATED, because it is the load-bearing half: `recomputeQuery` is the single
+   * writer that turns activities into query state. Any COUNT re-derived from the log would be a
+   * second implementation of what it owns, and the two would eventually disagree — the shape the
+   * dashboard and the To-do board had to be reconciled out of after they counted "urgent" twice.
+   *
+   * Bounded with sliceBetween: a bare indexOf pair widens to the rest of the file when an anchor is
+   * renamed, and every assertion then reads another function while passing.
+   */
+  /* ⚠️ THE ANCHORS ARE CODE, NEVER SECTION HEADINGS. Written first against the file's `═══` comment
+     banners, which read perfectly and are the first thing `decls` deletes — every slice failed with
+     "the END anchor is gone" about markers that are plainly in the file. A lock that strips comments
+     cannot then navigate by them. */
+  const COUNTERS = [
+    ["trackingTotals", "export const STAT_CELLS"],
+    ["export function repliesByPackage", "export const packagesContaining"],
+    ["export function requestsByMaterial", "export function trackingNudge"],
+    ["export function trackingNudge", "export const STAMP_BRIEFS"],
+  ] as const;
+
+  it.each(COUNTERS)("%s counts from queries, never from the log", (from, to) => {
+    const body = sliceBetween(decls, from, to, `${from} body`);
+    expect(body).not.toContain("ActivityType");
+    expect(body).not.toMatch(/\bactivities\b/);
+    expect(body).not.toContain("activityEventLabel");
+  });
+
+  /**
+   * ⚠️ AND THE LEDGER IS THE ONLY FUNCTION ALLOWED TO — asserted, so "it reads the log" stays a
+   * property of one named function rather than of the file.
+   */
+  it("confines the activity log to the ledger", () => {
+    const ledger = sliceBetween(decls, "export function ledgerRows", "\n}", "ledgerRows body");
+    expect(ledger).toMatch(/\bactivities\b/);
+    const rest = decls.replace(sliceBetween(decls, "function directionOf", "export function ledgerRows", "event section"), "")
+      .replace(ledger, "");
+    expect(rest, "the log leaked outside the ledger").not.toMatch(/\bactivities\b/);
   });
 
   /* counts only — packageMetrics exposes rates and this module deliberately ignores them */

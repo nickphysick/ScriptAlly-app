@@ -109,17 +109,19 @@
   margin-bottom: 36px;
 }
 
-/* ⚠️ `justify-content: center`, AND IT IS A DEVIATION THE CONFORM RULING CAUSED — flag F-I.
-   The ref pins this column to the top because it holds four things: title, subtitle, stat line,
-   actions. Ruling 1 moved the first two into the shared `PageHeader`, so the column holds two, and
-   pinned to the top against the taller blush panel it left ~150px of visible dead space (seen in the
-   screenshot, invisible to every measurement — nothing was wrong, there was just nothing there).
-   Centring is one declaration and reverses in one word if Nick would rather the ref's alignment. */
+/* ⚠️ PINNED TO THE TOP, AS THE REF DRAWS IT — and centring was tried and rejected (F-I, ruled).
+   The column holds two things rather than the ref's four, because Ruling 1 moved title and subtitle
+   into the shared `PageHeader`. Centring the survivors made them float in the middle of a band whose
+   height comes from the blush panel beside them, which reads as a composition nobody arranged. Top
+   alignment reads as a gap — and a gap is honest about what happened, where a float is not.
+   ⚠️ IF THE BAND STILL READS THIN, THE FIX IS NOT PADDING. It is that the band's height should come
+   from the panel's natural height rather than the panel stretching to fill a grid row — see the
+   `align-items` note on `.pkgb-hero`. Reaching for padding here would pad a box that is not the
+   thing setting the height. */
 .pkgb-hero-l {
   padding: 34px 38px 30px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 14px;
   align-items: flex-start;
   min-width: 0;
@@ -386,3 +388,171 @@
 .pkgb-sopen::after { content: ""; position: absolute; inset: 0; }
 .pkgb-sopen:focus-visible { outline: none; }
 .pkgb-sheet:focus-within { box-shadow: 0 6px 16px rgba(58, 28, 20, 0.09); outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE PACKAGES BAND (D1)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgb-pkggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 18px; }
+
+/* ⚠️ A `div`, LIKE THE SHEET, AND FOR THE SAME REASON — the card holds a name control and a bin,
+   and a button inside a button is invalid HTML. */
+.pkgb-pkgcard {
+  background: var(--pkgo-surface);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(58, 28, 20, 0.06);
+  padding: 18px 20px 13px;
+  position: relative;
+  display: flex; flex-direction: column; gap: 12px;
+  transition: box-shadow 0.15s, transform 0.15s;
+  min-width: 0;
+}
+.pkgb-pkgcard:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(58, 28, 20, 0.10); }
+.pkgb-pkgcard:focus-within { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+
+/* The stamp sits in the corner; the title reserves its width so a long name never runs under it. */
+.pkgb-pkgcard > .pkgb-plate--stamp { position: absolute; top: 14px; right: 14px; width: 52px; height: 62px; }
+.pkgb-pkgname {
+  font-family: var(--font-serif); font-size: 20px; font-weight: 600; line-height: 1.3;
+  padding-right: 64px; color: var(--pkg-ink); overflow-wrap: anywhere;
+}
+
+.pkgb-slots { display: flex; flex-direction: column; gap: 5px; }
+.pkgb-slot { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.pkgb-slt {
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.12em;
+  color: var(--pkg-muted); text-transform: uppercase; flex: 0 0 62px;
+}
+.pkgb-sln { font-size: 12.5px; font-weight: 600; color: var(--pkg-ink); min-width: 0; overflow-wrap: anywhere; }
+/* The writer left it out — quiet, because it is a choice. */
+.pkgb-sln--none { color: var(--pkg-muted); font-weight: 400; }
+/* ⚠️ THE MATERIAL IS GONE — italic burgundy, because this is a FAULT and not a choice. It read
+   identically to "Not included" until the slot learned its third state (§3), so a package that
+   lost a letter looked like one deliberately built without one. */
+.pkgb-sln--gone { color: var(--pkg-burg); font-weight: 400; font-style: italic; }
+
+.pkgb-pkgfoot {
+  border-top: 1px solid var(--pkgo-hairline-soft);
+  padding-top: 9px; margin-top: auto;
+  font-family: var(--font-mono); font-size: 9px;
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+}
+.pkgb-idle { color: var(--pkg-muted); }
+.pkgb-footspacer { flex: 1; }
+.pkgb-out { color: var(--pkg-burg); }
+.pkgb-in { color: var(--pkgo-sage-ink); }
+/* The card's bin is in the foot rather than absolutely placed — the stamp already owns the corner. */
+.pkgb-pkgfoot .pkgb-remwrap { position: static; }
+.pkgb-pkgcard:hover .pkgb-rem, .pkgb-pkgcard:focus-within .pkgb-rem { opacity: 1; }
+
+.pkgb-pkgghost {
+  min-height: 170px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE TRACKING BAND — stat strip, bar panels, ledger
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgb-statstrip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+.pkgb-stat {
+  background: var(--pkgo-surface);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 12px; padding: 16px 18px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 54px; gap: 10px; align-items: center;
+}
+.pkgb-statn { font-family: var(--font-serif); font-size: 32px; font-weight: 600; line-height: 1.3; color: var(--pkg-ink); }
+.pkgb-statl {
+  font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--pkg-muted); margin-top: 6px; display: flex; gap: 6px; align-items: center;
+}
+.pkgb-dir--out { color: var(--pkg-burg); }
+.pkgb-dir--in { color: var(--pkgo-sage-ink); }
+
+.pkgb-dashgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; margin-bottom: 16px; }
+.pkgb-panel {
+  background: var(--pkgo-surface);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 12px; overflow: hidden;
+}
+.pkgb-panelband {
+  background: linear-gradient(180deg, var(--pkgo-sage-a), var(--pkgo-sage-b));
+  padding: 10px 16px; display: flex; justify-content: space-between; align-items: center;
+}
+.pkgb-panelbody { padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 12px; }
+.pkgb-drow { min-width: 0; }
+.pkgb-drtop { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; gap: 10px; }
+.pkgb-drname { font-size: 12.5px; font-weight: 600; color: var(--pkg-ink); min-width: 0; overflow-wrap: anywhere; }
+.pkgb-dreyebrow {
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.12em; color: var(--pkg-muted);
+  text-transform: uppercase; display: block; font-weight: 400; margin-bottom: 2px;
+}
+.pkgb-drmeta { font-family: var(--font-mono); font-size: 8.5px; color: var(--pkg-ink-soft); white-space: nowrap; }
+
+/* The bar: the outer width is sends against the busiest row, the inner is what came back. */
+.pkgb-bar { height: 7px; background: var(--pkgo-sage-tint); border-radius: 4px; overflow: hidden; }
+.pkgb-bsent { height: 100%; background: var(--pkgo-sage-line); border-radius: 4px; }
+.pkgb-bin { height: 100%; background: var(--pkgo-sage-deep); border-radius: 4px; }
+
+/* ⚠️ `gap: 0` — the ledger's rows are separated by their own dotted rule, so a flex gap on top of
+   it would double the spacing and put the dots off the visual centre. */
+.pkgb-ledger { gap: 0; }
+.pkgb-lrow {
+  display: grid; grid-template-columns: 74px 16px minmax(0, 1fr) auto; gap: 12px; align-items: center;
+  padding: 9px 0; border-bottom: 1px dotted rgba(58, 28, 20, 0.16); font-size: 12px; color: var(--pkg-ink);
+}
+.pkgb-lrow:last-child { border-bottom: none; }
+.pkgb-ldate { font-family: var(--font-mono); font-size: 8.5px; color: var(--pkg-muted); }
+.pkgb-ldir { font-family: var(--font-mono); font-size: 11px; }
+.pkgb-lwhat { min-width: 0; overflow-wrap: anywhere; }
+.pkgb-lwhat b { font-weight: 600; }
+.pkgb-lpkg { font-family: var(--font-mono); font-size: 8.5px; color: var(--pkg-ink-soft); }
+
+.pkgb-ghostpanel {
+  border: 1.5px dashed var(--pkgo-dash-soft); border-radius: 12px; background: transparent;
+  padding: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; min-height: 130px; text-align: center;
+}
+.pkgb-gpt { font-family: var(--font-serif); font-style: italic; font-size: 14px; color: var(--pkg-muted); }
+.pkgb-gps { font-size: 10.5px; color: var(--pkg-muted); line-height: 1.5; max-width: 260px; }
+
+.pkgb-nudge {
+  background: var(--pkgo-sage-tint); border: 1px solid var(--pkgo-sage-line); border-radius: 10px;
+  padding: 12px 16px; font-size: 12.5px; color: var(--pkg-ink-soft); margin-bottom: 16px;
+  display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+}
+.pkgb-nudge strong { color: var(--pkg-ink); font-weight: 600; }
+.pkgb-nudgelink {
+  border: 0; background: none; padding: 0; cursor: pointer; font: inherit;
+  color: var(--pkg-burg); font-weight: 600;
+}
+.pkgb-nudgelink:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE FOOTNOTE BAND — how each figure is counted
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgb-band--last { margin-bottom: 0; }
+.pkgb-hownote {
+  background: var(--pkgo-surface);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 14px;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; overflow: hidden;
+}
+.pkgb-hncell {
+  padding: 20px 24px; display: flex; gap: 14px; align-items: flex-start;
+  border-right: 1px solid var(--pkgo-hairline-soft); min-width: 0;
+}
+.pkgb-hncell:last-child { border-right: none; }
+.pkgb-hnt {
+  font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  font-weight: 700; margin-bottom: 5px;
+}
+.pkgb-hncell p { font-size: 11px; color: var(--pkg-ink-soft); line-height: 1.6; }
+
+@media (max-width: 1080px) {
+  .pkgb-statstrip, .pkgb-dashgrid, .pkgb-hownote { grid-template-columns: minmax(0, 1fr); }
+  .pkgb-hncell { border-right: none; border-bottom: 1px solid var(--pkgo-hairline-soft); }
+  .pkgb-hncell:last-child { border-bottom: none; }
+}

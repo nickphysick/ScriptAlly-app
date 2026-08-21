@@ -96,10 +96,43 @@ const SENDS = [
   { pkg: "seed-pkg-2", status: "Rejected", days: 45 },
 ];
 
+/**
+ * ⚠️ THE FIXTURE WRITES ITS OWN ACTIVITY LOG, and it did not until §4 measured the ledger.
+ * Eight packaged queries existed with a spread of outcomes and NOT ONE activity document behind
+ * them, so "Latest activity" rendered empty on a page reporting 8 sent and 2 replied — correctly,
+ * because nothing typed existed, and uselessly, because the panel could not be measured at all.
+ * A seed that creates records without the events that produced them leaves whole features
+ * unmeasurable while looking complete. (Same shape as the note against `seed.mjs`, which writes no
+ * activity docs either — hence `seedCorrection.mjs`.)
+ *
+ * ⚠️ EVERY SEND GETS ITS `Query Sent`; a query whose status moved past Queried also gets the event
+ * that moved it. That is what `recomputeQuery` would have written, so the fixture is the shape the
+ * app produces rather than a convenient one.
+ */
+const EVENTS = SENDS.flatMap((s, i) => {
+  const qid = `seed-pkgq-${i + 1}`;
+  const rows = [{
+    id: `seed-pkgact-${i + 1}-sent`, queryId: qid,
+    activityType: "Query Sent", resultingStatus: "Queried", days: s.days,
+    description: `Query sent`,
+  }];
+  if (s.status !== "Queried") {
+    rows.push({
+      id: `seed-pkgact-${i + 1}-out`, queryId: qid,
+      activityType: "Status Changed", resultingStatus: s.status,
+      /* the outcome lands AFTER the send — a fortnight, so the ordering is unambiguous */
+      days: Math.max(0, s.days - 14),
+      description: `Status changed to ${s.status}`,
+    });
+  }
+  return rows;
+});
+
 const ids = {
   versions: MATERIALS.map((m) => m.id),
   packages: PACKAGES.map((p) => p.id),
   queries: SENDS.map((_, i) => `seed-pkgq-${i + 1}`),
+  activities: EVENTS.map((e) => e.id),
 };
 
 if (CLEAN) {
@@ -157,7 +190,20 @@ if (CLEAN) {
   console.log(`wrote ${SENDS.length} packaged queries`);
 }
 
-for (const c of ["versions", "packages", "queries"]) {
+{
+  const batch = writeBatch(db);
+  for (const e of EVENTS) {
+    batch.set(doc(db, "users", uid, "activities", e.id), {
+      id: e.id, userId: uid, queryId: e.queryId, manuscriptId: MS_ID,
+      activityType: e.activityType, resultingStatus: e.resultingStatus,
+      description: e.description, date: iso(e.days), details: "",
+    });
+  }
+  await batch.commit();
+  console.log(`wrote ${EVENTS.length} activities`);
+}
+
+for (const c of ["versions", "packages", "queries", "activities"]) {
   console.log(`  ${c}: ${(await getDocs(collection(db, "users", uid, c))).size} docs on the account`);
 }
 process.exit(0);

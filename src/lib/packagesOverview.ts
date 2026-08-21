@@ -29,124 +29,9 @@ import { sourceLabel } from "./materialDraft";
    MATERIALS
    ══════════════════════════════════════════════════════════════════════════════ */
 
-export interface MaterialRow {
-  id: string;
-  /** The type eyebrow — read from `TYPE_META`, never typed as a literal. */
-  typeLabel: string;
-  /** The writer's own name for this version. */
-  name: string;
-  /** Mono detail line — the material's SOURCE (`Text · N words` / `Ref · file`). Never empty. */
-  detail: string;
-}
-
-/**
- * The Materials register.
- *
- * ⚠️ THE DETAIL LINE IS NOW THE MATERIAL'S SOURCE, NOT ITS AGE (flow pack D2) — `Text · 412 words`,
- * `Ref · hook-first.docx`. The restructure's "added N ago" was what the register could honestly say
- * when a material had no recorded source; now that every one does, describing what the record IS
- * beats describing when it arrived. `materialDetail` / `addedLabel` below are kept and still locked:
- * the rule they encode — never label a created date as an edit, never invent a version number — is
- * the reason this line is not "edited 4 days ago", and it applies wherever a date is next shown.
- *
- * Grouped by `BUILDER_TYPES` canonical order, newest first inside each type. Full Manuscript is
- * absent because `BUILDER_TYPES` excludes it — the standing law that it is not a package material.
- */
-export function materialRows(versions: ManuscriptVersion[], now: number): MaterialRow[] {
-  const rows: MaterialRow[] = [];
-  for (const type of BUILDER_TYPES) {
-    const mine = versions
-      .filter((v) => v.componentType === type)
-      .sort((a, b) => Date.parse(b.createdDate ?? "") - Date.parse(a.createdDate ?? ""));
-    for (const v of mine) {
-      rows.push({
-        id: v.id,
-        typeLabel: TYPE_META[type].label,
-        name: v.versionName,
-        /* ⚠️ THE SOURCE LABEL SUPERSEDES THE RESTRUCTURE'S "added N ago" (flow pack D2). That line
-           existed because the register had nothing else true to say about a material; each one now
-           has a real source, which is both more useful and more honest — it describes what the
-           record IS rather than when it arrived. `materialDetail` and `addedLabel` survive below,
-           still unit-locked, because the honesty rule they encode (never call a created date an
-           edit) is worth keeping wherever a date is next shown. */
-        detail: sourceLabel(v),
-      });
-    }
-  }
-  return rows;
-}
-
-/** Word count (where a draft exists) then the added date, joined with the record interpunct. */
-export function materialDetail(v: ManuscriptVersion, now: number): string {
-  const parts: string[] = [];
-  const meta = versionMeta(v);
-  if (meta) parts.push(meta);
-  const added = addedLabel(v.createdDate, now);
-  if (added) parts.push(added);
-  /* An undated draft with no text has nothing true to say about itself. "—" states that the line
-     is empty rather than inventing a date, which is the row's own version of the `0`-vs-`—` split
-     the manuscript plate draws. */
-  return parts.length ? parts.join(" · ") : "—";
-}
-
-/** "added today" / "added 4 days ago" — the app's ONE elapsed formatter, never a second one. */
-export function addedLabel(createdDate: string | undefined, now: number): string | null {
-  if (!createdDate) return null;
-  const ms = Date.parse(createdDate);
-  if (Number.isNaN(ms)) return null;
-  return `added ${agoLabel(daysBetween(ms, now))}`;
-}
-
 /* ══════════════════════════════════════════════════════════════════════════════
    PACKAGES
    ══════════════════════════════════════════════════════════════════════════════ */
-
-export interface PackageRow {
-  id: string;
-  name: string;
-  /** "Hook-first · One-page · Chapters 1–3" — null when no slot is filled. */
-  composition: string | null;
-  /** "Sent with 6 queries" / "Not sent yet". */
-  sentLine: string;
-  sent: number;
-}
-
-/**
- * The Packages register.
- *
- * ⚠️ THE COMPOSITION LINE IS RESOLVED FROM REAL REFERENCES. `SubmissionPackage` holds three
- * version ids, so each name is looked up rather than reconstructed from prose — the legacy
- * free-text `*Details` fields the brief asked about do not exist in this codebase.
- *
- * ⚠️ AND A SLOT WHOSE MATERIAL IS GONE IS NAMED, NOT OMITTED — CORRECTED with the archive model.
- * This docstring used to say the opposite, and called it honest: "resolves to nothing and is simply
- * omitted... the package no longer contains it". It is not honest, because the reader cannot tell
- * the resulting line from a package deliberately built without a letter. `resolveSlot` returns
- * `MISSING_SLOT` and the line says so.
- */
-export function packageRows(
-  packages: SubmissionPackage[],
-  versions: ManuscriptVersion[],
-  queries: Query[],
-): PackageRow[] {
-  const byId = new Map(versions.map((v) => [v.id, v]));
-  return packages.map((p) => {
-    /* ⚠️ A MISSING MATERIAL IS NAMED, NOT DROPPED. Omitting it made the composition line describe a
-       package the writer does not have — "One-page · Chapters 1-3" for a bundle whose letter is
-       gone reads as a package deliberately built without one. */
-    const names = BUILDER_TYPES
-      .map((t) => resolveSlot(p[SLOT_FIELD[t]], byId).name)
-      .filter((n): n is string => !!n && n.trim().length > 0);
-    const { sent } = packageMetrics(p.id, queries);
-    return {
-      id: p.id,
-      name: p.packageName,
-      composition: names.length ? names.join(" · ") : null,
-      sentLine: sentLine(sent),
-      sent,
-    };
-  });
-}
 
 /**
  * ⚠️ ZERO IS A SENTENCE, NOT A COUNT, HERE. "Sent with 0 queries" is technically true and reads as
@@ -159,71 +44,19 @@ export const sentLine = (sent: number): string =>
 
 /* ══════════════════════════════════════════════════════════════════════════════
    TRACKING
-   ══════════════════════════════════════════════════════════════════════════════ */
 
-export interface TrackingRow {
-  key: "replies" | "requests";
-  name: string;
-  detail: string;
-}
+   ⚠️ `TrackingRow` / `replyCount` / `trackingRows` ARE GONE (broadsheet §4), and they had been dead
+   since the flow pack retired the Tracking RAIL PANEL they summarised — this commit only found
+   them. `packageTracking.ts` is the live derivation for everything the tracking band reads. The
+   distinction matters when reading the diff: `packageRows` and the materials register block were
+   killed BY this pack, these two were already cold.
+   ══════════════════════════════════════════════════════════════════════════════ */
 
 /** Queries that carry a package at all — the "anything has gone out" test, and step 3's LIVE. */
 export const packagedQueries = (packages: SubmissionPackage[], queries: Query[]): Query[] => {
   const ids = new Set(packages.map((p) => p.id));
   return queries.filter((q) => !!q.packageId && ids.has(q.packageId));
 };
-
-/** Replies across every package — the Tracking head's chip. */
-export function replyCount(packages: SubmissionPackage[], queries: Query[]): number {
-  return packages.reduce((n, p) => n + packageMetrics(p.id, queries).responses, 0);
-}
-
-/**
- * The Tracking register: two summary rows, each a route into the existing analytics view.
- *
- * ⚠️ THESE ARE SUMMARIES OF A VIEW THAT ALREADY EXISTS, NOT A SECOND ANALYTICS. Every figure comes
- * from `packageMetrics`, which is what the Analytics surface itself reads, so the rail can only
- * ever agree with the page it opens.
- *
- * Empty when nothing has gone out — the panel states that in prose instead (D6), because a row
- * reading "0 of 0 replied" asserts a measurement nobody has taken.
- */
-export function trackingRows(
-  packages: SubmissionPackage[],
-  versions: ManuscriptVersion[],
-  queries: Query[],
-): TrackingRow[] {
-  const sentQ = packagedQueries(packages, queries);
-  if (sentQ.length === 0) return [];
-
-  /* The busiest package leads the row — the one whose figures are worth quoting. Ties keep the
-     first in the caller's order, which is the order the register itself lists them in. */
-  let lead: { name: string; sent: number; replies: number } | null = null;
-  for (const p of packages) {
-    const m = packageMetrics(p.id, queries);
-    if (m.sent === 0) continue;
-    if (!lead || m.sent > lead.sent) lead = { name: p.packageName, sent: m.sent, replies: m.responses };
-  }
-
-  const requests = sentQ.filter(isRequest).length;
-
-  const rows: TrackingRow[] = [];
-  if (lead) {
-    rows.push({
-      key: "replies",
-      name: "Replies by package",
-      detail: `${lead.name} · ${lead.replies} of ${lead.sent} replied`,
-    });
-  }
-  rows.push({
-    key: "requests",
-    name: "Requests by material",
-    detail: requests === 0
-      ? "No requests yet"
-      : `${requests} request${requests === 1 ? "" : "s"} logged`,
-  });
-  return rows;
-}
 
 /* ══════════════════════════════════════════════════════════════════════════════
    HOW IT WORKS — the infographic doubles as progress (D3)
@@ -478,20 +311,53 @@ export type RemovalKind = "delete" | "archive";
 
 export interface RemovalChoice {
   kind: RemovalKind;
-  /** How many packages hold it — 0 for a delete, ≥1 for an archive. Same number the sheet prints. */
+  /** How many things hold it — 0 for a delete, ≥1 for an archive. Same number the sheet prints. */
   usedIn: number;
-  /** The packages by name, for the confirmation to name what it is protecting. */
-  packageNames: string[];
+  /** What holds it, by name, so the confirmation can say what it is protecting. */
+  holderNames: string[];
 }
 
-export function removalChoice(versionId: string, packages: SubmissionPackage[]): RemovalChoice {
-  /* ⚠️ RETIRED PACKAGES COUNT. One holding this material is still a record of what was sent, and
-     deleting the material out from under it would damage a package the writer archived rather than
-     discarded. The band hides retired packages; this question is not about the band. */
-  const holders = packagesUsing(versionId, packages);
+/**
+ * ⚠️ THE DECISION IS THE HOLDER COUNT AND NOTHING ELSE — which is what lets one function serve two
+ * record types. A material's holders are the packages containing it; a package's holders are the
+ * queries sent with it. Both questions are "does removing this damage something that points at it",
+ * and answering them in one place is what stops a material archiving while a package deletes.
+ */
+export function removalChoice(holderNames: string[]): RemovalChoice {
   return {
-    kind: holders.length === 0 ? "delete" : "archive",
-    usedIn: holders.length,
-    packageNames: holders.map((p) => p.packageName),
+    kind: holderNames.length === 0 ? "delete" : "archive",
+    usedIn: holderNames.length,
+    holderNames,
   };
 }
+
+/**
+ * A material's holders — every package containing it, by name.
+ *
+ * ⚠️ RETIRED PACKAGES COUNT. One holding this material is still a record of what was sent, and
+ * deleting the material out from under it would damage a package the writer archived rather than
+ * discarded. The band hides retired packages; this question is not about the band.
+ */
+export const materialHolders = (versionId: string, packages: SubmissionPackage[]): string[] =>
+  packagesUsing(versionId, packages).map((p) => p.packageName);
+
+/**
+ * A package's holders — every query sent with it, named by its agent where one resolves.
+ *
+ * ⚠️ A SENT PACKAGE IS THE RECORD OF WHAT WAS IN AN ENVELOPE, which is why it archives rather than
+ * deletes. `Query.packageId` is a real reference and the analytics read through it; deleting the
+ * package would leave every one of those queries pointing at nothing, and the writer would lose the
+ * answer to "what did I actually send them" for correspondence already out in the world.
+ *
+ * ⚠️ AND AN UNRESOLVABLE AGENT IS OMITTED, NEVER NAMED "Unknown". The count is what decides the
+ * branch, so a missing name costs nothing but a shorter sentence.
+ */
+export const packageHolders = (
+  packageId: string,
+  queries: Query[],
+  agentName: (agentId: string) => string | null,
+): string[] =>
+  queries
+    .filter((q) => q.packageId === packageId)
+    .map((q) => agentName(q.agentId))
+    .filter((n): n is string => !!n && n.trim().length > 0);

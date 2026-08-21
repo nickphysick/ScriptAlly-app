@@ -21,13 +21,18 @@
  * for the DEV `#/pkg-lab` route. Do not re-open a route into them to give the guided tour a door —
  * that tour's missing entry point is F-F, and it wants a decision, not a shortcut.
  */
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../types";
 import { useNavigate } from "react-router-dom";
-import { PackagesOverview } from "./packages/PackagesOverview";
+import { PackagesOnboarding } from "./packages/PackagesOnboarding";
+import { PackagesBand } from "./packages/PackagesBand";
+import { TrackingBand } from "./packages/TrackingBand";
+import { FootnoteBand } from "./packages/FootnoteBand";
+import { RemovePopover } from "./packages/RemovePopover";
 import { PackagesHeroBand } from "./packages/PackagesHeroBand";
 import { MaterialsBand } from "./packages/MaterialsBand";
+import { packageHolders, packagedQueries } from "../lib/packagesOverview";
 import { WaxSeal } from "./packages/IllustrationSlot";
 import { MaterialModal, MaterialDraftResult } from "./packages/MaterialModal";
 import { PackageModal, PackageDraftResult } from "./packages/PackageModal";
@@ -43,7 +48,7 @@ import { ChevronDown, ShieldCheck, Plus } from "lucide-react";
 import "./packages/packageWorkshop.css";
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries, addVersion, updateVersion, deleteVersion, archiveVersion, addPackage, updatePackage, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, activities, agents, addVersion, updateVersion, deleteVersion, archiveVersion, addPackage, updatePackage, deletePackage, retirePackage, updateUserProfile } = useScriptAllyDb();
   const navigate = useNavigate();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
@@ -106,6 +111,19 @@ export const SubmissionPackages: React.FC = () => {
   const msVersions = useMemo(() => versions.filter((v) => v.manuscriptId === msId), [versions, msId]);
   const msPackages = useMemo(() => packages.filter((p) => p.manuscriptId === msId && p.status !== "Retired"), [packages, msId]);
   const msQueries = useMemo(() => queries.filter((q) => q.manuscriptId === msId), [queries, msId]);
+  /* ⚠️ THE LEDGER'S EVENTS ARE SCOPED TO THE MANUSCRIPT LIKE EVERY OTHER FIGURE ON THIS PAGE.
+     `Activity.manuscriptId` is stored, so this is a filter rather than a join — but scoping it
+     matters: the band's counts are all manuscript-scoped, and a "Latest activity" list spanning
+     every book would name events none of the numbers above it include. */
+  const msActivities = useMemo(() => activities.filter((a) => a.manuscriptId === msId), [activities, msId]);
+  /* ⚠️ NAME, THEN AGENCY, THEN NOTHING — the app never invents a name for an agent it cannot
+     resolve, and it never uses a pronoun for one either. An agency-less agent is valid in this
+     model (name OR agency), so both are tried. */
+  const agentName = useCallback((agentId: string): string | null => {
+    const a = agents.find((x) => x.id === agentId);
+    if (!a) return null;
+    return [a.name, a.agency].find((x) => !!x?.trim()) ?? null;
+  }, [agents]);
 
   if (!currentUser) return null;
 
@@ -363,23 +381,56 @@ export const SubmissionPackages: React.FC = () => {
             onDeleteMaterial={deleteVersion}
             onArchiveMaterial={archiveVersion}
           />
-          <PackagesOverview
-              versions={msVersions}
-              packages={msPackages}
-              queries={msQueries}
-              /* ⚠️ NO `onAddMaterial` / `onOpenMaterial` ANY MORE — the rail's Materials panel is
-                 gone and the band above owns both entry points (D1). */
-              /* ⚠️ THE BUILDER, NOT THE WORKSHOP (D9). Same retirement as the material entries. */
-              onNewPackage={() => { setPkgEditing(null); setPkgModal(true); }}
-              onOpenPackage={(id) => {
-                setPkgEditing(msPackages.find((p) => p.id === id) ?? null);
-                setPkgModal(true);
-              }}
-              /* ⚠️ NO `onOpenTracking` ANY MORE (D9). Tracking is a dashboard on the stage, not a
-                 rail panel that opens another surface — so this page's last route into AnalyticsTab
-                 is gone. The component stays on disk and stays mounted by `#/pkg-lab`. */
-              onLogQuery={() => navigate("/queries")}
+          {/* ⚠️ THE RAIL IS GONE, AND ITS REGISTERS WITH IT (D1). Materials, Packages and Tracking
+              are bands on the page now — the rail was an index of two of them beside the things it
+              indexed, which is a second copy of a list rather than a way to reach it. Nothing
+              navigated anywhere: every rail row scrolled to a tile three inches to its right. */}
+          {msPackages.length > 0 ? (
+            <>
+              <PackagesBand
+                packages={msPackages}
+                versions={msVersions}
+                queries={msQueries}
+                onOpenPackage={(id) => {
+                  setPkgEditing(msPackages.find((p) => p.id === id) ?? null);
+                  setPkgModal(true);
+                }}
+                onNewPackage={() => { setPkgEditing(null); setPkgModal(true); }}
+                /* ⚠️ THE SAME POPOVER THE SHEETS USE, AND THE SAME DECISION FUNCTION. A package
+                   nothing has been sent with is deleted; one that has travelled is archived,
+                   because a query still points at it and it is the record of what was in the
+                   envelope. `removalChoice` is given the PACKAGE's own id against the queries, so
+                   "has anything been sent with this" is what decides. */
+                renderRemove={(p) => (
+                  <RemovePopover
+                    id={p.id}
+                    name={p.packageName}
+                    typeLabel="package"
+                    subject="package"
+                    holders={packageHolders(p.id, msQueries, agentName)}
+                    onDelete={deletePackage}
+                    onArchive={retirePackage}
+                  />
+                )}
+              />
+              <TrackingBand
+                packages={msPackages}
+                versions={msVersions}
+                queries={msQueries}
+                activities={msActivities}
+                agents={agents}
+                now={Date.now()}
+                onLogQuery={() => navigate("/queries")}
+              />
+              <FootnoteBand />
+            </>
+          ) : (
+            <PackagesOnboarding
+              materialCount={msVersions.length}
+              packageCount={msPackages.length}
+              live={packagedQueries(msPackages, msQueries).length}
             />
+          )}
         </>
       )}
 

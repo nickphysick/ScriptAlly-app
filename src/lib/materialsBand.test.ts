@@ -22,7 +22,7 @@ const decls = (src: string) =>
   src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{\/\*[\s\S]*?\*\/\}/g, "").replace(/\/\/[^\n]*/g, "");
 
 const band = read("../components/packages/MaterialsBand.tsx");
-const overview = read("../components/packages/PackagesOverview.tsx");
+const onboarding = read("../components/packages/PackagesOnboarding.tsx");
 const page = read("../components/SubmissionPackages.tsx");
 const ref = read("../../design-refs/submission-packages-broadsheet.html");
 
@@ -30,21 +30,46 @@ describe("the materials band replaces the rail's register (D1)", () => {
   /**
    * ⚠️ THE POINT IS THE ABSENCE, NOT THE PRESENCE. A band that listed materials while the rail also
    * listed them would be two indexes of one thing — and both would look right until the day one of
-   * them gained a filter. This is the assertion that fails if the panel comes back.
+   * them gained a filter. §4 went further and removed the rail entirely, so the claim widened with
+   * it: no file on this page renders a register at all.
+   *
+   * ⚠️ AND THE CLASS TOKENS ARE BOUNDED. `not.toContain("pkgo-rail")` would be satisfied by any
+   * longer class beginning with it, and would equally have missed a genuine one written into a
+   * template literal — the prefix trap this repo has hit twice.
    */
-  it("leaves no Materials panel in the rail", () => {
-    const src = decls(overview);
-    expect(src).not.toContain('<Panel label="Materials"');
-    expect(src).not.toContain("onOpenMaterial");
-    expect(src).not.toContain("onAddMaterial");
+  it("leaves no rail in any file on the page", () => {
+    for (const [label, src] of [["the page", page], ["the onboarding stage", onboarding]] as const) {
+      const d = decls(src);
+      expect(d, `${label} still renders a rail`).not.toMatch(/["\s`]pkgo-rail["\s`]/);
+      expect(d, `${label} still renders a register row`).not.toMatch(/["\s`]pkgo-row["\s`]/);
+      /* ⚠️ NOT a sweep for `onOpenMaterial` — the BAND takes that prop, legitimately, and a first
+         draft forbidding it went red on the correct mount. The claim is about the rail, so it is
+         the rail's own classes that are swept; the derivation check below covers the rest. */
+    }
   });
 
-  it("still renders the Packages panel — only the Materials register went", () => {
-    expect(decls(overview)).toContain('label="Packages"');
+  /**
+   * ⚠️ AND THE REGISTER'S DERIVATIONS WENT WITH IT, which is the half a class check cannot see. A
+   * tested function with no caller reads as live code to the next session — which is how a future
+   * run "restores" a register that was deliberately deleted.
+   */
+  it("leaves no orphaned register derivation behind", () => {
+    const lib = decls(read("./packagesOverview.ts"));
+    for (const gone of ["materialRows", "materialDetail", "addedLabel", "packageRows", "trackingRows", "replyCount"]) {
+      expect(lib, `${gone} is still exported with no caller`).not.toContain(`export function ${gone}`);
+      expect(lib, `${gone} is still exported with no caller`).not.toContain(`export const ${gone}`);
+    }
   });
 
   it("mounts the band on the page, once", () => {
     expect(decls(page).match(/<MaterialsBand\b/g) ?? []).toHaveLength(1);
+  });
+
+  it("mounts the three working bands, once each", () => {
+    const d = decls(page);
+    for (const band of ["PackagesBand", "TrackingBand", "FootnoteBand"]) {
+      expect(d.match(new RegExp(`<${band}\\b`, "g")) ?? [], `${band} is not mounted exactly once`).toHaveLength(1);
+    }
   });
 });
 
