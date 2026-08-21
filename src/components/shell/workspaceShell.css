@@ -630,9 +630,17 @@
    narrows and clips rather than wrapping or reflowing, and it never leaves the accessibility
    tree — `display: none` here would (locked in Phase 4). 160px comfortably exceeds the
    wordmark's rendered ~118px, so expanded it clips nothing. */
+/* ⚠️ MEASURED CLIPPED ON DEV: 26px of ink in a 22px box, so the `y` in "ScriptAlly" lost its tail.
+   `overflow: hidden` STAYS — it is load-bearing for the collapse, which animates `max-width` to 0 —
+   so the fix is the line box, not the clip. */
+/* ⚠️ 1.3, NOT 1 — PLAYFAIR'S DESCENDERS FALL BELOW THE BASELINE AND `line-height: 1` CUTS THEM.
+   `line-height: 1` was correct for the retired mono-uppercase band label: uppercase mono has no
+   descenders, so a line box the size of the em IS the ink. It became a bug the moment the same
+   declaration was applied to mixed-case Playfair. THE RULE: `line-height: 1` is only ever safe on
+   uppercase-only text. */
 .ws-bwm {
   font-family: var(--font-serif); font-weight: 600; font-size: 22px;
-  color: #1c130e; letter-spacing: -0.01em; line-height: 1; white-space: nowrap;
+  color: #1c130e; letter-spacing: -0.01em; line-height: 1.3; white-space: nowrap;
   margin-left: 9px; max-width: 160px; overflow: hidden;
 }
 .sb-collapsed .ws-bwm { opacity: 0; max-width: 0; margin-left: 0; }

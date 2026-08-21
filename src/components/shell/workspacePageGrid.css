@@ -603,7 +603,14 @@
   font-family: var(--font-serif);
   font-size: 19px;
   font-weight: 600;
-  line-height: 1;
+  /* ⚠️ MEASURED CLIPPED ON DEV: 22px of ink in a 19px box. `overflow: hidden` stays — it is what
+     the ellipsis truncation needs — so the line box is the fix.
+     ⚠️ PLAYFAIR'S DESCENDERS FALL BELOW THE BASELINE AND `line-height: 1` CUTS THEM.
+     `line-height: 1` was correct for the retired mono-uppercase band label: uppercase mono has no
+     descenders, so a line box the size of the em IS the ink. It became a bug the moment the same
+     declaration was applied to mixed-case Playfair. THE RULE: `line-height: 1` is only ever safe on
+     uppercase-only text. */
+  line-height: 1.3;
   color: var(--shell-ink);
   white-space: nowrap;
   overflow: hidden;

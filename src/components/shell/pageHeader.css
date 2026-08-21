@@ -327,8 +327,16 @@
 .wsh-title {
   font-family: var(--font-serif); font-size: var(--wsh-title-size); font-weight: var(--wsh-title-w);
   color: var(--shell-ink); margin: 0; white-space: nowrap;
-  /* 1.02 per both refs — a display line, set tight */
-  line-height: 1.02;
+  /* ⚠️ 1.02 CAME FROM BOTH REFS AND WAS CLIPPING ON EVERY PAGE WITH A DESCENDER IN ITS NAME.
+     Measured on dev: "Query Centre" rendered 35px of ink into a 31px box, so the `y` was cut. A
+     display line set tight is right; set BELOW the ink is not, and the refs drew titles that
+     happened to have no descenders. */
+  /* ⚠️ 1.3, NOT 1.02 — PLAYFAIR'S DESCENDERS FALL BELOW THE BASELINE AND `line-height: 1` CUTS THEM.
+     `line-height: 1` was correct for the retired mono-uppercase band label: uppercase mono has no
+     descenders, so a line box the size of the em IS the ink. It became a bug the moment the same
+     declaration was applied to mixed-case Playfair. THE RULE: `line-height: 1` is only ever safe on
+     uppercase-only text. */
+  line-height: 1.3;
   /* the positioning context for any ornament a page hangs on the title — see below */
   position: relative;
 }
