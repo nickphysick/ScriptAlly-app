@@ -695,7 +695,9 @@
   margin-bottom: 30px; border: 1px dashed var(--ct-taupe-bd); border-radius: 14px;
 }
 .ct-islot::after {
-  content: "ILLUSTRATION SLOT · 200×150"; position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%);
+  /* ⚠️ THE LABEL NAMES THE SLOT ITSELF, via `attr(data-slot)` — so the illustrator's brief and the
+     markup cannot drift, and a slot added without a name says so by rendering "SLOT ·  · 200×150". */
+  content: "SLOT · " attr(data-slot) " · 200×150"; position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%);
   font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .13em; color: var(--ct-label); white-space: nowrap;
 }
 .ct-estate .em { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; margin-top: 8px; color: var(--ct-ink); }

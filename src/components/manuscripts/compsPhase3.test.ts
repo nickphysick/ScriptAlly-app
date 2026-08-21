@@ -156,11 +156,24 @@ describe("Phase 3 — the empty states are states, not failures", () => {
    * finished would quietly become the finished thing. The dashed frame and the mono stamp are the
    * mechanism, and `ILLUSTRATION SLOT` is what a reviewer sees rather than a half-drawn mark.
    */
-  it("both carry a dashed, stamped slot", () => {
-    expect(rules).toContain("ILLUSTRATION SLOT");
+  /**
+   * ⚠️ THE STAMP NAMES THE SLOT NOW (v2 §5) — `attr(data-slot)` rather than the literal
+   * "ILLUSTRATION SLOT", so the illustrator's brief and the markup cannot drift, and a slot added
+   * without a name renders its own gap. The claim is stronger than the one it replaces: the old
+   * lock proved a caption existed, this proves every slot is identified.
+   */
+  it("both carry a dashed slot, stamped with its own name", () => {
+    expect(rules).toContain("attr(data-slot)");
     expect(rules.slice(rules.indexOf(".ct-islot"))).toContain("dashed");
     expect(src).toContain("<CompsEmptySketch />");
     expect(src).toContain("<ScoutEmptySketch />");
+    /* ⚠️ AND EVERY RENDERED SLOT CARRIES A NAME, or the stamp reads "SLOT ·  · 200×150". Counting
+       both sides catches a slot added without one — the population assertion this repo's negative
+       checks are required to make. */
+    const slots = src.match(/className="ct-islot"/g) ?? [];
+    const named = src.match(/className="ct-islot" data-slot="[a-z-]+"/g) ?? [];
+    expect(slots.length, "no slots rendered — the lock is measuring nothing").toBeGreaterThan(0);
+    expect(named.length, "a slot renders without a data-slot name").toBe(slots.length);
   });
 
   it("carry no apology, no exclamation and no congratulation", () => {
@@ -177,5 +190,38 @@ describe("Phase 3 — the empty states are states, not failures", () => {
   it("the comps empty state sells nothing", () => {
     const block = src.slice(src.indexOf("No comps yet."), src.indexOf("No comps yet.") + 600);
     expect(block).not.toMatch(/upgrade|pro plan|unlock/i);
+  });
+});
+
+/**
+ * ⚠️ THE APPRAISAL HELPERS MUST NOT COME BACK TO THIS PAGE (v2 §3/§5).
+ *
+ * `compAge` returns null unless a book is MORE than five years old, and `compRole` sorts comps into
+ * "Market comp" / "Tone comp" on the same boundary. Both are threshold classifications, and a mark
+ * that lands on SOME of a writer's comps is an appraisal of their choices delivered by presence,
+ * whatever its wording. §3 replaced them with `compAgeLine`, which has no cutoff at all.
+ *
+ * ⚠️ THIS IS A LOCK RATHER THAN A COMMENT ON PURPOSE. Both functions still exist in compsPage.ts
+ * with their tests — they were kept rather than swept, which means they are one import away from
+ * returning. A note in the file explaining why they went would stop nobody; this fails.
+ *
+ * ⚠️ AND IT STRIPS COMMENTS FIRST. The page carries a paragraph NAMING both functions to explain the
+ * retirement — this repo's prose is unusually rich in exactly the tokens its locks forbid, because
+ * every retirement here is documented by quoting what it retired. Asserting over raw source would
+ * fail on the explanation.
+ */
+describe("v2 — the page reads no threshold classifier", () => {
+  const decls = readFileSync(join(here, "ComparableTitlesPage.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/[^\n]*/g, "");
+
+  it("neither compAge nor compRole is imported or called", () => {
+    /* ⚠️ BOUNDED, NOT A SUBSTRING — a bare `toContain("compAge")` matches `compAgeLine`, which is
+       the replacement. That is the prefix trap this repo has hit twice, and here it would fire on
+       the correct code. */
+    expect(decls, "compAge is back — its chip appears only on older comps").not.toMatch(/\bcompAge\b/);
+    expect(decls, "compRole is back — it classifies on a five-year cutoff").not.toMatch(/\bcompRole\b/);
+    /* and the replacement really is there, so this cannot pass by the page losing its age chip */
+    expect(decls, "the page states no age at all").toMatch(/\bcompAgeLine\b/);
   });
 });

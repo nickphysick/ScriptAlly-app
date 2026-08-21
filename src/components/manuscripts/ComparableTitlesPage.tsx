@@ -461,7 +461,7 @@ const ScoutPanel: React.FC<{
 
       {phase === "done" && visible.length === 0 && (
         <div className="ct-estate">
-          <div className="ct-islot"><ScoutEmptySketch /></div>
+          <div className="ct-islot" data-slot="scout-empty"><ScoutEmptySketch /></div>
           <div className="em">Nothing left from this run.</div>
           <div className="es">
             You&rsquo;ve worked through every suggestion. Send the Scout out again whenever your
@@ -1028,15 +1028,20 @@ export const ComparableTitlesPage: React.FC<{
                   the Pro boundary is the Scout and nothing else. */}
               {comps.length === 0 && formState?.index !== null ? (
                 <div className="ct-estate">
-                  <div className="ct-islot"><CompsEmptySketch /></div>
-                  <div className="em">No comps yet.</div>
+                  {/* ⚠️ THE REAL SKETCH STAYS. The ref draws a 200×150 dashed placeholder because it
+                      is a mockup with no artwork; this page HAS artwork, and swapping finished
+                      illustration for a placeholder to match a drawing would be a regression. The
+                      slot is named for the illustrator's brief so the requirement is recorded
+                      either way, and sized to the ref's box. */}
+                  <div className="ct-islot" data-slot="comp-empty"><CompsEmptySketch /></div>
+                  <div className="em">No comps yet</div>
                   <div className="es">
-                    Add the books your manuscript sits beside — the ones an agent would recognise — or
-                    let the Scout find them for you.
+                    Comps are the published books your manuscript sits beside. Record the first one
+                    and it becomes available to your query line and submission packages.
                   </div>
                   <div className="eacts">
                     <button type="button" className="ct-btn-pink" onClick={() => setFormState({ index: null })}>
-                      Add a comp
+                      Add your first comp
                     </button>
                   </div>
                 </div>
