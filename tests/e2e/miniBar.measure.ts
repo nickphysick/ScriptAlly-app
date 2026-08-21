@@ -83,7 +83,7 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
 
 test("the mini bar stacks under nothing and over the control row, on every scrolling page", async ({ page }) => {
   const lines: string[] = [];
-  const seen: { name: string; h: number; edges: string; markW: number; size: string; weight: string }[] = [];
+  const seen: { name: string; h: number; edges: string; markW: number; size: string; weight: string; rowTop: number }[] = [];
 
   for (const { name, route, cls } of SCROLLING) {
     await openRoute(page, route, { width: 1440, height: 900 });
@@ -111,7 +111,14 @@ test("the mini bar stacks under nothing and over the control row, on every scrol
       .toBeCloseTo(derived, 0);
     expect(s.top, `${name}: the mini bar is not pinned to the scroller's top`).toBeLessThanOrEqual(0.5);
     /* the two stacked stickies: controls begin exactly where identity ends */
-    expect(s.rowTop, `${name}: the control row is at ${s.rowTop}, and the bar ends at ${s.h}`).toBeCloseTo(s.h, 0);
+    /* ⚠️ THE PRECONDITION FIRST — `-1` means the page renders NO control row, which is a real state
+       (Submission packages lost its row to another stream's restructure) and not a row at -1. The
+       claim below is about where a row sits when there IS one; running it against a page that has
+       none reports a page that is behaving correctly as broken. The population is asserted after the
+       loop so a run where NOBODY has a row cannot pass by having nothing to check. */
+    if (s.rowTop >= 0) {
+      expect(s.rowTop, `${name}: the control row is at ${s.rowTop}, and the bar ends at ${s.h}`).toBeCloseTo(s.h, 0);
+    }
     /* ⚠️ THE BAR AND THE MASTHEAD STATE THE SAME PAGE — two renders of one source, asserted against
        each other rather than against a literal, so a page that renamed one and not the other fails. */
     expect(s.name, `${name}: the mini bar says "${s.name}" and the masthead says "${s.mastTitle}"`).toBe(s.mastTitle);
@@ -122,9 +129,13 @@ test("the mini bar stacks under nothing and over the control row, on every scrol
     expect(s.actionable, `${name}: the mini bar carries ${s.actionable} control(s) on a scrolling page`).toBe(0);
     expect(s.background, `${name}: the mini bar is transparent — content would run through the page's own name`).not.toContain("rgba(0, 0, 0, 0)");
 
-    seen.push({ name, h: s.h, edges: `${s.left}/${s.right}`, markW: s.markW, size: s.nameSize, weight: s.nameWeight });
+    seen.push({ name, h: s.h, edges: `${s.left}/${s.right}`, markW: s.markW, size: s.nameSize, weight: s.nameWeight, rowTop: s.rowTop });
   }
   console.log("\n" + lines.join("\n"));
+  /* ⚠️ AND THE STACKING CLAIM MEASURED SOMETHING: if no page rendered a control row, every skip
+     above was silent and the pair-of-stickies claim went untested. */
+  expect(seen.filter((x) => x.rowTop >= 0).length, "no page rendered a control row — the two-stacked-stickies claim was skipped on every page")
+    .toBeGreaterThan(1);
 
   /* page against page, never constants */
   for (const k of ["h", "edges", "markW", "size", "weight"] as const) {
