@@ -200,5 +200,106 @@
       "right": 73
     },
     "scrollPad": "35px"
+  },
+  "2300|Query Centre": {
+    "content": {
+      "left": 432,
+      "right": 208
+    },
+    "row": null,
+    "scrollPad": "35px"
+  },
+  "2300|Analytics": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "2300|Contact list": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "2300|Discover": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "2300|Manuscripts": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": null,
+    "scrollPad": "80px"
+  },
+  "2300|Comparable titles": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "2300|Submission packages": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "2300|To-do list": {
+    "content": {
+      "left": 297,
+      "right": 73
+    },
+    "row": null,
+    "scrollPad": "35px"
+  },
+  "2300|Calendar": {
+    "content": {
+      "left": 297,
+      "right": 73
+    },
+    "row": {
+      "left": 297,
+      "right": 73
+    },
+    "scrollPad": "35px"
+  },
+  "2300|Noteboard": {
+    "content": {
+      "left": 297,
+      "right": 73
+    },
+    "row": {
+      "left": 297,
+      "right": 73
+    },
+    "scrollPad": "35px"
   }
 }

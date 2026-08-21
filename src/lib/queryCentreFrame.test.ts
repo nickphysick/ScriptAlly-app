@@ -117,7 +117,16 @@ describe("the workspace frame", () => {
        at `--work-max` and centres, the same token and the same mechanism the Dashboard uses, so the
        two pages agree by reading one value. What the case still protects is that the cap is the
        SHARED one rather than a figure invented here. */
-    expect(body, "the cap is not the shared token").toContain("max-width: var(--work-max)");
+    /* ⚠️ THE CAP MOVED UP ONE LEVEL AND IS STILL THE SHARED TOKEN (masthead measure, §1). It was
+       `max-width: var(--work-max)` on `.f12-body`; it is `--wpg-measure: var(--work-max)` on
+       `.qc-wpg` now, which every child of the scroll row reads — so the MASTHEAD is inside the same
+       measure as the panes instead of running the full width of the row beside them. Measured at
+       2300 before the move: the header was 135px wider on each side than the work it titles.
+       The claim is unchanged and is asserted where the value now lives: this page's work surface is
+       the shared token, never a number of its own. */
+    expect(body, "the page stopped naming its work measure").not.toContain("max-width: var(--work-max)");
+    expect(read("../components/shell/f12.css"), "the work measure is not the shared token, or it is not on the grid root")
+      .toContain("--wpg-measure: var(--work-max)");
     expect(body, "the frame re-declared a side inset — the scroll row already pays the gutter")
       .not.toContain("--sa-col-gut");
     expect(body, "the frame stopped filling the row").toContain("width: 100%");
@@ -131,7 +140,12 @@ describe("the workspace frame", () => {
        invitation. The cap has arrived on purpose, and the margin is what centres what it leaves
        over. Asserted PRESENT so a later tidy-up cannot delete it and leave the working area capped
        and left-aligned, which looks like a bug and reads as one. */
-    expect(body, "the cap has nothing to centre it — the working area would sit hard left at 2560")
+    /* ⚠️ THE CENTRING MOVED WITH THE CAP (masthead measure, §1) — both are the grid's now, applied
+       to every child of the scroll row so the masthead is centred in the same measure as the panes
+       rather than beside them. The claim is unchanged: without it the working area sits hard left
+       on a wide monitor. */
+    const grid = readFileSync(new URL("../components/shell/workspacePageGrid.css", import.meta.url), "utf8");
+    expect(grid, "the cap has nothing to centre it — the working area would sit hard left at 2560")
       .toMatch(/margin-inline:\s*auto/);
   });
 

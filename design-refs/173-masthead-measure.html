@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8">
+<title>ScriptAlly — masthead measure + descender fix</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+ :root{
+  --white:#fff;--content:#fefcfa;--paper:#faf6f0;--ground:#f7f4ee;--band:#f2ede7;
+  --burg:#7c3a2a;--burgd:#632e22;--ink:#3a1c14;--ink2:#311e19;
+  --edge:#e4ddd1;--rim:#e9e1d4;--hair:#e8e2d8;--pink:#f5e2da;--pinkb:#e8c8bc;
+  --sage-a:#d7ddd5;--sage-b:#d5dbd3;
+  --measure:1180px;      /* the content's own measure */
+  --gutter:35px;
+  --mini-h:51px;
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{background:#e9e4dc;font-family:'Inter',sans-serif;color:var(--ink);padding:15px 18px 34px}
+ .bar{display:flex;gap:6px;align-items:center;margin-bottom:7px;flex-wrap:wrap}
+ .lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#7d7267;margin:0 4px 0 10px}
+ .tab{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 10px;border:1px solid #cfc6b8;border-radius:7px;background:#f4efe7;cursor:pointer;color:var(--ink)}
+ .tab.on{background:var(--ink);color:#fdfaf5;border-color:var(--ink)}
+ .note{font-size:12.5px;color:#5d5048;margin:0 2px 11px;max-width:1180px;line-height:1.6;min-height:40px}
+ .note b{color:var(--ink)}
+
+ .shell{display:flex;width:100%;background:var(--ground);border-radius:13px;overflow:hidden;height:600px;
+        box-shadow:0 2px 6px rgba(58,28,20,.08),0 14px 34px rgba(58,28,20,.10)}
+ .side{flex:0 0 168px;background:#fff;border-right:1px solid var(--hair);padding:12px 9px;display:flex;flex-direction:column;gap:4px}
+
+ /* ── TOP BAR — the descender bug lives here too ── */
+ .topbar{display:flex;align-items:center;gap:11px;padding:0 15px;background:#fff;border-bottom:1px solid var(--hair);
+         height:52px;flex:0 0 auto}
+ body.clip .topbar .brand,body.clip .topbar .crumb{height:17px;overflow:hidden;line-height:1}
+ .topbar .brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;line-height:1.32}
+ .topbar .crumb{font-size:12.5px;color:#6b5a51;line-height:1.32}
+ .topbar .crumb b{color:var(--ink);font-weight:600}
+ .topbar .sp{flex:1}
+ .topbar .np{background:#3a2118;color:#fdfaf5;border-radius:999px;font-size:11px;padding:6px 13px;font-weight:600}
+
+ .main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+ .window{background:var(--content);border:1px solid var(--edge);border-radius:14px 14px 0 0;margin:10px 12px 0;
+         flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+
+ /* ══ THE MEASURE ══ one centred column; masthead and content are siblings in it ══ */
+ .measure{width:100%;max-width:var(--measure);margin-inline:auto;padding-inline:var(--gutter)}
+ body.bleed .measure.mast-measure{max-width:none;padding-inline:16px}
+
+ .mast{position:relative;padding:24px 0 18px;transition:max-height .26s cubic-bezier(.4,0,.2,1),padding .26s,opacity .18s;
+       max-height:240px;overflow:hidden}
+ .mrow{display:flex;align-items:center;justify-content:center;gap:22px}
+ .mmk{flex:0 0 52px;width:52px;height:52px;display:grid;place-items:center}
+ .mmk svg{width:36px;height:36px;stroke:var(--burg);fill:none;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
+ .mmk.mirror{transform:scaleX(-1)}
+ body.oneside .mmk.mirror{visibility:hidden}
+ .mtx{text-align:center}
+ /* descenders need room — Playfair at line-height 1 clips the y */
+ .mtx h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;line-height:1.24;color:var(--ink2)}
+ .mtx p{font-size:13.5px;color:#8a7a70;margin-top:4px;line-height:1.45}
+ .hidebtn{position:absolute;right:0;top:50%;transform:translateY(-50%);
+          display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px;border-radius:8px;
+          border:1px solid transparent;background:transparent;color:#8a7a70;font-size:12px;cursor:pointer}
+ .hidebtn:hover{background:var(--paper);color:var(--ink)}
+ .hidebtn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+ .mrule{height:1px;background:var(--rim);transition:opacity .2s}
+ body.folded .mast{max-height:0;padding:0;opacity:0}
+
+ /* ── MINI BAR — descender-safe ── */
+ .mini{position:relative;display:none;align-items:center;justify-content:center;gap:11px;
+       min-height:var(--mini-h);padding:9px 0}
+ body.folded .mini{display:flex}
+ .mini .mn{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--ink2);line-height:1.3}
+ body.clip .mini .mn{height:19px;overflow:hidden;line-height:1}
+ .mini .exp{position:absolute;right:0;top:50%;transform:translateY(-50%);
+            width:32px;height:32px;border-radius:8px;border:1px solid transparent;background:transparent;
+            color:#8a7a70;display:grid;place-items:center;cursor:pointer}
+ .mini .exp:hover{background:var(--paper);color:var(--ink)}
+ .mini .exp svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+ /* descender guide */
+ .dg{position:absolute;left:0;right:0;pointer-events:none;display:none}
+ body.guide .dg{display:block}
+ .dg i{position:absolute;left:0;right:0;height:1px;background:rgba(220,70,45,.6)}
+
+ .crow{display:flex;align-items:center;gap:9px;padding:14px 0}
+ .cbtn{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;border-radius:8px;border:1px solid #e2d8ca;
+       background:var(--white);color:#4d3b33;font-size:12px;font-weight:500;white-space:nowrap}
+ .cbtn.pink{background:var(--pink);border-color:var(--pinkb);color:var(--ink2);font-weight:600}
+ .sp{flex:1}
+ .work{flex:1;min-height:0;overflow:hidden;padding-bottom:20px}
+ .cols{display:grid;grid-template-columns:290px minmax(0,1fr);gap:16px;height:100%}
+ .pnl{border:1px solid var(--rim);border-radius:13px;background:var(--white);box-shadow:0 1px 2px rgba(58,28,20,.04);overflow:hidden}
+ .pnl .ph{padding:9px 12px;border-bottom:1px solid #f2ece2;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:#a2968c}
+ .row{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid #f8f3ec}
+ .avr{width:26px;height:26px;border-radius:50%;background:var(--pink);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--burgd)}
+ .row b{font-size:12px;font-weight:600;display:block}
+ .row span{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;color:#a2968c}
+ .pane{padding:22px;color:#a2968c;font-size:12.5px}
+</style></head><body>
+
+<div class="bar">
+ <span class="lab" style="margin-left:0">MASTHEAD WIDTH</span>
+ <button class="tab" data-w="bleed">FULL BLEED (TODAY)</button>
+ <button class="tab on" data-w="measure">SHARES THE CONTENT MEASURE</button>
+ <span class="lab">ILLUSTRATION</span>
+ <button class="tab on" data-i="both">BOTH SIDES</button>
+ <button class="tab" data-i="one">LEFT ONLY</button>
+ <span class="lab">DESCENDERS</span>
+ <button class="tab" data-c="clip">CLIPPED (THE BUG)</button>
+ <button class="tab on" data-c="ok">FIXED</button>
+ <span class="lab">GUIDE</span>
+ <button class="tab" id="gd">SHOW</button>
+ <span class="lab">STATE</span>
+ <button class="tab" id="fold">FOLD</button>
+</div>
+<div class="note" id="note">One centred measure holds masthead and content as siblings, so the header cannot drift from the work at any width. Title and subtitle centred with the mark either side; <b>Hide</b> absolutely positioned so it never pulls the centring off true. Folded, the bar is the page name alone &mdash; no illustration.</div>
+
+<div class="shell">
+ <aside class="side"></aside>
+ <div class="main">
+  <div class="topbar">
+    <span class="brand">ScriptAlly</span>
+    <span class="crumb">ScriptAlly&nbsp; / &nbsp;Queries&nbsp; / &nbsp;<b>Query Centre</b></span>
+    <span class="sp"></span><span class="np">+ New</span>
+  </div>
+  <div class="window">
+
+   <div class="measure mast-measure">
+     <div class="mast">
+       <div class="mrow">
+         <span class="mmk"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg></span>
+         <div class="mtx">
+           <h1>Query Centre<span class="dg" style="top:0;bottom:0"><i style="bottom:0"></i></span></h1>
+           <p>Every query, every response &mdash; track every step of your journey so far</p>
+         </div>
+         <span class="mmk mirror"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg></span>
+       </div>
+       <button class="hidebtn" id="hide"><svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>Hide</button>
+     </div>
+
+     <div class="mini">
+       <span class="mn">Query Centre</span>
+       <button class="exp" id="show"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+     </div>
+
+     <div class="mrule"></div>
+   </div>
+
+   <div class="measure">
+     <div class="crow">
+       <span class="cbtn pink">&#65291; Log new query</span>
+       <span class="sp"></span>
+       <span class="cbtn">Record response</span><span class="cbtn">Nudge</span>
+       <span class="cbtn">Mark closed</span><span class="cbtn">Delete</span>
+     </div>
+     <div class="work">
+       <div class="cols">
+         <div class="pnl"><div class="ph">25 QUERIES</div>
+           <div class="row"><span class="avr">SD</span><div><b>Sophie Dunn</b><span>CURTIS VANE</span></div></div>
+           <div class="row"><span class="avr">WT</span><div><b>William Tan</b><span>FOXGLOVE LITERARY</span></div></div>
+           <div class="row"><span class="avr">MR</span><div><b>Marcus Reed</b><span>BLOOMSBURY QUILL</span></div></div>
+           <div class="row"><span class="avr">PR</span><div><b>Priya Raman</b><span>NO AGENCY</span></div></div>
+         </div>
+         <div class="pnl"><div class="ph">READING PANE</div><div class="pane">The selected query opens here.</div></div>
+       </div>
+     </div>
+   </div>
+
+  </div>
+ </div>
+</div>
+
+<script>
+const B=(sel,fn)=>document.querySelectorAll(sel).forEach(b=>b.onclick=()=>fn(b));
+B('.tab[data-w]',b=>{document.body.classList.toggle('bleed',b.dataset.w==='bleed');
+ document.querySelectorAll('.tab[data-w]').forEach(x=>x.classList.toggle('on',x===b));});
+B('.tab[data-i]',b=>{document.body.classList.toggle('oneside',b.dataset.i==='one');
+ document.querySelectorAll('.tab[data-i]').forEach(x=>x.classList.toggle('on',x===b));});
+B('.tab[data-c]',b=>{document.body.classList.toggle('clip',b.dataset.c==='clip');
+ document.querySelectorAll('.tab[data-c]').forEach(x=>x.classList.toggle('on',x===b));});
+document.getElementById('gd').onclick=function(){const on=document.body.classList.toggle('guide');
+ this.textContent=on?'HIDE':'SHOW';this.classList.toggle('on',on);};
+document.getElementById('fold').onclick=function(){const on=document.body.classList.toggle('folded');
+ this.textContent=on?'UNFOLD':'FOLD';this.classList.toggle('on',on);};
+document.getElementById('hide').onclick=()=>{document.body.classList.add('folded');
+ const f=document.getElementById('fold');f.textContent='UNFOLD';f.classList.add('on');};
+document.getElementById('show').onclick=()=>{document.body.classList.remove('folded');
+ const f=document.getElementById('fold');f.textContent='FOLD';f.classList.remove('on');};
+</script></body></html>

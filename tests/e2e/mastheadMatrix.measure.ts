@@ -224,24 +224,32 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
   }
 
   /**
-   * ⚠️ THE MASTHEAD, ITS HAIRLINE AND THE MINI BAR SHARE ONE WIDTH, AND IT IS THE SAME ON EVERY
-   * PAGE — 16px inside the scroll row's own edge, once the scrollbar reservation is taken off.
+   * ⚠️ THE MASTHEAD, ITS HAIRLINE AND THE MINI BAR SHARE ONE WIDTH — WITHIN A PAGE, NOT ACROSS THEM.
    *
-   * ⚠️ THE RESERVATION IS MEASURED, NOT ASSUMED AWAY. `scrollbar-gutter: stable both-edges` takes
-   * one scrollbar width per side: 0 under overlay scrollbars (the real app), ~15 under classic ones
-   * (the harness). Subtracting what is actually there asserts 16 in both modes rather than pinning
-   * whichever the machine happens to be in.
+   * ⚠️ THIS REPLACES TWO ASSERTIONS THAT WERE BOTH TRUE OF THE WRONG DESIGN (masthead measure, §1).
+   * They were "the masthead sits 16px inside the scroll row" and "every page's masthead has the same
+   * edges" — correct while the masthead was a WINDOW concern with a width rule of its own, and that
+   * is exactly the model that put the header 135px wider than the work on Query Centre at 2300.
+   *
+   * ⚠️ PAGES KEEP THEIR OWN GUTTERS AND MEASURES, so their mastheads are DELIBERATELY not equal to
+   * each other: 35px on Query Centre and the Tasks family, 80 elsewhere, and Query Centre's work
+   * surface caps at `--work-max`. A cross-page equality here would now be asserting that those
+   * differences do not exist. The relationship that matters — masthead edges EQUAL the content's,
+   * on every page at every width, including 2300 — is `contentGeometry.measure.ts`'s, where the
+   * content is measured beside it.
+   *
+   * What stays here is the claim this file is placed to make: the three pieces of masthead chrome
+   * are one object, so within a page they must share one width. A mini bar at the content gutter
+   * beside a masthead 64px wider would read as a different object arriving rather than the same one
+   * folding.
    */
   for (const { name, r } of rows) {
-    expect(r.mastInset - r.barReserve, `${name}: the masthead sits ${r.mastInset - r.barReserve}px inside the scroll row (bar reserve ${r.barReserve})`)
-      .toBeCloseTo(16, 0);
     expect(r.ruleEdges, `${name}: the closing hairline is not the masthead's own width`).toBe(r.mastEdges);
     if (r.miniPresent) {
-      expect(r.miniEdges, `${name}: the mini bar sits at ${r.miniEdges} against the masthead's ${r.mastEdges} — it would read as a different object arriving`)
+      expect(r.miniEdges, `${name}: the mini bar sits at ${r.miniEdges} against the masthead's ${r.mastEdges}`)
         .toBe(r.mastEdges);
     }
   }
-  same("mastEdges", "the masthead's edges");
 
   /**
    * ⚠️ THE MINI BAR IS RENDERED ON EVERY SCROLLING PAGE AND ON NO FILL PAGE AT REST — presence, not

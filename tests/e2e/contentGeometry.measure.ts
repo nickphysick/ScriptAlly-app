@@ -2,15 +2,22 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * CONTENT GEOMETRY — the pledge that the masthead's width system moves NOTHING else.
+ * ONE MEASURE — the masthead and the page's content share edges (masthead measure, §1).
  *
- * ⚠️ THE MASTHEAD IS ABOUT TO ESCAPE ITS PAGE'S GUTTER, and the whole risk of that is collateral:
- * a negative margin, a token rename or a re-homed padding that also shifts the cards, the control
- * row or the panes. This captures where each page's content actually sits BEFORE the change and
- * asserts it byte-identical after — the one check that cannot be satisfied by the masthead looking
- * right.
+ * ⚠️ THIS REPLACES A LOCK THAT ASSERTED THE WRONG THING AND PASSED. The previous pack made the
+ * masthead a WINDOW concern — 16px from the window edge, deliberately independent of content — and
+ * this file asserted exactly that, at 1280 and 1440, green. On a wide monitor the masthead ran to
+ * the walls while the work sat in a narrower measure: 135px out on Query Centre at 2300, with Hide
+ * half a screen from anything.
  *
- * ⚠️ TWO WIDTHS, BECAUSE A LAW THAT HOLDS AT EXACTLY ONE WIDTH IS A COINCIDENCE. 1280 and 1440.
+ * ⚠️ TWO WIDTHS ON THE SAME SIDE OF EVERY CAP ARE ONE WIDTH. The old pair, 1280 and 1440, sit below
+ * every measure this app uses, so nothing could disagree at either. **2300 is in the list now, and
+ * it is the width that does the work** — it is where `--work-max` bites and where a masthead with a
+ * rule of its own separates from the content.
+ *
+ * THE CLAIM IS NOW MUCH SIMPLER, WHICH IS THE POINT: the masthead's left and right offsets EQUAL
+ * the first content column's, on every page at every width. Not a number — a relationship, and one
+ * that holds by construction because the masthead has no width rule of its own.
  *
  * Usage:  SA_BASELINE=1 npx playwright test tests/e2e/contentGeometry.measure.ts   → write baseline
  *         npx playwright test tests/e2e/contentGeometry.measure.ts                 → diff against it
@@ -35,7 +42,9 @@ const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Noteboard",           route: "/todo/noteboard",       cls: "tpl-wpg"  },
 ];
 
-const WIDTHS = [1280, 1440];
+/* ⚠️ 2300 IS THE ONE THAT MATTERS. Below ~1900 no page's measure binds, so 1280 and 1440 agree
+   about everything and prove nothing about a wide monitor. */
+const WIDTHS = [1280, 1440, 2300];
 
 const read = (page: Page, cls: string) => page.evaluate((c) => {
   const r = (n: number) => Math.round(n * 10) / 10;
@@ -70,16 +79,6 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
     scrollPad: getComputedStyle(sc).paddingLeft,
     /* what the pack DOES move — recorded so a diff says which half changed */
     masthead: box(mast),
-    /**
-     * ⚠️ THE MASTHEAD'S INSET FROM THE SCROLL ROW'S OWN EDGE, with the scrollbar reservation
-     * measured alongside rather than assumed away. `scrollbar-gutter: stable both-edges` reserves
-     * one scrollbar width on EACH side, so `offsetWidth - clientWidth` is twice it. Under overlay
-     * scrollbars that is 0 and the inset is 16 from the window; under classic ones it is 16 + ~15.
-     * That variance is the existing app-wide decision, which content already pays — stated here,
-     * never compensated for, or the masthead becomes the one element in the app fighting it.
-     */
-    barReserve: r((sc.offsetWidth - sc.clientWidth) / 2),
-    mastInset: r(mast.getBoundingClientRect().left - sc.getBoundingClientRect().left),
   };
 }, cls);
 
@@ -87,7 +86,7 @@ test("content geometry is unchanged by the masthead's width system", async ({ pa
   const now: Record<string, unknown> = {};
   /* kept apart from `now` deliberately: `now` is the half that must NOT change and is diffed
      against the baseline; this is the half that must, and is asserted as a relationship */
-  const mast: Record<string, { masthead: { left: number; right: number } | null; mastInset: number; barReserve: number }> = {};
+  const mast: Record<string, { masthead: { left: number; right: number } | null }> = {};
   const lines: string[] = [];
 
   for (const w of WIDTHS) {
@@ -97,7 +96,7 @@ test("content geometry is unchanged by the masthead's width system", async ({ pa
       expect(r, `${name} @${w}: no visible grid with class .${cls}`).not.toBeNull();
       expect(r!.content, `${name} @${w}: no content element after the chrome — the probe has nothing to hold still`).not.toBeNull();
       now[`${w}|${name}`] = { content: r!.content, row: r!.row, scrollPad: r!.scrollPad };
-      mast[`${w}|${name}`] = { masthead: r!.masthead, mastInset: r!.mastInset, barReserve: r!.barReserve };
+      mast[`${w}|${name}`] = { masthead: r!.masthead };
       lines.push(
         `${String(w).padEnd(5)} ${name.padEnd(21)} content "${r!.contentClass}" ${r!.content!.left}/${r!.content!.right}` +
         ` · row ${r!.row ? `${r!.row.left}/${r!.row.right}` : "—"} · pad ${r!.scrollPad} · masthead ${r!.masthead!.left}/${r!.masthead!.right}`);
@@ -106,28 +105,24 @@ test("content geometry is unchanged by the masthead's width system", async ({ pa
   console.log("\n" + lines.join("\n"));
 
   /**
-   * ⚠️ THE MASTHEAD'S OWN EDGES: EQUAL ON EVERY PAGE, AND 16px FROM THE SCROLL ROW'S EDGE ONCE THE
-   * SCROLLBAR RESERVATION IS TAKEN OFF. This is the half of step 2 that is supposed to CHANGE, so
-   * it is asserted as a relationship in its own right rather than diffed against the baseline.
+   * ⚠️ THE MASTHEAD AND THE CONTENT SHARE EDGES — the whole of §1, asserted per page and per width.
    *
-   * Before this step the masthead sat at its page's content gutter — 342 on seven pages and 297 on
-   * the three tight ones, two mastheads 45px apart while claiming to be the same object.
+   * It is a RELATIONSHIP, not a figure: the two numbers may be anything, and they must be the same
+   * two numbers. That is what makes it hold at a viewport nobody measured, and it is why the
+   * masthead is given no width rule of its own — a rule would be a second number to keep in step,
+   * which is precisely what the window-inset system was and precisely how it drifted.
    */
-  const insets = new Set<number>();
-  const edges = new Set<string>();
   for (const w of WIDTHS) {
-    for (const { name, route, cls } of PAGES) {
+    for (const { name } of PAGES) {
       const k = `${w}|${name}`;
-      const m = mast[k]!;
-      expect(m.mastInset - m.barReserve, `${name} @${w}: the masthead sits ${m.mastInset - m.barReserve}px inside the scroll row (bar reserve ${m.barReserve}) — the inset is 16`)
-        .toBeCloseTo(16, 0);
-      insets.add(m.mastInset);
-      edges.add(`${m.masthead!.left}/${m.masthead!.right}`);
-      void route; void cls;
+      const m = mast[k]!.masthead!;
+      const c = (now[k] as { content: { left: number; right: number } }).content;
+      expect(m.left, `${name} @${w}: the masthead starts at ${m.left} and the content at ${c.left} — the header has drifted from the work`)
+        .toBeCloseTo(c.left, 0);
+      expect(m.right, `${name} @${w}: the masthead ends ${m.right} from the edge and the content ${c.right}`)
+        .toBeCloseTo(c.right, 0);
     }
   }
-  expect([...edges], `the masthead's edges differ page to page: ${[...edges].join(" · ")}`).toHaveLength(1);
-  expect([...insets], "the masthead's inset differs page to page").toHaveLength(1);
 
   if (process.env.SA_BASELINE) {
     mkdirSync(dirname(BASELINE), { recursive: true });

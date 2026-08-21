@@ -1610,8 +1610,12 @@
    * `--shell-panelw` is the first of those, so two thirds of the arithmetic tracks the shell for
    * free and only the collapsed width is stated here.
    */
-  max-width: var(--work-max);
-  margin-inline: auto;
+  /* ⚠️ THE CAP MOVED UP TO THE GRID (masthead measure, §1), AND IT MOVED BECAUSE THE MASTHEAD HAS
+     TO BE INSIDE IT. This element held `max-width: var(--work-max); margin-inline: auto`, so the
+     work sat in a 1660px measure while the masthead — a sibling in the same scroller — ran the full
+     width of the row: 135px wider on each side at 2300, with Hide half a screen from anything.
+     `--wpg-measure` on `.qc-wpg` names it ONCE and every child of the scroller takes it, so the two
+     cannot diverge again. The VALUE is unchanged. */
   /**
    * ⚠️ THE CONTROL BAND IS A FIXED 36, NOT `auto` (alignment amendment). `auto` sized the row to
    * whichever cell was taller, and the two cells hold different things — a Playfair count on one
@@ -1712,22 +1716,16 @@
  * ⚠️ AND IT IS 35, NOT 50, BECAUSE THE SCROLLBAR GUTTER IS ALREADY PAYING 15. Writing 50 here would
  * land the content at 65 and look like an arithmetic slip six months from now.
  */
-/* ⚠️ THE TOKEN ON THE GRID ROOT, NOT THE ROW'S PADDING (masthead rethink, step 2). Overriding the
-   declaration set this page's content gutter and left the MASTHEAD reading the shell's 80 to cancel
-   — so its escape would have been 45px wrong, and wrong only here. `--wpg-gutter` is read by the
-   scroll row for its padding and by the masthead to cancel exactly that padding: one token, two
-   consumers, no way for them to disagree. The VALUE is unchanged. */
-/* ⚠️ `.wpg.qc-wpg`, NOT `.qc-wpg` — 0-2-0 AGAINST THE COMPONENT'S 0-1-0, AND THE FIRST VERSION LOST.
-   Both selectors match the SAME element (the grid root carries `wpg` and `qc-wpg` together), so at
-   equal specificity the cascade resolves on bundle source order — and `workspacePageGrid.css` is
-   emitted later, so the component's default silently beat this page's override. The content
-   geometry lock caught it: this page's scroll padding read 80px where it has always been 35.
-
-   ⚠️ AND RAISING SPECIFICITY IS RIGHT HERE, THOUGH IT IS THE WRONG FIX ELSEWHERE. CLAUDE.md's rule
-   is that a page and a component contributing to ONE property must each contribute a token and let
-   the property SUM them, because raising specificity makes one REPLACE the other. Replacing is
-   exactly what is wanted here: this page's gutter IS a different value, not an addition to one. */
-.wpg.qc-wpg { --wpg-gutter: var(--content-gutter-tight); }
+/* ⚠️ THE ROW'S PADDING AGAIN (masthead measure, §1). Step 2 of the rethink pack moved this to a
+   `--wpg-gutter` token on the grid root so the masthead could cancel exactly this padding and
+   escape to a window inset; that whole system is reverted — the masthead is a sibling of the
+   content and takes the page's measure by construction, so there is nothing to cancel. The VALUE
+   has never changed. */
+.qc-wpg .wpg-scroll { padding-inline: var(--content-gutter-tight); }
+/* ⚠️ THE ONE PAGE THAT CAPS ITS WORK SURFACE, AND IT SAYS SO ONCE. `--work-max` is the shared
+   work-surface measure (the dashboard's one-screen reads it too); naming it here puts the masthead,
+   the mini bar and the panes on the same edges by construction. */
+.qc-wpg { --wpg-measure: var(--work-max); }
 
 /* ── §1 · THE TWO CONTROL CELLS ───────────────────────────────────────────────────────────────
    Row 1 of the split. Left cell = what the list IS (count, sub-count) and the two controls that

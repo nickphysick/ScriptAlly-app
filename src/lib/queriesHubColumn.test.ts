@@ -112,7 +112,16 @@ describe("Queries hub · the header block sits in the SHARED content column", ()
        behaviour, and its margin being a share of the surplus is exactly what centring is. What
        survives is that the figure is the SHARED token the Dashboard reads, not one invented here:
        measured at 2560, both pages stop at 1660 with equal margins. */
-    expect(body, "the cap is not the shared token").toContain("max-width: var(--work-max)");
+    /* ⚠️ THE CAP MOVED UP ONE LEVEL AND IS STILL THE SHARED TOKEN (masthead measure, §1). It was
+       `max-width: var(--work-max)` on `.f12-body`; it is `--wpg-measure: var(--work-max)` on
+       `.qc-wpg` now, which every child of the scroll row reads — so the MASTHEAD is inside the same
+       measure as the panes instead of running the full width of the row beside them. Measured at
+       2300 before the move: the header was 135px wider on each side than the work it titles.
+       The claim is unchanged and is asserted where the value now lives: this page's work surface is
+       the shared token, never a number of its own. */
+    expect(body, "the page stopped naming its work measure").not.toContain("max-width: var(--work-max)");
+    expect(f12, "the work measure is not the shared token, or it is not on the grid root")
+      .toContain("--wpg-measure: var(--work-max)");
     expect(body, "the frame invented a cap of its own").not.toMatch(/max-width:\s*\d/);
     expect(body, "the frame re-declared a side inset — the scroll row already pays the gutter")
       .not.toContain("--sa-col-gut");
