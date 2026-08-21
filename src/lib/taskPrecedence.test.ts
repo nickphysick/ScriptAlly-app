@@ -197,3 +197,62 @@ describe("§3 · a scheduled nudge supersedes the close suggestion", () => {
     expect(replyTaskFor(q, { responseTimeWeeks: 8, noResponseMeansNo: true }, NOW, true)).toBe("none");
   });
 });
+
+/**
+ * ⚠️ THE WRITER'S OWN REMINDER RAISES THE EXISTING NUDGE (reminder round, Phase 2) — not a new kind,
+ * not a new bucket. It is a third route into a decision this function already makes, so everything
+ * downstream (deed, pill, group, count) is the nudge derivation's own and there is still one push
+ * site, which is what makes "it counts once" structural rather than asserted.
+ */
+describe("⚠️ a stored reminder becomes a nudge", () => {
+  const DAY = 864e5;
+  const NOW = Date.parse("2026-08-21T12:00:00.000Z");
+  const q = (over: Record<string, unknown> = {}) => ({
+    status: QueryStatus.QUERIED,
+    dateSent: new Date(NOW - 20 * DAY).toISOString(),
+    ...over,
+  }) as never;
+  /* a 52-week window, so the ordinary overdue route cannot fire and the reminder is the only cause */
+  const agent = { responseTimeWeeks: 52, noResponseMeansNo: false };
+
+  it("a reminder that has arrived raises exactly one nudge", () => {
+    expect(replyTaskFor(q({ nudgeDate: new Date(NOW - DAY).toISOString() }), agent, NOW)).toBe("nudge");
+  });
+
+  it("a reminder still ahead raises nothing", () => {
+    expect(replyTaskFor(q({ nudgeDate: new Date(NOW + 30 * DAY).toISOString() }), agent, NOW)).toBe("none");
+  });
+
+  it("no reminder raises nothing, ever", () => {
+    expect(replyTaskFor(q(), agent, NOW)).toBe("none");
+  });
+
+  /**
+   * ⚠️ IT MUST NOT FIRE INTO A WORLD THAT HAS MOVED ON. Three cancellations, and each is a fact the
+   * function already had: a reply since, a send since, a chase since. A writer who has already acted
+   * has answered the reminder by doing the thing.
+   */
+  it("a reply after the reminder date cancels it", () => {
+    const inp = { ...(q({ nudgeDate: new Date(NOW - 5 * DAY).toISOString() }) as object) } as never;
+    expect(replyTask({
+      status: QueryStatus.QUERIED, dateSent: new Date(NOW - 20 * DAY).toISOString(),
+      responseTimeWeeks: 52, noResponseMeansNo: false, now: NOW,
+      writerNudgeDate: new Date(NOW - 5 * DAY).toISOString(),
+      repliedSinceMs: NOW - 2 * DAY,
+    })).toBe("none");
+    void inp;
+  });
+
+  it("a chase already sent after the reminder date cancels it", () => {
+    expect(replyTaskFor(q({
+      nudgeDate: new Date(NOW - 5 * DAY).toISOString(),
+      lastNudgeSentDate: new Date(NOW - 2 * DAY).toISOString(),
+    }), agent, NOW)).toBe("none");
+  });
+
+  it("a closed query raises nothing, whatever the reminder says", () => {
+    expect(replyTaskFor(q({
+      status: QueryStatus.REJECTED, nudgeDate: new Date(NOW - DAY).toISOString(),
+    }), agent, NOW)).toBe("none");
+  });
+});

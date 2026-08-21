@@ -38,6 +38,13 @@ export interface ReplyTaskInput {
   responseDeadline?: string; // ISO — stored; else computed from dateSent + window
   responseTimeWeeks?: number; // the reply window; 0/undefined = no window recorded
   noResponseMeansNo: boolean;
+  /**
+   * ⚠️ THE WRITER'S OWN REMINDER (reminder round, Phase 2) — `Query.nudgeDate`, the date they asked
+   * to be reminded on. It is NOT `reminderScheduled`, which is a different thing pointing the other
+   * way: that says a chase has already been BOOKED AS A TASK and suppresses the suggestion. This is
+   * a stored date that RAISES one when it arrives.
+   */
+  writerNudgeDate?: string;
   lastNudgeSentDate?: string; // ISO — when a nudge was actually sent (drives the progression)
   /**
    * §3 (policy pack) — a FUTURE nudge reminder the writer has scheduled on this query.
@@ -127,6 +134,32 @@ export function replyTask(inp: ReplyTaskInput): ReplyTask {
   // Not an awaiting status, no window recorded, or undated — nothing to place in time.
   if (Number.isNaN(deadlineMs)) return "none";
 
+  /**
+   * ⚠️ THE WRITER'S OWN REMINDER IS CHECKED BEFORE THE WINDOW, AND THAT IS THE WHOLE POINT
+   * (reminder round, Phase 2). A reminder exists precisely to fire EARLIER than the agency's stated
+   * window — "chase them a week before the six weeks are up" — so consulting it after the
+   * still-inside-the-window return meant it could never fire at all. Measured: a reminder a day
+   * past its date against a 52-week window returned "none".
+   *
+   * ⚠️ IT RAISES THE SAME NUDGE, not a new kind. A third route into a decision this function
+   * already makes, so the deed, the pill, the bucket and the group are the nudge derivation's own —
+   * and it counts once because there is still exactly one push site downstream.
+   *
+   * ⚠️ AND IT MUST NOT FIRE INTO A WORLD THAT HAS MOVED ON. Three cancellations, each a fact already
+   * in hand: a REPLY since the reminder date, a SEND since, or a CHASE already sent since. A writer
+   * who has acted has answered the reminder by doing the thing. A status that is no longer the
+   * agent's turn returned "none" above, at the `NaN`.
+   */
+  const nudgeDueMs = ms(inp.writerNudgeDate);
+  if (!Number.isNaN(nudgeDueMs) && now >= nudgeDueMs) {
+    const sentAt = ms(inp.dateSent);
+    const chasedAt = ms(inp.lastNudgeSentDate);
+    const moved = (inp.repliedSinceMs != null && inp.repliedSinceMs > nudgeDueMs)
+      || (!Number.isNaN(sentAt) && sentAt > nudgeDueMs)
+      || (!Number.isNaN(chasedAt) && chasedAt > nudgeDueMs);
+    if (!moved) return "nudge";
+  }
+
   if (now < deadlineMs + NUDGE_GRACE_DAYS * DAY) return "none"; // still inside window + grace
 
   const sentMs = ms(inp.dateSent);
@@ -163,7 +196,7 @@ export function replyTask(inp: ReplyTaskInput): ReplyTask {
  * same reason an unstated one is — never a default window, which would invent a deadline.
  */
 export function replyTaskFor(
-  query: { status: QueryStatus; dateSent?: string; responseDeadline?: string; lastNudgeSentDate?: string },
+  query: { status: QueryStatus; dateSent?: string; responseDeadline?: string; lastNudgeSentDate?: string; nudgeDate?: string },
   agent: { responseTimeWeeks?: number; noResponseMeansNo?: boolean } | null | undefined,
   now: number,
   /* §3 — a future reminder on this query, from the caller's own task store. Optional so the
@@ -179,6 +212,8 @@ export function replyTaskFor(
     responseTimeWeeks: agent.responseTimeWeeks,
     noResponseMeansNo: !!agent.noResponseMeansNo,
     lastNudgeSentDate: query.lastNudgeSentDate,
+    /* the writer's own reminder, from the field it is stored in — one name, one place */
+    writerNudgeDate: query.nudgeDate,
     now,
   });
 }

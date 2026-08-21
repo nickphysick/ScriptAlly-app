@@ -813,6 +813,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         responseTimeWeeks: agent.responseTimeWeeks,
         noResponseMeansNo: agent.noResponseMeansNo,
         lastNudgeSentDate: q.lastNudgeSentDate,
+        /* the writer's own reminder date — raises the SAME nudge when it arrives (Phase 2) */
+        writerNudgeDate: q.nudgeDate,
         /* §3 — a nudge the writer has already scheduled supersedes both answers. The predicate is
            `scheduledReminder`'s, which is what the tracker's ghost rung draws from, so the feed and
            the timeline cannot disagree about whether a chase is booked. */
