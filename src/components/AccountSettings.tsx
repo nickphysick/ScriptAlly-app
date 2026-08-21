@@ -59,10 +59,7 @@ import { RailAside } from "./settings/RailAside";
 import { SettingsIllo, hasSectionWatermark } from "./settings/SettingsIllo";
 import { accountFacts, sentCount } from "../lib/accountHeaderFacts";
 import { todoPrefs, STALE_MONTHS_CHOICES } from "../lib/todoPrefs";
-import {
-  optionalTaskTypes, mutedRuleRows, unmute, ALWAYS_ON_LINE, MUTED_EMPTY_LINE,
-  staleOptionLabel, STALE_NOTE,
-} from "../lib/accountTasks";
+import { optionalTaskTypes, ALWAYS_ON_LINE, staleOptionLabel, STALE_NOTE } from "../lib/accountTasks";
 import {
   parchment,
   PAPER_TEXTURE,
@@ -696,7 +693,6 @@ export const AccountSettings: React.FC<{
   /* ⚠️ THROUGH `todoPrefs()`, WHICH IS TOTAL. An absent map, an absent field and a nonsense value
      all resolve to the same stated default, so this page never needs a `?? false` of its own. */
   const prefs = todoPrefs(currentUser.todoPrefs);
-  const mutedRows = mutedRuleRows(currentUser.mutedTaskRules);
 
   /** Every task pref commits instantly with the standard receipt — the same model as every other
    *  toggle and select on this page. */
@@ -706,15 +702,6 @@ export const AccountSettings: React.FC<{
       savedReceipt(what);
     } catch {
       showToast({ message: `Couldn't save ${what.toLowerCase()} — try again?`, duration: 4000 });
-    }
-  };
-
-  const switchBackOn = async (key: string, label: string) => {
-    try {
-      await updateUserProfile({ mutedTaskRules: unmute(currentUser.mutedTaskRules, key) });
-      savedReceipt(label);
-    } catch {
-      showToast({ message: "Couldn't switch that back on — try again?", duration: 4000 });
     }
   };
 
@@ -1280,6 +1267,18 @@ export const AccountSettings: React.FC<{
    * All four `todoPrefs` values live here — `rollForward`, `weeklyBriefing`, `staleMonths` and
    * `types` — plus the muted-rule list, so nothing is stranded when the sheet goes.
    */
+  /**
+   * THE TASKS SECTION — preferences only.
+   *
+   * ⚠️ THE MUTED-RULES COLUMN LEFT FOR THE BOARD. It listed one of the THREE kinds of hiding the
+   * app has; the other two — permanent dismissals and live snoozes — were never here, so a writer
+   * looking for something they had set aside had to know which kind it was before they knew where
+   * to look. `hiddenItems()` returns all three in one shape, and the board's "Set aside & tags"
+   * panel renders them together. Splitting them was the "two places to change one thing" fault the
+   * retired sheet existed to prevent, wearing different clothes.
+   *
+   * What stays is what a SETTING is: the four behaviours that decide what reaches the list at all.
+   */
   const tasksSection = (
     <SectionCard section="tasks" headingId="acct-h-tasks">
       <div className="acct-two">
@@ -1316,10 +1315,12 @@ export const AccountSettings: React.FC<{
               <p className="acct-note">{STALE_NOTE}</p>
             </div>
           </div>
+        </div>
 
-          {/* ⚠️ `decide` GETS A SENTENCE, NOT A SWITCH. `todoPrefs` forces it true — the one value
-              the prefs resolver refuses to take an instruction on — so a toggle for it would be a
-              control that cannot act, which this build has removed twice already. */}
+        {/* ⚠️ `decide` GETS A SENTENCE, NOT A SWITCH. `todoPrefs` forces it true — the one value the
+            prefs resolver refuses to take an instruction on — so a toggle for it would be a control
+            that cannot act, which this build has removed three times now. */}
+        <div>
           <div className="acct-group">
             <span className="acct-grouplabel">What appears on your list</span>
             {optionalTaskTypes().map((t, i) => (
@@ -1333,30 +1334,6 @@ export const AccountSettings: React.FC<{
               />
             ))}
             <p className="acct-note">{ALWAYS_ON_LINE}</p>
-          </div>
-        </div>
-
-        <div>
-          <div className="acct-group">
-            <span className="acct-grouplabel">Reminders you&rsquo;ve switched off</span>
-            {mutedRows.length === 0 ? (
-              <p className="acct-note acct-note--tight">{MUTED_EMPTY_LINE}</p>
-            ) : (
-              mutedRows.map((r) => (
-                <div key={r.key} className="acct-muterow">
-                  <div className="acct-rowmain">
-                    <p className="acct-rowtitle">{r.label}</p>
-                    {/* ⚠️ NO DATE. `mutedTaskRules` is a bare string[] and records no time; the ref
-                        draws one, and inventing it would be a plausible number stating something
-                        untrue. */}
-                    <p className="acct-mutewhen">Switched off</p>
-                  </div>
-                  <button type="button" style={ghostBtn} onClick={() => switchBackOn(r.key, r.label)}>
-                    Switch back on
-                  </button>
-                </div>
-              ))
-            )}
           </div>
         </div>
       </div>

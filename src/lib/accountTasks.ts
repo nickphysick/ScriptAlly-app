@@ -4,14 +4,16 @@
  *
  * accountTasks — what the Tasks settings section shows, derived from the fields that already exist.
  *
- * ⚠️ NO NEW FIELD AND NO NEW VOCABULARY. The page owns all four of `todoPrefs`'s values
- * (`rollForward`, `weeklyBriefing`, `staleMonths`, `types`) plus `mutedTaskRules`, and every label
- * it renders comes from the list the to-do board already reads. A settings page that invented its
- * own plain-English names would give the app two vocabularies for one set of tasks, and the writer
- * would meet both.
+ * ⚠️ NO NEW FIELD AND NO NEW VOCABULARY. The page owns the four `todoPrefs` values —
+ * `rollForward`, `weeklyBriefing`, `staleMonths`, `types` — and every label it renders comes from
+ * the list the to-do board already reads. A settings page that invented its own plain-English
+ * names would give the app two vocabularies for one set of tasks, and the writer would meet both.
+ *
+ * ⚠️ `mutedTaskRules` IS NOT HERE ANY MORE. It is one of three kinds of hiding, and all three now
+ * live together on the board's set-aside panel; a settings page owning one of them was how a
+ * writer came to need to know WHICH kind before they knew where to look.
  */
 import { TASK_TYPE_KEYS, TASK_TYPE_LABEL, TASK_TYPE_GLOSS, TaskTypeKey } from "./todoPrefs";
-import { TASK_SETTING_ROWS } from "./taskSettings";
 
 /* ── What appears on your list ─────────────────────────────────────────────── */
 
@@ -36,39 +38,12 @@ export function optionalTaskTypes(): TaskTypeRow[] {
 /** The line that stands in for the toggle `decide` cannot have. */
 export const ALWAYS_ON_LINE = "Decisions you need to make always appear.";
 
-/* ── Reminders you've switched off ─────────────────────────────────────────── */
-
-export interface MutedRuleRow {
-  key: string;
-  label: string;
-}
-
-/**
- * One row per muted rule, named from the board's own list.
- *
- * ⚠️ AN UNRECOGNISED KEY IS STILL SHOWN, NOT DROPPED. A rule muted by an older build, or by one
- * this version does not know about, is still muting something — hiding it would leave a reminder
- * switched off with nowhere to switch it back on, which is the one outcome this section exists to
- * prevent. It is listed under its own key rather than silently disappearing.
- *
- * ⚠️ AND THERE IS NO DATE. `mutedTaskRules` is a bare `string[]`; nothing records WHEN a rule was
- * muted. The design ref draws "Switched off 12 August 2026" — a date the data cannot produce, and
- * inventing one would be a plausible number stating something untrue, which this repo has paid for
- * before. The rows say "Switched off" and stop.
- */
-export function mutedRuleRows(muted: string[] | null | undefined): MutedRuleRow[] {
-  const byKey = new Map(TASK_SETTING_ROWS.filter((r) => r.key).map((r) => [r.key as string, r.title]));
-  return (muted ?? []).map((key) => ({ key, label: byKey.get(key) ?? key }));
-}
-
-/** Removing one key — the whole of "switch back on". */
-export function unmute(muted: string[] | null | undefined, key: string): string[] {
-  return (muted ?? []).filter((k) => k !== key);
-}
-
-export const MUTED_EMPTY_LINE =
-  "Nothing switched off. When you switch a reminder off from the to-do list, it'll appear here so " +
-  "you can bring it back.";
+/* ── The muted-rule list left this module with the section ────────────────────
+   ⚠️ `mutedRuleRows`, `unmute` and `MUTED_EMPTY_LINE` ARE GONE, and they are gone rather than kept
+   "in case". They listed ONE of the three kinds of hiding the app has; the board's set-aside panel
+   renders all three from `hiddenItems()`, which is the shape they should always have shared. A
+   second, narrower derivation surviving beside it is how two surfaces come to disagree about what
+   "hidden" means — which is the fault that put these rules in settings in the first place. */
 
 /* ── Your to-do list ───────────────────────────────────────────────────────── */
 

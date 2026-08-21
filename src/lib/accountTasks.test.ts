@@ -5,7 +5,7 @@
  * accountTasks — the non-choice, the unnameable rule, and the date that does not exist.
  */
 import { describe, it, expect } from "vitest";
-import { optionalTaskTypes, mutedRuleRows, unmute, ALWAYS_ON_LINE, staleOptionLabel } from "./accountTasks";
+import { optionalTaskTypes, ALWAYS_ON_LINE, staleOptionLabel } from "./accountTasks";
 import { TASK_TYPE_KEYS, TASK_TYPE_LABEL, STALE_MONTHS_CHOICES, todoPrefs } from "./todoPrefs";
 
 describe("optionalTaskTypes — a control that cannot act does not ship", () => {
@@ -34,30 +34,11 @@ describe("optionalTaskTypes — a control that cannot act does not ship", () => 
   });
 });
 
-describe("mutedRuleRows", () => {
-  it("names a known rule from the board's list", () => {
-    expect(mutedRuleRows(["nudge_overdue"])).toEqual([{ key: "nudge_overdue", label: "Nudge reminders" }]);
-  });
-
-  /* ⚠️ AN UNRECOGNISED KEY IS STILL A MUTED REMINDER. Dropping it would leave something switched
-     off with nowhere to switch it back on — the one outcome this section exists to prevent. */
-  it("still lists a key it cannot name, rather than hiding it", () => {
-    expect(mutedRuleRows(["from_a_later_build"])).toEqual([
-      { key: "from_a_later_build", label: "from_a_later_build" },
-    ]);
-  });
-
-  it("is empty for an absent or empty list", () => {
-    expect(mutedRuleRows(undefined)).toEqual([]);
-    expect(mutedRuleRows([])).toEqual([]);
-  });
-
-  it("unmute removes exactly one key and leaves the rest", () => {
-    expect(unmute(["a", "b", "c"], "b")).toEqual(["a", "c"]);
-    expect(unmute(["a"], "missing")).toEqual(["a"]);
-    expect(unmute(undefined, "a")).toEqual([]);
-  });
-});
+/* ⚠️ THE MUTED-RULE TESTS MOVED WITH THE FEATURE. They asserted that a known rule was named, that
+   an unrecognised key was still listed rather than dropped, and that `unmute` removed exactly one —
+   claims about a list that now lives on the board, derived from `hiddenItems()` alongside the other
+   two kinds of hiding. `boardSettings.test.tsx` carries the ledger's locks; nothing was dropped,
+   the subject moved. */
 
 /* ⚠️ THE OPTIONS ARE THE FIELD'S REAL VALUES. The ref invented its own list before recon; the
    resolver only accepts these five, and there is no "Never" because the field cannot hold one. */

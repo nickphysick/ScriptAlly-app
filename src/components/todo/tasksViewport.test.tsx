@@ -416,13 +416,15 @@ describe("⚠️ ONE FORM FOR THE TASK FIELDS, AND IT IS THE SETTINGS PAGE", () 
     expect(acct).not.toContain("taskSettingsRow");
   });
 
-  /* ⚠️ THE PAGE OWNS ALL FOUR FIELDS, so retiring the sheet stranded nothing. Asserted against
-     `todoPrefs`'s own key list rather than a hand-written one. */
+  /* ⚠️ THE PAGE OWNS THE FOUR PREFERENCES — and no longer the mute list, which went to the board's
+     set-aside panel with the other two kinds of hiding. The `mutedRuleRows` half of this assertion
+     is dropped rather than repointed: what it protected (nothing stranded when the sheet retired)
+     is now protected by `boardSettings`'s ledger group, against the surface that renders it. */
   it("every task preference has a home on the page", () => {
     for (const key of ["rollForward", "weeklyBriefing", "staleMonths", "types"]) {
       expect(acct, key).toContain(key);
     }
-    expect(acct).toContain("mutedRuleRows");
+    expect(acct, "hiding is the board's now, all three kinds together").not.toContain("mutedRuleRows");
   });
 
   it("no gear in any tool row — the doors are the two named places", () => {
