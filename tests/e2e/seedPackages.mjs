@@ -51,6 +51,16 @@ const EMAIL = process.env.SA_E2E_EMAIL ?? "harness@scriptally.test";
 const PASSWORD = process.env.SA_E2E_PASSWORD ?? local.SA_E2E_PASSWORD;
 if (!PASSWORD) throw new Error("No SA_E2E_PASSWORD in .env.local");
 const CLEAN = process.argv.includes("--clean");
+/**
+ * ⚠️ THE SPARSE STATE IS A MODE, NOT A SECOND SCRIPT (recut §4). The re-cut's faults showed at LOW
+ * data — an empty type column collapsed, ghosts sat at three heights, the tracking band had nothing
+ * to draw — and a fixture that only ever holds four materials and eight sends cannot reach any of
+ * them. Two modes off one set of ids means `--clean` still removes everything either mode wrote.
+ *
+ *   node tests/e2e/seedPackages.mjs            full:   4 materials · 2 packages · 8 sends
+ *   node tests/e2e/seedPackages.mjs --sparse   sparse: 2 materials · 1 package  · 0 sends
+ */
+const SPARSE = process.argv.includes("--sparse");
 
 const app = initializeApp({
   apiKey: dev.VITE_FIREBASE_API_KEY,
@@ -70,7 +80,7 @@ const MS_ID = "seed-ms-1";
 
 /* The four materials the ref's register draws — two covering letters so the type groups with more
    than one member, and a sample with a real draft so the word count has something to count. */
-const MATERIALS = [
+const ALL_MATERIALS = [
   { id: "seed-mat-ql1", componentType: "Query Letter", versionName: "Hook-first", days: 4 },
   { id: "seed-mat-ql2", componentType: "Query Letter", versionName: "Comps-forward", days: 14 },
   { id: "seed-mat-syn", componentType: "Synopsis", versionName: "One-page", days: 6 },
@@ -78,14 +88,27 @@ const MATERIALS = [
     draft: "The clockmaker's guild kept its records in a language nobody living could read. ".repeat(40) },
 ];
 
-const PACKAGES = [
+/* ⚠️ SPARSE KEEPS A LETTER AND A SYNOPSIS AND NO SAMPLE — deliberately, because that is what makes
+   the Sample pages column EMPTY, which is the state the re-cut's dashed hold exists for. Two
+   materials is also the minimum `canBuildPackage` accepts, so the New-package control stays live
+   rather than the page landing in its locked branch. */
+const MATERIALS = SPARSE ? ALL_MATERIALS.filter((m) => ["seed-mat-ql1", "seed-mat-syn"].includes(m.id)) : ALL_MATERIALS;
+
+const ALL_PACKAGES = [
   { id: "seed-pkg-1", packageName: "Standard UK", ql: "seed-mat-ql1", syn: "seed-mat-syn", pag: "seed-mat-pag" },
   { id: "seed-pkg-2", packageName: "Comps-led variant", ql: "seed-mat-ql2", syn: "seed-mat-syn", pag: "seed-mat-pag" },
 ];
+/* One package, and its sample slot UNFILLED — the sparse package has no sample to point at. */
+const PACKAGES = SPARSE
+  ? [{ id: "seed-pkg-1", packageName: "Standard UK", ql: "seed-mat-ql1", syn: "seed-mat-syn", pag: "" }]
+  : ALL_PACKAGES;
 
 /* Eight sends across the two packages, with a spread of outcomes so replies and requests are real
    rather than all-or-nothing. Statuses are the exact QueryStatus strings the rules accept. */
-const SENDS = [
+/* ⚠️ SPARSE SENDS NOTHING, which is the point: it is the only way to reach the tracking band's
+   pre-sent state — the nudge and its two dashed ghost panels. With any send at all those two slots
+   never render and cannot be measured. */
+const SENDS = SPARSE ? [] : [
   { pkg: "seed-pkg-1", status: "Queried", days: 30 },
   { pkg: "seed-pkg-1", status: "Queried", days: 28 },
   { pkg: "seed-pkg-1", status: "Full Requested", days: 60 },
@@ -128,11 +151,14 @@ const EVENTS = SENDS.flatMap((s, i) => {
   return rows;
 });
 
+/* ⚠️ `--clean` SPANS BOTH MODES. Cleaning the sparse set must still remove the full set's records,
+   or switching modes leaves the previous mode's leftovers behind and the next measurement reads a
+   state neither mode describes. The id lists are the union, not the current mode's. */
 const ids = {
-  versions: MATERIALS.map((m) => m.id),
-  packages: PACKAGES.map((p) => p.id),
-  queries: SENDS.map((_, i) => `seed-pkgq-${i + 1}`),
-  activities: EVENTS.map((e) => e.id),
+  versions: ALL_MATERIALS.map((m) => m.id),
+  packages: ALL_PACKAGES.map((p) => p.id),
+  queries: Array.from({ length: 8 }, (_, i) => `seed-pkgq-${i + 1}`),
+  activities: Array.from({ length: 8 }, (_, i) => [`seed-pkgact-${i + 1}-sent`, `seed-pkgact-${i + 1}-out`]).flat(),
 };
 
 if (CLEAN) {

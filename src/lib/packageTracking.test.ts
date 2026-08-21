@@ -14,7 +14,7 @@ import { readFileSync } from "fs";
 import { sliceBetween } from "../test/sliceBetween";
 import {
   trackingTotals, repliesByPackage, requestsByMaterial, packagesContaining, trackingNudge, STAT_CELLS,
-  ledgerRows, packageStamp, STAMP_BRIEFS,
+  ledgerRows, packageStamp, STAMP_ICONS,
 } from "./packageTracking";
 import { packageMetrics, UNFILLED_SLOT } from "./packageMetrics";
 import { activityEventLabel } from "./activityEvent";
@@ -292,7 +292,7 @@ describe("packageStamp — decorative, derived, stable", () => {
   it("gives one package the same stamp however the list is ordered", () => {
     const a = packageStamp("pk1");
     expect(packageStamp("pk1")).toBe(a);
-    expect(STAMP_BRIEFS).toContain(a);
+    expect(STAMP_ICONS).toContain(a);
   });
 
   it("does not give every package the same one", () => {
@@ -368,7 +368,7 @@ describe("D8 — the adapter is the only thing reading query data, and it reache
     ["trackingTotals", "export const STAT_CELLS"],
     ["export function repliesByPackage", "export const packagesContaining"],
     ["export function requestsByMaterial", "export function trackingNudge"],
-    ["export function trackingNudge", "export const STAMP_BRIEFS"],
+    ["export function trackingNudge", "export const STAMP_ICONS"],
   ] as const;
 
   it.each(COUNTERS)("%s counts from queries, never from the log", (from, to) => {

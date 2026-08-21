@@ -24,11 +24,11 @@ import {
 import { IllustrationSlot } from "./IllustrationSlot";
 import "./packagesBroadsheet.css";
 
-/** The ref's brief per stat cell, verbatim (D7) — kept beside the cells they belong to. */
-const STAT_BRIEF: Record<string, string> = {
-  sent: "outgoing\npost",
-  replies: "opened\nenvelope",
-  requests: "page with\nbookmark",
+/** The mark per stat cell, from the ref (D4). Briefs are in the report's inventory table. */
+const STAT_ICON: Record<string, string> = {
+  sent: "outgoing",
+  replies: "opened",
+  requests: "bookmark",
 };
 
 const BarPanel: React.FC<{ label: string; rows: BarRow[] }> = ({ label, rows }) => (
@@ -91,12 +91,12 @@ export const TrackingBand: React.FC<TrackingBandProps> = ({
           </div>
           <div className="pkgb-dashgrid">
             <div className="pkgb-ghostpanel">
-              <IllustrationSlot id="ghost-replies" brief={"bar chart\nsketch"} width={58} height={58} tiny />
+              <IllustrationSlot id="ghost-replies" icon="chart" px={52} />
               <span className="pkgb-gpt">Replies by package</span>
               <span className="pkgb-gps">Appears once a package goes out with a query.</span>
             </div>
             <div className="pkgb-ghostpanel">
-              <IllustrationSlot id="ghost-requests" brief={"tally marks\non paper"} width={58} height={58} tiny />
+              <IllustrationSlot id="ghost-requests" icon="tally" px={52} />
               <span className="pkgb-gpt">Requests by material</span>
               <span className="pkgb-gps">Shows which materials sit behind each request.</span>
             </div>
@@ -114,7 +114,7 @@ export const TrackingBand: React.FC<TrackingBandProps> = ({
                     {c.label}
                   </div>
                 </div>
-                <IllustrationSlot id={`stat-${c.key}`} brief={STAT_BRIEF[c.key]} width={54} height={54} tiny />
+                <IllustrationSlot id={`stat-${c.key}`} icon={STAT_ICON[c.key]} px={40} width={70} height={70} />
               </div>
             ))}
           </div>
@@ -130,9 +130,11 @@ export const TrackingBand: React.FC<TrackingBandProps> = ({
               holds nothing typed for a packaged query, which is a real and temporary state. */}
           {ledger.length > 0 && (
             <div className="pkgb-panel">
+              {/* ⚠️ NO PLATE ON THIS HEAD — the re-cut ref drops it, and measuring showed why: a 34px
+                  disc with 12px of padding left 8px of mark, which is a smudge rather than a
+                  placeholder. The band's other three slots carry the illustration budget here. */}
               <div className="pkgb-panelband">
                 <span className="pkgb-eyebrow">Latest activity</span>
-                <IllustrationSlot id="postmark" brief="postmark" shape="disc" width={30} height={30} tiny />
               </div>
               <div className="pkgb-panelbody pkgb-ledger">
                 {ledger.map((r) => (

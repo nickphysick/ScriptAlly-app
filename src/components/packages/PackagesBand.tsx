@@ -50,7 +50,7 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
           const pkg = byId.get(t.id);
           return (
             <div key={t.id} className="pkgb-pkgcard" data-package={t.id}>
-              <IllustrationSlot id={`stamp-${t.id}`} brief={packageStamp(t.id)} shape="stamp" tiny />
+              <IllustrationSlot id={`stamp-${t.id}`} icon={packageStamp(t.id)} px={36} shape="stamp" />
               <h3 className="pkgb-pkgname">
                 <button type="button" className="pkgb-sopen" onClick={() => onOpenPackage(t.id)}>
                   {t.name}
@@ -92,7 +92,7 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
 
         {/* The ghost is last, and it carries its own illustration slot per the ref. */}
         <button type="button" className="pkgb-ghost pkgb-pkgghost" onClick={onNewPackage}>
-          <IllustrationSlot id="pkg-ghost" brief={"open parcel,\nempty"} width={64} height={64} tiny />
+          <IllustrationSlot id="pkg-ghost" icon="parcelOpen" px={54} />
           <span className="pkgb-gt">Build another package</span>
           <span className="pkgb-gs">A different letter, a different length of synopsis.</span>
         </button>

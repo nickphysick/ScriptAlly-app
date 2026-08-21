@@ -20,7 +20,7 @@ import "./packagesBroadsheet.css";
 
 interface Cell {
   id: string;
-  brief: string;
+  icon: string;
   direction: "out" | "in";
   title: string;
   body: string;
@@ -29,21 +29,21 @@ interface Cell {
 const CELLS: Cell[] = [
   {
     id: "hn-sent",
-    brief: "postbox",
+    icon: "postbox",
     direction: "out",
     title: "Sent",
     body: "Counted when a query goes out with a package attached. The package records exactly which letter, synopsis and pages went.",
   },
   {
     id: "hn-replies",
-    brief: "letter on\ndoormat",
+    icon: "doormat",
     direction: "in",
     title: "Replies",
     body: "Any agent response lands against the package that went out — so every figure traces back to real correspondence.",
   },
   {
     id: "hn-requests",
-    brief: "magnifying glass\nover page",
+    icon: "magnifier",
     direction: "in",
     title: "Requests",
     body: "Partial and full requests are credited to each material in the package that earned them. Counts, never guesses.",
@@ -55,7 +55,7 @@ export const FootnoteBand: React.FC = () => (
     <div className="pkgb-hownote">
       {CELLS.map((c) => (
         <div key={c.id} className="pkgb-hncell">
-          <IllustrationSlot id={c.id} brief={c.brief} shape="disc" width={46} height={46} tiny />
+          <IllustrationSlot id={c.id} icon={c.icon} px={34} shape="disc" width={64} height={64} />
           <div>
             <div className={`pkgb-hnt pkgb-dir--${c.direction}`}>
               {c.direction === "out" ? "→" : "←"} {c.title}

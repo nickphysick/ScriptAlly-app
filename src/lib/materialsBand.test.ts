@@ -16,6 +16,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
+import { sliceBetween } from "../test/sliceBetween";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 const decls = (src: string) =>
@@ -135,19 +136,52 @@ describe("the sheets (D3)", () => {
   });
 });
 
-describe("the illustration briefs are the ref's own words (D7)", () => {
-  /**
-   * ⚠️ ASSERTED AGAINST THE REF FILE, NOT AGAINST A LITERAL TYPED TWICE. The brief is a commission
-   * to whoever draws these, so a paraphrase is a different instruction — and a copy of the words in
-   * this test would pass on the day the component's copy drifted from the ref's.
-   */
-  it("quotes each of the three column briefs verbatim", () => {
-    const line = ref.split("\n").find((l) => l.includes("TYPE_BRIEF"));
-    expect(line, "the ref no longer declares TYPE_BRIEF").toBeTruthy();
-    const briefs = [...line!.matchAll(/'([^']*<br>[^']*)'/g)].map((m) => m[1].replace(/<br>/g, "\n"));
-    expect(briefs, "expected the ref's three column briefs").toHaveLength(3);
-    for (const b of briefs) {
-      expect(band, `brief not quoted: ${JSON.stringify(b)}`).toContain(JSON.stringify(b).slice(1, -1));
+/**
+ * ⚠️ THE BRIEF MOVED OFF THE PAGE AND INTO THE REPORT (D4/D5), SO THE LOCK FOLLOWED IT. This block
+ * used to assert that the component quoted the ref's Caveat briefs verbatim — correct while the
+ * words were rendered, and pointless once line-art replaced them. Deleting it would have been the
+ * wrong response: the commission still exists, it just lives somewhere else now, and *somewhere
+ * else* is a markdown file with nothing holding it in place.
+ *
+ * ⚠️ SO THE REPORT IS NOW LOAD-BEARING, AND THIS IS WHAT BEARS ON IT. If someone trims the slot
+ * inventory table, or renames a slot without carrying its brief across, this goes red. That is the
+ * only mechanism standing between an illustrator's instructions and a quiet deletion.
+ */
+describe("the artist's commission survives, in the report (D5)", () => {
+  const report = read("../../reports/submission-packages-recut.md");
+  const oldRef = read("../../design-refs/submission-packages-broadsheet.html");
+
+  /* Every brief the retired ref ever wrote, taken from the ref rather than typed here — a literal
+     would be a second copy of the thing being protected. */
+  /* ⚠️ EXTRACTED FROM THE NAMED DECLARATION, NOT BY A PATTERN THAT HAPPENS TO MATCH. A first draft
+     swept `(?:letter|synopsis|sample):'...'` across the whole file and pulled in `TYPE_LABEL`'s
+     display strings — "Covering letter" is a label, not a brief, and the lock then demanded the
+     report protect something that was never a commission. Bound to the block, then read. */
+  const typeBriefBlock = sliceBetween(oldRef, "const TYPE_BRIEF", "};", "TYPE_BRIEF block");
+  const briefs = [
+    ...[...oldRef.matchAll(/plate\('([^']*)'/g)].map((m) => m[1]),
+    ...[...typeBriefBlock.matchAll(/:'([^']*)'/g)].map((m) => m[1]),
+    ...[...oldRef.matchAll(/stamp:'([^']*)'/g)].map((m) => m[1]),
+  ].map((b) => b.replace(/<br>/g, " ").trim());
+
+  it("finds briefs in the retired ref to protect", () => {
+    expect(new Set(briefs).size, "the old ref stopped yielding briefs — check it is still on disk")
+      .toBeGreaterThanOrEqual(14);
+  });
+
+  it("carries every one of them into the inventory table", () => {
+    for (const b of new Set(briefs)) {
+      expect(report, `brief lost from the inventory: ${JSON.stringify(b)}`).toContain(b);
+    }
+  });
+
+  /* ⚠️ AND THE TABLE NAMES THE ICON THAT REPLACED EACH ONE, or the brief is preserved without
+     saying what it is a brief FOR. */
+  it("names an icon for each slot alongside its brief", () => {
+    for (const icon of ["envelope", "scroll", "pages", "desk", "parcel", "typewriter", "inkwell",
+                        "parcelOpen", "chart", "tally", "outgoing", "opened", "bookmark",
+                        "postbox", "doormat", "magnifier"]) {
+      expect(report, `icon missing from the inventory: ${icon}`).toContain(`\`${icon}\``);
     }
   });
 });

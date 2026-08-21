@@ -29,17 +29,17 @@ import { RemovePopover } from "./RemovePopover";
 import "./packagesBroadsheet.css";
 
 /**
- * The artist's brief per column, verbatim from the ref's `TYPE_BRIEF` (D7).
+ * The mark per column, from the ref's `TYPE_ICON` (D4).
  *
- * ⚠️ THE 44px DISC DROPS THE "ILLUSTRATION" LABEL — a deviation, and the ref's own stylesheet is the
- * authority for it. It defines `.plate.tiny` to hide the label and shrink the brief for exactly this
- * case, then never applies the class; at 44px with a 7px label above a 14px Caveat brief the words
- * spill straight out of the circle. The slot is still inventoried by its `data-slot` id.
+ * ⚠️ THE WRITTEN BRIEF IS NOT HERE ANY MORE AND HAS NOT BEEN LOST. "sealed envelope", "rolled
+ * synopsis, ribbon", "sample pages, paperclip" now live in the slot inventory table in
+ * reports/submission-packages-recut.md, which is the artist's commission. On the page they were
+ * handwriting inside a 44px circle — unreadable, and the reason this pass exists.
  */
-const TYPE_BRIEF: Record<string, string> = {
-  [ComponentType.QUERY_LETTER]: "sealed\nenvelope",
-  [ComponentType.SYNOPSIS]: "rolled synopsis,\nribbon",
-  [ComponentType.SAMPLE_PAGES]: "sample pages,\npaperclip",
+const TYPE_ICON: Record<string, string> = {
+  [ComponentType.QUERY_LETTER]: "envelope",
+  [ComponentType.SYNOPSIS]: "scroll",
+  [ComponentType.SAMPLE_PAGES]: "pages",
 };
 
 export interface MaterialsBandProps {
@@ -74,15 +74,16 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
 
       <div className="pkgb-matcols">
         {cols.map((col) => (
+          /* ⚠️ THREE GRID ROWS — head / stack / ghost. The heads share a top and the ghosts share a
+             bottom BY CONSTRUCTION at any content length, rather than by the three columns happening
+             to hold the same number of sheets. */
           <div className="pkgb-matcol" key={col.type}>
             <div className="pkgb-matcolhead">
               <IllustrationSlot
                 id={`mat-${col.type}`}
-                brief={TYPE_BRIEF[col.type]}
+                icon={TYPE_ICON[col.type]}
+                px={40}
                 shape="disc"
-                tiny
-                width={44}
-                height={44}
               />
               <span className="pkgb-mchtext">
                 <span className="pkgb-eyebrow">{col.heading}</span>
@@ -100,38 +101,48 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
               </button>
             </div>
 
-            {col.sheets.map((s) => (
-              /* ⚠️ A `div` HOLDING TWO CONTROLS, not a button holding a button — the latter is
-                 invalid HTML and recovers however the parser feels like. The name is the real
-                 control and stretches over the card; the bin sits above it. */
-              <div key={s.id} className="pkgb-sheet" data-material={s.id}>
-                <span className="pkgb-stype">{s.typeLabel}</span>
-                <button type="button" className="pkgb-sopen pkgb-sname" onClick={() => onOpenMaterial(s.id)}>
-                  {s.name}
-                </button>
-                <span className="pkgb-ssrc">{s.source}</span>
-                {/* The usage line's number is bold and its words are not — `In **2** packages`. */}
-                <span className="pkgb-suse">
-                  {s.usedIn > 0
-                    ? <>In <b>{s.usedIn}</b> {s.usedIn === 1 ? "package" : "packages"}</>
-                    : s.usage}
-                </span>
-                <RemovePopover
-                  id={s.id}
-                  name={s.name}
-                  typeLabel={s.typeLabel}
-                  subject="material"
-                  /* The packages that hold it — the same derivation the usage line above prints. */
-                  holders={materialHolders(s.id, packages)}
-                  onDelete={onDeleteMaterial}
-                  onArchive={onArchiveMaterial}
-                />
-              </div>
-            ))}
+            <div className="pkgb-matstack">
+              {col.sheets.length === 0 ? (
+                /* ⚠️ A HOLD, NOT A COLLAPSE (D3). A type you own nothing of used to vanish, taking
+                   the row's alignment with it and making an empty page read as a broken one. The
+                   sentence states what is normal rather than urging — the same rule as every other
+                   absence line here. */
+                <div className="pkgb-colempty">None yet — most writers keep two or three versions.</div>
+              ) : col.sheets.map((s) => (
+                <div key={s.id} className="pkgb-sheet" data-material={s.id}>
+                  <span className="pkgb-stype">{s.typeLabel}</span>
+                  <button type="button" className="pkgb-sopen pkgb-sname" onClick={() => onOpenMaterial(s.id)}>
+                    {s.name}
+                  </button>
+                  {/* ⚠️ ONE LINE, ONE ROW, WITH A REAL SEPARATOR. Two spans relying on `margin-top`
+                      rendered as "TextIn 1 package" — vertical margin is inert on an inline box, and
+                      every probe read both strings correctly because each one WAS correct. The fault
+                      was the line they made together. */}
+                  <span className="pkgb-smeta">
+                    <span>{s.source}</span>
+                    <span className="pkgb-sdot" aria-hidden="true" />
+                    <span className="pkgb-suse">
+                      {s.usedIn > 0
+                        ? <>In <b>{s.usedIn}</b> {s.usedIn === 1 ? "package" : "packages"}</>
+                        : "Not in a package"}
+                    </span>
+                  </span>
+                  <RemovePopover
+                    id={s.id}
+                    name={s.name}
+                    typeLabel={s.typeLabel}
+                    subject="material"
+                    holders={materialHolders(s.id, packages)}
+                    onDelete={onDeleteMaterial}
+                    onArchive={onArchiveMaterial}
+                  />
+                </div>
+              ))}
+            </div>
 
-            {/* ⚠️ THE GHOST IS PER COLUMN AND ALWAYS PRESENT, not an empty state. It is the column's
-                second entry point, so a writer with four letters can still add a fifth from the foot
-                of the stack without going back up to `+ ADD`. */}
+            {/* ⚠️ ROW 3, ALWAYS PRESENT. It is the column's second entry point, so a writer with four
+                letters can add a fifth from the foot of the stack without going back up to `+ ADD` —
+                and pinning it to the bottom row is what puts all three on one baseline. */}
             <button type="button" className="pkgb-ghost" onClick={() => onAddMaterial(col.type)}>
               <span className="pkgb-gt">{col.ghostLabel}</span>
             </button>

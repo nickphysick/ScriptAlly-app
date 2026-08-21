@@ -33,7 +33,6 @@ import { RemovePopover } from "./packages/RemovePopover";
 import { PackagesHeroBand } from "./packages/PackagesHeroBand";
 import { MaterialsBand } from "./packages/MaterialsBand";
 import { packageHolders, packagedQueries } from "../lib/packagesOverview";
-import { WaxSeal } from "./packages/IllustrationSlot";
 import { MaterialModal, MaterialDraftResult } from "./packages/MaterialModal";
 import { PackageModal, PackageDraftResult } from "./packages/PackageModal";
 import { canBuildPackage, createPayload, updatePayload } from "../lib/materialDraft";
@@ -284,34 +283,23 @@ export const SubmissionPackages: React.FC = () => {
         @media (max-width: 768px) { .pkg-root { height: auto; min-height: 100%; overflow: visible; } }
       `}</style>
 
-      {/* The standard page header (shell rollout Phase 5) — full variant. The grand slab's
-          Pro pill and package-count pulse are dropped with it (no title-adornment/meta slots
-          under the header law); the manuscript selector keeps its function in the row below
-          the rule until the sidebar switcher is live-wired — see the rollout report. */}
-      {/* The Pro header format, shared by all three states of this page (landing, empty, populated).
-          The SHARED PageHeader is reused unmodified: the Pro pill rides `titleAdornment`, the
-          manuscript selector + primary action ride `actionsSlot` on the title's line (the floating
-          chip on its own row is gone), and its own rule is restyled to the 2px Pro rule under the
-          `.pkgw` scope — Discover's pattern, so there is no second rule and no fork of a component
-          eleven pages share. */}
-      {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9). The plate is row 1; the strip, the tabs
-          and the workshop scroll in row 3. No toolbar → no row 2 and no hairline. */}
       {/* ⚠️ THIS PAGE CONFORMS (F-E, ruled). The masthead is the SHARED `PageHeader` with
           `variant="workspace"`, so the census in `workspacePageGrid.test.tsx` stays green by
           conforming rather than by gaining an entry, and no shared header file is touched. The
-          broadsheet hero lives on as `PackagesHeroBand`, immediately beneath — everything the ref
-          drew except the page title, which belongs to the header alone.
+          hero lives on as `PackagesHeroBand`, immediately beneath — everything the ref drew except
+          the page title, which belongs to the header alone.
 
-          ⚠️ AND THE WAX SEAL RIDES `titleAdornment`, an existing prop that takes arbitrary content
-          ("rendered inline immediately right of the title text"). It REPLACES the `.pkgw-propill`
-          rather than joining it: one Pro marker, not two. */}
+          ⚠️ AND THERE IS NO PRO MARKER ON THIS PAGE AT ALL (D1). The wax seal that rode
+          `titleAdornment` is deleted with its styles, and no page-local Pro badge replaces it.
+          Checked before removing: `PageHeader` renders no Pro marker of its own — the seal was
+          entirely this page's code passing an existing prop — so unmounting it needed no shared
+          edit and left nothing behind in the shell. See F-K in the report. */}
       <WorkspacePageGrid className="pkgw-wpg" scrollLabel="Package Workshop" masthead={
         <PageHeader
           variant="workspace"
           mark="packages"
           title="Submission packages"
           description="Bundle your materials once, then send them without rebuilding each time."
-          titleAdornment={<WaxSeal />}
           /* ⚠️ NO ACTIONS SLOT, AND NO `toolbar` ON THE GRID EITHER. The band below carries the stat
              line and the actions, per the ref, so a control row would state both a second time a few
              inches away. No lock requires one: the three that name this page check the root's inline

@@ -186,6 +186,11 @@ export function trackingNudge(packages: SubmissionPackage[], queries: Query[]): 
 /**
  * The ref gives three distinct stamps so a grid of cards does not read as a repeating pattern.
  *
+ * ⚠️ IT RETURNS AN ICON NAME NOW, NOT A BRIEF (D4) — and the measurement is what caught the change
+ * being half-made. The re-cut swapped every slot to a mark, this function kept returning
+ * "stamp:\ntypewriter", and `PACKAGE_ICONS[that]` is undefined: the stamp plates rendered as empty
+ * dashed boxes. Nothing errored, nothing logged, and the page looked deliberate.
+ *
  * ⚠️ DERIVED FROM THE ID, NOT FROM THE INDEX. An index-based choice re-stamps every card below a
  * deleted one, so archiving your first package would silently redraw the rest — a change with no
  * cause the writer can see. A hash of the id is stable for the life of the record.
@@ -193,12 +198,12 @@ export function trackingNudge(packages: SubmissionPackage[], queries: Query[]): 
  * ⚠️ AND NOTHING IS STORED. A `stamp` field would be a decoration in the data model, and the first
  * thing anyone would ask is why it cannot be chosen.
  */
-export const STAMP_BRIEFS = ["stamp:\nparcel", "stamp:\ntypewriter", "stamp:\ninkwell"] as const;
+export const STAMP_ICONS = ["parcel", "typewriter", "inkwell"] as const;
 
 export function packageStamp(packageId: string): string {
   let h = 0;
   for (let i = 0; i < packageId.length; i++) h = (h * 31 + packageId.charCodeAt(i)) >>> 0;
-  return STAMP_BRIEFS[h % STAMP_BRIEFS.length];
+  return STAMP_ICONS[h % STAMP_ICONS.length];
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════

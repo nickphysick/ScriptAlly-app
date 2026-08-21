@@ -22,126 +22,85 @@
  */
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   THE ILLUSTRATION SLOT (D7)
+   THE ILLUSTRATION SLOT (D4) — a line-art mark in a dashed plate
    ══════════════════════════════════════════════════════════════════════════════ */
 
 .pkgb-plate {
-  border: 1.5px dashed rgba(124, 58, 42, 0.32);
+  border: 1.5px dashed rgba(124, 58, 42, 0.3);
   border-radius: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.55);
-  text-align: center;
-  padding: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 12px;
   box-sizing: border-box;
   flex: 0 0 auto;
 }
-.pkgb-plbl {
-  font-family: var(--font-mono);
-  font-size: 7px;
-  letter-spacing: 0.18em;
-  color: var(--pkg-burg);
-  text-transform: uppercase;
-  font-weight: 700;
+
+/* ⚠️ ONE RULE FOR ALL SEVENTEEN MARKS. Stroke, opacity and cap style are set here rather than on
+   each path, so the set cannot drift into looking like two sets — and so the day real artwork
+   arrives there is one declaration to delete rather than seventeen. */
+.pkgb-plate svg {
+  stroke: var(--pkg-burg);
+  stroke-width: 1.1;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.82;
+  display: block;
 }
-.pkgb-pbrief {
-  font-family: "Caveat", cursive;
-  font-size: 14px;
-  color: var(--pkg-ink-soft);
-  line-height: 1.1;
-}
+
 .pkgb-plate--disc { border-radius: 50%; }
-.pkgb-plate--tiny { border-radius: 50%; padding: 2px; }
-.pkgb-plate--tiny .pkgb-pbrief { font-size: 11px; }
-
 /* The postage stamp on a package card — perforated edge, sat in the corner. */
-.pkgb-plate--stamp {
-  border-radius: 3px;
-  border-style: dashed;
-  width: 62px;
-  height: 62px;
-}
-.pkgb-plate--stamp .pkgb-pbrief { font-size: 11px; }
+.pkgb-plate--stamp { border-radius: 4px; width: 62px; height: 72px; padding: 5px; }
+/* ⚠️ THE STAMP'S MARK IS FAINTER THAN THE REST (.7 against .82) — a postage stamp on a card is
+   decoration behind the name, not a thing to read. The ref sets it apart for that reason. */
+.pkgb-plate--stamp svg { opacity: 0.7; }
 
-/* ══════════════════════════════════════════════════════════════════════════════
-   THE WAX SEAL — this page's Pro marker, and only this page's (D2, F-A)
-   ══════════════════════════════════════════════════════════════════════════════ */
-
-.pkgb-wax {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 34% 30%, #93503f, var(--pkg-burg) 62%);
-  color: #fdf6ef;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  /* the seal's depth: a lit rim, then the stamped ring pressed into it */
-  box-shadow:
-    0 3px 8px rgba(124, 58, 42, 0.35),
-    inset 0 0 0 2px rgba(253, 246, 239, 0.28),
-    inset 0 0 0 5px rgba(124, 58, 42, 0.9);
-  transform: rotate(-6deg);
-  flex: 0 0 auto;
-}
+/* ⚠️ THE WAX SEAL IS DELETED (D1) — no Pro marker on this page, in any form. It was page-local
+   code riding `PageHeader`'s `titleAdornment`; `PageHeader` renders no Pro marker of its own, so
+   removing it took no shared edit and left nothing behind in the shell. Whether the app's Pro
+   marker should become a wax seal everywhere was F-A and is now moot for this page. */
 
 /* ══════════════════════════════════════════════════════════════════════════════
    THE HERO (D2)
    ══════════════════════════════════════════════════════════════════════════════ */
 
-/* ⚠️ `minmax(0, …)` ON BOTH TRACKS. A bare `1.2fr 1fr` gives each track an `auto` minimum, so one
-   long unbreakable string — a manuscript title in the actions row — makes its track wider than its
-   share and the hero grows past its container instead of the text wrapping. */
+/* ⚠️ `minmax(0, 1fr)` ON THE FLEXIBLE TRACK. A bare `1fr` carries an `auto` minimum, so one long
+   unbreakable string — a manuscript title in the footer row — makes the track wider than its share
+   and the hero grows past its container instead of the text wrapping. */
 .pkgb-hero {
   background: var(--pkgo-surface);
-  border-top: 5px solid var(--pkgo-sage-deep);
-  box-shadow: 0 12px 32px rgba(58, 28, 20, 0.10);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-top: 4px solid var(--pkgo-sage-deep);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(58, 28, 20, 0.08);
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-  overflow: hidden;
-  margin-bottom: 36px;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 38px;
+  padding: 30px 34px;
+  align-items: center;
+  margin-bottom: 44px;
 }
 
-/* ⚠️ PINNED TO THE TOP, AS THE REF DRAWS IT — and centring was tried and rejected (F-I, ruled).
-   The column holds two things rather than the ref's four, because Ruling 1 moved title and subtitle
-   into the shared `PageHeader`. Centring the survivors made them float in the middle of a band whose
-   height comes from the blush panel beside them, which reads as a composition nobody arranged. Top
-   alignment reads as a gap — and a gap is honest about what happened, where a float is not.
-   ⚠️ IF THE BAND STILL READS THIN, THE FIX IS NOT PADDING. It is that the band's height should come
-   from the panel's natural height rather than the panel stretching to fill a grid row — see the
-   `align-items` note on `.pkgb-hero`. Reaching for padding here would pad a box that is not the
-   thing setting the height. */
-.pkgb-hero-l {
-  padding: 34px 38px 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  align-items: flex-start;
-  min-width: 0;
+.pkgb-hero-l { display: flex; flex-direction: column; gap: 16px; align-items: flex-start; min-width: 0; }
+
+/* The headline. `line-height: 1.1` is safe here and nowhere else on the page: Caveat is a script
+   face whose descenders sit inside its own metrics, unlike the Playfair rule at 1.3. */
+.pkgb-prob {
+  font-family: "Caveat", cursive;
+  font-size: 34px;
+  font-weight: 600;
+  color: var(--pkg-burg);
+  line-height: 1.1;
+  transform: rotate(-0.6deg);
+  max-width: 560px;
 }
+.pkgb-say { font-size: 13px; color: var(--pkg-ink-soft); line-height: 1.6; max-width: 520px; }
+.pkgb-say b { color: var(--pkg-ink); font-weight: 600; }
 
-.pkgb-titlerow { display: flex; align-items: center; gap: 16px; }
-
-/* ⚠️ `line-height: 1.3` MINIMUM ON MIXED-CASE PLAYFAIR. "Submission packages" has a descender in
-   its p and g; the house rule is that 1 or a fixed height crops them, and this is the largest text
-   on the page. */
-.pkgb-hero-l h1 {
-  font-family: var(--font-serif);
-  font-size: 38px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
-  color: var(--pkg-ink);
-}
-
-.pkgb-hero-sub { font-size: 13.5px; color: var(--pkg-ink-soft); line-height: 1.6; max-width: 440px; }
+.pkgb-hero-foot { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.pkgb-hero-rule { width: 1px; height: 26px; background: rgba(124, 58, 42, 0.22); flex: 0 0 auto; }
 
 .pkgb-statline {
   font-family: var(--font-mono);
@@ -151,28 +110,14 @@
 }
 .pkgb-statline b { color: var(--pkg-ink); font-weight: 700; }
 
-.pkgb-hero-actions { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
-
-.pkgb-hero-r {
+/* ⚠️ THE BAND'S ONLY BLUSH SURFACE. The container is white; a blush half against a white half made
+   the band read as two panes rather than one object. */
+.pkgb-hero > .pkgb-plate {
+  height: 168px;
+  width: 100%;
   background: var(--pkgo-pink-band);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 26px 34px;
-  min-width: 0;
+  border-color: rgba(124, 58, 42, 0.26);
 }
-.pkgb-prob {
-  font-family: "Caveat", cursive;
-  font-size: 27px;
-  font-weight: 600;
-  color: var(--pkg-burg);
-  text-align: center;
-  line-height: 1.15;
-  transform: rotate(-1deg);
-}
-.pkgb-hero-r .pkgb-plate { width: 190px; height: 118px; background: rgba(255, 255, 255, 0.6); }
 
 /* ══════════════════════════════════════════════════════════════════════════════
    BUTTONS — the hero's two, and the page's one filled control
@@ -237,7 +182,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   THE MATERIALS BAND — three type columns (D3)
+   THE MATERIALS BAND — three type columns on a real grid (D3)
    ══════════════════════════════════════════════════════════════════════════════ */
 
 /* ⚠️ `minmax(0, 1fr)`, NOT `1fr`. A bare `1fr` carries an `auto` minimum, so one long material name
@@ -247,49 +192,84 @@
 .pkgb-matcols {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  gap: 22px;
   align-items: start;
 }
-.pkgb-matcol { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 
-.pkgb-matcolhead { display: flex; align-items: center; gap: 12px; padding-bottom: 4px; }
+/* ⚠️ THREE ROWS, AND THAT IS THE WHOLE FIX (D3). Each column was a flex stack, so its head sat
+   wherever its own content put it and its ghost sat wherever the stack ended: three heads on three
+   different lines, three ghosts at three different heights, and a column with no materials collapsed
+   to nothing. Naming the rows — head / stack / ghost — makes the heads share a top and the ghosts
+   share a bottom BY CONSTRUCTION, at any content length, rather than by the three happening to
+   contain the same number of sheets. `height: 100%` is what lets `1fr` see a row to fill. */
+.pkgb-matcol {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
+  height: 100%;
+  min-width: 0;
+}
+
+.pkgb-matcolhead {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--pkgo-hairline-soft);
+}
+.pkgb-matcolhead .pkgb-plate { width: 76px; height: 76px; flex: 0 0 auto; padding: 6px; }
 .pkgb-mchtext { flex: 1; min-width: 0; }
 .pkgb-eyebrow {
   font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em;
   color: var(--pkg-ink); text-transform: uppercase; font-weight: 700; display: block;
+  margin-bottom: 3px;
 }
-.pkgb-matcolhead .pkgb-statline { font-size: 8.5px; }
+.pkgb-matcolhead .pkgb-statline { font-size: 9px; }
 
-/* The per-column entry point. Outlined — the band's only filled control is in the hero band. */
+/* The per-column entry point. Outlined — the band's only filled control is in the hero. */
 .pkgb-add {
   font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em;
-  border: 1px solid rgba(58, 28, 20, 0.22); background: transparent; color: var(--pkg-ink);
-  padding: 3px 8px; border-radius: 6px; cursor: pointer; flex: 0 0 auto;
+  border: 1px solid rgba(58, 28, 20, 0.22); background: var(--pkgo-surface); color: var(--pkg-ink);
+  padding: 5px 10px; border-radius: 6px; cursor: pointer; flex: 0 0 auto;
 }
-.pkgb-add:hover { background: rgba(245, 226, 218, 0.4); }
+.pkgb-add:hover { background: var(--pkg-pink); border-color: var(--pkg-pinkline); color: var(--pkg-burg); }
+.pkgb-add:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+
+.pkgb-matstack { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+/* ⚠️ THE EMPTY COLUMN HOLDS ITS PLACE (D3). Without this a type you own nothing of collapses, the
+   row goes ragged, and the page reads as broken rather than as empty. It states what is normal
+   instead of urging — the same rule as every other absence sentence on this page. */
+.pkgb-colempty {
+  border: 1.5px dashed rgba(124, 58, 42, 0.22);
+  border-radius: 10px;
+  padding: 20px 14px;
+  text-align: center;
+  color: var(--pkg-muted);
+  font-size: 11px;
+  line-height: 1.55;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 88px;
+}
 
 /* ══════════════════════════════════════════════════════════════════════════════
    SHEETS
    ══════════════════════════════════════════════════════════════════════════════ */
 
-/* ⚠️ THE DOG-EAR IS A `::before`, NOT AN IMAGE OR A CLIPPED CORNER. It reads as a folded page because
-   the gradient turns over at exactly 50% — page colour above the fold, a hairline at the crease,
-   card colour below. The asymmetric radius (`10px 14px 10px 10px`) is what makes the folded corner
-   look cut rather than rounded off. */
+/* ⚠️ THE DOG-EAR IS A `::before`, NOT AN IMAGE OR A CLIPPED CORNER. It reads as a folded page
+   because the gradient turns over at exactly 50% — fold colour above the crease, card colour below.
+   The asymmetric radius (`10px 14px 10px 10px`) makes the corner look cut rather than rounded off. */
 .pkgb-sheet {
   position: relative;
   background: var(--pkgo-surface);
   border: 1px solid var(--pkgo-hairline-soft);
   border-radius: 10px 14px 10px 10px;
-  padding: 11px 34px 10px 14px;
+  padding: 13px 36px 12px 15px;
   box-shadow: 0 2px 6px rgba(58, 28, 20, 0.05);
   cursor: pointer;
   overflow: hidden;
   transition: box-shadow 0.15s;
-  text-align: left;
-  width: 100%;
-  font-family: inherit;
-  display: block;
+  min-width: 0;
 }
 .pkgb-sheet:hover { box-shadow: 0 6px 16px rgba(58, 28, 20, 0.09); }
 .pkgb-sheet::before {
@@ -300,16 +280,22 @@
 }
 .pkgb-stype {
   font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.14em;
-  color: var(--pkg-muted); text-transform: uppercase; display: block; margin-bottom: 3px;
+  color: var(--pkg-muted); text-transform: uppercase; display: block; margin-bottom: 4px;
 }
-.pkgb-sname { font-size: 13px; font-weight: 600; color: var(--pkg-ink); overflow-wrap: anywhere; display: block; }
-/* ⚠️ `display: block` ON BOTH, AND THE MEASUREMENT COULD NOT SEE WHY. The ref draws these as
-   `<div>`s; here they are `<span>`s, so `margin-top` applied to nothing and the two lines ran
-   together as "TextIn 1 package". Every probe read them correctly, because a probe queries the two
-   elements SEPARATELY and each one's text was right — it took the screenshot to see that the page
-   had joined them. Vertical margin is inert on an inline box; the block is what makes the rule real. */
-.pkgb-ssrc { display: block; font-family: var(--font-mono); font-size: 8.5px; color: var(--pkg-muted); margin-top: 3px; }
-.pkgb-suse { display: block; font-size: 10px; color: var(--pkg-muted); margin-top: 4px; }
+.pkgb-sname { font-size: 13.5px; font-weight: 600; color: var(--pkg-ink); overflow-wrap: anywhere; display: block; }
+
+/* ⚠️ ONE LINE, ONE FLEX ROW, AND THE DOT IS AN ELEMENT (D3). The source and usage lines used to be
+   two `<span>`s relying on `margin-top` — which is inert on an inline box, so the page read
+   "TextIn 1 package" while every probe reported both strings correctly. A flex row with a real
+   separator cannot collapse that way: the gap is the layout, not a margin that may or may not apply.
+   The lock reads the PARENT's textContent for the same reason. */
+.pkgb-smeta {
+  display: flex; align-items: center; gap: 9px; margin-top: 6px;
+  font-family: var(--font-mono); font-size: 8.5px; color: var(--pkg-muted);
+  flex-wrap: wrap;
+}
+.pkgb-sdot { width: 2.5px; height: 2.5px; border-radius: 50%; background: var(--pkg-muted); flex: 0 0 auto; }
+.pkgb-suse { font-family: inherit; font-size: 10px; }
 .pkgb-suse b { color: var(--pkg-ink-soft); font-weight: 600; }
 
 /* ══════════════════════════════════════════════════════════════════════════════
@@ -318,14 +304,16 @@
 
 .pkgb-ghost {
   border: 1.5px dashed var(--pkgo-dash);
-  border-radius: 10px; padding: 13px; text-align: center;
+  border-radius: 10px; padding: 14px; text-align: center;
   cursor: pointer; background: transparent; width: 100%;
   font-family: inherit;
   transition: background 0.15s, border-color 0.15s;
 }
-.pkgb-ghost:hover { background: rgba(245, 226, 218, 0.3); border-color: var(--pkg-pinkline); }
+.pkgb-ghost:hover { background: rgba(245, 226, 218, 0.4); border-color: var(--pkg-pinkline); }
 .pkgb-gt { font-family: var(--font-serif); font-style: italic; font-size: 14px; color: var(--pkg-burg); }
-.pkgb-gs { font-size: 11px; color: var(--pkg-muted); margin-top: 4px; display: block; }
+.pkgb-gs { font-size: 10.5px; color: var(--pkg-muted); margin-top: 3px; line-height: 1.5; display: block; }
+/* Row 3 of the column grid — pinned to the bottom, so all three sit on one baseline. */
+.pkgb-matcol .pkgb-ghost { align-self: end; }
 
 @media (max-width: 1080px) { .pkgb-matcols { grid-template-columns: minmax(0, 1fr); } }
 
@@ -333,7 +321,7 @@
    REMOVAL — the bin, and the archive/delete popover (Ruling 2)
    ══════════════════════════════════════════════════════════════════════════════ */
 
-.pkgb-remwrap { position: absolute; right: 9px; bottom: 9px; z-index: 2; }
+.pkgb-remwrap { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); z-index: 2; }
 
 /* ⚠️ HOVER *AND* FOCUS-VISIBLE. The ref reveals this on hover alone, which makes it unreachable for
    anyone driving by keyboard — the control is present in the tab order and invisible while focused,
@@ -341,7 +329,7 @@
    the `[aria-expanded="true"]` clause keeps it visible while its popover is open, so the thing you
    are acting through does not disappear from under you. */
 .pkgb-rem {
-  width: 22px; height: 22px; border-radius: 6px;
+  width: 24px; height: 24px; border-radius: 6px;
   border: none; background: transparent; cursor: pointer;
   opacity: 0; transition: opacity 0.15s, background 0.15s;
   display: flex; align-items: center; justify-content: center;
@@ -412,7 +400,7 @@
 .pkgb-pkgcard:focus-within { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
 
 /* The stamp sits in the corner; the title reserves its width so a long name never runs under it. */
-.pkgb-pkgcard > .pkgb-plate--stamp { position: absolute; top: 14px; right: 14px; width: 52px; height: 62px; }
+.pkgb-pkgcard > .pkgb-plate--stamp { position: absolute; top: 16px; right: 16px; }
 .pkgb-pkgname {
   font-family: var(--font-serif); font-size: 20px; font-weight: 600; line-height: 1.3;
   padding-right: 64px; color: var(--pkg-ink); overflow-wrap: anywhere;
@@ -445,6 +433,10 @@
 /* The card's bin is in the foot rather than absolutely placed — the stamp already owns the corner. */
 .pkgb-pkgfoot .pkgb-remwrap { position: static; }
 .pkgb-pkgcard:hover .pkgb-rem, .pkgb-pkgcard:focus-within .pkgb-rem { opacity: 1; }
+
+.pkgb-pkgghost .pkgb-plate { width: 88px; height: 88px; padding: 6px; }
+.pkgb-ghostpanel .pkgb-plate { width: 86px; height: 86px; padding: 6px; }
+.pkgb-hncell .pkgb-plate { padding: 5px; }
 
 .pkgb-pkgghost {
   min-height: 170px;
