@@ -934,7 +934,6 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       ["Query Centre", "../Queries.tsx"],
       ["Contact list", "../agents/AgentList.tsx"],
       ["Manuscripts", "../AllManuscripts.tsx"],
-      ["Comparable titles", "../manuscripts/ComparableTitlesPage.tsx"],
       ["Discover", "../DiscoverNewAgents.tsx"],
       ["Submission packages", "../SubmissionPackages.tsx"],
       ["Analytics", "../QueryAnalytics.tsx"],
@@ -945,6 +944,29 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       expect(src, `${page} is listed as rendering the grid and no longer does`).toContain("WorkspacePageGrid");
       expect(src, `${page} stopped rendering a masthead`).toContain('variant="workspace"');
     }
+
+    /* ⚠️ ONE PAGE DECLINES THE MASTHEAD, AND IT IS ENUMERATED HERE RATHER THAN DROPPED (comps v2.1).
+       Comparable titles renders the grid with `masthead={null}` and draws its own static header
+       inside the sheet, so the second assertion above cannot apply to it and it left CONVERTED.
+
+       ⚠️ BUT IT DOES NOT LEAVE THE CENSUS. This block's own warning is that "a matrix that omits the
+       page you just changed" is the fault, so a page that stops qualifying gets an EXCEPTION ROW
+       saying what it does instead — never a quiet deletion, which is how a census stops covering the
+       app one page at a time. The claim is INVERTED, not abandoned: it must still render the grid,
+       and it must still render NO masthead. If it ever takes the shared header back this fails, and
+       the message sends whoever did it to the list above.
+
+       ⚠️ AND IT READS STRIPPED SOURCE. That page's prose explains the opt-out and names both
+       `PageHeader` and `variant="workspace"` several times; a raw check would match the explanation
+       and report the masthead as present — the comment-stripping trap this repo has paid for. */
+    const comps = readFileSync(resolve(__dirname, "../manuscripts/ComparableTitlesPage.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/[^\n]*/g, "");
+    expect(comps, "Comparable titles stopped rendering the grid").toContain("WorkspacePageGrid");
+    expect(comps, "Comparable titles took the shared masthead back — move it into CONVERTED above")
+      .not.toContain('variant="workspace"');
+    expect(comps, "Comparable titles no longer declines the masthead explicitly").toContain("masthead={null}");
+
 
     /* ⚠️ THE OLD PATH IS FULLY GONE, AND BOTH ITS HALVES ARE ASSERTED ABSENT (in-flow masthead).
        The header used to read the grid's condensed state through context and throw when mounted

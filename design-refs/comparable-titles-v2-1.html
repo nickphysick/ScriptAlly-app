@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Comparable titles v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --parchment:#fdfaf5;
+  --cream:#f2ede7;
+  --ink:#3a1c14;
+  --head-ink:#2e3a2c;
+  --burg:#7c3a2a;
+  --burg-deep:#6b3023;
+  --label:#9c8878;
+  --muted:#8a7a6c;
+  --hairline:#ece0d2;
+  --frame:rgba(124,58,42,0.28);
+  --sage-a:#dce0d9; --sage-b:#d0d6cc; --sage:#8a9e88; --sage-text:#5a6e58;
+  --pink-a:#f5e2da; --pink-b:#efd5ca;
+  --btn-pink:#f5e2da; --btn-pink-bd:#e8c8bc; --btn-pink-hv:#efd5ca; --btn-pink-hbd:#d8a89a;
+  --slate:#6A89A7; --slate-deep:#4a6a84; --slate-a:#dbe3ea; --slate-b:#d1dbe4; --slate-soft:#e6edf3; --slate-bd:#c5d4df;
+}
+body{font-family:'Inter',sans-serif;background:#f2ede7;color:var(--ink);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;opacity:0.25;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.app{position:relative;z-index:2;display:flex;min-height:100vh;}
+.paper-texture{background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");}
+
+/* ══════════ NAV (LOCKED — faithful reproduction, not redesigned) ══════════ */
+.rail{width:270px;flex-shrink:0;padding:18px 14px;border-right:1px solid rgba(58,28,20,0.06);}
+.brand{display:flex;align-items:center;gap:9px;padding:4px 8px 16px;}
+.brand svg{width:30px;height:30px;}
+.brand-name{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;color:#1d1712;}
+.ms-switch{background:#fff;border:1px solid rgba(58,28,20,0.08);border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 3px rgba(58,28,20,0.05);margin-bottom:20px;}
+.ms-switch-icon{width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.ms-switch-t{font-size:13.5px;font-weight:600;color:#1d1712;line-height:1.15;}
+.ms-switch-s{font-size:11px;color:var(--muted);margin-top:1px;}
+.ms-switch-arrows{margin-left:auto;color:#c8b8a8;font-size:12px;letter-spacing:3px;}
+.rail-sec{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.17em;text-transform:uppercase;color:var(--label);font-weight:500;padding:14px 10px 6px;}
+.rail-item{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:11px;font-size:14px;color:#2a211c;cursor:pointer;}
+.rail-item svg{width:17px;height:17px;color:#4a3c34;flex-shrink:0;}
+.rail-item:hover{background:rgba(255,255,255,0.55);}
+.rail-item.active{background:#fff;box-shadow:0 1px 3px rgba(58,28,20,0.07);font-weight:500;}
+.rail-count{margin-left:auto;font-size:12px;color:var(--burg);font-weight:600;}
+.rail-count::before{content:'●';font-size:7px;vertical-align:2px;margin-right:5px;}
+
+/* ══════════ MAIN ══════════ */
+.main{flex:1;min-width:0;padding:14px 22px 80px;}
+.crumbs{display:flex;align-items:center;gap:8px;padding:8px 4px 16px;font-family:'Playfair Display',serif;font-size:17px;color:#5a4a40;}
+.crumbs b{font-weight:500;color:#1d1712;}
+.crumbs .saved{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.17em;text-transform:uppercase;color:#b8a898;border-left:1px solid var(--hairline);padding-left:14px;margin-left:6px;font-weight:500;}
+.sheet{background:var(--parchment);border-radius:18px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 30px rgba(58,28,20,0.07);padding:26px 28px 34px;max-width:1120px;}
+
+/* ── Mount card: Form 11 three-layer pattern (rim → frame → band) ── */
+.mount{background:var(--parchment);border-radius:14px;box-shadow:0 1px 2px rgba(58,28,20,0.06),0 6px 24px rgba(58,28,20,0.09);padding:6px;}
+.mount .frame{border:1px solid var(--frame);border-radius:10px;overflow:hidden;background:var(--parchment);}
+.band{padding:15px 22px 13px;position:relative;}
+.band.sage{background:linear-gradient(135deg,var(--sage-a) 0%,var(--sage-b) 100%);border-bottom:1px solid rgba(90,110,88,0.2);}
+.band.pink{background:linear-gradient(135deg,var(--pink-a) 0%,var(--pink-b) 100%);border-bottom:1px solid rgba(124,58,42,0.14);}
+.band-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--head-ink);display:flex;align-items:center;gap:10px;}
+.band.pink .band-title{color:var(--ink);}
+.chip{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;font-weight:500;background:#fff;color:#6a7e68;border:1px solid rgba(90,110,88,0.25);border-radius:99px;padding:3px 10px 2px;}
+.band.pink .chip{color:var(--burg);border-color:rgba(124,58,42,0.2);}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.17em;text-transform:uppercase;color:var(--label);font-weight:500;}
+
+/* ══════════ PAGE HEADER (static, not sticky) ══════════ */
+.pagehead{display:flex;align-items:flex-start;gap:18px;padding:2px 4px 20px;margin-bottom:20px;border-bottom:0.5px solid var(--hairline);}
+.pagehead .mark{flex-shrink:0;color:#4a3c34;padding-top:6px;}
+.pagehead h1{font-family:'Playfair Display',serif;font-size:38px;font-weight:500;color:var(--ink);line-height:1.05;}
+.pagehead p{font-size:13.5px;color:#6a5a50;font-weight:300;margin-top:5px;line-height:1.5;}
+
+/* ══════════ TOP ROW: manuscript tile + query line builder ══════════ */
+.toprow{display:grid;grid-template-columns:320px 1fr;gap:22px;align-items:stretch;margin-bottom:22px;}
+.toprow .mount{margin-bottom:0;display:flex;flex-direction:column;}
+.toprow .frame{flex:1;display:flex;flex-direction:column;}
+.toprow .qlb-body{flex:1;display:flex;flex-direction:column;}
+.toprow .qlb-line{margin-top:6px;}
+.toprow .qlb-row{margin-top:auto;padding-top:16px;}
+/* illustration slot sits beside the line */
+.qlb-split{display:grid;grid-template-columns:1fr 156px;gap:20px;align-items:start;}
+.qlb-slot{border:1px dashed #d8c8b8;border-radius:11px;height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#c8b8a8;}
+.qlb-slot span{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.12em;text-transform:uppercase;}
+/* Active manuscript tile — dashboard option D, scaled down */
+.ms-tile{background:#fff;border:0.5px solid #e0d5c8;border-radius:14px;padding:20px 18px 16px;text-align:center;box-shadow:inset 0 1px 2px rgba(58,28,20,0.02),0 1px 3px rgba(58,28,20,0.05);display:flex;flex-direction:column;align-items:center;gap:8px;}
+.ms-tile .plate{width:96px;height:96px;display:flex;align-items:center;justify-content:center;}
+.ms-tile .t{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;color:var(--ink);line-height:1.1;}
+.ms-pills{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
+.ms-pill{font-size:10.5px;font-weight:500;color:#6a5a50;background:var(--cream);border-radius:99px;padding:3px 11px;}
+.ms-wc{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.05em;}
+.ms-rule{width:34px;height:1px;background:#d8c8b8;margin:2px 0;}
+.ms-comps{font-size:11px;color:var(--sage-text);font-weight:500;}
+
+/* ══════════ INFOGRAPHIC — "What does a good comp do?" ══════════ */
+.info-head{display:flex;align-items:center;justify-content:space-between;width:100%;}
+.seg{display:flex;background:#fff;border:0.5px solid #e0d5c8;border-radius:10px;overflow:hidden;}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;font-weight:500;border:none;background:transparent;color:#8a7a6c;padding:7px 14px;cursor:pointer;transition:all 0.15s;}
+.seg button.on{background:var(--btn-pink);color:var(--burg);}
+.collapse-btn{background:none;border:none;cursor:pointer;color:var(--sage-text);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;font-weight:500;display:flex;align-items:center;gap:6px;}
+.collapse-btn svg{transition:transform 0.2s;}
+.info-body{padding:22px 22px 18px;}
+.info-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+.info-cell{border:0.5px solid var(--hairline);border-radius:12px;padding:14px 13px 13px;background:#fff;display:flex;flex-direction:column;gap:9px;min-height:172px;}
+.info-slot{height:64px;border:1px dashed #d8c8b8;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#c8b8a8;}
+.info-slot span{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.12em;text-transform:uppercase;}
+.info-cell h4{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:500;color:var(--ink);line-height:1.2;}
+.info-cell p{font-size:11px;color:#7a6a60;font-weight:300;line-height:1.5;}
+.info-attr{font-size:10.5px;color:#a89888;font-weight:300;font-style:italic;margin-top:14px;}
+.info-collapsed .info-body{display:none;}
+.mistake .info-slot{border-color:#e8c8bc;color:#d8a89a;}
+
+/* ══════════ QUERY LINE BUILDER ══════════ */
+.qlb-body{padding:20px 22px 22px;}
+.qlb-line{font-family:'Playfair Display',serif;font-size:25px;font-weight:400;color:#b09488;line-height:1.35;min-height:38px;}
+.qlb-line.live{color:var(--ink);}
+.qlb-line .ms-name{font-style:italic;}
+.qlb-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:16px;flex-wrap:wrap;}
+.qlb-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.q-chip{display:flex;align-items:center;gap:7px;background:#fff;border:0.5px solid #e0d5c8;border-radius:99px;padding:6px 12px 6px 8px;font-size:12px;color:#8a7a6c;cursor:pointer;transition:all 0.15s;user-select:none;}
+.q-chip .box{width:14px;height:14px;border-radius:4px;border:1px solid #d0c0b0;background:#fff;display:flex;align-items:center;justify-content:center;color:transparent;font-size:9px;transition:all 0.15s;}
+.q-chip.on{border-color:var(--btn-pink-bd);background:var(--btn-pink);color:var(--burg);font-weight:500;}
+.q-chip.on .box{background:var(--burg);border-color:var(--burg);color:#f5ede8;}
+.q-chip .ord{display:none;font-family:'JetBrains Mono',monospace;font-size:8px;color:#b8998c;letter-spacing:0.05em;margin-left:2px;}
+.q-chip.on .ord{display:inline;}
+.qlb-actions{display:flex;gap:8px;align-items:center;}
+.b-soft{cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;background:var(--btn-pink);color:var(--burg);border:0.5px solid var(--btn-pink-bd);border-radius:10px;padding:9px 16px;transition:all 0.2s;}
+.b-soft:hover{background:var(--btn-pink-hv);border-color:var(--btn-pink-hbd);}
+.b-ghost{cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;background:#fff;color:#6a5a50;border:0.5px solid #e0d5c8;border-radius:10px;padding:9px 16px;transition:all 0.2s;}
+.b-ghost:hover{border-color:#c9a89e;color:var(--burg);}
+
+/* ══════════ COMP CARDS ══════════ */
+.comps-body{padding:20px 22px 22px;display:flex;flex-direction:column;gap:14px;}
+.comp{display:grid;grid-template-columns:44px 1fr 214px;background:#fff;border:0.5px solid #e0d5c8;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(58,28,20,0.04);}
+/* signature: the book spine — shelf placement made literal */
+.spine{background:linear-gradient(180deg,var(--pink-a),var(--pink-b));border-right:0.5px solid rgba(124,58,42,0.14);display:flex;align-items:center;justify-content:center;position:relative;}
+.spine.screen{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));border-right-color:rgba(90,110,88,0.2);}
+.spine .yr{writing-mode:vertical-rl;transform:rotate(180deg);font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.22em;color:var(--burg);font-weight:500;}
+.spine.screen .yr{color:var(--sage-text);}
+.comp-main{padding:15px 18px 14px;min-width:0;}
+.comp-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.comp-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:var(--ink);font-style:italic;}
+.comp-author{font-size:12.5px;color:#6a5a50;}
+.age-chip{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);background:var(--cream);border-radius:99px;padding:3px 9px 2px;font-weight:500;}
+.comp-meta{display:flex;gap:16px;margin-top:5px;font-size:11px;color:#9a8a7c;flex-wrap:wrap;}
+.comp-meta b{font-weight:500;color:#7a6a60;}
+.facets{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.facet{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.12em;text-transform:uppercase;font-weight:500;color:var(--sage-text);border:1px solid rgba(90,110,88,0.3);border-radius:99px;padding:3px 10px 2px;background:rgba(220,224,217,0.35);}
+.why{font-family:'Caveat',cursive;font-size:17.5px;color:#5a4438;margin-top:9px;line-height:1.3;}
+.why::before{content:'“';color:#c8a898;}
+.why::after{content:'”';color:#c8a898;}
+.comp-aside{border-left:0.5px solid var(--hairline);padding:14px 16px;display:flex;flex-direction:column;gap:9px;background:#fdfbf8;}
+.fact-row{display:flex;flex-direction:column;gap:1px;}
+.fact-row .v{font-size:11.5px;color:#5a4a40;font-weight:400;}
+.comp-actions{margin-top:auto;display:flex;gap:6px;}
+.mini-btn{cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;background:#fff;color:#8a7a6c;border:0.5px solid #e0d5c8;border-radius:8px;padding:6px 10px;transition:all 0.15s;}
+.mini-btn:hover{color:var(--burg);border-color:var(--btn-pink-hbd);}
+.add-row{display:flex;justify-content:center;padding-top:4px;}
+
+/* ══════════ SCOUT BAND (pink — retokened from sage) ══════════ */
+.scout-body{padding:18px 22px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.scout-cell{border:0.5px solid var(--hairline);border-radius:11px;background:#fff;padding:13px 14px;display:flex;flex-direction:column;gap:5px;}
+.scout-cell h5{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:500;color:var(--ink);}
+.scout-cell p{font-size:10.5px;color:#8a7a6c;font-weight:300;line-height:1.45;}
+.scout-cell .lbl{font-size:8px;}
+
+/* ══════════ THE SCOUT (Pro) ══════════ */
+.band.slate{background:linear-gradient(135deg,var(--slate-a) 0%,var(--slate-b) 100%);border-bottom:1px solid rgba(74,106,132,0.22);}
+.band.slate .band-title{color:#2c3e4e;}
+.chip.pro{color:var(--slate-deep);border-color:rgba(74,106,132,0.3);background:#fff;}
+.scout-intro{padding:16px 22px 0;display:flex;align-items:baseline;justify-content:space-between;gap:18px;flex-wrap:wrap;}
+.scout-intro p{font-size:12.5px;color:#5a6a76;font-weight:300;line-height:1.55;max-width:62ch;}
+.lib-fact{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);font-weight:500;white-space:nowrap;}
+.scout-suggestions{padding:16px 22px 8px;display:flex;flex-direction:column;gap:12px;}
+.sugg{display:grid;grid-template-columns:44px 1fr 168px;background:#fff;border:0.5px solid var(--slate-bd);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(44,62,78,0.05);}
+.sugg .spine{background:linear-gradient(180deg,var(--slate-a),var(--slate-b));border-right:0.5px solid rgba(74,106,132,0.2);}
+.sugg .spine .yr{color:var(--slate-deep);}
+.sugg-aside{border-left:0.5px solid #e4ebf0;padding:14px 16px;display:flex;flex-direction:column;gap:9px;background:#f8fafc;}
+.match-line{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center;}
+.match-line .lbl{color:var(--slate);}
+.m-chip{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.12em;text-transform:uppercase;font-weight:500;color:var(--slate-deep);border:1px solid rgba(74,106,132,0.28);border-radius:99px;padding:3px 10px 2px;background:var(--slate-soft);}
+.prov{font-size:11px;color:#7a8a96;margin-top:9px;line-height:1.5;}
+.prov b{font-weight:500;color:#5a6a76;}
+.b-slate{cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;background:var(--slate-soft);color:var(--slate-deep);border:0.5px solid var(--slate-bd);border-radius:10px;padding:9px 16px;transition:all 0.2s;}
+.b-slate:hover{background:#dbe7ef;border-color:#a8bfd0;}
+.scout-grounds{margin:14px 22px 20px;border-top:0.5px solid var(--hairline);padding-top:14px;}
+.scout-grounds .lbl{display:block;margin-bottom:10px;}
+.grounds-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+/* locked (free) state */
+.scout-locked{padding:26px 22px 30px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;}
+.scout-locked .peek{width:100%;max-width:640px;filter:blur(3px) saturate(0.7);opacity:0.55;pointer-events:none;user-select:none;}
+.scout-locked h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;color:var(--ink);}
+.scout-locked p{font-size:12.5px;color:#7a8a96;font-weight:300;max-width:52ch;line-height:1.55;}
+
+/* ══════════ EMPTY STATE ══════════ */
+.empty{padding:44px 22px 48px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;}
+.empty .slot{width:200px;height:150px;border:1px dashed #d8c8b8;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#c8b8a8;}
+.empty h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;color:var(--ink);}
+.empty p{font-size:12.5px;color:#8a7a6c;font-weight:300;max-width:42ch;line-height:1.55;}
+
+/* ══════════ MOCKUP TOOLBAR ══════════ */
+.toolbar{position:fixed;bottom:18px;right:18px;z-index:50;background:#1d1712;border-radius:12px;padding:8px 10px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 24px rgba(0,0,0,0.3);}
+.toolbar .t{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8a7a6c;}
+.toolbar button{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;border:1px solid #4a3c34;background:transparent;color:#b8a898;border-radius:8px;padding:6px 11px;cursor:pointer;}
+.toolbar button.on{background:#fdfaf5;color:#1d1712;border-color:#fdfaf5;}
+.hidden{display:none !important;}
+section.mount{margin-bottom:22px;}
+@media (max-width:980px){.toprow{grid-template-columns:1fr;}.qlb-split{grid-template-columns:1fr;}.qlb-slot{display:none;}.info-grid{grid-template-columns:repeat(2,1fr);}.scout-body{grid-template-columns:repeat(2,1fr);}.comp{grid-template-columns:44px 1fr;}.comp-aside{grid-column:2;border-left:none;border-top:0.5px solid var(--hairline);}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══════ NAV RAIL (locked — faithful copy) ═══════ -->
+  <nav class="rail">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1d1712" stroke-width="1.6"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+      <span class="brand-name">ScriptAlly</span>
+    </div>
+    <div class="ms-switch">
+      <div class="ms-switch-icon"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#5a6e58" stroke-width="1.4"><rect x="4" y="3" width="14" height="18" rx="2" fill="#e9ede6"/><line x1="8" y1="8" x2="14" y2="8"/><line x1="8" y1="12" x2="14" y2="12"/></svg></div>
+      <div><div class="ms-switch-t">Murphy's Day Out</div><div class="ms-switch-s">Thriller · 50,000 words</div></div>
+      <div class="ms-switch-arrows">‹ ›</div>
+    </div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
+    <div class="rail-sec">Queries</div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>Query Centre</div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>Analytics</div>
+    <div class="rail-sec">Agents</div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>Contact list</div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>Discover</div>
+    <div class="rail-sec">Materials</div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Manuscripts</div>
+    <div class="rail-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="6" height="16" rx="1"/><rect x="10" y="3" width="6" height="18" rx="1"/><path d="M18 5l3 15.5"/></svg>Comparable titles</div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3h20v18H2z"/><path d="M2 9h20"/></svg>Submission packages</div>
+    <div class="rail-sec">Tasks</div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>To-do list<span class="rail-count">18</span></div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendar</div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Noteboard</div>
+    <div class="rail-sec">Account</div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
+  </nav>
+
+  <!-- ═══════ MAIN ═══════ -->
+  <main class="main">
+    <div class="crumbs">ScriptAlly&nbsp;&nbsp;/&nbsp;&nbsp;Materials&nbsp;&nbsp;/&nbsp;&nbsp;<b>Comparable titles</b><span class="saved">All changes saved</span></div>
+
+    <div class="sheet paper-texture">
+
+      <!-- ── PAGE HEADER (static) ── -->
+      <div class="pagehead">
+        <div class="mark"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="7" height="15" rx="1"/><rect x="11" y="3" width="7" height="17" rx="1"/><path d="M20 5l2 15"/></svg></div>
+        <div>
+          <h1>Comparable titles</h1>
+          <p>The books your manuscript sits beside, gathered and query-ready.</p>
+        </div>
+      </div>
+
+      <!-- ── TOP ROW: active manuscript (left) + query letter line (right) ── -->
+      <div class="toprow">
+        <div class="ms-tile">
+          <span class="lbl">Active manuscript</span>
+          <div class="plate"><svg viewBox="0 0 24 24" width="78" height="78" fill="none" stroke="#5a6e58" stroke-width="1.1"><rect x="4" y="2.5" width="15" height="19" rx="2" fill="#e9ede6"/><line x1="8" y1="8" x2="15" y2="8"/><line x1="8" y1="11.5" x2="15" y2="11.5"/><line x1="8" y1="15" x2="12.5" y2="15"/><path d="M4 5.5h-1.2" stroke="#b8998c"/><path d="M4 9.5h-1.2" stroke="#b8998c"/><path d="M4 13.5h-1.2" stroke="#b8998c"/><path d="M4 17.5h-1.2" stroke="#b8998c"/></svg></div>
+          <div class="t">Murphy's Day Out</div>
+          <div class="ms-pills"><span class="ms-pill">Thriller</span><span class="ms-pill">Young Adult</span></div>
+          <div class="ms-wc">50,000 WORDS</div>
+          <div class="ms-rule"></div>
+          <div class="ms-comps" id="tileComps">3 comps on the shelf</div>
+        </div>
+
+        <section class="mount">
+          <div class="frame">
+            <div class="band pink">
+              <div class="info-head">
+                <div class="band-title">Query letter line<span class="chip">Murphy's Day Out</span></div>
+                <div class="seg">
+                  <button class="on" id="segReaders" onclick="setMode('readers')">For readers of</button>
+                  <button id="segMeets" onclick="setMode('meets')">X meets Y</button>
+                </div>
+              </div>
+            </div>
+            <div class="qlb-body">
+              <div class="qlb-split">
+                <div class="qlb-line" id="qlbLine">Tick a comp below to start building your query line.</div>
+                <div class="qlb-slot">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><polyline points="15 4 15 9 20 9"/><line x1="7" y1="13" x2="16" y2="13"/><line x1="7" y1="17" x2="13" y2="17"/></svg>
+                  <span>comp-query-line</span>
+                  <span>156×118</span>
+                </div>
+              </div>
+              <div class="qlb-row">
+                <div class="qlb-chips" id="qlbChips"></div>
+                <div class="qlb-actions">
+                  <button class="b-ghost" onclick="alert('Mockup: would copy the line to the clipboard.')">Copy line</button>
+                  <button class="b-soft" onclick="alert('Mockup: would place this line in the submission package query letter.')">Send to package</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ── INFOGRAPHIC ── -->
+      <section class="mount" id="infoMount">
+        <div class="frame">
+          <div class="band sage">
+            <div class="info-head">
+              <div class="band-title">What does a good comp do?<span class="chip">Field notes</span></div>
+              <div style="display:flex;align-items:center;gap:14px;">
+                <div class="seg">
+                  <button class="on" id="segJobs" onclick="setInfo('jobs')">The five jobs</button>
+                  <button id="segMistakes" onclick="setInfo('mistakes')">Common missteps</button>
+                </div>
+                <button class="collapse-btn" onclick="toggleInfo()"><span id="collapseLbl">Collapse</span><svg id="collapseChev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg></button>
+              </div>
+            </div>
+          </div>
+          <div class="info-body">
+            <div class="info-grid" id="gridJobs">
+              <div class="info-cell"><div class="info-slot"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="5" width="5" height="15" rx="1"/><rect x="9" y="3" width="5" height="17" rx="1"/><path d="M16 5l3.5 14.5"/></svg><span>Slot · 120×64</span></div><h4>Places it on a shelf</h4><p>Comps tell an agent exactly which section of the bookshop your manuscript belongs in.</p></div>
+              <div class="info-cell"><div class="info-slot"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg><span>Slot · 120×64</span></div><h4>Names the readership</h4><p>They point to a set of readers who already buy books like yours.</p></div>
+              <div class="info-cell"><div class="info-slot"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg><span>Slot · 120×64</span></div><h4>Backs the sales case</h4><p>Editors build a book's numbers partly on how its nearest neighbours actually sold.</p></div>
+              <div class="info-cell"><div class="info-slot"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>Slot · 120×64</span></div><h4>Carries the tone</h4><p>A well-chosen pair conveys how the book feels faster than any synopsis can.</p></div>
+              <div class="info-cell"><div class="info-slot"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Slot · 120×64</span></div><h4>Shows you read now</h4><p>Recent comps — broadly the last three to five years — show you know today's market, not the one you grew up reading.</p></div>
+            </div>
+            <div class="info-grid hidden" id="gridMistakes">
+              <div class="info-cell mistake"><div class="info-slot"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9"/></svg><span>Slot · 120×64</span></div><h4>Comping the giants</h4><p>Global phenomena can't anchor a realistic case for a debut — and everyone names them.</p></div>
+              <div class="info-cell mistake"><div class="info-slot"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 8 14"/></svg><span>Slot · 120×64</span></div><h4>Reaching too far back</h4><p>A comp from another publishing era says the market has moved on without you.</p></div>
+              <div class="info-cell mistake"><div class="info-slot"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg><span>Slot · 120×64</span></div><h4>Comping the unread</h4><p>Agents ask about comps. A title you haven't read is easily exposed.</p></div>
+              <div class="info-cell mistake"><div class="info-slot"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M3 16v5h5"/><path d="M21 16v5h-5"/><line x1="8" y1="8" x2="16" y2="16"/></svg><span>Slot · 120×64</span></div><h4>Crossing shelves</h4><p>Comps from the wrong category muddy where the book sits — and who it's for.</p></div>
+              <div class="info-cell mistake"><div class="info-slot"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><span>Slot · 120×64</span></div><h4>Piling them on</h4><p>Two is the common counsel, three at most. A longer list dilutes the signal.</p></div>
+            </div>
+            <div class="info-attr">Drawn from published agent and industry guidance. Agents differ on the details — some accept one older anchor title alongside fresh ones.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── YOUR COMPS ── -->
+      <section class="mount">
+        <div class="frame">
+          <div class="band sage">
+            <div class="info-head">
+              <div class="band-title">Your comps<span class="chip">Free</span></div>
+              <button class="b-ghost" id="addTop" onclick="alert('Mockup: opens the add-comp form.')">Add a comp</button>
+            </div>
+          </div>
+
+          <!-- populated state -->
+          <div class="comps-body" id="compsPopulated">
+
+            <div class="comp">
+              <div class="spine"><span class="yr">2021 · BOOK</span></div>
+              <div class="comp-main">
+                <div class="comp-top"><span class="comp-title">The Appeal</span><span class="comp-author">Janice Hallett</span><span class="age-chip">Published 2021 · five years ago</span></div>
+                <div class="comp-meta"><span><b>Viper</b> · Serpent's Tail</span><span>Crime &amp; mystery</span><span>UK edition</span></div>
+                <div class="facets"><span class="facet">Structure</span><span class="facet">Tone</span></div>
+                <div class="why">Found-document storytelling with the same wry, very British ensemble feel.</div>
+              </div>
+              <div class="comp-aside">
+                <div class="fact-row"><span class="lbl">Found via</span><span class="v">Bookshop table, Waterstones</span></div>
+                <div class="fact-row"><span class="lbl">Reading</span><span class="v">Read · March 2026</span></div>
+                <div class="fact-row"><span class="lbl">Used in</span><span class="v">4 query letters</span></div>
+                <div class="comp-actions"><button class="mini-btn">Edit</button><button class="mini-btn">Remove</button></div>
+              </div>
+            </div>
+
+            <div class="comp">
+              <div class="spine"><span class="yr">2022 · BOOK</span></div>
+              <div class="comp-main">
+                <div class="comp-top"><span class="comp-title">The It Girl</span><span class="comp-author">Ruth Ware</span><span class="age-chip">Published 2022 · four years ago</span></div>
+                <div class="comp-meta"><span><b>Simon &amp; Schuster UK</b></span><span>Thriller</span><span>UK edition</span></div>
+                <div class="facets"><span class="facet">Audience</span><span class="facet">Premise</span></div>
+                <div class="why">Same readership — a past-and-present mystery built around one magnetic figure.</div>
+              </div>
+              <div class="comp-aside">
+                <div class="fact-row"><span class="lbl">Found via</span><span class="v">Goodreads readalikes</span></div>
+                <div class="fact-row"><span class="lbl">Reading</span><span class="v">Read · January 2026</span></div>
+                <div class="fact-row"><span class="lbl">Used in</span><span class="v">2 query letters</span></div>
+                <div class="comp-actions"><button class="mini-btn">Edit</button><button class="mini-btn">Remove</button></div>
+              </div>
+            </div>
+
+            <div class="comp">
+              <div class="spine screen"><span class="yr">2022 · SCREEN</span></div>
+              <div class="comp-main">
+                <div class="comp-top"><span class="comp-title">Slow Horses</span><span class="comp-author">Apple TV+</span><span class="age-chip">First aired 2022</span></div>
+                <div class="comp-meta"><span>Television</span><span>Spy thriller</span></div>
+                <div class="facets"><span class="facet">Tone</span></div>
+                <div class="why">The dry gallows humour — screen comp, kept alongside two book comps.</div>
+              </div>
+              <div class="comp-aside">
+                <div class="fact-row"><span class="lbl">Found via</span><span class="v">Agent interview, The Bookseller</span></div>
+                <div class="fact-row"><span class="lbl">Reading</span><span class="v">Watched · 2025</span></div>
+                <div class="fact-row"><span class="lbl">Used in</span><span class="v">1 query letter</span></div>
+                <div class="comp-actions"><button class="mini-btn">Edit</button><button class="mini-btn">Remove</button></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- empty state (toggle via toolbar) -->
+          <div class="empty hidden" id="compsEmpty">
+            <div class="slot"><span class="lbl">Illustration slot · 200×150</span></div>
+            <h3>No comps yet</h3>
+            <p>Comps are the published books your manuscript sits beside. Record the first one and it becomes available to your query line and submission packages.</p>
+            <button class="b-soft" onclick="alert('Mockup: opens the add-comp form.')">Add your first comp</button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── THE SCOUT (Pro) ── -->
+      <section class="mount">
+        <div class="frame">
+          <div class="band slate">
+            <div class="info-head">
+              <div class="band-title">The Scout<span class="chip pro">Pro</span></div>
+              <span class="lib-fact" id="libFact">Community library · 1,240 verified titles · 96 in Thriller</span>
+            </div>
+          </div>
+
+          <!-- Pro (active) state -->
+          <div id="scoutActive">
+            <div class="scout-intro">
+              <p>The Scout reads the community library of verified titles and brings back the ones shelved beside manuscripts like yours. Each suggestion states why it surfaced — matched on your manuscript's facts, with its provenance shown.</p>
+            </div>
+            <div class="scout-suggestions">
+
+              <div class="sugg">
+                <div class="spine"><span class="yr">2022 · BOOK</span></div>
+                <div class="comp-main">
+                  <div class="comp-top"><span class="comp-title">The Twyford Code</span><span class="comp-author">Janice Hallett</span><span class="age-chip">Published 2022 · four years ago</span></div>
+                  <div class="comp-meta"><span><b>Viper</b> · Serpent's Tail</span><span>Crime &amp; mystery</span><span>UK edition · Verified</span></div>
+                  <div class="match-line"><span class="lbl">Matched on</span><span class="m-chip">Thriller</span><span class="m-chip">Adult</span><span class="m-chip">Comparable length</span></div>
+                  <div class="prov">Named on <b>3 agent wish lists</b> · Shelved beside <b>The Appeal</b> in the library</div>
+                </div>
+                <div class="sugg-aside">
+                  <div class="fact-row"><span class="lbl">In the library</span><span class="v">Verified · added 2025</span></div>
+                  <div class="comp-actions" style="margin-top:auto;"><button class="b-slate" onclick="alert('Mockup: adds this title to Your comps.')">Add to comps</button></div>
+                </div>
+              </div>
+
+              <div class="sugg">
+                <div class="spine"><span class="yr">2023 · BOOK</span></div>
+                <div class="comp-main">
+                  <div class="comp-top"><span class="comp-title">The Last Party</span><span class="comp-author">Clare Mackintosh</span><span class="age-chip">Published 2023 · three years ago</span></div>
+                  <div class="comp-meta"><span><b>Sphere</b> · Little, Brown UK</span><span>Thriller</span><span>UK edition · Verified</span></div>
+                  <div class="match-line"><span class="lbl">Matched on</span><span class="m-chip">Thriller</span><span class="m-chip">Adult</span><span class="m-chip">UK setting</span></div>
+                  <div class="prov">Deal announced in <b>The Bookseller</b> · On <b>2 agent wish lists</b></div>
+                </div>
+                <div class="sugg-aside">
+                  <div class="fact-row"><span class="lbl">In the library</span><span class="v">Verified · added 2024</span></div>
+                  <div class="comp-actions" style="margin-top:auto;"><button class="b-slate" onclick="alert('Mockup: adds this title to Your comps.')">Add to comps</button></div>
+                </div>
+              </div>
+
+              <div class="sugg">
+                <div class="spine"><span class="yr">2024 · BOOK</span></div>
+                <div class="comp-main">
+                  <div class="comp-top"><span class="comp-title">A Talent for Murder</span><span class="comp-author">Peter Swanson</span><span class="age-chip">Published 2024 · two years ago</span></div>
+                  <div class="comp-meta"><span><b>Faber</b></span><span>Thriller</span><span>UK edition · Verified</span></div>
+                  <div class="match-line"><span class="lbl">Matched on</span><span class="m-chip">Thriller</span><span class="m-chip">Adult</span><span class="m-chip">Recent</span></div>
+                  <div class="prov">Shelved beside <b>The It Girl</b> by readers of both</div>
+                </div>
+                <div class="sugg-aside">
+                  <div class="fact-row"><span class="lbl">In the library</span><span class="v">Verified · added 2024</span></div>
+                  <div class="comp-actions" style="margin-top:auto;"><button class="b-slate" onclick="alert('Mockup: adds this title to Your comps.')">Add to comps</button></div>
+                </div>
+              </div>
+
+            </div>
+            <div class="scout-grounds">
+              <span class="lbl">Where the library draws from</span>
+              <div class="grounds-grid">
+                <div class="scout-cell"><span class="lbl">Trade press</span><h5>Recent deals</h5><p>Deal announcements in The Bookseller show what agents are selling right now.</p></div>
+                <div class="scout-cell"><span class="lbl">Agents themselves</span><h5>Wish lists</h5><p>Agents name the comps they want on Manuscript Wish List and in interviews.</p></div>
+                <div class="scout-cell"><span class="lbl">Reader data</span><h5>Readalike shelves</h5><p>Goodreads and StoryGraph surface what readers of a title also picked up.</p></div>
+                <div class="scout-cell"><span class="lbl">The community</span><h5>Fellow writers</h5><p>Titles recorded and verified by other ScriptAlly writers querying in your category.</p></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Free (locked) state -->
+          <div id="scoutLocked" class="scout-locked hidden">
+            <div class="peek">
+              <div class="sugg">
+                <div class="spine"><span class="yr">2022 · BOOK</span></div>
+                <div class="comp-main">
+                  <div class="comp-top"><span class="comp-title">The Twyford Code</span><span class="comp-author">Janice Hallett</span><span class="age-chip">Published 2022</span></div>
+                  <div class="match-line"><span class="lbl">Matched on</span><span class="m-chip">Thriller</span><span class="m-chip">Adult</span></div>
+                </div>
+                <div class="sugg-aside"><div class="fact-row"><span class="lbl">In the library</span><span class="v">Verified</span></div></div>
+              </div>
+            </div>
+            <h3>The Scout has found titles shelved beside manuscripts like yours</h3>
+            <p>Pro opens the community library of verified titles — 1,240 and growing — and brings back the ones matching your manuscript's category, audience and length, each with its provenance shown.</p>
+            <button class="b-slate" onclick="alert('Mockup: opens the Pro upgrade flow.')">See what the Scout found — Pro</button>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- mockup-only controls -->
+<div class="toolbar">
+  <span class="t">Mockup</span>
+  <button class="on" id="tbPop" onclick="setState('populated')">Populated</button>
+  <button id="tbEmpty" onclick="setState('empty')">Empty state</button>
+  <span class="t" style="margin-left:4px;">Scout</span>
+  <button class="on" id="tbPro" onclick="setScout('pro')">Pro</button>
+  <button id="tbFree" onclick="setScout('free')">Free</button>
+</div>
+
+<script>
+// ── Comp data feeding the query line builder ──
+var COMPS=[
+  {id:'appeal',short:'The Appeal',on:true},
+  {id:'itgirl',short:'The It Girl',on:true},
+  {id:'slow',short:'Slow Horses',on:false}
+];
+var mode='readers';
+
+function renderChips(){
+  var wrap=document.getElementById('qlbChips');wrap.innerHTML='';
+  var order=1;
+  COMPS.forEach(function(c){
+    var el=document.createElement('div');
+    el.className='q-chip'+(c.on?' on':'');
+    el.innerHTML='<span class="box">✓</span>'+c.short+(c.on?'<span class="ord">'+(order++)+'</span>':'');
+    el.onclick=function(){c.on=!c.on;renderChips();renderLine();};
+    wrap.appendChild(el);
+  });
+}
+function renderLine(){
+  var on=COMPS.filter(function(c){return c.on;});
+  var el=document.getElementById('qlbLine');
+  if(on.length===0){el.className='qlb-line';el.textContent='Tick a comp below to start building your query line.';return;}
+  el.className='qlb-line live';
+  var names=on.map(function(c){return '<em>'+c.short+'</em>';});
+  if(mode==='readers'){
+    var joined=names.length===1?names[0]:names.slice(0,-1).join(', ')+' and '+names[names.length-1];
+    el.innerHTML='<span class="ms-name">Murphy\'s Day Out</span> is a thriller for readers of '+joined+'.';
+  }else{
+    el.innerHTML=names.length===1
+      ? '<span class="ms-name">Murphy\'s Day Out</span> — in the vein of '+names[0]+'.'
+      : '<span class="ms-name">Murphy\'s Day Out</span> is '+names[0]+' meets '+names[1]+(names.length>2?' — with the tone of '+names[2]:'')+'.';
+  }
+}
+function setMode(m){
+  mode=m;
+  document.getElementById('segReaders').classList.toggle('on',m==='readers');
+  document.getElementById('segMeets').classList.toggle('on',m==='meets');
+  renderLine();
+}
+
+// ── Infographic ──
+function setInfo(which){
+  document.getElementById('segJobs').classList.toggle('on',which==='jobs');
+  document.getElementById('segMistakes').classList.toggle('on',which==='mistakes');
+  document.getElementById('gridJobs').classList.toggle('hidden',which!=='jobs');
+  document.getElementById('gridMistakes').classList.toggle('hidden',which!=='mistakes');
+}
+function toggleInfo(){
+  var m=document.getElementById('infoMount');
+  m.classList.toggle('info-collapsed');
+  var c=m.classList.contains('info-collapsed');
+  document.getElementById('collapseLbl').textContent=c?'Expand':'Collapse';
+  document.getElementById('collapseChev').style.transform=c?'rotate(180deg)':'none';
+}
+
+// ── Populated / empty toggle ──
+function setState(s){
+  var empty=s==='empty';
+  document.getElementById('compsPopulated').classList.toggle('hidden',empty);
+  document.getElementById('compsEmpty').classList.toggle('hidden',!empty);
+  document.getElementById('addTop').classList.toggle('hidden',empty); /* single CTA in empty state */
+  document.getElementById('tbPop').classList.toggle('on',!empty);
+  document.getElementById('tbEmpty').classList.toggle('on',empty);
+  document.getElementById('tileComps').textContent=empty?'No comps yet':'3 comps on the shelf';
+}
+
+// ── Scout: Pro / Free toggle ──
+function setScout(plan){
+  var pro=plan==='pro';
+  document.getElementById('scoutActive').classList.toggle('hidden',!pro);
+  document.getElementById('scoutLocked').classList.toggle('hidden',pro);
+  document.getElementById('tbPro').classList.toggle('on',pro);
+  document.getElementById('tbFree').classList.toggle('on',!pro);
+}
+
+renderChips();renderLine();
+</script>
+</body>
+</html>

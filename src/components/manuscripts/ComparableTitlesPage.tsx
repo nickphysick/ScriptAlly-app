@@ -5,7 +5,7 @@
  * Comparable titles — a manuscript-scoped workspace where a writer curates a single FLAT list of
  * comps (free), alongside "The Scout" (Pro), which will surface verified, web-scoured comps.
  * Route /manuscripts/comps; reached from the rail and each plate's MANAGE → link.
- * Single visual source of truth: design-refs/comparable-titles-flat.html.
+ * Single visual source of truth: design-refs/comparable-titles-v2-1.html.
  *
  * ⚠️ THIS PAGE DECLINES THE SHARED MASTHEAD (v2.1). `WorkspacePageGrid` is mounted with
  * `masthead={null}` and no toolbar, and the sticky `.wpg-chrome` slab is hidden page-scoped; the
