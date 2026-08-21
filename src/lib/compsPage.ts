@@ -81,6 +81,56 @@ export function compRole(c: CompTitle, now: number): CompRole {
  * An age is a fact about the book whether or not the writer has ticked it, and both the pack (Phase
  * 2) and the v5 ref show it unconditionally.
  */
+/** Spelled to twelve, then numerals — the house convention the dashboard's week eyebrow uses. */
+const ELAPSED_WORDS = [
+  "zero", "one", "two", "three", "four", "five", "six",
+  "seven", "eight", "nine", "ten", "eleven", "twelve",
+];
+
+/**
+ * The card's age chip — a FACT about the record and nothing else.
+ *
+ * ⚠️ NO THRESHOLD, NO CUTOFF, NO COMPARISON. This is the deliberate difference from `compAge`
+ * below, which returns null unless a book is more than five years old — so the chip it feeds appears
+ * ONLY on older comps, and a chip that appears only on some rows is a flag whatever its wording is.
+ * The writer reads "this one got marked", which is an appraisal of their choice delivered by
+ * presence rather than by words. Every comp with a year gets this chip; none of them gets a colour,
+ * an icon, an ordering or a warning.
+ *
+ * ⚠️ AND IF YOU FIND YOURSELF WRITING A COMPARISON AGAINST A CUTOFF HERE, STOP — that is the
+ * appraisal line, and this page has been walked back from it once already (c5832984).
+ *
+ * Book → "Published 2021 · five years ago". Screen → "First aired 2022", with no elapsed clause,
+ * because the ref draws it that way and a broadcast year is not a publication date.
+ * Published this year → the year alone; "zero years ago" is not something anyone says.
+ * No year recorded → null, and the card omits the chip rather than stating an absence.
+ */
+export function compAgeLine(c: CompTitle, now: number): string | null {
+  const y = compYear(c);
+  if (y === null) return null;
+  if (compMedia(c) !== "book") return `First aired ${y}`;
+  const elapsed = now - y;
+  if (elapsed <= 0) return `Published ${y}`;
+  const words = elapsed <= 12 ? ELAPSED_WORDS[elapsed] : String(elapsed);
+  return `Published ${y} · ${words} ${elapsed === 1 ? "year" : "years"} ago`;
+}
+
+/**
+ * The card's facet chips, from the writer's own free-text `matchAxis`.
+ *
+ * ⚠️ THE APP DOES NOT CLASSIFY — it splits what the writer typed. The ref draws chips reading
+ * Structure / Tone / Audience / Premise, which looks like a fixed vocabulary; the model has ONE
+ * free-text axis (documented "tone · atmosphere"), so the honest rendering is to split on the
+ * separator that documented format already uses and show the writer's own words. Inventing a
+ * taxonomy and mapping their prose onto it would be the app deciding what their comp is FOR.
+ */
+export function compFacets(c: CompTitle): string[] {
+  return (c.matchAxis ?? "")
+    .split("·")
+    .map((x) => x.trim())
+    .filter((x) => x !== "");
+}
+
 export function compAge(c: CompTitle, now: number): number | null {
   if (compMedia(c) !== "book") return null;
   const y = compYear(c);

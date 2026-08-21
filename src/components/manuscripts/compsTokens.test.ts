@@ -224,12 +224,18 @@ describe("comps.css — nothing on this page appraises a comp", () => {
    * is how `.ct-hnote`'s ok/tip pair became the verdict in the first place.
    */
   it("the composition sits in the caption, with no state class and no advisory colour", () => {
-    const cap = rule(".ct-hero-cap");
+    /* ⚠️ RENAMED, NOT MOVED (v2 §3): `.ct-hero-cap` became `.ct-qline-cap` when the query line got
+       its own card and the word "hero" went to the page hero above. The rule it guards is unchanged. */
+    const cap = rule(".ct-qline-cap");
     expect(cap).not.toContain("--ct-warn");
     expect(cap).toContain("var(--ct-label)");
-    expect(rules).not.toContain(".ct-hero-cap.ok");
-    expect(rules).not.toContain(".ct-hero-cap.tip");
+    /* ⚠️ BOUNDED TOKENS, NOT BARE `toContain`. `.ct-qline-cap` is a PREFIX of nothing today, but
+       `.ct-qline-caption` would satisfy a substring check and a state class is exactly the kind of
+       thing someone adds by lengthening a name. */
+    expect(rules).not.toMatch(/\.ct-qline-cap\.(ok|tip)\b/);
     expect(rules).not.toContain(".ct-comp-line");
+    /* the old name must not linger anywhere — two caption rules would drift */
+    expect(rules).not.toMatch(/\.ct-hero-cap\b/);
   });
 });
 

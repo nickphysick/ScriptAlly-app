@@ -17,7 +17,7 @@
  * normalizeComp so optional fields stay omit-empty (Firestore maps reject undefined).
  */
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronDown, Plus, Copy, Check, Pencil, X, Sparkles, Lock, RefreshCw, BookOpen, Star, GripVertical } from "lucide-react";
+import { ChevronDown, Plus, Copy, Check, X, Sparkles, Lock, RefreshCw, BookOpen, Star, GripVertical } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { CompMedia, CompTitle, Manuscript } from "../../types";
 import { PageHeader } from "../shell/PageHeader";
@@ -40,7 +40,14 @@ import {
   withCompRemoved,
   MAX_COMPS,
 } from "../../lib/comps";
-import { QueryFormat, compAge, compCounts, compMedia, compRole, currentYear, queryLine } from "../../lib/compsPage";
+/* ⚠️ `compAge` AND `compRole` ARE NO LONGER READ HERE, and that is the point of §3 rather than a
+   tidy-up. Both classify against a five-year cutoff — `compAge` returns null unless a book is
+   OLDER than five years, so its chip appeared only on some rows, and `compRole` sorted comps
+   into "Market comp" / "Tone comp" on the same boundary. A mark that lands on some of a
+   writer's comps and not others is an appraisal of their choices delivered by presence. The
+   card now reads `compAgeLine`, which has no cutoff at all. Both functions survive in
+   compsPage.ts with their tests; whether they are retired is a §5 sweep question. */
+import { QueryFormat, compAgeLine, compCounts, compFacets, compMedia, currentYear, queryLine } from "../../lib/compsPage";
 /* ⚠️ `CompsSavedMark` / `InYourQueryMark` / `VerifiedMark` ARE NO LONGER IMPORTED. The hero's
    stat rail became the ref's bare number-and-label fact row, so nothing renders them. They are
    RETAINED in compMarks.tsx rather than deleted — they are finished illustration work and
@@ -873,28 +880,13 @@ export const ComparableTitlesPage: React.FC<{
 
             <FieldNotesCard />
 
-            {/* ══ THE QUERY LINE — the composed line is the page; the list is the instrument that
-                builds it (baked decision 1). Phase 3 gives it its own card. ══ */}
-            <div className="ct-qline">
-              <div className="ct-qline-l">
-                <div className="ct-eyebrow">
-                  <span className="ct-lbl">Query letter line</span>
-                  <span className="ct-chip ms">{activeMs.title}</span>
-                </div>
-                {/* ⚠️ `aria-live="polite"` ON THE LINE, announcing ONCE per tick. It is the region
-                    that changes, so the whole recomposed sentence is read — not each fragment as it
-                    arrives, which is what marking the segments live would produce. */}
-                <div
-                  className={`ct-hero-line${qline.kind === "line" ? "" : " empty"}`}
-                  aria-live="polite"
-                >
-                  {qline.kind === "line"
-                    ? qline.segments.map((seg, i) => (
-                        <span key={i} className={seg.emphasis ?? undefined}>{seg.text}</span>
-                      ))
-                    : qline.prompt}
-                </div>
-                <div className="ct-hero-ctl">
+            {/* ══ THE QUERY LETTER LINE (v2 §3) — the composed line is the page; the chips below it
+                are the instrument that builds it (baked decision 1). ══ */}
+            <section className="ct-panel ct-qline">
+              <div className="ct-band">
+                <span className="bt">Query letter line</span>
+                <span className="ct-chip ms">{activeMs.title}</span>
+                <div className="ct-fnhead">
                   <div className="ct-seg" role="group" aria-label="Query line format">
                     <button
                       type="button"
@@ -913,16 +905,75 @@ export const ComparableTitlesPage: React.FC<{
                       X meets Y
                     </button>
                   </div>
+                </div>
+              </div>
+              <div className="ct-qline-l">
+                {/* ⚠️ `aria-live="polite"` ON THE LINE, announcing ONCE per tick. It is the region
+                    that changes, so the whole recomposed sentence is read — not each fragment as it
+                    arrives, which is what marking the segments live would produce. */}
+                <div
+                  className={`ct-qline-text${qline.kind === "line" ? "" : " empty"}`}
+                  aria-live="polite"
+                >
+                  {qline.kind === "line"
+                    ? qline.segments.map((seg, i) => (
+                        <span key={i} className={seg.emphasis ?? undefined}>{seg.text}</span>
+                      ))
+                    : qline.prompt}
+                </div>
+                {/* ⚠️ THE TICK LIVES HERE NOW, NOT ON THE CARD (v2 §3). A chip sits directly under
+                    the sentence it changes, so ticking one is visibly composition rather than a
+                    property being set on a record three sections down.
+
+                    ⚠️ AND EACH CHIP KEEPS `role="switch"` + `aria-checked` + ITS COMP'S NAME. A bare
+                    button would announce the title with nothing to say whether it was in the line —
+                    which is the whole state the control exists to carry.
+
+                    ⚠️ THE POSITION NUMBER IS SHOWN ONLY WHEN TICKED, because position is a fact
+                    about the LINE, and an unticked comp is not in it. Numbering everything would
+                    state an order the sentence does not have. */}
+                <div className="ct-qchips" role="group" aria-label="Comps in your query line">
+                  {comps.map((c, i) => {
+                    const pos = comps.slice(0, i).filter((x) => x.inQuery).length + 1;
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        role="switch"
+                        aria-checked={!!c.inQuery}
+                        aria-label={`Use ${c.title} in your query line`}
+                        className={`ct-qchip${c.inQuery ? " on" : ""}`}
+                        onClick={() => toggleInQuery(i)}
+                      >
+                        {c.inQuery && <span className="pos">{pos}</span>}
+                        {c.title}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="ct-qline-ctl">
                   {qline.kind === "line" && (
                     <button type="button" className="ct-copyb" onClick={copyLine}>
                       {copied ? <Check /> : <Copy />}
                       {copied ? "Copied" : "Copy line"}
                     </button>
                   )}
-                  {qline.caption && <span className="ct-hero-cap">{qline.caption}</span>}
+                  {/* ⚠️ SEND TO PACKAGE IS NOT DRAWN, AND THE REASON IS NOT "there is no field".
+                      There IS one — `ManuscriptVersion.contentDraft` holds the letter's text. The
+                      reason is that there is no unambiguous TARGET and no safe write:
+                        · a manuscript may have several packages, each with its own
+                          `queryLetterVersionId`, so "the" query letter does not exist; and
+                        · `contentDraft` is the writer's own prose, so the write is an edit to
+                          their letter — appending blindly is not a placement, it is a mangling.
+                      That makes this a flow with a target picker and an insertion decision, not a
+                      button. Drawing it inert would be worse than its absence: an undo that
+                      restores nothing is the shape this repo already has a law about, and a send
+                      that sends nothing is the same fault. Requirements are in the report. */}
+                  {qline.caption && <span className="ct-qline-cap">{qline.caption}</span>}
                 </div>
               </div>
-            </div>
+            </section>
 
             <div className="ct-split">
             {/* ── Your comps ── */}
@@ -951,18 +1002,26 @@ export const ComparableTitlesPage: React.FC<{
                 </div>
               ) : comps.length === 0 ? null : (
                 <>
-                  {/* the tick column reads as a column, rather than an unlabelled control */}
-                  <div className="ct-thead">
-                    <span />
-                    <span>Query</span>
-                    <span className="h3">Title</span>
-                    <span className="h5">Edit</span>
-                  </div>
                   {comps.map((c, i) => {
-                    const role = compRole(c, now);
                     const media = compMedia(c);
-                    const age = compAge(c, now);
-                    const meta = [c.author, c.publisher].filter(Boolean).join(" · ");
+                    const ageLine = compAgeLine(c, now);
+                    const facets = compFacets(c);
+                    /* ⚠️ THE SPINE STATES ONLY WHAT IS RECORDED. No year → the media word alone;
+                       the spine never invents a date to keep its shape. */
+                    const spineText = [c.year != null ? String(c.year) : null, MEDIA_LABEL[media].toUpperCase()]
+                      .filter(Boolean)
+                      .join(" · ");
+                    /* ⚠️ "Found via" IS DERIVED FROM `source`/`verification`, NEVER TYPED. The ref
+                       draws prose ("Bookshop table, Waterstones") that this model has nowhere to
+                       store, so the card states the provenance it actually holds and omits the row
+                       when it holds none. */
+                    const foundVia = isVerified(c)
+                      ? `The Scout · ${c.verification!.catalogue}`
+                      : c.source === "suggested"
+                        ? "The Scout"
+                        : c.source === "user"
+                          ? "Added by you"
+                          : null;
                     /* ⚠️ THE FORM TAKES THE ROW'S PLACE, HOLDING ITS INDEX — the list does not
                        reflow around an editor appended somewhere else, and the rows above and below
                        stay exactly where the writer left them. */
@@ -993,70 +1052,89 @@ export const ComparableTitlesPage: React.FC<{
                           setDragIndex(null);
                         }}
                       >
-                        {/* ⚠️ THE GRIP IS A BUTTON, NOT A DECORATION — reorder must be reachable
-                            without a pointer. ⌥↑ / ⌥↓ on the focused grip moves the row, and the
-                            move is announced politely rather than silently rearranging the list
-                            under a keyboard user. */}
-                        <button
-                          type="button"
-                          className="grip"
-                          aria-label={`Reorder ${c.title}. Position ${i + 1} of ${comps.length}. Use Option with the up and down arrows to move it.`}
-                          onKeyDown={(e) => {
-                            if (!e.altKey) return;
-                            if (e.key === "ArrowUp") { e.preventDefault(); moveComp(i, i - 1); }
-                            if (e.key === "ArrowDown") { e.preventDefault(); moveComp(i, i + 1); }
-                          }}
-                        >
-                          <GripVertical />
-                        </button>
-                        {/* ⚠️ `role="switch"` WITH `aria-checked`, LABELLED WITH ITS COMP. A bare
-                            button would announce "In query" on every row with nothing to say which
-                            comp it belonged to or whether it was on. */}
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked={!!c.inQuery}
-                          aria-label={`Use ${c.title} in your query line`}
-                          className={`ct-ck${c.inQuery ? " on" : ""}`}
-                          onClick={() => toggleInQuery(i)}
-                        >
-                          <Check />
-                        </button>
-                        <div>
-                          <div className="t">{c.title}</div>
-                          <div className="a">
-                            {meta || "—"}{c.year != null ? ` · ${c.year}` : ""}
-                          </div>
-                          {c.matchAxis && <div className="why">{c.matchAxis}</div>}
-                          {c.note && <div className="why note">{c.note}</div>}
-                          <div className="ct-roleline">{role.line}</div>
+                        {/* ⚠️ THE SPINE IS THE ONE PLACE THIS DESIGN SPENDS ITS BOLDNESS — pink for a
+                            book, sage for a screen comp. Everything around it stays quiet, which is
+                            what lets the year read as a signature rather than as another chip. */}
+                        <div className={`ct-spine${media === "book" ? "" : " screen"}`} aria-hidden="true">
+                          <span className="yr">{spineText}</span>
                         </div>
-                        <div className="chips">
+
+                        <div className="ct-cmain">
+                          <div className="ct-ctop">
+                            <span className="ct-ctitle">{c.title}</span>
+                            {c.author && <span className="ct-cauthor">{c.author}</span>}
+                            {/* ⚠️ A FACT, AND IT APPEARS ON EVERY COMP THAT HAS A YEAR. No cutoff, no
+                                colour, no icon, no ordering — see `compAgeLine`. A chip that shows up
+                                on only some rows is a flag whatever its words say. */}
+                            {ageLine && <span className="ct-agechip">{ageLine}</span>}
+                          </div>
+                          {(c.publisher || media !== "book") && (
+                            <div className="ct-cmeta">
+                              {c.publisher && <span><b>{c.publisher}</b></span>}
+                              {media !== "book" && <span>{MEDIA_LABEL[media]}</span>}
+                            </div>
+                          )}
+                          {facets.length > 0 && (
+                            <div className="ct-facets">
+                              {facets.map((f) => <span key={f} className="ct-facet">{f}</span>)}
+                            </div>
+                          )}
+                          {c.note && <div className="ct-why">{c.note}</div>}
+                        </div>
+
+                        {/* ⚠️ THE ASIDE STATES WHAT IS RECORDED AND OMITS THE REST. The ref draws
+                            "Reading · Read March 2026" and "Used in · 4 query letters"; this model
+                            stores neither a reading date nor any link between a comp and a letter,
+                            so both rows are absent rather than dashed or guessed. */}
+                        <div className="ct-caside">
                           {isVerified(c) && (
                             <span className="ct-chip verified">
-                              <Check /> Verified · {c.verification!.catalogue}
+                              <Check /> Verified
                             </span>
                           )}
-                          {media !== "book" && <span className="ct-chip media">{MEDIA_LABEL[media]}</span>}
-                          {age !== null && <span className="ct-chip age">{age} yrs ago</span>}
-                        </div>
-                        <div className="acts">
-                          <button
-                            type="button"
-                            className="ct-iconbtn"
-                            aria-label={`Edit ${c.title}`}
-                            onClick={() => setFormState({ index: i })}
-                          >
-                            <Pencil />
-                          </button>
-                          <button
-                            type="button"
-                            className="ct-iconbtn"
-                            aria-label={`Remove ${c.title}`}
-                            onClick={() => removeComp(i)}
-                          >
-                            <X />
-                          </button>
+                          {foundVia && (
+                            <div className="ct-factrow">
+                              <span className="ct-lbl">Found via</span>
+                              <span className="v">{foundVia}</span>
+                            </div>
+                          )}
+                          {/* ⚠️ LABELLED BUTTONS, PER THE REF — an aside has room for words, and
+                              "Edit" beats a pencil a reader has to decode.
+
+                              ⚠️ AND THE GRIP STAYS, WHICH IS A DELIBERATE ADDITION TO THE REF'S TWO.
+                              The list's ORDER is the query line's order, so reordering is a real
+                              operation on this page, and it is the only one reachable without a
+                              pointer (⌥↑ / ⌥↓ on the focused grip). Dropping it to match a mockup
+                              would be a functional regression, and an accessibility one. Same
+                              precedent as the Agents page keeping its ⋯ against a two-action ref. */}
+                          <div className="ct-cacts">
+                            <button
+                              type="button"
+                              className="ct-grip"
+                              aria-label={`Reorder ${c.title}. Position ${i + 1} of ${comps.length}. Use Option with the up and down arrows to move it.`}
+                              onKeyDown={(e) => {
+                                if (!e.altKey) return;
+                                if (e.key === "ArrowUp") { e.preventDefault(); moveComp(i, i - 1); }
+                                if (e.key === "ArrowDown") { e.preventDefault(); moveComp(i, i + 1); }
+                              }}
+                            >
+                              <GripVertical />
+                            </button>
+                            <button
+                              type="button"
+                              className="ct-minibtn"
+                              onClick={() => setFormState({ index: i })}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="ct-minibtn"
+                              onClick={() => removeComp(i)}
+                            >
+                              Remove
+                            </button>
+                          </div>
                         </div>
                       </div>
                     );

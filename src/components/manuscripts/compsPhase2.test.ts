@@ -85,38 +85,77 @@ describe("Phase 2 — the row alignment fix (baked decision 4)", () => {
    * ⚠️ BOTH GRIDS, AND THE VALUE IS EXTRACTED RATHER THAN PATTERN-EXCLUDED. Rows used to centre, so
    * any row carrying a match line dragged its neighbours' tick and buttons out of line.
    */
-  it("both row grids align to start, never centre", () => {
-    for (const sel of [".ct-crow", ".ct-thead"]) {
-      const block = rule(sel);
-      const m = block.match(/align-items\s*:([^;]*);/);
-      if (sel === ".ct-crow") {
-        expect(m, ".ct-crow states no align-items").not.toBeNull();
-        expect(m![1].trim()).toBe("start");
-      }
-    }
+  /**
+   * ⚠️ RETARGETED (v2 §3), AND THE CLAIM IS NOW STRUCTURAL RATHER THAN A VALUE.
+   *
+   * The old lock required `align-items: start` on a FIVE-TRACK row (grip · tick · text · chips ·
+   * actions) where every cell shared one line box, so a row carrying a match line really could drag
+   * its neighbours' controls out of line. The card has three tracks — spine · main · aside — each
+   * with its own padding, so that failure is no longer reachable by content: nothing in `main` can
+   * move anything in `aside`.
+   *
+   * ⚠️ AND THE VALUE HAD TO CHANGE TO `stretch`, DELIBERATELY. The spine is a full-height coloured
+   * edge; `start` would collapse it to the height of its own rotated text and leave the card's left
+   * edge part-painted. So the lock asserts what actually matters now — three independent tracks,
+   * and a spine that fills the card.
+   */
+  it("the card's three tracks are independent, and the spine fills its height", () => {
+    const block = rule(".ct-crow");
+    const cols = block.match(/grid-template-columns\s*:([^;]*);/);
+    expect(cols, ".ct-crow states no grid-template-columns").not.toBeNull();
+    /* ⚠️ `minmax(0, 1fr)` ON THE MIDDLE TRACK, never a bare `1fr` — a `1fr` track's automatic
+       minimum is min-content, so one long unbroken title would push the aside off the card. */
+    expect(cols![1]).toContain("minmax(0, 1fr)");
+    const align = block.match(/align-items\s*:([^;]*);/);
+    expect(align, ".ct-crow states no align-items").not.toBeNull();
+    expect(align![1].trim(), "the spine must fill the card, not hug its own text").toBe("stretch");
+    /* the retired header must not come back — it named columns this layout does not have */
+    expect(rules).not.toMatch(/["\s`]ct-thead["\s`]|\.ct-thead\s*\{/);
   });
 
   /**
-   * ⚠️ THE ACTION COLUMN IS A FIXED WIDTH, never content-sized — that is what keeps every row's
-   * right edge flush regardless of title length. `auto` here reverts the fix.
+   * ⚠️ THE ASIDE IS A FIXED WIDTH, never content-sized — that is what keeps every card's right edge
+   * flush regardless of title length. `auto` here reverts the fix.
+   *
+   * ⚠️ RETARGETED (v2 §3): the second grid was `.ct-thead`, which is retired — the card layout has
+   * no column header to keep in step. ONE grid now, so there is nothing left to disagree with.
+   *
+   * ⚠️ AND THE VALUE IS EXTRACTED AND COMPARED, never pattern-excluded. A regex written as
+   * `grid-template-columns\s*:\s*(?!auto)` would pass on `auto` — `\s*` backtracks to zero width so
+   * the lookahead is tested against the space, which is the exact shape this repo has been bitten by
+   * twice. Take the value, then compare it in code.
    */
-  it("the action column is a fixed width in both grids", () => {
-    for (const sel of [".ct-crow", ".ct-thead"]) {
-      const cols = rule(sel).match(/grid-template-columns\s*:([^;]*);/);
-      expect(cols, `${sel} states no grid-template-columns`).not.toBeNull();
-      const last = cols![1].trim().split(/\s+/).pop()!;
-      expect(["auto", "min-content", "max-content"], `${sel}'s action column sizes to content`).not.toContain(last);
-      expect(last).toMatch(/^\d+px$/);
-    }
+  it("the card's aside is a fixed width, never content-sized", () => {
+    const cols = rule(".ct-crow").match(/grid-template-columns\s*:([^;]*);/);
+    expect(cols, ".ct-crow states no grid-template-columns").not.toBeNull();
+    const tracks = cols![1].trim();
+    const last = tracks.split(/\s+/).pop()!;
+    expect(["auto", "min-content", "max-content"], "the aside sizes to content").not.toContain(last);
+    expect(last).toMatch(/^\d+px$/);
+    /* and the spine is fixed too — a spine that grew with its year would stagger the cards */
+    const first = tracks.split(/\s+/)[0];
+    expect(first, "the spine sizes to content").toMatch(/^\d+px$/);
   });
 
   /**
    * ⚠️ REVEALED ON HOVER **AND** FOCUS-WITHIN. A hover-only reveal makes edit, remove and the
    * reorder grip unreachable without a pointer.
    */
-  it("row actions and the grip reveal on focus as well as hover", () => {
-    expect(rules).toContain(".ct-crow:hover .acts, .ct-crow:focus-within .acts");
-    expect(rules).toContain(".ct-crow:hover .grip, .ct-crow:focus-within .grip");
+  /**
+   * ⚠️ RETARGETED (v2 §3): `.acts` and `.grip` became ONE revealed cluster, `.ct-cacts`, in the
+   * card's aside — the grip moved in beside Edit and Remove rather than sitting in its own track.
+   * One selector now covers all three controls, so the claim is unchanged and there is one fewer
+   * way for them to disagree.
+   *
+   * ⚠️ AND A COARSE POINTER IS ASSERTED TOO. `:hover` and `:focus-within` between them still leave
+   * a touch device with no way to reveal the actions — it has no hover and does not focus on tap —
+   * so the cluster is unconditionally visible under `(hover: none)`. That case was never covered.
+   */
+  it("card actions reveal on focus as well as hover, and are always on without a pointer", () => {
+    expect(rules).toContain(".ct-crow:hover .ct-cacts, .ct-crow:focus-within .ct-cacts");
+    expect(rules).toContain("@media (hover: none)");
+    /* the grip lives inside the revealed cluster, so it cannot be left behind by a future edit */
+    expect(tsx).toMatch(/className="ct-cacts"[\s\S]{0,400}className="ct-grip"/);
   });
 });
 
@@ -137,9 +176,13 @@ describe("Phase 2 — accessibility carried into the build, not after it", () =>
    * never the rule; where they sit is. So this now asserts the hero line's own region and that the
    * segments carry none of their own.
    */
-  it("the hero line is one live region, and its segments are not", () => {
-    const hero = sliceBetween(src, 'className={`ct-hero-line', "ct-hero-ctl");
-    expect(hero, "the hero line lost its live region").toContain('aria-live="polite"');
+  it("the query line is one live region, and its segments are not", () => {
+    /* ⚠️ ANCHORS RETARGETED (v2 §3) — the block is `.ct-qline-text` inside its own card now, and
+       what follows it is the tick-chip row rather than the format control. `sliceBetween` failed
+       loudly naming the missing anchor rather than silently widening to the rest of the file,
+       which is exactly what it exists for. */
+    const hero = sliceBetween(src, 'className={`ct-qline-text', "ct-qchips");
+    expect(hero, "the query line lost its live region").toContain('aria-live="polite"');
     expect((hero.match(/aria-live/g) ?? []).length, "the segments announce individually").toBe(1);
   });
 

@@ -254,14 +254,14 @@
    WEIGHT is the only emphasis device: the manuscript title 700, the comp titles 600. Colour,
    italics or an underline here would make the line look like a UI element rather than the sentence
    the writer is about to paste into a letter. */
-.ct-hero-line {
+.ct-qline-text {
   font-family: 'Playfair Display', serif; font-size: 31px; font-weight: 400; line-height: 1.32;
   letter-spacing: -.012em; margin-top: 13px; max-width: 980px; color: var(--ct-ink);
 }
-.ct-hero-line .ms { font-weight: 700; }
-.ct-hero-line .ttl { font-weight: 600; }
-.ct-hero-line.empty { color: var(--ct-label); font-size: 22px; }
-.ct-hero-ctl { display: flex; align-items: center; gap: 10px; margin-top: 19px; flex-wrap: wrap; }
+.ct-qline-text .ms { font-weight: 700; }
+.ct-qline-text .ttl { font-weight: 600; }
+.ct-qline-text.empty { color: var(--ct-label); font-size: 22px; }
+.ct-qline-ctl { display: flex; align-items: center; gap: 10px; margin-top: 19px; flex-wrap: wrap; }
 .ct-seg { display: flex; background: var(--ct-card); border: 1px solid var(--ct-taupe-bd); border-radius: 11px; overflow: hidden; }
 .ct-seg button {
   font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .09em; padding: 8px 13px;
@@ -276,13 +276,35 @@
 .ct-copyb:hover { background: var(--ct-pink); border-color: var(--ct-pink-bd); }
 .ct-copyb svg { width: 11px; height: 11px; }
 /* the caption — see the composition-line note; it states, it does not appraise */
-.ct-hero-cap {
+.ct-qline-cap {
   font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .11em;
   text-transform: uppercase; color: var(--ct-label);
 }
 /* ⚠️ `.ct-hero-r` / `.ct-hstat` ARE RETIRED (v2 §1). The three-stacked-rows stat rail beside the
    query line is gone — its facts are the hero's fact row now, and the space it held is the
    manuscript tile's. Baked decision 3 described THAT rail and no longer describes anything. */
+
+/* ── the query line's tick-chips (v2 §3) ── */
+/* ⚠️ THE CHIPS SIT UNDER THE SENTENCE THEY CHANGE. That adjacency is the whole reason the tick moved
+   off the comp card: ticking one is visibly composition, not a property set on a record elsewhere. */
+.ct-qchips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.ct-qchip {
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+  background: var(--ct-card); border: 1px solid var(--ct-taupe-bd); border-radius: 20px;
+  padding: 6px 13px; font-size: 12.5px; color: var(--ct-ink-soft); max-width: 100%;
+  overflow-wrap: anywhere; text-align: left;
+}
+.ct-qchip:hover { background: var(--ct-sect); }
+/* ⚠️ THE ON STATE IS FILL **AND** INK, not fill alone — in Editorial the pink token is a pale grey
+   and a fill-only difference is nearly invisible against the card. */
+.ct-qchip.on { background: var(--ct-pink); border-color: var(--ct-pink-bd); color: var(--ct-mocha); font-weight: 500; }
+/* the position roundel — present only when ticked, because position is a fact about the LINE */
+.ct-qchip .pos {
+  display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px;
+  border-radius: 50%; background: var(--ct-mocha); color: var(--ct-card); flex: 0 0 auto;
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 600;
+}
+.ct-qline-ctl { display: flex; align-items: center; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
 
 /* ══ FIELD NOTES — what a good comp does (v2 §2) ══ */
 .ct-fnotes { margin-bottom: 20px; }
@@ -338,42 +360,105 @@
    ⚠️ AND THE ACTION COLUMN IS A FIXED WIDTH, never content-sized: that is what keeps every row's
    right edge flush regardless of title length. Centring either, or sizing the action column to its
    contents, reverts the fix. */
-.ct-thead {
-  display: grid; grid-template-columns: 22px 36px minmax(0, 1fr) auto 66px; gap: 0 14px;
-  padding: 9px 20px; background: var(--ct-sect); border-bottom: 1px solid var(--ct-band-hair);
-}
-.ct-thead span {
-  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .14em; color: var(--ct-label);
-}
-.ct-thead .h3 { grid-column: 3; }
-.ct-thead .h5 { grid-column: 5; text-align: right; }
+/* ⚠️ `.ct-thead` IS RETIRED (v2 §3) — it labelled a five-track ROW ("Query · Title · Edit"),
+   and the list is cards now. Its "Query" column was the tick, which moved to the query line's
+   chips; a header naming columns the layout no longer has is worse than no header. */
+/* ⚠️ 44px SPINE / FLEXIBLE MAIN / 214px ASIDE — the v2 card. `minmax(0, 1fr)` on the middle track,
+   never a bare `1fr`: a `1fr` track's automatic minimum is min-content, so one long unbroken title
+   would push the aside off the card instead of wrapping. */
 .ct-crow {
-  display: grid; grid-template-columns: 22px 36px minmax(0, 1fr) auto 66px; gap: 0 14px;
-  align-items: start; padding: 15px 20px;
+  display: grid; grid-template-columns: 44px minmax(0, 1fr) 214px; gap: 0;
+  align-items: stretch; overflow: hidden;
 }
 .ct-crow + .ct-crow { border-top: 1px solid var(--ct-band-hair); }
 .ct-crow:hover { background: var(--ct-sect); }
-.ct-crow .grip { opacity: 0; color: var(--ct-label); cursor: grab; padding-top: 4px; transition: opacity .13s; background: none; border: none; }
-.ct-crow:hover .grip, .ct-crow:focus-within .grip { opacity: 1; }
-.ct-crow .grip svg { width: 11px; height: 11px; }
-.ct-crow .t { font-family: 'Playfair Display', serif; font-size: 16.5px; font-weight: 600; line-height: 1.25; color: var(--ct-ink); }
-.ct-crow .a { font-size: 12px; color: var(--ct-label); margin-top: 2px; }
-/* ⚠️ ROMAN, NOT ITALIC — the pack's Phase 2. It is the writer's own note about the comp, not a quote. */
-.ct-crow .why { font-size: 12px; color: var(--ct-ink-soft); margin-top: 4px; line-height: 1.45; font-style: normal; }
-.ct-crow .chips { display: flex; gap: 6px; padding-top: 3px; flex-wrap: wrap; }
+
+/* ── the spine: the one bold thing on the card ── */
+.ct-spine {
+  background: linear-gradient(160deg, var(--ct-pink), var(--ct-pink-hover));
+  display: flex; align-items: center; justify-content: center; padding: 14px 0;
+}
+.ct-spine.screen { background: linear-gradient(160deg, var(--ct-band-a), var(--ct-band-b)); }
+/* ⚠️ ROTATED WITH `writing-mode`, NOT `transform: rotate()`. A rotated transform does not change the
+   element's LAYOUT box, so the 44px track would still have to hold the string's full horizontal
+   width and every spine would blow its column. `writing-mode` rotates the box itself. */
+.ct-spine .yr {
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ct-ink-soft); white-space: nowrap;
+}
+
+/* ── main ── */
+.ct-cmain { min-width: 0; padding: 16px 18px; }
+.ct-ctop { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+/* ⚠️ ITALIC BECAUSE IT IS A TITLE, NOT BECAUSE IT IS EMPHASISED — the typographic convention for a
+   published work. It stays in the surrounding ink; no colour shift, ever. */
+.ct-ctitle {
+  font-family: 'Playfair Display', serif; font-style: italic; font-size: 17px; font-weight: 600;
+  line-height: 1.3; color: var(--ct-ink); overflow-wrap: anywhere;
+}
+.ct-cauthor { font-size: 12.5px; color: var(--ct-ink-soft); }
+/* ⚠️ NEUTRAL, ON EVERY COMP THAT HAS A YEAR. No cutoff colour and no warning variant — if this rule
+   ever grows a `.old` modifier, that is the appraisal line being crossed. */
+.ct-agechip {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .08em; text-transform: uppercase;
+  background: var(--ct-sect); color: var(--ct-label); border: 1px solid var(--ct-band-hair);
+  border-radius: 20px; padding: 3px 8px; white-space: nowrap;
+}
+.ct-cmeta {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;
+  font-size: 11.5px; color: var(--ct-label);
+}
+.ct-cmeta span + span::before { content: '· '; }
+.ct-cmeta b { font-weight: 600; color: var(--ct-ink-soft); }
+.ct-facets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.ct-facet {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .08em; text-transform: uppercase;
+  background: var(--ct-card); color: var(--ct-ink-soft); border: 1px solid var(--ct-taupe-bd);
+  border-radius: 5px; padding: 3px 8px;
+}
+/* ⚠️ CAVEAT, AND ROMAN RATHER THAN ITALIC — it is the writer's own note about the comp, not a quote. */
+.ct-why {
+  font-family: 'Caveat', cursive; font-size: 15px; line-height: 1.4; color: var(--ct-ink-soft);
+  margin-top: 11px; font-style: normal;
+}
+
+/* ── aside ── */
+.ct-caside {
+  border-left: 1px solid var(--ct-band-hair); padding: 16px 16px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 9px;
+}
+.ct-factrow { display: flex; flex-direction: column; gap: 3px; }
+.ct-factrow .v { font-size: 11.5px; color: var(--ct-ink-soft); line-height: 1.4; }
+/* ⚠️ REVEALED ON HOVER **AND** `:focus-within` — a keyboard user must be able to reach edit and
+   remove, and `:hover` alone hides them from one permanently. */
+.ct-cacts { display: flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 10px; opacity: 0; transition: opacity .13s; }
+.ct-crow:hover .ct-cacts, .ct-crow:focus-within .ct-cacts { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .ct-cacts { transition: none; } }
+/* ⚠️ AND A COARSE POINTER HAS NO HOVER AT ALL, so the actions are simply always on there. */
+@media (hover: none) { .ct-cacts { opacity: 1; } }
+.ct-grip { background: none; border: none; color: var(--ct-label); cursor: grab; padding: 4px 2px; display: flex; }
+.ct-grip svg { width: 12px; height: 12px; }
+.ct-minibtn {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .09em; text-transform: uppercase;
+  background: var(--ct-card); color: var(--ct-mocha); border: 1px solid var(--ct-taupe-bd);
+  border-radius: 7px; padding: 5px 10px; cursor: pointer;
+}
+.ct-minibtn:hover { background: var(--ct-pink); border-color: var(--ct-pink-bd); }
+
+/* ⚠️ THE CARD STACKS BEFORE IT SQUEEZES. Below this the aside's 214px and the main column fight,
+   and the aside wins by taking the title's width — so the spine goes horizontal and the aside drops
+   under the main column instead. */
+@media (max-width: 720px) {
+  .ct-crow { grid-template-columns: minmax(0, 1fr); }
+  .ct-spine { padding: 6px 14px; justify-content: flex-start; }
+  .ct-spine .yr { writing-mode: horizontal-tb; transform: none; }
+  .ct-caside { border-left: none; border-top: 1px solid var(--ct-band-hair); }
+}
 /* ⚠️ REVEALED ON HOVER **AND** `:focus-within` — a keyboard user must be able to reach edit and
    remove, and a hover-only reveal makes them unreachable without a pointer. */
-.ct-crow .acts { display: flex; gap: 5px; justify-content: flex-end; opacity: 0; transition: opacity .13s; }
-.ct-crow:hover .acts, .ct-crow:focus-within .acts { opacity: 1; }
-/* the tick — a real switch; see the role="switch" note at the call site */
-.ct-ck {
-  margin-top: 2px; width: 19px; height: 19px; border-radius: 6px; border: 1.5px solid var(--ct-taupe-bd);
-  background: var(--ct-card); display: flex; align-items: center; justify-content: center; padding: 0;
-  flex: 0 0 auto; cursor: pointer;
-}
-.ct-ck svg { opacity: 0; width: 11px; height: 11px; color: var(--ct-mocha); transition: opacity .12s; }
-.ct-ck.on { background: var(--ct-pink); border-color: var(--ct-pink-bd); }
-.ct-ck.on svg { opacity: 1; }
+/* ⚠️ `.ct-ck` IS RETIRED (v2 §3) — the tick moved off the comp card and became the query line's
+   own chip row (`.ct-qchip`), so it sits under the sentence it changes. */
 .ct-iconbtn {
   width: 28px; height: 28px; border-radius: 9px; background: var(--ct-card); border: 1px solid var(--ct-taupe-bd);
   color: var(--ct-label); display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer;
@@ -519,9 +604,7 @@
    floating "Working on" chip is gone */
 .ct-chip.ms { background: var(--ct-sect); color: var(--ct-mocha); border: 1px solid var(--ct-band-hair); }
 /* the derived role, beneath the writer's own lines — see compRole: it states, it does not appraise */
-.ct-roleline { margin-top: 6px; font-size: 11px; color: var(--ct-label); line-height: 1.4; }
 /* the writer's private note, distinguished from the match line by tone, never by a label */
-.ct-crow .why.note { color: var(--ct-label); }
 .ct-crow.dragging { opacity: .35; }
 .ct-listempty { padding: 30px 4px; text-align: center; font-family: 'Playfair Display', serif; font-size: 15px; color: var(--ct-ink-soft); }
 .ct-blank { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 60px 20px; text-align: center; color: var(--ct-ink-soft); }
@@ -532,7 +615,7 @@
  * ignore the interaction.
  */
 @media (prefers-reduced-motion: reduce) {
-  .ct-crow .grip, .ct-crow .acts, .ct-ck svg { transition: none; }
+  .ct-cacts { transition: none; }
 }
 
 /* ══ PHASE 3 — add, edit and remove, all inside the card ══════════════════════════════════════ */
