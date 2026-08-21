@@ -1148,10 +1148,23 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
          sentence says it — omitting the clause would render the same string as never having asked. */
       two.push(<>no nudge reminder</>);
     } else if (r?.kind === "lead" && replyMs != null) {
-      two.push(<>a nudge reminder lands here <b>{longDay(replyMs - r.days * 86400000)}</b></>);
+      /**
+       * ⚠️ A ZERO LEAD READS AS WORDS, NOT AS THE SAME DATE TWICE (write round, Phase 4). It said
+       * "Reply expected around 18 September; a nudge reminder lands here 18 September" — both
+       * correct, and a stutter: the reader checks the two dates against each other, finds them
+       * identical, and has to work out whether that is the point or a bug.
+       *
+       * ⚠️ AND A NON-ZERO LEAD SAYS BOTH — the relation AND the date. "the week before" is what the
+       * writer chose and what they will remember choosing; "11 September" is what will happen. One
+       * without the other makes the reader do arithmetic the sentence could have done.
+       */
+      const lead = longDay(replyMs - r.days * 86400000);
+      two.push(r.days === 0
+        ? <>a nudge reminder lands here <b>on the day</b></>
+        : <>a nudge reminder lands here <b>{leadPhrase(r.days)}, on {lead}</b></>);
     } else if (r?.kind === "date" && r.ymd) {
       /* a date the writer picked is stated as itself — it is not a lead off anything */
-      two.push(<>a nudge reminder lands here <b>{longDay(new Date(`${r.ymd}T12:00:00`).getTime())}</b></>);
+      two.push(<>a nudge reminder lands here <b>on {longDay(new Date(`${r.ymd}T12:00:00`).getTime())}</b></>);
     }
 
     if (!one && !two.length) return "—";
@@ -1161,6 +1174,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       {two.length ? "." : ""}
     </>;
   })();
+
+  /**
+   * The lead, in the words the writer chose it by. It reads them back rather than restating the
+   * number: "the week before" is the option they clicked, and "7 days before" is the app's
+   * arithmetic wearing their answer's clothes.
+   */
+  function leadPhrase(days: number): string {
+    if (days === 7) return "the week before";
+    if (days === 1) return "the day before";
+    return `${days} days before`;
+  }
 
   /** the day the send is dated from — the writer's own choice, and nothing when they have not said */
   function sentDateISO(): string | null {

@@ -146,6 +146,52 @@ test("deed round", async ({ page }) => {
       !!send && send.storyStat.trim().length > 0 && send.storyCount === 0,
       send ? `stat="${send.storyStat}" counts=${send.storyCount}` : "-");
 
+  /* ══ THE STRIP'S REMINDER CLAUSE — one case of each, and no date said twice ════════════════ */
+  const clause = async (label: string) => {
+    await page.goto("/todo"); await page.waitForTimeout(6000);
+    if (!(await page.evaluate(OPEN("Send")))) return null;
+    await page.waitForTimeout(1300);
+    /* answer everything, choosing the named reminder — the strip only states what is chosen */
+    for (let i = 0; i < 5; i++) {
+      await page.evaluate(`(() => {
+        const vis = ${VIS};
+        const n = [...document.querySelectorAll(".tpn .sect.next")].filter(vis)[0];
+        if (!n) return;
+        const named = [...n.querySelectorAll(".seg button")].find((b) => (b.textContent || "").trim() === ${JSON.stringify(label)});
+        const b = named || n.querySelector(".seg button, .upill");
+        if (b) b.click();
+      })()`);
+      await page.waitForTimeout(500);
+    }
+    /* ⚠️ THE PANE MUST STILL BE THE SEND JOURNEY, and that is checked rather than assumed. This
+       measured a NOTE's strip once — the row order changes under other sessions, and a probe that
+       reads whatever pane happens to be open reports a true sentence about the wrong journey. */
+    return await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const deed = [...document.querySelectorAll(".tpn .deed")].filter(vis)[0];
+      if (!deed || !/^Send your /.test((deed.textContent || "").trim())) return "";
+      const w = [...document.querySelectorAll(".tpn .willrec")].filter(vis)[0];
+      return w ? (w.textContent || "").replace(/[ ]+/g, " ") : "";
+    })()`) as string;
+  };
+
+  const onDay = await clause("On the day");
+  const weekBefore = await clause("The week before");
+  const dateRepeats = (s: string) => {
+    const dates = (s.match(/\d{1,2} [A-Z][a-z]+/g) || []);
+    return new Set(dates).size !== dates.length;
+  };
+  /* ⚠️ NOT RUN WHEN THE JOURNEY IS NOT THERE — the convention this suite already uses for absent
+     fixtures. The row order on the shared harness account changes between runs, and a probe that
+     goes red for missing data blames the pane for the account. The P0 floor below is what stops the
+     suite quietly measuring nothing. Phase 3's seeded fixture is what removes the volatility. */
+  add("P4a · a zero lead reads as words, not the same date twice",
+      onDay ? (/lands here on the day/i.test(onDay) && !dateRepeats(onDay)) : true,
+      onDay ? `"${onDay}"` : "NOT RUN — send journey absent from the account this run");
+  add("P4b · a non-zero lead says the relation AND the date",
+      weekBefore ? (/the week before, on \d/i.test(weekBefore) && !dateRepeats(weekBefore)) : true,
+      weekBefore ? `"${weekBefore}"` : "NOT RUN — send journey absent from the account this run");
+
   /* ══ PHASE 4 · custom date opens the calendar ═════════════════════════════════════════════ */
   await page.evaluate(OPEN("Send"));
   await page.waitForTimeout(1300);
