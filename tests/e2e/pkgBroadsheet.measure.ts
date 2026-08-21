@@ -12,6 +12,59 @@ const OUT = "reports/pkg-broadsheet"; const ART = "run-artifacts/pkg-broadsheet"
 mkdirSync(OUT, { recursive: true }); mkdirSync(ART, { recursive: true });
 const ROUTE = "/manuscripts/packages";
 
+/** The hero, measured. */
+export const HERO = `(() => {
+  const root = document.querySelector(".pkg-root");
+  if (!root) return { error: "no .pkg-root" };
+  const cs = (el, p) => el ? getComputedStyle(el).getPropertyValue(p).trim() : null;
+  const box = (s) => { const el = root.querySelector(s); if (!el) return null;
+    const b = el.getBoundingClientRect(); return { x: Math.round(b.x), w: Math.round(b.width), h: Math.round(b.height) }; };
+  const hero = root.querySelector(".pkgb-hero");
+  const body = root.querySelector(".pkgw-body") || root.querySelector(".pkgo-grid");
+  return {
+    heroPresent: !!hero,
+    hero: box(".pkgb-hero"),
+    body: body ? { x: Math.round(body.getBoundingClientRect().x), w: Math.round(body.getBoundingClientRect().width) } : null,
+    topBorder: cs(hero, "border-top-width"),
+    topColor: cs(hero, "border-top-color"),
+    cols: cs(hero, "grid-template-columns"),
+    title: (root.querySelector(".pkgb-hero-l h1")?.textContent || "").trim(),
+    titleLH: cs(root.querySelector(".pkgb-hero-l h1"), "line-height"),
+    wax: !!root.querySelector(".pkgb-wax"),
+    waxBox: box(".pkgb-wax"),
+    statline: (root.querySelector(".pkgb-statline")?.textContent || "").trim(),
+    prob: (root.querySelector(".pkgb-prob")?.textContent || "").trim(),
+    heroSlot: (root.querySelector(".pkgb-hero-r .pkgb-plate")?.textContent || "").trim(),
+    heroSlotBox: box(".pkgb-hero-r .pkgb-plate"),
+    actions: Array.from(root.querySelectorAll(".pkgb-hero-actions button")).map((b) => ({
+      label: (b.textContent || "").trim().slice(0, 30),
+      bg: getComputedStyle(b).backgroundColor,
+      disabled: b.disabled,
+    })),
+    /* the old shared header must be gone from this page */
+    sharedPageHeader: !!root.querySelector(".wsh"),
+    controlRow: !!root.querySelector(".wpg-tools"),
+    /* ⚠️ THE SERIF-CLIP CHECK, WITH A SUB-PIXEL TOLERANCE — and the tolerance is the finding, not a
+       loosening. Playfair at 38px with line-height 1.3 gives a 49.4px line box in a 49px content
+       box, so a bare scrollHeight > clientHeight reports "clipped" on text that is not: overflow is
+       visible, and the descender in "packages" paints in full (confirmed in the screenshot). The
+       house serifClip measure uses a ratio for exactly this reason. 2px is rounding; more is real. */
+    titleOverflowPx: (() => { const h = root.querySelector(".pkgb-hero-l h1");
+      return h ? h.scrollHeight - h.clientHeight : null; })(),
+    titleClipped: (() => { const h = root.querySelector(".pkgb-hero-l h1");
+      return h ? (h.scrollHeight - h.clientHeight) > 2 : null; })(),
+  };
+})()`;
+
+test("phase 1 — the hero", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  await liftMotionSuppression(page);
+  const r = await page.evaluate(HERO);
+  await page.screenshot({ path: `${OUT}/p1-hero-1440.png`, fullPage: true });
+  writeFileSync(`${ART}/p1-hero.txt`, JSON.stringify(r, null, 2) + "\n");
+  console.log(JSON.stringify(r, null, 2));
+});
+
 test("recon — the page after the header session's rework", async ({ page }) => {
   await openRoute(page, ROUTE, { width: 1440, height: 900 });
   await liftMotionSuppression(page);

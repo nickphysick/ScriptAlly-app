@@ -312,3 +312,86 @@ export function tileFooter(t: PackageTile): { idle: string } | { out: string; re
     requests: `${t.requests} ${t.requests === 1 ? "request" : "requests"}`,
   };
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE MATERIALS BAND — three columns by type (broadsheet D3)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+export interface MaterialSheet {
+  id: string;
+  typeLabel: string;
+  name: string;
+  /** `Text · N words` / `Ref · file.docx` — the flow pack's source label. */
+  source: string;
+  /** `In N packages` / `Not in a package yet` — derived, never stored. */
+  usage: string;
+  /** How many packages reference it — the delete guard reads the same number. */
+  usedIn: number;
+}
+
+export interface MaterialColumn {
+  type: ComponentType;
+  /** Plural heading: "Covering letters" / "Synopses" / "Sample pages". */
+  heading: string;
+  held: number;
+  sheets: MaterialSheet[];
+  /** The per-column ghost's wording, per the ref. */
+  ghostLabel: string;
+}
+
+/** The ref's per-column ghost wording — its own phrasing per type, not a template. */
+const GHOST_LABEL: Record<string, string> = {
+  [ComponentType.QUERY_LETTER]: "Add a letter",
+  [ComponentType.SYNOPSIS]: "Add a synopsis",
+  [ComponentType.SAMPLE_PAGES]: "Add sample pages",
+};
+
+/**
+ * The three type columns.
+ *
+ * ⚠️ THE USAGE LINE AND THE DELETE GUARD READ THE SAME NUMBER. `usedIn` is what the sheet prints as
+ * "In 2 packages" and what the guard uses to refuse the delete — one derivation, so the sheet can
+ * never say a material is free while the guard says it is held.
+ */
+export function materialColumns(
+  versions: ManuscriptVersion[],
+  packages: SubmissionPackage[],
+): MaterialColumn[] {
+  return BUILDER_TYPES.map((type) => {
+    const mine = versions
+      .filter((v) => v.componentType === type)
+      .sort((a, b) => Date.parse(b.createdDate ?? "") - Date.parse(a.createdDate ?? ""));
+    return {
+      type,
+      heading: TYPE_META[type].plural,
+      held: mine.length,
+      ghostLabel: GHOST_LABEL[type],
+      sheets: mine.map((v) => {
+        const used = packagesUsing(v.id, packages).length;
+        return {
+          id: v.id,
+          typeLabel: TYPE_META[type].label,
+          name: v.versionName,
+          source: sourceLabel(v),
+          usage: usageLine(used),
+          usedIn: used,
+        };
+      }),
+    };
+  });
+}
+
+/** Every package referencing this material, by any slot. The one definition of "referenced". */
+export const packagesUsing = (versionId: string, packages: SubmissionPackage[]): SubmissionPackage[] =>
+  packages.filter((p) => BUILDER_TYPES.some((t) => {
+    const id = p[SLOT_FIELD[t]];
+    return isSlotFilled(id) && id === versionId;
+  }));
+
+/**
+ * ⚠️ ZERO IS A SENTENCE HERE, NOT A COUNT. "In 0 packages" is true and reads as a malfunction; the
+ * line is prose about where a material sits, so absence is stated in words — the same split the
+ * package row makes with "Not sent yet".
+ */
+export const usageLine = (used: number): string =>
+  used === 0 ? "Not in a package yet" : `In ${used} ${used === 1 ? "package" : "packages"}`;

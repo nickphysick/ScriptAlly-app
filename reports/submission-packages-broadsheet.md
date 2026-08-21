@@ -151,3 +151,118 @@ Package attribution comes from `Query.packageId`, which the adapter already read
 | Flow build absent from `main` | **No** — all seven commits present |
 | Required edit lands in a do-not-touch file | **No** — the hero uses the grid's existing `masthead` prop; no shared header file is edited |
 | Another session has the same files staged | **No** — index clean; the header session's files are committed, not in flight |
+
+---
+
+## Phase 1 — RED GATE
+
+**The broadsheet hero is built, measured, and NOT mounted.** The blocker is a lock in a shared
+header file this run is forbidden to touch.
+
+### What is built and working
+
+`PackagesHero.tsx`, `IllustrationSlot.tsx` (+ `WaxSeal`) and `packagesBroadsheet.css` are complete
+and were **measured rendering correctly on the real page** before being stood down:
+
+| Reading | Measured |
+|---|---|
+| hero width | **980px at x 342** — exactly the body's, so the F6 mismatch does not recur |
+| top border | **5px `rgb(154, 168, 150)`** |
+| columns | `534.5px · 445.5px` — the ref's `1.2fr / 1fr` |
+| title | `Submission packages`, Playfair, line-height 49.4px |
+| wax seal | present, **51 × 51** |
+| stat line | **`4 materials · 2 packages · 8 sent`** — derived |
+| problem statement | Caveat, verbatim |
+| hero illustration slot | **190 × 118**, brief verbatim |
+| actions | **exactly one filled control** — `＋ New package`, `rgb(245,226,218)` |
+| shared `PageHeader` present | false |
+
+Screenshot: `reports/pkg-broadsheet/p1-hero-1440.png`. It is the ref.
+
+### ⚠️ Why it is not mounted
+
+`src/components/shell/workspacePageGrid.test.tsx` — the parallel masthead session's file — carries:
+
+```
+it("⚠️ THE CENSUS — every page that renders a masthead renders it through the grid", …)
+   ⚠️ THE PREDICATE IS `variant="workspace"` … Discover, Submission packages and Analytics
+   were absent while all three still rendered the header. Anything that renders a masthead
+   is on this list.
+```
+
+It reads `SubmissionPackages.tsx` and asserts it contains `variant="workspace"`. **A page-local
+masthead turns that lock red**, and the failure message is explicit: *"Submission packages stopped
+rendering a masthead"*.
+
+Mounting the hero therefore requires editing a shared page-header/shell file — which the concurrency
+section forbids without qualification: *"If the ref's hero cannot be built without touching a shared
+header file, RED GATE. Stop and report which file and why. Do not negotiate around it."*
+
+**File:** `src/components/shell/workspacePageGrid.test.tsx` (the census lock, ~line 881).
+**Why:** it enumerates this page by name and requires the shared component.
+
+### The other thing the grid enforces — worth knowing either way
+
+`WorkspacePageGrid` now **throws in development** when its `masthead` element exposes no `title`
+prop: the folded mini bar reads the page's identity off the masthead rather than being handed it
+twice. The error text says *"pass a `PageHeader` with `variant="workspace"`, `mark` and `title`"*,
+but the **check is narrower** — `masthead.props.title` alone (§3 dropped the mark). A page-local
+masthead can honour it simply by exposing a `title` prop, which `PackagesHero` does and renders its
+`<h1>` from, so the bar and the hero are one string. **That part is not the blocker** — the census
+lock is.
+
+### What was done instead
+
+* The page is **restored to the shared `PageHeader` masthead and the control row**, byte-for-byte as
+  the masthead session left it. Both their locks are green, and the full suite is back to baseline.
+* The hero components stay on disk, **unmounted**, with a comment at the call site naming the lock,
+  the ruling needed, and the exact three-step re-mount.
+* `materialColumns` / `packagesUsing` / `usageLine` — Phase 2's derivations — are landed and
+  unit-locked (**9 new cases**), because they are page data and no header file has an opinion about
+  them.
+
+### Gates
+
+| Gate | Baseline | Now |
+|---|---|---|
+| `tsc --noEmit` | exit 0 | **exit 0** |
+| `vite build` | — | **exit 0**, no diagnostics |
+| `vitest run` | 1 file / 1 test (`todo/taskPanePort`) | **1 file / 1 test — the same one**, 357 passed / 6099 |
+| shared header files touched | — | **none** |
+
+**⚠️ A separate observation for the record:** partway through this phase the dev server stopped
+compiling — `todo/TaskPaneBody.tsx`, the to-do stream's file, held a syntax error mid-edit, which
+takes Vite down and with it every measurement. It cleared on its own; nothing was fixed or staged.
+The server needed a restart afterwards, because Vite caches the failure and keeps serving it after
+the file is repaired.
+
+---
+
+## Phases 2–5 — not started, and why
+
+Every remaining phase renders inside the page the hero heads. Building the materials band, the
+package cards, the ledger and the footnote **on top of a masthead that may be reverted** would mean
+laying out four bands against a header whose existence is undecided — and the deletion work (Phase 3)
+carries its own unresolved question below. The honest stopping point is here, with one decision
+outstanding rather than four phases built on a guess.
+
+**Phase 3 has a second finding worth having before it starts.** D9 requires the two blocked deletes
+to be refused **at rules level**, and both predicates are collection scans — *"is this version in
+ANY package"*, *"has this package been sent with ANY query"*. Firestore rules have no query
+capability: only `get()` / `exists()` / `getAfter()` on a known path. So the guard as specified is
+**not expressible in rules**, and the real options are a callable function (which rides the Blaze
+gate `suggestComps` is already parked behind) or a denormalised counter (which D9 forbids, rightly,
+because it drifts). That wants a decision too.
+
+---
+
+## Flags for Nick
+
+| | Flag | Needs |
+|---|---|---|
+| **F-E** | **The blocker, and it is a genuine collision.** The masthead session has standardised page headers app-wide and locked it with a census naming this page. The broadsheet commissions a deliberately bespoke hero — wax seal, two-column split, blush panel, its own actions and stat line. **Both cannot hold.** Either this page conforms (and the broadsheet hero is dropped or reduced to fit `PageHeader`), or it becomes a declared exception as the flagship Pro surface and the census gains an entry for it. **Your ruling — I have not pre-empted it in either direction, and the hero is one commit away either way.** |
+| **F-A** | The wax seal as the app-wide PRO marker. Built and scoped to this page only. It would replace `.pkgw-propill` here and the equivalent Pro pill on `/plans`, Packages and the Manuscripts card. Not adopted anywhere else — that is a separate decision, and F-E should probably settle first. |
+| **F-G (new)** | **The rules-level delete guard may not be expressible.** See above. Callable function, or accept a code-level guard and say so. |
+| **F-B** | What the removed rail did that no band covers — **cannot be answered yet**; the rail is still mounted because the bands that replace it are not built. |
+| **F-C** | "Take it out of those packages first" — whether the popover needs an edit shortcut. Unchanged: deliberately not built, one action per popover. |
+| **F-D** | **Answered: agent names ARE reachable**, no wall breached. `Activity` has no `agentId`, so the ledger joins `Activity.queryId → Query.agentId → Agent.name`, and `agents` comes from `useScriptAllyDb()` — the shared data layer, not a Query Centre component. |

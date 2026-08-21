@@ -18,6 +18,7 @@ import { describe, it, expect } from "vitest";
 import {
   materialRows, materialDetail, addedLabel, packageRows, sentLine,
   trackingRows, howItWorks, packagedQueries, replyCount, packageTiles, tileFooter,
+  materialColumns, packagesUsing, usageLine,
 } from "./packagesOverview";
 import { packageMetrics, UNFILLED_SLOT, isRequest as isRequestExport } from "./packageMetrics";
 import { TYPE_META, BUILDER_TYPES } from "../components/packages/typeMeta";
@@ -314,5 +315,66 @@ describe("packageTiles — the working stage's grid (flow pack D7)", () => {
     const queries = [q("1", "pk1", QueryStatus.FULL_REQUESTED), q("2", "pk1", QueryStatus.PARTIAL_REQUESTED)];
     const foot = tileFooter(packageTiles([withSample], versions, queries)[0]) as Record<string, string>;
     expect(foot.requests).toBe("2 requests");
+  });
+});
+
+describe("materialColumns — the broadsheet's three type columns (D3)", () => {
+  const versions = [
+    v("q1", ComponentType.QUERY_LETTER, "Hook-first", daysAgo(4)),
+    v("q2", ComponentType.QUERY_LETTER, "Comps-forward", daysAgo(14)),
+    v("s1", ComponentType.SYNOPSIS, "One-page", daysAgo(6)),
+    v("p1", ComponentType.SAMPLE_PAGES, "Chapters 1-3", daysAgo(9)),
+  ];
+  const packages = [pkg("pk1", "Standard UK", "q1", "s1", "p1")];
+
+  it("gives exactly three columns, in canonical order, with PLURAL headings", () => {
+    const cols = materialColumns(versions, packages);
+    expect(cols.map((c) => c.heading)).toEqual(["Covering letters", "Synopses", "Sample pages"]);
+  });
+
+  it("never offers a Full Manuscript column", () => {
+    expect(materialColumns(versions, packages).map((c) => c.type))
+      .not.toContain(ComponentType.FULL_MANUSCRIPT);
+  });
+
+  it("counts what each column holds", () => {
+    expect(materialColumns(versions, packages).map((c) => c.held)).toEqual([2, 1, 1]);
+  });
+
+  it("carries the ref's own per-type ghost wording", () => {
+    expect(materialColumns(versions, packages).map((c) => c.ghostLabel))
+      .toEqual(["Add a letter", "Add a synopsis", "Add sample pages"]);
+  });
+
+  /* ⚠️ ONE DERIVATION FOR THE LINE AND THE GUARD. If these could differ, a sheet could say a
+     material is free while the delete guard refuses it. */
+  it("prints the usage the guard will read", () => {
+    const cols = materialColumns(versions, packages);
+    const hook = cols[0].sheets.find((s) => s.name === "Hook-first")!;
+    expect(hook.usedIn).toBe(packagesUsing("q1", packages).length);
+    expect(hook.usage).toBe(usageLine(hook.usedIn));
+    expect(hook.usage).toBe("In 1 package");
+  });
+
+  it("states absence in words rather than as a zero", () => {
+    const free = materialColumns(versions, packages)[0].sheets.find((s) => s.name === "Comps-forward")!;
+    expect(free.usage).toBe("Not in a package yet");
+    expect(free.usage).not.toContain("0");
+    expect(free.usedIn).toBe(0);
+  });
+
+  it("agrees with its noun at two packages", () => {
+    const two = [...packages, pkg("pk2", "Second", "q1", "s1", UNFILLED_SLOT)];
+    expect(usageLine(packagesUsing("q1", two).length)).toBe("In 2 packages");
+  });
+
+  it("carries the flow pack's source label unchanged", () => {
+    const withText = [v("q3", ComponentType.QUERY_LETTER, "Pasted", daysAgo(1), "one two three")];
+    expect(materialColumns(withText, [])[0].sheets[0].source).toBe("Text · 3 words");
+  });
+
+  it("ignores an unfilled slot rather than matching the empty sentinel", () => {
+    const noSample = [pkg("pk9", "No sample", "q1", "s1", UNFILLED_SLOT)];
+    expect(packagesUsing(UNFILLED_SLOT, noSample)).toEqual([]);
   });
 });

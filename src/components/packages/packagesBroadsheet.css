@@ -1,0 +1,228 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages — the broadsheet layout: hero, stacked bands, sheets, cards, ledger.
+ * Design authority: design-refs/submission-packages-broadsheet.html.
+ *
+ * ⚠️ ONE RULE PER SELECTOR, AND NO SECOND `.pkgw` BLOCK. The page's token block lives in
+ * packageWorkshop.css and stays the only one; this file declares `.pkgb-*` classes, which nothing
+ * else in the app owns. A second `.pkgw { … }` in a second file is the ambiguity that has caught
+ * `workspacePageGrid.css` twice.
+ *
+ * ⚠️ THE HERO IS PAGE-LOCAL AND TOUCHES NO SHARED HEADER FILE. It is passed as the grid's existing
+ * `masthead` node — a public `ReactNode` prop — so `PageHeader`, `pageHeader.css`,
+ * `WorkspacePageGrid` and `workspacePageGrid.css` are untouched by this build. They belong to the
+ * parallel masthead session; see the concurrency note in the report.
+ *
+ * ⚠️ AND IT DOES NOT COMPENSATE FOR THE WIDTH IT IS GIVEN. F6's masthead-vs-body mismatch was fixed
+ * by that session's rework (measured: masthead and body both x342/w980). There is no negative
+ * margin, no full-bleed override and no inset arithmetic here — the hero fills whatever the shell
+ * hands it, which is the whole of the agreed boundary.
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE ILLUSTRATION SLOT (D7)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgb-plate {
+  border: 1.5px dashed rgba(124, 58, 42, 0.32);
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.55);
+  text-align: center;
+  padding: 8px;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+}
+.pkgb-plbl {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.18em;
+  color: var(--pkg-burg);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.pkgb-pbrief {
+  font-family: "Caveat", cursive;
+  font-size: 14px;
+  color: var(--pkg-ink-soft);
+  line-height: 1.1;
+}
+.pkgb-plate--disc { border-radius: 50%; }
+.pkgb-plate--tiny { border-radius: 50%; padding: 2px; }
+.pkgb-plate--tiny .pkgb-pbrief { font-size: 11px; }
+
+/* The postage stamp on a package card — perforated edge, sat in the corner. */
+.pkgb-plate--stamp {
+  border-radius: 3px;
+  border-style: dashed;
+  width: 62px;
+  height: 62px;
+}
+.pkgb-plate--stamp .pkgb-pbrief { font-size: 11px; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE WAX SEAL — this page's Pro marker, and only this page's (D2, F-A)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgb-wax {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #93503f, var(--pkg-burg) 62%);
+  color: #fdf6ef;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  /* the seal's depth: a lit rim, then the stamped ring pressed into it */
+  box-shadow:
+    0 3px 8px rgba(124, 58, 42, 0.35),
+    inset 0 0 0 2px rgba(253, 246, 239, 0.28),
+    inset 0 0 0 5px rgba(124, 58, 42, 0.9);
+  transform: rotate(-6deg);
+  flex: 0 0 auto;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE HERO (D2)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ⚠️ `minmax(0, …)` ON BOTH TRACKS. A bare `1.2fr 1fr` gives each track an `auto` minimum, so one
+   long unbreakable string — a manuscript title in the actions row — makes its track wider than its
+   share and the hero grows past its container instead of the text wrapping. */
+.pkgb-hero {
+  background: var(--pkgo-surface);
+  border-top: 5px solid var(--pkgo-sage-deep);
+  box-shadow: 0 12px 32px rgba(58, 28, 20, 0.10);
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  overflow: hidden;
+  margin-bottom: 36px;
+}
+
+.pkgb-hero-l {
+  padding: 34px 38px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.pkgb-titlerow { display: flex; align-items: center; gap: 16px; }
+
+/* ⚠️ `line-height: 1.3` MINIMUM ON MIXED-CASE PLAYFAIR. "Submission packages" has a descender in
+   its p and g; the house rule is that 1 or a fixed height crops them, and this is the largest text
+   on the page. */
+.pkgb-hero-l h1 {
+  font-family: var(--font-serif);
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--pkg-ink);
+}
+
+.pkgb-hero-sub { font-size: 13.5px; color: var(--pkg-ink-soft); line-height: 1.6; max-width: 440px; }
+
+.pkgb-statline {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--pkg-ink-soft);
+}
+.pkgb-statline b { color: var(--pkg-ink); font-weight: 700; }
+
+.pkgb-hero-actions { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+
+.pkgb-hero-r {
+  background: var(--pkgo-pink-band);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 26px 34px;
+  min-width: 0;
+}
+.pkgb-prob {
+  font-family: "Caveat", cursive;
+  font-size: 27px;
+  font-weight: 600;
+  color: var(--pkg-burg);
+  text-align: center;
+  line-height: 1.15;
+  transform: rotate(-1deg);
+}
+.pkgb-hero-r .pkgb-plate { width: 190px; height: 118px; background: rgba(255, 255, 255, 0.6); }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   BUTTONS — the hero's two, and the page's one filled control
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgb-btn {
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--pkgo-hairline);
+  background: transparent;
+  color: var(--pkg-ink);
+  transition: background 0.15s;
+  font-family: inherit;
+}
+.pkgb-btn:hover:not(:disabled) { background: rgba(58, 28, 20, 0.04); }
+.pkgb-btn--primary {
+  background: var(--pkg-pink);
+  border-color: var(--pkg-pinkline);
+  color: var(--pkg-burg);
+}
+.pkgb-btn--primary:hover:not(:disabled) { background: #f0d6cb; }
+/* The house disabled treatment: faint, not-allowed, never opacity alone. */
+.pkgb-btn:disabled { cursor: not-allowed; color: var(--pkg-muted); background: transparent; border-color: var(--pkgo-hairline-soft); }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   BANDS — the stacked full-width sections that replace the rail (D1)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgb-band { margin-bottom: 38px; }
+.pkgb-band:last-child { margin-bottom: 0; }
+.pkgb-bandhead {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  border-bottom: 1px solid var(--pkgo-hairline);
+  padding-bottom: 9px;
+  margin-bottom: 18px;
+}
+.pkgb-bandhead h2 {
+  font-family: var(--font-serif);
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--pkg-ink);
+}
+.pkgb-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--pkg-muted);
+  text-transform: uppercase;
+}
+
+@media (max-width: 1080px) {
+  .pkgb-hero { grid-template-columns: minmax(0, 1fr); }
+}

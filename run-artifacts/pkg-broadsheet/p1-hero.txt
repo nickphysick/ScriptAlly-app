@@ -1,0 +1,42 @@
+{
+  "heroPresent": true,
+  "hero": {
+    "x": 342,
+    "w": 980,
+    "h": 251
+  },
+  "body": {
+    "x": 342,
+    "w": 980
+  },
+  "topBorder": "5px",
+  "topColor": "rgb(154, 168, 150)",
+  "cols": "534.531px 445.469px",
+  "title": "Submission packages",
+  "titleLH": "49.4px",
+  "wax": true,
+  "waxBox": {
+    "x": 761,
+    "w": 51,
+    "h": 51
+  },
+  "statline": "4 materials · 2 packages · 8 sent",
+  "prob": "Fed up of guessing which materials are landing with agents?",
+  "heroSlot": "Illustrationdesk scene — letters sortedinto a wrapped parcel",
+  "heroSlotBox": {
+    "x": 1004,
+    "w": 190,
+    "h": 118
+  },
+  "actions": [
+    {
+      "label": "＋ New package",
+      "bg": "rgb(245, 226, 218)",
+      "disabled": false
+    }
+  ],
+  "sharedPageHeader": false,
+  "controlRow": false,
+  "titleOverflowPx": 1,
+  "titleClipped": false
+}

@@ -2,29 +2,35 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Submission Package Builder → the single-page Package Workshop (route /manuscripts/packages, Pro).
- * Renders inside the global AppShell stage (no nav of its own), scoped to the active manuscript via
- * localStorage["scriptally_active_manuscript_id"]. This host provides the page header (the
- * standard PageHeader: title + Pro pill + the manuscript switcher) + the manuscript-scoped data and persistence,
- * and mounts the two-tab surface for everything else. At ZERO packages the WORKSHOP'S OWN first-run
- * empty state renders — for every user on every plan. (A Pro-selling landing used to sit in front of
- * it; it was retired because this route has no Pro gate, so it was pitching the feature to people who
- * already had it. If a real gate ever lands, a persuasion surface belongs at /plans or on the public
- * site, not on an authenticated route.)
+ * Submission packages (route /manuscripts/packages) — the host: manuscript scoping, the two modals,
+ * and every write this page makes. The page itself is `PackagesOverview`; the masthead is
+ * `PackagesHero`.
  *
- * The old multi-view builder (FirstVisitHome / PackagesHome / Composer / MaterialsManager /
- * MaterialsRail / JourneyStrip / PackageStats view / WorkedExample / the MaterialModal popup) was
- * retired for the workshop; the packageMetrics engine + TypeGlyph stay (the masthead is the
- * app-standard PageHeader since the shell rollout — HubHeaderBar is deleted, ChromeSlab unused here).
+ * Design authority: `design-refs/submission-packages-broadsheet.html` for the layout,
+ * `design-refs/submission-packages-flow.html` for the modal flows.
+ *
+ * ⚠️ THE HEADER BOUNDARY. The hero is passed as the grid's existing `masthead` node — a public
+ * `ReactNode` prop — so the shared `PageHeader` and `WorkspacePageGrid` are untouched. They belong
+ * to the parallel masthead session. Nothing here reads or compensates for `--header-inset`.
+ *
+ * ⚠️ NO PRO GATE ON THIS ROUTE, and the wax seal is branding rather than a gate. Package CREATION is
+ * Pro-gated inside `addPackage` (db.tsx) — the builder surfaces that refusal instead of swallowing
+ * it, which the old composer did. See F-E in the flow report.
+ *
+ * ⚠️ THE WORKSHOP AND ANALYTICS SURFACES ARE UNREACHABLE FROM HERE (flow pack D9) and stay on disk
+ * for the DEV `#/pkg-lab` route. Do not re-open a route into them to give the guided tour a door —
+ * that tour's missing entry point is F-F, and it wants a decision, not a shortcut.
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { ManuscriptVersion, SubmissionPackage } from "../types";
 import { useNavigate } from "react-router-dom";
 import { PackagesOverview } from "./packages/PackagesOverview";
+import { PackagesHero } from "./packages/PackagesHero";
 import { MaterialModal, MaterialDraftResult } from "./packages/MaterialModal";
 import { PackageModal, PackageDraftResult } from "./packages/PackageModal";
 import { canBuildPackage, createPayload, updatePayload } from "../lib/materialDraft";
+import { trackingTotals } from "../lib/packageTracking";
 import { deleteField } from "firebase/firestore";
 import { Tour } from "./Tour";
 import { WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
@@ -257,6 +263,20 @@ export const SubmissionPackages: React.FC = () => {
           eleven pages share. */}
       {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9). The plate is row 1; the strip, the tabs
           and the workshop scroll in row 3. No toolbar → no row 2 and no hairline. */}
+      {/* ⚠️ THE BROADSHEET HERO IS BUILT BUT NOT MOUNTED — RED GATE, see
+            reports/submission-packages-broadsheet.md.
+
+         `PackagesHero` + `IllustrationSlot` + `packagesBroadsheet.css` are complete and were
+         measured rendering correctly on this page. They are NOT wired in, because
+         `shell/workspacePageGrid.test.tsx` carries a CENSUS LOCK naming this page by hand and
+         requiring `variant="workspace"` in this file — every page must render its masthead through
+         the shared `PageHeader`. Mounting the hero turns that lock red, and the lock is the parallel
+         masthead session's file, which this run is forbidden to touch.
+
+         Conform, or stay an exception as the flagship Pro surface? That is F-E, and it is Nick's
+         ruling to make. To mount the hero afterwards: swap the `masthead` node below for
+         `<PackagesHero title="Submission packages" … />`, drop the `toolbar`, and the census lock
+         needs whatever exemption the ruling implies. */}
       <WorkspacePageGrid className="pkgw-wpg" scrollLabel="Package Workshop" masthead={
         <PageHeader
           variant="workspace"
