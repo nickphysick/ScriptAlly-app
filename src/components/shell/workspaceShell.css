@@ -675,9 +675,30 @@
 .ws-utext { min-width: 0; flex: 1; margin-left: 10px; }
 
 /* ══ the page area ══ */
+/* ⚠️ NO `height: 100vh` HERE — IT IS NOT AT THE TOP OF THE VIEWPORT (tasks-chassis pack).
+   `100vh` is the VIEWPORT'S height, never "the height remaining from here down". This element
+   starts below the beta strip (`BetaStrip.tsx`), so `100vh` asked for the whole viewport from an
+   origin 41.75px down it: bottom 941.75, less this rule's own 20px of padding, leaving the last
+   ~21px of EVERY Tasks page below the fold and unreachable — the document does not scroll.
+   Measured identically on /todo, /todo/calendar and /todo/noteboard.
+
+   ⚠️ AND THE DECLARATION WAS REDUNDANT AS WELL AS WRONG, which is why removing it is the fix
+   rather than replacing it. `.ws-app` is a flex ROW with `min-height: 0`, and this is `flex: 1`
+   inside it — default `align-items: stretch` already sizes it to its parent, correctly, from
+   wherever it starts. The `100vh` overrode a right answer with an absolute claim about the
+   viewport. `min-height: 0` is stated so the internal scroll chain keeps its own law.
+
+   ⚠️ `.sa-shellframe` CARRIES THE SAME DECLARATION AND IS CORRECT, because it sits at y=0. That is
+   what let this survive review: one element up it is right, one element down it is wrong, and
+   nothing distinguishes them but where they begin. Before adding `100vh` anywhere, ask what is
+   above it — and whether anything ever could be.
+
+   ⚠️ THE FAULT WAS DISMISSIBLE, which is why it went unseen: `BetaStrip` returns null once
+   dismissed, the strip goes, this element starts at 0, and `100vh` is momentarily right. The
+   harness gets a fresh session every run and therefore always saw it. */
 .ws-main {
-  flex: 1; min-width: 0; display: flex; flex-direction: column;
-  height: 100vh; overflow: hidden; padding: 0 22px 20px; background: var(--ws-ground);
+  flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column;
+  overflow: hidden; padding: 0 22px 20px; background: var(--ws-ground);
 }
 /* ⚠️ CHROME, NOT CONTENT — it sits ON the ground above the window and never scrolls. */
 .ws-pagebar { flex: none; display: flex; align-items: center; gap: 14px; padding: 16px 6px 14px; }
