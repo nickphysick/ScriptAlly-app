@@ -49,9 +49,9 @@ const read = (page: Page) => page.evaluate(() => {
     hasRow: true,
     position: cs.position,
     top: cs.top,
-    /* the mini bar above it — the row's `top` is supposed to BE this, and the two are one token */
-    miniH: r((g.querySelector(".wpg-mini") as HTMLElement | null)?.getBoundingClientRect().height ?? -1),
-    miniStuckH: r((g.querySelector(".wpg-mini--stuck") as HTMLElement | null)?.getBoundingClientRect().height ?? 0),
+    /* ⚠️ THE FOLDED NAME BAR'S TWO READINGS ARE DELETED (pinned chrome, §4). The row's `top` was
+       supposed to BE the bar's height and the pair shared one token; there is one sticky element now
+       and its offset is 0, which is asserted directly above. */
     zIndex: cs.zIndex,
     background: cs.backgroundColor,
     padTop: r(parseFloat(cs.paddingTop)),

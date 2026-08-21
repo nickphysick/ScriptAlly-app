@@ -135,7 +135,26 @@
    here states a width. The v5 ref's 1460/44 are placeholders from a standalone file — this app
    retired `--wpg-cap` precisely because a cap in the wrong place ate content under classic
    scrollbars. */
-/* ⚠️ THE PLATE AND THE SHEET NOW COMPUTE THE SAME MEASURE — and they did not before.
+/* ⚠️⚠️ THE SECOND HALF OF THIS NOTE IS SUPERSEDED, AND THE 45px STEP IS THE DESIGN (pinned chrome,
+ * §5; the rule was set by the masthead left-constant pack's §A and this is its enforcement).
+ *
+ * `--mast-gutter` is stated there as "35px, defined once. Every page uses it. No page overrides it",
+ * and the consequence is named in the same breath: "At 35px the masthead aligns exactly with Query
+ * Centre and Tasks and SITS OUTSIDE the wider pages' content. That's intended: the masthead is a
+ * constant, and constants don't bend to each page."
+ *
+ * ⚠️ THE PRECEDENT CITED BELOW DOES NOT TRANSFER. `--wpg-measure` IS a per-page opt-in — the grid
+ * reads it as `var(--wpg-measure, 100%)` precisely so a page can cap its own content. `--mast-gutter`
+ * has no fallback and no page scope: it is the one value that makes the header's left edge the same
+ * on all ten pages, which `contentGeometry.measure.ts` asserts at 1280, 1440 and 2300. That
+ * assertion is what found this — Comparable titles' masthead measured 342 where every other page
+ * measured 297.
+ *
+ * The arithmetic below is correct and the reasoning is sound; what it optimises for — plate and
+ * sheet flush on THIS page — is what the pack traded away to make the header constant across pages.
+ * Reinstating it needs the pack's rule changed, not a page-scoped exception.
+ *
+ * ⚠️ THE PLATE AND THE SHEET NOW COMPUTE THE SAME MEASURE — and they did not before.
  *
  * THE FAULT, arithmetically: the masthead is `min(var(--work-max), 100% - 2 * var(--mast-gutter))`
  * = `min(1660, W - 70)`, while the scroll column is
@@ -159,7 +178,11 @@
  * already opts out the same way (`--wpg-measure: var(--work-max)`), so this is a precedented page
  * choice — NOT a change to the grid's law, which would move nine other pages. */
 .ct-wpg { flex: 1; min-height: 0; width: 100%; }
-.ct-wpg.wpg { --wpg-measure: var(--work-max); --mast-gutter: var(--content-gutter); }
+/* ⚠️ THE `--mast-gutter` OVERRIDE IS REMOVED (pinned chrome, §5 — see the note above it).
+   `--wpg-measure` stays: capping this page's CONTENT at the shared measure is a page's own choice
+   and the grid offers it as one (`var(--wpg-measure, 100%)`). The masthead's gutter is not that
+   kind of token. */
+.ct-wpg.wpg { --wpg-measure: var(--work-max); }
 /* ⚠️ NO TOP PADDING, EVER — the gap under the header belongs to `--content-top-gap` and is paid
    ONCE, by whichever row is first below the hairline. This carried 22px, so the page rendered a
    92px gap against a 70px token: not the grid paying twice, but a bare wrapper adding a second

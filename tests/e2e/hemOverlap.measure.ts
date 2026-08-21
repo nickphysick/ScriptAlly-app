@@ -35,7 +35,6 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
   const sc = g.querySelector(".wpg-scroll") as HTMLElement;
   const hem = g.querySelector(".wpg-hem--top") as HTMLElement | null;
   const row = g.querySelector(".wpg-tools") as HTMLElement | null;
-  const mini = g.querySelector(".wpg-mini") as HTMLElement | null;
   if (!hem) return { noHem: true } as never;
   const scb = sc.getBoundingClientRect();
   const hb = hem.getBoundingClientRect();
@@ -47,8 +46,8 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
     /* what the component measured and published — the offset the hem is supposed to take */
     published: getComputedStyle(g).getPropertyValue("--wpg-stuck-h").trim(),
     hasRow: !!row,
-    /* the mini bar's rendered height — what the control row is supposed to be stuck beneath */
-    miniH: r(mini?.getBoundingClientRect().height ?? -1),
+    /* ⚠️ THE FOLDED NAME BAR'S HEIGHT IS DELETED WITH THE COMPONENT (pinned chrome, §4). The stuck
+       chrome is one box — the slab — and `chromeBottom` above reads its foot directly. */
     rowTop: row ? r(row.getBoundingClientRect().top - scb.top) : -1,
     rowBottom: row ? r(row.getBoundingClientRect().bottom - scb.top) : -1,
     /* ⚠️ THE STUCK CHROME'S HEIGHT, MEASURED HERE TOO AND FROM THE OTHER DIRECTION. The component

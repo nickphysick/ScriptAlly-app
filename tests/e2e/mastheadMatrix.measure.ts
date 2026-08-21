@@ -43,7 +43,6 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
   const sc = g.querySelector(".wpg-scroll") as HTMLElement;
   const row = g.querySelector(".wpg-tools") as HTMLElement | null;
   const mark = mast.querySelector(".os-mark") as HTMLElement | null;
-  const mini = g.querySelector(".wpg-mini") as HTMLElement | null;
   const title = mast.querySelector(".wsh-title") as HTMLElement;
   const cs = getComputedStyle(mast);
   const scb = sc.getBoundingClientRect();
@@ -107,17 +106,14 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
     wrapTop: r(wrap.getBoundingClientRect().top - scb.top),
     /**
      * ⚠️ THE THREE THINGS THAT MUST SHARE ONE WIDTH: the masthead, its closing hairline (drawn as
-     * the header's own `border-bottom`, so the header's box IS the hairline's width) and the mini
-     * bar. They are what the masthead system is; a bar at the content gutter beside a masthead 64px
-     * wider would read as a different object arriving rather than the same one folding.
+     * the SLAB's base) — one object, one width. A line at the content gutter beside a masthead 64px
+     * wider would read as two things rather than one.
      */
     mastEdges: `${r(wrap.getBoundingClientRect().left)}/${r(win - wrap.getBoundingClientRect().right)}`,
     ruleEdges: `${r(mast.getBoundingClientRect().left)}/${r(win - mast.getBoundingClientRect().right)}`,
-    miniEdges: mini ? `${r(mini.getBoundingClientRect().left)}/${r(win - mini.getBoundingClientRect().right)}` : "",
-    /* the mini bar: rendered on every scrolling page (at zero height until stuck), absent on a fill
-       page until its masthead is folded */
-    miniPresent: !!mini,
-    miniActionable: mini ? mini.querySelectorAll("button, a, input, [role='button']").length : -1,
+    /* ⚠️ THE FOLDED NAME BAR'S ROWS ARE DELETED (pinned chrome, §4) — its edges, its presence and
+       its control count. The component is gone: the slab keeps the masthead on screen, settled, and
+       a folded fill page shows a chevron on the window's border instead. */
     /* the inset, with the scrollbar reservation measured beside it rather than assumed away */
     barReserve: r((sc.offsetWidth - sc.clientWidth) / 2),
     mastInset: r(wrap.getBoundingClientRect().left - sc.getBoundingClientRect().left),
@@ -271,10 +267,6 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
    */
   for (const { name, r } of rows) {
     expect(r.ruleEdges, `${name}: the closing hairline is not the masthead's own width`).toBe(r.mastEdges);
-    if (r.miniPresent) {
-      expect(r.miniEdges, `${name}: the mini bar sits at ${r.miniEdges} against the masthead's ${r.mastEdges}`)
-        .toBe(r.mastEdges);
-    }
   }
 
   /**
@@ -288,10 +280,6 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
    */
   for (const { name, r } of rows) {
     const fill = PAGES.find((p) => p.name === name)!.fill;
-    /* ⚠️ NO PAGE RENDERS A MINI BAR AT REST (pinned chrome, §1). It used to be present-on-scroll-
-       pages, absent-on-fill; the slab supersedes it on the scrolling side and §3 replaces its fill
-       role with the chevron. */
-    expect(r.miniPresent, `${name}: a mini bar is rendered at rest`).toBe(false);
     void fill;
   }
 

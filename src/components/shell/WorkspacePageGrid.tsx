@@ -210,7 +210,6 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    */
   const [badgeHost, setBadgeHost] = React.useState<HTMLElement | null>(null);
   React.useEffect(() => { setBadgeHost(document.getElementById(WINWRAP_ID)); }, []);
-  const miniRef = React.useRef<HTMLDivElement>(null);
 
   /**
    * ⚠️ THE MINI BAR'S IDENTITY IS READ OFF THE MASTHEAD ELEMENT, NOT PASSED A SECOND TIME.
@@ -229,14 +228,15 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   /* ⚠️ THE TITLE ALONE, SINCE §3 — the folded bar carries no mark, so requiring one here would be
      demanding a prop for a thing that is not rendered. The masthead still takes a `mark`; the grid
      no longer has an opinion about it. */
-  const identity = (React.isValidElement(masthead) ? masthead.props : {}) as { title?: string };
-  if (process.env.NODE_ENV !== "production" && !identity.title) {
-    throw new Error(
-      "WorkspacePageGrid could not read a mark and a title from its `masthead` element. The mini " +
-      "bar states the page's identity and takes it from there rather than being passed it twice; " +
-      "pass a `PageHeader` with `variant=\"workspace\"`, `mark` and `title`, directly and unwrapped.",
-    );
-  }
+  /**
+   * ⚠️ THE IDENTITY READ IS DELETED, AND ITS ONLY CONSUMER WAS THE FOLDED NAME BAR (pinned chrome,
+   * §4). The grid pulled `title` off the masthead element's props so the bar could state the page's
+   * name without being passed it twice — a sound arrangement for a component that no longer exists.
+   *
+   * ⚠️ CHECKED BEFORE DELETING, not assumed: nothing else in this component read `identity`, and the
+   * dev-time throw it guarded ("a mark and a title must be readable from the masthead") was enforcing
+   * a requirement only the bar had. The masthead's own props are still validated by `PageHeader`.
+   */
   /**
    * ⚠️ ENGAGEMENT IS DELETED (masthead rethink, step 4) — the state, the `pointerdown` handlers on
    * the scroller and the dock, the containment test that stopped a click on the masthead folding

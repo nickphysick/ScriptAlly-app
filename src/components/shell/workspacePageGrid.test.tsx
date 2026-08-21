@@ -570,6 +570,37 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    * stylesheet's own file. It must equal the reclaim exactly and must not be transitioned: easing
    * it opens a frame in which max scroll is wrong, which is the clamp again, just harder to see.
    */
+  it("⚠️ THE FOLDED NAME BAR IS GONE ENTIRELY — component, classes and tokens", () => {
+    /**
+     * ⚠️ THE DELETION IS THE CLAIM (pinned chrome, §4). The bar kept the page's identity on screen
+     * once the masthead had scrolled away; the slab keeps the MASTHEAD on screen, settled but still
+     * the title and the mark, so there is nothing left for a name bar to say. On a fill page the
+     * fold leaves a chevron on the window's border instead.
+     *
+     * ⚠️ AND THE SWEEP IS FOR READS, NOT DEFINITIONS — the rule this repo learned from `--wsh-pill-*`,
+     * where two sheets went on READING tokens that had been deleted and fell back to a literal, so a
+     * grep for the definition found nothing and read as "already cleaned".
+     */
+    const grid = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8");
+    const liveSrc = grid.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    const liveCss = cssRules.replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const token of ["--wpg-mini-h", "--wpg-mini-pad", "--wpg-mini-fs", "--wpg-mini-lh"]) {
+      expect(liveCss, `\`${token}\` is still READ or DEFINED — the bar it sized is gone`).not.toContain(token);
+    }
+    /* ⚠️ THE CLASS NAME IS BOUNDED, not a substring: a bare `not.toContain("wpg-mini")` would also
+       forbid any future class that merely starts with it, and has produced false reds in this repo
+       twice. */
+    for (const cls of ["wpg-mini", "wpg-mini-name", "wpg-mini-show", "wpg-mini--stuck", "wpg-mini--static"]) {
+      expect(liveCss, `\`.${cls}\` still has a rule`).not.toMatch(new RegExp(`\\.${cls}[\\s.,{:]`));
+      expect(liveSrc, `\`${cls}\` is still rendered`).not.toMatch(new RegExp(`["\\s\`]${cls}["\\s\`]`));
+    }
+    /* ⚠️ AND THE IDENTITY PLUMBING GOES WITH ITS ONLY CONSUMER. The grid read `title` off the
+       masthead element's props so the bar could state it without being passed it twice. Nothing else
+       read it, which was checked rather than assumed. */
+    expect(liveSrc, "the grid still reads the masthead's props — the bar that needed them is gone")
+      .not.toContain("masthead.props");
+  });
+
   it("⚠️ THE SETTLE'S RECLAIM IS A SPACER, NOT SCROLLER PADDING", () => {
     /* ⚠️ THIS INVERTS ITS OWN SUBJECT, AND THE INVERSION WAS MEASURED RATHER THAN REASONED. The
        case used to REQUIRE `--wpg-reclaim-pad`: row 1 shrank when the header stripped, growing
@@ -691,11 +722,11 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        window's border that reverses it (pinned chrome, §3). The rule this case protects is
        unchanged — a pointer cursor may only appear on something that IS a control, never on a bare
        surface promising something invisible, which is what the retired click-to-restore band was.
-       ⚠️ `.wpg-mini-show` IS STILL LISTED AND MUST NOT BE, PAST §4 — the mini bar no longer renders
-       anywhere, so its rule is a pointer cursor on an element nothing mounts. §4 deletes it, and
-       this list is where that deletion is proved. */
+       ⚠️ AND `.wpg-mini-show` IS GONE FROM THIS LIST AT §4, which is where its deletion is proved.
+       The folded name bar no longer renders anywhere, so its pointer cursor was an affordance on an
+       element nothing mounts — the same class of residue as a transition with no state to tween. */
     expect(pointerRules.sort(), `a pointer cursor appeared on something that is not one of the fold controls: ${pointerRules.join(" · ")}`)
-      .toEqual([".wpg-chevfold", ".wpg-mast-hide", ".wpg-mini-show"]);
+      .toEqual([".wpg-chevfold", ".wpg-mast-hide"]);
   });
 
   /**

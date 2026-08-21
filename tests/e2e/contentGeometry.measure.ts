@@ -65,7 +65,7 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
   /* ⚠️ THE SLAB IS CHROME (pinned chrome, §1) — masthead and control row live inside `.wpg-chrome`
      now, so the scroller's first child is the slab and a content finder that does not know it
      reports the CHROME as the page's content. It did: "content \"wpg-chrome\"" on all ten pages. */
-  const CHROME = ["wpg-chrome", "wpg-mast", "wpg-mini", "wpg-tools", "wpg-reclaim"];
+  const CHROME = ["wpg-chrome", "wpg-mast", "wpg-tools", "wpg-reclaim"];
   const row = g.querySelector(".wpg-tools") as HTMLElement | null;
   const win = document.documentElement.clientWidth;
   /**
@@ -142,7 +142,7 @@ test("content geometry is unchanged by the masthead's width system", async ({ pa
     const rights = PAGES.map(({ name }) => ({ name, v: mast[`${w}|${name}`]!.masthead!.right }));
     for (const [edge, set] of [["left", lefts], ["right", rights]] as const) {
       const vals = [...new Set(set.map((x) => x.v))];
-      expect(vals, `@${w}: the masthead's ${edge} edge differs across pages — ${JSON.stringify(set.map((x) => [x.name, x.v]))}`)
+      expect(vals, `@${w}: the masthead's ${edge} edge differs across pages — ${JSON.stringify(set.map((x) => [x.name, x.v]))}. \`--mast-gutter\` is 35px, defined once, and NO PAGE OVERRIDES IT: that is what makes this edge the same everywhere. A page whose masthead sits outside its content is the intended trade — "the masthead is a constant, and constants don't bend to each page" — so the fix is never a page-scoped gutter.`)
         .toHaveLength(1);
     }
   }

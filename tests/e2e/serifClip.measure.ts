@@ -107,7 +107,7 @@ const check = (rows: Record<string, unknown>[], probes: Probe[], lines: string[]
      * ABSOLUTELY for the express purpose of staying out of the title's line box.
      *
      * ⚠️ THIS DOES NOT WEAKEN THE THREE REAL CASES. Every one of them clips: `.ws-bwm` and
-     * `.wpg-mini-name` carry `overflow: hidden` for their ellipsis truncation, and an ancestor cut
+     * the sidebar wordmark carries `overflow: hidden` for its collapse, and an ancestor cut
      * is a separate reading with its own branch. What is removed is a flag on a box that paints
      * every pixel it reports.
      *
@@ -181,19 +181,12 @@ test("no Playfair in the shell's chrome is cropped by its own box", async ({ pag
   lines.push("\n══ /manuscripts/packages — settled");
   check(await measure(page, [".wsh-title"]), [{ sel: ".wsh-title", what: "the settled masthead title" }], lines);
 
-  await openRoute(page, "/queries", { width: 1440, height: 900 });
-  await liftMotionSuppression(page);
-  /* the folded bar — only exists once a fill page's masthead is hidden */
-  const pt = await page.evaluate(() => {
-    const g = [...document.querySelectorAll(".wpg.qc-wpg")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-    const b = (g.querySelector(".wpg-mast-hide") as HTMLElement).getBoundingClientRect();
-    return { x: Math.round(b.left + b.width / 2), y: Math.round(b.top + b.height / 2), ok: b.height > 0 && b.bottom < window.innerHeight };
-  });
-  expect(pt.ok, "Hide is not on screen — the folded bar cannot be reached").toBe(true);
-  await page.mouse.click(pt.x, pt.y);
-  await page.waitForTimeout(600);
-  lines.push("\n══ /queries — folded");
-  check(await measure(page, [".wpg-mini-name"]), [{ sel: ".wpg-mini-name", what: "the folded bar's page name" }], lines);
+  /**
+   * ⚠️ THE FOLDED BAR'S PAGE NAME IS DELETED FROM THIS SWEEP WITH THE BAR ITSELF (pinned chrome, §4).
+   * A fill page's fold leaves a CHEVRON on the window's border and no text at all, so there is no
+   * Playfair in the folded state left to crop. It was one of the three sites this file was written
+   * for — 22px of ink in a 19px box — and it is gone rather than fixed.
+   */
 
   console.log(lines.join("\n"));
   expect(faults, `${faults.length} Playfair box(es) in chrome crop their own text:\n  · ${faults.join("\n  · ")}`).toEqual([]);
