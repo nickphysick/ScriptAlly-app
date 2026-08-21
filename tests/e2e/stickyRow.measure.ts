@@ -35,11 +35,14 @@ const read = (page: Page) => page.evaluate(() => {
   const sc = g.querySelector(".wpg-scroll") as HTMLElement;
   const row = g.querySelector(".wpg-tools") as HTMLElement | null;
   const mast = g.querySelector(".wsh") as HTMLElement | null;
-  if (!row || !mast) return { noRow: !row, noMast: !mast } as never;
+  /* ⚠️ `hasRow` IS A READING, NOT AN ERROR. A scrolling page without a control row is a real state
+     since the Packages restructure; the caller skips its row claims and asserts the population. */
+  if (!row || !mast) return { hasRow: false, noMast: !mast } as never;
   const cs = getComputedStyle(row);
   const rb = row.getBoundingClientRect();
   const sb = sc.getBoundingClientRect();
   return {
+    hasRow: true,
     position: cs.position,
     top: cs.top,
     /* the mini bar above it — the row's `top` is supposed to BE this, and the two are one token */
@@ -86,9 +89,10 @@ const wheelTo = async (page: Page, y: number) => {
   await page.waitForTimeout(450);
 };
 
-test("the sticky control row, on all five scrolling pages", async ({ page }) => {
+test("the sticky control row, on every scrolling page that has one", async ({ page }) => {
   const bar = await scrollbarWidth(page).catch(() => -1);
   const lines: string[] = [`scrollbar width: ${bar}px (the harness's one blind spot — macOS decides this)`];
+  const exercised: { name: string; ran: boolean }[] = [];
 
   for (const [name, route] of SCROLLING) {
     await openRoute(page, route, { width: 1440, height: 900 });
@@ -110,6 +114,21 @@ test("the sticky control row, on all five scrolling pages", async ({ page }) => 
       `   covers: ${moved.coverProbe}`,
       `   shadow when stuck: ${moved.shadow}`,
     );
+
+    /**
+     * ⚠️ A CONTROL ROW IS NO LONGER UNIVERSAL — Submission packages lost its row to another stream's
+     * restructure, and this whole file is ABOUT the row, so that page now sits outside its subject
+     * rather than failing it. The title said "all five scrolling pages"; it says what it means now.
+     *
+     * ⚠️ AND THE SKIP IS PAIRED WITH A POPULATION ASSERTION AFTER THE LOOP, because a skip that can
+     * silently apply to every page turns the whole measurement green by measuring nothing.
+     */
+    if (!rest.hasRow) {
+      lines.push(`   SKIPPED — this page renders no control row`);
+      exercised.push({ name, ran: false });
+      continue;
+    }
+    exercised.push({ name, ran: true });
 
     /* ── the contract ── */
     expect(rest.position, `${name}: the control row is not sticky`).toBe("sticky");
@@ -183,6 +202,9 @@ test("the sticky control row, on all five scrolling pages", async ({ page }) => 
     }
   }
   console.log(lines.join("\n"));
+  /* ⚠️ THE POPULATION — a run where every page skipped would otherwise pass having asserted nothing */
+  const ran = exercised.filter((x) => x.ran).map((x) => x.name);
+  expect(ran.length, `only ${ran.length} page(s) exercised the sticky row: ${JSON.stringify(exercised)}`).toBeGreaterThan(2);
 });
 
 test("⚠️ THE CONTENT DOES NOT JUMP WHEN THE MINI BAR ARRIVES", async ({ page }) => {
