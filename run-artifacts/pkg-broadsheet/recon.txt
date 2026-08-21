@@ -1,0 +1,27 @@
+{
+  "masthead": {
+    "x": 342,
+    "w": 980
+  },
+  "scroller": {
+    "x": 247,
+    "w": 1170
+  },
+  "controlRow": {
+    "x": 342,
+    "w": 980
+  },
+  "railPresent": true,
+  "railPanels": [
+    "Materials",
+    "Packages"
+  ],
+  "tiles": 2,
+  "dashboard": true,
+  "classesOnScrollChildren": [
+    "wpg-mini",
+    "wpg-mast",
+    "wpg-tools",
+    "pkgw-body"
+  ]
+}
