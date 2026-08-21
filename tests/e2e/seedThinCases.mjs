@@ -93,7 +93,19 @@ const remember = (patch) => writeFileSync(MEMO, JSON.stringify({ ...memo, ...pat
  */
 async function wipe() {
   let gone = 0;
-  for (const coll of ["queries", "agents", "manuscripts", "tasks", "taskFlags"]) {
+  /**
+   * ⚠️ THE QUERY'S OWN LOG GOES FIRST, BECAUSE DELETING A DOCUMENT DOES NOT DELETE ITS
+   * SUBCOLLECTION. Firestore leaves `users/{uid}/queries/{id}/activity/*` behind when the query
+   * above it is removed — orphaned rows on a shared account, which is the residue class that made
+   * a whole journey unmeasurable for four rounds.
+   */
+  for (const d of (await getDocs(collection(db, "users", uid, "queries"))).docs) {
+    if (!d.id.startsWith(PREFIX)) continue;
+    for (const a of (await getDocs(collection(db, "users", uid, "queries", d.id, "activity"))).docs) {
+      await deleteDoc(a.ref); gone++;
+    }
+  }
+  for (const coll of ["queries", "agents", "manuscripts", "tasks", "taskFlags", "activities"]) {
     for (const d of (await getDocs(collection(db, "users", uid, coll))).docs) {
       if (d.id.startsWith(PREFIX)) { await deleteDoc(d.ref); gone++; }
     }
@@ -206,6 +218,7 @@ const AGENTS = [
  * ⚠️ THE DATES ARE RELATIVE TO NOW, so the fixture stays true tomorrow. A close-eligible query
  * seeded with a fixed date stops being close-eligible the week the window moves.
  */
+const AGENT_BY_ID_EARLY = Object.fromEntries(AGENTS.map((a) => [a.id, a]));
 const QUERIES = [
   /* close: long past the stated window, so `replyTask` reaches its close branch */
   { id: `${PREFIX}q-close`, agentId: `${PREFIX}ag-close`, status: "Queried", sentDaysAgo: 400,
@@ -235,9 +248,57 @@ for (let i = 0; i < 6; i++) {
     b.set(doc(db, "users", uid, "queries", q.id), {
       id: q.id, userId: uid, agentId: q.agentId, manuscriptId: MS,
       dateSent: iso(q.sentDaysAgo), status: q.status, sendMethod: "Email",
+      /* ⚠️ THE STORED DEADLINE, WHICH THE CHASE DERIVATION READS. The app computes it at create
+         (`computeResponseDeadline`); a fixture that writes the query without it produces a board
+         with no Chase rows at all, and the journey it exists to reach is unmeasurable — the same
+         shape as the muted close rule, one field along. Same arithmetic: sent + weeks × 7. */
+      responseDeadline: iso(q.sentDaysAgo - (AGENT_BY_ID_EARLY[q.agentId]?.responseTimeWeeks ?? 6) * 7),
       personalisationNotes: "", packageId: "", materialsWanted: q.materialsWanted,
       ...(q.nudgeDate ? { nudgeDate: q.nudgeDate } : {}),
     });
+  }
+  await b.commit();
+}
+
+/**
+ * ⚠️ EVERY QUERY GETS A REAL LOG, IN BOTH STORES (chase round, Phase 2).
+ *
+ * The fixture wrote query documents and no activity at all, so every seeded card's story column
+ * held nothing but its terminus — and that emptiness looked exactly like the app fault this round
+ * found in `addQuery`, which is why the two had to be told apart before either was touched.
+ *
+ * ⚠️ BOTH STORES, THE SAME TWO SHAPES THE APP WRITES. The global feed keeps the `Activity` shape;
+ * `queries/{id}/activity` keeps the log's (`type`/`createdAt`/`note`). A fixture that wrote only
+ * the feed would reproduce the very bug it is meant to prove fixed.
+ */
+const AGENT_BY_ID = AGENT_BY_ID_EARLY;
+{
+  const b = writeBatch(db);
+  for (const q of QUERIES) {
+    const ag = AGENT_BY_ID[q.agentId];
+    /* the send, always — and the advanced rung too where the query is past Queried, so at least one
+       case has a story with ORDER in it rather than a single entry */
+    const rungs = [{ suffix: "sent", status: "Queried", days: q.sentDaysAgo,
+                     note: `Query sent to ${ag.name} at ${ag.agency}` }];
+    if (q.status !== "Queried") {
+      rungs.push({ suffix: "adv", status: q.status, days: Math.max(1, Math.floor(q.sentDaysAgo / 2)),
+                   note: `${q.status} recorded` });
+    }
+    for (const r of rungs) {
+      /* ⚠️ SANITISED IDS. `isValidId` is `^[a-zA-Z0-9_-]+$`, and a status like "Partial Sent" would
+         be denied on the spot — the ampersand-in-an-id fault, one letter along. */
+      const actId = `${PREFIX}act-${q.id.replace(PREFIX, "")}-${r.suffix}`;
+      const when = iso(r.days);
+      b.set(doc(db, "users", uid, "activities", actId), {
+        id: actId, userId: uid, queryId: q.id, manuscriptId: MS,
+        activityType: r.suffix === "sent" ? "Query Sent" : "Status Changed",
+        description: r.note, date: when, details: "Sent via Email", resultingStatus: r.status,
+      });
+      b.set(doc(db, "users", uid, "queries", q.id, "activity", actId), {
+        type: r.status, resultingStatus: r.status, createdAt: new Date(when),
+        note: r.note, queryId: q.id, agentName: ag.name, manuscriptTitle: "The Thin Cases",
+      });
+    }
   }
   await b.commit();
 }

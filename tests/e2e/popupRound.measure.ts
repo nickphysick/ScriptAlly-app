@@ -52,7 +52,7 @@ const READ = `(() => {
     /* the To-do pages share their OWN toast (useTodoToast); the app-wide ToastProvider is a
        different host, and probing it reported "no receipt at all" about journeys that had just
        written and said so on screen */
-    toast: all(".tdb-toast").map((t) => (t.textContent || "").replace(/\s+/g, " ").trim()).join(" | "),
+    toast: all(".tdb-toast").map((t) => (t.textContent || "").replace(/\\s+/g, " ").trim()).join(" | "),
     undo: all(".tdb-toast-act").length,
   };
 })()`;

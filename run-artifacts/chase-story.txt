@@ -1,0 +1,15 @@
+census: {"Decide":2,"Close":4,"Fix":28,"Note":4}
+Chase: NO ROW
+Send: NO ROW
+Close — CloseConsider closingRosalind Vale · Vale & Marchett
+  deed: Consider closing your query for The Quiet Fixture to Rosalin
+  status: Queried
+  rungs (2): ["Query sent17 Jul · via email","Your turnToday"]
+  tiles: ["You've waited57 weeks","Most recent interactionQuery sent17 Jul ","Sent previouslyCovering letter · Synopsi"]
+  ASSERT Close · story opens on the send: PASS · ends on the terminus: PASS · rungs beyond the terminus: 1
+Fix — FixFill in what you sentagent not specified · import
+  deed: Fill in what you sent
+  status: 
+  rungs (1): ["Your turnToday"]
+  tiles: ["Sent previouslyNone sent"]
+  ASSERT Fix · story opens on the send: FAIL · ends on the terminus: PASS · rungs beyond the terminus: 0

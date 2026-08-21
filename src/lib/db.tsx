@@ -1949,24 +1949,40 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       await setDoc(doc(db, "users", currentUser.id, "queries", id), newQ);
 
       const seeded = seedActivities();
-      // Global feed projection for every seeded entry.
+      const manuscriptTitle = manuscripts.find(m => m.id === q.manuscriptId)?.title || "";
+      /**
+       * ⚠️ BOTH STORES, FOR EVERY SEEDED ENTRY (chase round, Phase 2). The global feed is a
+       * PROJECTION; `users/{uid}/queries/{id}/activity` is the authoritative log, and it is what
+       * the task pane's story column reads. This loop wrote every entry to the feed and only the
+       * ADVANCED one to the log — so `QUERY_SENT` reached the projection and never the record.
+       *
+       * Measured on dev: a chase card for a query sent in July rendered a story column containing
+       * nothing but its "Your turn · Today" terminus, beside tiles stating that query's own dates
+       * correctly. The panel was right and the filter was right; the rung it was looking for had
+       * never been written. The Query Centre reads the feed, which is why the same query looked
+       * complete three inches away — the disagreement `useDockActivity`'s own header describes.
+       *
+       * ⚠️ THE TWO SHAPES ARE NOT THE SAME DOCUMENT, which is why this is a builder rather than a
+       * second `setDoc` of `act`. The log keys on `type`/`createdAt`/`note`; the feed keeps the
+       * `Activity` shape. Writing one into the other's collection would produce a row that parses
+       * and renders as nothing.
+       */
+      const logDoc = (act: Activity) => ({
+        type: act.resultingStatus,
+        resultingStatus: act.resultingStatus,
+        createdAt: Timestamp.fromDate(new Date(act.date)),
+        note: act.description,
+        queryId: id,
+        agentName: agent?.name || "The agent",
+        manuscriptTitle,
+      });
       for (const act of seeded) {
         await setDoc(doc(db, "users", currentUser.id, "activities", act.id), act);
+        await setDoc(doc(db, "users", currentUser.id, "queries", id, "activity", act.id), logDoc(act));
       }
-      // Advanced-status seed goes into the AUTHORITATIVE per-query subcollection too, so the
-      // imported query's derived status matches its seed without waiting on the backfill.
-      const advanced = seeded.find(a => a.resultingStatus && a.resultingStatus !== QueryStatus.QUERIED);
-      if (advanced) {
-        const manuscriptTitle = manuscripts.find(m => m.id === q.manuscriptId)?.title || "";
-        await setDoc(doc(db, "users", currentUser.id, "queries", id, "activity", advanced.id), {
-          type: advanced.resultingStatus,
-          resultingStatus: advanced.resultingStatus,
-          createdAt: Timestamp.fromDate(new Date(advanced.date)),
-          note: advanced.description,
-          queryId: id,
-          agentName: agent?.name || "The agent",
-          manuscriptTitle,
-        });
+      /* the derived status still follows an advanced seed, and only an advanced seed — a query born
+         at Queried is already at its derived status and has nothing to recompute towards */
+      if (seeded.some(a => a.resultingStatus && a.resultingStatus !== QueryStatus.QUERIED)) {
         await recomputeQueryOnline(currentUser.id, id);
       }
       return { success: true, id };
