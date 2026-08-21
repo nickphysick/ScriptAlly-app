@@ -75,6 +75,16 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
     titleH: r(title.getBoundingClientRect().height),
     padSum: r(parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderBottomWidth)),
     illustrated: !!mark?.querySelector("img"),
+    markCount: mast.querySelectorAll(".wsh-mark").length,
+    /**
+     * ⚠️ THE CENTRED BLOCK AGAINST THE MEASURE'S OWN CENTRE (masthead measure, §2), and it is read
+     * WITH Hide in the document, because Hide is the thing most likely to break it. Any control that
+     * joins the flex row shifts the centred block off true by half its own width — silently, and by
+     * an amount that looks like a rounding error until you put a ruler on it.
+     */
+    txtMid: (() => { const b = mast.querySelector(".wsh-txt")?.getBoundingClientRect(); return b ? r(b.left + b.width / 2) : -1; })(),
+    mastMid: (() => { const b = mast.getBoundingClientRect(); return r(b.left + b.width / 2); })(),
+    hidePresent: !!wrap.querySelector(".wpg-mast-hide"),
     /**
      * ⚠️ STRUCTURAL, NEVER A LIST OF LABELS. A name list passes the day someone adds a control this
      * matrix has never heard of, which is exactly the day it should fail.
@@ -266,12 +276,31 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
     if (!fill) expect(r.miniActionable, `${name}: the mini bar carries ${r.miniActionable} control(s) on a scrolling page`).toBe(0);
   }
 
-  /* ⚠️ TWO MARK SIZES AND EXACTLY TWO — illustrated bare, monoline on its parchment plate. Derived
-     from the artwork by `markHasArt`, never passed in, so a page converts when its drawing lands. */
-  const artSizes = new Set(rows.filter((x) => x.r.illustrated).map((x) => x.r.markW));
-  const glyphSizes = new Set(rows.filter((x) => !x.r.illustrated).map((x) => x.r.markW));
-  expect([...artSizes], "the illustrated marks are not all one size").toEqual([52]);
-  expect([...glyphSizes], "the monoline marks are not all one size").toEqual([38]);
+  /* ⚠️ ONE MARK SIZE, BOTH FAMILIES (masthead measure, §2). The two-size rule — illustrated 52 bare,
+     monoline 38 on a parchment plate — was reasoning about the PLATE, and the plate is gone: what is
+     left at 52 is a drawing in open space, which is what the illustrated marks always were. */
+  const sizes = new Set(rows.map((x) => x.r.markW));
+  expect([...sizes], `the marks are not all one size: ${rows.map((x) => `${x.name} ${x.r.markW}`).join(", ")}`).toEqual([52]);
+
+  /* ⚠️ AND THERE ARE TWO OF THEM, the second mirrored — a title page rather than a header bar. */
+  for (const { name, r } of rows) {
+    expect(r.markCount, `${name} draws ${r.markCount} mark(s) — the masthead is mark · text · mirrored mark`).toBe(2);
+  }
+
+  /**
+   * ⚠️ THE TEXT SITS ON THE MEASURE'S CENTRE, AND HIDE IS IN THE DOCUMENT WHILE THIS IS READ.
+   *
+   * This is the assertion §2 turns on. Hide is absolutely positioned for one reason: an in-flow
+   * control on ONE side of a centred row pushes the row off centre by half its own width. That is
+   * ~40px here — visible, but not obviously WRONG to the eye, which is why it needs a ruler rather
+   * than a screenshot. A tolerance of 1px covers subpixel rounding and nothing else.
+   */
+  for (const { name, r } of rows) {
+    const fill = PAGES.find((p) => p.name === name)!.fill;
+    if (fill) expect(r.hidePresent, `${name} is a fill page and drew no Hide — the centring is untested on the case that breaks it`).toBe(true);
+    expect(Math.abs(r.txtMid - r.mastMid), `${name}: the title block's centre is ${r.txtMid} against the measure's ${r.mastMid} — something in the row is taking width on one side`)
+      .toBeLessThanOrEqual(1);
+  }
 
   /* ⚠️ AND THE CONTROL ROW SITS THE SAME DISTANCE BELOW ON EVERY PAGE THAT HAS ONE. This is where
      Submission packages diverged by 14px: its own body rhythm (`display:flex; gap:14px`) was on the

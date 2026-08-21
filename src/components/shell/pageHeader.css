@@ -247,10 +247,10 @@
      change: the masthead is the first thing ON the page rather than an object laid on it, so it
      paints nothing and inherits the window's ground. Anything reinstated here turns content back
      into chrome and re-earns the collapse mechanism this pack deleted. */
-  /* 26px above, 20px below — `169-inflow-masthead-qc.html` (`--mpad`/`--mpadb`) and
-     `170-sticky-control-row.html` agree. The horizontal inset is NOT here: the scroll row's own
-     gutter pays it, so the masthead lines up with the content beneath it by construction. */
-  padding: 26px 0 20px;
+  /* 24 above, 18 below (masthead measure, §2; ref 173 supersedes the earlier pair's 26/20). The
+     horizontal inset is NOT here: the scroll row's own gutter pays it, so the masthead lines up
+     with the content beneath it by construction. */
+  padding: 24px 0 18px;
   /* the hairline that closes it, then 16px of air to the control row (`--mrule` in the QC ref).
      `--rim` in the refs is this app's `--ws-edge` — the window's own edge tone. */
   border-bottom: 1px solid var(--ws-edge);
@@ -269,8 +269,10 @@
   /* ⚠️ NO PADDING AND NO HEIGHT. Both were the plate's: 30px of its own inset, and `height: 100%`
      of a fixed-height card. In flow the masthead is sized by its contents and inset by the scroll
      row's gutter — which is what puts its mark on the same vertical as the content below it, on
-     every page, without either of them naming a number. */
-  display: flex; align-items: center; gap: 16px;
+     every page, without either of them naming a number.
+     ⚠️ CENTRED (masthead measure, §2). Mark · text · mirrored mark, the row centred between them —
+     a title page rather than a left-aligned header bar. */
+  display: flex; align-items: center; justify-content: center; gap: 22px;
 }
 
 /* ⚠️ THE FLEX CONTRACT, and the truncation ORDER: the description truncates first. Title and
@@ -281,16 +283,19 @@
    notes in AllManuscripts.tsx and ComparableTitlesPage.tsx. */
 /* ⚠️ .22s ON GEOMETRY, .14s ON FADES (spec §2, ref 84). One curve throughout — a fade that outlasts
    the collapse leaves the mark visible over a row that has already closed. */
-/* ⚠️ NO TRANSITION — it tweened the mark THROUGH the condense, and nothing condenses. Step 3
-   gives the fill pages a collapse, and that animates the masthead as a whole rather than each
-   of its parts separately. */
-.wsh-mark { flex: 0 0 38px; }
+/* ⚠️ NO TRANSITION — it tweened the mark THROUGH the condense, and nothing condenses; the fold
+   animates the masthead as a whole rather than each of its parts separately.
+   ⚠️ ONE SIZE FOR BOTH FAMILIES (masthead measure, §2) — 52px, illustrated or monoline. */
+.wsh-mark { flex: 0 0 52px; }
+/* ⚠️ THE SECOND MARK IS THE FIRST, FLIPPED — one drawing, rendered twice. A separate asset would be
+   two things to keep in step for a symmetry that is purely optical. The flip is applied to the
+   DRAWING, further down; see the note there for why it cannot live on this box. */
 /* ⚠️ 64 → 88 (preset B) — the illustrated mark only. The 38px monoline glyph on its parchment
    plate is the OTHER mark family and is deliberately untouched: it is a plated icon, not a
    drawing, and scaling it with the illustration would turn a small badge into a large blank tile.
    Two legitimate rest sizes, 38 and 88, and the matrix asserts exactly those two. */
-.wsh-mark--xl { flex: 0 0 52px; }
-.wsh-txt { display: flex; flex-direction: column; min-width: 0; flex: 0 1 auto; }
+
+.wsh-txt { display: flex; flex-direction: column; min-width: 0; flex: 0 1 auto; text-align: center; }
 /* ⚠️ 600 IS A TOKEN, NOT A LITERAL, AND IT MUST NOT PROPAGATE (amendment 12). Every other Playfair
    heading in the shell is 500; this plate is the one place that goes heavier, so the weight is
    named where it is used and read once. A bare `600` here would be indistinguishable from the
@@ -401,7 +406,7 @@
      `#8a7a70`: this rule carried the near-identical literal `#6b5a51` for its whole life, and
      importing a fifth warm ink from a document drawn against its own palette is how a scale drifts.
      Size from the ref, colour from the scale. */
-  margin: 6px 0 0; font-size: 13.5px; color: var(--shell-ink-soft);
+  margin: 4px 0 0; font-size: 13.5px; color: var(--shell-ink-soft);
   /* ⚠️ IT DECLARES ITS OWN LINE-HEIGHT OR IT INHERITS THE PAGE'S, AND THE PAGES DISAGREE. Measured
      on the built dev bundle at 1440×900 with every other value identical — same 26/20 padding, same
      30px title, same 16px margin, nothing between the masthead and the control row — the text block
@@ -428,21 +433,14 @@
    masthead that had actions. It has none — the guard in PageHeader throws if a page passes one —
    so both elements are gone from the markup and their rules with them. */
 
-/* ⚠️ THE PLATE IS WARM AND REALLY BORDERED — a translucent plate read fine on sage and DISSOLVES
-   on white, which is why it grew to 38px and gained `--shell-line`, the same warm hairline the
-   ghost button already uses. `--paper` sits it with the page's warm surfaces rather than pinning
-   one hex. */
-.wsh-mark .os-mark {
-  width: 38px; height: 38px; flex: 0 0 38px; border-radius: 9px;
-  background: var(--shell-card);
-  border: 1px solid var(--shell-line);
-  box-shadow: none;
-}
-.wsh-mark .os-mark svg { width: 20px; height: 20px; stroke: var(--shell-ink); stroke-width: 1.5; }
-
 /**
- * ⚠️ THE 64px MARK IS BARE — no plate, no border. The drawing carries its own outline, and a
- * parchment plate at this size competes with it rather than seating it.
+ * ⚠️ ONE BOX FOR BOTH MARK FAMILIES, AND IT IS BARE (masthead measure, §2; ref 173). 52px, no
+ * plate, no border, illustrated or monoline.
+ *
+ * ⚠️ THE PLATE'S REASONING WENT WITH THE PLATE. The rule was "illustrated → 52 bare, monoline → 38
+ * on a parchment plate", because scaling a PLATED glyph to an illustration's size "turns a small
+ * badge into a large blank tile". True of a plate, and there is no longer a plate: what remains at
+ * 52px is a drawing in open space, which is what the illustrated marks already were.
  *
  * ⚠️ AND IT MULTIPLIES, because the artwork is drawn on WHITE PAPER, not transparency. On this
  * header the ground is the window's white, so multiply is a no-op visually — but it is what keeps
@@ -453,16 +451,29 @@
  * 0.28s. The mark is held at opacity 0 until the animation ends, exactly as the dashboard marks
  * are. See the CLAUDE.md entry; do not remove this as redundant.
  */
-.wsh-mark--xl .os-mark {
+.wsh-mark .os-mark {
   width: 52px; height: 52px; flex: 0 0 52px;
   background: none; border: none; box-shadow: none; border-radius: 0;
 }
-.wsh-mark--xl .os-mark img {
+.wsh-mark .os-mark img {
   width: 100%; height: 100%; object-fit: contain; display: block;
   mix-blend-mode: multiply;
 }
-.wsh-mark--xl .os-mark svg { width: 34px; height: 34px; }  /* the degrade path, still centred */
-.agl-anim .wsh .wsh-mark--xl .os-mark img { opacity: 0; }
+/* 36px in a 52px box — ref 173's `.mmk`. The monoline glyphs were drawn for a 38px plate at 20px
+   and scale as vectors, so this is the same drawing larger, not a different weight. */
+.wsh-mark .os-mark svg { width: 36px; height: 36px; stroke: var(--shell-ink); stroke-width: 1.5; }
+.agl-anim .wsh .wsh-mark .os-mark img { opacity: 0; }
+
+/**
+ * ⚠️ THE MIRROR IS ON THE DRAWING, NOT ON THE BOX — and that is not tidiness, it is the blend group.
+ * A `transform` creates a stacking context, which ISOLATES `mix-blend-mode` in everything beneath
+ * it: `transform` on `.wsh-mark--mirror` would stop the right-hand mark multiplying while the
+ * left-hand one still did, so the two copies of one drawing would differ the moment the header sat
+ * on anything but white. Transforming the blending element ITSELF does not isolate it — the
+ * stacking context it forms governs its descendants, not its own compositing with the backdrop.
+ * This is the same trap the note above describes for the entrance animation, one level down.
+ */
+.wsh-mark--mirror .os-mark > * { transform: scaleX(-1); }
 
 /**
  * ⚠️ REDUCED MOTION KILLS THE TRANSITIONS, NEVER THE STATES. The plate must still condense — the

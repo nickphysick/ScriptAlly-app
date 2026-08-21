@@ -212,7 +212,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    * edges at three window widths rather than naming a figure — a hardcoded number here would have
    * to be edited every time either token moved, which is how a lock stops describing the design.
    */
-  it("⚠️ THE MASTHEAD ESCAPES THE CONTENT GUTTER TO ITS OWN INSET, through one token", () => {
+  it("⚠️ THE MASTHEAD TAKES THE PAGE'S MEASURE AND STATES NO WIDTH OF ITS OWN", () => {
     /* ⚠️ THIS REVERSES WHAT STOOD HERE, ON THE PACK'S TERMS. The old rule was a RELATIONSHIP:
        content = window − 2×gutter, header = content − 2×inset, so the plate sat `--header-inset`
        inside the cards it floated above. A plate was an object and an object needs a margin.
@@ -384,13 +384,13 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        `.wpg--tools` zeroing whichever had not paid.
 
        There is no chrome boundary now. The masthead is the first thing in the scroller and states
-       its own air: 26 above, 20 below, then its hairline, then 16 to whatever follows. One element
+       its own air: 24 above, 18 below, then its hairline, then 16 to whatever follows. One element
        declares all of it, so nothing can pay it twice and there is nothing to arbitrate. */
     const header = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8");
     const wsh = /\.wsh\s*\{([^}]*)\}/.exec(header);
     expect(wsh, "the masthead has no rule at all").toBeTruthy();
     const body = wsh![1].replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(body, "the masthead stopped stating its own vertical air").toContain("padding: 26px 0 20px");
+    expect(body, "the masthead stopped stating its own vertical air").toContain("padding: 24px 0 18px");
     expect(body, "the masthead lost the gap to whatever follows it").toContain("margin-bottom: 16px");
 
     /* ⚠️ AND NEITHER GRID ROW MAY RE-ADD ONE. A `padding-top` on the scroller would sit ABOVE the

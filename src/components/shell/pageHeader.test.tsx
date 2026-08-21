@@ -215,7 +215,7 @@ describe("the masthead is content, not chrome", () => {
     }
     /* what it DOES draw: the closing hairline, and the air around it */
     expect(wsh).toContain("border-bottom: 1px solid var(--ws-edge)");
-    expect(wsh).toContain("padding: 26px 0 20px");
+    expect(wsh).toContain("padding: 24px 0 18px");   /* 26/20 → 24/18 at §2, per ref 173 */
     expect(wsh).toContain("margin-bottom: 16px");
   });
 
@@ -265,14 +265,40 @@ describe("the masthead is content, not chrome", () => {
     }
   });
 
-  it("⚠️ ONE MARK SIZE PER FAMILY — 52 bare, 38 plated, and the pair is the rule", () => {
-    /* `markHasArt` decides, never a prop: a page converts when its drawing lands rather than when
-       someone remembers to pass a size. Scaling the plated glyph WITH the illustration would turn a
-       small badge into a large blank tile, which is why the two families do not share a number. */
-    expect(all(hdrCss, ".wsh-mark--xl")).toContain("flex: 0 0 52px");
-    expect(all(hdrCss, ".wsh-mark--xl .os-mark")).toContain("width: 52px");
-    expect(all(hdrCss, ".wsh-mark")).toContain("flex: 0 0 38px");
-    expect(all(hdrCss, ".wsh-mark .os-mark")).toContain("width: 38px");
+  it("⚠️ ONE MARK SIZE, BOTH FAMILIES, AND THE SECOND IS THE FIRST FLIPPED", () => {
+    /* ⚠️ THE TWO-SIZE RULE IS SUPERSEDED (masthead measure, §2). It was "illustrated → 52 bare,
+       monoline → 38 on a parchment plate", because scaling a PLATED glyph up "turns a small badge
+       into a large blank tile" — reasoning about the PLATE, which is gone. `markHasArt` no longer
+       decides anything here; it still governs the dashboard's marks and keeps its own lock. */
+    expect(all(hdrCss, ".wsh-mark"), "the mark box left 52px").toContain("flex: 0 0 52px");
+    expect(all(hdrCss, ".wsh-mark .os-mark"), "the drawing left 52px").toContain("width: 52px");
+    const live = decls(hdrCss);
+    expect(live, "`--xl` came back — one box, one size, and the modifier has nothing left to modify")
+      .not.toMatch(/["\s.]wsh-mark--xl[\s.{,]/);
+    for (const plate of ["border: 1px solid var(--shell-line)", "border-radius: 9px"]) {
+      expect(decls(all(hdrCss, ".wsh-mark .os-mark")), `the plate came back (\`${plate}\`)`).not.toContain(plate);
+    }
+    /* ⚠️ THE MIRROR IS ON THE DRAWING, NOT THE BOX, AND THAT IS THE BLEND GROUP. A `transform` on
+       `.wsh-mark--mirror` would form a stacking context, isolating `mix-blend-mode` beneath it — so
+       the right-hand mark would stop multiplying while the left one still did, and one drawing would
+       render as two different things anywhere but on white. */
+    expect(all(hdrCss, ".wsh-mark--mirror .os-mark > *"), "the mirror stopped flipping the drawing")
+      .toContain("transform: scaleX(-1)");
+    expect(decls(all(hdrCss, ".wsh-mark--mirror")), "the mirror moved onto the BOX — it isolates the blend group there")
+      .not.toMatch(/\.wsh-mark--mirror\s*\{[^}]*transform/);
+  });
+
+  it("⚠️ THE ROW IS CENTRED AND HIDE IS NOT IN IT", () => {
+    /* A title page, not a header bar: mark · text · mirrored mark, centred between them. Hide's
+       absolute positioning is load-bearing rather than cosmetic — ANY in-flow control on one side
+       shifts the centred block off true by half its own width, and it would do so silently. */
+    expect(all(hdrCss, ".wsh-row"), "the masthead row stopped centring").toContain("justify-content: center");
+    expect(all(hdrCss, ".wsh-txt"), "the text block stopped centring").toContain("text-align: center");
+    const grid = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8");
+    const hide = /\.wpg-mast-hide\s*\{([^}]*)\}/.exec(grid);
+    expect(hide, "Hide has no rule at all").toBeTruthy();
+    expect(hide![1], "Hide joined the flow — the centred block is now off true by half its width")
+      .toContain("position: absolute");
   });
 
   it("⚠️ ONE TITLE SIZE — the solo step is retired with the fixed height", () => {

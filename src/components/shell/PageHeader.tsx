@@ -26,7 +26,7 @@
  */
 import React from "react";
 import { MoreHorizontal } from "lucide-react";
-import { OneScreenMark, MarkName, markHasArt } from "../dashboard/OneScreenMark";
+import { OneScreenMark, MarkName } from "../dashboard/OneScreenMark";
 import "./pageHeader.css";
 
 
@@ -90,10 +90,14 @@ export interface PageHeaderProps {
   /** The masthead's mark: 52px BARE when the name has artwork, 38px on its parchment plate when
    *  it is a monoline glyph. Required when `variant="workspace"`; ignored otherwise. */
   mark?: MarkName;
-  /* ⚠️ THERE IS NO `markSize` PROP, and its removal was the point. It was a KNOB — any page could
-     ask for any size — and the size is a RULE: illustrated → 52px bare, monoline → 38px on a plate.
-     `markHasArt` decides, so a page converts when its drawing lands rather than when someone
-     remembers to pass a prop. See the note on `markHasArt` in OneScreenMark.tsx. */
+  /* ⚠️ THERE IS NO `markSize` PROP, and its removal was the point: the size is a RULE, not a knob
+     any page can turn.
+     ⚠️ AND IT IS NOW ONE SIZE FOR BOTH MARK FAMILIES — 52px, in a bare box, illustrated or monoline
+     (masthead measure, §2). The previous rule was "illustrated → 52 bare, monoline → 38 on a
+     parchment plate", on the reasoning that scaling a PLATED glyph up "would turn a small badge into
+     a large blank tile". That reasoning was about the plate, and the plate is gone: ref 173 draws a
+     bare 52px box with the glyph at 36, which is a drawing rather than a badge at either size. So
+     `markHasArt` is no longer read here — one box, one size, mirrored on the right. */
   actions?: PageHeaderActions;
   /**
    * The `full` layout's tool row. ⚠️ REJECTED BY `workspace`, WHICH THROWS — see the guard in the
@@ -244,12 +248,16 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
          element draws its own closing hairline and the gap beneath it — see pageHeader.css. */
       <header className="wsh">
         <div className="wsh-row">
-          {/* ⚠️ DERIVED FROM THE ARTWORK, NEVER PASSED IN — see the `markHasArt` note. The
-              illustrated mark is 52px and BARE; a monoline glyph keeps its parchment plate at its
-              own family size, because scaling a plated icon to an illustration's size turns a small
-              badge into a large blank tile. Two rest sizes, and the matrix asserts exactly those. */}
+          {/**
+            * ⚠️ TWO MARKS, THE SECOND MIRRORED, AND THE ROW CENTRED BETWEEN THEM (masthead measure,
+            * §2; ref 173). The masthead is a title page rather than a left-aligned header bar.
+            *
+            * ⚠️ THE SECOND IS `aria-hidden` AND SO IS THE FIRST — they are one ornament rendered
+            * twice, not two facts. A screen reader that announced the page's mark twice would be
+            * reporting a symmetry that means nothing to it.
+            */}
           {mark && (
-            <span className={`wsh-mark wsh-mark--${markHasArt(mark) ? "xl" : "md"}`}>
+            <span className="wsh-mark">
               <OneScreenMark name={mark} />
             </span>
           )}
@@ -262,6 +270,11 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
                 in flow there is no height to keep, so a title-only page is simply shorter. */}
             {description && <p className="wsh-sub">{description}</p>}
           </div>
+          {mark && (
+            <span className="wsh-mark wsh-mark--mirror">
+              <OneScreenMark name={mark} />
+            </span>
+          )}
         </div>
       </header>
     );
