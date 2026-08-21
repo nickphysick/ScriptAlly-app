@@ -187,8 +187,12 @@ describe("2 · every element of the mockup's Send journey exists in the rendered
      `.b-onband`. The pane contract supersedes that chassis with one card and three zones, so the
      checklist is its parts, read from its own markup. The CLAIM is unchanged: the pane is a port
      of its contract, and the contract is the input rather than a fixture. */
+  /* ⚠️ `story` LEFT THIS LIST WITH THE WRAPPER IT NAMED (steer round, Phase 4). `.fc > .rim` is
+     the card, so a `.story` div inside it was a fourth box; the updated contract has no such
+     element and the head, body and foot sit directly in the rim. `storycol` stays — the COLUMN is
+     still a part, and it is the one this list was really protecting. */
   const PANE_PARTS = ["pane", "band", "deed", "b-sub", "b-nav", "tiles", "tile",
-    "mid", "formcol", "storycol", "story", "actbar", "willrec", "ab"];
+    "mid", "formcol", "storycol", "actbar", "willrec", "ab"];
 
   it("the mockup emits every part this checks", () => {
     /* the guard on the guard: a part that stopped being in the ref would silently drop out */

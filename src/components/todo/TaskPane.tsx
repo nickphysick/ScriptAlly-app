@@ -244,9 +244,15 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
             {d.actSub && <div className="f-sub">{d.actSub}</div>}
             {d.body}
           </div></div></div></div>
+          {/* ⚠️ NO `.story` WRAPPER (steer round, Phase 4). `.fc > .rim` IS the card now, so a
+              `.story` div inside it was a fourth box around a card that already had three edges —
+              the card-within-card this phase retires from the form column, surviving here because
+              nothing had looked at the story column. The new contract has no such element: the
+              head, the body and the foot sit directly in the rim.
+              ⚠️ AND THE COMMENT IS OUTSIDE THE `&&` — a braced comment is a CHILD, and there is no
+              child position at the head of an expression. Second time tonight. */}
           {d.tl && (
             <div className="storycol"><div className="fc"><div className="rim">
-              <div className="story">
                 {/* ⚠️ THE HEAD AND THE RAIL WERE IN THE STYLESHEET AND NOT IN THE MARKUP. `.tl-head`,
                     `.tl-in` and `.tl` had rules — including the rail's own `::before` hairline —
                     and nothing rendered them, so the story was a bare stack of rungs beside a
@@ -266,7 +272,6 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                     </a>
                   </div>
                 )}
-              </div>
             </div></div></div>
           )}
         </div>
