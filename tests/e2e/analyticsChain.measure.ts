@@ -21,10 +21,11 @@
  * THE RULE THIS RECORDS: a scroll assertion on a page that does not currently overflow asserts
  * nothing. Make it overflow, then ask which element took the scroll.
  *
- * ⚠️ IT RUNS AGAINST WHATEVER `SA_E2E_BASE_URL` NAMES. The suite's default is the deployed dev
- * site, deliberately; this was written against a local server while the page is unshipped, and
- * that difference is stated here rather than left for a reader to infer. Re-run it against the
- * deployed site once the page is live.
+ * ⚠️ IT RUNS AGAINST WHATEVER `SA_E2E_BASE_URL` NAMES, AND THERE IS NO LONGER A DEFAULT — an unset
+ * target now fails at config load rather than quietly resolving to the deployed dev site. This was
+ * written against a local server while the page is unshipped, and that difference is stated here
+ * rather than left for a reader to infer. Re-run it with `SA_E2E_BASE_URL=dev` once the page is
+ * live.
  */
 import { test, expect } from "@playwright/test";
 import { openRoute, scrollbarWidth } from "./measure";
