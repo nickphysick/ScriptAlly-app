@@ -154,9 +154,24 @@ export function paneCommitValues(inp: PaneCommitInput): JourneySendValues {
     /* "Anything else going with it?" travels WITH the parcel — the committer appends it to materials */
     also: body.alongside,
     method,
-    /* ⚠️ AN UNANSWERED DAY REACHES THE COMMITTER AS `""`. The gate has already refused to commit any
-       journey that requires one, so this is only ever the shape of a journey that does not. */
-    sentDate: sent ?? "",
+    /**
+     * ⚠️ A CHASE HAS NO REQUIRED DAY AND ITS COMMITTER NEEDS ONE, SO THE DAY IS TODAY.
+     *
+     * Measured, not reasoned: an empty string reached `commitChaseFromPane`, which builds the
+     * check-back with `new Date("" + "T12:00:00")` — an Invalid Date whose `.toISOString()` THROWS.
+     * The throw landed in an async callback nobody awaited, so the primary wrote nothing, said
+     * nothing, and left the card exactly where it was. Silent, and indistinguishable from a button
+     * that does not work.
+     *
+     * Today is the value the quick rail already stamps (`quickNudgePayload`'s `nowIso`) for the
+     * same act, so this is the shared default rather than a second answer — and the form still
+     * renders its When section, so a writer who names a day is recorded on that day instead.
+     *
+     * ⚠️ EVERY OTHER JOURNEY KEEPS THE EMPTY STRING, deliberately. `send`, `close` and `fix` all
+     * require a day or never read one, so a fallback there would put a date in the record that
+     * nobody chose — which is the fault this pane exists to remove.
+     */
+    sentDate: sent ?? (kind === "chase" ? ymd(now) : ""),
     /* "Anything else? OPTIONAL" is the remembered note, not part of the parcel */
     note: body.also,
     checkBackDays: DEFAULT_CHECKBACK_DAYS,

@@ -95,7 +95,7 @@ import { ArtSlot } from "./ArtSlot";
 import { TaskPane } from "./TaskPane";
 import { TaskPaneBody, SendBodyValues, EXPECT_WEEKS } from "./TaskPaneBody";
 import { buildJourney } from "../../lib/taskPaneJourney";
-import { journeyKind, firstMissing, isBulkCard, unanswered, missingPhrase, anchorFor, type GateAnswers, type ReqField } from "../../lib/paneGate";
+import { journeyKind, firstMissing, isBulkCard, unanswered, missingPhrase, anchorFor, type GateAnswers, type ReqField, requiredFor } from "../../lib/paneGate";
 import { agentWindowMs } from "../../lib/expectedDate";
 import { getStatusLabel } from "../StatusPill";
 import { BulkFillTable } from "./BulkFillTable";
@@ -1998,10 +1998,25 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                         }} />
                       ) : (
                       <TaskPaneBody
-                        /* ⚠️ THE QUESTION IS ASKED ONLY WHERE A PARCEL IS GOING — `sendSpecFor` is
-                           what already decides partial-versus-full, so this cannot come to disagree
-                           with the deed above it about whether there is anything to send. */
-                        sample={!!sendSpecFor(paneCard)}
+                        /**
+                         * ⚠️ THE PARCEL SECTION IS DRAWN WHERE THE DECLARATION REQUIRES A PARCEL —
+                         * the same list the gate refuses on (steer round's law, applied where it
+                         * had not been).
+                         *
+                         * It asked `sendSpecFor`, which answers a DIFFERENT question: "what should
+                         * go now". A materials fill-in is recording what ALREADY went, so that is
+                         * null — and the section vanished while `requiredFor("fix")` still demanded
+                         * a parcel. Measured: the single fill-in's primary read "Log as sent · 1 to
+                         * answer" with no unit section anywhere on the page, so it could never be
+                         * satisfied and the jump target `#s-unit` did not exist. A permanently
+                         * inert primary, and the gate was correct throughout — the form was short a
+                         * section.
+                         *
+                         * Reading one list makes that shape impossible: a question the gate can
+                         * require is a question the form asks, by construction.
+                         */
+                        sample={requiredFor(journeyKind(paneCard)).includes("unit")}
+                        expectations={requiredFor(journeyKind(paneCard)).includes("expect")}
                         statedWeeks={statedWeeks(paneCard)}
                         /* the note's own words and its date — the centrepiece, and the one line
                            beneath. Both derived from the task the writer wrote, never restated. */

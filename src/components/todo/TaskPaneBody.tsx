@@ -126,6 +126,17 @@ export interface TaskPaneBodyProps {
    */
   sample?: boolean;
   /**
+   * ⚠️ THE EXPECTATION PAIR IS ITS OWN FLAG, because it answers a different question from the
+   * parcel (popup round, Phase 3). Both hung off `sample`, so drawing the parcel section on the
+   * materials fill-in — which records what ALREADY went — also asked when a reply is expected and
+   * when to be reminded about it. Those are questions about a send that is about to happen, and
+   * this journey is about one that already did.
+   *
+   * Each section is drawn where the declaration names it, which is the same list the gate refuses
+   * on: a question the writer is asked is a question that can be required, and the reverse.
+   */
+  expectations?: boolean;
+  /**
    * ⚠️ A NOTE'S OWN WORDS, AS THE CENTREPIECE (finishing round, Phase 5). Present only on the note
    * journey, and its presence is also what removes the When section: a note is dated by the tick,
    * so asking when it happened is asking about an event that has not happened yet.
@@ -156,7 +167,7 @@ const todayYmd = (): string => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
-export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sample, note, statedWeeks, nextId, upsell }) => {
+export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sample, expectations, note, statedWeeks, nextId, upsell }) => {
   /* one helper, so no section can decide for itself whether it is next */
   const sect = (id: string) => (id === nextId ? "sect next" : "sect");
   return (
@@ -233,7 +244,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
         THE THING IS TOUCHABLE. The questions keep their quiet hint lines and nothing else.
         ⚠️ AND THE COMMENT IS OUTSIDE THE `&&`, not braced inside it — a braced comment is a CHILD,
         and there is no child position at the head of an expression. */}
-    {sample && (<>
+    {expectations && (<>
       <div className={sect("s-expect")} id="s-expect">
         <label className="f-lbl" data-req="expect">When do you expect to hear back?</label>
         <div className="seg" style={{ marginBottom: 11 }}>

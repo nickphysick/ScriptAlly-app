@@ -13,6 +13,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { paneCommits, paneCommitValues, paneSentYMD, paneExpectISO, paneNudgeISO } from "./paneCommit";
 import type { JourneyKind } from "./paneJourney";
+import { requiredFor as requiredForGate } from "./paneGate";
 import type { SendBodyValues } from "../components/todo/TaskPaneBody";
 import { materialRowsFromAgent } from "./agentMaterials";
 import { DEFAULT_CHECKBACK_DAYS } from "./todoWalk";
@@ -241,4 +242,73 @@ describe("⚠️ the takeover survives; the pane's orphans do not", () => {
     "%s stays deleted", (name) => {
       expect(page, `${name} came back`).not.toMatch(new RegExp(`function\\s+${name}\\s*\\(`));
     });
+});
+
+/**
+ * ⚠️ THE CHASE'S DAY, AND WHY IT IS THE ONE JOURNEY WITH A FALLBACK (popup round, Phase 3).
+ *
+ * Found by measurement, not by reading: the chase requires no day, so `sentDate` reached
+ * `commitChaseFromPane` empty, and its check-back arithmetic — `new Date("" + "T12:00:00")` —
+ * produced an Invalid Date whose `.toISOString()` throws. The throw landed in an async callback
+ * nobody awaited: the primary wrote nothing, said nothing, and left the card where it was.
+ */
+describe("⚠️ the chase commits with a real day", () => {
+  it("an unanswered chase takes today — the day the quick rail already stamps", () => {
+    const v = paneCommitValues({ kind: "chase", now: NOW, body: body() });
+    expect(v.sentDate).toBe("2026-08-21");
+  });
+
+  /** the arithmetic the committer performs, run here so an Invalid Date fails at the seam */
+  it("its check-back is a real instant, not an Invalid Date", () => {
+    const v = paneCommitValues({ kind: "chase", now: NOW, body: body() });
+    const check = new Date(new Date(`${v.sentDate}T12:00:00`).getTime() + v.checkBackDays * 86400000);
+    expect(Number.isNaN(check.getTime()), "the check-back date is invalid — .toISOString() will throw")
+      .toBe(false);
+    expect(() => check.toISOString()).not.toThrow();
+  });
+
+  it("a writer who names a day is recorded on that day, not on today", () => {
+    const v = paneCommitValues({ kind: "chase", now: NOW, body: body({ when: { kind: "yesterday" } }) });
+    expect(v.sentDate).toBe("2026-08-20");
+  });
+
+  /**
+   * ⚠️ AND NO OTHER JOURNEY GAINS ONE. `send`, `close` and `fix` either require a day or never read
+   * it, so a fallback there would put a date in the record that nobody chose.
+   */
+  it("the fallback is the chase's alone", () => {
+    for (const k of ["send", "close", "fix", "materials", "note"] as JourneyKind[]) {
+      expect(paneCommitValues({ kind: k, now: NOW, body: body() }).sentDate,
+        `${k} invented a day nobody chose`).toBe("");
+    }
+  });
+});
+
+/**
+ * ⚠️ THE FORM DRAWS WHAT THE GATE REQUIRES (popup round, Phase 3) — found by measurement, and it
+ * had made one primary permanently inert.
+ *
+ * `sample` was `!!sendSpecFor(card)`, which answers "what should go NOW". A materials fill-in is
+ * recording what ALREADY went, so that is null — and the parcel section vanished while
+ * `requiredFor("fix")` still demanded a parcel. On the page: the primary read "Log as sent · 1 to
+ * answer", no unit section existed anywhere, and the jump target `#s-unit` was not in the document.
+ * Unsatisfiable, with the gate correct throughout — the form was short a section.
+ */
+describe("⚠️ a question the gate can require is a question the form asks", () => {
+  it("the parcel section is drawn from the declaration, not from what should go next", () => {
+    expect(page, "the parcel section stopped reading the declaration")
+      .toContain('requiredFor(journeyKind(paneCard)).includes("unit")');
+    expect(page, "`sendSpecFor` decides the parcel section again — a fill-in has none")
+      .not.toContain("sample={!!sendSpecFor(paneCard)}");
+  });
+
+  /**
+   * ⚠️ AND THE TWO JOURNEYS THAT REQUIRE A PARCEL ARE THE TWO THAT RECORD ONE. Stated as a set so
+   * a journey gaining the requirement without gaining the section fails here rather than on a page.
+   */
+  it("exactly the journeys that require a parcel are send and the fill-in", () => {
+    const withUnit = (["send", "chase", "close", "fix", "bulk", "note", "decide"] as const)
+      .filter((k) => requiredForGate(k).includes("unit"));
+    expect(withUnit).toEqual(["send", "fix"]);
+  });
 });

@@ -1,0 +1,9 @@
+docked, primary = Log 0 queries
+table: {"table":true,"ticks":10,"first":{"label":"Covering letter — Rosalind Vale","disabled":false,"pressed":"false","cls":"tick"},"rows":5}
+  at 80ms: aria-pressed = false · primary = Log 0 queries
+  at 250ms: aria-pressed = false · primary = Log 0 queries
+  at 600ms: aria-pressed = false · primary = Log 0 queries
+  at 1200ms: aria-pressed = false · primary = Log 0 queries
+  at 2500ms: aria-pressed = false · primary = Log 0 queries
+after a real click, primary = Log 0 queries
+first tick now: false/tick

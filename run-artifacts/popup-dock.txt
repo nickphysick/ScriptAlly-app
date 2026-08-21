@@ -1,0 +1,34 @@
+Close
+  clicked: Clo eCon ider clo ingDevendra Rao · Rao Agencyquiet fo
+  selected: Clo eCon ider clo ingDevendra Rao · Rao Agencyquiet fo
+  deed: Con ider clo ing your query for The Quiet Fi
+  primary: Log the close1 to answer
+  sections: ["s-when"]
+
+Chase
+  clicked: Cha eWorth a nudgeQuiet for 0 day  — pa t their  tated
+  selected: Cha eWorth a nudgeQuiet for 0 day  — pa t their  tated
+  deed: Worth a nudge
+  primary: I've nudged them
+  sections: ["s-when"]
+
+Send
+  clicked: SendSend your partialMarcu  Reed · Reed & Partner no d
+  selected: SendSend your partialMarcu  Reed · Reed & Partner no d
+  deed: Send your partial manu cript for The Smoke T
+  primary: Log as sent4 to answer
+  sections: ["s-unit","s-when","s-expect","s-remind"]
+
+Note
+  clicked: NoteNudge Sam Okoroadded3 day  ago
+  selected: DecideReply to the offerNoah Bright offered repre enta
+  deed: Reply to the offer
+  primary: Reply to the offer
+  sections: ["s-when"]
+
+Fix
+  clicked: FixFill in what you  entagent not  pecified · imported
+  selected: FixFill in what you  entagent not  pecified · imported
+  deed: Fill in what you  ent
+  primary: Log as sent2 to answer
+  sections: ["s-unit","s-when","s-expect","s-remind"]
