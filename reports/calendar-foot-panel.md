@@ -3,7 +3,13 @@
 **Session:** `calendar` · 22 Aug 2026, overnight, unattended.
 Prior: `calendar-finishing.md` and the seven reports before it.
 
-> **DEPLOY — filled in at Phase 3.**
+> # ✅ DEPLOYED — **https://scriptally-dev.web.app** → Tasks → Calendar
+>
+> All four conditions passed: `tsc` **0**, Vitest **6320 passed / 0 failed**, build exit 0 with the
+> dev target guard, and **no uncommitted source from any session** at build time — the noteboard
+> session committed its finish (P1+P2) minutes before the deploy, so their two commits ride along,
+> named under flag 6. The Phase 3 acceptance was then **re-run against the deployed site** and
+> passed at all three widths.
 
 ---
 
@@ -99,3 +105,106 @@ unaffordable slice — closing it costs ~1.2px per row of the 4px cushion. Flagg
 > change**, and the "after" measurement read the legend still 1px from the frame. The measurement
 > caught it; the edit now asserts its needle matched. The same shape as a lock reading the wrong
 > artefact: the tool reported success about work it never did.
+
+---
+
+## Phase 2 — the collapsible day panel
+
+Committed as `2244fd6d` + the parked-pointer guard in `ed50eebf`. The shape:
+
+- **One chevron, one mount** — absolutely positioned against the layout, moved by the collapse
+  class. Open it straddles the panel's left edge and points **›** ("push it away"); collapsed it
+  straddles the widened month's right edge and points **‹**. A mount per state would remount the
+  control on toggle and drop keyboard focus; one element keeps focus across the toggle with no
+  machinery. `aria-expanded`, verb-first names, the page's button grammar, the segment's focus ring.
+- **The panel width became a token** (`--cal-panel-w`) because two rules now read it — the grid
+  template and the chevron's open position. One owner; a lock asserts exactly one literal.
+- **Hidden, never unrendered** — `display: none` keeps `CalDayPanel` mounted, so an expanded record
+  row and the panel's scroll survive a collapse, and the narrow world keeps its panel.
+- **Below 1080 the state is ignored BY CONSTRUCTION**: the collapse rules live inside
+  `@media (min-width: 1080px)`, so the class has no rules in the narrow layout and the chevron hides
+  in the narrow block. No width check in the component.
+- **Reopen-on-read rides the three selection helpers** — `selectDay`, `focusCard`, `focusRecord` —
+  so a pip, a ghost, a record pill and whitespace all reopen a collapsed panel by one rule, and a
+  future fourth caller inherits it.
+- **Screenshot:** `reports/calendar-foot/collapsed-1440.png` — full-width month, chevron on the
+  right edge, today ringed, legend breathing.
+
+## Phase 3 — measured, then re-measured on the deployed site
+
+```
+@1000  narrow: chevron hidden · panel visible · cushion 13 · foldShort none
+@1440  grid 682 → 1070 (= the layout's own width) · cushion 4 → 4 · fold clean both states
+@1920  grid 1162 → 1550 (= the layout's own width) · cushion 4 → 4 · fold clean both states
+       click day 14 while collapsed → panel reopened, day 14 selected
+       click-away: ground collapses · kind menu + command bar + nav do not
+       sub-1080 overlap fix intact: grid ends 913, panel starts 956 — 43px clear
+```
+
+Full width is asserted as **equality with the layout's own box**, never "wider than before"; the
+overflow checks assert their population first; the nav is probed with a bare `pointerdown`, since a
+real click would navigate away mid-test.
+
+> **⚠️ AND THE SCREENSHOT CAUGHT WHAT NO ASSERTION DID — second pack running.** After clicking the
+> chevron, the month reflows under a STATIONARY pointer; the cell that slides beneath fires
+> `mouseenter` with no movement at all, and 450ms later **a peek bloomed uninvited over the freshly
+> widened month**. A peek is "450ms of uninterrupted hover", and hover is something the reader
+> *does* — layout arriving under a resting cursor is not it. The guard is a parked-pointer flag set
+> by the toggle and dropped on the first genuine `mousemove`; verified both ways (parked → no peek
+> at 900ms; a real move → peek as before), and the assertion is folded into the committed
+> acceptance.
+
+**Standing gap, restated plainly:** pointer interaction inside `FocusFlow` remains unverifiable in
+this harness, so **no completion write was made here and Undo stays unproven end-to-end.**
+
+---
+
+## FLAGS FOR NICK
+
+**1. Deployed —** yes; see the top. The acceptance was re-run against the deployed site after.
+
+**2. What the foot gap actually was.** Not a number — a difference in KIND, which is why three prior
+readings all said "parity": the chassis window is 20px from the viewport on every page *by
+construction*, and the pages differ one level in. **`/todo` (`.tdw-split`) and `/queries`
+(`.f12-body`) each carry a 32px bottom inset in their own page sheets; the Calendar carried none**,
+so its furniture ran to 1px of the window's frame — the day panel's card full-bleed, and the legend
+row sitting in what is clean paper on every other page. The v5 ref agrees with the siblings: it
+draws no legend and gives the layout a 28px ground band. Screenshots before/after side by side in
+`reports/calendar-foot/`.
+
+**What was fixed (cushion-neutral):** the legend's 25px of flow redistributed (`margin: 7px 0`) so
+it floats 8px clear of the frame; the day panel's card edge stopped on the grid's own bottom line
+(26px of ground) — free, because the panel's body is its own scroller. **What was NOT fixed, and is
+yours:** the remaining 7px (calendar cards at 854 vs siblings at 847; 26px of ground vs 33). A full
+32px band off a `minmax(0,1fr)` grid is **5.3px off every row**, and the cushion at 900 is +4.0 —
+`data-fold-short` would appear at 1440×900. Phase 0B forbids spending it, so the last 7px is a
+daylight trade: either accept 26 vs 33, or buy it back from cell geometry with your eyes open.
+
+**3. How "outside the calendar" was scoped.** The listener hangs on the **page's own root**, never
+`document`. So the nav, the masthead and every portalled surface (peek, overlay, menus, toasts — all
+portalled to `document.body`) *cannot* collapse the panel, because the event never reaches the
+listener — the "a click that opens a menu is not a click away" rule falls out of the scoping rather
+than an exception list. Within the page, the exclusions are the pack's four by `closest()`: grid,
+panel, command bar (`.tpl-tools`, which contains the kind menu), chevron. **What the listener cannot
+see:** clicks on the shell's own furniture collapse nothing — the pack's stated trade, and it reads
+correctly anyway: leaving the page is not clicking away inside it.
+
+**4. The fold on collapse — clean, with the cushion intact.** The ResizeObserver fires on the
+grid's width change and the post-render `readMetrics` runs regardless, both pre-existing. Measured:
+`data-fold-short` absent in both states at both widths, no populated cell overflows in either
+state, and the cushion is **4 → 4** at 1440 and 1920 (13 at 1000, where the control is hidden) —
+the collapse changes width, never row height.
+
+**5. Nothing fought the chassis.** The collapse is entirely inside `.cal-layout` — a class on the
+page's own grid, hidden-not-unrendered panel, one positioned button. `workspaceShell.css` and
+`workspacePageGrid.css` untouched; the foot fix likewise never compensates for a chassis value (the
+32px siblings carry is *page* CSS, and the calendar's answer is its own band, not a copied
+constant).
+
+**6. Cross-session.** The noteboard session was **live throughout** — `nbRecon.measure.ts` written
+mid-run, `TodoNoteboardPage.tsx` carrying up to 7 in-flight `tsc` errors — so every measurement ran
+in a detached worktree on port 4272, removed at the end. They committed their finish just before my
+deploy: **ride-alongs `26c31f0b` (noteboard P1) and `a02b503f` (noteboard P2)**, plus this pack's
+four calendar commits and the previous pack's report. One tool-fault of mine recorded in the Phase 1
+commit: a `str.replace` whose needle omitted `ui-monospace` no-opped silently and the "after"
+measurement caught the unchanged page — the edit now asserts its needle matched.
