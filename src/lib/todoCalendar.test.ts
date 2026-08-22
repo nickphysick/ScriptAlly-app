@@ -724,14 +724,39 @@ describe("⚠️ the day panel replaces the modal, inside the chassis", () => {
     expect(decls(pageSrc)).not.toMatch(/kind:\s*"card"[^\n]*rec/i);
   });
 
-  it("⚠️ EDIT THIS ENTRY routes — no calendar-local editor, no second correction surface", () => {
-    expect(pageSrc).toContain("EDIT THIS ENTRY");
-    expect(pageSrc).toContain("OPEN QUERY");
+  /* ⚠️ RETARGETED (proposals pack, Phase 1b), and the LAW is unchanged: no calendar-local editor,
+     no second correction surface. What changed is the door — `EDIT THIS ENTRY` and `OPEN QUERY`
+     are retired with the heavy detail (they were two buttons routing to the same place, one of
+     them wearing a verb it could not perform, since `TimelineComposer` has no importer anywhere).
+     The single `Open in Query Centre ›` link is the whole action surface now. */
+  it("⚠️ the row ROUTES — no calendar-local editor, no second correction surface", () => {
+    expect(pageSrc).toContain("Open in Query Centre ›");
     expect(pageSrc).toContain("/queries?q=");
     const d = decls(pageSrc);
+    expect(d).not.toContain("EDIT THIS ENTRY");
     expect(d).not.toContain("editActivity");
     expect(d).not.toContain("deleteActivity");
     expect(d).not.toContain("TimelineComposer");
+  });
+
+  /* ⚠️ THE EXPANDED ROW IS AT MOST: the header, ONE context line, ONE link (proposals pack, Phase
+     1b — asserted as the pack asks). The panel is a reading surface, not a duplicate of the
+     reading pane; the old grid, deed sentence, logged-on line and second button are all fenced
+     out at source, over stripped text so the explaining comments cannot re-trip them. */
+  it("the expanded record row is headlines plus a link, and nothing else", () => {
+    const i = pageSrc.indexOf('<div className="cal-recdet">');
+    expect(i, "the detail container is missing — the slice would prove nothing").toBeGreaterThan(-1);
+    const det = pageSrc.slice(i, pageSrc.indexOf("</div>\n                  )}", i));
+    const d = decls(det);
+    expect(d).toContain('className="cal-recctx"');
+    expect(d).toContain('className="cal-reclink"');
+    expect(d).not.toContain("cal-recgrid");
+    expect(d).not.toContain("<dt>");
+    expect(d).not.toContain("exchangeLine");
+    expect(d).not.toContain("r.note");
+    expect(d).not.toContain("toLocaleDateString");
+    /* one link, not two */
+    expect((d.match(/onOpenQuery/g) ?? []).length).toBe(1);
   });
 
   it("⚠️ NO COMPOSER — one composer, on the To-do list, reached by the existing announcement", () => {
@@ -979,11 +1004,17 @@ describe("⚠️ the month is ONE panel, ruled — not forty-two floating cards"
     expect(d).not.toContain("#b3a394"); // the old floating-label ink
   });
 
-  it("weekends warm faintly; adjacent months dim; both by ground, not opacity", () => {
-    expect(calCss).toContain(".cal-cell:nth-child(7n + 6)");
-    expect(calCss).toContain(".cal-cell:nth-child(7n + 7)");
-    expect(calCss).toContain("background: #fbf7f0");
+  /* ⚠️ RETARGETED (proposals pack, Phase 1a): THE WEEKEND TINT IS REMOVED, on Nick's ruling. It
+     came from a mockup and stated something untrue about the data — a querying writer works
+     weekends and an agency's window does not pause for them. The two dimmings that SURVIVE are
+     true statements about the DATE: `.off` (another month) and `.lead` (`Upcoming only`'s
+     pre-today days). The opacity half of the old law is unchanged. */
+  it("weekends are NOT greyed; adjacent months dim by ground, not opacity", () => {
+    const d = decls(calCss);
+    expect(d).not.toContain(":nth-child(7n + 6)");
+    expect(d).not.toContain("#fbf7f0");
     expect(rule(".cal-cell.off")).toContain("background: #f8f4ed");
+    expect(rule(".cal-cell.lead")).toContain("background: #f8f4ed");
     // ⚠️ opacity is retired: it dimmed the pips too, and a real pip on an adjacent-month day is
     // still a real pip. The GROUND changes; what sits on it does not.
     expect(rule(".cal-cell.off")).not.toContain("opacity");
@@ -1050,8 +1081,10 @@ describe("⚠️ the record's chip reads as one control", () => {
        because the comment happens not to quote the full selector, which is luck, not a guard. */
     expect(decls(calCss)).not.toContain(".cal-recbtn[");
     expect(decls(calCss)).not.toMatch(/["\s`.]cal-recsw["\s`{,:]/);
-    /* and the live prefix collision is untouched */
-    expect(calCss).toContain(".cal-recbtn2");
+    /* ⚠️ RETARGETED (proposals pack, Phase 1b): `.cal-recbtn2` is RETIRED with the two buttons it
+       dressed, so the prefix collision this line guarded is history — asserted gone over stripped
+       CSS, since the sheet's retirement comment names the class. */
+    expect(decls(calCss)).not.toMatch(/["\s`.]cal-recbtn2["\s`{,:]/);
   });
 
   it("⚠️ prev/next carry a real glyph — the buttons were empty at 26px wide", () => {

@@ -115,10 +115,13 @@
 .cal-cell:nth-child(7n) { border-right: 0; }
 .cal-cell:nth-last-child(-n + 7) { border-bottom: 0; }
 
-/* ⚠️ WEEKENDS TAKE A FAINTLY WARMER GROUND, adjacent months a dimmer one — columns 6 and 7 of each
-   week, which are children 7n+6 and 7n+7 (again, the DOW row's copies are not `.cal-cell`). */
-.cal-cell:nth-child(7n + 6),
-.cal-cell:nth-child(7n + 7) { background: #fbf7f0; }
+/* ⚠️ WEEKENDS ARE NOT GREYED — the tint is REMOVED, on Nick's ruling (proposals pack, Phase 1a).
+   The warm wash on columns 6 and 7 came from a mockup and stated something untrue about the data:
+   a querying writer works weekends, and an agency's response window does not pause for them, so
+   shading two columns implied a rhythm the record does not have. Cells are uniform. The two
+   dimmings that SURVIVE are true statements about the DATE, not the day of the week: `.off`
+   (another month, below) and `.lead` (`Upcoming only`'s pre-today days). Do not reinstate the
+   weekend wash without a ruling — this is its second removal path if a future ref draws it. */
 .cal-cell.off { background: #f8f4ed; }
 .cal-cell.off .cal-dn { color: #cfc2b3; }
 
@@ -441,26 +444,21 @@
 .cal-recwho { color: #a2937f; }
 .cal-recchev { color: #c3b6a6; font-size: 9px; flex: none; }
 .cal-recdet { padding: 2px 9px 10px; }
-.cal-recgrid { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 0; }
-.cal-recgrid dt {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 6.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #b3a394;
-  padding-top: 3px;
+/* ⚠️ THE EXPANDED ROW IS HEADLINES PLUS A LINK (proposals pack, Phase 1b) — `.cal-recgrid`,
+   `.cal-recmuted`, `.cal-recnote`, `.cal-recacts` and `.cal-recbtn2` are RETIRED with the detail
+   they dressed: the key/value grid, the deed sentence, the logged-on line and the two buttons were
+   a duplicate of the reading pane, three inches from a link to the reading pane. One muted context
+   line, one link. (`cal-recbtn2` was also this file's recorded prefix collision with the retired
+   `cal-recbtn`; with both gone, the trap is history rather than live.) */
+.cal-recctx {
+  margin: 0 0 7px; font-size: 11.5px; color: #8a7a6c;
 }
-.cal-recgrid dd { margin: 0; font-size: 12px; color: #46372c; }
-.cal-recmuted { color: #a2937f; }
-.cal-recnote {
-  margin: 9px 0 0; padding: 6px 0 6px 9px; border-left: 2px solid #d8e0d6;
-  font-size: 12px; color: #5c4c3f;
+.cal-reclink {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font-size: 12px; color: #7c3a2a; text-align: left;
 }
-.cal-recacts { display: flex; gap: 7px; margin-top: 10px; }
-.cal-recbtn2 {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 6.5px; letter-spacing: 0.13em;
-  background: #fff; border: 1px solid #e7dcce; border-radius: 6px;
-  padding: 5px 8px; cursor: pointer; color: #6b5a4e;
-}
-.cal-recbtn2:hover { background: #faf7f2; }
+.cal-reclink:hover { text-decoration: underline; }
+.cal-reclink:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
 
 /* ── the empty day, and the foot ─────────────────────────────────────────────────────────────── */
 .cal-fpempty { padding: 34px 8px; text-align: center; }
@@ -537,7 +535,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cal-fprow, .cal-recmain, .cal-recbtn2, .cal-fpfootb, .cal-pip { transition: none; }
+  .cal-fprow, .cal-recmain, .cal-reclink, .cal-fpfootb, .cal-pip { transition: none; }
 }
 
 /* ══ THE HOVER PEEK (finishing pack, Phase 2; ref calendar-month-focus-v5.html) ═══════════════

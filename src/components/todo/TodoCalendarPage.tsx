@@ -33,7 +33,7 @@ import { BoardCard } from "../../lib/todoBoard";
 import {
   CalendarItem, calendarDays, monthGridDays, monthLabel,
   shiftMonth, sameMonth, calFoldCap, calFoldCapFolded,
-  RecordItem, recordDays, cellSlots, exchangeLine, dedupeAgainstRecord, pillLabel,
+  RecordItem, recordDays, cellSlots, dedupeAgainstRecord, pillLabel,
   FoldMetrics, FOLD_FALLBACK, foldMetricsFrom, foldFor, REC_TONE, REC_LEGEND,
   peekBox, PEEK_DELAY_MS, PEEK_SCALE, PEEK_OPACITY,
   CalMode, upcomingGridDays,
@@ -283,29 +283,24 @@ const CalDayPanel: React.FC<CalDayPanelProps> = ({
                   </button>
                   {open && (
                     <div className="cal-recdet">
-                      <dl className="cal-recgrid">
-                        {r.agent && (<><dt>Agent</dt><dd>{r.agent}{r.agency && <span className="cal-recmuted"> · {r.agency}</span>}</dd></>)}
-                        {title && (<><dt>Manuscript</dt><dd>{title}</dd></>)}
-                        {r.detail && (<><dt>What went</dt><dd>{r.detail}</dd></>)}
-                        <dt>Timeline</dt><dd>{exchangeLine(r)}</dd>
-                        <dt>Record</dt><dd>{new Date(`${r.ymd}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</dd>
-                      </dl>
-                      {r.note && <p className="cal-recnote">{r.note}</p>}
-                      <div className="cal-recacts">
-                        <button type="button" className="cal-recbtn2" onClick={() => onOpenQuery(r.queryId)}>
-                          OPEN QUERY
-                        </button>
-                        {/* ⚠️ THE CORRECTION UI IS UNREACHABLE, so this ROUTES rather than editing
-                            here (record-layer Step 0, flag 2). `TimelineComposer` holds the only
-                            `editActivity` call in a component and has NO importer anywhere in the
-                            repo — Queries.tsx:5388 claims it "survives for the dashboard's own
-                            flows"; there are none. A calendar-local editor is fenced out and would
-                            be a second correction surface besides. The reading pane is where the
-                            entry lives, so that is where the writer is sent. */}
-                        <button type="button" className="cal-recbtn2" onClick={() => onOpenQuery(r.queryId)}>
-                          EDIT THIS ENTRY
-                        </button>
-                      </div>
+                      {/* ⚠️ HEADLINES PLUS A LINK — the reduction is the point (proposals pack,
+                          Phase 1b). The expanded row carried Agent, Manuscript, What went,
+                          Timeline, Record, the deed sentence and two buttons: a duplicate of the
+                          reading pane, three inches from a link to the reading pane. The panel is
+                          a READING SURFACE; one muted context line names what this entry belongs
+                          to, and the link goes where the full record lives. The "Record" date line
+                          went because the row already sits on its date; the key/value grid and the
+                          deed went with the duplication.
+                          ⚠️ `EDIT THIS ENTRY` IS REMOVED, NOT RELOCATED. Correction belongs in the
+                          reading pane, which the link reaches — and `TimelineComposer` has no
+                          importer anywhere in the repo today, so the button could never have
+                          edited from here anyway (record-layer Step 0, flag 2, still true). */}
+                      <p className="cal-recctx">
+                        {[r.agency, title, `Exchange ${r.exchange}`].filter(Boolean).join(" · ")}
+                      </p>
+                      <button type="button" className="cal-reclink" onClick={() => onOpenQuery(r.queryId)}>
+                        Open in Query Centre ›
+                      </button>
                     </div>
                   )}
                 </div>
