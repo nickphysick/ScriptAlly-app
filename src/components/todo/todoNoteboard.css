@@ -276,11 +276,7 @@
   display: block; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: var(--nb-micro);
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--nb-muted); margin: 10px 0 4px;
 }
-.nb-pinput {
-  width: 100%; border: 1px solid rgba(124, 58, 42, 0.2); border-radius: 8px; padding: 8px 10px;
-  font: inherit; font-size: 13px; background: #fff; color: var(--nb-ink); outline: 0;
-}
-.nb-pinput:focus { border-color: var(--nb-burgundy); }
+/* `.nb-pinput` went with the popover's Task field (finish run, Phase 4) — one object, one text */
 
 /* ── the Examples drawer ───────────────────────────────────────────────────────────────────── */
 /* ⚠️ Z-ORDER, DELIBERATELY BELOW THE MODALS. The shell's ladder is timeline drawer 45/46, modals
