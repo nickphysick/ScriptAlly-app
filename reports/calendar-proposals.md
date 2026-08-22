@@ -10,14 +10,18 @@ is demo chrome and ships nowhere).
 > builds exit 0 with the target guard naming `scriptally-dev` and the prod id absent, and the full
 > Phase 6 acceptance passed at **1000 / 1440 / 1920** against a local preview.
 >
-> **What failed:** the noteboard session is mid-edit and **five of its source files are
-> uncommitted**, including the shared `src/types.ts`:
+> **What failed:** the noteboard session is mid-edit, with **five of its source files uncommitted**
+> at the deploy check — including, at that moment, the shared `src/types.ts`:
 >
 > ```
 >  M src/components/todo/TodoNoteboardPage.tsx      M src/lib/noteboard.ts
 >  M src/components/todo/todoNoteboard.css          M src/types.ts
 > ?? src/components/todo/noteboardExamplePapers.test.tsx
 > ```
+>
+> **The set moves — they are still working.** A re-check minutes later showed `types.ts` committed
+> and a different five dirty (`todoPageSmoke.test.tsx` and `noteboardOrder.test.ts` had joined). The
+> condition failed at every check; the file list is a snapshot, not the finding.
 >
 > Their in-flight state also accounts for the tree's only red (`todoPageSmoke` — the Noteboard's
 > own render smoke) and both `tsc` errors (`TodoNoteboardPage.tsx`). **The calendar work is
