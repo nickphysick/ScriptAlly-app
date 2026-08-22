@@ -139,11 +139,21 @@ describe("⚠️ delete asks first and holds the LONG way back", () => {
   });
 });
 
-describe("the tool row: search · #All ▾ · the toggle · the pink Pin", () => {
-  it("the tag filter lives in the TOOL ROW (the page's only filter dimension) and reads the user's tags", () => {
+describe("the tool row: search · the derived chips · Board/Column · Examples · the pink Pin", () => {
+  it("⚠️ THE TAG FILTER IS A DERIVED CHIP ROW NOW, not a dropdown over the taxonomy", () => {
+    /* ⚠️ SUPERSEDED (Noteboard rebuild, 22 Aug). The `#All ▾` menu listed `currentUser.tags` —
+       the whole stored taxonomy — so it offered tags the writer had defined and never applied,
+       which can only ever return an empty board. The chips are the tags IN USE, derived from the
+       pinned notes, with the defs supplying the label. The page's filter DIMENSION is unchanged:
+       one tag at a time, or #All. */
     const tools = sliceBetween(page, "tools={", "/* ⚠️ NO sidebar prop");
-    expect(tools).toContain('#{tagSel ? tagLabel(tagSel) : "All"}');
-    expect(page).toContain("currentUser?.tags ?? []");
+    expect(tools).toContain("nb-chipset");
+    expect(tools).toContain("chips.map");
+    expect(page).toContain("noteTagChips(pinned, currentUser?.tags ?? [])");
+    /* ⚠️ AND IT DERIVES FROM `pinned`, NOT `notes`. From the filtered view the chips would vanish
+       as you used them — pick one and the rest disappear, because nothing left on the board
+       carries them any more. */
+    expect(page).not.toContain("noteTagChips(notes");
     expect(page).toContain("(n.tags ?? []).includes(tagSel)");
   });
 

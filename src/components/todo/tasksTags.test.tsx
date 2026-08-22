@@ -129,20 +129,25 @@ describe("⚠️ tag filters combine ADDITIVELY with FILTERS (Urgent AND #synops
     expect(cal).toContain("matchesTags(c.tags, tagSel)");
   });
 
-  it("⚠️ THE LIST'S TAG CONTROL IS THE NOTEBOARD'S OWN, not a lookalike", () => {
-    /* Same trigger class, same menu class, same `#All ▾` wording and the same single-select
-       shape. Two tag filters that looked different would be two things to learn about one idea. */
-    /* ⚠️ THE LIST'S COPY WENT WITH THE TOOL ROW (corrections, Phase 4) — its narrowing has a home
-       in the list card's filter menu now. The NOTEBOARD keeps the control, and what this case was
-       really about survives: the grammar is one thing rather than two lookalikes, which is now
-       asserted on the surface that still draws it. */
+  it("⚠️ ONE TAG IDEA, TWO SURFACES — and neither invents its own vocabulary", () => {
+    /* ⚠️ REWRITTEN (Noteboard rebuild, 22 Aug). This case used to require the Noteboard to draw
+       the To-do list's `#All ▾` dropdown, so the two would not be lookalikes. The LIST's copy had
+       already gone with its tool row, so the case was comparing the Noteboard against a surface
+       that no longer draws one — a precondition that had quietly stopped holding.
+       What it was really about survives and is asserted here: whatever each surface draws, both
+       read the SAME defs and the SAME palette, so a tag is one thing with one name and one
+       colour wherever it appears. */
     const nb = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
-    for (const token of ['className="nb-tagwrap"', 'className="cal-viewmenu"', '#All']) {
-      expect(nb, `noteboard: ${token}`).toContain(token);
-    }
-    /* and it renders only where there is something to pick — a filter over an empty vocabulary
-       is a control over nothing, the same fault this pass retired `goodDay` for */
-    expect(nb).toContain("nb-tagwrap");
+    /* the Noteboard: a derived chip row over the tags in use */
+    expect(nb).toContain("nb-chipset");
+    expect(nb).toContain("noteTagChips(");
+    expect(nb).not.toMatch(/["\s`]nb-tagwrap["\s`]/);   // the dropdown it replaced, bounded token
+    /* both surfaces name a tag from the user's own defs, never from a raw id */
+    expect(nb).toContain("currentUser?.tags ?? []");
+    expect(nb).toContain("TAG_PALETTE[def.colour]");
+    expect(side).toContain("TAG_PALETTE[t.colour]");
+    /* and the free-text composer mints through the app's minter rather than an untracked string */
+    expect(nb).toContain("newTag(label, userTags)");
   });
 
   it("the sidebar's TAGS section is REAL: rows with counts, multi-select, a clear control", () => {

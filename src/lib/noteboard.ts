@@ -8,7 +8,7 @@
  * rendering of these, which is what lets the locks call the SAME function the page calls rather
  * than a literal that agrees with it today.
  */
-import { NoteColour, UserTask } from "../types";
+import { NoteColour, TagDef, UserTask } from "../types";
 import { isNoteTask } from "./todoBoard";
 
 /**
@@ -104,3 +104,36 @@ export const composerWithColour = (d: NoteDraft, colour: NoteColour): NoteDraft 
  * make a misclick destructive on a surface whose whole promise is that nothing is final.
  */
 export const editCommit = (previous: string, typed: string): string => typed.trim() || previous;
+
+/** One chip in the tool row. `id` is null for #All, which narrows nothing. */
+export interface NoteChip {
+  id: string | null;
+  label: string;
+}
+
+/**
+ * ⚠️ DERIVED FROM THE TAGS IN USE, never from the stored taxonomy. A tag the writer defined and
+ * has not put on a note is not a way to narrow this board — offering it would hand them a filter
+ * that can only ever return nothing, which is the "control over nothing" fault the Tasks pack
+ * retired a chip for once already.
+ *
+ * The DEFS still supply the label, because that is where a tag's identity lives and the id is not
+ * something a reader should ever see. A tag id with no def is skipped rather than rendered raw:
+ * `#t-letter` in a chip row is a leak, not a label.
+ */
+export const noteTagChips = (notes: UserTask[], defs: TagDef[]): NoteChip[] => {
+  const used = new Set<string>();
+  for (const n of notes) for (const t of n.tags ?? []) used.add(t);
+  const named = defs
+    .filter((d) => used.has(d.id))
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .map((d) => ({ id: d.id, label: d.label }));
+  return [{ id: null, label: "All" }, ...named];
+};
+
+/** Case-insensitive, over the words a note actually shows. */
+export const noteMatchesSearch = (n: UserTask, q: string): boolean => {
+  const needle = q.trim().toLowerCase();
+  if (!needle) return true;
+  return `${n.text} ${n.detail ?? ""}`.toLowerCase().includes(needle);
+};

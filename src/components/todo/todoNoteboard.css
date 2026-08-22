@@ -168,6 +168,39 @@
 }
 .nb-ccancel:hover { background: var(--nb-ground); }
 
+/* ── the tool row's own controls ───────────────────────────────────────────────────────────── */
+.nb-chipset { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.nb-chip {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.06em;
+  padding: 6px 11px; border-radius: 99px; border: 1px solid var(--nb-hair);
+  background: #fff; color: #6f5a4c; cursor: pointer; transition: background 0.12s;
+}
+.nb-chip:hover { background: var(--nb-ground); }
+.nb-chip.on { background: var(--nb-pink); border-color: var(--nb-pink-deep); color: var(--nb-burgundy); }
+
+.nb-viewtog { display: flex; border: 1px solid var(--nb-hair); border-radius: 8px; overflow: hidden; }
+.nb-viewtog button {
+  border: 0; background: #fff; padding: 7px 13px; height: 32px;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #6f5a4c; cursor: pointer;
+}
+.nb-viewtog button.on { background: var(--nb-ground); color: var(--nb-ink); }
+
+/* the ghost beside the pink primary — transparent with a burgundy hairline, never a fill */
+.nb-btn-ghost {
+  height: 32px; padding: 0 14px; border-radius: 9px; cursor: pointer; font: inherit;
+  font-size: 12.5px; font-weight: 500;
+  background: transparent; border: 1px solid rgba(124, 58, 42, 0.22); color: var(--nb-burgundy);
+}
+.nb-btn-ghost:hover { background: var(--nb-ground); }
+
+/* ⚠️ THE MISS IS A SENTENCE, NOT AN APOLOGY — and it is rendered only while something is
+   narrowing. An empty BOARD is a different state with its own panel. */
+.nb-empty-search {
+  padding: 60px 20px; text-align: center; color: var(--nb-muted);
+  font-size: 13.5px; font-weight: 300;
+}
+
 /* the tool row's search — the ref's .tsrch grammar */
 .nb-search {
   display: inline-flex; align-items: center; gap: 7px; height: 32px;

@@ -21,7 +21,7 @@
  * confirm) and holds an 8s undo that re-creates the SAME document id through addUserTask.
  */
 import React, { useMemo, useState } from "react";
-import { Plus, Search, AlignLeft, MoreHorizontal } from "lucide-react";
+import { Plus, Search, MoreHorizontal } from "lucide-react";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { PortalMenu } from "./PortalMenu";
 import { BrandDatePicker } from "../forms/BrandDatePicker";
@@ -38,7 +38,8 @@ import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
 import {
   NOTEBOARD_SUBTITLE, noteCountLabel, noteColour, sortNotes, noteRestoreFields,
-  composerWithColour, editCommit, emptyDraft, NOTE_COLOURS, NoteDraft,
+  composerWithColour, editCommit, emptyDraft, noteTagChips, noteMatchesSearch,
+  NOTE_COLOURS, NoteDraft,
 } from "../../lib/noteboard";
 import { newTag } from "../../lib/todoTags";
 import { UserTask, TagDef } from "../../types";
@@ -63,8 +64,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
 
   const [search, setSearch] = useState("");
-  const [tagSel, setTagSel] = useState<string | null>(null); // one tag or #All — P5 widens the vocabulary
-  const [tagOpen, setTagOpen] = useState(false);
+  const [tagSel, setTagSel] = useState<string | null>(null); // one tag, or null for #All
+  const [examples, setExamples] = useState(false); // the Examples drawer (P7)
   const [column, setColumn] = useState(false);
   const [menu, setMenu] = useState<{ note: UserTask; anchor: HTMLElement } | null>(null);
   const [dateFor, setDateFor] = useState<UserTask | null>(null);
@@ -84,11 +85,14 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
 
   const notes = useMemo(() => {
     const all = pinned;
-    const searched = search.trim()
-      ? all.filter((n) => `${n.text} ${n.detail ?? ""}`.toLowerCase().includes(search.trim().toLowerCase()))
-      : all;
+    const searched = all.filter((n) => noteMatchesSearch(n, search));
     return tagSel ? searched.filter((n) => (n.tags ?? []).includes(tagSel)) : searched;
   }, [pinned, search, tagSel]);
+
+  /* ⚠️ THE CHIPS READ `pinned`, NOT `notes`. Derived from the filtered view they would vanish as
+     you used them — pick one and the others disappear, because nothing left on the board carries
+     them any more. */
+  const chips = useMemo(() => noteTagChips(pinned, currentUser?.tags ?? []), [pinned, currentUser?.tags]);
 
   const userTags = currentUser?.tags ?? [];
   const tagLabel = (id: string) => userTags.find((t) => t.id === id)?.label ?? id;
@@ -248,25 +252,30 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                   onKeyDown={(e) => { if (e.key === "Escape") setSearch(""); }}
                 />
               </span>
-              <span className="nb-tagwrap">
-                <button type="button" className="cal-nav" aria-haspopup="menu" aria-expanded={tagOpen} onClick={() => setTagOpen((v) => !v)}>
-                  #{tagSel ? tagLabel(tagSel) : "All"} ▾
-                </button>
-                {tagOpen && (
-                  <div className="cal-viewmenu" role="menu">
-                    <button type="button" role="menuitem" aria-current={tagSel === null} onClick={() => { setTagSel(null); setTagOpen(false); }}>#All</button>
-                    {userTags.map((t) => (
-                      <button key={t.id} type="button" role="menuitem" aria-current={tagSel === t.id} onClick={() => { setTagSel(t.id); setTagOpen(false); }}>
-                        #{t.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+              {/* ⚠️ THE CHIPS ARE THE TAGS IN USE, not the taxonomy. A tag the writer defined and
+                  has not put on a note can only ever return nothing, so it is not offered. The
+                  defs still supply the label — a raw `#t-letter` in a chip row is a leak. */}
+              <span className="nb-chipset">
+                {chips.map((c) => (
+                  <button
+                    key={c.id ?? "all"}
+                    type="button"
+                    className={`nb-chip${tagSel === c.id ? " on" : ""}`}
+                    aria-pressed={tagSel === c.id}
+                    onClick={() => setTagSel(c.id)}
+                  >
+                    #{c.label}
+                  </button>
+                ))}
               </span>
-              <button type="button" className={`cal-nav${column ? " on" : ""}`} aria-pressed={column} onClick={() => setColumn((v) => !v)}>
-                <AlignLeft size={13} aria-hidden /> Read as a column
-              </button>
               <TplGrow />
+              {/* the mockup's segmented pair — it replaces the "Read as a column" sentence, which
+                  named one of the two states and left the other unspoken */}
+              <span className="nb-viewtog">
+                <button type="button" className={column ? "" : "on"} aria-pressed={!column} onClick={() => setColumn(false)}>Board</button>
+                <button type="button" className={column ? "on" : ""} aria-pressed={column} onClick={() => setColumn(true)}>Column</button>
+              </span>
+              <button type="button" className="nb-btn-ghost" onClick={() => setExamples(true)}>Examples</button>
               <button type="button" className="tdb-addb" onClick={() => openComposer()}>
                 <Plus size={13} aria-hidden /> Pin a note
               </button>
@@ -401,6 +410,14 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                   </div>
                 </article>
               ))}
+              {/* ⚠️ CONDITIONALLY RENDERED, never `hidden`. The UA sheet's `[hidden]{display:none}`
+                  is weaker than any author display rule, so a flex or grid element wearing the
+                  attribute stays on screen — the element is simply absent instead. It appears only
+                  when a search or a chip is narrowing: an empty BOARD is a different state with
+                  its own panel, and "nothing matches" would be the wrong sentence for it. */}
+              {notes.length === 0 && (search.trim() || tagSel) && (
+                <div className="nb-empty-search">Nothing matches that search.</div>
+              )}
             </div>
           )}
           </TplZone>
