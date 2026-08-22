@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — the unselected pane, plain</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-br:#b9c6b7;--pinkc:#f8e7dc;}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.el{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheet{max-width:1360px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.cols{display:grid;grid-template-columns:290px minmax(0,1fr);gap:14px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.panel{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:10px;}
+.srow{display:flex;gap:7px;margin-bottom:8px;}
+.lsearch{flex:1;display:flex;align-items:center;height:36px;padding:0 11px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);color:#b5b0a8;font-size:11.5px;}
+.ico{width:36px;height:36px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);}
+.qi{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:9px;align-items:center;padding:8px 6px;border-radius:8px;}
+.qi+.qi{box-shadow:inset 0 1px 0 var(--line);}
+.av{width:26px;height:26px;border-radius:50%;background:var(--n2);font-family:'JetBrains Mono',monospace;font-size:8px;display:flex;align-items:center;justify-content:center;color:var(--ink2);}
+.qn b{display:block;font-size:11.5px;font-weight:500;}
+.qn i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);}
+.qright{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.sd{width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px var(--burg);color:var(--burg);font-size:7px;display:flex;align-items:center;justify-content:center;}
+.sd.in{box-shadow:inset 0 0 0 1.5px #9db09b;color:#4e6050;}
+.el{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--ink2);}
+
+/* the pane, no chassis */
+.pane{min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;}
+.slot{width:210px;height:150px;display:flex;align-items:center;justify-content:center;}
+.slot svg{width:100%;height:100%;stroke:var(--oat);fill:none;stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round;}
+.slot svg .f{fill:#f6f2ec;stroke:none;}
+.slot svg .f2{fill:#fbf7f2;stroke:none;}
+.cap{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;color:var(--ink2);margin-top:22px;}
+/* placeholder-only variant */
+.ph{width:210px;height:150px;border-radius:14px;background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);
+  display:flex;align-items:center;justify-content:center;}
+.ph span{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#c4bfb7;}
+.legend{max-width:1360px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
+</style></head>
+<body>
+
+<h4>The pane, no container <s>— illustration in flow, one line beneath</s></h4>
+<div class="sheet"><div class="cols">
+  <div class="panel">
+    <div class="srow"><span class="lsearch">⌕&nbsp; Search</span><span class="ico"></span><span class="ico"></span></div>
+    <div class="qi"><span class="av">EW</span><span class="qn"><b>Eleanor Whitfield</b><i>Greenfield Literary</i></span>
+      <span class="qright"><span class="sd">»</span><span class="el">9 days ago</span></span></div>
+    <div class="qi"><span class="av">WT</span><span class="qn"><b>William Tan</b><i>Foxglove Literary</i></span>
+      <span class="qright"><span class="sd">✈</span><span class="el">3 weeks ago</span></span></div>
+    <div class="qi"><span class="av">SD</span><span class="qn"><b>Sophie Dunn</b><i>Curtis Vane</i></span>
+      <span class="qright"><span class="sd">»</span><span class="el">4 weeks ago</span></span></div>
+    <div class="qi"><span class="av">DO</span><span class="qn"><b>Daniel O&rsquo;Rourke</b><i>Inkwell &amp; Stone</i></span>
+      <span class="qright"><span class="sd in">«</span><span class="el">5 weeks ago</span></span></div>
+    <div class="qi"><span class="av">PR</span><span class="qn"><b>Priya Raman</b><i>No agency</i></span>
+      <span class="qright"><span class="sd in">›</span><span class="el">5 weeks ago</span></span></div>
+    <div class="qi"><span class="av">MR</span><span class="qn"><b>Marcus Reed</b><i>Bloomsbury Quill</i></span>
+      <span class="qright"><span class="sd">✈</span><span class="el">2 years ago</span></span></div>
+  </div>
+
+  <div class="pane">
+    <div class="slot"><svg viewBox="0 0 210 150">
+      <ellipse class="f2" cx="105" cy="132" rx="66" ry="7"/>
+      <path class="f" d="M46 66h118v58H46z"/>
+      <path d="M46 66h118v58H46z"/>
+      <path d="M46 70l59 36 59-36"/>
+      <path class="f2" d="M72 30h66v40H72z"/>
+      <path d="M72 30h66v40H72z"/>
+      <path d="M84 44h42M84 53h42M84 62h26"/>
+      <path d="M150 24l16 8-16 8"/><path d="M166 32h-26"/>
+    </svg></div>
+    <div class="cap">Select a query to get started</div>
+  </div>
+</div></div>
+
+<h4>The slot itself <s>— what ships now, and what replaces it</s></h4>
+<div class="sheet"><div class="two">
+  <div><div class="lab">Now · ArtSlot placeholder<s>Ships until the illustration arrives</s></div>
+    <div class="pane" style="min-height:250px">
+      <div class="ph"><span>Art slot</span></div>
+      <div class="cap">Select a query to get started</div>
+    </div></div>
+  <div><div class="lab">Later · the illustration<s>Same box, same caption position</s></div>
+    <div class="pane" style="min-height:250px">
+      <div class="slot"><svg viewBox="0 0 210 150">
+        <ellipse class="f2" cx="105" cy="132" rx="66" ry="7"/>
+        <path class="f" d="M46 66h118v58H46z"/><path d="M46 66h118v58H46z"/>
+        <path d="M46 70l59 36 59-36"/>
+        <path class="f2" d="M72 30h66v40H72z"/><path d="M72 30h66v40H72z"/>
+        <path d="M84 44h42M84 53h42M84 62h26"/>
+        <path d="M150 24l16 8-16 8"/><path d="M166 32h-26"/>
+      </svg></div>
+      <div class="cap">Select a query to get started</div>
+    </div></div>
+</div></div>
+
+<div class="legend">
+  <b>No chassis at all.</b> No card, no sage top edge, no border — the pane's whole job when nothing is selected is to be quietly absent, and a bordered empty box asserts more presence than emptiness deserves. The moment a query is selected the full chassis returns, which also makes selection feel like something arriving rather than something swapping.<br><br>
+  <b>The illustration sits in layout flow, in its own row</b>, with the caption in a second row beneath — never absolutely positioned, per the standing law that no positioned element shares space with text. It is an <code>ArtSlot</code>, so the placeholder ships now and the watercolour drops into the same box later with no layout change; the caption's position is fixed by the box, not by the artwork's height.<br><br>
+  <b>Caption in Playfair, ink2, one line.</b> No sub-line, no keyboard hint, no counters — the list beside it already shows everything there is to know, and this surface only needs to say why the right-hand side is blank.<br><br>
+  ⚠️ <b>Two states this must not be confused with.</b> <i>No queries at all</i> (a new account) needs a different line and a way to log the first one — the list beside this one is empty then, so the pane is the only thing on screen. And <i>a search that matched nothing</i> belongs to the list, not the pane. Both stay separate; only "loaded, nothing selected" gets this treatment.
+</div>
+</body></html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — what the Query Centre opens on</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage-tx:#4e6050;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;--pinksel:#fbeee6;}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.el,.stat b{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheet{max-width:1360px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.cols{display:grid;grid-template-columns:280px minmax(0,1fr);gap:14px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.panel{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:10px;}
+.srow{display:flex;gap:7px;margin-bottom:8px;}
+.lsearch{flex:1;display:flex;align-items:center;height:36px;padding:0 11px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);color:#b5b0a8;font-size:11.5px;}
+.ico{width:36px;height:36px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);}
+.qi{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:9px;align-items:center;padding:8px 6px;border-radius:8px;}
+.qi+.qi{box-shadow:inset 0 1px 0 var(--line);}
+.av{width:26px;height:26px;border-radius:50%;background:var(--n2);font-family:'JetBrains Mono',monospace;font-size:8px;display:flex;align-items:center;justify-content:center;color:var(--ink2);}
+.qn b{display:block;font-size:11.5px;font-weight:500;}
+.qn i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);}
+.qright{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.sd{width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px var(--burg);color:var(--burg);font-size:7px;display:flex;align-items:center;justify-content:center;}
+.sd.in{box-shadow:inset 0 0 0 1.5px #9db09b;color:var(--sage-tx);}
+.el{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--ink2);}
+.pane{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);min-height:340px;display:flex;flex-direction:column;}
+.pane .top{height:5px;background:var(--sage-br);border-radius:12px 12px 0 0;}
+.welc{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:26px;}
+.welc svg{width:54px;height:44px;stroke:var(--oat);fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;}
+.welc h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;margin:12px 0 6px;}
+.welc p{font-size:12.5px;color:var(--ink2);line-height:1.6;max-width:340px;}
+.stats{display:flex;gap:26px;margin-top:18px;}
+.stat{text-align:center;}
+.stat b{display:block;font-family:'Playfair Display',serif;font-size:24px;font-weight:400;line-height:1.1;}
+.stat u{text-decoration:none;display:block;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-top:5px;}
+.hintk{margin-top:18px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:#c4bfb7;}
+.hintk kbd{background:var(--n1);border-radius:4px;padding:2px 6px;box-shadow:inset 0 0 0 1px var(--line);color:var(--faint);font-size:8px;}
+/* skeleton */
+.sk .av,.sk .l1,.sk .l2,.sk .sdd,.skb{background:linear-gradient(90deg,var(--n1) 25%,var(--n2) 37%,var(--n1) 63%);background-size:400% 100%;}
+@media (prefers-reduced-motion:no-preference){.sk .av,.sk .l1,.sk .l2,.sk .sdd,.skb{animation:shim 1.5s ease infinite;}}
+@keyframes shim{0%{background-position:100% 0;}100%{background-position:0 0;}}
+.sk{display:grid;grid-template-columns:26px minmax(0,1fr) 52px;gap:9px;align-items:center;padding:9px 6px;}
+.sk+.sk{box-shadow:inset 0 1px 0 var(--line);}
+.sk .av{box-shadow:none;}
+.sk .l1{height:9px;border-radius:4px;width:68%;}
+.sk .l1.w2{width:52%;}.sk .l1.w3{width:60%;}
+.sk .l2{height:7px;border-radius:4px;width:100%;margin-top:4px;}
+.sk .sdd{width:15px;height:15px;border-radius:50%;justify-self:end;}
+.skpane{flex:1;padding:22px 24px;}
+.skb{border-radius:8px;}
+.legend{max-width:1360px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+
+<h4>Loaded, nothing selected <s>— a flat list, and a pane that reports instead of presuming</s></h4>
+<div class="sheet"><div class="cols">
+  <div>
+    <div class="panel">
+      <div class="srow"><span class="lsearch">⌕&nbsp; Search</span><span class="ico"></span><span class="ico"></span></div>
+      <div class="qi"><span class="av">EW</span><span class="qn"><b>Eleanor Whitfield</b><i>Greenfield Literary</i></span>
+        <span class="qright"><span class="sd">»</span><span class="el">9 days ago</span></span></div>
+      <div class="qi"><span class="av">WT</span><span class="qn"><b>William Tan</b><i>Foxglove Literary</i></span>
+        <span class="qright"><span class="sd">✈</span><span class="el">3 weeks ago</span></span></div>
+      <div class="qi"><span class="av">SD</span><span class="qn"><b>Sophie Dunn</b><i>Curtis Vane</i></span>
+        <span class="qright"><span class="sd">»</span><span class="el">4 weeks ago</span></span></div>
+      <div class="qi"><span class="av">DO</span><span class="qn"><b>Daniel O&rsquo;Rourke</b><i>Inkwell &amp; Stone</i></span>
+        <span class="qright"><span class="sd in">«</span><span class="el">5 weeks ago</span></span></div>
+      <div class="qi"><span class="av">PR</span><span class="qn"><b>Priya Raman</b><i>No agency</i></span>
+        <span class="qright"><span class="sd in">›</span><span class="el">5 weeks ago</span></span></div>
+      <div class="qi"><span class="av">MR</span><span class="qn"><b>Marcus Reed</b><i>Bloomsbury Quill</i></span>
+        <span class="qright"><span class="sd">✈</span><span class="el">2 years ago</span></span></div>
+    </div>
+    <div class="lab" style="margin-top:9px">One flat list, most recent movement first. No group headings — <i>Whose turn</i> and <i>Status</i> live in the filter, where they already are.</div>
+  </div>
+
+  <div class="pane"><div class="top"></div>
+    <div class="welc">
+      <svg viewBox="0 0 60 48"><path d="M8 14h30v26H8z"/><path d="M8 17l15 10 15-10"/><path d="M44 10l8 4-8 4"/><path d="M52 14H30"/></svg>
+      <h3>26 queries in play</h3>
+      <p>Eleanor Whitfield moved most recently — a full request, 9 days ago. Select a query to see its story.</p>
+      <div class="stats">
+        <div class="stat"><b>12</b><u>Answered</u></div>
+        <div class="stat"><b>14</b><u>No reply yet</u></div>
+        <div class="stat"><b>3</b><u>Your move</u></div>
+      </div>
+      <span class="hintk"><kbd>↑</kbd> <kbd>↓</kbd> to browse · <kbd>L</kbd> to log a new query</span>
+    </div>
+  </div>
+</div></div>
+
+<h4>Loading <s>— both columns pulse in the geometry they will become</s></h4>
+<div class="sheet"><div class="cols">
+  <div class="panel">
+    <div class="srow"><span class="lsearch" style="color:transparent">.</span><span class="ico"></span><span class="ico"></span></div>
+    <div class="sk"><span class="av"></span><span><span class="l1"></span><span class="l2" style="display:block"></span></span><span class="sdd"></span></div>
+    <div class="sk"><span class="av"></span><span><span class="l1 w2"></span><span class="l2" style="display:block"></span></span><span class="sdd"></span></div>
+    <div class="sk"><span class="av"></span><span><span class="l1 w3"></span><span class="l2" style="display:block"></span></span><span class="sdd"></span></div>
+    <div class="sk"><span class="av"></span><span><span class="l1"></span><span class="l2" style="display:block"></span></span><span class="sdd"></span></div>
+    <div class="sk"><span class="av"></span><span><span class="l1 w2"></span><span class="l2" style="display:block"></span></span><span class="sdd"></span></div>
+  </div>
+  <div class="pane"><div class="top" style="background:var(--n2)"></div>
+    <div class="skpane">
+      <div style="display:flex;gap:14px;align-items:center">
+        <span class="skb" style="width:44px;height:44px;border-radius:50%"></span>
+        <span><span class="skb" style="display:block;width:190px;height:14px"></span>
+        <span class="skb" style="display:block;width:120px;height:8px;margin-top:8px"></span></span>
+        <span class="skb" style="margin-left:auto;width:110px;height:16px"></span>
+      </div>
+      <div style="display:flex;gap:14px;margin-top:26px">
+        <span class="skb" style="flex:1.5;height:170px"></span>
+        <span class="skb" style="flex:1;height:170px"></span>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div class="legend">
+  <b>The flat list.</b> No group headings on load — one list, most recent movement first, which is the sort already named as default. <i>Whose turn</i> and <i>Status</i> stay where they already live, in the filter panel; choosing one there is what brings a grouped reading back. ⚠️ The consequence worth naming: <i>Your move</i> queries no longer surface by position — the welcome pane's counter carries that instead, and it is a click-through.<br><br>
+  <b>Nothing pre-selected.</b> Auto-loading the first query made an arbitrary record look chosen and put its Delete one slip away. The pane instead <b>reports</b>: the count in play, who moved most recently and what they did, the three counters, and how to get going. Facts, no verdicts — the same voice as everywhere. Selection follows the first click or the first arrow key, exactly as the keyboard spec already works.<br><br>
+  <b>The skeleton is the layout at rest.</b> Both columns pulse in the geometry they will become — list rows in the row grid, the pane as header-plus-two-cards — so nothing jumps when data lands. One shimmer, behind <code>prefers-reduced-motion</code>, and the skeleton resolves into the <i>unselected</i> state above, never into a selection.
+</div>
+</body></html>
