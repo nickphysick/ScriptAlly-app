@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — attaching a submission package</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;--pro:#6A89A7;
+--popsh:0 2px 6px rgba(40,35,30,.08),0 14px 30px -12px rgba(40,35,30,.38);}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.k{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheet{max-width:1340px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.stage{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:15px 16px;}
+.ttl{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;}
+.mrow{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+.att{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink);background:var(--pinkc);
+  box-shadow:inset 0 0 0 1px var(--pinkb);border-radius:8px;padding:6px 11px;font-weight:500;cursor:pointer;}
+.att svg{width:12px;height:12px;stroke:var(--burg);fill:none;stroke-width:1.7;}
+.addb{display:inline-flex;font-size:12px;color:var(--burg);background:#fff;box-shadow:inset 0 0 0 1px var(--oat);border-radius:8px;padding:6px 12px;cursor:pointer;}
+.pop{background:#fff;border-radius:11px;box-shadow:var(--popsh);padding:6px;margin-top:12px;max-width:300px;}
+.pop h5{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding:8px 9px 5px;font-weight:500;}
+.pi{display:flex;align-items:center;gap:10px;padding:9px;border-radius:8px;font-size:12.5px;cursor:pointer;}
+.pi:hover{background:var(--n1);}
+.pi .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;color:#c0bbb3;}
+.pi.done{color:#bdb8b0;cursor:default;}
+.sep{height:1px;background:var(--line);margin:5px 9px;}
+.pk{display:block;padding:10px 9px;border-radius:9px;cursor:pointer;}
+.pk:hover{background:var(--n1);}
+.pk .nm{display:flex;align-items:baseline;gap:8px;font-size:13px;font-weight:500;}
+.pk .nm .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#b8b3ab;font-weight:400;}
+.pk .cts{margin-top:4px;font-size:11.5px;color:var(--faint);line-height:1.5;}
+.pk .cts b{font-weight:400;color:var(--ink2);}
+.pk .dup{margin-top:5px;font-size:10.5px;color:#9c6b4a;}
+.grptag{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--faint);margin-top:10px;}
+.grptag svg{width:11px;height:11px;stroke:var(--faint);fill:none;stroke-width:1.6;}
+.grptag a{color:var(--burg);text-decoration:underline;text-underline-offset:2px;cursor:pointer;text-transform:none;letter-spacing:.02em;font-size:10px;}
+.legend{max-width:1340px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+
+<h4>Attaching a package, without leaving the page <s>— menu → picker → pills</s></h4>
+<div class="sheet"><div class="grid3">
+
+  <div><div class="lab">1 · The Attach menu's last row<s>Below a rule — it fills the row above, not a fifth type</s></div>
+    <div class="stage">
+      <div class="ttl">Murphy&rsquo;s Day Out</div>
+      <div class="mrow"><span class="addb">+ Attach</span></div>
+      <div class="pop">
+        <h5>Attach to this send</h5>
+        <div class="pi">Query letter</div>
+        <div class="pi">Synopsis</div>
+        <div class="pi">Opening sample<span class="k">→ SIZE</span></div>
+        <div class="pi">Other…<span class="k">FREE TEXT</span></div>
+        <div class="sep"></div>
+        <div class="pi">Attach a submission package<span class="k">→ PICK</span></div>
+      </div>
+    </div></div>
+
+  <div><div class="lab">2 · The picker<s>Contents shown before choosing; overlaps declared, not discovered</s></div>
+    <div class="stage">
+      <div class="ttl">Murphy&rsquo;s Day Out</div>
+      <div class="mrow">
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Covering letter</span>
+        <span class="addb">+ Attach</span>
+      </div>
+      <div class="pop">
+        <h5>Your submission packages</h5>
+        <div class="pk">
+          <div class="nm">UK standard<span class="k">3 ITEMS</span></div>
+          <div class="cts"><b>Query letter · Synopsis · First 3 chapters</b></div>
+          <div class="dup">Covering letter is already attached — the package's query letter will sit beside it.</div>
+        </div>
+        <div class="pk">
+          <div class="nm">US agents<span class="k">2 ITEMS</span></div>
+          <div class="cts"><b>Query letter · First 10 pages</b></div>
+        </div>
+        <div class="sep"></div>
+        <div class="pi" style="color:var(--burg)">Manage packages…<span class="k">OPENS PAGE</span></div>
+      </div>
+    </div></div>
+
+  <div><div class="lab">3 · After attaching UK standard<s>Its items are ordinary pills, tagged with where they came from</s></div>
+    <div class="stage">
+      <div class="ttl">Murphy&rsquo;s Day Out</div>
+      <div class="mrow">
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Covering letter</span>
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Query letter</span>
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Synopsis</span>
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>First 3 chapters</span>
+        <span class="addb">+ Attach</span>
+      </div>
+      <div class="grptag">
+        <svg viewBox="0 0 24 24"><path d="M4 8l8-4 8 4-8 4-8-4Z"/><path d="M4 8v8l8 4 8-4V8"/></svg>
+        3 items from <b style="color:var(--ink2)">&nbsp;UK standard</b>&nbsp;· <a>undo</a>
+      </div>
+    </div></div>
+
+</div></div>
+
+<div class="legend">
+  <b>As well as, not instead of — because a package is a filler, not a container.</b> Choosing one writes its items into the send's materials as ordinary pills: individually editable, individually removable, sitting beside anything already attached. The send's record stays one flat list of what actually went, which is what <code>materialsSent</code> is. No second kind of attachment, no opaque bundle pill that hides its contents.<br><br>
+  <b>The decision that matters is snapshot, not reference.</b> Attaching copies the package's items <i>as they are today</i>. If the package is edited next month, this send does not change — it records what was sent, and a reference would quietly rewrite history every time the package evolved. The only stored trace of the package is a small origin tag on the send (<i>3 items from UK standard</i>), which is provenance, not a live link — and the pills work identically with or without it.<br><br>
+  <b>Overlaps are declared in the picker, not discovered after.</b> Each package row shows its contents, and if an item collides with something already attached, the row says what will happen before you choose. Attach never silently replaces or silently skips.<br><br>
+  <b>No page-leaving.</b> The picker is one more popover in the existing chain; <i>Manage packages…</i> is the only route out, clearly labelled as one. Undo on the origin tag removes the package's items in one action — the items it brought, not anything you attached separately.<br><br>
+  ⚠️ <b>Two questions for you before this is prompted:</b> is package-attach free-plan or Pro-gated? And can a package include an <i>opening sample with a size</i> (the picker assumes yes — "First 3 chapters" — which means packages carry quantities, worth confirming against what the Packages build actually stores)?
+</div>
+</body></html>
