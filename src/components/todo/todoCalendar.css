@@ -38,7 +38,13 @@
   /* the reset: everything todo.css's square-day-button sets that this row must not inherit */
   aspect-ratio: auto; border: 0; background: none; border-radius: 0;
   cursor: default; justify-content: flex-start; transition: none;
-  align-items: baseline;
+  /* ⚠️ `center`, NOT `baseline` (reclaim pack, Phase 1). Baseline alignment on a row whose tallest
+     child is a 16px INLINE-FLEX disc adds descender slop below it — measured 16.75 for a 16px box,
+     and that 0.75 was the last of the shortfall. It is also the more correct alignment now: the
+     numeral is centred inside its own disc, so aligning the row on a baseline aligns on a box that
+     no longer has a meaningful one. (CLAUDE.md's warning is about images in a baselined row; this
+     is the same family — a flex box has no baseline worth aligning to.) */
+  align-items: center;
 }
 .cal-layout .cal-dow {
   /* todo.css's `.cal-dow` is a seven-column CONTAINER; here each weekday is one CELL of the grid */
@@ -93,7 +99,9 @@
   background: transparent;
   border: 0; border-right: 1px solid #f0e9dd; border-bottom: 1px solid #f0e9dd;
   border-radius: 0;
-  padding: 6px 7px; cursor: pointer;
+  /* ⚠️ VERTICAL 6 -> 4 (reclaim pack, Phase 1); the horizontal 7 is untouched, since the shortfall
+     is a height one and the pills already run to the cell's inner edge. */
+  padding: 4px 7px; cursor: pointer;
   /* ⚠️ NO `min-height` — it was 104px, and a floor on the cell is a floor on its row: six of
      them plus the header block cannot fit a laptop, so the month scrolled. The cell takes the
      row's share and CLIPS; `min-height: 0` is what lets it shrink at all inside the track, and
@@ -129,12 +137,23 @@
 /* ⚠️ A FIXED 20px BOX, ANCHORED TOP-LEFT — not centred in whatever the row leaves. The cell's
    layout then holds identically whether or not the day has pips, which is what stops an empty
    month and a busy one reading as two different grids. */
+/* ⚠️ 16px, DOWN FROM 20 (reclaim pack, Phase 1) — and this box IS the today-disc, which is what
+   bounds it. `.cal-cell.today .cal-dn` fills this same element burgundy at `border-radius: 50%`;
+   there is no separate disc to keep, so shrinking the numeral row shrinks the mark. 16 was chosen
+   because it is the smallest circle that still reads as a disc around a 10.5px numeral — 2.75px of
+   ground on each side — and because the arithmetic needed 4.75px of the 8.75px shortfall from here.
+   Going further would have made the disc a ring around the glyph rather than a field behind it.
+   ⚠️ THE CHASSIS IS NOT THE PLACE TO FIND THIS SPACE. `.ws-main` is correct now — it was corrected
+   by removing an over-claim, and taking pixels back from it would re-create the fault under a new
+   name. The cell spends its own budget. */
 .cal-dn {
-  width: 20px; height: 20px; flex: none;
+  width: 16px; height: 16px; flex: none;
   display: inline-flex; align-items: center; justify-content: center;
   border-radius: 50%; line-height: 1;
 }
-.cal-c2 { margin-left: auto; font-size: 6.5px; color: #c3b6a6; line-height: 20px; }
+/* the chip's line box set the ROW's height alongside the numeral's — it follows the disc down, or
+   the reclaim is spent on a 6.5px label sitting in a 20px line. */
+.cal-c2 { margin-left: auto; font-size: 6.5px; color: #c3b6a6; line-height: 16px; }
 
 /* ⚠️ TODAY IS A DISC, NOT A BOX (fixes pack, Phase 3). The cell wore a 1.5px near-black outline —
    a leftover that read as a selection, competing with the actual selected-day ring. The mark
