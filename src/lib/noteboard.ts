@@ -108,6 +108,15 @@ export const noteTagChips = (notes: UserTask[], defs: TagDef[]): NoteChip[] => {
   return [{ id: null, label: "All" }, ...named];
 };
 
+/**
+ * The label of a note's FIRST tag — what the composer's single tag field seeds with. A note can
+ * carry several through the ⋯ Tags… picker; the field shows the first and, per `saveEdit`'s
+ * contract, governs the set only when touched. A tag id with no def yields "" rather than the
+ * raw id — an id in an input is a leak, not a value.
+ */
+export const firstTagLabel = (n: Pick<UserTask, "tags">, defs: TagDef[]): string =>
+  defs.find((d) => d.id === n.tags?.[0])?.label ?? "";
+
 /** Case-insensitive, over the words a note actually shows. */
 export const noteMatchesSearch = (n: UserTask, q: string): boolean => {
   const needle = q.trim().toLowerCase();

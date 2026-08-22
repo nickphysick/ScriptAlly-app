@@ -113,20 +113,47 @@ describe("⚠️ the composer keeps what you have already written", () => {
   });
 });
 
-describe("⚠️ edit in place — blur commits, and an empty commit keeps the words", () => {
+describe("⚠️ the composer IS the editor — one component, two slots, never two hosts", () => {
+  /* ⚠️ SUPERSEDED TWICE, AND EACH TIME ON PURPOSE. The pane round split composing from editing
+     ("one host per job") and gave editing a bare textarea — which could touch ONLY the words, so
+     recolouring an existing note was impossible: the mockup put swatches in the kebab, and
+     PortalMenu is a pure leaf model this run may not modify. The merge (finish run, Phase 3) is
+     what closes that gap: Edit opens the SAME composer, seeded, in the note's own board slot, so
+     colour and tag become ordinary edits. */
   it("typed text wins; blank and whitespace both keep what was there", () => {
-    /* three genuinely different inputs; a single case cannot tell a working guard from `return
-       typed` */
     expect(editCommit("Old words", "New words")).toBe("New words");
     expect(editCommit("Old words", "   ")).toBe("Old words");
     expect(editCommit("Old words", "")).toBe("Old words");
     expect(editCommit("Old words", "  Trimmed  ")).toBe("Trimmed");
   });
 
-  it("the edit happens on the card, not in a modal", () => {
-    expect(page).toContain("editCommit");
-    expect(page).toContain("nb-edit");
-    /* no second host: the note's own body element is what is replaced */
-    expect(page).not.toContain("EditNoteModal");
+  it("Edit routes into the composer; the bare-textarea editor is GONE, not shadowed", () => {
+    expect(page).toContain('if (item.id === "edit-task") openEditor(note);');
+    expect(page).toContain("const composerCard");
+    /* the retired pieces — bounded tokens, and the state that drove them */
+    expect(page).not.toMatch(/["\s`]nb-edit["\s`]/);
+    expect(page).not.toContain("setEditing");
+    expect(page).not.toContain("commitEdit");
+  });
+
+  it("one composer node, mounted in exactly two places — the top slot and the note's slot", () => {
+    /* two MOUNTS of one closure, not two copies of the JSX — copies drift */
+    expect([...page.matchAll(/composerCard/g)].length).toBe(3);   // the const + two mounts
+    expect(page).toContain("compose && !compose.id && composerCard");
+    expect(page).toContain("n.id === compose?.id");
+    /* and the commit button is the only fork */
+    expect(page).toContain('compose.id ? saveEdit() : pinNote()');
+  });
+
+  it("the edit writes only what changed — and the untouched tag field cannot collapse a set", () => {
+    const fn = page.slice(page.indexOf("const saveEdit"));
+    expect(page.indexOf("const saveEdit")).toBeGreaterThan(-1);
+    const body = fn.slice(0, fn.indexOf("\n  };"));
+    expect(body).toContain("if (body !== note.text)");
+    expect(body).toContain("compose.colour !== noteColour(note)");
+    expect(body).toContain("typed.toLowerCase() !== firstTagLabel(note, userTags).toLowerCase()");
+    /* PortalMenu untouched is asserted by the do-not-touch diff in the report; here, the menu
+       still offers the same leaves it did */
+    expect(page).toContain("noteMenu(");
   });
 });

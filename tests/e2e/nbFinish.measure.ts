@@ -142,3 +142,87 @@ test.describe("Phase 1 — layout", () => {
     expect(Math.abs(d!.ghost - d!.shortest!.h), "the ghost and a resting note are not a pair").toBeLessThanOrEqual(2);
   });
 });
+
+test.describe("Phase 3 — the composer IS the editor", () => {
+  test("Edit on a mid-board note: seeded body, same position, and a swatch change PAINTS on save", async ({ page }) => {
+    await openRoute(page, ROUTE, { width: 1440, height: 900 });
+    /* the board and its cards, before — anchors asserted before any index is used */
+    const before = await page.evaluate(() => {
+      const board = document.querySelector(".nb-board");
+      if (!board) return null;
+      const kids = Array.from(board.children).map((el) => ({
+        cls: (el as HTMLElement).className,
+        body: ((el.querySelector(".nb-body") as HTMLElement | null)?.innerText ?? ""),
+      }));
+      return { kids };
+    });
+    expect(before, "no board").toBeTruthy();
+    /* pick a note that is NOT first among the cards — an off-by-one at the top passes a
+       first-card-only check */
+    const target = before!.kids.findIndex((k, i) => i > 1 && k.cls.includes("nb-note") && k.body.startsWith("NBPROBE"));
+    expect(target, "no mid-board probe note").toBeGreaterThan(1);
+    const targetBody = before!.kids[target].body;
+
+    /* open its kebab → Edit */
+    const card = page.locator(".nb-note").filter({ hasText: targetBody.split("\n")[0] }).first();
+    await card.locator(".tbd-more").click();
+    await page.getByRole("menuitem", { name: "Edit the note…" }).click();
+    await page.waitForTimeout(250);
+
+    const during = await page.evaluate(() => {
+      const board = document.querySelector(".nb-board");
+      if (!board) return null;
+      const kids = Array.from(board.children).map((el) => (el as HTMLElement).className);
+      const idx = kids.findIndex((c) => c.includes("nb-compose"));
+      const ta = document.querySelector<HTMLTextAreaElement>(".nb-compose textarea");
+      return { idx, value: ta?.value ?? null, kids: kids.length };
+    });
+    expect(during, "no board during edit").toBeTruthy();
+    /* (a) the textarea holds the note's body, exactly */
+    expect(during!.value).toBe(targetBody);
+    /* (b) the composer sits in the note's own slot — not at the top */
+    console.log(`[p3] note index ${target} · composer index ${during!.idx}`);
+    expect(during!.idx, "the composer did not open in place").toBe(target);
+
+    /* (c) change the paper and save; the card must PAINT the change — a computed colour, not a
+       class string, because a class the cascade discards still reads as present */
+    await page.locator(".nb-compose .nb-sw.nb-c-pink").click();
+    await page.locator(".nb-compose .nb-csave").click();
+    await page.waitForTimeout(700);
+    const painted = await page.evaluate((body: string) => {
+      const el = Array.from(document.querySelectorAll<HTMLElement>(".nb-note"))
+        .find((e) => ((e.querySelector(".nb-body") as HTMLElement | null)?.innerText ?? "") === body);
+      return el ? getComputedStyle(el).backgroundColor : null;
+    }, targetBody);
+    console.log(`[p3] painted after save: ${painted}`);
+    expect(painted, "the card is gone after save").toBeTruthy();
+    expect(painted!).toBe("rgb(245, 226, 218)");   // the pink paper, resolved
+
+    /* leave the fixture as found — repaint it yellow through the same door */
+    await card.locator(".tbd-more").click();
+    await page.getByRole("menuitem", { name: "Edit the note…" }).click();
+    await page.locator(".nb-compose .nb-sw.nb-c-yellow").click();
+    await page.locator(".nb-compose .nb-csave").click();
+    await page.waitForTimeout(400);
+  });
+
+  test("Cancel restores the card unchanged; an empty save keeps the words", async ({ page }) => {
+    await openRoute(page, ROUTE, { width: 1440, height: 900 });
+    const card = page.locator(".nb-note").filter({ hasText: "NBPROBE six" }).first();
+    const bodyBefore = await card.locator(".nb-body").innerText();
+    await card.locator(".tbd-more").click();
+    await page.getByRole("menuitem", { name: "Edit the note…" }).click();
+    await page.locator(".nb-compose textarea").fill("something typed then abandoned");
+    await page.locator(".nb-compose .nb-ccancel").click();
+    await page.waitForTimeout(250);
+    expect(await page.locator(".nb-note").filter({ hasText: "NBPROBE six" }).first().locator(".nb-body").innerText()).toBe(bodyBefore);
+
+    /* empty save = keep the previous body, not erase it */
+    await card.locator(".tbd-more").click();
+    await page.getByRole("menuitem", { name: "Edit the note…" }).click();
+    await page.locator(".nb-compose textarea").fill("");
+    await page.locator(".nb-compose .nb-csave").click();
+    await page.waitForTimeout(500);
+    expect(await page.locator(".nb-note").filter({ hasText: "NBPROBE six" }).first().locator(".nb-body").innerText()).toBe(bodyBefore);
+  });
+});

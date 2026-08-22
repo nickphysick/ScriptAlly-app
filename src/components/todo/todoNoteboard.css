@@ -164,10 +164,6 @@
   min-height: 84px; display: block;
 }
 .nb-ta::placeholder { color: rgba(58, 28, 20, 0.35); }
-/* editing in place is the same surface at the card's own size — no minimum, or a two-word note
-   would grow a paragraph-sized box the moment it was touched */
-.nb-edit { min-height: 0; }
-
 .nb-crow { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .nb-swatches { display: flex; gap: 7px; }
 .nb-sw {
