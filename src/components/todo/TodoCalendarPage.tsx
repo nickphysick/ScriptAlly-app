@@ -35,6 +35,7 @@ import {
   RecordItem, recordDays, cellSlots, exchangeLine, dedupeAgainstRecord, pillLabel,
   FoldMetrics, FOLD_FALLBACK, foldMetricsFrom, foldFor, REC_TONE, REC_LEGEND,
   peekBox, PEEK_DELAY_MS, PEEK_SCALE, PEEK_OPACITY,
+  CalMode, upcomingGridDays,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 /* ⚠️ REUSED, not re-written — `shortDate` already renders "7 Aug" for the RecordingCalendar's
@@ -307,12 +308,17 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      it. `weekDays`, `weekLabel` and `shiftWeek` went with it, traced to zero remaining callers
      first. (The `weekLabel` in the dashboard files is a different, local symbol.) There was never
      a List view to delete. */
-  /* ⚠️ THE RECORD'S TOGGLE IS THE PAGE'S OWN STATE, AND DELIBERATELY NOT A FACET (record-layer P4).
-     `TODO_FACETS` is ONE vocabulary shared with the board and the sidebar badge; the board has no
-     history, so a fifth facet would leak a calendar-only concept into a control two other surfaces
-     read. Session-only and default on: the record is what the page gained, so it shows by default,
-     and a preference stored for a view toggle is a preference nobody asked to keep. */
-  const [showRecord, setShowRecord] = useState(true);
+  /* ⚠️ TWO VIEW MODES REPLACE "THE RECORD" (finishing pack, Phase 3). The old control named a
+     LAYER, and a control named after a layer asks the reader to know what that layer is before
+     they can decide whether they want it — which is what made it opaque. These name what you get.
+     `Done & upcoming` is everything the page showed with the record on; `Upcoming only` drops the
+     record AND the done cards and starts the grid at today's week.
+     ⚠️ STILL THE PAGE'S OWN STATE, and still NOT A FACET. `TODO_FACETS` is one vocabulary shared
+     with the board and the sidebar badge; the board has no history, so a mode leaked into it would
+     be a calendar-only concept in a control two other surfaces read. Session-only, defaulting to
+     `both`: the record is what the page gained, so it shows by default, and a preference stored
+     for a view toggle is a preference nobody asked to keep. */
+  const [mode, setMode] = useState<CalMode>("both");
   /* ⚠️ THE FOLD THRESHOLD IS MEASURED, NOT GUESSED (tasks-viewport P3). The grid resolves its own
      row height from whatever the frame leaves it, so the only honest source for "how many pips
      fit" is the grid itself. A ResizeObserver keeps it true through window resizes and through
@@ -355,8 +361,14 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     const el = gridRef.current;
     if (!el || typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(() => {
-      /* the month grid is always six week rows */
-      const rows = 6;
+      /* ⚠️ THE ROW COUNT IS COUNTED, NOT ASSUMED (finishing pack, Phase 3). This said
+         `const rows = 6` — "the month grid is always six week rows" — which was true until
+         `Upcoming only` began showing between one and six. A hard six against a five-row grid
+         divides the height by one row too many, so every cell is told it is SHORTER than it is and
+         the fold caps tighter than it needs to: a silent under-report, no error, no overflow to
+         notice. Counting the cells cannot go stale the way a constant can, and it is the same
+         lesson the fold's own metrics learned one pack ago. */
+      const rows = Math.max(1, Math.round(el.querySelectorAll(".cal-cell").length / 7));
       /* the grid's height less the day-name row, divided by the week rows it holds */
       const first = el.firstElementChild as HTMLElement | null;
       const dow = first?.offsetHeight ?? 0;
@@ -421,7 +433,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser?.mutedTaskRules],
   );
 
-  const visible = monthGridDays(anchor);
+  /* ⚠️ ONE RANGE PRODUCER PER MODE, and `Upcoming only`'s is month-bounded so `monthLabel` and
+     `sameMonth` both keep working untouched — see `upcomingGridDays`'s own note for why a rolling
+     five weeks was rejected. Everything downstream reads `visible`, so the mode reaches the
+     record derivation, the day derivation and the grid through the one value. */
+  const visible = mode === "upcoming" ? upcomingGridDays(anchor, today) : monthGridDays(anchor);
   /* ⚠️ THE KEYBOARD MOVES THE SELECTION, AND IT KEEPS THE MONTH IN STEP. Arrowing off the edge of
      the visible grid re-anchors the month, so the selected day is never one the writer cannot see —
      the state and the view cannot drift apart.
@@ -543,7 +559,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       setPeek({ ymd, left: box.left, top: box.top, width: box.width, cell: cellRect });
     }, PEEK_DELAY_MS);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [byDay, recByDay, showRecord]);
+  }, [byDay, recByDay, mode]);
 
   /* ⚠️ THE SECOND CLAMP IS NOT OPTIONAL, because the height is the one term `peekBox` cannot
      derive: the peek holds every item on the day with no cap, so how tall it is depends on how
@@ -575,19 +591,35 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     if (peekTimer.current !== null) window.clearTimeout(peekTimer.current);
   }, []);
 
-  const subtitle = `${monthLabel(anchor)} — every item on the day it needs you.`;
+  /* ⚠️ THE SUBTITLE STATES WHAT IS ON SCREEN. In `Upcoming only` the month is truncated at
+     today's week, so the old sentence — "every item on the day it needs you" — would be a claim
+     the page had stopped meeting. */
+  const subtitle = mode === "upcoming"
+    ? `${monthLabel(anchor)} — what is still ahead.`
+    : `${monthLabel(anchor)} — every item on the day it needs you.`;
 
   const openSheet = (item: CalendarItem) => {
     if (item.card) setFlowCard(item.card);
   };
 
   const dayData = (ymd: string) => byDay.get(ymd) ?? { items: [], rolled: 0 };
-  const recordFor = (ymd: string): RecordItem[] => (showRecord ? recByDay.get(ymd) ?? [] : []);
+  /* ⚠️ THE MODE HIDES THE RECORD THROUGH THE SAME ONE FUNCTION THE TOGGLE DID. That is what keeps
+     the dedupe composing rather than fighting: `dedupeAgainstRecord` takes the day's record as an
+     ARGUMENT, so an empty record restores every superseded done card automatically — and then the
+     mode's own done-filter takes them out again, for its own reason. Two rules, one order, tested
+     together. */
+  const recordFor = (ymd: string): RecordItem[] => (mode === "both" ? recByDay.get(ymd) ?? [] : []);
   /* ⚠️ THE ONE READING OF A DAY, so the grid, the day panel and the count line cannot disagree
      about what is on it. `recordFor` returns [] when the layer is hidden, so the same call restores
      every superseded done card — the record-off behaviour needs no branch of its own. */
-  const itemsFor = (ymd: string): CalendarItem[] =>
-    dedupeAgainstRecord(dayData(ymd).items, recordFor(ymd));
+  const itemsFor = (ymd: string): CalendarItem[] => {
+    const deduped = dedupeAgainstRecord(dayData(ymd).items, recordFor(ymd));
+    /* ⚠️ `Upcoming only` DROPS DONE CARDS BY ITS OWN RULE, not by the dedupe's. With the record
+       hidden the dedupe hands every superseded done card straight back — correctly, since nothing
+       is left to supersede them — and a mode promising upcoming work would then show finished
+       work. The family is the test, never the strikethrough, which is presentation. */
+    return mode === "upcoming" ? deduped.filter((it) => it.family !== "done") : deduped;
+  };
 
   return (
     <div className="t-f12 spine-root">
@@ -630,22 +662,27 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                   </div>
                 )}
               </span>
-              {/* ⚠️ THE RECORD'S CONTROL STANDS APART FROM THE FACETS, AND THE RULE BETWEEN THEM IS
-                  THE POINT (record-layer P4). `TODO_FACETS` is ONE vocabulary shared with the board
-                  and the sidebar badge — a fifth entry there would leak a calendar-only concept into
-                  a control two other surfaces read, and the board has no history for it to mean
-                  anything about. So this is a separate switch for a separate layer, and the
-                  separator says so before anyone has to read a tooltip. */}
+              {/* ⚠️ THE VIEW SEGMENT REPLACES "THE RECORD" (finishing pack, Phase 3). It sits in the same
+                  place and it is still SEPARATE from the facet control, behind the same rule — a
+                  mode is a calendar-only concept and `TODO_FACETS` is one vocabulary shared with the
+                  board and the sidebar badge. What changed is what the control NAMES: the old one
+                  named a layer, so it asked the reader to know what "the record" was before they
+                  could decide whether they wanted it. These name what you get. */}
               <span className="cal-sep" aria-hidden />
-              <button
-                type="button"
-                className="cal-nav calm-nav cal-recbtn"
-                aria-pressed={showRecord}
-                onClick={() => setShowRecord((v) => !v)}
-              >
-                <span className="cal-recsw" style={{ background: REC_TONE.out.dot }} aria-hidden />
-                The record
-              </button>
+              <div className="cal-seg" role="group" aria-label="What the month shows">
+                {([["both", "Done & upcoming"], ["upcoming", "Upcoming only"]] as const).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className="cal-segb"
+                    aria-pressed={mode === id}
+                    data-on={mode === id}
+                    onClick={() => { setMode(id); clearPeek(); }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
               <TplGrow />
               {/* the pink creation action: the ONE composer lives on the To-do list page — go
                   there and announce, the bar's ＋ New pattern (never a second create surface) */}
@@ -665,6 +702,16 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               (tasks-viewport P1/P3), and only the panel has a scroller of its own. */}
           <div className="cal-layout">
           <div className="cal-main">
+          {/* ⚠️ A PAST MONTH IN `Upcoming only` HAS AN HONEST ANSWER, AND IT IS NOTHING. Rather
+              than clamp to "the last week anyway" — which would put a week of finished days under
+              a heading promising upcoming work — the range comes back empty and this says so. It
+              reports; it does not suggest, apologise or offer to do anything about it. */}
+          {visible.length === 0 ? (
+            <div className="cal-nowt">
+              <p className="cal-nowt-t">Nothing ahead in {monthLabel(anchor)}.</p>
+              <p className="cal-nowt-s">Switch to Done &amp; upcoming to see what happened.</p>
+            </div>
+          ) : (
           <div className="cal-grid" role="grid" ref={gridRef}
             {...(fold.shortfall > 0 ? { "data-fold-short": String(fold.shortfall) } : {})} aria-label={monthLabel(anchor)}>
             {DOW.map((d) => <div key={d} className="cal-dow" role="columnheader">{d}</div>)}
@@ -680,11 +727,16 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               const { shownItems: shown, shownRecs, overflow } = cellSlots(items, recs, cellCap, cellCapFolded);
               const past = ymd < today;
               const off = !sameMonth(ymd, anchor);
+              /* ⚠️ THE LEAD-IN IS DIMMED, NEVER DELETED (finishing pack, Phase 3): whole weeks are
+                 preserved, so `Upcoming only`'s first row still carries the days before today. It
+                 gets its OWN class rather than borrowing `.off` — `.off` means "another month",
+                 and a same-month day wearing it would state something untrue about the date. */
+              const lead = mode === "upcoming" && ymd < today;
               return (
                 <div
                   key={ymd}
                   role="gridcell"
-                  className={`cal-cell${ymd === today ? " today" : ""}${ymd === selDay ? " sel" : ""}${past ? " past" : ""}${off ? " off" : ""}`}
+                  className={`cal-cell${ymd === today ? " today" : ""}${ymd === selDay ? " sel" : ""}${past ? " past" : ""}${off ? " off" : ""}${lead ? " lead" : ""}`}
                   onClick={() => selectDay(ymd)}
                   onMouseEnter={(e) => armPeek(ymd, e.currentTarget)}
                   onMouseLeave={clearPeek}
@@ -717,6 +769,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               );
             })}
           </div>
+          )}
 
           {/* ⚠️ THE PEEK IS PORTALLED TO `document.body` (finishing pack, Phase 2). `.cal-grid` has
               `overflow: hidden` — that is what clips its corner cells to the outer radius — so a
@@ -756,8 +809,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
             {/* ⚠️ THE RECORD IS ONE LAYER, NOT TWO MORE FAMILIES. Its entries wear the layer's own
                 dot (6px, solid, no frame) and sit behind a rule, so a reader counts four card
                 families and one record rather than six peers. */}
-            {showRecord && <i className="cal-legsep" />}
-            {showRecord && REC_LEGEND.map((l) => (
+            {mode === "both" && <i className="cal-legsep" />}
+            {mode === "both" && REC_LEGEND.map((l) => (
               <span key={l.dir}>
                 <i className="cal-legdot" style={{ background: REC_TONE[l.dir].dot }} />
                 {l.label}

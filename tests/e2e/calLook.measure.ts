@@ -43,11 +43,14 @@ test("calendar — a look at it", async ({ page }) => {
   await page.waitForTimeout(400);
   await page.screenshot({ path: shot("empty-day") });
 
-  /* 5 — the record layer switched OFF */
-  await page.locator(".cal-recbtn").click();
+  /* 5 — `Upcoming only`: the record and the done cards both gone, grid starting at today's week.
+     ⚠️ THE RECORD CHIP IT USED TO CLICK IS RETIRED (finishing pack, Phase 3) — the view segment
+     replaced it, and `Upcoming only` is the state that used to be "record off" plus the done
+     cards dropped. */
+  await page.locator(".cal-segb", { hasText: /Upcoming only/i }).click();
   await page.waitForTimeout(400);
-  await page.screenshot({ path: shot("record-off") });
-  await page.locator(".cal-recbtn").click();
+  await page.screenshot({ path: shot("upcoming-only") });
+  await page.locator(".cal-segb", { hasText: /Done & upcoming/i }).click();
 
   /* 6 — the collapsed width */
   await openRoute(page, ROUTE, { width: 1000, height: 900 });

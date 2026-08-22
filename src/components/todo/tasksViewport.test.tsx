@@ -298,11 +298,20 @@ describe("⚠️ the Calendar's tool-row facet — the sidebar's filter, rehouse
      working tonight — flagged in reports/calendar-record-layer.md for review.
      THE LAW IT ASSERTS IS UNCHANGED and both halves survive: the Calendar takes no `TplZone`
      because its grid COMPRESSES to the frame instead of scrolling, and the ResizeObserver's row
-     divisor is still the number of week rows the grid holds. That divisor was a ternary only
-     because there were two views; with the month the only grid, it is 6. */
+     divisor is still the number of week rows the grid holds.
+
+     ⚠️ RETARGETED A SECOND TIME, 22 Aug 2026 by the same session (finishing pack, Phase 3), for
+     the same reason and with the same flag. `const rows = 6` was true while the month grid was the
+     only grid; `Upcoming only` now shows between one and six week rows. A hard 6 against a
+     five-row grid divides the height by one row too many, so every cell is told it is SHORTER than
+     it is and the fold caps tighter than it needs to — silently, with no error and no overflow to
+     notice. The divisor is now COUNTED from the rendered cells, which is the law stated more
+     strongly than the constant ever stated it: it cannot go stale. */
   it("the month grid obeys the same lock — no zone, the grid still fills", () => {
     expect(cal).not.toContain("<TplZone");
-    expect(cal).toContain("const rows = 6;"); // the row divisor is the month's six week rows
+    // the row divisor is the week rows the grid HOLDS — counted, so it survives a shorter view
+    expect(cal).toContain('el.querySelectorAll(".cal-cell").length / 7');
+    expect(cal).not.toContain("const rows = 6;");
   });
 });
 

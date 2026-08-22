@@ -15,6 +15,7 @@ import type { CalendarItem, RecordItem } from "./todoCalendar";
 import {
   monthGridDays, monthLabel, shiftMonth, sameMonth,
   peekBox, PEEK_SCALE, PEEK_PAD, PEEK_LIFT, PEEK_DELAY_MS, PEEK_OPACITY,
+  upcomingGridDays,
   cardActionYmd, calendarDays, CAL_CELL_CAP, calFoldCap, toYmd,
   recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
   cellSlots,
@@ -548,12 +549,16 @@ describe("⚠️ one switch for the record, and it is NOT a facet", () => {
     expect(TODO_FACETS.map((f) => f.label)).toEqual(["Everything", "Urgent", "Housekeeping", "Your tasks"]);
   });
 
-  it("the record's toggle is the page's own state, separated by a rule", () => {
-    expect(pageSrc).toContain("useState(true)");
-    expect(pageSrc).toContain('aria-pressed={showRecord}');
+  /* ⚠️ THE TOGGLE IS RETIRED AND THE VIEW SEGMENT INHERITS ITS CLAIMS (finishing pack, Phase 3).
+     Every property this asserted is still required of the successor — page-owned state, separated
+     from the facet control by the rule, and governing the record through ONE read. Only the shape
+     of the control changed, so the lock is retargeted rather than dropped. */
+  it("the view segment is the page's own state, separated by a rule", () => {
+    expect(pageSrc).toContain('useState<CalMode>("both")');
+    expect(pageSrc).toContain("aria-pressed={mode === id}");
     expect(pageSrc).toContain('className="cal-sep"');
-    // it governs the pips, the legend and the day list together — one boolean, read in one place
-    expect(pageSrc).toContain("showRecord ? recByDay.get(ymd) ?? [] : []");
+    // it governs the pips, the legend and the day list together — one value, read in one place
+    expect(pageSrc).toContain('mode === "both" ? recByDay.get(ymd) ?? [] : []');
   });
 
   it("⚠️ the record's state is SESSION-ONLY — never persisted", () => {
@@ -562,7 +567,8 @@ describe("⚠️ one switch for the record, and it is NOT a facet", () => {
     const d = decls(pageSrc);
     expect(d).not.toMatch(/localStorage[^\n]*[Rr]ecord/);
     expect(d).not.toMatch(/todoPrefs[^\n]*[Rr]ecord/);
-    expect(d).not.toMatch(/showRecord[^\n]*localStorage/);
+    expect(d).not.toMatch(/setMode[^\n]*localStorage/);
+    expect(d).not.toMatch(/localStorage[^\n]*mode/i);
   });
 
   it("⚠️ the facet never reaches the record, and the record never reaches the facet counts", () => {
@@ -742,8 +748,12 @@ describe("⚠️ the week view is gone, and so are the helpers that served it", 
     expect(d).not.toContain('"month" | "week"');
     expect(d).not.toContain("weekDays");
     expect(d).not.toContain("shiftWeek");
-    // the month is now the only grid, and it says so without a ternary
-    expect(pageSrc).toContain("const visible = monthGridDays(anchor);");
+    /* ⚠️ RETARGETED (finishing pack, Phase 3). The WEEK view stays retired — that is what this
+       lock is for, and every assertion above it is untouched. What changed is that a second
+       MODE now chooses the range, so the producer line is a ternary again. The claim the lock
+       must keep making is that neither arm is the week view: both are month-anchored. */
+    expect(pageSrc).toContain('mode === "upcoming" ? upcomingGridDays(anchor, today) : monthGridDays(anchor)');
+    expect(pageSrc).not.toContain("weekDays(");
   });
 
   it("⚠️ the module no longer EXPORTS them — traced to zero callers before removal", () => {
@@ -968,21 +978,20 @@ describe("⚠️ the record's chip reads as one control", () => {
     return m![1];
   };
 
-  it("one line always, with the swatch inside the chip", () => {
-    const b = rule(".cal-recbtn");
-    expect(b).toContain("white-space: nowrap");
-    expect(b).toContain("display: inline-flex"); // the swatch is a child, not a sibling
-    expect(pageSrc).toContain('<span className="cal-recsw"');
-    /* ⚠️ THE ANCHOR IS THE EXACT className, NOT THE PREFIX. `indexOf("cal-recbtn")` finds
-       `cal-recbtn2` — the day panel's action button — which sits earlier in the file, and the slice
-       then describes the wrong control entirely. Same family as the `.cal-dow` / `.cal-layout
-       .cal-dow` slip in Phase 2: a token that is a prefix of a live class is never a safe anchor. */
-    const anchor = 'className="cal-nav calm-nav cal-recbtn"';
-    const i = pageSrc.indexOf(anchor);
-    expect(i, "the record chip's exact className is missing").toBeGreaterThan(-1);
-    const seg = pageSrc.slice(i, i + 420);
-    expect(seg).toContain("cal-recsw");
-    expect(rule(".cal-recsw")).toContain("width: 7px");
+  /* ⚠️ THE CHIP IS RETIRED; THE SEGMENT IS ASSERTED IN ITS PLACE (finishing pack, Phase 3). Its
+     one-line rule carries over — a two-state control that wraps is two controls to the eye — and
+     the swatch went with the chip, because a segment naming its two states needs no colour key. */
+  it("the segment is one line, two buttons, and the chosen one is visibly chosen", () => {
+    expect(rule(".cal-segb")).toContain("white-space: nowrap");
+    expect(rule(".cal-seg")).toContain("display: flex");
+    /* ⚠️ THE ANCHOR IS THE EXACT className, NOT A PREFIX. `.cal-seg` is a prefix of `.cal-segb`,
+       which is exactly the trap the retired version of this lock recorded (`cal-recbtn` finding
+       `cal-recbtn2`). The `rule()` helper anchors at a line start and takes the whole selector. */
+    expect(pageSrc).toContain('className="cal-segb"');
+    expect(pageSrc).toContain('data-on={mode === id}');
+    expect(rule('.cal-segb[data-on="true"]')).toContain("background: #f8e7e2");
+    /* the retired chip and its swatch are gone from BOTH artefacts */
+    expect(decls(pageSrc)).not.toMatch(/["\s`]cal-recsw["\s`]/);
   });
 
   it("⚠️ the separator is a RULE — 1px × 18px, centred, not a full-height column edge", () => {
@@ -995,10 +1004,23 @@ describe("⚠️ the record's chip reads as one control", () => {
     expect(s).toMatch(/margin:\s*0\s+9px/);
   });
 
-  it("off is visibly off — the whole chip, not the label alone", () => {
-    expect(calCss).toContain('.cal-recbtn[aria-pressed="false"] { opacity: 0.42; }');
-    // and the state is on the element the assistive tree reads, not only in the paint
-    expect(pageSrc).toContain("aria-pressed={showRecord}");
+  /* ⚠️ THE CLAIM SURVIVES ITS CONTROL, and it is the half worth keeping. The retired chip said
+     "off" by fading; a two-state segment says it by which half is filled — but EITHER WAY the
+     state must reach the assistive tree and not live only in the paint. That is what is asserted
+     here now; the opacity rule went with the chip it described. */
+  it("the chosen mode is in the assistive tree, not only in the paint", () => {
+    expect(pageSrc).toContain("aria-pressed={mode === id}");
+    /* and the group itself is named, so the two buttons are not read as loose siblings */
+    expect(pageSrc).toContain('role="group" aria-label="What the month shows"');
+    /* ⚠️ THE RETIRED CHIP'S FADE RULE IS GONE — ASSERTED OVER STRIPPED CSS, NOT RAW. The
+       stylesheet now carries a COMMENT naming `.cal-recbtn` to explain the retirement and to warn
+       that `.cal-recbtn2` is a live prefix collision. A raw `not.toContain` over prose that names
+       the very token it forbids is this repo's most-recorded false-red — it passes here only
+       because the comment happens not to quote the full selector, which is luck, not a guard. */
+    expect(decls(calCss)).not.toContain(".cal-recbtn[");
+    expect(decls(calCss)).not.toMatch(/["\s`.]cal-recsw["\s`{,:]/);
+    /* and the live prefix collision is untouched */
+    expect(calCss).toContain(".cal-recbtn2");
   });
 
   it("⚠️ prev/next carry a real glyph — the buttons were empty at 26px wide", () => {
@@ -1502,5 +1524,105 @@ describe("peekBox — where the peek goes, and what stops it leaving the grid", 
     expect(PEEK_OPACITY).toBe(0.97);
     /* derived from the constant rather than restated, so retuning PEEK_SCALE cannot desync them */
     expect(peekBox(cell(300, 100), GRID, 0).width).toBe(Math.round(100 * PEEK_SCALE));
+  });
+});
+
+/* ══ VIEW MODES (finishing pack, Phase 3) ═══════════════════════════════════════════════════ */
+describe("upcomingGridDays — the grid starts at today's week, in whole weeks", () => {
+  /* August 2026: the 1st is a Saturday, so the grid runs 27 Jul → 6 Sep, six rows of seven */
+  const AUG_FULL = monthGridDays("2026-08-12");
+
+  it("keeps whole weeks — the lead-in days before today survive, dimmed by the page", () => {
+    const got = upcomingGridDays("2026-08-12", "2026-08-12");
+    expect(got.length % 7).toBe(0);
+    /* today is a Wednesday; Mon 10 and Tue 11 are still in the row */
+    expect(got[0]).toBe("2026-08-10");
+    expect(got).toContain("2026-08-11");
+    expect(got).toContain("2026-08-12");
+  });
+
+  it("drops only weeks that are ENTIRELY behind today", () => {
+    const got = upcomingGridDays("2026-08-12", "2026-08-12");
+    /* the 27 Jul–2 Aug and 3–9 Aug rows are wholly past and gone */
+    expect(got).not.toContain("2026-07-27");
+    expect(got).not.toContain("2026-08-09");
+    /* and it runs to the end of the month's own grid, unchanged */
+    expect(got[got.length - 1]).toBe(AUG_FULL[AUG_FULL.length - 1]);
+  });
+
+  it("a day that IS today keeps its week — the boundary is inclusive", () => {
+    /* Sunday 9 Aug is a week's last day; on that day the week must survive */
+    const got = upcomingGridDays("2026-08-12", "2026-08-09");
+    expect(got).toContain("2026-08-03");
+    expect(got).toContain("2026-08-09");
+  });
+
+  it("a FUTURE month is untouched — all of it is upcoming", () => {
+    const sep = monthGridDays("2026-09-15");
+    expect(upcomingGridDays("2026-09-15", "2026-08-12")).toEqual(sep);
+  });
+
+  /* ⚠️ THE HONEST ANSWER FOR A PAST MONTH IS NOTHING, and the page states it rather than
+     clamping to "the last week anyway" — which would put a week of finished days under a
+     heading promising upcoming work. */
+  it("a PAST month yields nothing at all", () => {
+    expect(upcomingGridDays("2026-07-15", "2026-08-12")).toEqual([]);
+  });
+
+  it("is always a subset of the anchor's own month grid — which is what keeps monthLabel true", () => {
+    const got = upcomingGridDays("2026-08-12", "2026-08-12");
+    for (const d of got) expect(AUG_FULL).toContain(d);
+  });
+});
+
+/**
+ * ⚠️ THE DEDUPE AND THE MODE TOUCH THE SAME CARDS AND MUST COMPOSE, NOT FIGHT — the pack asks for
+ * both rules tested together, and this is why: with the record hidden the dedupe hands every
+ * superseded done card straight BACK (correctly — nothing is left to supersede them), so a mode
+ * that only hid the record would show MORE finished work than the mode it replaced, not less.
+ */
+describe("the mode and the dedupe compose", () => {
+  const REC: RecordItem[] = [];
+  const done = (key: string): CalendarItem =>
+    ({ key, ymd: "2026-08-12", label: "Query sent", family: "done", struck: true, activityId: "a1" });
+  /* ⚠️ `agent`, NOT AN INVENTED FAMILY. `CalFamily` is exactly "agent" | "task" | "snoozed" |
+     "done", and a literal outside that set is an input the derivation cannot produce — the shape
+     this repo has already been bitten by (a bucket a card could never carry, asserted for the life
+     of a feature that had never rendered). `tsc` caught it here; it would not have if the field
+     were typed loosely. */
+  const live = (key: string): CalendarItem =>
+    ({ key, ymd: "2026-08-12", label: "Send your full", family: "agent", card: {} as never });
+
+  it("record OFF: the dedupe returns the done card — that is the rule it has always had", () => {
+    expect(dedupeAgainstRecord([done("d1"), live("l1")], REC).map((i) => i.key))
+      .toEqual(["d1", "l1"]);
+  });
+
+  it("and the MODE is what removes it, by family — never by the strikethrough", () => {
+    const deduped = dedupeAgainstRecord([done("d1"), live("l1")], REC);
+    const upcoming = deduped.filter((it) => it.family !== "done");
+    expect(upcoming.map((i) => i.key)).toEqual(["l1"]);
+  });
+
+  /* the page's own composition, asserted at source so the two rules cannot be reordered apart */
+  it("the page applies them in that order, and reads the family", () => {
+    expect(pageSrc).toContain("dedupeAgainstRecord(dayData(ymd).items, recordFor(ymd))");
+    expect(pageSrc).toContain('mode === "upcoming" ? deduped.filter((it) => it.family !== "done") : deduped');
+    /* and the record is hidden through the SAME one function the retired toggle used */
+    expect(pageSrc).toContain('mode === "both" ? recByDay.get(ymd) ?? [] : []');
+  });
+
+  it("⚠️ the retired toggle is GONE from the page, not merely unrendered", () => {
+    const d = decls(pageSrc);
+    expect(d).not.toContain("showRecord");
+    expect(d).not.toContain("setShowRecord");
+    expect(d).not.toMatch(/["\s`]cal-recbtn["\s`]/);
+  });
+
+  /* ⚠️ THE ROW COUNT IS COUNTED, NOT ASSUMED — a hard six against a five-row grid divides the
+     height by one row too many and the fold caps tighter than it needs to, silently. */
+  it("the fold's row count is measured from the grid, never the constant 6", () => {
+    expect(pageSrc).toContain('el.querySelectorAll(".cal-cell").length / 7');
+    expect(decls(pageSrc)).not.toContain("const rows = 6");
   });
 });

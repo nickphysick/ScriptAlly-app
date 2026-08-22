@@ -288,18 +288,13 @@
   width: 1px; height: 18px; align-self: center; margin: 0 9px;
   background: #e7dcce; flex: none;
 }
-/* ⚠️ ONE LINE, ALWAYS, AND THE SWATCH IS INSIDE THE CHIP. It wrapped to two with the swatch
-   orphaned outside — a `width: 26px` bled onto `.cal-nav` from todo.css (Phase 1). `nowrap` is the
-   belt: the control names a layer, and a control that reflows says the bar is out of room when it
-   is not. */
-.cal-recbtn { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-.cal-recsw { width: 7px; height: 7px; border-radius: 50%; flex: none; }
-/* ⚠️ OFF IS VISIBLY OFF. The whole chip drops back rather than the label alone going grey — a
-   swatch at full strength beside muted text reads as a control mid-transition. The swatch keeps
-   its hue at reduced strength, so the chip still states WHICH layer it governs while it is not
-   governing it. */
-.cal-recbtn[aria-pressed="false"] { opacity: 0.42; }
-.cal-recbtn[aria-pressed="true"] { background: #f6f1ea; border-color: #b9a48f; }
+/* ⚠️ THE RECORD'S CHIP AND ITS SWATCH ARE RETIRED (finishing pack, Phase 3) — `.cal-recbtn`,
+   `.cal-recsw` and the two `aria-pressed` states went with the control they painted. The view
+   segment replaced it (`.cal-seg` / `.cal-segb`, below); a segment naming its two states in words
+   needs no colour key, so the swatch had nothing left to say.
+   ⚠️ `.cal-recbtn2` IS A DIFFERENT AND LIVE CLASS — the day panel's per-record action button. It
+   is a PREFIX collision with the retired name, which is the trap this file's own locks record
+   (`indexOf("cal-recbtn")` finds `cal-recbtn2`). Do not sweep for the prefix. */
 
 /* ══ THE IN-FOCUS DAY PANEL (record-layer pack, Phase 5) ════════════════════════════════════
  *
@@ -441,7 +436,7 @@
 /* ⚠️ VISIBLE FOCUS THROUGHOUT — the panel is keyboard-reachable and the month is arrow-navigable,
    so a focus ring is load-bearing rather than decorative. */
 .cal-focus :focus-visible,
-.cal-recbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+.cal-segb:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
 
 /* ⚠️ ONE COLUMN BELOW 1080. The month keeps a floor so it does not crush, and the LAYOUT becomes
    the scroller at this width — the one place this page scrolls at all. Stated rather than
@@ -504,3 +499,42 @@
    here that could drift. The one difference is that they cannot be pressed, and `pointer-events`
    on the container already says so; `cursor` follows it for honesty. */
 .cal-peek .cal-pip { cursor: default; }
+
+/* ══ THE VIEW SEGMENT (finishing pack, Phase 3; ref calendar-month-focus-v5.html) ══════════════
+ *
+ * ⚠️ IT SITS WHERE "The record" SAT AND IS THE SAME HEIGHT, so the command bar's rhythm is
+ * unchanged. The old control named a LAYER; these name what you get.
+ */
+.cal-seg {
+  display: flex; border: 1px solid #e6dcce; border-radius: 10px; overflow: hidden;
+  background: #fff; flex: none;
+}
+.cal-segb {
+  font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.11em;
+  text-transform: uppercase; font-weight: 500;
+  padding: 9px 13px; border: none; cursor: pointer; background: #fff; color: #8a7a6c;
+  line-height: 1; white-space: nowrap;
+}
+.cal-segb[data-on="true"] { background: #f8e7e2; color: #7c3a2a; }
+.cal-segb + .cal-segb { border-left: 1px solid #e6dcce; }
+
+/* ⚠️ THE LEAD-IN IS ITS OWN CLASS, NOT `.off` (finishing pack, Phase 3). `Upcoming only` preserves
+   whole weeks, so its first row still carries the days before today — dimmed, because they are not
+   what the mode is about, but NOT wearing `.off`, which means "a day in another month" and would
+   state something untrue about the date. The wash matches `.off` deliberately: the two mean
+   different things and read the same, which is right — both are "not what you are looking at". */
+.cal-cell.lead { background: #f8f4ed; }
+.cal-cell.lead .cal-dn { color: #cfc2b3; }
+
+/* ⚠️ AN EMPTY UPCOMING MONTH REPORTS; IT DOES NOT APOLOGISE OR SUGGEST. Same register as the day
+   panel's "A clear day." — a statement of fact and a way back, no prompt to do more. */
+.cal-nowt {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 5px; text-align: center;
+  background: #fdfaf5; border: 1px solid #ece0d2; border-radius: 14px;
+}
+.cal-nowt-t { font-family: "Playfair Display", serif; font-size: 19px; color: #4a3a30; margin: 0; line-height: 1.3; }
+.cal-nowt-s {
+  font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: #a8998a; margin: 0;
+}

@@ -869,3 +869,42 @@ export function peekBox(
   const top = Math.max(grid.top + PEEK_PAD, Math.min(wanted, maxTop));
   return { left, top, width, height: peekH };
 }
+
+/* ══ VIEW MODES (finishing pack, Phase 3; ref calendar-month-focus-v5.html) ════════════════════
+ *
+ * ⚠️ THIS REPLACES "THE RECORD" TOGGLE, WHOSE MEANING WAS OPAQUE. A control labelled with the name
+ * of a layer asks the reader to know what that layer is before they can decide whether they want
+ * it. The two modes name what you get instead of what gets switched.
+ */
+export type CalMode = "both" | "upcoming";
+
+/**
+ * The visible days in `Upcoming only` — whole weeks, from the week containing today.
+ *
+ * ⚠️ MONTH-BOUNDED, NOT A ROLLING FIVE WEEKS, and the inventory is the reason. The existing
+ * machinery is `monthGridDays(anchor)` → `monthLabel(anchor)` → `sameMonth(ymd, anchor)`: a
+ * month-bounded range keeps ALL THREE unchanged, because what is shown is still a subset of the
+ * anchor's own month. A rolling five weeks spans two months, so it would need a second labelling
+ * rule for a title naming two of them AND a second dimming rule, since `sameMonth` would then dim
+ * a third of the grid as "not this month" when those days are exactly what the mode exists to
+ * show. Two new rules against none is not a close call.
+ *
+ * ⚠️ WHOLE WEEKS ARE PRESERVED — a week is dropped only when ALL of it is behind today. So the
+ * first surviving row still carries its pre-today days, which the page dims rather than deletes:
+ * a row starting on a Thursday because that is when today falls would misrepresent the week.
+ *
+ * ⚠️ A PAST MONTH LEGITIMATELY YIELDS NOTHING. Navigating to July and asking what is still ahead
+ * in it has an honest answer, and the answer is nothing — so this returns `[]` and the page states
+ * it. Clamping to "the last week anyway" would put a week of finished days under a heading that
+ * promises upcoming work.
+ */
+export function upcomingGridDays(anchorYmd: string, todayYmd: string): string[] {
+  const all = monthGridDays(anchorYmd);
+  const out: string[] = [];
+  for (let i = 0; i < all.length; i += 7) {
+    const week = all.slice(i, i + 7);
+    /* the week survives if ANY of it is today or later — i.e. if its last day is */
+    if (week[week.length - 1] >= todayYmd) out.push(...week);
+  }
+  return out;
+}
