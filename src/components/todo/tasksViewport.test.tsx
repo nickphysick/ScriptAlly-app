@@ -163,7 +163,14 @@ describe("⚠️ the fade hem: sticky, weightless, and only where content contin
     const without = renderToStaticMarkup(<TplZone hem={false}>content</TplZone>);
     expect(without).not.toContain("tpl-hem");
     // the caller decides from real data — the Noteboard hems only when notes exist
-    expect(note).toContain("hem={notes.length > 0}");
+    /* ⚠️ RE-POINTED (paper run, Phase 1): the hem is gated on MEASURED overflow now, not on
+       notes existing — the old gate rendered the chassis's sticky gradient over whatever sat at
+       the fold (measured: across two cards at TWO pixels of zone overflow, which read as the
+       cards themselves fading). The state derives from scrollHeight − clientHeight, observers on
+       zone and child both. */
+    expect(note).toContain("hem={zoneScrolls}");
+    expect(note).toContain("zone.scrollHeight - zone.clientHeight > 24");
+    expect(note).toContain("ro.observe(zone);");
   });
 
   it("the hem is the zone's LAST child, or it is not at the foot", () => {

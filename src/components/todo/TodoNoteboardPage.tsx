@@ -20,7 +20,7 @@
  * ⚠️ DELETE IS REAL HERE — user content is the only deletable kind — so it asks first (the styled
  * confirm) and holds an 8s undo that re-creates the SAME document id through addUserTask.
  */
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Search, MoreHorizontal } from "lucide-react";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { PortalMenu } from "./PortalMenu";
@@ -103,6 +103,29 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   const chips = useMemo(() => noteTagChips(pinned, currentUser?.tags ?? []), [pinned, currentUser?.tags]);
 
   const userTags = currentUser?.tags ?? [];
+
+  /* ⚠️ THE HEM IS GATED ON MEASURED OVERFLOW, NOT EXISTENCE (paper run, Phase 1). It used to be
+     `hem={notes.length > 0}`, so the chassis's sticky gradient rendered over whatever sat at the
+     fold — measured: full-strength across two cards while the zone overflowed by TWO PIXELS,
+     which is the "fade" the screenshot showed on cards and composer alike; their own paint was
+     always flat. The state derives from the value (scrollHeight − clientHeight > 24), never from
+     an event that could be missed, and the observers watch the zone AND its child — a
+     ResizeObserver on a scroller alone says nothing when its content grows. */
+  const boardRef = useRef<HTMLDivElement | null>(null);
+  const [zoneScrolls, setZoneScrolls] = useState(false);
+  useEffect(() => {
+    const board = boardRef.current;
+    const zone = board?.closest(".tpl-zone") as HTMLElement | null;
+    if (!zone) return;
+    const read = () => setZoneScrolls(zone.scrollHeight - zone.clientHeight > 24);
+    read();
+    const ro = new ResizeObserver(read);
+    ro.observe(zone);
+    if (board) ro.observe(board);
+    return () => ro.disconnect();
+    /* re-find the board when the empty-state branch swaps it in or out; sizes are the
+       observers' job, existence is this dependency's */
+  }, [notes.length === 0 && !compose]);
   const tagLabel = (id: string) => userTags.find((t) => t.id === id)?.label ?? id;
 
   /* ⚠️ DECLARED ABOVE ITS FIRST READER. `pinNote` calls `createTagDef`; a hook destructured
@@ -411,7 +434,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
         >
           {/* ⚠️ THE MASONRY IS THE SCROLLZONE (tasks-viewport P4): the header and tool row are
               fixed above it, and the notes scroll beneath under their own hem. */}
-          <TplZone label="Notes" hem={notes.length > 0}>
+          <TplZone label="Notes" hem={zoneScrolls}>
           {notes.length === 0 && !compose ? (
             /* the empty state TEACHES rather than apologises */
             <div className="nb-empty">
@@ -431,7 +454,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
               </button>
             </div>
           ) : (
-            <div className={`nb-board${column ? " nb-col1" : ""}`}>
+            <div ref={boardRef} className={`nb-board${column ? " nb-col1" : ""}`}>
               {!(compose && !compose.id) && (
                 <button type="button" className="nb-ghost" onClick={() => openComposer()}>
                   + Pin a note
