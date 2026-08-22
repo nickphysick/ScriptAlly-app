@@ -246,3 +246,46 @@
   font: inherit; font-size: 13px; background: #fff; color: var(--nb-ink); outline: 0;
 }
 .nb-pinput:focus { border-color: var(--nb-burgundy); }
+
+/* ── the Examples drawer ───────────────────────────────────────────────────────────────────── */
+/* ⚠️ Z-ORDER, DELIBERATELY BELOW THE MODALS. The shell's ladder is timeline drawer 45/46, modals
+   50, dropdowns 60. This is a page sheet, so it sits under all three: an examples list must never
+   cover the popover that a note's ⋯ opened. */
+.nb-scrim {
+  position: fixed; inset: 0; background: rgba(58, 28, 20, 0.22); z-index: 44;
+}
+.nb-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(480px, 94vw);
+  background: var(--nb-parchment); z-index: 45;
+  box-shadow: -12px 0 40px rgba(58, 28, 20, 0.18);
+  display: flex; flex-direction: column;
+}
+.nb-drawer-head { padding: 24px 26px 18px; border-bottom: 1px solid var(--nb-hair-soft); position: relative; }
+.nb-drawer-head h2 { font-family: "Playfair Display", Georgia, serif; font-size: 22px; font-weight: 500; color: var(--nb-ink);
+  /* ⚠️ 1.3 MINIMUM WHEREVER PLAYFAIR RENDERS MIXED CASE — "keep" has a descender, and a line box
+     the size of the em crops it. The standing rule, not a value tuned to this string. */
+  line-height: 1.3; }
+.nb-drawer-head p { font-size: 13px; font-weight: 300; color: var(--nb-quiet); margin-top: 6px; line-height: 1.5; }
+.nb-drawer-x {
+  position: absolute; top: 18px; right: 18px; border: 0; background: transparent; cursor: pointer;
+  color: var(--nb-muted); font-size: 18px; padding: 6px; border-radius: 8px; line-height: 1;
+}
+.nb-drawer-x:hover { background: var(--nb-ground); color: var(--nb-burgundy); }
+.nb-drawer-body { overflow-y: auto; padding: 18px 26px 40px; flex: 1; }
+
+.nb-exgroup { margin-bottom: 22px; }
+.nb-exhead {
+  display: block; margin-bottom: 10px;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; font-weight: 500; color: var(--nb-muted);
+}
+.nb-exnote { border-radius: var(--nb-radius); border: 1px solid transparent; padding: 14px 14px 10px; margin-bottom: 10px; }
+.nb-exnote .nb-body { font-size: 19px; }
+.nb-exfoot { display: flex; justify-content: flex-end; margin-top: 8px; }
+.nb-uselink {
+  border: 0; background: transparent; cursor: pointer;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: var(--nb-micro);
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--nb-burgundy);
+  padding: 4px 8px; border-radius: 6px;
+}
+.nb-uselink:hover { background: rgba(255, 255, 255, 0.6); }

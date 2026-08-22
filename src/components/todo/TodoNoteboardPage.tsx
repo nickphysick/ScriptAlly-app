@@ -31,6 +31,7 @@ import { useScriptAllyDb } from "../../lib/db";
 import { noteMenu, MenuLeaf } from "../../lib/todoMenu";
 import { TagPicker } from "./TagPicker";
 import { ArtSlot } from "./ArtSlot";
+import { NOTE_EXAMPLES } from "./noteboardExamples";
 import { useTagWrites } from "./useTagWrites";
 import { toggleTagSel } from "../../lib/todoTags";
 import { TAG_PALETTE } from "../../lib/todoFamily";
@@ -39,7 +40,7 @@ import { isNoteTask as isNote } from "../../lib/todoBoard";
 import {
   NOTEBOARD_SUBTITLE, noteCountLabel, noteColour, sortNotes, noteRestoreFields,
   composerWithColour, editCommit, emptyDraft, noteTagChips, noteMatchesSearch,
-  NOTE_COLOURS, NoteDraft, projectedTaskId, projectedTask, noteTaskTitle,
+  NOTE_COLOURS, NoteDraft, projectedTaskId, projectedTask, noteTaskTitle, draftFromExample,
 } from "../../lib/noteboard";
 import { newTag } from "../../lib/todoTags";
 import { UserTask, TagDef } from "../../types";
@@ -538,6 +539,52 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
             />
           </div>
         </div>
+      )}
+
+      {/* ⚠️ THE EXAMPLES DRAWER — a right-hand sheet over a scrim. It TEACHES what belongs on a
+          noteboard, which an empty board cannot: "pin a note" says what the control does and
+          nothing about what is worth pinning. Its content is DATA (noteboardExamples.ts), ported
+          verbatim from the ref and locked against it. */}
+      {examples && (
+        <>
+          <div className="nb-scrim" onClick={() => setExamples(false)} />
+          <aside
+            className="nb-drawer"
+            aria-label="Example notes"
+            onKeyDown={(e) => { if (e.key === "Escape") setExamples(false); }}
+          >
+            <div className="nb-drawer-head">
+              <h2>What writers keep here</h2>
+              <p>
+                Real kinds of notes from writers in the query trenches. Use any of these as a
+                starting point — it lands on your board ready to edit.
+              </p>
+              <button type="button" className="nb-drawer-x" aria-label="Close" onClick={() => setExamples(false)}>✕</button>
+            </div>
+            <div className="nb-drawer-body">
+              {NOTE_EXAMPLES.map((g) => (
+                <div className="nb-exgroup" key={g.group}>
+                  <span className="nb-exhead">{g.group}</span>
+                  {g.items.map((ex) => (
+                    <div className={`nb-exnote nb-c-${ex.colour}`} key={ex.body}>
+                      <div className="nb-body">{ex.body}</div>
+                      <div className="nb-exfoot">
+                        <button
+                          type="button"
+                          className="nb-uselink"
+                          /* seeds an editable copy; nothing is written until Pin it */
+                          onClick={() => { setExamples(false); setCompose(draftFromExample(ex)); }}
+                        >
+                          Use as a starting point →
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </aside>
+        </>
       )}
 
       {confirmAskNode}

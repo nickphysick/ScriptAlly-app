@@ -174,3 +174,15 @@ export const projectedTask = (n: Pick<UserTask, "id">, all: UserTask[]): UserTas
  */
 export const noteTaskTitle = (body: string): string =>
   (body.split("\n")[0] ?? "").trim().slice(0, 60);
+
+/**
+ * An example, turned into a draft the writer can edit.
+ *
+ * ⚠️ IT SEEDS, IT DOES NOT WRITE. Nothing reaches the board until Pin it is pressed — an example
+ * that pinned itself would put words there that nobody decided to keep.
+ */
+export const draftFromExample = (ex: { body: string; colour: NoteColour; tag: string }): NoteDraft => ({
+  body: ex.body,
+  colour: ex.colour,
+  tag: ex.tag,
+});
