@@ -22,7 +22,7 @@ import {
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 /* §6 — the same atomic path the Edit drawer saves its dates through; recompute derives the rest. */
 import { commitQueryEdits } from "../lib/saveQueryEdits";
-import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, SubmissionStatus, ActivityType, QueryMaterial, UserPlan, ComponentType } from "../types";
+import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, SubmissionStatus, ActivityType, QueryMaterial, UserPlan, ComponentType , SubmissionPackage} from "../types";
 import { TypeGlyph } from "./packages/TypeGlyph";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
@@ -88,6 +88,11 @@ import { nextIndex, typeAheadIndex, nearestSurvivor, pageSizeFor, isListNavKey, 
 import { nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo, scheduledReminder } from "../lib/nudgeState";
 import { NUDGE_NESTED_TYPE } from "../lib/logNudge";
 import { useFixedMenu } from "./forms/useFixedMenu";
+import { PackagePicker } from "./reading-pane/PackagePicker";
+import {
+  attachablePackages, attachedMaterials, canAttachPackages, originTags, originTagText,
+  packageMenuRow, withoutPackage, type PackageItem,
+} from "../lib/packageAttach";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { MobileSheet } from "./shell/MobileSheet";
 import { useIsMobile, useMobileChrome } from "./shell/mobileChrome";
@@ -300,6 +305,9 @@ export const Queries: React.FC<{
     agents,
     queries,
     packages,
+    /* §2 — the package's slots are version ids; the picker resolves them to names. Both stores
+       are the DbProvider's own, which Queries already consumes, so this adds no import edge. */
+    versions,
     activities,
     journalEntries,
     tasks,
@@ -1708,6 +1716,15 @@ export const Queries: React.FC<{
      keyboard session, and the next Tab restarts at the page's first control. */
   const closeMatPop = () => { const el = matPopTrigRef.current; setMatPop(null); setOtherEditing(null); el?.focus(); };
   const [addMatOpen, setAddMatOpen] = useState(false);
+  /**
+   * §2 — the package picker. Anchored to the same Attach chip the menu hangs off, because the menu
+   * is gone by the time this opens and a popover needs something on screen to hang from.
+   */
+  const [pkgPickOpen, setPkgPickOpen] = useState(false);
+  const pkgPickPanelRef = useRef<HTMLElement>(null);
+  const { triggerRef: pkgPickTrigRef, menuStyle: pkgPickStyle } = useFixedMenu<HTMLElement>(
+    pkgPickOpen, { placement: "auto", constrain: true, menuRef: pkgPickPanelRef },
+  );
   /* §1 — the reported fault: this had the primitive and never asked it to flip or cap. */
   const addMatPanelRef = useRef<HTMLElement>(null);
   const { triggerRef: addMatTrigRef, menuStyle: addMatMenuStyle } = useFixedMenu<HTMLButtonElement>(
@@ -1925,6 +1942,56 @@ export const Queries: React.FC<{
    * what the agent and the writer did to each other. The undo restores the prior stored value,
    * which is what a correction needs instead. Do not "fix" this by adding a log entry.
    */
+  /**
+   * §2 — attach a package's items as ORDINARY MATERIALS.
+   *
+   * ⚠️ A SNAPSHOT, NOT A REFERENCE. The items are copied as they are today; editing the package
+   * afterwards cannot reach this send, because there is nothing here pointing back at it. The
+   * marks each item carries are a receipt (which package, and its name at the time), not a link.
+   *
+   * ⚠️ IT DOES NOT SET `packageId`. That field is the app's package LINK, and `materialsLinkWrites`
+   * states the invariant it belongs to — a query carries the link OR its own materials, never both.
+   * A snapshot is the second kind. Setting both would give one send two answers to "what did you
+   * send", which is the divergence that rule exists to prevent.
+   *
+   * ⚠️ AND THE PRIOR VALUE IS CAPTURED BEFORE THE WRITE. The empty-closure law: an undo built from
+   * state read back afterwards restores what it just wrote.
+   */
+  const attachPackage = (q: Query, pkg: SubmissionPackage, items: PackageItem[]) => {
+    const before = ((q as Query).materialsWanted ?? []) as (string | QueryMaterial)[];
+    const linkBefore = q.packageId || "";
+    const next = [...before, ...attachedMaterials(pkg, items)];
+    setPkgPickOpen(false);
+    /**
+     * ⚠️ THE LINK IS CLEARED AS THE SNAPSHOT LANDS, and the measurement is what found this. Writing
+     * only the materials left a query that had ALREADY been attached by reference carrying both — a
+     * stale `packageId` beside a set of copied items, which is the "two answers to what did you
+     * send" state `materialsLinkWrites` exists to forbid. Attaching a snapshot to a linked query is
+     * a REPLACEMENT of the link, not an addition beside it.
+     */
+    void updateQuery(q.id, { materialsWanted: next, packageId: "" });
+    showToast({
+      message: `${items.length} ${items.length === 1 ? "item" : "items"} from ${pkg.packageName}`,
+      /* the undo restores BOTH, or it would leave a query whose link it had silently dropped */
+      undo: () => void updateQuery(q.id, { materialsWanted: before, packageId: linkBefore }),
+    });
+  };
+
+  /**
+   * ⚠️ THE TAG'S UNDO REMOVES WHAT THAT PACKAGE BROUGHT AND NOTHING ELSE — matched on the item's
+   * mark, never on its name, so a synopsis the writer added by hand survives an undo of a package
+   * that also carried one.
+   */
+  const detachPackage = (q: Query, packageId: string, name: string) => {
+    const before = ((q as Query).materialsWanted ?? []) as (string | QueryMaterial)[];
+    const next = withoutPackage(before, packageId);
+    void updateQuery(q.id, { materialsWanted: next });
+    showToast({
+      message: `Removed the items from ${name}`,
+      undo: () => void updateQuery(q.id, { materialsWanted: before }),
+    });
+  };
+
   const writeMaterials = (q: Query, next: (string | QueryMaterial)[], msg: string) => {
     const prev = (q as any).materialsWanted;
     const restore = Array.isArray(prev) ? { materialsWanted: prev } : { materialsWanted: deleteField() as unknown as QueryMaterial[] };
@@ -5467,6 +5534,9 @@ export const Queries: React.FC<{
                                   : [];
                                 const isPro = currentUser?.plan === UserPlan.PRO;
                                 const openPackages = () => onNavigate?.("manuscripts", "Submission packages");
+                                /* §2 — this manuscript's live packages; retired ones are not offered */
+                                const attachablePkgs = attachablePackages(packages, activeQuery.manuscriptId);
+                                const materialsOf = (q: Query) => ((q.materialsWanted ?? []) as (string | QueryMaterial)[]);
                                 const openOtherEditor = (item: string | QueryMaterial, el: HTMLElement) => {
                                   setOtherEditing(item);
                                   setOtherText(sampleMaterialText(item));
@@ -5622,15 +5692,55 @@ export const Queries: React.FC<{
                                           onClick: () => { setAddMatOpen(false); if (addMatTrigRef.current) m.add(addMatTrigRef.current); },
                                         };
                                       }),
-                                      "divider" as const,
-                                      {
-                                        label: isPro ? "Attach a submission package" : "Attach a submission package · Pro",
-                                        onClick: () => { setAddMatOpen(false); if (isPro) openPackages(); else onNavigate?.("plans"); },
-                                      },
+                                      /* ⚠️ THE PACKAGE ROW SITS BELOW A RULE AND IS NOT A FIFTH
+                                         MATERIAL TYPE (§2). The four above are things you attach one
+                                         OF; this fills the row above wholesale. The divider is what
+                                         says so, and it goes only when the row does.
+                                         ⚠️ AND IT NO LONGER SELLS ANYTHING (§3). It read
+                                         `· Pro` and sent a Free user to the plans page; beta grants
+                                         everyone Pro, and the free plan shows no ceilings here. The
+                                         gate is `canAttachPackages`, one place, currently open. */
+                                      ...(packageMenuRow(canAttachPackages(currentUser), attachablePkgs.length).length ? ["divider" as const] : []),
+                                      ...packageMenuRow(canAttachPackages(currentUser), attachablePkgs.length).map((r) => ({
+                                        label: r.label,
+                                        onClick: () => {
+                                          setAddMatOpen(false);
+                                          /* the picker hangs off the same chip the menu did */
+                                          (pkgPickTrigRef as React.MutableRefObject<HTMLElement | null>).current = addMatTrigRef.current;
+                                          setPkgPickOpen(true);
+                                        },
+                                      })),
                                     ]}
                                   />
                                 </span>
                               </div>
+
+                              {/* ⚠️ THE ORIGIN TAG IS PROVENANCE, NOT A CONTROL OVER THE PILLS (§2).
+                                  The items above are ordinary materials — individually editable and
+                                  removable, indistinguishable from hand-attached ones, which is the
+                                  point of a snapshot. This line only says where they came from, and
+                                  offers to take back exactly what it brought.
+                                  ⚠️ IT DERIVES FROM THE ITEMS, so removing a pill by hand makes it
+                                  read one fewer, and removing the last makes it disappear. */}
+                              {originTags(materialsOf(activeQuery)).map((t) => (
+                                <div key={t.packageId} className="qc-pkgtag">
+                                  <span>{originTagText(t)}</span>
+                                  <button type="button" onClick={() => detachPackage(activeQuery, t.packageId, t.packageName)}>undo</button>
+                                </div>
+                              ))}
+
+                              {pkgPickOpen && (
+                                <PackagePicker
+                                  packages={attachablePkgs}
+                                  versions={versions}
+                                  existing={materialsOf(activeQuery)}
+                                  style={pkgPickStyle}
+                                  panelRef={pkgPickPanelRef}
+                                  onPick={(pkg, items) => attachPackage(activeQuery, pkg, items)}
+                                  onManage={() => { setPkgPickOpen(false); openPackages(); }}
+                                  onClose={() => setPkgPickOpen(false)}
+                                />
+                              )}
 
                               {/* ⚠️ OTHER TAKES A FIELD, NOT A STEPPER — a quantity of what? Its chip
                                   reads whatever the writer types, verbatim. */}

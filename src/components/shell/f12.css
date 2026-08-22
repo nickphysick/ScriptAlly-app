@@ -4383,3 +4383,29 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
    itself would scroll the heading out of view with the items — the same fault the sort panel had
    when its DONE button scrolled away, and the same fix: flex column, body shrinks, chrome pinned. */
 .f12-menu-body { display: flex; flex-direction: column; gap: 1px; min-height: 0; overflow-y: auto; }
+
+/* §2 — the submission-package picker (ref 173).
+   ⚠️ THE LIST SCROLLS, THE HEAD AND THE FOOT DO NOT — the same arrangement every other capped
+   popover on this page uses, so `Manage packages…` cannot be scrolled out of reach. */
+.qc-pkgpick { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--sh-3); padding: 6px; min-width: 288px; max-width: 360px; }
+.qc-pkgpick-head { flex: none; padding: 7px 9px 8px; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.qc-pkgpick-body { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.qc-pkgrow { display: flex; flex-direction: column; gap: 3px; width: 100%; padding: 9px 10px; border-radius: var(--r-sm); text-align: left; cursor: pointer; }
+.qc-pkgrow:hover { background: var(--paper); }
+.qc-pkgrow-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.qc-pkgname { font-family: var(--f12-body); font-size: 13px; color: var(--ink); }
+.qc-pkgcount { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.qc-pkgitems { display: flex; flex-wrap: wrap; gap: 4px 8px; }
+.qc-pkgitem { font-size: 11px; color: var(--ink-2); }
+.qc-pkgitem em { font-style: normal; color: var(--ink-3); }
+/* the overlap note is the one thing on the row that must not be skimmed past */
+/* ⚠️ THE TOKEN, NOT THE HEX — `f12.css` forbids colour literals and a lock scans for them. */
+.qc-pkgclash { font-size: 11px; line-height: 1.4; color: var(--burg); }
+.qc-pkgmanage { flex: none; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; width: 100%; margin-top: 4px; padding: 8px 10px; border-top: 1px solid var(--hairline); font-family: var(--f12-body); font-size: 12px; color: var(--ink-2); text-align: left; cursor: pointer; }
+.qc-pkgmanage:hover { color: var(--ink); }
+.qc-pkgmanage-note { font-family: var(--f12-mono); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+
+/* the origin tag beneath the pills — provenance, not a control */
+.qc-pkgtag { display: flex; align-items: baseline; gap: 8px; margin-top: 6px; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.qc-pkgtag button { font: inherit; color: var(--ink-2); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.qc-pkgtag button:hover { color: var(--ink); }

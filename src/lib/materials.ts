@@ -109,11 +109,27 @@ function formatLegacyMaterial(mat: string): string {
   const numMatch = mat.match(/\d+[\d,.]*/);
   const numStr = numMatch ? numMatch[0] : "";
 
+  /**
+   * ⚠️ AN UNSIZED SAMPLE NAMES ITSELF; IT DOES NOT INVENT A SIZE. These branches used to fall back
+   * to `50` pages and `3` chapters when the input carried no number, so a material recorded with no
+   * quantity RENDERED A PAGE COUNT NOBODY ENTERED — and the writer read it as the record of what
+   * they sent. Surfaced by package-attach (§2): a `SubmissionPackage` stores version ids only, with
+   * no quantity anywhere in the chain, so every attached opening sample took the invented 50.
+   *
+   * ⚠️ THE MODULE ALREADY DISAGREED WITH ITSELF ABOUT THIS. `sampleMaterialText` returns `Included`
+   * for exactly the same unsized item — the honest answer — while this one fabricated a figure, in
+   * the file whose docstring calls itself the only formatter so material display cannot drift.
+   *
+   * ⚠️ AND IT IS THE SAME LAW `ComponentType.SAMPLE_PAGES` ALREADY OBEYS: one artefact serves pages,
+   * chapters and words, so the record does not know the unit and a label must not assert one. An
+   * input that DOES carry a number keeps it — only the fabricated default is gone.
+   */
+  const UNSIZED_SAMPLE = "Opening sample";
   if (norm.includes("page")) {
-    return sized(numStr || "50", "page");
+    return numStr ? sized(numStr, "page") : UNSIZED_SAMPLE;
   }
   if (norm.includes("chapter")) {
-    return sized(numStr || "3", "chapter");
+    return numStr ? sized(numStr, "chapter") : UNSIZED_SAMPLE;
   }
   if (norm.includes("word")) {
     let formattedNum = numStr;

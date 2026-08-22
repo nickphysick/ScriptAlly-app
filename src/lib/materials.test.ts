@@ -124,3 +124,37 @@ describe("§2b — the sample names itself from its size", () => {
     expect(formatQueryMaterial({ material: "Other", type: "other", quantity: "Marketing plan" })).toBe("Marketing plan");
   });
 });
+
+describe("⚠️ an unsized sample names itself — it never invents a size", () => {
+  /**
+   * The fault this guards was surfaced by package-attach: a `SubmissionPackage` stores version ids
+   * and nothing else, so every attached opening sample arrives with no quantity — and the formatter
+   * fabricated `50` pages, printing a page count nobody entered as the record of what was sent.
+   *
+   * The module already disagreed with itself: `sampleMaterialText` returns `Included` for the very
+   * same item. Both now decline to state a size the record does not hold.
+   */
+  it("renders the canonical name when no quantity is recorded", () => {
+    expect(formatQueryMaterial({ material: "Sample Pages" })).toBe("Opening sample");
+    expect(formatQueryMaterial("Sample Pages")).toBe("Opening sample");
+    expect(formatQueryMaterial("Sample Chapters")).toBe("Opening sample");
+  });
+
+  it("⚠️ never prints a figure that is not in the input", () => {
+    for (const input of ["Sample Pages", "Sample Chapters", "sample pages"]) {
+      expect(formatQueryMaterial(input), `${input} fabricated a quantity`).not.toMatch(/\d/);
+    }
+  });
+
+  it("⚠️ but an input that DOES carry a number keeps it — only the fabricated default is gone", () => {
+    expect(formatQueryMaterial("First 50 pages")).toBe("First 50 pages");
+    expect(formatQueryMaterial("3 chapters")).toBe("First 3 chapters");
+    expect(formatQueryMaterial({ material: "Sample Pages", type: "pages", quantity: 50 })).toBe("First 50 pages");
+    expect(formatQueryMaterial({ material: "Sample Pages", type: "chapters", quantity: 1 })).toBe("First chapter");
+  });
+
+  it("the two formatters in this module now agree that an unsized sample states no size", () => {
+    expect(sampleMaterialText({ material: "Sample Pages" })).toBe("Included");
+    expect(formatQueryMaterial({ material: "Sample Pages" })).not.toMatch(/\d/);
+  });
+});
