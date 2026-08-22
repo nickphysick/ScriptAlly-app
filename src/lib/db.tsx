@@ -333,6 +333,11 @@ interface DbContextType {
   addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[]; createdAt?: string }) => Promise<string | undefined>;
   updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">> & { detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null }) => Promise<void>;
   deleteUserTask: (id: string) => Promise<void>;
+  /** ⚠️ THE UNDO'S WRITE — the captured document, VERBATIM. A restore through addUserTask loses
+   *  whatever that builder does not know about (it stamped createdAt once, then committedDate and
+   *  estimateMin were silently dropped by the field list); this puts back exactly what was
+   *  removed, byte for byte, and takes the caller's word that it held the document. */
+  restoreUserTask: (task: UserTask) => Promise<void>;
   /* ⚠️ THE ONE WRITE ON THIS OBJECT THAT ANSWERS. Every other user-task write routes its error
      through handleFirestoreError and returns void, which is right for them and wrong for this:
      `colour` is not yet in the deployed rules allowlist, so the write CAN be denied, and a
@@ -2571,6 +2576,25 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   /**
+   * The undo's inverse of deleteUserTask — the captured document written back VERBATIM.
+   *
+   * ⚠️ NOTHING IS RESTAMPED, and that is the whole point. `createdAt` decides where the note lands
+   * on a board sorted by it; `updatedAt`, `committedDate`, `estimateMin`, `tags` and `colour` are
+   * facts the writer held before the removal, and a restore that regenerates any of them returns
+   * a DIFFERENT note wearing the same words. setDoc rather than update, because the document no
+   * longer exists — and the whole map is allowlisted (isValidUserTask hasOnly, `colour` included
+   * since the 22 Aug dev rules deploy), so the create validates exactly as the original did.
+   */
+  const restoreUserTask = async (task: UserTask): Promise<void> => {
+    if (!currentUser) return;
+    try {
+      await setDoc(doc(db, "users", currentUser.id, "tasks", task.id), task);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/tasks/${task.id}`);
+    }
+  };
+
+  /**
    * The Noteboard's paper colour — its own write, deliberately.
    *
    * ⚠️ IT IS NEVER PART OF A CREATE. `isValidUserTask` validates with `keys().hasOnly([...])`, so
@@ -3165,6 +3189,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addUserTask,
         updateUserTask,
         deleteUserTask,
+        restoreUserTask,
         setUserTaskColour,
         addActivity,
         deleteActivity,

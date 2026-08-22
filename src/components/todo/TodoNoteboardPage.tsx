@@ -38,7 +38,7 @@ import { TAG_PALETTE } from "../../lib/todoFamily";
 import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
 import {
-  NOTEBOARD_SUBTITLE, noteFilterLabel, noteColour, sortNotes, noteRestoreFields,
+  NOTEBOARD_SUBTITLE, noteFilterLabel, noteColour, sortNotes, noteReceipt,
   composerWithColour, editCommit, emptyDraft, noteTagChips, noteMatchesSearch,
   NOTE_COLOURS, NoteDraft, projectedTaskId, projectedTask, noteTaskTitle, draftFromExample,
 } from "../../lib/noteboard";
@@ -60,7 +60,7 @@ const pinDate = (iso: string | undefined): string =>
   iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase() : "";
 
 export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
-  const { userTasks, addUserTask, updateUserTask, deleteUserTask, setUserTaskColour, updateUserProfile, currentUser } = useScriptAllyDb();
+  const { userTasks, addUserTask, updateUserTask, deleteUserTask, restoreUserTask, setUserTaskColour, updateUserProfile, currentUser } = useScriptAllyDb();
   const { toast, flash, dismiss, pause, resume } = useTodoToast();
   const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
 
@@ -218,9 +218,11 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   };
 
   const deleteNote = async (note: UserTask) => {
-    /* ⚠️ CAPTURED BEFORE THE DELETE. After it there is nowhere left to read the note from, so
-       "restore by id" would have nothing to restore. */
-    const restore = noteRestoreFields(note);
+    /* ⚠️ THE WHOLE DOCUMENT, CAPTURED BEFORE THE DELETE — after it there is nowhere left to read
+       the note from. A named field list here dropped `committedDate` and `estimateMin` (a note
+       committed to Today came back silently uncommitted); the receipt is a copy of the document,
+       so there is no list to chase the schema with. */
+    const receipt = noteReceipt(note);
     const ok = await confirmAsk(`Remove “${note.text}”?`, { confirmLabel: "Remove note", cancelLabel: "Keep it" });
     if (!ok) return;
     try {
@@ -229,17 +231,14 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
       flash("Couldn’t remove that — try again?");
       return;
     }
-    /* the 8s undo — user content deserves the longest way back; same-id re-create, no new path */
+    /* the 8s undo — user content deserves the longest way back */
     flash(`Removed — “${note.text}”`, {
       label: "Undo",
+      /* ⚠️ REWRITTEN VERBATIM, never re-created through the builder. addUserTask stamps its own
+         createdAt and accepts only the fields it knows about — the restore-through-create shape
+         this run swept the app for. restoreUserTask puts back exactly what was held. */
       fn: async () => {
-        /* ⚠️ `createdAt` IS WHAT PUTS IT BACK WHERE IT WAS. The board is that field descending
-           with no stored order, so an inverse without it returns the note to the TOP — present,
-           in the wrong place, which reads as a bug in the board rather than in the undo. */
-        const { colour, ...plain } = restore;
-        await addUserTask(plain);
-        /* and the paper follows on its own write, for the same reason the create never carries it */
-        if (colour) await setUserTaskColour(restore.id, colour);
+        await restoreUserTask(receipt);
         flash("Pinned again");
       },
     }, 8000);

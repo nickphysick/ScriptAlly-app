@@ -16,7 +16,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { UserTask } from "../../types";
-import { sortNotes, noteRestoreFields, composerWithColour, editCommit } from "../../lib/noteboard";
+import { sortNotes, noteReceipt, composerWithColour, editCommit } from "../../lib/noteboard";
 
 const here = __dirname;
 const decls = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
@@ -27,12 +27,17 @@ const note = (id: string, text: string, day: string, over: Partial<UserTask> = {
   createdAt: `2026-08-${day}T09:00:00Z`, updatedAt: `2026-08-${day}T09:00:00Z`, ...over,
 });
 
-/* six notes, six days, six bodies — a board where order is observable */
+/* six notes, six days, six bodies, genuinely different fields — a board where order AND
+   payload are observable. One mid-board note carries the two late optional fields. */
 const board = (): UserTask[] => [
-  note("a", "One", "12"), note("b", "Two", "13"), note("c", "Three", "14", { tags: ["t1"] }),
+  note("a", "One", "12"), note("b", "Two", "13"),
+  note("c", "Three", "14", { tags: ["t1"], committedDate: "2026-08-22", estimateMin: 15 }),
   note("d", "Four", "15", { colour: "pink" }), note("e", "Five", "16"), note("f", "Six", "17"),
 ];
-const sequence = (ts: UserTask[]) => sortNotes(ts).map((t) => t.text).join(" | ");
+/* ⚠️ THE SEQUENCE CARRIES THE PAYLOAD, not just the words — body · tag · colour per slot, joined
+   once. A body-only compare passes on a note that came back in place wearing less. */
+const sequence = (ts: UserTask[]) =>
+  sortNotes(ts).map((t) => `${t.text}·${(t.tags ?? []).join("+")}·${t.colour ?? "-"}·${t.committedDate ?? "-"}`).join(" | ");
 
 describe("⚠️ remove and undo — the board comes back as it was, in order", () => {
   it("the sequence after Undo is the sequence before Remove — one comparison, not six", () => {
@@ -44,24 +49,28 @@ describe("⚠️ remove and undo — the board comes back as it was, in order", 
       const left = before.filter((t) => t.id !== victim.id);
       expect(sequence(left), `removing ${victim.text} should change the board`).not.toBe(was);
       /* the inverse rebuilds it from what the receipt captured — never from what is left */
-      const restored = [...left, { ...victim, ...noteRestoreFields(victim) } as UserTask];
+      const restored = [...left, noteReceipt(victim)];
       expect(sequence(restored), `undo of ${victim.text}`).toBe(was);
     }
   });
 
-  it("⚠️ the receipt captures BEFORE it destroys, and carries everything that decides the note", () => {
-    const n = note("c", "Three", "14", { tags: ["t1", "t2"], colour: "sage", detail: "second line" });
-    const f = noteRestoreFields(n);
-    /* ⚠️ EXHAUSTIVE AGAINST THE NOTE'S OWN KEYS, not against a hand-written list — a list on both
-       sides agrees with itself the day someone adds a field and forgets this one. */
-    const carried = new Set(Object.keys(f));
-    const dropped = Object.keys(n).filter((k) => !carried.has(k));
-    /* userId is the writer's, updatedAt is stamped by the write, done is false by definition on a
-       note. Everything else must survive, or the note comes back changed. */
-    expect(dropped.sort()).toEqual(["done", "updatedAt", "userId"]);
-    expect(f.createdAt).toBe(n.createdAt);   // the field that decides WHERE it lands
-    expect(f.tags).toEqual(["t1", "t2"]);
-    expect(f.colour).toBe("sage");
+  it("⚠️ the receipt is the WHOLE DOCUMENT — proven against a note carrying every optional field", () => {
+    /* ⚠️ THE NAMED LIST WAS THE FAULT (finish run, Phase 2). `noteRestoreFields` carried a list of
+       fields chosen when it was written, and two optional fields postdate the list —
+       `committedDate` and `estimateMin` — so a note committed to Today came back silently
+       uncommitted. The exhaustive-keys check never fired because its fixture carried neither
+       field: it was honest about the note it was given. The fixture now carries EVERYTHING, and
+       the receipt is the document itself rather than a list that has to chase the schema. */
+    const n = note("c", "Three", "14", {
+      tags: ["t1", "t2"], colour: "sage", detail: "second line",
+      committedDate: "2026-08-22", estimateMin: 15,
+    });
+    const r = noteReceipt(n);
+    expect(r).toEqual(n);                       // nothing dropped, nothing added
+    expect(r).not.toBe(n);                      // and it is a COPY — later mutations cannot reach it
+    expect(r.committedDate).toBe("2026-08-22"); // the two fields the named list lost
+    expect(r.estimateMin).toBe(15);
+    expect(r.createdAt).toBe(n.createdAt);      // the field that decides WHERE it lands
   });
 
   it("⚠️ the undo is a real inverse, never an empty closure", () => {
@@ -71,7 +80,12 @@ describe("⚠️ remove and undo — the board comes back as it was, in order", 
     const fn = page.slice(page.indexOf("const deleteNote"));
     expect(page.indexOf("const deleteNote")).toBeGreaterThan(-1);
     const body = fn.slice(0, fn.indexOf("\n  };"));
-    expect(body).toContain("noteRestoreFields");
+    /* the receipt is captured before the confirm, and the undo REWRITES the document verbatim
+       through restoreUserTask — never re-derives it through the create path, whose builder
+       stamps its own createdAt and accepts only the fields it knows about */
+    expect(body).toContain("noteReceipt(note)");
+    expect(body).toContain("restoreUserTask(");
+    expect(body).not.toContain("addUserTask(");
     expect(body).toMatch(/label:\s*"Undo"/);
     expect(body).not.toMatch(/fn:\s*async\s*\(\)\s*=>\s*\{\s*\}/);   // the empty closure
   });

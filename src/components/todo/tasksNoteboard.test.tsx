@@ -142,13 +142,15 @@ describe("⚠️ delete asks first and holds the LONG way back", () => {
        are unchanged. */
     expect(page).toContain("await confirmAsk(`Remove “${note.text}”?`");
     expect(page).toContain("}, 8000)");
-    /* ⚠️ AND THE INVERSE CARRIES `createdAt` NOW. The old one re-created through
-       `addUserTask({ id, text, detail })`, and addUserTask stamps `createdAt: now` — so Undo put
-       the note back at the TOP of the board rather than in its slot, and dropped its tags with
-       it. Nothing failed; the note came back somewhere else wearing less.
-       noteboardCompose.test.ts compares the whole ordered sequence, which is what caught it. */
-    expect(page).toContain("noteRestoreFields(note)");
-    expect(page).not.toContain("addUserTask({ id: note.id, text: note.text, detail: note.detail })");
+    /* ⚠️ AND THE INVERSE IS THE WHOLE DOCUMENT NOW (finish run, Phase 2 — the second tightening
+       of this line). First fix: carry createdAt so Undo stopped returning the note to the TOP.
+       This fix: carry EVERYTHING — the named field list dropped `committedDate` and `estimateMin`
+       (a note committed to Today came back silently uncommitted), so the receipt is a copy of the
+       document and the restore writes it back verbatim through restoreUserTask, never through the
+       create builder. noteboardCompose.test.ts holds the sequence-and-payload comparison. */
+    expect(page).toContain("noteReceipt(note)");
+    expect(page).toContain("restoreUserTask(receipt)");
+    expect(page).not.toContain("addUserTask({ id: note.id");
   });
 
   it("the toast machinery takes the override rather than a second timer", () => {

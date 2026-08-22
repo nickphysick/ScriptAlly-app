@@ -50,38 +50,15 @@ export const noteColour = (t: Pick<UserTask, "colour">): NoteColour => t.colour 
 export const sortNotes = (tasks: UserTask[]): UserTask[] =>
   tasks.filter(isNoteTask).sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
 
-/** What a removed note must carry to come back as itself. */
-export interface NoteRestore {
-  id: string;
-  text: string;
-  createdAt: string;
-  detail?: string;
-  tags?: string[];
-  colour?: NoteColour;
-}
-
 /**
- * ⚠️ CAPTURE BEFORE YOU DESTROY. "Restore by id" is only possible while something still holds the
- * contents; after the delete there is nowhere to read them from. This is called on the note that
- * is about to go, and its result is what the toast's inverse closes over.
- *
- * ⚠️ AND `createdAt` IS THE LOAD-BEARING FIELD. `addUserTask` stamps `createdAt: now` when the
- * caller does not supply one, so an inverse that omits it returns the note to the TOP of the
- * board rather than to its slot — present, and in the wrong place, which reads as a bug in the
- * board rather than in the undo. `tags` and `colour` are here for the same reason: a note that
- * comes back wearing less has not been restored.
- *
- * `userId` is the writer's, `updatedAt` is stamped by the write, and `done` is false by
- * definition on a note — those three are the only fields deliberately not carried.
+ * ⚠️ THE RECEIPT IS THE WHOLE DOCUMENT, CAPTURED BEFORE THE DELETE — a COPY, so mutations after
+ * capture cannot reach it. Its predecessor (`noteRestoreFields`) carried a NAMED LIST of fields,
+ * and two optional fields postdated the list — `committedDate` and `estimateMin` — so a note
+ * committed to Today came back silently uncommitted. A list has to chase the schema; the document
+ * does not. The restore writes this back verbatim (`restoreUserTask`), never through the create
+ * path, whose builder stamps its own `createdAt` and accepts only the fields it knows about.
  */
-export const noteRestoreFields = (n: UserTask): NoteRestore => ({
-  id: n.id,
-  text: n.text,
-  createdAt: n.createdAt,
-  ...(n.detail ? { detail: n.detail } : {}),
-  ...(n.tags && n.tags.length ? { tags: n.tags } : {}),
-  ...(n.colour ? { colour: n.colour } : {}),
-});
+export const noteReceipt = (n: UserTask): UserTask => ({ ...n });
 
 /** The composer's draft — the mockup's three fields and nothing else. */
 export interface NoteDraft {
