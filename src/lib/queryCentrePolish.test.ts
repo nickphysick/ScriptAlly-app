@@ -445,8 +445,12 @@ describe("§9 · nothing selected", () => {
   it("the unselected pane is one line beneath the art, and nothing else", () => {
     expect(code, "the unselected pane is missing").toContain('className="qc-unsel"');
     expect(code, "the caption changed").toContain("Select a query to get started");
+    /* ⚠️ THE SLOT, NOT THE CALL'S SPELLING. Written as the literal `<ArtSlot name="pane-unselected" />`
+       this went red an hour later when the box gained its measured `maxWidth={210}` — a change that
+       fixed the placeholder and left this test's claim untouched. The claim is that the art is an
+       ArtSlot on that named slot, so the illustration can drop into the same box later. */
     expect(code, "the art is not an ArtSlot, so the illustration cannot drop in later")
-      .toContain('<ArtSlot name="pane-unselected" />');
+      .toMatch(/<ArtSlot\s+name="pane-unselected"/);
     /* ⚠️ THE RETIRED COPY IS ASSERTED GONE, both halves — the heading and its explanation. */
     expect(code, "the retired empty state came back").not.toContain("<h4>Nothing selected</h4>");
     expect(code, "the three-things line came back").not.toContain("where it stands, what you sent");
