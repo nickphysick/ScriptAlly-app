@@ -239,3 +239,34 @@ test.describe("Phase 3 — drag to reorder", () => {
     expect(reloaded.join(" | "), "the order did not survive reload — nothing was written").toBe(expected.join(" | "));
   });
 });
+
+test.describe("Phase 4 — link-aware bodies", () => {
+  test("one anchor, zero img elements, and the markup readable as text — on the real page", async ({ page }) => {
+    await openRoute(page, ROUTE, { width: 1440, height: 1400 });
+    const card = page.locator(".nb-note").filter({ hasText: "NBLINK" }).first();
+    await expect(card, "the link fixture is not on the board — re-seed").toBeVisible();
+
+    const d = await card.evaluate((el) => ({
+      anchors: Array.from(el.querySelectorAll("a")).map((a) => ({
+        href: a.getAttribute("href"), target: a.getAttribute("target"), rel: a.getAttribute("rel"),
+        text: a.textContent, colour: getComputedStyle(a).color,
+      })),
+      imgs: el.querySelectorAll("img").length,
+      scripts: el.querySelectorAll("script").length,
+      text: (el.querySelector(".nb-body") as HTMLElement).innerText,
+    }));
+    console.log(`[link] anchors=${d.anchors.length} imgs=${d.imgs} colour=${d.anchors[0]?.colour}`);
+
+    expect(d.anchors, "no anchor rendered").toHaveLength(1);
+    expect(d.anchors[0].href).toBe("https://bestsellerexperiment.com/ep432");
+    expect(d.anchors[0].target).toBe("_blank");
+    expect(d.anchors[0].rel).toContain("noopener");
+    /* ⚠️ A PAINTED VALUE, not a class — burgundy #7c3a2a */
+    expect(d.anchors[0].colour).toBe("rgb(124, 58, 42)");
+
+    /* the injection legs, on the rendered page */
+    expect(d.imgs, "an img element was created from note text").toBe(0);
+    expect(d.scripts).toBe(0);
+    expect(d.text, "the writer cannot read back what they typed").toContain("<img src=x onerror=alert(1)>");
+  });
+});

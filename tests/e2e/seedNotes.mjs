@@ -50,6 +50,9 @@ const NOTES = [
   { n: 9, body: "NBPAPER yellow", colour: "yellow" },
   { n: 10, body: "NBPAPER pink", colour: "pink" },
   { n: 11, body: "NBPAPER sage", colour: "sage" },
+  /* the link/injection fixture (paper run, Phase 4): plain text, a bare URL, and markup the
+     writer typed and must be able to READ BACK */
+  { n: 12, body: "NBLINK Notes on the letter\nhttps://bestsellerexperiment.com/ep432\n<img src=x onerror=alert(1)>" },
   { n: 1, body: "NBPROBE one" },
   { n: 2, body: "NBPROBE two — a line with rather more in it than the first one carried" },
   { n: 3, body: "NBPROBE three\nsecond line\nthird line" },

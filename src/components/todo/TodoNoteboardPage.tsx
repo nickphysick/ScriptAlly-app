@@ -39,7 +39,7 @@ import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
 import {
   NOTEBOARD_SUBTITLE, noteFilterLabel, noteColour, sortNotes, noteReceipt, firstTagLabel,
-  sparseExamples, noteboardPrefs, NOTEBOARD_HINT, ExamplePaper, orderNotes, reorderIds,
+  sparseExamples, noteboardPrefs, NOTEBOARD_HINT, ExamplePaper, orderNotes, reorderIds, linkifyBody,
   composerWithColour, editCommit, emptyDraft, noteTagChips, noteMatchesSearch,
   NOTE_COLOURS, NoteDraft, draftFromExample,
 } from "../../lib/noteboard";
@@ -567,11 +567,14 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                   onDrop={(e) => { e.preventDefault(); void dropOn(n.id); }}
                   className={`nb-note nb-c-${noteColour(n)}${dragId === n.id ? " nb-dragging" : ""}${overId === n.id ? " nb-dragover" : ""}`}
                 >
-                  <div className="nb-body">{n.text}</div>
+                  {/* ⚠️ NODES, NOT MARKUP — bare URLs become anchors and nothing else can.
+                      The body is React children, which React escapes by construction, so a note
+                      containing markup renders it as the words the writer typed. */}
+                  <div className="nb-body">{linkifyBody(n.text)}</div>
                   {/* ⚠️ THE OLD SPLIT'S SECOND BLOCK. Nothing writes `detail` any more — the
                       composer is one body — but notes written under the split have prose in it
                       and dropping it would lose their words. */}
-                  {n.detail && <div className="nb-body nb-body--legacy">{n.detail}</div>}
+                  {n.detail && <div className="nb-body nb-body--legacy">{linkifyBody(n.detail)}</div>}
                   {/* the badge is the note's OWN date — one document, nothing to consult */}
                   {n.dueDate && (
                     <div className="nb-taskbadge">
@@ -616,7 +619,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
               {examplePapers.map((ex) => (
                 <div key={ex.id} data-example={ex.id} className={`nb-note nb-example nb-c-${ex.colour}`}>
                   <span className="nb-exlabel">Example</span>
-                  <div className="nb-body">{ex.body}</div>
+                  <div className="nb-body">{linkifyBody(ex.body)}</div>
                   <div className="nb-ex-actions">
                     {ex.tag && <span className="nb-tag">#{ex.tag}</span>}
                     <button type="button" className="nb-keep" onClick={() => void keepExample(ex)}>Keep this</button>

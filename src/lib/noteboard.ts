@@ -8,6 +8,7 @@
  * rendering of these, which is what lets the locks call the SAME function the page calls rather
  * than a literal that agrees with it today.
  */
+import React from "react";
 import { NoteColour, TagDef, User, UserTask } from "../types";
 import { NOTE_EXAMPLES } from "../components/todo/noteboardExamples";
 import { isNoteTask } from "./todoBoard";
@@ -236,4 +237,50 @@ export const reorderIds = (ids: readonly string[], from: string, to: string): st
   next.splice(fi, 1);
   next.splice(next.indexOf(to) + (fi < ti ? 1 : 0), 0, from);
   return next;
+};
+
+/* ────────────────────────────────────────────────────────────────────────────────────────────
+ * Link-aware bodies (paper run, Phase 4)
+ * ──────────────────────────────────────────────────────────────────────────────────────────── */
+
+/** Bare http(s) up to whitespace, minus trailing punctuation that belongs to the sentence. */
+const URL_RE = /https?:\/\/[^\s<]+/g;
+/* a full stop, comma, bracket or quote at the end of a URL is prose — "see https://x/a." */
+const TRAILING = /[.,;:!?)\]}'"»]+$/;
+
+/**
+ * A note body as React nodes: plain text, with bare URLs as anchors.
+ *
+ * ⚠️ THERE IS NOTHING TO ESCAPE, AND THAT IS THE POINT. The instruction is "escape first, then
+ * linkify — never the reverse", which is the right rule for anyone BUILDING MARKUP. This builds
+ * NODES: the text arrives as React children, which React escapes on render by construction, and
+ * the href is an attribute value React also escapes. Ordering cannot be got wrong here because
+ * there is no string of markup at any point — a body can never become HTML, whatever it contains.
+ *
+ * `noteboardLinks.test.tsx` holds the same cases against a deliberately linkify-first string
+ * implementation and requires them to FAIL there, so the property is evidenced rather than
+ * assumed. `dangerouslySetInnerHTML` appears nowhere in this file or the page, and is locked.
+ */
+export const linkifyBody = (body: string): React.ReactNode[] => {
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  let i = 0;
+  for (const m of body.matchAll(URL_RE)) {
+    const start = m.index ?? 0;
+    const raw = m[0];
+    const trimmed = raw.replace(TRAILING, "");
+    if (start > last) out.push(body.slice(last, start));
+    out.push(
+      React.createElement(
+        "a",
+        { key: `l${i++}`, href: trimmed, target: "_blank", rel: "noopener noreferrer" },
+        trimmed,
+      ),
+    );
+    /* whatever the trim took back is prose and rejoins the text */
+    if (raw.length > trimmed.length) out.push(raw.slice(trimmed.length));
+    last = start + raw.length;
+  }
+  if (last < body.length) out.push(body.slice(last));
+  return out;
 };

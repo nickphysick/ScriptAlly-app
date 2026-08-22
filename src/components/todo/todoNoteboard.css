@@ -98,6 +98,12 @@
 
 /* ⚠️ ONE BODY, PRE-WRAP. A writer's note has line breaks and bullets in it, not a headline — so
    the mockup's single block is ported as one, and the breaks they typed survive. */
+/* the anchor inside a body — burgundy, and it may break anywhere: a bare URL is longer than a
+   masonry column and would otherwise push the card's width out */
+.nb-body a {
+  color: var(--nb-burgundy);
+  text-decoration-thickness: 1px; text-underline-offset: 3px; word-break: break-all;
+}
 .nb-body {
   font-family: "Caveat", cursive;
   font-size: var(--nb-body-size); line-height: var(--nb-body-lh);
