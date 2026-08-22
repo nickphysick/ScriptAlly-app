@@ -34,7 +34,8 @@ export type ArtSlotName =
   | "first-run-board"   // the To-do list before the first query — "not yet", not "well done"
   | "seize-the-day"     // Today's plan card — the ONE slot with a real asset committed
   | "agent-unknown"     // Query Centre: the agent context panel with nothing on file to report
-  | "no-quick-picks";   // Query Centre stage 1: no unqueried contacts to suggest
+  | "no-quick-picks"    // Query Centre stage 1: no unqueried contacts to suggest
+  | "pane-unselected";  // Query Centre: the reading pane before a query is chosen
 
 interface SlotBrief {
   /** The illustrator's brief, one line — rendered as the placeholder's own caption. */
@@ -117,6 +118,18 @@ export const ART_SLOTS: Record<ArtSlotName, SlotBrief> = {
     caption: "A closed reference book, waiting to be opened",
     w: 220, h: 150,
     alt: "A closed reference book on an empty desk",
+  },
+  /* Query Centre · the reading pane before anything is selected (ref 176). BRIEF: a letter rack or
+     pigeonholes seen straight on, several letters filed and none drawn out — the correspondence is
+     all there, waiting for one to be picked up. Calm and ordinary: nothing is missing and nothing
+     has gone wrong, the reader simply has not chosen yet.
+     ⚠️ 210×150 IS THE REF'S OWN BOX. The caption's position is fixed by it, so the watercolour can
+     drop into the same space later with no layout change — which is the whole reason this ships as
+     a placeholder rather than as blank space. */
+  "pane-unselected": {
+    caption: "A letter rack, filed and waiting for one to be drawn out",
+    w: 210, h: 150,
+    alt: "A rack of filed letters, none drawn out",
   },
 };
 

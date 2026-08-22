@@ -436,13 +436,20 @@ describe("§8 · Notes expands — RETIRED with the column it shared", () => {
 
 
 describe("§9 · nothing selected", () => {
-  it("the pane names what it would hold, in the order it holds it", () => {
-    expect(code, "the empty state is missing").toContain('className="qc-blank"');
-    expect(code, "the heading changed").toContain("<h4>Nothing selected</h4>");
-    expect(code, "the line stopped naming the three things the pane holds")
-      .toContain("where it stands, what you sent, and what you&rsquo;ve noted");
-    /* ⚠️ AND IT DESCRIBES THE RESULT, NOT THE MECHANISM. "Select a query to open the reading pane"
-       explained the interface to someone already looking at it. */
+  /**
+   * ⚠️ SUPERSEDED BY §2b (ref 176) — REWRITTEN, NOT DELETED. This asserted the three-things copy
+   * ("where it stands, what you sent, and what you've noted"), which was true and was an
+   * explanation nobody had asked for yet. The pane is now art plus one line, so the rule worth
+   * locking is what must NOT come back: a sub-line, a counter, or a keyboard hint.
+   */
+  it("the unselected pane is one line beneath the art, and nothing else", () => {
+    expect(code, "the unselected pane is missing").toContain('className="qc-unsel"');
+    expect(code, "the caption changed").toContain("Select a query to get started");
+    expect(code, "the art is not an ArtSlot, so the illustration cannot drop in later")
+      .toContain('<ArtSlot name="pane-unselected" />');
+    /* ⚠️ THE RETIRED COPY IS ASSERTED GONE, both halves — the heading and its explanation. */
+    expect(code, "the retired empty state came back").not.toContain("<h4>Nothing selected</h4>");
+    expect(code, "the three-things line came back").not.toContain("where it stands, what you sent");
     expect(code, "the mechanism copy came back").not.toContain("open the reading pane");
   });
 

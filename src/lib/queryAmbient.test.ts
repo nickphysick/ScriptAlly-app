@@ -179,7 +179,12 @@ describe("Queries height chain — structural guards (jsdom cannot verify flex/g
     // AMENDED AGAIN (§2): the pane is ONLY the rest state now — the journey is a portalled sheet,
     // so the takeover's conditional classes left and the className went back to a plain string.
     // The pair itself is what this guard is about, and the pair is unchanged.
-    expect(src).toContain('className="qp-pane f12-detail f12-pane-enter-read"');
+    /* ⚠️ THE CLAIM IS THE PAIR, NOT THE ATTRIBUTE'S SPELLING. This pinned the literal
+       `className="qp-pane f12-detail f12-pane-enter-read"`, so §2b making the wrapper's class a
+       template — the unselected pane drops the panel background — turned it red without touching
+       what the test is named for: the detail pane is the f12 pair's second half and flexes. */
+    expect(src).toMatch(/f12-detail f12-pane-enter-read/);
+    expect(src, "the detail pane is no longer the qp-pane in its selected state").toContain('"qp-pane"');
     expect(src.includes("gridColumn: 2, gridRow:")).toBe(false);
     expect(src.includes("gridColumn: 1, gridRow:")).toBe(false);
   });

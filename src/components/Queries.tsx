@@ -89,6 +89,8 @@ import { nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo, schedu
 import { NUDGE_NESTED_TYPE } from "../lib/logNudge";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { PackagePicker } from "./reading-pane/PackagePicker";
+/* §2b — the shared art registry, already consumed by two other Query Centre panels. */
+import { ArtSlot } from "./todo/ArtSlot";
 import {
   attachablePackages, attachedMaterials, canAttachPackages, originTags, originTagText,
   packageMenuRow, withoutPackage, type PackageItem,
@@ -2503,12 +2505,18 @@ export const Queries: React.FC<{
     </F12Popover>
   );
 
-  // Automatically select first element if currently selected is filtered out
+  /**
+   * Re-point the selection when the one being read is filtered out.
+   *
+   * ⚠️ IT RESCUES A SELECTION; IT DOES NOT CREATE ONE (§2a). Without the `selectedQueryId &&` guard
+   * this also fired on mount — nothing selected is trivially "not in the list" — so it was one of
+   * the two things auto-selecting the first row on load. Its stated job is to keep the pane from
+   * reading a row that has gone; with nothing selected there is nothing to keep.
+   */
   const statusFiltersKey = `${turnFilter}|${statusSel.join(",")}|${needsOverdue}|${needsTasks}`;
   useEffect(() => {
     if (sortedList.length > 0) {
-      const isStillInList = sortedList.some(q => q.id === selectedQueryId);
-      if (!isStillInList) {
+      if (selectedQueryId && !sortedList.some(q => q.id === selectedQueryId)) {
         setSelectedQueryId(sortedList[0].id);
       }
     } else {
@@ -3092,6 +3100,14 @@ export const Queries: React.FC<{
    */
   const listGrouped = listIsGrouped(turnFilter, statusSel);
 
+  /**
+   * §2b — is the pane in its unselected state? ⚠️ IT MIRRORS THE RENDER'S OWN BRANCH CHAIN
+   * (creating → a selection → filtered-to-zero → nothing selected), because the chassis has to come
+   * off in exactly the case the bare pane renders. Derived from the same three values the chain
+   * reads, so the two cannot fall out of step.
+   */
+  const paneUnselected = !creating && !selectedQueryId && sortedList.length > 0;
+
   const listGroups = (() => {
     const nowMs = Date.now();
     const rows = renderList
@@ -3252,12 +3268,16 @@ export const Queries: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingSave, sortedList]);
 
-  /* v4 P3 — the auto-select FALLBACK, here because it needs the resolved sort: with queries on file
-     and nothing selected (and no draft open), land on the first row the user can actually see. */
-  useEffect(() => {
-    if (creating || selectedQueryId || sortedList.length === 0) return;
-    setSelectedQueryId(sortedList[0].id);
-  }, [creating, selectedQueryId, sortedList]);
+  /**
+   * ⚠️ THE AUTO-SELECT FALLBACK IS RETIRED (§2a). It landed on the first row of the resolved sort
+   * whenever nothing was selected, so the page always opened reading SOMETHING — a query chosen by
+   * the sort rather than by the writer, presented in a pane that looks exactly like one they asked
+   * for. A pane showing a real agent's record is a claim that this is what you came for.
+   *
+   * ⚠️ WHAT SELECTS ON LOAD IS UNCHANGED AND DELIBERATE: a deep link (`?q=<id>`) and the
+   * last-viewed id both still restore, above. This removed only the EMPTY default — the case where
+   * nothing has asked for anything.
+   */
 
   /* Remember the last-viewed query (a preference, written on change only). */
   useEffect(() => {
@@ -4725,7 +4745,10 @@ export const Queries: React.FC<{
                journey is a sheet laid over the desk; the pane keeps reading behind it, unchanged,
                so `f12-pane-enter-read` is unconditional and the takeover's classes have moved to
                the sheet that actually arrives and leaves. */
-            className="qp-pane f12-detail f12-pane-enter-read"
+            /* §2b — ⚠️ THE CHASSIS IS THE `qp-pane` BACKGROUND, and the unselected state drops it.
+               Rendering the bare pane inside the panel would keep the card the ref removes, with
+               the art floating in the middle of it. */
+            className={`${paneUnselected ? "qc-pane-bare" : "qp-pane"} f12-detail f12-pane-enter-read`}
             /* ⚠️ NOT a .f12-pane. In the ref the pane column has NO wrapper card: the toolbar row, the
                hero and the three columns are siblings directly inside the workspace frame, and the
                only bordered surfaces are the hero and the columns themselves. Carrying .f12-pane
@@ -6007,12 +6030,28 @@ export const Queries: React.FC<{
                  ⚠️ A MONOLINE MARK, NOT AN ILLUSTRATION. The pane's other states are dense with real
                  content; an illustrated empty state would be the loudest thing on a screen that is
                  empty only because nothing has been asked for yet. */
-              <div className="qc-blank">
-                <span className="qc-blankmark" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
-                </span>
-                <h4>Nothing selected</h4>
-                <p>Pick a query on the left to see where it stands, what you sent, and what you&rsquo;ve noted.</p>
+              /**
+               * ══ §2b · THE UNSELECTED PANE (ref 176) ═══════════════════════════════════════════
+               *
+               * ⚠️ NO CHASSIS. No card, no border, no sage top edge — the pane's whole job when
+               * nothing is selected is to be quietly absent, and a bordered empty box asserts more
+               * presence than emptiness deserves. The full chassis returns with the selection,
+               * which also makes selecting feel like something ARRIVING rather than swapping.
+               *
+               * ⚠️ THE ART IS IN LAYOUT FLOW, IN ITS OWN ROW, never absolutely positioned — the
+               * standing law that no positioned element shares space with text. The caption's
+               * position is fixed by the BOX, so the watercolour drops into the same 210×150 later
+               * with no layout change; that is what makes shipping the placeholder honest rather
+               * than a gap waiting to be filled.
+               *
+               * ⚠️ ONE LINE, AND NOTHING ELSE. No sub-line, no counters, no keyboard hint: the list
+               * beside this already shows everything there is to know, and this surface only needs
+               * to say why the right-hand side is blank. The retired copy named the three things
+               * the pane holds — true, and an explanation nobody asked for yet.
+               */
+              <div className="qc-unsel">
+                <div className="qc-unsel-art"><ArtSlot name="pane-unselected" maxWidth={210} /></div>
+                <p className="qc-unsel-cap">Select a query to get started</p>
               </div>
             )}
           </div>{/* closes qp-pane */}

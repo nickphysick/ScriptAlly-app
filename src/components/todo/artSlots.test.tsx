@@ -35,9 +35,11 @@ const NAMES: ArtSlotName[] = [
   "agent-unknown",
   // Query Centre stage 1 with nobody left to suggest.
   "no-quick-picks",
+  // Query Centre's reading pane before a query is chosen (ref 176) — 210×150, the ref's own box.
+  "pane-unselected",
 ];
 
-describe("⚠️ ONE component, NINE slots — the briefs are the contract", () => {
+describe("⚠️ ONE component, TEN slots — the briefs are the contract", () => {
   it("every briefed slot exists, with its ratio and its caption", () => {
     expect(Object.keys(ART_SLOTS).sort()).toEqual([...NAMES].sort());
     for (const n of NAMES) {
@@ -50,6 +52,9 @@ describe("⚠️ ONE component, NINE slots — the briefs are the contract", () 
   });
 
   it("the ratios are the ref's own figures", () => {
+    /* ⚠️ 210×150 IS WHAT FIXES THE CAPTION'S POSITION, which is the whole reason the placeholder
+       ships: the watercolour drops into the same box later with no layout change. */
+    expect([ART_SLOTS["pane-unselected"].w, ART_SLOTS["pane-unselected"].h]).toEqual([210, 150]);
     expect([ART_SLOTS["desk-clear"].w, ART_SLOTS["desk-clear"].h]).toEqual([520, 300]);
     expect([ART_SLOTS["noteboard-empty"].w, ART_SLOTS["noteboard-empty"].h]).toEqual([380, 200]);
     expect([ART_SLOTS["done-empty"].w, ART_SLOTS["done-empty"].h]).toEqual([240, 150]);

@@ -4409,3 +4409,25 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 .qc-pkgtag { display: flex; align-items: baseline; gap: 8px; margin-top: 6px; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
 .qc-pkgtag button { font: inherit; color: var(--ink-2); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .qc-pkgtag button:hover { color: var(--ink); }
+
+/* §2b — the unselected reading pane (ref 176).
+   ⚠️ NO CHASSIS: no background, no border, no radius, no top edge. `.qc-pane-bare` replaces
+   `.qp-pane` for this state alone, so the pane is quietly absent until a query is selected and the
+   full chassis returns with it. */
+/* ⚠️ THE WHOLE CHASSIS, NOT JUST THE FILL. Clearing only the background left `.f12-detail`'s
+   BORDER drawing an empty outlined box — measured `borderStyle: solid` on a pane the ref says must
+   be absent. Ground, border, radius and shadow come off together, or "no chassis" is decoration
+   with its fill removed. */
+.qc-pane-bare { background: transparent; border: none; border-radius: 0; box-shadow: none; }
+
+/* ⚠️ THE ART IS A ROW AND THE CAPTION IS A ROW — a flex COLUMN, so the illustration never shares
+   space with the text and the caption's position is fixed by the box above it. Nothing here is
+   positioned; the standing law is that no positioned element shares space with text. */
+.qc-unsel { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 32px; text-align: center; }
+/* ⚠️ THE ROW GIVES THE BOX ITS WIDTH, AND MEASUREMENT IS WHY. `ArtSlot`'s placeholder is a
+   percentage-padding ratio box — its height derives from its WIDTH — so inside a shrink-to-fit
+   centred column it had no width to derive from and rendered 2×3px. The ref's 210 is stated here;
+   the 150 follows from the brief's ratio, which is what keeps the caption where the artwork will
+   later put it. */
+.qc-unsel-art { flex: none; width: 210px; }
+.qc-unsel-cap { font-family: var(--f12-serif); font-size: 16px; line-height: 1.3; color: var(--ink-2); margin: 0; }
