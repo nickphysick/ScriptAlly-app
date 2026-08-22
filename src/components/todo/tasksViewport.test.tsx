@@ -274,21 +274,49 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
   });
 });
 
-describe("⚠️ the Calendar's tool-row facet — the sidebar's filter, rehoused (P3)", () => {
-  it("it exists, and it reads the ONE facet definition rather than a second label list", () => {
-    expect(cal).toContain("cal-facetwrap");
-    expect(cal).toContain("TODO_FACETS.map");
-    expect(cal).not.toContain("FACET_LABEL"); // no per-page vocabulary
+/* ⚠️ RETARGETED 22 Aug 2026 by the `calendar` session (finishing pack, Phase 4), and flagged in
+   reports/calendar-finishing.md — the SECOND assertion block in this file outside that session's
+   stated territory that its work made stale, edited rather than left red so `main` stays green for
+   the other sessions working tonight.
+
+   THE FACET CONTROL IS SUPERSEDED ON THIS PAGE, deliberately and with its reason: the ruling that
+   "the calendar uses TODO_FACETS as the single shared vocabulary" dated from when the calendar was
+   a projection of TASKS. Since the record layer it shows EVENTS — most of which are not tasks and
+   never were — and "Urgent" has no meaning applied to a query sent three weeks ago. `TODO_FACETS`
+   itself is UNTOUCHED and the board's use of it is asserted elsewhere in this file.
+
+   The two laws worth keeping survive verbatim, pointed at the new vocabulary: ONE definition
+   rather than a per-page label list, and narrowing applied where every surface reads it so it
+   cannot reach the pips and miss the panel. */
+describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local (finishing P4)", () => {
+  it("it exists, and it reads the ONE kind definition rather than a second label list", () => {
+    expect(cal).toContain("cal-kwrap");
+    expect(cal).toContain("CAL_KIND_ORDER.map");
+    expect(cal).toContain("CAL_KINDS[k].label");
+    expect(cal).not.toContain("KIND_LABEL"); // no per-page vocabulary
+    /* and the superseded control is gone from the page, not merely unrendered */
+    /* ⚠️ STRIPPED, NOT RAW — and this caught me twice in one pack. The page now carries COMMENTS
+       explaining the supersession, and those comments necessarily name `TODO_FACETS`, `facetCounts`
+       and the retired classes. A bare `not.toContain` over prose that names the very token it
+       forbids is this repo's most-recorded false red; `decomment` is here for exactly this. */
+    expect(decomment(cal)).not.toMatch(/["\s`]cal-facetwrap["\s`]/);
+    expect(decomment(cal)).not.toContain("TODO_FACETS");
   });
 
-  it("⚠️ ITS COUNTS ARE THE BOARD'S OWN — the two surfaces cannot state different numbers", () => {
-    expect(cal).toContain("facetCounts(liveBoardCards(assembled.cols))");
+  it("⚠️ THE BOARD'S OWN VOCABULARY IS LEFT ALONE — this page no longer consults it", () => {
+    /* the old law was that the Calendar's counts had to BE the board's, so the two could not state
+       different numbers for the same facet. There is no such risk once the two controls name
+       different things — a shared count would be a coincidence, not a guarantee — so the honest
+       successor is that the calendar reads neither the board's counts nor its labels. */
+    expect(decomment(cal)).not.toContain("facetCounts");
+    expect(decomment(cal)).not.toContain("liveBoardCards");
   });
 
-  it("the facet reaches the pips, the day lists AND the day sheet — all read byDay", () => {
-    /* byDay is derived UNDER the facet, so narrowing cannot reach one surface and miss another;
-       that is why the filter is applied at the derivation rather than at each render site. */
-    expect(cal).toContain("userTasks: facet === \"all\" ? userTasks : []");
+  it("the filter reaches the pips, the day lists AND the peek — all read the same two functions", () => {
+    /* the kinds are applied inside `itemsFor`/`recordFor`, which every surface calls, so narrowing
+       cannot reach one and miss another — the same shape the facet had at the derivation. */
+    expect(cal).toContain("itemInKinds(it, kinds)");
+    expect(cal).toContain("recordInKinds(r, kinds)");
     expect(cal).toContain("dayData(ymd)");
   });
 

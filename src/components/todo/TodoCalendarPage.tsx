@@ -12,9 +12,11 @@
  * narrows. The pip tones are todoFamily's CAL_PIP — the one colour module — and the legend
  * renders FROM it.
  *
- * ⚠️ COMPLETED ITEMS SHOW UNDER "Everything" ONLY. A facet narrows to work of that kind still
- * WAITING; finished work is not waiting, and a struck pip inside "Urgent" would read as an
- * urgent item. Deliberate, stated here and in the report.
+ * ⚠️ COMPLETED ITEMS ARE GOVERNED BY THE VIEW MODE, NOT BY A FACET (finishing pack, Phases 3–4).
+ * The old rule was that they showed under "Everything" only, because a facet narrows to work of
+ * that kind still WAITING and a struck pip inside "Urgent" would read as an urgent item. That
+ * reasoning retired with the facet control: `Done & upcoming` shows them, `Upcoming only` does
+ * not, and the kind filters file them by what they were rather than withholding them wholesale.
  */
 import React, { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -26,8 +28,7 @@ import { FocusFlow } from "./FocusFlow";
 import { useScriptAllyDb } from "../../lib/db";
 import { localYMD } from "../../lib/shellSidebar";
 import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
-import { TodoFacetId, facetCounts, applyFacet, TODO_FACETS } from "../../lib/todoBoardSort";
-import { assembleBoardColumns, liveBoardCards } from "../../lib/todoColumns";
+import { assembleBoardColumns } from "../../lib/todoColumns";
 import { BoardCard } from "../../lib/todoBoard";
 import {
   CalendarItem, calendarDays, monthGridDays, monthLabel,
@@ -36,6 +37,7 @@ import {
   FoldMetrics, FOLD_FALLBACK, foldMetricsFrom, foldFor, REC_TONE, REC_LEGEND,
   peekBox, PEEK_DELAY_MS, PEEK_SCALE, PEEK_OPACITY,
   CalMode, upcomingGridDays,
+  CalKind, CAL_KINDS, CAL_KIND_ORDER, allKinds, itemInKinds, recordInKinds,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 /* ⚠️ REUSED, not re-written — `shortDate` already renders "7 Aug" for the RecordingCalendar's
@@ -300,7 +302,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      a failure surface: the same toast every other Tasks page uses, never a silent catch. */
   const { toast, flash, dismiss, pause, resume } = useTodoToast();
   const { createTagDef } = useTagWrites(flash);
-  const [facet, setFacet] = useState<TodoFacetId>("all");
   const [tagSel, setTagSel] = useState<string[]>([]); // tasks-pages P5 — additive with FILTERS
   /* ⚠️ THE WEEK VIEW IS RETIRED (record-layer P6). A week of seven cells showed the same items the
      month already showed, in more space and with less context — and the record layer sharpened the
@@ -319,6 +320,15 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      `both`: the record is what the page gained, so it shows by default, and a preference stored
      for a view toggle is a preference nobody asked to keep. */
   const [mode, setMode] = useState<CalMode>("both");
+  /* ⚠️ THE KIND FILTERS SUPERSEDE THE FACET CONTROL, and the supersession is deliberate — see
+     `CAL_KINDS` for the full reasoning. In one sentence: `TODO_FACETS` names live WORK, and since
+     the record layer this page shows EVENTS, most of which are not tasks and never were. "Urgent"
+     has no meaning applied to a query sent three weeks ago. The board and the sidebar badge keep
+     `TODO_FACETS` untouched; this control is calendar-local.
+     ⚠️ THEY COMPOSE WITH THE MODE RATHER THAN OVERLAPPING IT: the mode decides which LAYERS are on
+     screen, the kinds decide which EVENTS survive within them. */
+  const [kinds, setKinds] = useState<CalKind[]>(allKinds);
+  const [kindOpen, setKindOpen] = useState(false);
   /* ⚠️ THE FOLD THRESHOLD IS MEASURED, NOT GUESSED (tasks-viewport P3). The grid resolves its own
      row height from whatever the frame leaves it, so the only honest source for "how many pips
      fit" is the grid itself. A ResizeObserver keeps it true through window resizes and through
@@ -401,7 +411,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   /* the cap for a day that folds — the counter is 12px, not a whole pip (see calFoldCapFolded) */
   const cellCapFolded = calFoldCapFolded(rowPx, metrics);
 
-  const [facetOpen, setFacetOpen] = useState(false);
   const [anchor, setAnchor] = useState(today);
   /* ⚠️ THE DAY PANEL REPLACES THE MODAL (record-layer P5). A day is now SELECTED rather than
      opened: the panel is permanent chrome beside the grid, so there is no dialogue to dismiss and
@@ -477,7 +486,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      only the unfiltered view (see the head note). Tag selection joins here in Phase 5. */
   const byDay = useMemo(() => {
     const narrow = (cards: BoardCard[]) =>
-      applyFacet(cards, facet).filter((c) => matchesTags(c.tags, tagSel));
+      cards.filter((c) => matchesTags(c.tags, tagSel));
     const cols = {
       todo: narrow(assembled.cols.todo),
       today: narrow(assembled.cols.today),
@@ -490,24 +499,38 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     };
     return calendarDays({
       cols, flags: taskFlags, queries, agents,
-      userTasks: facet === "all" ? userTasks : [],
-      activities: facet === "all" ? activities : [],
+      /* ⚠️ THESE ARE NO LONGER GATED (finishing pack, Phase 4). Under the facet control they were
+         withheld unless "Everything" was chosen, because a writer's task and a completed item have
+         no facet — neither is urgent or housekeeping — so any narrower facet had to drop them
+         wholesale. The kind vocabulary HAS names for both ("Your tasks", and done items filed by
+         what they were), so they can be filtered honestly instead of withheld. */
+      userTasks,
+      activities,
       today, nowMs: now,
     }, visible);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assembled, facet, tagSel, taskFlags, queries, agents, userTasks, activities, today, visible.join("|")]);
+  }, [assembled, tagSel, taskFlags, queries, agents, userTasks, activities, today, visible.join("|")]);
 
-  /* ⚠️ THE COUNTS ARE THE ONE DERIVATION'S (tasks-viewport P3) — the same `facetCounts` over the
-     same `liveBoardCards(assembled.cols)` the sidebar fed, so the Calendar's control cannot state
-     a different number from the board's for the same facet. */
-  const facetTotals = facetCounts(liveBoardCards(assembled.cols));
+  /* ⚠️ THE FACET'S COUNTS ARE RETIRED WITH THE CONTROL (finishing pack, Phase 4). They existed so
+     the Calendar's facet chip could not state a different number from the board's for the same
+     facet — a real risk while both drew the same four buckets. There is no such risk now: the two
+     controls name different things, so a shared count would be a coincidence rather than a
+     guarantee. `facetCounts` and `liveBoardCards` are untouched and still the board's.
+     ⚠️ AND THE KIND CHECKLIST DELIBERATELY SHOWS NO COUNTS. A count beside a checkbox invites the
+     reading "this many will disappear", which is wrong in both modes — the number of events of a
+     kind depends on the month AND the mode, and computing it per kind per view is a second
+     derivation of what the grid already draws. */
 
   /* ⚠️ THE RECORD IS A SECOND, INDEPENDENT DERIVATION OVER THE SAME VISIBLE DAYS (record-layer P2).
      It reads `activities` — already loaded unwindowed by the db provider — so the whole layer costs
      one pass over an array in memory: no new query, no new hook, no stored field. It is deliberately
-     NOT narrowed by the facet: FILTERS narrow live WORK ("show me only what is urgent"), and there
-     is no urgent history — a facet reaching the record would quietly answer a question about the
-     past with a rule written for the present. The one control that governs it is THE RECORD. */
+     NOT narrowed here: the derivation reads every activity on the visible days, and the KINDS then
+     narrow it at the point of reading (`recordFor`). The old note said "a facet reaching the record
+     would quietly answer a question about the past with a rule written for the present" — that was
+     right about FACETS, which name live work, and it is the reason the calendar now has an event
+     vocabulary of its own. A kind IS a fact about the past, so it may narrow this layer honestly.
+     The controls that govern it are the MODE (whether the layer is on) and the KINDS (which of it
+     survives). */
   const recByDay = useMemo(
     () => recordDays(activities, queries, agents, visible),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -608,7 +631,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      ARGUMENT, so an empty record restores every superseded done card automatically — and then the
      mode's own done-filter takes them out again, for its own reason. Two rules, one order, tested
      together. */
-  const recordFor = (ymd: string): RecordItem[] => (mode === "both" ? recByDay.get(ymd) ?? [] : []);
+  const recordFor = (ymd: string): RecordItem[] =>
+    (mode === "both" ? recByDay.get(ymd) ?? [] : []).filter((r) => recordInKinds(r, kinds));
   /* ⚠️ THE ONE READING OF A DAY, so the grid, the day panel and the count line cannot disagree
      about what is on it. `recordFor` returns [] when the layer is hidden, so the same call restores
      every superseded done card — the record-off behaviour needs no branch of its own. */
@@ -618,7 +642,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
        hidden the dedupe hands every superseded done card straight back — correctly, since nothing
        is left to supersede them — and a mode promising upcoming work would then show finished
        work. The family is the test, never the strikethrough, which is presentation. */
-    return mode === "upcoming" ? deduped.filter((it) => it.family !== "done") : deduped;
+    const byMode = mode === "upcoming" ? deduped.filter((it) => it.family !== "done") : deduped;
+    /* ⚠️ THE KIND FILTER IS THE LAST WORD, so the panel's counts and the cell's `+N` both describe
+       the FILTERED set — they read this one function, which is what has kept them agreeing since
+       the dedupe landed. */
+    return byMode.filter((it) => itemInKinds(it, kinds));
   };
 
   return (
@@ -634,31 +662,47 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               <button type="button" className="cal-nav calm-nav cal-today" onClick={() => setAnchor(today)}>Today</button>
               <button type="button" className="cal-nav calm-nav" aria-label="Next" onClick={() => setAnchor(shiftMonth(anchor, 1))}><ChevronRight size={14} aria-hidden /></button>
 
-              {/* ⚠️ THE FACET LIVES IN THE TOOL ROW NOW (tasks-viewport P3). It was the page
-                  sidebar's FILTERS list; the sidebar is the To-do list's alone since P1, and
-                  between P1 and here the Calendar could not be narrowed at all. Same four facets
-                  from the SAME derivation the board and the badge read, in the Noteboard's
-                  `#All ▾` grammar so the two pages' filters are one control with two vocabularies
-                  rather than two controls. It reaches the pips, the day lists AND the day sheet,
-                  because they all read `byDay`, which is derived under the facet. */}
-              <span className="cal-facetwrap">
-                <button type="button" className="cal-nav calm-nav cal-facet" aria-haspopup="menu"
-                  aria-expanded={facetOpen} onClick={() => setFacetOpen((o) => !o)}>
-                  {TODO_FACETS.find((f) => f.id === facet)?.label} ▾
+              {/* ⚠️ EVENT KINDS REPLACE THE FACET CONTROL (finishing pack, Phase 4) — and this
+                  SUPERSEDES the recorded ruling that "the calendar uses `TODO_FACETS` as the single
+                  shared vocabulary". That ruling was right when the calendar was a projection of
+                  TASKS. The record layer changed what the page is: it shows EVENTS now, most of
+                  which are not tasks and never were, and "Urgent" has no meaning applied to a query
+                  sent three weeks ago. `TODO_FACETS` is UNTOUCHED — the board and the sidebar badge
+                  keep it; this control is calendar-local, and `CAL_KINDS` carries the full reason.
+                  ⚠️ MULTI-SELECT, ALL ON BY DEFAULT: a kind is a thing to switch OFF, so the
+                  resting state hides nothing and needs no explaining. */}
+              <span className="cal-kwrap">
+                <button type="button" className="cal-nav calm-nav cal-kbtn" aria-haspopup="true"
+                  aria-expanded={kindOpen} onClick={() => { setKindOpen((o) => !o); clearPeek(); }}>
+                  {kinds.length === CAL_KIND_ORDER.length
+                    ? "All kinds"
+                    : `${kinds.length} of ${CAL_KIND_ORDER.length} kinds`} ▾
                 </button>
-                {facetOpen && (
-                  <div className="cal-menu" role="menu">
-                    {/* ⚠️ TODO_FACETS, never a second label list — the sidebar, the board and this
-                        control all read the one definition, so they cannot come to disagree about
-                        what "Urgent" means or which four exist. */}
-                    {TODO_FACETS.map((f) => (
-                      <button key={f.id} type="button" role="menuitem" aria-current={facet === f.id}
-                        onClick={() => { setFacet(f.id); setFacetOpen(false); }}>
-                        <span className="cal-facetsw" style={{ background: f.swatch }} aria-hidden />
-                        {f.label}
-                        <span className="cal-facetn">{facetTotals[f.id]}</span>
-                      </button>
-                    ))}
+                {kindOpen && (
+                  <div className="cal-kmenu">
+                    {/* ⚠️ `CAL_KINDS`, never a second label list — the same rule the facet control
+                        obeyed, pointed at the vocabulary this page actually needs. */}
+                    {CAL_KIND_ORDER.map((k) => {
+                      const on = kinds.includes(k);
+                      return (
+                        <label key={k} className="cal-krow">
+                          <input
+                            type="checkbox"
+                            checked={on}
+                            onChange={() => setKinds((cur) =>
+                              cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k])}
+                          />
+                          <span className="cal-kbox" data-on={on} aria-hidden />
+                          {CAL_KINDS[k].label}
+                        </label>
+                      );
+                    })}
+                    {/* ⚠️ THE RESET SAYS WHAT IT RESTORES, and it is `allKinds()` rather than a
+                        hand-written list — the agent-list pack's `emptyFilterSet()` lesson, where a
+                        literal silently missed a facet the day one was added. */}
+                    <button type="button" className="cal-kall" onClick={() => setKinds(allKinds())}>
+                      Show every kind
+                    </button>
                   </div>
                 )}
               </span>

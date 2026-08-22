@@ -781,9 +781,11 @@ export function dedupeAgainstRecord(
  * by CALLING `cardActionYmd`, and checks this table against that, so neither list is hand-written
  * on both sides.
  *
- * ⚠️ `offer_received` IS ABSENT AND THAT IS A REPORTED GAP, NOT AN OMISSION. The pack's table has
- * no card row for an offer, and inventing one would be inventing product copy overnight. It falls
- * through to its own label, truncated by the cell, and is flagged.
+ * ⚠️ `offer_received` NOW HAS ITS ROW — the gap this table reported is CLOSED (finishing pack).
+ * It was absent because the originating pack's table had no card row for an offer and inventing
+ * product copy overnight is not this session's call; Nick ruled `Decide on offer`, which is what
+ * the card is: an offer is in hand and the decision is the writer's. It is not "Accept offer" —
+ * the app does not presume the answer — and it stays in the writer's-turn family for that reason.
  */
 export const PILL_BY_TASK: Partial<Record<TaskType, string>> = {
   partial_requested: "Send partial",
@@ -796,6 +798,7 @@ export const PILL_BY_TASK: Partial<Record<TaskType, string>> = {
      name asserts a unit the data does not carry. */
   revise_resubmit: "Send resubmission",
   nudge_overdue: "Nudge due",
+  offer_received: "Decide on offer",
 };
 
 /** The snoozed family's pill — a return is a return whatever came back. */
@@ -908,3 +911,104 @@ export function upcomingGridDays(anchorYmd: string, todayYmd: string): string[] 
   }
   return out;
 }
+
+/* ══ KIND FILTERS (finishing pack, Phase 4; ref calendar-month-focus-v5.html) ══════════════════
+ *
+ * ⚠️ THIS SUPERSEDES A RECORDED RULING, DELIBERATELY AND WITH ITS REASON. The standing lock said
+ * "the calendar uses `TODO_FACETS` as the single shared vocabulary", and that was right when the
+ * calendar was a projection of TASKS: the same four buckets the board and the sidebar badge read,
+ * narrowing the same live cards. The record layer changed what the page IS. It now shows EVENTS —
+ * things that happened, in both directions, most of which are not tasks and never were — and a
+ * vocabulary built for live work cannot name them. "Urgent" has no meaning applied to a query sent
+ * three weeks ago. So the calendar gets its own event-kind filters, and **`TODO_FACETS` is
+ * untouched**: the board keeps it, the sidebar badge keeps it, and this control is calendar-local.
+ *
+ * ⚠️ ONE CONST STATES BOTH VOCABULARIES, which is the point of putting it beside `RECORD_TYPES`.
+ * The calendar has two of them — record labels (from the activity log) and card pills (from the
+ * board's task types) — and a kind is a claim about BOTH. Split across two files they would drift;
+ * here, adding a record label or a task type without filing it under a kind is visible in one
+ * screen, and the lock below asserts the coverage rather than trusting the eye.
+ */
+export type CalKind =
+  | "queries" | "materials" | "responses" | "nudges" | "closures" | "tasks";
+
+export interface CalKindRule {
+  label: string;
+  /** Record labels (as `RECORD_STATUS`/`RECORD_TYPES` emit them) that belong to this kind. */
+  record: string[];
+  /** Board task types whose CARD belongs to this kind. */
+  task: TaskType[];
+  /** Live families that belong to this kind regardless of task type. */
+  family?: CalFamily[];
+}
+
+/**
+ * ⚠️ THE LABELS ARE THE MATCH KEY, NOT A SECOND ENUM. `RECORD_STATUS` and `RECORD_TYPES` already
+ * decide what an entry is CALLED, and every one of those strings is a closed set this file owns.
+ * Matching on the label means a new record label that nobody files here fails the coverage lock
+ * loudly, instead of being silently filtered out of — or into — a kind it was never considered for.
+ */
+export const CAL_KINDS: Record<CalKind, CalKindRule> = {
+  queries: { label: "Queries sent", record: ["Query sent"], task: [] },
+  /* the writer sending what was asked for — the three materials, and nothing else */
+  materials: { label: "Materials sent", record: ["Partial sent", "Full sent"], task: ["partial_requested", "full_requested", "revise_resubmit"] },
+  /* the agency moving: a request, a holding line, or an offer */
+  responses: {
+    label: "Agent responses",
+    record: ["Partial requested", "Full requested", "Revise & resubmit", "Holding reply", "Offer received"],
+    task: [],
+  },
+  nudges: { label: "Nudges", record: ["Nudge sent"], task: ["nudge_overdue"] },
+  /* ⚠️ THE WRITER'S ANSWER TO AN OFFER IS A CLOSURE, NOT A RESPONSE. `Offer accepted` and
+     `Offer declined` end the conversation; `Offer received` starts the last part of it. They read
+     as a pair and belong on opposite sides of this line — which is exactly why `RECORD_TYPES`
+     keeps the two answers' own labels rather than filing them under the generic "Closed". */
+  closures: { label: "Closures", record: ["Closed", "Offer accepted", "Offer declined"], task: [] },
+  /* ⚠️ THE WRITER'S OWN WORK, whatever shape it arrives in: their own dated tasks, anything
+     returning from a snooze, and the offer decision — which is a decision only they can make. */
+  tasks: { label: "Your tasks", record: [], task: ["offer_received"], family: ["task", "snoozed"] },
+};
+
+/** Every kind, in the order the checklist draws them. */
+export const CAL_KIND_ORDER: CalKind[] = ["queries", "materials", "responses", "nudges", "closures", "tasks"];
+
+/** All of them — the default, and what "nothing is filtered" means. */
+export const allKinds = (): CalKind[] => [...CAL_KIND_ORDER];
+
+/**
+ * ⚠️ A DONE ITEM IS FILED BY WHAT IT WAS, and when that cannot be told, it is KEPT.
+ *
+ * Completed cards carry no `taskType` — they are built from the activity log — so the only handle
+ * on them is their label, which `terseDoneLabel` wrote. Rather than guess, an item no kind claims
+ * survives every filter: a filter that silently swallows what it does not recognise reports a
+ * quieter month than the writer has, which is the one direction this must not fail in.
+ */
+export function itemKind(item: CalendarItem): CalKind | null {
+  for (const k of CAL_KIND_ORDER) {
+    const rule = CAL_KINDS[k];
+    if (rule.family?.includes(item.family)) return k;
+    const t = item.card?.taskType as TaskType | undefined;
+    if (t && rule.task.includes(t)) return k;
+  }
+  /* a done item: match on the label the record uses for the same event */
+  for (const k of CAL_KIND_ORDER) {
+    if (CAL_KINDS[k].record.some((l) => item.label.toLowerCase().startsWith(l.toLowerCase()))) return k;
+  }
+  return null;
+}
+
+/** The record's kind — its label is already one of the closed set. */
+export function recordKind(r: RecordItem): CalKind | null {
+  for (const k of CAL_KIND_ORDER) if (CAL_KINDS[k].record.includes(r.label)) return k;
+  return null;
+}
+
+/** Kept when its kind is on, or when nothing claims it. */
+export const itemInKinds = (item: CalendarItem, on: CalKind[]): boolean => {
+  const k = itemKind(item);
+  return k === null || on.includes(k);
+};
+export const recordInKinds = (r: RecordItem, on: CalKind[]): boolean => {
+  const k = recordKind(r);
+  return k === null || on.includes(k);
+};

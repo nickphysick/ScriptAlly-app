@@ -194,13 +194,22 @@ describe("the fold, the map, the wiring", () => {
     expect(pageSrc).toContain("cal-c2");
   });
 
-  it("⚠️ FILTERS narrow the live cards BEFORE placement — the same applyFacet the board uses", () => {
-    // P5 composed tags in: facet ∧ tags, one narrow helper over the same applyFacet
-    expect(pageSrc).toContain("applyFacet(cards, facet).filter((c) => matchesTags(c.tags, tagSel))");
+  /* ⚠️ RETARGETED (finishing pack, Phase 4). The facet is superseded by event KINDS — see
+     `CAL_KINDS` — so `applyFacet` no longer narrows here and the two feeds are no longer withheld.
+     What this lock exists to protect is the SHAPE, and the shape survives: tags still narrow the
+     live cards BEFORE placement, through one `narrow` helper applied to every live column, so a
+     filter cannot reach one column and miss another. */
+  it("⚠️ TAGS narrow the live cards BEFORE placement — one helper, every live column", () => {
+    expect(pageSrc).toContain("cards.filter((c) => matchesTags(c.tags, tagSel))");
     expect(pageSrc).toContain("todo: narrow(assembled.cols.todo)");
     expect(pageSrc).toContain("snoozed: narrow(assembled.cols.snoozed)");
-    // completed items ride only the unfiltered view — finished work is not waiting
-    expect(pageSrc).toContain('facet === "all" ? userTasks : []');
+    /* ⚠️ THE TWO FEEDS ARE NO LONGER GATED. Under the facet they were withheld unless "Everything"
+       was chosen, because neither a writer's task nor a completed item HAS a facet — so any
+       narrower facet had to drop them wholesale. The kind vocabulary names both, so they can be
+       filtered honestly instead of withheld. */
+    const d = decls(pageSrc);
+    expect(d).not.toContain('facet === "all" ? userTasks : []');
+    expect(d).not.toContain("applyFacet");
   });
 
   /* ⚠️ RETARGETED 20 Aug 2026 (record-layer P5): a day is now SELECTED, not opened. The modal it
@@ -571,12 +580,21 @@ describe("⚠️ one switch for the record, and it is NOT a facet", () => {
     expect(d).not.toMatch(/localStorage[^\n]*mode/i);
   });
 
-  it("⚠️ the facet never reaches the record, and the record never reaches the facet counts", () => {
+  /* ⚠️ RETARGETED (finishing pack, Phase 4), and the claim INVERTS with its reason.
+     The old law was that the facet must never reach the record: a facet names live WORK, and
+     reaching the past with a rule written for the present would answer a question it was not asked
+     — "urgent" means nothing applied to a query sent three weeks ago. That is precisely why the
+     calendar now has an event vocabulary of its own. A KIND *is* a fact about the past, so it may
+     narrow the record, and must: a control offering "Nudges" that left nudge entries on screen
+     would be lying. What survives untouched is the separation of the two vocabularies. */
+  it("⚠️ the KIND vocabulary narrows both layers; TODO_FACETS reaches neither", () => {
     const d = decls(pageSrc);
-    // facetCounts still reads the LIVE cards only — the record is not a countable facet
-    expect(d).toContain("facetCounts(liveBoardCards(assembled.cols))");
-    expect(d).not.toMatch(/facetCounts\([^)]*rec/i);
-    expect(d).not.toMatch(/TODO_FACETS[^\n]*record/i);
+    /* one kind predicate per layer, at the point of reading — never a second derivation */
+    expect(d).toContain("recordInKinds(r, kinds)");
+    expect(d).toContain("itemInKinds(it, kinds)");
+    /* the board's vocabulary is not consulted by this page at all any more */
+    expect(d).not.toContain("TODO_FACETS");
+    expect(d).not.toContain("facetCounts");
   });
 });
 
@@ -1256,14 +1274,22 @@ describe("⚠️ two words on the grid — and summarisation happens NOWHERE els
     expect(canCalendar.length, "no task type can reach the calendar — the probe is wrong").toBeGreaterThan(0);
     const covered = canCalendar.filter((t) => t in PILL_BY_TASK);
     const uncovered = canCalendar.filter((t) => !(t in PILL_BY_TASK));
-    /* `offer_received` is the reported gap: the pack's table has no card row for an offer, and
-       inventing product copy overnight is out of scope. It degrades to its own label. */
+    /* ⚠️ THE GAP IS CLOSED (finishing pack). `offer_received` was the ONE reported hole — the
+       originating pack's table had no card row for an offer, and inventing product copy overnight
+       was not that session's call. Nick ruled `Decide on offer`: what the card is, not what the
+       answer should be. So the table is now COMPLETE, and this assertion says so rather than
+       enumerating an exception. If a new task type reaches the calendar without a pill, this goes
+       red naming it — which is the whole point of deriving both sides. */
     expect(uncovered, "an uncovered kind appeared — decide its pill or confirm the fallback")
-      .toEqual(["offer_received"]);
-    expect(covered.sort()).toEqual(["full_requested", "nudge_overdue", "partial_requested", "revise_resubmit"]);
-    // and the fallback is the truth, not an invented summary
+      .toEqual([]);
+    expect(covered.sort()).toEqual(
+      ["full_requested", "nudge_overdue", "offer_received", "partial_requested", "revise_resubmit"]);
+    /* ⚠️ AND IT IS `Decide on offer`, NOT "Accept offer" — the app does not presume the answer. */
     expect(pillLabel(withTask("offer_received", "Noah Bright has made an offer")))
-      .toBe("Noah Bright has made an offer");
+      .toBe("Decide on offer");
+    /* the fallback still exists for anything genuinely unknown, and still tells the truth */
+    expect(pillLabel(withTask("nonexistent_kind" as never, "Some other thing")))
+      .toBe("Some other thing");
   });
 
   it("⚠️ NOTHING UPSTREAM WAS SHORTENED — the derivation still emits full labels", () => {

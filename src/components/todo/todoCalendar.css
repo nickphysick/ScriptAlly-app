@@ -538,3 +538,47 @@
   font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.13em;
   text-transform: uppercase; color: #a8998a; margin: 0;
 }
+
+/* ══ THE KIND CHECKLIST (finishing pack, Phase 4; ref calendar-month-focus-v5.html) ════════════
+ *
+ * ⚠️ IT REPLACES THE FACET CHIP, and it is a CHECKLIST rather than a menu because the kinds are
+ * not alternatives — a writer switching off Nudges is still looking at everything else. The facet
+ * control was single-select, which is the right shape for buckets that partition and the wrong one
+ * for layers that stack.
+ */
+.cal-kwrap { position: relative; display: inline-flex; flex: none; }
+.cal-kbtn { white-space: nowrap; }
+.cal-kmenu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 70;
+  background: #fff; border: 1px solid #ece0d2; border-radius: 11px;
+  box-shadow: 0 8px 24px rgba(58, 28, 20, 0.13);
+  padding: 7px; min-width: 208px;
+  display: flex; flex-direction: column;
+}
+.cal-krow {
+  display: flex; align-items: center; gap: 9px; padding: 7px 9px; border-radius: 8px;
+  cursor: pointer; font-family: "JetBrains Mono", monospace; font-size: 9px;
+  letter-spacing: 0.11em; text-transform: uppercase; color: #6a5a50; white-space: nowrap;
+}
+.cal-krow:hover { background: #faf6ef; }
+/* ⚠️ THE REAL CHECKBOX IS THE CONTROL, hidden but present and focusable — the painted box is a
+   sibling that follows it. A `<div role="checkbox">` would have to reimplement space-to-toggle,
+   the focus ring and the label association that `<label><input>` gives for nothing. */
+.cal-krow input { position: absolute; opacity: 0; width: 0; height: 0; }
+.cal-kbox {
+  width: 13px; height: 13px; border-radius: 4px; border: 1.5px solid #d8c9b8;
+  background: #fff; flex: none; position: relative;
+}
+.cal-kbox[data-on="true"] { background: #7c3a2a; border-color: #7c3a2a; }
+.cal-kbox[data-on="true"]::after {
+  content: ""; position: absolute; left: 3.5px; top: 1px; width: 3px; height: 6.5px;
+  border: solid #fff; border-width: 0 1.6px 1.6px 0; transform: rotate(42deg);
+}
+.cal-krow input:focus-visible + .cal-kbox { outline: 2px solid #7a3a28; outline-offset: 2px; }
+.cal-kall {
+  margin-top: 4px; padding: 7px 9px; border: none; border-top: 1px solid #f0e8dc;
+  background: none; cursor: pointer; text-align: left;
+  font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.11em;
+  text-transform: uppercase; color: #7c3a2a;
+}
+.cal-kall:hover { background: #faf6ef; }
