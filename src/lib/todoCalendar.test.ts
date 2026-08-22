@@ -19,6 +19,7 @@ import {
   upcomingGridDays,
   ghostsFor, daysSince, carriedLine, itemKind, recordKind, CAL_KINDS, CAL_KIND_ORDER, allKinds,
   itemInKinds, recordInKinds,
+  draggableTask,
   cardActionYmd, calendarDays, CAL_CELL_CAP, calFoldCap, toYmd,
   recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
   cellSlots,
@@ -1950,5 +1951,81 @@ describe("the collapsible day panel — one chevron, scoped click-away, reopen o
     const d = decls(pageSrc);
     expect(d).not.toMatch(/document\.addEventListener\("pointerdown"/);
     expect(d).not.toMatch(/window\.addEventListener\("pointerdown"/);
+  });
+});
+
+/* ══ DRAG YOUR OWN TASKS (proposals pack, Phase 2) ══════════════════════════════════════════ */
+describe("draggableTask — only writer-owned pills drag; you cannot drag a fact", () => {
+  const task = (over: Partial<CalendarItem> = {}): CalendarItem =>
+    ({ key: "t1", ymd: "2026-08-12", label: "Buy stamps", family: "task",
+       card: { userTaskId: "ut1" } as never, ...over });
+
+  it("a writer's own dated task drags", () => {
+    expect(draggableTask(task())).toBe(true);
+  });
+
+  it("every DERIVED pill refuses — send, snoozed return, done, and a card with no task id", () => {
+    /* an agent-family card (send/nudge/decide) is derived from the query's state */
+    expect(draggableTask(task({ family: "agent", card: { taskType: "full_requested" } as never }))).toBe(false);
+    /* a snoozed return is flag-derived — family "snoozed" even though it has a card */
+    expect(draggableTask(task({ family: "snoozed" }))).toBe(false);
+    /* a completed item belongs to the log */
+    expect(draggableTask(task({ family: "done", struck: true, card: undefined }))).toBe(false);
+    /* and no write key means no drag, whatever the family claims */
+    expect(draggableTask(task({ card: {} as never }))).toBe(false);
+  });
+
+  /* ⚠️ THE PAGE'S WIRING, at source: the drag prop is GATED on the predicate, the payload is the
+     write's own key, and the drop writes dueDate ALONE through the existing writer. */
+  it("the cell gates drag on the predicate and the drop writes dueDate alone", () => {
+    expect(pageSrc).toContain("drag={draggableTask(o.it) ? {");
+    expect(pageSrc).toContain("updateUserTask(dragTask.id, { dueDate: ymd })");
+    /* nothing else rides the write — no status, no completedAt, no committedDate */
+    const d = decls(pageSrc);
+    expect(d).not.toMatch(/updateUserTask\([^)]*\{[^}]*(status|completedAt|committedDate)/);
+  });
+
+  /* ⚠️ THE ORIGIN DAY IS A NO-OP BY CONSTRUCTION — dragover only permits a DIFFERENT day, so the
+     browser never allows the drop and no write can fire. Stronger than a check inside the write. */
+  it("dropping on the origin day cannot write", () => {
+    expect(pageSrc).toContain("dragTask && ymd !== dragTask.from ? (e) => { e.preventDefault();");
+    expect(pageSrc).toContain('if (!dragTask || ymd === dragTask.from) { endDrag(); return; }');
+  });
+
+  /* ⚠️ THE PEEK'S COPIES DO NOT DRAG: the drag prop is opt-in per mount and the peek passes none —
+     asserted by the peek's render lines carrying no drag prop. */
+  it("the peek's pills carry no drag", () => {
+    const i = pageSrc.indexOf('{itemsFor(peek.ymd).map((it) => <ItemPip key={it.key} it={it} />)}');
+    expect(i, "the peek's item render moved — the assertion would prove nothing").toBeGreaterThan(-1);
+  });
+
+  /* ⚠️ THE /todo ROW FOLLOWS IN THE SAME DERIVATION — asserted at the derivation, not the pixels:
+     the calendar places a task by the SAME `dueYmd` the board's card carries, so one write moves
+     both surfaces. And a moved task LOSES ITS GHOST, because the ghost is derived from
+     `rolledFrom`, which exists only while the action date is behind today. */
+  it("a moved task re-derives: new day holds it, old day is empty, the ghost is gone", () => {
+    const base = {
+      cols: { todo: [], today: [], snoozed: [], dismissed: [], done: [] },
+      flags: [], queries: [], agents: [], userTasks: [], activities: [],
+      today: "2026-08-19", nowMs: Date.parse("2026-08-19T12:00:00"),
+    };
+    const AUG = monthGridDays("2026-08-19");
+    const cardAt = (due: string) =>
+      ({ key: "c-ut1", title: "Buy stamps", userTaskId: "ut1", dueYmd: due, stream: "do" } as never);
+
+    /* before the drag: due 7 Aug, behind today → rolled onto today, ghost on the 7th */
+    const before = calendarDays({ ...base, cols: { ...base.cols, todo: [cardAt("2026-08-07")] } } as never, AUG);
+    const carried = before.get("2026-08-19")!.items[0];
+    expect(carried.rolledFrom).toBe("2026-08-07");
+    expect(ghostsFor("2026-08-07", [carried])).toHaveLength(1);
+
+    /* after the drop on the 25th: the SAME derivation, the store's dueYmd changed — that is all */
+    const after = calendarDays({ ...base, cols: { ...base.cols, todo: [cardAt("2026-08-25")] } } as never, AUG);
+    expect(after.get("2026-08-25")!.items.map((i) => i.label)).toEqual(["Buy stamps"]);
+    expect(after.get("2026-08-07")?.items ?? []).toEqual([]);
+    expect(after.get("2026-08-19")?.items ?? []).toEqual([]);
+    const moved = after.get("2026-08-25")!.items[0];
+    expect(moved.rolledFrom).toBeUndefined();
+    for (const d of AUG) expect(ghostsFor(d, [moved])).toEqual([]);
   });
 });

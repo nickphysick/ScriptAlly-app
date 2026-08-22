@@ -1085,3 +1085,18 @@ export function shortCalDate(ymd: string): string {
   const d = new Date(`${ymd}T12:00:00`);
   return `${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" })}`;
 }
+
+/* ══ DRAGGING YOUR OWN TASKS (proposals pack, Phase 2; ref calendar-proposals-v6.html) ═════════
+ *
+ * ⚠️ ONLY WRITER-OWNED PILLS DRAG — YOU CANNOT DRAG A FACT. A send, a nudge, a record entry, a
+ * ghost, an expected date: every one is DERIVED from something that happened or was asked for, and
+ * moving the pill would either lie about the record or silently rewrite a derivation at the wrong
+ * end. A writer's own task is the one thing on the grid whose date is INPUT — the two-natures law's
+ * own field (`UserTask.dueDate`) — so it is the one thing a hand can move. The drop writes through
+ * `updateUserTask`, the existing writer; nothing auto-fires.
+ */
+export const draggableTask = (it: CalendarItem): boolean =>
+  /* family "task" excludes snoozed returns (family "snoozed" — flag-derived) and everything
+     agent-shaped; `struck` excludes completed items, which are the log's, not the writer's to move;
+     `userTaskId` is the write's own key, so a pill this returns true for can always be written */
+  it.family === "task" && !it.struck && !!it.card?.userTaskId;

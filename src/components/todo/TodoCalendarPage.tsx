@@ -38,13 +38,14 @@ import {
   peekBox, PEEK_DELAY_MS, PEEK_SCALE, PEEK_OPACITY,
   CalMode, upcomingGridDays,
   CalKind, CAL_KINDS, CAL_KIND_ORDER, allKinds, itemInKinds, recordInKinds,
-  GhostItem, ghostsFor, carriedLine,
+  GhostItem, ghostsFor, carriedLine, draggableTask,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 /* ⚠️ REUSED, not re-written — `shortDate` already renders "7 Aug" for the RecordingCalendar's
    anchor button, and a third date formatter is a third chance for two surfaces to disagree. */
 import { shortDate } from "../../lib/recordingCalendar";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
+import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
 import "./tasksLayout.css";
 import "./taskChrome.css";
 import "./todoCalendar.css";
@@ -77,14 +78,25 @@ const peekDayLabel = (ymd: string): string => {
   return `${DOW[(d.getDay() + 6) % 7]} ${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" }).toUpperCase()}`;
 };
 
-const ItemPip: React.FC<{ it: CalendarItem; onPick?: () => void }> = ({ it, onPick }) => (
+const ItemPip: React.FC<{
+  it: CalendarItem;
+  onPick?: () => void;
+  /* ⚠️ DRAG IS OPT-IN PER MOUNT, exactly as clicking is: the CELL passes handlers, the PEEK passes
+     none, so the peek's copies are inert in both senses and the draggable attribute never appears
+     on a surface that cannot accept the gesture. The predicate (`draggableTask`) lives in the pure
+     layer — the component only asks whether it was given the handlers. */
+  drag?: { onStart: (e: React.DragEvent) => void; onEnd: () => void };
+}> = ({ it, onPick, drag }) => (
   <button
     type="button"
-    className={`cal-pip${it.struck ? " struck" : ""}${it.card ? "" : " inert"}`}
+    className={`cal-pip${it.struck ? " struck" : ""}${it.card ? "" : " inert"}${drag ? " grab" : ""}`}
     style={{ background: CAL_PIP[it.family].bg, color: CAL_PIP[it.family].tx, borderColor: CAL_PIP[it.family].bd }}
     title={onPick ? it.label : undefined}
     tabIndex={onPick ? undefined : -1}
     onClick={onPick ? (e) => { e.stopPropagation(); onPick(); } : undefined}
+    draggable={drag ? true : undefined}
+    onDragStart={drag?.onStart}
+    onDragEnd={drag?.onEnd}
   >
     {/* ⚠️ THE GRID SUMMARISES; NOTHING UPSTREAM DOES. `pillLabel` is the only place two-word
         labels exist — the tooltip above, the day panel and FocusFlow all still read `it.label` in
@@ -323,6 +335,7 @@ const CalDayPanel: React.FC<CalDayPanelProps> = ({
 export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, onNavigatePath = () => {} }) => {
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser,
+    updateUserTask,
   } = useScriptAllyDb();
   const now = Date.now();
   const today = localYMD(now);
@@ -684,6 +697,32 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     return () => window.removeEventListener("scroll", clearPeek, true);
   }, [peek, clearPeek]);
 
+  /* ══ DRAG A TASK TO A NEW DAY (proposals pack, Phase 2) ═══════════════════════════════════
+     ⚠️ THE DROP WRITES THROUGH `updateUserTask` — the existing writer — and writes `dueDate`
+     ALONE. Dates are input, not derived state: the writer moves the date and nothing auto-fires.
+     The feed re-derives from the store, so the pill appears on the new day, the panel follows and
+     the /todo row's date follows in the SAME derivation — one field, every surface.
+     ⚠️ THE ORIGIN DAY IS NOT A VALID TARGET, which makes dropping there a no-op by construction:
+     `dragover` only calls `preventDefault` on a DIFFERENT day, so the browser never permits the
+     drop and no write can fire. A no-op enforced at the gesture beats one checked at the write.
+     ⚠️ FAILURE IS VISIBLE — the house law (todoWrite): the write's catch flashes the page's own
+     toast; a dropped pill that silently stayed put would read as a broken feature. */
+  const [dragTask, setDragTask] = useState<{ id: string; from: string } | null>(null);
+  const [dropYmd, setDropYmd] = useState<string | null>(null);
+  const endDrag = () => { setDragTask(null); setDropYmd(null); };
+  const dropOn = (ymd: string) => {
+    if (!dragTask || ymd === dragTask.from) { endDrag(); return; }
+    /* ⚠️ THE FAILURE COPY IS `todoWrite`'s, NOT AUTHORED HERE — a page lock forbids this page
+       flashing a literal, and it caught exactly this line carrying one. The lock is right twice
+       over: `saveErrorCopy(classifyWriteError(e))` is the ONE producer of save-failure copy in
+       the Tasks world (permission and offline get their own true sentences), and no raw Firebase
+       message ever reaches the UI through it. */
+    updateUserTask(dragTask.id, { dueDate: ymd }).catch((e) => {
+      flash(saveErrorCopy(classifyWriteError(e)));
+    });
+    endDrag();
+  };
+
   /* ⚠️ CLICK-AWAY, SCOPED TO THE PAGE'S OWN ROOT — DELIBERATELY NOT `document` (foot-panel pack,
      Phase 2). "Outside the calendar" is defined by what the listener can reach: it hangs on this
      page's root element, so a click on the NAV, the MASTHEAD, or any PORTALLED surface (the peek,
@@ -907,10 +946,13 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                 <div
                   key={ymd}
                   role="gridcell"
-                  className={`cal-cell${ymd === today ? " today" : ""}${ymd === selDay ? " sel" : ""}${past ? " past" : ""}${off ? " off" : ""}${lead ? " lead" : ""}`}
+                  className={`cal-cell${ymd === today ? " today" : ""}${ymd === selDay ? " sel" : ""}${past ? " past" : ""}${off ? " off" : ""}${lead ? " lead" : ""}${dropYmd === ymd ? " dropok" : ""}`}
                   onClick={() => selectDay(ymd)}
                   onMouseEnter={(e) => armPeek(ymd, e.currentTarget)}
                   onMouseLeave={clearPeek}
+                  onDragOver={dragTask && ymd !== dragTask.from ? (e) => { e.preventDefault(); setDropYmd(ymd); } : undefined}
+                  onDragLeave={dropYmd === ymd ? () => setDropYmd(null) : undefined}
+                  onDrop={(e) => { e.preventDefault(); dropOn(ymd); }}
                 >
                   <div className="cal-d">
                     {/* ⚠️ THE NUMERAL IS ITS OWN BOX (fixes pack, Phase 3) — a bare text node has
@@ -921,7 +963,18 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                   </div>
                   {shown.map((o) => (o.t === "item" ? (
                     <ItemPip key={o.it.key} it={o.it}
-                      onPick={() => { o.it.card ? focusCard(ymd, o.it.key) : selectDay(ymd); }} />
+                      onPick={() => { o.it.card ? focusCard(ymd, o.it.key) : selectDay(ymd); }}
+                      drag={draggableTask(o.it) ? {
+                        onStart: (e) => {
+                          /* the payload rides the event too, for protocol correctness — but the
+                             STATE is what the drop reads; dataTransfer is write-only in dragover */
+                          e.dataTransfer.setData("text/plain", o.it.card!.userTaskId!);
+                          e.dataTransfer.effectAllowed = "move";
+                          setDragTask({ id: o.it.card!.userTaskId!, from: ymd });
+                          clearPeek();
+                        },
+                        onEnd: endDrag,
+                      } : undefined} />
                   ) : (
                     /* the ghost points AT today — select it and focus the live row there */
                     <GhostPip key={o.g.key} g={o.g} onPick={() => focusCard(today, o.g.of.key)} />

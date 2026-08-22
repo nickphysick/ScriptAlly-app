@@ -708,3 +708,13 @@
    0-1-0 and two would win TODAY: a uniform rule is one someone can extend without re-deriving the
    specificity argument, and this file's lock asserts the whole family rather than case by case. */
 .cal-flow .tdb-ffstage .tdb-ffbody { padding: 24px 22px 20px; }
+
+/* ══ DRAG A TASK (proposals pack, Phase 2; ref calendar-proposals-v6.html) ═════════════════════
+ *
+ * ⚠️ THE RING IS THE DROP AFFORDANCE AND IT IS INSET — an inset shadow spends no layout, so a full
+ * day cannot be shoved into overflow by its own highlight. Sage, matching the ref: sage is the
+ * incoming/receptive tone in this grammar. `.grab` rides only pills `draggableTask` approved.
+ */
+.cal-pip.grab { cursor: grab; }
+.cal-pip.grab:active { cursor: grabbing; }
+.cal-cell.dropok { box-shadow: inset 0 0 0 1.5px #8a9e88; background: #f4f7f2; }
