@@ -114,6 +114,33 @@ describe("⚠️ the count is a TALLY, so it rides the tool row — and it agree
   });
 });
 
+describe("⚠️ A TOKEN DEFINED SOMEWHERE IS NOT A TOKEN IN SCOPE WHERE IT IS READ", () => {
+  /* ⚠️ THE FAULT THIS EXISTS FOR, and it is a different one from the dangling-token sweep below.
+     Every `var(--nb-*)` in the sheet resolved to a definition — the sweep was clean and the Phase 1
+     lock was green. But the Examples drawer, the scrim and the task popover render OUTSIDE
+     `.nb-scope`: they are siblings of the page body, not children of it. So at THEIR use site the
+     tokens were undefined, every declaration reading one was silently DROPPED, and the drawer
+     rendered FULLY TRANSPARENT with the board showing through its text. Six passing geometry
+     measurements never looked at it; the screenshot did. */
+  it("every floating surface carries the token scope itself", () => {
+    const page = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
+    /* the population first — a census of nothing passes trivially */
+    const floating = ["nb-drawer", "nb-scrim", "nb-taskpanel"];
+    /* ⚠️ THE WHOLE ATTRIBUTE, NOT AN ADJACENCY. `nb-scope cal-daypanel nb-taskpanel` carries both
+       and would fail a check for the two tokens side by side — the first draft of this lock did
+       exactly that and reported a correctly-scoped element as unscoped. */
+    const attrs = [...page.matchAll(/className="([^"]*)"/g)].map((m) => m[1].split(/\s+/));
+    for (const cls of floating) {
+      const owner = attrs.find((a) => a.includes(cls));
+      expect(owner, `no element renders ${cls}`).toBeDefined();
+      expect(owner, `${cls} must carry nb-scope — it renders outside it`).toContain("nb-scope");
+    }
+    /* and nothing reads an --nb-* token from a class that is not inside a scoped element */
+    const scoped = [...page.matchAll(/className="([^"]*nb-scope[^"]*)"/g)].length;
+    expect(scoped, "the scope is not applied anywhere").toBeGreaterThanOrEqual(floating.length + 1);
+  });
+});
+
 describe("⚠️ one token set, declared once, at the top", () => {
   it("the sheet opens with a single :root-scoped block and never restates a token", () => {
     const first = cssDecls.indexOf("--nb-");

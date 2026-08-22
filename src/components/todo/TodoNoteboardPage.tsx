@@ -328,7 +328,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
               {/* ⚠️ ART · NOTEBOARD-EMPTY (board-optimise P3) — first run only, ABOVE the copy
                   that was already written. The trigger is the same emptiness the state itself
                   keys on; nothing new is derived. */}
-              <ArtSlot name="noteboard-empty" className="nb-art" />
+              <ArtSlot name="noteboard-empty" />
               <h3>Nothing pinned yet</h3>
               <p>
                 Notes are for the things you want to remember but don’t need chasing — a thought
@@ -488,7 +488,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
           a year teaching the opposite. */}
       {taskFor && (
         <div className="cal-dayscrim" onClick={() => setTaskFor(null)}>
-          <div className="cal-daypanel nb-taskpanel" role="dialog" aria-label="Turn into a task" onClick={(e) => e.stopPropagation()}>
+          <div className="nb-scope cal-daypanel nb-taskpanel" role="dialog" aria-label="Turn into a task" onClick={(e) => e.stopPropagation()}>
             <div className="cal-dayhead">
               Turn into a task
               <button type="button" className="cal-dayx" aria-label="Close" onClick={() => setTaskFor(null)}>✕</button>
@@ -547,9 +547,15 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
           verbatim from the ref and locked against it. */}
       {examples && (
         <>
-          <div className="nb-scrim" onClick={() => setExamples(false)} />
+          <div className="nb-scope nb-scrim" onClick={() => setExamples(false)} />
           <aside
-            className="nb-drawer"
+            /* ⚠️ IT CARRIES THE TOKEN SCOPE ITSELF. This renders OUTSIDE `.nb-scope` — the
+               floating surfaces are siblings of the page body, not children of it — so every
+               `var(--nb-*)` it reads resolved to nothing and the declaration was DROPPED. The
+               drawer rendered fully transparent with the board showing through it, and six
+               passing measurements never looked at it. A token being DEFINED somewhere is not
+               the same as being IN SCOPE where it is read. */
+            className="nb-scope nb-drawer"
             aria-label="Example notes"
             onKeyDown={(e) => { if (e.key === "Escape") setExamples(false); }}
           >

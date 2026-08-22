@@ -64,12 +64,6 @@
 @media (max-width: 680px) { .nb-board { columns: 1; } }
 
 /* ── the note ──────────────────────────────────────────────────────────────────────────────── */
-/* ⚠️ THE THREE PAPERS. Yellow is also what a note with NO stored colour renders as, so the
-   default and the denied-write fallback are one rule rather than two that could drift. */
-.nb-c-yellow { background: var(--nb-yellow); border-color: var(--nb-yellow-deep); }
-.nb-c-pink { background: var(--nb-pink); border-color: var(--nb-pink-deep); }
-.nb-c-sage { background: var(--nb-sage); border-color: var(--nb-sage-mid); }
-
 .nb-note {
   break-inside: avoid;
   margin: 0 0 var(--nb-gap);
@@ -80,6 +74,18 @@
   box-shadow: var(--nb-shadow);
   transition: box-shadow 0.15s;
 }
+/* ⚠️ THE THREE PAPERS, DECLARED AFTER `.nb-note` — AND THE ORDER IS LOAD-BEARING.
+   `.nb-note` and `.nb-c-*` land on the SAME element at the same specificity (0-1-0), so the later
+   rule wins. Declared above it, every `border-color` here lost to `.nb-note`'s
+   `border: 1px solid transparent` and all three papers rendered with an INVISIBLE border — in a
+   sheet where each rule reads correctly on its own, through a lock that asserted these very
+   declarations exist. Only measuring the computed value found it.
+   Yellow is also what a note with NO stored colour renders as, so the default and the
+   denied-write fallback are one rule rather than two that could drift. */
+.nb-c-yellow { background: var(--nb-yellow); border-color: var(--nb-yellow-deep); }
+.nb-c-pink { background: var(--nb-pink); border-color: var(--nb-pink-deep); }
+.nb-c-sage { background: var(--nb-sage); border-color: var(--nb-sage-mid); }
+
 /* ⚠️ HOVER IS A SHADOW AND NOTHING ELSE — never a lift. A `translateY` pushes the card's top edge
    past a clipping boundary and reads as the top hairline vanishing rather than as movement; that
    was fixed on `.msv-spine` once and reinstated by a revision that predated the fix. The masonry
@@ -230,9 +236,8 @@
 .nb-empty h3 { font-family: "Playfair Display", Georgia, serif; font-size: 19px; font-weight: 700; color: var(--nb-ink); margin: 0 0 8px; }
 .nb-empty p { font-size: 12.5px; color: var(--nb-quiet); line-height: 1.65; margin: 0 0 16px; }
 
-/* the conversion door's copy */
+/* the ⋯ Tags… sheet keeps the panel width; `.nb-datewhy` went with the date door it explained */
 .nb-datepanel { width: min(380px, calc(100vw - 40px)); }
-.nb-datewhy { font-size: 12.5px; color: var(--nb-quiet); line-height: 1.6; margin: 0 0 12px; }
 
 /* ── the "Turn into a task" popover ────────────────────────────────────────────────────────── */
 .nb-taskpanel { width: min(380px, calc(100vw - 40px)); }
@@ -260,7 +265,11 @@
   box-shadow: -12px 0 40px rgba(58, 28, 20, 0.18);
   display: flex; flex-direction: column;
 }
-.nb-drawer-head { padding: 24px 26px 18px; border-bottom: 1px solid var(--nb-hair-soft); position: relative; }
+/* ⚠️ THE RIGHT PADDING RESERVES THE ✕. It is the one absolutely-positioned thing on this page,
+   and the paragraph beneath the heading runs the full width — at 480px it would pass underneath.
+   Reserving the space makes the overlap impossible rather than merely unlikely, which is the
+   better half of the choice: a control that measures clear today is one content change from not. */
+.nb-drawer-head { padding: 24px 52px 18px 26px; border-bottom: 1px solid var(--nb-hair-soft); position: relative; }
 .nb-drawer-head h2 { font-family: "Playfair Display", Georgia, serif; font-size: 22px; font-weight: 500; color: var(--nb-ink);
   /* ⚠️ 1.3 MINIMUM WHEREVER PLAYFAIR RENDERS MIXED CASE — "keep" has a descender, and a line box
      the size of the em crops it. The standing rule, not a value tuned to this string. */

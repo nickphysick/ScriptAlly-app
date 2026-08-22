@@ -113,6 +113,24 @@ describe("⚠️ the foot is ONE run, and its order is a property of the arrange
   });
 });
 
+describe("⚠️ the paper rules come AFTER .nb-note — source order decides this", () => {
+  it("a paper's border-color is declared later than the border it must beat", () => {
+    /* ⚠️ MEASURED, THEN LOCKED. `.nb-note` and `.nb-c-*` land on the SAME element at the SAME
+       specificity (0-1-0), so the later rule wins. Declared above it, every `border-color` lost
+       to `.nb-note { border: 1px solid transparent }` and all three papers rendered with an
+       invisible border — in a sheet where each rule reads correctly on its own, through a lock
+       that asserted these very declarations exist. The computed value is what found it
+       (noteboardLook.measure.ts); this keeps it from coming back. */
+    const note = css.indexOf(".nb-note {");
+    expect(note, "no .nb-note rule").toBeGreaterThan(-1);
+    for (const paper of [".nb-c-yellow", ".nb-c-pink", ".nb-c-sage"]) {
+      const at = css.indexOf(paper);
+      expect(at, paper).toBeGreaterThan(-1);
+      expect(at, `${paper} must be declared AFTER .nb-note or its border-color is discarded`).toBeGreaterThan(note);
+    }
+  });
+});
+
 describe("⚠️ hover is a SHADOW, never a lift", () => {
   it("the card has a hover shadow and no transform anywhere near it", () => {
     /* a lift pushes the top edge past a clipping boundary and reads as the hairline vanishing —
