@@ -972,8 +972,22 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         </div>
       )}
 
-      {/* the item sheet — the same FocusFlow surface every other To-do entrance opens */}
+      {/* ⚠️ THE SAME `FocusFlow` EVERY OTHER To-do ENTRANCE OPENS — presentation scoped, behaviour
+          untouched (finishing pack, Phase 6). Recon established that the To-do page's right-hand
+          pane is a DIFFERENT component (`TaskPane` + `TaskPaneBody`, fed by `buildJourney`), and
+          that `TaskPane` takes a BUILT journey rather than a card — so true parity means extracting
+          the input-gathering `ToDoPage` does at :936, which is daylight work needing that session's
+          cooperation. It is estimated in the report and deliberately NOT begun here.
+          ⚠️ WHAT WAS ALREADY RIGHT IS LEFT ALONE. `FocusFlow` is already `role="dialog"
+          aria-modal="true"` over a fixed scrim, already centred by `.tdb-ffstage`, already scrolls
+          in `.tdb-ffbody`, and already closes on Escape and scrim-click. Rebuilding any of that to
+          "match the intent" would be replacing a working implementation with a second one. The one
+          thing that did not match was the WIDTH.
+          ⚠️ THE WRAPPER EXISTS ONLY TO CARRY A CLASS. `FocusFlow` is read-only territory, so the
+          narrowing is scoped from this page's own stylesheet through `.cal-flow`; the wrapper adds
+          no box of its own, since everything inside it is `position: fixed`. */}
       {flowCard && (
+        <div className="cal-flow">
         <FocusFlow
           items={[{ kind: "card", card: flowCard }]}
           onClose={() => setFlowCard(null)}
@@ -990,6 +1004,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
           onNavigate={onNavigate}
           onToast={flash}
         />
+        </div>
       )}
     </div>
   );

@@ -603,3 +603,29 @@
 .cal-pip.cal-ghost:hover { border-color: #b9a48f; color: #7a6a5c; }
 /* the peek's copy is a span, not a button — no pointer affordance on an inert surface */
 .cal-peek .cal-ghost { cursor: default; }
+
+/* ══ THE ACTION OVERLAY (finishing pack, Phase 6; ref calendar-month-focus-v5.html) ════════════
+ *
+ * ⚠️ ONLY THE WIDTH IS SCOPED, because everything else the pack asks for was already true.
+ * `FocusFlow` is `role="dialog" aria-modal="true"` over a fixed scrim, centred by `.tdb-ffstage`,
+ * scrolling in `.tdb-ffbody`, and closing on Escape and scrim-click. Rebuilding any of that here
+ * would be a second implementation of a working one. The sheet is `min(860px, 92vw)` for the
+ * To-do page's full-width takeover; from the calendar it should read as a WINDOW over the month.
+ *
+ * ⚠️ 430px IS A LIVE HOUSE WIDTH, not a number invented for this — `.tdb-sssum` in `todo.css` is
+ * the same, and it is comfortably under the journey's own 640px container query, so the two-column
+ * journey folds to one column here on its own. That fold is a CONTAINER query, so it answers to
+ * this width rather than to the viewport, which is exactly why it works at any screen size.
+ *
+ * ⚠️ 0-3-0, DELIBERATELY. `.tdb-ffwrap .tdb-ffsheet` in `todo.css` is 0-2-0, so a `.cal-flow
+ * .tdb-ffsheet` rule would TIE with it and be decided by which stylesheet the bundler happened to
+ * put last — the page-versus-component cascade trap this repo already records. Three classes wins
+ * outright and needs no `!important`.
+ */
+.cal-flow .tdb-ffstage .tdb-ffwrap { width: min(430px, 92vw); }
+.cal-flow .tdb-ffstage .tdb-ffsheet { width: min(430px, 92vw); }
+/* ⚠️ THE BODY KEEPS ITS OWN SCROLL REGION; only the padding tightens for the narrower card. It
+   carries three classes for the same reason the two above do, even though its only competitor is
+   0-1-0 and two would win TODAY: a uniform rule is one someone can extend without re-deriving the
+   specificity argument, and this file's lock asserts the whole family rather than case by case. */
+.cal-flow .tdb-ffstage .tdb-ffbody { padding: 24px 22px 20px; }

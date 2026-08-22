@@ -1799,3 +1799,44 @@ describe("daysSince / carriedLine — the gap, stated and never judged", () => {
     }
   });
 });
+
+/* ══ THE ACTION OVERLAY (finishing pack, Phase 6) ═══════════════════════════════════════════ */
+describe("the calendar's action surface — scoped presentation, untouched behaviour", () => {
+  it("it is still FocusFlow, with the page's REAL toast and navigation", () => {
+    expect(pageSrc).toContain("<FocusFlow");
+    /* the two that were `() => {}` and made completions silent — and therefore un-undoable */
+    expect(pageSrc).toContain("onNavigate={onNavigate}");
+    expect(pageSrc).toContain("onToast={flash}");
+    const d = decls(pageSrc);
+    expect(d).not.toContain("onToast={() => {}}");
+    expect(d).not.toContain("onNavigate={() => {}}");
+  });
+
+  /* ⚠️ THE PRESENTATION IS SCOPED FROM THIS PAGE'S OWN SHEET, because FocusFlow is read-only
+     territory. The wrapper carries a class and nothing else — everything inside it is fixed. */
+  it("the mount is wrapped so the width can be scoped without touching FocusFlow", () => {
+    expect(pageSrc).toContain('<div className="cal-flow">');
+    expect(calCss).toContain(".cal-flow .tdb-ffstage .tdb-ffsheet");
+  });
+
+  /* ⚠️ 0-3-0, DELIBERATELY. `.tdb-ffwrap .tdb-ffsheet` in todo.css is 0-2-0, so a two-class rule
+     here would TIE and be decided by bundler order — the page-versus-component cascade trap this
+     repo records. Asserted structurally: every `.cal-flow` sheet rule carries three classes. */
+  it("the scoping rule outranks the component's own without !important", () => {
+    const rules = calCss.split("\n").filter((l) => l.trim().startsWith(".cal-flow") && l.includes("{"));
+    expect(rules.length, "no .cal-flow rules found — the assertion would prove nothing").toBeGreaterThan(0);
+    for (const r of rules) {
+      const sel = r.slice(0, r.indexOf("{"));
+      expect((sel.match(/\./g) ?? []).length, `too weak to outrank todo.css: ${sel.trim()}`)
+        .toBeGreaterThanOrEqual(3);
+      expect(r, `!important should not be needed: ${sel.trim()}`).not.toContain("!important");
+    }
+  });
+
+  /* ⚠️ CLOSING DOES NOT CLEAR THE DAY. `onClose` nulls the card and nothing else, so the panel
+     stays on the day the writer was reading and re-derives from the feed the write just changed. */
+  it("closing keeps the day selected", () => {
+    expect(pageSrc).toContain("onClose={() => setFlowCard(null)}");
+    expect(decls(pageSrc)).not.toMatch(/onClose=\{[^}]*setSelDay/);
+  });
+});
