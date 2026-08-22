@@ -75,7 +75,10 @@ describe("a first-run draft actually renders", () => {
   /* Found during this pass: create mode lives in the populated branch, so with zero queries
      "Log your first query" set a draft that nothing displayed. */
   it("the empty branch yields to create mode", () => {
-    expect(queries).toContain("{queries.length === 0 && !creating ? (");
+    /* ⚠️ THE CONDITION, NOT ITS POSITION IN THE CHAIN. This pinned the opening brace too, so §3
+       putting the load skeleton AHEAD of the empty branch turned it red — a change that leaves the
+       claim ("the empty branch yields to create mode") exactly as true. */
+    expect(queries).toContain("queries.length === 0 && !creating ? (");
   });
 
   it("an empty list during a first-run draft isn't blamed on filters", () => {

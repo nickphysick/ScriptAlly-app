@@ -89,6 +89,7 @@ import { nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo, schedu
 import { NUDGE_NESTED_TYPE } from "../lib/logNudge";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { PackagePicker } from "./reading-pane/PackagePicker";
+import { QueryCentreSkeleton } from "./reading-pane/QueryCentreSkeleton";
 /* §2b — the shared art registry, already consumed by two other Query Centre panels. */
 import { ArtSlot } from "./todo/ArtSlot";
 import {
@@ -306,6 +307,7 @@ export const Queries: React.FC<{
     manuscripts,
     agents,
     queries,
+    collectionsReady,
     packages,
     /* §2 — the package's slots are version ids; the picker resolves them to names. Both stores
        are the DbProvider's own, which Queries already consumes, so this adds no import edge. */
@@ -3108,6 +3110,21 @@ export const Queries: React.FC<{
    */
   const paneUnselected = !creating && !selectedQueryId && sortedList.length > 0;
 
+  /**
+   * §3 — loading, told apart from empty.
+   *
+   * ⚠️ THE ~180ms GRACE IS THE POINT OF THE SECOND PIECE OF STATE. Rendering the skeleton the
+   * instant `collectionsReady` is false would flash it on every fast load, which is more jarring
+   * than the moment of nothing it replaces. This is the Dashboard's own pattern, reused rather
+   * than reinvented.
+   */
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  useEffect(() => {
+    if (collectionsReady) { setShowSkeleton(false); return; }
+    const t = setTimeout(() => setShowSkeleton(true), 180);
+    return () => clearTimeout(t);
+  }, [collectionsReady]);
+
   const listGroups = (() => {
     const nowMs = Date.now();
     const rows = renderList
@@ -3924,7 +3941,19 @@ export const Queries: React.FC<{
         {/* `&& !creating`: create mode lives in the populated branch, so without this a
             first-run "Log your first query" set a draft that NOTHING rendered — the CTA read as
             dead. Found during the re-entry work; see the report. */}
-        {queries.length === 0 && !creating ? (
+        {/**
+          * §3 — ⚠️ THE SKELETON GOES AHEAD OF THE EMPTY-DATABASE BRANCH, because that branch is what
+          * currently renders during the load. `queries` is `[]` until the first snapshot arrives, so
+          * a returning writer with forty queries met "No queries yet" and "Your first query starts
+          * here" — the page stating a fact about their account that it had not yet read.
+          *
+          * ⚠️ THE FLAG ALREADY EXISTED AND THIS PAGE DID NOT CONSUME IT. `collectionsReady` is false
+          * until manuscripts, agents AND queries have each delivered a first snapshot; the Dashboard
+          * has told loading from empty with it since the clean-load work. Same flag, same ~180ms
+          * grace so a fast load never flashes the skeleton — a second mechanism here would be a
+          * second answer to one question.
+          */}
+        {showSkeleton && !collectionsReady ? <QueryCentreSkeleton /> : queries.length === 0 && !creating ? (
           /* ── Empty database — F12 shell: a list pane with a "No queries yet" placeholder
              (Export disabled) beside the welcome pane (Smart Import + manual add). ── */
           <>

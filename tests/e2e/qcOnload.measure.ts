@@ -4,7 +4,7 @@
  *   SA_E2E_BASE_URL=dev npx playwright test --project=measure qcOnload
  */
 import { test, expect } from "@playwright/test";
-import { openRoute } from "./measure";
+import { openRoute, liftMotionSuppression } from "./measure";
 
 const state = (page: any) => page.evaluate(() => ({
   headings: Array.from(document.querySelectorAll(".qc-gh")).map((e) => (e.textContent || "").trim()),
@@ -109,4 +109,93 @@ test("§2a · a URL-restored selection still opens", async ({ page }) => {
   console.log(`  deep-linked ?q=${id} · selected ${s.selected} · unselected pane ${await page.locator(".qc-unsel").count()}`);
   expect(s.selected, "the deep-linked query did not open").toBe(1);
   expect(await page.locator(".qc-unsel").count(), "the bare pane rendered over a selection").toBe(0);
+});
+
+/**
+ * §3 · THE SKELETON.
+ *
+ * ⚠️ THE LOADING WINDOW CANNOT BE FORCED FROM OUTSIDE ON DEPLOYED DEV, and that is stated rather
+ * than worked around. `authReady` waits on the user document and `collectionsReady` on manuscripts,
+ * agents and queries — all of them over ONE Firestore WebChannel, so there is no URL to delay that
+ * separates them: hang the channel and the app never authenticates (it renders the landing);
+ * delay it and auth is delayed with it. Attempts on record: a 1200ms route delay, an abort, an
+ * offline reload, and hanging `Listen/channel` — the first showed nothing, the rest never reached
+ * the page.
+ *
+ * So this measures the two things that CAN be measured on the real page, and the third is verified
+ * where it actually lives:
+ *   · the shimmer and its reduced-motion behaviour — read from the SHIPPED stylesheet, by putting
+ *     the real class on a real element in a real browser with `prefers-reduced-motion` set;
+ *   · the row geometry — asserted BY CONSTRUCTION: the skeleton renders the real `.f12-row`, whose
+ *     height is measured here from the live list, so the two cannot be a pixel apart;
+ *   · "resolves into the unselected state, never a selection" — §2's check above already measures
+ *     that nothing is selected on load, which is the whole of that claim now that both auto-selects
+ *     are retired.
+ */
+test("§3 · the skeleton's row is the list's own row, not a transcribed number", async ({ page }) => {
+  test.setTimeout(240000);
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await page.waitForTimeout(2400);
+
+  const real = await page.evaluate(() => {
+    const r = document.querySelector(".f12-row") as HTMLElement;
+    return r ? Math.round(r.getBoundingClientRect().height) : 0;
+  });
+  console.log(`  the live list's row height: ${real}px`);
+  expect(real, "no rows on the page to measure against").toBeGreaterThan(0);
+
+  /* ⚠️ THE SKELETON'S ROW IS THE SAME ELEMENT CLASS, so its height is this number by construction.
+     Measured here rather than written into the skeleton, which is the difference between a
+     geometry that tracks the list and one that was true on the day it was typed. */
+  const skeletonRowHeight = await page.evaluate(() => {
+    const probe = document.createElement("div");
+    probe.className = "f12-row qc-skel-row";
+    probe.style.visibility = "hidden";
+    (document.querySelector(".f12-rows") || document.body).appendChild(probe);
+    const h = Math.round(probe.getBoundingClientRect().height);
+    probe.remove();
+    return h;
+  });
+  console.log(`  a skeleton row measures: ${skeletonRowHeight}px`);
+  expect(skeletonRowHeight, "the skeleton row is not the list's row").toBe(real);
+});
+
+test("§3 · one shimmer, and reduced motion keeps the blocks but stops the movement", async ({ browser }) => {
+  test.setTimeout(240000);
+  const read = async (reducedMotion: "reduce" | "no-preference") => {
+    const ctx = await browser.newContext({ reducedMotion, storageState: "tests/e2e/.auth/state.json" });
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await openRoute(page, "/queries", { width: 1440, height: 900 });
+    /* ⚠️ THE HARNESS SUPPRESSES MOTION WITH A STYLESHEET, so this read `animationName: none` for
+       BOTH cases and the check was about to call a working shimmer broken. Lifted before reading —
+       otherwise the reduced-motion half would pass for the harness's reason, not the page's. */
+    await liftMotionSuppression(page);
+    await page.waitForTimeout(1200);
+    /* the real class, on a real element, against the SHIPPED stylesheet */
+    const out = await page.evaluate(() => {
+      const el = document.createElement("span");
+      el.className = "qc-sk qc-sk-l1";
+      document.body.appendChild(el);
+      const cs = getComputedStyle(el);
+      const r = { anim: cs.animationName, iter: cs.animationIterationCount, img: cs.backgroundImage.slice(0, 24), bg: cs.backgroundColor, h: Math.round(el.getBoundingClientRect().height) };
+      el.remove();
+      return r;
+    });
+    await ctx.close();
+    return out;
+  };
+
+  const normal = await read("no-preference");
+  console.log(`  normal · animation "${normal.anim}" ×${normal.iter} · block ${normal.h}px · ${normal.img}…`);
+  expect(normal.anim, "the shimmer is not running").toBe("qc-sk-shimmer");
+  expect(normal.iter, "the shimmer does not run while loading").toBe("infinite");
+
+  const reduced = await read("reduce");
+  console.log(`  reduced · animation "${reduced.anim}" · block ${reduced.h}px · bg ${reduced.bg}`);
+  expect(reduced.anim, "the shimmer still animates under reduced motion").toBe("none");
+  /* ⚠️ THE BLOCKS STAY. The shape is the information; the shimmer is only the reassurance, and a
+     skeleton that vanished under reduced motion would leave the page blank while it loads. */
+  expect(reduced.h, "reduced motion removed the skeleton block itself").toBeGreaterThan(0);
+  expect(reduced.bg, "reduced motion removed the block's fill").not.toMatch(/rgba\(0, 0, 0, 0\)/);
 });
