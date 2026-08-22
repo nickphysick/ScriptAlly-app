@@ -203,3 +203,40 @@ protected name returns nothing. `PortalMenu`, `todoBoard.ts` and `todoBoard.css`
 - **The harness account's Noteboard prefs were reset** for the sparse screenshot
   (`dismissedExamples` and `order` cleared, the rest of `todoPrefs` — including `listView` —
   preserved), and its probe notes were removed. Re-seed with `node tests/e2e/seedNotes.mjs`.
+
+---
+
+## 9 — Dev deploy (22 Aug, after the run)
+
+**Hosting only** — the paper run changed no rules (`todoPrefs` was already allowlisted, §3), and
+`git diff e177b3fd..HEAD -- firestore.rules` is empty.
+
+Pre-flight: **0 behind** `origin/main` (54 ahead); `src/` clean, so the bundle is exactly HEAD
+`3577bdfc`; build output read in full and grepped, not tailed — clean, `assert-build-target`
+confirmed *"bundle targets scriptally-dev; gen-lang-client-0801391782 absent"*.
+
+```bash
+firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev
+```
+
+176 files → https://scriptally-dev.web.app
+
+**Verified against the deployed site** (`SA_E2E_BASE_URL=dev`) — the full paper suite, **9/9**:
+
+| | Reading |
+|---|---|
+| flat paper | 0 painting gradients at rest; composer clear |
+| the hem | absent at 0px of overflow, **present at 251px** |
+| examples | three on the sparse board; keep → real note, and **the dismissal survived reload** |
+| the hint | 2 real notes above, 2 examples below — on screen |
+| under search | zero examples |
+| drag | third → first, and **the same order after reload** |
+| links | 1 anchor, `imgs=0`, colour `rgb(124, 58, 42)` |
+
+Phases 3 and 4 failed their first pass on the deployed site for want of fixtures — the run had
+cleaned them — and passed once reseeded. A fixture absence, not a regression, and worth naming
+because a red that means "no data" looks identical to a red that means "broken".
+
+**Harness account left tidy:** probe notes removed, the two real notes the keep-this measurement
+created removed (their bodies are drawer examples verbatim — harness litter, not the writer's
+data), and `todoPrefs.noteboard` reset with `listView` and the desk behaviours preserved.
