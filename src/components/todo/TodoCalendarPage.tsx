@@ -39,7 +39,7 @@ import {
   CalMode, upcomingGridDays,
   CalKind, CAL_KINDS, CAL_KIND_ORDER, allKinds, itemInKinds, recordInKinds,
   GhostItem, ghostsFor, carriedLine, draggableTask,
-  ExpectedItem, expectedDays, expectedInKinds, EXPECTED_PILL, expectedLine,
+  ExpectedItem, expectedDays, expectedInKinds, EXPECTED_PILL, expectedLine, shortCalDate,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 /* ⚠️ REUSED, not re-written — `shortDate` already renders "7 Aug" for the RecordingCalendar's
@@ -780,6 +780,40 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     endDrag();
   };
 
+  /* ══ THE MONTH JUMP (proposals pack, Phase 4) ═════════════════════════════════════════════
+     ⚠️ THE CONTROL LIVES IN THE TOOL ROW, NOT THE SUBTITLE. The pack says "the month title
+     becomes a control", and the subtitle is where the month is WRITTEN — but the subtitle is
+     `TasksPageLayout`'s, typed `string`, and that file is read-only territory. The tool row is
+     where month NAVIGATION already lives (‹ Today ›), it is this page's own markup, and a control
+     belongs with its siblings rather than smuggled through a chrome component's prose line.
+     Deviation flagged in the report.
+     ⚠️ HIDDEN IN `Upcoming only` — the view is a range, not a month, and the subtitle there names
+     the range; a month picker under a range heading would navigate to something the heading
+     stopped claiming. */
+  const [jumpOpen, setJumpOpen] = useState(false);
+  const [jumpYear, setJumpYear] = useState(() => Number(anchor.slice(0, 4)));
+
+  /* ⚠️ ESCAPE IS CONSUMED ON THE CAPTURE PHASE — the house cascade law (the country picker's
+     precedent): dismissing a popover must never fall through to page-level handlers. Outside
+     pointerdown closes too, scoped exactly like the panel's own click-away. */
+  React.useEffect(() => {
+    if (!jumpOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopImmediatePropagation();
+      setJumpOpen(false);
+    };
+    const onDown = (e: PointerEvent) => {
+      if (!(e.target as HTMLElement | null)?.closest(".cal-mjwrap")) setJumpOpen(false);
+    };
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("pointerdown", onDown, true);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("pointerdown", onDown, true);
+    };
+  }, [jumpOpen]);
+
   /* ⚠️ CLICK-AWAY, SCOPED TO THE PAGE'S OWN ROOT — DELIBERATELY NOT `document` (foot-panel pack,
      Phase 2). "Outside the calendar" is defined by what the listener can reach: it hangs on this
      page's root element, so a click on the NAV, the MASTHEAD, or any PORTALLED surface (the peek,
@@ -819,8 +853,14 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      today's week, so the old sentence — "every item on the day it needs you" — would be a claim
      the page had stopped meeting. */
 
+  /* ⚠️ IN `Upcoming only` THE HEADING NAMES THE RANGE, NOT A MONTH (Phase 4) — the view starts at
+     today's week and a month name over a truncated month claims more than is shown. The month
+     picker hides with it. An empty range (a past month) keeps the month name: "Nothing ahead in
+     August" is the grid's own statement and the heading should agree with it. */
   const subtitle = mode === "upcoming"
-    ? `${monthLabel(anchor)} — what is still ahead.`
+    ? (visible.length > 0
+        ? `${shortCalDate(visible[0])} – ${shortCalDate(visible[visible.length - 1])} — what is still ahead.`
+        : `${monthLabel(anchor)} — what is still ahead.`)
     : `${monthLabel(anchor)} — every item on the day it needs you.`;
 
   const openSheet = (item: CalendarItem) => {
@@ -877,6 +917,50 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               <button type="button" className="cal-nav calm-nav" aria-label="Previous" onClick={() => setAnchor(shiftMonth(anchor, -1))}><ChevronLeft size={14} aria-hidden /></button>
               <button type="button" className="cal-nav calm-nav cal-today" onClick={() => setAnchor(today)}>Today</button>
               <button type="button" className="cal-nav calm-nav" aria-label="Next" onClick={() => setAnchor(shiftMonth(anchor, 1))}><ChevronRight size={14} aria-hidden /></button>
+
+              {/* ⚠️ THE MONTH NAME IS THE DOOR — chevron-only navigation is tedious across a
+                  querying timeline that spans seasons. Current month highlighted, year paged,
+                  choosing navigates. Hidden in `Upcoming only`, where the heading names a range. */}
+              {mode !== "upcoming" && (
+                <span className="cal-mjwrap">
+                  <button
+                    type="button"
+                    className="cal-nav calm-nav cal-mjbtn"
+                    aria-haspopup="true"
+                    aria-expanded={jumpOpen}
+                    aria-label="Jump to a month"
+                    onClick={() => { setJumpYear(Number(anchor.slice(0, 4))); setJumpOpen((o) => !o); clearPeek(); }}
+                  >
+                    {monthLabel(anchor)} ▾
+                  </button>
+                  {jumpOpen && (
+                    <div className="cal-mjump" aria-label="Jump to a month">
+                      <div className="cal-mjyr">
+                        <button type="button" aria-label="Previous year" onClick={() => setJumpYear((y) => y - 1)}>‹</button>
+                        <span>{jumpYear}</span>
+                        <button type="button" aria-label="Next year" onClick={() => setJumpYear((y) => y + 1)}>›</button>
+                      </div>
+                      <div className="cal-mjgrid">
+                        {["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"].map((m, i) => {
+                          const ymd = `${jumpYear}-${String(i + 1).padStart(2, "0")}-01`;
+                          const cur = sameMonth(ymd, anchor);
+                          return (
+                            <button
+                              key={m}
+                              type="button"
+                              className={cur ? "cur" : undefined}
+                              aria-current={cur || undefined}
+                              onClick={() => { setAnchor(ymd); setJumpOpen(false); }}
+                            >
+                              {m}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </span>
+              )}
 
               {/* ⚠️ EVENT KINDS REPLACE THE FACET CONTROL (finishing pack, Phase 4) — and this
                   SUPERSEDES the recorded ruling that "the calendar uses `TODO_FACETS` as the single

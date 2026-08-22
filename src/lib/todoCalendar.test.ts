@@ -1949,12 +1949,26 @@ describe("the collapsible day panel — one chevron, scoped click-away, reopen o
   /* ⚠️ THE CLICK-AWAY IS SCOPED TO THE PAGE ROOT, NEVER `document` — portalled surfaces and the
      shell's chrome must not collapse the panel, and that falls out of the scoping rather than out
      of an exception list that would go stale. */
+  /* ⚠️ NARROWED (proposals pack, Phase 4), and the narrowing is the honest scope. The first form
+     banned window-level pointerdown listeners WHOLESALE, which was broader than its claim: the law
+     is that the COLLAPSE cannot be triggered from outside the page (shell clicks, portals), and
+     that is a property of the collapse's own listener. The month-jump popover legitimately
+     dismisses on a window-level outside-click — a popover closing when you click anywhere else is
+     the scope-chip pattern, and scoping ITS dismissal to the page root would leave it open while
+     you clicked the sidebar. So: the collapse listener is asserted root-scoped in ITS effect, and
+     no listener anywhere calls setPanelOpen(false) from a window/document hook. */
   it("the click-away hangs on the page's own root, with the pack's four exclusions", () => {
     expect(pageSrc).toContain("root.addEventListener(\"pointerdown\", onDown)");
     expect(pageSrc).toContain('t.closest(".cal-grid, .cal-focus, .cal-paneltab, .tpl-tools")');
     const d = decls(pageSrc);
-    expect(d).not.toMatch(/document\.addEventListener\("pointerdown"/);
-    expect(d).not.toMatch(/window\.addEventListener\("pointerdown"/);
+    /* every window/document pointerdown block must not touch the panel's state */
+    const globalBlocks = [...d.matchAll(/(?:window|document)\.addEventListener\("pointerdown"[^;]*;/g)];
+    for (const m of globalBlocks) {
+      const from = d.lastIndexOf("React.useEffect", m.index!);
+      const to = d.indexOf("}, [", m.index!);
+      expect(d.slice(from, to), "a global pointerdown listener reaches the panel's collapse")
+        .not.toContain("setPanelOpen");
+    }
   });
 });
 
@@ -2139,5 +2153,39 @@ describe("expectedDays — the reply window, resolved and never read raw", () =>
     const i = lib.indexOf("export function expectedLine");
     expect(i).toBeGreaterThan(-1);
     expect(decls(lib.slice(i, i + 700))).not.toMatch(/\b(his|her|hers|he|she)\b/i);
+  });
+});
+
+/* ══ THE MONTH JUMP (proposals pack, Phase 4) ═══════════════════════════════════════════════ */
+describe("the month jump — the month name is the door", () => {
+  it("the control is accessible, and hidden in Upcoming only", () => {
+    expect(pageSrc).toContain('aria-label="Jump to a month"');
+    expect(pageSrc).toContain("aria-expanded={jumpOpen}");
+    /* the whole wrap is fenced on the mode — a picker under a range heading would navigate to
+       something the heading stopped claiming */
+    expect(pageSrc).toContain('{mode !== "upcoming" && (');
+    expect(pageSrc).toContain('<span className="cal-mjwrap">');
+  });
+
+  it("choosing a month NAVIGATES — anchor set to that month, popover closed", () => {
+    expect(pageSrc).toContain('onClick={() => { setAnchor(ymd); setJumpOpen(false); }}');
+    /* the current month is marked for the eye and the assistive tree by the same test */
+    expect(pageSrc).toContain("const cur = sameMonth(ymd, anchor);");
+    expect(pageSrc).toContain("aria-current={cur || undefined}");
+  });
+
+  /* ⚠️ ESCAPE IS CONSUMED ON CAPTURE — the house cascade law: dismissing a popover must never
+     fall through to a page-level handler. */
+  it("escape and outside-click close, on the capture phase", () => {
+    const i = pageSrc.indexOf("const [jumpOpen, setJumpOpen]");
+    expect(i).toBeGreaterThan(-1);
+    const block = pageSrc.slice(i, i + 1800);
+    expect(block).toContain("e.stopImmediatePropagation();");
+    expect(block).toContain('window.addEventListener("keydown", onKey, true)');
+    expect(block).toContain('window.addEventListener("pointerdown", onDown, true)');
+  });
+
+  it("in Upcoming only the subtitle names the RANGE, not the month", () => {
+    expect(pageSrc).toContain("`${shortCalDate(visible[0])} – ${shortCalDate(visible[visible.length - 1])} — what is still ahead.`");
   });
 });
