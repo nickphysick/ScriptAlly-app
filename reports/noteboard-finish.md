@@ -269,3 +269,29 @@ believed it had, §1.4).
   idempotent and dry-runnable (`--dry`). The harness account is already migrated.
 - **The two listed restore-through-create sites** (§4): `ToDoPage.tsx:1650` and
   `Dashboard.tsx:527` — both drop fields on undo; both outside this run's scope.
+
+---
+
+## 9 — Dev deploy (22 Aug, after the run)
+
+Asked for after the run closed. **Hosting only** — the finish run changed no rules (`dueDate` and
+`colour` were already live), so there was nothing else to ship.
+
+Pre-flight: `git fetch`, **0 behind** `origin/main` (39 ahead); `src/` clean, so the bundle
+carries exactly the committed tree — HEAD `5fe44f7f`, the run's P5. Build output read in full and
+grepped, not tailed: clean, `assert-build-target` confirmed *"bundle targets scriptally-dev;
+gen-lang-client-0801391782 absent"*. Then:
+
+```bash
+firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev
+```
+
+176 files → https://scriptally-dev.web.app
+
+**Verified against the deployed site itself** (`SA_E2E_BASE_URL=dev`, fixtures seeded then
+removed): the full measurement suite — `nbFinish` + `noteboardLook`, **16/16** — including the
+derived column count (3/4/6 at 1280/1800/2300), the one-line Pin button (overlap 13.0), the
+filtered count, the ghost pair (97.72 = 97.72), edit-in-slot with a painted recolour
+(`rgb(245,226,218)`), and the Phase 4 end-to-end (convert → badge → one visible To-do row →
+detach). `migrateNotetasks.mjs` re-run against the live data confirms **0 projection documents**
+remain. §8's first item is thereby done; the other two remain.
