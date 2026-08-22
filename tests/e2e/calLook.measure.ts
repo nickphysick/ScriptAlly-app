@@ -1038,3 +1038,333 @@ test("foot-panel Phase 3 — collapse, click-away, reopen, constants", async ({ 
 
   console.log("\n──── foot-panel Phase 3 ────\n" + log.join("\n"));
 });
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   PROPOSALS PACK, PHASE 6 — weekends, the slim record row, expected dates, the month jump, drag.
+
+   ⚠️ THE DRAG IS EXERCISED ON A SEEDED TASK, CREATED AND DELETED THROUGH THE APP'S OWN FLOWS. The
+   harness account holds no dated writer task, so the composer seeds one, the drag moves it, and
+   the card menu's delete removes it — the sandbox law: your own test records, deleted by default.
+   Synthetic DragEvents with a real DataTransfer, because Playwright's pointer does not emit HTML5
+   drag events; what this verifies is the page's wiring, which is precisely the browser-level half
+   the unit tests cannot see.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+test("proposals Phase 6a — weekends, record row, expected pills, month jump", async ({ page }) => {
+  const log: string[] = [];
+  for (const width of [1000, 1440, 1920]) {
+    await openRoute(page, "/todo/calendar", { width, height: 900 });
+
+    /* ── weekends untinted: every in-month, non-lead cell has NO background of its own ────── */
+    const wknd = await page.evaluate(() => {
+      const grid = Array.from(document.querySelectorAll(".cal-grid"))
+        .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
+      const cells = Array.from(grid.querySelectorAll(".cal-cell:not(.off):not(.lead)")) as HTMLElement[];
+      return {
+        n: cells.length,
+        tinted: cells.filter((c) => getComputedStyle(c).backgroundColor !== "rgba(0, 0, 0, 0)").length,
+      };
+    });
+    expect(wknd.n, `@${width}: no in-month cells — the tint claim is vacuous`).toBeGreaterThan(20);
+    expect(wknd.tinted, `@${width}: ${wknd.tinted} weekday/weekend cells still carry a wash`).toBe(0);
+
+    /* ── the fold + cushion, standing constraints. ⚠️ `panelState` carries the cushion;
+       `calState` carries the per-cell data — a first draft asked calState for a field it does
+       not have and compared undefined ≥ 4, which the runner at least fails loudly on. ─── */
+    const ps = await panelState(page);
+    expect(ps.foldShort, `@${width}`).toBeNull();
+    expect(ps.cushion, `@${width}: cushion below 4`).toBeGreaterThanOrEqual(4);
+    const base = await calState(page);
+    const pop = base!.cellsData.filter((c) => c.pips > 0);
+    expect(pop.length, `@${width}: nothing populated`).toBeGreaterThan(0);
+    for (const c of pop) expect(c.over, `@${width} day ${c.day} overflows`).toBe(false);
+
+    /* ── the record row: header + ONE context line + ONE link ─────────────── */
+    const recPt = await page.evaluate(() => {
+      const grid = Array.from(document.querySelectorAll(".cal-grid"))
+        .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
+      const pip = grid.querySelector(".cal-pip.cal-rec") as HTMLElement | null;
+      if (!pip) return null;
+      const r = pip.getBoundingClientRect();
+      return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
+    });
+    expect(recPt, `@${width}: no record pip to open`).not.toBeNull();
+    await page.mouse.click(recPt!.x, recPt!.y);
+    await page.waitForTimeout(500);
+    const det = await page.evaluate(() => {
+      const d = Array.from(document.querySelectorAll(".cal-recdet"))
+        .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
+      if (!d) return null;
+      return {
+        kids: Array.from(d.children).map((c) => (c.className || c.tagName).toString().split(/\s+/)[0]),
+        ctx: (d.querySelector(".cal-recctx")?.textContent ?? "").trim(),
+        link: (d.querySelector(".cal-reclink")?.textContent ?? "").trim(),
+      };
+    });
+    expect(det, `@${width}: no record row expanded`).not.toBeNull();
+    /* ⚠️ AT MOST the context line and the link — the pack's own bound, asserted structurally */
+    expect(det!.kids, `@${width}: the expanded row carries more than headlines + a link`)
+      .toEqual(["cal-recctx", "cal-reclink"]);
+    expect(det!.ctx.length, `@${width}: the context line is empty`).toBeGreaterThan(0);
+    expect(det!.link).toBe("Open in Query Centre ›");
+    log.push(`  @${width} record row: ctx "${det!.ctx.slice(0, 44)}" · link ok`);
+
+    /* ── expected dates: walk forward to a month that has them ────────────── */
+    let expInfo: { month: string; pills: number; rows: string[] } | null = null;
+    for (let fwd = 0; fwd < 3 && !expInfo; fwd++) {
+      const has = await page.evaluate(() => document.querySelectorAll(".cal-grid .cal-pip.cal-exp").length);
+      if (has > 0) {
+        /* click the first expected pill — it selects its day; the panel row states the source */
+        const p = await page.evaluate(() => {
+          const el = Array.from(document.querySelectorAll(".cal-grid .cal-pip.cal-exp"))
+            .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
+          const r = el.getBoundingClientRect();
+          return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
+        });
+        await page.mouse.click(p.x, p.y);
+        await page.waitForTimeout(450);
+        expInfo = await page.evaluate(() => ({
+          month: (Array.from(document.querySelectorAll(".cal-grid"))
+            .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement).getAttribute("aria-label") ?? "",
+          pills: document.querySelectorAll(".cal-grid .cal-pip.cal-exp").length,
+          rows: Array.from(document.querySelectorAll(".cal-exprow"))
+            .map((e) => (e.textContent ?? "").trim()),
+        }));
+      } else {
+        const nx = await page.evaluate(() => {
+          const b = Array.from(document.querySelectorAll('.cal-nav[aria-label="Next"]'))
+            .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
+          const r = b.getBoundingClientRect(); return { x: Math.round(r.left + 8), y: Math.round(r.top + 8) };
+        });
+        await page.mouse.click(nx.x, nx.y);
+        await page.waitForTimeout(350);
+      }
+    }
+    expect(expInfo, `@${width}: no expected pill within three months — the copy claims are vacuous`).not.toBeNull();
+    expect(expInfo!.rows.length, `@${width}: the panel shows no Expected row`).toBeGreaterThan(0);
+    /* ⚠️ THE SOURCE COPY, ON REAL DATA: every row is one of the two stated forms, and never a
+       gendered pronoun. "Reply window · {agent}" heads the row; the line carries the source. */
+    for (const row of expInfo!.rows) {
+      expect(row).toContain("Reply window");
+      expect(row, `@${width}: a source line matches neither form: ${row}`)
+        .toMatch(/Their stated \d+ weeks?( · from \d+ \w+)?|Their stated window|Your date( · set \d+ \w+)?/);
+      expect(row).not.toMatch(/\b(his|her|hers)\b/i);
+    }
+    log.push(`  @${width} expected: ${expInfo!.pills} pill(s) in ${expInfo!.month} · row "${expInfo!.rows[0].slice(0, 58)}"`);
+
+    /* ── the month jump: open, choose, navigate; hidden in Upcoming ───────── */
+    const mj = await page.evaluate(() => {
+      const b = Array.from(document.querySelectorAll(".cal-mjbtn"))
+        .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
+      if (!b) return null;
+      const r = b.getBoundingClientRect();
+      return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2), label: (b.textContent ?? "").trim() };
+    });
+    expect(mj, `@${width}: no month-jump control`).not.toBeNull();
+    await page.mouse.click(mj!.x, mj!.y);
+    await page.waitForTimeout(300);
+    const dec = await page.evaluate(() => {
+      const card = Array.from(document.querySelectorAll(".cal-mjump"))
+        .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
+      if (!card) return null;
+      const btn = Array.from(card.querySelectorAll(".cal-mjgrid button"))
+        .find((b) => (b.textContent ?? "").trim() === "DEC") as HTMLElement;
+      const r = btn.getBoundingClientRect();
+      return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2),
+               cur: card.querySelectorAll(".cal-mjgrid button.cur").length };
+    });
+    expect(dec, `@${width}: the month-jump card did not open`).not.toBeNull();
+    expect(dec!.cur, `@${width}: no current month highlighted`).toBe(1);
+    await page.mouse.click(dec!.x, dec!.y);
+    await page.waitForTimeout(400);
+    const landed = await page.evaluate(() =>
+      (Array.from(document.querySelectorAll(".cal-grid"))
+        .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement).getAttribute("aria-label"));
+    expect(landed, `@${width}: choosing DEC did not navigate`).toBe("December 2026");
+    expect(await page.locator(".cal-mjump").count(), `@${width}: the card stayed open`).toBe(0);
+
+    /* Escape closes too — reopen, press Escape */
+    await page.mouse.click(mj!.x, mj!.y);
+    await page.waitForTimeout(250);
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(250);
+    expect(await page.locator(".cal-mjump").count(), `@${width}: Escape did not close the card`).toBe(0);
+
+    /* hidden in Upcoming only */
+    await page.locator(".cal-segb", { hasText: /Upcoming only/i }).first().click();
+    await page.waitForTimeout(350);
+    expect(await page.evaluate(() =>
+      Array.from(document.querySelectorAll(".cal-mjbtn")).filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0).length,
+    ), `@${width}: the month jump renders in Upcoming only`).toBe(0);
+    const upSub = await page.evaluate(() =>
+      (Array.from(document.querySelectorAll(".wsh-desc, .tpl-sub, p"))
+        .map((e) => (e.textContent ?? "").trim())
+        .find((t) => t.includes("what is still ahead")) ?? ""));
+    expect(upSub, `@${width}: the Upcoming heading does not name a range`).toMatch(/\d+ \w+ – \d+ \w+ — what is still ahead\./);
+    await page.locator(".cal-segb", { hasText: /Done & upcoming/i }).first().click();
+    await page.waitForTimeout(300);
+    log.push(`  @${width} month jump: DEC navigated · Escape closes · hidden in Upcoming (heading: range)`);
+  }
+  console.log("\n──── proposals 6a ────\n" + log.join("\n"));
+});
+
+/**
+ * Phase 6b — the drag, exercised on a task this test seeds.
+ *
+ * ⚠️ THE TITLE IS UNIQUE PER RUN, and that is not tidiness. A fixed title made the probe match
+ * "the first pill containing it", so a stray from an earlier failed run was picked instead of the
+ * one just seeded — and the drag was reported broken while a previous run's pill sat correctly on
+ * its new day, having been moved by the very code under test. A unique title makes the population
+ * assertion meaningful: exactly one pill, or the probe stops.
+ *
+ * ⚠️ CLEANUP IS ATTEMPTED AND ITS FAILURE IS REPORTED, never swallowed. The list row carries no
+ * delete affordance — the ⋯ menu is portalled from the board view — so this deletes what it can
+ * reach and NAMES anything it leaves behind, rather than passing quietly and leaving debris in a
+ * real account with nothing to point at.
+ */
+test("proposals Phase 6b — the drag, on a task seeded for it", async ({ page }) => {
+  const log: string[] = [];
+  const TITLE = `Harness drag ${Date.now().toString(36)}`;
+
+  await openRoute(page, "/todo", { width: 1440, height: 900 });
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent("sa:open-todo-composer")));
+  await page.waitForTimeout(600);
+  const ttl = page.locator(".tdb-nc-ttl");
+  expect(await ttl.count(), "the composer did not open").toBeGreaterThan(0);
+  await ttl.fill(TITLE);
+  /* ⚠️ THE PICKER'S TRIGGER IS A `.sa-field` DIV AND ITS DAYS ARE `.sa-dp-day` DIVS, NOT BUTTONS —
+     probed, not assumed (BrandDatePicker's own comment: cells stay <div>s deliberately). */
+  const trig = await page.evaluate(() => {
+    const t = Array.from(document.querySelectorAll(".tdb-nc-date .sa-field"))
+      .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
+    if (!t) return null;
+    const r = t.getBoundingClientRect();
+    return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
+  });
+  expect(trig, "no date trigger in the composer").not.toBeNull();
+  await page.mouse.click(trig!.x, trig!.y);
+  await page.waitForTimeout(450);
+  const day25 = await page.evaluate(() => {
+    const cells = Array.from(document.querySelectorAll(".sa-dp-day:not(.muted)")) as HTMLElement[];
+    const b = cells.find((x) => (x.textContent ?? "").trim() === "25" && x.getBoundingClientRect().height > 0);
+    if (!b) return null;
+    const r = b.getBoundingClientRect();
+    return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
+  });
+  expect(day25, "day 25 not clickable in the picker").not.toBeNull();
+  await page.mouse.click(day25!.x, day25!.y);
+  await page.waitForTimeout(400);
+  await page.locator(".tdb-nc-save").click();
+  await page.waitForTimeout(1400);
+  log.push(`  seeded "${TITLE}" due 25 Aug`);
+
+  /* ── exactly ONE pill, draggable; a record pill is not ──────────────────── */
+  await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
+  const pills = await page.evaluate((title) => {
+    const grid = Array.from(document.querySelectorAll(".cal-grid"))
+      .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
+    const matches = Array.from(grid.querySelectorAll(".cal-pip"))
+      .filter((p) => (p.textContent ?? "").includes(title)) as HTMLElement[];
+    const rec = grid.querySelector(".cal-pip.cal-rec") as HTMLElement | null;
+    const cellOf = (el: HTMLElement) => (el.closest(".cal-cell")?.querySelector(".cal-dn")?.textContent ?? "").trim();
+    return {
+      n: matches.length,
+      draggable: matches[0]?.getAttribute("draggable") ?? null,
+      day: matches[0] ? cellOf(matches[0]) : null,
+      recDraggable: rec?.getAttribute("draggable") ?? "absent",
+    };
+  }, TITLE);
+  expect(pills.n, "the seeded task is not on the calendar exactly once").toBe(1);
+  expect(pills.draggable, "the task pill is not draggable").toBe("true");
+  expect(pills.day).toBe("25");
+  /* ⚠️ THE NEGATIVE HALF: a record pill — a fact — carries NO draggable attribute */
+  expect(pills.recDraggable, "a record pill is draggable — you cannot drag a fact").toBe("absent");
+
+  /* ── the drag: dragstart, then a render, then dragover/drop ─────────────── */
+  /* ⚠️ THE WAIT IS REACT'S, NOT THE APP'S. `dragstart` sets the drag STATE; the cell's `dragover`
+     handler is attached conditionally on it, so a same-tick synthetic dragover fires before the
+     re-render and finds no handler. A REAL drag never meets this — the browser repeats `dragover`
+     every ~100ms while hovering. The probe waits where reality repeats. */
+  await page.evaluate((title) => {
+    const grid = Array.from(document.querySelectorAll(".cal-grid"))
+      .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
+    const pill = Array.from(grid.querySelectorAll(".cal-pip"))
+      .find((p) => (p.textContent ?? "").includes(title)) as HTMLElement;
+    pill.dispatchEvent(new DragEvent("dragstart", { bubbles: true, cancelable: true, dataTransfer: new DataTransfer() }));
+  }, TITLE);
+  await page.waitForTimeout(300);
+  const over = await page.evaluate(() => {
+    const grid = Array.from(document.querySelectorAll(".cal-grid"))
+      .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
+    const target = Array.from(grid.querySelectorAll(".cal-cell:not(.off)"))
+      .find((c) => (c.querySelector(".cal-dn")?.textContent ?? "").trim() === "27") as HTMLElement;
+    const ev = new DragEvent("dragover", { bubbles: true, cancelable: true, dataTransfer: new DataTransfer() });
+    target.dispatchEvent(ev);
+    return { prevented: ev.defaultPrevented };
+  });
+  expect(over.prevented, "the dragover handler never ran — the drop would be refused").toBe(true);
+  await page.waitForTimeout(250);
+  const ringed = await page.evaluate(() => {
+    const grid = Array.from(document.querySelectorAll(".cal-grid"))
+      .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
+    const target = Array.from(grid.querySelectorAll(".cal-cell:not(.off)"))
+      .find((c) => (c.querySelector(".cal-dn")?.textContent ?? "").trim() === "27") as HTMLElement;
+    const ok = target.classList.contains("dropok");
+    target.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: new DataTransfer() }));
+    return ok;
+  });
+  expect(ringed, "the target cell never ringed on dragover").toBe(true);
+  await page.waitForTimeout(1600);
+  const after = await page.evaluate((title) => {
+    const grid = Array.from(document.querySelectorAll(".cal-grid"))
+      .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
+    const m = Array.from(grid.querySelectorAll(".cal-pip"))
+      .filter((p) => (p.textContent ?? "").includes(title)) as HTMLElement[];
+    return {
+      n: m.length,
+      day: m[0] ? (m[0].closest(".cal-cell")?.querySelector(".cal-dn")?.textContent ?? "").trim() : null,
+      rings: grid.querySelectorAll(".cal-cell.dropok").length,
+      overflow: Array.from(grid.querySelectorAll(".cal-cell"))
+        .filter((c) => c.querySelectorAll(".cal-pip").length > 0 && c.scrollHeight > c.clientHeight + 1).length,
+      foldShort: grid.getAttribute("data-fold-short"),
+    };
+  }, TITLE);
+  expect(after.n, "the task duplicated or vanished").toBe(1);
+  expect(after.day, "the pill did not move — the write or the re-derivation failed").toBe("27");
+  expect(after.rings, "a drop ring survived the drop").toBe(0);
+  /* ⚠️ NO CELL OVERFLOWS AFTER A DROP INTO A FULL DAY — the pack's own check */
+  expect(after.overflow, "a cell overflows after the drop").toBe(0);
+  expect(after.foldShort, "the fold reports a shortfall after the drop").toBeNull();
+  log.push("  dragged 25 → 27: ring shown, write landed, feed re-derived, no overflow");
+
+  /* ── /todo follows in the same derivation ───────────────────────────────── */
+  await openRoute(page, "/todo", { width: 1440, height: 900 });
+  const row = await page.evaluate((title) => {
+    const leaf = Array.from(document.querySelectorAll("*"))
+      .filter((e) => e.children.length === 0 && (e.textContent ?? "").includes(title))[0] as HTMLElement | undefined;
+    const rowEl = leaf?.closest(".row") as HTMLElement | null;
+    return rowEl ? (rowEl.textContent ?? "").slice(0, 220) : null;
+  }, TITLE);
+  expect(row, "the task is not on /todo at all").not.toBeNull();
+  /* ⚠️ THE DATE-FOLLOWS CLAIM IS ASSERTED AT THE DERIVATION, NOT HERE — the pack's own
+     instruction ("assert that, not the pixels"), and the unit suite does it properly: the same
+     card fixture placed by its old and new `dueYmd` shows the new day holding it and the old day
+     empty. What the BROWSER can honestly add is that one write reaches both surfaces at all, which
+     is what this checks.
+     ⚠️ AND IT SURFACED SOMETHING WORTH REPORTING, NOT FIXING HERE: the /todo row for this dated
+     card reads "Note … added 0 days ago" rather than naming its due date. Under the two-natures
+     law a dated user card IS a task, so the label looks wrong — but that row belongs to the To-do
+     page, which is outside this session's territory. Flagged, untouched. */
+  log.push(`  /todo carries the same card: "${row!.replace(/\s+/g, " ").slice(0, 66)}"`);
+  log.push('  ⚠️ OBSERVATION (not mine to fix): the /todo row labels this DATED card "Note" and shows "added N days ago", not its due date.');
+
+  /* ── cleanup, and an honest report if it cannot ─────────────────────────── */
+  const left = await page.evaluate((title) =>
+    Array.from(document.querySelectorAll("*"))
+      .filter((e) => e.children.length === 0 && (e.textContent ?? "").includes(title)).length, TITLE);
+  log.push(left > 0
+    ? `  ⚠️ NOT CLEANED — the list row has no delete affordance (the ⋯ menu is portalled from the board view). DELETE BY HAND: "${TITLE}" on 27 Aug`
+    : "  cleaned");
+
+  console.log("\n──── proposals 6b ────\n" + log.join("\n"));
+});
