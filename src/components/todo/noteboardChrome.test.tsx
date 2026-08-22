@@ -132,7 +132,11 @@ describe("⚠️ A TOKEN DEFINED SOMEWHERE IS NOT A TOKEN IN SCOPE WHERE IT IS R
   it("every floating surface carries the token scope itself", () => {
     const page = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
     /* the population first — a census of nothing passes trivially */
-    const floating = ["nb-drawer", "nb-scrim", "nb-taskpanel"];
+    /* ⚠️ EVERY FLOATING SURFACE, INCLUDING ONES THAT READ NO TOKEN TODAY. The Tags sheet
+       (`nb-datepanel`) declared only a width and was therefore safe by accident — the first
+       `var(--nb-*)` anyone added to it would have been dropped silently. Scoped surfaces make
+       the fault impossible rather than absent, which is the standing preference. */
+    const floating = ["nb-drawer", "nb-scrim", "nb-taskpanel", "nb-datepanel"];
     /* ⚠️ THE WHOLE ATTRIBUTE, NOT AN ADJACENCY. `nb-scope cal-daypanel nb-taskpanel` carries both
        and would fail a check for the two tokens side by side — the first draft of this lock did
        exactly that and reported a correctly-scoped element as unscoped. */

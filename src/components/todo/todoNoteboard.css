@@ -170,9 +170,17 @@
   font-size: 13px; padding: 4px 8px; border-radius: 6px; margin-left: auto;
 }
 .nb-exdismiss:hover { background: rgba(255, 255, 255, 0.6); color: var(--nb-burgundy); }
+/* ⚠️ IT SPANS THE COLUMNS, and that is what makes two baked decisions TRUE rather than merely
+   true-in-DOM-order. Multicol flows by length: as an ordinary child the hint landed at the foot
+   of column one while the examples it introduces sat in columns two and three — above it on
+   screen, below it in the markup, and connected to nothing a reader could see. `column-span: all`
+   splits the flow, so real notes fill the columns above, the hint runs full width beneath them,
+   and every example lands below it. "Below all real notes" and "above the first example" both
+   become facts about the page. */
 .nb-exhint {
-  break-inside: avoid; margin: 0 0 var(--nb-gap);
-  font-size: 11.5px; color: var(--nb-muted); font-weight: 300; padding: 2px 4px; line-height: 1.5;
+  column-span: all;
+  margin: 6px 0 var(--nb-gap); padding: 2px 4px;
+  font-size: 11.5px; color: var(--nb-muted); font-weight: 300; line-height: 1.5;
 }
 
 /* ── the pin affordance — first in the flow, the mockup's own ghost ────────────────────────── */

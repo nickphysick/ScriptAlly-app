@@ -679,7 +679,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
       {/* the ⋯ Tags… — the ONE picker, immediate writes */}
       {tagsFor && (
         <div className="cal-dayscrim" onClick={() => setTagsFor(null)}>
-          <div className="cal-daypanel nb-datepanel" role="dialog" aria-label={`Tags for ${tagsFor.text}`} onClick={(e) => e.stopPropagation()}>
+          <div className="nb-scope cal-daypanel nb-datepanel" role="dialog" aria-label={`Tags for ${tagsFor.text}`} onClick={(e) => e.stopPropagation()}>
             <div className="cal-dayhead">
               Tags — {tagsFor.text}
               <button type="button" className="cal-dayx" aria-label="Close" onClick={() => setTagsFor(null)}>✕</button>

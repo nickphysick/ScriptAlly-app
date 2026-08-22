@@ -175,6 +175,33 @@ test.describe("Phase 2 — example papers", () => {
     expect(reloaded, "the dismissal did not survive reload — the write never reached the store").not.toContain(target);
   });
 
+  test("⚠️ the hint sits BELOW every real note and ABOVE every example — on screen, not just in the DOM", async ({ page }) => {
+    /* ⚠️ THE GEOMETRIC HALF. DOM order already read ghost·notes·hint·examples and the screenshot
+       still showed the hint orphaned at the foot of column one with the examples it introduces
+       beside it — multicol flows by length, so "above the first" was true in the markup and false
+       on the page. This asserts the arrangement the reader actually gets. */
+    await openRoute(page, ROUTE, { width: 1440, height: 1400 });
+    await expect(page.locator(".nb-board")).toBeVisible();
+    const d = await page.evaluate(() => {
+      const hint = document.querySelector<HTMLElement>(".nb-exhint");
+      if (!hint) return null;
+      const box = (e: Element) => e.getBoundingClientRect();
+      const h = box(hint);
+      const reals = Array.from(document.querySelectorAll<HTMLElement>(".nb-note:not(.nb-example)")).map(box);
+      const exs = Array.from(document.querySelectorAll<HTMLElement>("[data-example]")).map(box);
+      return {
+        reals: reals.length, exs: exs.length,
+        realsAbove: reals.every((r) => r.bottom <= h.top + 1),
+        exsBelow: exs.every((e) => e.top >= h.bottom - 1),
+      };
+    });
+    if (!d) { test.skip(true, "board is not sparse — no hint to place"); return; }
+    console.log(`[hint] ${d.reals} real notes above=${d.realsAbove} · ${d.exs} examples below=${d.exsBelow}`);
+    expect(d.exs, "no examples to place").toBeGreaterThan(0);
+    expect(d.realsAbove, "a real note sits below the hint").toBe(true);
+    expect(d.exsBelow, "an example sits above the hint").toBe(true);
+  });
+
   test("under a search, ZERO examples — they are not the user's data and never appear in results", async ({ page }) => {
     await openRoute(page, ROUTE, WIDE);
     await expect(page.locator(".nb-board")).toBeVisible();
