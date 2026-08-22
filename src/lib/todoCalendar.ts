@@ -32,6 +32,8 @@ import { BoardColumns } from "./todoColumns";
 import { agentPrimary, agentSecondary } from "./agentDisplay";
 import { CLEARING_ACTIVITY_TYPES } from "./clearedToday";
 import { flagSleeps } from "./taskFlags";
+import { resolveExpectedDate } from "./expectedDate";
+import { queryBucket } from "./queryAmbient";
 
 export type CalFamily = "agent" | "task" | "snoozed" | "done";
 
@@ -940,6 +942,8 @@ export interface CalKindRule {
   task: TaskType[];
   /** Live families that belong to this kind regardless of task type. */
   family?: CalFamily[];
+  /** Whether the EXPECTED-DATE layer files under this kind (proposals pack, Phase 3). */
+  expected?: boolean;
 }
 
 /**
@@ -953,10 +957,16 @@ export const CAL_KINDS: Record<CalKind, CalKindRule> = {
   /* the writer sending what was asked for — the three materials, and nothing else */
   materials: { label: "Materials sent", record: ["Partial sent", "Full sent"], task: ["partial_requested", "full_requested", "revise_resubmit"] },
   /* the agency moving: a request, a holding line, or an offer */
+  /* ⚠️ EXPECTED DATES FILE HERE, NOT AS A SEVENTH KIND (proposals pack, Phase 3). A reply window
+     is an agent response that has not happened yet — same conversation, same direction — and a
+     seventh checkbox would make the writer learn a distinction the model does not draw. The flag
+     keeps the one-const-states-every-vocabulary property: the layer's kind membership is written
+     HERE, beside the labels and task types, not in a reader somewhere. */
   responses: {
     label: "Agent responses",
     record: ["Partial requested", "Full requested", "Revise & resubmit", "Holding reply", "Offer received"],
     task: [],
+    expected: true,
   },
   nudges: { label: "Nudges", record: ["Nudge sent"], task: ["nudge_overdue"] },
   /* ⚠️ THE WRITER'S ANSWER TO AN OFFER IS A CLOSURE, NOT A RESPONSE. `Offer accepted` and
@@ -1012,6 +1022,8 @@ export const recordInKinds = (r: RecordItem, on: CalKind[]): boolean => {
   const k = recordKind(r);
   return k === null || on.includes(k);
 };
+/** The expected layer survives while any kind claiming it is on — read from the const, never a literal. */
+export const expectedInKinds = (on: CalKind[]): boolean => on.some((k) => CAL_KINDS[k].expected === true);
 
 /* ══ CARRIED-TASK ORIGIN GHOSTS (finishing pack, Phase 5; ref calendar-month-focus-v5.html) ════
  *
@@ -1100,3 +1112,114 @@ export const draggableTask = (it: CalendarItem): boolean =>
      agent-shaped; `struck` excludes completed items, which are the log's, not the writer's to move;
      `userTaskId` is the write's own key, so a pill this returns true for can always be written */
   it.family === "task" && !it.struck && !!it.card?.userTaskId;
+
+
+/* ══ EXPECTED DATES (proposals pack, Phase 3; ref calendar-proposals-v6.html) ══════════════════
+ *
+ * ⚠️ THE GAP THIS CLOSES: `resolveExpectedDate()` existed and nothing surfaced it on the calendar,
+ * so "when will I hear back" had no answer on the page shaped to answer it.
+ *
+ * ⚠️ RESOLVED, NEVER READ RAW — `responseDeadline` and `writerExpectedDate` are consumed only
+ * through the resolver, whose D4 recency rule and provenance are the whole point of that module.
+ *
+ * ⚠️ NO REPLY-STATED WINDOW AT THIS LEVEL, MATCHING EVERY OTHER LIST SURFACE. The window an agent
+ * states inside a holding reply lives in the query's NESTED events, which only the reading pane
+ * loads (`QueryTimeline` is the one caller that passes `events`; the command bar's siblings and
+ * `todoBoard` omit them, byte-identically to the pre-holding-reply behaviour). The GLOBAL feed
+ * this page holds does not carry `replyWeeks`, so composing a window from it would be inventing
+ * data. Consequence, stated: a query whose latest statement is a reply resolves here from the
+ * agent's standing weeks or the writer's date — the same answer the To-do board gives for the
+ * same query — and "reply"-sourced items cannot arise. The pack renders nothing for them anyway.
+ */
+export interface ExpectedItem {
+  key: string;
+  ymd: string;
+  queryId: string;
+  /** Display name — `agentPrimary`, like every agent-naming surface. Panel only; never the pill. */
+  agent: string;
+  source: "agent" | "writer";
+  /** agent-source: the stated window and the send it counts from. */
+  weeks?: number;
+  fromYmd?: string;
+  /** writer-source: when they said so. Absent on a legacy unstamped date — then the clause OMITS
+   *  itself rather than inventing a moment (the rows-omit-themselves law). */
+  setYmd?: string;
+}
+
+/**
+ * One item per waiting query whose resolved window lands on a visible, not-yet-passed day.
+ *
+ * ⚠️ WAITING QUERIES ONLY — `queryBucket(status) === "waiting"`, the CTA engine's own split. A
+ * closed query expects nothing; a writer's-turn query is not waiting on a reply, so a window on it
+ * would state an expectation the pipeline says does not exist. This is also what makes "a query
+ * closed before its window renders nothing" true by construction rather than by a filter.
+ *
+ * ⚠️ A DATE THAT HAS PASSED SIMPLY STOPS RENDERING. No "window expired" pill, no expiry state —
+ * that copy needs its own ruling (flagged). And a dashed pill on a past day would break the house
+ * grammar besides: dashed means provisional, and the past is not provisional.
+ */
+export function expectedDays(
+  queries: readonly Query[],
+  agents: readonly Agent[],
+  visible: readonly string[],
+  todayYmd: string,
+): Map<string, ExpectedItem[]> {
+  const out = new Map<string, ExpectedItem[]>();
+  const inView = new Set(visible);
+  const byId = new Map(agents.map((a) => [a.id, a]));
+  for (const q of queries) {
+    if (queryBucket(q.status) !== "waiting") continue;
+    const agent = q.agentId ? byId.get(q.agentId) : undefined;
+    /* the send anchor — the latest of the three stage sends, dashboardStats' own pattern */
+    const sends = [q.dateSent, q.partialSentDate, q.fullSentDate]
+      .map((iso) => (iso ? new Date(iso as string).getTime() : NaN))
+      .filter((t) => !Number.isNaN(t));
+    const sentMs = sends.length ? Math.max(...sends) : null;
+    const resolved = resolveExpectedDate(q, sentMs, agent?.responseTimeWeeks ?? null, null);
+    if (resolved.ms == null || (resolved.source !== "agent" && resolved.source !== "writer")) continue;
+    const ymd = isoToYmd(new Date(resolved.ms).toISOString());
+    if (!ymd || !inView.has(ymd) || ymd < todayYmd) continue;
+    const item: ExpectedItem = {
+      key: `exp-${q.id}`,
+      ymd,
+      queryId: q.id,
+      agent: agent ? agentPrimary(agent) : "",
+      source: resolved.source,
+      ...(resolved.source === "agent"
+        ? {
+            ...(typeof agent?.responseTimeWeeks === "number" ? { weeks: agent.responseTimeWeeks } : {}),
+            ...(sentMs != null ? { fromYmd: isoToYmd(new Date(sentMs).toISOString()) ?? undefined } : {}),
+          }
+        : (() => {
+            const setAt = (q as { writerExpectedSetAt?: string }).writerExpectedSetAt;
+            const setYmd = setAt ? isoToYmd(setAt) : null;
+            return setYmd ? { setYmd } : {};
+          })()),
+    };
+    const cur = out.get(ymd);
+    if (cur) cur.push(item); else out.set(ymd, [item]);
+  }
+  return out;
+}
+
+/** The pill's one label — no agent name on a pill; the grid is a density map. */
+export const EXPECTED_PILL = "Reply window";
+
+/**
+ * The panel row's source line — the source stated AS FACT, because the two mean different things.
+ *
+ * ⚠️ "Their", NOT THE PACK'S "Her" — the no-gendered-pronouns law outranks a pack's example copy.
+ * The app never stores an agent's pronouns, and a wrong guess misgenders a real person; they/them
+ * is the standing rule for every surface an agent is named on. Deviation flagged in the report.
+ */
+export function expectedLine(x: ExpectedItem): string {
+  if (x.source === "agent") {
+    const parts: string[] = [];
+    parts.push(typeof x.weeks === "number"
+      ? `Their stated ${x.weeks} ${x.weeks === 1 ? "week" : "weeks"}`
+      : "Their stated window");
+    if (x.fromYmd) parts.push(`from ${shortCalDate(x.fromYmd)}`);
+    return parts.join(" · ");
+  }
+  return x.setYmd ? `Your date · set ${shortCalDate(x.setYmd)}` : "Your date";
+}

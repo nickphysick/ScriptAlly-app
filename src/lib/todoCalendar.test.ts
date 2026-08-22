@@ -20,6 +20,7 @@ import {
   ghostsFor, daysSince, carriedLine, itemKind, recordKind, CAL_KINDS, CAL_KIND_ORDER, allKinds,
   itemInKinds, recordInKinds,
   draggableTask,
+  expectedDays, expectedInKinds, expectedLine, EXPECTED_PILL, ExpectedItem,
   cardActionYmd, calendarDays, CAL_CELL_CAP, calFoldCap, toYmd,
   recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
   cellSlots,
@@ -1124,7 +1125,10 @@ describe("⚠️ the count line, and the legend's one record layer", () => {
   it("⚠️ the deviation from the ref is deliberate: a history-only day still gets a line", () => {
     // the ref reads `items.length ? … : ''`, counting only the LIVE items — so a day holding
     // nothing but record entries renders an "On the record" section under a blank head.
-    expect(pageSrc).toContain("const total = items.length + recs.length;");
+    /* ⚠️ RETARGETED (proposals pack, Phase 3): expected dates joined the day's contents, so the
+       count line — and the chip, same rule — counts all three layers. Ghosts stay out of both:
+       a ghost is a signpost for a thing that lives on TODAY. */
+    expect(pageSrc).toContain("const total = items.length + recs.length + exps.length;");
     expect(decls(pageSrc)).not.toMatch(/countLine\s*=\s*items\.length\s*===?\s*0/);
   });
 
@@ -2027,5 +2031,113 @@ describe("draggableTask — only writer-owned pills drag; you cannot drag a fact
     const moved = after.get("2026-08-25")!.items[0];
     expect(moved.rolledFrom).toBeUndefined();
     for (const d of AUG) expect(ghostsFor(d, [moved])).toEqual([]);
+  });
+});
+
+/* ══ EXPECTED DATES (proposals pack, Phase 3) ═══════════════════════════════════════════════ */
+describe("expectedDays — the reply window, resolved and never read raw", () => {
+  const AUG = monthGridDays("2026-08-19");
+  const TODAY_X = "2026-08-19";
+  const agent = (over: Partial<Agent> = {}): Agent =>
+    ({ id: "ag1", name: "Dara Okafor", agency: "Okafor Reps", responseTimeWeeks: 12, ...over } as Agent);
+  const waiting = (over: Partial<Query> = {}): Query =>
+    ({ id: "q1", agentId: "ag1", status: QueryStatus.QUERIED,
+       dateSent: "2026-06-03T09:00:00Z", ...over } as Query);
+
+  it("agent source: the stated weeks from the latest send, on its resolved day", () => {
+    /* 3 Jun + 12 weeks = 26 Aug */
+    const m = expectedDays([waiting()], [agent()], AUG, TODAY_X);
+    const items = [...m.values()].flat();
+    expect(items).toHaveLength(1);
+    expect(items[0].ymd).toBe("2026-08-26");
+    expect(items[0].source).toBe("agent");
+    expect(items[0].weeks).toBe(12);
+    expect(items[0].fromYmd).toBe("2026-06-03");
+    expect(expectedLine(items[0])).toBe("Their stated 12 weeks · from 3 Jun");
+  });
+
+  it("writer source: their own date, with the set-moment when it was stamped", () => {
+    const q = waiting({
+      responseDeadline: undefined,
+      writerExpectedDate: "2026-08-28T00:00:00Z",
+      writerExpectedSetAt: "2026-08-12T10:00:00Z",
+    } as never);
+    const m = expectedDays([q], [agent({ responseTimeWeeks: undefined })], AUG, TODAY_X);
+    const items = [...m.values()].flat();
+    expect(items).toHaveLength(1);
+    expect(items[0].source).toBe("writer");
+    expect(items[0].ymd).toBe("2026-08-28");
+    expect(expectedLine(items[0])).toBe("Your date · set 12 Aug");
+  });
+
+  /* ⚠️ AN UNSTAMPED LEGACY DATE OMITS THE CLAUSE — never invents a moment. */
+  it("a legacy writer date with no set-stamp reads 'Your date' alone", () => {
+    expect(expectedLine({ key: "e", ymd: "2026-08-28", queryId: "q", agent: "", source: "writer" }))
+      .toBe("Your date");
+  });
+
+  /* ⚠️ NOBODY STATED ANYTHING → NOTHING. The resolver refuses the house fallback for exactly this
+     reason; a pill here would assert a window nobody gave. */
+  it("null source renders nothing — no stated weeks, no writer date", () => {
+    const m = expectedDays([waiting()], [agent({ responseTimeWeeks: undefined })], AUG, TODAY_X);
+    expect([...m.values()].flat()).toEqual([]);
+  });
+
+  it("a query CLOSED before its window renders nothing — waiting queries only", () => {
+    for (const status of [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]) {
+      const m = expectedDays([waiting({ status })], [agent()], AUG, TODAY_X);
+      expect([...m.values()].flat(), status).toEqual([]);
+    }
+    /* and a writer's-turn query is not waiting on a reply either */
+    const m = expectedDays([waiting({ status: QueryStatus.FULL_REQUESTED })], [agent()], AUG, TODAY_X);
+    expect([...m.values()].flat()).toEqual([]);
+  });
+
+  /* ⚠️ A PASSED DATE SIMPLY STOPS RENDERING — no expiry pill, no expiry copy (its ruling is
+     flagged, not invented overnight), and dashed-on-a-past-day would break the house grammar. */
+  it("a window already behind today renders nothing", () => {
+    /* 1 May + 12 weeks = 24 Jul — inside the grid's lead-in? No: AUG starts 27 Jul, so use a
+       date that lands ON a visible past day to prove the today-gate, not the visibility gate */
+    const q = waiting({ dateSent: "2026-05-14T09:00:00Z" });   /* + 12wk = 6 Aug, visible, past */
+    const m = expectedDays([q], [agent()], AUG, TODAY_X);
+    expect([...m.values()].flat()).toEqual([]);
+  });
+
+  it("day bucketing: the anchor is the LATEST send across the three stages", () => {
+    const q = waiting({ status: QueryStatus.FULL_SENT, dateSent: "2026-03-01T09:00:00Z",
+      fullSentDate: "2026-06-10T09:00:00Z" } as Partial<Query>);
+    const m = expectedDays([q], [agent()], AUG, TODAY_X);
+    const items = [...m.values()].flat();
+    /* 10 Jun + 12 weeks = 2 Sep — in August's trailing week */
+    expect(items).toHaveLength(1);
+    expect(items[0].ymd).toBe("2026-09-02");
+    expect(items[0].fromYmd).toBe("2026-06-10");
+  });
+
+  it("expected dates file under Agent responses — never a seventh kind", () => {
+    expect(CAL_KIND_ORDER).toHaveLength(6);
+    expect(CAL_KINDS.responses.expected).toBe(true);
+    expect(expectedInKinds(allKinds())).toBe(true);
+    expect(expectedInKinds(allKinds().filter((k) => k !== "responses"))).toBe(false);
+    /* derived from the const, never a literal — switching the flag moves the reader with it */
+    expect(expectedInKinds(["responses"])).toBe(true);
+  });
+
+  /* ⚠️ NEVER DEDUPED AGAINST THE RECORD — separate derivation, separate reader, asserted at
+     source since the dedupe and this layer touch the same cells. */
+  it("the page keeps the expected layer out of the dedupe", () => {
+    expect(pageSrc).toContain("dedupeAgainstRecord(dayData(ymd).items, recordFor(ymd))");
+    expect(decls(pageSrc)).not.toMatch(/dedupeAgainstRecord\([^)]*exp/i);
+    /* and it pays for cell slots like any pill */
+    expect(pageSrc).toContain('...exps.map((x) => ({ t: "exp", x } as const))');
+  });
+
+  /* ⚠️ THE PRONOUN LAW OUTRANKS THE PACK'S EXAMPLE COPY — "Her stated 12 weeks" was the pack's
+     line; the app never stores an agent's pronouns and they/them is the standing rule. */
+  it("no gendered pronoun can reach the source line", () => {
+    const lib = readFileSync(join(here, "todoCalendar.ts"), "utf8");
+    const i = lib.indexOf("export function expectedLine");
+    expect(i).toBeGreaterThan(-1);
+    expect(decls(lib.slice(i, i + 700))).not.toMatch(/\b(his|her|hers|he|she)\b/i);
   });
 });

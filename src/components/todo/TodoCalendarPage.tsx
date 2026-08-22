@@ -39,6 +39,7 @@ import {
   CalMode, upcomingGridDays,
   CalKind, CAL_KINDS, CAL_KIND_ORDER, allKinds, itemInKinds, recordInKinds,
   GhostItem, ghostsFor, carriedLine, draggableTask,
+  ExpectedItem, expectedDays, expectedInKinds, EXPECTED_PILL, expectedLine,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 /* ⚠️ REUSED, not re-written — `shortDate` already renders "7 Aug" for the RecordingCalendar's
@@ -118,7 +119,26 @@ const ItemPip: React.FC<{
  * one item is how two surfaces come to disagree about its state.
  */
 /** What can sit in a cell's live stack: a real item, or a carried item's origin mark. */
-type Occupant = { readonly t: "item"; readonly it: CalendarItem } | { readonly t: "ghost"; readonly g: GhostItem };
+type Occupant =
+  | { readonly t: "item"; readonly it: CalendarItem }
+  | { readonly t: "exp"; readonly x: ExpectedItem }
+  | { readonly t: "ghost"; readonly g: GhostItem };
+
+/* ⚠️ SAGE-DASHED — incoming and provisional — deliberately DISTINCT from the ghosts' warm-dashed
+ * (your obligation, carried). Two dashed grammars, two meanings, two hues; the legend carries
+ * neither because the panel row explains each on click. No agent name on the pill. */
+const ExpPip: React.FC<{ onPick?: () => void }> = ({ onPick }) => (
+  <button
+    type="button"
+    className="cal-pip cal-exp"
+    title={onPick ? EXPECTED_PILL : undefined}
+    tabIndex={onPick ? undefined : -1}
+    onClick={onPick ? (e) => { e.stopPropagation(); onPick(); } : undefined}
+  >
+    <span className="cal-expdot" aria-hidden />
+    {EXPECTED_PILL}
+  </button>
+);
 
 const GhostPip: React.FC<{ g: GhostItem; onPick: () => void }> = ({ g, onPick }) => (
   <button
@@ -162,6 +182,7 @@ interface CalDayPanelProps {
   today: string;
   items: CalendarItem[];
   recs: RecordItem[];
+  exps: ExpectedItem[];
   manuscripts: { id: string; title: string }[];
   openRec: string | null;
   /** A row to bring into view — set by a grid pill click, cleared once honoured. */
@@ -174,7 +195,7 @@ interface CalDayPanelProps {
 }
 
 const CalDayPanel: React.FC<CalDayPanelProps> = ({
-  ymd, today, items, recs, manuscripts, openRec, focusKey, onFocused, onToggleRec, onOpenCard, onOpenQuery, onCompose,
+  ymd, today, items, recs, exps, manuscripts, openRec, focusKey, onFocused, onToggleRec, onOpenCard, onOpenQuery, onCompose,
 }) => {
   const d = new Date(`${ymd}T12:00:00`);
   const weekday = d.toLocaleDateString("en-GB", { weekday: "long" });
@@ -184,7 +205,7 @@ const CalDayPanel: React.FC<CalDayPanelProps> = ({
   const yours = items.filter((i) => i.family === "agent" || i.family === "task");
   const back = items.filter((i) => i.family === "snoozed");
   const done = items.filter((i) => i.family === "done");
-  const total = items.length + recs.length;
+  const total = items.length + recs.length + exps.length;
 
   /* ⚠️ THE COUNT LINE STATES WHAT IS THERE, and says nothing when there is nothing. "0 ITEMS" on a
      free day is a tally nobody asked for; the empty state below speaks for that case instead.
@@ -275,6 +296,28 @@ const CalDayPanel: React.FC<CalDayPanelProps> = ({
             {section("Yours", yours.map((it) => liveRow(it)))}
             {section("Coming back", back.map((it) => liveRow(it, " prov")))}
             {section("Done", done.map((it) => liveRow(it)))}
+            {/* ⚠️ THE EXPECTED ROW STATES ITS SOURCE AS FACT, because the two sources mean
+                different things — an agency's standing window and the writer's own date are not
+                the same claim about the future, and collapsing them would launder one into the
+                other. `expectedLine` owns the copy; "reply"/null-sourced items never reach here
+                (the derivation refuses them — do not invent a date). Sage-dashed like its pill:
+                provisional, incoming. Routes to the query, the same door the record rows use. */}
+            {section("Expected", exps.map((x) => (
+              <button
+                key={x.key}
+                type="button"
+                className="cal-fprow cal-exprow"
+                data-rowkey={x.key}
+                onClick={() => onOpenQuery(x.queryId)}
+              >
+                <i className="cal-expdot" aria-hidden />
+                <span className="cal-fptxt">
+                  {EXPECTED_PILL}
+                  {x.agent && <span className="cal-recwho"> · {x.agent}</span>}
+                </span>
+                <span className="cal-fporig">{expectedLine(x)}</span>
+              </button>
+            )))}
             {section("On the record", recs.map((r) => {
               const open = openRec === r.key;
               const title = msTitle(r.manuscriptId);
@@ -613,6 +656,20 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     [activities, queries, agents, visible.join("|")],
   );
 
+  /* ⚠️ THE EXPECTED LAYER IS A THIRD INDEPENDENT DERIVATION over the same visible days —
+     `resolveExpectedDate` per waiting query, never `responseDeadline`/`writerExpectedDate` raw
+     (Phase 3; the module's own header carries the list-level reply-window caveat). It obeys BOTH
+     modes by construction: its items are future-only, so `Upcoming only` cannot lose one, and the
+     kinds gate it through the same const the checklist reads. */
+  const expByDay = useMemo(
+    () => expectedDays(queries, agents, visible, today),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [queries, agents, today, visible.join("|")],
+  );
+  const expectedFor = (ymd: string): ExpectedItem[] =>
+    (expectedInKinds(kinds) ? expByDay.get(ymd) ?? [] : []);
+
+
   /* ══ THE HOVER PEEK (finishing pack, Phase 2; ref calendar-month-focus-v5.html) ═══════════
    *
    * ⚠️ IT IS PORTALLED, SO IT SPENDS NO CELL CUSHION. The reclaim pack left exactly +4.0px inside
@@ -653,7 +710,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       /* ⚠️ EMPTY CELLS NEVER PEEK — a 1.6× parchment card saying nothing is worse than no card. */
       /* ⚠️ A DAY HOLDING ONLY A GHOST IS NOT EMPTY — it has a mark, so it peeks. Counting only
          items and records here would make hovering a ghost do nothing, which reads as broken. */
-      if (itemsFor(ymd).length + recordFor(ymd).length + ghostsOn(ymd).length === 0) return;
+      if (itemsFor(ymd).length + recordFor(ymd).length + ghostsOn(ymd).length + expectedFor(ymd).length === 0) return;
       const c = cell.getBoundingClientRect();
       const g = grid.getBoundingClientRect();
       /* height 0 on this pass: the box is measured once it has been laid out, below */
@@ -670,7 +727,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      calls this during render: the body runs on mouseenter, by which time the consts are assigned.
      The same shape read during render is the temporal-dead-zone fault this repo has shipped once
      and `tsc` does not catch. Do not move the call site. */
-  }, [byDay, recByDay, mode, kinds]);
+  }, [byDay, recByDay, expByDay, mode, kinds]);
 
   /* ⚠️ THE SECOND CLAMP IS NOT OPTIONAL, because the height is the one term `peekBox` cannot
      derive: the peek holds every item on the day with no cap, so how tall it is depends on how
@@ -761,6 +818,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   /* ⚠️ THE SUBTITLE STATES WHAT IS ON SCREEN. In `Upcoming only` the month is truncated at
      today's week, so the old sentence — "every item on the day it needs you" — would be a claim
      the page had stopped meeting. */
+
   const subtitle = mode === "upcoming"
     ? `${monthLabel(anchor)} — what is still ahead.`
     : `${monthLabel(anchor)} — every item on the day it needs you.`;
@@ -930,8 +988,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                  — it is the same box, so a fold that ignored it would draw one pill too many into
                  room for the cap. `cellSlots` is generic, so items and ghosts travel through it as
                  one tagged list and are split again at render; the arithmetic is untouched. */
+              const exps = expectedFor(ymd);
               const occupants: Occupant[] = [
                 ...items.map((it) => ({ t: "item", it } as const)),
+                ...exps.map((x) => ({ t: "exp", x } as const)),
                 ...ghostsOn(ymd).map((g) => ({ t: "ghost", g } as const)),
               ];
               const { shownItems: shown, shownRecs, overflow } = cellSlots(occupants, recs, cellCap, cellCapFolded);
@@ -959,9 +1019,14 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                         nothing for today's disc to sit on, and nothing to hold the row's height
                         when a day is empty. */}
                     <span className="cal-dn">{Number(ymd.slice(8))}</span>
-                    {items.length + recs.length > 0 && <span className="cal-c2">{items.length + recs.length}</span>}
+                    {/* ⚠️ THE CHIP COUNTS THE DAY'S OWN CONTENTS — items, records and expected
+                        dates. Ghosts stay out: a ghost is a signpost for a thing that lives on
+                        TODAY, and counting it here would count one task twice across the month. */}
+                    {items.length + recs.length + exps.length > 0 && <span className="cal-c2">{items.length + recs.length + exps.length}</span>}
                   </div>
-                  {shown.map((o) => (o.t === "item" ? (
+                  {shown.map((o) => (o.t === "exp" ? (
+                    <ExpPip key={o.x.key} onPick={() => selectDay(ymd)} />
+                  ) : o.t === "item" ? (
                     <ItemPip key={o.it.key} it={o.it}
                       onPick={() => { o.it.card ? focusCard(ymd, o.it.key) : selectDay(ymd); }}
                       drag={draggableTask(o.it) ? {
@@ -1018,6 +1083,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                   `recordFor` are the same two calls the cell makes, so a filtered-out kind or a
                   hidden record layer is absent here for the same reason it is absent there. */}
               {itemsFor(peek.ymd).map((it) => <ItemPip key={it.key} it={it} />)}
+              {expectedFor(peek.ymd).map((x) => <ExpPip key={x.key} />)}
               {/* ⚠️ GHOSTS APPEAR IN THE PEEK TOO. The peek is the answer to "+N MORE", and a
                   ghost can be what the counter is counting — unfolding a day and finding the mark
                   missing would make the peek disagree with the cell it grew from. Inert here like
@@ -1060,6 +1126,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
             today={today}
             items={itemsFor(selDay)}
             recs={recordFor(selDay)}
+            exps={expectedFor(selDay)}
             manuscripts={manuscripts}
             openRec={openRec}
             focusKey={focusKey}
