@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Noteboard sparse-state mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ground:#f2ede7; --parchment:#fdfaf5; --ink:#3a1c14; --ink-deep:#1c130f;
+  --burgundy:#7c3a2a; --pink:#f5e2da; --pink-deep:#e8c8bc;
+  --sage:#e9ede6; --sage-mid:#c9d3c5; --sage-dark:#5a6e58; --sage-ring:#8a9e88;
+  --yellow:#fbf3d9; --yellow-deep:#eddfae;
+  --muted:#9c8878; --rule:rgba(124,58,42,0.28);
+}
+body{font-family:'Inter',sans-serif;background:var(--parchment);color:var(--ink);padding:0 0 80px;min-height:100vh}
+.mono{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;color:var(--muted)}
+
+/* toolbar as shipped */
+.toolbar{display:flex;align-items:center;gap:12px;padding:20px 40px;flex-wrap:wrap}
+.search{flex:1;min-width:220px;max-width:340px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(124,58,42,.18);border-radius:8px;padding:8px 12px}
+.search input{border:0;outline:0;background:transparent;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);width:100%}
+.search input::placeholder{color:var(--muted)}
+.chip{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.06em;padding:6px 12px;border-radius:99px;border:1px solid var(--pink-deep);background:var(--pink);color:var(--burgundy);cursor:pointer;flex:none}
+.spacer{flex:1}
+.viewtog{display:flex;border:1px solid rgba(124,58,42,.18);border-radius:8px;overflow:hidden;flex:none}
+.viewtog button{border:0;background:#fff;padding:7px 13px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6f5a4c;cursor:pointer;white-space:nowrap}
+.viewtog button.on{background:var(--ground);color:var(--ink)}
+.btn{border:0;cursor:pointer;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;border-radius:9px;padding:9px 16px;white-space:nowrap;flex:none}
+.btn-primary{background:var(--pink);border:1px solid var(--pink-deep);color:var(--burgundy)}
+.btn-primary:hover{background:var(--pink-deep)}
+.btn-ghost{background:transparent;border:1px solid rgba(124,58,42,.22);color:var(--burgundy)}
+.btn-ghost:hover{background:var(--ground)}
+.btn-sm{padding:6px 12px;font-size:12.5px;border-radius:8px}
+
+/* board */
+.boardwrap{padding:8px 40px 40px}
+.board{column-width:280px;column-gap:18px}
+.card{break-inside:avoid;margin:0 0 18px;border-radius:10px;padding:16px 16px 10px;position:relative;border:1px solid transparent;
+  box-shadow:0 1px 2px rgba(58,28,20,.05),0 3px 10px rgba(58,28,20,.07);transition:box-shadow .15s;
+  background-image:none} /* flat paper — no gradient, no fade, ever. A clamp fade, if one exists, may only render when scrollHeight > clientHeight. */
+.card:hover{box-shadow:0 2px 4px rgba(58,28,20,.07),0 8px 20px rgba(58,28,20,.11)}
+.c-yellow{background-color:var(--yellow);border-color:var(--yellow-deep)}
+.c-pink{background-color:var(--pink);border-color:var(--pink-deep)}
+.c-sage{background-color:var(--sage);border-color:var(--sage-mid)}
+.card[draggable="true"]{cursor:grab}
+.card.dragging{opacity:.45}
+.card.dragover{outline:2px dashed var(--burgundy);outline-offset:3px}
+.note-body{font-family:'Caveat',cursive;font-size:21px;line-height:1.32;color:var(--ink-deep);white-space:pre-wrap;word-break:break-word}
+.note-body a{color:var(--burgundy);text-decoration-thickness:1px;text-underline-offset:3px;word-break:break-all}
+.note-foot{display:flex;align-items:center;gap:8px;margin-top:10px;min-height:24px}
+.note-tag{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:#8a7466;background:rgba(255,255,255,.55);border-radius:99px;padding:3px 9px}
+.note-date{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:#8a7466;margin-left:auto}
+.kebab{border:0;background:transparent;cursor:pointer;color:#8a7466;padding:4px;border-radius:6px;line-height:0}
+.kebab:hover{background:rgba(255,255,255,.6);color:var(--burgundy)}
+
+/* ghost */
+.ghost{break-inside:avoid;margin:0 0 18px;border:1.5px dashed rgba(124,58,42,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--burgundy);font-size:13.5px;font-weight:500;background:transparent;width:100%;font-family:'Inter',sans-serif}
+.ghost:hover{background:rgba(245,226,218,.4)}
+
+/* example papers */
+.card.example{opacity:.72;border-style:dashed}
+.card.example:hover{opacity:1}
+.exlabel{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#8a7466;background:rgba(255,255,255,.65);border-radius:99px;padding:3px 9px;display:inline-block;margin-bottom:8px}
+.ex-actions{display:flex;align-items:center;gap:8px;margin-top:10px}
+.keep{border:0;background:rgba(255,255,255,.6);cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--burgundy);padding:5px 11px;border-radius:99px}
+.keep:hover{background:#fff}
+.exdismiss{border:0;background:transparent;cursor:pointer;color:#8a7466;font-size:13px;padding:4px 8px;border-radius:6px;margin-left:auto}
+.exdismiss:hover{background:rgba(255,255,255,.6);color:var(--burgundy)}
+.exhint{break-inside:avoid;margin:0 0 18px;font-size:11.5px;color:var(--muted);font-weight:300;padding:2px 4px;line-height:1.5}
+
+/* composer (flat, for contrast with live bug) */
+.composer{break-inside:avoid;margin:0 0 18px;border-radius:10px;border:1px solid var(--yellow-deep);background-color:var(--yellow);background-image:none;padding:14px 14px 10px;box-shadow:0 4px 16px rgba(58,28,20,.12)}
+.composer textarea{width:100%;border:0;outline:0;background:transparent;font-family:'Caveat',cursive;font-size:21px;line-height:1.32;color:var(--ink-deep);resize:none;min-height:72px}
+.composer textarea::placeholder{color:rgba(58,28,20,.35)}
+.composer-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.sw{width:20px;height:20px;border-radius:50%;cursor:pointer;border:1px solid rgba(58,28,20,.18);padding:0;flex:none}
+.sw.on{outline:2px solid var(--burgundy);outline-offset:2px}
+.sw.s-yellow{background:var(--yellow)}.sw.s-pink{background:var(--pink)}.sw.s-sage{background:var(--sage)}
+.taginput{font-family:'JetBrains Mono',monospace;font-size:10.5px;border:1px solid rgba(58,28,20,.16);background:rgba(255,255,255,.55);border-radius:99px;padding:5px 10px;outline:0;color:var(--ink);width:100px}
+.composer-actions{margin-left:auto;display:flex;gap:8px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--parchment);border-radius:10px;padding:10px 16px;font-size:13px;z-index:95;opacity:0;pointer-events:none;transition:opacity .18s;box-shadow:0 10px 30px rgba(28,19,15,.3)}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9c8878" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input type="text" placeholder="Search your notes…">
+  </div>
+  <button class="chip">#All</button>
+  <div class="spacer"></div>
+  <div class="viewtog"><button class="on">Board</button><button>Column</button></div>
+  <button class="btn btn-ghost">Examples</button>
+  <button class="btn btn-primary" id="btnPin">+ Pin a note</button>
+</div>
+
+<div class="boardwrap"><div class="board" id="board"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+var notes=[
+  {id:1,c:'yellow',tag:'',date:'12 Aug',body:'asdf'}
+];
+var nextId=10;
+var EXAMPLES=[
+  {exId:'e1',c:'pink',tag:'agents',body:'Heard [agent] on The Bestseller Experiment — she wants "thrillers with a domestic heart." Save the exact quote for the letter\u2019s opening line.\nhttps://bestsellerexperiment.com/ep432'},
+  {exId:'e2',c:'sage',tag:'letter',body:'Synopsis rules:\n• present tense\n• spoil the ending\n• one page, ~500 words'},
+  {exId:'e3',c:'yellow',tag:'calls',body:'Questions if an agent calls:\n— editorial vision?\n— which editors in mind?\n— how do they like to communicate?'}
+];
+var dismissed={};
+var composerOpen=false;
+var dragId=null;
+
+function el(h){var t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild;}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+/* link-aware: escape first, then wrap bare URLs */
+function linkify(s){return esc(s).replace(/https?:\/\/[^\s<]+/g,function(u){return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>';});}
+function today(){var d=new Date();return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];}
+function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show');},3500);}
+
+var board=document.getElementById('board');
+function sparse(){return notes.length<3;}
+
+function render(){
+  board.innerHTML='';
+  if(composerOpen)board.appendChild(renderComposer());
+  else{
+    var g=el('<button class="ghost" style="min-height:110px">+ Pin a note</button>');
+    g.onclick=function(){composerOpen=true;render();focusComposer();};
+    board.appendChild(g);
+  }
+  notes.forEach(function(n){board.appendChild(renderNote(n));});
+  if(sparse()){
+    var live=EXAMPLES.filter(function(e){return !dismissed[e.exId];});
+    if(live.length){
+      board.appendChild(el('<div class="exhint">A few examples of what writers keep here — keep one to make it yours, or dismiss them. They retire on their own as your board fills.</div>'));
+      live.forEach(function(e){board.appendChild(renderExample(e));});
+    }
+  }
+}
+
+function renderNote(n){
+  var card=el('<div class="card c-'+n.c+'" draggable="true" data-id="'+n.id+'"></div>');
+  card.appendChild(el('<div class="note-body">'+linkify(n.body)+'</div>'));
+  var foot=el('<div class="note-foot"></div>');
+  if(n.tag)foot.appendChild(el('<span class="note-tag">#'+esc(n.tag)+'</span>'));
+  foot.appendChild(el('<span class="note-date">'+esc(n.date)+'</span>'));
+  foot.appendChild(el('<button class="kebab" aria-label="Note actions"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>'));
+  card.appendChild(foot);
+  /* drag to reorder */
+  card.addEventListener('dragstart',function(e){dragId=n.id;card.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+  card.addEventListener('dragend',function(){dragId=null;render();});
+  card.addEventListener('dragover',function(e){e.preventDefault();if(dragId!==n.id)card.classList.add('dragover');});
+  card.addEventListener('dragleave',function(){card.classList.remove('dragover');});
+  card.addEventListener('drop',function(e){
+    e.preventDefault();card.classList.remove('dragover');
+    if(dragId===null||dragId===n.id)return;
+    var from=notes.findIndex(function(x){return x.id===dragId;});
+    var to=notes.findIndex(function(x){return x.id===n.id;});
+    var moved=notes.splice(from,1)[0];
+    notes.splice(to,0,moved);
+    render();
+  });
+  return card;
+}
+
+function renderExample(e){
+  var card=el('<div class="card example c-'+e.c+'" data-ex="'+e.exId+'"></div>');
+  card.appendChild(el('<span class="exlabel">Example</span>'));
+  card.appendChild(el('<div class="note-body">'+linkify(e.body)+'</div>'));
+  var row=el('<div class="ex-actions"></div>');
+  if(e.tag)row.appendChild(el('<span class="note-tag">#'+esc(e.tag)+'</span>'));
+  var keep=el('<button class="keep">Keep this</button>');
+  keep.onclick=function(){
+    dismissed[e.exId]=true;
+    notes.push({id:nextId++,c:e.c,tag:e.tag,date:today(),body:e.body});
+    render();
+    showToast('Kept — it\u2019s yours to edit now.');
+  };
+  row.appendChild(keep);
+  var x=el('<button class="exdismiss" aria-label="Dismiss example">✕</button>');
+  x.onclick=function(){dismissed[e.exId]=true;render();};
+  row.appendChild(x);
+  card.appendChild(row);
+  return card;
+}
+
+function renderComposer(){
+  var c=el('<div class="composer"></div>');
+  var draft={body:'',c:'yellow',tag:''};
+  var ta=el('<textarea placeholder="Write it down before it goes…"></textarea>');
+  ta.addEventListener('input',function(){draft.body=ta.value;ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';});
+  c.appendChild(ta);
+  var row=el('<div class="composer-row"></div>');
+  ['yellow','pink','sage'].forEach(function(col){
+    var s=el('<button class="sw s-'+col+(draft.c===col?' on':'')+'" aria-label="'+col+'"></button>');
+    s.onclick=function(){
+      draft.c=col;
+      c.className='composer';
+      c.style.backgroundColor='var(--'+col+')';
+      c.style.borderColor=col==='yellow'?'var(--yellow-deep)':col==='pink'?'var(--pink-deep)':'var(--sage-mid)';
+      row.querySelectorAll('.sw').forEach(function(b){b.classList.remove('on');});
+      s.classList.add('on');
+    };
+    row.appendChild(s);
+  });
+  var tg=el('<input class="taginput" placeholder="#tag">');
+  tg.addEventListener('input',function(){draft.tag=tg.value.replace(/^#/,'');});
+  row.appendChild(tg);
+  var acts=el('<div class="composer-actions"></div>');
+  var cancel=el('<button class="btn btn-ghost btn-sm">Cancel</button>');
+  cancel.onclick=function(){composerOpen=false;render();};
+  var pin=el('<button class="btn btn-primary btn-sm">Pin it</button>');
+  pin.onclick=function(){
+    var b=ta.value.trim();if(!b){composerOpen=false;render();return;}
+    notes.unshift({id:nextId++,c:draft.c,tag:draft.tag.trim(),date:today(),body:b});
+    composerOpen=false;render();
+  };
+  acts.appendChild(cancel);acts.appendChild(pin);
+  row.appendChild(acts);
+  c.appendChild(row);
+  return c;
+}
+function focusComposer(){var ta=board.querySelector('.composer textarea');if(ta)ta.focus();}
+document.getElementById('btnPin').onclick=function(){if(!composerOpen){composerOpen=true;render();focusComposer();}};
+
+render();
+})();
+</script>
+</body>
+</html>
