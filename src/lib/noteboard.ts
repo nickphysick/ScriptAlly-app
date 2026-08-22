@@ -8,7 +8,8 @@
  * rendering of these, which is what lets the locks call the SAME function the page calls rather
  * than a literal that agrees with it today.
  */
-import { NoteColour, TagDef, UserTask } from "../types";
+import { NoteColour, TagDef, User, UserTask } from "../types";
+import { NOTE_EXAMPLES } from "../components/todo/noteboardExamples";
 import { isNoteTask } from "./todoBoard";
 
 /**
@@ -150,4 +151,53 @@ export const draftFromExample = (ex: { body: string; colour: NoteColour; tag: st
   body: ex.body,
   colour: ex.colour,
   tag: ex.tag,
+});
+
+/* ────────────────────────────────────────────────────────────────────────────────────────────
+ * Example papers — the sparse board's teaching cards (paper run, Phase 2)
+ * ──────────────────────────────────────────────────────────────────────────────────────────── */
+
+/** One example paper: a drawer example wearing a STABLE id, one per colour. */
+export interface ExamplePaper {
+  id: string;
+  colour: NoteColour;
+  tag: string;
+  body: string;
+}
+
+/**
+ * ⚠️ DERIVED FROM THE DRAWER'S MODULE, NEVER COPIED. The sparse mockup ships its own EXAMPLES
+ * array whose first item says "she wants" about an agent — the pronoun class `NOTE_EXAMPLES`
+ * already fixed, with a declared divergence and a lock. One source keeps the fix; a copy would
+ * ship the violation back and then drift besides.
+ *
+ * One per colour — the FIRST of each, in the board's own swatch order — and the id is the
+ * COLOUR, not the content: a dismissal keyed on words would return the day a word changed.
+ */
+export const NOTE_EXAMPLE_PAPERS: readonly ExamplePaper[] = NOTE_COLOURS.map((colour) => {
+  const item = NOTE_EXAMPLES.flatMap((g) => g.items).find((i) => i.colour === colour);
+  /* NOTE_EXAMPLES carries all three colours by construction (locked against the ref); the throw
+     is for the day someone edits the module out from under that. */
+  if (!item) throw new Error(`no drawer example wears ${colour}`);
+  return { id: `ex-${colour}`, colour, tag: item.tag, body: item.body };
+});
+
+/** The hint above the first example — the baked verbatim. */
+export const NOTEBOARD_HINT =
+  "A few examples of what writers keep here — keep one to make it yours, or dismiss them. They retire on their own as your board fills.";
+
+/**
+ * ⚠️ FEWER THAN THREE REAL NOTES, minus what was sent away — and a dismissal is permanent, even
+ * if the board empties again. Not the user's data: they also hide under any search or tag filter
+ * (the page's render condition owns that half, because the filters are page state).
+ */
+export const sparseExamples = (realCount: number, dismissed: readonly string[]): ExamplePaper[] =>
+  realCount < 3 ? NOTE_EXAMPLE_PAPERS.filter((p) => !dismissed.includes(p.id)) : [];
+
+/** The total reader for the Noteboard's pref sub-map — absent anything reads as empty. */
+export const noteboardPrefs = (
+  user: Pick<User, "todoPrefs"> | undefined,
+): { dismissedExamples: string[]; order: string[] } => ({
+  dismissedExamples: user?.todoPrefs?.noteboard?.dismissedExamples ?? [],
+  order: user?.todoPrefs?.noteboard?.order ?? [],
 });

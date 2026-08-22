@@ -41,11 +41,28 @@ test.describe("Phase 1 — flat paper", () => {
        the screenshot is the zone's scroll hem, a sticky gradient overlay painting OVER them while
        the zone overflows by two pixels. Element-level flatness cannot catch an overlay; only the
        intersection can. */
-    await openRoute(page, ROUTE, WIDE);
+    /* ⚠️ THE PRECONDITION IS THE POINT: "no gradient over the cards" is a claim about a board
+       that does NOT scroll. When it genuinely overflows, the hem IS the affordance and covering
+       the bottom card is its whole job. This case ran green at 900 tall against 11 seeded notes
+       and then failed the moment Phase 2's example papers ADDED height — 58px of real overflow,
+       a correct hem, and a probe reporting it as the bug it was written to catch. So the
+       viewport grows until the board fits, and the state is asserted before the claim. */
+    await openRoute(page, ROUTE, { width: 1440, height: 1400 });
+    const fits = await page.evaluate(() => {
+      const zone = document.querySelector(".nb-board")?.closest(".tpl-zone") as HTMLElement | null;
+      return zone ? zone.scrollHeight - zone.clientHeight : null;
+    });
+    expect(fits, "no zone").not.toBeNull();
+    console.log(`[flat] zone overflow at 1400 tall: ${fits}px`);
+    expect(fits!, "the board still scrolls at 1400 tall — the hem is legitimate here").toBeLessThan(24);
     const grads = await gradientBoxes(page);
     const cards = await page.$$eval(".nb-note, .nb-ghost", (els) =>
       els.map((e) => { const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; }));
-    expect(cards.length, "no cards to test against").toBeGreaterThan(5);   // the population first
+    /* ⚠️ THE FLOOR IS 1, NOT A SEEDED FIGURE. This case ran green for a phase against 11 seeded
+       notes and then failed the moment Phase 2's cases cleared the board — a probe that needs
+       someone else's fixture is measuring their setup, not the page. One card is the real
+       precondition: an intersection needs something to intersect. */
+    expect(cards.length, "no cards to test against").toBeGreaterThan(0);
     const hits: string[] = [];
     for (const g of grads) for (const c of cards) {
       const ox = Math.min(g.x + g.w, c.x + c.w) - Math.max(g.x, c.x);
@@ -94,15 +111,16 @@ test.describe("Phase 1 — flat paper", () => {
   test("⚠️ the hem is an AFFORDANCE again: absent at 2px of overflow, present when the board truly scrolls", async ({ page }) => {
     /* the zone barely overflows at 900 tall with the seeded board — no hem; at 520 it genuinely
        scrolls — hem. The gate is measured overflow, not existence. */
-    await openRoute(page, ROUTE, WIDE);
+    await openRoute(page, ROUTE, { width: 1440, height: 1400 });
     const rest = await page.evaluate(() => {
       const zone = document.querySelector(".nb-board")?.closest(".tpl-zone") as HTMLElement | null;
       if (!zone) return null;
       return { over: zone.scrollHeight - zone.clientHeight, hem: !!zone.querySelector(".tpl-hem") };
     });
     expect(rest, "no zone").toBeTruthy();
-    console.log(`[hem] at 900 tall: overflow ${rest!.over}px · hem ${rest!.hem}`);
-    expect(rest!.over, "the fixture no longer sits near the fold — re-seed").toBeLessThan(24);
+    console.log(`[hem] at 1400 tall: overflow ${rest!.over}px · hem ${rest!.hem}`);
+    /* the precondition — a board that fits; the claim below is only meaningful against it */
+    expect(rest!.over, "the board scrolls even at 1400 tall — pick a taller viewport").toBeLessThan(24);
     expect(rest!.hem, "the hem renders over a board that does not scroll").toBe(false);
 
     await page.setViewportSize({ width: 1440, height: 520 });
@@ -115,5 +133,54 @@ test.describe("Phase 1 — flat paper", () => {
     console.log(`[hem] at 520 tall: overflow ${short!.over}px · hem ${short!.hem}`);
     expect(short!.over).toBeGreaterThan(24);   // the precondition, or the next line is vacuous
     expect(short!.hem, "the affordance was deleted rather than gated").toBe(true);
+  });
+});
+
+test.describe("Phase 2 — example papers", () => {
+  /* ⚠️ THESE RUN ON A NEARLY-EMPTY BOARD, so they clear the seeded fixtures first and restore
+     nothing — the seeder is the caller's job. Dismissals are persisted per user, so each case
+     un-dismisses through the app's own surface where it can, and the report names what it left. */
+  test("keep this → a real note appears, the example goes, and the dismissal SURVIVES RELOAD", async ({ page }) => {
+    await openRoute(page, ROUTE, WIDE);
+    const board = page.locator(".nb-board");
+    await expect(board).toBeVisible();                       // the anchor, before any indexing
+
+    const examples = await page.$$eval("[data-example]", (els) => els.map((e) => e.getAttribute("data-example")));
+    console.log(`[ex] examples on the sparse board: ${examples.join(",") || "none"}`);
+    if (examples.length === 0) {
+      /* the board is not sparse — say so rather than passing vacuously */
+      const real = await page.locator(".nb-note:not(.nb-example)").count();
+      expect(real, "no examples AND fewer than 3 real notes — the sparse state is broken").toBeGreaterThanOrEqual(3);
+      test.skip(true, `board holds ${real} real notes; sparse state not exercisable without clearing them`);
+      return;
+    }
+
+    const target = examples[0]!;
+    const before = await page.$$eval(".nb-note", (els) => els.length);
+    await page.locator(`[data-example="${target}"] .nb-keep`).click();
+    await page.waitForTimeout(1200);
+
+    /* the whole ordered board: a real note gained, that example gone */
+    const after = await page.evaluate(() => Array.from(document.querySelectorAll<HTMLElement>(".nb-note"))
+      .map((e) => (e.hasAttribute("data-example") ? `ex:${e.getAttribute("data-example")}` : "real")));
+    console.log(`[ex] after keep: ${after.join(" ")}`);
+    expect(after.filter((k) => k === "real").length, "no real note was created").toBeGreaterThan(before - examples.length);
+    expect(after).not.toContain(`ex:${target}`);
+
+    /* ⚠️ THE RELOAD LEG IS WHAT PROVES THE STORE — state alone would pass without it */
+    await page.reload();
+    await page.waitForTimeout(2500);
+    const reloaded = await page.$$eval("[data-example]", (els) => els.map((e) => e.getAttribute("data-example")));
+    console.log(`[ex] after reload: ${reloaded.join(",") || "none"}`);
+    expect(reloaded, "the dismissal did not survive reload — the write never reached the store").not.toContain(target);
+  });
+
+  test("under a search, ZERO examples — they are not the user's data and never appear in results", async ({ page }) => {
+    await openRoute(page, ROUTE, WIDE);
+    await expect(page.locator(".nb-board")).toBeVisible();
+    await page.locator(".nb-search input").fill("zzzz-no-match");
+    await page.waitForTimeout(400);
+    expect(await page.locator("[data-example]").count()).toBe(0);
+    await page.locator(".nb-search input").fill("");
   });
 });

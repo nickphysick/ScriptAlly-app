@@ -39,6 +39,7 @@ import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
 import {
   NOTEBOARD_SUBTITLE, noteFilterLabel, noteColour, sortNotes, noteReceipt, firstTagLabel,
+  sparseExamples, noteboardPrefs, NOTEBOARD_HINT, ExamplePaper,
   composerWithColour, editCommit, emptyDraft, noteTagChips, noteMatchesSearch,
   NOTE_COLOURS, NoteDraft, draftFromExample,
 } from "../../lib/noteboard";
@@ -103,6 +104,50 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   const chips = useMemo(() => noteTagChips(pinned, currentUser?.tags ?? []), [pinned, currentUser?.tags]);
 
   const userTags = currentUser?.tags ?? [];
+
+  /* ── example papers (paper run, Phase 2) ─────────────────────────────────────────────────
+     Not the user's data, so: below every real note, gone above three real notes, gone under ANY
+     narrowing (they must never appear in filtered results), and a dismissal is permanent —
+     persisted in todoPrefs.noteboard, which live data already nests sub-maps into. */
+  const prefs = noteboardPrefs(currentUser);
+  const narrowing = !!search.trim() || tagSel !== null;
+  const examplePapers = narrowing ? [] : sparseExamples(pinned.length, prefs.dismissedExamples);
+
+  /** ⚠️ EVERY WRITE SPREADS BOTH LAYERS. `updateUserProfile` replaces top-level fields, so a
+   *  bare `{ todoPrefs: { noteboard } }` would silently drop the desk behaviours AND the To-do
+   *  list's view prefs — the exact silent-loss shape the receipt fix retired one phase ago. */
+  const saveNoteboardPrefs = async (patch: Partial<{ dismissedExamples: string[]; order: string[] }>) => {
+    await updateUserProfile({
+      todoPrefs: {
+        ...currentUser?.todoPrefs,
+        noteboard: { ...currentUser?.todoPrefs?.noteboard, ...patch },
+      },
+    });
+  };
+
+  const dismissExample = async (id: string) => {
+    try {
+      await saveNoteboardPrefs({ dismissedExamples: [...prefs.dismissedExamples, id] });
+    } catch {
+      flash("Couldn’t dismiss that — try again?");
+    }
+  };
+
+  /** Keep = a REAL note through the normal create path, then the example retires for good. */
+  const keepExample = async (ex: ExamplePaper) => {
+    try {
+      const tagIds = await resolveTag(ex.tag);
+      const id = await addUserTask({ text: ex.body, ...(tagIds ? { tags: tagIds } : {}) });
+      if (id && ex.colour !== "yellow") {
+        const landed = await setUserTaskColour(id, ex.colour);
+        if (!landed) flash("Kept — but the colour didn’t save. It’s yellow for now.");
+      }
+      await saveNoteboardPrefs({ dismissedExamples: [...prefs.dismissedExamples, ex.id] });
+      flash("Kept — it’s yours to edit now.");
+    } catch {
+      flash("Couldn’t keep that — try again?");
+    }
+  };
 
   /* ⚠️ THE HEM IS GATED ON MEASURED OVERFLOW, NOT EXISTENCE (paper run, Phase 1). It used to be
      `hem={notes.length > 0}`, so the chassis's sticky gradient rendered over whatever sat at the
@@ -435,7 +480,14 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
           {/* ⚠️ THE MASONRY IS THE SCROLLZONE (tasks-viewport P4): the header and tool row are
               fixed above it, and the notes scroll beneath under their own hem. */}
           <TplZone label="Notes" hem={zoneScrolls}>
-          {notes.length === 0 && !compose ? (
+          {/* ⚠️ THE EXAMPLE PAPERS SUPERSEDE THE EMPTY PANEL WHILE THEY LAST (paper run, Phase 2).
+              The panel and the papers teach the same thing — what a note is for — and the papers
+              do it with real examples the writer can keep, so two teaching surfaces at once is
+              one too many. The panel returns the moment the papers are all dismissed, which is
+              exactly when the board has nothing left to say for itself. Measured: clearing the
+              seeds took the board to zero, the panel rendered, `.nb-board` never mounted and
+              every example was unreachable — the sparse state could not be reached at all. */}
+          {notes.length === 0 && !compose && examplePapers.length === 0 ? (
             /* the empty state TEACHES rather than apologises */
             <div className="nb-empty">
               {/* ⚠️ ART · NOTEBOARD-EMPTY (board-optimise P3) — first run only, ABOVE the copy
@@ -508,6 +560,24 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                   </div>
                 </article>
                 )
+              ))}
+              {/* ⚠️ EXAMPLE PAPERS — below every real note, never in filtered results, and only
+                  while the board holds fewer than three. Each is a dashed reduced-opacity card
+                  wearing its colour and an EXAMPLE chip; Keep pins a REAL copy through the
+                  normal create path and retires the example for good. */}
+              {examplePapers.length > 0 && (
+                <div className="nb-exhint">{NOTEBOARD_HINT}</div>
+              )}
+              {examplePapers.map((ex) => (
+                <div key={ex.id} data-example={ex.id} className={`nb-note nb-example nb-c-${ex.colour}`}>
+                  <span className="nb-exlabel">Example</span>
+                  <div className="nb-body">{ex.body}</div>
+                  <div className="nb-ex-actions">
+                    {ex.tag && <span className="nb-tag">#{ex.tag}</span>}
+                    <button type="button" className="nb-keep" onClick={() => void keepExample(ex)}>Keep this</button>
+                    <button type="button" className="nb-exdismiss" aria-label="Dismiss example" onClick={() => void dismissExample(ex.id)}>✕</button>
+                  </div>
+                </div>
               ))}
               {/* ⚠️ CONDITIONALLY RENDERED, never `hidden`. The UA sheet's `[hidden]{display:none}`
                   is weaker than any author display rule, so a flex or grid element wearing the

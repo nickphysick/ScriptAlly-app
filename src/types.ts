@@ -57,7 +57,16 @@ export interface User {
   tags?: TagDef[];
   /* board-optimise P5: the four desk behaviours as ONE map (see lib/todoPrefs) — one allowlist
      entry, one write path, one place to look. Readers go through todoPrefs(), which is total. */
-  todoPrefs?: { staleMonths?: number; goodDay?: number; rollForward?: boolean; weeklyBriefing?: boolean };
+  todoPrefs?: {
+    staleMonths?: number; goodDay?: number; rollForward?: boolean; weeklyBriefing?: boolean;
+    /* The Noteboard's own preferences (paper run, Phase 2) — the map already carries nested
+       sub-maps in live data (the To-do list's view prefs write `listView` here), so a page-scoped
+       sub-map follows an established precedent. `dismissedExamples` = example-paper ids sent away
+       for good; `order` = the writer's own arrangement of note ids (Phase 3 — the board falls
+       back to createdAt for anything unlisted). Rules: `todoPrefs` is `is map`, unconstrained,
+       so this ships with NO rules change — proven against the deployed ruleset before use. */
+    noteboard?: { dismissedExamples?: string[]; order?: string[] };
+  };
   // Querying goals (one-screen dashboard §6): ONLY the target is stored — progress derives from
   // dateSent at read time (lib/oneScreen.goalState). Absent === no goal set (the day-one CTA).
   // NOTE: rules-gated — writes are silently denied until the firestore.rules revision carrying
