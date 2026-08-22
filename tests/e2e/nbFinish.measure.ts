@@ -226,3 +226,70 @@ test.describe("Phase 3 — the composer IS the editor", () => {
     expect(await page.locator(".nb-note").filter({ hasText: "NBPROBE six" }).first().locator(".nb-body").innerText()).toBe(bodyBefore);
   });
 });
+
+test.describe("Phase 4 — the date lives on the note", () => {
+  test("date a note → badge + still on the board + one VISIBLE To-do card; detach → all reversed", async ({ page }) => {
+    /* ⚠️ THE ONE-ROW COUNT IS THE SELECTOR PROBE'S (noteboardTask.test.ts, against assembleBoard
+       — the To-do board's real selector, as the spec asks). The browser cannot re-prove a model
+       count: the board renders grouped batches and folded lanes, so DOM cards under-count the
+       model and a duplicate could hide folded exactly where a naïve count looks green. What the
+       browser CAN prove is the end-to-end wiring — the write lands, the badge derives, the SAME
+       document renders as a task card, and detach reverses all of it. The date is TODAY so the
+       card PROMOTES to the urgent lane, which renders open. */
+    await openRoute(page, ROUTE, { width: 1440, height: 900 });
+    const card = page.locator(".nb-note").filter({ hasText: "NBPROBE four" }).first();
+    await expect(card).toBeVisible();
+
+    /* self-heal a fixture left dated by an earlier failed run */
+    if (await card.locator(".nb-taskbadge").count()) {
+      await card.locator(".tbd-more").click();
+      await page.getByRole("menuitem", { name: "Detach from tasks" }).click();
+      await page.waitForTimeout(700);
+    }
+
+    const fresh = page.locator(".nb-note").filter({ hasText: "NBPROBE four" }).first();
+    await fresh.locator(".tbd-more").click();
+    await page.getByRole("menuitem", { name: "Turn into a task…" }).click();
+    await expect(page.locator(".nb-taskpanel")).toBeVisible();
+    /* the popover asks ONE question now — no Task field (one object, one text) */
+    expect(await page.locator(".nb-taskpanel input[type=text]").count()).toBe(0);
+    await page.locator(".nb-taskpanel .sa-field").click();
+    await page.locator(".sa-dp-pop .sa-dp-day.today").click();
+    await page.locator(".nb-taskpanel .nb-csave").click();
+    await page.waitForTimeout(900);
+
+    /* (a) the badge, on the SAME card, derived from the note's own date */
+    const again = page.locator(".nb-note").filter({ hasText: "NBPROBE four" }).first();
+    await expect(again, "the note LEFT the board on dating — the paper stamp failed").toBeVisible();
+    await expect(again.locator(".nb-taskbadge")).toContainText("On your to-do list");
+
+    /* (c) the To-do board renders the SAME document as a task card — due today, so promoted */
+    await page.goto("/todo");
+    await page.waitForTimeout(2500);
+    const rows = await page.evaluate(() => {
+      /* ⚠️ VISIBLE LIST ROWS, scoped to the list container. Two traps found live: `.tbd-card` is
+         the RETIRED board's class (the To-do page is the list+pane chassis now — the row class
+         is `.row` inside `.tlc`), and pages stay MOUNTED, so the dashboard's hidden task card
+         also carries the text and an unscoped scan counts it. The reading PANE echoes the
+         selected task too — a detail view, not a row — hence the container scope. */
+      const hits = Array.from(document.querySelectorAll<HTMLElement>(".tlc .row"))
+        .filter((e) => (e.innerText ?? "").includes("NBPROBE four") && e.getBoundingClientRect().width > 0);
+      return hits.map((e) => (e.innerText ?? "").split("\n").slice(0, 4).join(" · "));
+    });
+    console.log(`[p4] visible to-do list rows carrying the text: ${rows.length}`);
+    for (const r of rows) console.log(`   ${r}`);
+    expect(rows.length, "the task never reached the list").toBeGreaterThanOrEqual(1);
+    expect(rows.length, "TWO visible rows — the duplicate is back").toBe(1);
+
+    /* detach — back on the noteboard, the date gone, the note still there */
+    await page.goto(ROUTE);
+    await page.waitForTimeout(1500);
+    const card2 = page.locator(".nb-note").filter({ hasText: "NBPROBE four" }).first();
+    await card2.locator(".tbd-more").click();
+    await page.getByRole("menuitem", { name: "Detach from tasks" }).click();
+    await page.waitForTimeout(900);
+    const card3 = page.locator(".nb-note").filter({ hasText: "NBPROBE four" }).first();
+    await expect(card3).toBeVisible();
+    expect(await card3.locator(".nb-taskbadge").count()).toBe(0);
+  });
+});

@@ -58,8 +58,12 @@ describe("⚠️ notes only — nothing derived reaches this board", () => {
        lock, so the two cannot disagree about what a note is. The CLAIM is unchanged: the page's
        only source is userTasks read through isNote. */
     expect(page).toContain("sortNotes(userTasks)");
+    /* ⚠️ THE FILTER WIDENED BY ONE CLAUSE (finish run, Phase 4): dated-and-papered notes stay on
+       the board — the date lives on the note's own document now, and `colour` (this page's own
+       field, nothing else writes it) is what tells a converted note from an ordinary task. The
+       claim is unchanged: the ONLY source is userTasks, read through the board's own predicate. */
     const lib = readFileSync(join(here, "../../lib/noteboard.ts"), "utf8");
-    expect(lib).toContain("tasks.filter(isNoteTask)");
+    expect(lib).toContain("isNoteTask(t) || (!t.done && !!t.dueDate && t.colour !== undefined)");
     for (const derived of ["assembleBoard", "boardColumns", "tasks,", "taskFlags", "activities"]) {
       expect(page, derived).not.toContain(derived);
     }
@@ -79,10 +83,15 @@ describe("⚠️ 'THE DATE IS THE DOOR' IS RETIRED — the board projects a task
      it, which is two documents and cannot be a rendering of the old model.
      The claims worth keeping are kept, restated against the new mechanism. */
 
-  it("the conversion is GONE from the page, not merely unreachable", () => {
-    expect(page).not.toContain("updateUserTask(note.id, { dueDate: dateDraft })");
-    expect(page).not.toContain("Make it a task");
-    expect(page).not.toContain("give-date");
+  it("the conversion is the note's OWN date again — and the projection is gone with its id", () => {
+    /* ⚠️ REVERSED KNOWINGLY (finish run, Phase 4 / Branch A — the projection lasted one day and
+       produced a duplicate To-do row). The write this case once forbade is the correct one now:
+       the date goes onto the note, ONE document renders one row everywhere, and the board keeps
+       the note because the conversion stamps its paper. noteboardTask.test.ts holds the one-row
+       probe against the To-do board's own selector. */
+    expect(page).toContain("updateUserTask(note.id, { dueDate: dateDraft })");
+    expect(page).not.toContain("projectedTaskId");
+    expect(page).not.toContain("give-date");   // the RETIRED door stays retired — this is not it back
   });
 
   it("the projection lands in the Your-tasks family and on the Calendar — still by derivation", () => {

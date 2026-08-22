@@ -40,7 +40,7 @@ import { isNoteTask as isNote } from "../../lib/todoBoard";
 import {
   NOTEBOARD_SUBTITLE, noteFilterLabel, noteColour, sortNotes, noteReceipt, firstTagLabel,
   composerWithColour, editCommit, emptyDraft, noteTagChips, noteMatchesSearch,
-  NOTE_COLOURS, NoteDraft, projectedTaskId, projectedTask, noteTaskTitle, draftFromExample,
+  NOTE_COLOURS, NoteDraft, draftFromExample,
 } from "../../lib/noteboard";
 import { newTag } from "../../lib/todoTags";
 import { UserTask, TagDef } from "../../types";
@@ -69,9 +69,11 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   const [examples, setExamples] = useState(false); // the Examples drawer (P7)
   const [column, setColumn] = useState(false);
   const [menu, setMenu] = useState<{ note: UserTask; anchor: HTMLElement } | null>(null);
-  /** The note being turned into a task, and the two answers the popover collects. */
+  /** The note being turned into a task — the popover collects ONE answer now, the date. One
+   *  object has one text, so the projection-era title field went with the projection: a separate
+   *  short title could only land by overwriting the note's body, and the copy promises the note
+   *  stays unchanged. The task reads as the note's body — the app's own original model. */
   const [taskFor, setTaskFor] = useState<UserTask | null>(null);
-  const [taskTitle, setTaskTitle] = useState("");
   const [tagsFor, setTagsFor] = useState<UserTask | null>(null); // tasks-pages P5 — the ⋯ Tags… sheet
   const [dateDraft, setDateDraft] = useState("");
   /** The composer: null when closed, a draft when open. With an `id` it is EDITING that note —
@@ -199,50 +201,50 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   };
 
   /**
-   * ⚠️ A PROJECTION, NOT A MOVE. The note stays exactly where it is; a SECOND document appears,
-   * dated, and the To-do list and the Calendar pick it up with no change to either — they read
-   * every non-done `userTask` already. The link between the two is the projected task's ID, so
-   * nothing is stored on the note and nothing has to be kept in step.
+   * ⚠️ ONE DOCUMENT, ONE WRITE EACH WAY (finish run, Phase 4 / Branch A — supersedes the
+   * projection). The date goes onto the note itself; the To-do list and the Calendar pick the
+   * SAME document up (userCard renders one row, cardActionYmd places it), so the duplicate row
+   * the projection produced cannot exist. The note keeps its board place because the conversion
+   * stamps its paper — `sortNotes` reads dated ∧ papered as "a note that became a task".
+   *
+   * ⚠️ THE PAPER IS STAMPED BEFORE THE DATE, AND A REFUSED STAMP STOPS THE CONVERSION. Dated
+   * first, an unpapered note would leave the board between the two writes — and stay gone if the
+   * colour write was then refused by stale rules. Refusal is told, not swallowed.
    */
   const makeTask = async () => {
     if (!taskFor || !dateDraft) return;
     const note = taskFor;
-    const title = taskTitle.trim() || noteTaskTitle(note.text);
-    if (!title) return;
     try {
-      /* ⚠️ THE TAGS TRAVEL. Under the old in-place conversion they came for free — it was one
-         document — and the claim ("the date is the door, the tags are the luggage") is worth
-         keeping: a writer who filters #agents on the To-do board should not lose the task they
-         made from an #agents note. It is the writer's own classification of the same subject. */
-      await addUserTask({
-        id: projectedTaskId(note.id), text: title, dueDate: dateDraft,
-        ...(note.tags && note.tags.length ? { tags: note.tags } : {}),
-      });
+      if (note.colour === undefined) {
+        const landed = await setUserTaskColour(note.id, "yellow");
+        if (!landed) {
+          flash("Couldn’t set that up — the note’s paper wouldn’t save. Try again?");
+          return;
+        }
+      }
+      await updateUserTask(note.id, { dueDate: dateDraft });
       setTaskFor(null);
       setDateDraft("");
       flash(`On your to-do list for ${new Date(dateDraft).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}. The note stays here.`, {
-        label: "Undo", fn: async () => { await deleteUserTask(projectedTaskId(note.id)); flash("Detached — the note stays here."); },
+        label: "Undo", fn: async () => { await updateUserTask(note.id, { dueDate: null }); flash("Detached — the note stays here."); },
       });
     } catch {
       flash("Couldn’t add that to your tasks — try again?");
     }
   };
 
-  /** The inverse: the task goes, the note does not. */
+  /** The inverse: the date goes, the note and its paper do not. */
   const detachTask = async (note: UserTask) => {
-    const task = projectedTask(note, userTasks);
+    const was = note.dueDate;
     try {
-      await deleteUserTask(projectedTaskId(note.id));
+      await updateUserTask(note.id, { dueDate: null });
     } catch {
       flash("Couldn’t detach that — try again?");
       return;
     }
-    flash("Detached — the note stays here.", task ? {
+    flash("Detached — the note stays here.", was ? {
       label: "Undo",
-      fn: async () => {
-        await addUserTask({ id: task.id, text: task.text, dueDate: task.dueDate, createdAt: task.createdAt });
-        flash("Back on your to-do list");
-      },
+      fn: async () => { await updateUserTask(note.id, { dueDate: was }); flash("Back on your to-do list"); },
     } : undefined);
   };
 
@@ -282,7 +284,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
        the card EDITS. Routing edit back through the composer would put a second note-shaped box
        at the top of the board while the real one sat below it, unchanged. */
     if (item.id === "edit-task") openEditor(note);
-    if (item.id === "make-task") { setTaskFor(note); setTaskTitle(noteTaskTitle(note.text)); setDateDraft(""); }
+    if (item.id === "make-task") { setTaskFor(note); setDateDraft(""); }
     if (item.id === "detach-task") void detachTask(note);
     if (item.id === "tags") setTagsFor(note);
     if (item.id === "delete-task") void deleteNote(note);
@@ -450,17 +452,12 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                       composer is one body — but notes written under the split have prose in it
                       and dropping it would lose their words. */}
                   {n.detail && <div className="nb-body nb-body--legacy">{n.detail}</div>}
-                  {/* ⚠️ DERIVED FROM THE PROJECTION EXISTING — nothing is stored on the note. The
-                      badge is how the writer knows the note has a task without the note having
-                      become one. */}
-                  {(() => {
-                    const t = projectedTask(n, userTasks);
-                    return t?.dueDate ? (
-                      <div className="nb-taskbadge">
-                        ✓ On your to-do list · {new Date(t.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                      </div>
-                    ) : null;
-                  })()}
+                  {/* the badge is the note's OWN date — one document, nothing to consult */}
+                  {n.dueDate && (
+                    <div className="nb-taskbadge">
+                      ✓ On your to-do list · {new Date(n.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                    </div>
+                  )}
                   <div className="nb-foot">
                     {(n.tags ?? []).map((tid) => {
                       const def = userTags.find((t) => t.id === tid);
@@ -506,7 +503,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
       {menu && (
         <PortalMenu
           anchor={menu.anchor}
-          groups={noteMenu(!!projectedTask(menu.note, userTasks))}
+          groups={noteMenu(!!menu.note.dueDate)}
           ariaLabel={`Actions for ${menu.note.text}`}
           onPick={onMenuPick}
           onClose={(returnFocus) => {
@@ -515,9 +512,9 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
         />
       )}
 
-      {/* ⚠️ THE PROJECTION, NOT A CONVERSION. Two answers — what the task says and when it is due
-          — and the copy states plainly that the note is not going anywhere, because the app spent
-          a year teaching the opposite. */}
+      {/* ⚠️ ONE ANSWER — the date. The title field went with the projection: one object has one
+          text, and a separate short title could only land by overwriting the note's body, which
+          the copy below promises not to do. The heading and body copy are the baked verbatim. */}
       {taskFor && (
         <div className="cal-dayscrim" onClick={() => setTaskFor(null)}>
           <div className="nb-scope cal-daypanel nb-taskpanel" role="dialog" aria-label="Turn into a task" onClick={(e) => e.stopPropagation()}>
@@ -528,21 +525,11 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
             <p className="nb-taskwhy">
               The task appears on your to-do list and calendar. The note stays here, unchanged.
             </p>
-            <label className="nb-plabel" htmlFor="nb-task-title">Task</label>
-            <input
-              id="nb-task-title"
-              className="nb-pinput"
-              value={taskTitle}
-              /* offered, never decided — a note is prose and a task is a thing to do, and the two
-                 are only sometimes the same sentence */
-              onChange={(e) => setTaskTitle(e.target.value)}
-              aria-label="Task"
-            />
             <label className="nb-plabel">Date</label>
             <BrandDatePicker value={dateDraft} onChange={setDateDraft} placeholder="Choose a date" />
             <div className="nb-cactions">
               <button type="button" className="nb-ccancel" onClick={() => setTaskFor(null)}>Cancel</button>
-              <button type="button" className="nb-csave" disabled={!dateDraft || !taskTitle.trim()} onClick={() => void makeTask()}>Add to tasks</button>
+              <button type="button" className="nb-csave" disabled={!dateDraft} onClick={() => void makeTask()}>Add to tasks</button>
             </div>
           </div>
         </div>

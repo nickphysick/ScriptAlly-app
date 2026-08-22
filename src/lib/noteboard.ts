@@ -41,14 +41,24 @@ export const NOTE_COLOURS: readonly NoteColour[] = ["yellow", "pink", "sage"];
 export const noteColour = (t: Pick<UserTask, "colour">): NoteColour => t.colour ?? "yellow";
 
 /**
- * The board's order: newest pinned first. There is no stored order and there should not be — a
- * position is a fact about a list, and this list is a filter over the task store that four other
- * surfaces also read.
+ * What the Noteboard shows, newest pinned first. There is no stored order — a position is a fact
+ * about a list, and `createdAt` decides where an undone removal lands.
  *
- * ⚠️ WHICH IS WHY `createdAt` DECIDES WHERE AN UNDONE REMOVAL LANDS. Nothing else does.
+ * ⚠️ A DATED NOTE STAYS, AND THE PAPER IS HOW THE BOARD TELLS IT FROM A TASK (finish run,
+ * Phase 4 / Branch A). The date lives on the note's own document now — one object, one To-do
+ * row, one Calendar day — but a dated `UserTask` is indistinguishable from an ordinary To-do
+ * task, and a filter that kept every dated task would turn this board into a second To-do list.
+ * The discriminator is `colour`: the Noteboard is its ONLY writer (swept and locked in
+ * noteboardTask.test.ts), and the conversion stamps it before the date. So:
+ *   · dateless ∧ unticked        → a note, by the two-natures law — no marker needed
+ *   · dated ∧ papered ∧ unticked → a note that became a task, and it KEEPS ITS PLACE
+ *   · dated ∧ unpapered          → the To-do list's business, never shown here
+ *   · done                       → off the board (the document survives; untick brings it back)
  */
 export const sortNotes = (tasks: UserTask[]): UserTask[] =>
-  tasks.filter(isNoteTask).sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+  tasks
+    .filter((t) => isNoteTask(t) || (!t.done && !!t.dueDate && t.colour !== undefined))
+    .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
 
 /**
  * ⚠️ THE RECEIPT IS THE WHOLE DOCUMENT, CAPTURED BEFORE THE DELETE — a COPY, so mutations after
@@ -124,42 +134,11 @@ export const noteMatchesSearch = (n: UserTask, q: string): boolean => {
   return `${n.text} ${n.detail ?? ""}`.toLowerCase().includes(needle);
 };
 
-/* ────────────────────────────────────────────────────────────────────────────────────────────
- * Turning a note into a task
- *
- * ⚠️ THIS REVERSES A ⚠️ LAW OF THIS APP, KNOWINGLY. The model was "THE DATE IS THE DOOR": a note
- * and a task were ONE document and giving a note a date MOVED it — off this board, onto the To-do
- * list, onto the Calendar. "One object, three rooms. Nothing copies, nothing moves." The design
- * now asks for the opposite: the note stays where the writer pinned it and a task appears beside
- * it. That is two documents, and it cannot be a rendering of the old model. "Give it a date…" is
- * retired with it rather than left standing — two doors to the same place with opposite meanings
- * is worse than either one.
- *
- * ⚠️ AND THE LINK IS DERIVED, NOT STORED. A reference field would need the closed `userTasks`
- * rules allowlist opened, and an unlisted key on a `hasOnly()` create denies the whole document —
- * so the projection takes a KNOWN id instead. The note has a task iff `notetask-{noteId}` exists.
- * No field, no schema change, no deploy, and nothing to keep in step.
- * ──────────────────────────────────────────────────────────────────────────────────────────── */
-
-/**
- * ⚠️ BUILT FROM AN ID, NEVER FROM WORDS. `isValidId` requires `^[a-zA-Z0-9_-]+$`, and an id
- * composed from display text is exactly how that gets failed by accident — the R&R heal id
- * carried an ampersand from a status label and was denied permanently and silently. A task id is
- * already in the charset, so a prefix keeps it there.
- */
-export const projectedTaskId = (noteId: string): string => `notetask-${noteId}`;
-
-/** The task a note has projected, if it still has one. Absence is the answer, not an error. */
-export const projectedTask = (n: Pick<UserTask, "id">, all: UserTask[]): UserTask | undefined =>
-  all.find((t) => t.id === projectedTaskId(n.id));
-
-/**
- * The title the popover OFFERS — the note's first line, capped. It is a starting point the writer
- * edits, never a decision: a note is prose and a task is a thing to do, and the two are only
- * sometimes the same sentence.
- */
-export const noteTaskTitle = (body: string): string =>
-  (body.split("\n")[0] ?? "").trim().slice(0, 60);
+/* ⚠️ THE PROJECTION LAYER STOOD HERE FOR ONE DAY (projectedTaskId / projectedTask /
+ * noteTaskTitle) and is retired, not shadowed — the date lives on the note's own document now
+ * (see `sortNotes`), so there is no second document to derive a link to, and the duplicate To-do
+ * row the projection produced disappears by construction. The reasoning it carried — the closed
+ * rules allowlist, the id charset — is preserved in the finish report. */
 
 /**
  * An example, turned into a draft the writer can edit.

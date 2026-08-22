@@ -185,21 +185,18 @@ describe("⚠️ The tags sheet: rename, recolour, delete — with usage counts"
 /* ── conversion carries tags + the store ───────────────────────────────────────────────────── */
 
 describe("⚠️ tags survive note→task conversion — the date is the door, the tags are the luggage", () => {
-  it("⚠️ THE TAGS ARE STILL THE LUGGAGE — now they are COPIED, because there are two documents", () => {
-    /* ⚠️ THE MECHANISM REVERSED (Noteboard rebuild, 22 Aug). Under "the date is the door" a note
-       and its task were ONE document, so the tags came for free — the write touched only dueDate
-       and the field was untouched by construction. The board PROJECTS a task now: the note stays
-       and a second document appears, so "untouched" would mean the task has no tags at all.
-       The CLAIM is what matters and it is unchanged — a writer who filters #agents on the To-do
-       board must not lose the task they made from an #agents note — so the projection carries
-       them explicitly. */
+  it("⚠️ THE TAGS ARE THE LUGGAGE BY CONSTRUCTION AGAIN — the projection lasted one day", () => {
+    /* ⚠️ THE MECHANISM REVERSED TWICE, AND THE CLAIM NEVER MOVED. Original model: one document,
+       the conversion wrote only dueDate, tags untouched by construction. Projection (one day):
+       two documents, tags COPIED onto the task. Finish run Phase 4: one document again — the
+       date goes onto the note itself, so the tags are back to untouched-by-construction and the
+       copy is GONE, not shadowed. The claim throughout: a writer filtering #agents on the To-do
+       board must not lose the task they made from an #agents note. */
     const make = sliceBetween(noteboard, "const makeTask", "const detachTask");
-    expect(make).toContain("id: projectedTaskId(note.id)");
-    expect(make).toContain("tags: note.tags");
-    /* and it is the note's OWN tags, never a fresh list */
-    expect(make).not.toMatch(/tags:\s*\[\]/);
+    expect(make).toContain("updateUserTask(note.id, { dueDate: dateDraft })");
+    expect(make).not.toContain("tags");
+    expect(noteboard).not.toContain("projectedTaskId");
   });
-
   it("the card carries them into every room (userCard copies t.tags)", () => {
     const board = readFileSync(join(here, "..", "..", "lib", "todoBoard.ts"), "utf8");
     expect(board).toContain("tags: t.tags,");

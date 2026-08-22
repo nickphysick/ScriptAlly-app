@@ -2,26 +2,27 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Noteboard — turning a note into a task (build Phase 6).
+ * Noteboard — the date lives ON THE NOTE (finish run, Phase 4 / Branch A).
  *
- * ⚠️ THIS REVERSES A ⚠️ LAW, KNOWINGLY. The app's model was "THE DATE IS THE DOOR": a note and a
- * task were ONE document, and giving a note a date moved it — it left the Noteboard, joined the
- * To-do list and appeared on the Calendar. "One object, three rooms. Nothing copies, nothing
- * moves." The mockup asks for the opposite: the note STAYS and a task appears beside it. That is
- * two documents, and it cannot be a rendering of the old model. "Give it a date…" is retired with
- * this change rather than left standing, because two doors to the same place with opposite
- * meanings is worse than either.
+ * ⚠️ THE PROJECTION IS RETIRED AFTER ONE DAY, AND THE REASON IS A DUPLICATE ROW. The build gave a
+ * note's task its own document (`notetask-{noteId}`) because "the note stays on the board" and
+ * "one row on the To-do list" looked irreconcilable under the two-natures law. They are not: the
+ * board's own filter can keep a dated note IF it can tell one from an ordinary task — and a
+ * discriminator already exists. `colour` is written by the Noteboard alone and by nothing else in
+ * the app, so *dated ∧ papered* means "a note that became a task", and the conversion stamps the
+ * paper. One document again: one To-do row, one Calendar day, one text — and the note stays put.
  *
- * ⚠️ THE LINK IS DERIVED, NOT STORED. A reference field would need `userTasks`' closed rules
- * allowlist opened, and an unlisted key on a `hasOnly()` create denies the whole document. So the
- * projected task takes the id `notetask-{noteId}`: the note has a task iff that document exists.
- * No field, no schema change, no deploy — and it is what derived-over-stored asks for anyway.
+ * ⚠️ WHAT THIS COSTS, on purpose: the popover's separate task TITLE. One object has one text; a
+ * short title would have to overwrite the note's body, which violates "the note stays here,
+ * unchanged". The task reads as the note's body — which is what the app's own original
+ * "Give it a date" flow shipped for months. And completing the task retires the note from the
+ * board (`done` excludes it); the document survives, and unticking brings it back.
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { UserTask } from "../../types";
-import { projectedTaskId, projectedTask, noteTaskTitle, sortNotes } from "../../lib/noteboard";
+import { sortNotes, noteColour } from "../../lib/noteboard";
 import { assembleBoard, isNoteTask } from "../../lib/todoBoard";
 import { cardActionYmd } from "../../lib/todoCalendar";
 import { noteMenu, MenuLeaf } from "../../lib/todoMenu";
@@ -29,94 +30,117 @@ import { noteMenu, MenuLeaf } from "../../lib/todoMenu";
 const here = __dirname;
 const decls = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const page = decls(readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8"));
+const lib = decls(readFileSync(join(here, "../../lib/noteboard.ts"), "utf8"));
 
 const NOTE: UserTask = {
   id: "task-abc123", userId: "u1", text: "Two form passes mentioned the opening pace.\nLook again.",
   done: false, createdAt: "2026-08-19T09:00:00Z", updatedAt: "2026-08-19T09:00:00Z",
 };
-const TASK: UserTask = {
-  id: projectedTaskId(NOTE.id), userId: "u1", text: "Revisit chapter one pacing", done: false,
-  dueDate: "2026-08-26", createdAt: "2026-08-22T09:00:00Z", updatedAt: "2026-08-22T09:00:00Z",
-};
+/* the SAME document, dated — the conversion is one update plus the paper stamp */
+const DATED: UserTask = { ...NOTE, dueDate: "2026-08-26", colour: "yellow" };
 
 const boardInput = (userTasks: UserTask[]) => ({
   tasks: [], userTasks, queries: [], agents: [], manuscripts: [], activities: [], taskFlags: [],
   today: "2026-08-22", now: Date.parse("2026-08-22T09:00:00Z"),
 });
 
-describe("⚠️ the note stays, and a task appears beside it", () => {
-  it("(a) the note carries a badge, (b) it is still on the board, (c) the TO-DO BOARD's own selector finds the task", () => {
-    const all = [NOTE, TASK];
-
-    /* (b) — the note is still a note: dateless, unticked, on the board */
-    expect(isNoteTask(NOTE)).toBe(true);
-    expect(sortNotes(all).map((n) => n.id)).toEqual([NOTE.id]);
-    /* and its projection is NOT on the board beside it — a dated task is not a note */
-    expect(sortNotes(all).some((n) => n.id === TASK.id)).toBe(false);
-
-    /* (a) — the badge is DERIVED from the projection existing, never stored on the note */
-    expect(projectedTask(NOTE, all)).toEqual(TASK);
-    expect(projectedTask(NOTE, [NOTE])).toBeUndefined();
-    expect(Object.keys(NOTE)).not.toContain("taskId");
-
-    /* (c) — asked of the REAL selector the To-do board uses, not of a re-query of the store */
-    const cols = assembleBoard(boardInput(all) as never);
+describe("⚠️ ONE document, ONE row — the whole point of the collapse", () => {
+  it("a dated note is EXACTLY ONE card via the To-do board's own selector, and it is the note", () => {
+    const cols = assembleBoard(boardInput([DATED]) as never);
     const cards = [...cols.do, ...cols.nt, ...cols.hk];
-    expect(cards.some((c) => c.key === TASK.id), "the To-do board does not see the task").toBe(true);
-    /* and the Calendar's own day derivation places it */
-    const card = cards.find((c) => c.key === TASK.id)!;
-    expect(cardActionYmd(card as never, [])).toBe("2026-08-26");
+    const mine = cards.filter((c) => c.title.startsWith("Two form passes"));
+    /* the one-row assertion is the whole point of this phase */
+    expect(mine).toHaveLength(1);
+    expect(mine[0].key).toBe(NOTE.id);          // the note's own id — no notetask-* sibling
+    expect(cardActionYmd(mine[0] as never, [])).toBe("2026-08-26");   // and the Calendar's day
   });
 
-  it("⚠️ the link is a derived id, and it survives isValidId's charset", () => {
-    expect(projectedTaskId("task-abc123")).toBe("notetask-task-abc123");
-    /* ⚠️ `isValidId` is ^[a-zA-Z0-9_-]+$, and an id BUILT FROM DISPLAY TEXT is how that gets
-       failed by accident — the R&R heal id carried an ampersand and was denied permanently and
-       silently. This one is built from an id, never from words, and the check says so. */
-    for (const id of ["task-abc123", "a_b-C9", "x"]) {
-      expect(projectedTaskId(id)).toMatch(/^[a-zA-Z0-9_-]+$/);
-    }
+  it("…and the note is STILL ON THE BOARD, because the paper marks it as the board's own", () => {
+    expect(sortNotes([DATED]).map((n) => n.id)).toEqual([NOTE.id]);
+    /* the two-natures law is untouched — the dated document is a TASK to the To-do board */
+    expect(isNoteTask(DATED)).toBe(false);
+    /* an ORDINARY task (dated, no paper) does not leak onto the Noteboard */
+    const todoTask: UserTask = { ...NOTE, id: "task-ordinary", dueDate: "2026-08-26" };
+    expect(sortNotes([todoTask])).toHaveLength(0);
+    /* and a dateless note needs no marker — it is a note by the law itself */
+    expect(sortNotes([NOTE]).map((n) => n.id)).toEqual([NOTE.id]);
   });
 
-  it("detaching removes the TASK and leaves the note untouched", () => {
-    const after = [NOTE];                                  // the task document is deleted
-    expect(projectedTask(NOTE, after)).toBeUndefined();     // so the badge goes
-    expect(sortNotes(after).map((n) => n.id)).toEqual([NOTE.id]);  // and the note is where it was
-    expect(page).toContain("deleteUserTask(projectedTaskId(");
+  it("⚠️ the discriminator holds: NOTHING outside the Noteboard writes colour onto a task", () => {
+    /* the sweep that fences the pun — dated ∧ papered means noteboard-made, and that stays true
+       only while this page is colour's sole writer. Population first: the census must find the
+       writer before absence elsewhere means anything. */
+    const dir = join(here, "..");
+    const offenders: string[] = [];
+    let writers = 0;
+    const walk = (d: string) => {
+      for (const f of readdirSync(d, { withFileTypes: true })) {
+        const p = join(d, f.name);
+        if (f.isDirectory()) { walk(p); continue; }
+        if (!/\.(tsx?|ts)$/.test(f.name) || /\.test\./.test(f.name)) continue;
+        const src = decls(readFileSync(p, "utf8"));
+        if (src.includes("setUserTaskColour(")) {
+          writers++;
+          if (!p.endsWith("TodoNoteboardPage.tsx") && !p.endsWith("db.tsx")) offenders.push(p);
+        }
+      }
+    };
+    walk(dir);
+    expect(writers).toBeGreaterThan(0);
+    expect(offenders).toEqual([]);
   });
 });
 
-describe("⚠️ the title is offered, not decided", () => {
-  it("the first line, capped at 60 — and the cap is measured, not assumed", () => {
-    expect(noteTaskTitle(NOTE.text)).toBe("Two form passes mentioned the opening pace.");
-    const long = "x".repeat(200);
-    expect(noteTaskTitle(long)).toHaveLength(60);
-    expect(noteTaskTitle("  spaced  \nsecond")).toBe("spaced");
-    expect(noteTaskTitle("")).toBe("");
+describe("⚠️ the conversion and its inverse are ONE FIELD each way", () => {
+  it("the paper is stamped BEFORE the date, and a refused stamp stops the conversion", () => {
+    /* an unpapered note dated first would vanish from the board between the two writes — and
+       permanently, if the colour write is then refused by stale rules */
+    const fn = page.slice(page.indexOf("const makeTask"));
+    expect(page.indexOf("const makeTask")).toBeGreaterThan(-1);
+    const body = fn.slice(0, fn.indexOf("\n  };"));
+    const stampAt = body.indexOf("setUserTaskColour");
+    const dateAt = body.indexOf("dueDate: dateDraft");
+    expect(stampAt).toBeGreaterThan(-1);
+    expect(dateAt).toBeGreaterThan(-1);
+    expect(stampAt).toBeLessThan(dateAt);
+    expect(body).toContain("return");             // the refusal path stops before the date
   });
 
-  it("the popover states what happens, in the mockup's words", () => {
+  it("detach clears the date and ONLY the date — the note keeps its paper and its place", () => {
+    const fn = page.slice(page.indexOf("const detachTask"));
+    expect(page.indexOf("const detachTask")).toBeGreaterThan(-1);
+    const body = fn.slice(0, fn.indexOf("\n  };"));
+    expect(body).toContain("{ dueDate: null }");
+    expect(body).not.toContain("deleteUserTask");
+    /* the un-dated document is a note again, still papered, still on the board */
+    const detached: UserTask = { ...DATED, dueDate: undefined };
+    expect(sortNotes([detached]).map((n) => n.id)).toEqual([NOTE.id]);
+    expect(noteColour(detached)).toBe("yellow");
+  });
+
+  it("the badge derives from the note's OWN date — no second document to consult", () => {
+    expect(page).toContain("n.dueDate");
+    expect(page).toContain("On your to-do list");
+  });
+});
+
+describe("⚠️ the projection is GONE, not shadowed", () => {
+  it("no notetask id, no projectedTask, no separate title — in the lib or the page", () => {
+    for (const dead of ["projectedTaskId", "projectedTask", "noteTaskTitle", "notetask-"]) {
+      expect(lib, dead).not.toContain(dead);
+      expect(page, dead).not.toContain(dead);
+    }
+    /* the popover keeps its verbatim copy and loses its Task field — one object, one text */
     expect(page).toContain("Turn into a task");
     expect(page).toContain("The task appears on your to-do list and calendar. The note stays here, unchanged.");
+    expect(page).not.toContain("nb-task-title");
   });
-});
 
-describe("⚠️ 'Give it a date…' is RETIRED — one door, not two with opposite meanings", () => {
-  it("the menu offers the projection, and the conversion is gone", () => {
+  it("the menu still forks on whether the note has a task — now the note's own date", () => {
     const flat = noteMenu(false).flatMap((g) => g.entries) as MenuLeaf[];
     expect(flat.map((l) => l.label)).toContain("Turn into a task…");
-    expect(flat.map((l) => l.label)).not.toContain("Give it a date…");
-    /* and a note that already has one is offered the inverse instead — never both */
     const attached = noteMenu(true).flatMap((g) => g.entries) as MenuLeaf[];
     expect(attached.map((l) => l.label)).toContain("Detach from tasks");
-    expect(attached.map((l) => l.label)).not.toContain("Turn into a task…");
-  });
-
-  it("⚠️ the old in-place conversion is gone from the page, not merely unreachable", () => {
-    /* it moved a note off this board with one write; leaving it would give one note two
-       conversions that disagree about whether it survives */
-    expect(page).not.toContain('updateUserTask(note.id, { dueDate: dateDraft })');
-    expect(page).not.toContain("Make it a task");
-    expect(page).not.toContain("give-date");
+    expect(page).toContain("noteMenu(!!menu.note.dueDate)");
   });
 });

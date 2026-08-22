@@ -61,7 +61,10 @@ const NOTES = [
   { n: 7, body: "NBPAIR alpha beta" },
   { n: 8, body: "NBPAIR alpha\nbeta" },
 ];
-const id = (n) => `notetask-probe-${n}`;
+/* ⚠️ NOT `notetask-*` — that is the retired projection's namespace and migrateNotetasks.mjs
+   deletes strays in it (it classed three of this seeder's own notes as orphans and removed them,
+   which is how this comment earned its place). Seed fixtures get their own prefix. */
+const id = (n) => `nbseed-${n}`;
 const clean = process.argv.includes("--clean");
 
 for (const { n, body, colour } of NOTES) {

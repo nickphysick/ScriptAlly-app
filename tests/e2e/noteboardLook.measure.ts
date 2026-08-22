@@ -62,7 +62,10 @@ test.describe("Noteboard — measured", () => {
       console.log(`   ${k.padEnd(14)} x=${String(b.x).padStart(5)} y=${String(b.y).padStart(5)} ${b.w}×${b.h}`);
     }
     expect(heights.size, "six cards of six lengths rendered at one height — the board is not packing").toBeGreaterThanOrEqual(3);
-    expect(columns.size, "the board is not resolving to three columns").toBe(3);
+    /* ⚠️ RE-POINTED (finish run, 1a): the count is DERIVED from the viewport now (column-width,
+       no column-count), so an exact figure here would pin the coincidence of one width. Three is
+       what 1440 happens to produce; the claim is that columns exist and PACK. */
+    expect(columns.size, "the board is not resolving to multiple columns").toBeGreaterThanOrEqual(3);
 
     /* ⚠️ A LAW THAT HOLDS AT EXACTLY ONE WIDTH IS A COINCIDENCE. */
     await page.setViewportSize(WIDER);
@@ -72,7 +75,9 @@ test.describe("Noteboard — measured", () => {
     const wideCols = new Set(await page.$$eval(".nb-note, .nb-ghost",
       (els) => els.map((e) => Math.round(e.getBoundingClientRect().x))));
     console.log(`[1920] ${wideCols.size} columns at x=${[...wideCols].sort((a, b) => a - b).join(",")}`);
-    expect(wideCols.size, "three columns at 1440 and not at 1920").toBe(3);
+    /* wider viewport, MORE columns — the derived count's whole point; the old exact-3 pin was
+       the fixed count's coincidence and went with it */
+    expect(wideCols.size, "no reflow — the count did not grow with the viewport").toBeGreaterThan(columns.size);
   });
 
   test("⚠️ pre-wrap: the SAME characters, one newline apart, are two different heights", async ({ page }) => {
