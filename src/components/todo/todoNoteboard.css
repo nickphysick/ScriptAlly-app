@@ -115,6 +115,16 @@
   color: var(--nb-burgundy); background: rgba(255, 255, 255, 0.6); border-color: transparent;
 }
 
+/* ⚠️ THE BADGE IS DERIVED, and it is DASHED because it is a link to something living elsewhere
+   rather than a state of the note. The note is unchanged; a task exists beside it. */
+.nb-taskbadge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: var(--nb-micro);
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--nb-sage-dark);
+  background: rgba(255, 255, 255, 0.6); border: 1px dashed var(--nb-sage-ring);
+  border-radius: 99px; padding: 3px 10px; margin-top: 10px;
+}
+
 /* ── the pin affordance — first in the flow, the mockup's own ghost ────────────────────────── */
 .nb-ghost {
   break-inside: avoid; margin: 0 0 var(--nb-gap);
@@ -223,3 +233,16 @@
 /* the conversion door's copy */
 .nb-datepanel { width: min(380px, calc(100vw - 40px)); }
 .nb-datewhy { font-size: 12.5px; color: var(--nb-quiet); line-height: 1.6; margin: 0 0 12px; }
+
+/* ── the "Turn into a task" popover ────────────────────────────────────────────────────────── */
+.nb-taskpanel { width: min(380px, calc(100vw - 40px)); }
+.nb-taskwhy { font-size: 12.5px; color: var(--nb-quiet); line-height: 1.6; margin: 0 0 12px; }
+.nb-plabel {
+  display: block; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: var(--nb-micro);
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--nb-muted); margin: 10px 0 4px;
+}
+.nb-pinput {
+  width: 100%; border: 1px solid rgba(124, 58, 42, 0.2); border-radius: 8px; padding: 8px 10px;
+  font: inherit; font-size: 13px; background: #fff; color: var(--nb-ink); outline: 0;
+}
+.nb-pinput:focus { border-color: var(--nb-burgundy); }

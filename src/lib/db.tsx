@@ -330,7 +330,7 @@ interface DbContextType {
   // User tasks — the canonical stored to-do object (record-scoped; read by the To-do board + the
   // per-record "View tasks" popovers). Badge counts stay derived.
   userTasks: UserTask[];
-  addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[] }) => Promise<string | undefined>;
+  addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[]; createdAt?: string }) => Promise<string | undefined>;
   updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">> & { detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null }) => Promise<void>;
   deleteUserTask: (id: string) => Promise<void>;
   /* ⚠️ THE ONE WRITE ON THIS OBJECT THAT ANSWERS. Every other user-task write routes its error

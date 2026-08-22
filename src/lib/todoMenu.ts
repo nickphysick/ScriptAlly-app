@@ -38,7 +38,13 @@ export type MenuItemId =
   | "view-agent"
   | "edit-task"
   | "delete-task"
-  | "give-date"    // the Noteboard's conversion door (tasks-pages P4)
+  /* ⚠️ `give-date` IS REMOVED, not deprecated (Noteboard rebuild, 22 Aug). It converted a note in
+     place — one write, and the note left the board. The board PROJECTS a task now: the note stays
+     and a second document appears beside it. Leaving the id in the union would leave a
+     handler-shaped hole nothing can reach, reading as a live capability — the same reason the
+     `est-*` ids went. */
+  | "make-task"     // project a task from this note, dated; the note stays
+  | "detach-task"   // delete the projection; the note stays
   /* ⚠️ THE `est-*` IDS ARE REMOVED WITH THE LADDER (15 Aug) — see `cardMenu`. Keeping them in the
      union would leave a handler-shaped hole nothing can reach, reading as a live capability. */
   | "tags";       // the tag sheet (tasks-pages P5 — arrives WITH its picker)
@@ -199,19 +205,30 @@ export function cardMenu(card: BoardCard, column: TodoColumnId): MenuGroup[] {
  * the Calendar. ("Tags…" joins this menu in Phase 5 WITH its picker — a menu line shipped ahead
  * of its surface would be a dead affordance.)
  */
-export function noteMenu(): MenuGroup[] {
+/**
+ * The note's ⋯ menu.
+ *
+ * ⚠️ "GIVE IT A DATE…" IS RETIRED (Noteboard rebuild, 22 Aug). It converted the note in place —
+ * one write, and the note LEFT this board for the To-do list and the Calendar. The board now
+ * PROJECTS a task instead: the note stays and a second document appears beside it. Leaving both
+ * would give one note two conversions that disagree about whether it survives.
+ *
+ * @param hasTask whether the note already projects one — the two states offer opposite doors, and
+ *        never both at once.
+ */
+export function noteMenu(hasTask: boolean): MenuGroup[] {
   return [
     {
       head: null,
       entries: [
         leaf("edit-task", "Edit the note…"),
-        leaf("give-date", "Give it a date…"),
-        leaf("tags", "Tags…"), // tasks-pages P5 — lands with the picker
+        leaf("tags", "Tags…"),
+        hasTask ? leaf("detach-task", "Detach from tasks") : leaf("make-task", "Turn into a task…"),
       ],
     },
     {
       head: null,
-      entries: [leaf("delete-task", "Delete the note…", { danger: true })],
+      entries: [leaf("delete-task", "Remove note…", { danger: true })],
     },
   ];
 }

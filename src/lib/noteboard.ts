@@ -137,3 +137,40 @@ export const noteMatchesSearch = (n: UserTask, q: string): boolean => {
   if (!needle) return true;
   return `${n.text} ${n.detail ?? ""}`.toLowerCase().includes(needle);
 };
+
+/* ────────────────────────────────────────────────────────────────────────────────────────────
+ * Turning a note into a task
+ *
+ * ⚠️ THIS REVERSES A ⚠️ LAW OF THIS APP, KNOWINGLY. The model was "THE DATE IS THE DOOR": a note
+ * and a task were ONE document and giving a note a date MOVED it — off this board, onto the To-do
+ * list, onto the Calendar. "One object, three rooms. Nothing copies, nothing moves." The design
+ * now asks for the opposite: the note stays where the writer pinned it and a task appears beside
+ * it. That is two documents, and it cannot be a rendering of the old model. "Give it a date…" is
+ * retired with it rather than left standing — two doors to the same place with opposite meanings
+ * is worse than either one.
+ *
+ * ⚠️ AND THE LINK IS DERIVED, NOT STORED. A reference field would need the closed `userTasks`
+ * rules allowlist opened, and an unlisted key on a `hasOnly()` create denies the whole document —
+ * so the projection takes a KNOWN id instead. The note has a task iff `notetask-{noteId}` exists.
+ * No field, no schema change, no deploy, and nothing to keep in step.
+ * ──────────────────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * ⚠️ BUILT FROM AN ID, NEVER FROM WORDS. `isValidId` requires `^[a-zA-Z0-9_-]+$`, and an id
+ * composed from display text is exactly how that gets failed by accident — the R&R heal id
+ * carried an ampersand from a status label and was denied permanently and silently. A task id is
+ * already in the charset, so a prefix keeps it there.
+ */
+export const projectedTaskId = (noteId: string): string => `notetask-${noteId}`;
+
+/** The task a note has projected, if it still has one. Absence is the answer, not an error. */
+export const projectedTask = (n: Pick<UserTask, "id">, all: UserTask[]): UserTask | undefined =>
+  all.find((t) => t.id === projectedTaskId(n.id));
+
+/**
+ * The title the popover OFFERS — the note's first line, capped. It is a starting point the writer
+ * edits, never a decision: a note is prose and a task is a thing to do, and the two are only
+ * sometimes the same sentence.
+ */
+export const noteTaskTitle = (body: string): string =>
+  (body.split("\n")[0] ?? "").trim().slice(0, 60);

@@ -185,10 +185,19 @@ describe("⚠️ The tags sheet: rename, recolour, delete — with usage counts"
 /* ── conversion carries tags + the store ───────────────────────────────────────────────────── */
 
 describe("⚠️ tags survive note→task conversion — the date is the door, the tags are the luggage", () => {
-  it("the conversion writes ONLY dueDate; the tags field is untouched by construction", () => {
-    expect(noteboard).toContain("await updateUserTask(note.id, { dueDate: dateDraft })");
-    const give = sliceBetween(noteboard, "const giveDate", "const deleteNote");
-    expect(give).not.toContain("tags");
+  it("⚠️ THE TAGS ARE STILL THE LUGGAGE — now they are COPIED, because there are two documents", () => {
+    /* ⚠️ THE MECHANISM REVERSED (Noteboard rebuild, 22 Aug). Under "the date is the door" a note
+       and its task were ONE document, so the tags came for free — the write touched only dueDate
+       and the field was untouched by construction. The board PROJECTS a task now: the note stays
+       and a second document appears, so "untouched" would mean the task has no tags at all.
+       The CLAIM is what matters and it is unchanged — a writer who filters #agents on the To-do
+       board must not lose the task they made from an #agents note — so the projection carries
+       them explicitly. */
+    const make = sliceBetween(noteboard, "const makeTask", "const detachTask");
+    expect(make).toContain("id: projectedTaskId(note.id)");
+    expect(make).toContain("tags: note.tags");
+    /* and it is the note's OWN tags, never a fresh list */
+    expect(make).not.toMatch(/tags:\s*\[\]/);
   });
 
   it("the card carries them into every room (userCard copies t.tags)", () => {

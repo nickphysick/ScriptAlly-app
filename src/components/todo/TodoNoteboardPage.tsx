@@ -39,7 +39,7 @@ import { isNoteTask as isNote } from "../../lib/todoBoard";
 import {
   NOTEBOARD_SUBTITLE, noteCountLabel, noteColour, sortNotes, noteRestoreFields,
   composerWithColour, editCommit, emptyDraft, noteTagChips, noteMatchesSearch,
-  NOTE_COLOURS, NoteDraft,
+  NOTE_COLOURS, NoteDraft, projectedTaskId, projectedTask, noteTaskTitle,
 } from "../../lib/noteboard";
 import { newTag } from "../../lib/todoTags";
 import { UserTask, TagDef } from "../../types";
@@ -68,7 +68,9 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   const [examples, setExamples] = useState(false); // the Examples drawer (P7)
   const [column, setColumn] = useState(false);
   const [menu, setMenu] = useState<{ note: UserTask; anchor: HTMLElement } | null>(null);
-  const [dateFor, setDateFor] = useState<UserTask | null>(null);
+  /** The note being turned into a task, and the two answers the popover collects. */
+  const [taskFor, setTaskFor] = useState<UserTask | null>(null);
+  const [taskTitle, setTaskTitle] = useState("");
   const [tagsFor, setTagsFor] = useState<UserTask | null>(null); // tasks-pages P5 — the ⋯ Tags… sheet
   const [dateDraft, setDateDraft] = useState("");
   /** The composer: null when closed, a draft when open. It only ever PINS — editing happens on
@@ -166,20 +168,52 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
     }
   };
 
-  /* ⚠️ THE CONVERSION — one write; the derivation does the moving. */
-  const giveDate = async () => {
-    if (!dateFor || !dateDraft) return;
-    const note = dateFor;
+  /**
+   * ⚠️ A PROJECTION, NOT A MOVE. The note stays exactly where it is; a SECOND document appears,
+   * dated, and the To-do list and the Calendar pick it up with no change to either — they read
+   * every non-done `userTask` already. The link between the two is the projected task's ID, so
+   * nothing is stored on the note and nothing has to be kept in step.
+   */
+  const makeTask = async () => {
+    if (!taskFor || !dateDraft) return;
+    const note = taskFor;
+    const title = taskTitle.trim() || noteTaskTitle(note.text);
+    if (!title) return;
     try {
-      await updateUserTask(note.id, { dueDate: dateDraft });
-      setDateFor(null);
+      /* ⚠️ THE TAGS TRAVEL. Under the old in-place conversion they came for free — it was one
+         document — and the claim ("the date is the door, the tags are the luggage") is worth
+         keeping: a writer who filters #agents on the To-do board should not lose the task they
+         made from an #agents note. It is the writer's own classification of the same subject. */
+      await addUserTask({
+        id: projectedTaskId(note.id), text: title, dueDate: dateDraft,
+        ...(note.tags && note.tags.length ? { tags: note.tags } : {}),
+      });
+      setTaskFor(null);
       setDateDraft("");
-      flash(`Now a task — due ${new Date(dateDraft).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}. It’s on your To-do list and the Calendar.`, {
-        label: "Undo", fn: async () => { await updateUserTask(note.id, { dueDate: null }); flash("A note again"); },
+      flash(`On your to-do list for ${new Date(dateDraft).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}. The note stays here.`, {
+        label: "Undo", fn: async () => { await deleteUserTask(projectedTaskId(note.id)); flash("Detached — the note stays here."); },
       });
     } catch {
-      flash("Couldn’t set the date — try again?");
+      flash("Couldn’t add that to your tasks — try again?");
     }
+  };
+
+  /** The inverse: the task goes, the note does not. */
+  const detachTask = async (note: UserTask) => {
+    const task = projectedTask(note, userTasks);
+    try {
+      await deleteUserTask(projectedTaskId(note.id));
+    } catch {
+      flash("Couldn’t detach that — try again?");
+      return;
+    }
+    flash("Detached — the note stays here.", task ? {
+      label: "Undo",
+      fn: async () => {
+        await addUserTask({ id: task.id, text: task.text, dueDate: task.dueDate, createdAt: task.createdAt });
+        flash("Back on your to-do list");
+      },
+    } : undefined);
   };
 
   const deleteNote = async (note: UserTask) => {
@@ -219,7 +253,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
        the card EDITS. Routing edit back through the composer would put a second note-shaped box
        at the top of the board while the real one sat below it, unchanged. */
     if (item.id === "edit-task") setEditing({ id: note.id, text: note.text });
-    if (item.id === "give-date") { setDateFor(note); setDateDraft(""); }
+    if (item.id === "make-task") { setTaskFor(note); setTaskTitle(noteTaskTitle(note.text)); setDateDraft(""); }
+    if (item.id === "detach-task") void detachTask(note);
     if (item.id === "tags") setTagsFor(note);
     if (item.id === "delete-task") void deleteNote(note);
   };
@@ -383,6 +418,17 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                       composer is one body — but notes written under the split have prose in it
                       and dropping it would lose their words. */}
                   {n.detail && <div className="nb-body nb-body--legacy">{n.detail}</div>}
+                  {/* ⚠️ DERIVED FROM THE PROJECTION EXISTING — nothing is stored on the note. The
+                      badge is how the writer knows the note has a task without the note having
+                      become one. */}
+                  {(() => {
+                    const t = projectedTask(n, userTasks);
+                    return t?.dueDate ? (
+                      <div className="nb-taskbadge">
+                        ✓ On your to-do list · {new Date(t.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                      </div>
+                    ) : null;
+                  })()}
                   <div className="nb-foot">
                     {(n.tags ?? []).map((tid) => {
                       const def = userTags.find((t) => t.id === tid);
@@ -427,7 +473,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
       {menu && (
         <PortalMenu
           anchor={menu.anchor}
-          groups={noteMenu()}
+          groups={noteMenu(!!projectedTask(menu.note, userTasks))}
           ariaLabel={`Actions for ${menu.note.text}`}
           onPick={onMenuPick}
           onClose={(returnFocus) => {
@@ -436,22 +482,34 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
         />
       )}
 
-      {/* the conversion door — one date, one write */}
-      {dateFor && (
-        <div className="cal-dayscrim" onClick={() => setDateFor(null)}>
-          <div className="cal-daypanel nb-datepanel" role="dialog" aria-label="Give it a date" onClick={(e) => e.stopPropagation()}>
+      {/* ⚠️ THE PROJECTION, NOT A CONVERSION. Two answers — what the task says and when it is due
+          — and the copy states plainly that the note is not going anywhere, because the app spent
+          a year teaching the opposite. */}
+      {taskFor && (
+        <div className="cal-dayscrim" onClick={() => setTaskFor(null)}>
+          <div className="cal-daypanel nb-taskpanel" role="dialog" aria-label="Turn into a task" onClick={(e) => e.stopPropagation()}>
             <div className="cal-dayhead">
-              Give it a date
-              <button type="button" className="cal-dayx" aria-label="Close" onClick={() => setDateFor(null)}>✕</button>
+              Turn into a task
+              <button type="button" className="cal-dayx" aria-label="Close" onClick={() => setTaskFor(null)}>✕</button>
             </div>
-            <p className="nb-datewhy">
-              A date turns “{dateFor.text}” into a task: it leaves the Noteboard, joins your
-              To-do list, and appears on the Calendar.
+            <p className="nb-taskwhy">
+              The task appears on your to-do list and calendar. The note stays here, unchanged.
             </p>
+            <label className="nb-plabel" htmlFor="nb-task-title">Task</label>
+            <input
+              id="nb-task-title"
+              className="nb-pinput"
+              value={taskTitle}
+              /* offered, never decided — a note is prose and a task is a thing to do, and the two
+                 are only sometimes the same sentence */
+              onChange={(e) => setTaskTitle(e.target.value)}
+              aria-label="Task"
+            />
+            <label className="nb-plabel">Date</label>
             <BrandDatePicker value={dateDraft} onChange={setDateDraft} placeholder="Choose a date" />
             <div className="nb-cactions">
-              <button type="button" className="nb-csave" disabled={!dateDraft} onClick={() => void giveDate()}>Make it a task</button>
-              <button type="button" className="nb-ccancel" onClick={() => setDateFor(null)}>Keep it a note</button>
+              <button type="button" className="nb-ccancel" onClick={() => setTaskFor(null)}>Cancel</button>
+              <button type="button" className="nb-csave" disabled={!dateDraft || !taskTitle.trim()} onClick={() => void makeTask()}>Add to tasks</button>
             </div>
           </div>
         </div>

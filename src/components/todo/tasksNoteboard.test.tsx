@@ -68,39 +68,55 @@ describe("⚠️ notes only — nothing derived reaches this board", () => {
   });
 });
 
-describe("⚠️ the date is the door — one write, three rooms", () => {
-  it("the conversion is ONE updateUserTask carrying dueDate — nothing copies, nothing moves", () => {
-    expect(page).toContain("await updateUserTask(note.id, { dueDate: dateDraft })");
-    // and the undo is the same write reversed
-    expect(page).toContain("await updateUserTask(note.id, { dueDate: null })");
+describe("⚠️ 'THE DATE IS THE DOOR' IS RETIRED — the board projects a task, it does not become one", () => {
+  /* ⚠️ THIS BLOCK USED TO ASSERT THE OPPOSITE, and the reversal is deliberate (Noteboard rebuild,
+     22 Aug). The old law was: a note and a task are ONE document, and giving the note a date MOVES
+     it — off this board, onto the To-do list, onto the Calendar. "One object, three rooms. Nothing
+     copies, nothing moves." The design now asks for the note to STAY while a task appears beside
+     it, which is two documents and cannot be a rendering of the old model.
+     The claims worth keeping are kept, restated against the new mechanism. */
+
+  it("the conversion is GONE from the page, not merely unreachable", () => {
+    expect(page).not.toContain("updateUserTask(note.id, { dueDate: dateDraft })");
+    expect(page).not.toContain("Make it a task");
+    expect(page).not.toContain("give-date");
   });
 
-  it("a dated card lands in the Your-tasks family and on the Calendar — by derivation", () => {
-    const converted = {
-      key: "k", stream: "nt" as const, title: "t", who: "", subtitle: "", due: "", warn: false,
+  it("the projection lands in the Your-tasks family and on the Calendar — still by derivation", () => {
+    const projected = {
+      key: "notetask-n1", stream: "nt" as const, title: "t", who: "", subtitle: "", due: "", warn: false,
       snoozes: 0, hk: false, initials: "", record: "", committed: false, done: false,
-      userTaskId: "n1", nature: "task" as const, dueYmd: "2026-08-12",
+      userTaskId: "notetask-n1", nature: "task" as const, dueYmd: "2026-08-12",
     };
-    expect(facetOf(converted)).toBe("yours");                     // the To-do list's group
-    expect(cardActionYmd(converted, [])).toBe("2026-08-12");      // the Calendar's day
-    expect(isNote(ut({ dueDate: "2026-08-12" }))).toBe(false);    // and it has left this board
+    expect(facetOf(projected)).toBe("yours");                     // the To-do list's group
+    expect(cardActionYmd(projected, [])).toBe("2026-08-12");      // the Calendar's day
+    /* ⚠️ AND THE NOTE IS STILL A NOTE — this is the half that reversed */
+    expect(isNote(ut({}))).toBe(true);
+    expect(isNote(ut({ dueDate: "2026-08-12" }))).toBe(false);    // the PROJECTION is not one
   });
 
-  it("the menu's door says so: Give it a date…", () => {
-    expect(page).toContain('item.id === "give-date"');
-    expect(page).toContain("Make it a task");
+  it("the menu's door says so: Turn into a task…", () => {
+    expect(page).toContain('item.id === "make-task"');
+    expect(page).toContain("Add to tasks");
   });
 });
 
 describe("⚠️ the ⋯ menu — the SAME grammar, the SAME shell", () => {
-  it("the note menu: Edit · Give it a date… · Tags… · a separated danger Delete (Tags… ARRIVED with its picker, P5)", () => {
-    const groups = noteMenu();
-    const flat = groups.flatMap((g) => g.entries) as MenuLeaf[];
-    expect(flat.map((l) => l.label)).toEqual(["Edit the note…", "Give it a date…", "Tags…", "Delete the note…"]);
-    expect(groups).toHaveLength(2); // the danger group stands apart, the board's own pattern
+  it("⚠️ THE MENU'S DOOR CHANGED — Turn into a task…, and its inverse, never both", () => {
+    /* ⚠️ SUPERSEDED (Noteboard rebuild, 22 Aug). "Give it a date…" converted the note IN PLACE —
+       one write, and it left this board for the To-do list and the Calendar. The board projects
+       a task now: the note stays and a second document appears beside it. The two doors mean
+       opposite things about whether the note survives, so only one of them ships.
+       noteboardTask.test.ts holds the full case, including the retirement. */
+    const flat = noteMenu(false).flatMap((g) => g.entries) as MenuLeaf[];
+    expect(flat.map((l) => l.label)).toEqual(["Edit the note…", "Tags…", "Turn into a task…", "Remove note…"]);
+    expect(noteMenu(false)).toHaveLength(2); // the danger group stands apart, the board's pattern
     expect(flat.find((l) => l.id === "delete-task")!.danger).toBe(true);
-    // every opener says so
-    for (const l of flat) expect(l.label.endsWith("…"), l.label).toBe(true);
+    /* every OPENER says so — and the two that act at once deliberately do not */
+    for (const l of flat) {
+      const opens = !["detach-task"].includes(l.id);
+      expect(l.label.endsWith("…"), l.label).toBe(opens);
+    }
   });
 
   it("the cards feed the SHARED PortalMenu and wear the SAME reserved-corner seat", () => {
