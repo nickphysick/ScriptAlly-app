@@ -581,3 +581,460 @@ test("finishing Phase 7b — reduced motion, overlay, cushion, foot margin", asy
 
   console.log("\n──── Phase 7b ────\n" + log.join("\n"));
 });
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   THE FOOT GAP — PHASE 0. EVIDENCE FIRST, THEN THREE MEASUREMENTS THAT NAME WHAT THEY MEASURE.
+
+   ⚠️ THIS IS THE FOURTH READING OF THIS GAP AND THE PREVIOUS THREE ALL LOOKED LIKE ANSWERS. A
+   lowest-painted-box walk returned an inner pane's SCROLL EXTENT (1959px on /queries). Scrolling to
+   the bottom first changed nothing, because all three pages FILL. The third — the chassis window's
+   own bottom — read a clean 20px on all three and Nick still reports the Calendar looks wrong.
+   A fourth computed number is not what is needed, so this captures the pixels first.
+
+   ⚠️ AND IT MEASURES THREE DIFFERENT THINGS ON PURPOSE, because that is exactly why the earlier
+   readings disagreed: "the foot gap" is at least three questions, and the pages can match on one
+   while differing on another.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+const FOOT_ROUTES = ["/queries", "/todo", "/todo/calendar"];
+const FOOT_HEIGHTS = [900, 1080];
+
+test("foot gap Phase 0 — the pixels, then three named measurements", async ({ page }) => {
+  const rows: string[] = [];
+
+  for (const height of FOOT_HEIGHTS) {
+    for (const route of FOOT_ROUTES) {
+      await openRoute(page, route, { width: 1440, height });
+      const name = route.replace(/\//g, "") || "root";
+      await page.screenshot({
+        path: `reports/calendar-foot/${name}-${height}.png`,
+        clip: { x: 0, y: height - 200, width: 1440, height: 200 },
+      });
+
+      const m = await page.evaluate(() => {
+        const px = (n: number) => Math.round(n * 100) / 100;
+        const vis = (s: string) => Array.from(document.querySelectorAll(s))
+          .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
+        const vh = window.innerHeight;
+
+        /* (1) THE OUTERMOST CONTENT CARD — the chassis window. Same box on every page. */
+        const win = vis(".ws-window") ?? vis(".ws-winwrap");
+        const w = win?.getBoundingClientRect();
+
+        /* (2) THE INNERMOST SCROLLING REGION and the gap to its own container. */
+        const scroller = (() => {
+          const all = Array.from(document.querySelectorAll("*")) as HTMLElement[];
+          const cands = all.filter((e) => {
+            const b = e.getBoundingClientRect();
+            if (b.height < 40 || b.top > vh) return false;
+            const cs = getComputedStyle(e);
+            return (cs.overflowY === "auto" || cs.overflowY === "scroll")
+              && !e.closest("nav") && e.closest(".ws-window") !== null;
+          });
+          /* the DEEPEST one — "innermost" is the claim, so depth decides, not document order */
+          return cands.sort((a, b) => {
+            const d = (e: HTMLElement) => { let n = 0, p: HTMLElement | null = e; while (p) { n++; p = p.parentElement; } return n; };
+            return d(b) - d(a);
+          })[0];
+        })();
+        const sc = scroller?.getBoundingClientRect();
+        const scParent = scroller?.parentElement?.getBoundingClientRect();
+
+        /* (3) WHAT KIND OF THING THE PAGE ENDS IN — the candidate Nick may actually be seeing. */
+        const lastInk = (() => {
+          const root = vis(".ws-window") ?? document.body;
+          let best: HTMLElement | null = null, bestBottom = -Infinity;
+          for (const e of Array.from(root.querySelectorAll("*")) as HTMLElement[]) {
+            const b = e.getBoundingClientRect();
+            if (b.height < 3 || b.width < 3) continue;
+            if (b.bottom > vh + 0.5) continue;                 // must be on screen
+            const cs = getComputedStyle(e);
+            if (cs.visibility === "hidden" || cs.display === "none") continue;
+            /* ⚠️ LEAVES ONLY — a parent's box contains its children's by construction, so
+               including containers reports the outermost wrapper on every page and tells you
+               nothing about what the reader's eye actually stops at. */
+            if (e.children.length > 0) continue;
+            const t = (e.textContent ?? "").trim();
+            const painted = cs.backgroundColor !== "rgba(0, 0, 0, 0)" || cs.borderBottomWidth !== "0px" || t.length > 0;
+            if (!painted) continue;
+            if (b.bottom > bestBottom) { bestBottom = b.bottom; best = e; }
+          }
+          if (!best) return null;
+          const b = best.getBoundingClientRect();
+          const owner = (() => {          // the nearest named ancestor, so the KIND is legible
+            let p: HTMLElement | null = best;
+            while (p && !(p.className || "").toString().trim()) p = p.parentElement;
+            return p ? (p.className || "").toString().split(/\s+/)[0] : "?";
+          })();
+          return {
+            tag: best.tagName.toLowerCase(),
+            cls: (best.className || "").toString().split(/\s+/)[0] || owner,
+            text: (best.textContent ?? "").trim().slice(0, 22),
+            bottom: px(b.bottom),
+          };
+        })();
+
+        return {
+          vh,
+          /* (1) */ winBottom: w ? px(w.bottom) : null, winToViewport: w ? px(vh - w.bottom) : null,
+          /* (2) */ scrollerCls: scroller ? (scroller.className || "").toString().split(/\s+/)[0] : null,
+          scrollerBottom: sc ? px(sc.bottom) : null,
+          scrollerToParent: sc && scParent ? px(scParent.bottom - sc.bottom) : null,
+          scrollerScrolls: scroller ? scroller.scrollHeight > scroller.clientHeight + 1 : null,
+          /* (3) */ lastInk,
+          lastInkToWindow: lastInk && w ? px(w.bottom - lastInk.bottom) : null,
+        };
+      });
+
+      rows.push(
+        `  ${String(height).padEnd(5)} ${route.padEnd(16)}` +
+        ` | (1) window ends ${String(m.winBottom).padStart(6)} → ${String(m.winToViewport).padStart(5)}px to viewport` +
+        ` | (2) ${String(m.scrollerCls).padEnd(12)} ends ${String(m.scrollerBottom).padStart(6)} → ${String(m.scrollerToParent).padStart(6)}px to parent` +
+        ` | (3) last ink ${(m.lastInk?.cls ?? "-").padEnd(14)} "${(m.lastInk?.text ?? "").padEnd(20)}" → ${String(m.lastInkToWindow).padStart(6)}px to window edge`,
+      );
+    }
+    rows.push("");
+  }
+
+  console.log("\n──── FOOT GAP, three measurements at two heights ────\n" + rows.join("\n"));
+});
+
+/**
+ * Phase 0b — the comparison the screenshots point at: what the page ENDS IN, and how much ground
+ * the window leaves below it.
+ *
+ * ⚠️ MEASUREMENT (3) IN THE PASS ABOVE HAD A HOLE, and it is worth stating because it inverted the
+ * answer. It rejected boxes below the VIEWPORT but not boxes clipped by the WINDOW — and
+ * `.ws-window` is `overflow: hidden`. So on `/queries` and `/todo` it reported the last ink as
+ * sitting 12–13px PAST the window edge: geometrically true, invisible in fact. Those pixels are
+ * clipped. The honest question is where the last VISIBLE thing stops, and where the last CARD does.
+ */
+test("foot gap Phase 0b — what each page ends in, and the ground below it", async ({ page }) => {
+  const rows: string[] = [];
+  for (const height of FOOT_HEIGHTS) {
+    for (const route of FOOT_ROUTES) {
+      await openRoute(page, route, { width: 1440, height });
+      const m = await page.evaluate(() => {
+        const px = (n: number) => Math.round(n * 100) / 100;
+        const vis = (s: string) => Array.from(document.querySelectorAll(s))
+          .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
+        const win = (vis(".ws-window") ?? vis(".ws-winwrap"))!;
+        const wb = win.getBoundingClientRect();
+
+        /* the lowest CARD: a box with its own fill or border, inside the window, not clipped by it */
+        let card: { cls: string; bottom: number } | null = null;
+        let ink: { cls: string; text: string; bottom: number } | null = null;
+        for (const e of Array.from(win.querySelectorAll("*")) as HTMLElement[]) {
+          const b = e.getBoundingClientRect();
+          if (b.height < 4 || b.width < 4) continue;
+          if (b.bottom > wb.bottom + 0.5) continue;          // clipped by the window — not visible
+          const cs = getComputedStyle(e);
+          if (cs.visibility === "hidden" || cs.display === "none") continue;
+          const cls = (e.className || "").toString().split(/\s+/)[0] || e.tagName.toLowerCase();
+          const filled = cs.backgroundColor !== "rgba(0, 0, 0, 0)" || parseFloat(cs.borderBottomWidth) > 0;
+          if (filled && b.width > 200 && (!card || b.bottom > card.bottom)) card = { cls, bottom: px(b.bottom) };
+          if (e.children.length === 0 && (e.textContent ?? "").trim()
+              && (!ink || b.bottom > ink.bottom)) {
+            ink = { cls, text: (e.textContent ?? "").trim().slice(0, 18), bottom: px(b.bottom) };
+          }
+        }
+        return {
+          winBottom: px(wb.bottom),
+          card, ink,
+          cardToWindow: card ? px(wb.bottom - card.bottom) : null,
+          inkToWindow: ink ? px(wb.bottom - ink.bottom) : null,
+        };
+      });
+      rows.push(
+        `  ${String(height).padEnd(5)} ${route.padEnd(16)} window ${String(m.winBottom).padStart(6)}` +
+        ` | last CARD ${(m.card?.cls ?? "-").padEnd(14)} ends ${String(m.card?.bottom).padStart(7)} → GROUND BELOW ${String(m.cardToWindow).padStart(6)}px` +
+        ` | last VISIBLE ink ${(m.ink?.cls ?? "-").padEnd(13)} "${(m.ink?.text ?? "").padEnd(18)}" → ${String(m.inkToWindow).padStart(6)}px`,
+      );
+    }
+    rows.push("");
+  }
+  console.log("\n──── what each page ends in ────\n" + rows.join("\n"));
+});
+
+/**
+ * Phase 0c — the read that matches the screenshots: the last BORDERED PANEL on each page, the
+ * ground the window leaves under it, and what (if anything) sits inside that ground.
+ *
+ * ⚠️ "CARD" NEEDED A BORDER, NOT JUST A FILL. `ws-work` is a filled full-width wrapper and it ends
+ * 1px above the window on every page — a true, useless answer that hid the real one. The panels a
+ * reader sees are the bordered boxes (the list card, the reading pane, the month grid, the day
+ * panel), so the filter is a visible border-bottom AND a substantial box.
+ */
+test("foot gap Phase 0c — last bordered panel, and what lives in the ground below it", async ({ page }) => {
+  const rows: string[] = [];
+  for (const height of FOOT_HEIGHTS) {
+    for (const route of FOOT_ROUTES) {
+      await openRoute(page, route, { width: 1440, height });
+      const m = await page.evaluate(() => {
+        const px = (n: number) => Math.round(n * 100) / 100;
+        const vis = (s: string) => Array.from(document.querySelectorAll(s))
+          .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
+        const win = (vis(".ws-window") ?? vis(".ws-winwrap"))!;
+        const wb = win.getBoundingClientRect();
+
+        let panel: { cls: string; bottom: number } | null = null;
+        for (const e of Array.from(win.querySelectorAll("*")) as HTMLElement[]) {
+          const b = e.getBoundingClientRect();
+          if (b.height < 60 || b.width < 220) continue;
+          if (b.bottom > wb.bottom - 2) continue;             // the wrapper itself, or clipped
+          const cs = getComputedStyle(e);
+          if (parseFloat(cs.borderBottomWidth) < 1) continue; // bordered panels only
+          if (cs.visibility === "hidden") continue;
+          const cls = (e.className || "").toString().split(/\s+/)[0];
+          if (!cls) continue;
+          if (!panel || b.bottom > panel.bottom) panel = { cls, bottom: px(b.bottom) };
+        }
+
+        /* everything painted BELOW the last panel's edge — the band the reader sees as "the foot" */
+        const below: string[] = [];
+        if (panel) {
+          for (const e of Array.from(win.querySelectorAll("*")) as HTMLElement[]) {
+            const b = e.getBoundingClientRect();
+            if (b.top < panel.bottom + 1 || b.bottom > wb.bottom + 0.5) continue;
+            if (b.height < 3 || e.children.length > 0) continue;
+            const t = (e.textContent ?? "").trim();
+            const cs = getComputedStyle(e);
+            if (!t && cs.backgroundColor === "rgba(0, 0, 0, 0)") continue;
+            const cls = (e.className || "").toString().split(/\s+/)[0] || e.tagName.toLowerCase();
+            if (below.length < 4) below.push(`${cls}"${t.slice(0, 14)}"`);
+          }
+        }
+        return {
+          winBottom: px(wb.bottom),
+          panel,
+          ground: panel ? px(wb.bottom - panel.bottom) : null,
+          below,
+        };
+      });
+      rows.push(
+        `  ${String(height).padEnd(5)} ${route.padEnd(16)} last panel ${(m.panel?.cls ?? "-").padEnd(12)} ends ${String(m.panel?.bottom).padStart(7)}` +
+        ` | GROUND to window ${String(m.ground).padStart(6)}px | in that ground: ${m.below.length ? m.below.join(" · ") : "NOTHING — clean desk"}`,
+      );
+    }
+    rows.push("");
+  }
+  console.log("\n──── the band under the last panel ────\n" + rows.join("\n"));
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   FOOT-PANEL PACK, PHASE 3 — the collapse, the click-away, the reopen, and the constants.
+
+   ⚠️ EVERY POINTER ACTION IS A MEASURED POINT, never a locator action — `locator.hover`/`.click`
+   wait on actionability against a set that includes hidden mounted pages' zero-sized copies, and
+   hung a run for seven minutes once already. And every probe asserts its PRECONDITION first.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+async function panelState(page: import("@playwright/test").Page) {
+  return page.evaluate(() => {
+    const px = (n: number) => Math.round(n * 100) / 100;
+    const vis = (s: string) => Array.from(document.querySelectorAll(s))
+      .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
+    const grid = vis(".cal-grid"), lay = vis(".cal-layout"), tab = vis(".cal-paneltab");
+    const focus = document.querySelector(".cal-focus") as HTMLElement | null; // may be display:none
+    const g = grid?.getBoundingClientRect(), l = lay?.getBoundingClientRect(), t = tab?.getBoundingClientRect();
+    const cells = grid ? Array.from(grid.querySelectorAll(".cal-cell")) as HTMLElement[] : [];
+    return {
+      gridW: g ? px(g.width) : null, layW: l ? px(l.width) : null,
+      panelVisible: focus ? getComputedStyle(focus).display !== "none" : null,
+      panelMounted: !!focus,
+      tab: t ? { x: px(t.left), y: px(t.top), cx: Math.round(t.left + t.width / 2), cy: Math.round(t.top + t.height / 2),
+                 onScreen: t.left >= 0 && t.right <= window.innerWidth } : null,
+      tabExpanded: tab?.getAttribute("aria-expanded") ?? null,
+      tabLabel: tab?.getAttribute("aria-label") ?? null,
+      foldShort: grid?.getAttribute("data-fold-short") ?? null,
+      selDay: (vis(".cal-cell.sel .cal-dn")?.textContent ?? "").trim(),
+      overflowing: cells.filter((c) => c.querySelectorAll(".cal-pip").length > 0 && c.scrollHeight > c.clientHeight + 1)
+        .map((c) => (c.querySelector(".cal-dn")?.textContent ?? "").trim()),
+      populated: cells.filter((c) => c.querySelectorAll(".cal-pip").length > 0)
+        .map((c) => (c.querySelector(".cal-dn")?.textContent ?? "").trim()),
+      cushion: (() => {
+        const sample = cells.find((c) => c.querySelectorAll(".cal-pip").length > 0);
+        if (!sample) return null;
+        const cs = getComputedStyle(sample);
+        const d = sample.querySelector(".cal-d") as HTMLElement;
+        const pip = sample.querySelector(".cal-pip") as HTMLElement;
+        const pcs = getComputedStyle(pip);
+        const pipFlow = pip.getBoundingClientRect().height + parseFloat(pcs.marginTop);
+        const moreH = (document.querySelector(".cal-more2") as HTMLElement | null)?.getBoundingClientRect().height ?? 11;
+        const avail = sample.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - d.getBoundingClientRect().height;
+        return px(avail - (2 * pipFlow + Math.round(moreH)));
+      })(),
+    };
+  });
+}
+
+test("foot-panel Phase 3 — collapse, click-away, reopen, constants", async ({ page }) => {
+  const log: string[] = [];
+
+  for (const width of [1000, 1440, 1920]) {
+    await openRoute(page, "/todo/calendar", { width, height: 900 });
+    const narrow = width < 1080;
+    const open = await panelState(page);
+
+    if (narrow) {
+      /* ⚠️ BELOW 1080 THE CONTROL IS HIDDEN AND THE STATE IGNORED — the panel is under the grid */
+      expect(open.tab, `@${width}: the chevron renders in the single-column world`).toBeNull();
+      expect(open.panelVisible, `@${width}: the narrow panel is hidden`).toBe(true);
+      expect(open.foldShort, `@${width}`).toBeNull();
+      expect(open.overflowing, `@${width}: cells overflow`).toEqual([]);
+      log.push(`  @${width} narrow: chevron hidden · panel visible · cushion ${open.cushion} · foldShort none`);
+      continue;
+    }
+
+    /* ── open state ─────────────────────────────────────────────────────── */
+    expect(open.tab, `@${width}: no chevron — nothing below can be tested`).not.toBeNull();
+    expect(open.tab!.onScreen, `@${width}: the chevron is clipped`).toBe(true);
+    expect(open.tabExpanded).toBe("true");
+    expect(open.tabLabel).toBe("Hide the day panel");
+    expect(open.panelVisible).toBe(true);
+    expect(open.foldShort, `@${width} open`).toBeNull();
+    expect(open.populated.length, `@${width}: no populated cell — overflow claims are vacuous`).toBeGreaterThan(0);
+    expect(open.overflowing, `@${width} open: cells overflow`).toEqual([]);
+
+    /* ── collapse via the chevron ───────────────────────────────────────── */
+    await page.mouse.click(open.tab!.cx, open.tab!.cy);
+    await page.waitForTimeout(400);
+    const closed = await panelState(page);
+    log.push(`  @${width} grid ${open.gridW} → ${closed.gridW} (layout ${closed.layW}) · cushion ${open.cushion} → ${closed.cushion} · tab "${closed.tabLabel}"`);
+    expect(closed.panelVisible, `@${width}: the panel is still visible`).toBe(false);
+    expect(closed.panelMounted, `@${width}: the panel was UNRENDERED — state lost`).toBe(true);
+    /* ⚠️ THE MONTH TAKES THE FULL WIDTH — the grid's box IS the layout's box, not "wider than before" */
+    expect(closed.gridW, `@${width}: the month did not take the full width`).toBe(closed.layW);
+    expect(closed.tabExpanded).toBe("false");
+    expect(closed.tabLabel).toBe("Show the day panel");
+    expect(closed.tab!.onScreen, `@${width}: the collapsed chevron is clipped`).toBe(true);
+    /* ⚠️ THE FOLD RE-MEASURED — no shortfall, no overflow, in the WIDER geometry */
+    expect(closed.foldShort, `@${width} collapsed`).toBeNull();
+    expect(closed.overflowing, `@${width} collapsed: cells overflow`).toEqual([]);
+    /* ⚠️ THE CUSHION IS UNSPENT — the collapse changes width, never the row height */
+    expect(closed.cushion, `@${width}: the collapse spent the cushion`).toBeGreaterThanOrEqual(4);
+
+    /* ⚠️ THE PARKED POINTER MUST NOT PEEK — the collapse reflows the month under a stationary
+       cursor, the cell sliding beneath fires `mouseenter` with no movement, and a peek bloomed
+       uninvited 450ms later (caught by the acceptance SCREENSHOT, not by any assertion — the
+       reason this file keeps producing images). The pointer is still on the toggle point here,
+       so this asserts the guard before any deliberate move is made. */
+    await page.waitForTimeout(900);
+    expect(await page.locator(".cal-peek").count(), `@${width}: a peek bloomed under the parked pointer`).toBe(0);
+
+    /* ── the peek still clamps to the WIDER grid ────────────────────────── */
+    const pt = await page.evaluate(() => {
+      const grid = Array.from(document.querySelectorAll(".cal-grid"))
+        .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
+      const cell = Array.from(grid.querySelectorAll(".cal-cell"))
+        .find((c) => c.querySelectorAll(".cal-pip").length > 0) as HTMLElement | undefined;
+      if (!cell) return null;
+      const r = cell.getBoundingClientRect();
+      return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
+    });
+    expect(pt, `@${width}: no populated cell for the peek probe`).not.toBeNull();
+    await page.mouse.move(pt!.x - 60, pt!.y - 60);
+    await page.waitForTimeout(80);
+    await page.mouse.move(pt!.x, pt!.y);
+    await page.waitForTimeout(750);
+    const peek = await page.evaluate(() => {
+      const pk = document.querySelector(".cal-peek") as HTMLElement | null;
+      if (!pk) return null;
+      const r = pk.getBoundingClientRect();
+      const g = (Array.from(document.querySelectorAll(".cal-grid"))
+        .find((x) => (x as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement).getBoundingClientRect();
+      return { inGrid: r.left >= g.left - 0.5 && r.right <= g.right + 0.5, pips: pk.querySelectorAll(".cal-pip").length };
+    });
+    expect(peek, `@${width}: no peek in the collapsed state`).not.toBeNull();
+    expect(peek!.inGrid, `@${width}: the peek escaped the wider grid`).toBe(true);
+    await page.mouse.move(2, 2);
+    await page.waitForTimeout(200);
+
+    /* ── selecting a day while collapsed REOPENS and selects it ─────────── */
+    const dayPt = await page.evaluate(() => {
+      const grid = Array.from(document.querySelectorAll(".cal-grid"))
+        .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
+      const cell = Array.from(grid.querySelectorAll(".cal-cell:not(.off)"))
+        .find((c) => (c.querySelector(".cal-dn")?.textContent ?? "").trim() === "14") as HTMLElement | undefined;
+      if (!cell) return null;
+      const r = cell.getBoundingClientRect();
+      return { x: Math.round(r.left + r.width / 2), y: Math.round(r.bottom - 8) };
+    });
+    expect(dayPt, `@${width}: day 14 not found`).not.toBeNull();
+    await page.mouse.click(dayPt!.x, dayPt!.y);
+    await page.waitForTimeout(400);
+    const reopened = await panelState(page);
+    expect(reopened.panelVisible, `@${width}: selecting a day did not reopen the panel`).toBe(true);
+    expect(reopened.selDay, `@${width}: the click's day was not selected`).toBe("14");
+    log.push(`  @${width} click day 14 while collapsed → panel reopened, day 14 selected`);
+
+    /* ── click-away: ground collapses; the command bar and a menu do NOT ── */
+    const groundPt = await page.evaluate(() => {
+      const leg = Array.from(document.querySelectorAll(".cal-legend"))
+        .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
+      if (!leg) return null;
+      const r = leg.getBoundingClientRect();
+      /* the band's empty right end — inside the page, outside all four exclusions */
+      return { x: Math.round(r.right - 4), y: Math.round(r.top + r.height / 2) };
+    });
+    expect(groundPt, `@${width}: no legend band to click`).not.toBeNull();
+    await page.mouse.click(groundPt!.x, groundPt!.y);
+    await page.waitForTimeout(300);
+    expect((await panelState(page)).panelVisible, `@${width}: a ground click did not collapse`).toBe(false);
+
+    /* reopen via the chevron for the next check */
+    const tabNow = (await panelState(page)).tab!;
+    await page.mouse.click(tabNow.cx, tabNow.cy);
+    await page.waitForTimeout(300);
+    expect((await panelState(page)).panelVisible, `@${width}: the chevron did not reopen`).toBe(true);
+
+    /* the command bar does not collapse — open the kind menu and click a row */
+    const kbtn = await page.evaluate(() => {
+      const b = Array.from(document.querySelectorAll(".cal-kbtn"))
+        .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
+      if (!b) return null;
+      const r = b.getBoundingClientRect();
+      return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
+    });
+    expect(kbtn, `@${width}: no kind button`).not.toBeNull();
+    await page.mouse.click(kbtn!.x, kbtn!.y);
+    await page.waitForTimeout(250);
+    expect((await panelState(page)).panelVisible, `@${width}: opening the kind menu collapsed the panel`).toBe(true);
+    const krow = await page.evaluate(() => {
+      const r0 = Array.from(document.querySelectorAll(".cal-krow"))
+        .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
+      if (!r0) return null;
+      const r = r0.getBoundingClientRect();
+      return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
+    });
+    expect(krow, `@${width}: the kind menu did not open`).not.toBeNull();
+    await page.mouse.click(krow!.x, krow!.y);
+    await page.waitForTimeout(250);
+    expect((await panelState(page)).panelVisible, `@${width}: clicking IN the menu collapsed the panel`).toBe(true);
+    await page.mouse.click(krow!.x, krow!.y);   // restore the kind
+    await page.waitForTimeout(200);
+    /* the nav: outside the page root — the listener cannot see it, so nothing collapses */
+    const navPt = await page.evaluate(() => {
+      const n = Array.from(document.querySelectorAll(".ws-nav"))
+        .find((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement | undefined;
+      if (!n) return null;
+      const r = n.getBoundingClientRect();
+      return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + 30) };
+    });
+    if (navPt) {
+      /* pointerdown only — a real CLICK on a nav link would navigate away mid-test */
+      await page.mouse.move(navPt.x, navPt.y);
+      await page.mouse.down(); await page.mouse.up();
+      await page.waitForTimeout(250);
+      const onCal = await page.evaluate(() => location.pathname === "/todo/calendar");
+      if (onCal) {
+        expect((await panelState(page)).panelVisible, `@${width}: a nav click collapsed the panel`).toBe(true);
+      } else {
+        await openRoute(page, "/todo/calendar", { width, height: 900 });
+      }
+    }
+    log.push(`  @${width} click-away: ground collapses · kind menu + command bar + nav do not`);
+  }
+
+  console.log("\n──── foot-panel Phase 3 ────\n" + log.join("\n"));
+});

@@ -468,7 +468,20 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      state would remount the control on toggle and drop keyboard focus on the floor; a single
      element keeps focus across the toggle for free, which is the accessible behaviour with no
      machinery at all. */
-  const togglePanel = () => { setPanelOpen((o) => !o); clearPeek(); };
+  /* ⚠️ AFTER A TOGGLE THE PEEK WAITS FOR A REAL MOVE (foot-panel pack, Phase 3 finding). The
+     collapse reflows the month under a STATIONARY pointer, the cell that slides beneath it fires
+     `mouseenter` with no movement at all, and 450ms later a peek bloomed uninvited over the
+     freshly widened month — caught in the acceptance screenshot, not by any assertion. A peek is
+     "450ms of uninterrupted hover", and hover is something the reader DOES; layout arriving under
+     a resting cursor is not it. The flag drops on the first genuine `mousemove`, so ordinary
+     hovering is untouched. */
+  const pointerParked = React.useRef(false);
+  React.useEffect(() => {
+    const onMove = () => { pointerParked.current = false; };
+    window.addEventListener("mousemove", onMove);
+    return () => window.removeEventListener("mousemove", onMove);
+  }, []);
+  const togglePanel = () => { pointerParked.current = true; setPanelOpen((o) => !o); clearPeek(); };
 
   /* ⚠️ SELECTING A DAY WHILE COLLAPSED REOPENS — the writer has asked to READ something, and
      silently discarding that click would be worse than the panel reappearing. It rides the three
@@ -623,8 +636,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      reference held across the wait. */
   const armPeek = React.useCallback((ymd: string, cell: HTMLElement) => {
     if (peekTimer.current !== null) window.clearTimeout(peekTimer.current);
+    if (pointerParked.current) return;
     peekTimer.current = window.setTimeout(() => {
       peekTimer.current = null;
+      if (pointerParked.current) return;
       const grid = gridRef.current;
       if (!grid) return;
       /* ⚠️ EMPTY CELLS NEVER PEEK — a 1.6× parchment card saying nothing is worse than no card. */
