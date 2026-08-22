@@ -442,7 +442,27 @@
    the scroller at this width — the one place this page scrolls at all. Stated rather than
    silent: above 1080 the tasks-viewport law holds exactly as before. */
 @media (max-width: 1079px) {
-  .cal-layout { grid-template-columns: minmax(0, 1fr); overflow-y: auto; }
+  /* ⚠️ `grid-auto-rows: max-content` — AND WITHOUT IT THE MONTH PAINTED OVER THE DAY PANEL.
+     PRE-EXISTING; found by measurement while verifying the finishing pack, not introduced by it.
+
+     The container has a FIXED height here and its implicit rows were `auto`, so the two children
+     competed for it. `.cal-grid` asks for a 620px floor and `.cal-main` carries `min-height: 0` —
+     correct above this breakpoint, where it must shrink to the frame — so the parent resolved to
+     **281px against a 620px child**: the month overflowed its own box by 339px and drew across
+     `.cal-focus`, whose head sat 321px inside the grid's painted area. `elementsFromPoint` over
+     today's cell returned the PANEL, so the last three weeks of the month took no hover, no peek
+     and no click, while looking perfectly normal. That is why it survived: nothing was misdrawn,
+     it was just unreachable.
+
+     ⚠️ THE OBVIOUS FIX IS THE WRONG ONE, AND IT WAS TRIED AND MEASURED. Putting the floor on the
+     parent (`.cal-main { min-height: 620px }`) cures the overflow and then starves the panel: the
+     grid takes its 620 out of a fixed 586 and the day panel measured **6px tall** — the same fault
+     from the other direction. Sizing the ROWS by content fixes both at once and needs nothing on
+     either child; with the floor added as well the numbers are byte-identical, so it is redundant.
+     The layout is already the scroller at this width by design, so content-sized rows scroll
+     rather than fight for room. Measured after: grid 620, panel 377, layout 1040/586, no overlap,
+     and ≥1080 completely unchanged (539/586 and 561/586, exactly as before). */
+  .cal-layout { grid-template-columns: minmax(0, 1fr); grid-auto-rows: max-content; overflow-y: auto; }
   /* ⚠️ 600, DERIVED — not chosen. The density floor says two occupants minimum, so a folding cell
      needs 2 × CAL_PIP_H + CAL_MORE_H = 62px of room, hence rowPx >= 33 + 62 = 95, hence
      6 × 95 + 13 (the weekday band) = 583. 600 carries the margin. At 420 this width gave rowPx 66
