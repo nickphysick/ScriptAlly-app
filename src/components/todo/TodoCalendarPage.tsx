@@ -31,7 +31,8 @@ import { BoardCard } from "../../lib/todoBoard";
 import {
   CalendarItem, calendarDays, monthGridDays, monthLabel,
   shiftMonth, sameMonth, calFoldCap, calFoldCapFolded,
-  RecordItem, recordDays, cellSlots, exchangeLine, dedupeAgainstRecord, pillLabel, REC_TONE, REC_LEGEND,
+  RecordItem, recordDays, cellSlots, exchangeLine, dedupeAgainstRecord, pillLabel,
+  FoldMetrics, FOLD_FALLBACK, foldMetricsFrom, foldFor, REC_TONE, REC_LEGEND,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 /* ⚠️ REUSED, not re-written — `shortDate` already renders "7 Aug" for the RecordingCalendar's
@@ -269,7 +270,38 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      the month↔week switch; before the first measure `calFoldCap(0)` returns the old flat cap, so
      nothing renders emptier while it settles. */
   const gridRef = React.useRef<HTMLDivElement>(null);
+  /**
+   * ⚠️ THE READ RUNS AFTER EVERY RENDER, NOT ONLY ON RESIZE — and that is not belt-and-braces, it
+   * is the fix for a real fault this pack's own acceptance caught. A `ResizeObserver` fires once on
+   * `observe`, and at that moment the month's PILLS may not be painted yet; with no pill to measure
+   * the metrics stayed at their declared fallback for the life of the page, and the fold went on
+   * dividing by a stale `chrome` — which is exactly the staleness Phase 2 exists to end. Measured:
+   * the grid reported `data-fold-short="6.5"` at 1280 while the cells fitted comfortably.
+   * It cannot loop: `setMetrics` writes only when a value actually changes.
+   */
+  const readMetrics = React.useCallback((el: HTMLElement) => {
+    const cell = el.querySelector(".cal-cell") as HTMLElement | null;
+    const pill = el.querySelector(".cal-pip") as HTMLElement | null;
+    const more = el.querySelector(".cal-more2") as HTMLElement | null;
+    if (!cell || !pill) return;
+    const ccs = getComputedStyle(cell);
+    const head = cell.querySelector(".cal-d") as HTMLElement | null;
+    const pcs = getComputedStyle(pill);
+    const next = foldMetricsFrom(
+      {
+        clientHeight: cell.clientHeight,
+        paddingY: parseFloat(ccs.paddingTop) + parseFloat(ccs.paddingBottom),
+        headH: head?.getBoundingClientRect().height ?? 0,
+      },
+      { height: pill.getBoundingClientRect().height, marginTop: parseFloat(pcs.marginTop) },
+      more ? more.getBoundingClientRect().height : null,
+    );
+    if (next) setMetrics((cur) =>
+      cur.pipH === next.pipH && cur.moreH === next.moreH && cur.chrome === next.chrome ? cur : next);
+  }, []);
   const [rowPx, setRowPx] = useState(0);
+  /* the cell's measured costs; the declared values stand in only until a cell has been read */
+  const [metrics, setMetrics] = useState<FoldMetrics>(FOLD_FALLBACK);
   React.useEffect(() => {
     const el = gridRef.current;
     if (!el || typeof ResizeObserver === "undefined") return;
@@ -280,13 +312,33 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       const first = el.firstElementChild as HTMLElement | null;
       const dow = first?.offsetHeight ?? 0;
       setRowPx(Math.max(0, (el.clientHeight - dow) / rows));
+
+      /* ⚠️ AND THE CELL'S OWN COSTS, READ FROM A RENDERED ONE (reclaim pack, Phase 2). The fold
+         used to divide by declared constants — a hand-kept copy of the stylesheet — and when the
+         numeral box and the cell's padding moved by 8.75px in this same pack, `CAL_CELL_CHROME`
+         went stale and THE WHOLE SUITE STAYED GREEN. Asking the page what a pill costs cannot
+         drift from what a pill costs.
+         ⚠️ THE ELEMENTS ARE FOUND WITHIN THE GRID, never across the document: every workspace page
+         stays mounted, and a document-wide query can return a hidden page's zero-sized copy. */
+      readMetrics(el);
     });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  const cellCap = calFoldCap(rowPx);
+  /* the pills exist by the time this runs, which the observer's first fire cannot promise */
+  React.useEffect(() => { if (gridRef.current) readMetrics(gridRef.current); });
+
+  const cellCap = calFoldCap(rowPx, metrics);
+  /* ⚠️ WHAT THE PAGE DOES WHEN THE FLOOR CANNOT BE HONOURED. `CAL_CELL_FLOOR` is a product ruling
+     and cannot create space, so when the cell affords fewer pills than the ruling asks for, the
+     grid still draws the ruling — reversing it unattended is not this file's call — and STATES the
+     shortfall on itself. Silence was the old behaviour: the fold returned the floor into a cell
+     with room for one and the pills overflowed to say so. Now a measurement can see it before a
+     reader can, and `calReclaim.measure.ts` asserts the attribute is absent at every width.
+     No user-facing copy is invented for this overnight; the attribute is the honest minimum. */
+  const fold = foldFor(rowPx, metrics, true);
   /* the cap for a day that folds — the counter is 12px, not a whole pip (see calFoldCapFolded) */
-  const cellCapFolded = calFoldCapFolded(rowPx);
+  const cellCapFolded = calFoldCapFolded(rowPx, metrics);
 
   const [facetOpen, setFacetOpen] = useState(false);
   const [anchor, setAnchor] = useState(today);
@@ -487,7 +539,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               (tasks-viewport P1/P3), and only the panel has a scroller of its own. */}
           <div className="cal-layout">
           <div className="cal-main">
-          <div className="cal-grid" role="grid" ref={gridRef} aria-label={monthLabel(anchor)}>
+          <div className="cal-grid" role="grid" ref={gridRef}
+            {...(fold.shortfall > 0 ? { "data-fold-short": String(fold.shortfall) } : {})} aria-label={monthLabel(anchor)}>
             {DOW.map((d) => <div key={d} className="cal-dow" role="columnheader">{d}</div>)}
             {visible.map((ymd) => {
               const items = itemsFor(ymd);

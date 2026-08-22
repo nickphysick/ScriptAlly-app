@@ -20,6 +20,7 @@ import {
   dedupeAgainstRecord,
   pillLabel, PILL_BY_TASK, PILL_SNOOZED,
   calFoldCapFolded, CAL_MORE_H, CAL_CELL_FLOOR, CAL_PIP_H, CAL_CELL_CHROME,
+  foldFor, foldMetricsFrom, FOLD_FALLBACK, type FoldMetrics,
   exchangeLine,
   REC_TONE, REC_LEGEND,
 } from "./todoCalendar";
@@ -168,7 +169,9 @@ describe("the fold, the map, the wiring", () => {
     expect(cellSlots(["a", "b", "c", "d"], [], CAL_CELL_CAP).overflow).toBe(2);
     expect(cellSlots(["a", "b", "c"], [], CAL_CELL_CAP).shownItems).toEqual(["a", "b", "c"]);
     expect(pageSrc).toContain("cellSlots(items, recs, cellCap, cellCapFolded)");
-    expect(pageSrc).toContain("calFoldCap(rowPx)");
+    /* ⚠️ AMENDED (reclaim pack, Phase 2): the fold now takes MEASURED metrics, so the call
+       carries them. The law is unchanged — the page still derives its cap from the measured row. */
+    expect(pageSrc).toContain("calFoldCap(rowPx, metrics)");
     expect(pageSrc).toContain("+{overflow} MORE");
   });
 
@@ -477,7 +480,9 @@ describe("⚠️ the record is recessive, and it folds with everything else", ()
     expect(cellSlots([], [], 3)).toEqual({ shownItems: [], shownRecs: [], overflow: 0 });
     expect(cellSlots(["a"], ["r"], 0)).toEqual({ shownItems: [], shownRecs: [], overflow: 2 });
     // calFoldCap is consumed unchanged — this pack does not touch the measured fold
-    expect(pageSrc).toContain("calFoldCap(rowPx)");
+    /* ⚠️ AMENDED (reclaim pack, Phase 2): the fold now takes MEASURED metrics, so the call
+       carries them. The law is unchanged — the page still derives its cap from the measured row. */
+    expect(pageSrc).toContain("calFoldCap(rowPx, metrics)");
     expect(pageSrc).toContain("cellSlots(items, recs, cellCap, cellCapFolded)");
     expect(calFoldCap(0)).toBe(CAL_CELL_CAP);
   });
@@ -1368,5 +1373,67 @@ describe("⚠️ a completion made from the calendar is not silent", () => {
     const sig = "onNavigate: (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => void;";
     expect(pageSrc).toContain(sig);
     expect(todoSrc).toContain(sig);
+  });
+});
+
+/* ══ THE FOLD MEASURES WHAT IT NEEDS (reclaim pack, Phase 2) ════════════════════════════════ */
+
+describe("⚠️ the fold divides by a MEASURED pill, not a declared one", () => {
+  /* the shipping geometry, measured at 1440 on the corrected chassis */
+  const REAL: FoldMetrics = { pipH: 25, moreH: 11, chrome: 24 };
+
+  it("⚠️ THE CONSTANTS WENT STALE SILENTLY, WHICH IS WHY THIS EXISTS", () => {
+    /* CAL_CELL_CHROME described the numeral row plus the cell's padding. Both moved by 8.75px in
+       this pack and the whole suite stayed green, because nothing tied the number to the CSS. */
+    expect(FOLD_FALLBACK.chrome).toBe(CAL_CELL_CHROME);
+    /* ⚠️ COMPARED AT THE CAP END, NOT THE FLOOR END. A first version compared at rowPx 89.5, where
+       CAL_CELL_FLOOR forces 2 whatever the pill costs — so it asserted that two identical floors
+       differ, and went red for the right reason. A tall row is where the metrics actually decide. */
+    expect(calFoldCap(120, REAL)).toBe(3);
+    expect(calFoldCap(120, { ...REAL, pipH: 40 })).toBe(2);
+  });
+
+  it("metrics are read off a rendered cell, and absent ones yield null rather than a guess", () => {
+    expect(foldMetricsFrom({ clientHeight: 89, paddingY: 8, headH: 16 },
+      { height: 23, marginTop: 2 }, 11)).toEqual({ pipH: 25, moreH: 11, chrome: 24 });
+    /* ⚠️ AN EMPTY MONTH HAS NO PILL TO MEASURE. Inventing one would be the assumption this
+       replaces, so it returns null and the caller keeps the last known good numbers. */
+    expect(foldMetricsFrom({ clientHeight: 89, paddingY: 8, headH: 16 }, null, 11)).toBeNull();
+    expect(foldMetricsFrom({ clientHeight: 89, paddingY: 8, headH: 16 }, { height: 0, marginTop: 2 }, 11)).toBeNull();
+    // a missing counter falls back rather than collapsing the reserve to zero
+    expect(foldMetricsFrom({ clientHeight: 89, paddingY: 8, headH: 16 },
+      { height: 23, marginTop: 2 }, null)!.moreH).toBe(FOLD_FALLBACK.moreH);
+  });
+
+  it("the shipping row affords the floor, with the cushion Phase 1 bought", () => {
+    // rowPx 89.5, chrome 24 -> room 65.5; two pills + counter = 61
+    expect(foldFor(89.5, REAL, true)).toEqual({ cap: 2, fits: 2, shortfall: 0 });
+    expect(calFoldCap(89.5, REAL)).toBe(2);
+    expect(calFoldCapFolded(89.5, REAL)).toBe(2);
+  });
+
+  it("⚠️ WHEN THE FLOOR IS UNSATISFIABLE THE FOLD SAYS SO — it does not silently overflow", () => {
+    /* the pre-fix geometry: chrome 35, room 54.5, one pill fits beside the counter. The OLD code
+       returned 2 here and the cells overflowed to announce it; now `fits` is honest, `cap` still
+       carries the ruling, and `shortfall` states the gap in pixels. */
+    const tight = foldFor(89.5, { pipH: 25, moreH: 11, chrome: 35 }, true);
+    expect(tight.fits, "the honest fit is 1 at that geometry").toBe(1);
+    expect(tight.cap, "the ruling is still what gets drawn").toBe(CAL_CELL_FLOOR);
+    expect(tight.shortfall, "the gap is stated, in pixels").toBeCloseTo(6.5, 1);
+    // and the page surfaces it rather than swallowing it
+    expect(pageSrc).toContain('"data-fold-short"');
+    expect(pageSrc).toContain("const fold = foldFor(rowPx, metrics, true);");
+  });
+
+  it("a satisfiable floor reports no shortfall, at every width Phase 1 measured", () => {
+    for (const rowPx of [99.33, 89.5]) {
+      expect(foldFor(rowPx, REAL, true).shortfall, `rowPx ${rowPx}`).toBe(0);
+      expect(foldFor(rowPx, REAL, true).cap).toBeGreaterThanOrEqual(CAL_CELL_FLOOR);
+    }
+  });
+
+  it("no measurement yet still renders the ceiling, not an empty month", () => {
+    expect(foldFor(0, REAL, false)).toEqual({ cap: CAL_CELL_CAP, fits: CAL_CELL_CAP, shortfall: 0 });
+    expect(calFoldCap(0, REAL)).toBe(CAL_CELL_CAP);
   });
 });

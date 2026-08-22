@@ -302,10 +302,72 @@ export const CAL_MORE_H = 11;
  * `rowPx` of 0 (before the first measure, and in any test with no layout) yields the default cap,
  * so nothing renders emptier than it used to while the measurement settles.
  */
-export function calFoldCap(rowPx: number): number {
-  if (!rowPx || rowPx <= 0) return CAL_CELL_CAP;
-  const fits = Math.floor((rowPx - CAL_CELL_CHROME) / CAL_PIP_H);
-  return Math.max(CAL_CELL_FLOOR, Math.min(CAL_CELL_CAP, fits));
+/**
+ * The cell's real metrics, read from a rendered sample rather than assumed.
+ *
+ * ⚠️ THE CONSTANTS WERE A HAND-KEPT COPY OF THE STYLESHEET, AND THEY WENT STALE SILENTLY. When the
+ * numeral box and the cell's padding moved by 8.75px in this very pack, `CAL_CELL_CHROME = 35`
+ * became wrong by that amount and **the whole suite stayed green** — nothing tied the number to the
+ * CSS it described. That is why the pill's height is now measured: the fold asking the page what a
+ * pill costs cannot drift from what a pill costs.
+ *
+ * ⚠️ `chrome` IS EVERYTHING THE CELL SPENDS BEFORE THE FIRST PILL — its vertical padding plus the
+ * numeral row — measured as `clientHeight - (available for pills)`, so it needs no list of terms to
+ * keep in step. Add a subtitle to the cell tomorrow and this follows without an edit.
+ */
+export interface FoldMetrics {
+  /** a pill's own box plus its top margin — what one costs in the flow */
+  pipH: number;
+  /** the "+N MORE" line's height, including its padding */
+  moreH: number;
+  /** the cell's padding and numeral row — everything above the first pill */
+  chrome: number;
+}
+
+/**
+ * The declared values, used ONLY until a real cell has been measured.
+ *
+ * ⚠️ A FALLBACK, NOT A SOURCE OF TRUTH. Before the first measurement — the initial render, and any
+ * test with no layout — there is no rendered pill to ask, and rendering emptier than necessary for
+ * one frame is worse than using the last known good numbers. Once `foldMetricsFrom` has read a
+ * cell, these are never consulted again.
+ */
+export const FOLD_FALLBACK: FoldMetrics = { pipH: CAL_PIP_H, moreH: CAL_MORE_H, chrome: CAL_CELL_CHROME };
+
+/**
+ * How many pills fit, and whether the floor could be honoured.
+ *
+ * ⚠️ `fits` IS THE HONEST ANSWER AND `cap` IS THE RULED ONE. `CAL_CELL_FLOOR` is a product ruling —
+ * a one-pill month is close to information-free — and it cannot create space. Keeping both means
+ * the caller can render the ruling *and* know when the cell cannot afford it, instead of the fold
+ * quietly returning 2 into a cell with room for 1 and the pills overflowing to say so.
+ */
+export interface FoldResult {
+  /** what the ruling says to draw */
+  cap: number;
+  /** what actually fits — below `cap` when the floor is unsatisfiable */
+  fits: number;
+  /** pixels short of honouring the floor; 0 when it is satisfiable */
+  shortfall: number;
+}
+
+/** The cap, the honest fit, and the shortfall — one derivation, three answers. */
+export function foldFor(rowPx: number, m: FoldMetrics = FOLD_FALLBACK, withCounter = false): FoldResult {
+  if (!rowPx || rowPx <= 0) {
+    const cap = withCounter ? Math.max(CAL_CELL_FLOOR, CAL_CELL_CAP - 1) : CAL_CELL_CAP;
+    return { cap, fits: cap, shortfall: 0 };
+  }
+  const room = rowPx - m.chrome - (withCounter ? m.moreH : 0);
+  const fits = Math.max(0, Math.floor(room / m.pipH));
+  const cap = Math.max(CAL_CELL_FLOOR, Math.min(CAL_CELL_CAP, fits));
+  /* what honouring the floor would cost beyond the room there is */
+  const shortfall = fits >= CAL_CELL_FLOOR ? 0
+    : Math.max(0, Math.round((CAL_CELL_FLOOR * m.pipH + (withCounter ? m.moreH : 0) + m.chrome - rowPx) * 100) / 100);
+  return { cap, fits: Math.min(fits, CAL_CELL_CAP), shortfall };
+}
+
+export function calFoldCap(rowPx: number, m: FoldMetrics = FOLD_FALLBACK): number {
+  return foldFor(rowPx, m, false).cap;
 }
 
 /**
@@ -317,10 +379,30 @@ export function calFoldCap(rowPx: number): number {
  * when it can and still show as much as possible when it cannot. At the sizes that ship these are
  * often the SAME number, which is exactly the row the single-cap version was throwing away.
  */
-export function calFoldCapFolded(rowPx: number): number {
-  if (!rowPx || rowPx <= 0) return Math.max(CAL_CELL_FLOOR, CAL_CELL_CAP - 1);
-  const fits = Math.floor((rowPx - CAL_CELL_CHROME - CAL_MORE_H) / CAL_PIP_H);
-  return Math.max(CAL_CELL_FLOOR, Math.min(CAL_CELL_CAP, fits));
+export function calFoldCapFolded(rowPx: number, m: FoldMetrics = FOLD_FALLBACK): number {
+  return foldFor(rowPx, m, true).cap;
+}
+
+/**
+ * Read the cell's real metrics off a rendered cell. Returns null when there is nothing to read —
+ * an empty month has no pill, and inventing one would be the assumption this replaces.
+ *
+ * ⚠️ IT TAKES THE CELL, NOT THE DOCUMENT. Every workspace page stays mounted, so a query across the
+ * document can return a hidden page's zero-sized copy — which has already produced a false chain
+ * reading and an unclickable-button hunt in this repo. The caller passes the element it is
+ * rendering into.
+ */
+export function foldMetricsFrom(
+  cell: { clientHeight: number; paddingY: number; headH: number },
+  pill: { height: number; marginTop: number } | null,
+  moreH: number | null,
+): FoldMetrics | null {
+  if (!pill || pill.height <= 0) return null;
+  return {
+    pipH: pill.height + pill.marginTop,
+    moreH: moreH && moreH > 0 ? moreH : FOLD_FALLBACK.moreH,
+    chrome: cell.paddingY + cell.headH,
+  };
 }
 
 /* ══ THE RECORD LAYER (record-layer pack, Phase 2; ref design-refs/calendar-month-focus-v2.html) ═
