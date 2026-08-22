@@ -349,9 +349,12 @@ describe("⚠️ the Noteboard: no sidebar, masonry as the scrollzone, the empty
       .toBeLessThan(empty.indexOf("Nothing pinned yet"));
   });
 
-  it("⚠️ 'READ AS A COLUMN' IS CENTRED and changes the columns, never the scroller", () => {
-    const col = nbCss.slice(nbCss.indexOf(".nb-grid.column {"));
-    expect(nbCss.indexOf(".nb-grid.column {")).toBeGreaterThan(-1);
+  it("⚠️ THE COLUMN VIEW IS CENTRED and changes the columns, never the scroller", () => {
+    /* ⚠️ RENAMED (Noteboard rebuild, 22 Aug): `.nb-grid.column` → `.nb-board.nb-col1`, ported
+       class-for-class from the mockup's `.board.cols-1`. The claim is unchanged — one zone, one
+       scroller, a centred reading measure — only the selector moved. */
+    const col = nbCss.slice(nbCss.indexOf(".nb-board.nb-col1 {"));
+    expect(nbCss.indexOf(".nb-board.nb-col1 {")).toBeGreaterThan(-1);
     const rule = col.slice(0, col.indexOf("}"));
     expect(rule).toContain("columns: 1");
     expect(rule).toContain("margin-inline: auto");

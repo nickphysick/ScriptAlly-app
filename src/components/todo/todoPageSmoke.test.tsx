@@ -177,7 +177,7 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     seed.userTasks = [{ id: "n1", userId: "u1", text: "Open with the flood", detail: "Chapter one drags.", done: false, createdAt: "2026-08-01T09:00:00Z", updatedAt: "" }];
     const html = render(<TodoNoteboardPage onNavigate={() => {}} />);
     expect(html).toContain("Open with the flood");
-    expect(html).toContain("nb-grid");
+    expect(html).toContain("nb-board");  // renamed from nb-grid in the Noteboard rebuild
     expect(html).toContain("1 AUG"); // the pin date
   });
 });

@@ -27,15 +27,18 @@ const ut = (over: Partial<UserTask>): UserTask => ({
 
 describe("⚠️ masonry, not a stretched grid — and it can be read as a column", () => {
   it("the flow is CSS columns; no display:grid anywhere near it", () => {
-    expect(css).toMatch(/\.nb-grid\s*\{[^}]*columns:\s*3/);
+    /* ⚠️ RENAMED `.nb-grid` → `.nb-board` (Noteboard rebuild, 22 Aug): the mockup's class is
+       `.board`, and porting it class-for-class is what lets the ref and the sheet be diffed.
+       The SUBJECT is unchanged — CSS columns, never a stretched grid. */
+    expect(css).toMatch(/\.nb-board\s*\{[^}]*columns:\s*3/);
     expect(css).toContain("break-inside: avoid");
-    expect(css).not.toMatch(/\.nb-grid[^}]*display:\s*grid/);
+    expect(css).not.toMatch(/\.nb-board[^}]*display:\s*grid/);
+    expect(css).not.toContain(".nb-grid");   // and the old name is gone, not shadowed
   });
 
   it("the toggle collapses to one reading column", () => {
-    expect(css).toMatch(/\.nb-grid\.column\s*\{[^}]*columns:\s*1/);
-    expect(page).toContain("Read as a column");
-    expect(page).toContain('className={`nb-grid${column ? " column" : ""}`}');
+    expect(css).toMatch(/\.nb-board\.nb-col1\s*\{[^}]*columns:\s*1/);
+    expect(page).toContain('className={`nb-board${column ? " nb-col1" : ""}`}');
   });
 });
 
@@ -97,7 +100,13 @@ describe("⚠️ the ⋯ menu — the SAME grammar, the SAME shell", () => {
   it("the cards feed the SHARED PortalMenu and wear the SAME reserved-corner seat", () => {
     expect(page).toContain("<PortalMenu");
     expect(page).toContain('className="tbd-more"');
-    expect(css).toMatch(/\.nb-nt\s*\{[^}]*padding-right:\s*30px/); // the corner stays reserved
+    /* ⚠️ THE RESERVED CORNER IS RETIRED, not relaxed. `todoBoard.css` seats `.tbd-more`
+       `position: absolute` at a board card's bottom-right, and the body reserved 30px of padding
+       so the two never met. The mockup draws the ⋯ as the last item of the FOOT ROW, in flow, so
+       there is nothing to reserve against — the seat is overridden page-side (that file belongs
+       to the board and is not edited) and the padding went with the overlap. */
+    expect(css).toMatch(/\.nb-note\s+\.tbd-more\s*\{[^}]*position:\s*static/);
+    expect(css).not.toMatch(/padding-right:\s*30px/);
   });
 });
 

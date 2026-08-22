@@ -50,17 +50,20 @@
   --nb-shadow-hover: 0 2px 4px rgba(58, 28, 20, 0.07), 0 8px 20px rgba(58, 28, 20, 0.11);
 }
 
+/* ── the board ─────────────────────────────────────────────────────────────────────────────── */
 /* ⚠️ MASONRY, NOT GRID: CSS columns pack by LENGTH — a short note sits under a short note. The
-   ref's own mechanism (`columns:3`), kept. "Read as a column" collapses to one reading column. */
-.nb-grid { columns: 3; column-gap: var(--nb-gap); }
-/* ⚠️ "READ AS A COLUMN" IS CENTRED, AND IT OBEYS THE LOCK (tasks-viewport P4). A single 620px
-   column pinned to the left edge of a wide frame reads as a masonry that failed to lay out; the
-   auto margins are what make it a deliberate reading measure. It scrolls inside the same
-   `.tpl-zone` as the masonry — the view changes the columns, never the scroller. */
-.nb-grid.column { columns: 1; max-width: 620px; margin-inline: auto; }
-@media (max-width: 1100px) { .nb-grid { columns: 2; } }
-@media (max-width: 700px) { .nb-grid { columns: 1; } }
+   mockup's own mechanism (`columns: 3`), ported. A grid would stretch every card in a row to the
+   tallest, which is the one thing a board of notes must not do. */
+.nb-board { columns: 3; column-gap: var(--nb-gap); }
+/* ⚠️ THE COLUMN VIEW IS A READING MEASURE, AND IT IS CENTRED. A single 640px column pinned to the
+   left edge of a wide frame reads as a masonry that failed to lay out; the auto margin is what
+   makes it deliberate. (The ledger's no-auto-margins law is scoped to the `.tdb-l*` row family —
+   "margin-left: auto elsewhere on the page is other furniture".) */
+.nb-board.nb-col1 { columns: 1; max-width: 640px; margin-inline: auto; }
+@media (max-width: 1000px) { .nb-board { columns: 2; } }
+@media (max-width: 680px) { .nb-board { columns: 1; } }
 
+/* ── the note ──────────────────────────────────────────────────────────────────────────────── */
 /* ⚠️ THE THREE PAPERS. Yellow is also what a note with NO stored colour renders as, so the
    default and the denied-write fallback are one rule rather than two that could drift. */
 .nb-c-yellow { background: var(--nb-yellow); border-color: var(--nb-yellow-deep); }
@@ -69,32 +72,58 @@
 
 .nb-note {
   break-inside: avoid;
-  background: var(--nb-yellow); border: 1px solid var(--nb-yellow-deep); border-radius: 11px;
-  box-shadow: 0 3px 10px rgba(58, 28, 20, 0.08);
-  padding: 14px 16px 15px; margin-bottom: 16px; position: relative;
+  margin: 0 0 var(--nb-gap);
+  border-radius: var(--nb-radius);
+  padding: var(--nb-pad) var(--nb-pad) var(--nb-pad-foot);
+  position: relative;
+  border: 1px solid transparent;
+  box-shadow: var(--nb-shadow);
+  transition: box-shadow 0.15s;
 }
-.nb-nt {
+/* ⚠️ HOVER IS A SHADOW AND NOTHING ELSE — never a lift. A `translateY` pushes the card's top edge
+   past a clipping boundary and reads as the top hairline vanishing rather than as movement; that
+   was fixed on `.msv-spine` once and reinstated by a revision that predated the fix. The masonry
+   column is such a boundary. */
+.nb-note:hover { box-shadow: var(--nb-shadow-hover); }
+
+/* ⚠️ ONE BODY, PRE-WRAP. A writer's note has line breaks and bullets in it, not a headline — so
+   the mockup's single block is ported as one, and the breaks they typed survive. */
+.nb-body {
   font-family: "Caveat", cursive;
-  font-size: 21px; line-height: 1.22; color: #4a3a1e;
-  padding-right: 30px; /* the seat's reserved corner — same law as the board cards */
+  font-size: var(--nb-body-size); line-height: var(--nb-body-lh);
+  color: var(--nb-ink-deep); white-space: pre-wrap; word-break: break-word;
 }
-.nb-nb { font-family: "Caveat", cursive; font-size: 16px; color: #6f5f42; margin-top: 6px; line-height: 1.3; }
-.nb-nf { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 11px; padding-right: 30px; }
-.nb-when { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 6.5px; color: #b3a279; margin-left: auto; }
-.nb-tag { display: inline-flex; align-items: center; font-size: 9px; font-weight: 600; border-radius: 5px; padding: 2px 8px; background: #f4ecd4; color: #7a6030; }
+/* the second block a note written under the old title+detail split still carries. Nothing writes
+   it any more; dropping it would lose those writers' words. */
+.nb-body--legacy { margin-top: 6px; }
 
-/* the note's ⋯ reuses the board seat (.tbd-more) — butter-toned on hover here */
-.nb-note .tbd-more { color: #c9b98c; }
-.nb-note:hover .tbd-more, .nb-note .tbd-more[aria-expanded="true"] { color: #6b5a4e; background: #fbf3dd; border-color: #e6d9ae; }
-
-/* the dashed pin tile — first in the flow, the ref's own affordance */
-.nb-add {
-  break-inside: avoid; display: flex; align-items: center; justify-content: center;
-  width: 100%; min-height: 88px; margin-bottom: 16px;
-  border: 1.5px dashed #d9cbb8; border-radius: 11px; background: transparent;
-  color: #b3a394; font-size: 11.5px; font-family: inherit; cursor: pointer;
+.nb-foot { display: flex; align-items: center; gap: 8px; margin-top: 12px; min-height: 26px; }
+.nb-tag, .nb-date {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: var(--nb-micro); letter-spacing: 0.08em; color: var(--nb-quiet);
 }
-.nb-add:hover { color: #6b5a4e; background: #fdfbf7; }
+.nb-tag { background: rgba(255, 255, 255, 0.55); border-radius: 99px; padding: 3px 9px; }
+.nb-date { margin-left: auto; }
+
+/* ⚠️ THE ⋯ JOINS THE FOOT, IN FLOW. `todoBoard.css` seats it `position: absolute` at the card's
+   bottom-right for board cards, which is right there and wrong here — the mockup draws it as the
+   last item of the foot row. The seat is overridden page-side rather than edited, because that
+   file belongs to the board. */
+.nb-note .tbd-more { position: static; flex: none; color: var(--nb-quiet); }
+.nb-note:hover .tbd-more,
+.nb-note .tbd-more[aria-expanded="true"] {
+  color: var(--nb-burgundy); background: rgba(255, 255, 255, 0.6); border-color: transparent;
+}
+
+/* ── the pin affordance — first in the flow, the mockup's own ghost ────────────────────────── */
+.nb-ghost {
+  break-inside: avoid; margin: 0 0 var(--nb-gap);
+  border: 1.5px dashed rgba(124, 58, 42, 0.3); border-radius: var(--nb-radius);
+  min-height: 120px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--nb-burgundy); font-size: 13.5px; font-weight: 500;
+  background: transparent; width: 100%; font-family: inherit; transition: background 0.12s;
+}
+.nb-ghost:hover { background: rgba(245, 226, 218, 0.4); }
 
 /* the in-place composer — a butter note being written */
 .nb-compose { border-style: dashed; }

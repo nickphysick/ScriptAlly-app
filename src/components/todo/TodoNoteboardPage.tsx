@@ -232,10 +232,10 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
               </button>
             </div>
           ) : (
-            <div className={`nb-grid${column ? " column" : ""}`}>
+            <div className={`nb-board${column ? " nb-col1" : ""}`}>
               {!compose && (
-                <button type="button" className="nb-add" onClick={() => setCompose({ text: "", detail: "" })}>
-                  ＋ Pin a note
+                <button type="button" className="nb-ghost" onClick={() => setCompose({ text: "", detail: "" })}>
+                  + Pin a note
                 </button>
               )}
               {compose && (
@@ -272,12 +272,15 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                 </div>
               )}
               {notes.map((n) => (
-                /* the paper is READ, never assumed — a note with no colour is yellow here,
-                   which is also what a denied colour write leaves behind */
-                <article key={n.id} className={`nb-note nb-c-${noteColour(n)}`}>
-                  <div className="nb-nt">{n.text}</div>
-                  {n.detail && <div className="nb-nb">{n.detail}</div>}
-                  <div className="nb-nf">
+                /* the paper is READ, never assumed — a note with no colour is yellow here, which
+                   is also what a denied colour write leaves behind */
+                <article key={n.id} data-note={n.id} className={`nb-note nb-c-${noteColour(n)}`}>
+                  <div className="nb-body">{n.text}</div>
+                  {/* ⚠️ THE OLD SPLIT'S SECOND BLOCK. Nothing writes `detail` any more — the
+                      composer is one body — but notes written under the split have prose in it
+                      and dropping it would lose their words. */}
+                  {n.detail && <div className="nb-body nb-body--legacy">{n.detail}</div>}
+                  <div className="nb-foot">
                     {(n.tags ?? []).map((tid) => {
                       const def = userTags.find((t) => t.id === tid);
                       const tone = def ? TAG_PALETTE[def.colour] : undefined;
@@ -287,22 +290,21 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                         </span>
                       );
                     })}
-                    <span className="nb-when">{pinDate(n.createdAt)}</span>
+                    <span className="nb-date">{pinDate(n.createdAt)}</span>
+                    <button
+                      type="button"
+                      className="tbd-more"
+                      aria-haspopup="menu"
+                      aria-expanded={menu?.note.id === n.id}
+                      aria-label={`Actions for ${n.text}`}
+                      onClick={(e) => {
+                        const anchor = e.currentTarget;
+                        setMenu((m) => (m?.note.id === n.id ? null : { note: n, anchor }));
+                      }}
+                    >
+                      <MoreHorizontal size={15} aria-hidden />
+                    </button>
                   </div>
-                  {/* the same reserved-corner ⋯ as board cards, feeding the same PortalMenu shell */}
-                  <button
-                    type="button"
-                    className="tbd-more"
-                    aria-haspopup="menu"
-                    aria-expanded={menu?.note.id === n.id}
-                    aria-label={`Actions for ${n.text}`}
-                    onClick={(e) => {
-                      const anchor = e.currentTarget;
-                      setMenu((m) => (m?.note.id === n.id ? null : { note: n, anchor }));
-                    }}
-                  >
-                    <MoreHorizontal size={15} aria-hidden />
-                  </button>
                 </article>
               ))}
             </div>
