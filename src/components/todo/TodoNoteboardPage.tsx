@@ -36,7 +36,7 @@ import { toggleTagSel } from "../../lib/todoTags";
 import { TAG_PALETTE } from "../../lib/todoFamily";
 import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
-import { NOTEBOARD_SUBTITLE, noteCountLabel } from "../../lib/noteboard";
+import { NOTEBOARD_SUBTITLE, noteCountLabel, noteColour } from "../../lib/noteboard";
 import { UserTask, TagDef } from "../../types";
 import "./tasksLayout.css";
 import "./taskChrome.css";
@@ -272,7 +272,9 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                 </div>
               )}
               {notes.map((n) => (
-                <article key={n.id} className="nb-note">
+                /* the paper is READ, never assumed — a note with no colour is yellow here,
+                   which is also what a denied colour write leaves behind */
+                <article key={n.id} className={`nb-note nb-c-${noteColour(n)}`}>
                   <div className="nb-nt">{n.text}</div>
                   {n.detail && <div className="nb-nb">{n.detail}</div>}
                   <div className="nb-nf">

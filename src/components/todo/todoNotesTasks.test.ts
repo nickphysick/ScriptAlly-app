@@ -114,7 +114,12 @@ describe("notes-and-tasks P2 — the composer + the schema", () => {
     // Today's-list commit, and its absence denied every such write in silence. This lock is what
     // blocked the fix for two days — so it now pins the CORRECT list, and the rules suite proves
     // the write actually succeeds rather than merely that a string is present.
-    expect(rules).toContain("hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin'])"); // update affectedKeys
+    // ⚠️ AND `colour` JOINED IT (22 Aug 2026, the Noteboard rebuild) — the note's paper, one of
+    // three. UNDEPLOYED: it is in firestore.rules and not in the live ruleset, so every colour
+    // write is denied until one dev rules deploy lands. The client never carries it on a create
+    // for that reason — hasOnly() denies the whole document for one unlisted key — so the note
+    // is written plain and setUserTaskColour follows, returning whether the colour landed.
+    expect(rules).toContain("hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour'])"); // update affectedKeys
   });
 
   it("two entry points, two default natures: the section opens NOTE, the hero opens TASK — RETIRED SURFACE (board+dock P1)", () => {

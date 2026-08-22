@@ -407,7 +407,7 @@ service cloud.firestore {
     // Canonical stored user task. Record scope (queryId/agentId/manuscriptId) is optional user
     // input — string when present, rejecting a literal null.
     function isValidUserTask(data, userId) {
-      return data.keys().hasOnly(['id', 'userId', 'text', 'detail', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin'])
+      return data.keys().hasOnly(['id', 'userId', 'text', 'detail', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour'])
         && data.id is string && data.id.size() <= 128
         && data.userId == userId
         // No min length — the To-do board's blank-note flow creates an empty task then fills it.
@@ -418,6 +418,13 @@ service cloud.firestore {
         && (!data.keys().hasAny(['tags']) || (data.tags is list && data.tags.size() <= 32))
         // board-optimise P7: a ladder value in minutes — a number when present (the safe hasAny)
         && (!data.keys().hasAny(['estimateMin']) || (data.estimateMin is int && data.estimateMin > 0 && data.estimateMin <= 600))
+        // ⚠️ NOTEBOARD COLOUR — the note's paper, one of three. UNDEPLOYED as of 22 Aug 2026: it is
+        // in this file and not yet in the live ruleset, so every colour write is denied until one
+        // dev rules deploy lands. That is why the client NEVER carries it on a create — hasOnly()
+        // denies the whole document for one unlisted key, so a create carrying it would lose the
+        // note rather than the colour. `setUserTaskColour` sends it alone and returns whether it
+        // landed; a note with none reads yellow. Same safe hasAny pattern as every optional above.
+        && (!data.keys().hasAny(['colour']) || (data.colour is string && data.colour in ['pink', 'sage', 'yellow']))
         && data.done is bool
         // SAFE optional-field pattern (hasAny guard) — matches every other optional field here. The
         // old `data.completedAt == null` errored on an ABSENT key (Firestore rules do NOT return null
@@ -742,7 +749,7 @@ service cloud.firestore {
         // locks pinned the old string; all three halves land together. The VALUE shape needs no
         // guard here — isValidUserTask already enforces it on every update.
         allow update: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour'])
         );
       }
 

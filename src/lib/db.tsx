@@ -22,6 +22,7 @@ import {
   ActivityType,
   JournalEntry,
   Note,
+  NoteColour,
   UserTask,
   SurfaceOffset,
   DismissedTask,
@@ -332,6 +333,11 @@ interface DbContextType {
   addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[] }) => Promise<string | undefined>;
   updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">> & { detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null }) => Promise<void>;
   deleteUserTask: (id: string) => Promise<void>;
+  /* ⚠️ THE ONE WRITE ON THIS OBJECT THAT ANSWERS. Every other user-task write routes its error
+     through handleFirestoreError and returns void, which is right for them and wrong for this:
+     `colour` is not yet in the deployed rules allowlist, so the write CAN be denied, and a
+     swatch that silently does nothing is worse than no swatch. It returns whether it landed. */
+  setUserTaskColour: (id: string, colour: NoteColour) => Promise<boolean>;
 
   // Activity Actions
   addActivity: (act: Omit<Activity, "id" | "userId"> & { id?: string }) => Promise<{ success: boolean; error?: string }>;
@@ -2560,6 +2566,32 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  /**
+   * The Noteboard's paper colour — its own write, deliberately.
+   *
+   * ⚠️ IT IS NEVER PART OF A CREATE. `isValidUserTask` validates with `keys().hasOnly([...])`, so
+   * one unlisted key does not cost the key, it denies the whole document. Carried on create, a
+   * pink note would not be a yellow note — it would be no note. The note is created plain and the
+   * colour follows here, so a denial costs the colour and never the writing.
+   *
+   * ⚠️ AND IT RETURNS AN ANSWER RATHER THAN SWALLOWING ONE. `colour` is in firestore.rules but the
+   * rules have not been deployed, so until they are this is denied and the caller must be able to
+   * say so. `false` means "the colour did not land"; the note still reads yellow, which is what
+   * `noteColour` returns for a note that has none.
+   */
+  const setUserTaskColour = async (id: string, colour: NoteColour): Promise<boolean> => {
+    if (!currentUser) return false;
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "tasks", id), {
+        colour, updatedAt: new Date().toISOString(),
+      });
+      return true;
+    } catch (e) {
+      console.error(`Firestore error [UPDATE] users/${currentUser.id}/tasks/${id} (colour): ${e instanceof Error ? e.message : String(e)}`);
+      return false;
+    }
+  };
+
   const updateQuery = async (queryId: string, fields: Partial<Query>) => {
     if (!currentUser) return;
     const targetQ = queries.find(q => q.id === queryId);
@@ -3129,6 +3161,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addUserTask,
         updateUserTask,
         deleteUserTask,
+        setUserTaskColour,
         addActivity,
         deleteActivity,
         deleteActivities,

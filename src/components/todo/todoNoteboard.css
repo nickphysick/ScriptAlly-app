@@ -61,9 +61,15 @@
 @media (max-width: 1100px) { .nb-grid { columns: 2; } }
 @media (max-width: 700px) { .nb-grid { columns: 1; } }
 
+/* ⚠️ THE THREE PAPERS. Yellow is also what a note with NO stored colour renders as, so the
+   default and the denied-write fallback are one rule rather than two that could drift. */
+.nb-c-yellow { background: var(--nb-yellow); border-color: var(--nb-yellow-deep); }
+.nb-c-pink { background: var(--nb-pink); border-color: var(--nb-pink-deep); }
+.nb-c-sage { background: var(--nb-sage); border-color: var(--nb-sage-mid); }
+
 .nb-note {
   break-inside: avoid;
-  background: #fdf6e3; border: 1px solid #e6d9ae; border-radius: 11px;
+  background: var(--nb-yellow); border: 1px solid var(--nb-yellow-deep); border-radius: 11px;
   box-shadow: 0 3px 10px rgba(58, 28, 20, 0.08);
   padding: 14px 16px 15px; margin-bottom: 16px; position: relative;
 }
