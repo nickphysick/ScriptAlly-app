@@ -816,3 +816,56 @@ export function pillLabel(item: CalendarItem | RecordItem): string {
   const t = item.card?.taskType as TaskType | undefined;
   return (t && PILL_BY_TASK[t]) || item.label;
 }
+
+/* ══ THE HOVER PEEK (finishing pack, Phase 2; ref calendar-month-focus-v5.html) ═══════════════
+ *
+ * ⚠️ THE PEEK IS PORTALLED, SO IT SPENDS NO CELL CUSHION. The reclaim pack left exactly +4.0px in
+ * a cell at 1280 and above; a peek that grew the cell, or that added so much as a pill's margin to
+ * it, would spend a budget three packs went into earning. It is `position: fixed` over the grid and
+ * the cell underneath is untouched.
+ *
+ * ⚠️ AND IT IS A PEEK, NOT A READING SURFACE — `pointer-events: none`, no actions, clicks pass
+ * through to the cell. Anything else and it becomes a second day panel with a worse shape.
+ */
+
+/** How long the pointer must rest on a populated cell before it opens. */
+export const PEEK_DELAY_MS = 450;
+/** The peek's footprint as a multiple of the cell's own. */
+export const PEEK_SCALE = 1.6;
+/** Parchment at not-quite-opaque, so it reads as laid over the month rather than cut into it. */
+export const PEEK_OPACITY = 0.97;
+/** Breathing room between the peek and the grid's edge, both axes. */
+export const PEEK_PAD = 4;
+/** How far above the cell's own top edge it starts, before clamping. */
+export const PEEK_LIFT = 10;
+
+export interface PeekRect { left: number; top: number; width: number; height: number }
+
+/**
+ * Where the peek goes — pure, so the clamping is testable without a browser.
+ *
+ * ⚠️ EDGE CELLS GROW INWARD. A cell in the first or last column would otherwise put a 1.6×
+ * footprint half outside the month; clamping the left edge to the grid's box turns "centred on the
+ * cell" into "as centred as it can be while staying on the page", which is the ref's behaviour.
+ *
+ * ⚠️ AND THE HEIGHT IS PASSED IN, MEASURED, NEVER ASSUMED. The peek holds every item on the day
+ * with no cap, so its height is whatever that many pills come to — the one number this function
+ * cannot derive. Callers pass 0 on the first pass and re-clamp once it has been laid out.
+ */
+export function peekBox(
+  cell: { left: number; top: number; width: number },
+  grid: { left: number; top: number; right: number; bottom: number },
+  peekH = 0,
+  scale = PEEK_SCALE,
+): PeekRect {
+  const width = Math.round(cell.width * scale);
+  const centred = cell.left - (width - cell.width) / 2;
+  const maxLeft = grid.right - width - PEEK_PAD;
+  /* ⚠️ `Math.min` BEFORE `Math.max`, so a peek wider than the grid pins to the LEFT edge rather
+     than to a negative one. Reversed, an over-wide peek would be clamped off the left of the page. */
+  const left = Math.max(grid.left + PEEK_PAD, Math.min(centred, maxLeft));
+  const wanted = cell.top - PEEK_LIFT;
+  const maxTop = grid.bottom - peekH - PEEK_PAD;
+  const top = Math.max(grid.top + PEEK_PAD, Math.min(wanted, maxTop));
+  return { left, top, width, height: peekH };
+}

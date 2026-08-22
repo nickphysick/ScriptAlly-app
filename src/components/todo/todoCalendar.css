@@ -463,3 +463,44 @@
 @media (prefers-reduced-motion: reduce) {
   .cal-fprow, .cal-recmain, .cal-recbtn2, .cal-fpfootb, .cal-pip { transition: none; }
 }
+
+/* ══ THE HOVER PEEK (finishing pack, Phase 2; ref calendar-month-focus-v5.html) ═══════════════
+ *
+ * ⚠️ `position: fixed` AND PORTALLED TO THE BODY. `.cal-grid` carries `overflow: hidden` — that is
+ * what clips its corner cells to the outer radius — so a peek drawn inside it would be cut off by
+ * the very cells it exists to unfold. It is also what keeps the peek off the cell's height budget:
+ * the reclaim pack left exactly +4.0px of cushion at 1280 and above, and nothing in this rule
+ * touches `.cal-cell`.
+ *
+ * ⚠️ `pointer-events: none` IS LOAD-BEARING, NOT TIDINESS. The peek covers the cell the pointer is
+ * resting on. Without this the pointer would be over the PEEK rather than the cell, `mouseleave`
+ * would fire on the cell, the peek would close, the pointer would be back over the cell — and the
+ * card would flicker on and off at the refresh rate. It also means a click lands on the day
+ * underneath, which is the behaviour the pack asks for and comes free.
+ *
+ * ⚠️ THE BACKGROUND IS SET INLINE, from `PEEK_OPACITY` — one of the three named constants Nick can
+ * tune by name (delay, scale, opacity). It is deliberately NOT restated here.
+ */
+.cal-peek {
+  position: fixed; z-index: 55;
+  border: 1px solid #ece0d2; border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(58, 28, 20, 0.18);
+  padding: 9px;
+  display: flex; flex-direction: column; gap: 4px;
+  pointer-events: none;
+  transform-origin: center;
+  animation: calPeekIn 0.14s ease-out;
+}
+@keyframes calPeekIn { from { transform: scale(0.72); opacity: 0.3 } to { transform: scale(1); opacity: 1 } }
+/* ⚠️ THE PEEK STILL APPEARS UNDER REDUCED MOTION — only the scale animation goes. Suppressing the
+   card itself would remove information from the readers most likely to want it held still. */
+@media (prefers-reduced-motion: reduce) { .cal-peek { animation: none } }
+
+.cal-pkday {
+  font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.15em;
+  text-transform: uppercase; color: #a8998a; margin-bottom: 3px;
+}
+/* ⚠️ THE PEEK'S PILLS ARE THE CELL'S PILLS — same component, same class, so nothing is restated
+   here that could drift. The one difference is that they cannot be pressed, and `pointer-events`
+   on the container already says so; `cursor` follows it for honesty. */
+.cal-peek .cal-pip { cursor: default; }

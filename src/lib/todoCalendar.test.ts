@@ -14,6 +14,7 @@ import { BoardCard } from "./todoBoard";
 import type { CalendarItem, RecordItem } from "./todoCalendar";
 import {
   monthGridDays, monthLabel, shiftMonth, sameMonth,
+  peekBox, PEEK_SCALE, PEEK_PAD, PEEK_LIFT, PEEK_DELAY_MS, PEEK_OPACITY,
   cardActionYmd, calendarDays, CAL_CELL_CAP, calFoldCap, toYmd,
   recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
   cellSlots,
@@ -1124,7 +1125,12 @@ describe("⚠️ one fact, one pip — the record supersedes the done card that 
 
 describe("⚠️ the record pip names the agent, as the card pips beside it do", () => {
   it("the grid pip reads 'Label · Name', and falls back to the label alone", () => {
-    expect(pageSrc).toContain("{r.agent ? `${r.label} · ${r.agent}` : r.label}");
+    /* ⚠️ RETARGETED, NOT RELAXED (finishing pack, Phase 2). The record pip moved into the shared
+       `RecPip` so the peek could render the SAME pill rather than a second copy of it, and the
+       tooltip picked up a guard — the peek's pills carry no title, being a tooltip inside a
+       tooltip. The claim is unchanged and still exact: where a title IS rendered, it is
+       `Label · Name` with the label alone as the fallback. */
+    expect(pageSrc).toContain("r.agent ? `${r.label} · ${r.agent}` : r.label");
   });
 
   it("the panel row keeps its own format — the name is already in its title", () => {
@@ -1208,7 +1214,7 @@ describe("⚠️ two words on the grid — and summarisation happens NOWHERE els
     expect(pillLabel(rec)).not.toContain("Sam Okoro");
     // the page renders pillLabel, and keeps the full form in the tooltip
     expect(pageSrc).toContain("{pillLabel(r)}");
-    expect(pageSrc).toContain("title={r.agent ? `${r.label} · ${r.agent}` : r.label}");
+    expect(pageSrc).toContain("title={onPick ? (r.agent ? `${r.label} · ${r.agent}` : r.label) : undefined}");
   });
 
   it("⚠️ EVERY KIND THAT CAN CALENDAR IS EITHER IN THE TABLE OR DELIBERATELY OUT", () => {
@@ -1435,5 +1441,66 @@ describe("⚠️ the fold divides by a MEASURED pill, not a declared one", () =>
   it("no measurement yet still renders the ceiling, not an empty month", () => {
     expect(foldFor(0, REAL, false)).toEqual({ cap: CAL_CELL_CAP, fits: CAL_CELL_CAP, shortfall: 0 });
     expect(calFoldCap(0, REAL)).toBe(CAL_CELL_CAP);
+  });
+});
+
+/* ══ THE HOVER PEEK'S GEOMETRY (finishing pack, Phase 2) ═════════════════════════════════════ */
+describe("peekBox — where the peek goes, and what stops it leaving the grid", () => {
+  /* a 7-column grid of 100px cells, 600 wide, 400 tall, at the origin */
+  const GRID = { left: 0, top: 0, right: 700, bottom: 400 };
+  const cell = (left: number, top: number) => ({ left, top, width: 100 });
+
+  it("a middle cell grows CENTRED on itself", () => {
+    const b = peekBox(cell(300, 100), GRID, 0);
+    expect(b.width).toBe(160);                       // 100 × 1.6
+    expect(b.left).toBe(300 - 30);                   // (160 − 100) / 2 either side
+    expect(b.left + b.width / 2).toBe(300 + 50);     // the cell's own centre line
+  });
+
+  it("a FIRST-column cell grows inward, never off the left of the grid", () => {
+    const b = peekBox(cell(0, 100), GRID, 0);
+    expect(b.left).toBe(GRID.left + PEEK_PAD);
+    expect(b.left).toBeGreaterThanOrEqual(GRID.left);
+  });
+
+  it("a LAST-column cell grows inward, never off the right of the grid", () => {
+    const b = peekBox(cell(600, 100), GRID, 0);
+    expect(b.left + b.width).toBeLessThanOrEqual(GRID.right);
+    expect(b.left).toBe(GRID.right - 160 - PEEK_PAD);
+  });
+
+  it("it starts a little ABOVE the cell it grew from", () => {
+    expect(peekBox(cell(300, 100), GRID, 0).top).toBe(100 - PEEK_LIFT);
+  });
+
+  it("a cell in the LAST ROW is pushed up so a tall peek still ends inside the grid", () => {
+    /* eight items' worth of pill, on a day two rows from the foot */
+    const b = peekBox(cell(300, 330), GRID, 200);
+    expect(b.top + 200).toBeLessThanOrEqual(GRID.bottom);
+    expect(b.top).toBe(GRID.bottom - 200 - PEEK_PAD);
+  });
+
+  it("the FIRST row is clamped down rather than hung above the grid", () => {
+    const b = peekBox(cell(300, 0), GRID, 60);
+    expect(b.top).toBe(GRID.top + PEEK_PAD);
+  });
+
+  /* ⚠️ THE ORDER OF THE TWO CLAMPS IS THE BUG THIS CATCHES. `Math.min` must run before
+     `Math.max`, or a peek wider than its grid is clamped to a NEGATIVE left and drawn off the
+     page — the one case where getting it backwards is invisible at every ordinary width. */
+  it("a peek WIDER than the grid pins to the left edge, never to a negative one", () => {
+    const narrow = { left: 40, top: 0, right: 140, bottom: 400 };   // 100px of grid
+    const b = peekBox(cell(40, 100), narrow, 0);
+    expect(b.width).toBe(160);
+    expect(b.left).toBe(narrow.left + PEEK_PAD);
+    expect(b.left).toBeGreaterThan(0);
+  });
+
+  it("the three tunable constants are named, and the scale is the one the box uses", () => {
+    expect(PEEK_DELAY_MS).toBe(450);
+    expect(PEEK_SCALE).toBe(1.6);
+    expect(PEEK_OPACITY).toBe(0.97);
+    /* derived from the constant rather than restated, so retuning PEEK_SCALE cannot desync them */
+    expect(peekBox(cell(300, 100), GRID, 0).width).toBe(Math.round(100 * PEEK_SCALE));
   });
 });

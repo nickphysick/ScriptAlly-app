@@ -17,6 +17,7 @@
  * urgent item. Deliberate, stated here and in the report.
  */
 import React, { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { useTagWrites } from "./useTagWrites";
@@ -33,6 +34,7 @@ import {
   shiftMonth, sameMonth, calFoldCap, calFoldCapFolded,
   RecordItem, recordDays, cellSlots, exchangeLine, dedupeAgainstRecord, pillLabel,
   FoldMetrics, FOLD_FALLBACK, foldMetricsFrom, foldFor, REC_TONE, REC_LEGEND,
+  peekBox, PEEK_DELAY_MS, PEEK_SCALE, PEEK_OPACITY,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 /* ⚠️ REUSED, not re-written — `shortDate` already renders "7 Aug" for the RecordingCalendar's
@@ -54,6 +56,53 @@ export interface TodoCalendarPageProps {
 }
 
 const DOW = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
+/* ══ ONE PILL RENDERER, SHARED BY THE CELL AND THE PEEK (finishing pack, Phase 2) ══════════════
+ *
+ * ⚠️ THE PEEK'S WHOLE PROMISE IS THAT IT SHOWS THE SAME PILLS, UNCAPPED — so it must not have its
+ * own renderer. Two would agree on the day they were written and drift on the day the grammar
+ * changes, and the drift would show up as the peek quietly disagreeing with the cell it grew from.
+ * These were inline JSX in the cell; lifting them changes no markup.
+ *
+ * ⚠️ IN THE PEEK THEY ARE INERT: no click handler, `tabIndex={-1}` so tab cannot walk into a
+ * surface that only exists while the pointer rests, and no `title` — a tooltip inside a tooltip.
+ */
+/** "MON 12 AUG" — the peek's only chrome. Built from the ymd, never from a Date the caller holds. */
+const peekDayLabel = (ymd: string): string => {
+  const d = new Date(`${ymd}T12:00:00`);
+  return `${DOW[(d.getDay() + 6) % 7]} ${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" }).toUpperCase()}`;
+};
+
+const ItemPip: React.FC<{ it: CalendarItem; onPick?: () => void }> = ({ it, onPick }) => (
+  <button
+    type="button"
+    className={`cal-pip${it.struck ? " struck" : ""}${it.card ? "" : " inert"}`}
+    style={{ background: CAL_PIP[it.family].bg, color: CAL_PIP[it.family].tx, borderColor: CAL_PIP[it.family].bd }}
+    title={onPick ? it.label : undefined}
+    tabIndex={onPick ? undefined : -1}
+    onClick={onPick ? (e) => { e.stopPropagation(); onPick(); } : undefined}
+  >
+    {/* ⚠️ THE GRID SUMMARISES; NOTHING UPSTREAM DOES. `pillLabel` is the only place two-word
+        labels exist — the tooltip above, the day panel and FocusFlow all still read `it.label` in
+        full. A writer's own task returns its own words and the cell ellipsises them. */}
+    {pillLabel(it)}
+  </button>
+);
+
+const RecPip: React.FC<{ r: RecordItem; onPick?: () => void }> = ({ r, onPick }) => (
+  <button
+    type="button"
+    className="cal-pip cal-rec"
+    title={onPick ? (r.agent ? `${r.label} · ${r.agent}` : r.label) : undefined}
+    tabIndex={onPick ? undefined : -1}
+    onClick={onPick ? (e) => { e.stopPropagation(); onPick(); } : undefined}
+  >
+    <span className="cal-recdot" style={{ background: REC_TONE[r.dir].dot }} aria-hidden />
+    {/* ⚠️ NO AGENT NAME ON A PILL — on Nick's instruction. The grid is a density map; the name is
+        one click away in the panel, and the tooltip above still carries `Label · Name` in full. */}
+    {pillLabel(r)}
+  </button>
+);
 
 /* ══ THE IN-FOCUS DAY PANEL (record-layer pack, Phase 5) ════════════════════════════════════
  *
@@ -449,6 +498,83 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     [activities, queries, agents, visible.join("|")],
   );
 
+  /* ══ THE HOVER PEEK (finishing pack, Phase 2; ref calendar-month-focus-v5.html) ═══════════
+   *
+   * ⚠️ IT IS PORTALLED, SO IT SPENDS NO CELL CUSHION. The reclaim pack left exactly +4.0px inside
+   * a cell at 1280 and above. A peek drawn as a child of the cell — even one absolutely positioned
+   * — would still have had to grow the cell's own box to hold a full uncapped set, and that budget
+   * took three packs to earn. `position: fixed`, over the grid, cell untouched.
+   *
+   * ⚠️ AND IT NEVER OPENS FROM THE KEYBOARD. Arrowing through the month moves the SELECTION, and
+   * the day panel already answers "what is on this day" for the selected day in full. A peek that
+   * followed the caret would put a second, worse answer on screen beside the good one — and one
+   * the reader cannot dismiss without reaching for the mouse.
+   */
+  /* ⚠️ THE CELL'S OWN RECT IS KEPT, not reconstructed. The re-clamp below needs the cell the peek
+     grew from, and inverting the first clamp to recover it is arithmetic that is right until an
+     edge cell clamps — at which point the inverse is simply wrong, silently and only at the edges. */
+  const [peek, setPeek] = useState<
+    { ymd: string; left: number; top: number; width: number; cell: { left: number; top: number; width: number } } | null
+  >(null);
+  const peekTimer = React.useRef<number | null>(null);
+  const peekRef = React.useRef<HTMLDivElement>(null);
+
+  const clearPeek = React.useCallback(() => {
+    if (peekTimer.current !== null) { window.clearTimeout(peekTimer.current); peekTimer.current = null; }
+    setPeek((p) => (p === null ? p : null));
+  }, []);
+
+  /* ⚠️ THE CELL ELEMENT IS CAPTURED NOW, NOT READ IN THE TIMEOUT. React pools nothing here, but
+     `currentTarget` is null by the time a 450ms timer fires, so the rect must be taken from a
+     reference held across the wait. */
+  const armPeek = React.useCallback((ymd: string, cell: HTMLElement) => {
+    if (peekTimer.current !== null) window.clearTimeout(peekTimer.current);
+    peekTimer.current = window.setTimeout(() => {
+      peekTimer.current = null;
+      const grid = gridRef.current;
+      if (!grid) return;
+      /* ⚠️ EMPTY CELLS NEVER PEEK — a 1.6× parchment card saying nothing is worse than no card. */
+      if (itemsFor(ymd).length + recordFor(ymd).length === 0) return;
+      const c = cell.getBoundingClientRect();
+      const g = grid.getBoundingClientRect();
+      /* height 0 on this pass: the box is measured once it has been laid out, below */
+      const cellRect = { left: c.left, top: c.top, width: c.width };
+      const box = peekBox(cellRect, { left: g.left, top: g.top, right: g.right, bottom: g.bottom }, 0, PEEK_SCALE);
+      setPeek({ ymd, left: box.left, top: box.top, width: box.width, cell: cellRect });
+    }, PEEK_DELAY_MS);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [byDay, recByDay, showRecord]);
+
+  /* ⚠️ THE SECOND CLAMP IS NOT OPTIONAL, because the height is the one term `peekBox` cannot
+     derive: the peek holds every item on the day with no cap, so how tall it is depends on how
+     many there are. It is placed, measured, then re-clamped — and the re-clamp writes only when it
+     MOVES, so this cannot loop. A day near the foot of the month would otherwise hang past the
+     grid's bottom edge, which is precisely the case the clamp exists for. */
+  React.useLayoutEffect(() => {
+    const el = peekRef.current, grid = gridRef.current;
+    if (!el || !grid || !peek) return;
+    const h = el.getBoundingClientRect().height;
+    const g = grid.getBoundingClientRect();
+    const box = peekBox(peek.cell, { left: g.left, top: g.top, right: g.right, bottom: g.bottom }, h, PEEK_SCALE);
+    if (Math.abs(box.top - peek.top) > 0.5) setPeek({ ...peek, top: box.top });
+  }, [peek]);
+
+  /* ⚠️ SCROLL DISMISSES, ON THE CAPTURE PHASE. The peek is `position: fixed` against a grid that
+     can move under it — the day panel beside it scrolls, and so does the page's own frame on a
+     short viewport. A fixed card left behind by a scrolled grid points at the wrong day, which is
+     worse than no card at all. Capture, because these scrolls happen on inner elements and do not
+     bubble to the window. */
+  React.useEffect(() => {
+    if (!peek) return;
+    window.addEventListener("scroll", clearPeek, true);
+    return () => window.removeEventListener("scroll", clearPeek, true);
+  }, [peek, clearPeek]);
+
+  /* the timer must not outlive the page */
+  React.useEffect(() => () => {
+    if (peekTimer.current !== null) window.clearTimeout(peekTimer.current);
+  }, []);
+
   const subtitle = `${monthLabel(anchor)} — every item on the day it needs you.`;
 
   const openSheet = (item: CalendarItem) => {
@@ -560,6 +686,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                   role="gridcell"
                   className={`cal-cell${ymd === today ? " today" : ""}${ymd === selDay ? " sel" : ""}${past ? " past" : ""}${off ? " off" : ""}`}
                   onClick={() => selectDay(ymd)}
+                  onMouseEnter={(e) => armPeek(ymd, e.currentTarget)}
+                  onMouseLeave={clearPeek}
                 >
                   <div className="cal-d">
                     {/* ⚠️ THE NUMERAL IS ITS OWN BOX (fixes pack, Phase 3) — a bare text node has
@@ -569,42 +697,15 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                     {items.length + recs.length > 0 && <span className="cal-c2">{items.length + recs.length}</span>}
                   </div>
                   {shown.map((it) => (
-                    <button
-                      key={it.key}
-                      type="button"
-                      className={`cal-pip${it.struck ? " struck" : ""}${it.card ? "" : " inert"}`}
-                      style={{ background: CAL_PIP[it.family].bg, color: CAL_PIP[it.family].tx, borderColor: CAL_PIP[it.family].bd }}
-                      title={it.label}
-                      onClick={(e) => { e.stopPropagation(); it.card ? focusCard(ymd, it.key) : selectDay(ymd); }}
-                    >
-                      {/* ⚠️ THE GRID SUMMARISES; NOTHING UPSTREAM DOES. `pillLabel` is the only
-                          place two-word labels exist — the tooltip above, the day panel and
-                          FocusFlow all still read `it.label` in full. A writer's own task returns
-                          its own words and the cell ellipsises them. */}
-                      {pillLabel(it)}
-                    </button>
+                    <ItemPip key={it.key} it={it}
+                      onPick={() => { it.card ? focusCard(ymd, it.key) : selectDay(ymd); }} />
                   ))}
                   {/* ⚠️ THE RECORD SITS UNDER THE LIVE WORK, AND WEARS THE SAME BOX. It reuses
                       `.cal-pip` geometry deliberately: `CAL_PIP_H` is the fold's unit, so a record
                       pip of a different height would make the measured cap describe a cell it does
                       not fit. Only the paint differs — no fill, no border, a dot and muted ink. */}
                   {shownRecs.map((r) => (
-                    <button
-                      key={r.key}
-                      type="button"
-                      className="cal-pip cal-rec"
-                      title={r.agent ? `${r.label} · ${r.agent}` : r.label}
-                      onClick={(e) => { e.stopPropagation(); focusRecord(ymd, r.key); }}
-                    >
-                      <span className="cal-recdot" style={{ background: REC_TONE[r.dir].dot }} aria-hidden />
-                      {/* ⚠️ NO AGENT NAME ON A PILL — REVERSING THE PREVIOUS PACK, on Nick's
-                          instruction. The name was added here so the record read like the card pips
-                          beside it; under the pill grammar BOTH sides drop names, so the two are
-                          consistent again by the opposite route. The grid is a density map; the
-                          name is one click away in the panel, and the tooltip above still carries
-                          `Label · Name` in full. */}
-                      {pillLabel(r)}
-                    </button>
+                    <RecPip key={r.key} r={r} onPick={() => focusRecord(ymd, r.key)} />
                   ))}
                   {overflow > 0 && <div className="cal-more2">+{overflow} MORE</div>}
                   {/* ⚠️ "{n} ROLLED FORWARD ↗" IS GONE (pill pack, Phase 4). It was bookkeeping
@@ -616,6 +717,31 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               );
             })}
           </div>
+
+          {/* ⚠️ THE PEEK IS PORTALLED TO `document.body` (finishing pack, Phase 2). `.cal-grid` has
+              `overflow: hidden` — that is what clips its corner cells to the outer radius — so a
+              peek rendered inside it would be cut off by exactly the cells it is trying to unfold.
+              Portalling also takes it out of the cell's box entirely, which is what keeps it off
+              the fold's cushion.
+              ⚠️ `aria-hidden` AND EVERY PILL AT `tabIndex={-1}`: it is a pointer affordance that
+              exists for a few hundred milliseconds, and the day panel already states the same day
+              in full for anyone not using a mouse. */}
+          {peek && createPortal(
+            <div
+              ref={peekRef}
+              className="cal-peek"
+              aria-hidden
+              style={{ left: peek.left, top: peek.top, width: peek.width, background: `rgba(253, 250, 245, ${PEEK_OPACITY})` }}
+            >
+              <div className="cal-pkday">{peekDayLabel(peek.ymd)}</div>
+              {/* ⚠️ NO CAP, NO COUNTER — the peek IS the answer to "+N MORE". `itemsFor` and
+                  `recordFor` are the same two calls the cell makes, so a filtered-out kind or a
+                  hidden record layer is absent here for the same reason it is absent there. */}
+              {itemsFor(peek.ymd).map((it) => <ItemPip key={it.key} it={it} />)}
+              {recordFor(peek.ymd).map((r) => <RecPip key={r.key} r={r} />)}
+            </div>,
+            document.body,
+          )}
 
           {/* ⚠️ THE LEGEND RENDERS FROM THE RECORDS — never a second list. It reads TWO now, each
               owning the layer it describes: CAL_LEGEND for the live families, REC_LEGEND for the
