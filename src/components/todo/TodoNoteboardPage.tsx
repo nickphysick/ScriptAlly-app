@@ -36,6 +36,7 @@ import { toggleTagSel } from "../../lib/todoTags";
 import { TAG_PALETTE } from "../../lib/todoFamily";
 import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
+import { NOTEBOARD_SUBTITLE, noteCountLabel } from "../../lib/noteboard";
 import { UserTask, TagDef } from "../../types";
 import "./tasksLayout.css";
 import "./taskChrome.css";
@@ -69,21 +70,24 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   const [compose, setCompose] = useState<null | { id?: string; text: string; detail: string }>(null);
   const [saving, setSaving] = useState(false);
 
+  /* ⚠️ THE TALLY AND THE VIEW ARE TWO LISTS. `pinned` is what is on the board; `notes` is what the
+     search and the chip row have left of it. A count taken from the filtered list would state that
+     searching had unpinned things. */
+  const pinned = useMemo(
+    () => userTasks.filter(isNote).sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")),
+    [userTasks],
+  );
+
   const notes = useMemo(() => {
-    const all = userTasks.filter(isNote)
-      .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+    const all = pinned;
     const searched = search.trim()
       ? all.filter((n) => `${n.text} ${n.detail ?? ""}`.toLowerCase().includes(search.trim().toLowerCase()))
       : all;
     return tagSel ? searched.filter((n) => (n.tags ?? []).includes(tagSel)) : searched;
-  }, [userTasks, search, tagSel]);
+  }, [pinned, search, tagSel]);
 
   const userTags = currentUser?.tags ?? [];
   const tagLabel = (id: string) => userTags.find((t) => t.id === id)?.label ?? id;
-
-  const subtitle = notes.length === 0
-    ? "Thoughts that aren’t tasks yet."
-    : `${spellNumber(notes.length)[0].toUpperCase()}${spellNumber(notes.length).slice(1)} note${notes.length === 1 ? "" : "s"} pinned — thoughts that aren’t tasks yet.`;
 
   const saveCompose = async () => {
     if (!compose || saving) return;
@@ -154,11 +158,19 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
 
   return (
     <div className="t-f12 spine-root">
-      <div className="tdb-wrap today-off">
+      {/* ⚠️ THE TOKENS SCOPE HERE, NOT ON THE ROOT. `tasksViewport` requires the exact
+          attribute `className="t-f12 spine-root"` on all four Tasks pages — the one-column law —
+          so a page that needs a class of its own hangs it one level down. */}
+      <div className="tdb-wrap today-off nb-scope">
         <TasksPageLayout
           title="Noteboard"
           mark="noteboard"
-          subtitle={subtitle}
+          subtitle={NOTEBOARD_SUBTITLE}
+          /* ⚠️ THE TALLY RIDES THE TOOL ROW. `PageHeaderProps` has no count slot — "the slot is
+             DELETED from the variant (amendment 7)… the two pages that had one had their figure
+             REHOMED rather than dropped". This is the third, and the eyebrow is the chassis's own
+             word for it: "the plate carries identity while the tool row carries tallies". */
+          eyebrow={noteCountLabel(pinned.length)}
           tools={
             <>
               <span className="nb-search">

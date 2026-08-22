@@ -1,11 +1,58 @@
 /**
- * The Noteboard (tasks-pages pack, Phase 4; ref design-refs/tasks-pages.html — the NOTEBOARD
- * frame: butter cards in Caveat flowing into MASONRY COLUMNS by length, never a stretched grid).
+ * The Noteboard (rebuilt from design-refs/noteboard-mockup.html).
+ *
+ * ⚠️ ONE TOKEN SET, DECLARED ONCE, AT THE TOP — and nothing below restates a value.
+ *
+ * ⚠️ AND A VALUE index.css ALREADY NAMES IS READ, NEVER COPIED. Five of the mockup's hard-coded
+ * hexes are app colours with app names (`--burg`, `--pink`, `--pink-b`, `--shell-card`,
+ * `--shell-panel`); those are `var()`s here, so a retone of the app retones the board.
+ *
+ * ⚠️ SAGE IS THE ONE DELIBERATE EXCEPTION. index.css does carry `--sageC: #e9ede6`, and the note
+ * beside it locks the trio — "StatusDot sage (--sage/--sageC/--sageD) is a STATUS colour — LOCKED
+ * to StatusDots only." A note's sage fill is that hex doing an unrelated job, so it is declared
+ * here rather than borrowed from a token reserved for another meaning. Borrowing it would tie a
+ * writer's colour choice to the status palette, and the next retone of one would move the other.
  */
+.nb-scope {
+  /* ── surfaces read from the app ─────────────────────────────────────────────────────────── */
+  --nb-burgundy: var(--burg);
+  --nb-pink: var(--pink);
+  --nb-pink-deep: var(--pink-b);
+  --nb-parchment: var(--shell-card);
+  --nb-ground: var(--shell-panel);
+
+  /* ── the three note papers (see the sage note above) ────────────────────────────────────── */
+  --nb-yellow: #fbf3d9;
+  --nb-yellow-deep: #eddfae;
+  --nb-sage: #e9ede6;
+  --nb-sage-mid: #c9d3c5;
+  --nb-sage-dark: #5a6e58;
+  --nb-sage-ring: #8a9e88;
+
+  /* ── ink and rules ──────────────────────────────────────────────────────────────────────── */
+  --nb-ink: #3a1c14;
+  --nb-ink-deep: #1c130f;
+  --nb-muted: #9c8878;
+  --nb-quiet: #8a7466;
+  --nb-rule: rgba(124, 58, 42, 0.28);
+  --nb-hair: rgba(124, 58, 42, 0.18);
+  --nb-hair-soft: rgba(124, 58, 42, 0.12);
+
+  /* ── the one spacing scale ──────────────────────────────────────────────────────────────── */
+  --nb-gap: 18px;
+  --nb-radius: 10px;
+  --nb-pad: 18px;
+  --nb-pad-foot: 12px;
+  --nb-body-size: 21px;
+  --nb-body-lh: 1.32;
+  --nb-micro: 9.5px;
+  --nb-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 3px 10px rgba(58, 28, 20, 0.07);
+  --nb-shadow-hover: 0 2px 4px rgba(58, 28, 20, 0.07), 0 8px 20px rgba(58, 28, 20, 0.11);
+}
 
 /* ⚠️ MASONRY, NOT GRID: CSS columns pack by LENGTH — a short note sits under a short note. The
    ref's own mechanism (`columns:3`), kept. "Read as a column" collapses to one reading column. */
-.nb-grid { columns: 3; column-gap: 16px; }
+.nb-grid { columns: 3; column-gap: var(--nb-gap); }
 /* ⚠️ "READ AS A COLUMN" IS CENTRED, AND IT OBEYS THE LOCK (tasks-viewport P4). A single 620px
    column pinned to the left edge of a wide frame reads as a masonry that failed to lay out; the
    auto margins are what make it a deliberate reading measure. It scrolls inside the same
@@ -55,22 +102,22 @@
 .nb-cactions { display: flex; gap: 8px; margin-top: 12px; }
 .nb-csave {
   height: 30px; padding: 0 13px; border-radius: 8px; font-size: 11.5px; font-weight: 700;
-  background: #f5e2da; border: 1px solid #e8c8bc; color: #5c2f22; cursor: pointer; font-family: inherit;
+  background: var(--nb-pink); border: 1px solid var(--nb-pink-deep); color: var(--nb-burgundy); cursor: pointer; font-family: inherit;
 }
 .nb-csave[disabled] { background: #faf7f1; border-color: #e8dfd1; color: #b3a394; cursor: not-allowed; }
 .nb-ccancel {
   height: 30px; padding: 0 11px; border-radius: 8px; font-size: 11.5px;
-  background: transparent; border: 1px solid #e8dfd1; color: #8a7a6c; cursor: pointer; font-family: inherit;
+  background: transparent; border: 1px solid var(--nb-hair); color: var(--nb-quiet); cursor: pointer; font-family: inherit;
 }
 
 /* the tool row's search — the ref's .tsrch grammar */
 .nb-search {
   display: inline-flex; align-items: center; gap: 7px; height: 32px;
-  border: 1px solid #e8dfd1; border-radius: 8px; padding: 0 11px;
-  color: #a5988c; font-size: 11.5px; width: 190px; background: #fff;
+  border: 1px solid var(--nb-hair); border-radius: 8px; padding: 0 11px;
+  color: var(--nb-muted); font-size: 11.5px; width: 190px; background: #fff;
 }
-.nb-search input { border: 0; outline: none; background: transparent; font: inherit; color: #2b2118; width: 100%; }
-.nb-search input::placeholder { color: #a5988c; }
+.nb-search input { border: 0; outline: none; background: transparent; font: inherit; color: var(--nb-ink); width: 100%; }
+.nb-search input::placeholder { color: var(--nb-muted); }
 /* ⚠️ `.nb-tagwrap` and `.cal-nav.on` MOVED TO `taskChrome.css` — the tag filter is shared with
    the To-do list now, and a control's rules cannot live in one of its consumers' stylesheets. */
 
@@ -79,9 +126,9 @@
   max-width: 520px; margin: 26px auto 0; text-align: center;
   background: #fbf7ee; border: 1px dashed #d9cca8; border-radius: 13px; padding: 26px 28px;
 }
-.nb-empty h3 { font-family: "Playfair Display", Georgia, serif; font-size: 19px; font-weight: 700; color: #2b2118; margin: 0 0 8px; }
-.nb-empty p { font-size: 12.5px; color: #8a7d6e; line-height: 1.65; margin: 0 0 16px; }
+.nb-empty h3 { font-family: "Playfair Display", Georgia, serif; font-size: 19px; font-weight: 700; color: var(--nb-ink); margin: 0 0 8px; }
+.nb-empty p { font-size: 12.5px; color: var(--nb-quiet); line-height: 1.65; margin: 0 0 16px; }
 
 /* the conversion door's copy */
 .nb-datepanel { width: min(380px, calc(100vw - 40px)); }
-.nb-datewhy { font-size: 12.5px; color: #8a7a6c; line-height: 1.6; margin: 0 0 12px; }
+.nb-datewhy { font-size: 12.5px; color: var(--nb-quiet); line-height: 1.6; margin: 0 0 12px; }
