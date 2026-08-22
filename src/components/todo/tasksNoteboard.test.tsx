@@ -30,7 +30,10 @@ describe("⚠️ masonry, not a stretched grid — and it can be read as a colum
     /* ⚠️ RENAMED `.nb-grid` → `.nb-board` (Noteboard rebuild, 22 Aug): the mockup's class is
        `.board`, and porting it class-for-class is what lets the ref and the sheet be diffed.
        The SUBJECT is unchanged — CSS columns, never a stretched grid. */
-    expect(css).toMatch(/\.nb-board\s*\{[^}]*columns:\s*3/);
+    /* ⚠️ RE-RE-POINTED (finish run, 1a): `columns: 3` → `column-width: 280px`. The fixed count
+       was the mockup's, drawn against a 1240px card; on the full-width page it produced 505px
+       notes at 1920. The count now falls out of the viewport. Same subject: columns, never grid. */
+    expect(css).toMatch(/\.nb-board\s*\{[^}]*column-width:\s*280px/);
     expect(css).toContain("break-inside: avoid");
     expect(css).not.toMatch(/\.nb-board[^}]*display:\s*grid/);
     expect(css).not.toContain(".nb-grid");   // and the old name is gone, not shadowed

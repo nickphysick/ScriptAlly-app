@@ -38,7 +38,7 @@ import { TAG_PALETTE } from "../../lib/todoFamily";
 import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
 import {
-  NOTEBOARD_SUBTITLE, noteCountLabel, noteColour, sortNotes, noteRestoreFields,
+  NOTEBOARD_SUBTITLE, noteFilterLabel, noteColour, sortNotes, noteRestoreFields,
   composerWithColour, editCommit, emptyDraft, noteTagChips, noteMatchesSearch,
   NOTE_COLOURS, NoteDraft, projectedTaskId, projectedTask, noteTaskTitle, draftFromExample,
 } from "../../lib/noteboard";
@@ -270,11 +270,9 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
           title="Noteboard"
           mark="noteboard"
           subtitle={NOTEBOARD_SUBTITLE}
-          /* ⚠️ THE TALLY RIDES THE TOOL ROW. `PageHeaderProps` has no count slot — "the slot is
-             DELETED from the variant (amendment 7)… the two pages that had one had their figure
-             REHOMED rather than dropped". This is the third, and the eyebrow is the chassis's own
-             word for it: "the plate carries identity while the tool row carries tallies". */
-          eyebrow={noteCountLabel(pinned.length)}
+          /* ⚠️ NO RESTING TALLY (finish run, 1c). "N notes pinned" sat left of the search box
+             and read as the field's label; the board self-evidences. The count that survives is
+             the FILTERED one, in the tool row, only while a search or a chip narrows. */
           tools={
             <>
               <span className="nb-search">
@@ -305,6 +303,10 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                 ))}
               </span>
               <TplGrow />
+              {/* only while something narrows — the pure label keeps the form in one place */}
+              {(search.trim() || tagSel) && (
+                <span className="nb-fcount">{noteFilterLabel(notes.length, pinned.length)}</span>
+              )}
               {/* the mockup's segmented pair — it replaces the "Read as a column" sentence, which
                   named one of the two states and left the other unspoken */}
               <span className="nb-viewtog">

@@ -151,7 +151,12 @@ describe("⚠️ hover is a SHADOW, never a lift", () => {
 
 describe("⚠️ the flow is masonry, and the column view is a reading measure", () => {
   it("CSS columns pack by length — never a stretched grid", () => {
-    expect(css).toMatch(/\.nb-board\s*\{[^}]*columns:\s*3/);
+    /* ⚠️ THE COUNT IS DERIVED FROM THE VIEWPORT NOW (finish run, 1a): `column-width`, never a
+       fixed `column-count` — the mockup's three was drawn against a 1240px card and gave 505px
+       notes at 1920 on the real page. The mechanism claim is unchanged: multicol, never grid. */
+    expect(css).toMatch(/\.nb-board\s*\{[^}]*column-width:\s*280px/);
+    expect(css).not.toMatch(/\.nb-board\s*\{[^}]*column-count/);
+    expect(css).not.toMatch(/\.nb-board\s*\{[^}]*columns:\s*\d/);
     expect(css).toMatch(/\.nb-note\s*\{[^}]*break-inside:\s*avoid/);
     expect(css).not.toMatch(/\.nb-board[^}]*display:\s*grid/);
   });

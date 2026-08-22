@@ -20,11 +20,11 @@ export const NOTEBOARD_SUBTITLE =
   "Thoughts, snippets, and things worth keeping — pinned where you can see them.";
 
 /**
- * ⚠️ THE TALLY, NOT THE FILTERED VIEW. It counts what is PINNED — a search that hides five notes
- * has not unpinned them, and a count that moved with the search would be describing the query
- * rather than the board.
+ * ⚠️ THE COUNT EXISTS ONLY WHILE SOMETHING NARROWS (finish run, 1c — supersedes `noteCountLabel`,
+ * whose resting tally sat beside the search box and read as its label). It states both figures,
+ * because "3 notes" under a filter cannot say whether three is all of them.
  */
-export const noteCountLabel = (n: number): string => `${n} note${n === 1 ? "" : "s"} pinned`;
+export const noteFilterLabel = (shown: number, total: number): string => `${shown} of ${total} notes`;
 
 /**
  * The three papers, in the order the composer offers them. Typed as the app's own `NoteColour`,

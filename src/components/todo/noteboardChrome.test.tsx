@@ -26,7 +26,7 @@ import { MemoryRouter } from "react-router-dom";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { UserPlan, UserTask } from "../../types";
-import { noteCountLabel, NOTEBOARD_SUBTITLE } from "../../lib/noteboard";
+import { noteFilterLabel, NOTEBOARD_SUBTITLE } from "../../lib/noteboard";
 
 const here = __dirname;
 const css = readFileSync(join(here, "todoNoteboard.css"), "utf8");
@@ -91,26 +91,33 @@ describe("⚠️ the band is REHOMED, not drawn — the chassis already owns the
   });
 });
 
-describe("⚠️ the count is a TALLY, so it rides the tool row — and it agrees with itself", () => {
-  /* ⚠️ MEASURED ACROSS GENUINELY DIFFERENT INPUTS. A count asserted once collapses to one value
-     and proves nothing about the derivation; three volumes must produce three distinct strings,
-     and the singular must actually be singular. */
-  it("nought · one · many produce three distinct labels, and one is singular", () => {
-    const labels = [0, 1, 6].map(noteCountLabel);
+describe("⚠️ the count exists ONLY while something narrows — the resting tally is retired", () => {
+  /* ⚠️ SUPERSEDED (finish run, 1c). This block used to assert the opposite: "N notes pinned" on
+     the tool row at rest. That tally sat immediately left of the search box and read as the
+     field's label, so it is gone — the board self-evidences — and what renders instead is the
+     FILTERED count, only while a search or a chip narrows, stating both figures because "3 notes"
+     under a filter cannot say whether three is all of them. */
+  it("the label states shown-of-total, and different figures produce different strings", () => {
+    expect(noteFilterLabel(3, 12)).toBe("3 of 12 notes");
+    const labels = [noteFilterLabel(0, 3), noteFilterLabel(1, 3), noteFilterLabel(3, 3)];
     expect(new Set(labels).size).toBe(3);
-    expect(labels).toEqual(["0 notes pinned", "1 note pinned", "6 notes pinned"]);
   });
 
-  it("the rendered page states the live tally, and it moves with the board", () => {
+  it("at rest the page renders NO count — neither the eyebrow tally nor the filtered form", () => {
     seed.userTasks = [note({ id: "a" }), note({ id: "b" })];
-    expect(render()).toContain(noteCountLabel(2));
-    seed.userTasks = [note({ id: "a" })];
-    expect(render()).toContain(noteCountLabel(1));
+    const html = render();
+    expect(html).not.toContain("notes pinned");
+    expect(html).not.toMatch(/["\s`]nb-fcount["\s`]/);
+    expect(html).not.toMatch(/["\s`]tpl-eyebrow["\s`]/);
   });
 
-  it("…and the tally is NOT smuggled back into the masthead description", () => {
-    /* the description is identity; a count inside it is the deleted slot rebuilt by hand */
-    expect(NOTEBOARD_SUBTITLE).not.toMatch(/\d|\bnotes? pinned\b/);
+  it("…and the source only mounts the count behind the narrowing condition", () => {
+    const page = decls(readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8"));
+    expect(page).toContain('(search.trim() || tagSel) && (');
+    expect(page).toContain("noteFilterLabel(notes.length, pinned.length)");
+    /* the retired tally is gone from the page, not merely unrendered */
+    expect(page).not.toContain("noteCountLabel");
+    expect(page).not.toContain("eyebrow={");
   });
 });
 

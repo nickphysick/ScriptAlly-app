@@ -51,17 +51,21 @@
 }
 
 /* ── the board ─────────────────────────────────────────────────────────────────────────────── */
-/* ⚠️ MASONRY, NOT GRID: CSS columns pack by LENGTH — a short note sits under a short note. The
-   mockup's own mechanism (`columns: 3`), ported. A grid would stretch every card in a row to the
-   tallest, which is the one thing a board of notes must not do. */
-.nb-board { columns: 3; column-gap: var(--nb-gap); }
+/* ⚠️ MASONRY, NOT GRID: CSS columns pack by LENGTH — a short note sits under a short note. A grid
+   would stretch every row to its tallest card, the one thing a board of notes must not do.
+   ⚠️ THE COUNT FALLS OUT OF THE VIEWPORT — `column-width`, never `column-count` (finish run, 1a).
+   The mockup's `columns: 3` was drawn against a 1240px card; the real page is full width, so a
+   fixed three gave 345px notes at 1440 and 505px at 1920 — the count was the mockup's, the widths
+   were nobody's. One measured constraint on the value: multicol can only render
+   (container − gaps) ÷ N, and the content column is 909px at a 1280 viewport, where N=3 means
+   291px cards — so the width is 280, not the mockup's 340, or 1280 would fall to two 445px
+   columns. The media queries went with the count: column-width already answers narrow. */
+.nb-board { column-width: 280px; column-gap: var(--nb-gap); }
 /* ⚠️ THE COLUMN VIEW IS A READING MEASURE, AND IT IS CENTRED. A single 640px column pinned to the
    left edge of a wide frame reads as a masonry that failed to lay out; the auto margin is what
    makes it deliberate. (The ledger's no-auto-margins law is scoped to the `.tdb-l*` row family —
    "margin-left: auto elsewhere on the page is other furniture".) */
 .nb-board.nb-col1 { columns: 1; max-width: 640px; margin-inline: auto; }
-@media (max-width: 1000px) { .nb-board { columns: 2; } }
-@media (max-width: 680px) { .nb-board { columns: 1; } }
 
 /* ── the note ──────────────────────────────────────────────────────────────────────────────── */
 .nb-note {
@@ -135,7 +139,13 @@
 .nb-ghost {
   break-inside: avoid; margin: 0 0 var(--nb-gap);
   border: 1.5px dashed rgba(124, 58, 42, 0.3); border-radius: var(--nb-radius);
-  min-height: 120px; display: flex; align-items: center; justify-content: center;
+  /* ⚠️ THE GHOST AND A RESTING NOTE ARE A MATCHED PAIR (finish run, 1d) — its minimum is the
+     one-line note's own height, MEMBER BY MEMBER, not a number that happened to match once:
+     pad-top + one body line (size × line-height, the lh token is unitless so calc can multiply)
+     + the foot's 12px margin + its 26px min-height + pad-foot + 2px of note border. Measured
+     97.72 on the live board; the old fixed 120 sat 22px proud of every one-line note beside it. */
+  min-height: calc(var(--nb-pad) + var(--nb-body-size) * var(--nb-body-lh) + 12px + 26px + var(--nb-pad-foot) + 2px);
+  display: flex; align-items: center; justify-content: center;
   cursor: pointer; color: var(--nb-burgundy); font-size: 13.5px; font-weight: 500;
   background: transparent; width: 100%; font-family: inherit; transition: background 0.12s;
 }
@@ -184,6 +194,25 @@
 }
 .nb-ccancel:hover { background: var(--nb-ground); }
 
+/* ⚠️ THE COUNT APPEARS ONLY WHILE SOMETHING NARROWS (finish run, 1c). At rest it sat left of
+   the search box and read as the field's label; the board self-evidences. Filtered, it states
+   what the filter kept — and it sits immediately left of the view toggle, at the answer end of
+   the row rather than the question end. */
+.nb-fcount {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10px;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--nb-muted); white-space: nowrap;
+}
+
+/* ⚠️ THE PIN BUTTON IS A FLEX ROW, AND THE REASON IS TAILWIND'S PREFLIGHT (finish run, 1b).
+   Preflight sets `svg { display: block }`, and a block box inside inline content forces a line
+   break around itself REGARDLESS of `white-space: nowrap` — nowrap governs soft wraps at white
+   space and has no authority over block boxes. So `.tdb-addb` (display: block in todo.css) drew
+   its <Plus> icon on one line and its label on the next, at EVERY width — the two line boxes sum
+   to ≈32px and fit the fixed 34px height, so nothing overflowed, nothing shrank, and no
+   flex-sizing change could have touched it. Measured: 394px of row slack at 1440 with the wrap
+   present. Page-scoped: todo.css belongs to the board. */
+.nb-scope .tdb-addb { display: inline-flex; align-items: center; gap: 6px; }
+
 /* ── the tool row's own controls ───────────────────────────────────────────────────────────── */
 .nb-chipset { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .nb-chip {
@@ -219,9 +248,14 @@
 
 /* the tool row's search — the ref's .tsrch grammar */
 .nb-search {
+  /* ⚠️ THE SEARCH ABSORBS THE ROW'S SLACK (finish run, 1b) — the mockup's own sizing restored:
+     flex 1 between a floor and a cap, so the field grows before anything else moves. Declared in
+     THIS rule, not a second block: a grouped or repeated selector silently repoints every
+     first-match slice a lock takes (the house one-rule-per-selector law). */
+  flex: 1; min-width: 220px; max-width: 340px;
   display: inline-flex; align-items: center; gap: 7px; height: 32px;
   border: 1px solid var(--nb-hair); border-radius: 8px; padding: 0 11px;
-  color: var(--nb-muted); font-size: 11.5px; width: 190px; background: #fff;
+  color: var(--nb-muted); font-size: 11.5px; background: #fff;
 }
 .nb-search input { border: 0; outline: none; background: transparent; font: inherit; color: var(--nb-ink); width: 100%; }
 .nb-search input::placeholder { color: var(--nb-muted); }
