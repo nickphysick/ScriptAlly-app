@@ -37,7 +37,13 @@ describe("B2 — the sheet renders the HUB'S timeline (reuse, not imitation)", (
   });
   it("the Hub consumes the MOVED component verbatim — same rows, same ⋯ wiring, extraction only", () => {
     expect(hub).toContain("export const TimelineRows");
-    expect(hub).toContain("onMenuOpen={onEditEntry || onDeleteEntry ? (entry, style) => setMenu({ entry, style }) : undefined}");
+    /* ⚠️ THE ⋯ WIRING NOW HANDS UP THE TRIGGER ELEMENT, NOT A HAND-COMPUTED STYLE (§1, popover
+       sweep). The equivalence this test is named for is untouched — both hosts still render the one
+       `TimelineRows`, and the ⋯ still appears on exactly the rows with an `activityId`. What
+       changed is that the Hub anchors the menu through `useFixedMenu` instead of positioning it
+       from the button's rect with an assumed 184px width, so it can flip when the entry sits low. */
+    expect(hub).toContain("onMenuOpen={onEditEntry || onDeleteEntry ? (entry, trigger) => {");
+    expect(hub).toContain("setMenu({ entry });");
     expect(hub).toContain("row.activityId && onMenuOpen"); // the ⋯ condition, equivalence preserved
     /* ⚠️ `TL_MARK` SINCE §6 — and this lock is the reason the token behind it sits at `:root`.
        To-do renders these rows inside `.tdb-ffhubtl`, nowhere near `.t-f12`, so a page-scoped

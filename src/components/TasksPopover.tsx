@@ -29,8 +29,10 @@ const fmtDue = (iso: string): string => {
 export const TasksPopover: React.FC<{
   scope: TasksScope;
   style?: React.CSSProperties;
+  /** §1 — the panel's element, so `useFixedMenu`'s `auto` placement can measure it and flip. */
+  panelRef?: React.RefObject<HTMLElement | null>;
   onClose: () => void;
-}> = ({ scope, style, onClose }) => {
+}> = ({ scope, style, panelRef, onClose }) => {
   const { tasks, userTasks, dismissTask, updateUserTask, addUserTask } = useScriptAllyDb();
   const { showToast } = useToast();
   const ref = useRef<HTMLDivElement>(null);
@@ -76,7 +78,7 @@ export const TasksPopover: React.FC<{
        The class is applied here rather than matched by a selector on the body, which would
        hard-code where React chooses to mount. */
     <div className="t-f12 qc-neutral">
-      <div ref={ref} className="f12-tasks" style={{ zIndex: 60, ...style }} role="dialog" aria-label="Tasks">
+      <div ref={(el) => { (ref as React.MutableRefObject<HTMLElement | null>).current = el; if (panelRef) (panelRef as React.MutableRefObject<HTMLElement | null>).current = el; }} className="f12-tasks" style={{ zIndex: 60, minHeight: 0, ...style }} role="dialog" aria-label="Tasks">
         <div className="f12-tasks-h">Tasks</div>
         <div className="f12-tasks-body">
           {suggestions.length === 0 && stored.length === 0 && (

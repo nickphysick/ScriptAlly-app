@@ -11,7 +11,8 @@
  * timeline style rather than diverging. The dashboard "Story so far" is a separate global card-feed,
  * intentionally not this pipeline presentation.
  */
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { useFixedMenu } from "../forms/useFixedMenu";
 import { StatusDot } from "../StatusDot";
 import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
@@ -368,7 +369,16 @@ const TlEvent: React.FC<{ last?: boolean; minor?: boolean; mark: React.ReactNode
 
 export const TimelineRows: React.FC<{
   rows: RowSpec[];
-  onMenuOpen?: (entry: TimelineEntryRef, style: React.CSSProperties) => void;
+  /**
+   * §1 — hands up the TRIGGER ELEMENT, not a position.
+   *
+   * ⚠️ THIS USED TO PASS A HAND-COMPUTED `style`: `{ top: r.bottom + 4, left: max(8, r.right - 184) }`,
+   * built from the button's rect at the click. It was the one popover in the Query Centre doing its
+   * own positioning, and it could not flip — an entry near the foot of a long timeline opened a
+   * menu that ran off the bottom of the window, with `184` hard-coded as an assumed menu width.
+   * The host anchors it through `useFixedMenu` now, which measures rather than assumes.
+   */
+  onMenuOpen?: (entry: TimelineEntryRef, trigger: HTMLElement) => void;
   /**
    * ⚠️ ADDITIVE, AND DEFAULTED SO TO-DO IS UNTOUCHED (fix pack 4 §3). The waiting stage is now an
    * event BELOW these rows, so the last real row has to grow a connector into it or the timeline
@@ -430,10 +440,9 @@ export const TimelineRows: React.FC<{
                         aria-label="Correct this entry"
                         title="Correct this entry"
                         onClick={(e) => {
-                          const r = e.currentTarget.getBoundingClientRect();
                           onMenuOpen(
                             { activityId: row.activityId!, status: row.status, label: row.title, dateISO: row.dateISO || "", note: row.note || "" },
-                            { position: "fixed", top: r.bottom + 4, left: Math.max(8, r.right - 184) },
+                            e.currentTarget,
                           );
                         }}
                       >⋯</button>
@@ -474,10 +483,9 @@ export const TimelineRows: React.FC<{
                       aria-label="Correct this entry"
                       title="Correct this entry"
                       onClick={(e) => {
-                        const r = e.currentTarget.getBoundingClientRect();
                         onMenuOpen(
                           { activityId: row.activityId!, status: row.status, label: row.title, dateISO: row.dateISO || "", note: row.note || "" },
-                          { position: "fixed", top: r.bottom + 4, left: Math.max(8, r.right - 184) },
+                          e.currentTarget,
                         );
                       }}
                     >⋯</button>
@@ -699,7 +707,13 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
   /** §6c — create the reminder task through the existing task-creation path. */
   onRemindLater?: () => void;
 }> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod, onSetSendDate, sentExtra, onMarkClosed, onKeepTracking, reminder = null, onOpenReminder, onRemindLater }) => {
-  const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
+  const [menu, setMenu] = useState<{ entry: TimelineEntryRef } | null>(null);
+  /* §1 — anchored, flipping and constrained like every other popover on this page. The trigger is
+     assigned on open (the rows are many; a ref per row would be a ref per rung). */
+  const menuPanelRef = useRef<HTMLElement>(null);
+  const { triggerRef: menuTrigRef, menuStyle: entryMenuStyle } = useFixedMenu<HTMLElement>(
+    !!menu, { placement: "auto", align: "right", constrain: true, menuRef: menuPanelRef },
+  );
 
   const rows = buildTimelineRows(events, query, agent);
 
@@ -762,7 +776,10 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
         rows={rows}
         chaptered
         onEditSendMethod={onEditSendMethod}
-        onMenuOpen={onEditEntry || onDeleteEntry ? (entry, style) => setMenu({ entry, style }) : undefined}
+        onMenuOpen={onEditEntry || onDeleteEntry ? (entry, trigger) => {
+          (menuTrigRef as React.MutableRefObject<HTMLElement | null>).current = trigger;
+          setMenu({ entry });
+        } : undefined}
         continues={ballHolder === "agent" && !!waiting}
         sentExtra={sentExtra}
       />
@@ -1101,7 +1118,8 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
         <F12Menu
           open
           onClose={() => setMenu(null)}
-          style={menu.style}
+          style={entryMenuStyle}
+          panelRef={menuPanelRef}
           ariaLabel="Correct entry"
           /* ⚠️ EDIT RENDERS ONLY WHEN IT HAS SOMEWHERE TO GO. It used to render unconditionally and
              call `onEditEntry?.()`, which is silent when the handler is absent — and it became

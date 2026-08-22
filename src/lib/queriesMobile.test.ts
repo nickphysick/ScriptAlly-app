@@ -65,8 +65,12 @@ describe("the espresso command bar (concept frame 03)", () => {
        call, computed where it is rendered. The anchor rule is unchanged: exactly ONE live
        markSentTriggerRef per breakpoint, because the cell is `display: none` below md. */
     expect(hub).toContain("ref={verbIsMark && !isMobile ? markSentTriggerRef : undefined}");
-    // and the popover opens UPWARD from the foot-pinned bar
-    expect(hub).toContain('isMobile ? { placement: "up" } : undefined');
+    /* and the popover opens UPWARD from the foot-pinned bar.
+       ⚠️ THE CLAIM IS "UP BELOW MD", NOT THE WHOLE OPTIONS OBJECT. This asserted the literal
+       `isMobile ? { placement: "up" } : undefined`, so §1 adding `constrain: true` — which changes
+       nothing about the direction this test is named for — turned it red. A lock that pins more
+       than its own claim goes red for edits that leave the claim true. */
+    expect(hub).toMatch(/isMobile \? \{ placement: "up"/);
     /* ⚠️ THE RULE HIDING THE HERO'S PRIMARY IS GONE, and it was already hiding a button that had
        left two packs earlier. `.f12-hero` itself went with the pairing merge (§1) — the mobile
        command bar's own primary is what this case is really about, asserted below. */

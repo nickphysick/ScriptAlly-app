@@ -258,8 +258,19 @@ export const F12Menu: React.FC<{
    * actions does not, and forcing a head onto both would put a label over `Delete · Duplicate`.
    */
   heading?: string;
-}> = ({ open, onClose, style, items, ariaLabel, heading }) => {
+  /**
+   * §1 — the panel's own element, for `useFixedMenu`'s `auto` placement.
+   *
+   * ⚠️ THE FLIP IS DECIDED BY MEASUREMENT, exactly as `F12Popover`'s is. Without a handle on this
+   * element the hook cannot know how tall the menu is, so it cannot know whether it fits below —
+   * and a menu opened from a trigger near the foot of the window runs off the bottom. That is what
+   * the Attach menu was doing: it had the anchoring primitive and never asked it to flip.
+   */
+  panelRef?: React.RefObject<HTMLElement | null>;
+}> = ({ open, onClose, style, items, ariaLabel, heading, panelRef }) => {
   const ref = useRef<HTMLDivElement>(null);
+  /* one element, two holders: the outside-click handler's and the caller's placement measurement */
+  useEffect(() => { if (panelRef) (panelRef as React.MutableRefObject<HTMLElement | null>).current = ref.current; });
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
@@ -275,8 +286,12 @@ export const F12Menu: React.FC<{
   if (!open) return null;
   return createPortal(
     <div className="t-f12 qc-neutral">
-      <div ref={ref} className="f12-menu" style={{ zIndex: 60, ...style }} role="menu" aria-label={ariaLabel}>
+      {/* ⚠️ `minHeight: 0` IS LOAD-BEARING (§1). A `max-height` arriving in `style` has to squeeze
+          the scrolling body, and a flex column whose child cannot shrink below its content ignores
+          it — the same arrangement `F12Popover` already uses to keep its DONE button reachable. */}
+      <div ref={ref} className="f12-menu" style={{ zIndex: 60, minHeight: 0, ...style }} role="menu" aria-label={ariaLabel}>
         {heading && <div className="f12-menu-head">{heading}</div>}
+        <div className="f12-menu-body">
         {items.map((it, i) =>
           it === "divider" ? (
             <div key={i} className="f12-menu-sep" aria-hidden="true" />
@@ -295,6 +310,7 @@ export const F12Menu: React.FC<{
             </button>
           )
         )}
+        </div>
       </div>
     </div>,
     document.body

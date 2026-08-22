@@ -33,6 +33,8 @@ export type MarkSentKind = "partial" | "full" | "resubmit";
 export interface MarkSentPopoverProps {
   /** Fixed-position style from the host's useFixedMenu, anchored to the CTA. */
   style: React.CSSProperties;
+  /** §1 — the panel's element, so `useFixedMenu`'s `auto` placement can measure it and flip. */
+  panelRef?: React.RefObject<HTMLElement | null>;
   kind: MarkSentKind;
   query: Query & { materialsRequestedType?: string; materialsRequestedQuantity?: string };
   agent: Agent;
@@ -66,6 +68,7 @@ const TITLES: Record<MarkSentKind, string> = {
 
 export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
   style,
+  panelRef,
   kind,
   query,
   agent,
@@ -135,7 +138,11 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
 
   return (
     <motion.div
-      ref={popRef}
+      /* one element, two holders: the outside-click handler's and the caller's flip measurement */
+      ref={(el: HTMLDivElement | null) => {
+        (popRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+        if (panelRef) (panelRef as React.MutableRefObject<HTMLElement | null>).current = el;
+      }}
       role="dialog"
       aria-label={TITLES[kind]}
       // initial={false}: render at the resting state immediately. The host control bar re-renders

@@ -5,16 +5,34 @@
  * and a mono subject line. They are three moments of one act, and a writer moving between them
  * should feel the same surface rather than three dialogs that happen to be adjacent.
  */
+/**
+ * ⚠️ THE SHEETS ARE THE ONE THING §1 DOES NOT PUT THROUGH `useFixedMenu`, AND THE REASON IS THAT
+ * THEY ARE NOT ANCHORED TO ANYTHING. The primitive positions a popover from a TRIGGER's rect; these
+ * are centred modal dialogs on a scrim, with no trigger to measure from and nothing to flip above.
+ * Handing them the hook would mean inventing an anchor so a menu-placement primitive had something
+ * to do, which is worse than the honest arrangement: the scrim centres them, and they take the
+ * SAME height discipline the constrained popovers take — cap, flex column, body scrolls, chrome
+ * pinned. At a 700px window the move sheet's two blocks and its action stack no longer overflow;
+ * before this they were simply clipped, because `overflow: hidden` with no cap cannot scroll.
+ */
 .cor-sheet {
   width: min(520px, calc(100vw - 32px));
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   background: var(--white, #fffdfb);
   border: 1px solid var(--line, #e6dccd);
   border-radius: 0;                    /* square — the chassis is a sheet, not a card */
   box-shadow: 0 18px 44px rgba(40, 28, 20, 0.16);
   overflow: hidden;
 }
-.cor-top { height: 5px; background: var(--sage-edge, #c8d0c5); }
-.cor-body { padding: 18px 20px 16px; }
+.cor-top { height: 5px; background: var(--sage-edge, #c8d0c5); flex: none; }
+/* ⚠️ ONE RULE PER SELECTOR (house invariant) — the height discipline folds into the body's own
+   rule rather than adding a second block. Two `.cor-body` rules would make any lock that finds this
+   rule by first match read whichever came first. The body is what gives when the window is short;
+   never the rule above it or the actions below. */
+.cor-body { padding: 18px 20px 16px; min-height: 0; overflow-y: auto; }
 
 /* ⚠️ THE QUESTION IS PLAYFAIR AND THE SUBJECT IS MONO — the question is prose addressed to a
    person; the subject names a record, which is the register the app states facts in. */

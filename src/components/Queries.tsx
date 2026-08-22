@@ -973,7 +973,24 @@ export const Queries: React.FC<{
   // Desktop: anchored to the reading-pane hero button, opening downward. Mobile Pass 1: the
   // anchor moves to the floating command bar's primary (the hero button hides <md), and the
   // popover opens UPWARD from it — the trigger is pinned to the viewport foot.
-  const { triggerRef: markSentTriggerRef, menuStyle: markSentMenuStyle } = useFixedMenu<HTMLButtonElement>(isMarkSentOpen, isMobile ? { placement: "up" } : undefined);
+  /**
+   * §1 — EVERY ANCHORED POPOVER ON THIS PAGE NOW FLIPS AND CONSTRAINS, and none of them do it
+   * themselves. `useFixedMenu` owns both: `auto` measures the panel and opens upward only when
+   * there is genuinely no room below AND more room above, `constrain` caps the height to the room
+   * that is left. The panels that grow — the menus, the task list — pin their chrome and scroll
+   * their body, which is the arrangement `F12Popover` already used to stop its DONE button
+   * scrolling away.
+   *
+   * ⚠️ THE FAULT WAS NEVER MISSING ANCHORING. All of these were already `position: fixed` off the
+   * trigger's rect; what they lacked was any instruction about what to do when the trigger sits
+   * low. A fixed popover with no flip is exactly as clipped as an absolute one, and looks correct
+   * everywhere except the bottom of the window.
+   */
+  const markSentPanelRef = useRef<HTMLElement>(null);
+  const { triggerRef: markSentTriggerRef, menuStyle: markSentMenuStyle } = useFixedMenu<HTMLButtonElement>(
+    isMarkSentOpen,
+    isMobile ? { placement: "up", constrain: true } : { placement: "auto", constrain: true, menuRef: markSentPanelRef },
+  );
   // Control-ribbon secondary surfaces — Nudge (modal), Close-reasons menu (anchored upward off its
   // ribbon tile), and the Delete confirmation dialog. (v3: the More ⋯ menu was removed.)
   const [isNudgeOpen, setIsNudgeOpen] = useState(false);
@@ -996,7 +1013,10 @@ export const Queries: React.FC<{
   const { triggerRef: moreTrigRef, menuStyle: moreMenuStyle } = useFixedMenu<HTMLButtonElement>(isMoreOpen);
   // View tasks — the record-scoped popover (5c), anchored to the command-bar button.
   const [isTasksOpen, setIsTasksOpen] = useState(false);
-  const { triggerRef: tasksTrigRef, menuStyle: tasksMenuStyle } = useFixedMenu<HTMLButtonElement>(isTasksOpen);
+  const tasksPanelRef = useRef<HTMLElement>(null);
+  const { triggerRef: tasksTrigRef, menuStyle: tasksMenuStyle } = useFixedMenu<HTMLButtonElement>(
+    isTasksOpen, { placement: "auto", constrain: true, menuRef: tasksPanelRef },
+  );
   // Timeline composer (5a): the CTA button scrolls + focuses this; Offer/R&R + "Add more detail"
   // open the rich form pre-set via these seam props.
   const [richInitialType, setRichInitialType] = useState<QueryStatus | undefined>(undefined);
@@ -1213,7 +1233,10 @@ export const Queries: React.FC<{
     });
   };
 
-  const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen); // F12: downward
+  const closePanelRef = useRef<HTMLElement>(null);
+  const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(
+    isCloseMenuOpen, { placement: "auto", constrain: true, menuRef: closePanelRef },
+  );
   /* §4c — the confirm hangs off the Nudge button itself; the control row sits at the top of the
      pane, so it opens downward like every other menu in that row. */
   /**
@@ -1226,12 +1249,21 @@ export const Queries: React.FC<{
    */
   const [agentEdit, setAgentEdit] = useState<null | "email" | "website">(null);
   const [agentDraft, setAgentDraft] = useState("");
-  const { triggerRef: agentEditTrigRef, menuStyle: agentEditStyle } = useFixedMenu<HTMLElement>(!!agentEdit);
+  const agentEditPanelRef = useRef<HTMLElement>(null);
+  const { triggerRef: agentEditTrigRef, menuStyle: agentEditStyle } = useFixedMenu<HTMLElement>(
+    !!agentEdit, { placement: "auto", constrain: true, menuRef: agentEditPanelRef },
+  );
   const [dateEdit, setDateEdit] = useState<null | "sent" | "expected">(null);
   const [dateDraft, setDateDraft] = useState("");
-  const { triggerRef: dateTrigRef, menuStyle: dateMenuStyle } = useFixedMenu<HTMLElement>(!!dateEdit);
+  const datePanelRef = useRef<HTMLElement>(null);
+  const { triggerRef: dateTrigRef, menuStyle: dateMenuStyle } = useFixedMenu<HTMLElement>(
+    !!dateEdit, { placement: "auto", constrain: true, menuRef: datePanelRef },
+  );
   const [nudgeAsk, setNudgeAsk] = useState<{ title: string; body: string; bar?: { pct: number; sentLabel: string; closesLabel: string } } | null>(null);
-  const { triggerRef: nudgeTriggerRef, menuStyle: nudgeAskStyle } = useFixedMenu<HTMLButtonElement>(!!nudgeAsk);
+  const nudgePanelRef = useRef<HTMLDivElement>(null);
+  const { triggerRef: nudgeTriggerRef, menuStyle: nudgeAskStyle } = useFixedMenu<HTMLButtonElement>(
+    !!nudgeAsk, { placement: "auto", constrain: true, menuRef: nudgePanelRef },
+  );
   // Close every ribbon popover/modal whenever the reader moves to a different query.
   useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); setNudgeAsk(null); }, [selectedQueryId]);
   // 5e — the delete is now WIRED to db.deleteQuery (cascades the per-query activity log + the
@@ -1639,7 +1671,10 @@ export const Queries: React.FC<{
   // straight to the query (updateQuery is a plain patch; both keys are in the query update allowlist)
   // with an undo. The Edit drawer stays the home for everything else (agent, dates, materials…).
   const [methodPickOpen, setMethodPickOpen] = useState(false);
-  const { triggerRef: methodPickTrigRef, menuStyle: methodPickMenuStyle } = useFixedMenu<HTMLButtonElement>(methodPickOpen);
+  const methodPanelRef = useRef<HTMLElement>(null);
+  const { triggerRef: methodPickTrigRef, menuStyle: methodPickMenuStyle } = useFixedMenu<HTMLButtonElement>(
+    methodPickOpen, { placement: "auto", constrain: true, menuRef: methodPanelRef },
+  );
   // Phase 6 — the What-you-sent sample-materials inline editor (unit toggle + quantity). Wired to the
   // existing QueryMaterial.type/quantity via updateQuery — no new fields.
   /* §5 — the Attach menu and the Other free-text editor. Both portal through the page's own
@@ -1673,7 +1708,11 @@ export const Queries: React.FC<{
      keyboard session, and the next Tab restarts at the page's first control. */
   const closeMatPop = () => { const el = matPopTrigRef.current; setMatPop(null); setOtherEditing(null); el?.focus(); };
   const [addMatOpen, setAddMatOpen] = useState(false);
-  const { triggerRef: addMatTrigRef, menuStyle: addMatMenuStyle } = useFixedMenu<HTMLButtonElement>(addMatOpen);
+  /* §1 — the reported fault: this had the primitive and never asked it to flip or cap. */
+  const addMatPanelRef = useRef<HTMLElement>(null);
+  const { triggerRef: addMatTrigRef, menuStyle: addMatMenuStyle } = useFixedMenu<HTMLButtonElement>(
+    addMatOpen, { placement: "auto", constrain: true, menuRef: addMatPanelRef },
+  );
   const [otherText, setOtherText] = useState("");
   /* ⚠️ THE SHARED `SampleUnit`, NOT A LOCAL TRIPLE. This page had its own
      `["pages","chapters","words"]` — the same concept the agent list's Materials editor already
@@ -3861,6 +3900,7 @@ export const Queries: React.FC<{
               <MarkSentPopover
                 key="mark-sent"
                 style={markSentMenuStyle}
+                panelRef={markSentPanelRef}
                 kind={a2.markKind}
                 query={activeQuery}
                 agent={activeAgent}
@@ -4048,7 +4088,7 @@ export const Queries: React.FC<{
         {isCloseMenuOpen && activeQuery && (
           <>
             <div onClick={() => setIsCloseMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 59 }} aria-hidden="true" />
-            <div style={{ ...closeMenuStyle, zIndex: 60, background: "#fffefb", border: "1px solid var(--bd)", borderRadius: 12, boxShadow: "0 12px 34px rgba(58,44,31,.18)", padding: 6, minWidth: 198 }}>
+            <div ref={closePanelRef as React.RefObject<HTMLDivElement>} style={{ ...closeMenuStyle, zIndex: 60, display: "flex", flexDirection: "column", minHeight: 0, overflowY: "auto", background: "#fffefb", border: "1px solid var(--bd)", borderRadius: 12, boxShadow: "0 12px 34px rgba(58,44,31,.18)", padding: 6, minWidth: 198 }}>
               <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".12em", textTransform: "uppercase", color: "#b7ab99", padding: "6px 10px 5px" }}>Close this query as…</div>
               {[QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE].map((reason) => (
                 <RibbonMenuItem
@@ -5563,6 +5603,7 @@ export const Queries: React.FC<{
                                     open={addMatOpen}
                                     onClose={() => { setAddMatOpen(false); addMatTrigRef.current?.focus(); }}
                                     style={addMatMenuStyle}
+                                    panelRef={addMatPanelRef}
                                     ariaLabel="Add to this query"
                                     items={[
                                       ...MATERIAL_MENU.map((m) => {
@@ -5712,7 +5753,7 @@ export const Queries: React.FC<{
                             one of them read as a list of things to do; `Sent via` says the list is
                             an ANSWER to a question the card already asked, which is what every other
                             popover on this page does with its own head. */}
-                        <F12Menu open={methodPickOpen} onClose={() => setMethodPickOpen(false)} style={methodPickMenuStyle} ariaLabel="Change send method" heading="Sent via"
+                        <F12Menu open={methodPickOpen} onClose={() => setMethodPickOpen(false)} style={methodPickMenuStyle} panelRef={methodPanelRef} ariaLabel="Change send method" heading="Sent via"
                           items={[SubmissionMethod.EMAIL, SubmissionMethod.ONLINE_FORM, SubmissionMethod.QUERY_MANAGER, SubmissionMethod.POST].map((m) => ({
                             label: sendMethodLabel(m),
                             icon: activeQuery?.sendMethod === m ? <span aria-hidden="true">✓</span> : undefined,
@@ -6028,6 +6069,7 @@ export const Queries: React.FC<{
           eyebrow={agentEdit === "email" ? `Email · ${agentPrimary(activeAgent)}` : `Website · ${agentPrimary(activeAgent)}`}
           width={272}
           style={agentEditStyle}
+          panelRef={agentEditPanelRef}
           onClose={() => setAgentEdit(null)}
         >
           <div className="f12-panel-free">
@@ -6068,6 +6110,7 @@ export const Queries: React.FC<{
         width={244}
         title={dateEdit === "sent" ? "Date sent" : "Reply expected by"}
         style={dateMenuStyle}
+        panelRef={datePanelRef}
         onClose={() => setDateEdit(null)}
       >
         <input
@@ -6108,7 +6151,7 @@ export const Queries: React.FC<{
       * like every other popover here.
       */}
     {isTasksOpen && activeQuery && (
-      <TasksPopover scope={{ queryId: activeQuery.id }} style={tasksMenuStyle} onClose={() => setIsTasksOpen(false)} />
+      <TasksPopover scope={{ queryId: activeQuery.id }} style={tasksMenuStyle} panelRef={tasksPanelRef} onClose={() => setIsTasksOpen(false)} />
     )}
 
     {/**
@@ -6129,7 +6172,7 @@ export const Queries: React.FC<{
       */}
     {nudgeAsk && createPortal(
       <div className="t-f12 qc-neutral">
-        <div className="qc-nask" style={{ ...nudgeAskStyle, zIndex: 60 }} role="dialog" aria-label={nudgeAsk.title}>
+        <div ref={nudgePanelRef} className="qc-nask" style={{ ...nudgeAskStyle, zIndex: 60, display: "flex", flexDirection: "column", minHeight: 0 }} role="dialog" aria-label={nudgeAsk.title}>
           <div className="qc-nask-h">{nudgeAsk.title}</div>
           <div className="qc-nask-b">
             {nudgeAsk.body}
