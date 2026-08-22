@@ -255,7 +255,19 @@ describe("§4c · the list is one composite widget", () => {
 
   it("the groups are groups, and their headings are not stops in the option flow", () => {
     expect(src, "the groups have no role").toContain('role="group"');
-    expect(src, "a group has no accessible name").toContain("aria-label={`${GROUP_LABEL[g]}, ${items.length}`}");
+    expect(src, "a group has no accessible name").toContain("`${GROUP_LABEL[g]}, ${items.length}`");
+  });
+
+  /**
+   * §1 — ⚠️ THE FLAT LIST IS NOT AN UNNAMED GROUP. When the list opens flat it is one section
+   * holding every row, and announcing `role="group"` over it would tell a screen reader the list is
+   * organised when it is not — the same claim the headings make visually, made invisibly. Both the
+   * role and the name are withheld together; withholding only the name would leave an anonymous
+   * group, which is worse than either.
+   */
+  it("⚠️ the flat list carries neither the group role nor a name", () => {
+    expect(src, "the section kind does not decide the role").toContain('g === "flat" ? {} : { role: "group"');
+    expect(src, "the heading is not gated on the section kind").toContain('{g !== "flat" && <div');
   });
 
   /* ⚠️ ONE VISUAL ORDER, READ BY BOTH THE ARROWS AND THE RENDER. Two derivations of "which rows are

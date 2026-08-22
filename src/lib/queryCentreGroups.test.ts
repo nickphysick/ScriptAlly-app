@@ -11,7 +11,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
-import { listGroupFor, rowFigure, figureText, GROUP_ORDER, GROUP_LABEL, foldClosed, CLOSED_FOLD_MIN } from "./queryCentreGroups";
+import { listGroupFor, rowFigure, figureText, GROUP_ORDER, GROUP_LABEL, foldClosed, CLOSED_FOLD_MIN, listIsGrouped } from "./queryCentreGroups";
 import { replyTaskFor } from "./taskPrecedence";
 import { queryBucket } from "./queryAmbient";
 
@@ -137,5 +137,40 @@ describe("§5 · closed folds, but only when folding earns its place", () => {
     expect(foldClosed(CLOSED_FOLD_MIN - 1)).toBe(false);
     expect(foldClosed(CLOSED_FOLD_MIN)).toBe(true);
     expect(foldClosed(40)).toBe(true);
+  });
+});
+
+describe("§1 · the list opens flat, and grouping moves behind the filter", () => {
+  it("⚠️ NO GROUPS ON LOAD — nothing is filtered, so nothing is partitioned", () => {
+    expect(listIsGrouped("all", [])).toBe(false);
+  });
+
+  it("choosing Whose turn brings the grouped reading back", () => {
+    expect(listIsGrouped("move", [])).toBe(true);
+    expect(listIsGrouped("wait", [])).toBe(true);
+  });
+
+  it("choosing any Status does too", () => {
+    expect(listIsGrouped("all", [QueryStatus.QUERIED])).toBe(true);
+    expect(listIsGrouped("all", [QueryStatus.QUERIED, QueryStatus.REJECTED])).toBe(true);
+  });
+
+  /**
+   * ⚠️ IT IS A PREDICATE OVER THE FILTERS, NOT A STORED MODE — so clearing the filter returns the
+   * flat list with no second piece of state to reset, and RESET ALL un-groups for free.
+   */
+  it("clearing the filters returns the flat list", () => {
+    expect(listIsGrouped("all", [])).toBe(false);
+  });
+
+  /**
+   * ⚠️ GROUPING IS NOT DELETED. `listGroupFor` still classifies every query exactly as it did, and
+   * `GROUP_ORDER` still names the four in reading order — what changed is only whether the
+   * partition is DRAWN. This asserts the machinery, so a future edit cannot quietly remove it while
+   * the flat list hides its absence.
+   */
+  it("⚠️ the grouping machinery is untouched — only whether it is drawn", () => {
+    expect(GROUP_ORDER).toEqual(["overdue", "waiting", "move", "closed"]);
+    expect(GROUP_ORDER.every((g) => typeof GROUP_LABEL[g] === "string" && GROUP_LABEL[g].length > 0)).toBe(true);
   });
 });

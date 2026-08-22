@@ -77,7 +77,7 @@ import { NudgeModal } from "./NudgeModal";
 import { queryTaskBadge } from "../lib/queryTaskBadge";
 /* §5 — the list's four groups and the position figure, both derived, both composing rules that
    already exist (`queryBucket` for membership, `taskPrecedence` for the clock). */
-import { GROUP_ORDER, GROUP_LABEL, listGroupFor, foldClosed, lastSendMs } from "../lib/queryCentreGroups";
+import { GROUP_ORDER, GROUP_LABEL, listGroupFor, foldClosed, lastSendMs, listIsGrouped, type ListSection } from "../lib/queryCentreGroups";
 import { exactDate, elapsedPhrase, agoLabel, daysBetween } from "../lib/elapsed";
 import { nextIndex, typeAheadIndex, nearestSurvivor, pageSizeFor, isListNavKey, isTypeAheadKey, TYPEAHEAD_MS } from "../lib/listKeyboard";
 /* ⚠️ §4 — NUDGE NO LONGER READS `replyTaskFor`, AND THE RULE ITSELF IS UNTOUCHED. It is the
@@ -3072,11 +3072,35 @@ export const Queries: React.FC<{
    * the overdue split honest across a day boundary; the grouping was computed per render before
    * this and still is. What moved is WHERE, not how often.
    */
+  /**
+   * §1 — ⚠️ THE LIST OPENS FLAT, AND GROUPING IS NOT DELETED: IT MOVES BEHIND THE FILTER.
+   *
+   * Grouping answers "who do I chase", which is a question the writer asks by CHOOSING it. On load
+   * they have not asked anything yet, so four headings over a short list is the page arranging
+   * itself before being told what for — and on an account with a handful of queries the headings
+   * outnumbered the rows they organised.
+   *
+   * ⚠️ THE TRIGGER IS THE FILTER THEY ALREADY SET, NOT A NEW CONTROL. `Whose turn` and `Status` are
+   * the two sections that ask about state, and state is what the groups partition — so choosing
+   * either brings the grouped reading back, exactly as it renders today. A separate "Group by"
+   * control would be a second way to say the same thing, and the two would eventually disagree.
+   *
+   * ⚠️ AND THE GROUPING ITSELF IS UNTOUCHED — same `listGroupFor`, same `GROUP_ORDER`, same fold on
+   * the closed group. What is conditional is whether the partition is DRAWN, never how it is made:
+   * the flat list is one section holding every row, so keyboard order, `visibleIds` and the
+   * selection-holds-a-fold rule all keep working without a second code path.
+   */
+  const listGrouped = listIsGrouped(turnFilter, statusSel);
+
   const listGroups = (() => {
     const nowMs = Date.now();
     const rows = renderList
       .map((q) => ({ q, agent: agents.find((a) => a.id === q.agentId), ms: manuscripts.find((m) => m.id === q.manuscriptId) }))
       .filter((r) => !!r.agent && !!r.ms);
+    /* ⚠️ ONE SECTION, IN THE SORT'S OWN ORDER — `rows` is already sorted (grouping partitions an
+       already-sorted list), so the flat view is that same array undivided. It is deliberately the
+       same shape the grouped path returns, so everything downstream reads one structure. */
+    if (!listGrouped) return [{ g: "flat" as ListSection, items: rows, foldable: false, shut: false }];
     return GROUP_ORDER
       .map((g) => ({ g, items: rows.filter((r) => listGroupFor(r.q as never, r.agent, nowMs) === g) }))
       .filter((s) => s.items.length > 0)
@@ -4568,15 +4592,18 @@ export const Queries: React.FC<{
                    button role and its tab stop. That makes it a non-option child of a listbox, which
                    is an ARIA compromise; hiding it would trade a compromise for an unreachable
                    control, which is worse. */
-                <div className="qc-grp" role="group" aria-label={`${GROUP_LABEL[g]}, ${items.length}`} key={g}>
-                  <div className={`qc-gh${g === "overdue" ? " qc-gh-od" : ""}${foldable ? " qc-gh-fold" : ""}`}
+                /* §1 — flat: no `role="group"`, no name, no heading. A single unnamed section over
+                   every row is not a grouping, and announcing one would tell a screen reader the
+                   list is organised when it is not. */
+                <div className={g === "flat" ? "qc-grp qc-grp--flat" : "qc-grp"} {...(g === "flat" ? {} : { role: "group", "aria-label": `${GROUP_LABEL[g]}, ${items.length}` })} key={g}>
+                  {g !== "flat" && <div className={`qc-gh${g === "overdue" ? " qc-gh-od" : ""}${foldable ? " qc-gh-fold" : ""}`}
                     {...(foldable ? { role: "button", tabIndex: 0, onClick: () => setClosedOpen((o) => !o),
                       onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setClosedOpen((o) => !o); } },
                       "aria-expanded": !shut } : { "aria-hidden": true })}>
                     <span>{GROUP_LABEL[g]} · {items.length}</span>
                     <i aria-hidden="true" />
                     {foldable && <em>{shut ? "show" : "hide"}</em>}
-                  </div>
+                  </div>}
                   {!shut && items.map(({ q, agent, ms }) => {
                 const isSelected = selectedQueryId === q.id;
                 /**

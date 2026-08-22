@@ -26,6 +26,17 @@ import { replyOverdue, replyDeadlineMs } from "./taskPrecedence";
 export type ListGroup = "overdue" | "waiting" | "move" | "closed";
 
 /**
+ * What the list renders as one section.
+ *
+ * ⚠️ `flat` IS NOT A GROUP, WHICH IS WHY IT IS A SEPARATE TYPE (§1). It is the ABSENCE of grouping,
+ * carried in the same shape so the list keeps one code path — but it must never reach `GROUP_ORDER`,
+ * `GROUP_LABEL` or `listGroupFor`, all of which are total over REAL groups and would need a
+ * meaningless entry each if the union were widened. Nothing classifies a query as flat; the page
+ * decides not to partition at all.
+ */
+export type ListSection = ListGroup | "flat";
+
+/**
  * ⚠️ OVERDUE FIRST, CLOSED LAST — the order is the point of the section. The list is read top-down
  * by someone deciding what to do this morning, so what has lapsed is what they meet first.
  */
@@ -173,3 +184,23 @@ export function lastSendMs(query: { dateSent?: string; partialSentDate?: string;
     .filter((t) => !Number.isNaN(t));
   return times.length ? Math.max(...times) : null;
 }
+
+/**
+ * §1 — DOES THE LIST DRAW ITS GROUPS?
+ *
+ * ⚠️ THE LIST OPENS FLAT, AND GROUPING MOVES BEHIND THE FILTER RATHER THAN BEING DELETED. Grouping
+ * answers "who do I chase" — a question the writer asks by choosing it. On load they have not asked
+ * anything, so four headings over a short list is the page arranging itself before being told what
+ * for; on a small account the headings outnumbered the rows they organised.
+ *
+ * ⚠️ THE TRIGGER IS A FILTER THEY ALREADY SET, NOT A NEW CONTROL. `Whose turn` and `Status` are the
+ * two filter sections that ask about STATE, and state is exactly what these groups partition — so
+ * choosing either brings the grouped reading back. A separate "Group by" control would be a second
+ * way to say the same thing, and two controls over one arrangement eventually disagree.
+ *
+ * ⚠️ AND IT IS A PREDICATE OVER THE FILTERS, NOT A STORED MODE. Nothing remembers "grouped"; it is
+ * a function of what is currently filtered, so clearing the filter returns the flat list with no
+ * second piece of state to reset — and `RESET ALL` already un-groups for free.
+ */
+export const listIsGrouped = (turnFilter: string, statusSel: readonly unknown[]): boolean =>
+  turnFilter !== "all" || statusSel.length > 0;
