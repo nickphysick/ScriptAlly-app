@@ -13,7 +13,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, setDoc, deleteDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 
 const env = (file) => Object.fromEntries(
   readFileSync(file, "utf8").split("\n")
@@ -43,6 +43,13 @@ console.log(`database: ${dbId || "(default)"} · project: ${PROJECT} · uid ${ui
    position, and a masonry check over them passes on a page that is not packing at all. One
    carries a NEWLINE, which is the pre-wrap claim's whole subject. */
 const NOTES = [
+  /* ⚠️ THE THREE PAPERS, WRITTEN THE WAY THE APP WRITES THEM — plain create, then the colour as
+     its own update. `isValidUserTask` is keys().hasOnly(), so a create carrying `colour` denies
+     the WHOLE document; seeding it in one write would test a path the app never takes and would
+     fail outright on any database whose rules predate the field. */
+  { n: 9, body: "NBPAPER yellow", colour: "yellow" },
+  { n: 10, body: "NBPAPER pink", colour: "pink" },
+  { n: 11, body: "NBPAPER sage", colour: "sage" },
   { n: 1, body: "NBPROBE one" },
   { n: 2, body: "NBPROBE two — a line with rather more in it than the first one carried" },
   { n: 3, body: "NBPROBE three\nsecond line\nthird line" },
@@ -57,13 +64,20 @@ const NOTES = [
 const id = (n) => `notetask-probe-${n}`;
 const clean = process.argv.includes("--clean");
 
-for (const { n, body } of NOTES) {
+for (const { n, body, colour } of NOTES) {
   const ref = doc(db, "users", uid, "tasks", id(n));
   if (clean) { await deleteDoc(ref); continue; }
-  const at = `2026-08-${String(10 + n).padStart(2, "0")}T09:00:00.000Z`;
+  const at = `2026-08-${String(10 + (n % 20)).padStart(2, "0")}T09:00:00.000Z`;
   await setDoc(ref, {
     id: id(n), userId: uid, text: body, done: false, createdAt: at, updatedAt: at,
   });
+  /* the second write, exactly as `setUserTaskColour` does it. Yellow needs none — absence IS
+     yellow at the read — but it is seeded anyway so the three cards differ by a STORED value
+     rather than one stored and two defaulted. */
+  if (colour) {
+    try { await updateDoc(ref, { colour, updatedAt: at }); }
+    catch { console.log(`  ⚠️  colour "${colour}" denied on ${id(n)} — the rules deploy has not landed`); }
+  }
 }
 console.log(clean ? `removed ${NOTES.length} probe notes` : `seeded ${NOTES.length} probe notes`);
 process.exit(0);

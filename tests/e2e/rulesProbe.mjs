@@ -161,4 +161,23 @@ await attempt("heal step 1 — with the APP's id", "isValidId",
 const after11 = await getDoc(q11);
 console.log(`  seed-query-11 restored to: ${Object.keys(after11.data()).sort().join(",")}`);
 
+/* ── the Noteboard's paper colour (Noteboard rebuild, 22 Aug) ───────────────────────────────── */
+console.log("\nuserTasks — the Noteboard's colour, on a throwaway note:");
+/* ⚠️ ON A THROWAWAY, AND CREATED WITHOUT `colour` ON PURPOSE. That is exactly what the app does:
+   `isValidUserTask` is keys().hasOnly(), so an unlisted key denies the WHOLE document — a create
+   carrying colour while the rules are stale loses the note, not the colour. So the note is written
+   plain and `setUserTaskColour` follows. The two steps are probed separately for that reason. */
+const tref = doc(db, "users", uid, "tasks", "probe-colour-note");
+await attempt("create a plain note (no colour)", "long-standing",
+  () => setDoc(tref, { id: "probe-colour-note", userId: uid, text: "rules probe", done: false,
+    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }));
+/* ⚠️ THE VALUE MUST CHANGE OR THIS PROVES NOTHING — the F7 lesson. The note was just created with
+   no colour at all, so any colour is a real change and lands in affectedKeys. */
+await attempt("colour 'pink' (the update)", "Noteboard P2",
+  () => updateDoc(tref, { colour: "pink", updatedAt: new Date().toISOString() }));
+/* and the value is BOUNDED — a fourth colour must be refused, or the field is free text */
+await attempt("colour 'chartreuse' (must be DENIED)", "Noteboard P2",
+  () => updateDoc(tref, { colour: "chartreuse", updatedAt: new Date().toISOString() }));
+await attempt("remove the throwaway note", "long-standing", () => deleteDoc(tref));
+
 process.exit(0);

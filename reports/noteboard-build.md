@@ -390,17 +390,9 @@ The other half needs one dev rules deploy.
 Nothing in the eight phases was skipped. Five things are narrower than the instructions asked, and
 each says why.
 
-1. **Note colour does not work until one dev rules deploy lands.** `firestore.rules` carries
-   `colour` in both `userTasks` allowlists and was **not deployed** (this run commits only). Until
-   it is, `setUserTaskColour` is denied, every note renders yellow, and the swatch reports the
-   failure rather than silently doing nothing. The composer's create never carries the field, so a
-   denial costs the colour and never the note. One command switches it on:
-   ```bash
-   firebase deploy --only firestore:rules --config firebase.dev.json --project scriptally-dev
-   ```
-   Per the house rule, verify by release `updateTime` under `--debug`, not by the success line —
-   and **wait before probing**, because rules take seconds to propagate and an impatient probe
-   reports a false denial.
+1. ~~**Note colour does not work until one dev rules deploy lands.**~~ **— DONE, 22 Aug.**
+   See section 7. Colour is live on dev: `pink` is accepted, `chartreuse` is refused, and three
+   notes wearing three stored colours render as three on the deployed site.
 
 2. **The band is not built** (1.6/1.7). The page keeps the shared pinned masthead; the band's three
    pieces are rehomed. Phase 1's specified probe — the band's fill reaching the frame's inner edges
@@ -529,3 +521,83 @@ asserted, and each edit states the reversal in place rather than loosening the a
 
 `e975dbda` (ref) → `8f11e1dd` P1 → `7028e944` P2 → `74f683c9` P3 → `b736ef85` P4 → `3429d7cd` P5 →
 `2887de0e` P6 → `776cdea8` P7 → `3531bc39` P8. Nothing pushed, nothing deployed.
+
+---
+
+## 7 — Dev deploy (22 Aug)
+
+Asked for after the build. **Rules and hosting were deployed as two separate acts** — they have
+separate blast radii, and the house rule forbids folding hosting into a rules deploy.
+
+### Pre-flight
+
+- `git fetch`; **0 behind** `origin/main`, 25 ahead. A behind-main deploy looks exactly like
+  another stream's feature having been reverted, which has cost a session before.
+- `src/` clean — the other session had committed its Query Centre work by then, so the bundle
+  carries only committed code.
+- `firestore.rules` grepped for what the deploy was meant to carry: the `isValidUserTask`
+  allowlist (:410), the value-shape clause (:427) and the **tasks** update `affectedKeys` (:752).
+  All three present. (:395 and :731 are the separate post-it `notes` store, untouched.)
+- **`rulesProbe.mjs` gained a `colour` case** and was run *before* the deploy, so the change has a
+  before as well as an after. Pre-deploy: a plain note create **ACCEPTED**, `colour: "pink"`
+  **DENIED** — exactly as the build report predicted.
+
+### Targets, named explicitly
+
+`.firebaserc`'s `default` is `gen-lang-client-0801391782` — **prod**. Every command therefore named
+its project. And `firebase.json`'s hosting site is `scriptally-app`, also prod, which is why the
+second rules command stays `--only firestore:rules`.
+
+Both dev databases were deployed, per the dual-DB trap:
+
+```bash
+firebase deploy --only firestore:rules --config firebase.dev.json --project scriptally-dev
+firebase deploy --only firestore:rules --project scriptally-dev
+```
+
+**Verified by release `updateTime`, never by the success line** — which reads "released rules
+firestore.rules to cloud.firestore" and names no database at all:
+
+| release | ruleset before → after | updateTime |
+|---|---|---|
+| `cloud.firestore` (default) | `ab1a8c56` → `1cb74970` | 2026-08-22T10:03:45Z |
+| `cloud.firestore/ai-studio-ae82196c…` | `ab1a8c56` → `27e75018` | 2026-08-22T10:04:05Z |
+
+### Hosting
+
+`npm run build:dev` — output read in full and grepped for `error|[WARNING]|css-syntax`, **not
+tailed**: clean, `✓ built in 11.75s`. `assert-build-target.mjs` confirmed *"bundle targets
+scriptally-dev (dev); gen-lang-client-0801391782 absent."*
+
+```bash
+firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev
+```
+
+176 files → **https://scriptally-dev.web.app**
+
+### Verified after
+
+The build ran between the rules deploy and the probe, so propagation had minutes rather than
+seconds — an impatient probe reports a false denial, and that asymmetry looks exactly like a rule
+written wrong.
+
+- `rulesProbe.mjs`, full run: **23 attempts, every one as expected.** `colour: "pink"` flipped
+  DENIED → **ACCEPTED**; `colour: "chartreuse"` is **DENIED**, so the value is bounded rather than
+  free text. Nothing else moved.
+- `noteboardLook.measure.ts` against **`SA_E2E_BASE_URL=dev`** (the deployed site, not a local
+  preview): **9/9**, including the case that could not exist before —
+
+  > **⚠️ a note WEARING a colour renders it.** Three notes with three stored colours:
+  > yellow `rgb(251,243,217)`, pink `rgb(245,226,218)`, sage `rgb(233,237,230)`, each carrying
+  > its own `nb-c-*` class, each border distinct. The cascade case proved the three RULES
+  > resolve; this proves the DATA reaches them, which is the claim that matters to a writer.
+
+  The seeder writes colour the way the app does — **plain create, then the colour as its own
+  update** — because a create carrying it would be denied whole on any database whose rules
+  predate the field.
+
+The eleven probe notes were deleted afterwards (`node tests/e2e/seedNotes.mjs --clean`).
+
+### Still Nick's
+
+**Prod rules are unchanged** and now one commit further behind dev's file. Nothing was pushed.

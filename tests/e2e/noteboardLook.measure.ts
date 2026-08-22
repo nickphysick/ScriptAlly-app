@@ -143,6 +143,33 @@ test.describe("Noteboard — measured", () => {
     expect(new Set(bds).size, "the three borders are not three colours").toBe(3);
   });
 
+  test("⚠️ a note WEARING a colour renders it — the half the rules deploy unlocked", async ({ page }) => {
+    /* ⚠️ THIS COULD NOT BE MEASURED BEFORE 22 Aug. `colour` was in firestore.rules and not in the
+       deployed ruleset, so no seeded note could carry one and every note rendered yellow —
+       correctly. The cascade case above proved the three RULES resolve; this proves the DATA
+       reaches them, which is a different claim and the one that matters to a writer. */
+    await openRoute(page, ROUTE, WIDE);
+    const papers = await page.evaluate(() => {
+      const out: Record<string, { bg: string; bd: string; cls: string }> = {};
+      for (const el of Array.from(document.querySelectorAll<HTMLElement>(".nb-note"))) {
+        const t = (el.querySelector(".nb-body") as HTMLElement | null)?.innerText ?? "";
+        const m = /^NBPAPER (\w+)/.exec(t.trim());
+        if (!m) continue;
+        const cs = getComputedStyle(el);
+        out[m[1]] = { bg: cs.backgroundColor, bd: cs.borderTopColor, cls: el.className };
+      }
+      return out;
+    });
+    /* the population first — three cards, or the comparison below is between things that are not there */
+    expect(Object.keys(papers).sort(), "the three paper notes are not on the page").toEqual(["pink", "sage", "yellow"]);
+    for (const [name, v] of Object.entries(papers)) console.log(`[worn] ${name.padEnd(7)} ${v.bg} / ${v.bd}  ${v.cls}`);
+    /* each note carries the class its STORED colour asks for */
+    for (const name of ["yellow", "pink", "sage"]) expect(papers[name].cls).toContain(`nb-c-${name}`);
+    /* and the three render as three, not as three copies of the default */
+    expect(new Set(Object.values(papers).map((v) => v.bg)).size, "the three notes render one fill").toBe(3);
+    expect(new Set(Object.values(papers).map((v) => v.bd)).size).toBe(3);
+  });
+
   test("⚠️ nothing on the board overlaps anything else — the negative-space check", async ({ page }) => {
     await openRoute(page, ROUTE, WIDE);
     /* ⚠️ TEXT LEAVES ONLY. A parent's box contains its children's by construction and inline
