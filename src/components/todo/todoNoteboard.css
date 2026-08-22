@@ -135,6 +135,13 @@
   border-radius: 99px; padding: 3px 10px; margin-top: 10px;
 }
 
+/* ── drag to reorder (paper run, Phase 3; ref noteboard-sparse-mockup.html) ────────────────── */
+.nb-note[draggable="true"] { cursor: grab; }
+.nb-dragging { opacity: 0.45; }
+/* ⚠️ AN OUTLINE, NOT A BORDER — the mockup's own choice, and the right one: a border would
+   change the card's box and shove the masonry column while a drag is in flight. */
+.nb-dragover { outline: 2px dashed var(--nb-burgundy); outline-offset: 3px; }
+
 /* ── example papers (paper run, Phase 2; ref noteboard-sparse-mockup.html) ─────────────────── */
 /* not the user's data and dressed to say so: reduced opacity, dashed border, a mono chip */
 .nb-example { opacity: 0.72; border-style: dashed; }

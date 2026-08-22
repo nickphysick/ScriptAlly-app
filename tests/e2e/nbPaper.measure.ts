@@ -184,3 +184,58 @@ test.describe("Phase 2 — example papers", () => {
     await page.locator(".nb-search input").fill("");
   });
 });
+
+test.describe("Phase 3 — drag to reorder", () => {
+  test("the third onto the first, then RELOAD — the order was written, not just mutated", async ({ page }) => {
+    await openRoute(page, ROUTE, { width: 1440, height: 1400 });
+    await expect(page.locator(".nb-board")).toBeVisible();
+    const bodies = () => page.$$eval(".nb-note:not(.nb-example) .nb-body",
+      (els) => els.map((e) => (e as HTMLElement).innerText.split("\n")[0]));
+    const before = await bodies();
+    expect(before.length, "need four notes to move through the middle").toBeGreaterThanOrEqual(4);
+    console.log(`[drag] before: ${before.slice(0, 5).join(" | ")}`);
+
+    /* ⚠️ A REAL HTML5 DRAG, dispatched through the DOM. Playwright's dragTo drives POINTER
+       events; native drag-and-drop is a separate event stream (dragstart/dragover/drop) that
+       pointer moves do not produce, so a pointer drag would land on a page that never heard of
+       it and the probe would report a passing no-op. */
+    const started = await page.evaluate(() => {
+      const cards = Array.from(document.querySelectorAll<HTMLElement>(".nb-note:not(.nb-example)"));
+      const from = cards[2];
+      if (!from) return null;
+      const dt = new DataTransfer();
+      (window as unknown as { __dt: DataTransfer }).__dt = dt;
+      from.dispatchEvent(new DragEvent("dragstart", { bubbles: true, dataTransfer: dt }));
+      return true;
+    });
+    expect(started, "no cards to drag").toBeTruthy();
+    /* a beat between pick-up and drop — a real drag has one, and the page needs it to re-render
+       the dashed target. (The move itself no longer depends on this: the note in hand is a ref.) */
+    await page.waitForTimeout(120);
+    const moved = await page.evaluate(() => {
+      const cards = Array.from(document.querySelectorAll<HTMLElement>(".nb-note:not(.nb-example)"));
+      const from = cards[2], to = cards[0];
+      if (!from || !to) return null;
+      const dt = (window as unknown as { __dt: DataTransfer }).__dt;
+      to.dispatchEvent(new DragEvent("dragover", { bubbles: true, cancelable: true, dataTransfer: dt }));
+      to.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
+      from.dispatchEvent(new DragEvent("dragend", { bubbles: true, dataTransfer: dt }));
+      return true;
+    });
+    expect(moved, "the drop had no target").toBeTruthy();
+    await page.waitForTimeout(1200);
+
+    const expected = (() => { const n = [...before]; const [m] = n.splice(2, 1); n.splice(0, 0, m); return n; })();
+    const after = await bodies();
+    console.log(`[drag] after:  ${after.slice(0, 5).join(" | ")}`);
+    /* the WHOLE joined sequence, one comparison */
+    expect(after.join(" | ")).toBe(expected.join(" | "));
+
+    /* ⚠️ THE RELOAD IS THE PHASE. State alone passes the line above. */
+    await page.reload();
+    await page.waitForTimeout(2500);
+    const reloaded = await bodies();
+    console.log(`[drag] reload: ${reloaded.slice(0, 5).join(" | ")}`);
+    expect(reloaded.join(" | "), "the order did not survive reload — nothing was written").toBe(expected.join(" | "));
+  });
+});

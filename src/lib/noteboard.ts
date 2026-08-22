@@ -201,3 +201,39 @@ export const noteboardPrefs = (
   dismissedExamples: user?.todoPrefs?.noteboard?.dismissedExamples ?? [],
   order: user?.todoPrefs?.noteboard?.order ?? [],
 });
+
+/* ────────────────────────────────────────────────────────────────────────────────────────────
+ * The writer's own order (paper run, Phase 3)
+ * ──────────────────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * ⚠️ THE LIST IS A PREFERENCE, NOT A SOURCE. It names ids; the notes are still the notes. An id
+ * it names that no longer exists is ignored, and a note it has never heard of still appears —
+ * `createdAt` descending remains the answer for anything unplaced. A stale list can therefore
+ * never hide a note, which is the property that makes it safe to store on the user rather than
+ * on the documents.
+ */
+export const orderNotes = (notes: UserTask[], order: readonly string[]): UserTask[] => {
+  const rank = new Map<string, number>();
+  order.forEach((id, i) => { if (!rank.has(id)) rank.set(id, i); });
+  return [...notes].sort((a, b) => {
+    const ra = rank.get(a.id), rb = rank.get(b.id);
+    if (ra !== undefined && rb !== undefined) return ra - rb;   // both placed
+    if (ra !== undefined) return -1;                            // placed beats unplaced
+    if (rb !== undefined) return 1;
+    return (b.createdAt || "").localeCompare(a.createdAt || ""); // neither: newest first
+  });
+};
+
+/**
+ * Move `from` to sit where `to` sits. Total by construction: the same multiset out as in, so a
+ * drag can never drop or duplicate a note however the ids arrive.
+ */
+export const reorderIds = (ids: readonly string[], from: string, to: string): string[] => {
+  const fi = ids.indexOf(from), ti = ids.indexOf(to);
+  if (fi < 0 || ti < 0 || fi === ti) return [...ids];
+  const next = [...ids];
+  next.splice(fi, 1);
+  next.splice(next.indexOf(to) + (fi < ti ? 1 : 0), 0, from);
+  return next;
+};

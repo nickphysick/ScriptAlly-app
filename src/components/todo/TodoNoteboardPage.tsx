@@ -39,7 +39,7 @@ import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
 import {
   NOTEBOARD_SUBTITLE, noteFilterLabel, noteColour, sortNotes, noteReceipt, firstTagLabel,
-  sparseExamples, noteboardPrefs, NOTEBOARD_HINT, ExamplePaper,
+  sparseExamples, noteboardPrefs, NOTEBOARD_HINT, ExamplePaper, orderNotes, reorderIds,
   composerWithColour, editCommit, emptyDraft, noteTagChips, noteMatchesSearch,
   NOTE_COLOURS, NoteDraft, draftFromExample,
 } from "../../lib/noteboard";
@@ -90,7 +90,12 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   /* ⚠️ THE TALLY AND THE VIEW ARE TWO LISTS. `pinned` is what is on the board; `notes` is what the
      search and the chip row have left of it. A count taken from the filtered list would state that
      searching had unpinned things. */
-  const pinned = useMemo(() => sortNotes(userTasks), [userTasks]);
+  /* ⚠️ THE WRITER'S ORDER WINS WHERE THEY HAVE STATED ONE; createdAt answers everywhere else.
+     A stale list cannot hide a note — orderNotes is total over the notes it is given. */
+  const pinned = useMemo(
+    () => orderNotes(sortNotes(userTasks), currentUser?.todoPrefs?.noteboard?.order ?? []),
+    [userTasks, currentUser?.todoPrefs?.noteboard?.order],
+  );
 
   const notes = useMemo(() => {
     const all = pinned;
@@ -123,6 +128,34 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
         noteboard: { ...currentUser?.todoPrefs?.noteboard, ...patch },
       },
     });
+  };
+
+  /* ── drag to reorder (paper run, Phase 3) ───────────────────────────────────────────────
+     HTML5 drag-and-drop, no dependency. `dragId` is the note in hand; `overId` draws the dashed
+     drop target. The write is the ids of what is on the board RIGHT NOW, reordered — so a list
+     that had drifted from the notes is repaired by the first drag rather than compounded. */
+  /* ⚠️ THE NOTE IN HAND IS A REF, NOT ONLY STATE. `drop` must know what `dragstart` picked up,
+     and a handler closes over the render it was created in — so a drop that arrives before React
+     has re-rendered reads the OLD value and the move is silently dropped. Measured: three events
+     dispatched in one synchronous block moved nothing at all, with every piece of the code
+     present and correct. The state stays for the visuals (it must re-render to draw the dashed
+     target); the ref is what the logic reads. */
+  const dragIdRef = useRef<string | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+
+  const dropOn = async (targetId: string) => {
+    const from = dragIdRef.current;
+    dragIdRef.current = null;
+    setDragId(null);
+    setOverId(null);
+    if (!from || from === targetId) return;
+    const next = reorderIds(pinned.map((n) => n.id), from, targetId);
+    try {
+      await saveNoteboardPrefs({ order: next });
+    } catch {
+      flash("Couldn’t save that order — try again?");
+    }
   };
 
   const dismissExample = async (id: string) => {
@@ -521,7 +554,19 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                 ) : (
                 /* the paper is READ, never assumed — a note with no colour is yellow here, which
                    is also what a denied colour write leaves behind */
-                <article key={n.id} data-note={n.id} className={`nb-note nb-c-${noteColour(n)}`}>
+                <article
+                  key={n.id}
+                  data-note={n.id}
+                  /* ⚠️ REAL NOTES ONLY — the example papers are not the writer's data and are
+                     never draggable (they carry no handlers and no draggable attribute). */
+                  draggable
+                  onDragStart={(e) => { dragIdRef.current = n.id; setDragId(n.id); e.dataTransfer.effectAllowed = "move"; }}
+                  onDragEnd={() => { dragIdRef.current = null; setDragId(null); setOverId(null); }}
+                  onDragOver={(e) => { e.preventDefault(); if (dragIdRef.current && dragIdRef.current !== n.id) setOverId(n.id); }}
+                  onDragLeave={() => setOverId((o) => (o === n.id ? null : o))}
+                  onDrop={(e) => { e.preventDefault(); void dropOn(n.id); }}
+                  className={`nb-note nb-c-${noteColour(n)}${dragId === n.id ? " nb-dragging" : ""}${overId === n.id ? " nb-dragover" : ""}`}
+                >
                   <div className="nb-body">{n.text}</div>
                   {/* ⚠️ THE OLD SPLIT'S SECOND BLOCK. Nothing writes `detail` any more — the
                       composer is one body — but notes written under the split have prose in it
