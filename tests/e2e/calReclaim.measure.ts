@@ -108,3 +108,59 @@ test("calendar — the cell's budget on the corrected chassis", async ({ page })
   }
   console.log(lines.join("\n"));
 });
+
+/** Phase 3 — the acceptance: no overflow, the floor intact, the mark still right. */
+test("calendar — acceptance after the reclaim", async ({ page }) => {
+  for (const width of WIDTHS) {
+    await openRoute(page, ROUTE, { width, height: 900 });
+    const b = await cellBudget(page);
+    const r = b!;
+    const extra = await page.evaluate(() => {
+      const grid = document.querySelector(".cal-grid") as HTMLElement;
+      const todayDn = document.querySelector(".cal-cell.today .cal-dn") as HTMLElement | null;
+      const sel = document.querySelector(".cal-cell.sel, .cal-cell[aria-selected='true']") as HTMLElement | null;
+      const foot = Array.from(document.querySelectorAll(".cal-focus button"))
+        .find((x) => /Open the list/i.test(x.textContent ?? "")) as HTMLElement | undefined;
+      const fb = foot?.getBoundingClientRect();
+      const cells = Array.from(document.querySelectorAll(".cal-cell")) as HTMLElement[];
+      return {
+        /* ⚠️ THE FOLD'S OWN DISTRESS SIGNAL — absent means the floor was satisfiable */
+        foldShort: grid.getAttribute("data-fold-short"),
+        todayDisc: todayDn ? { h: Math.round(todayDn.getBoundingClientRect().height),
+                               bg: getComputedStyle(todayDn).backgroundColor,
+                               radius: getComputedStyle(todayDn).borderRadius } : null,
+        selRing: sel ? getComputedStyle(sel).boxShadow : null,
+        footOnScreen: fb ? fb.top >= 0 && fb.bottom <= window.innerHeight : null,
+        recon: cells.map((c) => ({
+          day: (c.querySelector(".cal-dn")?.textContent ?? "").trim(),
+          chip: Number(c.querySelector(".cal-c2")?.textContent ?? 0),
+          shown: c.querySelectorAll(".cal-pip").length,
+          more: Number((c.querySelector(".cal-more2")?.textContent ?? "0").replace(/\D/g, "")),
+        })).filter((c) => c.chip > 0),
+      };
+    });
+
+    console.log(`  @${width}  cushion ${r.cushion}  foldShort=${extra.foldShort ?? "none"}  disc ${JSON.stringify(extra.todayDisc)}  foot ${extra.footOnScreen}`);
+
+    /* no populated cell overflows — days 12 and 13 asserted BY NAME, since they were the symptom */
+    for (const c of r.overflowing) {
+      expect(c.over, `@${width} day ${c.day} overflows (${c.sh}/${c.ch})`).toBe(false);
+      expect(c.sh, `@${width} day ${c.day}`).toBe(c.ch);
+    }
+    for (const named of ["12", "13"]) {
+      const cell = r.overflowing.find((c) => c.day === named);
+      expect(cell, `@${width} day ${named} is not populated — the named assertion proves nothing`).toBeTruthy();
+      expect(cell!.over, `@${width} day ${named} still overflows`).toBe(false);
+    }
+    expect(r.cushion, `@${width} cushion below 4px`).toBeGreaterThanOrEqual(4);
+    expect(extra.foldShort, `@${width} the fold reports the floor unsatisfiable`).toBeNull();
+    /* the mark survives the smaller numeral row */
+    expect(extra.todayDisc!.h, `@${width} today-disc height`).toBe(16);
+    expect(extra.todayDisc!.radius).toBe("50%");
+    expect(extra.todayDisc!.bg).toBe("rgb(124, 58, 42)");
+    expect(extra.footOnScreen, `@${width} "Open the list" is off screen`).toBe(true);
+    for (const c of extra.recon) {
+      expect(c.shown + c.more, `@${width} day ${c.day}: chip ${c.chip} != ${c.shown} + ${c.more}`).toBe(c.chip);
+    }
+  }
+});
