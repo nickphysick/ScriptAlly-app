@@ -36,7 +36,11 @@ import { toggleTagSel } from "../../lib/todoTags";
 import { TAG_PALETTE } from "../../lib/todoFamily";
 import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
-import { NOTEBOARD_SUBTITLE, noteCountLabel, noteColour } from "../../lib/noteboard";
+import {
+  NOTEBOARD_SUBTITLE, noteCountLabel, noteColour, sortNotes, noteRestoreFields,
+  composerWithColour, editCommit, emptyDraft, NOTE_COLOURS, NoteDraft,
+} from "../../lib/noteboard";
+import { newTag } from "../../lib/todoTags";
 import { UserTask, TagDef } from "../../types";
 import "./tasksLayout.css";
 import "./taskChrome.css";
@@ -54,7 +58,7 @@ const pinDate = (iso: string | undefined): string =>
   iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase() : "";
 
 export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
-  const { userTasks, addUserTask, updateUserTask, deleteUserTask, updateUserProfile, currentUser } = useScriptAllyDb();
+  const { userTasks, addUserTask, updateUserTask, deleteUserTask, setUserTaskColour, updateUserProfile, currentUser } = useScriptAllyDb();
   const { toast, flash, dismiss, pause, resume } = useTodoToast();
   const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
 
@@ -66,17 +70,17 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   const [dateFor, setDateFor] = useState<UserTask | null>(null);
   const [tagsFor, setTagsFor] = useState<UserTask | null>(null); // tasks-pages P5 — the ⋯ Tags… sheet
   const [dateDraft, setDateDraft] = useState("");
-  /** The composer: null closed · "new" pinning · a task id editing. */
-  const [compose, setCompose] = useState<null | { id?: string; text: string; detail: string }>(null);
+  /** The composer: null when closed, a draft when open. It only ever PINS — editing happens on
+   *  the card itself, so there is one host per job rather than one host wearing two hats. */
+  const [compose, setCompose] = useState<NoteDraft | null>(null);
+  /** The note being edited in place, and the words as they stand. */
+  const [editing, setEditing] = useState<{ id: string; text: string } | null>(null);
   const [saving, setSaving] = useState(false);
 
   /* ⚠️ THE TALLY AND THE VIEW ARE TWO LISTS. `pinned` is what is on the board; `notes` is what the
      search and the chip row have left of it. A count taken from the filtered list would state that
      searching had unpinned things. */
-  const pinned = useMemo(
-    () => userTasks.filter(isNote).sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")),
-    [userTasks],
-  );
+  const pinned = useMemo(() => sortNotes(userTasks), [userTasks]);
 
   const notes = useMemo(() => {
     const all = pinned;
@@ -89,22 +93,72 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   const userTags = currentUser?.tags ?? [];
   const tagLabel = (id: string) => userTags.find((t) => t.id === id)?.label ?? id;
 
-  const saveCompose = async () => {
+  /* ⚠️ DECLARED ABOVE ITS FIRST READER. `pinNote` calls `createTagDef`; a hook destructured
+     below the function that reads it is the temporal-dead-zone shape this repo has shipped once
+     already, and tsc does not catch it when the read sits inside a deferred body. */
+  // board-optimise P2 — the shared pair (one copy for all four Tasks pages)
+  const { createTagDef, applyTagToggle } = useTagWrites(flash);
+
+  /** One composer, two doors — the tool row's button and the ghost tile both come through here. */
+  const openComposer = (seed?: Partial<NoteDraft>) => setCompose({ ...emptyDraft(), ...seed });
+
+  /**
+   * ⚠️ THE NOTE IS WRITTEN PLAIN AND THE COLOUR FOLLOWS. `isValidUserTask` is `keys().hasOnly()`,
+   * so an unlisted key denies the whole document — a create carrying `colour` while the rules
+   * deploy is outstanding would lose the note, not the colour. Yellow needs no write at all,
+   * because `noteColour` returns it for a note that has none.
+   */
+  const pinNote = async () => {
     if (!compose || saving) return;
-    const text = compose.text.trim();
-    if (!text) return;
+    const body = compose.body.trim();
+    if (!body) return;
     setSaving(true);
     try {
-      if (compose.id) {
-        await updateUserTask(compose.id, { text, detail: compose.detail.trim() || null });
-      } else {
-        await addUserTask({ text, detail: compose.detail.trim() || undefined });
+      const label = compose.tag.trim().replace(/^#/, "");
+      let tagIds: string[] | undefined;
+      if (label) {
+        /* free text, one taxonomy — the typed tag becomes a real TagDef through the app's own
+           minter rather than an untracked string only this page understands */
+        const existing = userTags.find((t) => t.label.toLowerCase() === label.toLowerCase());
+        if (existing) tagIds = [existing.id];
+        else {
+          const made = newTag(label, userTags);
+          if (made) { await createTagDef(made); tagIds = [made.id]; }
+        }
+      }
+      const id = await addUserTask({ text: body, ...(tagIds ? { tags: tagIds } : {}) });
+      if (id && compose.colour !== "yellow") {
+        const landed = await setUserTaskColour(id, compose.colour);
+        if (!landed) flash("Pinned — but the colour didn’t save. It’s yellow for now.");
       }
       setCompose(null);
     } catch {
-      flash("Couldn’t save that — try again?");
+      flash("Couldn’t pin that — try again?");
     } finally {
       setSaving(false);
+    }
+  };
+
+  /** The kebab's swatches, on a note that already exists. */
+  const repaint = async (note: UserTask, colour: typeof NOTE_COLOURS[number]) => {
+    const landed = await setUserTaskColour(note.id, colour);
+    /* ⚠️ IT SAYS SO WHEN IT FAILS. `colour` is in firestore.rules and not in the deployed ruleset,
+       so this write CAN be refused — and a swatch that silently does nothing is worse than no
+       swatch, because it leaves the writer believing the colour was taken. */
+    if (!landed) flash("Couldn’t change the colour — try again?");
+  };
+
+  /** Blur commits; an empty commit keeps the words that were there. */
+  const commitEdit = async () => {
+    if (!editing) return;
+    const note = userTasks.find((t) => t.id === editing.id);
+    const next = editCommit(note?.text ?? "", editing.text);
+    setEditing(null);
+    if (!note || next === note.text) return;
+    try {
+      await updateUserTask(note.id, { text: next });
+    } catch {
+      flash("Couldn’t save that — try again?");
     }
   };
 
@@ -125,32 +179,42 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   };
 
   const deleteNote = async (note: UserTask) => {
-    const ok = await confirmAsk(`Delete “${note.text}”?`, { confirmLabel: "Delete the note", cancelLabel: "Keep it" });
+    /* ⚠️ CAPTURED BEFORE THE DELETE. After it there is nowhere left to read the note from, so
+       "restore by id" would have nothing to restore. */
+    const restore = noteRestoreFields(note);
+    const ok = await confirmAsk(`Remove “${note.text}”?`, { confirmLabel: "Remove note", cancelLabel: "Keep it" });
     if (!ok) return;
     try {
       await deleteUserTask(note.id);
     } catch {
-      flash("Couldn’t delete that — try again?");
+      flash("Couldn’t remove that — try again?");
       return;
     }
     /* the 8s undo — user content deserves the longest way back; same-id re-create, no new path */
-    flash(`Deleted — “${note.text}”`, {
+    flash(`Removed — “${note.text}”`, {
       label: "Undo",
       fn: async () => {
-        await addUserTask({ id: note.id, text: note.text, detail: note.detail });
+        /* ⚠️ `createdAt` IS WHAT PUTS IT BACK WHERE IT WAS. The board is that field descending
+           with no stored order, so an inverse without it returns the note to the TOP — present,
+           in the wrong place, which reads as a bug in the board rather than in the undo. */
+        const { colour, ...plain } = restore;
+        await addUserTask(plain);
+        /* and the paper follows on its own write, for the same reason the create never carries it */
+        if (colour) await setUserTaskColour(restore.id, colour);
         flash("Pinned again");
       },
     }, 8000);
   };
 
-  // board-optimise P2 — the shared pair (one copy for all four Tasks pages)
-  const { createTagDef, applyTagToggle } = useTagWrites(flash);
 
   const onMenuPick = (item: MenuLeaf) => {
     if (!menu) return;
     const note = menu.note;
     setMenu(null);
-    if (item.id === "edit-task") setCompose({ id: note.id, text: note.text, detail: note.detail ?? "" });
+    /* ⚠️ EDIT IS IN PLACE — it does not reopen the composer. One host per job: the composer PINS,
+       the card EDITS. Routing edit back through the composer would put a second note-shaped box
+       at the top of the board while the real one sat below it, unchanged. */
+    if (item.id === "edit-task") setEditing({ id: note.id, text: note.text });
     if (item.id === "give-date") { setDateFor(note); setDateDraft(""); }
     if (item.id === "tags") setTagsFor(note);
     if (item.id === "delete-task") void deleteNote(note);
@@ -203,7 +267,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                 <AlignLeft size={13} aria-hidden /> Read as a column
               </button>
               <TplGrow />
-              <button type="button" className="tdb-addb" onClick={() => setCompose({ text: "", detail: "" })}>
+              <button type="button" className="tdb-addb" onClick={() => openComposer()}>
                 <Plus size={13} aria-hidden /> Pin a note
               </button>
             </>
@@ -227,47 +291,63 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                 dateless and quiet. The day one becomes real work, give it a date from its ⋯ menu
                 and it walks itself to your To-do list and the Calendar.
               </p>
-              <button type="button" className="tdb-addb" onClick={() => setCompose({ text: "", detail: "" })}>
+              <button type="button" className="tdb-addb" onClick={() => openComposer()}>
                 <Plus size={13} aria-hidden /> Pin your first note
               </button>
             </div>
           ) : (
             <div className={`nb-board${column ? " nb-col1" : ""}`}>
               {!compose && (
-                <button type="button" className="nb-ghost" onClick={() => setCompose({ text: "", detail: "" })}>
+                <button type="button" className="nb-ghost" onClick={() => openComposer()}>
                   + Pin a note
                 </button>
               )}
               {compose && (
-                <div className="nb-note nb-compose">
-                  <input
-                    className="nb-nt-in"
-                    value={compose.text}
+                /* the composer is a LIVE NOTE, in the flow, in the paper it is about to be —
+                   not a modal and not a panel. It takes the ghost's place rather than sitting
+                   beside it, so the board never shows two ways to start the same thing. */
+                <div className={`nb-compose nb-c-${compose.colour}`}>
+                  <textarea
+                    className="nb-body nb-ta"
+                    value={compose.body}
                     autoFocus
-                    placeholder="Jot it down…"
+                    rows={3}
+                    placeholder="Write it down before it goes…"
                     aria-label="Note"
                     disabled={saving}
-                    onChange={(e) => setCompose({ ...compose, text: e.target.value })}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") { e.preventDefault(); void saveCompose(); }
-                      if (e.key === "Escape") setCompose(null);
-                    }}
-                  />
-                  <textarea
-                    className="nb-nb-in"
-                    value={compose.detail}
-                    rows={2}
-                    placeholder="A little more (optional)…"
-                    aria-label="Detail"
-                    disabled={saving}
-                    onChange={(e) => setCompose({ ...compose, detail: e.target.value })}
+                    onChange={(e) => setCompose({ ...compose, body: e.target.value })}
                     onKeyDown={(e) => { if (e.key === "Escape") setCompose(null); }}
                   />
-                  <div className="nb-cactions">
-                    <button type="button" className="nb-csave" disabled={!compose.text.trim() || saving} onClick={() => void saveCompose()}>
-                      {saving ? "Saving…" : compose.id ? "Save changes" : "Pin it"}
-                    </button>
-                    <button type="button" className="nb-ccancel" disabled={saving} onClick={() => setCompose(null)}>Cancel</button>
+                  <div className="nb-crow">
+                    <div className="nb-swatches">
+                      {NOTE_COLOURS.map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          className={`nb-sw nb-c-${c}${compose.colour === c ? " on" : ""}`}
+                          aria-label={c}
+                          aria-pressed={compose.colour === c}
+                          /* ⚠️ REPAINTS, NEVER RESTARTS — the swatch is pressed mid-sentence more
+                             often than not, so the body and the tag come through untouched. */
+                          onClick={() => setCompose(composerWithColour(compose, c))}
+                        />
+                      ))}
+                    </div>
+                    <input
+                      className="nb-taginput"
+                      value={compose.tag}
+                      placeholder="#tag"
+                      aria-label="Tag"
+                      disabled={saving}
+                      onChange={(e) => setCompose({ ...compose, tag: e.target.value.replace(/^#/, "") })}
+                      onKeyDown={(e) => { if (e.key === "Escape") setCompose(null); }}
+                    />
+                    <div className="nb-cactions">
+                      <button type="button" className="nb-ccancel" disabled={saving} onClick={() => setCompose(null)}>Cancel</button>
+                      <button type="button" className="nb-csave" disabled={!compose.body.trim() || saving} onClick={() => void pinNote()}>
+                        {saving ? "Pinning…" : "Pin it"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -275,7 +355,21 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                 /* the paper is READ, never assumed — a note with no colour is yellow here, which
                    is also what a denied colour write leaves behind */
                 <article key={n.id} data-note={n.id} className={`nb-note nb-c-${noteColour(n)}`}>
-                  <div className="nb-body">{n.text}</div>
+                  {editing?.id === n.id ? (
+                    /* ⚠️ IN PLACE — the note's own body element is what is replaced, so the card
+                       does not move, resize or reopen somewhere else while it is being edited. */
+                    <textarea
+                      className="nb-body nb-ta nb-edit"
+                      value={editing.text}
+                      autoFocus
+                      aria-label={`Edit ${n.text}`}
+                      onChange={(e) => setEditing({ id: n.id, text: e.target.value })}
+                      onBlur={() => void commitEdit()}
+                      onKeyDown={(e) => { if (e.key === "Escape") setEditing(null); }}
+                    />
+                  ) : (
+                    <div className="nb-body">{n.text}</div>
+                  )}
                   {/* ⚠️ THE OLD SPLIT'S SECOND BLOCK. Nothing writes `detail` any more — the
                       composer is one body — but notes written under the split have prose in it
                       and dropping it would lose their words. */}

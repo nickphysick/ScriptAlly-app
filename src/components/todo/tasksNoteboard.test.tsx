@@ -50,7 +50,13 @@ describe("⚠️ notes only — nothing derived reaches this board", () => {
   });
 
   it("the page reads userTasks THROUGH isNote and nothing else — no derived source in reach", () => {
-    expect(page).toContain("userTasks.filter(isNote)");
+    /* ⚠️ THE FILTER MOVED INTO THE PURE LAYER (Noteboard rebuild, 22 Aug) — `sortNotes` is
+       `tasks.filter(isNoteTask).sort(byCreatedAtDesc)`, called by the page and by the undo's
+       lock, so the two cannot disagree about what a note is. The CLAIM is unchanged: the page's
+       only source is userTasks read through isNote. */
+    expect(page).toContain("sortNotes(userTasks)");
+    const lib = readFileSync(join(here, "../../lib/noteboard.ts"), "utf8");
+    expect(lib).toContain("tasks.filter(isNoteTask)");
     for (const derived of ["assembleBoard", "boardColumns", "tasks,", "taskFlags", "activities"]) {
       expect(page, derived).not.toContain(derived);
     }
@@ -112,9 +118,18 @@ describe("⚠️ the ⋯ menu — the SAME grammar, the SAME shell", () => {
 
 describe("⚠️ delete asks first and holds the LONG way back", () => {
   it("confirm → delete → an 8s undo that re-creates the SAME id (no new write path)", () => {
-    expect(page).toContain("await confirmAsk(`Delete “${note.text}”?`");
+    /* ⚠️ THE VERB IS "REMOVE" NOW, not "Delete" — the approved set for this board is Pin a note ·
+       Pin it · Remove note · Turn into a task · Detach from tasks. The confirm and the 8s window
+       are unchanged. */
+    expect(page).toContain("await confirmAsk(`Remove “${note.text}”?`");
     expect(page).toContain("}, 8000)");
-    expect(page).toContain("addUserTask({ id: note.id, text: note.text, detail: note.detail })");
+    /* ⚠️ AND THE INVERSE CARRIES `createdAt` NOW. The old one re-created through
+       `addUserTask({ id, text, detail })`, and addUserTask stamps `createdAt: now` — so Undo put
+       the note back at the TOP of the board rather than in its slot, and dropped its tags with
+       it. Nothing failed; the note came back somewhere else wearing less.
+       noteboardCompose.test.ts compares the whole ordered sequence, which is what caught it. */
+    expect(page).toContain("noteRestoreFields(note)");
+    expect(page).not.toContain("addUserTask({ id: note.id, text: note.text, detail: note.detail })");
   });
 
   it("the toast machinery takes the override rather than a second timer", () => {

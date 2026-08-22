@@ -2415,6 +2415,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (!currentUser) return;
     const id = "note-" + Math.random().toString(36).substr(2, 9);
     const now = new Date().toISOString();
+    /* ⚠️ THE CALLER MAY SUPPLY `createdAt`, AND ONE UNDO DEPENDS ON IT. The Noteboard is ordered
+       `createdAt` descending with no stored position, so a removal's inverse that let this default
+       to `now` would return the note to the TOP of the board instead of to its slot — present, in
+       the wrong place, reading as a bug in the board rather than in the undo. */
     const newNote: Note = {
       id,
       userId: currentUser.id,
@@ -2496,7 +2500,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // ── User tasks (users/{uid}/tasks) — the canonical stored to-do object. Record scope is INPUT
   //    (queryId/agentId/manuscriptId), not derived state; omitted when absent (Firestore rejects
   //    undefined). The "N tasks" badge count stays DERIVED — nothing counts is cached here. ──
-  const addUserTask = async (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[] }): Promise<string | undefined> => {
+  const addUserTask = async (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[]; createdAt?: string }): Promise<string | undefined> => {
     if (!currentUser) return undefined;
     const text = (fields.text ?? "").trim();
     if (!text) return undefined; // never create an empty task
@@ -2505,7 +2509,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const id = fields.id ?? "task-" + Math.random().toString(36).substr(2, 9);
     const now = new Date().toISOString();
     const newTask: UserTask = {
-      id, userId: currentUser.id, text, done: false, createdAt: now, updatedAt: now,
+      id, userId: currentUser.id, text, done: false, createdAt: fields.createdAt ?? now, updatedAt: now,
       ...(fields.detail && fields.detail.trim() ? { detail: fields.detail.trim() } : {}),
       ...(fields.queryId ? { queryId: fields.queryId } : {}),
       ...(fields.agentId ? { agentId: fields.agentId } : {}),
