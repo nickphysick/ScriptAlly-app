@@ -16,6 +16,8 @@ import {
   monthGridDays, monthLabel, shiftMonth, sameMonth,
   peekBox, PEEK_SCALE, PEEK_PAD, PEEK_LIFT, PEEK_DELAY_MS, PEEK_OPACITY,
   upcomingGridDays,
+  ghostsFor, daysSince, carriedLine, itemKind, recordKind, CAL_KINDS, CAL_KIND_ORDER, allKinds,
+  itemInKinds, recordInKinds,
   cardActionYmd, calendarDays, CAL_CELL_CAP, calFoldCap, toYmd,
   recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
   cellSlots,
@@ -170,7 +172,11 @@ describe("the fold, the map, the wiring", () => {
     expect(cellSlots(["a", "b", "c", "d"], [], CAL_CELL_CAP).shownItems).toEqual(["a", "b"]);
     expect(cellSlots(["a", "b", "c", "d"], [], CAL_CELL_CAP).overflow).toBe(2);
     expect(cellSlots(["a", "b", "c"], [], CAL_CELL_CAP).shownItems).toEqual(["a", "b", "c"]);
-    expect(pageSrc).toContain("cellSlots(items, recs, cellCap, cellCapFolded)");
+    /* ⚠️ RETARGETED (finishing pack, Phase 5): items and GHOSTS now travel through the fold as one
+       tagged occupant list, because a ghost is the same box and must pay for its slot. The claim is
+       unchanged — one call, both live layers and the record, never three expressions at the render
+       site. */
+    expect(pageSrc).toContain("cellSlots(occupants, recs, cellCap, cellCapFolded)");
     /* ⚠️ AMENDED (reclaim pack, Phase 2): the fold now takes MEASURED metrics, so the call
        carries them. The law is unchanged — the page still derives its cap from the measured row. */
     expect(pageSrc).toContain("calFoldCap(rowPx, metrics)");
@@ -494,7 +500,11 @@ describe("⚠️ the record is recessive, and it folds with everything else", ()
     /* ⚠️ AMENDED (reclaim pack, Phase 2): the fold now takes MEASURED metrics, so the call
        carries them. The law is unchanged — the page still derives its cap from the measured row. */
     expect(pageSrc).toContain("calFoldCap(rowPx, metrics)");
-    expect(pageSrc).toContain("cellSlots(items, recs, cellCap, cellCapFolded)");
+    /* ⚠️ RETARGETED (finishing pack, Phase 5): items and GHOSTS now travel through the fold as one
+       tagged occupant list, because a ghost is the same box and must pay for its slot. The claim is
+       unchanged — one call, both live layers and the record, never three expressions at the render
+       site. */
+    expect(pageSrc).toContain("cellSlots(occupants, recs, cellCap, cellCapFolded)");
     expect(calFoldCap(0)).toBe(CAL_CELL_CAP);
   });
 
@@ -1310,7 +1320,9 @@ describe("⚠️ a pill points at its row — and actioning is untouched", () =>
   it("a card pill selects its day and asks for its row; a record pill also opens it", () => {
     expect(pageSrc).toContain("const focusCard = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(key); };");
     expect(pageSrc).toContain("const focusRecord = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(key); setFocusKey(key); };");
-    expect(pageSrc).toContain("focusCard(ymd, it.key)");
+    /* ⚠️ RETARGETED (finishing pack, Phase 5): the cell's stack is a tagged union now, so the item
+       arm names `o.it`. Same claim — a card pill selects its day and asks for its row. */
+    expect(pageSrc).toContain("focusCard(ymd, o.it.key)");
     expect(pageSrc).toContain("focusRecord(ymd, r.key)");
   });
 
@@ -1379,7 +1391,11 @@ describe("⚠️ rolled-forward: the marker goes, the provenance travels with th
   });
 
   it("the provenance line renders on the panel row, from the item's own field", () => {
-    expect(pageSrc).toContain("{it.rolledFrom && <span className=\"cal-fporig\">Originally due {shortDate(it.rolledFrom)}</span>}");
+    /* ⚠️ RETARGETED (finishing pack, Phase 5). The line now states the GAP as well as the origin —
+       "Originally due 7 Aug" left the reader to do the arithmetic, and the gap is the whole point
+       of a carried item. Still on the panel row, still muted, still derived from `rolledFrom`, and
+       still the ONLY place provenance renders as prose. */
+    expect(pageSrc).toContain('{it.rolledFrom && <span className="cal-fporig">{carriedLine(it.rolledFrom, today)}</span>}');
     // reusing the existing formatter rather than adding a third date format
     expect(pageSrc).toContain('import { shortDate } from "../../lib/recordingCalendar";');
   });
@@ -1650,5 +1666,136 @@ describe("the mode and the dedupe compose", () => {
   it("the fold's row count is measured from the grid, never the constant 6", () => {
     expect(pageSrc).toContain('el.querySelectorAll(".cal-cell").length / 7');
     expect(decls(pageSrc)).not.toContain("const rows = 6");
+  });
+});
+
+/* ══ CARRIED-TASK ORIGIN GHOSTS (finishing pack, Phase 5) ═══════════════════════════════════ */
+describe("ghostsFor — the origin mark for a carried item", () => {
+  const TODAY_YMD = "2026-08-19";
+  const carried = (key: string, from: string): CalendarItem =>
+    ({ key, ymd: TODAY_YMD, label: "Send your full to Ana Duarte", family: "agent",
+       card: { taskType: "full_requested" } as never, rolledFrom: from });
+  const onTime = (key: string): CalendarItem =>
+    ({ key, ymd: TODAY_YMD, label: "Send your partial", family: "agent",
+       card: { taskType: "partial_requested" } as never });
+
+  it("the ghost sits on the ORIGIN day while the live pill stays on today", () => {
+    const todays = [carried("c1", "2026-08-07")];
+    const ghosts = ghostsFor("2026-08-07", todays);
+    expect(ghosts).toHaveLength(1);
+    expect(ghosts[0].ymd).toBe("2026-08-07");
+    /* it points AT the live item — the same object, so the two can never describe different work */
+    expect(ghosts[0].of).toBe(todays[0]);
+    /* and no ghost anywhere else */
+    expect(ghostsFor("2026-08-08", todays)).toEqual([]);
+  });
+
+  it("the ghost's words ARE the live pill's words — one summarisation, not two", () => {
+    const todays = [carried("c1", "2026-08-07")];
+    expect(pillLabel(ghostsFor("2026-08-07", todays)[0].of)).toBe(pillLabel(todays[0]));
+    expect(pillLabel(todays[0])).toBe("Send full");
+  });
+
+  /* ⚠️ COMPLETING IT MUST CLEAR BOTH IN ONE DERIVATION — there is no second store to sweep. */
+  it("when the item leaves the feed the ghost vanishes in the same derivation", () => {
+    expect(ghostsFor("2026-08-07", [])).toEqual([]);
+  });
+
+  it("an item that never rolled has no ghost anywhere", () => {
+    const todays = [onTime("c2")];
+    for (const d of monthGridDays(TODAY_YMD)) expect(ghostsFor(d, todays)).toEqual([]);
+  });
+
+  /* ⚠️ NO ORIGIN, NO GHOST — the live pill stands alone rather than a mark being invented for it. */
+  it("a carried item with no recoverable origin renders live-only", () => {
+    const noOrigin: CalendarItem =
+      { key: "c3", ymd: TODAY_YMD, label: "Something", family: "agent", card: {} as never };
+    for (const d of monthGridDays(TODAY_YMD)) expect(ghostsFor(d, [noOrigin])).toEqual([]);
+  });
+
+  /* ⚠️ THE KIND FILTER TAKES THE MARK AND THE PILL TOGETHER. The page derives ghosts from the
+     ALREADY-FILTERED `itemsFor(today)`, so a switched-off kind cannot leave an orphaned ghost
+     pointing at a pill that is not on screen. Asserted through the real predicate, not a literal. */
+  it("a filtered-out kind renders NEITHER the pill nor its ghost", () => {
+    const todays = [carried("c1", "2026-08-07")];
+    const kind = itemKind(todays[0]);
+    expect(kind, "the fixture's kind is unclaimed — the assertion would prove nothing").not.toBeNull();
+    const without = allKinds().filter((k) => k !== kind);
+    const survivingToday = todays.filter((it) => itemInKinds(it, without));
+    expect(survivingToday).toEqual([]);
+    expect(ghostsFor("2026-08-07", survivingToday)).toEqual([]);
+  });
+
+  /* ⚠️ AND A GHOST IS NEVER DEDUPED AGAINST THE RECORD — the two touch the same cells, which is
+     exactly why this is asserted rather than assumed. A carried task is not an activity; nothing
+     happened on its origin day. Deduping would let a record entry there delete the mark for work
+     still outstanding. */
+  it("a record entry on the origin day does NOT remove the ghost", () => {
+    const todays = [carried("c1", "2026-08-07")];
+    const rec: RecordItem = { key: "r1", ymd: "2026-08-07", label: "Query sent", dir: "out",
+      queryId: "q1", activityId: "a1", agent: "Ana Duarte", agency: "Duarte", manuscriptId: "m1",
+      note: "", detail: "", exchange: 1, turned: false };
+    /* the page never passes ghosts through the dedupe; this states the consequence of that */
+    expect(ghostsFor("2026-08-07", todays)).toHaveLength(1);
+    expect(dedupeAgainstRecord(todays, [rec]).length).toBe(todays.length);
+  });
+
+  it("the page derives ghosts from TODAY's items and keeps them out of the dedupe", () => {
+    expect(pageSrc).toContain("ghostsFor(ymd, itemsFor(today))");
+    /* the dedupe's only argument is the day's own items — never a ghost list */
+    expect(pageSrc).toContain("dedupeAgainstRecord(dayData(ymd).items, recordFor(ymd))");
+    expect(decls(pageSrc)).not.toMatch(/dedupeAgainstRecord\([^)]*ghost/i);
+  });
+
+  /* ⚠️ A GHOST PAYS FOR ITS SLOT. It is the same box as any pill, so a fold that ignored it would
+     draw one pill too many into room for the cap — the silent shrink this file already records. */
+  it("ghosts travel through cellSlots as ordinary occupants", () => {
+    expect(pageSrc).toContain("const occupants: Occupant[] = [");
+    expect(pageSrc).toContain("cellSlots(occupants, recs, cellCap, cellCapFolded)");
+  });
+
+  it("ghosts never appear in the day panel — the age line carries the fact there", () => {
+    const d = decls(pageSrc);
+    /* the panel renders liveRow/record rows only; no ghost component is mounted inside it */
+    const panelStart = d.indexOf("const liveRow = (it: CalendarItem");
+    expect(panelStart, "liveRow is missing — the slice would prove nothing").toBeGreaterThan(-1);
+    const panelEnd = d.indexOf("export const TodoCalendarPage");
+    expect(panelEnd, "the page component is missing — the slice would run to EOF").toBeGreaterThan(panelStart);
+    expect(d.slice(panelStart, panelEnd)).not.toContain("GhostPip");
+  });
+});
+
+describe("daysSince / carriedLine — the gap, stated and never judged", () => {
+  it("counts whole days, and across a month boundary", () => {
+    expect(daysSince("2026-08-19", "2026-08-19")).toBe(0);
+    expect(daysSince("2026-08-07", "2026-08-19")).toBe(12);
+    /* ⚠️ ACROSS THE BOUNDARY: 28 Jul → 3 Aug is six days, not a month's worth of arithmetic */
+    expect(daysSince("2026-07-28", "2026-08-03")).toBe(6);
+    expect(daysSince("2026-12-28", "2027-01-04")).toBe(7);
+    /* ⚠️ AND ACROSS A DST SHIFT — the UK clocks go back on 25 Oct 2026. Anchored at midnight this
+       reads 13 rather than 14, because the extra hour floors the division. */
+    expect(daysSince("2026-10-20", "2026-11-03")).toBe(14);
+  });
+
+  it("states the turn, the origin and the gap — and nothing else", () => {
+    expect(carriedLine("2026-08-07", "2026-08-19")).toBe("Your turn · Since 7 Aug · 12 days waiting");
+    expect(carriedLine("2026-08-18", "2026-08-19")).toBe("Your turn · Since 18 Aug · 1 day waiting");
+  });
+
+  /* ⚠️ ZERO OMITS ITSELF. "0 days waiting" states a duration that has not happened. */
+  it("an item that fell due today states no duration at all", () => {
+    expect(carriedLine("2026-08-19", "2026-08-19")).toBe("Your turn · Since 19 Aug");
+  });
+
+  /* ⚠️ THE COPY LAW, ASSERTED: no "overdue", no verdict, no quality or speed adjective. */
+  it("it reports and does not judge", () => {
+    const samples = [
+      carriedLine("2026-08-07", "2026-08-19"),
+      carriedLine("2026-05-01", "2026-08-19"),
+      carriedLine("2026-08-19", "2026-08-19"),
+    ];
+    for (const line of samples) {
+      expect(line).not.toMatch(/overdue|late|slow|still|already|only|just|urgent|should|behind/i);
+    }
   });
 });

@@ -1012,3 +1012,76 @@ export const recordInKinds = (r: RecordItem, on: CalKind[]): boolean => {
   const k = recordKind(r);
   return k === null || on.includes(k);
 };
+
+/* ══ CARRIED-TASK ORIGIN GHOSTS (finishing pack, Phase 5; ref calendar-month-focus-v5.html) ════
+ *
+ * ⚠️ THE PROBLEM IS THAT AN UNACTIONED DATED ITEM TELEPORTS. Roll-forward puts the live work on
+ * TODAY — which is right, because that is where the work is — but it leaves the month saying
+ * nothing happened on the day it fell due. A reader scanning August sees a clean fortnight and one
+ * busy today, when what actually happened is that something has been waiting a fortnight.
+ *
+ * ⚠️ THE GHOST CARRIES NO STATE AND NOTHING TO CLEAN UP. It is derived at render from the item's
+ * own `rolledFrom` — no ghost record, no carry flag, no write. If the item leaves the feed the
+ * ghost vanishes in the same render, because there was never anything else holding it up.
+ *
+ * ⚠️ AND A GHOST IS NEVER DEDUPED AGAINST THE RECORD. The dedupe exists because a completed card
+ * and a record entry can be two readings of ONE activity; a carried task is not an activity at all
+ * — nothing happened on its origin day, which is precisely what the ghost says. Feeding ghosts to
+ * `dedupeAgainstRecord` would let a record entry on the origin day delete the mark for a task that
+ * is still outstanding. Asserted, because the two touch the same cells.
+ */
+export interface GhostItem {
+  key: string;
+  /** The origin day it renders on. */
+  ymd: string;
+  /** The live item it points at — which lives on today. */
+  of: CalendarItem;
+}
+
+/**
+ * The ghosts belonging to one day: every carried item whose ORIGIN is that day.
+ *
+ * ⚠️ IT READS TODAY'S ITEMS, because that is where carried work renders. Passing the day's own
+ * items instead would find nothing, forever, and look like a feature nobody switched on.
+ */
+export function ghostsFor(ymd: string, todayItems: CalendarItem[]): GhostItem[] {
+  return todayItems
+    .filter((it) => it.rolledFrom === ymd)
+    .map((it) => ({ key: `ghost-${it.key}`, ymd, of: it }));
+}
+
+/**
+ * Whole days between two dates.
+ *
+ * ⚠️ MIDDAY ANCHORS, so a DST shift cannot round a whole day off. Both dates are parsed at 12:00
+ * local; the offset between them is at most an hour either way, which `Math.round` absorbs. Parsed
+ * at midnight, an hour's shift lands the difference at 13.958 days and floors to 13.
+ */
+export function daysSince(fromYmd: string, toYmd: string): number {
+  const a = new Date(`${fromYmd}T12:00:00`).getTime();
+  const b = new Date(`${toYmd}T12:00:00`).getTime();
+  return Math.max(0, Math.round((b - a) / 86_400_000));
+}
+
+/**
+ * The live row's provenance line in the day panel — fact, and nothing more.
+ *
+ * ⚠️ NO ESCALATION, NO URGENCY, NO VERDICT. "12 days waiting" is a fact; "12 days overdue" is a
+ * judgement wearing a number, and this app reports. The house copy law forbids "overdue" outright
+ * and every quality or speed adjective with it — the writer decides what a fortnight means.
+ *
+ * ⚠️ AND THE DAY COUNT OMITS ITSELF AT ZERO rather than reading "0 days waiting": an item that
+ * fell due today has not waited, and a zero there states a duration that has not happened.
+ */
+export function carriedLine(rolledFrom: string, today: string, turn = "Your turn"): string {
+  const d = daysSince(rolledFrom, today);
+  const parts = [turn, `Since ${shortCalDate(rolledFrom)}`];
+  if (d > 0) parts.push(`${d} day${d === 1 ? "" : "s"} waiting`);
+  return parts.join(" · ");
+}
+
+/** "7 Aug" — the same shape the panel's other dates take. */
+export function shortCalDate(ymd: string): string {
+  const d = new Date(`${ymd}T12:00:00`);
+  return `${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" })}`;
+}

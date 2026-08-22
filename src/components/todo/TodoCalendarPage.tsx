@@ -38,6 +38,7 @@ import {
   peekBox, PEEK_DELAY_MS, PEEK_SCALE, PEEK_OPACITY,
   CalMode, upcomingGridDays,
   CalKind, CAL_KINDS, CAL_KIND_ORDER, allKinds, itemInKinds, recordInKinds,
+  GhostItem, ghostsFor, carriedLine,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 /* ⚠️ REUSED, not re-written — `shortDate` already renders "7 Aug" for the RecordingCalendar's
@@ -89,6 +90,33 @@ const ItemPip: React.FC<{ it: CalendarItem; onPick?: () => void }> = ({ it, onPi
         labels exist — the tooltip above, the day panel and FocusFlow all still read `it.label` in
         full. A writer's own task returns its own words and the cell ellipsises them. */}
     {pillLabel(it)}
+  </button>
+);
+
+/* ⚠️ THE GHOST IS THE SAME PILL, DRESSED AS PROVISIONAL — dashed outline, muted ink, `↦` at the
+ * tail. It reuses `pillLabel` on the LIVE item, so the two marks always read the same words; a
+ * second label here would be a second summarisation of one thing.
+ *
+ * ⚠️ DASHED MEANS PROVISIONAL, WHICH IS THE HOUSE GRAMMAR AND IS EXACTLY RIGHT HERE: nothing
+ * happened on this day. The work fell due and moved on, and the ghost says so rather than
+ * asserting an event.
+ *
+ * ⚠️ IT IS A SIGNPOST, NOT AN ACTION SURFACE. Clicking selects TODAY — where the work actually is
+ * — and focuses the live row there. It never opens a sheet and never expands: two places to act on
+ * one item is how two surfaces come to disagree about its state.
+ */
+/** What can sit in a cell's live stack: a real item, or a carried item's origin mark. */
+type Occupant = { readonly t: "item"; readonly it: CalendarItem } | { readonly t: "ghost"; readonly g: GhostItem };
+
+const GhostPip: React.FC<{ g: GhostItem; onPick: () => void }> = ({ g, onPick }) => (
+  <button
+    type="button"
+    className="cal-pip cal-ghost"
+    title={`${g.of.label} — fell due here, carried to today`}
+    onClick={(e) => { e.stopPropagation(); onPick(); }}
+  >
+    <span className="cal-ghtxt">{pillLabel(g.of)}</span>
+    <span className="cal-ghfwd" aria-hidden>↦</span>
   </button>
 );
 
@@ -192,8 +220,13 @@ const CalDayPanel: React.FC<CalDayPanelProps> = ({
       {/* ⚠️ PROVENANCE TRAVELS WITH THE ITEM, not with the day it left. The grid's marker sat on an
           empty day and said a move had happened there; this says the same thing where the reader is
           actually looking — on today's row, in the panel, muted. Derived from `rolledFrom`, which
-          is the value the marker itself was counted from. */}
-      {it.rolledFrom && <span className="cal-fporig">Originally due {shortDate(it.rolledFrom)}</span>}
+          is the value the marker itself was counted from.
+          ⚠️ IT STATES THE GAP NOW (finishing pack, Phase 5), because "Originally due 7 Aug" leaves
+          the reader to do the arithmetic — and the gap is the whole point of a carried item. It
+          reports and does not judge: "12 days waiting" is a fact, "12 days overdue" is a judgement
+          wearing a number, and the house copy law forbids that word outright. No colour
+          escalation, no bold, no urgency styling — see `carriedLine`. */}
+      {it.rolledFrom && <span className="cal-fporig">{carriedLine(it.rolledFrom, today)}</span>}
     </button>
   );
 
@@ -573,7 +606,9 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       const grid = gridRef.current;
       if (!grid) return;
       /* ⚠️ EMPTY CELLS NEVER PEEK — a 1.6× parchment card saying nothing is worse than no card. */
-      if (itemsFor(ymd).length + recordFor(ymd).length === 0) return;
+      /* ⚠️ A DAY HOLDING ONLY A GHOST IS NOT EMPTY — it has a mark, so it peeks. Counting only
+         items and records here would make hovering a ghost do nothing, which reads as broken. */
+      if (itemsFor(ymd).length + recordFor(ymd).length + ghostsOn(ymd).length === 0) return;
       const c = cell.getBoundingClientRect();
       const g = grid.getBoundingClientRect();
       /* height 0 on this pass: the box is measured once it has been laid out, below */
@@ -581,8 +616,16 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       const box = peekBox(cellRect, { left: g.left, top: g.top, right: g.right, bottom: g.bottom }, 0, PEEK_SCALE);
       setPeek({ ymd, left: box.left, top: box.top, width: box.width, cell: cellRect });
     }, PEEK_DELAY_MS);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [byDay, recByDay, mode]);
+  /* ⚠️ `kinds` IS IN THE DEPS, and leaving it out was a live staleness bug rather than a lint
+     nicety: this callback closes over `itemsFor`/`recordFor`/`ghostsOn`, which are rebuilt every
+     render and read the CURRENT filters. A memo that skipped `kinds` would keep the callback built
+     when the checklist was last touched, so switching a kind off and hovering would test emptiness
+     against the OLD filter set — a peek opening on a day it had just emptied.
+     ⚠️ THOSE THREE ARE DECLARED BELOW THIS LINE and that is safe here, but only because nothing
+     calls this during render: the body runs on mouseenter, by which time the consts are assigned.
+     The same shape read during render is the temporal-dead-zone fault this repo has shipped once
+     and `tsc` does not catch. Do not move the call site. */
+  }, [byDay, recByDay, mode, kinds]);
 
   /* ⚠️ THE SECOND CLAMP IS NOT OPTIONAL, because the height is the one term `peekBox` cannot
      derive: the peek holds every item on the day with no cap, so how tall it is depends on how
@@ -648,6 +691,20 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
        the dedupe landed. */
     return byMode.filter((it) => itemInKinds(it, kinds));
   };
+
+  /* ⚠️ GHOSTS ARE DERIVED FROM TODAY'S ITEMS, NEVER THE DAY'S OWN — carried work renders on today,
+     so that is the only list its origin can be read from. They obey the kind filters through the
+     SAME predicate the live pill obeys (`itemsFor(today)` is already filtered), so a switched-off
+     kind takes the mark and the pill together rather than leaving one orphaned.
+     ⚠️ AND THEY ARE NEVER FED TO `dedupeAgainstRecord`. That exists because a completed card and a
+     record entry can be two readings of one ACTIVITY; a carried task is not an activity — nothing
+     happened on its origin day, which is the whole of what the ghost says. Deduping them would let
+     a record entry on the origin day delete the mark for work that is still outstanding.
+     ⚠️ IN `Upcoming only` THIS COMPOSES WITHOUT A RULE OF ITS OWN: an origin outside `visible` has
+     no cell to render in, and one inside it is by definition a dimmed lead-in day. The panel's age
+     line carries the fact either way. */
+  const ghostsOn = (ymd: string): GhostItem[] =>
+    ymd === today ? [] : ghostsFor(ymd, itemsFor(today));
 
   return (
     <div className="t-f12 spine-root">
@@ -768,7 +825,15 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                  ⚠️ THE RECORD FOLDS WITH EVERYTHING ELSE (record-layer P3), and the arithmetic is
                  `cellSlots` rather than three expressions here — a rule this easy to get subtly
                  wrong belongs somewhere a test can call it. `calFoldCap` is untouched. */
-              const { shownItems: shown, shownRecs, overflow } = cellSlots(items, recs, cellCap, cellCapFolded);
+              /* ⚠️ A GHOST IS AN ORDINARY CELL OCCUPANT and pays for its slot like any other pill
+                 — it is the same box, so a fold that ignored it would draw one pill too many into
+                 room for the cap. `cellSlots` is generic, so items and ghosts travel through it as
+                 one tagged list and are split again at render; the arithmetic is untouched. */
+              const occupants: Occupant[] = [
+                ...items.map((it) => ({ t: "item", it } as const)),
+                ...ghostsOn(ymd).map((g) => ({ t: "ghost", g } as const)),
+              ];
+              const { shownItems: shown, shownRecs, overflow } = cellSlots(occupants, recs, cellCap, cellCapFolded);
               const past = ymd < today;
               const off = !sameMonth(ymd, anchor);
               /* ⚠️ THE LEAD-IN IS DIMMED, NEVER DELETED (finishing pack, Phase 3): whole weeks are
@@ -792,10 +857,13 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                     <span className="cal-dn">{Number(ymd.slice(8))}</span>
                     {items.length + recs.length > 0 && <span className="cal-c2">{items.length + recs.length}</span>}
                   </div>
-                  {shown.map((it) => (
-                    <ItemPip key={it.key} it={it}
-                      onPick={() => { it.card ? focusCard(ymd, it.key) : selectDay(ymd); }} />
-                  ))}
+                  {shown.map((o) => (o.t === "item" ? (
+                    <ItemPip key={o.it.key} it={o.it}
+                      onPick={() => { o.it.card ? focusCard(ymd, o.it.key) : selectDay(ymd); }} />
+                  ) : (
+                    /* the ghost points AT today — select it and focus the live row there */
+                    <GhostPip key={o.g.key} g={o.g} onPick={() => focusCard(today, o.g.of.key)} />
+                  )))}
                   {/* ⚠️ THE RECORD SITS UNDER THE LIVE WORK, AND WEARS THE SAME BOX. It reuses
                       `.cal-pip` geometry deliberately: `CAL_PIP_H` is the fold's unit, so a record
                       pip of a different height would make the measured cap describe a cell it does
@@ -835,6 +903,16 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                   `recordFor` are the same two calls the cell makes, so a filtered-out kind or a
                   hidden record layer is absent here for the same reason it is absent there. */}
               {itemsFor(peek.ymd).map((it) => <ItemPip key={it.key} it={it} />)}
+              {/* ⚠️ GHOSTS APPEAR IN THE PEEK TOO. The peek is the answer to "+N MORE", and a
+                  ghost can be what the counter is counting — unfolding a day and finding the mark
+                  missing would make the peek disagree with the cell it grew from. Inert here like
+                  every other pill: the peek takes no clicks at all. */}
+              {ghostsOn(peek.ymd).map((g) => (
+                <span key={g.key} className="cal-pip cal-ghost" aria-hidden>
+                  <span className="cal-ghtxt">{pillLabel(g.of)}</span>
+                  <span className="cal-ghfwd">↦</span>
+                </span>
+              ))}
               {recordFor(peek.ymd).map((r) => <RecPip key={r.key} r={r} />)}
             </div>,
             document.body,
