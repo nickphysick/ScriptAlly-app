@@ -454,7 +454,29 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      to the entry the writer opened, not to the position it occupied in some other day's list. */
   const [openRec, setOpenRec] = useState<string | null>(null);
   const [focusKey, setFocusKey] = useState<string | null>(null);
-  const selectDay = (ymd: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(null); };
+  /* ══ THE COLLAPSIBLE DAY PANEL (foot-panel pack, Phase 2) ═══════════════════════════════
+     ⚠️ SESSION-LOCAL, NEVER PERSISTED — the same rule the view mode follows: a preference stored
+     for a view toggle is a preference nobody asked to keep. Default OPEN: the panel is the page's
+     reading surface, and a writer arriving should not have to ask for it.
+     ⚠️ BELOW 1080 THE STATE IS IGNORED BY CONSTRUCTION, not by a width check here. The collapse is
+     expressed as a CSS class whose rules live inside `@media (min-width: 1080px)`, and the panel
+     stays MOUNTED in both states (hidden by `display: none`, never unrendered) — so the narrow
+     single-column layout always shows it, and its internal state survives a collapse. */
+  const [panelOpen, setPanelOpen] = useState(true);
+  const pageRef = React.useRef<HTMLDivElement>(null);
+  /* ⚠️ ONE CHEVRON, ONE MOUNT — positioned by the layout, moved by a class. Rendering a mount per
+     state would remount the control on toggle and drop keyboard focus on the floor; a single
+     element keeps focus across the toggle for free, which is the accessible behaviour with no
+     machinery at all. */
+  const togglePanel = () => { setPanelOpen((o) => !o); clearPeek(); };
+
+  /* ⚠️ SELECTING A DAY WHILE COLLAPSED REOPENS — the writer has asked to READ something, and
+     silently discarding that click would be worse than the panel reappearing. It rides the three
+     selection helpers rather than the cell's onClick, so a pip, a ghost and whitespace all reopen
+     by the same rule. */
+  const reopenForReading = () => setPanelOpen((o) => (o ? o : true));
+
+  const selectDay = (ymd: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(null); reopenForReading(); };
   /* ⚠️ A PILL SELECTS ITS DAY *AND* POINTS AT ITS ROW (pill pack, Phase 3). The grid is a density
      map now: two words and a colour. Whatever the pill abbreviates is one click away in full, so
      the click has to land somewhere — the panel row it summarises.
@@ -462,8 +484,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      here. These set the day and the target together, in one render, so nothing is set and undone.
      ⚠️ ACTIONING IS UNCHANGED. The row still opens `FocusFlow` with the same card and the same
      props; the pill routes to the row rather than past it. */
-  const focusCard = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(key); };
-  const focusRecord = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(key); setFocusKey(key); };
+  const focusCard = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(key); reopenForReading(); };
+  const focusRecord = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(key); setFocusKey(key); reopenForReading(); };
   const [flowCard, setFlowCard] = useState<BoardCard | null>(null);
 
   const assembled = useMemo(
@@ -652,6 +674,36 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     return () => window.removeEventListener("scroll", clearPeek, true);
   }, [peek, clearPeek]);
 
+  /* ⚠️ CLICK-AWAY, SCOPED TO THE PAGE'S OWN ROOT — DELIBERATELY NOT `document` (foot-panel pack,
+     Phase 2). "Outside the calendar" is defined by what the listener can reach: it hangs on this
+     page's root element, so a click on the NAV, the MASTHEAD, or any PORTALLED surface (the peek,
+     the overlay, menus, toasts — all portalled to `document.body`) never reaches it and cannot
+     collapse the panel. A click that opens a menu is not a click away — and that falls out of the
+     SCOPING, not out of a list of exceptions that would go stale as surfaces are added.
+     ⚠️ THE LIMITATION THAT BUYS, stated for the report: a click on the shell's own furniture (the
+     sidebar, the top bar) collapses nothing, because listening above the page's container is what
+     the pack forbids. It reads as correct anyway — leaving the page is not "clicking away" inside
+     it.
+     ⚠️ WITHIN the page the exclusions are the pack's four, by `closest`: the month grid, the panel,
+     the command bar (`.tpl-tools` — the row holding Today/prev/next, the segment and the kinds; the
+     kind MENU lives inside it, so an open checklist is covered by the same test), and the chevron.
+     Everything else — the legend, the title, empty ground — collapses. `pointerdown`, matching the
+     app's other dismissal patterns, so it cannot lose a race with a click handler that re-renders
+     the tree from under the event. */
+  React.useEffect(() => {
+    if (!panelOpen) return;
+    const root = pageRef.current;
+    if (!root) return;
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (!t) return;
+      if (t.closest(".cal-grid, .cal-focus, .cal-paneltab, .tpl-tools")) return;
+      setPanelOpen(false);
+    };
+    root.addEventListener("pointerdown", onDown);
+    return () => root.removeEventListener("pointerdown", onDown);
+  }, [panelOpen]);
+
   /* the timer must not outlive the page */
   React.useEffect(() => () => {
     if (peekTimer.current !== null) window.clearTimeout(peekTimer.current);
@@ -707,7 +759,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     ymd === today ? [] : ghostsFor(ymd, itemsFor(today));
 
   return (
-    <div className="t-f12 spine-root">
+    <div className="t-f12 spine-root" ref={pageRef}>
       <div className="tdb-wrap today-off">
         <TasksPageLayout
           title="Calendar"
@@ -801,7 +853,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               chain, so the two-column split is this page's own box inside it. `TplZone` is not
               used here and never was: the month COMPRESSES to the frame rather than scrolling
               (tasks-viewport P1/P3), and only the panel has a scroller of its own. */}
-          <div className="cal-layout">
+          <div className={`cal-layout${panelOpen ? "" : " cal-nopanel"}`}>
           <div className="cal-main">
           {/* ⚠️ A PAST MONTH IN `Upcoming only` HAS AN HONEST ANSWER, AND IT IS NOTHING. Rather
               than clamp to "the last week anyway" — which would put a week of finished days under
@@ -957,6 +1009,24 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               window.dispatchEvent(new CustomEvent(TODO_OPEN_COMPOSER));
             }}
           />
+
+          {/* ⚠️ THE CHEVRON (foot-panel pack, Phase 2). Open: it straddles the PANEL's left edge
+              and points right — "push it away". Collapsed: it straddles the widened month's right
+              edge and points left — "bring it back". One absolutely-positioned element against the
+              layout; the position moves by class, and the panel's column width is read from the
+              SAME token the grid template reads (`--cal-panel-w`), so the two cannot drift.
+              ⚠️ `aria-expanded` + a verb-first name, per the pack; the focus ring rides the same
+              rule as the view segment's. Hidden below 1080 in CSS — the narrow layout stacks the
+              panel under the grid, so there is nothing beside the month to push away. */}
+          <button
+            type="button"
+            className="cal-paneltab"
+            aria-expanded={panelOpen}
+            aria-label={panelOpen ? "Hide the day panel" : "Show the day panel"}
+            onClick={togglePanel}
+          >
+            {panelOpen ? <ChevronRight size={13} aria-hidden /> : <ChevronLeft size={13} aria-hidden />}
+          </button>
           </div>
         </TasksPageLayout>
       </div>

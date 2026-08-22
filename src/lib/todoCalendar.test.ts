@@ -7,6 +7,7 @@
  * (filters applied before placement, the shared pip map, the click targets).
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { Query, Agent, UserTask, TaskFlag, Activity, ActivityType, QueryStatus } from "../types";
@@ -691,7 +692,9 @@ describe("⚠️ the day panel replaces the modal, inside the chassis", () => {
   });
 
   it("the panel is this page's own box inside .tpl-body — TasksPageLayout is not forked", () => {
-    expect(pageSrc).toContain('className="cal-layout"');
+    /* ⚠️ RETARGETED (foot-panel pack, Phase 2): the layout takes the collapse class by template
+       literal now. The claim is unchanged — the two-column split exists and is this element. */
+    expect(pageSrc).toContain('className={`cal-layout${panelOpen ? "" : " cal-nopanel"}`}');
     expect(pageSrc).toContain('className="cal-focus"');
     // still the shared chassis, and still no TplZone: the month compresses, it does not scroll
     expect(pageSrc).toContain("<TasksPageLayout");
@@ -1318,8 +1321,11 @@ describe("⚠️ two words on the grid — and summarisation happens NOWHERE els
 
 describe("⚠️ a pill points at its row — and actioning is untouched", () => {
   it("a card pill selects its day and asks for its row; a record pill also opens it", () => {
-    expect(pageSrc).toContain("const focusCard = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(key); };");
-    expect(pageSrc).toContain("const focusRecord = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(key); setFocusKey(key); };");
+    /* ⚠️ RETARGETED (foot-panel pack, Phase 2): the helper also reopens a collapsed panel — the
+       writer has asked to READ something. The original claim (day + target set together, one
+       render) is unchanged. */
+    expect(pageSrc).toContain("const focusCard = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(key); reopenForReading(); };");
+    expect(pageSrc).toContain("const focusRecord = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(key); setFocusKey(key); reopenForReading(); };");
     /* ⚠️ RETARGETED (finishing pack, Phase 5): the cell's stack is a tagged union now, so the item
        arm names `o.it`. Same claim — a card pill selects its day and asks for its row. */
     expect(pageSrc).toContain("focusCard(ymd, o.it.key)");
@@ -1334,7 +1340,8 @@ describe("⚠️ a pill points at its row — and actioning is untouched", () =>
   });
 
   it("⚠️ SELECTING A DIFFERENT DAY STILL CLEARS THE EXPANSION — and now the focus request too", () => {
-    expect(pageSrc).toContain("const selectDay = (ymd: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(null); };");
+    /* ⚠️ RETARGETED (foot-panel pack, Phase 2) — same reopen rider, same original claim. */
+    expect(pageSrc).toContain("const selectDay = (ymd: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(null); reopenForReading(); };");
   });
 
   it("⚠️ ACTIONING IS UNCHANGED — the row still opens FocusFlow with the same card", () => {
@@ -1838,5 +1845,77 @@ describe("the calendar's action surface — scoped presentation, untouched behav
   it("closing keeps the day selected", () => {
     expect(pageSrc).toContain("onClose={() => setFlowCard(null)}");
     expect(decls(pageSrc)).not.toMatch(/onClose=\{[^}]*setSelDay/);
+  });
+});
+
+/* ══ THE COLLAPSIBLE DAY PANEL (foot-panel pack, Phase 2) ═══════════════════════════════════ */
+describe("the collapsible day panel — one chevron, scoped click-away, reopen on read", () => {
+  it("session-local state, defaulting open, never persisted", () => {
+    expect(pageSrc).toContain("const [panelOpen, setPanelOpen] = useState(true)");
+    const d = decls(pageSrc);
+    expect(d).not.toMatch(/localStorage[^\n]*panel/i);
+    expect(d).not.toMatch(/panelOpen[^\n]*localStorage/);
+  });
+
+  it("ONE chevron mount — remounting per state would drop keyboard focus on toggle", () => {
+    const d = decls(pageSrc);
+    const mounts = d.match(/className="cal-paneltab"/g) ?? [];
+    expect(mounts).toHaveLength(1);
+    expect(pageSrc).toContain("aria-expanded={panelOpen}");
+    expect(pageSrc).toContain('aria-label={panelOpen ? "Hide the day panel" : "Show the day panel"}');
+  });
+
+  /* ⚠️ THE PANEL WIDTH IS ONE TOKEN, TWO READERS — the template and the chevron's open position.
+     Restated, they drift the day someone widens the panel. */
+  it("the chevron's open position reads the SAME token as the grid template", () => {
+    expect(calCss).toContain("--cal-panel-w: 370px");
+    expect(calCss).toContain("grid-template-columns: minmax(0, 1fr) var(--cal-panel-w)");
+    expect(calCss).toContain("right: calc(var(--cal-panel-w) - 13px)");
+    /* and nothing else restates the panel's width as a literal */
+    const d = decls(calCss);
+    expect((d.match(/370px/g) ?? []).length, "370px restated outside the token").toBe(1);
+  });
+
+  it("hidden, never unrendered — CalDayPanel stays mounted in both states", () => {
+    /* the class hides it in CSS; the JSX mounts it unconditionally */
+    expect(calCss).toContain(".cal-nopanel .cal-focus { display: none; }");
+    const d = decls(pageSrc);
+    expect(d).not.toMatch(/panelOpen\s*&&\s*<CalDayPanel/);
+  });
+
+  /* ⚠️ THE COLLAPSE LIVES INSIDE min-width: 1080px — that IS "the state is ignored below 1080".
+     A bare .cal-nopanel rule would hide the panel from the narrow single-column world, where it
+     is the only reading surface on the page. */
+  it("the collapse rules are fenced to ≥1080, and the chevron hides below it", () => {
+    const wide = sliceBetween(calCss, "@media (min-width: 1080px)", ".cal-paneltab {");
+    expect(wide).toContain(".cal-nopanel { grid-template-columns: minmax(0, 1fr); }");
+    expect(wide).toContain(".cal-nopanel .cal-focus { display: none; }");
+    const narrow = sliceBetween(calCss, "@media (max-width: 1079px)", "/* ══ THE HOVER PEEK");
+    expect(narrow).toContain(".cal-paneltab { display: none; }");
+  });
+
+  /* ⚠️ REOPEN RIDES THE THREE SELECTION HELPERS, not the cell's onClick — so a pip, a ghost and
+     whitespace all reopen by the same rule, and a future fourth caller inherits it. */
+  it("selecting a day while collapsed reopens, through every selection path", () => {
+    expect(pageSrc).toContain("const reopenForReading = () => setPanelOpen((o) => (o ? o : true));");
+    for (const helper of ["const selectDay", "const focusCard", "const focusRecord"]) {
+      const i = pageSrc.indexOf(helper);
+      expect(i, `${helper} is missing — the slice would prove nothing`).toBeGreaterThan(-1);
+      /* ⚠️ THE SLICE IS THE LINE, NOT "to the first semicolon" — these are one-line arrow bodies
+         whose first `;` is an interior statement, so a semicolon slice stops before the rider and
+         reports it missing on a correct file. The line end cannot. */
+      expect(pageSrc.slice(i, pageSrc.indexOf("\n", i))).toContain("reopenForReading()");
+    }
+  });
+
+  /* ⚠️ THE CLICK-AWAY IS SCOPED TO THE PAGE ROOT, NEVER `document` — portalled surfaces and the
+     shell's chrome must not collapse the panel, and that falls out of the scoping rather than out
+     of an exception list that would go stale. */
+  it("the click-away hangs on the page's own root, with the pack's four exclusions", () => {
+    expect(pageSrc).toContain("root.addEventListener(\"pointerdown\", onDown)");
+    expect(pageSrc).toContain('t.closest(".cal-grid, .cal-focus, .cal-paneltab, .tpl-tools")');
+    const d = decls(pageSrc);
+    expect(d).not.toMatch(/document\.addEventListener\("pointerdown"/);
+    expect(d).not.toMatch(/window\.addEventListener\("pointerdown"/);
   });
 });

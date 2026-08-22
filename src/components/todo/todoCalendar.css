@@ -320,9 +320,49 @@
  * for on a page that had no such row to sit in.
  */
 .cal-layout {
-  display: grid; grid-template-columns: minmax(0, 1fr) 370px; gap: 18px;
+  /* ⚠️ THE PANEL'S WIDTH IS A TOKEN because TWO rules read it (foot-panel pack, Phase 2): the
+     template here, and the chevron's open position below. Restated, the chevron would drift the
+     day someone widens the panel — one owner, two readers. */
+  --cal-panel-w: 370px;
+  display: grid; grid-template-columns: minmax(0, 1fr) var(--cal-panel-w); gap: 18px;
   flex: 1; min-height: 0;
+  /* the chevron positions against the layout, so the layout is the containing block */
+  position: relative;
 }
+
+/* ══ THE COLLAPSIBLE DAY PANEL (foot-panel pack, Phase 2) ═════════════════════════════════════
+ *
+ * ⚠️ THE COLLAPSE LIVES INSIDE `@media (min-width: 1080px)`, WHICH IS WHAT "the state is ignored
+ * below 1080" MEANS MECHANICALLY. The narrow layout stacks the panel under the grid in a scrolling
+ * column — there is nothing beside the month to push away — so the class simply has no rules
+ * there, the panel stays visible whatever the state says, and the chevron is hidden in the narrow
+ * block below. No width check in the component, nothing to keep in step with the breakpoint.
+ *
+ * ⚠️ THE PANEL IS HIDDEN, NEVER UNRENDERED. `display: none` keeps `CalDayPanel` mounted, so an
+ * expanded record row and the panel's scroll position survive a collapse — and below 1080 the
+ * single-column layout always has it, because unrendering would have taken it from the narrow
+ * world too.
+ */
+@media (min-width: 1080px) {
+  .cal-nopanel { grid-template-columns: minmax(0, 1fr); }
+  .cal-nopanel .cal-focus { display: none; }
+}
+
+/* ⚠️ THE CHEVRON — one element, positioned by the layout, moved by the class. Open it straddles
+   the PANEL's left edge (reading the same `--cal-panel-w` the template reads); collapsed it
+   straddles the widened month's right edge. Parchment ground, hairline border, muted glyph — the
+   page's own button grammar, not a new one. */
+.cal-paneltab {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
+  width: 26px; height: 26px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #fdfaf5; border: 1px solid #e6dcce; color: #a8998a;
+  cursor: pointer; padding: 0;
+  right: calc(var(--cal-panel-w) - 13px);
+}
+.cal-nopanel .cal-paneltab { right: -13px; }
+.cal-paneltab:hover { color: #7a6a5c; border-color: #d3c4b3; }
+.cal-paneltab:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
 .cal-main { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 
 .cal-focus {
@@ -492,6 +532,8 @@
      scrolling column, so there is no shared foot line for it to close on; a margin here would just
      lengthen the scroll. The single-column world keeps its own rules. */
   .cal-focus { max-height: none; margin-bottom: 0; }
+  /* the collapse control goes with it: nothing sits beside the month to push away */
+  .cal-paneltab { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
