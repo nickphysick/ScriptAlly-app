@@ -215,7 +215,14 @@
    tag filter unstyled in dev while looking correct in a bundled build. One home, three importers. */
 
 .cal-legend {
-  display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px;
+  /* ⚠️ `margin: 7px 0`, NOT `margin-top: 14px` — THE SAME 25px OF FLOW, REDISTRIBUTED (foot-gap
+     pack, Phase 1). The legend used to sit hard against the window's bottom edge: 14 above, 0
+     below, ending ONE pixel from the frame — furniture touching the frame is what read as "the
+     spacing is still wrong". The total is deliberately unchanged (7 + 11 + 7 = 14 + 11 + 0 = 25):
+     the grid's height, its row height and therefore THE FOLD'S CUSHION are untouched to the
+     hundredth. Any value that grows this band comes straight out of the cells — 32px of band costs
+     5.3px per row, and the cushion at 900 viewport height is 4.0. */
+  display: flex; flex-wrap: wrap; gap: 12px; margin: 7px 0;
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 6.5px; letter-spacing: 0.13em; color: #b3a394;
 }
@@ -320,6 +327,15 @@
 
 .cal-focus {
   display: flex; flex-direction: column; min-height: 0;
+  /* ⚠️ `margin-bottom: 25px` — THE PANEL'S CARD EDGE STOPS WHERE THE GRID'S DOES (foot-gap pack,
+     Phase 1). It ran to 1px of the window's bottom edge while every sibling page's panels stop
+     33px short over clean ground; the calendar cannot afford the full 32px band (see the legend's
+     note — it would cost the fold's cushion), but the PANEL's height is not cell geometry: its
+     body is its own scroller, so shortening it costs scroll length and nothing else. 25 is the
+     legend's flow band (7 + 11 + 7) so the two columns' furniture closes on ONE line — the grid's
+     bottom — with the legend riding in the band under the month. One decision, two declarations:
+     change this and the legend's margins together or the foot line breaks. */
+  margin-bottom: 25px;
   background: #fff; border: 1px solid #efe8dc; border-top: 5px solid #8a9e88;
   /* square, per the ref — the month's cells are the rounded objects on this page */
   border-radius: 0;
@@ -472,7 +488,10 @@
      the density floor of two would have promised anyway. 6 × (33 + 66) + 13 = 607; 620 carries the
      margin. This number and CAL_PIP_H are one decision. */
   .cal-grid { min-height: 620px; }
-  .cal-focus { max-height: none; }
+  /* ⚠️ AND THE FOOT MARGIN COMES OFF — below the breakpoint the panel is UNDER the grid in a
+     scrolling column, so there is no shared foot line for it to close on; a margin here would just
+     lengthen the scroll. The single-column world keeps its own rules. */
+  .cal-focus { max-height: none; margin-bottom: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
