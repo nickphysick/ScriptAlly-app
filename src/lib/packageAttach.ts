@@ -49,6 +49,19 @@ export interface AttachedMaterial extends QueryMaterial {
   fromPackageId?: string;
   /** Its name AS IT WAS at attach time — renaming the package must not rewrite this send's tag. */
   fromPackageName?: string;
+  /**
+   * ⚠️ WHICH VERSION WENT — and without it "the package has changed since" cannot be answered.
+   *
+   * A snapshot recording only the material NAMES can see a slot appear or disappear and cannot see
+   * the synopsis swapped for a different synopsis, which is ref 177's own example of state 1. The
+   * package stores version ids; the send has to store the one it copied, or the comparison is
+   * between two lists of the same three words.
+   *
+   * ⚠️ OPTIONAL, AND ITS ABSENCE MEANS "CANNOT SAY" RATHER THAN "UNCHANGED". Sends attached before
+   * this field existed carry no version ids, and `packageDrift` returns `unknown` for them — no
+   * marker at all. A false "changed" is worse than no marker.
+   */
+  fromVersionId?: string;
 }
 
 /** The canonical order a package's slots are read in — the order the picker and the pills use. */
@@ -114,7 +127,12 @@ export const overlapNote = (i: PackageItem): string =>
 
 /** The items as they land in `materialsWanted` — copied, marked, and never linked. */
 export const attachedMaterials = (pkg: SubmissionPackage, items: readonly PackageItem[]): AttachedMaterial[] =>
-  items.map((i) => ({ material: i.material, fromPackageId: pkg.id, fromPackageName: pkg.packageName }));
+  items.map((i) => ({
+    material: i.material,
+    fromPackageId: pkg.id,
+    fromPackageName: pkg.packageName,
+    fromVersionId: i.versionId,
+  }));
 
 /**
  * The origin tag beneath the pills — `3 items from UK standard`.
@@ -252,3 +270,90 @@ export function groupByOrigin(
 
 /** ⚠️ ONE MARK FOR ALL PACKAGES, not one per package — a package is not a brand. */
 export const PACKAGE_MARK_SLOT = "package-mark" as const;
+
+/* ── the three states (ref 177) ───────────────────────────────────────────────────────────── */
+
+/**
+ * Has the package moved on since this send took its copy?
+ *
+ * ⚠️ COMPARED BY IDENTITY, NOT BY VALUE — slot to VERSION ID. Comparing the material names would
+ * see three words that had not changed while the synopsis behind one of them had been replaced,
+ * which is ref 177's own example of state 1. Comparing the versions' CONTENT would be worse again:
+ * editing a version's text in place is not a change to which materials the package holds, and a
+ * send that went out with "QL v3" still went out with QL v3 after its wording was tweaked.
+ *
+ * ⚠️ ORDER IS NOT PART OF THE QUESTION, AND CANNOT BE. A `SubmissionPackage` has three NAMED slots —
+ * query letter, synopsis, opening sample — so a package has no sequence to reorder. The comparison
+ * is a slot→version map on both sides, order-free by construction; a reordered-but-identical
+ * package is not a state this model can express, and if the shape ever grows a list, comparing maps
+ * is still the right answer.
+ *
+ * ⚠️ AND `unknown` IS A REAL ANSWER THAT RENDERS NOTHING. A send attached before version ids were
+ * stored cannot be compared, so it gets no marker rather than a guess. A false "changed" tells a
+ * writer their record diverged from a template when it did not.
+ */
+export type PackageDrift = "none" | "changed" | "deleted" | "unknown";
+
+export interface DriftResult {
+  state: PackageDrift;
+  /** The materials whose version differs, for the note line. Empty unless `changed`. */
+  differing: string[];
+}
+
+export function packageDrift(
+  group: MaterialGroup,
+  live: SubmissionPackage | null | undefined,
+  sent: readonly (string | QueryMaterial)[],
+): DriftResult {
+  if (!live) return { state: "deleted", differing: [] };
+
+  /* the snapshot's own slot→version map, from the items this package brought */
+  const snapshot = new Map<string, string>();
+  let anyMissing = false;
+  for (const m of sent) {
+    const a = typeof m === "string" ? null : (m as AttachedMaterial);
+    if (!a || a.fromPackageId !== group.packageId) continue;
+    if (!a.fromVersionId) { anyMissing = true; continue; }
+    snapshot.set(a.material, a.fromVersionId);
+  }
+  if (anyMissing || snapshot.size === 0) return { state: "unknown", differing: [] };
+
+  const current = new Map<string, string>();
+  for (const { key, type } of PACKAGE_SLOTS) {
+    const id = live[key] as string;
+    if (isSlotFilled(id)) current.set(type as string, id);
+  }
+
+  /**
+   * ⚠️ ONLY THE SLOTS THIS SEND ACTUALLY TOOK ARE COMPARED. A writer who removed the synopsis pill
+   * by hand has a send that no longer matches the package — but that is their own edit, not the
+   * package moving on, and reporting it as "the package has changed" would blame the template for
+   * something the writer did. State 1 is about the PACKAGE's movement.
+   */
+  const differing: string[] = [];
+  for (const [material, versionId] of snapshot) {
+    if (current.get(material) !== versionId) differing.push(material);
+  }
+  return differing.length ? { state: "changed", differing } : { state: "none", differing: [] };
+}
+
+/**
+ * The note beneath a changed group's meta line.
+ *
+ * ⚠️ IT REPORTS AND REASSURES; IT NEVER PRESCRIBES. "This send keeps what actually went" is the
+ * whole point of the state — nothing here suggests re-attaching, updating or fixing anything,
+ * because there is nothing wrong: a send is a fact and a package is a template.
+ */
+export const driftNote = (differing: readonly string[]): string => {
+  const names = differing.map((m) => MATERIAL_LABEL[m as ComponentType] ?? m).map((n) => n.toLowerCase());
+  const list = names.length === 1 ? names[0]
+    : names.length === 2 ? `${names[0]} and ${names[1]}`
+    : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  return `The package now includes a different ${list}. This send keeps what actually went.`;
+};
+
+/** `As sent, 12 Aug` — the meta line's left half once a package has moved on. */
+export const asSentLabel = (dateISO: string | undefined): string => {
+  const t = dateISO ? new Date(dateISO).getTime() : NaN;
+  return Number.isNaN(t) ? "As sent" : `As sent, ${new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`;
+};

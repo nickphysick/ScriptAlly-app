@@ -5804,6 +5804,8 @@ export const Queries: React.FC<{
                                         key={g.packageId}
                                         group={g}
                                         live={packages.find((p) => p.id === g.packageId) ?? null}
+                                        sent={materialsOf(activeQuery)}
+                                        sentDate={activeQuery.dateSent}
                                         onView={openPackages}
                                       >
                                         {take(g.materials)}

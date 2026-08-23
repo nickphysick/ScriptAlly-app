@@ -5,6 +5,7 @@ import {
   packageItems, overlaps, overlapNote, attachedMaterials, originTags, originTagText,
   withoutPackage, attachablePackages, materialName, type AttachedMaterial,
   canAttachPackages, packageMenuRow, PACKAGE_ROW_LABEL, isProUser, groupByOrigin,
+  packageDrift, driftNote,
 } from "./packageAttach";
 
 const PKG = {
@@ -207,5 +208,66 @@ describe("§1 · the group is presentation over stored origin", () => {
     const { groups } = groupByOrigin(attached);
     expect(groups[0].packageName).toBe("UK standard");
     expect(groups[0].packageId).toBe("p1");
+  });
+});
+
+describe("§2 · the three states, each only when true", () => {
+  const items = packageItems(PKG, VERSIONS);
+  const sent = attachedMaterials(PKG, items);
+  const group = groupByOrigin(sent).groups[0];
+
+  it("⚠️ says NOTHING when the send and the package still match", () => {
+    expect(packageDrift(group, PKG, sent)).toEqual({ state: "none", differing: [] });
+  });
+
+  it("⚠️ compares by VERSION IDENTITY — a swapped synopsis is seen, though the names are identical", () => {
+    const moved = { ...PKG, synopsisVersionId: "v-syn2" } as SubmissionPackage;
+    const d = packageDrift(group, moved, sent);
+    expect(d.state).toBe("changed");
+    expect(d.differing).toEqual(["Synopsis"]);
+    expect(driftNote(d.differing)).toContain("a different synopsis");
+    expect(driftNote(d.differing)).toContain("keeps what actually went");
+  });
+
+  it("sees a slot the package has since emptied", () => {
+    const d = packageDrift(group, { ...PKG, samplePagesVersionId: "" } as SubmissionPackage, sent);
+    expect(d.state).toBe("changed");
+    expect(d.differing).toEqual(["Sample Pages"]);
+  });
+
+  /**
+   * ⚠️ ORDER IS NOT PART OF THE QUESTION AND CANNOT BE. A package has three NAMED slots, so there
+   * is no sequence to reorder; both sides are compared as slot→version maps, order-free by
+   * construction. This asserts that building the same package's items in a different order changes
+   * nothing — the closest this model can come to a "reordered" package.
+   */
+  it("⚠️ a reordered-but-identical package is not a change", () => {
+    const shuffled = [...sent].reverse();
+    expect(packageDrift(groupByOrigin(shuffled).groups[0], PKG, shuffled).state).toBe("none");
+  });
+
+  it("⚠️ editing a version's CONTENT is not a change — the send went out with that version", () => {
+    /* nothing in the package's slot map moved, so nothing here can see a reworded draft */
+    expect(packageDrift(group, { ...PKG, packageName: "Renamed" } as SubmissionPackage, sent).state).toBe("none");
+  });
+
+  it("the deleted state keeps the name and reports the absence", () => {
+    expect(packageDrift(group, null, sent)).toEqual({ state: "deleted", differing: [] });
+    expect(group.packageName, "the name must outlive the package").toBe("UK standard");
+  });
+
+  /**
+   * ⚠️ `unknown` RENDERS NOTHING. A send attached before version ids were stored cannot be
+   * compared, and a false "changed" is worse than no marker — it tells a writer their record
+   * diverged from a template when it did not.
+   */
+  it("⚠️ says nothing about a send that carries no version ids", () => {
+    const legacy = sent.map(({ fromVersionId, ...rest }) => rest as AttachedMaterial);
+    expect(packageDrift(groupByOrigin(legacy).groups[0], PKG, legacy).state).toBe("unknown");
+  });
+
+  it("⚠️ a pill the WRITER removed is not the package moving on", () => {
+    const minusSynopsis = sent.filter((m) => m.material !== "Synopsis");
+    expect(packageDrift(groupByOrigin(minusSynopsis).groups[0], PKG, minusSynopsis).state).toBe("none");
   });
 });

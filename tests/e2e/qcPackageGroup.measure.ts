@@ -99,3 +99,57 @@ test("§4 · the meta line's contrast is measured against the group's ground, no
   /* ⚠️ AGAINST THE GROUP'S BLUE GROUND, NOT WHITE — mono 9px is small text, so AA is 4.5. */
   expect(r!.ratio, "the meta line fails AA on the group's own ground").toBeGreaterThanOrEqual(4.5);
 });
+
+test("§2 · the changed and deleted states, on the page", async ({ page }) => {
+  test.setTimeout(300000);
+  const { db, uid } = await harnessDb();
+  const pkgRef = doc(db, "users", uid, "packages", "seed-pkg-1");
+  const before = (await getDoc(pkgRef)).data() as any;
+
+  /* attach WITH version ids, the way the app now does */
+  await updateDoc(doc(db, "users", uid, "queries", PKG_QUERY), {
+    packageId: "",
+    materialsWanted: [
+      { material: "Query Letter", fromPackageId: "seed-pkg-1", fromPackageName: before.packageName, fromVersionId: before.queryLetterVersionId },
+      { material: "Synopsis", fromPackageId: "seed-pkg-1", fromPackageName: before.packageName, fromVersionId: before.synopsisVersionId },
+    ],
+  });
+  await openRoute(page, `/queries?q=${PKG_QUERY}`, { width: 1440, height: 900 });
+  await page.waitForTimeout(2600);
+  let g = await readGroup(page);
+  console.log(`  matching · meta "${g!.meta}" · note ${await page.locator(".qc-pkggrp-note").count()}`);
+  /* ⚠️ NO "MATCHES" STATE — a group that still matches says nothing at all. */
+  /* ⚠️ CASE-INSENSITIVE: the meta line is uppercased by `text-transform`, so `textContent` returns
+     the SOURCE case. The same trap as the toast's UNDO — a probe matching the rendered case reports
+     a working string missing. */
+  expect(g!.meta, "a matching group announced itself").toMatch(/submission package/i);
+  expect(await page.locator(".qc-pkggrp-note").count(), "a matching group drew a note").toBe(0);
+
+  /* now move the package on — swap the synopsis for a different version */
+  await updateDoc(pkgRef, { synopsisVersionId: "seed-mat-ql2" });
+  await page.waitForTimeout(2600);
+  g = await readGroup(page);
+  const note = (await page.locator(".qc-pkggrp-note").textContent()) || "";
+  console.log(`  changed  · meta "${g!.meta}" · note "${note.trim()}"`);
+  expect(g!.meta, "the changed state does not read 'As sent'").toMatch(/AS SENT/i);
+  expect(g!.meta, "the link did not become 'view current'").toMatch(/VIEW CURRENT/i);
+  expect(note, "no note explaining what changed").toMatch(/different synopsis/i);
+  expect(note, "the note stopped reassuring that the send is intact").toMatch(/keeps what actually went/i);
+
+  /* and the send itself must be untouched by any of it */
+  const mats = ((await snapshotQuery(PKG_QUERY)).query as any).materialsWanted as any[];
+  expect(mats.filter((m) => m.fromPackageId).length, "the send changed when the package did").toBe(2);
+
+  /* deleted: the name stays, the link goes, the send is untouched */
+  await deleteDoc(pkgRef);
+  await page.waitForTimeout(2600);
+  g = await readGroup(page);
+  console.log(`  deleted  · name "${g!.name}" · meta "${g!.meta}" · view link ${g!.hasView}`);
+  expect(g!.name, "the package's name did not survive its deletion").toBe("Standard UK");
+  expect(g!.meta, "the deleted state does not say so").toMatch(/NO LONGER EXISTS/i);
+  expect(g!.hasView, "the view link survived the package's deletion").toBe(false);
+  const after = ((await snapshotQuery(PKG_QUERY)).query as any).materialsWanted as any[];
+  expect(after.length, "deleting the package altered the send").toBe(mats.length);
+
+  await setDoc(pkgRef, before);
+});

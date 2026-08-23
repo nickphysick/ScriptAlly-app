@@ -42,3 +42,13 @@
    are ordinary materials and must stay indistinguishable from the ones below the group. This rule
    exists to lay out the row and for no other purpose. */
 .qc-pkggrp-items { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ⚠️ THE NOTE REPORTS; IT DOES NOT WARN. No blush, no icon, no amber — the package moving on is an
+   ordinary thing that happens to templates, and the send is not damaged by it. It reads as a
+   footnote in the group's own ink. */
+.qc-pkggrp-note {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--pastille-ink);
+}
