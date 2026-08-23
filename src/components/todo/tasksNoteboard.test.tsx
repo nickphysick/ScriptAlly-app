@@ -196,8 +196,20 @@ describe("the tool row: search · the derived chips · Board/Column · Examples 
     expect(page).toContain("<TplGrow />");
   });
 
-  it("the empty state TEACHES rather than apologises", () => {
-    expect(page).toContain("give it a date from its ⋯ menu");
-    expect(page).not.toContain("Sorry");
+  it("the empty state TEACHES rather than apologises — and it is the WORKFLOW now", () => {
+    /* ⚠️ THE `.nb-empty` PANEL IS RETIRED (empty-state run). Its single paragraph — which
+       included the phrase this case used to pin, "give it a date from its ⋯ menu", wording the
+       kebab itself had already retired — is superseded by three illustrated panels. The claim is
+       unchanged and now lives with the component: noteboardEmptyState.test.tsx locks every word
+       against the ref. */
+    /* ⚠️ COMMENTS STRIPPED — the module's own docstring NAMES the retired phrase to explain the
+       substitution, so a raw read matched the prose and went red on correct code. */
+    const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(?<!:)\/\/[^\n]*/g, "");
+    const empty = strip(readFileSync(join(here, "noteboardEmptyState.tsx"), "utf8"));
+    expect(empty).toContain("Your board is empty");
+    expect(empty).not.toContain("Sorry");
+    /* and the retired phrasing did not come back in with it */
+    expect(empty).not.toContain("Give it a date");
+    expect(page).not.toContain("give it a date from its ⋯ menu");
   });
 });

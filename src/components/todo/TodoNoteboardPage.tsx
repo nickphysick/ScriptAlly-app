@@ -30,8 +30,8 @@ import { useTodoToast } from "./useTodoToast";
 import { useScriptAllyDb } from "../../lib/db";
 import { noteMenu, MenuLeaf } from "../../lib/todoMenu";
 import { TagPicker } from "./TagPicker";
-import { ArtSlot } from "./ArtSlot";
 import { NOTE_EXAMPLES } from "./noteboardExamples";
+import { NoteboardEmptyState, NOTEBOARD_EXHEAD } from "./noteboardEmptyState";
 import { useTagWrites } from "./useTagWrites";
 import { toggleTagSel } from "../../lib/todoTags";
 import { TAG_PALETTE } from "../../lib/todoFamily";
@@ -39,7 +39,7 @@ import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
 import {
   NOTEBOARD_SUBTITLE, noteFilterLabel, noteColour, sortNotes, noteReceipt, firstTagLabel,
-  sparseExamples, noteboardPrefs, NOTEBOARD_HINT, ExamplePaper, orderNotes, reorderIds, linkifyBody,
+  sparseExamples, noteboardPrefs, ExamplePaper, orderNotes, reorderIds, linkifyBody,
   composerWithColour, editCommit, emptyDraft, noteTagChips, noteMatchesSearch,
   NOTE_COLOURS, NoteDraft, draftFromExample,
 } from "../../lib/noteboard";
@@ -513,33 +513,14 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
           {/* ⚠️ THE MASONRY IS THE SCROLLZONE (tasks-viewport P4): the header and tool row are
               fixed above it, and the notes scroll beneath under their own hem. */}
           <TplZone label="Notes" hem={zoneScrolls}>
-          {/* ⚠️ THE EXAMPLE PAPERS SUPERSEDE THE EMPTY PANEL WHILE THEY LAST (paper run, Phase 2).
-              The panel and the papers teach the same thing — what a note is for — and the papers
-              do it with real examples the writer can keep, so two teaching surfaces at once is
-              one too many. The panel returns the moment the papers are all dismissed, which is
-              exactly when the board has nothing left to say for itself. Measured: clearing the
-              seeds took the board to zero, the panel rendered, `.nb-board` never mounted and
-              every example was unreachable — the sparse state could not be reached at all. */}
-          {notes.length === 0 && !compose && examplePapers.length === 0 ? (
-            /* the empty state TEACHES rather than apologises */
-            <div className="nb-empty">
-              {/* ⚠️ ART · NOTEBOARD-EMPTY (board-optimise P3) — first run only, ABOVE the copy
-                  that was already written. The trigger is the same emptiness the state itself
-                  keys on; nothing new is derived. */}
-              <ArtSlot name="noteboard-empty" />
-              <h3>Nothing pinned yet</h3>
-              <p>
-                Notes are for the things you want to remember but don’t need chasing — a thought
-                about an agent, a line for the query letter, where you left off. They sit here,
-                dateless and quiet. The day one becomes real work, give it a date from its ⋯ menu
-                and it walks itself to your To-do list and the Calendar.
-              </p>
-              <button type="button" className="tdb-addb" onClick={() => openComposer()}>
-                <Plus size={13} aria-hidden /> Pin your first note
-              </button>
-            </div>
-          ) : (
-            <div ref={boardRef} className={`nb-board${column ? " nb-col1" : ""}`}>
+          {/* ⚠️ ZERO NOTES, FULL STOP — a deliberate override of the condition this replaces.
+              `.nb-empty` rendered only when the board was empty AND every example had been
+              dismissed, because an earlier pass found the panel suppressing the papers entirely
+              and made the panel yield. Coexistence is what that fix was protecting: the workflow
+              and the papers STACK, as the ref draws them, and the old panel's content is retired
+              rather than demoted — so the page teaches twice at most, never three times. */}
+          {notes.length === 0 && !compose && <NoteboardEmptyState onPin={() => openComposer()} />}
+          <div ref={boardRef} className={`nb-board${column ? " nb-col1" : ""}`}>
               {!(compose && !compose.id) && (
                 <button type="button" className="nb-ghost" onClick={() => openComposer()}>
                   + Pin a note
@@ -613,8 +594,16 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                   while the board holds fewer than three. Each is a dashed reduced-opacity card
                   wearing its colour and an EXAMPLE chip; Keep pins a REAL copy through the
                   normal create path and retires the example for good. */}
+              {/* ⚠️ THE HEADER BLOCK REPLACES THE ORPHANED HINT LINE (empty-state run). The hint
+                  was one sentence doing a section head's job; the ref gives the examples a proper
+                  heading and paragraph. It spans the columns for the same reason the hint did —
+                  multicol flows by length, so an ordinary child lands beside the cards it
+                  introduces rather than above them. */}
               {examplePapers.length > 0 && (
-                <div className="nb-exhint">{NOTEBOARD_HINT}</div>
+                <div className="nb-exintro">
+                  <span className="nb-exintro-h">{NOTEBOARD_EXHEAD.heading}</span>
+                  <p>{NOTEBOARD_EXHEAD.body}</p>
+                </div>
               )}
               {examplePapers.map((ex) => (
                 <div key={ex.id} data-example={ex.id} className={`nb-note nb-example nb-c-${ex.colour}`}>
@@ -635,8 +624,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
               {notes.length === 0 && (search.trim() || tagSel) && (
                 <div className="nb-empty-search">Nothing matches that search.</div>
               )}
-            </div>
-          )}
+          </div>
           </TplZone>
         </TasksPageLayout>
       </div>

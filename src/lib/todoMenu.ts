@@ -216,6 +216,18 @@ export function cardMenu(card: BoardCard, column: TodoColumnId): MenuGroup[] {
  * @param hasTask whether the note already projects one — the two states offer opposite doors, and
  *        never both at once.
  */
+/**
+ * ⚠️ THE DATE DOOR'S WORDING, EXTRACTED SO TWO SURFACES CANNOT DRIFT (empty-state run, Phase 1).
+ * The kebab renders it with an ellipsis because it OPENS A POPOVER; the empty state's third panel
+ * is a HEADING, which opens nothing, so it takes the bare phrase. One constant, one rewording.
+ *
+ * ⚠️ AND IT IS NOT "Give it a date". That phrase and the `give-date` menu id were retired together
+ * when the projection model gave one note two contradictory doors, and the retirement is locked
+ * (`tasksNoteboard.test.tsx`). The empty-state ref still draws the old wording in its third panel;
+ * the kebab wins, and that lock is untouched.
+ */
+export const MAKE_TASK_LABEL = "Turn into a task";
+
 export function noteMenu(hasTask: boolean): MenuGroup[] {
   return [
     {
@@ -223,7 +235,7 @@ export function noteMenu(hasTask: boolean): MenuGroup[] {
       entries: [
         leaf("edit-task", "Edit the note…"),
         leaf("tags", "Tags…"),
-        hasTask ? leaf("detach-task", "Detach from tasks") : leaf("make-task", "Turn into a task…"),
+        hasTask ? leaf("detach-task", "Detach from tasks") : leaf("make-task", `${MAKE_TASK_LABEL}…`),
       ],
     },
     {

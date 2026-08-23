@@ -384,13 +384,17 @@ describe("⚠️ the Noteboard: no sidebar, masonry as the scrollzone, the empty
     expect(note).toContain("hem={notes.length > 0}");
   });
 
-  it("the empty state carries its ArtSlot ABOVE the copy that was already written", () => {
-    const empty = note.slice(note.indexOf("nb-empty"));
-    expect(note.indexOf("nb-empty")).toBeGreaterThan(-1); // the anchor, per the slice law
-    expect(empty.indexOf('<ArtSlot name="noteboard-empty"')).toBeGreaterThan(-1);
-    // the art precedes the heading — a slot beneath the copy is a footnote, not an empty state
-    expect(empty.indexOf('<ArtSlot name="noteboard-empty"'))
-      .toBeLessThan(empty.indexOf("Nothing pinned yet"));
+  it("⚠️ the ArtSlot RETIRED WITH THE PANEL — the empty state draws its own illustrations", () => {
+    /* ⚠️ SUPERSEDED (empty-state run). `.nb-empty` and its single raster slot are replaced by
+       three inline-SVG panels following `manuscriptMarks` — baked fills, identical across themes,
+       no asset pipeline. `ArtSlot` was NOT taken despite registering a "noteboard-empty" slot:
+       it renders `<img src>` and `src` is absent for every slot it holds, so adopting it would
+       have reintroduced the raster dependency the illustrations exist to avoid. The slot stays
+       registered and unused, which artSlots.test.tsx now records. */
+    expect(note).not.toContain('<ArtSlot name="noteboard-empty"');
+    expect(note).not.toMatch(/["\s`]nb-empty["\s`]/);
+    const art = readFileSync(join(here, "noteboardEmptyArt.tsx"), "utf8");
+    expect([...art.matchAll(/<svg/g)]).toHaveLength(3);
   });
 
   it("⚠️ THE COLUMN VIEW IS CENTRED and changes the columns, never the scroller", () => {

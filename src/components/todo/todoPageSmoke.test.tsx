@@ -173,7 +173,11 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        three keepable examples instead of the first-run panel — the panel returns only once every
        paper has been dismissed, which this mock (no todoPrefs) is not. Still a teaching state,
        still asserted; the words changed. */
-    expect(html).toContain("A few examples of what writers keep here");
+    /* ⚠️ THE TEACHING STATE IS THE WORKFLOW NOW (empty-state run) — three illustrated panels
+       above the example papers, which still render beneath them. The hint line this pinned one
+       day ago became the examples' header block. */
+    expect(html).toContain("Your board is empty");
+    expect(html).toContain("What writers keep here");
     expect(html).not.toContain("<aside");             // the contract's optional sidebar, absent
   });
 

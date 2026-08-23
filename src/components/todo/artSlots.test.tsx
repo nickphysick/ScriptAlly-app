@@ -156,7 +156,18 @@ describe("⚠️ each slot's TRIGGER — the conditions, named", () => {
     expect(emptyBranch).toContain("done-empty");
   });
 
-  it("noteboard-empty: the first-run state, ABOVE the copy that was already written", () => {
+  it("⚠️ noteboard-empty: REGISTERED AND UNUSED, deliberately (empty-state run)", () => {
+    /* The Noteboard's empty state draws three inline SVGs of its own now (noteboardEmptyArt.tsx),
+       following `manuscriptMarks` — baked fills, no asset. This slot renders `<img src>` and its
+       `src` is absent, as every slot's is, so mounting it would have put a raster dependency in
+       an illustrated state that had none. The brief stays in the registry for whenever a real
+       asset lands; nothing renders it today, and that is the record. */
+    const noteboard = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
+    expect(noteboard).not.toContain("ArtSlot");
+    expect(ART_SLOTS["noteboard-empty"]).toBeDefined();
+  });
+
+  it.skip("noteboard-empty: the first-run state, ABOVE the copy that was already written", () => {
     expect(noteboard).toContain('<ArtSlot name="noteboard-empty"');
     expect(noteboard.indexOf('name="noteboard-empty"')).toBeLessThan(noteboard.indexOf("Nothing pinned yet"));
   });

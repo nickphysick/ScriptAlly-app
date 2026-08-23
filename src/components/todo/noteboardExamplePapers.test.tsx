@@ -20,7 +20,8 @@ import { MemoryRouter } from "react-router-dom";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { UserPlan, UserTask } from "../../types";
-import { NOTE_EXAMPLE_PAPERS, sparseExamples, NOTEBOARD_HINT, noteboardPrefs } from "../../lib/noteboard";
+import { NOTE_EXAMPLE_PAPERS, sparseExamples, noteboardPrefs } from "../../lib/noteboard";
+import { NOTEBOARD_EXHEAD } from "./noteboardEmptyState";
 import { NOTE_EXAMPLES } from "./noteboardExamples";
 
 const here = __dirname;
@@ -64,11 +65,16 @@ const kinds = (html: string): string => {
   const board = html.slice(at, html.indexOf("nb-empty-search") > at ? html.length : html.length);
   const seq: string[] = [];
   for (const m of board.matchAll(/class="([^"]*)"/g)) {
-    const c = m[1];
-    if (/\bnb-ghost\b/.test(c)) seq.push("ghost");
-    else if (/\bnb-exhint\b/.test(c)) seq.push("hint");
-    else if (/\bnb-example\b/.test(c)) seq.push("example");
-    else if (/\bnb-note\b/.test(c) && !/\bnb-example\b/.test(c)) seq.push("note");
+    /* ⚠️ EXACT CLASS TOKENS, NEVER `\b`. A hyphen is a word boundary, so `nb-exhead` matched
+       inside `nb-exhead-h` and counted the header block twice. The prefix trap, wearing a regex —
+       the class list is split and compared member by member. */
+    const tokens = (m[1] ?? "").split(/\s+/);
+    if (tokens.includes("nb-ghost")) seq.push("ghost");
+    /* the orphaned hint LINE became the ref's header BLOCK (empty-state run) — same slot, same
+       column-span, a heading and a paragraph instead of one sentence */
+    else if (tokens.includes("nb-exintro")) seq.push("hint");
+    else if (tokens.includes("nb-example")) seq.push("example");
+    else if (tokens.includes("nb-note")) seq.push("note");
   }
   return seq.join(" ");
 };
@@ -102,11 +108,10 @@ describe("⚠️ the arrangement: ghost, all real notes, hint, examples — one 
     seed.userTasks = [note("a", "12")];
     const html = render();
     expect(kinds(html)).toBe("ghost note hint example example example");
-    expect(html).toContain(NOTEBOARD_HINT);
-    /* the hint's words are the baked verbatim */
-    expect(NOTEBOARD_HINT).toBe(
-      "A few examples of what writers keep here — keep one to make it yours, or dismiss them. They retire on their own as your board fills.",
-    );
+    expect(html).toContain(NOTEBOARD_EXHEAD.heading);
+    /* ⚠️ THE HINT LINE IS RETIRED (empty-state run) — the ref gives the examples a proper
+       header block, and its words are locked against the ref in noteboardEmptyState.test.tsx. */
+    expect(NOTEBOARD_EXHEAD.heading).toBe("What writers keep here");
   });
 
   it("with 3 real notes there are ZERO example elements — and the board is still there", () => {
@@ -114,7 +119,7 @@ describe("⚠️ the arrangement: ghost, all real notes, hint, examples — one 
     const html = render();
     expect(kinds(html)).toBe("ghost note note note");
     expect(html).not.toMatch(/["\s`]nb-example["\s`]/);
-    expect(html).not.toContain("nb-exhint");
+    expect(html).not.toContain("nb-exintro");
   });
 
   it("a persisted dismissal subtracts before render — the store is read, not just written", () => {
@@ -130,20 +135,25 @@ describe("⚠️ the arrangement: ghost, all real notes, hint, examples — one 
   });
 });
 
-describe("⚠️ the empty panel and the papers never teach at once", () => {
-  it("an empty board shows the PAPERS, not the first-run panel", () => {
-    /* measured live: with the board at zero the panel rendered and `.nb-board` never mounted, so
-       the sparse state was unreachable — the examples could only ever be seen by someone who
-       already had a note, which is precisely who least needs them */
+describe("⚠️ REVERSED: the workflow and the papers COEXIST at zero notes", () => {
+  /* ⚠️ THIS BLOCK ASSERTED THE OPPOSITE ONE DAY AGO, and the reversal is deliberate. The paper
+     run found `.nb-empty` SUPPRESSING the papers — with the board at zero the panel rendered,
+     `.nb-board` never mounted, and the sparse state was unreachable — and made the panel yield.
+     Coexistence is what that fix was protecting, not what it was preventing: the empty-state run
+     replaces the panel with the three-panel workflow, which renders ABOVE a board that always
+     mounts. Two teaching surfaces, never three — the old panel's copy is retired, not demoted. */
+  it("an empty board shows the workflow AND the papers", () => {
     const html = render();
+    expect(html).toContain("Your board is empty");
     expect(kinds(html)).toBe("ghost hint example example example");
+    /* the retired panel's own words are gone, not merely outranked */
     expect(html).not.toContain("Nothing pinned yet");
   });
 
-  it("…and the panel returns once every paper is dismissed — the board has nothing left to say", () => {
+  it("…and with every paper dismissed the workflow still stands alone", () => {
     seed.noteboard = { dismissedExamples: ["ex-yellow", "ex-pink", "ex-sage"] };
     const html = render();
-    expect(html).toContain("Nothing pinned yet");
+    expect(html).toContain("Your board is empty");
     expect(html).not.toMatch(/["\s`]nb-example["\s`]/);
   });
 });
