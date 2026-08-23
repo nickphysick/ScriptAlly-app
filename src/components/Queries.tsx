@@ -3111,19 +3111,20 @@ export const Queries: React.FC<{
   const paneUnselected = !creating && !selectedQueryId && sortedList.length > 0;
 
   /**
-   * §3 — loading, told apart from empty.
+   * §2 — ONE READINESS VALUE, READ EVERYWHERE.
    *
-   * ⚠️ THE ~180ms GRACE IS THE POINT OF THE SECOND PIECE OF STATE. Rendering the skeleton the
-   * instant `collectionsReady` is false would flash it on every fast load, which is more jarring
-   * than the moment of nothing it replaces. This is the Dashboard's own pattern, reused rather
-   * than reinvented.
+   * ⚠️ THE 180ms GRACE IS GONE, AND IT WAS THE FAULT. It started its timer at MOUNT, and this page
+   * mounts when `authReady` resolves — measured at ~336ms — so for the next 180ms the skeleton's
+   * own condition was false and the branch beneath it rendered "Your first query starts here".
+   * Data arrived at 491ms, INSIDE that window, so the skeleton could never appear at all and the
+   * empty state covered the entire load. A grace before a skeleton is a grace during which
+   * something else renders, and that something was the wrong answer.
+   *
+   * ⚠️ A SKELETON ON A FAST LOAD IS HARMLESS; A WRONG ANSWER IS NOT. The flash it was written to
+   * avoid is handled by the minimum-display floor in §3 instead — which holds the skeleton rather
+   * than delaying it, and so cannot leave a gap for anything else to fill.
    */
-  const [showSkeleton, setShowSkeleton] = useState(false);
-  useEffect(() => {
-    if (collectionsReady) { setShowSkeleton(false); return; }
-    const t = setTimeout(() => setShowSkeleton(true), 180);
-    return () => clearTimeout(t);
-  }, [collectionsReady]);
+  const dataReady = collectionsReady;
 
   const listGroups = (() => {
     const nowMs = Date.now();
@@ -3953,7 +3954,7 @@ export const Queries: React.FC<{
           * grace so a fast load never flashes the skeleton — a second mechanism here would be a
           * second answer to one question.
           */}
-        {showSkeleton && !collectionsReady ? <QueryCentreSkeleton /> : queries.length === 0 && !creating ? (
+        {!dataReady ? <QueryCentreSkeleton /> : queries.length === 0 && !creating ? (
           /* ── Empty database — F12 shell: a list pane with a "No queries yet" placeholder
              (Export disabled) beside the welcome pane (Smart Import + manual add). ── */
           <>
@@ -4751,7 +4752,11 @@ export const Queries: React.FC<{
                   );
                 });
               })()}
-              {sortedList.length === 0 && queries.length > 0 && (
+              {/* ⚠️ `dataReady &&` STATES WHAT `queries.length > 0` ONLY IMPLIED. This was unreachable
+                  during a load by coincidence — an empty store makes the second clause false — which
+                  is exactly the kind of accidental correctness that stops being correct when
+                  someone edits the clause for an unrelated reason. */}
+              {dataReady && sortedList.length === 0 && queries.length > 0 && (
                 <div style={{ textAlign: "center", padding: "48px 16px", color: "var(--faint)", fontSize: 12, fontStyle: "italic" }}>
                   No queries match these filters.
                 </div>

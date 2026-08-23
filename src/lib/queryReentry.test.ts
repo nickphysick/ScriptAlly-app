@@ -82,6 +82,6 @@ describe("a first-run draft actually renders", () => {
   });
 
   it("an empty list during a first-run draft isn't blamed on filters", () => {
-    expect(queries).toContain("{sortedList.length === 0 && queries.length > 0 && (");
+    expect(queries).toContain("sortedList.length === 0 && queries.length > 0 && (");
   });
 });

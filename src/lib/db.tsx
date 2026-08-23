@@ -404,6 +404,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   //                  delivered their first snapshot. Lets the dashboard tell "loading" from "empty".
   const [authReady, setAuthReady] = useState<boolean>(false);
   const [collectionsReady, setCollectionsReady] = useState<boolean>(false);
+  /** Cleared with the listeners — see `readinessNet` below. */
+  const readinessNetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
@@ -438,6 +440,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setSmartImportUsage(null);
         setAuthReady(true);          // auth resolved: definitively logged out
         setCollectionsReady(false);  // next sign-in starts in the loading state
+        if (readinessNetRef.current) { clearTimeout(readinessNetRef.current); readinessNetRef.current = null; }
         try { localStorage.removeItem("scriptally_was_authed"); } catch {}
 
         // Clean up any active listeners
@@ -465,6 +468,30 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const markCollectionsLoaded = () => {
         if (mLoaded && aLoaded && qLoaded) setCollectionsReady(true);
       };
+
+      /**
+       * ⚠️ AN EMPTY SNAPSHOT FROM CACHE IS NOT A LOADED COLLECTION. `onSnapshot` can raise a first
+       * snapshot from the local cache before the server replies, and marking loaded on it makes
+       * readiness true while the data is still in flight — a second way for a falsy array to mean
+       * both "not loaded" and "loaded and empty", which is the fault this whole pack is about.
+       *
+       * ⚠️ A CACHED SNAPSHOT WITH DOCUMENTS *IS* LOADED, though. Cached data is real data; refusing
+       * it would hold the skeleton over a page that has everything it needs to render.
+       *
+       * ⚠️ AND OFFLINE MUST STILL RESOLVE. With no connection every snapshot is `fromCache`, so a
+       * strict rule would skeleton forever. The safety net below marks everything loaded after a
+       * few seconds regardless: a stale-but-real answer beats a spinner that never ends.
+       */
+      const snapshotIsLoaded = (snap: { metadata?: { fromCache?: boolean }; size?: number }): boolean =>
+        !snap.metadata?.fromCache || (snap.size ?? 0) > 0;
+
+      /* the net itself — cleared on sign-out with the listeners, so it cannot fire into a torn-down
+         session and declare a signed-out account ready. */
+      const readinessNet = setTimeout(() => {
+        mLoaded = aLoaded = qLoaded = true;
+        markCollectionsLoaded();
+      }, 6000);
+      readinessNetRef.current = readinessNet;
 
       // Seed community agents once after authenticated session is established. Writes are
       // admin-only (FINDING-1) — the helper no-ops for non-admin uids, so this only writes
@@ -526,7 +553,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const arr: Manuscript[] = [];
           snap.forEach(d => arr.push(d.data() as Manuscript));
           setManuscripts(arr);
-          mLoaded = true; markCollectionsLoaded();
+          if (snapshotIsLoaded(snap)) { mLoaded = true; markCollectionsLoaded(); }
         }, (error) => {
           mLoaded = true; markCollectionsLoaded(); // don't hang the loading state on a read error
           handleFirestoreError(error, OperationType.GET, `users/${uid}/manuscripts`);
@@ -555,7 +582,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const arr: Agent[] = [];
           snap.forEach(d => arr.push(d.data() as Agent));
           setAgents(arr);
-          aLoaded = true; markCollectionsLoaded();
+          if (snapshotIsLoaded(snap)) { aLoaded = true; markCollectionsLoaded(); }
         }, (error) => {
           aLoaded = true; markCollectionsLoaded();
           handleFirestoreError(error, OperationType.GET, `users/${uid}/agents`);
@@ -566,7 +593,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const arr: Query[] = [];
           snap.forEach(d => arr.push(d.data() as Query));
           setQueries(arr);
-          qLoaded = true; markCollectionsLoaded();
+          if (snapshotIsLoaded(snap)) { qLoaded = true; markCollectionsLoaded(); }
         }, (error) => {
           qLoaded = true; markCollectionsLoaded();
           handleFirestoreError(error, OperationType.GET, `users/${uid}/queries`);
