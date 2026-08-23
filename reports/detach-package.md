@@ -239,6 +239,22 @@ The restore therefore has two halves — strip the marks, and re-assert the seed
 `seedPackages.mjs`'s own `SENDS` table — and it **re-reads** rather than trusting its own writes,
 because a cleanup that reports success from its intent is the fault this file exists to undo.
 
+### Final state, re-verified after every probe had run
+
+The visibility probes attached again after the first restore, so it was run once more at the end and
+then checked on the page rather than from its own output:
+
+```
+DASHBOARD: sent 8 · replies 2 · requests 2
+  REPLIES BY PACKAGE  Standard UK 2 of 6 replied · Comps-led variant 0 of 2 replied
+scanned 12 queries · packaged strips found: 0
+```
+
+**Eight sends, six on Standard UK, and no snapshot attachment anywhere.** That is the seed state.
+The restore is idempotent and safe to re-run; it is the tool this account needs whenever a
+measurement attaches something, and it exists because the fix in Phase 1 did not exist when the
+first one did.
+
 ### Left alone, deliberately
 
 `seed-pkgq-3` and `seed-pkgq-4` carry `materialsWanted: ["First 10 pages"]` — plain strings, no
