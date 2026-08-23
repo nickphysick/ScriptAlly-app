@@ -894,21 +894,27 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       .not.toContain("Contact list");
   });
 
-  it("⚠️ THE MASTHEAD COLLAPSES ON FILL PAGES ONLY — a scrolling page's leaves by scrolling", () => {
-    /* Two proxies for one thing: the user has started working. On a scrolling page that is the
-       scroll, and the masthead is content, so nothing has to act. On a fill page the panes scroll
-       and the page does not, so it has to leave under its own power. Scoping matters in BOTH
-       directions — a scrolling page whose masthead also collapsed would lose it at `scrollTop 0`,
-       where the sentinel says it must be resting. */
+  it("⚠️ THE MASTHEAD COLLAPSES ON TYPE B ONLY — a pinned page's chrome settles instead", () => {
+    /**
+     * ⚠️ SCOPED TO THE TYPE, NOT TO `fill` (header types — canonical). It was `.wpg--fill`, and that
+     * put the fold on the Tasks family beside a settle — two mechanisms for one job. `fill` is the
+     * LAYOUT (the row does not scroll, the panes do); the type is the CHROME, and the Tasks family
+     * is `fill` and Type A.
+     *
+     * The scoping still matters in BOTH directions: a Type A page whose masthead also collapsed
+     * would lose it at `scrollTop 0`, where the settle says it must be resting.
+     */
     const live = cssRules.replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(live, "the collapse is not scoped to fill pages")
-      .toContain(".wpg--fill.wpg--hidden > .wpg-scroll > .wpg-chrome > .wpg-mast");
+    expect(live, "the collapse is not scoped to the static type")
+      .toContain(".wpg--static.wpg--hidden > .wpg-scroll > .wpg-chrome > .wpg-mast");
+    expect(live, "the collapse is keyed on `fill` again — that is the layout, not the header type")
+      .not.toContain(".wpg--fill.wpg--hidden");
     /* it goes to NOTHING — no band, no strip, no residue to click */
-    const gone = block(".wpg--fill.wpg--hidden > .wpg-scroll > .wpg-chrome > .wpg-mast").replace(/\s+/g, " ");
+    const gone = block(".wpg--static.wpg--hidden > .wpg-scroll > .wpg-chrome > .wpg-mast").replace(/\s+/g, " ");
     expect(gone, "the masthead collapses to a band rather than to nothing").toContain("max-height: 0");
     expect(gone, "the masthead is still painted when collapsed").toContain("opacity: 0");
     /* ⚠️ AND `max-height` NEEDS A DEFINITE REST VALUE or there is nothing to transition from. */
-    expect(block(".wpg--fill > .wpg-scroll > .wpg-chrome > .wpg-mast"), "no resting max-height — the collapse would snap")
+    expect(block(".wpg--static > .wpg-scroll > .wpg-chrome > .wpg-mast"), "no resting max-height — the collapse would snap")
       .toMatch(/max-height:\s*\d+px/);
   });
 

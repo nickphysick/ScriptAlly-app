@@ -16,12 +16,18 @@
 import { test, expect, Page } from "@playwright/test";
 import { openRoute, liftMotionSuppression } from "./measure";
 
+/**
+ * ⚠️ TYPE B ONLY — AND IT WAS "FILL", WHICH IS THE DISTINCTION THIS PACK GOT WRONG. The fold belongs
+ * to pages with NO single primary scroller; the Tasks family is `fill` and Type A, and it settles on
+ * its zone instead. Hide beside a settle is two mechanisms for one job.
+ *
+ * ⚠️ THE LIST IS A ROUTE TABLE, NOT A CLAIM. Which pages are Type B is asserted in
+ * `headerTypes.measure.ts` as a partition with no page names in it; these are the routes to open,
+ * and each one's type is re-read from the page before anything is asserted about it.
+ */
 const FILL: { name: string; route: string; cls: string }[] = [
-  { name: "Query Centre", route: "/queries",         cls: "qc-wpg"  },
-  { name: "Manuscripts",  route: "/manuscripts",     cls: "msv-wpg" },
-  { name: "To-do list",   route: "/todo",            cls: "tpl-wpg" },
-  { name: "Calendar",     route: "/todo/calendar",   cls: "tpl-wpg" },
-  { name: "Noteboard",    route: "/todo/noteboard",  cls: "tpl-wpg" },
+  { name: "Query Centre", route: "/queries",     cls: "qc-wpg"  },
+  { name: "Manuscripts",  route: "/manuscripts", cls: "msv-wpg" },
 ];
 
 const read = (page: Page, cls: string) => page.evaluate((c) => {
@@ -38,6 +44,7 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
   const slab = g.querySelector(".wpg-chrome") as HTMLElement | null;
   const wb = win.getBoundingClientRect();
   return {
+    type: g.getAttribute("data-wpg-type"),
     hidden: g.classList.contains("wpg--hidden"),
     mastH: mast ? r(mast.getBoundingClientRect().height) : -1,
     /* the slab's hairline must go with the masthead — a boundary with nothing above it is chrome
@@ -118,6 +125,8 @@ test("Hide folds the masthead to a chevron on the window's border, on every fill
 
     const rest = await read(page, cls);
     expect(rest, `${name}: no grid`).not.toBeNull();
+    /* the precondition: this route is genuinely Type B, read from the page rather than from the list */
+    expect(rest!.type, `${name} is not a static page — the fold is Type B's alone`).toBe("static");
     expect(rest!.hidden, `${name}: the masthead is folded on arrival`).toBe(false);
     expect(rest!.mastH, `${name}: no masthead on arrival`).toBeGreaterThan(40);
     expect(rest!.badgeCount, `${name}: a chevron is drawn while the masthead is showing`).toBe(0);

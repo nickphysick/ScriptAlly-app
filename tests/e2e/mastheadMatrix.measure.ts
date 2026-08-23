@@ -69,6 +69,7 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
     /* ⚠️ THE MASTHEAD DRAWS NO LINE (pinned chrome, §1) — the SLAB's base carries it, full width,
        once. Kept as a reading so "it drew one again" is a measurable claim rather than an absence. */
     borderBottom: cs.borderBottomWidth,
+    type: g.getAttribute("data-wpg-type"),
     slabLine: (() => {
       const slab = g.querySelector(".wpg-chrome") as HTMLElement | null;
       return slab ? getComputedStyle(slab).borderBottomWidth : "absent";
@@ -261,9 +262,16 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
      * beside `.wsh`; `PageHeader` still throws if a page hands it an action. Two counts, because
      * "one control on the masthead" and "no page may add one" are different claims.
      */
-    const pages = PAGES.find((p) => p.name === name)!;
-    expect(r.actionable, `${name}: the masthead carries ${r.actionable} controls; a ${pages.fill ? "fill" : "scrolling"} page's carries ${pages.fill ? 1 : 0}`)
-      .toBe(pages.fill ? 1 : 0);
+    /**
+     * ⚠️ THE COUNT FOLLOWS THE HEADER TYPE, NOT `fill` (header types — canonical). It was "one on a
+     * fill page, none on a scrolling one", which put Hide on the Tasks family beside a settle. A
+     * Type A page reclaims its strip by scrolling and carries NO fold control; Type B carries
+     * exactly one. The type is read from the page rather than from this file's table.
+     */
+    expect(r.type, `${name} declares no header type`).toMatch(/^(pinned|static)$/);
+    const wants = r.type === "static" ? 1 : 0;
+    expect(r.actionable, `${name}: the masthead carries ${r.actionable} control(s); a ${r.type} page's carries ${wants}`)
+      .toBe(wants);
     expect(r.headerActionable, `${name}: a control was put inside the header element itself`).toBe(0);
     /* the masthead opens the scroll row — the control row anchors, so it must come second */
     expect(r.wrapTop, `${name}: something sits above the masthead inside the scroller`).toBeLessThanOrEqual(0.5);
@@ -325,7 +333,10 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
   for (const { name, r } of rows) {
     expect(r.markCount, `${name} draws ${r.markCount} mark(s) — the masthead carries one`).toBe(1);
     const fill = PAGES.find((p) => p.name === name)!.fill;
-    if (fill) expect(r.hidePresent, `${name} is a fill page and drew no Hide`).toBe(true);
+    /* ⚠️ HIDE IS TYPE B'S, NOT `fill`'s. The Tasks family is `fill` and Type A: it settles on its
+       own zone and carries no fold control at all. */
+    if (r.type === "static") expect(r.hidePresent, `${name} is a static page and drew no Hide`).toBe(true);
+    void fill;
   }
 
   /* ⚠️ AND THE CONTROL ROW SITS THE SAME DISTANCE BELOW ON EVERY PAGE THAT HAS ONE. This is where

@@ -597,6 +597,20 @@
   box-shadow: 0 12px 16px -13px rgba(58, 28, 20, 0);
   transition: box-shadow .2s cubic-bezier(.4, 0, .2, 1);
 }
+/**
+ * ⚠️ A TYPE B PAGE'S SLAB IS NOT STICKY, AND SAYING SO IS NOT TIDINESS. Type B has no single primary
+ * scroller — its panes scroll independently — so nothing it could pin to ever moves. A `sticky` left
+ * on it would be a claim about a behaviour that cannot occur, which is precisely how the next reader
+ * is misled into giving it an offset (this file has paid for that once already: `top: 51px` on a
+ * page that cannot scroll does not idle, it CLAMPS).
+ *
+ * ⚠️ AND ITS MASTHEAD IS IN FLOW, WHICH IS THE TYPE'S WHOLE DEFINITION — it sits at the top of the
+ * page, never settles, and leaves only when the reader folds it with Hide.
+ */
+.wpg--static > .wpg-scroll > .wpg-chrome {
+  position: static;
+  box-shadow: none;
+}
 .wpg-scroll > .wpg-chrome.wpg-chrome--stuck {
   box-shadow: 0 12px 16px -13px rgba(58, 28, 20, 0.18);
 }
@@ -662,7 +676,7 @@
 .wpg-mast {
   min-width: 0;
 }
-.wpg--fill > .wpg-scroll > .wpg-chrome > .wpg-mast {
+.wpg--static > .wpg-scroll > .wpg-chrome > .wpg-mast {
   flex: none;
   overflow: hidden;
   max-height: 220px;
@@ -678,15 +692,15 @@
 /* ⚠️ THE HAIRLINE FOLDS WITH THE MASTHEAD (pinned chrome, §3). Hide removes the page's title; a
    line left behind would be a boundary with nothing above it — chrome marking the edge of nothing.
    The control row is NOT folded: it holds the page's controls, and Hide is about the title. */
-.wpg--fill.wpg--hidden > .wpg-scroll > .wpg-chrome { border-bottom-color: transparent; }
-.wpg--fill.wpg--hidden > .wpg-scroll > .wpg-chrome > .wpg-mast {
+.wpg--static.wpg--hidden > .wpg-scroll > .wpg-chrome { border-bottom-color: transparent; }
+.wpg--static.wpg--hidden > .wpg-scroll > .wpg-chrome > .wpg-mast {
   max-height: 0;
   opacity: 0;
 }
 @media (prefers-reduced-motion: reduce) {
   /* the STATE still changes — the masthead must still go, or the height it was collapsing to give
      back is never given back. Only the tweening goes, exactly as everywhere else in this file. */
-  .wpg--fill > .wpg-scroll > .wpg-chrome > .wpg-mast { transition: none; }
+  .wpg--static > .wpg-scroll > .wpg-chrome > .wpg-mast { transition: none; }
 }
 
 /**
@@ -750,7 +764,7 @@
  * ⚠️ A GHOST, NOT A BUTTON WITH A FRAME. It is chrome for chrome — the only control the masthead
  * carries — and anything with a fill would read as the page's action rather than the header's.
  */
-.wpg--fill > .wpg-scroll > .wpg-chrome > .wpg-mast { position: relative; }
+.wpg--static > .wpg-scroll > .wpg-chrome > .wpg-mast { position: relative; }
 .wpg-mast-hide {
   position: absolute;
   right: 0;

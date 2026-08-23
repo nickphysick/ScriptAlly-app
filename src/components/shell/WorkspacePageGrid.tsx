@@ -219,6 +219,8 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * would portal into `null` on mount and never retry. Held in state so finding it re-renders once.
    */
   const [badgeHost, setBadgeHost] = React.useState<HTMLElement | null>(null);
+  /* whether this grid is the page currently on screen — see the badge's note */
+  const [displayed, setDisplayed] = React.useState(false);
   React.useEffect(() => { setBadgeHost(document.getElementById(WINWRAP_ID)); }, []);
 
   /**
@@ -265,6 +267,29 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * the thing that sets it true — lands at step 4 with the removal of the click-anywhere vanish it
    * replaces, so this is false for the whole of this commit and the fill mini bar does not render.
    */
+  /**
+   * ══ THE HEADER TYPE — TWO, AND EVERY PAGE IS ONE OF THEM ═════════════════════════════════════
+   *
+   * A page has a SINGLE PRIMARY SCROLLER if exactly one element scrolls the page's own body: the
+   * scroll row, or one internal zone. Panes that scroll independently of each other are not one.
+   *
+   *   · TYPE A · PINNED — has one. Sticky slab, settles on that scroller. No Hide, no chevron.
+   *   · TYPE B · STATIC — has none. Masthead in flow, never settles. Hide folds it to a chevron.
+   *
+   * No page may be both, neither, or opt out.
+   *
+   * ⚠️ IT IS ONE DERIVED BOOLEAN, NOT A SECOND PROP TO KEEP IN STEP. A scrolling page has a primary
+   * scroller by construction — its row. A `fill` page has one only if it NAMES it, because that is
+   * the fact no probe can discover: Query Centre's panes scroll independently and only one of them
+   * happens to hold enough to scroll, so "the single element that currently overflows" finds one and
+   * is wrong. `settleOn` is the declaration; its absence is the other type.
+   *
+   * ⚠️ AND `fill` IS NOT THE TYPE. It was, and that produced the caught-between state: `fill`
+   * describes the LAYOUT — the row does not scroll, the panes do — while the type describes the
+   * CHROME. The Tasks family is `fill` and Type A; Query Centre is `fill` and Type B.
+   */
+  const pinned = !fill || !!settleOn;
+
   const [hidden, setHidden] = React.useState(false);
 
   /* the journey latch went with engagement — see the note above */
@@ -476,11 +501,15 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
     const el = rootRef.current;
     if (!el) return;
     let shown = el.getBoundingClientRect().height > 0;
+    setDisplayed(shown);
     const ro = new ResizeObserver(() => {
       const now = el.getBoundingClientRect().height > 0;
       /* ⚠️ ONLY THE HIDDEN → SHOWN EDGE. Resetting on every observation would clear engagement on
          any reflow — a window resize, a pane opening — and the header would pop back mid-task. */
       if (now && !shown) setHidden(false);
+      /* ⚠️ AND THE STATE ITSELF, EVERY OBSERVATION — the badge is portalled to a host shared with
+         every other page, so "am I the page on screen" has to be current rather than an edge. */
+      setDisplayed((prev) => (prev === now ? prev : now));
       shown = now;
     });
     ro.observe(el);
@@ -501,7 +530,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
            arbitration died with the chrome rows. Grepped before removing: no stylesheet in `src/`
            reads it. A class the markup emits and nothing consumes is what a bundle sweep exists to
            find, and leaving it would imply a rule someone would go looking for. */
-        className={`wpg${hidden ? " wpg--hidden" : ""}${fill ? " wpg--fill" : ""}${className ? ` ${className}` : ""}`}
+        className={`wpg${hidden ? " wpg--hidden" : ""}${fill ? " wpg--fill" : ""}${pinned ? "" : " wpg--static"}${className ? ` ${className}` : ""}`}
         /**
          * ⚠️ THE BINDING IS DECLARED IN THE DOM, so it can be asserted by IDENTITY rather than by a
          * list of page names — and page lists are what have been wrong twice about this app.
@@ -514,6 +543,8 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
          * settles".
          */
         data-wpg-settle={fill ? settleOn : ".wpg-scroll"}
+        /* the type itself, so a lock can partition the ten pages without naming any of them */
+        data-wpg-type={pinned ? "pinned" : "static"}
       >
         {/* ⚠️ THE CHROME ROWS ARE GONE. Rows 1 and 2 were the plate and the toolbar, pinned as
             siblings of the scroller; both now sit INSIDE it, which is the whole of this pack. The
@@ -581,7 +612,11 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
               * would be a second way to do what the page already does — and a control that becomes
               * pointless the moment you scroll past it.
               */}
-            {fill && !hidden && (
+            {/* ⚠️ TYPE B ONLY. It was `fill`, which put Hide on the Tasks family beside a settle —
+                two mechanisms for one job, and the caught-between state that produced. A Type A page
+                reclaims its strip by scrolling, so a Hide there is a second way to do what the page
+                already does. */}
+            {!pinned && !hidden && (
               <button type="button" className="wpg-mast-hide" onClick={() => setHidden(true)}>
                 <ChevronUp aria-hidden="true" />
                 Hide
@@ -642,7 +677,19 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             * there would be a second way to do what the page already does — and a control that
             * becomes pointless the moment you scroll past it.
             */}
-          {fill && hidden && badgeHost
+          {/**
+            * ⚠️ `displayed` IS NOT DEFENSIVE — IT IS THE FIX FOR A LEAK NICK SAW ON SCREEN. The badge
+            * is PORTALLED out to the window's wrapper, which is the SHELL's and shared by every
+            * page; the workspace keeps every page MOUNTED and toggles `display`. So a folded page
+            * kept rendering its badge into that shared host after the reader navigated away, and it
+            * floated over whatever page they went to — measured: fold Query Centre, open Comparable
+            * titles, and QC's chevron sits at y=100 over a page that has no fold at all.
+            *
+            * ⚠️ A PORTAL OUTLIVES ITS PAGE UNDER A DISPLAY-TOGGLING SHELL, and nothing about the
+            * portal says so. The state that gated it — `hidden` — is per-page and stays true; what
+            * had to be added is the page asking whether it is the one on screen.
+            */}
+          {!pinned && hidden && displayed && badgeHost
             ? createPortal(
                 <button
                   type="button"
