@@ -176,8 +176,10 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     /* ⚠️ THE TEACHING STATE IS THE WORKFLOW NOW (empty-state run) — three illustrated panels
        above the example papers, which still render beneath them. The hint line this pinned one
        day ago became the examples' header block. */
+    /* ⚠️ THE EXAMPLES LEFT THE BOARD (workflow run, Phase 1) — "What writers keep here" is the
+       DRAWER's heading now, and the drawer mounts only when open, so a render smoke cannot see
+       it. The teaching state on the page is the workflow. */
     expect(html).toContain("Your board is empty");
-    expect(html).toContain("What writers keep here");
     expect(html).not.toContain("<aside");             // the contract's optional sidebar, absent
   });
 

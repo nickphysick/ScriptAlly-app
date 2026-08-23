@@ -71,9 +71,15 @@ describe("⚠️ the content is the ref's, group for group and word for word", (
   });
 });
 
-describe("⚠️ using one seeds the composer — it does not write anything", () => {
-  it("the draft's body is the example's body, exactly", () => {
-    /* every example, not a sample of one — a single case cannot tell a copy from a coincidence */
+describe("⚠️ REVERSED: using one CREATES a note — the draft door is retired", () => {
+  /* ⚠️ THIS BLOCK ASSERTED THE OPPOSITE (workflow run, Phase 1). "Use as a starting point →"
+     seeded the composer with an editable copy and wrote NOTHING — the right call while the BOARD
+     carried example papers with their own immediate "Keep this". v2 moves the examples to the
+     drawer entirely, so the drawer inherits that action: Keep this commits, closes the drawer and
+     posts the receipt. One example, one door. */
+  it("the draft is still derivable — the pure helper stays, unused by the drawer", () => {
+    /* `draftFromExample` is not deleted: it is total, tested, and the shape any future
+       seed-a-draft surface would want. Nothing renders it today, and that is the record. */
     for (const g of NOTE_EXAMPLES) {
       for (const ex of g.items) {
         const d = draftFromExample(ex);
@@ -82,18 +88,20 @@ describe("⚠️ using one seeds the composer — it does not write anything", (
         expect(d.tag).toBe(ex.tag);
       }
     }
-    /* nine examples, nine distinct bodies — so the check above compared nine different things */
     expect(new Set(NOTE_EXAMPLES.flatMap((g) => g.items.map((i) => i.body))).size).toBe(9);
   });
 
-  it("the link closes the drawer and opens the composer — nothing is pinned", () => {
-    expect(page).toContain("draftFromExample");
-    expect(page).toContain("Use as a starting point");
-    /* ⚠️ NO WRITE ON THIS PATH. An example that pinned itself would put words on the board that
-       the writer had not decided to keep. */
-    const use = page.slice(page.indexOf("draftFromExample"));
-    expect(page.indexOf("draftFromExample")).toBeGreaterThan(-1);
-    expect(use.slice(0, 220)).not.toContain("addUserTask");
+  it("the drawer's action WRITES now, and the old link is gone rather than relabelled", () => {
+    expect(page).toContain("keepFromDrawer");
+    expect(page).toContain("Keep this");
+    expect(page).not.toContain("Use as a starting point");
+    expect(page).not.toContain("draftFromExample");
+    /* the write is the normal create path, and the drawer closes behind it */
+    const fn = page.slice(page.indexOf("const keepFromDrawer"));
+    expect(page.indexOf("const keepFromDrawer")).toBeGreaterThan(-1);
+    const handler = fn.slice(0, fn.indexOf("\n  };"));
+    expect(handler).toContain("addUserTask(");
+    expect(handler).toContain("setExamples(false)");
   });
 });
 

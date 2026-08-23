@@ -154,46 +154,18 @@ export const draftFromExample = (ex: { body: string; colour: NoteColour; tag: st
   tag: ex.tag,
 });
 
-/* ────────────────────────────────────────────────────────────────────────────────────────────
- * Example papers — the sparse board's teaching cards (paper run, Phase 2)
- * ──────────────────────────────────────────────────────────────────────────────────────────── */
-
-/** One example paper: a drawer example wearing a STABLE id, one per colour. */
-export interface ExamplePaper {
-  id: string;
-  colour: NoteColour;
-  tag: string;
-  body: string;
-}
-
-/**
- * ⚠️ DERIVED FROM THE DRAWER'S MODULE, NEVER COPIED. The sparse mockup ships its own EXAMPLES
- * array whose first item says "she wants" about an agent — the pronoun class `NOTE_EXAMPLES`
- * already fixed, with a declared divergence and a lock. One source keeps the fix; a copy would
- * ship the violation back and then drift besides.
+/* ⚠️ THE EXAMPLE PAPERS RETIRED FROM THE BOARD (workflow run, Phase 1). `ExamplePaper`,
+ * `NOTE_EXAMPLE_PAPERS`, `sparseExamples` and `NOTEBOARD_HINT` stood here for one day: three
+ * papers, one per colour, shown below the real notes while the board held fewer than three, each
+ * dismissible for good. v2 moves the examples to the DRAWER entirely — the board shows the
+ * writer's notes and nothing else, and the examples become a place you visit rather than cards
+ * you send away. The threshold and the board-level dismissal go with them.
  *
- * One per colour — the FIRST of each, in the board's own swatch order — and the id is the
- * COLOUR, not the content: a dismissal keyed on words would return the day a word changed.
+ * ⚠️ THE PREFS READER BELOW STAYS, and its `dismissedExamples` key is now DEAD DATA rather than
+ * dead code: `order` (drag-to-reorder) lives in the same sub-map and is read every render, so the
+ * reader is load-bearing. Existing dismissals sit unread on user documents; the data and the
+ * rules are deliberately untouched — deleting a store is not an unattended-run decision.
  */
-export const NOTE_EXAMPLE_PAPERS: readonly ExamplePaper[] = NOTE_COLOURS.map((colour) => {
-  const item = NOTE_EXAMPLES.flatMap((g) => g.items).find((i) => i.colour === colour);
-  /* NOTE_EXAMPLES carries all three colours by construction (locked against the ref); the throw
-     is for the day someone edits the module out from under that. */
-  if (!item) throw new Error(`no drawer example wears ${colour}`);
-  return { id: `ex-${colour}`, colour, tag: item.tag, body: item.body };
-});
-
-/** The hint above the first example — the baked verbatim. */
-export const NOTEBOARD_HINT =
-  "A few examples of what writers keep here — keep one to make it yours, or dismiss them. They retire on their own as your board fills.";
-
-/**
- * ⚠️ FEWER THAN THREE REAL NOTES, minus what was sent away — and a dismissal is permanent, even
- * if the board empties again. Not the user's data: they also hide under any search or tag filter
- * (the page's render condition owns that half, because the filters are page state).
- */
-export const sparseExamples = (realCount: number, dismissed: readonly string[]): ExamplePaper[] =>
-  realCount < 3 ? NOTE_EXAMPLE_PAPERS.filter((p) => !dismissed.includes(p.id)) : [];
 
 /** The total reader for the Noteboard's pref sub-map — absent anything reads as empty. */
 export const noteboardPrefs = (

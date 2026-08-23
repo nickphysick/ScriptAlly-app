@@ -86,9 +86,16 @@ const sections = (html: string): string => {
 afterEach(() => { seed.userTasks = []; seed.dismissed = undefined; });
 
 describe("⚠️ the arrangement — one ordered comparison, never per-section presence", () => {
-  it("(a) zero notes, nothing dismissed: heading · steps · cta · examples-header · examples×3", () => {
-    expect(sections(render()))
-      .toBe("heading steps cta examples-header example example example");
+  it("(a) zero notes: heading · steps · cta — and NOTHING example-shaped on the board", () => {
+    /* ⚠️ SUPERSEDED (workflow run, Phase 1). This asserted the papers stacking beneath the
+       workflow, which was the arrangement for exactly one day; v2 moves them to the drawer
+       entirely, so the board carries the writer's notes and nothing else.
+       ⚠️ THE ORDER WITHIN THE WORKFLOW REVERSES TOO — v2 puts the CTA between the lede and the
+       panels, not after them. Phase 2 owns that; this case owns the absence. */
+    const html = render();
+    expect(html.indexOf("nb-board"), "no board container").toBeGreaterThan(-1);
+    expect(sections(html)).not.toContain("example");
+    expect(html).not.toContain("data-example");
   });
 
   it("(b) ⚠️ zero notes, ALL examples dismissed: the workflow STILL renders and no example does", () => {
@@ -102,14 +109,15 @@ describe("⚠️ the arrangement — one ordered comparison, never per-section p
     expect(html).not.toMatch(/["\s`]nb-exintro["\s`]/);
   });
 
-  it("(c) one note: no workflow, examples still there", () => {
+  it("(c) one note: no examples anywhere on the board", () => {
+    /* ⚠️ AND THE WORKFLOW NO LONGER RETIRES HERE — v2 keeps it below the board at any note count,
+       in its own second arrangement. Phase 2 asserts that; this case owns the examples' absence,
+       which is unconditional now. */
     seed.userTasks = [note("a", "12")];
     const html = render();
     expect(html.indexOf("nb-board"), "no board to anchor on").toBeGreaterThan(-1);
-    expect(sections(html)).toBe("examples-header example example example");
-    for (const dead of ["nb-opening", "nb-steps", "nb-opening-cta"]) {
-      expect(html, dead).not.toMatch(new RegExp(`["\\s\`]${dead}["\\s\`]`));
-    }
+    expect(sections(html)).not.toContain("example");
+    expect(html).not.toContain("data-example");
   });
 
   it("(d) three notes: neither workflow nor examples", () => {

@@ -31,7 +31,7 @@ import { useScriptAllyDb } from "../../lib/db";
 import { noteMenu, MenuLeaf } from "../../lib/todoMenu";
 import { TagPicker } from "./TagPicker";
 import { NOTE_EXAMPLES } from "./noteboardExamples";
-import { NoteboardEmptyState, NOTEBOARD_EXHEAD } from "./noteboardEmptyState";
+import { NoteboardEmptyState } from "./noteboardEmptyState";
 import { useTagWrites } from "./useTagWrites";
 import { toggleTagSel } from "../../lib/todoTags";
 import { TAG_PALETTE } from "../../lib/todoFamily";
@@ -39,12 +39,12 @@ import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
 import {
   NOTEBOARD_SUBTITLE, noteFilterLabel, noteColour, sortNotes, noteReceipt, firstTagLabel,
-  sparseExamples, noteboardPrefs, ExamplePaper, orderNotes, reorderIds, linkifyBody,
+  noteboardPrefs, orderNotes, reorderIds, linkifyBody,
   composerWithColour, editCommit, emptyDraft, noteTagChips, noteMatchesSearch,
-  NOTE_COLOURS, NoteDraft, draftFromExample,
+  NOTE_COLOURS, NoteDraft,
 } from "../../lib/noteboard";
 import { newTag } from "../../lib/todoTags";
-import { UserTask, TagDef } from "../../types";
+import { NoteColour, UserTask, TagDef } from "../../types";
 import "./tasksLayout.css";
 import "./taskChrome.css";
 import "./todoNoteboard.css";
@@ -110,13 +110,13 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
 
   const userTags = currentUser?.tags ?? [];
 
-  /* ── example papers (paper run, Phase 2) ─────────────────────────────────────────────────
-     Not the user's data, so: below every real note, gone above three real notes, gone under ANY
-     narrowing (they must never appear in filtered results), and a dismissal is permanent —
-     persisted in todoPrefs.noteboard, which live data already nests sub-maps into. */
+  /* ⚠️ THE EXAMPLE PAPERS HAVE LEFT THE BOARD (workflow run, Phase 1). They lived here for one
+     day, below the real notes, under a fewer-than-three threshold with their own dismissal store.
+     v2 moves them to the drawer entirely: the board shows the writer's notes and nothing else,
+     and the examples are something you go and look at rather than something you dismiss. The
+     threshold and the board-level dismissal retire with them; `noteboardPrefs` STAYS because
+     `order` (drag-to-reorder) lives in the same sub-map. */
   const prefs = noteboardPrefs(currentUser);
-  const narrowing = !!search.trim() || tagSel !== null;
-  const examplePapers = narrowing ? [] : sparseExamples(pinned.length, prefs.dismissedExamples);
 
   /** ⚠️ EVERY WRITE SPREADS BOTH LAYERS. `updateUserProfile` replaces top-level fields, so a
    *  bare `{ todoPrefs: { noteboard } }` would silently drop the desk behaviours AND the To-do
@@ -158,16 +158,19 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
     }
   };
 
-  const dismissExample = async (id: string) => {
-    try {
-      await saveNoteboardPrefs({ dismissedExamples: [...prefs.dismissedExamples, id] });
-    } catch {
-      flash("Couldn’t dismiss that — try again?");
-    }
-  };
-
-  /** Keep = a REAL note through the normal create path, then the example retires for good. */
-  const keepExample = async (ex: ExamplePaper) => {
+  /**
+   * Keep this — from the DRAWER now (workflow run, Phase 1). A real note through the normal
+   * create path, the paper following on its own write, the drawer closing behind it.
+   *
+   * ⚠️ IT REPLACES "Use as a starting point →", WHICH WROTE NOTHING. That action seeded the
+   * composer with an editable draft; this one commits. Leaving both would give one example two
+   * doors with different consequences — and the immediate-create behaviour is not new to the app,
+   * it is the board papers' own, migrating here as they leave the board.
+   *
+   * ⚠️ NO DISMISSAL. The examples are a place you visit now, not cards you send away, so the
+   * `dismissedExamples` half of the prefs sub-map goes unread — see the report.
+   */
+  const keepFromDrawer = async (ex: { body: string; colour: NoteColour; tag: string }) => {
     try {
       const tagIds = await resolveTag(ex.tag);
       const id = await addUserTask({ text: ex.body, ...(tagIds ? { tags: tagIds } : {}) });
@@ -175,7 +178,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
         const landed = await setUserTaskColour(id, ex.colour);
         if (!landed) flash("Kept — but the colour didn’t save. It’s yellow for now.");
       }
-      await saveNoteboardPrefs({ dismissedExamples: [...prefs.dismissedExamples, ex.id] });
+      setExamples(false);
       flash("Kept — it’s yours to edit now.");
     } catch {
       flash("Couldn’t keep that — try again?");
@@ -594,28 +597,6 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                   while the board holds fewer than three. Each is a dashed reduced-opacity card
                   wearing its colour and an EXAMPLE chip; Keep pins a REAL copy through the
                   normal create path and retires the example for good. */}
-              {/* ⚠️ THE HEADER BLOCK REPLACES THE ORPHANED HINT LINE (empty-state run). The hint
-                  was one sentence doing a section head's job; the ref gives the examples a proper
-                  heading and paragraph. It spans the columns for the same reason the hint did —
-                  multicol flows by length, so an ordinary child lands beside the cards it
-                  introduces rather than above them. */}
-              {examplePapers.length > 0 && (
-                <div className="nb-exintro">
-                  <span className="nb-exintro-h">{NOTEBOARD_EXHEAD.heading}</span>
-                  <p>{NOTEBOARD_EXHEAD.body}</p>
-                </div>
-              )}
-              {examplePapers.map((ex) => (
-                <div key={ex.id} data-example={ex.id} className={`nb-note nb-example nb-c-${ex.colour}`}>
-                  <span className="nb-exlabel">Example</span>
-                  <div className="nb-body">{linkifyBody(ex.body)}</div>
-                  <div className="nb-ex-actions">
-                    {ex.tag && <span className="nb-tag">#{ex.tag}</span>}
-                    <button type="button" className="nb-keep" onClick={() => void keepExample(ex)}>Keep this</button>
-                    <button type="button" className="nb-exdismiss" aria-label="Dismiss example" onClick={() => void dismissExample(ex.id)}>✕</button>
-                  </div>
-                </div>
-              ))}
               {/* ⚠️ CONDITIONALLY RENDERED, never `hidden`. The UA sheet's `[hidden]{display:none}`
                   is weaker than any author display rule, so a flex or grid element wearing the
                   attribute stays on screen — the element is simply absent instead. It appears only
@@ -723,13 +704,14 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                     <div className={`nb-exnote nb-c-${ex.colour}`} key={ex.body}>
                       <div className="nb-body">{ex.body}</div>
                       <div className="nb-exfoot">
+                        {ex.tag && <span className="nb-tag">#{ex.tag}</span>}
                         <button
                           type="button"
-                          className="nb-uselink"
-                          /* seeds an editable copy; nothing is written until Pin it */
-                          onClick={() => { setExamples(false); setCompose(draftFromExample(ex)); }}
+                          className="nb-keep"
+                          /* creates a real note, closes the drawer, posts the receipt */
+                          onClick={() => void keepFromDrawer(ex)}
                         >
-                          Use as a starting point →
+                          Keep this
                         </button>
                       </div>
                     </div>
