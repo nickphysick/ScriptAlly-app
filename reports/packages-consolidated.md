@@ -51,9 +51,26 @@ account — **delete the second copy when the worktree goes**). Gates and measur
 `firestore.rules`. The collision is the tree, not the files — which is why isolation is sufficient
 and stopping was not required.
 
-**⚠️ For Nick:** two sessions are live in `/Users/nickphysick/ScriptAlly-app` right now. That is the
-thing CLAUDE.md forbids outright. The other session should be moved to its own worktree or stopped;
-this report cannot tell you which session is which.
+**⚠️ For Nick:** two sessions were live in `/Users/nickphysick/ScriptAlly-app` throughout this run.
+That is the thing CLAUDE.md forbids outright.
+
+**And it was not theoretical — they committed twice while this pack was landing**, so `main` is now
+interleaved:
+
+```
+18733bed  Pack B Phase 2 — the rendered check the source locks cannot make   ← other session
+eed3c482  packages, Part C                                                    ← this session
+438f5bf4  Pack B Phase 2 — the task pane's session leaves the page            ← other session
+1cb71409  packages, Part B                                                    ← this session
+6d5349e5  packages, D-A6                                                      ← this session
+5fdbdc66  packages consolidated, recon                                        ← this session
+```
+
+Explicit-path staging held — no commit here contains a byte of theirs, and their file was untracked
+for most of the run so it could not have been swept in. **The final gate below was therefore run in
+the PRIMARY tree, on the true tip, so it covers both sessions' work rather than only mine.**
+
+The other session should be moved to its own worktree; this report cannot tell you which is which.
 
 ### Baseline, recorded fresh at commit time (worktree `d4bdf418`)
 
@@ -528,15 +545,263 @@ vite build     exit 0, no error/[WARNING] lines
 vitest run     382 files, 6538 passed, 3 skipped   (baseline 379 / 6483)
 ```
 
+---
+
+## Phase 7 — driven, at 1440 and 1920
+
+**Environment.** Local `vite preview` of a `build:dev` bundle in the measurement worktree
+(`SA_E2E_BASE_URL=http://127.0.0.1:4191`), signed in as `harness@scriptally.test`, against the dev
+Firestore. Build target asserted: *"bundle targets scriptally-dev (dev); gen-lang-client-0801391782
+absent"*. **Measured scrollbar width: 0px** — the harness's standing blind spot; a
+classic-scrollbar question still needs Nick's own browser.
+
+Files: `tests/e2e/packagesConsolidated.measure.ts`, screenshots and the full log in
+`reports/packages/`.
+
+### Packages page — Part A holds
+
+| | 1440 | 1920 |
+|---|---|---|
+| horizontal overflow | **0px** (1440 / 1440) | **0px** (1920 / 1920) |
+| retired rail classes in the DOM | **none** | **none** |
+| bands rendered | 4 | 4 |
+| filled controls | 2 | 2 |
+
+**The filled-control count needs its caveat rather than a tick.** The two are `＋ New package` — the
+page's own, and correctly one — and `New`, which is the **shell's** quick-action button. My first
+probe scanned the whole document and reported **3** (it also caught the plan `Upgrade`); scoping to
+the main region removed one but not the other, because the shell's `New` sits inside `.ws-main`.
+**So: the page has exactly one filled control, and the probe cannot yet say so without a human
+reading its output.** Stated as measured rather than rounded to the answer the gate wanted.
+
+### The builder — Part B, verified live
+
+```
+fields:   ["Package name","Covering letterRequired","SynopsisOptional",
+           "Sample pagesOptional","OtherOptional · free text"]
+synopsis: ["One-page","Not included"]        ← the stated omission
+letter:   ["Hook-first","Comps-forward"]     ← and NOT there, correctly
+composition, as opened:        THIS PACKAGE SENDS → Hook-first · One-page
+composition, synopsis omitted: THIS PACKAGE SENDS → Hook-first
+Other placeholder: e.g. chapter outline, author bio, pitch document
+composition after typing Other: THIS PACKAGE SENDS → Hook-first    ← free text does not leak in
+```
+
+D-B1, D-B2, D-B4 and D-B5 all confirmed on the running page.
+
+### The sent strip — Part C
+
+**Loose, at both widths** (the first query in the list carries one):
+
+```
+border 0px · radius 0px · background rgba(0,0,0,0) · box-shadow none
+plate 38px on rgba(0,0,0,0)
+```
+
+**D-C3 measured, not read off the stylesheet.** No container, and the sheets plate sits on a
+genuinely transparent ground.
+
+**Packaged, after attaching `Standard UK`** (there was no packaged send in the harness data — see
+the cleanup note):
+
+| | 1440 | 1920 |
+|---|---|---|
+| rim | `rgb(195,213,228)` = `#c3d5e4` ✓ `--pro-edge` | same |
+| seal fill | `rgb(230,237,244)` = `#e6edf4` ✓ `--pro-fill` | same |
+| label + mark stroke | `rgb(65,98,127)` = `#41627f` ✓ `--pro-ink` | same |
+| slot / seal / items tops | all `624.9` — **one row** | all share |
+| slot / seal / items heights | all `112` | all `53.6` |
+| plate | **38 × 38** ✓ | 38 × 38 |
+| name `Standard UK` | `scrollHeight 20` vs `clientHeight 20` — **not clipped** | same |
+| strip width | **319.2** (wraps to 114px tall) | 533.6 (one line, 53.6px tall) |
+
+**⚠️ At 1440 the strip wraps and triples in height.** The reading pane is narrower there, so the
+52px slot and 142px-min seal leave ~123px for three chips and they stack. It is not broken — the
+row is `flex-wrap` and the object stays coherent — but a 114px strip is a different thing from the
+ref's 53px one, and the ref only ever drew it at its 600px maximum. **Reported, not changed:** the
+honest fixes are a narrower seal minimum or letting the chips scroll, and both are design calls.
+
+**D-C1's negative half, measured at both widths:** `attachment blocks on non-send rows: 0`. Visible
+in `packed-1920.png` — *Partial requested*, *Partial sent* and *Closed — no response* all render
+with no attachment block beneath them.
+
+### ⚠️ The strip test passed once while measuring nothing
+
+The first run reported `packaged strips: 0 · loose rows: 0` and **four tests passed**. Both branches
+were skipped, so the file asserted nothing about the thing it is named for. It did not lie about it —
+the precondition lines say *"cannot measure the packed strip here"* — and that is the only reason it
+was caught. **A negative check over an empty set passes; the population line is what makes the
+difference between a green run and a green run that means something.**
+
+The cause was two selector faults, and the second is the documented one:
+
+1. `.qc-qrow` / `.qc-listrow` do not exist — the row is **`.f12-row`**.
+2. **An unscoped text locator for a query found "Elinor Hale" on the DASHBOARD.** Every workspace
+   page stays MOUNTED, so `querySelector` returns a hidden page's copy and the click then fails on a
+   zero-sized element. The hazard CLAUDE.md records, hit on the first attempt. Every locator is now
+   scoped to `.qc-wpg`.
+
+### ⚠️ Test data left on the dev harness account, and why it could not be removed
+
+The measurement attached **`Standard UK`** to the harness account's first query (**Rachel Lin ·
+Lin Literary**), because there was no packaged send to measure otherwise. It is still attached.
+
+**There is no UI route to un-attach a package.** The Attach menu offers *"Attach a submission
+package"* and lists the three materials as `ATTACHED`; nothing offers a detach. Clicking the chips'
+`×` did not remove them.
+
+**`detachPackage` exists — `src/components/Queries.tsx:1990` — and has zero callers.** It is written,
+commented, and unreachable. Somebody intended the control and it was never mounted; the
+reachability sweep this repo prescribes finds it in one grep. **That makes the leftover data a
+symptom rather than sloppiness, and it is the thing worth fixing** — see F-O.
+
+Before: one loose chip, `First 15 pages`. Now: a packaged strip carrying
+`Covering letter · Synopsis · First 15 pages`. One `updateQuery` on one query on the dev harness
+account; no other record was touched.
+
+---
+
+## Final gate — the real `main` tip, both sessions' work
+
+Run in the **primary tree** after the other session's two commits landed, so this is the honest
+answer to "is `main` green", not just "are my changes green in isolation".
+
+```
+tsc --noEmit   exit 0, 0 lines
+vite build     exit 0, no error/[WARNING] lines (grepped in full, never tail alone)
+vitest run     382 files, 6538 passed, 3 skipped
+```
+
+**Baseline was 379 files / 6483 passed.** The delta is +3 files and +55 tests: 4 from
+`packagesOverviewSweep`, 26 from `packageShapes`, 25 from `sentStrip` — and the rest from the other
+session's commits.
+
+`git diff --name-only HEAD` at close carries only this phase's own additions plus three artefacts
+that were **already dirty when this session opened** and belong to other runs
+(`reports/calendar-fixes/month-{1440,1920}.png`, a deleted `run-artifacts/finish-round.txt`, and two
+untracked files). None was touched here.
+
 ## Flags
+
+### F-L — the pink chip inside the blue strip · **ANSWERED, and it works**
+
+Measured: chip fill `rgb(245,226,218)` = `#f5e2da`, border `#eecdc3`, against a seal of `#e6edf4`
+and a **white** strip body (`rgb(255,255,255)` — the tint is the chips, not the container).
+Screenshot at real size: `reports/packages/fl-strip-actual.png`; the seal zoomed 3×:
+`fl-strip-zoom.png`.
+
+**It does not clash.** The blue is confined to the two left cells and the chips sit on white, so
+warm and cool never share an edge — and that is the design working: *blue marks the package, never
+its contents.*
+
+**The one thing worth Nick's eye is weight, not hue.** Three pink chips are the loudest thing in a
+534px object, so the eye lands on the CONTENTS before the CONTAINER — arguably backwards for a strip
+whose whole job is to say "this came from a package". **Proposed, not changed**, and the two options
+are not equal:
+
+- quieten the chips *inside a strip* to a neutral — which **contradicts the standing law** that the
+  pills are the same pills, and that law is load-bearing (it is what makes removing one an ordinary
+  act rather than "breaking the package");
+- accept it, on the grounds that the law is worth more than the optics.
+
+**My read: accept it.** The seal already carries the identification, and the alternative buys a
+small visual gain by making one class of material look different from another — which is the thing
+the law exists to prevent.
+
+### F-M — pastille blue is now a system token · **UNRESOLVED, and bigger than expected**
+
+The ref names its tokens `--pro-*` and derives them from `--pro-slate: #6A89A7`. The code being
+replaced argued **the opposite, in a comment**: *"IT IS NOT `--slate`. Slate is the PRO TIER's
+colour … blue here means provenance … reusing the tier's token would collapse two axes into one hue
+and make a package look like a price."* Both cannot stand. The ref won (global rule 6), the old
+sentence was **deleted rather than left contradicting the code**, and the argument is this flag.
+
+**The full inventory — the app has at least four near-identical blue families and one exact
+duplicate:**
+
+| where | tokens / values | what the blue means there |
+|---|---|---|
+| `index.css:43,47–49` | `--slate #6A89A7` · `--slate-deep #4f6b86` · `--slate-tint #eef2f7` · `--slate-line #c7d6e3` | the **Pro tier** |
+| `index.css:972` | `--pro #6A89A7` | **an exact duplicate of `--slate`** |
+| `packageGroup.css` (new) | `--pro-fill #e6edf4` · `--pro-edge #c3d5e4` · `--pro-ink #41627f` | **provenance** — came from a template |
+| `oneScreen.css:44–47` | `--os-pastille-bg #f4f7fa` · `-line #dde6ee` · `-ink #4a5a6b` · `-fig #2c3f52` | dashboard pastilles |
+| `comps.css` | `--ct-scout-*` | the **tier** again (states so in its own header) |
+| `todo.css:141–144`, `manuscripts.css:459`, `manuscriptPlate.css:332`, `f12.css:3072`, `discover.css:154,166` | hard-coded `#6A89A7` | the tier |
+
+**The three new values are within a few points of `--slate-tint` / `--slate-line` / `--slate-deep`
+and are not equal to them** (`#e6edf4` vs `#eef2f7`; `#c3d5e4` vs `#c7d6e3`; `#41627f` vs `#4f6b86`).
+So this pack adds a fourth family that is *almost* the third.
+
+**Two questions for Nick, and they are separable:**
+
+1. **Does blue mean one thing or two?** If provenance and tier are genuinely different axes, they
+   need visibly different hues, not two slates four points apart — the current pair is close enough
+   to read as an inconsistency rather than a distinction.
+2. **If it is one thing**, the new set should collapse into `--slate-tint/-line/-deep` and the
+   duplicate `--pro` should go.
+
+**Nothing propagates until that ruling.** The three tokens are declared **page-locally in
+`packageGroup.css`, deliberately not in `index.css`**, so a reversal costs one file.
+
+### F-N — Other is excluded from tracking · **CONFIRMED**
+
+Nothing aggregates it, and the check is derived rather than listed — the contributing set is read
+from `PACKAGE_SLOTS`, so a fourth slot added later is caught. `packageItems` yields nothing for it;
+`packageMetrics` / `packageAnalytics` / `packageTracking` / `packageAttach` contain zero field
+reads. See Part B.
+
+### F-O — **NEW: a package can be attached to a send and never un-attached**
+
+`detachPackage` is written at `src/components/Queries.tsx:1990`, complete with a comment explaining
+its undo semantics, and **nothing calls it**. The Attach menu offers no detach; the chips' `×` did
+not remove them. Found because this session's measurement attached a package and then could not
+take it back — the leftover harness data is the symptom.
+
+Same family as the row/reel cluster: a symbol that looks live, reads as considered, and has no
+caller. **One control away from being fixed**, and until it is, attaching is a one-way act on a
+real record.
+
+**⚠️ And `detachPackage` is not quite right either, so mounting it is not purely wiring.** It
+restores `materialsWanted` and says nothing about `packageId`, while `attachPackage` deliberately
+writes `packageId: ""` as the snapshot lands (*"a query carries the link OR its own materials, never
+both"*). Whoever mounts it should decide what the link should be afterwards.
+
+### F-P — **NEW: the builder contradicts a standing CLAUDE.md law**
+
+`TYPE_META[ComponentType.SAMPLE_PAGES].label` is the hardcoded `"Sample pages"`, while the covering
+letter goes through `materialLabel(…)`. CLAUDE.md states as a **correctness rule** that
+`SAMPLE_PAGES` reads *"Opening sample", never "Sample pages"*, on **every surface** — because three
+unit choices map to that one `ComponentType`, so the label asserts a unit the data does not carry.
+
+Not changed: the ref says "Sample pages" too, it is app copy rather than this brief's subject, and
+the argument is weaker in the builder than on the agent Materials tab (here you are choosing a saved
+version whose own `versionName` carries the specifics). **One constant either way.**
+
+### Carried forward
 
 | flag | state |
 |---|---|
-| **F-M** | **Raised early, because the refs and the landed code disagree in writing.** `query-sent-strip-v2.html` names its tokens `--pro-fill/--pro-edge/--pro-ink` and derives them from `--pro-slate:#6A89A7`. The landed `packageGroup.css` argues the *opposite* in a comment: *"IT IS NOT `--slate`. Slate is the PRO TIER's colour … blue here means provenance … Reusing the tier's token would collapse two axes into one hue and make a package look like a price."* Both cannot stand. Full inventory of the app's blues below once Part C lands; Nick to rule. |
-| **F-L, F-N** | pending Part C / Part B. |
-| **F-A** | moot for this page (the wax seal is deleted); carried. |
-| **F-H** | open, unchanged — still no un-archive surface. |
-| **F-I** | **closed by the re-cut** (`reports/submission-packages-recut.md`); no re-measure needed. |
-| **F-B** | open, unchanged. |
+| **F-A** | Storage / the wax seal — **moot for this page**, the seal is deleted. Unchanged. |
+| **F-B** | open — no guard on deleting a sent package from the Workshop's own surfaces. Unchanged. |
+| **F-H** | **open, and still the most visible gap** — no un-archive surface, and no `unarchiveVersion` writer. Now joined by F-O, which is the same shape one layer along: an act with no way back. |
+| **F-I** | **closed** by the re-cut; the left column sets the band height at both widths. Not re-measured. |
+| **F-J, F-K** | closed in `reports/submission-packages-recut.md`. |
+| **Move surface** | Correction UI's outstanding piece. Untouched here — Part C adds no edit affordance, by design. |
 
-**Phase 5 of the broadsheet pack remains held. This session deploys nothing.**
+---
+
+## What is NOT done, stated plainly
+
+1. **D-C1's positive half is partial.** The strip renders on *query sent* only. *Partial sent* and
+   *full sent* are blocked on the `materialsWanted` → activities migration, which is gated on Nick.
+   Rendering the query's one list under three send rungs would state that the same materials went
+   three times.
+2. **Sparse-vs-full states.** The harness account has one data state (2 letters, 1 synopsis, 1
+   package). The 6-materials / 3-packages case was **not** measured; manufacturing it means writing
+   a lot of records to the dev account, which is a bigger act than a measurement should be without
+   being asked.
+3. **Nothing is deployed.** `firestore.rules` is ahead of both databases — until a deploy,
+   **creating** a package with `Other` works and **updating** one to add, change or clear it is
+   silently denied. Dev rules are Claude's to deploy on request; prod is Nick's, and this is the
+   sixth item in that queue.
+4. **Test data left behind** — see the cleanup note above. One query on the dev harness account.
