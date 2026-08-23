@@ -1,3 +1,20 @@
+# ⚠️ SUPERSEDED AND WRONG — see `reports/dev-rules-phase0.md`
+
+**Every claim below is false.** I wrote this, and bisection against the live rules (`dev-rules`
+Phase 0, 23 Aug) refuted it point by point: the manuscript write is ACCEPTED, including an exact
+reproduction of the seeder's own; there is no evidence the deployed ruleset differs from `main`
+anywhere; and the denial is the agents' update allowlist omitting `dateAdded` — a rule `main`
+carries identically, and a correct one.
+
+The real cause was `seed.mjs` recomputing `dateAdded` relative to TODAY on every run, so on any
+day but the first it became an affected key and the batch was refused atomically. Fixed; the
+account restores, `seed-query-11` included.
+
+**The reasoning error worth keeping:** "denied at its first write" was inferred from the absence
+of the next log line, never verified. The write it named had never been tested.
+
+---
+
 # STOP THE LINE — the deployed dev ruleset has drifted from `firestore.rules` on `main`
 
 **Found** 23 Aug, during Pack B Phase 2's rendered check · **not touched** — the packages session is

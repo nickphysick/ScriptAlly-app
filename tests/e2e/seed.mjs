@@ -20,7 +20,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, setDoc, collection, getDocs, writeBatch } from "firebase/firestore";
+import { getFirestore, doc, setDoc, collection, getDocs, getDoc, writeBatch } from "firebase/firestore";
 
 const env = (file) => Object.fromEntries(
   readFileSync(file, "utf8").split("\n")
@@ -76,6 +76,32 @@ const NAMES = [
 ];
 const AGENT_IDS = [];
 {
+  /**
+   * ⚠️ `dateAdded` IS IMMUTABLE, AND RECOMPUTING IT IS WHAT BROKE THIS SEEDER (dev-rules, Phase 0).
+   *
+   * The agents' update allowlist (`firestore.rules:653`) does not include `dateAdded` — the date an
+   * agent was added is not something a later write should rewrite, and that rule is right. But this
+   * file wrote `iso(120 - i * 3)`, a date relative to TODAY, and `set` without merge over an agent
+   * that already exists is an UPDATE whose `affectedKeys()` is a VALUE diff. On the day this was
+   * first run the recomputed value matched what it had just written; every day after, it differed by
+   * the days elapsed, `dateAdded` became an affected key, and the batch was refused — atomically, so
+   * all twelve agents failed together and the account could not be restored at all.
+   *
+   * It had been failing that way, silently, for as long as the file existed. Nothing was wrong with
+   * the rules and nothing was wrong with the data.
+   *
+   * ⚠️ SO THE STORED VALUE WINS WHERE THERE IS ONE. A fresh account gets the intended spread of
+   * dates; an existing agent keeps the `dateAdded` it already has, so the key never enters the diff
+   * and the seeder is idempotent on any day. A fixed constant would NOT do — it would differ from
+   * what these agents already carry and be refused exactly the same way on the next run.
+   */
+  const existingAdded = new Map();
+  for (let i = 0; i < NAMES.length; i++) {
+    const snap = await getDoc(doc(db, "users", uid, "agents", `seed-agent-${i + 1}`));
+    if (snap.exists() && typeof snap.data().dateAdded === "string") {
+      existingAdded.set(i, snap.data().dateAdded);
+    }
+  }
   const batch = writeBatch(db);
   NAMES.forEach(([name, agency], i) => {
     const id = `seed-agent-${i + 1}`;
@@ -93,7 +119,7 @@ const AGENT_IDS = [];
       noResponseMeansNo: i % 3 === 0,
       setAside: false, importedNeedsReview: false,
       materialsWanted: ["Query letter", "Synopsis"],
-      dateAdded: iso(120 - i * 3), lastCheckedDate: iso(10),
+      dateAdded: existingAdded.get(i) ?? iso(120 - i * 3), lastCheckedDate: iso(10),
     });
   });
   await batch.commit();
