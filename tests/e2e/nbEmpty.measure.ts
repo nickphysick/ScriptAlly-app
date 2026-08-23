@@ -52,26 +52,26 @@ test.describe("Phase 1 — the illustrated empty state", () => {
     expect(new Set(arts.map((a) => a.label)).size).toBe(3);
   });
 
-  test("the workflow and the example papers COEXIST at zero notes, in order", async ({ page }) => {
+  test("⚠️ REVERSED: the examples have LEFT the board — the workflow stands alone", async ({ page }) => {
+    /* ⚠️ THIS ASSERTED COEXISTENCE, and v3 undid it deliberately (workflow run, Phase 1). The
+       example papers moved to the DRAWER entirely: no sparse threshold, no board-level dismissal,
+       nothing example-shaped on the board at any note count. The claim that survives is the
+       workflow's own presence, which nbWorkflow.measure.ts owns in both arrangements — so this
+       case keeps only the half that is still about THIS file: the examples' absence.
+       ⚠️ AND THE CLASS NAMES MOVED WITH THE ARRANGEMENT: `.nb-opening*` became `.nb-wf*`. */
     await openRoute(page, ROUTE, WIDE);
-    const d = await page.evaluate(() => {
-      const box = (sel: string) => document.querySelector(sel)?.getBoundingClientRect() ?? null;
-      const opening = box(".nb-opening"), steps = box(".nb-steps"), cta = box(".nb-opening-cta");
-      const exhead = box(".nb-exintro");
-      const exs = Array.from(document.querySelectorAll("[data-example]")).map((e) => e.getBoundingClientRect());
-      return {
-        has: { opening: !!opening, steps: !!steps, cta: !!cta, exhead: !!exhead, exs: exs.length },
-        order: opening && steps && cta && exhead && exs.length
-          ? opening.bottom <= steps.top + 1 && steps.bottom <= cta.top + 1
-            && cta.bottom <= exhead.top + 1 && exs.every((e) => e.top >= exhead.bottom - 1)
-          : null,
-      };
-    });
-    console.log(`[coexist] ${JSON.stringify(d.has)} · ordered=${d.order}`);
-    expect(d.has.opening && d.has.steps && d.has.cta, "the workflow is missing").toBe(true);
-    expect(d.has.exs, "the papers did not survive beside the workflow").toBe(3);
-    expect(d.order, "the sections are not stacked in the ref's order on screen").toBe(true);
+    const d = await page.evaluate(() => ({
+      board: !!document.querySelector(".nb-board"),
+      examples: document.querySelectorAll("[data-example]").length,
+      papers: document.querySelectorAll(".nb-example").length,
+      workflow: !!document.querySelector(".nb-wf"),
+    }));
+    console.log(`[no-papers] board=${d.board} workflow=${d.workflow} examples=${d.examples} papers=${d.papers}`);
+    expect(d.board, "no board to look inside — a vacuous pass").toBe(true);
+    expect(d.examples, "example papers are back on the board").toBe(0);
+    expect(d.papers).toBe(0);
   });
+
 });
 
 test.describe("Phase 2 — one composer, three entry points", () => {
@@ -96,7 +96,7 @@ test.describe("Phase 2 — one composer, three entry points", () => {
       return d;
     };
 
-    const fromCta = await openAndRead(() => page.locator(".nb-opening-cta .tdb-addb").click());
+    const fromCta = await openAndRead(() => page.locator(".nb-wf-cta .tdb-addb").click());
     /* ⚠️ THE VISIBLE ROW. Main pages stay MOUNTED, so `.tpl-tools .tdb-addb` matches the To-do
        list's and the Calendar's buttons too — the default-subject trap, which strict mode caught
        here rather than letting it answer about the wrong page. */
