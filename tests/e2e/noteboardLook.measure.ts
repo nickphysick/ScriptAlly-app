@@ -97,17 +97,25 @@ test.describe("Noteboard — measured", () => {
     await liftMotionSuppression(page);
     const card = page.locator(".nb-note").filter({ hasText: "NBPROBE five" }).first();
     await expect(card).toBeVisible();
+    /* ⚠️ SCROLL IT INTO VIEW BEFORE THE FIRST READING, AND MEASURE `offsetTop`. `hover()` scrolls
+       the element into view if it needs to, so a viewport-relative `y` taken before the hover and
+       again after compares two different scroll positions — measured on the deployed site with a
+       12-note board: y 668 -> 643, `transform: none`, reported as "the card LIFTED" when nothing
+       had moved in the layout at all. `offsetTop` is document-relative and immune to it, and it
+       is also the honest subject: the claim is that the card does not move in the LAYOUT. */
+    await card.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
     const before = await card.evaluate((el) => ({
       shadow: getComputedStyle(el).boxShadow,
       transform: getComputedStyle(el).transform,
-      y: Math.round(el.getBoundingClientRect().y),
+      y: (el as HTMLElement).offsetTop,
     }));
     await card.hover();
     await page.waitForTimeout(400);   // the transition is 0.15s; wait past it, never read through it
     const after = await card.evaluate((el) => ({
       shadow: getComputedStyle(el).boxShadow,
       transform: getComputedStyle(el).transform,
-      y: Math.round(el.getBoundingClientRect().y),
+      y: (el as HTMLElement).offsetTop,
     }));
     console.log(`[hover] y ${before.y} -> ${after.y} · transform ${after.transform} · shadow changed: ${before.shadow !== after.shadow}`);
     expect(before.shadow, "hover changed nothing — the rule is not reaching the card").not.toBe(after.shadow);

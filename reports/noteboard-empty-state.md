@@ -215,3 +215,55 @@ against every protected name returns nothing.
   dismissed-state and three-note screenshots created them through the real UI. Reset with the
   seeder's clean flag plus a prefs reset if you want a fresh sparse board:
   `node tests/e2e/seedNotes.mjs --clean`
+
+---
+
+## 9 — Dev deploy (23 Aug, after the run)
+
+**Hosting only** — this run changed no rules, and `git diff 3577bdfc..HEAD -- firestore.rules` is
+empty.
+
+**⚠️ Built from a detached worktree, not the shared checkout.** Another session had committed since
+Phase 3 (`b609aea1`, `8134a77d`) and held **uncommitted WIP in `src/components/todo/ToDoPage.tsx`**
+plus an untracked `src/lib/taskCardFacts.ts`. Building in place would have shipped their in-flight
+edits to dev. `git worktree add --detach … HEAD` gives a tree that is clean by construction — their
+*committed* work rides along, correctly; their unfinished work does not.
+
+Pre-flight: 0 behind `origin/main` (74 ahead); build output read in full and grepped, not tailed —
+clean; `assert-build-target` confirmed *"bundle targets scriptally-dev; gen-lang-client-0801391782
+absent"*. 176 files → https://scriptally-dev.web.app
+
+**Verified against the deployed site** (`SA_E2E_BASE_URL=dev`), after resetting the harness board
+to a true empty state (§8's litter):
+
+| | Reading |
+|---|---|
+| the three SVGs | 250×130 each, `role="img"`, three distinct labels, `gradients=0`, palette fills `rgb(233,237,230)` / `rgb(251,243,217)` / `rgb(245,226,218)` |
+| coexistence | `{"opening":true,"steps":true,"cta":true,"exintro":true,"exs":3} · ordered=true` |
+| one composer | cta / toolbar / ghost — each `count=1 focused=true classes="nb-c-yellow nb-compose"` |
+
+**Regression sweep on the deployed site**: the paper run's and the original build's suites,
+**14 passed**, with one real red worth recording.
+
+### The hover case, and why it was not a regression
+
+`noteboardLook`'s hover probe failed with *"the card LIFTED"* — `y 668 → 643`, a 25px shift, on a
+12-note board. It had passed on every previous deploy. But `transform` read `none`, so **nothing
+had moved in the layout**: Playwright's `hover()` scrolls an element into view when it needs to,
+and the probe compared a viewport-relative `y` taken before that scroll with one taken after. A
+taller board made the target card need scrolling for the first time, and the probe reported the
+page's scroll as the card's lift.
+
+Fixed at the probe: scroll into view *first*, then measure **`offsetTop`** — document-relative,
+immune to scrolling, and the honest subject, since the claim is that the card does not move in the
+*layout*. Now `375 → 375`, shadow changed, transform none.
+
+The same family as three faults inside this run: a measurement answering truthfully about the
+wrong thing. It is worth noting the shape survives a probe being green for two deploys — it only
+went red when the fixture grew.
+
+### Left for Nick
+
+- **Nothing to deploy or run.** No rules change, none pending.
+- The harness account is tidy: `SHOTNOTE` notes removed, example dismissals cleared, probe notes
+  cleaned, `todoPrefs.listView` preserved throughout.
