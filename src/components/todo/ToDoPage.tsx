@@ -130,6 +130,15 @@ import {
 import { taskGroups, railChips, chipGroups, chipMatchesCard, RailChipId } from "../../lib/todoGroups";
 import { paneRestLine, showingLine, tasksCsv } from "../../lib/todoHandoff";
 import { rowFigure, daysSince, waitAnchorMs, RowFigure, cardBucket, BUCKET_LABEL, taskDeed } from "../../lib/todoBuckets";
+/* ⚠️ THE THREE LIFTED DERIVATIONS (tasks-workflow, Pack A). Aliased on import so the page's own
+   wrappers keep the names every call site already uses — the lift changes where the code lives,
+   never what this file calls it. */
+import {
+  figureFor as libFigureFor,
+  listRowInputs as libListRowInputs,
+  recordSweepFor as libRecordSweepFor,
+  isoOf,
+} from "../../lib/taskCardFacts";
 import { rowPrimaryLabel } from "../../lib/taskRow";
 import { SnoozeDial } from "./SnoozeDial";
 import { isTerminalStatus } from "../../lib/agentList";
@@ -504,6 +513,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const activitiesRef = useRef(activities);
   activitiesRef.current = activities;
 
+  /* ⚠️ ONE BUNDLE FOR THE LIFTED DERIVATIONS (tasks-workflow, Pack A). `taskCardFacts`' three
+     functions each need the same five arrays; memoising them here means the page allocates one
+     object per data change rather than one per call, and — the part that matters — `[taskData]` is
+     EXACTLY equivalent to the five-array dependency list the wrappers replaced, because it changes
+     when and only when one of the five does. The memoisation `TaskList` depends on is unchanged. */
+  const taskData = React.useMemo(
+    () => ({ queries, userTasks, activities, agents, manuscripts }),
+    [queries, userTasks, activities, agents, manuscripts],
+  );
   const now = Date.now();
   const today = localYMD(now);
 
@@ -863,94 +881,23 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * agent list's turn axis and the To-do flows all read. A local "is the agent waiting" test here
    * would be a fourth answer to a question with one.
    */
-  /** ⚠️ `responseReceivedAt` and `lastStatusChange` are `Timestamp | string` — the derived pair
-   *  carry whichever the write left. One coercion, at the only place that reads them here. */
-  const isoOf = (v: unknown): string | undefined => {
-    if (typeof v === "string") return v;
-    const d = (v as { toDate?: () => Date } | undefined)?.toDate?.();
-    return d ? d.toISOString() : undefined;
-  };
+  /* ⚠️ `isoOf` MOVED WITH THE DERIVATIONS THAT READ IT (Pack A) — it is imported above rather than
+     declared here. Left in place it would have SHADOWED the import silently: legal TypeScript, a
+     clean `tsc`, and two coercions of one fact in a file whose lifted half exists to prevent
+     exactly that. The body is unchanged; only its home is. */
 
+  /* ⚠️ LIFTED TO `lib/taskCardFacts.ts` (tasks-workflow, Pack A) — this is a WRAPPER, not a
+     reimplementation, and the call sites below are untouched. The body moved verbatim; what was
+     captured scope is now parameters. It had to leave because the task pane's journey is built
+     from it and the LIST reads it too (`paneFacts`, and `boardCols` which the subtitle, FILTERS
+     and badge share), so a pane hook owning a copy would be a second reading of one fact.
+     ⚠️ `boardCols.snoozed` AND `now` STAY THE PAGE'S. The keys are derived here, from the page's
+     own board, so the lifted function cannot drift onto a different board than the rows show. */
+  const snoozedKeys = new Set(boardCols.snoozed.map((x) => x.key));
   function figureFor(c: BoardCard): RowFigure {
-    const snoozedKeys = new Set(boardCols.snoozed.map((x) => x.key));
-    const ag = c.agentId ? agents.find((a) => a.id === c.agentId) : undefined;
-    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
-    const ut = c.userTaskId ? userTasks.find((t) => t.id === c.userTaskId) : undefined;
-    const statedWeeks = typeof ag?.responseTimeWeeks === "number" && ag.responseTimeWeeks > 0
-      ? ag.responseTimeWeeks : undefined;
-    const ballHolder = q ? getPrimaryAction(q.status as QueryStatus).ballHolder ?? null : null;
-
-    /* a sleeping card states its return date and nothing else */
-    if (snoozedKeys.has(c.key)) {
-      return rowFigure({ card: c, backOn: (c.due || "").replace(/^BACK\s+/i, "") });
-    }
-
-    /* ⚠️ AN OFFER'S REPLY-BY IS THE ONE CLOCK THAT COUNTS DOWN, and it can run out — a negative
-       remainder is "Reply was due / 3 days ago" rather than a figure quietly clamped to zero. */
-    if (c.taskType === "offer_received" && q?.responseDeadline) {
-      const left = Math.ceil((Date.parse(q.responseDeadline) - now) / 86400000);
-      if (Number.isFinite(left)) return rowFigure({ card: c, replyWithinDays: left });
-    }
-
-    /**
-     * ⚠️ THE ANCHOR IS PER BUCKET AND IT CAN BE ABSENT. `waitAnchorMs` returns NaN where the record
-     * cannot say; `elapsedDays` is then left UNDEFINED and the figure reads "No date on record".
-     * There is no `?? now` here any more — that fallback is what printed "Today" on cards that had
-     * waited 47 days.
-     */
-    const anchor = waitAnchorMs(cardBucket(c), c.taskType, {
-      dateSent: q?.dateSent,
-      partialRequestedDate: q?.partialRequestedDate,
-      fullRequestedDate: q?.fullRequestedDate,
-      partialSentDate: q?.partialSentDate,
-      fullSentDate: q?.fullSentDate,
-      lastNudgeSentDate: q?.lastNudgeSentDate,
-      lastReplyAt: isoOf(q?.responseReceivedAt),
-      statusMovedAt: isoOf(q?.lastStatusChange),
-      createdAt: ut?.createdAt,
-    });
-
-    return rowFigure({
-      card: c,
-      statedWeeks,
-      ballHolder,
-      elapsedDays: Number.isFinite(anchor) ? daysSince(anchor, now) : undefined,
-    });
+    return libFigureFor(c, taskData, snoozedKeys, now);
   }
 
-  /**
-   * ⚠️ THIS BLOCK SITS HERE, BELOW `userTasks`, `isoOf` AND `figureFor`, AND THAT IS LOAD-BEARING.
-   * It was written 150 lines higher and the page threw on render — `useMemo`'s factory runs DURING
-   * render, so every `const` declared beneath it was in the temporal dead zone. `tsc` passed and
-   * 5,683 tests passed: the references live inside closures, which TypeScript cannot prove run at
-   * render time (the same shape this repo has been caught by in `AllManuscripts.tsx`).
-   *
-   * ⚠️ WHAT CAUGHT IT WAS THE PAGE. The e2e harness could not sign in, because the workspace never
-   * mounted — the app's error boundary was showing "Something went wrong" and a source-reading
-   * suite cannot see that. Bisected across three worktrees to be sure it was mine and not the
-   * concurrent session's onboarding work.
-   *
-   * Anything moved above `figureFor` reintroduces it, silently.
-   */
-  /**
-   * ⚠️ THE PORTED PANE'S INPUTS, GATHERED ONCE. `TaskPane` renders the mockup's `DATA` shape and
-   * nothing else, so everything it needs is answered here from derivations the page already runs —
-   * `figureFor` for the wait, `cardMenu` for what a card offers, `rowPrimaryLabel` for the verb.
-   * None of it is re-derived: a second opinion here is how the pane and the rail come to state
-   * different waits, which this page has already been caught by once.
-   */
-  /**
-   * ⚠️ THE PARCEL IS SEEDED FROM WHAT WAS ASKED FOR, AND NARROWED TO ONE UNIT (pane round, Phase 3).
-   *
-   * What the agency asked for is the best guess at what went, so the form opens on it rather than
-   * empty — but a request may name TWO measures ("three chapters or fifty pages") and a record of
-   * what you sent may name only one. So the seed keeps the FIRST ticked unit and drops the rest.
-   *
-   * ⚠️ IT IS A DEFAULT, NOT A RECORD. Nothing is written until the primary is pressed, and the
-   * writer can change the unit or the amount first — which is the whole reason the row of read-only
-   * chips this replaced was wrong: an agency that asked for three chapters and got five had nowhere
-   * on the page to say so.
-   */
   const seedRows = React.useCallback((card: BoardCard | null): MaterialRow[] => {
     const q = card?.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
     const asked = materialRowsFromAgent(q?.materialsWanted as string[] | undefined);
@@ -1010,46 +957,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setBulkTouched(0);
   }, [paneCard?.key]);
 
-  /**
-   * ⚠️ WHAT A LIST ROW NEEDS BEYOND ITS CARD, and every one of these is a lookup rather than a new
-   * derivation. `waitAnchorMs` is the SAME clock the rail's figure already runs on, so the row's
-   * duration and the pane's cannot disagree; `sendSpecFor` is what already decides partial-versus-
-   * full; `queriesMissingMaterials` is the derivation the bulk card was raised by.
-   *
-   * ⚠️ AND WHERE THE RECORD IS SILENT, THIS RETURNS NULL RATHER THAN A GUESS. `listMeta` falls back
-   * to the agent-and-agency pair, which is the contract's own instruction. Two facts are absent on
-   * this account and reported rather than invented: the partial's SPECIFIC ASK ("the first 3
-   * chapters") has no field on the request record, and an offer's date is `offerDate`, which the
-   * imported queries do not carry.
-   */
-  const listRowInputs = React.useCallback((c: BoardCard) => {
-    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
-    const anchorMs = waitAnchorMs(cardBucket(c), c.taskType, {
-      dateSent: q?.dateSent,
-      partialRequestedDate: q?.partialRequestedDate,
-      fullRequestedDate: q?.fullRequestedDate,
-      partialSentDate: q?.partialSentDate,
-      fullSentDate: q?.fullSentDate,
-      lastNudgeSentDate: q?.lastNudgeSentDate,
-      lastReplyAt: isoOf(q?.responseReceivedAt),
-      statusMovedAt: isoOf(q?.lastStatusChange),
-      createdAt: c.userTaskId ? userTasks.find((t) => t.id === c.userTaskId)?.createdAt : undefined,
-    });
-    const spec = sendSpecFor(c);
-    const offer = isoOf(q?.offerDate);
-    const ag = c.agentId ? agents.find((a) => a.id === c.agentId) : undefined;
-    return {
-      agency: ag?.agency ?? null,
-      days: Number.isFinite(anchorMs) ? daysBetween(anchorMs, Date.now()) : null,
-      partial: spec?.material === "partial",
-      /* the ask, through the ONE materials formatter — absent when the request recorded none */
-      ask: formatQueryMaterials(q?.materialsWanted),
-      offeredOn: offer ? new Date(offer).toLocaleDateString("en-GB", { day: "numeric", month: "long" }) : null,
-      bulkCount: c.taskType === "materials_unrecorded_bulk"
-        ? queriesMissingMaterials({ queries, activities, agents, manuscripts, displayName: agentPrimary }).length
-        : null,
-    };
-  }, [queries, userTasks, activities, agents, manuscripts]);
+  /* ⚠️ LIFTED TO `lib/taskCardFacts.ts` (Pack A) — a WRAPPER over the moved body, and the
+     `useCallback` with its EXACT original dependency list is kept deliberately: this function is
+     handed to `TaskList` as `rowInputs` and drives the view's sort key, so its identity stability
+     is load-bearing. Changing the memoisation would change when the list re-renders, which is a
+     behaviour change, and this pack forbids one. */
+  const listRowInputs = React.useCallback(
+    (c: BoardCard) => libListRowInputs(c, taskData),
+    [taskData],
+  );
 
   const paneFacts = React.useMemo(() => {
     if (!paneCard) return [];
@@ -3024,20 +2940,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * not a second scan. A card that stands for ten queries and a table that lists eleven is the
    * class of disagreement this page has paid for before.
    */
+  /* ⚠️ LIFTED TO `lib/taskCardFacts.ts` (Pack A) — a wrapper; the body moved verbatim. The pane's
+     reset effect seeds the cohort from it and the bulk card is RAISED by the same
+     `queriesMissingMaterials`, so one function is what stops the table and the card disagreeing. */
   function recordSweepFor(card: BoardCard): RecordSweepRow[] | undefined {
-    if (card.taskType !== "materials_unrecorded_bulk") return undefined;
-    const gaps = queriesMissingMaterials({
-      queries, activities, agents, manuscripts, displayName: agentPrimary,
-    });
-    if (!gaps.length) return undefined;
-    return gaps.map((g) => {
-      const ag = agents.find((a) => a.id === g.agentId);
-      return recordSweepRow(g, {
-        ...(ag?.agency ? { agency: ag.agency } : {}),
-        sentOn: new Date(g.dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
-        ...(ag?.materialsWanted ? { agentMaterials: ag.materialsWanted } : {}),
-      });
-    });
+    return libRecordSweepFor(card, taskData);
   }
 
   /**
