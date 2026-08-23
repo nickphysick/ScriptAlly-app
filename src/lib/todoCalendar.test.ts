@@ -246,6 +246,19 @@ describe("the fold, the map, the wiring", () => {
     expect(pageSrc).toContain('className="cal-focus"');
   });
 
+  /**
+   * ⚠️ THE WEEKLY REVIEW STILL REACHES `nudgeSheet` (Pack C Phase 2). The pane took the SINGLE-card
+   * entrance on this page; the multi-card rituals keep `FocusFlow`, and `nudgeSheet` is the
+   * review's own step — Nick's ruling, and the reason it was never legacy. This is a SOURCE claim
+   * ("the route was not disturbed"), so it lives in a source lock rather than a measurement, per
+   * the rule in CLAUDE.md about stating a claim against the artefact that can carry it.
+   */
+  it("the weekly review's nudge step is untouched — the pane took the single-card entrance only", () => {
+    const flow = readFileSync(join(__dirname, "..", "components", "todo", "FocusFlow.tsx"), "utf8");
+    expect(flow, "FocusFlow stopped routing a nudge to its own sheet").toContain('if (j === "nudge") return nudgeSheet(it.card);');
+    expect(flow, "nudgeSheet is gone").toContain("function nudgeSheet(c: BoardCard)");
+  });
+
   it("the roll-forward marker's copy is the ref's", () => {
     expect(pageSrc).toContain("ROLLED FORWARD ↗");
   });
