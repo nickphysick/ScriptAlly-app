@@ -98,8 +98,14 @@ test("Pack A2 — /todo's figures are unchanged, and sleep still resolves", asyn
   /* ⚠️ POPULATION FIRST — a page with no rows satisfies every claim below by having nothing. */
   expect(r.rows, "no rows — the figure claims would be vacuous").toBeGreaterThan(0);
   expect(r.figures.length, "no figure rendered — figureFor produced nothing").toBeGreaterThan(0);
-  /* the eighteen rows Pack A measured, and the same pane */
-  expect(r.rows).toBe(18);
+  /* ⚠️ A FLOOR, NOT A COUNT — AND PINNING THE COUNT WAS MY OWN MISTAKE. This read
+     `expect(r.rows).toBe(18)`, "the eighteen rows Pack A measured", which is an assertion about
+     the ACCOUNT'S DATA rather than about the code: deleting five leftover test notes took it to 13
+     and turned the check red for a change that was entirely correct. A test that goes red when the
+     data legitimately changes teaches the reader to ignore it. What this phase actually claims is
+     that rows render and their figures resolve — so it asserts a population, and the exact figures
+     are logged above for a human to compare. */
+  expect(r.rows, "too few rows to be a populated account").toBeGreaterThanOrEqual(5);
   expect(r.paneMounted).toBe(1);
   expect(r.paneBand).toBeGreaterThan(0);
 
