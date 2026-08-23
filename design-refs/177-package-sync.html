@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — how packages sync</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.k{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheet{max-width:1360px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.card{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:15px 16px;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);}
+.mstitle{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;display:flex;align-items:center;gap:8px;margin-top:9px;}
+.mstitle svg{width:13px;height:13px;stroke:var(--burg);fill:none;stroke-width:1.6;}
+
+/* the package group in materials */
+.pgrp{margin-top:11px;background:var(--ground);border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);padding:11px 12px;}
+.pghead{display:flex;align-items:center;gap:10px;}
+.pgart{width:34px;height:34px;border-radius:8px;background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);flex:none;display:flex;align-items:center;justify-content:center;}
+.pgart svg{width:18px;height:18px;stroke:var(--oat);fill:none;stroke-width:1.4;}
+.pgname{font-size:13px;font-weight:500;}
+.pgsub{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-top:2px;}
+.pgsub a{color:var(--burg);text-transform:none;letter-spacing:.02em;font-size:10px;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.att{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink);background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);border-radius:7px;padding:5px 10px;font-weight:500;}
+.att svg{width:11px;height:11px;stroke:var(--burg);fill:none;stroke-width:1.7;}
+.loose{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center;}
+.addb{display:inline-flex;font-size:11.5px;color:var(--burg);background:#fff;box-shadow:inset 0 0 0 1px var(--oat);border-radius:7px;padding:5px 10px;cursor:pointer;}
+
+/* packages page card */
+.pkc{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:17px 18px;}
+.pkc h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;}
+.rowl{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:8px 0;font-size:12.5px;}
+.rowl+.rowl{box-shadow:inset 0 1px 0 var(--line);}
+.rowl .kk{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);line-height:1.6;}
+.rowl b{font-weight:500;}
+.rowl .none{color:var(--faint);}
+.track{margin-top:14px;padding-top:13px;box-shadow:inset 0 1px 0 var(--line);}
+.trkhead{display:flex;align-items:baseline;gap:8px;}
+.trkhead .n{font-family:'Playfair Display',serif;font-size:17px;}
+.trkhead .t{font-size:12.5px;color:var(--ink2);}
+.qrow{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:12px;cursor:pointer;}
+.qrow+.qrow{box-shadow:inset 0 1px 0 var(--line);}
+.qrow .av{width:23px;height:23px;border-radius:50%;background:var(--n2);font-family:'JetBrains Mono',monospace;font-size:7.5px;display:flex;align-items:center;justify-content:center;color:var(--ink2);}
+.qrow .st{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);}
+.more{font-size:11.5px;color:var(--burg);text-decoration:underline;text-underline-offset:2px;cursor:pointer;margin-top:9px;display:inline-block;}
+.quiet{font-size:12px;color:var(--faint);margin-top:11px;line-height:1.55;}
+.note{margin-top:10px;background:var(--n1);border-radius:9px;box-shadow:inset 0 0 0 1px var(--line);padding:9px 11px;font-size:11.5px;color:var(--ink2);line-height:1.55;}
+.note b{font-weight:500;color:var(--ink);}
+.legend{max-width:1360px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+table{border-collapse:collapse;margin:9px 0 4px;font-size:12px;width:100%;}
+td,th{text-align:left;padding:7px 14px 7px 0;border-bottom:1px solid var(--line);vertical-align:top;}
+th{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:400;}
+</style></head>
+<body>
+
+<h4>The two pages, showing the same fact from opposite ends <s>— one query, one package</s></h4>
+<div class="sheet"><div class="g2">
+
+  <div><div class="lab">Query Centre · the send's materials<s>The package is a group; its items are still real pills</s></div>
+    <div class="card">
+      <div class="eyebrow">Query sent · 12 Aug</div>
+      <div class="mstitle"><svg viewBox="0 0 24 24"><path d="M4 5h13v15H4z"/><path d="M8 9h5M8 13h5"/></svg>Murphy&rsquo;s Day Out</div>
+      <div class="pgrp">
+        <div class="pghead">
+          <span class="pgart"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>
+          <span><span class="pgname">Standard UK</span><span class="pgsub">Submission package · <a>view</a></span></span>
+        </div>
+        <div class="pills">
+          <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Hook-first</span>
+          <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>One-page synopsis</span>
+          <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>First 10 pages</span>
+        </div>
+      </div>
+      <div class="loose">
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Author bio &mdash; asked for</span>
+        <span class="addb">+ Attach</span>
+      </div>
+      <div class="quiet">Anything attached outside the package sits below it, as its own pill.</div>
+    </div></div>
+
+  <div><div class="lab">Submission packages · the same package<s>Tracking is derived from the queries, never stored here</s></div>
+    <div class="pkc">
+      <h3>Standard UK</h3>
+      <div style="margin-top:10px">
+        <div class="rowl"><span class="kk">Covering letter</span><span><b>Hook-first</b></span></div>
+        <div class="rowl"><span class="kk">Synopsis</span><span><b>One-page</b></span></div>
+        <div class="rowl"><span class="kk">Sample pages</span><span><b>First 10 pages</b></span></div>
+      </div>
+      <div class="track">
+        <div class="trkhead"><span class="n k">4</span><span class="t">queries sent with this package</span></div>
+        <div style="margin-top:7px">
+          <div class="qrow"><span class="av">HV</span><span>Harriet Vane-Coe</span><span class="st">Queried · 12 Aug</span></div>
+          <div class="qrow"><span class="av">EW</span><span>Eleanor Whitfield</span><span class="st">Full requested · 4 Aug</span></div>
+          <div class="qrow"><span class="av">WT</span><span>William Tan</span><span class="st">Closed · 2 Aug</span></div>
+        </div>
+        <span class="more">Show all four</span>
+      </div>
+    </div></div>
+
+</div></div>
+
+<h4>The three states that make it honest <s>— what happens when the package moves on</s></h4>
+<div class="sheet"><div class="g3">
+
+  <div><div class="lab">1 · The package has changed since<s>Only appears when the two actually differ</s></div>
+    <div class="card">
+      <div class="pgrp">
+        <div class="pghead">
+          <span class="pgart"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>
+          <span><span class="pgname">Standard UK</span><span class="pgsub">As sent, 12 Aug · <a>view current</a></span></span>
+        </div>
+        <div class="pills">
+          <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Hook-first</span>
+          <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>One-page synopsis</span>
+          <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>First 10 pages</span>
+        </div>
+      </div>
+      <div class="note"><b>The package now includes a different synopsis.</b> This send keeps what actually went.</div>
+    </div></div>
+
+  <div><div class="lab">2 · The package was deleted<s>The send is untouched — it happened</s></div>
+    <div class="card">
+      <div class="pgrp">
+        <div class="pghead">
+          <span class="pgart"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>
+          <span><span class="pgname">Standard UK</span><span class="pgsub" style="color:#c0bbb3">Package no longer exists</span></span>
+        </div>
+        <div class="pills">
+          <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Hook-first</span>
+          <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>One-page synopsis</span>
+          <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>First 10 pages</span>
+        </div>
+      </div>
+      <div class="quiet">The name stays as a record of what was sent; only the link goes.</div>
+    </div></div>
+
+  <div><div class="lab">3 · Never sent<s>The packages page states it plainly</s></div>
+    <div class="pkc">
+      <h3>US agents</h3>
+      <div style="margin-top:10px">
+        <div class="rowl"><span class="kk">Covering letter</span><span><b>Comps-forward</b></span></div>
+        <div class="rowl"><span class="kk">Synopsis</span><span class="none">Not included</span></div>
+        <div class="rowl"><span class="kk">Sample pages</span><span><b>First 3 chapters</b></span></div>
+      </div>
+      <div class="track">
+        <div class="quiet" style="margin-top:0">Not yet sent — attach it when you log a query.</div>
+      </div>
+    </div></div>
+
+</div></div>
+
+<div class="legend">
+  <b>The sync runs one way, and that is the whole design.</b> A package is a template; a send is a fact. Attaching copies the template's contents into the send and the copy never updates — so the Query Centre always shows what actually went, whatever happened to the package afterwards. Nothing flows back from the send to the package.<br><br>
+  <b>What the send stores is the snapshot plus a name and an id.</b> The items are ordinary materials, exactly as if attached by hand; the package group around them is presentation, driven by that stored origin. That is why the pills stay individually editable and removable — ⚠️ <b>and editing one out of the group does not "break" anything</b>, it just means the send no longer matches the package, which is state 1.<br><br>
+  <b>The other direction is derived, not stored.</b> The packages page's <i>4 queries sent with this package</i> is a count over the queries whose sends carry that package id — never a list maintained on the package. ⚠️ <b>Nothing writes to the package when a query is logged</b>, so the two pages cannot disagree, and a deleted query simply stops being counted.
+  <table>
+    <tr><th></th><th>Query Centre → package</th><th>Package → Query Centre</th></tr>
+    <tr><td>What flows</td><td><b>Nothing is written</b></td><td>Contents, once, at attach</td></tr>
+    <tr><td>How it appears</td><td>Derived count and list</td><td>Copied items + stored origin</td></tr>
+    <tr><td>Later edits</td><td>Recount automatically</td><td><b>Never reach the send</b></td></tr>
+  </table>
+  <b>The three states exist so the writer is never quietly misled.</b> State 1 appears <i>only</i> when the snapshot and the package actually differ — compare on render, show nothing when they match. State 2 keeps the name after deletion because the name is part of what happened; only the link goes. State 3 is the line the packages page already shows, now derived rather than assumed.<br><br>
+  ⚠️ <b>One thing to decide:</b> the illustration in the group header is a small <code>ArtSlot</code> — <b>one image for all packages, or per-package?</b> Per-package means a picker, a stored choice and an empty default; one shared mark costs nothing and reads as "this is a package". My recommendation is <b>one shared mark now</b>, per-package only if packages ever become numerous enough to need telling apart at a glance.
+</div>
+</body></html>

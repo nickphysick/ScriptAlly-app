@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — pastille blue on packages</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;
+--blue:#6a89a7;--blue-tx:#3f5a75;--blue-br:#b9c8d6;--blue-bg:#eef3f7;}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.k{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheet{max-width:1360px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.lab.no{color:#b58a7a;}
+.card{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:15px 16px;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);}
+.mstitle{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;display:flex;align-items:center;gap:8px;margin-top:9px;}
+.mstitle svg{width:13px;height:13px;stroke:var(--burg);fill:none;stroke-width:1.6;}
+
+.pgrp{margin-top:11px;background:var(--blue-bg);border-radius:11px;box-shadow:inset 0 0 0 1px var(--blue-br);padding:11px 12px;}
+.pghead{display:flex;align-items:center;gap:10px;}
+.pgart{width:34px;height:34px;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--blue-br);flex:none;display:flex;align-items:center;justify-content:center;}
+.pgart svg{width:18px;height:18px;stroke:var(--blue);fill:none;stroke-width:1.4;}
+.pgname{font-size:13px;font-weight:500;}
+.pgsub{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue-tx);margin-top:2px;opacity:.8;}
+.pgsub a{color:var(--blue-tx);text-transform:none;letter-spacing:.02em;font-size:10px;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.att{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink);background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);border-radius:7px;padding:5px 10px;font-weight:500;}
+.att svg{width:11px;height:11px;stroke:var(--burg);fill:none;stroke-width:1.7;}
+.att.bad{background:var(--blue-bg);box-shadow:inset 0 0 0 1px var(--blue-br);}
+.att.bad svg{stroke:var(--blue);}
+.loose{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center;}
+.addb{display:inline-flex;font-size:11.5px;color:var(--burg);background:#fff;box-shadow:inset 0 0 0 1px var(--oat);border-radius:7px;padding:5px 10px;cursor:pointer;}
+
+.pkc{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:0 0 17px;overflow:hidden;}
+.pkc .top{height:5px;background:var(--blue-br);}
+.pkc .bd{padding:15px 18px 0;}
+.pkc h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;display:flex;align-items:center;gap:9px;}
+.pkc h3 .mk{width:24px;height:24px;border-radius:6px;background:var(--blue-bg);box-shadow:inset 0 0 0 1px var(--blue-br);display:flex;align-items:center;justify-content:center;}
+.pkc h3 .mk svg{width:13px;height:13px;stroke:var(--blue);fill:none;stroke-width:1.5;}
+.rowl{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:8px 0;font-size:12.5px;}
+.rowl+.rowl{box-shadow:inset 0 1px 0 var(--line);}
+.rowl .kk{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);line-height:1.6;}
+.rowl b{font-weight:500;}
+.track{margin-top:14px;padding-top:13px;box-shadow:inset 0 1px 0 var(--line);}
+.trkhead{display:flex;align-items:baseline;gap:8px;}
+.trkhead .n{font-family:'Playfair Display',serif;font-size:17px;color:var(--blue-tx);}
+.trkhead .t{font-size:12.5px;color:var(--ink2);}
+.qrow{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:12px;cursor:pointer;}
+.qrow+.qrow{box-shadow:inset 0 1px 0 var(--line);}
+.qrow .av{width:23px;height:23px;border-radius:50%;background:var(--n2);font-family:'JetBrains Mono',monospace;font-size:7.5px;display:flex;align-items:center;justify-content:center;color:var(--ink2);}
+.qrow .st{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);}
+.pkbtn{display:inline-flex;font-size:11.5px;color:var(--blue-tx);background:var(--blue-bg);box-shadow:inset 0 0 0 1px var(--blue-br);border-radius:7px;padding:6px 11px;cursor:pointer;}
+.badpill{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;
+  background:var(--blue);color:#fff;border-radius:20px;padding:4px 10px;}
+.legend{max-width:1360px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+table{border-collapse:collapse;margin:9px 0 4px;font-size:12px;width:100%;}
+td,th{text-align:left;padding:7px 14px 7px 0;border-bottom:1px solid var(--line);vertical-align:top;}
+th{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:400;}
+</style></head>
+<body>
+
+<h4>Blue marks the package, never its contents <s>— the container is a template; the items are ordinary materials</s></h4>
+<div class="sheet"><div class="g2">
+
+  <div><div class="lab">Query Centre · the group takes the blue<s>Rim, ground, mark, meta — pills untouched</s></div>
+    <div class="card">
+      <div class="eyebrow">Query sent · 12 Aug</div>
+      <div class="mstitle"><svg viewBox="0 0 24 24"><path d="M4 5h13v15H4z"/><path d="M8 9h5M8 13h5"/></svg>Murphy&rsquo;s Day Out</div>
+      <div class="pgrp">
+        <div class="pghead">
+          <span class="pgart"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>
+          <span><span class="pgname">Standard UK</span><span class="pgsub">Submission package · <a>view</a></span></span>
+        </div>
+        <div class="pills">
+          <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Hook-first</span>
+          <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>One-page synopsis</span>
+          <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>First 10 pages</span>
+        </div>
+      </div>
+      <div class="loose">
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Author bio &mdash; asked for</span>
+        <span class="addb">+ Attach</span>
+      </div>
+    </div></div>
+
+  <div><div class="lab">Submission packages · blue is the page's own accent<s>Top edge, mark, the derived figure</s></div>
+    <div class="pkc"><div class="top"></div><div class="bd">
+      <h3><span class="mk"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>Standard UK</h3>
+      <div style="margin-top:11px">
+        <div class="rowl"><span class="kk">Covering letter</span><span><b>Hook-first</b></span></div>
+        <div class="rowl"><span class="kk">Synopsis</span><span><b>One-page</b></span></div>
+        <div class="rowl"><span class="kk">Sample pages</span><span><b>First 10 pages</b></span></div>
+      </div>
+      <div class="track">
+        <div class="trkhead"><span class="n k">4</span><span class="t">queries sent with this package</span></div>
+        <div style="margin-top:7px">
+          <div class="qrow"><span class="av">HV</span><span>Harriet Vane-Coe</span><span class="st">Queried · 12 Aug</span></div>
+          <div class="qrow"><span class="av">EW</span><span>Eleanor Whitfield</span><span class="st">Full requested · 4 Aug</span></div>
+        </div>
+        <div style="margin-top:11px"><span class="pkbtn">Attach to a query</span></div>
+      </div>
+    </div></div></div>
+
+</div></div>
+
+<h4>Where it must not go <s>— three ways the third colour breaks the system</s></h4>
+<div class="sheet"><div class="g3">
+
+  <div><div class="lab no">✗ Not on the pills<s>They'd read as a different kind of material</s></div>
+    <div class="card"><div class="pgrp"><div class="pills">
+      <span class="att bad"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Hook-first</span>
+      <span class="att bad"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>One-page synopsis</span>
+    </div></div>
+    <div style="font-size:11.5px;color:var(--ink2);line-height:1.55;margin-top:11px">The whole point of snapshot-not-reference is that these are <b>ordinary materials</b> — identical to hand-attached ones, individually editable. Colouring them says they are a special class that behaves differently. They are not.</div>
+    </div></div>
+
+  <div><div class="lab no">✗ Not as a Pro badge<s>The free plan shows no ceilings</s></div>
+    <div class="card" style="min-height:118px;display:flex;align-items:center;justify-content:center">
+      <span class="badpill">◆ Pro feature</span>
+    </div>
+    <div style="font-size:11.5px;color:var(--ink2);line-height:1.55;margin-top:11px">A locked law: no Pro badges, no meters, no upsell in the working surface. Blue can be <b>the colour packages happen to wear</b>; it must never be the colour that says <i>you cannot have this</i>.</div>
+    </div>
+
+  <div><div class="lab no">✗ Not on the timeline<s>Direction owns that axis</s></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+        <span style="width:25px;height:25px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--burg);color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:10px">✈</span>
+        <span style="font-family:'Playfair Display',serif;font-size:15px">Query sent</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;opacity:.5">
+        <span style="width:25px;height:25px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--blue);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:10px">✈</span>
+        <span style="font-family:'Playfair Display',serif;font-size:15px">Query sent</span>
+      </div>
+      <div style="font-size:11.5px;color:var(--ink2);line-height:1.55;margin-top:11px">Burgundy is outgoing, sage is incoming — <b>rings are a locked vocabulary</b>. A blue ring would read as a third direction that does not exist.</div>
+    </div></div>
+
+</div></div>
+
+<div class="legend">
+  <b>Blue gets one meaning: this came from a template you built.</b> That is a different axis from the two the app already uses, which is exactly why it can be added without collision — burgundy is outgoing, sage is incoming, and <i>provenance</i> is orthogonal to direction.
+  <table>
+    <tr><th>Takes blue</th><th>Stays as it is</th></tr>
+    <tr><td>The package group's rim and ground in the send</td><td>Every material pill, in or out of a group</td></tr>
+    <tr><td>The package mark (the small ArtSlot)</td><td>Status dots and timeline rings</td></tr>
+    <tr><td>The group's meta line and its <i>view</i> link</td><td>The primary button — soft pink stays primary</td></tr>
+    <tr><td>The Submission packages page: top edge, mark, derived figure</td><td>Anything that would read as a plan or a limit</td></tr>
+  </table>
+  ⚠️ <b>Sample the real token, not this file.</b> The hexes here are approximations of pastille blue for the mockup; the build must read the value from wherever the Bold Pastille theme defines it, and add tint and border variants beside it rather than inventing a new family.<br><br>
+  ⚠️ <b>Contrast is the risk.</b> A pale blue rim on a parchment ground is quiet by design, but the meta line and any link inside the group must still meet contrast at small mono sizes — check the <code>blue-tx</code> value against the group ground, not against white.
+</div>
+</body></html>

@@ -1,0 +1,44 @@
+/**
+ * The submission-package group in a send (refs 177, 178).
+ *
+ * ⚠️ PASTILLE BLUE, SAMPLED NOT INVENTED. `#c2cfda` is the real value — it is `.t-bold`'s `--desk`
+ * and the dashboard spec names it "pastille-blue" in as many words. The tint and the ink beside it
+ * are derived from that hue rather than chosen: a pale ground for the group and a deepened ink dark
+ * enough to read on it.
+ *
+ * ⚠️ IT IS NOT `--slate`. Slate is the PRO TIER's colour — `comps.css` states that plainly ("blue on
+ * this page means the tier") — and blue here means provenance: this came from a template you built.
+ * Reusing the tier's token would collapse two axes into one hue and make a package look like a
+ * price. Two families, two meanings, stated in both files.
+ */
+:root {
+  --pastille: #c2cfda;       /* the real pastille blue — the group's rim, the page's top edge */
+  --pastille-tint: #edf1f6;  /* the group's ground */
+  --pastille-ink: #3a5570;   /* meta + view link — measured 6.82:1 on the tint */
+}
+
+.qc-pkggrp {
+  border: 1px solid var(--pastille);
+  background: var(--pastille-tint);
+  border-radius: 10px;
+  padding: 9px 11px 11px;
+  margin: 6px 0 8px;
+}
+.qc-pkggrp-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.qc-pkggrp-mark { flex: none; display: block; }
+.qc-pkggrp-id { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.qc-pkggrp-name { font-family: var(--f12-body); font-size: 13px; color: var(--ink); font-weight: 600; }
+.qc-pkggrp-meta {
+  font-family: var(--f12-mono);
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--pastille-ink);
+}
+.qc-pkggrp-view { font: inherit; color: var(--pastille-ink); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.qc-pkggrp-view:hover { color: var(--ink); }
+
+/* ⚠️ THE PILLS INSIDE TAKE NOTHING FROM THE GROUP. No colour, no size change, no override — they
+   are ordinary materials and must stay indistinguishable from the ones below the group. This rule
+   exists to lay out the row and for no other purpose. */
+.qc-pkggrp-items { display: flex; flex-wrap: wrap; gap: 6px; }
