@@ -133,3 +133,84 @@ this pack did not put in scope**, and the pack says this is *"a move, not a rede
 
 **Phase 1 does not depend on this** — with only `/todo` mounting the pane there is one `.tpn`, so
 scoping the query to a ref is behaviour-identical there. **Phase 2 does.** The ruling is Nick's.
+
+---
+
+# Phase 1 — **STOPPED**, on the pack's own condition
+
+> *"If any state has a reader outside the pane block (Phase 0 item 1), stop and report. That is the
+> real seam and Nick rules on it. **Do not restructure the page to force the move.**"*
+
+**No source file was modified.** The extraction was mapped to the line, and then measured — and the
+measurement says the job is not the one that was approved.
+
+## What the map showed when it was followed through
+
+The four session states move cleanly. **The journey assembly around them does not**, because it
+depends on derivations **the list itself consumes**:
+
+| the journey needs | which needs | consumed elsewhere by |
+|---|---|---|
+| `paneFacts` (`:1054`) | **`figureFor`** (`:874`) | `figureFor` reads **`boardCols`** (`:544`) — *"the same object the subtitle, FILTERS and badge read"* |
+| `noteAgo` (`:1234`) | **`listRowInputs`** (`:1025`) | passed to the list as **`rowInputs={listRowInputs}`** (`:3635`), and drives the view's sort key (`:3584`) |
+| the reset effect (`:1005`) | **`recordSweepFor`** (`:3027`) | the cohort derivation the bulk card is raised by |
+| `events` | `dockTimeline` (`:3290`, 113 lines) | pane-only ✓ |
+
+> **⚠️ SO THE HOOK CANNOT OWN THE JOURNEY WITHOUT OWNING THE LIST'S DERIVATIONS TOO.** There are
+> exactly three ways out and the pack forbids all three:
+>
+> 1. **Duplicate them in the hook** — two readings of one fact, which is the fault this codebase has
+>    been caught by more than any other, and which `figureFor`'s own comment exists to prevent.
+> 2. **Lift them to a lib module** both the list and the hook call — correct, and it is
+>    *restructuring the page*, which constraint 2 and the stop condition both forbid.
+> 3. **Pass them in** — `boardCols`, `listRowInputs`, `recordSweepFor`, `facts`, `events`,
+>    `primaryLabel`, plus the six callbacks. At that width "one thing both pages call" has stopped
+>    being true, and it is the input-gathering abstraction Nick already ruled was wrong, wearing a
+>    hook's clothes.
+
+## The scope, measured rather than estimated
+
+| region | lines |
+|---|---|
+| `figureFor` | 80 |
+| `seedRows` · `statedWeeks` · the reset effect | 71 |
+| `paneFacts` | 59 |
+| `paneWill` | 114 |
+| `noteAddedDate` · `noteAgo` | 19 |
+| `dockTimeline` | 113 |
+| `gateAnswers` | 31 |
+| `dockPrimary` | 72 |
+| `jumpToSection` | 11 |
+| the pane block's `buildJourney` + body JSX | ~110 |
+| **total** | **≈ 680** |
+
+**The pack estimated ~200.** The gap is not padding: it is `figureFor`, `paneFacts`, `dockTimeline`
+and `paneWill` — journey *construction*, which the first recon correctly placed outside the session
+and which cannot stay behind once the session leaves.
+
+## The three states that stay, restated
+
+`snoozeAnchor`, `dismissOpen` and `dockKey` are **not pane-session state** (Phase 0, item 1). Their
+handlers stay with the host as callbacks, which is what constraint 1 allows. `bulkRows` moves but
+**travels as an argument** to the host's commit, because `commitFromPane` reads it directly.
+
+---
+
+## The corrected plan, so the next pack can be right
+
+**It is two packs, not one, and the first is not the hook.**
+
+**Pack A — lift the shared derivations to pure lib functions.** `figureFor`, `listRowInputs` and
+`recordSweepFor` become `(card, db) => …` in `lib/`, and `ToDoPage` calls them exactly where it does
+now. **Nothing moves into a hook; nothing changes shape.** Every existing test should stay green
+untouched, which is the honest acceptance for a pure lift, and it is verifiable in a way the hook is
+not. This is what makes the hook possible without duplication.
+
+**Pack B — `useTaskPaneSession`.** With the derivations callable, the hook owns the four states and
+builds the journey from `(card, db)` alone. The host bundle shrinks to the **six callbacks** that
+genuinely belong to the page — `jumpToSection` (scoped to a ref, see the Phase 2 blocker),
+`openFlow`, `commit`, `advance`, `onSnooze`, `onDismiss` — and *that* is one thing both pages call.
+
+**And Phase 2 still needs its own ruling** — `TaskPaneBody`'s hard-coded ids (`s-unit`, `s-when`,
+`s-expect`, `s-remind`) against pages that all stay mounted. That blocker is independent of both
+packs and is documented above.
