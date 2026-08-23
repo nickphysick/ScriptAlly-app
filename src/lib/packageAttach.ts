@@ -357,3 +357,59 @@ export const asSentLabel = (dateISO: string | undefined): string => {
   const t = dateISO ? new Date(dateISO).getTime() : NaN;
   return Number.isNaN(t) ? "As sent" : `As sent, ${new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`;
 };
+
+/* ── §3 · what a package was sent with (ref 177, right panel) ─────────────────────────────── */
+
+/**
+ * The sends that carry this package, derived from the queries themselves.
+ *
+ * ⚠️ NOTHING WRITES TO A PACKAGE WHEN A QUERY IS LOGGED, AND NOTHING HERE CHANGES THAT. This is a
+ * READ over data the app already holds. A deleted query stops being counted the moment it is gone,
+ * with no cleanup, no counter to decrement and no way for the figure to drift from the truth —
+ * which is the whole reason it is derived rather than stored.
+ *
+ * ⚠️ THE COST, STATED. `queries` is already fully in memory: `DbProvider` holds an `onSnapshot` over
+ * the whole collection, so this adds ZERO Firestore reads. It is a linear scan — every query, and
+ * within each the items of `materialsWanted` (capped at 20 by the rules) — recomputed per render.
+ * At a writer's scale that is a few hundred comparisons and not worth memoising; at ten thousand
+ * queries it would be, and the fix then is a single pass building a Map of packageId → sends rather
+ * than one pass per package.
+ *
+ * ⚠️ AND IT COUNTS THE SNAPSHOT'S MARKS, NOT `query.packageId`. Those are two different facts and
+ * the difference is load-bearing: `packageId` is the app's older package LINK, which the snapshot
+ * attach deliberately CLEARS (a query carries the link or its own materials, never both). A count
+ * over the link would therefore report zero for every send made through the attach flow.
+ * ⚠️ `packageMetrics` IN `packageMetrics.ts` STILL COUNTS THE LINK — reported, not changed, since
+ * that module is the Packages page's own. The two answer different questions today and will
+ * disagree about any snapshot-attached send.
+ */
+export interface PackageSend {
+  queryId: string;
+  agentId?: string;
+  status: string;
+  dateSent?: string;
+}
+
+export function sendsWithPackage(
+  packageId: string,
+  queries: readonly { id: string; agentId?: string; status: string; dateSent?: string; materialsWanted?: (string | QueryMaterial)[] }[],
+): PackageSend[] {
+  return queries
+    .filter((q) => (q.materialsWanted ?? []).some((m) =>
+      typeof m !== "string" && (m as AttachedMaterial).fromPackageId === packageId))
+    .map((q) => ({ queryId: q.id, agentId: q.agentId, status: q.status, dateSent: q.dateSent }))
+    /* newest first — the list is read for "what happened lately", and the full set is behind Show all */
+    .sort((a, b) => (b.dateSent ?? "").localeCompare(a.dateSent ?? ""));
+}
+
+/** ⚠️ THE SHORT LIST IS THREE; the rest are behind `Show all`, which states the real total. */
+export const TRACKING_PREVIEW = 3;
+
+export const sentWithLine = (n: number): string =>
+  `${n} ${n === 1 ? "query" : "queries"} sent with this package`;
+
+/**
+ * ⚠️ STATE 3, DERIVED RATHER THAN ASSUMED. The packages page already carried this sentence; what it
+ * lacked was a fact behind it. It now appears when the derived count is zero and at no other time.
+ */
+export const NEVER_SENT_LINE = "Not yet sent — attach it when you log a query.";

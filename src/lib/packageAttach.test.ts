@@ -5,7 +5,7 @@ import {
   packageItems, overlaps, overlapNote, attachedMaterials, originTags, originTagText,
   withoutPackage, attachablePackages, materialName, type AttachedMaterial,
   canAttachPackages, packageMenuRow, PACKAGE_ROW_LABEL, isProUser, groupByOrigin,
-  packageDrift, driftNote,
+  packageDrift, driftNote, sendsWithPackage, sentWithLine, NEVER_SENT_LINE,
 } from "./packageAttach";
 
 const PKG = {
@@ -269,5 +269,54 @@ describe("§2 · the three states, each only when true", () => {
   it("⚠️ a pill the WRITER removed is not the package moving on", () => {
     const minusSynopsis = sent.filter((m) => m.material !== "Synopsis");
     expect(packageDrift(groupByOrigin(minusSynopsis).groups[0], PKG, minusSynopsis).state).toBe("none");
+  });
+});
+
+describe("§3 · the derived count, and §5 · the gate on its affordance", () => {
+  const Q = (id: string, pkgId: string | null, status: string, dateSent: string) => ({
+    id, agentId: `ag-${id}`, status, dateSent,
+    materialsWanted: pkgId ? [{ material: "Query Letter", fromPackageId: pkgId, fromPackageName: "UK standard" }] : ["Query Letter"],
+  });
+  const QUERIES = [Q("a", "p1", "Queried", "2026-08-12"), Q("b", "p1", "Full Requested", "2026-08-04"), Q("c", null, "Queried", "2026-08-06"), Q("d", "p2", "Queried", "2026-08-01")];
+
+  it("counts the sends whose MARKS name this package", () => {
+    expect(sendsWithPackage("p1", QUERIES as never).map((s) => s.queryId)).toEqual(["a", "b"]);
+  });
+
+  /**
+   * ⚠️ IT DOES NOT READ `query.packageId`, and that is load-bearing. The snapshot attach CLEARS that
+   * older link field (a query carries the link or its own materials, never both), so a count over
+   * it would report zero for every send made through the attach flow.
+   */
+  it("⚠️ ignores the legacy packageId link entirely", () => {
+    const linked = [{ id: "e", status: "Queried", dateSent: "2026-08-20", packageId: "p1", materialsWanted: [] }];
+    expect(sendsWithPackage("p1", linked as never)).toEqual([]);
+  });
+
+  it("newest first — the short list is what happened lately", () => {
+    expect(sendsWithPackage("p1", QUERIES as never)[0].queryId).toBe("a");
+  });
+
+  /* ⚠️ A DELETED QUERY STOPS BEING COUNTED WITH NO CLEANUP — nothing was ever written to decrement. */
+  it("a query that is gone is simply not counted", () => {
+    expect(sendsWithPackage("p1", QUERIES.filter((q) => q.id !== "a") as never)).toHaveLength(1);
+  });
+
+  it("states state 3 only when nothing has been sent", () => {
+    expect(sendsWithPackage("p9", QUERIES as never)).toEqual([]);
+    expect(NEVER_SENT_LINE).toMatch(/not yet sent/i);
+    /* ⚠️ AND IT NEVER SELLS — no badge, no meter, no upgrade, per the locked law. */
+    expect(NEVER_SENT_LINE).not.toMatch(/pro\b|upgrade|unlock|plan/i);
+  });
+
+  it("the count's wording agrees with itself at one", () => {
+    expect(sentWithLine(1)).toBe("1 query sent with this package");
+    expect(sentWithLine(4)).toBe("4 queries sent with this package");
+  });
+
+  /** §5 — the affordance routes through the same one predicate the Query Centre's menu row uses. */
+  it("⚠️ the Attach affordance is gated by the ONE predicate, which is open today", () => {
+    expect(canAttachPackages({ plan: UserPlan.FREE })).toBe(true);
+    expect(canAttachPackages({ plan: UserPlan.PRO })).toBe(true);
   });
 });

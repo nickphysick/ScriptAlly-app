@@ -29,10 +29,16 @@ export interface PackagesBandProps {
   onNewPackage: () => void;
   /** Rendered per card when given — the archive/delete control. */
   renderRemove?: (pkg: SubmissionPackage) => React.ReactNode;
+  /**
+   * ⚠️ A RENDER PROP, following `renderRemove`'s own pattern (§3, ref 177 right panel). The derived
+   * tracking block needs the page's agent lookup and its navigation, neither of which belongs to
+   * this band — so the band says WHERE it goes and the page says what it is.
+   */
+  renderTracking?: (pkg: SubmissionPackage) => React.ReactNode;
 }
 
 export const PackagesBand: React.FC<PackagesBandProps> = ({
-  packages, versions, queries, onOpenPackage, onNewPackage, renderRemove,
+  packages, versions, queries, onOpenPackage, onNewPackage, renderRemove, renderTracking,
 }) => {
   const tiles = packageTiles(packages, versions, queries);
   const byId = new Map(packages.map((p) => [p.id, p]));
@@ -86,6 +92,8 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
                 <span className="pkgb-footspacer" />
                 {pkg && renderRemove?.(pkg)}
               </div>
+              {/* §3 — the derived tracking block, beneath the card's own foot. */}
+              {pkg && renderTracking?.(pkg)}
             </div>
           );
         })}

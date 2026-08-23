@@ -22,6 +22,7 @@
  * that tour's missing entry point is F-F, and it wants a decision, not a shortcut.
  */
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { PackageTracking } from "./packages/PackageTracking";
 import { useScriptAllyDb } from "../lib/db";
 import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../types";
 import { useNavigate } from "react-router-dom";
@@ -384,6 +385,19 @@ export const SubmissionPackages: React.FC = () => {
                   setPkgModal(true);
                 }}
                 onNewPackage={() => { setPkgEditing(null); setPkgModal(true); }}
+                /* §3 — ⚠️ DERIVED, NEVER STORED. The count is a read over the queries already in
+                   memory; nothing writes to the package when one is logged, so a deleted query
+                   stops being counted with no cleanup. See `sendsWithPackage`. */
+                renderTracking={(p) => (
+                  <PackageTracking
+                    packageId={p.id}
+                    queries={msQueries}
+                    agentName={agentName}
+                    onOpenQuery={(id) => navigate(`/queries?q=${id}`)}
+                    user={currentUser}
+                    onAttach={() => navigate("/queries")}
+                  />
+                )}
                 /* ⚠️ THE SAME POPOVER THE SHEETS USE, AND THE SAME DECISION FUNCTION. A package
                    nothing has been sent with is deleted; one that has travelled is archived,
                    because a query still points at it and it is the record of what was in the
