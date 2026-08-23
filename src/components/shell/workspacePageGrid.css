@@ -279,20 +279,17 @@
   transition: opacity .18s ease;
 }
 /**
- * ⚠️ THE TOP HEM STARTS BELOW THE STICKY CHROME (masthead rethink, step 1) — it was starting at the
- * scroller's top edge and washing straight over the anchored control row. A fade whose whole job is
- * to say "content is passing UNDER this" was being drawn ON the thing it passes under.
+ * ⚠️ THE TOP HEM IS DELETED (pinned header ground, §2) — app-wide, both types, with its rule, its
+ * markup and `--wpg-stuck-h`, whose only consumer was its `margin-top`.
  *
- * ⚠️ THE OFFSET IS A MEASUREMENT PUBLISHED BY THE COMPONENT, not a number written here. The sticky
- * chrome is the control row today and the mini bar plus the control row once that lands, and pages
- * differ anyway because their control rows hold different things — a literal would be right for one
- * page on one day. `--wpg-stuck-h` is `0px` whenever nothing is stuck, so at rest this is inert.
+ * It was built for a masthead that SCROLLED AWAY: a fade at the row's top edge said "there is more
+ * up there". No page's masthead scrolls away now — Type A pins its chrome and Type B's sits in flow
+ * — so against pinned chrome the fade half-erases content that is about to pass BEHIND the header
+ * anyway. That ghosting is what made the chrome read as see-through.
+ *
+ * ⚠️ THE BOTTOM HEM STAYS AND IS A DIFFERENT CLAIM: content below the fold is hidden by the fold and
+ * by nothing else, so a fade there still says the only thing it ever said.
  */
-.wpg-hem--top {
-  align-self: start;
-  margin-top: var(--wpg-stuck-h, 0px);
-  background: linear-gradient(to bottom, var(--ws-window) 12%, rgba(var(--ws-window-rgb), 0));
-}
 .wpg-hem--bot { align-self: end; background: linear-gradient(to top, var(--ws-window) 12%, rgba(var(--ws-window-rgb), 0)); }
 .wpg-hem.on { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
@@ -611,8 +608,55 @@
   position: static;
   box-shadow: none;
 }
+/**
+ * ══ THE PINNED GROUND — TRANSLUCENT, BLURRED (pinned header ground, §3; ref 176 option C) ═════
+ *
+ * ⚠️ TYPE A ONLY, AND THE SCOPING IS THE POINT. A ground and a blur exist so content can pass
+ * BENEATH pinned chrome. On a Type B page nothing passes beneath anything — the masthead sits in
+ * flow on the page's own ground — so a blur there would be an effect with nothing behind it, and a
+ * pin shadow would claim a pin that never happens. The base rule above keeps them opaque and
+ * unchanged; this rule is what makes Type A different.
+ *
+ * ⚠️ THE FILL IS DERIVED FROM THE GROUND'S OWN CHANNELS, NEVER A LITERAL. `--ws-window-rgb` is the
+ * triple `--ws-window` is itself built from (`rgb(var(--ws-window-rgb))` in index.css), so an alpha
+ * of the same channels cannot drift from it. A hardcoded `254, 252, 250` would silently diverge the
+ * next time the ground moves — and it has moved twice this year, which is how five hem gradients
+ * came to fade into a colour no page displayed.
+ */
+.wpg:not(.wpg--static) > .wpg-scroll > .wpg-chrome {
+  background: rgba(var(--ws-window-rgb), 0.72);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+}
+/**
+ * ⚠️ WITHOUT THE BLUR, 72% IS THE FAULT THIS PACK EXISTS TO FIX. `backdrop-filter` is widely
+ * supported but not universally, and some accessibility settings disable it outright — and where it
+ * does not apply, a 72% fill is simply a see-through header with content legible through the title.
+ * So the fallback is not a nicety: it is the same guarantee by another means.
+ *
+ * ⚠️ ONE BLOCK TESTING BOTH SPELLINGS TOGETHER — `not ((a) or (b))` — AND TWO SEPARATE BLOCKS WERE
+ * WRONG IN THE EXPENSIVE DIRECTION. I wrote them apart reasoning that "a browser may support one and
+ * not the other"; separate blocks make the fallback fire when EITHER is missing, which is the
+ * opposite. Measured: Chromium supports the unprefixed form and does not report the `-webkit-` one
+ * to `@supports`, so the second block matched and every page rendered the OPAQUE fill — the blur
+ * silently unused on the browser that has it. The fallback belongs where NEITHER is available.
+ */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .wpg:not(.wpg--static) > .wpg-scroll > .wpg-chrome { background: var(--ws-window); }
+}
+/* ⚠️ AND A READER WHO HAS ASKED FOR LESS TRANSPARENCY GETS THE OPAQUE FILL, not a thinner one — the
+   setting is a request to stop layering surfaces, not to soften the layering. */
+@media (prefers-reduced-transparency: reduce) {
+  .wpg:not(.wpg--static) > .wpg-scroll > .wpg-chrome {
+    background: var(--ws-window);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+/* ⚠️ LIGHTER THAN THE OPAQUE OPTION'S SHADOW (.14 against .18) — the blur already separates the
+   layers, so the same shadow on top of it reads as two devices doing one job. */
 .wpg-scroll > .wpg-chrome.wpg-chrome--stuck {
-  box-shadow: 0 12px 16px -13px rgba(58, 28, 20, 0.18);
+  box-shadow: 0 12px 16px -13px rgba(58, 28, 20, 0.14);
 }
 /**
  * ══ SETTLE ON PIN — ONE OBJECT, TWO POSTURES (pinned chrome, §2; ref 174 option C) ════════════

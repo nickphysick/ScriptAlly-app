@@ -205,7 +205,6 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * inside the anchored controls, which is the exact fault this offset exists to remove. Sub-pixel
    * and invisible is still the wrong side of a boundary the lock asserts.
    */
-  const [stuckH, setStuckH] = React.useState(0);
   /* what the settle takes out of `scrollHeight`, given back as padding so max scroll cannot move */
   const [reclaim, setReclaim] = React.useState(0);
   const toolsRef = React.useRef<HTMLDivElement>(null);
@@ -393,8 +392,11 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
        */
       const settling = chromeRef.current?.getAnimations?.({ subtree: true }).length ?? 0;
       if (!settled && h > 0 && settling === 0) restHRef.current = h;
-      const chrome = settled ? h : 0;
-      setStuckH((prev) => (prev === chrome ? prev : chrome));
+      /* ⚠️ THE STUCK CHROME'S HEIGHT IS NO LONGER MEASURED OR PUBLISHED (pinned header ground, §2).
+         `--wpg-stuck-h` existed so the TOP HEM could clear the pinned chrome, and the top hem is
+         deleted — swept for reads before removing it, and the hem's `margin-top` was the only one.
+         The settle needs the slab's height for its RECLAIM, which is derived just below from the
+         same `h`; nothing else wanted the figure. */
       /**
        * ⚠️ THE SETTLE SHRINKS THE SLAB, AND SHRINK IS THE DANGEROUS DIRECTION (§2). The slab is
        * inside the scroller, so its box is part of `scrollHeight`: settling takes ~62px out of the
@@ -522,7 +524,6 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
         /* ⚠️ A CUSTOM PROPERTY RATHER THAN A CLASS, because the value is a MEASUREMENT and classes
            carry states. The stylesheet reads it; nothing else needs to know it exists. */
         style={{
-          ["--wpg-stuck-h" as string]: `${stuckH}px`,
           ["--wpg-reclaim-pad" as string]: `${reclaim}px`,
         } as React.CSSProperties}
         /* ⚠️ `wpg--tools` IS GONE FROM THIS LIST. It existed for ONE rule — `.wpg--tools > .wpg-scroll`,
@@ -728,7 +729,14 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             at all. Skipping the work would mean a second answer to "where is this scroller". */}
         {!fill && (
           <>
-            <div className={`wpg-hem wpg-hem--top${hem.top ? " on" : ""}`} aria-hidden="true" />
+            {/* ⚠️ THE TOP HEM IS DELETED (pinned header ground, §2) — app-wide, both types. It was
+                built for a masthead that SCROLLED AWAY, leaving nothing pinned above the content, so
+                a fade at the row's top edge said "there is more up there". No page's masthead
+                scrolls away now: a Type A page pins its chrome and a Type B page's sits in flow.
+                Against a pinned slab the fade is actively wrong — it half-erases content that is
+                about to pass behind the header anyway, and that ghosting is what made the chrome
+                read as see-through. The BOTTOM hem is untouched: content below the fold is still
+                hidden by nothing but the fold. */}
             <div className={`wpg-hem wpg-hem--bot${hem.bot ? " on" : ""}`} aria-hidden="true" />
           </>
         )}

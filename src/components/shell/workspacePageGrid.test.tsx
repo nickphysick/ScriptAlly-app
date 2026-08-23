@@ -135,7 +135,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(slab, "the slab's ground is a literal — it will be wrong the next time the window is retoned")
       .toMatch(/background:\s*var\(--ws-window\)/);
     expect(block(".wpg-scroll > .wpg-chrome.wpg-chrome--stuck"), "the slab casts no shadow when pinned")
-      .toMatch(/box-shadow:[^;]*rgba\(58, 28, 20, 0\.18\)/);
+      .toMatch(/box-shadow:[^;]*rgba\(58, 28, 20, 0\.14\)/);   /* .18 → .14: the blur separates the layers now */
   });
 
   /**
@@ -449,13 +449,20 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
         .toMatch(/grid-(column|template-columns):/);
     }
     expect(hem, "the hems must not take pointer events — they sit over the scroller").toContain("pointer-events: none");
-    expect(block(".wpg-hem--top"), "the top hem is not pinned to the row's top edge").toContain("align-self: start");
+    /* ⚠️ THE TOP HEM IS DELETED (pinned header ground, §2) — app-wide. It was built for a masthead
+       that SCROLLED AWAY; no page's does now, and against pinned chrome the fade half-erases content
+       that is about to pass behind the header anyway. Asserted GONE rather than dropped, so it
+       cannot return unnoticed. */
+    expect(cssRules, "the top hem came back — see the note at its deletion").not.toMatch(/["\s.]wpg-hem--top[\s.{,]/);
+    expect(srcCode, "the top hem is rendered again").not.toMatch(/["\s`]wpg-hem--top["\s`]/);
+    /* the BOTTOM hem is a different claim and stays: content below the fold is hidden by the fold */
+    expect(block(".wpg-hem--bot"), "the bottom hem is not pinned to the row's bottom edge").toContain("align-self: end");
     expect(block(".wpg-hem--bot"), "the bottom hem is not pinned to the row's bottom edge").toContain("align-self: end");
     /* ⚠️ NO MASK ON THE SCROLLER — it interacts badly with `scrollbar-gutter`, which this row
        depends on for the reservation that stops content jumping sideways mid-filter. */
     expect(block(".wpg-scroll"), "a mask went on the scroller — it fights `scrollbar-gutter`").not.toContain("mask");
     /* the hems are rendered by the grid, so every page gets them identically or none does */
-    expect(srcCode, "the hems are not mounted").toContain("wpg-hem--top");
+    expect(srcCode, "the bottom hem is not mounted").toContain("wpg-hem--bot");
     expect(srcCode, "the hems are not mounted").toContain("wpg-hem--bot");
   });
 
@@ -477,7 +484,8 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    * runs against the space. The declaration is pulled out and checked in code.
    */
   it("⚠️ NEITHER HEM PAINTS A LITERAL — both ends read the ground token", () => {
-    for (const sel of [".wpg-hem--top", ".wpg-hem--bot"]) {
+    /* one hem left, and it still reads the ground token rather than a literal */
+    for (const sel of [".wpg-hem--bot"]) {
       /* ⚠️ ANCHOR BEFORE SLICING — `block()` returns "" for a selector it cannot find, and every
          `.not.toMatch` below passes happily on an empty string. */
       const b = block(sel);

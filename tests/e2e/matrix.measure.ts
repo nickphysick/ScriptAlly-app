@@ -401,15 +401,16 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
      * lose them.
      */
     for (const r of all.filter((x) => x.fill)) {
-      expect(r.hemRest, `${r.page}: a fill page drew hems — its row cannot reach a state either hem describes`).toBe("absent absent");
+      expect(r.hemRest, `${r.page}: a fill page drew a hem — its row cannot reach a state a hem describes`).toBe("absent absent");
     }
     for (const r of all.filter((x) => !x.fill)) {
-      expect(r.hemRest, `${r.page}: the hems are missing`).not.toContain("absent");
+      /* one hem now — the bottom one; the top one is deleted app-wide */
+      expect(String(r.hemRest).split(" ")[1], `${r.page}: the bottom hem is missing`).not.toBe("absent");
     }
-    const hemmed = all.filter((r) => !String(r.hemRest).includes("absent"));
+    const hemmed = all.filter((r) => String(r.hemRest).split(" ")[1] !== "absent");
     expect(hemmed.length, "no page mounted a hem at all — the reading is broken, not the hems").toBeGreaterThan(0);
     for (const r of hemmed) {
-      for (const [edge, ink] of [["top", String(r.hemInk).split(" | ")[0]], ["bottom", String(r.hemInk).split(" | ")[1]]]) {
+      for (const [edge, ink] of [["bottom", String(r.hemInk).split(" | ")[1]]]) {
         expect(ink, `${r.page}: the ${edge} hem has no opaque stop — its gradient is not a fade into anything (${r.hemInk})`)
           .toMatch(/^rgba?\(/);
         expect(ink, `${r.page}: the ${edge} hem fades from ${ink} over a ${r.windowBg} ground — a pale band across the scroller, visible only where content passes under it`)
@@ -454,10 +455,14 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
      * rather than filling. That is Manuscripts' own height chain and not this pack's to change.
      */
     for (const r of all.filter((x) => x.canScroll && !x.fill)) {
+      /* ⚠️ THE TOP HEM IS DELETED APP-WIDE (pinned header ground, §2) — built for a masthead that
+         SCROLLED AWAY, and against pinned chrome it half-erased content about to pass behind the
+         header anyway. Asserted ABSENT so it cannot return unnoticed.
+         ⚠️ THE BOTTOM HEM'S CLAIM IS UNCHANGED and is the one that mattered most: it is what caught
+         a `ResizeObserver` reporting nothing while its scroller's children grew. */
       const [restTop, restBot] = String(r.hemRest).split(" ");
-      expect(state(restTop), `${r.page}: a top fade at the top of the page — it reads as a rendering fault`).toBe("off");
+      expect(restTop, `${r.page}: a top hem is still rendered — it is deleted app-wide`).toBe("absent");
       expect(state(restBot), `${r.page}: no bottom fade with content below the fold — the observer is not seeing the content grow`).toBe("on");
-      expect(state(String(r.hemWork).split(" ")[0]), `${r.page}: no top fade once scrolled`).toBe("on");
     }
     for (const r of all) {
       expect(r.stacked, `${r.page}: a legacy fade sits inside the grid's own scroller — two gradients on one edge (${r.stacked})`).toBe("none");
@@ -465,7 +470,7 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     /* a page that cannot scroll shows neither — nothing is hidden in either direction. Fill pages
        are excluded because they have no hems AT ALL, which the case above states directly. */
     for (const r of all.filter((x) => !x.canScroll && !x.fill)) {
-      expect(String(r.hemRest).split(" ").map(state).join(" "), `${r.page}: a fade on a page with nothing hidden past either edge (${r.hemRest})`).toBe("off off");
+      expect(state(String(r.hemRest).split(" ")[1]), `${r.page}: a bottom fade on a page with nothing hidden past its foot (${r.hemRest})`).toBe("off");
     }
 
     /* ⚠️ THE TASKS VIEWPORT LOCK: the frame is a window and NEVER scrolls — all scrolling belongs
