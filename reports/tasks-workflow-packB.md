@@ -330,3 +330,35 @@ did exactly what A2's pack added it for.
 **7. Cross-session —** busy again. HEAD moved from my last commit to `7ae9fe3a` across several
 sessions' work before I began; my history is intact and an ancestor. The noteboard session entered
 the territory mid-run.
+
+---
+
+## For the Phase 2 session — two constraints, ruled by Nick
+
+**1. No scripted substitution for the move itself.** The bodies move by hand. This session tried a
+regex pipeline over ~500 lines and hit the same failure class three times — substring not found, a
+replacement matching its own comment prose, one matching the first of two identical blocks. The map
+above is what makes a hand-move short; the pipeline is what makes it wrong.
+
+**2. Re-check the mid-run gate before every gate**, not only at Step 0. The noteboard session is
+demonstrably active in `src/components/todo/` — it has entered the directory during three separate
+runs now — and the gate fired at this pack's Phase 2 boundary, which is what it was added for.
+
+**And one standing observation, since it has now cost three deploys.** Condition 4 has blocked the
+deploy three times in a row, each time on a *different* session's uncommitted source that ships:
+`WorkspacePageGrid.tsx`, then `TodoNoteboardPage.tsx` + `noteboard.ts`, and now the noteboard set
+again. The work being blocked has been green and verified every time. This is not a fault in any one
+session — it is what happens when several sessions share a checkout and the deploy rule is honest.
+Worth knowing that the rule is doing its job rather than mis-firing.
+
+## And a finding that wants its own pack
+
+**A user task, once created with a date, cannot be removed through the UI.** Evidenced, not
+inferred: `deleteUserNote` exists (`ToDoPage:2607`), `cardMenu` declares
+`leaf("delete-task", "Remove note…")` (`todoMenu:243`), and the **only** component that renders that
+menu is `TodoBoard` — mounted nowhere. The Noteboard's own `removeNote` exists in source but its
+trigger is not reachable for these items on the deployed build either.
+
+The five leftover harness notes are now cleared, so the symptom is gone — but the gap is not, and it
+is the reason the debris accumulated in the first place. A writer who creates a note has no way to
+delete it.
