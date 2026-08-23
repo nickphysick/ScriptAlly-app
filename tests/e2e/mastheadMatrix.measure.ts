@@ -38,7 +38,19 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
   const all = [...document.querySelectorAll(`.wpg.${c}`)] as HTMLElement[];
   const g = all.find((e) => e.getBoundingClientRect().height > 0);
   if (!g) return null;
-  const mast = g.querySelector(".wsh") as HTMLElement;
+  /**
+   * ⚠️ A PAGE MAY HAVE NO MASTHEAD, AND THAT IS A READING RATHER THAN A CRASH. `WorkspacePageGrid`
+   * takes `masthead` as a `ReactNode`, so `null` is a way for a page to decline the shared header
+   * without editing the grid — and one page did exactly that for a while. This file dereferenced
+   * `.wsh` unguarded and died with `Cannot read properties of null`, which is the least useful thing
+   * a census can do: the fault it should have REPORTED was a page silently leaving the system.
+   *
+   * ⚠️ AND THE POPULATION IS ASSERTED SEPARATELY, both ways — that enough pages were measured, and
+   * that the opted-out count is currently ZERO. An absence tolerated in silence is how three locks
+   * came to crash at once instead of one lock going red with a sentence.
+   */
+  const mast = g.querySelector(".wsh") as HTMLElement | null;
+  if (!mast) return { optedOut: true } as never;
   const wrap = g.querySelector(".wpg-mast") as HTMLElement;
   const sc = g.querySelector(".wpg-scroll") as HTMLElement;
   const row = g.querySelector(".wpg-tools") as HTMLElement | null;
@@ -157,6 +169,18 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
   /* ⚠️ THE MASTHEAD DRAWS NO LINE AND THE SLAB DRAWS ONE — asserted as two positive claims rather
      than as one absence, because "the hairline is 0 everywhere" is also true of a build that lost it
      altogether (pinned chrome, §1). */
+  /**
+   * ⚠️ NO PAGE HAS OPTED OUT, AND THAT IS ASSERTED RATHER THAN ASSUMED (Nick's call, after
+   * Comparable titles did). A page declining the shared masthead is a product decision — one
+   * masthead, one settle, one Hide rule — so it surfaces here as a named failure instead of being
+   * absorbed by a skip. The reading above keeps the state measurable for a page that genuinely
+   * needs it one day; this says today is not that day.
+   */
+  const optedOut = rows.filter((x) => (x.r as { optedOut?: boolean }).optedOut).map((x) => x.name);
+  expect(optedOut, `${optedOut.join(", ")} render the grid with no masthead. Page headers behave identically across the app; if a page genuinely needs to decline, that is a decision to take rather than a lock to relax.`)
+    .toEqual([]);
+  expect(rows.length, "no page was measured at all").toBe(PAGES.length);
+
   for (const { name, r } of rows) {
     expect(r.borderBottom, `${name}: the masthead drew its own hairline again — the slab's base is the one line`).toBe("0px");
   }

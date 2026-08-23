@@ -184,30 +184,9 @@
    kind of token. */
 .ct-wpg.wpg { --wpg-measure: var(--work-max); }
 
-/* ⚠️ THE SHARED STICKY SLAB IS HIDDEN ON THIS PAGE ONLY (v2.1 §1) — hidden rather than restyled,
- * because what it does is behaviour, not appearance.
- *
- * `.wpg-chrome` is `position: sticky; top: 0` with an opaque fill, a base hairline, a scroll shadow
- * that fades in on `--stuck`, and a settled posture that shrinks the mark to 34px and the title to
- * 22px as content passes beneath it. This page wants a header that simply leaves with the content,
- * on the SHEET's measure rather than the masthead's constant 35px gutter. Neither is reachable by
- * styling the slab: the first is behaviour, and the second is a cross-page constant that
- * `contentGeometry.measure.ts` exists to protect — one a previous pass of mine wrongly overrode.
- *
- * ⚠️ `masthead={null}` ALONE IS NOT ENOUGH, which is the whole reason this rule exists. The grid
- * renders `.wpg-chrome` UNCONDITIONALLY, so declining its contents leaves an empty sticky box that
- * still draws its hairline across the top of the page.
- *
- * ⚠️ AND IT IS PAGE-SCOPED BY DESCENDANCY, WHICH IS THE SAFE SHAPE. `.ct-wpg .wpg-chrome` is 0-2-0
- * and names an element INSIDE this page's own grid, so it cannot reach another page's chrome
- * whatever source order the bundler emits. Nothing in the shared component or its stylesheet is
- * edited, and every other page is byte-identical.
- *
- * ⚠️ THE GRID'S ARITHMETIC SURVIVES IT. `chromeRef` measures the slab to give the scroll hems their
- * clearance; a hidden box measures 0, which is the correct clearance for a slab that is not there.
- * The `.wpg-reclaim` spacer keeps its 16px `--wpg-chrome-gap`, which is now simply the page's top
- * margin — a sensible one, so it is left rather than zeroed. */
-.ct-wpg .wpg-chrome { display: none; }
+/* ⚠️ THE SLAB IS NOT HIDDEN HERE ANY MORE. This page declined the shared masthead and hid the empty
+   sticky box it left behind; it takes the masthead again, so the slab has contents and does the same
+   job it does on the other four scrolling pages. */
 /* ⚠️ NO TOP PADDING, EVER — the gap under the header belongs to `--content-top-gap` and is paid
    ONCE, by whichever row is first below the hairline. This carried 22px, so the page rendered a
    92px gap against a 70px token: not the grid paying twice, but a bare wrapper adding a second
@@ -224,32 +203,8 @@
 }
 
 /* ── the hero: the composed query line, and what it is made of ── */
-/* ══ THE PAGE HEADER — static, inside the sheet (v2.1 §1) ══
- *
- * ⚠️ NOTHING STICKY, NOTHING FLOATING. No `position`, no background, no shadow — the four things the
- * shared slab carried, and the four reasons it could not simply be restyled into this. The only
- * rule here is the hairline UNDER the block, which belongs to the header rather than the viewport.
- *
- * ⚠️ `.ct-hero` AND ITS PARTS ARE RETIRED WITH IT — the eyebrow, the standfirst, the three-fact row
- * and the `0 comps` tally are all gone. The tile survives them and moved into `.ct-toprow`; its
- * comps line is the only count above the fold now. */
-.ct-pagehead {
-  display: flex; align-items: flex-start; gap: 16px;
-  padding: 4px 0 20px; margin-bottom: 24px;
-  border-bottom: 1px solid var(--ct-band-hair);
-}
-/* the shared mark, sized by its container exactly as `PageHeader` sizes it */
-.ct-pagemark { flex: 0 0 34px; display: flex; align-items: center; justify-content: center; }
-.ct-pagemark .os-mark { width: 34px; height: 34px; flex-basis: 34px; }
-.ct-pagemark .os-mark img, .ct-pagemark .os-mark svg { width: 34px; height: 34px; }
-/* ⚠️ 1.3 MINIMUM ON MIXED-CASE PLAYFAIR — "Comparable titles" carries a `p`, and a tighter line box
-   crops it. This is the largest text on the page, so it is the most visible place to get it wrong.
-   Plain ink, one weight: no italic accent word, no burgundy `<em>`, no colour-shifted word. */
-.ct-pagehead h1 {
-  margin: 0; font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 600;
-  line-height: 1.3; letter-spacing: -.015em; color: var(--ct-ink);
-}
-.ct-pagehead p { margin: 6px 0 0; font-size: 14px; line-height: 1.55; color: var(--ct-ink-soft); }
+/* ⚠️ `.ct-pagehead` AND `.ct-pagemark` ARE DELETED — the page-local header they styled is gone and
+   the shared masthead draws both the mark and the title again. */
 
 /* ══ THE TOP ROW — tile left, query line right (v2.1 §2) ══
  *

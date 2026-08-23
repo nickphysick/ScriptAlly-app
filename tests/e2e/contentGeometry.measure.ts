@@ -95,7 +95,11 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
      * off by exactly one `--mast-gutter` and reads as the constant having been chosen wrongly.
      * What a reader sees line up is the mark and the title, and those sit at the ink.
      */
-    masthead: box(g.querySelector(".wsh") as HTMLElement),
+    /* ⚠️ `null` WHEN A PAGE DECLINES THE SHARED MASTHEAD — a reading, not a crash. `box()` already
+       returns null for a missing element; what died was the assertion downstream reading `.left`
+       off it. The opted-out population is asserted at zero in `mastheadMatrix`, so this one reports
+       the state and names the page rather than repeating that claim. */
+    masthead: box(g.querySelector(".wsh") as HTMLElement | null),
     /* the measure box too, so a diff can say which of the two moved */
     mastBox: box(mast),
   };
@@ -137,6 +141,9 @@ test("content geometry is unchanged by the masthead's width system", async ({ pa
    * measured; and asserted at all three widths, because the cap binds only at the widest and a law
    * that holds at one width is a coincidence.
    */
+  const missing = WIDTHS.flatMap((w) => PAGES.filter(({ name }) => !mast[`${w}|${name}`]?.masthead).map(({ name }) => `${name} @${w}`));
+  expect(missing, `no masthead rendered on: ${missing.join(", ")} — a page declining the shared header leaves this comparison with nothing to compare`)
+    .toEqual([]);
   for (const w of WIDTHS) {
     const lefts = PAGES.map(({ name }) => ({ name, v: mast[`${w}|${name}`]!.masthead!.left }));
     const rights = PAGES.map(({ name }) => ({ name, v: mast[`${w}|${name}`]!.masthead!.right }));

@@ -7,11 +7,11 @@
  * Route /manuscripts/comps; reached from the rail and each plate's MANAGE → link.
  * Single visual source of truth: design-refs/comparable-titles-v2-1.html.
  *
- * ⚠️ THIS PAGE DECLINES THE SHARED MASTHEAD (v2.1). `WorkspacePageGrid` is mounted with
- * `masthead={null}` and no toolbar, and the sticky `.wpg-chrome` slab is hidden page-scoped; the
- * header is a static `.ct-pagehead` inside the sheet, carrying the page's only `<h1>`. The previous
- * sentence here described the standard `PageHeader` in the grid's masthead slot with a manuscript
- * selector in its tools — none of which is true any more.
+ * ⚠️ THIS PAGE TAKES THE SHARED MASTHEAD, like every other (Nick's call, reverting v2.1's opt-out).
+ * `WorkspacePageGrid` is mounted with the standard `PageHeader`, so the page gets the §1 slab and
+ * the §2 settle with no page-specific variant of either. It briefly drew its own static header
+ * inside the sheet and hid the slab page-scoped; that reasoning was sound page-locally and is not
+ * what the app does — one masthead, one settle, one Hide rule, everywhere.
  * Store only facts + one intent (`inQuery`); role / query line / composition / age are derived
  * at render (src/lib/compsPage.ts). Comp writes go through the shared updateManuscript path (a first
  * write on a legacy-string doc converts it to the structured array); every write runs through
@@ -21,10 +21,11 @@ import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown, Plus, Copy, Check, X, Sparkles, Lock, RefreshCw, BookOpen, Star, GripVertical } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { CompMedia, CompTitle, Manuscript } from "../../types";
-/* ⚠️ `PageHeader` IS NO LONGER IMPORTED — this page declines the shared masthead
-   (`masthead={null}`) and draws its own static header inside the sheet. The MARK is still
-   the shared one: `OneScreenMark` is what `PageHeader` itself renders for `mark="comps"`,
-   so the glyph cannot drift from the one every other page shows. */
+/* ⚠️ THE SHARED MASTHEAD IS BACK (pinned chrome; Nick's call). This page briefly drew its own
+   static header inside the sheet — a fair reading in isolation, and the wrong one across the app:
+   page headers behave identically everywhere, and a page differing because two streams each decided
+   sensibly on their own is the outcome to avoid. `OneScreenMark` stays imported for the tiles. */
+import { PageHeader } from "../shell/PageHeader";
 import { OneScreenMark } from "../dashboard/OneScreenMark";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { BrandDropdown } from "../forms/BrandDropdown";
@@ -799,27 +800,23 @@ export const ComparableTitlesPage: React.FC<{
         className="ct-wpg"
         scrollLabel="Comparable titles"
         /**
-         * ⚠️ `masthead={null}` IS THE OPT-OUT, AND IT NEEDED NO EDIT TO THE SHARED GRID (v2.1 §1).
-         * The prop is REQUIRED but typed `React.ReactNode`, and that type admits `null` — so a page
-         * can decline the shared masthead without the component learning a new prop and without any
-         * other page changing. `PageHeader` is not rendered here at all, so its rules are neither
-         * touched nor bent.
+         * ⚠️ THE SAME MASTHEAD EVERY OTHER PAGE PASSES. This was `masthead={null}` — the prop is
+         * typed `React.ReactNode`, so `null` was a way to decline the shared header without editing
+         * the grid. The reasoning was sound page-locally (a header that leaves with the content, on
+         * the sheet's measure rather than the masthead's constant gutter) and it is not what the app
+         * does: one masthead, one settle, one Hide rule, on all ten pages.
          *
-         * ⚠️ WHY THE SHARED ONE HAD TO GO RATHER THAN BE RESTYLED. `.wpg-chrome` is a STICKY slab —
-         * `position: sticky; top: 0`, an opaque fill, a base hairline, a scroll shadow that fades in
-         * on `--stuck`, and a settled posture that shrinks the mark to 34px and the title to 22px as
-         * you scroll. This page wants a header that simply leaves with the content, and it wants it
-         * on the SHEET's measure rather than the masthead's constant 35px gutter. Neither is
-         * reachable by styling: the first is behaviour, and the second is the cross-page constant
-         * that `contentGeometry.measure.ts` exists to protect (and which a previous pass of mine
-         * wrongly overrode). A page-local header inside the sheet is the only shape that gets both
-         * without moving anything else.
-         *
-         * ⚠️ AND THE TOOLBAR GOES WITH IT. Its `PageTally` was the `0 comps` line; the tile's own
-         * comps line is the page's count now. A tally pinned above a header that no longer exists
-         * would be a fact anchored to nothing.
+         * ⚠️ THE COPY IS THE PAGE'S OWN, carried across verbatim from the header this replaces — the
+         * title and the sentence beneath it are unchanged, only the thing rendering them.
          */
-        masthead={null}
+        masthead={(
+          <PageHeader
+            variant="workspace"
+            mark="comps"
+            title="Comparable titles"
+            description="The books your manuscript sits beside, gathered and query-ready."
+          />
+        )}
       >
       <div className="ct-pagebody">
         {!activeMs ? (
@@ -831,26 +828,6 @@ export const ComparableTitlesPage: React.FC<{
           </div>
         ) : (
           <>
-            {/* ══ THE PAGE HEADER — static, inside the sheet, and the page's only h1 (v2.1 §1).
-
-                ⚠️ IT SCROLLS AWAY BECAUSE IT IS CONTENT. No `position: sticky`, no fill, no base
-                hairline of its own beyond the rule under the block, and no scroll shadow — the
-                shared slab carried all four and that is precisely what this replaces.
-
-                ⚠️ PLAIN PLAYFAIR IN INK, ONE WEIGHT. No italic accent word and no burgundy `<em>`:
-                a heading that changes colour mid-sentence reads as two things, and the reader has
-                to work out which half is the point.
-
-                ⚠️ THE MARK IS THE SHARED `OneScreenMark`, NOT A TRACED COPY — the same glyph the
-                masthead drew for `mark="comps"`. Its size comes from the container here exactly as
-                it does in `PageHeader`, because the component takes a name and nothing else. */}
-            <header className="ct-pagehead">
-              <span className="ct-pagemark"><OneScreenMark name="comps" /></span>
-              <div>
-                <h1>Comparable titles</h1>
-                <p>The books your manuscript sits beside, gathered and query-ready.</p>
-              </div>
-            </header>
 
             {/* ══ THE TOP ROW — active manuscript left, the query line right (v2.1 §2) ══ */}
             <div className="ct-toprow">

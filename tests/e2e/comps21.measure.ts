@@ -9,68 +9,22 @@ import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 const ROUTE = "/manuscripts/comps";
 
-test("the header is static, inside the sheet, and the only h1", async ({ page }) => {
-  await openRoute(page, ROUTE, { width: 1440, height: 900 });
-  const r = await page.evaluate(() => {
-    const grid = [...document.querySelectorAll(".wpg")].find((x) => x.getBoundingClientRect().height > 0) as HTMLElement;
-    const head = document.querySelector(".ct-pagehead") as HTMLElement | null;
-    const chrome = grid?.querySelector(".wpg-chrome") as HTMLElement | null;
-    if (!grid || !head) return null;
-    const cs = getComputedStyle(head);
-    const h = head.getBoundingClientRect();
-    const row = document.querySelector(".ct-toprow") as HTMLElement | null;
-    return {
-      /* ⚠️ SCOPED TO THIS PAGE'S ROOT, NOT THE DOCUMENT. Workspace pages stay MOUNTED in this app —
-         they toggle `display` rather than unmounting — so `document.querySelectorAll("h1")` counts
-         every other route's heading too and reads 9 on a page with one. The claim is about this
-         page; the selector has to be as well. */
-      pageH1: document.querySelectorAll(".ctpage h1").length,
-      docH1: document.querySelectorAll("h1").length,
-      pos: cs.position, bg: cs.backgroundColor, shadow: cs.boxShadow,
-      headL: Math.round(h.left), headTop: Math.round(h.top),
-      rowL: row ? Math.round(row.getBoundingClientRect().left) : -1,
-      chromeShown: chrome ? getComputedStyle(chrome).display : "absent",
-      title: (head.querySelector("h1")?.textContent ?? "").trim(),
-      titleColour: head.querySelector("h1") ? getComputedStyle(head.querySelector("h1")!).color : "",
-    };
-  });
-  expect(r, "the page header did not render").not.toBeNull();
-  console.log(`  header pos=${r!.pos} bg=${r!.bg} shadow=${r!.shadow}`);
-  console.log(`  h1 on page=${r!.pageH1} (document total ${r!.docH1}) "${r!.title}" · chrome display=${r!.chromeShown} · head x${r!.headL} row x${r!.rowL}`);
-  expect(r!.pos, "the page header is positioned — it must be static content").toBe("static");
-  expect(r!.bg, "the header has a fill; it must not").toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
-  expect(r!.shadow, "the header has a shadow; it must not").toBe("none");
-  expect(r!.chromeShown, "the shared sticky slab still renders").toBe("none");
-  expect(r!.pageH1, "this page does not have exactly one h1").toBe(1);
-  /* inside the sheet: the header shares the content column's left edge, not the masthead's */
-  expect(Math.abs(r!.headL - r!.rowL), "the header is not on the sheet's measure").toBeLessThanOrEqual(1);
-});
-
-test("nothing sticks when the page scrolls", async ({ page }) => {
-  /* ⚠️ A SHORT VIEWPORT, DELIBERATELY. The harness account has an empty shelf, so at 1440x700 the
-     page does not overflow and `scrollTop` stays 0 — and a scroll test on a page that cannot scroll
-     proves nothing while looking like a pass. 420px guarantees overflow whatever the shelf holds. */
-  await openRoute(page, ROUTE, { width: 1440, height: 420 });
-  const r = await page.evaluate(async () => {
-    /* ⚠️ SCOPED TO THIS PAGE'S ROOT. Workspace pages stay MOUNTED, so several `.wpg-scroll`
-       elements exist at once and a bare query returns whichever is first in the document — a hidden
-       one, with no overflow, whose `scrollTop` stays 0 for ever. The unscoped version reported "the
-       page does not scroll" about a scroller with 1091px of overflow. */
-    const sc = document.querySelector(".ctpage .wpg-scroll") as HTMLElement;
-    const head = document.querySelector(".ctpage .ct-pagehead") as HTMLElement;
-    const before = head.getBoundingClientRect().top;
-    sc.scrollTop = 300;
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-    const after = head.getBoundingClientRect().top;
-    return { before: Math.round(before), after: Math.round(after), moved: Math.round(before - after), scrolled: sc.scrollTop };
-  });
-  console.log(`  header top ${r.before} → ${r.after} (moved ${r.moved}px for ${r.scrolled}px of scroll)`);
-  expect(r.scrolled, "the page did not scroll — the test proves nothing").toBeGreaterThan(0);
-  /* it must travel with the content: a sticky header would move 0 and clamp at the top */
-  expect(r.moved, "the header did not move with the content — something is still sticky")
-    .toBeGreaterThanOrEqual(r.scrolled - 2);
-});
-
+/**
+ * ⚠️ TWO CASES ARE DELETED HERE, AND THEY ASSERTED A DECISION THAT HAS BEEN REVERSED.
+ *
+ * "the header is static, inside the sheet, and the only h1" and "nothing sticks when the page
+ * scrolls" both measured this page's own header — a `.ct-pagehead` drawn in the sheet while the
+ * grid was mounted `masthead={null}`. Comparable titles takes the SHARED masthead again (Nick's
+ * call), so its chrome is the sticky slab and it settles on scroll like the other four scrolling
+ * pages. Both cases now assert the opposite of what the page does.
+ *
+ * ⚠️ DELETED RATHER THAN INVERTED, because the shared masthead already has its own locks and they
+ * cover this page with no carve-out: `mastheadMatrix` for both postures, `contentGeometry` for the
+ * constant left offset, `stickyRow` for the slab and the settle. Rewriting them here would give one
+ * guarantee two homes.
+ *
+ * The two cases below are this page's OWN work — the top row — and are untouched.
+ */
 test("the top row shares one height and the actions sit at the foot", async ({ page }) => {
   await openRoute(page, ROUTE, { width: 1440, height: 900 });
   const r = await page.evaluate(() => {
