@@ -609,54 +609,32 @@
   box-shadow: none;
 }
 /**
- * ══ THE PINNED GROUND — TRANSLUCENT, BLURRED (pinned header ground, §3; ref 176 option C) ═════
+ * ══ THE PINNED GROUND — FULLY OPAQUE (pinned header ground, withdrawn and replaced) ═══════════
  *
- * ⚠️ TYPE A ONLY, AND THE SCOPING IS THE POINT. A ground and a blur exist so content can pass
- * BENEATH pinned chrome. On a Type B page nothing passes beneath anything — the masthead sits in
- * flow on the page's own ground — so a blur there would be an effect with nothing behind it, and a
- * pin shadow would claim a pin that never happens. The base rule above keeps them opaque and
- * unchanged; this rule is what makes Type A different.
+ * ⚠️ THE TRANSLUCENT-PLUS-BLUR DIRECTION IS WITHDRAWN, AND THIS IS THE THIRD REPORT OF THE SAME
+ * SYMPTOM. `backdrop-filter` does not reliably APPLY inside a nested scroller beneath a rounded,
+ * `overflow: hidden` window — so the 72% fill was doing the work alone and crisp card borders read
+ * straight through it.
  *
- * ⚠️ THE FILL IS DERIVED FROM THE GROUND'S OWN CHANNELS, NEVER A LITERAL. `--ws-window-rgb` is the
- * triple `--ws-window` is itself built from (`rgb(var(--ws-window-rgb))` in index.css), so an alpha
- * of the same channels cannot drift from it. A hardcoded `254, 252, 250` would silently diverge the
- * next time the ground moves — and it has moved twice this year, which is how five hem gradients
- * came to fade into a colour no page displayed.
+ * ⚠️ AND `getComputedStyle` SAID THE BLUR WAS THERE THE WHOLE TIME. Measured on the built bundle:
+ * `backdrop-filter: blur(14px) saturate(1.4)`, resolved and reported, on a header you could see
+ * through. A declaration that parses says nothing about what is rendered — which is the sentence I
+ * wrote at the top of the lock while asserting the declaration anyway.
+ *
+ * ⚠️ AND IT IS NOT A STACKING FAULT, which was checked before this was written rather than assumed:
+ * the slab has a computed background, no child paints in its place, nothing between it and the
+ * window establishes a stacking or backdrop root, and nothing paints above it at any sampled point.
+ * The alpha was the whole story, so an opaque colour is enough.
+ *
+ * ⚠️ TYPE A ONLY. On a Type B page nothing passes beneath the masthead — it sits in flow on the
+ * page's own ground — so it keeps the base rule above and gains nothing here.
  */
 .wpg:not(.wpg--static) > .wpg-scroll > .wpg-chrome {
-  background: rgba(var(--ws-window-rgb), 0.72);
-  backdrop-filter: blur(14px) saturate(1.4);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  background: var(--ws-window);
 }
-/**
- * ⚠️ WITHOUT THE BLUR, 72% IS THE FAULT THIS PACK EXISTS TO FIX. `backdrop-filter` is widely
- * supported but not universally, and some accessibility settings disable it outright — and where it
- * does not apply, a 72% fill is simply a see-through header with content legible through the title.
- * So the fallback is not a nicety: it is the same guarantee by another means.
- *
- * ⚠️ ONE BLOCK TESTING BOTH SPELLINGS TOGETHER — `not ((a) or (b))` — AND TWO SEPARATE BLOCKS WERE
- * WRONG IN THE EXPENSIVE DIRECTION. I wrote them apart reasoning that "a browser may support one and
- * not the other"; separate blocks make the fallback fire when EITHER is missing, which is the
- * opposite. Measured: Chromium supports the unprefixed form and does not report the `-webkit-` one
- * to `@supports`, so the second block matched and every page rendered the OPAQUE fill — the blur
- * silently unused on the browser that has it. The fallback belongs where NEITHER is available.
- */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .wpg:not(.wpg--static) > .wpg-scroll > .wpg-chrome { background: var(--ws-window); }
-}
-/* ⚠️ AND A READER WHO HAS ASKED FOR LESS TRANSPARENCY GETS THE OPAQUE FILL, not a thinner one — the
-   setting is a request to stop layering surfaces, not to soften the layering. */
-@media (prefers-reduced-transparency: reduce) {
-  .wpg:not(.wpg--static) > .wpg-scroll > .wpg-chrome {
-    background: var(--ws-window);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-}
-/* ⚠️ LIGHTER THAN THE OPAQUE OPTION'S SHADOW (.14 against .18) — the blur already separates the
-   layers, so the same shadow on top of it reads as two devices doing one job. */
+/* the pin shadow is back to the opaque value — there is no blur separating the layers now */
 .wpg-scroll > .wpg-chrome.wpg-chrome--stuck {
-  box-shadow: 0 12px 16px -13px rgba(58, 28, 20, 0.14);
+  box-shadow: 0 12px 16px -13px rgba(58, 28, 20, 0.18);
 }
 /**
  * ══ SETTLE ON PIN — ONE OBJECT, TWO POSTURES (pinned chrome, §2; ref 174 option C) ════════════

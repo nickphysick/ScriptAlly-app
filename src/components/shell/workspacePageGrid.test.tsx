@@ -135,7 +135,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(slab, "the slab's ground is a literal — it will be wrong the next time the window is retoned")
       .toMatch(/background:\s*var\(--ws-window\)/);
     expect(block(".wpg-scroll > .wpg-chrome.wpg-chrome--stuck"), "the slab casts no shadow when pinned")
-      .toMatch(/box-shadow:[^;]*rgba\(58, 28, 20, 0\.14\)/);   /* .18 → .14: the blur separates the layers now */
+      .toMatch(/box-shadow:[^;]*rgba\(58, 28, 20, 0\.18\)/);   /* back to .18 — the blur that justified .14 is withdrawn */
   });
 
   /**
