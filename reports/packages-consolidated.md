@@ -198,6 +198,79 @@ a do-not-touch or shared-header file; Correction UI is settled.
 
 ---
 
+---
+
+## Part A — D-A6, the only survivor
+
+**The brief named one rule. The fault was twenty.**
+
+`.pkgo-rail` was declared in `packagesOverview.css` and rendered by nothing — but so was most of the
+sheet. §4 of the broadsheet pack (`71debcac`) retired the rail and three bands took its place; the
+re-cut moved the problem statement into the hero band. Neither change swept the CSS behind it.
+
+**The sweep was for RENDERS, not declarations**, over the whole of `src`, in every form a class can
+take. Of 36 declared `.pkgo-*` classes, **10 are live and 26 were dead**; six of the dead were
+modifiers living in a *second* file.
+
+| | |
+|---|---|
+| `packagesOverview.css` | **439 → 150 lines.** Gone: the two-column body (`pkgo-grid`/`rail`/`stage`), the rail panels (`panel`/`head`/`lbl`/`meta`/`chip`/`add`/`body`), the back control, the ghost empty states (`ghost`/`ghost--inert`/`gtitle`/`gsub`), the register rows (`reg`/`row`/`type`/`name`/`comp`/`detail`), the problem statement (`prob`/`prob::after`/`probsub`/`hand`), and the how-it-works header (`hiwhead`/`hiwtag`). Plus the dead `.pkgo-grid` line in the 1080 media query. |
+| `packagesFlow.css` | **393 → 364 lines.** Orphaned modifiers on bases that no longer exist: `.pkgo-ghost--locked` (+ `:hover`, + its `.pkgo-gtitle` descendant), `.pkgo-ghost--next`, `.pkgo-add:disabled` (+ `:hover`), and `.pkgf-tile--ghost .pkgo-gtitle`. |
+| survivors | `pkgo-eyebrow · num · num--done · plate · platelbl · step · step--live · steps · tick · tick--live` — the how-it-works infographic, whose only consumer is `PackagesOnboarding.tsx`. |
+
+### ⚠️ Three live classes read as dead first, and the reason is worth keeping
+
+`pkgo-num`, `pkgo-step` and `pkgo-tick` are rendered **only** as
+`` className={`pkgo-num${state.done ? " pkgo-num--done" : ""}`} `` — the token immediately followed
+by an interpolation. The house bounded matcher (`/["\s`]token["\s`]/`) correctly declines that
+form, because when the question is *"is this exact class forbidden"* a concatenation is not the
+token. Here the question is the **opposite** one — *"is this class ever produced"* — and the same
+matcher gives the wrong answer. Deleting on that first reading would have stripped the styling from
+the one part of the sheet that still renders.
+
+**The general form: a matcher is only correct with respect to the question being asked.** Reusing
+the repo's bounded form without re-deriving it for an inverted question is how a correct idiom
+produces a wrong answer.
+
+### The lock — `packagesOverviewSweep.test.ts` (4 cases)
+
+A comment would not have stopped this; the sheet *had* comments. The lock asserts the **property**
+over the whole sheet rather than forbidding a list of retired names — a name-list would have been
+written from the same twenty-item blind spot that let these survive:
+
+1. **population floor first** (≥ 8 selectors found, and the component mentions `pkgo-`) — a
+   negative check over an empty set passes, which is this repo's recorded vacuous-probe family;
+2. every declared class is rendered by `PackagesOnboarding`, using a matcher that **does** count the
+   `${` form;
+3. the twenty-two retired names are not declared again;
+4. `packagesFlow.css` contains no `.pkgo-` at all — a modifier on a deleted base is dead twice over,
+   and it lives in the file a sweep of the *named* file would never open.
+
+**Proven red before believed:** re-adding `.pkgo-rail { display: flex; }` fails cases 2 and 3 with
+`dead rules in packagesOverview.css: pkgo-rail`; removing it restores 4/4.
+
+**Comments stripped before asserting** — the sheet's new header names every class it just retired,
+which is precisely the false-red this repo has hit seven times in one session.
+
+### Gates (worktree `d4bdf418` + these changes)
+
+```
+tsc --noEmit   exit 0, 0 lines
+vite build     exit 0, no error/[WARNING] lines
+vitest run     380 files, 6487 passed, 3 skipped   (baseline 379 / 6483 — +1 file, +4, all the new lock)
+```
+
+**No page was re-measured for this phase, and deliberately so:** every deleted rule was proven to
+match no element, so there is nothing whose rendering could have changed. The re-cut's own
+measurements stand in `reports/submission-packages-recut.md`.
+
+### Found in passing, NOT swept — a decision for Nick
+
+`.pkgf-tile--ghost` (`packagesFlow.css`) is also rendered by nothing, and it has a `:hover` rule
+under it. It is a `pkgf-` class, a different family from the one D-A6 names, so it is reported
+rather than deleted — widening a housekeeping sweep into a neighbouring family without being asked
+is how a small commit becomes an unreviewable one. One line to remove when someone wants it.
+
 ## Flags
 
 | flag | state |

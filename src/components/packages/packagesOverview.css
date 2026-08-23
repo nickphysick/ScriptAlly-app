@@ -2,9 +2,25 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Submission packages — the restructured overview: a page-local rail of three registers beside a
- * stage carrying the problem statement and the how-it-works infographic.
- * Design authority: design-refs/submission-packages-restructure.html.
+ * Submission packages — the how-it-works infographic. All this sheet still dresses is the three
+ * numbered steps and their plates; `PackagesOnboarding.tsx` is its only consumer.
+ * Design authority: design-refs/submission-packages-restructure.html, as amended by the re-cut
+ * (design-refs/submission-packages-recut-v2.html).
+ *
+ * ⚠️ THE RAIL, ITS PANELS, THE REGISTER ROWS, THE GHOSTS, THE BACK CONTROL AND THE PROBLEM
+ * STATEMENT ARE ALL GONE FROM THIS SHEET, and they went because nothing rendered them. §4 of the
+ * broadsheet pack retired the rail and three bands took its place; the re-cut moved the problem
+ * statement into the hero band. Twenty rules outlived both changes — declared here, matched by no
+ * element, and invisible to every gate, because dead CSS neither errors nor fails a test. A sweep
+ * for the ONE class the brief named (`.pkgo-rail`) would have left the other nineteen behind: the
+ * fault is the retired layout, not the rule someone happened to notice.
+ *
+ * ⚠️ THE SWEEP WAS FOR RENDERS, NOT FOR DECLARATIONS. Each class was checked against the whole of
+ * `src` in every form it could take — including the template-literal concatenation
+ * (`className={`pkgo-num${…}`}`) that a quote-and-space-bounded grep correctly declines to match,
+ * and which is why three live classes first read as dead. `packagesFlow.css`'s orphaned modifiers
+ * (`.pkgo-ghost--locked`, `.pkgo-ghost--next`, `.pkgo-add:disabled`) went in the same pass — a
+ * modifier on a base nothing renders is dead twice over.
  *
  * ⚠️ THE TOKENS LIVE IN `packageWorkshop.css`'s `.pkgw` BLOCK, NOT HERE, and that is deliberate.
  * A second `.pkgw { … }` rule in a second file is exactly the ambiguity that has caught
@@ -24,312 +40,8 @@
  */
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   THE TWO-COLUMN BODY
-   ══════════════════════════════════════════════════════════════════════════════ */
-
-/* ⚠️ `align-items: start` IS WHAT MAKES THE RAIL A RAIL. Without it the grid stretches both
-   columns to the tallest, and the three rail panels — which are content-sized objects — would be
-   pulled to the stage's height with the last one's fill running to the bottom of the page. The ref
-   says the same thing in its own `.body-grid`. */
-.pkgo-grid {
-  display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  gap: 26px;
-  align-items: start;
-}
-
-/* ⚠️ `minmax(0, 1fr)` AND NOT `1fr` ON THE STAGE. A bare `1fr` track has an `auto` minimum, so a
-   single long unbreakable string inside the stage (a package name, a composition line) makes the
-   track wider than its share and pushes the rail off its 300px — the grid grows rather than the
-   text wrapping. The zero minimum is what lets the content wrap instead of the layout moving.
-   This is the same failure the stat block hit with `auto-fit`, from the other direction. */
-
-.pkgo-rail {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  min-width: 0;
-}
-
-.pkgo-stage {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  min-width: 0;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════════
-   RAIL PANELS
-   ══════════════════════════════════════════════════════════════════════════════ */
-
-.pkgo-panel {
-  background: var(--pkgo-surface);
-  border: 1px solid var(--pkgo-hairline-soft);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.pkgo-head {
-  background: linear-gradient(180deg, var(--pkgo-sage-a), var(--pkgo-sage-b));
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.pkgo-lbl {
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  color: var(--pkg-ink);
-  text-transform: uppercase;
-}
-
-.pkgo-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-}
-
-.pkgo-chip {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(58, 28, 20, 0.12);
-  padding: 1px 7px;
-  border-radius: 999px;
-  color: var(--pkg-ink-soft);
-  white-space: nowrap;
-}
-
-/* The rail's own action. Outlined, never filled — the page has exactly one filled control and it
-   is `New package` in the header (D5). */
-.pkgo-add {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  border: 1px solid rgba(58, 28, 20, 0.22);
-  background: transparent;
-  color: var(--pkg-ink);
-  padding: 3px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s;
-}
-.pkgo-add:hover { background: rgba(255, 255, 255, 0.55); }
-
-/* ⚠️ WHITE AGAIN — F8's cream well is REVERTED by the flow pack (D10). The tint was the right answer
-   to the question "why do the rows not read as rows" while the rows were the only thing in the
-   panel; the flow ref answers it differently and keeps every container and well pure white, with
-   the row's own hairline and hover shadow doing the separating. Reverting rather than layering a
-   second opinion on top: two half-applied treatments read worse than either one whole.
-   `--pkgo-well` stays defined in packageWorkshop.css — it is one token, it is now read by nothing,
-   and removing it is a tidy-up for whoever next touches that block. */
-.pkgo-body { padding: 10px; background: var(--pkgo-surface); }
-
-/* ══════════════════════════════════════════════════════════════════════════════
-   BACK TO THE OVERVIEW
-   ══════════════════════════════════════════════════════════════════════════════
-
-   The return from a surface the rail opened. Outlined, because `New package` is the page's only
-   filled control (D5). Aligned left and self-sized so it never spans the surface it sits above. */
-.pkgo-back {
-  align-self: flex-start;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  border: 1px solid rgba(58, 28, 20, 0.22);
-  background: transparent;
-  color: var(--pkg-ink);
-  padding: 5px 11px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-bottom: 12px;
-  transition: background 0.15s, border-color 0.15s;
-}
-.pkgo-back:hover { background: rgba(255, 255, 255, 0.6); border-color: var(--pkg-pinkline); }
-
-/* ══════════════════════════════════════════════════════════════════════════════
-   GHOST EMPTY STATES — dashed means provisional (D6)
-   ══════════════════════════════════════════════════════════════════════════════
-
-   ⚠️ TWO ELEMENTS, NOT ONE WITH A CURSOR SWAP. Materials and Packages are invitations and render as
-   buttons; Tracking's note explains what will happen and is a plain div, because you make a reply
-   arrive by sending a query, not by pressing a panel. A button that does nothing is worse than no
-   button — the same reasoning that keeps a restore affordance off scrolling pages. */
-.pkgo-ghost {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  width: 100%;
-  border: 1.5px dashed var(--pkgo-dash);
-  border-radius: 10px;
-  padding: 18px 14px;
-  text-align: center;
-  background: transparent;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-.pkgo-ghost:hover { background: rgba(245, 226, 218, 0.35); border-color: var(--pkg-pinkline); }
-
-/* Inert variant — no pointer, no hover, and it is a div rather than a disabled button so nothing
-   about it invites a press. */
-.pkgo-ghost--inert { cursor: default; }
-.pkgo-ghost--inert:hover { background: transparent; border-color: var(--pkgo-dash); }
-
-.pkgo-gtitle {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 15px;
-  color: var(--pkg-burg);
-}
-.pkgo-gsub {
-  font-size: 11px;
-  color: var(--pkg-muted);
-  line-height: 1.5;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════════
-   REGISTER ROWS
-   ══════════════════════════════════════════════════════════════════════════════ */
-
-.pkgo-reg { display: flex; flex-direction: column; gap: 6px; }
-
-/* ⚠️ A BUTTON, NOT A DIV WITH A HANDLER. Every row opens something, so each one is reachable by
-   keyboard and announced as a control for free. `text-align: left` and the flex column are what
-   stop a button element centring its contents the way the ghost deliberately does. */
-.pkgo-row {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  text-align: left;
-  background: var(--pkgo-surface);
-  border: 1px solid var(--pkgo-hairline-soft);
-  border-radius: 8px;
-  padding: 9px 11px;
-  cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.pkgo-row:hover {
-  border-color: var(--pkg-pinkline);
-  box-shadow: 0 2px 8px rgba(58, 28, 20, 0.06);
-}
-
-.pkgo-type {
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.14em;
-  color: var(--pkg-muted);
-  text-transform: uppercase;
-  margin-bottom: 3px;
-}
-
-/* ⚠️ `overflow-wrap: anywhere` RATHER THAN A TRUNCATION. A material's name is the writer's own, and
-   a 300px rail is narrow enough that a long one would otherwise push the row's box wider than the
-   panel. Wrapping keeps the whole name readable; an ellipsis would hide the end of something they
-   chose. The stage track's `minmax(0, 1fr)` handles the same problem from the other side. */
-.pkgo-name {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--pkg-ink);
-  overflow-wrap: anywhere;
-}
-
-.pkgo-comp {
-  font-size: 10.5px;
-  color: var(--pkg-ink-soft);
-  margin-top: 3px;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-}
-
-.pkgo-detail {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--pkg-muted);
-  margin-top: 3px;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════════
-   THE PROBLEM STATEMENT
-   ══════════════════════════════════════════════════════════════════════════════
-
-   ⚠️ THIS IS WHERE `.pkgw-strip` WENT. The old page carried the same sentence as a thin banded
-   strip above the tabs; the ref promotes it to the stage's opening card, so keeping both would
-   state the page's one argument twice, fifteen pixels apart. The strip is removed from the render
-   rather than hidden — see the note in SubmissionPackages.tsx. */
-.pkgo-prob {
-  background: var(--pkgo-surface);
-  border: 1px solid var(--pkgo-hairline-soft);
-  border-radius: 12px;
-  padding: 30px 34px 28px;
-  position: relative;
-  overflow: hidden;
-}
-
-/* The corner wash. `pointer-events:none` is not needed — it is a ::after with no content — but the
-   z-index pair IS: without it the wash paints over the sentence rather than behind it. */
-.pkgo-prob::after {
-  content: "";
-  position: absolute;
-  right: -30px;
-  top: -30px;
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  background: var(--pkgo-pink-band);
-  opacity: 0.5;
-}
-.pkgo-hand,
-.pkgo-probsub { position: relative; z-index: 1; }
-
-.pkgo-hand {
-  font-family: "Caveat", cursive;
-  font-size: 34px;
-  font-weight: 600;
-  color: var(--pkg-burg);
-  line-height: 1.15;
-}
-
-.pkgo-probsub {
-  font-size: 13.5px;
-  color: var(--pkg-ink-soft);
-  margin-top: 10px;
-  max-width: 640px;
-  line-height: 1.6;
-}
-.pkgo-probsub strong { color: var(--pkg-ink); font-weight: 600; }
-
-/* ══════════════════════════════════════════════════════════════════════════════
    HOW IT WORKS
    ══════════════════════════════════════════════════════════════════════════════ */
-
-.pkgo-hiwhead {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  border-bottom: 1px solid var(--pkgo-hairline);
-  padding-bottom: 10px;
-  margin-bottom: 16px;
-}
-.pkgo-hiwhead h2 {
-  font-family: var(--font-serif);
-  font-size: 22px;
-  font-weight: 600;
-  color: var(--pkg-ink);
-}
-.pkgo-hiwtag {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.16em;
-  color: var(--pkg-muted);
-  text-transform: uppercase;
-}
 
 /* ⚠️ `repeat(3, minmax(0, 1fr))`, NOT `repeat(3, 1fr)`. A bare `1fr` has an `auto` minimum, so the
    widest step's unbreakable content sets its track and the three stop being equal — which is
@@ -431,9 +143,8 @@
 .pkgo-step p { font-size: 12.5px; color: var(--pkg-ink-soft); line-height: 1.6; }
 .pkgo-step p strong { color: var(--pkg-ink); font-weight: 600; }
 
-/* ⚠️ THE REF'S OWN BREAKPOINT, kept. Below 1080 the rail stops being a rail and the steps stack —
-   at 300px + three columns the cards would otherwise be too narrow to read. */
+/* ⚠️ THE REF'S OWN BREAKPOINT, kept — the steps stack below 1080, where three columns would be too
+   narrow to read. It no longer restacks a rail: there is no rail. */
 @media (max-width: 1080px) {
-  .pkgo-grid { grid-template-columns: minmax(0, 1fr); }
   .pkgo-steps { grid-template-columns: minmax(0, 1fr); }
 }

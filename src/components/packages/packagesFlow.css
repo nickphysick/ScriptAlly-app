@@ -201,34 +201,6 @@
 }
 .pkgf-comp b { color: var(--pkg-burg); font-weight: 700; }
 
-/* ══════════════════════════════════════════════════════════════════════════════
-   THE LOCKED PACKAGES GHOST (D4)
-   ══════════════════════════════════════════════════════════════════════════════
-
-   ⚠️ PURE EXPLANATION — NO BUTTONS, NOTHING CLICKABLE INSIDE IT. A locked state that offers a
-   control you cannot use teaches the wrong thing twice: it implies the door is stuck rather than
-   not yet reached, and it puts a dead control under the pointer. This is a `div` with a cursor of
-   `default`, and its title goes muted so it does not read as an invitation the way the live ghosts'
-   burgundy italic does. */
-.pkgo-ghost--locked { cursor: default; }
-.pkgo-ghost--locked:hover { background: transparent; border-color: var(--pkgo-dash); }
-.pkgo-ghost--locked .pkgo-gtitle { color: var(--pkg-muted); font-style: normal; }
-
-/* The "next thing to do" ghost — tinted, because at this point it IS the next action. */
-.pkgo-ghost--next { border-color: var(--pkg-pinkline); background: rgba(245, 226, 218, 0.22); }
-
-/* ⚠️ DISABLED CONTROLS MOVE IN LOCKSTEP WITH THE GATE (D4) — the rail's `+ NEW` and the header's
-   `New package` are the same decision rendered twice, so they are disabled by the same boolean.
-   The house disabled treatment: paper fill, faint text, not-allowed — never opacity alone, which
-   reads as a rendering fault rather than a state. */
-.pkgo-add:disabled {
-  cursor: not-allowed;
-  color: var(--pkg-muted);
-  border-color: var(--pkgo-hairline-soft);
-  background: transparent;
-}
-.pkgo-add:disabled:hover { background: transparent; }
-
 /* ⚠️ A REFUSED WRITE IS SHOWN, NOT SWALLOWED. `addPackage` declines on a FREE plan and returns its
    reason; the pre-existing Workshop composer discards it, so the form closed on a save that never
    happened. This is where that reason lands — burgundy on blush, inside the modal, with the draft
@@ -305,7 +277,6 @@
   transform: none; box-shadow: none;
   background: rgba(245, 226, 218, 0.3); border-color: var(--pkg-pinkline);
 }
-.pkgf-tile--ghost .pkgo-gtitle { font-style: italic; }
 
 /* ⚠️ THE FLASH IS HOW THE RAIL AND THE GRID STAY ONE PLACE. Clicking a package in the rail index
    scrolls its tile into view and flashes it, rather than opening anything — the rail is an index of
