@@ -62,46 +62,85 @@ export const NOTEBOARD_STEPS: readonly NoteboardStep[] = [
   },
 ] as const;
 
-/** The examples' own header block — it replaces the orphaned hint line. */
-export const NOTEBOARD_EXHEAD = {
-  heading: "What writers keep here",
-  body: "Drawn from what querying writers actually hang on to. Keep one to make it yours, or dismiss them — they retire on their own as your board fills.",
+/**
+ * The workflow's second arrangement — beneath a board that already has notes.
+ *
+ * ⚠️ IT NEVER RETIRES. No threshold, no dismissal: the panels sit below the board at any note
+ * count, which is why the heading changes from a statement about the board ("Your board is
+ * empty") to one about the practice ("Write it down for later…") and the lede shortens — the
+ * writer has already done this once and does not need the long version again.
+ */
+export const NOTEBOARD_BELOW = {
+  separator: "How the board works",
+  heading: "Write it down for later…",
+  lede: "Querying throws a lot at you at once. Anything you pin here stays put until you need it.",
 } as const;
 
 /** The sanctioned second entry point — the SAME composer the toolbar and the ghost open. */
-export const NOTEBOARD_CTA = {
-  label: "+ Pin your first note",
-  note: "Or keep one of the examples below to start with.",
-} as const;
+/* ⚠️ THE ASIDE IS RETIRED — it read "Or keep one of the examples below", and the examples are no
+   longer below. v2 pairs the primary with a "Browse examples" ghost that opens the drawer, which
+   says the same thing and can be acted on. */
+export const NOTEBOARD_CTA = { label: "+ Pin your first note" } as const;
 
-export const NoteboardEmptyState: React.FC<{ onPin: () => void }> = ({ onPin }) => (
-  <>
-    <div className="nb-opening">
-      <h2>{NOTEBOARD_OPENING.heading}</h2>
-      <p>{NOTEBOARD_OPENING.body}</p>
-    </div>
-
-    <div className="nb-steps">
-      {NOTEBOARD_STEPS.map((s) => (
-        <div className="nb-step" key={s.n}>
-          <div className="nb-step-art">
-            <s.Art />
-          </div>
-          <div className="nb-step-txt">
-            <span className="nb-step-n">{s.n}</span>
-            <h3>{s.heading}</h3>
-            <p>{s.body}</p>
-            <p className="nb-step-aside">{s.aside}</p>
-          </div>
+/**
+ * ⚠️ ONE PANELS COMPONENT, MOUNTED BY BOTH ARRANGEMENTS. Two copies of this JSX would pass every
+ * probe about either state and drift the first time one was edited — so the panels are defined
+ * once and the arrangements differ only in what surrounds them. `data-nb-steps` is the marker the
+ * lock reads to prove both states rendered the same thing.
+ */
+const NoteboardSteps: React.FC = () => (
+  <div className="nb-steps" data-nb-steps="workflow">
+    {NOTEBOARD_STEPS.map((s) => (
+      <div className="nb-step" key={s.n}>
+        <div className="nb-step-art">
+          <s.Art />
         </div>
-      ))}
-    </div>
-
-    {/* ⚠️ THE DUPLICATE CTA IS SANCTIONED — one code path, two entry points. `onPin` is the same
-        opener the toolbar button and the ghost tile call; there is no second composer. */}
-    <div className="nb-opening-cta">
-      <button type="button" className="tdb-addb" onClick={onPin}>{NOTEBOARD_CTA.label}</button>
-      <span className="nb-cta-note">{NOTEBOARD_CTA.note}</span>
-    </div>
-  </>
+        <div className="nb-step-txt">
+          <span className="nb-step-n">{s.n}</span>
+          <h3>{s.heading}</h3>
+          <p>{s.body}</p>
+          <p className="nb-step-aside">{s.aside}</p>
+        </div>
+      </div>
+    ))}
+  </div>
 );
+
+export interface NoteboardWorkflowProps {
+  /** True while the board holds no notes — the two arrangements' only input. */
+  empty: boolean;
+  /** The composer opener, shared with the toolbar button and the ghost tile. */
+  onPin: () => void;
+  /** Opens the Examples drawer — the examples' only home now. */
+  onBrowse: () => void;
+}
+
+export const NoteboardWorkflow: React.FC<NoteboardWorkflowProps> = ({ empty, onPin, onBrowse }) =>
+  empty ? (
+    /* ⚠️ THE CTA SITS BETWEEN THE LEDE AND THE PANELS, not after them — v2's own order, and the
+       reason the lock compares a SEQUENCE rather than checking presence. Someone arriving at an
+       empty board should be able to act before reading three panels, not after. */
+    <div className="nb-wf">
+      <h2 className="nb-wf-h">{NOTEBOARD_OPENING.heading}</h2>
+      <p className="nb-wf-lede">{NOTEBOARD_OPENING.body}</p>
+      <div className="nb-wf-cta">
+        <button type="button" className="tdb-addb" onClick={onPin}>{NOTEBOARD_CTA.label}</button>
+        <button type="button" className="nb-btn-ghost" onClick={onBrowse}>Browse examples</button>
+      </div>
+      <NoteboardSteps />
+    </div>
+  ) : (
+    /* ⚠️ NO CTA ROW HERE, DELIBERATELY. The toolbar's button and the ghost tile are both on screen
+       already; a third door to the same composer would be one too many. */
+    <>
+      <div className="nb-wf-sep">
+        <hr />
+        <span className="nb-wf-sep-label">{NOTEBOARD_BELOW.separator}</span>
+      </div>
+      <div className="nb-wf nb-wf--below">
+        <h2 className="nb-wf-h">{NOTEBOARD_BELOW.heading}</h2>
+        <p className="nb-wf-lede">{NOTEBOARD_BELOW.lede}</p>
+        <NoteboardSteps />
+      </div>
+    </>
+  );

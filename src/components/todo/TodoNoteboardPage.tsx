@@ -31,7 +31,7 @@ import { useScriptAllyDb } from "../../lib/db";
 import { noteMenu, MenuLeaf } from "../../lib/todoMenu";
 import { TagPicker } from "./TagPicker";
 import { NOTE_EXAMPLES } from "./noteboardExamples";
-import { NoteboardEmptyState } from "./noteboardEmptyState";
+import { NoteboardWorkflow } from "./noteboardEmptyState";
 import { useTagWrites } from "./useTagWrites";
 import { toggleTagSel } from "../../lib/todoTags";
 import { TAG_PALETTE } from "../../lib/todoFamily";
@@ -516,13 +516,13 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
           {/* ⚠️ THE MASONRY IS THE SCROLLZONE (tasks-viewport P4): the header and tool row are
               fixed above it, and the notes scroll beneath under their own hem. */}
           <TplZone label="Notes" hem={zoneScrolls}>
-          {/* ⚠️ ZERO NOTES, FULL STOP — a deliberate override of the condition this replaces.
-              `.nb-empty` rendered only when the board was empty AND every example had been
-              dismissed, because an earlier pass found the panel suppressing the papers entirely
-              and made the panel yield. Coexistence is what that fix was protecting: the workflow
-              and the papers STACK, as the ref draws them, and the old panel's content is retired
-              rather than demoted — so the page teaches twice at most, never three times. */}
-          {notes.length === 0 && !compose && <NoteboardEmptyState onPin={() => openComposer()} />}
+          {/* ⚠️ THE WORKFLOW NEVER RETIRES (workflow run, Phase 2) — it renders at ANY note
+              count, in one of two arrangements. Empty, it stands alone ABOVE the board with its
+              CTA row; populated, it sits BELOW the board behind a separator, with no CTA. One
+              component, one panels child; the board mounts in both cases. */}
+          {notes.length === 0 && !compose && (
+            <NoteboardWorkflow empty onPin={() => openComposer()} onBrowse={() => setExamples(true)} />
+          )}
           <div ref={boardRef} className={`nb-board${column ? " nb-col1" : ""}`}>
               {!(compose && !compose.id) && (
                 <button type="button" className="nb-ghost" onClick={() => openComposer()}>
@@ -606,6 +606,15 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                 <div className="nb-empty-search">Nothing matches that search.</div>
               )}
           </div>
+
+          {/* ⚠️ BELOW THE BOARD, IN THE FLOW — not merely later in the DOM. The board is a
+              multicol block that closes above this, so the separator and the panels stack
+              beneath whatever the columns grew to; the geometric half is measured in the
+              browser (nbWorkflow.measure.ts), because DOM order alone would not have caught
+              the multicol flow problem that bit the examples' hint line one run earlier. */}
+          {notes.length > 0 && (
+            <NoteboardWorkflow empty={false} onPin={() => openComposer()} onBrowse={() => setExamples(true)} />
+          )}
           </TplZone>
         </TasksPageLayout>
       </div>

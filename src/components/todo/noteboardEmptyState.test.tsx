@@ -20,7 +20,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { UserPlan, UserTask } from "../../types";
 import { MAKE_TASK_LABEL } from "../../lib/todoMenu";
-import { NOTEBOARD_STEPS, NOTEBOARD_OPENING, NOTEBOARD_EXHEAD } from "./noteboardEmptyState";
+import { NOTEBOARD_STEPS, NOTEBOARD_OPENING, NOTEBOARD_BELOW } from "./noteboardEmptyState";
 
 const here = __dirname;
 /* ⚠️ THE LINE-COMMENT STRIP MUST NOT EAT A URL. `xmlns="http://www.w3.org/2000/svg"` contains
@@ -83,6 +83,26 @@ const sections = (html: string): string => {
   return seq.sort((a, b) => a.at - b.at).map((s) => s.kind).join(" ");
 };
 
+/** The page's BLOCK kinds in rendered order — board, separator, and the workflow's own parts. */
+const blocks = (html: string): string => {
+  const seq: Array<{ at: number; kind: string }> = [];
+  const mark = (cls: string, kind: string) => {
+    for (const m of html.matchAll(/class="([^"]*)"/g)) {
+      if ((m[1] ?? "").split(/\s+/).includes(cls)) seq.push({ at: m.index ?? 0, kind });
+    }
+  };
+  /* ⚠️ THE EMPTY BOARD STILL MOUNTS (it holds the ghost), so its presence is not the signal —
+     a NOTE inside it is. Marking the container unconditionally put a trailing "board" after the
+     empty state's own sequence and made a correct page look wrong. */
+  if (/class="[^"]*\bnb-note\b/.test(html)) mark("nb-board", "board");
+  mark("nb-wf-sep", "separator");
+  mark("nb-wf-h", "heading");
+  mark("nb-wf-lede", "lede");
+  mark("nb-wf-cta", "cta");
+  mark("nb-steps", "steps");
+  return seq.sort((a, b) => a.at - b.at).map((s) => s.kind).join(" ");
+};
+
 afterEach(() => { seed.userTasks = []; seed.dismissed = undefined; });
 
 describe("⚠️ the arrangement — one ordered comparison, never per-section presence", () => {
@@ -98,15 +118,13 @@ describe("⚠️ the arrangement — one ordered comparison, never per-section p
     expect(html).not.toContain("data-example");
   });
 
-  it("(b) ⚠️ zero notes, ALL examples dismissed: the workflow STILL renders and no example does", () => {
-    /* the case the inherited condition got wrong — `.nb-empty` rendered ONLY when every example
-       was dismissed, which is precisely backwards: the workflow is what an empty board owes the
-       reader whether or not the papers are still on offer */
-    seed.dismissed = ["ex-yellow", "ex-pink", "ex-sage"];
+  it("(b) ⚠️ zero notes: the workflow renders and nothing example-shaped does", () => {
+    /* ⚠️ THE DISMISSAL HALF IS RETIRED (workflow run, Phase 1) — there is no board-level
+       dismissal any more, so the case that once distinguished "dismissed" from "not" collapses
+       to the one claim that survives: the workflow stands, the board carries no examples. */
     const html = render();
-    expect(sections(html)).toBe("heading steps cta");
+    expect(blocks(html)).toBe("heading lede cta steps");
     expect(html).not.toMatch(/["\s`]nb-example["\s`]/);
-    expect(html).not.toMatch(/["\s`]nb-exintro["\s`]/);
   });
 
   it("(c) one note: no examples anywhere on the board", () => {
@@ -120,32 +138,64 @@ describe("⚠️ the arrangement — one ordered comparison, never per-section p
     expect(html).not.toContain("data-example");
   });
 
-  it("(d) three notes: neither workflow nor examples", () => {
+  it("(d) ⚠️ three notes: no examples — and the workflow is STILL THERE", () => {
+    /* ⚠️ REVERSED (workflow run, Phase 2). This asserted the workflow retiring at three notes,
+       which was v1's rule; v2's workflow never retires — it moves below the board instead. The
+       examples' absence is what stays unconditional. */
     seed.userTasks = [note("a", "12"), note("b", "13"), note("c", "14")];
     const html = render();
     expect(html.indexOf("nb-board"), "no board to anchor on").toBeGreaterThan(-1);
-    expect(sections(html)).toBe("");
+    expect(blocks(html)).toBe("board separator heading lede steps");
+    expect(html).not.toContain("data-example");
   });
 });
 
-describe("⚠️ ONE composer, three entry points — one code path, never a second component", () => {
-  it("the CTA takes an opener as a PROP; it does not know how to open anything itself", () => {
-    /* ⚠️ THE STRUCTURAL HALF of the identity claim the browser probe measures. The empty state
-       cannot mount a composer even by mistake: it holds no composer state, imports no composer,
-       and calls whatever `onPin` it is given — which the page wires to the SAME `openComposer`
-       the toolbar button and the ghost tile call. A lookalike second composer would pass a
-       presence check; it cannot exist at all if the component has no way to build one. */
+describe("⚠️ TWO ARRANGEMENTS, ONE PANELS COMPONENT (workflow run, Phase 2)", () => {
+  it("(a) zero notes: heading · lede · CTA · steps — the CTA sits BETWEEN lede and steps", () => {
+    /* ⚠️ ONE ORDERED COMPARISON. The CTA's POSITION is the whole point of v2's first state — it
+       moved above the panels — and a presence check cannot see order. */
+    expect(blocks(render())).toBe("heading lede cta steps");
+  });
+
+  it("(b) one note: board · separator · heading · lede · steps, and NO CTA row", () => {
+    seed.userTasks = [note("a", "12")];
+    const html = render();
+    expect(blocks(html)).toBe("board separator heading lede steps");
+    /* the toolbar button and the ghost card already cover it; a third door would be one too many */
+    expect(html, "a CTA row rendered beside a board that already has two doors")
+      .not.toMatch(/["\s`]nb-wf-cta["\s`]/);
+    expect(html).toContain("Write it down for later…");
+    expect(html).toContain("How the board works");
+  });
+
+  it("…and the workflow NEVER retires — four notes still carry it", () => {
+    seed.userTasks = ["12", "13", "14", "15"].map((d, i) => note(`n${i}`, d));
+    expect(blocks(render())).toBe("board separator heading lede steps");
+  });
+
+  it("(e) ⚠️ both states mount the SAME panels component — never two divergent copies", () => {
     const empty = decls(readFileSync(join(here, "noteboardEmptyState.tsx"), "utf8"));
-    expect(empty).toContain("onPin: () => void");
-    expect(empty).toContain("onClick={onPin}");
-    for (const forbidden of ["useState", "nb-compose", "textarea", "setCompose"]) {
-      expect(empty, forbidden).not.toContain(forbidden);
-    }
-    /* and the page hands all three doors the same function */
-    const page = decls(readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8"));
-    expect(page).toContain("onPin={() => openComposer()}");
-    expect([...page.matchAll(/openComposer\(\)/g)].length).toBeGreaterThanOrEqual(3);
-    expect([...page.matchAll(/["\s`]nb-compose["\s`]/g)].length).toBe(1);   // one composer node
+    /* one <NoteboardSteps/> definition, referenced by both arrangements — two copies would pass
+       every other probe here and drift on the next edit */
+    expect([...empty.matchAll(/const NoteboardSteps/g)]).toHaveLength(1);
+    expect([...empty.matchAll(/<NoteboardSteps/g)].length).toBeGreaterThanOrEqual(2);
+    /* and the panels' own data is one array, mapped once */
+    expect([...empty.matchAll(/NOTEBOARD_STEPS\.map/g)]).toHaveLength(1);
+    /* the rendered marker is identical in both states */
+    const zero = render();
+    seed.userTasks = [note("a", "12")];
+    const withNote = render();
+    for (const html of [zero, withNote]) expect(html).toContain('data-nb-steps="workflow"');
+  });
+
+  it("the second state's copy is the ref's own shortened lede", () => {
+    const ref = readFileSync(join(here, "../../../design-refs/noteboard-empty-state-v2.html"), "utf8")
+      .replace(/<[^>]+>/g, "");
+    expect(ref).toContain(NOTEBOARD_BELOW.heading);
+    expect(ref).toContain(NOTEBOARD_BELOW.lede);
+    expect(ref).toContain(NOTEBOARD_BELOW.separator);
+    /* shorter than the empty state's, which is what "shortened" means */
+    expect(NOTEBOARD_BELOW.lede.length).toBeLessThan(NOTEBOARD_OPENING.body.length);
   });
 });
 
@@ -190,8 +240,6 @@ describe("⚠️ the copy is the ref's, and panel three reads the KEBAB'S consta
     }
     expect(ref).toContain(NOTEBOARD_OPENING.heading);
     expect(ref).toContain(NOTEBOARD_OPENING.body);
-    expect(ref).toContain(NOTEBOARD_EXHEAD.heading);
-    expect(ref).toContain(NOTEBOARD_EXHEAD.body);
   });
 
   it("⚠️ the illustrations are FLAT — no gradient, filter or shadow anywhere in the SVGs", () => {
