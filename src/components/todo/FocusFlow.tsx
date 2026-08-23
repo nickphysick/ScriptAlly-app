@@ -688,7 +688,18 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (step === 0) return sheet(
       <>
         <div className="tdb-ffqsub">
-          {ag?.responseTimeWeeks ? <>Their stated reply time is <b>{ag.responseTimeWeeks} weeks</b> — a polite follow-up is fair.</> : "A polite follow-up is fair."}
+          {/* ⚠️ THE APP REPORTS THE FACT; THE WRITER DECIDES WHETHER TO NUDGE (copy-fix, 23 Aug).
+              Both branches used to end "— a polite follow-up is fair", which is a VERDICT: it tells
+              the writer what is reasonable in their own correspondence, which is not the app's to
+              say. The stated window is a fact and stands alone.
+              ⚠️ THE FALSE BRANCH HAD NO FACT UNDER THE VERDICT — it was the verdict entire ("A
+              polite follow-up is fair."), so removing the clause left nothing. It states the
+              ABSENCE instead, which is the true thing and is what the reference panel on the next
+              step already says. Rendering an empty subtitle was the alternative and is worse: the
+              element keeps its box either way, so the choice was a fact or a blank. */}
+          {ag?.responseTimeWeeks
+            ? <>Their stated reply time is <b>{ag.responseTimeWeeks} weeks</b>.</>
+            : "No reply time is recorded."}
         </div>
         {whoRow(ag, c.initials)}
         {openQueryLink(q)}
@@ -700,7 +711,12 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <button type="button" className="tdb-ffskip" onClick={() => c.taskType && c.relatedRecordId && stageAndAdvance({ kind: "snooze", cardKey: c.key, label: c.title, taskType: c.taskType, relatedRecordId: c.relatedRecordId, days: 7 })}>Snooze</button>
         <button type="button" className="tdb-ffpri" onClick={() => setStep(1)}>Write the nudge →</button>
       </>,
-      band("pink", c.due || "No reply yet", <>Time to nudge {c.who ? <em>{c.who}</em> : "them"}?</>, c.subtitle || undefined, { art: "nudge", kickCls: c.warn ? "warn" : "" }),
+      /* ⚠️ THE HEADING NAMES THE TASK; IT DOES NOT ASK FOR IT (copy-fix, 23 Aug). "Time to nudge
+         X?" prompts — it puts the app in the position of suggesting the writer act, and a question
+         mark in a heading invites an answer the sheet's own buttons already offer. "Nudge X" is the
+         calendar pill's vocabulary ("Nudge due") and this app's habit throughout: name the task.
+         The kick keeps "25 DAYS · NO REPLY" — that is a fact and is untouched. */
+      band("pink", c.due || "No reply yet", <>Nudge {c.who ? <em>{c.who}</em> : "them"}</>, c.subtitle || undefined, { art: "nudge", kickCls: c.warn ? "warn" : "" }),
     );
     const ms = q ? manuscripts.find((m) => m.id === q.manuscriptId) : undefined;
     const draft = nudgeDraft({
@@ -763,7 +779,11 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         heading: ag?.agency ? "What the listing states" : "What you know of their window",
         body: ag?.responseTimeWeeks
           ? <>They state <b>{ag.responseTimeWeeks} weeks</b>{ag.noResponseMeansNo ? <>, and that <b>no reply means no</b></> : null}.</>
-          : <>No reply window is recorded for {c.who || "this agent"}. A polite follow-up is fair once their stated window has passed.</>,
+          /* ⚠️ THE VERDICT WENT AND IT WAS ALSO SELF-CONTRADICTORY (copy-fix, 23 Aug). This is the
+             branch where NO window is recorded, and the removed sentence read "…is fair once their
+             stated window has passed" — referring to a stated window that, by the branch's own
+             test, does not exist. The first sentence is the fact and stands alone. */
+          : <>No reply window is recorded for {c.who || "this agent"}.</>,
         meta: [q?.dateSent ? `Queried ${fmtShort(q.dateSent)}` : null, weeksWaited != null ? `you have waited ${weeksWaited} week${weeksWaited === 1 ? "" : "s"}` : null]
           .filter(Boolean).join(" · ") || undefined,
       },
