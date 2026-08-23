@@ -1,0 +1,32 @@
+/**
+ * The derived tracking block on the Packages page (refs 177, 178).
+ *
+ * ⚠️ BLUE IS THE PAGE'S OWN ACCENT HERE — top edge, mark, derived figure — and nothing else takes
+ * it. The rows are ordinary list rows and the statuses keep their own vocabulary: a blue status
+ * would read as a third direction beside burgundy-outgoing and sage-incoming.
+ *
+ * ⚠️ NO PRO BADGE, NO METER, NO UPSELL. Blue is the colour packages wear, never the colour that
+ * says you cannot have this — the locked law holds even though packages are Pro-gated.
+ */
+/* ⚠️ ABOVE THE CARD'S OWN CLICK TARGET, AND THE MEASUREMENT IS WHAT FOUND THIS. The package card
+   makes its whole area open the package via `.pkgb-sopen::after { position: absolute; inset: 0 }`,
+   so this block's rows sat UNDER a full-card overlay and could not be clicked at all — by a probe
+   or by a writer. One stacking context lifts them clear; the card stays clickable everywhere else,
+   which is right, because these rows go somewhere different. Declared here rather than in the
+   Packages page's own sheet, so that stream's file is untouched. */
+.pkgt { position: relative; z-index: 1; border-top: 2px solid var(--pastille); padding-top: 10px; margin-top: 10px; }
+.pkgt-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.pkgt-mark { align-self: center; flex: none; display: block; }
+.pkgt-figure { font-family: var(--f12-serif, Georgia, serif); font-size: 22px; font-weight: 600; color: var(--pastille-ink); line-height: 1; }
+.pkgt-label { font-size: 11.5px; color: var(--muted); }
+
+.pkgt-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.pkgt-row { display: flex; align-items: center; gap: 8px; width: 100%; padding: 5px 6px; border-radius: 6px; text-align: left; cursor: pointer; }
+.pkgt-row:hover { background: var(--pastille-tint); }
+.pkgt-av { flex: none; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--pastille-tint); color: var(--pastille-ink); font-size: 8.5px; letter-spacing: .04em; }
+.pkgt-who { font-size: 12.5px; color: var(--ink); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkgt-meta { margin-left: auto; flex: none; font-size: 10.5px; color: var(--muted); }
+
+.pkgt-more, .pkgt-attach { margin-top: 6px; font-size: 11.5px; color: var(--pastille-ink); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.pkgt-more:hover, .pkgt-attach:hover { color: var(--ink); }
+.pkgt-idle { margin: 0; font-size: 11.5px; line-height: 1.45; color: var(--muted); }
