@@ -96,7 +96,7 @@ import {
   attachablePackages, attachedMaterials, canAttachPackages, groupByOrigin, materialName,
   packageMenuRow, withoutPackage, type PackageItem,
 } from "../lib/packageAttach";
-import { PackageGroup } from "./reading-pane/PackageGroup";
+import { PackageGroup, LooseMaterials } from "./reading-pane/PackageGroup";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { MobileSheet } from "./shell/MobileSheet";
 import { useIsMobile, useMobileChrome } from "./shell/mobileChrome";
@@ -5795,6 +5795,7 @@ export const Queries: React.FC<{
 
                                 const { groups } = groupByOrigin(materialsOf(activeQuery));
                                 const claimed = new Set(groups.flatMap((g) => g.materials));
+                                const loose = pills.filter((p) => !claimed.has(p.material));
                                 const take = (names: string[]) => pills.filter((p) => names.includes(p.material)).map((p) => p.node);
 
                                 return (
@@ -5811,10 +5812,38 @@ export const Queries: React.FC<{
                                         {take(g.materials)}
                                       </PackageGroup>
                                     ))}
-                                    {/* ⚠️ ANYTHING ATTACHED OUTSIDE A PACKAGE SITS BELOW IT, as its
-                                        own pill — the group is a statement about provenance, and a
-                                        hand-added item has none. */}
-                                    {pills.filter((p) => !claimed.has(p.material)).map((p) => p.node)}
+                                    {/**
+                                      * ⚠️ ANYTHING ATTACHED OUTSIDE A PACKAGE SITS BELOW IT — the
+                                      * group is a statement about provenance, and a hand-added item
+                                      * has none.
+                                      *
+                                      * ⚠️ AND IT IS NOT A CONTAINER (Part C, D-C3). `LooseMaterials`
+                                      * draws a sheets plate and the chips directly on the pane, with
+                                      * no border, fill or slug. Lighter than the packaged strip,
+                                      * never lesser than it — a package is a convenience, not a
+                                      * status, so boxing the loose case would say the wrong thing
+                                      * about every send an agent named the materials for.
+                                      */}
+                                    {loose.length > 0 && (
+                                      <LooseMaterials
+                                        /* ⚠️ OFFERED ONLY WHEN THERE IS NOTHING TO PROMOTE INTO
+                                           (D-C4). Beside an attached package these pills are
+                                           additions to it, and "save as package" would be asking
+                                           which of two packages the writer meant.
+
+                                           ⚠️ AND IT SHARES THE ATTACH GATE, not a second one of its
+                                           own — `canAttachPackages` is `true` for everyone today and
+                                           becomes `isProUser` when billing arrives. Two predicates
+                                           for one feature is two things to remember to flip. */
+                                        onSaveAsPackage={
+                                          groups.length === 0 && canAttachPackages(currentUser)
+                                            ? openPackages
+                                            : undefined
+                                        }
+                                      >
+                                        {loose.map((p) => p.node)}
+                                      </LooseMaterials>
+                                    )}
                                   </>
                                 );
                                 })()}

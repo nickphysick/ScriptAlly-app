@@ -51,6 +51,9 @@
 }
 
 .pkgb-plate--disc { border-radius: 50%; }
+/* ⚠️ THE SEND-STRIP'S PLATE — 38px holding a 22px mark, so the 12px padding the other shapes carry
+   would leave 14px of room for it. Sized by the caller's width/height; the radius is the ref's. */
+.pkgb-plate--chip { border-radius: 8px; padding: 0; }
 /* The postage stamp on a package card — perforated edge, sat in the corner. */
 .pkgb-plate--stamp { border-radius: 4px; width: 62px; height: 72px; padding: 5px; }
 /* ⚠️ THE STAMP'S MARK IS FAINTER THAN THE REST (.7 against .82) — a postage stamp on a card is

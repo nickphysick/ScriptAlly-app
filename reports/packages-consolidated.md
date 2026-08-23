@@ -415,6 +415,119 @@ rather than this brief's subject, and the argument is weaker here than on the ag
 in the builder you are choosing a saved version whose own `versionName` carries the specifics. **A
 decision for Nick**, one constant either way.
 
+---
+
+## Part C — the Query Centre sent-strip
+
+**Re-cut, not built from nothing.** `PackageGroup` already existed, landed 22–23 Aug against refs
+177/178 as a *block* — head row (mark + name over meta) above a wrapped items row.
+`query-sent-strip-v2.html` draws a *single row*: `slot · seal · chips`. The behaviour underneath —
+drift states, the link, the pills being ordinary pills — is preserved; the shape and the tokens are
+the ref's.
+
+### D-C1 · scope — and the half that is BLOCKED, not skipped
+
+`sentExtra` is gated in `QueryTimeline` by
+`!!sentExtra && row.status === QueryStatus.QUERIED && !row.kind`, so requests, replies, holding
+replies and waiting states carry no attachment block. **That negative half is exactly as specified.**
+
+**⚠️ The positive half is not.** D-C1 asks for the strip on *query sent, partial sent and full
+sent*. It renders on **query sent only**, and extending it is blocked on a data question that is
+already gated on Nick: `materialsWanted` lives on the **query**, not on the activity.
+`Queries.tsx` says so in its own words — *"§2's migration — moving `materialsWanted` onto the
+activities — is gated on Nick's confirmation and is NOT done here"*.
+
+Rendering the same query-level list under three send rungs would **state that the same materials
+went three times**, which is a false statement about a real record, and precisely the
+"copy asserts only what the code does today" family. So it is reported rather than faked. **The
+loose treatment is built and correct; it simply has one send to appear on until the migration
+lands** — which is a shame, because the ref's own note says the loose shape is *"the common case
+further down a query"*, and further down a query is exactly where it cannot yet appear.
+
+### D-C2 · packaged — a contained strip
+
+One row, `align-items: stretch`, so slot and seal share a fill and read as a single sealed object:
+52px slot · 142px-min seal · chips at `flex: 1`. Rim `--pro-edge`, both left cells `--pro-fill`.
+Seal is **mono `Package` above the Playfair name** — the kind before the instance, which is the
+inversion from the block shape's name-over-meta.
+
+The plate **recolours in context** — `.qc-strip .pkgb-plate` takes the strip's ink — rather than
+`IllustrationSlot` learning a colour prop, which keeps the library's one-stroke-rule law intact.
+
+**⚠️ One deviation from the ref, on a standing law.** The ref sets the package name at
+`line-height: 1.15`. A package name is **writer-supplied**, so it can hold a `y` or a `g`, and this
+repo's descender law asks **1.3** of mixed-case Playfair — a law written after a value taken from
+two refs that both happened to draw descender-free titles cropped the largest text on every page.
+Shipped at 1.3 and locked with a numeric floor.
+
+### D-C3 · loose — no container, and this is the case that will be broken
+
+No border, no fill, no radius, no padding, no slug. Sheets plate on a **transparent** ground.
+
+**The ref's own CSS is the tell:** it defines `.mslug` — a "Sent" label for the floating row — and
+then never renders one. Porting the stylesheet faithfully would have reinstated the very wrapper the
+design removed.
+
+The lock states this as a **property** of `.qc-loose` (no `border:`, `border-radius`, `background:`,
+`box-shadow`, `padding:`) rather than as today's declarations, because the regression it guards is
+not a typo — it is somebody tidying a floating row into a light box, on purpose, and silently
+reversing the design's one claim. **Proven red** by adding a 1px border.
+
+### D-C4 · Save as package ›
+
+Mono, hairline-underlined, `margin-left: auto`, no fill. Absent — not inert — when there is nothing
+to promote. **Not offered beside an attached package** (`groups.length === 0`): those pills are
+additions to it, and the offer would be asking which of two packages the writer meant. **It shares
+the attach gate** (`canAttachPackages`, `true` for everyone today, `isProUser` when billing arrives)
+rather than inventing a second predicate for one feature. Nothing stores a dismissal — a thing you
+may ignore forever needs nowhere to remember that you did.
+
+### D-C5 · two slots, one library
+
+`sheets` ported verbatim from the ref; `parcel` was already in the library. Both at **22px in a 38px
+plate**, both through `IllustrationSlot`, both still **dashed** — they are placeholders. A new
+`chip` shape carries the small plate (8px radius, **no padding**: the other shapes' 12px would leave
+14px of room for a 22px mark). Added to the inventory below.
+
+### D-C6 / D-C7 · display only, derivation untouched
+
+The strip has exactly two buttons: the package **name** (its only control, per D-C6) and the promote
+link. The block shape's separate `view` button is **retired into the name** — one control where
+there were two. No `onEdit`/`onRemove`/`onDelete`/`onCorrect` anywhere in the component; Correction
+UI owns editing these rows. `recomputeQuery` is asserted to contain no `packageId`,
+`materialsWanted`, `otherMaterials` or `MaterialGroup` — the single-writer rule holds.
+
+### Slot inventory — the two new marks (D-C5, extending Part A's D-A5 table)
+
+The full thirteen-slot commission stays in `reports/submission-packages-recut.md`. These two are
+additions, and they are a **pair**: same size, same weight, so they read as two categories rather
+than as a filled and an empty state.
+
+| id | surface | icon | rendered | brief |
+|---|---|---|---|---|
+| `strip-parcel` | Query Centre · packaged send | `parcel` | 22px mark in a 38px dashed plate, on `--pro-fill` | **a wrapped parcel, tied with string and sealed** |
+| `strip-sheets` | Query Centre · loose materials | `sheets` | 22px mark in a 38px dashed plate, on the bare pane | **two or three loose sheets, slightly fanned** |
+
+**⚠️ For the illustrator — the small-size constraint is the hard part.** 22px is roughly a third of
+the smallest plate elsewhere on the packages page (64px footnote discs). Both marks must survive
+that reduction with no fill and a ~1.1px stroke. **The parcel gets a coloured ground and the sheets
+get none — that difference belongs to the container, not to the drawing**, so neither should be
+drawn assuming a backdrop.
+
+### Locks — `src/components/reading-pane/sentStrip.test.ts` (25 cases)
+
+Includes a bounded sweep proving the old `qc-pkggrp*` classes and `--pastille*` tokens are **gone,
+not merely unused** — and it was worth writing: the whole suite passed before this pack with the
+block shape in place, so **nothing had ever locked that component's markup**.
+
+### Gates
+
+```
+tsc --noEmit   exit 0, 0 lines
+vite build     exit 0, no error/[WARNING] lines
+vitest run     382 files, 6538 passed, 3 skipped   (baseline 379 / 6483)
+```
+
 ## Flags
 
 | flag | state |

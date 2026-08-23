@@ -28,7 +28,13 @@ import React from "react";
 import { PACKAGE_ICONS } from "./packageIcons";
 import "./packagesBroadsheet.css";
 
-export type SlotShape = "rect" | "disc" | "stamp";
+/**
+ * ⚠️ `chip` IS THE SMALL PLATE THE SEND-STRIP USES — 8px radius and NO padding, because a 22px mark
+ * in a 38px plate has no room for the 12px the other shapes carry. It is a shape on the SHARED
+ * component rather than a second component, so all nineteen marks still come from one library and
+ * one stroke rule; a bespoke plate in the reading pane would be a second set that could drift.
+ */
+export type SlotShape = "rect" | "disc" | "stamp" | "chip";
 
 export interface IllustrationSlotProps {
   /** Which mark to draw — a key of `PACKAGE_ICONS`. */

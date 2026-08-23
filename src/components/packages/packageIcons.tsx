@@ -55,6 +55,19 @@ export const PACKAGE_ICONS: Record<string, React.ReactNode> = {
       <circle cx="16" cy="15" r="2.4"/>
     </>
   ),
+  /**
+   * ⚠️ SLOT B — LOOSE MATERIALS (query-sent-strip-v2.html). Its pair is `parcel`, and the two must
+   * read as two CATEGORIES rather than as a filled and an empty state: same size, same weight, and
+   * the coloured ground belongs to the container, never to the drawing. Brief: "two or three loose
+   * sheets, slightly fanned". Must hold at 22px inside a 38px plate.
+   */
+  sheets: (
+    <>
+      <path d="M7 10h13l4 4v13H7z"/>
+      <path d="M11 6h13l4 4v13" opacity=".75"/>
+      <path d="M11 17h9M11 21h6"/>
+    </>
+  ),
   parcelOpen: (
     <>
       <path d="M4 13 16 7l12 6v11l-12 6-12-6z"/>
