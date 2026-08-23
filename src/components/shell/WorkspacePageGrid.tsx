@@ -142,6 +142,16 @@ export interface WorkspacePageGridProps {
    */
   fill?: boolean;
   /**
+   * The page's PRIMARY SCROLLER, as a selector, for a `fill` page whose scrolling happens inside it.
+   *
+   * ⚠️ ONLY WHERE A SINGLE ONE EXISTS. A scroll page has one by construction and passes nothing. The
+   * Tasks family names its zone classes here because its frame never scrolls by contract. Query
+   * Centre and Manuscripts pass nothing DELIBERATELY: their panes scroll independently, and a
+   * masthead settling because a list moved inside one pane would report the page as being worked on
+   * when a corner of it was.
+   */
+  settleOn?: string;
+  /**
    * ⚠️ `condensed` IS DELETED (masthead rethink, step 4), AND WITH IT THE UNION IT WAS HALF OF.
    *
    * It was the MODE input to `stuck || condensedByMode || engaged` — the masthead folding when the
@@ -158,7 +168,7 @@ export interface WorkspacePageGridProps {
 }
 
 export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
-  masthead, toolbar, children, className, scrollLabel, dock, fill = false,
+  masthead, toolbar, children, className, scrollLabel, dock, fill = false, settleOn,
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = React.useState(false);
@@ -281,11 +291,46 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
     const root = scrollRef.current;
     if (!root) return;
 
+    /**
+     * ══ THE SETTLE FOLLOWS THE PAGE'S SCROLLER, NOT THE SCROLL ROW ═══════════════════════════
+     *
+     * ⚠️ THE TRIGGER WAS THE FAULT, NOT THE VARIANT. The settle listened to the scroll row on every
+     * page — and on the Tasks family the scroll row is not where scrolling happens. Those pages are
+     * `fill` by a deliberate contract: the frame is a window that NEVER scrolls, and all scrolling
+     * belongs to an internal zone. So the chrome sat at rest while the reader worked, on exactly the
+     * three pages with least room to spare. The contract is untouched; the chrome now reacts to the
+     * scroll that is actually occurring.
+     *
+     * ⚠️ A PAGE BINDS THE SETTLE ONLY WHERE A SINGLE PRIMARY SCROLLER EXISTS, and that is the whole
+     * rule. A scroll page has one by construction — the row. The Tasks family names its zone through
+     * `settleOn`. Query Centre and Manuscripts name nothing and therefore never settle: their panes
+     * scroll INDEPENDENTLY, and a masthead settling because a list moved inside one pane would be
+     * reporting the page as working when a corner of it was.
+     *
+     * ⚠️ AND THE CANDIDATE IS CHOSEN BY WHAT ACTUALLY SCROLLS, not by which selector matched first.
+     * `settleOn` is a list — the family owns three zone classes — and on a page carrying more than
+     * one of them `querySelector` would return whichever came first in the document rather than the
+     * one with anything to scroll. Zero scrollable candidates means there is nothing to settle FOR,
+     * which is a real state: Calendar does not overflow at 1440×900, and Hide is what reclaims the
+     * strip there.
+     */
+    const primaryScroller = (): HTMLElement | null => {
+      if (!fill) return root;
+      if (!settleOn) return null;
+      const live = [...root.querySelectorAll(settleOn)]
+        .map((e) => e as HTMLElement)
+        .filter((e) => e.scrollHeight - e.clientHeight > 2);
+      return live.length === 1 ? live[0] : null;
+    };
+
     let frame = 0;
     const evaluate = () => {
       frame = 0;
+      /* the hems and the reclaim are the SCROLL ROW's — they describe that box and nothing else */
       const top = root.scrollTop;
-      setStuck(top > 2);
+      const settleEl = primaryScroller();
+      const settled = !!settleEl && settleEl.scrollTop > 2;
+      setStuck(settled);
       /* ⚠️ COMPARED BEFORE IT IS WRITTEN. A fresh object every frame would re-render the whole
          page on every wheel tick even when nothing changed — the header's `setStuck` is free of
          that only because a boolean compares by value. */
@@ -322,8 +367,8 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
        * follows them. Asking only this element reports "nothing is animating" throughout.
        */
       const settling = chromeRef.current?.getAnimations?.({ subtree: true }).length ?? 0;
-      if (top <= 2 && h > 0 && settling === 0) restHRef.current = h;
-      const chrome = top > 2 ? h : 0;
+      if (!settled && h > 0 && settling === 0) restHRef.current = h;
+      const chrome = settled ? h : 0;
       setStuckH((prev) => (prev === chrome ? prev : chrome));
       /**
        * ⚠️ THE SETTLE SHRINKS THE SLAB, AND SHRINK IS THE DANGEROUS DIRECTION (§2). The slab is
@@ -341,13 +386,19 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
        * control row reclaims less, a title that wraps reclaims more — so a literal would be right
        * for one page on one day.
        */
-      const reclaim = top > 2 ? Math.max(0, restHRef.current - h) : 0;
+      const reclaim = settled ? Math.max(0, restHRef.current - h) : 0;
       setReclaim((prev) => (Math.abs(prev - reclaim) < 0.5 ? prev : reclaim));
     };
     /* rAF-throttled: at most one evaluation per painted frame, however fast the wheel reports */
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(evaluate); };
 
-    root.addEventListener("scroll", onScroll, { passive: true });
+    /**
+     * ⚠️ CAPTURE, SO ONE LISTENER CATCHES BOTH. A `scroll` event does not BUBBLE, but it does
+     * CAPTURE — so a single listener here sees the scroll row and any internal zone alike, whenever
+     * that zone appears. The alternative is re-attaching a listener every time the page swaps its
+     * content, which is the shape that silently stops listening.
+     */
+    root.addEventListener("scroll", onScroll, { capture: true, passive: true });
     evaluate();
 
     /**
@@ -374,12 +425,12 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
     const mo = new MutationObserver(() => { watch(); evaluate(); });
     mo.observe(root, { childList: true });
     return () => {
-      root.removeEventListener("scroll", onScroll);
+      root.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
       ro.disconnect();
       mo.disconnect();
       if (frame) cancelAnimationFrame(frame);
     };
-  }, []);
+  }, [fill, settleOn]);
 
   /**
    * ⚠️ THE TRIGGER IS ON THE CONTENT ROWS, NEVER ON THE DOCUMENT. A document-level listener would
@@ -451,6 +502,18 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
            reads it. A class the markup emits and nothing consumes is what a bundle sweep exists to
            find, and leaving it would imply a rule someone would go looking for. */
         className={`wpg${hidden ? " wpg--hidden" : ""}${fill ? " wpg--fill" : ""}${className ? ` ${className}` : ""}`}
+        /**
+         * ⚠️ THE BINDING IS DECLARED IN THE DOM, so it can be asserted by IDENTITY rather than by a
+         * list of page names — and page lists are what have been wrong twice about this app.
+         *
+         * ⚠️ AND IT HAS TO BE A DECLARATION, NOT A DISCOVERY. "The single element that currently
+         * overflows" cannot tell Query Centre from Noteboard: QC's panes scroll INDEPENDENTLY and
+         * only one of them happens to hold enough to scroll, so a discovering probe finds exactly one
+         * and concludes the page has a primary scroller. It has none. Absent here means exactly that
+         * — no single place this page scrolls — and is the assertable form of "this page never
+         * settles".
+         */
+        data-wpg-settle={fill ? settleOn : ".wpg-scroll"}
       >
         {/* ⚠️ THE CHROME ROWS ARE GONE. Rows 1 and 2 were the plate and the toolbar, pinned as
             siblings of the scroller; both now sit INSIDE it, which is the whole of this pack. The

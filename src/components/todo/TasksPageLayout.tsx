@@ -136,6 +136,18 @@ export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({
          overflow. This was a bespoke rule in tasksLayout.css until Query Centre needed the
          identical one — see the variant's note in workspacePageGrid.css. */
       fill
+      /**
+       * ⚠️ THE FAMILY NAMES ITS OWN SCROLLER, because the frame never scrolls and the settle has to
+       * follow the scroll that actually happens (pinned chrome). The three pages carry three
+       * different zones — Noteboard's `.tpl-zone`, the To-do list's `.l-body`, Calendar's
+       * `.cal-fpbody` — and the grid picks whichever of them has anything to scroll, so a page
+       * carrying more than one class does not bind to the first in document order.
+       *
+       * ⚠️ THIS DOES NOT MAKE THE FRAME SCROLL. The masthead settles in place above the zone; the
+       * viewport lock is untouched, and `tasksViewport`'s claim that the frame never scrolls is the
+       * one that proves it.
+       */
+      settleOn=".tpl-zone, .l-body, .cal-fpbody"
       scrollLabel={title}
       masthead={<PageHeader variant="workspace" mark={mark} title={title} description={subtitle} />}
       /* ⚠️ THE EYEBROW RIDES THE TOOL ROW. Mono context — a date, a week count — and the rule is

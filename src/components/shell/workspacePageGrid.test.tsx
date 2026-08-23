@@ -557,11 +557,20 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        both states derive from it — which is MORE of what this case wants, not less, and the
        literal match failed on it. What matters is the shape: one read, a bare comparison against
        the threshold, and nothing cached or conditional in between. */
+    /* ⚠️ AMENDED AGAIN, AND THE CLAIM IS UNCHANGED: derived every frame, written once, nothing
+       cached. The comparison moved one line up because the settle no longer reads the SCROLL ROW —
+       it reads the page's primary scroller, which on the Tasks family is an internal zone. The
+       shape asserted is therefore "one bare comparison against the threshold, assigned to a local,
+       and that local is what is written" rather than the comparison appearing inside `setStuck`. */
+    const derived = /const settled = [^;]*?\.scrollTop > 2;/.exec(srcCode);
+    expect(derived, "the settle is no longer one bare comparison of a scrollTop against the threshold").toBeTruthy();
     const setter = /setStuck\(([^;]+)\);/.exec(srcCode);
     expect(setter, "the state is not written in one place").toBeTruthy();
-    expect(setter![1].trim(), "the state stopped being a bare comparison against the threshold")
-      .toMatch(/^\w[\w.]* > 2$/);
-    expect(srcCode, "the scroll position is no longer read from the scroller itself").toMatch(/=\s*root\.scrollTop\b|root\.scrollTop\s*>\s*2/);
+    expect(setter![1].trim(), "the state stopped being the derived value written straight through")
+      .toBe("settled");
+    /* ⚠️ AND NOTHING IS REMEMBERED BETWEEN FRAMES. A cached "is it stuck" is what a missed event
+       makes permanently wrong; this recomputes from a live `scrollTop` on every evaluation. */
+    expect(srcCode, "the settle's state is being remembered rather than derived").not.toMatch(/stuckRef|wasStuck|lastStuck/);
     expect(srcCode, "the updater takes the previous value again — that is a latch, and a latch is a cached decision").not.toMatch(/setStuck\(\(was\)/);
   });
 
@@ -654,7 +663,23 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        grid's own root and the stylesheet reads it from there, which cannot be mounted outside its
        provider and cannot resolve to `null`. What remains is the half that was always the point:
        the grid holds a ref to the element it owns and traverses nothing. */
-    expect(srcCode, "a DOM lookup for the scroller appeared — the grid owns its scroller, it must not hunt for one").not.toContain("querySelector");
+    /**
+     * ⚠️ THE CLAIM IS ABOUT ITS OWN SCROLLER, AND THAT DISTINCTION IS NOW LOAD-BEARING. What this
+     * forbids is the grid HUNTING for the row it already holds — `closest(grid) → querySelector
+     * (.wpg-scroll)`, two strings coupling two components across the DOM, which finds the wrong
+     * element the day anything inside the row is itself a scroller.
+     *
+     * ⚠️ IT DOES NOT FORBID RESOLVING A SCROLLER THE PAGE NAMED. `settleOn` is a selector the page
+     * hands in for its own internal zone, because on a `fill` page the frame never scrolls and the
+     * settle has to follow the scroll that does. The grid is not searching for something it owns; it
+     * is resolving something it was told about, and it picks by which candidate actually scrolls
+     * rather than by document order. So the ban is scoped to the row's own class.
+     */
+    expect(srcCode, "the grid went hunting for its own scroll row — it holds a ref to it")
+      .not.toMatch(/querySelector[^(]*\(\s*["'`][^"'`]*wpg-scroll/);
+    const lookups = [...srcCode.matchAll(/querySelectorAll?\(([^)]*)\)/g)].map((m) => m[1].trim());
+    expect(lookups, `the grid resolves something other than the page's own \`settleOn\`: ${lookups.join(" · ")}`)
+      .toEqual(["settleOn"]);
     expect(srcCode, "a `closest()` traversal appeared").not.toContain("closest(");
     expect(srcCode, "the grid stopped holding a ref to its own scroller").toContain("ref={scrollRef}");
   });
