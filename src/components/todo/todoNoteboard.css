@@ -374,12 +374,10 @@
    the To-do list now, and a control's rules cannot live in one of its consumers' stylesheets. */
 
 /* the teaching empty state */
-.nb-empty {
-  max-width: 520px; margin: 26px auto 0; text-align: center;
-  background: #fbf7ee; border: 1px dashed #d9cca8; border-radius: 13px; padding: 26px 28px;
-}
-.nb-empty h3 { font-family: "Playfair Display", Georgia, serif; font-size: 19px; font-weight: 700; color: var(--nb-ink); margin: 0 0 8px; }
-.nb-empty p { font-size: 12.5px; color: var(--nb-quiet); line-height: 1.65; margin: 0 0 16px; }
+/* ⚠️ `.nb-empty` IS RETIRED (empty-state run) — its heading, paragraph and ArtSlot are superseded
+   by the three-panel workflow (noteboardEmptyState.tsx), which renders ABOVE a board that always
+   mounts rather than in place of one. `.nb-empty-search` above is a different thing and stays:
+   that is the "nothing matches that search" line. */
 
 /* the ⋯ Tags… sheet keeps the panel width; `.nb-datewhy` went with the date door it explained */
 .nb-datepanel { width: min(380px, calc(100vw - 40px)); }
