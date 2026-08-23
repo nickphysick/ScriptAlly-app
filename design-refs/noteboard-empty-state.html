@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Noteboard empty state</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ground:#f2ede7; --parchment:#fdfaf5; --ink:#3a1c14; --ink-deep:#1c130f;
+  --burgundy:#7c3a2a; --pink:#f5e2da; --pink-deep:#e8c8bc;
+  --sage:#e9ede6; --sage-mid:#c9d3c5; --sage-dark:#5a6e58; --sage-ring:#8a9e88;
+  --yellow:#fbf3d9; --yellow-deep:#eddfae;
+  --muted:#9c8878; --hairline:#e7ddd2;
+}
+body{font-family:'Inter',sans-serif;background:var(--parchment);color:var(--ink);padding:0 0 80px}
+
+/* toolbar as shipped */
+.toolbar{display:flex;align-items:center;gap:12px;padding:20px 40px;flex-wrap:wrap}
+.search{flex:1;min-width:220px;max-width:340px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(124,58,42,.18);border-radius:8px;padding:8px 12px}
+.search input{border:0;outline:0;background:transparent;font-size:13.5px;color:var(--ink);width:100%}
+.search input::placeholder{color:var(--muted)}
+.chip{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.06em;padding:6px 12px;border-radius:99px;border:1px solid var(--pink-deep);background:var(--pink);color:var(--burgundy);flex:none;cursor:pointer}
+.spacer{flex:1}
+.viewtog{display:flex;border:1px solid rgba(124,58,42,.18);border-radius:8px;overflow:hidden;flex:none}
+.viewtog button{border:0;background:#fff;padding:7px 13px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6f5a4c;cursor:pointer;white-space:nowrap}
+.viewtog button.on{background:var(--ground);color:var(--ink)}
+.btn{border:0;cursor:pointer;font-size:13.5px;font-weight:500;border-radius:9px;padding:9px 16px;white-space:nowrap;flex:none;font-family:'Inter',sans-serif}
+.btn-primary{background:var(--pink);border:1px solid var(--pink-deep);color:var(--burgundy)}
+.btn-primary:hover{background:var(--pink-deep)}
+.btn-ghost{background:transparent;border:1px solid rgba(124,58,42,.22);color:var(--burgundy)}
+.btn-ghost:hover{background:var(--ground)}
+.btn-sm{padding:6px 12px;font-size:12.5px;border-radius:8px}
+
+/* ===== empty-state workflow ===== */
+.opening{padding:26px 40px 0;max-width:1180px}
+.opening h2{font-family:'Playfair Display',serif;font-size:23px;font-weight:500;color:var(--ink)}
+.opening p{font-size:13.5px;font-weight:300;color:#6f5a4c;margin-top:7px;line-height:1.55;max-width:62ch}
+
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;padding:24px 40px 8px;max-width:1180px}
+@media(max-width:1000px){.steps{grid-template-columns:1fr}}
+.step{border:1px solid var(--hairline);border-radius:12px;background:var(--parchment);padding:0;overflow:hidden;display:flex;flex-direction:column}
+.step-art{background:var(--ground);border-bottom:1px solid var(--hairline);padding:20px 20px 14px;display:flex;align-items:center;justify-content:center;min-height:158px}
+.step-art svg{display:block;width:100%;max-width:250px;height:auto}
+.step-txt{padding:16px 20px 20px}
+.step-n{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px}
+.step h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;margin-bottom:6px}
+.step p{font-size:13px;font-weight:300;line-height:1.55;color:#6f5a4c}
+.step .aside{font-size:12px;color:var(--muted);margin-top:9px;font-weight:300}
+
+.opening-cta{display:flex;align-items:center;gap:12px;padding:14px 40px 4px;flex-wrap:wrap}
+.opening-cta .note{font-size:12.5px;color:var(--muted);font-weight:300}
+
+.divider{margin:30px 40px 0;border-top:1px solid var(--hairline);max-width:1180px}
+
+/* ===== examples below ===== */
+.exhead{padding:22px 40px 0;max-width:1180px}
+.exhead .mono{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.exhead p{font-size:12.5px;color:var(--muted);font-weight:300;margin-top:6px;line-height:1.5;max-width:70ch}
+.boardwrap{padding:16px 40px 40px}
+.board{column-width:280px;column-gap:18px;max-width:1180px}
+.card{break-inside:avoid;margin:0 0 18px;border-radius:10px;padding:16px 16px 10px;border:1px solid transparent;background-image:none;
+  box-shadow:0 1px 2px rgba(58,28,20,.05),0 3px 10px rgba(58,28,20,.07)}
+.c-yellow{background-color:var(--yellow);border-color:var(--yellow-deep)}
+.c-pink{background-color:var(--pink);border-color:var(--pink-deep)}
+.c-sage{background-color:var(--sage);border-color:var(--sage-mid)}
+.card.example{opacity:.75;border-style:dashed}
+.card.example:hover{opacity:1}
+.exlabel{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#8a7466;background:rgba(255,255,255,.65);border-radius:99px;padding:3px 9px;display:inline-block;margin-bottom:8px}
+.note-body{font-family:'Caveat',cursive;font-size:21px;line-height:1.32;color:var(--ink-deep);white-space:pre-wrap}
+.ex-actions{display:flex;align-items:center;gap:8px;margin-top:10px}
+.note-tag{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:#8a7466;background:rgba(255,255,255,.55);border-radius:99px;padding:3px 9px}
+.keep{border:0;background:rgba(255,255,255,.6);cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--burgundy);padding:5px 11px;border-radius:99px}
+.keep:hover{background:#fff}
+.exdismiss{border:0;background:transparent;cursor:pointer;color:#8a7466;font-size:13px;padding:4px 8px;border-radius:6px;margin-left:auto}
+.exdismiss:hover{background:rgba(255,255,255,.6);color:var(--burgundy)}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9c8878" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input type="text" placeholder="Search your notes…">
+  </div>
+  <button class="chip">#All</button>
+  <div class="spacer"></div>
+  <div class="viewtog"><button class="on">Board</button><button>Column</button></div>
+  <button class="btn btn-ghost">Examples</button>
+  <button class="btn btn-primary">+ Pin a note</button>
+</div>
+
+<div class="opening">
+  <h2>Your board is empty</h2>
+  <p>Querying throws a lot at you at once — an agent’s wishlist heard on a podcast, a line that finally works, a rule you keep forgetting. This is where those live until you need them.</p>
+</div>
+
+<div class="steps">
+
+  <!-- 1 -->
+  <div class="step">
+    <div class="step-art">
+      <svg viewBox="0 0 250 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A note being written">
+        <!-- desk line -->
+        <path d="M14 112 H236" stroke="#e7ddd2" stroke-width="2" stroke-linecap="round"/>
+        <!-- back papers -->
+        <rect x="46" y="26" width="112" height="72" rx="5" fill="#e9ede6" stroke="#c9d3c5" stroke-width="1.5" transform="rotate(-5 102 62)"/>
+        <rect x="60" y="22" width="112" height="72" rx="5" fill="#f5e2da" stroke="#e8c8bc" stroke-width="1.5" transform="rotate(3 116 58)"/>
+        <!-- front paper -->
+        <rect x="54" y="32" width="122" height="76" rx="5" fill="#fbf3d9" stroke="#eddfae" stroke-width="1.5"/>
+        <path d="M68 54 H150 M68 68 H158 M68 82 H124" stroke="#c9b98a" stroke-width="2" stroke-linecap="round"/>
+        <!-- pencil -->
+        <g transform="rotate(38 186 60)">
+          <rect x="178" y="22" width="13" height="58" rx="2.5" fill="#f5e2da" stroke="#7c3a2a" stroke-width="1.5"/>
+          <path d="M178 80 L184.5 96 L191 80 Z" fill="#fdfaf5" stroke="#7c3a2a" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M181.5 89 L184.5 96 L187.5 89 Z" fill="#3a1c14"/>
+          <path d="M178 34 H191" stroke="#7c3a2a" stroke-width="1.5"/>
+        </g>
+      </svg>
+    </div>
+    <div class="step-txt">
+      <span class="step-n">One</span>
+      <h3>Write it down</h3>
+      <p>A quote, a comp title, a half-formed pitch. Pin it in a second and get back to what you were doing.</p>
+      <p class="aside">Nothing here goes anywhere else unless you send it.</p>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="step">
+    <div class="step-art">
+      <svg viewBox="0 0 250 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three coloured notes with tags">
+        <path d="M14 112 H236" stroke="#e7ddd2" stroke-width="2" stroke-linecap="round"/>
+        <!-- three papers fanned -->
+        <g transform="rotate(-7 62 66)">
+          <rect x="26" y="34" width="72" height="66" rx="5" fill="#fbf3d9" stroke="#eddfae" stroke-width="1.5"/>
+          <path d="M38 52 H84 M38 64 H76" stroke="#c9b98a" stroke-width="2" stroke-linecap="round"/>
+          <rect x="38" y="76" width="34" height="13" rx="6.5" fill="#fdfaf5" stroke="#c9b98a" stroke-width="1.2"/>
+        </g>
+        <g>
+          <rect x="90" y="28" width="72" height="66" rx="5" fill="#f5e2da" stroke="#e8c8bc" stroke-width="1.5"/>
+          <path d="M102 46 H148 M102 58 H140" stroke="#cfa694" stroke-width="2" stroke-linecap="round"/>
+          <rect x="102" y="70" width="38" height="13" rx="6.5" fill="#fdfaf5" stroke="#cfa694" stroke-width="1.2"/>
+        </g>
+        <g transform="rotate(7 190 66)">
+          <rect x="154" y="34" width="72" height="66" rx="5" fill="#e9ede6" stroke="#c9d3c5" stroke-width="1.5"/>
+          <path d="M166 52 H212 M166 64 H204" stroke="#a8b7a5" stroke-width="2" stroke-linecap="round"/>
+          <rect x="166" y="76" width="30" height="13" rx="6.5" fill="#fdfaf5" stroke="#a8b7a5" stroke-width="1.2"/>
+        </g>
+      </svg>
+    </div>
+    <div class="step-txt">
+      <span class="step-n">Two</span>
+      <h3>Colour and tag it</h3>
+      <p>Three papers and a tag of your own wording. Filter to <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px">#agents</span> when you’re polishing a letter, or search the lot.</p>
+      <p class="aside">Your tags, your grouping — nothing is prescribed.</p>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="step">
+    <div class="step-art">
+      <svg viewBox="0 0 250 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A note gaining a date, appearing on a calendar">
+        <path d="M14 112 H236" stroke="#e7ddd2" stroke-width="2" stroke-linecap="round"/>
+        <!-- note -->
+        <rect x="24" y="30" width="88" height="70" rx="5" fill="#f5e2da" stroke="#e8c8bc" stroke-width="1.5"/>
+        <path d="M36 48 H96 M36 60 H88" stroke="#cfa694" stroke-width="2" stroke-linecap="round"/>
+        <!-- sage stitched date badge -->
+        <rect x="36" y="72" width="52" height="15" rx="7.5" fill="#fdfaf5" stroke="#8a9e88" stroke-width="1.3" stroke-dasharray="3 2.5"/>
+        <path d="M43 79.5 l3.5 3.5 l6 -7" stroke="#5a6e58" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M58 80 H82" stroke="#8a9e88" stroke-width="2" stroke-linecap="round"/>
+        <!-- arrow -->
+        <path d="M120 66 H144" stroke="#7c3a2a" stroke-width="2" stroke-linecap="round"/>
+        <path d="M138 60 L145 66 L138 72" stroke="#7c3a2a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- calendar -->
+        <rect x="154" y="30" width="72" height="70" rx="5" fill="#fdfaf5" stroke="#c9d3c5" stroke-width="1.5"/>
+        <path d="M154 46 H226" stroke="#c9d3c5" stroke-width="1.5"/>
+        <path d="M170 24 V38 M210 24 V38" stroke="#8a9e88" stroke-width="2" stroke-linecap="round"/>
+        <g fill="#dfe5dc">
+          <rect x="163" y="55" width="12" height="10" rx="2"/>
+          <rect x="184" y="55" width="12" height="10" rx="2"/>
+          <rect x="205" y="55" width="12" height="10" rx="2"/>
+          <rect x="163" y="72" width="12" height="10" rx="2"/>
+          <rect x="205" y="72" width="12" height="10" rx="2"/>
+        </g>
+        <rect x="184" y="72" width="12" height="10" rx="2" fill="#e8c8bc" stroke="#7c3a2a" stroke-width="1.3"/>
+      </svg>
+    </div>
+    <div class="step-txt">
+      <span class="step-n">Three</span>
+      <h3>Give it a date, if it needs one</h3>
+      <p>A note with a date turns up on your to-do list and calendar when it’s due — and stays here on the board. One note, not a copy.</p>
+      <p class="aside">Undated notes stay put. They never chase you.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="opening-cta">
+  <button class="btn btn-primary">+ Pin your first note</button>
+  <span class="note">Or keep one of the examples below to start with.</span>
+</div>
+
+<div class="divider"></div>
+
+<div class="exhead">
+  <span class="mono">What writers keep here</span>
+  <p>Drawn from what querying writers actually hang on to. Keep one to make it yours, or dismiss them — they retire on their own as your board fills.</p>
+</div>
+
+<div class="boardwrap">
+  <div class="board">
+    <div class="card example c-yellow">
+      <span class="exlabel">Example</span>
+      <div class="note-body">Heard [agent] on [podcast] — they’re hunting locked-room mysteries with an unreliable narrator. Save the exact quote for the opening line of the letter.</div>
+      <div class="ex-actions"><span class="note-tag">#agents</span><button class="keep">Keep this</button><button class="exdismiss">✕</button></div>
+    </div>
+    <div class="card example c-pink">
+      <span class="exlabel">Example</span>
+      <div class="note-body">[Agent]’s #MSWL: “speculative fiction that feels like literary fiction wearing a disguise.” That’s the book. Query when their window opens.</div>
+      <div class="ex-actions"><span class="note-tag">#agents</span><button class="keep">Keep this</button><button class="exdismiss">✕</button></div>
+    </div>
+    <div class="card example c-sage">
+      <span class="exlabel">Example</span>
+      <div class="note-body">One-line pitch, draft 4: When a small-town archivist vanishes, the sister who stopped believing in her must decide which of the town’s stories were ever true.</div>
+      <div class="ex-actions"><span class="note-tag">#letter</span><button class="keep">Keep this</button><button class="exdismiss">✕</button></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
