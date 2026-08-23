@@ -229,6 +229,42 @@ export function packageMenuRow(
   return [{ label: PACKAGE_ROW_LABEL, hint: `${packageCount}` }];
 }
 
+/**
+ * The Attach menu's REMOVAL rows — one per package the send currently carries.
+ *
+ * ⚠️ IT LIVES WHERE ATTACH LIVES, AND THAT IS THE WHOLE POINT OF PUTTING IT HERE. `attachPackage`
+ * had no inverse on any surface: `detachPackage` was written, commented, and never mounted, because
+ * its only caller — the origin tag — was retired and the reasoning recorded at the time was that
+ * "each pill already carries its own ×". That is true and it is not the same act. Three separate
+ * removals with three separate undos is not "remove this package", and nothing on the page said the
+ * three items belonged to one decision the writer could take back in one move.
+ *
+ * ⚠️ ONE ROW PER PACKAGE, NAMED. `materialsWanted` is a flat list and a send may legitimately draw
+ * on two templates, so a single "Remove package" row would have to guess which. The name comes from
+ * the GROUP — i.e. from the mark stored on the items — so it still reads correctly after the
+ * package itself has been deleted, which is the same reason the strip shows it.
+ *
+ * ⚠️ AND THE HINT STATES THE SCOPE RATHER THAN WARNING ABOUT IT. `3 ITEMS` is what will go; it is a
+ * fact, and it is what lets the writer tell a mis-attached package from one they have since edited
+ * down to a single sheet.
+ */
+export const detachRowLabel = (packageName: string) => `Remove ${packageName}`;
+
+export function detachMenuRows(
+  groups: readonly MaterialGroup[],
+): { packageId: string; packageName: string; label: string; hint: string }[] {
+  return groups.map((g) => ({
+    packageId: g.packageId,
+    packageName: g.packageName,
+    label: detachRowLabel(g.packageName),
+    hint: `${g.materials.length} ${g.materials.length === 1 ? "ITEM" : "ITEMS"}`,
+  }));
+}
+
+/** What the toast says once the items are gone. States the deed and its scope; no verdict. */
+export const detachToast = (n: number, packageName: string) =>
+  `Removed ${n} ${n === 1 ? "item" : "items"} from ${packageName}`;
+
 /* ── the group in the send (ref 177, left panel) ──────────────────────────────────────────── */
 
 /**

@@ -94,7 +94,7 @@ import { QueryCentreSkeleton, SKELETON_FLOOR_MS } from "./reading-pane/QueryCent
 import { ArtSlot } from "./todo/ArtSlot";
 import {
   attachablePackages, attachedMaterials, canAttachPackages, groupByOrigin, materialName,
-  packageMenuRow, withoutPackage, type PackageItem,
+  packageMenuRow, detachMenuRows, detachToast, withoutPackage, type PackageItem,
 } from "../lib/packageAttach";
 import { PackageGroup, LooseMaterials } from "./reading-pane/PackageGroup";
 import { useOpenEditQuery } from "./EditQueryHost";
@@ -1983,16 +1983,30 @@ export const Queries: React.FC<{
   };
 
   /**
-   * ⚠️ THE TAG'S UNDO REMOVES WHAT THAT PACKAGE BROUGHT AND NOTHING ELSE — matched on the item's
-   * mark, never on its name, so a synopsis the writer added by hand survives an undo of a package
-   * that also carried one.
+   * ⚠️ REMOVES WHAT THAT PACKAGE BROUGHT AND NOTHING ELSE — matched on the item's MARK, never on its
+   * name, so a synopsis the writer added by hand survives the removal of a package that also carried
+   * one. It is the inverse of `attachPackage`, and it is mounted in the same menu that attaches.
+   *
+   * ⚠️ IT DOES NOT TOUCH `packageId`, AND THAT IS NOT AN OMISSION. `attachPackage` writes
+   * `packageId: ""` as the snapshot lands — attaching a snapshot REPLACES a link rather than sitting
+   * beside it — so by the time a group exists there is no link left to clear. Re-clearing it would
+   * add a key to `affectedKeys` for no change, and RESTORING the pre-attach link would be wrong:
+   * this is not an undo of the attach (the toast below is), it is a removal of the items.
+   *
+   * ⚠️ AND IT IS A CORRECTION, NOT HISTORY. No activity is appended; no status, date or count is
+   * written. `recomputeQuery` stays the single writer of every derived field, and the package's
+   * sent/replies/requests figures are derived from the queries at read time — so they follow this
+   * write without anything having to update them.
+   *
+   * ⚠️ THE PRIOR VALUE IS CAPTURED BEFORE THE WRITE. The empty-closure law: an undo built from state
+   * read back afterwards restores what it just wrote.
    */
   const detachPackage = (q: Query, packageId: string, name: string) => {
     const before = ((q as Query).materialsWanted ?? []) as (string | QueryMaterial)[];
     const next = withoutPackage(before, packageId);
     void updateQuery(q.id, { materialsWanted: next });
     showToast({
-      message: `Removed the items from ${name}`,
+      message: detachToast(before.length - next.length, name),
       undo: () => void updateQuery(q.id, { materialsWanted: before }),
     });
   };
@@ -5691,6 +5705,18 @@ export const Queries: React.FC<{
                                 /* §2 — this manuscript's live packages; retired ones are not offered */
                                 const attachablePkgs = attachablePackages(packages, activeQuery.manuscriptId);
                                 const materialsOf = (q: Query) => ((q.materialsWanted ?? []) as (string | QueryMaterial)[]);
+                                /**
+                                 * ⚠️ ONE DERIVATION, READ TWICE. The strip below draws these groups
+                                 * and the Attach menu offers to remove them; computing
+                                 * `groupByOrigin` separately in each place would let the two come to
+                                 * disagree about what the send is carrying — a menu offering to
+                                 * remove a package no strip shows, or a strip with no way off it.
+                                 */
+                                const { groups: sentGroups } = groupByOrigin(materialsOf(activeQuery));
+                                /* ⚠️ AFTER `materialsOf`, DELIBERATELY. Declared above it this is a
+                                   temporal-dead-zone read — tsc catches THIS shape because the
+                                   reference shares the declaration's scope, but the same mistake one
+                                   helper deeper typechecks clean and throws at runtime. */
                                 const openOtherEditor = (item: string | QueryMaterial, el: HTMLElement) => {
                                   setOtherEditing(item);
                                   setOtherText(sampleMaterialText(item));
@@ -5793,7 +5819,7 @@ export const Queries: React.FC<{
                                   node: attach(`oth-${i}`, formatQueryMaterial(it), (el) => openOtherEditor(it, el), formatQueryMaterial(it), () => removeOtherMaterial(activeQuery, activeAgent, it)),
                                 }));
 
-                                const { groups } = groupByOrigin(materialsOf(activeQuery));
+                                const groups = sentGroups;
                                 const claimed = new Set(groups.flatMap((g) => g.materials));
                                 const loose = pills.filter((p) => !claimed.has(p.material));
                                 const take = (names: string[]) => pills.filter((p) => names.includes(p.material)).map((p) => p.node);
@@ -5936,6 +5962,36 @@ export const Queries: React.FC<{
                                           /* the picker hangs off the same chip the menu did */
                                           (pkgPickTrigRef as React.MutableRefObject<HTMLElement | null>).current = addMatTrigRef.current;
                                           setPkgPickOpen(true);
+                                        },
+                                      })),
+                                      /**
+                                       * ⚠️ REMOVAL LIVES WHERE ATTACHMENT LIVES (F-O). `attachPackage`
+                                       * had no inverse on any surface: `detachPackage` was written
+                                       * and never mounted, so a package could be put on a send and
+                                       * only ever be taken apart pill by pill — three removals and
+                                       * three undos for one decision. A second, separate detach
+                                       * entry point would be the wrong fix; this is the menu the
+                                       * writer already opens to attach, so it is the menu that
+                                       * offers to take it back.
+                                       *
+                                       * ⚠️ THE ROWS ARE DERIVED FROM THE GROUPS ALREADY ON SCREEN,
+                                       * so the menu can never offer to remove a package the send is
+                                       * not carrying, and it names each one rather than guessing
+                                       * when a send drew on two.
+                                       *
+                                       * ⚠️ NO CONFIRM. The write is reversible and the toast carries
+                                       * a real undo that restores the captured list — this app's
+                                       * grammar for a reversible act. A dialogue here would ask the
+                                       * writer to be certain about something they can put straight
+                                       * back.
+                                       */
+                                      ...(sentGroups.length ? ["divider" as const] : []),
+                                      ...detachMenuRows(sentGroups).map((r) => ({
+                                        label: r.label,
+                                        hint: r.hint,
+                                        onClick: () => {
+                                          setAddMatOpen(false);
+                                          detachPackage(activeQuery, r.packageId, r.packageName);
                                         },
                                       })),
                                     ]}
