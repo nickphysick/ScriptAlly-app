@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Query sent — package strip / floating materials</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f2ede7; --white:#ffffff;
+    --sage-a:#d7ddd5; --sage-b:#d5dbd3; --sage-deep:#9aa896; --sage-ink:#5c7053;
+    --pink-band:#f3e0d6; --pink-cta:#f5e2da; --pink-cta-edge:#e8c8bc;
+    --burgundy:#7c3a2a; --ink:#3a1c14;
+    --pro-slate:#6A89A7; --pro-fill:#e6edf4; --pro-edge:#c3d5e4; --pro-ink:#41627f;
+    --ink-soft:rgba(58,28,20,.62); --ink-faint:rgba(58,28,20,.40);
+    --hairline:rgba(124,58,42,.16); --hairline-soft:rgba(58,28,20,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--page);font-family:'Inter',sans-serif;color:var(--ink);padding:44px 40px 90px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;}
+  h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;letter-spacing:-.01em;}
+  h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;}
+  .lede{font-size:13.5px;color:var(--ink-soft);line-height:1.65;max-width:740px;margin:12px 0 38px;}
+  .lede b{color:var(--ink);font-weight:600;}
+  .sec{margin-bottom:46px;}
+  .band-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--hairline);padding-bottom:9px;margin-bottom:10px;}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--ink-faint);text-transform:uppercase;}
+  .verdict{font-size:11.5px;line-height:1.6;margin:0 0 18px;padding:9px 14px;border-radius:0 8px 8px 0;max-width:740px;background:rgba(215,221,213,.35);border-left:3px solid var(--sage-deep);color:var(--sage-ink);}
+  .verdict b{font-weight:700;}
+  .caseline{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 9px;}
+  .note{font-size:11px;color:var(--ink-faint);line-height:1.6;font-style:italic;max-width:740px;margin-top:4px;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* timeline chassis */
+  .pane{background:var(--white);border:1px solid var(--hairline-soft);border-radius:12px;padding:18px 22px 20px;max-width:760px;margin-bottom:16px;}
+  .tl{position:relative;padding-left:34px;}
+  .tl::before{content:"";position:absolute;left:13px;top:16px;bottom:10px;width:1px;background:rgba(58,28,20,.14);}
+  .ev{position:relative;padding-bottom:22px;}
+  .ev:last-child{padding-bottom:0;}
+  .ev .marker{position:absolute;left:-34px;top:0;width:27px;height:27px;border-radius:50%;background:#f8e7dc;border:2px solid var(--burgundy);display:flex;align-items:center;justify-content:center;}
+  .ev .marker svg{width:13px;height:13px;stroke:var(--burgundy);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .ev.sage .marker{background:#e9ede6;border-color:#8a9e88;}
+  .ev.sage .marker svg{stroke:#5c7053;}
+  .ev-head{display:flex;align-items:baseline;gap:10px;margin-bottom:9px;}
+  .ev-head .e-t{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;}
+  .ev-head .e-via{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;border-bottom:1px dotted var(--ink-faint);}
+  .ev-head .e-date{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-faint);}
+  .ev-body{font-size:12.5px;color:var(--ink-soft);}
+
+  /* ===== the strip ===== */
+  .strip{
+    display:flex;align-items:stretch;max-width:600px;
+    border:1px solid var(--hairline-soft);border-radius:10px;overflow:hidden;background:var(--white);
+  }
+  /* leading illustration slot */
+  .slot{
+    flex:0 0 auto;width:52px;
+    display:flex;align-items:center;justify-content:center;
+    border-right:1px solid var(--hairline-soft);
+    background:rgba(255,255,255,.6);
+  }
+  .slot .ph{
+    width:38px;height:38px;border-radius:8px;
+    border:1.5px dashed rgba(124,58,42,.32);
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.55);
+  }
+  .slot .ph svg{width:22px;height:22px;stroke:var(--burgundy);stroke-width:1.15;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.85;}
+  /* packaged variant: slot picks up the seal colour */
+  .strip.packed{border-color:var(--pro-edge);}
+  .strip.packed .slot{background:var(--pro-fill);border-right-color:var(--pro-edge);}
+  .strip.packed .slot .ph{border-color:rgba(65,98,127,.42);background:rgba(255,255,255,.55);}
+  .strip.packed .slot .ph svg{stroke:var(--pro-ink);}
+
+  .s-seal{
+    background:var(--pro-fill);border-right:1px solid var(--pro-edge);
+    padding:10px 15px;display:flex;flex-direction:column;gap:2px;justify-content:center;min-width:142px;
+  }
+  .s-seal .ss-l{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:var(--pro-ink);opacity:.8;}
+  .s-seal .ss-n{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--pro-ink);line-height:1.15;}
+  .s-items{padding:10px 14px;display:flex;gap:7px;flex-wrap:wrap;align-items:center;flex:1;}
+  /* loose = no container: chips float on the pane */
+  .loose{display:flex;gap:8px;flex-wrap:wrap;align-items:center;max-width:600px;}
+  .loose .lslot{
+    width:38px;height:38px;border-radius:8px;border:1.5px dashed rgba(124,58,42,.32);
+    display:flex;align-items:center;justify-content:center;background:transparent;flex:0 0 auto;
+  }
+  .loose .lslot svg{width:22px;height:22px;stroke:var(--burgundy);stroke-width:1.15;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.8;}
+  .mslug{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);margin-right:2px;}
+  .mchip{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink);background:var(--white);border:1px solid var(--hairline-soft);padding:4px 10px;border-radius:7px;white-space:nowrap;}
+  .mchip svg{width:11px;height:11px;stroke:var(--burgundy);stroke-width:1.5;fill:none;}
+  .mchip.addv{border-style:dashed;border-color:rgba(124,58,42,.32);color:var(--burgundy);cursor:pointer;}
+  .vchip{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--burgundy);background:var(--pink-cta);border:1px solid var(--pink-cta-edge);padding:2px 8px;border-radius:999px;white-space:nowrap;}
+  .promote{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--burgundy);border-bottom:1px solid var(--pink-cta-edge);cursor:pointer;margin-left:auto;white-space:nowrap;}
+
+  .briefgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:760px;}
+  .brief{background:var(--white);border:1px solid var(--hairline-soft);border-radius:10px;padding:15px 18px;display:flex;gap:15px;align-items:flex-start;}
+  .brief .bph{
+    flex:0 0 auto;width:64px;height:64px;border-radius:10px;border:1.5px dashed rgba(124,58,42,.32);
+    display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.55);
+  }
+  .brief .bph svg{width:36px;height:36px;stroke:var(--burgundy);stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.85;}
+  .brief .bt{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-bottom:5px;}
+  .brief p{font-size:11.5px;color:var(--ink-soft);line-height:1.6;}
+  .brief .cav{font-family:'Caveat',cursive;font-size:15px;color:var(--burgundy);margin-top:6px;display:block;}
+  @media(max-width:900px){.briefgrid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Packaged strip, floating materials</h1>
+<div class="lede">
+Option B, refined. A package is a contained object — <b>blue-filled strip, parcel in the leading slot, name on the seal</b>. Loose materials aren't contained at all: they <b>float</b> on the pane, sheets and chips, nothing boxing them. The distinction is structural, so the eye reads it before the words.
+</div>
+
+<div class="sec">
+  <div class="band-head"><h2>1 · Package attached</h2><span class="tag">Parcel · seal · contents</span></div>
+  <div class="verdict"><b>Slot, seal and chips share one row.</b> The slot takes the pastille blue of the seal beside it, so parcel and package name read as one object — and blue marks it as the Pro surface without a badge saying so.</div>
+  <div class="pane">
+    <div class="tl">
+      <div class="ev">
+        <span class="marker"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></span>
+        <div class="ev-head"><span class="e-t">Query sent</span><span class="e-via">Email</span><span class="e-date">12 AUG</span></div>
+        <div class="strip packed">
+          <div class="slot"><span class="ph">
+            <svg viewBox="0 0 32 32"><path d="M16 4 28 10v12L16 28 4 22V10z"/><path d="M16 15 28 10M16 15v13M16 15 4 10"/><path d="M10 7l12 6"/><circle cx="16" cy="15" r="2.2"/></svg>
+          </span></div>
+          <div class="s-seal"><span class="ss-l">Package</span><span class="ss-n">Standard UK</span></div>
+          <div class="s-items">
+            <span class="mchip"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 8l9 6 9-6"/></svg>Hook-first</span>
+            <span class="mchip"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 9h7M9 13h7"/></svg>One-page</span>
+            <span class="mchip"><svg viewBox="0 0 24 24"><path d="M5 4h8l4 4v12H5z"/><path d="M13 4v4h4"/></svg>Chapters 1–3</span>
+            <span class="vchip"><span>§</span>Prologue-first</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="band-head"><h2>2 · Loose materials, no package</h2><span class="tag">Uncontained · floating</span></div>
+  <div class="verdict"><b>No container at all.</b> Sheets and chips sit directly on the pane — lighter than the packaged row, not lesser than it. The promote link sits at the end where it can be ignored: offered once, never insisted on.</div>
+  <div class="pane">
+    <div class="tl">
+      <div class="ev">
+        <span class="marker"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></span>
+        <div class="ev-head"><span class="e-t">Query sent</span><span class="e-via">Email</span><span class="e-date">12 AUG</span></div>
+        <div class="loose">
+          <span class="lslot"><svg viewBox="0 0 32 32"><path d="M7 10h13l4 4v13H7z"/><path d="M11 6h13l4 4v13" opacity=".75"/><path d="M11 17h9M11 21h6"/></svg></span>
+          <span class="mchip"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 8l9 6 9-6"/></svg>Covering letter</span>
+          <span class="mchip"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 9h7M9 13h7"/></svg>Synopsis</span>
+          <span class="mchip"><svg viewBox="0 0 24 24"><path d="M5 4h8l4 4v12H5z"/><path d="M13 4v4h4"/></svg>First 10 pages</span>
+          <span class="mchip addv">+ Attach</span>
+          <span class="promote">Save as package ›</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="band-head"><h2>3 · The rest of the timeline</h2><span class="tag">In context</span></div>
+  <div class="verdict"><b>Attachments only ever hang off a send.</b> Requests, replies and waiting states carry nothing — neither strip nor floating chips, so the slot never becomes a fixture on every row.</div>
+  <div class="pane">
+    <div class="tl">
+      <div class="ev">
+        <span class="marker"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></span>
+        <div class="ev-head"><span class="e-t">Query sent</span><span class="e-via">Email</span><span class="e-date">12 AUG</span></div>
+        <div class="strip packed">
+          <div class="slot"><span class="ph">
+            <svg viewBox="0 0 32 32"><path d="M16 4 28 10v12L16 28 4 22V10z"/><path d="M16 15 28 10M16 15v13M16 15 4 10"/><path d="M10 7l12 6"/><circle cx="16" cy="15" r="2.2"/></svg>
+          </span></div>
+          <div class="s-seal"><span class="ss-l">Package</span><span class="ss-n">Standard UK</span></div>
+          <div class="s-items">
+            <span class="mchip"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 8l9 6 9-6"/></svg>Hook-first</span>
+            <span class="mchip"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 9h7M9 13h7"/></svg>One-page</span>
+            <span class="mchip"><svg viewBox="0 0 24 24"><path d="M5 4h8l4 4v12H5z"/><path d="M13 4v4h4"/></svg>Chapters 1–3</span>
+          </div>
+        </div>
+      </div>
+      <div class="ev sage">
+        <span class="marker"><svg viewBox="0 0 24 24"><path d="M4 12h16M4 12l6-6M4 12l6 6"/></svg></span>
+        <div class="ev-head"><span class="e-t">Partial requested</span><span class="e-date">02 SEP</span></div>
+        <div class="ev-body">Stillwater Reps asked for the first fifty pages.</div>
+      </div>
+      <div class="ev">
+        <span class="marker"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></span>
+        <div class="ev-head"><span class="e-t">Partial sent</span><span class="e-via">Email</span><span class="e-date">03 SEP</span></div>
+        <div class="loose">
+          <span class="lslot"><svg viewBox="0 0 32 32"><path d="M7 10h13l4 4v13H7z"/><path d="M11 6h13l4 4v13" opacity=".75"/><path d="M11 17h9M11 21h6"/></svg></span>
+          <span class="mchip"><svg viewBox="0 0 24 24"><path d="M5 4h8l4 4v12H5z"/><path d="M13 4v4h4"/></svg>First fifty pages</span>
+          <span class="vchip"><span>§</span>Prologue-first</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note">A partial send is usually loose by nature — the agent named what they wanted — so the loose treatment is the common case further down a query, not an edge case.</div>
+</div>
+
+<div class="sec">
+  <div class="band-head"><h2>4 · The two illustration briefs</h2><span class="tag">For the artist</span></div>
+  <div class="briefgrid">
+    <div class="brief">
+      <span class="bph"><svg viewBox="0 0 32 32"><path d="M16 4 28 10v12L16 28 4 22V10z"/><path d="M16 15 28 10M16 15v13M16 15 4 10"/><path d="M10 7l12 6"/><circle cx="16" cy="15" r="2.2"/></svg></span>
+      <div>
+        <div class="bt" style="color:var(--burgundy);">Slot A · Package</div>
+        <p>Shown when a submission package was attached. Sits on pastille blue; needs to hold at 22px inside a 38px plate.</p>
+        <span class="cav">a wrapped parcel, tied with string and sealed</span>
+      </div>
+    </div>
+    <div class="brief">
+      <span class="bph"><svg viewBox="0 0 32 32"><path d="M7 10h13l4 4v13H7z"/><path d="M11 6h13l4 4v13" opacity=".75"/><path d="M11 17h9M11 21h6"/></svg></span>
+      <div>
+        <div class="bt" style="color:var(--ink-soft);">Slot B · Loose materials</div>
+        <p>Shown when materials went without a package. Sits on the bare pane with no fill behind it; same 22px/38px constraint. Must not read as lesser — different, not worse.</p>
+        <span class="cav">two or three loose sheets, slightly fanned</span>
+      </div>
+    </div>
+  </div>
+  <div class="note">Two drawings, same size and weight, so they read as a pair of categories rather than a filled and empty state. The parcel gets a coloured ground; the sheets get none — the container does that work, not the drawing.</div>
+</div>
+
+</div>
+</body>
+</html>

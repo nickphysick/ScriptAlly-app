@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Package shapes — optional slots + Other</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f2ede7; --white:#ffffff;
+    --sage-a:#d7ddd5; --sage-b:#d5dbd3; --sage-deep:#9aa896; --sage-ink:#5c7053;
+    --pink-band:#f3e0d6; --pink-cta:#f5e2da; --pink-cta-edge:#e8c8bc;
+    --burgundy:#7c3a2a; --ink:#3a1c14;
+    --ink-soft:rgba(58,28,20,.62); --ink-faint:rgba(58,28,20,.40);
+    --hairline:rgba(124,58,42,.16); --hairline-soft:rgba(58,28,20,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--page);font-family:'Inter',sans-serif;color:var(--ink);padding:40px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;}
+  h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;}
+  .band-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--hairline);padding-bottom:9px;margin-bottom:20px;}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--ink-faint);text-transform:uppercase;}
+  .note{font-size:12.5px;color:var(--ink-soft);line-height:1.6;max-width:720px;margin-bottom:26px;}
+  .note b{color:var(--ink);font-weight:600;}
+  .section{margin-bottom:48px;}
+
+  .btn{font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:8px;cursor:pointer;border:1px solid var(--hairline);background:transparent;color:var(--ink);}
+  .btn.primary{background:var(--pink-cta);border-color:var(--pink-cta-edge);color:var(--burgundy);}
+  .btn.sm{padding:6px 12px;font-size:11.5px;}
+
+  /* ---- builder modal ---- */
+  .modal{background:var(--white);border-radius:14px;padding:10px;width:560px;box-shadow:0 20px 50px rgba(58,28,20,.18);}
+  .frame{border:1px solid var(--hairline);border-radius:8px;overflow:hidden;}
+  .m-band{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));padding:11px 16px;}
+  .m-title{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;}
+  .m-body{padding:20px 22px 22px;}
+  .m-hint{font-size:11.5px;color:var(--ink-faint);line-height:1.55;margin-bottom:16px;}
+  .fld{margin-bottom:14px;}
+  .fld label{display:flex;align-items:baseline;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;}
+  .fld label .opt{font-size:8px;letter-spacing:.1em;color:var(--ink-faint);}
+  .fld input,.fld select{width:100%;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);border:1px solid var(--hairline-soft);border-radius:8px;padding:9px 11px;background:var(--white);outline:none;}
+  .fld select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237c3a2a' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer;}
+  .fld .sub{font-size:10.5px;color:var(--ink-faint);margin-top:5px;}
+  .comp-preview{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink-soft);border:1px dashed var(--hairline);border-radius:8px;padding:10px 12px;margin-bottom:14px;line-height:1.7;}
+  .comp-preview b{color:var(--burgundy);font-weight:700;}
+  .m-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;}
+
+  /* ---- package cards ---- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:20px;}
+  .pkg-card{
+    background:var(--white);border:1px solid var(--hairline-soft);border-radius:14px;
+    box-shadow:0 4px 14px rgba(58,28,20,.06);padding:20px 22px 14px;position:relative;
+    display:flex;flex-direction:column;gap:14px;min-height:200px;
+  }
+  .stamp{position:absolute;top:16px;right:16px;width:62px;height:72px;background:rgba(255,255,255,.6);border:1.5px dashed rgba(124,58,42,.3);border-radius:4px;display:flex;align-items:center;justify-content:center;padding:5px;}
+  .stamp svg{stroke:var(--burgundy);stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.7;}
+  .pkg-card h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;padding-right:72px;}
+  .slots{display:flex;flex-direction:column;gap:7px;}
+  .slot{display:flex;align-items:baseline;gap:12px;}
+  .slot .sl-t{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase;flex:0 0 58px;}
+  .slot .sl-n{font-size:13px;font-weight:600;}
+  .slot .sl-n.none{color:var(--ink-faint);font-weight:400;font-style:italic;}
+  .slot .sl-n.other{font-family:'Caveat',cursive;font-size:15px;font-weight:600;color:var(--burgundy);}
+  .pkg-foot{border-top:1px solid var(--hairline-soft);padding-top:10px;margin-top:auto;font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;gap:14px;flex-wrap:wrap;}
+  .pkg-foot .idle{color:var(--ink-faint);}
+  .out{color:var(--burgundy);} .in{color:var(--sage-ink);}
+  .caption{font-size:11px;color:var(--ink-faint);margin-top:10px;line-height:1.55;font-style:italic;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="section">
+    <div class="band-head"><h2>The amendment</h2><span class="tag">Two changes</span></div>
+    <div class="note">
+      <b>1. Every slot except the covering letter becomes optional.</b> Letter-only and letter-plus-synopsis are real submission shapes, so the builder shouldn't insist on more.<br><br>
+      <b>2. One free-text "Other" line per package</b> — mirroring the Other row that already exists on the agent Materials tab. Catches chapter outlines, pitch documents, separate bios, writing CVs, anything odd, without committing the app to a taxonomy it would then have to maintain.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="band-head"><h2>Builder</h2><span class="tag">Optional slots + Other</span></div>
+    <div class="modal">
+      <div class="frame">
+        <div class="m-band"><span class="m-title">Build a package</span></div>
+        <div class="m-body">
+          <div class="m-hint">Choose from the materials you've saved. Nothing new is created here. Only the covering letter is required — send what each agency asks for.</div>
+          <div class="fld">
+            <label>Package name</label>
+            <input type="text" value="Letter + synopsis">
+          </div>
+          <div class="fld">
+            <label>Covering letter <span class="opt">Required</span></label>
+            <select><option>Hook-first</option><option>Comps-forward</option></select>
+          </div>
+          <div class="fld">
+            <label>Synopsis <span class="opt">Optional</span></label>
+            <select><option>Two-page</option><option>One-page</option><option>Not included</option></select>
+          </div>
+          <div class="fld">
+            <label>Sample pages <span class="opt">Optional</span></label>
+            <select><option>Not included</option><option>Chapters 1–3</option><option>First fifty pages</option></select>
+          </div>
+          <div class="fld">
+            <label>Other <span class="opt">Optional · free text</span></label>
+            <input type="text" placeholder="e.g. chapter outline, author bio, pitch document">
+            <div class="sub">Anything an agency asks for that isn't one of the three above. Recorded with the package so replies still trace back to it.</div>
+          </div>
+          <div class="comp-preview">THIS PACKAGE SENDS &nbsp;→&nbsp; <b>Hook-first</b> · <b>Two-page</b></div>
+          <div class="m-actions">
+            <button class="btn sm">Cancel</button>
+            <button class="btn sm primary">Save package</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="band-head"><h2>The shapes this allows</h2><span class="tag">Four real submission patterns</span></div>
+    <div class="cards">
+
+      <div class="pkg-card">
+        <div class="stamp"><svg viewBox="0 0 32 32" width="36" height="36"><path d="M16 4 28 10v12L16 28 4 22V10z"/><path d="M16 15 28 10M16 15v13M16 15 4 10"/><path d="M10 7l12 6"/><circle cx="16" cy="15" r="2.4"/></svg></div>
+        <h3>Standard UK</h3>
+        <div class="slots">
+          <span class="slot"><span class="sl-t">Letter</span><span class="sl-n">Hook-first</span></span>
+          <span class="slot"><span class="sl-t">Synopsis</span><span class="sl-n">One-page</span></span>
+          <span class="slot"><span class="sl-t">Sample</span><span class="sl-n">Chapters 1–3</span></span>
+        </div>
+        <div class="pkg-foot"><span class="out">→ 6 sent</span><span class="in">← 2 replied</span><span class="in">1 request</span></div>
+      </div>
+
+      <div class="pkg-card">
+        <div class="stamp"><svg viewBox="0 0 32 32" width="36" height="36"><path d="M6 14h20l2 8H4z"/><path d="M9 14V7h14v7"/><path d="M12 10h8"/><path d="M10 22v3h12v-3"/></svg></div>
+        <h3>Letter + synopsis</h3>
+        <div class="slots">
+          <span class="slot"><span class="sl-t">Letter</span><span class="sl-n">Hook-first</span></span>
+          <span class="slot"><span class="sl-t">Synopsis</span><span class="sl-n">Two-page</span></span>
+          <span class="slot"><span class="sl-t">Sample</span><span class="sl-n none">Not included</span></span>
+        </div>
+        <div class="pkg-foot"><span class="idle">Not yet sent — attach it when you log a query</span></div>
+      </div>
+
+      <div class="pkg-card">
+        <div class="stamp"><svg viewBox="0 0 32 32" width="36" height="36"><path d="M10 16h12v8a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3z"/><path d="M9 16h14"/><path d="M20 16 25 5l3 1.5-4 10.5"/></svg></div>
+        <h3>Letter only</h3>
+        <div class="slots">
+          <span class="slot"><span class="sl-t">Letter</span><span class="sl-n">Comps-forward</span></span>
+          <span class="slot"><span class="sl-t">Synopsis</span><span class="sl-n none">Not included</span></span>
+          <span class="slot"><span class="sl-t">Sample</span><span class="sl-n none">Not included</span></span>
+        </div>
+        <div class="pkg-foot"><span class="out">→ 2 sent</span><span class="in">← 1 replied</span></div>
+      </div>
+
+      <div class="pkg-card">
+        <div class="stamp"><svg viewBox="0 0 32 32" width="36" height="36"><path d="M8 5h13a3 3 0 0 1 3 3v16a3 3 0 0 0 3 3H11a3 3 0 0 1-3-3z"/><path d="M8 5a3 3 0 0 0-3 3v2h3"/><path d="M12 11h8M12 15h8M12 19h5"/></svg></div>
+        <h3>US agencies</h3>
+        <div class="slots">
+          <span class="slot"><span class="sl-t">Letter</span><span class="sl-n">Hook-first</span></span>
+          <span class="slot"><span class="sl-t">Synopsis</span><span class="sl-n">One-page</span></span>
+          <span class="slot"><span class="sl-t">Sample</span><span class="sl-n">First fifty pages</span></span>
+          <span class="slot"><span class="sl-t">Other</span><span class="sl-n other">chapter outline</span></span>
+        </div>
+        <div class="pkg-foot"><span class="out">→ 3 sent</span><span class="in">← 1 replied</span></div>
+      </div>
+
+    </div>
+    <div class="caption">The Other line renders in Caveat and only when it's filled — it reads as a note, not a fourth material, because it isn't one: it's free text, not a saved version, so it can't be tracked per-version in Requests by material.</div>
+  </div>
+
+</div>
+</body>
+</html>
