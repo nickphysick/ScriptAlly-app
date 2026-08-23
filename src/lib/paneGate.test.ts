@@ -151,12 +151,39 @@ describe("⚠️ the four surfaces read one declaration", () => {
    * cannot sit on, or the scroll cannot reach, would gate the primary and point at nothing.
    * Scanned over the WHOLE body, not the first level — P5.1's lesson from the finish round.
    */
-  it("every requirement's id is a section the form renders", async () => {
+  /**
+   * ⚠️ RETARGETED, ON NICK'S RULING (tasks-workflow, Pack B Phase 1) — and the LAW IS UNCHANGED.
+   *
+   * It used to scrape `id="(s-[a-z]+)"` out of the source. `TaskPaneBody` now takes an `idPrefix`
+   * so two mounts cannot collide, which makes the attribute an EXPRESSION rather than a literal —
+   * and **no prefix mechanism can keep `id="s-unit"` literal in source**, so the old form and the
+   * feature were mutually exclusive rather than merely inconvenient.
+   *
+   * ⚠️ THE SECTION'S OWN NAME IS STILL A LITERAL, which is what this scrapes now: every section is
+   * declared `sect("s-unit")`, and `sect` is the helper that decides whether a section is next. So
+   * this still answers "does a section exist for every declared requirement", in source, cheaply —
+   * and it cannot be defeated by the id's spelling changing again.
+   *
+   * ⚠️ AND THE STRONGER FORM OF THIS LAW NOW RUNS ON A RENDERED PAGE, which is where it belongs:
+   * `tests/e2e/packB.measure.ts` mounts the pane and asserts every declared anchor RESOLVES to an
+   * element that exists. A source test can only ever prove the code was written; that one proves
+   * the section is there to be scrolled to, which is the thing the gate actually promises.
+   */
+  it("every requirement's id is a section the form declares", async () => {
     const fs = await import("node:fs");
     const body = fs.readFileSync(new URL("../components/todo/TaskPaneBody.tsx", import.meta.url), "utf8");
     const table = fs.readFileSync(new URL("../components/todo/BulkFillTable.tsx", import.meta.url), "utf8");
     const src = body + table;
-    const ids = new Set([...src.matchAll(/id="(s-[a-z]+)"/g)].map((m) => m[1]));
+    /* ⚠️ TWO SPELLINGS, BECAUSE THE TWO FORMS DECLARE THEIR ANCHORS DIFFERENTLY — and the first
+       version of this retarget missed it and went red, correctly. `TaskPaneBody`'s sections are
+       `sect("s-unit")` (the id is now an expression, so it is the CLASS helper that names them);
+       `BulkFillTable`'s cohort is a single `<table id="s-rows">`, still a literal because that
+       component has one anchor and no prefix. Matching both is what keeps the law whole. */
+    const ids = new Set([
+      ...[...src.matchAll(/sect\("(s-[a-z]+)"\)/g)].map((m) => m[1]),
+      ...[...src.matchAll(/id="(s-[a-z]+)"/g)].map((m) => m[1]),
+    ]);
+    expect(ids.size, "no sections found at all — the scrape is broken, not the form").toBeGreaterThan(0);
     for (const k of KINDS) {
       for (const r of requirementsFor(k)) {
         expect(ids.has(r.id), `${k} requires "${r.name}" at #${r.id} and no section carries it`).toBe(true);

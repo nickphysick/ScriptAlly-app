@@ -153,6 +153,23 @@ export interface TaskPaneBodyProps {
    * match, by construction.
    */
   nextId?: string | null;
+  /**
+   * ⚠️ A PREFIX FOR THIS MOUNT'S SECTION IDS, defaulting to `""` so `/todo` is byte-identical
+   * (tasks-workflow, Pack B Phase 1).
+   *
+   * Every workspace page in this app stays MOUNTED, so the moment a second surface renders this
+   * component the document holds two `id="s-unit"`, two `id="s-when"`, and so on. Two things break,
+   * and the first looks like a feature bug rather than an HTML one:
+   * `document.querySelector('.tpn #s-unit')` returns the FIRST match, so a "jump to the missing
+   * answer" scrolls a pane the writer cannot see; and duplicate ids make any `aria-labelledby` or
+   * label-`for` resolving by id ambiguous. Scoping the query to a ref fixes the first and NOT the
+   * second — only unique ids fix the second.
+   *
+   * ⚠️ IT PREFIXES THE RENDERED ATTRIBUTE ONLY. `nextId` and `paneGate`'s `REQ` table keep the BARE
+   * names, so `sect()`'s comparison and `anchorFor` are untouched — one vocabulary for what a
+   * section IS, and a per-mount name for where it lives in the document.
+   */
+  idPrefix?: string;
   /** the free-plan `.upsell`; omitted for Pro */
   upsell?: React.ReactNode;
 }
@@ -167,9 +184,13 @@ const todayYmd = (): string => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
-export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sample, expectations, note, statedWeeks, nextId, upsell }) => {
+export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sample, expectations, note, statedWeeks, nextId, idPrefix = "", upsell }) => {
   /* one helper, so no section can decide for itself whether it is next */
   const sect = (id: string) => (id === nextId ? "sect next" : "sect");
+  /* ⚠️ THE DOM NAME, WHICH IS NOT THE SECTION'S NAME. `sect()` above compares the BARE id, because
+     that is what `paneGate` emits and what `nextId` carries; this is only what the attribute says.
+     Default `""` makes it the identity function, so `/todo` renders exactly what it rendered. */
+  const domId = (id: string) => `${idPrefix}${id}`;
   return (
   <>
     {/* ⚠️ THE WRITER'S OWN SENTENCE, AT READING SIZE. It was a label above a form; it is the thing
@@ -186,7 +207,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
         so the question stood over an empty row — a question the page then declined to answer.
         Absence is a value: no sample, no section. */}
     {sample && (
-      <div className={sect("s-unit")} id="s-unit">
+      <div className={sect("s-unit")} id={domId("s-unit")}>
         <label className="f-lbl" data-req="unit">What are you sending?</label>
         <div className="f-sub" style={{ margin: "-3px 0 9px" }}>
           Pick the unit you actually sent in — one only.
@@ -211,7 +232,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
     {/* ⚠️ A NOTE HAS NO `When`. Ticking it off IS the act and the tick carries its own date, so the
         question has no subject — an empty segmented control here would be asking the writer to date
         something that has not happened. Absent, not disabled. */}
-    {!note && <div className={sect("s-when")} id="s-when">
+    {!note && <div className={sect("s-when")} id={domId("s-when")}>
       <label className="f-lbl" data-req="when">When</label>
       <div className="seg">
         {DAY_OPTIONS.map((o) => (
@@ -245,7 +266,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
         ⚠️ AND THE COMMENT IS OUTSIDE THE `&&`, not braced inside it — a braced comment is a CHILD,
         and there is no child position at the head of an expression. */}
     {expectations && (<>
-      <div className={sect("s-expect")} id="s-expect">
+      <div className={sect("s-expect")} id={domId("s-expect")}>
         <label className="f-lbl" data-req="expect">When do you expect to hear back?</label>
         <div className="seg" style={{ marginBottom: 11 }}>
           {EXPECT_WEEKS.map((w) => (
@@ -270,7 +291,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
           <div className="hintline">Their stated window is {statedWeeks} weeks.</div>
         )}
       </div>
-      <div className={sect("s-remind")} id="s-remind">
+      <div className={sect("s-remind")} id={domId("s-remind")}>
         <label className="f-lbl" data-req="remind">Remind you to nudge?</label>
         <div className="seg">
           {REMIND_OPTIONS.map((o) => (

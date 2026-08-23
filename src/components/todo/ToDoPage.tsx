@@ -288,6 +288,17 @@ export interface ToDoPageProps {
    takeback window. Four page-local toasts could all be open at once, each with its own timer and
    an Undo that reversed whichever you happened to click. The type comes with it. */
 
+/**
+ * ⚠️ THIS PAGE'S PANE ID PREFIX — empty, deliberately (tasks-workflow, Pack B Phase 1).
+ *
+ * `/todo` was here first and its ids are the ones every existing selector knows, so it keeps them:
+ * `TaskPaneBody`'s `idPrefix` defaults to `""` and this states that choice AT THE CALL SITE rather
+ * than leaving it implicit. A second mount passes its own non-empty prefix, and the two then cannot
+ * collide in a document that holds both — which is the normal case in this app, where every
+ * workspace page stays mounted.
+ */
+export const PANE_ID_PREFIX = "";
+
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const navigate = useNavigate();
   const {
@@ -1943,6 +1954,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                            the sentence does not mention. `null` when complete — and on a note,
                            which requires nothing, so there is never a next thing to point at. */
                         nextId={unanswered(journeyKind(paneCard), gateAnswers(paneCard))[0]?.id ?? null}
+                        idPrefix={PANE_ID_PREFIX}
                         value={paneBody}
                         onChange={setPaneBody}
                       />
@@ -3409,8 +3421,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * the missing line and the steer square all reach a section by one route. It took a `ReqField`
    * and looked the label up by `data-req`, which was a second address for the same place.
    */
+  /**
+   * ⚠️ IT LOOKS UP THE PREFIXED ID (tasks-workflow, Pack B Phase 1). `paneGate` emits BARE names —
+   * `s-unit`, `s-when` — because that is what a section IS; the document name is per-mount, so the
+   * query adds the same prefix `TaskPaneBody` rendered with. `PANE_ID_PREFIX` is this page's, and
+   * it is `""`, so this selector is byte-identical to what it has always been.
+   *
+   * ⚠️ AND THE `.tpn` SCOPE IS NOT ENOUGH ON ITS OWN, which is the whole reason the prefix exists.
+   * Every workspace page stays MOUNTED, so once a second surface renders a pane there are two
+   * `.tpn` in the document and `querySelector` returns the FIRST — this page's, even when the
+   * writer is looking at the other. Unique ids make the lookup unambiguous; scoping alone would
+   * only have hidden the collision behind a selector that still matched twice.
+   */
   function jumpToSection(id: string) {
-    const sect = document.querySelector<HTMLElement>(`.tpn #${id}`);
+    const sect = document.querySelector<HTMLElement>(`.tpn #${PANE_ID_PREFIX}${id}`);
     if (!sect) return;
     sect.scrollIntoView({ block: "center", behavior: "smooth" });
     const focusable = sect.querySelector<HTMLElement>("button, input, textarea, [tabindex]");
