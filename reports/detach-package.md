@@ -330,3 +330,66 @@ different products (make tracking read marks; make attach preserve the link; ret
 | **F-H** | no un-archive surface. Now the nearer neighbour of F-P than of F-O. |
 | **Move surface** | Correction UI's outstanding piece. |
 | **Phase 5** of the broadsheet build | remains held. Nothing here is deployed. |
+
+---
+
+## Deploy record — dev only, 23 Aug
+
+Asked for after the two commits above. **Dev rules are Claude's; prod remains Nick's, and prod was
+not touched.**
+
+### Rules — both databases, because `scriptally-dev` has two
+
+`.firebaserc`'s `default` is the **prod** project, so every command named its target explicitly.
+
+| database | pinned by | updateTime before | after |
+|---|---|---|---|
+| `(default)` | `firebase.dev.json` | `2026-08-23T15:29:38Z` | **`2026-08-23T20:47:55Z`** |
+| `ai-studio-ae82196c-…` | `firebase.json` | `2026-08-22T10:04:05Z` | **`2026-08-23T20:48:19Z`** |
+
+Verified by **release `updateTime` under `--debug`**, never the success line — which never names the
+database. `gen-lang-client-0801391782` appeared **0 times** in either deploy log, and the second
+command touched **0 hosting lines** (`--only firestore:rules` with `firebase.json`, whose hosting
+site is `scriptally-app`, i.e. prod — the reason `--only` is load-bearing there).
+
+### Probed, after propagation — `rulesProbe.mjs` gained this pack's section
+
+The probe predated Part B and had no case for it, so it would have reported a clean vintage while
+saying nothing about the fields just deployed. Six cases, and **both negatives matter**:
+
+```
+✅ package create — letter present              ACCEPTED
+✅ otherMaterials on UPDATE                     ACCEPTED   ← the silent denial is gone
+✅ otherMaterials cleared (deleteField)         ACCEPTED
+❌ otherMaterials 513 chars (must be DENIED)    DENIED     ← the 512 cap is real
+✅ update to an empty letter (must be ALLOWED)  ACCEPTED   ← legacy records stay repairable
+❌ package create, NO letter (must be DENIED)   DENIED     ← create-only, as designed
+   probe package removed: yes
+```
+
+The fifth and sixth together are the whole point of R3's split: **refused on create, permitted on
+update.** A probe that only tried the happy path could not tell that from a rule applied everywhere.
+
+### Hosting
+
+`npm run build:dev` → `firebase deploy --only hosting --config firebase.dev.json --project
+scriptally-dev` → **https://scriptally-dev.web.app**. Prod project id and prod site name both **0**
+occurrences in the log. The deployed page references `assets/index-n4ujkbJb.js`, the exact asset the
+build produced, and that bundle carries `qc-strip`, `qc-loose`, `otherMaterials`, `Not included` and
+`Only the covering` — with `gen-lang-client-0801391782` absent.
+
+### ⚠️ What is NOT on dev, and how that was proved
+
+The page-header session is editing the shared shell **uncommitted** right now
+(`WorkspacePageGrid.tsx`, `workspacePageGrid.css`, `workspacePageGrid.test.tsx`), and their WIP
+deletes `.wpg-hem--top` — which makes **three `workspacePageGrid` cases fail in the primary tree**.
+
+**None of it is deployed, and none of it is mine.** Two independent checks:
+
+- the deployed stylesheet still **contains** `.wpg-hem--top`, the marker their WIP removes;
+- a build of **committed HEAD in a clean worktree** produces `index-n4ujkbJb.js` — the identical
+  hash to what is live.
+
+And committed HEAD is green: **383 files / 6557 passed, 3 skipped**. The three red cases exist only
+in the shared checkout's working tree.
+

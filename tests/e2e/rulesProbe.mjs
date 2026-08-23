@@ -215,4 +215,46 @@ await attempt("queryingGoals — 201 entries (must be DENIED)", "goals P1",
 const afterGoals = await getDoc(uref);
 console.log(`  queryingGoals after the probe: ${JSON.stringify(afterGoals.data().queryingGoals ?? null)}`);
 
+/* ── flexible package shapes (consolidated pack, Part B) ────────────────────────────────────── */
+console.log("\npackages — the free-text Other line, and the letter-on-create rule:");
+/**
+ * ⚠️ BOTH HALVES OF THE FIELD, BECAUSE EITHER ALONE IS A SILENT DENIAL. `otherMaterials` needs a
+ * clause in `isValidPackage` AND an entry in the update allowlist; with only the first, an update
+ * carrying it fails `hasOnly` and the write disappears with nothing the client can act on.
+ *
+ * ⚠️ AND THE LETTER RULE IS ASSERTED FROM BOTH SIDES. A create without a covering letter must be
+ * REFUSED and an update of a legacy letterless package must still be ALLOWED — the split exists so
+ * a record written before the rule stays repairable rather than becoming permanently unupdatable.
+ * A probe that only tried the happy path could not tell that split from a rule applied everywhere.
+ */
+const PKG = doc(db, "users", uid, "packages", "probe-pkg-otherMaterials");
+const basePkg = (over = {}) => ({
+  id: "probe-pkg-otherMaterials", manuscriptId: "seed-ms-1", userId: uid,
+  packageName: "Rules probe", queryLetterVersionId: "v-probe-letter",
+  synopsisVersionId: "", samplePagesVersionId: "",
+  status: "Active", createdDate: new Date(0).toISOString(), ...over,
+});
+const dropPkg = () => deleteDoc(PKG);
+
+await attempt("package create — letter present", "Part B",
+  () => setDoc(PKG, basePkg()), null);
+await attempt("otherMaterials on UPDATE", "Part B",
+  () => updateDoc(PKG, { otherMaterials: "chapter outline" }), null);
+/* the writer clearing the line — an unset, never a stored "" */
+await attempt("otherMaterials cleared (deleteField)", "Part B",
+  () => updateDoc(PKG, { otherMaterials: deleteField() }), null);
+/* the ceiling is real — 513 characters must be refused (OTHER_MAX is 512) */
+await attempt("otherMaterials 513 chars (must be DENIED)", "Part B",
+  () => updateDoc(PKG, { otherMaterials: "x".repeat(513) }), null);
+/* an UPDATE may still empty the letter — legacy records have to stay repairable */
+await attempt("update to an empty letter (must be ALLOWED)", "Part B",
+  () => updateDoc(PKG, { queryLetterVersionId: "" }), null);
+await dropPkg().catch(() => {});
+/* …but a CREATE without one must not be possible */
+await attempt("package create, NO letter (must be DENIED)", "Part B",
+  () => setDoc(PKG, basePkg({ queryLetterVersionId: "" })), dropPkg);
+await dropPkg().catch(() => {});
+const pkgGone = await getDoc(PKG);
+console.log(`  probe package removed: ${pkgGone.exists() ? "NO — still present" : "yes"}`);
+
 process.exit(0);
