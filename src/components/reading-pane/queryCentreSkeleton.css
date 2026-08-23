@@ -57,3 +57,21 @@
 .qc-sk-h2 { height: 11px; width: 140px; }
 .qc-skel-cards { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
 .qc-sk-card { height: 148px; border-radius: 10px; }
+
+/* §3b — the content fades in as the skeleton leaves.
+   ⚠️ OPACITY ONLY, NEVER A TRANSFORM. A transform on this wrapper would isolate a blend group and
+   break `mix-blend-mode` on anything inside it — documented in CLAUDE.md, and the reason a "gentle
+   rise" is not an option here however much better it might look.
+   ⚠️ AND IT IS AN ENTRANCE, NOT A STATE. `backwards` fill only, so the finished animation holds no
+   frame: a persistent fill-mode outranks inline transforms and silently discards a FLIP offset,
+   which this page's save path depends on. */
+@keyframes qc-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+[data-qc-fade="in"] { animation: qc-fade-in 200ms ease backwards; }
+
+/* ⚠️ REDUCED MOTION GETS NEITHER SHIMMER NOR FADE — static blocks, instant swap. */
+@media (prefers-reduced-motion: reduce) {
+  [data-qc-fade="in"] { animation: none; }
+}

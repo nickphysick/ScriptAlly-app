@@ -89,7 +89,7 @@ import { nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo, schedu
 import { NUDGE_NESTED_TYPE } from "../lib/logNudge";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { PackagePicker } from "./reading-pane/PackagePicker";
-import { QueryCentreSkeleton } from "./reading-pane/QueryCentreSkeleton";
+import { QueryCentreSkeleton, SKELETON_FLOOR_MS } from "./reading-pane/QueryCentreSkeleton";
 /* §2b — the shared art registry, already consumed by two other Query Centre panels. */
 import { ArtSlot } from "./todo/ArtSlot";
 import {
@@ -3108,6 +3108,69 @@ export const Queries: React.FC<{
    * off in exactly the case the bare pane renders. Derived from the same three values the chain
    * reads, so the two cannot fall out of step.
    */
+  /**
+   * §3a — THE LIST'S HEAD, DEFINED ONCE AND RENDERED IN BOTH STATES.
+   *
+   * ⚠️ THE CHROME DOES NOT SKELETON — the search and the Filter/Sort controls stay exactly as they
+   * are while the rows below them load. They act on state that exists without data, so there is
+   * nothing to wait for, and a writer can start typing a search before the list arrives.
+   *
+   * ⚠️ AND IT IS THE SAME ELEMENT, NOT A MATCHING ONE. The skeleton used to draw its own search
+   * block instead: a 40px `.f12-lhead` replaced by a different box, so the rows beneath it started
+   * at a different height and everything shifted when data landed — the exact jump the skeleton
+   * exists to prevent, built into the skeleton.
+   */
+  const listHead = (
+            <div className="f12-lhead">
+              <div className="f12-lsearch">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={listSearch}
+                  onChange={(e) => setListSearch(e.target.value)}
+                  aria-label="Search queries"
+                />
+              </div>
+              {/* ⚠️ FILTER AND SORT ARE BACK IN THIS ROW (§3a), REVERSING §1's MOVE ON ITS OWN
+                  TERMS. §1 argued they "narrow the list, so they stay over the list" and put them
+                  beside the count — which is over the list, and is also the row the pack labelled
+                  THIS QUERY. Two controls acting on the whole set sat inside a row named for one
+                  record. They act on the LIST, so they belong in the list's own row, beside the
+                  field they act with.
+
+                  ⚠️ NOTHING IS LOST IN THE MOVE, and that is worth stating because it looks like it
+                  should be: `PillTrig` has been a 36px icon button since v5 P1 — the word lives in
+                  the title, the aria-label and the popover's own header — so the sort's chosen value
+                  was never on its face. The field shortens by two buttons and a gap; the wiring,
+                  handlers, popovers and refs are untouched. */}
+              <div className="f12-popwrap">
+                <PillTrig
+                  ref={filterTrigRef}
+                  label="Filter"
+                  open={filterPopOpen}
+                  active={activeFilterCount > 0}
+                  count={activeFilterCount}
+                  onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
+                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
+                />
+                {filterPopOpen && renderFilterPopover()}
+              </div>
+              <div className="f12-popwrap">
+                <PillTrig
+                  ref={sortTrigRef}
+                  label="Sort"
+                  open={sortPopOpen}
+                  active={sortKey !== "last_activity"}
+                  value={sortKey !== "last_activity" ? (F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || undefined) : undefined}
+                  onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
+                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
+                />
+                {sortPopOpen && renderSortPopover()}
+              </div>
+            </div>
+  );
+
   const paneUnselected = !creating && !selectedQueryId && sortedList.length > 0;
 
   /**
@@ -3125,6 +3188,52 @@ export const Queries: React.FC<{
    * than delaying it, and so cannot leave a gap for anything else to fill.
    */
   const dataReady = collectionsReady;
+
+  /**
+   * §3b — THE MINIMUM-DISPLAY FLOOR, and §3c's resolution.
+   *
+   * ⚠️ A FLOOR HOLDS THE SKELETON; A GRACE DELAYED IT. That is the whole difference. The retired
+   * 180ms grace left a gap at the START of the load for the wrong answer to fill; a floor extends
+   * the RIGHT answer at the end, so there is never a moment with nothing correct to show.
+   *
+   * ⚠️ AND IT NEVER RUNS WHEN THE DATA IS ALREADY THERE. `startedUnready` is decided at the first
+   * render and never again: arrive with collections loaded — a second visit, since this page stays
+   * mounted — and the skeleton is skipped entirely. A floor that fired regardless would be a timer
+   * showing a skeleton after the data had arrived, which is the one thing it must not become.
+   */
+  const startedUnready = useRef<boolean | null>(null);
+  if (startedUnready.current === null) startedUnready.current = !dataReady;
+  const [floorDone, setFloorDone] = useState(false);
+  useEffect(() => {
+    if (!startedUnready.current) { setFloorDone(true); return; }
+    const t = setTimeout(() => setFloorDone(true), SKELETON_FLOOR_MS);
+    return () => clearTimeout(t);
+  }, []);
+
+  /**
+   * §3c — ⚠️ A REMEMBERED SELECTION RESOLVES BEHIND THE SKELETON, NEVER IN FRONT OF IT. The restore
+   * runs in an effect once the queries arrive, so the content would render UNSELECTED for one frame
+   * and the remembered query would appear after it — a flash of "Select a query to get started" on
+   * every return visit. Reading the id at mount lets the skeleton stay up until the selection it is
+   * going to resolve into has actually been applied.
+   *
+   * ⚠️ IT WAITS ONLY FOR AN ID THE DATA ACTUALLY CONTAINS. A remembered query that has since been
+   * deleted would otherwise hold the skeleton forever, waiting for a row that is never coming.
+   */
+  const rememberedAtMount = useRef<string | null>(null);
+  if (rememberedAtMount.current === null) rememberedAtMount.current = readLastViewedQueryId() ?? "";
+  const awaitingRemembered =
+    !!rememberedAtMount.current && !selectedQueryId && dataReady &&
+    queries.some((q) => q.id === rememberedAtMount.current);
+
+  const showSkeleton = !!startedUnready.current && (!dataReady || !floorDone || awaitingRemembered);
+
+  /**
+   * ⚠️ THE FADE IS ARMED ONLY WHEN A SKELETON ACTUALLY PRECEDED THE CONTENT. A page that was ready
+   * at mount has nothing to cross-fade FROM, and fading it in anyway would put a 200ms veil over
+   * every ordinary return to this page.
+   */
+  const fadeIn = !!startedUnready.current && !showSkeleton;
 
   const listGroups = (() => {
     const nowMs = Date.now();
@@ -3954,14 +4063,14 @@ export const Queries: React.FC<{
           * grace so a fast load never flashes the skeleton — a second mechanism here would be a
           * second answer to one question.
           */}
-        {!dataReady ? <QueryCentreSkeleton /> : queries.length === 0 && !creating ? (
+        {showSkeleton ? <QueryCentreSkeleton head={listHead} /> : queries.length === 0 && !creating ? (
           /* ── Empty database — F12 shell: a list pane with a "No queries yet" placeholder
              (Export disabled) beside the welcome pane (Smart Import + manual add). ── */
           <>
           {/* Empty split — list placeholder + welcome pane in the centred column. f12-body-empty
               opts OUT of the mobile pusher: at <md the two panes stack instead (the welcome pane
               must never hide behind a push that has nothing to push to). */}
-          <div className="f12-body f12-body-empty" style={{ paddingTop: "var(--gut)" }}>
+          <div data-qc-fade={fadeIn ? "in" : undefined} className="f12-body f12-body-empty" style={{ paddingTop: "var(--gut)" }}>
 
             {/* List pane — search + centred placeholder + disabled CSV foot */}
             <div className="f12-list">
@@ -4254,7 +4363,14 @@ export const Queries: React.FC<{
             on top of the row's own gap made the band-to-content distance 82px in the commonest
             state and 70 in the other. The page states ONE offset now, 18px, and states it on the
             row where every other page's lives. */}
-        <div className="f12-body">
+        {/* ⚠️ THE FADE RIDES A DATA ATTRIBUTE, NOT THE CLASS LIST, and that is deliberate rather
+            than incidental. Four locks slice this file on the literal `className="f12-body"` to
+            find the populated branch — the bounded-slice pattern, working exactly as designed —
+            and folding transient state into that attribute would make a structural anchor vary
+            with a 200ms animation. The class states what this element IS; the attribute states
+            what it is momentarily doing — and it is written BEFORE the class so `className="f12-body">`
+            stays literally intact, which is what those slices anchor on. */}
+        <div data-qc-fade={fadeIn ? "in" : undefined} className="f12-body">
           {/* ⚠️ §3 · ONE HAIRLINE UNDER THE WHOLE BAR. A grid child spanning both columns, so it
               crosses the channel and reads as one rule rather than two borders with a gap in it. */}
           <span className="qc-barrule" aria-hidden="true" />
@@ -4564,54 +4680,7 @@ export const Queries: React.FC<{
                 vanished while the sheet was open would animate the desk behind the writer's back.
 
                 Wiring is untouched: same handlers, same popovers, same refs. */}
-            <div className="f12-lhead">
-              <div className="f12-lsearch">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-                <input
-                  type="text"
-                  placeholder="Search"
-                  value={listSearch}
-                  onChange={(e) => setListSearch(e.target.value)}
-                  aria-label="Search queries"
-                />
-              </div>
-              {/* ⚠️ FILTER AND SORT ARE BACK IN THIS ROW (§3a), REVERSING §1's MOVE ON ITS OWN
-                  TERMS. §1 argued they "narrow the list, so they stay over the list" and put them
-                  beside the count — which is over the list, and is also the row the pack labelled
-                  THIS QUERY. Two controls acting on the whole set sat inside a row named for one
-                  record. They act on the LIST, so they belong in the list's own row, beside the
-                  field they act with.
-
-                  ⚠️ NOTHING IS LOST IN THE MOVE, and that is worth stating because it looks like it
-                  should be: `PillTrig` has been a 36px icon button since v5 P1 — the word lives in
-                  the title, the aria-label and the popover's own header — so the sort's chosen value
-                  was never on its face. The field shortens by two buttons and a gap; the wiring,
-                  handlers, popovers and refs are untouched. */}
-              <div className="f12-popwrap">
-                <PillTrig
-                  ref={filterTrigRef}
-                  label="Filter"
-                  open={filterPopOpen}
-                  active={activeFilterCount > 0}
-                  count={activeFilterCount}
-                  onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
-                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
-                />
-                {filterPopOpen && renderFilterPopover()}
-              </div>
-              <div className="f12-popwrap">
-                <PillTrig
-                  ref={sortTrigRef}
-                  label="Sort"
-                  open={sortPopOpen}
-                  active={sortKey !== "last_activity"}
-                  value={sortKey !== "last_activity" ? (F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || undefined) : undefined}
-                  onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
-                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
-                />
-                {sortPopOpen && renderSortPopover()}
-              </div>
-            </div>
+{listHead}
             <div ref={listScrollRef} className="f12-rows" role="listbox" aria-label="Queries" onKeyDown={onListKeyDown}>
               {/* ══ §5 · THE LIST GROUPS BY STATE ═══════════════════════════════════════════════
                   ⚠️ GROUPING PARTITIONS AN ALREADY-SORTED LIST — the agent list's rule, and the

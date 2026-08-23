@@ -37,6 +37,25 @@ const rule = (selector: string): string => {
 };
 
 /** The POPULATED list/pane row — the empty branch's body carries `f12-body-empty` and comes first. */
+/**
+ * ⚠️ THE HEAD IS DEFINED ONCE AND RENDERED TWICE (§3a of the readiness pack) — the real list column
+ * mounts `{listHead}`, and so does the load skeleton, so the search and the Filter/Sort controls do
+ * not change or move when the rows arrive. That indirection is what these position checks have to
+ * follow: `className="f12-lhead"` no longer sits literally between `f12-list` and `f12-rows`.
+ *
+ * ⚠️ THE CLAIM IS UNCHANGED AND SO IS ITS STRENGTH — the head is inside the list column, above the
+ * rows — it is now asserted in two halves: the MOUNT sits where the head must sit, and the
+ * DEFINITION is the head. The nesting is measured on the page as well (`qcOnload.measure.ts`),
+ * which is a stronger statement than any reading of this file.
+ */
+const headDefinition = (): string => {
+  const at = code.indexOf("const listHead = (");
+  expect(at, "the list head's definition is missing").toBeGreaterThan(-1);
+  const end = code.indexOf("\n  );", at);
+  expect(end, "the list head's definition is unterminated").toBeGreaterThan(at);
+  return code.slice(at, end);
+};
+
 const populated = (): number => {
   const at = code.indexOf('className="f12-body">');
   expect(at, "the populated list/pane row is missing — every slice below would read the empty branch")
@@ -49,13 +68,15 @@ describe("§1c · the list's controls sit at the head of the list column", () =>
     expect(code, "the grid's toolbar row came back — it spanned the pane too").not.toContain("toolbar={");
     const body = populated();
     const list = code.indexOf('className="f12-list"', body);
-    const head = code.indexOf('className="f12-lhead"', body);
+    const head = code.indexOf("{listHead}", body);
     const rows = code.indexOf('className="f12-rows"', body);
     expect(list, "the list column is missing").toBeGreaterThan(-1);
-    expect(head, "the list head is missing").toBeGreaterThan(-1);
+    expect(head, "the list head is not mounted in the populated branch").toBeGreaterThan(-1);
     expect(rows, "the rows container is missing").toBeGreaterThan(-1);
     expect(head).toBeGreaterThan(list);
     expect(head, "the head fell below the rows — it must head the column, not scroll with it").toBeLessThan(rows);
+    /* and what is mounted there IS the head */
+    expect(headDefinition(), "the mounted head is not the list head").toContain('className="f12-lhead"');
   });
 
   /**
@@ -71,10 +92,7 @@ describe("§1c · the list's controls sit at the head of the list column", () =>
    * and the popover's header. The field simply shortens.
    */
   it("the search row holds all three controls, at one height", () => {
-    const body = populated();
-    const head = code.indexOf('className="f12-lhead"', body);
-    expect(head, "the panel's search row is missing").toBeGreaterThan(-1);
-    const slice = code.slice(head, code.indexOf('className="f12-rows"', body));
+    const slice = headDefinition();
     expect(slice, "the slice is empty — this case is testing nothing").toContain("f12-lsearch");
     expect(slice, "the search field left the panel").toContain('aria-label="Search queries"');
     expect(slice, "Filter is not in the search row").toContain('label="Filter"');
@@ -130,10 +148,16 @@ describe("§1c · the list's controls sit at the head of the list column", () =>
      under the sheet now, so a head that vanished would animate the desk behind the writer. */
   it("the head does not vanish while a journey is open", () => {
     const body = populated();
-    const head = code.indexOf('className="f12-lhead"', body);
+    const head = code.indexOf("{listHead}", body);
+    expect(head, "the head is not mounted in the list column").toBeGreaterThan(-1);
     const before = code.slice(code.indexOf('className="f12-list"', body), head);
     expect(before, "the head grew a journey gate — the desk must not change while the sheet is over it")
       .not.toMatch(/creating|recording/);
+    /* ⚠️ AND THE GATE MUST NOT HAVE MOVED INTO THE DEFINITION EITHER — the whole point of extracting
+       the head is that both mounts render the same thing, so a condition hidden in the definition
+       would be a journey gate this check could no longer see. */
+    expect(headDefinition(), "the journey gate moved into the head's own definition")
+      .not.toMatch(/\bcreating\b|\brecording\b/);
   });
 });
 
@@ -172,10 +196,11 @@ describe("§1c · one button vocabulary", () => {
     const badge = rule(".f12-pill .f12-pcount");
     expect(badge, "the count badge is missing").not.toBe("");
     expect(badge).toContain("background: var(--burg)");
-    const body = populated();
-    const at = code.indexOf('label="Sort"', body);
-    expect(at, "the Sort trigger is missing").toBeGreaterThan(-1);
-    const sort = code.slice(at, at + 400);
+    /* the trigger lives in the head's definition now, not inline in the populated branch */
+    const def = headDefinition();
+    const at = def.indexOf('label="Sort"');
+    expect(at, "the Sort trigger is missing from the list head").toBeGreaterThan(-1);
+    const sort = def.slice(at, at + 400);
     expect(sort, "Sort grew a count badge — a single-choice control states itself in its popover")
       .not.toContain("count=");
   });

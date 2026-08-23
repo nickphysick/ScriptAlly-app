@@ -152,19 +152,29 @@ describe("the query's verbs live in one kebab, not a bar", () => {
     const body = code.indexOf('className="f12-body">');
     expect(body, "the populated list/pane row is missing").toBeGreaterThan(-1);
     const list = code.indexOf('className="f12-list"', body);
-    const head = code.indexOf('className="f12-lhead"', body);
+    /* ⚠️ THE HEAD IS DEFINED ONCE AND MOUNTED TWICE since the readiness pack — the real list column
+       and the load skeleton render the same `{listHead}`, so the search and the Filter/Sort controls
+       neither move nor change when the rows arrive. So the position is asserted on the MOUNT and
+       the contents on the DEFINITION; the claim is the same and the nesting is measured on the page
+       besides. */
+    const head = code.indexOf("{listHead}", body);
     const rows = code.indexOf('className="f12-rows"', body);
     expect(list, "the list column is missing").toBeGreaterThan(-1);
-    expect(head, "the list head is missing").toBeGreaterThan(-1);
+    expect(head, "the list head is not mounted in the populated branch").toBeGreaterThan(-1);
     expect(rows, "the rows container is missing").toBeGreaterThan(-1);
     expect(head, "the head escaped the list column").toBeGreaterThan(list);
     expect(head, "the head is below the rows — it must be the column's head, and it stays fixed while they scroll")
       .toBeLessThan(rows);
 
+    const defAt = code.indexOf("const listHead = (");
+    expect(defAt, "the list head's definition is missing").toBeGreaterThan(-1);
+    const defEnd = code.indexOf("\n  );", defAt);
+    expect(code.slice(defAt, defEnd), "the mounted head is not the list head").toContain('className="f12-lhead"');
+
     /* ⚠️ AND NOTHING SELECTED-QUERY-SCOPED CAME WITH IT. `View tasks` and `Nudge` sound page-level
        and are not: both are gated on `!sel`. In a list-scope head they would be dead controls
        whenever nothing is selected — the fault the split exists to remove. */
-    const slice = code.slice(head, rows);
+    const slice = code.slice(defAt, defEnd);
     for (const verb of ["Nudge", "View tasks", "Delete"]) {
       expect(slice, `${verb} acts on the selected query and must not be in the list head`).not.toContain(verb);
     }

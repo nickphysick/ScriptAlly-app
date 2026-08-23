@@ -25,14 +25,37 @@ import "./queryCentreSkeleton.css";
 /** Measured on the deployed page, not guessed: `.f12-rows` is 422px tall, `.f12-row` is 56px. */
 const SKELETON_ROWS = 7;
 
-export const QueryCentreSkeleton: React.FC = () => (
+/**
+ * ⚠️ THE MINIMUM THE SKELETON IS SHOWN FOR, ONCE IT HAS BEEN SHOWN AT ALL. Measured before this
+ * landed, a fast load put the skeleton on screen for 109ms — long enough to see and too short to
+ * read as anything but a glitch. The floor makes a fast load look deliberate and leaves a slow one
+ * exactly as it was: the skeleton lasts as long as the data takes, never less than this.
+ *
+ * ⚠️ IT IS A FLOOR, NOT A DURATION. Nothing here shows a skeleton after the data has arrived on a
+ * page that was ready at mount — that decision is made once, at the first render.
+ */
+export const SKELETON_FLOOR_MS = 400;
+
+export interface QueryCentreSkeletonProps {
+  /**
+   * ⚠️ THE LIST'S REAL HEAD — the search and the Filter/Sort controls, passed in rather than drawn.
+   * They act on state that exists without data, so there is nothing for them to wait for, and a
+   * writer can start typing a search before the rows arrive. Drawing a skeleton block instead put a
+   * DIFFERENT box where the 40px `.f12-lhead` goes, so everything below it shifted when data landed
+   * — the exact jump a skeleton exists to prevent, built into the skeleton.
+   */
+  head?: React.ReactNode;
+}
+
+export const QueryCentreSkeleton: React.FC<QueryCentreSkeletonProps> = ({ head }) => (
   <div className="f12-body qc-skel" aria-busy="true" aria-live="polite">
     {/* the screen reader gets a sentence; the blocks below are decoration and say so */}
     <span className="qc-skel-sr">Loading your queries</span>
 
-    <div className="f12-list" aria-hidden="true">
-      <div className="f12-lsearch"><span className="qc-sk qc-sk-search" /></div>
-      <div className="f12-rows">
+    {/* ⚠️ `aria-hidden` ON THE ROWS ONLY, never the head — the head is real, focusable chrome. */}
+    <div className="f12-list">
+      {head}
+      <div className="f12-rows" aria-hidden="true">
         {Array.from({ length: SKELETON_ROWS }, (_, i) => (
           /* ⚠️ THE REAL ROW CLASS. Restating `height: 56px` here is how a skeleton comes to be a
              pixel out from the list it stands in — the row grid is the row grid. */
@@ -46,7 +69,7 @@ export const QueryCentreSkeleton: React.FC = () => (
           </div>
         ))}
       </div>
-      <div className="f12-lfoot"><span className="qc-sk qc-sk-foot" /></div>
+      <div className="f12-lfoot" aria-hidden="true"><span className="qc-sk qc-sk-foot" /></div>
     </div>
 
     {/* the pane: a header, then two cards — the shape a selected query resolves into */}
