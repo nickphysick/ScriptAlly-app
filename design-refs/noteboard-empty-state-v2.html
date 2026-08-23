@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Noteboard, revised structure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ground:#f2ede7; --parchment:#fdfaf5; --ink:#3a1c14; --ink-deep:#1c130f;
+  --burgundy:#7c3a2a; --pink:#f5e2da; --pink-deep:#e8c8bc;
+  --sage:#e9ede6; --sage-mid:#c9d3c5; --sage-dark:#5a6e58; --sage-ring:#8a9e88;
+  --yellow:#fbf3d9; --yellow-deep:#eddfae;
+  --muted:#9c8878; --hairline:#e7ddd2;
+}
+body{font-family:'Inter',sans-serif;background:var(--parchment);color:var(--ink);padding:0 0 80px}
+
+/* dev-only state switcher, not part of the design */
+.devbar{position:fixed;bottom:14px;left:14px;z-index:120;background:var(--ink);color:var(--parchment);border-radius:10px;padding:8px 12px;display:flex;gap:8px;align-items:center;font-size:12px;box-shadow:0 8px 24px rgba(28,19,15,.3)}
+.devbar span{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}
+.devbar button{border:0;background:#5c3428;color:#f7e6de;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif}
+.devbar button:hover{background:#7c3a2a}
+
+/* toolbar as shipped */
+.toolbar{display:flex;align-items:center;gap:12px;padding:20px 40px;flex-wrap:wrap}
+.search{flex:1;min-width:220px;max-width:340px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(124,58,42,.18);border-radius:8px;padding:8px 12px}
+.search input{border:0;outline:0;background:transparent;font-size:13.5px;color:var(--ink);width:100%}
+.search input::placeholder{color:var(--muted)}
+.chip{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.06em;padding:6px 12px;border-radius:99px;border:1px solid var(--pink-deep);background:var(--pink);color:var(--burgundy);flex:none;cursor:pointer}
+.spacer{flex:1}
+.viewtog{display:flex;border:1px solid rgba(124,58,42,.18);border-radius:8px;overflow:hidden;flex:none}
+.viewtog button{border:0;background:#fff;padding:7px 13px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6f5a4c;cursor:pointer;white-space:nowrap}
+.viewtog button.on{background:var(--ground);color:var(--ink)}
+.btn{border:0;cursor:pointer;font-size:13.5px;font-weight:500;border-radius:9px;padding:9px 16px;white-space:nowrap;flex:none;font-family:'Inter',sans-serif}
+.btn-primary{background:var(--pink);border:1px solid var(--pink-deep);color:var(--burgundy)}
+.btn-primary:hover{background:var(--pink-deep)}
+.btn-ghost{background:transparent;border:1px solid rgba(124,58,42,.22);color:var(--burgundy)}
+.btn-ghost:hover{background:var(--ground)}
+.btn-sm{padding:6px 12px;font-size:12.5px;border-radius:8px}
+
+/* ===== workflow block — centred ===== */
+.wf{max-width:1120px;margin:0 auto;padding:34px 40px 0;text-align:center}
+.wf h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:500;color:var(--ink)}
+.wf .lede{font-size:13.5px;font-weight:300;color:#6f5a4c;margin:9px auto 0;line-height:1.55;max-width:60ch}
+.wf-cta{margin-top:18px;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}
+.wf-cta .aside{font-size:12.5px;color:var(--muted);font-weight:300}
+
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:26px;text-align:left}
+@media(max-width:1000px){.steps{grid-template-columns:1fr}}
+.step{border:1px solid var(--hairline);border-radius:12px;background:var(--parchment);overflow:hidden;display:flex;flex-direction:column}
+.step-art{background:var(--ground);border-bottom:1px solid var(--hairline);padding:20px 20px 14px;display:flex;align-items:center;justify-content:center;min-height:158px}
+.step-art svg{display:block;width:100%;max-width:250px;height:auto}
+.step-txt{padding:16px 20px 20px}
+.step-n{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px}
+.step h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;margin-bottom:6px}
+.step p{font-size:13px;font-weight:300;line-height:1.55;color:#6f5a4c}
+.step .aside{font-size:12px;color:var(--muted);margin-top:9px;font-weight:300}
+
+/* workflow when it sits below the board */
+.wf.below{padding-top:0;margin-top:0}
+.wf-sep{max-width:1120px;margin:64px auto 0;padding:0 40px}
+.wf-sep hr{border:0;border-top:1px solid var(--hairline)}
+.wf-sep .mono{display:block;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:-8px;background:var(--parchment);padding:0 14px;width:fit-content;margin-left:auto;margin-right:auto;position:relative;top:-8px}
+.wf.below h2{font-size:21px}
+
+/* ===== board ===== */
+.boardwrap{padding:22px 40px 0}
+.board{column-width:280px;column-gap:18px}
+.card{break-inside:avoid;margin:0 0 18px;border-radius:10px;padding:16px 16px 10px;border:1px solid transparent;background-image:none;
+  box-shadow:0 1px 2px rgba(58,28,20,.05),0 3px 10px rgba(58,28,20,.07)}
+.c-yellow{background-color:var(--yellow);border-color:var(--yellow-deep)}
+.c-pink{background-color:var(--pink);border-color:var(--pink-deep)}
+.c-sage{background-color:var(--sage);border-color:var(--sage-mid)}
+.note-body{font-family:'Caveat',cursive;font-size:21px;line-height:1.32;color:var(--ink-deep);white-space:pre-wrap}
+.note-foot{display:flex;align-items:center;gap:8px;margin-top:10px;min-height:24px}
+.note-tag{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:#8a7466;background:rgba(255,255,255,.55);border-radius:99px;padding:3px 9px}
+.note-date{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:#8a7466;margin-left:auto}
+.kebab{border:0;background:transparent;cursor:pointer;color:#8a7466;padding:4px;border-radius:6px;line-height:0}
+.kebab:hover{background:rgba(255,255,255,.6);color:var(--burgundy)}
+.ghost{break-inside:avoid;margin:0 0 18px;border:1.5px dashed rgba(124,58,42,.3);border-radius:10px;min-height:110px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--burgundy);font-size:13.5px;font-weight:500;background:transparent;width:100%;font-family:'Inter',sans-serif}
+.ghost:hover{background:rgba(245,226,218,.4)}
+
+/* ===== examples drawer ===== */
+.scrim{position:fixed;inset:0;background:rgba(58,28,20,.22);z-index:90;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,94vw);background:var(--parchment);z-index:91;box-shadow:-12px 0 40px rgba(58,28,20,.18);transform:translateX(103%);transition:transform .22s ease;display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.drawer-head{padding:24px 26px 18px;border-bottom:1px solid var(--hairline);position:relative}
+.drawer-head h2{font-family:'Playfair Display',serif;font-size:21px;font-weight:500}
+.drawer-head p{font-size:12.5px;font-weight:300;color:#6f5a4c;margin-top:6px;line-height:1.5}
+.drawer-close{position:absolute;top:16px;right:16px;border:0;background:transparent;cursor:pointer;color:var(--muted);font-size:17px;padding:6px;border-radius:8px}
+.drawer-close:hover{background:var(--ground);color:var(--burgundy)}
+.drawer-body{overflow-y:auto;padding:18px 26px 40px;flex:1}
+.exgroup{margin-bottom:20px}
+.exgroup>.mono{display:block;margin-bottom:9px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.exnote{border-radius:10px;border:1px solid transparent;padding:14px 14px 10px;margin-bottom:10px;background-image:none}
+.exnote .note-body{font-size:19px}
+.exnote-foot{display:flex;align-items:center;gap:8px;margin-top:9px}
+.keep{border:0;background:rgba(255,255,255,.6);cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--burgundy);padding:5px 11px;border-radius:99px;margin-left:auto}
+.keep:hover{background:#fff}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--parchment);border-radius:10px;padding:10px 16px;font-size:13px;z-index:95;opacity:0;pointer-events:none;transition:opacity .18s}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9c8878" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input type="text" placeholder="Search your notes…">
+  </div>
+  <button class="chip">#All</button>
+  <div class="spacer"></div>
+  <div class="viewtog"><button class="on">Board</button><button>Column</button></div>
+  <button class="btn btn-ghost" id="btnExamples">Examples</button>
+  <button class="btn btn-primary" id="btnPin">+ Pin a note</button>
+</div>
+
+<div id="page"></div>
+
+<!-- examples drawer -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Example notes">
+  <div class="drawer-head">
+    <h2>What writers keep here</h2>
+    <p>Drawn from what querying writers actually hang on to. Keep one and it lands on your board, yours to edit.</p>
+    <button class="drawer-close" id="drawerClose" aria-label="Close">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<div class="devbar">
+  <span>Mockup only</span>
+  <button id="devAdd">Add a note</button>
+  <button id="devClear">Empty the board</button>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+var ART = {
+one:'<svg viewBox="0 0 250 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A note being written"><path d="M14 112 H236" stroke="#e7ddd2" stroke-width="2" stroke-linecap="round"/><rect x="46" y="26" width="112" height="72" rx="5" fill="#e9ede6" stroke="#c9d3c5" stroke-width="1.5" transform="rotate(-5 102 62)"/><rect x="60" y="22" width="112" height="72" rx="5" fill="#f5e2da" stroke="#e8c8bc" stroke-width="1.5" transform="rotate(3 116 58)"/><rect x="54" y="32" width="122" height="76" rx="5" fill="#fbf3d9" stroke="#eddfae" stroke-width="1.5"/><path d="M68 54 H150 M68 68 H158 M68 82 H124" stroke="#c9b98a" stroke-width="2" stroke-linecap="round"/><g transform="rotate(38 186 60)"><rect x="178" y="22" width="13" height="58" rx="2.5" fill="#f5e2da" stroke="#7c3a2a" stroke-width="1.5"/><path d="M178 80 L184.5 96 L191 80 Z" fill="#fdfaf5" stroke="#7c3a2a" stroke-width="1.5" stroke-linejoin="round"/><path d="M181.5 89 L184.5 96 L187.5 89 Z" fill="#3a1c14"/><path d="M178 34 H191" stroke="#7c3a2a" stroke-width="1.5"/></g></svg>',
+two:'<svg viewBox="0 0 250 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three coloured notes with tags"><path d="M14 112 H236" stroke="#e7ddd2" stroke-width="2" stroke-linecap="round"/><g transform="rotate(-7 62 66)"><rect x="26" y="34" width="72" height="66" rx="5" fill="#fbf3d9" stroke="#eddfae" stroke-width="1.5"/><path d="M38 52 H84 M38 64 H76" stroke="#c9b98a" stroke-width="2" stroke-linecap="round"/><rect x="38" y="76" width="34" height="13" rx="6.5" fill="#fdfaf5" stroke="#c9b98a" stroke-width="1.2"/></g><g><rect x="90" y="28" width="72" height="66" rx="5" fill="#f5e2da" stroke="#e8c8bc" stroke-width="1.5"/><path d="M102 46 H148 M102 58 H140" stroke="#cfa694" stroke-width="2" stroke-linecap="round"/><rect x="102" y="70" width="38" height="13" rx="6.5" fill="#fdfaf5" stroke="#cfa694" stroke-width="1.2"/></g><g transform="rotate(7 190 66)"><rect x="154" y="34" width="72" height="66" rx="5" fill="#e9ede6" stroke="#c9d3c5" stroke-width="1.5"/><path d="M166 52 H212 M166 64 H204" stroke="#a8b7a5" stroke-width="2" stroke-linecap="round"/><rect x="166" y="76" width="30" height="13" rx="6.5" fill="#fdfaf5" stroke="#a8b7a5" stroke-width="1.2"/></g></svg>',
+three:'<svg viewBox="0 0 250 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A note gaining a date, appearing on a calendar"><path d="M14 112 H236" stroke="#e7ddd2" stroke-width="2" stroke-linecap="round"/><rect x="24" y="30" width="88" height="70" rx="5" fill="#f5e2da" stroke="#e8c8bc" stroke-width="1.5"/><path d="M36 48 H96 M36 60 H88" stroke="#cfa694" stroke-width="2" stroke-linecap="round"/><rect x="36" y="72" width="52" height="15" rx="7.5" fill="#fdfaf5" stroke="#8a9e88" stroke-width="1.3" stroke-dasharray="3 2.5"/><path d="M43 79.5 l3.5 3.5 l6 -7" stroke="#5a6e58" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M58 80 H82" stroke="#8a9e88" stroke-width="2" stroke-linecap="round"/><path d="M120 66 H144" stroke="#7c3a2a" stroke-width="2" stroke-linecap="round"/><path d="M138 60 L145 66 L138 72" stroke="#7c3a2a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="154" y="30" width="72" height="70" rx="5" fill="#fdfaf5" stroke="#c9d3c5" stroke-width="1.5"/><path d="M154 46 H226" stroke="#c9d3c5" stroke-width="1.5"/><path d="M170 24 V38 M210 24 V38" stroke="#8a9e88" stroke-width="2" stroke-linecap="round"/><g fill="#dfe5dc"><rect x="163" y="55" width="12" height="10" rx="2"/><rect x="184" y="55" width="12" height="10" rx="2"/><rect x="205" y="55" width="12" height="10" rx="2"/><rect x="163" y="72" width="12" height="10" rx="2"/><rect x="205" y="72" width="12" height="10" rx="2"/></g><rect x="184" y="72" width="12" height="10" rx="2" fill="#e8c8bc" stroke="#7c3a2a" stroke-width="1.3"/></svg>'
+};
+
+var STEPS=[
+ {n:'One',art:'one',h:'Write it down',p:'A quote, a comp title, a half-formed pitch. Pin it in a second and get back to what you were doing.',a:'Nothing here goes anywhere else unless you send it.'},
+ {n:'Two',art:'two',h:'Colour and tag it',p:'Three papers and a tag of your own wording. Filter to #agents when you’re polishing a letter, or search the lot.',a:'Your tags, your grouping — nothing is prescribed.'},
+ {n:'Three',art:'three',h:'Turn into a task',p:'A note with a date turns up on your to-do list and calendar when it’s due — and stays here on the board. One note, not a copy.',a:'Undated notes stay put. They never chase you.'}
+];
+
+var EXAMPLES=[
+ {group:'Personalisation',items:[
+  {c:'yellow',tag:'agents',body:'Heard [agent] on [podcast] — they’re hunting locked-room mysteries with an unreliable narrator. Save the exact quote for the opening line of the letter.'},
+  {c:'pink',tag:'agents',body:'[Agent]’s #MSWL: “speculative fiction that feels like literary fiction wearing a disguise.” That’s the book. Query when their window opens.'}
+ ]},
+ {group:'The letter & package',items:[
+  {c:'sage',tag:'letter',body:'One-line pitch, draft 4: When a small-town archivist vanishes, the sister who stopped believing in her must decide which of the town’s stories were ever true.'},
+  {c:'yellow',tag:'letter',body:'Standard UK package: letter + one-page synopsis + first three chapters. Always check the agency page — some want 5k words, some want 10k.'}
+ ]},
+ {group:'Reading the responses',items:[
+  {c:'sage',tag:'strategy',body:'Two form passes mentioned the opening. One is noise, two is a pattern — look at chapter one before the next batch goes out.'}
+ ]},
+ {group:'If the call comes',items:[
+  {c:'pink',tag:'calls',body:'Before saying yes: ask for time to notify other agents with the full (1–2 weeks is normal), and ask to speak to a current client.'}
+ ]}
+];
+
+var notes=[];
+var nextId=1;
+
+function el(h){var t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild;}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function today(){var d=new Date();return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show');},3200);}
+
+var page=document.getElementById('page');
+
+function stepsGrid(){
+  var g=el('<div class="steps"></div>');
+  STEPS.forEach(function(s){
+    var c=el('<div class="step"></div>');
+    var art=el('<div class="step-art"></div>');art.innerHTML=ART[s.art];c.appendChild(art);
+    var t=el('<div class="step-txt"></div>');
+    t.appendChild(el('<span class="step-n">'+s.n+'</span>'));
+    t.appendChild(el('<h3>'+s.h+'</h3>'));
+    t.appendChild(el('<p>'+s.p+'</p>'));
+    t.appendChild(el('<p class="aside">'+s.a+'</p>'));
+    c.appendChild(t);g.appendChild(c);
+  });
+  return g;
+}
+
+function workflowEmpty(){
+  var w=el('<div class="wf"></div>');
+  w.appendChild(el('<h2>Your board is empty</h2>'));
+  w.appendChild(el('<p class="lede">Querying throws a lot at you at once — an agent’s wishlist heard on a podcast, a line that finally works, a rule you keep forgetting. This is where those live until you need them.</p>'));
+  var cta=el('<div class="wf-cta"></div>');
+  var b=el('<button class="btn btn-primary">+ Pin your first note</button>');
+  b.onclick=addNote;
+  cta.appendChild(b);
+  var link=el('<button class="btn btn-ghost btn-sm">Browse examples</button>');
+  link.onclick=openDrawer;
+  cta.appendChild(link);
+  w.appendChild(cta);
+  w.appendChild(stepsGrid());
+  return w;
+}
+
+function workflowBelow(){
+  var sep=el('<div class="wf-sep"><hr><span class="mono">How the board works</span></div>');
+  var w=el('<div class="wf below"></div>');
+  w.appendChild(el('<h2>Write it down for later…</h2>'));
+  w.appendChild(el('<p class="lede">Querying throws a lot at you at once. Anything you pin here stays put until you need it.</p>'));
+  w.appendChild(stepsGrid());
+  var frag=document.createDocumentFragment();
+  frag.appendChild(sep);frag.appendChild(w);
+  return frag;
+}
+
+function renderNote(n){
+  var card=el('<div class="card c-'+n.c+'"></div>');
+  card.appendChild(el('<div class="note-body">'+esc(n.body)+'</div>'));
+  var f=el('<div class="note-foot"></div>');
+  if(n.tag)f.appendChild(el('<span class="note-tag">#'+esc(n.tag)+'</span>'));
+  f.appendChild(el('<span class="note-date">'+esc(n.date)+'</span>'));
+  f.appendChild(el('<button class="kebab" aria-label="Note actions"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>'));
+  card.appendChild(f);
+  return card;
+}
+
+function render(){
+  page.innerHTML='';
+  if(notes.length===0){
+    page.appendChild(workflowEmpty());
+    return;
+  }
+  var bw=el('<div class="boardwrap"></div>');
+  var b=el('<div class="board"></div>');
+  var g=el('<button class="ghost">+ Pin a note</button>');
+  g.onclick=addNote;
+  b.appendChild(g);
+  notes.forEach(function(n){b.appendChild(renderNote(n));});
+  bw.appendChild(b);
+  page.appendChild(bw);
+  page.appendChild(workflowBelow());
+}
+
+var SAMPLE=[
+ {c:'yellow',tag:'agents',body:'Kate Burke said on the podcast she wants thrillers with a domestic heart — lead the letter with that.'},
+ {c:'sage',tag:'letter',body:'Synopsis: present tense, spoil the ending, one page.'},
+ {c:'pink',tag:'comps',body:'Check whether The Last Word is still inside the five-year comp window.'},
+ {c:'yellow',tag:'calls',body:'If an agent calls: editorial vision? which editors? what if book one doesn’t sell?'}
+];
+function addNote(){
+  var s=SAMPLE[notes.length%SAMPLE.length];
+  notes.unshift({id:nextId++,c:s.c,tag:s.tag,date:today(),body:s.body});
+  render();
+}
+document.getElementById('devAdd').onclick=addNote;
+document.getElementById('devClear').onclick=function(){notes=[];render();};
+document.getElementById('btnPin').onclick=addNote;
+
+/* drawer */
+var drawer=document.getElementById('drawer'),scrim=document.getElementById('scrim');
+function buildDrawer(){
+  var b=document.getElementById('drawerBody');b.innerHTML='';
+  EXAMPLES.forEach(function(g){
+    var grp=el('<div class="exgroup"><span class="mono">'+esc(g.group)+'</span></div>');
+    g.items.forEach(function(it){
+      var c=el('<div class="exnote c-'+it.c+'"></div>');
+      c.appendChild(el('<div class="note-body">'+esc(it.body)+'</div>'));
+      var f=el('<div class="exnote-foot"></div>');
+      if(it.tag)f.appendChild(el('<span class="note-tag">#'+esc(it.tag)+'</span>'));
+      var k=el('<button class="keep">Keep this</button>');
+      k.onclick=function(){
+        notes.unshift({id:nextId++,c:it.c,tag:it.tag,date:today(),body:it.body});
+        closeDrawer();render();toast('Kept — it’s yours to edit now.');
+      };
+      f.appendChild(k);c.appendChild(f);grp.appendChild(c);
+    });
+    b.appendChild(grp);
+  });
+}
+function openDrawer(){buildDrawer();drawer.classList.add('open');scrim.classList.add('open');}
+function closeDrawer(){drawer.classList.remove('open');scrim.classList.remove('open');}
+document.getElementById('btnExamples').onclick=openDrawer;
+document.getElementById('drawerClose').onclick=closeDrawer;
+scrim.onclick=closeDrawer;
+
+render();
+})();
+</script>
+</body>
+</html>
