@@ -25,6 +25,19 @@ import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { useTagWrites } from "./useTagWrites";
 import { useTodoToast } from "./useTodoToast";
 import { FocusFlow } from "./FocusFlow";
+import { TaskPane } from "./TaskPane";
+import { useTaskPaneSession, type TaskPaneHost } from "./useTaskPaneSession";
+import { useTaskCommit } from "./useTaskCommit";
+import { useConfirmAsk } from "./ConfirmAsk";
+
+/**
+ * ⚠️ THIS MOUNT'S SECTION-ID PREFIX, AND IT MUST DIFFER FROM `/todo`'s. Both pages stay mounted, so
+ * without it the document would hold two `#s-unit`s: `getElementById` returns the first, and a
+ * "jump to the missing answer" would scroll a page the reader cannot see. Invalid HTML too, which
+ * makes any `aria-labelledby` resolving by id ambiguous. `/todo` keeps `PANE_ID_PREFIX` ("") so it
+ * stays byte-identical; this one is prefixed.
+ */
+const CAL_PANE_PREFIX = "cal-";
 import { useScriptAllyDb } from "../../lib/db";
 import { localYMD } from "../../lib/shellSidebar";
 import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
@@ -384,7 +397,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const today = localYMD(now);
   /* board-optimise P2 — the page gained tag CREATION (the sidebar's ＋ New tag row), so it needs
      a failure surface: the same toast every other Tasks page uses, never a silent catch. */
-  const { toast, flash, dismiss, pause, resume } = useTodoToast();
+  const { toast, flash, dismiss, pause, resume, remember } = useTodoToast();
+  /* ⚠️ THE DUPLICATE-SEND GUARD IS PART OF THE WRITE PATH, not decoration — declining writes
+     nothing — so the calendar must be able to ask it, exactly as `/todo` can. */
+  const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
   const { createTagDef } = useTagWrites(flash);
   const [tagSel, setTagSel] = useState<string[]>([]); // tasks-pages P5 — additive with FILTERS
   /* ⚠️ THE WEEK VIEW IS RETIRED (record-layer P6). A week of seven cells showed the same items the
@@ -551,6 +567,62 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const focusCard = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(key); reopenForReading(); };
   const focusRecord = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(key); setFocusKey(key); reopenForReading(); };
   const [flowCard, setFlowCard] = useState<BoardCard | null>(null);
+  /**
+   * ⚠️ THE TASK PANE, OVER THE CALENDAR (Pack C Phase 2) — the SAME pane `/todo` draws, driven by
+   * the same session hook and writing through the same committer. It is the point of the whole
+   * stream: one task workflow, wherever you meet a task.
+   *
+   * ⚠️ AND IT PASSES NO OVERLAY SINK. On `/todo` the sink draws a receipt on a board card; there
+   * are no board cards here, so the toast carries the receipt — Undo included, which is what makes
+   * it a receipt rather than a notice. (Measured in Phase 1: `/todo` draws no receipt either any
+   * more, so the two surfaces already agree. See the run report.)
+   */
+  const [paneCard, setPaneCard] = useState<BoardCard | null>(null);
+  const { commit } = useTaskCommit({
+    flash, rememberUndo: remember, confirmAsk,
+    openFlow: (c) => setFlowCard(c),
+  });
+  const paneRef = React.useRef<HTMLDivElement | null>(null);
+  const paneHost: TaskPaneHost = {
+    /**
+     * ⚠️ SCOPED TO THIS MOUNT'S OWN PANE, which is why Pack B built `idPrefix`. Every workspace
+     * page stays MOUNTED, so `/todo`'s pane is in the document too — a bare `document.querySelector`
+     * would find ITS section and scroll a page the reader cannot see.
+     */
+    jumpToSection: (id) => {
+      const root = paneRef.current;
+      const sect = root?.querySelector<HTMLElement>(`#${CAL_PANE_PREFIX}${id}`);
+      sect?.scrollIntoView({ behavior: "smooth", block: "center" });
+    },
+    /* the `offer`/`fix` hand-off — parity with `/todo`, which is why the sheet stays mounted */
+    openFlow: (c) => { setPaneCard(null); setFlowCard(c); },
+    commit,
+    /* ⚠️ NO DOCK CURSOR HERE. `/todo` advances to the next card in its dock; a calendar day is not
+       a queue, so a completed card simply leaves the day and the pane closes with it. */
+    advance: () => setPaneCard(null),
+    openQuery: (c) => { if (c.relatedRecordId) onNavigate("queries", c.relatedRecordId); },
+    /* onSnooze / onDismiss are deliberately ABSENT — see `TaskPaneHost`. The calendar's snooze is
+       drag, and it shows no dismissed cards at all. */
+  };
+  const paneSession = useTaskPaneSession(paneCard, paneHost, CAL_PANE_PREFIX);
+
+  /**
+   * ⚠️ ESCAPE CLOSES THE PANE, AND ONLY WHILE IT IS OPEN. It is captured so it does not also reach
+   * the page beneath — a day expansion or a peek would otherwise close at the same time, and the
+   * writer pressed once. `FocusFlow` keeps its own handler; the two are mutually exclusive, since
+   * the pane closes itself before handing a card over.
+   */
+  React.useEffect(() => {
+    if (!paneCard) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      e.stopPropagation();
+      setPaneCard(null);
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [paneCard]);
 
   const assembled = useMemo(
     () => assembleBoardColumns({
@@ -863,8 +935,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         : `${monthLabel(anchor)} — what is still ahead.`)
     : `${monthLabel(anchor)} — every item on the day it needs you.`;
 
+  /* ⚠️ THE PANE IS THE ENTRANCE NOW, FOR EVERY KIND — parity with `/todo`, where clicking a row
+     docks the pane whatever the card is. `offer` and `fix` still reach `FocusFlow`, but they reach
+     it the way they do there: through the pane's own primary, past `paneCommits`. */
   const openSheet = (item: CalendarItem) => {
-    if (item.card) setFlowCard(item.card);
+    if (item.card) setPaneCard(item.card);
   };
 
   const dayData = (ymd: string) => byDay.get(ymd) ?? { items: [], rolled: 0 };
@@ -1270,6 +1345,27 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
           ⚠️ THE WRAPPER EXISTS ONLY TO CARRY A CLASS. `FocusFlow` is read-only territory, so the
           narrowing is scoped from this page's own stylesheet through `.cal-flow`; the wrapper adds
           no box of its own, since everything inside it is `position: fixed`. */}
+      {/**
+        * ⚠️ THE PANE'S WINDOW — scrim, one lifted card, its own scroll region, and it closes on
+        * ESCAPE AND THE × ONLY. Scrim-click is deliberately not a close: the pane holds answers the
+        * writer has typed, and a stray click on the ground is not a decision to discard them. That
+        * is the standing ruling for this surface, and `FocusFlow` beside it keeps its own.
+        */}
+      {paneCard && (
+        <div className="cal-panescrim" role="presentation">
+          <div className="cal-panewin" role="dialog" aria-modal="true" aria-label="Task"
+               ref={paneRef} onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="cal-panex" aria-label="Close" onClick={() => setPaneCard(null)}>×</button>
+            <div className="cal-panescroll">
+              {paneSession.journey && (
+                <TaskPane journey={paneSession.journey} onPrimary={paneSession.onPrimary} />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {confirmAskNode}
+
       {flowCard && (
         <div className="cal-flow">
         <FocusFlow

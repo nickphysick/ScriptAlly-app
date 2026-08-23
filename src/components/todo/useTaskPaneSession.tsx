@@ -118,8 +118,15 @@ export interface TaskPaneHost {
   openFlow: (card: BoardCard) => void;
   commit: (card: BoardCard, values: ReturnType<typeof paneCommitValues>, bulkRows: RecordSweepRow[]) => Promise<boolean>;
   advance: (card: BoardCard) => void;
-  onSnooze: (el: HTMLElement) => void;
-  onDismiss: () => void;
+  /**
+   * ⚠️ OPTIONAL, AND ABSENCE IS NOT THE SAME AS DISABLED. `TaskPane` renders these verbs only when
+   * the callback is present — `{d.onSnooze && …}` — which is the grammar its own type states. A
+   * host with no surface for them passes neither and the pane shows neither, rather than drawing a
+   * dead control. The calendar is exactly that host: its snooze is DRAG, on the surface where days
+   * are the subject, and it deliberately shows no dismissed cards at all.
+   */
+  onSnooze?: (el: HTMLElement) => void;
+  onDismiss?: () => void;
   openQuery: (card: BoardCard) => void;
 }
 
@@ -588,9 +595,9 @@ export function useTaskPaneSession(
          reads `.disabled` from snooze and dismiss and supplies its own handlers, so only
          `openQuery.onPress` is ever called. They point at the host rather than at a second
          implementation, so a future caller cannot reach a different surface than the journey. */
-      snooze: { disabled: !offers("snooze-1"), onPress: (anchor: HTMLElement) => host.onSnooze(anchor) },
+      snooze: { disabled: !offers("snooze-1") || !host.onSnooze, onPress: (anchor: HTMLElement) => host.onSnooze?.(anchor) },
       openQuery: { disabled: !card.relatedRecordId, onPress: () => host.openQuery(card) },
-      dismiss: { disabled: !offers("dismiss-week"), onPress: () => host.onDismiss() },
+      dismiss: { disabled: !offers("dismiss-week") || !host.onDismiss, onPress: () => host.onDismiss?.() },
     };
   }, [card]);
 
@@ -753,12 +760,12 @@ export function useTaskPaneSession(
                     /* ⚠️ SNOOZE ANCHORS TO THE PANE'S OWN BUTTON. `AnchoredPanel` takes any element
                        and places against its rect — recon 6 confirmed it needs nothing else, so the
                        panel moved surface without a line of change inside it. */
-                    onSnooze: paneVerbs.snooze.disabled ? undefined : (el) => host.onSnooze(el),
+                    onSnooze: paneVerbs.snooze.disabled ? undefined : (el) => host.onSnooze?.(el),
                     /* ⚠️ IT OPENS THE QUESTION; IT DOES NOT ACT (Phase 7). This is the one verb on
                        the page whose result cannot be read off the page afterwards, so it is the
                        one that asks — see `TaskDismissDialog` for why that is about WHERE IT GOES
                        rather than about certainty. */
-                    onDismiss: paneVerbs.dismiss.disabled ? undefined : () => host.onDismiss(),
+                    onDismiss: paneVerbs.dismiss.disabled ? undefined : () => host.onDismiss?.(),
                     /* the cohort's numbers, where this IS a cohort — absent everywhere else, so a
                        single journey can never accidentally wear a counted primary */
                     /* ⚠️ THE ONE LIST, HANDED OVER ONCE. The chip counts it, the line names it and

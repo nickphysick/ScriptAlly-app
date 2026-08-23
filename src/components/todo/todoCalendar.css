@@ -768,3 +768,48 @@
 .cal-mjgrid button:hover { border-color: #d3c4b3; color: #7c3a2a; }
 .cal-mjgrid button.cur { background: #f8e7e2; border-color: #eecfc2; color: #7c3a2a; }
 .cal-mjump button:focus-visible, .cal-mjbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+
+/**
+ * ⚠️ THE TASK PANE'S WINDOW (Pack C Phase 2) — the same `TaskPane` `/todo` draws, over the calendar.
+ *
+ * ⚠️ THE SCRIM TAKES NO CLICK HANDLER, and that is the ruling rather than an omission. The pane
+ * holds answers the writer has typed; a stray click on the ground is not a decision to discard
+ * them. Escape and the × are the two ways out. `.cal-flow`'s `FocusFlow` beside it keeps its own
+ * behaviour, which is why neither is expressed here as a shared rule.
+ */
+.cal-panescrim {
+  position: fixed; inset: 0; z-index: 80;
+  background: rgba(36, 18, 9, 0.28);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 44px 16px 24px;
+}
+/* ⚠️ 440px IS THE PANE'S OWN MEASURE, not a number chosen here — `.cal-flow` narrows `FocusFlow` to
+   430 for the same reason, and the two sit within a few pixels so the surface reads as one family. */
+.cal-panewin {
+  position: relative;
+  width: min(440px, 94vw);
+  /* ⚠️ NO VIEWPORT ARITHMETIC. The scrim is `position: fixed; inset: 0` and carries the padding, so
+     `100%` here is already "the scrim's content box" — the same height, derived rather than
+     restated. `calc(100vh - 68px)` was the first version and it is exactly the shape this repo
+     forbids: a number that encodes another element's size and goes wrong the day that size moves. */
+  max-height: 100%;
+  display: flex; flex-direction: column;
+  background: #fefcfa;
+  border: 1px solid #e8e0d8;
+  border-radius: 14px;
+  /* the lift — a card resting on the month, not a hole cut through it */
+  box-shadow: 0 18px 44px rgba(36, 18, 9, 0.22), 0 2px 6px rgba(36, 18, 9, 0.10);
+  overflow: hidden;
+}
+/* ⚠️ THE WINDOW SCROLLS, NOT THE PAGE. `.tpn` is a panel with no scroll of its own — on `/todo` its
+   container provides one — so the window must, or a long journey would run past the viewport with
+   the document unable to reach it. Same fault the chassis note in CLAUDE.md records. */
+.cal-panescroll { overflow-y: auto; overscroll-behavior: contain; }
+.cal-panex {
+  position: absolute; top: 8px; right: 10px; z-index: 2;
+  width: 26px; height: 26px; line-height: 1;
+  border: 1px solid #e7ddd2; border-radius: 999px;
+  background: #fffdfa; color: #8a7a6c; font-size: 15px;
+  cursor: pointer;
+}
+.cal-panex:hover { background: #f7f4ee; color: #241209; }

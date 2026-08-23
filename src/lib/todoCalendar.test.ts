@@ -227,8 +227,20 @@ describe("the fold, the map, the wiring", () => {
      mattered is unchanged and still asserted: a pip opens the item sheet, and clicking a day sends
      it to the day surface. Its retirement is locked positively in the Phase 5 block below, so this
      is a retarget rather than a deletion. */
-  it("clicks: a pip opens the item sheet (FocusFlow), a day is selected into the panel", () => {
-    expect(pageSrc).toContain("setFlowCard(item.card)");
+  /**
+   * ⚠️ SUPERSEDED IN PART (Pack C Phase 2), AND THIS IS A BEHAVIOUR CHANGE RATHER THAN A RETARGET.
+   * A pip used to open `FocusFlow` directly; it now opens the SAME `TaskPane` `/todo` draws, and
+   * `FocusFlow` is reached the way it is there — through the pane's own primary, past `paneCommits`,
+   * for the `offer` and `fix` journeys the form cannot answer. That is the pack's stated purpose:
+   * one task workflow, wherever you meet a task.
+   *
+   * ⚠️ THE HAND-OFF HALF IS ASSERTED, NOT ASSUMED. `<FocusFlow` must still be mounted here, or
+   * those two journeys would have nowhere to go — which is the failure this case was really
+   * guarding, and it is unchanged.
+   */
+  it("clicks: a pip opens the task pane, and the sheet stays mounted for the journeys it still owns", () => {
+    expect(pageSrc).toContain("setPaneCard(item.card)");
+    expect(pageSrc).toContain("<TaskPane");
     expect(pageSrc).toContain("<FocusFlow");
     expect(pageSrc).toContain("onClick={() => selectDay(ymd)}");
     expect(pageSrc).toContain('className="cal-focus"');
@@ -690,7 +702,20 @@ describe("⚠️ the day panel replaces the modal, inside the chassis", () => {
       expect(decls(pageSrc), `${c} still renders`).not.toMatch(new RegExp(`["\\s\`]${c}["\\s\`]`));
       expect(decls(calCss), `${c} still has a rule`).not.toMatch(new RegExp(`\\.${c}[\\s{.:,]`));
     }
-    expect(decls(pageSrc)).not.toContain('role="dialog"');
+    /**
+     * ⚠️ NARROWED, DELIBERATELY (Pack C Phase 2). This line used to ban `role="dialog"` outright.
+     * The law it protects is about the DAY — "a dialogue over a scrim would put a layer between the
+     * writer and the month" — and that law is untouched: the five classes above still render
+     * nowhere and still have no rules.
+     *
+     * What the blanket ban also caught was the TASK PANE's window, which Nick ruled for explicitly:
+     * scrim, one lifted card, its own scroll region, Escape and × only. So the assertion states
+     * what is actually true — there is exactly ONE dialog on this page and it is the pane's — which
+     * is a stronger claim than the ban was, because a second one would now fail.
+     */
+    expect((decls(pageSrc).match(/role="dialog"/g) ?? []).length,
+      "a second dialogue appeared on the calendar — the day modal's law is one layer per surface").toBe(1);
+    expect(decls(pageSrc)).toContain('className="cal-panewin" role="dialog" aria-modal="true"');
   });
 
   it("the panel is this page's own box inside .tpl-body — TasksPageLayout is not forked", () => {
