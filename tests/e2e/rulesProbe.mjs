@@ -180,4 +180,39 @@ await attempt("colour 'chartreuse' (must be DENIED)", "Noteboard P2",
   () => updateDoc(tref, { colour: "chartreuse", updatedAt: new Date().toISOString() }));
 await attempt("remove the throwaway note", "long-standing", () => deleteDoc(tref));
 
+/* ── querying goals (goals pack, Phase 1) ───────────────────────────────────────────────────── */
+console.log("\nuser document — the querying-goals list:");
+/* ⚠️ ON THE USER DOC, AND IT UNDOES ITSELF. The harness account carries no `queryingGoals`, so any
+   list is a real change and lands in affectedKeys — the F7 lesson. The undo unsets the key rather
+   than writing an empty list: [] and absent are DIFFERENT states to the derivation ("a target was
+   removed" vs "no target was ever set"), and leaving [] behind would seed the next run with a
+   history this one invented. */
+const uref = doc(db, "users", uid);
+const usnap = await getDoc(uref);
+const hadGoals = usnap.exists() && usnap.data().queryingGoals !== undefined;
+console.log(`  harness account already has queryingGoals: ${hadGoals ? "YES — NOT undoing" : "no"}`);
+const restoreGoals = () => hadGoals
+  ? updateDoc(uref, { queryingGoals: usnap.data().queryingGoals })
+  : updateDoc(uref, { queryingGoals: deleteField() });
+
+await attempt("queryingGoals — a real entry", "goals P1",
+  () => updateDoc(uref, { queryingGoals: [{ target: 10, cadence: "month", effectiveFrom: "2026-08-01" }] }),
+  restoreGoals);
+/* the removal entry — the shape that says "there was a target, and it was taken away" */
+await attempt("queryingGoals — the null (removal) entry", "goals P1",
+  () => updateDoc(uref, { queryingGoals: [{ target: null, cadence: null, effectiveFrom: "2026-08-23" }] }),
+  restoreGoals);
+/* ⚠️ AND THE TYPE IS BOUNDED — a non-list must be refused, or `is list` is not doing its job. A
+   probe that only ever tries the happy path cannot tell a live clause from an absent one. */
+await attempt("queryingGoals as a string (must be DENIED)", "goals P1",
+  () => updateDoc(uref, { queryingGoals: "not a list" }), restoreGoals);
+/* and the cap is real — 201 entries must be refused (MAX_GOAL_ENTRIES is 200) */
+await attempt("queryingGoals — 201 entries (must be DENIED)", "goals P1",
+  () => updateDoc(uref, { queryingGoals: Array.from({ length: 201 },
+    (_, i) => ({ target: 1, cadence: "week", effectiveFrom: `2026-01-0${(i % 9) + 1}` })) }), restoreGoals);
+/* ⚠️ AND THE STATE IS PROVED RESTORED, not assumed. Every attempt above ran its own undo, but an
+   undo inside a catch is exactly the thing that quietly does not happen. */
+const afterGoals = await getDoc(uref);
+console.log(`  queryingGoals after the probe: ${JSON.stringify(afterGoals.data().queryingGoals ?? null)}`);
+
 process.exit(0);

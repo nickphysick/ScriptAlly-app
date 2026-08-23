@@ -8,6 +8,32 @@ export enum UserPlan {
   PRO = "Pro",
 }
 
+/**
+ * The cadence a querying target runs on.
+ *
+ * ⚠️ NO QUARTER AND NO YEAR. The retired `goalPeriod` offered both; a target you cannot feel
+ * yourself missing for eleven weeks is not a target, it is a note-to-self. The three that
+ * survive are all short enough that the count on the card is about this stretch of work.
+ */
+export type GoalCadence = "week" | "fortnight" | "month";
+
+/**
+ * One declaration of intent, stamped with the day it starts applying.
+ *
+ * `target: null` + `cadence: null` is a REMOVAL — the writer took their target away. It is a
+ * real entry rather than a deletion, because "there was a target until the 4th of August" and
+ * "there was never a target" are different histories and the card reads periods in the past.
+ *
+ * `effectiveFrom` is a date-only "YYYY-MM-DD" in the Europe/London calendar, matching every
+ * other day-granular field in the app (Note.dueDate and friends) — day-granular so a boundary
+ * comparison is a string compare with no timezone drift.
+ */
+export interface QueryingGoalEntry {
+  target: number | null;
+  cadence: GoalCadence | null;
+  effectiveFrom: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -67,12 +93,26 @@ export interface User {
        so this ships with NO rules change — proven against the deployed ruleset before use. */
     noteboard?: { dismissedExamples?: string[]; order?: string[] };
   };
-  // Querying goals (one-screen dashboard §6): ONLY the target is stored — progress derives from
-  // dateSent at read time (lib/oneScreen.goalState). Absent === no goal set (the day-one CTA).
-  // NOTE: rules-gated — writes are silently denied until the firestore.rules revision carrying
-  // these keys is deployed (the affectedKeys gotcha).
+  /**
+   * ⚠️ LEGACY, AND READ BY NOTHING. Superseded by `queryingGoals` below. Left in place rather
+   * than migrated: the only values in the wild are a `quarter` cadence the new set does not
+   * offer, so there is nothing here worth carrying forward. Deleting the fields would be a
+   * destructive write for no gain; reading them would resurrect a cadence that no longer exists.
+   */
   goalTarget?: number;
   goalPeriod?: "quarter" | "month" | "year";
+  /**
+   * Querying goals — an APPEND-ONLY list of intents, and the only thing about a goal that is
+   * stored. No progress counter, no met flag, no period-close write, no cached history: every
+   * one of those is derived from this list and the queries, at read time (lib/queryingGoals).
+   *
+   * ⚠️ APPEND, NEVER MUTATE. Changing a target appends a new entry; removing one appends a null
+   * entry. That is what lets a PAST period be read with the target that was actually in force
+   * while it ran — rewriting the last entry would silently restate history instead.
+   *
+   * Absent or empty === no target has ever been set.
+   */
+  queryingGoals?: QueryingGoalEntry[];
   // One-screen dashboard tour (§12): completion stamp (set on Finish OR Skip — skipping counts)
   // and the explicit dismissal. Day-7 chip visibility is DERIVED from the auth account's creation
   // time, never stored. Rules-gated like the goal fields.

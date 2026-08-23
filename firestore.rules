@@ -91,6 +91,19 @@ service cloud.firestore {
         // Absent-or-valid: an int target 1–999, a period from the closed set.
         && (!data.keys().hasAny(['goalTarget']) || (data.goalTarget is int && data.goalTarget >= 1 && data.goalTarget <= 999))
         && (!data.keys().hasAny(['goalPeriod']) || (data.goalPeriod is string && (data.goalPeriod == 'quarter' || data.goalPeriod == 'month' || data.goalPeriod == 'year')))
+        // Querying goals — the APPEND-ONLY list of intents that supersedes the two fields above.
+        // Each entry is {target: int 1-999 | null, cadence: 'week'|'fortnight'|'month' | null,
+        // effectiveFrom: 'YYYY-MM-DD'}.
+        //
+        // ⚠️ PER-ITEM SHAPE IS CLIENT-ENFORCED, BECAUSE RULES CANNOT ITERATE A LIST. There is no
+        // loop, no map and no all() in this language, so a list can only be bounded by type and
+        // size — the same limit `comps`, `personalGenres` and `mutedTaskRules` all live under, and
+        // it is stated here so nobody reads the missing per-entry validation as an oversight.
+        // The shape is owned by lib/queryingGoals.ts, which is the single writer.
+        //
+        // ⚠️ THE CAP IS ARTEFACT-LOCKED TO `MAX_GOAL_ENTRIES` in src/lib/queryingGoals.ts. If the
+        // two drift, the client permits a write this rule denies SILENTLY.
+        && (!data.keys().hasAny(['queryingGoals']) || (data.queryingGoals is list && data.queryingGoals.size() <= 200))
         // One-screen dashboard tour (§12): completion stamp + dismissal (the hasSeenTour pattern).
         && (!data.keys().hasAny(['tourCompletedAt']) || (data.tourCompletedAt is string && data.tourCompletedAt.size() <= 64))
         && (!data.keys().hasAny(['tourDismissed']) || data.tourDismissed is bool);
@@ -550,7 +563,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'tourCompletedAt', 'tourDismissed', 'todoPrefs', 'notifyPrefs', 'marketingConsent', 'workspacePrefs', 'scheduledDeletion'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'queryingGoals', 'tourCompletedAt', 'tourDismissed', 'todoPrefs', 'notifyPrefs', 'marketingConsent', 'workspacePrefs', 'scheduledDeletion'])
         /**
          * ⚠️ A CLIENT MAY NOT CHANGE ITS OWN `plan` — THIS LINE IS THE WHOLE GUARD.
          *

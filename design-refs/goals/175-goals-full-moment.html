@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Querying goals: target reached, full moment (175)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#f2ede7;color:#3a1c14;padding:44px 28px 120px;}
+.wrap{max-width:1360px;margin:0 auto;}
+.page-title{font-family:'Playfair Display',serif;font-size:25px;font-weight:500;margin-bottom:6px;}
+.page-sub{font-size:13px;color:#9a8c80;font-weight:300;margin-bottom:34px;}
+.sec-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#9a8c80;font-weight:500;margin:38px 0 14px;}
+.rule{height:1px;background:#e7ddd2;margin:34px 0 0;}
+.row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start;}
+.col{width:300px;}
+.cap{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:#9a8c80;margin-bottom:9px;}
+.cap b{color:#7c3a2a;font-weight:500;}
+.note{font-size:12px;line-height:1.55;color:#7a6c60;font-weight:300;margin-top:10px;}
+.note b{color:#3a1c14;font-weight:500;}
+.note code{font-family:'JetBrains Mono',monospace;font-size:11px;color:#7c3a2a;}
+.hgt{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;color:#b0a294;margin-top:7px;}
+
+/* Panel canon: parchment rim -> .frame clipping child */
+.panel{background:#fdfaf5;border-radius:14px;padding:6px;box-shadow:0 1px 2px rgba(58,28,20,0.06),0 6px 20px rgba(58,28,20,0.07);}
+.frame{border:1px solid rgba(124,58,42,0.28);border-radius:10px;overflow:hidden;background:#fdfaf5;}
+.band{background:linear-gradient(135deg,#dce0d9 0%,#d0d6cc 100%);padding:11px 13px;display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(90,110,88,0.2);}
+.band-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:#2e3a2c;flex:1;line-height:1.1;}
+.band-mark{width:26px;height:26px;border-radius:7px;background:#fdfaf5;border:1px solid rgba(124,58,42,0.22);display:flex;align-items:center;justify-content:center;color:#7c3a2a;flex-shrink:0;}
+.band-meta{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#5a6e58;}
+.kebab{width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:#5a6e58;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;flex-shrink:0;}
+.pbody{padding:15px 15px 14px;}
+
+.count{display:flex;align-items:baseline;gap:7px;}
+.count-n{font-family:'Playfair Display',serif;font-size:31px;font-weight:500;color:#3a1c14;line-height:1;}
+.count-of{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;color:#9a8c80;line-height:1;}
+.count-sub{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.11em;text-transform:uppercase;color:#9a8c80;margin-top:7px;}
+.reached{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.09em;text-transform:uppercase;color:#5a6e58;margin-top:6px;}
+
+.meter{margin-top:12px;height:8px;border-radius:5px;background:#efe4dc;overflow:hidden;}
+.meter i{display:block;height:100%;border-radius:5px;background:#bf8a7b;}
+
+.hist{margin-top:12px;padding-top:11px;border-top:1px solid #e7ddd2;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.05em;color:#9a8c80;display:flex;gap:9px;flex-wrap:wrap;}
+.hist span b{color:#3a1c14;font-weight:500;}
+.hist .dot{color:#cbbcae;}
+.hist.mid{justify-content:center;}
+
+/* --- the moment --- */
+.moment{display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:2px;}
+.ill{width:104px;height:104px;flex-shrink:0;}
+.ill-ph{width:104px;height:104px;border-radius:12px;border:1px dashed #c9b8a8;background:
+   repeating-linear-gradient(45deg,rgba(124,58,42,0.035) 0 6px,transparent 6px 12px),#f7f3ec;
+   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#b0a294;}
+.ill-ph span{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.08em;text-transform:uppercase;}
+.moment .count{margin-top:11px;}
+.moment .count-sub{margin-top:6px;}
+
+.fade{animation:fadeUp .5s cubic-bezier(.2,.7,.3,1) both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+@media (prefers-reduced-motion: reduce){.fade{animation:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="page-title">Target reached — full moment</div>
+  <div class="page-sub">175 · 300px rail card · illustration is a placeholder box at its intended 104px</div>
+
+  <div class="sec-label">The state, and what it sits next to</div>
+  <div class="row">
+
+    <!-- IN PROGRESS, for comparison -->
+    <div class="col">
+      <div class="cap">Before — <b>in progress</b></div>
+      <div class="panel"><div class="frame">
+        <div class="band">
+          <div class="band-mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></div>
+          <div class="band-title">Querying goals</div>
+          <div class="band-meta">Monthly</div>
+          <button class="kebab">⋯</button>
+        </div>
+        <div class="pbody">
+          <div class="count"><span class="count-n">9</span><span class="count-of">of 10</span></div>
+          <div class="count-sub">Queries sent · August</div>
+          <div class="meter"><i style="width:90%"></i></div>
+          <div class="hist"><span>JUL <b>7</b></span><span class="dot">·</span><span>JUN <b>9</b></span><span class="dot">·</span><span>MAY <b>4</b></span></div>
+        </div>
+      </div></div>
+      <div class="hgt">Baseline</div>
+    </div>
+
+    <!-- THE MOMENT -->
+    <div class="col">
+      <div class="cap"><b>Target reached</b> — day it happens</div>
+      <div class="panel"><div class="frame">
+        <div class="band">
+          <div class="band-mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></div>
+          <div class="band-title">Querying goals</div>
+          <div class="band-meta">Monthly</div>
+          <button class="kebab">⋯</button>
+        </div>
+        <div class="pbody">
+          <div class="moment">
+            <!-- swap for: <img class="ill" src="…/Goal_Reached.png" alt=""> -->
+            <div class="ill-ph fade"><span>Illustration</span><span>104 × 104</span></div>
+            <div class="count"><span class="count-n">10</span><span class="count-of">of 10</span></div>
+            <div class="count-sub">Queries sent · August</div>
+            <div class="reached">Target reached 14 August</div>
+          </div>
+          <div class="hist mid"><span>JUL <b>7</b></span><span class="dot">·</span><span>JUN <b>9</b></span><span class="dot">·</span><span>MAY <b>4</b></span></div>
+        </div>
+      </div></div>
+      <div class="note">Meter goes — at target it could only ever read full, so the illustration takes its place rather than adding to it.</div>
+      <div class="hgt">Δ +101px on the baseline</div>
+    </div>
+
+    <!-- LATER -->
+    <div class="col">
+      <div class="cap">Two weeks later — <b>17 of 10</b></div>
+      <div class="panel"><div class="frame">
+        <div class="band">
+          <div class="band-mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></div>
+          <div class="band-title">Querying goals</div>
+          <div class="band-meta">Monthly</div>
+          <button class="kebab">⋯</button>
+        </div>
+        <div class="pbody">
+          <div class="moment">
+            <div class="ill-ph"><span>Illustration</span><span>104 × 104</span></div>
+            <div class="count"><span class="count-n">17</span><span class="count-of">of 10</span></div>
+            <div class="count-sub">Queries sent · August</div>
+            <div class="reached">Target reached 14 August</div>
+          </div>
+          <div class="hist mid"><span>JUL <b>7</b></span><span class="dot">·</span><span>JUN <b>9</b></span><span class="dot">·</span><span>MAY <b>4</b></span></div>
+        </div>
+      </div></div>
+      <div class="note">Count climbs, date holds. The state stays true for the rest of the month instead of ageing into a stale cheer.</div>
+    </div>
+
+    <div class="col" style="width:380px;">
+      <div class="cap">Build notes</div>
+      <div class="note" style="margin-top:0;">
+        <b>Asset:</b> <code>design/refreshed-designs/icons/Goal_Reached.png</code>, transparent PNG at 208×208 for retina, rendered at 104. If it ships with a white field it needs <code>mix-blend-mode:multiply</code> — and then no <code>transform</code> on any ancestor, including the entrance animation. In that case switch the keyframe to <code>top</code>.<br><br>
+        <b>Height:</b> +101px on the rail. The activity card's <code>min-height</code> (150px) has to absorb it — it must be free to shrink, or this state pushes the dashboard past the fold. Worth a measured check at 1440×900 and 1440×720 as part of the build.<br><br>
+        <b>Entrance:</b> fires once, on the transition into the state — not on every dashboard mount. A remount-triggered replay is what makes this kind of thing grating. Gate it on the reached-date being today and honour <code>prefers-reduced-motion</code>.<br><br>
+        <b>Subject for your illustrator:</b> a dart landed in the target, or a full out-tray of sent letters. Desk-and-correspondence set, hard-edged palette, burgundy/blush for outgoing.
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>
