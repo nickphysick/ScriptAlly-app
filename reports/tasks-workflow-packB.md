@@ -217,3 +217,116 @@ read `pendingSaveId`. **The obligation is to prove the re-derivation equals `boa
 every dockable card**, on a rendered page, because a divergence changes the pane's figure silently.
 
 **And rule on the `paneGate` scrape**, which blocks Phase 1 independently of all of this.
+
+---
+
+# Pack B, resumed (23 Aug, later) — Phase 1 shipped; Phase 2 stopped by the mid-run gate
+
+> **Not deployed.** Phase 1 is committed and verified, but the deploy rule's condition 4 fails:
+> another session holds uncommitted `TodoNoteboardPage.tsx`, `noteboard.ts` and an untracked
+> `noteboardDrawer.test.tsx`. Their in-flight state is also the tree's only `tsc` red (4 errors,
+> all in their two test files). My files are committed and `git diff HEAD` on them is empty.
+
+## ✅ Phase 1 — `idPrefix`, and the anchor law moved to a rendered page
+
+Committed `15f69962`. Baseline at HEAD `7ae9fe3a` was **clean** — 379 files / 6482 tests — and it
+is **identical after**, with the only changed test the one Nick permitted.
+
+`TaskPaneBody` takes `idPrefix`, defaulting to `""`. It prefixes **the rendered attribute only** —
+`paneGate`'s `REQ` and `nextId` keep bare names, so `sect()`'s comparison and `anchorFor` are
+untouched: one vocabulary for what a section *is*, a per-mount name for where it lives in the
+document. `jumpToSection` applies the same prefix; `PANE_ID_PREFIX` states this page's choice at the
+call site.
+
+**`paneGate.test.ts` retargeted, and the law is unchanged.** The old form scraped
+`id="(s-[a-z]+)"`; with the attribute now an expression, that form and the feature were *mutually
+exclusive*. It scrapes the section's own name instead — `sect("s-unit")`, still a literal — so it
+still answers "does a section exist for every declared requirement", and cannot be defeated by the
+id's spelling changing again.
+
+> **⚠️ THE RETARGET IMMEDIATELY CAUGHT A GAP I HAD NOT ALLOWED FOR.** `s-rows` is declared by
+> `BulkFillTable` as a plain `<table id="s-rows">`, not through `sect()`, because that component has
+> one anchor and no prefix. The first version went red and was right to; matching both spellings is
+> what keeps the law whole.
+
+**And the stronger form now runs on a rendered page**, as ruled: `tests/e2e/packB.measure.ts` mounts
+the pane and asserts every declared anchor **resolves to an element that exists**, scoped to the
+*visible* pane. All five covered — a Send card renders `s-unit`/`s-when`/`s-expect`/`s-remind`, the
+cohort renders `s-rows` — plus `/todo`'s ids proven **bare on the page**, which makes
+"byte-identical" a measurement rather than a claim. Console clean.
+
+> **⚠️ TWO VACUOUS-CHECK FAULTS OF MY OWN, both caught by their own population guards.** The first
+> version *walked* the dock and found **zero anchors across twelve cards** — because the pane opens
+> on whatever is docked, which on this account is a NOTE, and a note declares nothing. Cards are
+> chosen by kind now. The second asserted "every id is bare" over an empty list for the same reason;
+> it docks a Send first. And the cohort is asserted only when its **band proves it actually docked**
+> — its row sits far down a scrolling list, and a click that misses leaves the previous card in the
+> pane, which would then have been asserted about under the cohort's name.
+
+## ⛔ Phase 2 — stopped by the mid-run gate, with the map complete
+
+**A2 genuinely unblocked it.** `dockTimeline` needs only `now`, `queries`, `agents`; `figureFor` is
+now `(card, data, flags, now)`; `listRowInputs` and `recordSweepFor` are lib calls. **The hook can
+build its journey from `(card, data)` alone** — nothing needs `boardCols`, `facts`, `events` or
+`primaryLabel` passed in.
+
+**Then the gate fired.** Another session began editing `TodoNoteboardPage.tsx` and `noteboard.ts`
+inside the red-gate directory at 18:52. The rule is *stop and report — do not attribute the
+failures, do not work around them.*
+
+**And I had independently decided to stop the approach I was taking**, which is worth recording:
+
+> **⚠️ I WAS ASSEMBLING A ~500-LINE MOVE BY SCRIPTED TEXT SUBSTITUTION, AND HIT THE SAME FAILURE
+> CLASS THREE TIMES** — "substring not found", a replacement matching my own comment prose, and a
+> replacement matching the first of two identical blocks. Individually cheap; three times is a
+> signal about the method. A verbatim move of that size wants a focused pass, not a regex pipeline
+> at the tail of a long session, on the page this app is used through most. **The scaffold was
+> removed rather than left as debris** — `git status` on `src/` shows nothing of mine.
+
+### The map, so the next pass is short
+
+| region | lines | destination |
+|---|---|---|
+| `seedRows` · `statedWeeks` · `BLANK` · `paneBody` + seeds ref + reset effect | 911–974 | hook |
+| `paneFacts` | 980–1007 | hook |
+| `paneVerbs` | 1008–1038 | **dissolves** — the hook computes the *disabled* flags from `cardMenu` (pure); the actions become host callbacks |
+| `paneWill` · `noteAddedDate` · `noteAgo` | 1039–1171 | hook |
+| the `buildJourney` argument + body JSX | 1887–1960 | hook |
+| `dockTimeline` | 3208–3320 | hook |
+| `gateAnswers` | 3321–3351 | hook |
+| `dockPrimary` | 3352–3435 | hook (gate half); commit half calls the host |
+
+**`listRowInputs` stays on the page** (it is `TaskList`'s `rowInputs` and the view's sort key) — the
+hook calls the *lib* copy, which is what Pack A made possible.
+
+**The substitutions a verbatim move needs**, all mechanical: `paneCard`→`card`;
+`figureFor`/`listRowInputs`/`recordSweepFor`→ the lib calls bound to this render's data;
+`jumpToSection`/`openFlowCards([card])`/`commitFromPane`/`setDockKey`/`setSnoozeAnchor`/
+`setDismissOpen`/`onNavigate`→ the seven host callbacks.
+
+**The seven callbacks** (Phase 0's finding, unchanged): `jumpToSection`, `openFlow`, `commit`,
+`advance`, `onSnooze`, `onDismiss`, `openQuery`.
+
+---
+
+## FLAGS
+
+**1. Deployed —** no. Condition 4: the noteboard session's uncommitted source, which is also the
+tree's only `tsc` red. Phase 1 is committed, verified and ready to go out with the next clean tree.
+
+**2. Did the hook build from `(card, data)` alone? —** it can; A2 removed the last dependency. Not
+built, for the two reasons above.
+
+**3. `bulkRows` —** unchanged: it travels as an argument to `commit(card, values, bulkRows)`.
+
+**4. The seven callbacks —** as listed. `cardMenu` is pure, so the *disabled* flags need none.
+
+**5. TDZ / shadowing —** Phase 1 introduced no hoisted-function-reads-later-const shape;
+`PANE_ID_PREFIX` is a module constant, above every use. Nothing shadowing found.
+
+**6. The mid-run gate — IT FIRED**, at the Phase 2 boundary. That is the first time it has, and it
+did exactly what A2's pack added it for.
+
+**7. Cross-session —** busy again. HEAD moved from my last commit to `7ae9fe3a` across several
+sessions' work before I began; my history is intact and an ancestor. The noteboard session entered
+the territory mid-run.
