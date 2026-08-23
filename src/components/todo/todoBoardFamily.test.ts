@@ -195,7 +195,12 @@ describe("⚠️ completion goes through the PRIMITIVE, from either path (the un
   });
 
   it("and quickDone still raises the undo toast it always did", () => {
-    const qd = page.slice(page.indexOf("async function quickDone"), page.indexOf("async function quickDone") + 1200);
+  /* ⚠️ `quickDone` LEFT THE PAGE for `useTaskCommit` (Pack C Phase 1) so the calendar can reach
+     the same primitive. The law below is unchanged; only the file holding it moved. */
+    const writer = readFileSync(join(here, "useTaskCommit.tsx"), "utf8");
+    const at = writer.indexOf("async function quickDone");
+    expect(at, "the completion primitive is gone from the committer").toBeGreaterThan(-1);
+    const qd = writer.slice(at, at + 1200);
     expect(qd).toContain("const undo =");
     expect(qd).toContain("flash(");
   });

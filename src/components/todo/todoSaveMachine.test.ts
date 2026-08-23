@@ -118,7 +118,10 @@ describe("save machine P1 — idle → pending → (saved | failed)", () => {
 
 describe("save machine P1 — the tick is a write too (no silent no-op)", () => {
   it("ticking a user task complete surfaces a Try-again toast on failure instead of throwing silently", () => {
-    const qd = sliceBetween(page, "async function quickDone", "function forkNotNowGroup");
+  /* ⚠️ `quickDone` LEFT THE PAGE for `useTaskCommit` (Pack C Phase 1) so the calendar can reach
+     the same primitive. The law below is unchanged; only the file holding it moved. */
+    const writer = readFileSync(join(here, "useTaskCommit.tsx"), "utf8");
+    const qd = sliceBetween(writer, "async function quickDone", "function writeQueryMaterials");
     expect(qd).toContain("try {\n        await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });");
     expect(qd).toContain('flash("Couldn’t mark that done — try again?", { label: "Try again", fn: () => quickDone(c) })');
   });

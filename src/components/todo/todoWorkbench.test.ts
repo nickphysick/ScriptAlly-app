@@ -339,7 +339,18 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
       expect(f).not.toContain("window.confirm(");
     }
     expect(ask).toContain("new Promise<boolean>((resolve) => {");
-    expect((page.match(/await confirmAsk\(/g) ?? []).length).toBe(3); // quick-✓ duplicate · composer discard · delete-note/task confirm
+    /* ⚠️ THE SCOPE IS THREE FILES NOW (Pack C Phase 1): the quick-✓'s duplicate guard went to
+       `useTaskCommit` with the completion primitive, the other two stayed. The law is the one this
+       case exists for — the To-do scope's blocking choices all go through the styled ask, and there
+       are three of them — so it is counted across the scope rather than narrowed to the page. */
+    const writer = readFileSync(join(here, "useTaskCommit.tsx"), "utf8");
+    for (const f of [writer]) {
+      expect(f).not.toContain("window.prompt(");
+      expect(f).not.toContain("window.alert(");
+      expect(f).not.toContain("window.confirm(");
+    }
+    const scope = page + writer;
+    expect((scope.match(/await confirmAsk\(/g) ?? []).length).toBe(3); // quick-✓ duplicate · composer discard · delete-note/task confirm
     expect((flow.match(/await confirmAsk\(/g) ?? []).length).toBe(3); // exit guard + staged + quick guards
     expect(rule(".tdb-askwrap")).toContain("z-index: 90"); // above the flow (50) + toast (60) + modal (70)
     expect(page).toContain("{confirmAskNode}");

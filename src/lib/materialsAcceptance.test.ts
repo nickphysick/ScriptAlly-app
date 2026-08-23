@@ -22,7 +22,13 @@ import {
 } from "./agentMaterials";
 import { QueryStatus } from "../types";
 
-const page = readFileSync(join(__dirname, "..", "components", "todo", "ToDoPage.tsx"), "utf8");
+/**
+ * ⚠️ THE COMMITTER LEFT THE PAGE (Pack C Phase 1) — `writeQueryMaterials`, `commitMaterialsFromPane`,
+ * `commitRecordSweep` and the send arm now live in `useTaskCommit`, so the calendar can reach the
+ * same writers as `/todo`. **The law is unchanged and is the whole point of this suite: no
+ * materials path writes a status.** Only the file holding those functions moved.
+ */
+const page = readFileSync(join(__dirname, "..", "components", "todo", "useTaskCommit.tsx"), "utf8");
 /** ⚠️ comments stripped — this repo's prose names every write it deliberately does NOT perform. */
 const code = page.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 /** ⚠️ fails loudly on a missing anchor rather than silently widening to the rest of the file. */

@@ -23,7 +23,14 @@ import {
 } from "./todoActions";
 import { BoardCard } from "./todoBoard";
 
-const page = readFileSync(join(__dirname, "..", "components", "todo", "ToDoPage.tsx"), "utf8");
+/**
+ * ⚠️ `quickDone` LEFT THE PAGE (Pack C Phase 1) and is now `useTaskCommit`'s. **The law is
+ * unchanged — the completion primitive consults `completionVia` rather than carrying a per-kind
+ * if-ladder of its own** — and this suite reads whichever file holds the primitive. Both are read,
+ * so a branch reappearing on EITHER side fails: the page must not grow one back.
+ */
+const commit = readFileSync(join(__dirname, "..", "components", "todo", "useTaskCommit.tsx"), "utf8");
+const page = commit + readFileSync(join(__dirname, "..", "components", "todo", "ToDoPage.tsx"), "utf8");
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
   key: "k", stream: "do", title: "t", who: "", subtitle: "", due: "", warn: false, snoozes: 0,

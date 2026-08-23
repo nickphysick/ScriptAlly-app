@@ -30,10 +30,16 @@ const page = decls(read("../components/todo/ToDoPage.tsx"));
  * rather than silently reading nothing.
  */
 const hook = decls(read("../components/todo/useTaskPaneSession.tsx"));
+/**
+ * ⚠️ AND THE COMMITTER LEFT IT TOO (Pack C Phase 1) — `commitFromPane` and its eight arms are
+ * `useTaskCommit`'s, so the calendar writes through the same functions `/todo` does. Every law
+ * below is the law it was; the search simply spans the three files the pane's code now occupies.
+ */
+const writer = decls(read("../components/todo/useTaskCommit.tsx"));
 
 function slice(name: string): string {
-  const hits = [page, hook].filter((src) => src.includes(`function ${name}`));
-  expect(hits.length, `${name} not found in the page or the session — the anchor moved`).toBe(1);
+  const hits = [page, hook, writer].filter((src) => src.includes(`function ${name}`));
+  expect(hits.length, `${name} not found in the page, the session or the committer — the anchor moved`).toBe(1);
   const src = hits[0];
   const i = src.indexOf(`function ${name}`);
   const j = src.indexOf("\n  }", i);

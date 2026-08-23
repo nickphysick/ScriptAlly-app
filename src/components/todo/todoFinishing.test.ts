@@ -105,8 +105,13 @@ const pageCode = page.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, ""
     expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-toast { animation: tdbToastFade 160ms ease; } }");
   });
   it("undo reverses via the EXISTING inverses only — the reversible primitives, no new compensators", () => {
+    /* ⚠️ THE INVERSES SPAN TWO FILES NOW (Pack C Phase 1) — the completion primitive's went to
+       `useTaskCommit`, the fork's stayed on the page. The law is unchanged and is the point of the
+       case: undo reverses through the EXISTING inverses, and no compensator was invented. Reading
+       both files keeps that claim whole rather than narrowing it to whichever half is convenient. */
+    const scope = page + readFileSync(join(here, "useTaskCommit.tsx"), "utf8");
     for (const inv of ["undoQueryStatus(q.id, prev", "deleteActivity(acts[0].id)", "snoozedUntil: null, unbumpSnooze: true", "updateUserTask(c.userTaskId!, { done: false })", "mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter"]) {
-      expect(page).toContain(inv);
+      expect(scope).toContain(inv);
     }
   });
   /* ⚠️ RETARGETED (workspace P3): the sage circle and strike-in-place were the CORNER PANEL's
@@ -118,7 +123,13 @@ const pageCode = page.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, ""
     expect(page).not.toContain('className="tdb-cc"');
     expect(page).not.toContain("strikeThenDone(c)");
     expect(page).not.toContain("setStrikeIds(");
-    expect(page).toContain("quickDone(c)"); // the completion + undo toast, unchanged and still here
+    /* ⚠️ THIS CASE NOW SPANS THE SEAM, AND THE HALVES ARE ASSERTED SEPARATELY. "No second piece of
+       strike state" is a claim about THE PAGE and stays pointed at it. "The completion primitive is
+       not dead" is a claim about the primitive, which is `useTaskCommit`'s — and the page must
+       still REACH it, or this would pass on a page that had quietly stopped completing anything. */
+    const writer = readFileSync(join(here, "useTaskCommit.tsx"), "utf8");
+    expect(writer).toContain("quickDone(c)"); // the completion + undo toast, unchanged and still here
+    expect(page).toContain("quickDone(card)"); // and the page still reaches it
     /* ⚠️ THE STRIKE'S HOST CHANGED TWICE; THE PRIMITIVE NEVER DID. The strike-in-place moved from
        the retired corner panel to the Today page (workspace P3), and Today is retired in turn
        (tasks-consolidation P1, 9 Aug). What this test protects is the half above — no second

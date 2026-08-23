@@ -78,10 +78,15 @@ describe("B3 — the duplicate-send guard wires all three write moments (source 
     const fq = flow.indexOf("priorQuick && !(await confirmAsk");
     expect(fq).toBeGreaterThan(-1);
     expect(fq).toBeLessThan(flow.indexOf("await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path"));
-    expect(page).toContain("const prior = priorSameTypeSend(activitiesRef.current, q.id");
-    const pq = page.indexOf("prior && !(await confirmAsk");
+    /* ⚠️ THE BOARD'S HALF OF THE GUARD MOVED, THE FLOW'S DID NOT (Pack C Phase 1). The quick-✓ is
+       `quickDone`'s and went to `useTaskCommit`; `FocusFlow`'s own guard above is untouched. The
+       law is the one this case was written for and is unchanged: the guard is consulted BEFORE the
+       one write path, and declining returns without writing. */
+    const writer = readFileSync(join(here, "useTaskCommit.tsx"), "utf8");
+    expect(writer).toContain("const prior = priorSameTypeSend(activitiesRef.current, q.id");
+    const pq = writer.indexOf("prior && !(await confirmAsk");
     expect(pq).toBeGreaterThan(-1);
-    expect(pq).toBeLessThan(page.indexOf("await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path"));
+    expect(pq).toBeLessThan(writer.indexOf("await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path"));
   });
   it("R&R is passed through as isResubmit at every site (never guarded); no new state anywhere", () => {
     expect((flow.match(/action\.markKind === "resubmit"\)/g) ?? []).length).toBeGreaterThanOrEqual(2);
