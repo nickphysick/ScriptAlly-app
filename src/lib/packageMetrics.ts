@@ -175,6 +175,25 @@ export function avgReplyDays(pkgId: string, queries: Query[]): number | null {
 export const UNFILLED_SLOT = "";
 export const isSlotFilled = (id: string | null | undefined): id is string => !!id && id !== UNFILLED_SLOT;
 
+/**
+ * ⚠️ THE FREE-TEXT "OTHER" LINE IS NOT A SLOT, AND THIS IS THE ONLY THING IT SHARES WITH ONE — a
+ * length ceiling, matched to `isValidPackage`'s `size() <= 512` so the input cannot compose a write
+ * the rule will refuse. Everything else about it is deliberately different: it holds prose rather
+ * than a version id, it is ABSENT when empty rather than `""`, and nothing aggregates it.
+ *
+ * ⚠️ IT MUST NEVER JOIN `PACKAGE_SLOTS` OR ANY per-material DERIVATION. "Requests by material"
+ * compares packages by the version each one used; free text has no version to compare, so counting
+ * it would either invent an identity for two writers' differently-worded outlines or collapse them
+ * into one. The absence is the design, not a gap — see `SubmissionPackage.otherMaterials`.
+ */
+export const OTHER_MAX = 512;
+
+/** The package's free-text line, trimmed, or `null` when there is none to show. */
+export const otherMaterialsText = (pkg: { otherMaterials?: string }): string | null => {
+  const t = pkg.otherMaterials?.trim();
+  return t ? t : null;
+};
+
 /** Active packages that reference a given component version (any of the three slots). */
 export function packagesUsingVersion(versionId: string, packages: SubmissionPackage[]): SubmissionPackage[] {
   return packages.filter(

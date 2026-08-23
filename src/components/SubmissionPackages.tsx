@@ -181,6 +181,10 @@ export const SubmissionPackages: React.FC = () => {
       queryLetterVersionId: d.letterId,
       synopsisVersionId: d.synopsisId,
       samplePagesVersionId: d.sampleId,
+      /* ⚠️ ALWAYS SENT, EVEN WHEN BLANK — `updatePackage` turns blank into `deleteField()`, which is
+         how the writer CLEARS the line. Omitting the key here instead would make a cleared field
+         indistinguishable from an untouched one, and the old text would survive the edit. */
+      otherMaterials: d.otherMaterials,
     };
     if (pkgEditing) {
       await updatePackage(pkgEditing.id, fields);

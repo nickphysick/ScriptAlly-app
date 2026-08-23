@@ -19,7 +19,7 @@
  * Pure: no Firestore, no clock of its own (`now` is injected), no React.
  */
 import { ManuscriptVersion, SubmissionPackage, Query, ComponentType, RecordStatus } from "../types";
-import { packageMetrics, isRequest, isSlotFilled, packagesUsingVersion } from "./packageMetrics";
+import { packageMetrics, isRequest, isSlotFilled, otherMaterialsText, packagesUsingVersion } from "./packageMetrics";
 import { TYPE_META, BUILDER_TYPES, SLOT_FIELD } from "../components/packages/typeMeta";
 import { versionMeta } from "./packageMetrics";
 import { agoLabel, daysBetween } from "./elapsed";
@@ -129,8 +129,20 @@ export function resolveSlot(
 export interface PackageTile {
   id: string;
   name: string;
-  /** Three rows, always — an empty sample says "Not included" rather than vanishing. */
+  /** Three rows, always — an empty slot says "Not included" rather than vanishing. */
   slots: TileSlot[];
+  /**
+   * ⚠️ THE FREE-TEXT LINE, AND IT IS `null` RATHER THAN A FOURTH `TileSlot` ON PURPOSE. Giving it a
+   * `TileSlot` would put it in `slots`, and everything that walks `slots` would then treat prose as
+   * a material. It is a different TYPE of thing, so it gets a different field, and the type system
+   * carries the distinction instead of a convention nobody can see.
+   *
+   * ⚠️ AND IT OMITS ITSELF. Unlike the three slots, an absent Other renders NOTHING — no row, no
+   * `Not included`. The three rows always render because "considered and left out" is a fact about
+   * a package's shape; there is no equivalent fact about free text, and a permanent empty `Other`
+   * row would make every package look unfinished.
+   */
+  other: string | null;
   sent: number;
   replies: number;
   requests: number;
@@ -164,6 +176,8 @@ export function packageTiles(
         label: TYPE_META[t].label,
         ...resolveSlot(p[SLOT_FIELD[t]], byId),
       })),
+      /* ⚠️ NOT IN `slots`. See the field's note — prose is not a material. */
+      other: otherMaterialsText(p),
       sent: m.sent,
       replies: m.responses,
       requests: mine.filter(isRequest).length,

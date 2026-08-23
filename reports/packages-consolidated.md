@@ -271,6 +271,150 @@ under it. It is a `pkgf-` class, a different family from the one D-A6 names, so 
 rather than deleted — widening a housekeeping sweep into a neighbouring family without being asked
 is how a small commit becomes an unreviewable one. One line to remove when someone wants it.
 
+---
+
+## Part B — flexible package slots
+
+### D-B1 · only the covering letter is required
+
+**The rules were never the constraint.** `isValidPackage` already permitted `""` in all three slots;
+what made a synopsis compulsory was the *builder*, where sample had a stated `Not included` and
+synopsis did not. A synopsis could therefore only become empty **by accident** — the writer had
+saved none, and `synopses[0]?.id` fell through to `""`. A slot empty because nobody could say
+otherwise is not the same fact as a slot the writer left out, and the card cannot tell them apart
+afterwards.
+
+**⚠️ The letter requirement is enforced on CREATE only, and that split is the important decision.**
+`isValidPackage` gates **update** as well as create. Requiring a filled letter inside it would make
+every package written before this change **permanently unupdatable — and therefore un-archivable and
+unrepairable, silently**, because the writer's only route to fixing it is an update. Legacy
+letterless packages are producible today (build one with no saved letters and the select has no
+options). So:
+
+- `firestore.rules` create rule: `&& incoming().queryLetterVersionId.size() >= 1`
+- `isValidPackage`: unchanged on the letter — all three keys **present**, none required **filled**
+- the builder: Save is disabled *and states why* — `Save a covering letter first — every package
+  needs one.`
+
+A disabled button with no sentence teaches nothing, and without the client-side refusal the write
+would come back from three layers away as `Database transaction error`.
+
+**A second fabricated-value fault, fixed in passing:** the builder seeded `synopsisId` from
+`synopses[0]` **even when editing**, so opening a letter-only package and pressing Save would have
+silently re-filled the slot the writer had chosen to leave out. Only a *new* package now takes a
+default. Same family as `completionVia`'s writing default and `RemindChoice`'s fabricated lead.
+
+### D-B2 · one free-text "Other" line — additive, and absent when empty
+
+`SubmissionPackage.otherMaterials?: string` (R4: there was no free-text field).
+
+**Both halves of the rules change, or the write is silently denied** — the recorded fault class:
+
+```
+isValidPackage:  && (!data.keys().hasAny(['otherMaterials'])
+                     || (data.otherMaterials is string && data.otherMaterials.size() <= 512))
+update allowlist: hasOnly([… 'samplePagesVersionId', 'otherMaterials', 'status'])
+```
+
+**Empty means ABSENT, never `""`** — a stored empty string would claim the writer answered the
+question. `addPackage` omits the key; `updatePackage` converts blank to `deleteField()`. That
+conversion lives in `db.tsx`, not in the callers, so the two write paths cannot drift — and the
+caller therefore **always sends the key**, because omitting it would make "cleared" indistinguishable
+from "untouched" and the old text would survive the edit.
+
+`OTHER_MAX = 512` sits beside `UNFILLED_SLOT` in `packageMetrics.ts` and is asserted **equal to the
+rule's ceiling**, so the input cannot compose a write the rule will refuse.
+
+### D-B3 · it renders in Caveat, and nothing counts it — F-N
+
+**It is not a fourth `TileSlot`, and that is a type-level decision rather than a convention.**
+`PackageTile.other: string | null` sits *outside* `slots`, because everything that walks `slots`
+would otherwise treat prose as a material. **It also omits itself**: the three slot rows always
+render (`Not included` states that a slot was considered and left out — a fact about the package's
+shape), but there is no equivalent fact about free text, and a permanent empty `Other` row would make
+every package look unfinished.
+
+Set in **Caveat, burgundy, `font-style: normal`** (`.pkgb-sln--other`) — the hand the app already
+uses for the writer's own words. It reads as something *typed* rather than something *chosen*.
+
+**F-N — confirmed, and asserted against a derivation rather than a list.** A hand-written "these
+modules must not mention it" list would go green the day someone adds a fourth derivation. Instead
+the contributing set is **read from `PACKAGE_SLOTS`** and the claim is that `otherMaterials` is not
+in it — so adding a real slot is caught, and so is this one being quietly promoted. Plus:
+`packageItems` yields nothing for it, and `packageMetrics` / `packageAnalytics` / `packageTracking` /
+`packageAttach` are asserted to contain **zero** field reads (two allowed in `packageMetrics`, which
+defines the accessor).
+
+### D-B4 / D-B5 · builder copy and the composition line
+
+Hint takes the ref's wording verbatim, and **"one of each" had to go** — it is no longer true.
+Labels carry `Required` / `Optional` / `Optional · free text` in a `.pkgf-opt` tag that is quieter
+than the label beside it: "Optional" is the ordinary case on three of four rows, and a tag with any
+weight would read as a caution on every one of them. The composition line filters through
+`isSlotFilled`, so an unfilled slot is **absent** rather than printed as `Not included` — and `Other`
+is not in it either, because the line lists what the package *sends* and free text is a note about
+the package, not one of its contents. Empty throughout reads `nothing yet`.
+
+### ⚠️ My own probe had the exact substring fault this repo documents
+
+The F-N check first counted `otherMaterials` as a substring — so **the accessor's own name,
+`otherMaterialsText`, scored as a read of the field it exists to wrap**, and the case went red on
+correct code. Same shape as `tdk-q` matching `tdk-quiet`. Bounded to
+`/otherMaterials(?![A-Za-z0-9_])/`. Recorded because the trap is documented, I had just re-read it,
+and I still wrote it — a paragraph is not protection.
+
+**And one fake knob, caught before commit:** `.pkgb-sln--other` was first written
+`font-family: var(--font-hand, 'Caveat', cursive)`. No `--font-hand` exists anywhere in `src`, so the
+rule would have rendered perfectly while advertising a knob that was never there — the
+"parameterised and is not" class. The house idiom is the family directly, and a lock now forbids the
+token.
+
+### Locks — `src/lib/packageShapes.test.ts` (26 cases)
+
+Behavioural where behaviour is the claim (`otherMaterialsText`, `packageTiles`, `packageItems`),
+source where the claim is about a rule or a piece of copy. Slice anchors are asserted before use.
+
+**Proven red before believed** — two breaks, both restored:
+- pushing `Other` into `slots` → *"NEVER puts Other in slots"* fails;
+- reinstating `size() >= 1` inside `isValidPackage` → *"isValidPackage does NOT require a filled
+  letter"* fails.
+
+### Gates
+
+```
+tsc --noEmit   exit 0, 0 lines
+vite build     exit 0, no error/[WARNING] lines
+vitest run     381 files, 6513 passed, 3 skipped   (baseline 379 / 6483)
+```
+
+### ⚠️ RULES ARE EDITED AND NOT DEPLOYED — what that means on dev today
+
+This session deploys nothing (global rule 2), so `firestore.rules` in the tree is ahead of both
+databases. Until a `firestore:rules` deploy lands:
+
+| path | dev/prod behaviour now |
+|---|---|
+| **create** a package with `Other` filled | **works** — the old `isValidPackage` does not restrict extra keys on create. |
+| **update** a package to add, change or clear `Other` | **SILENTLY DENIED** — the old `hasOnly` allowlist has no `otherMaterials`, and a denied update surfaces as nothing happening. |
+| letter-required-on-create | **not enforced** yet — the builder enforces it client-side regardless. |
+
+**Dev deploy is Claude's to run when asked** (CLAUDE.md, 18 Aug) — one command, naming its config
+and project, with the before/after checks that section specifies. It was **not** run here because
+this prompt forbids it. **Prod rules remain Nick's**, and this adds a sixth item to that queue.
+
+### Found in passing — a live tension with a CLAUDE.md law, not changed
+
+`TYPE_META[ComponentType.SAMPLE_PAGES].label` is `"Sample pages"`, hardcoded, while the covering
+letter goes through `materialLabel(…)`. CLAUDE.md states as a **correctness rule** that
+`SAMPLE_PAGES` reads *"Opening sample", never "Sample pages"* — because three unit choices
+(pages/chapters/words) map to that one `ComponentType`, so the label asserts a unit the data does not
+carry. The builder therefore contradicts the law on every render.
+
+Left alone deliberately: `package-shapes-amendment.html` says "Sample pages" too, this is app copy
+rather than this brief's subject, and the argument is weaker here than on the agent Materials tab —
+in the builder you are choosing a saved version whose own `versionName` carries the specifics. **A
+decision for Nick**, one constant either way.
+
 ## Flags
 
 | flag | state |

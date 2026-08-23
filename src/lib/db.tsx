@@ -261,7 +261,13 @@ interface DbContextType {
 
   // Package Actions
   addPackage: (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">) => Promise<{ success: boolean; error?: string; id?: string }>;
-  updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId">>) => Promise<void>;
+  /**
+   * ⚠️ `otherMaterials` IS PASSED AS A PLAIN STRING AND UNSET BY THIS FUNCTION, not by the caller.
+   * Blank means "the writer cleared it", which on Firestore is `deleteField()` and never `""` — a
+   * stored empty string would be a claim that the question was answered. Keeping that conversion
+   * here means the two callers cannot disagree about what empty means.
+   */
+  updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials">>) => Promise<void>;
   retirePackage: (id: string) => Promise<void>;
   /**
    * Delete a package outright. Returns `false` WITHOUT writing when any query was sent with it.
@@ -1596,13 +1602,19 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
 
     const id = "pkg-" + Math.random().toString(36).substr(2, 9);
+    /* ⚠️ A BLANK `otherMaterials` IS OMITTED, NOT WRITTEN. Firestore rejects `undefined` outright,
+       and a stored `""` would be indistinguishable from a writer who typed nothing on purpose —
+       `isValidPackage` therefore gates the key with `hasAny`, and absence is the honest encoding. */
+    const other = p.otherMaterials?.trim();
     const newPkg: SubmissionPackage = {
       ...p,
+      ...(other ? { otherMaterials: other } : {}),
       id,
       userId: currentUser.id,
       status: "Active",
       createdDate: new Date().toISOString()
     };
+    if (!other) delete (newPkg as { otherMaterials?: string }).otherMaterials;
 
     try {
       await setDoc(doc(db, "users", currentUser.id, "packages", id), newPkg);
@@ -1615,11 +1627,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const updatePackage = async (
     id: string,
-    fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId">>,
+    fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials">>,
   ) => {
     if (!currentUser) return;
+    /* ⚠️ CLEARING THE FREE-TEXT LINE IS AN UNSET, NOT AN EMPTY STRING. The caller sends what the
+       input holds; the conversion lives here so both callers cannot drift. `otherMaterials` is the
+       only unsettable field on a package — the three version slots use `""` as their sentinel and
+       `deleteField()` on one of THOSE would fail `isValidPackage`, which requires the key present. */
+    const payload: Record<string, unknown> = { ...fields };
+    if ("otherMaterials" in fields) {
+      const t = fields.otherMaterials?.trim();
+      payload.otherMaterials = t ? t : deleteField();
+    }
     try {
-      await updateDoc(doc(db, "users", currentUser.id, "packages", id), fields);
+      await updateDoc(doc(db, "users", currentUser.id, "packages", id), payload);
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
     }

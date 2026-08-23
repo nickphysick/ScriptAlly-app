@@ -121,9 +121,20 @@
 .pkgf-crumb:hover { color: var(--pkg-burg); }
 
 .pkgf-fld { margin-bottom: 14px; }
+/* ⚠️ `baseline`, NOT `center`, AND BOTH CHILDREN ARE TEXT. The label and its Required/Optional tag
+   are different sizes; centring them would leave the smaller one floating off the label's baseline.
+   (This row is safe to baseline precisely because it holds no image — the app-shell rule about
+   images having no baseline is about mixed rows, and this one never gains one.) */
 .pkgf-fld label {
-  display: block; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--pkg-ink-soft); margin-bottom: 6px;
+}
+/* ⚠️ IT STATES THE RULE, IT DOES NOT WARN ABOUT IT. Quieter than the label it sits beside — smaller,
+   looser, and in the muted ink — because "Optional" is the ordinary case on three of the four rows
+   and a tag with any weight would read as a caution on every one of them. */
+.pkgf-opt {
+  font-size: 8px; letter-spacing: 0.1em; color: var(--pkg-muted); flex: none;
 }
 .pkgf-fld input[type="text"],
 .pkgf-fld textarea,

@@ -78,6 +78,21 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
                     </span>
                   </span>
                 ))}
+                {/* ⚠️ THE FREE-TEXT LINE, AND ONLY WHEN IT IS FILLED (D-B3). The three rows above
+                    always render, because "considered and left out" is a fact about the package's
+                    shape. There is no such fact about free text, so an empty Other is simply not a
+                    row — a permanent blank one would make every package look unfinished.
+
+                    ⚠️ AND IT IS VISUALLY A NOTE, NOT A FOURTH MATERIAL. Caveat, in burgundy: the
+                    same hand the page already uses for the writer's own words. It reads as
+                    something typed rather than something chosen, which is exactly what it is — and
+                    it is why nothing counts it, ranks it, or offers it in a dropdown. */}
+                {t.other && (
+                  <span className="pkgb-slot">
+                    <span className="pkgb-slt">Other</span>
+                    <span className="pkgb-sln pkgb-sln--other">{t.other}</span>
+                  </span>
+                )}
               </div>
               <div className="pkgb-pkgfoot">
                 {"idle" in foot ? (

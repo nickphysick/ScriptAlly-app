@@ -431,6 +431,26 @@
    lost a letter looked like one deliberately built without one. */
 .pkgb-sln--gone { color: var(--pkg-burg); font-weight: 400; font-style: italic; }
 
+/* ⚠️ CAVEAT, BECAUSE IT IS THE WRITER'S OWN WORDS AND NOT A MATERIAL. The three slots above name
+   saved versions the writer PICKED; this line is prose they TYPED. The hand says which is which
+   before the label does, and it is the reason nothing aggregates this line: there is no version
+   behind it to compare, count or rank. Ref: package-shapes-amendment.html `.sl-n.other`.
+
+   ⚠️ NOT `font-style: italic` ON TOP. Caveat is already a hand; italicising it reads as a second
+   emphasis on text that is not being emphasised — it is being attributed. */
+.pkgb-sln--other {
+  /* ⚠️ THE FAMILY DIRECTLY, NOT `var(--font-hand, …)`. No such token exists, and a `var()` whose
+     property is undefined falls back silently — so the rule would have LOOKED parameterised, worked
+     perfectly, and sent the next reader hunting for a knob that was never there. `'Caveat', cursive`
+     is what every other hand-set line in this app declares. */
+  font-family: 'Caveat', cursive;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--pkg-burg);
+  font-style: normal;
+  line-height: 1.35;
+}
+
 .pkgb-pkgfoot {
   border-top: 1px solid var(--pkgo-hairline-soft);
   padding-top: 9px; margin-top: auto;

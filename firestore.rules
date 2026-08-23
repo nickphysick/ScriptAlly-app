@@ -182,9 +182,20 @@ service cloud.firestore {
         && data.manuscriptId is string && data.manuscriptId.size() <= 128
         && data.userId == userId
         && data.packageName is string && data.packageName.size() >= 1 && data.packageName.size() <= 256
+        // ⚠️ ALL THREE KEYS PRESENT, NONE OF THEM REQUIRED TO BE FILLED HERE. `""` is the unfilled
+        // sentinel and omitting a key fails outright. "Only the covering letter is required" is
+        // enforced on CREATE (see the create rule) and in the builder — NOT here, because this
+        // validator also gates UPDATE, and a package written before that rule may hold `""` in the
+        // letter slot. Requiring it on update would make every such record permanently unupdatable,
+        // and therefore un-archivable and unrepairable — silently. Letter-only and
+        // letter-plus-synopsis are real submission shapes; a letterless legacy record is a shape we
+        // have to let the writer fix.
         && data.queryLetterVersionId is string && data.queryLetterVersionId.size() <= 128
         && data.synopsisVersionId is string && data.synopsisVersionId.size() <= 128
         && data.samplePagesVersionId is string && data.samplePagesVersionId.size() <= 128
+        // ⚠️ FREE TEXT, OPTIONAL, AND ABSENT WHEN EMPTY. `hasAny` rather than `is string` because an
+        // unanswered question has no key at all; a stored `""` would claim the writer answered it.
+        && (!data.keys().hasAny(['otherMaterials']) || (data.otherMaterials is string && data.otherMaterials.size() <= 512))
         && data.status is string && (data.status == 'Active' || data.status == 'Retired')
         && data.createdDate is string && data.createdDate.size() <= 64;
     }
@@ -624,9 +635,13 @@ service cloud.firestore {
       match /packages/{packageId} {
         allow get, delete: if isOwner(userId) && isValidId(packageId);
         allow list: if isOwner(userId);
-        allow create: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId);
+        // ⚠️ THE LETTER IS REQUIRED ON CREATE AND ONLY ON CREATE. Nothing new may be written without
+        // a covering letter; an existing record that predates the rule stays repairable. Putting it
+        // inside isValidPackage would apply it to update too — see the note there.
+        allow create: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId)
+          && incoming().queryLetterVersionId.size() >= 1;
         allow update: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'status'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status'])
         );
       }
 

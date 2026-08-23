@@ -369,9 +369,31 @@ export interface SubmissionPackage {
   manuscriptId: string;
   userId: string;
   packageName: string;
+  /**
+   * The three version slots. `""` is the UNFILLED sentinel — never an absent key, because
+   * `isValidPackage` requires all three to be present. Single source: `UNFILLED_SLOT` /
+   * `isSlotFilled` in `lib/packageMetrics.ts`.
+   *
+   * ⚠️ ONLY THE COVERING LETTER IS REQUIRED. Letter-only and letter-plus-synopsis are real
+   * submission shapes, so the other two may be `""` by the writer's stated choice. The rule
+   * enforces `queryLetterVersionId.size() >= 1`; the other two only enforce the key's presence.
+   */
   queryLetterVersionId: string;
   synopsisVersionId: string;
   samplePagesVersionId: string;
+  /**
+   * ⚠️ FREE TEXT, AND DELIBERATELY NOT A FOURTH SLOT. One line per package for whatever an agency
+   * asks for that is not one of the three above — a chapter outline, a pitch document, a writing CV.
+   * It is prose the writer typed, NOT a reference to a saved `ManuscriptVersion`, so it cannot be
+   * compared between packages, counted, ranked, or offered in a dropdown. Everything that
+   * aggregates on this page keys off a version id; this has none, and that is why "Requests by
+   * material" can never include it. Rendered in Caveat and only when filled, so it reads as a note
+   * rather than as a fourth material.
+   *
+   * ⚠️ ABSENT WHEN EMPTY — omitted on create, `deleteField()` on update. Firestore rejects
+   * `undefined`, and a stored `""` would be a claim that the writer answered the question.
+   */
+  otherMaterials?: string;
   status: RecordStatus;
   createdDate: string; // ISO String
 }
