@@ -17,7 +17,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, User, UserTask } from "../../types";
 import { StatusDot } from "../StatusDot";
-import { goalBlockGap, goalFigure, GoalPeriod, goalMeter, goalState } from "../../lib/oneScreen";
+import { AnchoredPanel } from "../todo/AnchoredPanel";
+import { GoalTargetSheet } from "./GoalTargetSheet";
+import { appendGoalEntry, CADENCE_TAG, formatReached, londonDay, unsetLine } from "../../lib/queryingGoals";
+import type { GoalProgress } from "../../lib/queryingGoals";
+import type { GoalCadence } from "../../types";
+import "./queryingGoals.css";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { OneScreenMark } from "./OneScreenMark";
@@ -328,19 +333,30 @@ export interface OneScreenRailProps {
   activeManuscript: Manuscript | null;
   onNavigate: (tab: string, sub?: string) => void;
   updateUserProfile: (fields: Partial<User>) => Promise<void>;
+  /**
+   * ⚠️ DERIVED ABOVE THIS COMPONENT, AND THE RAW SET IS DELIBERATELY NOT PASSED DOWN. The goal is
+   * per WRITER, across every manuscript, while everything else the rail receives is scoped to the
+   * manuscript in the chip — `queries`, `activities`, all of it. Handing this component an
+   * unscoped list beside those would be an invitation to scope it by mistake, and the resulting
+   * bug — a count that drops when you switch books — is one nobody would think to check for.
+   */
+  goal: GoalProgress;
   now: Date;
 }
 
 export const OneScreenRail: React.FC<OneScreenRailProps> = ({
   expanded, setExpanded, loading, queries, agents, manuscripts, activities, currentUser,
-  activeManuscript, onNavigate, updateUserProfile, now,
+  activeManuscript, onNavigate, updateUserProfile, goal, now,
 }) => {
-  const [editingGoal, setEditingGoal] = useState(false);
-  const [goalDraft, setGoalDraft] = useState({ target: 25, period: "quarter" as GoalPeriod });
+  /* ⚠️ TWO PIECES OF STATE, AND NEITHER IS A DRAFT. The old inline editor kept a `goalDraft` in
+     the card because the card WAS the editor; the sheet owns its own working values now, so all
+     this holds is whether a surface is open. */
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const moreRef = useRef<HTMLButtonElement>(null);
   const actvRef = useRef<HTMLDivElement>(null);
   const expBtnRef = useRef<HTMLButtonElement>(null);
 
-  const goal = goalState(queries, currentUser?.goalTarget, currentUser?.goalPeriod, now);
   const ms = activeManuscript ?? manuscripts[0] ?? null;
   const rows = useMemo(() => feedRows(activities, queries, agents, manuscripts, now), [activities, queries, agents, manuscripts, now]);
 
@@ -368,15 +384,22 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
     };
   }, [expanded, setExp]);
 
-  const saveGoal = async () => {
-    const target = Math.max(1, Math.min(999, Math.round(goalDraft.target)));
-    await updateUserProfile({ goalTarget: target, goalPeriod: goalDraft.period });
-    setEditingGoal(false);
+  /**
+   * ⚠️ EVERY CHANGE APPENDS. Setting a target, changing one and removing one are the same write
+   * with a different entry — which is what keeps a completed period readable with the target that
+   * was actually in force while it ran. `appendGoalEntry` is the single place that shape is built.
+   */
+  const writeGoal = async (next: { target: number; cadence: GoalCadence } | null) => {
+    await updateUserProfile({ queryingGoals: appendGoalEntry(currentUser?.queryingGoals, next, now) });
   };
 
-  /* ⚠️ ONE BLOCK PER QUERY — the meter and the {done}/{target} beside it are the same two
-     numbers, so they cannot disagree. Above the cap it turns proportional and says so. */
-  const meter = goalMeter(goal?.done ?? 0, goal?.target ?? 0);
+  const reached = goal.target !== null && goal.count >= goal.target && goal.reachedOn !== null;
+  /**
+   * ⚠️ THE ENTRANCE IS GATED ON THE DAY, NOT ON THE MOUNT. `reachedOn` is derived, so nothing is
+   * stored to remember the animation ran — and a card that replayed its moment on every visit to
+   * the dashboard would turn a pleasant thing into an irritating one within a day.
+   */
+  const justReached = reached && goal.reachedOn === londonDay(now);
 
   return (
     <div className={`os-colR${expanded ? " os-rail-expanded" : ""}`}>
@@ -385,68 +408,128 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
         {/* ⚠️ NO BAND AND NO MARK BOX HERE — both were tried and rejected. The goals header is a
             LABEL, not an instrument: it names the card and gets out of the way, and the band gave
             it a weight the card does not carry. A bare flex row inside the card's own padding —
-            title, status word right-aligned, line and meter beneath. */}
+            title, status word right-aligned, line and meter beneath.
+
+            ⚠️ RE-CONFIRMED 23 Aug, IN THE BROWSER, against a local build AND deployed dev: the
+            card renders bare on both. A banded version of it exists only in a preview harness,
+            which is what `cfccf325` says in as many words — "the band was never applied to it in
+            code — only in the preview harness". The goals pack arrived asking for the band back
+            and the measurement is why it did not get it. Two locks guard this. */}
         <div className="os-goal-r1">
           {/* ⚠️ BARE, and no transform on this wrapper — see the blend traps in oneScreen.css. */}
           <span className="os-mark-il os-goalmark" aria-hidden="true"><img src={targetMark} alt="" /></span>
           <h2>Querying goals</h2>
-          {goal && !editingGoal && (
-            <button type="button" className="os-goal-num" title="Adjust the goal" onClick={() => { setGoalDraft({ target: goal.target, period: goal.period }); setEditingGoal(true); }}>
-              {goalFigure(goal.done, goal.target)}
-            </button>
-          )}
-        </div>
-        {editingGoal || !goal ? (
-          editingGoal ? (
-            <div className="os-goal-edit">
-              <label>
-                <span className="os-lbl">Target</span>
-                <input type="number" min={1} max={999} value={goalDraft.target}
-                  onChange={(e) => setGoalDraft((d) => ({ ...d, target: Number(e.target.value) }))} />
-              </label>
-              <label>
-                <span className="os-lbl">Period</span>
-                <select value={goalDraft.period} onChange={(e) => setGoalDraft((d) => ({ ...d, period: e.target.value as GoalPeriod }))}>
-                  <option value="quarter">This quarter</option>
-                  <option value="month">This month</option>
-                  <option value="year">This year</option>
-                </select>
-              </label>
-              <div className="os-goal-btns">
-                <button type="button" className="os-btn-mini" onClick={saveGoal}>Save</button>
-                <button type="button" className="os-btn-mini ghost" onClick={() => setEditingGoal(false)}>Cancel</button>
-              </div>
-            </div>
-          ) : (
+          {/* the cadence and the ⋯ appear only once there is a target for them to be about */}
+          {goal.cadence !== null && (
             <>
-              {/* §9: no goal yet — the ghost meter and the invitation, never fake progress */}
-              <div className="os-goal-t">Set a target for the quarter</div>
-              <div className="os-blocks ghost" aria-hidden="true" style={{ gap: goalBlockGap(24) }}>
-                {Array.from({ length: 24 }, (_, i) => <i key={i} />)}
-              </div>
-              <button type="button" className="os-btn-mini ghost" onClick={() => { setGoalDraft({ target: 25, period: "quarter" }); setEditingGoal(true); }}>
-                Set a goal
+              <span className="os-goal-cad">{CADENCE_TAG[goal.cadence]}</span>
+              <button
+                ref={moreRef}
+                type="button"
+                className="os-goal-more"
+                aria-label="Change this target"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((v) => !v)}
+              >
+                ⋯
               </button>
             </>
-          )
+          )}
+        </div>
+
+        {goal.target === null ? (
+          /* ⚠️ NO ILLUSTRATION AND NO PROMPT TO ENGAGE. The line states a fact the writer already
+             owns; the button is there if they want it. Empty-state art here would sell a feature
+             on a card whose whole job is to report. */
+          <>
+            <div className="os-goal-line">{unsetLine(goal.count)}</div>
+            <button type="button" className="os-goal-set" onClick={() => setSheetOpen(true)}>
+              Set a target
+            </button>
+          </>
+        ) : reached ? (
+          /* ⚠️ THE METER IS ABSENT, NOT FULL — at or past the target it could only read 100%, so
+             it states nothing and the illustration takes its place. The count keeps climbing and
+             the date holds, so this stays true for the rest of the period rather than ageing into
+             a stale cheer. */
+          <div className="os-goal-moment">
+            {/* ⚠️ A DECLARED PLACEHOLDER. `Goal_Reached.png` does not exist; a second copy of the
+                target icon would read as finished work. See design-refs/goals/README.md. */}
+            <div className={`os-goal-illph${justReached ? " os-goal-fade" : ""}`} aria-hidden="true">
+              <span>Illustration</span>
+              <span>104 × 104</span>
+            </div>
+            <div className="os-goal-count">
+              <span className="os-goal-n">{goal.count}</span>
+              <span className="os-goal-of">of {goal.target}</span>
+            </div>
+            <div className="os-goal-sub">Queries sent · {goal.periodLabel}</div>
+            <div className="os-goal-reached">Target reached {formatReached(goal.reachedOn!)}</div>
+          </div>
         ) : (
           <>
-            <div className="os-goal-t">{goal.sentence}</div>
+            <div className="os-goal-count">
+              <span className="os-goal-n">{goal.count}</span>
+              <span className="os-goal-of">of {goal.target}</span>
+            </div>
+            <div className="os-goal-sub">Queries sent · {goal.periodLabel}</div>
+            {/* ⚠️ ONE FILL COLOUR AT EVERY WIDTH — see queryingGoals.css. No notch, no pace line. */}
             <div
-              className="os-blocks"
+              className="os-goal-meter"
               role="img"
-              style={{ gap: goalBlockGap(meter.blocks) }}
-              aria-label={meter.proportional
-                ? `${goal.done} of ${goal.target} — the meter shows the share completed`
-                : `${goal.done} of ${goal.target} queries sent`}
+              aria-label={`${goal.count} of ${goal.target} queries sent`}
             >
-              {Array.from({ length: meter.blocks }, (_, i) => (
-                <i key={i} className={i < meter.filled ? "f" : undefined} style={i < meter.filled ? { animationDelay: `${i * 0.02}s` } : undefined} />
-              ))}
+              <i style={{ width: `${Math.min(100, (goal.count / goal.target) * 100)}%` }} />
             </div>
           </>
         )}
+
+        {/* ⚠️ IT DRAWS IN EVERY STATE, INCLUDING THE UNSET ONE. What you sent last month is true
+            whether or not you have declared a target — the strip is not a goal artefact. */}
+        {goal.history.length > 0 && (
+          <div className={`os-goal-hist${reached ? " mid" : ""}`}>
+            {goal.history.map((h, i) => (
+              <React.Fragment key={h.label}>
+                {i > 0 && <span className="os-goal-dot">·</span>}
+                <span>{h.label} <b>{h.count}</b></span>
+              </React.Fragment>
+            ))}
+          </div>
+        )}
       </OneScreenPanel>
+
+      {/* ⚠️ ANCHORED THROUGH THE SHARED PANEL, never a locally positioned popover — `placeMenu`
+          owns right-alignment, viewport clamping, flip-above, Escape, outside-press and returning
+          focus to the trigger. Both edit rows open the SAME sheet, pre-filled: "change the target"
+          and "change the cadence" are one decision seen from two sides. */}
+      {menuOpen && moreRef.current && (
+        <AnchoredPanel
+          anchor={moreRef.current}
+          ariaLabel="Change this target"
+          onClose={(back) => { setMenuOpen(false); if (back) moreRef.current?.focus(); }}
+        >
+          <button type="button" role="menuitem" className="m-i"
+            onClick={() => { setMenuOpen(false); setSheetOpen(true); }}>Change target</button>
+          <button type="button" role="menuitem" className="m-i"
+            onClick={() => { setMenuOpen(false); setSheetOpen(true); }}>Change cadence</button>
+          <div className="m-rule" />
+          {/* ⚠️ REMOVAL APPENDS A NULL ENTRY — it does not delete the list, so the history strip
+              survives and a past period keeps the target it ran under. */}
+          <button type="button" role="menuitem" className="m-i"
+            onClick={() => { setMenuOpen(false); void writeGoal(null); }}>Remove target</button>
+        </AnchoredPanel>
+      )}
+
+      {sheetOpen && (
+        <GoalTargetSheet
+          initialTarget={goal.target ?? 10}
+          initialCadence={goal.cadence ?? "month"}
+          now={now}
+          onCommit={(next) => writeGoal(next)}
+          onClose={() => setSheetOpen(false)}
+        />
+      )}
 
       {/* ══ activity ══ */}
       <OneScreenPanel variant="os-actv" loading={loading} skel={["h", "", "", "grow"]} innerRef={actvRef}>

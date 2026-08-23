@@ -33,6 +33,7 @@ import { OneScreenPro } from "./OneScreenPro";
 import { OneScreenCounters } from "./OneScreenCounters";
 import { OneScreenCommunity } from "./OneScreenCommunity";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../lib/manuscriptScope";
+import { deriveGoalProgress } from "../../lib/queryingGoals";
 import { OneScreenRail } from "./OneScreenRail";
 import { OneScreenSkeleton } from "./OneScreenSkeleton";
 import { useSkeleton } from "../../lib/skeletonTiming";
@@ -86,6 +87,20 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   const scopedQueries = React.useMemo(() => scopeQueries(queries, scopeId), [queries, scopeId]);
   const scopedActivities = React.useMemo(() => scopeActivities(activities, scopeId), [activities, scopeId]);
   const scopedTasks = React.useMemo(() => scopeTasks(tasks, queries, msIds, scopeId), [tasks, queries, msIds, scopeId]);
+  /**
+   * ⚠️ DERIVED HERE, FROM THE UNSCOPED SET, AND HANDED DOWN AS A RESULT.
+   *
+   * A querying target is the WRITER's, not a book's — "ten queries this month" means ten, however
+   * many manuscripts they went out for. Every other list the rail receives is scoped to the
+   * manuscript chip, so this is the one derivation that must skip `scopeQueries`, and the rail is
+   * deliberately given the finished object rather than the raw list: a second unscoped array
+   * beside four scoped ones is an invitation to scope it by mistake, and the resulting bug — a
+   * goal count that drops when you switch books — is not one anybody would think to look for.
+   */
+  const goalProgress = React.useMemo(
+    () => deriveGoalProgress(queries, currentUser?.queryingGoals, now),
+    [queries, currentUser?.queryingGoals, now],
+  );
 
   const firstName = (currentUser?.name ?? "").trim().split(/\s+/)[0] || "there";
 
@@ -320,6 +335,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           manuscripts={manuscripts}
           userTasks={userTasks}
           activities={scopedActivities}
+          goal={goalProgress}
           currentUser={currentUser}
           activeManuscript={activeManuscript}
           onNavigate={onNavigate}

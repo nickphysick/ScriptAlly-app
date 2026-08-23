@@ -192,9 +192,22 @@ describe("Querying goals keeps its bare header", () => {
     expect(goalHead).not.toContain("OneScreenMark");
   });
 
-  it("⚠️ `Goal met` survives — the at-or-beyond-target state is not what was rejected", () => {
+  /* ⚠️ REVERSED BY THE GOALS PACK, AND THE REVERSAL IS THE POINT. This case used to require
+     `"Goal met"` in oneScreen.ts, on the reasoning that the at-or-beyond-target STATE was not what
+     the header pass rejected. That still holds — the state survives, and is now the card's fullest
+     moment — but the WORDS do not: "Goal met" is a verdict, and the rebuilt card may not deliver
+     one. It states the day instead ("Target reached 19 August"), which is a fact that stays true
+     rather than a cheer that ages. The assertion is inverted rather than deleted, so the phrase
+     cannot drift back in.
+
+     ⚠️ THE CASE ABOVE IS UNTOUCHED. The bare header is a separate decision, re-confirmed in the
+     browser on 23 Aug against a local build and deployed dev before this pack was written. */
+  it("⚠️ `Goal met` is retired — the reached state states a DAY, never a verdict", () => {
     const lib = readFileSync(resolve(__dirname, "../../lib/oneScreen.ts"), "utf8");
-    expect(lib).toContain('"Goal met"');
+    /* comments stripped: this file's own prose quotes the retired phrase, twice */
+    const decls = lib.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(decls).not.toContain("Goal met");
+    expect(decls).not.toContain("goalFigure");
   });
 });
 

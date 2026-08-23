@@ -13,6 +13,8 @@ import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ActivityType, QueryStatus, UserPlan } from "../../types";
 import { feedLabel, feedRows, OneScreenRail } from "./OneScreenRail";
+import { deriveGoalProgress } from "../../lib/queryingGoals";
+import type { QueryingGoalEntry } from "../../types";
 
 const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
 const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -30,6 +32,13 @@ const act = (over: Record<string, unknown>) => ({
 const queries = [{ id: "q1", agentId: "a1", status: QueryStatus.QUERIED }] as any[];
 const agents = [{ id: "a1", name: "Sophie Dunn", agency: "Curtis Vane" }] as any[];
 const manuscripts = [{ id: "m1", title: "Murphy's Day Out", genre: "Thriller", wordCount: 82400 }] as any[];
+
+/* ⚠️ THE GOAL ARRIVES DERIVED, and these fixtures build it with the REAL derivation rather than a
+   hand-written object. A literal here would go green the day `deriveGoalProgress` changed shape —
+   the "test the function with an input the system can actually produce" rule, applied to a prop. */
+const goalFrom = (sent: string[], entries: QueryingGoalEntry[], now: Date = NOW) =>
+  deriveGoalProgress(sent.map((d) => ({ dateSent: d })), entries, now);
+const noGoal = goalFrom([], []);
 
 describe("§6 · the 30-day feed", () => {
   it("windows to 30 days, newest first, day-labelled", () => {
@@ -106,7 +115,8 @@ describe("the rendered rail", () => {
       expanded={false} setExpanded={() => {}}
       loading={false} queries={[]} agents={[]} manuscripts={manuscripts} userTasks={[]}
       activities={[act({})]}
-      currentUser={{ id: "u", name: "Nick Physick", plan: UserPlan.FREE, goalTarget: 25, goalPeriod: "quarter" } as any}
+      currentUser={{ id: "u", name: "Nick Physick", plan: UserPlan.FREE } as any}
+      goal={goalFrom([], [])}
       activeManuscript={manuscripts[0]} onNavigate={() => {}}
       updateUserProfile={async () => {}} now={NOW}
     />,
@@ -120,12 +130,15 @@ describe("the rendered rail", () => {
     expect(html).not.toContain('aria-label="Add a photo"');
   });
 
-  it("goals: the sentence, 25 blocks, and 0/25 done derives from sends", () => {
-    expect(html).toContain("Query 25 agents this quarter");
-    expect(html).toContain("0/25");
-    const blocks = html.slice(html.indexOf('class="os-blocks"'));
-    const cells = (blocks.slice(0, blocks.indexOf("</div>")).match(/<i/g) ?? []).length;
-    expect(cells).toBe(25);
+  /* ⚠️ RETIRED WITH THE GOALS PACK. The old card carried an instruction ("Query 25 agents this
+     quarter"), a `{done}/{target}` figure and a one-block-per-query meter. It reports a count now,
+     against a target the writer set in a sheet. The retirement is asserted rather than deleted:
+     each of those three is a thing that must not come back. */
+  it("⚠️ the instruction, the ratio figure and the block meter are all gone", () => {
+    expect(html).not.toContain("agents this quarter");
+    expect(html).not.toMatch(/\d+\/\d+/);
+    expect(html).not.toMatch(/["\s`]os-blocks["\s`]/);
+    expect(html).not.toMatch(/["\s`]os-goal-num["\s`]/);
   });
 
   it("activity: the expand button wires aria-expanded/aria-controls; the footer is caption ONLY", () => {
@@ -145,18 +158,20 @@ describe("the rendered rail", () => {
     expect(cssRules).not.toContain(".os-promini");
   });
 
-  it("no goal set → the ghost meter and Set a goal, never fake progress", () => {
+  it("no goal set → the count for the month and the way to set one, never fake progress", () => {
     const bare = renderToStaticMarkup(
       <OneScreenRail
         expanded={false} setExpanded={() => {}}
         loading={false} queries={[]} agents={[]} manuscripts={[]} userTasks={[]} activities={[]}
         currentUser={{ id: "u", name: "N", plan: UserPlan.FREE } as any}
+        goal={noGoal}
         activeManuscript={null} onNavigate={() => {}} updateUserProfile={async () => {}} now={NOW}
       />,
     );
-    expect(bare).toContain("Set a target for the quarter");
-    expect(bare).toContain("Set a goal");
-    expect(bare).toContain("os-blocks ghost");
+    /* ⚠️ HTML-ESCAPED — renderToStaticMarkup emits &#x27; for an apostrophe. */
+    expect(bare).toContain("You&#x27;ve sent 0 queries this month.");
+    expect(bare).toContain("Set a target");
+    expect(bare).not.toMatch(/["\s`]os-blocks ghost["\s`]/);
     expect(bare).toContain("The story starts with your first query.");
   });
 });
@@ -216,8 +231,12 @@ describe("§6 · the collapse mechanics in CSS", () => {
 
   /* the fill-in animates the BLOCKS, whose final frame equals their natural state — never the
      card, whose stowable opacity a pinned keyframe would fight (the §6 trap) */
-  it("⚠️ the goal meter's fill-in animates the blocks, never the card", () => {
-    expect(cssRules).toContain(".os-blocks i.f { background: #c9a293; animation: os-fillin");
+  /* ⚠️ RETIRED WITH THE BLOCK METER. The case required `.os-blocks i.f`'s fill-in — there are no
+     blocks now, and `os-fillin` is gone from the sheet. Its SECOND half is the durable half and is
+     kept: whatever the meter is, the animation must never sit on the card, because an animation
+     with a persistent fill-mode on a container pins its transform for the element's whole life. */
+  it("⚠️ no animation on the goals CARD — the §6 fill-mode trap", () => {
     expect(cssRules).not.toMatch(/\.os-goal \{[^}]*animation/);
+    expect(cssRules).not.toContain("os-fillin");
   });
 });

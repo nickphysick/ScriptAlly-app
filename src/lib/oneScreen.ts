@@ -6,8 +6,10 @@
  * + design-refs/dashboard-one-screen-spec.md; every rule cited below by § is that spec's).
  *
  * ⚠️ EVERYTHING HERE IS DERIVED, NOTHING IS STORED. The weekly ledger, the pins, the achievement
- * pill, the goal progress — all pure functions over the collections. The two stored fields this
- * page introduces (`goalTarget`/`goalPeriod`) hold only the TARGET; progress derives (§6).
+ * pill — all pure functions over the collections.
+ *
+ * ⚠️ THE GOAL IS NO LONGER ONE OF THEM. §6 moved out whole to `lib/queryingGoals.ts`; the two
+ * stored fields this file used to name (`goalTarget`/`goalPeriod`) are read by nothing now.
  */
 import { Agent, Query, QueryStatus } from "../types";
 import { isoWeekStart, responsesReceivedCount } from "./dashboardStats";
@@ -479,90 +481,24 @@ export const achievementPill = (queries: Query[], now: Date): Achievement => {
   return { key: "awaiting", pre: "", strong: String(awaiting), post: ` ${awaiting === 1 ? "query" : "queries"} out with agents` };
 };
 
-/* ══════════════════════════ §6 · QUERYING GOALS ══════════════════════════ */
-
-export type GoalPeriod = "quarter" | "month" | "year";
-
-export interface GoalState {
-  target: number;
-  period: GoalPeriod;
-  /** Sends inside the current period — derived from dateSent, never stored (§6). */
-  done: number;
-  /** Target reached or passed — the card states completion rather than reporting a fraction. */
-  met: boolean;
-  sentence: string;
-}
-
-/** The current period's start, local. */
-export const goalPeriodStart = (period: GoalPeriod, now: Date): Date => {
-  if (period === "month") return new Date(now.getFullYear(), now.getMonth(), 1);
-  if (period === "year") return new Date(now.getFullYear(), 0, 1);
-  return new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
-};
-
-export const goalState = (
-  queries: Query[],
-  target: number | undefined,
-  period: GoalPeriod | undefined,
-  now: Date,
-): GoalState | null => {
-  if (!target || target < 1) return null;
-  const p: GoalPeriod = period ?? "quarter";
-  const from = goalPeriodStart(p, now).getTime();
-  const done = queries.filter((q) => {
-    const t = parseWhen(q.dateSent);
-    return t !== null && t >= from && t <= now.getTime();
-  }).length;
-  const word = p === "quarter" ? "this quarter" : p === "month" ? "this month" : "this year";
-  /* ⚠️ "Query 1 agents this quarter" was live. A count in a sentence needs its noun to agree. */
-  const noun = target === 1 ? "agent" : "agents";
-  const met = done >= target;
-  /**
-   * ⚠️ ONE VOICE, BOTH HALVES (fixes-2 A2). The header read "2 — done" while this line still read
-   * "Query 1 agent this quarter" — an instruction to do something already finished, sitting under
-   * a figure saying it was finished. Past the target the sentence REPORTS rather than instructs.
-   */
-  const sentence = met
-    ? `Queried ${done} of ${target} ${noun} ${word}`
-    : `Query ${target} ${noun} ${word}`;
-  return { target, period: p, done, met, sentence };
-};
+/* ══════════════════════════ §6 · QUERYING GOALS — MOVED ══════════════════════════ */
 
 /**
- * ⚠️ ONE BLOCK PER QUERY, so the meter and the ratio beside it are the SAME two numbers. The
- * meter used to be a fixed 25 blocks with done/target scaled onto them, which at a target of 1
- * drew twenty-five full blocks beside a header reading "1/1" — the count and the ratio saying
- * different things about the same goal.
+ * ⚠️ THE WHOLE OF §6 LIVES IN `lib/queryingGoals.ts` NOW, and nothing of it survives here.
  *
- * ⚠️ ABOVE THE CAP IT BECOMES PROPORTIONAL, because a hundred 3px blocks is not a meter, it is a
- * texture. Past `GOAL_BLOCK_CAP` the blocks stop being one-per-query and represent a share
- * instead — `proportional` says which reading is on screen so the label can say so too.
+ * Retired with it, and each for its own reason:
+ *  · `goalState` counted `Query[]` against a target stored as two flat fields, in the BROWSER's
+ *    zone, and phrased its output as an INSTRUCTION ("Query 25 agents this quarter"). The card
+ *    reports a count now, in the London calendar, against an append-only list of intents.
+ *  · `goalFigure` produced "Goal met" — a verdict, and the one thing the new card may not say.
+ *  · `goalMeter`/`goalBlockGap`/`GOAL_BLOCK_CAP` drew one block per query, with a proportional
+ *    mode above sixty. The meter is a single bar of one constant colour.
+ *  · `goalPeriodStart`/`GoalPeriod` offered quarter and year. Neither is on the new cadence set:
+ *    a target you cannot feel yourself missing for eleven weeks is a note-to-self.
+ *
+ * ⚠️ NOT LEFT AS DEAD-BUT-TESTED. Two live goal derivations is exactly the shape that lets two
+ * surfaces disagree about one number, and the pack that moved them said so explicitly.
  */
-export const GOAL_BLOCK_CAP = 60;
-
-export interface GoalMeter {
-  /** How many blocks to draw. */
-  blocks: number;
-  /** How many of them are filled. */
-  filled: number;
-  /** True once a block no longer means exactly one query. */
-  proportional: boolean;
-}
-
-export const goalMeter = (done: number, target: number): GoalMeter => {
-  if (!Number.isFinite(target) || target <= 0) return { blocks: 0, filled: 0, proportional: false };
-  const d = Math.max(0, Math.floor(done));
-  if (target <= GOAL_BLOCK_CAP) {
-    // one block per query — over-achievement fills the meter, never overflows it
-    return { blocks: target, filled: Math.min(target, d), proportional: false };
-  }
-  const filled = Math.min(GOAL_BLOCK_CAP, Math.floor((d / target) * GOAL_BLOCK_CAP));
-  return { blocks: GOAL_BLOCK_CAP, filled, proportional: true };
-};
-
-/** ⚠️ The gap has to give way as the blocks multiply — 60 blocks at a 3px gap leaves 1.8px of
- *  block on a 287px rail, which reads as a dotted line rather than a meter. */
-export const goalBlockGap = (blocks: number): number => (blocks > 30 ? 1 : blocks > 12 ? 2 : 3);
 
 /* ══════════════════════════ §9 · FIRST-RUN STATES ══════════════════════════ */
 
@@ -609,20 +545,8 @@ export const tourChipShows = (accountCreatedAt: string | undefined, now: Date, w
 };
 
 /**
- * The goal figure's words (polish P7; wording settled in fixes-2 A2).
- *
- * ⚠️ "2/1" IS NOT A PROGRESS FIGURE, IT IS A BROKEN ONE. A fraction whose numerator passes its
- * denominator reads as a bug even when the maths is right, and it turns beating your own target
- * into something that looks like a miscount. Past the target the card stops counting UP TO it and
- * states that it is done, keeping the real number so nothing is hidden.
- *
- * The meter already caps (`goalMeter` clamps `filled`), so this is the display catching up with a
- * derivation that was correct all along.
- *
- * ⚠️ "Goal met", NOT "2 — done". The em-dash construction read as a stray fragment rather than a
- * status, and it left the real figure carrying two jobs at once. The count is not lost: the line
- * beneath states it in full ("Queried 2 of 1 agent this quarter"), so the card says the same thing
- * twice in two registers instead of contradicting itself in two halves.
+ * ⚠️ `goalFigure` IS RETIRED. It rendered "Goal met" past the target — a verdict, and the one
+ * register the goals card may not use. The reached state states the day it happened instead
+ * ("Target reached 14 August"), which is a fact that stays true rather than a cheer that ages.
+ * See `lib/queryingGoals.ts`.
  */
-export const goalFigure = (done: number, target: number): string =>
-  done >= target ? "Goal met" : `${done}/${target}`;

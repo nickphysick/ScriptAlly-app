@@ -1012,33 +1012,14 @@
 .os-goal { padding: 13px 16px 14px; flex: none; }
 .os-goal-r1 { display: flex; align-items: baseline; gap: 10px; }
 .os-goal-r1 h2 { font-family: var(--font-serif); font-size: 14.5px; font-weight: 600; color: #241811; flex: 1; margin: 0; }
-.os-goal-num {
-  font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: #8a7a6c;
-  background: none; border: none; padding: 0; cursor: pointer; font-variant-numeric: tabular-nums;
-}
-.os-goal-num:hover { color: #7c3a2a; }
-.os-goal-t { font-size: 12px; color: #4a3a2e; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* ⚠️ THE GAP IS SET INLINE from the block count (goalBlockGap) — a fixed 3px gap leaves 1.8px of
-   block once there are 60 of them. The declaration here is the fallback for the ghost meter. */
-.os-blocks { display: flex; gap: 3px; margin: 9px 0 1px; }
-.os-blocks i { flex: 1; height: 9px; border-radius: 3px; background: #e9dfd1; transition: background 0.16s ease; }
-/* ⚠️ `backwards`, NEVER `both` (audit P6 · the §6 trap). This animation is NOT scoped to a class
-   that gets removed — it lives on `.f` for the element's whole life — so `both` would PIN
-   transform and opacity permanently and outrank any later declaration on these blocks. The final
-   keyframe is the resting state anyway, so nothing about the finished look changes.
-   ⚠️ AND IT IS DELAYED past the cards (§6): the meter reads after they land, never with them. */
-.os-blocks i.f { background: #c9a293; animation: os-fillin 0.5s cubic-bezier(0.22, 0.68, 0.36, 1) 0.18s backwards; }
-/* hover deepens the fill (§6) — no pace line, no nudge, ever */
-.os-blocks:hover i.f { background: #b98a76; }
-.os-blocks.ghost i { border: 1px dashed #ddd0c0; background: transparent; height: 8px; }
-@keyframes os-fillin { from { transform: scaleY(0.3); opacity: 0; } to { transform: none; opacity: 1; } }
-.os-goal-edit { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-.os-goal-edit label { display: flex; align-items: center; gap: 8px; }
-.os-goal-edit input, .os-goal-edit select {
-  font: inherit; font-size: 12px; color: #3a1c14;
-  border: 1px solid #e3d9cc; border-radius: 8px; padding: 5px 8px; background: #ffffff; flex: 1; min-width: 0;
-}
-.os-goal-btns { display: flex; gap: 6px; margin-top: 2px; }
+/* ⚠️ `.os-goal-num`, `.os-blocks` AND `.os-goal-edit` ARE RETIRED (goals pack).
+   `.os-goal-num` was the count rendered as a BUTTON that opened an inline editor — an editing
+   surface inside a reporting one, which made the number look like a control. `.os-blocks` was the
+   one-block-per-query meter, replaced by a single proportional bar whose fill is one constant
+   colour at every width. `.os-goal-edit`/`.os-goal-btns` were that inline editor's number input
+   and period select; the Form 11 sheet replaces them whole.
+   The card's own rules now live in `queryingGoals.css`, beside the component that renders them.
+   `.os-goal-t` went with the sentence it carried — the card states a count, not an instruction. */
 
 /* ══ §6 · ACTIVITY ══ */
 /* ⚠️ THE MIN-HEIGHT IS SMALL ON PURPOSE. Its job is to stop the card collapsing, NOT to reserve
@@ -1304,9 +1285,9 @@
 
 /* buttons — ⚠️ THE PRESSED STATE IS THE ONE USUALLY MISSED, and it is the only feedback a click
    gives before its effect arrives. */
-.os-btn-mini, .os-see, .os-goal-num { transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease; }
-.os-btn-mini:hover, .os-see:hover, .os-goal-num:hover { transform: translateY(-1px); }
-.os-btn-mini:active, .os-see:active, .os-goal-num:active { transform: scale(0.97); }
+.os-btn-mini, .os-see { transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease; }
+.os-btn-mini:hover, .os-see:hover { transform: translateY(-1px); }
+.os-btn-mini:active, .os-see:active { transform: scale(0.97); }
 
 /* ⚠️ TASK ROWS KEEP THEIR PLAIN HOVER — background only. A hover-revealed action button was
    tried on these rows and rejected; the status pill stays put and the ⋯ is always there. */
@@ -1495,5 +1476,4 @@
   }
   /* the entrance offsets must not be left applied — a 0.01ms animation still paints its `from` */
   .os-card.enter, .os-greet.enter, .os-actv.enter .os-tlev { animation: none !important; }
-  .os-blocks i.f { animation: none !important; }
 }

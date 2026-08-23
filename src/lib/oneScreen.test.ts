@@ -7,8 +7,8 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
 import {
-  achievementPill, awaitingChip, chartEvents, GOAL_BLOCK_CAP, goalBlockGap, goalMeter, goalPeriodStart,
-  aggregateLedger, bindEvents, dailyLedger, defaultFreq, goalState, MIN_SPAN, monotonePath,
+  achievementPill, awaitingChip, chartEvents,
+  aggregateLedger, bindEvents, dailyLedger, defaultFreq, MIN_SPAN, monotonePath,
   nearestStop, RANGE_STOPS, rangeChip, rangeWindow, runStage, stopForDays, tenureLine,
   tourAutoRuns, tourChipShows, yScale,
 } from "./oneScreen";
@@ -351,70 +351,14 @@ describe("achievementPill — the highest-priority TRUE fact, facts only", () =>
 
 /* ══ §6 · goals ══ */
 
-describe("goalState + the 25-block meter", () => {
-  it("derives done from sends inside the current period — never stored", () => {
-    const g = goalState([
-      q({ dateSent: daysAgo(2) }),                                     // inside Q3
-      q({ dateSent: new Date(2026, 2, 1).toISOString() }),             // Q1 — outside
-    ], 25, "quarter", NOW)!;
-    expect(g.done).toBe(1);
-    expect(g.sentence).toBe("Query 25 agents this quarter");
-  });
-
-  /* ⚠️ "Query 1 agents this quarter" was live on a real account. A count in a sentence needs its
-     noun to agree with it. */
-  it("⚠️ the noun agrees with the count", () => {
-    const one = goalState([], 1, "quarter", NOW)!;
-    expect(one.sentence).toBe("Query 1 agent this quarter");
-    expect(goalState([], 2, "quarter", NOW)!.sentence).toBe("Query 2 agents this quarter");
-    expect(goalState([], 1, "month", NOW)!.sentence).toBe("Query 1 agent this month");
-    expect(goalState([], 1, "year", NOW)!.sentence).toBe("Query 1 agent this year");
-  });
-
-  it("no target → no goal state (the day-one CTA renders instead)", () => {
-    expect(goalState([], undefined, undefined, NOW)).toBeNull();
-    expect(goalState([], 0, "quarter", NOW)).toBeNull();
-  });
-
-  it("quarter starts are calendar quarters", () => {
-    expect(goalPeriodStart("quarter", NOW).getMonth()).toBe(6); // Jul for an Aug now
-    expect(goalPeriodStart("month", NOW).getDate()).toBe(1);
-    expect(goalPeriodStart("year", NOW).getMonth()).toBe(0);
-  });
-
-  it("⚠️ the meter rounds DOWN and never claims more than happened", () => {
-    /* ⚠️ ONE BLOCK PER QUERY, so the meter and the ratio are the same two numbers. The old meter
-       was a fixed 25 blocks with done/target scaled onto them — at target 1 that drew 25 full
-       blocks beside a header reading "1/1", which is the bug this replaces. */
-    expect(goalMeter(21, 25)).toEqual({ blocks: 25, filled: 21, proportional: false });
-    expect(goalMeter(1, 1)).toEqual({ blocks: 1, filled: 1, proportional: false });
-    expect(goalMeter(0, 25)).toEqual({ blocks: 25, filled: 0, proportional: false });
-    // over-achievement fills the meter, never overflows it
-    expect(goalMeter(30, 25)).toEqual({ blocks: 25, filled: 25, proportional: false });
-    // never NaN, never negative blocks
-    expect(goalMeter(0, 0)).toEqual({ blocks: 0, filled: 0, proportional: false });
-    expect(goalMeter(5, -3)).toEqual({ blocks: 0, filled: 0, proportional: false });
-  });
-
-  /* ⚠️ a hundred 3px blocks is a texture, not a meter — past the cap a block stops meaning one
-     query and represents a share, and `proportional` is what lets the label say so */
-  it("⚠️ above the cap the meter goes proportional rather than drawing one block per query", () => {
-    expect(goalMeter(50, 100)).toEqual({ blocks: GOAL_BLOCK_CAP, filled: 30, proportional: true });
-    expect(goalMeter(0, 100)).toEqual({ blocks: GOAL_BLOCK_CAP, filled: 0, proportional: true });
-    expect(goalMeter(999, 100)).toEqual({ blocks: GOAL_BLOCK_CAP, filled: GOAL_BLOCK_CAP, proportional: true });
-    // exactly at the cap it is still one-per-query
-    expect(goalMeter(10, GOAL_BLOCK_CAP)).toEqual({ blocks: 60, filled: 10, proportional: false });
-    expect(goalMeter(10, GOAL_BLOCK_CAP + 1).proportional).toBe(true);
-  });
-
-  it("the gap gives way as the blocks multiply, or 60 of them are a dotted line", () => {
-    expect(goalBlockGap(10)).toBe(3);
-    expect(goalBlockGap(25)).toBe(2);
-    expect(goalBlockGap(60)).toBe(1);
-  });
-});
-
-/* ══ §12 · tour visibility ══ */
+/**
+ * ⚠️ `goalState` AND THE 25-BLOCK METER ARE RETIRED (goals pack) — their cases are gone rather
+ * than repointed, because the SUBJECT is gone: the sentence they asserted was an instruction
+ * ("Query 25 agents this quarter"), the periods included quarter and year, and the meter drew one
+ * block per query. The replacements live in `lib/queryingGoals.test.ts`, and the retirement is
+ * asserted in `queryingGoalsCard.test.ts` — repointing these at the new function would have kept
+ * the shape of a test written for something that no longer exists.
+ */
 
 describe("tour visibility — derived, never a stored day-7 flag", () => {
   it("auto-runs only when never completed, and never below the breakpoint", () => {

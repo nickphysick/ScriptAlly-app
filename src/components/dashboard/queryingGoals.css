@@ -1,0 +1,189 @@
+/**
+ * QUERYING GOALS — the card's own sheet.
+ *
+ * ⚠️ ITS OWN FILE, NOT `index.css` AND NOT `oneScreen.css`. `index.css` is contested by two other
+ * streams; `oneScreen.css` is the dashboard's shared sheet and this card is one consumer of it.
+ * Everything here is `.os-goal`-scoped and nothing outside the card reads it.
+ *
+ * ⚠️ THE CARD IS BARE-HEADED AND STAYS THAT WAY. No sage band, no mark box — tried and rejected
+ * (cfccf325), and re-verified in the browser on 23 Aug against both a local build and deployed dev
+ * before this pack was written. Two locks guard it: `oneScreenPanel.test.tsx` forbids `os-ahead`
+ * and `OneScreenMark` in the header, and `illustratedMarks.test.ts` states the mark count as a
+ * DECISION rather than a count. A banded version of this card exists only in a preview harness.
+ *
+ * ⚠️ NO COLOUR MOVES WITH PROGRESS. The meter fill is one constant. A meter that warms towards a
+ * deadline turns a record of what you did into a verdict on whether you are doing enough, and this
+ * card reports. For the same reason there is no amber, no red, no target notch, and no pace line.
+ */
+
+/* ── the header row (bare, per the standing decision) ─────────────────────────────────────── */
+
+/* ⚠️ `margin-left: auto` PUTS THE CADENCE AT THE RIGHT WITHOUT `justify-content` — the row is
+   `align-items: baseline` and the title already takes `flex: 1`, so pushing the pair right from
+   the cadence keeps the title's ellipsis behaviour intact. */
+.os-goal-cad {
+  font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #9a8c80; margin-left: auto; flex: none; white-space: nowrap;
+}
+.os-goal-more {
+  flex: none; width: 22px; height: 22px; margin: -4px -5px -4px 2px; align-self: center;
+  display: flex; align-items: center; justify-content: center;
+  border: none; border-radius: 6px; background: transparent; cursor: pointer;
+  color: #9a8c80; font-size: 15px; line-height: 1;
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+.os-goal-more:hover { background: #f4ede4; color: #7c3a2a; }
+.os-goal-more:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
+.os-goal-more[aria-expanded="true"] { background: #f4ede4; color: #7c3a2a; }
+
+/* ── the unset state ──────────────────────────────────────────────────────────────────────── */
+
+/* ⚠️ NO EMPTY-STATE ART AND NO PROMPT TO ENGAGE. The line states a fact the writer can already
+   act on; the button is available if they want it. An illustration here would sell the feature. */
+.os-goal-line { font-size: 12px; color: #4a3a2e; margin-top: 7px; }
+.os-goal-set {
+  display: block; width: 100%; margin-top: 10px; padding: 7px 12px;
+  font: inherit; font-size: 12px; font-weight: 500; color: #7c3a2a;
+  background: #f5e2da; border: 1px solid #e8c8bc; border-radius: 9px; cursor: pointer;
+  transition: background-color 0.14s ease, border-color 0.14s ease;
+}
+.os-goal-set:hover { background: #f0d6cb; border-color: #dfb8a9; }
+.os-goal-set:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
+
+/* ── the count, shared by the in-progress and reached states ──────────────────────────────── */
+
+.os-goal-count { display: flex; align-items: baseline; gap: 7px; margin-top: 9px; }
+.os-goal-n {
+  font-family: var(--font-serif); font-size: 31px; font-weight: 500; color: #3a1c14;
+  line-height: 1; font-variant-numeric: tabular-nums;
+}
+.os-goal-of { font-family: var(--font-serif); font-size: 18px; font-weight: 400; color: #9a8c80; line-height: 1; }
+.os-goal-sub {
+  font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.11em;
+  text-transform: uppercase; color: #9a8c80; margin-top: 7px;
+}
+
+/* ── the meter (in-progress only) ─────────────────────────────────────────────────────────── */
+
+/* ⚠️ THE FILL IS ONE COLOUR AT EVERY WIDTH. See the header note. */
+.os-goal-meter { margin-top: 12px; height: 8px; border-radius: 5px; background: #efe4dc; overflow: hidden; }
+.os-goal-meter i { display: block; height: 100%; border-radius: 5px; background: #bf8a7b; transition: width 0.4s cubic-bezier(0.22, 0.68, 0.36, 1); }
+
+/* ── the reached state ────────────────────────────────────────────────────────────────────── */
+
+/* ⚠️ THE METER IS ABSENT HERE, NOT FULL. At or past the target it could only ever read 100%, so it
+   states nothing; the illustration takes its place rather than sitting above it. */
+.os-goal-moment { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 2px; }
+.os-goal-moment .os-goal-count { margin-top: 11px; }
+.os-goal-moment .os-goal-sub { margin-top: 6px; }
+.os-goal-ill { width: 104px; height: 104px; flex-shrink: 0; object-fit: contain; }
+/* ⚠️ THE PLACEHOLDER IS DELIBERATE AND SAYS SO. `Goal_Reached.png` does not exist yet; a second
+   copy of the target icon would read as finished work. See design-refs/goals/README.md. */
+.os-goal-illph {
+  width: 104px; height: 104px; border-radius: 12px; border: 1px dashed #c9b8a8;
+  background: repeating-linear-gradient(45deg, rgba(124, 58, 42, 0.035) 0 6px, transparent 6px 12px), #f7f3ec;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #b0a294;
+}
+.os-goal-illph span {
+  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase;
+}
+/* ⚠️ SAGE, AND IT IS THE ONLY COLOURED TEXT ON THE CARD. It marks an event that happened, not a
+   grade — which is why nothing else changes colour when it appears. */
+.os-goal-reached {
+  font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 0.09em;
+  text-transform: uppercase; color: #5a6e58; margin-top: 6px;
+}
+
+/* ── the history strip ────────────────────────────────────────────────────────────────────── */
+
+/* ⚠️ IT IS NOT A GOAL ARTEFACT — it draws in every state, including the unset one, because what
+   you sent last month is true whether or not you have declared a target. */
+.os-goal-hist {
+  margin-top: 12px; padding-top: 11px; border-top: 1px solid #e7ddd2;
+  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.05em;
+  color: #9a8c80; display: flex; gap: 9px; flex-wrap: wrap;
+}
+.os-goal-hist b { color: #3a1c14; font-weight: 500; }
+.os-goal-hist .os-goal-dot { color: #cbbcae; }
+.os-goal-hist.mid { justify-content: center; }
+
+/* ── the entrance ─────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * ⚠️ FIRES ONCE, ON THE DAY THE TARGET IS REACHED — not on every dashboard mount. The card is on a
+ * page that stays mounted and is returned to many times a day; a replay on each visit is what
+ * makes this kind of thing grating rather than pleasant. The gate is `reachedOn === today`, which
+ * is derived, so no flag is stored to remember that the animation has run.
+ *
+ * ⚠️ AND IT IS `backwards`, NEVER `both` — the §6 trap this sheet's sibling records at length. A
+ * `both` fill-mode pins the final keyframe's transform and opacity for the element's whole life
+ * and outranks every later declaration, which is the "card sits 7px out of place" bug.
+ */
+.os-goal-fade { animation: os-goal-rise 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) backwards; }
+@keyframes os-goal-rise {
+  from { opacity: 0; transform: translateY(6px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .os-goal-fade { animation: none; }
+  .os-goal-meter i { transition: none; }
+}
+
+/* ══════════════════════════ THE SET-TARGET SHEET ══════════════════════════ */
+
+/* ⚠️ `gts-` SCOPED, INSIDE THE LOCKED FORM 11 SHELL. `FormShell` owns the overlay, the parchment
+   card, the sage header band, the centred soft-pink button and every exit; these rules dress only
+   the three things that are this form's own — the stepper, the cadence group and the preview. */
+
+.gts-field { display: flex; align-items: center; gap: 14px; margin-bottom: 15px; }
+.gts-lbl {
+  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.11em;
+  text-transform: uppercase; color: #9a8c80; flex: none; width: 62px;
+}
+
+/* ── the stepper ──────────────────────────────────────────────────────────────────────────── */
+
+.gts-step { display: flex; align-items: center; gap: 4px; }
+.gts-stepb {
+  width: 30px; height: 30px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font: inherit; font-size: 16px; line-height: 1; color: #7c3a2a;
+  background: #ffffff; border: 1px solid #e3d9cc; border-radius: 8px; cursor: pointer;
+  transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+.gts-stepb:hover:not(:disabled) { background: #f5e2da; border-color: #e8c8bc; }
+.gts-stepb:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
+/* ⚠️ THE ENDS DISABLE RATHER THAN WRAP. A `+` at 99 that silently returned to 1 would record a
+   target the writer did not choose — the same fault as a default branch inventing a value. */
+.gts-stepb:disabled { color: #c9bcae; cursor: default; background: #faf7f2; }
+/* ⚠️ TABULAR AND FIXED-WIDTH, so the two buttons do not shuffle between 9 and 10. */
+.gts-qty {
+  font-family: var(--font-serif); font-size: 23px; font-weight: 500; color: #3a1c14;
+  line-height: 1; font-variant-numeric: tabular-nums; min-width: 42px; text-align: center;
+}
+
+/* ── the cadence group ────────────────────────────────────────────────────────────────────── */
+
+.gts-seg { display: flex; gap: 5px; flex: 1; min-width: 0; }
+.gts-segb {
+  flex: 1; min-width: 0; padding: 7px 6px;
+  font: inherit; font-size: 12px; color: #6b5b4d;
+  background: #ffffff; border: 1px solid #e3d9cc; border-radius: 8px; cursor: pointer;
+  transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+.gts-segb:hover { background: #faf5ee; }
+.gts-segb:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
+/* the Form 11 selected treatment — the same pair the shell's own button wears */
+.gts-segb.on { background: #f5e2da; border-color: #e8c8bc; color: #7c3a2a; font-weight: 500; }
+
+/* ── the preview ──────────────────────────────────────────────────────────────────────────── */
+
+/* ⚠️ IT STATES WHAT WILL HAPPEN, IN THE WRITER'S OWN TERMS, and updates as they move. The restart
+   date comes from the same `periodBounds` the card counts with, so the sheet cannot promise a
+   period the card will not then use. */
+.gts-preview {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 12px 14px; border-radius: 10px; background: #faf5ee; border: 1px solid #ece2d5;
+  font-size: 12.5px; color: #6b5b4d; line-height: 1.45;
+}
+.gts-preview strong { color: #3a1c14; font-weight: 500; }
