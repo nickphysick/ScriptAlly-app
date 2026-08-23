@@ -53,3 +53,24 @@ replies. That is a second way for readiness to be true while the data is not the
 
 A falsy array cannot mean both "not loaded" and "loaded and empty". Every branch above must read one
 readiness value, and that value must not be satisfiable by an empty cached snapshot.
+
+## §4 — the pane's `qc-nomatch` is NOT a clean deletion, and is left in place
+
+Four test files reference it, three asserting the pane branch exists and one using it as a **slice
+anchor** for a different claim. But the dependency that decides it is functional, not structural:
+
+⚠️ **THE PANE'S HALF CARRIES THE ONLY WAY BACK.** The list's copy is a bare sentence — "No queries
+match these filters." — with no control. The pane's half adds `Clear filters`, which also clears the
+search, on the stated grounds that "a dead end is not a state, it is a trap". Deleting the pane's
+half would remove the only escape from a filtered-to-zero view, so it is a regression rather than a
+de-duplication until that button has somewhere else to live.
+
+⚠️ **AND ITS ORIGINAL REASONING HAS BEEN INVALIDATED WITHOUT BEING REPLACED.** `queryCentreRest`
+states it plainly: *"an auto-select fallback means 'nothing selected' is only reachable when the
+FILTER matched nothing. So that is the state to design, and the pane is where it belongs."* The
+auto-select fallback was retired in the previous pack, so "nothing selected" is now the ordinary
+state and that argument no longer holds — the pane has a genuine unselected state of its own now.
+The duplication is therefore real and worth resolving, but the resolution is a design decision (does
+`Clear filters` move into the list's note, or does the list's sentence go?) rather than a deletion.
+
+Reported and left, per the brief.
