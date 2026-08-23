@@ -116,3 +116,104 @@ a Pack A-shaped job — a small lift with a rendered-page acceptance — and it 
 
 **Phase 3 depends on Phase 2 and stops with it. Phase 1 does not** — it is independent, and it is
 delivered below.
+
+---
+
+## ⛔ PHASE 1 — ALSO STOPPED, and this one is a genuine ruling
+
+> *"No test should need retargeting; if one does, stop and report."*
+
+**One does, and no `idPrefix` design can avoid it.** The work was built, measured, and then **reverted
+so the tree is byte-identical to `HEAD`** — confirmed by `git diff HEAD`.
+
+### What was built, and what it cost
+
+`TaskPaneBody` took `idPrefix?: string` defaulting to `""`; the four sections rendered
+`id={domId("s-unit")}` where `domId` is the identity function by default; `paneGate` kept emitting
+**bare** names so `sect()`'s comparison, `anchorFor` and `paneGate`'s own semantics were untouched;
+`jumpToSection` applied the same prefix. **`/todo`'s rendered ids were byte-identical.**
+
+Then `paneGate.test.ts:154` went red:
+
+```ts
+const ids = new Set([...src.matchAll(/id="(s-[a-z]+)"/g)].map((m) => m[1]));
+…
+expect(ids.has(r.id), `${k} requires "${r.name}" at #${r.id} and no section carries it`).toBe(true);
+```
+
+> **⚠️ THE LOCK SCRAPES THE LITERAL SPELLING `id="s-unit"` OUT OF THE SOURCE.** Its LAW — *"every
+> declared anchor must be an anchor the pane renders; a requirement the square cannot sit on would
+> gate the primary and point at nothing"* — is **still true and still met**. What changed is the
+> spelling: an attribute that is now an expression rather than a literal. **No prefix mechanism can
+> keep a literal `id="s-unit"` in the source**, so this is not a design that can be adjusted around
+> — it is the lock and the feature being mutually exclusive as written.
+
+### The ruling this needs
+
+The lock is a **source-string scrape**, and this repo's own standing law says a source lock *"proves
+the code was written, not that it ran"*. The honest retarget is one line — scrape both spellings:
+
+```ts
+const ids = new Set([...src.matchAll(/id=(?:"(s-[a-z]+)"|\{domId\("(s-[a-z]+)"\))/g)]
+  .map((m) => m[1] ?? m[2]));
+```
+
+…**and the stronger replacement is to stop scraping and assert the rendered ids on a page**, which
+is what this pack's own acceptance asks for everywhere else and what would have caught a real
+divergence that the scrape cannot see.
+
+**It was not done**, because the pack made "no test retargeted" the acceptance and the disciplined
+answer to failing a stated bar is to report it, not to reinterpret it — especially when Phase 3, the
+only consumer of this work, is already stopped, so shipping it has no user-visible effect tonight.
+
+---
+
+## FLAGS FOR NICK
+
+**1. Deployed — no.** Nothing shipped: Phase 1 reverted after its acceptance failed, Phases 2–3
+stopped. The tree is byte-identical to `HEAD` in my territory, `tsc` 0.
+
+**2. Did the hook build its journey from `(card, data)` alone? —** it could not; it needs
+**`boardCols`**, via `figureFor`'s `snoozedKeys` parameter, which reaches back to `pendingSaveId`,
+page state. Full chain in Phase 0 above.
+
+**3. How `bulkRows` travels —** as an argument: `commit(card, values, bulkRows)`. The hook owns the
+rows; the host's commit family owns the writes, the toast and the navigation. Neither can hold both.
+
+**4. The host callbacks — seven, not six.** The seventh is **`openQuery(card)`**: it navigates, so
+it cannot be the hook's. Offsetting that, the *disabled* flags for snooze and dismiss need no
+callback at all — `cardMenu` is a pure lib the hook can call itself.
+
+**5. TDZ audit —** not reached, since no state moved. Pack A's audit stands and its `isoOf`
+shadowing is fixed. **Nothing new shadowing was found**, and one near-miss of my own was caught: a
+blanket string replace hit my own *comment prose* before the render sites, so the JSX anchors are
+matched on the full element, not the bare id.
+
+**6. Did the calendar keep a `FocusFlow` mount? —** not reached. It would have had to regardless,
+for the `offer`/`fix` fall-through.
+
+**7. Unverifiable —** everything, tonight: nothing was built, so nothing was measured. The standing
+gap is unchanged — pointer interaction inside the pane is unverifiable in this harness, so
+completion writes and Undo would stay unproven even once it ships.
+
+**8. Cross-session —** the territory was clean at Step 0 and for most of the run. **Another session
+began editing `src/components/todo/ArtSlot.tsx`, `artSlots.test.tsx` and `src/lib/packageAttach.ts`
+at 15:11**, inside the red-gate directory. Its effect was visible immediately: three *different*
+suites failed on three consecutive whole-tree runs — `queriesPageSmoke`, `marketingLinks`,
+`queryMaterialKind` — a set that cannot be caused by a clean tree and is the signature of files
+changing mid-run. My own suites (`paneGate`, `paneCommit`, `todoPageSmoke`) are green, and
+`git diff HEAD` on my two files is empty.
+
+---
+
+## What the next pack should be
+
+**One small pack, then Pack B unchanged.**
+
+**Pack A2 — finish the lift.** Give `figureFor` the ability to answer *"is this card asleep?"* from
+`(card, data)` and drop `snoozedKeys`. The material is `snoozedCards`' own predicate —
+`flagSleeps(f, nowMs) && !flagDismissed(f)` over `taskFlags`, which is in the bundle and does **not**
+read `pendingSaveId`. **The obligation is to prove the re-derivation equals `boardCols.snoozed` for
+every dockable card**, on a rendered page, because a divergence changes the pane's figure silently.
+
+**And rule on the `paneGate` scrape**, which blocks Phase 1 independently of all of this.
