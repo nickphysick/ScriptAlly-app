@@ -1143,21 +1143,28 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
     /* ⚠️ RE-ANCHORED ON `paneFacts` — the `handoff` resolver went with the retired pane, and the
        claim moved intact: the card's strip reads the ROW's `figureFor` rather than recomputing a
        wait of its own, which is what stops the two surfaces stating different numbers. */
-    const at = board.indexOf("const paneFacts");
+    /* ⚠️ AND RE-HOMED, NOT WEAKENED (Pack B Phase 2): `paneFacts` moved into
+       `useTaskPaneSession` with the rest of the pane's session, so the calendar can mount the same
+       pane. The claim is the one above, word for word — one derivation behind both surfaces. */
+    const pane = readFileSync(join(here, "useTaskPaneSession.tsx"), "utf8");
+    const at = pane.indexOf("const paneFacts");
     expect(at, "the pane's fact builder is gone — this slice would read nothing").toBeGreaterThan(-1);
-    const fn = board.slice(at, at + 3200);
+    const fn = pane.slice(at, at + 3200);
     /* ⚠️ THE WAIT HALF WAS ALWAYS TRUE — `figureFor` IS the row's resolver. The ANCHOR half was
        not: it read `q.dateSent` under a hardcoded "Requested", which is a DIFFERENT fact from the
        rail's `waitAnchorMs` and mislabelled on every bucket. Measured on the deployed page: the
        R&R row said "No date on record" while its card showed "13 June". Both halves now come from
        the row's own derivations, so the comment at that site is finally true of the code. */
-    expect(fn).toContain("const f = figureFor(paneCard);");
+    /* ⚠️ THE IDENTIFIER IS `card` NOW, NOT `paneCard` — the pane's card is the session hook's
+       PARAMETER rather than a variable the page happened to hold. Same value, same derivations,
+       same three assertions; the rename is the whole of the difference. */
+    expect(fn).toContain("const f = figureFor(card);");
     /* the wait is pushed as a tile built from the row's own label and value — one derivation */
     expect(fn).toContain("out.push({ k: f.label, v: `${f.value}");
-    expect(fn).toContain("waitAnchorMs(cardBucket(paneCard), paneCard.taskType");
+    expect(fn).toContain("waitAnchorMs(cardBucket(card), card.taskType");
     /* ⚠️ AND THE NOUN IS STILL DERIVED PER BUCKET. A hardcoded "Requested" printed on every card —
        offer, chase and close alike — and that is the half this case exists to keep out. */
-    expect(fn).toContain("k: anchorNoun(paneCard)");
+    expect(fn).toContain("k: anchorNoun(card)");
     expect(fn).not.toContain('"Requested"');
   });
 

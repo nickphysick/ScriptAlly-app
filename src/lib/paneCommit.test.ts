@@ -22,13 +22,23 @@ const read = (f: string) => readFileSync(new URL(f, import.meta.url), "utf8");
 /** ⚠️ comments stripped — this file's prose names every surface it deliberately stopped opening. */
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const page = decls(read("../components/todo/ToDoPage.tsx"));
+/**
+ * ⚠️ THE PANE'S SESSION MOVED OUT OF THE PAGE (Pack B Phase 2) — `dockPrimary`, `gateAnswers`,
+ * `dockTimeline`, `paneFacts` and the form's four states now live in `useTaskPaneSession`, so the
+ * calendar can mount the same pane. Every law below is the law it was; only the file holding the
+ * code changed. `slice` therefore looks in BOTH and says which, so the next relocation fails loudly
+ * rather than silently reading nothing.
+ */
+const hook = decls(read("../components/todo/useTaskPaneSession.tsx"));
 
 function slice(name: string): string {
-  const i = page.indexOf(`function ${name}`);
-  expect(i, `${name} not found — the anchor moved`).toBeGreaterThan(-1);
-  const j = page.indexOf("\n  }", i);
+  const hits = [page, hook].filter((src) => src.includes(`function ${name}`));
+  expect(hits.length, `${name} not found in the page or the session — the anchor moved`).toBe(1);
+  const src = hits[0];
+  const i = src.indexOf(`function ${name}`);
+  const j = src.indexOf("\n  }", i);
   expect(j, `${name} has no end`).toBeGreaterThan(i);
-  return page.slice(i, j);
+  return src.slice(i, j);
 }
 
 const NOW = new Date("2026-08-21T09:00:00");
@@ -157,10 +167,13 @@ describe("⚠️ the primary commits, and mounts nothing", () => {
    */
   it("dockPrimary routes to the write, and reaches the takeover only past `paneCommits`", () => {
     const body = slice("dockPrimary");
-    expect(body, "the primary stopped committing").toContain("commitFromPane(");
+    /* ⚠️ THE LAW IS UNCHANGED AND STILL WHOLE IN ONE FUNCTION — commit, and reach the takeover only
+       past the declaration. Post-move the primary calls the host rather than the page's own
+       functions, so the names are `host.commit` and `host.openFlow`; the ORDER is the claim. */
+    expect(body, "the primary stopped committing").toContain("host.commit(");
     expect(body, "the primary stopped building the pane's answers").toContain("paneCommitValues(");
     const guard = body.indexOf("paneCommits(");
-    const mount = body.indexOf("openFlowCards(");
+    const mount = body.indexOf("host.openFlow(");
     expect(guard, "the declaration is not consulted").toBeGreaterThan(-1);
     expect(mount, "the hand-off vanished — the two undrawn journeys have nowhere to go")
       .toBeGreaterThan(guard);
@@ -182,12 +195,25 @@ describe("⚠️ the primary commits, and mounts nothing", () => {
    */
   it("it advances only on a commit that wrote", () => {
     const body = slice("dockPrimary");
+    /* ⚠️ THIS LAW NOW SPANS THE SEAM, AND THE HALVES ARE ASSERTED SEPARATELY BECAUSE THEY LIVE IN
+       TWO FILES. Gating on the write is the session's (below); reading the cursor off the board as
+       it WAS is the page's, and it is no longer expressible as statement order — see the note on
+       the page half. Saying so beats quietly asserting only the half that still reads whole. */
     const wrote = body.indexOf("if (!wrote) return;");
-    const advance = body.indexOf("setDockKey(nextKey)");
+    const advance = body.indexOf("host.advance(");
     expect(wrote, "the commit's answer is not consulted before advancing").toBeGreaterThan(-1);
     expect(advance).toBeGreaterThan(wrote);
-    /* and the next card is read BEFORE the write — the board is derived, so afterwards it is gone */
-    expect(body.indexOf("const nextKey")).toBeLessThan(body.indexOf("commitFromPane("));
+
+    /* ⚠️ THE PAGE HALF. The cursor is the page's, so the session hands it the CARD and never an
+       index — which is what leaves the page free to resolve it against its own board. The
+       "before the write" guarantee is now closure capture (the host object is the press-time
+       render's, holding that render's `dockable`) rather than statement order, and source cannot
+       see that. It is the rendered check's job, not this file's. */
+    expect(page, "the page stopped owning the dock cursor").toContain("advance: (c) =>");
+    expect(page, "the cursor stopped being resolved against the page's own board")
+      .toMatch(/advance: \(c\) => \{[\s\S]{0,400}dockable\.findIndex/);
+    expect(body, "the session started computing the cursor itself — that is the page's board")
+      .not.toContain("const nextKey");
   });
 
   /**
@@ -235,7 +261,13 @@ describe("⚠️ the takeover survives; the pane's orphans do not", () => {
    * gap with no surface at all.
    */
   it("the pane's hand-off survives for exactly the journeys it is declared for", () => {
-    expect(page, "the pane lost its hand-off entirely").toContain("openFlowCards([card])");
+    /* ⚠️ THE LAW IS THE SAME AND THE ANCHOR NOW SPANS THE SEAM, so this follows the BEHAVIOUR
+       rather than the file: the session must reach for the hand-off, and the page must wire that
+       reach to the real `openFlowCards`. Asserting only the session's half would pass on a page
+       that had quietly stopped mounting anything — which is the failure this lock exists for. */
+    expect(hook, "the pane lost its hand-off entirely").toContain("host.openFlow(card)");
+    expect(page, "the page stopped wiring the hand-off to the takeover")
+      .toMatch(/openFlow: \(c\) => openFlowCards\(\[c\]\)/);
   });
 
   it.each(["commitSendMaterials", "commitSweep", "dismissRecordSweep", "leaveMaterialsUnrecorded"])(
@@ -296,10 +328,13 @@ describe("⚠️ the chase commits with a real day", () => {
  */
 describe("⚠️ a question the gate can require is a question the form asks", () => {
   it("the parcel section is drawn from the declaration, not from what should go next", () => {
-    expect(page, "the parcel section stopped reading the declaration")
-      .toContain('requiredFor(journeyKind(paneCard)).includes("unit")');
-    expect(page, "`sendSpecFor` decides the parcel section again — a fill-in has none")
-      .not.toContain("sample={!!sendSpecFor(paneCard)}");
+    /* ⚠️ THE LAW IS UNCHANGED — the form draws what the gate requires. The journey argument moved
+       into the session with the rest of the pane, and the pane's card is the hook's parameter, so
+       the identifier is `card`. Both halves are read from the one file that now holds them. */
+    expect(hook, "the parcel section stopped reading the declaration")
+      .toContain('requiredFor(journeyKind(card)).includes("unit")');
+    expect(hook, "`sendSpecFor` decides the parcel section again — a fill-in has none")
+      .not.toContain("sample={!!sendSpecFor(card)}");
   });
 
   /**

@@ -48,8 +48,11 @@ describe("⚠️ the tile shows the whole recorded list", () => {
    * invisible to the unit assertions above, which never see the call site.
    */
   it("the pane reads the query's own field through the one formatter, and joins nothing itself", () => {
-    const page = readFileSync(join(__dirname, "../components/todo/ToDoPage.tsx"), "utf8");
-    const block = sliceBetween(page, "sentPreviously: (() => {", "})(),", "the sentPreviously block");
+    /* ⚠️ THE LAW IS UNCHANGED: the call site hands the field over untouched. Only its home moved —
+       the pane's journey argument left `ToDoPage` for `useTaskPaneSession` (Pack B Phase 2) so the
+       calendar can mount the same pane. The block is read whole, exactly as before. */
+    const src = readFileSync(join(__dirname, "../components/todo/useTaskPaneSession.tsx"), "utf8");
+    const block = sliceBetween(src, "sentPreviously: (() => {", "})(),", "the sentPreviously block");
     expect(block).toContain("formatQueryMaterials(q?.materialsWanted)");
     for (const local of [".slice(", ".join(", ".map(", "[0]"]) {
       expect(block, `the tile does its own ${local} — it is showing a subset`).not.toContain(local);
