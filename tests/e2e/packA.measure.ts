@@ -60,3 +60,61 @@ test("Pack A — the console is clean on /todo", async ({ page }) => {
   console.log(`  console errors: ${real.length ? JSON.stringify(real.slice(0, 3)) : "none"}`);
   expect(real, "the page threw at runtime").toEqual([]);
 });
+
+
+/**
+ * Pack A2 — `figureFor` derives sleep, and the figures are unchanged by it.
+ *
+ * ⚠️ THIS IS THE REST HALF OF THE OBLIGATION. The mid-save half is proved deterministically in
+ * `src/lib/taskCardFactsSleep.test.ts` — calling the derivation with and without
+ * `hiddenUserTaskId` — because a browser race observes ONE save and cannot speak for the next.
+ * What the page adds is that the change did not disturb what a reader sees, and that the sleep
+ * branch still fires through the new derivation rather than being quietly skipped.
+ */
+test("Pack A2 — /todo's figures are unchanged, and sleep still resolves", async ({ page }) => {
+  const errs: string[] = [];
+  page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
+  page.on("pageerror", (e) => errs.push(String(e)));
+  await openRoute(page, "/todo", { width: 1440, height: 900 });
+
+  const r = await page.evaluate(() => {
+    const vis = (s: string) => Array.from(document.querySelectorAll(s))
+      .filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement[];
+    const rows = vis(".row");
+    const text = (e: Element | null) => (e?.textContent ?? "").trim();
+    return {
+      rows: rows.length,
+      figures: rows.map((e) => text(e.querySelector("[class*='fig'], .r-fig"))).filter(Boolean),
+      /* a card whose figure is the SLEEP branch — "BACK 8 Sep" and friends */
+      backFigures: rows.map((e) => text(e.querySelector("[class*='fig'], .r-fig")))
+        .filter((t) => /back/i.test(t)),
+      paneMounted: vis(".tpn").length,
+      paneBand: vis(".tpn .band").length,
+    };
+  });
+  console.log(`  rows ${r.rows} · figures ${JSON.stringify(r.figures.slice(0, 4))}`);
+  console.log(`  sleep-branch figures: ${JSON.stringify(r.backFigures)} · pane ${r.paneMounted}/${r.paneBand}`);
+
+  /* ⚠️ POPULATION FIRST — a page with no rows satisfies every claim below by having nothing. */
+  expect(r.rows, "no rows — the figure claims would be vacuous").toBeGreaterThan(0);
+  expect(r.figures.length, "no figure rendered — figureFor produced nothing").toBeGreaterThan(0);
+  /* the eighteen rows Pack A measured, and the same pane */
+  expect(r.rows).toBe(18);
+  expect(r.paneMounted).toBe(1);
+  expect(r.paneBand).toBeGreaterThan(0);
+
+  /* ⚠️ THE SLEEP BRANCH IS REPORTED, NOT ASSERTED, AND THE DIFFERENCE IS DELIBERATE. This account
+     holds no snoozed card, so `backFigures` is empty and an assertion over it would pass by
+     measuring nothing — the vacuous-check family this repo records. The branch IS proved, in
+     `taskCardFactsSleep.test.ts`, on a fixture with a genuinely sleeping flag; what the page can
+     honestly add is that nothing else moved. Anyone who snoozes a card on the harness account
+     should expect a "BACK …" figure here, and this line will start reporting it. */
+  console.log(r.backFigures.length
+    ? `  sleep branch exercised on the page: ${JSON.stringify(r.backFigures)}`
+    : "  ⚠️ sleep branch NOT exercised — no snoozed card on this account; proved in taskCardFactsSleep.test.ts instead");
+
+
+  const real = errs.filter((e) => !/favicon|net::ERR|Download the React DevTools/i.test(e));
+  console.log(`  console errors: ${real.length ? JSON.stringify(real.slice(0, 3)) : "none"}`);
+  expect(real, "the page threw at runtime").toEqual([]);
+});

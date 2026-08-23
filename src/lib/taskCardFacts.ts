@@ -21,9 +21,10 @@
  * hands the page; passing it whole keeps every call site to two arguments and means adding a field
  * later does not re-open every signature.
  */
-import type { Activity, Agent, Manuscript, Query, QueryStatus, UserTask } from "../types";
+import type { Activity, Agent, Manuscript, Query, QueryStatus, TaskFlag, UserTask } from "../types";
 import type { BoardCard } from "./todoBoard";
 import { rowFigure, daysSince, waitAnchorMs, RowFigure, cardBucket } from "./todoBuckets";
+import { snoozedCards, boardEligible } from "./todoColumns";
 import { queriesMissingMaterials } from "./queryMaterialsGap";
 import { recordSweepRow, type RecordSweepRow } from "./materialsSweep";
 import { sendSpecFor } from "./todoDock";
@@ -65,7 +66,15 @@ export const isoOf = (v: unknown): string | undefined => {
 export function figureFor(
   c: BoardCard,
   db: TaskData,
-  snoozedKeys: ReadonlySet<string>,
+  /**
+   * ⚠️ THE FLAGS ARE THEIR OWN ARGUMENT, NOT A SIXTH FIELD ON `TaskData` (Pack A2), and the reason
+   * is memoisation rather than tidiness. `TaskData` is memoised on the page and
+   * `listRowInputs`' `useCallback` depends on it — and Pack A found that callback's IDENTITY
+   * decides when `TaskList` re-renders. `listRowInputs` does not read flags, so folding them into
+   * the bundle would re-render the list every time any flag changed, for a value it never uses.
+   * One argument, to the one function that needs it.
+   */
+  flags: TaskFlag[],
   now: number,
 ): RowFigure {
   const ag = c.agentId ? db.agents.find((a) => a.id === c.agentId) : undefined;
@@ -74,7 +83,29 @@ export function figureFor(
   const statedWeeks = typeof ag?.responseTimeWeeks === "number" && ag.responseTimeWeeks > 0
     ? ag.responseTimeWeeks : undefined;
   const ballHolder = q ? getPrimaryAction(q.status as QueryStatus).ballHolder ?? null : null;
-  if (snoozedKeys.has(c.key)) {
+  /**
+   * ⚠️ "IS THIS CARD ASLEEP?" IS ANSWERED HERE NOW, FROM DATA (Pack A2). It used to arrive as a
+   * `snoozedKeys` set the page built from `boardCols.snoozed` — which reaches back through
+   * `assembleBoardColumns` to `pendingSaveId`, page state, and that is what stopped
+   * `useTaskPaneSession` building its journey from `(card, data)` alone.
+   *
+   * ⚠️ IT CALLS THE SAME FUNCTION `boardColumns` CALLS, deliberately, rather than re-expressing the
+   * predicate. `boardColumns` builds its column as
+   * `boardEligible(snoozedCards({ flags, queries, agents, manuscripts, userTasks, nowMs }))`, and
+   * every one of those six is data. Writing a cheaper card→flag test here would have been a
+   * SECOND expression of the rule, and equality with the column would then be a claim to prove
+   * rather than a property of construction — which is the whole fault this extraction removes.
+   *
+   * ⚠️ AND `pendingSaveId` NEVER REACHED THIS COLUMN. `assembleBoardColumns` filters `userTasks`
+   * by `hiddenUserTaskId` only for `assembleBoard` — the LANES — and hands `boardColumns` the
+   * UNFILTERED `input.userTasks`. So the two readings were never capable of disagreeing about
+   * sleep, mid-save or at rest; the parameter carried a dependency the value never had.
+   */
+  const asleep = boardEligible(snoozedCards({
+    flags, queries: db.queries, agents: db.agents,
+    manuscripts: db.manuscripts, userTasks: db.userTasks, nowMs: now,
+  })).some((x) => x.key === c.key);
+  if (asleep) {
     return rowFigure({ card: c, backOn: (c.due || "").replace(/^BACK\s+/i, "") });
   }
   /* ⚠️ AN OFFER'S FIGURE IS THE REPLY-BY, and it may be NEGATIVE — the card reads "Reply was due /

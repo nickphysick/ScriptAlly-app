@@ -886,16 +886,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      clean `tsc`, and two coercions of one fact in a file whose lifted half exists to prevent
      exactly that. The body is unchanged; only its home is. */
 
-  /* ⚠️ LIFTED TO `lib/taskCardFacts.ts` (tasks-workflow, Pack A) — this is a WRAPPER, not a
-     reimplementation, and the call sites below are untouched. The body moved verbatim; what was
-     captured scope is now parameters. It had to leave because the task pane's journey is built
-     from it and the LIST reads it too (`paneFacts`, and `boardCols` which the subtitle, FILTERS
-     and badge share), so a pane hook owning a copy would be a second reading of one fact.
-     ⚠️ `boardCols.snoozed` AND `now` STAY THE PAGE'S. The keys are derived here, from the page's
-     own board, so the lifted function cannot drift onto a different board than the rows show. */
-  const snoozedKeys = new Set(boardCols.snoozed.map((x) => x.key));
+  /* ⚠️ LIFTED TO `lib/taskCardFacts.ts` (Pack A) — a WRAPPER, not a reimplementation, and the call
+     site below is untouched. The body moved verbatim; what was captured scope became parameters.
+     ⚠️ `snoozedKeys` IS GONE (Pack A2). The page used to build it from `boardCols.snoozed` and hand
+     it down — which tied the lifted function to a board derived with `pendingSaveId`, page state,
+     and that is what stopped `useTaskPaneSession` building its journey from `(card, data)` alone.
+     `figureFor` answers "is this card asleep?" itself now, by calling the SAME `snoozedCards` that
+     `boardColumns` calls. Nothing about the page's board changed; one argument left this line. */
   function figureFor(c: BoardCard): RowFigure {
-    return libFigureFor(c, taskData, snoozedKeys, now);
+    return libFigureFor(c, taskData, taskFlags, now);
   }
 
   const seedRows = React.useCallback((card: BoardCard | null): MaterialRow[] => {
