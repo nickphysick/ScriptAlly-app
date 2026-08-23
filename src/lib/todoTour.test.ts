@@ -123,6 +123,23 @@ describe("⚠️ EVERY TOUR TARGET STILL EXISTS — a stop that misses is droppe
        RETIRED on 9 August (tasks-consolidation P1). A stop that fails to appear teaches nothing;
        this one teaches something untrue. Reported for a decision, not patched here. */
     '[aria-expanded][class*="asec"], .ws-navrow',
+    /**
+     * ⚠️ THE CARD STOP, AND IT APPEARS TO BREAK THE RULE ABOVE — so here is why it does not. This
+     * list "may only ever shrink", and a third entry looks like a census that has stopped counting.
+     *
+     * But this stop did not BECOME stale; it was ALREADY stale and the census could not see it.
+     * None of `.tdb-tile`, `.tdb-gcard`, `.tdb-lrow` has been rendered since the board became a
+     * grouped list. The one keeping this assertion green was `.tdb-tile`, written by
+     * `overlayCards` — a renderer that lost its last caller on 6 Aug and drew nothing thereafter.
+     * Deleting that dead code (completion-paths Phase 2) is what exposed the stop. **A source
+     * census cannot distinguish a class the app RENDERS from one a dead function WRITES**, which
+     * is the real lesson and is worth more than this entry.
+     *
+     * So the count of dead stops did not go from two to three. It was three, and is now honest.
+     * Retiring or rewriting it is a product decision — its copy describes hover actions and batches
+     * expanding in place, behaviour the list does not have. Left standing, named, reported.
+     */
+    ".tdb-tile, .tdb-gcard, .tdb-lrow",
   ];
 
   it("each stop names at least one class the app still renders or styles", () => {

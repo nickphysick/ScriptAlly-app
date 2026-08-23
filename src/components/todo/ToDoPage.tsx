@@ -119,7 +119,7 @@ import { paneCommits, paneCommitValues } from "../../lib/paneCommit";
 import { CLOSE_REASONS } from "../../lib/todoJourneys";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
-import { clampSnooze, cardLane, snoozeVia, completionVia, snoozeDateLabel } from "../../lib/todoActions";
+import { clampSnooze, snoozeVia, completionVia, snoozeDateLabel } from "../../lib/todoActions";
 import { focusesSearch, isTypingTarget } from "../../lib/taskShortcuts";
 import { activityEventLabel } from "../../lib/activityEvent";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
@@ -220,11 +220,6 @@ const G3_COPY: Record<string, { rest: (n: number) => string; sub: string }> = {
   dq_mswl: { rest: (n) => ` agent${n === 1 ? "" : "s"} missing a wish list`, sub: "Their wish list is how we tell you who’s worth querying." },
 };
 
-type Overlay =
-  | { kind: "receipt"; lane: "do" | "hk" | "nt"; title: string; line: string; undo?: () => void | Promise<void>; edit?: () => void }
-  | { kind: "dismissed"; lane: "do" | "hk" | "nt"; text: string; undo: () => void | Promise<void>; never?: () => void }
-  | { kind: "fork"; single: boolean }
-  ;
 
 /** THE SECTION HEADING (todo rebuild P1 — ref design-refs/scriptally-todo-sectioned.html).
  *  SECTIONING IS TYPOGRAPHIC: a Playfair heading with its count beside it in mono, closed by a
@@ -351,7 +346,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [pulsing, setPulsing] = useState<string | null>(null);
   // THE completion surface — the focus flow (queue of one for a card click; a set for the two walks).
   const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" | "weeklyReview"; ritual?: boolean } | null>(null);
-  const [flowPrefill, setFlowPrefill] = useState<{ sentDate?: string; method?: string; materials?: string[] } | undefined>(undefined);
   // VI P1 — "Done today" collapses by default to the ✓ row; expanding is in place, session-only.
   /* (showDone was the corner panel's done-row toggle — retired with it in workspace P3.) */
   // ── workbench shell state. View is a DEVICE UI pref → the sa. localStorage convention.
@@ -502,15 +496,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   };
   // Quick-rail card states. Receipts/dismissed render as STANDALONE cards (the live card vanishes the
   // moment the write lands — the board is derived); fork/flip replace a still-live card's body.
-  const [overlays, setOverlays] = useState<Record<string, Overlay>>({});
-  const setOverlay = (key: string, o: Overlay) => setOverlays((s) => ({ ...s, [key]: o }));
-  const clearOverlay = (key: string) => setOverlays((s) => { const n = { ...s }; delete n[key]; return n; });
 
   /**
    * ⚠️ THE WRITE LAYER IS SHARED (Pack C Phase 1). `commitFromPane` and its eight arms, `quickDone`
    * and `doneToast` moved to `useTaskCommit` so the calendar can mount the same pane and reach the
-   * same writers. Nothing about this page's behaviour changes: it passes the overlay sink it always
-   * had, so the card receipt is drawn exactly as before.
+   * same writers.
+   *
+   * ⚠️ AND THE TOAST IS THE ONLY RECEIPT (completion-paths Phase 2). The card overlay this page used
+   * to draw is gone — `overlayCards` had rendered nothing since 6 Aug, when the board became a
+   * grouped list and its last caller went with it, so `setOverlay` was writing into state nobody
+   * read. State written and never read is a trap: it looks like a feature, so the next reader
+   * preserves it. If a receipt is ever wanted back it should be designed for the LIST, not
+   * resurrected from a vestige.
    *
    * ⚠️ `quickDone` IS A `const` NOW, not a hoisted declaration. Anything that calls it must sit
    * below this line — see the TDZ note in CLAUDE.md, and the audit in the run report.
@@ -520,8 +517,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     rememberUndo,
     confirmAsk,
     openFlow: (c) => openFlowCards([c]),
-    /* the card-surface receipt — this page HAS cards to draw it on, so it supplies the sink */
-    overlay: { set: setOverlay, clear: clearOverlay, prefill: setFlowPrefill },
   });
   // Fresh activities for late undo closures (the created nudge row lands AFTER the click's snapshot).
   const activitiesRef = useRef(activities);
@@ -628,29 +623,23 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        a guarantee. `clampSnooze` is the single clamp now; every path reaches it, and its ceilings
        are unit-tested away from this file. */
     ({ days, when } = clampSnooze(c, days, when));
-    const lane = cardLane(c);
-    const text = `Snoozed — back ${when}.`;
     if (snoozeVia(c) === "user-task-flag") {
       const key = { taskType: USER_TASK_FLAG_TYPE, queryId: c.userTaskId! };
       upsertTaskFlag(key, { snoozedUntil: new Date(Date.now() + days * 86400000).toISOString(), bumpSnooze: true });
       const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
-      setOverlay(c.key, { kind: "dismissed", lane, text, undo });
-      flash(`Snoozed until ${snoozeDateLabel(days)}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+      flash(`Snoozed until ${snoozeDateLabel(days)}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
       return;
     }
     if (snoozeVia(c) !== "dismiss-task") return;
     dismissTask(c.taskType!, c.relatedRecordId!, "fixed snooze", days);
     const key = flagKeyForTask(c.taskType, c.relatedRecordId);
     const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
-    setOverlay(c.key, { kind: "dismissed", lane, text, undo });
-    flash(`Snoozed until ${snoozeDateLabel(days)}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+    flash(`Snoozed until ${snoozeDateLabel(days)}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
   }
   function snoozeGroup(g: HkGroup, days: number, when: string) {
     g.members.forEach((m) => m.agentId && dismissTask("data_quality_poor", m.agentId, "fixed snooze", days));
     const undo = async () => { g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null, unbumpSnooze: true })); };
-    const gkey = `group-${g.rule}`;
-    setOverlay(gkey, { kind: "dismissed", lane: "hk", text: `Snoozed — back ${when}.`, undo });
-    flash(`Snoozed until ${snoozeDateLabel(days)}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(gkey); flash("Restored"); } });
+    flash(`Snoozed until ${snoozeDateLabel(days)}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
   }
   // the per-type hide — the SAME single suppression point Task settings drives (restorable there)
   function hideType(c: BoardCard, ruleKey: string) {
@@ -1168,21 +1157,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     g.members.forEach((m) => m.agentId && dismissTask("data_quality_poor", m.agentId, "fixed snooze", 7));
     const undo = async () => { g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null, unbumpSnooze: true })); };
     const key = `group-${g.rule}`;
-    setOverlay(key, { kind: "dismissed", lane: "hk", text: "Snoozed — back in a week.", undo });
-    flash(`Snoozed until ${snoozeDateLabel(7)}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(key); flash("Restored"); } });
+    flash(`Snoozed until ${snoozeDateLabel(7)}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
   }
   function forkNeverThese(g: HkGroup) {
     g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: MUTED_UNTIL }));
     const undo = async () => { g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null })); };
     const key = `group-${g.rule}`;
-    setOverlay(key, { kind: "dismissed", lane: "hk", text: "Muted — we won’t ask about these agents again.", undo });
-    flash(`Hidden — ${HK_RULES[g.rule].label}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(key); flash("Restored"); } });
+    flash(`Hidden — ${HK_RULES[g.rule].label}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
   }
   function forkNeverRule(g: HkGroup) {
     // rule-mute now carries its own Undo (the finishing pack's compensator-table gap): the
     // reversal is the profile filter-out — the same write unmuteRule performs.
     updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), g.rule])) });
-    clearOverlay(`group-${g.rule}`);
     const undo = () => updateUserProfile({ mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter((r) => r !== g.rule) });
     flash(`Hidden — ${HK_RULES[g.rule].label}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
   }
@@ -1193,14 +1179,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     if (mode === "notNow") {
       dismissTask(c.taskType, c.relatedRecordId, "fixed snooze", 7);
       const snoozeUndo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
-      setOverlay(c.key, { kind: "dismissed", lane: "hk", text: "Snoozed — back in a week.", undo: snoozeUndo });
       /* the same formatter every other receipt uses — "next week" was right for a fixed 7 days
          and would still have been a second way of saying a date the app now states once */
-      flash(`Snoozed until ${snoozeDateLabel(7)}`, { label: "Undo", fn: async () => { await snoozeUndo(); clearOverlay(c.key); flash("Restored"); } });
+      flash(`Snoozed until ${snoozeDateLabel(7)}`, { label: "Undo", fn: async () => { await snoozeUndo(); flash("Restored"); } });
     } else {
       upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL });
-      setOverlay(c.key, { kind: "dismissed", lane: "hk", text: "Muted — we won’t ask about this query again.", undo });
-      flash(`Hidden — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+      flash(`Hidden — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
     }
   }
   // hero-pair P4 — THE INLINE COMPOSER (todo-composer.html §4): the browser prompt was a
@@ -1701,7 +1685,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { void toast.action!.fn(); dismissToast(); }}>{toast.action.label}</button>}
         </div>
       )}
-      {flow && <FocusFlow items={flow.items} mode={flow.mode} ritual={flow.ritual} onClose={() => { setFlow(null); setFlowPrefill(undefined); }} onNavigate={onNavigate} onToast={flash} prefill={flowPrefill} />}
+      {flow && <FocusFlow items={flow.items} mode={flow.mode} ritual={flow.ritual} onClose={() => setFlow(null)} onNavigate={onNavigate} onToast={flash} />}
       {/* ⚠️ FocusedSession IS RETIRED (board+dock P4). It was a SECOND work surface, and two of
           them would have had to agree about what "done" means — the first time they disagreed,
           one would have been silently wrong. The dock is the one surface, and "Focused session"
@@ -2740,41 +2724,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setFlow({ items: board.do.map((card) => ({ kind: "card" as const, card })), mode: "weeklyReview" });
   }
 
-  // Standalone receipt/dismissed cards — the live card vanished with the write; the receipt persists.
-  function overlayCards(lane: "do" | "hk" | "nt") {
-    return Object.entries(overlays)
-      .filter(([, o]) => (o.kind === "receipt" || o.kind === "dismissed") && o.lane === lane)
-      .map(([key, o]) => {
-        if (o.kind === "receipt") return (
-          <div key={`ov-${key}`} className="tdb-tile receipt">
-            <div className="tdb-frame">
-              <div className="tdb-receiptbody">
-                <div className="tdb-rk"><span className="tdb-rtick">✓</span><span className="tdb-rt">{o.title}</span></div>
-                <div className="tdb-rlog">{o.line}<br />Wrong? Fix it before you move on.</div>
-                <div className="tdb-racts">
-                  {o.edit && <button type="button" className="tdb-ra" onClick={o.edit}>Edit details</button>}
-                  {o.undo && <button type="button" className="tdb-ra" onClick={async () => { await o.undo!(); clearOverlay(key); }}>Undo</button>}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-        if (o.kind !== "dismissed") return null;
-        return (
-          <div key={`ov-${key}`} className="tdb-tile dismissed">
-            <div className="tdb-frame">
-              <div className="tdb-dismissbody">
-                <div className="tdb-dt">{o.text}</div>
-                <div className="tdb-dact">
-                  <button type="button" className="tdb-ra" onClick={async () => { await o.undo(); clearOverlay(key); }}>Undo</button>
-                  {o.never && <button type="button" className="tdb-ra" onClick={o.never}>Never ask</button>}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      });
-  }
 
 
 

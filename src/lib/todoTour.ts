@@ -81,6 +81,13 @@ export const TOUR_STOPS: TourStop[] = [
     p: "Every box ticked turns the dial in your favour \u2014 open it from the banner, or the chip beneath Begin.",
     cta: "Next →",
   },
+  /* ⚠️ THIS STOP IS DEAD AND IS LEFT STANDING (completion-paths Phase 2). None of the three
+     classes has been rendered since the board became a grouped list; `.tdb-tile` survived only
+     inside `overlayCards`, a renderer with no caller, which is why the census could not see it.
+     Retiring it is a product decision — its copy describes hover actions and batches expanding in
+     place, so retargeting the selector at a list row would make the tour state something the app
+     does not do, and new copy about the list is a decision rather than a repair. Named in
+     `todoTour.test.ts`'s KNOWN_STALE and reported. */
   {
     sel: ".tdb-tile, .tdb-gcard, .tdb-lrow",
     h: "Every card works the same.",

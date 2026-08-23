@@ -13,22 +13,16 @@
  * entrances."* Nothing in this pack writes a completion inline, and the four entrances are still
  * four.
  *
- * ⚠️ THE OVERLAY IS AN OPTIONAL SINK, AND THAT IS A RULING RATHER THAN A CONVENIENCE. On `/todo`
- * the card overlay is a receipt drawn ON A BOARD CARD, additional to the toast. The calendar has no
- * board cards, so it passes no sink and the toast alone carries the receipt — including Undo, which
- * is what makes it a receipt rather than a notice. **This is one primitive with one surface-specific
- * decoration that only exists where it can be drawn**: not a no-op, and not a second invented
- * receipt. Do not add another.
+ * ⚠️ THE TOAST IS THE ONLY RECEIPT, ON EVERY SURFACE (completion-paths Phase 2). There was a card
+ * overlay, drawn beside the toast on a board card. It had rendered NOTHING since 6 Aug: the board
+ * became a grouped list, `overlayCards` lost its last caller, and `setOverlay` went on writing into
+ * state nobody read. Pack C then threaded that dead sink through here as an optional parameter so
+ * the calendar could decline it — preserving, carefully, a thing that did not exist.
  *
- * ⚠️ EVERY REACH THE SINK COVERS IS DECORATION, VERIFIED BEFORE THE SHAPE WAS CHOSEN (Phase 0).
- * `set` is only ever called AFTER a completed write; `clear` only ever inside an undo closure; and
- * `prefill` + the takeover it opens are reachable ONLY through the receipt's own `edit`, which is
- * handed nowhere else. With no sink, `edit` is constructed and never reachable — so a quick
- * mark-sent on the calendar has no "Edit details", and nothing else differs.
- *
- * ⚠️ THE SINK IS OPTIONAL IN BOTH DIRECTIONS. The undo closures call `clear` unconditionally, so a
- * missing sink must SKIP the clear rather than throw inside an undo — a throw there would strand a
- * writer mid-reversal, which is the one place an error is least recoverable.
+ * It is all gone: the state, both writers, the renderer, the sink, and the "Edit details" closure
+ * that was handed to the receipt and to nothing else. **State written and never read is worse than
+ * absent, because it looks like a feature and the next reader preserves it.** If a receipt is ever
+ * wanted back it should be designed for the list, not resurrected from a vestige.
  */
 import React from "react";
 import { useScriptAllyDb } from "../../lib/db";
@@ -37,8 +31,8 @@ import { JourneySendValues } from "../../lib/paneJourney";
 import { QueryStatus, ActivityType, Agent } from "../../types";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import { completionVia } from "../../lib/todoActions";
-import { quickSendPayload, quickNudgePayload, markSentWriteArgs, nudgeWriteArgs, receiptLine,
-  materialOptsForTask, priorSameTypeSend, duplicateSendPrompt, journeyEventISO } from "../../lib/todoWalk";
+import { quickSendPayload, quickNudgePayload, markSentWriteArgs, nudgeWriteArgs,
+  priorSameTypeSend, duplicateSendPrompt, journeyEventISO } from "../../lib/todoWalk";
 import { isBulkCard } from "../../lib/paneGate";
 import { paneJourneyKind } from "./useTaskPaneSession";
 import { type RecordSweepRow, sweepWrites, sweepActLabel } from "../../lib/materialsSweep";
@@ -46,15 +40,6 @@ import { type MaterialRow, materialsWantedFromRows, summaryFromRows, willRecordT
 import { notifyGroups, reminderFields } from "../../lib/offerNotify";
 import { flagKeyForTask } from "../../lib/taskFlags";
 import { CLOSE_REASONS } from "../../lib/todoJourneys";
-import { localYMD } from "../../lib/shellSidebar";
-
-/** the receipt a board card can draw — `/todo` supplies one, the calendar has nowhere to draw it */
-export interface TaskOverlaySink {
-  set: (key: string, receipt: any) => void;
-  clear: (key: string) => void;
-  /** only reachable through the receipt's own `edit` — see the head note */
-  prefill: (p: { sentDate?: string; method?: string; materials?: string[] }) => void;
-}
 
 export interface TaskCommitHost {
   flash: (msg: string, action?: { label: string; fn: () => void | Promise<void> }) => void;
@@ -64,7 +49,6 @@ export interface TaskCommitHost {
   confirmAsk: (msg: string, opts?: { confirmLabel?: string; cancelLabel?: string }) => Promise<boolean>;
   /** the `offer`/`fix` hand-off, and the takeover a receipt's `edit` re-opens */
   openFlow: (card: BoardCard) => void;
-  overlay?: TaskOverlaySink;
 }
 
 export interface TaskCommit {
@@ -80,17 +64,12 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
     recordMaterialsSent, recordOfferDecision, undoQueryStatus, logNudge, deleteActivity,
     upsertTaskFlag, resolveTaskFlag,
   } = useScriptAllyDb();
-  const today = localYMD(Date.now());
   /* ⚠️ THE HOOK HOLDS ITS OWN REF, for the same reason the page did: the nudge undo and the
      duplicate-send guard read the activity feed from inside an async closure, where the array
      captured at render is already stale. */
   const activitiesRef = React.useRef(activities);
   activitiesRef.current = activities;
   const { flash, rememberUndo, confirmAsk } = host;
-  const setOverlay = (key: string, receipt: any) => host.overlay?.set(key, receipt);
-  const clearOverlay = (key: string) => host.overlay?.clear(key);
-  const setFlowPrefill = (p: { sentDate?: string; method?: string; materials?: string[] }) => host.overlay?.prefill(p);
-  const openFlowCards = (cards: BoardCard[]) => { if (cards[0]) host.openFlow(cards[0]); };
 
   function doneToast(c: BoardCard, fn: () => Promise<void>) {
     rememberUndo(c.key, fn);
@@ -113,8 +92,7 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
         return;
       }
       const undo = () => updateUserTask(c.userTaskId!, { done: false });
-      setOverlay(c.key, { kind: "receipt", lane: "nt", title: "Note done", line: `${c.title} — struck through on Today.`, undo });
-      doneToast(c, async () => { await undo(); clearOverlay(c.key); flash("Restored"); });
+      doneToast(c, async () => { await undo(); flash("Restored"); });
       return;
     }
     const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
@@ -123,8 +101,7 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
       const prev = q.status as QueryStatus;
       await updateQueryStatus(q.id, QueryStatus.NO_RESPONSE, "Closed as no response from the quick rail");
       const undo = () => undoQueryStatus(q.id, prev, QueryStatus.NO_RESPONSE);
-      setOverlay(c.key, { kind: "receipt", lane: "hk", title: `${c.who || "Query"} — closed`, line: "Logged as no response — not a rejection, so your response rate stays honest." , undo });
-      doneToast(c, async () => { await undo(); clearOverlay(c.key); flash("Restored"); });
+      doneToast(c, async () => { await undo(); flash("Restored"); });
       return;
     }
     if (via === "log-nudge") {
@@ -138,8 +115,7 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
           .sort((x, y) => new Date(y.date).getTime() - new Date(x.date).getTime());
         if (acts[0]?.id) await deleteActivity(acts[0].id);
       };
-      setOverlay(c.key, { kind: "receipt", lane: "do", title: c.title, line: receiptLine(p, today), undo });
-      doneToast(c, async () => { await undo(); clearOverlay(c.key); flash("Restored"); });
+      doneToast(c, async () => { await undo(); flash("Restored"); });
       return;
     }
     const action = getPrimaryAction(q.status as QueryStatus);
@@ -151,18 +127,13 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
     const p = quickSendPayload({ cardKey: c.key, label: c.title, taskType: c.taskType, queryId: q.id, targetStatus: action.target as QueryStatus, isResubmit: action.markKind === "resubmit", method: q.sendMethod, nowIso });
     const prev = q.status as QueryStatus;
     await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path
-    const line = receiptLine(p, today, materialOptsForTask(c.taskType));
     const undo = () => undoQueryStatus(q.id, prev, p.targetStatus);
-    const edit = async () => {
-      // "Edit details" = undo the quick write, then re-open the journey PRE-FILLED with what was
-      // logged — saving again writes once, honestly.
-      await undo();
-      clearOverlay(c.key);
-      setFlowPrefill({ sentDate: p.sentDate.slice(0, 10), method: p.method, materials: p.materials });
-      openFlowCards([c]);
-    };
-    setOverlay(c.key, { kind: "receipt", lane: "do", title: c.title, line, undo, edit });
-    doneToast(c, async () => { await undo(); clearOverlay(c.key); flash("Restored"); });
+    /* ⚠️ "EDIT DETAILS" WENT WITH THE RECEIPT (completion-paths Phase 2), and it could not have gone
+       anywhere else: the closure was handed to `setOverlay` and to nothing else, so it was already
+       unreachable the day `overlayCards` lost its caller. Re-opening the journey pre-filled with
+       what was just logged is a good affordance and it belongs to whatever surface next draws a
+       receipt — designed for that surface, not carried forward as an orphan. */
+    doneToast(c, async () => { await undo(); flash("Restored"); });
   }
   async function writeQueryMaterials(card: BoardCard, rows: MaterialRow[]): Promise<(() => Promise<void>) | null> {
     const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
@@ -177,13 +148,7 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
     const undo = await writeQueryMaterials(card, v.recordRows);
     /* nothing ticked is not a save — the escape hatch is how you leave without recording */
     if (!undo) return false;
-    setOverlay(card.key, {
-      kind: "receipt", lane: "hk",
-      title: card.who || "Recorded",
-      line: `${willRecordText(v.recordRows, "and") ?? "Materials"} — on your query to ${card.who || "the agent"}.`,
-      undo,
-    });
-    doneToast(card, async () => { await undo(); clearOverlay(card.key); flash("Restored"); });
+    doneToast(card, async () => { await undo(); flash("Restored"); });
     return true;
   }
   async function commitRecordSweep(card: BoardCard, rows: RecordSweepRow[]): Promise<boolean> {
@@ -194,13 +159,7 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
     const undo = async () => {
       for (const w of writes) await updateQuery(w.queryId, { materialsWanted: before.get(w.queryId) ?? [] });
     };
-    setOverlay(card.key, {
-      kind: "receipt", lane: "hk",
-      title: sweepActLabel(writes.length),
-      line: "Recorded on your queries — nothing else about them changed.",
-      undo,
-    });
-    doneToast(card, async () => { await undo(); clearOverlay(card.key); flash("Restored"); });
+    doneToast(card, async () => { await undo(); flash("Restored"); });
     return true;
   }
   async function commitOfferFromPane(card: BoardCard, v: JourneySendValues): Promise<boolean> {

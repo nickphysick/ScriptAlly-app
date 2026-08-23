@@ -161,9 +161,13 @@ describe("⚠️ WHICH WRITE PATH A SNOOZE TAKES — decided once", () => {
   });
 
   it("the page routes both branches through it", () => {
+    /* ⚠️ THE LAW IS THE ROUTING, AND IT IS UNCHANGED: both branches are decided by `snoozeVia`
+       rather than by an if-ladder in the component. The third assertion named `cardLane(c)`, which
+       was never part of that claim — it computed the LANE for the card receipt, and the receipt is
+       gone (completion-paths Phase 2), so the call went with it. Dropping it narrows nothing this
+       case was written to protect. */
     expect(page).toContain('snoozeVia(c) === "user-task-flag"');
     expect(page).toContain('snoozeVia(c) !== "dismiss-task"');
-    expect(page).toContain("cardLane(c)");
   });
 });
 
