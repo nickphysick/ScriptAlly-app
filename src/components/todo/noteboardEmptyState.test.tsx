@@ -120,6 +120,27 @@ describe("⚠️ the arrangement — one ordered comparison, never per-section p
   });
 });
 
+describe("⚠️ ONE composer, three entry points — one code path, never a second component", () => {
+  it("the CTA takes an opener as a PROP; it does not know how to open anything itself", () => {
+    /* ⚠️ THE STRUCTURAL HALF of the identity claim the browser probe measures. The empty state
+       cannot mount a composer even by mistake: it holds no composer state, imports no composer,
+       and calls whatever `onPin` it is given — which the page wires to the SAME `openComposer`
+       the toolbar button and the ghost tile call. A lookalike second composer would pass a
+       presence check; it cannot exist at all if the component has no way to build one. */
+    const empty = decls(readFileSync(join(here, "noteboardEmptyState.tsx"), "utf8"));
+    expect(empty).toContain("onPin: () => void");
+    expect(empty).toContain("onClick={onPin}");
+    for (const forbidden of ["useState", "nb-compose", "textarea", "setCompose"]) {
+      expect(empty, forbidden).not.toContain(forbidden);
+    }
+    /* and the page hands all three doors the same function */
+    const page = decls(readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8"));
+    expect(page).toContain("onPin={() => openComposer()}");
+    expect([...page.matchAll(/openComposer\(\)/g)].length).toBeGreaterThanOrEqual(3);
+    expect([...page.matchAll(/["\s`]nb-compose["\s`]/g)].length).toBe(1);   // one composer node
+  });
+});
+
 describe("⚠️ the copy is the ref's, and panel three reads the KEBAB'S constant", () => {
   it("(f) panel three's heading IS the extracted label — not a literal beside it", () => {
     /* ⚠️ THE SAME CONSTANT, imported from the module the kebab renders from. A duplicated string
