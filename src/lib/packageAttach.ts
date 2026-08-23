@@ -210,3 +210,45 @@ export function packageMenuRow(
   if (!canAttach || packageCount < 1) return [];
   return [{ label: PACKAGE_ROW_LABEL, hint: `${packageCount}` }];
 }
+
+/* ── the group in the send (ref 177, left panel) ──────────────────────────────────────────── */
+
+/**
+ * ⚠️ THE GROUP IS PRESENTATION OVER STORED ORIGIN, NEVER A CONTAINER IN THE DATA. `materialsWanted`
+ * stays one flat list; this reads the marks each item already carries and says which of them were
+ * drawn from the same template. That is why removing a pill cannot "break" the package: there is no
+ * container to break, and the send simply stops matching the template — which is state 1.
+ *
+ * ⚠️ FIRST-APPEARANCE ORDER, so a send that drew on two packages lists them in the order they were
+ * attached rather than in whatever order a map happens to iterate.
+ */
+export interface MaterialGroup {
+  packageId: string;
+  /** The name AS STORED on the items — it outlives the package's deletion, which is the point. */
+  packageName: string;
+  /** The canonical material names this package brought to the send. */
+  materials: string[];
+}
+
+export function groupByOrigin(
+  materials: readonly (string | QueryMaterial)[],
+): { groups: MaterialGroup[]; loose: string[] } {
+  const groups: MaterialGroup[] = [];
+  const byId = new Map<string, MaterialGroup>();
+  const loose: string[] = [];
+  for (const m of materials) {
+    const a = typeof m === "string" ? null : (m as AttachedMaterial);
+    if (!a?.fromPackageId) { loose.push(materialName(m)); continue; }
+    let g = byId.get(a.fromPackageId);
+    if (!g) {
+      g = { packageId: a.fromPackageId, packageName: a.fromPackageName || "a package", materials: [] };
+      byId.set(a.fromPackageId, g);
+      groups.push(g);
+    }
+    g.materials.push(a.material);
+  }
+  return { groups, loose };
+}
+
+/** ⚠️ ONE MARK FOR ALL PACKAGES, not one per package — a package is not a brand. */
+export const PACKAGE_MARK_SLOT = "package-mark" as const;

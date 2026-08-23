@@ -127,7 +127,11 @@ describe("§4 · the Query Centre stopped keeping its own copies", () => {
    */
   it("free text renders as its own chip, in the writer's words", () => {
     expect(src, "nothing collects the Other items").toContain("const otherItems = base.filter(isOtherMat)");
-    expect(src, "the Other items are collected and never drawn").toContain("otherItems.map(");
+    /* ⚠️ `forEach` SINCE THE PACKAGE GROUP (§1, ref 177): every pill is built into one keyed list
+       first so it can be placed inside its package's group or beneath it. The claim is unchanged —
+       the Other items are drawn, each through the shared renderer — and the iteration is what the
+       partition needs it to be. */
+    expect(src, "the Other items are collected and never drawn").toMatch(/otherItems\.(map|forEach)\(/);
     /* ⚠️ THE CHIP GOES THROUGH THE SHARED RENDERER SINCE §2, so the writer's words arrive as its
        LABEL argument rather than as JSX of their own — which is the point of the move: its ×, its
        hover and its editor cannot drift from the other three pills'. The clause is unchanged: the

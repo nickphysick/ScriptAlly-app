@@ -4,7 +4,7 @@ import { MATERIAL_LABEL } from "./manuscriptPackages";
 import {
   packageItems, overlaps, overlapNote, attachedMaterials, originTags, originTagText,
   withoutPackage, attachablePackages, materialName, type AttachedMaterial,
-  canAttachPackages, packageMenuRow, PACKAGE_ROW_LABEL, isProUser,
+  canAttachPackages, packageMenuRow, PACKAGE_ROW_LABEL, isProUser, groupByOrigin,
 } from "./packageAttach";
 
 const PKG = {
@@ -167,5 +167,45 @@ describe("§3 · the gate is wired, and open", () => {
   it("⚠️ reuses the app's ONE Pro predicate rather than re-implementing the plan check", () => {
     expect(isProUser(pro)).toBe(true);
     expect(isProUser(free)).toBe(false);
+  });
+});
+
+describe("§1 · the group is presentation over stored origin", () => {
+  const attached = attachedMaterials(PKG, packageItems(PKG, VERSIONS));
+
+  it("gathers a package's items and leaves hand-attached ones loose", () => {
+    const { groups, loose } = groupByOrigin([...attached, "Author bio", { material: "Synopsis" } as QueryMaterial]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].packageName).toBe("UK standard");
+    expect(groups[0].materials).toEqual(["Query Letter", "Synopsis", "Sample Pages"]);
+    /* ⚠️ ANYTHING ATTACHED OUTSIDE THE PACKAGE SITS BELOW IT, including a second synopsis added by
+       hand — the group is a statement about provenance, not about the material's name. */
+    expect(loose).toEqual(["Author bio", "Synopsis"]);
+  });
+
+  it("keeps two packages apart, in the order they were attached", () => {
+    const other = attachedMaterials({ ...PKG, id: "p2", packageName: "US wide" } as SubmissionPackage, packageItems(PKG, VERSIONS).slice(0, 1));
+    const { groups } = groupByOrigin([...other, ...attached]);
+    expect(groups.map((g) => g.packageName)).toEqual(["US wide", "UK standard"]);
+  });
+
+  /**
+   * ⚠️ REMOVING A PILL DOES NOT DISSOLVE THE GROUP — the remaining items still came from the
+   * template, and the send simply no longer matches it. There is no container in the data to break.
+   */
+  it("survives one of its items being removed", () => {
+    const { groups } = groupByOrigin(attached.slice(1));
+    expect(groups).toHaveLength(1);
+    expect(groups[0].materials).toEqual(["Synopsis", "Sample Pages"]);
+  });
+
+  it("disappears once the last of its items is gone", () => {
+    expect(groupByOrigin(["Author bio"]).groups).toEqual([]);
+  });
+
+  it("⚠️ carries the name STORED ON THE ITEMS, so it outlives the package's deletion", () => {
+    const { groups } = groupByOrigin(attached);
+    expect(groups[0].packageName).toBe("UK standard");
+    expect(groups[0].packageId).toBe("p1");
   });
 });

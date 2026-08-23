@@ -37,9 +37,11 @@ const NAMES: ArtSlotName[] = [
   "no-quick-picks",
   // Query Centre's reading pane before a query is chosen (ref 176) — 210×150, the ref's own box.
   "pane-unselected",
+  // the submission-package group's mark — ONE for every package (refs 177/178)
+  "package-mark",
 ];
 
-describe("⚠️ ONE component, TEN slots — the briefs are the contract", () => {
+describe("⚠️ ONE component, ELEVEN slots — the briefs are the contract", () => {
   it("every briefed slot exists, with its ratio and its caption", () => {
     expect(Object.keys(ART_SLOTS).sort()).toEqual([...NAMES].sort());
     for (const n of NAMES) {

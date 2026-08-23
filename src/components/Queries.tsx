@@ -93,9 +93,10 @@ import { QueryCentreSkeleton, SKELETON_FLOOR_MS } from "./reading-pane/QueryCent
 /* §2b — the shared art registry, already consumed by two other Query Centre panels. */
 import { ArtSlot } from "./todo/ArtSlot";
 import {
-  attachablePackages, attachedMaterials, canAttachPackages, originTags, originTagText,
+  attachablePackages, attachedMaterials, canAttachPackages, groupByOrigin, materialName,
   packageMenuRow, withoutPackage, type PackageItem,
 } from "../lib/packageAttach";
+import { PackageGroup } from "./reading-pane/PackageGroup";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { MobileSheet } from "./shell/MobileSheet";
 import { useIsMobile, useMobileChrome } from "./shell/mobileChrome";
@@ -5767,8 +5768,54 @@ export const Queries: React.FC<{
                                 {/* ⚠️ THE CHIP OPENS ITS OWN POPOVER (§5) rather than toggling on click. A single click that
                                      silently flipped "sent" gave one control two of the three things a
                                      material can have done to it and no way to reach the third. */}
-                                {qlSent && attach("ql", materialLabel("Query letter"), (el) => openMatPop("ql", el), materialLabel("Query letter"), () => toggleDocMaterial(activeQuery, activeAgent, "query"))}
-                                {synSent && attach("syn", "Synopsis", (el) => openMatPop("syn", el), "Synopsis", () => toggleDocMaterial(activeQuery, activeAgent, "synopsis"))}
+                                {(() => {
+                                /**
+                                 * ══ §1 · THE PACKAGE GROUP (ref 177, left panel) ══════════════════
+                                 *
+                                 * ⚠️ THE PILLS ARE THE SAME PILLS. Every one below is built by the
+                                 * same `attach()` helper whether it lands inside a group or beneath
+                                 * one — same markup, same editor, same ×. That is the whole content
+                                 * of "snapshot, not reference": an item that came from a template is
+                                 * an ordinary material, and removing one cannot break a package
+                                 * because there is no container in the data to break. It only means
+                                 * the send no longer matches the template, which is state 1.
+                                 *
+                                 * ⚠️ THE GROUP IS PRESENTATION OVER STORED ORIGIN. `materialsWanted`
+                                 * stays one flat list; `groupByOrigin` reads the marks each item
+                                 * already carries. Nothing here is a nested structure.
+                                 */
+                                const pills: { material: string; node: React.ReactNode }[] = [];
+                                if (qlSent) pills.push({ material: "Query Letter", node: attach("ql", materialLabel("Query letter"), (el) => openMatPop("ql", el), materialLabel("Query letter"), () => toggleDocMaterial(activeQuery, activeAgent, "query")) });
+                                if (synSent) pills.push({ material: "Synopsis", node: attach("syn", "Synopsis", (el) => openMatPop("syn", el), "Synopsis", () => toggleDocMaterial(activeQuery, activeAgent, "synopsis")) });
+                                if (sampleItem) pills.push({ material: "Sample Pages", node: attach("smp", formatQueryMaterial(sampleItem), (el) => { openSampleEditor(); openMatPop("smp", el); }, "Opening sample", () => removeSampleMaterial(activeQuery, activeAgent)) });
+                                otherItems.forEach((it, i) => pills.push({
+                                  material: materialName(it),
+                                  node: attach(`oth-${i}`, formatQueryMaterial(it), (el) => openOtherEditor(it, el), formatQueryMaterial(it), () => removeOtherMaterial(activeQuery, activeAgent, it)),
+                                }));
+
+                                const { groups } = groupByOrigin(materialsOf(activeQuery));
+                                const claimed = new Set(groups.flatMap((g) => g.materials));
+                                const take = (names: string[]) => pills.filter((p) => names.includes(p.material)).map((p) => p.node);
+
+                                return (
+                                  <>
+                                    {groups.map((g) => (
+                                      <PackageGroup
+                                        key={g.packageId}
+                                        group={g}
+                                        live={packages.find((p) => p.id === g.packageId) ?? null}
+                                        onView={openPackages}
+                                      >
+                                        {take(g.materials)}
+                                      </PackageGroup>
+                                    ))}
+                                    {/* ⚠️ ANYTHING ATTACHED OUTSIDE A PACKAGE SITS BELOW IT, as its
+                                        own pill — the group is a statement about provenance, and a
+                                        hand-added item has none. */}
+                                    {pills.filter((p) => !claimed.has(p.material)).map((p) => p.node)}
+                                  </>
+                                );
+                                })()}
                                 {/* ⚠️ THE SAMPLE CHIP OPENS ITS EDITOR RATHER THAN TOGGLING, because a
                                     sample is a quantity and a unit, not a yes. Its label carries what
                                     was sent; Remove keeps its own control, since a chip that both
@@ -5782,16 +5829,13 @@ export const Queries: React.FC<{
                                       ⚠️ `Opening sample` REMAINS THE NAME IN THE ATTACH MENU, and
                                       that is not an inconsistency — the menu offers a type you have
                                       not sized yet, and the pill states a thing you sent. */}
-                                  {sampleItem && attach("smp", formatQueryMaterial(sampleItem), (el) => { openSampleEditor(); openMatPop("smp", el); }, "Opening sample", () => removeSampleMaterial(activeQuery, activeAgent))}
+                                  {/* (the sample's pill is built in the block above, so it can be
+                                       placed inside its package's group or beneath it) */}
                                 {/* ⚠️ AND `Other` OPENS ITS EDITOR TOO (§2) — free text rather than a
                                     quantity. It was the one pill that could only be removed, so a
                                     typo in it meant deleting and retyping. Same renderer as the
                                     rest, so its × and its hover cannot drift from theirs. */}
-                                {otherItems.map((it, i) => attach(
-                                  `oth-${i}`, formatQueryMaterial(it),
-                                  (el) => openOtherEditor(it, el), formatQueryMaterial(it),
-                                  () => removeOtherMaterial(activeQuery, activeAgent, it),
-                                ))}
+                                {/* (Other's pills are built in the block above, for the same reason) */}
                                 {/* ⚠️ THE FLOATING `REMOVE` IS GONE (§4) — it now lives on the chip
                                     it removes. A verb parked at the end of a row of chips has no
                                     visible subject; this one silently meant "the sample". */}
@@ -5875,12 +5919,11 @@ export const Queries: React.FC<{
                                   offers to take back exactly what it brought.
                                   ⚠️ IT DERIVES FROM THE ITEMS, so removing a pill by hand makes it
                                   read one fewer, and removing the last makes it disappear. */}
-                              {originTags(materialsOf(activeQuery)).map((t) => (
-                                <div key={t.packageId} className="qc-pkgtag">
-                                  <span>{originTagText(t)}</span>
-                                  <button type="button" onClick={() => detachPackage(activeQuery, t.packageId, t.packageName)}>undo</button>
-                                </div>
-                              ))}
+                              {/* ⚠️ THE ORIGIN TAG IS RETIRED — the group above says everything it
+                                  said, in the place the items actually are (ref 177 supersedes 173's
+                                  small-text tag). Its `undo` went with it: removing a package's items
+                                  wholesale is not a correction to a send, and each pill already
+                                  carries its own ×. */}
 
                               {pkgPickOpen && (
                                 <PackagePicker

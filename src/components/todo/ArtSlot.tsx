@@ -35,7 +35,8 @@ export type ArtSlotName =
   | "seize-the-day"     // Today's plan card — the ONE slot with a real asset committed
   | "agent-unknown"     // Query Centre: the agent context panel with nothing on file to report
   | "no-quick-picks"    // Query Centre stage 1: no unqueried contacts to suggest
-  | "pane-unselected";  // Query Centre: the reading pane before a query is chosen
+  | "pane-unselected"   // Query Centre: the reading pane before a query is chosen
+  | "package-mark";     // the submission-package group's mark — ONE mark for every package
 
 interface SlotBrief {
   /** The illustrator's brief, one line — rendered as the placeholder's own caption. */
@@ -126,6 +127,18 @@ export const ART_SLOTS: Record<ArtSlotName, SlotBrief> = {
      ⚠️ 210×150 IS THE REF'S OWN BOX. The caption's position is fixed by it, so the watercolour can
      drop into the same space later with no layout change — which is the whole reason this ships as
      a placeholder rather than as blank space. */
+  /* The submission-package group, in the send and on the Packages page (refs 177/178). BRIEF: a
+     small stack of papers squared up and tied with a ribbon — a set prepared in advance, ready to
+     go out. It is a TEMPLATE mark, so it must not read as a sent letter or an envelope: nothing in
+     flight, nothing addressed.
+     ⚠️ ONE MARK FOR EVERY PACKAGE, never one per package. A package is a template the writer built,
+     not a brand — a mark per package would make "which package" a visual identity and turn a list
+     of three into three logos. */
+  "package-mark": {
+    caption: "A squared-up stack of papers tied with a ribbon",
+    w: 40, h: 40,
+    alt: "A small stack of prepared papers, tied",
+  },
   "pane-unselected": {
     caption: "A letter rack, filed and waiting for one to be drawn out",
     w: 210, h: 150,
