@@ -206,6 +206,16 @@
 /* ⚠️ `.ct-pagehead` AND `.ct-pagemark` ARE DELETED — the page-local header they styled is gone and
    the shared masthead draws both the mark and the title again. */
 
+/* ══ FIRST VISIT — the page at zero comps (v3 §1) ══
+ *
+ * ⚠️ THE STATE IS DERIVED FROM THE COUNT, so there is nothing here that turns it on. These rules
+ * only give the two things it can show — the add form, and the placeholder that offers it — room to
+ * sit on the page rather than inside a card that no longer exists at zero. */
+.ct-firstform { margin-bottom: 24px; }
+/* ⚠️ NOT A CARD. At zero comps there is no panel to sit inside, and framing the placeholder would
+   put an empty box on a page whose whole message is "there is nothing here yet". */
+.ct-firstempty { padding: 40px 20px 48px; }
+
 /* ══ THE TOP ROW — tile left, query line right (v2.1 §2) ══
  *
  * ⚠️ `align-items: stretch` IS THE POINT: both columns share one height, and the card's insides take

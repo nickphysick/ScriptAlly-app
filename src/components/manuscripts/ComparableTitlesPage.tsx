@@ -826,6 +826,47 @@ export const ComparableTitlesPage: React.FC<{
               <span className="lab">Add a manuscript to build its comp list</span>
             </div>
           </div>
+        ) : counts.total === 0 ? (
+          /* ══ FIRST VISIT — no comps recorded (v3 §1) ══
+
+             ⚠️ THE STATE IS A DERIVATION, NOT A FLAG. `counts.total === 0` and nothing else: no
+             `hasSeenX` field, no localStorage, no manual toggle. Recording a first comp moves the
+             page to the workspace on the next render because the count changed, which is the only
+             thing that should be able to move it. The ref's state toggle is mockup scaffolding.
+
+             ⚠️ AND THE ADD FORM IS HOSTED HERE TOO. In the workspace it lives inside the Your comps
+             card; there is no such card in this state, so the same `CompInlineForm` takes the whole
+             block when it opens. One form component, two homes — never a second form. */
+          formState?.index === null ? (
+            <section className="ct-panel ct-firstform">
+              <div className="ct-band">
+                <span className="bt">Add your first comp</span>
+              </div>
+              <CompInlineForm
+                mode="add"
+                otherTitles={[]}
+                onSave={addComp}
+                onCancel={() => setFormState(null)}
+                onShowExisting={pointAt}
+              />
+            </section>
+          ) : (
+            <>
+              <div className="ct-estate ct-firstempty">
+                <div className="ct-islot" data-slot="comp-empty"><CompsEmptySketch /></div>
+                <div className="em">No comps yet</div>
+                <div className="es">
+                  Comps are the published books your manuscript sits beside. Record the first one
+                  and it becomes available to your query line and submission packages.
+                </div>
+                <div className="eacts">
+                  <button type="button" className="ct-btn-pink" onClick={() => setFormState({ index: null })}>
+                    Add your first comp
+                  </button>
+                </div>
+              </div>
+            </>
+          )
         ) : (
           <>
 
@@ -987,29 +1028,11 @@ export const ComparableTitlesPage: React.FC<{
                 <span className="bmeta">{counts.total} {counts.total === 1 ? "comp" : "comps"}</span>
               </div>
 
-              {/* ⚠️ A STATE, NOT A FAILURE — and no upsell in this card. Free comps are unlimited;
-                  the Pro boundary is the Scout and nothing else. */}
-              {comps.length === 0 && formState?.index !== null ? (
-                <div className="ct-estate">
-                  {/* ⚠️ THE REAL SKETCH STAYS. The ref draws a 200×150 dashed placeholder because it
-                      is a mockup with no artwork; this page HAS artwork, and swapping finished
-                      illustration for a placeholder to match a drawing would be a regression. The
-                      slot is named for the illustrator's brief so the requirement is recorded
-                      either way, and sized to the ref's box. */}
-                  <div className="ct-islot" data-slot="comp-empty"><CompsEmptySketch /></div>
-                  <div className="em">No comps yet</div>
-                  <div className="es">
-                    Comps are the published books your manuscript sits beside. Record the first one
-                    and it becomes available to your query line and submission packages.
-                  </div>
-                  <div className="eacts">
-                    <button type="button" className="ct-btn-pink" onClick={() => setFormState({ index: null })}>
-                      Add your first comp
-                    </button>
-                  </div>
-                </div>
-              ) : comps.length === 0 ? null : (
-                <>
+              {/* ⚠️ NO EMPTY STATE IN THIS CARD ANY MORE (v3 §1). It could only render at zero
+                  comps, and at zero comps the page renders the FIRST-VISIT state instead — so the
+                  branch was unreachable the moment the page-level split landed. An unreachable
+                  branch is worse than none: it reads as a state the card still has. */}
+              <>
                   {comps.map((c, i) => {
                     const media = compMedia(c);
                     const ageLine = compAgeLine(c, now);
@@ -1151,15 +1174,15 @@ export const ComparableTitlesPage: React.FC<{
                       </div>
                     );
                   })}
-                </>
-              )}
+              </>
 
               {/* ⚠️ THE HINT APPEARS ONLY NOW THAT THE KEY WORKS. Phase 2 deliberately rendered no
                   `N` affordance because the shortcut did not exist yet. */}
-              {/* ⚠️ THE ADD ROW STANDS DOWN WHILE THE EMPTY STATE IS UP. Both offer the same action,
-                  and they stacked — a pink ADD A COMP directly above ADD A COMP MANUALLY. The empty
-                  state's button is the one with the explanation around it, so the row yields. */}
-              {comps.length === 0 && formState?.index !== null ? null : formState?.index === null ? (
+              {/* ⚠️ THE STAND-DOWN GUARD IS GONE WITH THE STATE IT GUARDED (v3 §1). It existed
+                  because the card's empty state and this row both offered "add a comp" and stacked;
+                  the card has no empty state now — at zero comps the page is the first-visit state —
+                  so `comps.length === 0` is unreachable here and the row is simply always offered. */}
+              {formState?.index === null ? (
                 <CompInlineForm
                   mode="add"
                   otherTitles={comps.map((x, xi) => ({ title: x.title, index: xi }))}
