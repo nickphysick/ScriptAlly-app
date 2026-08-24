@@ -1,0 +1,336 @@
+/*
+ * Contact list — the editorial empty state (blank account). Scoped under `.cle`, which only ever
+ * renders inside `.aglist`, so nothing here can reach another page.
+ *
+ * ⚠️ THE RHYTHM IS `comps.css`'s AND THE VALUES ARE ITS VALUES. Two measures that do not align
+ * (1060 copy / 1240 stages), 96px between blocks, a 4:3 dashed plate at radius 14 with 7.5px mono,
+ * a 1040px stacking breakpoint, `flip` as `order` on two grid children. Where a number here
+ * matches a `ct-` rule that is deliberate — the two pages are one grammar, and the day they should
+ * differ they differ by a value rather than by a mechanism.
+ *
+ * ⚠️ EVERY COLOUR IS ONE OF THE PAGE'S OWN `--agl-*` TOKENS. The brief named a Form 11 palette in
+ * literal hex; six of its seven values already exist on this page under a token name, and this
+ * sheet reads the token. The two exceptions are recorded on `.cle` below.
+ *
+ * ⚠️ NO PER-THEME BLOCK, BECAUSE THE AGENT LIST HAS NONE. `agentList.css` carries a single token
+ * set on `.aglist` and no `.t-capp` / `.t-bold` / `.t-edn` override anywhere in its 1000 lines.
+ * Adding a theme layer for one section would make this the only themed part of an unthemed page.
+ */
+
+.cle {
+  /*
+   * ⚠️ TWO BRIEF COLOURS HAVE NO EQUIVALENT IN THE APP AND ARE NOT INTRODUCED HERE.
+   *   · the brief's burgundy #72243E — the app's accent is `--agl-burg` #7c3a2a, which the brief
+   *     itself lists separately as "rust". Shipping #72243E would put a second burgundy on a page
+   *     whose every other accent is the first one, and the repo already carries a standing finding
+   *     about four near-identical blues that arrived exactly this way.
+   *   · the brief's soft pink #f8ece6 — `--agl-pink` #f5e2da is the app-wide CTA fill and four
+   *     points away.
+   * Both are flagged in the run note. If Nick wants the darker burgundy it is one token here.
+   */
+  --cle-accent: var(--agl-burg);
+  --cle-ink: var(--agl-ink-head);
+  --cle-ink-body: var(--agl-ink-body);
+  --cle-ink-soft: var(--agl-ink-muted);
+  --cle-ink-faint: var(--agl-ink-label);
+  --cle-line: var(--agl-line);
+  --cle-line-faint: var(--agl-linesoft);
+  --cle-paper: var(--agl-paper);
+  --cle-band: var(--agl-card);
+  --cle-pink: var(--agl-pink);
+  --cle-pink-line: var(--agl-pinkline);
+  --cle-pink-hover: #efd5ca;
+
+  /* ⚠️ ILLUSTRATION VALUES, BAKED — the same decision `noteboardEmptyArt.tsx` records. These two
+     pills DEPICT a standing and a nudge; they are not the live components and must never be
+     recoloured to track them, or a drawing starts making a claim. */
+  --cle-sage-bg: #e8f0e4; --cle-sage-line: #7a8f6a; --cle-sage-ink: #4c5f40;
+  --cle-sand-bg: #f2ead9; --cle-sand-line: #b09a6d; --cle-sand-ink: #7d6a41;
+
+  --cle-lift: 0 14px 40px rgba(58, 50, 44, .10), 0 2px 8px rgba(58, 50, 44, .05);
+
+  color: var(--cle-ink-body);
+  /*
+   * ⚠️ `clip`, NOT `hidden`, AND ON ONE AXIS. The scenes are rotated cards with badges hung past
+   * their own edges; at 375px a stray degree of rotation is a page-wide horizontal scrollbar, and
+   * the page's real scroller is `.wpg-scroll` above this. `overflow-x: clip` is the only value
+   * that may differ from a visible `overflow-y` — `hidden` on one axis silently makes the other
+   * `auto` and would put a second scroll container inside the first. The clip margin keeps the
+   * cards' soft shadows from being sheared at the gutter.
+   */
+  overflow-x: clip;
+  overflow-clip-margin: 40px;
+}
+
+.cle-sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+/* ── hero ───────────────────────────────────────────────────────────────── */
+/* ⚠️ NO `padding-top`. The workspace grid pays the gap under the masthead; a page that pads its
+   own first row ADDS to that token rather than replacing it. */
+.cle-hero { max-width: 1060px; margin-inline: auto; padding: 0 8px; text-align: center; }
+.cle-hero-h {
+  margin: 0 auto; max-width: 880px;
+  font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 600;
+  /* no fixed height anywhere on this page's type, so a descender can never be cropped */
+  line-height: 1.25; letter-spacing: -.018em; color: var(--cle-ink);
+}
+.cle-hero-p {
+  margin: 18px auto 0; max-width: 620px;
+  font-size: 14.5px; line-height: 1.68; color: var(--cle-ink-soft);
+}
+.cle-hero-cta { margin-top: 28px; padding: 11px 22px; font-size: 13px; }
+
+/* ── the three stages ───────────────────────────────────────────────────── */
+/* ⚠️ 1240, AGAINST THE COPY BLOCKS' 1060 (comps §1). The left edges do not align down the page and
+   that is the design: a three-across grid of plates starved to a copy measure makes each plate too
+   small to read. */
+.cle-stages { max-width: 1240px; margin: 72px auto 0; padding: 0 8px; }
+.cle-stages-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; }
+.cle-stage { display: flex; flex-direction: column; align-items: center; min-width: 0; text-align: center; }
+.cle-slot {
+  /* the illustrator's plate: full column width at 4:3 — `aspect-ratio`, never a second number to
+     keep in step with the measure */
+  width: 100%; aspect-ratio: 4 / 3; border-radius: 14px;
+  border: 1px dashed var(--cle-line); background: var(--cle-band);
+  display: flex; align-items: center; justify-content: center; padding: 0 10px; margin-bottom: 18px;
+}
+.cle-slot span {
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .06em;
+  color: var(--cle-ink-faint); text-align: center; overflow-wrap: anywhere;
+}
+.cle-lbl {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .15em;
+  text-transform: uppercase; color: var(--cle-ink-faint);
+}
+.cle-stage h4 {
+  margin: 9px 0 0; max-width: 24ch;
+  font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600;
+  line-height: 1.3; color: var(--cle-ink);
+}
+.cle-stage p { margin: 10px 0 0; max-width: 36ch; font-size: 13.5px; line-height: 1.6; color: var(--cle-ink-soft); }
+
+/* ── the band ───────────────────────────────────────────────────────────── */
+.cle-band {
+  margin-top: 88px; padding: 84px 0 96px; border-radius: 18px;
+  border-top: 1px solid var(--cle-line-faint); background: var(--cle-band);
+}
+.cle-band-inner { max-width: 1060px; margin-inline: auto; padding: 0 24px; }
+.cle-band-h {
+  margin: 0; text-align: center;
+  font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 600;
+  line-height: 1.25; letter-spacing: -.018em; color: var(--cle-ink);
+}
+
+/* ── one feature row ────────────────────────────────────────────────────── */
+/* ⚠️ `minmax(0, 500px) 420px`, NOT `1fr` — the copy column STOPS GROWING and `justify-content:
+   center` puts the pair in the middle of what is left. A `1fr` consumes all free space by
+   definition, which is what opens a hole between the two columns on a wide monitor. */
+.cle-row {
+  display: grid; grid-template-columns: minmax(0, 500px) 420px; gap: 44px;
+  align-items: center; justify-content: center; padding: 8px 8px 30px;
+  margin-top: 96px;
+}
+.cle-row-l { min-width: 0; }
+.cle-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 500;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--cle-ink-faint);
+}
+.cle-eyebrow b { font-weight: 500; color: var(--cle-accent); }
+.cle-row-h {
+  margin: 14px 0 0;
+  font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 600;
+  line-height: 1.3; letter-spacing: -.01em; color: var(--cle-ink);
+}
+.cle-row-p { margin: 16px 0 0; max-width: 440px; font-size: 14.5px; line-height: 1.8; color: var(--cle-ink-soft); }
+/* ⚠️ EMPHASIS IS WEIGHT AND VALUE, NEVER HUE — the body's soft ink stepped up to the page's own
+   body ink at 600. A sentence that changes colour mid-way reads as two things. */
+.cle-row-p strong { font-weight: 600; color: var(--cle-ink-body); }
+.cle-row-art { display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 280px; }
+
+/* ⚠️ `flip` MOVES THE TRACKS AS WELL AS THE CHILDREN, or the scene would sit in the 500px track
+   and the copy in the 420px one. */
+.cle-row.flip { grid-template-columns: 420px minmax(0, 500px); }
+.cle-row.flip .cle-row-l { order: 2; }
+.cle-row.flip .cle-row-art { order: 1; }
+
+/* ── the closing ────────────────────────────────────────────────────────── */
+.cle-close { margin-top: 118px; text-align: center; }
+.cle-close-note {
+  display: inline-block; transform: rotate(-1deg);
+  font-family: 'Caveat', cursive; font-size: 21px; font-weight: 500; color: var(--cle-accent);
+}
+.cle-close-acts { margin-top: 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 24px; }
+.cle-btn-pink {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: inherit; font-size: 14.5px; font-weight: 500; color: var(--cle-ink-body);
+  background: var(--cle-pink); border: 1px solid var(--cle-pink-line); border-radius: 10px;
+  padding: 13px 26px; cursor: pointer; transition: background .15s, transform .15s;
+}
+.cle-btn-pink:hover { background: var(--cle-pink-hover); transform: translateY(-1px); }
+.cle-close-link {
+  font-family: inherit; font-size: 14px; font-weight: 500; color: var(--cle-ink-body);
+  background: none; border: 0; padding: 4px 2px; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--cle-line);
+}
+.cle-close-link:hover { text-decoration-color: var(--cle-ink-body); }
+/* ⚠️ THE FOCUS RING IS DECLARED, NOT INHERITED. `.agl-btn` carries none of its own, and two of the
+   three controls on this page are the only way out of it for a keyboard reader. */
+.cle :is(button):focus-visible { outline: 2px solid var(--cle-accent); outline-offset: 3px; border-radius: 10px; }
+
+/* ── illustration furniture ─────────────────────────────────────────────── */
+.cle-art { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; }
+/* ⚠️ THE SCENE HUGS ITS CARD WHEN SOMETHING HANGS OFF IT. `.cle-badge` is positioned against
+   this box, so a full-width wrapper would measure its offset from the 420px column's edge and
+   drop the pill in the gutter — correct CSS, wrong containing block. */
+.cle-art--genres { width: min(340px, 100%); }
+.cle-card {
+  position: relative; box-sizing: border-box; width: min(340px, 100%);
+  background: var(--cle-paper); border-radius: 14px; padding: 22px 26px; box-shadow: var(--cle-lift);
+}
+.cle-card--tilt-a { transform: rotate(-1.2deg); }
+.cle-card--tilt-b { transform: rotate(-1.4deg); }
+.cle-card--tilt-c { transform: rotate(1deg); }
+.cle-card--tilt-d { transform: rotate(-1deg); }
+.cle-card--tilt-e { width: min(360px, 100%); transform: rotate(.8deg); }
+
+.cle-micro {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 500;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--cle-ink-faint);
+}
+.cle-mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+.cle-ident { display: flex; align-items: center; gap: 12px; }
+.cle-ident-mono {
+  flex: none; width: 36px; height: 36px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--cle-pink); border: 1px solid var(--cle-line-faint);
+  font-size: 11.5px; font-weight: 600; color: var(--cle-accent);
+}
+.cle-ident-txt { min-width: 0; }
+.cle-ident-name {
+  display: block; font-family: 'Playfair Display', serif; font-size: 16.5px; font-weight: 600;
+  line-height: 1.3; color: var(--cle-ink);
+}
+.cle-ident-txt .cle-micro { margin-top: 2px; }
+
+.cle-chips { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 7px; }
+.cle-chip {
+  border-radius: 999px; padding: 4px 12px; font-size: 11.5px; line-height: 1.5;
+  background: var(--agl-cream); border: 1px solid var(--cle-line-faint); color: var(--cle-ink-soft);
+}
+.cle-chip--hot { background: var(--cle-pink); border-color: var(--cle-pink-line); color: var(--cle-accent); }
+.cle-cardnote { margin: 14px 0 0; font-size: 12px; line-height: 1.5; color: var(--cle-ink-soft); }
+
+.cle-pill {
+  display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; padding: 6px 12px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 500;
+  letter-spacing: .14em; text-transform: uppercase; white-space: nowrap;
+}
+.cle-pill-dot { width: 7px; height: 7px; border-radius: 999px; }
+.cle-pill--sage { background: var(--cle-sage-bg); border: 1px solid var(--cle-sage-line); color: var(--cle-sage-ink); }
+.cle-pill--sage .cle-pill-dot { background: var(--cle-sage-bg); border: 1px solid var(--cle-sage-line); }
+.cle-pill--sand { background: var(--cle-sand-bg); border: 1px solid var(--cle-sand-line); color: var(--cle-sand-ink); }
+.cle-pill--sand .cle-pill-dot { background: var(--cle-sand-bg); border: 1px solid var(--cle-sand-line); }
+.cle-pillrow { margin-top: 14px; }
+
+/* 01 — the badge hung off the card's corner */
+.cle-badge {
+  position: absolute; right: -18px; bottom: -14px; transform: rotate(2deg);
+  background: var(--cle-paper); border-radius: 999px; padding: 4px;
+  box-shadow: 0 10px 26px rgba(58, 50, 44, .12);
+}
+
+/* 03 — the wish-list quote */
+.cle-card--quote { width: min(360px, 100%); padding-top: 30px; }
+.cle-quotemark {
+  position: absolute; left: 20px; top: 2px;
+  font-family: 'Playfair Display', serif; font-size: 58px; line-height: 1; color: var(--cle-pink);
+}
+.cle-quote {
+  position: relative; margin: 0;
+  font-family: 'Playfair Display', serif; font-size: 18.5px; font-weight: 500; line-height: 1.55;
+  color: var(--cle-ink);
+}
+.cle-card--quote .cle-micro { margin-top: 14px; }
+
+/* 04 — the response ledger */
+.cle-kv {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--cle-line-faint);
+}
+.cle-kv--last { border-bottom: 0; }
+.cle-kv-k { font-size: 13px; font-weight: 500; color: var(--cle-ink-body); }
+.cle-kv-v { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cle-ink-body); }
+
+/* 05 — the contact card */
+.cle-clines { margin-top: 14px; }
+.cle-cline { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--cle-line-faint); }
+.cle-cline:last-child { border-bottom: 0; }
+.cle-cline-g {
+  flex: none; width: 26px; height: 26px; border-radius: 7px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--cle-pink); font-size: 12px; line-height: 1; color: var(--cle-accent);
+}
+.cle-cline-t { min-width: 0; font-size: 12.5px; overflow-wrap: anywhere; }
+.cle-socials { display: flex; flex-wrap: wrap; gap: 6px; }
+.cle-social {
+  border-radius: 6px; padding: 3px 10px; background: var(--agl-cream);
+  border: 1px solid var(--cle-line-faint);
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cle-ink-soft);
+}
+
+/* 06 — the two overlapping cards */
+.cle-art--stack { display: block; position: relative; width: min(380px, 100%); min-height: 300px; }
+.cle-card--behind { width: min(300px, 100%); opacity: .9; transform: rotate(-2deg) translateX(-26px); }
+.cle-card--note {
+  position: absolute; right: 4px; bottom: -24px; width: min(300px, 100%);
+  transform: rotate(1.6deg); background: #fffdf6;
+}
+.cle-star { font-size: 13px; color: var(--cle-accent); }
+.cle-hand {
+  margin: 8px 0 0;
+  font-family: 'Caveat', cursive; font-size: 20px; font-weight: 500; line-height: 1.4;
+  color: var(--cle-accent);
+}
+
+/* ── stacking ───────────────────────────────────────────────────────────── */
+/* ⚠️ THE ALTERNATION DOES NOT SURVIVE THE STACK, DELIBERATELY (comps §4). Below the breakpoint
+   every row puts its COPY first: a reader scrolling one column meets heading-then-picture each
+   time, and a row that inverted there would read as a mistake rather than as rhythm. */
+@media (max-width: 1040px) {
+  .cle-stages-grid { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  .cle-row,
+  .cle-row.flip { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+  .cle-row.flip .cle-row-l { order: 1; }
+  .cle-row.flip .cle-row-art { order: 2; }
+  .cle-row { margin-top: 72px; }
+}
+
+@media (max-width: 767.98px) {
+  .cle-hero-h { font-size: 32px; }
+  .cle-band-h { font-size: 30px; }
+  .cle-row-h { font-size: 26px; }
+  .cle-stage h4 { font-size: 20px; }
+  .cle-band { margin-top: 64px; padding: 56px 0 68px; }
+  .cle-band-inner { padding: 0 16px; }
+  .cle-stages { margin-top: 56px; }
+  .cle-close { margin-top: 80px; }
+  .cle-row-art { min-height: 0; }
+  /* ⚠️ THE ROTATIONS AND THE HUNG BADGE COME OFF AT PHONE WIDTHS. A degree of tilt on a card that
+     is already the full column wide is a horizontal scrollbar, not a flourish — and 06's absolute
+     note card, which overhangs by design on a desktop, has nothing to overhang into here. */
+  .cle-card { transform: none; padding: 18px 20px; }
+  .cle-badge { position: static; transform: none; display: inline-block; margin-top: 12px; box-shadow: none; padding: 0; }
+  .cle-art--stack { min-height: 0; display: flex; flex-direction: column; gap: 14px; }
+  .cle-card--behind { opacity: 1; transform: none; width: 100%; }
+  .cle-card--note { position: static; transform: none; width: 100%; }
+}
+
+/* ⚠️ THE ONLY MOTION ON THIS PAGE IS THE PINK BUTTON'S LIFT, AND IT IS GATED. */
+@media (prefers-reduced-motion: reduce) {
+  .cle-btn-pink { transition: none; }
+  .cle-btn-pink:hover { transform: none; }
+}

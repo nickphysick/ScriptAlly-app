@@ -567,3 +567,50 @@ export function notePreview(
   const flat = (agent.notes || "").trim();
   return flat ? { text: flat, pinned: false } : null;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE PAGE'S THREE STATES — loading · blank account · list
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * What the Contact list is currently showing.
+ *
+ * ⚠️ THREE, NOT TWO, AND THE THIRD IS THE ONE THAT BITES. `agents.length === 0` means "loading OR
+ * empty": the collections arrive over a live snapshot, so a page that branches on the count alone
+ * paints its first-run state for a beat on every refresh and then swaps it for a list. That is the
+ * flash the editorial empty state must never have, and it is why `collectionsReady` — the flag
+ * `db.tsx` raises once manuscripts, agents AND queries have each delivered a first snapshot, and
+ * which the Dashboard has always read — is an input rather than an afterthought.
+ *
+ * ⚠️ AND `adding` IS NOT AN EDGE CASE — it is the FIRST thing that happens on a blank account.
+ * The page's own `onAddAgent` mints an UNSAVED stub that lives in the grid and not in `agents`, so
+ * a writer who has just pressed "Add your first agent" still has `agentCount === 0`. Without this
+ * input the new card would be created, focused and scrolled to, and then rendered behind the empty
+ * state that offered it.
+ *
+ * Pure, so the gate can be asserted without a browser: a static render cannot press a button, and
+ * a source lock reading the predicate off the component would prove it was written, not that it
+ * decides anything.
+ */
+export type ContactListState = "settling" | "blank" | "list";
+
+export interface ContactListStateInput {
+  /** `collectionsReady` from the db context — never a count-derived guess. */
+  collectionsReady: boolean;
+  /** How many agents are ON FILE. Excludes the unsaved stub, which is what `adding` carries. */
+  agentCount: number;
+  /** An unsaved new-agent card is open in the grid. */
+  adding: boolean;
+}
+
+export const contactListState = ({
+  collectionsReady,
+  agentCount,
+  adding,
+}: ContactListStateInput): ContactListState => {
+  /* An agent on file, or one being written, is a list — whatever the flag says. Waiting for
+     `collectionsReady` when there is demonstrably something to draw would blank a page that has
+     already loaded its own collection while another was still in flight. */
+  if (agentCount > 0 || adding) return "list";
+  return collectionsReady ? "blank" : "settling";
+};

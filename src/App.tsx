@@ -76,6 +76,9 @@ import { QueryTimeline } from "./components/reading-pane/QueryTimeline";
 import { NotesLab } from "./components/notes/NotesLab";
 // Dev review surface for the Package Workshop landing + workshop (over stubs, no auth) — #/pkg-lab, DEV only.
 import { PkgLab } from "./components/packages/PkgLab";
+// Dev review surface for the Contact list's three states — #/contact-lab, DEV only. The blank
+// state is unreachable on any account that has agents, which is every real one.
+import { ContactListLab } from "./components/agents/ContactListLab";
 import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -463,6 +466,11 @@ function AppContent() {
   // Dev-only duplicate-query reconcile card preview (working ⇄ sorted, local state).
   if (hash === "#/reconcile-card" && import.meta.env.DEV) {
     return <ReconcileCardDevPreview />;
+  }
+  // Dev-only Contact list review surface — the real page over a stub db, so its blank state can
+  // be seen at all. Three data states + the theme toggle; no auth, no persistence.
+  if (hash === "#/contact-lab" && import.meta.env.DEV) {
+    return <ContactListLab />;
   }
   // Dev-only notes review surface (PostIt / quick-add / editor) — local state, no persistence.
   if (hash === "#/notes-lab" && import.meta.env.DEV) {

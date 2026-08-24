@@ -12,7 +12,6 @@
  * The page owns its own chrome and scroll — it mounts in a bare `fill`+`clip` StagePage.
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Plus } from "lucide-react";
 import { PageHeader } from "../shell/PageHeader";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../lib/db";
@@ -50,6 +49,7 @@ import {
   STANDING_LABEL,
   TURN_LABEL,
   agentAxisCounts,
+  contactListState,
   emptyFilterSet,
   groupAgents,
   locationCounts,
@@ -71,10 +71,20 @@ import { BUMP_MS, EXIT_MS, SAVE_BREATH_MS, SAVE_FADE_IN_MS, SAVE_FADE_OUT_MS } f
 import { saveNotice, saveOutcome, sectionFor } from "../../lib/agentSaveOutcome";
 import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
 import { AgentToolbar, AppliedTag, AgentAppliedTags } from "./AgentToolbar";
+import { ContactListEmptyState } from "./ContactListEmptyState";
+import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
 import { blankDraft } from "../../lib/agentDraft";
 import { useIsMobile, useMobileChrome } from "../shell/mobileChrome";
 import "./agentList.css";
+
+/**
+ * ⚠️ THE DISCOVER DESTINATION COMES FROM THE RAIL'S OWN TABLE, NOT FROM A PAIR OF STRINGS TYPED
+ * HERE. `handleNavigate("agents", "Discover new agents")` is the bridge App.tsx maps to
+ * `/agents/discover`, and `railNav` already names that pair for the rail entry — so reading it
+ * is one destination in one place rather than two that agree until somebody renames a sub-page.
+ */
+const DISCOVER = RAIL_GROUPS.flatMap((g) => g.items).find((i) => i.path === "/agents/discover");
 
 interface AgentListProps {
   /** A global search landing on this route seeds the page filter. */
@@ -84,7 +94,8 @@ interface AgentListProps {
 }
 
 export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate }) => {
-  const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser } = useScriptAllyDb();
+  const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser, collectionsReady } =
+    useScriptAllyDb();
 
   const [filters, setFilters] = useState<AgentFilterSet>(emptyFilterSet);
   const [search, setSearch] = useState(searchQuery?.trim() || "");
@@ -213,6 +224,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   );
   // The unsaved new agent always rides at the front of the grid, immune to filter and sort.
   const shown = useMemo(() => (newAgent ? [newAgent, ...visible] : visible), [newAgent, visible]);
+
+  /**
+   * Loading · blank account · list — the page's three states, derived once in `agentList.ts` and
+   * never restated here. See `contactListState` for why there are three of them and why the
+   * unsaved stub is one of its inputs.
+   */
+  const pageState = contactListState({
+    collectionsReady,
+    agentCount: agents.length,
+    adding: !!newAgent,
+  });
 
   // Sections over the ALREADY SORTED list — grouping partitions, it never reorders, so whichever
   // sort is chosen applies within each section for free.
@@ -825,7 +847,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
                `PageHeader` throws in development if a masthead is handed one. */
            />
          }
-         toolbar={
+         /* ⚠️ NO TOOLBAR ON A BLANK ACCOUNT, AND NONE WHILE THE COLLECTIONS SETTLE. Not one of the
+             six controls does anything against nothing on file — a count that reads `0 of 0`, a
+             search over an empty set, three narrowing controls with nothing to narrow — and the
+             seventh, `Add new agent`, is the empty state's own hero button. `toolbar` is optional
+             on the grid, so this is an absent row rather than an empty one: the grid's rows 1 and
+             3 close up and nothing is left holding space. It returns the moment an agent exists.
+             ⚠️ SUPPRESSED WHILE SETTLING TOO, so the toolbar and the cards arrive on the same
+             frame rather than the row appearing first and the list dropping in under it. */
+         toolbar={pageState === "list" ? (
           <AgentToolbar
             search={search}
             onSearch={setSearch}
@@ -845,9 +875,26 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
             onSort={(k) => setSort(k as AgentListSort)}
             onAddAgent={onAddAgent}
           />
-         }
+         ) : undefined}
        >
         <div className="agl-inner">
+
+        {/* ⚠️ THE BLANK ACCOUNT IS ITS OWN PAGE, NOT A DASHED BOX IN THE GRID. What it replaces —
+            `.agl-empty`'s welcome branch — is DELETED rather than demoted: two doorways for one
+            state is one of them to keep in step, and this one has three of the other's words in
+            it. The filtered "No agents match." branch below survives and is now unreachable
+            except with agents on file, which is the only way it was ever true.
+            ⚠️ AND `settling` RENDERS NOTHING AT ALL. The alternative to a blank frame here is a
+            skeleton, and this page has none to borrow; a beat of empty scroller is honest, where
+            a first-run pitch shown to somebody with forty agents on file is not. */}
+        {pageState === "blank" ? (
+          <ContactListEmptyState
+            onAddAgent={onAddAgent}
+            /* the bridge App.tsx already maps to `/agents/discover` — not a second router call */
+            onDiscover={() => DISCOVER && onNavigate?.(DISCOVER.tab, DISCOVER.sub)}
+          />
+        ) : pageState === "settling" ? null : (
+        <>
 
         {/* Applied filters live OUTSIDE the popover — closing it must never hide what is
             filtering the list. Each tag removes its own value; "Clear all" empties the set. */}
@@ -875,30 +922,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
           </div>
         ) : (
         <div className="agl-grid agl-gridwrap" ref={gridRef}>
+          {/* ⚠️ THE FILTERED STATE ONLY — the blank account never reaches this branch, so the
+              condition it used to carry (`agents.length === 0 ? welcome : no match`) has one arm
+              left and no test to make. */}
           {shown.length === 0 && (
             <div className="agl-empty">
-              {agents.length === 0 ? (
-                /* welcome state — a doorway, not an error */
-                <>
-                  <div className="big">Your agent list starts here.</div>
-                  <div className="small" style={{ marginBottom: 14 }}>
-                    Everyone you're querying, watching, or saving for later.
-                  </div>
-                  <button type="button" className="agl-btn agl-btn-dark" onClick={onAddAgent}>
-                    <Plus width={14} height={14} aria-hidden="true" />
-                    Add your first agent
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="big">No agents match.</div>
-                  <div className="small">Loosen the filter, or clear the search.</div>
-                </>
-              )}
+              <div className="big">No agents match.</div>
+              <div className="small">Loosen the filter, or clear the search.</div>
             </div>
           )}
           {shown.map(renderCard)}
         </div>
+        )}
+        </>
         )}
         {/* The notice sits BENEATH the grid and persists until dismissed or superseded — a card
             that travelled off-screen, or left because it no longer matches the filters, would

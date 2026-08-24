@@ -401,7 +401,15 @@ interface DbContextType {
   // (ConfirmDestroy's manifest pattern) before it can exist again, not a red button.
 }
 
-const DbContext = createContext<DbContextType | undefined>(undefined);
+/**
+ * ⚠️ EXPORTED FOR THE DEV LABS ONLY, AND THE APP NEVER READS IT DIRECTLY. `DbProvider` is the one
+ * writer in every shipped path; the export exists so a `#/…-lab` route can mount a REAL page
+ * against a stub state instead of reconstructing that page's chrome. That distinction has cost
+ * this repo whole sessions — a reconstruction agrees with itself while describing a page the app
+ * never serves — and a first-run state is otherwise unreachable on any account that has data.
+ * If you are reaching for this from `src/components/**` outside a lab, you want `useScriptAllyDb`.
+ */
+export const DbContext = createContext<DbContextType | undefined>(undefined);
 
 export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
