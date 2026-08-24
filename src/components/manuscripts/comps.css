@@ -216,6 +216,115 @@
    put an empty box on a page whose whole message is "there is nothing here yet". */
 .ct-firstempty { padding: 40px 20px 48px; }
 
+/* ══ THE FEATURE BLOCK — first visit, and again demoted at the workspace foot (v3 §2) ══ */
+.ct-feature {
+  display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 48px;
+  align-items: center; padding: 26px 0 44px;
+}
+@media (max-width: 1040px) { .ct-feature { grid-template-columns: minmax(0, 1fr); gap: 30px; } }
+.ct-feature-l { min-width: 0; }
+/* ⚠️ 1.25 MINIMUM ON PLAYFAIR THIS LARGE — "What does a good comp do?" carries a `g` and a `p`, and
+   a tighter line box crops both. Plain ink, one weight: no italic accent, no burgundy `<em>`. */
+.ct-feature-h {
+  margin: 0; font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 600;
+  line-height: 1.25; letter-spacing: -.018em; color: var(--ct-ink);
+}
+.ct-feature.demoted .ct-feature-h { font-size: 34px; }
+.ct-feature-p { margin: 16px 0 0; max-width: 560px; font-size: 14.5px; line-height: 1.68; color: var(--ct-ink-soft); }
+.ct-feature-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+/* ⚠️ THE THEME'S SOLID DARK, NOT BURGUNDY. `--ct-accent` is the advisory ink on this page; filling
+   the page's primary action with it makes the main thing to do look like a warning. */
+.ct-btn-dark {
+  background: var(--ct-mocha); border: 1px solid var(--ct-mocha); color: var(--ct-card);
+  border-radius: 11px; padding: 12px 22px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.ct-btn-dark:hover { background: var(--ct-ink); border-color: var(--ct-ink); }
+.ct-btn-slateghost {
+  display: inline-flex; align-items: center; gap: 9px;
+  background: transparent; border: 1px solid var(--slate-line, var(--ct-scout-bd)); color: var(--slate-deep, var(--ct-scout-deep));
+  border-radius: 11px; padding: 12px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.ct-btn-slateghost:hover { background: var(--slate-tint, var(--ct-scout-bg)); }
+
+/* ── the carousel ── */
+.ct-caro { min-width: 0; }
+.ct-caro-stage {
+  position: relative; background: var(--ct-card); border: var(--ct-bdw) solid var(--ct-bd);
+  border-radius: 16px; box-shadow: var(--ct-panel-sh); padding: 24px 24px 22px;
+}
+.ct-caro-count {
+  position: absolute; top: 14px; right: 16px;
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .13em; color: var(--ct-label);
+}
+/* ⚠️ THE STAGE HOLDS ITS HEIGHT FROM THE TALLEST SLIDE, so the block does not jump as it advances:
+   every slide is in the grid's ONE cell, and only the active one is visible. `display: none` would
+   let the stage collapse to the current slide and resize on every tick. */
+.ct-caro-slide { grid-area: 1 / 1; opacity: 0; visibility: hidden; transition: opacity .34s ease; }
+.ct-caro-stage { display: grid; grid-template-columns: minmax(0, 1fr); }
+.ct-caro-slide.on { opacity: 1; visibility: visible; }
+@media (prefers-reduced-motion: reduce) { .ct-caro-slide { transition: none; } }
+.ct-caro-slot {
+  width: 100%; max-width: 396px; height: 270px; margin: 0 auto;
+  border: 1px dashed var(--ct-taupe-bd); border-radius: 12px; background: var(--ct-sect);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+}
+.ct-caro-slot span {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .07em; color: var(--ct-label);
+}
+.ct-caro-cap { text-align: center; margin-top: 18px; }
+/* 1.3 on mixed-case Playfair — "Places it on a shelf" and "Backs the sales case" both descend */
+.ct-caro-cap h4 {
+  margin: 0; font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 600;
+  line-height: 1.3; color: var(--ct-ink);
+}
+.ct-caro-cap p { margin: 8px auto 0; max-width: 400px; font-size: 12.5px; line-height: 1.55; color: var(--ct-ink-soft); }
+.ct-caro-dots { display: flex; justify-content: center; gap: 7px; margin-top: 16px; }
+/* ⚠️ REAL BUTTONS, SO THEY NEED A REAL HIT AREA — the visible dot is 7px, the control is not. */
+.ct-caro-dot {
+  width: 7px; height: 7px; padding: 0; border: none; border-radius: 20px; cursor: pointer;
+  background: var(--ct-taupe-bd); transition: width .24s ease, background .24s ease;
+}
+.ct-caro-dot.on { width: 22px; background: var(--ct-mocha); }
+.ct-caro-dot:focus-visible { outline: 2px solid var(--ct-accent); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .ct-caro-dot { transition: none; } }
+
+/* ══ MANAGING YOUR COMPS — the three stages (v3 §3) ══ */
+.ct-stages { padding: 40px 0 20px; text-align: center; }
+.ct-stages-h {
+  margin: 0; font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600;
+  line-height: 1.3; color: var(--ct-ink);
+}
+.ct-stages-p { margin: 10px 0 0; font-size: 13.5px; color: var(--ct-ink-soft); }
+.ct-stages-grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 34px; margin-top: 38px;
+}
+@media (max-width: 1040px) { .ct-stages-grid { grid-template-columns: minmax(0, 1fr); gap: 34px; } }
+.ct-stage { position: relative; display: flex; flex-direction: column; align-items: center; min-width: 0; }
+/* ⚠️ THE CONNECTOR IS WIDE-VIEWPORT ONLY, and never on the last stage. Once the grid stacks, a
+   horizontal rule between rows points sideways at nothing. */
+.ct-stage.linked::after {
+  content: ''; position: absolute; top: 75px; left: calc(50% + 90px); right: calc(-50% + 90px);
+  height: 1px; background: var(--ct-band-hair);
+}
+@media (max-width: 1040px) { .ct-stage.linked::after { display: none; } }
+.ct-stage-slot {
+  width: 150px; height: 150px; border-radius: 50%; border: 1px dashed var(--ct-taupe-bd);
+  background: var(--ct-sect); display: flex; align-items: center; justify-content: center;
+  padding: 0 10px; margin-bottom: 18px;
+}
+.ct-stage-slot span {
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .06em;
+  color: var(--ct-label); text-align: center; overflow-wrap: anywhere;
+}
+.ct-stage h4 {
+  margin: 9px 0 0; font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600;
+  line-height: 1.3; color: var(--ct-ink);
+}
+.ct-stage p { margin: 9px 0 0; max-width: 320px; font-size: 12.5px; line-height: 1.6; color: var(--ct-ink-soft); }
+
+/* the Scout standing alone on the first-visit state — it is the CTA's destination there */
+.ct-scout--solo { margin-bottom: 8px; }
+
 /* ══ THE TOP ROW — tile left, query line right (v2.1 §2) ══
  *
  * ⚠️ `align-items: stretch` IS THE POINT: both columns share one height, and the card's insides take

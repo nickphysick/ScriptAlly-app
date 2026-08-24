@@ -58,7 +58,12 @@ import { QueryFormat, compAgeLine, compCounts, compFacets, compMedia, currentYea
    stat rail became the ref's bare number-and-label fact row, so nothing renders them. They are
    RETAINED in compMarks.tsx rather than deleted — they are finished illustration work and
    whether they come back is a design call, not a sweep. Flagged in the report. */
-import { CompsEmptySketch, ScoutEmptySketch } from "./compMarks";
+/* ⚠️ `CompsEmptySketch` IS NO LONGER IMPORTED (v3 §2). The comps empty state it drew was
+   replaced by the feature block, so nothing renders it. It is RETAINED in compMarks.tsx
+   rather than deleted — finished illustration work, and whether it returns is a design
+   call, not a sweep. `ScoutEmptySketch` still draws the Scout's own empty result. */
+import { ScoutEmptySketch } from "./compMarks";
+import { FeatureBlock, StagesBlock } from "./compsMarketing";
 import { useToast } from "../toast/ToastProvider";
 import {
   CompSuggestion,
@@ -781,6 +786,8 @@ export const ComparableTitlesPage: React.FC<{
     }
   };
 
+  /* the first-visit Scout's scroll/focus target — see the `onScout` note below */
+  const scoutRef = useRef<HTMLElement>(null);
   const editingComp = formState && formState.index != null ? comps[formState.index] : undefined;
 
   return (
@@ -852,19 +859,38 @@ export const ComparableTitlesPage: React.FC<{
             </section>
           ) : (
             <>
-              <div className="ct-estate ct-firstempty">
-                <div className="ct-islot" data-slot="comp-empty"><CompsEmptySketch /></div>
-                <div className="em">No comps yet</div>
-                <div className="es">
-                  Comps are the published books your manuscript sits beside. Record the first one
-                  and it becomes available to your query line and submission packages.
+              <FeatureBlock
+                onAddComp={() => setFormState({ index: null })}
+                /* ⚠️ THE SCOUT IS ON THIS STATE TOO, SO THE CTA HAS A REAL DESTINATION (Nick's
+                   call). It reads the MANUSCRIPT, not the shelf, so it already works with nothing
+                   recorded — and an empty shelf is exactly when "find me some" is worth most. The
+                   alternative was a button labelled "Try the Scout" that opened a comp form, which
+                   is a control whose label does not describe what it does. */
+                onScout={() => {
+                  scoutRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  /* ⚠️ FOCUS FOLLOWS THE SCROLL, or a keyboard reader is moved somewhere their
+                     focus is not and the next Tab returns them to the button they just left. */
+                  scoutRef.current?.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true });
+                }}
+              />
+
+              {/* ⚠️ THE SAME `ScoutPanel`, NOT A FIRST-RUN COPY — same run, same phases, same
+                  machinery. Only its placement differs between the two states. */}
+              <section className="ct-panel ct-scout--solo" ref={scoutRef}>
+                <div className="ct-band blue">
+                  <span className="bt">The Scout</span>
+                  <span className="ct-tag pro">Pro</span>
                 </div>
-                <div className="eacts">
-                  <button type="button" className="ct-btn-pink" onClick={() => setFormState({ index: null })}>
-                    Add your first comp
-                  </button>
-                </div>
-              </div>
+                <ScoutPanel
+                  isPro={isProUser(currentUser)}
+                  input={{ manuscriptId: activeMs.id }}
+                  shelfTitles={[]}
+                  onAddToShelf={(comp) => writeComps(withCompAdded(comps, comp))}
+                  onUpgrade={() => onNavigate?.("plans")}
+                />
+              </section>
+
+              <StagesBlock />
             </>
           )
         ) : (

@@ -165,7 +165,11 @@ describe("Phase 3 — the empty states are states, not failures", () => {
   it("both carry a dashed slot, stamped with its own name", () => {
     expect(rules).toContain("attr(data-slot)");
     expect(rules.slice(rules.indexOf(".ct-islot"))).toContain("dashed");
-    expect(src).toContain("<CompsEmptySketch />");
+    /* ⚠️ ONE SKETCH, NOT TWO, SINCE v3 §2 — and the change is recorded rather than the assertion
+       quietly halved. The COMPS empty state is gone: at zero comps the page is the first-visit
+       state, which is a feature block and a carousel, so `CompsEmptySketch` has nothing to draw.
+       The Scout's own empty-result sketch is untouched and still asserted. */
+    expect(src, "the comps empty sketch is back — restore its half of this lock").not.toContain("<CompsEmptySketch />");
     expect(src).toContain("<ScoutEmptySketch />");
     /* ⚠️ AND EVERY RENDERED SLOT CARRIES A NAME, or the stamp reads "SLOT ·  · 200×150". Counting
        both sides catches a slot added without one — the population assertion this repo's negative
