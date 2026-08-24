@@ -53,8 +53,6 @@
      column was wider than ours. A number carried off a ref is a hypothesis until measured.
      ⚠️ THE REQUIREMENT IS ONE LINE ABOVE THE `nowrap` BOUNDARY, not this number. */
   --mk-hero-h1: clamp(2.1rem, 4.5vw, 3.65rem);
-  /* The pulse halo. Read on the rule, never inside the keyframes — see the note there. */
-  --mk-halo: #f0d5c8;
   /* The paper slip's hairline — ink at 10%, pre-computed per the no-colour-mix() rule. */
   --mk-slip-bd: rgba(58, 28, 20, 0.10);
   font-family: "Source Sans Pro", system-ui, -apple-system, sans-serif;
