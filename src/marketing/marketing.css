@@ -11,6 +11,23 @@
  */
 
 .mk-scope {
+  /* ⚠️ TWO SURFACES, AND THE BOUNDARY IS THE ONLY MARKER. The hero sits on the APP's content-area
+     ground; everything from the section break down sits on the brand's warmer desk. There is no
+     hairline at the join — the colour change is the whole signal, which is why the step between
+     these two values has to be real. Measured: ~5 points. An earlier plan had the lower surface
+     LIGHTER than the hero (#f9f6f1), a ~2-point step that is inside noise and cannot carry a
+     section break; the parchment cards below the break would have flattened out on it as well,
+     which is the same fault the retired parchment band had.
+     ⚠️ `--mk-hero-ground` IS A DOCUMENTED COPY OF `--ws-ground` (#f7f4ee, src/index.css), NOT a
+     reference to it. The tier states that it carries its own palette because it renders outside
+     the theme classes; `--ws-ground` happens to sit at bare `:root` so a direct `var()` would
+     work, and that is exactly the trap — one cross-tier read is what a shell refactor deletes
+     without knowing marketing depended on it. `marketingTokens.test.ts` asserts the two values
+     still agree, which buys the protection without the coupling. */
+  --mk-hero-ground: #f7f4ee;
+  /* Named for where it sits, not what colour it is — the value is a decision, the mechanism is
+     not. Changing the surface below the break is this one line. */
+  --mk-lower: #f2ede7;
   --mk-desk: #f2ede7;
   --mk-card: #fffefb;
   --mk-parch: #fdfaf5;
@@ -56,7 +73,7 @@
   /* The paper slip's hairline — ink at 10%, pre-computed per the no-colour-mix() rule. */
   --mk-slip-bd: rgba(58, 28, 20, 0.10);
   font-family: "Source Sans Pro", system-ui, -apple-system, sans-serif;
-  background: var(--mk-desk);
+  background: var(--mk-hero-ground);
   color: var(--mk-ink);
   min-height: 100vh;
   display: flex;
@@ -128,7 +145,8 @@
   position: sticky;
   top: 0;
   z-index: 60;
-  background: var(--mk-desk);
+  /* The nav is sticky over the hero, so it takes the hero's ground. */
+  background: var(--mk-hero-ground);
   border-bottom: 1px solid transparent;
   transition: border-color 180ms ease;
 }
@@ -193,6 +211,10 @@
   .mk-nav { padding: 14px 22px; gap: 18px; }
   .mk-links { display: none; }
 }
+
+/* ⚠️ EVERYTHING FROM THE SECTION BREAK DOWN, FOOTER INCLUDED. One wrapper, one token, no
+   hairline — see the note on the tokens. Nothing inside this may repaint the ground. */
+.mk-lower { background: var(--mk-lower); }
 
 /* ═══════════════ Landing page (design-refs/landing-v13.html, values verbatim) ═══════════════ */
 
@@ -344,9 +366,12 @@
 /* ⚠️ THE TOP PADDING HOLDS THE ECG INSIDE THE BAND. The trace is 150px tall and centred on the
    heading, so it reaches ~75px above it; too little padding here and it draws out over the cream
    above the top hairline. Ceiling ~ the value 8vh yields at 900, per the vh rule. */
+/* ⚠️ NO BACKGROUND AND NO HAIRLINES. The band used to be a parchment slab with a rule top and
+   bottom; the page is two surfaces now and this sits wholly on the lower one, so painting it
+   again would put a third surface inside the second. The top padding still holds the trace clear
+   of the band's top edge. */
 .mk-featband {
-  background: var(--mk-parch); border-top: 1px solid var(--mk-hair);
-  border-bottom: 1px solid var(--mk-hair); padding: clamp(58px, 8vh, 74px) 0 26px; margin-top: 14px;
+  padding: clamp(58px, 8vh, 74px) 0 26px; margin-top: 14px;
 }
 
 /* ── The band's header: a heading with an ECG trace passing behind it ── */

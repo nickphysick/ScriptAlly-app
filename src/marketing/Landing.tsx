@@ -46,13 +46,18 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
   return (
     <div>
       <Hero onStart={openSignup} />
-      <FeatureRows onStart={openSignup} onRowLink={onRowLink} />
-      <CtaBand onStart={openSignup} />
+      {/* ⚠️ THE SECOND SURFACE STARTS HERE AND RUNS TO THE FOOT OF THE PAGE. The hero is on the
+          app's content ground above it and the boundary is marked by the colour change alone —
+          there is deliberately no rule at the join. */}
+      <div className="mk-lower">
+        <FeatureRows onStart={openSignup} onRowLink={onRowLink} />
+        <CtaBand onStart={openSignup} />
       {/* ⚠️ LINKS, NOT SPANS. These were inert text for as long as the pages did not exist — which
           is a worse answer than an unfinished page, because a reader cannot tell the difference
           between "no policy yet" and "the link is broken". The footer is now shared, so a page
           added to the site is reachable from every other page by construction. */}
-      <MarketingFooter onNavigate={onNavigate} />
+        <MarketingFooter onNavigate={onNavigate} />
+      </div>
     </div>
   );
 };
