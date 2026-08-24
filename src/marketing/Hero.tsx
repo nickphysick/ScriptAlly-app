@@ -14,6 +14,15 @@
  * bug. There is no `P.S.` label.
  *
  * ⚠️ ONE CTA. `See pricing` and the `Free to start` microline are both gone.
+ *
+ * ⚠️ THE ILLUSTRATION IS A PLACEHOLDER AND NOTHING ON THE PAGE SAYS SO. It renders `finished`, so
+ * the slot's dashed rim, tinted ground and "ILLUSTRATION · HERO" caption — the three things that
+ * used to admit it was a stand-in — are all off. The filename is the remaining signal; see
+ * CLAUDE.md. Swapping in the commissioned artwork is this import and nothing else.
+ *
+ * ⚠️ NO `mix-blend-mode`, AND DO NOT ADD ONE. The PNG is RGBA with a real alpha channel, so it
+ * composites onto the cream directly. A blend mode here would also be silently killed by a
+ * `transform` on any ancestor — and this hero has two rotated elements in it already.
  */
 
 import React from "react";
@@ -21,6 +30,7 @@ import {
   HERO_EYEBROW, HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B, CTA_START,
 } from "./landingCopy";
 import { MarketingIllustration } from "./marketingMarks";
+import heroIllustration from "../assets/marketing/hero-illustration-placeholder.png";
 
 export const Hero: React.FC<{ onStart: () => void }> = ({ onStart }) => (
   <section className="mk-hero">
@@ -58,7 +68,11 @@ export const Hero: React.FC<{ onStart: () => void }> = ({ onStart }) => (
         </div>
       </div>
 
-      <MarketingIllustration slot="landingHero" />
+      {/* `finished` is the slot primitive's own prop — the component is not forked, and the
+          About page's vision plates keep every piece of chrome this drops. */}
+      <MarketingIllustration slot="landingHero" finished>
+        <img className="mk-illoart" src={heroIllustration} alt="" />
+      </MarketingIllustration>
     </div>
   </section>
 );

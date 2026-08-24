@@ -944,8 +944,40 @@
    keeps the shorter plate centred against it instead of hanging from the top. The `min-height`
    floors below still win, so a short row cannot collapse it. */
 .mk-illo--tall { min-height: 340px; align-self: center; height: min(100%, 620px); }
+/* ⚠️ THE HERO PLATE IS HEIGHT-CAPPED SEPARATELY FROM THE ABOUT MISSION'S. Both wear `--tall`, but
+   the hero now holds a bare transparent PNG with no rim to give it edges, and the inherited
+   `min(100%, 620px)` let it stretch the row on tall viewports. 430px stops that. The artwork is
+   width-limited at this column anyway (760x639 contained in ~530px is ~445px tall), so neither
+   cap crops it — the ceiling exists only to stop the row growing. About keeps 620. */
+.mk-hero .mk-illo--tall {
+  height: clamp(300px, 42vh, 430px); min-height: 0; padding: 22px;
+  /* ⚠️ THE EXPLICIT ROW IS WHAT MAKES THE IMAGE'S PERCENTAGE BOUNDS RESOLVE. `.mk-illo` is a grid
+     whose implicit row is `auto`, i.e. content-sized — and a percentage height or max-height
+     against an auto row is INDEFINITE, so the browser drops it. Both `height: 100%` and
+     `max-height: 100%` were therefore ignored in turn, the image took its intrinsic ratio off the
+     resolved width, and `overflow: hidden` cropped ~70px of artwork without a word. A definite
+     row makes the bound mean something. */
+  grid-template-rows: minmax(0, 1fr);
+}
 .mk-illo--tall svg { width: min(56%, 300px); stroke-width: 1.4; opacity: .62; }
-.mk-illo--done { border-color: transparent; }
+/* ⚠️ `--done` DROPS THE GROUND AS WELL AS THE RIM AND THE CAPTION. All three are placeholder
+   chrome: a tinted plate behind finished artwork is as much of a lie as a dashed rim around it.
+   Callers that do not pass `finished` — the About page's three vision plates — keep all of it. */
+.mk-illo--done { border-color: transparent; background: none; }
+/* The hero's artwork. `object-fit: contain` so a swapped-in asset of any ratio is never cropped.
+   ⚠️ THE 22px INSET IS THE PLATE'S PADDING, NOT THE IMAGE'S — and putting it on the image is a
+   crop, not a style choice. `height: 100%` resolves against the plate's height, and with padding
+   on the image that 100% is its CONTENT box, so the border box comes out 44px taller than the
+   plate and `overflow: hidden` silently cuts the difference. Measured before the fix: a 451px
+   image box inside a 378px plate, ~66px of artwork gone, with every property-level assertion
+   passing. Keep the inset on the plate.
+   ⚠️ AND IT IS SIZED BY CONSTRAINT, NOT BY `width/height: 100%` + `object-fit`. That pair looks
+   like it fits an image to a box and here it did not: the grid area's height was indefinite, so
+   `height: 100%` computed to `auto`, the image took its INTRINSIC ratio off the resolved width
+   (484 / 1.189 = 407) and overflowed a 334px content box — which `overflow: hidden` then cropped
+   in silence. `max-width`/`max-height` cannot do that: the image scales itself to fit and is
+   incapable of exceeding either bound, whether or not the percentage resolves. */
+.mk-illoart { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
 .mk-illo svg {
   width: 190px; max-width: 100%; height: auto; fill: none;
   stroke: var(--mk-burg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; opacity: .55;
@@ -1002,6 +1034,7 @@
      SHORTER than the three vision plates beneath it — measured, and the wrong way round. The
      stacked floor still tightens from 340, it just cannot go under the plates it outranks. */
   .mk-illo--tall { min-height: 280px; }
+  .mk-hero .mk-illo--tall { height: 280px; }
   .mk-bandcopy h1 { font-size: 32px; }
   .mk-commitinner { padding: 34px 26px; }
   .mk-commitgrid { grid-template-columns: 1fr; }
