@@ -12,8 +12,20 @@
  */
 export interface AgentLike { name?: string | null; agency?: string | null }
 
-const nm = (a: AgentLike) => (a.name || "").trim();
-const ag = (a: AgentLike) => (a.agency || "").trim();
+/**
+ * ⚠️ NULL-SAFE, AND THAT IS A DIFFERENT STATE FROM "no name" (F-AF, D3 / R5). These read
+ * `a.name` directly and THREW on an absent agent — `Cannot read properties of undefined`. Every
+ * helper below is called from the query list, the list renders on a mounted page, and a mounted
+ * page that throws takes the whole shell with it: measured, 0 rows and a sign-in that never
+ * completed, from one query whose `agentId` resolved to nothing.
+ *
+ * ⚠️ THE FILE ALREADY HANDLED A RECORD WITH NO NAME. It did not handle NO RECORD, and the two are
+ * genuinely different facts — `AGENT_NOT_SPECIFIED` says "this agent has no name on file",
+ * `AGENT_NOT_RECORDED` says "this query names an agent we hold nothing about". Collapsing them
+ * would tell a writer their contact exists when it does not.
+ */
+const nm = (a: AgentLike | null | undefined) => (a?.name || "").trim();
+const ag = (a: AgentLike | null | undefined) => (a?.agency || "").trim();
 
 /**
  * The canonical missing-name string (app-wide display rule): "Unnamed agent" / "Unknown agent"
@@ -22,9 +34,14 @@ const ag = (a: AgentLike) => (a.agency || "").trim();
  */
 export const AGENT_NOT_SPECIFIED = "Agent not specified";
 
+/** No agent record at all — the query points at one this account does not hold. Never blank: a
+ *  wrong message gets reported, a blank one gets read as nothing to see. */
+export const AGENT_NOT_RECORDED = "Agent not recorded";
+
 /** Single-line label: "Name — Agency" when both present, else whichever exists, else a quiet fallback.
  *  Never leaves a dangling separator for an agency-less (but named) agent. */
-export function agentLabel(a: AgentLike, fallback = AGENT_NOT_SPECIFIED): string {
+export function agentLabel(a: AgentLike | null | undefined, fallback = AGENT_NOT_SPECIFIED): string {
+  if (!a) return AGENT_NOT_RECORDED;
   const name = nm(a), agency = ag(a);
   if (name && agency) return `${name} — ${agency}`;
   return name || agency || fallback;
@@ -33,16 +50,21 @@ export function agentLabel(a: AgentLike, fallback = AGENT_NOT_SPECIFIED): string
 /** The primary display field: the name, else the agency (the identity-anchor rule — name OR agency
  *  always exists on a valid record, so this is never empty in practice). Compact single-line
  *  surfaces show only this — they must never render "Unnamed agent". */
-export const agentPrimary = (a: AgentLike): string => nm(a) || ag(a);
+export const agentPrimary = (a: AgentLike | null | undefined): string =>
+  a ? (nm(a) || ag(a)) : AGENT_NOT_RECORDED;
 
 /** The secondary line beneath the primary: the agency for a named agent (may be "" — surfaces keep
  *  their own empty treatment, e.g. "Independent"), or the canonical "Agent not specified" once the
  *  agency has been promoted to primary. Supersedes agentAgencyLine for new call sites. */
-export const agentSecondary = (a: AgentLike): string => (nm(a) ? ag(a) : AGENT_NOT_SPECIFIED);
+export const agentSecondary = (a: AgentLike | null | undefined): string =>
+  !a ? "" : nm(a) ? ag(a) : AGENT_NOT_SPECIFIED;
 
 /** Avatar initials from the PRIMARY field (the agency's initials when unnamed — never a bare "?"
  *  for any valid record; "?" survives only for the rules-impossible anchor-less one). */
-export function agentInitials(a: AgentLike): string {
+export function agentInitials(a: AgentLike | null | undefined): string {
+  /* ⚠️ A DASH, NOT "?" — an absent record is a known gap, and a question mark reads as confusion
+     about a record that exists. "?" is still the anchor-less case's fallback below. */
+  if (!a) return "–";
   const parts = agentPrimary(a).split(/\s+/).filter(Boolean);
   if (!parts.length) return "?";
   if (parts.length === 1) return parts[0][0]!.toUpperCase();
@@ -52,7 +74,8 @@ export function agentInitials(a: AgentLike): string {
 /** The secondary "agency" line shown beneath a name — the parameterised base agentSecondary sits on.
  *  For a named agent: the agency, or a gentle "No agency" when it's empty (never blank, never
  *  "agency only"). For a name-less agency-only agent: the canonical missing-name kicker. */
-export function agentAgencyLine(a: AgentLike, opts: { noAgency?: string; agencyOnly?: string } = {}): string {
+export function agentAgencyLine(a: AgentLike | null | undefined, opts: { noAgency?: string; agencyOnly?: string } = {}): string {
+  if (!a) return "";
   const name = nm(a), agency = ag(a);
   if (name) return agency || (opts.noAgency ?? "No agency");
   return agency ? (opts.agencyOnly ?? AGENT_NOT_SPECIFIED) : "";

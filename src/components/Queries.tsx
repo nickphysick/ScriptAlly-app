@@ -2204,7 +2204,16 @@ export const Queries: React.FC<{
   // Queries Hub subtitle — the manuscript currently in scope ("Tracking …").
   const trackedManuscript = selectedManuscriptFilter !== "All" ? manuscripts.find(m => m.id === selectedManuscriptFilter) : null;
   // Manuscripts that actually have queries — the MANUSCRIPT pill group only shows these.
+  /** The scope value for "no manuscript". Not an id — no manuscript has it, which is the point. */
+  const UNASSIGNED_MS = "__unassigned__";
+  const UNASSIGNED_LABEL = "Unassigned";
   const manuscriptsWithQueries = manuscripts.filter(m => queries.some(q => q.manuscriptId === m.id));
+  /**
+   * ⚠️ DERIVED, NEVER STORED (D6's rule applied here). "Unassigned" is not a manuscript and has no
+   * record; it is the count of queries whose manuscript does not resolve — an absent id and an id
+   * naming nothing alike, because a reader cannot tell those apart and should not have to.
+   */
+  const unassignedCount = queries.filter(q => !manuscripts.some(m => m.id === q.manuscriptId)).length;
   const hubSubtitle = trackedManuscript ? trackedManuscript.title : "all manuscripts";
   // (The grand masthead + its pulse line are RETIRED with the F12 shell — the breadcrumb and
   // the list footer carry the page name and counts now; queriesPulse remains a lib for others.)
@@ -2335,7 +2344,17 @@ export const Queries: React.FC<{
     const agent = agents.find(a => a.id === q.agentId);
     const ms = manuscripts.find(m => m.id === q.manuscriptId);
 
-    if (!agent || !ms) return false;
+    /**
+     * ⚠️ AN UNRESOLVABLE ROW IS SHOWN, NOT DROPPED (F-AF, D2). This was
+     * `if (!agent || !ms) return false` — so a query naming a manuscript or agent that does not
+     * exist vanished from the list at EVERY scope, with no filter selected and nothing to say it
+     * was there. Measured: two probes planted, 46 queries stored, 44 rows rendered.
+     *
+     * ⚠️ AND STORING `""` DOES NOT FIX IT BY ITSELF, which is the trap. The import stopped writing
+     * invented ids in Phase 1, and an unassigned query STILL failed `!ms` here — the same row,
+     * invisible for the same reason. A row must never be hidden by the thing that is missing from
+     * it, and that is a property of this predicate rather than of what was written.
+     */
 
     // Whose turn — the CTA engine's queryBucket is the ONE source of truth (never re-derived):
     // "move" = the agent replied, your turn; "waiting" = ball in the agent's court.
@@ -2346,8 +2365,11 @@ export const Queries: React.FC<{
     // Status multi-select — the exact QueryStatus strings; only a partial selection filters.
     if (statusFilterActive && !statusSel.includes(q.status as QueryStatus)) return false;
 
-    // Manuscript filter
-    if (selectedManuscriptFilter !== "All" && q.manuscriptId !== selectedManuscriptFilter) {
+    /* Manuscript filter. ⚠️ `UNASSIGNED_MS` matches every query whose manuscript does not resolve —
+       an empty id AND an id naming nothing, because both are the same fact to a reader. */
+    if (selectedManuscriptFilter === UNASSIGNED_MS) {
+      if (ms) return false;
+    } else if (selectedManuscriptFilter !== "All" && q.manuscriptId !== selectedManuscriptFilter) {
       return false;
     }
 
@@ -2359,9 +2381,12 @@ export const Queries: React.FC<{
     const term = (listSearch || searchQuery).toLowerCase();
     if (term) {
       return (
-        agent.name.toLowerCase().includes(term) ||
-        agent.agency.toLowerCase().includes(term) ||
-        ms.title.toLowerCase().includes(term)
+        /* ⚠️ NULL-SAFE, because the bail above is gone. An unassigned row has no title and no
+           agent name to match, and `UNASSIGNED_LABEL` is searchable so "unassigned" finds them. */
+        (agent?.name ?? "").toLowerCase().includes(term) ||
+        (agent?.agency ?? "").toLowerCase().includes(term) ||
+        (ms?.title ?? "").toLowerCase().includes(term) ||
+        (!ms || !agent ? UNASSIGNED_LABEL.toLowerCase().includes(term) : false)
       );
     }
 
@@ -2514,6 +2539,14 @@ export const Queries: React.FC<{
         {manuscriptsWithQueries.map(m => (
           <PRow key={m.id} kind="rad" on={selectedManuscriptFilter === m.id} label={m.title} onClick={() => setSelectedManuscriptFilter(m.id)} />
         ))}
+        {/* ⚠️ OFFERED ONLY WHEN THERE IS SOMETHING IN IT (derived, never stored). An always-present
+            "Unassigned" would teach that the state is normal; an absent one on an account that has
+            some would hide them. The count is derived like every other figure on this page. */}
+        {unassignedCount > 0 && (
+          <PRow kind="rad" on={selectedManuscriptFilter === UNASSIGNED_MS}
+                label={`${UNASSIGNED_LABEL} · ${unassignedCount}`}
+                onClick={() => setSelectedManuscriptFilter(UNASSIGNED_MS)} />
+        )}
       </PopSection>
       <PopSection label="Status">
         <div className="f12-quick">
@@ -3305,13 +3338,22 @@ export const Queries: React.FC<{
     const nowMs = Date.now();
     const rows = renderList
       .map((q) => ({ q, agent: agents.find((a) => a.id === q.agentId), ms: manuscripts.find((m) => m.id === q.manuscriptId) }))
-      .filter((r) => !!r.agent && !!r.ms);
+      /* ⚠️ THE SECOND DROP, AND IT IS WHY FIXING `matchesFilters` ALONE DID NOTHING. This read
+         `.filter((r) => !!r.agent && !!r.ms)` — a join that silently discarded any row whose agent
+         or manuscript did not resolve, after the predicate above had already agreed to show it.
+         Measured: with the predicate fixed and this still in place, 47 stored and 44 rendered.
+         Two independent gates on the same fact, and only the second one was load-bearing. */
+      ;
     /* ⚠️ ONE SECTION, IN THE SORT'S OWN ORDER — `rows` is already sorted (grouping partitions an
        already-sorted list), so the flat view is that same array undivided. It is deliberately the
        same shape the grouped path returns, so everything downstream reads one structure. */
     if (!listGrouped) return [{ g: "flat" as ListSection, items: rows, foldable: false, shut: false }];
     return GROUP_ORDER
-      .map((g) => ({ g, items: rows.filter((r) => listGroupFor(r.q as never, r.agent, nowMs) === g) }))
+      /* ⚠️ `listGroupFor` READS THE AGENT'S RESPONSE WINDOW, so an unresolvable agent threw and took
+         the WHOLE LIST with it — measured 0 rows rendered, the page-won't-load shape. An unassigned
+         row has no stated window and therefore no honest group: it goes to `waiting`, which is what
+         the function returns when nothing is overdue, rather than being guessed into `overdue`. */
+      .map((g) => ({ g, items: rows.filter((r) => (r.agent ? listGroupFor(r.q as never, r.agent, nowMs) : "waiting") === g) }))
       .filter((s) => s.items.length > 0)
       .map(({ g, items }) => {
         /* the fold is the closed group's alone, and only once folding earns its place */

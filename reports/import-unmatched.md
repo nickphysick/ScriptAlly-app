@@ -80,3 +80,48 @@ That is the one case where dropping is right — an event with nothing to attach
 a record — and reporting the row number is what separates it from the silent skip the ruling
 rejects. `q-seed-fantasy` was worse than either: the activity was written, attached to a query that
 does not exist, and visible from nowhere.
+
+## Phase 2 — Unassigned visibility
+
+### ⚠️ Two independent gates on the same fact, and only the second was load-bearing
+
+Fixing `matchesFilters` alone changed **nothing**: 47 stored, 44 rendered, exactly as before. The
+list joins its rows a second time —
+
+```js
+.map((q) => ({ q, agent: agents.find(…), ms: manuscripts.find(…) }))
+.filter((r) => !!r.agent && !!r.ms)      // ← the one that was actually dropping them
+```
+
+— so the predicate agreed to show a row and the join discarded it a few lines later. **A fix that
+reads correctly and measures unchanged is the signature of a second gate.** Only measuring found it.
+
+### ⚠️ And removing it took the whole app down
+
+With the join opened up, the list rendered **0 rows and sign-in never completed**. The cause was
+`agentDisplay.ts`: `nm = (a) => (a.name || "").trim()` dereferences its argument, so an absent agent
+threw. Every workspace page stays mounted, so a throw in the query list kills the shell on **every**
+route — the page-won't-load shape, from one query whose `agentId` resolved to nothing.
+
+The helpers already handled a record with **no name**; they had never been given **no record**. Those
+are different facts and now say so: `AGENT_NOT_SPECIFIED` ("this agent has no name on file") and the
+new `AGENT_NOT_RECORDED` ("this query names an agent we hold nothing about"). Initials render `–`
+rather than `?` — a question mark reads as confusion about a record that exists.
+
+### Measured
+
+```
+stored 47 · rendered 47 · difference 0        (three probes: no ms, no agent, neither)
+rows rendering an empty label : 0
+Unassigned scope offered      : "Unassigned · 2"
+rows under Unassigned         : 2
+```
+
+⚠️ **Two, not three, and that is the design.** "Unassigned" is a **manuscript** scope, so it holds the
+two probes with no manuscript. The third has a manuscript and no agent — a **per-row state** (D3),
+not a scope. Scoping by "missing agent" would file a query under something it lacks rather than
+under the book it belongs to.
+
+The scope is **derived, never stored** (`unassignedCount`) and is offered only when something is in
+it: an always-present "Unassigned" would teach that the state is normal, and an absent one on an
+account that has some would hide them.
