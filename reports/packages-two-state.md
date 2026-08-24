@@ -370,13 +370,61 @@ re-filled — is unchanged and now covers both modes; only the expression widene
 tsc 0 · build 0, no error/[WARNING] lines · vitest 383 files, 6581 passed, 3 skipped
 ```
 
+## Where this stopped, and what is left
+
+**Delivered: Phases 1, 2 and 3, plus D-D2/D-D3 pulled forward.** Every one measured or proven
+against the deployed database, not asserted.
+
+| phase | state |
+|---|---|
+| 1 · recon + refs | **done** — R1–R5 answered, F-Q quantified |
+| 2 · Part D data layer | **done, deployed to dev**, both halves proven at rules level |
+| 3 · Part A first visit | **done, measured** at 1440 and 1920 on an emptied account |
+| — · D-D2 / D-D3 | **done** — pulled forward because Phase 2 had shipped the lock without it |
+| 4 · Part B workspace | **not started** |
+| 5 · Part C drawer | **not started** |
+| 6 · Part D UI | **not started** |
+| 7 · full verify | **not started** |
+
+**Stopped at a phase boundary deliberately.** The page is coherent as it stands: the new first-visit
+state, the existing workspace, and the attachment lock with its way forward. Beginning Part B and
+leaving the workspace half-rebuilt would be worse than not beginning it.
+
+### What Part D's UI still needs — the recon is done, so the shape is known
+
+- **D-D5, the visible half of the reported bug.** Chips still read `Covering letter` rather than
+  `Hook-first`. The fix is one derivation away and already exists: `packageItems(pkg, versions)`
+  resolves each slot id to its `versionName` and carries the `ComponentType` for the slot eyebrow.
+  The strip renders `materialsWanted`'s canonical type strings instead — **that substitution is the
+  leak.**
+- **D-D4's fork.** `materialsLinkWrites` already writes one and clears the other, so the either/or is
+  a render change plus routing `attachPackage` through it, rather than new machinery.
+- **D-D1's other half.** `markPackageSent` exists and has **no caller yet** — attaching a package must
+  call it. Until then no package locks in the app, though the rule and the refusal are live.
+- **D-D6.** Remove `+ Attach` and the per-chip `✕` from inside a packaged strip.
+
+⚠️ **And one conflict the model cannot express, found in recon.** `QueryStatus` has **no unsent
+member** — every query in this app is a send. So the ref's `foot-unsent` branch (`Change package` /
+`Remove` shown *instead of* the locked note) has **no reachable state**. The coherent reading, and
+what a build should follow: the lock governs a package's **contents**, while *which* package a query
+points at stays correctable — so both the note and the change/remove controls belong on screen
+together, not as alternatives. That differs from the ref and should be ruled on before it is built.
+
+---
+
 ## Flags
 
 | flag | state |
 |---|---|
-| **F-Q** | **answered: 2** — `seed-pkgq-3`, `seed-pkgq-4`. Migration in Phase 2; the outcome is recorded there. |
-| **F-S** | forming — `CompCarousel` is already shareable verbatim; `StagesBlock` needs heading/sub/stages as props; `FeatureBlock` is too comps-specific to share. Full shape after Part A. |
-| **F-R** | pending Part B. |
-| **F-M, F-O, F-H, D-C1, Move surface** | carried, untouched. |
+| **F-Q** | **answered and acted on: 2** — `seed-pkgq-3`, `seed-pkgq-4`, both `packageId="seed-pkg-1"` carrying a loose `["First 10 pages"]`. Migrated: link kept, list **unset**. Re-read confirms 0 remain. |
+| **F-S** | **answered concretely.** `CompCarousel` is one hardcoded string from being shareable — it takes `{slides, label}` and imports nothing but React, but prints `396×250` inline. A shared component needs: that dimension as a prop (or read off the slide), the `ct-` classes renamed to a neutral prefix, and its styles moved out of `comps.css` into their own sheet. `StagesBlock` needs heading/sub/stages lifted to props. `FeatureBlock` is too comps-specific to share. Not attempted here: their pattern moved hours before this pack, and the brief's instruction for that case is to build to `main` and flag. |
+| **F-T (new)** | **A mis-attach locks a package that never went out.** `firstSentAt` is permanent by design — deleting the queries does not un-send an envelope — but attaching the wrong package freezes it, and `Duplicate & edit` is a workaround rather than a repair. The alternative, clearing the stamp when the last attachment goes, is expressible client-side but **not in rules** (they cannot count attachments), so it would soften the guarantee. Proposal, not a decision. |
+| **F-R** | **not reached** — the materials shelf is Part B. |
+| **F-M** | carried. Blue tokens stay page-local pending the consolidation ruling. |
+| **F-O** | **closed last session**; the removal rows are live in the Attach menu. |
+| **F-H** | carried — still no un-archive surface. Now adjacent to F-T: two acts with no way back. |
+| **D-C1 partial/full strips** | carried, still blocked on the `materialsWanted` migration. |
+| **Move surface** | carried — Correction UI's outstanding piece. |
 
-**Phase 5 of the broadsheet build remains held. Nothing is deployed in this phase.**
+**Phase 5 of the broadsheet build remains held.** Dev rules and nothing else were deployed;
+`origin/main` is untouched.
