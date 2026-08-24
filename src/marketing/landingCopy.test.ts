@@ -12,7 +12,10 @@
 import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B, HERO_EYEBROW, CTA_START,
-  CTA_BAND_HEADING, DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
+  DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
+  FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_CTA,
+  FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
+  FOUNDING_NOTE, FOUNDING_INVALID, foundingCounterLabel,
 } from "./landingCopy";
 
 /** The lede is segments now (one is bold); this is the sentence a reader actually sees. */
@@ -120,7 +123,8 @@ describe("landing copy — verbatim locks", () => {
       PULSE_HEADING,
       ...FEATURE_ROWS.map((r) => r.heading),
       ...FEATURE_ROWS.flatMap((r) => r.body.map((b) => b.text)),
-      HERO_H1, ledeText(), HERO_TURN_B, CTA_BAND_HEADING,
+      HERO_H1, ledeText(), HERO_TURN_B,
+      FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL,
     ].filter((t) => t.toLowerCase().includes("finger on the pulse"));
     expect(said).toEqual(["A finger on the pulse of your querying journey"]);
   });
@@ -170,9 +174,81 @@ describe("landing copy — verbatim locks", () => {
     expect(strings.some((t) => /spreadsheet\.$/.test(t))).toBe(false);
   });
 
-  it("CTA band and document title", () => {
-    expect(CTA_BAND_HEADING).toBe("Free to start. Take control of your querying journey today.");
+  it("document title", () => {
     expect(DOCUMENT_TITLE).toBe("ScriptAlly — Take control of your querying journey");
+  });
+
+  /**
+   * ⚠️ RETARGET, AND THE CLAIM IS NOW ABSENCE PLUS A REPLACEMENT. `CTA_BAND_HEADING` is deleted
+   * with the band that rendered it — the page closed by restating the hero's CTA three screens
+   * later. Asserting the string is gone from every export is what stops the foot of the page
+   * regaining two competing primaries.
+   */
+  it("no closing CTA band — the page ends on the founding offer", async () => {
+    const copy = await import("./landingCopy");
+    expect("CTA_BAND_HEADING" in copy).toBe(false);
+    const strings = Object.values(copy).filter((v): v is string => typeof v === "string");
+    expect(strings).not.toContain("Free to start. Take control of your querying journey today.");
+  });
+
+  /** ⚠️ Verbatim from `design-refs/scriptally-landing-v13.html` .beta. Edit there and here only. */
+  it("the founding-members band, verbatim", () => {
+    expect(FOUNDING_EYEBROW).toBe("Founding members");
+    expect(FOUNDING_HEADING).toBe("Be one of the first hundred.");
+    expect(FOUNDING_BLURB).toBe(
+      "ScriptAlly opens in stages. Founding members get in first, keep every feature free " +
+      "through the beta, and help decide what gets built next.",
+    );
+    expect(FOUNDING_CTA).toBe("Claim your place");
+    expect(FOUNDING_SENT).toBe(
+      "You're on the list. We'll email your invite code when your place opens — no other mail, ever.",
+    );
+    expect(FOUNDING_DUPE).toBe(
+      "You're already on the list — no need to sign up twice. Your invite is still coming.",
+    );
+  });
+
+  /**
+   * ⚠️ THE TWO FAILURES SAY DIFFERENT THINGS AND OFFER THE SAME WAY OUT. One is "try again", the
+   * other is "this is not wired" — collapsing them would tell one of the two readers to do
+   * something useless. Both hand over a real address, because a failure that offers no way
+   * through is a dead end with an apology attached.
+   */
+  it("both failure messages are distinct, and both offer a human", () => {
+    const text = (runs: typeof FOUNDING_ERROR) =>
+      runs.map((r) => (typeof r === "string" ? r : "link" in r ? r.link : r.b)).join("");
+    expect(text(FOUNDING_ERROR)).not.toBe(text(FOUNDING_DOWN));
+    expect(text(FOUNDING_ERROR)).toContain("try again");
+    expect(text(FOUNDING_DOWN)).toContain("unavailable");
+    for (const runs of [FOUNDING_ERROR, FOUNDING_DOWN]) {
+      const mail = runs.find((r) => typeof r !== "string" && "mailto" in r);
+      expect(mail, "offers a mailto").toBeTruthy();
+    }
+  });
+
+  /**
+   * ⚠️ THE COUNTER'S WORDS ARE BUILT FROM NUMBERS PASSED IN — there is no string in the module
+   * stating how many places are claimed. The ref hardcodes "37 of 100"; a fabricated scarcity
+   * number on a public page is a factual claim nobody could check.
+   */
+  it("no hardcoded count anywhere in the copy", async () => {
+    expect(foundingCounterLabel(37, 100)).toBe("37 of 100 places claimed");
+    const copy = await import("./landingCopy");
+    const strings = Object.values(copy).filter((v): v is string => typeof v === "string");
+    expect(strings.some((t) => /\bplaces claimed\b/.test(t))).toBe(false);
+    expect(strings.some((t) => /\b\d+ of \d+\b/.test(t))).toBe(false);
+  });
+
+  /** The invalid-address line is field feedback, not an outcome — it never displaces the form. */
+  it("the invalid-address line is its own thing", () => {
+    expect(FOUNDING_INVALID).toBe("That doesn't look like an email address.");
+    expect([FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL]).not.toContain(FOUNDING_INVALID);
+  });
+
+  /** The privacy note points at a real route, never a spelled URL. */
+  it("the privacy note links into the site by route", () => {
+    const link = FOUNDING_NOTE.find((r) => typeof r !== "string" && "to" in r);
+    expect(link).toEqual({ link: "Privacy", to: "privacy" });
   });
 
   it("seven feature rows, alternating from the second, Pro badge only on the email drop", () => {

@@ -1,8 +1,12 @@
 /**
  * Landing — the public front page at "/" (design ref: design-refs/landing-v13.html,
- * pixel-authoritative). Hero (copy + scaled dashboard demo + Form 11 peek) → the parchment
- * features band → CTA band → footer. Pure presentation over static data — no Firebase, no
+ * pixel-authoritative). Hero → the band header →
+ * the feature rows → the founding-members band → footer. Pure presentation over static data — no Firebase, no
  * stores, no workspace imports.
+ *
+ * ⚠️ THE PAGE CLOSES ON THE FOUNDING-MEMBERS LETTER, NOT ON A SECOND CTA BAND. `CtaBand` restated
+ * the hero's "start tracking" three screens later; a page that ends by repeating its own opening
+ * call to action is looping rather than closing.
  *
  * Action wiring: every "start" CTA opens Create account via the pre-auth hash transport
  * (#/signup — App.tsx renders Auth for it; a signed-in visitor is bounced straight to the
@@ -18,7 +22,7 @@ import React, { useEffect } from "react";
 import { Hero } from "./Hero";
 import { BandHeader } from "./BandHeader";
 import { FeatureRows } from "./FeatureRows";
-import { CtaBand } from "./CtaBand";
+import { FoundingBand } from "./FoundingBand";
 import { MarketingFooter } from "./MarketingFooter";
 import { DOCUMENT_TITLE, FeatureRow } from "./landingCopy";
 
@@ -53,7 +57,7 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
       <div className="mk-lower">
         <BandHeader />
         <FeatureRows onStart={openSignup} onRowLink={onRowLink} />
-        <CtaBand onStart={openSignup} />
+        <FoundingBand onNavigate={onNavigate} />
       {/* ⚠️ LINKS, NOT SPANS. These were inert text for as long as the pages did not exist — which
           is a worse answer than an unfinished page, because a reader cannot tell the difference
           between "no policy yet" and "the link is broken". The footer is now shared, so a page

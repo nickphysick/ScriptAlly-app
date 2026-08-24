@@ -70,8 +70,11 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   --mk-label: #9c8878;
   --mk-muted: #8a7a6c;
   --mk-burg: #7c3a2a;
+  /* ⚠️ `--mk-band-b` IS DELETED AND ITS PARTNER IS NOT. The two were the retired parchment band's
+     gradient stops; when that band went, `-a` survived as the About page's commitment strip's flat
+     fill and `-b` had no reader left. Found by the inverse half of the token lock below — a
+     declared-but-unread token is a knob the next reader goes looking for the effect of. */
   --mk-band-a: #ece5d8;
-  --mk-band-b: #e5ddcd;
   --mk-centre: #f6e4da;
   --mk-sage: #e9ede6;
   --mk-sage-t: #5a6e58;
@@ -83,6 +86,32 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   --mk-cta: #f5e2da;
   --mk-cta-bd: #e8c8bc;
   --mk-cta-hov: #f8e9e2;
+  /* ── The founding-members band ──
+     ⚠️ EVERY COLOUR THIS BAND PAINTS IS A TOKEN, AND THAT IS NOT TIDINESS. A `var()` naming a
+     custom property nobody declares does not error and does not warn — the declaration is simply
+     dropped, so a mistyped token is a surface that paints NOTHING, on a public page, through a
+     green build and a green suite. `marketingTokens.test.ts` asserts that every `var(--mk-…)`
+     this sheet READS resolves to a declaration; declaring them together here is what makes that
+     guard cheap to keep satisfied. */
+  --mk-blush: #f8e8e1;
+  --mk-blush-line: #eed6cb;
+  --mk-blush-label: #9c6a56;
+  --mk-blush-body: #6d5348;
+  --mk-blush-note: #8a6c5f;
+  --mk-blush-ph: #b08e80;
+  --mk-letter-bd: rgba(58, 28, 20, .11);
+  --mk-letter-fold: rgba(58, 28, 20, .09);
+  --mk-letter-sh: rgba(124, 58, 42, .13);
+  --mk-letter-rim: rgba(255, 255, 255, .85);
+  /* ⚠️ THE SEAL IS THE ONE BURGUNDY FILL AT SCALE ON THIS SITE. Every other burgundy fill here is
+     a mark under 12px — the Pro tag, the status dot, the pinned-note pin, a few hairlines at half
+     opacity. The exception is about SIZE, not hue, and it does not travel: no button is
+     burgundy-filled, here or anywhere. */
+  --mk-seal-sh: rgba(124, 58, 42, .34);
+  --mk-seal-ring: rgba(253, 250, 245, .42);
+  --mk-msg-ok-bg: rgba(233, 237, 230, .8);
+  --mk-msg-ok-bd: rgba(138, 158, 136, .5);
+  --mk-counter-track: rgba(124, 58, 42, .15);
   /* The display ink for statement type. `--mk-head` (mocha) is the page-furniture heading colour
      and stays; a 52px+ statement wants the darker end, and the two are not interchangeable. */
   --mk-nearblack: #1c130f;
@@ -299,6 +328,11 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   border-radius: 0 0 8px 0; padding: 12px 18px; font-size: .95rem; text-decoration: none;
 }
 .mk-skip:focus { left: 0; }
+/* ⚠️ VISUALLY HIDDEN, NOT HIDDEN. This is for labels a reader must still HEAR — it stays in the
+   accessibility tree, which `display: none`, `visibility: hidden` and `aria-hidden` all do not.
+   `.mk-trap` looks identical and is the opposite thing: a honeypot, deliberately `aria-hidden`.
+   Do not use one for the other. */
+.mk-sr { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .mk-avatar {
   width: 30px;
   height: 30px;
@@ -783,14 +817,131 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-pinned .mk-cv { font-family: "Caveat", cursive; font-size: 16px; line-height: 1.35; color: #4a3a30; }
 .mk-pinned .mk-pt3 { font-family: "JetBrains Mono", monospace; font-size: 6.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--mk-label); margin-top: 9px; }
 
-/* ── CTA band + footer ── */
-.mk-ctaband { max-width: 1080px; margin: 20px auto 0; padding: 0 56px; }
-.mk-ctainner { background: var(--mk-parch); border: 1px solid var(--mk-bd); border-radius: 20px; padding: 46px 40px; text-align: center; position: relative; overflow: hidden; }
-.mk-ctainner::after { content: ''; position: absolute; inset: 8px; border: 1px solid var(--mk-burg); border-radius: 14px; pointer-events: none; opacity: .5; }
-.mk-ctainner h2 { font-family: "Playfair Display", Georgia, serif; font-size: 29px; font-weight: 500; color: var(--mk-head); }
-/* ⚠️ THE BAND HAS NO SUBTITLE ANY MORE — the line that was here is the heading. This rule sets
-   the gap the `<p>` used to provide between the words and the button. */
-.mk-ctainner h2 + .mk-btn { margin-top: 24px; }
+/* ── The founding-members band + footer ── */
+/* ⚠️ THIS REPLACES `.mk-ctaband`, WHICH IS DELETED. That band restated the hero's CTA three
+   screens later inside a parchment card; the page closes on an offer now. The `.mk-ctainner`
+   double-rule treatment went with it and should not be revived here — the letter's fold and its
+   seal are what say "document", and a second inset frame would be a third edge on one card.
+   ⚠️ AND THIS IS THE ONE PLACE INSIDE `.mk-lower` THAT REPAINTS THE GROUND. The two-surface rule
+   says nothing within the wrapper may lay a third surface over the desk — and it says that
+   because the retired parchment band did it by accident, over its whole height, flattening the
+   cards on it. This is a deliberate, bounded band with a hairline declaring its top edge, which
+   is the difference between a section and a seam. */
+.mk-beta {
+  background: var(--mk-blush); border-top: 1px solid var(--mk-blush-line);
+  padding: clamp(96px, 12vh, 128px) 0 clamp(84px, 10vh, 112px); margin: 0;
+}
+.mk-betacard {
+  position: relative; max-width: 790px; margin: 0 auto; background: var(--mk-parch);
+  border: 1px solid var(--mk-letter-bd); border-radius: 6px;
+  padding: 74px 58px 52px; text-align: center;
+  box-shadow: 0 22px 52px var(--mk-letter-sh), 0 1px 0 var(--mk-letter-rim) inset;
+}
+/* The fold, 44px down — a letter that has been in an envelope. */
+.mk-betacard::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 44px; height: 1px;
+  background: var(--mk-letter-fold);
+}
+/* Paper grain. Inline SVG turbulence rather than an asset: it is 300 bytes, it never 404s, and
+   it is the only way to get noise without a network request under this tier's self-contained
+   palette rule. */
+.mk-betacard::after {
+  content: ""; position: absolute; inset: 0; border-radius: 6px; pointer-events: none; opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
+}
+
+/* The wax seal, breaking the card's top edge. */
+.mk-wax {
+  position: absolute; top: -40px; left: 50%; transform: translateX(-50%) rotate(-4deg);
+  width: 92px; height: 92px; display: grid; place-items: center; z-index: 2;
+}
+.mk-waxblob { position: absolute; inset: 0; }
+.mk-waxblob svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 5px 10px var(--mk-seal-sh)); }
+/* ⚠️ THE BLOB IS DELIBERATELY IRREGULAR — a circle reads as a badge, and a badge is a UI element.
+   Wax is poured, so the outline has to be slightly wrong on every side. */
+.mk-waxblob path { fill: var(--mk-burg); }
+.mk-waxblob circle { fill: none; stroke: var(--mk-seal-ring); stroke-width: 1.3; }
+/* ⚠️ THE MARK SHIPS PRE-TINTED AND TAKES NO FILTER. It is a parchment-coloured PNG so it reads on
+   the wax; recolouring it in CSS would fork one illustration in two. Placeholder, like the hero
+   artwork and the tick — the filename is the only thing on the page that says so. */
+.mk-wax img { position: relative; width: 46px; height: auto; opacity: .95; }
+
+.mk-betaeyebrow {
+  font-family: "JetBrains Mono", monospace; font-size: .66rem; letter-spacing: .28em;
+  text-transform: uppercase; color: var(--mk-blush-label); margin: 0 0 16px;
+}
+/* ⚠️ THE REF'S CEILING STANDS, AND THE CONTAINER-CAP RULE DOES NOT APPLY HERE — worth stating,
+   because at a glance it looks like it should. `2.6vw` reaches 2.35rem at 1446px, well past the
+   790px card, which is exactly the shape that fault takes. It is not that fault, because this
+   heading's MEASURE is `18ch` set on the element itself: `ch` resolves against the element's own
+   font-size, so the measure grows in lockstep with the type and the line count never changes. The
+   rule bites when a capped CONTAINER sets the measure while a viewport-relative size keeps
+   climbing — `.mk-statement` inside `.mk-heroinner`, which is why that one is a lock. A
+   self-scaled `ch` measure is immune by construction.
+   ⚠️ AND `18ch` IS ONLY MEANINGFUL BECAUSE THIS ELEMENT CARRIES ITS OWN FONT-SIZE. On a container
+   that inherits 16px while its child paints at 37, the same number is 60% out — the trap this
+   stylesheet has already paid for three times. */
+.mk-beta h2 {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600;
+  font-size: clamp(1.75rem, 2.6vw, 2.35rem); line-height: 1.3; letter-spacing: -.018em;
+  color: var(--mk-nearblack); margin: 0 auto; max-width: 18ch;
+}
+/* ⚠️ 1.3, NOT THE REF'S 1.18, AND NOT BECAUSE OF THIS STRING. "Be one of the first hundred."
+   happens to contain no descender, so 1.18 would render it fine — which is precisely the reason
+   not to fit the value to it. The house floor for mixed-case Playfair is 1.3, and this is copy
+   that can change; a value tuned to the sentence someone typed is how the largest text on three
+   pages ended up cropped. */
+.mk-betablurb {
+  margin: 16px auto 0; max-width: 44ch; color: var(--mk-blush-body);
+  font-size: 1.02rem; line-height: 1.62;
+}
+.mk-betaform {
+  display: flex; gap: 12px; justify-content: center; margin: 30px auto 0;
+  max-width: 490px; flex-wrap: wrap;
+}
+.mk-betaform input {
+  flex: 1 1 240px; min-width: 0; font-family: inherit; font-size: 1rem; color: var(--mk-ink);
+  background: #fff; border: 1px solid var(--mk-cta-bd); border-radius: 11px; padding: 13px 16px;
+}
+.mk-betaform input::placeholder { color: var(--mk-blush-ph); }
+/* ⚠️ INK ON PINK, AND THE GRAMMAR GENERALISES RATHER THAN BREAKS. `.mk-btn--ink` is the nav's
+   fill and `.mk-btn--cta` is every page primary — on cream and parchment. This band's ground IS
+   the pink, so a pink button would have nothing to sit against. Primaries are pink on cream and
+   parchment grounds, ink on pink ones. */
+.mk-betaform .mk-btn--ink { flex: none; }
+
+/* The reader is told what went wrong beneath the form, never instead of the page. */
+.mk-betainvalid { margin: 12px auto 0; max-width: 44ch; font-size: .92rem; color: var(--mk-burg); }
+/* ⚠️ THE LIVE REGION IS ALWAYS MOUNTED AND USUALLY EMPTY — see `FoundingBand`. An empty box must
+   therefore contribute nothing, or every reader pays for the announcement. */
+.mk-betamsgwrap:empty { display: none; }
+.mk-betamsg {
+  margin: 28px auto 0; max-width: 44ch; font-size: .99rem; line-height: 1.55;
+  padding: 14px 18px; border-radius: 11px;
+}
+.mk-betamsg--ok { background: var(--mk-msg-ok-bg); border: 1px solid var(--mk-msg-ok-bd); color: var(--mk-ink); }
+.mk-betamsg--warn { background: #fff; border: 1px solid var(--mk-cta-bd); color: var(--mk-ink); }
+.mk-betamsg a { color: var(--mk-burg); }
+
+/* ⚠️ LIVE OR ABSENT. These rules only ever paint real numbers — `FoundingBand` renders nothing at
+   all until the endpoint answers with a count. There is no empty-bar state and there must not be
+   one: an empty scarcity bar is a claim about how many people have signed up. */
+.mk-counter { margin: 30px auto 0; max-width: 390px; }
+.mk-counterbar { height: 6px; border-radius: 999px; background: var(--mk-counter-track); overflow: hidden; }
+.mk-counterfill { height: 100%; background: var(--mk-burg); opacity: .82; border-radius: 999px; }
+.mk-counterlab {
+  font-family: "JetBrains Mono", monospace; font-size: .66rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--mk-blush-label); margin: 10px 0 0;
+}
+.mk-betanote { font-size: .86rem; color: var(--mk-blush-note); margin: 22px 0 0; }
+.mk-betanote .mk-doclink { color: var(--mk-burg); }
+
+@media (max-width: 820px) {
+  .mk-betacard { padding: 64px 26px 44px; }
+  .mk-wax { width: 78px; height: 78px; top: -34px; }
+  .mk-wax img { width: 38px; }
+}
+
 .mk-foot { max-width: 1300px; margin: 0 auto; padding: 38px 56px 48px; display: flex; align-items: center; gap: 20px; }
 .mk-foot .mk-brand { margin-right: auto; }
 .mk-foot .mk-monogram { width: 26px; height: 26px; font-size: 13px; }
@@ -809,7 +960,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   .mk-frow.mk-flip .mk-fcopy { order: 1; }
   .mk-frow.mk-flip .mk-fv { order: 2; }
   .mk-fv { min-height: 260px; }
-  .mk-ctaband { padding: 0 26px; }
+  .mk-beta { padding-left: 18px; padding-right: 18px; }
   .mk-foot { padding: 30px 26px 40px; flex-wrap: wrap; }
 }
 @media (max-width: 560px) {

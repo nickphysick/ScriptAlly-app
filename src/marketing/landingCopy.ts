@@ -12,6 +12,9 @@
  * (repo test convention: node environment, no DOM rendering). UK spelling throughout.
  */
 
+import { CopyRun } from "./CopyRuns";
+import { supportMailto } from "../lib/companyInfo";
+
 export const HERO_EYEBROW = "For querying writers";
 
 export const HERO_H1 = "You've written a book.";
@@ -95,17 +98,87 @@ export const SECTION_EYEBROW = "What ScriptAlly does";
    sat immediately below this heading — two centred head-and-sub pairs back to back, which reads
    as a mistake rather than as a rhythm. The heading above is the band's header now. */
 
+/* ⚠️ THE CLOSING CTA BAND IS GONE, AND WITH IT `CTA_BAND_H2`, `CTA_BAND_SUB` AND
+   `CTA_BAND_HEADING` ("Free to start. Take control of your querying journey today."). The page
+   closes on the founding-members letter below instead — an actual offer with an actual thing to
+   do, rather than a restatement of the hero's CTA three screens later. Do not reinstate any of
+   the three: a band that repeats "start tracking" beneath a band that asks you to claim a place
+   gives the foot of the page two competing primaries. */
+
+/* ══════════════ The founding-members band ══════════════
+   ⚠️ VERBATIM FROM `design-refs/scriptally-landing-v13.html` .beta, under the same discipline as
+   the rest of this file: the words are edited here or nowhere.
+
+   ⚠️ AND THE OFFER IS A PROMISE THE PRODUCT HAS TO KEEP. "keep every feature free through the
+   beta" and "help decide what gets built next" are commitments, not adjectives — the same class
+   as the About page's three, and the same rule applies: if one stops being true the fix is the
+   product, not the sentence. The number in the heading is the cap the backend carries; if that
+   number ever changes, this heading changes with it. */
+export const FOUNDING_EYEBROW = "Founding members";
+export const FOUNDING_HEADING = "Be one of the first hundred.";
+export const FOUNDING_BLURB =
+  "ScriptAlly opens in stages. Founding members get in first, keep every feature free through " +
+  "the beta, and help decide what gets built next.";
+
+export const FOUNDING_FIELD_LABEL = "Email address";
+export const FOUNDING_PLACEHOLDER = "you@example.com";
+export const FOUNDING_CTA = "Claim your place";
+
 /**
- * ⚠️ `CTA_BAND_H2` IS DELETED AND SHOULD NOT COME BACK. It read "Your story deserves better than
- * a spreadsheet." — retired on Nick's instruction.
- *
- * ⚠️ AND THE BAND KEEPS ITS HEADING SLOT: this line was the subtitle and is now the heading,
- * wearing the same Playfair treatment. Deleting the heading alone would have left a closing band
- * with a subtitle and a button and no heading; deleting the whole band would have cost the page
- * its last conversion point. Promoting the line that was already there invents no copy and
- * orphans no string.
+ * ⚠️ THE INVALID-ADDRESS MESSAGE IS NOT ONE OF THE OUTCOME STATES. It is what the field says
+ * before anything has been sent, so it never displaces the form the way an outcome does.
  */
-export const CTA_BAND_HEADING = "Free to start. Take control of your querying journey today.";
+export const FOUNDING_INVALID = "That doesn't look like an email address.";
+
+/**
+ * The outcomes, one per state the band can end in.
+ *
+ * ⚠️ `FOUNDING_FULL` IS WRITTEN AND UNREACHABLE, DELIBERATELY. Nothing can produce it: the
+ * waitlist function returns the cap in every response but has no branch that enforces it, so a
+ * 101st sign-up succeeds and is told it is in. Deciding "full" on the client from `count >= cap`
+ * would be the front end inventing a policy the server does not hold — and two browsers racing
+ * past 100 would both be told they were in, which is a promise the product cannot keep. The one
+ * change that makes this string reachable is a cap branch in `functions/src/waitlist.ts`; until
+ * then it sits here so the wording is settled and the gap is visible rather than forgotten.
+ *
+ * ⚠️ AND THE TWO FAILURES ARE DIFFERENT FACTS, NOT ONE FACT WORDED TWICE. `FOUNDING_DOWN` is "the
+ * route is not wired" — an HTML response, a parse failure, a network error — and it hides the
+ * form, because trying again cannot help. `FOUNDING_ERROR` is a real answer that says no, and it
+ * keeps the form, because trying again can. Collapsing them tells one of the two readers to do
+ * something useless.
+ */
+export const FOUNDING_SENT =
+  "You're on the list. We'll email your invite code when your place opens — no other mail, ever.";
+export const FOUNDING_DUPE =
+  "You're already on the list — no need to sign up twice. Your invite is still coming.";
+export const FOUNDING_FULL =
+  "All hundred founding places are claimed. Join the waiting list and we'll be in touch as the " +
+  "next stage opens.";
+export const FOUNDING_ERROR: CopyRun[] = [
+  "That didn't send. Check the address and try again, or ",
+  { link: "email us", mailto: supportMailto("ScriptAlly founding members") },
+  " and we'll add you by hand.",
+];
+export const FOUNDING_DOWN: CopyRun[] = [
+  "Sign-ups are briefly unavailable. Try again shortly, or ",
+  { link: "email us", mailto: supportMailto("ScriptAlly founding members") },
+  " and we'll add you by hand.",
+];
+
+/**
+ * ⚠️ THE COUNTER'S LABEL IS BUILT FROM REAL NUMBERS OR IT IS NOT RENDERED AT ALL — see
+ * `FoundingBand`. The ref hardcodes "37 of 100 places claimed"; a fabricated scarcity number is
+ * worse than no number, and this one would sit on a public page making a factual claim about how
+ * many people had signed up.
+ */
+export const foundingCounterLabel = (claimed: number, cap: number) =>
+  `${claimed} of ${cap} places claimed`;
+
+export const FOUNDING_NOTE: CopyRun[] = [
+  "We'll only use your address to send your invite. ",
+  { link: "Privacy", to: "privacy" },
+  ".",
+];
 
 export const DOCUMENT_TITLE = "ScriptAlly — Take control of your querying journey";
 

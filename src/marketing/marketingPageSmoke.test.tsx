@@ -321,3 +321,82 @@ describe("the statement's ticked box", () => {
     expect(h).not.toMatch(/["\s`]mk-subhead["\s`]/);
   });
 });
+
+/**
+ * The founding-members band — the page's closing offer, and the first thing on any public page
+ * that asks a stranger to type something.
+ *
+ * ⚠️ THE COUNTER IS LIVE OR ABSENT AND THIS IS THE LOCK THAT SAYS SO. The ref hardcodes
+ * "37 of 100 places claimed". On a public page that is a factual claim about how many people have
+ * signed up, made by nobody, checkable by nobody. Nothing renders until a real figure comes back —
+ * not a zero, not an empty bar, not a dash — so the first render must contain no counter at all.
+ */
+describe("the founding-members band", () => {
+  const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
+
+  it("closes the page — the CTA band is gone", () => {
+    const h = html();
+    expect(h).toContain("Founding members");
+    expect(h).toContain("Be one of the first hundred.");
+    expect(h).not.toMatch(/["\s`]mk-ctaband["\s`]/);
+    expect(h).not.toMatch(/["\s`]mk-ctainner["\s`]/);
+    expect(h).not.toContain("Free to start. Take control of your querying journey today.");
+  });
+
+  it("renders no counter and no number, because there is no count yet", () => {
+    const h = html();
+    expect(h).not.toMatch(/["\s`]mk-counter["\s`]/);
+    expect(h).not.toContain("places claimed");
+    /* And nothing that reads as a tally of places. */
+    expect(h).not.toMatch(/\d+\s+of\s+\d+/);
+  });
+
+  it("offers a real, labelled email field", () => {
+    const h = html();
+    const input = h.match(/<input[^>]*id="mk-founding-email"[^>]*>/);
+    expect(input, "the email field is rendered").toBeTruthy();
+    expect(input![0]).toContain('type="email"');
+    /* ⚠️ A LABEL, NOT A PLACEHOLDER STANDING IN FOR ONE. The placeholder is an example address and
+       it disappears the moment anyone types; the label has to survive that. `.mk-sr` hides it
+       visually and keeps it in the accessibility tree — which is what separates it from
+       `.mk-trap`, the contact form's honeypot, which is deliberately `aria-hidden`. */
+    const label = h.match(/<label[^>]*for="mk-founding-email"[^>]*>([^<]*)</);
+    expect(label, "the field has a label element").toBeTruthy();
+    expect(label![1]).toBe("Email address");
+    expect(label![0]).not.toContain("aria-hidden");
+  });
+
+  /** The wax seal says nothing the heading beneath it does not. */
+  it("the seal is decorative throughout", () => {
+    const seal = html().match(/<span class="mk-wax"[^>]*>/);
+    expect(seal, "the seal is rendered").toBeTruthy();
+    expect(seal![0]).toContain('aria-hidden="true"');
+    expect(html()).toMatch(/<img[^>]*src="[^"]*founding-seal-mark[^"]*"[^>]*alt=""/);
+  });
+
+  /**
+   * ⚠️ THE LIVE REGION IS MOUNTED EMPTY, ON THE FIRST RENDER, AND THAT IS THE WHOLE POINT. A
+   * region that appears at the same moment as its message is not reliably announced — the outcome
+   * has to arrive INTO something the reader's software is already watching.
+   */
+  it("mounts an empty live region before there is anything to announce", () => {
+    const h = html();
+    const region = h.match(/<div class="mk-betamsgwrap"[^>]*>([\s\S]*?)<\/div>/);
+    expect(region, "the live region is rendered").toBeTruthy();
+    expect(region![0]).toContain('aria-live="polite"');
+    expect(region![0]).toContain('role="status"');
+    expect(region![1].trim()).toBe("");
+  });
+
+  /** No outcome is stated before anything has been sent. */
+  it("says nothing about the outcome on first render", () => {
+    const h = html();
+    for (const s of [
+      "You're on the list",
+      "already on the list",
+      "All hundred founding places are claimed",
+      "Sign-ups are briefly unavailable",
+      "That didn&#x27;t send",
+    ]) expect(h).not.toContain(s);
+  });
+});

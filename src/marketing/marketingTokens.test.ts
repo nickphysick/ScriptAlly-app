@@ -147,3 +147,71 @@ describe("every viewport-scaled clamp reaches its ceiling before its container s
     });
   }
 });
+
+/**
+ * ⚠️ EVERY `var(--mk-…)` THIS SHEET READS MUST RESOLVE TO A DECLARATION — the missing-custom-
+ * property guard, pointed from CONSUMPTION to DEFINITION.
+ *
+ * A `var()` naming a property nobody declares does not error and does not warn. Where there is no
+ * fallback the whole declaration is DROPPED, so the surface paints nothing; where there is one,
+ * the rule looks parameterised and is not, and a grep for the token's definition finds nothing —
+ * which reads as "already cleaned" rather than as "still read". Both go green through a build and
+ * a suite.
+ *
+ * ⚠️ THE DIRECTION IS THE POINT. Checking that what you wrote arrived cannot catch what you
+ * referenced and never wrote. The shell sheets have carried this lock since a `calc()` on an
+ * undefined token rendered the app's only active marker 0px wide through 2,259 green tests; the
+ * public pages are a harder place to find out, because nobody is signed in to notice.
+ */
+describe("no marketing rule reads a token that does not exist", () => {
+  const declared = new Set(
+    [...marketing.matchAll(/(--mk-[a-z0-9-]+)\s*:/g)].map((m) => m[1]),
+  );
+  const read = [...marketing.matchAll(/var\(\s*(--mk-[a-z0-9-]+)/g)].map((m) => m[1]);
+
+  it("reads at least the tokens we know about (the scan is not vacuous)", () => {
+    expect(read.length).toBeGreaterThan(40);
+    expect(declared.size).toBeGreaterThan(30);
+  });
+
+  it("every token read is declared", () => {
+    const missing = [...new Set(read)].filter((t) => !declared.has(t)).sort();
+    expect(missing, `read but never declared: ${missing.join(", ")}`).toEqual([]);
+  });
+
+  /**
+   * ⚠️ AND THE INVERSE IS A DIFFERENT, WEAKER CLAIM, kept because a token nobody reads is a knob
+   * that does nothing — the next person to open the file goes looking for what it controls.
+   */
+  it("every token declared is read somewhere", () => {
+    const readSet = new Set(read);
+    const unread = [...declared].filter((t) => !readSet.has(t)).sort();
+    expect(unread, `declared but never read: ${unread.join(", ")}`).toEqual([]);
+  });
+});
+
+/**
+ * ⚠️ THE FOUNDING BAND IS THE ONE PLACE INSIDE `.mk-lower` THAT REPAINTS THE GROUND, and that is
+ * a decision rather than a drift. The two-surface rule exists because the retired parchment band
+ * repainted by accident, over its whole height, flattening the cards on it. A bounded band with a
+ * hairline declaring its top edge is a section; an unbounded repaint is a seam. This asserts the
+ * count is ONE, so a second one has to be argued for rather than added.
+ */
+describe("the founding band is the lower surface's only repaint", () => {
+  it("declares a ground and a top hairline", () => {
+    const rule = /\.mk-beta\s*\{([^}]*)\}/.exec(marketing);
+    expect(rule, ".mk-beta has a rule").toBeTruthy();
+    expect(rule![1]).toMatch(/background:\s*var\(--mk-blush\)/);
+    expect(rule![1]).toMatch(/border-top:\s*1px solid var\(--mk-blush-line\)/);
+  });
+
+  it("and it is the only ground repaint under the wrapper", () => {
+    /* Sections that sit inside `.mk-lower`, by the classes `Landing` renders there. */
+    const INSIDE = [".mk-sect", ".mk-featband", ".mk-beta", ".mk-foot"];
+    const painted = INSIDE.filter((sel) => {
+      const rule = new RegExp("\\" + sel + "\\s*\\{([^}]*)\\}").exec(marketing);
+      return rule ? /background(?!-image)\s*:/.test(rule[1]) : false;
+    });
+    expect(painted).toEqual([".mk-beta"]);
+  });
+});
