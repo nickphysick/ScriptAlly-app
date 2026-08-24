@@ -68,12 +68,29 @@
 }
 
 /* ── hero ───────────────────────────────────────────────────────────────── */
-/* ⚠️ NO `padding-top`. The workspace grid pays the gap under the masthead; a page that pads its
-   own first row ADDS to that token rather than replacing it. */
-.cle-hero { max-width: 1060px; margin-inline: auto; padding: 0 8px; text-align: center; }
+/*
+ * ⚠️ THE 101 IS AN ADDITION, NOT THE GAP — AND THE GAP WAS 17px, NOT THE 76 THE BRIEF ASSUMED.
+ * The workspace grid pays `--wpg-chrome-gap` (16px, plus the hairline) between the masthead and
+ * the content, and NOTHING ELSE was paying anything: measured 17px from the header rule to the
+ * headline's box at 1280, 1440 and 1728 alike. The house law is that the gap is the grid's alone,
+ * because a page quietly padding its own first row is how two pages end up opening at different
+ * heights for no stated reason. This page departs from it deliberately and says so: a first-run
+ * editorial page opens lower than a working one. 101 + 17 = 118, which is the number asked for,
+ * and it is written as the ADDITION so the grid's token still leads.
+ *
+ * ⚠️ AND IT IS PADDING, NOT MARGIN. An adjacent margin collapses; padding cannot. The same
+ * distinction cost this repo a 4px compensation that summed correctly on paper and was absorbed
+ * by the next element's margin-top in the browser.
+ */
+.cle-hero { max-width: 1060px; margin-inline: auto; padding: 101px 8px 0; text-align: center; }
+/* ⚠️ 38 OVER 720 IS ONE SETTING, NOT TWO VALUES. At 42/880 the sentence broke after "your" and
+   left `words.` alone on line two — an orphan that reads as a mistake rather than a break. The
+   size and the measure have to move together: narrowing alone would have made it three lines,
+   shrinking alone leaves the same break. Measured at 1280/1440/1728 — the break lands after
+   "champion" at all three, and the measure is capped so it cannot drift with the viewport. */
 .cle-hero-h {
-  margin: 0 auto; max-width: 880px;
-  font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 600;
+  margin: 0 auto; max-width: 720px;
+  font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 600;
   /* no fixed height anywhere on this page's type, so a descender can never be cropped */
   line-height: 1.25; letter-spacing: -.018em; color: var(--cle-ink);
 }
@@ -84,16 +101,20 @@
 .cle-hero-cta { margin-top: 28px; padding: 11px 22px; font-size: 13px; }
 
 /* ── the three stages ───────────────────────────────────────────────────── */
-/* ⚠️ 1240, AGAINST THE COPY BLOCKS' 1060 (comps §1). The left edges do not align down the page and
-   that is the design: a three-across grid of plates starved to a copy measure makes each plate too
-   small to read. */
-.cle-stages { max-width: 1240px; margin: 72px auto 0; padding: 0 8px; }
-.cle-stages-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; }
+/* ⚠️ 1000 — AND THIS INVERTS THE COMPS RELATIONSHIP ON PURPOSE. There the stages are WIDER than
+   the copy (1240 vs 1060), because a three-across grid of images starved to a copy measure makes
+   each image too small to read. Here they are NARROWER, because the fault being corrected is the
+   opposite one: at 1240 the three plates were the heaviest thing on the page and out-weighed the
+   headline. The left edges still do not align — 1000 against 1060 — which is the price of the
+   inversion and is flagged in the report rather than split the difference silently. */
+.cle-stages { max-width: 1000px; margin: 96px auto 0; padding: 0 8px; }
+.cle-stages-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 34px; }
 .cle-stage { display: flex; flex-direction: column; align-items: center; min-width: 0; text-align: center; }
 .cle-slot {
-  /* the illustrator's plate: full column width at 4:3 — `aspect-ratio`, never a second number to
-     keep in step with the measure */
-  width: 100%; aspect-ratio: 4 / 3; border-radius: 14px;
+  /* ⚠️ 3:2, AND IT IS THE ILLUSTRATOR'S BRIEF AS MUCH AS A LAYOUT VALUE — artwork drawn to 4:3
+     will not fit this box. `aspect-ratio` rather than a height, so the plate tracks its column
+     instead of needing a second number kept in step with the measure. */
+  width: 100%; aspect-ratio: 3 / 2; border-radius: 14px;
   border: 1px dashed var(--cle-line); background: var(--cle-band);
   display: flex; align-items: center; justify-content: center; padding: 0 10px; margin-bottom: 18px;
 }
@@ -300,8 +321,20 @@
 /* ⚠️ THE ALTERNATION DOES NOT SURVIVE THE STACK, DELIBERATELY (comps §4). Below the breakpoint
    every row puts its COPY first: a reader scrolling one column meets heading-then-picture each
    time, and a row that inverted there would read as a mistake rather than as rhythm. */
-@media (max-width: 1040px) {
+/*
+ * ⚠️ THE STAGES AND THE ROWS NOW STACK AT DIFFERENT WIDTHS, AND THAT IS A CONSEQUENCE OF THE
+ * NARROWER CAP RATHER THAN A SECOND OPINION. Both were 1040 — the comps rhythm — when the stage
+ * grid capped at 1240. At 1000 the three plates fit far longer, and 1040 was collapsing a grid
+ * with room to spare. Measured, three columns, heading line counts per stage:
+ *   1176 → 305px plates, 2/2/2 · 1024 → 260px, 2/2/2 · 960 → 239px, 2/2/2 · 920 → 225px, 2/3/2
+ * So the headings hold to 960 and the first one breaks at 920. 900 is the honest floor.
+ * The six feature rows keep 1040: they are a copy column beside an illustration, and their
+ * stacking point has nothing to do with how many plates fit in a row.
+ */
+@media (max-width: 900px) {
   .cle-stages-grid { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+}
+@media (max-width: 1040px) {
   .cle-row,
   .cle-row.flip { grid-template-columns: minmax(0, 1fr); gap: 26px; }
   .cle-row.flip .cle-row-l { order: 1; }
@@ -316,7 +349,11 @@
   .cle-stage h4 { font-size: 20px; }
   .cle-band { margin-top: 64px; padding: 56px 0 68px; }
   .cle-band-inner { padding: 0 16px; }
-  .cle-stages { margin-top: 56px; }
+  /* ⚠️ THE OPENING COMES DOWN WITH THE TYPE. 101px of air above a 32px headline on a 375px screen
+     is most of the first viewport spent on nothing; the desktop value is generous because there is
+     a page's width to be generous against. */
+  .cle-hero { padding-top: 44px; }
+  .cle-stages { margin-top: 64px; }
   .cle-close { margin-top: 80px; }
   .cle-row-art { min-height: 0; }
   /* ⚠️ THE ROTATIONS AND THE HUNG BADGE COME OFF AT PHONE WIDTHS. A degree of tilt on a card that

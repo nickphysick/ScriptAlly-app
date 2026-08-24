@@ -259,15 +259,41 @@ describe("the stylesheet", () => {
   });
 
   /**
-   * ⚠️ THE GAP UNDER THE MASTHEAD IS THE GRID'S ALONE. A page that pads its own first row ADDS to
-   * the token rather than replacing it — measured elsewhere as 92px and 154px against a 70px
-   * token, on pages whose own declarations read perfectly.
+   * ⚠️ THIS LOCK USED TO SAY THE OPPOSITE, AND THE REVERSAL IS THE POINT. It required
+   * `padding: 0` on the hero, on the house law that the gap under the masthead is the grid's
+   * alone — a page quietly padding its own first row is how two pages open at different heights
+   * for no stated reason. The spacing pass departs from that deliberately: the grid pays
+   * `--wpg-chrome-gap`, which is 16px, and 17px measured from the header rule to the headline is
+   * right for a working page and crowded for a first-run editorial one.
+   *
+   * ⚠️ SO WHAT IS LOCKED HERE IS THE MECHANISM, NOT THE NUMBER. The total gap is a rendered fact
+   * and is asserted on the page (`emptyStateSpacing.measure.ts`, 118px at 1280/1440/1728); a
+   * declaration cannot see the grid's half of it and would be describing a page nobody serves.
+   * What a source lock CAN hold is that the opening is PADDING — an adjacent margin collapses and
+   * would be absorbed by whatever sits above, which is how a compensation that summed correctly
+   * on paper came out 4px short in the browser.
    */
-  it("puts no top padding on its first row", () => {
+  it("pays its opening with padding, which cannot collapse — never a margin", () => {
     const hero = decls(css).match(/\.cle-hero\s*\{[^}]*\}/)?.[0];
     expect(hero).toBeTruthy();
-    expect(hero).toMatch(/padding:\s*0\s/);
-    expect(hero).not.toMatch(/padding-top/);
+    const pad = /padding:\s*([^;]+);/.exec(hero!)?.[1]?.trim();
+    expect(pad, "the hero declares its own top padding").toBeTruthy();
+    expect(parseFloat(pad!.split(/\s+/)[0]), "and it is a real opening, not a token gap").toBeGreaterThan(60);
+    expect(hero).not.toMatch(/margin-top|margin:\s*\d/);
+  });
+
+  /**
+   * ⚠️ THE STAGES STACK EARLIER THAN THE ROWS, AND THE TWO NUMBERS ARE NOT A DISAGREEMENT. Both
+   * were 1040 while the stage grid capped at 1240; at 1000 the plates fit to 960 with every
+   * heading still on two lines, so 1040 was collapsing a grid with room to spare. The rows are a
+   * copy column beside an illustration and keep their own point.
+   */
+  it("stacks the stage grid and the feature rows at their own widths", () => {
+    const d = decls(css);
+    expect(d).toMatch(/@media \(max-width: 900px\)\s*\{\s*\.cle-stages-grid/);
+    const rows = d.slice(d.indexOf("@media (max-width: 1040px)"));
+    expect(rows).toContain(".cle-row.flip .cle-row-l { order: 1; }");
+    expect(rows).not.toContain(".cle-stages-grid");
   });
 
   /**

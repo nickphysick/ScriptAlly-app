@@ -109,3 +109,77 @@ white band where the content is. The frames come from scrolling the real scrolle
   rows. It reads as generous rather than broken, but it is the number to turn if it reads as sparse.
 - Every `#/…-lab` route is stripped from **any** build — `import.meta.env.DEV` follows `NODE_ENV`,
   not `--mode`. `#/contact-lab` is reachable on `npx vite` only, and so is this measurement.
+
+
+---
+
+# Spacing and scale pass
+
+Four value corrections to the opening. No structure, no components, no copy.
+`emptyStateSpacing.measure.ts` (dev server, `#/contact-lab`) holds all of it.
+
+| | before | after |
+|---|---|---|
+| header rule → headline | **17px** | 118px |
+| headline | 42px over 880px | 38px over 720px |
+| headline break | `…champion your` / **`words.`** | `…champion` / `your words.` |
+| CTA → stages | 72px | 96px |
+| stage grid cap | 1240 (→ 1104–1224 rendered) | 1000 (→ 984) |
+| stage gap | 40px | 34px |
+| plate | 4:3, 381×286 | 3:2, 305×204 |
+| **plate height ÷ headline height** | **2.72** | **2.14** |
+
+Identical at 1280, 1440 and 1728 — the headline measure is capped, so the break cannot drift.
+
+## ⚠️ The gap was 17px, not the 76 the brief assumed
+
+Nothing was paying for the opening except the grid's `--wpg-chrome-gap` (16px, plus the hairline).
+So the crowding was worse than reported, and `76 → 118` was a delta against a number that did not
+exist. The section now adds **101**, which is written as the addition: 101 + 17 = 118.
+
+This is a **declared departure from a house law** — the gap under the masthead is the grid's alone,
+because a page quietly padding its own first row is how two pages open at different heights for no
+stated reason. A first-run editorial page opens lower than a working one; that is the reason, and it
+is in the stylesheet. The unit lock that used to require `padding: 0` here has been **reversed**, and
+now holds the mechanism rather than the number: the opening must be *padding*, never a margin, since
+an adjacent margin collapses. The number is a rendered fact and is asserted on the page.
+
+*(Also corrected: my own comment named a token `--wpg-gap`. No such token exists.)*
+
+## The fifth edit, and why it is a consequence rather than an opinion
+
+**The stage grid now stacks at 900px, not 1040.** Your Verify list said "stages *still* collapse to a
+single column below 900px" — they did not; both the stages and the feature rows stacked at 1040, the
+rhythm inherited from Comparable titles. That was right at a 1240 cap and wrong at 1000. Measured
+across three columns, per-stage heading line counts:
+
+| viewport | column | plate | heading lines |
+|---|---|---|---|
+| 1176 | 305px | 305×204 | 2 / 2 / 2 |
+| 1024 | 260px | 260×173 | 2 / 2 / 2 |
+| 960 | 239px | 239×159 | 2 / 2 / 2 |
+| **920** | 225px | 225×150 | 2 / **3** / 2 |
+
+The headings hold to 960 and the first one breaks at 920, so 900 is the honest floor and 1040 was
+collapsing a grid with room to spare. **The six feature rows keep 1040** — they are a copy column
+beside an illustration, and their stacking point has nothing to do with how many plates fit in a row.
+
+## Flagged
+
+**The two measures are now 30px apart and neither aligns.** The copy blocks cap at 1060 and the
+stages at 1000, so the stage grid sits 38px inside the copy's edges at every width above ~1176. On
+Comparable titles the two deliberately differ by 180px, which reads as intent; 1060 against 1000
+reads as a near-miss. Either is defensible — matching them at 1060 keeps the plates a shade larger,
+and widening the difference restates the intent — but the current pair is the one that could read as
+sloppy. **One value in `.cle-stages`.**
+
+**Stacked plates are large.** At 3:2 full width a plate is 724×483 at tablet and 327×218 at 375px,
+three of them in a column. Shorter than the 4:3 they replace (543 / 245), so not a regression, but
+they are still the tallest things on a narrow screen.
+
+## What the measurement now asserts, not just prints
+
+The gap as a **rendered total** (both halves), the break **by name** (`line 1` must end "champion",
+line 2 must be more than one word — a line *count* passes on the very fault this pass corrected), the
+plate-to-headline **ratio** rather than a size (the fault was relative), the stacking point **from
+both sides**, and gutter symmetry. Zero horizontal overflow at 375 through 1728.

@@ -360,9 +360,10 @@ export interface ContactListEmptyStateProps {
 
 export const ContactListEmptyState: React.FC<ContactListEmptyStateProps> = ({ onAddAgent, onDiscover }) => (
   <div className="cle">
-    {/* ⚠️ NO TOP PADDING ON THE HERO. The workspace grid already pays the gap under the masthead
-        (`--wpg-gap`), and a page that pads its own first row adds to it rather than replacing it —
-        measured elsewhere as 92px and 154px against a 70px token. The gap is the grid's alone. */}
+    {/* ⚠️ THE HERO PAYS ITS OWN OPENING, WHICH IS A DECLARED DEPARTURE — see the stylesheet. The
+        grid's `--wpg-chrome-gap` is 16px and was the ONLY thing between the header rule and the
+        headline (measured: 17px), which is right for a working page and crowded for this one. The
+        token was named `--wpg-gap` in this comment and no such token exists — corrected. */}
     <section className="cle-hero">
       <h2 className="cle-hero-h">{CLE_HERO.heading}</h2>
       <p className="cle-hero-p">{CLE_HERO.body}</p>
