@@ -180,14 +180,6 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    ground is close to invisible. One rule, both element types, both pages. */
 .mk-scope a:focus-visible,
 .mk-scope button:focus-visible { outline: 2px solid var(--mk-burg); outline-offset: 3px; }
-.mk-btn.mk-ghost {
-  background: none;
-  border: none;
-  box-shadow: none;
-  color: #6a5a50;
-  padding: 11px 8px;
-}
-.mk-btn.mk-ghost:hover { color: var(--mk-head); background: none; }
 .mk-tlink {
   font-size: 13px;
   font-weight: 500;
