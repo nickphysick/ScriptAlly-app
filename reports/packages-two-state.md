@@ -440,6 +440,137 @@ tsc 0 · build 0, no error/[WARNING] lines · vitest 383 files, 6581 passed, 3 s
 mid-run, so the close is fully green rather than "no worse than baseline".
 
 
+---
+
+## Ruling 2 — the stamp is wired
+
+### F-T · which path carries it, and why it is atomic there
+
+**R1 — every path that puts a real `packageId` on a query:**
+
+| path | writes a link? | stamped? |
+|---|---|---|
+| `EditQueryDrawer` → `editMaterialsUpdate` → `materialsLinkWrites` → `commitQueryEdits` | **yes** — the only UI path | **yes** |
+| `ImportCsv.tsx:522` — `packageId: "pkg-seed-default"` | yes, a **placeholder id defined nowhere in the repo** | **no** — see below |
+| `Queries.tsx` `attachPackage` (Query Centre) | **no** — writes `packageId: ""` | n/a |
+| `draftToPayload` (logging a query) | **no** — writes `packageId: ""` | n/a |
+| `seeds.ts`, `seedPackages.mjs` | fixtures, not app paths | no |
+
+**R2 — atomicity.** `commitQueryEdits` already batches everything (`writeBatch` →
+`batch.update(queryRef, queryPatch)` → `commit()`). The stamp is one more `batch.update`, on the
+package ref, **inside that same batch**. So there is no window in which a package is locked with
+nothing sent, or a send renders a package that can still change under it.
+
+**R3 — attaching IS sending**, confirmed for both link paths: `QueryStatus` has no unsent member, so a
+query record is a send. The Query Centre's attach is out of scope because it creates no link at all.
+
+**⚠️ And that is the principled reason the Query Centre path is left unstamped, not an omission.**
+The lock exists because a LINK renders the package's live contents. The Query Centre writes a
+*snapshot* — names and version ids copied onto the query — so editing the package afterwards
+misreports nothing, and there is nothing for a lock to protect. **The stamp follows the link.**
+
+**ImportCsv is deliberately unstamped.** Its `packageId` is the literal `"pkg-seed-default"`, a
+fallback id that exists nowhere in the repo, and `addQuery` writes per row with no batch — so a stamp
+there could not be atomic *and* would lock a package that may not exist. D1's instruction is
+explicit: leave the path unstamped rather than ship a stamp that can drift.
+
+### The write-once problem, and who owns it
+
+Re-stamping is **DENIED** by the deployed rule, and a denied write **fails the whole batch** — so a
+writer re-selecting the same package, or correcting an unrelated field on an already-sent one, would
+have their entire save refused. So the **caller** decides: the drawer has the packages in hand and
+sets `stampPackageId` only for one that is not already stamped.
+
+⚠️ **The race is acknowledged, not hidden.** Between that check and the commit another client could
+stamp the same package and the batch would be refused. One writer, one session — and the refusal is
+**shown** in `saveError` rather than swallowed, which is the difference that matters.
+
+`hasQueryEdits` had to learn about it too: without that, a save carrying **only** the stamp
+short-circuits at the no-edits guard and the package never locks.
+
+### R4 · the rule, re-read
+
+Keys on `firstSentAt`; `hasOnly` permits it; write-once via
+`!existing().keys().hasAny(['firstSentAt']) || !affectedKeys().hasAny([...slots, 'firstSentAt'])`.
+Stamping an **unstamped** package satisfies the first clause, so the slot-immutability arm is never
+consulted — proven `ACCEPTED` by `rulesProbe` before this wiring existed.
+
+### R5 · the data state, before and after
+
+**Before: nothing was stamped**, and both seed packages had sends — the account was in exactly the
+defective state. After the drive:
+
+```
+seed-pkg-1   stamped=2026-08-24T12:56:27   linked-queries=7
+seed-pkg-2   stamped=NO                    linked-queries=2   ← still unstamped
+```
+
+⚠️ **`seed-pkg-2` remains unstamped and therefore still editable despite two sends.** Historical rows
+are not backfilled — the stamp is permanent and unclearable, so backfilling real data is a one-way
+act I have not taken unasked. **A decision for Nick**, and the audit tool (`tests/e2e/stampAudit.mjs`)
+reports the gap on demand.
+
+### Driven, end to end
+
+```
+BEFORE  seed-pkg-1 firstSentAt=NO
+        → drawer → package select ["Custom materials","Standard UK","Comps-led variant"]
+AFTER   seed-pkg-1 firstSentAt=2026-08-24T12:56:27.013Z          ← the stamp landed with the link
+
+locked note   : "LOCKED — THIS PACKAGE HAS BEEN SENT"
+refusal shown : "Locked — this package has been sent. Its contents are fixed so every query that
+                 used it keeps reporting what the agent actually received."
+modal          : stayed open · the slot did not change
+Duplicate&edit : title "DUPLICATE PACKAGE" · name "Standard UK v2" · pre-filled ·
+                 save "Save as a new package"
+```
+
+Rename, archive, re-stamp-refused and clear-refused were already proven **on the deployed database**
+by `rulesProbe`'s eight cases and are not re-driven here — the rules evidence is the stronger of the
+two. D4 (detach does not unstamp) is asserted at source: `detachPackage` contains no `firstSentAt`.
+
+### ⚠️ Two harness traps worth keeping
+
+**The drawer is unreachable from the desktop Query Centre.** Its Edit control sits inside
+`isMobile && mobileDetailOn` — the standing **F10**. The drive signs in at desktop (the harness's own
+sign-in wait watches `.ws-panel`, which is **hidden** below `md`, so opening straight at 375 times
+out in the harness rather than in the app) and then resizes to 375.
+
+**`force: true` was worse than the timeout it fixed.** `.pkgb-pkgcard:hover` lifts the card 4px, so a
+real click never settles and Playwright retries out. `force` skips that check and fires at the
+recorded **coordinates**, which by then belong to a neighbouring control — it opened the **edit**
+builder instead of the duplicate, reporting `title="EDIT PACKAGE"`. That reads exactly like
+*"Duplicate & edit is wired to the wrong handler"* when the wiring is correct. Dispatching on the
+element cannot hit a neighbour. **A person is unaffected either way** — the whole card moves together
+and the cursor stays on target.
+
+### Measured in a worktree
+
+The primary tree's bundle was overwritten twice mid-run — once stale from the other session's `src/`
+edits, once replaced by their **production** build (which `bundleGuard` caught, refusing to point the
+harness at prod). Measurement moved to `/Users/nickphysick/ScriptAlly-stamp`; commits are
+explicit-path from the primary tree.
+
+```
+tsc 0 · build 0, no error/[WARNING] lines · vitest 383 files, 6587 passed, 3 skipped
+                                            (baseline 383 / 6581)
+```
+
+### F-U — `#/pkg-lab` is now the last caller of three derivations
+
+`STAT_CELLS`, `repliesByPackage` and `ledgerRows` lost their page mount in Part B. Their **only**
+remaining caller is the DEV-only `#/pkg-lab` route. That route must go before any prod deploy — and
+when it does, those three lose their last caller. Recorded so a future sweep finds the dependency
+rather than rediscovering it.
+
+### Not done in this run
+
+**D-D5 was not attempted.** D6 makes it conditional, and recon confirms the condition holds —
+`packageItems` resolves each slot id to its `versionName` and carries the `ComponentType` for the
+eyebrow, and the strip renders `materialsWanted`'s canonical type strings instead. It is one
+substitution. It was left rather than started thin: the brief's own instruction is not to let it grow
+into a second feature inside this run, and there was not room to drive it properly.
+
 ## Where this stopped, and what is left
 
 | phase | state |

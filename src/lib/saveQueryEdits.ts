@@ -33,6 +33,21 @@ export interface QueryEditEdit {
   note?: string;
 }
 export interface QueryEditOps {
+  /**
+   * ⚠️ THE PACKAGE TO STAMP AS SENT, IN THIS SAME BATCH (Ruling 2, D1).
+   *
+   * A query record IS a send in this app — `QueryStatus` has no unsent member — so pointing a query
+   * at a package is sending it. The stamp is what freezes that package's contents, and it has to
+   * land with the link or it can drift: a stamp without the link locks a package nothing went out
+   * with, and a link without the stamp leaves a live-rendered package editable. `batch.update` on
+   * both refs is one commit, so neither can happen.
+   *
+   * ⚠️ THE CALLER DECIDES, BECAUSE THE STAMP IS WRITE-ONCE IN THE RULE. Re-stamping is DENIED, and a
+   * denied write fails the WHOLE batch — which would refuse the writer's correction as well. So this
+   * is set only for a package that is not already stamped; the caller has the packages in hand and
+   * this function does not.
+   */
+  stampPackageId?: string;
   appends: QueryEditAppend[];
   edits: QueryEditEdit[];
   deletes: string[];
@@ -72,6 +87,9 @@ export function activityTypeForStatus(status: QueryStatus): ActivityType {
 }
 
 export function hasQueryEdits(ops: QueryEditOps): boolean {
+  // ⚠️ A STAMP ALONE IS A REAL EDIT — without it a save carrying only the stamp would short-circuit
+  //    at the guard above and the package would never lock.
+  if (ops.stampPackageId) return true;
   return ops.appends.length > 0 || ops.edits.length > 0 || ops.deletes.length > 0
     || ops.dateSentMs !== undefined
     || (ops.queryFields !== undefined && Object.keys(ops.queryFields).length > 0);
@@ -181,6 +199,22 @@ export async function commitQueryEdits(
       if (f.agentComments !== undefined) queryPatch.agentComments = f.agentComments;
     }
     if (Object.keys(queryPatch).length > 0) batch.update(queryRef, queryPatch);
+
+    /**
+     * ⚠️ THE STAMP RIDES THE SAME COMMIT AS THE LINK. This is the whole of D1: the two writes are
+     * one act, so there is no window in which a package is locked with nothing sent, or a send
+     * renders a package that can still change under it.
+     *
+     * ⚠️ AND IT IS THE ONLY WRITE HERE THAT LEAVES THE QUERY'S OWN DOCUMENTS. Everything else in
+     * this batch is the query, its activity rung and its feed twin; this touches the package. It is
+     * still the same atomic unit, which is exactly why it belongs here rather than in a follow-up
+     * write the caller would have to remember.
+     */
+    if (ops.stampPackageId) {
+      batch.update(doc(db, "users", userId, "packages", ops.stampPackageId), {
+        firstSentAt: new Date().toISOString(),
+      });
+    }
 
     await batch.commit();
 

@@ -36,7 +36,7 @@ import { formatQueryMaterial } from "../lib/materials";
 import { computeResponseDeadline } from "../lib/responseDeadline";
 import { writerExpectedIso } from "../lib/expectedDate";
 import { HOLDING_REPLY_TYPE } from "../lib/holdingReply";
-import { editMaterialsUpdate } from "../lib/packageMetrics";
+import { editMaterialsUpdate, isPackageLocked } from "../lib/packageMetrics";
 import {
   validateTimeline, appendNoteFor, ADVANCE_OPTIONS, RECLASSIFY_OPTIONS, TimelineError,
 } from "../lib/queryTimelineEdit";
@@ -305,7 +305,27 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
     if (draftAgentComments !== null) queryFields.agentComments = draftAgentComments;
     // Materials ⟷ package are one source of truth (editMaterialsUpdate clears the other side).
     if (materialsTouched) Object.assign(queryFields, editMaterialsUpdate({ touched: true, packageId: effPackageId, materials: effMaterials }));
+    /**
+     * ⚠️ THE STAMP RIDES THE SAVE (Ruling 2). Pointing a query at a package IS sending it — every
+     * query record in this app is a send — so this is the moment the package's contents are frozen.
+     * `commitQueryEdits` puts it in the SAME batch as the link, so the two cannot drift apart.
+     *
+     * ⚠️ AND IT IS ONLY SET FOR A PACKAGE THAT IS NOT ALREADY STAMPED. Re-stamping is DENIED by the
+     * deployed rule, and a denied write fails the WHOLE batch — so a writer re-selecting the same
+     * package, or correcting an unrelated field on an already-sent one, would have their entire
+     * save refused. Write-once is the rule; asking once is how the client honours it.
+     *
+     * ⚠️ THE RACE IS ACKNOWLEDGED AND ACCEPTED. Between this check and the commit another client
+     * could stamp the same package, and the batch would then be refused. One writer, one session —
+     * and the refusal is SHOWN in `saveError` rather than swallowed, which is the difference that
+     * matters.
+     */
+    const stampTarget = materialsTouched && effPackageId
+      ? packages.find((p) => p.id === effPackageId) ?? null
+      : null;
+
     const ops: QueryEditOps = {
+      ...(stampTarget && !isPackageLocked(stampTarget) ? { stampPackageId: stampTarget.id } : {}),
       appends,
       edits: Object.entries(edits).map(([id, e]) => ({ id, ...e })),
       deletes,

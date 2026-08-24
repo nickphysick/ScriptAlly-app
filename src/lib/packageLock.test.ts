@@ -222,3 +222,71 @@ describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers 
     expect(rule).toContain("sage");
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("Ruling 2 — the stamp rides the write that creates the link", () => {
+  const save = decls(read("src/lib/saveQueryEdits.ts"));
+  const drawer = decls(read("src/components/EditQueryDrawer.tsx"));
+
+  it("it is written inside the SAME batch as the query patch", () => {
+    /**
+     * ⚠️ ATOMICITY IS THE WHOLE POINT (D1). A stamp that can land without the link locks a package
+     * nothing went out with; a link without the stamp leaves a live-rendered package editable
+     * underneath a send. One `writeBatch`, one commit, so neither is reachable.
+     */
+    const i = save.indexOf("const batch = writeBatch(db);");
+    const commit = save.indexOf("await batch.commit();", i);
+    expect(i, "the batch is gone").toBeGreaterThan(-1);
+    expect(commit, "the commit is gone").toBeGreaterThan(i);
+    const inBatch = save.slice(i, commit);
+    expect(inBatch, "the stamp is written outside the batch").toContain("ops.stampPackageId");
+    expect(inBatch).toContain("firstSentAt: new Date().toISOString()");
+  });
+
+  it("a stamp on its own counts as an edit", () => {
+    // ⚠️ Without this a save carrying ONLY the stamp short-circuits at the no-edits guard and the
+    //    package never locks — the guard silently eating the one write that mattered.
+    const i = save.indexOf("export function hasQueryEdits");
+    const body = save.slice(i, save.indexOf("}", save.indexOf("return", i)));
+    expect(body).toContain("if (ops.stampPackageId) return true;");
+  });
+
+  it("the caller only stamps a package that is NOT already stamped", () => {
+    /**
+     * ⚠️ WRITE-ONCE IS THE RULE, AND A DENIED WRITE FAILS THE WHOLE BATCH. Without this check a
+     * writer re-selecting the same package — or correcting an unrelated field on an already-sent
+     * one — would have their entire save refused.
+     */
+    expect(drawer).toContain("!isPackageLocked(stampTarget) ? { stampPackageId: stampTarget.id }");
+  });
+
+  it("it stamps only when the package link was actually touched", () => {
+    // Opening the drawer and saving something else must not stamp anything.
+    expect(drawer).toContain("materialsTouched && effPackageId");
+  });
+
+  it("detach does not unstamp — a package that has been sent has been sent (D4)", () => {
+    /**
+     * ⚠️ THE ABSENCE IS THE ASSERTION. Removing a package from a query does not unsend it: other
+     * queries may hold it, and the agent received what they received. The rule refuses a clear
+     * anyway; this is the client agreeing rather than trying.
+     */
+    const q = decls(read("src/components/Queries.tsx"));
+    const i = q.indexOf("const detachPackage = (");
+    const body = q.slice(i, q.indexOf("const writeMaterials = (", i));
+    expect(i).toBeGreaterThan(-1);
+    expect(body).not.toContain("firstSentAt");
+  });
+
+  it("nothing else in the app writes the stamp", () => {
+    // ⚠️ SINGLE WRITER. `markPackageSent` in db.tsx and this batch are the two, and they are the
+    //    same act reached from two surfaces; a third would be a third answer to "when did it go out".
+    const roots = ["src/lib/db.tsx", "src/lib/saveQueryEdits.ts"];
+    for (const f of ["src/components/Queries.tsx", "src/components/ImportCsv.tsx",
+                     "src/components/packages/PackageModal.tsx", "src/lib/packagesOverview.ts"]) {
+      expect(decls(read(f)), `${f} writes firstSentAt`).not.toMatch(/firstSentAt\s*:/);
+    }
+    const writers = roots.filter((f) => /firstSentAt\s*:\s*new Date/.test(decls(read(f))));
+    expect(writers.sort()).toEqual(["src/lib/db.tsx", "src/lib/saveQueryEdits.ts"]);
+  });
+});
