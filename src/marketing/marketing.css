@@ -43,7 +43,6 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   /* Named for where it sits, not what colour it is — the value is a decision, the mechanism is
      not. Changing the surface below the break is this one line. */
   --mk-lower: #f2ede7;
-  --mk-desk: #f2ede7;
   --mk-card: #fffefb;
   --mk-parch: #fdfaf5;
   --mk-hair: #e7ddd2;
@@ -295,7 +294,12 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    ⚠️ THE POPPER IS A FLEX SIBLING OF THE WORD, NOT A POSITIONED DECORATION — so it stays beside
    "Congratulations." at every type size, and the second line sits under both rather than under
    the mark. `flex: 0 0 auto` stops it being squeezed when the column narrows. */
-.mk-subhead { margin: 26px 0 0; max-width: 34ch; }
+/* ⚠️ THE MEASURE BELONGS TO THE PROSE LINE, NOT TO THE ROW THAT HOLDS THE MARK. With `34ch` on
+   the wrapper, the flex row had to fit "Congratulations." — one unbreakable word — plus a 16px
+   gap plus a 36px mark inside 270px, and at 390 the popper was pushed 8.8px past the cap. It was
+   invisible, because the column is wider than the measure, which is exactly why it needed
+   measuring rather than looking. The second line is the only part that is prose. */
+.mk-subhead { margin: 26px 0 0; }
 .mk-congrats {
   display: flex; align-items: center; gap: 16px;
   font-family: "Playfair Display", Georgia, serif; font-size: 1.95rem; line-height: 1.15;
@@ -307,7 +311,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   display: block; width: 36px; height: 33px; fill: none;
   stroke: var(--mk-burg); stroke-width: 1.5; opacity: .8;
 }
-.mk-congrats-sub { display: block; margin-top: 8px; font-size: 1.06rem; color: var(--mk-muted); }
+.mk-congrats-sub { display: block; margin-top: 8px; max-width: 34ch; font-size: 1.06rem; color: var(--mk-muted); }
 
 /* ⚠️ `nowrap` FAILS BY OVERFLOW, NOT BY WRAPPING — which is why the boundary is measured, never
    assumed. A ceiling slightly too large does not produce an obviously broken two-line headline; it
