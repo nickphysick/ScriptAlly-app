@@ -1039,7 +1039,11 @@ describe("§2 · the reading pane", () => {
        a count over three visible rows states what the reader can already see. The derivation is
        still the rows' single source, which is the clause that mattered. */
     expect(code, "the merged half stopped reading the one materials derivation")
-      .toContain("const base = baseMaterialsFor(activeQuery, activeAgent);");
+      /* ⚠️ THE DERIVATION, NOT THE LINE. The render now suppresses the agent-expected FALLBACK when
+         a package is attached (D6) — `attachedHere ? [] : baseMaterialsFor(...)` — because drawing
+         the agency's asks beside a package made them read as a second thing that was sent. The
+         claim, one materials derivation with no second copy, is unchanged. */
+      .toContain("baseMaterialsFor(activeQuery, activeAgent)");
     expect(code, "a materials count came back over rows the reader can see")
       .not.toContain("baseMaterialsFor(activeQuery, activeAgent).length");
     /* ⚠️ NOTES COUNTS *THIS QUERY'S* ENTRIES, and it did not — `journalEntries` is every note in

@@ -24,14 +24,20 @@
  * take pastille blue; the pills inside take nothing. Colouring them would say they are a different
  * class of material that behaves differently, which is exactly what they are not.
  *
- * ⚠️ DISPLAY ONLY (D-C6). The strip adds no edit affordance, no menu and no click target beyond the
- * package NAME, which links to the package. Correction UI owns editing these rows; a second route
- * into the same edit would be a second place for the two to disagree. The separate `view` button
- * the block shape carried is retired into the name for that reason — one control, not two.
+ * ⚠️ ITS CONTENTS ARE DISPLAY ONLY; ITS POINTER IS NOT (Ruling 1, superseding D-C6's blanket form).
+ * The strip offers no way to edit what is INSIDE the package — no `+ Attach`, no per-chip `×` —
+ * because those contents are shared and, once sent, immutable. It does offer `Change package` and
+ * `Remove`, because which package THIS query points at is this query's own field and can be
+ * mistaken like any other.
+ *
+ * The earlier blanket "adds no edit affordance" is deleted rather than left standing: it described
+ * a build where the pointer had no home, and a comment arguing the opposite of the code is how the
+ * next person "restores" a bug.
  */
 import React from "react";
 import { IllustrationSlot } from "../packages/IllustrationSlot";
 import { packageDrift, driftNote, asSentLabel, type MaterialGroup } from "../../lib/packageAttach";
+import { LOCKED_NOTE } from "../../lib/packageMetrics";
 import type { QueryMaterial, SubmissionPackage } from "../../types";
 import "./packageGroup.css";
 
@@ -52,10 +58,27 @@ export interface PackageGroupProps {
   /** The send's own date, for `As sent, 12 Aug`. */
   sentDate?: string;
   onView: () => void;
+  /**
+   * ⚠️ POINTER CONTROLS, NOT CONTENT CONTROLS (Ruling 1). Which package this query points at is
+   * THIS QUERY'S OWN FIELD and stays correctable like any other; the package's CONTENTS are shared
+   * and, once sent, immutable. Both facts show at once — they are not alternatives, and the ref's
+   * `foot-unsent` / `foot-sent` branch has no reachable state in this app because every query
+   * record is a send.
+   *
+   * ⚠️ AND THEY READ AS THE FOURTH OF A SET. The pane already edits the date sent, the expected date
+   * and the send method in place, each with a `title` beginning "Change". These match that grammar
+   * and that affordance so a writer meets one editing model, not two.
+   */
+  onChangePackage?: () => void;
+  onRemovePackage?: () => void;
+  /** Stamped sent — its contents are fixed. Shown, never used to hide the pointer controls. */
+  locked?: boolean;
   children: React.ReactNode;
 }
 
-export const PackageGroup: React.FC<PackageGroupProps> = ({ group, live, sent, sentDate, onView, children }) => {
+export const PackageGroup: React.FC<PackageGroupProps> = ({
+  group, live, sent, sentDate, onView, onChangePackage, onRemovePackage, locked, children,
+}) => {
   /**
    * ⚠️ EACH STATE APPEARS ONLY WHEN TRUE, AND THERE IS NO "MATCHES" STATE. A group that still
    * matches its package says nothing at all — a marker confirming that nothing has happened is
@@ -102,6 +125,34 @@ export const PackageGroup: React.FC<PackageGroupProps> = ({ group, live, sent, s
           an ordinary thing that happens to templates, and the send is not damaged by it. */}
       {state === "changed" && differing.length > 0 && (
         <p className="qc-strip-note">{driftNote(differing)}</p>
+      )}
+
+      {/**
+        * ⚠️ ONE FOOTER, BOTH FACTS (Ruling 1). The lock explains why the CONTENTS cannot change; the
+        * pointer controls change which package this query used. A branch showing one or the other
+        * would make correcting a mis-attached package impossible on exactly the sends that matter.
+        */}
+      {(locked || onChangePackage || onRemovePackage) && (
+        <div className="qc-strip-foot">
+          {locked && (
+            <span className="qc-strip-lock">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" />
+              </svg>
+              {LOCKED_NOTE}
+            </span>
+          )}
+          <span className="qc-strip-ptrs">
+            {onChangePackage && (
+              <button type="button" className="qp-inplace qc-strip-ptr" onClick={onChangePackage}
+                      title="Change which package this query used">Change package</button>
+            )}
+            {onRemovePackage && (
+              <button type="button" className="qp-inplace qc-strip-ptr" onClick={onRemovePackage}
+                      title="Change this query to carry no package">Remove</button>
+            )}
+          </span>
+        </div>
       )}
     </div>
   );

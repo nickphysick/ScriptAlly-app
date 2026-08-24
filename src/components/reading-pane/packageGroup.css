@@ -190,3 +190,39 @@
   white-space: nowrap;
 }
 .qc-loose-promote:hover { color: var(--ink, #3a1c14); }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE FOOTER — one row, both facts (Ruling 1)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ THE LOCK AND THE POINTER CONTROLS SHOW TOGETHER, never as alternatives. The ref branches
+ * `foot-unsent` / `foot-sent`, and that branch has NO REACHABLE STATE here: `QueryStatus` has no
+ * unsent member, so a query record is a send and the unsent arm could never draw. Branching would
+ * have made a mis-attached package uncorrectable on exactly the sends that matter.
+ */
+.qc-strip-foot {
+  flex: 1 0 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 0 14px 10px;
+}
+.qc-strip-lock {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--pro-ink);
+}
+.qc-strip-lock svg {
+  width: 10px; height: 10px; stroke: var(--pro-ink); stroke-width: 1.7; fill: none;
+  stroke-linecap: round; stroke-linejoin: round; flex: none;
+}
+/**
+ * ⚠️ THE PANE'S OWN IN-PLACE AFFORDANCE, REUSED RATHER THAN INVENTED. `.qp-inplace` is the dashed
+ * underline the send method and both dates already wear — this is the fourth of that set, so it
+ * takes the same class and the same `title` grammar. A new treatment here would say "this field is
+ * special", which is the opposite of what it is.
+ */
+.qc-strip-ptrs { margin-left: auto; display: inline-flex; gap: 12px; }
+.qc-strip-ptr { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; }

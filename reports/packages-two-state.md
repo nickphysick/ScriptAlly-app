@@ -731,6 +731,104 @@ contents are copied, so nothing can drift), so nothing is unsafe — but a deskt
 produce the linked, live-rendering, lockable attachment that Part D is built around. **That gap
 closes with Ruling 1's footer, not with a button.**
 
+---
+
+## Parts 1 & 2 — pointer controls, and the fallback that caused the original complaint
+
+**Committed together, and by path they could not be separated**: both live in the same render in
+`Queries.tsx`, and Part 2's proof (exactly one attachment block) depends on Part 1's strip being
+there to count. Explicit-path staging is the safety rule; the phase count is the convention, so the
+rule won.
+
+### Part 1 — one footer, both facts (Ruling 1)
+
+`Change package` and `Remove` sit beside the lock note, never instead of it. **They read as the
+fourth of a set**: the pane already edits the date sent, the expected date and the send method in
+place, each with a `title` beginning "Change", and these take the same `.qp-inplace` affordance and
+the same grammar — `"Change which package this query used"`, `"Change this query to carry no
+package"`.
+
+**`setQueryPackage` batches the link and the stamp.** `updateQuery` is a single `updateDoc`, so
+calling it and then stamping would leave a window in which a query renders a package's live contents
+while that package can still change under it. One `writeBatch` across the two documents closes it —
+the same shape `commitQueryEdits` already uses for the drawer.
+
+**D4 holds**: no activity appended, `recomputeQuery` untouched. Both writers capture the prior value
+*before* the write, so the undo restores rather than re-writing what it just wrote.
+
+### D5 — the contribution moves, proven both ways
+
+Changing one query's package, then changing it back:
+
+| | Standard UK | Comps-led variant |
+|---|---|---|
+| before | 7 / 3 / 3 | 2 / 0 / 0 |
+| after the move | 6 / 2 / 2 | 3 / 1 / 1 |
+| moved back | **7 / 3 / 3** | **2 / 0 / 0** |
+
+And **Requests by material followed too** — `Hook-first 2 requests from 6 sent → 3 from 7`,
+`Comps-forward 1 from 3 → 0 from 2`. Both surfaces are derived at read time; neither needed telling.
+
+**The stamp landed on the new package**: `seed-pkg-2` went from `null` to
+`2026-08-24T13:48:45.515Z` on the first change, and stayed put on the second — write-once, from the
+pane. **F10 is closed**: desktop stamps.
+
+### Part 2 — the fallback render
+
+`baseMaterialsFor` falls back to the **agent's** `materialsWanted` whenever the query's own list is
+empty — which is exactly the state `materialsLinkWrites` leaves a linked query in. So the pane drew
+the agency's *asks* as pink chips above the package, and they read as a second thing that was sent.
+**That is the original complaint, and this was its cause.**
+
+**The fallback is kept where it earns its place.** With no attachment it answers a real question, and
+the first edit promotes that set onto the query — which is why the **writers** still read
+`baseMaterialsFor` unchanged. Only the **render** suppresses it, and only when something is attached.
+
+Measured on a linked query: `{packed: 1, loose: 0, looseChips: [], attachBtn: 0}`.
+
+### D11 — and `＋ Attach` had to go with it
+
+A packaged query still offered `＋ Attach`, outside the strip. A control that can only produce the
+forbidden state (a package *and* a loose list) is an invitation to a write the model then has to
+undo. **Absent, not disabled** — a greyed control poses a question the writer cannot act on.
+
+⚠️ **The first attempt used the `hidden` attribute and did nothing**: `.f12-popwrap { display: flex }`
+overrides the UA's `display: none`. And the probe would not have caught it either, because
+`querySelectorAll` counts hidden nodes — it now filters on `offsetParent`.
+
+### ⚠️ `markPackageSent` had no caller, and is retired
+
+Written last run in anticipation of a stamping surface that turned out not to need one: **both real
+paths stamp inside their own atomic batch**, because a stamp that is not in the same commit as the
+link can drift from it. A standalone stamp had nowhere safe to be called from, which is precisely
+why nothing called it.
+
+Its lock said "the stamp's SINGLE writer" — a claim about a function that never ran. The invariant is
+not *one writer* but **no stamp outside a batch**, and that is what the lock now asserts, by walking
+back from each stamp to its `writeBatch`.
+
+### Four locks moved, two claims retired
+
+| lock | outcome |
+|---|---|
+| `markPackageSent is the stamp's SINGLE writer` | **retired** — named a function with no caller; replaced by "no stamp outside a batch" |
+| `the package name is the strip's only control` | **retired** — a count of two buttons, right before Ruling 1. The surviving claim is the property: nothing here edits the package's *contents* |
+| `they go through IllustrationSlot, not a bespoke plate` | repointed — it forbade every inline `<svg>`, a fair shorthand until the footer gained a 10px padlock. Now forbids a bespoke *plate* |
+| `reads the one materials derivation` | repointed — the expression widened to suppress the fallback; the claim is unchanged |
+
+⚠️ **And the uppercase-`innerText` trap caught me twice more in one run** — once on the footer's
+labels, once on a `Requests by material` heading that is *not* uppercased, so an uppercase search
+reported `null` and I nearly recorded "the panel is missing". Third and fourth instances in two runs.
+
+```
+tsc 0 · build 0, no error/[WARNING] lines · vitest 383 files, 6593 passed, 3 skipped
+                                            (baseline 383 / 6587)
+```
+
+**F-O is closed**: `Remove` on the strip supersedes the standalone `detachPackage` mount for the
+packaged case. `detachPackage` still serves the snapshot groups, which Part 4 stops creating but does
+not remove.
+
 ## Where this stopped, and what is left
 
 | phase | state |

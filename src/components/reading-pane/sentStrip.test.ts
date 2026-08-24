@@ -185,7 +185,16 @@ describe("D-C5 — two slots, one shared component, one library", () => {
     // ⚠️ ONE LIBRARY OR THEY DRIFT INTO TWO SETS. R1 established IllustrationSlot as the single
     // implementation for every slot; a hand-rolled 38px plate here would be the second.
     expect(tsx).toContain('import { IllustrationSlot } from "../packages/IllustrationSlot"');
-    expect(decls(tsx)).not.toContain("<svg");
+    /**
+     * ⚠️ THE CLAIM IS ABOUT THE SLOTS, NOT ABOUT EVERY `<svg>` IN THE FILE. It forbade inline SVG
+     * outright, which was a fair shorthand while the strip drew nothing but its two marks. Ruling 1
+     * added a footer with a padlock glyph — a 10px icon inside a label, not a commissioned
+     * illustration — so the shorthand now fails on correct code. What must not happen is a bespoke
+     * PLATE beside the shared component's.
+     */
+    expect(decls(tsx)).not.toContain("pkgb-plate");
+    const svgs = (decls(tsx).match(/<svg/g) ?? []).length;
+    expect(svgs, "an inline mark has appeared beside the shared slots").toBeLessThanOrEqual(1);
   });
 
   it("the chip plate has room for the mark — 8px radius and no padding", () => {
@@ -207,17 +216,29 @@ describe("D-C5 — two slots, one shared component, one library", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 describe("D-C6 / D-C7 — display only, and the derivation is untouched", () => {
   it("the package name is the strip's only control", () => {
+    /**
+     * ⚠️ SUPERSEDED BY RULING 1, AND THE OLD FORM WAS A COUNT. It asserted exactly two buttons — the
+     * name and the promote link — which was right when the strip had no pointer controls. It now
+     * carries `Change package` and `Remove`, because WHICH package a query points at is that
+     * query's own field and can be mistaken like any other.
+     *
+     * ⚠️ THE CLAIM THAT SURVIVES IS THE ONE THAT MATTERED: nothing here edits the package's
+     * CONTENTS. That is a property, not a number, so it is asserted as one.
+     */
     const d = decls(tsx);
-    expect((d.match(/<button/g) ?? []).length).toBe(2); // the name, and the promote link
     expect(d).toContain('className="qc-strip-open"');
     expect(d).not.toContain("qc-strip-menu");
-    // the separate `view` button of the block shape is retired into the name
     expect(d).not.toMatch(/["\s`]qc-pkggrp-view["\s`]/);
+    /* no way to add to, or remove from, what is inside the package */
+    expect(d, "a per-chip remove inside the strip").not.toContain("qc-mchipx");
+    expect(d, "an attach control inside the strip").not.toContain("qc-mchip-add");
   });
 
   it("the strip adds no edit affordance of its own", () => {
     const d = decls(tsx);
-    for (const verb of ["onEdit", "onRemove", "onDelete", "onCorrect"]) {
+    /* ⚠️ `onRemovePackage` IS THE POINTER, NOT THE CONTENTS — it changes this query's own field and
+       rewrites nothing about the package. The content verbs stay forbidden. */
+    for (const verb of ["onEdit", "onDelete", "onCorrect", "onRemoveMaterial"]) {
       expect(d, `the strip has grown an ${verb}`).not.toContain(verb);
     }
   });

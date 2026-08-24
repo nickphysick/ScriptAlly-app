@@ -101,7 +101,7 @@ import { computeResponseDeadline } from "./responseDeadline";
 /* ⚠️ THE SAME PREDICATE THE PAGE READS. `deleteVersion`'s last check and the material sheet's
    usage line must agree about "does a package hold this", so both go through one function rather
    than each filtering the three slot fields for itself. */
-import { packagesUsingVersion, isPackageLocked, LOCKED_PACKAGE_FIELDS, LOCKED_NOTE, LOCKED_WHY } from "./packageMetrics";
+import { packagesUsingVersion, isPackageLocked, LOCKED_PACKAGE_FIELDS, LOCKED_NOTE, LOCKED_WHY, materialsLinkWrites } from "./packageMetrics";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
 import { buildHoldingReplyWrites, HOLDING_REPLY_TYPE } from "./holdingReply";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
@@ -268,11 +268,18 @@ interface DbContextType {
    * here means the two callers cannot disagree about what empty means.
    */
   updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials">>) => Promise<string | null>;
+  /* ⚠️ `markPackageSent` IS RETIRED — it never had a caller. It was written in anticipation of a
+     stamping surface that turned out not to need it: both real paths stamp INSIDE their own atomic
+     batch (`commitQueryEdits` for the drawer, `setQueryPackage` for the pane), because a stamp that
+     is not in the same commit as the link can drift from it. A standalone stamp had nowhere safe to
+     be called from, which is exactly why nothing called it. */
   /**
-   * Stamp a package as sent (D-D1). Idempotent — the FIRST send is the one that matters, so an
-   * already-stamped package is left exactly as it is rather than re-dated.
+   * Point a query at a package — or at none — and stamp the package in the SAME write.
+   *
+   * ⚠️ WHICH PACKAGE A QUERY POINTS AT IS THAT QUERY'S OWN FIELD, and correcting it rewrites
+   * nothing about the package's contents. That is why it stays editable while the contents do not.
    */
-  markPackageSent: (id: string) => Promise<void>;
+  setQueryPackage: (queryId: string, packageId: string) => Promise<string | null>;
   retirePackage: (id: string) => Promise<void>;
   /**
    * Delete a package outright. Returns `false` WITHOUT writing when any query was sent with it.
@@ -1667,23 +1674,36 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+
   /**
-   * ⚠️ THE MARK'S SINGLE WRITER. Everywhere a package becomes attached to a query calls this and
-   * nothing else stamps the field — a second writer is a second answer to "when did this go out".
+   * ⚠️ THE LINK AND THE STAMP IN ONE COMMIT. `updateQuery` is a single `updateDoc`, so calling it and
+   * then stamping would leave a window where a query renders a package's LIVE contents while that
+   * package can still change under it. A `writeBatch` across the two documents closes it — the same
+   * shape `commitQueryEdits` already uses for the drawer's path.
    *
-   * ⚠️ IDEMPOTENT BY READING FIRST. The FIRST send is the fact being recorded, so a package already
-   * stamped is left alone; re-dating it on every later send would turn a fixed point into a moving
-   * one and quietly make "sent on" mean "last sent on".
+   * ⚠️ AND `materialsLinkWrites` DECIDES BOTH FIELDS, never this function. A query holds a package
+   * OR its own materials; the one derivation that enforces that is the one that writes it, so the
+   * pane and the drawer cannot come to disagree about what "attached" means.
+   *
+   * ⚠️ THE STAMP IS ASKED FOR ONLY WHEN THE PACKAGE IS UNSTAMPED. Re-stamping is DENIED by the rule
+   * and a denied write fails the WHOLE batch — which would refuse the writer's correction too.
    */
-  const markPackageSent = async (id: string) => {
-    if (!currentUser || !id) return;
-    const live = packages.find((p) => p.id === id);
-    if (!live || live.firstSentAt) return;
+  const setQueryPackage = async (queryId: string, packageId: string): Promise<string | null> => {
+    if (!currentUser) return "Authentication required.";
+    const patch = materialsLinkWrites({ packageId, materials: [] });
+    const target = packageId ? packages.find((p) => p.id === packageId) ?? null : null;
     try {
-      await updateDoc(doc(db, "users", currentUser.id, "packages", id),
-        { firstSentAt: new Date().toISOString() });
+      const batch = writeBatch(db);
+      batch.update(doc(db, "users", currentUser.id, "queries", queryId), patch);
+      if (target && !isPackageLocked(target)) {
+        batch.update(doc(db, "users", currentUser.id, "packages", target.id),
+          { firstSentAt: new Date().toISOString() });
+      }
+      await batch.commit();
+      return null;
     } catch (e) {
-      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
+      return "Couldn't change the package.";
     }
   };
 
@@ -3251,7 +3271,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         archiveVersion,
         addPackage,
         updatePackage,
-        markPackageSent,
+        setQueryPackage,
         retirePackage,
         deletePackage,
         setActivePackage,

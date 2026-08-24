@@ -125,11 +125,28 @@ describe("the client refuses the write, and says why", () => {
     expect(db).toMatch(/updatePackage[\s\S]{0,400}Promise<string \| null>/);
   });
 
-  it("markPackageSent is the stamp's SINGLE writer, and is idempotent", () => {
-    const writes = (db.match(/firstSentAt:\s*new Date\(\)\.toISOString\(\)/g) ?? []).length;
-    expect(writes, "the stamp has more than one writer").toBe(1);
-    // reading first is what makes the FIRST send the fact, rather than the last
-    expect(db).toContain("if (!live || live.firstSentAt) return;");
+  it("every stamp is written INSIDE an atomic batch, never on its own", () => {
+    /**
+     * ⚠️ THE CLAIM CHANGED SHAPE, AND THE OLD ONE NAMED A FUNCTION THAT NEVER RAN. It asserted
+     * `markPackageSent` was the single writer — but `markPackageSent` had **no caller**, written in
+     * anticipation of a surface that turned out not to need it. Both real paths stamp inside their
+     * own `writeBatch`: `commitQueryEdits` for the drawer, `setQueryPackage` for the pane, each
+     * atomic with the link write it accompanies. A standalone stamp had nowhere safe to be called
+     * from, which is precisely why nothing called it, and it is retired.
+     *
+     * ⚠️ SO THE INVARIANT IS NOT "one writer" BUT "no stamp outside a batch" — two surfaces, two
+     * commits, and neither can leave a package locked with nothing sent.
+     */
+    expect(db, "markPackageSent is back").not.toMatch(/const markPackageSent\s*=/);
+    const stamps = [...db.matchAll(/firstSentAt:\s*new Date\(\)\.toISOString\(\)/g)];
+    expect(stamps.length, "no stamp writer in db.tsx").toBeGreaterThan(0);
+    for (const m of stamps) {
+      const before = db.slice(0, m.index ?? 0);
+      const batchAt = before.lastIndexOf("writeBatch(db)");
+      const commitAt = before.lastIndexOf("batch.commit()");
+      expect(batchAt, "a stamp is written outside any batch").toBeGreaterThan(-1);
+      expect(batchAt, "a stamp is written after its batch has committed").toBeGreaterThan(commitAt);
+    }
   });
 });
 

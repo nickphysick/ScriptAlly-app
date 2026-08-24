@@ -97,6 +97,7 @@ import {
   packageMenuRow, detachMenuRows, detachToast, withoutPackage, linkedChips, type PackageItem,
 } from "../lib/packageAttach";
 import { PackageGroup, LooseMaterials } from "./reading-pane/PackageGroup";
+import { isPackageLocked } from "../lib/packageMetrics";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { MobileSheet } from "./shell/MobileSheet";
 import { useIsMobile, useMobileChrome } from "./shell/mobileChrome";
@@ -333,8 +334,7 @@ export const Queries: React.FC<{
     editActivity,
     updateAgent,
     updateQueryStatus,
-    logNudge
-  } = useScriptAllyDb();
+    logNudge, setQueryPackage} = useScriptAllyDb();
   const { showConfirm, showToast } = useToast();
   // Query editing is the app-level Edit Query drawer (the inline isEditMode editor is retired).
   const openEditQuery = useOpenEditQuery();
@@ -1726,6 +1726,9 @@ export const Queries: React.FC<{
    * is gone by the time this opens and a popover needs something on screen to hang from.
    */
   const [pkgPickOpen, setPkgPickOpen] = useState(false);
+  /* ⚠️ TEMPORARY, AND PART 4 DELETES IT. `Change package` writes a LINK; the legacy `+ Attach` route
+     still writes a snapshot until that path is retired. One flag beats two pickers. */
+  const [pkgPickLink, setPkgPickLink] = useState(false);
   const pkgPickPanelRef = useRef<HTMLElement>(null);
   const { triggerRef: pkgPickTrigRef, menuStyle: pkgPickStyle } = useFixedMenu<HTMLElement>(
     pkgPickOpen, { placement: "auto", constrain: true, menuRef: pkgPickPanelRef },
@@ -2001,6 +2004,40 @@ export const Queries: React.FC<{
    * ⚠️ THE PRIOR VALUE IS CAPTURED BEFORE THE WRITE. The empty-closure law: an undo built from state
    * read back afterwards restores what it just wrote.
    */
+  /**
+   * ⚠️ THE POINTER, NOT THE CONTENTS (Ruling 1). Changing which package a query used is a CORRECTION
+   * to that query's own field — it rewrites nothing about the package, and it moves the query's
+   * contribution from one scorecard to the other because both are derived at read time.
+   *
+   * ⚠️ NO ACTIVITY, EVER (D4). Editing what you sent is a correction to a factual record, not an
+   * event in the story between the writer and the agent — the same rule `writeMaterials` and the
+   * timeline's own corrections already follow. The undo restores the prior value instead.
+   */
+  const changeQueryPackage = async (q: Query, pkg: SubmissionPackage) => {
+    const before = q.packageId || "";
+    setPkgPickOpen(false);
+    setPkgPickLink(false);
+    const err = await setQueryPackage(q.id, pkg.id);
+    if (err) { showToast({ message: err }); return; }
+    showToast({
+      message: `This query now carries ${pkg.packageName}`,
+      /* ⚠️ THE PRIOR VALUE IS CAPTURED BEFORE THE WRITE — an undo built from state read back
+         afterwards restores what it just wrote. */
+      undo: () => void setQueryPackage(q.id, before),
+    });
+  };
+
+  /** Remove the pointer. The package is untouched — and stays stamped, because it was still sent. */
+  const removeQueryPackage = async (q: Query, name: string) => {
+    const before = q.packageId || "";
+    const err = await setQueryPackage(q.id, "");
+    if (err) { showToast({ message: err }); return; }
+    showToast({
+      message: `Removed ${name} from this query`,
+      undo: () => void setQueryPackage(q.id, before),
+    });
+  };
+
   const detachPackage = (q: Query, packageId: string, name: string) => {
     const before = ((q as Query).materialsWanted ?? []) as (string | QueryMaterial)[];
     const next = withoutPackage(before, packageId);
@@ -5691,7 +5728,24 @@ export const Queries: React.FC<{
                                * is what stops §1 stranding the editors with nothing to open them.
                                */
                               sentExtra={(() => {
-                                const base = baseMaterialsFor(activeQuery, activeAgent);
+                                /**
+                                 * ⚠️ THE AGENT'S EXPECTED SET IS GUIDANCE, NOT A RECORD (D6/D7) — and
+                                 * rendering it beside an attachment is the original complaint's
+                                 * cause. `baseMaterialsFor` falls back to the AGENT's
+                                 * `materialsWanted` whenever the query's own list is empty, which is
+                                 * exactly the state a linked query is in: `materialsLinkWrites`
+                                 * clears the list when it writes the link. So the pane drew the
+                                 * agency's asks as pink chips above the package, and they read as a
+                                 * second thing that was sent.
+                                 *
+                                 * ⚠️ THE FALLBACK IS KEPT WHERE IT EARNS ITS PLACE. With no
+                                 * attachment it answers a real question — what does this agency ask
+                                 * for — and the first edit promotes that set onto the query, which is
+                                 * why the WRITERS still read `baseMaterialsFor` unchanged. Only the
+                                 * RENDER suppresses it, and only when something is already attached.
+                                 */
+                                const attachedHere = !!activeQuery.packageId;
+                                const base = attachedHere ? [] : baseMaterialsFor(activeQuery, activeAgent);
                                 const qlSent = base.some(isQueryLetterMat);
                                 const synSent = base.some(isSynopsisMat);
                                 const sampleItem = base.find(isSampleMat) ?? null;
@@ -5923,6 +5977,13 @@ export const Queries: React.FC<{
                                     sent={[]}
                                     sentDate={activeQuery.dateSent}
                                     onView={openPackages}
+                                    locked={isPackageLocked(linkedPackage)}
+                                    onChangePackage={() => {
+                                      setPkgPickLink(true);
+                                      (pkgPickTrigRef as React.MutableRefObject<HTMLElement | null>).current = addMatTrigRef.current;
+                                      setPkgPickOpen(true);
+                                    }}
+                                    onRemovePackage={() => void removeQueryPackage(activeQuery, linkedPackage.packageName)}
                                   >
                                     {linkedChips(linkedPackage, versions).map((c) => (
                                       <span key={c.key} className={`qc-mchip qc-mchip-slot${c.missing ? " qc-mchip-gone" : ""}`}>
@@ -5941,6 +6002,17 @@ export const Queries: React.FC<{
                                     `UPGRADE TO ATTACH A PACKAGE` was a pitch parked among facts; as
                                     the last item of "what you could attach" it is one more thing you
                                     could attach, which is what it actually is. */}
+                                {/**
+                                  * ⚠️ NO `+ Attach` ON A PACKAGED QUERY (D11). A query holds a package
+                                  * OR its own list, never both — and a control that can only produce
+                                  * the forbidden state is an invitation to a write the model then has
+                                  * to undo. The package's contents are changed on the package;
+                                  * WHICH package this query used is changed on the strip's footer.
+                                  *
+                                  * ⚠️ IT IS ABSENT, NOT DISABLED. A greyed control here would pose a
+                                  * question the writer cannot act on and cannot see the answer to.
+                                  */}
+                                {!attachedHere && (
                                 <span className="f12-popwrap">
                                   <button
                                     ref={addMatTrigRef}
@@ -6024,6 +6096,7 @@ export const Queries: React.FC<{
                                     ]}
                                   />
                                 </span>
+                                )}
                               </div>
 
                               {/* ⚠️ THE ORIGIN TAG IS PROVENANCE, NOT A CONTROL OVER THE PILLS (§2).
@@ -6046,9 +6119,12 @@ export const Queries: React.FC<{
                                   existing={materialsOf(activeQuery)}
                                   style={pkgPickStyle}
                                   panelRef={pkgPickPanelRef}
-                                  onPick={(pkg, items) => attachPackage(activeQuery, pkg, items)}
+                                  onPick={(pkg, items) => {
+                                    if (pkgPickLink) { void changeQueryPackage(activeQuery, pkg); return; }
+                                    attachPackage(activeQuery, pkg, items);
+                                  }}
                                   onManage={() => { setPkgPickOpen(false); openPackages(); }}
-                                  onClose={() => setPkgPickOpen(false)}
+                                  onClose={() => { setPkgPickOpen(false); setPkgPickLink(false); }}
                                 />
                               )}
 
