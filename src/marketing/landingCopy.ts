@@ -61,29 +61,23 @@ export const HERO_TURN_B = "ScriptAlly tips the odds back in your favour.";
  */
 export const CTA_START = "Start tracking — it's free";
 
-/* ══════════════ The pulse section ══════════════ */
+/* ══════════════ The parchment band's header ══════════════ */
 
 /**
- * ⚠️ `pulse` IS A SEGMENT BECAUSE IT IS ANIMATED, NOT BECAUSE IT IS EMPHASISED. It stays plain
- * Playfair in the heading's own ink — the effect is a halo behind it. A coloured word here would
- * read as a link, and a heading that changes colour mid-sentence reads as two things, which is
- * the standing rule this app already enforces on the To-do task pane.
+ * ⚠️ ONE PLAIN STRING — the word "pulse" is no longer a segment. It used to be marked so a blush
+ * halo could animate behind it; the halo is replaced by the ECG trace running behind the WHOLE
+ * heading, so there is nothing left to mark and a segment would only invite the halo back.
+ *
+ * ⚠️ AND `and so much more…` IS DELETED. It was this heading's Caveat subtitle in the cream
+ * section; the heading is the band's header now, and a subtitle under it competed with the first
+ * feature row for the same job.
  */
-export const PULSE_HEADING: Array<{ text: string; pulse?: boolean }> = [
-  { text: "A finger on the " },
-  { text: "pulse", pulse: true },
-  { text: " of your querying journey" },
-];
-
-/** A real ellipsis character, not three dots. Set in Caveat, in burgundy. */
-export const PULSE_SUB = "and so much more…";
+export const PULSE_HEADING = "A finger on the pulse of your querying journey";
 
 /* ⚠️ THE FEATURES HEADER IS DELETED AND SHOULD NOT COME BACK. `FEATURES_H2` ("The querying
    trenches, organised") and `FEATURES_SUB` ("Ditch the spreadsheet. It's time to get serious.")
-   sat immediately below the pulse line's own centred heading and Caveat sub — two centred headers
-   with subtitles, back to back, which reads as a mistake rather than as a rhythm. The pulse
-   section does that job now and the parchment band boundary carries the transition. Retired on
-   Nick's sign-off, not on a whim: the copy was written for a page that had no pulse line. */
+   sat immediately below this heading — two centred head-and-sub pairs back to back, which reads
+   as a mistake rather than as a rhythm. The heading above is the band's header now. */
 
 export const CTA_BAND_H2 = "Your story deserves better than a spreadsheet.";
 export const CTA_BAND_SUB = "Free to start. Take control of your querying journey today.";

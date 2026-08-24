@@ -5,8 +5,9 @@
  * landingCopy.ts; each visual is a faithful static tableau from the ref markup.
  */
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FEATURE_ROWS, FeatureRow } from "./landingCopy";
+import { BandHeader } from "./BandHeader";
 
 /* ── Row visuals (static tableaux, keyed by row) ── */
 
@@ -206,15 +207,35 @@ const Row: React.FC<{ row: FeatureRow; onPrimary: () => void; onLink?: (row: Fea
 export const FeatureRows: React.FC<{
   onStart: () => void;
   onRowLink: (row: FeatureRow) => void;
-}> = ({ onStart, onRowLink }) => (
-  <section className="mk-featband" id="mk-features">
-    {/* ⚠️ NO HEADER HERE, DELIBERATELY. The pulse section above is this band's heading; a second
-        centred head-and-sub directly beneath it read as two headers arguing. The band's own
-        opening padding replaces the space the block used to hold — see `.mk-rows`. */}
+}> = ({ onStart, onRowLink }) => {
+  /**
+   * ⚠️ THE SWEEP IS GATED ON VISIBILITY, AND THE FALLBACK IS "RUNNING", NOT "PAUSED". An infinite
+   * animation on a band most of the page never scrolls to is work the browser does for nobody.
+   * But if `IntersectionObserver` is missing the honest default is to let it run: a paused trace
+   * would be a dead line with no way back, which is worse than an animation nobody sees.
+   */
+  const bandRef = useRef<HTMLElement | null>(null);
+  const [inView, setInView] = useState(() => typeof IntersectionObserver === "undefined");
+  useEffect(() => {
+    const el = bandRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => setInView(e.isIntersecting)),
+      { threshold: 0.15 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+  <section className={"mk-featband" + (inView ? " mk-inview" : "")} id="mk-features" ref={bandRef}>
+    {/* The band's own header — it moved here out of the cream section above. */}
+    <BandHeader />
     <div className="mk-rows">
       {FEATURE_ROWS.map((row) => (
         <Row key={row.key} row={row} onPrimary={onStart} onLink={onRowLink} />
       ))}
     </div>
   </section>
-);
+  );
+};

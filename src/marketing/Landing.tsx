@@ -16,7 +16,6 @@
 
 import React, { useEffect } from "react";
 import { Hero } from "./Hero";
-import { PulseSection } from "./PulseSection";
 import { FeatureRows } from "./FeatureRows";
 import { CtaBand } from "./CtaBand";
 import { MarketingFooter } from "./MarketingFooter";
@@ -47,7 +46,6 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
   return (
     <div>
       <Hero onStart={openSignup} />
-      <PulseSection />
       <FeatureRows onStart={openSignup} onRowLink={onRowLink} />
       <CtaBand onStart={openSignup} />
       {/* ⚠️ LINKS, NOT SPANS. These were inert text for as long as the pages did not exist — which

@@ -12,7 +12,7 @@
 import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B, HERO_EYEBROW, CTA_START,
-  CTA_BAND_H2, DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING, PULSE_SUB,
+  CTA_BAND_H2, DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
 } from "./landingCopy";
 
 /** The lede is segments now (one is bold); this is the sentence a reader actually sees. */
@@ -85,15 +85,14 @@ describe("landing copy — verbatim locks", () => {
   });
 
   /**
-   * ⚠️ THE PHRASE HAS ONE HOME NOW. "A finger on the pulse" was a row heading and is the centred
-   * section heading above the showreel; saying it twice on one page reads as a stutter, and the
-   * retitle is the whole reason the row is called "From beginning to end". Asserted as a
-   * page-wide count rather than as a string on the section, so restoring the row heading fails
-   * here rather than quietly giving the page two of them.
+   * ⚠️ THE PHRASE HAS ONE HOME, AND IT MOVED. It was a row heading, then the centred heading of a
+   * cream section above the showreel; it is the parchment band's own header now. The COUNT is the
+   * claim and it is unchanged — exactly one occurrence across every string the page renders — so
+   * this survives the move and still fails if the row heading is restored.
    */
   it("says `a finger on the pulse` in exactly one place", () => {
     const said = [
-      PULSE_HEADING.map((s) => s.text).join(""),
+      PULSE_HEADING,
       ...FEATURE_ROWS.map((r) => r.heading),
       ...FEATURE_ROWS.flatMap((r) => r.body.map((b) => b.text)),
       HERO_H1, ledeText(), HERO_TURN_B, CTA_BAND_H2,
@@ -101,10 +100,19 @@ describe("landing copy — verbatim locks", () => {
     expect(said).toEqual(["A finger on the pulse of your querying journey"]);
   });
 
-  it("the pulse line animates a word, and states its own sub in a real ellipsis", () => {
-    expect(PULSE_HEADING.filter((s) => s.pulse).map((s) => s.text)).toEqual(["pulse"]);
-    expect(PULSE_SUB).toBe("and so much more…");
-    expect(PULSE_SUB).not.toContain("...");
+  /**
+   * ⚠️ RETARGET: the heading is one plain string and its subtitle is deleted. `pulse` was a
+   * segment only so a halo could animate behind that one word; the halo is replaced by the ECG
+   * trace running behind the WHOLE heading, so there is nothing to mark. Asserting the segment
+   * shape and the subtitle are GONE is what stops either being reinstated — a marked word would
+   * invite the halo back, and a subtitle under a band header competes with the first row.
+   */
+  it("the band header is one plain string, with no marked word and no subtitle", async () => {
+    expect(PULSE_HEADING).toBe("A finger on the pulse of your querying journey");
+    const copy = await import("./landingCopy");
+    expect("PULSE_SUB" in copy).toBe(false);
+    expect(Object.values(copy).filter((v): v is string => typeof v === "string"))
+      .not.toContain("and so much more…");
   });
 
   /**
