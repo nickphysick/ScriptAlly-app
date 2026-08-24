@@ -24,6 +24,7 @@ vi.mock("../../lib/firebase", async () => (await import("../../test/pageSmoke"))
 
 import { BetaStrip } from "./BetaStrip";
 import { FeedbackDock } from "./FeedbackDock";
+import { WorkspaceShell } from "./WorkspaceShell";
 import {
   BETA_MODE, BETA_PILL, BETA_STRIP_REPORT_LINK, FEEDBACK_FAB, FEEDBACK_KINDS,
   FEEDBACK_PRIVACY_NOTE, feedbackContextLines,
@@ -40,6 +41,28 @@ const dock = (open: boolean) =>
   renderToStaticMarkup(
     <MemoryRouter initialEntries={["/queries"]}>
       <FeedbackDock uid="u1" open={open} onOpenChange={() => {}} onReceipt={() => {}} />
+    </MemoryRouter>,
+  );
+
+/**
+ * ⚠️ THE BAR IS ASSERTED AS RENDERED, NOT AS WRITTEN. Where the pill ends up among the bar's other
+ * controls is an ARRANGEMENT claim, and a source lock answers it only by accident — it reads the
+ * order the JSX happens to be typed in, which survives no refactor and proves nothing about a
+ * control rendered behind a gate. This renders the shell and reads the markup.
+ */
+const bar = (wired: boolean): string =>
+  renderToStaticMarkup(
+    <MemoryRouter initialEntries={["/queries"]}>
+      <WorkspaceShell
+        sections={[]}
+        icons={{}}
+        onNavigatePath={() => {}}
+        onOpenSearch={() => {}}
+        onOpenHelp={() => {}}
+        onOpenFeedback={wired ? () => {} : undefined}
+      >
+        content
+      </WorkspaceShell>
     </MemoryRouter>,
   );
 
@@ -107,10 +130,71 @@ describe("⚠️ the strip takes no part in the page grid's arithmetic", () => {
 });
 
 describe("the feedback dock", () => {
-  it("shows only its button until it is opened", () => {
+  /**
+   * ⚠️ RETARGETED, AND THE LAW IS UNCHANGED (feedback pack). This case used to read "shows only its
+   * button until it is opened" and asserted the dock rendered `FEEDBACK_FAB`. The law it was
+   * really holding is *a beta has a visible, labelled route to the panel, and the panel does not
+   * exist until it is asked for* — and that law survives the move: the button became a labelled
+   * pill in the workspace top bar, so the claim is now asserted where the control lives.
+   *
+   * Both halves are pinned on purpose. Asserting only the retirement would go green on a build
+   * that had lost the control altogether, which is the one outcome a beta cannot afford.
+   */
+  it("draws nothing until it is opened — the dock is the PANEL now, not a button", () => {
     const closed = dock(false);
-    expect(closed).toContain(FEEDBACK_FAB);
-    expect(closed).not.toContain('role="dialog"');
+    /* ⚠️ THE PRECONDITION FIRST. A closed dock renders an empty string, and `not.toContain` on ""
+       passes for the wrong reason forever — so state that it is empty rather than inferring it. */
+    expect(closed).toBe("");
+    expect(dock(true)).toContain('role="dialog"');
+  });
+
+  it("its floating button is retired, and the bar carries the labelled control instead", () => {
+    const source = read("FeedbackDock.tsx");
+    expect(source, "the FAB was a puck hovering over the reader's work").not.toMatch(/["\s`]sa-fbfab["\s`]/);
+    expect(read("betaChrome.css")).not.toMatch(/\.sa-fbfab[\s{,:]/);
+
+    /* THE NEW HOME. Labelled, because a bare pencil among three glyphs is a control nobody
+       presses; and left of the divider, so it reads as the reader's action rather than as one
+       more piece of system furniture in the icon cluster. */
+    const html = bar(true);
+    expect(html).toContain('class="ws-fbpill"');
+    expect(html).toContain("Feedback");
+    /* The accessible name is on the BUTTON, not the label span, so it survives the narrow state
+       where the CSS folds the label away and only the pencil is left. */
+    expect(html).toContain(`aria-label="${FEEDBACK_FAB}"`);
+    expect(FEEDBACK_FAB).toBe("Give feedback");
+
+    const cluster = html.indexOf('class="ws-bright"');
+    expect(cluster, "the bar must draw its right-hand cluster").toBeGreaterThan(-1);
+    const order = (needle: string) => {
+      const i = html.indexOf(needle, cluster);
+      expect(i, `the rendered bar must contain ${needle}`).toBeGreaterThan(-1);
+      return i;
+    };
+    expect(order('class="sp-search"')).toBeLessThan(order('class="ws-fbpill"'));
+    expect(order('class="ws-fbpill"')).toBeLessThan(order('class="ws-bdiv"'));
+    expect(order('class="ws-bdiv"')).toBeLessThan(order('class="sp-help"'));
+  });
+
+  /**
+   * ⚠️ THE HANDLER MOVED HOUSE; IT DID NOT CHANGE. The pill toggles the SAME `feedbackOpen` the
+   * FAB toggled and the beta strip sets — one state, three ways in. A second piece of state here
+   * would give the app two feedback panels that disagree about whether one is open.
+   */
+  it("the pill and the strip open the same panel, from the same state", () => {
+    const app = read("AppShell.tsx");
+    expect(app).toContain("onOpenFeedback={() => setFeedbackOpen((o) => !o)}");
+    expect(app).toContain("feedbackOpen={feedbackOpen}");
+    expect(app).toContain("onReport={() => setFeedbackOpen(true)}");
+    expect(app).toContain("open={feedbackOpen}");
+    /* ⚠️ ABSENT RATHER THAN INERT when nothing is wired: a feedback button that opens nothing
+       collects the report the writer believes they have sent. Asserted on the RENDERED bar, so it
+       holds however the gate is written — and the wired case above is what stops this passing on
+       a build that simply lost the control. */
+    const unwired = bar(false);
+    expect(unwired).toContain('class="ws-bright"');
+    expect(unwired).not.toContain("ws-fbpill");
+    expect(unwired).not.toContain("ws-bdiv");
   });
 
   it("offers all four kinds, including one that is not a complaint", () => {

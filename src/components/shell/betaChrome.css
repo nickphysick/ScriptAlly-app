@@ -67,29 +67,21 @@
    is the left-correct/right-short signature the timeline pull tab and the help FAB were both fixed
    for, so this takes the same correction: the capsule gap plus 6px. (The floating help FAB is
    retired — help is a bar button now — so this corner is the dock's alone.) */
+/* ⚠️ THE FAB'S RULES WENT WITH THE FAB. `.sa-fbfab` was the floating puck; the control is a
+   labelled pill in the workspace top bar now (`.ws-fbpill`), and nothing else in `src/` read
+   those rules — swept before deleting them.
+
+   ⚠️ WHAT IS LEFT IS A PANEL ANCHOR, and it kept its inset deliberately. The panel still opens at
+   the foot of the window rather than under its new trigger: re-anchoring it to the bar is a design
+   decision the pack did not make, and this inset is shared with the 767px step below. Flagged in
+   the run report, not guessed at here. The dock renders nothing at all while closed, so this box
+   no longer sits on every page waiting to be blamed for a stacking-order fault. */
 .sa-fbdock {
   position: fixed;
   right: calc(var(--shell-cap-gap, 14px) + 6px);
   bottom: 84px;
   z-index: 46;
 }
-
-.sa-fbfab {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: inherit;
-  font-size: 12.5px;
-  font-weight: 500;
-  padding: 10px 16px;
-  border-radius: 999px;
-  cursor: pointer;
-  background: #fffefb;
-  border: 1px solid #ded3c2;
-  color: #5d4037;
-  box-shadow: 0 2px 6px rgba(58, 28, 20, 0.1), 0 10px 26px rgba(58, 28, 20, 0.1);
-}
-.sa-fbfab:hover { background: #f4f2ef; }
 
 .sa-fbpanel {
   position: absolute;

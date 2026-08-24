@@ -386,6 +386,11 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         onOpenSearch={openPalette}
         searchAnchorRef={desktopSearchRef}
         onOpenHelp={() => goPath("/help")}
+        /* ⚠️ THE DOCK'S OWN TOGGLE, LIFTED ONE LEVEL. The FAB called `onOpenChange(!open)` against
+           this same state; the button moved into the bar and the state did not move at all, so
+           `BetaStrip`'s "tell us when you find one" still opens the same panel. */
+        onOpenFeedback={() => setFeedbackOpen((o) => !o)}
+        feedbackOpen={feedbackOpen}
         onOpenAccount={toggleAccount}
         onUpgrade={() => goPath("/plans")}
         onNavigate={onNavigate}

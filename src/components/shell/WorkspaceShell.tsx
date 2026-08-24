@@ -25,7 +25,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
-  Book, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Plus,
+  Book, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, PenLine, Plus,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { planLine, resolveScopedManuscript, stepManuscript } from "../../lib/shellSidebar";
@@ -33,6 +33,7 @@ import {
   ShellSection, openForHit, sectionClick, sectionRowState, shellCrumb, shellHitFor,
 } from "../../lib/workspaceShell";
 import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardDivider, MenuCardItem, SearchPill } from "./primitives";
+import { FEEDBACK_FAB } from "../../lib/beta";
 import { useSaveState, saveWhisper } from "../../lib/useSaveState";
 import { useSidebarCollapsed } from "./useSidebarCollapsed";
 import { formatSidebarName, getInitials } from "../../lib/displayName";
@@ -64,6 +65,18 @@ export interface WorkspaceShellProps {
   /** Attached to the desktop SearchPill so the palette can anchor to it. */
   searchAnchorRef?: React.Ref<HTMLButtonElement>;
   onOpenHelp: () => void;
+  /**
+   * Toggles the beta feedback panel — the SAME state the dock's own button used to toggle, and
+   * the same state `BetaStrip`'s "tell us when you find one" sets. The control moved into the bar
+   * (feedback pack); what it does is untouched.
+   *
+   * ⚠️ OPTIONAL, so the pill is ABSENT rather than inert when nothing is wired to it. A feedback
+   * button that opens nothing is the beta's worst possible control: it collects the report the
+   * writer thinks they have sent.
+   */
+  onOpenFeedback?: () => void;
+  /** True while that panel is open — the pill reports it, as the dock's button did. */
+  feedbackOpen?: boolean;
   /** Opens the account menu, and hands it the element to anchor against (it is portalled). */
   onOpenAccount?: (anchor: HTMLElement) => void;
   onUpgrade?: () => void;
@@ -109,7 +122,8 @@ export function msMeta(ms: { genre?: string; wordCount?: number }): string {
    the name beside it. One input, one module, two outputs. */
 
 export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
-  sections, icons, onNavigatePath, onOpenSearch, searchAnchorRef, onOpenHelp, onOpenAccount, onUpgrade,
+  sections, icons, onNavigatePath, onOpenSearch, searchAnchorRef, onOpenHelp, onOpenFeedback,
+  feedbackOpen = false, onOpenAccount, onUpgrade,
   onNavigate, scrollId, scrollRef, onScroll, footFade, fit = false, accountMenu, children,
 }) => {
   const { pathname, search } = useLocation();
@@ -650,6 +664,34 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
               <div className="ws-bright">
                 <SearchPill onOpen={onOpenSearch} anchorRef={searchAnchorRef} />
+                {/* ⚠️ LABELLED, NOT ICON-ONLY, AND THAT IS A PRE-LAUNCH DECISION ABOUT
+                    DISCOVERABILITY — not a density one. A beta that hears nothing reads as "it's
+                    fine" right up until people stop signing in, and a pencil glyph among three
+                    other glyphs is a thing nobody presses.
+
+                    ⚠️ AND IT SITS LEFT OF THE DIVIDER, so it reads as the reader's action beside
+                    their search rather than as one more piece of system furniture in the icon
+                    cluster on the right.
+
+                    ⚠️ THE HANDLER IS THE DOCK'S OWN, UNCHANGED. This moved a control; it did not
+                    change what the control does. */}
+                {onOpenFeedback && (
+                  <>
+                    <button
+                      type="button"
+                      className="ws-fbpill"
+                      onClick={onOpenFeedback}
+                      aria-expanded={feedbackOpen}
+                      /* The accessible name survives the narrow state, where the label is hidden
+                         and only the pencil is left. */
+                      aria-label={FEEDBACK_FAB}
+                    >
+                      <PenLine aria-hidden="true" />
+                      <span className="ws-fbpill-l">Feedback</span>
+                    </button>
+                    <span className="ws-bdiv" aria-hidden="true" />
+                  </>
+                )}
                 <HelpButton onOpen={onOpenHelp} />
                 <div className="ws-newwrap" ref={newRef}>
                   <button
