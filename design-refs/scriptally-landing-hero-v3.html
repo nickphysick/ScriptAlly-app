@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — landing v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..700&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#f2ede7;
+  --parchment:#fdfaf5;
+  --ink:#3a1c14;
+  --near-black:#1c130f;
+  --muted:#7a655c;
+  --burgundy:#7c3a2a;
+  --pink:#f5e2da;
+  --pink-deep:#e8c8bc;
+  --blush:#f7e7de;
+  --sage-panel:#e7ede5;
+  --hair:rgba(58,28,20,.12);
+
+  --display:"Playfair Display",Georgia,serif;
+  --body:"Inter",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --hand:"Caveat",cursive;
+
+  --h1: clamp(3.2rem, 6.4vw, 6rem);
+  --gutter: 48px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--cream);color:var(--ink);
+  font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.45;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.055'/%3E%3C/svg%3E");
+}
+.wrap{position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 var(--gutter)}
+
+/* ---------- nav ---------- */
+.nav{display:flex;align-items:center;gap:34px;padding:26px 0 0}
+.brand{display:flex;align-items:center;gap:12px;font-family:var(--display);font-size:1.42rem;font-weight:600;color:var(--near-black)}
+.brand .mark{width:30px;height:30px;border-radius:50%;background:#dfe4ea;display:grid;place-items:center;font-family:var(--display);font-size:.86rem;color:#5b6a7a}
+.nav a.link{color:var(--muted);text-decoration:none;font-size:.93rem}
+.nav a.link:hover{color:var(--ink)}
+.nav .spacer{margin-left:auto}
+.nav .pill{background:var(--parchment);border:1px solid var(--hair);border-radius:999px;padding:11px 22px;font-size:.92rem;color:var(--near-black);text-decoration:none;box-shadow:0 1px 2px rgba(58,28,20,.05)}
+
+/* ---------- hero ---------- */
+.hero{
+  display:grid;grid-template-columns:1fr 1.02fr;gap:60px;align-items:stretch;
+  padding:clamp(44px,6.5vh,84px) 0 clamp(44px,6vh,76px);
+}
+.hcol{display:flex;flex-direction:column;justify-content:center}
+.eyebrow{font-family:var(--mono);font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin:0 0 22px}
+h1.statement{
+  font-family:var(--display);font-weight:700;font-size:var(--h1);line-height:.96;
+  letter-spacing:-.022em;color:var(--near-black);margin:0;max-width:13ch;
+}
+.after{position:relative;margin:clamp(22px,2.6vh,34px) 0 0;max-width:48ch}
+.after .dots{
+  position:absolute;left:-1.75em;top:-.3em;
+  font-family:var(--display);font-size:2.2rem;line-height:1;color:var(--burgundy);opacity:.55;
+}
+.lede{font-size:clamp(1.04rem,1.16vw,1.18rem);line-height:1.55;color:var(--ink);margin:0}
+.grind{font-size:.98rem;line-height:1.7;color:var(--muted);margin:12px 0 0;max-width:46ch}
+.grind .robots{font-family:var(--mono);font-size:.92em;color:var(--ink)}
+.turn{margin:clamp(24px,2.8vh,36px) 0 0;padding-left:18px;border-left:2px solid var(--burgundy);max-width:32ch}
+.turn .a{display:block;font-weight:600;font-size:1.02rem;color:var(--near-black)}
+.turn .b{display:block;font-family:var(--display);font-size:clamp(1.4rem,1.9vw,1.85rem);line-height:1.25;color:var(--ink);margin-top:5px;letter-spacing:-.012em}
+.actions{display:flex;align-items:center;gap:24px;margin:clamp(26px,3vh,38px) 0 0;flex-wrap:wrap}
+.btn{
+  background:var(--pink);border:1px solid var(--pink-deep);color:var(--near-black);border-radius:12px;
+  padding:14px 28px;font-size:.98rem;font-weight:500;text-decoration:none;
+  box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 2px 6px rgba(124,58,42,.08);
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+}
+.btn:hover{background:#f8e9e2;transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 6px 14px rgba(124,58,42,.13)}
+.ghost{color:var(--burgundy);text-decoration:none;border-bottom:1px solid rgba(124,58,42,.35);padding-bottom:2px;font-size:.98rem}
+.ghost:hover{border-bottom-color:var(--burgundy)}
+.microline{font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:20px 0 0}
+
+/* ---------- illustration placeholders ---------- */
+.illo{
+  position:relative;border:1px dashed rgba(124,58,42,.34);border-radius:18px;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:340px;
+}
+.illo.blush{background:var(--blush)}
+.illo.sage{background:var(--sage-panel)}
+.illo.paper{background:var(--parchment)}
+.illo .tag{
+  position:absolute;left:16px;bottom:13px;font-family:var(--mono);font-size:.6rem;
+  letter-spacing:.2em;text-transform:uppercase;color:rgba(124,58,42,.5);
+}
+.illo svg{width:min(56%,300px);height:auto;stroke:var(--burgundy);stroke-width:1.4;fill:none;opacity:.62}
+
+/* ---------- pulse section ---------- */
+.pulse-sec{text-align:center;padding:clamp(72px,10vh,124px) 0 clamp(30px,4vh,54px)}
+.pulse-sec h2{
+  font-family:var(--display);font-weight:600;color:var(--near-black);
+  font-size:clamp(1.9rem,3.5vw,3.05rem);line-height:1.18;letter-spacing:-.018em;
+  margin:0 auto;max-width:20ch;
+}
+.pulseword{position:relative;display:inline-block}
+.pulseword::before{
+  content:"";position:absolute;left:-.22em;right:-.22em;top:-.1em;bottom:.02em;
+  border-radius:999px;background:#f0d5c8;z-index:-1;opacity:0;transform:scale(.86);
+}
+@media (prefers-reduced-motion:no-preference){
+  .pulseword::before{animation:halo 2.6s cubic-bezier(.4,0,.3,1) infinite}
+  .pulseword{animation:beat 2.6s cubic-bezier(.4,0,.3,1) infinite}
+}
+@keyframes halo{
+  0%{opacity:0;transform:scale(.84)}
+  18%{opacity:.85;transform:scale(1)}
+  46%{opacity:0;transform:scale(1.16)}
+  100%{opacity:0;transform:scale(1.16)}
+}
+@keyframes beat{
+  0%{transform:scale(1)}
+  14%{transform:scale(1.035)}
+  34%{transform:scale(1)}
+  100%{transform:scale(1)}
+}
+.pulse-sec .sub{margin:16px 0 0;color:var(--muted);font-size:1.06rem}
+body.hand .pulse-sec .sub{font-family:var(--hand);font-size:1.72rem;color:var(--burgundy);line-height:1.2}
+
+/* ---------- showreel ---------- */
+.reel{padding:0 0 40px}
+.row{display:grid;grid-template-columns:1fr 1.05fr;gap:70px;align-items:center;padding:clamp(46px,7vh,86px) 0}
+.row + .row{border-top:1px solid var(--hair)}
+.row.flip .txt{order:2}
+.row.flip .illo{order:1}
+.row .kick{font-family:var(--mono);font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+.row h3{font-family:var(--display);font-weight:600;font-size:clamp(1.6rem,2.5vw,2.3rem);line-height:1.16;letter-spacing:-.015em;color:var(--near-black);margin:0 0 16px;max-width:16ch}
+.row p{color:var(--muted);font-size:1.02rem;line-height:1.7;margin:0;max-width:46ch}
+.row .acts{display:flex;align-items:center;gap:22px;margin-top:26px;flex-wrap:wrap}
+.stub{opacity:.62}
+.stub .kick{color:rgba(124,58,42,.55)}
+
+/* ---------- controls ---------- */
+.ctl{
+  position:fixed;right:16px;bottom:16px;z-index:50;display:flex;gap:8px;align-items:center;
+  background:rgba(253,250,245,.94);border:1px solid var(--hair);border-radius:999px;padding:7px 10px;
+  box-shadow:0 6px 20px rgba(58,28,20,.12);backdrop-filter:blur(6px);
+}
+.ctl span{font-family:var(--mono);font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:0 4px}
+.ctl button{font-family:var(--mono);font-size:.64rem;border:1px solid var(--hair);background:#fff;color:var(--muted);border-radius:999px;padding:6px 11px;cursor:pointer}
+.ctl button[aria-pressed="true"]{background:var(--pink);border-color:var(--pink-deep);color:var(--near-black)}
+.ctl .div{width:1px;height:18px;background:var(--hair)}
+
+@media (prefers-reduced-motion:no-preference){
+  .r{opacity:0;transform:translateY(12px);animation:rise .75s cubic-bezier(.2,.7,.25,1) forwards}
+  .r1{animation-delay:.05s}.r2{animation-delay:.38s}.r3{animation-delay:.56s}.r4{animation-delay:.74s}.r5{animation-delay:.9s}
+  @keyframes rise{to{opacity:1;transform:none}}
+}
+@media (max-width:900px){
+  :root{--gutter:22px;--h1:clamp(2.4rem,10vw,3.6rem)}
+  .nav a.link{display:none}
+  .hero,.row{grid-template-columns:1fr;gap:34px}
+  .row.flip .txt{order:1}.row.flip .illo{order:2}
+  .after .dots{position:static;display:block;font-size:1.9rem;margin-bottom:2px}
+  .illo{min-height:230px}
+}
+a:focus-visible,button:focus-visible{outline:2px solid var(--burgundy);outline-offset:3px}
+</style>
+</head>
+<body class="hand">
+
+<div class="wrap">
+  <nav class="nav">
+    <div class="brand"><span class="mark">S</span>ScriptAlly</div>
+    <a class="link" href="#">Features</a>
+    <a class="link" href="#">About</a>
+    <a class="link" href="#">Pricing</a>
+    <a class="link" href="#">Contact</a>
+    <span class="spacer"></span>
+    <a class="link" href="#">Log in</a>
+    <a class="pill" href="#">Start tracking — it's free</a>
+  </nav>
+
+  <header class="hero">
+    <div class="hcol">
+      <p class="eyebrow r r1">For querying writers</p>
+      <h1 class="statement r r1">You've written a book.</h1>
+
+      <div class="after r r2">
+        <span class="dots" aria-hidden="true">…</span>
+        <p class="lede">and now your querying journey begins. Your quest for traditional publication; an endless, gruelling campaign of self-promotion in a fiercely competitive, ever-changing market.</p>
+        <p class="grind r r3">Oh, and now you're up against <span class="robots">robots</span>, too.</p>
+      </div>
+
+      <div class="turn r r4">
+        <span class="a">You are not alone.</span>
+        <span class="b">ScriptAlly tips the odds back in your favour.</span>
+      </div>
+
+      <div class="actions r r5">
+        <a class="btn" href="#">Start tracking — it's free</a>
+        <a class="ghost" href="#">See pricing</a>
+      </div>
+      <p class="microline r r5">Free to start</p>
+    </div>
+
+    <div class="illo blush r r2">
+      <svg viewBox="0 0 200 150" aria-hidden="true">
+        <path d="M18 74 L176 26 L104 118 L88 84 Z" stroke-linejoin="round"/>
+        <path d="M88 84 L176 26"/>
+        <rect x="74" y="104" width="76" height="15" rx="4"/>
+        <rect x="74" y="126" width="56" height="15" rx="4"/>
+      </svg>
+      <span class="tag">Illustration · Hero</span>
+    </div>
+  </header>
+</div>
+
+<div class="wrap">
+  <section class="pulse-sec">
+    <h2>A finger on the <span class="pulseword">pulse</span> of your querying journey</h2>
+    <p class="sub">and so much more…</p>
+  </section>
+
+  <section class="reel">
+
+    <div class="row">
+      <div class="txt">
+        <p class="kick">Smart Import</p>
+        <h3>Your journey so far comes with you</h3>
+        <p>Already deep in the trenches? Upload the spreadsheet you've been fighting with and Smart Import turns it into a living database — every agent, query and response, ready to track from today.</p>
+        <div class="acts">
+          <a class="btn" href="#">Import your history</a>
+          <a class="ghost" href="#">Download the import template</a>
+        </div>
+      </div>
+      <div class="illo paper">
+        <svg viewBox="0 0 200 150" aria-hidden="true">
+          <rect x="14" y="24" width="86" height="102" rx="4"/>
+          <path d="M14 46 H100 M14 66 H100 M14 86 H100 M14 106 H100 M44 24 V126 M72 24 V126"/>
+          <path d="M112 75 H150 M140 64 L152 75 L140 86" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="160" y="40" width="28" height="70" rx="6"/>
+          <circle cx="174" cy="58" r="5"/><path d="M166 78 H182 M166 92 H182"/>
+        </svg>
+        <span class="tag">Illustration · Smart Import</span>
+      </div>
+    </div>
+
+    <div class="row flip">
+      <div class="txt">
+        <p class="kick">The dashboard</p>
+        <h3>From beginning to end</h3>
+        <p>Who you've queried, what you sent, when a nudge is due, which version went where. Every fact stays in its place, so the state of your search is one glance away — from the first query to the last reply.</p>
+      </div>
+      <div class="illo sage">
+        <svg viewBox="0 0 200 150" aria-hidden="true">
+          <path d="M16 108 C46 108 46 56 76 56 C106 56 106 92 136 92 C158 92 166 74 182 74" stroke-linecap="round"/>
+          <circle cx="182" cy="74" r="5"/>
+          <path d="M16 128 H184" opacity=".5"/>
+        </svg>
+        <span class="tag">Illustration · From beginning to end</span>
+      </div>
+    </div>
+
+    <div class="row stub">
+      <div class="txt">
+        <p class="kick">Existing showreel row · unchanged</p>
+        <h3>Your third feature sits here</h3>
+        <p>Placeholder standing in for the next row of the live showreel, so the alternation and rhythm read correctly. Send me the current copy and I'll drop it in.</p>
+      </div>
+      <div class="illo paper">
+        <svg viewBox="0 0 200 150" aria-hidden="true">
+          <rect x="34" y="26" width="94" height="98" rx="4"/>
+          <path d="M46 50 H84 M46 68 H112 M46 86 H98"/>
+          <path d="M156 124 V56 M156 56 L148 40 M156 56 L164 40" stroke-linecap="round"/>
+          <circle cx="156" cy="48" r="6"/>
+        </svg>
+        <span class="tag">Illustration · Placeholder</span>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<div class="ctl">
+  <span>Headline</span>
+  <button data-s="s" aria-pressed="false">S</button>
+  <button data-s="m" aria-pressed="false">M</button>
+  <button data-s="l" aria-pressed="true">L</button>
+  <div class="div"></div>
+  <span>Subtitle</span>
+  <button data-f="inter" aria-pressed="false">Inter</button>
+  <button data-f="hand" aria-pressed="true">Caveat</button>
+</div>
+
+<script>
+  var sizes={s:'clamp(2.5rem,4.4vw,4.2rem)',m:'clamp(2.9rem,5.4vw,5.1rem)',l:'clamp(3.2rem,6.4vw,6rem)'};
+  document.querySelectorAll('.ctl button').forEach(function(b){
+    b.addEventListener('click',function(){
+      if(b.dataset.s){
+        document.documentElement.style.setProperty('--h1',sizes[b.dataset.s]);
+        document.querySelectorAll('.ctl button[data-s]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});
+      }else{
+        document.body.classList.toggle('hand', b.dataset.f==='hand');
+        document.querySelectorAll('.ctl button[data-f]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});
+      }
+    });
+  });
+</script>
+</body>
+</html>

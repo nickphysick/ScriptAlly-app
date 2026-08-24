@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — about v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..700&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#f2ede7;--parchment:#fdfaf5;--ink:#3a1c14;--near-black:#1c130f;--muted:#7a655c;
+  --burgundy:#7c3a2a;--pink:#f5e2da;--pink-deep:#e8c8bc;--blush:#f7e7de;--sage-panel:#e7ede5;
+  --hair:rgba(58,28,20,.12);
+  --display:"Playfair Display",Georgia,serif;--body:"Inter",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;--hand:"Caveat",cursive;
+  --h1: clamp(2.9rem, 5.6vw, 5.3rem);
+  --gutter:48px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.45;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.055'/%3E%3C/svg%3E");
+}
+.wrap{position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 var(--gutter)}
+
+.nav{display:flex;align-items:center;gap:34px;padding:26px 0 0}
+.brand{display:flex;align-items:center;gap:12px;font-family:var(--display);font-size:1.42rem;font-weight:600;color:var(--near-black)}
+.brand .mark{width:30px;height:30px;border-radius:50%;background:#dfe4ea;display:grid;place-items:center;font-family:var(--display);font-size:.86rem;color:#5b6a7a}
+.nav a.link{color:var(--muted);text-decoration:none;font-size:.93rem}
+.nav a.link.on{color:var(--ink)}
+.nav .spacer{margin-left:auto}
+.nav .pill{background:var(--parchment);border:1px solid var(--hair);border-radius:999px;padding:11px 22px;font-size:.92rem;color:var(--near-black);text-decoration:none;box-shadow:0 1px 2px rgba(58,28,20,.05)}
+
+/* ---------- mission hero ---------- */
+.mission{display:grid;grid-template-columns:1fr 1.02fr;gap:60px;align-items:stretch;padding:clamp(52px,8vh,104px) 0 clamp(48px,7vh,88px)}
+.mcol{display:flex;flex-direction:column;justify-content:center}
+h1.mission-line{margin:0}
+h1.mission-line .pre{display:block}
+h1.mission-line .main{
+  display:block;font-family:var(--display);font-weight:700;font-size:clamp(1.95rem,3.6vw,3.05rem);
+  line-height:1.02;letter-spacing:-.022em;color:var(--near-black);
+}
+/* A — mono kicker */
+body.msn-a .pre{font-family:var(--mono);font-weight:400;font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:24px}
+body.msn-a .colon{display:none}
+/* B — quiet serif */
+body.msn-b .pre{font-family:var(--display);font-weight:400;font-size:clamp(1.05rem,1.7vw,1.6rem);color:var(--muted);letter-spacing:-.005em;margin-bottom:8px}
+/* C — plain lead-in */
+body.msn-c .pre{font-family:var(--body);font-weight:500;font-size:1.02rem;color:var(--muted);letter-spacing:.005em;margin-bottom:14px}
+
+.hello{margin:clamp(24px,3vh,36px) 0 0;max-width:52ch;font-size:1.05rem;line-height:1.72;color:var(--muted)}
+.hello-hit{margin:16px 0 0;max-width:44ch;font-size:1.1rem;line-height:1.55;font-weight:600;color:var(--near-black)}
+.turn{
+  margin:clamp(22px,2.8vh,32px) 0 0;padding-left:18px;border-left:2px solid var(--burgundy);
+  font-family:var(--display);font-size:clamp(1.35rem,1.9vw,1.85rem);line-height:1.24;
+  letter-spacing:-.012em;color:var(--near-black);max-width:26ch;
+}
+.sig{margin:26px 0 0;font-family:var(--hand);font-size:1.6rem;color:var(--burgundy);line-height:1.2}
+
+/* centred section header above the vision rows */
+.sec-head{text-align:center;padding:clamp(56px,8vh,96px) 0 clamp(8px,1.5vh,18px)}
+.sec-head h2{
+  font-family:var(--display);font-weight:600;font-size:clamp(1.75rem,3vw,2.6rem);
+  line-height:1.18;letter-spacing:-.018em;color:var(--near-black);margin:0;
+}
+.sec-head .rule{width:46px;height:2px;background:var(--burgundy);opacity:.5;margin:20px auto 0}
+
+.illo{position:relative;border:1px dashed rgba(124,58,42,.34);border-radius:18px;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:340px}
+.illo.blush{background:var(--blush)}
+.illo.sage{background:var(--sage-panel)}
+.illo.paper{background:var(--parchment)}
+.illo .tag{position:absolute;left:16px;bottom:13px;font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(124,58,42,.5)}
+.illo svg{width:min(56%,300px);height:auto;stroke:var(--burgundy);stroke-width:1.4;fill:none;opacity:.62}
+
+/* ---------- vision rows (existing) ---------- */
+.vision{padding:0 0 60px}
+.row{display:grid;grid-template-columns:1fr 1.02fr;gap:70px;align-items:center;padding:clamp(48px,7vh,88px) 0;border-top:1px solid var(--hair)}
+.row.flip .txt{order:2}
+.row.flip .illo{order:1}
+.row.first{border-top:0;padding-top:clamp(24px,3.5vh,44px)}
+.row .kick{font-family:var(--mono);font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+.row h2{font-family:var(--display);font-weight:600;font-size:clamp(1.6rem,2.5vw,2.25rem);line-height:1.16;letter-spacing:-.015em;color:var(--near-black);margin:0 0 16px;max-width:18ch}
+.row p{color:var(--muted);font-size:1.02rem;line-height:1.7;margin:0;max-width:48ch}
+.row p .term{color:var(--ink);font-weight:600}
+.stub{opacity:.62}
+.stub .kick{color:rgba(124,58,42,.55)}
+
+/* ---------- closing ---------- */
+.close{text-align:center;padding:clamp(60px,9vh,110px) 0 clamp(80px,10vh,120px);border-top:1px solid var(--hair)}
+.close h2{font-family:var(--display);font-weight:600;font-size:clamp(1.8rem,3.1vw,2.7rem);line-height:1.18;letter-spacing:-.018em;color:var(--near-black);margin:0 auto;max-width:20ch}
+.close .sub{font-family:var(--hand);font-size:1.7rem;color:var(--burgundy);margin:14px 0 0;line-height:1.2}
+.actions{display:flex;align-items:center;justify-content:center;gap:24px;margin:32px 0 0;flex-wrap:wrap}
+.btn{background:var(--pink);border:1px solid var(--pink-deep);color:var(--near-black);border-radius:12px;padding:14px 28px;font-size:.98rem;font-weight:500;text-decoration:none;box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 2px 6px rgba(124,58,42,.08);transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.btn:hover{background:#f8e9e2;transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 6px 14px rgba(124,58,42,.13)}
+.ghost{color:var(--burgundy);text-decoration:none;border-bottom:1px solid rgba(124,58,42,.35);padding-bottom:2px;font-size:.98rem}
+
+@media (min-width:901px){
+  h1.mission-line .main{white-space:nowrap}
+}
+@media (prefers-reduced-motion:no-preference){
+  .r{opacity:0;transform:translateY(12px);animation:rise .75s cubic-bezier(.2,.7,.25,1) forwards}
+  .r1{animation-delay:.05s}.r2{animation-delay:.4s}.r3{animation-delay:.6s}
+  @keyframes rise{to{opacity:1;transform:none}}
+}
+@media (max-width:900px){
+  :root{--gutter:22px;--h1:clamp(2.3rem,9.4vw,3.5rem)}
+  .nav a.link{display:none}
+  .mission,.row{grid-template-columns:1fr;gap:34px}
+  .row.flip .txt{order:1}.row.flip .illo{order:2}
+  .illo{min-height:230px}
+}
+a:focus-visible{outline:2px solid var(--burgundy);outline-offset:3px}
+.ctl{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;gap:8px;align-items:center;background:rgba(253,250,245,.94);border:1px solid var(--hair);border-radius:999px;padding:7px 10px;box-shadow:0 6px 20px rgba(58,28,20,.12);backdrop-filter:blur(6px)}
+.ctl span{font-family:var(--mono);font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:0 4px}
+.ctl button{font-family:var(--mono);font-size:.64rem;border:1px solid var(--hair);background:#fff;color:var(--muted);border-radius:999px;padding:6px 11px;cursor:pointer}
+.ctl button[aria-pressed="true"]{background:var(--pink);border-color:var(--pink-deep);color:var(--near-black)}
+.ctl button:focus-visible{outline:2px solid var(--burgundy);outline-offset:3px}
+</style>
+</head>
+<body class="msn-b">
+
+<div class="wrap">
+  <nav class="nav">
+    <div class="brand"><span class="mark">S</span>ScriptAlly</div>
+    <a class="link" href="#">Features</a>
+    <a class="link on" href="#">About</a>
+    <a class="link" href="#">Pricing</a>
+    <a class="link" href="#">Contact</a>
+    <span class="spacer"></span>
+    <a class="link" href="#">Log in</a>
+    <a class="pill" href="#">Start tracking — it's free</a>
+  </nav>
+
+  <header class="mission">
+    <div class="mcol">
+      <h1 class="mission-line r r1"><span class="pre">Our mission is simple<span class="colon">:</span></span><span class="main">Get good stories told.</span></h1>
+
+      <p class="hello r r2">To write a truly captivating story is rare. To also be adept in mounting a solid querying campaign? A great deal rarer. This gives rise to a barrier. A dangerous drop-off point. A gap between the skills writers have and the skills they need to pursue traditional publication in today's landscape.</p>
+
+      <p class="hello-hit r r2">That gap is where good stories go to die.</p>
+
+      <p class="turn r r3">So, why don't we bridge it?</p>
+    </div>
+
+    <div class="illo blush r r2">
+      <svg viewBox="0 0 200 150" aria-hidden="true">
+        <path d="M18 74 L176 26 L104 118 L88 84 Z" stroke-linejoin="round"/>
+        <path d="M88 84 L176 26"/>
+        <rect x="74" y="104" width="76" height="15" rx="4"/>
+        <rect x="74" y="126" width="56" height="15" rx="4"/>
+      </svg>
+      <span class="tag">Illustration · Mission</span>
+    </div>
+  </header>
+</div>
+
+<div class="wrap">
+  <section class="sec-head">
+    <h2>Why ScriptAlly exists</h2>
+    <div class="rule"></div>
+  </section>
+
+  <section class="vision">
+
+    <div class="row flip first">
+      <div class="txt">
+        <p class="kick">The vision · 01</p>
+        <h2>Simplify the querying process.</h2>
+        <p>Who you've queried, what you sent, when a nudge is due, which version went where — the search generates a hundred small facts, and losing one costs you. ScriptAlly keeps every fact in its place, so the state of your search is one glance away instead of one spreadsheet archaeology dig.</p>
+      </div>
+      <div class="illo sage">
+        <svg viewBox="0 0 200 150" aria-hidden="true">
+          <path d="M16 100 C46 100 46 52 76 52 C106 52 106 88 136 88 C158 88 166 72 182 72" stroke-linecap="round"/>
+          <circle cx="182" cy="72" r="5"/>
+        </svg>
+        <span class="tag">Illustration · The tangle, untangled</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="txt">
+        <p class="kick">The vision · 02</p>
+        <h2>Reduce story waste.</h2>
+        <p>Good stories go unrepresented every year — not because they weren't good, but because the process defeated the writer. Queries fizzle out half-sent, nudges never happen, promising fulls sit forgotten. We think of that as <span class="term">story waste</span>, and it's the thing ScriptAlly exists to reduce: a search that stays organised is a search that gets finished.</p>
+      </div>
+      <div class="illo paper">
+        <svg viewBox="0 0 200 150" aria-hidden="true">
+          <rect x="44" y="26" width="82" height="98" rx="4"/>
+          <path d="M56 50 H92 M56 68 H114 M56 86 H100"/>
+          <path d="M158 124 V54 M158 54 L150 38 M158 54 L166 38" stroke-linecap="round"/>
+          <circle cx="158" cy="46" r="6"/>
+        </svg>
+        <span class="tag">Illustration · Stories found</span>
+      </div>
+    </div>
+
+    <div class="row flip stub">
+      <div class="txt">
+        <p class="kick">The vision · 03 · placeholder</p>
+        <h2>Your third vision beat sits here.</h2>
+        <p>Standing in for whatever follows 02 on the live page, so the alternation reads correctly. Send me the current copy and I'll drop it in.</p>
+      </div>
+      <div class="illo sage">
+        <svg viewBox="0 0 200 150" aria-hidden="true">
+          <circle cx="100" cy="75" r="42"/>
+          <path d="M100 42 V75 L124 90" stroke-linecap="round"/>
+        </svg>
+        <span class="tag">Illustration · Placeholder</span>
+      </div>
+    </div>
+
+  </section>
+
+  <section class="close">
+    <h2>Every good story deserves a fair hearing.</h2>
+    <p class="sub">let's get yours in front of someone…</p>
+    <div class="actions">
+      <a class="btn" href="#">Start tracking — it's free</a>
+      <a class="ghost" href="#">See pricing</a>
+    </div>
+  </section>
+</div>
+
+<div class="ctl">
+  <span>Mission headline</span>
+  <button data-m="a" aria-pressed="false">Mono kicker</button>
+  <button data-m="b" aria-pressed="true">Quiet serif</button>
+  <button data-m="c" aria-pressed="false">Plain lead-in</button>
+</div>
+
+<script>
+  document.querySelectorAll('.ctl button').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.body.className='msn-'+b.dataset.m;
+      document.querySelectorAll('.ctl button').forEach(function(x){
+        x.setAttribute('aria-pressed',String(x===b));
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
