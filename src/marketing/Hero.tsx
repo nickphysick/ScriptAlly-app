@@ -28,7 +28,7 @@
 import React from "react";
 import {
   HERO_EYEBROW, HERO_H1, HERO_CONGRATS, HERO_CONGRATS_SUB,
-  HERO_LEDE, HERO_GRIND, HERO_TURN_B, CTA_START,
+  HERO_LEDE, HERO_GRIND, HERO_TURN_B, CTA_START, CTA_LEARN,
 } from "./landingCopy";
 import { MarketingIllustration, PartyPopper } from "./marketingMarks";
 import heroIllustration from "../assets/marketing/hero-illustration-placeholder.png";
@@ -77,6 +77,13 @@ export const Hero: React.FC<{ onStart: () => void }> = ({ onStart }) => (
 
         <div className="mk-hctas mk-r mk-r5">
           <button type="button" className="mk-btn mk-btn--cta" onClick={onStart}>{CTA_START}</button>
+          {/* ⚠️ A REAL ANCHOR, NOT A JS SCROLL HANDLER. It works with JavaScript off, it is
+              keyboard- and screen-reader-navigable as a link, the browser owns the focus move,
+              and the reduced-motion case is one CSS line rather than a branch. A handler would
+              have to reimplement all four. */}
+          <a className="mk-learn" href="#pulse">
+            {CTA_LEARN}<span className="mk-chev" aria-hidden="true">↓</span>
+          </a>
         </div>
       </div>
 

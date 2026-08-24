@@ -10,6 +10,16 @@
  * All tints are pre-computed hexes — no colour-mix() (repo rule).
  */
 
+/* ⚠️ SCOPED WITH `:has()`, NOT SET GLOBALLY ON `html`. `scroll-behavior` has to sit on the
+   scrolling box, and for marketing that is the viewport — but this stylesheet is global once
+   loaded, so a bare `html { scroll-behavior: smooth }` would follow the reader into the app. The
+   workspace scrolls its own containers rather than the document, and several places there call
+   `scrollIntoView` expecting it to be instant. `:has(.mk-scope)` turns it on only while a
+   marketing page is mounted, and degrades to today's behaviour where it is unsupported — the
+   anchor still works, it just jumps. */
+html:has(.mk-scope) { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html:has(.mk-scope) { scroll-behavior: auto; } }
+
 .mk-scope {
   /* ⚠️ TWO SURFACES, AND THE BOUNDARY IS THE ONLY MARKER. The hero sits on the APP's content-area
      ground; everything from the section break down sits on the brand's warmer desk. There is no
@@ -24,6 +34,11 @@
      work, and that is exactly the trap — one cross-tier read is what a shell refactor deletes
      without knowing marketing depended on it. `marketingTokens.test.ts` asserts the two values
      still agree, which buys the protection without the coupling. */
+  /* The sticky nav's height, so anything scrolled to by anchor can clear it. Declared as a token
+     because a bare override in the nav's own media block LOSES TO a later `.mk-sect` rule on
+     source order — measured: the 720px override was live and the 76.5px base still won. A token
+     is set on one selector and the media query genuinely overrides it. */
+  --mk-nav-h: 76.5px;
   --mk-hero-ground: #f7f4ee;
   /* Named for where it sits, not what colour it is — the value is a decision, the mechanism is
      not. Changing the surface below the break is this one line. */
@@ -98,6 +113,19 @@
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05);
 }
 .mk-btn:hover { background: #f4f2ef; }
+/* The hero's secondary action: a text link to the section break. */
+.mk-learn {
+  color: var(--mk-burg); text-decoration: none; font-size: .98rem;
+  border-bottom: 1px solid rgba(124, 58, 42, .35); padding-bottom: 2px; cursor: pointer;
+}
+.mk-learn:hover { border-bottom-color: var(--mk-burg); }
+.mk-chev { display: inline-block; margin-left: .4em; transition: transform .18s ease; }
+.mk-learn:hover .mk-chev { transform: translateY(2px); }
+@media (prefers-reduced-motion: reduce) {
+  .mk-chev { transition: none; }
+  .mk-learn:hover .mk-chev { transform: none; }
+}
+
 /* ⚠️ A MODIFIER, NOT A CHANGE TO `.mk-btn`. The base button is the Cappuccino-conformant white
    one and it is worn by the nav, Pricing and Contact — all out of this pack's scope. The soft-pink
    pair is the app's own CTA treatment (`#f5e2da` on `#e8c8bc`), and it is applied per button so
@@ -210,6 +238,8 @@
 @media (max-width: 720px) {
   .mk-nav { padding: 14px 22px; gap: 18px; }
   .mk-links { display: none; }
+  /* Same breakpoint, because it is the same cause: the nav re-wraps to 92px once the links go. */
+  .mk-scope { --mk-nav-h: 92px; }
 }
 
 /* ⚠️ EVERYTHING FROM THE SECTION BREAK DOWN, FOOTER INCLUDED. One wrapper, one token, no
@@ -400,7 +430,12 @@
 .mk-featband { padding: 0 0 26px; margin-top: 0; }
 
 /* ── The full-width section break: eyebrow, heading, and a trace behind them ── */
-.mk-sect { position: relative; padding: 70px 0 96px; }
+/* ⚠️ `scroll-margin-top` IS THE NAV'S HEIGHT, OR THE HEADING LANDS UNDERNEATH IT. The marketing
+   nav is `position: sticky; top: 0`, so an anchor that scrolls this section to y=0 puts its first
+   76.5px behind the bar. The mobile value differs because the nav re-wraps to 92px, and the
+   override is tied to the SAME breakpoint at which `.mk-links` hides — so the two cannot drift
+   apart without someone seeing both. */
+.mk-sect { position: relative; padding: 70px 0 96px; scroll-margin-top: var(--mk-nav-h); }
 .mk-sectinner { max-width: 1300px; margin: 0 auto; padding: 0 56px; }
 .mk-seyebrow {
   font-family: "JetBrains Mono", monospace; font-size: .66rem; letter-spacing: .26em;

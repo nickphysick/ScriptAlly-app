@@ -72,6 +72,9 @@ export const HERO_TURN_B = "ScriptAlly tips the odds back in your favour.";
  */
 export const CTA_START = "Start tracking — it's free";
 
+/** The hero's secondary action — an anchor to the section break, not a second destination. */
+export const CTA_LEARN = "Learn more";
+
 /* ══════════════ The parchment band's header ══════════════ */
 
 /**
