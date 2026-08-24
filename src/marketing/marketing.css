@@ -38,7 +38,19 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
      because a bare override in the nav's own media block LOSES TO a later `.mk-sect` rule on
      source order — measured: the 720px override was live and the 76.5px base still won. A token
      is set on one selector and the media query genuinely overrides it. */
-  --mk-nav-h: 76.5px;
+  /* ⚠️ SET FROM THE CONDENSED NAV, NOT THE FULL ONE. Any in-page anchor scroll happens with the
+     page already moved, i.e. with the nav already condensed, so the full height would over-clear
+     by the difference and leave a gap under the bar. MEASURED after the condense landed, in all
+     three regimes rather than reasoned about — the nav now has three, not two:
+       >=961  full links      88 → 72   (this value)
+       561-960  burger, one row  76 → 68
+       <=560  wrapped, two rows  134.8 → 126.8
+     Each override sits in the media block that CAUSES its regime, so the height and the layout
+     that produces it cannot drift apart. */
+  --mk-nav-h: 72px;
+  /* The cream the nav's ink pill prints in — lighter than the parchment so it reads as type on
+     ink rather than a second surface. */
+  --mk-cta-ink: #f7f0e9;
   --mk-hero-ground: #f7f4ee;
   /* Named for where it sits, not what colour it is — the value is a decision, the mechanism is
      not. Changing the surface below the break is this one line. */
@@ -112,6 +124,29 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05);
 }
 .mk-btn:hover { background: #f4f2ef; }
+/* ⚠️ DECLARED AFTER `.mk-btn` AND `.mk-btn--cta`, AND THAT ORDERING IS THE WHOLE RULE. All three
+   are single-class selectors at equal specificity, so the last one in the file wins — move this
+   above the base and the nav's CTA silently reverts to white while the source still reads as ink.
+   The ref shipped with exactly that bug.
+   ⚠️ AND THE TWO FILLS ARE A GRAMMAR: ink in the NAV, pink for page primaries. They are
+   deliberately different so the bar's CTA and the page's CTAs are distinguishable; converging
+   them removes the distinction rather than tidying it. */
+.mk-btn--ink {
+  background: var(--mk-nearblack); border-color: var(--mk-nearblack); color: var(--mk-cta-ink);
+  border-radius: 999px; padding: 11px 24px; font-size: 1rem; box-shadow: none;
+  transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+  white-space: nowrap;
+}
+.mk-btn--ink:hover {
+  background: #2c1f19; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(28, 19, 15, .18);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk-btn--ink { transition: none; }
+  .mk-btn--ink:hover { transform: none; }
+  /* The condense is a state change, not an animation — it should land instantly. */
+  .mk-navwrap, .mk-nav, .mk-logo { transition: none !important; }
+}
+
 /* The hero's secondary action: a text link to the section break. */
 .mk-learn {
   color: var(--mk-burg); text-decoration: none; font-size: .98rem;
@@ -167,57 +202,84 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 }
 .mk-tlink:hover { border-bottom-color: var(--mk-burg); }
 
-/* ── Pinned marketing nav — desk-coloured; hairline appears once scrolled (scrollY > 4) ── */
+/* ── The marketing nav: brand furniture, condensing on scroll ── */
 .mk-navwrap {
-  position: sticky;
-  top: 0;
-  z-index: 60;
-  /* The nav is sticky over the hero, so it takes the hero's ground. */
-  background: var(--mk-hero-ground);
-  border-bottom: 1px solid transparent;
-  transition: border-color 180ms ease;
+  position: sticky; top: 0; z-index: 60; background: var(--mk-hero-ground);
+  transition: box-shadow .2s ease, background .2s ease;
 }
-.mk-navwrap.mk-scrolled { border-bottom-color: #d8d2c8; }
+/* ⚠️ THE CONDENSED STATE IS SHORTER THAN THE FULL ONE, and `--mk-nav-h` is set from the CONDENSED
+   height on purpose — see the token. By the time an in-page anchor has scrolled anywhere, the nav
+   has already condensed, so that is its height during every scroll the offset exists to clear. */
+.mk-navwrap.mk-scrolled {
+  box-shadow: 0 1px 0 var(--mk-hair), 0 6px 18px rgba(58, 28, 20, .05);
+  background: rgba(247, 244, 238, .92); backdrop-filter: blur(8px);
+}
 .mk-nav {
-  display: flex;
-  align-items: center;
-  gap: 30px;
-  padding: 16px 56px;
-  max-width: 1300px;
-  margin: 0 auto;
+  display: flex; align-items: center; gap: 40px; padding: 20px 56px;
+  max-width: 1300px; margin: 0 auto; transition: padding .2s ease;
 }
-.mk-brand { display: flex; align-items: center; gap: 10px; }
+.mk-navwrap.mk-scrolled .mk-nav { padding: 12px 56px; }
+.mk-brand { display: flex; align-items: center; gap: 13px; }
 .mk-brand-link { cursor: pointer; background: none; border: none; padding: 0; font-family: inherit; }
-/* ⚠️ `.mk-monogram` STAYS, AND DELETING IT BREAKS THE FOOTER. The circled "S" was the nav's mark
+.mk-logo { height: 34px; width: auto; display: block; flex: none; transition: height .2s ease; }
+.mk-navwrap.mk-scrolled .mk-logo { height: 29px; }
+/* ⚠️ `.mk-monogram` STAYS, AND DELETING IT BREAKS THE FOOTER. The circled "S" was this nav's mark
    and the only blue on the site — but the SHARED FOOTER renders the same class, and the footer's
-   internals are not this pass's to change. So the nav stops using it; the rule survives for its
-   other caller. "Delete any styles only it used" did not apply: it was never only the nav's.
+   internals are not this pass's to change. It looks orphaned here and is not.
    (`.mk-avatar` is a third, different thing — the signed-in user's initial chip.) */
 .mk-monogram {
   width: 32px; height: 32px; border-radius: 50%; background: #dfe7ec;
   display: flex; align-items: center; justify-content: center;
   font-family: "Playfair Display", Georgia, serif; font-size: 17px; color: #3a4650; flex: none;
 }
-/* The real logo, in the nav's lockup. Shipped as supplied — see MarketingShell.tsx. */
-.mk-logo { height: 34px; width: auto; display: block; flex: none; }
 .mk-wordmark {
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 21px;
-  font-weight: 500;
-  color: var(--mk-ink);
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.62rem;
+  letter-spacing: -.012em; color: var(--mk-nearblack); line-height: 1;
 }
-.mk-links { display: flex; gap: 26px; margin-left: 16px; }
-.mk-links button {
-  font-size: 13px;
-  color: #6a5a50;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  padding: 0;
+
+/* ⚠️ THE LINKS ARE THE BODY FACE, NOT PLAYFAIR. The display face was tried here and rejected —
+   the wordmark is the only Playfair in the bar, which is what makes it read as the brand rather
+   than as the first item in a list. */
+.mk-links { display: flex; align-items: center; gap: 30px; }
+.mk-links button, .mk-login {
+  font-family: inherit; font-size: 1.06rem; font-weight: 500; color: var(--mk-ink);
+  background: none; border: none; cursor: pointer; padding: 4px 0; line-height: 1.2;
+  position: relative;
 }
-.mk-links button:hover { color: var(--mk-head); }
+.mk-links button:hover, .mk-login:hover { color: var(--mk-burg); }
+/* The active page. `aria-current` is the source of truth and the styling hangs off it, so the
+   two cannot disagree — a class would let one be set without the other. */
+.mk-links button[aria-current] { color: var(--mk-burg); }
+.mk-links button[aria-current]::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -2px;
+  height: 1.5px; background: var(--mk-burg); opacity: .65;
+}
 .mk-navright { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.mk-login { margin-right: 28px; }
+
+/* The burger and its panel — below the breakpoint only. */
+.mk-burger { display: none; background: none; border: 0; cursor: pointer; padding: 8px; }
+.mk-burger span { display: block; width: 22px; height: 1.6px; background: var(--mk-ink); margin: 5px 0; }
+.mk-navpanel {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 6px 22px 18px; background: var(--mk-hero-ground);
+}
+.mk-navpanel button {
+  font-family: inherit; font-size: 1.06rem; font-weight: 500; color: var(--mk-ink);
+  background: none; border: none; cursor: pointer; text-align: left; padding: 12px 0;
+  border-bottom: 1px solid var(--mk-hair);
+}
+.mk-navpanel button:last-child { border-bottom: none; }
+.mk-navpanel button[aria-current] { color: var(--mk-burg); }
+
+/* ⚠️ THE SKIP LINK IS OFF-SCREEN, NOT `display: none` — hidden that way it is unreachable by the
+   keyboard, which is the only thing it exists for. */
+.mk-skip {
+  position: absolute; left: -9999px; top: 0; z-index: 70;
+  background: var(--mk-parch); color: var(--mk-ink); border: 1px solid var(--mk-bd);
+  border-radius: 0 0 8px 0; padding: 12px 18px; font-size: .95rem; text-decoration: none;
+}
+.mk-skip:focus { left: 0; }
 .mk-avatar {
   width: 30px;
   height: 30px;
@@ -233,12 +295,45 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   flex: none;
 }
 
-@media (max-width: 720px) {
+/* ⚠️ 960, NOT THE 720 THIS TIER USED OR THE 820 THE REF USES — AND IT IS MEASURED, NOT CHOSEN.
+   This pass makes the nav's content substantially wider (wordmark 21px → 1.62rem, links 13px →
+   1.06rem, an ink pill with 24px of side padding), and the four links plus Log in plus the pill
+   now need 831.7px of content width — 943.7 with the gutters. Measured slack against available
+   width: −169 at 721, −130 at 760, −70 at 820, −10 at 880, and only positive from 960.
+   ⚠️ THE 900–940 READINGS SHOW SLACK OF EXACTLY 0, WHICH IS NOT "FITS". Flex was compressing the
+   children to the available width — the tell is the nav standing 88.7px tall there against 88.0
+   from 960 up. A slack of zero across three consecutive widths is a squeeze, not a fit. */
+@media (max-width: 960px) {
   .mk-nav { padding: 14px 22px; gap: 18px; }
-  .mk-links { display: none; }
-  /* Same breakpoint, because it is the same cause: the nav re-wraps to 92px once the links go. */
-  .mk-scope { --mk-nav-h: 92px; }
+  .mk-navwrap.mk-scrolled .mk-nav { padding: 10px 22px; }
+  .mk-links, .mk-login { display: none; }
+  .mk-burger { display: block; }
+  /* Same breakpoint, same cause: the nav's height changes when the links go. */
+  .mk-scope { --mk-nav-h: 68px; }
 }
+
+/* ⚠️ DECLARED AFTER THE 960 BLOCK, AND THAT ORDER IS LOAD-BEARING. Both are single-class media
+   queries at equal specificity, so the LATER one wins — with this above, the 960 rule's
+   `--mk-nav-h: 68px` overrode this regime's 127px and the anchor offset was wrong by 59px on
+   every phone. Measured, not spotted: the override was live and losing.
+   ⚠️ THE BAR WRAPS ON A NARROW PHONE, AND WITHOUT THIS IT RUNS OFF THE SCREEN. The lockup, the
+   ink pill and the burger need ~374px of content before gutters; at 390 there are 346, so the
+   burger sat 42px past the viewport edge (112px at 320) with a real horizontal scrollbar.
+   Measured, not eyeballed — and it is a regression this pass introduced: the old nav had a
+   smaller wordmark and no burger, and simply wrapped.
+   ⚠️ SHRINKING THE PILL CANNOT FIX IT. "Start tracking — it's free" needs ~208px at 1rem and
+   ~160px even at 0.82rem, against the 144px left once the lockup and burger are placed. The label
+   is normative copy, so the row is what gives. Brand and burger share the first row; the CTA
+   takes the second, full width, where it is more tappable than it was squeezed. */
+@media (max-width: 560px) {
+  .mk-nav { flex-wrap: wrap; row-gap: 12px; }
+  .mk-burger { margin-left: auto; order: 2; }
+  .mk-navright { order: 3; width: 100%; margin-left: 0; }
+  .mk-navright .mk-btn { width: 100%; justify-content: center; }
+  /* Two rows means a much taller bar, and the anchor offset has to know. */
+  .mk-scope { --mk-nav-h: 121px; }
+}
+
 
 /* ⚠️ EVERYTHING FROM THE SECTION BREAK DOWN, FOOTER INCLUDED. One wrapper, one token, no
    hairline — see the note on the tokens. Nothing inside this may repaint the ground. */
