@@ -12,6 +12,7 @@
 import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B, HERO_EYEBROW, CTA_START,
+  HERO_CONGRATS, HERO_CONGRATS_SUB,
   CTA_BAND_H2, DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
 } from "./landingCopy";
 
@@ -25,7 +26,7 @@ describe("landing copy — verbatim locks", () => {
 
   it("the lede resumes the headline's sentence, word for word", () => {
     expect(ledeText()).toBe(
-      "and now your quest for agent representation begins; an endless, gruelling campaign of " +
+      "but here your quest for agent representation begins; an endless, gruelling campaign of " +
         "self-promotion in a fiercely competitive, ever-changing market."
     );
   });
@@ -39,8 +40,14 @@ describe("landing copy — verbatim locks", () => {
    * ⚠️ THE LOWERCASE OPENING IS THE DEVICE, AND IT IS THE THING MOST LIKELY TO BE "CORRECTED".
    * Asserted on its own so the failure names the cause rather than diffing a 200-character string.
    */
+  /**
+   * ⚠️ RETARGET, SAME LAW: the lede now opens "but here" rather than "and now" — it turns against
+   * the congratulation above it instead of continuing the headline's sentence. It is still
+   * lowercase, and the ellipsis is still a separate positioned element rather than a character in
+   * the string; those are the two claims, and both survive the rewording.
+   */
   it("opens lowercase, and hides no ellipsis in the string", () => {
-    expect(ledeText().startsWith("and now")).toBe(true);
+    expect(ledeText().startsWith("but here")).toBe(true);
     expect(ledeText()).not.toContain("…");
     expect(ledeText()).not.toContain("...");
   });
@@ -51,7 +58,7 @@ describe("landing copy — verbatim locks", () => {
    * exactly one word carries the treatment — asserted against the flag that now names it.
    */
   it("marks `robots`, and nothing else, inside an otherwise plain sentence", () => {
-    expect(HERO_GRIND.map((s) => s.text).join("")).toBe("Oh, and now you're up against robots, too.");
+    expect(HERO_GRIND.map((s) => s.text).join("")).toBe("…and these days, you're up against robots, too.");
     expect(HERO_GRIND.filter((s) => s.underline).map((s) => s.text)).toEqual(["robots"]);
   });
 
@@ -60,6 +67,17 @@ describe("landing copy — verbatim locks", () => {
    * old two-register claim no longer has a subject. Asserting its ABSENCE is the stronger
    * replacement — it is what stops the softening line being reinstated from a diff.
    */
+  /**
+   * ⚠️ THE CONGRATULATION IS A BEAT, AND THE LEDE TURNS AGAINST IT. "but here your quest…" only
+   * works because something above it said the reader had got somewhere. Locking both together is
+   * what stops one being edited without the other.
+   */
+  it("congratulates before the lede turns", () => {
+    expect(HERO_CONGRATS).toBe("Congratulations.");
+    expect(HERO_CONGRATS_SUB).toBe("You've got further than most.");
+    expect(ledeText().startsWith("but here")).toBe(true);
+  });
+
   it("the turn is one line, and the reassurance in front of it is gone", async () => {
     expect(HERO_TURN_B).toBe("ScriptAlly tips the odds back in your favour.");
     const copy = await import("./landingCopy");

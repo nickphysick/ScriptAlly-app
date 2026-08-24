@@ -27,9 +27,10 @@
 
 import React from "react";
 import {
-  HERO_EYEBROW, HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B, CTA_START,
+  HERO_EYEBROW, HERO_H1, HERO_CONGRATS, HERO_CONGRATS_SUB,
+  HERO_LEDE, HERO_GRIND, HERO_TURN_B, CTA_START,
 } from "./landingCopy";
-import { MarketingIllustration } from "./marketingMarks";
+import { MarketingIllustration, PartyPopper } from "./marketingMarks";
 import heroIllustration from "../assets/marketing/hero-illustration-placeholder.png";
 
 export const Hero: React.FC<{ onStart: () => void }> = ({ onStart }) => (
@@ -39,7 +40,18 @@ export const Hero: React.FC<{ onStart: () => void }> = ({ onStart }) => (
         <p className="mk-eyebrow mk-r mk-r1">{HERO_EYEBROW}</p>
         <h1 className="mk-statement mk-r mk-r1">{HERO_H1}</h1>
 
-        <div className="mk-after mk-r mk-r2">
+        {/* ⚠️ THE POPPER SHARES THE FIRST LINE'S ROW — it is a flex sibling of the word, not an
+            absolutely-positioned decoration, so it stays beside "Congratulations." however the
+            type resizes. The second line sits under both. */}
+        <p className="mk-subhead mk-r mk-r2">
+          <span className="mk-congrats">
+            {HERO_CONGRATS}
+            <span className="mk-markslot"><PartyPopper /></span>
+          </span>
+          <span className="mk-congrats-sub">{HERO_CONGRATS_SUB}</span>
+        </p>
+
+        <div className="mk-after mk-r mk-r3">
           <div className="mk-slip">
             <p className="mk-lede">
               <span className="mk-dots" aria-hidden="true">…</span>
@@ -50,7 +62,7 @@ export const Hero: React.FC<{ onStart: () => void }> = ({ onStart }) => (
               ))}
             </p>
           </div>
-          <p className="mk-ps mk-r mk-r3">
+          <p className="mk-ps mk-r mk-r4">
             {HERO_GRIND.map((seg, i) => (
               seg.underline
                 ? <span className="mk-robots" key={i}>{seg.text}</span>
@@ -59,7 +71,7 @@ export const Hero: React.FC<{ onStart: () => void }> = ({ onStart }) => (
           </p>
         </div>
 
-        <div className="mk-turn mk-r mk-r4">
+        <div className="mk-turn mk-r mk-r5">
           <span className="mk-turn-b">{HERO_TURN_B}</span>
         </div>
 

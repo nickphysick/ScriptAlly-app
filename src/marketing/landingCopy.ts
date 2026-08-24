@@ -17,6 +17,17 @@ export const HERO_EYEBROW = "For querying writers";
 export const HERO_H1 = "You've written a book.";
 
 /**
+ * The congratulation, between the statement and the lede. Two lines, stacked: the first shares
+ * its row with a party-popper mark, the second sits under both.
+ *
+ * ⚠️ IT IS A BEAT, NOT A SUBHEADING. It exists so the page acknowledges the achievement before
+ * the lede tells the reader how hard the next part is — take it out and the slip's "but here your
+ * quest for agent representation begins" has nothing to turn against.
+ */
+export const HERO_CONGRATS = "Congratulations.";
+export const HERO_CONGRATS_SUB = "You've got further than most.";
+
+/**
  * ⚠️ THE LEDE RESUMES THE HEADLINE'S SENTENCE, SO IT OPENS LOWERCASE. That `a` is the signature of
  * the page, not a typo: the h1 ends in a full stop, a hanging ellipsis sits in the left margin,
  * and the sentence picks up mid-flow. Anyone "fixing" the capital is removing the device.
@@ -26,7 +37,7 @@ export const HERO_H1 = "You've written a book.";
  * is really a piece of layout, and the glyph has to sit outside the text block to hang.
  */
 export const HERO_LEDE: Array<{ text: string; b?: boolean }> = [
-  { text: "and now your quest for " },
+  { text: "but here your quest for " },
   { text: "agent representation", b: true },
   { text: " begins; an endless, gruelling campaign of self-promotion in a fiercely competitive, " +
           "ever-changing market." },
@@ -43,7 +54,7 @@ export const HERO_LEDE: Array<{ text: string; b?: boolean }> = [
  * the work a label would have done.
  */
 export const HERO_GRIND: Array<{ text: string; underline?: boolean }> = [
-  { text: "Oh, and now you're up against " },
+  { text: "…and these days, you're up against " },
   { text: "robots", underline: true },
   { text: ", too." },
 ];

@@ -221,9 +221,10 @@
 /* ── Hero: the statement beside the blush illustration slot ──
    ⚠️ NO `overflow: hidden` HERE. The old hero clipped a dashboard replica that overhung its box;
    this one hangs an ellipsis in the LEFT MARGIN, and the same declaration would cut it off. */
-.mk-hero { position: relative; padding: 0 0 26px; }
+/* Ref v8 geometry. `min-height` opens the hero up; the padding pulls the break upward. */
+.mk-hero { position: relative; padding: 84px 0 64px; min-height: 70vh; }
 .mk-heroinner {
-  max-width: 1300px; margin: 0 auto; padding: 56px 56px 0;
+  max-width: 1300px; margin: 0 auto; padding: 0 56px;
   /* ⚠️ 1.12fr 1fr IS WHAT LETS THE STATEMENT HOLD ONE LINE — load-bearing, not taste. At
      1fr 1.02fr the copy column is 558px and the headline needs ~546 at its ceiling; the ratio
      buys ~35px and turns a squeak into real headroom. Narrow it again and the statement goes into
@@ -233,16 +234,16 @@
      deliberately NOT restructured — if you are diffing the ref against this file, that difference
      is intentional and nothing is missing. `.mk-mission` keeps 1fr 1.02fr; it is a different
      headline with its own headroom. */
-  display: grid; grid-template-columns: 1.12fr 1fr; gap: 64px;
+  display: grid; grid-template-columns: 1.1fr 1fr; gap: 72px;
   /* The plate matches the copy column's height rather than declaring one of its own. */
-  align-items: stretch;
+  align-items: center;
 }
 .mk-hcopy { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .mk-eyebrow {
   font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: .22em;
   text-transform: uppercase; color: var(--mk-label);
 }
-.mk-hero .mk-eyebrow { margin-bottom: 22px; }
+.mk-hero .mk-eyebrow { margin-bottom: 30px; }
 .mk-statement {
   font-family: "Playfair Display", Georgia, serif; font-weight: 700;
   /* ⚠️ .96 IS SAFE FOR THIS STRING AND WOULD NOT BE FOR EVERY STRING. "You've written a book."
@@ -260,6 +261,24 @@
   color: var(--mk-nearblack); margin: 0;
 }
 
+/* The congratulation: a beat between the statement and the lede.
+   ⚠️ THE POPPER IS A FLEX SIBLING OF THE WORD, NOT A POSITIONED DECORATION — so it stays beside
+   "Congratulations." at every type size, and the second line sits under both rather than under
+   the mark. `flex: 0 0 auto` stops it being squeezed when the column narrows. */
+.mk-subhead { margin: 26px 0 0; max-width: 34ch; }
+.mk-congrats {
+  display: flex; align-items: center; gap: 16px;
+  font-family: "Playfair Display", Georgia, serif; font-size: 1.95rem; line-height: 1.15;
+  color: var(--mk-nearblack); letter-spacing: -.014em;
+}
+.mk-markslot { display: inline-flex; flex: 0 0 auto; }
+/* ⚠️ A PLACEHOLDER MARK, matched to the hero artwork's stroke so the two read as one hand. */
+.mk-popper {
+  display: block; width: 36px; height: 33px; fill: none;
+  stroke: var(--mk-burg); stroke-width: 1.5; opacity: .8;
+}
+.mk-congrats-sub { display: block; margin-top: 8px; font-size: 1.06rem; color: var(--mk-muted); }
+
 /* ⚠️ `nowrap` FAILS BY OVERFLOW, NOT BY WRAPPING — which is why the boundary is measured, never
    assumed. A ceiling slightly too large does not produce an obviously broken two-line headline; it
    produces one that runs out of its column, and with `overflow-x` clipped anywhere up the tree it
@@ -275,16 +294,23 @@
    viewport, so the page-level scrollbar check reported "ok" at every failing width. The gate that
    works is rendered ink against computed column width; the scrollbar check is a second, weaker
    net. 20px of headroom is first reached at 1140 (20.3px) — too close to sit on — so the boundary
-   is 1160, where it is 22.2px. Below it the statement simply wraps, as it did before this pass.
+   is 1260. ⚠️ IT WAS 1160 UNTIL THE HERO'S GRID RATIO CHANGED. `1.12fr 1fr` at a 64px gap gave a
+   593.8px column; `1.1fr 1fr` at 72px gives 584.6, and that ~9px comes straight off the headroom
+   at every width — 22.2 → 13.6 at the old boundary. ⚠️ AND LOWERING THE CEILING CANNOT FIX IT:
+   3.65rem only binds from ~1298 up, so at 1160 the `4.5vw` term is what sets the size and the
+   ceiling is not in the calculation at all. Only the boundary or the vw coefficient can move that
+   width, and the coefficient would shrink the statement everywhere below the cap to serve one
+   band. Measured: 20px is first reached at ~1233, so the boundary is 1260 (23.1px). Below it the
+   statement simply wraps, as it always has.
    ⚠️ THE FIX IS THE BOUNDARY, NOT A SMALLER CEILING: shrinking the statement at 1440 to serve
    1024 would pay for one narrow band out of every width above it. */
-@media (min-width: 1160px) { .mk-statement { white-space: nowrap; } }
+@media (min-width: 1260px) { .mk-statement { white-space: nowrap; } }
 
 /* The continuation: the lede on a paper slip, the postscript tilted against it.
    ⚠️ THE `vh` CEILINGS ON THIS BLOCK, `.mk-turn` AND `.mk-hctas` ARE REACHED AT ~900px OF VIEWPORT
    HEIGHT ON PURPOSE — see the note on the headline token. A ceiling here should be roughly the
    value the `vh` term yields at 900. */
-.mk-after { position: relative; margin: clamp(22px, 2.6vh, 24px) 0 0; max-width: 32rem; }
+.mk-after { position: relative; margin: 0; }
 
 /* ⚠️ THE ROTATION IS THE POINT, AND IT IS ALSO THE RISK. −0.45° reads as a note set down on the
    page; much more and it reads as a rendering fault, which is the one thing a deliberate tilt
@@ -292,11 +318,11 @@
    rather than a tinted box — drop either and the rotation just looks wrong. */
 .mk-slip {
   background: var(--mk-parch); border: 1px solid var(--mk-slip-bd); border-radius: 5px;
-  padding: 24px 28px 22px;
+  margin-top: 36px; max-width: 31rem; padding: 22px 26px;
   box-shadow: 0 10px 26px rgba(58, 28, 20, .09), 0 1px 0 rgba(255, 255, 255, .8) inset;
   transform: rotate(-.45deg);
 }
-.mk-lede { font-size: 1.16rem; line-height: 1.5; color: var(--mk-ink); margin: 0; }
+.mk-lede { font-size: 1.08rem; line-height: 1.55; color: var(--mk-ink); margin: 0; }
 .mk-lede strong { font-weight: 600; color: var(--mk-nearblack); }
 
 /* ⚠️ INLINE, NOT HANGING — and `line-height: 0` is the load-bearing half. At 1.15em the glyph
@@ -312,9 +338,9 @@
    left edge; the two do not agree and must not be made to. Harmonising them turns two objects set
    down at different moments into one skewed block. */
 .mk-ps {
-  display: block; font-family: "Caveat", cursive; font-size: 1.5rem; line-height: 1.25;
+  display: block; font-family: "Caveat", cursive; font-size: 1.4rem; line-height: 1.25;
   color: var(--mk-burg); transform: rotate(-.9deg); transform-origin: left center;
-  margin: 16px 0 0 10px; max-width: 26rem;
+  margin: 22px 0 0 10px; max-width: 26rem;
 }
 /* ⚠️ UNDERLINED, NOT MONO. This word was mono while the postscript was body copy; inside Caveat a
    monospace run reads as a font that failed to load. `font-family: inherit` is stated rather than
@@ -326,8 +352,8 @@
 
 /* The turn: one line behind a burgundy rule. */
 .mk-turn {
-  margin: clamp(24px, 2.8vh, 26px) 0 0; padding-left: 18px;
-  border-left: 2px solid var(--mk-burg); max-width: 26rem;
+  margin: 42px 0 0; padding-left: 18px;
+  border-left: 2px solid var(--mk-burg); max-width: 21rem;
 }
 .mk-turn-b {
   display: block; font-family: "Playfair Display", Georgia, serif;
@@ -336,7 +362,7 @@
 /* ⚠️ RE-TUNED FOR ONE CHILD. This margin was set when a text link sat beside the button and a
    microline sat beneath it; with both gone the button was the last thing in the column and the
    old 26–28px read as a crowded finish. `.mk-hnote` and its rule are deleted with it. */
-.mk-hctas { display: flex; gap: 22px; margin: clamp(30px, 3.6vh, 34px) 0 0; align-items: center; flex-wrap: wrap; }
+.mk-hctas { display: flex; gap: 26px; margin: 44px 0 0; align-items: center; flex-wrap: wrap; }
 
 /* ⚠️ THE ENTRANCE IS DECLARED ONLY INSIDE `no-preference`, SO REDUCED MOTION IS INERT BY
    CONSTRUCTION — not "the same animation, faster". Outside the query these elements have no
@@ -983,7 +1009,7 @@
    width-limited at this column anyway (760x639 contained in ~530px is ~445px tall), so neither
    cap crops it — the ceiling exists only to stop the row growing. About keeps 620. */
 .mk-hero .mk-illo--tall {
-  height: clamp(300px, 42vh, 430px); min-height: 0; padding: 22px;
+  height: clamp(300px, 42vh, 430px); min-height: 0; padding: 12px;
   /* ⚠️ THE EXPLICIT ROW IS WHAT MAKES THE IMAGE'S PERCENTAGE BOUNDS RESOLVE. `.mk-illo` is a grid
      whose implicit row is `auto`, i.e. content-sized — and a percentage height or max-height
      against an auto row is INDEFINITE, so the browser drops it. Both `height: 100%` and
@@ -1010,7 +1036,14 @@
    (484 / 1.189 = 407) and overflowed a 334px content box — which `overflow: hidden` then cropped
    in silence. `max-width`/`max-height` cannot do that: the image scales itself to fit and is
    incapable of exceeding either bound, whether or not the percentage resolves. */
-.mk-illoart { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
+/* ⚠️ WIDTH-DRIVEN, WITH `max-height` STILL GUARDING THE BOX. 92% of the column up to 400px is
+   what the ref asks for; `max-height: 100%` is what stops a short plate cropping it, and it only
+   resolves because the plate declares a definite grid row — see the note there. Both bounds are
+   load-bearing: the width sets the size, the height stops the crop. */
+.mk-illoart {
+  width: 92%; max-width: 400px; height: auto; max-height: 100%;
+  object-fit: contain; display: block;
+}
 .mk-illo svg {
   width: 190px; max-width: 100%; height: auto; fill: none;
   stroke: var(--mk-burg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; opacity: .55;
