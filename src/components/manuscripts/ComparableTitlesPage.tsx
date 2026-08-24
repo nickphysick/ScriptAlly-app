@@ -18,7 +18,7 @@
  * normalizeComp so optional fields stay omit-empty (Firestore maps reject undefined).
  */
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronDown, Plus, Copy, Check, X, Sparkles, Lock, RefreshCw, BookOpen, Star, GripVertical } from "lucide-react";
+import { Plus, Copy, Check, X, Lock, RefreshCw, GripVertical } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { CompMedia, CompTitle, Manuscript } from "../../types";
 /* ⚠️ THE SHARED MASTHEAD IS BACK (pinned chrome; Nick's call). This page briefly drew its own
@@ -550,132 +550,18 @@ const ScoutPanel: React.FC<{
   );
 };
 
-// ── Field notes: what a good comp does (v2 §2) ──
 /**
- * ⚠️ GENERAL GUIDANCE, NEVER APPRAISAL. Every cell here describes what comps do IN GENERAL. No cell
- * may refer to the writer's own manuscript, their own comps, or how well they have chosen — that is
- * the appraisal line this page has already been walked back from once, and this card sits three
- * inches from the list it would be appraising.
+ * ⚠️ `FieldNotesCard` IS RETIRED (v3 §6), AND IT WAS RENDERING A DUPLICATE. It carried the heading
+ * "What does a good comp do?" and the same five job descriptions the feature block's carousel now
+ * carries — so on the workspace state the page stated both, twice, a few hundred pixels apart. The
+ * carousel is the v3 home for that content; this was the v2 one.
  *
- * ⚠️ AND THE RECENCY CLAIM STAYS SOFT. "broadly the last three to five years", plus an attribution
- * line saying agents differ. The research behind this page found genuine disagreement, and tightening
- * either into a single hard number would have the app manufacture a consensus that does not exist.
- *
- * `slot` is the illustrator's brief — one named 120×64 slot per cell, dashed placeholder until the
- * artwork lands.
+ * ⚠️ AND ITS "COMMON MISSTEPS" PANEL LEAVES THE PRODUCT WITH IT — five reviewed cells (Comping the
+ * giants · Reaching too far back · Comping the unread · Crossing shelves · Piling them on) that the
+ * v3 reference does not carry anywhere. That is a CONTENT decision rather than a cleanup, so it is
+ * named here and in the report rather than disappearing into a diff: recover them from `cc27a62e`
+ * if they should come back. The `sa.compsFieldNotes` fold preference goes too — nothing reads it.
  */
-interface FieldNote { slot: string; heading: string; body: string }
-
-const COMP_JOBS: FieldNote[] = [
-  { slot: "comp-job-shelf", heading: "Places it on a shelf",
-    body: "Comps tell an agent exactly which section of the bookshop your manuscript belongs in." },
-  { slot: "comp-job-readership", heading: "Names the readership",
-    body: "They point to a set of readers who already buy books like yours." },
-  { slot: "comp-job-sales", heading: "Backs the sales case",
-    body: "Editors build a book's numbers partly on how its nearest neighbours actually sold." },
-  { slot: "comp-job-tone", heading: "Carries the tone",
-    body: "A well-chosen pair conveys how the book feels faster than any synopsis can." },
-  { slot: "comp-job-current", heading: "Shows you read now",
-    body: "Recent comps — broadly the last three to five years — show you know today's market, not the one you grew up reading." },
-];
-
-const COMP_MISSTEPS: FieldNote[] = [
-  { slot: "comp-miss-giants", heading: "Comping the giants",
-    body: "Global phenomena can't anchor a realistic case for a debut — and everyone names them." },
-  { slot: "comp-miss-age", heading: "Reaching too far back",
-    body: "A comp from another publishing era says the market has moved on without you." },
-  { slot: "comp-miss-unread", heading: "Comping the unread",
-    body: "Agents ask about comps. A title you haven't read is easily exposed." },
-  { slot: "comp-miss-shelf", heading: "Crossing shelves",
-    body: "Comps from the wrong category muddy where the book sits — and who it's for." },
-  { slot: "comp-miss-count", heading: "Piling them on",
-    body: "Two is the common counsel, three at most. A longer list dilutes the signal." },
-];
-
-const FIELD_NOTES_ATTRIBUTION =
-  "Drawn from published agent and industry guidance. Agents differ on the details — some accept one older anchor title alongside fresh ones.";
-
-/** ⚠️ THE `sa.` PREFIX IS THE HOUSE CONVENTION for a small per-user UI preference, and localStorage
- *  is deliberately the store rather than the user doc: a new field on `User` needs a Firestore
- *  allowlist entry and therefore a PROD rules deploy, which is Nick's and would leave the control
- *  silently denied until it landed. A fold state does not warrant that. */
-const FIELD_NOTES_KEY = "sa.compsFieldNotes";
-
-const FieldNotesCard: React.FC = () => {
-  const [panel, setPanel] = useState<"jobs" | "missteps">("jobs");
-  const [open, setOpen] = useState<boolean>(() => {
-    try { return localStorage.getItem(FIELD_NOTES_KEY) !== "collapsed"; } catch { return true; }
-  });
-
-  const toggle = () => {
-    setOpen((was) => {
-      const next = !was;
-      try { localStorage.setItem(FIELD_NOTES_KEY, next ? "open" : "collapsed"); } catch { /* private mode */ }
-      return next;
-    });
-  };
-
-  const cells = panel === "jobs" ? COMP_JOBS : COMP_MISSTEPS;
-
-  return (
-    <section className="ct-panel ct-fnotes">
-      <div className="ct-band">
-        <span className="bt">What does a good comp do?</span>
-        <span className="ct-tag free">Field notes</span>
-        <div className="ct-fnhead">
-          <div className="ct-seg" role="group" aria-label="Field notes">
-            <button
-              type="button"
-              className={panel === "jobs" ? "on" : ""}
-              aria-pressed={panel === "jobs"}
-              onClick={() => setPanel("jobs")}
-            >
-              The five jobs
-            </button>
-            <button
-              type="button"
-              className={panel === "missteps" ? "on" : ""}
-              aria-pressed={panel === "missteps"}
-              onClick={() => setPanel("missteps")}
-            >
-              Common missteps
-            </button>
-          </div>
-          <button
-            type="button"
-            className={`ct-fncollapse${open ? "" : " shut"}`}
-            aria-expanded={open}
-            onClick={toggle}
-          >
-            {open ? "Collapse" : "Expand"}
-            <ChevronDown />
-          </button>
-        </div>
-      </div>
-
-      {open && (
-        <div className="ct-fnbody">
-          <div className={`ct-fngrid${panel === "missteps" ? " missteps" : ""}`}>
-            {cells.map((c) => (
-              <div key={c.slot} className="ct-fncell">
-                {/* the illustrator's slot — named, sized, and dashed until the artwork arrives */}
-                <div className="ct-fnslot" data-slot={c.slot} aria-hidden="true">
-                  <span>{c.slot}</span>
-                </div>
-                <h4>{c.heading}</h4>
-                <p>{c.body}</p>
-              </div>
-            ))}
-          </div>
-          {/* ⚠️ THE ATTRIBUTION IS PART OF THE CLAIM, not a footnote to trim. It is what stops the
-              five cells reading as house rules. */}
-          <div className="ct-fnattr">{FIELD_NOTES_ATTRIBUTION}</div>
-        </div>
-      )}
-    </section>
-  );
-};
-
 export const ComparableTitlesPage: React.FC<{
   onNavigate?: (tab: string, subPageName?: string, opts?: { manuscriptId?: string }) => void;
 }> = ({ onNavigate }) => {
@@ -1097,8 +983,6 @@ export const ComparableTitlesPage: React.FC<{
               </div>
             </section>
             </div>
-
-            <FieldNotesCard />
 
             <div className="ct-split">
             {/* ── Your comps ── */}

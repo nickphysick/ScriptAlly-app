@@ -124,7 +124,13 @@ export const dbStub: Record<string, unknown> = new Proxy(DB_DATA, {
 const SEED_MANUSCRIPT = {
   id: "m1", userId: SMOKE_USER.id, title: "The Smoke Test", genre: "Literary Fiction",
   ageCategory: "Adult", wordCount: 82000, logline: "A page that would not load.",
-  comps: [], status: ManuscriptStatus.QUERYING, statusChangedDate: "2026-01-05T00:00:00.000Z",
+  /* ⚠️ ONE REAL COMP, NOT `[]` — and this block's own warning above is why. Comparable titles
+     branches on the comps COUNT: at zero it renders a first-visit marketing state and none of its
+     derivations run, so an empty seed tested the empty path twice and reported it as coverage of
+     the populated one. The entry carries a year and an axis because `compAgeLine` and `compFacets`
+     both read them; a title-only comp would leave those two unexecuted. */
+  comps: [{ title: "The Smoke Comp", author: "A N Author", year: 2021, media: "book", matchAxis: "structure · tone" }],
+  status: ManuscriptStatus.QUERYING, statusChangedDate: "2026-01-05T00:00:00.000Z",
   createdDate: "2026-01-01T00:00:00.000Z",
 };
 

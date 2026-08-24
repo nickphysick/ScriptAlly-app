@@ -124,6 +124,23 @@ describe("/manuscripts/comps renders", () => {
     expect(html).toContain("The Smoke Test");
     expect(html).not.toContain("No manuscript to compare yet");
   });
+
+  /**
+   * ⚠️ THE PAGE HAS THREE BRANCHES NOW, NOT TWO (v3 §1) — no manuscript · first visit at zero comps ·
+   * the workspace. The seed carries a comp, so the case above lands on the WORKSPACE, which is where
+   * every derivation on this page lives. Without that the smoke exercised a marketing block and
+   * reported it as coverage of the working page.
+   */
+  it("…and the workspace branch runs its derivations, not the first-visit block", () => {
+    setActiveManuscript();
+    const html = renderPageSeeded(page(), "/manuscripts/comps");
+    /* the comp card rendered, with the two read-time derivations that only run here */
+    expect(html, "the comp card did not render").toContain("The Smoke Comp");
+    expect(html, "compAgeLine did not run").toContain("Published 2021");
+    expect(html, "compFacets did not run").toContain("structure");
+    /* and the marketing block is the DEMOTED variant here, so its CTAs are absent */
+    expect(html, "the first-visit CTA rendered on the workspace").not.toContain("Add your first comp");
+  });
 });
 
 describe("/manuscripts/packages renders", () => {
