@@ -1966,11 +1966,16 @@ export const Queries: React.FC<{
   /**
    * ⚠️ REMOVES WHAT THAT PACKAGE BROUGHT AND NOTHING ELSE — matched on the item's MARK, never on its
    * name, so a synopsis the writer added by hand survives the removal of a package that also carried
-   * one. It is the inverse of `attachPackage`, and it is mounted in the same menu that attaches.
+   * one.
    *
-   * ⚠️ IT DOES NOT TOUCH `packageId`, AND THAT IS NOT AN OMISSION. `attachPackage` writes
-   * `packageId: ""` as the snapshot lands — attaching a snapshot REPLACES a link rather than sitting
-   * beside it — so by the time a group exists there is no link left to clear. Re-clearing it would
+   * ⚠️ IT IS THE INVERSE OF A PATH THAT NO LONGER RUNS, AND IT STAYS FOR THAT REASON. `attachPackage`
+   * was retired with D12, so nothing creates a snapshot group any more — but the groups that already
+   * exist are a true record of what was sent (D13), and a record you cannot correct is worse than one
+   * you cannot make. This is the only way to take an item out of one.
+   *
+   * ⚠️ IT DOES NOT TOUCH `packageId`, AND THAT IS NOT AN OMISSION. The retired path wrote
+   * `packageId: ""` as the snapshot landed — attaching a snapshot REPLACED a link rather than sitting
+   * beside it — so on any group that exists there is no link left to clear. Re-clearing it would
    * add a key to `affectedKeys` for no change, and RESTORING the pre-attach link would be wrong:
    * this is not an undo of the attach (the toast below is), it is a removal of the items.
    *
