@@ -467,9 +467,20 @@ function AppContent() {
   if (hash === "#/reconcile-card" && import.meta.env.DEV) {
     return <ReconcileCardDevPreview />;
   }
-  // Dev-only Contact list review surface — the real page over a stub db, so its blank state can
-  // be seen at all. Three data states + the theme toggle; no auth, no persistence.
-  if (hash === "#/contact-lab" && import.meta.env.DEV) {
+  /**
+   * Contact list review surface — the real page over a stub db, so its blank state can be seen at
+   * all. Three data states + the theme toggle; no auth, no persistence.
+   *
+   * ⚠️ IT IS GATED ON `MODE`, NOT ON `DEV`, AND IT IS THE ONLY LAB THAT IS. Vite derives
+   * `import.meta.env.DEV` from NODE_ENV rather than from `--mode`, so `vite build --mode
+   * development` strips every `#/…-lab` route from the bundle — verified, `grep -c notes-lab
+   * dist/assets/index-*.js` returns 0. That is right for the labs that exist to be looked at on a
+   * dev SERVER, and wrong for this one: the state it shows needs an account with no agents, which
+   * no real account is, so a dev DEPLOY that dropped it could not show the page it was deploying.
+   * `MODE` is "development" for `build:dev` and "production" for both `build` and `build:prod`, so
+   * this reaches the dev site and can never reach production.
+   */
+  if (hash === "#/contact-lab" && import.meta.env.MODE !== "production") {
     return <ContactListLab />;
   }
   // Dev-only notes review surface (PostIt / quick-add / editor) — local state, no persistence.
