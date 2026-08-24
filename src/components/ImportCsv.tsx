@@ -514,12 +514,35 @@ export const ImportCsv: React.FC<{
             }
           }
 
-          // Generate dummy packages to link the queries fully
+          /**
+           * ⚠️ AN IMPORTED QUERY CARRIES NO PACKAGE, AND `""` IS HOW THAT IS SAID.
+           *
+           * This wrote `packageId: "pkg-seed-default"` — an id defined NOWHERE in the repo — under
+           * the comment "Fallback standard submittal". It was not a fallback to anything: it was a
+           * pointer to nothing.
+           *
+           * ⚠️ AND THE CONSEQUENCE IS SILENCE, NOT A WRONG MESSAGE. I first recorded that such a
+           * query would show the pane's "Package no longer exists" state. Measured, it does not:
+           * that state belongs to snapshot groups, and a LINK to a missing package matches no
+           * render branch at all. The query showed **no strip, no loose row and no fork** — the
+           * whole "what went with this query" section blank, with nothing to click and nothing to
+           * explain it. The fork is suppressed too, because `packageId` is truthy, so the writer is
+           * never even offered the chance to say what they sent.
+           *
+           * A visible wrong message gets reported. A blank section gets read as "nothing to see".
+           *
+           * ⚠️ AND THE KEY STAYS PRESENT, because `isValidQuery` requires `data.packageId is
+           * string` (firestore.rules:327). Omitting it altogether — the obvious reading of "write
+           * no packageId" — is DENIED, so every imported query would silently fail to write.
+           * Measured both ways before choosing: absent → PERMISSION_DENIED, `""` → accepted.
+           * `""` is already the model's word for "no package": the seed writes it and
+           * `materialsLinkWrites` returns it when clearing a link.
+           */
           const queryId = "q-imported-" + Math.random().toString(36).substr(2, 9);
           const queryData = {
             manuscriptId: foundMs?.id || "ms-seed-fantasy",
             agentId: foundAgent?.id || "agent-seed-alex",
-            packageId: "pkg-seed-default", // Fallback standard submittal
+            packageId: "",
             personalisationNotes,
             sendMethod: SubmissionMethod.EMAIL,
             status: normalizeQueryStatus(statusInput),
