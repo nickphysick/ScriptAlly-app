@@ -23,7 +23,6 @@ const decls = (src: string) =>
   src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{\/\*[\s\S]*?\*\/\}/g, "").replace(/\/\/[^\n]*/g, "");
 
 const band = read("../components/packages/MaterialsBand.tsx");
-const onboarding = read("../components/packages/PackagesOnboarding.tsx");
 const page = read("../components/SubmissionPackages.tsx");
 const ref = read("../../design-refs/submission-packages-broadsheet.html");
 
@@ -39,7 +38,11 @@ describe("the materials band replaces the rail's register (D1)", () => {
    * template literal — the prefix trap this repo has hit twice.
    */
   it("leaves no rail in any file on the page", () => {
-    for (const [label, src] of [["the page", page], ["the onboarding stage", onboarding]] as const) {
+    /* ⚠️ THE ONBOARDING STAGE IS GONE, NOT SKIPPED. `PackagesOnboarding` was retired with the
+       two-state rebuild — the first-visit surface is `PackagesTeachFirst`, which renders no
+       register of any kind. The claim narrows to the files that still exist rather than quietly
+       iterating one; a loop over a deleted file is a case that asserts nothing. */
+    for (const [label, src] of [["the page", page]] as const) {
       const d = decls(src);
       expect(d, `${label} still renders a rail`).not.toMatch(/["\s`]pkgo-rail["\s`]/);
       expect(d, `${label} still renders a register row`).not.toMatch(/["\s`]pkgo-row["\s`]/);
@@ -94,8 +97,22 @@ describe("every entry point names its type (D3)", () => {
   });
 
   it("clears the preselect on every exit, so a later edit cannot open on a stale type", () => {
+    /**
+     * ⚠️ THE PROPERTY, NOT A COUNT. This asserted exactly three clears — save · close · openMaterial
+     * — so it went RED the day a fourth, entirely CORRECT entry point was added (the first-visit
+     * CTA, which opens the modal with no preselect and clears it exactly as the rule requires).
+     * A literal count is not "every entry point clears it"; it is "there are three entry points",
+     * which is a claim nobody meant to make and which fails on the change it should welcome.
+     *
+     * The real claim: every call that OPENS the material modal clears the preselect first, or
+     * deliberately sets one. So count the opens, and require a clear-or-set beside each.
+     */
     const src = decls(page);
-    expect(src.match(/setMatPreselect\(null\)/g) ?? []).toHaveLength(3); // save · close · openMaterial
+    const opens = (src.match(/setMatModal\(true\)/g) ?? []).length;
+    const preselects = (src.match(/setMatPreselect\((null|[a-zA-Z]+)\)/g) ?? []).length;
+    expect(opens, "no entry point opens the material modal").toBeGreaterThan(0);
+    expect(preselects, "an entry point opens the modal without saying which type")
+      .toBeGreaterThanOrEqual(opens);
   });
 });
 

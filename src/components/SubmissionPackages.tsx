@@ -26,7 +26,7 @@ import { PackageTracking } from "./packages/PackageTracking";
 import { useScriptAllyDb } from "../lib/db";
 import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../types";
 import { useNavigate } from "react-router-dom";
-import { PackagesOnboarding } from "./packages/PackagesOnboarding";
+import { PackagesTeachFirst } from "./packages/PackagesTeachFirst";
 import { PackagesBand } from "./packages/PackagesBand";
 import { TrackingBand } from "./packages/TrackingBand";
 import { FootnoteBand } from "./packages/FootnoteBand";
@@ -357,34 +357,44 @@ export const SubmissionPackages: React.FC = () => {
           {/* ⚠️ THE BAND SITS DIRECTLY BENEATH THE HEADER, and it is the ref's hero minus the title
               (F-E, ruled: this page conforms). Rendered inside the page body rather than as chrome,
               so it scrolls with the content exactly as the masthead above it now does. */}
-          <PackagesHeroBand
-            materials={msVersions.length}
-            packages={msPackages.length}
-            sent={trackingTotals(msPackages, msQueries).sent}
-            manuscriptControl={msSelector}
-            canBuild={canBuildPackage(msVersions)}
-            onNewPackage={() => { setPkgEditing(null); setPkgModal(true); }}
-          />
-          {/* ⚠️ THE MATERIALS BAND REPLACES THE RAIL'S MATERIALS PANEL (D1) — mounted here and
-              deleted there in the same commit, so the two never coexist. */}
-          <MaterialsBand
-            versions={msVersions}
-            packages={msPackages}
-            onAddMaterial={(type) => { setMatEditing(null); setMatPreselect(type); setMatModal(true); }}
-            onOpenMaterial={openMaterial}
-            /* ⚠️ THE PAGE PASSES BOTH WRITERS AND CHOOSES NEITHER (Ruling 2). Which one runs is
-               decided inside the popover from `removalChoice`, off the same packages this page
-               already hands the band — so the sheet's usage line, the popover's wording and the
-               act performed are three readings of one number. */
-            onDeleteMaterial={deleteVersion}
-            onArchiveMaterial={archiveVersion}
-          />
-          {/* ⚠️ THE RAIL IS GONE, AND ITS REGISTERS WITH IT (D1). Materials, Packages and Tracking
-              are bands on the page now — the rail was an index of two of them beside the things it
-              indexed, which is a second copy of a list rather than a way to reach it. Nothing
-              navigated anywhere: every rail row scrolled to a tile three inches to its right. */}
-          {msPackages.length > 0 ? (
+          {msVersions.length + msPackages.length > 0 ? (
             <>
+            <PackagesHeroBand
+              materials={msVersions.length}
+              packages={msPackages.length}
+              sent={trackingTotals(msPackages, msQueries).sent}
+              manuscriptControl={msSelector}
+              canBuild={canBuildPackage(msVersions)}
+              onNewPackage={() => { setPkgEditing(null); setPkgModal(true); }}
+            />
+            {/* ⚠️ THE MATERIALS BAND REPLACES THE RAIL'S MATERIALS PANEL (D1) — mounted here and
+                deleted there in the same commit, so the two never coexist. */}
+            <MaterialsBand
+              versions={msVersions}
+              packages={msPackages}
+              onAddMaterial={(type) => { setMatEditing(null); setMatPreselect(type); setMatModal(true); }}
+              onOpenMaterial={openMaterial}
+              /* ⚠️ THE PAGE PASSES BOTH WRITERS AND CHOOSES NEITHER (Ruling 2). Which one runs is
+                 decided inside the popover from `removalChoice`, off the same packages this page
+                 already hands the band — so the sheet's usage line, the popover's wording and the
+                 act performed are three readings of one number. */
+              onDeleteMaterial={deleteVersion}
+              onArchiveMaterial={archiveVersion}
+            />
+            {/* ⚠️ THE RAIL IS GONE, AND ITS REGISTERS WITH IT (D1). Materials, Packages and Tracking
+                are bands on the page now — the rail was an index of two of them beside the things it
+                indexed, which is a second copy of a list rather than a way to reach it. Nothing
+                navigated anywhere: every rail row scrolled to a tile three inches to its right. */}
+            {/**
+              * ⚠️ THE BOUNDARY MOVED, AND IT IS A BEHAVIOUR CHANGE RATHER THAN A RE-SKIN (D-A).
+              * It was `msPackages.length > 0`, so a writer who had saved three materials and not yet
+              * built a package still met the teaching screen — and their materials were invisible.
+              * The state is now `materials + packages === 0`: nothing filed, nothing to file with.
+              *
+              * ⚠️ DERIVED, NEVER STORED. It comes back if a writer clears everything out, which is
+              * correct — they are a first-time user of a feature they now have no record in. A
+              * `hasSeenPackages` flag would strand them on a workspace with nothing to show.
+              */}
               <PackagesBand
                 packages={msPackages}
                 versions={msVersions}
@@ -436,11 +446,7 @@ export const SubmissionPackages: React.FC = () => {
               <FootnoteBand />
             </>
           ) : (
-            <PackagesOnboarding
-              materialCount={msVersions.length}
-              packageCount={msPackages.length}
-              live={packagedQueries(msPackages, msQueries).length}
-            />
+            <PackagesTeachFirst onAddMaterial={() => { setMatPreselect(null); setMatEditing(null); setMatModal(true); }} />
           )}
         </>
       )}

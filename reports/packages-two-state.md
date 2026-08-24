@@ -263,6 +263,78 @@ tsc 0 · build 0, no error/[WARNING] lines · vitest 384 files, 6579 passed, 3 s
                                             (baseline 383 / 6561)
 ```
 
+---
+
+## Phase 3 — Part A, the first-visit state
+
+`PackagesTeachFirst` + `packagesTeach.css`. Hero (Playfair headline, prose, solid near-black CTA),
+auto-advancing four-job carousel with dot navigation and a dashed slot per card, and the three-stage
+strip below. Copy verbatim from the ref.
+
+**The boundary moved**: `materials + packages === 0`, derived, no stored flag. It was
+`packages > 0`, so a writer with three saved materials and no package met the teaching screen while
+their materials were invisible.
+
+### ⚠️ D-A4 was still broken after the rebuild, and only the measurement said so
+
+`PackagesHeroBand` and `MaterialsBand` rendered **unconditionally, above the branch** — so the new
+teaching state came up with **three empty material columns, three ghost rows and seven zero counts**
+beneath its own hero. That is precisely the fault Part A exists to fix, surviving the rebuild because
+the branch was the only thing anyone thought to switch. Reading the JSX did not show it; the probe
+did, first run:
+
+```
+before: {"materialColumns":3,"packageCards":0,"ghosts":3,"tracking":0,"zeroCounts":7}
+after : {"materialColumns":0,"packageCards":0,"ghosts":0,"tracking":0,"zeroCounts":0}
+```
+
+### ⚠️ And the ref's `line-height: 1.12` really does crop
+
+I wrote a comment asserting 1.12 was safe *because the headline is a fixed constant rather than
+writer-supplied*. It is not: measured at both widths, `scrollHeight 138` against
+`clientHeight 134` — four pixels of `g` and `y` gone from the largest text on the page. Raised to the
+standing **1.3** floor; now `156 / 156` at both widths.
+
+**Which is the Playfair-descender law's own story repeated**: a value fitted to a drawing crops the
+words underneath it, and a comment asserting otherwise is not evidence. The comment now records
+being wrong rather than being deleted.
+
+### Measured, at both widths, on an emptied account
+
+`tests/e2e/packagesTeach.measure.ts`. `seedPackages.mjs --clean` to reach the state, re-seeded after.
+
+```
+teach-first present: 1
+furniture: all zero (columns, cards, ghosts, tracking, zero-counts)
+headline : "Fed up of guessing which materials are landing with agents?"  · 156/156, unclipped
+carousel : 4 slides · slot label "SLOT · PKG-JOB-RECORD · 396×214"
+stages   : Stage one / Stage two / Stage three · 3 discs
+filled controls: ["Add your first material"]   · horizontal overflow: 0px
+```
+
+⚠️ **The filled-control probe counts controls that carry WORDS.** The carousel's active dot is a
+solid burgundy button with no label — a position indicator, not a call to action. Counting it
+reported two and would have had me lighten a dot to satisfy a rule about buttons; the comps carousel
+this mirrors fills its active dot the same way.
+
+### Three files deleted, because they became unreachable
+
+`PackagesOnboarding.tsx` had no caller once the branch changed, which made `packagesOverview.css`
+dead with it and **my own `packagesOverviewSweep.test.ts` vacuous** — a lock asserting that every
+class in a sheet is rendered by a component that is now mounted nowhere. All three removed rather
+than left to read as live.
+
+`materialsBand.test.ts` lost its `onboarding` half: a loop over a deleted file is a case that asserts
+nothing. **And one of its cases had to change shape** — it counted exactly three `setMatPreselect(null)`
+calls, so it went red on a fourth, entirely correct entry point (the first-visit CTA). A literal
+count is not *"every entry point clears it"*; it is *"there are three entry points"* — a claim nobody
+meant to make, which fails on the change it should welcome. It now counts the opens and requires a
+preselect beside each.
+
+```
+tsc 0 · build 0, no error/[WARNING] lines · vitest 383 files, 6575 passed, 3 skipped
+```
+
 ## Flags
 
 | flag | state |

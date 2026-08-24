@@ -1,0 +1,226 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * First visit on Submission packages — hero + carousel + stage strip.
+ * Design authority: design-refs/submission-packages-teach-first.html.
+ *
+ * ⚠️ SINGLE-LOOK, like the rest of this page. No `.t-capp` / `.t-bold` / `.t-edn` variants — the
+ * page renders identically in all three themes, as the agent list and Discover do, which is why the
+ * ref's literal sage and pink are correct here rather than a themed-surface violation.
+ *
+ * ⚠️ ITS OWN NAMESPACE (`pkgt-`), NOT `ct-`. The structure mirrors Comparable titles' first visit
+ * deliberately (see the component header and F-S), but reading their `--ct-*` tokens would couple
+ * this page to a stylesheet it does not own and cannot see change.
+ */
+
+.pkgt {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+/* ══ hero ═══════════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ `1.1fr 1fr`, AND THE PROSE COLUMN IS THE WIDER ONE. The carousel is the illustration; the
+ * argument is the text. Equal columns make the placeholder plate look like the subject.
+ */
+.pkgt-hero {
+  background: var(--pkgo-surface);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 14px;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 40px;
+  padding: 44px 46px 40px;
+  align-items: center;
+  min-width: 0;
+}
+
+/**
+ * ⚠️ `1.3`, THE STANDING FLOOR — AND THE REF'S `1.12` REALLY DOES CROP. This note first said 1.12
+ * was safe because the string is a fixed constant rather than writer-supplied. It is not: measured
+ * at 1440 and 1920, the headline came back `scrollHeight 138` against `clientHeight 134` — four
+ * pixels of `g` and `y` gone, on the largest text on the page, from a value taken off a ref.
+ *
+ * ⚠️ WHICH IS THE LAW'S OWN STORY REPEATED. The Playfair-descender rule exists because a value
+ * fitted to a drawing crops the words underneath it, and a comment asserting otherwise is not
+ * evidence. Only the measurement told them apart.
+ */
+.pkgt-h {
+  font-family: var(--font-serif);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  max-width: 430px;
+  color: var(--pkg-ink);
+}
+
+.pkgt-body {
+  font-size: 14px;
+  color: var(--pkg-ink-soft);
+  line-height: 1.7;
+  max-width: 440px;
+  margin: 18px 0 24px;
+}
+.pkgt-body b { color: var(--pkg-ink); font-weight: 600; }
+
+/**
+ * ⚠️ THE SOLID NEAR-BLACK CTA, MATCHING COMPARABLE TITLES' `.ct-btn-dark` IN WEIGHT AND ROLE. It is
+ * this state's only filled control, and the page's only filled control in the other — one filled
+ * thing per page is the rule this page has been measured against since the re-cut.
+ */
+.pkgt-cta {
+  /* ⚠️ THE LITERAL, NOT `var(--pkg-near-black, #1c130f)`. No such token exists, and a `var()` whose
+     property is undefined falls back silently — so the rule would have LOOKED parameterised, worked
+     perfectly, and sent the next reader hunting for a knob that was never there. The other five
+     tokens this sheet reads were checked the same way and all resolve. */
+  background: #1c130f;
+  border: 1px solid #1c130f;
+  color: #fdf9f4;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 12px 22px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.pkgt-cta:hover { background: #31241d; border-color: #31241d; }
+
+/* ══ carousel ═══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgt-caro { display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; }
+
+.pkgt-caro-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--pkgo-surface);
+  border: 1px solid var(--pkgo-hairline);
+  border-radius: 12px;
+  padding: 16px 18px 18px;
+  box-shadow: 0 6px 20px rgba(58, 28, 20, 0.07);
+  min-width: 0;
+}
+.pkgt-caro-ct {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: var(--pkg-muted);
+  text-align: right;
+  margin-bottom: 8px;
+}
+
+/* ⚠️ DASHED — the artwork is a commission, not a rendering fault. The plate carries its own slot id
+   so the brief is on screen where the drawing will go. */
+.pkgt-caro-slot {
+  border: 1.5px dashed rgba(124, 58, 42, 0.3);
+  border-radius: 10px;
+  height: 214px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.5);
+}
+.pkgt-caro-slot svg {
+  width: 52px; height: 52px;
+  stroke: var(--pkg-burg); stroke-width: 1.1; fill: none;
+  stroke-linecap: round; stroke-linejoin: round; opacity: 0.8;
+}
+.pkgt-slotlbl {
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.14em;
+  color: var(--pkg-muted);
+  text-transform: uppercase;
+}
+
+.pkgt-caro-card h4 {
+  font-family: var(--font-serif);
+  font-size: 18px; font-weight: 600;
+  margin: 14px 0 5px;
+  /* mixed-case Playfair — the standing descender floor */
+  line-height: 1.3;
+  color: var(--pkg-ink);
+}
+.pkgt-caro-card p { font-size: 12px; color: var(--pkg-ink-soft); line-height: 1.6; }
+
+.pkgt-dots { display: flex; gap: 7px; align-items: center; }
+.pkgt-dots button {
+  width: 7px; height: 7px; border-radius: 999px; border: none;
+  background: rgba(58, 28, 20, 0.18); cursor: pointer; padding: 0;
+  transition: width 0.15s, background 0.15s;
+}
+.pkgt-dots button.on { width: 18px; background: var(--pkg-burg); }
+.pkgt-dots button:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 3px; }
+
+/* ══ stage strip ════════════════════════════════════════════════════════════════════════════ */
+
+.pkgt-stages { padding: 44px 0 8px; text-align: center; min-width: 0; }
+.pkgt-stages-h {
+  font-family: var(--font-serif);
+  font-size: 24px; font-weight: 600; line-height: 1.3;
+  color: var(--pkg-ink);
+}
+.pkgt-stages-sub { font-size: 12.5px; color: var(--pkg-ink-soft); margin: 6px 0 34px; }
+
+/**
+ * ⚠️ `1fr 40px 1fr 40px 1fr` — the 40px tracks ARE the dashes between stages, not gaps. A `gap`
+ * plus three columns cannot draw a line that stops short of each disc.
+ */
+.pkgt-stage-grid {
+  display: grid;
+  grid-template-columns: 1fr 40px 1fr 40px 1fr;
+  gap: 0;
+  align-items: start;
+  max-width: 920px;
+  margin: 0 auto;
+}
+.pkgt-stage { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; }
+
+.pkgt-disc {
+  width: 96px; height: 96px; border-radius: 50%;
+  border: 1.5px dashed rgba(124, 58, 42, 0.3);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 5px;
+  background: var(--pkgo-surface);
+  flex: none;
+}
+.pkgt-disc svg {
+  width: 36px; height: 36px;
+  stroke: var(--pkg-burg); stroke-width: 1.1; fill: none;
+  stroke-linecap: round; stroke-linejoin: round; opacity: 0.8;
+}
+.pkgt-disc-l {
+  font-family: var(--font-mono);
+  font-size: 6.5px; letter-spacing: 0.12em;
+  color: var(--pkg-muted); text-transform: uppercase;
+}
+.pkgt-stage-n {
+  font-family: var(--font-mono);
+  font-size: 8.5px; letter-spacing: 0.18em;
+  color: var(--pkg-muted); text-transform: uppercase; font-weight: 700;
+}
+.pkgt-stage h5 {
+  font-family: var(--font-serif);
+  font-size: 17px; font-weight: 600; line-height: 1.3;
+  max-width: 230px; color: var(--pkg-ink);
+}
+.pkgt-stage p { font-size: 11.5px; color: var(--pkg-ink-soft); line-height: 1.65; max-width: 250px; }
+
+.pkgt-stage-dash { border-top: 1px solid rgba(58, 28, 20, 0.16); margin-top: 48px; }
+
+/* ⚠️ THE REF'S OWN BREAKPOINT. Below 900 the hero stacks and the dashes go — a horizontal
+   connector between vertically stacked stages points at nothing. */
+@media (max-width: 900px) {
+  .pkgt-hero { grid-template-columns: minmax(0, 1fr); gap: 28px; padding: 30px 24px 26px; }
+  .pkgt-h { font-size: 30px; }
+  .pkgt-stage-grid { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+  .pkgt-stage-dash { display: none; }
+}
