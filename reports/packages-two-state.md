@@ -1099,3 +1099,68 @@ headline weight (600 vs 700) and the two slot sizes are one-line reconciliations
 `line-height: 1.25`, below the floor. Whether that genuinely crops needs the *fractional* check
 above — the integer form would report a false positive at 1px, which is exactly how a correct page
 gets "fixed".
+
+---
+
+## Part D UI, re-issued — the recon (24 Aug)
+
+The re-issued prompt describes four pieces of work and a live defect. **All four landed earlier the
+same day** (`64311dba` Parts 1–2 · `3d9526a9` Parts 3–4 · `4e0d8e21` the report) and were deployed
+to dev at 15:1x and again at 16:1x UTC. This section is the recon the prompt asks for, taken
+against the **deployed** dev site rather than the source.
+
+### F-AC — R-A's answer: neither branch, because the premise is stale
+
+R-A offers a dichotomy — either the strip is snapshot-attached (so its generic chips are correct,
+and Part 4 resolves it), or it is linked and D-D5 never reached that render path. **Measured, it is
+neither.**
+
+* **There are no snapshots.** Stored across all 44 queries: `link 9 · loose 3 · none 32 ·
+  snapshot 0`. Not one query carries a `fromPackageId` mark.
+* **D-D5 is complete on this path.** Linked strips read `LETTER Hook-first`, `SYN One-page`,
+  `LETTER Comps-forward` — the version names. Nothing renders `Covering letter · Synopsis ·
+  Opening sample`.
+
+The screenshot showing generic chips under a fork predates the deploy. Both faults it shows were
+fixed in `64311dba`, which suppressed the fork beside an attachment and the agent fallback with it.
+
+### D8 — the census, every query on every manuscript
+
+⚠️ **Taken at scope All.** The list is manuscript-scoped, so the first pass saw 30 of 44 and would
+have omitted every query on another manuscript — which is exactly where a stale render would hide.
+
+```
+rows sampled : 44 of 44
+strip 1 · loose 0 · fork 0   →  9   (every linked query)
+strip 0 · loose 1 · fork 0   → 33   (3 stored loose + 30 agent-fallback)
+strip 0 · loose 0 · fork 1   →  2   (nothing attached, no agent defaults)
+offenders                    →  0
+```
+
+Every one of D8's three cases holds across the whole account. No query renders a fork beside an
+attachment; none renders two attachment blocks.
+
+Also measured on every row: `editsInStrip 0` — no per-chip `×` and no `+ Attach` inside a packaged
+strip (**D11**) — and, on each of the 9 linked queries, `CHANGE PACKAGE` + `REMOVE` present
+**together with** the lock note (**D1**, Ruling 1's one footer).
+
+### D15 — verified, not asserted
+
+`ImportCsv.tsx:522` writes `packageId: "pkg-seed-default"` (comment: *"Fallback standard
+submittal"*). Grepped: that id is defined **nowhere** in `src/`, `tests/`, `firestore.rules` or
+`functions/`. ImportCsv references none of `attachPackage`, `attachedMaterials`, `firstSentAt`,
+`stampPackageId`, `setQueryPackage` or `materialsLinkWrites`. **Part 4 changes nothing about it.**
+
+⚠️ **But it writes a dangling link, and that is a latent defect rather than a cosmetic one.** An
+imported query points at a package that cannot exist, so the pane resolves it to the deleted-package
+state and tells the writer their package "no longer exists" about one that never did. No such query
+exists on this account, so the census could not see it. Left alone as instructed — flagged as its
+own item, not folded into Part 4.
+
+### F-O — closed by Part 1, with one qualification
+
+`Remove` clears `packageId`; `detachPackage` removes snapshot-marked items from `materialsWanted`.
+They act on different attachment kinds, so Remove supersedes it **for everything new** — and since
+snapshots are no longer written, everything is new from here. `detachPackage` stays reachable only
+where a historical snapshot exists. There are none on this account, so its menu never draws here;
+prod may still hold some, which is why it was kept rather than deleted.
