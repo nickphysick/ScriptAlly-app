@@ -571,6 +571,82 @@ eyebrow, and the strip renders `materialsWanted`'s canonical type strings instea
 substitution. It was left rather than started thin: the brief's own instruction is not to let it grow
 into a second feature inside this run, and there was not room to drive it properly.
 
+---
+
+## D-D5 — a linked package's chips name its real materials
+
+**⚠️ The brief's diagnosis was wrong, and the finding is more interesting than the fix.** It expected
+the leak to be a substitution inside the packaged strip. It was not: **a linked query rendered no
+materials at all.** It rendered ONE chip carrying the package's *name*, with the canonical type
+strings — `Covering letter · Synopsis · Sample pages` — hidden in a `title` **tooltip**. So a writer
+could not see what went without hovering, and what they saw when they did was the *type* of each
+slot rather than the material in it.
+
+The strip the brief was describing only ever rendered for **snapshot** attachments, and D2 forbids
+touching those. So D1 could only mean the linked case, and the linked case had no strip.
+
+**It was still one substitution in weight** — `linkedChips(pkg, versions)` over the existing
+`packageItems`, rendered through the existing `PackageGroup`. No new component, ~20 lines. So it did
+not trip D4, and the report records the discrepancy rather than the fix pretending the diagnosis
+held.
+
+Read off the rendered strip at 1440, not off the derivation:
+
+```
+CHIPS: [{"eyebrow":"LETTER","name":"Hook-first"},
+        {"eyebrow":"SYN","name":"One-page"},
+        {"eyebrow":"SAMPLE","name":"Chapters 1-3"}]
+edit affordances inside the strip: {"removeX":0,"attach":0}      ← D-D6 holds
+```
+
+`pkgComponents`, the derivation that filled the tooltip, is deleted — it had no other caller.
+
+**D3** — a filled slot whose version has been deleted renders muted *"No longer available"*, the same
+words the packages page uses. Locked with a fixture, since the harness has no deleted version.
+
+⚠️ **`Sample` rather than `Opening sample` is not the unit problem.** The standing law forbids
+labelling `SAMPLE_PAGES` "Sample pages" because three unit choices map to that one type. `Sample`
+asserts no unit — it names the slot, and the version's own name carries the specifics.
+
+⚠️ **And one probe fault worth keeping:** the eyebrow's source string is `Letter`; `innerText`
+returns `LETTER`, because `text-transform: uppercase` is what the reader actually sees. A probe
+comparing against the source is asking about a string nobody reads. Compared case-insensitively.
+
+### F-V — the comparison could not be made on screen
+
+**There are no snapshot-attached queries on the account** (`snapshot queries: 0`) — the marks were
+swept in an earlier session's restore, and nothing has created one since. So how a snapshot reads
+*beside* a linked strip could not be photographed.
+
+From the data model, though, the answer is clear and worth Nick's attention: a snapshot stores
+`material` (the canonical type string), `fromPackageId`, `fromPackageName` and `fromVersionId` — but
+**not** `versionName`. So a snapshot strip can only ever say `Covering letter`, while a linked strip
+now says `LETTER Hook-first`. **They are distinguishable — but only by the reader noticing that one
+names materials and the other names types**, which is a difference nobody has been told to look for.
+Both are wrapped in the same blue packaged strip with the same seal.
+
+**That is a design problem, not something to fix here.** The two could be reconciled by resolving
+`fromVersionId` for snapshots too — but the snapshot's own comment argues against live lookups, and
+D2 forbids the change. Flagged as it stands.
+
+### ⚠️ Found while driving: a package and a loose row DO render together
+
+`reports/packages-two-state/dd5-linked.png` shows one query rendering **both** — pink
+`Covering letter` and `Synopsis` chips with `+ Attach` and `SAVE AS PACKAGE ›`, *and* the blue
+`Standard UK` strip beneath them. That is the first of Part D's three reported faults, on screen.
+
+It is **not stored** as both: `materialsLinkWrites` cleared the list, and the loose chips come from
+the pane's fallback, which displays the AGENT's expected materials when the query's own list is
+empty. So the data obeys the either/or and the render does not.
+
+Out of scope here — it is D-D4, carried — but this is the clearest evidence yet of why that phase
+matters, and it now has a screenshot.
+
+```
+tsc 0 · build 0, no error/[WARNING] lines · vitest 383 files, 6593 passed, 3 skipped
+                                            (baseline 383 / 6587)
+```
+
 ## Where this stopped, and what is left
 
 | phase | state |

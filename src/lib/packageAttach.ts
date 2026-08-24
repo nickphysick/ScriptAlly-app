@@ -107,6 +107,52 @@ export function packageItems(pkg: SubmissionPackage, versions: readonly Manuscri
   });
 }
 
+/**
+ * The chip's slot eyebrow — `Letter`, `Syn`, `Sample` (ref query-attachments-model.html).
+ *
+ * ⚠️ SHORT, BECAUSE THE EYEBROW IS NOT THE LABEL. The name beside it is what the writer reads;
+ * the eyebrow only says which slot it filled, and a full `Covering letter` above `Hook-first`
+ * states the type twice at the size of the thing that matters.
+ *
+ * ⚠️ AND `Sample` RATHER THAN `Opening sample` IS NOT THE UNIT PROBLEM. The standing law is that
+ * `SAMPLE_PAGES` must not be labelled "Sample pages", because three unit choices map to that one
+ * type and the label would assert a unit the data does not carry. `Sample` asserts no unit — it
+ * names the slot, and the version's own name carries the specifics.
+ */
+export const SLOT_EYEBROW: Record<string, string> = {
+  [ComponentType.QUERY_LETTER]: "Letter",
+  [ComponentType.SYNOPSIS]: "Syn",
+  [ComponentType.SAMPLE_PAGES]: "Sample",
+};
+
+/**
+ * What a LINKED package's chips read — its actual materials, resolved live (D-D5).
+ *
+ * ⚠️ LIVE IS CORRECT HERE AND WOULD BE WRONG FOR A SNAPSHOT. A linked query renders the package's
+ * current contents, and it is safe to because a sent package cannot change — that is the whole
+ * point of the lock. A snapshot is a receipt of what was copied and resolves nothing.
+ *
+ * ⚠️ AN UNRESOLVED SLOT SAYS SO (D3). A version that has been deleted leaves the slot filled and
+ * the name missing; `No longer available` is a fact, where a blank chip is a rendering fault and
+ * omitting the row hides that something went.
+ */
+export interface LinkedChip { key: string; eyebrow: string; name: string; missing: boolean }
+
+export function linkedChips(
+  pkg: SubmissionPackage,
+  versions: readonly ManuscriptVersion[],
+): LinkedChip[] {
+  return packageItems(pkg, versions).map((i) => ({
+    key: i.versionId,
+    eyebrow: SLOT_EYEBROW[i.type] ?? i.label,
+    name: i.versionName?.trim() || MISSING_SLOT_CHIP,
+    missing: !i.versionName?.trim(),
+  }));
+}
+
+/** Same words as the packages page's own missing-slot state — one sentence, two surfaces. */
+export const MISSING_SLOT_CHIP = "No longer available";
+
 /** The canonical name of one already-attached material, however it is stored. */
 export const materialName = (m: string | QueryMaterial): string =>
   typeof m === "string" ? m : m.material;

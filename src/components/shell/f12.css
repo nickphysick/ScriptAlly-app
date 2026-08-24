@@ -4432,3 +4432,18 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 .qc-unsel-art { flex: none; width: 210px; }
 .qc-unsel-cap { font-family: var(--f12-serif); font-size: 16px; line-height: 1.3; color: var(--ink-2); margin: 0; }
 
+
+/**
+ * ⚠️ A LINKED PACKAGE'S CHIPS CARRY A SLOT EYEBROW (D-D5). `Letter Hook-first`, not
+ * `Covering letter` — the eyebrow says which slot it filled and the name says what went in it.
+ * They are NOT `.qc-mchip-att`: an attached-material chip is editable and carries a `×`, and these
+ * are the package's contents, which cannot be edited from the query (D-D6).
+ */
+.qc-mchip-slot { cursor: default; gap: 7px; }
+.qc-mchipeye {
+  font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--qc-tx-quiet); flex: none;
+}
+/* ⚠️ A SLOT WHOSE MATERIAL IS GONE SAYS SO — a blank chip reads as a rendering fault, and omitting
+   the row hides that something went. Same words as the packages page's own missing-slot state. */
+.qc-mchip-gone .qc-mchiptx { font-style: italic; color: var(--qc-tx-quiet); }

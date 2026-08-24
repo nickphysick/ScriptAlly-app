@@ -27,7 +27,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { UNFILLED_SLOT, isSlotFilled, otherMaterialsText, OTHER_MAX } from "./packageMetrics";
-import { PACKAGE_SLOTS, packageItems } from "./packageAttach";
+import { PACKAGE_SLOTS, packageItems, linkedChips } from "./packageAttach";
 import { packageTiles } from "./packagesOverview";
 import { ComponentType, RecordStatus, SubmissionPackage, ManuscriptVersion } from "../types";
 
@@ -270,5 +270,67 @@ describe("the card renders Other as a note, not as a fourth material", () => {
     // ⚠️ `var(--font-hand, 'Caveat', cursive)` would render correctly and be a knob that does not
     // exist — the fault class this repo records as "parameterised and is not".
     expect(css).not.toContain("--font-hand");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("D-D5 — a linked package's chips name its real materials", () => {
+  const versions = [
+    { id: "v-l", componentType: ComponentType.QUERY_LETTER, versionName: "Hook-first" },
+    { id: "v-s", componentType: ComponentType.SYNOPSIS, versionName: "One-page" },
+  ] as unknown as ManuscriptVersion[];
+  const linked = pkg({ queryLetterVersionId: "v-l", synopsisVersionId: "v-s", samplePagesVersionId: "" });
+
+  it("resolves each slot to its version NAME, never the canonical type", () => {
+    /**
+     * ⚠️ THE REPORTED BUG, AND ITS REAL SHAPE. A linked query rendered ONE chip carrying the
+     * package's name, with `Covering letter · Synopsis · Sample pages` hidden in a `title` tooltip
+     * — the TYPE of each slot rather than the material in it, and only on hover.
+     */
+    const chips = linkedChips(linked, versions);
+    expect(chips.map((c) => c.name)).toEqual(["Hook-first", "One-page"]);
+    for (const c of chips) {
+      expect(["Covering letter", "Synopsis", "Sample pages", "Opening sample"]).not.toContain(c.name);
+    }
+  });
+
+  it("carries a SHORT slot eyebrow", () => {
+    // ⚠️ The name beside it is what the writer reads; a full `Covering letter` above `Hook-first`
+    //    states the type twice at the size of the thing that matters.
+    expect(linkedChips(linked, versions).map((c) => c.eyebrow)).toEqual(["Letter", "Syn"]);
+  });
+
+  it("an unfilled slot produces no chip at all", () => {
+    // the sample is `""` above — an omitted slot is not a thing that went
+    expect(linkedChips(linked, versions)).toHaveLength(2);
+  });
+
+  it("a slot whose material is GONE says so, rather than blanking (D3)", () => {
+    /**
+     * ⚠️ FILLED-BUT-UNRESOLVABLE IS NOT THE SAME AS EMPTY. The slot still records that something
+     * went; only its name is missing. A blank chip reads as a rendering fault and omitting the row
+     * hides the send.
+     */
+    const chips = linkedChips(pkg({ queryLetterVersionId: "v-deleted", synopsisVersionId: "", samplePagesVersionId: "" }), versions);
+    expect(chips).toHaveLength(1);
+    expect(chips[0].name).toBe("No longer available");
+    expect(chips[0].missing).toBe(true);
+  });
+
+  it("the tooltip derivation it replaces is gone from the page", () => {
+    const page = decls(read("src/components/Queries.tsx"));
+    expect(page, "pkgComponents is back").not.toContain("const pkgComponents");
+    expect(page).toContain("linkedChips(linkedPackage, versions)");
+  });
+
+  it("D-D6 — the chips are not the editable attached-material pill", () => {
+    // ⚠️ `.qc-mchip-att` carries a × and an editor; a package's contents cannot be edited from the
+    //    query, so these are a different class that happens to share the chip's shape.
+    const page = decls(read("src/components/Queries.tsx"));
+    const i = page.indexOf("linkedChips(linkedPackage, versions)");
+    const block = page.slice(i, i + 500);
+    expect(block).toContain("qc-mchip-slot");
+    expect(block).not.toContain("qc-mchip-att");
+    expect(block).not.toContain("qc-mchipx");
   });
 });

@@ -94,7 +94,7 @@ import { QueryCentreSkeleton, SKELETON_FLOOR_MS } from "./reading-pane/QueryCent
 import { ArtSlot } from "./todo/ArtSlot";
 import {
   attachablePackages, attachedMaterials, canAttachPackages, groupByOrigin, materialName,
-  packageMenuRow, detachMenuRows, detachToast, withoutPackage, type PackageItem,
+  packageMenuRow, detachMenuRows, detachToast, withoutPackage, linkedChips, type PackageItem,
 } from "../lib/packageAttach";
 import { PackageGroup, LooseMaterials } from "./reading-pane/PackageGroup";
 import { useOpenEditQuery } from "./EditQueryHost";
@@ -5697,9 +5697,12 @@ export const Queries: React.FC<{
                                 const sampleItem = base.find(isSampleMat) ?? null;
                                 const otherItems = base.filter(isOtherMat);
                                 const linkedPackage = activeQuery.packageId ? packages.find(p => p.id === activeQuery.packageId) : null;
-                                const pkgComponents = linkedPackage
-                                  ? [[materialLabel("Query letter"), linkedPackage.queryLetterVersionId], ["Synopsis", linkedPackage.synopsisVersionId], ["Sample pages", linkedPackage.samplePagesVersionId]].filter(([, v]) => !!v).map(([l]) => l as string)
-                                  : [];
+                                /* ⚠️ `pkgComponents` IS GONE WITH THE TOOLTIP IT FILLED (D-D5). It
+                                   mapped the package's three slots to their CANONICAL TYPE NAMES —
+                                   `Covering letter · Synopsis · Sample pages` — for a `title`
+                                   attribute, which is exactly the leak: the type of each slot
+                                   rather than the material in it, and only on hover. `linkedChips`
+                                   resolves the real names onto the strip instead. */
                                 const isPro = currentUser?.plan === UserPlan.PRO;
                                 const openPackages = () => onNavigate?.("manuscripts", "Submission packages");
                                 /* §2 — this manuscript's live packages; retired ones are not offered */
@@ -5899,11 +5902,35 @@ export const Queries: React.FC<{
                                 {/* ⚠️ THE PACKAGE SURVIVES AS A CHIP. It is not among §1's named
                                     removals, and a Pro attachment is a record of what was sent —
                                     which is exactly what this sub-row lists. */}
+                                {/**
+                                  * ⚠️ D-D5 — A LINKED PACKAGE SHOWS ITS ACTUAL MATERIALS, and until
+                                  * now it showed NONE. This rendered a single chip carrying the
+                                  * package's NAME, with the canonical type strings
+                                  * (`Covering letter · Synopsis · Sample pages`) hidden in a
+                                  * `title` tooltip. So a writer could not see what went without
+                                  * hovering, and what they saw when they did was the type of each
+                                  * slot rather than the material in it.
+                                  *
+                                  * ⚠️ LIVE RESOLUTION IS SAFE HERE BECAUSE OF THE LOCK. The strip
+                                  * reads the package's CURRENT contents, which cannot change once it
+                                  * has been sent — that is what D-D1 buys, and it is why there is no
+                                  * snapshot to keep in step.
+                                  */}
                                 {linkedPackage ? (
-                                  <button type="button" className="qc-mchip qc-mchip-att on" onClick={openPackages} title={pkgComponents.length ? `${linkedPackage.packageName} — ${pkgComponents.join(" · ")}` : linkedPackage.packageName}>
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" /></svg>
-                                    <span className="qc-mchiptx">{linkedPackage.packageName}</span>
-                                  </button>
+                                  <PackageGroup
+                                    group={{ packageId: linkedPackage.id, packageName: linkedPackage.packageName, materials: [] }}
+                                    live={linkedPackage}
+                                    sent={[]}
+                                    sentDate={activeQuery.dateSent}
+                                    onView={openPackages}
+                                  >
+                                    {linkedChips(linkedPackage, versions).map((c) => (
+                                      <span key={c.key} className={`qc-mchip qc-mchip-slot${c.missing ? " qc-mchip-gone" : ""}`}>
+                                        <span className="qc-mchipeye">{c.eyebrow}</span>
+                                        <span className="qc-mchiptx">{c.name}</span>
+                                      </span>
+                                    ))}
+                                  </PackageGroup>
                                 ) : null}
                                 {/* ══ §5 · + ATTACH ═══════════════════════════════════════════════
                                     ⚠️ ALREADY-ADDED TYPES STAY IN THE MENU, MARKED `Added`. The menu
