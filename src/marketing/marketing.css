@@ -188,19 +188,18 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 }
 .mk-brand { display: flex; align-items: center; gap: 10px; }
 .mk-brand-link { cursor: pointer; background: none; border: none; padding: 0; font-family: inherit; }
+/* ⚠️ `.mk-monogram` STAYS, AND DELETING IT BREAKS THE FOOTER. The circled "S" was the nav's mark
+   and the only blue on the site — but the SHARED FOOTER renders the same class, and the footer's
+   internals are not this pass's to change. So the nav stops using it; the rule survives for its
+   other caller. "Delete any styles only it used" did not apply: it was never only the nav's.
+   (`.mk-avatar` is a third, different thing — the signed-in user's initial chip.) */
 .mk-monogram {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #dfe7ec;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 17px;
-  color: #3a4650;
-  flex: none;
+  width: 32px; height: 32px; border-radius: 50%; background: #dfe7ec;
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Playfair Display", Georgia, serif; font-size: 17px; color: #3a4650; flex: none;
 }
+/* The real logo, in the nav's lockup. Shipped as supplied — see MarketingShell.tsx. */
+.mk-logo { height: 34px; width: auto; display: block; flex: none; }
 .mk-wordmark {
   font-family: "Playfair Display", Georgia, serif;
   font-size: 21px;

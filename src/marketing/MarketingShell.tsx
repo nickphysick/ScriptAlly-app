@@ -12,6 +12,7 @@
 
 import React, { useEffect, useState } from "react";
 import "./marketing.css";
+import scriptallyLogo from "../assets/marketing/scriptally-logo.png";
 import { marketingNavState, MarketingNavUser } from "./marketingNav";
 
 export const MarketingShell: React.FC<{
@@ -44,7 +45,13 @@ export const MarketingShell: React.FC<{
       <div className={"mk-navwrap" + (scrolled ? " mk-scrolled" : "")}>
         <nav className="mk-nav" aria-label="Marketing">
           <button type="button" className="mk-brand mk-brand-link" onClick={() => onNavigate("landing")} aria-label="ScriptAlly home">
-            <span className="mk-monogram">S</span>
+            {/* ⚠️ SHIPPED AS SUPPLIED — BLACK, UNTINTED. The ref carries two recoloured variants
+                beside this one; Nick chose the black. Do not add a CSS filter or swap the fill:
+                the mark is artwork, not an icon that takes the tier's ink.
+                `alt=""` because the wordmark beside it already says ScriptAlly — a second
+                announcement is noise to a screen reader, and the button's own aria-label names
+                the destination. */}
+            <img className="mk-logo" src={scriptallyLogo} alt="" />
             <span className="mk-wordmark">ScriptAlly</span>
           </button>
           {/* ⚠️ THE NAV AND THE FOOTER MUST NOT DISAGREE ABOUT WHAT THE SITE CONTAINS. About and
