@@ -34,14 +34,17 @@ export const ABOUT_MISSION_PRE = "Our mission is simple:";
 export const ABOUT_MISSION_MAIN = "Get good stories told.";
 
 /**
- * The three registers, and the escalation between them is the point — a measured paragraph, a
+ * The three registers, and the escalation between them is the point — a measured statement, a
  * flat sentence, then the turn. Flattening any one of them into the others loses the argument.
+ *
+ * ⚠️ THE LEDE IS ONE SENTENCE NOW. It was three sentences and two fragments ("This gives rise to a
+ * barrier. A dangerous drop-off point.") which built to the hit line by accumulation; it states
+ * the gap once and lets the hit line do the work instead. The two below it are UNCHANGED and must
+ * stay — the hit line only lands because something named the gap immediately before it.
  */
 export const ABOUT_GAP_BODY =
-  "To write a truly captivating story is rare. To also be adept in mounting a solid querying " +
-  "campaign? A great deal rarer. This gives rise to a barrier. A dangerous drop-off point. A gap " +
-  "between the skills writers have and the skills they need to pursue traditional publication in " +
-  "today's landscape.";
+  "There exists a gap between the skills required for writing a captivating story and the skills " +
+  "required to manage an effective querying campaign.";
 
 export const ABOUT_GAP_HIT = "That gap is where good stories go to die.";
 
