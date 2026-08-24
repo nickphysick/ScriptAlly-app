@@ -1325,6 +1325,23 @@ export const ComparableTitlesPage: React.FC<{
               />
             </section>
             </div>
+
+            {/* ══ THE SAME TWO BLOCKS, DEMOTED (v3 §5) ══
+
+                ⚠️ THE SAME COMPONENTS WITH PROPS — not a second copy of the markup, and therefore
+                not a second copy of the COPY. Two copies of a sentence become two sentences the day
+                one of them is edited, and these carry the recency claim the page has defended three
+                times.
+
+                ⚠️ AND THE CTAs GO, WHICH IS WHAT `demoted` MEANS. Offering "Add your first comp"
+                beneath a list of comps is the page forgetting what the reader has already done —
+                the add action lives in the band and the row above, where it belongs once there is
+                a list to add to. The heading steps down and the standfirst loses its last sentence,
+                exactly as the ref draws it. */}
+            <div className="ct-demoted">
+              <FeatureBlock demoted />
+              <StagesBlock />
+            </div>
           </>
         )}
       </div>
