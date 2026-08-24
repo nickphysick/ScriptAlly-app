@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submission packages — teach, then workspace</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f2ede7; --white:#ffffff;
+    --sage-a:#d7ddd5; --sage-b:#d5dbd3; --sage-deep:#9aa896; --sage-ink:#5c7053;
+    --pink-band:#f3e0d6; --pink-cta:#f5e2da; --pink-cta-edge:#e8c8bc;
+    --burgundy:#7c3a2a; --ink:#3a1c14; --near-black:#1c130f;
+    --ink-soft:rgba(58,28,20,.62); --ink-faint:rgba(58,28,20,.40);
+    --hairline:rgba(124,58,42,.16); --hairline-soft:rgba(58,28,20,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  [hidden]{display:none!important;}
+  body{background:var(--page);font-family:'Inter',sans-serif;color:var(--ink);padding:36px 40px 90px;-webkit-font-smoothing:antialiased;}
+  .canvas{max-width:1180px;margin:0 auto;}
+
+  .harness{position:fixed;top:14px;right:16px;z-index:300;display:flex;align-items:center;gap:8px;background:var(--ink);color:#fff;padding:7px 8px 7px 14px;border-radius:999px;box-shadow:0 6px 18px rgba(58,28,20,.25);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;}
+  .harness span{opacity:.65;}
+  .harness button{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;padding:4px 10px;border-radius:999px;cursor:pointer;}
+  .harness button.on{background:#fff;color:var(--ink);border-color:#fff;}
+
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase;font-weight:700;}
+  .out{color:var(--burgundy);} .in{color:var(--sage-ink);}
+
+  .btn{font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:8px;cursor:pointer;border:1px solid var(--hairline);background:transparent;color:var(--ink);display:inline-flex;align-items:center;gap:7px;}
+  .btn:hover{background:rgba(58,28,20,.04);}
+  .btn.primary{background:var(--pink-cta);border-color:var(--pink-cta-edge);color:var(--burgundy);}
+  .btn.solid{
+    background:var(--near-black);border-color:var(--near-black);color:#fdf9f4;
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+    padding:12px 22px;border-radius:9px;
+  }
+  .btn.solid:hover{background:#31241d;}
+
+  /* shell header sim */
+  .shellhead{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+  .shellhead .sh-icon{width:40px;height:40px;border-radius:10px;border:1px solid var(--hairline);display:flex;align-items:center;justify-content:center;background:var(--white);}
+  .shellhead .sh-icon svg{width:19px;height:19px;stroke:var(--burgundy);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .shellhead h1{font-family:'Playfair Display',serif;font-size:27px;font-weight:700;}
+  .shellhead .sh-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+
+  /* ---------- TEACH STATE (mirrors Comparable titles) ---------- */
+  .teach-hero{
+    background:transparent;border:none;border-radius:0;
+    display:grid;grid-template-columns:1fr 456px;gap:56px;
+    padding:34px 0 46px;align-items:center;margin:0 auto;
+    max-width:1010px;justify-content:center;
+  }
+  .teach-hero h2{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;line-height:1.18;letter-spacing:-.01em;max-width:460px;}
+  .teach-hero .th-body{font-size:14.5px;color:var(--ink-soft);line-height:1.7;max-width:450px;margin:20px 0 26px;}
+  .teach-hero .th-body b{color:var(--ink);font-weight:600;}
+
+  /* carousel */
+  .caro{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .caro-card{
+    width:100%;max-width:456px;background:var(--white);
+    border:1px solid var(--hairline);border-radius:12px;
+    padding:16px 18px 18px;box-shadow:0 6px 20px rgba(58,28,20,.07);
+  }
+  .caro-card .cc-ct{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--ink-faint);text-align:right;margin-bottom:8px;}
+  .caro-card .cc-slot{
+    border:1.5px dashed rgba(124,58,42,.3);border-radius:10px;height:230px;
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;
+    background:rgba(255,255,255,.5);
+  }
+  .caro-card .cc-slot svg{width:52px;height:52px;stroke:var(--burgundy);stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.8;}
+  .caro-card .cc-slot .sl-lbl{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;}
+  .caro-card h4{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin:14px 0 5px;}
+  .caro-card p{font-size:12px;color:var(--ink-soft);line-height:1.6;}
+  .dots{display:flex;gap:7px;align-items:center;}
+  .dots button{width:7px;height:7px;border-radius:999px;border:none;background:rgba(58,28,20,.18);cursor:pointer;padding:0;transition:width .15s, background .15s;}
+  .dots button.on{width:18px;background:var(--burgundy);}
+
+  /* stages strip (mirrors "Managing your comps") */
+  .stages{
+    background:rgba(255,255,255,.55);border:1px solid var(--hairline-soft);
+    border-radius:16px;padding:54px 40px 58px;text-align:center;
+  }
+  .stages h3{font-family:'Playfair Display',serif;font-size:34px;font-weight:600;letter-spacing:-.01em;}
+  .stages .st-sub{font-size:14px;color:var(--ink-soft);margin:10px 0 46px;}
+  .stage-grid{display:grid;grid-template-columns:1fr 72px 1fr 72px 1fr;gap:0;align-items:start;max-width:100%;margin:0 auto;}
+  .stage{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .stage .st-disc{
+    width:128px;height:128px;border-radius:50%;
+    border:1.5px dashed rgba(124,58,42,.3);
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;
+    background:var(--white);
+  }
+  .stage .st-disc svg{width:50px;height:50px;stroke:var(--burgundy);stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.8;}
+  .stage .st-disc .sd-l{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase;}
+  .stage .st-n{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.2em;color:var(--ink-faint);text-transform:uppercase;font-weight:700;}
+  .stage h5{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;line-height:1.28;max-width:300px;}
+  .stage p{font-size:13px;color:var(--ink-soft);line-height:1.7;max-width:320px;}
+  .stage-dash{border-top:1px solid rgba(58,28,20,.16);margin-top:64px;}
+
+  /* ---------- WORKSPACE STATE ---------- */
+  .ws-top{display:flex;align-items:center;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+  .ws-top .statline{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--ink-soft);}
+  .ws-top .statline b{color:var(--ink);font-weight:700;}
+  .band{margin-bottom:40px;}
+  .band-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--hairline);padding-bottom:9px;margin-bottom:18px;}
+  .band-head h2{font-family:'Playfair Display',serif;font-size:23px;font-weight:600;}
+  .band-head .tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--ink-faint);text-transform:uppercase;}
+  .band-head .spacer{flex:1;}
+
+  .mat-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start;}
+  .mat-col{display:grid;grid-template-rows:auto 1fr auto;gap:11px;height:100%;}
+  .mat-col-head{display:flex;align-items:center;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--hairline-soft);}
+  .mat-col-head .mc-disc{width:52px;height:52px;border-radius:50%;border:1.5px dashed rgba(124,58,42,.3);display:flex;align-items:center;justify-content:center;background:var(--white);flex:0 0 auto;}
+  .mat-col-head .mc-disc svg{width:26px;height:26px;stroke:var(--burgundy);stroke-width:1.15;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.85;}
+  .mat-col-head .mch-t{flex:1;}
+  .mat-col-head .mch-t .eyebrow{display:block;color:var(--ink);margin-bottom:2px;}
+  .mat-col-head .add{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;border:1px solid rgba(58,28,20,.22);background:var(--white);color:var(--ink);padding:5px 10px;border-radius:6px;cursor:pointer;}
+  .sheet{position:relative;background:var(--white);border:1px solid var(--hairline-soft);border-radius:10px 14px 10px 10px;padding:12px 15px 11px;box-shadow:0 2px 6px rgba(58,28,20,.05);overflow:hidden;}
+  .sheet::before{content:"";position:absolute;top:0;right:0;width:14px;height:14px;background:linear-gradient(225deg, var(--page) 48%, rgba(58,28,20,.12) 50%, var(--white) 52%);border-bottom-left-radius:6px;}
+  .sheet .s-type{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;display:block;margin-bottom:3px;}
+  .sheet .s-name{font-size:13px;font-weight:600;}
+  .sheet .s-meta{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-faint);margin-top:5px;}
+  .ghostrow{border:1.5px dashed rgba(124,58,42,.3);border-radius:10px;padding:12px;text-align:center;background:transparent;font-family:inherit;width:100%;cursor:pointer;}
+  .ghostrow:hover{background:rgba(245,226,218,.35);}
+  .ghostrow .g-t{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:var(--burgundy);}
+  .mat-col .ghostrow{align-self:end;}
+  .col-empty{border:1.5px dashed rgba(124,58,42,.2);border-radius:10px;padding:16px 12px;text-align:center;color:var(--ink-faint);font-size:10.5px;line-height:1.5;display:flex;align-items:center;justify-content:center;}
+
+  .pkg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;}
+  .pkg-card{background:var(--white);border:1px solid var(--hairline-soft);border-radius:14px;box-shadow:0 4px 14px rgba(58,28,20,.06);padding:18px 20px 13px;display:flex;flex-direction:column;gap:12px;min-height:170px;}
+  .pkg-card h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;line-height:1.3;}
+  .slots{display:flex;flex-direction:column;gap:5px;}
+  .slot-r{display:flex;align-items:baseline;gap:12px;}
+  .slot-r .sl-t{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase;flex:0 0 56px;}
+  .slot-r .sl-n{font-size:12.5px;font-weight:600;}
+  .pkg-foot{border-top:1px solid var(--hairline-soft);padding-top:9px;margin-top:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;display:flex;gap:12px;}
+  .ghostcard{border:1.5px dashed rgba(124,58,42,.3);border-radius:14px;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;background:transparent;font-family:inherit;}
+  .ghostcard:hover{background:rgba(245,226,218,.3);}
+  .ghostcard .g-t{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--burgundy);}
+  .ghostcard .g-s{font-size:10.5px;color:var(--ink-faint);}
+
+  .nudge{background:var(--white);border:1px solid var(--pink-cta-edge);border-left:3px solid var(--burgundy);border-radius:10px;padding:13px 17px;font-size:12px;color:var(--ink-soft);line-height:1.6;display:flex;align-items:center;gap:14px;max-width:720px;}
+  .nudge b{color:var(--burgundy);font-weight:600;}
+  .nudge .n-link{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;color:var(--burgundy);white-space:nowrap;cursor:pointer;border-bottom:1px solid var(--pink-cta-edge);}
+
+  /* demoted explainer */
+  .demoted{
+    border-top:1px solid var(--hairline);margin-top:8px;padding-top:26px;
+  }
+  .demoted .d-head{display:flex;align-items:baseline;gap:14px;margin-bottom:24px;}
+  .demoted .d-head h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--ink-soft);}
+  .demoted .d-head .hide{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase;cursor:pointer;}
+  .demoted .d-head .hide:hover{color:var(--burgundy);}
+  .demoted .stage-grid{max-width:100%;}
+  .demoted .stage .st-disc{width:72px;height:72px;}
+  .demoted .stage .st-disc svg{width:28px;height:28px;}
+  .demoted .stage h5{font-size:15px;}
+  .demoted .stage p{font-size:11px;}
+  .demoted .stage-dash{margin-top:36px;}
+
+  @media(max-width:1000px){
+    .teach-hero{grid-template-columns:1fr;max-width:560px;gap:34px;}
+    .stages{padding:40px 26px 44px;}
+    .stages h3{font-size:27px;}
+    .stage-grid{grid-template-columns:1fr;gap:26px;}
+    .stage-dash{display:none;}
+    .mat-cols{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="harness">
+  <span>STATE</span>
+  <button id="hb-teach" class="on" onclick="setState('teach')">FIRST VISIT</button>
+  <button id="hb-ws" onclick="setState('ws')">IN USE</button>
+</div>
+
+<div class="canvas">
+
+  <div class="shellhead">
+    <span class="sh-icon"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg></span>
+    <div>
+      <h1>Submission packages</h1>
+      <div class="sh-sub">Bundle your materials once, then send them without rebuilding each time.</div>
+    </div>
+  </div>
+
+  <!-- ================= TEACH STATE ================= -->
+  <div id="state-teach" class="teach">
+    <div class="teach-hero">
+      <div>
+        <h2>Fed up of guessing which materials are landing with agents?</h2>
+        <div class="th-body">
+          A package is one covering letter, one synopsis and one sample, bundled under a name. Every package keeps its own scorecard — ScriptAlly records <b>which letter, synopsis and pages went to each agent</b>, so the answer sits on the page, not in your head.
+        </div>
+        <button class="btn solid" onclick="setState('ws')">Add your first material</button>
+      </div>
+      <div class="caro">
+        <div class="caro-card">
+          <div class="cc-ct"><span id="caro-n">1</span> / 4</div>
+          <div class="cc-slot" id="caro-slot"></div>
+          <h4 id="caro-t"></h4>
+          <p id="caro-p"></p>
+        </div>
+        <div class="dots" id="caro-dots"></div>
+      </div>
+    </div>
+
+    <div class="stages">
+      <h3>Managing your packages with ScriptAlly</h3>
+      <div class="st-sub">Gather your materials, bundle them, and let the replies report back.</div>
+      <div class="stage-grid">
+        <div class="stage">
+          <span class="st-disc"><svg viewBox="0 0 32 32"><path d="M9 4h9l5 5v17H9z"/><path d="M18 4v5h5"/><path d="M12 14h9M12 18h9M12 22h6"/></svg><span class="sd-l">PKG-STAGE-ADD</span></span>
+          <span class="st-n">Stage one</span>
+          <h5>Add your materials</h5>
+          <p>Versions of your covering letter, synopsis and sample pages — written here or pasted in. Most writers keep two or three of each.</p>
+        </div>
+        <div class="stage-dash"></div>
+        <div class="stage">
+          <span class="st-disc"><svg viewBox="0 0 32 32"><path d="M16 4 28 10v12L16 28 4 22V10z"/><path d="M16 15 28 10M16 15v13M16 15 4 10"/></svg><span class="sd-l">PKG-STAGE-BUNDLE</span></span>
+          <span class="st-n">Stage two</span>
+          <h5>Bundle them into packages</h5>
+          <p>Pick one of each and name the combination. Attach a package when you log a query — its contents go exactly as they are.</p>
+        </div>
+        <div class="stage-dash"></div>
+        <div class="stage">
+          <span class="st-disc"><svg viewBox="0 0 32 32"><path d="M5 26h22M5 26V5"/><rect x="9" y="17" width="4" height="9"/><rect x="15" y="12" width="4" height="14"/><rect x="21" y="7" width="4" height="19"/></svg><span class="sd-l">PKG-STAGE-TRACK</span></span>
+          <span class="st-n">Stage three</span>
+          <h5>Track what comes back</h5>
+          <p>Replies land against the package that went out. Tracking shows which materials sit behind each response and request.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= WORKSPACE STATE ================= -->
+  <div id="state-ws" hidden>
+
+    <div class="ws-top">
+      <button class="btn primary">＋ New package</button>
+      <span class="statline"><b>3</b> materials · <b>1</b> package · <b>0</b> sent</span>
+    </div>
+
+    <div class="band">
+      <div class="band-head"><h2>Your materials</h2><span class="tag">3 held</span></div>
+      <div class="mat-cols">
+        <div class="mat-col">
+          <div class="mat-col-head">
+            <span class="mc-disc"><svg viewBox="0 0 32 32"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h19A2.5 2.5 0 0 1 28 8.5v15a2.5 2.5 0 0 1-2.5 2.5h-19A2.5 2.5 0 0 1 4 23.5z"/><path d="M4.6 7.6 16 17 27.4 7.6"/></svg></span>
+            <div class="mch-t"><span class="eyebrow">Covering letters</span><span class="mono" style="font-size:8.5px;color:var(--ink-faint);">2 held</span></div>
+            <button class="add">+ ADD</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px;">
+            <div class="sheet"><span class="s-type">Covering letter</span><span class="s-name">Hook-first</span><div class="s-meta">Text · 412 words · In 1 package</div></div>
+            <div class="sheet"><span class="s-type">Covering letter</span><span class="s-name">Comps-forward</span><div class="s-meta">Ref · comps-forward-v1.docx</div></div>
+          </div>
+          <button class="ghostrow"><span class="g-t">Add a letter</span></button>
+        </div>
+        <div class="mat-col">
+          <div class="mat-col-head">
+            <span class="mc-disc"><svg viewBox="0 0 32 32"><path d="M8 5h13a3 3 0 0 1 3 3v16a3 3 0 0 0 3 3H11a3 3 0 0 1-3-3z"/><path d="M8 5a3 3 0 0 0-3 3v2h3"/><path d="M12 11h8M12 15h8"/></svg></span>
+            <div class="mch-t"><span class="eyebrow">Synopses</span><span class="mono" style="font-size:8.5px;color:var(--ink-faint);">1 held</span></div>
+            <button class="add">+ ADD</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px;">
+            <div class="sheet"><span class="s-type">Synopsis</span><span class="s-name">One-page</span><div class="s-meta">Text · 638 words · In 1 package</div></div>
+          </div>
+          <button class="ghostrow"><span class="g-t">Add a synopsis</span></button>
+        </div>
+        <div class="mat-col">
+          <div class="mat-col-head">
+            <span class="mc-disc"><svg viewBox="0 0 32 32"><path d="M9 4h9l5 5v17H9z"/><path d="M18 4v5h5"/><path d="M12 14h9M12 18h9"/></svg></span>
+            <div class="mch-t"><span class="eyebrow">Sample pages</span><span class="mono" style="font-size:8.5px;color:var(--ink-faint);">0 held</span></div>
+            <button class="add">+ ADD</button>
+          </div>
+          <div class="col-empty">None yet — most writers keep two or three versions.</div>
+          <button class="ghostrow"><span class="g-t">Add sample pages</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="band-head"><h2>Your packages</h2><span class="tag">1 built</span></div>
+      <div class="pkg-grid">
+        <div class="pkg-card">
+          <h3>Standard UK</h3>
+          <div class="slots">
+            <div class="slot-r"><span class="sl-t">Letter</span><span class="sl-n">Hook-first</span></div>
+            <div class="slot-r"><span class="sl-t">Synopsis</span><span class="sl-n">One-page</span></div>
+            <div class="slot-r"><span class="sl-t">Sample</span><span class="sl-n" style="font-weight:400;font-style:italic;color:var(--ink-faint);">Not included</span></div>
+          </div>
+          <div class="pkg-foot"><span style="color:var(--ink-faint);">Not yet sent — attach it when you log a query</span></div>
+        </div>
+        <button class="ghostcard"><span class="g-t">Build another package</span><span class="g-s">A different letter, a different length of synopsis.</span></button>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="band-head"><h2>Tracking</h2><span class="tag">Reported, not guessed</span></div>
+      <div class="nudge">
+        Attach <b>Standard UK</b> when you log your next query — replies land back here against it.
+        <span class="n-link">Log a query ›</span>
+      </div>
+    </div>
+
+    <!-- demoted explainer -->
+    <div class="demoted" id="demoted">
+      <div class="d-head">
+        <h3>How packages work</h3>
+        <span class="tag">Three stages</span>
+        <span class="hide" onclick="document.getElementById('demoted').hidden=true">Hide</span>
+      </div>
+      <div class="stage-grid">
+        <div class="stage">
+          <span class="st-disc"><svg viewBox="0 0 32 32"><path d="M9 4h9l5 5v17H9z"/><path d="M18 4v5h5"/><path d="M12 14h9M12 18h9M12 22h6"/></svg></span>
+          <span class="st-n">Stage one</span>
+          <h5>Add your materials</h5>
+          <p>Versions of your covering letter, synopsis and sample pages, kept here and reused everywhere.</p>
+        </div>
+        <div class="stage-dash"></div>
+        <div class="stage">
+          <span class="st-disc"><svg viewBox="0 0 32 32"><path d="M16 4 28 10v12L16 28 4 22V10z"/><path d="M16 15 28 10M16 15v13M16 15 4 10"/></svg></span>
+          <span class="st-n">Stage two</span>
+          <h5>Bundle them into packages</h5>
+          <p>Pick one of each and name the combination. Attach it when you log a query.</p>
+        </div>
+        <div class="stage-dash"></div>
+        <div class="stage">
+          <span class="st-disc"><svg viewBox="0 0 32 32"><path d="M5 26h22M5 26V5"/><rect x="9" y="17" width="4" height="9"/><rect x="15" y="12" width="4" height="14"/><rect x="21" y="7" width="4" height="19"/></svg></span>
+          <span class="st-n">Stage three</span>
+          <h5>Track what comes back</h5>
+          <p>Replies land against the package that went out — which materials sit behind each request.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // carousel — the four jobs a package does
+  const CARDS = [
+    {t:'Remembers exactly what went', p:"Which letter, which synopsis, which pages — recorded per agent, so six months later you know precisely what any of them is holding.",
+     slot:'PKG-JOB-RECORD · 396×214',
+     svg:'<path d="M7 4h13l5 5v19H7z"/><path d="M20 4v5h5"/><path d="M11 14h11M11 18h11M11 22h7"/>'},
+    {t:'Sends without rebuilding', p:"Bundle once, attach to every query that wants the same combination. No re-assembling the same three documents forty times.",
+     slot:'PKG-JOB-REUSE · 396×214',
+     svg:'<path d="M16 4 28 10v12L16 28 4 22V10z"/><path d="M16 15 28 10M16 15v13M16 15 4 10"/><path d="M10 7l12 6"/>'},
+    {t:'Ties replies to materials', p:"When an agent replies or requests more, it lands against the package that went out — so every figure traces back to real correspondence.",
+     slot:'PKG-JOB-REPLIES · 396×214',
+     svg:'<path d="M5 14 16 6l11 8v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M5 14l11 8 11-8"/>'},
+    {t:'Shows which combination lands', p:"Two letters, two synopses, tested across your list — Tracking reports which materials sit behind each request, as counts, not guesses.",
+     slot:'PKG-JOB-SCORECARD · 396×214',
+     svg:'<path d="M5 26h22M5 26V5"/><rect x="9" y="17" width="4" height="9"/><rect x="15" y="12" width="4" height="14"/><rect x="21" y="7" width="4" height="19"/>'}
+  ];
+  let ci = 0;
+  function renderCaro(){
+    const c = CARDS[ci];
+    document.getElementById('caro-n').textContent = ci+1;
+    document.getElementById('caro-t').textContent = c.t;
+    document.getElementById('caro-p').textContent = c.p;
+    document.getElementById('caro-slot').innerHTML =
+      `<svg viewBox="0 0 32 32">${c.svg}</svg><span class="sl-lbl">SLOT · ${c.slot}</span>`;
+    document.getElementById('caro-dots').innerHTML = CARDS.map((_,i)=>
+      `<button class="${i===ci?'on':''}" onclick="ci=${i};renderCaro()"></button>`).join('');
+  }
+  setInterval(()=>{ if(!document.getElementById('state-teach').hidden){ ci=(ci+1)%CARDS.length; renderCaro(); } }, 5200);
+
+  function setState(s){
+    document.getElementById('state-teach').hidden = s!=='teach';
+    document.getElementById('state-ws').hidden = s!=='ws';
+    document.getElementById('hb-teach').classList.toggle('on', s==='teach');
+    document.getElementById('hb-ws').classList.toggle('on', s==='ws');
+    if(s==='ws') document.getElementById('demoted').hidden=false;
+  }
+  renderCaro();
+</script>
+</body>
+</html>
