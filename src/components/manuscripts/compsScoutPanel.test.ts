@@ -50,11 +50,21 @@ describe("the suggestion row — the pack's alignment spec, exactly", () => {
    * in the same wrong direction, which is the whole failure mode this file exists to catch.
    */
   it("shares the comp card's grid, so a suggestion and a comp are the same object", () => {
-    const sugg = row.match(/grid-template-columns\s*:([^;]*);/)![1].trim().split(/\s+/);
-    const comp = rule(".ct-crow").match(/grid-template-columns\s*:([^;]*);/)![1].trim().split(/\s+/);
-    expect(sugg[0], "the spine widths have drifted apart").toBe(comp[0]);
-    expect(sugg.slice(1, -1).join(" "), "the main track has drifted").toBe(comp.slice(1, -1).join(" "));
-    expect(sugg).toHaveLength(comp.length);
+    const sugg = row.match(/grid-template-columns\s*:([^;]*);/)![1].trim();
+    const comp = rule(".ct-crow").match(/grid-template-columns\s*:([^;]*);/)![1].trim();
+    /* ⚠️ THE SPINE IS THE CLAIM NOW, NOT THE WHOLE TRACK LIST (v3 §4). The Scout moved into a 340px
+       panel, so it cannot carry the comp card's aside and its row is two tracks to the card's three
+       — asserting equal LENGTH would now be asserting that the redesign did not happen.
+
+       ⚠️ WHAT STILL HAS TO HOLD IS THE SPINE WIDTH, and it is compared between the two rules rather
+       than against a literal: two derivations against each other, so changing both in the same wrong
+       direction still fails. The spine is what makes a suggestion and a recorded comp read as one
+       object, which matters because "Add to comps" turns one into the other. */
+    expect(sugg.split(/\s+/)[0], "the spine widths have drifted apart").toBe(comp.split(/\s+/)[0]);
+    /* and both keep a `minmax(0, …)` main track — a bare `1fr` takes min-content as its automatic
+       minimum, so one long unbroken title would push the row wider than its panel */
+    expect(sugg, "the suggestion's main track lost its zero minimum").toContain("minmax(0,");
+    expect(comp, "the comp card's main track lost its zero minimum").toContain("minmax(0,");
   });
 
   /**
@@ -72,12 +82,15 @@ describe("the suggestion row — the pack's alignment spec, exactly", () => {
    * change that silently reverts the fix — a long title would push its own ADD leftwards while its
    * neighbours' stayed put.
    */
-  it("never lets the aside size to its contents", () => {
-    const last = row.match(/grid-template-columns\s*:([^;]*);/)![1].trim().split(/\s+/).pop()!;
+  it("never lets the spine size to its contents", () => {
+    const tracks = row.match(/grid-template-columns\s*:([^;]*);/)![1].trim();
     /* ⚠️ EXTRACTED AND COMPARED, never pattern-excluded — a `(?!auto)` lookahead after `\s*`
-       backtracks to zero width and matches `auto`, which this repo has been bitten by twice. */
-    expect(["auto", "min-content", "max-content", "fit-content"]).not.toContain(last);
-    expect(last).toMatch(/^\d+px$/);
+       backtracks to zero width and matches `auto`, which this repo has been bitten by twice.
+       ⚠️ AND THE SUBJECT IS THE SPINE NOW: the aside is no longer a track of this grid (v3 §4), so
+       the thing that must not size to content is the fixed column that remains. */
+    const first = tracks.split(/\s+/)[0];
+    expect(["auto", "min-content", "max-content", "fit-content"]).not.toContain(first);
+    expect(first).toMatch(/^\d+px$/);
   });
 
   /**

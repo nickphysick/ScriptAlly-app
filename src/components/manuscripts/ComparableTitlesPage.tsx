@@ -271,6 +271,23 @@ function lastSentOut(runAt: string): string | null {
 }
 
 /**
+ * The returned-run status — "Returned 21 Aug · 3 titles" (v3 §4).
+ *
+ * ⚠️ IT COUNTS WHAT IS ON SCREEN, not what the run brought back. Dismissing a suggestion or adding
+ * one to the shelf removes it from view, and a header still claiming the original figure would be
+ * describing a list the reader can see is shorter.
+ *
+ * ⚠️ AND A MALFORMED DATE LOSES THE DATE, NEVER THE COUNT. The two facts are independent; dropping
+ * both because one is unreadable states less than is known.
+ */
+function returnedLine(runAt: string, shown: number): string {
+  const titles = `${shown} ${shown === 1 ? "title" : "titles"}`;
+  const d = new Date(runAt);
+  if (!runAt || Number.isNaN(d.getTime())) return `Returned · ${titles}`;
+  return `Returned ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · ${titles}`;
+}
+
+/**
  * One suggestion row.
  *
  * ⚠️ THE GRID IS THE ALIGNMENT SPEC AND IT IS EXACT: `26px minmax(0,1fr) 104px`, `align-items:start`.
@@ -436,17 +453,40 @@ const ScoutPanel: React.FC<{
   }
 
   const sent = run ? lastSentOut(run.runAt) : null;
+  const returned = phase === "done" && run;
   return (
-    <>
-      <div className="ct-sctl">
-        <span className="dotok" aria-hidden="true" />
-        {/* ⚠️ IT STATES WHETHER THE SCOUT HAS BEEN OUT, and says WHEN only when the run carried a
-            usable timestamp. A malformed date loses the claim, never the suggestions. */}
-        <span className="status">{run ? (sent ?? "Sent out this session") : "Not sent out yet"}</span>
-        <button type="button" className="ct-btn-blue" onClick={send} disabled={phase === "running"}>
-          {phase === "running" ? "Sending…" : run ? "Send again" : "Send the Scout out"}
-        </button>
-      </div>
+    <div className="ct-sbody">
+      {/* ⚠️ THE IDLE STATE IS THE PANEL, not a strip above one (v3 §4). With nothing to list, the
+          slot takes the height the suggestions will take, so the panel does not resize the first
+          time a run comes back. Status, one line on what a run does, then the send. */}
+      {phase === "idle" && !run && (
+        <div className="ct-sidle">
+          <div className="ct-sslot" data-slot="comp-scout-idle" aria-hidden="true">
+            <span>comp-scout-idle</span><span>300×200</span>
+          </div>
+          <div className="ct-sstatus">Not sent out yet</div>
+          <p className="ct-snote">
+            The Scout reads your manuscript&rsquo;s details and returns recent, real titles that
+            match it — with the reason each one surfaced.
+          </p>
+          <button type="button" className="ct-btn-blue" onClick={send}>Send the Scout out</button>
+        </div>
+      )}
+
+      {/* ⚠️ THE RETURNED HEADER STATES WHEN AND HOW MANY, and the count is what is SHOWN. */}
+      {returned && (
+        <div className="ct-sstatus ct-sstatus--back">{returnedLine(run.runAt, visible.length)}</div>
+      )}
+
+      {(phase === "running" || phase === "notyet" || phase === "error") && (
+        <div className="ct-sctl">
+          <span className="dotok" aria-hidden="true" />
+          <span className="status">{run ? (sent ?? "Sent out this session") : "Not sent out yet"}</span>
+          <button type="button" className="ct-btn-blue" onClick={send} disabled={phase === "running"}>
+            {phase === "running" ? "Sending…" : run ? "Send again" : "Send the Scout out"}
+          </button>
+        </div>
+      )}
 
       {phase === "running" && (
         <div className="ct-runsteps" role="status" aria-live="polite">
@@ -492,12 +532,21 @@ const ScoutPanel: React.FC<{
         />
       ))}
 
+      {/* ⚠️ THE RE-RUN PINS TO THE FOOT via `margin-top: auto`, not a fixed height — the panel's
+          height comes from the comps card beside it, and a number here would have to be kept in
+          step with a list whose length the writer controls. */}
+      {returned && (
+        <button type="button" className="ct-btn-blue ct-srerun" onClick={send}>
+          <RefreshCw aria-hidden="true" />Send the Scout out again
+        </button>
+      )}
+
       {/* ⚠️ THE CLAIM THE WHOLE CONTRACT EXISTS TO EARN — see `verification`. */}
       <div className="ct-sfoot">
         <Check />
         <span className="ct-lbl">Every title checked against a real catalogue — nothing invented</span>
       </div>
-    </>
+    </div>
   );
 };
 
@@ -906,30 +955,36 @@ export const ComparableTitlesPage: React.FC<{
                   ⚠️ AND EVERY ROW OMITS ITSELF WHEN ABSENT. No word count → no word-count line; no
                   genre → no pills. A dash or a zero here would assert something the record does not
                   say. */}
+              {/* ⚠️ HORIZONTAL NOW, AND THE COMPRESSION IS THE POINT (v3 §4). The vertical tile was
+                  296px tall and set the row's height; the working row wants roughly half that, so
+                  the plate moved beside the details instead of above them. Nothing was dropped —
+                  the word count and the comps figure became one mono line.
+
+                  ⚠️ AND EVERY CLAUSE STILL OMITS ITSELF WHEN ABSENT. No word count → the line is the
+                  comps figure alone; no genre → no pills. A dash or a zero would assert something
+                  the record does not say. */}
               <div className="ct-mstile">
-                <span className="ct-lbl">Active manuscript</span>
                 <div className="ct-msplate">
                   <img src={manuscriptIcon} alt="" />
                 </div>
-                <div className="ct-mstitle">{activeMs.title}</div>
-                {msPills.length > 0 && (
-                  <div className="ct-mspills">
-                    {msPills.map((label) => (
-                      <span key={label} className="ct-mspill">{label}</span>
-                    ))}
+                <div className="ct-mstile-body">
+                  <span className="ct-lbl">Active manuscript</span>
+                  <div className="ct-mstitle">{activeMs.title}</div>
+                  {msPills.length > 0 && (
+                    <div className="ct-mspills">
+                      {msPills.map((label) => (
+                        <span key={label} className="ct-mspill">{label}</span>
+                      ))}
+                    </div>
+                  )}
+                  {/* ⚠️ THE COMPS FIGURE IS DERIVED AT READ TIME from `compCounts`, the same function
+                      the band's tally reads — one source, so the two cannot disagree. */}
+                  <div className="ct-msmeta">
+                    {activeMs.wordCount > 0 && <>{activeMs.wordCount.toLocaleString("en-GB")} words · </>}
+                    <b>{counts.total} {counts.total === 1 ? "comp" : "comps"}</b>
                   </div>
-                )}
-                {activeMs.wordCount > 0 && (
-                  <div className="ct-mswc">{activeMs.wordCount.toLocaleString("en-GB")} words</div>
-                )}
-                <div className="ct-msrule" />
-                <div className="ct-mscomps">
-                  {counts.total === 0
-                    ? "No comps yet"
-                    : `${counts.total} ${counts.total === 1 ? "comp" : "comps"} on the shelf`}
                 </div>
               </div>
-
 
               {/* ⚠️ THE CARD IS THE ROW'S RIGHT COLUMN NOW (v2.1 §2). It is the same `MountCard`
                   composition, moved — band, format toggle, tick-chips and actions are untouched.
@@ -1051,7 +1106,18 @@ export const ComparableTitlesPage: React.FC<{
               <div className="ct-band">
                 <span className="bt">Your comps</span>
                 <span className="ct-tag free">Free</span>
+                {/* ⚠️ THE TALLY AND THE ROW'S ADD BOTH READ ONE SOURCE. `compCounts` is the figure and
+                    `setFormState` is the action the add ROW below already uses — this is a second
+                    PLACE to reach it, never a second mechanism. */}
                 <span className="bmeta">{counts.total} {counts.total === 1 ? "comp" : "comps"}</span>
+                <button
+                  type="button"
+                  className="ct-bandbtn"
+                  disabled={comps.length >= MAX_COMPS}
+                  onClick={() => setFormState({ index: null })}
+                >
+                  Add a comp
+                </button>
               </div>
 
               {/* ⚠️ NO EMPTY STATE IN THIS CARD ANY MORE (v3 §1). It could only render at zero
