@@ -167,6 +167,26 @@
   padding-bottom: 9px;
   margin-bottom: 18px;
 }
+/**
+ * ⚠️ THE EXPLAINER'S CONTROL, AND IT IS THE QUIETEST THING IN THE ROW. `margin-left: auto` puts it
+ * at the far end, past the count, so the head still reads "Your packages · N built" and this sits
+ * outside that sentence rather than inside it. No fill, no weight — it opens a drawer that changes
+ * nothing, and a control that only explains must never outrank the ones that act.
+ */
+.pkgb-how {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--pkg-ink-soft);
+}
+.pkgb-how:hover { color: var(--pkg-ink); text-decoration: underline; text-underline-offset: 3px; }
+
 .pkgb-bandhead h2 {
   font-family: var(--font-serif);
   font-size: 23px;

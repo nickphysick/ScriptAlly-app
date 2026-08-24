@@ -44,11 +44,19 @@ import { WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
 import { FONT_SERIF } from "../lib/designTokens";
 import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid, PageTally } from "./shell/WorkspacePageGrid";
+import { PackagesDrawer } from "./packages/PackagesDrawer";
 import { ChevronDown, ShieldCheck, Plus } from "lucide-react";
 import "./packages/packageWorkshop.css";
 
 export const SubmissionPackages: React.FC = () => {
   const { currentUser, manuscripts, versions, packages, queries, activities, agents, addVersion, updateVersion, deleteVersion, archiveVersion, addPackage, updatePackage, deletePackage, retirePackage, updateUserProfile } = useScriptAllyDb();
+  /**
+   * ⚠️ NEVER AUTO-OPENS (D7). Plain component state, seeded `false`: no localStorage, no first-run
+   * trigger, nothing watching the teach→workspace transition. A drawer that opened itself would
+   * interrupt someone who came to the page to do something, and the one thing this drawer knows is
+   * that it was asked for.
+   */
+  const [howOpen, setHowOpen] = useState(false);
   const navigate = useNavigate();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
@@ -313,11 +321,11 @@ export const SubmissionPackages: React.FC = () => {
           mark="packages"
           title="Submission packages"
           description="Bundle your materials once, then send them without rebuilding each time."
-          /* ⚠️ NO ACTIONS SLOT, AND NO `toolbar` ON THE GRID EITHER. The band below carries the stat
-             line and the actions, per the ref, so a control row would state both a second time a few
-             inches away. No lock requires one: the three that name this page check the root's inline
-             padding, the census `variant="workspace"`, and the absence of an inline overflow — all
-             still satisfied. */
+          /* ⚠️ NO ACTIONS SLOT — AND THE SHARED MASTHEAD ENFORCES THAT WITH A THROW, not a comment.
+             `PageHeader` refuses `actions` on `variant="workspace"`: a masthead with nothing
+             actionable never needs restoring mid-visit, so it can scroll away on a scrolling page
+             and vanish outright on a fill page without stranding a control. "How it works" was
+             tried here first and belongs in the band head instead, beside the page's own count. */
         />
       }>
       {/**
@@ -400,6 +408,7 @@ export const SubmissionPackages: React.FC = () => {
                   setPkgModal(true);
                 }}
                 onNewPackage={() => { setPkgEditing(null); setPkgDuplicating(null); setPkgModal(true); }}
+                onHowItWorks={() => setHowOpen(true)}
                 /* ⚠️ A CREATE, NOT AN EDIT — `pkgEditing` stays null, so Save writes a NEW document
                    and the sent package is untouched, which is the entire point of D-D2. */
                 onDuplicatePackage={(id) => {
@@ -493,6 +502,11 @@ export const SubmissionPackages: React.FC = () => {
       />}
       </div>
       </WorkspacePageGrid>
+
+      {/* ⚠️ OUTSIDE THE GRID, because it is an overlay rather than page content — `Form11Drawer`
+          fixes itself to the viewport and paints its own scrim, so nesting it inside the scroll row
+          would put a fixed element inside a clipping container for no reason. */}
+      <PackagesDrawer open={howOpen} onClose={() => setHowOpen(false)} />
     </div>
   );
 };

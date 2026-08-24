@@ -1,0 +1,126 @@
+/**
+ * The "How packages work" drawer (design-refs/packages-workspace-drawer.html, the `<aside>`).
+ *
+ * ⚠️ THESE RULES STYLE THE CONTENT ONLY. The panel, the scrim, the slide and the Escape close all
+ * come from `Form11Drawer` — nothing here positions, sizes or animates a drawer, because doing so
+ * would be the second drawer D5 forbids wearing a stylesheet instead of a component.
+ *
+ * ⚠️ AND THE VALUES ARE LITERAL BY DECISION, NOT BY OVERSIGHT. This sheet is page-local and reads
+ * no `--pkg*` token, so a hex here is the value rather than a knob nobody can turn — the shape the
+ * shell's own lock exists to catch. If the packages pages ever share one palette, these move with
+ * the rest; today there is no token to point at.
+ */
+
+.pkgd-head { position: relative; }
+/* The ref's top-right ✕. Its own hit area, clear of the title's right padding. */
+.pkgd-x {
+  position: absolute;
+  top: -2px;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  color: #a1948c;
+}
+.pkgd-x:hover { background: rgba(43, 33, 24, 0.06); color: #2b2118; }
+
+.pkgd-head h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 24px;
+  font-weight: 600;
+  /* ⚠️ 1.3 IS THE FLOOR ON MIXED-CASE PLAYFAIR, and "How packages work" carries a `p` and a `g`. */
+  line-height: 1.3;
+  color: #2b2118;
+  padding-right: 34px;
+}
+.pkgd-head p {
+  font-size: 12px;
+  color: #6b5a52;
+  line-height: 1.6;
+  margin-top: 7px;
+  max-width: 340px;
+}
+
+.pkgd-body { max-width: 92vw; }
+
+/* Mono eyebrows — uppercase only, so line-height 1 would be safe; it is left at the default. */
+.pkgd-sec {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #a1948c;
+  font-weight: 700;
+  margin: 22px 0 11px;
+}
+.pkgd-body > .pkgd-sec:first-child { margin-top: 0; }
+
+.pkgd-card {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #eadfd6;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+/* The art band — a wash, then the dashed plate the library draws. */
+.pkgd-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(243, 224, 214, 0.5), rgba(243, 224, 214, 0.22));
+  border-bottom: 1px solid #eadfd6;
+}
+/* ⚠️ THE PLATE IS SIZED HERE, NOT BY THE COMPONENT'S `width`/`height`. It must span the card, which
+   is a width this sheet knows and the call site does not. */
+.pkgd-art .pkgb-plate { width: 100%; height: 88px; }
+
+.pkgd-card h4 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #2b2118;
+  padding: 14px 17px 0;
+}
+.pkgd-card p { font-size: 12px; color: #6b5a52; line-height: 1.65; padding: 6px 17px 15px; }
+
+/* ⚠️ SAGE, AND IT MEANS "a rule about how this works" — not a warning and not a status. The three
+   notes are the only tinted things in the drawer, which is what makes them findable. */
+.pkgd-note {
+  background: rgba(215, 221, 213, 0.24);
+  border: 1px solid rgba(154, 168, 150, 0.35);
+  border-radius: 10px;
+  padding: 13px 16px 14px;
+  margin-bottom: 9px;
+}
+.pkgd-note h5 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #2b2118;
+  margin-bottom: 5px;
+}
+.pkgd-note p { font-size: 11.5px; color: #6b5a52; line-height: 1.65; }
+.pkgd-note p b { color: #2b2118; font-weight: 600; }
+
+.pkgd-foot { display: flex; justify-content: flex-end; width: 100%; }
+.pkgd-done {
+  background: #1c130f;
+  border: 1px solid #1c130f;
+  color: #fffefb;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 11px 22px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.pkgd-done:hover { background: #31241d; border-color: #31241d; }

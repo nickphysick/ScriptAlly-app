@@ -29,6 +29,14 @@ export interface PackagesBandProps {
   onOpenPackage: (id: string) => void;
   onNewPackage: () => void;
   /**
+   * ⚠️ THE EXPLAINER LIVES HERE AND NOT IN THE MASTHEAD (D4, amended). The brief asked for a
+   * control "in the packages page header"; `PageHeader` variant="workspace" THROWS when handed one,
+   * because a masthead with nothing actionable never needs restoring mid-visit. The band head is
+   * this page's own, it already carries the count, and it does not scroll away — which is the
+   * property the masthead law is protecting.
+   */
+  onHowItWorks?: () => void;
+  /**
    * ⚠️ THE WAY FORWARD FROM A LOCKED PACKAGE (D-D2), AND IT SHIPS WITH THE LOCK. Without it the rule
    * is a dead end — the writer wanted a different combination and the app just refuses.
    */
@@ -44,7 +52,7 @@ export interface PackagesBandProps {
 }
 
 export const PackagesBand: React.FC<PackagesBandProps> = ({
-  packages, versions, queries, onOpenPackage, onNewPackage, onDuplicatePackage, renderRemove, renderTracking,
+  packages, versions, queries, onOpenPackage, onNewPackage, onHowItWorks, onDuplicatePackage, renderRemove, renderTracking,
 }) => {
   const tiles = packageTiles(packages, versions, queries);
   const byId = new Map(packages.map((p) => [p.id, p]));
@@ -54,6 +62,17 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
       <div className="pkgb-bandhead">
         <h2 id="pkgb-pkg-h">Your packages</h2>
         <span className="pkgb-tag">{packages.length} built</span>
+        {/* ⚠️ IT CHANGES NOTHING, so it is the quietest control on the page — a ghost beside the
+            count, never a filled button competing with the page's actual work. */}
+        {onHowItWorks && (
+          <button type="button" className="pkgb-how" onClick={onHowItWorks}>
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+                 strokeWidth={1.6} strokeLinecap="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8.5v.01" />
+            </svg>
+            How it works
+          </button>
+        )}
       </div>
 
       <div className="pkgb-pkggrid">

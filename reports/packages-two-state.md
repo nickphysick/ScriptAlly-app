@@ -1254,3 +1254,63 @@ blank sections         : 0
 the value, dressed as a knob someone could turn**. `queryCentreMoment`'s "the three waxes are
 tokens" lock failed it as a colour literal, correctly. Now `var(--ink-2)`, which the sheet already
 reads 78 times. Second time this pack that a fallback has stood in for a token that was never there.
+
+## Part C — the explainer drawer (24 Aug)
+
+### D5 — reused `Form11Drawer`; built nothing new
+
+It already is a right-hand slide-in with a scrim, an Escape close, a `width` prop and
+header/body/footer slots. `onPark` and the draft-stashing half are optional, so nothing form-shaped
+comes with it. **The Noteboard's "What writers keep here" is not a primitive** — it is inline markup
+in `TodoNoteboardPage` under page-scoped `nb-` classes, so reusing it would have meant lifting it out
+of a page this pack does not own.
+
+Its one gap: it renders no ✕. Its own prose says so (*"a header ✕ routed through the ref"*), and
+`EditAgentDrawer` does exactly that. This drawer's ✕ calls `ref.close(false)` — **not `onClose`
+directly**, which would skip the exit animation and make the panel vanish rather than leave.
+
+### ⚠️ D4 could not be built where it was specified
+
+The brief asks for the control **in the packages page header**. `PageHeader` **throws** when
+`variant="workspace"` is handed an action:
+
+> *"a masthead with nothing actionable in it never needs restoring mid-visit, so it can scroll away
+> on a scrolling page and vanish outright on a fill page without stranding a control."*
+
+That is a good law and it belongs to the page-header session, so the control moved to **the band
+head** — this page's own element, beside `Your packages · N built`, which does not scroll away.
+
+⚠️ **And the throw is dev-only** (`process.env.NODE_ENV !== "production"`), so in the built bundle
+the prop silently rendered nothing. The measurement found it; a code reading would have shipped a
+button that did not exist. The guard prevents the fault in development and displaces it in
+production — worth knowing before relying on it.
+
+### Measured at 1440
+
+```
+open      : from the band-head control only
+geometry  : width 436 · right offset 32 · scrim present
+content   : 3 stage cards · 3 sage notes · sections Stage one/two/three · Worth knowing
+closes    : ✕ · scrim click · Escape · "Got it"      (all four driven)
+D7        : not open on arrival; not open on the teach→workspace transition
+D8        : first-visit state intact — teach 1, stages strip 3
+```
+
+### D9 — slot inventory, v3
+
+| slot | id | rendered plate | mark | nature |
+|---|---|---|---|---|
+| carousel, ×4 slides (first visit) | `PKG-JOB-RECORD` · `-REUSE` · `-REPLIES` · `-SCORECARD` | 418 × 230 | 52 × 52 | dashed placeholder |
+| stage disc, ×3 (first visit) | `PKG-STAGE-ADD` · `-BUNDLE` · `-TRACK` | 128 × 128 circle | 50 × 50 | dashed placeholder |
+| **stage card, ×3 (drawer)** | **same three ids** | **362 × 88** | **46 × 46** | dashed placeholder |
+
+⚠️ **The drawer reuses the first-visit ids deliberately** — same three subjects, two placements, so
+it is one asset each rather than six. The plate shapes differ (a 128px circle and a 362 × 88
+letterbox), which the artist needs to know: the mark has to read at both.
+
+### D6 — one copy amendment carried from Part D
+
+The ref's first note says a sent package *"stops changing"*. The pane now offers **Change package**
+and **Remove**, so the note says which half is frozen: the three materials inside are fixed, and
+which package a query points at stays correctable from the query. A writer who read the ref's
+sentence and then found a Change control would have been told two things.
