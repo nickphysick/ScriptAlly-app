@@ -1,19 +1,55 @@
 /**
- * Landing copy — verbatim from design-refs/landing-v13.html (pixel- and word-authoritative).
+ * Landing copy — word-authoritative from the design refs. The HERO block comes from
+ * design-refs/scriptally-landing-hero-v3.html; everything below it (the showreel, the CTA band,
+ * pricing) still comes from design-refs/landing-v13.html.
+ *
+ * ⚠️ MARKETING HEADLINE COPY IS NORMATIVE FROM THE REF AND IS NOT PARAPHRASED. Punctuation is part
+ * of it — the semicolon in "traditional publication; an endless", the lowercase `a` opening the
+ * lede, the real ellipsis character. A sentence here that reads slightly better than the ref is a
+ * sentence that no longer matches the artefact it was signed off from.
+ *
  * Kept as pure constants so the copy tests can lock the strapline and sub-copy exactly
  * (repo test convention: node environment, no DOM rendering). UK spelling throughout.
  */
 
 export const HERO_EYEBROW = "For querying writers";
 
-export const HERO_H1 = "Take control of your querying journey.";
+export const HERO_H1 = "You've written a book.";
 
-export const HERO_SUB =
-  "Every agent, every query, every response — tracked. And that's just the start of it. " +
-  "ScriptAlly is a finger on the pulse of your querying journey, packed with tools designed " +
-  "to aid you on your quest to find a champion for your words.";
+/**
+ * ⚠️ THE LEDE RESUMES THE HEADLINE'S SENTENCE, SO IT OPENS LOWERCASE. That `a` is the signature of
+ * the page, not a typo: the h1 ends in a full stop, a hanging ellipsis sits in the left margin,
+ * and the sentence picks up mid-flow. Anyone "fixing" the capital is removing the device.
+ *
+ * ⚠️ THE ELLIPSIS IS NOT IN THIS STRING. It is a separately positioned, `aria-hidden` element —
+ * a screen reader meeting "… and now your querying journey begins" would read punctuation that
+ * is really a piece of layout, and the glyph has to sit outside the text block to hang.
+ */
+export const HERO_LEDE =
+  "and now your querying journey begins. Your quest for traditional publication; an endless, " +
+  "gruelling campaign of self-promotion in a fiercely competitive, ever-changing market.";
 
-export const HERO_NOTE = "Free to start · Built for UK querying";
+/**
+ * The follow-up. `robots` is set in the mono face — the one machine-set word in a page of prose,
+ * which is the joke. Segment shape matches `FeatureRow.body` below rather than inventing a second
+ * convention in the same file.
+ */
+export const HERO_GRIND: Array<{ text: string; mono?: boolean }> = [
+  { text: "Oh, and now you're up against " },
+  { text: "robots", mono: true },
+  { text: ", too." },
+];
+
+/** The turn: the flat statement, then the promise. Two registers, deliberately unalike. */
+export const HERO_TURN_A = "You are not alone.";
+export const HERO_TURN_B = "ScriptAlly tips the odds back in your favour.";
+
+/**
+ * ⚠️ "Built for UK querying" WAS REMOVED AND SHOULD NOT COME BACK. It is a claim about scope, in
+ * the smallest type on the page, next to a claim about price — and the two do not belong in one
+ * line. The microline states the one thing a visitor needs before clicking.
+ */
+export const HERO_NOTE = "Free to start";
 
 export const CTA_START = "Start tracking — it's free";
 export const CTA_PRICING = "See pricing";

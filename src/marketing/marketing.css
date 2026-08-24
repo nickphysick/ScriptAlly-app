@@ -41,6 +41,9 @@
      repo's no-colour-mix() rule. */
   --mk-illo-rim: rgba(124, 58, 42, 0.34);
   --mk-illo-tag: rgba(124, 58, 42, 0.5);
+  /* The statement headline's size, at the "large" scale the ref ships as its default. Declared
+     here so the stacked override below is one line rather than a restated clamp. */
+  --mk-hero-h1: clamp(3.2rem, 6.4vw, 6rem);
   font-family: "Source Sans Pro", system-ui, -apple-system, sans-serif;
   background: var(--mk-desk);
   color: var(--mk-ink);
@@ -67,6 +70,26 @@
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05);
 }
 .mk-btn:hover { background: #f4f2ef; }
+/* ⚠️ A MODIFIER, NOT A CHANGE TO `.mk-btn`. The base button is the Cappuccino-conformant white
+   one and it is worn by the nav, Pricing and Contact — all out of this pack's scope. The soft-pink
+   pair is the app's own CTA treatment (`#f5e2da` on `#e8c8bc`), and it is applied per button so
+   the primary can be pink on the pages that asked for it without retinting three others. */
+.mk-btn--cta {
+  background: var(--mk-cta); border-color: var(--mk-cta-bd); color: var(--mk-nearblack);
+  padding: 14px 28px; font-size: .98rem;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 2px 6px rgba(124, 58, 42, .08);
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.mk-btn--cta:hover {
+  background: var(--mk-cta-hov); transform: translateY(-1px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 6px 14px rgba(124, 58, 42, .13);
+}
+@media (prefers-reduced-motion: reduce) { .mk-btn--cta { transition: none; } .mk-btn--cta:hover { transform: none; } }
+
+/* ⚠️ THE TIER HAD NO FOCUS STYLE AT ALL — every control fell back to the UA ring, which on a warm
+   ground is close to invisible. One rule, both element types, both pages. */
+.mk-scope a:focus-visible,
+.mk-scope button:focus-visible { outline: 2px solid var(--mk-burg); outline-offset: 3px; }
 .mk-btn.mk-ghost {
   background: none;
   border: none;
@@ -162,28 +185,91 @@
 
 /* ═══════════════ Landing page (design-refs/landing-v13.html, values verbatim) ═══════════════ */
 
-/* ── Hero: copy beside the contained dashboard panel; the whole section on the desk ── */
-.mk-hero { position: relative; padding: 0 0 26px; overflow: hidden; }
+/* ── Hero: the statement beside the blush illustration slot ──
+   ⚠️ NO `overflow: hidden` HERE. The old hero clipped a dashboard replica that overhung its box;
+   this one hangs an ellipsis in the LEFT MARGIN, and the same declaration would cut it off. */
+.mk-hero { position: relative; padding: 0 0 26px; }
 .mk-heroinner {
   max-width: 1300px; margin: 0 auto; padding: 56px 56px 0;
-  display: grid; grid-template-columns: 1fr 736px; gap: 44px; align-items: start;
+  display: grid; grid-template-columns: 1fr 1.02fr; gap: 60px;
+  /* The plate matches the copy column's height rather than declaring one of its own. */
+  align-items: stretch;
 }
-.mk-hcopy { max-width: 430px; position: relative; z-index: 4; padding-top: 34px; }
+.mk-hcopy { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .mk-eyebrow {
   font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: .22em;
   text-transform: uppercase; color: var(--mk-label);
 }
-.mk-hcopy h1 {
-  font-family: "Playfair Display", Georgia, serif; font-size: 52px; font-weight: 500;
-  line-height: 1.1; color: var(--mk-head); margin-top: 16px;
+.mk-hero .mk-eyebrow { margin-bottom: 22px; }
+.mk-statement {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 700;
+  font-size: var(--mk-hero-h1); line-height: .96; letter-spacing: -.022em;
+  color: var(--mk-nearblack); margin: 0; max-width: 13ch;
 }
-.mk-hsub { font-size: 15.5px; font-weight: 300; line-height: 1.7; color: #5a4a40; margin-top: 20px; max-width: 500px; }
-.mk-hctas { display: flex; gap: 16px; margin-top: 28px; align-items: center; }
+
+/* The continuation. The paragraph resumes the headline's sentence, so the ellipsis has to sit
+   outside the text block — see Hero.tsx. */
+.mk-after { position: relative; margin: clamp(22px, 2.6vh, 34px) 0 0; max-width: 48ch; }
+.mk-dots {
+  position: absolute;
+  /* ⚠️ -1.5em, NOT THE REF'S -1.75em, AND THE DIFFERENCE IS A HORIZONTAL SCROLLBAR. `left` resolves
+     `em` against this element's OWN font-size (2.2rem = 35.2px), so -1.75em is a 61.6px overhang
+     into a 56px gutter — the ref overflows its own page at every width from 901 up to the point
+     the 1300px measure starts centring. MEASURED: -1.5em clears by 3.2px, which is not an edge
+     margin; -1.3em (45.8px) leaves 10.2px to the viewport and 17.2px to the text, and overflows at
+     no width from 390 up. The gutter is a constant, so anyone restoring the ref's value has to
+     widen the gutter in the same edit. */
+  left: -1.3em; top: -.3em;
+  font-family: "Playfair Display", Georgia, serif; font-size: 2.2rem; line-height: 1;
+  color: var(--mk-burg); opacity: .55;
+}
+.mk-lede {
+  font-size: clamp(1.04rem, 1.16vw, 1.18rem); line-height: 1.55; color: var(--mk-ink); margin: 0;
+}
+.mk-grind { font-size: .98rem; line-height: 1.7; color: var(--mk-muted); margin: 12px 0 0; max-width: 46ch; }
+.mk-robots { font-family: "JetBrains Mono", monospace; font-size: .92em; color: var(--mk-ink); }
+
+/* The turn: a flat statement and a promise, behind one burgundy rule. */
+.mk-turn {
+  margin: clamp(24px, 2.8vh, 36px) 0 0; padding-left: 18px;
+  border-left: 2px solid var(--mk-burg); max-width: 32ch;
+}
+.mk-turn-a { display: block; font-weight: 600; font-size: 1.02rem; color: var(--mk-nearblack); }
+.mk-turn-b {
+  display: block; font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(1.4rem, 1.9vw, 1.85rem); line-height: 1.25; color: var(--mk-ink);
+  margin-top: 5px; letter-spacing: -.012em;
+}
+.mk-hctas { display: flex; gap: 24px; margin: clamp(26px, 3vh, 38px) 0 0; align-items: center; flex-wrap: wrap; }
 .mk-hnote {
-  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--mk-label); margin-top: 14px;
+  font-family: "JetBrains Mono", monospace; font-size: .66rem; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--mk-muted); margin: 20px 0 0;
 }
-.mk-hvisual { position: relative; z-index: 2; min-width: 0; }
+
+/* ⚠️ THE ENTRANCE IS DECLARED ONLY INSIDE `no-preference`, SO REDUCED MOTION IS INERT BY
+   CONSTRUCTION — not "the same animation, faster". Outside the query these elements have no
+   opacity and no transform at all, so the final state is simply what gets painted. Suppressing an
+   animation that had already set `opacity: 0` is how a hero ships invisible. */
+@media (prefers-reduced-motion: no-preference) {
+  .mk-r { opacity: 0; transform: translateY(12px); animation: mkRise .75s cubic-bezier(.2, .7, .25, 1) forwards; }
+  .mk-r1 { animation-delay: .05s; }
+  .mk-r2 { animation-delay: .38s; }
+  .mk-r3 { animation-delay: .56s; }
+  .mk-r4 { animation-delay: .74s; }
+  .mk-r5 { animation-delay: .9s; }
+  @keyframes mkRise { to { opacity: 1; transform: none; } }
+}
+
+/* ⚠️ THE HERO COLLAPSES AT 900, NOT AT THE 1080 THE REST OF THE LANDING USES. Its two columns are
+   a statement and a plate — they hold their proportions far longer than a copy-and-tableau
+   showreel row does, and the ref sets the break at 900. The showreel keeps its own 1080 break
+   below; the two are deliberately different numbers, not an oversight. */
+@media (max-width: 900px) {
+  .mk-scope { --mk-hero-h1: clamp(2.4rem, 10vw, 3.6rem); }
+  .mk-heroinner { grid-template-columns: 1fr; gap: 34px; padding: 40px 26px 0; }
+  /* Nothing left to hang in: the ellipsis becomes a plain block above the paragraph. */
+  .mk-dots { position: static; display: block; font-size: 1.9rem; margin-bottom: 2px; }
+}
 
 /* ── The dashboard panel: contained card cropping the 1180px replica just under the stats ── */
 .mk-dashpanel {
@@ -591,8 +677,6 @@
 
 /* ── Responsive baseline (presentable, not pixel-designed) ── */
 @media (max-width: 1080px) {
-  .mk-heroinner { grid-template-columns: 1fr; padding: 40px 26px 0; gap: 30px; }
-  .mk-hcopy { max-width: 560px; padding-top: 6px; }
   .mk-formstrip { grid-template-columns: 1fr; }
   .mk-formstrip .mk-f11:last-child { margin-top: 0; transform: none; }
   .mk-rows { padding: 10px 26px 22px; }
@@ -605,7 +689,6 @@
   .mk-foot { padding: 30px 26px 40px; flex-wrap: wrap; }
 }
 @media (max-width: 560px) {
-  .mk-hcopy h1 { font-size: 38px; }
   .mk-fv { transform: scale(.82); transform-origin: top left; }
 }
 

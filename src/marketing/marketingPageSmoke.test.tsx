@@ -34,7 +34,11 @@ import { SUPPORT_EMAIL } from "../lib/companyInfo";
 
 /** The public marketing routes and a string each must actually render. */
 const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain: string][] = [
-  ["/", () => <Landing onNavigate={noNavigate} />, "Take control of your querying journey"],
+  /* ⚠️ RETARGET, SAME LAW: the landmark is the hero's h1, and the statement hero replaced the
+     strapline it used to name. The claim is unchanged — this route must render real content, not
+     a null. `DOCUMENT_TITLE` still carries the old words, but it is set in an effect and never
+     reaches the static markup, so it cannot stand in as the landmark. */
+  ["/", () => <Landing onNavigate={noNavigate} />, "You&#x27;ve written a book."],
   ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "Start free"],
   ["/about", () => <AboutPage onNavigate={noNavigate} />, "Querying shouldn&#x27;t be the hard part"],
   ["/contact", () => <ContactPage onNavigate={noNavigate} />, "Get in touch"],
