@@ -157,7 +157,19 @@ describe("D-C4 — Save as package is offered once and never insisted on", () =>
 
   it("it is absent — not inert — when there is a package, and it shares the attach gate", () => {
     expect(queries).toContain("groups.length === 0 && canAttachPackages(currentUser)");
-    expect(queries).toContain("? openPackages");
+    /**
+     * ⚠️ THE OFFER NOW SWITCHES IN PLACE; IT NO LONGER LEAVES THE PAGE. This assertion read
+     * `? openPackages` — the earlier build, where "Save as package" navigated to Submission
+     * packages and the writer had to come back and attach by hand. It asks first, because taking
+     * it REPLACES the listed materials with the package's contents.
+     *
+     * ⚠️ AND THE GATE GAINED A THIRD CLAUSE, `attachablePkgs.length > 0`, for the same reason:
+     * with nowhere to switch TO, the offer would open a confirm onto an empty picker.
+     */
+    expect(queries).toContain("? () => void switchToPackage(activeQuery, loose.length)");
+    expect(queries).toContain("attachablePkgs.length > 0");
+    expect(queries, "the offer still navigates away instead of switching in place")
+      .not.toContain("? openPackages");
     // absent, because the prop is optional and the component omits the button when unset
     expect(decls(tsx)).toContain("{onSaveAsPackage && (");
   });

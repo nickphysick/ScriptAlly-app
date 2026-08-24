@@ -4447,3 +4447,41 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 /* ⚠️ A SLOT WHOSE MATERIAL IS GONE SAYS SO — a blank chip reads as a rendering fault, and omitting
    the row hides that something went. Same words as the packages page's own missing-slot state. */
 .qc-mchip-gone .qc-mchiptx { font-style: italic; color: var(--qc-tx-quiet); }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE EITHER/OR FORK (Part D, D9)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ DASHED, BECAUSE NOTHING HAS BEEN ANSWERED YET. On this pane dashed means provisional — the
+ * scheduled-nudge ghost and the writer's own expected date already use it — and an unanswered
+ * question is exactly that. It is not a warning and carries no tint.
+ */
+.qc-fork {
+  border: 1.5px dashed rgba(124, 58, 42, 0.3);
+  border-radius: 11px;
+  padding: 16px 18px;
+  max-width: 560px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  margin: 6px 0 8px;
+}
+.qc-fork-q { font-size: 12.5px; color: var(--qc-tx-quiet); line-height: 1.5; flex: 1; min-width: 190px; }
+.qc-fork-c { display: flex; gap: 9px; }
+
+/**
+ * ⚠️ NEITHER IS DRESSED AS THE BETTER CHOICE. The package button takes the pastille blue it wears
+ * everywhere else — that is PROVENANCE, the same blue as the strip it produces, not emphasis — and
+ * the other is the pane's ordinary bordered control. Making one a filled primary would answer the
+ * question the fork exists to ask.
+ */
+.qc-forkbtn {
+  font-size: 12px; font-weight: 600; padding: 9px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.qc-forkbtn:hover:not(:disabled) { background: rgba(58, 28, 20, 0.04); }
+.qc-forkbtn--pkg { background: var(--pro-fill); border-color: var(--pro-edge); color: var(--pro-ink); }
+.qc-forkbtn--pkg:hover:not(:disabled) { background: var(--pro-fill-hov); }
+/* ⚠️ DISABLED STATES ITS REASON IN THE TITLE — with no package built there is nowhere to go, and a
+   control that can only disappoint should say why rather than simply refuse. */
+.qc-forkbtn:disabled { opacity: 0.5; cursor: not-allowed; }

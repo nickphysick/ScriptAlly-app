@@ -93,11 +93,12 @@ import { QueryCentreSkeleton, SKELETON_FLOOR_MS } from "./reading-pane/QueryCent
 /* §2b — the shared art registry, already consumed by two other Query Centre panels. */
 import { ArtSlot } from "./todo/ArtSlot";
 import {
-  attachablePackages, attachedMaterials, canAttachPackages, groupByOrigin, materialName,
-  packageMenuRow, detachMenuRows, detachToast, withoutPackage, linkedChips, type PackageItem,
+  attachablePackages, canAttachPackages, groupByOrigin, materialName,
+  packageMenuRow, detachMenuRows, detachToast, withoutPackage, linkedChips,
 } from "../lib/packageAttach";
 import { PackageGroup, LooseMaterials } from "./reading-pane/PackageGroup";
-import { isPackageLocked } from "../lib/packageMetrics";
+import { isPackageLocked, materialsLinkWrites } from "../lib/packageMetrics";
+import { useConfirmAsk } from "./todo/ConfirmAsk";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { MobileSheet } from "./shell/MobileSheet";
 import { useIsMobile, useMobileChrome } from "./shell/mobileChrome";
@@ -338,6 +339,14 @@ export const Queries: React.FC<{
   const { showConfirm, showToast } = useToast();
   // Query editing is the app-level Edit Query drawer (the inline isEditMode editor is retired).
   const openEditQuery = useOpenEditQuery();
+  /**
+   * ⚠️ THE APP'S ONE BLOCKING-CHOICE PRIMITIVE, REUSED RATHER THAN A SECOND DIALOG BUILT (D10).
+   * `useConfirmAsk` already owns Escape, the scrim, one-at-a-time and the promise — the parts worth
+   * sharing. Its card wears To-do's `tdb-ask*` styling, so the ref's two-line `h5 + p` structure is
+   * folded into one paragraph: the WORDS are the ref's, the shape is the primitive's. Building a
+   * third confirm look for one sentence would have been the worse trade, and it is flagged.
+   */
+  const { ask: askConfirm, node: confirmNode } = useConfirmAsk();
 
   const [selectedQueryId, setSelectedQueryId] = useState<string | null>(null);
   const [selectedQuery, setSelectedQuery] = useState<any | null>(null);
@@ -1726,9 +1735,6 @@ export const Queries: React.FC<{
    * is gone by the time this opens and a popover needs something on screen to hang from.
    */
   const [pkgPickOpen, setPkgPickOpen] = useState(false);
-  /* ⚠️ TEMPORARY, AND PART 4 DELETES IT. `Change package` writes a LINK; the legacy `+ Attach` route
-     still writes a snapshot until that path is retired. One flag beats two pickers. */
-  const [pkgPickLink, setPkgPickLink] = useState(false);
   const pkgPickPanelRef = useRef<HTMLElement>(null);
   const { triggerRef: pkgPickTrigRef, menuStyle: pkgPickStyle } = useFixedMenu<HTMLElement>(
     pkgPickOpen, { placement: "auto", constrain: true, menuRef: pkgPickPanelRef },
@@ -1950,40 +1956,12 @@ export const Queries: React.FC<{
    * what the agent and the writer did to each other. The undo restores the prior stored value,
    * which is what a correction needs instead. Do not "fix" this by adding a log entry.
    */
-  /**
-   * §2 — attach a package's items as ORDINARY MATERIALS.
-   *
-   * ⚠️ A SNAPSHOT, NOT A REFERENCE. The items are copied as they are today; editing the package
-   * afterwards cannot reach this send, because there is nothing here pointing back at it. The
-   * marks each item carries are a receipt (which package, and its name at the time), not a link.
-   *
-   * ⚠️ IT DOES NOT SET `packageId`. That field is the app's package LINK, and `materialsLinkWrites`
-   * states the invariant it belongs to — a query carries the link OR its own materials, never both.
-   * A snapshot is the second kind. Setting both would give one send two answers to "what did you
-   * send", which is the divergence that rule exists to prevent.
-   *
-   * ⚠️ AND THE PRIOR VALUE IS CAPTURED BEFORE THE WRITE. The empty-closure law: an undo built from
-   * state read back afterwards restores what it just wrote.
-   */
-  const attachPackage = (q: Query, pkg: SubmissionPackage, items: PackageItem[]) => {
-    const before = ((q as Query).materialsWanted ?? []) as (string | QueryMaterial)[];
-    const linkBefore = q.packageId || "";
-    const next = [...before, ...attachedMaterials(pkg, items)];
-    setPkgPickOpen(false);
-    /**
-     * ⚠️ THE LINK IS CLEARED AS THE SNAPSHOT LANDS, and the measurement is what found this. Writing
-     * only the materials left a query that had ALREADY been attached by reference carrying both — a
-     * stale `packageId` beside a set of copied items, which is the "two answers to what did you
-     * send" state `materialsLinkWrites` exists to forbid. Attaching a snapshot to a linked query is
-     * a REPLACEMENT of the link, not an addition beside it.
-     */
-    void updateQuery(q.id, { materialsWanted: next, packageId: "" });
-    showToast({
-      message: `${items.length} ${items.length === 1 ? "item" : "items"} from ${pkg.packageName}`,
-      /* the undo restores BOTH, or it would leave a query whose link it had silently dropped */
-      undo: () => void updateQuery(q.id, { materialsWanted: before, packageId: linkBefore }),
-    });
-  };
+  /* ⚠️ `attachPackage` IS RETIRED (D12) — the snapshot path. It appended the package's material
+     NAMES to `materialsWanted` and wrote `packageId: ""`, which meant the send could only ever say
+     `Covering letter` where a link says `LETTER Hook-first`, and it contributed to no scorecard at
+     all. Snapshots existed to stop a package changing under a send; the LOCK does that now, so the
+     copy bought nothing and cost the two-models problem. Existing snapshots are untouched and keep
+     rendering — they are a true record of what was sent (D13). */
 
   /**
    * ⚠️ REMOVES WHAT THAT PACKAGE BROUGHT AND NOTHING ELSE — matched on the item's MARK, never on its
@@ -2013,17 +1991,48 @@ export const Queries: React.FC<{
    * event in the story between the writer and the agent — the same rule `writeMaterials` and the
    * timeline's own corrections already follow. The undo restores the prior value instead.
    */
+  /**
+   * ⚠️ SWITCHING BRANCH REPLACES, AND IT SAYS SO ONCE (D10). The two are exclusive, so choosing a
+   * package drops the list this query was carrying — stated plainly, with no warning tone and no
+   * scolding. `materialsLinkWrites` is what actually does the replacing; this only asks first.
+   *
+   * ⚠️ THE COUNT IS DERIVED, so the sentence says "two materials" when there are two. A fixed
+   * "your materials" would be vaguer than the app's own knowledge.
+   */
+  const switchToPackage = async (q: Query, count: number) => {
+    const ok = await askConfirm(
+      `Use a package instead? The ${count === 1 ? "material" : `${count} materials`} listed here will be replaced by the package's contents. Nothing else about this query changes.`,
+      { confirmLabel: "Choose a package", cancelLabel: "Cancel" },
+    );
+    if (!ok) return;
+    (pkgPickTrigRef as React.MutableRefObject<HTMLElement | null>).current = addMatTrigRef.current;
+    setPkgPickOpen(true);
+  };
+
   const changeQueryPackage = async (q: Query, pkg: SubmissionPackage) => {
     const before = q.packageId || "";
+    /**
+     * ⚠️ THE UNDO MUST CAPTURE THE MATERIALS, NOT JUST THE POINTER — attaching CLEARS them.
+     * `setQueryPackage` writes through `materialsLinkWrites`, which enforces one-or-the-other, so
+     * arriving here from the loose state (the switch) destroys the list. An undo that restored only
+     * `packageId` left the query with NEITHER the package nor its materials, while the toast said it
+     * had been reversed. Measured: a query showing two loose materials, switched, undone — both gone.
+     *
+     * ⚠️ AND IT IS RESTORED THROUGH THE SAME INVARIANT IT WAS CLEARED BY. `materialsLinkWrites`
+     * decides what a restore looks like: a prior LINK restores as a link with an empty list, a prior
+     * loose list restores as a list with no link. Hand-writing the two cases here is how the two
+     * halves drift apart.
+     */
+    const beforeMats = ((q as Query).materialsWanted ?? []) as (string | QueryMaterial)[];
+    const restore = materialsLinkWrites({ packageId: before, materials: beforeMats });
     setPkgPickOpen(false);
-    setPkgPickLink(false);
     const err = await setQueryPackage(q.id, pkg.id);
     if (err) { showToast({ message: err }); return; }
     showToast({
       message: `This query now carries ${pkg.packageName}`,
       /* ⚠️ THE PRIOR VALUE IS CAPTURED BEFORE THE WRITE — an undo built from state read back
          afterwards restores what it just wrote. */
-      undo: () => void setQueryPackage(q.id, before),
+      undo: () => void updateQuery(q.id, restore),
     });
   };
 
@@ -5907,6 +5916,36 @@ export const Queries: React.FC<{
                                       * status, so boxing the loose case would say the wrong thing
                                       * about every send an agent named the materials for.
                                       */}
+                                    {/**
+                                      * ⚠️ ONE QUESTION, TWO ANSWERS, MUTUALLY EXCLUSIVE (D9). Neither
+                                      * is the default and neither is dressed as the better choice —
+                                      * a package is a convenience, not a status, and a writer with
+                                      * three saved materials and no package has not done anything
+                                      * wrong.
+                                      *
+                                      * ⚠️ IT ASKS ONCE. The fork appears only while the query carries
+                                      * nothing; the moment either branch is taken it is replaced by
+                                      * that branch's own surface, which then carries the way back.
+                                      */}
+                                    {!attachedHere && loose.length === 0 && (
+                                      <div className="qc-fork">
+                                        <span className="qc-fork-q">What went with this query?</span>
+                                        <span className="qc-fork-c">
+                                          <button type="button" className="qc-forkbtn qc-forkbtn--pkg"
+                                            onClick={() => {
+                                                      (pkgPickTrigRef as React.MutableRefObject<HTMLElement | null>).current = addMatTrigRef.current;
+                                              setPkgPickOpen(true);
+                                            }}
+                                            disabled={attachablePkgs.length === 0}
+                                            title={attachablePkgs.length === 0 ? "Build a package on the Submission packages page first" : "Attach a submission package to this query"}
+                                          >Attach a package</button>
+                                          <button type="button" className="qc-forkbtn"
+                                            onClick={() => { addMatTrigRef.current?.click(); }}
+                                            title="List the materials that went with this query"
+                                          >List materials</button>
+                                        </span>
+                                      </div>
+                                    )}
                                     {loose.length > 0 && (
                                       <LooseMaterials
                                         /* ⚠️ OFFERED ONLY WHEN THERE IS NOTHING TO PROMOTE INTO
@@ -5919,8 +5958,8 @@ export const Queries: React.FC<{
                                            becomes `isProUser` when billing arrives. Two predicates
                                            for one feature is two things to remember to flip. */
                                         onSaveAsPackage={
-                                          groups.length === 0 && canAttachPackages(currentUser)
-                                            ? openPackages
+                                          groups.length === 0 && canAttachPackages(currentUser) && attachablePkgs.length > 0
+                                            ? () => void switchToPackage(activeQuery, loose.length)
                                             : undefined
                                         }
                                       >
@@ -5979,7 +6018,6 @@ export const Queries: React.FC<{
                                     onView={openPackages}
                                     locked={isPackageLocked(linkedPackage)}
                                     onChangePackage={() => {
-                                      setPkgPickLink(true);
                                       (pkgPickTrigRef as React.MutableRefObject<HTMLElement | null>).current = addMatTrigRef.current;
                                       setPkgPickOpen(true);
                                     }}
@@ -6112,6 +6150,10 @@ export const Queries: React.FC<{
                                   wholesale is not a correction to a send, and each pill already
                                   carries its own ×. */}
 
+                              {/* ⚠️ MOUNTED, OR `ask` NEVER RESOLVES. An unmounted confirm leaves the
+                                  promise pending for ever and the switch silently does nothing —
+                                  the dead-control family, one layer deeper than a no-op undo. */}
+                              {confirmNode}
                               {pkgPickOpen && (
                                 <PackagePicker
                                   packages={attachablePkgs}
@@ -6119,12 +6161,16 @@ export const Queries: React.FC<{
                                   existing={materialsOf(activeQuery)}
                                   style={pkgPickStyle}
                                   panelRef={pkgPickPanelRef}
-                                  onPick={(pkg, items) => {
-                                    if (pkgPickLink) { void changeQueryPackage(activeQuery, pkg); return; }
-                                    attachPackage(activeQuery, pkg, items);
-                                  }}
+                                  /* ⚠️ EVERY NEW ATTACHMENT IS A LINK (D12). The snapshot path is
+                                     retired: it copied the package's material NAMES onto the query
+                                     and wrote `packageId: ""`, so the send could only ever say
+                                     `Covering letter` while a link says `LETTER Hook-first`, and it
+                                     contributed to no scorecard. The lock is what makes the link
+                                     safe — a sent package cannot change, so there is nothing to
+                                     snapshot against. */
+                                  onPick={(pkg) => void changeQueryPackage(activeQuery, pkg)}
                                   onManage={() => { setPkgPickOpen(false); openPackages(); }}
-                                  onClose={() => { setPkgPickOpen(false); setPkgPickLink(false); }}
+                                  onClose={() => setPkgPickOpen(false)}
                                 />
                               )}
 

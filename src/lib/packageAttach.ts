@@ -172,6 +172,15 @@ export const overlapNote = (i: PackageItem): string =>
   `${i.label} is already attached — the package's copy will sit beside it.`;
 
 /** The items as they land in `materialsWanted` — copied, marked, and never linked. */
+/**
+ * ⚠️ RETIRED AS A WRITER (D12) — nothing creates snapshots any more. `attachPackage` was its only
+ * caller and the pane now writes a LINK for every new attachment, because the package lock makes a
+ * copy unnecessary: a sent package cannot change, so there is nothing to snapshot against.
+ *
+ * ⚠️ KEPT, AND NOT OUT OF INERTIA. Existing snapshots are a true record of what was sent and keep
+ * rendering (D13); this function and its tests are where the shape of that record is written down.
+ * Delete it and the format survives only in stored data nobody can read the definition of.
+ */
 export const attachedMaterials = (pkg: SubmissionPackage, items: readonly PackageItem[]): AttachedMaterial[] =>
   items.map((i) => ({
     material: i.material,

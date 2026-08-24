@@ -24,6 +24,11 @@
   --pro-fill: #e6edf4;   /* the seal's ground, and the packed slot's */
   --pro-edge: #c3d5e4;   /* the strip's rim */
   --pro-ink: #41627f;    /* the label, the name and the mark inside a packed slot */
+  /* ⚠️ A FOURTH, AND IT IS A TOKEN BECAUSE THE REGION THAT READS IT FORBIDS LITERALS. The fork's
+     package branch hovers a step down from the fill; written as a hex in f12.css it tripped
+     `queryCentreMoment`'s "§5 · the seal" lock, which is right — a colour stated in two files is a
+     colour that will drift in one of them. */
+  --pro-fill-hov: #dbe6f0;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════

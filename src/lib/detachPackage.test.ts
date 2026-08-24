@@ -21,6 +21,8 @@ import {
   detachMenuRows, detachRowLabel, detachToast, withoutPackage, groupByOrigin,
   attachedMaterials, packageItems, type MaterialGroup,
 } from "./packageAttach";
+import { materialsLinkWrites } from "./packageMetrics";
+import { sliceBetween } from "../test/sliceBetween";
 import { ComponentType, SubmissionPackage, ManuscriptVersion, QueryMaterial } from "../types";
 
 const root = join(__dirname, "..", "..");
@@ -207,5 +209,62 @@ describe("D3 — a correction, not history", () => {
     expect(beforeAt).toBeGreaterThan(-1);
     expect(beforeAt).toBeLessThan(writeAt);
     expect(body).toContain("undo: () => void updateQuery(q.id, { materialsWanted: before })");
+  });
+});
+
+/**
+ * ══ THE SWITCH'S UNDO RESTORES BOTH HALVES ═══════════════════════════════════════════════════
+ *
+ * ⚠️ THIS IS THE PARTIAL-UNDO SHAPE, WHICH IS WORSE THAN NO UNDO. Attaching a package CLEARS the
+ * loose materials (`materialsLinkWrites` enforces one-or-the-other), so an undo that restored only
+ * `packageId` left the query holding NEITHER — while the toast said the change had been reversed.
+ * Measured on the running app before the fix: two loose materials, switched to a package, undone,
+ * and both were gone.
+ *
+ * ⚠️ ASSERTED AS A PROPERTY OF THE INVERSE, NOT AS A STRING. The claim is "whatever state you were
+ * in comes back", so it is checked by round-tripping both prior states through the same function
+ * the component builds its restore with.
+ */
+describe("the switch's undo", () => {
+  const mats = ["Query letter", "Synopsis"];
+
+  it("restores a loose list that attaching cleared", () => {
+    /* prior state: no link, two materials */
+    const restore = materialsLinkWrites({ packageId: "", materials: mats });
+    expect(restore.packageId).toBe("");
+    expect(restore.materialsWanted).toEqual(mats);
+  });
+
+  it("restores a prior link as a link, with nothing loose beside it", () => {
+    const restore = materialsLinkWrites({ packageId: "pkg-a", materials: [] });
+    expect(restore.packageId).toBe("pkg-a");
+    expect(restore.materialsWanted).toEqual([]);
+  });
+
+  it("never returns a state holding both a link and a list", () => {
+    for (const args of [
+      { packageId: "pkg-a", materials: mats },
+      { packageId: "", materials: mats },
+      { packageId: "pkg-a", materials: [] },
+      { packageId: "", materials: [] },
+    ]) {
+      const r = materialsLinkWrites(args);
+      expect(!!r.packageId && r.materialsWanted.length > 0).toBe(false);
+    }
+  });
+
+  /**
+   * ⚠️ AND THE COMPONENT MUST UNDO THROUGH THAT INVERSE, not through the forward writer.
+   * `setQueryPackage` only takes a package id — it cannot carry materials back — so an undo wired
+   * to it is the bug above by construction, whatever the surrounding code intends.
+   */
+  it("changeQueryPackage undoes with the built restore, not with setQueryPackage", () => {
+    const fn = decls(sliceBetween(read("src/components/Queries.tsx"),
+      "const changeQueryPackage", "const removeQueryPackage"));
+    expect(fn).toContain("materialsLinkWrites({ packageId: before, materials: beforeMats })");
+    expect(fn).toMatch(/undo:\s*\(\)\s*=>\s*void updateQuery\(q\.id, restore\)/);
+    expect(fn, "the undo still routes through the forward writer").not.toMatch(
+      /undo:\s*\(\)\s*=>\s*void setQueryPackage/,
+    );
   });
 });
