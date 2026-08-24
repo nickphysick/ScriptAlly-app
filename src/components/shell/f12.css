@@ -4448,6 +4448,23 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
    the row hides that something went. Same words as the packages page's own missing-slot state. */
 .qc-mchip-gone .qc-mchiptx { font-style: italic; color: var(--qc-tx-quiet); }
 
+/**
+ * ⚠️ A BROKEN POINTER SAYS SO (F-AD, D2) — and it is a SENTENCE, not a warning box. No blush, no
+ * icon, no rule: a package leaving the file is an ordinary thing that can happen to a record, and
+ * the send is not damaged by it. The fork beneath carries the action, so this line only has to
+ * state the fact and get out of the way.
+ */
+.qc-gonelink {
+  margin: 6px 0 2px;
+  max-width: 600px;
+  font-size: 12px;
+  line-height: 1.55;
+  /* ⚠️ `--ink-2`, AND NOT A FALLBACK. This was `var(--f12-ink-soft, #6b5a52)` — a token this
+     stylesheet does not define, so the hex WAS the value, dressed as a knob someone could turn.
+     The region's own lock caught it as a colour literal, correctly. */
+  color: var(--ink-2);
+}
+
 /* ══════════════════════════════════════════════════════════════════════════════
    THE EITHER/OR FORK (Part D, D9)
    ══════════════════════════════════════════════════════════════════════════════ */

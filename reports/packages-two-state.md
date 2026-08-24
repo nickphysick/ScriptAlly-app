@@ -1213,3 +1213,44 @@ delete branch. `attachablePackages(packages, query.manuscriptId)` makes that unr
 can only link to a package on its own manuscript — so the two agree for all reachable data. Noted
 rather than changed: the fix would be passing `queries`, and it is only correct while that scoping
 holds.
+
+## F-AD — Phase 2: a broken pointer says so
+
+D1 cannot be enforced in rules, so the render is the real defence — and it covers every route D1
+misses: prod data with a dangling id, a race, `pkg-seed-default`'s siblings, anything that reaches
+the database another way.
+
+**The fault, restated precisely.** `attachedHere = !!packageId` suppressed both the agent fallback
+and the fork; `linkedPackage` being null drew no strip. Three correct-looking conditions, and
+between them the whole section rendered nothing. **Measured before the fix on a planted id:
+`strip 0 · loose 0 · fork 0` — the one anomaly in 45 rows.**
+
+**The fix is a three-way distinction:** a pointer that resolves to nothing is not an attachment.
+`danglingLink = !!packageId && !linkedPackage`, and the fork's condition becomes `!linkedPackage`
+rather than `!attachedHere`.
+
+> The package this query pointed at is no longer on file, so what went with it isn't recorded here.
+
+A sentence in the pane's own soft ink — no blush, no icon, no rule. A package leaving the file is an
+ordinary thing that can happen to a record, and the send is not damaged by it. The fork beneath
+carries the action, and **both of its branches heal the pointer**: attaching writes a new link,
+listing materials clears the old one.
+
+⚠️ **The agent fallback stays suppressed here, deliberately.** On an unattached query it is useful —
+it says what this agency asks for. Beside a broken pointer it would be a guess wearing the shape of
+a record: this query *was* sent with something, and what the agency usually asks for is not evidence
+of what went.
+
+### Measured, full scope
+
+```
+rows swept (scope All) : 45 of 45
+dangling query renders : strip 0 · loose 0 · fork 1 · message present
+blank sections         : 0
+```
+
+⚠️ **And the token lock caught my own CSS.** The message was written
+`color: var(--f12-ink-soft, #6b5a52)` — a token this stylesheet does not define, so **the hex was
+the value, dressed as a knob someone could turn**. `queryCentreMoment`'s "the three waxes are
+tokens" lock failed it as a colour literal, correctly. Now `var(--ink-2)`, which the sheet already
+reads 78 times. Second time this pack that a fallback has stood in for a token that was never there.

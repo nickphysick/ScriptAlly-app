@@ -5764,7 +5764,26 @@ export const Queries: React.FC<{
                                 const synSent = base.some(isSynopsisMat);
                                 const sampleItem = base.find(isSampleMat) ?? null;
                                 const otherItems = base.filter(isOtherMat);
-                                const linkedPackage = activeQuery.packageId ? packages.find(p => p.id === activeQuery.packageId) : null;
+                                const linkedPackage = (activeQuery.packageId ? packages.find(p => p.id === activeQuery.packageId) : null) ?? null;
+                                /**
+                                 * ⚠️ A POINTER THAT RESOLVES TO NOTHING IS NOT AN ATTACHMENT (F-AD, D2).
+                                 * `packageId` truthy suppressed the fallback AND the fork, while
+                                 * `linkedPackage` null drew no strip — so the whole "what went with this
+                                 * query" section rendered BLANK: no strip, no loose row, no fork, no
+                                 * message. Measured on a planted id: `strip 0 · loose 0 · fork 0`, the one
+                                 * anomaly in 45 rows.
+                                 *
+                                 * ⚠️ AND BLANK IS THE WORST OF THE THREE OUTCOMES. A wrong message gets
+                                 * reported; a blank section gets read as "nothing to see", and the writer
+                                 * is not even offered the chance to say what they sent.
+                                 *
+                                 * ⚠️ THE FALLBACK STAYS SUPPRESSED HERE, DELIBERATELY. On an unattached
+                                 * query the agent's expected materials are useful — they say what this
+                                 * agency asks for. Beside a broken pointer they would be a guess wearing
+                                 * the shape of a record: this query WAS sent with something, and what the
+                                 * agency usually asks for is not evidence of what went.
+                                 */
+                                const danglingLink = !!activeQuery.packageId && !linkedPackage;
                                 /* ⚠️ `pkgComponents` IS GONE WITH THE TOOLTIP IT FILLED (D-D5). It
                                    mapped the package's three slots to their CANONICAL TYPE NAMES —
                                    `Covering letter · Synopsis · Sample pages` — for a `title`
@@ -5932,7 +5951,20 @@ export const Queries: React.FC<{
                                       * nothing; the moment either branch is taken it is replaced by
                                       * that branch's own surface, which then carries the way back.
                                       */}
-                                    {!attachedHere && loose.length === 0 && (
+                                    {/**
+                                      * ⚠️ THE MESSAGE COMES BEFORE THE QUESTION, because it is the reason
+                                      * the question is being asked. It states the fact and nothing else —
+                                      * no blame, no alarm, no instruction — and the fork beneath it is the
+                                      * "here is what you can do". Both of its branches heal the pointer:
+                                      * attaching writes a new link, listing materials clears the old one.
+                                      */}
+                                    {danglingLink && (
+                                      <p className="qc-gonelink">
+                                        The package this query pointed at is no longer on file, so what went
+                                        with it isn’t recorded here.
+                                      </p>
+                                    )}
+                                    {!linkedPackage && loose.length === 0 && (
                                       <div className="qc-fork">
                                         <span className="qc-fork-q">What went with this query?</span>
                                         <span className="qc-fork-c">
