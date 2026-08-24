@@ -540,8 +540,21 @@ export const ImportCsv: React.FC<{
            */
           const queryId = "q-imported-" + Math.random().toString(36).substr(2, 9);
           const queryData = {
-            manuscriptId: foundMs?.id || "ms-seed-fantasy",
-            agentId: foundAgent?.id || "agent-seed-alex",
+            /**
+             * ⚠️ NO INVENTED IDS (D1). These were `|| "ms-seed-fantasy"` and `|| "agent-seed-alex"`,
+             * neither defined anywhere in the repo. The row was stored and then **invisible in every
+             * view**: `matchesFilters` in Queries.tsx opens `if (!agent || !ms) return false`, so a
+             * query naming a manuscript or agent that does not exist is dropped from the list at
+             * every scope, with no filter selected and nothing to say it is there.
+             *
+             * ⚠️ `""`, NOT AN OMITTED KEY. `isValidQuery` requires `manuscriptId is string` and
+             * `agentId is string`, so absence is DENIED — measured both ways: absent →
+             * PERMISSION_DENIED, `""` → accepted, for each field and for both together. `""` is
+             * already this model's word for "no link": `packageId` uses it and so does
+             * `UNFILLED_SLOT`.
+             */
+            manuscriptId: foundMs?.id ?? "",
+            agentId: foundAgent?.id ?? "",
             packageId: "",
             personalisationNotes,
             sendMethod: SubmissionMethod.EMAIL,
@@ -583,9 +596,21 @@ export const ImportCsv: React.FC<{
           else if (actVal.includes("query")) activityType = ActivityType.QUERY_SENT;
           else if (actVal.includes("material")) activityType = ActivityType.MATERIALS_SENT;
 
+          /**
+           * ⚠️ AN ACTIVITY WITH NO QUERY IS NOT IMPORTED (D4), and this is the one place dropping is
+           * right: an event with nothing to attach to is not a record, it is an orphan. It is
+           * reported by ROW NUMBER rather than skipped silently — which is the distinction Nick's
+           * ruling turns on. `q-seed-fantasy` made it worse than either: the activity was written,
+           * attached to a query that does not exist, and visible from nowhere.
+           */
+          if (!foundQ) {
+            failedCount++;
+            errorsList.push(`Activity row ${index + 2}: no query matches this manuscript and agent, so there is nothing to attach the event to. Import the query first, then this row.`);
+            continue;
+          }
           const actData = {
-            queryId: foundQ?.id || "q-seed-fantasy",
-            manuscriptId: foundMs?.id || "ms-seed-fantasy",
+            queryId: foundQ.id,
+            manuscriptId: foundMs?.id ?? "",
             activityType,
             description,
             date,

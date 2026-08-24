@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Import — unmatched rows</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f2ede7; --white:#ffffff;
+    --sage-a:#d7ddd5; --sage-b:#d5dbd3; --sage-deep:#9aa896; --sage-ink:#5c7053;
+    --pink-band:#f3e0d6; --pink-cta:#f5e2da; --pink-cta-edge:#e8c8bc;
+    --burgundy:#7c3a2a; --ink:#3a1c14; --near-black:#1c130f;
+    --ink-soft:rgba(58,28,20,.62); --ink-faint:rgba(58,28,20,.40);
+    --hairline:rgba(124,58,42,.16); --hairline-soft:rgba(58,28,20,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  [hidden]{display:none!important;}
+  body{background:var(--page);font-family:'Inter',sans-serif;color:var(--ink);padding:40px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;letter-spacing:-.01em;}
+  .lede{font-size:13.5px;color:var(--ink-soft);line-height:1.65;max-width:740px;margin:12px 0 34px;}
+  .lede b{color:var(--ink);font-weight:600;}
+  .sec{margin-bottom:46px;}
+  .band-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--hairline);padding-bottom:9px;margin-bottom:10px;}
+  .band-head h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--ink-faint);text-transform:uppercase;}
+  .rule-note{font-size:11.5px;line-height:1.6;margin:0 0 18px;padding:9px 14px;border-radius:0 8px 8px 0;max-width:740px;background:rgba(215,221,213,.35);border-left:3px solid var(--sage-deep);color:var(--sage-ink);}
+  .rule-note b{font-weight:700;}
+  .note{font-size:11px;color:var(--ink-faint);line-height:1.6;font-style:italic;max-width:740px;margin-top:10px;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  .btn{font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:9px 15px;border-radius:8px;cursor:pointer;border:1px solid var(--hairline);background:var(--white);color:var(--ink);display:inline-flex;align-items:center;gap:7px;}
+  .btn:hover{background:rgba(58,28,20,.04);}
+  .btn.primary{background:var(--pink-cta);border-color:var(--pink-cta-edge);color:var(--burgundy);}
+  .btn.primary:hover{background:#f0d6cb;}
+  .btn.sm{padding:6px 11px;font-size:11.5px;}
+  .btn.solid{background:var(--near-black);border-color:var(--near-black);color:#fdf9f4;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding:11px 20px;}
+
+  /* summary card */
+  .summary{background:var(--white);border:1px solid var(--hairline-soft);border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(58,28,20,.06);}
+  .sum-head{padding:22px 26px 18px;border-bottom:1px solid var(--hairline-soft);}
+  .sum-head h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;}
+  .sum-head p{font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin-top:6px;max-width:520px;}
+  .counts{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--hairline-soft);}
+  .count{padding:16px 22px;text-align:center;border-right:1px solid var(--hairline-soft);}
+  .count:last-child{border-right:none;}
+  .count .n{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;line-height:1;}
+  .count .l{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);margin-top:6px;}
+  .count.attn .n{color:var(--burgundy);}
+  .sum-body{padding:20px 26px 22px;}
+  .sec-lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;margin-bottom:12px;}
+
+  /* unmatched row */
+  .urow{
+    border:1px solid var(--hairline-soft);border-left:3px solid var(--pink-cta-edge);
+    border-radius:10px;padding:14px 16px;margin-bottom:10px;background:var(--white);
+  }
+  .urow.done{border-left-color:var(--sage-deep);background:rgba(215,221,213,.16);}
+  .ur-top{display:flex;align-items:baseline;gap:12px;margin-bottom:8px;flex-wrap:wrap;}
+  .ur-line{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase;}
+  .ur-name{font-size:13.5px;font-weight:600;}
+  .ur-what{font-size:11.5px;color:var(--ink-soft);line-height:1.6;margin-bottom:11px;}
+  .ur-what b{color:var(--ink);font-weight:600;}
+  .ur-what .miss{color:var(--burgundy);font-weight:600;}
+  .ur-fix{display:flex;gap:9px;align-items:center;flex-wrap:wrap;}
+  .ur-fix select{
+    font-family:'Inter',sans-serif;font-size:12px;color:var(--ink);border:1px solid var(--hairline-soft);
+    border-radius:7px;padding:7px 28px 7px 10px;background:var(--white);outline:none;
+    appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237c3a2a' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 10px center;cursor:pointer;
+  }
+  .ur-done{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-ink);display:flex;align-items:center;gap:6px;}
+
+  .banner{
+    background:var(--white);border:1px solid var(--pink-cta-edge);border-left:3px solid var(--burgundy);
+    border-radius:10px;padding:13px 17px;font-size:12.5px;color:var(--ink-soft);line-height:1.6;
+    display:flex;align-items:center;gap:14px;max-width:740px;
+  }
+  .banner b{color:var(--burgundy);font-weight:600;}
+  .banner .lk{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;color:var(--burgundy);white-space:nowrap;cursor:pointer;border-bottom:1px solid var(--pink-cta-edge);}
+
+  /* query row preview */
+  .qprev{background:var(--white);border:1px solid var(--hairline-soft);border-radius:10px;padding:12px 15px;display:grid;grid-template-columns:22px 1fr auto;gap:14px;align-items:center;max-width:560px;}
+  .qprev .dot{width:13px;height:13px;border-radius:50%;border:2px solid var(--burgundy);background:#f8e7dc;}
+  .qprev .qp-n{font-size:13px;font-weight:600;}
+  .qprev .qp-s{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-faint);margin-top:3px;}
+  .qprev .flag{
+    font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--burgundy);background:var(--pink-cta);border:1px solid var(--pink-cta-edge);
+    padding:3px 9px;border-radius:999px;white-space:nowrap;
+  }
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+  @media(max-width:900px){.cols2,.counts{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>CSV import — what happens to a row that doesn't match</h1>
+<div class="lede">
+Ruling: <b>import every row, and say what didn't resolve.</b> Skipping silently leaves a writer believing their data is there; inventing an id (<span class="mono">ms-seed-fantasy</span>) leaves the row real but invisible in every scope. Neither is acceptable — so an unmatched row lands, is flagged, and is resolvable in one place.
+</div>
+
+<!-- 1 -->
+<div class="sec">
+  <div class="band-head"><h2>1 · The summary</h2><span class="tag">Last step of the wizard</span></div>
+  <div class="rule-note">Counts first, then only what needs a decision. A clean import shows the counts and nothing else — this screen is quiet when there's nothing wrong.</div>
+
+  <div class="summary">
+    <div class="sum-head">
+      <h3>44 queries imported</h3>
+      <p>Three rows referred to something ScriptAlly couldn't find. They've been imported and flagged — resolve them here, or later from the query list.</p>
+    </div>
+    <div class="counts">
+      <div class="count"><div class="n">41</div><div class="l">Matched cleanly</div></div>
+      <div class="count attn"><div class="n">3</div><div class="l">Need a decision</div></div>
+      <div class="count"><div class="n">0</div><div class="l">Skipped</div></div>
+    </div>
+    <div class="sum-body">
+      <div class="sec-lbl">Rows needing a decision</div>
+
+      <div class="urow" id="r1">
+        <div class="ur-top"><span class="ur-line">Row 12</span><span class="ur-name">Priya Raman · Halcyon Literary</span></div>
+        <div class="ur-what">Manuscript <span class="miss">"The Salt Road"</span> isn't in your account. The query is imported and waiting on a manuscript.</div>
+        <div class="ur-fix" id="f1">
+          <select onchange="resolve('r1','f1','Assigned to Murphy&#39;s Day Out')">
+            <option>Choose a manuscript…</option>
+            <option>Murphy's Day Out</option>
+            <option>Beggars Belief</option>
+          </select>
+          <button class="btn sm" onclick="resolve('r1','f1','Created “The Salt Road”')">Create “The Salt Road”</button>
+        </div>
+      </div>
+
+      <div class="urow" id="r2">
+        <div class="ur-top"><span class="ur-line">Row 27</span><span class="ur-name">— · Fern &amp; Marlowe</span></div>
+        <div class="ur-what">No agent named. The agency is there, but a query needs someone to have sent it to.</div>
+        <div class="ur-fix" id="f2">
+          <select onchange="resolve('r2','f2','Matched to R. Osei')">
+            <option>Choose an agent…</option>
+            <option>R. Osei</option>
+            <option>A. Whitmore</option>
+          </select>
+          <button class="btn sm" onclick="resolve('r2','f2','Created agent from row')">Create from this row</button>
+        </div>
+      </div>
+
+      <div class="urow" id="r3">
+        <div class="ur-top"><span class="ur-line">Row 33</span><span class="ur-name">Jonathan Marsh · The Marsh Agency</span></div>
+        <div class="ur-what">Response dated <b>04 Jul</b> but no query sent date. The response is imported against the query with its date left open.</div>
+        <div class="ur-fix" id="f3">
+          <input type="text" placeholder="dd/mm/yyyy" style="font-family:'Inter',sans-serif;font-size:12px;border:1px solid var(--hairline-soft);border-radius:7px;padding:7px 10px;width:130px;outline:none;">
+          <button class="btn sm" onclick="resolve('r3','f3','Date set')">Set date</button>
+          <button class="btn sm" onclick="resolve('r3','f3','Left open')">Leave open</button>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+        <button class="btn">Resolve later</button>
+        <button class="btn primary">Done</button>
+      </div>
+    </div>
+  </div>
+  <div class="note">"Resolve later" is not a dismissal — the flags persist on the rows themselves (section 3). Nothing here is a last chance.</div>
+</div>
+
+<!-- 2 -->
+<div class="sec">
+  <div class="band-head"><h2>2 · What replaces the invented ids</h2><span class="tag">The three siblings</span></div>
+  <div class="cols2">
+    <div>
+      <div class="rule-note" style="max-width:100%;">Each fallback becomes a real state on the record, not a pointer to a fiction.</div>
+      <div style="font-size:12px;color:var(--ink-soft);line-height:1.8;">
+        <div style="margin-bottom:10px;"><span class="mono" style="font-size:10px;color:var(--burgundy);">ms-seed-fantasy</span><br>→ the query holds <b>no manuscript</b> and is listed under <b>Unassigned</b>, which is visible in every scope. It cannot disappear.</div>
+        <div style="margin-bottom:10px;"><span class="mono" style="font-size:10px;color:var(--burgundy);">agent-seed-alex</span><br>→ the query holds <b>the agency and whatever name the row gave</b>, as an unlinked contact. Agent-derived figures read "not recorded", not blank.</div>
+        <div><span class="mono" style="font-size:10px;color:var(--burgundy);">q-seed-fantasy</span><br>→ an activity with no resolvable query is <b>not imported</b>, and says so by row number. This is the one case where dropping is right: an event with nothing to attach to isn't a record, it's an orphan.</div>
+      </div>
+    </div>
+    <div>
+      <div class="sec-lbl">How an unassigned query reads</div>
+      <div class="qprev">
+        <span class="dot"></span>
+        <div><div class="qp-n">Priya Raman</div><div class="qp-s">HALCYON LITERARY · 04 JUL</div></div>
+        <span class="flag">Needs a manuscript</span>
+      </div>
+      <div class="note" style="margin-top:12px;">The flag is the fact, not a scolding. Clicking it opens the same chooser as the summary — one resolution path, two entry points.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 -->
+<div class="sec">
+  <div class="band-head"><h2>3 · It doesn't vanish when the wizard closes</h2><span class="tag">Persistence</span></div>
+  <div class="rule-note">The import summary is a moment; the flags are the record. A writer who closes the wizard has lost nothing.</div>
+  <div class="banner">
+    <b>3 imported queries need a decision</b> — a missing manuscript, an unnamed agent, and one without a sent date.
+    <span class="lk">Review them ›</span>
+  </div>
+  <div class="note">Shown on the query list while any flagged row remains, and gone the moment the last is resolved. No dismissal state to store — the count is derived, like everything else.</div>
+</div>
+
+</div>
+
+<script>
+  function resolve(rowId, fixId, label){
+    const row = document.getElementById(rowId);
+    row.classList.add('done');
+    document.getElementById(fixId).innerHTML =
+      `<span class="ur-done">✓ ${label}</span>`;
+  }
+</script>
+</body>
+</html>
