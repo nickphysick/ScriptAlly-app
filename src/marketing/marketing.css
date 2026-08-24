@@ -46,10 +46,13 @@
      ~558px while a viewport-relative font-size keeps climbing — type growing against a fixed
      measure. Measured: the ceiling was 6rem, the statement broke to three lines at 1440 and 2080
      and held two at 1280, purely because 6.4vw kept rising after the column stopped.
-     6.4vw reaches 80px at 1250, so a 5rem ceiling tops out just before the container does and
-     every width from ~1250 up renders identically. ⚠️ RAISE THE CEILING AND THE THIRD LINE COMES
-     BACK — the binding requirement is two lines at every width from 901 up, not this number. */
-  --mk-hero-h1: clamp(3.2rem, 6.4vw, 5rem);
+     4.5vw reaches 3.65rem at 1298px, just inside `.mk-heroinner`'s 1300 cap, so every width above
+     renders identically. ⚠️ THE REF SAYS 3.85rem AND THAT VALUE IS WRONG HERE: it needs 578.3px
+     against a 593.8px column — 15.5px of headroom, under the 20px gate — and it is not reached
+     until 1369px, past the cap, which is the exact bug the previous pass removed. The mockup's
+     column was wider than ours. A number carried off a ref is a hypothesis until measured.
+     ⚠️ THE REQUIREMENT IS ONE LINE ABOVE THE `nowrap` BOUNDARY, not this number. */
+  --mk-hero-h1: clamp(2.1rem, 4.5vw, 3.65rem);
   /* The pulse halo. Read on the rule, never inside the keyframes — see the note there. */
   --mk-halo: #f0d5c8;
   font-family: "Source Sans Pro", system-ui, -apple-system, sans-serif;
@@ -199,7 +202,16 @@
 .mk-hero { position: relative; padding: 0 0 26px; }
 .mk-heroinner {
   max-width: 1300px; margin: 0 auto; padding: 56px 56px 0;
-  display: grid; grid-template-columns: 1fr 1.02fr; gap: 60px;
+  /* ⚠️ 1.12fr 1fr IS WHAT LETS THE STATEMENT HOLD ONE LINE — load-bearing, not taste. At
+     1fr 1.02fr the copy column is 558px and the headline needs ~546 at its ceiling; the ratio
+     buys ~35px and turns a squeak into real headroom. Narrow it again and the statement goes into
+     an OVERFLOW, not a wrap, because of the `nowrap` below.
+     ⚠️ THE REF EXPRESSES THIS AS A THREE-AREA GRID (`"lead plate" "body plate"`), with the eyebrow
+     and headline in a row of their own. Column 1 computes identically either way, so the DOM is
+     deliberately NOT restructured — if you are diffing the ref against this file, that difference
+     is intentional and nothing is missing. `.mk-mission` keeps 1fr 1.02fr; it is a different
+     headline with its own headroom. */
+  display: grid; grid-template-columns: 1.12fr 1fr; gap: 64px;
   /* The plate matches the copy column's height rather than declaring one of its own. */
   align-items: stretch;
 }
@@ -216,10 +228,35 @@
      line can reach the next. Measured whole at 1440/1300/901/390, with no ancestor clipping it.
      A headline containing g, j, p, q or y at this leading WILL collide with the line beneath it,
      so the copy lock that pins the wording is also what keeps this value honest. Change the
-     headline and re-measure, or raise the leading to the house floor of 1.3. */
+     headline and re-measure, or raise the leading to the house floor of 1.3.
+     ⚠️ `max-width: 13ch` IS DELETED, AND THE PREVIOUS PASS'S OWN NOTE IS WHY — it said "if it ever
+     binds, delete it rather than tune it; the column is the measure." At the 5rem ceiling it
+     resolved to 670.8px against a 558px column and never bound. At 3.65rem it resolves to ~490px
+     against a natural width of ~546, so it WOULD bind — and under `nowrap` a binding max-width
+     does not wrap the text, it lets it spill out of its own box. */
   font-size: var(--mk-hero-h1); line-height: .96; letter-spacing: -.022em;
-  color: var(--mk-nearblack); margin: 0; max-width: 13ch;
+  color: var(--mk-nearblack); margin: 0;
 }
+
+/* ⚠️ `nowrap` FAILS BY OVERFLOW, NOT BY WRAPPING — which is why the boundary is measured, never
+   assumed. A ceiling slightly too large does not produce an obviously broken two-line headline; it
+   produces one that runs out of its column, and with `overflow-x` clipped anywhere up the tree it
+   is invisible until someone reads `scrollWidth`. The narrowest width where the rule applies is
+   the boundary itself — smallest column, type still sized from the viewport — so that is the
+   width to measure. Never 1440.
+   ⚠️ 1160, NOT THE 901 THE REF AND THE BRIEF BOTH USE, AND THE REASON IS ARITHMETIC RATHER THAN
+   TASTE. Below the 1300 cap the column grows at 0.528px per px of viewport while the headline
+   grows at only 0.429 (4.5vw x ~9.53px of glyph per px of type), so headroom CLOSES as the
+   viewport narrows: measured 37.1px at 1440, 18.3 at 1120, 6.4 at 1000 and **-3.4 at 901** — the
+   statement was overflowing its own column at the boundary the brief specified.
+   ⚠️ AND `scrollWidth` DOES NOT CATCH IT. The overflow spills into the 64px grid gap, not past the
+   viewport, so the page-level scrollbar check reported "ok" at every failing width. The gate that
+   works is rendered ink against computed column width; the scrollbar check is a second, weaker
+   net. 20px of headroom is first reached at 1140 (20.3px) — too close to sit on — so the boundary
+   is 1160, where it is 22.2px. Below it the statement simply wraps, as it did before this pass.
+   ⚠️ THE FIX IS THE BOUNDARY, NOT A SMALLER CEILING: shrinking the statement at 1440 to serve
+   1024 would pay for one narrow band out of every width above it. */
+@media (min-width: 1160px) { .mk-statement { white-space: nowrap; } }
 
 /* The continuation. The paragraph resumes the headline's sentence, so the ellipsis has to sit
    outside the text block — see Hero.tsx.
