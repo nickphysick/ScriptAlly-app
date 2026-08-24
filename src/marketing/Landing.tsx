@@ -46,7 +46,7 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
 
   return (
     <div>
-      <Hero onStart={openSignup} onPricing={() => onNavigate("pricing")} />
+      <Hero onStart={openSignup} />
       <PulseSection />
       <FeatureRows onStart={openSignup} onRowLink={onRowLink} />
       <CtaBand onStart={openSignup} />

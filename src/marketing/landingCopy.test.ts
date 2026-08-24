@@ -11,9 +11,12 @@
 
 import { describe, it, expect } from "vitest";
 import {
-  HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_A, HERO_TURN_B, HERO_EYEBROW, HERO_NOTE, CTA_START,
+  HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B, HERO_EYEBROW, CTA_START,
   CTA_BAND_H2, DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING, PULSE_SUB,
 } from "./landingCopy";
+
+/** The lede is segments now (one is bold); this is the sentence a reader actually sees. */
+const ledeText = () => HERO_LEDE.map((s) => s.text).join("");
 
 describe("landing copy — verbatim locks", () => {
   it("strapline", () => {
@@ -21,10 +24,15 @@ describe("landing copy — verbatim locks", () => {
   });
 
   it("the lede resumes the headline's sentence, word for word", () => {
-    expect(HERO_LEDE).toBe(
-      "and now your querying journey begins. Your quest for traditional publication; an endless, " +
-        "gruelling campaign of self-promotion in a fiercely competitive, ever-changing market."
+    expect(ledeText()).toBe(
+      "and now your quest for agent representation begins; an endless, gruelling campaign of " +
+        "self-promotion in a fiercely competitive, ever-changing market."
     );
+  });
+
+  /** ⚠️ ONE bold phrase, and it is the thing the sentence is about. */
+  it("sets `agent representation` in the heavier ink, and nothing else", () => {
+    expect(HERO_LEDE.filter((s) => s.b).map((s) => s.text)).toEqual(["agent representation"]);
   });
 
   /**
@@ -32,30 +40,48 @@ describe("landing copy — verbatim locks", () => {
    * Asserted on its own so the failure names the cause rather than diffing a 200-character string.
    */
   it("opens lowercase, and hides no ellipsis in the string", () => {
-    expect(HERO_LEDE.startsWith("and now")).toBe(true);
-    expect(HERO_LEDE).not.toContain("…");
-    expect(HERO_LEDE).not.toContain("...");
-  });
-
-  /** The one machine-set word on the page. Asserted as the rendered sentence AND as the segment. */
-  it("sets `robots` in the mono face, inside an otherwise plain sentence", () => {
-    expect(HERO_GRIND.map((s) => s.text).join("")).toBe("Oh, and now you're up against robots, too.");
-    expect(HERO_GRIND.filter((s) => s.mono).map((s) => s.text)).toEqual(["robots"]);
-  });
-
-  it("the turn, in two registers", () => {
-    expect(HERO_TURN_A).toBe("You are not alone.");
-    expect(HERO_TURN_B).toBe("ScriptAlly tips the odds back in your favour.");
+    expect(ledeText().startsWith("and now")).toBe(true);
+    expect(ledeText()).not.toContain("…");
+    expect(ledeText()).not.toContain("...");
   });
 
   /**
-   * ⚠️ THE MICROLINE IS PRICE ONLY. "· Built for UK querying" was removed deliberately — a claim
-   * about scope does not belong in the same eight-point line as a claim about cost.
+   * ⚠️ RETARGET: `robots` is UNDERLINED now, not mono. The postscript became Caveat, and a
+   * monospace word inside a handwritten line reads as a rendering fault. Same claim as before —
+   * exactly one word carries the treatment — asserted against the flag that now names it.
    */
-  it("eyebrow, note and primary CTA", () => {
+  it("marks `robots`, and nothing else, inside an otherwise plain sentence", () => {
+    expect(HERO_GRIND.map((s) => s.text).join("")).toBe("Oh, and now you're up against robots, too.");
+    expect(HERO_GRIND.filter((s) => s.underline).map((s) => s.text)).toEqual(["robots"]);
+  });
+
+  /**
+   * ⚠️ RETARGET: the turn is ONE line. `HERO_TURN_A` ("You are not alone.") is deleted, so the
+   * old two-register claim no longer has a subject. Asserting its ABSENCE is the stronger
+   * replacement — it is what stops the softening line being reinstated from a diff.
+   */
+  it("the turn is one line, and the reassurance in front of it is gone", async () => {
+    expect(HERO_TURN_B).toBe("ScriptAlly tips the odds back in your favour.");
+    const copy = await import("./landingCopy");
+    expect("HERO_TURN_A" in copy).toBe(false);
+    expect(Object.values(copy).filter((v): v is string => typeof v === "string"))
+      .not.toContain("You are not alone.");
+  });
+
+  /**
+   * ⚠️ RETARGET: the microline and the pricing link are both DELETED, so the hero ends on one
+   * CTA. The previous version of this test asserted the microline's wording; asserting that
+   * neither string is exported any more is the claim that now matters, because a hero with three
+   * things under the headline is exactly what this change removed.
+   */
+  it("eyebrow and one primary CTA — no microline, no pricing link", async () => {
     expect(HERO_EYEBROW).toBe("For querying writers");
-    expect(HERO_NOTE).toBe("Free to start");
     expect(CTA_START).toBe("Start tracking — it's free");
+    const copy = await import("./landingCopy");
+    expect("HERO_NOTE" in copy).toBe(false);
+    expect("CTA_PRICING" in copy).toBe(false);
+    expect(Object.values(copy).filter((v): v is string => typeof v === "string"))
+      .not.toContain("See pricing");
   });
 
   /**
@@ -70,7 +96,7 @@ describe("landing copy — verbatim locks", () => {
       PULSE_HEADING.map((s) => s.text).join(""),
       ...FEATURE_ROWS.map((r) => r.heading),
       ...FEATURE_ROWS.flatMap((r) => r.body.map((b) => b.text)),
-      HERO_H1, HERO_LEDE, HERO_TURN_A, HERO_TURN_B, CTA_BAND_H2,
+      HERO_H1, ledeText(), HERO_TURN_B, CTA_BAND_H2,
     ].filter((t) => t.toLowerCase().includes("finger on the pulse"));
     expect(said).toEqual(["A finger on the pulse of your querying journey"]);
   });

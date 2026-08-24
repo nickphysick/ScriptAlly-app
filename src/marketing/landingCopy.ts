@@ -25,34 +25,41 @@ export const HERO_H1 = "You've written a book.";
  * a screen reader meeting "… and now your querying journey begins" would read punctuation that
  * is really a piece of layout, and the glyph has to sit outside the text block to hang.
  */
-export const HERO_LEDE =
-  "and now your querying journey begins. Your quest for traditional publication; an endless, " +
-  "gruelling campaign of self-promotion in a fiercely competitive, ever-changing market.";
+export const HERO_LEDE: Array<{ text: string; b?: boolean }> = [
+  { text: "and now your quest for " },
+  { text: "agent representation", b: true },
+  { text: " begins; an endless, gruelling campaign of self-promotion in a fiercely competitive, " +
+          "ever-changing market." },
+];
 
 /**
- * The follow-up. `robots` is set in the mono face — the one machine-set word in a page of prose,
- * which is the joke. Segment shape matches `FeatureRow.body` below rather than inventing a second
- * convention in the same file.
+ * The postscript, rendered outside the lede's paper slip.
+ *
+ * ⚠️ `robots` IS UNDERLINED, NOT SET IN MONO. It was mono when the postscript was body copy; the
+ * postscript is Caveat now, and a monospace word inside a handwritten line reads as a rendering
+ * fault rather than as emphasis. The flag names the treatment so the two cannot drift apart.
+ *
+ * ⚠️ AND THERE IS NO `P.S.` LABEL. An earlier draft had one; it is cut. The tilt and the hand do
+ * the work a label would have done.
  */
-export const HERO_GRIND: Array<{ text: string; mono?: boolean }> = [
+export const HERO_GRIND: Array<{ text: string; underline?: boolean }> = [
   { text: "Oh, and now you're up against " },
-  { text: "robots", mono: true },
+  { text: "robots", underline: true },
   { text: ", too." },
 ];
 
-/** The turn: the flat statement, then the promise. Two registers, deliberately unalike. */
-export const HERO_TURN_A = "You are not alone.";
+/**
+ * ⚠️ THE TURN IS ONE LINE. "You are not alone." preceded it and is deleted — the promise carries
+ * itself, and a flat reassurance in front of it softened the thing it was introducing.
+ */
 export const HERO_TURN_B = "ScriptAlly tips the odds back in your favour.";
 
 /**
- * ⚠️ "Built for UK querying" WAS REMOVED AND SHOULD NOT COME BACK. It is a claim about scope, in
- * the smallest type on the page, next to a claim about price — and the two do not belong in one
- * line. The microline states the one thing a visitor needs before clicking.
+ * ⚠️ THE HERO ENDS ON ONE CTA. `See pricing` and the `Free to start` microline are both gone —
+ * a single button is the whole ask, and two more things under it were competing for the click
+ * they were meant to support. Do not reinstate either without the same decision being re-made.
  */
-export const HERO_NOTE = "Free to start";
-
 export const CTA_START = "Start tracking — it's free";
-export const CTA_PRICING = "See pricing";
 
 /* ══════════════ The pulse section ══════════════ */
 

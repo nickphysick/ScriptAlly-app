@@ -55,6 +55,8 @@
   --mk-hero-h1: clamp(2.1rem, 4.5vw, 3.65rem);
   /* The pulse halo. Read on the rule, never inside the keyframes — see the note there. */
   --mk-halo: #f0d5c8;
+  /* The paper slip's hairline — ink at 10%, pre-computed per the no-colour-mix() rule. */
+  --mk-slip-bd: rgba(58, 28, 20, 0.10);
   font-family: "Source Sans Pro", system-ui, -apple-system, sans-serif;
   background: var(--mk-desk);
   color: var(--mk-ink);
@@ -258,76 +260,63 @@
    1024 would pay for one narrow band out of every width above it. */
 @media (min-width: 1160px) { .mk-statement { white-space: nowrap; } }
 
-/* The continuation. The paragraph resumes the headline's sentence, so the ellipsis has to sit
-   outside the text block — see Hero.tsx.
+/* The continuation: the lede on a paper slip, the postscript tilted against it.
    ⚠️ THE `vh` CEILINGS ON THIS BLOCK, `.mk-turn` AND `.mk-hctas` ARE REACHED AT ~900px OF VIEWPORT
-   HEIGHT ON PURPOSE. Every one of them used to top out above 1280px, so a tall screen added
-   spacing to a hero whose layout had stopped changing — the vertical twin of the `vw`-type bug
-   above, and together they made 2080x1170 a permanently taller page for no compositional reason.
-   A ceiling here should be roughly the value the `vh` term yields at 900. */
-/* ⚠️ `rem`, NOT `ch` — see the note on `.mk-turn` below. This was `48ch` resolving against this
-   container's INHERITED 16px while the lede paints at 16.6px, so the measure was ~4% tighter than
-   it read. Widened rather than merely corrected: 30rem takes the lede from four lines to three,
-   and a line saved here is height that does not have to be argued back out of the hero somewhere
-   else. `.mk-grind`'s own 46ch (358px) is narrower, so it is unaffected. */
-.mk-after { position: relative; margin: clamp(22px, 2.6vh, 24px) 0 0; max-width: 30rem; }
-.mk-dots {
-  position: absolute;
-  /* ⚠️ -1.5em, NOT THE REF'S -1.75em, AND THE DIFFERENCE IS A HORIZONTAL SCROLLBAR. `left` resolves
-     `em` against this element's OWN font-size (2.2rem = 35.2px), so -1.75em is a 61.6px overhang
-     into a 56px gutter — the ref overflows its own page at every width from 901 up to the point
-     the 1300px measure starts centring. MEASURED: -1.5em clears by 3.2px, which is not an edge
-     margin; -1.3em (45.8px) leaves 10.2px to the viewport and 17.2px to the text, and overflows at
-     no width from 390 up. The gutter is a constant, so anyone restoring the ref's value has to
-     widen the gutter in the same edit. */
-  left: -1.3em; top: -.3em;
-  font-family: "Playfair Display", Georgia, serif; font-size: 2.2rem; line-height: 1;
-  color: var(--mk-burg); opacity: .55;
-}
-.mk-lede {
-  /* ⚠️ CONSTANT, BECAUSE THE `vw` TERM ONLY EVER FIRED WHERE IT COULD DO NO GOOD. It was
-     `clamp(1.04rem, 1.16vw, 1.18rem)`: 1.16vw does not clear the 1.04rem floor until 1434px and
-     does not reach the 1.18rem ceiling until 1627px — both well past the 1300px container cap, so
-     every pixel it added was type growing against a frozen 558px column. Measured: it accounted
-     for 13.5px of the 24.3px by which 2080 still outgrew 1440 after the headline was fixed. The
-     floor was the real size at every width the column actually changes at, so it is now the
-     value. Same rule as the headline, one unit along. */
-  font-size: 1.04rem; line-height: 1.55; color: var(--mk-ink); margin: 0;
-}
-.mk-grind { font-size: .98rem; line-height: 1.7; color: var(--mk-muted); margin: 12px 0 0; max-width: 46ch; }
-.mk-robots { font-family: "JetBrains Mono", monospace; font-size: .92em; color: var(--mk-ink); }
+   HEIGHT ON PURPOSE — see the note on the headline token. A ceiling here should be roughly the
+   value the `vh` term yields at 900. */
+.mk-after { position: relative; margin: clamp(22px, 2.6vh, 24px) 0 0; max-width: 32rem; }
 
-/* The turn: a flat statement and a promise, behind one burgundy rule. */
-/* ⚠️ A `ch` MEASURE ONLY MEANS WHAT IT LOOKS LIKE ON AN ELEMENT THAT CARRIES ITS OWN FONT-SIZE.
-   `ch` is the width of "0" in the ELEMENT'S OWN font, so on a container that inherits 16px while
-   its child paints at 27px, a measure drawn for ~500px applies at 254px — 71% out. That is why
-   "ScriptAlly tips the odds back in your favour." stacked over three short lines and read as a
-   narrow pull-quote instead of a statement. Measured: its natural single-line width is 517.8px,
-   so the container missed a two-line break BY 4.4px.
-   THE RULE, and it holds for both public pages: a container measure is `rem`; `ch` is only ever
-   written on the element that sets the font-size it is counting. Six other `ch` measures in this
-   file do carry their own font-size and are correct as they stand. */
+/* ⚠️ THE ROTATION IS THE POINT, AND IT IS ALSO THE RISK. −0.45° reads as a note set down on the
+   page; much more and it reads as a rendering fault, which is the one thing a deliberate tilt
+   must never look like. The shadow and the inset white highlight are what make it a physical slip
+   rather than a tinted box — drop either and the rotation just looks wrong. */
+.mk-slip {
+  background: var(--mk-parch); border: 1px solid var(--mk-slip-bd); border-radius: 5px;
+  padding: 24px 28px 22px;
+  box-shadow: 0 10px 26px rgba(58, 28, 20, .09), 0 1px 0 rgba(255, 255, 255, .8) inset;
+  transform: rotate(-.45deg);
+}
+.mk-lede { font-size: 1.16rem; line-height: 1.5; color: var(--mk-ink); margin: 0; }
+.mk-lede strong { font-weight: 600; color: var(--mk-nearblack); }
+
+/* ⚠️ INLINE, NOT HANGING — and `line-height: 0` is the load-bearing half. At 1.15em the glyph
+   would otherwise raise the first line box above the rest of the paragraph, opening a gap inside
+   a box whose whole job is to look like a flat slip of paper. Zero line-height lets it draw at
+   its own size without contributing to the line's height at all. */
+.mk-dots {
+  font-family: "Playfair Display", Georgia, serif; font-size: 1.15em; line-height: 0;
+  color: var(--mk-burg); opacity: .6; margin-right: .06em; letter-spacing: .02em;
+}
+
+/* ⚠️ TILTED AGAINST THE SLIP, DELIBERATELY. The slip leans −0.45°, this leans −0.9° from its own
+   left edge; the two do not agree and must not be made to. Harmonising them turns two objects set
+   down at different moments into one skewed block. */
+.mk-ps {
+  display: block; font-family: "Caveat", cursive; font-size: 1.5rem; line-height: 1.25;
+  color: var(--mk-burg); transform: rotate(-.9deg); transform-origin: left center;
+  margin: 16px 0 0 10px; max-width: 26rem;
+}
+/* ⚠️ UNDERLINED, NOT MONO. This word was mono while the postscript was body copy; inside Caveat a
+   monospace run reads as a font that failed to load. `font-family: inherit` is stated rather than
+   assumed so the rule survives anyone reinstating a global mono `.mk-robots`. */
+.mk-robots {
+  font-family: inherit; font-size: inherit; color: inherit;
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px;
+}
+
+/* The turn: one line behind a burgundy rule. */
 .mk-turn {
   margin: clamp(24px, 2.8vh, 26px) 0 0; padding-left: 18px;
-  border-left: 2px solid var(--mk-burg); max-width: 21rem;
+  border-left: 2px solid var(--mk-burg); max-width: 26rem;
 }
-.mk-turn-a { display: block; font-weight: 600; font-size: 1.02rem; color: var(--mk-nearblack); }
 .mk-turn-b {
   display: block; font-family: "Playfair Display", Georgia, serif;
-  /* Ceiling 1.85rem → 1.7rem: the old one was not reached until 1558px, so the turn kept growing
-     against a column frozen since 1300 and was the last 8.4px by which 2080 outgrew 1440. 1.7rem
-     is the size the design was judged at, so 1440 and every width above it now render identically.
-     (The strict form of the rule would be 1.544rem — the value 1.9vw yields at the 1300 cap — but
-     that shrinks the turn at the width it was signed off on, which is a design change rather than
-     a bug fix.) The floor still lets it shrink on a narrow column. */
-  font-size: clamp(1.4rem, 1.9vw, 1.7rem); line-height: 1.25; color: var(--mk-ink);
-  margin-top: 5px; letter-spacing: -.012em;
+  font-size: 1.72rem; line-height: 1.22; color: var(--mk-ink); letter-spacing: -.012em;
 }
-.mk-hctas { display: flex; gap: 24px; margin: clamp(26px, 3vh, 28px) 0 0; align-items: center; flex-wrap: wrap; }
-.mk-hnote {
-  font-family: "JetBrains Mono", monospace; font-size: .66rem; letter-spacing: .2em;
-  text-transform: uppercase; color: var(--mk-muted); margin: 20px 0 0;
-}
+/* ⚠️ RE-TUNED FOR ONE CHILD. This margin was set when a text link sat beside the button and a
+   microline sat beneath it; with both gone the button was the last thing in the column and the
+   old 26–28px read as a crowded finish. `.mk-hnote` and its rule are deleted with it. */
+.mk-hctas { display: flex; gap: 22px; margin: clamp(30px, 3.6vh, 34px) 0 0; align-items: center; flex-wrap: wrap; }
 
 /* ⚠️ THE ENTRANCE IS DECLARED ONLY INSIDE `no-preference`, SO REDUCED MOTION IS INERT BY
    CONSTRUCTION — not "the same animation, faster". Outside the query these elements have no
@@ -350,8 +339,6 @@
 @media (max-width: 900px) {
   .mk-scope { --mk-hero-h1: clamp(2.4rem, 10vw, 3.6rem); }
   .mk-heroinner { grid-template-columns: 1fr; gap: 34px; padding: 40px 26px 0; }
-  /* Nothing left to hang in: the ellipsis becomes a plain block above the paragraph. */
-  .mk-dots { position: static; display: block; font-size: 1.9rem; margin-bottom: 2px; }
 }
 
 /* ── The pulse line, between the hero and the showreel ──
