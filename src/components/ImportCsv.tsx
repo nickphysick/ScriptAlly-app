@@ -206,7 +206,14 @@ export const ImportCsv: React.FC<{
     failed: number;
     errors: string[];
     logs: string[];
-  }>({ successful: 0, failed: 0, errors: [], logs: [] });
+    /**
+     * ⚠️ THE THIRD COUNT, AND IT IS NOT A KIND OF FAILURE (D5). A row that imported without a
+     * manuscript or an agent is ON THE RECORD — it just has a gap the writer has to close.
+     * Counting it as "failed" would say the data is not there; counting it as "successful" would
+     * say nothing needs doing. It is its own state because it is its own fact.
+     */
+    unmatched: { row: number; missing: string; detail: string }[];
+  }>({ successful: 0, failed: 0, errors: [], logs: [], unmatched: [] });
 
   const targetFields = {
     agents: ["name", "agency", "email", "website", "genres", "mswlNotes", "starRating", "notes"],
@@ -295,6 +302,7 @@ export const ImportCsv: React.FC<{
     let successfulCount = 0;
     let failedCount = 0;
     const errorsList: string[] = [];
+    const unmatchedList: { row: number; missing: string; detail: string }[] = [];
     const runLogs: string[] = [];
     
     const total = csvRows.length;
@@ -562,6 +570,19 @@ export const ImportCsv: React.FC<{
             dateSent: dateSentInput ? new Date(dateSentInput).toISOString() : new Date().toISOString()
           };
 
+          /* ⚠️ RECORDED BEFORE THE WRITE, so the row is reported whether or not the write succeeds —
+             and phrased as a fact rather than a verdict (D8): what is missing, never "invalid". */
+          if (!foundMs || !foundAgent) {
+            const missing = !foundMs && !foundAgent ? "Needs a manuscript and an agent"
+              : !foundMs ? "Needs a manuscript" : "Needs an agent";
+            unmatchedList.push({
+              row: index + 2,
+              missing,
+              detail: [!foundMs ? `manuscript “${msTitleInput}”` : null,
+                       !foundAgent ? `agent “${agentNameInput}”` : null]
+                .filter(Boolean).join(" · "),
+            });
+          }
           const res = await addQuery({ ...queryData, id: queryId }, true);
           if (res.success) {
             const addedQRef = {
@@ -634,6 +655,7 @@ export const ImportCsv: React.FC<{
       setImportProgress(Math.round(((index + 1) / total) * 100));
       setImportResults({
         successful: successfulCount,
+        unmatched: unmatchedList,
         failed: failedCount,
         errors: errorsList,
         logs: runLogs
@@ -653,7 +675,7 @@ export const ImportCsv: React.FC<{
     setHeaders([]);
     setFieldMappings({});
     setImportProgress(0);
-    setImportResults({ successful: 0, failed: 0, errors: [], logs: [] });
+    setImportResults({ successful: 0, failed: 0, errors: [], logs: [], unmatched: [] });
   };
 
   return (
@@ -981,7 +1003,7 @@ export const ImportCsv: React.FC<{
             </div>
 
             {/* LIVE SCOREBOARD METRICS */}
-            <div className="grid grid-cols-2 gap-4 text-center">
+            <div className="grid grid-cols-3 gap-4 text-center">
               <div className="bg-[#FAF1EF] border border-[#F2DDD5] rounded-xl p-4">
                 <span className="block text-3xl font-serif font-bold text-[#7c3a2a]">
                   {importResults.successful}
@@ -996,6 +1018,16 @@ export const ImportCsv: React.FC<{
                 <span className="text-xs text-stone-600 font-medium">Lines Failed / Skipped</span>
               </div>
             </div>
+              {/* ⚠️ THE THIRD COUNT READS AS WORK, NOT DAMAGE (D5/D8). "Need a decision" says
+                  something is waiting for the writer; "failed" would say the data is gone. */}
+              <div className="bg-[#FBF7EF] border border-[#EADFC9] rounded-xl p-4">
+                <div className="text-2xl font-serif font-bold text-[#8a6d3b]">
+                  {importResults.unmatched.length}
+                </div>
+                <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 mt-1">
+                  Need a decision
+                </div>
+              </div>
 
             {/* DETAILED PROCESSING LOGGER BOX */}
             <div className="space-y-2">
@@ -1004,6 +1036,35 @@ export const ImportCsv: React.FC<{
               </label>
               
               <div className="w-full bg-stone-900 rounded-lg p-4 text-[10px] font-mono text-[#DCD1C4] h-52 overflow-y-auto space-y-1">
+                {/**
+                  * ⚠️ QUIET WHEN NOTHING IS WRONG (D5). This block renders ONLY when a row needs a
+                  * call — a clean import shows its counts and nothing else. A list that is always
+                  * present, empty, teaches the eye to skip the place the problems appear.
+                  */}
+                {importResults.unmatched.length > 0 && (
+                  <div className="mb-4 rounded-xl border border-[#EADFC9] bg-[#FBF7EF] p-4">
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-stone-500 mb-2">
+                      Rows that need a decision
+                    </div>
+                    <ul className="space-y-1.5">
+                      {importResults.unmatched.map((u) => (
+                        <li key={u.row} className="text-xs text-[#3a1c14] flex gap-2">
+                          <span className="font-mono text-stone-400 shrink-0">Row {u.row}</span>
+                          <span><b className="font-semibold">{u.missing}</b>
+                            {u.detail ? <span className="text-[#3a1c14]/70"> — no match for {u.detail}</span> : null}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    {/* ⚠️ THE SUMMARY IS A MOMENT; THE FLAGS ARE THE RECORD (D6). Closing this loses
+                        nothing — every row above is on the query list under Unassigned, and the
+                        banner there stays until the last one is resolved. */}
+                    <p className="text-[11px] text-[#3a1c14]/70 mt-3 leading-relaxed">
+                      Every row above was imported. You can close this — they are on your query list,
+                      and it will keep showing them until each one has what it needs.
+                    </p>
+                  </div>
+                )}
                 {importResults.logs.map((log, idx) => (
                   <p key={idx} className="text-[#3B6D11]/90 font-sans"><span className="text-stone-400">&bull;&nbsp;</span>{log}</p>
                 ))}

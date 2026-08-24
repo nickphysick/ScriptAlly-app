@@ -2214,6 +2214,15 @@ export const Queries: React.FC<{
    * naming nothing alike, because a reader cannot tell those apart and should not have to.
    */
   const unassignedCount = queries.filter(q => !manuscripts.some(m => m.id === q.manuscriptId)).length;
+  /**
+   * ⚠️ THE FLAG IS THE DATA (D6). Nothing is stored and nothing is dismissed: a query is flagged
+   * because its manuscript or its agent does not resolve, so the banner appears when the first such
+   * row arrives and goes when the last one is resolved — with no field to keep in step and no
+   * dismissal state to get stuck. The summary at the end of an import is a moment; this is the
+   * record, and it is the same fact counted rather than a copy of it.
+   */
+  const needsDecisionCount = queries.filter(q =>
+    !manuscripts.some(m => m.id === q.manuscriptId) || !agents.some(a => a.id === q.agentId)).length;
   const hubSubtitle = trackedManuscript ? trackedManuscript.title : "all manuscripts";
   // (The grand masthead + its pulse line are RETIRED with the F12 shell — the breadcrumb and
   // the list footer carry the page name and counts now; queriesPulse remains a lib for others.)
@@ -4789,6 +4798,22 @@ export const Queries: React.FC<{
 
                 Wiring is untouched: same handlers, same popovers, same refs. */}
 {listHead}
+            {/**
+              * ⚠️ DERIVED, UNDISMISSABLE, AND IT LEAVES ON ITS OWN (D6). It states a count and offers
+              * the scope that holds them — no ✕, because there is nothing to remember having
+              * dismissed, and a banner you can silence is how a gap outlives the notice about it.
+              * It is not an alarm: an imported row missing its manuscript is work, not damage.
+              */}
+            {needsDecisionCount > 0 && selectedManuscriptFilter !== UNASSIGNED_MS && (
+              <button type="button" className="qc-needbar"
+                      onClick={() => setSelectedManuscriptFilter(UNASSIGNED_MS)}>
+                <span>
+                  <b>{needsDecisionCount}</b>{" "}
+                  {needsDecisionCount === 1 ? "query is" : "queries are"} missing a manuscript or an agent.
+                </span>
+                <span className="qc-needbar-go">Show {needsDecisionCount === 1 ? "it" : "them"} ›</span>
+              </button>
+            )}
             <div ref={listScrollRef} className="f12-rows" role="listbox" aria-label="Queries" onKeyDown={onListKeyDown}>
               {/* ══ §5 · THE LIST GROUPS BY STATE ═══════════════════════════════════════════════
                   ⚠️ GROUPING PARTITIONS AN ALREADY-SORTED LIST — the agent list's rule, and the

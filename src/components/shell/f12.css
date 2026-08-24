@@ -4449,6 +4449,43 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 .qc-mchip-gone .qc-mchiptx { font-style: italic; color: var(--qc-tx-quiet); }
 
 /**
+ * ⚠️ THE UNRESOLVED-ROW BANNER (F-AF, D6) — a note, not an alarm. An imported row missing its
+ * manuscript is WORK, not damage, so this takes the page's quiet parchment rather than a blush or
+ * an amber: the colours that mean "something is wrong" are spent elsewhere and would outrank the
+ * writer's actual queries for attention.
+ *
+ * ⚠️ IT IS A BUTTON, WHOLE. The count and the affordance are one target — a sentence with a link
+ * buried in it makes the reader hunt for the part that does something.
+ */
+.qc-needbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 9px 13px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  text-align: left;
+}
+.qc-needbar:hover { border-color: var(--burg); }
+.qc-needbar b { color: var(--ink); font-weight: 600; }
+.qc-needbar-go {
+  margin-left: auto;
+  white-space: nowrap;
+  font-family: var(--f12-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--burg);
+}
+
+/**
  * ⚠️ A BROKEN POINTER SAYS SO (F-AD, D2) — and it is a SENTENCE, not a warning box. No blush, no
  * icon, no rule: a package leaving the file is an ordinary thing that can happen to a record, and
  * the send is not damaged by it. The fork beneath carries the action, so this line only has to
