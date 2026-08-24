@@ -317,10 +317,14 @@
   .mk-dots { position: static; display: block; font-size: 1.9rem; margin-bottom: 2px; }
 }
 
-/* ── The pulse line, between the hero and the showreel ── */
+/* ── The pulse line, between the hero and the showreel ──
+   ⚠️ THE `vh` CEILINGS BELOW TOP OUT AT ~900px OF VIEWPORT HEIGHT ON PURPOSE — see the same note
+   in the hero. Every one of the twelve `vh` clamps in this file used to reach its ceiling above
+   1140px, so a tall screen added vertical space to sections whose layout had already stopped
+   changing, and 2080x1170 was a permanently taller page for no compositional reason. */
 .mk-pulsesec {
   max-width: 1300px; margin: 0 auto; text-align: center;
-  padding: clamp(72px, 10vh, 124px) 56px clamp(30px, 4vh, 54px);
+  padding: clamp(72px, 10vh, 92px) 56px clamp(30px, 4vh, 38px);
 }
 .mk-pulsesec h2 {
   font-family: "Playfair Display", Georgia, serif; font-weight: 600; color: var(--mk-nearblack);
@@ -796,7 +800,7 @@
    measure. NOT a `.mk-band` — a band centres its copy against the plate, and the three paragraphs
    below the headline are an escalation that has to read top-down. ── */
 .mk-mission {
-  max-width: 1180px; margin: 0 auto; padding: clamp(52px, 8vh, 104px) 56px clamp(48px, 7vh, 88px);
+  max-width: 1180px; margin: 0 auto; padding: clamp(52px, 8vh, 76px) 56px clamp(48px, 7vh, 64px);
   display: grid; grid-template-columns: 1fr 1.02fr; gap: 60px; align-items: stretch;
 }
 .mk-missioncol { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
@@ -827,7 +831,7 @@
 
 /* The three registers. Measured paragraph → flat sentence → the turn. */
 .mk-gapbody {
-  margin: clamp(24px, 3vh, 36px) 0 0; max-width: 52ch;
+  margin: clamp(24px, 3vh, 28px) 0 0; max-width: 52ch;
   font-size: 1.05rem; line-height: 1.72; color: var(--mk-muted);
 }
 .mk-gaphit {
@@ -835,16 +839,25 @@
   font-size: 1.1rem; line-height: 1.55; font-weight: 600; color: var(--mk-nearblack);
 }
 .mk-missionturn {
-  margin: clamp(22px, 2.8vh, 32px) 0 0; padding-left: 18px;
+  margin: clamp(22px, 2.8vh, 26px) 0 0; padding-left: 18px;
   border-left: 2px solid var(--mk-burg); max-width: 26ch;
-  font-family: "Playfair Display", Georgia, serif; font-size: clamp(1.35rem, 1.9vw, 1.85rem);
+  font-family: "Playfair Display", Georgia, serif;
+  /* Ceiling 1.85rem → 1.7rem, matching `.mk-turn-b`: the old one was not reached until 1558px, so
+     the turn grew against a column frozen since 1180. */
+  font-size: clamp(1.35rem, 1.9vw, 1.7rem);
   line-height: 1.3; letter-spacing: -.012em; color: var(--mk-nearblack);
 }
 
-/* The centred header above the vision rows. */
+/* The centred header above the vision rows.
+   ⚠️ ITS TOP PADDING IS A CONSTANT, AND THAT IS THE ONLY WAY THE GAP CAN BE BOUNDED. The distance
+   from the turn to this heading is `.mk-mission`'s padding-bottom PLUS this padding-top, and both
+   used to be `vh` clamps — 63+72 at 1440 and 81.9+93.6 at 2080, so the gap was 135px and 175.5px
+   for the same two sentences. Two variable terms cannot be held inside a 20px window: even with
+   the hero's ceiling capped, its 56→64px spread eats a third of it, so this one has to stop
+   varying. 28px puts the measured ink gap at 84–92px across 1280/1440/2080. */
 .mk-sechead {
   max-width: 1180px; margin: 0 auto; text-align: center;
-  padding: clamp(56px, 8vh, 96px) 56px clamp(8px, 1.5vh, 18px);
+  padding: 28px 56px clamp(8px, 1.5vh, 14px);
 }
 .mk-sechead h2 {
   font-family: "Playfair Display", Georgia, serif; font-weight: 600;
@@ -863,7 +876,7 @@
    that rule no longer matches and the hairline is gone STRUCTURALLY. All this modifier does is
    give back the top padding the hairline used to justify. Adding a `border-top: 0` would look
    like the load-bearing half and outlive the structure that actually does the work. */
-.mk-band--first { padding-top: clamp(24px, 3.5vh, 44px); }
+.mk-band--first { padding-top: clamp(24px, 3.5vh, 32px); }
 /* Every vision band renders illustration-first, so the plate sits left by default and the
    alternating band pulls the copy across. Both sides are declared: giving only the copy an order
    leaves the illustration on `order: 0` and it jumps in front. */
