@@ -71,8 +71,12 @@ export const PULSE_HEADING: Array<{ text: string; pulse?: boolean }> = [
 /** A real ellipsis character, not three dots. Set in Caveat, in burgundy. */
 export const PULSE_SUB = "and so much more…";
 
-export const FEATURES_H2 = "The querying trenches, organised";
-export const FEATURES_SUB = "Ditch the spreadsheet. It's time to get serious.";
+/* ⚠️ THE FEATURES HEADER IS DELETED AND SHOULD NOT COME BACK. `FEATURES_H2` ("The querying
+   trenches, organised") and `FEATURES_SUB` ("Ditch the spreadsheet. It's time to get serious.")
+   sat immediately below the pulse line's own centred heading and Caveat sub — two centred headers
+   with subtitles, back to back, which reads as a mistake rather than as a rhythm. The pulse
+   section does that job now and the parchment band boundary carries the transition. Retired on
+   Nick's sign-off, not on a whim: the copy was written for a page that had no pulse line. */
 
 export const CTA_BAND_H2 = "Your story deserves better than a spreadsheet.";
 export const CTA_BAND_SUB = "Free to start. Take control of your querying journey today.";

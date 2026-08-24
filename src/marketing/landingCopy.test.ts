@@ -12,8 +12,7 @@
 import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_A, HERO_TURN_B, HERO_EYEBROW, HERO_NOTE, CTA_START,
-  FEATURES_H2, FEATURES_SUB, CTA_BAND_H2, DOCUMENT_TITLE, FEATURE_ROWS,
-  PULSE_HEADING, PULSE_SUB,
+  CTA_BAND_H2, DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING, PULSE_SUB,
 } from "./landingCopy";
 
 describe("landing copy — verbatim locks", () => {
@@ -71,7 +70,7 @@ describe("landing copy — verbatim locks", () => {
       PULSE_HEADING.map((s) => s.text).join(""),
       ...FEATURE_ROWS.map((r) => r.heading),
       ...FEATURE_ROWS.flatMap((r) => r.body.map((b) => b.text)),
-      HERO_H1, HERO_LEDE, HERO_TURN_A, HERO_TURN_B, FEATURES_H2, FEATURES_SUB, CTA_BAND_H2,
+      HERO_H1, HERO_LEDE, HERO_TURN_A, HERO_TURN_B, CTA_BAND_H2,
     ].filter((t) => t.toLowerCase().includes("finger on the pulse"));
     expect(said).toEqual(["A finger on the pulse of your querying journey"]);
   });
@@ -82,9 +81,20 @@ describe("landing copy — verbatim locks", () => {
     expect(PULSE_SUB).not.toContain("...");
   });
 
-  it("features header pair", () => {
-    expect(FEATURES_H2).toBe("The querying trenches, organised");
-    expect(FEATURES_SUB).toBe("Ditch the spreadsheet. It's time to get serious.");
+  /**
+   * ⚠️ RETIREMENT, ASSERTED — the stronger claim, and the reason this test still exists rather
+   * than simply being deleted. `FEATURES_H2`/`FEATURES_SUB` were a second centred head-and-sub
+   * directly beneath the pulse section's, and two of those back to back read as a mistake. The
+   * pulse line is the band's heading now. Asserting the strings are GONE from the module is what
+   * stops someone reinstating them from a diff and giving the page two headers again.
+   */
+  it("no longer ships a features header", async () => {
+    const copy = await import("./landingCopy");
+    expect("FEATURES_H2" in copy).toBe(false);
+    expect("FEATURES_SUB" in copy).toBe(false);
+    const rendered = Object.values(copy).filter((v): v is string => typeof v === "string");
+    expect(rendered).not.toContain("The querying trenches, organised");
+    expect(rendered).not.toContain("Ditch the spreadsheet. It's time to get serious.");
   });
 
   it("CTA band and document title", () => {

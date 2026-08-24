@@ -1,12 +1,12 @@
 /**
  * FeatureRows — the full-bleed parchment features band (design ref:
- * design-refs/landing-v13.html .featband): centred header (no eyebrow, no tick, no kickers)
- * and seven alternating rows with hairline separators. Copy comes verbatim from
+ * design-refs/landing-v13.html .featband): seven alternating rows with hairline separators, and
+ * NO header of its own — the pulse section above the band is its heading. Copy comes verbatim from
  * landingCopy.ts; each visual is a faithful static tableau from the ref markup.
  */
 
 import React from "react";
-import { FEATURES_H2, FEATURES_SUB, FEATURE_ROWS, FeatureRow } from "./landingCopy";
+import { FEATURE_ROWS, FeatureRow } from "./landingCopy";
 
 /* ── Row visuals (static tableaux, keyed by row) ── */
 
@@ -191,7 +191,7 @@ const Row: React.FC<{ row: FeatureRow; onPrimary: () => void; onLink?: (row: Fea
         {row.body.map((seg, i) => (seg.b ? <b key={i}>{seg.text}</b> : <React.Fragment key={i}>{seg.text}</React.Fragment>))}
       </p>
       <div className="mk-factions">
-        <button type="button" className="mk-btn" onClick={onPrimary}>{row.primary}</button>
+        <button type="button" className="mk-btn mk-btn--cta" onClick={onPrimary}>{row.primary}</button>
         {row.link && (
           <button type="button" className="mk-tlink" onClick={() => onLink?.(row)}>{row.link}</button>
         )}
@@ -208,10 +208,9 @@ export const FeatureRows: React.FC<{
   onRowLink: (row: FeatureRow) => void;
 }> = ({ onStart, onRowLink }) => (
   <section className="mk-featband" id="mk-features">
-    <div className="mk-feathead">
-      <h2>{FEATURES_H2}</h2>
-      <p>{FEATURES_SUB}</p>
-    </div>
+    {/* ⚠️ NO HEADER HERE, DELIBERATELY. The pulse section above is this band's heading; a second
+        centred head-and-sub directly beneath it read as two headers arguing. The band's own
+        opening padding replaces the space the block used to hold — see `.mk-rows`. */}
     <div className="mk-rows">
       {FEATURE_ROWS.map((row) => (
         <Row key={row.key} row={row} onPrimary={onStart} onLink={onRowLink} />

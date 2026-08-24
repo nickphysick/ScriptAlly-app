@@ -370,9 +370,14 @@
 
 /* ── Features: one parchment band, centred header, seven alternating hairline rows ── */
 .mk-featband { background: var(--mk-parch); border-top: 1px solid var(--mk-hair); border-bottom: 1px solid var(--mk-hair); padding: 14px 0 26px; margin-top: 14px; }
-.mk-feathead { text-align: center; max-width: 1300px; margin: 0 auto; padding: 30px 56px 8px; }
-.mk-feathead h2 { font-family: "Playfair Display", Georgia, serif; font-size: 34px; font-weight: 500; color: var(--mk-head); }
-.mk-feathead p { font-size: 14px; font-weight: 300; color: var(--mk-muted); margin-top: 10px; }
+/* ⚠️ UNCHANGED WHEN `.mk-feathead` WAS DELETED, AND THAT IS A MEASURED DECISION RATHER THAN AN
+   OVERSIGHT. The brief said to add back whatever the removed header was contributing IF the first
+   row ended up against the band edge. It does not: `.mk-frow` carries its own 60px of top padding
+   and centres its content, so with this padding untouched the first heading still sits 122.6px
+   below the parchment's top hairline (measured at 1440; the row box itself is 31px down). Adding
+   the header's 120px back on top of that gave 152.6px, which read as a hole where a heading used
+   to be. The band's hairline and its change of paper are the separator — it does not need a
+   run-up as well. */
 .mk-rows { max-width: 1180px; margin: 0 auto; padding: 16px 56px 30px; }
 .mk-frow { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; padding: 60px 0; }
 .mk-frow + .mk-frow { border-top: 1px solid var(--mk-hair); }
@@ -557,7 +562,6 @@
   .mk-frow.mk-flip .mk-fcopy { order: 1; }
   .mk-frow.mk-flip .mk-fv { order: 2; }
   .mk-fv { min-height: 260px; }
-  .mk-feathead { padding: 26px 26px 4px; }
   .mk-ctaband { padding: 0 26px; }
   .mk-foot { padding: 30px 26px 40px; flex-wrap: wrap; }
 }
