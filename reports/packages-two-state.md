@@ -1164,3 +1164,52 @@ They act on different attachment kinds, so Remove supersedes it **for everything
 snapshots are no longer written, everything is new from here. `detachPackage` stays reachable only
 where a historical snapshot exists. There are none on this account, so its menu never draws here;
 prod may still hold some, which is why it was kept rather than deleted.
+
+---
+
+## F-AD — Phase 1: the guard was already built, and my flag was wrong about its route
+
+I reported that *"deleting a package blanks the materials section of every query linked to it,
+today"*. **That route does not exist.** `deletePackage` refuses before writing —
+`if (queries.some((q) => q.packageId === id)) return false` — and it keys on **the link, not the
+stamp**, which is exactly what D1 asks for. I had traced `deletePackage` to a live control and
+proved a dangling id renders blank, then joined the two without checking the guard between them.
+
+The whole ladder was already in place:
+
+* `removalChoice(holderNames)` → `"delete"` at zero holders, `"archive"` at one or more.
+* `packageHolders(id, queries, agentName)` → every query whose `packageId` matches, named by agent.
+* `RemovePopover` renders the archive branch, and handles a late refusal by staying open so its
+  props re-render on the archive branch — its own comment names the "delete that silently did
+  nothing" fault and forecloses it.
+
+### Driven at 1440, both branches
+
+```
+seed-pkg-1  Standard UK        · links 7 · stamped
+seed-pkg-2  Comps-led variant  · links 2 · stamped
+probe       Probe · unlinked   · links 0 · unstamped   (created for this, then deleted by the drive)
+
+linked   → "Archive Comps-led variant? It leaves your packages list. The 2 queries sent with it
+            — Rachel Lin and David Marsh — keep it on record, so what you sent stays answerable."
+            buttons: Cancel · Archive          ← no Delete offered
+unlinked → "Delete Probe · unlinked? Nothing has been sent with this package, so it can go for good."
+            buttons: Cancel · Delete           ← clicked; the document is gone
+```
+
+### F-AE — stated without hedging: **client-side only**
+
+A rule cannot express *"is this package referenced by any query"* — that is a predicate over a
+collection, and rules have no query capability. `deletePackage`'s own interface note already said
+so before this run. There is **no database-level guarantee**; D2 is the safety net that makes that
+acceptable, and it is why D2 matters more than D1 did.
+
+### One latent inconsistency, not reachable
+
+The page passes `packageHolders(p.id, msQueries, …)` — **manuscript-scoped** — while `deletePackage`
+checks **all** queries. They would disagree for a package linked from another manuscript's query:
+the popover would offer Delete, the write would refuse, and the popover would re-render still on the
+delete branch. `attachablePackages(packages, query.manuscriptId)` makes that unreachable — a query
+can only link to a package on its own manuscript — so the two agree for all reachable data. Noted
+rather than changed: the fix would be passing `queries`, and it is only correct while that scoping
+holds.
