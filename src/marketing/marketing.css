@@ -946,12 +946,6 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-foot .mk-brand { margin-right: auto; }
 .mk-foot .mk-monogram { width: 26px; height: 26px; font-size: 13px; }
 .mk-foot .mk-wordmark { font-size: 16px; }
-.mk-footlinks { font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .12em; text-transform: uppercase; color: var(--mk-label); }
-.mk-footlinks button {
-  color: inherit; background: none; border: none; cursor: pointer; font-family: inherit; font-size: inherit;
-  letter-spacing: inherit; text-transform: inherit; margin-right: 18px; padding: 0;
-}
-.mk-footlinks button:hover { color: var(--mk-head); }
 
 /* ── Responsive baseline (presentable, not pixel-designed) ── */
 @media (max-width: 1080px) {
@@ -1030,37 +1024,12 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   font-size: 12.5px; line-height: 1.6; color: var(--mk-muted); text-align: center;
 }
 
-/* ── Legal documents: one readable column, nothing decorative ── */
-.mk-legal { max-width: 720px; margin: 0 auto; padding: 54px 56px 10px; }
-.mk-legal h1 {
-  font-family: "Playfair Display", Georgia, serif; font-size: 38px; font-weight: 500;
-  line-height: 1.15; color: var(--mk-head); margin-top: 12px;
-}
-.mk-legal h2 {
-  font-family: "Playfair Display", Georgia, serif; font-size: 20px; font-weight: 500;
-  color: var(--mk-head); margin-top: 34px;
-}
-.mk-legal p { font-size: 14.5px; font-weight: 300; line-height: 1.75; color: #5a4a40; margin-top: 11px; }
-
-/* The placeholder notice reads as a notice, not as body copy — a reader must not mistake this
-   page for finished policy. */
-.mk-legalnotice {
-  margin-top: 24px; padding: 15px 18px; border-radius: 12px;
-  background: var(--mk-parch); border: 1px solid var(--mk-bd);
-}
-.mk-legalnotice strong {
-  display: block; font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--mk-burg); font-weight: 500;
-}
-.mk-legalnotice p { margin-top: 7px; font-size: 13.5px; color: var(--mk-muted); }
 
 @media (max-width: 760px) {
   .mk-pricehead { padding: 36px 26px 4px; }
   .mk-pricehead h1 { font-size: 32px; }
   .mk-pricegrid { grid-template-columns: 1fr; padding: 22px 26px 0; gap: 16px; }
   .mk-pricefoot { padding: 0 26px; }
-  .mk-legal { padding: 36px 26px 6px; }
-  .mk-legal h1 { font-size: 30px; }
 }
 
 /* ══════════════ Shared footer (every public page) ══════════════
