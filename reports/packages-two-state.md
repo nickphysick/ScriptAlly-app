@@ -647,6 +647,90 @@ tsc 0 · build 0, no error/[WARNING] lines · vitest 383 files, 6593 passed, 3 s
                                             (baseline 383 / 6587)
 ```
 
+---
+
+## F10 — recon, and the RED GATE trips
+
+**The mobile gate is deliberate. Desktop editing lives elsewhere, and it is not a drawer.** Per the
+brief, I stopped here rather than add a desktop Edit button.
+
+### R1 — why Edit is gated to mobile
+
+`git log -S "qh-mq"` returns exactly one commit: **`7b86c290` (30 Jul) — *"mobile: queries — list to
+pushed detail, espresso command bar, sheeted response flow (P4)"***.
+
+The control was **added for mobile**, not removed from desktop. Mobile gained a pushed detail view
+with no room for in-place affordances, so it got a drawer. Desktop never had the button because
+desktop never needed one.
+
+### R2 — what desktop already offers, read off the running pane
+
+```
+IN-PLACE EDITABLES
+  Imogen Farr          title="Open the agent list"
+  5 weeks · Waiting so far     title="Change the date this was sent"
+  16 Sept · Reply expected by  title="Change when a reply is expected"
+  Email                title="Change how this query was sent"
+  The Quiet Fixture    title="Open your manuscripts"
+```
+
+**Three of the query's own fields are editable in place, each with a `title` beginning "Change".**
+That is a deliberate editing model, not an absence of one: on desktop a writer edits a query by
+clicking the thing they want to change. The drawer is the *mobile* equivalent of this pane, not a
+desktop feature that was forgotten.
+
+Query-level actions sit in the bar above — `Record response`, `Nudge`, `Mark closed`, download,
+`Delete` — and none of them is an "edit query" door.
+
+### R3 — Correction UI's reach, and the overlap
+
+The timeline `⋯` offers **`Edit` / `Delete…`**, and it edits **timeline entries** — a rung's date,
+kind and text. It does not reach query fields, and it should not: an entry is a record of something
+that happened, and `packageId` is a property of the send.
+
+**So there is no overlap to reuse, and that is the useful part of the answer.** Every editing route
+desktop has is *in place, on the thing being edited*: the send method on the send method, the dates
+on the dates, an entry from the entry's own menu.
+
+### The one thing desktop cannot do
+
+**Point a query at a package.** The `＋ Attach` menu does carry `Attach a submission package` (when
+the manuscript has one — it is correctly absent on a manuscript with none, which is what the probe
+caught), but that path is `attachPackage`, which writes a **snapshot** and `packageId: ""`. It does
+not create the link, so it does not stamp and the strip does not render live contents.
+
+The **link** — the model Part D standardises on and the only thing `markPackageSent` rides — is
+reachable on desktop from nowhere.
+
+### Recommendation — and it is F-W's answer too
+
+**Do not add a desktop Edit button.** It would give desktop a second editing model beside the
+in-place one, for a single field, and a writer looking to change a package would still have to learn
+that this one field is behind a door while the send method beside it is not.
+
+**Put the pointer controls in the reading pane, in place, on the strip** — which is exactly what
+**Ruling 1** already specifies and what is not yet built:
+
+> one footer: the lock note (when the package is stamped sent) plus **Change package / Remove**
+> (always).
+
+`Change package` on the strip is the same gesture as `Change how this query was sent` on the send
+method. It routes through `materialsLinkWrites` + `stampPackageId`, so desktop starts stamping the
+moment it ships — no new door, no second model, and F10 stops being load-bearing because the drawer
+stops being the only stamping path.
+
+**F-W: yes.** Part D's attachment block belongs in the reading pane rather than behind the drawer,
+and R2 is the evidence: the pane is already where every other query field is edited. The shape is
+the strip's footer, per Ruling 1 — no new component, and it supersedes the standalone `detachPackage`
+mount for the packaged case (**F-O**).
+
+### What this leaves true today
+
+Desktop can attach a package **as a snapshot** and cannot link one. A snapshot needs no lock (its
+contents are copied, so nothing can drift), so nothing is unsafe — but a desktop writer cannot
+produce the linked, live-rendering, lockable attachment that Part D is built around. **That gap
+closes with Ruling 1's footer, not with a button.**
+
 ## Where this stopped, and what is left
 
 | phase | state |
