@@ -220,11 +220,24 @@
 .ct-firstempty { padding: 40px 20px 48px; }
 
 /* ══ THE FEATURE BLOCK — first visit, and again demoted at the workspace foot (v3 §2) ══ */
+/* ⚠️ THE SHARED CONTENT MEASURE — and the ROOT of what v3.1 corrects (§1).
+ *
+ * The sheet has no measure of its own, so the feature grid's `1fr` copy column ran to about 1100px
+ * while the text inside it was capped at 48ch. The copy and the illustration ended up pushed to
+ * opposite edges of a void, reading as two things rather than one block.
+ *
+ * ⚠️ IT IS APPLIED TO THE TWO BLOCKS, NOT TO THE SHEET. Changing the sheet would move every page;
+ * this is a wrapper the feature and stages blocks opt into, and nothing else reads it. */
+.ct-measure { max-width: 1060px; margin-inline: auto; }
+
+/* ⚠️ `minmax(0, 500px)`, NOT `1fr` — the copy column STOPS GROWING, and `justify-content: center`
+   puts the pair in the middle of whatever room is left rather than spreading it to the edges. A
+   `1fr` here is what created the gap: it consumes all free space by definition. */
 .ct-feature {
-  display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 48px;
-  align-items: center; padding: 26px 0 44px;
+  display: grid; grid-template-columns: minmax(0, 500px) 420px; gap: 44px;
+  align-items: center; justify-content: center; padding: 14px 8px 34px;
 }
-@media (max-width: 1040px) { .ct-feature { grid-template-columns: minmax(0, 1fr); gap: 30px; } }
+@media (max-width: 1040px) { .ct-feature { grid-template-columns: minmax(0, 1fr); gap: 26px; } }
 .ct-feature-l { min-width: 0; }
 /* ⚠️ 1.25 MINIMUM ON PLAYFAIR THIS LARGE — "What does a good comp do?" carries a `g` and a `p`, and
    a tighter line box crops both. Plain ink, one weight: no italic accent, no burgundy `<em>`. */
@@ -242,21 +255,34 @@
   border-radius: 11px; padding: 12px 22px; font-size: 13px; font-weight: 600; cursor: pointer;
 }
 .ct-btn-dark:hover { background: var(--ct-ink); border-color: var(--ct-ink); }
-.ct-btn-slateghost {
-  display: inline-flex; align-items: center; gap: 9px;
-  background: transparent; border: 1px solid var(--slate-line, var(--ct-scout-bd)); color: var(--slate-deep, var(--ct-scout-deep));
-  border-radius: 11px; padding: 12px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+/* ⚠️ `.ct-btn-slateghost` IS RETIRED WITH THE CTA IT STYLED (v3.1 §3). */
+
+/* ⚠️ THE TRACK TOGGLE — a quiet inline control, deliberately not a segment. The five jobs are the
+   block's point and the missteps are its aside; a segmented control would draw them as equal halves.
+   Underlined rather than boxed for the same reason: it reads as a sentence continuing, not a mode. */
+.ct-caro-toggle {
+  margin-top: 16px; padding: 0; background: none; border: none; cursor: pointer;
+  font-size: 12.5px; color: var(--ct-ink-soft); text-decoration: underline;
+  text-underline-offset: 3px; text-decoration-color: var(--ct-taupe-bd);
 }
-.ct-btn-slateghost:hover { background: var(--slate-tint, var(--ct-scout-bg)); }
+.ct-caro-toggle:hover { color: var(--ct-mocha); text-decoration-color: var(--ct-mocha); }
+.ct-caro-toggle:focus-visible { outline: 2px solid var(--ct-accent); outline-offset: 3px; border-radius: 3px; }
 
 /* ── the carousel ── */
-.ct-caro { min-width: 0; }
+/* ⚠️ THE STAGE AND THE DOTS SHARE ONE WRAPPER AT ONE WIDTH (§2). They were siblings of different
+   widths: the card overran the sheet's right edge and the dot row sat outside it, ranged right.
+   `width: 100%` on the wrapper and on both children is the whole fix — the dots then centre
+   beneath the card because they are the same box wide. */
+.ct-caro { min-width: 0; width: 100%; position: relative; }
 .ct-caro-stage {
-  position: relative; background: var(--ct-card); border: var(--ct-bdw) solid var(--ct-bd);
+  position: relative; width: 100%; box-sizing: border-box;
+  background: var(--ct-card); border: var(--ct-bdw) solid var(--ct-bd);
   border-radius: 16px; box-shadow: var(--ct-panel-sh); padding: 24px 24px 22px;
 }
+/* ⚠️ INSIDE THE STAGE'S TOP-RIGHT AND ABOVE THE SLIDES — `z-index` because the slides are grid
+   siblings in the same cell and would otherwise paint over it. */
 .ct-caro-count {
-  position: absolute; top: 14px; right: 16px;
+  position: absolute; top: 14px; right: 16px; z-index: 2;
   font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .13em; color: var(--ct-label);
 }
 /* ⚠️ THE STAGE HOLDS ITS HEIGHT FROM THE TALLEST SLIDE, so the block does not jump as it advances:
@@ -267,7 +293,7 @@
 .ct-caro-slide.on { opacity: 1; visibility: visible; }
 @media (prefers-reduced-motion: reduce) { .ct-caro-slide { transition: none; } }
 .ct-caro-slot {
-  width: 100%; max-width: 396px; height: 270px; margin: 0 auto;
+  width: 100%; max-width: 396px; height: 250px; margin: 0 auto;
   border: 1px dashed var(--ct-taupe-bd); border-radius: 12px; background: var(--ct-sect);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
 }
@@ -281,7 +307,7 @@
   line-height: 1.3; color: var(--ct-ink);
 }
 .ct-caro-cap p { margin: 8px auto 0; max-width: 400px; font-size: 12.5px; line-height: 1.55; color: var(--ct-ink-soft); }
-.ct-caro-dots { display: flex; justify-content: center; gap: 7px; margin-top: 16px; }
+.ct-caro-dots { display: flex; justify-content: center; gap: 8px; margin-top: 14px; width: 100%; }
 /* ⚠️ REAL BUTTONS, SO THEY NEED A REAL HIT AREA — the visible dot is 7px, the control is not. */
 .ct-caro-dot {
   width: 7px; height: 7px; padding: 0; border: none; border-radius: 20px; cursor: pointer;
@@ -292,7 +318,30 @@
 @media (prefers-reduced-motion: reduce) { .ct-caro-dot { transition: none; } }
 
 /* ══ MANAGING YOUR COMPS — the three stages (v3 §3) ══ */
-.ct-stages { padding: 40px 0 20px; text-align: center; }
+/* ══ THE STAGES BAND (v3.1 §4) ══
+ *
+ * ⚠️ A WASH, NOT A FILL. A soft vertical gradient of the app's own cream at low opacity — the block
+ * has to read as a different SURFACE from the sheet above it without becoming a panel. Anything
+ * approaching a solid would make it a third card on a page that already has several.
+ *
+ * ⚠️ IT REACHES THE SHEET'S BOTTOM BY EATING `.ct-pagebody`'s 110px TAIL PADDING, which is what a
+ * negative bottom margin does here — the padding exists to keep content off the scroller's floor,
+ * and a band that IS the floor does not need clearing from it. Its own bottom radius then sits where
+ * the sheet's does.
+ *
+ * ⚠️ AND IT DOES NOT BLEED SIDEWAYS. The ref negative-margins to its mockup sheet's 32px padding;
+ * this page's body has NO horizontal padding — the inset is the grid's `--content-gutter`, which
+ * belongs to shared chrome. Pulling the band out to the window edge would mean escaping the content
+ * measure, so it spans the column instead and its content sits inside the shared measure. */
+.ct-stages-band {
+  background: linear-gradient(180deg, rgba(242, 237, 231, .55) 0%, rgba(242, 237, 231, .35) 100%);
+  border-top: 1px solid var(--ct-band-hair);
+  border-radius: 0 0 14px 14px;
+  margin: 56px 0 -110px; padding: 44px 0 48px;
+}
+/* the demoted placement already carries the rule and the gap above it — no second one */
+.ct-demoted .ct-stages-band { margin-top: 0; border-top: none; }
+.ct-stages { padding: 0; text-align: center; }
 .ct-stages-h {
   margin: 0; font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600;
   line-height: 1.3; color: var(--ct-ink);
@@ -306,12 +355,14 @@
 /* ⚠️ THE CONNECTOR IS WIDE-VIEWPORT ONLY, and never on the last stage. Once the grid stacks, a
    horizontal rule between rows points sideways at nothing. */
 .ct-stage.linked::after {
-  content: ''; position: absolute; top: 75px; left: calc(50% + 90px); right: calc(-50% + 90px);
+  /* ⚠️ 60px IS HALF THE CIRCLE, so the rule meets it on its centre line — the number is derived
+     from the circle's height and has to move with it. It was 75 for a 150px circle. */
+  content: ''; position: absolute; top: 60px; left: calc(50% + 76px); right: calc(-50% + 76px);
   height: 1px; background: var(--ct-band-hair);
 }
 @media (max-width: 1040px) { .ct-stage.linked::after { display: none; } }
 .ct-stage-slot {
-  width: 150px; height: 150px; border-radius: 50%; border: 1px dashed var(--ct-taupe-bd);
+  width: 120px; height: 120px; border-radius: 50%; border: 1px dashed var(--ct-taupe-bd);
   background: var(--ct-sect); display: flex; align-items: center; justify-content: center;
   padding: 0 10px; margin-bottom: 18px;
 }
@@ -325,8 +376,8 @@
 }
 .ct-stage p { margin: 9px 0 0; max-width: 320px; font-size: 12.5px; line-height: 1.6; color: var(--ct-ink-soft); }
 
-/* the Scout standing alone on the first-visit state — it is the CTA's destination there */
-.ct-scout--solo { margin-bottom: 8px; }
+/* ⚠️ `.ct-scout--solo` IS RETIRED (v3.1 §3) — the Scout no longer renders on the first-visit
+   state, so there is no solo placement to space. */
 
 /* ══ THE TOP ROW — tile left, query line right (v2.1 §2) ══
  *
@@ -337,8 +388,12 @@
  * ⚠️ `minmax(0, 1fr)` ON THE RIGHT TRACK, never a bare `1fr` — a `1fr` track's automatic minimum is
  * min-content, so one long unbroken query line would push the card past the row. */
 .ct-toprow {
+  /* ⚠️ `start`, NOT `stretch` (v3.1 §5) — and reverting this undoes the point of §4's redesign.
+     Stretching pulled the tile back up to the query builder's height, so a tile whose content is
+     137px was drawn at 254 with 117px of nothing under it. The builder sets the row; the tile keeps
+     the compression that was the whole reason it went horizontal. */
   display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 18px;
-  align-items: stretch; margin-bottom: 18px;
+  align-items: start; margin-bottom: 18px;
 }
 /* ⚠️ THE TILE GOES FIRST WHEN IT STACKS — it is the page's scope, and scope reads before the thing
    it scopes. Source order already does that; it is stated so nobody "improves" the order later. */
@@ -475,6 +530,32 @@
    The 18px is kept as a MINIMUM gap for the case where the card is exactly its content height
    and there is no free space for `auto` to consume. */
 .ct-qline-ctl { display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 18px; flex-wrap: wrap; }
+
+/* ⚠️ THE TAIL ROW ABSORBS THE SLACK THE PAIRED HEIGHT CREATES (v3.1 §5). Comps and Scout STAY
+   stretched — reading as a matched pair is deliberate — so at one comp the card had most of its
+   height empty. `flex: 1` on a dashed invitation turns that emptiness into an offer: nearly a full
+   card at one comp, a thin strip at six.
+   ⚠️ IT IS AN ADDITIONAL AFFORDANCE, NOT A REPLACEMENT — the band's `Add a comp` button stays, and
+   both call the same `setFormState`. Two places to reach one action, never two mechanisms. */
+.ct-ctail {
+  flex: 1; min-height: 64px; margin: 10px 12px 12px; padding: 14px;
+  border: 1px dashed var(--ct-taupe-bd); border-radius: 12px; background: rgba(255, 255, 255, .4);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer; transition: border-color .18s ease, background .18s ease;
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--ct-label);
+}
+.ct-ctail:hover { border-color: var(--ct-pink-bd); background: var(--ct-pink); color: var(--ct-mocha); }
+.ct-ctail:disabled { cursor: default; opacity: .5; }
+@media (prefers-reduced-motion: reduce) { .ct-ctail { transition: none; } }
+.ct-ctail .plus {
+  width: 26px; height: 26px; border-radius: 99px; border: 1px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+}
+.ct-ctail .plus svg { width: 13px; height: 13px; }
+/* ⚠️ THE CARD IS A FLEX COLUMN SO `flex: 1` ON THE TAIL HAS SOMETHING TO GROW INTO — without this
+   the tail is its min-height and the slack stays where it was. */
+.ct-split > .ct-panel:first-child { display: flex; flex-direction: column; }
 
 /* ── the Scout in its narrow panel (v3 §4) ── */
 /* ⚠️ A FLEX COLUMN SO THE PANEL'S HEIGHT IS USABLE. The comps card beside it sets the row; without

@@ -721,8 +721,6 @@ export const ComparableTitlesPage: React.FC<{
     }
   };
 
-  /* the first-visit Scout's scroll/focus target — see the `onScout` note below */
-  const scoutRef = useRef<HTMLElement>(null);
   const editingComp = formState && formState.index != null ? comps[formState.index] : undefined;
 
   return (
@@ -794,36 +792,13 @@ export const ComparableTitlesPage: React.FC<{
             </section>
           ) : (
             <>
-              <FeatureBlock
-                onAddComp={() => setFormState({ index: null })}
-                /* ⚠️ THE SCOUT IS ON THIS STATE TOO, SO THE CTA HAS A REAL DESTINATION (Nick's
-                   call). It reads the MANUSCRIPT, not the shelf, so it already works with nothing
-                   recorded — and an empty shelf is exactly when "find me some" is worth most. The
-                   alternative was a button labelled "Try the Scout" that opened a comp form, which
-                   is a control whose label does not describe what it does. */
-                onScout={() => {
-                  scoutRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-                  /* ⚠️ FOCUS FOLLOWS THE SCROLL, or a keyboard reader is moved somewhere their
-                     focus is not and the next Tab returns them to the button they just left. */
-                  scoutRef.current?.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true });
-                }}
-              />
-
-              {/* ⚠️ THE SAME `ScoutPanel`, NOT A FIRST-RUN COPY — same run, same phases, same
-                  machinery. Only its placement differs between the two states. */}
-              <section className="ct-panel ct-scout--solo" ref={scoutRef}>
-                <div className="ct-band blue">
-                  <span className="bt">The Scout</span>
-                  <span className="ct-tag pro">Pro</span>
-                </div>
-                <ScoutPanel
-                  isPro={isProUser(currentUser)}
-                  input={{ manuscriptId: activeMs.id }}
-                  shelfTitles={[]}
-                  onAddToShelf={(comp) => writeComps(withCompAdded(comps, comp))}
-                  onUpgrade={() => onNavigate?.("plans")}
-                />
-              </section>
+              {/* ⚠️ ONE ACTION ON FIRST VISIT (v3.1 §3), AND THIS REVERSES AN EARLIER DECISION.
+                  v3 §2 put the Scout on this state so "Try the Scout" had an honest destination.
+                  The CTA is gone instead: it had no honest destination for a FREE user — the panel
+                  it opened was the locked one — stage two of the explainer already introduces the
+                  Scout, and the rail's Upgrade button is the route to Pro. A second CTA that leads
+                  to a locked panel is an upsell wearing a feature's label. */}
+              <FeatureBlock onAddComp={() => setFormState({ index: null })} />
 
               <StagesBlock />
             </>
@@ -1179,6 +1154,20 @@ export const ComparableTitlesPage: React.FC<{
                   {comps.length < MAX_COMPS && <span className="ct-kbd">N</span>}
                 </button>
               )}
+
+              {/* ⚠️ THE TAIL ROW — the last item in the list, and an offer rather than a spacer
+                  (v3.1 §5). It takes the slack the paired panel height creates: nearly a full card
+                  at one comp, a thin strip at six. Same action as the band's button and the add row;
+                  three places to reach it, one `setFormState`. */}
+              <button
+                type="button"
+                className="ct-ctail"
+                disabled={comps.length >= MAX_COMPS}
+                onClick={() => setFormState({ index: null })}
+              >
+                <span className="plus" aria-hidden="true"><Plus /></span>
+                {comps.length >= MAX_COMPS ? "This list is full" : "Add a comp"}
+              </button>
 
               {/* ⚠️ A STATEMENT ABOUT THE INDUSTRY, NOT ABOUT THIS LIST. It must never be reworded
                   into advice about the writer's own comps — that is the appraisal the sweep removed,

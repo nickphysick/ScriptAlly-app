@@ -20,6 +20,10 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 /** One carousel slide. `slot` is the illustrator's brief; `caption`/`body` are the ref's copy. */
+/* ⚠️ THE SLOT IS LABELLED 396×250, WHICH IS WHAT THE BOX IS — and the v3.1 ref disagrees with
+   itself here: its CSS draws `height: 250px` while its label text reads 396×270. The label is the
+   illustrator's brief, so it has to describe the box the artwork will actually sit in; art drawn to
+   270 would not fit. Flagged in the report. */
 export interface CompSlide {
   slot: string;
   caption: string;
@@ -47,6 +51,31 @@ export const COMP_SLIDES: CompSlide[] = [
     body: "Recent comps — broadly the last three to five years — show you know today's market, not the one you grew up reading." },
 ];
 
+/**
+ * The second track (v3.1 §6).
+ *
+ * ⚠️ THE COPY IS RECOVERED VERBATIM FROM `cc27a62e`, NOT REWRITTEN. These five cells were reviewed
+ * once and then lost: they belonged to `FieldNotesCard`, which v3 §6 retired because it duplicated
+ * the first track's five jobs — and the missteps went with it because the v3 reference carried them
+ * nowhere. The carousel is their home now, which is why the card did not need reviving.
+ *
+ * ⚠️ AND THEY DESCRIBE MISSTEPS IN GENERAL, NEVER THIS WRITER'S. "Comping the giants" is a thing
+ * people do; it is not an observation about the list three sections down. That distinction is the
+ * whole reason this page is allowed to give advice at all.
+ */
+export const COMP_MISSTEPS: CompSlide[] = [
+  { slot: "comp-miss-giants", caption: "Comping the giants",
+    body: "Global phenomena can't anchor a realistic case for a debut — and everyone names them." },
+  { slot: "comp-miss-age", caption: "Reaching too far back",
+    body: "A comp from another publishing era says the market has moved on without you." },
+  { slot: "comp-miss-unread", caption: "Comping the unread",
+    body: "Agents ask about comps. A title you haven't read is easily exposed." },
+  { slot: "comp-miss-shelf", caption: "Crossing shelves",
+    body: "Comps from the wrong category muddy where the book sits — and who it's for." },
+  { slot: "comp-miss-count", caption: "Piling them on",
+    body: "Two is the common counsel, three at most. A longer list dilutes the signal." },
+];
+
 const AUTOPLAY_MS = 4200;
 
 /**
@@ -67,6 +96,11 @@ const AUTOPLAY_MS = 4200;
  */
 export const CompCarousel: React.FC<{ slides: CompSlide[]; label: string }> = ({ slides, label }) => {
   const [index, setIndex] = useState(0);
+  /* ⚠️ SWITCHING TRACKS RESETS TO SLIDE ONE, and the effect keys on the ARRAY rather than on a
+     counter the parent has to remember to bump. Landing on slide 4 of a track you have just opened
+     is the reader being dropped into the middle of something they have not started. Autoplay
+     restarts with it — or stays suppressed, because the interval effect still reads `reduced`. */
+  useEffect(() => { setIndex(0); }, [slides]);
   const [paused, setPaused] = useState(false);
   const [reduced, setReduced] = useState(false);
   const count = slides.length;
@@ -117,7 +151,7 @@ export const CompCarousel: React.FC<{ slides: CompSlide[]; label: string }> = ({
           >
             <div className="ct-caro-slot" data-slot={s.slot}>
               <span>{s.slot}</span>
-              <span>396×270</span>
+              <span>396×250</span>
             </div>
             <div className="ct-caro-cap">
               <h4>{s.caption}</h4>
@@ -157,12 +191,17 @@ const FEATURE_LEAD_SHORT =
  * standfirst, and no actions. The actions are what makes it a first-visit block; offering "Add your
  * first comp" underneath a list of comps would be the page forgetting what the reader has done.
  */
+/* ⚠️ `onScout` AND THE SLATE-GHOST CTA ARE GONE (v3.1 §3). First visit has exactly one action. The
+   Scout CTA had no honest destination for a free user — it opened the locked panel — and stage two
+   of the explainer already introduces the Scout. The route to Pro is the rail's Upgrade button. */
 export const FeatureBlock: React.FC<{
   demoted?: boolean;
   onAddComp?: () => void;
-  onScout?: () => void;
-}> = ({ demoted = false, onAddComp, onScout }) => (
-  <section className={`ct-feature${demoted ? " demoted" : ""}`} aria-labelledby="ct-feature-h">
+}> = ({ demoted = false, onAddComp }) => {
+  const [track, setTrack] = useState<"jobs" | "missteps">("jobs");
+  const showing = track === "jobs" ? COMP_SLIDES : COMP_MISSTEPS;
+  return (
+  <section className={`ct-measure ct-feature${demoted ? " demoted" : ""}`} aria-labelledby="ct-feature-h">
     <div className="ct-feature-l">
       {/* ⚠️ PLAIN PLAYFAIR IN INK, ONE WEIGHT — no italic accent word, no burgundy `<em>`, no
           colour-shifted word. A heading that changes colour mid-sentence reads as two things. */}
@@ -175,16 +214,28 @@ export const FeatureBlock: React.FC<{
           <button type="button" className="ct-btn-dark" onClick={onAddComp}>
             Add your first comp
           </button>
-          {/* slate marks the TIER, and the chip says which — the same slate the Scout's band uses */}
-          <button type="button" className="ct-btn-slateghost" onClick={onScout}>
-            Try the Scout<span className="ct-tag pro">Pro</span>
-          </button>
         </div>
       )}
+      {/* ⚠️ A QUIET INLINE CONTROL, NOT A SEGMENTED ONE. A segment would make the two tracks read as
+          equal halves of the block; they are not — the five jobs are the point and the missteps are
+          the aside. `aria-pressed` still says which is showing, because "quiet" is a visual
+          decision and must not cost a screen reader the state. */}
+      <button
+        type="button"
+        className="ct-caro-toggle"
+        aria-pressed={track === "missteps"}
+        onClick={() => setTrack((t) => (t === "jobs" ? "missteps" : "jobs"))}
+      >
+        {track === "jobs" ? "…and five to avoid" : "← back to the five jobs"}
+      </button>
     </div>
-    <CompCarousel slides={COMP_SLIDES} label="What a good comp does" />
+    <CompCarousel
+      slides={showing}
+      label={track === "jobs" ? "What a good comp does" : "Common missteps"}
+    />
   </section>
-);
+  );
+};
 
 /** One stage of the three-stage explainer. */
 interface CompStage {
@@ -215,7 +266,10 @@ export const COMP_STAGES: CompStage[] = [
 ];
 
 export const StagesBlock: React.FC = () => (
-  <section className="ct-stages" aria-labelledby="ct-stages-h">
+  /* ⚠️ THE BAND WRAPS THE MEASURE, NOT THE OTHER WAY ROUND — the wash spans the column and the
+     CONTENT sits inside the shared measure, so the surface is full width and the words are not. */
+  <div className="ct-stages-band">
+   <section className="ct-measure ct-stages" aria-labelledby="ct-stages-h">
     <h3 className="ct-stages-h" id="ct-stages-h">Managing your comps with ScriptAlly</h3>
     <p className="ct-stages-p">Gather them, grow them, and put them to work in your queries.</p>
     <div className="ct-stages-grid">
@@ -231,5 +285,6 @@ export const StagesBlock: React.FC = () => (
         </div>
       ))}
     </div>
-  </section>
+   </section>
+  </div>
 );
