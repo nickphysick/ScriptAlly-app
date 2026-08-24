@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — band header (locked)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400..900&family=Source+Sans+3:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#f2ede7;--parchment:#fdfaf5;--ink:#3a1c14;--nearblack:#1c130f;--muted:#7a655c;
+  --burgundy:#7c3a2a;--hair:rgba(58,28,20,.12);
+  --display:"Playfair Display",Georgia,serif;--body:"Source Sans 3",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--body);font-size:16px;-webkit-font-smoothing:antialiased}
+.pad{max-width:1300px;margin:0 auto;padding:0 56px}
+
+.cream-tail{height:130px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:14px}
+.cream-tail span{font-family:var(--mono);font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(124,58,42,.4)}
+
+.band{background:var(--parchment);border-top:1px solid var(--hair);padding:clamp(58px,8vh,96px) 0 clamp(64px,9vh,104px)}
+.head-wrap{position:relative;text-align:center}
+
+h2{
+  font-family:var(--display);font-weight:600;color:var(--nearblack);
+  font-size:clamp(1.85rem,3.1vw,2.75rem);line-height:1.2;letter-spacing:-.018em;
+  margin:0 auto;max-width:24ch;position:relative;z-index:2;
+  /* parchment mask so the trace reads as passing under the words */
+  background:linear-gradient(90deg,transparent,var(--parchment) 6%,var(--parchment) 94%,transparent);
+  padding:0 8px;
+}
+
+/* the trace */
+.ecg{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:150px;pointer-events:none;z-index:1}
+.ecg svg{display:block;width:100%;height:100%}
+.ecg .base{fill:none;stroke:var(--burgundy);stroke-width:1.4;stroke-linejoin:round;stroke-linecap:round;opacity:.16}
+.ecg .live{fill:none;stroke:var(--burgundy);stroke-width:1.9;stroke-linejoin:round;stroke-linecap:round;opacity:.85;
+  stroke-dasharray:110 4000;animation:sweep 5.2s linear infinite;animation-play-state:paused}
+.band.in-view .ecg .live{animation-play-state:running}
+@keyframes sweep{from{stroke-dashoffset:0}to{stroke-dashoffset:-4110}}
+
+@media (prefers-reduced-motion:reduce){
+  .ecg .live{animation:none!important;stroke-dasharray:none;opacity:.34}
+}
+
+.feat{margin-top:clamp(56px,8vh,92px);text-align:center;font-family:var(--display);font-size:1.5rem;color:var(--nearblack);opacity:.55}
+.note-inline{margin-top:10px;text-align:center;font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(124,58,42,.45)}
+@media(max-width:900px){
+  .pad{padding:0 22px}
+  .ecg{height:110px}
+}
+</style>
+</head>
+<body>
+
+<div class="cream-tail"><span>… end of hero, cream ground</span></div>
+
+<section class="band" id="band">
+  <div class="pad">
+    <div class="head-wrap">
+      <div class="ecg"><svg viewBox="0 0 1200 150" preserveAspectRatio="none" aria-hidden="true"><path class="base"/><path class="live"/></svg></div>
+      <h2>A finger on the pulse of your querying journey</h2>
+    </div>
+    <div class="feat">Your journey so far comes with you</div>
+    <div class="note-inline">first showreel row · for context only</div>
+  </div>
+</section>
+
+<script>
+function ecgPath(w,h,cycle,amp){
+  var mid=h/2,d="",x=0;
+  while(x<w+cycle){
+    d+=(x===0?"M"+x+" "+mid:"L"+x+" "+mid);
+    d+="L"+(x+cycle*0.30)+" "+mid;
+    d+="Q"+(x+cycle*0.34)+" "+(mid-amp*0.22)+" "+(x+cycle*0.38)+" "+mid;
+    d+="L"+(x+cycle*0.43)+" "+mid;
+    d+="L"+(x+cycle*0.455)+" "+(mid+amp*0.28);
+    d+="L"+(x+cycle*0.50)+" "+(mid-amp);
+    d+="L"+(x+cycle*0.545)+" "+(mid+amp*0.52);
+    d+="L"+(x+cycle*0.58)+" "+mid;
+    d+="Q"+(x+cycle*0.66)+" "+(mid-amp*0.34)+" "+(x+cycle*0.74)+" "+mid;
+    d+="L"+(x+cycle)+" "+mid;
+    x+=cycle;
+  }
+  return d;
+}
+document.querySelectorAll(".ecg path").forEach(function(p){p.setAttribute("d",ecgPath(1200,150,300,52));});
+
+var band=document.getElementById("band");
+if("IntersectionObserver" in window){
+  new IntersectionObserver(function(es){
+    es.forEach(function(e){ band.classList.toggle("in-view", e.isIntersecting); });
+  },{threshold:0.15}).observe(band);
+}else{ band.classList.add("in-view"); }
+</script>
+</body>
+</html>
