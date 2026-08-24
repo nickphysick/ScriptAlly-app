@@ -370,52 +370,66 @@
    bottom; the page is two surfaces now and this sits wholly on the lower one, so painting it
    again would put a third surface inside the second. The top padding still holds the trace clear
    of the band's top edge. */
-.mk-featband {
-  padding: clamp(58px, 8vh, 74px) 0 26px; margin-top: 14px;
+/* The section break above now opens this region, so the band itself only closes it. */
+.mk-featband { padding: 0 0 26px; margin-top: 0; }
+
+/* ── The full-width section break: eyebrow, heading, and a trace behind them ── */
+.mk-sect { position: relative; padding: 70px 0 96px; }
+.mk-sectinner { max-width: 1300px; margin: 0 auto; padding: 0 56px; }
+.mk-seyebrow {
+  font-family: "JetBrains Mono", monospace; font-size: .66rem; letter-spacing: .26em;
+  text-transform: uppercase; color: var(--mk-muted); margin: 0 0 20px;
+  position: relative; z-index: 2; text-align: center;
+}
+/* ⚠️ NO `background` ON THIS HEADING, DELIBERATELY, AND DO NOT PUT A TIGHTER RECTANGLE BACK.
+   It used to paint a parchment gradient to clear itself space in the trace. A rectangle is always
+   wider and taller than the letterforms it covers, so it reads as a visible block — and it only
+   ever passed review because the band behind it happened to be the same colour. The moment the
+   page became two surfaces it was a pale slab across the section. Space is cleared by MASKING the
+   trace below, which paints over nothing and does not care what colour is behind it. */
+.mk-sect h2 {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600; color: var(--mk-nearblack);
+  font-size: clamp(1.9rem, 3.2vw, 2.8rem); line-height: 1.2; letter-spacing: -.018em;
+  margin: 0 auto; max-width: 24ch; position: relative; z-index: 2; text-align: center;
+  padding: 0 10px;
 }
 
-/* ── The band's header: a heading with an ECG trace passing behind it ── */
-.mk-headwrap { position: relative; text-align: center; max-width: 1180px; margin: 0 auto; padding: 0 56px; }
-.mk-headwrap h2 {
-  font-family: "Playfair Display", Georgia, serif; font-weight: 600; color: var(--mk-nearblack);
-  font-size: clamp(1.85rem, 3.1vw, 2.75rem); line-height: 1.2; letter-spacing: -.018em;
-  margin: 0 auto; max-width: 24ch; position: relative; z-index: 2;
-  /* ⚠️ THIS GRADIENT IS LOAD-BEARING AND IS NOT "UNUSED STYLING". It is a parchment mask that
-     makes the trace read as passing UNDER the words; without it the ECG cuts straight through the
-     letterforms and the heading becomes unreadable wherever the R spike crosses it. The
-     transparent stops at each end are what stop the mask reading as a painted box. It only works
-     against `z-index: 2` here and `1` on the trace — all three parts are one mechanism. */
-  background: linear-gradient(90deg, transparent, var(--mk-parch) 6%, var(--mk-parch) 94%, transparent);
-  padding: 0 8px;
-}
+/* ⚠️ THE TRACE SPANS THE VIEWPORT, NOT THE CONTENT COLUMN — it is absolutely positioned across
+   the full-bleed section while the words above it stay in the normal gutters. */
 .mk-ecg {
   position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
-  height: 150px; pointer-events: none; z-index: 1;
+  height: 190px; pointer-events: none; z-index: 1;
+  /* ⚠️ THE MASK IS WHAT CLEARS SPACE FOR THE WORDS. The trace dissolves as it nears them and
+     resumes beyond, so nothing is painted over anything. Both prefixes ship: older Safari needs
+     `-webkit-`, and without it the trace would simply run through the heading there. */
+  -webkit-mask-image: radial-gradient(ellipse 30% 62% at 50% 50%, transparent 0 46%, #000 100%);
+          mask-image: radial-gradient(ellipse 30% 62% at 50% 50%, transparent 0 46%, #000 100%);
 }
 .mk-ecg svg { display: block; width: 100%; height: 100%; }
 .mk-ecg-base, .mk-ecg-live {
   fill: none; stroke: var(--mk-burg); stroke-linejoin: round; stroke-linecap: round;
 }
 .mk-ecg-base { stroke-width: 1.4; opacity: .16; }
-/* ⚠️ THE DASH PATTERN IS THE ANIMATION. A 110-unit dash in a 4000-unit gap is a single pulse of
-   ink travelling the path; offsetting it by the full period is what moves it. Clearing the
-   dasharray (as reduced motion does) leaves the whole path drawn, which is the correct still. */
+/* The dash pattern is the animation: one pulse of ink travelling the path. Clearing the dasharray
+   (as reduced motion does) leaves the whole path drawn, which is the correct still. */
 .mk-ecg-live {
   stroke-width: 1.9; opacity: .85;
-  stroke-dasharray: 110 4000; animation: mkSweep 5.2s linear infinite;
+  stroke-dasharray: 130 4600; animation: mkSweep 6s linear infinite;
   animation-play-state: paused;
 }
-.mk-featband.mk-inview .mk-ecg-live { animation-play-state: running; }
-@keyframes mkSweep { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -4110; } }
+.mk-sect.mk-inview .mk-ecg-live { animation-play-state: running; }
+@keyframes mkSweep { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -4730; } }
 
 @media (prefers-reduced-motion: reduce) {
-  /* Inert, not slower: no sweep, no dash, and the full trace left visible a little stronger than
-     the base so the band still has its device. */
+  /* Inert, not slower: no sweep, no dash, the full trace left a little stronger than the base. */
   .mk-ecg-live { animation: none !important; stroke-dasharray: none; opacity: .34; }
 }
 @media (max-width: 900px) {
-  .mk-headwrap { padding-inline: 26px; }
-  .mk-ecg { height: 110px; }
+  .mk-sectinner { padding-inline: 26px; }
+  /* ⚠️ NO TRACE BELOW 900. The mask is an ellipse in percentages of the trace box, so it cannot
+     follow a heading that wraps — and here the heading is three lines. There is no hole that
+     works for both; the eyebrow and the vertical space carry the break instead. */
+  .mk-ecg { display: none; }
 }
 /* ⚠️ UNCHANGED WHEN `.mk-feathead` WAS DELETED, AND THAT IS A MEASURED DECISION RATHER THAN AN
    OVERSIGHT. The brief said to add back whatever the removed header was contributing IF the first

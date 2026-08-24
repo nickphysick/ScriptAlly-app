@@ -74,6 +74,9 @@ export const CTA_START = "Start tracking — it's free";
  */
 export const PULSE_HEADING = "A finger on the pulse of your querying journey";
 
+/** The break's mono eyebrow. One element, one string — delete both together if it ever goes. */
+export const SECTION_EYEBROW = "What ScriptAlly does";
+
 /* ⚠️ THE FEATURES HEADER IS DELETED AND SHOULD NOT COME BACK. `FEATURES_H2` ("The querying
    trenches, organised") and `FEATURES_SUB` ("Ditch the spreadsheet. It's time to get serious.")
    sat immediately below this heading — two centred head-and-sub pairs back to back, which reads

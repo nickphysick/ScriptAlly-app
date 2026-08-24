@@ -5,9 +5,8 @@
  * landingCopy.ts; each visual is a faithful static tableau from the ref markup.
  */
 
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { FEATURE_ROWS, FeatureRow } from "./landingCopy";
-import { BandHeader } from "./BandHeader";
 
 /* ── Row visuals (static tableaux, keyed by row) ── */
 
@@ -207,35 +206,14 @@ const Row: React.FC<{ row: FeatureRow; onPrimary: () => void; onLink?: (row: Fea
 export const FeatureRows: React.FC<{
   onStart: () => void;
   onRowLink: (row: FeatureRow) => void;
-}> = ({ onStart, onRowLink }) => {
-  /**
-   * ⚠️ THE SWEEP IS GATED ON VISIBILITY, AND THE FALLBACK IS "RUNNING", NOT "PAUSED". An infinite
-   * animation on a band most of the page never scrolls to is work the browser does for nobody.
-   * But if `IntersectionObserver` is missing the honest default is to let it run: a paused trace
-   * would be a dead line with no way back, which is worse than an animation nobody sees.
-   */
-  const bandRef = useRef<HTMLElement | null>(null);
-  const [inView, setInView] = useState(() => typeof IntersectionObserver === "undefined");
-  useEffect(() => {
-    const el = bandRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => setInView(e.isIntersecting)),
-      { threshold: 0.15 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  return (
-  <section className={"mk-featband" + (inView ? " mk-inview" : "")} id="mk-features" ref={bandRef}>
-    {/* The band's own header — it moved here out of the cream section above. */}
-    <BandHeader />
+}> = ({ onStart, onRowLink }) => (
+  /* ⚠️ NO HEADER AND NO OBSERVER HERE ANY MORE. Both moved to `BandHeader`, which is its own
+     full-width section above this band — the gate belongs with the trace it gates. */
+  <section className="mk-featband" id="mk-features">
     <div className="mk-rows">
       {FEATURE_ROWS.map((row) => (
         <Row key={row.key} row={row} onPrimary={onStart} onLink={onRowLink} />
       ))}
     </div>
   </section>
-  );
-};
+);
