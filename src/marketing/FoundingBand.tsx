@@ -20,14 +20,15 @@
  * figure comes back from the endpoint. A fabricated scarcity number on a public page is a factual
  * claim about how many people have signed up, and it is one nobody could check.
  *
- * ⚠️ AND THE SUBMIT PATH IS NOT WIRED YET — this phase builds the band; the next one connects it.
- * The handler therefore reports `down`, which is not a placeholder but the truth: there is no
- * `/api/waitlist` rewrite on either app host and the `waitlist` function is deployed nowhere, so
- * "sign-ups are briefly unavailable" is what a reader should be told either way. A control that
- * silently did nothing, or one that claimed success, would both be worse than saying so.
+ * ⚠️ THE SUBMIT PATH IS WIRED AND WILL FAIL, AND THAT IS THE CORRECT BEHAVIOUR TODAY. There is no
+ * `/api/waitlist` rewrite on either app host and the `waitlist` function is deployed on neither
+ * project, so every attempt classifies as `down` — "sign-ups are briefly unavailable", form
+ * hidden, a real address offered. See `waitlist.ts` for why the status code cannot be trusted to
+ * tell us that: a missing route here answers **200 with `text/html`**, so `res.ok` is `true` for a
+ * route that does not exist.
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Runs } from "./CopyRuns";
 import { isValidEmail } from "../lib/authActions";
 import {
@@ -35,6 +36,7 @@ import {
   FOUNDING_PLACEHOLDER, FOUNDING_CTA, FOUNDING_INVALID, FOUNDING_SENT, FOUNDING_DUPE,
   FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN, FOUNDING_NOTE, foundingCounterLabel,
 } from "./landingCopy";
+import { joinWaitlist, fetchWaitlistCount, WaitlistCount } from "./waitlist";
 import sealMark from "../assets/marketing/founding-seal-mark-placeholder.png";
 
 /**
@@ -54,15 +56,26 @@ export const FoundingBand: React.FC<{
   const [state, setState] = useState<FoundingState>("idle");
   const [invalid, setInvalid] = useState(false);
   /** Real figures from the endpoint, or null. Null renders NOTHING — see the docblock. */
-  const [count] = useState<{ claimed: number; cap: number } | null>(null);
+  const [count, setCount] = useState<WaitlistCount | null>(null);
 
-  const submit = (e: React.FormEvent) => {
+  /* ⚠️ A FAILED READ HIDES THE COUNTER AND DOES NOT CONDEMN THE FORM. `fetchWaitlistCount`
+     resolves to null for every failure, so there is no branch here to get wrong. */
+  useEffect(() => {
+    let live = true;
+    void fetchWaitlistCount().then((c) => { if (live) setCount(c); });
+    return () => { live = false; };
+  }, []);
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValidEmail(email)) { setInvalid(true); return; }
     setInvalid(false);
-    /* Phase 3b replaces this with the real call. Reporting `down` is not a stub standing in for
-       an answer — it IS the answer while nothing is deployed behind `/api/waitlist`. */
-    setState("down");
+    setState("sending");
+    const outcome = await joinWaitlist(email.trim());
+    setState(outcome.state);
+    /* The join answers with the count too, so a reader who has just claimed a place sees the bar
+       including themselves rather than the figure from before they arrived. */
+    if ("count" in outcome && outcome.count) setCount(outcome.count);
   };
 
   const showForm = !HIDES_FORM.has(state);
@@ -87,7 +100,7 @@ export const FoundingBand: React.FC<{
         <p className="mk-betablurb">{FOUNDING_BLURB}</p>
 
         {showForm && (
-          <form className="mk-betaform" onSubmit={submit} noValidate>
+          <form className="mk-betaform" onSubmit={(e) => { void submit(e); }} noValidate>
             {/* A real label, visually hidden — the placeholder is an example address, not a name
                 for the field, and a placeholder-as-label disappears the moment anyone types. */}
             <label className="mk-sr" htmlFor="mk-founding-email">{FOUNDING_FIELD_LABEL}</label>
