@@ -220,7 +220,12 @@ describe("the builder states which slots are optional, and unsets rather than st
   it("editing an existing package does not re-fill a slot the writer left out", () => {
     // ⚠️ Seeding from `synopses[0]` on EDIT would fabricate a value the writer never chose — the
     // same family as a default branch that writes. Only a new package takes a default.
-    expect(body).toContain("editing ? (isSlotFilled(editing.synopsisVersionId)");
+    /* ⚠️ THE SEED, NOT `editing` — the builder now opens on either the package being edited or the
+       one being COPIED (D-D2), and both must preserve an empty slot. The claim is unchanged; the
+       expression it reads was widened, which is exactly when a source lock needs re-pointing rather
+       than re-writing. */
+    expect(body).toContain("const seed = editing ?? duplicating ?? null;");
+    expect(body).toContain("seed ? (isSlotFilled(seed.synopsisVersionId)");
   });
 
   it("the composition line omits unfilled slots rather than printing Not included", () => {

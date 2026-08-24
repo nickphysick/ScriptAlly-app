@@ -165,3 +165,60 @@ describe("the rule — proven against the deployed database by rulesProbe, asser
     }
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers the way on", () => {
+  const band = decls(read("src/components/packages/PackagesBand.tsx"));
+  const modal = decls(read("src/components/packages/PackageModal.tsx"));
+  const page = decls(read("src/components/SubmissionPackages.tsx"));
+
+  it("a sent package's card says so, in the words the writer needs", () => {
+    /**
+     * ⚠️ THE REPORTED FAULT WAS SILENCE. Nothing on the page said a sent package cannot change, so
+     * "edited it, nothing happened" read as a bug rather than as a rule.
+     */
+    expect(band).toContain("isPackageLocked(pkg)");
+    expect(band).toContain("{LOCKED_NOTE}");
+    expect(band).toContain("{LOCKED_WHY}");
+  });
+
+  it("Duplicate & edit sits in the same box as the note", () => {
+    // ⚠️ A note that states a refusal and offers nothing is where a reader stops.
+    const i = band.indexOf("pkgb-locked");
+    expect(i, "the locked block is gone").toBeGreaterThan(-1);
+    const block = band.slice(i, i + 900);
+    expect(block).toContain("onDuplicatePackage");
+    expect(block).toContain("Duplicate &amp; edit");
+  });
+
+  it("duplicating is a CREATE — the sent package is never the write target", () => {
+    /**
+     * ⚠️ THE ENTIRE POINT OF D-D2. `pkgEditing` stays null while `pkgDuplicating` is set, so
+     * `savePackageDraft` takes the `addPackage` branch and the sent package is untouched.
+     */
+    expect(page).toContain("setPkgEditing(null);\n                  setPkgDuplicating(");
+    expect(page).toMatch(/if \(pkgEditing\) \{[\s\S]{0,600}updatePackage\(pkgEditing\.id/);
+  });
+
+  it("the two modes are mutually exclusive at every entry point", () => {
+    // open-to-edit clears duplicating; duplicate clears editing; new clears both.
+    expect(page).toContain("setPkgDuplicating(null);\n                  setPkgModal(true);");
+    expect(page).toContain("setPkgEditing(null); setPkgDuplicating(null); setPkgModal(true);");
+  });
+
+  it("the builder seeds from whichever it was given, and names the duplicate", () => {
+    expect(modal).toContain("const seed = editing ?? duplicating ?? null;");
+    expect(modal).toContain("duplicateName(duplicating.packageName, existingNames)");
+    expect(modal).toContain('duplicating ? "Duplicate package"');
+  });
+
+  it("the note reports rather than warns — no caution palette", () => {
+    const css = decls(read("src/components/packages/packagesBroadsheet.css"));
+    const i = css.indexOf(".pkgb-locked {");
+    expect(i, ".pkgb-locked is not declared").toBeGreaterThan(-1);
+    const rule = css.slice(i, css.indexOf("}", i));
+    // ⚠️ A sent package having stopped changing is the feature working, not damage.
+    expect(rule).not.toMatch(/#f?[ae]|amber|blush|--pkg-pink\b/i);
+    expect(rule).toContain("sage");
+  });
+});

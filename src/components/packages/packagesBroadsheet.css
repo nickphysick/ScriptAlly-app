@@ -582,3 +582,60 @@
   .pkgb-hncell { border-right: none; border-bottom: 1px solid var(--pkgo-hairline-soft); }
   .pkgb-hncell:last-child { border-bottom: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE LOCK ON A SENT PACKAGE (attachment model, D-D3)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ IT REPORTS, IT DOES NOT WARN. No blush, no amber, no exclamation — a sent package having
+ * stopped changing is the feature working, not a fault the writer must fix. The sage tint is the
+ * page's own "worth knowing" register; a caution palette here would make the rule read as damage.
+ *
+ * ⚠️ AND THE WAY ON IS INSIDE THE SAME BOX. A note stating a refusal with the remedy somewhere else
+ * on the page is where a reader stops. `Duplicate & edit` is what the rule costs them, so it sits in
+ * the sentence that imposes it.
+ */
+.pkgb-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 9px 11px;
+  border-radius: 9px;
+  background: rgba(215, 221, 213, 0.34);
+  border-left: 3px solid var(--pkgo-sage-deep);
+}
+.pkgb-locked-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--pkg-ink);
+}
+.pkgb-locked-note svg {
+  width: 11px; height: 11px;
+  stroke: var(--pkg-ink); stroke-width: 1.6; fill: none;
+  stroke-linecap: round; stroke-linejoin: round; flex: none;
+}
+.pkgb-locked-why { font-size: 11px; line-height: 1.5; color: var(--pkg-ink-soft); }
+
+/* ⚠️ A LINK, NOT A BUTTON FILL. The page has one filled control and it is `New package`; this is the
+   quiet alternative to an action that has just been refused, not a second call to action. */
+.pkgb-dup {
+  margin-top: 2px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pkg-burg);
+  border-bottom: 1px solid var(--pkg-pinkline);
+  cursor: pointer;
+}
+.pkgb-dup:hover { color: var(--pkg-ink); }

@@ -33,7 +33,7 @@
 import React, { useMemo, useState } from "react";
 import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../../types";
 import { ofType } from "../../lib/materialDraft";
-import { UNFILLED_SLOT, isSlotFilled, OTHER_MAX } from "../../lib/packageMetrics";
+import { UNFILLED_SLOT, isSlotFilled, OTHER_MAX, duplicateName } from "../../lib/packageMetrics";
 import { TYPE_META } from "./typeMeta";
 import "./packagesFlow.css";
 
@@ -54,6 +54,17 @@ export interface PackageDraftResult {
 export interface PackageModalProps {
   /** The package being edited, or null to build a new one. */
   editing: SubmissionPackage | null;
+  /**
+   * ⚠️ DUPLICATE & EDIT — the way forward from a locked package (D-D2), and it ships WITH the lock
+   * rather than after it. A rule that freezes a sent package and offers nothing in its place is not
+   * a rule, it is a dead end: the writer wanted a different combination and the app simply refuses.
+   *
+   * ⚠️ IT IS A CREATE, NOT AN EDIT. The source package's slots seed the form and `editing` stays
+   * null, so Save writes a NEW document and the sent one is untouched — which is the whole point.
+   */
+  duplicating?: SubmissionPackage | null;
+  /** Existing names, so the duplicate can pick one that is free. */
+  existingNames?: readonly string[];
   versions: ManuscriptVersion[];
   /** How many packages already exist — drives the suggested name. */
   packageCount: number;
@@ -70,28 +81,32 @@ export interface PackageModalProps {
 }
 
 export const PackageModal: React.FC<PackageModalProps> = ({
-  editing, versions, packageCount, onClose, onSave,
+  editing, duplicating, existingNames = [], versions, packageCount, onClose, onSave,
 }) => {
+  /* The record the form OPENS on — the one being edited, or the one being copied. */
+  const seed = editing ?? duplicating ?? null;
   const letters = useMemo(() => ofType(versions, ComponentType.QUERY_LETTER), [versions]);
   const synopses = useMemo(() => ofType(versions, ComponentType.SYNOPSIS), [versions]);
   const samples = useMemo(() => ofType(versions, ComponentType.SAMPLE_PAGES), [versions]);
 
   const [name, setName] = useState(
-    editing ? editing.packageName : packageCount === 0 ? "Standard UK" : `Variant ${packageCount + 1}`,
+    editing ? editing.packageName
+      : duplicating ? duplicateName(duplicating.packageName, existingNames)
+        : packageCount === 0 ? "Standard UK" : `Variant ${packageCount + 1}`,
   );
-  const [letterId, setLetterId] = useState(editing?.queryLetterVersionId || letters[0]?.id || "");
+  const [letterId, setLetterId] = useState(seed?.queryLetterVersionId || letters[0]?.id || "");
   /**
    * ⚠️ AN EXISTING PACKAGE'S EMPTY SLOT STAYS EMPTY. Seeding from `synopses[0]` on edit would
    * silently re-fill a slot the writer had chosen to leave out — the same fabricated-value fault as
    * a default branch that writes. Only a NEW package takes a first-listed default.
    */
   const [synopsisId, setSynopsisId] = useState(
-    editing ? (isSlotFilled(editing.synopsisVersionId) ? editing.synopsisVersionId : "") : synopses[0]?.id || "",
+    seed ? (isSlotFilled(seed.synopsisVersionId) ? seed.synopsisVersionId : "") : synopses[0]?.id || "",
   );
   const [sampleId, setSampleId] = useState(
-    editing ? (isSlotFilled(editing.samplePagesVersionId) ? editing.samplePagesVersionId : "") : "",
+    seed ? (isSlotFilled(seed.samplePagesVersionId) ? seed.samplePagesVersionId : "") : "",
   );
-  const [other, setOther] = useState(editing?.otherMaterials ?? "");
+  const [other, setOther] = useState(seed?.otherMaterials ?? "");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -102,7 +117,7 @@ export const PackageModal: React.FC<PackageModalProps> = ({
   }, [onClose]);
 
   const nameOf = (id: string) => versions.find((v) => v.id === id)?.versionName ?? "—";
-  const title = editing ? "Edit package" : "Build a package";
+  const title = editing ? "Edit package" : duplicating ? "Duplicate package" : "Build a package";
 
   /**
    * ⚠️ THE ONE THING THAT CAN STOP A SAVE, AND IT STATES ITS REASON RATHER THAN GREYING OUT. With no
@@ -233,7 +248,7 @@ export const PackageModal: React.FC<PackageModalProps> = ({
                   if (err) setError(err);
                 }}
               >
-                {saving ? "Saving…" : editing ? "Save changes" : "Save package"}
+                {saving ? "Saving…" : editing ? "Save changes" : duplicating ? "Save as a new package" : "Save package"}
               </button>
             </div>
           </div>

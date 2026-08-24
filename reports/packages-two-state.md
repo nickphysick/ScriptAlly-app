@@ -335,6 +335,41 @@ preselect beside each.
 tsc 0 · build 0, no error/[WARNING] lines · vitest 383 files, 6575 passed, 3 skipped
 ```
 
+---
+
+## D-D2 / D-D3 — shipped WITH the lock, because Phase 2 had opened a gap
+
+**The brief says `Duplicate & edit` "must ship with it, not after", and Phase 2 shipped the lock
+without it.** For the length of one commit a writer could meet a frozen package, be told why, and be
+offered nothing — the rule as a dead end. Closed here rather than left for Phase 6.
+
+- **`PackageModal` gained a duplicate mode** — `duplicating` seeds the form and `editing` stays
+  **null**, so Save takes the `addPackage` branch and the sent package is never the write target.
+  That is the whole point: a duplicate is a create.
+- **`duplicateName`** picks the first free `<name> vN`, stripping any existing suffix so duplicating
+  a `v2` gives `v3` rather than `Standard UK v2 v2`.
+- **The card carries the note** (D-D3) — `Locked — this package has been sent`, the reason beneath
+  it, and `Duplicate & edit` **inside the same box**. A note that states a refusal with its remedy
+  elsewhere on the page is where a reader stops.
+- **It reports, it does not warn.** Sage tint, no blush, no amber: a sent package having stopped
+  changing is the feature working, not damage. Asserted — the rule must contain `sage` and must not
+  reach for a caution palette.
+
+The three entry points are mutually exclusive by construction (open-to-edit clears duplicating,
+duplicate clears editing, New clears both), and that is locked rather than assumed.
+
+Six further cases in `packageLock.test.ts` (24 total). **Proven red** by removing the card's locked
+block: two cases fail naming the missing block.
+
+⚠️ **One existing lock had to be re-pointed, not re-written.** `packageShapes.test.ts` asserted the
+literal `editing ? (isSlotFilled(editing.synopsisVersionId)`; the builder now reads a `seed` that is
+either the edited package or the copied one. The **claim** — an empty slot is never silently
+re-filled — is unchanged and now covers both modes; only the expression widened.
+
+```
+tsc 0 · build 0, no error/[WARNING] lines · vitest 383 files, 6581 passed, 3 skipped
+```
+
 ## Flags
 
 | flag | state |

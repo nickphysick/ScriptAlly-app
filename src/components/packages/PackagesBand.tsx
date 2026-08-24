@@ -17,6 +17,7 @@
 import React from "react";
 import { ManuscriptVersion, Query, SubmissionPackage } from "../../types";
 import { packageTiles, tileFooter, MISSING_SLOT } from "../../lib/packagesOverview";
+import { isPackageLocked, LOCKED_NOTE, LOCKED_WHY } from "../../lib/packageMetrics";
 import { packageStamp } from "../../lib/packageTracking";
 import { IllustrationSlot } from "./IllustrationSlot";
 import "./packagesBroadsheet.css";
@@ -27,6 +28,11 @@ export interface PackagesBandProps {
   queries: Query[];
   onOpenPackage: (id: string) => void;
   onNewPackage: () => void;
+  /**
+   * ⚠️ THE WAY FORWARD FROM A LOCKED PACKAGE (D-D2), AND IT SHIPS WITH THE LOCK. Without it the rule
+   * is a dead end — the writer wanted a different combination and the app just refuses.
+   */
+  onDuplicatePackage?: (id: string) => void;
   /** Rendered per card when given — the archive/delete control. */
   renderRemove?: (pkg: SubmissionPackage) => React.ReactNode;
   /**
@@ -38,7 +44,7 @@ export interface PackagesBandProps {
 }
 
 export const PackagesBand: React.FC<PackagesBandProps> = ({
-  packages, versions, queries, onOpenPackage, onNewPackage, renderRemove, renderTracking,
+  packages, versions, queries, onOpenPackage, onNewPackage, onDuplicatePackage, renderRemove, renderTracking,
 }) => {
   const tiles = packageTiles(packages, versions, queries);
   const byId = new Map(packages.map((p) => [p.id, p]));
@@ -62,6 +68,33 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
                   {t.name}
                 </button>
               </h3>
+              {/**
+                * ⚠️ THE LOCK IS VISIBLE WHERE THE EDITING HAPPENS (D-D3), and that is the whole
+                * point of putting it on the card rather than only in the refusal. The reported
+                * fault — edited the package, query unchanged, no feedback — was SILENCE, not a bug:
+                * nothing on the page said a sent package cannot change, so the app looked broken
+                * rather than principled.
+                *
+                * ⚠️ AND THE WAY ON SITS IN THE SAME BREATH. A note that states a refusal and offers
+                * nothing is where a writer stops; `Duplicate & edit` is what the rule costs them,
+                * and it belongs beside the sentence that imposes it.
+                */}
+              {pkg && isPackageLocked(pkg) && (
+                <div className="pkgb-locked">
+                  <span className="pkgb-locked-note">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                    </svg>
+                    {LOCKED_NOTE}
+                  </span>
+                  <span className="pkgb-locked-why">{LOCKED_WHY}</span>
+                  {onDuplicatePackage && (
+                    <button type="button" className="pkgb-dup" onClick={() => onDuplicatePackage(t.id)}>
+                      Duplicate &amp; edit
+                    </button>
+                  )}
+                </div>
+              )}
               <div className="pkgb-slots">
                 {t.slots.map((sl) => (
                   <span key={sl.label} className="pkgb-slot">

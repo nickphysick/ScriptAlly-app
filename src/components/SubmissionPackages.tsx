@@ -85,6 +85,8 @@ export const SubmissionPackages: React.FC = () => {
   /* The package builder (flow pack Phase 3). */
   const [pkgModal, setPkgModal] = useState(false);
   const [pkgEditing, setPkgEditing] = useState<SubmissionPackage | null>(null);
+  /** The package being COPIED (D-D2). Never set at the same time as `pkgEditing`. */
+  const [pkgDuplicating, setPkgDuplicating] = useState<SubmissionPackage | null>(null);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -202,6 +204,7 @@ export const SubmissionPackages: React.FC = () => {
     }
     setPkgModal(false);
     setPkgEditing(null);
+    setPkgDuplicating(null);
     return null;
   };
 
@@ -401,9 +404,17 @@ export const SubmissionPackages: React.FC = () => {
                 queries={msQueries}
                 onOpenPackage={(id) => {
                   setPkgEditing(msPackages.find((p) => p.id === id) ?? null);
+                  setPkgDuplicating(null);
                   setPkgModal(true);
                 }}
-                onNewPackage={() => { setPkgEditing(null); setPkgModal(true); }}
+                onNewPackage={() => { setPkgEditing(null); setPkgDuplicating(null); setPkgModal(true); }}
+                /* ⚠️ A CREATE, NOT AN EDIT — `pkgEditing` stays null, so Save writes a NEW document
+                   and the sent package is untouched, which is the entire point of D-D2. */
+                onDuplicatePackage={(id) => {
+                  setPkgEditing(null);
+                  setPkgDuplicating(msPackages.find((p) => p.id === id) ?? null);
+                  setPkgModal(true);
+                }}
                 /* §3 — ⚠️ DERIVED, NEVER STORED. The count is a read over the queries already in
                    memory; nothing writes to the package when one is logged, so a deleted query
                    stops being counted with no cleanup. See `sendsWithPackage`. */
@@ -470,11 +481,13 @@ export const SubmissionPackages: React.FC = () => {
       />}
 
       {pkgModal && <PackageModal
-        key={pkgEditing?.id ?? "new-package"}
+        key={pkgEditing?.id ?? (pkgDuplicating ? `dup-${pkgDuplicating.id}` : "new-package")}
         editing={pkgEditing}
+        duplicating={pkgDuplicating}
+        existingNames={msPackages.map((p) => p.packageName)}
         versions={msVersions}
         packageCount={msPackages.length}
-        onClose={() => { setPkgModal(false); setPkgEditing(null); }}
+        onClose={() => { setPkgModal(false); setPkgEditing(null); setPkgDuplicating(null); }}
         onSave={savePackageDraft}
       />}
       </div>
