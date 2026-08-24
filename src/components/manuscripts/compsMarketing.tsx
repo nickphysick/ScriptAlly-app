@@ -131,8 +131,9 @@ export const CompCarousel: React.FC<{ slides: CompSlide[]; label: string }> = ({
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
+      {/* ⚠️ NO `n / 5` COUNTER (v3.1 §2) — the dots already state position, and two devices saying
+          one thing is one of them to keep in step for nothing. */}
       <div className="ct-caro-stage">
-        <span className="ct-caro-count" aria-hidden="true">{index + 1} / {count}</span>
         {slides.map((s, i) => (
           /* ⚠️ INACTIVE SLIDES LEAVE THE ACCESSIBILITY TREE, not just the viewport. Visually hidden
              but readable is how a screen reader ends up narrating all five at once; `aria-hidden`
@@ -186,7 +187,6 @@ export const CompCarousel: React.FC<{ slides: CompSlide[]; label: string }> = ({
  * mechanism.
  */
 export interface FeatureCopy {
-  eyebrow?: string;
   heading: string;
   lead: string;
   /** the demoted placement's shorter lead, where one is wanted */
@@ -209,7 +209,8 @@ export const FEATURE_JOBS: FeatureCopy = {
  * nobody later goes looking for a source that does not exist.
  */
 export const FEATURE_MISSTEPS: FeatureCopy = {
-  eyebrow: "And five to avoid",
+  /* ⚠️ NO EYEBROW (v3.1 §5). The heading carries it; a mono label above a Playfair heading that says
+     nearly the same thing is a second voice for one idea. */
   heading: "Things to avoid",
   lead: "The same handful of missteps turn up in query letters again and again. None of them are about the writing — they are about the choice of comp, which makes them the easiest thing on the page to get right.",
   slides: COMP_MISSTEPS,
@@ -232,7 +233,6 @@ export const FeatureBlock: React.FC<{
     aria-label={copy.heading}
   >
     <div className="ct-feature-l">
-      {copy.eyebrow && <div className="ct-lbl ct-feature-eyebrow">{copy.eyebrow}</div>}
       {/* ⚠️ PLAIN PLAYFAIR IN INK, ONE WEIGHT — no italic accent word, no burgundy `<em>`, no
           colour-shifted word. A heading that changes colour mid-sentence reads as two things. */}
       <h2 className="ct-feature-h">{copy.heading}</h2>
@@ -283,15 +283,21 @@ export const StagesBlock: React.FC = () => (
   /* ⚠️ NO BAND ANY MORE (v3.1 §4). The stages moved to the TOP of the page, and a wash that made
      sense as a closing section reads as a header treatment at the top. The three blocks are now
      separated by hairline dividers on one surface — the sheet — rather than by changing surface. */
-  <section className="ct-measure ct-stages" aria-labelledby="ct-stages-h">
-    <h3 className="ct-stages-h" id="ct-stages-h">Managing your comps with ScriptAlly</h3>
+  /* ⚠️ A WIDER MEASURE THAN THE FEATURE BLOCKS, DELIBERATELY (v3.1 §1). 1240 against their 1060,
+     because a three-across grid of images needs the room and a three-column grid squeezed to a
+     copy measure makes each image too small to read. The left edges therefore do NOT align down
+     the page — that is intended, and unifying them is the thing not to "fix". */
+  <section className="ct-stageswide ct-stages" aria-labelledby="ct-stages-h">
+    <h3 className="ct-stages-h" id="ct-stages-h">Curate your comps with ScriptAlly</h3>
     <p className="ct-stages-p">Gather them, grow them, and put them to work in your queries.</p>
     <div className="ct-stages-grid">
       {COMP_STAGES.map((s, i) => (
         /* ⚠️ THE CONNECTOR IS A CLASS ON THE STAGE, NOT A SEPARATE ELEMENT, and the LAST stage never
            carries it — a trailing connector points at nothing. It is drawn only on wide viewports,
            because once the grid stacks a horizontal rule between rows is pointing sideways. */
-        <div key={s.slot} className={`ct-stage${i < COMP_STAGES.length - 1 ? " linked" : ""}`}>
+        /* ⚠️ NO CONNECTOR CLASS ANY MORE (v3.1 §4) — the hairlines between stages went with the
+           circles they joined. A rule between two rectangular plates reads as a border, not a link. */
+        <div key={s.slot} className="ct-stage">
           <div className="ct-stage-slot" data-slot={s.slot}><span>{s.slot}</span></div>
           <span className="ct-lbl">{s.label}</span>
           <h4>{s.heading}</h4>

@@ -68,29 +68,31 @@ test("§1 the feature block sits inside a measure, copy beside illustration", as
   expect(r.scoutOnFirstVisit, "the Scout is still on the first-visit state").toBe(false);
 });
 
-test("§2 the stage and the dots share one width, counter inside", async ({ page }) => {
+test("§2 the stage and the dots share one width, and the counter is gone", async ({ page }) => {
   await openRoute(page, ROUTE, { width: 1440, height: 1000 });
   const r = await page.evaluate(() => {
     const caro = document.querySelector(".ctpage .ct-caro") as HTMLElement;
     const stage = caro.querySelector(".ct-caro-stage") as HTMLElement;
     const dots = caro.querySelector(".ct-caro-dots") as HTMLElement;
-    const count = caro.querySelector(".ct-caro-count") as HTMLElement;
     const slot = caro.querySelector(".ct-caro-slide.on .ct-caro-slot") as HTMLElement;
     const w = caro.getBoundingClientRect(), s = stage.getBoundingClientRect();
-    const d = dots.getBoundingClientRect(), c = count.getBoundingClientRect();
+    const d = dots.getBoundingClientRect();
     return {
       wrapW: Math.round(w.width), stageW: Math.round(s.width), dotsW: Math.round(d.width),
       stageRight: Math.round(s.right), wrapRight: Math.round(w.right),
       dotsCentred: Math.abs((d.left + d.right) / 2 - (s.left + s.right) / 2) < 2,
-      countInside: c.left >= s.left && c.right <= s.right && c.top >= s.top,
+      counterGone: !caro.querySelector(".ct-caro-count"),
       slotH: Math.round(slot.getBoundingClientRect().height),
     };
   });
-  console.log(`  wrap ${r.wrapW} · stage ${r.stageW} · dots ${r.dotsW} · dots centred=${r.dotsCentred} · counter inside=${r.countInside} · slot ${r.slotH}`);
+  console.log(`  wrap ${r.wrapW} · stage ${r.stageW} · dots ${r.dotsW} · dots centred=${r.dotsCentred} · counter gone=${r.counterGone} · slot ${r.slotH}`);
   expect(r.stageW, "the stage overruns its wrapper").toBeLessThanOrEqual(r.wrapW);
   expect(r.stageRight, "the stage overruns the wrapper's right edge").toBeLessThanOrEqual(r.wrapRight + 1);
   expect(r.dotsCentred, "the dots are not centred under the card").toBe(true);
-  expect(r.countInside, "the n/5 counter is outside the stage").toBe(true);
+  /* ⚠️ THE COUNTER IS RETIRED (v3.1 §2) — the dots state position, so this asserts its ABSENCE
+     where it used to assert its placement. An assertion about where a deleted thing sits is one
+     that can only ever fail or mislead. */
+  expect(r.counterGone, "the n/5 counter is back").toBe(true);
   expect(r.slotH).toBe(250);
 });
 
@@ -103,7 +105,7 @@ test("§5 the top row starts, and the tail absorbs the paired-panel slack", asyn
       const tile = q(".ct-mstile"), card = q(".ct-toprow .ct-qline");
       const comps = document.querySelectorAll(".ctpage .ct-split > .ct-panel")[0] as HTMLElement;
       const scout = document.querySelectorAll(".ctpage .ct-split > .ct-panel")[1] as HTMLElement;
-      const tail = q(".ct-ctail"), circle = q(".ct-stage-slot");
+      const tail = q(".ct-ctail");
       return {
         row: getComputedStyle(q(".ct-toprow")).alignItems,
         tileH: Math.round(tile.getBoundingClientRect().height),
@@ -111,16 +113,16 @@ test("§5 the top row starts, and the tail absorbs the paired-panel slack", asyn
         compsH: Math.round(comps.getBoundingClientRect().height),
         scoutH: Math.round(scout.getBoundingClientRect().height),
         tailH: Math.round(tail.getBoundingClientRect().height),
-        circle: Math.round(circle.getBoundingClientRect().width),
       };
     });
     console.log(`  align=${one.row} tile ${one.tileH} card ${one.cardH} · comps ${one.compsH} scout ${one.scoutH} · tail ${one.tailH}`);
-    console.log(`  circle ${one.circle}`);
     expect(one.row, "the top row is stretching again — the tile loses its compression").toBe("start");
     expect(one.tileH, "the tile is being stretched to the builder's height").toBeLessThan(200);
     expect(Math.abs(one.compsH - one.scoutH), "comps and Scout stopped sharing a height").toBeLessThanOrEqual(2);
     expect(one.tailH, "the tail row is not absorbing the slack at one comp").toBeGreaterThan(120);
-    expect(one.circle).toBe(120);
+    /* ⚠️ THE STAGE SLOT'S GEOMETRY MOVED TO `compsReorder` (v3.1 §4) — it is a 4:3 plate now, not a
+       120px circle, and it is asserted there against its own column rather than here against a
+       literal that this round retired. */
 
     /* at several comps the same tail is a thin strip — the point of `flex: 1` */
     await add(page, `${T} two`, "2022");

@@ -13,48 +13,78 @@ const blocks = (page: import("@playwright/test").Page, scope: string) =>
   page.evaluate((sel) => {
     const root = document.querySelector(sel) as HTMLElement;
     if (!root) return null;
-    return [...root.querySelectorAll(".ct-stages, .ct-feature, .ct-blockrule")].map((el) => {
-      if (el.classList.contains("ct-blockrule")) return "rule";
+    return [...root.querySelectorAll(".ct-stages, .ct-feature")].map((el) => {
       if (el.classList.contains("ct-stages")) return "stages";
       const h = el.querySelector("h2")?.textContent?.trim() ?? "";
       return `${h.startsWith("Things") ? "missteps" : "jobs"}${el.classList.contains("flip") ? "+flip" : ""}${el.classList.contains("demoted") ? "+demoted" : ""}`;
     });
   }, scope);
 
-test("§4 first visit reads stages · rule · jobs · rule · missteps(flipped)", async ({ page }) => {
+test("§4 first visit reads stages · jobs · missteps(flipped), separated by space alone", async ({ page }) => {
   await openRoute(page, ROUTE, { width: 1440, height: 1000 });
   const order = await blocks(page, ".ctpage");
   console.log(`  order: ${order!.join(" → ")}`);
-  expect(order).toEqual(["stages", "rule", "jobs", "rule", "missteps+flip"]);
+  expect(order).toEqual(["stages", "jobs", "missteps+flip"]);
 
   const r = await page.evaluate(() => {
     const flip = document.querySelector(".ctpage .ct-feature.flip") as HTMLElement;
     const copy = flip.querySelector(".ct-feature-l") as HTMLElement;
     const reel = flip.querySelector(".ct-caro") as HTMLElement;
     const band = document.querySelector(".ctpage .ct-stages-band");
-    const rule = document.querySelector(".ctpage .ct-blockrule") as HTMLElement;
-    const circle = document.querySelector(".ctpage .ct-stage-slot") as HTMLElement;
+    const rule = document.querySelector(".ctpage .ct-blockrule");
+    const counter = document.querySelector(".ctpage .ct-caro-count");
+    const connector = document.querySelector(".ctpage .ct-stage.linked");
+    const slot = document.querySelector(".ctpage .ct-stage-slot") as HTMLElement;
+    const stages = document.querySelector(".ctpage .ct-stages") as HTMLElement;
+    const feature = document.querySelector(".ctpage .ct-feature") as HTMLElement;
+    const sb = slot.getBoundingClientRect();
     return {
       reelLeftOfCopy: reel.getBoundingClientRect().left < copy.getBoundingClientRect().left,
       cols: getComputedStyle(flip).gridTemplateColumns,
       band: !!band,
       ctas: document.querySelectorAll(".ctpage .ct-feature-ctas button").length,
-      ruleW: Math.round(rule.getBoundingClientRect().width),
-      circle: Math.round(circle.getBoundingClientRect().width),
+      rule: !!rule, counter: !!counter, connector: !!connector,
+      /* the slot is a 4:3 plate at the column's full width now, not a circle */
+      slotW: Math.round(sb.width), slotH: Math.round(sb.height),
+      colW: Math.round((slot.parentElement as HTMLElement).getBoundingClientRect().width),
+      slotRatio: Math.round((sb.width / sb.height) * 100) / 100,
+      slotRadius: getComputedStyle(slot).borderTopLeftRadius,
+      /* two measures, deliberately different — see the §1 note in comps.css */
+      stagesMax: getComputedStyle(stages).maxWidth,
+      featureMax: getComputedStyle(feature).maxWidth,
+      gap: Math.round(feature.getBoundingClientRect().top - stages.getBoundingClientRect().bottom),
       eyebrow: flip.querySelector(".ct-feature-eyebrow")?.textContent?.trim(),
       heading: flip.querySelector("h2")?.textContent?.trim(),
       headingColour: getComputedStyle(flip.querySelector("h2")!).color,
       slots: [...flip.querySelectorAll(".ct-caro-slot")].map((s) => s.getAttribute("data-slot")),
     };
   });
-  console.log(`  flip: reel-left=${r.reelLeftOfCopy} cols "${r.cols}" · band=${r.band} · ctas=${r.ctas} · rule ${r.ruleW} · circle ${r.circle}`);
+  console.log(`  flip: reel-left=${r.reelLeftOfCopy} cols "${r.cols}" · ctas=${r.ctas}`);
+  console.log(`  retired: band=${r.band} rule=${r.rule} counter=${r.counter} connector=${r.connector}`);
+  console.log(`  slot ${r.slotW}×${r.slotH} (col ${r.colW}) ratio ${r.slotRatio} radius ${r.slotRadius} · measures stages ${r.stagesMax} / feature ${r.featureMax} · gap ${r.gap}`);
   console.log(`  "${r.eyebrow}" / "${r.heading}" · slots ${r.slots!.join(" · ")}`);
   expect(r.reelLeftOfCopy, "the flipped block did not invert").toBe(true);
   expect(r.band, "the stages band is still rendering").toBe(false);
   expect(r.ctas, "first visit must offer exactly one action").toBe(1);
-  expect(r.ruleW, "the divider is not inside the shared measure").toBeLessThanOrEqual(1060);
-  expect(r.circle).toBe(120);
-  expect(r.eyebrow).toBe("And five to avoid");
+  /* ⚠️ FOUR PIECES OF FURNITURE ARE ASSERTED ABSENT, not merely unused — band, dividers, the n/5
+     counter and the stage connectors. Each was built to a previous brief and removed by this one,
+     and an absent-assertion is what stops one quietly coming back. */
+  expect(r.rule, "the dividers are back — separation is space alone now").toBe(false);
+  expect(r.counter, "the n/5 counter is back — the dots state position").toBe(false);
+  expect(r.connector, "the stage connectors are back — they went with the circles").toBe(false);
+  /* the slot is a 4:3 plate, ~340×255 at the 1240 measure */
+  expect(r.slotRatio, "the stage slot is not 4:3").toBeCloseTo(1.33, 1);
+  /* ⚠️ COMPARED AGAINST THE COLUMN, NOT A LITERAL. The first version said `> 300` and the slot is
+     exactly 300 at 1440 — an off-by-one that reported a correct plate as too narrow. The claim is
+     "full column width", so it is measured against the column. */
+  expect(r.slotW, "the stage slot is not the column's full width").toBeGreaterThanOrEqual(r.colW - 1);
+  expect(r.slotRadius).toBe("14px");
+  /* ⚠️ THE TWO MEASURES MUST DIFFER. Equal ones would mean somebody "fixed" the intended
+     misalignment, which starves the three-across grid or over-runs the prose. */
+  expect(r.stagesMax).toBe("1240px");
+  expect(r.featureMax).toBe("1060px");
+  expect(r.gap, "the 96px block rhythm has gone").toBeGreaterThanOrEqual(80);
+  expect(r.eyebrow, "the missteps block grew an eyebrow again").toBeUndefined();
   expect(r.heading).toBe("Things to avoid");
   expect(r.slots).toEqual(["comp-miss-giants", "comp-miss-age", "comp-miss-unread", "comp-miss-shelf", "comp-miss-count"]);
 });
@@ -69,7 +99,7 @@ test("§7 the workspace mirrors all three, demoted, in the same order", async ({
     await page.locator(`.ct-crow:has-text("${T}")`).waitFor({ timeout: 8000 });
     const order = await blocks(page, ".ct-demoted");
     console.log(`  demoted: ${order!.join(" → ")}`);
-    expect(order).toEqual(["stages", "rule", "jobs+demoted", "rule", "missteps+flip+demoted"]);
+    expect(order).toEqual(["stages", "jobs+demoted", "missteps+flip+demoted"]);
     const ctas = await page.evaluate(() => document.querySelectorAll(".ctpage .ct-feature-ctas button").length);
     const h = await page.evaluate(() => getComputedStyle(document.querySelector(".ctpage .ct-feature.demoted h2")!).fontSize);
     console.log(`  demoted ctas=${ctas} heading ${h}`);

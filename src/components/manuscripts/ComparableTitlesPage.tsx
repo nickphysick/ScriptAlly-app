@@ -729,10 +729,11 @@ export const ComparableTitlesPage: React.FC<{
                   ⚠️ THE DIVIDERS ARE THE SEPARATION NOW — the band is gone. Three blocks on one
                   surface, ruled apart; a wash that read as a closing section reads as a header
                   treatment once the block moves to the top. */}
+              {/* ⚠️ SEPARATION IS SPACE ALONE (v3.1 §4) — the dividers are gone with the band. Three
+                  blocks on one surface, held apart by 96px; a rule between them was doing the job
+                  twice and made each block read as a panel rather than as a section. */}
               <StagesBlock />
-              <hr className="ct-blockrule" />
               <FeatureBlock copy={FEATURE_JOBS} onAddComp={() => setFormState({ index: null })} />
-              <hr className="ct-blockrule" />
               <FeatureBlock copy={FEATURE_MISSTEPS} flip />
             </>
           )
@@ -1150,9 +1151,7 @@ export const ComparableTitlesPage: React.FC<{
                 would make the two states two different documents. */}
             <div className="ct-demoted">
               <StagesBlock />
-              <hr className="ct-blockrule" />
               <FeatureBlock copy={FEATURE_JOBS} demoted />
-              <hr className="ct-blockrule" />
               <FeatureBlock copy={FEATURE_MISSTEPS} flip demoted />
             </div>
           </>

@@ -229,6 +229,15 @@
  * ⚠️ IT IS APPLIED TO THE TWO BLOCKS, NOT TO THE SHEET. Changing the sheet would move every page;
  * this is a wrapper the feature and stages blocks opt into, and nothing else reads it. */
 .ct-measure { max-width: 1060px; margin-inline: auto; }
+/* ⚠️ TWO MEASURES, AND THEIR EDGES DO NOT ALIGN — that is the design (v3.1 §1). The stages carry a
+   three-across grid of images and need 1240; the feature blocks are a copy column and cap at 1060.
+   Unifying them is the thing not to "fix": it would either starve the images or run the prose past
+   a comfortable measure. */
+.ct-stageswide { max-width: 1240px; margin-inline: auto; }
+
+/* ⚠️ THE BLOCK RHYTHM IS THE SEPARATION (v3.1 §4). 96px between the three sections, 110px before the
+   workspace's demoted run — space alone, no rules, no band. */
+.ct-feature + .ct-feature, .ct-stages + .ct-feature { margin-top: 96px; }
 
 /* ⚠️ `minmax(0, 500px)`, NOT `1fr` — the copy column STOPS GROWING, and `justify-content: center`
    puts the pair in the middle of whatever room is left rather than spreading it to the edges. A
@@ -260,13 +269,8 @@
 /* ⚠️ `.ct-caro-toggle` IS RETIRED (v3.1 §5) — the missteps have their own BLOCK now rather than a
    second track behind a control, so there is nothing to toggle between. */
 
-/* ⚠️ THE DIVIDER IS THE BLOCK SEPARATION NOW. It sits INSIDE the shared measure so it lines up with
-   the copy either side of it — a rule running wider than the text it divides reads as page furniture
-   rather than as punctuation between two blocks. */
-.ct-blockrule {
-  max-width: 1060px; margin: 8px auto 8px; border: none;
-  border-top: 1px solid var(--ct-band-hair);
-}
+/* ⚠️ `.ct-blockrule` IS RETIRED (v3.1 §4). Separation is SPACE now — 96px between blocks — and a
+   rule as well was doing the job twice, which made each section read as a panel. */
 
 /* ⚠️ `flip` REORDERS THE GRID'S CHILDREN AND NOTHING ELSE (v3.1 §4). `order` on the two children,
    not `direction: rtl` — which would invert punctuation and the scrollbar — and not a second markup
@@ -284,7 +288,7 @@
   .ct-feature.flip .ct-feature-l { order: 1; }
   .ct-feature.flip .ct-caro { order: 2; }
 }
-.ct-feature-eyebrow { display: block; margin-bottom: 12px; }
+/* ⚠️ `.ct-feature-eyebrow` IS RETIRED (v3.1 §5) — the missteps block carries its heading alone. */
 
 /* ── the carousel ── */
 /* ⚠️ THE STAGE AND THE DOTS SHARE ONE WRAPPER AT ONE WIDTH (§2). They were siblings of different
@@ -297,12 +301,7 @@
   background: var(--ct-card); border: var(--ct-bdw) solid var(--ct-bd);
   border-radius: 16px; box-shadow: var(--ct-panel-sh); padding: 24px 24px 22px;
 }
-/* ⚠️ INSIDE THE STAGE'S TOP-RIGHT AND ABOVE THE SLIDES — `z-index` because the slides are grid
-   siblings in the same cell and would otherwise paint over it. */
-.ct-caro-count {
-  position: absolute; top: 14px; right: 16px; z-index: 2;
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .13em; color: var(--ct-label);
-}
+/* ⚠️ `.ct-caro-count` IS RETIRED (v3.1 §2) — the dots state position already. */
 /* ⚠️ THE STAGE HOLDS ITS HEIGHT FROM THE TALLEST SLIDE, so the block does not jump as it advances:
    every slide is in the grid's ONE cell, and only the active one is visible. `display: none` would
    let the stage collapse to the current slide and resize on every tick. */
@@ -342,29 +341,25 @@
    separate the three blocks on ONE surface instead. */
 /* ⚠️ THE FIRST BLOCK SITS CLOSE UNDER THE HEADER'S HAIRLINE (§1) — it leads the page now,
    so the old 40px opening gap read as a dropped first line. */
-.ct-stages { padding: 6px 0 0; text-align: center; }
+.ct-stages { padding: 14px 0 0; text-align: center; }
 .ct-stages-h {
-  margin: 0; font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600;
-  line-height: 1.3; color: var(--ct-ink);
+  margin: 0; font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 600;
+  line-height: 1.25; color: var(--ct-ink);
 }
-.ct-stages-p { margin: 10px 0 0; font-size: 13.5px; color: var(--ct-ink-soft); }
+.ct-stages-p { margin: 12px 0 0; font-size: 14.5px; color: var(--ct-ink-soft); }
 .ct-stages-grid {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 34px; margin-top: 38px;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin-top: 40px;
 }
-@media (max-width: 1040px) { .ct-stages-grid { grid-template-columns: minmax(0, 1fr); gap: 34px; } }
+@media (max-width: 1040px) { .ct-stages-grid { grid-template-columns: minmax(0, 1fr); gap: 36px; } }
 .ct-stage { position: relative; display: flex; flex-direction: column; align-items: center; min-width: 0; }
-/* ⚠️ THE CONNECTOR IS WIDE-VIEWPORT ONLY, and never on the last stage. Once the grid stacks, a
-   horizontal rule between rows points sideways at nothing. */
-.ct-stage.linked::after {
-  /* ⚠️ 60px IS HALF THE CIRCLE, so the rule meets it on its centre line — the number is derived
-     from the circle's height and has to move with it. It was 75 for a 150px circle. */
-  content: ''; position: absolute; top: 60px; left: calc(50% + 76px); right: calc(-50% + 76px);
-  height: 1px; background: var(--ct-band-hair);
-}
-@media (max-width: 1040px) { .ct-stage.linked::after { display: none; } }
+/* ⚠️ THE CONNECTORS ARE RETIRED WITH THE CIRCLES THEY JOINED (v3.1 §4). A hairline between two
+   rectangular plates reads as a border on each rather than as a link between them. */
 .ct-stage-slot {
-  width: 120px; height: 120px; border-radius: 50%; border: 1px dashed var(--ct-taupe-bd);
-  background: var(--ct-sect); display: flex; align-items: center; justify-content: center;
+  /* ⚠️ A RECTANGULAR PLATE, NOT A CIRCLE (v3.1 §4) — full column width at 4:3, which is ~340×255 at
+     the 1240 measure. `aspect-ratio` rather than a fixed height, so the plate tracks the column
+     instead of needing a second number kept in step with the measure. */
+  width: 100%; aspect-ratio: 4 / 3; border-radius: 14px; border: 1px dashed var(--ct-taupe-bd);
+  background: var(--ct-card); display: flex; align-items: center; justify-content: center;
   padding: 0 10px; margin-bottom: 18px;
 }
 .ct-stage-slot span {
@@ -372,10 +367,10 @@
   color: var(--ct-label); text-align: center; overflow-wrap: anywhere;
 }
 .ct-stage h4 {
-  margin: 9px 0 0; font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600;
-  line-height: 1.3; color: var(--ct-ink);
+  margin: 9px 0 0; font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600;
+  line-height: 1.25; color: var(--ct-ink); max-width: 24ch;
 }
-.ct-stage p { margin: 9px 0 0; max-width: 320px; font-size: 12.5px; line-height: 1.6; color: var(--ct-ink-soft); }
+.ct-stage p { margin: 10px 0 0; max-width: 36ch; font-size: 13.5px; line-height: 1.6; color: var(--ct-ink-soft); }
 
 /* ⚠️ `.ct-scout--solo` IS RETIRED (v3.1 §3) — the Scout no longer renders on the first-visit
    state, so there is no solo placement to space. */
@@ -590,7 +585,9 @@
 /* ⚠️ THE DEMOTED BLOCKS ARE SEPARATED BY A RULE AND A GENEROUS GAP (v3 §5) — the reader has
    finished working by the time they reach these, and without the break the feature block reads as
    another panel of the workspace rather than as reference material below it. */
-.ct-demoted { margin-top: 56px; padding-top: 8px; border-top: 1px solid var(--ct-band-hair); }
+/* ⚠️ 110px AND NO RULE. The reader has finished working by the time they reach these; the gap is
+   what says so, and the hairline that used to say it as well went with the dividers. */
+.ct-demoted { margin-top: 110px; }
 
 /* ⚠️ THE FIELD-NOTES CARD'S RULES ARE RETIRED WITH IT (v3 §6) — `.ct-fnotes`, `.ct-fncollapse`,
    `.ct-fnbody`, `.ct-fngrid`, `.ct-fncell`, `.ct-fnslot` and `.ct-fnattr`. The card duplicated
