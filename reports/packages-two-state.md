@@ -307,7 +307,7 @@ being wrong rather than being deleted.
 teach-first present: 1
 furniture: all zero (columns, cards, ghosts, tracking, zero-counts)
 headline : "Fed up of guessing which materials are landing with agents?"  · 156/156, unclipped
-carousel : 4 slides · slot label "SLOT · PKG-JOB-RECORD · 396×214"
+carousel : 4 slides · slot label "SLOT · PKG-JOB-RECORD · 396×214"   ⚠️ SUPERSEDED — see the v2 inventory below
 stages   : Stage one / Stage two / Stage three · 3 discs
 filled controls: ["Add your first material"]   · horizontal overflow: 0px
 ```
@@ -991,3 +991,111 @@ mid-shape-change) and touch no file in this pack.
 
 **D15:** `ImportCsv` is unaffected — it writes `materialsWanted` on import and never touched
 `attachPackage`; Part 4 changes nothing about it.
+
+---
+
+## Part A visual amendments — hero de-boxed, stages enlarged (24 Aug)
+
+Ref: `design-refs/submission-packages-teach-v2.html`, committed. Supersedes
+`submission-packages-teach-first.html` for this state's layout. Measured at 1440 and 1920 in the
+worktree at `/Users/nickphysick/ScriptAlly-ptr` — 2 commits behind main, neither touching
+`src/components/packages/`, both files under test byte-identical to the primary tree.
+
+Reached by **selecting** a manuscript with neither versions nor packages (`thin-ms`), not by
+deleting anything: the predicate is `msVersions.length + msPackages.length > 0`, per manuscript.
+
+### ⚠️ Two premise corrections
+
+**There was no bottom-joined slab.** D1 called for removing a `14px 14px 0 0` / `0 0 14px 14px`
+join between hero and stages. The hero was `border-radius: 14px` on all four corners and
+`.pkgt-stages` had no container at all. Nothing was un-joined: the card came **off** the hero and
+a card went **on** to the stages, which never had one. The end state is the ref's.
+
+**The ref's `line-height: 1.18` is not taken — it crops.** Measured at 42px: `scrollHeight 151`
+against `clientHeight 149` at both widths; `1.3` gives 164/164. This is the **second ref running**
+to ask for less than the floor on this headline (v1's 1.12 cost 4px at 40px). The brief's own
+clause covers it. Stage titles likewise keep 1.3 rather than the ref's 1.28.
+
+### ⚠️ And a correction to the descender check itself
+
+The sweep first reported two headings cropping at 1.3 — the section head and one stage title.
+**Both were rounding, not lost ink.** `scrollHeight` and `clientHeight` are integers; a 44.19px
+line box gives 44 and 45, so the standing check fires on 0.81px of arithmetic.
+
+Measured against the **fractional** rect at three line-heights:
+
+| heading | 1.3 | 1.35 | 1.4 |
+|---|---|---|---|
+| Managing your packages with ScriptAlly | 0.81 | 0.11 | 0.41 |
+| Add your materials | 0.41 | 0.31 | 0.20 |
+| Bundle them into packages | 0.81 | −0.38 | 0.41 |
+
+Sub-pixel at every value — raising the leading does not clear it, because there is nothing to
+clear. **The tell is that the boolean disagrees with itself:** "Add your materials" has the same
+0.41px overflow as a heading the check called clean; only the rounding side differs. The check now
+compares against the fractional box with a 1px threshold, which still catches the real thing — the
+hero's 1.18 was 2px, and no single boundary rounds that far.
+
+### Measured
+
+```
+@1440  hero    bg rgba(0,0,0,0) · border 0px none · radius 0px   (D1)
+       columns 460 + 456 · gap 56 · block 972 · gutters 4 / 4    (D2)
+@1920  columns 460 + 456 · gap 56 · block 972 · gutters 244 / 244
+       — identical at both widths, which is the point of the fixed column
+@1440  stages  bg rgba(255,255,255,.55) · radius 16 · pad 54/40/58 · 980 = content width
+       tracks  251 | 72 | 251 | 72 | 251   (three equal columns)
+@1920  stages  1460 = content width
+       tracks  411 | 72 | 411 | 72 | 411
+       both placeholders still dashed · 0 headings losing ink
+```
+
+### Slot inventory — v2 (D5). This table is the artist's brief.
+
+| slot | id | rendered plate | mark | nature |
+|---|---|---|---|---|
+| carousel, ×4 slides | `PKG-JOB-RECORD` · `-REUSE` · `-REPLIES` · `-SCORECARD` | **418 × 230** (was 396 × 214) | 52 × 52 | dashed placeholder |
+| stage disc, ×3 | `PKG-STAGE-ADD` · `-BUNDLE` · `-TRACK` | **128 × 128** circle (was 96 × 96) | **50 × 50** (was 36 × 36) | dashed placeholder |
+
+The printed labels in `PackagesTeachFirst.tsx` were `396×214` and are now the measured box. The
+older inventory block above is marked superseded rather than edited.
+
+### F-AA — the 320px body measure at 1920
+
+It does not run long; it runs **short**. The columns are 411px and the copy caps at 320, so each
+paragraph sits as a centred block with ~45px of slack either side and breaks to three lines.
+Readable, and consistent with the ref. **Proposed, not changed:** if anything wants attention it is
+that the 72px dashes look thin against 411px columns at 1920 — but that is the ref's ratio, and
+widening them is a design call. Screenshot: `reports/packages-teach-v2/stages-only-1920.png`.
+
+### F-AB — this run **converged** the two pages; one new divergence
+
+Comparable titles had already done what Phase 1 just did. `.ct-feature` is
+`grid-template-columns: minmax(0, 500px) 420px; justify-content: center` with no background, no
+border and no radius — and its own comment names the cause: *"A `1fr` here is what created the gap:
+it consumes all free space by definition."* **Packages was the page that had drifted.**
+
+Where they now stand:
+
+| | Comparable titles | Submission packages |
+|---|---|---|
+| hero container | none | none ✓ *(new)* |
+| hero columns | `minmax(0,500px) 420px`, gap 44 | `1fr → 460` + `456`, gap 56 |
+| headline | 42px / 600 | 42px / **700** |
+| body | 14.5px | 14.5px ✓ *(new)* |
+| carousel slot | 396 × 250 | 418 × 230 |
+| stage title | 22px / lh **1.25** | 22px / lh 1.3 |
+| stages cap | `max-width: 1240px` | **`100%`** *(new divergence)* |
+| stages container | none | **card, radius 16** *(new divergence)* |
+| stage plate | 4:3 rounded rect | 128px circle |
+
+**Applying the same treatment to comps would touch:** `.ct-stages` (gaining the card),
+`.ct-stageswide` (dropping the 1240 cap), and the disc-versus-plate decision, which is the one real
+design question — a circle and a 4:3 rectangle are different objects, not different sizes. The
+headline weight (600 vs 700) and the two slot sizes are one-line reconciliations either way.
+**Nick's call, not this run's work.**
+
+⚠️ **One thing to check there before anyone acts on it:** comps' stage titles sit at
+`line-height: 1.25`, below the floor. Whether that genuinely crops needs the *fractional* check
+above — the integer form would report a false positive at 1px, which is exactly how a correct page
+gets "fixed".

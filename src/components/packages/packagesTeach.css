@@ -184,30 +184,42 @@
 
 /* ══ stage strip ════════════════════════════════════════════════════════════════════════════ */
 
-.pkgt-stages { padding: 44px 0 8px; text-align: center; min-width: 0; }
+/**
+ * ⚠️ THE CARD IS HERE NOW, AND IT NEVER WAS BEFORE (D1/D4, ref v2). The hero used to be the card
+ * and this section was bare padding. The two swapped: the argument sits on the page ground, and the
+ * diagram — which is a discrete thing you look AT rather than read THROUGH — is what gets a frame.
+ */
+.pkgt-stages {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 16px;
+  padding: 54px 40px 58px;
+  text-align: center;
+  min-width: 0;
+}
 .pkgt-stages-h {
   font-family: var(--font-serif);
-  font-size: 24px; font-weight: 600; line-height: 1.3;
+  font-size: 34px; font-weight: 600; line-height: 1.3;
   color: var(--pkg-ink);
 }
-.pkgt-stages-sub { font-size: 12.5px; color: var(--pkg-ink-soft); margin: 6px 0 34px; }
+.pkgt-stages-sub { font-size: 14px; color: var(--pkg-ink-soft); margin: 10px 0 46px; }
 
 /**
- * ⚠️ `1fr 40px 1fr 40px 1fr` — the 40px tracks ARE the dashes between stages, not gaps. A `gap`
+ * ⚠️ `1fr 72px 1fr 72px 1fr` — the 72px tracks ARE the dashes between stages, not gaps. A `gap`
  * plus three columns cannot draw a line that stops short of each disc.
  */
 .pkgt-stage-grid {
   display: grid;
-  grid-template-columns: 1fr 40px 1fr 40px 1fr;
+  grid-template-columns: 1fr 72px 1fr 72px 1fr;
   gap: 0;
   align-items: start;
-  max-width: 920px;
+  max-width: 100%;
   margin: 0 auto;
 }
-.pkgt-stage { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; }
+.pkgt-stage { display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; }
 
 .pkgt-disc {
-  width: 96px; height: 96px; border-radius: 50%;
+  width: 128px; height: 128px; border-radius: 50%;
   border: 1.5px dashed rgba(124, 58, 42, 0.3);
   display: flex; align-items: center; justify-content: center;
   flex-direction: column; gap: 5px;
@@ -215,28 +227,28 @@
   flex: none;
 }
 .pkgt-disc svg {
-  width: 36px; height: 36px;
+  width: 50px; height: 50px;
   stroke: var(--pkg-burg); stroke-width: 1.1; fill: none;
   stroke-linecap: round; stroke-linejoin: round; opacity: 0.8;
 }
 .pkgt-disc-l {
   font-family: var(--font-mono);
-  font-size: 6.5px; letter-spacing: 0.12em;
+  font-size: 7.5px; letter-spacing: 0.12em;
   color: var(--pkg-muted); text-transform: uppercase;
 }
 .pkgt-stage-n {
   font-family: var(--font-mono);
-  font-size: 8.5px; letter-spacing: 0.18em;
+  font-size: 9.5px; letter-spacing: 0.2em;
   color: var(--pkg-muted); text-transform: uppercase; font-weight: 700;
 }
 .pkgt-stage h5 {
   font-family: var(--font-serif);
-  font-size: 17px; font-weight: 600; line-height: 1.3;
-  max-width: 230px; color: var(--pkg-ink);
+  font-size: 22px; font-weight: 600; line-height: 1.3;
+  max-width: 300px; color: var(--pkg-ink);
 }
-.pkgt-stage p { font-size: 11.5px; color: var(--pkg-ink-soft); line-height: 1.65; max-width: 250px; }
+.pkgt-stage p { font-size: 13px; color: var(--pkg-ink-soft); line-height: 1.7; max-width: 320px; }
 
-.pkgt-stage-dash { border-top: 1px solid rgba(58, 28, 20, 0.16); margin-top: 48px; }
+.pkgt-stage-dash { border-top: 1px solid rgba(58, 28, 20, 0.16); margin-top: 64px; }
 
 /* ⚠️ THE REF'S OWN BREAKPOINT. Below 900 the hero stacks and the dashes go — a horizontal
    connector between vertically stacked stages points at nothing. */

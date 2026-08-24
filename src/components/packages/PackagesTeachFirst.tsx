@@ -31,7 +31,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./packagesTeach.css";
 
 export interface TeachSlide {
-  /** Slot id + rendered size, in the comps convention: `PKG-JOB-RECORD · 396×214`. */
+  /** Slot id + rendered size, in the comps convention: `PKG-JOB-RECORD · 418×230`. */
   slot: string;
   caption: string;
   body: string;
@@ -42,25 +42,25 @@ export interface TeachSlide {
 /** The four jobs a package does. Copy verbatim from the ref. */
 export const TEACH_SLIDES: TeachSlide[] = [
   {
-    slot: "PKG-JOB-RECORD · 396×214",
+    slot: "PKG-JOB-RECORD · 418×230",
     caption: "Remembers exactly what went",
     body: "Which letter, which synopsis, which pages — recorded per agent, so six months later you know precisely what any of them is holding.",
     art: <><path d="M7 4h13l5 5v19H7z" /><path d="M20 4v5h5" /><path d="M11 14h11M11 18h11M11 22h7" /></>,
   },
   {
-    slot: "PKG-JOB-REUSE · 396×214",
+    slot: "PKG-JOB-REUSE · 418×230",
     caption: "Sends without rebuilding",
     body: "Bundle once, attach to every query that wants the same combination. No re-assembling the same three documents forty times.",
     art: <><path d="M16 4 28 10v12L16 28 4 22V10z" /><path d="M16 15 28 10M16 15v13M16 15 4 10" /><path d="M10 7l12 6" /></>,
   },
   {
-    slot: "PKG-JOB-REPLIES · 396×214",
+    slot: "PKG-JOB-REPLIES · 418×230",
     caption: "Ties replies to materials",
     body: "When an agent replies or requests more, it lands against the package that went out — so every figure traces back to real correspondence.",
     art: <><path d="M5 14 16 6l11 8v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z" /><path d="M5 14l11 8 11-8" /></>,
   },
   {
-    slot: "PKG-JOB-SCORECARD · 396×214",
+    slot: "PKG-JOB-SCORECARD · 418×230",
     caption: "Shows which combination lands",
     body: "Two letters, two synopses, tested across your list — Tracking reports which materials sit behind each request, as counts, not guesses.",
     art: <><path d="M5 26h22M5 26V5" /><rect x="9" y="17" width="4" height="9" /><rect x="15" y="12" width="4" height="14" /><rect x="21" y="7" width="4" height="19" /></>,
