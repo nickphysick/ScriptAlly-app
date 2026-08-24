@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Packages workspace — visual-led</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f2ede7; --white:#ffffff;
+    --sage-a:#d7ddd5; --sage-b:#d5dbd3; --sage-deep:#9aa896; --sage-ink:#5c7053;
+    --pink-band:#f3e0d6; --pink-cta:#f5e2da; --pink-cta-edge:#e8c8bc;
+    --burgundy:#7c3a2a; --ink:#3a1c14; --near-black:#1c130f;
+    --ink-soft:rgba(58,28,20,.62); --ink-faint:rgba(58,28,20,.40);
+    --hairline:rgba(124,58,42,.16); --hairline-soft:rgba(58,28,20,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  [hidden]{display:none!important;}
+  body{background:var(--page);font-family:'Inter',sans-serif;color:var(--ink);padding:36px 40px 90px;-webkit-font-smoothing:antialiased;}
+  .canvas{max-width:1180px;margin:0 auto;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .out{color:var(--burgundy);} .in{color:var(--sage-ink);}
+
+  .harness{position:fixed;top:14px;right:16px;z-index:300;display:flex;align-items:center;gap:8px;background:var(--ink);color:#fff;padding:7px 8px 7px 14px;border-radius:999px;box-shadow:0 6px 18px rgba(58,28,20,.25);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;}
+  .harness span{opacity:.65;}
+  .harness button{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;padding:4px 10px;border-radius:999px;cursor:pointer;}
+  .harness button.on{background:#fff;color:var(--ink);border-color:#fff;}
+
+  .btn{font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:8px;cursor:pointer;border:1px solid var(--hairline);background:transparent;color:var(--ink);display:inline-flex;align-items:center;gap:7px;}
+  .btn.primary{background:var(--pink-cta);border-color:var(--pink-cta-edge);color:var(--burgundy);}
+  .btn.primary:hover{background:#f0d6cb;}
+
+  .shellhead{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+  .shellhead .sh-icon{width:40px;height:40px;border-radius:10px;border:1px solid var(--hairline);display:flex;align-items:center;justify-content:center;background:var(--white);}
+  .shellhead .sh-icon svg{width:19px;height:19px;stroke:var(--burgundy);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .shellhead h1{font-family:'Playfair Display',serif;font-size:27px;font-weight:700;}
+  .shellhead .sh-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .shellhead .sh-right{margin-left:auto;display:flex;align-items:center;gap:16px;}
+  .statline{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--ink-soft);}
+  .statline b{color:var(--ink);font-weight:700;}
+
+  .band{margin-bottom:46px;}
+  .band-head{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;}
+  .band-head h2{font-family:'Playfair Display',serif;font-size:23px;font-weight:600;}
+  .band-head .tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--ink-faint);text-transform:uppercase;}
+  .band-head .spacer{flex:1;}
+  .band-head .mini{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;border:1px solid rgba(58,28,20,.22);background:var(--white);color:var(--ink);padding:5px 11px;border-radius:6px;cursor:pointer;}
+  .band-head .mini:hover{background:var(--pink-cta);border-color:var(--pink-cta-edge);color:var(--burgundy);}
+
+  /* ============ PACKAGES — object cards ============ */
+  .pkg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:20px;}
+  .pkg-card{
+    background:var(--white);border:1px solid var(--hairline-soft);border-radius:16px;
+    overflow:hidden;cursor:pointer;display:flex;flex-direction:column;
+    box-shadow:0 4px 16px rgba(58,28,20,.06);
+    transition:transform .18s, box-shadow .18s;
+  }
+  .pkg-card:hover{transform:translateY(-4px);box-shadow:0 14px 32px rgba(58,28,20,.11);}
+  .pkg-art{
+    background:linear-gradient(180deg, rgba(243,224,214,.55), rgba(243,224,214,.28));
+    padding:18px 18px 14px;display:flex;align-items:center;justify-content:center;
+    border-bottom:1px solid var(--hairline-soft);
+  }
+  .pkg-art .slot{
+    width:100%;height:104px;border:1.5px dashed rgba(124,58,42,.3);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.55);
+  }
+  .pkg-art .slot svg{width:56px;height:56px;stroke:var(--burgundy);stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.8;}
+  .pkg-body{padding:15px 18px 13px;display:flex;flex-direction:column;gap:8px;flex:1;}
+  .pkg-body h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;line-height:1.25;}
+  .pkg-comp{font-size:11.5px;color:var(--ink-soft);line-height:1.55;}
+  .pkg-comp b{color:var(--ink);font-weight:600;}
+  .pkg-comp .none{font-style:italic;color:var(--ink-faint);}
+  .pkg-score{
+    border-top:1px solid var(--hairline-soft);margin-top:auto;padding-top:10px;
+    display:flex;gap:0;align-items:stretch;
+  }
+  .pkg-score .sc{flex:1;text-align:center;}
+  .pkg-score .sc + .sc{border-left:1px solid var(--hairline-soft);}
+  .pkg-score .sc .n{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;line-height:1;}
+  .pkg-score .sc .l{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-top:4px;}
+  .pkg-score.idle{display:block;text-align:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.06em;color:var(--ink-faint);padding-top:12px;padding-bottom:2px;}
+  .ghost-pkg{
+    border:1.5px dashed rgba(124,58,42,.32);border-radius:16px;background:transparent;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    min-height:230px;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s;
+  }
+  .ghost-pkg:hover{background:rgba(245,226,218,.35);border-color:var(--pink-cta-edge);}
+  .ghost-pkg svg{width:44px;height:44px;stroke:var(--burgundy);stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.6;}
+  .ghost-pkg .g-t{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--burgundy);}
+  .ghost-pkg .g-s{font-size:10.5px;color:var(--ink-faint);}
+
+  /* ============ MATERIALS — one shelf ============ */
+  .shelf{
+    display:flex;gap:12px;flex-wrap:wrap;align-items:stretch;
+  }
+  .msheet{
+    position:relative;width:196px;background:var(--white);
+    border:1px solid var(--hairline-soft);
+    border-radius:10px 16px 10px 10px;
+    padding:13px 15px 12px;
+    box-shadow:0 2px 7px rgba(58,28,20,.05);
+    cursor:pointer;overflow:hidden;
+    transition:transform .15s, box-shadow .15s;
+  }
+  .msheet:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(58,28,20,.09);}
+  .msheet::before{
+    content:"";position:absolute;top:0;right:0;width:17px;height:17px;
+    background:linear-gradient(225deg, var(--page) 48%, rgba(58,28,20,.13) 50%, var(--white) 52%);
+    border-bottom-left-radius:7px;
+  }
+  .msheet .wm{position:absolute;right:10px;bottom:8px;opacity:.14;}
+  .msheet .wm svg{width:34px;height:34px;stroke:var(--burgundy);stroke-width:1.2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .msheet .m-type{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;display:block;margin-bottom:4px;}
+  .msheet .m-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;line-height:1.25;}
+  .msheet .m-meta{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--ink-faint);margin-top:7px;}
+  .msheet .m-use{font-size:10px;color:var(--ink-soft);margin-top:3px;}
+  .msheet .m-use b{font-weight:600;}
+  .msheet-add{
+    width:196px;border:1.5px dashed rgba(124,58,42,.32);border-radius:10px;background:transparent;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+    cursor:pointer;font-family:inherit;min-height:104px;
+    transition:background .15s,border-color .15s;
+  }
+  .msheet-add:hover{background:rgba(245,226,218,.35);border-color:var(--pink-cta-edge);}
+  .msheet-add .g-t{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--burgundy);}
+  .msheet-add .g-s{font-size:10px;color:var(--ink-faint);}
+
+  /* ============ TRACKING — folded in ============ */
+  .nudge{
+    background:var(--white);border:1px solid var(--pink-cta-edge);border-left:3px solid var(--burgundy);
+    border-radius:10px;padding:13px 17px;font-size:12px;color:var(--ink-soft);line-height:1.6;
+    display:flex;align-items:center;gap:14px;max-width:700px;
+  }
+  .nudge b{color:var(--burgundy);font-weight:600;}
+  .nudge .n-link{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;color:var(--burgundy);white-space:nowrap;cursor:pointer;border-bottom:1px solid var(--pink-cta-edge);}
+
+  .land{
+    background:var(--white);border:1px solid var(--hairline-soft);border-radius:14px;
+    padding:20px 24px 18px;max-width:700px;
+  }
+  .land .land-head{display:flex;align-items:baseline;gap:12px;margin-bottom:16px;}
+  .land .land-head h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;}
+  .drow{margin-bottom:14px;}
+  .drow:last-child{margin-bottom:0;}
+  .drow .dr-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;gap:12px;}
+  .drow .dr-name{font-size:12.5px;font-weight:600;}
+  .drow .dr-name .dr-eyebrow{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase;display:block;font-weight:400;margin-bottom:2px;}
+  .drow .dr-meta{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-soft);white-space:nowrap;}
+  .bar{height:8px;border-radius:4px;background:rgba(58,28,20,.07);overflow:hidden;}
+  .bar .b-sent{height:100%;background:var(--pink-band);border-radius:4px;overflow:hidden;}
+  .bar .b-in{height:100%;background:var(--sage-deep);border-radius:4px 0 0 4px;}
+
+  /* ============ slide-in drawer ============ */
+  .scrim{
+    position:fixed;inset:0;background:rgba(58,28,20,.22);z-index:190;
+    opacity:0;pointer-events:none;transition:opacity .22s ease;
+  }
+  .scrim.open{opacity:1;pointer-events:auto;}
+  .drawer{
+    position:fixed;top:0;right:0;bottom:0;width:452px;max-width:92vw;z-index:200;
+    background:var(--white);border-left:1px solid var(--hairline-soft);
+    box-shadow:-14px 0 40px rgba(58,28,20,.16);
+    display:flex;flex-direction:column;
+    transform:translateX(100%);transition:transform .26s cubic-bezier(.32,.72,.35,1);
+  }
+  .drawer.open{transform:none;}
+  .dr-head{
+    padding:26px 30px 20px;border-bottom:1px solid var(--hairline-soft);position:relative;flex:0 0 auto;
+  }
+  .dr-head h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;padding-right:34px;}
+  .dr-head p{font-size:12px;color:var(--ink-soft);line-height:1.6;margin-top:7px;max-width:340px;}
+  .dr-close{
+    position:absolute;top:22px;right:24px;width:28px;height:28px;border-radius:7px;
+    border:none;background:transparent;cursor:pointer;font-size:20px;line-height:1;color:var(--ink-faint);
+  }
+  .dr-close:hover{background:rgba(58,28,20,.05);color:var(--ink);}
+  .dr-body{padding:20px 30px 30px;overflow-y:auto;flex:1;}
+  .dr-sec{
+    font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-faint);font-weight:700;margin:22px 0 11px;
+  }
+  .dr-body > .dr-sec:first-child{margin-top:0;}
+  .dr-card{
+    background:rgba(255,255,255,.7);border:1px solid var(--hairline-soft);border-radius:12px;
+    overflow:hidden;margin-bottom:6px;
+  }
+  .dc-art{
+    background:linear-gradient(180deg, rgba(243,224,214,.5), rgba(243,224,214,.22));
+    padding:16px;display:flex;align-items:center;justify-content:center;
+    border-bottom:1px solid var(--hairline-soft);
+  }
+  .dc-slot{
+    width:100%;height:88px;border:1.5px dashed rgba(124,58,42,.3);border-radius:9px;
+    display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.55);
+  }
+  .dc-slot svg{stroke:var(--burgundy);stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.8;}
+  .dr-card h4{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;padding:14px 17px 0;}
+  .dr-card p{font-size:12px;color:var(--ink-soft);line-height:1.65;padding:6px 17px 15px;}
+  .dr-note{
+    background:rgba(215,221,213,.24);border:1px solid rgba(154,168,150,.35);
+    border-radius:10px;padding:13px 16px 14px;margin-bottom:9px;
+  }
+  .dr-note h5{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:600;margin-bottom:5px;}
+  .dr-note p{font-size:11.5px;color:var(--ink-soft);line-height:1.65;}
+  .dr-note p b{color:var(--ink);font-weight:600;}
+  .dr-foot{padding-top:18px;display:flex;justify-content:flex-end;}
+
+  @media(max-width:900px){.pkg-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<div class="harness">
+  <span>DATA</span>
+  <button id="hb-start" class="on" onclick="setData('start')">JUST STARTED</button>
+  <button id="hb-active" onclick="setData('active')">ACTIVE</button>
+</div>
+
+<div class="canvas">
+
+  <div class="shellhead">
+    <span class="sh-icon"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg></span>
+    <div>
+      <h1>Submission packages</h1>
+      <div class="sh-sub">Bundle your materials once, then send them without rebuilding each time.</div>
+    </div>
+    <div class="sh-right">
+      <span class="statline" id="topstat"></span>
+      <button class="btn" onclick="openDrawer()">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8.5v.01"/></svg>
+        How it works
+      </button>
+      <button class="btn primary">＋ New package</button>
+    </div>
+  </div>
+
+  <!-- PACKAGES lead -->
+  <div class="band">
+    <div class="band-head"><h2>Your packages</h2><span class="tag" id="pkg-tag"></span></div>
+    <div class="pkg-grid" id="pkg-grid"></div>
+  </div>
+
+  <!-- MATERIALS shelf -->
+  <div class="band">
+    <div class="band-head"><h2>Your materials</h2><span class="tag" id="mat-tag"></span><span class="spacer"></span><button class="mini">+ ADD MATERIAL</button></div>
+    <div class="shelf" id="shelf"></div>
+  </div>
+
+  <!-- TRACKING -->
+  <div class="band" id="track-band"></div>
+
+</div>
+
+<!-- ============ SLIDE-IN DRAWER ============ -->
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="dr-head">
+    <button class="dr-close" onclick="closeDrawer()" aria-label="Close">×</button>
+    <h2>How packages work</h2>
+    <p>Three stages, and the few rules worth knowing before you build one.</p>
+  </div>
+  <div class="dr-body">
+
+    <div class="dr-sec">Stage one</div>
+    <div class="dr-card">
+      <div class="dc-art"><span class="dc-slot"><svg viewBox="0 0 32 32" width="46" height="46"><path d="M9 4h9l5 5v17H9z"/><path d="M18 4v5h5"/><path d="M12 14h9M12 18h9M12 22h6"/></svg></span></div>
+      <h4>Add your materials</h4>
+      <p>Versions of your covering letter, synopsis and sample pages — written here or pasted in. Most writers keep two or three of each, so they can test which one lands.</p>
+    </div>
+
+    <div class="dr-sec">Stage two</div>
+    <div class="dr-card">
+      <div class="dc-art"><span class="dc-slot"><svg viewBox="0 0 32 32" width="46" height="46"><path d="M16 4 28 10v12L16 28 4 22V10z"/><path d="M16 15 28 10M16 15v13M16 15 4 10"/><path d="M10 7l12 6"/><circle cx="16" cy="15" r="2.2"/></svg></span></div>
+      <h4>Bundle them into a package</h4>
+      <p>Pick one of each and name the combination. Only the covering letter is required — send what each agency actually asks for.</p>
+    </div>
+
+    <div class="dr-sec">Stage three</div>
+    <div class="dr-card">
+      <div class="dc-art"><span class="dc-slot"><svg viewBox="0 0 32 32" width="46" height="46"><path d="M5 26h22M5 26V5"/><rect x="9" y="17" width="4" height="9"/><rect x="15" y="12" width="4" height="14"/><rect x="21" y="7" width="4" height="19"/></svg></span></div>
+      <h4>Track what comes back</h4>
+      <p>Attach a package when you log a query. Replies land against it, and each material's requests are counted across every package that carries it.</p>
+    </div>
+
+    <div class="dr-sec">Worth knowing</div>
+
+    <div class="dr-note">
+      <h5>A sent package stops changing</h5>
+      <p>Once a package has gone out with a query, its contents are fixed. That's what keeps tracking honest — otherwise editing it would rewrite what agents received. Need a different combination? <b>Duplicate &amp; edit</b> makes a new one.</p>
+    </div>
+
+    <div class="dr-note">
+      <h5>A query takes a package <i>or</i> loose materials</h5>
+      <p>Not both. Attach a package and its contents go exactly as they are, uneditable from the query. Or list materials individually on that query alone — useful when an agent asks for something unusual.</p>
+    </div>
+
+    <div class="dr-note">
+      <h5>Counts, never scores</h5>
+      <p>Tracking reports what happened — six sent, two replied, one request. It doesn't rank your materials or tell you which is best. Small numbers rarely mean much; you decide when they do.</p>
+    </div>
+
+    <div class="dr-foot">
+      <button class="btn primary" onclick="closeDrawer()">Got it</button>
+    </div>
+  </div>
+</aside>
+
+<script>
+  const ICON = {
+    envelope:'<path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h19A2.5 2.5 0 0 1 28 8.5v15a2.5 2.5 0 0 1-2.5 2.5h-19A2.5 2.5 0 0 1 4 23.5z"/><path d="M4.6 7.6 16 17 27.4 7.6"/>',
+    scroll:'<path d="M8 5h13a3 3 0 0 1 3 3v16a3 3 0 0 0 3 3H11a3 3 0 0 1-3-3z"/><path d="M8 5a3 3 0 0 0-3 3v2h3"/><path d="M12 11h8M12 15h8"/>',
+    pages:'<path d="M9 4h9l5 5v17H9z"/><path d="M18 4v5h5"/><path d="M12 14h9M12 18h9"/>',
+    parcel:'<path d="M16 4 28 10v12L16 28 4 22V10z"/><path d="M16 15 28 10M16 15v13M16 15 4 10"/><path d="M10 7l12 6"/><circle cx="16" cy="15" r="2.2"/>',
+    parcelOpen:'<path d="M4 13 16 7l12 6v11l-12 6-12-6z"/><path d="M16 19 28 13M16 19v11M16 19 4 13"/><path d="M11 4.5 16 7l5-2.5" stroke-dasharray="2 2"/>'
+  };
+  const svg = (n,px)=>`<svg viewBox="0 0 32 32" width="${px}" height="${px}">${ICON[n]}</svg>`;
+
+  const MATS = [
+    {type:'Covering letter', icon:'envelope', name:'Hook-first', meta:'Text · 412 words', use:1},
+    {type:'Covering letter', icon:'envelope', name:'Comps-forward', meta:'Ref · comps-forward-v1.docx', use:1},
+    {type:'Synopsis', icon:'scroll', name:'One-page', meta:'Text · 638 words', use:2},
+    {type:'Sample pages', icon:'pages', name:'Chapters 1–3', meta:'Text · 7,412 words', use:2}
+  ];
+
+  function setData(mode){
+    const active = mode==='active';
+    document.getElementById('hb-start').classList.toggle('on', !active);
+    document.getElementById('hb-active').classList.toggle('on', active);
+
+    const pkgs = active ? [
+      {name:'Standard UK', comp:'<b>Hook-first</b> · <b>One-page</b> · <b>Chapters 1–3</b>', sent:6, rep:2, req:1},
+      {name:'Comps-led variant', comp:'<b>Comps-forward</b> · <b>One-page</b> · <b>Chapters 1–3</b>', sent:3, rep:1, req:1}
+    ] : [
+      {name:'Standard UK', comp:'<b>Hook-first</b> · <b>One-page</b> · <span class="none">no sample</span>', sent:0, rep:0, req:0}
+    ];
+
+    document.getElementById('topstat').innerHTML =
+      `<b>${active?4:MATS.length-1}</b> materials · <b>${pkgs.length}</b> package${pkgs.length===1?'':'s'} · <b>${pkgs.reduce((n,p)=>n+p.sent,0)}</b> sent`;
+    document.getElementById('pkg-tag').textContent = `${pkgs.length} built`;
+    document.getElementById('mat-tag').textContent = `${active?4:3} held`;
+
+    document.getElementById('pkg-grid').innerHTML = pkgs.map(p=>`
+      <div class="pkg-card">
+        <div class="pkg-art"><span class="slot">${svg('parcel',56)}</span></div>
+        <div class="pkg-body">
+          <h3>${p.name}</h3>
+          <div class="pkg-comp">${p.comp}</div>
+          ${p.sent===0
+            ? `<div class="pkg-score idle">Not yet sent — attach it when you log a query</div>`
+            : `<div class="pkg-score">
+                 <span class="sc"><span class="n out">${p.sent}</span><span class="l">Sent</span></span>
+                 <span class="sc"><span class="n in">${p.rep}</span><span class="l">Replied</span></span>
+                 <span class="sc"><span class="n in">${p.req}</span><span class="l">Requests</span></span>
+               </div>`}
+        </div>
+      </div>`).join('') + `
+      <button class="ghost-pkg">${svg('parcelOpen',44)}
+        <span class="g-t">Build another package</span>
+        <span class="g-s">A different letter, a different synopsis.</span>
+      </button>`;
+
+    const mats = active ? MATS : MATS.slice(0,3);
+    document.getElementById('shelf').innerHTML = mats.map(m=>`
+      <div class="msheet">
+        <span class="wm">${svg(m.icon,34)}</span>
+        <span class="m-type">${m.type}</span>
+        <span class="m-name">${m.name}</span>
+        <div class="m-meta">${m.meta}</div>
+        <div class="m-use">${m.use>0?`In <b>${m.use}</b> package${m.use===1?'':'s'}`:'Not in a package'}</div>
+      </div>`).join('') + `
+      <button class="msheet-add">
+        <span class="g-t">Add a material</span>
+        <span class="g-s">Letter, synopsis or sample</span>
+      </button>`;
+
+    document.getElementById('track-band').innerHTML = active ? `
+      <div class="band-head"><h2>What's landing</h2><span class="tag">Reported, not guessed</span></div>
+      <div class="land">
+        <div class="land-head"><h3>Requests by material</h3><span class="tag">Across every package that carries it</span></div>
+        <div class="drow">
+          <div class="dr-top"><span class="dr-name"><span class="dr-eyebrow">Covering letter</span>Hook-first</span><span class="dr-meta">2 requests from 6 sent</span></div>
+          <div class="bar"><div class="b-sent" style="width:100%"><div class="b-in" style="width:33%"></div></div></div>
+        </div>
+        <div class="drow">
+          <div class="dr-top"><span class="dr-name"><span class="dr-eyebrow">Covering letter</span>Comps-forward</span><span class="dr-meta">0 requests from 3 sent</span></div>
+          <div class="bar"><div class="b-sent" style="width:50%"><div class="b-in" style="width:0%"></div></div></div>
+        </div>
+        <div class="drow">
+          <div class="dr-top"><span class="dr-name"><span class="dr-eyebrow">Synopsis</span>One-page</span><span class="dr-meta">2 requests from 9 sent</span></div>
+          <div class="bar"><div class="b-sent" style="width:100%"><div class="b-in" style="width:22%"></div></div></div>
+        </div>
+      </div>` : `
+      <div class="nudge">
+        Attach <b>Standard UK</b> when you log your next query — replies land back here against it.
+        <span class="n-link">Log a query ›</span>
+      </div>`;
+  }
+  function openDrawer(){
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawer').setAttribute('aria-hidden','false');
+    document.getElementById('scrim').classList.add('open');
+  }
+  function closeDrawer(){
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawer').setAttribute('aria-hidden','true');
+    document.getElementById('scrim').classList.remove('open');
+  }
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
+
+  setData('start');
+</script>
+</body>
+</html>
