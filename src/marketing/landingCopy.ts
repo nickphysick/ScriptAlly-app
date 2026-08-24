@@ -54,6 +54,23 @@ export const HERO_NOTE = "Free to start";
 export const CTA_START = "Start tracking — it's free";
 export const CTA_PRICING = "See pricing";
 
+/* ══════════════ The pulse section ══════════════ */
+
+/**
+ * ⚠️ `pulse` IS A SEGMENT BECAUSE IT IS ANIMATED, NOT BECAUSE IT IS EMPHASISED. It stays plain
+ * Playfair in the heading's own ink — the effect is a halo behind it. A coloured word here would
+ * read as a link, and a heading that changes colour mid-sentence reads as two things, which is
+ * the standing rule this app already enforces on the To-do task pane.
+ */
+export const PULSE_HEADING: Array<{ text: string; pulse?: boolean }> = [
+  { text: "A finger on the " },
+  { text: "pulse", pulse: true },
+  { text: " of your querying journey" },
+];
+
+/** A real ellipsis character, not three dots. Set in Caveat, in burgundy. */
+export const PULSE_SUB = "and so much more…";
+
 export const FEATURES_H2 = "The querying trenches, organised";
 export const FEATURES_SUB = "Ditch the spreadsheet. It's time to get serious.";
 
@@ -80,7 +97,9 @@ export interface FeatureRow {
 export const FEATURE_ROWS: FeatureRow[] = [
   {
     key: "import",
-    heading: "Smart Import",
+    /* Retitled with the pulse section: the row now leads with what the reader gets rather than
+       with the feature's name, which the body still carries in bold. */
+    heading: "Your journey so far comes with you",
     body: [
       { text: "Already deep in the trenches? Bring your history with you. Upload the spreadsheet you've been fighting with and " },
       { text: "Smart Import", b: true },
@@ -118,7 +137,10 @@ export const FEATURE_ROWS: FeatureRow[] = [
   },
   {
     key: "pulse",
-    heading: "A finger on the pulse",
+    /* ⚠️ RETITLED BECAUSE THE PHRASE WAS PROMOTED. "A finger on the pulse" is the centred section
+       heading above the showreel now, and a row repeating it three screens later would read as a
+       stutter. The row's key stays `pulse` — it names the visual and the copy, not the heading. */
+    heading: "From beginning to end",
     body: [
       { text: "Open any query and its whole story is there — " },
       { text: "every event date-stamped", b: true },

@@ -13,6 +13,7 @@ import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_A, HERO_TURN_B, HERO_EYEBROW, HERO_NOTE, CTA_START,
   FEATURES_H2, FEATURES_SUB, CTA_BAND_H2, DOCUMENT_TITLE, FEATURE_ROWS,
+  PULSE_HEADING, PULSE_SUB,
 } from "./landingCopy";
 
 describe("landing copy — verbatim locks", () => {
@@ -58,6 +59,29 @@ describe("landing copy — verbatim locks", () => {
     expect(CTA_START).toBe("Start tracking — it's free");
   });
 
+  /**
+   * ⚠️ THE PHRASE HAS ONE HOME NOW. "A finger on the pulse" was a row heading and is the centred
+   * section heading above the showreel; saying it twice on one page reads as a stutter, and the
+   * retitle is the whole reason the row is called "From beginning to end". Asserted as a
+   * page-wide count rather than as a string on the section, so restoring the row heading fails
+   * here rather than quietly giving the page two of them.
+   */
+  it("says `a finger on the pulse` in exactly one place", () => {
+    const said = [
+      PULSE_HEADING.map((s) => s.text).join(""),
+      ...FEATURE_ROWS.map((r) => r.heading),
+      ...FEATURE_ROWS.flatMap((r) => r.body.map((b) => b.text)),
+      HERO_H1, HERO_LEDE, HERO_TURN_A, HERO_TURN_B, FEATURES_H2, FEATURES_SUB, CTA_BAND_H2,
+    ].filter((t) => t.toLowerCase().includes("finger on the pulse"));
+    expect(said).toEqual(["A finger on the pulse of your querying journey"]);
+  });
+
+  it("the pulse line animates a word, and states its own sub in a real ellipsis", () => {
+    expect(PULSE_HEADING.filter((s) => s.pulse).map((s) => s.text)).toEqual(["pulse"]);
+    expect(PULSE_SUB).toBe("and so much more…");
+    expect(PULSE_SUB).not.toContain("...");
+  });
+
   it("features header pair", () => {
     expect(FEATURES_H2).toBe("The querying trenches, organised");
     expect(FEATURES_SUB).toBe("Ditch the spreadsheet. It's time to get serious.");
@@ -71,8 +95,8 @@ describe("landing copy — verbatim locks", () => {
   it("seven feature rows, alternating from the second, Pro badge only on the email drop", () => {
     expect(FEATURE_ROWS).toHaveLength(7);
     expect(FEATURE_ROWS.map((r) => r.heading)).toEqual([
-      "Smart Import", "Track every query", "A home for your agents", "A finger on the pulse",
-      "Curate and compare", "Smart email drop", "Notes to self",
+      "Your journey so far comes with you", "Track every query", "A home for your agents",
+      "From beginning to end", "Curate and compare", "Smart email drop", "Notes to self",
     ]);
     expect(FEATURE_ROWS.map((r) => !!r.flip)).toEqual([false, true, false, true, false, true, false]);
     expect(FEATURE_ROWS.filter((r) => r.pro).map((r) => r.key)).toEqual(["email"]);

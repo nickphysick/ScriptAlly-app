@@ -44,6 +44,8 @@
   /* The statement headline's size, at the "large" scale the ref ships as its default. Declared
      here so the stacked override below is one line rather than a restated clamp. */
   --mk-hero-h1: clamp(3.2rem, 6.4vw, 6rem);
+  /* The pulse halo. Read on the rule, never inside the keyframes — see the note there. */
+  --mk-halo: #f0d5c8;
   font-family: "Source Sans Pro", system-ui, -apple-system, sans-serif;
   background: var(--mk-desk);
   color: var(--mk-ink);
@@ -270,6 +272,57 @@
   /* Nothing left to hang in: the ellipsis becomes a plain block above the paragraph. */
   .mk-dots { position: static; display: block; font-size: 1.9rem; margin-bottom: 2px; }
 }
+
+/* ── The pulse line, between the hero and the showreel ── */
+.mk-pulsesec {
+  max-width: 1300px; margin: 0 auto; text-align: center;
+  padding: clamp(72px, 10vh, 124px) 56px clamp(30px, 4vh, 54px);
+}
+.mk-pulsesec h2 {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600; color: var(--mk-nearblack);
+  font-size: clamp(1.9rem, 3.5vw, 3.05rem); line-height: 1.18; letter-spacing: -.018em;
+  margin: 0 auto; max-width: 20ch;
+}
+/* ⚠️ `z-index: 0` HERE IS LOAD-BEARING, AND THE HALO IS INVISIBLE WITHOUT IT. The halo is a
+   `::before` at `z-index: -1`, which paints behind the backgrounds of every ancestor up to the
+   nearest STACKING CONTEXT. `.mk-scope` paints `--mk-desk` and creates no context of its own, so
+   without a context here the halo would sink behind the page's own background and simply never
+   appear — with the rule applying cleanly and no error anywhere. Positioning the word gives the
+   negative layer somewhere to live.
+   ⚠️ AND THE WORD KEEPS THE HEADING'S INK. `color: inherit` is structural, not decorative: it
+   cannot drift if the tier is retoned. */
+.mk-pulseword { position: relative; z-index: 0; display: inline-block; color: inherit; }
+.mk-pulseword::before {
+  content: ""; position: absolute; left: -.22em; right: -.22em; top: -.1em; bottom: .02em;
+  border-radius: 999px; background: var(--mk-halo); z-index: -1;
+  opacity: 0; transform: scale(.86);
+}
+/* ⚠️ THE KEYFRAMES ANIMATE OPACITY AND TRANSFORM ONLY, AND THAT IS DELIBERATE. A `var()` inside a
+   `@keyframes` block fails silently in this setup — no error, no animation, no warning — so the
+   halo's colour is declared on the rule above, where a token resolves normally, and never inside
+   the frames. Do not "tidy" a colour stop into these blocks. */
+@media (prefers-reduced-motion: no-preference) {
+  .mk-pulseword { animation: mkBeat 2.6s cubic-bezier(.4, 0, .3, 1) infinite; }
+  .mk-pulseword::before { animation: mkHalo 2.6s cubic-bezier(.4, 0, .3, 1) infinite; }
+  @keyframes mkHalo {
+    0% { opacity: 0; transform: scale(.84); }
+    18% { opacity: .85; transform: scale(1); }
+    46% { opacity: 0; transform: scale(1.16); }
+    100% { opacity: 0; transform: scale(1.16); }
+  }
+  /* Fast in, slow release — a heartbeat rather than a notification badge. */
+  @keyframes mkBeat {
+    0% { transform: scale(1); }
+    14% { transform: scale(1.035); }
+    34% { transform: scale(1); }
+    100% { transform: scale(1); }
+  }
+}
+.mk-pulsesub {
+  margin: 16px 0 0; font-family: "Caveat", cursive; font-size: 1.72rem;
+  line-height: 1.2; color: var(--mk-burg);
+}
+@media (max-width: 900px) { .mk-pulsesec { padding-inline: 26px; } }
 
 /* ── The dashboard panel: contained card cropping the 1180px replica just under the stats ── */
 .mk-dashpanel {
