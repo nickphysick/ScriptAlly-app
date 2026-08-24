@@ -54,6 +54,8 @@
 /* ⚠️ THE SEND-STRIP'S PLATE — 38px holding a 22px mark, so the 12px padding the other shapes carry
    would leave 14px of room for it. Sized by the caller's width/height; the radius is the ref's. */
 .pkgb-plate--chip { border-radius: 8px; padding: 0; }
+/* ⚠️ NO PLATE — see the note on `SlotShape`. Decoration, not a placeholder. */
+.pkgb-plate--bare { border: none; background: none; padding: 0; border-radius: 0; }
 /* The postage stamp on a package card — perforated edge, sat in the corner. */
 .pkgb-plate--stamp { border-radius: 4px; width: 62px; height: 72px; padding: 5px; }
 /* ⚠️ THE STAMP'S MARK IS FAINTER THAN THE REST (.7 against .82) — a postage stamp on a card is
@@ -639,3 +641,183 @@
   cursor: pointer;
 }
 .pkgb-dup:hover { color: var(--pkg-ink); }
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE PACKAGE AS AN OBJECT (workspace, D-B1)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ AN OBJECT, NOT A ROW IN A REGISTER. The lid, the name and the scorecard on one card are what
+ * make a package read as a thing the writer BUILT. The band this replaces listed three slot rows
+ * and put the same figures in a separate panel three inches away.
+ *
+ * ⚠️ HOVER LIFTS, AND THE CARD IS NOT FLUSH TO A CLIPPING BOUNDARY. The standing rule — cards flush
+ * to a clip hover by SHADOW, never by lift — applies to the manuscript spine and the details tiles,
+ * which sit against a clipped edge. This grid has a gap all round, so the lift is safe here and the
+ * rule is not being broken by inattention.
+ */
+.pkgb-pkgcard {
+  background: var(--pkgo-surface);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(58, 28, 20, 0.06);
+  transition: transform 0.18s, box-shadow 0.18s;
+  min-width: 0;
+}
+.pkgb-pkgcard:hover { transform: translateY(-4px); box-shadow: 0 14px 32px rgba(58, 28, 20, 0.11); }
+
+/* ⚠️ THE ONE BLUSH SURFACE ON THE CARD. Tint here says "this is the object's face"; anywhere else on
+   the card it would start to mean something a second time. */
+.pkgb-pkgart {
+  background: linear-gradient(180deg, rgba(243, 224, 214, 0.55), rgba(243, 224, 214, 0.28));
+  padding: 18px 18px 14px;
+  display: flex; align-items: center; justify-content: center;
+  border-bottom: 1px solid var(--pkgo-hairline-soft);
+}
+.pkgb-pkgslot { width: 100%; display: block; }
+.pkgb-pkgslot .pkgb-plate {
+  width: 100%; height: 104px; border-radius: 10px; background: rgba(255, 255, 255, 0.55);
+}
+
+.pkgb-pkgbody { padding: 15px 18px 13px; display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+
+/* mixed-case Playfair, writer-supplied — the standing descender floor, measured not assumed */
+.pkgb-pkgname { font-family: var(--font-serif); font-size: 19px; font-weight: 600; line-height: 1.3; }
+.pkgb-pkgcomp { font-size: 11.5px; color: var(--pkg-ink-soft); line-height: 1.55; }
+.pkgb-pkgcomp b { color: var(--pkg-ink); font-weight: 600; }
+/* an omitted slot is a quiet clause in the sentence, never a stated row */
+.pkgb-none { font-style: italic; color: var(--pkg-muted); }
+/* the free-text line, in the hand the page already uses for the writer's own words */
+.pkgb-pkgother { font-family: 'Caveat', cursive; font-size: 15px; font-weight: 600; color: var(--pkg-burg); line-height: 1.35; }
+
+/**
+ * ⚠️ THE SCORECARD IS THE CARD'S FOOTER, AND THE "REPLIES BY PACKAGE" PANEL IS DELETED. Those
+ * figures described packages while living somewhere else; on the card there is one place to read
+ * them, so the two cannot come to disagree. `margin-top: auto` is what keeps every card's foot on
+ * one line whatever the composition above it runs to.
+ */
+.pkgb-score {
+  border-top: 1px solid var(--pkgo-hairline-soft);
+  margin-top: auto; padding-top: 10px;
+  display: flex; gap: 0; align-items: stretch;
+}
+.pkgb-sc { flex: 1; text-align: center; display: flex; flex-direction: column; }
+.pkgb-sc + .pkgb-sc { border-left: 1px solid var(--pkgo-hairline-soft); }
+.pkgb-n { font-family: var(--font-serif); font-size: 19px; font-weight: 600; line-height: 1.15; color: var(--pkg-ink); }
+.pkgb-l {
+  font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--pkg-muted); margin-top: 4px;
+}
+/* ⚠️ AN UNSENT CARD STATES THE FACT INSTEAD — three zeroes would read as a poor result rather than
+   as a package that has not gone anywhere yet. */
+.pkgb-score--idle {
+  border-top: 1px solid var(--pkgo-hairline-soft); margin-top: auto;
+  display: block; text-align: center;
+  font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.06em;
+  color: var(--pkg-muted); padding-top: 12px; padding-bottom: 2px;
+}
+
+.pkgb-ghostpkg {
+  border: 1.5px dashed rgba(124, 58, 42, 0.32); border-radius: 16px; background: transparent;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  min-height: 230px; cursor: pointer; font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pkgb-ghostpkg:hover { background: rgba(245, 226, 218, 0.35); border-color: var(--pkg-pinkline); }
+.pkgb-gt { font-family: var(--font-serif); font-style: italic; font-size: 15px; color: var(--pkg-burg); line-height: 1.35; }
+.pkgb-gs { font-size: 10.5px; color: var(--pkg-muted); }
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE MATERIALS SHELF (D-B2)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgb-shelf { display: flex; gap: 12px; flex-wrap: wrap; align-items: stretch; }
+
+/**
+ * ⚠️ PAPER, AND THE FOLDED CORNER IS WHAT SAYS SO. `border-radius: 10px 16px 10px 10px` plus the
+ * `::before` fold turns a rectangle into a sheet — which is the point of a shelf: these are
+ * documents you wrote, not rows in a table.
+ */
+.pkgb-msheet {
+  position: relative; width: 196px;
+  background: var(--pkgo-surface);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 10px 16px 10px 10px;
+  padding: 13px 15px 12px;
+  box-shadow: 0 2px 7px rgba(58, 28, 20, 0.05);
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
+  min-width: 0;
+}
+.pkgb-msheet:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(58, 28, 20, 0.09); }
+.pkgb-msheet::before {
+  content: ""; position: absolute; top: 0; right: 0; width: 17px; height: 17px;
+  /* ⚠️ THE LITERAL PAGE GROUND, NOT `var(--pkgo-page, …)`. No such token exists — the sheet reads
+     `--pkgo-surface`, `--pkgo-hairline*`, `--pkgo-sage-*` and `--pkgo-dash*`, all of which do — and a
+     `var()` on an undefined property falls back silently, leaving a knob nobody can find. */
+  background: linear-gradient(225deg, #f2ede7 48%, rgba(58, 28, 20, 0.13) 50%, #ffffff 52%);
+  border-bottom-left-radius: 7px;
+}
+/* ⚠️ BEHIND THE WORDS, AT 14%. It repeats the eyebrow deliberately — the eyebrow is for reading,
+   the mark is for scanning a shelf at a glance. */
+.pkgb-wm { position: absolute; right: 10px; bottom: 8px; opacity: 0.14; pointer-events: none; }
+.pkgb-mtype {
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.14em;
+  color: var(--pkg-muted); text-transform: uppercase; display: block; margin-bottom: 4px;
+}
+.pkgb-mname {
+  font-family: var(--font-serif); font-size: 16px; font-weight: 600; line-height: 1.3;
+  color: var(--pkg-ink); background: none; border: none; padding: 0; text-align: left; cursor: pointer;
+  display: block; position: relative; z-index: 1;
+}
+.pkgb-mname:hover { text-decoration: underline; text-underline-offset: 2px; }
+.pkgb-mmeta { font-family: var(--font-mono); font-size: 8px; color: var(--pkg-muted); margin-top: 7px; }
+.pkgb-muse { font-size: 10px; color: var(--pkg-ink-soft); margin-top: 3px; }
+
+.pkgb-msheetadd {
+  width: 196px; border: 1.5px dashed rgba(124, 58, 42, 0.32); border-radius: 10px; background: transparent;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
+  cursor: pointer; font-family: inherit; min-height: 104px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pkgb-msheetadd:hover { background: rgba(245, 226, 218, 0.35); border-color: var(--pkg-pinkline); }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   TRACKING — one panel (D-B3)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgb-land {
+  background: var(--pkgo-surface);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 14px;
+  padding: 20px 24px 18px;
+  max-width: 700px;
+}
+.pkgb-landhead {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  padding-bottom: 12px; margin-bottom: 12px;
+  border-bottom: 1px solid var(--pkgo-hairline-soft);
+}
+.pkgb-landhead h3 {
+  font-family: var(--font-serif); font-size: 15px; font-weight: 600; line-height: 1.3;
+  color: var(--pkg-ink);
+}
+.pkgb-drow { margin-bottom: 13px; }
+.pkgb-drow:last-child { margin-bottom: 0; }
+.pkgb-drtop { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; margin-bottom: 5px; }
+.pkgb-drname { font-size: 12.5px; color: var(--pkg-ink); min-width: 0; }
+.pkgb-dreyebrow {
+  font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--pkg-muted); display: block;
+}
+/* ⚠️ COUNTS, NEVER PERCENTAGES — `2 requests from 6 sent` is a fact; a rate at this sample size is
+   a claim the data cannot support. The bar ranks; the number states. */
+.pkgb-drmeta { font-family: var(--font-mono); font-size: 8px; color: var(--pkg-muted); white-space: nowrap; }
+.pkgb-bar { height: 7px; border-radius: 99px; background: rgba(58, 28, 20, 0.06); overflow: hidden; }
+.pkgb-bsent { height: 100%; background: var(--pkgo-sage-tint); border-radius: 99px; position: relative; }
+.pkgb-bin { height: 100%; background: var(--pkgo-sage-deep); border-radius: 99px; }

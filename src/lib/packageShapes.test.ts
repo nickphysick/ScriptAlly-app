@@ -252,7 +252,9 @@ describe("the card renders Other as a note, not as a fourth material", () => {
   const css = decls(read("src/components/packages/packagesBroadsheet.css"));
 
   it("the row is conditional on the value", () => {
-    expect(band).toContain("{t.other && (");
+    /* the row moved from the slot list into the card body with the object-card rebuild (D-B1);
+       the CLAIM — it renders only when filled — is unchanged */
+    expect(band).toContain("{t.other && <div className=\"pkgb-pkgother\">");
   });
 
   it("it is set in Caveat, in burgundy, and not italicised on top", () => {

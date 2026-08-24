@@ -370,6 +370,76 @@ re-filled — is unchanged and now covers both modes; only the expression widene
 tsc 0 · build 0, no error/[WARNING] lines · vitest 383 files, 6581 passed, 3 skipped
 ```
 
+---
+
+## Part B — the workspace
+
+`PackagesBand` → object cards, `MaterialsBand` → one shelf, `TrackingBand` → one panel. The
+derivations already existed: `packageTiles` / `tileFooter` feed the cards, `requestsByMaterial` and
+`trackingNudge` feed the panel. Two new pure functions — `materialShelf` (flat, sorted by type,
+**empty types absent**) and `composition` (the card's one line).
+
+- **D-B1** — art panel lid, Playfair name, one-line composition, three-cell scorecard footer, ghost
+  card last. An omitted slot reads `no sample`, not `Not included`: this is a sentence about what the
+  package sends, and `Not included` is a stated choice that belongs in the builder's list.
+- **D-B2** — 196px paper sheets, folded corner, watermark of their type, one add card. **An empty
+  type does not appear at all** — the columns stated a heading, a `0 held` and a ghost for every type
+  a writer had not used yet.
+- **D-B3** — "Replies by package" **deleted**; those figures are the cards' footers. Counts, never
+  percentages. Pre-send is the nudge alone, without the two dashed ghost panels that promised tables.
+- **D-B4** — one derived stat line, filled `New package` as the page's only filled control.
+
+### ⚠️ Packages did not lead until the screenshot said so
+
+The first render put materials first — a filing cabinet with the point of the feature underneath it,
+`Your packages` below the fold at 1440. Fixed, and now asserted **by document position** rather than
+by reading the JSX: `pkgTop 653` against `shelfTop 1327` at 1440, `599 / 1025` at 1920.
+
+### D-B5 — descenders measured, and this time they were fine
+
+The Part A ref's `1.12` cropped `g` and `y` by four pixels, so the card and sheet headings were
+measured rather than trusted: **`16px / 20.8px`** on the sheet name (a 1.3 ratio) and no clipped
+heading anywhere across `.pkgb-pkgname`, `.pkgb-mname`, `.pkgb-n`, `.pkgb-gt` at either width. The
+ref's values were kept only where the measurement agreed with them.
+
+### Measured, both widths, active fixture
+
+```
+package cards 2 · repliesByPackagePanel 0 · scorecards-on-cards 2 · labels Sent/Replied/Requests
+matColumns 0 · shelves 1 · sheets 4 · addCards 1 · ghostPkg 1 · percentSigns 0
+clipped headings [] · filled ["＋ New package"] · horizontal overflow 0px
+```
+
+### What the rewrite orphaned, and what was done about it
+
+`STAT_ICON` and `BarPanel` lost their caller inside `TrackingBand` the moment the render changed —
+**removed**, because an unreferenced component sitting in a file is the shape this build has twice
+found costing a session. `STAT_CELLS`, `repliesByPackage` and `ledgerRows` are **unmounted but kept**:
+still exported, still unit-locked, still drawn by the DEV `#/pkg-lab` route. That is a mount being
+removed, not a derivation being deleted, and the file says so.
+
+### Four locks moved, and one claim was retired rather than repointed
+
+- *"passes a type from both the add button and the ghost"* — **retired**. It asserted two type-bearing
+  entry points per column; the shelf has neither, by D-B2. The weaker surviving claim replaces it.
+- *"prints the usage line's number from the derivation"* — the shelf's loop binds `sh`, not `s`, so a
+  case about **where a number comes from** broke on a variable rename. Now `/\.usedIn\b/` — the
+  property, not the identifier.
+- Two more repointed to the new class names, claims unchanged.
+
+The shelf also now **bolds the count from `usedIn`** rather than printing the pre-formatted string —
+the same field the delete guard reads, so the sheet can never say a material is free while the guard
+refuses to remove it.
+
+```
+tsc 0 · build 0, no error/[WARNING] lines · vitest 383 files, 6581 passed, 3 skipped
+```
+
+⚠️ **Baseline note:** this session opened with **one pre-existing failure**
+(`src/marketing/marketingLinks.test.tsx`, the marketing session's). It was fixed by that session
+mid-run, so the close is fully green rather than "no worse than baseline".
+
+
 ## Where this stopped, and what is left
 
 **Delivered: Phases 1, 2 and 3, plus D-D2/D-D3 pulled forward.** Every one measured or proven

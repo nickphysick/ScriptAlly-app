@@ -83,10 +83,20 @@ describe("every entry point names its type (D3)", () => {
    * would drop the writer on the type-picker under a heading that already said which type they
    * wanted — the exact step the per-column entry exists to skip.
    */
-  it("passes a type from both the add button and the ghost", () => {
+  it("the ONE add card opens the modal without answering its type question", () => {
+    /**
+     * ⚠️ THE CLAIM IS RETIRED, NOT REPOINTED (D-B2). It asserted two type-bearing entry points per
+     * column — a `+ ADD` head button and a per-type ghost — and the shelf has neither: one add card
+     * at the end, because the type is a question the material modal already asks and three adds
+     * meant choosing it twice.
+     *
+     * What survives is the weaker, still-true claim: the add card exists and hands over a type the
+     * modal can start from.
+     */
     const src = decls(band);
-    expect(src.match(/onAddMaterial\(col\.type\)/g) ?? []).toHaveLength(2);
-    expect(src).not.toMatch(/onAddMaterial\(\s*\)/);
+    expect(src).toContain("pkgb-msheetadd");
+    expect(src).toContain("onAddMaterial(BUILDER_TYPES[0])");
+    expect(src, "the per-type column heads are back").not.toMatch(/["\s`]pkgb-matcolhead["\s`]/);
   });
 
   it("carries the preselect through to the modal", () => {
@@ -142,14 +152,20 @@ describe("the sheets (D3)", () => {
    */
   it("keeps the sheet a div so it can hold two controls", () => {
     const src = decls(band);
-    expect(src).toMatch(/<div key=\{s\.id\} className="pkgb-sheet"/);
+    expect(decls(band)).toMatch(/<div key=\{sh\.id\} className="pkgb-msheet"/);
     expect(src).not.toMatch(/<button[^>]*className="pkgb-sheet"/);
   });
 
   it("prints the usage line's number from the derivation, not from a stored field", () => {
     const src = decls(band);
-    expect(src).toContain("materialColumns(versions, packages)");
-    expect(src).toContain("s.usedIn");
+    /* ⚠️ VIA `materialShelf`, WHICH WRAPS `materialColumns` — the shelf deliberately reuses the
+       columns' sheets rather than re-deriving them, so `usedIn` is still the one number the usage
+       line prints and the delete guard reads. The claim is unchanged; the call site moved. */
+    expect(src).toContain("materialShelf(versions, packages)");
+    /* ⚠️ THE PROPERTY, NOT THE VARIABLE NAME. This asserted the literal `s.usedIn`; the shelf's
+       loop binds `sh`, so a rename broke a case about where a NUMBER comes from. The claim is that
+       the band reads the derived field — which is what the pattern says and a literal did not. */
+    expect(src).toMatch(/\.usedIn\b/);
   });
 });
 

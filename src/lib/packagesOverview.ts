@@ -283,6 +283,55 @@ export function materialColumns(
  * it (`materialColumns` passes a Firestore document id), and the guard states the boundary rather
  * than relying on that staying true.
  */
+/**
+ * ══ THE SHELF (D-B2) — one row of paper, not three columns ═══════════════════════════════════
+ *
+ * ⚠️ AN EMPTY TYPE DOES NOT APPEAR AT ALL. The columns it replaces rendered a heading, a `0 held`
+ * count and a ghost for every type the writer had not used — three statements of absence for
+ * somebody who had simply not got there yet. A shelf shows what is on it.
+ *
+ * ⚠️ SORTED BY TYPE, THEN NEWEST FIRST INSIDE EACH. Type is the only grouping a writer reads the
+ * shelf by ("where are my synopses"), and `BUILDER_TYPES` is the same order the builder offers the
+ * slots in — so the shelf and the form cannot disagree about what comes first.
+ *
+ * ⚠️ AND IT REUSES `materialColumns`' SHEETS RATHER THAN RE-DERIVING THEM. `usedIn` is what the
+ * sheet prints and what the delete guard reads; a second derivation here would let the shelf say a
+ * material is free while the guard refuses to remove it.
+ */
+export function materialShelf(
+  versions: ManuscriptVersion[],
+  packages: SubmissionPackage[],
+): (MaterialSheet & { type: ComponentType })[] {
+  return materialColumns(versions, packages)
+    .filter((c) => c.sheets.length > 0)
+    .flatMap((c) => c.sheets.map((sh) => ({ ...sh, type: c.type })));
+}
+
+/**
+ * The card's one-line composition: `Hook-first · One-page · no sample`.
+ *
+ * ⚠️ AN OMITTED SLOT READS `no sample`, NOT `Not included`. On the card this is a sentence about
+ * what the package sends, and the quiet lower-case clause belongs to the sentence; `Not included`
+ * is a stated CHOICE and reads as a row in the builder's list, where it is right and here is not.
+ *
+ * ⚠️ AND `Other` IS NOT IN IT. The line lists saved materials; the free-text note is not one.
+ */
+export const NO_SLOT_WORD: Record<string, string> = {
+  [ComponentType.QUERY_LETTER]: "no letter",
+  [ComponentType.SYNOPSIS]: "no synopsis",
+  [ComponentType.SAMPLE_PAGES]: "no sample",
+};
+
+export interface CompositionPart { text: string; held: boolean }
+
+export function composition(t: PackageTile): CompositionPart[] {
+  return t.slots.map((sl, i) => sl.state === "held" && sl.name
+    ? { text: sl.name, held: true }
+    : sl.state === "missing"
+      ? { text: MISSING_SLOT, held: false }
+      : { text: NO_SLOT_WORD[BUILDER_TYPES[i]] ?? "not included", held: false });
+}
+
 export const packagesUsing = (versionId: string, packages: SubmissionPackage[]): SubmissionPackage[] =>
   isSlotFilled(versionId) ? packagesUsingVersion(versionId, packages) : [];
 

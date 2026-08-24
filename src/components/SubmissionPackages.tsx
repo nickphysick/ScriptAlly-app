@@ -372,18 +372,10 @@ export const SubmissionPackages: React.FC = () => {
             />
             {/* ⚠️ THE MATERIALS BAND REPLACES THE RAIL'S MATERIALS PANEL (D1) — mounted here and
                 deleted there in the same commit, so the two never coexist. */}
-            <MaterialsBand
-              versions={msVersions}
-              packages={msPackages}
-              onAddMaterial={(type) => { setMatEditing(null); setMatPreselect(type); setMatModal(true); }}
-              onOpenMaterial={openMaterial}
-              /* ⚠️ THE PAGE PASSES BOTH WRITERS AND CHOOSES NEITHER (Ruling 2). Which one runs is
-                 decided inside the popover from `removalChoice`, off the same packages this page
-                 already hands the band — so the sheet's usage line, the popover's wording and the
-                 act performed are three readings of one number. */
-              onDeleteMaterial={deleteVersion}
-              onArchiveMaterial={archiveVersion}
-            />
+              {/* ⚠️ PACKAGES LEAD (D-B1). Materials came first and it read as a filing
+                  cabinet with the point of the feature underneath it — the packages ARE the
+                  feature, and the shelf is what they are built from. Measured, not assumed:
+                  the first screenshot of this rebuild had "Your packages" below the fold. */}
             {/* ⚠️ THE RAIL IS GONE, AND ITS REGISTERS WITH IT (D1). Materials, Packages and Tracking
                 are bands on the page now — the rail was an index of two of them beside the things it
                 indexed, which is a second copy of a list rather than a way to reach it. Nothing
@@ -445,13 +437,22 @@ export const SubmissionPackages: React.FC = () => {
                   />
                 )}
               />
+            <MaterialsBand
+              versions={msVersions}
+              packages={msPackages}
+              onAddMaterial={(type) => { setMatEditing(null); setMatPreselect(type); setMatModal(true); }}
+              onOpenMaterial={openMaterial}
+              /* ⚠️ THE PAGE PASSES BOTH WRITERS AND CHOOSES NEITHER (Ruling 2). Which one runs is
+                 decided inside the popover from `removalChoice`, off the same packages this page
+                 already hands the band — so the sheet's usage line, the popover's wording and the
+                 act performed are three readings of one number. */
+              onDeleteMaterial={deleteVersion}
+              onArchiveMaterial={archiveVersion}
+            />
               <TrackingBand
                 packages={msPackages}
                 versions={msVersions}
                 queries={msQueries}
-                activities={msActivities}
-                agents={agents}
-                now={Date.now()}
                 onLogQuery={() => navigate("/queries")}
               />
               <FootnoteBand />

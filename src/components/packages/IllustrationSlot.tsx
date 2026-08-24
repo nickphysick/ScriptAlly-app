@@ -34,7 +34,13 @@ import "./packagesBroadsheet.css";
  * component rather than a second component, so all nineteen marks still come from one library and
  * one stroke rule; a bespoke plate in the reading pane would be a second set that could drift.
  */
-export type SlotShape = "rect" | "disc" | "stamp" | "chip";
+/**
+ * ⚠️ `bare` HAS NO PLATE AT ALL — no border, no fill, no padding. It is for a mark used as
+ * DECORATION rather than as a placeholder: the shelf sheet's watermark sits at 14% behind the
+ * words, and a dashed box around it would say "artwork pending" about something that is already
+ * doing its job. Every other shape keeps the dash, because every other shape IS a placeholder.
+ */
+export type SlotShape = "rect" | "disc" | "stamp" | "chip" | "bare";
 
 export interface IllustrationSlotProps {
   /** Which mark to draw — a key of `PACKAGE_ICONS`. */

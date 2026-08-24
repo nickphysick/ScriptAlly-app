@@ -23,7 +23,8 @@
  */
 import React from "react";
 import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../../types";
-import { materialColumns, materialHolders } from "../../lib/packagesOverview";
+import { materialShelf, materialHolders } from "../../lib/packagesOverview";
+import { BUILDER_TYPES } from "./typeMeta";
 import { IllustrationSlot } from "./IllustrationSlot";
 import { RemovePopover } from "./RemovePopover";
 import "./packagesBroadsheet.css";
@@ -61,7 +62,15 @@ export interface MaterialsBandProps {
 export const MaterialsBand: React.FC<MaterialsBandProps> = ({
   versions, packages, onAddMaterial, onOpenMaterial, onDeleteMaterial, onArchiveMaterial,
 }) => {
-  const cols = materialColumns(versions, packages);
+  /**
+   * ⚠️ ONE SHELF, NOT THREE COLUMNS (D-B2). The columns stated a heading, a `0 held` count and a
+   * ghost for every type the writer had not used yet — three statements of absence to somebody who
+   * had simply not got there. **An empty type does not appear at all**: a shelf shows what is on it.
+   *
+   * ⚠️ AND THE PER-TYPE `+ ADD` GOES WITH THEM. One add card at the end, because the type is a
+   * question the material modal already asks; three adds meant choosing the type twice.
+   */
+  const sheets = materialShelf(versions, packages);
 
   return (
     <section className="pkgb-band" aria-labelledby="pkgb-mat-h">
@@ -69,89 +78,49 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
         <h2 id="pkgb-mat-h">Your materials</h2>
         {/* ⚠️ `0 held` IS TRUE AND STAYS. A count of things you have is a count; the sentence-not-a-
             count rule applies to the usage line, where "In 0 packages" reads as a malfunction. */}
-        <span className="pkgb-tag">{versions.length} held</span>
+        <span className="pkgb-tag">{sheets.length} held</span>
       </div>
 
-      <div className="pkgb-matcols">
-        {cols.map((col) => (
-          /* ⚠️ THREE GRID ROWS — head / stack / ghost. The heads share a top and the ghosts share a
-             bottom BY CONSTRUCTION at any content length, rather than by the three columns happening
-             to hold the same number of sheets. */
-          <div className="pkgb-matcol" key={col.type}>
-            <div className="pkgb-matcolhead">
-              <IllustrationSlot
-                id={`mat-${col.type}`}
-                icon={TYPE_ICON[col.type]}
-                px={40}
-                shape="disc"
-              />
-              <span className="pkgb-mchtext">
-                <span className="pkgb-eyebrow">{col.heading}</span>
-                <span className="pkgb-statline">{col.held} held</span>
-              </span>
-              <button
-                type="button"
-                className="pkgb-add"
-                onClick={() => onAddMaterial(col.type)}
-                /* The column already names the type; the button alone would read "+ ADD" to a
-                   screen reader three times over. */
-                aria-label={`Add to ${col.heading}`}
-              >
-                + ADD
-              </button>
-            </div>
-
-            <div className="pkgb-matstack">
-              {col.sheets.length === 0 ? (
-                /* ⚠️ A HOLD, NOT A COLLAPSE (D3). A type you own nothing of used to vanish, taking
-                   the row's alignment with it and making an empty page read as a broken one. The
-                   sentence states what is normal rather than urging — the same rule as every other
-                   absence line here. */
-                <div className="pkgb-colempty">None yet — most writers keep two or three versions.</div>
-              ) : col.sheets.map((s) => (
-                <div key={s.id} className="pkgb-sheet" data-material={s.id}>
-                  <span className="pkgb-stype">{s.typeLabel}</span>
-                  <button type="button" className="pkgb-sopen pkgb-sname" onClick={() => onOpenMaterial(s.id)}>
-                    {s.name}
-                  </button>
-                  {/* ⚠️ ONE LINE, ONE ROW, WITH A REAL SEPARATOR. Two spans relying on `margin-top`
-                      rendered as "TextIn 1 package" — vertical margin is inert on an inline box, and
-                      every probe read both strings correctly because each one WAS correct. The fault
-                      was the line they made together. */}
-                  <span className="pkgb-smeta">
-                    <span>{s.source}</span>
-                    <span className="pkgb-sdot" aria-hidden="true" />
-                    {/* ⚠️ THE NUMBER IS BOLD AND THE WORDS ARE NOT, but the WORDS are `usageLine`'s
-                        — split here rather than restated. Rendering the sentence inline left the
-                        lib's `usageLine` saying "Not in a package yet" with nobody reading it: two
-                        wordings for one fact on a page that claims single-sourced figures. */}
-                    <span className="pkgb-suse">
-                      {s.usedIn > 0
-                        ? <>In <b>{s.usedIn}</b> {s.usedIn === 1 ? "package" : "packages"}</>
-                        : s.usage}
-                    </span>
-                  </span>
-                  <RemovePopover
-                    id={s.id}
-                    name={s.name}
-                    typeLabel={s.typeLabel}
-                    subject="material"
-                    holders={materialHolders(s.id, packages)}
-                    onDelete={onDeleteMaterial}
-                    onArchive={onArchiveMaterial}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* ⚠️ ROW 3, ALWAYS PRESENT. It is the column's second entry point, so a writer with four
-                letters can add a fifth from the foot of the stack without going back up to `+ ADD` —
-                and pinning it to the bottom row is what puts all three on one baseline. */}
-            <button type="button" className="pkgb-ghost" onClick={() => onAddMaterial(col.type)}>
-              <span className="pkgb-gt">{col.ghostLabel}</span>
+      <div className="pkgb-shelf">
+        {sheets.map((sh) => (
+          /* ⚠️ THE WATERMARK IS THE TYPE, FAINT AND BEHIND THE WORDS. It repeats the eyebrow on
+             purpose — the eyebrow is for reading, the mark is for scanning a shelf at a glance. */
+          <div key={sh.id} className="pkgb-msheet" data-material={sh.id} data-type={sh.type}>
+            <span className="pkgb-wm" aria-hidden="true">
+              <IllustrationSlot id={`wm-${sh.id}`} icon={TYPE_ICON[sh.type]} px={34} shape="bare" />
+            </span>
+            <span className="pkgb-mtype">{sh.typeLabel}</span>
+            <button type="button" className="pkgb-mname" onClick={() => onOpenMaterial(sh.id)}>
+              {sh.name}
             </button>
+            <div className="pkgb-mmeta">{sh.source}</div>
+            {/* ⚠️ THE NUMBER IS BOLD AND IT IS `usedIn` — the SAME field the delete guard reads, so
+                the sheet can never say a material is free while the guard refuses to remove it.
+                `usage` carries the wording; `usedIn` carries the count, and both come from one
+                derivation. */}
+            <div className="pkgb-muse">
+              {sh.usedIn > 0
+                ? <>In <b>{sh.usedIn}</b> package{sh.usedIn === 1 ? "" : "s"}</>
+                : sh.usage}
+            </div>
+            <RemovePopover
+              id={sh.id}
+              name={sh.name}
+              typeLabel={sh.typeLabel}
+              subject="material"
+              holders={materialHolders(sh.id, packages)}
+              onDelete={onDeleteMaterial}
+              onArchive={onArchiveMaterial}
+            />
           </div>
         ))}
+        {/* ⚠️ ONE ADD CARD, AND IT NAMES THE THREE TYPES RATHER THAN ASKING FOR ONE. The modal owns
+            the type step; a preselect here would be the page answering a question it is about to
+            ask. */}
+        <button type="button" className="pkgb-msheetadd" onClick={() => onAddMaterial(BUILDER_TYPES[0])}>
+          <span className="pkgb-gt">Add a material</span>
+          <span className="pkgb-gs">Letter, synopsis or sample</span>
+        </button>
       </div>
     </section>
   );
