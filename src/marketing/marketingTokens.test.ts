@@ -92,3 +92,58 @@ describe("two surfaces, and the step between them is real", () => {
     expect(rule![1]).not.toMatch(/border/);
   });
 });
+
+/**
+ * ⚠️ THE CONTAINER-CAP PRE-CHECK, AS A TEST RATHER THAN AS A HABIT. A `clamp(min, Nvw, max)` must
+ * reach its ceiling at or BEFORE the container it sits in stops growing. Past the cap the measure
+ * is frozen, so anything still climbing is type growing against a fixed column — invisible at the
+ * width a ref was drawn at, and the reason the landing statement broke to three lines at 1440
+ * while holding two at 1280.
+ *
+ * This has now decided five numbers in this project (the statement's 5rem → 3.65rem → 3rem, the
+ * lede's constant, `.mk-turn-b`'s 1.7rem, About's mission 2.65rem). It is one division —
+ * `max / N` against the cap — so it belongs in a lock, not in a paragraph someone has to
+ * remember to re-read.
+ *
+ * ⚠️ IT ASSERTS THE RELATION, NOT THE VALUES. Pinning "3rem" and "1300" would go red on every
+ * legitimate redesign and train the next person to rebaseline it without reading it; pinning the
+ * relation stays true through any redesign that is correct and fails every one that is not.
+ */
+describe("every viewport-scaled clamp reaches its ceiling before its container stops growing", () => {
+  /** `max-width` of the box each token's text is measured inside. */
+  const CONTAINERS: Record<string, { selector: string; token: string }> = {
+    "--mk-hero-h1": { selector: ".mk-heroinner", token: "--mk-hero-h1" },
+  };
+
+  /** The `max-width` a selector declares, in px. */
+  const capOf = (selector: string) => {
+    const rule = new RegExp("\\" + selector + "\\s*\\{([^}]*)\\}").exec(marketing);
+    expect(rule, `${selector} has a rule`).toBeTruthy();
+    const m = /max-width\s*:\s*([\d.]+)px/.exec(rule![1]);
+    expect(m, `${selector} declares a px max-width`).toBeTruthy();
+    return parseFloat(m![1]);
+  };
+
+  /** The viewport width at which `clamp(min, Nvw, max)` first reaches `max`. */
+  const ceilingReachedAt = (token: string) => {
+    const raw = value(marketing, token);
+    expect(raw, `${token} is declared`).toBeTruthy();
+    const m = /clamp\(\s*[\d.]+rem\s*,\s*([\d.]+)vw\s*,\s*([\d.]+)rem\s*\)/.exec(raw!);
+    expect(m, `${token} is a clamp(min, Nvw, max)`).toBeTruthy();
+    const vw = parseFloat(m![1]);
+    const maxPx = parseFloat(m![2]) * 16;
+    return maxPx / (vw / 100);
+  };
+
+  for (const [name, { selector, token }] of Object.entries(CONTAINERS)) {
+    it(`${name} tops out inside ${selector}'s cap`, () => {
+      const reached = ceilingReachedAt(token);
+      const cap = capOf(selector);
+      expect(
+        reached,
+        `${name} reaches its ceiling at ${Math.round(reached)}px, past ${selector}'s ${cap}px cap — ` +
+        `between those widths the type grows against a frozen measure`,
+      ).toBeLessThanOrEqual(cap);
+    });
+  }
+});

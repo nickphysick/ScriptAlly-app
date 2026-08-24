@@ -12,7 +12,6 @@
 import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B, HERO_EYEBROW, CTA_START,
-  HERO_CONGRATS, HERO_CONGRATS_SUB,
   CTA_BAND_HEADING, DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
 } from "./landingCopy";
 
@@ -68,14 +67,22 @@ describe("landing copy — verbatim locks", () => {
    * replacement — it is what stops the softening line being reinstated from a diff.
    */
   /**
-   * ⚠️ THE CONGRATULATION IS A BEAT, AND THE LEDE TURNS AGAINST IT. "but here your quest…" only
-   * works because something above it said the reader had got somewhere. Locking both together is
-   * what stops one being edited without the other.
+   * ⚠️ RETARGET TO THE STRONGER CLAIM, SAME LAW: the congratulation is DELETED, so this asserts
+   * its absence rather than its wording. The law it was protecting — that the lede turns against
+   * something — is unchanged and still asserted; what it turns against is the STATEMENT now, and
+   * the acknowledgement is carried by the ticked box on the statement's row. Asserting the two
+   * strings are gone from every export is what stops them being reinstated from a diff and giving
+   * the hero three lines of praise before the argument starts again.
    */
-  it("congratulates before the lede turns", () => {
-    expect(HERO_CONGRATS).toBe("Congratulations.");
-    expect(HERO_CONGRATS_SUB).toBe("You've got further than most.");
+  it("the lede turns against the statement, and the congratulation is gone", async () => {
+    expect(HERO_H1.endsWith(".")).toBe(true);
     expect(ledeText().startsWith("but here")).toBe(true);
+    const copy = await import("./landingCopy");
+    expect("HERO_CONGRATS" in copy).toBe(false);
+    expect("HERO_CONGRATS_SUB" in copy).toBe(false);
+    const strings = Object.values(copy).filter((v): v is string => typeof v === "string");
+    expect(strings).not.toContain("Congratulations.");
+    expect(strings).not.toContain("You've got further than most.");
   });
 
   it("the turn is one line, and the reassurance in front of it is gone", async () => {

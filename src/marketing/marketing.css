@@ -95,13 +95,16 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
      ~558px while a viewport-relative font-size keeps climbing — type growing against a fixed
      measure. Measured: the ceiling was 6rem, the statement broke to three lines at 1440 and 2080
      and held two at 1280, purely because 6.4vw kept rising after the column stopped.
-     4.5vw reaches 3.65rem at 1298px, just inside `.mk-heroinner`'s 1300 cap, so every width above
-     renders identically. ⚠️ THE REF SAYS 3.85rem AND THAT VALUE IS WRONG HERE: it needs 578.3px
-     against a 593.8px column — 15.5px of headroom, under the 20px gate — and it is not reached
-     until 1369px, past the cap, which is the exact bug the previous pass removed. The mockup's
-     column was wider than ours. A number carried off a ref is a hypothesis until measured.
+     4.5vw reaches 3rem at 1067px, well inside `.mk-heroinner`'s 1300 cap, so every width from
+     there up renders identically. ⚠️ THE REF SAYS 3.3rem AND THIS IS 3rem: the ceiling has to pay
+     for the ticked box that now closes the statement, which costs the row a fixed 58px (44 of
+     mark plus a 14 gap). At 3.3rem the row projected to ~15px of headroom at 1440 against a 20px
+     gate. ⚠️ AND AN EARLIER REF VALUE, 3.85rem, WAS WRONG FOR A SECOND REASON WORTH KEEPING: it
+     was not reached until 1369px, PAST the cap, which is the fault this whole note is about. The
+     mockup's column was wider than ours. A number carried off a ref is a hypothesis until
+     measured — and `marketingTokens.test.ts` now runs the arithmetic so nobody has to remember.
      ⚠️ THE REQUIREMENT IS ONE LINE ABOVE THE `nowrap` BOUNDARY, not this number. */
-  --mk-hero-h1: clamp(2.1rem, 4.5vw, 3.65rem);
+  --mk-hero-h1: clamp(2.1rem, 4.5vw, 3rem);
   /* The paper slip's hairline — ink at 10%, pre-computed per the no-colour-mix() rule. */
   --mk-slip-bd: rgba(58, 28, 20, 0.10);
   font-family: "Source Sans Pro", system-ui, -apple-system, sans-serif;
@@ -401,28 +404,31 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   color: var(--mk-nearblack); margin: 0;
 }
 
-/* The congratulation: a beat between the statement and the lede.
-   ⚠️ THE POPPER IS A FLEX SIBLING OF THE WORD, NOT A POSITIONED DECORATION — so it stays beside
-   "Congratulations." at every type size, and the second line sits under both rather than under
-   the mark. `flex: 0 0 auto` stops it being squeezed when the column narrows. */
-/* ⚠️ THE MEASURE BELONGS TO THE PROSE LINE, NOT TO THE ROW THAT HOLDS THE MARK. With `34ch` on
-   the wrapper, the flex row had to fit "Congratulations." — one unbreakable word — plus a 16px
-   gap plus a 36px mark inside 270px, and at 390 the popper was pushed 8.8px past the cap. It was
-   invisible, because the column is wider than the measure, which is exactly why it needed
-   measuring rather than looking. The second line is the only part that is prose. */
-.mk-subhead { margin: 26px 0 0; }
-.mk-congrats {
-  display: flex; align-items: center; gap: 16px;
-  font-family: "Playfair Display", Georgia, serif; font-size: 1.95rem; line-height: 1.15;
-  color: var(--mk-nearblack); letter-spacing: -.014em;
+/* The ticked box that closes the statement.
+   ⚠️ IT IS AN INLINE MARK INSIDE THE HEADLINE, NOT A FLEX SIBLING BESIDE IT. The ref draws
+   `.statement` as `display: flex` with the h1 and the mark as children — correct for the
+   single-line headline it draws, and wrong as soon as the headline wraps, which ours does below
+   ~1173. A block flex item takes the whole available width and wraps its text INSIDE that box, so
+   the mark is pinned to the column's right edge with a hole between it and the words: measured
+   ~40px at 1100, and it read as furniture rather than punctuation. Nothing in the ref could show
+   that, because its headline never wraps. Inline, the mark follows the full stop onto whatever
+   line the full stop lands on, and at every width where the headline IS one line it renders in
+   exactly the ref's place.
+   ⚠️ 44px AND A 14px GAP, BOTH MEASURED RATHER THAN DRAWN. The ref's 48/18 projected to ~15px of
+   headroom at 1440 against a 20px floor. Growing either is a change to re-measure at 1260 — the
+   `nowrap` boundary, where the headroom is tightest — never at 1440, where it looks generous.
+   ⚠️ AND `vertical-align: middle` IS WHAT KEEPS IT OFF THE BASELINE. An image aligns on its bottom
+   MARGIN edge by default (this repo has paid for that once already, in the pagebar wordmark), so
+   a baseline-aligned tick would sit low against type it is meant to punctuate. */
+/* ⚠️ THE LAST WORD AND THE MARK BREAK AS ONE. Without this the mark is orphaned onto a line of
+   its own at every width where the words fit but the words plus the mark do not — measured at
+   1100, where "You've written a book." fits in 479.8px and the mark's extra 58 does not. The
+   sentence's full stop and the tick that replaces the congratulation belong on the same line. */
+.mk-tickword { white-space: nowrap; }
+.mk-tick {
+  display: inline-block; vertical-align: middle;
+  width: 44px; height: auto; margin-left: 14px;
 }
-.mk-markslot { display: inline-flex; flex: 0 0 auto; }
-/* ⚠️ A PLACEHOLDER MARK, matched to the hero artwork's stroke so the two read as one hand. */
-.mk-popper {
-  display: block; width: 36px; height: 33px; fill: none;
-  stroke: var(--mk-burg); stroke-width: 1.5; opacity: .8;
-}
-.mk-congrats-sub { display: block; margin-top: 8px; max-width: 34ch; font-size: 1.06rem; color: var(--mk-muted); }
 
 /* ⚠️ `nowrap` FAILS BY OVERFLOW, NOT BY WRAPPING — which is why the boundary is measured, never
    assumed. A ceiling slightly too large does not produce an obviously broken two-line headline; it
@@ -518,8 +524,10 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   .mk-r1 { animation-delay: .05s; }
   .mk-r2 { animation-delay: .38s; }
   .mk-r3 { animation-delay: .56s; }
+  /* ⚠️ FOUR STAGES, NOT FIVE. The congratulation was stage 2 and is gone, so the stages below
+     it moved up rather than leaving a 0.5s hole in the entrance where a deleted element used to
+     be. `.mk-r5` went with it. */
   .mk-r4 { animation-delay: .74s; }
-  .mk-r5 { animation-delay: .9s; }
   @keyframes mkRise { to { opacity: 1; transform: none; } }
 }
 

@@ -16,16 +16,15 @@ export const HERO_EYEBROW = "For querying writers";
 
 export const HERO_H1 = "You've written a book.";
 
-/**
- * The congratulation, between the statement and the lede. Two lines, stacked: the first shares
- * its row with a party-popper mark, the second sits under both.
- *
- * ⚠️ IT IS A BEAT, NOT A SUBHEADING. It exists so the page acknowledges the achievement before
- * the lede tells the reader how hard the next part is — take it out and the slip's "but here your
- * quest for agent representation begins" has nothing to turn against.
- */
-export const HERO_CONGRATS = "Congratulations.";
-export const HERO_CONGRATS_SUB = "You've got further than most.";
+/* ⚠️ THE CONGRATULATION IS DELETED AND IS NOT COMING BACK AS WORDS. `HERO_CONGRATS`
+   ("Congratulations.") and `HERO_CONGRATS_SUB` ("You've got further than most.") were a two-line
+   beat between the statement and the lede, and the note here argued they were load-bearing —
+   that the slip's "but here your quest… begins" had nothing to turn against without them.
+   It turns against the STATEMENT, which is the stronger reading: "You've written a book." is
+   itself the thing the lede undercuts, and the acknowledgement is now carried by the ticked box
+   beside it rather than spelled out underneath. Three lines of praise before the argument starts
+   was the page clearing its throat.
+   The mark is `hero-tick-placeholder.png`, imported by `Hero.tsx` — see the ref. */
 
 /**
  * ⚠️ THE LEDE RESUMES THE HEADLINE'S SENTENCE, SO IT OPENS LOWERCASE. That `a` is the signature of

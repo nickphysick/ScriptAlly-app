@@ -30,6 +30,7 @@ import { LegalPage } from "./LegalPage";
 import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
 import { LEGAL_COPY_REVIEWED } from "./legalCopy";
+import { HERO_H1 } from "./landingCopy";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
 
 /** The public marketing routes and a string each must actually render. */
@@ -37,8 +38,12 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
   /* ⚠️ RETARGET, SAME LAW: the landmark is the hero's h1, and the statement hero replaced the
      strapline it used to name. The claim is unchanged — this route must render real content, not
      a null. `DOCUMENT_TITLE` still carries the old words, but it is set in an effect and never
-     reaches the static markup, so it cannot stand in as the landmark. */
-  ["/", () => <Landing onNavigate={noNavigate} />, "You&#x27;ve written a book."],
+     reaches the static markup, so it cannot stand in as the landmark.
+     ⚠️ AND IT STOPS BEFORE THE LAST WORD ON PURPOSE. The headline's final word is bound to the
+     tick inside a `nowrap` span, so the full sentence is no longer one uninterrupted run of text
+     in the markup. That the sentence still reads whole is a stronger claim than a landmark can
+     make, and it is asserted below against the h1's stripped text. */
+  ["/", () => <Landing onNavigate={noNavigate} />, "You&#x27;ve written a"],
   ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "Start free"],
   /* Retarget, same law: the mission statement replaced the old About headline as this page's h1. */
   ["/about", () => <AboutPage onNavigate={noNavigate} />, "Get good stories told."],
@@ -267,5 +272,52 @@ describe("the nav's condense is triggered by sentinels ahead of the nav", () => 
     expect(line, "the fallback states both edges on one line").toBeTruthy();
     expect(parseFloat(line![1])).toBe(box("release").height);
     expect(parseFloat(line![2])).toBe(box("condense").height);
+  });
+});
+
+/**
+ * ⚠️ THE HEADLINE IS SPLIT IN THE COMPONENT AND MUST NOT BE EDITED BY THE SPLIT. `HERO_H1` stays
+ * one locked string; `Hero` cuts it at its last space so the final word and the ticked box can be
+ * bound into one unbreakable unit. The risk that buys is a silent copy change — a dropped space, a
+ * lost full stop — which no verbatim lock on the constant can see, because the constant is still
+ * right. So this reads the RENDERED h1, strips the markup, and requires the sentence back.
+ *
+ * The mark's placement — that it sits on the same line as the last word at every width, and that
+ * the row clears the column — is a rendered-page claim and is measured, not read out of a file.
+ */
+describe("the statement's ticked box", () => {
+  const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
+  const heading = () => {
+    const m = html().match(/<h1[^>]*class="[^"]*mk-statement[^"]*"[^>]*>([\s\S]*?)<\/h1>/);
+    expect(m, "the hero renders an h1.mk-statement").toBeTruthy();
+    return m![1];
+  };
+
+  it("reads as the whole sentence once the markup is stripped", () => {
+    const text = heading().replace(/<[^>]*>/g, "").replace(/&#x27;/g, "'").replace(/\s+/g, " ").trim();
+    expect(text).toBe(HERO_H1);
+  });
+
+  it("binds the last word and the mark into one unbreakable unit", () => {
+    const h = heading();
+    const span = h.match(/<span class="mk-tickword">([\s\S]*?)<\/span>/);
+    expect(span, "the last word sits in .mk-tickword").toBeTruthy();
+    /* The mark is INSIDE that span — outside it, the span binds a word to nothing. */
+    expect(span![1]).toContain("mk-tick");
+    /* …and the word it binds is the headline's last. */
+    expect(span![1].replace(/<[^>]*>/g, "").trim()).toBe(HERO_H1.split(" ").pop());
+  });
+
+  it("the mark is decorative — it is punctuation, not content", () => {
+    expect(heading()).toMatch(/<img[^>]*class="mk-tick"[^>]*alt=""/);
+  });
+
+  it("the congratulation and its popper are gone from the page", () => {
+    const h = html();
+    expect(h).not.toContain("Congratulations.");
+    expect(h).not.toContain("You&#x27;ve got further than most.");
+    expect(h).not.toMatch(/["\s`]mk-popper["\s`]/);
+    expect(h).not.toMatch(/["\s`]mk-congrats["\s`]/);
+    expect(h).not.toMatch(/["\s`]mk-subhead["\s`]/);
   });
 });

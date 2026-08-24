@@ -169,26 +169,6 @@ export const ContactWayPlate: React.FC<{ way: "questions" | "broken" | "privacy"
 );
 
 /**
- * The party popper beside the hero's congratulation.
- *
- * ⚠️ A PLACEHOLDER AWAITING THE ILLUSTRATOR, matched to the hero artwork's stroke weight so the
- * two read as one hand until the commissioned mark arrives. Stroke-only and coloured by CSS, like
- * every other mark in this file — see the header note.
- */
-export const PartyPopper: React.FC = () => (
-  <svg className="mk-popper" viewBox="0 0 44 40" aria-hidden="true">
-    <path d="M4 36 L17 15 L25 21 Z" strokeLinejoin="round" />
-    <path d="M17 15 Q20.5 19 25 21" />
-    <path d="M24 12 Q29 9 34 11" strokeLinecap="round" />
-    <path d="M27 17 Q33 16 38 19" strokeLinecap="round" />
-    <path d="M21 9 Q22 5 20 2" strokeLinecap="round" />
-    <circle cx="35" cy="5" r="1.5" />
-    <circle cx="40" cy="14" r="1.5" />
-    <rect x="30" y="25" width="3" height="3" transform="rotate(20 31.5 26.5)" />
-  </svg>
-);
-
-/**
  * The lightbulb beside About's turn.
  *
  * ⚠️ IT REPLACES THE BURGUNDY LEFT RULE, it does not join it. The rule said "this is a pull
