@@ -171,3 +171,71 @@ contact in the list, with no summary line and nothing to say either was invented
 up unresolvable — from a failed auto-create, from prod data, from a future path — is now visible
 under Unassigned with a banner, instead of vanishing. The safety net is real even where the summary
 is quiet.
+
+---
+
+# Overnight run — retire auto-create, light up the flag flow (24 Aug)
+
+## Step 0 — recon
+
+**Red gates: all clear.** No other session holds `ImportCsv.tsx`, `Queries.tsx` or `agentDisplay.ts`
+(only `src/marketing/*` is dirty, and is another session's). Retiring auto-create touches the
+import's own write path and nothing else. R2 holds.
+
+### R1 — the two auto-create paths, and what they fabricate
+
+Both sit **inside the query import**, at `ImportCsv.tsx:467` and `:492`. They are distinct from the
+Agents and Manuscripts import categories (`:380`, `:432`), which create records because that is what
+those imports are *for*.
+
+| | manuscript (`ms-autoimport-…`) | agent (`agent-autoimport-…`) |
+|---|---|---|
+| | `genre: "Uncategorized Fiction"` | `agency: "Pending Match"` |
+| | **`wordCount: 80000`** | **`email: "imported@zite.com"`** |
+| | `logline: "Imported automatically to preserve Query relationships."` | `genres: ["Fiction"]` |
+| | `ageCategory: "General Adult"` | `mswlNotes: "Auto-profile created via historical query logs."` |
+| | | **`starRating: 3`** |
+| | | `responseTimeWeeks: 8` · `noResponseMeansNo: true` · `materialsWanted: ["Query Letter"]` · `notes: "Added during Zite CSV import."` |
+
+⚠️ **Two beyond what I reported last run.** `wordCount: 80000` is a specific figure for the writer's
+own book, and `starRating: 3` is a rating of a real person the writer has never rated. Both are
+written silently and are indistinguishable afterwards from values the writer gave.
+
+**When auto-create itself fails** (a tier cap, a denied write) `foundMs`/`foundAgent` stay undefined
+and the row falls through to the Phase 1 code — `manuscriptId: ""` / `agentId: ""`. That is the only
+path by which the shipped flag surfaces can currently be reached.
+
+### R2 — re-measured, and the shipped safety net rests on something true
+
+```
+manuscriptId: "" + agentId: ""  → ACCEPTED
+manuscriptId key omitted        → DENIED
+agentId key omitted             → DENIED
+```
+
+### R3 — F-AG, the complete list with dispositions
+
+| line | value | disposition |
+|---|---|---|
+| 472–477 | the manuscript block: genre · **wordCount 80000** · logline · ageCategory | **fixed** — block retired (D1) |
+| 498–509 | the agent block: agency · **email** · genres · mswlNotes · **starRating** · responseTimeWeeks · noResponseMeansNo · materialsWanted · notes | **fixed** — block retired (D1) |
+| 344 | `email \|\| "unlisted@agent.com"` | **fixed** — a fabricated address that could be sent to |
+| 415 | `logline \|\| "A compelling new manuscript."` | **fixed** — the writer's sentence about their own novel |
+| 413 | `genre \|\| "Fiction"` | **fixed** (D4) — unset when the CSV does not supply it |
+| 418 | `ageCategory \|\| "Adult"` | **fixed** — a claim about the book |
+| 454 | `personalisationNotes \|\| "Zite query backup logs."` | **fixed** — this field is *what the writer said to that agent* |
+| 353 | `mswlNotes \|\| "Imported MSWL focus points."` | **fixed** — wish-list notes the agency never wrote |
+| 343 | `agency \|\| "Independent"` | **fixed** — "Independent" is a factual claim about where someone works |
+| 361 | `notes \|\| "Imported from Zite archives."` | **flagged** — provenance, and *true*; but it is written into the writer's own notes field |
+| 604 | `description \|\| "Activity logged via CSV Import."` | **flagged** — same shape: true provenance, in a field the writer owns |
+| 372 | `responseTimeWeeks: 8` (agent import) | **flagged** — a real default with a meaning, not a fabrication; needs a call |
+| 1373 | `act.details \|\| "--"` | **benign** — display only, writes nothing |
+
+The three flagged are held back deliberately: each is either *true* or a genuine default, and Phase
+4's instruction is to fix the unambiguous and flag the rest.
+
+### R4 — D3's count: **zero**
+
+`ms-autoimport-*`: 0 of 2 manuscripts. `agent-autoimport-*`: 0 of 16 agents. The only ones that ever
+existed on dev were created by my own drives last run and removed at the end of it. **Nothing to
+leave alone, no migration to decline.**
