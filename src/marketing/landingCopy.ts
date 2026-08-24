@@ -96,8 +96,17 @@ export const SECTION_EYEBROW = "What ScriptAlly does";
    sat immediately below this heading — two centred head-and-sub pairs back to back, which reads
    as a mistake rather than as a rhythm. The heading above is the band's header now. */
 
-export const CTA_BAND_H2 = "Your story deserves better than a spreadsheet.";
-export const CTA_BAND_SUB = "Free to start. Take control of your querying journey today.";
+/**
+ * ⚠️ `CTA_BAND_H2` IS DELETED AND SHOULD NOT COME BACK. It read "Your story deserves better than
+ * a spreadsheet." — retired on Nick's instruction.
+ *
+ * ⚠️ AND THE BAND KEEPS ITS HEADING SLOT: this line was the subtitle and is now the heading,
+ * wearing the same Playfair treatment. Deleting the heading alone would have left a closing band
+ * with a subtitle and a button and no heading; deleting the whole band would have cost the page
+ * its last conversion point. Promoting the line that was already there invents no copy and
+ * orphans no string.
+ */
+export const CTA_BAND_HEADING = "Free to start. Take control of your querying journey today.";
 
 export const DOCUMENT_TITLE = "ScriptAlly — Take control of your querying journey";
 

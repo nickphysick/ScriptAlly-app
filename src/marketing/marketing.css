@@ -665,7 +665,9 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-ctainner { background: var(--mk-parch); border: 1px solid var(--mk-bd); border-radius: 20px; padding: 46px 40px; text-align: center; position: relative; overflow: hidden; }
 .mk-ctainner::after { content: ''; position: absolute; inset: 8px; border: 1px solid var(--mk-burg); border-radius: 14px; pointer-events: none; opacity: .5; }
 .mk-ctainner h2 { font-family: "Playfair Display", Georgia, serif; font-size: 29px; font-weight: 500; color: var(--mk-head); }
-.mk-ctainner p { font-size: 13.5px; font-weight: 300; color: var(--mk-muted); margin: 10px 0 24px; }
+/* ⚠️ THE BAND HAS NO SUBTITLE ANY MORE — the line that was here is the heading. This rule sets
+   the gap the `<p>` used to provide between the words and the button. */
+.mk-ctainner h2 + .mk-btn { margin-top: 24px; }
 .mk-foot { max-width: 1300px; margin: 0 auto; padding: 38px 56px 48px; display: flex; align-items: center; gap: 20px; }
 .mk-foot .mk-brand { margin-right: auto; }
 .mk-foot .mk-monogram { width: 26px; height: 26px; font-size: 13px; }

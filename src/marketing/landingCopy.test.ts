@@ -13,7 +13,7 @@ import { describe, it, expect } from "vitest";
 import {
   HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B, HERO_EYEBROW, CTA_START,
   HERO_CONGRATS, HERO_CONGRATS_SUB,
-  CTA_BAND_H2, DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
+  CTA_BAND_HEADING, DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
 } from "./landingCopy";
 
 /** The lede is segments now (one is bold); this is the sentence a reader actually sees. */
@@ -113,7 +113,7 @@ describe("landing copy — verbatim locks", () => {
       PULSE_HEADING,
       ...FEATURE_ROWS.map((r) => r.heading),
       ...FEATURE_ROWS.flatMap((r) => r.body.map((b) => b.text)),
-      HERO_H1, ledeText(), HERO_TURN_B, CTA_BAND_H2,
+      HERO_H1, ledeText(), HERO_TURN_B, CTA_BAND_HEADING,
     ].filter((t) => t.toLowerCase().includes("finger on the pulse"));
     expect(said).toEqual(["A finger on the pulse of your querying journey"]);
   });
@@ -149,8 +149,22 @@ describe("landing copy — verbatim locks", () => {
     expect(rendered).not.toContain("Ditch the spreadsheet. It's time to get serious.");
   });
 
+  /**
+   * ⚠️ RETARGET TO THE STRONGER CLAIM: the spreadsheet line is gone, so this asserts its ABSENCE
+   * from every export rather than its wording. The band's subtitle was promoted into the heading
+   * slot, so the constant that survives is the one that was already on the page.
+   */
+  it("no longer says the spreadsheet line, anywhere", async () => {
+    const copy = await import("./landingCopy");
+    expect("CTA_BAND_H2" in copy).toBe(false);
+    expect("CTA_BAND_SUB" in copy).toBe(false);
+    const strings = Object.values(copy).filter((v): v is string => typeof v === "string");
+    expect(strings).not.toContain("Your story deserves better than a spreadsheet.");
+    expect(strings.some((t) => /spreadsheet\.$/.test(t))).toBe(false);
+  });
+
   it("CTA band and document title", () => {
-    expect(CTA_BAND_H2).toBe("Your story deserves better than a spreadsheet.");
+    expect(CTA_BAND_HEADING).toBe("Free to start. Take control of your querying journey today.");
     expect(DOCUMENT_TITLE).toBe("ScriptAlly — Take control of your querying journey");
   });
 
