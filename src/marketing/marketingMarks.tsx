@@ -188,6 +188,21 @@ export const PartyPopper: React.FC = () => (
   </svg>
 );
 
+/**
+ * The lightbulb beside About's turn.
+ *
+ * ⚠️ IT REPLACES THE BURGUNDY LEFT RULE, it does not join it. The rule said "this is a pull
+ * quote"; the bulb says "here is the idea", which is what the line actually is. Same drawn hand
+ * as the planes and the handshake — stroke-only, coloured by CSS.
+ */
+export const IdeaBulb: React.FC = () => (
+  <svg className="mk-bulb" viewBox="0 0 36 46" aria-hidden="true">
+    <path d="M11.5 27.5a9.5 9.5 0 1 1 13 0c-1.7 1.6-2.6 3-2.9 4.9h-7.2c-.3-1.9-1.2-3.3-2.9-4.9z" strokeLinejoin="round" />
+    <path d="M14 36.5h8M15 40.5h6" strokeLinecap="round" />
+    <path d="M18 3.5V.5M5.5 15.5h-3M30.5 15.5h3M8.6 6.6 6.5 4.5M27.4 6.6l2.1-2.1" strokeLinecap="round" />
+  </svg>
+);
+
 /** The tick inside a commitment card. */
 export const CommitmentTick: React.FC = () => (
   <span className="mk-ctick" aria-hidden="true">

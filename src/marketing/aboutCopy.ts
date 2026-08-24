@@ -24,13 +24,15 @@ export const ABOUT_DOCUMENT_TITLE = "About — ScriptAlly";
    else on the page that sentence belongs, and moving it somewhere would be the compromise the
    change was made to avoid. */
 
+/* ⚠️ SUPERSEDED: the lead-in WAS a quiet serif line inside the `h1`, chosen over a mono kicker.
+   It is the mono kicker now, and it is its own element outside the heading — because it is a
+   label rather than half a sentence, the h1 is "Get good stories told." alone. */
 /**
- * ⚠️ TWO SPANS, ONE HEADING. The lead-in is a quiet serif line above the statement, not a second
- * heading and not a mono kicker — the ref offers all three and this is the one that was chosen.
- * Keeping them inside one `h1` is what stops the document outline gaining a level for a phrase
- * that is half a sentence.
+ * ⚠️ NO COLON. This is a mono uppercase KICKER now, not the first half of a sentence — a label
+ * has nothing to join to the line beneath it, and a colon in tracked-out caps reads as a stray
+ * mark. The name stays `_PRE` because it still sits above the headline.
  */
-export const ABOUT_MISSION_PRE = "Our mission is simple:";
+export const ABOUT_MISSION_PRE = "Our mission is simple";
 export const ABOUT_MISSION_MAIN = "Get good stories told.";
 
 /**

@@ -37,7 +37,8 @@ import {
   ABOUT_FOUNDER_BODY, ABOUT_FOUNDER_NAME, ABOUT_FOUNDER_ROLE,
 } from "./aboutCopy";
 import { Runs } from "./CopyRuns";
-import { MarketingIllustration, CommitmentTick } from "./marketingMarks";
+import { MarketingIllustration, CommitmentTick, IdeaBulb } from "./marketingMarks";
+import missionIllustration from "../assets/marketing/mission-illustration-placeholder.png";
 import { MarketingFooter } from "./MarketingFooter";
 
 export const AboutPage: React.FC<{
@@ -53,17 +54,24 @@ export const AboutPage: React.FC<{
     <div>
       <main>
         <section className="mk-mission">
+          {/* ⚠️ ONE MANUSCRIPT PAGE CARRYING THE WHOLE ARGUMENT — not a card around the headline.
+              The kicker, the rule, the statement, the lede, the hit line and the turn all sit on
+              the same sheet, which is what makes it read as a page rather than as a heading in a
+              box with prose underneath. */}
           <div className="mk-missioncol">
-            {/* One heading, two spans — the lead-in is half a sentence, not a level of its own. */}
-            <h1 className="mk-missionline">
-              <span className="mk-mission-pre">{ABOUT_MISSION_PRE}</span>
-              <span className="mk-mission-main">{ABOUT_MISSION_MAIN}</span>
-            </h1>
+            <div className="mk-kickrule" aria-hidden="true" />
+            <p className="mk-mission-kicker">{ABOUT_MISSION_PRE}</p>
+            <h1 className="mk-mission-main">{ABOUT_MISSION_MAIN}</h1>
             <p className="mk-gapbody">{ABOUT_GAP_BODY}</p>
             <p className="mk-gaphit">{ABOUT_GAP_HIT}</p>
-            <p className="mk-missionturn">{ABOUT_TURN}</p>
+            {/* The bulb is a flex sibling aligned to the first line's top — see marketing.css. */}
+            <p className="mk-missionturn"><IdeaBulb /><span>{ABOUT_TURN}</span></p>
           </div>
-          <MarketingIllustration slot="mission" />
+          {/* ⚠️ A PLACEHOLDER AWAITING THE ILLUSTRATOR, like the hero's — and with the dashed
+              plate gone nothing on the page says so. Recorded in CLAUDE.md. */}
+          <MarketingIllustration slot="mission" finished>
+            <img className="mk-missionart" src={missionIllustration} alt="" />
+          </MarketingIllustration>
         </section>
 
         {/* ⚠️ THE HEADER OWNS THE BREAK, WHICH IS WHY THE FIRST BAND GIVES ONE UP. A centred
