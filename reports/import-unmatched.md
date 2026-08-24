@@ -314,3 +314,48 @@ fix the unambiguous:
 | 389 | `responseTimeWeeks: 8` (agent import) | a real default with a meaning, not an invention |
 
 **Benign:** `act.details || "--"` — display only, writes nothing.
+
+## Phase 5 — full census
+
+```
+summary counts   : "4 Successfully Imported" · "0 Lines Failed / Skipped" · "3 NEED A DECISION"
+rows in CSV      : 4        queries created: 4        (nothing skipped)
+list census      : 48 rendered of 48 stored           (zero dropped)
+banner           : "3 queries are missing a manuscript or an agent."
+banner resolved  : absent once the last flagged row was gone
+second sweep     : 47 stored / 47 rendered / 0 blank labels
+Unassigned scope : "Unassigned · 2", holding 2
+```
+
+Harness left at baseline: 44 queries · 2 manuscripts · 16 agents, nothing to remove.
+
+## F-AI — retiring auto-create touches nothing else
+
+Smart Import is `src/lib/smartImport.ts`, `SmartImportReview.tsx` and `BranchB.tsx` — **separate
+files with no dependency on `ImportCsv.tsx`**, whose only importer in `src/` is a smoke test. No
+other file in `src/` contains `autoimport` or auto-creates a record.
+
+Smart Import's own `||` fallbacks were checked and are a **different class**: `"This agent"`,
+`"Agency only"`, `"Record"` are display labels in toasts and notes, never written to a record.
+Nothing to change and nothing touched.
+
+## Phase 6 — deployed
+
+⚠️ **Built and deployed from the clean worktree at `8db6af63`, not from the shared checkout.** At
+deploy time another session held four files uncommitted — `DiscoverNewAgents.tsx`,
+`WorkspacePageGrid.tsx`, `workspacePageGrid.css`, `Hero.tsx` — and `workspacePageGrid.test.tsx` was
+**red** against that edit. Shipping the shared grid mid-edit would have put it on every page. This
+deploy therefore contains committed work only, and **dev is reproducible from `8db6af63`** — which
+it has not been for the last two deploys.
+
+Served bundle verified independently: hash matches the worktree build, and every retired value is
+absent — `ms-autoimport` · `agent-autoimport` · `Uncategorized Fiction` · `imported@zite.com` ·
+`Imported automatically` · `unlisted@agent.com` · `A compelling new manuscript`, **0 occurrences
+each**. `Need a decision`, `Needs a manuscript`, `Create from this row` and `Unassigned` all present.
+
+## What is left flagged
+
+* **F-AG's three survivors** — `notes` and `description` write true provenance into fields the
+  writer owns; `responseTimeWeeks: 8` is a real default. Each needs a call.
+* **F-AE** — the delete guard is client-side only. Recorded, not a defect.
+* Carried forward unchanged: F-M, F-H, F-R, F-S, F-U, F-X, F-AB, partial/full strips, Move surface.
