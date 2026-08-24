@@ -190,10 +190,22 @@ describe("the footer claim, and what stands behind it", () => {
    * treatment, both cards — a chip that meant sage in the list and blue in the panel would read as
    * two different claims.
    */
+  /**
+   * ⚠️ RETARGETED TO ITS NEW MODULE (v3.1 §7). `ScoutRow` moved out of the page into
+   * `compsScoutRow.tsx` so a spec could render it without the page's Firebase import chain dragging
+   * `auth/invalid-api-key` into collection. `sliceBetween` failed LOUDLY naming the missing anchor
+   * rather than widening to the rest of the file, which is the whole reason it exists.
+   *
+   * ⚠️ AND THE SLICE IS GONE WITH THE MOVE. The row is now the whole module, so there is nothing to
+   * bound — and a whole-file assertion is strictly stronger than the bounded one it replaces.
+   */
   it("the row's verified chip is the shared one, naming its catalogue", () => {
-    const row = sliceBetween(src, "const ScoutRow", "type ScoutPhase");
+    const row = readFileSync(join(here, "compsScoutRow.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(row, "the suggestion card is not in its own module any more").toContain("ScoutRow");
     expect(row).toContain('className="ct-chip verified"');
     expect(row).toContain("s.verification.catalogue");
+    /* and the page no longer defines it — two copies would drift */
+    expect(src, "ScoutRow is defined in the page again").not.toContain("const ScoutRow");
   });
 
   /** links and agentMatch are CARRIED but not rendered — Amendment 3 keeps the fields, defers the UI */

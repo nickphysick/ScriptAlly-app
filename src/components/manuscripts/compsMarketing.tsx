@@ -96,11 +96,6 @@ const AUTOPLAY_MS = 4200;
  */
 export const CompCarousel: React.FC<{ slides: CompSlide[]; label: string }> = ({ slides, label }) => {
   const [index, setIndex] = useState(0);
-  /* ⚠️ SWITCHING TRACKS RESETS TO SLIDE ONE, and the effect keys on the ARRAY rather than on a
-     counter the parent has to remember to bump. Landing on slide 4 of a track you have just opened
-     is the reader being dropped into the middle of something they have not started. Autoplay
-     restarts with it — or stays suppressed, because the interval effect still reads `reduced`. */
-  useEffect(() => { setIndex(0); }, [slides]);
   const [paused, setPaused] = useState(false);
   const [reduced, setReduced] = useState(false);
   const count = slides.length;
@@ -229,7 +224,15 @@ export const FeatureBlock: React.FC<{
         {track === "jobs" ? "…and five to avoid" : "← back to the five jobs"}
       </button>
     </div>
+    {/* ⚠️ THE `key` IS THE RESET, AND AN EFFECT WAS THE WRONG TOOL — measured. `useEffect(() =>
+        setIndex(0), [slides])` is a PASSIVE effect: it runs after paint, so switching tracks showed
+        the new track's slide FOUR for a frame and then jumped to slide one. The browser check caught
+        exactly that ("Carries the tone" → "Crossing shelves", both index 3). Keying the component to
+        the track remounts it with its state already fresh, in the same render, with no intermediate
+        frame to see. Autoplay restarts with the remount — or stays suppressed, because the new
+        instance re-reads `prefers-reduced-motion` on mount. */}
     <CompCarousel
+      key={track}
       slides={showing}
       label={track === "jobs" ? "What a good comp does" : "Common missteps"}
     />
