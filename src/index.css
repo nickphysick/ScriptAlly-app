@@ -314,6 +314,11 @@
   --shell-rail-hi: #f4efe7;           /* active/hover icon on the ink rail, and the brand glyph */
   --shell-avatar-bg: #f5e3da;         /* Baked 11 — one avatar everywhere, incl. the ink rail */
   --shell-avatar-bd: rgba(124, 58, 42, 0.25);
+  /* ⚠️ ADDITIVE (account-menu B). A FLOATING card's own edge, burgundy at 15% — softer than
+     --shell-avatar-bd's 25% because it runs the whole perimeter of a 270px card rather than a
+     32px disc, and softer than --shell-edge because a menu lifted off the ground states its
+     boundary with the shadow and only needs the hairline to close the corners. */
+  --shell-menu-edge: rgba(124, 58, 42, 0.15);
   --shell-page: #f7eee7;              /* the top-nav ground — flat, no desk, no capsules */
   --shell-desk-grad: linear-gradient(160deg, #b4c2b6, #a8b8aa);  /* the workspace sage desk */
   --shell-focus: rgba(124, 58, 42, 0.45);  /* Baked 21 — one focus ring, both shells */
