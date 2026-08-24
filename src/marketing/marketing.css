@@ -38,16 +38,22 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
      because a bare override in the nav's own media block LOSES TO a later `.mk-sect` rule on
      source order — measured: the 720px override was live and the 76.5px base still won. A token
      is set on one selector and the media query genuinely overrides it. */
-  /* ⚠️ SET FROM THE CONDENSED NAV, NOT THE FULL ONE. Any in-page anchor scroll happens with the
-     page already moved, i.e. with the nav already condensed, so the full height would over-clear
-     by the difference and leave a gap under the bar. MEASURED after the condense landed, in all
-     three regimes rather than reasoned about — the nav now has three, not two:
-       >=961  full links      88 → 72   (this value)
-       561-960  burger, one row  76 → 68
-       <=560  wrapped, two rows  134.8 → 126.8
+  /* ⚠️ SET FROM THE FULL NAV, NOT THE CONDENSED ONE — AND THE PREVIOUS NOTE HERE ARGUED THE
+     OPPOSITE AND WAS WRONG. It reasoned that an anchor scroll happens with the nav already
+     condensed, so the full height would over-clear. The browser computes the target `scrollTop`
+     from the layout AT THE MOMENT THE SCROLL STARTS — the top of the page, nav at full height —
+     and only then does the condense pull everything above the target up by the difference. So the
+     section lands SHORT by exactly the condense delta, under the bar rather than below it.
+     Measured, `Learn more` → `#pulse`, gap between the nav's bottom edge and the section's top:
+       condensed values   390 -7.8   901 -7.6   1440 -16.1   2080 -16.0
+       full values        390 +0.2   901 +0.4   1440 -0.1    2080  0.0
+     The three regimes, full → condensed (the FIRST number is the one to use):
+       >=961    full links          88 → 72   (this value)
+       561-960  burger, one row     76 → 68
+       <=560    wrapped, two rows  128.8 → 120.8
      Each override sits in the media block that CAUSES its regime, so the height and the layout
      that produces it cannot drift apart. */
-  --mk-nav-h: 72px;
+  --mk-nav-h: 88px;
   /* The cream the nav's ink pill prints in — lighter than the parchment so it reads as type on
      ink rather than a second surface. */
   --mk-cta-ink: #f7f0e9;
@@ -195,13 +201,31 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-tlink:hover { border-bottom-color: var(--mk-burg); }
 
 /* ── The marketing nav: brand furniture, condensing on scroll ── */
+/* ⚠️ THE CONDENSE'S TRIGGERS, AND THEY SIT BEFORE THE NAV ON PURPOSE. Condensing shortens the nav,
+   so anything observed at or AFTER the nav is moved by the very state change it is being used to
+   decide — which is the feedback loop this replaced. These boxes are ahead of it in flow and
+   nothing the nav does can reach them.
+   ⚠️ THERE ARE TWO BECAUSE ONE WAS NOT ENOUGH, and the reason is measured rather than reasoned:
+   scroll anchoring moves `scrollY` to absorb the nav's own height change, so a single boundary is
+   re-crossed from underneath and the class still flipped 2–4 times per direction. 40px condenses,
+   8px releases, and the 32px between them is 8× the worst drift observed. Full account in
+   `MarketingShell`.
+   Neither takes space: each cancels its height with a matching negative margin, so both begin at
+   document y=0. `.mk-scope` is a COLUMN FLEX container, so no margin collapsing is in play and the
+   cancellation is exact — but for the same reason a flex item is shrinkable by default, and
+   `flex: none` is what stops `min-height: 100vh` compressing them. A sentinel of no height is a
+   sentinel that answers about nothing. */
+.mk-navsentinel { flex: none; pointer-events: none; }
+.mk-navsentinel--condense { height: 40px; margin-bottom: -40px; }
+.mk-navsentinel--release { height: 8px; margin-bottom: -8px; }
 .mk-navwrap {
   position: sticky; top: 0; z-index: 60; background: var(--mk-hero-ground);
   transition: box-shadow .2s ease, background .2s ease;
 }
-/* ⚠️ THE CONDENSED STATE IS SHORTER THAN THE FULL ONE, and `--mk-nav-h` is set from the CONDENSED
-   height on purpose — see the token. By the time an in-page anchor has scrolled anywhere, the nav
-   has already condensed, so that is its height during every scroll the offset exists to clear. */
+/* ⚠️ THE CONDENSED STATE IS SHORTER THAN THE FULL ONE, and `--mk-nav-h` is set from the FULL
+   height — see the token, where the measurement is. The intuition that an anchor scroll "happens
+   with the nav already condensed" is the trap: the target is computed before the condense, and the
+   condense then moves the target. */
 .mk-navwrap.mk-scrolled {
   box-shadow: 0 1px 0 var(--mk-hair), 0 6px 18px rgba(58, 28, 20, .05);
   background: rgba(247, 244, 238, .92); backdrop-filter: blur(8px);
@@ -301,13 +325,14 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   .mk-links, .mk-login { display: none; }
   .mk-burger { display: block; }
   /* Same breakpoint, same cause: the nav's height changes when the links go. */
-  .mk-scope { --mk-nav-h: 68px; }
+  .mk-scope { --mk-nav-h: 76px; }
 }
 
 /* ⚠️ DECLARED AFTER THE 960 BLOCK, AND THAT ORDER IS LOAD-BEARING. Both are single-class media
    queries at equal specificity, so the LATER one wins — with this above, the 960 rule's
-   `--mk-nav-h: 68px` overrode this regime's 127px and the anchor offset was wrong by 59px on
-   every phone. Measured, not spotted: the override was live and losing.
+   `--mk-nav-h` for the burger regime overrode this regime's much taller value and the anchor
+   offset was wrong by the whole difference on every phone (59px at the values of the day, 53 at
+   today's 76 vs 129). Measured, not spotted: the override was live and losing.
    ⚠️ THE BAR WRAPS ON A NARROW PHONE, AND WITHOUT THIS IT RUNS OFF THE SCREEN. The lockup, the
    ink pill and the burger need ~374px of content before gutters; at 390 there are 346, so the
    burger sat 42px past the viewport edge (112px at 320) with a real horizontal scrollbar.
@@ -323,7 +348,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   .mk-navright { order: 3; width: 100%; margin-left: 0; }
   .mk-navright .mk-btn { width: 100%; justify-content: center; }
   /* Two rows means a much taller bar, and the anchor offset has to know. */
-  .mk-scope { --mk-nav-h: 121px; }
+  .mk-scope { --mk-nav-h: 129px; }
 }
 
 

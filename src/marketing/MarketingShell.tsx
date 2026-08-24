@@ -1,8 +1,8 @@
 /**
  * MarketingShell — tier-1 chrome (design refs: landing-v13.html nav + chrome-overview-v1.html
- * tier map). Pinned desk-coloured top nav whose bottom hairline fades in once the WINDOW has
- * scrolled past 4px (the marketing tier scrolls the document — the stage-scroll rules are
- * workspace-only). Right side is auth-aware via the pure marketingNavState:
+ * tier map). Pinned desk-coloured top nav that condenses once a 40px sentinel at the top of the
+ * document has scrolled out of view (the marketing tier scrolls the document — the stage-scroll
+ * rules are workspace-only). Right side is auth-aware via the pure marketingNavState:
  *   logged out → Log in (ghost, → #/login) + "Start tracking — it's free" (→ #/signup)
  *   logged in  → "Open dashboard" + avatar chip — never an auto-redirect.
  *
@@ -25,9 +25,49 @@ export const MarketingShell: React.FC<{
   /* ⚠️ A CLASS TOGGLED BY A PASSIVE LISTENER, NOT A SCROLL-LINKED ANIMATION. The condense is a
      state change with a transition, so it runs on the compositor once and stops; a scroll-driven
      animation would recompute on every frame of every scroll for a two-state effect. */
+  /* ⚠️ AND THE TRIGGER IS A SENTINEL, NOT A `scrollY` THRESHOLD — the threshold version was a
+     FEEDBACK LOOP. It condensed on `scrollY > 12`; condensing SHORTENS the nav (88 → 72 at full
+     width, 76 → 68 with the burger, 134.8 → 126.8 wrapped); a shorter nav reflows everything after
+     it; and within a few pixels of the threshold the two states chased each other. A sentinel at
+     the top of the document sits BEFORE the nav in flow, so nothing the nav does to its own height
+     can move it.
+     ⚠️ AND THE SENTINEL ALONE DOES NOT FINISH THE JOB — MEASURED, not assumed. With ONE sentinel
+     the class still flipped 2–4 times per direction at 901/1440/2080. The residual cause is SCROLL
+     ANCHORING: the nav shortening pulls content up, the browser compensates by moving `scrollY`
+     itself, and the sentinel is crossed again from underneath. `window.scrollTo(0, 50)` measured
+     as `scrollY === 41`. It is the ORIGINAL loop with the browser, rather than a threshold, as the
+     second party — so no choice of trigger element can fix it, only a gap wider than the drift.
+     Measured drift: 0px at 390, 2px at 901, 4px at 1440/2080. (Suppressing the 200ms condense
+     transition makes it WORSE — 19px and 15 flips — because the height change lands in one step
+     for anchoring to answer in one step. The transition was damping the fault, not causing it.)
+     ⚠️ SO THERE ARE TWO SENTINELS, AND THE HYSTERESIS IS THE POINT. 40px tall for the condense,
+     8px for the release: condense when the tall one leaves, release when the short one returns,
+     hold between. The 32px gap is 8× the worst measured drift. They are the same two numbers as
+     the scroll fallback below — one rule, two implementations, so the two paths cannot disagree
+     about where the nav changes state. */
+  const condenseRef = useRef<HTMLDivElement | null>(null);
+  const releaseRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const condense = condenseRef.current;
+    const release = releaseRef.current;
+    if (condense && release && typeof IntersectionObserver !== "undefined") {
+      /* Each edge only ever asserts ONE direction, which is what makes the pair a hysteresis
+         rather than two competing triggers: the tall box says "condensed" when it leaves and says
+         nothing when it returns; the short box says "full" when it returns and nothing when it
+         leaves. Both fire once on observe, so the state is correct on a deep-linked load too. */
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.target === condense && !e.isIntersecting) setScrolled(true);
+          if (e.target === release && e.isIntersecting) setScrolled(false);
+        });
+      }, { threshold: 0 });
+      io.observe(condense);
+      io.observe(release);
+      return () => io.disconnect();
+    }
+    /* The same two edges for a browser without the API. */
+    const onScroll = () => setScrolled((was) => (was ? window.scrollY > 8 : window.scrollY > 40));
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
@@ -101,6 +141,12 @@ export const MarketingShell: React.FC<{
     <div className="mk-scope">
       {/* Before the nav, so it is the first thing a keyboard reaches on every marketing page. */}
       <a className="mk-skip" href="#mk-main">Skip to content</a>
+      {/* The condense's two triggers. They have to be AHEAD of the nav in flow — see the effect
+          above — and they take no space: each cancels its own height with a matching negative
+          margin, so both sit at document y=0. The skip link is absolutely positioned, so these are
+          the first in-flow boxes on the page. */}
+      <div className="mk-navsentinel mk-navsentinel--condense" ref={condenseRef} aria-hidden="true" />
+      <div className="mk-navsentinel mk-navsentinel--release" ref={releaseRef} aria-hidden="true" />
       <div className={"mk-navwrap" + (scrolled ? " mk-scrolled" : "")}>
         <nav className="mk-nav" aria-label="Marketing">
           <button type="button" className="mk-brand mk-brand-link" onClick={() => onNavigate("landing")} aria-label="ScriptAlly home">

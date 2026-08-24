@@ -194,3 +194,78 @@ describe("the marketing chrome renders in both of its states", () => {
     expect(renderPage(shell(SMOKE_USER), "/")).toContain("Open dashboard");
   });
 });
+
+/**
+ * ⚠️ THE CONDENSE'S TWO EDGES ARE STATED TWICE — IN CSS AND IN JS — AND THIS ASSERTS THEM AGAINST
+ * EACH OTHER, never against literals on both sides. The sentinel heights ARE the observer's
+ * thresholds (a box of height N stops intersecting at exactly `scrollY === N`), and the scroll
+ * fallback restates the same two numbers for a browser without the API. Two derivations that must
+ * agree, so a lock that pinned "40" and "8" in both places would go green the day someone changed
+ * both in the same wrong direction.
+ *
+ * ⚠️ AND THE ORDER IS THE WHOLE MECHANISM. The sentinels must precede the nav in the rendered
+ * output: condensing SHORTENS the nav, so a trigger at or after it is moved by the state change it
+ * is deciding — the feedback loop this replaced. Asserted against the rendered markup, not the
+ * source, because that is where "before" actually means something.
+ *
+ * The one-flip-per-direction behaviour itself is a rendered-page claim and is measured, not read
+ * out of a file — see the pass report.
+ */
+describe("the nav's condense is triggered by sentinels ahead of the nav", () => {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const css = readFileSync(resolve(here, "marketing.css"), "utf8");
+  const shell = readFileSync(resolve(here, "MarketingShell.tsx"), "utf8");
+
+  /** Height and the negative margin that cancels it, per sentinel modifier. */
+  const box = (mod: string) => {
+    const m = stripComments(css).match(
+      new RegExp(`\\.mk-navsentinel--${mod}\\s*\\{([^}]*)\\}`),
+    );
+    expect(m, `.mk-navsentinel--${mod} has a rule`).toBeTruthy();
+    const decl = m![1];
+    const num = (prop: string) => {
+      const d = decl.match(new RegExp(`${prop}\\s*:\\s*(-?[\\d.]+)px`));
+      expect(d, `${mod} declares ${prop}`).toBeTruthy();
+      return parseFloat(d![1]);
+    };
+    return { height: num("height"), margin: num("margin-bottom") };
+  };
+
+  it("both sentinels render, and both come before the nav", () => {
+    const html = renderPage(
+      <MarketingShell user={null as never} onNavigate={noNavigate} path="/"><div /></MarketingShell>,
+      "/",
+    );
+    const condense = html.indexOf("mk-navsentinel--condense");
+    const release = html.indexOf("mk-navsentinel--release");
+    const nav = html.indexOf("mk-navwrap");
+    expect(condense).toBeGreaterThan(-1);
+    expect(release).toBeGreaterThan(-1);
+    expect(nav).toBeGreaterThan(-1);
+    expect(condense).toBeLessThan(nav);
+    expect(release).toBeLessThan(nav);
+  });
+
+  it("each sentinel cancels its own height, so neither takes space", () => {
+    for (const mod of ["condense", "release"]) {
+      const b = box(mod);
+      expect(b.height + b.margin, `${mod} is cancelled`).toBe(0);
+    }
+  });
+
+  it("the release edge sits well below the condense edge — the gap IS the hysteresis", () => {
+    const condense = box("condense").height;
+    const release = box("release").height;
+    expect(release).toBeLessThan(condense);
+    /* Worst drift measured while scroll anchoring absorbs the nav's own height change was 4px,
+       at 1440 and 2080. Anything under ~16px of gap is inside the fault it exists to survive. */
+    expect(condense - release).toBeGreaterThanOrEqual(16);
+  });
+
+  it("the scroll fallback uses the same two edges as the sentinels", () => {
+    const line = stripComments(shell).match(/was \? window\.scrollY > (\d+) : window\.scrollY > (\d+)/);
+    expect(line, "the fallback states both edges on one line").toBeTruthy();
+    expect(parseFloat(line![1])).toBe(box("release").height);
+    expect(parseFloat(line![2])).toBe(box("condense").height);
+  });
+});
