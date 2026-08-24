@@ -888,3 +888,106 @@ retired outright is a Part D UI decision, not settled here.
 
 **Phase 5 of the broadsheet build remains held.** Dev rules and nothing else were deployed;
 `origin/main` is untouched.
+
+---
+
+## Part D UI — Parts 3 & 4 (24 Aug, `3d9526a9` + `b0e156e3`)
+
+**Landed (code + unit + measured at 1440×1000 on the dev bundle).** Undeployed.
+
+### Part 3 — the either/or fork
+
+A query carrying nothing asks once: **"What went with this query?"** with `Attach a package`
+and `List materials` side by side. Measured: neither is a filled primary (pastille `#e6edf4`
+and white), both carry their own `title`, and exactly **one** attachment block renders in that
+state. `List materials` opens the editor; it writes nothing by itself.
+
+**⚠️ The fork is narrower than "no package", and that is data, not design.** An unattached query
+still renders the *agent's* expected materials as a fallback, so `loose.length > 0` and the fork
+is suppressed. It draws only where there is no package, **no stored materials and no agent
+defaults**. On the harness account exactly one query reaches it — and its manuscript has no
+packages, so the package branch measured correctly **disabled**, titled *"Build a package on the
+Submission packages page first"*.
+
+> **F-Z (a):** the fork's package branch is **not drivable end-to-end on this account's data**.
+> Its write is proven through the switch below, which calls the same `changeQueryPackage`.
+> Nothing to fix — recorded so a future run does not read the gap as an untested path.
+
+### The switch, driven
+
+`Save as package ›` on a loose row now switches **in place** rather than navigating to the
+packages page. Measured wording, with plural agreement:
+
+> *"Use a package instead? The 2 materials listed here will be replaced by the package's
+> contents. Nothing else about this query changes."* — Cancel · Choose a package
+
+### Part 4 — snapshots retired as a writer
+
+`attachPackage` is deleted and `onPick` routes to `changeQueryPackage`, so **every new
+attachment writes a link**. Verified against the diff, not asserted: the declaration and its one
+call site are both in the commit's removed lines, and no live reference survives in `src/`.
+
+After the pick: `packed 1 / loose 0`, slot eyebrows **LETTER · SYN · SAMPLE** — which only a live
+package lookup can resolve, so the write is a link and not a copy.
+
+> **F-Z (b):** **0** snapshot-attached queries remain on the harness; **10** links. So D13's
+> "existing snapshots keep rendering" is currently **unobservable on screen here** — there are
+> none to look at. The render path is untouched and `detachPackage` still corrects them.
+
+`attachedMaterials` is now orphaned and is **kept, documented as retired**: it and its tests are
+where the shape of an existing snapshot is written down.
+
+### ⚠️ A partial undo, found by driving the switch
+
+Attaching **clears** the loose materials (`materialsLinkWrites` enforces one-or-the-other), and
+the undo restored only `packageId` — so undoing a switch left the query with **neither the
+package nor its materials**, while the toast said it had been reversed. That is the dead-undo
+family in a worse form: a live control that half-works reads as a working one.
+
+Fixed: the prior materials are captured before the write and restored **through the same
+invariant that cleared them**, so the two halves cannot drift. `removeQueryPackage` is correct
+as it stands — its prior state always has an empty list. Locked as a property of the inverse and
+**verified red against the old wiring**.
+
+### F-Y — the pane's in-place grammar does not accommodate a fourth control, because there was never one grammar
+
+Measured on a packaged query — every visible in-place control in the reading pane:
+
+| control | class | line | size | colour |
+|---|---|---|---|---|
+| date sent | `.qp-stat--edit` | none | 13px | ink `#141412` |
+| reply expected by | `.qp-stat--edit` | none | 13px | ink |
+| send method | `.qp-inplace` | 1px dashed grey | 12.5px | grey `#a19e9a` |
+| **Change package** | `.qp-inplace .qc-strip-ptr` | 1px dashed grey | **7.5px** | ink |
+| **Remove** | `.qp-inplace .qc-strip-ptr` | 1px dashed grey | **7.5px** | ink |
+
+The `title` grammar **is** consistent — all five open with "Change …", and the two new ones
+follow it. The visual grammar is not, **and two of the three treatments predate this pack**.
+
+**Proposed, not done** — this is a judgement about the whole pane, and making it silently inside
+a packages change is how a pane acquires a fourth treatment:
+
+1. **Leave it.** The two new controls read as the strip's own mono furniture, which is arguably
+   right: they act on the *strip*, not on the query's fields. Costs nothing.
+2. **Unify on `.qp-inplace`** — 12.5px grey dashed for all three of that family, and let the two
+   stat cells keep their own look, since a stat cell is a different kind of thing.
+3. **Unify all five.** The largest change and the only one that ends with one editing model.
+
+Screenshots: `reports/packages-two-state/fy-inplace.png`, `fy-strip.png`, `p3-fork.png`,
+`p3-loose.png`, `p3-confirm.png`, `p4-linked.png`.
+
+### Harness
+
+`seed-query-20` was borrowed to drive the switch and **restored to its seeded state**
+(`packageId: ""`, no `materialsWanted` — its chips were the agent fallback, so the restore is
+exact). `seed-pkgq-1` and `cor-move-a`, borrowed by earlier attempts, were restored to
+`seed-pkg-1`.
+
+### Gate
+
+tsc clean · build clean bar the standing chunk-size note · Vitest **383 files green**. The 3
+failures in `src/marketing/landingCopy.test.ts` are another session's live WIP (`PULSE_HEADING`
+mid-shape-change) and touch no file in this pack.
+
+**D15:** `ImportCsv` is unaffected — it writes `materialsWanted` on import and never touched
+`attachPackage`; Part 4 changes nothing about it.

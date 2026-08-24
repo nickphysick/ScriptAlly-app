@@ -65,9 +65,17 @@ export interface PackageGroupProps {
    * `foot-unsent` / `foot-sent` branch has no reachable state in this app because every query
    * record is a send.
    *
-   * ⚠️ AND THEY READ AS THE FOURTH OF A SET. The pane already edits the date sent, the expected date
-   * and the send method in place, each with a `title` beginning "Change". These match that grammar
-   * and that affordance so a writer meets one editing model, not two.
+   * ⚠️ THEY JOIN A `title` GRAMMAR THAT IS ALREADY CONSISTENT AND A VISUAL ONE THAT IS NOT — measured,
+   * not assumed. Every in-place control in the pane opens with "Change …", and these two follow it.
+   * But the pane does NOT have one look to match: the two stat cells (`.qp-stat--edit`) are 13px ink
+   * with no line, the send method (`.qp-inplace`) is 12.5px grey with a dashed line, and these take
+   * the dashed line at the strip's own 7.5px mono in ink. **Three treatments, of which two predate
+   * this pack.** An earlier draft of this comment claimed a single grammar and is deleted rather
+   * than softened — it would have been quoted forward as though the set were already tidy.
+   *
+   * ⚠️ NOT RESTYLED HERE, DELIBERATELY (F-Y). Picking one of the three is a judgement about the whole
+   * pane, not about this control, and making it silently inside a packages change is how a pane ends
+   * up with a fourth treatment. Reported in reports/packages-two-state.md for Nick's ruling.
    */
   onChangePackage?: () => void;
   onRemovePackage?: () => void;
