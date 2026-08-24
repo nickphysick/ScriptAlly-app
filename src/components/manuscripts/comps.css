@@ -235,7 +235,7 @@
    `1fr` here is what created the gap: it consumes all free space by definition. */
 .ct-feature {
   display: grid; grid-template-columns: minmax(0, 500px) 420px; gap: 44px;
-  align-items: center; justify-content: center; padding: 14px 8px 34px;
+  align-items: center; justify-content: center; padding: 8px 8px 30px;
 }
 @media (max-width: 1040px) { .ct-feature { grid-template-columns: minmax(0, 1fr); gap: 26px; } }
 .ct-feature-l { min-width: 0; }
@@ -257,16 +257,34 @@
 .ct-btn-dark:hover { background: var(--ct-ink); border-color: var(--ct-ink); }
 /* ⚠️ `.ct-btn-slateghost` IS RETIRED WITH THE CTA IT STYLED (v3.1 §3). */
 
-/* ⚠️ THE TRACK TOGGLE — a quiet inline control, deliberately not a segment. The five jobs are the
-   block's point and the missteps are its aside; a segmented control would draw them as equal halves.
-   Underlined rather than boxed for the same reason: it reads as a sentence continuing, not a mode. */
-.ct-caro-toggle {
-  margin-top: 16px; padding: 0; background: none; border: none; cursor: pointer;
-  font-size: 12.5px; color: var(--ct-ink-soft); text-decoration: underline;
-  text-underline-offset: 3px; text-decoration-color: var(--ct-taupe-bd);
+/* ⚠️ `.ct-caro-toggle` IS RETIRED (v3.1 §5) — the missteps have their own BLOCK now rather than a
+   second track behind a control, so there is nothing to toggle between. */
+
+/* ⚠️ THE DIVIDER IS THE BLOCK SEPARATION NOW. It sits INSIDE the shared measure so it lines up with
+   the copy either side of it — a rule running wider than the text it divides reads as page furniture
+   rather than as punctuation between two blocks. */
+.ct-blockrule {
+  max-width: 1060px; margin: 8px auto 8px; border: none;
+  border-top: 1px solid var(--ct-band-hair);
 }
-.ct-caro-toggle:hover { color: var(--ct-mocha); text-decoration-color: var(--ct-mocha); }
-.ct-caro-toggle:focus-visible { outline: 2px solid var(--ct-accent); outline-offset: 3px; border-radius: 3px; }
+
+/* ⚠️ `flip` REORDERS THE GRID'S CHILDREN AND NOTHING ELSE (v3.1 §4). `order` on the two children,
+   not `direction: rtl` — which would invert punctuation and the scrollbar — and not a second markup
+   order, which would be the duplication this component exists to prevent. */
+.ct-feature.flip .ct-feature-l { order: 2; }
+.ct-feature.flip .ct-caro { order: 1; }
+/* ⚠️ AND THE COLUMN WIDTHS SWAP WITH THEM, or the reel would sit in the 500px track and the copy in
+   the 420px one — the flip has to move the TRACKS, not just the contents. */
+.ct-feature.flip { grid-template-columns: 420px minmax(0, 500px); }
+/* ⚠️ THE ALTERNATION DOES NOT SURVIVE THE STACK, DELIBERATELY. Below the breakpoint every block puts
+   its copy first: a reader scrolling one column meets heading-then-picture each time, and a block
+   that inverted there would read as a mistake rather than as rhythm. */
+@media (max-width: 1040px) {
+  .ct-feature.flip { grid-template-columns: minmax(0, 1fr); }
+  .ct-feature.flip .ct-feature-l { order: 1; }
+  .ct-feature.flip .ct-caro { order: 2; }
+}
+.ct-feature-eyebrow { display: block; margin-bottom: 12px; }
 
 /* ── the carousel ── */
 /* ⚠️ THE STAGE AND THE DOTS SHARE ONE WRAPPER AT ONE WIDTH (§2). They were siblings of different
@@ -318,30 +336,13 @@
 @media (prefers-reduced-motion: reduce) { .ct-caro-dot { transition: none; } }
 
 /* ══ MANAGING YOUR COMPS — the three stages (v3 §3) ══ */
-/* ══ THE STAGES BAND (v3.1 §4) ══
- *
- * ⚠️ A WASH, NOT A FILL. A soft vertical gradient of the app's own cream at low opacity — the block
- * has to read as a different SURFACE from the sheet above it without becoming a panel. Anything
- * approaching a solid would make it a third card on a page that already has several.
- *
- * ⚠️ IT REACHES THE SHEET'S BOTTOM BY EATING `.ct-pagebody`'s 110px TAIL PADDING, which is what a
- * negative bottom margin does here — the padding exists to keep content off the scroller's floor,
- * and a band that IS the floor does not need clearing from it. Its own bottom radius then sits where
- * the sheet's does.
- *
- * ⚠️ AND IT DOES NOT BLEED SIDEWAYS. The ref negative-margins to its mockup sheet's 32px padding;
- * this page's body has NO horizontal padding — the inset is the grid's `--content-gutter`, which
- * belongs to shared chrome. Pulling the band out to the window edge would mean escaping the content
- * measure, so it spans the column instead and its content sits inside the shared measure. */
-.ct-stages-band {
-  background: linear-gradient(180deg, rgba(242, 237, 231, .55) 0%, rgba(242, 237, 231, .35) 100%);
-  border-top: 1px solid var(--ct-band-hair);
-  border-radius: 0 0 14px 14px;
-  margin: 56px 0 -110px; padding: 44px 0 48px;
-}
-/* the demoted placement already carries the rule and the gap above it — no second one */
-.ct-demoted .ct-stages-band { margin-top: 0; border-top: none; }
-.ct-stages { padding: 0; text-align: center; }
+/* ⚠️ `.ct-stages-band` IS RETIRED (v3.1 §4) — its wash, its hairline, its bottom radius and its
+   negative bottom margin all went with it. The stages moved to the TOP of the page, and a surface
+   change that read as a closing section reads as a header treatment there. Hairline dividers
+   separate the three blocks on ONE surface instead. */
+/* ⚠️ THE FIRST BLOCK SITS CLOSE UNDER THE HEADER'S HAIRLINE (§1) — it leads the page now,
+   so the old 40px opening gap read as a dropped first line. */
+.ct-stages { padding: 6px 0 0; text-align: center; }
 .ct-stages-h {
   margin: 0; font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600;
   line-height: 1.3; color: var(--ct-ink);

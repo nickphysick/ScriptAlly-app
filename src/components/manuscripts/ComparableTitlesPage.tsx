@@ -64,7 +64,7 @@ import { QueryFormat, compAgeLine, compCounts, compFacets, compMedia, currentYea
    call, not a sweep. `ScoutEmptySketch` still draws the Scout's own empty result. */
 import { ScoutEmptySketch } from "./compMarks";
 import { ScoutRow, returnedLine } from "./compsScoutRow";
-import { FeatureBlock, StagesBlock } from "./compsMarketing";
+import { FeatureBlock, StagesBlock, FEATURE_JOBS, FEATURE_MISSTEPS } from "./compsMarketing";
 import { useToast } from "../toast/ToastProvider";
 import {
   CompSuggestion,
@@ -716,15 +716,24 @@ export const ComparableTitlesPage: React.FC<{
             </section>
           ) : (
             <>
-              {/* ⚠️ ONE ACTION ON FIRST VISIT (v3.1 §3), AND THIS REVERSES AN EARLIER DECISION.
-                  v3 §2 put the Scout on this state so "Try the Scout" had an honest destination.
-                  The CTA is gone instead: it had no honest destination for a FREE user — the panel
-                  it opened was the locked one — stage two of the explainer already introduces the
-                  Scout, and the rail's Upgrade button is the route to Pro. A second CTA that leads
-                  to a locked panel is an upsell wearing a feature's label. */}
-              <FeatureBlock onAddComp={() => setFormState({ index: null })} />
+              {/* ══ THE FIRST-VISIT ORDER (v3.1 §4): how it works, then what a comp does, then
+                  what to avoid. The explainer leads because a reader at zero comps is asking what
+                  this page is FOR before they are asking what makes a good one.
 
+                  ⚠️ ONE ACTION ON THIS STATE, AND THAT REVERSES AN EARLIER DECISION. v3 §2 put the
+                  Scout here so "Try the Scout" had an honest destination; the honest answer turned
+                  out to be that a free user's destination was the LOCKED panel, which is an upsell
+                  wearing a feature's label. Stage two of the explainer already introduces the Scout,
+                  and the rail's Upgrade is the route to Pro.
+
+                  ⚠️ THE DIVIDERS ARE THE SEPARATION NOW — the band is gone. Three blocks on one
+                  surface, ruled apart; a wash that read as a closing section reads as a header
+                  treatment once the block moves to the top. */}
               <StagesBlock />
+              <hr className="ct-blockrule" />
+              <FeatureBlock copy={FEATURE_JOBS} onAddComp={() => setFormState({ index: null })} />
+              <hr className="ct-blockrule" />
+              <FeatureBlock copy={FEATURE_MISSTEPS} flip />
             </>
           )
         ) : (
@@ -1135,9 +1144,16 @@ export const ComparableTitlesPage: React.FC<{
                 the add action lives in the band and the row above, where it belongs once there is
                 a list to add to. The heading steps down and the standfirst loses its last sentence,
                 exactly as the ref draws it. */}
+            {/* ⚠️ THE SAME THREE BLOCKS IN THE SAME ORDER (v3.1 §7), via the same components with
+                props. A reader who has scrolled past their comps meets the page's explanation in
+                the sequence they would have met it on their first visit — a different order here
+                would make the two states two different documents. */}
             <div className="ct-demoted">
-              <FeatureBlock demoted />
               <StagesBlock />
+              <hr className="ct-blockrule" />
+              <FeatureBlock copy={FEATURE_JOBS} demoted />
+              <hr className="ct-blockrule" />
+              <FeatureBlock copy={FEATURE_MISSTEPS} flip demoted />
             </div>
           </>
         )}

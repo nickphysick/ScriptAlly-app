@@ -174,71 +174,82 @@ export const CompCarousel: React.FC<{ slides: CompSlide[]; label: string }> = ({
   );
 };
 
-/** The two standfirsts — the demoted placement drops the last sentence, exactly as the ref draws it. */
-export const FEATURE_HEADING = "What does a good comp do?";
-const FEATURE_LEAD_FULL =
-  "A comp is a recent, published book your manuscript sits beside. Two well-chosen comps tell an agent where your book shelves, who buys it, and how it feels — before they've read a word. Gather yours here, and they'll be ready for every query letter and submission package you build.";
-const FEATURE_LEAD_SHORT =
-  "A comp is a recent, published book your manuscript sits beside. Two well-chosen comps tell an agent where your book shelves, who buys it, and how it feels — before they've read a word.";
+/**
+ * ⚠️ ONE FEATURE COMPONENT, TWO BLOCKS, TWO PLACEMENTS EACH (v3.1 §4/§5). The five jobs and the five
+ * missteps are the SAME block with different content and a `flip`; each renders again demoted at the
+ * workspace foot. Four renders, one implementation — never a second copy of the markup, and
+ * therefore never a second copy of the copy.
+ *
+ * ⚠️ AND `flip` REORDERS THE CHILDREN, IT DOES NOT DUPLICATE THEM. `direction: rtl` and a second
+ * markup order were both available and both wrong: the first inverts punctuation and scrollbars, the
+ * second is the duplication this file exists to avoid. `order` on the two grid children is the whole
+ * mechanism.
+ */
+export interface FeatureCopy {
+  eyebrow?: string;
+  heading: string;
+  lead: string;
+  /** the demoted placement's shorter lead, where one is wanted */
+  leadShort?: string;
+  slides: CompSlide[];
+  carouselLabel: string;
+}
+
+export const FEATURE_JOBS: FeatureCopy = {
+  heading: "What does a good comp do?",
+  lead: "A comp is a recent, published book your manuscript sits beside. Two well-chosen comps tell an agent where your book shelves, who buys it, and how it feels — before they've read a word. Gather yours here, and they'll be ready for every query letter and submission package you build.",
+  leadShort: "A comp is a recent, published book your manuscript sits beside. Two well-chosen comps tell an agent where your book shelves, who buys it, and how it feels — before they've read a word.",
+  slides: COMP_SLIDES,
+  carouselLabel: "What a good comp does",
+};
 
 /**
- * ⚠️ `demoted` IS THE ONLY DIFFERENCE BETWEEN THE TWO PLACEMENTS — a smaller heading, the shorter
- * standfirst, and no actions. The actions are what makes it a first-visit block; offering "Add your
- * first comp" underneath a list of comps would be the page forgetting what the reader has done.
+ * ⚠️ THE STANDFIRST IS NICK'S, SUPPLIED DIRECTLY — it is NOT "from the mockup", because the ref this
+ * pack names carries no such block: it still shows the toggle design this replaces. Recorded so
+ * nobody later goes looking for a source that does not exist.
  */
-/* ⚠️ `onScout` AND THE SLATE-GHOST CTA ARE GONE (v3.1 §3). First visit has exactly one action. The
-   Scout CTA had no honest destination for a free user — it opened the locked panel — and stage two
-   of the explainer already introduces the Scout. The route to Pro is the rail's Upgrade button. */
+export const FEATURE_MISSTEPS: FeatureCopy = {
+  eyebrow: "And five to avoid",
+  heading: "Things to avoid",
+  lead: "The same handful of missteps turn up in query letters again and again. None of them are about the writing — they are about the choice of comp, which makes them the easiest thing on the page to get right.",
+  slides: COMP_MISSTEPS,
+  carouselLabel: "Common missteps",
+};
+
+/**
+ * ⚠️ `demoted` DROPS THE ACTION AND STEPS THE HEADING DOWN. Offering "Add your first comp" beneath a
+ * list of comps is the page forgetting what the reader has already done — and the add action has
+ * three homes up there already.
+ */
 export const FeatureBlock: React.FC<{
+  copy: FeatureCopy;
+  flip?: boolean;
   demoted?: boolean;
   onAddComp?: () => void;
-}> = ({ demoted = false, onAddComp }) => {
-  const [track, setTrack] = useState<"jobs" | "missteps">("jobs");
-  const showing = track === "jobs" ? COMP_SLIDES : COMP_MISSTEPS;
-  return (
-  <section className={`ct-measure ct-feature${demoted ? " demoted" : ""}`} aria-labelledby="ct-feature-h">
+}> = ({ copy, flip = false, demoted = false, onAddComp }) => (
+  <section
+    className={`ct-measure ct-feature${flip ? " flip" : ""}${demoted ? " demoted" : ""}`}
+    aria-label={copy.heading}
+  >
     <div className="ct-feature-l">
+      {copy.eyebrow && <div className="ct-lbl ct-feature-eyebrow">{copy.eyebrow}</div>}
       {/* ⚠️ PLAIN PLAYFAIR IN INK, ONE WEIGHT — no italic accent word, no burgundy `<em>`, no
           colour-shifted word. A heading that changes colour mid-sentence reads as two things. */}
-      <h2 className="ct-feature-h" id="ct-feature-h">{FEATURE_HEADING}</h2>
-      <p className="ct-feature-p">{demoted ? FEATURE_LEAD_SHORT : FEATURE_LEAD_FULL}</p>
-      {!demoted && (
+      <h2 className="ct-feature-h">{copy.heading}</h2>
+      <p className="ct-feature-p">{demoted && copy.leadShort ? copy.leadShort : copy.lead}</p>
+      {!demoted && onAddComp && (
         <div className="ct-feature-ctas">
-          {/* ⚠️ THE THEME'S SOLID DARK, NOT BURGUNDY-FILLED. Burgundy is this app's advisory ink;
-              a burgundy-filled primary makes the page's main action look like a warning. */}
+          {/* ⚠️ THE THEME'S SOLID DARK, NOT BURGUNDY-FILLED. `--ct-accent` is this page's ADVISORY
+              ink; filling the main action with it makes the thing to do look like a warning. */}
           <button type="button" className="ct-btn-dark" onClick={onAddComp}>
             Add your first comp
           </button>
         </div>
       )}
-      {/* ⚠️ A QUIET INLINE CONTROL, NOT A SEGMENTED ONE. A segment would make the two tracks read as
-          equal halves of the block; they are not — the five jobs are the point and the missteps are
-          the aside. `aria-pressed` still says which is showing, because "quiet" is a visual
-          decision and must not cost a screen reader the state. */}
-      <button
-        type="button"
-        className="ct-caro-toggle"
-        aria-pressed={track === "missteps"}
-        onClick={() => setTrack((t) => (t === "jobs" ? "missteps" : "jobs"))}
-      >
-        {track === "jobs" ? "…and five to avoid" : "← back to the five jobs"}
-      </button>
     </div>
-    {/* ⚠️ THE `key` IS THE RESET, AND AN EFFECT WAS THE WRONG TOOL — measured. `useEffect(() =>
-        setIndex(0), [slides])` is a PASSIVE effect: it runs after paint, so switching tracks showed
-        the new track's slide FOUR for a frame and then jumped to slide one. The browser check caught
-        exactly that ("Carries the tone" → "Crossing shelves", both index 3). Keying the component to
-        the track remounts it with its state already fresh, in the same render, with no intermediate
-        frame to see. Autoplay restarts with the remount — or stays suppressed, because the new
-        instance re-reads `prefers-reduced-motion` on mount. */}
-    <CompCarousel
-      key={track}
-      slides={showing}
-      label={track === "jobs" ? "What a good comp does" : "Common missteps"}
-    />
+    <CompCarousel slides={copy.slides} label={copy.carouselLabel} />
   </section>
-  );
-};
+);
 
 /** One stage of the three-stage explainer. */
 interface CompStage {
@@ -269,10 +280,10 @@ export const COMP_STAGES: CompStage[] = [
 ];
 
 export const StagesBlock: React.FC = () => (
-  /* ⚠️ THE BAND WRAPS THE MEASURE, NOT THE OTHER WAY ROUND — the wash spans the column and the
-     CONTENT sits inside the shared measure, so the surface is full width and the words are not. */
-  <div className="ct-stages-band">
-   <section className="ct-measure ct-stages" aria-labelledby="ct-stages-h">
+  /* ⚠️ NO BAND ANY MORE (v3.1 §4). The stages moved to the TOP of the page, and a wash that made
+     sense as a closing section reads as a header treatment at the top. The three blocks are now
+     separated by hairline dividers on one surface — the sheet — rather than by changing surface. */
+  <section className="ct-measure ct-stages" aria-labelledby="ct-stages-h">
     <h3 className="ct-stages-h" id="ct-stages-h">Managing your comps with ScriptAlly</h3>
     <p className="ct-stages-p">Gather them, grow them, and put them to work in your queries.</p>
     <div className="ct-stages-grid">
@@ -288,6 +299,5 @@ export const StagesBlock: React.FC = () => (
         </div>
       ))}
     </div>
-   </section>
-  </div>
+  </section>
 );
