@@ -228,7 +228,12 @@
    spacing to a hero whose layout had stopped changing — the vertical twin of the `vw`-type bug
    above, and together they made 2080x1170 a permanently taller page for no compositional reason.
    A ceiling here should be roughly the value the `vh` term yields at 900. */
-.mk-after { position: relative; margin: clamp(22px, 2.6vh, 24px) 0 0; max-width: 48ch; }
+/* ⚠️ `rem`, NOT `ch` — see the note on `.mk-turn` below. This was `48ch` resolving against this
+   container's INHERITED 16px while the lede paints at 16.6px, so the measure was ~4% tighter than
+   it read. Widened rather than merely corrected: 30rem takes the lede from four lines to three,
+   and a line saved here is height that does not have to be argued back out of the hero somewhere
+   else. `.mk-grind`'s own 46ch (358px) is narrower, so it is unaffected. */
+.mk-after { position: relative; margin: clamp(22px, 2.6vh, 24px) 0 0; max-width: 30rem; }
 .mk-dots {
   position: absolute;
   /* ⚠️ -1.5em, NOT THE REF'S -1.75em, AND THE DIFFERENCE IS A HORIZONTAL SCROLLBAR. `left` resolves
@@ -256,14 +261,29 @@
 .mk-robots { font-family: "JetBrains Mono", monospace; font-size: .92em; color: var(--mk-ink); }
 
 /* The turn: a flat statement and a promise, behind one burgundy rule. */
+/* ⚠️ A `ch` MEASURE ONLY MEANS WHAT IT LOOKS LIKE ON AN ELEMENT THAT CARRIES ITS OWN FONT-SIZE.
+   `ch` is the width of "0" in the ELEMENT'S OWN font, so on a container that inherits 16px while
+   its child paints at 27px, a measure drawn for ~500px applies at 254px — 71% out. That is why
+   "ScriptAlly tips the odds back in your favour." stacked over three short lines and read as a
+   narrow pull-quote instead of a statement. Measured: its natural single-line width is 517.8px,
+   so the container missed a two-line break BY 4.4px.
+   THE RULE, and it holds for both public pages: a container measure is `rem`; `ch` is only ever
+   written on the element that sets the font-size it is counting. Six other `ch` measures in this
+   file do carry their own font-size and are correct as they stand. */
 .mk-turn {
   margin: clamp(24px, 2.8vh, 26px) 0 0; padding-left: 18px;
-  border-left: 2px solid var(--mk-burg); max-width: 32ch;
+  border-left: 2px solid var(--mk-burg); max-width: 21rem;
 }
 .mk-turn-a { display: block; font-weight: 600; font-size: 1.02rem; color: var(--mk-nearblack); }
 .mk-turn-b {
   display: block; font-family: "Playfair Display", Georgia, serif;
-  font-size: clamp(1.4rem, 1.9vw, 1.85rem); line-height: 1.25; color: var(--mk-ink);
+  /* Ceiling 1.85rem → 1.7rem: the old one was not reached until 1558px, so the turn kept growing
+     against a column frozen since 1300 and was the last 8.4px by which 2080 outgrew 1440. 1.7rem
+     is the size the design was judged at, so 1440 and every width above it now render identically.
+     (The strict form of the rule would be 1.544rem — the value 1.9vw yields at the 1300 cap — but
+     that shrinks the turn at the width it was signed off on, which is a design change rather than
+     a bug fix.) The floor still lets it shrink on a narrow column. */
+  font-size: clamp(1.4rem, 1.9vw, 1.7rem); line-height: 1.25; color: var(--mk-ink);
   margin-top: 5px; letter-spacing: -.012em;
 }
 .mk-hctas { display: flex; gap: 24px; margin: clamp(26px, 3vh, 28px) 0 0; align-items: center; flex-wrap: wrap; }
