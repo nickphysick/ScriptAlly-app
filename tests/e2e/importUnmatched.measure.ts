@@ -33,8 +33,11 @@ Another Missing Book,Also Nobody,Queried,2026-08-04`);
 
   const summary = await page.evaluate(() => {
     const body = document.body.innerText;
-    const nums = [...document.querySelectorAll(".grid.grid-cols-3 > div")]
-      .map((d) => (d as HTMLElement).innerText.replace(/\n+/g, " "));
+    /* ⚠️ SCOPED TO THE COUNTS GRID. `.grid.grid-cols-3` also matches the wizard's step tabs, so an
+       unscoped query returned five cells and reported the wrong two as the counts. */
+    const grid = [...document.querySelectorAll(".grid.grid-cols-3")]
+      .find((g) => /imported/i.test((g as HTMLElement).innerText));
+    const nums = grid ? [...grid.children].map((d) => (d as HTMLElement).innerText.replace(/\n+/g, " ")) : [];
     const rows = [...document.querySelectorAll("li")]
       .map((l) => (l as HTMLElement).innerText.replace(/\n+/g, " "))
       .filter((t) => /^Row \d/.test(t));

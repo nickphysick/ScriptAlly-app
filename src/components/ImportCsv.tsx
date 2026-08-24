@@ -463,64 +463,29 @@ export const ImportCsv: React.FC<{
           let foundMs = localManuscripts.find(m => m.title.toLowerCase() === msTitleInput.toLowerCase());
           let foundAgent = localAgents.find(a => a.name.toLowerCase() === agentNameInput.toLowerCase());
 
-          // Dynamic recovery/auto-create if not found!
-          if (!foundMs) {
-            runLogs.push(`Manuscript "${msTitleInput}" not found. Auto-creating database record...`);
-            const mockMsId = "ms-autoimport-" + Math.random().toString(36).substr(2, 9);
-            const mockMs = {
-              title: msTitleInput,
-              genre: "Uncategorized Fiction",
-              subGenres: [],
-              wordCount: 80000,
-              logline: "Imported automatically to preserve Query relationships.",
-              comps: [],
-              ageCategory: "General Adult",
-              status: ManuscriptStatus.QUERYING
-            };
-            const creator = await addManuscript({ ...mockMs, id: mockMsId }, true);
-            if (creator.success) {
-              const fullMsRecord = {
-                ...mockMs,
-                id: mockMsId,
-                userId: currentUser?.id || "",
-                statusChangedDate: new Date().toISOString()
-              };
-              foundMs = fullMsRecord;
-              localManuscripts.push(fullMsRecord);
-            }
-          }
-
-          if (!foundAgent) {
-            runLogs.push(`Agent "${agentNameInput}" not found. Auto-creating directory profile...`);
-            const mockAgId = "agent-autoimport-" + Math.random().toString(36).substr(2, 9);
-            const mockAg = {
-              name: agentNameInput,
-              agency: "Pending Match",
-              email: "imported@zite.com",
-              website: "",
-              genres: ["Fiction"],
-              mswlNotes: "Auto-profile created via historical query logs.",
-              starRating: 3 as any,
-              submissionStatus: SubmissionStatus.OPEN,
-              responseTimeWeeks: 8,
-              noResponseMeansNo: true,
-              submissionMethod: SubmissionMethod.EMAIL,
-              materialsWanted: ["Query Letter"],
-              notes: "Added during Zite CSV import."
-            };
-            const creator = await addAgent({ ...mockAg, id: mockAgId }, true);
-            if (creator.success) {
-              const fullAgRecord = {
-                ...mockAg,
-                id: mockAgId,
-                userId: currentUser?.id || "",
-                dateAdded: new Date().toISOString(),
-                lastCheckedDate: new Date().toISOString()
-              };
-              foundAgent = fullAgRecord;
-              localAgents.push(fullAgRecord);
-            }
-          }
+          /**
+           * ⚠️ AN UNMATCHED ROW IS FLAGGED, NOT FABRICATED (overnight ruling, D1).
+           *
+           * This auto-created whatever the CSV did not match — a manuscript with
+           * `genre: "Uncategorized Fiction"`, `wordCount: 80000`, `ageCategory: "General Adult"` and
+           * a logline reading "Imported automatically to preserve Query relationships", and an
+           * agent with `agency: "Pending Match"`, `email: "imported@zite.com"`, `starRating: 3` and
+           * a stated response time. Thirteen values in two objects, none of them supplied by the
+           * writer, none of them afterwards distinguishable from one that was.
+           *
+           * ⚠️ A LOGLINE IS THE WRITER'S OWN SENTENCE ABOUT THEIR OWN NOVEL, and a word count is a
+           * fact about it. An email address is worse again, because it can be sent to. Preserving
+           * the relationship was a good goal; inventing the thing at the other end of it is not the
+           * way to do it.
+           *
+           * ⚠️ SO THE ROW FALLS THROUGH, and the machinery is already there: `manuscriptId: ""` /
+           * `agentId: ""` below, the row recorded in `unmatchedList`, the summary's third count, and
+           * the banner on the query list that stays until the last one is resolved. Those surfaces
+           * shipped quiet precisely because this block never let anything reach them.
+           *
+           * Creation still happens — from the summary, on the writer's word, out of the values the
+           * CSV actually gave (D2).
+           */
 
           /**
            * ⚠️ AN IMPORTED QUERY CARRIES NO PACKAGE, AND `""` IS HOW THAT IS SAID.
@@ -1017,7 +982,6 @@ export const ImportCsv: React.FC<{
                 </span>
                 <span className="text-xs text-stone-600 font-medium">Lines Failed / Skipped</span>
               </div>
-            </div>
               {/* ⚠️ THE THIRD COUNT READS AS WORK, NOT DAMAGE (D5/D8). "Need a decision" says
                   something is waiting for the writer; "failed" would say the data is gone. */}
               <div className="bg-[#FBF7EF] border border-[#EADFC9] rounded-xl p-4">
@@ -1028,6 +992,7 @@ export const ImportCsv: React.FC<{
                   Need a decision
                 </div>
               </div>
+            </div>
 
             {/* DETAILED PROCESSING LOGGER BOX */}
             <div className="space-y-2">

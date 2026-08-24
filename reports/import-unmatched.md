@@ -239,3 +239,31 @@ The three flagged are held back deliberately: each is either *true* or a genuine
 `ms-autoimport-*`: 0 of 2 manuscripts. `agent-autoimport-*`: 0 of 16 agents. The only ones that ever
 existed on dev were created by my own drives last run and removed at the end of it. **Nothing to
 leave alone, no migration to decline.**
+
+## Phase 2 — auto-create retired, and the quiet surfaces light up
+
+The two blocks are gone. An unmatched row now falls through to the Phase 1 code, is recorded in
+`unmatchedList`, and reaches the summary and banner that shipped last run with nothing to carry.
+
+### Measured — the same CSV, the same three failure cases
+
+```
+records auto-created : manuscripts 0 · agents 0
+rows in CSV          : 4          queries created: 4      (nothing skipped)
+summary counts       : "4 Successfully Imported" · "0 Lines Failed / Skipped" · "3 NEED A DECISION"
+summary rows         : Row 3  Needs a manuscript — no match for manuscript “A Book That Does Not Exist”
+                       Row 4  Needs an agent — no match for agent “Nobody At All”
+                       Row 5  Needs a manuscript and an agent — no match for
+                              manuscript “Another Missing Book” · agent “Also Nobody”
+list census          : 52 rendered of 52 stored          (zero dropped)
+banner               : "6 queries are missing a manuscript or an agent."
+banner once resolved : absent
+```
+
+Each row states **what is missing**, never a verdict — "Needs a manuscript", not "invalid row" (D8).
+
+⚠️ **The banner read 6 while the drive had made 4, and that was correct.** Three flagged rows
+survived an earlier run that errored before its cleanup. The count is derived from the data rather
+than from the import, so it counts what is there — which is the property that makes it a record
+rather than a receipt. Verified the other way too: with the last flagged row removed, the banner is
+gone.
