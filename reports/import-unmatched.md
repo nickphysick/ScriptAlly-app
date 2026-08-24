@@ -267,3 +267,50 @@ survived an earlier run that errored before its cleanup. The count is derived fr
 than from the import, so it counts what is there — which is the property that makes it a record
 rather than a receipt. Verified the other way too: with the last flagged row removed, the banner is
 gone.
+
+## Phase 3 — creation with consent
+
+"Create from this row" sits on each summary row. It writes **the title the CSV carried and the name
+the CSV carried**, and nothing else.
+
+```
+after import          : manuscripts 2 (was 2) · agents 16 (was 16)   ← the import creates nothing
+on consent            : manuscripts 1 · agents 1
+MANUSCRIPT            : title "Consent Probe Book" · genre "" · logline "" · wordCount 0 · ageCategory ""
+AGENT                 : name "Consent Probe Agent" · agency "" · email "" · mswlNotes "" · no starRating
+query now             : ms="ms-fromrow-…" ag="agent-fromrow-…"
+```
+
+`starRating`, `responseTimeWeeks` and `noResponseMeansNo` are **omitted**, not defaulted — the rules
+make each optional and this app treats absence as a first-class state for all three. Writing a
+default would be the `starRating: 3` the auto-create block was retired for.
+
+⚠️ **`materialsWanted: []` is required and is not a fabrication.** `isValidAgent` asks for a list;
+omitting it was **denied**, and the agent silently failed to create while the manuscript succeeded —
+a half-done write, found only because the drive counted both. An empty list is honest: the row
+stated no materials.
+
+⚠️ **And it resolves the flag by LINKING, not by clearing one.** The query's `manuscriptId` and
+`agentId` are filled in, so the derived banner stops counting the row because it has what it needed.
+There is no flag field to unset — which is the point of deriving it.
+
+## Phase 4 — the sweep
+
+Eight fixed, three flagged, one benign.
+
+**Fixed** — every one now empty when the CSV does not supply it: `agency` (was `"Independent"`),
+`email` (was `"unlisted@agent.com"`), `mswlNotes`, `genre` (was `"Fiction"`), `logline` (was
+`"A compelling new manuscript."`), `ageCategory` (was `"Adult"`), `personalisationNotes` — and
+**`wordCount`, which was `|| 85000`** and was not in the list I gave last run. That is a specific
+figure about the writer's own novel, invented when the column was absent.
+
+**Flagged, not fixed** — each is either true or a genuine default, and Phase 4's instruction is to
+fix the unambiguous:
+
+| line | value | why it survives |
+|---|---|---|
+| 378 | `notes \|\| "Imported from Zite archives."` | true provenance, but written into a field the writer owns |
+| 590 | `description \|\| "Activity logged via CSV Import."` | same shape |
+| 389 | `responseTimeWeeks: 8` (agent import) | a real default with a meaning, not an invention |
+
+**Benign:** `act.details || "--"` — display only, writes nothing.

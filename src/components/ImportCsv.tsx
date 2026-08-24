@@ -184,6 +184,7 @@ export const ImportCsv: React.FC<{
     addManuscript,
     addQuery,
     addActivity,
+    updateQuery,
   } = useScriptAllyDb();
 
   const [importType, setImportType] = useState<ImportType>("agents");
@@ -212,7 +213,16 @@ export const ImportCsv: React.FC<{
      * Counting it as "failed" would say the data is not there; counting it as "successful" would
      * say nothing needs doing. It is its own state because it is its own fact.
      */
-    unmatched: { row: number; missing: string; detail: string }[];
+    /**
+     * ⚠️ IT CARRIES THE CSV'S OWN VALUES AND NOTHING ELSE (D2). `msTitle` and `agentName` are what
+     * the row said; there is no genre, logline, word count or email here because the row did not
+     * supply them, and creation must not fill what was never given.
+     */
+    unmatched: {
+      row: number; missing: string; detail: string;
+      queryId: string; msTitle: string; agentName: string;
+      needsMs: boolean; needsAgent: boolean;
+    }[];
   }>({ successful: 0, failed: 0, errors: [], logs: [], unmatched: [] });
 
   const targetFields = {
@@ -294,6 +304,68 @@ export const ImportCsv: React.FC<{
   };
 
   // Handle execution of the import
+  /**
+   * ⚠️ CREATION WITH CONSENT, FROM VALUES THE ROW ACTUALLY GAVE (D2).
+   *
+   * The importer no longer creates anything by itself; this runs only when the writer asks, from
+   * the summary. It writes the TITLE the CSV carried and the NAME the CSV carried, and leaves every
+   * other field empty — no genre, no logline, no age category, no word count, no email, no star
+   * rating. An empty logline is honest; a written one is a sentence about someone's novel that they
+   * did not write.
+   *
+   * ⚠️ AND IT RESOLVES THE FLAG BY LINKING, not by clearing it. The query's `manuscriptId` /
+   * `agentId` are filled in, so the row stops being counted by the derived banner because it has
+   * what it needed — there is no flag field to unset, which is the point of deriving it.
+   */
+  const [creating, setCreating] = useState<number | null>(null);
+  const createFromRow = async (u: {
+    row: number; queryId: string; msTitle: string; agentName: string;
+    needsMs: boolean; needsAgent: boolean;
+  }) => {
+    if (!currentUser) return;
+    setCreating(u.row);
+    try {
+      const patch: { manuscriptId?: string; agentId?: string } = {};
+      if (u.needsMs && u.msTitle) {
+        const id = "ms-fromrow-" + Math.random().toString(36).slice(2, 11);
+        const res = await addManuscript({
+          id,
+          title: u.msTitle,
+          /* ⚠️ EVERY ONE OF THESE IS THE FIELD'S EMPTY FORM, not a default. The rules ask for a
+             string or an int; they do not ask for a value, and neither does the writer. */
+          genre: "", subGenres: [], wordCount: 0, logline: "", ageCategory: "", comps: [],
+          status: ManuscriptStatus.QUERYING,
+        } as never, true);
+        if (res.success) patch.manuscriptId = id;
+      }
+      if (u.needsAgent && u.agentName) {
+        const id = "agent-fromrow-" + Math.random().toString(36).slice(2, 11);
+        const res = await addAgent({
+          id,
+          name: u.agentName,
+          agency: "", email: "", website: "", genres: [], mswlNotes: "", notes: "",
+          submissionStatus: SubmissionStatus.OPEN,
+          submissionMethod: SubmissionMethod.EMAIL,
+          /* ⚠️ REQUIRED BY `isValidAgent` AS A LIST, and an empty one is honest — the row stated no
+             materials. Omitting it was DENIED and the agent silently failed to create while the
+             manuscript succeeded, which is the half-done write this whole run is about. */
+          materialsWanted: [],
+          /* ⚠️ `starRating`, `responseTimeWeeks` and `noResponseMeansNo` are OMITTED, deliberately.
+             The rules make each optional and this app treats absence as a first-class state for all
+             three — an unrated agent shows no stars rather than five hollow ones. Writing a default
+             here would be the `starRating: 3` the auto-create block was retired for. */
+        } as never, true);
+        if (res.success) patch.agentId = id;
+      }
+      if (Object.keys(patch).length) {
+        await updateQuery(u.queryId, patch as never);
+        setImportResults((r) => ({ ...r, unmatched: r.unmatched.filter((x) => x.row !== u.row) }));
+      }
+    } finally {
+      setCreating(null);
+    }
+  };
+
   const handleExecuteImport = async () => {
     setIsImporting(true);
     setImportProgress(0);
@@ -302,7 +374,11 @@ export const ImportCsv: React.FC<{
     let successfulCount = 0;
     let failedCount = 0;
     const errorsList: string[] = [];
-    const unmatchedList: { row: number; missing: string; detail: string }[] = [];
+    const unmatchedList: {
+    row: number; missing: string; detail: string;
+    queryId: string; msTitle: string; agentName: string;
+    needsMs: boolean; needsAgent: boolean;
+  }[] = [];
     const runLogs: string[] = [];
     
     const total = csvRows.length;
@@ -340,8 +416,25 @@ export const ImportCsv: React.FC<{
             continue;
           }
           
-          const agency = getMappedValue("agency") || "Independent";
-          const email = getMappedValue("email") || "unlisted@agent.com";
+          /**
+           * ⚠️ NO FABRICATED FIELD VALUES (overnight ruling, rule 8). Seven of these carried a `||`
+           * fallback that wrote something the writer never supplied — `"Independent"` for an agency,
+           * `"unlisted@agent.com"` for an email, `"A compelling new manuscript."` for a logline,
+           * `"Fiction"` for a genre, `"Adult"` for an age category, and invented MSWL and
+           * personalisation notes. An empty field is honest; a filled one is a claim.
+           *
+           * ⚠️ THE EMAIL IS THE ONE TO REMEMBER. A fabricated address sits on a real person's record
+           * and can be SENT TO — and nothing downstream distinguishes it from one the writer typed.
+           *
+           * ⚠️ THREE FALLBACKS SURVIVE DELIBERATELY AND ARE FLAGGED, NOT FIXED: `notes` and
+           * `description` write true provenance ("Imported from Zite archives"), which is a
+           * different thing from a fabrication even though it is still words in a field the writer
+           * owns; and `responseTimeWeeks: 8` is a real default with a meaning rather than an
+           * invention. Each needs a call, and Phase 4's instruction is to fix the unambiguous and
+           * flag the rest.
+           */
+          const agency = getMappedValue("agency");
+          const email = getMappedValue("email");
           const website = getMappedValue("website") || "";
           
           // Custom parsing for genres (split by comma, semicolon, etc.)
@@ -350,7 +443,7 @@ export const ImportCsv: React.FC<{
             ? genresRaw.split(/[,;|]+/).map(g => g.trim()).filter(Boolean)
             : ["General Fiction"];
             
-          const mswlNotes = getMappedValue("mswlNotes") || "Imported MSWL focus points.";
+          const mswlNotes = getMappedValue("mswlNotes");
           
           // Star rating parsing
           const starRaw = parseInt(getMappedValue("starRating"), 10);
@@ -410,12 +503,16 @@ export const ImportCsv: React.FC<{
             continue;
           }
 
-          const genre = getMappedValue("genre") || "Fiction";
-          const wordCount = parseInt(getMappedValue("wordCount"), 10) || 85000;
-          const logline = getMappedValue("logline") || "A compelling new manuscript.";
+          const genre = getMappedValue("genre");
+          /* ⚠️ `0`, NOT 85000. This read `parseInt(…) || 85000` — a word count for the writer's own
+             book, invented when the CSV did not carry one, and indistinguishable afterwards from a
+             figure they typed. `0` is the field's not-set form (the rules ask only for an int >= 0)
+             and the surfaces already render it as an empty field with a muted placeholder. */
+          const wordCount = parseInt(getMappedValue("wordCount"), 10) || 0;
+          const logline = getMappedValue("logline");
           // Comps column → structured titles-only comps (split on commas / " meets ").
           const comps = parseLegacyComps(getMappedValue("comps"));
-          const ageCategory = getMappedValue("ageCategory") || "Adult";
+          const ageCategory = getMappedValue("ageCategory");
 
           const msData = {
             title,
@@ -451,7 +548,7 @@ export const ImportCsv: React.FC<{
           const agentNameInput = getMappedValue("agentId");
           const statusInput = getMappedValue("status");
           const dateSentInput = getMappedValue("dateSent");
-          const personalisationNotes = getMappedValue("personalisationNotes") || "Zite query backup logs.";
+          const personalisationNotes = getMappedValue("personalisationNotes");
 
           if (!msTitleInput || !agentNameInput) {
             failedCount++;
@@ -542,6 +639,11 @@ export const ImportCsv: React.FC<{
               : !foundMs ? "Needs a manuscript" : "Needs an agent";
             unmatchedList.push({
               row: index + 2,
+              queryId,
+              msTitle: msTitleInput,
+              agentName: agentNameInput,
+              needsMs: !foundMs,
+              needsAgent: !foundAgent,
               missing,
               detail: [!foundMs ? `manuscript “${msTitleInput}”` : null,
                        !foundAgent ? `agent “${agentNameInput}”` : null]
@@ -1015,9 +1117,19 @@ export const ImportCsv: React.FC<{
                       {importResults.unmatched.map((u) => (
                         <li key={u.row} className="text-xs text-[#3a1c14] flex gap-2">
                           <span className="font-mono text-stone-400 shrink-0">Row {u.row}</span>
-                          <span><b className="font-semibold">{u.missing}</b>
+                          <span className="flex-1"><b className="font-semibold">{u.missing}</b>
                             {u.detail ? <span className="text-[#3a1c14]/70"> — no match for {u.detail}</span> : null}
                           </span>
+                          {/* ⚠️ THE OFFER, NOT THE DEFAULT (D2). It creates from what the row gave —
+                              the title and the name — and leaves everything else empty. */}
+                          <button
+                            type="button"
+                            disabled={creating === u.row}
+                            onClick={() => void createFromRow(u)}
+                            className="shrink-0 text-[10px] font-mono uppercase tracking-wider text-[#7c3a2a] border-b border-[#e8c8bc] hover:text-[#3a1c14] disabled:opacity-50"
+                          >
+                            {creating === u.row ? "Creating…" : "Create from this row"}
+                          </button>
                         </li>
                       ))}
                     </ul>
