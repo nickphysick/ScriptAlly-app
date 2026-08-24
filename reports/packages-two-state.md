@@ -442,45 +442,46 @@ mid-run, so the close is fully green rather than "no worse than baseline".
 
 ## Where this stopped, and what is left
 
-**Delivered: Phases 1, 2 and 3, plus D-D2/D-D3 pulled forward.** Every one measured or proven
-against the deployed database, not asserted.
-
 | phase | state |
 |---|---|
-| 1 · recon + refs | **done** — R1–R5 answered, F-Q quantified |
+| 1 · recon + refs | **done** |
 | 2 · Part D data layer | **done, deployed to dev**, both halves proven at rules level |
-| 3 · Part A first visit | **done, measured** at 1440 and 1920 on an emptied account |
-| — · D-D2 / D-D3 | **done** — pulled forward because Phase 2 had shipped the lock without it |
-| 4 · Part B workspace | **not started** |
+| 3 · Part A first visit | **done, measured** |
+| — · D-D2 / D-D3 | **done** — pulled forward to close the gap Phase 2 opened |
+| 4 · Part B workspace | **done, measured** at 1440 and 1920 |
 | 5 · Part C drawer | **not started** |
-| 6 · Part D UI | **not started** |
+| 6 · Part D UI + `markPackageSent` | **not started** |
 | 7 · full verify | **not started** |
 
-**Stopped at a phase boundary deliberately.** The page is coherent as it stands: the new first-visit
-state, the existing workspace, and the attachment lock with its way forward. Beginning Part B and
-leaving the workspace half-rebuilt would be worse than not beginning it.
+Stopped at a phase boundary again. The page is coherent: first-visit teaching, the rebuilt
+workspace, and the lock with its way forward.
 
-### What Part D's UI still needs — the recon is done, so the shape is known
+### Part C — the shape is known
 
-- **D-D5, the visible half of the reported bug.** Chips still read `Covering letter` rather than
-  `Hook-first`. The fix is one derivation away and already exists: `packageItems(pkg, versions)`
-  resolves each slot id to its `versionName` and carries the `ComponentType` for the slot eyebrow.
-  The strip renders `materialsWanted`'s canonical type strings instead — **that substitution is the
-  leak.**
-- **D-D4's fork.** `materialsLinkWrites` already writes one and clears the other, so the either/or is
-  a render change plus routing `attachPackage` through it, rather than new machinery.
-- **D-D1's other half.** `markPackageSent` exists and has **no caller yet** — attaching a package must
-  call it. Until then no package locks in the app, though the rule and the refusal are live.
-- **D-D6.** Remove `+ Attach` and the per-chip `✕` from inside a packaged strip.
+R5 stands: **there is no neutral drawer primitive** (the Noteboard's is page-local markup;
+`Form11Drawer` is a Form-11 *editing* shell whose chrome says the wrong thing). Part C builds
+page-local and the duplication is the flag. Header needs a `How it works` control beside the stat
+line; the drawer's three stage cards can reuse `TEACH_STAGES` from `PackagesTeachFirst`.
 
-⚠️ **And one conflict the model cannot express, found in recon.** `QueryStatus` has **no unsent
-member** — every query in this app is a send. So the ref's `foot-unsent` branch (`Change package` /
-`Remove` shown *instead of* the locked note) has **no reachable state**. The coherent reading, and
-what a build should follow: the lock governs a package's **contents**, while *which* package a query
-points at stays correctable — so both the note and the change/remove controls belong on screen
-together, not as alternatives. That differs from the ref and should be ruled on before it is built.
+⚠️ **D-C2's "Worth knowing" wording must carry Ruling 1's correction (D-R1c):** a sent package's
+**contents** stop changing — not the attachment. Which package a query points at stays correctable.
 
----
+### Part D UI — still the visible half of the reported bug
+
+- **`markPackageSent` still has NO CALLER** (Ruling 2). The rule and the refusal are live and proven,
+  but nothing stamps, so **no package locks in the app yet**. The card's locked note and
+  `Duplicate & edit` are built and will appear the moment the stamp is wired. **This is the single
+  most valuable remaining change.**
+- **D-D5** — chips still read `Covering letter`. `packageItems(pkg, versions)` already resolves each
+  slot id to its `versionName` and carries the `ComponentType` for the eyebrow; the strip renders
+  `materialsWanted`'s canonical type strings instead, and that substitution is the leak.
+- **D-D4 / D-D6 / D-R1a** — the either/or fork, no `+ Attach` or per-chip `✕` inside a packaged
+  strip, and **one footer**: the lock note plus Change package / Remove together, per Ruling 1.
+- **D-R1b** — the before/after scorecard proof is unrun.
+
+**F-O note (carried):** Ruling 1's `Remove` supersedes the standalone `detachPackage` mount for the
+packaged case; the loose case keeps its own per-chip removal. Whether `detachPackage` should be
+retired outright is a Part D UI decision, not settled here.
 
 ## Flags
 
