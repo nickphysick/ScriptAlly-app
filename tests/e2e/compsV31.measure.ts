@@ -7,6 +7,19 @@
  */
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
+
+/**
+ * ⚠️ TWO CASES WERE RETIRED FROM THIS FILE (v3.1 §4/§5), NOT QUIETLY DELETED. Both drove
+ * `.ct-caro-toggle`, and the toggle is gone: the missteps have their own BLOCK now rather than a
+ * second track behind a control. `compsReorder.measure.ts` carries the replacements — the missteps
+ * block with its five slots, and a reduced-motion case sweeping EVERY reel on the page rather than
+ * the two tracks of one.
+ *
+ * ⚠️ AND THE BAND ASSERTION WENT WITH THEM WHILE THE REST OF ITS CASE STAYED. That is the half worth
+ * keeping: the top row's `align-items: start` and the tail row absorbing the paired-panel slack are
+ * live behaviour, and the band is retired furniture. A case asserting both is one edit away from
+ * being deleted whole.
+ */
 const ROUTE = "/manuscripts/comps";
 const T = "E2E Harness Comp";
 
@@ -81,27 +94,7 @@ test("§2 the stage and the dots share one width, counter inside", async ({ page
   expect(r.slotH).toBe(250);
 });
 
-test("§6 the second track carries the missteps and resets to slide one", async ({ page }) => {
-  await openRoute(page, ROUTE, { width: 1440, height: 1000 });
-  /* move off slide one so the reset is observable */
-  await page.locator(".ctpage .ct-caro-dot").nth(3).click();
-  const before = await page.evaluate(() => document.querySelector(".ctpage .ct-caro-dot.on")?.getAttribute("aria-label"));
-  await page.locator(".ctpage .ct-caro-toggle").click();
-  const r = await page.evaluate(() => ({
-    label: document.querySelector(".ctpage .ct-caro")?.getAttribute("aria-label"),
-    active: document.querySelector(".ctpage .ct-caro-dot.on")?.getAttribute("aria-label"),
-    pressed: document.querySelector(".ctpage .ct-caro-toggle")?.getAttribute("aria-pressed"),
-    slots: [...document.querySelectorAll(".ctpage .ct-caro-slot")].map((s) => s.getAttribute("data-slot")),
-  }));
-  console.log(`  was "${before}" → track "${r.label}" active "${r.active}" pressed=${r.pressed}`);
-  console.log(`  slots: ${r.slots!.join(" · ")}`);
-  expect(r.label).toBe("Common missteps");
-  expect(r.active, "switching tracks did not reset to slide one").toContain("Comping the giants");
-  expect(r.pressed).toBe("true");
-  expect(r.slots).toEqual(["comp-miss-giants", "comp-miss-age", "comp-miss-unread", "comp-miss-shelf", "comp-miss-count"]);
-});
-
-test("§4 the stages are a band; §5 the top row starts and the tail absorbs the slack", async ({ page }) => {
+test("§5 the top row starts, and the tail absorbs the paired-panel slack", async ({ page }) => {
   await openRoute(page, ROUTE, { width: 1440, height: 1000 });
   try {
     await add(page, `${T} one`);
@@ -110,7 +103,7 @@ test("§4 the stages are a band; §5 the top row starts and the tail absorbs the
       const tile = q(".ct-mstile"), card = q(".ct-toprow .ct-qline");
       const comps = document.querySelectorAll(".ctpage .ct-split > .ct-panel")[0] as HTMLElement;
       const scout = document.querySelectorAll(".ctpage .ct-split > .ct-panel")[1] as HTMLElement;
-      const tail = q(".ct-ctail"), band = q(".ct-stages-band"), circle = q(".ct-stage-slot");
+      const tail = q(".ct-ctail"), circle = q(".ct-stage-slot");
       return {
         row: getComputedStyle(q(".ct-toprow")).alignItems,
         tileH: Math.round(tile.getBoundingClientRect().height),
@@ -118,18 +111,15 @@ test("§4 the stages are a band; §5 the top row starts and the tail absorbs the
         compsH: Math.round(comps.getBoundingClientRect().height),
         scoutH: Math.round(scout.getBoundingClientRect().height),
         tailH: Math.round(tail.getBoundingClientRect().height),
-        bandBg: getComputedStyle(band).backgroundImage.slice(0, 22),
-        bandTop: getComputedStyle(band).borderTopWidth,
         circle: Math.round(circle.getBoundingClientRect().width),
       };
     });
     console.log(`  align=${one.row} tile ${one.tileH} card ${one.cardH} · comps ${one.compsH} scout ${one.scoutH} · tail ${one.tailH}`);
-    console.log(`  band bg "${one.bandBg}" borderTop ${one.bandTop} · circle ${one.circle}`);
+    console.log(`  circle ${one.circle}`);
     expect(one.row, "the top row is stretching again — the tile loses its compression").toBe("start");
     expect(one.tileH, "the tile is being stretched to the builder's height").toBeLessThan(200);
     expect(Math.abs(one.compsH - one.scoutH), "comps and Scout stopped sharing a height").toBeLessThanOrEqual(2);
     expect(one.tailH, "the tail row is not absorbing the slack at one comp").toBeGreaterThan(120);
-    expect(one.bandBg, "the stages band lost its wash").toContain("linear-gradient");
     expect(one.circle).toBe(120);
 
     /* at several comps the same tail is a thin strip — the point of `flex: 1` */
@@ -161,17 +151,3 @@ test("under 1040px everything stacks, with no horizontal overflow", async ({ pag
   expect(r.xOverflow).toBeLessThanOrEqual(1);
 });
 
-test("reduced motion still suppresses the autoplay on both tracks", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await openRoute(page, ROUTE, { width: 1440, height: 1000 });
-  const a = await page.evaluate(() => document.querySelector(".ctpage .ct-caro-dot.on")?.getAttribute("aria-label"));
-  await page.waitForTimeout(5400);
-  const b = await page.evaluate(() => document.querySelector(".ctpage .ct-caro-dot.on")?.getAttribute("aria-label"));
-  await page.locator(".ctpage .ct-caro-toggle").click();
-  const c = await page.evaluate(() => document.querySelector(".ctpage .ct-caro-dot.on")?.getAttribute("aria-label"));
-  await page.waitForTimeout(5400);
-  const d = await page.evaluate(() => document.querySelector(".ctpage .ct-caro-dot.on")?.getAttribute("aria-label"));
-  console.log(`  jobs "${a}" → "${b}" · missteps "${c}" → "${d}"`);
-  expect(b, "the jobs track autoplayed under reduced motion").toBe(a);
-  expect(d, "the missteps track autoplayed under reduced motion").toBe(c);
-});
