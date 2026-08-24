@@ -205,6 +205,12 @@
 .mk-hero .mk-eyebrow { margin-bottom: 22px; }
 .mk-statement {
   font-family: "Playfair Display", Georgia, serif; font-weight: 700;
+  /* ⚠️ .96 IS SAFE FOR THIS STRING AND WOULD NOT BE FOR EVERY STRING. "You've written a book."
+     carries no lowercase descender — the `Y` is a capital — so at three lines nothing from one
+     line can reach the next. Measured whole at 1440/1300/901/390, with no ancestor clipping it.
+     A headline containing g, j, p, q or y at this leading WILL collide with the line beneath it,
+     so the copy lock that pins the wording is also what keeps this value honest. Change the
+     headline and re-measure, or raise the leading to the house floor of 1.3. */
   font-size: var(--mk-hero-h1); line-height: .96; letter-spacing: -.022em;
   color: var(--mk-nearblack); margin: 0; max-width: 13ch;
 }
@@ -968,11 +974,78 @@
 /* ══════════════ About — full-width alternating bands ══════════════
    Deliberately NOT the document card: this is a page read once, not a reference consulted. Colour
    comes from the tier's tokens only. */
+/* ── The mission hero: a statement beside a plate, the landing hero's rhythm on this page's
+   measure. NOT a `.mk-band` — a band centres its copy against the plate, and the three paragraphs
+   below the headline are an escalation that has to read top-down. ── */
+.mk-mission {
+  max-width: 1180px; margin: 0 auto; padding: clamp(52px, 8vh, 104px) 56px clamp(48px, 7vh, 88px);
+  display: grid; grid-template-columns: 1fr 1.02fr; gap: 60px; align-items: stretch;
+}
+.mk-missioncol { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.mk-missionline { margin: 0; }
+.mk-mission-pre {
+  display: block; font-family: "Playfair Display", Georgia, serif; font-weight: 400;
+  font-size: clamp(1.05rem, 1.7vw, 1.6rem); color: var(--mk-muted);
+  letter-spacing: -.005em; margin-bottom: 8px;
+}
+.mk-mission-main {
+  display: block; font-family: "Playfair Display", Georgia, serif; font-weight: 700;
+  /* ⚠️ 1.02 IS BELOW THE HOUSE FLOOR OF 1.3 FOR MIXED-CASE PLAYFAIR, AND IT WAS MEASURED BEFORE IT
+     WAS KEPT. That floor exists because a tight leading inside a box with a HEIGHT crops
+     descenders — which is how a cropped masthead reached dev once already. Neither condition holds
+     here: this is one line (`nowrap` above 900), nothing in its ancestry declares a height or an
+     overflow, and the sweep over every Playfair leaf on both pages found no ancestor clipping it.
+     The two `g` descenders in "Get good stories told." paint in full, into 24px+ of margin below.
+     ⚠️ IF THIS EVER WRAPS TO TWO LINES the floor applies again immediately — descenders would meet
+     the next line's ascenders. The `nowrap` above and the release below 900 are what keep that
+     from happening; do not remove one without raising this. */
+  font-size: clamp(1.95rem, 3.6vw, 3.05rem); line-height: 1.02; letter-spacing: -.022em;
+  color: var(--mk-nearblack);
+}
+/* ⚠️ ONE LINE ABOVE 900, AND RELEASED BELOW IT so the four words wrap rather than overflow. The
+   clamp ceiling is tuned to fit them in this column — change the grid ratio and this needs
+   re-measuring at 1300 and at 901, which are the two widths where it is tightest. */
+@media (min-width: 901px) { .mk-mission-main { white-space: nowrap; } }
+
+/* The three registers. Measured paragraph → flat sentence → the turn. */
+.mk-gapbody {
+  margin: clamp(24px, 3vh, 36px) 0 0; max-width: 52ch;
+  font-size: 1.05rem; line-height: 1.72; color: var(--mk-muted);
+}
+.mk-gaphit {
+  margin: 16px 0 0; max-width: 44ch;
+  font-size: 1.1rem; line-height: 1.55; font-weight: 600; color: var(--mk-nearblack);
+}
+.mk-missionturn {
+  margin: clamp(22px, 2.8vh, 32px) 0 0; padding-left: 18px;
+  border-left: 2px solid var(--mk-burg); max-width: 26ch;
+  font-family: "Playfair Display", Georgia, serif; font-size: clamp(1.35rem, 1.9vw, 1.85rem);
+  line-height: 1.3; letter-spacing: -.012em; color: var(--mk-nearblack);
+}
+
+/* The centred header above the vision rows. */
+.mk-sechead {
+  max-width: 1180px; margin: 0 auto; text-align: center;
+  padding: clamp(56px, 8vh, 96px) 56px clamp(8px, 1.5vh, 18px);
+}
+.mk-sechead h2 {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600;
+  font-size: clamp(1.75rem, 3vw, 2.6rem); line-height: 1.18; letter-spacing: -.018em;
+  color: var(--mk-nearblack); margin: 0;
+}
+.mk-secrule { width: 46px; height: 2px; background: var(--mk-burg); opacity: .5; margin: 20px auto 0; }
+
 .mk-band {
   max-width: 1180px; margin: 0 auto; padding: 54px 56px;
   display: grid; grid-template-columns: 1fr 1fr; gap: 46px; align-items: center;
 }
 .mk-band + .mk-band { border-top: 1px solid var(--mk-hair); }
+/* ⚠️ NO `border-top: 0` HERE, AND ITS ABSENCE IS THE POINT. The first vision's hairline came from
+   the adjacent-sibling rule above; with the section header now sitting between it and the hero,
+   that rule no longer matches and the hairline is gone STRUCTURALLY. All this modifier does is
+   give back the top padding the hairline used to justify. Adding a `border-top: 0` would look
+   like the load-bearing half and outlive the structure that actually does the work. */
+.mk-band--first { padding-top: clamp(24px, 3.5vh, 44px); }
 /* Every vision band renders illustration-first, so the plate sits left by default and the
    alternating band pulls the copy across. Both sides are declared: giving only the copy an order
    leaves the illustration on `order: 0` and it jumps in front. */
@@ -1055,6 +1128,8 @@
 }
 
 @media (max-width: 900px) {
+  .mk-mission { grid-template-columns: 1fr; gap: 34px; padding: 40px 26px; }
+  .mk-sechead { padding: 44px 26px 10px; }
   .mk-band { grid-template-columns: 1fr; gap: 28px; padding: 40px 26px; }
   /* Stacked, the words come first on EVERY band — a reader meeting the plate before the sentence
      is reading a caption with nothing to caption. Applied to the band, not to the alternating

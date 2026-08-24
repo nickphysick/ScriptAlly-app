@@ -40,7 +40,8 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
      reaches the static markup, so it cannot stand in as the landmark. */
   ["/", () => <Landing onNavigate={noNavigate} />, "You&#x27;ve written a book."],
   ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "Start free"],
-  ["/about", () => <AboutPage onNavigate={noNavigate} />, "Querying shouldn&#x27;t be the hard part"],
+  /* Retarget, same law: the mission statement replaced the old About headline as this page's h1. */
+  ["/about", () => <AboutPage onNavigate={noNavigate} />, "Get good stories told."],
   ["/contact", () => <ContactPage onNavigate={noNavigate} />, "Get in touch"],
   ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of Service"],
   ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "Privacy Policy"],

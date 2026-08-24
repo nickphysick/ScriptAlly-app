@@ -28,9 +28,18 @@ describe("About is built from bands, not the document card", () => {
     expect(html()).not.toMatch(/["\s`]mk-doccard["\s`]/);
   });
 
-  it("renders one band per vision, plus the hero", () => {
-    const bands = html().match(/class="mk-band(?![a-z-])/g) ?? [];
-    expect(bands.length).toBe(ABOUT_VISIONS.length + 1);
+  /**
+   * ⚠️ RETARGET, AND THE LAW GOT STRONGER RATHER THAN WEAKER. The hero used to be a band and is
+   * now the mission grid, so the count is one per vision with NO hero — and the second half of
+   * this test is new: the mission hero must not be a band. That is the thing worth locking. A
+   * band centres its copy against the plate, which would flatten the three-register escalation
+   * the hero is built on.
+   */
+  it("renders one band per vision, and the mission hero is not one of them", () => {
+    const page = html();
+    const bands = page.match(/class="mk-band(?![a-z-])/g) ?? [];
+    expect(bands.length).toBe(ABOUT_VISIONS.length);
+    expect(page).toMatch(/["\s`]mk-mission["\s`]/);
   });
 
   /**
@@ -42,11 +51,30 @@ describe("About is built from bands, not the document card", () => {
    */
   it("pulls the copy across on exactly the middle vision", () => {
     /* ⚠️ THE WHOLE ATTRIBUTE, NEVER A PREFIX. Splitting on `class="mk-band` also splits on
-       `class="mk-bandcopy"` — it found eight bands in a page that has four. */
-    const bands = [...html().matchAll(/class="(mk-band(?: mk-band--copyfirst)?)"/g)].map((m) => m[1]);
-    expect(bands.length).toBe(ABOUT_VISIONS.length + 1);
-    // Band 0 is the hero (its copy is already first in the markup); the visions follow.
-    expect(bands.slice(1)).toEqual(["mk-band", "mk-band mk-band--copyfirst", "mk-band"]);
+       `class="mk-bandcopy"` — it found eight bands in a page that has four. The pattern below
+       still cannot match `mk-bandcopy`: after `mk-band` it demands either the closing quote or a
+       ` mk-band--` modifier, and `copy"` is neither. */
+    const bands = [...html().matchAll(/class="(mk-band(?: mk-band--[a-z]+)*)"/g)].map((m) => m[1]);
+    expect(bands.length).toBe(ABOUT_VISIONS.length);
+    expect(bands).toEqual([
+      "mk-band mk-band--first", "mk-band mk-band--copyfirst", "mk-band",
+    ]);
+  });
+
+  /**
+   * ⚠️ THE FIRST BAND'S HAIRLINE IS REMOVED BY STRUCTURE, NOT BY A DECLARATION — which is exactly
+   * why it is worth asserting. `.mk-band + .mk-band` draws it, so the section header sitting
+   * between the hero and the first vision is what stops it matching. Move the header and the
+   * hairline comes back silently, under a centred rule that already separates the two.
+   */
+  it("puts the section header between the hero and the first vision", () => {
+    const page = html();
+    const mission = page.indexOf("mk-mission");
+    const sechead = page.indexOf("mk-sechead");
+    const firstBand = page.indexOf("mk-band mk-band--first");
+    expect(mission).toBeGreaterThanOrEqual(0);
+    expect(sechead).toBeGreaterThan(mission);
+    expect(firstBand).toBeGreaterThan(sechead);
   });
 
   /**

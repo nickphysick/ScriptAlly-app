@@ -2,7 +2,18 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * About — the public marketing route at /about (ref: design-refs/scriptally-about.html).
+ * About — the public marketing route at /about. The mission hero and the centred section header
+ * come from design-refs/scriptally-about-v1.html; the vision bands, commitments and sign-off below
+ * them are unchanged from design-refs/scriptally-about.html.
+ *
+ * ⚠️ THE MISSION HERO IS NOT A `.mk-band`. It is a stretch grid carrying a statement beside a
+ * plate, the same rhythm as the landing hero; the bands below it are centre-aligned rows. Making
+ * it a band again would centre the copy against a 340px plate and lose the escalation the three
+ * paragraphs are built on.
+ *
+ * ⚠️ ITS MEASURE IS THIS PAGE'S 1180, NOT THE LANDING'S 1300. The rhythm is shared; the measure is
+ * not. A 1300 hero above 1180 bands would put the page's own left edges 60px apart, and alignment
+ * down a page beats matching a number across two.
  *
  * ⚠️ FULL-WIDTH ALTERNATING BANDS, NOT THE DOCUMENT CARD. Privacy and Terms are documents you
  * consult; this is a page you read once, and the card's reading column would make three short
@@ -20,7 +31,8 @@
 
 import React, { useEffect } from "react";
 import {
-  ABOUT_DOCUMENT_TITLE, ABOUT_HERO_H1, ABOUT_HERO_BODY, ABOUT_VISIONS,
+  ABOUT_DOCUMENT_TITLE, ABOUT_MISSION_PRE, ABOUT_MISSION_MAIN,
+  ABOUT_GAP_BODY, ABOUT_GAP_HIT, ABOUT_TURN, ABOUT_SECTION_H2, ABOUT_VISIONS,
   ABOUT_COMMITMENTS_EYEBROW, ABOUT_COMMITMENTS,
   ABOUT_FOUNDER_BODY, ABOUT_FOUNDER_NAME, ABOUT_FOUNDER_ROLE,
 } from "./aboutCopy";
@@ -40,12 +52,28 @@ export const AboutPage: React.FC<{
   return (
     <div>
       <main>
-        <section className="mk-band">
-          <div className="mk-bandcopy">
-            <h1>{ABOUT_HERO_H1}</h1>
-            <p><Runs runs={ABOUT_HERO_BODY} onNavigate={onNavigate} /></p>
+        <section className="mk-mission">
+          <div className="mk-missioncol">
+            {/* One heading, two spans — the lead-in is half a sentence, not a level of its own. */}
+            <h1 className="mk-missionline">
+              <span className="mk-mission-pre">{ABOUT_MISSION_PRE}</span>
+              <span className="mk-mission-main">{ABOUT_MISSION_MAIN}</span>
+            </h1>
+            <p className="mk-gapbody">{ABOUT_GAP_BODY}</p>
+            <p className="mk-gaphit">{ABOUT_GAP_HIT}</p>
+            <p className="mk-missionturn">{ABOUT_TURN}</p>
           </div>
           <MarketingIllustration slot="mission" />
+        </section>
+
+        {/* ⚠️ THE HEADER OWNS THE BREAK, WHICH IS WHY THE FIRST BAND GIVES ONE UP. A centred
+            heading with a rule under it, sitting directly on top of a band's own top hairline,
+            reads as two separators arguing. The band's hairline comes from `.mk-band + .mk-band`,
+            so putting this section between the hero and the first band removes it structurally;
+            `--first` only has to tighten the padding the hairline used to justify. */}
+        <section className="mk-sechead">
+          <h2>{ABOUT_SECTION_H2}</h2>
+          <div className="mk-secrule" aria-hidden="true" />
         </section>
 
         {/* ⚠️ THE SIDE IS SET BY A CLASS, NOT BY DOM ORDER — every vision renders illustration-first
@@ -54,7 +82,10 @@ export const AboutPage: React.FC<{
             wrong: the flip class was a no-op against a DOM order that already agreed with it, and
             all three visions rendered their plate on the left. Measured at 1280, not inferred. */}
         {ABOUT_VISIONS.map((vision, i) => (
-          <section className={"mk-band" + (i % 2 === 1 ? " mk-band--copyfirst" : "")} key={vision.key}>
+          <section
+            className={"mk-band" + (i === 0 ? " mk-band--first" : "") + (i % 2 === 1 ? " mk-band--copyfirst" : "")}
+            key={vision.key}
+          >
             <MarketingIllustration slot={vision.key as "simplify" | "waste" | "time"} />
             <div className="mk-bandcopy">
               <div className="mk-eyebrow">{vision.eyebrow}</div>

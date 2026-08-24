@@ -18,14 +18,37 @@ import { CopyRun } from "./CopyRuns";
 
 export const ABOUT_DOCUMENT_TITLE = "About — ScriptAlly";
 
-export const ABOUT_HERO_H1 = "Querying shouldn't be the hard part";
+/* ══════════════ The mission hero ══════════════
+   ⚠️ "Hello, we're ScriptAlly." IS GONE AND WAS NOT RELOCATED. The page used to open by
+   introducing the company; it opens with the reason the company exists instead. There is nowhere
+   else on the page that sentence belongs, and moving it somewhere would be the compromise the
+   change was made to avoid. */
 
-export const ABOUT_HERO_BODY: CopyRun[] = [
-  { b: "Hello, we're ScriptAlly." },
-  " Finding an agent had turned into a second job of spreadsheets, guesswork and lost threads — so " +
-  "we built the tool the search deserves. One place for your agents, your manuscripts, and every " +
-  "exchange between you and representation.",
-];
+/**
+ * ⚠️ TWO SPANS, ONE HEADING. The lead-in is a quiet serif line above the statement, not a second
+ * heading and not a mono kicker — the ref offers all three and this is the one that was chosen.
+ * Keeping them inside one `h1` is what stops the document outline gaining a level for a phrase
+ * that is half a sentence.
+ */
+export const ABOUT_MISSION_PRE = "Our mission is simple:";
+export const ABOUT_MISSION_MAIN = "Get good stories told.";
+
+/**
+ * The three registers, and the escalation between them is the point — a measured paragraph, a
+ * flat sentence, then the turn. Flattening any one of them into the others loses the argument.
+ */
+export const ABOUT_GAP_BODY =
+  "To write a truly captivating story is rare. To also be adept in mounting a solid querying " +
+  "campaign? A great deal rarer. This gives rise to a barrier. A dangerous drop-off point. A gap " +
+  "between the skills writers have and the skills they need to pursue traditional publication in " +
+  "today's landscape.";
+
+export const ABOUT_GAP_HIT = "That gap is where good stories go to die.";
+
+export const ABOUT_TURN = "So, why don't we bridge it?";
+
+/** The centred header that owns the break above the vision rows. */
+export const ABOUT_SECTION_H2 = "Why ScriptAlly exists";
 
 export interface VisionBand {
   key: string;
