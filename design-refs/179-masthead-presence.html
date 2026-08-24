@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8">
+<title>ScriptAlly — masthead presence</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+ :root{
+  --white:#fff;--content:#fefcfa;--paper:#faf6f0;--ground:#f7f4ee;
+  --burg:#7c3a2a;--ink:#3a1c14;--ink2:#311e19;
+  --edge:#e4ddd1;--rim:#e9e1d4;--hair:#e8e2d8;--pink:#f5e2da;--pinkb:#e8c8bc;
+  --sage-a:#d7ddd5;--sage-b:#d5dbd3;
+  --work-max:1240px;--mast-gutter:35px;--mk:52px;
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{background:#e9e4dc;font-family:'Inter',sans-serif;color:var(--ink);padding:15px 18px 34px}
+ .bar{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+ .lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#7d7267;margin:0 4px 0 10px}
+ .tab{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 9px;border:1px solid #cfc6b8;border-radius:7px;background:#f4efe7;cursor:pointer;color:var(--ink)}
+ .tab.on{background:var(--ink);color:#fdfaf5;border-color:var(--ink)}
+ .note{font-size:12.5px;color:#5d5048;margin:4px 2px 10px;max-width:1180px;line-height:1.6;min-height:38px}
+ .note b{color:var(--ink)}
+
+ .shell{display:flex;width:100%;background:var(--ground);border-radius:13px;overflow:hidden;height:560px;
+        box-shadow:0 2px 6px rgba(58,28,20,.08),0 14px 34px rgba(58,28,20,.10)}
+ .side{flex:0 0 168px;background:#fff;border-right:1px solid var(--hair)}
+ .main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+ .topbar{display:flex;align-items:center;gap:11px;padding:0 15px;background:#fff;border-bottom:1px solid var(--hair);height:50px;flex:0 0 auto}
+ .topbar .brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;line-height:1.3}
+ .topbar .crumb{font-size:12.5px;color:#6b5a51;line-height:1.3}
+ .topbar .crumb b{color:var(--ink);font-weight:600}
+ .window{background:var(--content);border:1px solid var(--edge);border-radius:14px 14px 0 0;margin:10px 12px 0;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+ .scroll{flex:1;min-height:0;overflow-y:auto}
+
+ /* ── the slab: full width, its ground varies ── */
+ .chrome{position:relative;background:var(--content);transition:background .2s}
+ body[data-g="pink"] .chrome{background:linear-gradient(180deg,#f7e6de,#f9ece5)}
+ body[data-g="parch"] .chrome{background:linear-gradient(180deg,#f5efe6,#f9f5ee)}
+ body[data-g="grad"] .chrome{background:linear-gradient(180deg,#f6e5dd 0%,#faeee8 55%,var(--content) 100%)}
+ body[data-g="sage"] .chrome{background:linear-gradient(180deg,#e4e9e2,#eef1ec)}
+
+ .mm{width:100%;max-width:var(--work-max);margin-inline:auto;padding-inline:var(--mast-gutter)}
+ .mast{display:flex;align-items:center;gap:18px;padding:30px 0 24px;transition:padding .22s}
+ body.settled .mast{padding:13px 0 10px}
+ body[data-a="c"] .mast{justify-content:center;text-align:center}
+ .mk{flex:0 0 var(--mk);width:var(--mk);height:var(--mk);display:grid;place-items:center;transition:all .22s}
+ .mk svg{width:calc(var(--mk)*.7);height:calc(var(--mk)*.7);stroke:var(--burg);fill:none;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round;transition:all .22s}
+ body.settled .mk{flex-basis:34px;width:34px;height:34px}
+ body[data-m="none"] .mk{display:none}
+ .mtx h1{font-family:'Playfair Display',serif;font-size:32px;font-weight:600;line-height:1.3;color:var(--ink2);transition:font-size .22s}
+ body.settled .mtx h1{font-size:22px}
+ .mtx p{font-size:13.5px;color:#8a7a70;margin-top:3px;line-height:1.45;transition:opacity .18s,max-height .22s}
+ body.settled .mtx p{opacity:0;max-height:0;margin-top:0;overflow:hidden}
+ .crow{display:flex;align-items:center;gap:9px;padding:0 0 14px}
+ body[data-a="c"] .crow{justify-content:center}
+ .cbtn{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;border-radius:8px;border:1px solid #e2d8ca;
+       background:var(--white);color:#4d3b33;font-size:12px;font-weight:500}
+ .cbtn.dark{background:#3a2118;border-color:#3a2118;color:#fdfaf5;font-weight:600}
+ .sp{flex:1}
+ body[data-a="c"] .sp{display:none}
+ .baserule{height:1px;background:var(--rim)}
+ body[data-g="grad"] .baserule{opacity:0}
+
+ .work{padding:26px 0 30px}
+ .hero{text-align:center;padding:26px 0 34px}
+ .hero h2{font-family:'Playfair Display',serif;font-size:40px;font-weight:600;line-height:1.25;max-width:800px;margin:0 auto}
+ .hero p{font-size:14px;color:#6b5a51;max-width:640px;margin:16px auto 0;line-height:1.7}
+ .hero .cta{display:inline-flex;align-items:center;gap:8px;background:#3a2118;color:#fdfaf5;border-radius:999px;padding:12px 22px;font-size:13.5px;font-weight:600;margin-top:22px}
+ .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+ .slot{border:1px dashed #ded4c6;border-radius:13px;min-height:150px;display:grid;place-items:center;
+        font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#c0b4a6}
+</style></head><body data-g="none" data-a="l" data-m="52">
+
+<div class="bar">
+ <span class="lab" style="margin-left:0">GROUND</span>
+ <button class="tab on" data-g="none">NONE</button>
+ <button class="tab" data-g="pink">SOFT PINK</button>
+ <button class="tab" data-g="parch">PARCHMENT</button>
+ <button class="tab" data-g="sage">SAGE</button>
+ <button class="tab" data-g="grad">PINK &rarr; GROUND</button>
+ <span class="lab">ALIGN</span>
+ <button class="tab on" data-a="l">LEFT</button>
+ <button class="tab" data-a="c">CENTRED</button>
+ <span class="lab">MARK</span>
+ <button class="tab" data-m="0">NONE</button>
+ <button class="tab on" data-m="52">52</button>
+ <button class="tab" data-m="72">72</button>
+ <span class="lab">POSTURE</span>
+ <button class="tab on" id="post">REST</button>
+</div>
+<div class="note" id="note">The masthead's ground is the lever with most effect &mdash; a tint turns it from a line of text into a <b>place</b>. Check every option in the settled posture too: a coloured band that reads well at 100px can feel heavy at 55.</div>
+
+<div class="shell">
+ <aside class="side"></aside>
+ <div class="main">
+  <div class="topbar"><span class="brand">ScriptAlly</span>
+    <span class="crumb">ScriptAlly&nbsp; / &nbsp;Agents&nbsp; / &nbsp;<b>Contact list</b></span></div>
+  <div class="window">
+   <div class="scroll">
+
+    <div class="chrome">
+      <div class="mm">
+        <div class="mast">
+          <span class="mk"><svg viewBox="0 0 24 24"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M19 8h4M21 6v4"/></svg></span>
+          <div class="mtx"><h1>Contact list</h1><p>Everyone you're querying, watching, or saving for later.</p></div>
+        </div>
+        <div class="crow">
+          <span class="cbtn dark">&#65291; Add new agent</span><span class="sp"></span>
+          <span class="cbtn">Filters</span><span class="cbtn">Group</span><span class="cbtn">Sort</span>
+        </div>
+      </div>
+      <div class="baserule"></div>
+    </div>
+
+    <div class="mm"><div class="work">
+      <div class="hero">
+        <h2>These are the people who will champion your words.</h2>
+        <p>Grow your list. Gather all the detail you can. This is the data that everything is built on &mdash; the bedrock of your campaign.</p>
+        <span class="cta">&#65291; Add your first agent</span>
+      </div>
+      <div class="g3"><div class="slot">agent-stage-add</div><div class="slot">agent-stage-discover</div><div class="slot">agent-stage-track</div></div>
+    </div></div>
+
+   </div>
+  </div>
+ </div>
+</div>
+
+<script>
+const R=document.documentElement.style;
+const set=(k,v,attr)=>{document.body.dataset[attr]=v;
+ document.querySelectorAll('.tab['+k+']').forEach(x=>x.classList.toggle('on',x.getAttribute(k)===v));};
+document.querySelectorAll('.tab[data-g]').forEach(b=>b.onclick=()=>set('data-g',b.dataset.g,'g'));
+document.querySelectorAll('.tab[data-a]').forEach(b=>b.onclick=()=>set('data-a',b.dataset.a,'a'));
+document.querySelectorAll('.tab[data-m]').forEach(b=>b.onclick=()=>{
+ R.setProperty('--mk',(b.dataset.m==='0'?52:b.dataset.m)+'px');
+ set('data-m',b.dataset.m==='0'?'none':b.dataset.m,'m');});
+const P=document.getElementById('post');
+P.onclick=()=>{const on=document.body.classList.toggle('settled');P.textContent=on?'SETTLED':'REST';};
+</script></body></html>

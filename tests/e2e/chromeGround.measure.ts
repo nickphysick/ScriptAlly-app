@@ -14,6 +14,12 @@
  * ⚠️ AND A SINGLE SAMPLE PASSES OVER BLANK PARCHMENT WHILE BORDERS SHOW THROUGH TWO INCHES AWAY. So
  * this sweeps a grid across the slab's whole box.
  *
+ * ⚠️ AND THE SWEEP NEEDED NO CHANGE WHEN THE FLAT FILL BECAME A GRADIENT, which is the sign it was
+ * built on the right claim. It never compares against an expected colour — a gradient would have
+ * broken that, and sampling three rows against one value would have failed honestly while sampling
+ * against "not the content colour" would have passed vacuously. It compares the chrome with itself
+ * over two different backdrops, so what the chrome is filled with does not enter into it.
+ *
  * ⚠️ THE CLAIM IS THAT THE CHROME RENDERS IDENTICALLY WHATEVER IS BEHIND IT — which is stronger than
  * "every point equals the ground" and needs no knowledge of which pixels are the header's own ink.
  * The slab is photographed with nothing beneath it and again with content beneath it, and the two
@@ -45,6 +51,9 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
   return {
     type: g.getAttribute("data-wpg-type"),
     bg: cs.backgroundColor,
+    bgImage: cs.backgroundImage,
+    washTop: cs.getPropertyValue("--mast-wash-top").trim(),
+    washBottom: cs.getPropertyValue("--mast-wash-bottom").trim(),
     blur: cs.backdropFilter || (cs as unknown as { webkitBackdropFilter?: string }).webkitBackdropFilter || "none",
     shadow: cs.boxShadow,
     /* the ground the fill is supposed to be an alpha OF — read from the page, never restated */
@@ -60,9 +69,17 @@ const alphaOf = (c: string) => {
   const parts = m[1].split(",").map((x) => parseFloat(x.trim()));
   return parts.length > 3 ? parts[3] : 1;
 };
+/** `#rrggbb` → `r, g, b`, so a token and a computed stop can be compared as values */
+const hexToRgb = (h: string) => {
+  const m = /^#?([0-9a-f]{6})$/i.exec(h.trim());
+  if (!m) return h.trim();
+  const n = parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(", ");
+};
+const normRgb = (c: string) => (/rgba?\(([^)]*)\)/.exec(c)?.[1].split(",").slice(0, 3).map((x) => Math.round(parseFloat(x.trim()))) ?? []).join(", ");
 const channelsOf = (c: string) => (/rgba?\(([^)]*)\)/.exec(c)?.[1].split(",").slice(0, 3).map((x) => Math.round(parseFloat(x.trim()))) ?? []).join(", ");
 
-test("⚠️ THE PINNED GROUND IS THE OPAQUE GROUND TOKEN — no alpha anywhere", async ({ page }) => {
+test("⚠️ THE PINNED GROUND IS AN OPAQUE PARCHMENT WASH — no alpha in the colour or any stop", async ({ page }) => {
   const lines: string[] = [];
   let pinned = 0, staticc = 0;
   for (const { name, route, cls } of PAGES) {
@@ -71,13 +88,40 @@ test("⚠️ THE PINNED GROUND IS THE OPAQUE GROUND TOKEN — no alpha anywhere"
     const r = (await read(page, cls))!;
     expect(r, `${name}: no grid`).not.toBeNull();
     lines.push(`${name.padEnd(21)} ${String(r.type).padEnd(7)} · bg ${r.bg.padEnd(24)} · blur ${r.blur}`);
-    /* ⚠️ NO ALPHA AT ALL, EITHER TYPE. The translucent direction is withdrawn: `backdrop-filter`
-       does not reliably apply here, so any alpha is a see-through header waiting to be reported. */
-    expect(alphaOf(r.bg), `${name}: the ground is ${r.bg} — it must be fully opaque`).toBe(1);
-    expect(channelsOf(r.bg), `${name}: the ground's channels are not the window's (${r.groundRgb})`)
-      .toBe(r.groundRgb.split(",").map((x) => Math.round(parseFloat(x.trim()))).join(", "));
+    /* ⚠️ NO ALPHA ANYWHERE, EITHER TYPE — in the colour or in any gradient stop. The translucent
+       direction is withdrawn: `backdrop-filter` does not reliably apply in this scroller, so any
+       alpha is a see-through header waiting to be reported for a fifth time. */
+    expect(alphaOf(r.bg), `${name}: the ground colour is ${r.bg} — it must be fully opaque`).toBe(1);
     expect(r.blur, `${name}: a backdrop blur survives — it was only ever propping up a translucent fill`).toBe("none");
-    if (r.type === "pinned") pinned += 1; else staticc += 1;
+    for (const stop of (r.bgImage.match(/rgba?\([^)]*\)/g) ?? [])) {
+      expect(alphaOf(stop), `${name}: a gradient stop carries alpha (${stop}) — the wash must be opaque throughout`).toBe(1);
+    }
+
+    if (r.type === "pinned") {
+      pinned += 1;
+      /**
+       * ⚠️ A WASH, NOT A FLAT FILL (ref 179, PARCHMENT). Asserted as a gradient BETWEEN THE TWO
+       * TOKENS rather than against two hexes, so the pair can move without this case moving with
+       * them — the palette has shifted twice this year.
+       */
+      expect(r.washTop, `${name}: \`--mast-wash-top\` resolves to nothing`).toMatch(/^#|^rgb/);
+      expect(r.washBottom, `${name}: \`--mast-wash-bottom\` resolves to nothing`).toMatch(/^#|^rgb/);
+      const stops = r.bgImage.match(/rgb\([^)]*\)/g) ?? [];
+      expect(stops.length, `${name}: the chrome draws no gradient (${r.bgImage.slice(0, 60)})`).toBe(2);
+      expect(hexToRgb(r.washTop), `${name}: the wash's first stop is not \`--mast-wash-top\``).toBe(normRgb(stops[0]));
+      expect(hexToRgb(r.washBottom), `${name}: the wash's second stop is not \`--mast-wash-bottom\``).toBe(normRgb(stops[1]));
+      /* ⚠️ AND A COLOUR BENEATH THE IMAGE, so a gradient the browser declines to paint cannot leave
+         the slab transparent — the failure mode this whole sequence has been chasing. */
+      expect(normRgb(r.bg), `${name}: the chrome has no opaque colour under its gradient — if the image is ever dropped it is see-through`)
+        .toBe(hexToRgb(r.washBottom));
+    } else {
+      staticc += 1;
+      /* ⚠️ TYPE B KEEPS THE PAGE GROUND AND GAINS NO WASH — nothing passes beneath a static
+         masthead, so a band of its own would be decoration marking a boundary that is not there. */
+      expect(r.bgImage, `${name} is static and carries the pinned chrome's wash`).toBe("none");
+      expect(channelsOf(r.bg), `${name}: a static page's ground is not the window's (${r.groundRgb})`)
+        .toBe(r.groundRgb.split(",").map((x) => Math.round(parseFloat(x.trim()))).join(", "));
+    }
   }
   console.log("\n══ CHROME GROUND\n" + lines.join("\n"));
   expect(pinned, "no pinned page was measured").toBeGreaterThan(4);
