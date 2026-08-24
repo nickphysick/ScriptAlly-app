@@ -382,6 +382,26 @@ export interface SubmissionPackage {
   synopsisVersionId: string;
   samplePagesVersionId: string;
   /**
+   * ⚠️ THE LOCK, AND THE ONE PLACE THIS FEATURE STORES WHAT IT WOULD RATHER DERIVE.
+   *
+   * ISO stamp of the first time a query went out carrying this package. Absent = never sent = the
+   * slots are freely editable. Present = the contents are frozen, and `Duplicate & edit` is the way
+   * to a different combination.
+   *
+   * ⚠️ WHY STORED. Sent-ness is "some query holds this `packageId` and has gone out", and enforcement
+   * has to happen in the Firestore rules — which can `get()` a document by path but cannot QUERY a
+   * collection, and there is no reverse index from a package to its queries. So the derived form is
+   * not expressible in the one place it must be enforced. The rule reads this field on `existing()`;
+   * the app is its single writer.
+   *
+   * ⚠️ AND IT IS PERMANENT. A package that has gone to twelve agents cannot become editable again by
+   * deleting the queries — what those agents received is a fact about the world, not about the
+   * records still in the app. The cost is that a MIS-ATTACH also locks; `Duplicate & edit` is the
+   * answer the design gives, and the alternative (clearing the stamp when the last attachment goes)
+   * is a proposal in the report rather than a decision taken here.
+   */
+  firstSentAt?: string;
+  /**
    * ⚠️ FREE TEXT, AND DELIBERATELY NOT A FOURTH SLOT. One line per package for whatever an agency
    * asks for that is not one of the three above — a chapter outline, a pitch document, a writing CV.
    * It is prose the writer typed, NOT a reference to a saved `ManuscriptVersion`, so it cannot be

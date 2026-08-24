@@ -101,7 +101,7 @@ import { computeResponseDeadline } from "./responseDeadline";
 /* ⚠️ THE SAME PREDICATE THE PAGE READS. `deleteVersion`'s last check and the material sheet's
    usage line must agree about "does a package hold this", so both go through one function rather
    than each filtering the three slot fields for itself. */
-import { packagesUsingVersion } from "./packageMetrics";
+import { packagesUsingVersion, isPackageLocked, LOCKED_PACKAGE_FIELDS, LOCKED_NOTE, LOCKED_WHY } from "./packageMetrics";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
 import { buildHoldingReplyWrites, HOLDING_REPLY_TYPE } from "./holdingReply";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
@@ -267,7 +267,12 @@ interface DbContextType {
    * stored empty string would be a claim that the question was answered. Keeping that conversion
    * here means the two callers cannot disagree about what empty means.
    */
-  updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials">>) => Promise<void>;
+  updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials">>) => Promise<string | null>;
+  /**
+   * Stamp a package as sent (D-D1). Idempotent — the FIRST send is the one that matters, so an
+   * already-stamped package is left exactly as it is rather than re-dated.
+   */
+  markPackageSent: (id: string) => Promise<void>;
   retirePackage: (id: string) => Promise<void>;
   /**
    * Delete a package outright. Returns `false` WITHOUT writing when any query was sent with it.
@@ -1625,11 +1630,25 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  /**
+   * ⚠️ THE LOCK IS CHECKED HERE AND IN THE RULES, and neither is redundant. The rule is the
+   * guarantee — it cannot be talked out of by a bug in this file. This check is the EXPLANATION:
+   * without it a refused write comes back from three layers away as "Database transaction error",
+   * which is what made the reported fault read as silence rather than as a rule.
+   *
+   * ⚠️ IT RETURNS THE REASON RATHER THAN THROWING OR SHRUGGING. A caller that cannot tell a refusal
+   * from a success closes its form on a write it never made — the silent-denial family this page has
+   * already been bitten by twice.
+   */
   const updatePackage = async (
     id: string,
     fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials">>,
-  ) => {
-    if (!currentUser) return;
+  ): Promise<string | null> => {
+    if (!currentUser) return "Authentication required.";
+    const live = packages.find((p) => p.id === id);
+    if (live && isPackageLocked(live) && LOCKED_PACKAGE_FIELDS.some((k) => k in fields)) {
+      return `${LOCKED_NOTE}. ${LOCKED_WHY}`;
+    }
     /* ⚠️ CLEARING THE FREE-TEXT LINE IS AN UNSET, NOT AN EMPTY STRING. The caller sends what the
        input holds; the conversion lives here so both callers cannot drift. `otherMaterials` is the
        only unsettable field on a package — the three version slots use `""` as their sentinel and
@@ -1641,6 +1660,28 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
     try {
       await updateDoc(doc(db, "users", currentUser.id, "packages", id), payload);
+      return null;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
+      return "Couldn't save that change.";
+    }
+  };
+
+  /**
+   * ⚠️ THE MARK'S SINGLE WRITER. Everywhere a package becomes attached to a query calls this and
+   * nothing else stamps the field — a second writer is a second answer to "when did this go out".
+   *
+   * ⚠️ IDEMPOTENT BY READING FIRST. The FIRST send is the fact being recorded, so a package already
+   * stamped is left alone; re-dating it on every later send would turn a fixed point into a moving
+   * one and quietly make "sent on" mean "last sent on".
+   */
+  const markPackageSent = async (id: string) => {
+    if (!currentUser || !id) return;
+    const live = packages.find((p) => p.id === id);
+    if (!live || live.firstSentAt) return;
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "packages", id),
+        { firstSentAt: new Date().toISOString() });
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
     }
@@ -3210,6 +3251,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         archiveVersion,
         addPackage,
         updatePackage,
+        markPackageSent,
         retirePackage,
         deletePackage,
         setActivePackage,

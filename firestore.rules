@@ -193,6 +193,12 @@ service cloud.firestore {
         && data.queryLetterVersionId is string && data.queryLetterVersionId.size() <= 128
         && data.synopsisVersionId is string && data.synopsisVersionId.size() <= 128
         && data.samplePagesVersionId is string && data.samplePagesVersionId.size() <= 128
+        // ⚠️ THE LOCK STAMP (attachment model, D-D1). Optional; present means the package has gone out
+        // and its slots are frozen — enforced on the update rule below, because a validator cannot
+        // see what CHANGED. Stored rather than derived because rules can get() a document by path
+        // but cannot QUERY for the queries that hold this package: the derived form is not
+        // expressible in the one place enforcement has to happen.
+        && (!data.keys().hasAny(['firstSentAt']) || (data.firstSentAt is string && data.firstSentAt.size() <= 64))
         // ⚠️ FREE TEXT, OPTIONAL, AND ABSENT WHEN EMPTY. `hasAny` rather than `is string` because an
         // unanswered question has no key at all; a stored `""` would claim the writer answered it.
         && (!data.keys().hasAny(['otherMaterials']) || (data.otherMaterials is string && data.otherMaterials.size() <= 512))
@@ -640,9 +646,21 @@ service cloud.firestore {
         // inside isValidPackage would apply it to update too — see the note there.
         allow create: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId)
           && incoming().queryLetterVersionId.size() >= 1;
-        allow update: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status'])
-        );
+        // ⚠️ A SENT PACKAGE'S CONTENTS ARE IMMUTABLE, AND THIS IS THE GUARANTEE — not the client
+        // check beside it. Once `firstSentAt` exists the three slot fields cannot change, so every
+        // query that used this package keeps reporting what the agent actually received. The name,
+        // the free-text line and `status` stay writable: renaming is filing, not misreporting, and
+        // freezing `status` would make a sent package impossible to archive.
+        //
+        // ⚠️ AND THE STAMP IS WRITE-ONCE. Left mutable it would be the unlock: clear the field,
+        // edit the slots, and the guarantee is a formality. `hasAny` on the CHANGED keys is what
+        // says "you may add it, you may never touch it again".
+        allow update: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId)
+          && incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status', 'firstSentAt'])
+          && (
+            !existing().keys().hasAny(['firstSentAt'])
+            || !incoming().diff(existing()).affectedKeys().hasAny(['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt'])
+          );
       }
 
       // ROUTE: Agents

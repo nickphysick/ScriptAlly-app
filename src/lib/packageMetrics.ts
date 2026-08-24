@@ -188,6 +188,45 @@ export const isSlotFilled = (id: string | null | undefined): id is string => !!i
  */
 export const OTHER_MAX = 512;
 
+/* ── the lock (attachment model, D-D1) ─────────────────────────────────────────────────────── */
+
+/**
+ * ⚠️ A PACKAGE IS FREELY EDITABLE UNTIL ITS FIRST SEND, THEN IT LOCKS — and that one rule is what
+ * lets a query render a package's LIVE contents and never lie about what an agent received. It is
+ * why there is no snapshot, no copied materials and no drift to explain.
+ *
+ * ⚠️ THE ALTERNATIVE IS WORSE, WHICH IS THE ARGUMENT FOR IT. Send `Standard UK` to twelve agents,
+ * later swap its letter, and tracking would claim all twelve received a letter they never saw —
+ * the one thing this feature exists to tell you.
+ */
+export const isPackageLocked = (pkg: Pick<SubmissionPackage, "firstSentAt">): boolean =>
+  !!pkg.firstSentAt;
+
+/**
+ * The slot fields the lock freezes. `packageName`, `status` and `otherMaterials` are NOT among them.
+ *
+ * ⚠️ RENAMING A SENT PACKAGE IS NOT CHANGING WHAT WENT. The lock exists so the query cannot
+ * misreport an agent's envelope; a name is the writer's label for their own filing, and freezing it
+ * would punish tidying without protecting anything. Archiving likewise — `status` has to stay
+ * writable or a sent package could never be put away, which is the un-archive trap one step along.
+ */
+export const LOCKED_PACKAGE_FIELDS = [
+  "queryLetterVersionId", "synopsisVersionId", "samplePagesVersionId",
+] as const;
+
+/** What the writer is told, where the editing happens. States the fact; offers the way on. */
+export const LOCKED_NOTE = "Locked — this package has been sent";
+export const LOCKED_WHY =
+  "Its contents are fixed so every query that used it keeps reporting what the agent actually received.";
+
+/** The name a duplicate takes (D-D2). `Standard UK` → `Standard UK v2`, then v3, v4… */
+export function duplicateName(name: string, existing: readonly string[]): string {
+  const base = name.replace(/\s+v\d+$/i, "").trim() || "Package";
+  let n = 2;
+  while (existing.includes(`${base} v${n}`)) n++;
+  return `${base} v${n}`;
+}
+
 /** The package's free-text line, trimmed, or `null` when there is none to show. */
 export const otherMaterialsText = (pkg: { otherMaterials?: string }): string | null => {
   const t = pkg.otherMaterials?.trim();

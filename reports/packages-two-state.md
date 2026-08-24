@@ -162,6 +162,107 @@ shared-header file; Correction UI is settled.
 
 ---
 
+---
+
+## Phase 2 — Part D's data layer: the lock, the rules, the migration
+
+### The stored field, and why it is stored
+
+`SubmissionPackage.firstSentAt?: string` — ISO stamp of the first send. Absent = editable; present =
+the three version slots are frozen.
+
+**R4's finding forced this.** Sent-ness is *"some query holds this `packageId` and has gone out"*.
+Firestore rules can `get()` a document by path but **cannot query a collection**, and there is no
+reverse index from a package to its queries — so the derived form is **not expressible in the one
+place enforcement has to happen**. Stated at the field, in the rule, and in the lock's test.
+
+**It is permanent.** A package that went to twelve agents does not become editable by deleting the
+queries; what those agents received is a fact about the world, not about the records still in the
+app. ⚠️ **The cost is that a MIS-ATTACH also locks** — attach the wrong package and it is frozen
+having never actually gone out. `Duplicate & edit` (D-D2) is the design's answer; clearing the stamp
+when the last attachment goes is a **proposal, not a decision** — see F-T.
+
+### What the lock freezes, and what it deliberately does not
+
+Frozen: `queryLetterVersionId`, `synopsisVersionId`, `samplePagesVersionId`.
+Open: `packageName`, `status`, `otherMaterials`.
+
+**Renaming a sent package is not changing what went** — a name is the writer's own filing label, and
+freezing it would punish tidying while protecting nothing. Freezing `status` would make a sent
+package impossible to archive, which is the un-archive trap (F-H) one step along.
+
+### Two layers, and neither is redundant
+
+- **The rules are the guarantee** — they cannot be talked out of by a bug in `db.tsx`.
+- **`updatePackage` is the explanation** — it returns the reason, so a refusal does not arrive from
+  three layers away as `Database transaction error`.
+
+⚠️ **And `savePackageDraft` was still discarding that return.** Left as it was, editing a locked
+package would have closed the modal reporting success — the exact *"edited the package, query
+unchanged, no feedback"* fault being fixed, reproduced one layer up. Now returned and shown.
+
+`markPackageSent` is the stamp's **single writer**, idempotent by reading first: the FIRST send is
+the fact, and re-dating on every later send would make "sent on" silently mean "last sent on".
+
+### Deployed to dev, both databases
+
+| database | updateTime |
+|---|---|
+| `(default)` | **2026-08-24T10:34:14Z** |
+| `ai-studio-ae82196c-…` | **2026-08-24T10:34:23Z** |
+
+`gen-lang-client-0801391782` appeared **0 times** in either log; the second command touched **0
+hosting lines**.
+
+### The gate — proven on the deployed database, both halves
+
+`rulesProbe.mjs` gained eight cases. **Both halves, because "a sent package's slots are denied" is
+satisfied by a rule that denies every slot write** — which would break the feature and still pass.
+
+```
+✅ UNSENT — slot write (must be ALLOWED)        ACCEPTED   ← it is a lock, not a wall
+✅ stamp firstSentAt                            ACCEPTED
+❌ SENT — slot write (must be DENIED)           DENIED
+❌ SENT — letter slot too (must be DENIED)      DENIED
+✅ SENT — rename (must be ALLOWED)              ACCEPTED
+✅ SENT — archive (must be ALLOWED)             ACCEPTED
+❌ SENT — re-stamp firstSentAt (must be DENIED) DENIED     ← write-once
+❌ SENT — clear firstSentAt (must be DENIED)    DENIED     ← left mutable, this IS the unlock
+   probe package removed: yes
+```
+
+### F-Q — the migration, with rows
+
+`tests/e2e/auditAttachments.mjs`, **read-only by default** — "how many are affected" is a question
+you ask *before* deciding to change anything, and a script that answers it by changing them cannot
+be run twice for the same answer.
+
+```
+queries: 44 · link ONLY 6 · loose ONLY 4 · BOTH 2 · neither 32 · snapshot-marked 0
+
+seed-pkgq-3  packageId="seed-pkg-1"  dropping 1: ["First 10 pages"]
+seed-pkgq-4  packageId="seed-pkg-1"  dropping 1: ["First 10 pages"]
+migrated 2 · re-read: 44 queries, 0 still holding both
+```
+
+**Two, and they are the pair `reports/detach-package.md` left alone for want of a rule.** D-D4 is
+that rule. The link wins; the list is **unset**, never emptied to `[]` — an empty array is a stored
+claim that the writer listed nothing.
+
+**Zero snapshot-marked queries**, so D-D1's "no snapshot, no copied materials" has nothing to unpick
+on this account.
+
+### Locks — `src/lib/packageLock.test.ts` (18 cases)
+
+Proven red twice: making the stamp mutable in the rule fails *"a sent package's three slots cannot
+change"*; dropping the client's reason fails *"it RETURNS the reason rather than throwing or
+shrugging"*.
+
+```
+tsc 0 · build 0, no error/[WARNING] lines · vitest 384 files, 6579 passed, 3 skipped
+                                            (baseline 383 / 6561)
+```
+
 ## Flags
 
 | flag | state |

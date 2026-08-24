@@ -254,6 +254,38 @@ await dropPkg().catch(() => {});
 await attempt("package create, NO letter (must be DENIED)", "Part B",
   () => setDoc(PKG, basePkg({ queryLetterVersionId: "" })), dropPkg);
 await dropPkg().catch(() => {});
+
+/* ── the lock: a sent package's contents are immutable (attachment model, D-D1) ─────────────── */
+console.log("\npackages — the lock, both halves:");
+/**
+ * ⚠️ BOTH HALVES OR THE RULE IS UNPROVEN. "A sent package's slots are denied" is satisfied by a rule
+ * that denies EVERY slot write, which would make the feature unusable and still pass. The unsent
+ * ACCEPT is what says the lock is a lock rather than a wall.
+ *
+ * ⚠️ AND THE STAMP IS PROVED WRITE-ONCE, because that is the unlock if it is not: clear the field,
+ * edit the slots, and the guarantee is a formality.
+ */
+await setDoc(PKG, basePkg()).catch(() => {});
+await attempt("UNSENT — slot write (must be ALLOWED)", "D-D1",
+  () => updateDoc(PKG, { synopsisVersionId: "v-probe-syn" }), null);
+await attempt("stamp firstSentAt", "D-D1",
+  () => updateDoc(PKG, { firstSentAt: new Date(0).toISOString() }), null);
+await attempt("SENT — slot write (must be DENIED)", "D-D1",
+  () => updateDoc(PKG, { synopsisVersionId: "v-probe-other" }), null);
+await attempt("SENT — letter slot too (must be DENIED)", "D-D1",
+  () => updateDoc(PKG, { queryLetterVersionId: "v-probe-other" }), null);
+/* the writer may still file and archive — the lock is about what went, not about tidying */
+await attempt("SENT — rename (must be ALLOWED)", "D-D1",
+  () => updateDoc(PKG, { packageName: "Rules probe, renamed" }), null);
+await attempt("SENT — archive (must be ALLOWED)", "D-D1",
+  () => updateDoc(PKG, { status: "Retired" }), null);
+/* and the stamp cannot be moved or removed */
+await attempt("SENT — re-stamp firstSentAt (must be DENIED)", "D-D1",
+  () => updateDoc(PKG, { firstSentAt: new Date(1).toISOString() }), null);
+await attempt("SENT — clear firstSentAt (must be DENIED)", "D-D1",
+  () => updateDoc(PKG, { firstSentAt: deleteField() }), null);
+await dropPkg().catch(() => {});
+
 const pkgGone = await getDoc(PKG);
 console.log(`  probe package removed: ${pkgGone.exists() ? "NO — still present" : "yes"}`);
 

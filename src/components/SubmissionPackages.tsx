@@ -187,7 +187,12 @@ export const SubmissionPackages: React.FC = () => {
       otherMaterials: d.otherMaterials,
     };
     if (pkgEditing) {
-      await updatePackage(pkgEditing.id, fields);
+      /* ⚠️ THE REFUSAL IS RETURNED, NOT DISCARDED. `updatePackage` now declines a slot write on a
+         SENT package and hands back the reason; dropping it here would close the modal on a write
+         that never happened — which is the silent-denial family this page has been bitten by twice,
+         and precisely the "edited the package, nothing changed, no feedback" fault being fixed. */
+      const err = await updatePackage(pkgEditing.id, fields);
+      if (err) return err;
     } else {
       /* ⚠️ THE REFUSAL IS RETURNED, NOT DISCARDED. `addPackage` declines on a FREE plan with a
          reason; the existing `savePackage` above drops it on the floor (`res.success ? … :
