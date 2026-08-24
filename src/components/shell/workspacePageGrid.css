@@ -105,9 +105,11 @@
    Giving it a frame would make it read as a second plate stacked under the first, which is the
    arrangement amendment 9 exists to undo. */
 .wpg-tools {
-  /* rest 14/14, settling to 0/12 (§2) — the transition rides on the REST rule so both directions
-     ease; declared only on the stuck rule it would snap on the way back. */
-  transition: padding .22s cubic-bezier(.4, 0, .2, 1);
+  /* ⚠️ THE VERTICAL RHYTHM MOVED TO THE BAND (header fix, §4), and the reason is the retract. The
+     band's height is what animates when the toolbar folds away, so that height has to be a STABLE
+     target — and while the padding lived here it changed with the settle, so the band would have
+     been easing towards a number that was itself easing. With the padding on the band, this row's
+     natural height is constant across every settle state and the retract has one thing to chase. */
   /* ⚠️ EVERY BOX WHOSE MATHS DEPENDS ON THE BOX MODEL DECLARES IT — the house rule, and the
      render harness is why: it loads a hand-picked stylesheet list without Tailwind's preflight, so
      an inherited `border-box` silently becomes `content-box` and every padded row measures wide. */
@@ -124,7 +126,7 @@
      bottom padding alone — the 16px margin that used to sit between them moved to the SLAB's base,
      because the hairline it was clearing moved there too. Masthead and controls are one object; the
      gap belongs below the object, not inside it. */
-  padding: 14px 0;
+  padding: 0;
   /* ⚠️ `flex: none` — on a fill page the scroller is a flex COLUMN, and without this the control
      row would shrink as the panes below claim the space. Same reason the masthead states it. */
   flex: none;
@@ -365,7 +367,7 @@
  */
 @media (prefers-reduced-motion: reduce) {
   /* the STATE still changes — only the crossfade goes, exactly as the hems do */
-  .wpg-tools { transition: none; }
+  .wpg-tools, .wpg-toolband { transition: none; }
 }
 
 /* ══ THE CONTROL ROW'S TALLY (in-flow masthead, step 1; ref 170-sticky-control-row.html `.cnt`) ══
@@ -524,9 +526,12 @@
  * frame. Giving this its own easing would make the two curves independent, and the sum would drift
  * mid-animation, which is the only moment anyone would see it.
  *
- * ⚠️ AND IT IS INERT ON A FILL PAGE rather than scoped off one: a fill page cannot scroll, so it
- * never settles, so the reclaim is 0 and this is a zero-height box. `flex: none` because a fill
- * page's scroller is a flex column and it must not be stretched into one.
+ * ⚠️ IT IS SCOPED OFF A FILL PAGE IN THE COMPONENT, and this paragraph used to say the opposite —
+ * that it was "inert on a fill page" because such a page "never settles". That stopped being true
+ * the day the settle was bound to each page's own primary scroller: a fill page settles on its ZONE,
+ * so the spacer grew by exactly what the slab lost and the settle reclaimed nothing at all. Measured
+ * on Calendar at 1440: chrome 166 → 104, spacer 16 → 78, zone height unchanged at 408. `flex: none`
+ * because a fill page's scroller is a flex column and it must not be stretched into one.
  */
 /**
  * ══ THE FOLD'S CHEVRON — ON THE WINDOW'S BORDER, NEVER THROUGH IT (pinned chrome, §3; ref 175) ══
@@ -573,6 +578,30 @@
      to the column on every settle. Summing them here means nothing can collapse and the column's
      total is `slab + gap + reclaim`, constant by construction. */
   height: calc(var(--wpg-chrome-gap) + var(--wpg-reclaim-pad, 0px));
+  /**
+   * ⚠️ THE RETRACT'S COMPENSATION IS CSS, NOT JS, AND THAT IS THE WHOLE FIX (header fix, §4).
+   *
+   * The settle's share of this box is sampled per frame by the component, which is close enough for
+   * a change that begins where the reader is not looking. The retract is not: it removes ~64px at
+   * `scrollTop` ≈ 10, and a compensation one frame behind lets content move, which wakes SCROLL
+   * ANCHORING, which pulls `scrollTop` towards 0, which drops the page below the settle threshold —
+   * so the chrome grows back and the whole thing starts again. Measured before this: Contact list
+   * retracted at 8, was pulled to `scrollTop` 0 within three frames, and un-retracted.
+   *
+   * ⚠️ TWO TRANSITIONS, ONE CLOCK. The band shrinks by exactly the height this grows by, both over
+   * the same duration on the same curve, both started by the same class — so the browser interpolates
+   * them together and the column's total is constant at every frame rather than at the ends. A JS
+   * sampler cannot achieve that however often it runs, because it is always reporting the frame
+   * before.
+   *
+   * ⚠️ AND `--wpg-band-h` IS CAPTURED WHILE EXPANDED, never sampled mid-movement — a target that
+   * moves while it is being animated to is the same lag wearing different clothes.
+   */
+  /* ⚠️ NO TRANSITION HERE, DELIBERATELY, AND THE VERSION THAT HAD ONE IS WHY. The component writes
+     `--wpg-reclaim-pad` every frame, so a `height` transition on this box is re-targeted on every
+     frame and never eases — it chases, lagging further the faster the change. Measured: the spacer
+     reached 23px while the slab had already shed 87. This box STEPS, in the same style recalculation
+     as the band's collapse, and the two are equal and opposite by construction. */
   /* ⚠️ IT IS NOT PART OF ANY MEASURE — a full-width, zero-content box, so `.wpg-scroll > *`'s
      max-width would make it narrower than the column for no reason anyone could see. */
   max-width: none;
@@ -631,13 +660,14 @@
  * window establishes a stacking or backdrop root, and nothing paints above it at any sampled point.
  * The alpha was the whole story, so an opaque colour is enough.
  *
- * ⚠️ TYPE A ONLY, AND THE WASH IS WHY IT MATTERS MORE THAN THE OPACITY DID. A pinned slab is an
- * OBJECT the page travels under, so it earns a surface of its own; a Type B masthead sits in flow on
- * the page's own ground with nothing passing beneath it, and a band there would be decoration
- * marking a boundary that is not there. Type B keeps the base rule above — flat `--ws-window`, no
- * wash — and the ground lock asserts that absence rather than leaving it to habit.
+ * ⚠️ EVERY MASTHEAD, BOTH TYPES — AND SCOPING IT TO TYPE A WAS MY ERROR, NOT AN OMISSION. I read
+ * the wash as compensation for content passing beneath a pinned slab, so I gave it to the pages that
+ * pin. It is not that: the wash is what a masthead IS, and how a masthead behaves on scroll is a
+ * separate question with a separate answer. Query Centre and Manuscripts were EXCLUDED by that
+ * reasoning rather than missed by it, which is the more embarrassing of the two and the reason this
+ * paragraph exists. The lock is now a partition — every masthead carries it, no page list.
  */
-.wpg:not(.wpg--static) > .wpg-scroll > .wpg-chrome {
+.wpg > .wpg-scroll > .wpg-chrome {
   /**
    * ⚠️ A COLOUR *AND* AN IMAGE, NEVER THE SHORTHAND ALONE — and after four rounds of a see-through
    * header that is not caution, it is the lesson. `background: linear-gradient(…)` resets
@@ -674,16 +704,126 @@
 /* ⚠️ THE DESCRIPTION FOLDS RATHER THAN HIDING — opacity AND the box, or the space it occupied stays
    and the settle reclaims nothing. `display: none` would jump instead of easing. */
 .wpg-chrome--stuck .wsh-sub { opacity: 0; max-height: 0; margin-top: 0; }
-.wpg-chrome--stuck .wpg-tools { padding: 0 0 12px; }
+/**
+ * ⚠️ THE BAND'S PADDING NO LONGER TIGHTENS ON PIN, AND THAT IS A FIX RATHER THAN A LOSS. It went
+ * 14/14 → 0/12 with the settle, so the band's total height differed by 16px between the settled and
+ * unsettled states — and the retract's compensation is a STEP of the band's whole height, captured
+ * while it is expanded. A height that depends on another piece of state is a step that is right in
+ * one state and 16px wrong in the other, which is exactly what it was: measured, the scroll position
+ * alternated ±16px and the toolbar changed state on 33 of 75 steps, a clean limit cycle.
+ *
+ * The settle still tightens — in the MASTHEAD, which is where the 62px comes from and which the
+ * component compensates by measurement. The row keeps one rhythm in every state, so its height is a
+ * constant and the step that replaces it is exact.
+ */
 @media (prefers-reduced-motion: reduce) {
   /* the STATE still changes — only the tween goes, as everywhere else in this file */
   .wpg-scroll > .wpg-chrome { transition: none; }
 }
+/**
+ * ══ THE TOOLBAR IS NOT THE HEADER (header fix, §2) ════════════════════════════════════════════
+ *
+ * It TRAVELS with the masthead — it is inside the slab, so it pins when the slab pins — and it is
+ * not PART of it. The wash is the masthead's ground; the toolbar keeps the page's own `--ws-window`,
+ * unchanged from the content below it.
+ *
+ * ⚠️ IT NEEDS A BAND OF ITS OWN BECAUSE BOTH SLAB CHILDREN ARE INSET. The slab is full-bleed and
+ * paints the wash edge to edge; `.wpg-tools` is reduced to the PAGE's measure. Painting the toolbar
+ * element itself would therefore leave the wash showing in the gutters on either side of it — a
+ * washed frame around an unwashed row, which is worse than either. The band is full-bleed and the
+ * row keeps its measure inside it.
+ *
+ * ⚠️ AND THE COLOUR CHANGE IS THE ONLY BOUNDARY. No hairline between the two, no shadow: one
+ * hairline and one shadow at the base of the PAIR, which the slab already draws. A rule here would
+ * be a second horizontal line 60px above the real one, and the eye reads the nearer one as the
+ * bottom of the chrome.
+ */
+.wpg-toolband {
+  width: 100%;
+  background: var(--ws-window);
+  /* ⚠️ `flex: none` for the reason the row itself states it — on a fill page the slab's column
+     would otherwise let this shrink as the panes below claim the space. */
+  flex: none;
+  /**
+   * ══ THE RETRACT (header fix, §4; ref toolbar-behaviour option C) ═══════════════════════════
+   *
+   * Scrolling down the toolbar folds away and the settled masthead holds the top alone; scrolling
+   * up it comes back. The STATE is decided in the component — accumulated delta, two thresholds —
+   * and this is only its movement.
+   *
+   * ⚠️ CONTENT-BOX, AND THAT IS LOAD-BEARING. The height published by the component is the ROW's
+   * natural height; the padding here is the settle's rhythm. Under `border-box` the two would fight
+   * — the padding would eat into the row's height and the toolbar would clip by 28px at rest.
+   *
+   * ⚠️ NO `overflow: hidden`, DELIBERATELY, AND IT IS NOT AN OVERSIGHT. Contact list's Filters,
+   * Group and Sort menus are `position: absolute` inside this row (`.agl-pop`, not portalled), so
+   * clipping the band would cut every one of them off at the chrome's edge. The retracted state is
+   * hidden by `opacity` instead, which hides the overflow just as completely and clips nothing.
+   */
+  box-sizing: content-box;
+  height: var(--wpg-tools-h, auto);
+  padding: 14px 0;
+}
+/**
+ * ⚠️ ONE MOVEMENT, AND INTERRUPTIBLE BY CONSTRUCTION. A CSS transition on a reversing property
+ * continues from wherever the value currently is rather than snapping to the far end, so a reader
+ * who scrolls down and immediately up sees the row turn round mid-travel. That is a property of
+ * transitions and not of anything written here — which is exactly why the movement is a transition
+ * and not a keyframe animation, whose `from` would restart at full height.
+ */
+/* ⚠️ NOT ON A FILL PAGE — there the freed height is MEANT to reach the panes, which is the whole
+   point of settling on such a page, and the guard that keeps that safe is the settle's own: a page
+   whose zone overflows by less than the chrome is tall does not settle at all. */
+.wpg--retracted:not(.wpg--fill) > .wpg-scroll > .wpg-reclaim {
+  height: calc(var(--wpg-chrome-gap) + var(--wpg-reclaim-pad, 0px) + var(--wpg-band-h, 0px));
+}
+@media (prefers-reduced-motion: reduce) {
+  .wpg-tools { transition: none; }
+}
+/**
+ * ⚠️ THE FLOW CHANGES INSTANTLY AND THE ROW IS WHAT MOVES — and this is the third mechanism tried,
+ * kept because it is the only one that is exact BY CONSTRUCTION rather than by measurement.
+ *
+ * The band's box collapses and the spacer grows by the same number in the SAME style recalculation,
+ * so the column's total is identical on every frame — there is no window in which content could
+ * move, so nothing can wake scroll anchoring and nothing has to be compensated after the fact. The
+ * two mechanisms that animated the flow both worked at the ends and were wrong in the middle: the
+ * first lagged by up to 20px and was pulled to `scrollTop` 0 within three frames; the second had its
+ * transition re-targeted every frame by the JS term and reached a third of its travel.
+ *
+ * ⚠️ WHAT THE READER SEES IS THE ROW SLIDING UP BEHIND THE MASTHEAD, which is why the masthead is
+ * given a stacking order and the row an opaque ground of its own. The band's box is zero-height by
+ * then, so it paints nothing; without a ground on the row itself the page's content would show
+ * through the row for the length of the movement.
+ */
+.wpg--retracted .wpg-toolband {
+  height: 0;
+  padding: 0;
+}
+.wpg-tools {
+  transition:
+    transform .22s cubic-bezier(.4, 0, .2, 1),
+    opacity .22s cubic-bezier(.4, 0, .2, 1);
+}
+.wpg--retracted .wpg-tools {
+  /* up by its own height plus the padding it had, so it clears the masthead's closing edge */
+  transform: translateY(calc(-1 * (var(--wpg-tools-h, 0px) + 14px)));
+  opacity: 0;
+  /* invisible, and it must not still be clickable */
+  pointer-events: none;
+}
+/* ⚠️ THE ROW CARRIES ITS OWN GROUND ONLY WHILE IT MOVES — the band paints it at rest, and two boxes
+   painting one ground is how a seam appears the day one is retinted. It is the same token, and it
+   exists for the 220ms in which the band has no box to paint with. */
+.wpg--retracted .wpg-tools { background: var(--ws-window); }
+/* ⚠️ THE MASTHEAD IS ABOVE THE ROW IN PAINT ORDER, or the row would slide over its own title — the
+   band comes later in the DOM, so without this it wins by document order. */
+.wpg-mast { position: relative; z-index: 1; }
 /* ⚠️ THE SLAB'S CHILDREN TAKE THEIR MEASURES HERE, since they are no longer the scroller's own
    children and `.wpg-scroll > *` no longer reaches them. The control row keeps the PAGE's measure
    and the masthead keeps its constant one — the two differ deliberately, and §A of the previous
    pack is why. */
-.wpg-chrome > .wpg-tools {
+.wpg-toolband > .wpg-tools {
   width: 100%;
   max-width: min(var(--wpg-measure, 100%), calc(100% - 2 * var(--wpg-gutter, var(--content-gutter))));
   margin-inline: auto;

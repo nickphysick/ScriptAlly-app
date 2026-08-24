@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8">
+<title>ScriptAlly — header spec, both page types</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+ :root{
+  --white:#fff;--content:#fefcfa;--paper:#faf6f0;--ground:#f7f4ee;
+  --wash-a:#f5efe6;--wash-b:#f9f5ee;
+  --burg:#7c3a2a;--ink:#3a1c14;--ink2:#311e19;
+  --edge:#e4ddd1;--rim:#e9e1d4;--hair:#e8e2d8;--pink:#f5e2da;--pinkb:#e8c8bc;
+  --sage-a:#d7ddd5;--sage-b:#d5dbd3;
+  --work-max:1240px;--mast-gutter:35px;
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{background:#e9e4dc;font-family:'Inter',sans-serif;color:var(--ink);padding:15px 18px 34px}
+ .bar{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+ .lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#7d7267;margin:0 4px 0 10px}
+ .tab{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 10px;border:1px solid #cfc6b8;border-radius:7px;background:#f4efe7;cursor:pointer;color:var(--ink)}
+ .tab.on{background:var(--ink);color:#fdfaf5;border-color:var(--ink)}
+ .hint{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:#9b8d81;margin:0 2px 8px}
+ .spec{font-size:12.5px;color:#5d5048;margin:0 2px 11px;max-width:1180px;line-height:1.65;min-height:74px}
+ .spec b{color:var(--ink)}
+ .spec code{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:#f4efe7;border:1px solid #e2d8ca;border-radius:4px;padding:1px 5px}
+
+ .shell{display:flex;width:100%;background:var(--ground);border-radius:13px;overflow:hidden;height:580px;
+        box-shadow:0 2px 6px rgba(58,28,20,.08),0 14px 34px rgba(58,28,20,.10)}
+ .side{flex:0 0 168px;background:#fff;border-right:1px solid var(--hair)}
+ .main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+ .topbar{display:flex;align-items:center;gap:11px;padding:0 15px;background:#fff;border-bottom:1px solid var(--hair);height:50px;flex:0 0 auto}
+ .topbar .brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;line-height:1.3}
+ .topbar .crumb{font-size:12.5px;color:#6b5a51;line-height:1.3}
+ .topbar .crumb b{color:var(--ink);font-weight:600}
+ .winwrap{position:relative;flex:1;min-height:0;margin:10px 12px 0;display:flex}
+ .window{position:relative;background:var(--content);border:1px solid var(--edge);border-radius:14px 14px 0 0;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+ .scroll{flex:1;min-height:0;overflow-y:auto;position:relative}
+ body.fill .scroll{overflow:hidden;display:flex;flex-direction:column}
+
+ .mm{width:100%;max-width:var(--work-max);margin-inline:auto;padding-inline:var(--mast-gutter)}
+
+ /* ═══ ZONE 1 · the masthead — parchment wash, EVERY page ═══ */
+ .mast{background-color:var(--wash-b);background-image:linear-gradient(180deg,var(--wash-a),var(--wash-b));
+       transition:max-height .26s cubic-bezier(.4,0,.2,1),opacity .18s}
+ .mastin{display:flex;align-items:center;gap:18px;padding:28px 0 22px;position:relative;transition:padding .22s}
+ body.settled .mastin{padding:13px 0 10px}
+ .mk{flex:0 0 52px;width:52px;height:52px;display:grid;place-items:center;transition:all .22s}
+ .mk svg{width:36px;height:36px;stroke:var(--burg);fill:none;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round;transition:all .22s}
+ body.settled .mk{flex-basis:34px;width:34px;height:34px}
+ body.settled .mk svg{width:25px;height:25px}
+ .mtx h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;line-height:1.3;color:var(--ink2);transition:font-size .22s}
+ body.settled .mtx h1{font-size:22px}
+ .mtx p{font-size:13.5px;color:#8a7a70;margin-top:3px;line-height:1.45;transition:opacity .18s,max-height .22s,margin .22s;max-height:24px;overflow:hidden}
+ body.settled .mtx p{opacity:0;max-height:0;margin-top:0}
+ .hidebtn{position:absolute;right:var(--mast-gutter);top:50%;transform:translateY(-50%);display:none;align-items:center;gap:6px;
+          height:32px;padding:0 10px;border-radius:8px;border:1px solid transparent;background:transparent;color:#8a7a70;font-size:12px;cursor:pointer}
+ .hidebtn:hover{background:rgba(255,255,255,.6);color:var(--ink)}
+ .hidebtn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+ body.fill .hidebtn{display:inline-flex}
+ body.fill.folded .mast{max-height:0;opacity:0;overflow:hidden}
+
+ /* ═══ ZONE 2 · the toolbar — PAGE GROUND, never washed ═══ */
+ .tools{background:var(--content)}
+ .toolsin{display:flex;align-items:center;gap:9px;padding:13px 0}
+ .cbtn{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;border-radius:8px;border:1px solid #e2d8ca;
+       background:var(--white);color:#4d3b33;font-size:12px;font-weight:500;white-space:nowrap}
+ .cbtn.dark{background:#3a2118;border-color:#3a2118;color:#fdfaf5;font-weight:600}
+ .cnt{font-family:'Playfair Display',serif;font-size:18px;font-weight:500}
+ .cnt i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:#a2968c;margin-left:9px}
+ .sp{flex:1}
+ body.notools .tools{display:none}
+
+ /* the sticky chrome wrapper — scroll pages only */
+ .chrome{background:var(--content)}
+ body.scrollpg .chrome{position:sticky;top:0;z-index:20}
+ .baserule{height:1px;background:var(--rim)}
+ body.scrollpg.stuck .chrome{box-shadow:0 12px 16px -13px rgba(58,28,20,.18)}
+
+ /* fill-page chevron on the window border */
+ .chev{position:absolute;left:50%;top:0;transform:translate(-50%,-50%);z-index:30;width:38px;height:20px;
+       border:1px solid var(--edge);border-radius:999px;background:var(--content);display:none;place-items:center;
+       color:#8a7a70;cursor:pointer;box-shadow:0 1px 3px rgba(58,28,20,.10)}
+ .chev svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+ body.fill.folded .chev{display:grid}
+
+ .work{padding:20px 0 28px}
+ body.fill .work{flex:1;min-height:0;overflow:hidden;display:flex}
+ .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+ .cd{border:1px solid var(--rim);border-radius:13px;background:var(--white);box-shadow:0 1px 2px rgba(58,28,20,.04);overflow:hidden}
+ .cdh{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;color:#3f4c3c}
+ .cdb{padding:14px}
+ .cdb b{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;display:block}
+ .cdb i{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:#6b5a51}
+ .cols{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px;width:100%}
+ .pnl{border:1px solid var(--rim);border-radius:13px;background:var(--white);box-shadow:0 1px 2px rgba(58,28,20,.04);overflow:hidden}
+ .pnl .ph{padding:9px 12px;border-bottom:1px solid #f2ece2;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:#a2968c}
+ .rw{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid #f8f3ec;font-size:12px}
+ .avr{width:26px;height:26px;border-radius:50%;background:var(--pink);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#632e22}
+ body.fill .g3{display:none}
+ body.scrollpg .cols{display:none}
+</style></head><body class="scrollpg">
+
+<div class="bar">
+ <span class="lab" style="margin-left:0">PAGE TYPE</span>
+ <button class="tab on" data-p="scroll">A &middot; PINNED (SCROLLS)</button>
+ <button class="tab" data-p="fill">B &middot; STATIC (FILLS)</button>
+ <span class="lab">TOOLBAR</span>
+ <button class="tab on" data-t="yes">HAS ONE</button>
+ <button class="tab" data-t="no">NONE (e.g. DISCOVER)</button>
+ <span class="lab" id="fl" style="display:none">FOLD</span>
+ <button class="tab" id="fold" style="display:none">HIDE</button>
+</div>
+<div class="hint" id="hint">SCROLL INSIDE THE WINDOW</div>
+<div class="spec" id="spec"></div>
+
+<div class="shell">
+ <aside class="side"></aside>
+ <div class="main">
+  <div class="topbar"><span class="brand">ScriptAlly</span>
+    <span class="crumb">ScriptAlly&nbsp; / &nbsp;Agents&nbsp; / &nbsp;<b id="crumb">Contact list</b></span></div>
+  <div class="winwrap">
+   <button class="chev" id="chev"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+   <div class="window">
+    <div class="scroll" id="sc">
+
+     <div class="chrome">
+       <div class="mast">
+         <div class="mm"><div class="mastin">
+           <span class="mk" id="mk"><svg viewBox="0 0 24 24"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M19 8h4M21 6v4"/></svg></span>
+           <div class="mtx"><h1 id="ttl">Contact list</h1><p id="dsc">Everyone you're querying, watching, or saving for later.</p></div>
+           <button class="hidebtn" id="hide"><svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>Hide</button>
+         </div></div>
+       </div>
+       <div class="tools">
+         <div class="mm"><div class="toolsin">
+           <span class="cnt" id="cnt">16 agents<i>4 WITH LIVE QUERIES</i></span><span class="sp"></span>
+           <span class="cbtn">Filters</span><span class="cbtn">Group</span><span class="cbtn">Sort</span>
+           <span class="cbtn dark">&#65291; Add new agent</span>
+         </div></div>
+       </div>
+       <div class="baserule"></div>
+     </div>
+
+     <div class="mm"><div class="work">
+       <div class="g3" id="g3"></div>
+       <div class="cols">
+         <div class="pnl"><div class="ph">25 QUERIES</div>
+           <div class="rw"><span class="avr">SD</span>Sophie Dunn</div>
+           <div class="rw"><span class="avr">WT</span>William Tan</div>
+           <div class="rw"><span class="avr">MR</span>Marcus Reed</div></div>
+         <div class="pnl"><div class="ph">READING PANE</div></div>
+       </div>
+     </div></div>
+
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<script>
+const AG=[["Penhallow Literary","Agent not specified"],["Aisha Kapoor","The Lantern Agency"],["Daniel O'Rourke","Inkwell & Stone"],
+["Eleanor Whitfield","Greenfield Literary"],["Fenella Str","Brightwater Books"],["Greg Panetta","Marlowe Literary"],
+["Priya Raman","No agency"],["Marcus Reed","Hartley & Co"],["Nina Alvarez","Redgate Books"],["Tom Ellery","Curtis Vane"],
+["Sophie Dunn","Curtis Vane"],["Ada Mensah","Copperline Agency"]];
+document.getElementById('g3').innerHTML=AG.map(([n,a])=>`<div class="cd"><div class="cdh">ACTIVE QUERIES</div>
+ <div class="cdb"><b>${n}</b><i>${a}</i></div></div>`).join('');
+
+const S={scroll:`<b>Type A &middot; Pinned.</b> Analytics, Contact list, Discover, Comparable titles, Submission packages, To-do, Calendar, Noteboard.<br>
+The masthead carries the <b>parchment wash</b>. The toolbar beneath it keeps the <b>page ground</b> — it is not part of the header, it merely travels with it. Both sit in one sticky wrapper at <code>top: 0</code>; one hairline and one shadow at the base of the pair, never between them. On scroll the masthead <b>settles</b> — mark 52&rarr;34, title 30&rarr;22, description folds, paddings tighten — and the toolbar does not change at all. No Hide.`,
+fill:`<b>Type B &middot; Static.</b> Query Centre, Manuscripts.<br>
+Same parchment masthead, same wash — <b>this is the part I scoped wrongly and it is why they look missed.</b> The masthead sits in flow, never sticky, never settles. <b>Hide</b> at its right folds it away and a chevron straddles the window's top border to bring it back. If the page has a toolbar it sits below on the page ground, unwashed, and stays put.`};
+const spec=document.getElementById('spec'), hint=document.getElementById('hint');
+const sc=document.getElementById('sc'), F=document.getElementById('fold'), FL=document.getElementById('fl');
+sc.addEventListener('scroll',()=>document.body.classList.toggle('settled',sc.scrollTop>4)||document.body.classList.toggle('stuck',sc.scrollTop>4));
+const setF=on=>{document.body.classList.toggle('folded',on);F.textContent=on?'SHOW':'HIDE';F.classList.toggle('on',on);};
+F.onclick=()=>setF(!document.body.classList.contains('folded'));
+document.getElementById('hide').onclick=()=>setF(true);
+document.getElementById('chev').onclick=()=>setF(false);
+document.querySelectorAll('.tab[data-p]').forEach(b=>b.onclick=()=>{
+ const fill=b.dataset.p==='fill';
+ document.body.classList.toggle('fill',fill);
+ document.body.classList.toggle('scrollpg',!fill);
+ document.body.classList.remove('settled','stuck'); setF(false); sc.scrollTop=0;
+ F.style.display=fill?'':'none'; FL.style.display=fill?'':'none';
+ hint.textContent=fill?'USE HIDE — THE CHEVRON SITS ON THE WINDOW BORDER':'SCROLL INSIDE THE WINDOW';
+ document.getElementById('ttl').textContent=fill?'Query Centre':'Contact list';
+ document.getElementById('crumb').textContent=fill?'Query Centre':'Contact list';
+ document.getElementById('dsc').textContent=fill?'Every query, every response — track every step of your journey so far.':"Everyone you're querying, watching, or saving for later.";
+ document.getElementById('cnt').innerHTML=fill?'25 queries<i>16 AWAITING</i>':'16 agents<i>4 WITH LIVE QUERIES</i>';
+ document.getElementById('mk').innerHTML=fill?'<svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>'
+  :'<svg viewBox="0 0 24 24"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M19 8h4M21 6v4"/></svg>';
+ spec.innerHTML=S[b.dataset.p];
+ document.querySelectorAll('.tab[data-p]').forEach(x=>x.classList.toggle('on',x===b));});
+document.querySelectorAll('.tab[data-t]').forEach(b=>b.onclick=()=>{
+ document.body.classList.toggle('notools',b.dataset.t==='no');
+ document.querySelectorAll('.tab[data-t]').forEach(x=>x.classList.toggle('on',x===b));});
+spec.innerHTML=S.scroll;
+</script></body></html>

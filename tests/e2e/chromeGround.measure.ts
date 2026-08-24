@@ -116,11 +116,16 @@ test("⚠️ THE PINNED GROUND IS AN OPAQUE PARCHMENT WASH — no alpha in the c
         .toBe(hexToRgb(r.washBottom));
     } else {
       staticc += 1;
-      /* ⚠️ TYPE B KEEPS THE PAGE GROUND AND GAINS NO WASH — nothing passes beneath a static
-         masthead, so a band of its own would be decoration marking a boundary that is not there. */
-      expect(r.bgImage, `${name} is static and carries the pinned chrome's wash`).toBe("none");
-      expect(channelsOf(r.bg), `${name}: a static page's ground is not the window's (${r.groundRgb})`)
-        .toBe(r.groundRgb.split(",").map((x) => Math.round(parseFloat(x.trim()))).join(", "));
+      /**
+       * ⚠️ TYPE B CARRIES THE WASH TOO, AND THIS ASSERTION USED TO SAY THE OPPOSITE (header fix,
+       * §1). The wash was scoped to pinned pages on the reasoning that it compensates for content
+       * passing beneath — which is a fact about BEHAVIOUR, not about what a masthead is. Query
+       * Centre and Manuscripts were excluded by that reasoning rather than overlooked. The claim is
+       * now a partition: every masthead, no page named, asserted in the pinned branch above and
+       * repeated here so a page changing type cannot slip between the two.
+       */
+      const stops = r.bgImage.match(/rgb\([^)]*\)/g) ?? [];
+      expect(stops.length, `${name} is static and carries no wash — the wash belongs to every masthead`).toBe(2);
     }
   }
   console.log("\n══ CHROME GROUND\n" + lines.join("\n"));
@@ -176,16 +181,45 @@ for (const vp of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }]) {
        */
       const range = await scrollTo(0);
       if (range.max < 140) { lines.push(`${name.padEnd(21)} — only ${range.max}px of scroll; too little to move a backdrop`); continue; }
-      const first = await scrollTo(Math.round(range.max * 0.15) + 30);
+      /**
+       * ⚠️ BOTH READINGS ARE TAKEN WITH THE TOOLBAR IN THE SAME STATE, and the retract is why this
+       * had to be added. The claim is that the chrome renders identically over two different
+       * backdrops — which is only a claim about TRANSPARENCY if the chrome is otherwise the same
+       * object in both photographs. Once the toolbar folds away on downward travel, a reading taken
+       * deep in the page has no control row and one taken near the top does: measured, 122px of
+       * chrome against 58px, and the case reported 74 of 75 points "changed" on a header nothing
+       * was showing through.
+       *
+       * ⚠️ THE NUDGE UP IS WHAT PUTS THEM IN STEP — a few pixels of upward travel restores the row
+       * wherever it is, so both photographs are of the expanded chrome. It moves the position by
+       * less than a hundredth of the distance between them, so what is BEHIND the chrome still
+       * differs by everything, which is the thing the case actually needs.
+       */
+      /* ⚠️ TWO STEPS, WITH THE MOVEMENT ALLOWED TO FINISH BETWEEN THEM. One nudge was intermittent:
+         the arrival and the nudge can be coalesced into a single scroll event, and the component
+         then sees one large downward delta and no upward travel at all. Two separated steps cannot
+         both be swallowed, and the wait after the arrival also puts the retract's transition behind
+         us so the restore is not racing it. */
+      const nudgeUp = async (to: number) => {
+        await scrollTo(to);
+        await page.waitForTimeout(320);
+        await scrollTo(to - 8);
+        await page.waitForTimeout(80);
+        return scrollTo(to - 16);
+      };
+      const first = await nudgeUp(Math.round(range.max * 0.15) + 42);
       if (!first.max) { lines.push(`${name.padEnd(21)} — nothing to scroll at this viewport`); continue; }
       await page.waitForTimeout(800);          /* past the .22s settle, so the posture is stable */
       const before = readPng(await page.screenshot({ clip: await box() }));
       const beforeBelow = readPng(await page.screenshot({ clip: await strip() }));
 
-      const second = await scrollTo(Math.round(range.max * 0.85));
+      const second = await nudgeUp(Math.round(range.max * 0.85));
       await page.waitForTimeout(800);
       const after = readPng(await page.screenshot({ clip: await box() }));
       const afterBelow = readPng(await page.screenshot({ clip: await strip() }));
+      /* ⚠️ THE PRECONDITION FOR THE PRECONDITION: same chrome, or the pixel comparison is asking
+         about two different elements and its answer means nothing either way. */
+      expect(after.height, `${name}: the chrome is ${before.height}px in one reading and ${after.height}px in the other — they are not the same object`).toBe(before.height);
       const scrolled = second.at - first.at;
       expect(scrolled, `${name}: the second scroll position is not past the first (${first.at} → ${second.at})`).toBeGreaterThan(60);
 

@@ -610,10 +610,10 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
       {/* THE shared page header — identical to the agent list's but for two things: the Pro pill
           beside the title, and the closing rule rendered 2px in the Pro token (discover.css). The
           manuscript selector occupies the same slot as the agent list's "Add new agent" button. */}
-      {/* ⚠️ THE MASTHEAD IS THE FIRST THING IN THE SCROLLER AND LEAVES WITH THE CONTENT (in-flow
-          masthead, step 1). It was a plate in a pinned chrome row; it is content now, so the matches
-          scroll past it and the CONTROL ROW beneath does the anchoring. Discover gained that row in
-          this pack — it had none, and its controls were sitting in the masthead. */}
+      {/* ⚠️ THE MASTHEAD PINS AND SETTLES (header types — Discover is Type A). It was a plate in a
+          pinned chrome row, then briefly content that scrolled away; it is the sticky slab now.
+          ⚠️ AND WHILE THE FEATURE IS GATED THERE IS NO CONTROL ROW AT ALL — see the `toolbar` prop.
+          Discover's controls are live-only, so the gated page has none, so it renders none. */}
       <WorkspacePageGrid className="dv-wpg" scrollLabel="Discover" masthead={
         <PageHeader
             variant="workspace"
@@ -627,16 +627,31 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
                matching the page is not doing. */
         />
       }
-      toolbar={
+      /**
+       * ⚠️ NO TOOLBAR WHILE THE FEATURE IS GATED — A PAGE WITH NO CONTROLS HAS NO CONTROL ROW
+       * (header fix, §3). What sat here was a spacer and a `Coming soon` chip: the chip had been
+       * `actionsSlot` content, promoted into a row of its own when actions were evicted from the
+       * masthead, and a state badge is not a control. The row was the shape of a toolbar with
+       * nothing in it that a toolbar is for.
+       *
+       * ⚠️ AND THE CHIP IS DROPPED RATHER THAN MOVED BESIDE THE TITLE, which was the other option
+       * offered. The page ALREADY says it, in `.dv-close`, where the sentence explaining it lives —
+       * "Discover opens to Pro members shortly after launch". A second copy at the top would be the
+       * same badge twice on one page, the upper one with no explanation attached, and two identical
+       * chips in different places invite the reader to work out whether they mean different things.
+       * Said once, where it is answered.
+       */
+      toolbar={DISCOVER_LIVE ? (
         <>
           {/* ⚠️ THE COUNT IS LIVE-ONLY, AND ITS ABSENCE IS CORRECT RATHER THAN A GAP. Nothing has
               been matched on the feature page, so there is no number to state; a `0 matches` there
               would report a result for a search that never ran. `PageTally` also carries the row's
-              `margin-right: auto`, so the gated row pins its chip right with a plain spacer. */}
-          {DISCOVER_LIVE && selected
+              `margin-right: auto`, so a selection-less live row pins its control right with a plain
+              spacer. */}
+          {selected
             ? <PageTally value={`${visible.length} ${visible.length === 1 ? "match" : "matches"}`} />
             : <span className="dv-tallysp" aria-hidden="true" />}
-          {DISCOVER_LIVE ? (
+          {(
             selected ? (
               pickable.length >= 2 ? (
                 <button
@@ -656,11 +671,9 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
                 </span>
               )
             ) : undefined
-          ) : (
-            <span className="dv-soon">Coming soon</span>
           )}
         </>
-      }>
+      ) : undefined}>
       <div className="dv-wrap">
         <div>
           {/* ⚠️ ONE CONDITION SPLITS THE PAGE, AND IT IS NOT `firstRun`. The live RESULTS view is
