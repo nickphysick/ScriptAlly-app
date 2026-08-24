@@ -49,10 +49,15 @@ describe("About is built from bands, not the document card", () => {
     expect(bands.slice(1)).toEqual(["mk-band", "mk-band mk-band--copyfirst", "mk-band"]);
   });
 
-  /** Every band carries its illustration slot, so no slot is silently dropped by a copy edit. */
+  /**
+   * Every band carries its illustration slot, so no slot is silently dropped by a copy edit.
+   * ⚠️ RETARGET, SAME LAW: the hero slot is now keyed `mission` — one primitive serves both public
+   * pages, so the key names which panel it is rather than where it sits. The claim is unchanged
+   * (every band reserves its plate) and it is still read off rendered output.
+   */
   it("reserves an illustration slot in each band", () => {
     const page = html();
-    for (const slot of ["hero", ...ABOUT_VISIONS.map((v) => v.key)]) {
+    for (const slot of ["mission", ...ABOUT_VISIONS.map((v) => v.key)]) {
       expect(page).toContain(`data-illo="${slot}"`);
     }
   });

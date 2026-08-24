@@ -17,7 +17,7 @@
 import React from "react";
 
 /**
- * The About page's illustration slots — a dashed-rim plate holding a monoline stand-in and a mono
+ * The public pages' illustration slots — a dashed-rim plate holding a monoline stand-in and a mono
  * caption naming what belongs there.
  *
  * ⚠️ THE PLACEHOLDER SHIPS SO NOTHING SHIFTS LATER. Each slot reserves the space the finished
@@ -25,33 +25,56 @@ import React from "react";
  * label — so the brief travels with the slot instead of living in a document nobody opens. Same
  * reasoning as `ArtSlot` in the workspace; a separate implementation because that component's
  * names are a closed union and it declines to appear in page headers.
+ *
+ * ⚠️ ONE PRIMITIVE, FIVE PANELS. The landing hero, the About mission and the three vision bands
+ * all render `MarketingIllustration`. Five hand-rolled plates would be five places to change when the
+ * artwork lands, and the rim, the caption and the accessible label would drift apart first.
+ *
+ * ⚠️ `finished` IS HOW THE REAL ARTWORK ARRIVES. Pass the asset as the child and set the flag: the
+ * dashed rim and the caption come off together and the label stops saying "placeholder". Without
+ * it the finished illustration would ship inside the chrome that means "not drawn yet".
  */
-export type AboutIlloKey = "hero" | "simplify" | "waste" | "time";
+export type MarketingIlloKey = "landingHero" | "mission" | "simplify" | "waste" | "time";
 
-interface AboutIllo {
+/** Which tinted ground the plate sits on. `plate` is the parchment. */
+export type IlloGround = "blush" | "sage" | "plate";
+
+interface MarketingIlloSpec {
   /** Rendered as the slot's caption and, with a prefix, as its accessible label. */
   caption: string;
-  /** The illustrator's subject, from the ref's own HTML comment. */
+  /** The illustrator's subject, from the refs' own markup. */
   subject: string;
-  /** Which tinted ground the plate sits on — the three alternate down the page. */
-  ground: "blush" | "sage" | "plate";
+  ground: IlloGround;
+  /** The statement heroes take the taller plate and the larger art. */
+  tall?: boolean;
   art: React.ReactNode;
 }
 
-const ABOUT_ILLOS: Record<AboutIlloKey, AboutIllo> = {
-  hero: {
+/* The two statement heroes share one drawing: the landing and the About mission are the same
+   promise told twice, and the refs draw the same paper plane over the same stacked letters. */
+const PLANE_OVER_LETTERS = (
+  <svg viewBox="0 0 200 150">
+    <path d="M18 74 L176 26 L104 118 L88 84 Z" strokeLinejoin="round" />
+    <path d="M88 84 L176 26" />
+    <rect x="74" y="104" width="76" height="15" rx="4" />
+    <rect x="74" y="126" width="56" height="15" rx="4" />
+  </svg>
+);
+
+const MARKETING_ILLOS: Record<MarketingIlloKey, MarketingIlloSpec> = {
+  landingHero: {
     caption: "Illustration · Hero",
     subject: "desk scene, paper plane over stacked query letters",
     ground: "blush",
-    art: (
-      <svg viewBox="0 0 120 96">
-        <path d="M8 38 L74 16 L48 62 L40 44 Z" />
-        <path d="M40 44 L74 16" />
-        <rect x="52" y="66" width="52" height="12" rx="2" />
-        <rect x="58" y="80" width="46" height="12" rx="2" />
-        <path d="M60 72h30M66 86h26" />
-      </svg>
-    ),
+    tall: true,
+    art: PLANE_OVER_LETTERS,
+  },
+  mission: {
+    caption: "Illustration · Mission",
+    subject: "desk scene, paper plane over stacked query letters",
+    ground: "blush",
+    tall: true,
+    art: PLANE_OVER_LETTERS,
   },
   simplify: {
     caption: "Illustration · The tangle, untangled",
@@ -95,17 +118,30 @@ const ABOUT_ILLOS: Record<AboutIlloKey, AboutIllo> = {
   },
 };
 
-export const AboutIllustration: React.FC<{ slot: AboutIlloKey }> = ({ slot }) => {
-  const illo = ABOUT_ILLOS[slot];
+export const MarketingIllustration: React.FC<{
+  slot: MarketingIlloKey;
+  /**
+   * The finished asset. Supplying it replaces the monoline stand-in; pair it with `finished` so
+   * the placeholder chrome comes off too.
+   */
+  children?: React.ReactNode;
+  /** Drops the dashed rim and the caption, and stops the label saying "placeholder". */
+  finished?: boolean;
+}> = ({ slot, children, finished }) => {
+  const illo = MARKETING_ILLOS[slot];
   return (
     <div
-      className={`mk-illo mk-illo--${illo.ground}`}
+      className={
+        `mk-illo mk-illo--${illo.ground}`
+        + (illo.tall ? " mk-illo--tall" : "")
+        + (finished ? " mk-illo--done" : "")
+      }
       role="img"
-      aria-label={`Illustration placeholder: ${illo.subject}`}
+      aria-label={finished ? illo.subject : `Illustration placeholder: ${illo.subject}`}
       data-illo={slot}
     >
-      {illo.art}
-      <span className="mk-illotag">{illo.caption}</span>
+      {children ?? illo.art}
+      {!finished && <span className="mk-illotag">{illo.caption}</span>}
     </div>
   );
 };

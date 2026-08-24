@@ -28,6 +28,19 @@
   --mk-sage-t: #5a6e58;
   --mk-pink-a: #f3ddd2;
   --mk-pink-b: #eed2c5;
+  /* ⚠️ THE MONOGRAM PAIR ABOVE IS A GRADIENT, NOT A BUTTON. `--mk-cta`/`--mk-cta-bd` are the
+     app-wide soft-pink CTA pair (the same #f5e2da/#e8c8bc the workspace uses); the two are four
+     points apart and swapping one for the other reads as a mistake rather than a variant. */
+  --mk-cta: #f5e2da;
+  --mk-cta-bd: #e8c8bc;
+  --mk-cta-hov: #f8e9e2;
+  /* The display ink for statement type. `--mk-head` (mocha) is the page-furniture heading colour
+     and stays; a 52px+ statement wants the darker end, and the two are not interchangeable. */
+  --mk-nearblack: #1c130f;
+  /* Burgundy at low alpha — the illustration slot's placeholder chrome. Pre-computed, per the
+     repo's no-colour-mix() rule. */
+  --mk-illo-rim: rgba(124, 58, 42, 0.34);
+  --mk-illo-tag: rgba(124, 58, 42, 0.5);
   font-family: "Source Sans Pro", system-ui, -apple-system, sans-serif;
   background: var(--mk-desk);
   color: var(--mk-ink);
@@ -843,14 +856,26 @@
 .mk-bandcopy strong { color: var(--mk-ink); font-weight: 500; }
 
 /* The illustration slot: a dashed rim reserving the artwork's box, the monoline stand-in inside
-   it, and the subject in mono beneath. The rim is what says "not finished" without a label. */
+   it, and the subject in mono beneath. The rim is what says "not finished" without a label.
+   ⚠️ THE RIM AND THE CAPTION ARE PLACEHOLDER CHROME AND COME OFF TOGETHER. `.mk-illo--done` is
+   what a finished asset ships behind — a dashed border around real artwork reads as a bug, and a
+   caption naming the brief reads as a note left in the shop window. One modifier, both jobs.
+   ⚠️ NO FIXED HEIGHT. The slot fills its grid cell (the PARENT declares `align-items: stretch`)
+   and `min-height` is only the floor for the stacked layout — a height here would decide the
+   band's proportions from the wrong end. */
 .mk-illo {
-  position: relative; border-radius: 16px; border: 1px dashed var(--mk-bd);
-  min-height: 260px; display: grid; place-items: center; padding: 26px;
+  position: relative; border-radius: 16px; border: 1px dashed var(--mk-illo-rim);
+  min-height: 260px; height: 100%; display: grid; place-items: center; padding: 26px;
+  overflow: hidden;
 }
 .mk-illo--blush { background: var(--mk-centre); }
 .mk-illo--sage { background: var(--mk-sage); }
 .mk-illo--plate { background: var(--mk-parch); }
+/* The two statement heroes: a taller plate carrying larger art, because it is the biggest object
+   on its page. The vision bands keep the 260px floor deliberately. */
+.mk-illo--tall { min-height: 340px; }
+.mk-illo--tall svg { width: min(56%, 300px); stroke-width: 1.4; opacity: .62; }
+.mk-illo--done { border-color: transparent; }
 .mk-illo svg {
   width: 190px; max-width: 100%; height: auto; fill: none;
   stroke: var(--mk-burg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; opacity: .55;
@@ -858,7 +883,7 @@
 .mk-illotag {
   position: absolute; left: 14px; bottom: 12px;
   font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--mk-label);
+  text-transform: uppercase; color: var(--mk-illo-tag);
 }
 
 /* Commitments — three cards on a tinted band. */
@@ -900,6 +925,7 @@
      modifier, so the two vision layouts converge rather than staying mirrored. */
   .mk-band .mk-bandcopy { order: 1; }
   .mk-band .mk-illo { order: 2; }
+  .mk-illo--tall { min-height: 230px; }
   .mk-bandcopy h1 { font-size: 32px; }
   .mk-commitinner { padding: 34px 26px; }
   .mk-commitgrid { grid-template-columns: 1fr; }

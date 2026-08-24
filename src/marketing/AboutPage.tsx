@@ -25,7 +25,7 @@ import {
   ABOUT_FOUNDER_BODY, ABOUT_FOUNDER_NAME, ABOUT_FOUNDER_ROLE,
 } from "./aboutCopy";
 import { Runs } from "./CopyRuns";
-import { AboutIllustration, CommitmentTick } from "./marketingMarks";
+import { MarketingIllustration, CommitmentTick } from "./marketingMarks";
 import { MarketingFooter } from "./MarketingFooter";
 
 export const AboutPage: React.FC<{
@@ -45,7 +45,7 @@ export const AboutPage: React.FC<{
             <h1>{ABOUT_HERO_H1}</h1>
             <p><Runs runs={ABOUT_HERO_BODY} onNavigate={onNavigate} /></p>
           </div>
-          <AboutIllustration slot="hero" />
+          <MarketingIllustration slot="mission" />
         </section>
 
         {/* ⚠️ THE SIDE IS SET BY A CLASS, NOT BY DOM ORDER — every vision renders illustration-first
@@ -55,7 +55,7 @@ export const AboutPage: React.FC<{
             all three visions rendered their plate on the left. Measured at 1280, not inferred. */}
         {ABOUT_VISIONS.map((vision, i) => (
           <section className={"mk-band" + (i % 2 === 1 ? " mk-band--copyfirst" : "")} key={vision.key}>
-            <AboutIllustration slot={vision.key as "simplify" | "waste" | "time"} />
+            <MarketingIllustration slot={vision.key as "simplify" | "waste" | "time"} />
             <div className="mk-bandcopy">
               <div className="mk-eyebrow">{vision.eyebrow}</div>
               <h2>{vision.heading}</h2>
