@@ -237,3 +237,73 @@ describe("⚠️ the fork resolves, and a single-option fork is not a choice", (
     expect(n, "no question-free flows found — this case measured nothing").toBeGreaterThan(2);
   });
 });
+
+/**
+ * ⚠️ DELAY IS SNOOZE (journey round, Phase 3). What the SESSION does with these — calling the
+ * action bar's own writer, the mute — is measured on the page; what the declaration says is here.
+ */
+describe("⚠️ every delay question is answerable, and no delay invents a date", () => {
+  /* ⚠️ A DELAY FIELD WITHOUT OPTIONS DRAWS A QUESTION WITH NOTHING UNDER IT. Swept over every flow,
+     so a flow that gains `holdday` and forgets its options fails here rather than on the page. */
+  it("every flow naming a delay field declares its options", () => {
+    let n = 0;
+    for (const id of IDS) {
+      for (const [flowId, f] of Object.entries(JOURNEYS[id].flows)) {
+        for (const q of f.questions) {
+          if (q !== "holdday" && q !== "checkin" && q !== "again") continue;
+          n++;
+          const opts = f.delays?.[q];
+          expect(opts?.length, `${id}.${flowId} asks "${q}" and offers nothing`).toBeGreaterThan(1);
+        }
+      }
+    }
+    expect(n, "no delay questions found — this case measured nothing").toBeGreaterThan(3);
+  });
+
+  it("every option set offers a date, so no delay is limited to the presets someone chose", () => {
+    for (const id of IDS) {
+      for (const [flowId, f] of Object.entries(JOURNEYS[id].flows)) {
+        for (const [field, opts] of Object.entries(f.delays ?? {})) {
+          expect(opts.some((o) => o.kind === "date"),
+            `${id}.${flowId}.${field} offers no date of its own`).toBe(true);
+          /* every option's id is unique within its set — they become part of a DOM id */
+          const ids = opts.map((o) => o.id);
+          expect(new Set(ids).size, `${id}.${flowId}.${field} repeats an option id`).toBe(ids.length);
+          for (const o of opts) {
+            if (o.kind === "days") expect(o.days, `${id}.${flowId}.${field}:${o.id} delays by nothing`).toBeGreaterThan(0);
+          }
+        }
+      }
+    }
+  });
+
+  /* ⚠️ `never` IS OFFERED WHERE THE CONTRACT OFFERS IT AND NOWHERE ELSE. "Don't ask again" on a
+     send's *hold me to it* would be a writer muting a request they have not answered. */
+  it("only the nudge's check-in and the close's ask-again offer an end to the asking", () => {
+    const withNever: string[] = [];
+    for (const id of IDS) {
+      for (const [flowId, f] of Object.entries(JOURNEYS[id].flows)) {
+        for (const [field, opts] of Object.entries(f.delays ?? {})) {
+          if (opts.some((o) => o.kind === "never")) withNever.push(`${id}.${flowId}.${field}`);
+        }
+      }
+    }
+    expect(withNever.sort()).toEqual(["close.leave.again", "nudge.nudged.checkin"]);
+  });
+
+  /* ⚠️ THE MUTE'S COPY SAYS EXACTLY WHAT IT DOES AND DOES NOT DO — the affordance the popup round
+     reported as homeless, and the reason it can live here is that it is a choice inside a decision
+     rather than a hidden setting. */
+  it("the close's leave-it-open hint states what the mute does not touch", () => {
+    const hint = JOURNEYS.close.flows.leave.delayHints!.again!;
+    expect(hint).toMatch(/this query only/i);
+    expect(hint).toMatch(/deletes nothing/i);
+    expect(hint).toMatch(/every other task/i);
+  });
+
+  /* ⚠️ AND A DELAY SAYS IT TOUCHES NOTHING. "Nothing is recorded on the query" is the sentence that
+     stops "hold me to it" reading as a half-finished send. */
+  it("the send's hold-me-to-it says nothing is recorded on the query", () => {
+    expect(JOURNEYS.send.flows.later.delayHints!.holdday!).toMatch(/nothing is recorded on the query/i);
+  });
+});

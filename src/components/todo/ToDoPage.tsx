@@ -838,6 +838,22 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       try { sessionStorage.setItem("sa.manuscriptReveal", manuscriptId); } catch { /* private mode */ }
       onNavigate("manuscripts");
     },
+    /* ⚠️ THE FORK'S DELAY INTENTS TAKE THE ACTION BAR'S OWN WRITER — `snoozeCard`, which already
+       clamps through `lib/todoActions`, chooses its write path by `snoozeVia`, toasts, and offers a
+       full undo including the ×n counter. A second dated-task path was the thing to avoid. */
+    snooze: (c, days, label) => snoozeCard(c, days, label),
+    /* ⚠️ AND THE MUTE IS THE EXISTING PER-QUERY ONE — `dismissTask(…, "permanent")`, which writes
+       `snoozedUntil: MUTED_UNTIL` on THIS task's flag. It is deliberately NOT `hideType`: that
+       mutes the RULE for every query, and "stop asking about this one" says this one. */
+    mute: (c) => {
+      if (!c.taskType || !c.relatedRecordId) return;
+      dismissTask(c.taskType, c.relatedRecordId, "permanent");
+      const key = flagKeyForTask(c.taskType, c.relatedRecordId);
+      flash("Won’t ask about this one again", {
+        label: "Undo",
+        fn: async () => { await upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); flash("Restored"); },
+      });
+    },
   };
   const session = useTaskPaneSession(paneCard, paneHost, PANE_ID_PREFIX);
 

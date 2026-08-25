@@ -147,6 +147,22 @@ export interface TaskPaneHost {
    */
   openManuscript?: (manuscriptId: string) => void;
   openAgent?: (agentId: string) => void;
+  /**
+   * ⚠️ THE EXISTING SNOOZE PRIMITIVE, CALLED FROM THE FORK (journey round, Phase 3). Every "not yet"
+   * intent — Send's *hold me to it*, Nudge's *give it longer*, Close's *leave it open*, a note's
+   * *give it a date* — is this, not a new dated-task path. Storage, ceilings, chips, the slider's
+   * own readout and the undo arm are all unchanged; only the WORDING is the journey's, which is why
+   * it takes a label.
+   *
+   * It is the HOST's because it toasts and it owns the board cursor — the same reason `commit` is.
+   */
+  snooze?: (card: BoardCard, days: number, label: string) => void;
+  /**
+   * ⚠️ THE EXISTING PER-QUERY MUTE. Close's "Stop asking about this one" and the fill-in's "I can't
+   * remember" both land here: it mutes THIS suggestion for THIS query, deletes nothing, and leaves
+   * every other task on the query alone. `dismissTask(…, "permanent")` is the live writer.
+   */
+  mute?: (card: BoardCard) => void;
 }
 
 export interface TaskPaneSession {
@@ -654,6 +670,25 @@ export function useTaskPaneSession(
     return !!d && (d.kind !== "date" || !!d.ymd);
   }
 
+  /** the delay this flow actually asked for — `null` where it asked for none */
+  function delayAnswerOf(field: "holdday" | "again" | "checkin"): SendBodyValues["hold"] {
+    if (!activeFlow?.questions.includes(field)) return null;
+    return field === "holdday" ? paneBody.hold : field === "again" ? paneBody.again : paneBody.checkin;
+  }
+
+  /**
+   * ⚠️ A PICKED DATE BECOMES DAYS, BECAUSE THE PRIMITIVE COUNTS IN DAYS. Rounded UP from the start
+   * of today, so "tomorrow" is one day rather than nought-point-something — and `null` where the
+   * date does not parse, which refuses the write rather than snoozing to an invented day.
+   */
+  function daysUntil(ymd: string): number | null {
+    if (!ymd) return null;
+    const then = new Date(`${ymd}T12:00:00`).getTime();
+    if (!Number.isFinite(then)) return null;
+    const start = new Date(); start.setHours(12, 0, 0, 0);
+    return Math.max(1, Math.round((then - start.getTime()) / 86400000));
+  }
+
   /* ⚠️ THE VERBS ARE `cardMenu`'s, NOT A SECOND LIST. The band's Snooze and Dismiss are the same
      entries the ⋯ menu offers, so a card that cannot be snoozed shows no Snooze in either place. */
   const paneVerbs = React.useMemo(() => {
@@ -722,6 +757,30 @@ export function useTaskPaneSession(
       return;
     }
     setShowMissing(false);
+
+    /**
+     * ⚠️ THE PRIMARY DOES WHAT THE FLOW DECLARES (journey round, Phase 3), and this branch is why
+     * the fork could not ship without it. Phase 2 made "Not yet — hold me to it" reachable; the
+     * primary still routed on the CARD's journey, so pressing "Set the reminder" would have run the
+     * send committer and RECORDED A SEND. A flow's write is the flow's, and reading it here is what
+     * makes that impossible rather than remembered.
+     */
+    const w = activeFlow.writes;
+    if (w.kind === "snooze" || w.kind === "date-note") {
+      /* ⚠️ THE SAME WRITER THE ACTION BAR'S SNOOZE USES — no second dated-task path. The days come
+         from the answer; the label is the journey's own wording, which is the only thing that
+         differs between a send's "hold me to it" and a close's "ask me again". */
+      const d = delayAnswerOf("holdday") ?? delayAnswerOf("again");
+      if (!d) return;
+      if (d.kind === "never") { host.mute?.(card); host.advance(card); return; }
+      const days = d.kind === "days" ? d.days : daysUntil(d.ymd);
+      if (days == null) return;
+      host.snooze?.(card, days, activeFlow.primary);
+      host.advance(card);
+      return;
+    }
+    if (w.kind === "mute") { host.mute?.(card); host.advance(card); return; }
+    if (w.kind === "hand-off") { host.openFlow(card); return; }
 
     /**
      * ⚠️ THE PRIMARY COMMITS HERE, AND NOTHING OPENS (popup round, Phase 1).
@@ -919,6 +978,11 @@ export function useTaskPaneSession(
                              answer", so the tick and the words cannot disagree. */
                           ...(r.field === "unit" && sendSpecFor(card)?.material === "full"
                             ? { answer: "The full manuscript" } : {}),
+                          /* the delay options and hint are the FLOW's — see `JourneyFlow.delays` */
+                          ...((activeFlow?.delays as Record<string, unknown> | undefined)?.[r.field]
+                            ? { delays: (activeFlow!.delays as any)[r.field] } : {}),
+                          ...((activeFlow?.delayHints as Record<string, string> | undefined)?.[r.field]
+                            ? { hint: (activeFlow!.delayHints as any)[r.field] } : {}),
                         }))}
                         /* ⚠️ `null` FOLLOWS THE FIRST UNANSWERED — the same array the chip counts
                            and the missing line names, so the open row cannot point somewhere the
@@ -999,7 +1063,13 @@ export function useTaskPaneSession(
                     /* ⚠️ SNOOZE ANCHORS TO THE PANE'S OWN BUTTON. `AnchoredPanel` takes any element
                        and places against its rect — recon 6 confirmed it needs nothing else, so the
                        panel moved surface without a line of change inside it. */
-                    onSnooze: paneVerbs.snooze.disabled ? undefined : (el) => host.onSnooze?.(el),
+                    /* ⚠️ SNOOZE LEAVES THE BAR ONCE AN INTENT IS CHOSEN (Phase 3). The fork has
+                       already offered the honest version — with the journey's own wording and its
+                       own question — and two doorways to one outcome is the pattern this repo keeps
+                       closing. It stays while the fork is showing, because there it is one of the
+                       answers to "not now". */
+                    ...(effectiveIntent === null && !paneVerbs.snooze.disabled
+                      ? { onSnooze: (el: HTMLElement) => host.onSnooze?.(el) } : {}),
                     /* ⚠️ IT OPENS THE QUESTION; IT DOES NOT ACT (Phase 7). This is the one verb on
                        the page whose result cannot be read off the page afterwards, so it is the
                        one that asks — see `TaskDismissDialog` for why that is about WHERE IT GOES

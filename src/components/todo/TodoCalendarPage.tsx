@@ -606,6 +606,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
        a queue, so a completed card simply leaves the day and the pane closes with it. */
     advance: () => setPaneCard(null),
     openQuery: (c) => { if (c.relatedRecordId) onNavigate("queries", c.relatedRecordId); },
+    /* ⚠️ THE CALENDAR SUPPLIES NEITHER `snooze` NOR `mute`, AND ABSENCE IS NOT DISABLED. Its snooze
+       is DRAG — on the surface where days are the subject — and it shows no dismissed cards at all,
+       which is the same reason it passes no `onSnooze` and no `onDismiss`. A delay intent there
+       therefore writes nothing rather than writing through a surface that has no place for it; the
+       fork's delay options are the journey's, and whether this host can honour them is the host's
+       business. Flagged in the run report as the one journey the calendar cannot complete. */
     /* the deed's two links — the same one-shot reveal keys `/todo` and the ⋯ menu use */
     openAgent: (agentId) => {
       try { sessionStorage.setItem("sa.agentReveal", agentId); } catch { /* private mode */ }

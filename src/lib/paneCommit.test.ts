@@ -180,10 +180,18 @@ describe("⚠️ the primary commits, and mounts nothing", () => {
     expect(body, "the primary stopped committing").toContain("host.commit(");
     expect(body, "the primary stopped building the pane's answers").toContain("paneCommitValues(");
     const guard = body.indexOf("paneCommits(");
-    const mount = body.indexOf("host.openFlow(");
     expect(guard, "the declaration is not consulted").toBeGreaterThan(-1);
-    expect(mount, "the hand-off vanished — the two undrawn journeys have nowhere to go")
-      .toBeGreaterThan(guard);
+    /* ⚠️ THERE ARE TWO HAND-OFF ROUTES NOW, AND THE LAW COVERS BOTH (journey round, Phase 3). The
+       FLOW may declare `hand-off` — the offer and the agent-record gap, which this form does not
+       draw — and that branch is reached BEFORE `paneCommits`, deliberately: a flow that says it
+       hands off must not be asked whether its journey commits. The older route, past the
+       declaration, survives for a card whose journey has no pane flow at all. Both are asserted, so
+       neither can quietly disappear. */
+    expect(body, "the flow's own hand-off vanished").toContain('w.kind === "hand-off"');
+    const mounts = [...body.matchAll(/host\.openFlow\(/g)].map((m) => m.index ?? -1);
+    expect(mounts.length, "the hand-off vanished — the two undrawn journeys have nowhere to go")
+      .toBeGreaterThan(1);
+    expect(mounts.some((i) => i > guard), "no hand-off survives past the declaration").toBe(true);
   });
 
   /**
@@ -206,10 +214,24 @@ describe("⚠️ the primary commits, and mounts nothing", () => {
        TWO FILES. Gating on the write is the session's (below); reading the cursor off the board as
        it WAS is the page's, and it is no longer expressible as statement order — see the note on
        the page half. Saying so beats quietly asserting only the half that still reads whole. */
+    /* ⚠️ THE CLAIM IS ABOUT THE COMMIT'S ADVANCE, AND THERE ARE OTHER ADVANCES NOW (journey round,
+       Phase 3). A delay and a mute advance too — correctly, and with nothing to gate on, because
+       `host.snooze`/`host.mute` are the writers and they have already run. A first-match `indexOf`
+       therefore found the DELAY's advance, hundreds of characters before the commit's, and reported
+       a law broken that is intact. The law is unchanged: the advance that follows a COMMIT is gated
+       on that commit having written. */
     const wrote = body.indexOf("if (!wrote) return;");
-    const advance = body.indexOf("host.advance(");
     expect(wrote, "the commit's answer is not consulted before advancing").toBeGreaterThan(-1);
-    expect(advance).toBeGreaterThan(wrote);
+    const advances = [...body.matchAll(/host\.advance\(/g)].map((m) => m.index ?? -1);
+    expect(advances.some((i) => i > wrote), "the commit advances without consulting the write").toBe(true);
+    /* and every advance BEFORE the gate belongs to a write that cannot fail silently — the delay
+       and the mute, whose writers toast their own outcome */
+    const beforeGate = body.slice(0, wrote);
+    for (const m of beforeGate.matchAll(/host\.advance\(/g)) {
+      const line = beforeGate.slice(Math.max(0, (m.index ?? 0) - 200), m.index);
+      expect(/host\.(snooze|mute)\?\./.test(line),
+        "something advances before the write gate that is not a delay or a mute").toBe(true);
+    }
 
     /* ⚠️ THE PAGE HALF. The cursor is the page's, so the session hands it the CARD and never an
        index — which is what leaves the page free to resolve it against its own board. The
@@ -346,6 +368,57 @@ describe("⚠️ the chase commits with a real day", () => {
  * `tests/e2e/workspaceRound.measure.ts` against the ledger beside it — which is the only form that
  * can catch a value appearing in both.
  */
+/**
+ * ⚠️ DELAY IS THE EXISTING SNOOZE, AND THE PRIMARY ROUTES ON THE FLOW (journey round, Phase 3).
+ *
+ * The fork made "Not yet — hold me to it" reachable in Phase 2 while the primary still routed on
+ * the CARD's journey — so pressing "Set the reminder" would have run the SEND committer and
+ * recorded a send. This asserts the seam: the flow's declared write decides, the delay writes reach
+ * the host's snooze/mute rather than a committer, and no second dated-task path exists.
+ */
+describe("⚠️ a delay writes through the snooze primitive, never through a committer", () => {
+  it("the primary reads the flow's declared write before it reaches any committer", () => {
+    const body = slice("dockPrimary");
+    const w = body.indexOf("const w = activeFlow.writes");
+    const commit = body.indexOf("host.commit(");
+    expect(w, "the primary no longer reads the flow's write").toBeGreaterThan(-1);
+    expect(commit, "the primary no longer commits at all").toBeGreaterThan(-1);
+    expect(w, "a committer is reached before the flow's write is consulted").toBeLessThan(commit);
+  });
+
+  it("the delay writes reach the host's snooze and mute, not a query writer", () => {
+    const body = slice("dockPrimary");
+    expect(body).toContain("host.snooze?.(card, days, activeFlow.primary)");
+    expect(body).toContain("host.mute?.(card)");
+    /* ⚠️ AND NO SECOND DATED-TASK PATH. A delay that wrote its own flag would be the thing Phase 3
+       exists to avoid — one outcome, two writers, drifting apart. */
+    expect(body, "the pane grew its own snooze write")
+      .not.toMatch(/upsertTaskFlag|dismissTask|snoozedUntil/);
+  });
+
+  /* ⚠️ THE HOST'S SNOOZE IS THE ACTION BAR'S OWN `snoozeCard` — the same clamp, the same
+     `snoozeVia` split, the same toast and the same undo. Asserted at the page, which is where the
+     two are joined. */
+  it("/todo hands the fork the same writer its action bar uses", () => {
+    expect(page).toContain("snooze: (c, days, label) => snoozeCard(c, days, label)");
+    /* the mute is the per-QUERY one. `hideType` mutes the RULE for every query and would be the
+       wrong affordance under "stop asking about THIS one". */
+    expect(page).toContain('dismissTask(c.taskType, c.relatedRecordId, "permanent")');
+    /* ⚠️ NOT `slice("paneHost")` — IT IS A `const`, AND THE HELPER SAID SO, LOUDLY. `slice` anchors
+       on `function <name>` and named the missing anchor rather than widening to the rest of the
+       file, which is the behaviour `sliceBetween`'s own rule asks for. The claim is about one line
+       and the page is where it lives. */
+    expect(page, "the fork's mute reached the per-TYPE rule mute").not.toContain("mute: (c) => hideType");
+  });
+
+  it("Snooze leaves the action bar once an intent is chosen", () => {
+    expect(hook).toContain("effectiveIntent === null && !paneVerbs.snooze.disabled");
+    /* it is still offered while the fork shows — there it is one of the answers to "not now" */
+    expect(hook, "Snooze was removed from the fork as well as from the flow")
+      .toContain("onSnooze: (el: HTMLElement) => host.onSnooze?.(el)");
+  });
+});
+
 describe("⚠️ the strip carries the consequences, not the answers", () => {
   /* ⚠️ NOT `slice("paneWill")` — IT IS A `const`, AND THE HELPER SAID SO. `slice` anchors on
      `function <name>` and failed LOUDLY naming the missing anchor, which is exactly what

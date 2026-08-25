@@ -112,6 +112,16 @@ export type FlowWrite =
    */
   | { kind: "hand-off" };
 
+/**
+ * ⚠️ ONE DELAY OPTION, AND `days` IS THE ONLY THING THE WRITE NEEDS. The label is the writer's
+ * words; `days` is what reaches the existing snooze primitive. `kind: "date"` opens the app's own
+ * picker and `kind: "never"` ends the asking — both are answers, and the type can say so.
+ */
+export type DelayOption =
+  | { id: string; label: string; kind: "days"; days: number }
+  | { id: string; label: string; kind: "date" }
+  | { id: string; label: string; kind: "never" };
+
 export interface JourneyFlow {
   /** the ledger's rows, in order — the ONE list the square, the count, the line and the fill read */
   questions: ReqField[];
@@ -126,6 +136,15 @@ export interface JourneyFlow {
   strip: "consequences" | "closed" | "note" | "cohort" | "snoozed" | "muted" | "nothing";
   /** a standing line above the ledger where the flow has one — the fill-in's "records nothing" */
   info?: string;
+  /**
+   * ⚠️ THE DELAY QUESTIONS' OWN OPTIONS, PER FLOW — because "hold me to when?" offers tomorrow and
+   * "ask you again…" offers three months, and they are the same FIELD asked in different registers.
+   * A flow naming `holdday`, `checkin` or `again` without options would draw a question with
+   * nothing under it; `journeys.test.ts` refuses that rather than leaving it to be noticed.
+   */
+  delays?: Partial<Record<"holdday" | "checkin" | "again", DelayOption[]>>;
+  /** the hint under a delay question, where the contract gives one */
+  delayHints?: Partial<Record<"holdday" | "checkin" | "again", string>>;
 }
 
 export interface Journey {
@@ -165,7 +184,14 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
       sent: { questions: ["unit", "when", "expect", "remind"], primary: "Log as sent",
               links: ["alongside", "also"], writes: { kind: "record-send" }, strip: "consequences" },
       later: { questions: ["holdday"], primary: "Set the reminder", links: [],
-               writes: { kind: "snooze" }, strip: "snoozed" },
+               writes: { kind: "snooze" }, strip: "snoozed",
+               delays: { holdday: [
+                 { id: "tomorrow", label: "Tomorrow", kind: "days", days: 1 },
+                 { id: "d3", label: "In 3 days", kind: "days", days: 3 },
+                 { id: "week", label: "Next week", kind: "days", days: 7 },
+                 { id: "date", label: "A date…", kind: "date" },
+               ] },
+               delayHints: { holdday: "This task waits quietly until then — nothing is recorded on the query." } },
     },
   },
 
@@ -190,9 +216,23 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
          nudge logged from the pane wrote a check-in date the writer never chose. A nudge resets the
          clock, so the flow asks for the new clock. */
       nudged: { questions: ["when", "checkin"], primary: "Log the nudge", links: ["also"],
-                writes: { kind: "record-nudge" }, strip: "consequences" },
+                writes: { kind: "record-nudge" }, strip: "consequences",
+                delays: { checkin: [
+                  { id: "w2", label: "Ask me in 2 weeks", kind: "days", days: 14 },
+                  { id: "m1", label: "Ask me in a month", kind: "days", days: 30 },
+                  { id: "date", label: "A date…", kind: "date" },
+                  { id: "never", label: "Don’t ask again", kind: "never" },
+                ] },
+                delayHints: { checkin: "A nudge deserves its own clock — this is when the app checks in next." } },
       wait: { questions: ["holdday"], primary: "Set it aside", links: [],
-              writes: { kind: "snooze" }, strip: "snoozed" },
+              writes: { kind: "snooze" }, strip: "snoozed",
+              delays: { holdday: [
+                { id: "w1", label: "In a week", kind: "days", days: 7 },
+                { id: "w2", label: "In 2 weeks", kind: "days", days: 14 },
+                { id: "m1", label: "In a month", kind: "days", days: 30 },
+                { id: "date", label: "A date…", kind: "date" },
+              ] },
+              delayHints: { holdday: "The task waits quietly until then." } },
     },
   },
 
@@ -219,9 +259,18 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
                      crossover carries that — see `crossoverWrite`. */
                   writes: { kind: "close-query", reason: "no_reply" }, strip: "closed" },
       leave: { questions: ["again"], primary: "Set it aside", links: [],
-               /* the mute is one of this question's own answers; the write follows the answer, so
-                  the flow declares the delay and `answerWrite` names the exception */
-               writes: { kind: "snooze" }, strip: "snoozed" },
+               /* ⚠️ THE MUTE IS ONE OF THIS QUESTION'S OWN ANSWERS. The flow declares the delay; the
+                  ANSWER decides which of the two writes runs, because "stop asking" and "ask me in
+                  a month" are the same question answered two ways rather than two questions. */
+               writes: { kind: "snooze" }, strip: "snoozed",
+               delays: { again: [
+                 { id: "w2", label: "In 2 weeks", kind: "days", days: 14 },
+                 { id: "m1", label: "In a month", kind: "days", days: 30 },
+                 { id: "m3", label: "In 3 months", kind: "days", days: 90 },
+                 { id: "date", label: "A date…", kind: "date" },
+                 { id: "never", label: "Stop asking about this one", kind: "never" },
+               ] },
+               delayHints: { again: "“Stop asking” mutes this suggestion for this query only — it deletes nothing, and every other task still appears." } },
     },
   },
 
@@ -269,7 +318,12 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
       tick: { questions: [], primary: "Tick it off", links: ["also"], writes: { kind: "tick-note" },
               strip: "note", info: "Ticking it off is what finishes it." },
       date: { questions: ["holdday"], primary: "Set the date", links: [],
-              writes: { kind: "date-note" }, strip: "snoozed" },
+              writes: { kind: "date-note" }, strip: "snoozed",
+              delays: { holdday: [
+                { id: "tomorrow", label: "Tomorrow", kind: "days", days: 1 },
+                { id: "week", label: "Next week", kind: "days", days: 7 },
+                { id: "date", label: "A date…", kind: "date" },
+              ] } },
     },
   },
 

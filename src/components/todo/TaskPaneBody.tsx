@@ -37,6 +37,7 @@ import { SampleSpecPicker } from "../materials/SampleSpecPicker";
 import { BrandDatePicker } from "../forms/BrandDatePicker";
 import { formatSampleSpecs, type MaterialRow } from "../../lib/agentMaterials";
 import type { ReqField } from "../../lib/paneGate";
+import type { DelayOption } from "../../lib/journeys";
 
 /**
  * ⚠️ EVERY CHOICE IS A UNION WITH `null` FOR UNCHOSEN, AND `null` IS NEVER A DEFAULT (finishing
@@ -170,6 +171,15 @@ export interface PaneQuestion {
    * the session supplies it and the body renders it like any other answer.
    */
   answer?: string;
+  /**
+   * ⚠️ A DELAY QUESTION'S OWN OPTIONS, FROM ITS FLOW. "Hold me to when?" offers tomorrow and "ask
+   * you again…" offers three months — the same FIELD in different registers, so the options belong
+   * to the flow rather than to this component. A delay row with none would draw a question with
+   * nothing under it, which is why `journeys.test.ts` refuses one.
+   */
+  delays?: DelayOption[];
+  /** the hint under this question, where its flow declares one */
+  hint?: string;
 }
 
 export interface TaskPaneBodyProps {
@@ -258,7 +268,24 @@ const longDay = (ymd: string): string =>
  * come to say different things. A date is the exception and reads as a date, because "Another
  * date…" is the name of a control and not the name of an answer.
  */
-function answerText(field: ReqField, v: SendBodyValues): string | null {
+/** which of `SendBodyValues`' three delay slots a field reads — one map, so nothing guesses */
+const DELAY_SLOT: Partial<Record<ReqField, "hold" | "checkin" | "again">> =
+  { holdday: "hold", checkin: "checkin", again: "again" };
+
+function answerText(field: ReqField, v: SendBodyValues, delays?: DelayOption[]): string | null {
+  const slot = DELAY_SLOT[field];
+  if (slot) {
+    const d = v[slot];
+    if (!d) return null;
+    if (d.kind === "date") return d.ymd ? longDay(d.ymd) : null;
+    /* ⚠️ THE OPTION'S OWN LABEL, READ BACK. The answer the writer sees is the words they pressed;
+       deriving "in 14 days" from the stored number would be the app's arithmetic wearing their
+       answer's clothes — the fault the strip's `leadPhrase` was retired for. Matched against the
+       FLOW's own options, so a flow that renames an option renames its answer with it. */
+    const hit = (delays ?? []).find((o) =>
+      d.kind === "never" ? o.kind === "never" : o.kind === "days" && o.days === d.days);
+    return hit?.label ?? null;
+  }
   if (field === "unit") return formatSampleSpecs(v.rows, "and");
   if (field === "when") {
     if (!v.when) return null;
@@ -290,6 +317,50 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
      so a journey that records no parcel has nothing for it to go alongside — the same absence rule
      the ledger's own rows follow, read off the same declaration. */
   const offersAlongside = questions.some((q) => q.field === "unit");
+
+  /**
+   * ⚠️ ONE CONTROL FOR ALL THREE DELAY QUESTIONS (journey round, Phase 3). *Hold me to when?*, *if
+   * nothing comes back…* and *ask you again…* are the same question in three registers, so they get
+   * the same control and differ only by the options their FLOW declares. Three near-identical
+   * blocks here is how they would come to behave differently.
+   */
+  const delayControl = (q: PaneQuestion): React.ReactNode => {
+    const slot = DELAY_SLOT[q.field]!;
+    const v = value[slot];
+    const on = (o: DelayOption) =>
+      !!v && (o.kind === "date" ? v.kind === "date"
+            : o.kind === "never" ? v.kind === "never"
+            : v.kind === "days" && v.days === o.days);
+    return (
+      <>
+        <div className="seg">
+          {(q.delays ?? []).map((o) => (
+            <button type="button" key={o.id} className={on(o) ? "on" : undefined}
+              onClick={() => {
+                /* ⚠️ THE PICKER OPENS EMPTY AND AN EMPTY DATE IS NOT AN ANSWER — the gate checks the
+                   date's presence, not the pill's selection. Seeding one here is the fault the
+                   finishing round removed from the reminder. */
+                const next: DelayChoice =
+                  o.kind === "date" ? { kind: "date", ymd: "" }
+                  : o.kind === "never" ? { kind: "never" }
+                  : { kind: "days", days: o.days };
+                onChange({ ...value, [slot]: next });
+                if (o.kind !== "date") onAnswered?.();
+              }}>{o.label}</button>
+          ))}
+        </div>
+        {v?.kind === "date" && (
+          <div style={{ marginTop: 8 }}>
+            {/* the app's own picker — a second date control would be a second place a date comes from */}
+            <BrandDatePicker value={v.ymd} placeholder="Pick the day"
+              min={todayYmd()}
+              onChange={(ymd) => { onChange({ ...value, [slot]: { kind: "date", ymd } }); if (ymd) onAnswered?.(); }} />
+          </div>
+        )}
+        {q.hint && <div className="hint">{q.hint}</div>}
+      </>
+    );
+  };
 
   /** the control a row opens onto — chosen by the declaration's field, never by row position */
   const control = (field: ReqField): React.ReactNode => {
@@ -409,7 +480,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
     {questions.map((q) => {
       const open = q.id === openId;
       /* the row's own answer where the form holds one; the card's where it does not */
-      const ans = q.answered ? (answerText(q.field, value) ?? q.answer ?? null) : null;
+      const ans = q.answered ? (answerText(q.field, value, q.delays) ?? q.answer ?? null) : null;
       /* ⚠️ EVERY CLOSED ROW OPENS ON A CLICK, ANSWERED OR NOT. `Edit` is the visible cue on an
          answered one; an UNANSWERED closed row has no cue and still has to be reachable, because
          editing an earlier answer closes a later unanswered row behind it. One target, not two
@@ -444,7 +515,11 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
           {/* ⚠️ RENDERED ONLY WHEN OPEN, not hidden with `display: none`. A hidden control is still
               in the tab order and still in the document, so "at rest this form holds no textarea"
               would be a claim about paint rather than about the page. */}
-          {open && <div className="body">{control(q.field)}</div>}
+          {open && (
+            <div className="body">
+              {DELAY_SLOT[q.field] ? delayControl(q) : control(q.field)}
+            </div>
+          )}
         </div>
       );
     })}
