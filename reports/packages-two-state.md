@@ -1474,3 +1474,41 @@ copy makes the duplication invisible to review.
 
 The smaller ghost survives, per D10 — a ghost must read as quieter and shorter than a real card, or
 a populated page stops reading as populated.
+
+## Next session — start here, in this order
+
+**1 · The manuscript selector check (before D3).** Part A moved it into the packages band head out of
+necessity — the hero carried it and removing the hero would have stranded it. **It does not stay
+there.** A band head's actions act on *that band*; a manuscript selector scopes the whole page, so
+sitting on Packages it implies it does not scope Materials, which is false.
+
+* **Does it duplicate the sidebar's switcher?** The sidebar carries the manuscript with prev/next
+  arrows on every page. If it is a duplicate, **delete it** — two controls doing one job in two
+  places is worse than one.
+* **If it does something the sidebar does not**, it goes in the **page header area** beside the stat
+  line and "How it works". Page-level chrome for page-level scope. **Say what the difference is** in
+  the report.
+
+⚠️ **And before deleting it as redundant, check what else on the page assumes it exists.** This is
+Part A's own lesson, one surface along: D1 said "delete the hero" and the hero was carrying the
+manuscript selector *and* the New package CTA, so removing it as written would have left the page's
+primary action reachable only through a ghost card at the end of the grid. **A control that looks
+redundant may be load-bearing for something offscreen.**
+
+**2 · `＋ New package` stays in the packages band head.** It genuinely acts on that band, and the ref
+puts it there.
+
+**3 · D3 onward** — rule-only bands, banded cards, then Part C's drawer.
+
+### The instrument that has been working
+
+Part A's two defects were found by a **rendered-element count in two data states** —
+`ghostCards: 2` beside `realCards: 2`, and `heroBand: 1` in a state that should have had none. Several
+passes of reading the component had missed both. `tests/e2e/partA.measure.ts` holds that harness with
+the before/after figures; extend it rather than starting a new one, and **count in both states** for
+anything D3–D20 changes.
+
+### State at handover
+
+Part A is committed and **undeployed** — dev serves `7f718ec0` (the stationery band). Deploy A–C
+together once the bands are done. Both refs are committed.
