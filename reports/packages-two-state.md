@@ -1585,3 +1585,41 @@ Rule-only bands → banded cards (D4–D10) → legend and marks (D11, D12) → 
 * Current workspace baseline to compare against:
   `heroBand 0 · ghostCards 1 · realCards 2 · pageSelector 0 · newPkgCta 1`.
 * Dev serves `3ffd3ac5`, which now trails `main` by Phase 0.
+
+## Part B — rule-only bands, banded cards (D3–D10)
+
+Measured at 1440 and 1920:
+
+```
+band      background rgba(0,0,0,0) · 1px rule · 56px burgundy tick at bottom:-1px
+actions   How it works · [Show archived] · ＋ New package     (the ruled order)
+card head linear-gradient(#e3ebf3, #d5e1ec) · ink #39587a · "Submission package" · "Locked" · glyph 16px
+slot rows LETTER Hook-first / SYN One-page / SAMPLE Chapters 1-3
+lock      "Contents fixed — sent with 5 · DUPLICATE ›"
+art panels 0 · grey lock boxes 0 · dashed on cards 0
+ghost     230px against a 290px card, at BOTH widths
+```
+
+⚠️ **`Show archived` is conditional and its absence is correct** — it does not render with nothing
+archived (F-H's D5). The assertion is about **order among what renders**, not a fixed list of three;
+written the other way it would fail on a correct page whenever the archive is empty.
+
+⚠️ **The ghost was the same height as a real card at 1920 and shorter at 1440 — same markup, opposite
+readings.** The grid stretches its items, so D10 held at the width I happened to look at first and
+failed at the other. `align-self: start` fixes it; measured 230/290 at both widths now. **A layout
+claim proven at one width is a coincidence** — this file already says so, and this is the instance.
+
+### Retired with their subjects, in the same commit (rule 7)
+
+`.pkgb-pkgart` / `.pkgb-pkgslot` (D7) · `.pkgb-locked*` (D8) · `.pkgb-pkgcomp` (D6) · `.pkgb-wm` /
+`.pkgb-mtype` (D5) · `TYPE_ICON` (D12), whose written brief was **not** lost — it lives in the
+artist's slot inventory, which is unaffected.
+
+**Four locks retargeted, not adjusted:** three in `packageLock.test.ts` asserted the grey box, and
+one in `materialsBand.test.ts` matched the sheet's className as a literal, which broke when the band
+head made it a template. ⚠️ **One of the three required the box to be SAGE** — correct for a tinted
+box and meaningless for a footnote line with no fill; the claim it protected (*a sent package is the
+feature working, not damage*) is now asserted as the absence of any caution colour.
+
+**The card's Playfair name is unchanged at 19px** and was not re-measured for descenders — the size
+did not move, only what sits above it.

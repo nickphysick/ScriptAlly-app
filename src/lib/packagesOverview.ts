@@ -21,6 +21,7 @@
 import { ManuscriptVersion, SubmissionPackage, Query, ComponentType, RecordStatus } from "../types";
 import { packageMetrics, isRequest, isSlotFilled, otherMaterialsText, packagesUsingVersion } from "./packageMetrics";
 import { TYPE_META, BUILDER_TYPES, SLOT_FIELD } from "../components/packages/typeMeta";
+import { SLOT_EYEBROW } from "./packageAttach";
 import { versionMeta } from "./packageMetrics";
 import { agoLabel, daysBetween } from "./elapsed";
 import { sourceLabel } from "./materialDraft";
@@ -322,14 +323,25 @@ export const NO_SLOT_WORD: Record<string, string> = {
   [ComponentType.SAMPLE_PAGES]: "no sample",
 };
 
-export interface CompositionPart { text: string; held: boolean }
+/**
+ * ⚠️ `label` IS ADDITIVE, FOR THE BANDED CARD'S SLOT ROWS (D6). The card used to print these as one
+ * comma sentence, where an omitted slot read as a quiet clause (`no sample`); as ROWS each line
+ * needs its slot named, because a row with only a value cannot say which slot is empty.
+ */
+export interface CompositionPart { text: string; held: boolean; label: string }
 
 export function composition(t: PackageTile): CompositionPart[] {
-  return t.slots.map((sl, i) => sl.state === "held" && sl.name
-    ? { text: sl.name, held: true }
-    : sl.state === "missing"
-      ? { text: MISSING_SLOT, held: false }
-      : { text: NO_SLOT_WORD[BUILDER_TYPES[i]] ?? "not included", held: false });
+  return t.slots.map((sl, i) => {
+    const label = SLOT_EYEBROW[BUILDER_TYPES[i]] ?? "";
+    /* ⚠️ AS A ROW, AN OMITTED SLOT READS `Not included` — the ref's word, and the right one here.
+       The old `no sample` was correct in a SENTENCE about what the package sends; in a labelled row
+       the slot is already named, so the value states the choice rather than repeating the noun. */
+    return sl.state === "held" && sl.name
+      ? { text: sl.name, held: true, label }
+      : sl.state === "missing"
+        ? { text: MISSING_SLOT, held: false, label }
+        : { text: "Not included", held: false, label };
+  });
 }
 
 export const packagesUsing = (versionId: string, packages: SubmissionPackage[]): SubmissionPackage[] =>

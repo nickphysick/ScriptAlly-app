@@ -23,27 +23,26 @@
  */
 import { MATERIAL_LABEL } from "../../lib/manuscriptPackages";
 import { ArchivedToggle, ArchivedRow, ArchivedSection } from "./ArchivedRow";
+import { TypeGlyph } from "./TypeGlyph";
 import React from "react";
 import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../../types";
 import { materialShelf, materialHolders } from "../../lib/packagesOverview";
 import { BUILDER_TYPES } from "./typeMeta";
-import { IllustrationSlot } from "./IllustrationSlot";
 import { RemovePopover } from "./RemovePopover";
 import "./packagesBroadsheet.css";
 
-/**
- * The mark per column, from the ref's `TYPE_ICON` (D4).
- *
- * ⚠️ THE WRITTEN BRIEF IS NOT HERE ANY MORE AND HAS NOT BEEN LOST. "sealed envelope", "rolled
- * synopsis, ribbon", "sample pages, paperclip" now live in the slot inventory table in
- * reports/submission-packages-recut.md, which is the artist's commission. On the page they were
- * handwriting inside a 44px circle — unreadable, and the reason this pass exists.
- */
-const TYPE_ICON: Record<string, string> = {
-  [ComponentType.QUERY_LETTER]: "envelope",
-  [ComponentType.SYNOPSIS]: "scroll",
-  [ComponentType.SAMPLE_PAGES]: "pages",
+/** ⚠️ THE BAND CLASS PER TYPE (D4) — colour IS the type, which is what makes the shelf scannable
+ *  without reading it. The four sets are page-local pending F-AK. */
+const TYPE_BAND: Record<string, string> = {
+  [ComponentType.QUERY_LETTER]: "pkgb-t-let",
+  [ComponentType.SYNOPSIS]: "pkgb-t-syn",
+  [ComponentType.SAMPLE_PAGES]: "pkgb-t-sam",
 };
+
+/* ⚠️ `TYPE_ICON` IS GONE (D4/D12) — it named the icons for a 34px dashed `IllustrationSlot`
+   watermark, and the band head draws a solid `TypeGlyph` at 16px instead. The written brief it
+   points at ("sealed envelope", "rolled synopsis, ribbon", "sample pages, paperclip") is the
+   artist's commission and is unaffected: it lives in the slot inventory, not here. */
 
 export interface MaterialsBandProps {
   versions: ManuscriptVersion[];
@@ -97,11 +96,20 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
         {sheets.map((sh) => (
           /* ⚠️ THE WATERMARK IS THE TYPE, FAINT AND BEHIND THE WORDS. It repeats the eyebrow on
              purpose — the eyebrow is for reading, the mark is for scanning a shelf at a glance. */
-          <div key={sh.id} className="pkgb-msheet" data-material={sh.id} data-type={sh.type}>
-            <span className="pkgb-wm" aria-hidden="true">
-              <IllustrationSlot id={`wm-${sh.id}`} icon={TYPE_ICON[sh.type]} px={34} shape="bare" />
-            </span>
-            <span className="pkgb-mtype">{sh.typeLabel}</span>
+          <div key={sh.id} className={`pkgb-msheet ${TYPE_BAND[sh.type] ?? ""}`} data-material={sh.id} data-type={sh.type}>
+            {/**
+              * ⚠️ THE BAND HEAD CARRIES THE TYPE (D4/D5), so the body no longer repeats it. The card
+              * used to say it three times over — a faint watermark, a mono eyebrow, and the colour
+              * of nothing — and the eyebrow above the name is what pushed the Playfair line down to
+              * second place on its own card. Head says the type; the name gets its line back.
+              *
+              * ⚠️ AND THE MARK IS SOLID (D12). It was a 34px `IllustrationSlot` — a dashed
+              * commission plate on a user-facing card. At 16px in a band head it is an icon.
+              */}
+            <div className="pkgb-cardhead">
+              <TypeGlyph type={sh.type} size={16} />
+              <span className="pkgb-chlbl">{sh.typeLabel}</span>
+            </div>
             <button type="button" className="pkgb-mname" onClick={() => onOpenMaterial(sh.id)}>
               {sh.name}
             </button>

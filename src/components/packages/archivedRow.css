@@ -3,7 +3,8 @@
  * take the Restore control down with the text, and that control is the row's whole point.
  */
 .pkgb-arcToggle {
-  margin-left: auto;
+  /* ⚠️ NO `margin-left: auto` — `.pkgb-bandacts` owns it now (D3). Three controls each
+     claiming auto would push only the first right and leave the rest trailing it. */
   background: none;
   border: none;
   padding: 0;

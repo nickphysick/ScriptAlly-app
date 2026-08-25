@@ -18,7 +18,7 @@ import { ArchivedToggle, ArchivedRow, ArchivedSection } from "./ArchivedRow";
 import React from "react";
 import { ManuscriptVersion, Query, SubmissionPackage } from "../../types";
 import { packageTiles, tileFooter, composition } from "../../lib/packagesOverview";
-import { isPackageLocked, LOCKED_NOTE, LOCKED_WHY } from "../../lib/packageMetrics";
+import { isPackageLocked } from "../../lib/packageMetrics";
 import { packageStamp } from "../../lib/packageTracking";
 import { IllustrationSlot } from "./IllustrationSlot";
 import "./packagesBroadsheet.css";
@@ -78,22 +78,33 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
         <span className="pkgb-tag">
           {packages.length} built{typeof sent === "number" ? ` · ${sent} sent` : ""}
         </span>
-        {/* ⚠️ IT CHANGES NOTHING, so it is the quietest control on the page — a ghost beside the
-            count, never a filled button competing with the page's actual work. */}
-        <ArchivedToggle n={archived.length} on={showArchived} onClick={onToggleArchived} />
-        {/* ⚠️ THE CTA CAME WITH THE SELECTOR (D1). Losing the hero left `＋ New package` reachable
-            only through the ghost card at the END of the grid — a primary action behind a scroll,
-            which is a regression the hero was hiding. The ref puts a band's actions in its head. */}
-        <button type="button" className="pkgb-newpkg" onClick={onNewPackage}>＋ New package</button>
-        {onHowItWorks && (
-          <button type="button" className="pkgb-how" onClick={onHowItWorks}>
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
-                 strokeWidth={1.6} strokeLinecap="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8.5v.01" />
-            </svg>
-            How it works
-          </button>
-        )}
+        {/**
+          * ⚠️ THE ACTIONS ARE A GROUP, IN A RULED ORDER (D3): How it works · Show archived ·
+          * ＋ New package.
+          *
+          * ⚠️ `Show archived` SITS WITH THEM AND IS THE QUIETEST OF THE THREE. It modifies what the
+          * band DISPLAYS rather than acting on the page, so it belongs in the group without
+          * competing with the two that do something — and it already carries the quietest
+          * treatment, which the re-order preserves rather than restyles.
+          *
+          * ⚠️ AND THE GROUP TAKES THE `margin-left: auto`, not its members. Three controls each
+          * claiming auto would push only the first of them right and leave the rest trailing it.
+          */}
+        <span className="pkgb-bandacts">
+          {onHowItWorks && (
+            <button type="button" className="pkgb-how" onClick={onHowItWorks}>
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+                   strokeWidth={1.6} strokeLinecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8.5v.01" />
+              </svg>
+              How it works
+            </button>
+          )}
+          <ArchivedToggle n={archived.length} on={showArchived} onClick={onToggleArchived} />
+          {/* ⚠️ THE BAND'S PRIMARY ACTION, AND IT GENUINELY ACTS ON THIS BAND (D0d) — which is why
+              it stayed when the manuscript selector beside it did not. */}
+          <button type="button" className="pkgb-newpkg" onClick={onNewPackage}>＋ New package</button>
+        </span>
       </div>
 
       <div className="pkgb-pkggrid">
@@ -101,14 +112,25 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
           const foot = tileFooter(t);
           const pkg = byId.get(t.id);
           return (
-            <div key={t.id} className="pkgb-pkgcard" data-package={t.id}>
-              {/* ⚠️ THE ART PANEL IS THE CARD'S LID (D-B1) — blush, dashed slot, parcel. It is what
-                  makes a package read as an OBJECT you built rather than a row in a register, which
-                  is the whole difference between this and the band it replaces. */}
-              <div className="pkgb-pkgart">
-                <span className="pkgb-pkgslot">
-                  <IllustrationSlot id={`pkg-art-${t.id}`} icon="parcel" px={56} shape="chip" />
-                </span>
+            <div key={t.id} className="pkgb-pkgcard pkgb-t-pkg" data-package={t.id}>
+              {/**
+                * ⚠️ THE ART PANEL IS DELETED, AND ITS GLYPH MOVES INTO A BAND HEAD (D4/D7). The panel
+                * was a blush block with a dashed 56px slot, and it is the element that made the card
+                * mostly decoration: half the card's height carrying no information. The band head
+                * says the same thing — this is a package — in 16px, and colours the card by type
+                * while it does so.
+                *
+                * ⚠️ AND THE GLYPH IS SOLID (D12). A dashed plate on a user-facing card is a
+                * commission slot; at 16px this is an icon. The mockups and the artist's inventory
+                * keep dashed, the served page does not.
+                */}
+              <div className="pkgb-cardhead">
+                <svg viewBox="0 0 32 32" aria-hidden="true">
+                  <path d="M16 4 28 10v12L16 28 4 22V10z" />
+                  <path d="M16 15 28 10M16 15v13M16 15 4 10" />
+                </svg>
+                <span className="pkgb-chlbl">Submission package</span>
+                {pkg && isPackageLocked(pkg) && <span className="pkgb-chrt">Locked</span>}
               </div>
               <div className="pkgb-pkgbody">
                 <h3 className="pkgb-pkgname">
@@ -119,27 +141,37 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
                 {/* ⚠️ ONE LINE, AND AN OMITTED SLOT IS A QUIET CLAUSE IN IT — `no sample`, not
                     `Not included`. This is a sentence about what the package sends; `Not included`
                     is a stated choice and belongs in the builder's list, where it reads as a row. */}
-                <div className="pkgb-pkgcomp">
-                  {composition(t).map((part, i) => (
-                    <React.Fragment key={i}>
-                      {i > 0 && " · "}
-                      {part.held ? <b>{part.text}</b> : <span className="pkgb-none">{part.text}</span>}
-                    </React.Fragment>
-                  ))}
-                </div>
+                {/**
+                  * ⚠️ ROWS, NOT A COMMA SENTENCE (D6). The line used to read
+                  * `Hook-first · One-page · no sample`, which is a sentence about what the package
+                  * sends — fine in prose and unscannable in a grid, because the eye cannot tell
+                  * which slot a value belongs to without reading the order.
+                  *
+                  * ⚠️ AND AN OMITTED SLOT IS MUTED ITALIC, not a quiet word in the sentence. The row
+                  * already names the slot, so the value states the choice: `Not included`.
+                  */}
+                {composition(t).map((part, i) => (
+                  <div className="pkgb-slotline" key={i}>
+                    <span className="pkgb-sl">{part.label}</span>
+                    <span className={`pkgb-sv${part.held ? "" : " pkgb-sv--none"}`}>{part.text}</span>
+                  </div>
+                ))}
                 {t.other && <div className="pkgb-pkgother">{t.other}</div>}
+                {/**
+                  * ⚠️ ONE FOOTNOTE LINE (D8). The grey box carried `LOCKED_NOTE` over `LOCKED_WHY`
+                  * — two sentences explaining a rule beside a card the writer is not editing. The
+                  * line states the fact and offers the way forward; the DRAWER is where the lock
+                  * explains itself, which is the one place the reason is being asked for.
+                  */}
                 {pkg && isPackageLocked(pkg) && (
-                  <div className="pkgb-locked">
-                    <span className="pkgb-locked-note">
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" />
-                      </svg>
-                      {LOCKED_NOTE}
-                    </span>
-                    <span className="pkgb-locked-why">{LOCKED_WHY}</span>
+                  <div className="pkgb-lockline">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                    </svg>
+                    <span>Contents fixed — sent with {t.sent}</span>
                     {onDuplicatePackage && (
                       <button type="button" className="pkgb-dup" onClick={() => onDuplicatePackage(t.id)}>
-                        Duplicate &amp; edit
+                        Duplicate ›
                       </button>
                     )}
                   </div>

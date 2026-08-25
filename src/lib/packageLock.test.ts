@@ -189,23 +189,41 @@ describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers 
   const modal = decls(read("src/components/packages/PackageModal.tsx"));
   const page = decls(read("src/components/SubmissionPackages.tsx"));
 
-  it("a sent package's card says so, in the words the writer needs", () => {
-    /**
-     * ⚠️ THE REPORTED FAULT WAS SILENCE. Nothing on the page said a sent package cannot change, so
-     * "edited it, nothing happened" read as a bug rather than as a rule.
-     */
+  /**
+   * ⚠️ THE CARD'S LOCK IS ONE FOOTNOTE LINE NOW (Part B, D8) — the grey box holding `LOCKED_NOTE`
+   * over `LOCKED_WHY` is deleted. These three cases asserted that box; retargeted onto the line
+   * rather than adjusted, because the subject changed shape and a lock kept alive against a deleted
+   * surface is how that surface gets restored.
+   *
+   * ⚠️ THE LAW IS UNCHANGED: a sent package says so on its card, and offers the way on in the same
+   * place. Only the shape moved — and the REASON moved with it, to the drawer, which is the one
+   * place a writer asks why.
+   */
+  it("a sent package's card says so, and states what it was sent with", () => {
+    const band = read("src/components/packages/PackagesBand.tsx");
     expect(band).toContain("isPackageLocked(pkg)");
-    expect(band).toContain("{LOCKED_NOTE}");
-    expect(band).toContain("{LOCKED_WHY}");
+    expect(band).toContain("pkgb-lockline");
+    expect(band).toContain("Contents fixed — sent with");
+    /* the two-sentence box is gone from this surface */
+    expect(band).not.toContain("{LOCKED_WHY}");
   });
 
-  it("Duplicate & edit sits in the same box as the note", () => {
-    // ⚠️ A note that states a refusal and offers nothing is where a reader stops.
-    const i = band.indexOf("pkgb-locked");
-    expect(i, "the locked block is gone").toBeGreaterThan(-1);
+  it("the way on sits in the same line as the note", () => {
+    const band = read("src/components/packages/PackagesBand.tsx");
+    const i = band.indexOf("pkgb-lockline");
+    expect(i, "the lock line is gone").toBeGreaterThan(-1);
     const block = band.slice(i, i + 900);
     expect(block).toContain("onDuplicatePackage");
-    expect(block).toContain("Duplicate &amp; edit");
+    expect(block).toContain("Duplicate ›");
+  });
+
+  it("the note reports rather than warns — no caution palette", () => {
+    const css = read("src/components/packages/packagesBroadsheet.css");
+    const i = css.indexOf(".pkgb-lockline");
+    expect(i, ".pkgb-lockline is not declared").toBeGreaterThan(-1);
+    const rule = css.slice(i, css.indexOf("}", i));
+    /* ⚠️ NO AMBER, NO BLUSH, NO ICON-RED. A sent package is an ordinary state, not a caution. */
+    expect(rule).not.toMatch(/#f?[ce][0-9a-f]{4}|amber|warn/i);
   });
 
   it("duplicating is a CREATE — the sent package is never the write target", () => {
@@ -229,15 +247,10 @@ describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers 
     expect(modal).toContain('duplicating ? "Duplicate package"');
   });
 
-  it("the note reports rather than warns — no caution palette", () => {
-    const css = decls(read("src/components/packages/packagesBroadsheet.css"));
-    const i = css.indexOf(".pkgb-locked {");
-    expect(i, ".pkgb-locked is not declared").toBeGreaterThan(-1);
-    const rule = css.slice(i, css.indexOf("}", i));
-    // ⚠️ A sent package having stopped changing is the feature working, not damage.
-    expect(rule).not.toMatch(/#f?[ae]|amber|blush|--pkg-pink\b/i);
-    expect(rule).toContain("sage");
-  });
+  /* ⚠️ THE OLD PALETTE CASE IS GONE WITH `.pkgb-locked` (D8). It required the box to be SAGE —
+     correct for a tinted box, and meaningless for a footnote line that has no fill at all. The
+     claim it protected ("a sent package is the feature working, not damage") is asserted above,
+     against the line, as the absence of any caution colour. */
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

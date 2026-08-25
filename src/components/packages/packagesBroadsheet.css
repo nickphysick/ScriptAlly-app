@@ -1,4 +1,105 @@
 /**
+ * ══ THE FOUR TYPE BANDS (Part B, D4 — packages-banded-cards.html) ═══════════════════════════════
+ *
+ * ⚠️ EVERY CARD CARRIES ITS TYPE IN A BAND HEAD, so the body never repeats it (D5). Colour is the
+ * type: blue is a package, pink a covering letter, sage a synopsis, note-yellow a sample. That is
+ * why the shelf is scannable without reading — and why the legend beneath it (D11) renders the real
+ * swatch rather than a reproduction, which would drift.
+ *
+ * ⚠️ PAGE-LOCAL, PENDING F-AK. These four sets are new input to the app-wide blue ruling rather than
+ * an answer to it: the Pro blue here is the same family the query pane's band uses, and the other
+ * three are new. Nothing outside this page reads them.
+ */
+:root {
+  --pkgt-pro-ink: #39587a; --pkgt-pro-a: #e3ebf3; --pkgt-pro-b: #d5e1ec; --pkgt-pro-edge: #b9cdde;
+  --pkgt-let-ink: #8a4433; --pkgt-let-a: #f7e3da; --pkgt-let-b: #f0d5c9; --pkgt-let-edge: #e5c3b4;
+  --pkgt-syn-ink: #4f6647; --pkgt-syn-a: #dfe6dc; --pkgt-syn-b: #d2dccf; --pkgt-syn-edge: #bccab8;
+  --pkgt-sam-ink: #7a6326; --pkgt-sam-a: #f6eed5; --pkgt-sam-b: #efe4c2; --pkgt-sam-edge: #e0d3aa;
+}
+
+/**
+ * ⚠️ THE PAGE BAND LOSES ITS CONTAINER (D3). A Playfair heading over a hairline with a short
+ * burgundy tick at its start — the containers move DOWN to the objects, which is the whole idea:
+ * a band is a rule on the page, a card is a thing on it.
+ */
+.pkgb-bandhead {
+  position: relative;
+  border-bottom: 1px solid var(--pkgo-hairline);
+  padding-bottom: 10px;
+  margin-bottom: 18px;
+}
+/* ⚠️ THE TICK IS `bottom: -1px`, so it sits ON the rule rather than above it. */
+.pkgb-bandhead::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 56px;
+  height: 2px;
+  background: var(--pkg-burg);
+  opacity: 0.75;
+}
+/* ⚠️ THE ACTIONS GROUP RIGHT, in the ruled order: How it works · Show archived · ＋ New package.
+   `Show archived` sits WITH them and is the quietest — it modifies what the band DISPLAYS rather
+   than acting on the page, so it belongs in the group without competing with the two that do
+   something. */
+.pkgb-bandacts { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+
+/* ⚠️ THE CARD'S BAND HEAD (D4). 16px glyph · mono type label · optional right-aligned state word. */
+.pkgb-cardhead {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 13px;
+  border-bottom: 1px solid transparent;
+}
+.pkgb-cardhead svg { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.4; }
+.pkgb-cardhead .pkgb-chlbl {
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.pkgb-cardhead .pkgb-chrt {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.pkgb-t-pkg .pkgb-cardhead { background: linear-gradient(180deg, var(--pkgt-pro-a), var(--pkgt-pro-b)); border-bottom-color: var(--pkgt-pro-edge); color: var(--pkgt-pro-ink); }
+.pkgb-t-let .pkgb-cardhead { background: linear-gradient(180deg, var(--pkgt-let-a), var(--pkgt-let-b)); border-bottom-color: var(--pkgt-let-edge); color: var(--pkgt-let-ink); }
+.pkgb-t-syn .pkgb-cardhead { background: linear-gradient(180deg, var(--pkgt-syn-a), var(--pkgt-syn-b)); border-bottom-color: var(--pkgt-syn-edge); color: var(--pkgt-syn-ink); }
+.pkgb-t-sam .pkgb-cardhead { background: linear-gradient(180deg, var(--pkgt-sam-a), var(--pkgt-sam-b)); border-bottom-color: var(--pkgt-sam-edge); color: var(--pkgt-sam-ink); }
+
+/* ⚠️ SLOT ROWS, NOT A COMMA STRING (D6). Labels muted and fixed-width so the values line up; an
+   omitted slot is muted italic, which reads as an absence rather than as a value. */
+.pkgb-slotline { display: flex; align-items: baseline; gap: 9px; font-size: 12px; }
+.pkgb-slotline .pkgb-sl {
+  font-family: var(--font-mono);
+  font-size: 6.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--pkg-muted);
+  flex: 0 0 44px;
+}
+.pkgb-slotline .pkgb-sv { font-weight: 600; }
+.pkgb-slotline .pkgb-sv--none { font-weight: 400; font-style: italic; color: var(--pkg-muted); }
+
+/* ⚠️ THE LOCK IS ONE LINE (D8) — the grey box is gone. It explained a rule beside a card the writer
+   is not editing; the drawer is where it explains itself. */
+.pkgb-lockline { display: flex; align-items: center; gap: 7px; font-size: 10.5px; color: var(--pkg-ink-soft); margin-top: 2px; }
+.pkgb-lockline svg { width: 11px; height: 11px; stroke: var(--pkg-muted); stroke-width: 1.5; fill: none; flex: none; }
+.pkgb-lockline .pkgb-dup {
+  margin-left: auto;
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--pkg-burg); white-space: nowrap;
+}
+
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -175,7 +276,6 @@
  * nothing, and a control that only explains must never outrank the ones that act.
  */
 .pkgb-how {
-  margin-left: auto;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -619,35 +719,8 @@
  * on the page is where a reader stops. `Duplicate & edit` is what the rule costs them, so it sits in
  * the sentence that imposes it.
  */
-.pkgb-locked {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  padding: 9px 11px;
-  border-radius: 9px;
-  background: rgba(215, 221, 213, 0.34);
-  border-left: 3px solid var(--pkgo-sage-deep);
-}
-.pkgb-locked-note {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  color: var(--pkg-ink);
-}
-.pkgb-locked-note svg {
-  width: 11px; height: 11px;
-  stroke: var(--pkg-ink); stroke-width: 1.6; fill: none;
-  stroke-linecap: round; stroke-linejoin: round; flex: none;
-}
-.pkgb-locked-why { font-size: 11px; line-height: 1.5; color: var(--pkg-ink-soft); }
-
-/* ⚠️ A LINK, NOT A BUTTON FILL. The page has one filled control and it is `New package`; this is the
-   quiet alternative to an action that has just been refused, not a second call to action. */
+/* ⚠️ `.pkgb-locked*` ARE GONE (D8) — the grey explanation box is one footnote line now,
+   `.pkgb-lockline`. */
 .pkgb-dup {
   margin-top: 2px;
   background: none;
@@ -693,12 +766,8 @@
 
 /* ⚠️ THE ONE BLUSH SURFACE ON THE CARD. Tint here says "this is the object's face"; anywhere else on
    the card it would start to mean something a second time. */
-.pkgb-pkgart {
-  background: linear-gradient(180deg, rgba(243, 224, 214, 0.55), rgba(243, 224, 214, 0.28));
-  padding: 18px 18px 14px;
-  display: flex; align-items: center; justify-content: center;
-  border-bottom: 1px solid var(--pkgo-hairline-soft);
-}
+/* ⚠️ `.pkgb-pkgart` / `.pkgb-pkgslot` ARE GONE (D7) — the art panel is deleted and its
+   glyph lives in the card's band head. */
 .pkgb-pkgslot { width: 100%; display: block; }
 .pkgb-pkgslot .pkgb-plate {
   width: 100%; height: 104px; border-radius: 10px; background: rgba(255, 255, 255, 0.55);
@@ -708,9 +777,7 @@
 
 /* mixed-case Playfair, writer-supplied — the standing descender floor, measured not assumed */
 .pkgb-pkgname { font-family: var(--font-serif); font-size: 19px; font-weight: 600; line-height: 1.3; }
-.pkgb-pkgcomp { font-size: 11.5px; color: var(--pkg-ink-soft); line-height: 1.55; }
-.pkgb-pkgcomp b { color: var(--pkg-ink); font-weight: 600; }
-/* an omitted slot is a quiet clause in the sentence, never a stated row */
+/* ⚠️ `.pkgb-pkgcomp` IS GONE (D6) — the comma sentence is slot rows, `.pkgb-slotline`. */
 .pkgb-none { font-style: italic; color: var(--pkg-muted); }
 /* the free-text line, in the hand the page already uses for the writer's own words */
 .pkgb-pkgother { font-family: 'Caveat', cursive; font-size: 15px; font-weight: 600; color: var(--pkg-burg); line-height: 1.35; }
@@ -743,6 +810,12 @@
 }
 
 .pkgb-ghostpkg {
+  /* ⚠️ `align-self: start` — WITHOUT IT THE GRID STRETCHES THE GHOST TO THE ROW'S HEIGHT, and D10
+     stops being true at exactly the width where the row is tallest. Measured: 230px against a 290px
+     card at 1440, and 290 against 290 at 1920 — the same markup reading correctly at one width and
+     dominating at the other. A ghost must be quieter AND shorter, or a populated page stops reading
+     as populated. */
+  align-self: start;
   border: 1.5px dashed rgba(124, 58, 42, 0.32); border-radius: 16px; background: transparent;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
   min-height: 230px; cursor: pointer; font-family: inherit;
@@ -786,11 +859,9 @@
 }
 /* ⚠️ BEHIND THE WORDS, AT 14%. It repeats the eyebrow deliberately — the eyebrow is for reading,
    the mark is for scanning a shelf at a glance. */
-.pkgb-wm { position: absolute; right: 10px; bottom: 8px; opacity: 0.14; pointer-events: none; }
-.pkgb-mtype {
-  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.14em;
-  color: var(--pkg-muted); text-transform: uppercase; display: block; margin-bottom: 4px;
-}
+/* ⚠️ `.pkgb-wm` / `.pkgb-mtype` ARE GONE (D4/D5) — the watermark and the mono eyebrow above the
+   name. The band head carries the type now, so the card said it three times and the eyebrow was
+   what pushed the Playfair name to second place on its own card. */
 .pkgb-mname {
   font-family: var(--font-serif); font-size: 16px; font-weight: 600; line-height: 1.3;
   color: var(--pkg-ink); background: none; border: none; padding: 0; text-align: left; cursor: pointer;

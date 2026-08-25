@@ -152,7 +152,7 @@ describe("the sheets (D3)", () => {
    */
   it("keeps the sheet a div so it can hold two controls", () => {
     const src = decls(band);
-    expect(decls(band)).toMatch(/<div key=\{sh\.id\} className="pkgb-msheet"/);
+    expect(decls(band)).toMatch(/<div key=\{sh\.id\} className=\{`pkgb-msheet /);
     expect(src).not.toMatch(/<button[^>]*className="pkgb-sheet"/);
   });
 
