@@ -133,14 +133,12 @@ export interface FocusFlowProps {
   onToast: (msg: string, action?: { label: string; fn: () => void }) => void;
   /** Seed the send capture (a receipt's "Edit details" re-opens the journey pre-filled with what
    *  the quick-✓ logged; the quick write is undone first so Save never double-writes). */
-  /**
-   * ⚠️ THE PREFILL CARRIES THE EXPECTATION NOW (write round, Phase 1). It was
-   * `{ sentDate?, method?, materials? }` — no member for the answer the send form REQUIRES — so the
-   * pane collected it, the strip promised it, and the takeover boundary dropped it. Additive: every
-   * existing caller passes what it always passed.
-   */
-  prefill?: { sentDate?: string; method?: string; materials?: string[]; writerExpectedDate?: string; note?: string; nudgeDate?: string };
-  /** "sweep" = the speed grammar: one summary per screen, big ✓/⏸/skip, keyboard D·S·→ (F·N on
+  /* ⚠️ THE `prefill` PROP IS GONE (completion-paths Phase 4). It existed to carry the quick-✓'s
+     answers ACROSS the takeover boundary when a receipt's "Edit details" re-opened this journey
+     pre-filled. That receipt was deleted with the overlay machinery, its `edit` closure went with
+     it, and `flowPrefill` — the prop's only value-writer — went too. Nothing has passed it since,
+     so every initialiser below already resolved to its fallback on every render; removing it is
+     behaviour-neutral by construction rather than by intention. */  /** "sweep" = the speed grammar: one summary per screen, big ✓/⏸/skip, keyboard D·S·→ (F·N on
    *  housekeeping, Enter opens an offer). Sweep quick-✓s use the Phase-C defaults + a brief inline
    *  receipt, write IMMEDIATELY (Undo on the toast) and never stage. Default: the full journey. */
   mode?: "journey" | "sweep" | "weeklyReview";
@@ -161,7 +159,7 @@ export interface FocusFlowProps {
   quickDone: (c: BoardCard) => Promise<boolean>;
 }
 
-export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast, prefill, mode = "journey", ritual = false, quickDone }) => {
+export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast, mode = "journey", ritual = false, quickDone }) => {
   const {
     queries, agents, manuscripts, activities, taskFlags, userTasks, packages, currentUser,
     recordMaterialsSent, logNudge, recordOfferDecision, dismissTask, upsertTaskFlag, updateUserProfile, updateAgent, updateUserTask, addUserTask, updateQueryStatus, undoQueryStatus, resolveTaskFlag, deleteActivity,
@@ -199,15 +197,12 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const [rvSummary, setRvSummary] = useState<{ closed: number; seeded: number } | null>(null);
   const activitiesRef = useRef(activities);
   activitiesRef.current = activities;
-  // per-item scratch (reset on advance; the initial values honour a receipt-edit prefill)
-  const [mats, setMats] = useState<Record<string, boolean>>(() => Object.fromEntries((prefill?.materials ?? []).map((m) => [m, true])));
-  const [sentDate, setSentDate] = useState(prefill?.sentDate ?? todayISO());
-  const [method, setMethod] = useState(prefill?.method ?? "Email");
+  // per-item scratch (reset on advance)
+  const [mats, setMats] = useState<Record<string, boolean>>({});
+  const [sentDate, setSentDate] = useState(todayISO());
+  const [method, setMethod] = useState("Email");
   /* the writer's stated expectation, travelling from the pane to the one commit path. Held rather
      than re-asked: the journey does not ask this question, so it has nothing of its own to keep. */
-  const expectedFromPane = prefill?.writerExpectedDate;
-  const noteFromPane = prefill?.note;
-  const nudgeFromPane = prefill?.nudgeDate;
   const [copied, setCopied] = useState(false);
   const [extrasOpen, setExtrasOpen] = useState(false); // "+ I sent something else too"
   const [backdated, setBackdated] = useState(false); // the quiet "I sent it earlier" day picker
@@ -447,9 +442,6 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         materials: [assumed.label, ...extrasOn],
         /* the pane's stated expectation, carried through to the one write. Absent when the writer
            did not answer — the key is omitted rather than defaulted. */
-        ...(expectedFromPane ? { writerExpectedDate: expectedFromPane } : {}),
-        ...(noteFromPane ? { note: noteFromPane } : {}),
-        ...(nudgeFromPane ? { nudgeDate: nudgeFromPane } : {}),
       });
     };
     return journeySheet({
@@ -618,9 +610,6 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
             sentDate: journeyEventISO(sentDate, new Date().toISOString()),
             isResubmit: action.markKind === "resubmit", method,
             materials: chosen,
-            ...(expectedFromPane ? { writerExpectedDate: expectedFromPane } : {}),
-        ...(noteFromPane ? { note: noteFromPane } : {}),
-        ...(nudgeFromPane ? { nudgeDate: nudgeFromPane } : {}),
           });
         },
       },
