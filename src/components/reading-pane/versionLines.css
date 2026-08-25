@@ -1,0 +1,44 @@
+/**
+ * The two derived version lines in the reading pane (design-refs/query-centre-version-impact.html §1).
+ *
+ * ⚠️ THEY SIT WITH WHAT WENT OUT, not with the query's own facts — they are statements about the
+ * package and the log, and the sent strip immediately above is the rest of that story.
+ */
+.qv-lines { max-width: 620px; margin: 10px 0 4px; display: flex; flex-direction: column; gap: 6px; }
+
+.qv-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; }
+
+.qv-k {
+  font-family: var(--f12-mono, ui-monospace, monospace);
+  font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--pkg-muted, rgba(58, 28, 20, 0.4));
+  flex: none;
+}
+
+/* Where the fact comes from — quiet, because it explains rather than states. */
+.qv-src, .qv-note {
+  font-family: var(--f12-mono, ui-monospace, monospace);
+  font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.qv-src { color: var(--pkg-muted, rgba(58, 28, 20, 0.34)); }
+
+/**
+ * ⚠️ A DIFFERENCE IS NOT A WARNING. It takes the same muted ink as the match and the unknown — no
+ * blush, no amber, no rule. Sending a revision on purpose is ordinary, and a caution colour would
+ * make the app's report read as the app's opinion.
+ */
+.qv-note { color: var(--pkg-ink-soft, rgba(58, 28, 20, 0.62)); }
+
+/* "Not recorded" is plain text, never a chip — a chip would read as a version with that name. */
+.qv-none {
+  font-family: var(--f12-mono, ui-monospace, monospace);
+  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--pkg-muted, rgba(58, 28, 20, 0.34));
+}
+
+/**
+ * ⚠️ THE CHIP INSIDE A MATERIAL PILL (D5). It is `.pkgb-mver` — the same mark the packages page and
+ * the manuscripts panel draw — with only the spacing it needs inside a pill that already holds a
+ * label and a remove control.
+ */
+.qc-mchipver { margin-left: 6px; vertical-align: middle; }

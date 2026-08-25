@@ -97,6 +97,9 @@ import {
   packageMenuRow, detachMenuRows, detachToast, withoutPackage, linkedChips,
 } from "../lib/packageAttach";
 import { PackageGroup, LooseMaterials } from "./reading-pane/PackageGroup";
+import { VersionLines } from "./reading-pane/VersionLines";
+import { bookVersionsOf } from "../lib/bookVersions";
+import { openingRead, versionsActive } from "../lib/queryVersions";
 import { isPackageLocked, materialsLinkWrites } from "../lib/packageMetrics";
 import { useConfirmAsk } from "./todo/ConfirmAsk";
 import { useOpenEditQuery } from "./EditQueryHost";
@@ -1925,6 +1928,14 @@ export const Queries: React.FC<{
   const currentStatus = activeQuery?.status ?? selectedQuery?.status;
   const activeAgent = activeQuery ? agents.find(a => a.id === activeQuery.agentId) : null;
   const activeMs = activeQuery ? manuscripts.find(m => m.id === activeQuery.manuscriptId) : null;
+  /**
+   * The active manuscript's BOOK versions — named orderings, NOT the `versions` subcollection, which
+   * holds materials. See the note on `BookVersion` in types.ts.
+   *
+   * ⚠️ READ THROUGH `bookVersionsOf`, the one defended accessor, so a malformed stored value cannot
+   * reach four surfaces raw.
+   */
+  const activeBookVersions = bookVersionsOf(activeMs ?? null);
   // 5d — click-to-pick writers (constrained values, plain updateQuery + undo). No cascade needed:
   // sendMethod is a display field; manuscriptId reassignment is a plain patch (historical activities
   // keep their own manuscriptId — the same derived-over-stored limitation the drawer has).
@@ -5926,10 +5937,17 @@ export const Queries: React.FC<{
                                    chapters`. The sample now NAMES itself from that same size, so the
                                    badge would restate the amount beside the words carrying it, and a
                                    pill holding a pill was the busiest thing in the row. */
-                                const attach = (key: string, label: string, onClick: (el: HTMLElement) => void, title: string, onRemove: () => void) => (
+                                /**
+                                 * ⚠️ `extra` IS FOR A MARK THAT BELONGS TO THE MATERIAL, not to the
+                                 * send (Part E, D5). Only the sample takes one today — the version
+                                 * it excerpts, inherited through the package. A letter or a synopsis
+                                 * does not excerpt an ordering of the book, so nothing passes one.
+                                 */
+                                const attach = (key: string, label: string, onClick: (el: HTMLElement) => void, title: string, onRemove: () => void, extra?: React.ReactNode) => (
                                   <button key={key} type="button" className="qc-mchip qc-mchip-att" onClick={(e) => onClick(e.currentTarget)} title={title}>
                                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5" /></svg>
                                     <span className="qc-mchiptx">{label}</span>
+                                    {extra}
                                     <span role="button" tabIndex={0} className="qc-mchipx"
                                       aria-label={`Remove ${label} from this send`} title={`Remove ${label}`}
                                       onClick={(e) => { e.stopPropagation(); onRemove(); }}
@@ -5989,7 +6007,23 @@ export const Queries: React.FC<{
                                 const pills: { material: string; node: React.ReactNode }[] = [];
                                 if (qlSent) pills.push({ material: "Query Letter", node: attach("ql", materialLabel("Query letter"), (el) => openMatPop("ql", el), materialLabel("Query letter"), () => toggleDocMaterial(activeQuery, activeAgent, "query")) });
                                 if (synSent) pills.push({ material: "Synopsis", node: attach("syn", "Synopsis", (el) => openMatPop("syn", el), "Synopsis", () => toggleDocMaterial(activeQuery, activeAgent, "synopsis")) });
-                                if (sampleItem) pills.push({ material: "Sample Pages", node: attach("smp", formatQueryMaterial(sampleItem), (el) => { openSampleEditor(); openMatPop("smp", el); }, "Opening sample", () => removeSampleMaterial(activeQuery, activeAgent)) });
+                                /**
+                                 * ⚠️ THE SAMPLE CARRIES THE VERSION CHIP (Part E, D5), DERIVED
+                                 * THROUGH THE PACKAGE'S SAMPLE — nothing about it is stored on the
+                                 * query. `openingRead` returns null when there is no package, when
+                                 * its sample slot is empty, or when that sample carries no version,
+                                 * so the chip appears exactly where there is a fact to state.
+                                 *
+                                 * ⚠️ AND IT IS THE SAME `.pkgb-mver` CHIP the packages page and the
+                                 * manuscripts panel draw. One mark for one object, wherever it
+                                 * appears — a second treatment would teach two vocabularies for one
+                                 * thing.
+                                 */
+                                const sampleVersion = openingRead(activeQuery, packages, versions, activeBookVersions);
+                                if (sampleItem) pills.push({ material: "Sample Pages", node: attach("smp", formatQueryMaterial(sampleItem), (el) => { openSampleEditor(); openMatPop("smp", el); }, "Opening sample", () => removeSampleMaterial(activeQuery, activeAgent),
+                                  sampleVersion && versionsActive({ bookVersions: activeBookVersions })
+                                    ? <span className="pkgb-mver qc-mchipver"><span aria-hidden="true">§</span>{sampleVersion.name}</span>
+                                    : undefined) });
                                 otherItems.forEach((it, i) => pills.push({
                                   material: materialName(it),
                                   node: attach(`oth-${i}`, formatQueryMaterial(it), (el) => openOtherEditor(it, el), formatQueryMaterial(it), () => removeOtherMaterial(activeQuery, activeAgent, it)),
@@ -6077,6 +6111,20 @@ export const Queries: React.FC<{
                                   </>
                                 );
                                 })()}
+                                {/**
+                                  * ⚠️ THE TWO DERIVED LINES SIT WITH WHAT WENT OUT (Part E, D7).
+                                  * They are statements about the package and the log — the sent
+                                  * strip immediately above is the rest of that story, and putting
+                                  * them among the query's own stat cells would file a fact about
+                                  * the PACKAGE under the query's identity.
+                                  */}
+                                <VersionLines
+                                  query={activeQuery}
+                                  packages={packages}
+                                  materials={versions}
+                                  activities={activities}
+                                  bookVersions={activeBookVersions}
+                                />
                                 {/* ⚠️ THE SAMPLE CHIP OPENS ITS EDITOR RATHER THAN TOGGLING, because a
                                     sample is a quantity and a unit, not a yes. Its label carries what
                                     was sent; Remove keeps its own control, since a chip that both
