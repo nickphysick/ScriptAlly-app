@@ -11,7 +11,19 @@
  * three are new. Nothing outside this page reads them.
  */
 :root {
-  --pkgt-pro-ink: #39587a; --pkgt-pro-a: #e3ebf3; --pkgt-pro-b: #d5e1ec; --pkgt-pro-edge: #b9cdde;
+  /**
+   * ⚠️ DEEPENED (Part 1, D3). At `#e3ebf3 → #d5e1ec` the package band was PALER than the three
+   * material tints beside it, which inverts the hierarchy — the package is the parent object and the
+   * materials are what it holds. It read as a disabled strip rather than a Pro surface.
+   *
+   * ⚠️ AND THE HEIGHT WAS NEVER THE FAULT. The brief reported the band as "visibly deeper"; measured,
+   * every band on the page was **33px**, package and material alike. What differed was the INSET —
+   * the package card's ghost padding held its band 18px down and 20px in, which reads as a deeper,
+   * floatier strip. Fixing the inset fixed the apparent depth; the colour is a separate change.
+   *
+   * Input to F-AK (the app's four near-identical blues); Nick's ruling still pending.
+   */
+  --pkgt-pro-ink: #2d4a6b; --pkgt-pro-a: #cfdcea; --pkgt-pro-b: #bccfe2; --pkgt-pro-edge: #9db6cf;
   --pkgt-let-ink: #8a4433; --pkgt-let-a: #f7e3da; --pkgt-let-b: #f0d5c9; --pkgt-let-edge: #e5c3b4;
   --pkgt-syn-ink: #4f6647; --pkgt-syn-a: #dfe6dc; --pkgt-syn-b: #d2dccf; --pkgt-syn-edge: #bccab8;
   --pkgt-sam-ink: #7a6326; --pkgt-sam-a: #f6eed5; --pkgt-sam-b: #efe4c2; --pkgt-sam-edge: #e0d3aa;
@@ -75,14 +87,19 @@
 
 /* ⚠️ SLOT ROWS, NOT A COMMA STRING (D6). Labels muted and fixed-width so the values line up; an
    omitted slot is muted italic, which reads as an absence rather than as a value. */
-.pkgb-slotline { display: flex; align-items: baseline; gap: 9px; font-size: 12px; }
+.pkgb-slotline { display: flex; align-items: baseline; gap: 6px; font-size: 12px; }
 .pkgb-slotline .pkgb-sl {
   font-family: var(--font-mono);
   font-size: 6.5px;
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--pkg-muted);
-  flex: 0 0 44px;
+  /**
+   * ⚠️ A LEAD-IN, NOT A COLUMN HEAD (D5). `flex: 0 0 44px` gave the label a fixed track, so `LETTER`
+   * and `Hook-first` sat 44 + 9px apart and read as two columns — a table with one row per card.
+   * `flex: none` makes the label exactly as wide as its word and the row closes to one line.
+   */
+  flex: none;
 }
 .pkgb-slotline .pkgb-sv { font-weight: 600; }
 .pkgb-slotline .pkgb-sv--none { font-weight: 400; font-style: italic; color: var(--pkg-muted); }
@@ -520,28 +537,22 @@
 
 .pkgb-pkggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 18px; }
 
-/* ⚠️ A `div`, LIKE THE SHEET, AND FOR THE SAME REASON — the card holds a name control and a bin,
-   and a button inside a button is invalid HTML. */
-.pkgb-pkgcard {
-  background: var(--pkgo-surface);
-  border: 1px solid var(--pkgo-hairline-soft);
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(58, 28, 20, 0.06);
-  padding: 18px 20px 13px;
-  position: relative;
-  display: flex; flex-direction: column; gap: 12px;
-  transition: box-shadow 0.15s, transform 0.15s;
-  min-width: 0;
-}
-.pkgb-pkgcard:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(58, 28, 20, 0.10); }
-.pkgb-pkgcard:focus-within { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
-
-/* The stamp sits in the corner; the title reserves its width so a long name never runs under it. */
-.pkgb-pkgcard > .pkgb-plate--stamp { position: absolute; top: 16px; right: 16px; }
-.pkgb-pkgname {
-  font-family: var(--font-serif); font-size: 20px; font-weight: 600; line-height: 1.3;
-  padding-right: 64px; color: var(--pkg-ink); overflow-wrap: anywhere;
-}
+/**
+ * ⚠️ THIS BLOCK IS GONE, AND ITS PADDING WAS THE BUG (Part 1, D2/D3).
+ *
+ * The banded card further down SUPERSEDED it and was ADDED rather than swapped, so both
+ * `.pkgb-pkgcard` blocks were live. The later one wins per property — but it declares no `padding`,
+ * so **`18px 20px 13px` survived from here** and held every package band 18px off the top of its own
+ * card and 20px off each side. Measured, not deduced: `gapTop 18 · gapLeft 20 · gapRight 20`.
+ *
+ * ⚠️ THE TELL IS AN OFFSET THAT IS EXACTLY A PADDING VALUE NOBODY CAN FIND. Grepping the winning
+ * rule showed no padding at all, which reads as "already clean" rather than "declared somewhere
+ * else" — the same shape as a `var()` fallback on a retired token.
+ *
+ * Two dead things went with it: `.pkgb-pkgcard > .pkgb-plate--stamp` positioned a stamp NO packages
+ * component renders, and `.pkgb-pkgname`'s `padding-right: 64px` reserved a gutter for that stamp —
+ * so every package name has been indented 64px on its right for an element that is not there.
+ */
 
 .pkgb-slots { display: flex; flex-direction: column; gap: 5px; }
 .pkgb-slot { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
@@ -751,17 +762,28 @@
  * which sit against a clipped edge. This grid has a gap all round, so the lift is safe here and the
  * rule is not being broken by inattention.
  */
+/**
+ * ⚠️ ONE AUTHORITATIVE BLOCK — the house practice, adopted after this selector was declared twice
+ * and the dead half's padding decided the layout. **No padding here by design**: the band is a
+ * direct child and must reach all three edges, so the card is a bare frame and `.pkgb-pkgbody`
+ * carries the inset.
+ *
+ * ⚠️ `overflow: hidden` IS LOAD-BEARING, NOT TIDINESS. It clips the square-cornered band to the
+ * card's radius — the MountCard construction. Remove it and the band's top corners stick out.
+ */
 .pkgb-pkgcard {
   background: var(--pkgo-surface);
   border: 1px solid var(--pkgo-hairline-soft);
   border-radius: 16px;
   overflow: hidden;
+  position: relative;
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 16px rgba(58, 28, 20, 0.06);
   transition: transform 0.18s, box-shadow 0.18s;
   min-width: 0;
 }
+.pkgb-pkgcard:focus-within { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
 .pkgb-pkgcard:hover { transform: translateY(-4px); box-shadow: 0 14px 32px rgba(58, 28, 20, 0.11); }
 
 /* ⚠️ THE ONE BLUSH SURFACE ON THE CARD. Tint here says "this is the object's face"; anywhere else on
@@ -839,26 +861,34 @@
  * `::before` fold turns a rectangle into a sheet — which is the point of a shelf: these are
  * documents you wrote, not rows in a table.
  */
+/**
+ * ⚠️ NO PADDING, AND THE RADIUS IS UNIFORM (D2/D4).
+ *
+ * The padding was `13px 15px 12px` and it was what held the band off the card's edges — measured at
+ * `gapTop 13 · gapLeft 15 · gapRight 15` on every material card. The inset lives on `.pkgb-mbody`
+ * now, below the band, so the band reaches all three edges and the frame clips it.
+ *
+ * ⚠️ AND THE 16px TOP-RIGHT CORNER WENT WITH THE FOLD (D4). That radius existed to make room for a
+ * folded-corner `::before`; a fold and a band are two decorative devices competing at the top of a
+ * 196px card, and the band now does that job.
+ */
 .pkgb-msheet {
   position: relative; width: 196px;
   background: var(--pkgo-surface);
   border: 1px solid var(--pkgo-hairline-soft);
-  border-radius: 10px 16px 10px 10px;
-  padding: 13px 15px 12px;
+  border-radius: 10px;
   box-shadow: 0 2px 7px rgba(58, 28, 20, 0.05);
   overflow: hidden;
   transition: transform 0.15s, box-shadow 0.15s;
   min-width: 0;
 }
+/* The inset the card no longer carries (D2). */
+.pkgb-mbody { padding: 11px 15px 12px; }
 .pkgb-msheet:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(58, 28, 20, 0.09); }
-.pkgb-msheet::before {
-  content: ""; position: absolute; top: 0; right: 0; width: 17px; height: 17px;
-  /* ⚠️ THE LITERAL PAGE GROUND, NOT `var(--pkgo-page, …)`. No such token exists — the sheet reads
-     `--pkgo-surface`, `--pkgo-hairline*`, `--pkgo-sage-*` and `--pkgo-dash*`, all of which do — and a
-     `var()` on an undefined property falls back silently, leaving a knob nobody can find. */
-  background: linear-gradient(225deg, #f2ede7 48%, rgba(58, 28, 20, 0.13) 50%, #ffffff 52%);
-  border-bottom-left-radius: 7px;
-}
+/* ⚠️ THE FOLDED CORNER IS DELETED (D4). It was a 17px `::before` triangle in the top-right, and the
+   uniform radius above went with it. A fold and a band are two decorative devices competing at the
+   top of a 196px card; the band does that job now. The literal-page-ground note that lived here went
+   with the rule it explained — a comment outliving its element is worse than no comment. */
 /* ⚠️ BEHIND THE WORDS, AT 14%. It repeats the eyebrow deliberately — the eyebrow is for reading,
    the mark is for scanning a shelf at a glance. */
 /* ⚠️ `.pkgb-wm` / `.pkgb-mtype` ARE GONE (D4/D5) — the watermark and the mono eyebrow above the

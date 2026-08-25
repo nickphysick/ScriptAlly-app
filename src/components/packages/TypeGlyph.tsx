@@ -27,13 +27,30 @@ interface GlyphSpec {
 }
 
 const GLYPHS: Partial<Record<ComponentType, GlyphSpec>> = {
+  /**
+   * ⚠️ THIS WAS A QUESTION MARK, AND IT WAS NOT FAILING TO RENDER (F-BA).
+   *
+   * The reported fault was "the letter glyph shows a `?`". The map entry existed, resolved and
+   * painted perfectly — the ARTWORK was a question mark: an arc hooking over a filled dot
+   * (`M8.5 9a3.5 3.5 0 116 2.4…` plus `<circle cy="19" r="0.6">`). Nothing was missing, nothing fell
+   * back, and no font was involved. It arrived in `e4685f53` ("canonical type glyphs") and every
+   * covering-letter card in the app has drawn it since.
+   *
+   * ⚠️ SO THE TELL FOR THIS FAULT CLASS IS THAT EVERY OTHER TYPE RESOLVED. A missing map entry
+   * renders NOTHING here (`if (!g) return null`), and a broken path renders nothing either. A `?`
+   * that is drawn correctly, at the right weight, in the right colour, is a `?` somebody drew.
+   *
+   * The envelope is the ref's (`design-refs/packages-banded-cards.html`, its `＋ Add material`
+   * mark), transposed from its 32 viewBox to this component's 24: body 24×20 → 18×13, flap
+   * likewise. Same optical weight as the synopsis and sample marks beside it.
+   */
   [ComponentType.QUERY_LETTER]: {
-    sw: 2.4,
-    cap: "round",
+    sw: 2,
+    join: "round",
     paths: (
       <>
-        <path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1" />
-        <circle cx="12" cy="19" r="0.6" fill="currentColor" />
+        <rect x="3" y="5.5" width="18" height="13" rx="2" />
+        <path d="M3.6 6.6 12 13.6 20.4 6.6" />
       </>
     ),
   },
@@ -59,7 +76,7 @@ export interface TypeGlyphProps {
   type: ComponentType;
   /** Square px size (viewBox is 24). Default 12 — the mockup's common size. */
   size?: number;
-  /** Override the per-type stroke weight (defaults: letter 2.4 · synopsis 2.2 · pages 2). */
+  /** Override the per-type stroke weight (defaults: letter 2 · synopsis 2.2 · pages 2). */
   strokeWidth?: number;
   /** Accessible label. When set the glyph is exposed as an image; otherwise it is aria-hidden. */
   title?: string;

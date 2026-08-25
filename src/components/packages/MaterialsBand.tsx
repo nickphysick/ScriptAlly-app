@@ -116,6 +116,9 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
               <TypeGlyph type={sh.type} size={16} />
               <span className="pkgb-chlbl">{sh.typeLabel}</span>
             </div>
+            {/* ⚠️ THE BODY CARRIES THE INSET, NOT THE CARD (D2). The band is a direct child of the
+                card so it can reach all three edges; everything below it is padded here instead. */}
+            <div className="pkgb-mbody">
             <button type="button" className="pkgb-mname" onClick={() => onOpenMaterial(sh.id)}>
               {sh.name}
             </button>
@@ -150,6 +153,7 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
               onDelete={onDeleteMaterial}
               onArchive={onArchiveMaterial}
             />
+            </div>
           </div>
         ))}
         {/* ⚠️ ONE ADD CARD, AND IT NAMES THE THREE TYPES RATHER THAN ASKING FOR ONE. The modal owns
