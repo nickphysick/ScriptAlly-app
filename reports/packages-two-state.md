@@ -1834,3 +1834,25 @@ reports a false mismatch.
 
 The letter glyph was **a question mark by construction** — not a missing map entry, not a failed
 render, not a font fallback. See Part 1 above.
+
+### ⚠️ THREE RUNNER-LEVEL ARTEFACTS, NONE OF THEM A FAILURE
+
+All three read as red and none was. Recorded together, because under a loaded machine — several
+sessions running suites and builds at once — they are the ordinary noise, and each one costs a
+re-run to tell apart from a real fault.
+
+1. **A 120s test timeout.** `pageStructure`'s `Queries.tsx` sweep takes 52s alone and exceeded its
+   limit in the batch run. Green in isolation, 26/26. *"Test timed out"* and an assertion failure
+   are indistinguishable in a run summary.
+2. **A CDN propagation race.** Two hash comparisons failed on the first read and matched on the
+   second. A single strict read after a deploy reports a false mismatch.
+3. **A vitest worker RPC timeout.** The final gate exited **1** with `393 passed (393)` and
+   `6852 passed | 3 skipped`, **zero failures** — the non-zero code came from one unhandled error:
+   `[vitest-worker]: Timeout calling "onTaskUpdate"`, wholly inside `node_modules/vitest/dist/chunks/rpc.js`,
+   **naming no test and no repo file**. The run's own timings say why: transform 73s, collect 328s,
+   prepare 132s.
+
+**The honest reading of the last one is not "green".** It is: every assertion passed, and the runner
+failed to report one task update in time, which vitest exits non-zero for and itself flags as
+*"might cause false positive tests"*. The distinction matters — an exit code is evidence about the
+run, and the summary is evidence about the code, and this run had them disagree.
