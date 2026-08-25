@@ -1,0 +1,232 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * ══ THE PACKAGE DRAWER (packages Part 3) ══════════════════════════════════════════════════════
+ *
+ * Derivation and construction checks. The rendered claims — four dismissal routes, the two-line
+ * clamp, the version chip on the page — are measured in `tests/e2e/packageDrawer.measure.ts`.
+ */
+import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { drawerSlots, drawerHolders, drawerReturns, returnsLine, LOCK_FOOTNOTE } from "./packageDrawer";
+import { ComponentType, QueryStatus } from "../types";
+import type { Agent, BookVersion, ManuscriptVersion, Query, SubmissionPackage } from "../types";
+
+const root = join(__dirname, "..", "..");
+const read = (p: string) => readFileSync(join(root, p), "utf8");
+const decls = (x: string) => x.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+const pkg = (over: Partial<SubmissionPackage> = {}): SubmissionPackage =>
+  ({ id: "p1", userId: "u", manuscriptId: "m1", packageName: "Standard UK",
+     queryLetterVersionId: "ql1", synopsisVersionId: "syn1", samplePagesVersionId: "pag1",
+     createdDate: "2026-01-01", ...over } as SubmissionPackage);
+
+const mat = (id: string, type: ComponentType, over: Partial<ManuscriptVersion> = {}): ManuscriptVersion =>
+  ({ id, manuscriptId: "m1", userId: "u", componentType: type, versionName: id,
+     fileAttached: false, createdDate: "", ...over } as ManuscriptVersion);
+
+const MATS = [
+  mat("ql1", ComponentType.QUERY_LETTER, { versionName: "Hook-first", wordCount: 412, contentDraft: "When the tide went out…" }),
+  mat("syn1", ComponentType.SYNOPSIS, { versionName: "One-page", wordCount: 638, contentDraft: "MURPHY, a retired harbourmaster…" }),
+  mat("pag1", ComponentType.SAMPLE_PAGES, { versionName: "Chapters 1–3", wordCount: 7412,
+      contentDraft: "The bell had been ringing…", bookVersionId: "bv-a" }),
+];
+const BV: BookVersion[] = [
+  { id: "bv-a", name: "Prologue-first", kind: "initial", createdDate: "2026-03-01" },
+  { id: "bv-b", name: "Worldbuilding-first", kind: "reordering", createdDate: "2026-05-01" },
+];
+
+const q = (id: string, status: QueryStatus, agentId = "a1", dateSent = "2026-06-01"): Query =>
+  ({ id, userId: "u", manuscriptId: "m1", agentId, status, packageId: "p1", dateSent } as unknown as Query);
+
+const AGENTS = [{ id: "a1", name: "T. Marsh", agency: "The Marsh Agency" }] as unknown as Agent[];
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("D10 — what's in it", () => {
+  it("resolves all three slots with name, words and opening", () => {
+    const s = drawerSlots(pkg(), MATS, BV);
+    expect(s.map((x) => x.name)).toEqual(["Hook-first", "One-page", "Chapters 1–3"]);
+    expect(s[0].words).toBe("412 words");
+    expect(s[2].words).toBe("7,412 words");
+    expect(s[0].opening).toBe("When the tide went out…");
+  });
+
+  it("⚠️ RETURNS THE WHOLE OPENING — the two-line clamp is the stylesheet's job", () => {
+    /* Cutting the string here bakes a line count into the data, which is wrong at every width but
+       the one it was cut for. Asserted so nobody 'helpfully' truncates it. */
+    const long = "x".repeat(600);
+    const s = drawerSlots(pkg(), [mat("ql1", ComponentType.QUERY_LETTER, { contentDraft: long }),
+                                  ...MATS.slice(1)], BV);
+    expect(s[0].opening).toHaveLength(600);
+    const css = read("src/components/packages/packageDetailDrawer.css");
+    expect(css).toContain("-webkit-line-clamp: 2");
+  });
+
+  it("an empty slot is a row that says so, not a row that vanishes", () => {
+    const s = drawerSlots(pkg({ synopsisVersionId: "" }), MATS, BV);
+    expect(s).toHaveLength(3);
+    expect(s[1].name).toBeNull();
+    expect(s[1].materialId).toBeNull();
+  });
+
+  it("⚠️ resolves an ARCHIVED material — the archive model, or archiving would read as deleting", () => {
+    const archived = MATS.map((m) => (m.id === "ql1" ? { ...m, status: "Retired" as never } : m));
+    expect(drawerSlots(pkg(), archived, BV)[0].name).toBe("Hook-first");
+  });
+
+  it("shows no word count where nothing was counted", () => {
+    expect(drawerSlots(pkg(), [mat("ql1", ComponentType.QUERY_LETTER), ...MATS.slice(1)], BV)[0].words).toBeNull();
+  });
+});
+
+describe("D11 — the version chip is INHERITED, never stored", () => {
+  it("names the sample's version", () => {
+    expect(drawerSlots(pkg(), MATS, BV)[2].versionName).toBe("Prologue-first");
+  });
+
+  it("is absent on the letter and the synopsis", () => {
+    const s = drawerSlots(pkg(), MATS, BV);
+    expect(s[0].versionName).toBeNull();
+    expect(s[1].versionName).toBeNull();
+  });
+
+  it("is absent on a sample carrying none, and below two versions", () => {
+    const noBv = [...MATS.slice(0, 2), mat("pag1", ComponentType.SAMPLE_PAGES)];
+    expect(drawerSlots(pkg(), noBv, BV)[2].versionName).toBeNull();
+    expect(drawerSlots(pkg(), MATS, BV.slice(0, 1))[2].versionName).toBeNull();
+  });
+
+  it("⚠️ AND NO VERSION FIELD EXISTS ON THE PACKAGE — model, builder, card or rules", () => {
+    const types = decls(read("src/types.ts"));
+    const i = types.indexOf("export interface SubmissionPackage {");
+    expect(types.slice(i, types.indexOf("\n}", i))).not.toMatch(/bookVersion/i);
+    for (const f of ["src/components/packages/PackageModal.tsx", "src/components/packages/PackagesBand.tsx"]) {
+      expect(read(f), `${f} names a book version`).not.toMatch(/bookVersion/i);
+    }
+    const rules = read("firestore.rules");
+    const j = rules.indexOf("function isValidPackage");
+    expect(rules.slice(j, rules.indexOf("\n    }", j))).not.toMatch(/bookVersion/i);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("D12 / D17 — who has it, and what it will not guess", () => {
+  const qs = [q("q1", QueryStatus.FULL_SENT, "a1", "2026-06-01"),
+              q("q2", QueryStatus.QUERIED, "a1", "2026-08-01"),
+              { ...q("q3", QueryStatus.QUERIED, "ghost", "2026-05-01") }];
+
+  it("lists every query carrying the package, newest send first", () => {
+    expect(drawerHolders("p1", qs, AGENTS).map((h) => h.queryId)).toEqual(["q2", "q1", "q3"]);
+  });
+
+  it("names the agent and the agency", () => {
+    const h = drawerHolders("p1", qs, AGENTS)[0];
+    expect(h.agent).toBe("T. Marsh");
+    expect(h.agency).toBe("The Marsh Agency");
+  });
+
+  it("⚠️ AN UNRESOLVABLE AGENT IS NAMED, NEVER DROPPED (D17)", () => {
+    /* Dropping the row would make the list disagree with the scorecard's "3 sent" — three counted,
+       two shown, and nothing saying why. An unknown is reported, not folded into the known. */
+    const rows = drawerHolders("p1", qs, AGENTS);
+    expect(rows).toHaveLength(3);
+    const ghost = rows.find((r) => r.queryId === "q3")!;
+    expect(ghost.agent).toBe("Agent not recorded");
+    expect(ghost.agency).toBeNull();
+  });
+
+  it("says so when a send has no date, rather than inventing one", () => {
+    const undated = [{ ...q("q9", QueryStatus.FULL_SENT), dateSent: undefined } as unknown as Query];
+    expect(drawerHolders("p1", undated, AGENTS)[0].sentDate).toBeNull();
+    expect(read("src/components/packages/PackageDetailDrawer.tsx")).toContain("Date not recorded");
+  });
+
+  it("ignores queries carrying another package", () => {
+    const other = [{ ...q("qX", QueryStatus.QUERIED), packageId: "p2" } as unknown as Query];
+    expect(drawerHolders("p1", other, AGENTS)).toEqual([]);
+  });
+});
+
+describe("D13 — returns are one line", () => {
+  /**
+   * ⚠️ `hasAgentResponded` IS SET ON THE REJECTED ROW, BECAUSE `recomputeQuery` SETS IT.
+   *
+   * The first draft of this fixture left it off and expected `replied: 2`; the derivation returned
+   * 1, and the fixture was wrong rather than the code. `isResponse` is `hasAgentResponded === true
+   * || isRequest`, and a bare `Rejected` satisfies neither — so a hand-built query that skips the
+   * flag is an input the app cannot produce, which is the standing rule about test arguments.
+   *
+   * ⚠️ It also surfaces the known global under-count this repo already records: any real record
+   * whose flag never got written reads as unreplied here. That is a standing fix elsewhere and not
+   * this drawer's to make — the drawer reports what the derivation says.
+   */
+  const qs = [q("q1", QueryStatus.FULL_REQUESTED),
+              { ...q("q2", QueryStatus.REJECTED), hasAgentResponded: true } as unknown as Query,
+              q("q3", QueryStatus.QUERIED)];
+
+  it("counts sends, replies and requests for the package", () => {
+    expect(drawerReturns("p1", qs)).toEqual({ sent: 3, replied: 2, requests: 1 });
+  });
+
+  it("⚠️ a query whose response flag was never written reads as unreplied — the known under-count", () => {
+    const bare = [q("q1", QueryStatus.REJECTED)];
+    expect(drawerReturns("p1", bare)).toEqual({ sent: 1, replied: 0, requests: 0 });
+  });
+
+  it("reads as one sentence, agreeing its verbs", () => {
+    expect(returnsLine({ sent: 6, replied: 3, requests: 2 })).toBe("6 sent · 3 replied · 2 requests");
+    expect(returnsLine({ sent: 1, replied: 1, requests: 1 })).toBe("1 sent · 1 replied · 1 request");
+  });
+
+  it("⚠️ AND THE DRAWER DRAWS NO PER-MATERIAL BARS — the ref does, and they read identically", () => {
+    /* Every material in a package rides the same sends, so three rows saying "2 requests from 6
+       sent" are true, look broken, and invite a hunt for a difference that cannot exist. */
+    const tsx = decls(read("src/components/packages/PackageDetailDrawer.tsx"));
+    expect(tsx).toContain("returnsLine(returns)");
+    expect(tsx).not.toContain("pkgb-bar");
+    expect(tsx).not.toContain("requestsByMaterial");
+  });
+});
+
+describe("D14 / D15 / D16 — the lock, the two variants, and no editing", () => {
+  const tsx = decls(read("src/components/packages/PackageDetailDrawer.tsx"));
+
+  it("the lock footnote gives its reason, not just its rule", () => {
+    expect(LOCK_FOOTNOTE).toContain("that's what keeps every figure above true");
+    expect(tsx).toContain("{locked && <p className=\"pkgdd-lock\">{LOCK_FOOTNOTE}</p>}");
+  });
+
+  it("⚠️ D15 — an unsent package loses the sections, it does not grey them", () => {
+    /* A "0 sent" section states something about a thing that has never happened. */
+    expect(tsx).toContain("{holders.length > 0 && (");
+    expect(tsx).toContain("{returns.sent > 0 && (");
+  });
+
+  it("a sent package duplicates; an unsent one edits", () => {
+    expect(tsx).toMatch(/locked\s*\?[\s\S]{0,200}Duplicate &amp; edit[\s\S]{0,120}onEdit\(pkg\.id\)/);
+  });
+
+  it("⚠️ D16 — the body offers no control that writes", () => {
+    const body = tsx.slice(tsx.indexOf('className="pkgdd-body"'));
+    for (const w of ["onChange", "<input", "<textarea", "<select", "contentEditable"]) {
+      expect(body, `the drawer body can edit (${w})`).not.toContain(w);
+    }
+  });
+
+  it("imports StatusDot rather than recreating it", () => {
+    expect(tsx).toContain('import { StatusDot } from "../StatusDot"');
+    expect(tsx).toContain("<StatusDot status={h.status}");
+  });
+
+  it("⚠️ reuses Form11Drawer — the same primitive the explainer sits on", () => {
+    expect(tsx).toContain("<Form11Drawer");
+    expect(tsx).toContain("width={472}");
+  });
+
+  it("the head renders the card's own band component", () => {
+    expect(tsx).toContain('<CardBand kind="package"');
+    expect(tsx).toContain("BAND_CLASS.package");
+  });
+});

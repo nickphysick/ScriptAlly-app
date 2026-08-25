@@ -236,8 +236,28 @@ describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers 
   });
 
   it("the two modes are mutually exclusive at every entry point", () => {
-    // open-to-edit clears duplicating; duplicate clears editing; new clears both.
-    expect(page).toContain("setPkgDuplicating(null);\n                  setPkgModal(true);");
+    /**
+     * ⚠️ RETARGETED, AND THE LAW IS UNCHANGED: **whichever mode an entry point sets, it clears the
+     * other**, so the builder can never be handed both an `editing` and a `duplicating` package.
+     *
+     * It used to assert two whitespace-exact source literals, and went red when the open-to-edit
+     * path MOVED — the card now opens a reader and the drawer's footer opens the composer, which is
+     * a change of entry point and not of the rule. A lock bound to indentation cannot tell a
+     * relocation from a regression, which is the only thing a lock is for.
+     *
+     * Stated structurally now: every `setPkgEditing(` call site is checked for a `setPkgDuplicating`
+     * within the same handler, and the reverse. It survives the next relocation and still fails the
+     * day somebody sets one without clearing the other.
+     */
+    const setters = [...page.matchAll(/setPkg(Editing|Duplicating)\(/g)].map((m) => m.index ?? 0);
+    expect(setters.length, "no builder-mode entry points found").toBeGreaterThan(2);
+    for (const i of setters) {
+      /* the handler around it — bounded by the nearest braces either side, not by a line count */
+      const win = page.slice(Math.max(0, i - 260), i + 260);
+      expect(win, `a mode is set without clearing the other near offset ${i}`)
+        .toMatch(/setPkgEditing\([\s\S]*setPkgDuplicating\(|setPkgDuplicating\([\s\S]*setPkgEditing\(/);
+    }
+    /* and `New` clears both — the one entry point that seeds from neither */
     expect(page).toContain("setPkgEditing(null); setPkgDuplicating(null); setPkgModal(true);");
   });
 

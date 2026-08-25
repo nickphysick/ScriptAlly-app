@@ -29,6 +29,7 @@ import { useNavigate } from "react-router-dom";
 import { PackagesTeachFirst } from "./packages/PackagesTeachFirst";
 import { PackagesBand } from "./packages/PackagesBand";
 import { TrackingBand } from "./packages/TrackingBand";
+import { PackageDetailDrawer } from "./packages/PackageDetailDrawer";
 import { bookVersionsOf } from "../lib/bookVersions";
 import { agentLabel, AGENT_NOT_RECORDED } from "../lib/agentDisplay";
 import { FootnoteBand } from "./packages/FootnoteBand";
@@ -175,6 +176,9 @@ export const SubmissionPackages: React.FC = () => {
   };
 
   /** Open the modal on an existing material. One opener, so every surface opens it the same way. */
+  /** The package the drawer is reading, or null. Read-only — the composer keeps its own state. */
+  const [pkgOpen, setPkgOpen] = useState<SubmissionPackage | null>(null);
+
   const openMaterial = (id: string) => {
     setMatEditing(msVersions.find((x) => x.id === id) ?? null);
     setMatPreselect(null);
@@ -399,11 +403,13 @@ export const SubmissionPackages: React.FC = () => {
                 packages={msPackages}
                 versions={msVersions}
                 queries={msQueries}
-                onOpenPackage={(id) => {
-                  setPkgEditing(msPackages.find((p) => p.id === id) ?? null);
-                  setPkgDuplicating(null);
-                  setPkgModal(true);
-                }}
+                /**
+                 * ⚠️ THE CARD OPENS A READER, NOT AN EDITOR (D8/D16). It used to open the composer
+                 * straight away — which is an edit the lock would refuse on any sent package, and
+                 * which answers "change this" when the question a card provokes is "what IS this?".
+                 * The drawer's footer is where Edit and Duplicate live now.
+                 */
+                onOpenPackage={(id) => setPkgOpen(msPackages.find((p) => p.id === id) ?? null)}
                 onNewPackage={() => { setPkgEditing(null); setPkgDuplicating(null); setPkgModal(true); }}
                 onHowItWorks={() => setHowOpen(true)}
                 sent={trackingTotals(msPackages, msQueries).sent}
@@ -494,6 +500,33 @@ export const SubmissionPackages: React.FC = () => {
           its draft in `useState` initialisers instead of an effect — which is what removed the
           type-grid flash when opening a material to edit. The key makes reopening a DIFFERENT
           material a remount rather than a stale-state hazard. */}
+      {/**
+        * ⚠️ MOUNTED ONLY WHILE OPEN, so every opening is a fresh mount — the same reason the
+        * material modal is. A drawer kept mounted and hidden would carry the previous package's
+        * scroll position and its `Form11Drawer` entry animation would not replay.
+        */}
+      <PackageDetailDrawer
+        pkg={pkgOpen}
+        materials={msVersions}
+        bookVersions={msBookVersions}
+        queries={msQueries}
+        agents={agents}
+        onClose={() => setPkgOpen(null)}
+        onOpenMaterial={(id) => { setPkgOpen(null); openMaterial(id); }}
+        onDuplicate={(id) => {
+          setPkgOpen(null);
+          setPkgEditing(null);
+          setPkgDuplicating(msPackages.find((p) => p.id === id) ?? null);
+          setPkgModal(true);
+        }}
+        onEdit={(id) => {
+          setPkgOpen(null);
+          setPkgEditing(msPackages.find((p) => p.id === id) ?? null);
+          setPkgDuplicating(null);
+          setPkgModal(true);
+        }}
+        onArchive={(id) => { setPkgOpen(null); void retirePackage(id); }}
+      />
       {matModal && <MaterialModal
         bookVersions={msBookVersions}
         key={matEditing?.id ?? `new-${matPreselect ?? "material"}`}

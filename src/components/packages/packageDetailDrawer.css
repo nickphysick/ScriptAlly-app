@@ -1,0 +1,138 @@
+/**
+ * The package drawer (design-refs/package-drawer.html).
+ *
+ * ⚠️ NOT `packagesDrawer.css`, WHICH DRESSES THE "HOW IT WORKS" EXPLAINER. Both sit on
+ * `Form11Drawer`; they are different contents in the same chassis, and their class prefixes differ
+ * by one letter (`pkgd-` there, `pkgdd-` here) for the same reason the components do.
+ */
+
+.pkgdd-head { position: relative; }
+/* The head repeats the card's band, so the band's own rules paint it — nothing is restated here. */
+.pkgdd-head .pkgb-cardhead { padding: 11px 18px; }
+
+.pkgdd-x {
+  position: absolute; top: 8px; right: 10px; z-index: 2;
+  background: none; border: none; padding: 4px 6px; cursor: pointer;
+  font-size: 17px; line-height: 1; color: var(--pkgt-pro-ink);
+}
+.pkgdd-head h2 {
+  font-family: var(--font-serif); font-size: 25px; font-weight: 600;
+  /* ⚠️ 1.3 — THE STANDING FLOOR. A package name is writer-supplied and can hold a `g` or a `y`. */
+  line-height: 1.3;
+  color: var(--pkg-ink); margin: 0; padding: 15px 20px 0; overflow-wrap: anywhere;
+}
+
+/**
+ * ⚠️ THE SCORECARD IS LARGER HERE THAN ON THE CARD (D9) — the card's figures are a glance and these
+ * are the thing you opened the drawer to read. Same three cells, same order, more weight.
+ */
+.pkgdd-score {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  padding: 14px 20px 16px; gap: 10px;
+}
+.pkgdd-scell { text-align: center; }
+.pkgdd-scell b {
+  display: block; font-family: var(--font-serif); font-size: 27px; font-weight: 600;
+  line-height: 1.2; color: var(--pkg-ink);
+}
+.pkgdd-scell span {
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--pkg-muted);
+}
+
+.pkgdd-body { padding: 4px 20px 20px; }
+.pkgdd-sec {
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--pkg-muted); margin: 20px 0 10px; font-weight: 700;
+}
+.pkgdd-sec:first-child { margin-top: 12px; }
+
+/* ── What's in it (D10) ──────────────────────────────────────────────────────────────────────── */
+
+/* Each slot is a small card in its own type colour, banded like the ones on the shelf. */
+.pkgdd-slot {
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.pkgdd-slotbody { padding: 11px 14px 12px; }
+.pkgdd-slotname {
+  font-family: var(--font-serif); font-size: 15px; font-weight: 600; line-height: 1.3;
+  color: var(--pkg-ink); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+
+/**
+ * ⚠️ THE CLAMP IS HERE AND NOT IN THE DERIVATION. Cutting the string in JS bakes a line count into
+ * the data, which is wrong at every width but the one it was cut for. `-webkit-line-clamp` clamps
+ * what is rendered, so the same two lines hold at 472px and at any narrower cap the drawer takes.
+ */
+.pkgdd-open {
+  margin: 7px 0 0;
+  font-size: 12px; line-height: 1.55; color: var(--pkg-ink-soft);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pkgdd-omat {
+  margin-top: 8px; background: none; border: none; padding: 0; cursor: pointer;
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--pkg-burg);
+}
+.pkgdd-omat:hover { text-decoration: underline; text-underline-offset: 2px; }
+.pkgdd-none { margin: 0; font-size: 12px; font-style: italic; color: var(--pkg-muted); }
+
+/* ── Who has it (D12) ────────────────────────────────────────────────────────────────────────── */
+
+.pkgdd-holders { display: flex; flex-direction: column; }
+.pkgdd-hrow {
+  display: grid; grid-template-columns: auto 1fr auto;
+  gap: 10px; align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px dotted rgba(58, 28, 20, 0.14);
+  font-size: 12.5px;
+}
+.pkgdd-hrow:last-child { border-bottom: none; }
+.pkgdd-hagent { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.pkgdd-hagent em {
+  display: block; font-style: normal; font-weight: 400;
+  font-size: 10.5px; color: var(--pkg-ink-soft);
+}
+.pkgdd-hsent {
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--pkg-muted); white-space: nowrap;
+}
+
+/* ── What came back (D13) ────────────────────────────────────────────────────────────────────── */
+
+/* One line. Three per-material bars would render identical rows and look broken while being true. */
+.pkgdd-returns {
+  margin: 0; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--pkg-ink-soft);
+}
+
+/* ── The lock (D14) ──────────────────────────────────────────────────────────────────────────── */
+
+/* A footnote under the figures it protects — not a banner, not a warning, no colour. */
+.pkgdd-lock {
+  margin: 18px 0 0; padding-top: 13px;
+  border-top: 1px solid var(--pkgo-hairline-soft);
+  font-size: 11px; line-height: 1.5; color: var(--pkg-muted);
+}
+
+/* ── The footer (D16) ────────────────────────────────────────────────────────────────────────── */
+
+.pkgdd-foot { display: flex; align-items: center; gap: 14px; }
+.pkgdd-act {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--pkg-burg);
+}
+.pkgdd-act:hover { text-decoration: underline; text-underline-offset: 3px; }
+.pkgdd-close {
+  margin-left: auto;
+  font-family: inherit; font-size: 12.5px; font-weight: 600;
+  color: var(--pkg-burg); background: var(--pink-cta, #f5e2da);
+  border: 1px solid var(--pink-cta-edge, #e8c8bc);
+  border-radius: 9px; padding: 8px 18px; cursor: pointer;
+}
+.pkgdd-close:hover { background: #f8e9e2; }
