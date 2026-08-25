@@ -1857,6 +1857,12 @@ failed to report one task update in time, which vitest exits non-zero for and it
 *"might cause false positive tests"*. The distinction matters — an exit code is evidence about the
 run, and the summary is evidence about the code, and this run had them disagree.
 
+**⚠️ SETTLED BY THE NEXT RUN.** The gate after the scorecard fix came back **exit 0 · 393 files ·
+6853 passed · 3 skipped · no unhandled error**, on the same tree plus one change. That converts the
+earlier exit-1 from *probably environmental* to *confirmed environmental* — and it is the reason to
+re-run rather than to argue from the log: one clean run is the only thing that tells a loaded machine
+from a real fault.
+
 ---
 
 ## Eyeballed on dev — and it found one more
