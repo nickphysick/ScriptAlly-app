@@ -243,3 +243,37 @@ Its `.t-f12` block (lines ~948–1029) defines `--ink`, `--burg`, `--f12-serif` 
 scope**, while `:root` defines `--ink` and `--burg` at *different* values. That is not a fault — it is
 how the F12 theme retones — but it is why a fallback sweep cannot be done by grep alone, and why the
 same `var(--ink, …)` is inert in one file and load-bearing in another. **Not edited.**
+
+## Part 3 — the destination side, measured
+
+Move: a Partial Sent event from `seed-query-9` (Ana Duarte) to `seed-pkgq-8` (David Marsh, Rejected).
+
+| | destination `seed-pkgq-8` | source `seed-query-9` |
+|---|---|---|
+| **before** | `Rejected` · lsc 5 Jul · partialSent — · fullSent — | `Partial Sent` · lsc 23 Aug · partialSent 23 Aug · fullSent 21 Aug |
+| **after** | `Partial Sent` · lsc 23 Aug · **partialSent 23 Aug** · fullSent — | `Full Sent` · lsc 21 Aug · **partialSent —** · fullSent 21 Aug |
+| **after undo** | `Rejected` · lsc 5 Jul · partialSent — · fullSent — | `Partial Sent` · lsc 23 Aug · partialSent 23 Aug · fullSent 21 Aug |
+
+**Both sides derive from their own logs.** The destination gained the event and derived
+`Partial Sent` with a `partialSentDate`; the source lost it and fell back to `Full Sent` with
+`partialSentDate` cleared. `revisionRound` and `responseReceivedAt` held on both — each is derived
+from its own log and neither log's answer to those changed. **Undo returned both objects exactly**,
+asserted field-by-field rather than on a status string.
+
+### D9 — the one thing that looked like a defect, and is not
+
+The destination went from **`Rejected`** — a terminal status — to `Partial Sent`. The seed script
+carries a fixture named *"move DESTINATION, closed → this does not reopen it"*, so this reads at
+first glance as the opposite of what was promised. It is not. `moveNotices` says:
+
+> *"{agent}'s query is closed — {status}. **An event dated before the closure** slots into the record
+> without reopening it."*
+
+My moved event is dated **23 Aug** against a closure of **5 Jul** — *after*, so the condition does not
+apply and reopening is the honest derivation. The copy is precise; I read past the qualifier.
+
+⚠️ **One observation, not a defect.** That notice renders whenever the target is closed, and states
+a **conditional** the reader has to apply themselves — and `moveNotices(target, note, agentName)` is
+not passed the moving event's date, so it *cannot* say which side of the closure this event falls on.
+A writer moving a post-closure event sees a true sentence that does not describe what is about to
+happen. Sharpening it means passing the date; **flagged, not changed** — the copy is not wrong.
