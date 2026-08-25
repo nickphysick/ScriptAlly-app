@@ -101,9 +101,37 @@ test("samples carry a version, and the two panels answer for them", async ({ pag
       /* THE GATE, OPEN. */
       expect(samples.some((s) => s.version), `no sample carries a chip at ${width}`).toBe(true);
 
-      /* ⚠️ THE USAGE LINE READS AS ONE RUN, not two strings colliding. */
-      const chipped = samples.find((s) => s.version)!;
-      expect(chipped.use).toMatch(/package.*·.*§/s);
+      /**
+       * ⚠️ THE CHIP FLOWS WITH THE USAGE LINE — MEASURED AS GEOMETRY, NOT AS A SEPARATOR.
+       *
+       * The first version of this asserted `use` matched `/package.*·.*§/`. It passed, and it was
+       * worthless: the `·` came from THIS PROBE's own newline-to-separator step, not from the page.
+       * A check that measures its own helper is the proxy fault this repo keeps recording — the
+       * same shape as a rule naming one hue, or a lookahead after optional whitespace.
+       *
+       * The real claim is containment and flow: the chip is INSIDE `.pkgb-muse`, and it sits at or
+       * below the usage text rather than on top of it. On this narrow column card it wraps to its
+       * own line, which is correct — the ref draws the row wide; the card is a column.
+       */
+      const flow = await page.evaluate(() => {
+        const sh = [...document.querySelectorAll('.pkgb-msheet[data-type="Sample Pages"]')]
+          .find((x) => x.querySelector(".pkgb-mver"));
+        if (!sh) return null;
+        const use = sh.querySelector(".pkgb-muse") as HTMLElement;
+        const chip = sh.querySelector(".pkgb-mver") as HTMLElement;
+        const u = use.getBoundingClientRect(), c = chip.getBoundingClientRect();
+        return {
+          inside: use.contains(chip),
+          chipTopBelowUseTop: c.top >= u.top - 1,
+          chipWithinUse: c.bottom <= u.bottom + 1,
+          overflowsCard: c.right > sh.getBoundingClientRect().right + 1,
+        };
+      });
+      expect(flow, "no sample sheet carries a chip on the page").not.toBeNull();
+      expect(flow!.inside, "the chip is not inside the usage line").toBe(true);
+      expect(flow!.chipTopBelowUseTop).toBe(true);
+      expect(flow!.chipWithinUse, "the chip escapes its own block").toBe(true);
+      expect(flow!.overflowsCard, "the chip overflows the card").toBe(false);
 
       /* D15 — one row per opening, INCLUDING the one nothing has gone out with */
       expect(r.openings.length, `openings at ${width}`).toBe(3);

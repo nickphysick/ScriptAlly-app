@@ -243,7 +243,139 @@ https://scriptally-dev.web.app → Manuscripts → *The Smoke Test* → The reco
 
 ---
 
+## Parts C and D
+
+**One commit for two parts, deliberately.** `packagesBroadsheet.css` and `SubmissionPackages.tsx` are
+each touched by both, and explicit-path staging is whole-file — splitting them would leave the first
+commit unable to build.
+
+### Part C — samples reference a version
+
+| | |
+|---|---|
+| **D11** | One `<select>` on the sample-pages modal. **Selected, never typed** — the vocabulary is defined on the Manuscripts page and nowhere else, so "Prologue-first" and "prologue first" cannot become two openings the panels count separately. |
+| **D12** | The chip joins the card's **usage line**, not a row of its own: `In 2 packages · § Prologue-first` is one fact about where these pages have been and what they are. |
+| **D13** | **No version anywhere on the package model, builder, card or rules.** See below. |
+| **D14** | On the control, not buried: *"ScriptAlly records the reference — it can't check that the text matches."* |
+
+Two smaller decisions that follow standing rules here: the field **seeds from what is stored and
+never defaults to the latest** (a pre-filled answer the writer did not give is a recorded fault class
+in this app), and **clearing it unsets** rather than being skipped — *"I picked the wrong version"*
+has to be correctable, and a write that ignored the empty case would leave the old reference in place
+while the form showed none.
+
+### ⚠️ D13 has a positive half with nowhere to go
+
+The pack puts the inherited chip in the package drawer's *"What's in it"* sample slot. **That drawer
+does not exist.** `PackagesDrawer.tsx` is the *"How it works"* explainer; the per-package drawer is
+the packages lane's own Part C, which is unbuilt and explicitly carried forward as not this run's
+work. Reported rather than invented — the derivation is ready and the slot is one line when the
+drawer lands.
+
+The **negative** half is fully enforced and is where most of the new lock went: the type, the
+builder, the card and the rules are each asserted clean, and the aggregation is asserted to reach a
+package **through its sample slot** rather than through a field of its own. One edge, so the two can
+never disagree.
+
+### Part D — the two panels
+
+Both live in the tracking band beside "Requests by material", which is the same walk one level down.
+**"Requests by opening" reuses that row's exact markup** rather than drawing its own: two ways of
+rendering the same kind of count eventually disagree about what a full bar means.
+
+**⚠️ It lists an opening nothing has gone out with.** `requestsByMaterial` drops its empty rows; this
+must not. *"Nothing has been sent with this opening yet"* is the most useful thing the panel can say
+to somebody who has just made one, and a row that vanishes says nothing at all.
+
+**"Who holds what" is entirely derived** — holders from query status, the version from the **latest**
+send on the log, the name through `agentLabel`. Newest first, and an undated send sorts last rather
+than reading as "just now". An unrecorded version says so **in words rather than wearing a chip**: a
+send predating the feature is not the same fact as a send of the earliest version.
+
+### ⚠️ THE FINDING — the denominator, caught by real data and not by review
+
+On the live fixture the D17 line read:
+
+> **2 of 4 hold a version earlier than your latest.**
+
+Two of those four had **no recorded version at all**. The arithmetic is true and the sentence is
+misleading: a reader takes "2 of 4" to mean the other two hold the latest, and they do not — they are
+unknown.
+
+`holdingEarlier` already refuses to count an unknown as an earlier — its docstring says so in as many
+words. **The rule had been applied to the numerator and not to the denominator.** It now reads:
+
+> 2 hold a version earlier than your latest; 2 are unrecorded.
+
+Where every holder is recorded the sentence is the ref's, unchanged. This was invisible to the unit
+tests, which had no unrecorded holder in their fixture, and invisible to review; it took a seeded
+account where two sends predate the feature — which is the ordinary case for any real writer.
+
+### Evidence — measured on the deployed dev site
+
+`tests/e2e/bookVersionsCD.measure.ts`, at 1440 and 1920. Identical at both.
+
+```
+sheets
+  Query Letter   Hook-first        In 1 package        —
+  Query Letter   Comps-forward     In 1 package        —
+  Synopsis       One-page          In 2 packages       —
+  Sample Pages   Chapters 1-3      In 2 packages   · § PROLOGUE-FIRST
+  Sample Pages   Sample 2          Not in a package· § PROLOGUE-FIRST
+  Sample Pages   Sample 3          Not in a package· § WORLDBUILDING-FIRST
+
+requests by opening
+  § PROLOGUE-FIRST        2 SAMPLES · 2 PACKAGES    2 requests from 7 sent
+  § WORLDBUILDING-FIRST   1 SAMPLE  · 0 PACKAGES    0 requests from 0 sent
+  § POST-R&R (T. MARSH)   0 SAMPLES · 0 PACKAGES    0 requests from 0 sent
+
+who holds what — 4 HELD
+  Elinor Hale     PARTIAL · SENT 21 AUG   NOT RECORDED
+  Sam Okoro       FULL    · SENT 28 JUL   NOT RECORDED
+  Peter Vance     FULL    · SENT 19 JUN   § WORLDBUILDING-FIRST
+  David Marsh     PARTIAL · SENT 11 JUN   § PROLOGUE-FIRST
+```
+
+Every non-sample sheet carries no chip. Every holder row answers **exactly once** — a chip or the
+words, never both and never neither. No rate anywhere on either panel.
+
+### ⚠️ AND ONE OF MY OWN ASSERTIONS WAS MEASURING A PROXY
+
+The chip's containment check first read `use).toMatch(/package.*·.*§/)`. It passed, and it was
+worthless: **the `·` came from this probe's own newline-to-separator step**, not from the page. A
+check that measures its own helper is the family this repo keeps recording — the same shape as a rule
+naming one hue, or a lookahead after optional whitespace.
+
+It now measures geometry: the chip is **inside** `.pkgb-muse`, sits at or below the usage text, stays
+within its own block, and does not overflow the card. On this narrow column card it **wraps to its
+own line**, which is correct — the ref draws that row wide; ours is a column card.
+
+**The modal was checked by opening it, not by reading the component** — a source lock proves the
+control was written, and this one is behind a type condition, so "written" and "reachable" are
+genuinely different claims. On a sample: `From version` · `Optional` · options
+`— none —, Prologue-first, Worldbuilding-first, Post-R&R (T. Marsh)` · the D14 hint · **no text input
+bound to it**. On a letter: absent.
+
+**⚠️ AND THE SEED'S OWN REFUSAL IS WORTH RECORDING.** It tries to point the second package at the
+second opening so the panel has a comparison; the package lock (D-D1) **denied it**, because
+`seed-pkg-2` has already been sent and its slots are frozen. That is the lock working. The seed
+reports it rather than swallowing it — a silent catch would have left the fixture in a state the
+measurement then reported as a bug in the panel.
+
+### Deployed
+
+Dev hosting from a clean worktree, twice: `2c8d69e4` (`index-BcJOpqdz.js`) for the measurement that
+found the D17 fault, then `35e66660` (`index-D6CnjpKn.js`) with the fix. Both hash-compared, and the
+served stylesheet greps all seven new classes, one each. **Rules were already live from the Part A/B
+deploy; Parts C and D add no fields.** Screenshots in `reports/manuscript-versions/`.
+
+---
+
 ## Where this stops
 
-Parts A and B stand alone and are the intended first seam. **Parts C–D are the next session**
-(samples reference a version; the two tracking panels), and **Part E is its own** (the Query Centre).
+Parts A–D are done. **Part E is its own session** (the Query Centre): the stationery band's `SAMPLE`
+row gains an inherited chip, the two send events gain a pre-filled dropdown, the reading pane gains
+"Opening read" and "Manuscript held", and the query list gains an optional column and filter.
+
+**Still open from this run:** D13's positive half, which is blocked on the packages lane's per-package
+drawer.
