@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Pricing v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400..900&family=Source+Sans+3:wght@300..700&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#f7f4ee;--lower:#f2ede7;--parch:#fdfaf5;--blush:#f8e8e1;--ink:#3a1c14;--nb:#1c130f;
+  --muted:#7a655c;--burg:#7c3a2a;--pink:#f5e2da;--pinkbd:#e8c8bc;--sage:#e9ede6;--sagebd:rgba(138,158,136,.5);
+  --hair:rgba(58,28,20,.12);--kicker:rgba(122,101,92,.72);
+  --d:"Playfair Display",Georgia,serif;--b:"Source Sans 3",system-ui,sans-serif;
+  --m:"JetBrains Mono",ui-monospace,monospace;--h:"Caveat",cursive;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--b);font-size:16px;-webkit-font-smoothing:antialiased}
+.pad{max-width:1180px;margin:0 auto;padding:0 52px}
+
+/* nav */
+.nav{display:flex;align-items:center;gap:30px;padding:22px 0 0;font-size:1rem}
+.brand{font-family:var(--d);font-size:1.5rem;font-weight:600;color:var(--nb)}
+.nav a{color:var(--ink);text-decoration:none;font-weight:500}
+.nav .sp{margin-left:auto}
+.nav .pill{background:var(--nb);border-radius:999px;padding:11px 22px;color:#f7f0e9;font-size:.95rem}
+
+/* head */
+.head{text-align:center;padding:70px 0 44px}
+.eyebrow{font-family:var(--m);font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin:0 0 18px}
+h1{font-family:var(--d);font-weight:700;font-size:clamp(2.2rem,4vw,3.1rem);line-height:1.06;
+  letter-spacing:-.02em;color:var(--nb);margin:0 auto;max-width:16ch}
+.sub{margin:18px auto 0;max-width:52ch;color:var(--muted);font-size:1.06rem;line-height:1.6}
+
+/* the three tiers */
+.tiers{display:grid;grid-template-columns:1fr 1.16fr 1fr;gap:20px;align-items:stretch;padding:22px 0 0}
+.tier{position:relative;display:flex;flex-direction:column;background:var(--parch);
+  border:1px solid var(--hair);border-radius:16px;padding:30px 28px 28px}
+/* Free and Pro are not selectable while founding access is open */
+.tier[aria-disabled="true"]{opacity:.5;box-shadow:none;cursor:default}
+.tier[aria-disabled="true"] .btn{pointer-events:none}
+
+/* the founding tier */
+.tier--found{background:var(--blush);border-color:var(--pinkbd);cursor:default;
+  box-shadow:0 18px 44px rgba(124,58,42,.14);transform:translateY(-6px)}
+.tier--found .tag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  font-family:var(--m);font-weight:600;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+  background:var(--nb);color:#f7f0e9;border-radius:999px;padding:6px 15px;white-space:nowrap}
+
+.tname{font-family:var(--d);font-weight:600;font-size:1.5rem;color:var(--nb);margin:0}
+.tline{font-size:.95rem;color:var(--muted);margin:6px 0 0;min-height:2.6em;line-height:1.4}
+.price{display:flex;align-items:baseline;gap:8px;margin:20px 0 0;flex-wrap:wrap}
+.amount{font-family:var(--d);font-weight:700;font-size:2.5rem;line-height:1;color:var(--nb);letter-spacing:-.02em}
+.per{font-family:var(--m);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.was{font-family:var(--b);font-size:1rem;color:var(--muted);text-decoration:line-through;opacity:.75}
+.after{font-size:.88rem;color:var(--muted);margin:8px 0 0;line-height:1.45;min-height:2.6em}
+.after strong{color:var(--nb);font-weight:600}
+
+.feats{list-style:none;margin:22px 0 0;padding:20px 0 0;border-top:1px solid var(--hair);display:grid;gap:10px}
+.tier--found .feats{border-top-color:rgba(124,58,42,.18)}
+.feats li{position:relative;padding-left:22px;font-size:.95rem;line-height:1.45;color:#5f4c43}
+.feats li::before{content:"";position:absolute;left:1px;top:.36em;width:9px;height:6px;
+  border-left:2px solid var(--burg);border-bottom:2px solid var(--burg);transform:rotate(-45deg);opacity:.8}
+.feats li.off{color:rgba(122,101,92,.62)}
+.feats li.off::before{border-color:rgba(122,101,92,.45);transform:rotate(-45deg) scale(.85);opacity:.7}
+
+.cta{margin-top:auto;padding-top:24px}
+.btn{display:block;width:100%;text-align:center;font-family:var(--b);font-size:1rem;font-weight:500;
+  border-radius:11px;padding:13px 20px;text-decoration:none;cursor:pointer;border:1px solid transparent}
+.btn--ink{background:var(--nb);border-color:var(--nb);color:#f7f0e9}
+.btn--ink:hover{background:#2c1f19}
+.btn--quiet{background:transparent;border-color:var(--hair);color:var(--ink)}
+.btn--quiet:hover{border-color:rgba(58,28,20,.28)}
+.btn--off{font-family:var(--m);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--kicker);background:transparent;border-style:dashed;cursor:default}
+.note{font-family:var(--m);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--kicker);margin:11px 0 0;text-align:center}
+
+/* places bar in the founding tier */
+.places{margin:16px 0 0}
+.pbar{height:5px;border-radius:999px;background:rgba(124,58,42,.16);overflow:hidden}
+.pfill{height:100%;width:37%;background:var(--burg);opacity:.85;border-radius:999px}
+.plab{font-family:var(--m);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:#9c6a56;margin:8px 0 0;text-align:center}
+.plab .n{color:var(--burg);font-weight:500}
+.plab .of{opacity:.6}
+
+/* footnote */
+.foot{text-align:center;padding:46px 0 0;color:var(--muted);font-size:.95rem}
+.foot a{color:var(--burg)}
+
+/* comparison */
+.cmp{margin:72px 0 0;background:var(--parch);border:1px solid var(--hair);border-radius:16px;overflow:hidden}
+.cmp h2{font-family:var(--d);font-weight:600;font-size:1.35rem;color:var(--nb);margin:0;padding:22px 26px 18px}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th,td{text-align:left;padding:12px 26px;border-top:1px solid var(--hair)}
+th{font-family:var(--m);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:400}
+td.c{text-align:center;width:132px}
+td.c .yes{color:var(--burg);font-weight:600}
+td.c .no{color:rgba(122,101,92,.5)}
+tr td:first-child{color:#5f4c43}
+.cmp .col-found{background:rgba(248,232,225,.5)}
+
+.faq{margin:64px 0 100px}
+.faq h2{font-family:var(--d);font-weight:600;font-size:1.35rem;color:var(--nb);margin:0 0 18px}
+.qa{border-top:1px solid var(--hair);padding:16px 0}
+.qa p{margin:0}
+.q{font-weight:600;color:var(--nb)}
+.a{color:var(--muted);margin-top:5px;line-height:1.6;max-width:76ch}
+
+@media(max-width:960px){
+  .pad{padding:0 22px}
+  .tiers{grid-template-columns:1fr;gap:26px}
+  .tier--found{transform:none}
+  td.c{width:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="pad">
+  <nav class="nav">
+    <span class="brand">ScriptAlly</span>
+    <a href="#">Features</a><a href="#">About</a><a href="#">Pricing</a><a href="#">Contact</a>
+    <span class="sp"></span><a href="#">Log in</a><span class="pill">Become a Founding Writer</span>
+  </nav>
+
+  <header class="head">
+    <p class="eyebrow">Pricing</p>
+    <h1>Pick the plan that fits the search you're on.</h1>
+    <p class="sub">Free for as long as you want it. Pro when you're querying in earnest. And for the next hundred writers, something better than both.</p>
+  </header>
+
+  <div class="tiers">
+
+    <!-- FREE -->
+    <div class="tier tier--free" aria-disabled="true">
+      <p class="tname">Free</p>
+      <p class="tline">Everything you need to run one manuscript's campaign.</p>
+      <div class="price"><span class="amount">£0</span><span class="per">forever</span></div>
+      <p class="after">No card, no trial clock. Stays free.</p>
+      <ul class="feats">
+        <li>One manuscript</li>
+        <li>Unlimited agents and queries</li>
+        <li>The full querying timeline</li>
+        <li>One Smart Import at sign-up</li>
+        <li class="off">Smart Email Drop</li>
+        <li class="off">The Comp Scout</li>
+      </ul>
+      <div class="cta"><span class="btn btn--quiet btn--off">Available at launch</span></div>
+    </div>
+
+    <!-- FOUNDING -->
+    <div class="tier tier--found">
+      <span class="tag">Available now · 100 places</span>
+      <p class="tname">Founding Writer</p>
+      <p class="tline">For the hundred writers who put ScriptAlly through its paces.</p>
+      <div class="price"><span class="amount">£0</span><span class="per">for six months</span><span class="was">£7/mo</span></div>
+      <p class="after">Then <strong>half price for life</strong> — a founding rate that never expires.</p>
+      <ul class="feats">
+        <li>Everything in Pro</li>
+        <li>Six months' free Pro access</li>
+        <li>Half price for life</li>
+        <li>A direct line to the founder</li>
+        <li>A hand in what gets built next</li>
+      </ul>
+      <div class="places">
+        <div class="pbar" role="img" aria-label="37 of 100 places claimed"><div class="pfill"></div></div>
+        <p class="plab"><span class="n">37</span><span class="of">/100</span> places claimed</p>
+      </div>
+      <div class="cta">
+        <a class="btn btn--ink" href="#">Claim your spot</a>
+        <p class="note">Closes at 100 · no card needed</p>
+      </div>
+    </div>
+
+    <!-- PRO -->
+    <div class="tier tier--pro" aria-disabled="true">
+      <p class="tname">Pro</p>
+      <p class="tline">For writers running several manuscripts, or querying hard.</p>
+      <div class="price"><span class="amount">£7</span><span class="per">per month</span></div>
+      <p class="after">Or £70 a year. Cancel whenever you like.</p>
+      <ul class="feats">
+        <li>Unlimited manuscripts</li>
+        <li>One Smart Import a month</li>
+        <li>Smart Email Drop</li>
+        <li>The Comp Scout</li>
+        <li>Querying analytics</li>
+        <li>Submission packages</li>
+      </ul>
+      <div class="cta"><span class="btn btn--quiet btn--off">Available at launch</span></div>
+    </div>
+  </div>
+
+  <p class="foot">Founding places are limited to a hundred. When they're gone, Pro is £7 a month. <a href="#">How founding access works →</a></p>
+
+  <section class="cmp">
+    <h2>What's in each plan</h2>
+    <table>
+      <thead>
+        <tr><th>Feature</th><th class="c">Free</th><th class="c col-found">Founding</th><th class="c">Pro</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Manuscripts</td><td class="c">1</td><td class="c col-found"><span class="yes">Unlimited</span></td><td class="c">Unlimited</td></tr>
+        <tr><td>Agents &amp; queries</td><td class="c">Unlimited</td><td class="c col-found"><span class="yes">Unlimited</span></td><td class="c">Unlimited</td></tr>
+        <tr><td>Smart Import</td><td class="c">Once</td><td class="c col-found"><span class="yes">Monthly</span></td><td class="c">Monthly</td></tr>
+        <tr><td>Smart Email Drop</td><td class="c"><span class="no">—</span></td><td class="c col-found"><span class="yes">✓</span></td><td class="c">✓</td></tr>
+        <tr><td>The Comp Scout</td><td class="c"><span class="no">—</span></td><td class="c col-found"><span class="yes">✓</span></td><td class="c">✓</td></tr>
+        <tr><td>Querying analytics</td><td class="c"><span class="no">—</span></td><td class="c col-found"><span class="yes">✓</span></td><td class="c">✓</td></tr>
+        <tr><td>A direct line to the founder</td><td class="c"><span class="no">—</span></td><td class="c col-found"><span class="yes">✓</span></td><td class="c"><span class="no">—</span></td></tr>
+        <tr><td>Price after six months</td><td class="c">£0</td><td class="c col-found"><span class="yes">£3.50/mo</span></td><td class="c">£7/mo</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="faq">
+    <h2>Questions</h2>
+    <div class="qa"><p class="q">What happens when my six free months end?</p><p class="a">You move onto the founding rate — half price, for as long as you keep querying with ScriptAlly. Nothing is charged automatically without telling you first.</p></div>
+    <div class="qa"><p class="q">What if I don't want to pay anything?</p><p class="a">Stay on Free. One manuscript, unlimited agents and queries, the full timeline — it isn't a trial and it doesn't expire.</p></div>
+    <div class="qa"><p class="q">What happens when the hundred places are gone?</p><p class="a">Founding access closes. Pro stays at £7 a month, and everyone who joined as a Founding Writer keeps their rate.</p></div>
+  </section>
+</div>
+
+</body>
+</html>

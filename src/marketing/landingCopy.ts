@@ -15,7 +15,10 @@
 import { CopyRun } from "./CopyRuns";
 import { supportMailto } from "../lib/companyInfo";
 
-export const HERO_EYEBROW = "For querying writers";
+/* ⚠️ `HERO_EYEBROW` ("For querying writers") IS DELETED, NOT RELOCATED. The headline says who
+   the page is for; a mono label above it was the page introducing its own first sentence.
+   `landingCopy.test.ts` asserts the export is absent rather than pinning the string — the
+   same shape as the four constants the actions row took with it. */
 
 export const HERO_H1 = "You've written a book.";
 

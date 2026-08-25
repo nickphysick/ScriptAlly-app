@@ -397,12 +397,18 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    ⚠️ NO `overflow: hidden` HERE. The old hero clipped a dashboard replica that overhung its box;
    this one hangs an ellipsis in the LEFT MARGIN, and the same declaration would cut it off. */
 /* Ref v8 geometry. `min-height` opens the hero up; the padding pulls the break upward. */
-.mk-hero { position: relative; padding: 84px 0 64px; min-height: 70vh; }
+/* ⚠️ 74px, AND THE EYEBROW'S REMOVAL SUPPLIES THE REST OF THE RISE. The two are one decision:
+   deleting the eyebrow takes 44px off the top of this hero (14px of ink plus a 30px margin), and
+   this gives 10 of them back so the headline does not sit up against the nav. Net movement ~34px,
+   not 82 — the mockup's own 46px belongs to a document whose `.hero` merges this element with
+   `.mk-heroinner`, so it does not map onto ours. The bottom stays 64px; the ref's 0 was never
+   asked for. */
+.mk-hero { position: relative; padding: 74px 0 64px; min-height: 70vh; }
 .mk-heroinner {
   max-width: 1300px; margin: 0 auto; padding: 0 56px;
   /* ⚠️ EXPLICIT ROW/COLUMN PLACEMENTS, NOT AREAS — because the artwork now SPANS rows and a named
-     area cannot overlap another item's. Five rows: eyebrow, statement, copy, turn, panel; the
-     plate is placed across 2–4 in column 2 and shares those cells with the words.
+     area cannot overlap another item's. Four rows: statement, copy, turn, panel; the
+     plate is placed across 1–3 in column 2 and shares those cells with the words.
      ⚠️ GRID ITEMS MAY OVERLAP, AND THAT IS THE MECHANISM HERE. Auto-placement never overlaps, so
      every item in this grid is placed by hand; the moment one is not, it is pushed into an
      implicit row and the layout silently grows downward. */
@@ -422,7 +428,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    declaration of it. Two rules for one element is how the fault that cost sixty-five rules in the
    ref begins. */
 .mk-hcopy {
-  grid-row: 3; grid-column: 1;
+  grid-row: 2; grid-column: 1;
   position: relative; z-index: 2; padding-top: 26px;
   display: flex; flex-direction: column; justify-content: center; min-width: 0;
 }
@@ -430,7 +436,6 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: .22em;
   text-transform: uppercase; color: var(--mk-label);
 }
-.mk-hero .mk-eyebrow { grid-row: 1; grid-column: 1 / -1; margin-bottom: 30px; }
 .mk-statement {
   font-family: "Playfair Display", Georgia, serif; font-weight: 700;
   /* ⚠️ .96 IS SAFE FOR THIS STRING AND WOULD NOT BE FOR EVERY STRING. "You've written a book."
@@ -446,7 +451,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
      does not wrap the text, it lets it spill out of its own box. */
   font-size: var(--mk-hero-h1); line-height: 1.02; letter-spacing: -.022em;
   color: var(--mk-nearblack); margin: 0;
-  grid-row: 2; grid-column: 1 / -1; position: relative; z-index: 2;
+  grid-row: 1; grid-column: 1 / -1; position: relative; z-index: 2;
 }
 
 /* The ticked box that closes the statement.
@@ -503,7 +508,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 
    The panel is its own full-width grid row beneath the turn, centred, and centred throughout — a
    single column of statements rather than a form with labels beside it. */
-.mk-found { grid-row: 5; grid-column: 1 / -1; width: 100%; }
+.mk-found { grid-row: 4; grid-column: 1 / -1; width: 100%; }
 .mk-found-panel {
   max-width: 48rem; margin: 98px auto 0; position: relative; text-align: center;
   background: var(--mk-blush); border: 1px solid var(--mk-cta-bd); border-radius: 16px;
@@ -705,7 +710,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    the units of the size it is measuring, so the element that declares the size is the only element
    the measure can live on. The lead's `1.34em` then scales with it for free. */
 .mk-turn {
-  grid-row: 4; grid-column: 1;
+  grid-row: 3; grid-column: 1;
   margin: 40px 0 0; padding-left: 20px;
   border-left: 2px solid var(--mk-burg);
   font-family: "Playfair Display", Georgia, serif;
@@ -783,12 +788,12 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
     grid-template-columns: 1fr;
     gap: 34px; padding: 40px 26px 0;
   }
-  .mk-hero .mk-eyebrow, .mk-statement, .mk-hcopy, .mk-turn, .mk-found { grid-column: 1; }
+  .mk-statement, .mk-hcopy, .mk-turn, .mk-found { grid-column: 1; }
   .mk-hcopy { padding-top: 0; }
-  /* The artwork takes row 5 when stacked (see its own override), so the panel closes at 6. Its
+  /* The artwork takes row 4 when stacked (see its own override), so the panel closes at 5. Its
      98px top margin is the two-column layout's breathing room and is not wanted in a stack that
      already has a 34px row gap. */
-  .mk-found { grid-row: 6; }
+  .mk-found { grid-row: 5; }
   .mk-found-panel { margin-top: 0; }
   /* The plate's own stacked override lives beside its base rule — see the note there. */
 }
@@ -1744,16 +1749,19 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
      than its row extends past it top and bottom by itself; an offset fakes the same picture and
      then has to be re-tuned every time the copy column's height changes, which it does on every
      copy edit. */
-  /* ⚠️ ROWS 2–4, COLUMN 2, AND IT SHARES THOSE CELLS WITH THE WORDS. `grid-row: 2 / 5` is rows 2,
-     3 and 4 — statement, copy, turn. The statement spans both columns in row 2 and this sits
+  /* ⚠️ ROWS 1–3, COLUMN 2, AND IT SHARES THOSE CELLS WITH THE WORDS. `grid-row: 1 / 4` is rows 1,
+     2 and 3 — statement, copy, turn. The statement spans both columns in row 1 and this sits
      under it at `z-index: 1`, which is the overlap the design asks for and the reason every item
      in this grid is placed by hand.
+     ⚠️ THE SPAN MOVED WITH THE ROWS WHEN THE EYEBROW WENT (2/5 → 1/4). It had to: the point of the
+     span is that the plate centres against statement-through-turn, and left at 2/5 it would have
+     reached for a row that no longer exists and centred against the wrong three.
      ⚠️ AND THE BLEED IS A NEGATIVE MARGIN THAT IS NOT FAKING ANYTHING. Elsewhere in this file a
      negative margin is forbidden because it fakes an alignment the layout should produce; here it
      is the effect itself — the plate is meant to run past the container's own 56px gutter to the
      page edge, and `margin-right: -56px` is exactly the gutter it cancels. `justify-content:
      flex-end` is what pins the artwork to that edge rather than centring it in the surplus. */
-  grid-row: 2 / 5; grid-column: 2; align-self: center;
+  grid-row: 1 / 4; grid-column: 2; align-self: center;
   position: relative; z-index: 1;
   display: flex; justify-content: flex-end; align-items: center;
   margin-right: -56px;
@@ -1766,20 +1774,20 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 
 /* ⚠️ THIS BLOCK SITS IMMEDIATELY AFTER THE RULE IT OVERRIDES, AND IT HAS TO. Both selectors are
    0-2-0, so SOURCE ORDER decides — placed with the hero's other stacked rules a thousand lines
-   earlier it LOST to the base, and the plate kept `grid-row: 2 / 5`, `grid-column: 2` and its
+   earlier it LOST to the base, and the plate kept its full-height span, `grid-column: 2` and its
    negative margin on a one-column grid. Measured: 30px of real horizontal overflow at 390 from a
    media query that read perfectly correctly. A media query confers no specificity of its own.
    ⚠️ AND THE BLEED MUST BE UNDONE, NOT INHERITED. `margin-right: -56px` cancels the two-column
    layout's own 56px gutter; stacked, the gutter is 26px, so the same margin over-cancels by 30.
    The art also stops spanning rows it no longer shares and returns to the flow beneath the copy. */
 @media (max-width: 900px) {
-  /* ⚠️ ROW 5, NOT `auto` — AND THE PANEL MOVES TO 6 TO MAKE ROOM. `auto` auto-places, and
-     auto-placement starts AFTER the highest explicit row, which is the panel's 5 — so the
+  /* ⚠️ ROW 4, NOT `auto` — AND THE PANEL MOVES TO 5 TO MAKE ROOM. `auto` auto-places, and
+     auto-placement starts AFTER the highest explicit row, which is the panel's — so the
      artwork landed below the call to action. Measured at 390: turn@824, panel@1014, art@1583.
      The art belongs with the hero's argument and the panel closes the hero, so that order is
      stated here rather than left to a placement algorithm. Keep the two numbers in step. */
   .mk-hero .mk-illo--tall {
-    grid-row: 5; grid-column: 1;
+    grid-row: 4; grid-column: 1;
     margin-right: 0; justify-content: center; margin-top: 24px;
   }
 }

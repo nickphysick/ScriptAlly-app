@@ -11,7 +11,7 @@
 
 import { describe, it, expect } from "vitest";
 import {
-  HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_LEAD, HERO_TURN_BODY, HERO_EYEBROW,
+  HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_LEAD, HERO_TURN_BODY,
   DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
   FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_CTA,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
@@ -133,9 +133,16 @@ describe("landing copy — verbatim locks", () => {
    * `/pricing`, so a lock that forbade the WORDING across the module would go red on a correct
    * site. The claim is the constants.
    */
-  it("eyebrow and one primary CTA — no microline, no pricing link, no actions row", async () => {
-    expect(HERO_EYEBROW).toBe("For querying writers");
+  /**
+   * ⚠️ RETARGETED TO THE STRONGER CLAIM, NOT WEAKENED. This used to pin `HERO_EYEBROW`'s wording;
+   * the eyebrow is deleted, so the honest assertion is the one its four neighbours already make —
+   * that the export is absent. A lock on a string can only catch an edit to the string; a lock on
+   * the export catches the constant being quietly reinstated, which is the thing that would put
+   * the label back on the page.
+   */
+  it("no eyebrow, no microline, no pricing link, no actions row", async () => {
     const copy = await import("./landingCopy");
+    expect("HERO_EYEBROW" in copy).toBe(false);
     expect("CTA_START" in copy).toBe(false);
     expect("CTA_LEARN" in copy).toBe(false);
     expect("HERO_NOTE" in copy).toBe(false);

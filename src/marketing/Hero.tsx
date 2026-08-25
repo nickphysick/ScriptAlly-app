@@ -39,7 +39,7 @@
 
 import React from "react";
 import {
-  HERO_EYEBROW, HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_LEAD, HERO_TURN_BODY,
+  HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_LEAD, HERO_TURN_BODY,
 } from "./landingCopy";
 import { MarketingIllustration } from "./marketingMarks";
 import { FoundingPanel } from "./FoundingPanel";
@@ -61,8 +61,10 @@ export const Hero: React.FC<{
 }> = ({ onNavigate }) => (
   <section className="mk-hero">
     <div className="mk-heroinner">
-      <p className="mk-eyebrow mk-r mk-r1">{HERO_EYEBROW}</p>
-
+      {/* ⚠️ NO EYEBROW. `For querying writers` sat above this line and is deleted, constant and
+          all — the headline establishes its audience by itself, and a label saying who the page
+          is for is the page explaining a sentence that does not need explaining. Every row below
+          shifted up one when it went; the artwork's span moved with them. */}
       <h1 className="mk-statement mk-r mk-r1">{HERO_H1}</h1>
 
       <div className="mk-hcopy">
