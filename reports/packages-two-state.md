@@ -1856,3 +1856,37 @@ re-run to tell apart from a real fault.
 failed to report one task update in time, which vitest exits non-zero for and itself flags as
 *"might cause false positive tests"*. The distinction matters — an exit code is evidence about the
 run, and the summary is evidence about the code, and this run had them disagree.
+
+---
+
+## Eyeballed on dev — and it found one more
+
+The two seeded packages are **both sent**, so D15's unsent variant had never rendered anywhere: the
+unit lock asserted the branch existed in source, and every measurement had only ever seen the other
+one. A throwaway unsent package was created on dev to look at it, and removed after.
+
+**⚠️ THE UNSENT DRAWER WAS STATING `0 SENT · 0 REPLIED · 0 REQUESTS`.** D15 was applied to the
+*sections* — no holders, no returns, no lock — and **not to the scorecard in the head**, so an unsent
+package read three noughts under its own name. Chrome pretending to be a fact about something that
+has never happened.
+
+**Every check passed.** The sections were correctly absent and nothing asked what the head was
+claiming. It is the same shape as the versions lane's D17 fault earlier the same day: *a rule applied
+to the numerator and not to the denominator.* The measurement asserts the **pairing** now —
+scorecard cells present exactly when the returns line is — so it holds on either variant rather than
+counting three.
+
+| | sections | empty slots | holders | returns | lock | footer |
+|---|---|---|---|---|---|---|
+| **Voice-led (draft)** — unsent | What's in it | 1 | 0 | — | — | EDIT · ARCHIVE |
+| **Standard UK** — sent | all three | 0 | 5 | 5 SENT · 2 REPLIED · 2 REQUESTS | yes | DUPLICATE & EDIT · ARCHIVE |
+| **Comps-led variant** — sent | all three | 0 | 2 | 2 SENT · 1 REPLIED · 0 REQUESTS | yes | DUPLICATE & EDIT · ARCHIVE |
+
+Both variants confirmed by eye: the `LOCKED` chip and the `✕` no longer collide, the empty synopsis
+slot reads *"Not included"* in italic, the sample carries its version chip in both, and the sample's
+opening clamps to two lines on the sent one.
+
+**⚠️ FLAG — the primitive's pull tab.** `Form11Drawer` draws a vertical `tabLabel` down the panel's
+left edge; on the drawer it reads as a clipped fragment (`(DRAFT)` for "the package Voice-led
+(draft)"). It is the shared primitive's affordance and out of this pass's scope, but it is visible
+and it says nothing useful at that width.
