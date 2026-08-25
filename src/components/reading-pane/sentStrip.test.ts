@@ -90,7 +90,12 @@ describe("D-C2 — packaged is a contained strip, and its blue is named once", (
     expect(lbl).toBeGreaterThan(-1);
     expect(nm).toBeGreaterThan(lbl); // label first
     expect(rule(".qc-strip-lbl")).toContain("text-transform: uppercase");
-    expect(rule(".qc-strip-name")).toContain("Playfair Display");
+    /* ⚠️ THE TOKEN, NOT THE FAMILY NAME. This read `toContain("Playfair Display")`, which passed on
+       the FALLBACK in `var(--f12-serif, 'Playfair Display', serif)`. The fallback is gone — this
+       sheet renders inside `.t-f12`, which sets `--f12-serif` to exactly that family, so the
+       fallback was provably inert and the token is what the rule should have been asserting all
+       along. The claim is unchanged: the name is Playfair. */
+    expect(rule(".qc-strip-name")).toContain("var(--f12-serif)");
   });
 
   it("the name's line-height clears Playfair's descenders", () => {

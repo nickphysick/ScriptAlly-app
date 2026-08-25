@@ -99,7 +99,7 @@
  * descender, which clears. It is the ref's value and it is checked by measurement, not assumed.
  */
 .qc-strip-name {
-  font-family: var(--f12-serif, 'Playfair Display', serif);
+  font-family: var(--f12-serif);
   font-size: 15px;
   font-weight: 600;
   color: var(--pro-ink);
@@ -189,12 +189,17 @@
   font-size: 7.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--burg, #7c3a2a);
-  border-bottom: 1px solid var(--pink-cta-edge, #e8c8bc);
+  color: var(--burg);
+  /* ⚠️ THE LITERAL, NOT `var(--pink-cta-edge, …)`. No such token is defined anywhere, so the
+     hex WAS the value wearing a knob's clothes — and a reader would go looking for a knob that
+     does not exist. The three above lost their fallbacks for the opposite reason: this sheet
+     renders inside `.t-f12`, which SETS `--f12-serif`, `--burg` and `--ink`, so those fallbacks
+     were provably inert. */
+  border-bottom: 1px solid #e8c8bc;
   margin-left: auto;
   white-space: nowrap;
 }
-.qc-loose-promote:hover { color: var(--ink, #3a1c14); }
+.qc-loose-promote:hover { color: var(--ink); }
 
 /* ══════════════════════════════════════════════════════════════════════════════
    THE FOOTER — one row, both facts (Ruling 1)

@@ -199,3 +199,47 @@ sweep on its own merits, not by being missed.
 
 Gate: tsc clean, build clean, Vitest 387 files / 6680 tests green; grep with comments stripped finds
 no reference to any deleted symbol.
+
+## Part 2 — the `var()` fallback sweep, and why "does the token exist" is the wrong question
+
+⚠️ **D5's test is too simple, and the sweep proves it with the same token twice.**
+
+`--f12-serif` is defined — once, on **`.t-f12`**, a theme class `Queries.tsx` applies and the
+packages page does not sit under. So the identical construct has **opposite dispositions**:
+
+| site | inside `.t-f12`? | `var(--f12-serif, …)` is | done |
+|---|---|---|---|
+| `packageGroup.css:102` (Query Centre strip) | **yes** | dead weight — the token resolves | fallback dropped |
+| `packageTracking.css:20` (packages page) | **no** | **the painted value** — `Georgia, serif` renders | made an honest literal |
+
+Dropping the second as dead weight — the obvious reading of *"the token exists"* — would have
+silently changed the font on a live surface. **Existence is not resolution.**
+
+### The rest of this pack's sheets
+
+* `--burg`, `--ink` in `packageGroup.css` — defined on `.t-f12`, which this sheet renders inside, so
+  both fallbacks were **provably inert**. Dropped. (`--ink` is also `:root` at a *different* value;
+  inside `.t-f12` the theme's wins, and the fallback was a third value that never applied.)
+* `--pink-cta-edge` — **defined nowhere.** The hex was the value wearing a knob's clothes; now a
+  literal with the reason recorded.
+* `--pkg-near-black`, `--font-hand`, `--pkgo-page` — already literals from an earlier pass; the only
+  matches left are the comments recording that.
+
+⚠️ **A source lock was asserting the fallback.** `sentStrip.test.ts` read
+`toContain("Playfair Display")`, which passed on the fallback string rather than on the token. It now
+asserts `var(--f12-serif)`; the claim — the name is Playfair — is unchanged, and `.t-f12` sets
+`--f12-serif` to exactly that family.
+
+⚠️ **D7's proof is by scope, not by screenshot.** A fallback applies only when the token is unset;
+`.t-f12` sets all three at the sites they were dropped from, so those three were inert by
+construction and the painted values cannot have moved. Where the token does **not** resolve, the
+value was kept verbatim. A browser run was attempted and timed out; the scope argument is the
+stronger evidence in any case, because it holds at every viewport and theme rather than the one
+measured.
+
+## F-AN — `index.css`, reported not edited
+
+Its `.t-f12` block (lines ~948–1029) defines `--ink`, `--burg`, `--f12-serif` and siblings **at theme
+scope**, while `:root` defines `--ink` and `--burg` at *different* values. That is not a fault — it is
+how the F12 theme retones — but it is why a fallback sweep cannot be done by grep alone, and why the
+same `var(--ink, …)` is inert in one file and load-bearing in another. **Not edited.**
