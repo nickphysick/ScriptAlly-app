@@ -320,15 +320,29 @@ describe("D-D5 — a linked package's chips name its real materials", () => {
   it("the tooltip derivation it replaces is gone from the page", () => {
     const page = decls(read("src/components/Queries.tsx"));
     expect(page, "pkgComponents is back").not.toContain("const pkgComponents");
-    expect(page).toContain("linkedChips(linkedPackage, versions)");
+    /* ⚠️ MATCHED ON THE CALL'S SHAPE, NOT ITS ARGUMENT LIST. This pinned
+       `linkedChips(linkedPackage, versions)` exactly and went red the day the helper gained a third
+       argument — about a claim that had not moved. THE LAW IS "the chips come from `linkedChips`
+       rather than a local derivation", and an argument the helper happens to take is not part of it. */
+    expect(page).toMatch(/linkedChips\(\s*linkedPackage\s*,\s*versions\b/);
   });
 
   it("D-D6 — the chips are not the editable attached-material pill", () => {
     // ⚠️ `.qc-mchip-att` carries a × and an editor; a package's contents cannot be edited from the
     //    query, so these are a different class that happens to share the chip's shape.
     const page = decls(read("src/components/Queries.tsx"));
-    const i = page.indexOf("linkedChips(linkedPackage, versions)");
-    const block = page.slice(i, i + 500);
+    /**
+     * ⚠️ THE ANCHOR IS ASSERTED BEFORE THE SLICE, and it was not.
+     *
+     * This sliced from `indexOf("linkedChips(linkedPackage, versions)")` — which returned **-1** the
+     * day the helper gained a third argument. `slice(-1, 499)` yields `""`, and the three assertions
+     * then ran against an empty string. The positive one failed loudly, which is luck: the two
+     * `not.toContain`s would both have passed on `""`, and this case would have gone green having
+     * checked nothing. The `sliceBetween` family, one anchor along.
+     */
+    const i = page.search(/linkedChips\(\s*linkedPackage\s*,\s*versions\b/);
+    expect(i, "the linkedChips call site has moved — this slice reads nothing").toBeGreaterThan(-1);
+    const block = page.slice(i, i + 900);
     expect(block).toContain("qc-mchip-slot");
     expect(block).not.toContain("qc-mchip-att");
     expect(block).not.toContain("qc-mchipx");

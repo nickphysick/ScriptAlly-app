@@ -46,16 +46,31 @@ test("the two derived lines, against a seeded match / differs / unrecorded", asy
   for (const width of [1440, 1920]) {
     for (const c of CASES) {
       await openRoute(page, `/queries?q=${c.q}`, { width, height: 1200 });
-      await page.waitForTimeout(1100);
+      /**
+       * ⚠️ WAIT FOR THE ELEMENT, NOT FOR A DURATION. A fixed 1100ms reported "no version lines" on
+       * a pane that renders them — the query's own data arrives on a Firestore listener, so the
+       * settle time is whatever the network gives you that run. A sleep long enough today is a
+       * flake tomorrow, and the failure reads as a missing feature.
+       */
+      await expect(page.locator(".qv-lines").first()).toBeVisible({ timeout: 20_000 });
+      await page.waitForTimeout(250);
       const r = await read(page);
       out.push({ width, query: c.q, ...r });
 
-      const keys = r.lines.map((l) => l.key);
-      expect(keys, `${c.q} at ${width}: no version lines`).toContain("Opening read");
-      expect(keys, `${c.q} at ${width}: no held line`).toContain("Manuscript held");
+      /**
+       * ⚠️ COMPARED CASE-INSENSITIVELY, BECAUSE `.qv-k` IS `text-transform: uppercase`.
+       *
+       * `innerText` returns the RENDERED text, so the DOM says "OPENING READ" while the source says
+       * "Opening read" — and an assertion written from the source string fails on a pane that is
+       * working perfectly. This repo has recorded that trap repeatedly and it has now caught me in
+       * three separate packs; writing the expectation from the JSX is what does it every time.
+       */
+      const keys = r.lines.map((l) => (l.key ?? "").toLowerCase());
+      expect(keys, `${c.q} at ${width}: no version lines`).toContain("opening read");
+      expect(keys, `${c.q} at ${width}: no held line`).toContain("manuscript held");
 
-      const readLine = r.lines.find((l) => l.key === "Opening read")!;
-      const heldLine = r.lines.find((l) => l.key === "Manuscript held")!;
+      const readLine = r.lines.find((l) => (l.key ?? "").toLowerCase() === "opening read")!;
+      const heldLine = r.lines.find((l) => (l.key ?? "").toLowerCase() === "manuscript held")!;
 
       /* every case rides seed-pkg-1, so every case READS Prologue-first */
       expect(readLine.chip, `${c.q}: opening read`).toContain("PROLOGUE-FIRST");
@@ -79,13 +94,19 @@ test("the two derived lines, against a seeded match / differs / unrecorded", asy
         expect(heldLine.note?.toLowerCase()).toContain("version not recorded");
       }
 
-      /* D5 — the chip is on the SAMPLE pill and on no other material */
+      /**
+       * D5 — the chip is on the SAMPLE pill and on no other material.
+       *
+       * ⚠️ THIS ASSERTED `<= 1` AND PASSED ON ZERO — the vacuous shape, in a check written to prove
+       * a chip exists. It hid the chip being attached to the wrong builder entirely: `attach()`
+       * makes `qc-mchip-att` from the query's own materials and does not run for a packaged send,
+       * so nothing rendered and the measurement went green. **EXACTLY one**, and its owner named.
+       */
+      expect(r.samplePills, `${c.q}: no material pills at all`).toBeGreaterThan(0);
       const withChip = r.chipsOnPills.filter((p) => p.ver);
-      expect(withChip.length, `${c.q}: ${withChip.length} pills carry a version chip`).toBeLessThanOrEqual(1);
-      if (withChip.length === 1) {
-        expect(withChip[0].label?.toLowerCase()).toMatch(/chapter|page|sample|word/);
-        expect(withChip[0].ver).toContain("PROLOGUE-FIRST");
-      }
+      expect(withChip.length, `${c.q}: ${withChip.length} pills carry a version chip`).toBe(1);
+      expect(withChip[0].label?.toLowerCase()).toMatch(/chapter|page|sample|word/);
+      expect(withChip[0].ver).toContain("PROLOGUE-FIRST");
     }
   }
   console.log(JSON.stringify(out, null, 2));

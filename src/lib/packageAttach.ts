@@ -23,8 +23,9 @@
  * afterwards with the pill editor that already exists. A quantity conjured here would be a number
  * the record does not hold, printed as if it did.
  */
-import { ComponentType, type ManuscriptVersion, type QueryMaterial, type SubmissionPackage, type User } from "../types";
+import { ComponentType, type BookVersion, type ManuscriptVersion, type QueryMaterial, type SubmissionPackage, type User } from "../types";
 import { isSlotFilled } from "./packageMetrics";
+import { bookVersionOf } from "./bookVersions";
 import { MATERIAL_LABEL } from "./manuscriptPackages";
 import { isProUser } from "./suggestComps";
 
@@ -136,18 +137,37 @@ export const SLOT_EYEBROW: Record<string, string> = {
  * the name missing; `No longer available` is a fact, where a blank chip is a rendering fault and
  * omitting the row hides that something went.
  */
-export interface LinkedChip { key: string; eyebrow: string; name: string; missing: boolean }
+export interface LinkedChip {
+  key: string; eyebrow: string; name: string; missing: boolean;
+  /**
+   * The BOOK version this slot's material excerpts (Part E, D5) — sample pages only, and null
+   * everywhere else.
+   *
+   * ⚠️ IT IS REACHED THROUGH THE MATERIAL, NEVER THROUGH THE PACKAGE. A package carries no version
+   * field anywhere in this app; `bookVersionOf` enforces sample-pages-only, so a stray id on a
+   * letter draws nothing. One edge, and the two can never disagree.
+   */
+  bookVersionName: string | null;
+}
 
 export function linkedChips(
   pkg: SubmissionPackage,
   versions: readonly ManuscriptVersion[],
+  /** The manuscript's book versions. Absent, or fewer than two, and no chip is offered (D12). */
+  bookVersions: readonly BookVersion[] = [],
 ): LinkedChip[] {
-  return packageItems(pkg, versions).map((i) => ({
-    key: i.versionId,
-    eyebrow: SLOT_EYEBROW[i.type] ?? i.label,
-    name: i.versionName?.trim() || MISSING_SLOT_CHIP,
-    missing: !i.versionName?.trim(),
-  }));
+  const show = bookVersions.length >= 2;
+  return packageItems(pkg, versions).map((i) => {
+    const mat = show ? versions.find((v) => v.id === i.versionId) : undefined;
+    const bvId = mat ? bookVersionOf(mat) : null;
+    return {
+      key: i.versionId,
+      eyebrow: SLOT_EYEBROW[i.type] ?? i.label,
+      name: i.versionName?.trim() || MISSING_SLOT_CHIP,
+      missing: !i.versionName?.trim(),
+      bookVersionName: bvId ? bookVersions.find((b) => b.id === bvId)?.name ?? null : null,
+    };
+  });
 }
 
 /** Same words as the packages page's own missing-slot state — one sentence, two surfaces. */

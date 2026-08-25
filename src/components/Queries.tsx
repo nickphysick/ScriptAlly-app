@@ -6019,11 +6019,7 @@ export const Queries: React.FC<{
                                  * appears — a second treatment would teach two vocabularies for one
                                  * thing.
                                  */
-                                const sampleVersion = openingRead(activeQuery, packages, versions, activeBookVersions);
-                                if (sampleItem) pills.push({ material: "Sample Pages", node: attach("smp", formatQueryMaterial(sampleItem), (el) => { openSampleEditor(); openMatPop("smp", el); }, "Opening sample", () => removeSampleMaterial(activeQuery, activeAgent),
-                                  sampleVersion && versionsActive({ bookVersions: activeBookVersions })
-                                    ? <span className="pkgb-mver qc-mchipver"><span aria-hidden="true">§</span>{sampleVersion.name}</span>
-                                    : undefined) });
+                                if (sampleItem) pills.push({ material: "Sample Pages", node: attach("smp", formatQueryMaterial(sampleItem), (el) => { openSampleEditor(); openMatPop("smp", el); }, "Opening sample", () => removeSampleMaterial(activeQuery, activeAgent)) });
                                 otherItems.forEach((it, i) => pills.push({
                                   material: materialName(it),
                                   node: attach(`oth-${i}`, formatQueryMaterial(it), (el) => openOtherEditor(it, el), formatQueryMaterial(it), () => removeOtherMaterial(activeQuery, activeAgent, it)),
@@ -6178,10 +6174,23 @@ export const Queries: React.FC<{
                                     }}
                                     onRemovePackage={() => void removeQueryPackage(activeQuery, linkedPackage.packageName)}
                                   >
-                                    {linkedChips(linkedPackage, versions).map((c) => (
+                                    {linkedChips(linkedPackage, versions, activeBookVersions).map((c) => (
                                       <span key={c.key} className={`qc-mchip qc-mchip-slot${c.missing ? " qc-mchip-gone" : ""}`}>
                                         <span className="qc-mchipeye">{c.eyebrow}</span>
                                         <span className="qc-mchiptx">{c.name}</span>
+                                        {/**
+                                          * ⚠️ THE VERSION CHIP GOES ON THE SLOT PILL (Part E, D5),
+                                          * and the first attempt put it on the WRONG BUILDER. The
+                                          * strip's pills are `qc-mchip-slot`, built from the
+                                          * PACKAGE's contents by `linkedChips`; `attach()` builds
+                                          * `qc-mchip-att` from the query's own `materialsWanted`
+                                          * and does not run for a packaged send — which is exactly
+                                          * the case D5 is about. It rendered nothing, and a
+                                          * measurement asserting "at most one chip" passed on zero.
+                                          */}
+                                        {c.bookVersionName && (
+                                          <span className="pkgb-mver qc-mchipver"><span aria-hidden="true">§</span>{c.bookVersionName}</span>
+                                        )}
                                       </span>
                                     ))}
                                   </PackageGroup>
