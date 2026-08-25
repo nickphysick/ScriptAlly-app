@@ -1512,3 +1512,37 @@ anything D3–D20 changes.
 
 Part A is committed and **undeployed** — dev serves `7f718ec0` (the stationery band). Deploy A–C
 together once the bands are done. Both refs are committed.
+
+## Phase 0 — the manuscript selector: R1's answer is *duplicate*, and the sidebar's is a superset
+
+| | page selector (`msSelector`) | sidebar (`WorkspaceShell:400`) |
+|---|---|---|
+| storage | `scriptally_active_manuscript_id` | **the same key** |
+| switch | chevron → listbox, **title only** | chevron → listbox with a **subtitle per row** |
+| also | — | **prev/next arrows** + position dots |
+| where | the packages page | **every page** |
+
+Same job, same key, and the sidebar's carries strictly more: arrows, dots, and a subtitle the page's
+list omitted. **Deleted (D0a).** It does not move to the header either — a band head's actions act on
+that band, so page scope on Packages implies it does not scope Materials, which is false; and the
+shared masthead refuses actions outright.
+
+### D0c — what assumed it existed, checked before deleting
+
+⚠️ **`activeMs` is load-bearing and stays.** It derives `msId`, which scopes *every* list on the page
+(`msVersions`, `msPackages`, `msQueries`), and it drives the no-manuscript branch. This is the check
+that D1 skipped last run, when the hero looked deletable and was carrying the New package CTA.
+
+Everything else was the selector's own machinery and went with it in the same commit: `selectMs`,
+`multiMs`, `msMenuOpen`, `msMenuRef`, its outside-click effect, `bookIcon`, and the `.pkgw-mschip` /
+`.pkgw-mschip--static` / `.pkg-msopt` rules.
+
+### Measured, workspace state
+
+```
+pageSelector 0 · newPkgCta 1 · sidebarScope 2
+heroBand 0 · heroCopy false · ghostCards 1 · realCards 2
+```
+
+`＋ New package` stays in the band head (D0d) — it genuinely acts on that band, and the ref puts it
+there.

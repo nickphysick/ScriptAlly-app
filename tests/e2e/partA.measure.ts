@@ -16,6 +16,10 @@ const count = (page: import("@playwright/test").Page) => page.evaluate(() => {
     ghostCopy: (txt.match(/Build another package/g) ?? []).length,
     realCards: q(".pkgb-pkgcard"),
     bandHeads: q(".pkgb-bandhead"),
+    /* Phase 0 — the page's own selector must be gone, and the sidebar's must still be there. */
+    pageSelector: q(".pkgw-mschip"),
+    newPkgCta: q(".pkgb-newpkg"),
+    sidebarScope: document.querySelectorAll(".ws-msname, .sv2-scope, [aria-label='Previous manuscript']").length,
   };
 });
 

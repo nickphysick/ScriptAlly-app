@@ -37,10 +37,10 @@ export interface PackagesBandProps {
    * property the masthead law is protecting.
    */
   onHowItWorks?: () => void;
-  /** ⚠️ THE HERO'S TWO SURVIVORS (D1). The band head is where the ref puts a band's actions, and
-   *  these are the page's scope control and its primary action — neither could go with the hero. */
+  /** ⚠️ THE HERO'S ONE SURVIVOR. The band head is where the ref puts a band's actions; the
+   *  manuscript selector that briefly sat here is deleted (Phase 0) — it duplicated the sidebar's,
+   *  and page-level scope never belonged to one band anyway. */
   sent?: number;
-  manuscriptControl?: React.ReactNode;
   /**
    * ⚠️ ARCHIVED ITEMS ARRIVE AS THEIR OWN LIST (F-H, D1/D3). They are never merged into the active
    * array, so the count above cannot see them whatever the toggle says.
@@ -65,7 +65,7 @@ export interface PackagesBandProps {
 }
 
 export const PackagesBand: React.FC<PackagesBandProps> = ({
-  packages, versions, queries, onOpenPackage, onNewPackage, onHowItWorks, sent, manuscriptControl, onDuplicatePackage, renderRemove, renderTracking,
+  packages, versions, queries, onOpenPackage, onNewPackage, onHowItWorks, sent, onDuplicatePackage, renderRemove, renderTracking,
   archived, showArchived, onToggleArchived, onRestore,
 }) => {
   const tiles = packageTiles(packages, versions, queries);
@@ -78,7 +78,6 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
         <span className="pkgb-tag">
           {packages.length} built{typeof sent === "number" ? ` · ${sent} sent` : ""}
         </span>
-        {manuscriptControl}
         {/* ⚠️ IT CHANGES NOTHING, so it is the quietest control on the page — a ghost beside the
             count, never a filled button competing with the page's actual work. */}
         <ArchivedToggle n={archived.length} on={showArchived} onClick={onToggleArchived} />

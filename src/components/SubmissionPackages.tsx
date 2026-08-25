@@ -61,8 +61,6 @@ export const SubmissionPackages: React.FC = () => {
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("scriptally_active_manuscript_id") : null,
   );
-  const [msMenuOpen, setMsMenuOpen] = useState(false);
-  const msMenuRef = useRef<HTMLDivElement>(null);
   // The guided tour. While active the workshop renders the PURE example fixture (never persisted) and
   // the gold badge; on end we clear it and stamp hasSeenTour so it never auto-runs again.
   const [tourActive, setTourActive] = useState(false);
@@ -105,16 +103,6 @@ export const SubmissionPackages: React.FC = () => {
     }
   }, [manuscripts, activeMsId]);
 
-  // Outside-click closes the manuscript menu.
-  useEffect(() => {
-    if (!msMenuOpen) return;
-    const onClick = (e: MouseEvent) => {
-      if (msMenuRef.current && !msMenuRef.current.contains(e.target as Node)) setMsMenuOpen(false);
-    };
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
-  }, [msMenuOpen]);
-
   const activeMs = useMemo(() => manuscripts.find((m) => m.id === activeMsId) ?? manuscripts[0], [manuscripts, activeMsId]);
   const msId = activeMs?.id;
   const msVersions = useMemo(() => versions.filter((v) => v.manuscriptId === msId), [versions, msId]);
@@ -150,13 +138,6 @@ export const SubmissionPackages: React.FC = () => {
   }, [agents]);
 
   if (!currentUser) return null;
-
-  const selectMs = (id: string) => {
-    setActiveMsId(id);
-    localStorage.setItem("scriptally_active_manuscript_id", id);
-    setMsMenuOpen(false);
-  };
-  const multiMs = manuscripts.length > 1;
 
   // ── Workshop persistence — all scoped to the active manuscript. ──
   /**
@@ -272,34 +253,23 @@ export const SubmissionPackages: React.FC = () => {
      page has been invisible to a rule that needed it (the root's `overflowY`, then its 28px side
      padding). `.pkgw-mschip` carries the same declarations. */
   const chipShell: React.CSSProperties = {};
-  const msSelector = activeMs ? (
-    <div ref={msMenuRef} style={{ position: "relative" }}>
-      {multiMs ? (
-        <button type="button" onClick={() => setMsMenuOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={msMenuOpen} className="pkgw-mschip">
-          {bookIcon}
-          <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 }}>{activeMs.title}</span>
-          <ChevronDown style={{ width: 15, height: 15, color: "var(--muted)", flexShrink: 0, transform: msMenuOpen ? "rotate(180deg)" : "none", transition: "transform .15s" }} aria-hidden="true" />
-        </button>
-      ) : (
-        <span className="pkgw-mschip pkgw-mschip--static">
-          {bookIcon}
-          <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 240 }}>{activeMs.title}</span>
-        </span>
-      )}
-      {multiMs && msMenuOpen && (
-        <div role="listbox" style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, minWidth: 220, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 10, boxShadow: "0 10px 26px rgba(29,23,18,.18)", padding: 6, zIndex: 40 }}>
-          {manuscripts.map((m) => {
-            const on = m.id === activeMs.id;
-            return (
-              <button key={m.id} type="button" role="option" aria-selected={on} onClick={() => selectMs(m.id)} className="pkg-msopt" style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", fontFamily: FONT_SERIF, fontSize: 14, fontWeight: on ? 700 : 500, color: on ? "var(--burg)" : "var(--ink)", background: on ? "linear-gradient(135deg, var(--band-a), var(--band-b))" : "transparent", border: "none", borderRadius: 7, padding: "9px 11px", cursor: "pointer" }}>
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  ) : null;
+  /**
+   * ⚠️ THE PAGE'S MANUSCRIPT SELECTOR IS DELETED (Phase 0, D0a) — it duplicated the sidebar's.
+   *
+   * Both read and write the SAME key, `scriptally_active_manuscript_id`, and offer the same list.
+   * The sidebar's is a strict superset: `WorkspaceShell.tsx:400` gives it prev/next arrows and
+   * position dots, and its rows carry a subtitle this one omitted — on every page, not just here.
+   * Two controls doing one job in two places is worse than one.
+   *
+   * ⚠️ AND IT DOES NOT MOVE TO THE HEADER EITHER. A band head's actions act on THAT band, so page
+   * scope sitting on Packages implies it does not scope Materials, which is false; and the shared
+   * masthead refuses actions outright. The sidebar is already the right home.
+   *
+   * ⚠️ `activeMs` STAYS — it is load-bearing and the deletion check found it (D0c). It derives
+   * `msId`, which scopes every list on this page, and it drives the no-manuscript branch below.
+   * Only the selector's own machinery went: `selectMs`, `multiMs`, `msMenuOpen`, `msMenuRef`,
+   * `bookIcon` and the `.pkgw-mschip` / `.pkg-msopt` rules.
+   */
 
   /* ⚠️ THE SIDE PADDING IS GONE (strip-fixes §3/§4), for a related reason and with the same
      invisibility: 28px each side here inset the whole GRID, so this page's header sat 28px
@@ -314,7 +284,6 @@ export const SubmissionPackages: React.FC = () => {
   return (
     <div className="pkg-root pkgw" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "0 0 16px" /* no top inset — the grid owns the gap above the header */, gap: 14, overflow: "hidden" }}>
       <style>{`
-        .pkg-msopt:hover { background: linear-gradient(135deg, var(--band-a), var(--band-b)) !important; }
         @media (max-width: 768px) { .pkg-root { height: auto; min-height: 100%; overflow: visible; } }
       `}</style>
 
@@ -428,7 +397,6 @@ export const SubmissionPackages: React.FC = () => {
                 onNewPackage={() => { setPkgEditing(null); setPkgDuplicating(null); setPkgModal(true); }}
                 onHowItWorks={() => setHowOpen(true)}
                 sent={trackingTotals(msPackages, msQueries).sent}
-                manuscriptControl={msSelector}
                 archived={archivedPackages}
                 showArchived={showArchived}
                 onToggleArchived={() => setShowArchived((v) => !v)}

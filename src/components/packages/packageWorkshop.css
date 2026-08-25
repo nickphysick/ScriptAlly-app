@@ -837,16 +837,8 @@
  * down, so the strip read as fuller and tighter than every other page's at the same height.
  * A page element with no working-state size is the exception that is wrong, not the row.
  */
-.pkgw-mschip {
-  display: inline-flex; align-items: center; gap: 9px;
-  font-family: 'Playfair Display', Georgia, serif; font-size: 15px; font-weight: 600;
-  color: var(--ink); background: #fffefb; border: var(--bdw) solid var(--bd); border-radius: 10px;
-  /* the values, not `var()`s on retired tokens — see the note in discover.css */
-  height: 38px; padding: 0 14px; cursor: pointer;
-  transition: height .22s cubic-bezier(.4, 0, .2, 1), padding .22s cubic-bezier(.4, 0, .2, 1),
-    font-size .22s cubic-bezier(.4, 0, .2, 1);
-}
-.pkgw-mschip--static { cursor: default; padding: 0 16px; }
+/* ⚠️ `.pkgw-mschip` / `.pkgw-mschip--static` ARE GONE (Phase 0) — the page's manuscript
+   selector duplicated the sidebar's and was deleted with its styles. */
 /* ⚠️ FIVE `.wsh--scrolled` OVERRIDES WERE DELETED HERE, not moved. The chip, the button and the
    pill each carried their own working sizes — three ladders, one of which (the button's) is why
    `.pkgw-btn` measured correct in a header it should never have been in. The chip reads the shared
