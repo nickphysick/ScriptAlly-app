@@ -99,6 +99,14 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   --mk-blush: #f8e8e1;
   --mk-panel-sh: rgba(124, 58, 42, .08);
   --mk-blush-line: #eed6cb;
+  /* ⚠️ THE QUIET LABEL TREATMENT ON CARD KICKERS, AND IT IS DELIBERATELY NOT EITHER NEIGHBOUR.
+     Mono uppercase at wide tracking is a high-attention treatment, and on the deal cards the
+     HEADING is the offer — the kicker only says which of the three you are reading. This sits
+     between `--mk-muted` (#8a7a6c, 16 points lighter on every channel and visibly cooler) and
+     `--mk-blush-body` (#6d5348, darker and redder); neither is this value, and snapping to one to
+     save a token would be a colour decision made by convenience. Alpha pre-computed, per the
+     no-`color-mix()` rule. */
+  --mk-kicker: rgba(122, 101, 92, .7);
   --mk-blush-label: #9c6a56;
   --mk-blush-body: #6d5348;
   --mk-blush-note: #8a6c5f;
@@ -951,9 +959,12 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 }
 /* The offer itself, in blush; the other two qualify it. */
 .mk-fwcard--hl { background: var(--mk-blush); border-color: var(--mk-cta-bd); }
+/* ⚠️ QUIETER THAN IT WAS, ON PURPOSE — .6rem/.22em/blush-label arrived BEFORE the heading and
+   out-shouted it. The heading is the offer; the kicker names which of the three cards you are in.
+   Everything else about the cards is unchanged. */
 .mk-fwk {
-  font-family: "JetBrains Mono", monospace; font-size: .6rem; letter-spacing: .22em;
-  text-transform: uppercase; color: var(--mk-blush-label); margin: 0 0 12px;
+  font-family: "JetBrains Mono", monospace; font-size: .55rem; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--mk-kicker); margin: 0 0 9px;
 }
 /* 1.3, the house floor for mixed-case Playfair — "Half price, for as long as you need it." has a
    descender in it, and this is copy that can change. */

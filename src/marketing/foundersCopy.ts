@@ -71,8 +71,9 @@ export const FOUNDERS_DEAL: DealCard[] = [
     kicker: "A direct line",
     heading: "You shape what's built",
     body:
-      "Founding writers will work alongside ScriptAlly's founder to shape the tool and design " +
-      "features that work for them.",
+      "You'll be in direct contact with ScriptAlly's founder, giving feedback, shaping new " +
+      "features, helping to design and refine a tool that works for you and for the whole " +
+      "writing community.",
   },
 ];
 

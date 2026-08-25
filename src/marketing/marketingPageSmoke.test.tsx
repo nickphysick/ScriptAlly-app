@@ -458,6 +458,7 @@ describe("the Founding Writers page", () => {
     expect(h).toContain("Six months of Pro, free");
     expect(h).toContain("Half price, for as long as you need it.");
     expect(h).toContain("You shape what&#x27;s built");
+    expect(h).toContain("You&#x27;ll be in direct contact with ScriptAlly&#x27;s founder");
     expect(h).toContain("Full disclosure");
     expect(h).toContain("Nick — ScriptAlly&#x27;s founder");
   });
