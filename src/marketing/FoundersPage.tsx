@@ -71,7 +71,7 @@ export const FoundersPage: React.FC<{
             different lengths do not push three bodies out of line with each other. */}
         <section className="mk-fwdeal" aria-label="What founding writers get">
           {FOUNDERS_DEAL.map((card) => (
-            <div key={card.key} className={"mk-fwcard" + (card.highlight ? " mk-fwcard--hl" : "")}>
+            <div key={card.key} className="mk-fwcard">
               <p className="mk-fwk">{card.kicker}</p>
               <h2>{card.heading}</h2>
               <p>{card.body}</p>

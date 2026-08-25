@@ -69,9 +69,18 @@ describe("the hero", () => {
 });
 
 describe("the deal", () => {
-  it("three cards, the offer highlighted and the other two qualifying it", () => {
+  /**
+   * ⚠️ RETARGETED, AND THE CLAIM IS NOW THAT NO CARD IS SINGLED OUT. This used to assert the first
+   * card carried a blush `highlight`; the three read as one set of three things you get, and
+   * tinting one said they were different KINDS rather than different clauses. Asserting the flag
+   * is ABSENT from every card is what stops it being reinstated on one of them — a lock on
+   * `["deal"]` could only ever have caught it moving to a different card.
+   */
+  it("three cards, and none of them is singled out", () => {
     expect(FOUNDERS_DEAL.map((c) => c.key)).toEqual(["deal", "sweetener", "line"]);
-    expect(FOUNDERS_DEAL.filter((c) => c.highlight).map((c) => c.key)).toEqual(["deal"]);
+    for (const card of FOUNDERS_DEAL) {
+      expect("highlight" in card, `${card.key} carries no highlight flag`).toBe(false);
+    }
   });
 
   it("kickers and headings, verbatim", () => {

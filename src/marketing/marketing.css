@@ -1180,8 +1180,6 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   background: var(--mk-parch); border: 1px solid var(--mk-hair); border-radius: 14px;
   padding: 28px 26px 26px; box-shadow: 0 10px 26px rgba(58, 28, 20, .06);
 }
-/* The offer itself, in blush; the other two qualify it. */
-.mk-fwcard--hl { background: var(--mk-blush); border-color: var(--mk-cta-bd); }
 /* ⚠️ QUIETER THAN IT WAS, ON PURPOSE — .6rem/.22em/blush-label arrived BEFORE the heading and
    out-shouted it. The heading is the offer; the kicker names which of the three cards you are in.
    Everything else about the cards is unchanged.

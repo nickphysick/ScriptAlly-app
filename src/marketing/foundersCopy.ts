@@ -53,9 +53,12 @@ export interface DealCard {
   kicker: string;
   heading: string;
   body: string;
-  /** The first card carries the blush treatment — it is the offer, the others qualify it. */
-  highlight?: boolean;
 }
+/* ⚠️ NO `highlight` FLAG. The first card wore a blush fill on the reasoning that it is the offer
+   and the other two qualify it; on the page the three read as one set of three things you get,
+   and tinting one of them said they were different KINDS rather than different clauses. The flag,
+   its conditional class and `.mk-fwcard--hl` all went together — a flag with no true value is a
+   knob nobody turns, and the next reader would have gone looking for what sets it. */
 
 export const FOUNDERS_DEAL: DealCard[] = [
   {
@@ -66,7 +69,6 @@ export const FOUNDERS_DEAL: DealCard[] = [
       "The full force of ScriptAlly is yours. Be amongst the first to supercharge your campaign " +
       "for agent representation, backed by an arsenal of time-saving Pro features and a tailored " +
       "suite of querying analytics.",
-    highlight: true,
   },
   {
     key: "sweetener",
