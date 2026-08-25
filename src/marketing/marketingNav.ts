@@ -2,7 +2,7 @@
  * Auth-aware marketing-nav state — pure, so the tier tests can lock both modes without DOM
  * rendering (repo test convention: node environment, no testing-library).
  *
- * Logged out : Log in (ghost) + "Start tracking — it's free" (white Cappuccino button).
+ * Logged out : Log in (ghost) + "Become a Founding Writer" (the nav's ink pill, → /founders).
  * Logged in  : white "Open dashboard" button + avatar chip — the landing never redirects.
  */
 

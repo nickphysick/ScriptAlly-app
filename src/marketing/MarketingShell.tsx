@@ -3,7 +3,7 @@
  * tier map). Pinned desk-coloured top nav that condenses once a 40px sentinel at the top of the
  * document has scrolled out of view (the marketing tier scrolls the document — the stage-scroll
  * rules are workspace-only). Right side is auth-aware via the pure marketingNavState:
- *   logged out → Log in (ghost, → #/login) + "Start tracking — it's free" (→ #/signup)
+ *   logged out → Log in (ghost, → #/login) + "Become a Founding Writer" (→ /founders)
  *   logged in  → "Open dashboard" + avatar chip — never an auto-redirect.
  *
  * Pre-auth hashes stay the auth transport (the holding page's existing links depend on them);

@@ -11,7 +11,7 @@
 
 import { describe, it, expect } from "vitest";
 import {
-  HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B, HERO_EYEBROW, CTA_START,
+  HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B, HERO_EYEBROW,
   DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
   FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_CTA,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
@@ -102,10 +102,19 @@ describe("landing copy — verbatim locks", () => {
    * neither string is exported any more is the claim that now matters, because a hero with three
    * things under the headline is exactly what this change removed.
    */
-  it("eyebrow and one primary CTA — no microline, no pricing link", async () => {
+  /**
+   * ⚠️ RETARGET AGAIN, AND THE CLAIM NARROWS RATHER THAN WIDENS. The hero's action is the founding
+   * panel now, so `CTA_START` and `CTA_LEARN` are deleted with the row that rendered them —
+   * asserting their absence is what stops the actions row being reinstated from a diff.
+   * ⚠️ BUT NOT THE STRING. "Start tracking — it's free" is still the free tier's action label on
+   * `/pricing`, so a lock that forbade the WORDING across the module would go red on a correct
+   * site. The claim is the constants.
+   */
+  it("eyebrow and one primary CTA — no microline, no pricing link, no actions row", async () => {
     expect(HERO_EYEBROW).toBe("For querying writers");
-    expect(CTA_START).toBe("Start tracking — it's free");
     const copy = await import("./landingCopy");
+    expect("CTA_START" in copy).toBe(false);
+    expect("CTA_LEARN" in copy).toBe(false);
     expect("HERO_NOTE" in copy).toBe(false);
     expect("CTA_PRICING" in copy).toBe(false);
     expect(Object.values(copy).filter((v): v is string => typeof v === "string"))

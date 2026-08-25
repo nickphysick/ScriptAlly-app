@@ -84,9 +84,8 @@ export const submitFounding = async (email: string): Promise<void> => {
   });
 };
 
-/** Tests only — the module holds process-wide state by design. */
-export const __resetFounding = (): void => {
-  snapshot = { state: "idle", count: null };
-  countRequested = false;
-  listeners.clear();
-};
+/* ⚠️ NO `__reset` EXPORT. One was written and deleted before it shipped: this repo's tests read
+   SOURCE (`environment: 'node'`, no jsdom, no testing-library), so nothing here ever renders a
+   state change and nothing would have called it. An exported reset with no caller is a knob that
+   does nothing — the same fault the token lock's inverse half exists to catch, in TypeScript
+   rather than CSS. If a rendering test arrives, it comes back with a caller. */

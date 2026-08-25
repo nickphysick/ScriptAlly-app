@@ -72,10 +72,13 @@ export const HERO_TURN_B = "ScriptAlly tips the odds back in your favour.";
  * a single button is the whole ask, and two more things under it were competing for the click
  * they were meant to support. Do not reinstate either without the same decision being re-made.
  */
-export const CTA_START = "Start tracking — it's free";
-
-/** The hero's secondary action — an anchor to the section break, not a second destination. */
-export const CTA_LEARN = "Learn more";
+/* ⚠️ `CTA_START` AND `CTA_LEARN` ARE DELETED WITH THE ACTIONS ROW THAT RENDERED THEM. The hero's
+   action is the founding panel; `Start tracking — it's free` offered a self-serve product that
+   does not exist yet, and `Learn more` was an in-page anchor competing with a real offer three
+   inches below it.
+   ⚠️ THE STRING "Start tracking — it's free" IS STILL LIVE, on `/pricing`, as the free tier's
+   action label — so a lock asserting the WORDING has left the site would be wrong. The claim is
+   about the constants and the hero. */
 
 /* ══════════════ The parchment band's header ══════════════ */
 

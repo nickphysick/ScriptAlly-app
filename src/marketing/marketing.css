@@ -189,19 +189,6 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   .mk-navwrap, .mk-nav, .mk-logo { transition: none !important; }
 }
 
-/* The hero's secondary action: a text link to the section break. */
-.mk-learn {
-  color: var(--mk-burg); text-decoration: none; font-size: .98rem;
-  border-bottom: 1px solid rgba(124, 58, 42, .35); padding-bottom: 2px; cursor: pointer;
-}
-.mk-learn:hover { border-bottom-color: var(--mk-burg); }
-.mk-chev { display: inline-block; margin-left: .4em; transition: transform .18s ease; }
-.mk-learn:hover .mk-chev { transform: translateY(2px); }
-@media (prefers-reduced-motion: reduce) {
-  .mk-chev { transition: none; }
-  .mk-learn:hover .mk-chev { transform: none; }
-}
-
 /* ⚠️ A MODIFIER, NOT A CHANGE TO `.mk-btn`. The base button is the Cappuccino-conformant white
    one and it is worn by the nav, Pricing and Contact — all out of this pack's scope. The soft-pink
    pair is the app's own CTA treatment (`#f5e2da` on `#e8c8bc`), and it is applied per button so
@@ -561,9 +548,9 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-found-panel .mk-betainvalid { margin-top: 10px; }
 
 /* The continuation: the lede on a paper slip, the postscript tilted against it.
-   ⚠️ THE `vh` CEILINGS ON THIS BLOCK, `.mk-turn` AND `.mk-hctas` ARE REACHED AT ~900px OF VIEWPORT
-   HEIGHT ON PURPOSE — see the note on the headline token. A ceiling here should be roughly the
-   value the `vh` term yields at 900. */
+   ⚠️ THE `vh` CEILINGS ON THIS BLOCK AND ON `.mk-turn` ARE REACHED AT ~900px OF VIEWPORT HEIGHT ON
+   PURPOSE — see the note on the headline token. A ceiling here should be roughly the value the
+   `vh` term yields at 900. (`.mk-hctas` carried a third; it is deleted with the actions row.) */
 .mk-after { position: relative; margin: 0; }
 
 /* ⚠️ THE ROTATION IS THE POINT, AND IT IS ALSO THE RISK. −0.45° reads as a note set down on the
@@ -613,11 +600,6 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   display: block; font-family: "Playfair Display", Georgia, serif;
   font-size: 1.72rem; line-height: 1.22; color: var(--mk-ink); letter-spacing: -.012em;
 }
-/* ⚠️ RE-TUNED FOR ONE CHILD. This margin was set when a text link sat beside the button and a
-   microline sat beneath it; with both gone the button was the last thing in the column and the
-   old 26–28px read as a crowded finish. `.mk-hnote` and its rule are deleted with it. */
-.mk-hctas { display: flex; gap: 26px; margin: 44px 0 0; align-items: center; flex-wrap: wrap; }
-
 /* ⚠️ THE ENTRANCE IS DECLARED ONLY INSIDE `no-preference`, SO REDUCED MOTION IS INERT BY
    CONSTRUCTION — not "the same animation, faster". Outside the query these elements have no
    opacity and no transform at all, so the final state is simply what gets painted. Suppressing an
