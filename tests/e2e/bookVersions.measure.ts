@@ -148,3 +148,66 @@ test("the versions panel — gate, counts and chips", async ({ page }) => {
 
   console.log(JSON.stringify(report, null, 2));
 });
+
+/**
+ * ⚠️ THE EDITORIAL CLAIM IS MEASURED, NOT ASSERTED. The ref draws a sage band; this build makes it a
+ * token because `manuscriptPlate.css` already rules that Editorial is monochrome. That reconciliation
+ * is a decision about a rendered colour, so it is checked as one — by the repo's own standing test:
+ * **not "is it sage" but "what is its chroma"**, because a rule written against one named hue passes
+ * anything that is not that hue, and this codebase has already had a pink slip through such a check.
+ *
+ * The theme class is toggled in the DOM rather than through the settings control: the tokens are
+ * resolved purely from that ancestor class, so swapping it exercises exactly the cascade under test
+ * without writing a preference to the account.
+ */
+test("the band and the chips are a token, and Editorial keeps its chroma", async ({ page }) => {
+  await openRecord(page, 1440);
+  await expect(page.locator(".bv-panel").first()).toBeVisible({ timeout: 15_000 });
+
+  const out = await page.evaluate(() => {
+    const root = document.querySelector(".t-capp, .t-bold, .t-edn") as HTMLElement;
+    if (!root) return { error: "no theme root" };
+    const original = root.className;
+    const read = () => {
+      const q = (s: string) => document.querySelector(s) as HTMLElement | null;
+      const grab = (el: HTMLElement | null, prop: string) =>
+        el ? getComputedStyle(el).getPropertyValue(prop).trim() : "";
+      return {
+        band: grab(q(".bv-band"), "background-image") || grab(q(".bv-band"), "background-color"),
+        rr: grab(q(".bv-chip--rr"), "background-color"),
+        latest: grab(q(".bv-chip--latest"), "background-color"),
+        kind: grab(q(".bv-chip--kind"), "background-color"),
+      };
+    };
+    const res: Record<string, ReturnType<typeof read>> = {};
+    for (const t of ["t-capp", "t-bold", "t-edn"]) {
+      root.className = original.replace(/\bt-(capp|bold|edn)\b/g, t);
+      res[t] = read();
+    }
+    root.className = original;
+    return res;
+  });
+
+  console.log(JSON.stringify(out, null, 2));
+  expect((out as { error?: string }).error).toBeUndefined();
+  const themed = out as Record<string, Record<string, string>>;
+
+  /* the band must not be the same value in every theme, or it is not a token at all */
+  expect(themed["t-capp"].band).not.toBe(themed["t-edn"].band);
+
+  /**
+   * ⚠️ CHROMA SPREAD, NOT A NAMED HUE. Every colour Editorial paints here must have its channels
+   * within 6 of one another — the standing form of this repo's Editorial rule.
+   */
+  const spread = (rgb: string): number => {
+    const m = rgb.match(/\d+(\.\d+)?/g);
+    if (!m || m.length < 3) return 0;
+    const [r, g, b] = m.slice(0, 3).map(Number);
+    return Math.max(r, g, b) - Math.min(r, g, b);
+  };
+  for (const [key, value] of Object.entries(themed["t-edn"])) {
+    for (const rgb of value.match(/rgba?\([^)]*\)/g) ?? []) {
+      expect(spread(rgb), `Editorial's ${key} paints ${rgb} — chroma ${spread(rgb)}`).toBeLessThanOrEqual(6);
+    }
+  }
+});

@@ -204,6 +204,27 @@ re-sending `createdDate` with a different value denied the whole write, silently
 seed had no business touching. Existing documents now get the one field; missing ones get a full,
 valid create.
 
+### The Editorial reconciliation is measured, not asserted
+
+The ref draws a sage band; this build makes it a token because `manuscriptPlate.css` already rules
+that Editorial is monochrome. That is a decision about a rendered colour, so it is checked as one —
+and by the repo's **standing form** of the test: *not "is it sage" but "what is its chroma"*, because
+a rule written against one named hue passes anything that is not that hue, and this codebase has
+already had a pink slip through such a check.
+
+The theme class is toggled in the DOM rather than through the settings control: the tokens resolve
+purely from that ancestor class, so swapping it exercises exactly the cascade under test without
+writing a preference to the account. Channel spread in brackets:
+
+| | band | R&R chip | Latest | kind |
+|---|---|---|---|---|
+| **Cappuccino** | sage Δ8 | pink Δ27 | sage Δ8 | Δ38 (5% ink) |
+| **Bold** | pink Δ50 | pink Δ27 | pink Δ27 | white Δ0 |
+| **Editorial** | **Δ1** | **Δ2** | **Δ3** | **Δ1** |
+
+Editorial's four values are pure greys, well inside the ≤6 rule. The band also differs between
+themes, which is what says it is a token rather than one value wearing three names.
+
 ### F-AX — nothing to report yet
 
 The flag asks where a version chip would land with no room for it. **No chip renders outside this
