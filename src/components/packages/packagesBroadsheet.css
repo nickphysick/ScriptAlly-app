@@ -175,10 +175,15 @@
 /* ⚠️ NO PLATE — see the note on `SlotShape`. Decoration, not a placeholder. */
 .pkgb-plate--bare { border: none; background: none; padding: 0; border-radius: 0; }
 /* The postage stamp on a package card — perforated edge, sat in the corner. */
-.pkgb-plate--stamp { border-radius: 4px; width: 62px; height: 72px; padding: 5px; }
+/* ⚠️ `.pkgb-plate--stamp` IS GONE, AND ITS `svg` RULE WITH IT. The stamp is unreachable: no
+   component renders `shape="stamp"`, and the one rule that positioned it — `.pkgb-pkgcard >
+   .pkgb-plate--stamp` — went with the duplicate card block. **Found by grepping the SERVED
+   stylesheet after the deploy, not by reading the source**: the positioning rule was deleted and
+   these two sizing rules sat 370 lines away, so the source read as clean. Third time this check has
+   caught something a source read could not. The `stamp` member stays on `SlotShape` — it is a
+   variant of a general primitive, not a packages-only class. */
 /* ⚠️ THE STAMP'S MARK IS FAINTER THAN THE REST (.7 against .82) — a postage stamp on a card is
    decoration behind the name, not a thing to read. The ref sets it apart for that reason. */
-.pkgb-plate--stamp svg { opacity: 0.7; }
 
 /* ⚠️ THE WAX SEAL IS DELETED (D1) — no Pro marker on this page, in any form. It was page-local
    code riding `PageHeader`'s `titleAdornment`; `PageHeader` renders no Pro marker of its own, so
