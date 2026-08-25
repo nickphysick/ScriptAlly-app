@@ -136,6 +136,17 @@ export interface PaneQuestion {
   label: string;
   /** answered? — the GATE's predicate, never a second reading of the same values */
   answered: boolean;
+  /**
+   * ⚠️ THE ANSWER WHERE THE FORM CANNOT DERIVE IT FROM ITS OWN VALUES — today exactly one case, and
+   * it was a blank row on the page until a screenshot showed it (workspace round).
+   *
+   * A FULL MANUSCRIPT has no unit to pick, so the gate counts the parcel as answered by the
+   * MATERIAL itself and the picker holds nothing to format. The row therefore read "WHAT YOU SENT"
+   * with no answer, no tick and no Edit — a question stating itself and nothing else, which is
+   * worse than either an open control or an absent row. What was sent is a fact about the CARD, so
+   * the session supplies it and the body renders it like any other answer.
+   */
+  answer?: string;
 }
 
 export interface TaskPaneBodyProps {
@@ -374,7 +385,8 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
 
     {questions.map((q) => {
       const open = q.id === openId;
-      const ans = q.answered ? answerText(q.field, value) : null;
+      /* the row's own answer where the form holds one; the card's where it does not */
+      const ans = q.answered ? (answerText(q.field, value) ?? q.answer ?? null) : null;
       /* ⚠️ EVERY CLOSED ROW OPENS ON A CLICK, ANSWERED OR NOT. `Edit` is the visible cue on an
          answered one; an UNANSWERED closed row has no cue and still has to be reachable, because
          editing an earlier answer closes a later unanswered row behind it. One target, not two

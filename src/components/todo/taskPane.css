@@ -433,12 +433,27 @@
 /* ⚠️ THE BAR IS ITS OWN STRIP, not a footer with a rule above it. It stands on the ground beside
    the cards, so it needs the card's own edge and radius rather than a hairline against a box it is
    no longer inside. */
-.tpn .actbar { flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05); }
+/* ⚠️ THE BAR WRAPS, BECAUSE THE SPLIT MADE ITS COLUMN NARROW (workspace round, found in the first
+   screenshot, not in the measurements). The contract draws this bar across an 854px column; under
+   the split the worksheet is 390px at 1440, and a sentence plus Snooze plus Dismiss plus the
+   primary needs about 375 of it. The strip was crushed into a 150px gutter five lines tall, with
+   its own mono lead-in overlapping the first button.
+
+   ⚠️ AND EVERY PER-ELEMENT CHECK PASSED THROUGH IT. The strip's text was correct, the buttons'
+   text was correct, nothing overflowed its own box — the fault is in the LINE they make together,
+   which is the one thing a probe of the parts cannot see. This repo has a standing note about
+   exactly that; the screenshot is what caught it.
+
+   `flex: 1 1 240px` on the strip rather than a forced break: it shares the line wherever 240px is
+   available beside the buttons and takes a line of its own where it is not, so a wide pane pays
+   nothing for a narrow one's problem. `justify-content: flex-end` is what keeps the buttons right
+   on the wrapped row, where `margin-right: auto` on the strip no longer reaches them. */
+.tpn .actbar { flex:0 0 auto;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:10px;padding:12px 16px;background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05); }
 /* ⚠️ PROSE, NOT A FIELD STRING (deed round, Phase 2). It was uppercase mono with `·` separators and
    `text-overflow: ellipsis` — a database row read aloud, and clipped. It is a sentence now: Inter,
    sentence case, wrapping, capped at a readable measure. The mono survives on the LEAD-IN alone,
    which is a label rather than the content. */
-.tpn .willrec { font-size:12px;color:#6a584a;font-weight:300;line-height:1.5;min-width:0;max-width:56ch;margin-right:auto; }
+.tpn .willrec { font-size:12px;color:#6a584a;font-weight:300;line-height:1.5;min-width:0;max-width:56ch;flex:1 1 240px; }
 .tpn .willrec b { color:var(--ink2);font-weight:500; }
 .tpn .willrec .lead { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-right:7px; }
 .tpn .willrec b { color:var(--ink2);font-weight:500; }
@@ -605,7 +620,7 @@
 /* ⚠️ IT WRAPS, IT DOES NOT TRUNCATE. A line naming the missing answers is useless with the last two
    clipped off — which is exactly what the will-record strip's `text-overflow: ellipsis` would do to
    it, and the reason this is its own element rather than that strip wearing different words. */
-.tpn .miss { font-size:11.5px;color:var(--ink2);font-weight:300;line-height:1.5;margin-right:auto;min-width:0;flex:1 1 240px; }
+.tpn .miss { font-size:11.5px;color:var(--ink2);font-weight:300;line-height:1.5;min-width:0;flex:1 1 240px; }
 .tpn .miss a { color:var(--burg);text-decoration:underline;text-underline-offset:2px;cursor:pointer; }
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════

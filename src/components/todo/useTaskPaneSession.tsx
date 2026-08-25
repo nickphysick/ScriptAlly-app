@@ -789,6 +789,14 @@ export function useTaskPaneSession(
                         questions={requirementsFor(journeyKind(card)).map((r) => ({
                           id: r.id, field: r.field, label: r.label,
                           answered: r.isAnswered(gateAnswers(card)),
+                          /* ⚠️ THE WHOLE-MANUSCRIPT PARCEL IS ANSWERED BY THE CARD, NOT BY A
+                             CONTROL — the one case the form cannot format, because a full
+                             manuscript has no unit to pick and the picker holds nothing. Read from
+                             `sendSpecFor`, which is the same spec `gateAnswers` reads to decide the
+                             requirement is met: one source for "is it answered" and "what is the
+                             answer", so the tick and the words cannot disagree. */
+                          ...(r.field === "unit" && sendSpecFor(card)?.material === "full"
+                            ? { answer: "The full manuscript" } : {}),
                         }))}
                         /* ⚠️ `null` FOLLOWS THE FIRST UNANSWERED — the same array the chip counts
                            and the missing line names, so the open row cannot point somewhere the
