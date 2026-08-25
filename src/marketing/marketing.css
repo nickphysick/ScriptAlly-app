@@ -667,25 +667,62 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 }
 
 /* The turn: one line behind a burgundy rule. */
+/* ⚠️ THE MEASURE IS IN `em`, ON THE ELEMENT THAT SETS THE FONT-SIZE — AND THIS IS THE SECOND TIME
+   IT HAS HAD TO BE FIXED ON THIS EXACT ELEMENT. The ref sets `max-width: 31rem`, frozen at 496px
+   while `2.05vw` grows the type to 27.5px, and the failure is visible in the ref itself: rendered,
+   its body is two lines at 1180 and 1280 and THREE at 1440 and 2080, the third carrying an 85px
+   orphan. In `em` the measure and the type are expressed in the same units and cannot diverge, so
+   the line count is a property of the SENTENCE rather than of the viewport.
+   ⚠️ DO NOT "TIDY" THIS TO `rem`. It looks inconsistent beside every other measure in this sheet
+   and it is one of the two places that must be. `/founders`'s lifted line is the other.
+   ⚠️ AND THE FONT-SIZE MOVED HERE FROM THE CHILD, deliberately: the measure has to be counted in
+   the units of the size it is measuring, so the element that declares the size is the only element
+   the measure can live on. The lead's `1.34em` then scales with it for free. */
 .mk-turn {
-  margin: 36px 0 0; padding-left: 18px;
+  grid-row: 4; grid-column: 1;
+  margin: 40px 0 0; padding-left: 20px;
   border-left: 2px solid var(--mk-burg);
-}
-/* ⚠️ THE MEASURE IS IN `em`, ON THE ELEMENT THAT SETS THE FONT-SIZE, AND THAT UNIT IS THE WHOLE
-   POINT. A `rem` measure is FROZEN — the ref's `33rem` is 528px at every width — while
-   `1.68vw` grows the type until 1276px, so between ~1050 and there the type climbs against a
-   fixed column and the line count can flip to three. That is the container-cap fault in its
-   purest form: type growing against a measure that has stopped growing.
-   In `em` the two are expressed in the same units and cannot diverge. The line count is then a
-   property of the SENTENCE, not of the viewport, and the 1276px cap becomes irrelevant.
-   ⚠️ DO NOT "TIDY" THIS TO `rem`. It reads like an inconsistency beside every other measure in
-   this sheet and it is the one place that must not be one. Same carve-out as `/founders`'s lifted
-   line, for the same reason. */
-.mk-turn-b {
-  display: block; font-family: "Playfair Display", Georgia, serif;
-  font-size: clamp(1.1rem, 1.68vw, 1.34rem); line-height: 1.3;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(1.3rem, 2.05vw, 1.72rem); line-height: 1.3;
   color: var(--mk-ink); letter-spacing: -.012em;
-  max-width: 24.5em;
+  max-width: 20em;
+}
+/* ⚠️ THE WASH IS A HIGHLIGHTER STROKE, NOT A LABEL, AND THREE DECLARATIONS CARRY THAT. The
+   gradient fades to nothing at 88% so it has no right edge to read as a box; `inline-block` keeps
+   it one continuous stroke rather than one box per line; and the negative side margins let it
+   bleed ~9px past the glyphs at each end, which is what a highlighter does and a background does
+   not. Take away any one and it becomes a tinted rectangle behind a sentence. */
+/* ⚠️ `font-family: inherit` IS NOT REDUNDANT — IT IS THE WHOLE REASON THESE SPANS ARE PLAYFAIR.
+   A global element rule (`.font-sans, p, span, div, button, …`) sets Source Sans on every `span`
+   in the app, and a rule that matches an element DIRECTLY beats an INHERITED value whatever the
+   specificities are: inheritance is not a competitor in the cascade, it is what happens when
+   nothing matched. So `.mk-turn`'s Playfair reached the container and stopped there, and both
+   spans rendered sans while `.mk-turn` itself computed Playfair — visible only in a screenshot,
+   because every measurement I had was about widths.
+   This is new here because the font-size moved UP to `.mk-turn` for the `em` measure; the old
+   single span declared its own family and never met the problem. Asking to inherit explicitly is
+   a direct match, so it wins. */
+.mk-turn-lead {
+  font-family: inherit;
+  display: inline-block; font-weight: 700; color: var(--mk-nearblack);
+  font-size: 1.34em; line-height: 1.16; letter-spacing: -.014em;
+  background: linear-gradient(90deg, #e4e9e1, rgba(233, 237, 230, .35) 88%, rgba(233, 237, 230, 0));
+  margin: 0 -9px; padding: 0 9px; border-radius: 3px;
+}
+.mk-turn-body { font-family: inherit; display: block; margin-top: 10px; }
+
+/* ⚠️ A NARROWER MEASURE ON A NARROW PHONE, AND IT IS THE THIRD LINE'S SHAPE THAT FORCES IT. Below
+   ~400 the COLUMN binds, not the measure — 318px at 390 against the measure's 416 — so the body
+   takes a third line whatever the measure says, and the only question is whether that line is full
+   or an orphan. Measured at 390: at 20em the wrap is [300, 272, 58] with ONE word stranded; at
+   15em it is [200, 265, 164] with four.
+   ⚠️ AND 15em IS THE FLOOR, NOT A PREFERENCE. At 13em the body balances better still — [200, 219,
+   210], a spread of 19 — but the LEAD wraps to two lines, which breaks the one guarantee this
+   block exists to make. 14–15em is the whole window; this sits at the top of it.
+   ⚠️ THE BAND IS ≤400 BECAUSE 420 IS ALREADY FINE — measured two lines from 420 up, even though
+   the column binds all the way to 900. Only 390 and below need this. */
+@media (max-width: 400px) {
+  .mk-turn { max-width: 15em; }
 }
 /* ⚠️ THE ENTRANCE IS DECLARED ONLY INSIDE `no-preference`, SO REDUCED MOTION IS INERT BY
    CONSTRUCTION — not "the same animation, faster". Outside the query these elements have no
@@ -707,19 +744,6 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    a statement and a plate — they hold their proportions far longer than a copy-and-tableau
    showreel row does, and the ref sets the break at 900. The showreel keeps its own 1080 break
    below; the two are deliberately different numbers, not an oversight. */
-/* ⚠️ THE TURN'S MEASURE NARROWS ON A NARROW PHONE, AND IT IS THE THIRD LINE'S SHAPE THAT FORCES IT.
-   Two lines is unreachable below ~440: the COLUMN binds there — 320px at 390 against the measure's
-   431 — and getting the sentence into two lines would need ~13px type, smaller than the body copy
-   beneath it, which is the thing this size was chosen to avoid. So the third line is a fact, and
-   the only question left is whether it is a full line or an orphan.
-   Measured at 390: at 24.5em the wrap is [282, 300, 92] with TWO words stranded; at 15em it is
-   [209, 243, 222] with six, a 34px spread against 208. Narrowing the measure makes the block worse
-   on paper and better on the page, which is why the number came from a render and not a ratio.
-   ⚠️ THE BAND IS ≤440 — it is two lines from 460 up — and 15em rather than 14 because 13.5em tips
-   to FOUR lines. 14–15em is the entire safe window; this sits at the top of it. */
-@media (max-width: 440px) {
-  .mk-turn-b { max-width: 15em; }
-}
 
 @media (max-width: 900px) {
   .mk-scope { --mk-hero-h1: clamp(2.4rem, 10vw, 3.6rem); }

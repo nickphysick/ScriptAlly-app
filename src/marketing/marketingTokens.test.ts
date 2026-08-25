@@ -385,7 +385,7 @@ describe("every specific rule on /founders outranks the generic one beside it", 
  * measure in the sheet and be the one place that must not be.
  */
 describe("measures that must track their type are expressed in `em`", () => {
-  const IN_EM = [".mk-turn-b", ".mk-fwhonest .mk-fwlead"];
+  const IN_EM = [".mk-turn", ".mk-fwhonest .mk-fwlead"];
 
   it("each is declared with a max-width in `em` or `ch`, never `rem` or `px`", () => {
     for (const sel of IN_EM) {

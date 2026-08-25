@@ -66,13 +66,20 @@ export const HERO_GRIND: Array<{ text: string; underline?: boolean }> = [
  * itself, and a flat reassurance in front of it softened the thing it was introducing.
  */
 /**
- * ⚠️ 89 CHARACTERS AGAINST THE OLD 44 — IT CANNOT HOLD ONE LINE AND MUST NEVER BE GIVEN `nowrap`.
- * At the copy column's width one line would need ~11px type, smaller than the body beneath it.
- * The target is TWO lines at every width; three, carrying two or three orphaned words, is the
- * failure mode. See `.mk-turn-b`, where the measure is expressed in `em` for exactly that reason.
+ * The turn, in two spans rather than one wrapping string.
+ *
+ * ⚠️ TWO SPANS, NOT A WRAP, BECAUSE THE BREAK IS STRUCTURAL. The lead is a sentence of its own and
+ * must never share a line with the body, however wide the page gets — a wrap cannot guarantee
+ * that and two elements can. The body may wrap within itself; the lead may not join it.
+ *
+ * ⚠️ AND THE LEAD CARRIES A SAGE WASH, WHICH IS WHY IT IS `display: inline-block` WITH NEGATIVE
+ * SIDE MARGINS. The gradient has to bleed a little past the glyphs to read as a highlighter stroke
+ * rather than a label with a background; an inline box would break the wash across lines and a
+ * block would run it to the full measure.
  */
-export const HERO_TURN_B =
-  "ScriptAlly is an end-to-end querying companion built to tip the odds back in your favour.";
+export const HERO_TURN_LEAD = "Introducing ScriptAlly.";
+export const HERO_TURN_BODY =
+  "An end-to-end querying companion built to tip the odds back in your favour.";
 
 /**
  * ⚠️ THE HERO ENDS ON ONE CTA. `See pricing` and the `Free to start` microline are both gone —

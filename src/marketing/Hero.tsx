@@ -39,7 +39,7 @@
 
 import React from "react";
 import {
-  HERO_EYEBROW, HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B,
+  HERO_EYEBROW, HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_LEAD, HERO_TURN_BODY,
 } from "./landingCopy";
 import { MarketingIllustration } from "./marketingMarks";
 import { FoundingPanel } from "./FoundingPanel";
@@ -93,7 +93,8 @@ export const Hero: React.FC<{
           sibling in the same grid; nested inside `.mk-hcopy` they were invisible to the row
           machinery, and the art could reach at most the copy row. */}
       <div className="mk-turn mk-r mk-r4">
-        <span className="mk-turn-b">{HERO_TURN_B}</span>
+        <span className="mk-turn-lead">{HERO_TURN_LEAD}</span>
+        <span className="mk-turn-body">{HERO_TURN_BODY}</span>
       </div>
 
       {/* ⚠️ THE ACTIONS ROW IS GONE, BOTH HALVES. `Start tracking — it's free` left because

@@ -11,7 +11,7 @@
 
 import { describe, it, expect } from "vitest";
 import {
-  HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B, HERO_EYEBROW,
+  HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_LEAD, HERO_TURN_BODY, HERO_EYEBROW,
   DOCUMENT_TITLE, FEATURE_ROWS, PULSE_HEADING,
   FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_CTA,
   FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
@@ -94,14 +94,24 @@ describe("landing copy — verbatim locks", () => {
    * third carrying two or three orphaned words. The rendered line count is measured on a page —
    * this asserts the property that makes the measurement possible to reason about.
    */
-  it("the turn is too long for one line, which is why the measure is in `em`", () => {
-    expect(HERO_TURN_B.length).toBeGreaterThan(80);
-    expect(HERO_TURN_B).not.toContain("  ");
+  /**
+   * ⚠️ TWO SPANS, NOT A WRAP. The lead is a sentence of its own and must never share a line with
+   * the body however wide the page gets; a wrap cannot guarantee that and two elements can. The
+   * body's own line count is a rendered-page claim and is measured.
+   */
+  it("the turn is two sentences, and the lead is short enough never to wrap", () => {
+    expect(HERO_TURN_LEAD).toBe("Introducing ScriptAlly.");
+    expect(HERO_TURN_BODY).toBe(
+      "An end-to-end querying companion built to tip the odds back in your favour.",
+    );
+    expect(HERO_TURN_LEAD.length).toBeLessThan(30);
+    expect(HERO_TURN_BODY).not.toContain("  ");
   });
 
   it("the turn is one line, and the reassurance in front of it is gone", async () => {
-    expect(HERO_TURN_B).toBe(
-      "ScriptAlly is an end-to-end querying companion built to tip the odds back in your favour.",
+    expect(`${HERO_TURN_LEAD} ${HERO_TURN_BODY}`).toBe(
+      "Introducing ScriptAlly. An end-to-end querying companion built to tip the odds back in " +
+      "your favour.",
     );
     const copy = await import("./landingCopy");
     expect("HERO_TURN_A" in copy).toBe(false);
@@ -145,7 +155,7 @@ describe("landing copy — verbatim locks", () => {
       PULSE_HEADING,
       ...FEATURE_ROWS.map((r) => r.heading),
       ...FEATURE_ROWS.flatMap((r) => r.body.map((b) => b.text)),
-      HERO_H1, ledeText(), HERO_TURN_B,
+      HERO_H1, ledeText(), HERO_TURN_LEAD, HERO_TURN_BODY,
       FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL,
     ].filter((t) => t.toLowerCase().includes("finger on the pulse"));
     expect(said).toEqual(["A finger on the pulse of your querying journey"]);
