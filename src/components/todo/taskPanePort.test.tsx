@@ -152,12 +152,20 @@ describe("1 · the pane's class names are the mockup's", () => {
        the corrected contract exists to state. Read as source order, which is the only half of it a
        string can carry; that the bar is not a LID is a rendered-page claim and lives in
        `tests/e2e/workspaceRound.measure.ts`. */
+    const hdr = HTML.indexOf('class="fc hdr"');
+    const ws = HTML.indexOf('class="ws');
     const band = HTML.indexOf('class="band"');
     const work = HTML.indexOf('class="fc work"');
     const bar = HTML.indexOf('class="actbar"');
     const rec = HTML.indexOf('class="fc rec"');
     expect(band).toBeGreaterThan(-1);
-    expect(work).toBeGreaterThan(band);
+    /* ⚠️ THE HEADER IS OUTSIDE THE SPLIT AND ABOVE IT (owner's call, mid-round). The deed is the
+       TASK's statement and both columns answer it, so it spans both rather than sitting in the
+       worksheet column at 390px with a hard edge between it and the record. Asserted as source
+       order — header before the row that holds the two columns. */
+    expect(hdr, "the header card is missing").toBeGreaterThan(-1);
+    expect(ws, "the split row is missing").toBeGreaterThan(hdr);
+    expect(work).toBeGreaterThan(ws);
     expect(bar).toBeGreaterThan(work);
     expect(rec, "the record card is not after the pane column — it is inside it").toBeGreaterThan(bar);
     /* a query journey: header + worksheet + record. The rim is what clips the band's tint, so its

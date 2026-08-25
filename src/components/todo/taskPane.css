@@ -305,9 +305,9 @@
 /* ⚠️ THE PANE IS A TRANSPARENT COLUMN ON THE GROUND (finishing round, Phase 1) — its card
    treatment moved onto the three `.fc` cards it now holds. It used to BE the card, which is what
    left no room for the rims. */
-/* ⚠️ THE GAP IS THE GRID'S NOW, NOT THE COLUMN'S. `.ws` is `.pane`'s only child, so a gap here
-   separates nothing; the 12px between the cards is `.ws`'s and `.paneCol`'s own. */
-.tpn .pane { display:flex;flex-direction:column;min-width:0; }
+/* ⚠️ THE PANE IS A TWO-PART COLUMN AGAIN — the full-width header, then the split row that fills
+   what is left. The gap is back because `.ws` is no longer the only child. */
+.tpn .pane { display:flex;flex-direction:column;min-width:0;gap:12px; }
 .tpn .band { flex:0 0 auto;padding:13px 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative; }
 .tpn .band::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px; }
 .tpn .pane.u-now .band { background:linear-gradient(135deg,var(--u-now-1),var(--u-now-2)); }

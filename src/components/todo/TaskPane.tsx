@@ -226,31 +226,41 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
           ⚠️ THE TILES MOVED WITH IT, and out of the band entirely. They are three facts about the
           record; the band is the deed and the arrows and nothing else. */}
       <div className={`pane ${d.cls}`}>
-        <div className={hasRecord ? "ws" : "ws solo"}>
-          {/* ⚠️ THE PANE COLUMN'S THREE PARTS, IN ORDER — header, worksheet, bar. Phase 2 gives
-              them their heights; this is the order they stand in, and the bar is the LAST CHILD of
-              the column rather than anything's footer. */}
-          <div className="paneCol">
-            <div className="fc hdr"><div className="rim">
-              <div className="band">
-                <div style={{ minWidth: 0 }}>
-                  <div className={d.hand ? "deed hand" : "deed"}>{d.deed}</div>
-                  {/* absent, not empty — a rendered `.b-sub` holding nothing is a blank line under
-                      the deed, and blank space under a heading reads as something that failed to
-                      load */}
-                  {d.sub ? <div className="b-sub">{d.sub}</div> : null}
-                </div>
-                {/* ⚠️ THE ARROWS LIVE HERE, not in a counter row above the card — Phase 1's
-                    retirement. */}
-                {nav && (
-                  <div className="b-nav">
-                    <button type="button" onClick={nav.onPrev} aria-label="Previous task">‹</button>
-                    <button type="button" onClick={nav.onNext} aria-label="Next task">›</button>
-                  </div>
-                )}
-              </div>
-            </div></div>
+        {/* ⚠️ THE HEADER SPANS THE WHOLE PANE, ABOVE BOTH COLUMNS (owner's call, mid-round). It was
+            the first card INSIDE the worksheet column, which made the deed 390px wide at 1440 and
+            put a hard edge between it and the record — as though the sentence were about the form
+            rather than about the task. It is the task's own statement, and both columns are answers
+            to it, so it sits above both.
 
+            ⚠️ IT IS A SIBLING OF `.ws`, NOT A GRID ITEM SPANNING IT. A `grid-column: 1 / -1` row
+            would have to share the grid's height model with the two columns beneath, and the whole
+            of Phase 2 rests on `.ws` being a stretch row whose height IS the pane's remaining
+            space. Header fixed, row fills — the same two-part chain, one level up. */}
+        <div className="fc hdr"><div className="rim">
+          <div className="band">
+            <div style={{ minWidth: 0 }}>
+              <div className={d.hand ? "deed hand" : "deed"}>{d.deed}</div>
+              {/* absent, not empty — a rendered `.b-sub` holding nothing is a blank line under
+                  the deed, and blank space under a heading reads as something that failed to
+                  load */}
+              {d.sub ? <div className="b-sub">{d.sub}</div> : null}
+            </div>
+            {/* ⚠️ THE ARROWS LIVE HERE, not in a counter row above the card — Phase 1's
+                retirement. */}
+            {nav && (
+              <div className="b-nav">
+                <button type="button" onClick={nav.onPrev} aria-label="Previous task">‹</button>
+                <button type="button" onClick={nav.onNext} aria-label="Next task">›</button>
+              </div>
+            )}
+          </div>
+        </div></div>
+
+        <div className={hasRecord ? "ws" : "ws solo"}>
+          {/* ⚠️ THE PANE COLUMN'S TWO PARTS, IN ORDER — worksheet, then bar. The bar is the LAST
+              CHILD of the column rather than anything's footer, which is what puts its bottom edge
+              on the record's. */}
+          <div className="paneCol">
             {/* ⚠️ THE WORK SCROLLS INSIDE THE CARD'S RIM, NEVER BEHIND THE BAR (Phase 2). `.rim`
                 carries `overflow: hidden`, so work leaves at the card's edge and there is nothing
                 underneath it to reappear in. The bar below is a SIBLING, not a lid. */}
