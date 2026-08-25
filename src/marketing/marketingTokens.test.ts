@@ -26,6 +26,36 @@ const value = (src: string, token: string) => {
 };
 
 /**
+ * The stylesheet with every `@media` / `@supports` / `@keyframes` BODY removed, so what is left is
+ * the base cascade — the rules that apply at every width. An override inside a media query is the
+ * legitimate way to restate a property and must not be counted as a duplicate of it.
+ */
+const baseCss = (() => {
+  let out = "", i = 0;
+  for (;;) {
+    const m = /@(?:media|supports|keyframes)[^{]*\{/.exec(marketing.slice(i));
+    if (!m) return out + marketing.slice(i);
+    out += marketing.slice(i, i + m.index);
+    let j = i + m.index + m[0].length, depth = 1;
+    while (j < marketing.length && depth) {
+      if (marketing[j] === "{") depth++;
+      else if (marketing[j] === "}") depth--;
+      j++;
+    }
+    i = j;
+  }
+})();
+
+/** Every BASE rule body for a selector, in source order. A grouped rule counts for each member. */
+const baseRules = (sel: string): string[] => {
+  const bodies: string[] = [];
+  for (const m of baseCss.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
+    if (m[1].split(",").some((s) => s.trim() === sel)) bodies.push(m[2]);
+  }
+  return bodies;
+};
+
+/**
  * The declarations of a rule whose selector is EXACTLY `sel`.
  *
  * ⚠️ ANCHORED AT A LINE START, AND THAT IS NOT FUSSINESS. A bare `.mk-beta\s*\{` also matches the
@@ -36,9 +66,17 @@ const value = (src: string, token: string) => {
  * times; this is the same one wearing a descendant selector.
  */
 const ruleFor = (sel: string): string => {
-  const m = new RegExp(`(?:^|\\n)\\s*\\${sel}\\s*\\{([^}]*)\\}`).exec(marketing);
-  expect(m, `${sel} has a rule of its own`).toBeTruthy();
-  return m![1];
+  const all = baseRules(sel);
+  expect(all.length, `${sel} has a rule of its own`).toBeGreaterThan(0);
+  /* ⚠️ AND IT MUST HAVE EXACTLY ONE, or this helper is reading a rule the browser does not apply.
+     Every lock in this file goes through here, so the guard belongs here rather than in each of
+     them: `ruleFor` takes the FIRST base rule, the cascade takes the LAST, and where a selector is
+     declared twice those are different blocks. That is not hypothetical — the ref this pass was
+     drawn from carries four such selectors, and the brief quoted the SUPERSEDED value of one of
+     them, because reading the file top-down is how a person reads it too. */
+  expect(all.length, `${sel} is declared ${all.length} times at base level — ruleFor would read ` +
+    "the first while the browser applies the last").toBe(1);
+  return all[0];
 };
 
 describe("the hero's ground is a documented copy of the app's, not a reference to it", () => {
@@ -404,5 +442,67 @@ describe("measures that must track their type are expressed in `em`", () => {
       const m = new RegExp("(?:^|\\n)\\s*" + sel.replace(/\./g, "\\.") + "\\s*\\{([^}]*)\\}").exec(marketing);
       expect(m![1], `${sel} sets its own font-size`).toMatch(/font-size:/);
     }
+  });
+});
+
+/**
+ * ══════════════ One selector, one statement of each property ══════════════
+ *
+ * ⚠️ THE FAULT IS A SECOND DECLARATION THAT SILENTLY WINS, AND IT IS INVISIBLE TO EVERY READER WHO
+ * STOPS AT THE FIRST. A selector may legitimately appear twice — a shared group (`.a, .b { … }`)
+ * followed by a specialisation (`.a { … }`) is the normal idiom and is not this. The fault is the
+ * same PROPERTY stated twice for the same selector at base level: the earlier value is dead, the
+ * source reads as though it applies, and anyone patching it patches the loser.
+ *
+ * It is not a hypothetical. The ref this pass was drawn from carries four selectors with two base
+ * rules each — and the brief written from it quoted the superseded value of `.fm-count`, because
+ * reading top-down is how a person reads a stylesheet. It is also why `ruleFor` above now refuses
+ * a selector with more than one base rule: this file's locks would otherwise assert about the
+ * block the browser discards.
+ */
+describe("no base selector states the same property twice", () => {
+  const repeats = (): Record<string, string[]> => {
+    const seen: Record<string, string[]> = {};
+    for (const m of baseCss.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
+      const props = m[2].split(";").filter((d) => d.includes(":"))
+        .map((d) => d.slice(0, d.indexOf(":")).trim()).filter(Boolean);
+      for (const raw of m[1].split(",")) {
+        const sel = raw.trim().replace(/\s+/g, " ");
+        if (sel) (seen[sel] ||= []).push(...props);
+      }
+    }
+    const out: Record<string, string[]> = {};
+    for (const [sel, props] of Object.entries(seen)) {
+      const twice = [...new Set(props)].filter((p) => props.filter((q) => q === p).length > 1);
+      if (twice.length) out[sel] = twice.sort();
+    }
+    return out;
+  };
+
+  it("scans the whole stylesheet, not a fragment of it (the sweep is not vacuous)", () => {
+    const sels = new Set<string>();
+    for (const m of baseCss.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
+      m[1].split(",").forEach((s) => sels.add(s.trim()));
+    }
+    expect(sels.size, "base selectors scanned").toBeGreaterThan(300);
+    expect(baseCss).not.toContain("@media");
+  });
+
+  /**
+   * ⚠️ NO EXEMPTIONS, AND THE ONE THIS SWEEP FOUND WAS FIXED RATHER THAN LISTED. `.mk-foot` stated
+   * `display` twice — flex for the single-row footer the shared footer superseded, then block two
+   * hundred lines later — so `align-items` and `gap` were describing a layout that no longer
+   * existed. Folding it was render-neutral (both are inert on a block box) and it is worth more
+   * than an exemption entry would have been: a sweep that tolerates its own findings teaches the
+   * next reader that the finding is acceptable.
+   */
+  it("…and every selector states each property once", () => {
+    expect(repeats()).toEqual({});
+  });
+
+  it("the hero and the panel are clean without exemption", () => {
+    const mine = Object.keys(repeats())
+      .filter((s) => /^\.mk-(hero|hcopy|statement|turn|illo|found|fm)/.test(s));
+    expect(mine).toEqual([]);
   });
 });

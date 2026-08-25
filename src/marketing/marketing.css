@@ -491,84 +491,93 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    overflows its column by ~103px. The ref draws one width. */
 @media (min-width: 901px) { .mk-statement { white-space: nowrap; } }
 
-/* ── The hero's founding panel: the landing's primary action ──
-   ⚠️ IT REPLACES THE ACTIONS ROW, AND `.mk-hctas` WENT WITH IT. `Start tracking — it's free` and
-   `Learn more` are both retired: pre-launch there is nothing self-serve behind the first, and the
-   second was an in-page anchor competing with a real offer three inches below it.
-   ⚠️ THE BUTTON IS INK BECAUSE THE GROUND IS BLUSH — primaries are pink on cream and parchment,
-   ink on pink. `.mk-fmform .mk-btn--ink` below re-tints the SHARED primitive's button for this
-   mount; the form is shared, the treatment is the wrapper's.
-   ⚠️ AND THE BOTTOM PADDING IS NOT DECORATION. `How it works` is `position: absolute`, pinned
-   bottom-right, so it occupies no flow space and cannot push anything out of its way. The 46px
-   below the counter IS the room it sits in. Reduce it and the link prints over the tally. */
-.mk-found { margin-top: 34px; max-width: 35rem; }
+/* ── The hero's founding panel ──────────────────────────────────────────────────
+   ⚠️ ONE AUTHORITATIVE BLOCK. Every `.mk-found*` and `.mk-fm*` rule was deleted and rewritten here
+   rather than patched, because patching is what produced the ref's broken panel: three superseded
+   declarations still winning on source order, the markup correct and the render not. If this
+   section is touched again it is rewritten again — a second declaration of any selector below is
+   the beginning of that fault, not a tidy-up waiting to happen.
+   ⚠️ `.mk-founder*` AND `.mk-foundcnt` ARE NOT PART OF THIS BLOCK AND MUST NOT BE SWEPT WITH IT.
+   `.mk-founder` is the About page's founder block; `.mk-foundcnt` is `/founders`'s line counter,
+   which a removal scoped to this panel already destroyed once. Both live elsewhere in this file.
+
+   The panel is its own full-width grid row beneath the turn, centred, and centred throughout — a
+   single column of statements rather than a form with labels beside it. */
+.mk-found { grid-row: 5; grid-column: 1 / -1; width: 100%; }
 .mk-found-panel {
-  position: relative;
-  background: var(--mk-blush); border: 1px solid var(--mk-cta-bd); border-radius: 14px;
-  padding: 26px 24px 46px; box-shadow: 0 10px 26px var(--mk-panel-sh);
+  max-width: 48rem; margin: 98px auto 0; position: relative; text-align: center;
+  background: var(--mk-blush); border: 1px solid var(--mk-cta-bd); border-radius: 16px;
+  padding: 22px 30px 20px; box-shadow: 0 10px 26px var(--mk-panel-sh);
 }
-/* `--mk-kicker` is the eighth pass's quiet-label token — rgba(122,101,92,.7) against the ref's
-   .72, which is inside a rounding error of one another. One token, two surfaces. */
+/* `--mk-kicker` is the eighth pass's quiet-label token; one token, three surfaces. */
 .mk-fmkick {
   font-family: "JetBrains Mono", monospace; font-size: .58rem; letter-spacing: .22em;
-  text-transform: uppercase; color: var(--mk-kicker); margin: 0 0 11px;
+  text-transform: uppercase; color: var(--mk-kicker); margin: 0 0 12px;
 }
-.mk-fmh { margin: 0; font-size: 1.06rem; line-height: 1.4; color: var(--mk-ink); }
-/* ⚠️ A `border-bottom`, NOT `text-decoration`. The marked run is "100 Founding Writers" and the
-   `g` descends through an underline drawn by the text decoration; a border sits below the box and
-   clears it. */
+/* ⚠️ NO `max-width`. A centred single sentence does not take a reading measure — the measure is
+   for scanning a column of prose, and imposing one here wrapped the sentence two words early for
+   no benefit. It is one line at every width the panel is this wide. */
+.mk-fmh { margin: 0 auto; font-size: 1.16rem; line-height: 1.45; color: var(--mk-ink); }
+/* ⚠️ A `border-bottom`, NOT `text-decoration` — the marked run is "100 Founding Writers" and the
+   `g` descends through a text underline; a border sits below the box and clears it. */
 .mk-fmh strong {
   font-weight: 600; color: var(--mk-nearblack);
   border-bottom: 1.5px solid rgba(124, 58, 42, .45); padding-bottom: 1px;
 }
-/* ⚠️ ONE ROW AT >=1280, AND EACH ITEM IS `nowrap` SO THE ROW BREAKS BETWEEN PERKS RATHER THAN
-   INSIDE ONE. That is the right failure below 1280 — three whole phrases stacked beats one phrase
-   split across a line break. It also means the WORDING is length-constrained: a longer phrase does
-   not shrink, it drops the row to two lines. See `FOUNDING_PERKS`. */
+/* ⚠️ THE PERKS SIT ABOVE THE FORM SO THE OFFER IS READ BEFORE THE ASK. Each item is `nowrap`, so
+   the row breaks between whole perks rather than inside a phrase — which is also why the WORDING
+   is length-constrained. The full phrasing is back because the panel is its own 48rem row now, not
+   a 512px column; the constraint moved rather than went away. See `FOUNDING_PERKS`. */
 .mk-fmperks {
-  list-style: none; display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 14px 0 0; padding: 0;
+  list-style: none; display: flex; justify-content: center; flex-wrap: wrap;
+  gap: 8px 26px; margin: 20px 0 0; padding: 0;
 }
-/* ⚠️ THE REF'S OWN VALUES, AND THE LEVERS PREPARED FOR THIS ROW WERE NOT NEEDED. A pre-build
-   estimate put the row at ~511px against a 512px panel and a tightening was authorised — gap 14,
-   indent 17, then .84rem. Measured, the ref's 16/19/.88rem gives 444.9px with 67.1px of headroom
-   at 1280 and 23.7 even at 1180, so the estimate was 66px pessimistic and the tightening bought
-   nothing but a smaller perk row than the design asks for. Reverted to the drawn values.
-   The arithmetic was wrong in the safe direction, which is the only reason it cost nothing. */
 .mk-fmperks li {
-  position: relative; padding-left: 19px; font-size: .88rem; color: var(--mk-blush-body);
-  line-height: 1.4; white-space: nowrap;
+  position: relative; padding-left: 20px; font-size: .94rem;
+  color: var(--mk-blush-body); line-height: 1.4; white-space: nowrap;
 }
-/* ⚠️ THE TICK IS DRAWN, NOT TYPED — two borders on an empty `::before`, rotated. A glyph would be
-   announced by a screen reader three times, and the list already says there are three of them. */
+/* Drawn, not typed — a glyph would be announced once per item and the list already says there are
+   three of them. */
 .mk-fmperks li::before {
-  content: ""; position: absolute; left: 1px; top: .3em; width: 9px; height: 6px;
+  content: ""; position: absolute; left: 1px; top: .34em; width: 9px; height: 6px;
   border-left: 2px solid var(--mk-burg); border-bottom: 2px solid var(--mk-burg);
   transform: rotate(-45deg); opacity: .8;
 }
-.mk-fmform { display: flex; gap: 9px; margin: 13px 0 0; flex-wrap: wrap; }
+/* ⚠️ THE ROW HOLDS THE FORM AND THE WAY THROUGH, AND AN OUTCOME REPLACES THE WHOLE ROW. The link
+   is no longer pinned to a corner, so the panel needs no reserved bottom padding to clear it. */
+.mk-fmrow {
+  display: flex; align-items: center; justify-content: center;
+  gap: 22px; margin: 20px 0 0; flex-wrap: wrap;
+}
+/* ⚠️ `flex-wrap: nowrap` ON THE FORM ITSELF, so the button can never drop below the field. The ROW
+   may wrap — the link moving to its own line is fine — but a field with its own button orphaned
+   underneath reads as two controls rather than one. */
+.mk-fmform { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; }
 .mk-fmform input {
-  flex: 1 1 190px; min-width: 0; font-family: inherit; font-size: .95rem; color: var(--mk-ink);
-  background: #fff; border: 1px solid var(--mk-cta-bd); border-radius: 10px; padding: 11px 14px;
+  width: 290px; font-family: inherit; font-size: .98rem; color: var(--mk-ink);
+  background: #fff; border: 1px solid var(--mk-cta-bd); border-radius: 11px; padding: 12px 15px;
 }
 .mk-fmform input::placeholder { color: var(--mk-blush-ph); }
 .mk-fmform .mk-btn--ink {
-  flex: none; font-size: .95rem; font-weight: 500; padding: 11px 20px; border-radius: 10px;
+  flex: none; font-size: .98rem; font-weight: 500; padding: 12px 22px; border-radius: 11px;
 }
-/* The counter: a 5px bar and a mono tally, live or absent. */
-.mk-fmcount { margin: 14px 0 0; }
+.mk-fmlearn {
+  background: none; border: none; padding: 0 0 2px; cursor: pointer; font-family: inherit;
+  font-size: .95rem; font-weight: 500; color: var(--mk-burg); white-space: nowrap;
+  border-bottom: 1px solid rgba(124, 58, 42, .4);
+}
+.mk-fmlearn:hover { border-bottom-color: var(--mk-burg); }
+
+/* The counter: a 5px bar and a mono tally, centred. Live or absent. */
+.mk-fmcount { max-width: 380px; margin: 22px auto 0; }
 .mk-fmbar { height: 5px; border-radius: 999px; background: rgba(124, 58, 42, .16); overflow: hidden; }
-/* ⚠️ THE TRANSITION IS ON `width` SO A SUCCESSFUL JOIN MOVES THE BAR RATHER THAN JUMPING IT — the
-   count it animates to is the SERVER's, not a local increment. Suppressed under reduced motion. */
 .mk-fmfill {
   height: 100%; background: var(--mk-burg); opacity: .8; border-radius: 999px;
   transition: width .5s ease;
 }
-/* ⚠️ THIS BLOCK SITS AFTER `.mk-fmfill`, AND IT HAS TO. Both are single-class rules at 0-1-0, so
-   SOURCE ORDER decides — placed with the other reduced-motion overrides near the top of the file
-   it lost to a rule declared four hundred lines later, and the bar animated for a reader who had
-   asked it not to. Measured: `transition-duration: 0.5s` under `reducedMotion: "reduce"`, from a
-   declaration that read correctly. A media query confers no specificity of its own.
-   The ease is motion rather than a state change, so it goes entirely rather than running faster. */
+/* ⚠️ AFTER `.mk-fmfill`, NOT WITH THE OTHER REDUCED-MOTION RULES. Both are 0-1-0 and a media query
+   confers no specificity, so an override placed earlier in the file loses — measured last pass at
+   0.5s under `reduce`, from a declaration that read correctly. */
 @media (prefers-reduced-motion: reduce) {
   .mk-fmfill { transition: none; }
 }
@@ -578,19 +587,20 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 }
 .mk-fmtally { color: var(--mk-burg); font-weight: 500; }
 .mk-fmof { opacity: .6; }
+
 /* ── The panel's outcomes ──
-   ⚠️ THE SUCCESS BLOCK REPLACES THE FORM RATHER THAN JOINING IT. `HIDES_FORM` stops rendering the
-   field and button, so the action reads as consumed and a double submit is foreclosed by there
-   being nothing to submit — structurally, rather than by disabling a control that is still there.
-   ⚠️ AND THE TWO GOOD OUTCOMES SHARE A TREATMENT ON PURPOSE. "You're on board" and "You're already
-   on the list" are both good news; giving the second a warning tint would make being on the list
-   look like a problem. */
+   ⚠️ THE SUCCESS BLOCK REPLACES THE FORM ROW RATHER THAN JOINING IT. `HIDES_FORM` stops rendering
+   the field and button, so the action reads as consumed and a double submit is foreclosed by there
+   being nothing to submit — structurally, rather than by disabling a control still on screen.
+   ⚠️ AND THE TWO GOOD OUTCOMES SHARE A TREATMENT. "You're on board" and "You're already on the
+   list" are both good news; a warning tint on the second would make being on the list look like a
+   problem. */
 .mk-fmok {
-  display: flex; align-items: flex-start; gap: 12px; margin: 16px 0 0;
+  display: flex; align-items: flex-start; gap: 12px; margin: 16px auto 0; max-width: 34rem;
+  text-align: left;
   background: var(--mk-msg-ok-bg); border: 1px solid var(--mk-msg-ok-bd);
   border-radius: 11px; padding: 13px 16px;
 }
-/* The disc and its tick are drawn, not typed — the same construction as the perks' ticks. */
 .mk-fmokmark {
   flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%;
   background: var(--mk-burg); position: relative; margin-top: 1px;
@@ -602,25 +612,41 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 }
 .mk-fmokh { margin: 0; font-weight: 600; color: var(--mk-nearblack); font-size: .98rem; }
 .mk-fmokb { margin: 3px 0 0; font-size: .9rem; color: var(--mk-sage-t); line-height: 1.45; }
-/* ⚠️ WHITE ON BLUSH, NOT A SECOND PINK. The panel's ground is already blush; a warn tint in the
-   same family would not read as a change of state at all. */
+/* ⚠️ WHITE ON BLUSH, NOT A SECOND PINK — the ground is already blush, so a warn tint in the same
+   family would not read as a change of state at all. */
 .mk-fmwarn {
-  margin: 14px 0 0; background: rgba(255, 255, 255, .75); border: 1px solid var(--mk-cta-bd);
+  margin: 14px auto 0; max-width: 34rem;
+  background: rgba(255, 255, 255, .75); border: 1px solid var(--mk-cta-bd);
   border-radius: 11px; padding: 12px 15px; font-size: .92rem; color: var(--mk-ink);
 }
 .mk-fmwarn a { color: var(--mk-burg); }
+.mk-found-panel .mk-betainvalid { margin: 10px auto 0; }
 
-/* Pinned bottom-right — see the panel's padding note. */
-.mk-fmlearn {
-  position: absolute; right: 22px; bottom: 16px;
-  background: none; border: none; padding: 0 0 2px; cursor: pointer; font-family: inherit;
-  font-size: .92rem; font-weight: 500; color: var(--mk-burg);
-  border-bottom: 1px solid rgba(124, 58, 42, .4);
+@media (max-width: 760px) {
+  .mk-found-panel { padding: 24px 20px 22px; }
+  /* The row wraps and the field takes the width it can get; the button still cannot drop below it. */
+  .mk-fmrow { gap: 14px; }
+  .mk-fmform { flex-wrap: wrap; justify-content: center; }
+  .mk-fmform input { width: 100%; }
 }
-.mk-fmlearn:hover { border-bottom-color: var(--mk-burg); }
-/* The shared form's own messages sit tighter inside a panel than inside the letter. */
-.mk-found-panel .mk-betamsg { margin-top: 14px; font-size: .95rem; padding: 12px 15px; }
-.mk-found-panel .mk-betainvalid { margin-top: 10px; }
+
+/* ⚠️ 720, AND THE NUMBER IS MEASURED RATHER THAN CHOSEN. The three perks need 599px on one line
+   and the panel's content box is `viewport − 94` here, so the row stops fitting at 693. The query
+   is `max-width: 720px`, so the row survives down to 721 where it still clears by 28px, and
+   everything at 720 and below stacks — a 700 boundary would have shipped a 7px clearance. Between 680 and 480 the wrapped row put TWO perks on one line and the third centred
+   beneath, which is the worst of both: neither a row nor a list.
+   ⚠️ AND STACKED THEY SHARE A LEFT EDGE. Three individually-centred items give three different
+   tick positions, so the checklist reads as ragged text rather than as a list; `width: max-content`
+   with `margin-inline: auto` centres the BLOCK and left-aligns its contents.
+   ⚠️ AFTER THE 760 BLOCK, NOT BEFORE IT. Both are equal specificity and a media query confers
+   none, so the narrower query has to come second or the wider one wins inside its range — the
+   fault this file has already met twice, most recently 30px of real overflow at 390. */
+@media (max-width: 720px) {
+  .mk-fmperks {
+    flex-direction: column; align-items: flex-start;
+    width: max-content; max-width: 100%; margin-inline: auto; gap: 9px;
+  }
+}
 
 /* The continuation: the lede on a paper slip, the postscript tilted against it.
    ⚠️ THE `vh` CEILINGS ON THIS BLOCK AND ON `.mk-turn` ARE REACHED AT ~900px OF VIEWPORT HEIGHT ON
@@ -1311,7 +1337,11 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   .mk-wax img { width: 38px; }
 }
 
-.mk-foot { max-width: 1300px; margin: 0 auto; padding: 38px 56px 48px; display: flex; align-items: center; gap: 20px; }
+/* ⚠️ ONE RULE. `display` was stated twice — a flex row here for the single-row footer the
+   shared footer superseded, and `block` two hundred lines below, which won. `align-items`
+   and `gap` went with it: both are inert on a block box, so they described a layout that no
+   longer existed while reading as though they applied. The grid inside does the arranging. */
+.mk-foot { max-width: 1300px; margin: 0 auto; padding: 38px 56px 48px; display: block; }
 .mk-foot .mk-brand { margin-right: auto; }
 .mk-foot .mk-monogram { width: 26px; height: 26px; font-size: 13px; }
 .mk-foot .mk-wordmark { font-size: 16px; }
@@ -1403,8 +1433,8 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 /* ══════════════ Shared footer (every public page) ══════════════
    Supersedes the single-row `.mk-foot` layout that Landing, Pricing and the legal pages each drew
    their own copy of. `.mk-foot` keeps its name and its outer padding; what changed is what sits
-   inside it. Every value below is a var() or a neutral already used in this file. */
-.mk-foot { display: block; }
+   inside it — `.mk-foot`'s own rule is declared once, above. Every value below is a var() or a
+   neutral already used in this file. */
 .mk-footgrid {
   display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 30px; align-items: start;
   padding-bottom: 26px; border-bottom: 1px solid var(--mk-hair);

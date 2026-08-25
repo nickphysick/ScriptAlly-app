@@ -161,7 +161,7 @@ export const FOUNDING_PANEL_KICKER = "Get involved";
 export const FOUNDING_ASK: CopyRun[] = [
   "We're looking for ",
   { b: "100 Founding Writers" },
-  " to put ScriptAlly through its paces. You'll get:",
+  " to put ScriptAlly through its paces.",
 ];
 
 /**
@@ -174,7 +174,7 @@ export const FOUNDING_ASK: CopyRun[] = [
  * that a few characters are free; the first perk lost eleven to buy the row.
  */
 export const FOUNDING_PERKS = [
-  "6 months free Pro",
+  "Six months' free Pro access",
   "Half price for life",
   "A direct line to the founder",
 ] as const;

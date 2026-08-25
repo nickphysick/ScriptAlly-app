@@ -34,6 +34,14 @@ import { useFounding, ensureCount, submitFounding, FoundingState } from "./found
 /** Which outcomes replace the form, and which leave it there to try again. */
 const HIDES_FORM: ReadonlySet<FoundingState> = new Set<FoundingState>(["sent", "dupe", "full", "down"]);
 
+/**
+ * ⚠️ EXPORTED SO A WRAPPER CAN ASK THE SAME QUESTION, NOT ANSWER IT ITSELF. The landing panel puts
+ * `How it works` inside the form's row and that whole row is replaced on an outcome — so the
+ * wrapper has to know whether the form is showing. Re-deriving the rule there would be two lists
+ * of states to keep in step, and they would drift the first time a state was added.
+ */
+export const formIsVisible = (state: FoundingState): boolean => !HIDES_FORM.has(state);
+
 export const FoundingSignup: React.FC<{
   /** Unique per mount. Every `id` this renders is built from it — see the docblock. */
   idPrefix: string;

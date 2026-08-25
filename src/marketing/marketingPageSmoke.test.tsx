@@ -354,13 +354,51 @@ describe("the founding sign-up — one component, mounted more than once", () =>
    * item is `nowrap`, so a longer phrase does not shrink, it drops the row to two lines. This
    * pins the three phrases; the ROW's fit is a rendered-page claim and is measured.
    */
-  it("three perks, in the wording the one-row rule bought", () => {
+  /**
+   * ⚠️ RETARGETED, AND THE LAW IT ASSERTS IS THE SAME ONE: three perks on ONE ROW. What changed is
+   * the width available to hold them. This lock used to pin the SHORTENED first perk ("6 months
+   * free Pro"), because at 512px the panel could not fit the full phrasing; the panel is now its
+   * own 48rem row beneath the turn, so the full wording fits and the abbreviation was costing
+   * clarity for nothing. The constraint did not go away — it moved — so the one-row measurement at
+   * 1280 and 1180 is still the gate, and anyone narrowing the panel re-measures before shortening
+   * the copy again.
+   */
+  it("three perks, in their full wording — the row is wide enough for it now", () => {
     const h = html();
-    expect(h).toContain("6 months free Pro");
+    expect(h).toContain("Six months&#x27; free Pro access");
     expect(h).toContain("Half price for life");
     expect(h).toContain("A direct line to the founder");
-    /* The shortened first perk — the long form is what the row could not hold. */
-    expect(h).not.toContain("Six months&#x27; free Pro access");
+    expect(h).not.toContain("6 months free Pro");
+  });
+
+  /**
+   * ⚠️ THE PERKS ARE READ BEFORE THE ASK IS MADE. They used to sit under the form, which put the
+   * reason to sign up after the thing to sign up with. Asserted by ORDER in the rendered document,
+   * because a lock that merely finds both strings cannot tell which comes first.
+   */
+  it("the perks come above the form", () => {
+    const h = html();
+    const perks = h.indexOf("mk-fmperks");
+    const form = h.indexOf("mk-fmrow");
+    expect(perks, "the perks list renders").toBeGreaterThan(-1);
+    expect(form, "the form row renders").toBeGreaterThan(-1);
+    expect(perks).toBeLessThan(form);
+  });
+
+  /**
+   * ⚠️ THE WAY THROUGH SITS INSIDE THE FORM'S ROW AND LEAVES WITH IT. It used to be pinned to the
+   * panel's bottom-right corner with `position: absolute`, which is why the panel carried bottom
+   * padding whose only job was to keep the tally out from under it. Both are gone.
+   */
+  it("`How it works` is inside the form's row, not pinned beneath the counter", () => {
+    const h = html();
+    const row = h.indexOf("mk-fmrow");
+    const learn = h.indexOf("mk-fmlearn");
+    const count = h.indexOf("mk-fmcount");
+    expect(learn, "the link renders").toBeGreaterThan(row);
+    /* No counter renders before a real figure comes back, so this is an absence either way — the
+       assertion is that the link is not AFTER it, which is where the pinned version sat. */
+    expect(count === -1 || learn < count).toBe(true);
   });
 
   it("the panel's button asks for a spot; the band's asks for a place", () => {

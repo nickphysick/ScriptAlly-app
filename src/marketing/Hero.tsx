@@ -101,9 +101,7 @@ export const Hero: React.FC<{
           pre-launch there is nothing self-serve behind it, and `Learn more` left with the row it
           shared — an in-page anchor to `#pulse` competing with a real offer three inches below
           it. The panel is the hero's only action now. */}
-      <div className="mk-r mk-r4">
-        <FoundingPanel onNavigate={onNavigate} />
-      </div>
+      <FoundingPanel onNavigate={onNavigate} className="mk-r mk-r4" />
 
       {/* ⚠️ THE ARTWORK SPANS ROWS 2–4 AND PASSES BEHIND THE WORDS. Grid items may share cells;
           the statement and the copy sit at `z-index: 2`, the plate at `1`. `finished` is the slot
