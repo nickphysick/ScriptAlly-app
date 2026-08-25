@@ -120,6 +120,21 @@ export const FOUNDING_BLURB =
   "ScriptAlly opens in stages. Founding members get in first, keep every feature free through " +
   "the beta, and help decide what gets built next.";
 
+/* ══════════════ The hero's founding panel ══════════════
+   ⚠️ VERBATIM FROM `design-refs/scriptally-landing-v16.html` .found-panel. This is the landing
+   hero's PRIMARY ACTION now — `Start tracking — it's free` has left the hero, because pre-launch
+   there is no self-serve product behind it.
+
+   ⚠️ AND THE OFFER IS A PRICING COMMITMENT, STATED ON TWO PAGES. "then half price for life" here
+   and "for as long as you're querying your manuscript" on `/founders` are the same promise in two
+   wordings; if the terms change, both change together, and the `/founders` sweetener card is the
+   one that carries the detail. */
+export const FOUNDING_PANEL_KICKER = "Founding writers · limited to 100";
+/** The bold half of the offer line. Rendered as one sentence with the muted half after it. */
+export const FOUNDING_OFFER_LEAD = "Become a Founding Writer.";
+export const FOUNDING_OFFER_REST = "Six months' free Pro access, then half price for life.";
+export const FOUNDING_LEARN = "How it works";
+
 export const FOUNDING_FIELD_LABEL = "Email address";
 export const FOUNDING_PLACEHOLDER = "you@example.com";
 export const FOUNDING_CTA = "Claim your place";

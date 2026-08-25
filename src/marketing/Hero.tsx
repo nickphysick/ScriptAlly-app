@@ -13,7 +13,8 @@
  * harmonised. It is Caveat, so `robots` is UNDERLINED — mono inside a handwritten line reads as a
  * bug. There is no `P.S.` label.
  *
- * ⚠️ ONE CTA. `See pricing` and the `Free to start` microline are both gone.
+ * ⚠️ THE HERO'S ACTION IS THE FOUNDING PANEL. `Start tracking — it's free` and `Learn more` are
+ * both gone with the actions row they shared — see `FoundingPanel`.
  *
  * ⚠️ THE STATEMENT IS A FULL-WIDTH GRID ROW NOW, NOT A CHILD OF THE COPY COLUMN. The eyebrow and
  * the headline each span both columns; the copy and the artwork share the row beneath. That is
@@ -37,9 +38,10 @@
 
 import React from "react";
 import {
-  HERO_EYEBROW, HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B, CTA_START, CTA_LEARN,
+  HERO_EYEBROW, HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_B,
 } from "./landingCopy";
 import { MarketingIllustration } from "./marketingMarks";
+import { FoundingPanel } from "./FoundingPanel";
 import heroIllustration from "../assets/marketing/hero-illustration-placeholder.png";
 /* ⚠️ A PLACEHOLDER AWAITING THE ILLUSTRATOR, like the hero artwork beside it — the filename is
    the only thing on the page that says so. */
@@ -58,7 +60,9 @@ const LAST_SPACE = HERO_H1.lastIndexOf(" ");
 const STATEMENT_HEAD = HERO_H1.slice(0, LAST_SPACE + 1);
 const STATEMENT_TAIL = HERO_H1.slice(LAST_SPACE + 1);
 
-export const Hero: React.FC<{ onStart: () => void }> = ({ onStart }) => (
+export const Hero: React.FC<{
+  onNavigate: (tab: string, subPageName?: string) => void;
+}> = ({ onNavigate }) => (
   <section className="mk-hero">
     <div className="mk-heroinner">
       <p className="mk-eyebrow mk-r mk-r1">{HERO_EYEBROW}</p>
@@ -110,15 +114,12 @@ export const Hero: React.FC<{ onStart: () => void }> = ({ onStart }) => (
           <span className="mk-turn-b">{HERO_TURN_B}</span>
         </div>
 
-        <div className="mk-hctas mk-r mk-r4">
-          <button type="button" className="mk-btn mk-btn--cta" onClick={onStart}>{CTA_START}</button>
-          {/* ⚠️ A REAL ANCHOR, NOT A JS SCROLL HANDLER. It works with JavaScript off, it is
-              keyboard- and screen-reader-navigable as a link, the browser owns the focus move,
-              and the reduced-motion case is one CSS line rather than a branch. A handler would
-              have to reimplement all four. */}
-          <a className="mk-learn" href="#pulse">
-            {CTA_LEARN}<span className="mk-chev" aria-hidden="true">↓</span>
-          </a>
+        {/* ⚠️ THE ACTIONS ROW IS GONE, BOTH HALVES. `Start tracking — it's free` left because
+            pre-launch there is nothing self-serve behind it, and `Learn more` left with the row it
+            shared — an in-page anchor to `#pulse` competing with a real offer three inches below
+            it. The panel is the hero's only action now. */}
+        <div className="mk-r mk-r4">
+          <FoundingPanel onNavigate={onNavigate} />
         </div>
       </div>
 

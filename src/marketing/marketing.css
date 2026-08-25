@@ -53,6 +53,9 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
        <=560    wrapped, two rows  128.8 → 120.8
      Each override sits in the media block that CAUSES its regime, so the height and the layout
      that produces it cannot drift apart. */
+  /* ⚠️ DORMANT SINCE `Learn more` LEFT THE HERO — its only reader is `.mk-sect`'s
+     `scroll-margin-top`, which currently has no anchor to serve. Kept on purpose; see the note
+     there, and do not sweep either as dead code. */
   --mk-nav-h: 88px;
   /* The cream the nav's ink pill prints in — lighter than the parchment so it reads as type on
      ink rather than a second surface. */
@@ -94,6 +97,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
      this sheet READS resolves to a declaration; declaring them together here is what makes that
      guard cheap to keep satisfied. */
   --mk-blush: #f8e8e1;
+  --mk-panel-sh: rgba(124, 58, 42, .08);
   --mk-blush-line: #eed6cb;
   --mk-blush-label: #9c6a56;
   --mk-blush-body: #6d5348;
@@ -503,6 +507,59 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    overflows its column by ~103px. The ref draws one width. */
 @media (min-width: 901px) { .mk-statement { white-space: nowrap; } }
 
+/* ── The hero's founding panel: the landing's primary action ──
+   ⚠️ IT REPLACES THE ACTIONS ROW, AND `.mk-hctas` GOES WITH IT. `Start tracking — it's free` and
+   `Learn more` are both retired: pre-launch there is nothing self-serve behind the first, and the
+   second was an in-page anchor competing with a real offer three inches below it.
+   ⚠️ THE BUTTON IS PINK HERE AND INK IN THE SEALED BAND, and that is the grammar working rather
+   than an inconsistency: primaries are pink on cream and parchment grounds, ink on pink ones. This
+   panel's ground is BLUSH; the band's ground is the pink itself, where a pink button would have
+   nothing to sit against. `.mk-found-form .mk-btn--ink` below is what re-tints the shared
+   primitive's button for this mount — the FORM is shared, the treatment is the wrapper's. */
+.mk-found { margin-top: 34px; max-width: 35rem; }
+.mk-found-panel {
+  background: var(--mk-blush); border: 1px solid var(--mk-cta-bd); border-radius: 14px;
+  padding: 24px 26px 22px; box-shadow: 0 10px 26px var(--mk-panel-sh);
+}
+.mk-found-kick {
+  font-family: "JetBrains Mono", monospace; font-size: .62rem; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--mk-blush-label); margin: 0 0 10px;
+}
+.mk-offer { margin: 0; font-size: 1.06rem; line-height: 1.55; color: var(--mk-blush-body); }
+.mk-offer strong { color: var(--mk-nearblack); font-weight: 600; }
+.mk-found-form { display: flex; gap: 11px; margin-top: 14px; flex-wrap: wrap; }
+.mk-found-form input {
+  flex: 1 1 210px; min-width: 0; font-family: inherit; font-size: .98rem; color: var(--mk-ink);
+  background: #fff; border: 1px solid var(--mk-cta-bd); border-radius: 11px; padding: 13px 15px;
+}
+.mk-found-form input::placeholder { color: var(--mk-blush-ph); }
+/* The pink primary, overriding the primitive's default ink. See the note above. */
+.mk-found-form .mk-btn--ink {
+  flex: none; font-size: .98rem; font-weight: 500; padding: 13px 22px; border-radius: 11px;
+  color: var(--mk-nearblack); background: var(--mk-cta); border-color: var(--mk-cta-bd);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 2px 6px var(--mk-panel-sh);
+}
+.mk-found-form .mk-btn--ink:hover { background: var(--mk-cta-hov); }
+/* ⚠️ THE FOOT ROW SURVIVES AN ABSENT COUNTER. The counter renders nothing until a real figure
+   comes back, so `space-between` with one child would push the link left; `margin-left: auto` on
+   the link keeps it right whether or not the count is there. Today it is never there. */
+.mk-found-foot {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 14px;
+}
+.mk-foundcnt {
+  font-family: "JetBrains Mono", monospace; font-size: .6rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--mk-blush-label); margin: 0;
+}
+.mk-found-learn {
+  margin-left: auto; background: none; border: none; padding: 0 0 2px; cursor: pointer;
+  font-family: inherit; font-size: .98rem; color: var(--mk-burg);
+  border-bottom: 1px solid rgba(124, 58, 42, .35);
+}
+.mk-found-learn:hover { border-bottom-color: var(--mk-burg); }
+/* The shared form's outcome messages sit tighter inside a panel than inside the letter. */
+.mk-found-panel .mk-betamsg { margin-top: 14px; font-size: .95rem; padding: 12px 15px; }
+.mk-found-panel .mk-betainvalid { margin-top: 10px; }
+
 /* The continuation: the lede on a paper slip, the postscript tilted against it.
    ⚠️ THE `vh` CEILINGS ON THIS BLOCK, `.mk-turn` AND `.mk-hctas` ARE REACHED AT ~900px OF VIEWPORT
    HEIGHT ON PURPOSE — see the note on the headline token. A ceiling here should be roughly the
@@ -612,6 +669,14 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    76.5px behind the bar. The mobile value differs because the nav re-wraps to 92px, and the
    override is tied to the SAME breakpoint at which `.mk-links` hides — so the two cannot drift
    apart without someone seeing both. */
+/* ⚠️ DORMANT, DELIBERATELY — DO NOT SWEEP THIS AS DEAD CODE. `Learn more` was the only in-page
+   anchor on the site and it left with the hero's actions row, so `scroll-margin-top` currently has
+   nothing to serve and `--mk-nav-h` currently has no other reader. Both are kept because they are
+   RIGHT and were expensive to get right: the token is derived from the CONDENSED nav height, and
+   the intuition is inverted — see the token's own note, where the measurement is. Delete them and
+   the next person to add an anchor re-derives the offset from scratch and gets it wrong the same
+   way, because "the nav has already condensed by the time the scroll happens" is the reading that
+   sounds correct and is not. Any future in-page anchor on any marketing page is already served. */
 .mk-sect { position: relative; padding: 70px 0 96px; scroll-margin-top: var(--mk-nav-h); }
 .mk-sectinner { max-width: 1300px; margin: 0 auto; padding: 0 56px; }
 .mk-seyebrow {

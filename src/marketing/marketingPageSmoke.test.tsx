@@ -331,39 +331,71 @@ describe("the statement's ticked box", () => {
  * signed up, made by nobody, checkable by nobody. Nothing renders until a real figure comes back —
  * not a zero, not an empty bar, not a dash — so the first render must contain no counter at all.
  */
-describe("the founding-members band", () => {
+describe("the founding sign-up — one component, mounted more than once", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
 
-  it("closes the page — the CTA band is gone", () => {
+  it("the hero's panel is the page's action, and the CTA band is gone", () => {
     const h = html();
+    expect(h).toContain("Founding writers · limited to 100");
+    expect(h).toContain("Become a Founding Writer.");
     expect(h).toContain("Founding members");
     expect(h).toContain("Be one of the first hundred.");
     expect(h).not.toMatch(/["\s`]mk-ctaband["\s`]/);
-    expect(h).not.toMatch(/["\s`]mk-ctainner["\s`]/);
     expect(h).not.toContain("Free to start. Take control of your querying journey today.");
+  });
+
+  /**
+   * ⚠️ THE HERO'S OLD ACTIONS ROW IS GONE, BOTH HALVES. `Start tracking — it's free` left because
+   * pre-launch nothing self-serve sits behind it; `Learn more` left with the row it shared. A
+   * hero with a real offer and an in-page anchor competing three inches below it is the shape
+   * this replaced.
+   */
+  it("neither half of the old actions row survives on the page", () => {
+    const h = html();
+    /* ⚠️ THE FULL LABEL, NOT THE PREFIX. "Start tracking" on its own is still legitimate copy on
+       this page — three feature rows use it as their action — so a substring check goes red on a
+       correct page. The claim is about the HERO's CTA, which is the whole string. */
+    expect(h).not.toContain("Start tracking — it&#x27;s free");
+    expect(h).not.toMatch(/["\s`]mk-hctas["\s`]/);
+    expect(h).not.toMatch(/["\s`]mk-learn["\s`]/);
+    expect(h).not.toContain("Learn more");
   });
 
   it("renders no counter and no number, because there is no count yet", () => {
     const h = html();
     expect(h).not.toMatch(/["\s`]mk-counter["\s`]/);
+    expect(h).not.toMatch(/["\s`]mk-foundcnt["\s`]/);
     expect(h).not.toContain("places claimed");
-    /* And nothing that reads as a tally of places. */
     expect(h).not.toMatch(/\d+\s+of\s+\d+/);
   });
 
-  it("offers a real, labelled email field", () => {
+  /**
+   * ⚠️ TWO MOUNTS ON ONE PAGE, AND THEIR IDS MUST DIFFER. `<label for>` and `aria-describedby`
+   * resolve to whichever element comes first in the document, so a shared id would silently point
+   * the second form's label at the first form's field — and duplicate ids are invalid HTML
+   * besides. `idPrefix` is what stops it, and this is the assertion that says so.
+   */
+  it("every sign-up on the page has its own ids and its own label", () => {
     const h = html();
-    const input = h.match(/<input[^>]*id="mk-founding-email"[^>]*>/);
-    expect(input, "the email field is rendered").toBeTruthy();
-    expect(input![0]).toContain('type="email"');
-    /* ⚠️ A LABEL, NOT A PLACEHOLDER STANDING IN FOR ONE. The placeholder is an example address and
-       it disappears the moment anyone types; the label has to survive that. `.mk-sr` hides it
-       visually and keeps it in the accessibility tree — which is what separates it from
-       `.mk-trap`, the contact form's honeypot, which is deliberately `aria-hidden`. */
-    const label = h.match(/<label[^>]*for="mk-founding-email"[^>]*>([^<]*)</);
-    expect(label, "the field has a label element").toBeTruthy();
-    expect(label![1]).toBe("Email address");
-    expect(label![0]).not.toContain("aria-hidden");
+    const ids = [...h.matchAll(/<input[^>]*id="([^"]+)"[^>]*type="email"/g)].map((m) => m[1]);
+    expect(ids.length, "the landing carries two sign-ups").toBe(2);
+    expect(new Set(ids).size, `ids collide: ${ids.join(", ")}`).toBe(2);
+    for (const id of ids) {
+      const label = h.match(new RegExp(`<label[^>]*for="${id}"[^>]*>([^<]*)<`));
+      expect(label, `${id} has its own label`).toBeTruthy();
+      expect(label![1]).toBe("Email address");
+      expect(label![0]).not.toContain("aria-hidden");
+    }
+  });
+
+  it("…and one live region each, mounted empty before there is anything to announce", () => {
+    const regions = [...html().matchAll(/<div class="mk-betamsgwrap"([^>]*)>([\s\S]*?)<\/div>/g)];
+    expect(regions.length).toBe(2);
+    for (const [, attrs, body] of regions) {
+      expect(attrs).toContain('aria-live="polite"');
+      expect(attrs).toContain('role="status"');
+      expect(body.trim()).toBe("");
+    }
   });
 
   /** The wax seal says nothing the heading beneath it does not. */
@@ -374,21 +406,7 @@ describe("the founding-members band", () => {
     expect(html()).toMatch(/<img[^>]*src="[^"]*founding-seal-mark[^"]*"[^>]*alt=""/);
   });
 
-  /**
-   * ⚠️ THE LIVE REGION IS MOUNTED EMPTY, ON THE FIRST RENDER, AND THAT IS THE WHOLE POINT. A
-   * region that appears at the same moment as its message is not reliably announced — the outcome
-   * has to arrive INTO something the reader's software is already watching.
-   */
-  it("mounts an empty live region before there is anything to announce", () => {
-    const h = html();
-    const region = h.match(/<div class="mk-betamsgwrap"[^>]*>([\s\S]*?)<\/div>/);
-    expect(region, "the live region is rendered").toBeTruthy();
-    expect(region![0]).toContain('aria-live="polite"');
-    expect(region![0]).toContain('role="status"');
-    expect(region![1].trim()).toBe("");
-  });
-
-  /** No outcome is stated before anything has been sent. */
+  /** No outcome is stated before anything has been sent, on either mount. */
   it("says nothing about the outcome on first render", () => {
     const h = html();
     for (const s of [

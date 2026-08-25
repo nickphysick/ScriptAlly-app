@@ -1,0 +1,128 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * FoundingSignup — the waitlist form itself: a field, a button, the outcome states and the live
+ * region that announces them. It carries no chrome of its own.
+ *
+ * ⚠️ ONE COMPONENT, THREE MOUNTS, ONE LIST. The landing hero's blush panel, the `/founders` hero
+ * and the sealed band at the foot of both pages all render THIS, with different wrappers around
+ * it. Copying it would give the site three sign-ups that drift apart — three success states,
+ * three counters, three sets of error copy to keep in step — and they would disagree in front of
+ * a reader long before anyone noticed in the source.
+ *
+ * ⚠️ `idPrefix` IS REQUIRED AND THAT IS THE POINT. `/founders` renders TWO of these on one page,
+ * so a hardcoded `id` would put duplicates in one document: invalid HTML, and `<label for>` /
+ * `aria-describedby` resolve to whichever comes first — so the second form's label would silently
+ * point at the first form's field. This repo has met that fault before, in the workspace, where
+ * every page stays mounted; here it is one page rendering the same component twice.
+ *
+ * State and count both come from `foundingStore`, never from this component, so all three mounts
+ * agree. See that file for why.
+ */
+
+import React, { useEffect, useState } from "react";
+import { Runs } from "./CopyRuns";
+import { isValidEmail } from "../lib/authActions";
+import {
+  FOUNDING_FIELD_LABEL, FOUNDING_PLACEHOLDER, FOUNDING_CTA, FOUNDING_INVALID,
+  FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL, FOUNDING_ERROR, FOUNDING_DOWN,
+  foundingCounterLabel,
+} from "./landingCopy";
+import { useFounding, ensureCount, submitFounding, FoundingState } from "./foundingStore";
+
+/** Which outcomes replace the form, and which leave it there to try again. */
+const HIDES_FORM: ReadonlySet<FoundingState> = new Set<FoundingState>(["sent", "dupe", "full", "down"]);
+
+export const FoundingSignup: React.FC<{
+  /** Unique per mount. Every `id` this renders is built from it — see the docblock. */
+  idPrefix: string;
+  /** The button. Defaults to the band's wording so the two band mounts do not restate it. */
+  ctaLabel?: string;
+  /** The form's own class, so each wrapper owns its own layout. */
+  formClass: string;
+  onNavigate: (tab: string, subPageName?: string) => void;
+}> = ({ idPrefix, ctaLabel = FOUNDING_CTA, formClass, onNavigate }) => {
+  const { state } = useFounding();
+  const [email, setEmail] = useState("");
+  const [invalid, setInvalid] = useState(false);
+
+  useEffect(ensureCount, []);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isValidEmail(email)) { setInvalid(true); return; }
+    setInvalid(false);
+    await submitFounding(email.trim());
+  };
+
+  const fieldId = `${idPrefix}-email`;
+  const invalidId = `${idPrefix}-invalid`;
+
+  return (
+    <>
+      {!HIDES_FORM.has(state) && (
+        <form className={formClass} onSubmit={(e) => { void submit(e); }} noValidate>
+          {/* ⚠️ A LABEL, NOT A PLACEHOLDER STANDING IN FOR ONE. The placeholder is an example
+              address and it disappears the moment anyone types; the label has to survive that.
+              `.mk-sr` hides it visually and keeps it in the accessibility tree — which is what
+              separates it from `.mk-trap`, the contact form's honeypot, which is `aria-hidden`. */}
+          <label className="mk-sr" htmlFor={fieldId}>{FOUNDING_FIELD_LABEL}</label>
+          <input
+            id={fieldId}
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            placeholder={FOUNDING_PLACEHOLDER}
+            value={email}
+            aria-invalid={invalid || undefined}
+            aria-describedby={invalid ? invalidId : undefined}
+            onChange={(ev) => { setEmail(ev.target.value); if (invalid) setInvalid(false); }}
+          />
+          <button type="submit" className="mk-btn mk-btn--ink" disabled={state === "sending"}>
+            {ctaLabel}
+          </button>
+        </form>
+      )}
+
+      {invalid && <p className="mk-betainvalid" id={invalidId}>{FOUNDING_INVALID}</p>}
+
+      {/* ⚠️ ONE LIVE REGION, ALWAYS PRESENT. A region mounted at the same moment as its message is
+          not reliably announced — the outcome has to arrive INTO a region the reader's software is
+          already watching. Empty and silent until there is something to say. */}
+      <div className="mk-betamsgwrap" role="status" aria-live="polite">
+        {state === "sent" && <p className="mk-betamsg mk-betamsg--ok">{FOUNDING_SENT}</p>}
+        {state === "dupe" && <p className="mk-betamsg mk-betamsg--ok">{FOUNDING_DUPE}</p>}
+        {state === "full" && <p className="mk-betamsg mk-betamsg--warn">{FOUNDING_FULL}</p>}
+        {state === "error" && (
+          <p className="mk-betamsg mk-betamsg--warn"><Runs runs={FOUNDING_ERROR} onNavigate={onNavigate} /></p>
+        )}
+        {state === "down" && (
+          <p className="mk-betamsg mk-betamsg--warn"><Runs runs={FOUNDING_DOWN} onNavigate={onNavigate} /></p>
+        )}
+      </div>
+    </>
+  );
+};
+
+/**
+ * The counter, live or absent.
+ *
+ * ⚠️ IT RENDERS NOTHING UNTIL A REAL FIGURE COMES BACK — no bar, no number, no dash, no zero. The
+ * ref hardcodes "37 of 100 places claimed"; on a public page that is a factual claim about how
+ * many people have signed up, made by nobody and checkable by nobody. Each wrapper places this
+ * where its own layout wants it; the figure itself comes from the one shared store.
+ */
+export const FoundingCounter: React.FC<{ variant: "bar" | "line" }> = ({ variant }) => {
+  const { count, state } = useFounding();
+  if (!count || state === "down") return null;
+  const pct = Math.min(100, Math.round((count.claimed / count.cap) * 100));
+  const label = foundingCounterLabel(count.claimed, count.cap);
+  if (variant === "line") return <p className="mk-foundcnt">{label}</p>;
+  return (
+    <div className="mk-counter">
+      <div className="mk-counterbar"><div className="mk-counterfill" style={{ width: `${pct}%` }} /></div>
+      <p className="mk-counterlab">{label}</p>
+    </div>
+  );
+};

@@ -50,7 +50,7 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
 
   return (
     <div>
-      <Hero onStart={openSignup} />
+      <Hero onNavigate={onNavigate} />
       {/* ⚠️ THE SECOND SURFACE STARTS HERE AND RUNS TO THE FOOT OF THE PAGE. The hero is on the
           app's content ground above it and the boundary is marked by the colour change alone —
           there is deliberately no rule at the join. */}
