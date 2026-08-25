@@ -140,11 +140,36 @@ test("all four dismissal routes close it", async ({ page }) => {
   await page.waitForTimeout(600);
   routes["Escape"] = !(await isOpen(page));
 
-  /* 4 — the scrim. Clicked at a point clear of the panel, on its left. */
+  /**
+   * 4 — the scrim.
+   *
+   * ⚠️ THE CLICK POINT IS DERIVED FROM THE PANEL'S MEASURED BOX, NOT ASSUMED. A hardcoded x=60
+   * reported "scrim did not close the drawer" — and it was true: the panel was AT x=24, because the
+   * primitive's fixed wrapper resolves to the full viewport width and its flex row put the panel
+   * hard left. The probe was right about the symptom and wrong about the cause, which is what a
+   * fixed coordinate buys you. Clicking a measured distance clear of the panel tests the scrim
+   * wherever the panel is.
+   */
   await openDrawer(page, 1440);
-  await page.mouse.click(60, 400);
+  const box = await page.evaluate(() => {
+    const b = document.querySelector(".pkgdd-body")!.getBoundingClientRect();
+    return { left: b.left, right: b.right, w: innerWidth };
+  });
+  /* the wider clear side */
+  const x = box.left > box.w - box.right ? Math.round(box.left / 2) : Math.round((box.right + box.w) / 2);
+  await page.mouse.click(x, 400);
   await page.waitForTimeout(600);
   routes["scrim"] = !(await isOpen(page));
+
+  /* ⚠️ AND THE PANEL IS ON THE RIGHT (D8) — asserted, because it was not. */
+  await openDrawer(page, 1440);
+  const side = await page.evaluate(() => {
+    const b = document.querySelector(".pkgdd-body")!.getBoundingClientRect();
+    return { left: Math.round(b.left), rightGap: Math.round(innerWidth - b.right) };
+  });
+  console.log("panel box " + JSON.stringify(side));
+  expect(side.rightGap, `the drawer is ${side.left}px from the left — it should hug the right`)
+    .toBeLessThan(side.left);
 
   console.log(JSON.stringify(routes, null, 2));
   for (const [name, closed] of Object.entries(routes)) {

@@ -333,6 +333,13 @@ export const Form11Styles: React.FC = () => (
   <style>{`
     @keyframes f11-slide-in { 0%{transform:translateX(125%) rotate(-5deg);} 65%{transform:translateX(0) rotate(-3deg);} 100%{transform:translateX(0) rotate(0deg);} }
     @keyframes f11-slide-out { 0%{transform:translateX(0) rotate(0deg);} 100%{transform:translateX(130%) rotate(-4deg);} }
+    /* ⚠️ RIGHT-ANCHORED, EXPLICITLY. The wrapper carries an inline right:0 and NO left, which should
+       shrink-wrap a fixed box — measured, it resolves to the FULL viewport width (1440 at 1440), so
+       the flex row's default flex-start put the panel hard LEFT. Both drawers on this primitive
+       were opening on the wrong side, and the inline right:0 read as though they were not.
+       flex-end states the intent somewhere the layout can honour it.
+       ⚠️ NO BACKTICKS IN THIS BLOCK — it lives inside a template literal, and one terminates it. */
+    .f11-slide { justify-content: flex-end; }
     .f11-slide > div { animation: f11-slide-in .55s cubic-bezier(.22,.61,.36,1); transform-origin:center; }
     .f11-slide.f11-closing > div { animation: f11-slide-out .18s cubic-bezier(.5,0,.9,.4) forwards; }
     @media (prefers-reduced-motion: reduce) { .f11-slide > div, .f11-slide.f11-closing > div { animation: none !important; } }
