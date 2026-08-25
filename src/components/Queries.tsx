@@ -6262,7 +6262,6 @@ export const Queries: React.FC<{
                                 <PackagePicker
                                   packages={attachablePkgs}
                                   versions={versions}
-                                  existing={materialsOf(activeQuery)}
                                   style={pkgPickStyle}
                                   panelRef={pkgPickPanelRef}
                                   /* ⚠️ EVERY NEW ATTACHMENT IS A LINK (D12). The snapshot path is

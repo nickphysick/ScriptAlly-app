@@ -158,20 +158,13 @@ export const materialName = (m: string | QueryMaterial): string =>
   typeof m === "string" ? m : m.material;
 
 /**
- * ⚠️ AN OVERLAP IS DECLARED, NEVER RESOLVED FOR THE WRITER (ref card: "Covering letter is already
- * attached — the package's query letter will sit beside it"). Silently replacing loses something
- * they chose; silently skipping loses something the package promised. Both are decisions this
- * module has no standing to make, so it reports and the picker prints it.
+ * ⚠️ `overlaps` AND `overlapNote` ARE GONE (D4), with their tests. They built the picker's per-row
+ * line — "Covering letter is already attached — the package's copy will sit beside it" — which
+ * announced a duplicate the model forbids: `materialsLinkWrites` clears one side as it writes the
+ * other, so a query holds a package OR a loose list and the "beside it" state has never been
+ * reachable. The copy described a write this code cannot perform, and the derivation existed only
+ * to phrase it.
  */
-export function overlaps(items: readonly PackageItem[], existing: readonly (string | QueryMaterial)[]): PackageItem[] {
-  const have = new Set(existing.map((m) => materialName(m).toLowerCase()));
-  return items.filter((i) => have.has(i.material.toLowerCase()));
-}
-
-export const overlapNote = (i: PackageItem): string =>
-  `${i.label} is already attached — the package's copy will sit beside it.`;
-
-/** The items as they land in `materialsWanted` — copied, marked, and never linked. */
 /**
  * ⚠️ RETIRED AS A WRITER (D12) — nothing creates snapshots any more. `attachPackage` was its only
  * caller and the pane now writes a LINK for every new attachment, because the package lock makes a

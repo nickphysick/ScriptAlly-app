@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { ComponentType, RecordStatus, UserPlan, type ManuscriptVersion, type QueryMaterial, type SubmissionPackage } from "../types";
 import { MATERIAL_LABEL } from "./manuscriptPackages";
 import {
-  packageItems, overlaps, overlapNote, attachedMaterials, originTags, originTagText,
+  packageItems, attachedMaterials, originTags, originTagText,
   withoutPackage, attachablePackages, materialName, type AttachedMaterial,
   canAttachPackages, packageMenuRow, PACKAGE_ROW_LABEL, isProUser, groupByOrigin,
   packageDrift, driftNote, sendsWithPackage, sentWithLine, NEVER_SENT_LINE,
@@ -59,25 +59,6 @@ describe("a package's items", () => {
   it("⚠️ uses the app's own name for a sample — never 'Sample pages', which asserts a unit", () => {
     expect(packageItems(PKG, VERSIONS)[2].label).toBe(MATERIAL_LABEL[ComponentType.SAMPLE_PAGES]);
     expect(packageItems(PKG, VERSIONS)[2].label).not.toMatch(/sample pages/i);
-  });
-});
-
-describe("overlaps are declared, never resolved", () => {
-  const items = packageItems(PKG, VERSIONS);
-  it("names an item the send already carries", () => {
-    const clash = overlaps(items, [{ material: "Query Letter" } as QueryMaterial]);
-    expect(clash.map((i) => i.label)).toEqual([MATERIAL_LABEL[ComponentType.QUERY_LETTER]]);
-    expect(overlapNote(clash[0])).toContain("will sit beside it");
-  });
-  it("⚠️ never says replace or skip — both would decide for the writer", () => {
-    expect(overlapNote(items[0])).not.toMatch(/replac|skip|remov/i);
-  });
-  it("reads legacy plain-string materials too", () => {
-    expect(overlaps(items, ["Synopsis"]).map((i) => i.label)).toEqual(["Synopsis"]);
-    expect(materialName("Synopsis")).toBe("Synopsis");
-  });
-  it("finds none when nothing clashes", () => {
-    expect(overlaps(items, ["Author bio"])).toEqual([]);
   });
 });
 

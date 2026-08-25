@@ -4389,6 +4389,22 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
    popover on this page uses, so `Manage packages…` cannot be scrolled out of reach. */
 .qc-pkgpick { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--sh-3); padding: 6px; min-width: 288px; max-width: 360px; }
 .qc-pkgpick-head { flex: none; padding: 7px 9px 8px; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+
+/* ⚠️ THE HEAD BECOMES A ROW so the × can sit at its end. The picker had no visible way out at all;
+   the other two routes (Escape, click-away) are invisible, and a writer who knows neither needs
+   something to press. */
+.qc-pkgpick-head { display: flex; align-items: center; gap: 10px; }
+.qc-pkgpick-x {
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 0 2px;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--muted);
+}
+.qc-pkgpick-x:hover { color: var(--ink); }
 .qc-pkgpick-body { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
 .qc-pkgrow { display: flex; flex-direction: column; gap: 3px; width: 100%; padding: 9px 10px; border-radius: var(--r-sm); text-align: left; cursor: pointer; }
 .qc-pkgrow:hover { background: var(--paper); }
@@ -4400,7 +4416,8 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 .qc-pkgitem em { font-style: normal; color: var(--ink-3); }
 /* the overlap note is the one thing on the row that must not be skimmed past */
 /* ⚠️ THE TOKEN, NOT THE HEX — `f12.css` forbids colour literals and a lock scans for them. */
-.qc-pkgclash { font-size: 11px; line-height: 1.4; color: var(--burg); }
+/* ⚠️ `.qc-pkgclash` IS GONE (D4) — it styled the picker's per-row conflict line, which announced a
+   duplicate the model forbids. Its derivations (`overlaps`, `overlapNote`) went with it. */
 .qc-pkgmanage { flex: none; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; width: 100%; margin-top: 4px; padding: 8px 10px; border-top: 1px solid var(--hairline); font-family: var(--f12-body); font-size: 12px; color: var(--ink-2); text-align: left; cursor: pointer; }
 .qc-pkgmanage:hover { color: var(--ink); }
 .qc-pkgmanage-note { font-family: var(--f12-mono); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
