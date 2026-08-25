@@ -128,7 +128,26 @@
   color: var(--pro-ink);
 }
 
-/* ⚠️ BELOW THE CARD AND OUTSIDE IT (D4). Reveal rules live in the next phase. */
+/**
+ * ⚠️ REVEALED ON HOVER **AND** `:focus-within` (D4). Hover alone strands the keyboard and touch —
+ * a control that exists only under a pointer is unreachable to anyone not using one, and these are
+ * the only way to correct a mis-attached package.
+ *
+ * ⚠️ AND IT IS `opacity`, NOT `display` OR `visibility`. Both of those take the buttons out of the
+ * tab order, so `:focus-within` could never fire: the element would have to be focusable before it
+ * could be focused into. Opacity keeps them in the order and reachable by Tab, which is what makes
+ * the focus reveal work at all rather than merely look like it should.
+ *
+ * ⚠️ ON A COARSE POINTER THEY ARE ALWAYS VISIBLE. There is no hover to give, and the mobile pass
+ * will refine the arrangement — but unreachable is not a state to ship in the meantime.
+ */
+.qc-stat-acts { opacity: 0; transition: opacity 0.15s; }
+.qc-attach:hover .qc-stat-acts,
+.qc-attach:focus-within .qc-stat-acts { opacity: 1; }
+@media (hover: none), (pointer: coarse) {
+  .qc-stat-acts { opacity: 1; }
+}
+
 .qc-stat-acts {
   display: flex;
   justify-content: flex-end;

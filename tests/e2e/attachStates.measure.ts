@@ -15,7 +15,7 @@ const census = (page: import("@playwright/test").Page) => page.locator(".qc-wpg"
     return el.offsetParent !== null && getComputedStyle(el).visibility !== "hidden";
   }).length;
   return {
-    packedStrip: vis(".qc-strip--packed"),
+    packedStrip: vis(".qc-stat"),
     looseRow: vis(".qc-loose"),
     fork: vis(".qc-fork"),
     goneMsg: vis(".qc-gonelink"),
@@ -24,10 +24,12 @@ const census = (page: import("@playwright/test").Page) => page.locator(".qc-wpg"
     looseSlot: [...r.querySelectorAll(".qc-loose .pkgb-plate")].length,
     attachChip: vis(".qc-mchip-add"),
     lockNote: vis(".qc-strip-lock"),
+    actsOutside: (() => { const c = r.querySelector(".qc-stat"); const a = r.querySelector(".qc-stat-acts"); return c && a ? !c.contains(a) : null; })(),
     /* what must survive */
-    parcel: [...r.querySelectorAll(".qc-strip--packed .pkgb-plate")].length,
-    seal: vis(".qc-strip-seal"),
-    ptrs: [...r.querySelectorAll(".qc-strip-ptr")].map((e) => (e as HTMLElement).innerText.trim()),
+    glyph: vis(".qc-stat-glyph svg"),
+    dashed: [...r.querySelectorAll(".qc-stat *")].filter((e) => getComputedStyle(e).borderTopStyle === "dashed").length,
+    label: vis(".qc-stat-l"),
+    ptrs: [...r.querySelectorAll(".qc-stat-a")].map((e) => (e as HTMLElement).innerText.trim()),
   };
 });
 
@@ -68,11 +70,23 @@ test("all four attachment states, counted", async ({ page }) => {
   }
   const packaged = seen["packaged"] as never as Record<string, unknown>;
   if (packaged) {
-    expect(packaged.parcel, "the packaged strip lost its slot (D9)").toBe(1);
-    expect(packaged.seal, "the packaged strip lost its seal (D9)").toBe(1);
+    expect(packaged.glyph, "the band lost its glyph (D9)").toBe(1);
+    expect(packaged.label, "the band lost its label").toBe(1);
+    expect(packaged.dashed, "a dashed placeholder survives (D5)").toBe(0);
+    expect(packaged.actsOutside, "the actions are inside the card (D4)").toBe(true);
     expect((packaged.ptrs as string[]).map((t) => t.toLowerCase()))
       .toEqual(["change package", "remove"]);
   }
+  /* F-AQ — does focusing one of the pane's OWN in-place controls reveal the band's actions? */
+  const fAQ = await page.locator(".qc-wpg").evaluate((r) => {
+    const inplace = r.querySelector(".qp-inplace") as HTMLElement | null;
+    const acts = r.querySelector(".qc-stat-acts");
+    if (!inplace || !acts) return "not both on screen";
+    inplace.focus();
+    return { insideAttach: !!inplace.closest(".qc-attach") };
+  });
+  console.log(`F-AQ: ${JSON.stringify(fAQ)}`);
+
   const unatt = seen["unattached"] as never as Record<string, number>;
   if (unatt) expect(unatt.attachChip, "the third + Attach survives beside the fork (D10)").toBe(0);
   await updateDoc(doc(db, "users", uid, "queries", gone!.id), { packageId: (gone!.data() as { packageId?: string }).packageId! });

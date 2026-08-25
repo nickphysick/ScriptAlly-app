@@ -162,3 +162,43 @@ No dashed border survives anywhere in the card. `PARCEL_SLOT`, `SHEETS_SLOT` and
 are deleted; the mark is drawn inline at 15px. **The artist's slot inventory is updated** in
 `reports/packages-two-state.md` with the two retired rows and the reason; the first-visit carousel
 and the three stage discs are unchanged and still wanted.
+
+## D4 — the actions leave the object, and the keyboard can still reach them
+
+```
+at rest           opacity 0
+on hover          opacity 1
+pointer away      opacity 0
+keyboard focus    active true · opacity 1
+titles            "Change which package this query used" · "Change this query to carry no package"
+```
+
+⚠️ **It is `opacity`, not `display` or `visibility`** — both of those take the buttons out of the tab
+order, so `:focus-within` could never fire: the element would have to be focusable before it could be
+focused into. Opacity keeps them reachable by Tab, which is what makes the focus reveal work rather
+than merely look like it should.
+
+⚠️ **And the first run reported focus-within as broken about a working reveal** — it read `opacity`
+during the 0.15s transition, which reports where the property *started*. This repo's own standing
+trap, and `liftMotionSuppression` is what makes it live.
+
+On a coarse pointer the actions render visible: there is no hover to give, and unreachable is not a
+state to ship while the mobile pass is pending.
+
+### F-AQ — no interaction with the pane's in-place grammar
+
+On a packaged query the pane's only in-place control is the send method (`Email`), and it sits
+**outside** `.qc-attach`. Focusing it leaves the band's actions at `opacity: 0`. The reveal is scoped
+to the attachment block and cannot be tripped by the pane's own editing.
+
+## Phase 4 — all four states, 44 of 44 rows
+
+| state | card | glyph | label | dashed | acts outside | loose | fork | gone | promote | +Attach |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **packaged** | 1 | 1 | 1 | **0** | **true** | 0 | 0 | 0 | 0 | 0 |
+| **loose** | 0 | 0 | 0 | 0 | — | 1 | 0 | 0 | **0** | 1 |
+| **unattached** | 0 | 0 | 0 | 0 | — | 0 | 1 | 0 | 0 | **0** |
+| **package removed** | 0 | 0 | 0 | 0 | — | 0 | 1 | 1 | 0 | 0 |
+
+**Zero regressions** against the previous report's per-state counts — the loose row, the fork and the
+removed-package message are unchanged (D7).
