@@ -147,9 +147,21 @@ export interface FocusFlowProps {
   /** C2 family law — a Today's-list walk is a RITUAL: every band wears sage whole-walk (the
    *  mixed-lane crossfade never fires). Set only by the Work-the-list launch. */
   ritual?: boolean;
+  /**
+   * ⚠️ THE COMPLETION PRIMITIVE, SUPPLIED BY THE HOST (completion-paths Phase 1). Both mounts get it
+   * from the same `useTaskCommit` they use for everything else, so a task ticked here and a task
+   * ticked on the board go through ONE function — CLAUDE.md's law, and the reason this sheet must
+   * not write `{ done: true }` of its own: *"an inline completion is how the undo was bypassed once
+   * already. One primitive, four entrances."*
+   *
+   * Required rather than optional, deliberately. An optional primitive is one a future mount can
+   * forget to pass, and the fallback would have to be an inline completion — which is the thing
+   * being removed.
+   */
+  quickDone: (c: BoardCard) => Promise<void>;
 }
 
-export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast, prefill, mode = "journey", ritual = false }) => {
+export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast, prefill, mode = "journey", ritual = false, quickDone }) => {
   const {
     queries, agents, manuscripts, activities, taskFlags, userTasks, packages, currentUser,
     recordMaterialsSent, logNudge, recordOfferDecision, dismissTask, upsertTaskFlag, updateUserProfile, updateAgent, updateUserTask, addUserTask, updateQueryStatus, undoQueryStatus, resolveTaskFlag, deleteActivity,

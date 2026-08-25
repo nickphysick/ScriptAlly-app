@@ -578,7 +578,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * more, so the two surfaces already agree. See the run report.)
    */
   const [paneCard, setPaneCard] = useState<BoardCard | null>(null);
-  const { commit } = useTaskCommit({
+  const { commit, quickDone } = useTaskCommit({
     flash, rememberUndo: remember, confirmAsk,
     openFlow: (c) => setFlowCard(c),
   });
@@ -1383,6 +1383,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
              two pages can be relied on to say the same thing. */
           onNavigate={onNavigate}
           onToast={flash}
+          quickDone={quickDone}
         />
         </div>
       )}
