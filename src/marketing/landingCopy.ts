@@ -244,13 +244,13 @@ export const FOUNDING_INVALID = "That doesn't look like an email address.";
 /**
  * The outcomes, one per state the band can end in.
  *
- * ⚠️ `FOUNDING_FULL` IS WRITTEN AND UNREACHABLE, DELIBERATELY. Nothing can produce it: the
- * waitlist function returns the cap in every response but has no branch that enforces it, so a
- * 101st sign-up succeeds and is told it is in. Deciding "full" on the client from `count >= cap`
- * would be the front end inventing a policy the server does not hold — and two browsers racing
- * past 100 would both be told they were in, which is a promise the product cannot keep. The one
- * change that makes this string reachable is a cap branch in `functions/src/waitlist.ts`; until
- * then it sits here so the wording is settled and the gap is visible rather than forgotten.
+ * ⚠️ `FOUNDING_FULL` IS REACHABLE NOW — the function enforces the cap. Past a hundred verified
+ * places a sign-up is written `status: "waiting"` and answered `full: true`, and this is what
+ * the reader is shown. It sat here unreachable for a year so the wording would be settled before
+ * anything could produce it; that is why turning the cap on needed no copy decision.
+ * ⚠️ AND IT IS STILL NEVER DECIDED ON THE CLIENT. `count >= cap` is not the test — the server's
+ * flag is. Two browsers racing past 100 both read 99, and only the transaction knows which of
+ * them got the last place.
  *
  * ⚠️ AND THE TWO FAILURES ARE DIFFERENT FACTS, NOT ONE FACT WORDED TWICE. `FOUNDING_DOWN` is "the
  * route is not wired" — an HTML response, a parse failure, a network error — and it hides the

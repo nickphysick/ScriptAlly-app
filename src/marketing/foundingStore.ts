@@ -25,11 +25,12 @@ import { useSyncExternalStore } from "react";
 import { joinWaitlist, fetchWaitlistCount, WaitlistCount } from "./waitlist";
 
 /**
- * ⚠️ `full` IS DECLARED AND CANNOT BE REACHED. `functions/src/waitlist.ts` returns the cap in
- * every response and enforces it nowhere, so a 101st sign-up succeeds and is told it is in;
- * deciding "full" here from `count >= cap` would be the client inventing a policy the server does
- * not hold. It is in the union so the renderers stay exhaustive over the outcomes the product
- * intends, and so the day the function grows a cap branch the only change is the wiring.
+ * ⚠️ `full` IS REACHABLE NOW, AND IT ARRIVES FROM THE SERVER RATHER THAN FROM ARITHMETIC.
+ * `functions/src/waitlist.ts` writes `status: "waiting"` past the cap and answers `full: true`;
+ * `classifyJoin` reads that flag and nothing else. Deciding it here from `count >= cap` would be
+ * the client inventing a policy — and two browsers racing past 100 would both read 99 and both be
+ * told they were in. The state was declared here for a year before anything could produce it, so
+ * the renderers were already exhaustive and the only change was the wiring, as intended.
  */
 export type FoundingState = "idle" | "sending" | "sent" | "dupe" | "full" | "error" | "down";
 

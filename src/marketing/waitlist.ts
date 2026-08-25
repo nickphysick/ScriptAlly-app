@@ -59,6 +59,14 @@ export type RawResponse =
 export type JoinOutcome =
   | { state: "sent"; count: WaitlistCount | null }
   | { state: "dupe"; count: WaitlistCount | null }
+  /**
+   * ⚠️ REACHABLE NOW. `FoundingState` has declared `full` since the sealed band was built, and
+   * nothing could produce it: the function returned `cap` in every response and enforced it
+   * nowhere, so a 101st sign-up succeeded and was told it was in. The function now writes
+   * `status: "waiting"` past the cap and answers `full: true`, and this is the member that
+   * carries it. Purely additive — every existing branch keeps its meaning.
+   */
+  | { state: "full"; count: WaitlistCount | null }
   | { state: "error" }
   | { state: "down" };
 
@@ -89,6 +97,10 @@ export const classifyJoin = (raw: RawResponse): JoinOutcome => {
      anything else arriving with a 2xx is an answer we do not understand, and treating an
      unrecognised body as success is how a reader gets told they are on a list they are not on. */
   if (body.ok !== true) return { state: "error" };
+  /* ⚠️ `full` IS CHECKED BEFORE `alreadyJoined`, and the order is deliberate: a person who joins
+     the waiting list after the cap fills is `full`, not `sent`, even though the write succeeded.
+     Both flags are absent on an ordinary join, so this reads as one `if` on a normal day. */
+  if (body.full === true) return { state: "full", count: readCount(body) };
   return { state: body.alreadyJoined === true ? "dupe" : "sent", count: readCount(body) };
 };
 

@@ -67,28 +67,55 @@ describe("what a join attempt means", () => {
   });
 
   /**
-   * ⚠️ NOTHING CAN PRODUCE `full`, AND THIS IS THE ASSERTION THAT SAYS SO RATHER THAN A COMMENT.
-   * The function returns the cap in every response and enforces it nowhere, so a 101st sign-up
-   * succeeds. Deciding "full" here from `count >= cap` would be the client inventing a policy the
-   * server does not hold — and two browsers racing past 100 would both be told they were in. The
-   * copy exists (`FOUNDING_FULL`); the one change that reaches it is a cap branch in
-   * `functions/src/waitlist.ts`.
+   * ⚠️ RETARGETED, AND THE CLAIM GOT STRONGER RATHER THAN WEAKER. This used to assert that NOTHING
+   * could produce `full` — true and worth pinning while the function returned the cap in every
+   * response and enforced it nowhere. The function now writes `status: "waiting"` past the cap and
+   * answers `full: true`, so the state is reachable and the old assertion would be a lock on a
+   * limitation that has been fixed.
+   *
+   * What replaces it is the invariant that actually mattered all along: `full` comes from the
+   * SERVER SAYING SO and from nothing else. Deciding it here from `count >= cap` would be the
+   * client inventing a policy — and two browsers racing past 100 would both read the count as 99
+   * and both be told they were in. Only the flag counts.
    */
-  it("no response, including one at or over the cap, classifies as `full`", () => {
-    const every: RawResponse[] = [
-      { kind: "network" },
-      { kind: "non-json", status: 200 },
-      { kind: "non-json", status: 503 },
+  it("`full` comes from the server's flag, never from `count >= cap`", () => {
+    /* Every shape that LOOKS full and is not, because the server did not say so. */
+    const looksFull: RawResponse[] = [
       json(200, { ok: true, count: 100, cap: 100 }),
       json(200, { ok: true, count: 137, cap: 100 }),
       json(200, { ok: true, alreadyJoined: true, count: 100, cap: 100 }),
+      /* ⚠️ A NON-2xx SAYING "full" IS AN ERROR, NOT A FULL LIST. `ok` is the gate; a body that
+         arrives with a failing status is an answer we do not trust the contents of. */
       json(409, { error: "full", count: 100, cap: 100 }),
-      json(200, { ok: true, full: true, count: 100, cap: 100 }),
+    ];
+    expect(looksFull.map((r) => classifyJoin(r).state)).not.toContain("full");
+
+    /* And the one shape that IS. */
+    expect(classifyJoin(json(200, { ok: true, full: true, count: 100, cap: 100 })))
+      .toEqual({ state: "full", count: { claimed: 100, cap: 100 } });
+  });
+
+  /**
+   * ⚠️ `full` OUTRANKS `alreadyJoined`, because the write succeeded either way and the reader needs
+   * to know which list they are on. A returning address past the cap is on the waiting list.
+   */
+  it("…and a full response wins over a duplicate one", () => {
+    expect(classifyJoin(json(200, { ok: true, full: true, alreadyJoined: true, cap: 100 })).state)
+      .toBe("full");
+  });
+
+  it("the reachable states are exactly the five the store renders", () => {
+    const every: RawResponse[] = [
+      { kind: "network" },
+      { kind: "non-json", status: 200 },
+      json(500, { ok: false }),
+      json(200, { ok: true, cap: 100 }),
+      json(200, { ok: true, alreadyJoined: true, cap: 100 }),
+      json(200, { ok: true, full: true, cap: 100 }),
     ];
     const states = every.map((r) => classifyJoin(r).state);
-    expect(states).not.toContain("full");
-    /* …and the ones that ARE reachable, so this is not passing on an empty set. */
-    expect(new Set(states)).toEqual(new Set<JoinOutcome["state"]>(["down", "sent", "dupe", "error"]));
+    expect(new Set(states))
+      .toEqual(new Set<JoinOutcome["state"]>(["down", "error", "sent", "dupe", "full"]));
   });
 });
 

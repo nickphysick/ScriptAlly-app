@@ -1,115 +1,175 @@
 /**
  * waitlist — HTTP Cloud Function (europe-west2, Blaze plan).
  *
- * Backs the founding-writer signup form on the prod holding page (holding/index.html),
- * reached same-origin via the Firebase Hosting rewrite  /api/waitlist → this function
- * (see firebase.holding.json). The static page only does plain fetch() — no Firebase SDK,
- * no exposed config, no CORS. This function writes via the Admin SDK, which bypasses
- * Firestore rules (the waitlist/ and counters/ paths are explicitly denied to all clients).
+ * Backs the founding-writer signup, which is mounted on THREE surfaces — the landing hero's panel,
+ * the `/founders` hero and the sealed band at the foot of both pages — plus the legacy holding
+ * page. Reached same-origin via a Firebase Hosting rewrite `/api/waitlist → this function`.
  *
- * Unlike the repo's other functions (smartImportMap / extractFromEmail) this is an HTTP
- * `onRequest`, not a callable `onCall` — required because the holding page has no SDK and
- * must hit it over a same-origin rewrite. Conventions otherwise mirror those functions
- * (v2 import, europe-west2 pinning, lazy admin init, log-internals/return-generic errors).
+ * ⚠️ THE REWRITE MUST PIN THE REGION. These are v2 functions in `europe-west2`; the short
+ * `"function": "waitlist"` form looks up a DEFAULT-region function, finds nothing, hosting 404s,
+ * and the SPA catch-all turns that into `200 text/html`. The client checks `content-type` before
+ * it believes a body precisely because of this. See CLAUDE.md for the block and the deploy order.
  *
- *   GET            → { count, cap }
- *   POST { email } → { ok, position, count, cap, alreadyJoined? }
+ * ⚠️ IT WRITES THROUGH THE ADMIN SDK AND BYPASSES SECURITY RULES. `waitlist`, `counters` and
+ * `ratelimits` are denied to every client in `firestore.rules`; this function is the only writer.
  *
- * Setup (one-off, run by Nick):
- *   cd functions && npm install && npm run build
- *   firebase deploy --only functions:waitlist -P prod
+ *   GET  /api/waitlist          → { visible, cap, count? }        — `count` ABSENT below the floor
+ *   POST /api/waitlist          → { ok, alreadyJoined?, full?, count?, cap, position? }
+ *   GET  /api/waitlist/verify?token=…  → 302 to /founders?verified=…
  *
- * Follow-up (NOT built here — recommended next defence): App Check + rate-limiting to harden
- * this public endpoint against abuse/inflation.
+ * The decisions live in `waitlistModel.ts`; the transactions live in `waitlistStore.ts`. What is
+ * here is method, origin, content-type, size and response shape.
  */
+
 import { onRequest } from "firebase-functions/v2/https";
+import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
-import { createHash } from "crypto";
+import {
+  ALLOWED_ORIGINS, GET_CACHE_SECONDS, MAX_BODY_BYTES, REQUIRE_VERIFICATION,
+  countPayload, ipHash, judgeJoin, normaliseEmail, readSource,
+} from "./waitlistModel";
+import { consumeRateLimit, joinWaitlist, readCounterState, verifyWaitlist } from "./waitlistStore";
 
 if (admin.apps.length === 0) admin.initializeApp();
 const db = admin.firestore();
-const FieldValue = admin.firestore.FieldValue;
 
-const DEFAULT_CAP = 100;
-const MAX_EMAIL_CHARS = 254; // RFC 5321 practical maximum
-// Pragmatic single-line email check — server-side gate, not a deliverability guarantee.
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/**
+ * ⚠️ THE IP SALT IS A SECRET AND NEVER HAS A DEFAULT IN CODE. A hard-coded fallback would look
+ * like a salt and provide none — anyone with the repo could reverse every stored hash by
+ * enumerating IPv4. When it is unset the function still works and simply stores no `ipHash`:
+ * rate limiting degrades to per-window-without-identity rather than the build failing closed on a
+ * public signup form.
+ */
+const IP_HASH_SALT = defineSecret("WAITLIST_IP_SALT");
 
-const counterRef = () => db.doc("counters/waitlist");
-const signupRef = (hash: string) => db.doc(`waitlist/${hash}`);
+/** The public origin a verify link lands on. Overridden per environment by hosting, not by code. */
+const FOUNDERS_PATH = "/founders";
 
-/** Deterministic doc id from a normalised email, so the same address can't double-insert. */
-function emailHash(normalisedEmail: string): string {
-  return createHash("sha256").update(normalisedEmail).digest("hex");
-}
+const jsonHeaders = (res: { set: (k: string, v: string) => void }, origin: string | undefined) => {
+  /* ⚠️ AN ORIGIN IS ALLOWED OR IT IS NOT ECHOED. Reflecting whatever arrived is the same as having
+     no allowlist while looking like having one. Same-origin requests send no `Origin` at all and
+     need no header — which is how all four real surfaces reach this. */
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    res.set("Access-Control-Allow-Origin", origin);
+    res.set("Vary", "Origin");
+  }
+};
 
 export const waitlist = onRequest(
-  { region: "europe-west2", timeoutSeconds: 30, memory: "256MiB" },
+  { region: "europe-west2", timeoutSeconds: 30, memory: "256MiB", secrets: [IP_HASH_SALT] },
   async (req, res) => {
+    const origin = typeof req.headers.origin === "string" ? req.headers.origin : undefined;
+    jsonHeaders(res, origin);
+
     try {
-      if (req.method === "GET") {
-        const snap = await counterRef().get();
-        const count = snap.exists ? (snap.get("count") as number) ?? 0 : 0;
-        const cap = snap.exists ? (snap.get("cap") as number) ?? DEFAULT_CAP : DEFAULT_CAP;
-        res.status(200).json({ count, cap });
+      /* ⚠️ A CROSS-ORIGIN REQUEST FROM AN UNLISTED HOST IS REFUSED, NOT SERVED. The browser would
+         block the response anyway, but a server that answers is a server that did the work. */
+      if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+        res.status(403).json({ ok: false, error: "Not permitted." });
         return;
       }
 
-      if (req.method === "POST") {
-        // onRequest auto-parses JSON bodies; tolerate a raw string body too.
-        let body: any = req.body;
-        if (typeof body === "string") {
-          try { body = JSON.parse(body); } catch { body = {}; }
-        }
-        const raw = body?.email;
-        const email = typeof raw === "string" ? raw.trim().toLowerCase() : "";
+      const path = (req.path || "").replace(/\/+$/, "");
+      const isVerify = path.endsWith("/verify");
 
-        if (!email || email.length > MAX_EMAIL_CHARS || !EMAIL_RE.test(email)) {
+      /* ── The verify link ── */
+      if (isVerify) {
+        if (req.method !== "GET") { res.status(405).json({ ok: false, error: "Method not allowed." }); return; }
+        const token = typeof req.query.token === "string" ? req.query.token : "";
+        if (!token) { res.redirect(302, `${FOUNDERS_PATH}?verified=unknown`); return; }
+        const outcome = await verifyWaitlist(db, token, Date.now());
+        /* ⚠️ A REDIRECT, NOT JSON. This URL is opened by a person from their email client, so the
+           answer has to be a page. `/founders` reads the parameter and says what happened. */
+        res.redirect(302, `${FOUNDERS_PATH}?verified=${outcome.kind}`);
+        return;
+      }
+
+      /* ── The count ── */
+      if (req.method === "GET") {
+        const counter = await readCounterState(db);
+        /* ⚠️ CACHED AT THE EDGE. Three mounted forms ask on every page view for a number that
+           moves a handful of times a day; without this every visit is an invocation and a read. */
+        res.set("Cache-Control", `public, max-age=${GET_CACHE_SECONDS}`);
+        res.status(200).json(countPayload(counter));
+        return;
+      }
+
+      /* ── Joining ── */
+      if (req.method === "POST") {
+        const ctype = String(req.headers["content-type"] ?? "");
+        if (!ctype.toLowerCase().includes("application/json")) {
+          res.status(415).json({ ok: false, error: "Expected JSON." });
+          return;
+        }
+        /* ⚠️ SIZE IS CHECKED BEFORE THE BODY IS TRUSTED. `rawBody` is what actually arrived; the
+           parsed object cannot tell you how much was sent. */
+        const size = Buffer.isBuffer(req.rawBody) ? req.rawBody.length : 0;
+        if (size > MAX_BODY_BYTES) {
+          res.status(413).json({ ok: false, error: "That request was too large." });
+          return;
+        }
+
+        let body: Record<string, unknown> = {};
+        if (req.body && typeof req.body === "object") body = req.body as Record<string, unknown>;
+        else if (typeof req.body === "string") { try { body = JSON.parse(req.body); } catch { body = {}; } }
+
+        const email = normaliseEmail(body.email);
+        const verdict = judgeJoin({ email, trap: body.website, elapsedMs: body.elapsedMs });
+
+        /* ⚠️ A HONEYPOT HIT AND A TOO-FAST SUBMIT BOTH LOOK LIKE SUCCESS AND WRITE NOTHING.
+           Telling a bot which check it failed is telling it what to change. */
+        if (verdict.kind === "honeypot" || verdict.kind === "too-fast") {
+          const counter = await readCounterState(db);
+          res.status(200).json({ ok: true, ...countPayload(counter) });
+          return;
+        }
+
+        /* ⚠️ THE RATE LIMIT RUNS BEFORE VALIDATION, so malformed attempts are not free. */
+        const rawIp = String(req.headers["x-forwarded-for"] ?? "").split(",")[0].trim()
+          || req.ip || "";
+        const salt = IP_HASH_SALT.value();
+        const hashedIp = rawIp && salt ? ipHash(rawIp, salt) : null;
+        if (hashedIp) {
+          const { allowed } = await consumeRateLimit(db, hashedIp, Date.now());
+          if (!allowed) {
+            res.status(429).json({ ok: false, error: "Too many attempts. Please try again later." });
+            return;
+          }
+        }
+
+        if (verdict.kind === "bad-email") {
           res.status(400).json({ ok: false, error: "Please enter a valid email address." });
           return;
         }
 
-        const hash = emailHash(email);
-
-        const result = await db.runTransaction(async (tx) => {
-          // All reads before any writes (Firestore transaction rule).
-          const cRef = counterRef();
-          const sRef = signupRef(hash);
-          const [cSnap, sSnap] = await Promise.all([tx.get(cRef), tx.get(sRef)]);
-
-          const cap = cSnap.exists ? (cSnap.get("cap") as number) ?? DEFAULT_CAP : DEFAULT_CAP;
-          const count = cSnap.exists ? (cSnap.get("count") as number) ?? 0 : 0;
-
-          if (sSnap.exists) {
-            const position = (sSnap.get("position") as number) ?? count;
-            return { alreadyJoined: true, position, count, cap };
-          }
-
-          const position = count + 1;
-          tx.set(sRef, {
-            email,
-            createdAt: FieldValue.serverTimestamp(),
-            source: "holding-page",
-            position,
-          });
-          if (cSnap.exists) {
-            tx.update(cRef, { count: FieldValue.increment(1), cap });
-          } else {
-            // Lazily initialise the counter doc, single source of truth for the cap.
-            tx.set(cRef, { count: 1, cap: DEFAULT_CAP });
-          }
-          return { alreadyJoined: false, position, count: position, cap };
+        const result = await joinWaitlist(db, {
+          emailNormalised: email,
+          hashedIp,
+          source: readSource(body.source),
+          nowMs: Date.now(),
+          requireVerification: REQUIRE_VERIFICATION,
         });
 
-        res.status(200).json({ ok: true, ...result });
+        /* ⚠️ THE RESPONSE IS ADDITIVE OVER WHAT THE CLIENT ALREADY READS. `ok`, `alreadyJoined`,
+           `count` and `cap` keep their meanings; `full` is the one new flag, and a client that
+           does not know it simply reads a successful join — which is what a waiting-list place is.
+           The counter fields come from `countPayload`, so the floor applies to the join response
+           too: a number that is public here is public. */
+        res.status(200).json({
+          ok: true,
+          ...countPayload(result.counter),
+          ...(result.outcome === "already" ? { alreadyJoined: true } : {}),
+          ...(result.outcome === "waiting" ? { full: true } : {}),
+          ...(result.position !== null ? { position: result.position } : {}),
+        });
         return;
       }
 
       res.status(405).json({ ok: false, error: "Method not allowed." });
     } catch (e) {
-      // Log the real cause; never leak internals to the caller.
+      /* Log the real cause; never leak internals to the caller. */
       console.error("waitlist: request failed:", e);
       res.status(500).json({ ok: false, error: "Something went wrong. Please try again." });
     }
-  }
+  },
 );
