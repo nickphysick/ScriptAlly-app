@@ -24,10 +24,12 @@ export const HERO_H1 = "You've written a book.";
    beat between the statement and the lede, and the note here argued they were load-bearing —
    that the slip's "but here your quest… begins" had nothing to turn against without them.
    It turns against the STATEMENT, which is the stronger reading: "You've written a book." is
-   itself the thing the lede undercuts, and the acknowledgement is now carried by the ticked box
-   beside it rather than spelled out underneath. Three lines of praise before the argument starts
-   was the page clearing its throat.
-   The mark is `hero-tick-placeholder.png`, imported by `Hero.tsx` — see the ref. */
+   itself the thing the lede undercuts. Three lines of praise before the argument starts was the
+   page clearing its throat.
+   ⚠️ AND THE TICK THAT REPLACED THE WORDS HAS ITSELF GONE. The acknowledgement was briefly
+   carried by a ticked box beside the headline; that mark is retired too, so the statement now
+   carries the beat alone. `hero-tick-placeholder.png` is RETAINED in the assets folder but is
+   imported by nothing — see CLAUDE.md, and do not read its presence as evidence it is in use. */
 
 /**
  * ⚠️ THE LEDE RESUMES THE HEADLINE'S SENTENCE, SO IT OPENS LOWERCASE. That `a` is the signature of

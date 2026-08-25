@@ -785,6 +785,11 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   }
   .mk-hero .mk-eyebrow, .mk-statement, .mk-hcopy, .mk-turn, .mk-found { grid-column: 1; }
   .mk-hcopy { padding-top: 0; }
+  /* The artwork takes row 5 when stacked (see its own override), so the panel closes at 6. Its
+     98px top margin is the two-column layout's breathing room and is not wanted in a stack that
+     already has a 34px row gap. */
+  .mk-found { grid-row: 6; }
+  .mk-found-panel { margin-top: 0; }
   /* The plate's own stacked override lives beside its base rule — see the note there. */
 }
 
@@ -1768,8 +1773,13 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    layout's own 56px gutter; stacked, the gutter is 26px, so the same margin over-cancels by 30.
    The art also stops spanning rows it no longer shares and returns to the flow beneath the copy. */
 @media (max-width: 900px) {
+  /* ⚠️ ROW 5, NOT `auto` — AND THE PANEL MOVES TO 6 TO MAKE ROOM. `auto` auto-places, and
+     auto-placement starts AFTER the highest explicit row, which is the panel's 5 — so the
+     artwork landed below the call to action. Measured at 390: turn@824, panel@1014, art@1583.
+     The art belongs with the hero's argument and the panel closes the hero, so that order is
+     stated here rather than left to a placement algorithm. Keep the two numbers in step. */
   .mk-hero .mk-illo--tall {
-    grid-row: auto; grid-column: 1;
+    grid-row: 5; grid-column: 1;
     margin-right: 0; justify-content: center; margin-top: 24px;
   }
 }
