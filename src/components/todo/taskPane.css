@@ -60,7 +60,9 @@
 .tpn .u-yours .band { background:linear-gradient(135deg,var(--u-yours-1) 0%,var(--u-yours-2) 100%); }
 .tpn .u-yours .band::after { background:var(--u-yours-rule); }
 .tpn .u-house .deed { color:#2e3a2c; }
-.tpn .u-house .deed em { color:#405a3c; }
+/* (`.u-house .deed em` is retired — the deed has never rendered an `<em>` since the emphasis became
+   typographic, and it drew a COLOUR, which is the one thing a deed's emphasis may not carry. A rule
+   reaching no element, and a rule that would have broken the law if it ever had.) */
 .tpn .u-now .b-sub { color:#8a6558; }
 .tpn .u-house .b-sub { color:#5f7059; }
 .tpn .u-yours .b-sub { color:#8a7a5c; }
@@ -320,7 +322,25 @@
    ⚠️ AND `line-height` GOES 1.12 → 1.3, which the standing Playfair rule already required: 1.12 on
    mixed-case Playfair crops descenders, and the deed now renders whole sentences full of them. */
 .tpn .deed { font-family:'Playfair Display',serif;font-size:19px;font-weight:400;color:var(--ink2);line-height:1.3;max-width:72ch; }
-.tpn .deed i { font-style:italic;font-weight:500;color:inherit; }
+/* ⚠️ VARIABLES IN 600, FRAME WORDS AT 400 — treatment C, and `.deed i` is retired with the italic
+   it drew (workspace round, Phase 5). The deed is a sentence of variables; italicising three of its
+   five spans reads as prose with something wrong with it rather than as a filled-in form. Manuscript
+   titles keep their italic everywhere else in the app — this one sentence is the exception, because
+   it is almost entirely titles and names.
+   ⚠️ `color: inherit` IS THE STRUCTURAL HALF OF THE REPO'S OWN LAW: a heading may not carry
+   colour-shifted emphasis. It is declared rather than left to inheritance so a retone cannot drift
+   it, and so a burgundy revival has to edit a line that says why it must not. */
+.tpn .deed b { font-weight:600;color:inherit; }
+/* ⚠️ A LINKABLE VARIABLE IS A DOTTED UNDERLINE AND NOTHING ELSE AT REST — the manuscript and the
+   agent, both records this app holds. The AGENCY has no page and therefore no underline: a rule
+   that underlines a word going nowhere teaches the reader that underlines here mean nothing.
+   Burgundy arrives on HOVER, which is a pointer state rather than resting emphasis. */
+.tpn .deed a.dl {
+  font-weight:600;color:inherit;text-decoration:none;cursor:pointer;
+  border-bottom:1px dotted rgba(58,28,20,0.42);
+}
+.tpn .deed a.dl:hover { border-bottom-style:solid;border-bottom-color:var(--burg);color:var(--burg); }
+.tpn .deed a.dl:focus-visible { outline:2px solid var(--sage);outline-offset:2px;border-radius:3px; }
 .tpn .b-sub { font-size:11px;font-weight:300;margin-top:3px; }
 .tpn .b-nav { display:flex;gap:6px;flex-shrink:0; }
 .tpn .b-nav button { cursor:pointer;width:28px;height:28px;border-radius:8px;background:rgba(255,253,250,0.8);border:0.5px solid rgba(58,28,20,0.13);color:var(--ink2);display:flex;align-items:center;justify-content:center; }

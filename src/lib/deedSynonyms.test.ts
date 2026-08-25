@@ -196,6 +196,52 @@ describe("⚠️ the chase deed names the agent", () => {
     expect(spans[0]).toEqual({ text: "Nudge " });
   });
 
+  /**
+   * ⚠️ TWO VARIABLES ARE DESTINATIONS AND ONE IS NOT (workspace round, Phase 5). The manuscript and
+   * the agent are records this app holds and can open; the AGENCY is not, and has no page to reach.
+   * Underlining a word that goes nowhere teaches the reader that an underline here means nothing —
+   * so the agency's absence of a `link` is a statement rather than an omission, and it is asserted
+   * as such on every journey rather than on the one that happened to be looked at.
+   */
+  it("the manuscript and the agent link; the agency never does, on any journey", () => {
+    const parts = { agent: "Ana Duarte", agency: "Duarte Words", title: "The Smoke Test" };
+    /* ⚠️ ONE CARD PER JOURNEY, BUILT FROM THE TASK TYPES THE BOARD REALLY RAISES — never a bucket
+       string typed in here. `cardBucket` is what `deedSentence` switches on, so a literal would be
+       an input the app cannot produce. */
+    const journeys = [
+      chase({ who: "Ana Duarte", record: "Duarte Words" }),
+      card({ taskType: "full_requested", who: "Ana Duarte", record: "Duarte Words" }),
+      card({ taskType: "no_response_close", who: "Ana Duarte", record: "Duarte Words" }),
+      card({ taskType: "materials_unrecorded", who: "Ana Duarte", record: "Duarte Words" }),
+    ];
+    let sawTitle = 0, sawAgent = 0;
+    for (const c of journeys) {
+      const spans = deedSentence(c, parts);
+      for (const sp of spans) {
+        if (sp.text === "Duarte Words") {
+          expect(sp.link, "the agency was given a destination it does not have").toBeUndefined();
+        }
+        if (sp.text === "The Smoke Test") { expect(sp.link).toBe("manuscript"); sawTitle++; }
+        if (sp.text === "Ana Duarte") { expect(sp.link).toBe("agent"); sawAgent++; }
+      }
+    }
+    /* ⚠️ THE POPULATION FIRST — a sweep that found no titles and no agents would pass having
+       measured nothing, which is this repo's standing failure mode for a negative assertion. */
+    expect(sawTitle, "no journey named a manuscript — this case measured nothing").toBeGreaterThan(0);
+    expect(sawAgent, "no journey named an agent — this case measured nothing").toBeGreaterThan(0);
+  });
+
+  /* ⚠️ AND A LINK IS ONLY EVER ON A VARIABLE. A frame word that carried one would make the sentence
+     itself clickable in the middle, which is neither a record nor a destination. */
+  it("nothing that links is anything but an emphasised span", () => {
+    for (const c of [chase({ who: "A", record: "B" }),
+                     card({ taskType: "full_requested", who: "A", record: "B" })]) {
+      for (const sp of deedSentence(c, { agent: "A", agency: "B", title: "T" })) {
+        if (sp.link) expect(sp.em, `"${sp.text}" links without being a variable`).toBe(true);
+      }
+    }
+  });
+
   /** the row is a summary and keeps its own words — the two surfaces differ on purpose now */
   it("the row still reads the short deed", () => {
     expect(listDeed({ card: chase({}) })).toBe("Worth a nudge");

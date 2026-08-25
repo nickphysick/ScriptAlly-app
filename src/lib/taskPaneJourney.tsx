@@ -67,6 +67,14 @@ export interface JourneyInputs {
   btns?: { label: string; onPress: (anchor: HTMLElement) => void }[];
   quiet?: { label: string; onPress: () => void };
   onOpenQuery?: () => void;
+  /**
+   * ⚠️ THE DEED'S TWO DESTINATIONS, AND ABSENCE MEANS "NOT REACHABLE FROM HERE" RATHER THAN
+   * "DISABLED". The manuscript and the agent are records this app holds; the agency is not, and has
+   * no third callback for that reason. A host with no route to one passes neither, and the span
+   * renders as weight — a bold word promises nothing, a dead anchor promises somewhere to go.
+   */
+  onOpenManuscript?: () => void;
+  onOpenAgent?: () => void;
   primDisabled?: boolean;
   /**
    * ⚠️ THE COHORT'S TWO NUMBERS. `count` is how many queries the gap stands for; `touched` is how
@@ -84,14 +92,33 @@ export interface JourneyInputs {
  * rather than parsed out of a string. The emphasis falls on the OBJECT — what is being sent, chased
  * or logged — because that is the word you scan for; the verb is the same on every card in a group.
  */
-function deedNode(c: BoardCard, parts: DeedParts): React.ReactNode {
-  /* ⚠️ `<i>`, NOT `<em>`, AND NO COLOUR. The emphasis is typographic — italic in the heading's own
-     ink — because a heading that shifts colour mid-sentence reads as two things, and the reader
-     has to work out which half is the point. The stylesheet enforces `color: inherit`; this picks
-     the spans. `<em>` carried a burgundy rule for three rounds and is retired with it. */
+function deedNode(
+  c: BoardCard,
+  parts: DeedParts,
+  open?: { manuscript?: () => void; agent?: () => void },
+): React.ReactNode {
+  /* ⚠️ WEIGHT, NOT ITALIC, AND NEVER COLOUR (workspace round, Phase 5). The deed is a sentence of
+     VARIABLES set against frame words; the contract puts the variables in Playfair 600. Italic was
+     right when one word was emphasised and reads as prose-with-something-wrong when three of five
+     spans carry it. The colour prohibition is unchanged and is repo law — the stylesheet declares
+     `color: inherit` on both the weight span and the link, so a burgundy revival has to edit a rule
+     that says why it must not.
+
+     ⚠️ A LINK IS RENDERED ONLY WHERE THE HOST OFFERS ONE. `link` says the span IS a record; whether
+     it can be reached from this surface is the host's business, and a dead anchor is worse than a
+     bold word — it promises somewhere to go. No handler, no anchor. */
   const spans = deedSentence(c, parts);
   if (spans.length === 1 && !spans[0].em) return spans[0].text;
-  return <>{spans.map((s, i) => (s.em ? <i key={i}>{s.text}</i> : <React.Fragment key={i}>{s.text}</React.Fragment>))}</>;
+  return <>{spans.map((s, i) => {
+    const go = s.link === "manuscript" ? open?.manuscript : s.link === "agent" ? open?.agent : undefined;
+    if (go) return (
+      <a key={i} href="#" className="dl"
+        onClick={(e) => { e.preventDefault(); go(); }}>{s.text}</a>
+    );
+    return s.em
+      ? <b key={i}>{s.text}</b>
+      : <React.Fragment key={i}>{s.text}</React.Fragment>;
+  })}</>;
 }
 
 /**
@@ -189,6 +216,9 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
       agency: bandUnder(c),
       ...(typeof input.partial === "boolean" ? { partial: input.partial } : {}),
       ...(input.bulk ? { bulkCount: input.bulk.count } : {}),
+    }, {
+      ...(input.onOpenManuscript ? { manuscript: input.onOpenManuscript } : {}),
+      ...(input.onOpenAgent ? { agent: input.onOpenAgent } : {}),
     }),
     hand: isNote,
     /* ⚠️ THE NOTE'S SUB-LINE SAYS WHOSE IT IS AND HOW OLD (finishing round, Phase 5). It printed

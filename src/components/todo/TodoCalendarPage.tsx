@@ -606,6 +606,15 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
        a queue, so a completed card simply leaves the day and the pane closes with it. */
     advance: () => setPaneCard(null),
     openQuery: (c) => { if (c.relatedRecordId) onNavigate("queries", c.relatedRecordId); },
+    /* the deed's two links — the same one-shot reveal keys `/todo` and the ⋯ menu use */
+    openAgent: (agentId) => {
+      try { sessionStorage.setItem("sa.agentReveal", agentId); } catch { /* private mode */ }
+      onNavigate("agents");
+    },
+    openManuscript: (manuscriptId) => {
+      try { sessionStorage.setItem("sa.manuscriptReveal", manuscriptId); } catch { /* private mode */ }
+      onNavigate("manuscripts");
+    },
     /* onSnooze / onDismiss are deliberately ABSENT — see `TaskPaneHost`. The calendar's snooze is
        drag, and it shows no dismissed cards at all. */
   };

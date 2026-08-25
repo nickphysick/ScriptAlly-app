@@ -187,17 +187,32 @@ export interface DeedParts {
   bulkCount?: number;
 }
 
-/** one span of the sentence. `em` renders `<i>` — italic in the heading's own ink, never coloured. */
-export interface DeedSpan { text: string; em?: boolean }
+/**
+ * One span of the sentence.
+ *
+ * ⚠️ `em` IS WEIGHT NOW, NOT ITALIC (workspace round, Phase 5). The deed is a sentence of
+ * VARIABLES — a manuscript, an agent, an agency — set against frame words, and the contract sets
+ * the variables in Playfair 600 rather than italic. Italic survives everywhere else in the app for
+ * a manuscript title; this one sentence is almost entirely titles and names, and italicising three
+ * of its five spans reads as prose with something wrong with it rather than as a filled-in form.
+ * Colour emphasis remains forbidden either way — repo law.
+ *
+ * ⚠️ `link` IS A VARIABLE THAT IS ALSO A DESTINATION, and the two that are are the MANUSCRIPT and
+ * the AGENT, because both are records this app holds. The AGENCY is weight only: there is no agency
+ * page to reach, and underlining a word that goes nowhere teaches the reader that underlines here
+ * mean nothing. Absence of `link` is therefore a statement, not an omission.
+ */
+export interface DeedSpan { text: string; em?: boolean; link?: "manuscript" | "agent" }
 
 export function deedSentence(c: BoardCard, p: DeedParts = {}): DeedSpan[] {
   const t = (p.title ?? "").trim();
   const ag = (p.agent ?? "").trim();
   const agy = (p.agency ?? "").trim();
-  const forTitle = (): DeedSpan[] => (t ? [{ text: " for " }, { text: t, em: true }] : []);
+  /* the manuscript and the agent carry their `link`; the agency is emphasis and nothing more */
+  const forTitle = (): DeedSpan[] => (t ? [{ text: " for " }, { text: t, em: true, link: "manuscript" }] : []);
   const to = (): DeedSpan[] => {
     const out: DeedSpan[] = [];
-    if (ag) out.push({ text: " to " }, { text: ag, em: true });
+    if (ag) out.push({ text: " to " }, { text: ag, em: true, link: "agent" });
     if (agy) out.push({ text: " at " }, { text: agy, em: true });
     return out;
   };
@@ -211,6 +226,8 @@ export function deedSentence(c: BoardCard, p: DeedParts = {}): DeedSpan[] {
       return [{ text: "Consider closing your query" }, ...forTitle(), ...to()];
     case "fix": {
       const n = p.bulkCount ?? 0;
+      /* ⚠️ A COHORT'S COUNT IS EMPHASIS, NOT A DESTINATION — "12 imported queries" is a figure this
+         sentence states, not a record the app can open. */
       return n > 1
         ? [{ text: "Fill in what you sent with " }, { text: `${n} imported queries`, em: true }, ...forTitle()]
         : [{ text: "Fill in what you sent" }, ...forTitle(), ...to()];
@@ -226,9 +243,12 @@ export function deedSentence(c: BoardCard, p: DeedParts = {}): DeedSpan[] {
      * agent whose pronouns it does not know and never asks for.
      */
     case "chase": {
-      const about = (): DeedSpan[] => (t ? [{ text: " about " }, { text: t, em: true }] : []);
-      if (ag && agy) return [{ text: "Nudge " }, { text: ag, em: true }, { text: " at " }, { text: agy, em: true }, ...about()];
-      if (ag) return [{ text: "Nudge " }, { text: ag, em: true }, ...about()];
+      const about = (): DeedSpan[] => (t ? [{ text: " about " }, { text: t, em: true, link: "manuscript" as const }] : []);
+      if (ag && agy) return [{ text: "Nudge " }, { text: ag, em: true, link: "agent" }, { text: " at " }, { text: agy, em: true }, ...about()];
+      if (ag) return [{ text: "Nudge " }, { text: ag, em: true, link: "agent" }, ...about()];
+      /* ⚠️ NO AGENT MEANS NO AGENT LINK, EVEN THOUGH THE AGENCY IS NOW THE SUBJECT. The agency has
+         no page; making it the link here because it happens to be first would send the writer
+         somewhere that is not about it. */
       if (agy) return [{ text: "Nudge " }, { text: agy, em: true }, ...about()];
       return [{ text: "Nudge them" }, ...about()];
     }

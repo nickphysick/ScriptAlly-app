@@ -23,7 +23,7 @@
  * The lifecycle flows (reversible shelve with undo, guarded delete via the cascade manifest) and the
  * edit modal carry over unchanged; comps are deliberately absent from the modal.
  */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { deleteField } from "firebase/firestore";
 import { useScriptAllyDb } from "../lib/db";
 import { destroyManifest } from "../lib/cascade";
@@ -81,6 +81,33 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
   // Plates: active books first, shelved sink to the end.
   const ordered = [...manuscripts]
     .sort((a, b) => Number(isShelvedPresentation(a)) - Number(isShelvedPresentation(b)));
+
+  /**
+   * ⚠️ THE ONE-SHOT REVEAL — the sibling of the agent list's `sa.agentReveal`, and deliberately the
+   * same idiom rather than a second mechanism (workspace round, Phase 5). The task pane's deed
+   * links a manuscript by name; landing on the shelf instead of on the book would make the link a
+   * navigation rather than a destination.
+   *
+   * sessionStorage rather than a route param, for the reasons the agent list already states: a
+   * reveal is a GESTURE, not an address — it must not survive the tab, must not enter history, and
+   * must fire exactly once. Held until the manuscripts arrive so a slow snapshot does not eat it;
+   * a stale id is consumed and does nothing, which returns the reader to the shelf rather than to
+   * some other book.
+   *
+   * ⚠️ ABOVE THE `currentUser` GUARD, because a hook after a conditional return is a hook that
+   * sometimes does not run — the rule React states and this file's early return makes easy to
+   * break.
+   */
+  useEffect(() => {
+    let id: string | null = null;
+    try { id = sessionStorage.getItem("sa.manuscriptReveal"); } catch { /* private mode */ }
+    if (!id || manuscripts.length === 0) return;
+    try { sessionStorage.removeItem("sa.manuscriptReveal"); } catch { /* private mode */ }
+    if (!manuscripts.some((m) => m.id === id)) return;   // stale id — consumed, nothing to show
+    try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* private mode */ }
+    setOpenId(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [manuscripts.length]);
 
   if (!currentUser) return null;
 

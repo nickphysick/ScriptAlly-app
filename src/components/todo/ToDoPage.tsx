@@ -825,6 +825,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     onSnooze: (el) => setSnoozeAnchor(el),
     onDismiss: () => setDismissOpen(true),
     openQuery: (c) => { if (c.relatedRecordId) onNavigate("queries", c.relatedRecordId); },
+    /* ⚠️ THE DEED'S TWO LINKS TAKE THE ROUTES THE ⋯ MENU ALREADY TAKES, not second ones. The agent
+       goes through `sa.agentReveal` — the one-shot sessionStorage key the agent list reads on
+       arrival, scrolls to and clears — which is exactly what `view-agent` in `runMenu` does. The
+       manuscript goes through `sa.manuscriptReveal`, its sibling on the manuscripts page. Two
+       surfaces reaching one record by one route is the whole reason those keys exist. */
+    openAgent: (agentId) => {
+      try { sessionStorage.setItem("sa.agentReveal", agentId); } catch { /* private mode */ }
+      onNavigate("agents");
+    },
+    openManuscript: (manuscriptId) => {
+      try { sessionStorage.setItem("sa.manuscriptReveal", manuscriptId); } catch { /* private mode */ }
+      onNavigate("manuscripts");
+    },
   };
   const session = useTaskPaneSession(paneCard, paneHost, PANE_ID_PREFIX);
 

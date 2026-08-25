@@ -129,6 +129,18 @@ export interface TaskPaneHost {
   onSnooze?: (el: HTMLElement) => void;
   onDismiss?: () => void;
   openQuery: (card: BoardCard) => void;
+  /**
+   * ⚠️ THE DEED'S TWO LINKS, AND THEY ARE THE HOST'S BECAUSE THEY ARE NAVIGATION (workspace round,
+   * Phase 5). This hook's own head note already says it: a hook must not own navigation. Optional
+   * for the same reason `onSnooze` is — a host with no route to a manuscript passes nothing and the
+   * span renders as weight rather than as an anchor that goes nowhere.
+   *
+   * ⚠️ THEY TAKE AN ID, NOT A CARD. The card carries `msTitle` and no manuscript id, so resolving
+   * which record the deed names is a lookup over `queries` — which is the SESSION's data, not the
+   * page's. Handing the card over would put that lookup in every host.
+   */
+  openManuscript?: (manuscriptId: string) => void;
+  openAgent?: (agentId: string) => void;
 }
 
 export interface TaskPaneSession {
@@ -807,6 +819,19 @@ export function useTaskPaneSession(
                        and two controls for one act is how they come to disagree about whether it is available. */
                     btns: [],
                     onOpenQuery: () => paneVerbs.openQuery.onPress(),
+                    /* ⚠️ THE IDS COME FROM THE QUERY, AND ABSENCE IS AN ABSENT LINK. The card holds
+                       `msTitle` and an `agentId`; the manuscript's id is the query's. Where either
+                       is missing — a card with no query behind it, an unresolvable agent — no
+                       handler is passed and the deed's span is bold rather than a dead anchor. */
+                    ...(() => {
+                      const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
+                      const msId = q?.manuscriptId;
+                      const agId = card.agentId ?? q?.agentId;
+                      return {
+                        ...(msId && host.openManuscript ? { onOpenManuscript: () => host.openManuscript!(msId) } : {}),
+                        ...(agId && host.openAgent ? { onOpenAgent: () => host.openAgent!(agId) } : {}),
+                      };
+                    })(),
                     /* ⚠️ SNOOZE ANCHORS TO THE PANE'S OWN BUTTON. `AnchoredPanel` takes any element
                        and places against its rect — recon 6 confirmed it needs nothing else, so the
                        panel moved surface without a line of change inside it. */
