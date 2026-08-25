@@ -108,3 +108,121 @@ strip**, which would quietly delete half of what it checks.
 `src/lib/bookVersions.test.ts` — 36 cases, all passing. They are **derivation and source checks**:
 they prove the arithmetic and the model's shape, never that anything rendered. The rendered claims
 (panel absent at one version, present at two; counts on screen matching) are measured in Part B.
+
+---
+
+## Part B — the panel
+
+Lives on **"The record"** tab, beneath the detail tiles. Not a fifth tab: a tab would advertise the
+feature to every writer who has never used it, which is the thing the gate exists to prevent.
+
+### ⚠️ F-AZ — the gate has a door below it, and that is a deviation
+
+D8 says the panel renders only when a second version exists; the fence says a writer with one
+version sees none of it. **Both are honoured for the list** — below two there is no band, no row, no
+count, and not even the one version's name.
+
+But this panel is the only place a version can be created, so **a gate at two with nothing below it
+makes the feature permanently unreachable**: no writer could ever reach a second version. The ghost
+row is therefore the entry point at nought and one, and everything else arrives at two.
+
+Flagged rather than assumed. Moving the entry point elsewhere — the plate's ⋯ menu, say — is a
+one-line change if that reads better.
+
+### Two reconciliations with standing locks, both against the ref
+
+- **The band is a token, not sage.** `manuscriptPlate.css` already carries the ruling: *"Editorial is
+  monochrome and has no sage at all; a sage band there is not 'the theme with a green tint', it is
+  the wrong theme."* Sage in Cappuccino, pink-and-ink in Bold, a grey step in Editorial. A mockup
+  wins on what it shows; a standing, reasoned lock wins over an artefact that could not know about it.
+- **The R&R chip replaces the kind chip** rather than joining it — which is what the ref itself
+  draws. "From R&R" already says the version is a revision, and two chips saying one thing is noise.
+  It renders only while the activity is still there; a link the correction pack has since moved shows
+  **nothing** rather than a dead chip, and the row falls back to stating its kind.
+
+### The date is parsed by hand
+
+`new Date("2026-03-01")` is UTC midnight, so a browser west of Greenwich renders **FEB** for the
+first of March. `monthYear()` reads the string, like every other day-granular field in this app.
+
+### Evidence — measured on the deployed dev site
+
+`tests/e2e/bookVersions.measure.ts`, at **1440 and 1920**, against `seedBookVersions.mjs` at three
+different counts. The gate is a claim about absence, so it is proved from **both** sides:
+
+| Versions seeded | rows | bands | chips | ghost |
+|---|---|---|---|---|
+| 0 | 0 | 0 | 0 | 1 |
+| 1 | 0 | 0 | 0 | 1 |
+| 3 | 3 | 1 | 4 | 1 |
+
+At three, the rendered rows against figures derived by hand from the seed:
+
+```
+Prologue-first        [INITIAL]            MAR 2026 · 2 samples · held by 1 agent
+Worldbuilding-first   [REORDERING]         MAY 2026 · 1 sample  · held by 1 agent
+Post-R&R (T. Marsh)   [§ FROM R&R][LATEST] JUL 2026 · 0 samples · held by 0 agents
+```
+
+Exactly one `Latest`, on the **newest by date** rather than the last in the list. Exactly one R&R
+chip, and the row carrying it has **no** kind chip. No cropped descenders at either width.
+Identical at both widths — the panel caps at 720px, as the ref draws it. Screenshots in
+`reports/manuscript-versions/`.
+
+**⚠️ THE MEASUREMENT'S FIRST TWO RUNS REPORTED A WORKING PANEL AS ABSENT**, both times through the
+locator rather than the page:
+
+- `.mlib-card` **does not exist**. The library card's affordance is `.mlib-plate`. A locator written
+  from the obvious guess found nothing and the failure read *"no panel"*.
+- The tab labels are **uppercased by CSS**, so `innerText` is `THE RECORD` while the source says
+  `The record`. This repo has recorded that trap repeatedly and it still cost two runs here.
+
+Both are the standing shape: a probe that answers a question you did not ask, in the format of the
+question you did.
+
+### D4 — proved on the live dev database, both directions
+
+`node tests/e2e/rulesProbe.mjs`, after deploying dev rules with **both** configs and verifying by
+release `updateTime` rather than the success line (`cloud.firestore` 18:48:34Z ·
+`cloud.firestore/ai-studio-…` 18:48:49Z, both 25 Aug):
+
+```
+✅ bookVersions (a real list)                    ACCEPTED
+❌ bookVersions as a string                      DENIED
+❌ bookVersions over the cap (51 entries)        DENIED
+✅ material bookVersionId                        ACCEPTED
+❌ material bookVersionId as a number            DENIED
+✅ activity bookVersionId                        ACCEPTED
+❌ activity bookVersionId as a list              DENIED
+```
+
+Every write was undone; **D5 holds** — no existing document was changed.
+
+**⚠️ AND THE SEED SCRIPT LEARNED THE CREATE/UPDATE SPLIT THE HARD WAY.** `setDoc(…, { merge: true })`
+on an existing material is an **update**, and the versions update allowlist is a `hasOnly` — so
+re-sending `createdDate` with a different value denied the whole write, silently, about a field the
+seed had no business touching. Existing documents now get the one field; missing ones get a full,
+valid create.
+
+### F-AX — nothing to report yet
+
+The flag asks where a version chip would land with no room for it. **No chip renders outside this
+panel today**: the sample card (D12), the package drawer's slot (D13), the Query Centre's `SAMPLE`
+row (D19) and the query list's column (D22) are all Parts C–E. The answer belongs to those parts and
+is not guessable from here.
+
+### Deployed
+
+Dev rules (both databases) and dev hosting, from a clean worktree at `80cbe2af`.
+Bundle hash-compared at both ends — `index-CzSZ8Tis.js` served and local — and the served
+stylesheet greps `bv-panel · bv-band · bv-row · bv-chip--rr · bv-chip--latest · bv-ghost`, one each.
+
+**The fixture is left at three versions**, so the panel is on screen at
+https://scriptally-dev.web.app → Manuscripts → *The Smoke Test* → The record.
+
+---
+
+## Where this stops
+
+Parts A and B stand alone and are the intended first seam. **Parts C–D are the next session**
+(samples reference a version; the two tracking panels), and **Part E is its own** (the Query Centre).
