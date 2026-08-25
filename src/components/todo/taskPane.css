@@ -303,7 +303,9 @@
 /* ⚠️ THE PANE IS A TRANSPARENT COLUMN ON THE GROUND (finishing round, Phase 1) — its card
    treatment moved onto the three `.fc` cards it now holds. It used to BE the card, which is what
    left no room for the rims. */
-.tpn .pane { display:flex;flex-direction:column;min-width:0;gap:12px; }
+/* ⚠️ THE GAP IS THE GRID'S NOW, NOT THE COLUMN'S. `.ws` is `.pane`'s only child, so a gap here
+   separates nothing; the 12px between the cards is `.ws`'s and `.paneCol`'s own. */
+.tpn .pane { display:flex;flex-direction:column;min-width:0; }
 .tpn .band { flex:0 0 auto;padding:13px 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative; }
 .tpn .band::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px; }
 .tpn .pane.u-now .band { background:linear-gradient(135deg,var(--u-now-1),var(--u-now-2)); }
@@ -341,6 +343,50 @@
    retired `.formpad`. The card, its rim and its scroller carry none, so the scroller's edge is the
    card's edge and work disappears at the rim rather than inside an inset. */
 .tpn .form { padding:4px 20px 14px; }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * THE FIXED-ZONE PANE (workspace round, Phase 2) — `design-refs/todo-actionbar-corrected.html`.
+ *
+ * ⚠️ NOTHING IS STICKY AND NOTHING SCROLLS BEHIND OR BENEATH THE BAR. Sticky positioning can only
+ * hold a bar OVER a scrolling page: the content still exists behind it and reappears in whatever
+ * strip sits below. This pane does not scroll at all. The worksheet card owns a scroller INSIDE
+ * ITS RIM, and `.rim` carries `overflow: hidden` — so work vanishes at the card's edge and there is
+ * nothing underneath it to reappear. The bar is the card's SIBLING, not a lid over it.
+ *
+ * ⚠️ ALIGNMENT IS STRUCTURAL, NOT COMPENSATED. The grid row is `align-items: stretch`, so the pane
+ * column always fills the row's height exactly; the column is header (fixed) · worksheet (grows and
+ * shrinks) · bar (fixed, last), so the bar's bottom edge and the record card's bottom edge are the
+ * SAME LINE by construction. There is no offset anywhere that could drift, and when the record is
+ * the taller column the bar drops to meet it because the row grew, not because anything followed.
+ *
+ * ⚠️ `flex: 1 1 auto` ON `.work` IS UNCONDITIONAL, AND THE CONTRACT'S OWN DEMO SCRIPT IS WRONG
+ * ABOUT THIS — measured, not assumed. Its harness sets `work.style.flex = '0 0 auto'` for the two
+ * short modes, on the reasoning that a short journey should let the card hug its content. With no
+ * growing item the column's free space collects at the END, so the bar stops wherever the work
+ * stops: at 1440 the bar's bottom edge measured **165px above the record's** in the file's first
+ * mode and **83px above** in its second, while its own caption reads "they end together". Only the
+ * third mode — the one that restores the flex the file's CSS declares — measured 0. The CSS is the
+ * contract; the script is a working reference, and here it contradicts the property the file exists
+ * to demonstrate.
+ * ═════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* ⚠️ `min-height: 0` IS NOT OPTIONAL ANYWHERE ON THE CHAIN. A flex item's automatic minimum is its
+   content, so without it the worksheet grows past the frame and the PAGE scrolls — the fault this
+   whole block exists to prevent, and it fails silently. */
+.tpn .work { flex:1 1 auto;min-height:0;display:flex; }
+.tpn .work > .rim { display:flex;flex-direction:column;min-height:0;width:100%; }
+.tpn .workscroll { flex:1 1 auto;min-height:0;overflow-y:auto; }
+.tpn .workscroll::-webkit-scrollbar { width:9px; }
+.tpn .workscroll::-webkit-scrollbar-thumb { background:#e2d6c8;border-radius:5px;border:2px solid var(--white); }
+
+/* ⚠️ THE RECORD SCROLLS ITS OWN MIDDLE THE SAME WAY, and for the same reason: a long history would
+   otherwise push the query link off the bottom of a card that cannot grow. Head and foot are
+   fixed; only the tiles and the story move between them. */
+.tpn .rec { align-self:stretch;display:flex;min-height:0; }
+.tpn .rec > .rim { display:flex;flex-direction:column;min-height:0;width:100%; }
+.tpn .recscroll { flex:1 1 auto;min-height:0;overflow-y:auto; }
+.tpn .recscroll::-webkit-scrollbar { width:9px; }
+.tpn .recscroll::-webkit-scrollbar-thumb { background:#e2d6c8;border-radius:5px;border:2px solid var(--white); }
 /* (`.formcol`/`.storycol` and their grow factors are retired with `.mid` — a wrapping row needs
    grow factors to decide who takes the surplus, and a two-track grid with a fixed record column
    does not. `.formpad` goes the same way: the worksheet's padding is `.form`'s, which is the
@@ -504,7 +550,7 @@
  * ROW rather than of either column: it is what makes the pane column fill the row's height, which
  * is what puts the action bar's bottom edge on the record card's bottom edge by construction.
  * ═════════════════════════════════════════════════════════════════════════════════════════════ */
-.tpn .ws { display:grid;grid-template-columns:minmax(0,1fr) 288px;gap:12px;align-items:stretch;min-height:0; }
+.tpn .ws { display:grid;grid-template-columns:minmax(0,1fr) 288px;gap:12px;align-items:stretch;flex:1 1 auto;min-height:0; }
 /* ⚠️ ONE COLUMN WHERE THERE IS NO RECORD, and the modifier says which case that is rather than the
    grid guessing from a child count. A cohort concerns many queries and a note concerns none; both
    take the full width, and `.ws` without `.rec` beside it would otherwise hold a 288px empty
