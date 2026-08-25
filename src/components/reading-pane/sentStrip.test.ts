@@ -55,10 +55,14 @@ describe("D-C1 — attachments hang off a send and nothing else", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 describe("D-C2 — packaged is a contained strip, and its blue is named once", () => {
   it("the three tokens carry the ref's values", () => {
-    expect(cssD).toContain("--pro-fill: #e6edf4");
-    expect(cssD).toContain("--pro-edge: #c3d5e4");
-    expect(cssD).toContain("--pro-ink: #41627f");
-    expect(cssD).toContain("--pro-slate: #6A89A7");
+    /* ⚠️ DEEPENED TO OPTION B'S VALUES (D2). The lighter pastille was right for a tinted seal and
+       reads as a smudge behind a printed letterhead. `--pro-mid` keeps the tier's colour under the
+       ref's own name; `--pro-fill-deep` is new, and is the letterhead's bottom stop. */
+    expect(cssD).toContain("--pro-ink: #39587a");
+    expect(cssD).toContain("--pro-fill: #e3ebf3");
+    expect(cssD).toContain("--pro-fill-deep: #d5e1ec");
+    expect(cssD).toContain("--pro-edge: #b9cdde");
+    expect(cssD).toContain("--pro-mid: #6A89A7");
   });
 
   it("no call site restates a hex — every rule reads a token", () => {

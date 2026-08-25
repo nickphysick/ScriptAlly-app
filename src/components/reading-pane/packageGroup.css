@@ -5,7 +5,7 @@
  * sheet used to derive its blue from `#c2cfda` — `.t-bold`'s `--desk` — and argued in as many words
  * that it must NOT be the Pro slate, because "slate is the PRO TIER's colour … blue here means
  * provenance … reusing the tier's token would make a package look like a price". The ref supersedes
- * that: it names its tokens `--pro-*` and derives them from `--pro-slate: #6A89A7` explicitly. The
+ * that: it names its tokens `--pro-*` and derives them from `--pro-mid: #6A89A7` explicitly. The
  * old sentence is removed instead of contradicted, because a comment arguing the opposite of the
  * code is how the next person "restores" a bug.
  *
@@ -19,16 +19,27 @@
  * restated in a rule.
  */
 :root {
-  /* The ref's own values, verbatim. Derived from the Pro slate rather than from the Bold desk. */
-  --pro-slate: #6A89A7;  /* the tier's colour, for reference — nothing here paints with it */
-  --pro-fill: #e6edf4;   /* the seal's ground, and the packed slot's */
-  --pro-edge: #c3d5e4;   /* the strip's rim */
-  --pro-ink: #41627f;    /* the label, the name and the mark inside a packed slot */
-  /* ⚠️ A FOURTH, AND IT IS A TOKEN BECAUSE THE REGION THAT READS IT FORBIDS LITERALS. The fork's
-     package branch hovers a step down from the fill; written as a hex in f12.css it tripped
-     `queryCentreMoment`'s "§5 · the seal" lock, which is right — a colour stated in two files is a
-     colour that will drift in one of them. */
-  --pro-fill-hov: #dbe6f0;
+  /**
+   * ⚠️ DEEPENED TO THE REF'S VALUES (Option B, D2) — `packaged-strip-cuts.html`. The previous set
+   * was a lighter pastille (`#e6edf4` / `#c3d5e4` / `#41627f`); the stationery band asks for more
+   * contrast because the head is now a printed letterhead rather than a tinted cell, and a wash
+   * that read as a seal reads as a smudge at that size.
+   *
+   * ⚠️ THE TOKENS MOVE, NOT THE CALL SITES. Every rule below already reads these names, so this is
+   * a retone rather than an edit — which is the property that made the earlier canonicalisation
+   * worth doing.
+   *
+   * ⚠️ AND THEY STAY PAGE-LOCAL. F-AK's app-wide ruling is still pending, and these deepened values
+   * are new input to it: the app now carries a FIFTH near-identical blue family, which is an
+   * argument for the consolidation rather than against this change.
+   */
+  --pro-mid: #6A89A7;       /* the tier's colour — reference; nothing here paints with it */
+  --pro-ink: #39587a;       /* the name, the label and the glyph */
+  --pro-fill: #e3ebf3;      /* the letterhead's top stop, and the mat around the card */
+  --pro-fill-deep: #d5e1ec; /* the letterhead's bottom stop */
+  --pro-edge: #b9cdde;      /* the card's rim and the head's closing rule */
+  /* The fork's package branch hovers a step down from the fill. */
+  --pro-fill-hov: #d5e1ec;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
