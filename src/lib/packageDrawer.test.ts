@@ -204,6 +204,20 @@ describe("D14 / D15 / D16 — the lock, the two variants, and no editing", () =>
     expect(tsx).toContain("{returns.sent > 0 && (");
   });
 
+  it("⚠️ AND THE SCORECARD GOES WITH THEM — found by looking at the page, not by a check", () => {
+    /**
+     * The rule was applied to the SECTIONS and not to the head, so an unsent drawer read
+     * `0 SENT · 0 REPLIED · 0 REQUESTS` under its own name. Every check passed — the sections were
+     * correctly absent, and nothing asked what the head was claiming. Same shape as a rule applied
+     * to a numerator and not to its denominator.
+     *
+     * Counted rather than matched: there must be TWO `returns.sent > 0` gates now, the head's and
+     * the returns section's.
+     */
+    expect((tsx.match(/\{returns\.sent > 0 && \(/g) ?? []).length).toBe(2);
+    expect(tsx).toContain('className="pkgdd-score"');
+  });
+
   it("a sent package duplicates; an unsent one edits", () => {
     expect(tsx).toMatch(/locked\s*\?[\s\S]{0,200}Duplicate &amp; edit[\s\S]{0,120}onEdit\(pkg\.id\)/);
   });

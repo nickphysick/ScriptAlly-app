@@ -91,7 +91,10 @@ test("the drawer opens from a card and reads what the card cannot", async ({ pag
     expect(r.headBand.toLowerCase()).toContain("submission package");
     expect(r.xOverlapsLabel, "the close control sits on the band's right label").toBe(false);
     expect(r.headBandBg, "the drawer's band is not the card's blue").toBe(r.cardBandBg);
-    expect(r.score.length).toBe(3);
+    /* ⚠️ THE SCORECARD IS PRESENT ONLY ON A SENT PACKAGE (D15). Three noughts about something that
+       has never gone out is chrome pretending to be a fact — this measurement asserts the pairing
+       rather than the count, so it holds on either variant. */
+    expect(r.score.length, "scorecard cells").toBe(r.returns ? 3 : 0);
 
     /* D10 — three slots, each banded, each with an opening and a way through */
     expect(r.slots.length, `slots at ${width}`).toBe(3);

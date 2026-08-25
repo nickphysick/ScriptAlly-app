@@ -76,14 +76,28 @@ export const PackageDetailDrawer: React.FC<PackageDetailDrawerProps> = ({
           <button type="button" className="pkgdd-x" aria-label="Close"
                   onClick={() => ref.current?.close(false)}>×</button>
           <CardBand kind="package" right={locked ? "Locked" : undefined} />
-          <h2>{pkg.packageName}</h2>
-          {/* The scorecard sits directly beneath the band, larger than the card's (D9). */}
-          <div className="pkgdd-score">
-            {([["Sent", returns.sent], ["Replied", returns.replied], ["Requests", returns.requests]] as const)
-              .map(([k, v]) => (
-                <div key={k} className="pkgdd-scell"><b>{v}</b><span>{k}</span></div>
-              ))}
-          </div>
+          <h2 className={returns.sent > 0 ? undefined : "pkgdd-name--solo"}>{pkg.packageName}</h2>
+          {/**
+            * The scorecard sits directly beneath the band, larger than the card's (D9).
+            *
+            * ⚠️ AND IT IS ABSENT ON AN UNSENT PACKAGE, NOT ZEROED (D15). Three noughts about
+            * something that has never gone out is chrome pretending to be a fact — the same rule
+            * that removes the holders and the returns below, applied to the head.
+            *
+            * ⚠️ THIS WAS BUILT WRONG AND FOUND BY LOOKING. The rule was applied to the SECTIONS and
+            * not to the scorecard, so an unsent drawer read `0 SENT · 0 REPLIED · 0 REQUESTS` under
+            * its own name. Every check passed: the sections were correctly absent, and nothing
+            * asked what the head was claiming. It is the same shape as a rule applied to a
+            * numerator and not to its denominator.
+            */}
+          {returns.sent > 0 && (
+            <div className="pkgdd-score">
+              {([["Sent", returns.sent], ["Replied", returns.replied], ["Requests", returns.requests]] as const)
+                .map(([k, v]) => (
+                  <div key={k} className="pkgdd-scell"><b>{v}</b><span>{k}</span></div>
+                ))}
+            </div>
+          )}
         </div>
       }
       footer={

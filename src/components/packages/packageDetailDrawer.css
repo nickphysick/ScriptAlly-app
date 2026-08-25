@@ -34,6 +34,9 @@
  * ⚠️ THE SCORECARD IS LARGER HERE THAN ON THE CARD (D9) — the card's figures are a glance and these
  * are the thing you opened the drawer to read. Same three cells, same order, more weight.
  */
+/* With no scorecard beneath it, the name carries the head's closing space itself. */
+.pkgdd-name--solo { padding-bottom: 16px; }
+
 .pkgdd-score {
   display: grid; grid-template-columns: repeat(3, 1fr);
   padding: 14px 20px 16px; gap: 10px;
