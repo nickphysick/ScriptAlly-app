@@ -339,7 +339,13 @@ export const Form11Styles: React.FC = () => (
        were opening on the wrong side, and the inline right:0 read as though they were not.
        flex-end states the intent somewhere the layout can honour it.
        ⚠️ NO BACKTICKS IN THIS BLOCK — it lives inside a template literal, and one terminates it. */
-    .f11-slide { justify-content: flex-end; }
+    /* ⚠️ AND IT MUST NOT SWALLOW THE SCRIM'S CLICKS. Being full-width at z-index 1001, this wrapper
+       covers the overlay at 1000 completely — so every click landed on it, it has no handler, and
+       the outside-click dismissal was DEAD on both drawers while the overlay's onClick read as
+       perfectly correct. pointer-events:none here, auto on the panel: the wrapper positions and
+       nothing else. Measured — with the panel at x=972, a click at x=486 still did not close. */
+    .f11-slide { justify-content: flex-end; pointer-events: none; }
+    .f11-slide > * { pointer-events: auto; }
     .f11-slide > div { animation: f11-slide-in .55s cubic-bezier(.22,.61,.36,1); transform-origin:center; }
     .f11-slide.f11-closing > div { animation: f11-slide-out .18s cubic-bezier(.5,0,.9,.4) forwards; }
     @media (prefers-reduced-motion: reduce) { .f11-slide > div, .f11-slide.f11-closing > div { animation: none !important; } }
