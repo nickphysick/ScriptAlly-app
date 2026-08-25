@@ -133,7 +133,13 @@ export const FoundingSignup: React.FC<{
  * many people have signed up, made by nobody and checkable by nobody. Each wrapper places this
  * where its own layout wants it; the figure itself comes from the one shared store.
  */
-export const FoundingCounter: React.FC<{ variant: "bar" | "line" | "tally" }> = ({ variant }) => {
+/**
+ * ⚠️ TWO VARIANTS, NOT THREE. `line` rendered a bare `.mk-foundcnt` sentence and `/founders` was
+ * its only consumer; that hero now uses `tally`, so the branch went with it rather than being
+ * left as a shape nothing draws. A replacement is SWAPPED, not added — a third variant surviving
+ * its last caller is exactly how this file would grow a form nobody has looked at in a year.
+ */
+export const FoundingCounter: React.FC<{ variant: "bar" | "tally" }> = ({ variant }) => {
   /* ⚠️ THE COUNTER ASKS FOR ITS OWN FIGURE. It used to rely on a `FoundingSignup` being mounted
      beside it, which held on every surface until the pricing page rendered a counter with no form
      — and the failure is silent, because "no count yet" and "never asked" both render nothing.
@@ -144,7 +150,6 @@ export const FoundingCounter: React.FC<{ variant: "bar" | "line" | "tally" }> = 
   if (!count || state === "down") return null;
   const pct = Math.min(100, Math.round((count.claimed / count.cap) * 100));
   const label = foundingCounterLabel(count.claimed, count.cap);
-  if (variant === "line") return <p className="mk-foundcnt">{label}</p>;
   /**
    * ⚠️ `tally` IS A THIRD VARIANT RATHER THAN A RESTYLED `bar`, AND THE REASON IS THE LABEL. The
    * panel's tint differences — a 5px track, a different fill alpha, a transition — are a

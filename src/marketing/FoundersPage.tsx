@@ -59,7 +59,11 @@ export const FoundersPage: React.FC<{
               formClass="mk-fwform"
               onNavigate={onNavigate}
             />
-            <FoundingCounter variant="line" />
+            {/* ⚠️ THE SAME COUNTER THE LANDING PANEL DRAWS, not a second shape for one number.
+                This hero showed a bare mono line while the panel showed a bar and a tally, so one
+                figure had two appearances across two pages. Width is a wrapper-scoped override
+                below — the component is reused, never restyled in place. */}
+            <FoundingCounter variant="tally" />
           </div>
 
           <div className="mk-fwillo">

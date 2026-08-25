@@ -536,9 +536,11 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    declarations still winning on source order, the markup correct and the render not. If this
    section is touched again it is rewritten again — a second declaration of any selector below is
    the beginning of that fault, not a tidy-up waiting to happen.
-   ⚠️ `.mk-founder*` AND `.mk-foundcnt` ARE NOT PART OF THIS BLOCK AND MUST NOT BE SWEPT WITH IT.
-   `.mk-founder` is the About page's founder block; `.mk-foundcnt` is `/founders`'s line counter,
-   which a removal scoped to this panel already destroyed once. Both live elsewhere in this file.
+   ⚠️ `.mk-founder*` IS NOT PART OF THIS BLOCK AND MUST NOT BE SWEPT WITH IT — it is the About
+   page's founder block and lives elsewhere in this file. (`.mk-foundcnt` used to be named here
+   too, as `/founders`'s line counter, which a removal scoped to this panel destroyed once. That
+   class is retired: the founders hero renders the panel's own `tally` counter now, so there is no
+   longer a second thing here to sweep by accident.)
 
    The panel is its own full-width grid row beneath the turn, centred, and centred throughout — a
    single column of statements rather than a form with labels beside it. */
@@ -1157,16 +1159,16 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 2px 6px var(--mk-panel-sh);
 }
 .mk-fwform .mk-btn--ink:hover { background: var(--mk-cta-hov); }
-/* ⚠️ THE `line` COUNTER VARIANT'S BASE, AND IT LIVES HERE NOW BECAUSE `/founders` IS ITS ONLY
-   CONSUMER. It used to sit in the landing panel's block, and rebuilding that block deleted it —
-   collateral from a removal that was scoped to one surface and served two. The panel uses the
-   `tally` variant; this is the founders hero's. Caught by asking what still RENDERS the class
-   rather than by reading the diff. */
-.mk-foundcnt {
-  font-family: "JetBrains Mono", monospace; font-size: .6rem; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--mk-blush-label); margin: 0;
-}
-.mk-fwcol .mk-foundcnt { margin: 14px 0 0; font-size: .62rem; letter-spacing: .18em; }
+/* ⚠️ A WRAPPER-SCOPED WIDTH, AND THAT IS THE WHOLE OVERRIDE. The founders hero renders the SAME
+   `tally` counter as the landing panel — same bar, same fill, same mono tally — and differs only
+   in how wide the column it sits in is. The panel caps at 380px inside a 48rem card; this sits
+   under a 31rem form. A fourth variant for one `max-width` would be a component forked over a
+   number.
+   ⚠️ `.mk-foundcnt` AND THE `line` VARIANT ARE GONE WITH IT. That class rendered the bare sentence
+   this replaces, `/founders` was its only consumer, and a replacement is swapped rather than
+   added. Verified against the post-edit tree: nothing in `src/` renders it, and the smoke's
+   assertion that no counter appears without a live figure still names it. */
+.mk-fwcol .mk-fmcount { max-width: 31rem; margin: 18px 0 0; }
 .mk-fwillo { display: flex; align-items: center; justify-content: center; min-height: 320px; }
 /* ⚠️ BARE, AND NOT THROUGH `MarketingIllustration`. No rim, no caption, no tinted ground: this
    asset arrived finished, and the slot primitive exists to render the chrome that says an asset
