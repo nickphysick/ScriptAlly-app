@@ -47,7 +47,9 @@ import {
 import { TaskPaneBody, SendBodyValues } from "./TaskPaneBody";
 import { BulkFillTable } from "./BulkFillTable";
 import { rowHasAnswer, type RecordSweepRow } from "../../lib/materialsSweep";
-import { materialRowsFromAgent, formatSampleSpecs, type MaterialRow } from "../../lib/agentMaterials";
+/* (`formatSampleSpecs` left with the strip's first sentence — the LEDGER states the parcel
+   now, in the writer's own words, and the strip stating it too was the same fact twice.) */
+import { materialRowsFromAgent, type MaterialRow } from "../../lib/agentMaterials";
 import { formatQueryMaterials } from "../../lib/materials";
 import { journeyKind, firstMissing, isBulkCard, unanswered, anchorFor, requirementsFor, type GateAnswers } from "../../lib/paneGate";
 import { paneCommits, paneCommitValues } from "../../lib/paneCommit";
@@ -339,23 +341,35 @@ export function useTaskPaneSession(
       return day ? <>Closed as <b>no response</b>, {day}.</> : "—";
     }
 
-    const spec = sendSpecFor(card);
     const longDay = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
-
-    /* the first sentence: what went, and when */
-    const parcel = spec ? formatSampleSpecs(paneBody.rows, "and") : null;
     const sentIso = sentDateISO();
-    const noun = spec ? (spec.material === "full" ? "Your full" : "Your partial") : null;
-    /* ⚠️ THE NOUN TRAVELS WITH THE PARCEL, NEVER ALONE. "Your full" is read off the CARD, not
-       given by the writer — so on its own it is the strip stating something nobody said, which is
-       the pre-filled-answer fault in miniature. It appears once there is a measure beside it, and a
-       full manuscript (which has no unit to pick) waits for the date instead. */
-    let one = "";
-    if (parcel) one = noun ? `${noun} — ${parcel}` : parcel;
-    if (sentIso) one += one ? ` — sent ${longDay(new Date(`${sentIso}T12:00:00`).getTime())}`
-                            : `Sent ${longDay(new Date(`${sentIso}T12:00:00`).getTime())}`;
 
-    /* the second: what happens next, with the two dates emphasised */
+    /**
+     * ⚠️ THE STRIP CARRIES ONLY THE CONSEQUENCES NOW (workspace round, Phase 6).
+     *
+     * It used to open with the parcel and the send date — "Your full — 3 chapters — sent 13
+     * August." — which was the right sentence when the form showed those answers only as lit pills.
+     * The LEDGER states them, three centimetres above, in the writer's own words. A strip that
+     * repeats them is the same fact twice on one screen, and the reader has to check the two
+     * against each other to find out that they agree.
+     *
+     * What is left is what the rows CANNOT show: the future. A window is an answer; the date it
+     * resolves to is a consequence, and the consequence is what gets written.
+     *
+     * ⚠️ THE DATES ARE RESOLVED, NOT ECHOED, AND THE BRIEF'S OWN EXAMPLE ECHOES THEM. Its sentence
+     * reads "reply expected around 6 weeks from then; a nudge reminder lands here the week before"
+     * — which is the two ledger answers read back, and therefore fails the brief's own assertion
+     * that no value appears in both places. It also contradicts the standing law that this strip
+     * says what will be STORED: "6 weeks" is what the writer picked, "1 October" is what goes in
+     * the record. Resolved wins, and the phrase goes rather than the date — the reason the phrase
+     * used to travel WITH the date ("the week before, on 11 September") was that nothing else on
+     * the page said which lead had been chosen. The ledger says it now.
+     *
+     * ⚠️ WHERE THE WRITER PICKS A DATE DIRECTLY the answer and the consequence coincide, and the
+     * strip states it anyway. That is not a restatement: there is only one form of that fact, and
+     * a strip that fell silent about the expected reply because the writer had typed it would be
+     * describing a different write from the one about to happen.
+     */
     const two: React.ReactNode[] = [];
     const e = paneBody.expect;
     let replyMs: number | null = null;
@@ -363,7 +377,7 @@ export function useTaskPaneSession(
     else if (e?.kind === "weeks" && sentIso) {
       replyMs = agentWindowMs(new Date(`${sentIso}T12:00:00`).getTime(), e.weeks);
     }
-    if (replyMs != null) two.push(<>Reply expected around <b>{longDay(replyMs)}</b></>);
+    if (replyMs != null) two.push(<>reply expected around <b>{longDay(replyMs)}</b></>);
     const r = paneBody.remind;
     if (r?.kind === "none") {
       /* ⚠️ AN EXPLICIT CHOICE READS AS ONE. "No reminder" is an answer the writer gave, so the
@@ -372,41 +386,29 @@ export function useTaskPaneSession(
     } else if (r?.kind === "lead" && replyMs != null) {
       /**
        * ⚠️ A ZERO LEAD READS AS WORDS, NOT AS THE SAME DATE TWICE (write round, Phase 4). It said
-       * "Reply expected around 18 September; a nudge reminder lands here 18 September" — both
+       * "reply expected around 18 September; a nudge reminder lands here 18 September" — both
        * correct, and a stutter: the reader checks the two dates against each other, finds them
-       * identical, and has to work out whether that is the point or a bug.
-       *
-       * ⚠️ AND A NON-ZERO LEAD SAYS BOTH — the relation AND the date. "the week before" is what the
-       * writer chose and what they will remember choosing; "11 September" is what will happen. One
-       * without the other makes the reader do arithmetic the sentence could have done.
+       * identical, and has to work out whether that is the point or a bug. It is the one case with
+       * no date of its own to state, so it states the relation instead.
        */
-      const lead = longDay(replyMs - r.days * 86400000);
       two.push(r.days === 0
         ? <>a nudge reminder lands here <b>on the day</b></>
-        : <>a nudge reminder lands here <b>{leadPhrase(r.days)}, on {lead}</b></>);
+        : <>a nudge reminder lands here <b>on {longDay(replyMs - r.days * 86400000)}</b></>);
     } else if (r?.kind === "date" && r.ymd) {
       /* a date the writer picked is stated as itself — it is not a lead off anything */
       two.push(<>a nudge reminder lands here <b>on {longDay(new Date(`${r.ymd}T12:00:00`).getTime())}</b></>);
     }
 
-    if (!one && !two.length) return "—";
+    if (!two.length) return "—";
     return <>
-      {one ? `${one}. ` : ""}
       {two.map((n, i) => <React.Fragment key={i}>{i > 0 ? "; " : ""}{n}</React.Fragment>)}
-      {two.length ? "." : ""}
+      .
     </>;
   })();
 
-  /**
-   * The lead, in the words the writer chose it by. It reads them back rather than restating the
-   * number: "the week before" is the option they clicked, and "7 days before" is the app's
-   * arithmetic wearing their answer's clothes.
-   */
-  function leadPhrase(days: number): string {
-    if (days === 7) return "the week before";
-    if (days === 1) return "the day before";
-    return `${days} days before`;
-  }
+  /* (`leadPhrase` is DELETED with the clause it wrote — workspace round, Phase 6. It read the lead
+     back in the writer's own words, which is exactly what the ledger's `Nudge reminder` row does
+     three centimetres above the strip. Its only caller was that clause.) */
 
   /** the chosen day in words, for a strip that reads as a sentence — absent until it is chosen */
   function dayPartLong(w: SendBodyValues["when"]): string | null {

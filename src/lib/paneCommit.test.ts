@@ -332,6 +332,53 @@ describe("⚠️ the chase commits with a real day", () => {
  * answer", no unit section existed anywhere, and the jump target `#s-unit` was not in the document.
  * Unsatisfiable, with the gate correct throughout — the form was short a section.
  */
+/**
+ * ⚠️ THE STRIP SAYS ONLY WHAT THE ROWS CANNOT (workspace round, Phase 6).
+ *
+ * With the answers visible in the ledger, a strip that opened "Your full — 3 chapters — sent 13
+ * August" stated the same three facts a second time, three centimetres below. What is left is the
+ * FUTURE: the resolved reply date, and where the nudge lands. A window is an answer; the date it
+ * resolves to is a consequence, and the consequence is what gets written.
+ *
+ * ⚠️ SOURCE, DELIBERATELY, AND ONLY FOR THE RETIREMENTS. "This clause is no longer written" is a
+ * claim a source lock makes well. What the strip SAYS is a rendered-page claim and is measured in
+ * `tests/e2e/workspaceRound.measure.ts` against the ledger beside it — which is the only form that
+ * can catch a value appearing in both.
+ */
+describe("⚠️ the strip carries the consequences, not the answers", () => {
+  /* ⚠️ NOT `slice("paneWill")` — IT IS A `const`, AND THE HELPER SAID SO. `slice` anchors on
+     `function <name>` and failed LOUDLY naming the missing anchor, which is exactly what
+     `sliceBetween`'s own rule asks for: a bounded read that cannot find its anchor must not widen
+     silently to the rest of the file. The four sentences below are unique in the session, so the
+     honest read is the whole file. */
+  const will = hook;
+
+  it("the parcel and the send date are no longer restated", () => {
+    /* the two identifiers that composed the retired first sentence */
+    expect(hook, "the strip is formatting the parcel again").not.toContain("formatSampleSpecs(paneBody.rows");
+    expect(hook, "the strip is stating the send date again").not.toMatch(/`Sent \$\{longDay/);
+    expect(hook, "the parcel's noun is back in the strip").not.toContain('"Your full" : "Your partial"');
+  });
+
+  /* ⚠️ THE LEAD IS NO LONGER ECHOED. "the week before" is the ledger's `Nudge reminder` answer;
+     the strip states the DATE it resolves to, which is the thing that gets written. */
+  it("the lead phrase is retired with the clause that read it back", () => {
+    for (const src of [hook, page, writer]) {
+      expect(src, "leadPhrase survives — the strip is echoing the writer's own answer")
+        .not.toMatch(/["\s`(]leadPhrase[\s(]/);
+    }
+  });
+
+  /* ⚠️ AND THE THREE JOURNEYS WITH THEIR OWN GRAMMAR KEEP IT. Close, note and bulk say something a
+     row cannot: what closing MEANS, that a note is finished by the tick, and a cohort's count. */
+  it("close, note and bulk keep their own sentences", () => {
+    expect(will).toContain("Closed as ");
+    expect(will).toContain("no response");
+    expect(will).toContain("Your note, ticked off today.");
+    expect(will).toContain("materials on ");
+  });
+});
+
 describe("⚠️ a question the gate can require is a question the form asks", () => {
   it("the parcel section is drawn from the declaration, not from what should go next", () => {
     /* ⚠️ THE LAW IS UNCHANGED AND ITS EXPRESSION IS STRONGER (workspace round, Phase 3). This read
