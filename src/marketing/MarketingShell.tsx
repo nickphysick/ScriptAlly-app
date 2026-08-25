@@ -178,7 +178,7 @@ export const MarketingShell: React.FC<{
               </button>
             )}
             {nav.mode === "anon" ? (
-              <button type="button" className="mk-btn mk-btn--ink" onClick={() => { window.location.hash = "#/signup"; }}>
+              <button type="button" className="mk-btn mk-btn--ink" onClick={() => onNavigate("founders")}>
                 {nav.primaryLabel}
               </button>
             ) : (

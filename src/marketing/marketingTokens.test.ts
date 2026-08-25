@@ -25,6 +25,22 @@ const value = (src: string, token: string) => {
   return m ? m[1].trim() : null;
 };
 
+/**
+ * The declarations of a rule whose selector is EXACTLY `sel`.
+ *
+ * ⚠️ ANCHORED AT A LINE START, AND THAT IS NOT FUSSINESS. A bare `.mk-beta\s*\{` also matches the
+ * tail of `.mk-fw .mk-beta {` — so the moment a page scoped an override to that selector, every
+ * assertion about the base rule silently began reading a two-line block that happened to come
+ * first. Measured: two locks went red claiming the founding band declared no background, about a
+ * band whose background had not changed. First-match slicing is a fault this repo has met three
+ * times; this is the same one wearing a descendant selector.
+ */
+const ruleFor = (sel: string): string => {
+  const m = new RegExp(`(?:^|\\n)\\s*\\${sel}\\s*\\{([^}]*)\\}`).exec(marketing);
+  expect(m, `${sel} has a rule of its own`).toBeTruthy();
+  return m![1];
+};
+
 describe("the hero's ground is a documented copy of the app's, not a reference to it", () => {
   /**
    * ⚠️ THIS TEST IS THE WHOLE REASON THE COPY IS ALLOWED. A direct `var(--ws-ground)` from the
@@ -117,9 +133,7 @@ describe("every viewport-scaled clamp reaches its ceiling before its container s
 
   /** The `max-width` a selector declares, in px. */
   const capOf = (selector: string) => {
-    const rule = new RegExp("\\" + selector + "\\s*\\{([^}]*)\\}").exec(marketing);
-    expect(rule, `${selector} has a rule`).toBeTruthy();
-    const m = /max-width\s*:\s*([\d.]+)px/.exec(rule![1]);
+    const m = /max-width\s*:\s*([\d.]+)px/.exec(ruleFor(selector));
     expect(m, `${selector} declares a px max-width`).toBeTruthy();
     return parseFloat(m![1]);
   };
@@ -199,19 +213,15 @@ describe("no marketing rule reads a token that does not exist", () => {
  */
 describe("the founding band is the lower surface's only repaint", () => {
   it("declares a ground and a top hairline", () => {
-    const rule = /\.mk-beta\s*\{([^}]*)\}/.exec(marketing);
-    expect(rule, ".mk-beta has a rule").toBeTruthy();
-    expect(rule![1]).toMatch(/background:\s*var\(--mk-blush\)/);
-    expect(rule![1]).toMatch(/border-top:\s*1px solid var\(--mk-blush-line\)/);
+    const decls = ruleFor(".mk-beta");
+    expect(decls).toMatch(/background:\s*var\(--mk-blush\)/);
+    expect(decls).toMatch(/border-top:\s*1px solid var\(--mk-blush-line\)/);
   });
 
   it("and it is the only ground repaint under the wrapper", () => {
     /* Sections that sit inside `.mk-lower`, by the classes `Landing` renders there. */
     const INSIDE = [".mk-sect", ".mk-featband", ".mk-beta", ".mk-foot"];
-    const painted = INSIDE.filter((sel) => {
-      const rule = new RegExp("\\" + sel + "\\s*\\{([^}]*)\\}").exec(marketing);
-      return rule ? /background(?!-image)\s*:/.test(rule[1]) : false;
-    });
+    const painted = INSIDE.filter((sel) => /background(?!-image)\s*:/.test(ruleFor(sel)));
     expect(painted).toEqual([".mk-beta"]);
   });
 });
@@ -228,11 +238,7 @@ describe("the founding band is the lower surface's only repaint", () => {
  * to be re-tuned on every copy edit, because the row's height is whatever the copy makes it.
  */
 describe("the hero grid aligns per item, and overlaps by construction", () => {
-  const rule = (sel: string) => {
-    const m = new RegExp("\\" + sel + "\\s*\\{([^}]*)\\}").exec(marketing);
-    expect(m, `${sel} has a rule`).toBeTruthy();
-    return m![1];
-  };
+  const rule = ruleFor;
 
   it("the container states the row default and the artwork overrides it on itself", () => {
     expect(rule(".mk-heroinner")).toMatch(/align-items:\s*start/);

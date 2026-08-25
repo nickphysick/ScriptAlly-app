@@ -71,11 +71,19 @@ describe("tierForPath", () => {
 });
 
 describe("marketingNavState", () => {
-  it("logged out: Log in ghost + the free-start button", () => {
+  /**
+   * ⚠️ RETARGET: the anon CTA is the FOUNDING OFFER until launch, not `Start tracking — it's
+   * free`. There is no self-serve product behind that label yet, so a chrome button offering one
+   * is a door to a room that is not built; `Log in` continues to serve existing accounts and the
+   * founding list is the funnel. The law is unchanged — logged out means one ghost link and one
+   * primary — and the destination is asserted alongside the label, because a CTA whose wording
+   * changed without its target changing is the half-done version of this.
+   */
+  it("logged out: Log in ghost + the founding CTA", () => {
     const s = marketingNavState(null);
     expect(s.mode).toBe("anon");
     expect(s.showLogIn).toBe(true);
-    expect(s.primaryLabel).toBe("Start tracking — it's free");
+    expect(s.primaryLabel).toBe("Become a Founding Writer");
     expect(s.avatarInitial).toBeNull();
   });
 

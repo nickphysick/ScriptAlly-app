@@ -29,6 +29,7 @@ import { PricingPage } from "./PricingPage";
 import { LegalPage } from "./LegalPage";
 import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
+import { FoundersPage } from "./FoundersPage";
 import { LEGAL_COPY_REVIEWED } from "./legalCopy";
 import { HERO_H1 } from "./landingCopy";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
@@ -48,6 +49,7 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
   /* Retarget, same law: the mission statement replaced the old About headline as this page's h1. */
   ["/about", () => <AboutPage onNavigate={noNavigate} />, "Get good stories told."],
   ["/contact", () => <ContactPage onNavigate={noNavigate} />, "Get in touch"],
+  ["/founders", () => <FoundersPage onNavigate={noNavigate} />, "Help build our world."],
   ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of Service"],
   ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "Privacy Policy"],
 ];
@@ -416,5 +418,73 @@ describe("the founding sign-up — one component, mounted more than once", () =>
       "Sign-ups are briefly unavailable",
       "That didn&#x27;t send",
     ]) expect(h).not.toContain(s);
+  });
+});
+
+/**
+ * `/founders` — the page the landing hero's panel and the sealed band both point at, and the page
+ * that forced the sign-up's generalisation: it mounts the form TWICE on one document.
+ */
+describe("the Founding Writers page", () => {
+  const html = () => renderPage(<FoundersPage onNavigate={noNavigate} />, "/founders");
+
+  /**
+   * ⚠️ TWO SIGN-UPS ON ONE PAGE, AND THIS IS THE ASSERTION THAT WOULD HAVE CAUGHT THE SINGLETON.
+   * `<label for>` and `aria-describedby` resolve to whichever id comes first in the document, so a
+   * shared id points the second form's label at the first form's field — and duplicate ids are
+   * invalid HTML besides. `idPrefix` is what stops it.
+   */
+  it("mounts the sign-up twice, with distinct ids and a label each", () => {
+    const h = html();
+    const ids = [...h.matchAll(/<input[^>]*id="([^"]+)"[^>]*type="email"/g)].map((m) => m[1]);
+    expect(ids.length).toBe(2);
+    expect(new Set(ids).size, `ids collide: ${ids.join(", ")}`).toBe(2);
+    for (const id of ids) {
+      const label = h.match(new RegExp(`<label[^>]*for="${id}"[^>]*>([^<]*)<`));
+      expect(label, `${id} has its own label`).toBeTruthy();
+      expect(label![1]).toBe("Email address");
+    }
+  });
+
+  /** Two buttons, two jobs: the hero asks you to become one, the band asks you to claim a place. */
+  it("the hero's button and the band's read differently", () => {
+    const h = html();
+    expect(h).toContain("Become a Founding Writer");
+    expect(h).toContain("Claim your place");
+  });
+
+  it("states the offer, the sweetener and the direct line", () => {
+    const h = html();
+    expect(h).toContain("Six months of Pro, free");
+    expect(h).toContain("Half price, for as long as you need it.");
+    expect(h).toContain("You shape what&#x27;s built");
+    expect(h).toContain("Full disclosure");
+    expect(h).toContain("Nick — ScriptAlly&#x27;s founder");
+  });
+
+  /** ⚠️ LIVE OR ABSENT, HERE TOO. Two mounts, and neither may invent a number. */
+  it("renders no count anywhere", () => {
+    const h = html();
+    expect(h).not.toContain("places claimed");
+    expect(h).not.toMatch(/\d+\s+of\s+\d+/);
+  });
+
+  /**
+   * ⚠️ THE EARTH IS BARE AND MUST NOT ACQUIRE PLACEHOLDER CHROME. It arrived finished; the slot
+   * primitive exists to draw a dashed rim and a caption that say an asset has NOT, and wrapping
+   * this one would mean passing `finished` to switch off everything the component does.
+   */
+  it("the artwork is bare and decorative", () => {
+    const h = html();
+    expect(h).toMatch(/<img class="mk-fwearth" src="[^"]*founders-earth[^"]*" alt=""/);
+    expect(h).not.toMatch(/["\s`]mk-illo["\s`]/);
+    expect(h).not.toContain("Illustration placeholder");
+  });
+
+  /** It carries the shared footer, so every other public page is one click away. */
+  it("takes the shared footer with it", () => {
+    const h = html();
+    expect(h).toMatch(/["\s`]mk-foot["\s`]/);
+    expect(h).toContain("Founding writers");
   });
 });

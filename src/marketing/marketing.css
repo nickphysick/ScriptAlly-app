@@ -902,6 +902,113 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-pinned .mk-cv { font-family: "Caveat", cursive; font-size: 16px; line-height: 1.35; color: #4a3a30; }
 .mk-pinned .mk-pt3 { font-family: "JetBrains Mono", monospace; font-size: 6.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--mk-label); margin-top: 9px; }
 
+/* ── /founders: the Founding Writers page ──────────────────────────────────── */
+.mk-fwpad { max-width: 1180px; margin: 0 auto; padding: 0 56px; }
+
+/* ⚠️ `align-items: stretch` IS THE WHOLE POINT OF THIS ROW, and neither column declares a height
+   because of it. The earth is exactly as tall as headline + lede + field because the row makes it
+   so; a fixed height would set the proportion from the wrong end and stop tracking the copy the
+   moment the copy changes. (Contrast the landing hero, where `start` is the row default and the
+   ARTWORK overrides to `center` on itself — two rows, two answers, each stated where it belongs.) */
+.mk-fwhero {
+  display: grid; grid-template-columns: 1.08fr 1fr; gap: 56px;
+  align-items: stretch; padding: 64px 0 56px;
+}
+.mk-fwcol { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.mk-fweyebrow {
+  font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .26em;
+  text-transform: uppercase; color: var(--mk-muted); margin: 0 0 22px;
+}
+/* ⚠️ `4.2vw` REACHES 3.3rem AT 1257px, INSIDE `.mk-fwpad`'s 1180 cap — the container-cap
+   pre-check, and it FAILS it. The ceiling is 3.1rem instead, reached at 1181: one pixel inside the
+   cap, so the headline stops growing at the same moment its measure does. At 3.3rem the type would
+   have gone on climbing from 1181 to 1257 against a frozen column, which is the fault that has now
+   decided six numbers in this project.
+   ⚠️ AND `13ch` IS ONLY MEANINGFUL BECAUSE THIS ELEMENT CARRIES ITS OWN FONT-SIZE. */
+.mk-fwh1 {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 700;
+  font-size: clamp(2.2rem, 4.2vw, 3.1rem); line-height: 1.3; letter-spacing: -.02em;
+  color: var(--mk-nearblack); margin: 0; max-width: 13ch;
+}
+.mk-fwlede {
+  margin: 22px 0 0; max-width: 46ch; font-size: 1.12rem; line-height: 1.6; color: var(--mk-muted);
+}
+.mk-fwlede strong { color: var(--mk-nearblack); font-weight: 600; }
+/* Same shared form, this page's layout. The pink primary, as on the landing panel — this ground is
+   the page's cream, not the band's pink. */
+.mk-fwform { display: flex; gap: 11px; margin: 28px 0 0; max-width: 31rem; flex-wrap: wrap; }
+.mk-fwform input {
+  flex: 1 1 210px; min-width: 0; font-family: inherit; font-size: .98rem; color: var(--mk-ink);
+  background: #fff; border: 1px solid var(--mk-cta-bd); border-radius: 11px; padding: 13px 15px;
+}
+.mk-fwform input::placeholder { color: var(--mk-blush-ph); }
+.mk-fwform .mk-btn--ink {
+  flex: none; font-size: .98rem; font-weight: 500; padding: 13px 22px; border-radius: 11px;
+  color: var(--mk-nearblack); background: var(--mk-cta); border-color: var(--mk-cta-bd);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 2px 6px var(--mk-panel-sh);
+}
+.mk-fwform .mk-btn--ink:hover { background: var(--mk-cta-hov); }
+.mk-fwcol .mk-foundcnt { margin: 14px 0 0; font-size: .62rem; letter-spacing: .18em; }
+.mk-fwillo { display: flex; align-items: center; justify-content: center; min-height: 320px; }
+/* ⚠️ BARE, AND NOT THROUGH `MarketingIllustration`. No rim, no caption, no tinted ground: this
+   asset arrived finished, and the slot primitive exists to render the chrome that says an asset
+   has NOT. `max-height: 100%` is what stops a short row cropping it — the row's height comes from
+   the copy column beside it. */
+.mk-fwearth { width: 100%; max-width: 460px; height: auto; max-height: 100%; object-fit: contain; display: block; }
+
+/* ⚠️ EQUAL HEIGHT BY `stretch` PLUS A FLEX COLUMN INSIDE, not by a height. Three headings of
+   different lengths would otherwise push three bodies out of line with one another. */
+.mk-fwdeal {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
+  margin: 56px 0 0; align-items: stretch;
+}
+.mk-fwcard {
+  display: flex; flex-direction: column;
+  background: var(--mk-parch); border: 1px solid var(--mk-hair); border-radius: 14px;
+  padding: 28px 26px 26px; box-shadow: 0 10px 26px rgba(58, 28, 20, .06);
+}
+/* The offer itself, in blush; the other two qualify it. */
+.mk-fwcard--hl { background: var(--mk-blush); border-color: var(--mk-cta-bd); }
+.mk-fwk {
+  font-family: "JetBrains Mono", monospace; font-size: .6rem; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--mk-blush-label); margin: 0 0 12px;
+}
+/* 1.3, the house floor for mixed-case Playfair — "Half price, for as long as you need it." has a
+   descender in it, and this is copy that can change. */
+.mk-fwcard h2 {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.32rem;
+  line-height: 1.3; color: var(--mk-nearblack); margin: 0 0 10px;
+}
+.mk-fwcard p { margin: 0; font-size: .98rem; color: var(--mk-muted); line-height: 1.6; }
+
+.mk-fwhonest {
+  margin: 78px 0 0; background: var(--mk-parch); border: 1px solid var(--mk-hair);
+  border-radius: 14px; padding: 36px 40px; box-shadow: 0 10px 26px rgba(58, 28, 20, .06);
+  max-width: 56rem;
+}
+.mk-fwhonest .mk-fwk { font-size: .62rem; letter-spacing: .24em; margin-bottom: 14px; }
+.mk-fwhonest p { margin: 0 0 12px; color: var(--mk-muted); max-width: 60ch; line-height: 1.7; }
+.mk-fwhonest p:last-child { margin: 0; }
+.mk-fwhonest strong { color: var(--mk-nearblack); font-weight: 600; }
+/* The same hand as the landing's postscript — it is one person asking, and the signature says so. */
+.mk-fwsign {
+  font-family: "Caveat", cursive; font-size: 1.5rem; color: var(--mk-burg);
+  margin: 18px 0 0; transform: rotate(-.7deg);
+}
+
+/* ⚠️ THE BAND KEEPS ITS OWN TOP MARGIN HERE. On the landing it closes a page that has just ended
+   a features band; here it follows a bordered card, and without the gap the two edges meet. */
+.mk-fw .mk-beta { margin-top: 100px; }
+
+@media (max-width: 880px) {
+  .mk-fwpad { padding: 0 22px; }
+  .mk-fwhero { grid-template-columns: 1fr; gap: 32px; padding: 40px 0 44px; }
+  /* The artwork goes below the copy, and stops reserving a row it no longer shares. */
+  .mk-fwillo { min-height: 0; order: 2; }
+  .mk-fwdeal { grid-template-columns: 1fr; }
+  .mk-fwhonest { padding: 28px 24px; margin-top: 54px; }
+}
+
 /* ── The founding-members band + footer ── */
 /* ⚠️ THIS REPLACES `.mk-ctaband`, WHICH IS DELETED. That band restated the hero's CTA three
    screens later inside a parchment card; the page closes on an offer now. The `.mk-ctainner`

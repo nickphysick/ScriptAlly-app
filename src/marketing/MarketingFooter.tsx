@@ -44,6 +44,7 @@ export const MarketingFooter: React.FC<{
         <div className="mk-footcol">
           <h4>Company</h4>
           <button type="button" onClick={() => onNavigate("about")}>About</button>
+          <button type="button" onClick={() => onNavigate("founders")}>Founding writers</button>
           <button type="button" onClick={() => onNavigate("contact")}>Contact</button>
         </div>
 

@@ -35,6 +35,7 @@ const PUBLIC_DESTINATIONS: [label: string, tab: string, path: string][] = [
   ["Pricing", "pricing", "/pricing"],
   ["About", "about", "/about"],
   ["Contact", "contact", "/contact"],
+  ["Founding writers", "founders", "/founders"],
   ["Privacy", "privacy", "/privacy"],
   ["Terms", "terms", "/terms"],
 ];
