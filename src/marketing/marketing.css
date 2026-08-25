@@ -503,55 +503,92 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 @media (min-width: 901px) { .mk-statement { white-space: nowrap; } }
 
 /* ── The hero's founding panel: the landing's primary action ──
-   ⚠️ IT REPLACES THE ACTIONS ROW, AND `.mk-hctas` GOES WITH IT. `Start tracking — it's free` and
+   ⚠️ IT REPLACES THE ACTIONS ROW, AND `.mk-hctas` WENT WITH IT. `Start tracking — it's free` and
    `Learn more` are both retired: pre-launch there is nothing self-serve behind the first, and the
    second was an in-page anchor competing with a real offer three inches below it.
-   ⚠️ THE BUTTON IS PINK HERE AND INK IN THE SEALED BAND, and that is the grammar working rather
-   than an inconsistency: primaries are pink on cream and parchment grounds, ink on pink ones. This
-   panel's ground is BLUSH; the band's ground is the pink itself, where a pink button would have
-   nothing to sit against. `.mk-found-form .mk-btn--ink` below is what re-tints the shared
-   primitive's button for this mount — the FORM is shared, the treatment is the wrapper's. */
+   ⚠️ THE BUTTON IS INK BECAUSE THE GROUND IS BLUSH — primaries are pink on cream and parchment,
+   ink on pink. `.mk-fmform .mk-btn--ink` below re-tints the SHARED primitive's button for this
+   mount; the form is shared, the treatment is the wrapper's.
+   ⚠️ AND THE BOTTOM PADDING IS NOT DECORATION. `How it works` is `position: absolute`, pinned
+   bottom-right, so it occupies no flow space and cannot push anything out of its way. The 46px
+   below the counter IS the room it sits in. Reduce it and the link prints over the tally. */
 .mk-found { margin-top: 34px; max-width: 35rem; }
 .mk-found-panel {
+  position: relative;
   background: var(--mk-blush); border: 1px solid var(--mk-cta-bd); border-radius: 14px;
-  padding: 24px 26px 22px; box-shadow: 0 10px 26px var(--mk-panel-sh);
+  padding: 26px 24px 46px; box-shadow: 0 10px 26px var(--mk-panel-sh);
 }
-.mk-found-kick {
-  font-family: "JetBrains Mono", monospace; font-size: .62rem; letter-spacing: .22em;
-  text-transform: uppercase; color: var(--mk-blush-label); margin: 0 0 10px;
+/* `--mk-kicker` is the eighth pass's quiet-label token — rgba(122,101,92,.7) against the ref's
+   .72, which is inside a rounding error of one another. One token, two surfaces. */
+.mk-fmkick {
+  font-family: "JetBrains Mono", monospace; font-size: .58rem; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--mk-kicker); margin: 0 0 11px;
 }
-.mk-offer { margin: 0; font-size: 1.06rem; line-height: 1.55; color: var(--mk-blush-body); }
-.mk-offer strong { color: var(--mk-nearblack); font-weight: 600; }
-.mk-found-form { display: flex; gap: 11px; margin-top: 14px; flex-wrap: wrap; }
-.mk-found-form input {
-  flex: 1 1 210px; min-width: 0; font-family: inherit; font-size: .98rem; color: var(--mk-ink);
-  background: #fff; border: 1px solid var(--mk-cta-bd); border-radius: 11px; padding: 13px 15px;
+.mk-fmh { margin: 0; font-size: 1.06rem; line-height: 1.4; color: var(--mk-ink); }
+/* ⚠️ A `border-bottom`, NOT `text-decoration`. The marked run is "100 Founding Writers" and the
+   `g` descends through an underline drawn by the text decoration; a border sits below the box and
+   clears it. */
+.mk-fmh strong {
+  font-weight: 600; color: var(--mk-nearblack);
+  border-bottom: 1.5px solid rgba(124, 58, 42, .45); padding-bottom: 1px;
 }
-.mk-found-form input::placeholder { color: var(--mk-blush-ph); }
-/* The pink primary, overriding the primitive's default ink. See the note above. */
-.mk-found-form .mk-btn--ink {
-  flex: none; font-size: .98rem; font-weight: 500; padding: 13px 22px; border-radius: 11px;
-  color: var(--mk-nearblack); background: var(--mk-cta); border-color: var(--mk-cta-bd);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 2px 6px var(--mk-panel-sh);
+/* ⚠️ ONE ROW AT >=1280, AND EACH ITEM IS `nowrap` SO THE ROW BREAKS BETWEEN PERKS RATHER THAN
+   INSIDE ONE. That is the right failure below 1280 — three whole phrases stacked beats one phrase
+   split across a line break. It also means the WORDING is length-constrained: a longer phrase does
+   not shrink, it drops the row to two lines. See `FOUNDING_PERKS`. */
+.mk-fmperks {
+  list-style: none; display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 14px 0 0; padding: 0;
 }
-.mk-found-form .mk-btn--ink:hover { background: var(--mk-cta-hov); }
-/* ⚠️ THE FOOT ROW SURVIVES AN ABSENT COUNTER. The counter renders nothing until a real figure
-   comes back, so `space-between` with one child would push the link left; `margin-left: auto` on
-   the link keeps it right whether or not the count is there. Today it is never there. */
-.mk-found-foot {
-  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 14px;
+/* ⚠️ THE REF'S OWN VALUES, AND THE LEVERS PREPARED FOR THIS ROW WERE NOT NEEDED. A pre-build
+   estimate put the row at ~511px against a 512px panel and a tightening was authorised — gap 14,
+   indent 17, then .84rem. Measured, the ref's 16/19/.88rem gives 444.9px with 67.1px of headroom
+   at 1280 and 23.7 even at 1180, so the estimate was 66px pessimistic and the tightening bought
+   nothing but a smaller perk row than the design asks for. Reverted to the drawn values.
+   The arithmetic was wrong in the safe direction, which is the only reason it cost nothing. */
+.mk-fmperks li {
+  position: relative; padding-left: 19px; font-size: .88rem; color: var(--mk-blush-body);
+  line-height: 1.4; white-space: nowrap;
 }
-.mk-foundcnt {
-  font-family: "JetBrains Mono", monospace; font-size: .6rem; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--mk-blush-label); margin: 0;
+/* ⚠️ THE TICK IS DRAWN, NOT TYPED — two borders on an empty `::before`, rotated. A glyph would be
+   announced by a screen reader three times, and the list already says there are three of them. */
+.mk-fmperks li::before {
+  content: ""; position: absolute; left: 1px; top: .3em; width: 9px; height: 6px;
+  border-left: 2px solid var(--mk-burg); border-bottom: 2px solid var(--mk-burg);
+  transform: rotate(-45deg); opacity: .8;
 }
-.mk-found-learn {
-  margin-left: auto; background: none; border: none; padding: 0 0 2px; cursor: pointer;
-  font-family: inherit; font-size: .98rem; color: var(--mk-burg);
-  border-bottom: 1px solid rgba(124, 58, 42, .35);
+.mk-fmform { display: flex; gap: 9px; margin: 13px 0 0; flex-wrap: wrap; }
+.mk-fmform input {
+  flex: 1 1 190px; min-width: 0; font-family: inherit; font-size: .95rem; color: var(--mk-ink);
+  background: #fff; border: 1px solid var(--mk-cta-bd); border-radius: 10px; padding: 11px 14px;
 }
-.mk-found-learn:hover { border-bottom-color: var(--mk-burg); }
-/* The shared form's outcome messages sit tighter inside a panel than inside the letter. */
+.mk-fmform input::placeholder { color: var(--mk-blush-ph); }
+.mk-fmform .mk-btn--ink {
+  flex: none; font-size: .95rem; font-weight: 500; padding: 11px 20px; border-radius: 10px;
+}
+/* The counter: a 5px bar and a mono tally, live or absent. */
+.mk-fmcount { margin: 14px 0 0; }
+.mk-fmbar { height: 5px; border-radius: 999px; background: rgba(124, 58, 42, .16); overflow: hidden; }
+/* ⚠️ THE TRANSITION IS ON `width` SO A SUCCESSFUL JOIN MOVES THE BAR RATHER THAN JUMPING IT — the
+   count it animates to is the SERVER's, not a local increment. Suppressed under reduced motion. */
+.mk-fmfill {
+  height: 100%; background: var(--mk-burg); opacity: .8; border-radius: 999px;
+  transition: width .5s ease;
+}
+.mk-fmmeta {
+  font-family: "JetBrains Mono", monospace; font-size: .62rem; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--mk-blush-label); margin: 8px 0 0;
+}
+.mk-fmtally { color: var(--mk-burg); font-weight: 500; }
+.mk-fmof { opacity: .6; }
+/* Pinned bottom-right — see the panel's padding note. */
+.mk-fmlearn {
+  position: absolute; right: 22px; bottom: 16px;
+  background: none; border: none; padding: 0 0 2px; cursor: pointer; font-family: inherit;
+  font-size: .92rem; font-weight: 500; color: var(--mk-burg);
+  border-bottom: 1px solid rgba(124, 58, 42, .4);
+}
+.mk-fmlearn:hover { border-bottom-color: var(--mk-burg); }
+/* The shared form's own messages sit tighter inside a panel than inside the letter. */
 .mk-found-panel .mk-betamsg { margin-top: 14px; font-size: .95rem; padding: 12px 15px; }
 .mk-found-panel .mk-betainvalid { margin-top: 10px; }
 
@@ -964,6 +1001,15 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 2px 6px var(--mk-panel-sh);
 }
 .mk-fwform .mk-btn--ink:hover { background: var(--mk-cta-hov); }
+/* ⚠️ THE `line` COUNTER VARIANT'S BASE, AND IT LIVES HERE NOW BECAUSE `/founders` IS ITS ONLY
+   CONSUMER. It used to sit in the landing panel's block, and rebuilding that block deleted it —
+   collateral from a removal that was scoped to one surface and served two. The panel uses the
+   `tally` variant; this is the founders hero's. Caught by asking what still RENDERS the class
+   rather than by reading the diff. */
+.mk-foundcnt {
+  font-family: "JetBrains Mono", monospace; font-size: .6rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--mk-blush-label); margin: 0;
+}
 .mk-fwcol .mk-foundcnt { margin: 14px 0 0; font-size: .62rem; letter-spacing: .18em; }
 .mk-fwillo { display: flex; align-items: center; justify-content: center; min-height: 320px; }
 /* ⚠️ BARE, AND NOT THROUGH `MarketingIllustration`. No rim, no caption, no tinted ground: this

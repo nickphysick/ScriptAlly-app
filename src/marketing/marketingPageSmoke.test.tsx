@@ -338,8 +338,8 @@ describe("the founding sign-up — one component, mounted more than once", () =>
 
   it("the hero's panel is the page's action, and the CTA band is gone", () => {
     const h = html();
-    expect(h).toContain("Founding writers · limited to 100");
-    expect(h).toContain("Become a Founding Writer.");
+    expect(h).toContain("Get involved");
+    expect(h).toContain("100 Founding Writers");
     expect(h).toContain("Founding members");
     expect(h).toContain("Be one of the first hundred.");
     expect(h).not.toMatch(/["\s`]mk-ctaband["\s`]/);
@@ -363,9 +363,30 @@ describe("the founding sign-up — one component, mounted more than once", () =>
     expect(h).not.toContain("Learn more");
   });
 
+  /**
+   * ⚠️ THE PERKS ARE ONE ROW AT >=1280 AND THE WORDING IS LENGTH-CONSTRAINED BECAUSE OF IT — each
+   * item is `nowrap`, so a longer phrase does not shrink, it drops the row to two lines. This
+   * pins the three phrases; the ROW's fit is a rendered-page claim and is measured.
+   */
+  it("three perks, in the wording the one-row rule bought", () => {
+    const h = html();
+    expect(h).toContain("6 months free Pro");
+    expect(h).toContain("Half price for life");
+    expect(h).toContain("A direct line to the founder");
+    /* The shortened first perk — the long form is what the row could not hold. */
+    expect(h).not.toContain("Six months&#x27; free Pro access");
+  });
+
+  it("the panel's button asks for a spot; the band's asks for a place", () => {
+    const h = html();
+    expect(h).toContain("Claim your spot");
+    expect(h).toContain("Claim your place");
+  });
+
   it("renders no counter and no number, because there is no count yet", () => {
     const h = html();
     expect(h).not.toMatch(/["\s`]mk-counter["\s`]/);
+    expect(h).not.toMatch(/["\s`]mk-fmcount["\s`]/);
     expect(h).not.toMatch(/["\s`]mk-foundcnt["\s`]/);
     expect(h).not.toContain("places claimed");
     expect(h).not.toMatch(/\d+\s+of\s+\d+/);

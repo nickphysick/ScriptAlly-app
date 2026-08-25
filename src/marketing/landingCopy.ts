@@ -139,15 +139,47 @@ export const FOUNDING_BLURB =
    and "for as long as you're querying your manuscript" on `/founders` are the same promise in two
    wordings; if the terms change, both change together, and the `/founders` sweetener card is the
    one that carries the detail. */
-export const FOUNDING_PANEL_KICKER = "Founding writers · limited to 100";
-/** The bold half of the offer line. Rendered as one sentence with the muted half after it. */
-export const FOUNDING_OFFER_LEAD = "Become a Founding Writer.";
-export const FOUNDING_OFFER_REST = "Six months' free Pro access, then half price for life.";
+export const FOUNDING_PANEL_KICKER = "Get involved";
+
+/**
+ * The ask. `100 Founding Writers` is the marked run — semibold near-black under a burgundy
+ * hairline, which is a `border-bottom` rather than `text-decoration` so it clears the descenders
+ * in `g`.
+ *
+ * ⚠️ `FOUNDING_OFFER_LEAD` / `FOUNDING_OFFER_REST` ARE DELETED. The panel used to open with
+ * "Become a Founding Writer." as a statement and then explain the offer in prose; it asks a
+ * question of the reader now and answers it in the perks beneath, which is a shorter route to the
+ * same three facts.
+ */
+export const FOUNDING_ASK: CopyRun[] = [
+  "We're looking for ",
+  { b: "100 Founding Writers" },
+  " to put ScriptAlly through its paces. You'll get:",
+];
+
+/**
+ * ⚠️ THESE THREE MUST FIT ON ONE ROW AND THE WORDING IS LENGTH-CONSTRAINED BECAUSE OF IT. Each
+ * item is `white-space: nowrap`, so the row wraps as whole items rather than mid-phrase — which
+ * means a longer phrase does not shrink, it drops the row to two lines. "6 months free Pro" is
+ * already the shortened form of "Six months' free Pro access", cut for exactly this reason.
+ * ⚠️ ANYONE LENGTHENING ONE OF THESE RE-MEASURES THE ROW against the panel's inner width at 1280,
+ * which is the narrowest width where one row is required. Do not lengthen them on the assumption
+ * that a few characters are free; the first perk lost eleven to buy the row.
+ */
+export const FOUNDING_PERKS = [
+  "6 months free Pro",
+  "Half price for life",
+  "A direct line to the founder",
+] as const;
+
 export const FOUNDING_LEARN = "How it works";
 
 export const FOUNDING_FIELD_LABEL = "Email address";
 export const FOUNDING_PLACEHOLDER = "you@example.com";
 export const FOUNDING_CTA = "Claim your place";
+
+/** The panel's button. The sealed band keeps `FOUNDING_CTA`; two surfaces, two asks. */
+export const FOUNDING_PANEL_CTA = "Claim your spot";
 
 /**
  * ⚠️ THE INVALID-ADDRESS MESSAGE IS NOT ONE OF THE OUTCOME STATES. It is what the field says

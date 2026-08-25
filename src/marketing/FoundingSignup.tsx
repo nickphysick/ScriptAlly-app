@@ -113,12 +113,36 @@ export const FoundingSignup: React.FC<{
  * many people have signed up, made by nobody and checkable by nobody. Each wrapper places this
  * where its own layout wants it; the figure itself comes from the one shared store.
  */
-export const FoundingCounter: React.FC<{ variant: "bar" | "line" }> = ({ variant }) => {
+export const FoundingCounter: React.FC<{ variant: "bar" | "line" | "tally" }> = ({ variant }) => {
   const { count, state } = useFounding();
   if (!count || state === "down") return null;
   const pct = Math.min(100, Math.round((count.claimed / count.cap) * 100));
   const label = foundingCounterLabel(count.claimed, count.cap);
   if (variant === "line") return <p className="mk-foundcnt">{label}</p>;
+  /**
+   * ⚠️ `tally` IS A THIRD VARIANT RATHER THAN A RESTYLED `bar`, AND THE REASON IS THE LABEL. The
+   * panel's tint differences — a 5px track, a different fill alpha, a transition — are a
+   * wrapper-scoped override like the button already uses, and could have been done from outside.
+   * The label could not: `37/100 places claimed` with a dimmed `/100` is different MARKUP and
+   * different WORDING from the band's `37 of 100 places claimed`, and changing `bar` to suit the
+   * panel would reach into the sealed band, which renders on two pages and is not this surface.
+   * One branch, same component, same store.
+   */
+  if (variant === "tally") {
+    return (
+      <div className="mk-fmcount">
+        {/* The bar carries the figure for anyone who cannot see it; the text beneath is then
+            decorative to a screen reader and would otherwise be read out twice. */}
+        <div className="mk-fmbar" role="img" aria-label={label}>
+          <div className="mk-fmfill" style={{ width: `${pct}%` }} />
+        </div>
+        <p className="mk-fmmeta" aria-hidden="true">
+          <span className="mk-fmtally">{count.claimed}<span className="mk-fmof">/{count.cap}</span></span>
+          {" places claimed"}
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="mk-counter">
       <div className="mk-counterbar"><div className="mk-counterfill" style={{ width: `${pct}%` }} /></div>
