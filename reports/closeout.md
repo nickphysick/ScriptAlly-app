@@ -58,3 +58,55 @@ about.
 
 ⚠️ **Harness note:** the run that failed on that wrong assertion left `cor-move-a` mutated (its
 Partial Sent entry moved and not undone). Repaired by re-running `tests/e2e/seedCorrection.mjs`.
+
+## Part 2 — `#/pkg-lab` removed
+
+Route gone from `App.tsx`, `PkgLab.tsx` deleted, census entry dropped from `devSurfaceSmoke`.
+
+### ⚠️ The brief's reason was wrong, and the answer is stronger than it
+
+`#/pkg-lab` was **not** the caller of `STAT_CELLS`, `repliesByPackage` or `ledgerRows`. It imported
+`PackageTabs`, `WorkshopTab` and `AnalyticsTab` and none of those three. **With comments stripped,
+the three had zero references anywhere but their own test file** — already orphaned by an earlier
+change, not by this one. They are deleted with their tests in the same commit.
+
+⚠️ **What made a plain grep read as though a caller survived:** `TrackingBand.tsx` carries a comment
+*recording* that it stopped importing them. The prose names all three. Strip comments before
+believing a reachability answer — the same trap the source-string locks are written against.
+
+### What the deletion pulled with it, and what it nearly took
+
+`LedgerRow` went too (only `ledgerRows` used it), along with four types and **two whole module
+imports** — `./activityEvent` and `./queryDerivation` — that nothing else in the file needed.
+
+⚠️ **`BarRow` and `pct` were nearly lost and are live.** Both were introduced for `repliesByPackage`
+and both are used by `requestsByMaterial`, which stays. tsc caught them: they read as part of the
+retired band and are not.
+
+⚠️ **Two anchors went with their functions, and the lock said so.** `packageTracking.test.ts`'s D8
+block navigates with `sliceBetween`; deleting `export const STAT_CELLS` and
+`export function repliesByPackage` made it **fail loudly naming the missing anchors** — which is
+exactly why that lock uses `sliceBetween` rather than a bare `indexOf` pair, and the difference
+between reporting a retirement and silently widening to the rest of the file. Re-anchored on what
+survives, claim unchanged.
+
+The `ledgerRows` case — *"the ledger is the only function allowed to read the activity log"* — is
+retired with its subject and **replaced by the stronger whole-file property**: nothing in
+`packageTracking.ts` reads the log at all now. That assertion failed first, correctly, on an
+`ActivityType` import the deleted function had owned.
+
+### F-AL — what removing the route stranded
+
+| symbol | other callers | disposition |
+|---|---|---|
+| `PackageTabs` | none | **stranded** — proposed for deletion |
+| `AnalyticsTab` | none | **stranded** — proposed for deletion |
+| `WorkshopTab` | `workshopEmpty.test.tsx` only | **stranded, tested-but-unmounted** — the exact shape D6 names |
+| `tourExample` / `WORKSHOP_TOUR_STEPS` | `SubmissionPackages.tsx` | **live, kept** |
+
+The first three are the same fault D6 describes, one level out. **Not deleted** — the brief scoped
+this run to the three named exports, and `AnalyticsTab` in particular is substantial. Proposed for a
+follow-up rather than taken now.
+
+Gate: tsc clean, build clean, **Vitest 387 files / 6670 tests, all green.** Grep with comments
+stripped: no live reference to the route, the component, or the three exports.

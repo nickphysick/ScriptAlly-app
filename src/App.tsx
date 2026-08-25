@@ -74,8 +74,6 @@ import { EditQueryDrawer } from "./components/EditQueryDrawer";
 import { QueryTimeline } from "./components/reading-pane/QueryTimeline";
 // Dev review surface for the notes pieces (PostIt / quick-add / editor) — #/notes-lab, DEV only.
 import { NotesLab } from "./components/notes/NotesLab";
-// Dev review surface for the Package Workshop landing + workshop (over stubs, no auth) — #/pkg-lab, DEV only.
-import { PkgLab } from "./components/packages/PkgLab";
 // Dev review surface for the Contact list's three states — #/contact-lab, DEV only. The blank
 // state is unreachable on any account that has agents, which is every real one.
 import { ContactListLab } from "./components/agents/ContactListLab";
@@ -505,9 +503,6 @@ function AppContent() {
     return <ShellLab />;
   }
   // Dev-only Package Workshop review surface (landing + empty/full workshop over stubs, no auth). TEMP.
-  if (hash === "#/pkg-lab" && import.meta.env.DEV) {
-    return <PkgLab />;
-  }
 
   // Boot: while Firebase Auth is still resolving the session, show a neutral splash — never a
   // landing/auth view. Stops the old "calmer place to query" landing flashing on a hard refresh.

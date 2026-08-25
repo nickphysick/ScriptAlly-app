@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Render smokes — the DEV-only hash surfaces (`#/status-dots`, `#/notes-lab`, `#/pkg-lab`, …).
+ * Render smokes — the DEV-only hash surfaces (`#/status-dots`, `#/notes-lab`, …).
  *
  * These never reach a production build (`import.meta.env.DEV` is false there), so a crash costs a
  * developer their review surface rather than a user their page. They are smoked anyway because
@@ -21,7 +21,6 @@ vi.mock("../components/toast/ToastProvider", async () => (await import("./pageSm
 
 import { StatusDotDemo } from "../components/StatusDotDemo";
 import { NotesLab } from "../components/notes/NotesLab";
-import { PkgLab } from "../components/packages/PkgLab";
 import { DiaryLab } from "../components/dashboard/DiaryLab";
 import { SmartImportReview } from "../components/onboarding/SmartImportReview";
 import { REVIEW_FIXTURE } from "../components/onboarding/SmartImportReviewFixture";
@@ -33,7 +32,6 @@ import { SidebarShell } from "../components/shell/SidebarShell";
 const surfaces: [hash: string, chrome: string, node: () => React.ReactElement][] = [
   ["#/status-dots", "StatusDot", () => <StatusDotDemo />],
   ["#/notes-lab", "Notes — lab", () => <NotesLab />],
-  ["#/pkg-lab", "Package Workshop", () => <PkgLab />],
   ["#/diary-lab", "Dates for the diary", () => <DiaryLab />],
   ["#/import-review", "", () => <SmartImportReview result={REVIEW_FIXTURE} userName="Nick" onSkip={() => {}} />],
   ["#/reconcile-card", "Duplicates", () => <ReconcileCardDevPreview />],

@@ -13,8 +13,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { sliceBetween } from "../test/sliceBetween";
 import {
-  trackingTotals, repliesByPackage, requestsByMaterial, packagesContaining, trackingNudge, STAT_CELLS,
-  ledgerRows, packageStamp, STAMP_ICONS,
+  trackingTotals, requestsByMaterial, packagesContaining, trackingNudge, packageStamp, STAMP_ICONS,
 } from "./packageTracking";
 import { packageMetrics, UNFILLED_SLOT } from "./packageMetrics";
 import { activityEventLabel } from "./activityEvent";
@@ -82,46 +81,6 @@ describe("trackingTotals", () => {
     expect(trackingTotals(PACKAGES, [])).toEqual({ sent: 0, replies: 0, requests: 0 });
   });
 
-  it("names its three cells in direction order", () => {
-    expect(STAT_CELLS.map((c) => c.key)).toEqual(["sent", "replies", "requests"]);
-    expect(STAT_CELLS.map((c) => c.dir)).toEqual(["→", "←", "←"]);
-  });
-});
-
-describe("repliesByPackage", () => {
-  it("gives one row per package that has gone out", () => {
-    expect(repliesByPackage(PACKAGES, QUERIES).map((r) => r.name)).toEqual(["Standard UK", "Comps-led"]);
-  });
-
-  /* ⚠️ OMITTED, NOT DRAWN AT ZERO. "0 of 0 replied" asserts a measurement nobody took; the package
-     is already visible as a tile saying "Not yet sent". */
-  it("omits a package that has never been sent", () => {
-    const unsent = pkg("pk3", "Never sent", "l1", "s1", UNFILLED_SLOT);
-    expect(repliesByPackage([...PACKAGES, unsent], QUERIES).map((r) => r.name)).not.toContain("Never sent");
-  });
-
-  it("is empty when nothing has gone out at all", () => {
-    expect(repliesByPackage(PACKAGES, [])).toEqual([]);
-  });
-
-  it("states the count, never a rate", () => {
-    const row = repliesByPackage(PACKAGES, QUERIES)[0];
-    expect(row.meta).toBe("2 of 3 replied");
-    expect(row.meta).not.toMatch(/%/);
-  });
-
-  /* ⚠️ ONE SHARED MAXIMUM, so bar lengths compare between rows. Scaled to its own total, a single
-     send would look the same as six. */
-  it("scales every bar against the busiest package", () => {
-    const rows = repliesByPackage(PACKAGES, QUERIES);
-    expect(rows[0].sentPct).toBe(100);        // 3 sends, the max
-    expect(rows[1].sentPct).toBeCloseTo(200 / 3);  // 2 of 3
-  });
-
-  it("scales the inner bar against its own row", () => {
-    const rows = repliesByPackage(PACKAGES, QUERIES);
-    expect(rows[0].inPct).toBeCloseTo(200 / 3);   // 2 replies of 3 sent
-  });
 });
 
 describe("requestsByMaterial — the aggregation", () => {
@@ -205,84 +164,6 @@ const act = (id: string, queryId: string, date: string, over: Partial<Activity> 
   date, details: "", ...over,
 });
 
-describe("ledgerRows — three stores joined by real references", () => {
-  const ACTS = [
-    act("e1", "1", "2026-08-12T09:00:00.000Z", { activityType: ActivityType.QUERY_SENT, resultingStatus: QueryStatus.QUERIED }),
-    act("e2", "2", "2026-08-18T09:00:00.000Z", { resultingStatus: QueryStatus.FULL_REQUESTED }),
-    act("e3", "5", "2026-08-14T09:00:00.000Z", { resultingStatus: QueryStatus.PARTIAL_REQUESTED }),
-    /* on a query with NO package — must never appear in a panel about packages */
-    act("e4", "6", "2026-08-20T09:00:00.000Z", { resultingStatus: QueryStatus.FULL_REQUESTED }),
-  ];
-
-  it("lists newest first", () => {
-    expect(ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW).map((r) => r.id)).toEqual(["e2", "e3", "e1"]);
-  });
-
-  /**
-   * ⚠️ THE ONE THE PANEL'S HEADING DEPENDS ON. It sits inside a Tracking band whose every count
-   * excludes unpackaged queries; an event from one would put a figure on the page that none of the
-   * numbers above it include.
-   */
-  it("excludes an event on a query that carried no package", () => {
-    expect(ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW).map((r) => r.id)).not.toContain("e4");
-  });
-
-  it("names the agent and the direction together", () => {
-    const [full, partial, sent] = ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW);
-    expect(full.direction).toBe("in");
-    expect(full.who).toBe("from R. Osei");
-    expect(partial.direction).toBe("in");
-    expect(sent.direction).toBe("out");
-    expect(sent.who).toBe("to Jonathan Fairfax");
-  });
-
-  /**
-   * ⚠️ THE LABEL IS `activityEventLabel`'s, ASSERTED AGAINST IT rather than typed here. A literal
-   * would be a second copy of a vocabulary whose own module exists to stop exactly that — and it
-   * would pass on the day the labeller changed and this panel stopped matching the timeline.
-   */
-  it("speaks the app's one event vocabulary", () => {
-    for (const row of ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW)) {
-      const source = ACTS.find((a) => a.id === row.id)!;
-      expect(row.what).toBe(activityEventLabel(source, { includeSend: true }));
-    }
-  });
-
-  /** ⚠️ AND THE SEND IS INCLUDED — this panel has no hero row, which is what `includeSend` is for. */
-  it("draws the query going out, which a hero-row surface suppresses", () => {
-    const rows = ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW);
-    expect(rows.find((r) => r.id === "e1")?.what).toBe("Query sent");
-  });
-
-  /** A deleted agent leaves a dangling id; inventing a name for it is worse than omitting it. */
-  it("omits the clause rather than naming an agent it cannot resolve", () => {
-    const row = ledgerRows(ACTS, QUERIES, [], PACKAGES, NOW)[0];
-    expect(row.who).toBeNull();
-    expect(row.what).toBeTruthy();
-  });
-
-  it("names the package that travelled", () => {
-    const rows = ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW);
-    expect(rows.map((r) => r.packageName)).toEqual(["Standard UK", "Comps-led", "Standard UK"]);
-  });
-
-  it("drops the year in the current one and keeps it otherwise", () => {
-    const old = [act("e9", "1", "2025-03-04T09:00:00.000Z", { resultingStatus: QueryStatus.FULL_REQUESTED })];
-    expect(ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW)[0].date).toBe("18 AUG");
-    expect(ledgerRows(old, QUERIES, AGENTS, PACKAGES, NOW)[0].date).toBe("04 MAR 2025");
-  });
-
-  it("caps at the limit it is given", () => {
-    expect(ledgerRows(ACTS, QUERIES, AGENTS, PACKAGES, NOW, 2)).toHaveLength(2);
-  });
-
-  /** An event with no typed signal is inert — never mis-mapped from its description prose. */
-  it("drops an event with no typed status signal", () => {
-    const untyped = [act("e8", "1", "2026-08-19T09:00:00.000Z")];
-    expect(ledgerRows(untyped, QUERIES, AGENTS, PACKAGES, NOW)).toEqual([]);
-  });
-});
-
 describe("packageStamp — decorative, derived, stable", () => {
   /**
    * ⚠️ STABLE ACROSS A DELETION, which is the whole reason it hashes the id rather than taking an
@@ -364,9 +245,13 @@ describe("D8 — the adapter is the only thing reading query data, and it reache
      banners, which read perfectly and are the first thing `decls` deletes — every slice failed with
      "the END anchor is gone" about markers that are plainly in the file. A lock that strips comments
      cannot then navigate by them. */
+  /* ⚠️ TWO ANCHORS WENT WITH THEIR FUNCTIONS (F-U). `export const STAT_CELLS` and
+     `export function repliesByPackage` are deleted, and `sliceBetween` failed LOUDLY naming them —
+     which is the whole reason this lock navigates with it rather than a bare `indexOf` pair, and is
+     the difference between a lock that reports a retirement and one that silently widens to the
+     rest of the file. Re-anchored on what survives; the claim is unchanged. */
   const COUNTERS = [
-    ["trackingTotals", "export const STAT_CELLS"],
-    ["export function repliesByPackage", "export const packagesContaining"],
+    ["trackingTotals", "export const packagesContaining"],
     ["export function requestsByMaterial", "export function trackingNudge"],
     ["export function trackingNudge", "export const STAMP_ICONS"],
   ] as const;
@@ -382,12 +267,14 @@ describe("D8 — the adapter is the only thing reading query data, and it reache
    * ⚠️ AND THE LEDGER IS THE ONLY FUNCTION ALLOWED TO — asserted, so "it reads the log" stays a
    * property of one named function rather than of the file.
    */
-  it("confines the activity log to the ledger", () => {
-    const ledger = sliceBetween(decls, "export function ledgerRows", "\n}", "ledgerRows body");
-    expect(ledger).toMatch(/\bactivities\b/);
-    const rest = decls.replace(sliceBetween(decls, "function directionOf", "export function ledgerRows", "event section"), "")
-      .replace(ledger, "");
-    expect(rest, "the log leaked outside the ledger").not.toMatch(/\bactivities\b/);
+  /**
+   * ⚠️ THE LEDGER CASE IS RETIRED WITH ITS SUBJECT (F-U). It asserted that `ledgerRows` was the only
+   * function reading the activity log; `ledgerRows` is deleted, so the claim has nothing to be about.
+   * The stronger half survives as a whole-file property below — NOTHING here reads the log now.
+   */
+  it("reads no activity log at all, now the ledger is gone", () => {
+    expect(decls).not.toMatch(/\bactivities\b/);
+    expect(decls).not.toContain("ActivityType");
   });
 
   /* counts only — packageMetrics exposes rates and this module deliberately ignores them */
