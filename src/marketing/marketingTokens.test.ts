@@ -294,8 +294,20 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
  * This asserts the scoping rather than the values, so it stays true through any restyle and fails
  * the moment someone "tidies" a selector back to its bare class.
  */
-describe("the disclosure's specific rules outrank its generic one", () => {
-  const SCOPED = [".mk-fwhonest .mk-fwmark", ".mk-fwhonest .mk-fwlead", ".mk-fwhonest .mk-fwsign"];
+describe("every specific rule on /founders outranks the generic one beside it", () => {
+  /**
+   * ⚠️ THE CARDS' KICKER IS IN THIS LIST BECAUSE THE SWEEP FOUND IT, NOT BECAUSE THE BRIEF DID.
+   * `.mk-fwcard p` beat `.mk-fwk` exactly as `.mk-fwhonest p` beat the other three — measured, the
+   * kicker rendered at 15.68px in `--mk-muted` where the rule asked for .55rem in `--mk-kicker`,
+   * THROUGH a phase written to retune it. The mono face, tracking and uppercase came through
+   * because the generic rule does not set those, which is why it still looked like a kicker.
+   * The lesson is the one this repo already records about symptom reports: scan for the fault
+   * CLASS, do not treat the element you were pointed at as the search space.
+   */
+  const SCOPED = [
+    ".mk-fwcard .mk-fwk",
+    ".mk-fwhonest .mk-fwmark", ".mk-fwhonest .mk-fwlead", ".mk-fwhonest .mk-fwsign",
+  ];
 
   it("each element rule is scoped to the section", () => {
     for (const sel of SCOPED) {
@@ -316,8 +328,9 @@ describe("the disclosure's specific rules outrank its generic one", () => {
     }
   });
 
-  /** The generic rule that does the outranking is still there — this is not a licence to delete it. */
-  it("the generic paragraph rule it competes with is still declared", () => {
+  /** The generic rules that do the outranking are still there — not a licence to delete them. */
+  it("the generic paragraph rules they compete with are still declared", () => {
     expect(/(?:^|\n)\s*\.mk-fwhonest p\s*\{/.test(marketing)).toBe(true);
+    expect(/(?:^|\n)\s*\.mk-fwcard p\s*\{/.test(marketing)).toBe(true);
   });
 });

@@ -961,8 +961,16 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-fwcard--hl { background: var(--mk-blush); border-color: var(--mk-cta-bd); }
 /* ⚠️ QUIETER THAN IT WAS, ON PURPOSE — .6rem/.22em/blush-label arrived BEFORE the heading and
    out-shouted it. The heading is the offer; the kicker names which of the three cards you are in.
-   Everything else about the cards is unchanged. */
-.mk-fwk {
+   Everything else about the cards is unchanged.
+   ⚠️ AND IT IS SCOPED TO `.mk-fwcard`, WHICH IS THE ONLY REASON IT APPLIES AT ALL. `.mk-fwcard p`
+   is 0-1-1 and a bare `.mk-fwk` is 0-1-0, so the generic paragraph rule was winning on font-size
+   and colour — measured, the kicker rendered at 15.68px (0.98rem) in `--mk-muted` where the rule
+   asks for .55rem in `--mk-kicker`. The mono face, the tracking and the uppercase came through,
+   because `.mk-fwcard p` does not set those, which is exactly why it looked like a kicker and
+   nobody noticed. Same fault as the one in the disclosure below, one section over; I fixed that
+   one first and did not sweep for the class, which is how this survived a whole phase written to
+   change it. */
+.mk-fwcard .mk-fwk {
   font-family: "JetBrains Mono", monospace; font-size: .55rem; letter-spacing: .2em;
   text-transform: uppercase; color: var(--mk-kicker); margin: 0 0 9px;
 }
