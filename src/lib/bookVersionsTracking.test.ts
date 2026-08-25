@@ -136,8 +136,25 @@ describe("D17 — earlier is a count, and nothing more", () => {
   const queries = [q("q1", QueryStatus.FULL_SENT), q("q2", QueryStatus.FULL_SENT),
                    q("q3", QueryStatus.PARTIAL_SENT)];
 
-  it("states the count against the total", () => {
+  it("states the count against the total when every holder is recorded", () => {
     expect(earlierLine(queries, acts, versions)).toBe("2 of 3 hold a version earlier than your latest.");
+  });
+
+  it("⚠️ EXCLUDES UNRECORDED HOLDERS FROM THE DENOMINATOR — found on live data, not in review", () => {
+    /**
+     * The fixture had two of four holders with no recorded version, and the panel read
+     * "2 of 4 hold a version earlier than your latest" — true arithmetic, read as "the other two
+     * hold the latest", which is false. `holdingEarlier` already refuses to count an unknown as an
+     * earlier; the rule had been applied to the numerator and not to the denominator.
+     */
+    const withUnknown = [...queries, q("q8", QueryStatus.FULL_SENT), q("q9", QueryStatus.FULL_SENT)];
+    expect(earlierLine(withUnknown, acts, versions))
+      .toBe("2 hold a version earlier than your latest; 2 are unrecorded.");
+  });
+
+  it("agrees its verb at one unrecorded holder", () => {
+    expect(earlierLine([...queries, q("q8", QueryStatus.FULL_SENT)], acts, versions))
+      .toBe("2 hold a version earlier than your latest; 1 is unrecorded.");
   });
 
   it("says NOTHING when everybody holds the latest", () => {
@@ -146,7 +163,8 @@ describe("D17 — earlier is a count, and nothing more", () => {
   });
 
   it("⚠️ CARRIES NO VERB — whether to send an update is a judgement the app does not make", () => {
-    const line = earlierLine(queries, acts, versions) ?? "";
+    const line = (earlierLine(queries, acts, versions) ?? "")
+      + " " + (earlierLine([...queries, q("q8", QueryStatus.FULL_SENT)], acts, versions) ?? "");
     for (const w of ["should", "consider", "send them", "update them", "chase", "worth", "recommend"]) {
       expect(line.toLowerCase(), `the line urges: "${w}"`).not.toContain(w);
     }

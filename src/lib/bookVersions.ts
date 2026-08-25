@@ -410,5 +410,20 @@ export const earlierLine = (
   const hs = holdings(queries, activities);
   const earlier = holdingEarlier(hs, latestVersion(versions)?.id ?? null);
   if (earlier === 0) return null;
-  return `${earlier} of ${hs.length} hold a version earlier than your latest.`;
+
+  /**
+   * ⚠️ THE DENOMINATOR EXCLUDES UNRECORDED HOLDERS, AND THIS WAS WRONG UNTIL REAL DATA SHOWED IT.
+   *
+   * `holdingEarlier` already refuses to count a holder whose version is unknown — "I do not know
+   * what they have" is not "they have an older one". That rule was applied to the numerator and NOT
+   * to the denominator, so on the live fixture the panel read **"2 of 4 hold a version earlier than
+   * your latest"** when only two of the four had any version recorded at all. Arithmetically true;
+   * read as "the other two hold the latest", which is false. The other two are unknown.
+   *
+   * Where every holder is recorded the sentence is the ref's, unchanged. Where some are not, the
+   * unrecorded ones get their own clause rather than being folded into a total they cannot support.
+   */
+  const unknown = hs.filter((h) => h.versionId === null).length;
+  if (unknown === 0) return `${earlier} of ${hs.length} hold a version earlier than your latest.`;
+  return `${earlier} hold a version earlier than your latest; ${unknown} ${unknown === 1 ? "is" : "are"} unrecorded.`;
 };
