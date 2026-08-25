@@ -77,23 +77,40 @@ export const FOUNDERS_DEAL: DealCard[] = [
   },
 ];
 
-/* ══════════════ Full disclosure ══════════════ */
-export const FOUNDERS_HONEST_KICKER = "Full disclosure";
+/* ══════════════ Full disclosure ══════════════
+   ⚠️ IT IS A PULL-QUOTE ON THE PAGE GROUND NOW, NOT A CARD — and `FOUNDERS_HONEST_KICKER`
+   ("Full disclosure") is deleted with the card that framed it. A mono label above a lifted
+   statement announces that a statement is coming; the statement announces itself. Do not
+   reinstate it: the label and the lifted line say the same thing twice, and the label says it
+   in the smaller voice.
+
+   ⚠️ AND THE PROMISE MOVED UP RATHER THAN BEING REPEATED. "Your data is never the experiment"
+   was a bolded phrase inside the first paragraph; it is the lifted line, so there is no
+   `<strong>` anywhere in the prose beneath it. Emphasising it in both places is the version of
+   this that says it twice and means it less. */
+
+/** The lifted statement. Playfair, near-black, its own line — this is what the section is for. */
+export const FOUNDERS_HONEST_LEAD = "Your data is never the experiment.";
+
+/**
+ * ⚠️ `quite` IS ITALIC AND IN THE SAME INK. A burgundy word here would pull the eye off the
+ * statement above it, which is the one thing on this section that should hold it.
+ *
+ * ⚠️ EM DASHES, NOT HYPHENS — "ensured — your queries", "Writers — and their writing —". They are
+ * part of the copy, and a hyphen where an em dash belongs reads as a typo in prose this careful.
+ */
 export const FOUNDERS_HONEST: CopyRun[][] = [
   [
-    "It's a beta. Things will occasionally move under you — a page redesigned, a feature renamed, " +
-    "the odd rough edge. ",
-    { b: "Your data is never the experiment" },
-    ": every query, response and note you record is yours, safe, and exportable from day one.",
+    "ScriptAlly isn't ",
+    { em: "quite" },
+    " finished. Things will shift. Features will be tweaked. The look and feel might change. But " +
+    "the security of your data will be ensured — your queries, your agents, your materials. They " +
+    "won't be lost, they won't be shared. Writers — and their writing — are our absolute priority.",
   ],
   [
-    "What we ask in return is small: use it on your real querying, and tell us when something " +
-    "gets in your way.",
+    "All we ask is that you stick at it. Let us know what you like, what could be better, and do " +
+    "shout loudly if something gets in your way.",
   ],
 ];
 
-/**
- * ⚠️ IT IS A SIGN-OFF, NOT A HEADING. Caveat, burgundy, tilted — the same hand as the landing's
- * postscript. The page is one person asking; the signature is what says so.
- */
 export const FOUNDERS_SIGNOFF = "Nick — ScriptAlly's founder";

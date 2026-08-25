@@ -278,3 +278,46 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
     expect(block![1]).toMatch(/grid-template-areas:\s*"eye"\s*"head"\s*"copy"\s*"art"/);
   });
 });
+
+/**
+ * ⚠️ A SINGLE-CLASS RULE FOR ONE ELEMENT INSIDE A SECTION THAT ALSO STYLES ITS ELEMENTS
+ * GENERICALLY WILL LOSE, AND LOSE SILENTLY. `.mk-fwhonest p` is 0-1-1 — a class and an element —
+ * and a bare `.mk-fwlead` is 0-1-0, so the broad paragraph rule outranks the specific one on every
+ * property it happens to set.
+ *
+ * Measured: the lifted line and the quote mark both computed at 16px against an intended 28px and
+ * 3.4rem. **And the fault predates the pass that found it** — `.mk-fwsign` had been losing its
+ * COLOUR to the same rule since the page shipped, rendering `rgb(138, 122, 108)` on the deployed
+ * build where the rule asks for burgundy. It survived because `.mk-fwhonest p` did not set a
+ * font-size then, so the Caveat face came through and the signature looked right at a glance.
+ *
+ * This asserts the scoping rather than the values, so it stays true through any restyle and fails
+ * the moment someone "tidies" a selector back to its bare class.
+ */
+describe("the disclosure's specific rules outrank its generic one", () => {
+  const SCOPED = [".mk-fwhonest .mk-fwmark", ".mk-fwhonest .mk-fwlead", ".mk-fwhonest .mk-fwsign"];
+
+  it("each element rule is scoped to the section", () => {
+    for (const sel of SCOPED) {
+      expect(
+        new RegExp("(?:^|\\n)\\s*" + sel.replace(/\./g, "\\.") + "\\s*\\{").test(marketing),
+        `${sel} is declared scoped`,
+      ).toBe(true);
+    }
+  });
+
+  it("…and none of them is ALSO declared bare, where the generic rule would beat it", () => {
+    for (const sel of SCOPED) {
+      const bare = sel.split(" ")[1];
+      expect(
+        new RegExp("(?:^|\\n)\\s*" + bare.replace(/\./g, "\\.") + "\\s*\\{").test(marketing),
+        `${bare} must not be declared unscoped — .mk-fwhonest p would outrank it`,
+      ).toBe(false);
+    }
+  });
+
+  /** The generic rule that does the outranking is still there — this is not a licence to delete it. */
+  it("the generic paragraph rule it competes with is still declared", () => {
+    expect(/(?:^|\n)\s*\.mk-fwhonest p\s*\{/.test(marketing)).toBe(true);
+  });
+});

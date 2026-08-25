@@ -25,6 +25,16 @@ export type CopyRoute = "landing" | "pricing" | "about" | "contact" | "privacy" 
 export type CopyRun =
   | string
   | { b: string }
+  /**
+   * ⚠️ ITALIC, ADDED BECAUSE THE TYPE COULD NOT EXPRESS A CHOICE THE COPY OFFERED. The founders
+   * page needs one italicised word inside a run, and the alternatives were both worse: a bespoke
+   * render in that page would put a SECOND copy-rendering path into a tier that deliberately has
+   * one, and the next italic would either copy it or extend the type anyway. Purely additive —
+   * no existing branch is altered and no call site changes.
+   * ⚠️ AND IT CARRIES NO COLOUR. Emphasis here is a change of voice, not of ink; a coloured word
+   * inside a paragraph pulls the eye off whatever the paragraph is subordinate to.
+   */
+  | { em: string }
   | { link: string; to: CopyRoute }
   | { link: string; mailto: string }
   | { link: string; href: string };
@@ -37,6 +47,7 @@ export const Runs: React.FC<{
     {runs.map((run, i) => {
       if (typeof run === "string") return <React.Fragment key={i}>{run}</React.Fragment>;
       if ("b" in run) return <strong key={i}>{run.b}</strong>;
+      if ("em" in run) return <em key={i}>{run.em}</em>;
       if ("to" in run) {
         return (
           <button key={i} type="button" className="mk-doclink" onClick={() => onNavigate(run.to)}>

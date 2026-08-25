@@ -225,7 +225,7 @@ describe("landing copy — verbatim locks", () => {
    */
   it("both failure messages are distinct, and both offer a human", () => {
     const text = (runs: typeof FOUNDING_ERROR) =>
-      runs.map((r) => (typeof r === "string" ? r : "link" in r ? r.link : r.b)).join("");
+      runs.map((r) => (typeof r === "string" ? r : "link" in r ? r.link : "b" in r ? r.b : r.em)).join("");
     expect(text(FOUNDING_ERROR)).not.toBe(text(FOUNDING_DOWN));
     expect(text(FOUNDING_ERROR)).toContain("try again");
     expect(text(FOUNDING_DOWN)).toContain("unavailable");

@@ -974,23 +974,69 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 }
 .mk-fwcard p { margin: 0; font-size: .98rem; color: var(--mk-muted); line-height: 1.6; }
 
-.mk-fwhonest {
-  margin: 78px 0 0; background: var(--mk-parch); border: 1px solid var(--mk-hair);
-  border-radius: 14px; padding: 36px 40px; box-shadow: 0 10px 26px rgba(58, 28, 20, .06);
-  max-width: 56rem;
+/* ── Full disclosure: a pull-quote on the page ground ──
+   ⚠️ THE PARCHMENT CARD IS DELETED, ALONG WITH ITS BORDER, RADIUS, PADDING AND SHADOW. A bordered
+   box around the one passage asking to be believed made it read as a disclaimer — the register
+   this section is furthest from. Nothing here has a background: the measure and the centring are
+   the only things holding it, which is what a pull-quote is.
+   ⚠️ AND THE `Full disclosure` LABEL WENT WITH IT — `.mk-fwhonest .mk-fwk` is deleted and so is
+   the constant. A mono label above a lifted statement announces that a statement is coming; the
+   statement announces itself. `.mk-fwhonest strong` is deleted too: the phrase it emphasised IS
+   the lifted line now, and emphasising it in both places says it twice and means it less. */
+.mk-fwhonest { max-width: 760px; margin: 86px auto 0; text-align: center; }
+/* ⚠️ EVERY ONE OF THE THREE RULES BELOW IS SCOPED TO `.mk-fwhonest`, AND THAT IS NOT DECORATION —
+   IT IS THE ONLY THING THAT MAKES THEM APPLY. `.mk-fwhonest p` is 0-1-1 (a class and an element)
+   and a bare `.mk-fwlead` is 0-1-0, so the broad paragraph rule OUTRANKS the specific one on every
+   property it happens to set. Measured before the fix: the lifted line and the quote mark both
+   computed at 16px against intended 28px and 3.4rem.
+   ⚠️ AND THIS FAULT PREDATES THIS PASS — `.mk-fwsign` has been losing its COLOUR to the same rule
+   since the page shipped. Measured on the deployed build: `rgb(138, 122, 108)`, which is
+   `--mk-muted`, where the rule asks for burgundy. It survived review because `.mk-fwhonest p` did
+   not set a font-size then, so the Caveat face and its size came through and the signature looked
+   right at a glance. A glance is what it survived; a measurement is what caught it.
+   The lesson generalises: a single-class rule for ONE element inside a section that also styles
+   its elements generically will lose. Scope it, or the generic rule is the one that ships. */
+.mk-fwhonest .mk-fwmark {
+  font-family: "Playfair Display", Georgia, serif; font-size: 3.4rem; line-height: 1;
+  color: rgba(124, 58, 42, .28); margin: 0 0 4px;
 }
-.mk-fwhonest .mk-fwk { font-size: .62rem; letter-spacing: .24em; margin-bottom: 14px; }
-.mk-fwhonest p { margin: 0 0 12px; color: var(--mk-muted); max-width: 60ch; line-height: 1.7; }
-.mk-fwhonest p:last-child { margin: 0; }
-.mk-fwhonest strong { color: var(--mk-nearblack); font-weight: 600; }
-/* The same hand as the landing's postscript — it is one person asking, and the signature says so. */
-.mk-fwsign {
-  font-family: "Caveat", cursive; font-size: 1.5rem; color: var(--mk-burg);
-  margin: 18px 0 0; transform: rotate(-.7deg);
+/* ⚠️ THIS CLAMP LOOKS LIKE IT FAILS THE CONTAINER-CAP CHECK AND DOES NOT — READ THIS BEFORE
+   REACHING FOR THE CEILING. `2.1vw` reaches 1.75rem at 1333px while `.mk-fwpad` caps at 1180, and
+   that is the exact arithmetic that has decided six numbers in this project. It is not that fault
+   here. The rule bites when type grows against a measure that has STOPPED growing; this line's
+   measure is `24ch` set on the element that also sets the font-size, so the two are expressed in
+   the same units and cannot diverge. The line count is fixed however wide the page gets. Lowering
+   the ceiling would shrink the statement for no reason at all.
+   ⚠️ 1.32 CLEARS THE 1.3 PLAYFAIR FLOOR, AND HERE THAT IS LOAD-BEARING RATHER THAN LUCKY — "Your
+   data is never the experiment." contains a `y` and a `p`, unlike the landing statement, whose
+   tighter leading rests on having no descender at all. Verified rendered, not calculated. */
+.mk-fwhonest .mk-fwlead {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600;
+  font-size: clamp(1.35rem, 2.1vw, 1.75rem); line-height: 1.32; letter-spacing: -.012em;
+  color: var(--mk-nearblack); margin: 0 auto 24px; max-width: 24ch;
+}
+.mk-fwhonest p { margin: 0 auto 13px; color: var(--mk-muted); max-width: 54ch; font-size: 1rem; line-height: 1.66; }
+/* ⚠️ IN THE SAME INK. Emphasis here is a change of voice, not of ink — a burgundy word inside the
+   paragraph would pull the eye off the statement above it, which is the one thing on this section
+   that should hold it. */
+.mk-fwhonest em { font-style: italic; }
+/* The same hand as the landing's postscript — it is one person asking, and the signature says so.
+   ⚠️ THE ROTATION IS REMOVED, NOT OVERRIDDEN. It belonged to a signature at the foot of a bordered
+   card, where a tilt read as ink set down on paper; on open ground with everything above it
+   centred, the same rotation reads as a rendering fault. A `transform: none` sitting on top of a
+   `rotate()` would be two declarations describing one decision. */
+.mk-fwhonest .mk-fwsign {
+  font-family: "Caveat", cursive; font-size: 1.45rem; color: var(--mk-burg);
+  margin: 24px auto 0; text-align: center;
 }
 
 /* ⚠️ THE BAND KEEPS ITS OWN TOP MARGIN HERE. On the landing it closes a page that has just ended
-   a features band; here it follows a bordered card, and without the gap the two edges meet. */
+   a features band; here it follows the disclosure pull-quote, and the band's own blush edge needs
+   air between it and the sign-off.
+   ⚠️ THIS NOTE USED TO SAY "here it follows a bordered card" — true until the card was deleted,
+   and then read as current for exactly as long as nobody checked. The margin was still right; the
+   reason had stopped being. A comment that outlives the thing it describes is worse than no
+   comment, because it is read as fact. */
 .mk-fw .mk-beta { margin-top: 100px; }
 
 @media (max-width: 880px) {
@@ -999,7 +1045,8 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   /* The artwork goes below the copy, and stops reserving a row it no longer shares. */
   .mk-fwillo { min-height: 0; order: 2; }
   .mk-fwdeal { grid-template-columns: 1fr; }
-  .mk-fwhonest { padding: 28px 24px; margin-top: 54px; }
+  /* No card, so no padding to tighten — only the gap above it. */
+  .mk-fwhonest { margin-top: 54px; }
 }
 
 /* ── The founding-members band + footer ── */

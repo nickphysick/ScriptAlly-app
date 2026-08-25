@@ -18,7 +18,7 @@
 import { describe, it, expect } from "vitest";
 import {
   FOUNDERS_DOCUMENT_TITLE, FOUNDERS_EYEBROW, FOUNDERS_H1, FOUNDERS_LEDE, FOUNDERS_CTA,
-  FOUNDERS_DEAL, FOUNDERS_HONEST, FOUNDERS_SIGNOFF,
+  FOUNDERS_DEAL, FOUNDERS_HONEST_LEAD, FOUNDERS_HONEST, FOUNDERS_SIGNOFF,
 } from "./foundersCopy";
 import { CopyRun } from "./CopyRuns";
 
@@ -88,7 +88,44 @@ describe("the sign-off", () => {
 });
 
 describe("the disclosure", () => {
-  it("is two paragraphs", () => {
+  it("lifts the promise, and the label is gone", async () => {
+    expect(FOUNDERS_HONEST_LEAD).toBe("Your data is never the experiment.");
+    const copy = await import("./foundersCopy");
+    expect("FOUNDERS_HONEST_KICKER" in copy).toBe(false);
+    const strings = Object.values(copy).filter((v) => typeof v === "string") as string[];
+    expect(strings).not.toContain("Full disclosure");
+  });
+
+  it("two paragraphs, verbatim", () => {
     expect(FOUNDERS_HONEST).toHaveLength(2);
+    expect(text(FOUNDERS_HONEST[0])).toBe(
+      "ScriptAlly isn't quite finished. Things will shift. Features will be tweaked. The look and " +
+      "feel might change. But the security of your data will be ensured — your queries, your " +
+      "agents, your materials. They won't be lost, they won't be shared. Writers — and their " +
+      "writing — are our absolute priority.",
+    );
+    expect(text(FOUNDERS_HONEST[1])).toBe(
+      "All we ask is that you stick at it. Let us know what you like, what could be better, and " +
+      "do shout loudly if something gets in your way.",
+    );
+  });
+
+  /**
+   * ⚠️ `quite` IS ITALIC, AND IT IS THE ONLY MARKED RUN. The promise moved up into the lifted
+   * line, so nothing in the prose is bold any more — emphasising it in both places says it twice
+   * and means it less.
+   */
+  it("marks `quite` as italic and nothing as bold", () => {
+    const runs = FOUNDERS_HONEST.flat();
+    expect(runs.filter((r) => typeof r !== "string" && "em" in r)).toEqual([{ em: "quite" }]);
+    expect(runs.filter((r) => typeof r !== "string" && "b" in r)).toEqual([]);
+  });
+
+  /** ⚠️ EM DASHES ARE PART OF THE COPY. A hyphen here reads as a typo in prose this careful. */
+  it("uses em dashes, not hyphens", () => {
+    const all = FOUNDERS_HONEST.map(text).join(" ");
+    expect(all).toContain("ensured — your queries");
+    expect(all).toContain("Writers — and their writing — are our absolute priority");
+    expect(all).not.toMatch(/\w - \w/);
   });
 });

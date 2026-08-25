@@ -459,8 +459,37 @@ describe("the Founding Writers page", () => {
     expect(h).toContain("Half price, for as long as you need it.");
     expect(h).toContain("You shape what&#x27;s built");
     expect(h).toContain("You&#x27;ll be in direct contact with ScriptAlly&#x27;s founder");
-    expect(h).toContain("Full disclosure");
     expect(h).toContain("Nick — ScriptAlly&#x27;s founder");
+  });
+
+  /**
+   * ⚠️ THE DISCLOSURE IS A PULL-QUOTE ON THE PAGE GROUND, NOT A CARD — and the `Full disclosure`
+   * label is deleted with the card. A mono label above a lifted statement announces that a
+   * statement is coming; the statement announces itself. Asserting the label's ABSENCE is what
+   * stops it being reinstated from a diff, and asserting the lifted line is present is what stops
+   * the section quietly losing the sentence the whole page turns on.
+   */
+  it("lifts the promise instead of labelling the section", () => {
+    const h = html();
+    expect(h).toContain("Your data is never the experiment.");
+    expect(h).not.toContain("Full disclosure");
+    /* The mark is punctuation, not content. */
+    expect(h).toMatch(/<p class="mk-fwmark" aria-hidden="true">/);
+  });
+
+  /**
+   * ⚠️ SAID ONCE, IN THE LIFTED LINE. It used to be a bolded phrase inside the first paragraph as
+   * well; emphasising it in both places says it twice and means it less. No `<strong>` survives
+   * anywhere in the disclosure.
+   */
+  it("says the promise once, and italicises `quite` without colouring it", () => {
+    const section = html().match(/<section class="mk-fwhonest">([\s\S]*?)<\/section>/);
+    expect(section, "the disclosure renders").toBeTruthy();
+    expect(section![1]).not.toContain("<strong");
+    expect(section![1]).toContain("<em>quite</em>");
+    /* Em dashes, not hyphens — they are part of the copy. */
+    expect(section![1]).toContain("ensured — your queries");
+    expect(section![1]).toContain("Writers — and their writing —");
   });
 
   /** ⚠️ LIVE OR ABSENT, HERE TOO. Two mounts, and neither may invent a number. */
@@ -487,5 +516,37 @@ describe("the Founding Writers page", () => {
     const h = html();
     expect(h).toMatch(/["\s`]mk-foot["\s`]/);
     expect(h).toContain("Founding writers");
+  });
+});
+
+/**
+ * ⚠️ `CopyRun` GAINED AN ITALIC MEMBER, AND `CopyRuns` IS SHARED BY FOUR PUBLIC PAGES. The change
+ * is purely additive — a new branch, no existing one altered — and that has to be provable rather
+ * than asserted, because the file renders every sentence on About, Contact, Legal and the landing.
+ * These render the three pages that do NOT use the new member and check the markup contains no
+ * `<em>`: if the branch had disturbed the ones above it, bold or links would have started coming
+ * out italic.
+ */
+describe("the italic run is additive — the pages that do not use it are unchanged", () => {
+  const PAGES: [string, () => React.ReactElement, string][] = [
+    ["/about", () => <AboutPage onNavigate={noNavigate} />, "/about"],
+    ["/contact", () => <ContactPage onNavigate={noNavigate} />, "/contact"],
+    ["/", () => <Landing onNavigate={noNavigate} />, "/"],
+  ];
+
+  for (const [name, node, path] of PAGES) {
+    it(`${name} renders no italics and keeps its bold and its links`, () => {
+      const html = renderPage(node(), path);
+      expect(html).not.toContain("<em>");
+      /* …and the branches that were already there still work. */
+      expect(html.includes("<strong>") || html.includes("mk-doclink") || html.includes("<a "))
+        .toBe(true);
+    });
+  }
+
+  /** The one page that does use it. */
+  it("/founders renders exactly one italic, and it is `quite`", () => {
+    const html = renderPage(<FoundersPage onNavigate={noNavigate} />, "/founders");
+    expect([...html.matchAll(/<em>([^<]*)<\/em>/g)].map((m) => m[1])).toEqual(["quite"]);
   });
 });
