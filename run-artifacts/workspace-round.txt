@@ -1,0 +1,134 @@
+── workspace round · 45 assertions · 0 RED · 45 green
+
+PHASE 2 GEOMETRY, IN FULL (1440x900) — the round's proof
+  send  
+           ws {"x":692,"y":421.4,"w":690,"h":425.6,"bottom":847,"right":1382}
+           col {"x":692,"y":421.4,"w":390,"h":425.6,"bottom":847,"right":1082}
+           work {"x":692,"y":421.4,"w":390,"h":325.6,"bottom":747,"right":1082}
+           bar {"x":692,"y":759,"w":390,"h":88,"bottom":847,"right":1082}
+           rec {"x":1094,"y":421.4,"w":288,"h":425.6,"bottom":847,"right":1382}
+           barVsRec 0
+           workScroll {"h":310,"c":310,"over":0,"overflowY":"auto"}
+           recScroll {"h":322,"c":322,"over":0,"overflowY":"auto"}
+           page {"scrollH":900,"clientH":900}
+  close 
+           ws {"x":692,"y":421.4,"w":690,"h":425.6,"bottom":847,"right":1382}
+           col {"x":692,"y":421.4,"w":390,"h":425.6,"bottom":847,"right":1082}
+           work {"x":692,"y":421.4,"w":390,"h":325.6,"bottom":747,"right":1082}
+           bar {"x":692,"y":759,"w":390,"h":88,"bottom":847,"right":1082}
+           rec {"x":1094,"y":421.4,"w":288,"h":425.6,"bottom":847,"right":1382}
+           barVsRec 0
+           workScroll {"h":310,"c":310,"over":0,"overflowY":"auto"}
+           recScroll {"h":322,"c":322,"over":0,"overflowY":"auto"}
+           page {"scrollH":900,"clientH":900}
+  note  
+           ws {"x":692,"y":416.2,"w":690,"h":430.8,"bottom":847,"right":1382}
+           col {"x":692,"y":416.2,"w":690,"h":430.8,"bottom":847,"right":1382}
+           work {"x":692,"y":416.2,"w":690,"h":358.8,"bottom":775,"right":1382}
+           bar {"x":692,"y":787,"w":690,"h":60,"bottom":847,"right":1382}
+           rec null
+           barVsRec null
+           workScroll {"h":343,"c":343,"over":0,"overflowY":"auto"}
+           recScroll null
+           page {"scrollH":900,"clientH":900}
+  bulk  
+           ws {"x":692,"y":400,"w":690,"h":447,"bottom":847,"right":1382}
+           col {"x":692,"y":400,"w":690,"h":447,"bottom":847,"right":1382}
+           work {"x":692,"y":400,"w":690,"h":375,"bottom":775,"right":1382}
+           bar {"x":692,"y":787,"w":690,"h":60,"bottom":847,"right":1382}
+           rec null
+           barVsRec null
+           workScroll {"h":497,"c":359,"over":138,"overflowY":"auto"}
+           recScroll null
+           page {"scrollH":900,"clientH":900}
+
+  green  P1.1 · two columns at 1440, the record at 288
+           grid-template-columns=390px 288px · record w=288
+  green  P1.2 · the tiles are in the record card and nowhere else
+           band=0 record=2
+  green  P1.3 · the record head reads 'The record' and carries the query's status word
+           head="The record" status="Full Requested"
+  green  P1.4 · bulk renders ONE column and no record card
+           solo=true rec=absent
+  green  P1.5 · the status word is a real status label, not an enum string
+           statusWord="Full Requested" (from the send capture, which has a record)
+  green  P2.1 · the bar's bottom edge lands on the record card's, within 1px
+           close journey (short work, tall record): barVsRec=0
+  green  P2.2 · and on every journey that has a record
+           send=0 · close=0
+  green  P2.3 · the row stretches — the columns are the same height
+           align-items=stretch col.h=425.6 rec.h=425.6
+  green  P2.4 · the worksheet scrolls INSIDE its rim, and the rim clips
+           overflow-y=auto rim overflow=hidden
+  green  P2.5 · the record scrolls its own middle the same way
+           overflow-y=auto
+  green  P2.6 · nothing in the pane is sticky, on any journey
+           [] [] [] []
+  green  P2.7 · the page itself never scrolls at 1440
+           900/900 · 900/900 · 900/900 · 900/900
+  green  P2.8 · with a long journey, no work renders below the worksheet card's bottom edge
+           overflow=852 scrolled to 852 · workBottom=747 barTop=759 · spill=[]
+  green  P2.9 · and the page still does not scroll, and the bar still meets the record
+           pageScroll=0 barVsRec=0
+  green  P3.1 · the ledger is one row per required answer, with exactly one open
+           rows=4 open=["s-when"]
+  green  P3.2 · the steer square is on the open row and on no other
+           s-unit:hidden s-when:visible s-expect:hidden s-remind:hidden
+  green  P3.3 · a hint renders under the open row only
+           s-unit:0 s-when:0 s-expect:0 s-remind:0
+  green  P3.4 · answering advances to the next unanswered question
+           was s-when -> now s-expect
+  green  P3.5 · the answered row keeps its 40px head, its answer, its tick and its Edit
+           id=s-when h=40 ans="Today" edit=true
+  green  P3.6 · an answered row's head is the same height as an unanswered one's
+           closed head heights [40,40,40] (answered=[40,40])
+  green  P3.7 · Edit reopens the row it belongs to, and no other
+           clicked s-unit -> open ["s-unit"]
+  green  P3.8 · an incomplete primary writes nothing and OPENS the first unanswered question
+           first unanswered=s-when opened=s-when focusInOpen=true tookOver=false
+  green  P3.9 · the chip, the missing line and the ledger read one declaration
+           chip="3 to answer" links=["when it went","when you expect to hear back","your reminder"] unansweredRows=3
+  green  P3.11 · every ANSWERED row states its answer — none is a question with nothing under it
+           ["s-unit=\"The full manuscript\" edit=true","s-when=\"Today\" edit=true"]
+  green  P3.10 · the answers are Inter, not mono — a writer's answer is not metadata
+           "Source Sans Pro", system-ui, -apple-system, sans-serif / 12.5px
+  green  P4.1 · no journey renders a form heading or sub-line
+           f-h + f-sub count = 0
+  green  P4.2 · at rest the form holds zero textareas and zero OPTIONAL tags
+           textareas=0 opttags=0 links=["+ Anything else going with it","+ Add a note for your file"]
+  green  P4.3 · the labels are the short ones
+           ["What you sent","When","Reply expected","Nudge reminder"]
+  green  P4.4 · opening one optional field renders it, its tag, and no other
+           opened "+ Anything else going with it" -> fields=1 tags=1 links left=1
+  green  P2.10 · nothing in the action bar overlaps anything else in it
+           bar 390x104.5 · children=4 · overlaps=[]
+  green  P2.11 · and nothing in it is clipped, and the strip gets a readable measure
+           clipped=[] · strip width=356 in a 390px bar
+  green  P5.1 · variables are weight 600, frame words 400, and no span is italic
+           base=400 italics=[] spans=["The Smoke Test@600","Marcus Reed@600","full manuscript@600","Reed & Partners@600"]
+  green  P5.2 · no element in the deed has a resting colour differing from the deed's
+           base=rgb(58, 28, 20) offenders=[]
+  green  P5.3 · linkable variables carry a dotted underline; the agency carries none
+           links=["The Smoke Test dotted 1px","Marcus Reed dotted 1px"] bolds=["full manuscript solid 0px","Reed & Partners solid 0px"]
+  green  P5.4 · both links are in the tab order, in reading order
+           ["The Smoke Test tabIndex=0","Marcus Reed tabIndex=0"]
+  green  P5.5 · a deed link sets the one-shot reveal for the record it names
+           clicked "The Smoke Test" -> manuscriptReveal=seed-ms-1 agentReveal=null
+  green  P5.6 · and the page it lands on opens that record rather than the shelf
+           path=/manuscripts dossier open=true
+  green  P5.7 · the one-shot reveal is consumed rather than left sitting in sessionStorage
+           sa.manuscriptReveal after landing = null
+  green  P5.8 · the agent link lands on the agent list and its reveal is consumed
+           clicked "Marcus Reed" key=seed-agent-3 -> path=/agents consumed=true
+  green  P6.1 · nothing answered, the strip is an em-dash
+           strip="—"
+  green  P6.2 · fully answered, the strip states only consequences
+           strip="reply expected around 22 September; a nudge reminder lands here on the day."
+  green  P6.3 · no chosen answer that has another form is echoed in the strip
+           ledger answers=["The full manuscript","Today","4 weeks","On the day"] · echoable=["The full manuscript","Today","4 weeks"] · echoed=[]
+  green  P6.4 · the ledger's rows are complete, so the chip is gone
+           chip=""
+  green  P6.5 · the close journey keeps its own grammar
+           strip="Closed as no response, today."
+  green  P6.6 · the note journey keeps its own
+           strip="Your note, ticked off today."
