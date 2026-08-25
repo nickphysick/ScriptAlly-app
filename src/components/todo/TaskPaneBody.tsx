@@ -248,6 +248,16 @@ export interface TaskPaneBodyProps {
    */
   extras?: { alongside: boolean; also: boolean };
   onOpenExtra?: (which: "alongside" | "also") => void;
+  /**
+   * ⚠️ WHICH OPTIONAL FIELDS THIS FLOW OFFERS — from the declaration, and `[]` while the fork is
+   * showing (journey round, Phase 3, found in the first screenshot).
+   *
+   * The links rendered off the body's own reasoning, so `+ Add a note for your file` sat under the
+   * fork before the writer had said what they wanted to do — offering to annotate a decision not
+   * yet made. And `JourneyFlow.links` was declared and read by nothing, which is the reachability
+   * trap this repo has a standing note about: a field nobody reads is a field that drifts.
+   */
+  offers?: ("alongside" | "also")[];
   /** the free-plan `.upsell`; omitted for Pro */
   upsell?: React.ReactNode;
 }
@@ -307,7 +317,8 @@ function answerText(field: ReqField, v: SendBodyValues, delays?: DelayOption[]):
 
 export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
   value, onChange, note, statedWeeks, questions = [], openId = null, onOpen, onAnswered,
-  idPrefix = "", whenHint, extras = { alongside: false, also: false }, onOpenExtra, upsell,
+  idPrefix = "", whenHint, extras = { alongside: false, also: false }, onOpenExtra,
+  offers = ["alongside", "also"], upsell,
 }) => {
   /* ⚠️ THE DOM NAME, WHICH IS NOT THE ROW'S NAME. `openId` carries the BARE id, because that is
      what `paneGate` emits; this is only what the attribute says. Default `""` makes it the identity
@@ -316,7 +327,8 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
   /* ⚠️ "ANYTHING ELSE GOING WITH IT" IS OFFERED ONLY WHERE THERE IS AN IT. It is about the parcel,
      so a journey that records no parcel has nothing for it to go alongside — the same absence rule
      the ledger's own rows follow, read off the same declaration. */
-  const offersAlongside = questions.some((q) => q.field === "unit");
+  const offersAlongside = offers.includes("alongside") && questions.some((q) => q.field === "unit");
+  const offersAlso = offers.includes("also");
 
   /**
    * ⚠️ ONE CONTROL FOR ALL THREE DELAY QUESTIONS (journey round, Phase 3). *Hold me to when?*, *if
@@ -532,14 +544,14 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
         ⚠️ AND THE `OPTIONAL` TAG GOES WITH THE FIELD, not with the link. It answers "must I?" about
         a control that is on screen; beside a link that nobody has opened it answers a question
         nobody asked. At rest this form holds no textarea and no tag at all. */}
-    {(!extras.alongside || !extras.also) && (
+    {((offersAlongside && !extras.alongside) || (offersAlso && !extras.also)) && (
       <div className="addrow">
         {offersAlongside && !extras.alongside && (
           <button type="button" className="addlink" onClick={() => onOpenExtra?.("alongside")}>
             + Anything else going with it
           </button>
         )}
-        {!extras.also && (
+        {offersAlso && !extras.also && (
           <button type="button" className="addlink" onClick={() => onOpenExtra?.("also")}>
             + Add a note for your file
           </button>
@@ -561,7 +573,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
       </div>
     )}
 
-    {extras.also && (
+    {offersAlso && extras.also && (
       <div className="sect">
         <label className="f-lbl" htmlFor={domId("s-also")}>A note for your file <span className="opttag">OPTIONAL</span></label>
         <textarea id={domId("s-also")} className="note-in" autoFocus

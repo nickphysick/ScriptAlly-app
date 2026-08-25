@@ -991,6 +991,10 @@ export function useTaskPaneSession(
                         openId={openId ?? unansweredOf(activeFlow?.questions ?? [], gateAnswers(card))[0]?.id ?? null}
                         onOpen={jumpTo}
                         onAnswered={() => setOpenId(null)}
+                        /* ⚠️ THE FLOW SAYS WHICH OPTIONAL FIELDS IT OFFERS, and `[]` while the fork
+                           is showing — a link inviting a note on a decision the writer has not made
+                           yet. It is also what makes `JourneyFlow.links` READ rather than declared. */
+                        offers={activeFlow?.links ?? []}
                         extras={extras}
                         onOpenExtra={(w) => setExtras((e) => ({ ...e, [w]: true }))}
                         /* ⚠️ THE CLOSE JOURNEY'S REASSURANCE, ON THE ROW WHERE IT IS READ. It was

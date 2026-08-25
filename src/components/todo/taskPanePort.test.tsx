@@ -449,6 +449,33 @@ describe("the chrome diet — what the form no longer says", () => {
     expect(HTML, "the ledger did not render — this case is measuring nothing").toContain('class="q');
   });
 
+  /* ⚠️ THE FLOW DECIDES WHICH OPTIONAL FIELDS ARE OFFERED, and none is offered before an intent is
+     chosen (journey round, Phase 3, found in a screenshot). A link inviting a note on a decision the
+     writer has not made yet is the fork's own question answered from underneath. */
+  it("no optional field is offered while the fork is showing", () => {
+    const html = renderToStaticMarkup(
+      <TaskPaneBody questions={[]} openId={null} offers={[]}
+        value={{ rows: [], alongside: "", when: null, expect: null, remind: null, also: "",
+                 hold: null, checkin: null, again: null }}
+        onChange={() => {}} />);
+    expect(html, "an optional field was offered before the intent was chosen").not.toContain("addlink");
+    expect(html).not.toContain("<textarea");
+  });
+
+  it("a flow offering only one optional field offers only that one", () => {
+    const html = renderToStaticMarkup(
+      <TaskPaneBody
+        questions={requirementsFor("send").map((r) => ({
+          id: r.id, field: r.field, label: r.label, answered: false }))}
+        openId="s-when" offers={["also"]}
+        value={{ rows: [], alongside: "", when: null, expect: null, remind: null, also: "",
+                 hold: null, checkin: null, again: null }}
+        onChange={() => {}} />);
+    expect(html).toContain("+ Add a note for your file");
+    expect(html, "a field this flow does not offer was offered anyway")
+      .not.toContain("+ Anything else going with it");
+  });
+
   it("at rest the form holds no textarea and no OPTIONAL tag, on any journey", () => {
     for (const k of ["send", "close", "fix", "note"] as const) {
       const html = form(k);
