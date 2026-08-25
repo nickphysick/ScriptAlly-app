@@ -742,6 +742,30 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 }
 .mk-turn-body { font-family: inherit; display: block; margin-top: 10px; }
 
+/* ⚠️ THE CARET IS SIZED IN `em` SO IT SCALES WITH THE LINE IT CLOSES. `.mk-turn-lead` sets its own
+   font-size (1.34em of the turn's clamp), so every value here is a fraction of the glyphs beside
+   it and the bar cannot end up a different height at a different width — the same law this file
+   already applies to the turn's measure, one element down.
+   ⚠️ AND THE COLOUR IS ON THE RULE, NEVER IN THE KEYFRAMES. A `var()` inside `@keyframes` fails
+   silently in this setup — no error, no animation, no warning — so the frames carry opacity and
+   nothing else. */
+.mk-caret {
+  display: inline-block; width: .055em; height: .78em; background: var(--mk-burg);
+  margin-left: .09em; vertical-align: -.04em;
+  animation: mkCaret 1.1s steps(1) infinite;
+}
+/* `steps(1)` is what makes it a cursor rather than a pulse: the opacity jumps, it never fades. */
+@keyframes mkCaret { 0%, 50% { opacity: 1 } 50.01%, 100% { opacity: 0 } }
+/* ⚠️ STATIC AND VISIBLE, NOT HIDDEN — the caret is what tells the eye the line is still being
+   written, and removing it under reduced motion would remove the meaning along with the movement.
+   ⚠️ AND THIS BLOCK SITS IMMEDIATELY AFTER THE RULE IT OVERRIDES. Both are 0-1-0 and a media query
+   confers no specificity, so an override placed with the other reduced-motion rules four hundred
+   lines up would LOSE on source order — measured on this stylesheet once already, as a 0.5s
+   transition still running under `reduce` from a declaration that read perfectly correctly. */
+@media (prefers-reduced-motion: reduce) {
+  .mk-caret { animation: none; opacity: 1; }
+}
+
 /* ⚠️ A NARROWER MEASURE ON A NARROW PHONE, AND IT IS THE THIRD LINE'S SHAPE THAT FORCES IT. Below
    ~400 the COLUMN binds, not the measure — 318px at 390 against the measure's 416 — so the body
    takes a third line whatever the measure says, and the only question is whether that line is full

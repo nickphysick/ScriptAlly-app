@@ -100,7 +100,7 @@ describe("landing copy — verbatim locks", () => {
    * body's own line count is a rendered-page claim and is measured.
    */
   it("the turn is two sentences, and the lead is short enough never to wrap", () => {
-    expect(HERO_TURN_LEAD).toBe("Introducing ScriptAlly.");
+    expect(HERO_TURN_LEAD).toBe("Introducing ScriptAlly");
     expect(HERO_TURN_BODY).toBe(
       "An end-to-end querying companion built to tip the odds back in your favour.",
     );
@@ -109,8 +109,11 @@ describe("landing copy — verbatim locks", () => {
   });
 
   it("the turn is one line, and the reassurance in front of it is gone", async () => {
+    /* ⚠️ NO FULL STOP AFTER `ScriptAlly` — a blinking caret closes that line instead, and it is
+       an `aria-hidden` element rather than a character. If someone puts the stop back, this is
+       the assertion that says the caret then follows a finished sentence. */
     expect(`${HERO_TURN_LEAD} ${HERO_TURN_BODY}`).toBe(
-      "Introducing ScriptAlly. An end-to-end querying companion built to tip the odds back in " +
+      "Introducing ScriptAlly An end-to-end querying companion built to tip the odds back in " +
       "your favour.",
     );
     const copy = await import("./landingCopy");

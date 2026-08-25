@@ -95,7 +95,14 @@ export const Hero: React.FC<{
           sibling in the same grid; nested inside `.mk-hcopy` they were invisible to the row
           machinery, and the art could reach at most the copy row. */}
       <div className="mk-turn mk-r mk-r4">
-        <span className="mk-turn-lead">{HERO_TURN_LEAD}</span>
+        <span className="mk-turn-lead">
+          {HERO_TURN_LEAD}
+          {/* ⚠️ AN ELEMENT, NOT A CHARACTER, AND `aria-hidden` BECAUSE IT SAYS NOTHING. A caret is
+              a cursor: it is there to make the line read as still being written, which is a
+              visual claim only. A screen reader announcing a bar — or a `|` in the constant —
+              would be noise in the middle of the page's one statement of what ScriptAlly is. */}
+          <span className="mk-caret" aria-hidden="true" />
+        </span>
         <span className="mk-turn-body">{HERO_TURN_BODY}</span>
       </div>
 

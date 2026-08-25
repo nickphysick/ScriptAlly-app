@@ -82,7 +82,12 @@ export const HERO_GRIND: Array<{ text: string; underline?: boolean }> = [
  * rather than a label with a background; an inline box would break the wash across lines and a
  * block would run it to the full measure.
  */
-export const HERO_TURN_LEAD = "Introducing ScriptAlly.";
+/* ⚠️ NO FULL STOP, AND THAT IS THE POINT RATHER THAN AN OMISSION. A blinking caret follows this
+   line, and a caret after a full stop reads as a sentence that has ended and is being typed into
+   anyway. The caret is CHROME, not copy — it is an `aria-hidden` element in `Hero.tsx`, never a
+   character in this string, because a screen reader announcing a decorative bar is noise and a
+   character could not blink. */
+export const HERO_TURN_LEAD = "Introducing ScriptAlly";
 export const HERO_TURN_BODY =
   "An end-to-end querying companion built to tip the odds back in your favour.";
 
