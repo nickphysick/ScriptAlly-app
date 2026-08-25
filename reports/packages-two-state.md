@@ -1304,6 +1304,21 @@ D8        : first-visit state intact — teach 1, stages strip 3
 | stage disc, ×3 (first visit) | `PKG-STAGE-ADD` · `-BUNDLE` · `-TRACK` | 128 × 128 circle | 50 × 50 | dashed placeholder |
 | **stage card, ×3 (drawer)** | **same three ids** | **362 × 88** | **46 × 46** | dashed placeholder |
 
+⚠️ **SUPERSEDED — the two QUERY-STRIP slots have left this commission (25 Aug, Option B).** The
+packaged attachment is now a stationery band whose mark is a **solid 15px glyph drawn inline**, and
+the loose row has no mark at all. At 15px this is icon territory rather than illustration territory,
+which is the risk already named at 22px: a dashed commission slot that small is a box saying an
+artist owes us something.
+
+| retired slot | was | why it went |
+|---|---|---|
+| `PARCEL_SLOT` — the packaged strip's parcel | 22px mark in a 38px dashed plate | drawn inline at 15px; an icon, not a plate |
+| `SHEETS_SLOT` — the loose row's sheets | 22px mark in a 38px dashed plate | the row has no emblem at all now (D8) |
+
+**The rest of the commission stands** — the first-visit carousel and the three stage discs are
+unchanged and still wanted.
+
+
 ⚠️ **The drawer reuses the first-visit ids deliberately** — same three subjects, two placements, so
 it is one asset each rather than six. The plate shapes differ (a 128px circle and a 362 × 88
 letterbox), which the artist needs to know: the mark has to read at both.

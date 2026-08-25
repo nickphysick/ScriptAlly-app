@@ -35,19 +35,17 @@
  * next person "restores" a bug.
  */
 import React from "react";
-import { IllustrationSlot } from "../packages/IllustrationSlot";
 import { packageDrift, driftNote, asSentLabel, type MaterialGroup } from "../../lib/packageAttach";
 import type { QueryMaterial, SubmissionPackage } from "../../types";
 import "./packageGroup.css";
 
-/** Slot A — the parcel, on pastille blue. Shared library, shared plate, one stroke rule. */
-export const PARCEL_SLOT = "parcel";
+/* ⚠️ `PARCEL_SLOT` IS GONE (D5) — it named a DASHED commission slot, and the band draws a solid
+   15px glyph, which is an icon rather than an illustration. */
 /* ⚠️ `SHEETS_SLOT` IS GONE (D8). It named the loose row's dashed plate, which rendered empty and
    is retired — loose materials are not an object needing an emblem. `PARCEL_SLOT` stays: the
    packaged strip IS one. */
-/** Both marks render at 22px inside a 38px plate. The ref's constraint, and the artist's. */
-export const STRIP_MARK_PX = 22;
-export const STRIP_PLATE_PX = 38;
+/** The band's glyph size — icon territory, per D5. */
+export const STRIP_MARK_PX = 15;
 
 export interface PackageGroupProps {
   group: MaterialGroup;
@@ -96,72 +94,73 @@ export const PackageGroup: React.FC<PackageGroupProps> = ({
    */
   const { state, differing } = packageDrift(group, live, sent);
 
-  /**
-   * ⚠️ THE NAME IS THE ONE STORED ON THE ITEMS, not looked up live — it is a record of what was
-   * sent, and it must outlive the package's deletion. A deleted package keeps its name and loses
-   * only its link, because the name is the record and the link is the only part with nowhere to go.
-   */
-  const name = <span className="qc-strip-name">{group.packageName}</span>;
+  /* ⚠️ THE NAME IS THE ONE STORED ON THE ITEMS, not looked up live — it is a record of what was
+     sent and must outlive the package's deletion. Rendered inline in the head now; the shared
+     `name` const went with the old two-cell strip. */
 
   return (
-    <div className="qc-strip qc-strip--packed">
-      <span className="qc-strip-slot">
-        <IllustrationSlot
-          icon={PARCEL_SLOT} px={STRIP_MARK_PX} shape="chip"
-          width={STRIP_PLATE_PX} height={STRIP_PLATE_PX} id="strip-parcel"
-        />
-      </span>
-
-      {/* ⚠️ THE LABEL SITS ABOVE THE NAME, mono over Playfair. It names the KIND of thing before the
-          instance — which is what lets the strip be recognised at a glance without reading it. */}
-      <span className="qc-strip-seal">
-        <span className="qc-strip-lbl">Package</span>
-        {live ? (
-          <button type="button" className="qc-strip-open" onClick={onView}
-                  title={`Open ${group.packageName}`}>
-            {name}
-          </button>
-        ) : name}
-        {/* Drift, and only when there is any. */}
-        {state === "deleted" && <span className="qc-strip-state">Package no longer exists</span>}
-        {state === "changed" && <span className="qc-strip-state">{asSentLabel(sentDate)}</span>}
-      </span>
-
-      <span className="qc-strip-items">{children}</span>
-
-      {/* ⚠️ THE NOTE REPORTS; IT DOES NOT WARN. No blush, no icon, no amber — a package moving on is
-          an ordinary thing that happens to templates, and the send is not damaged by it. */}
-      {state === "changed" && differing.length > 0 && (
-        <p className="qc-strip-note">{driftNote(differing)}</p>
-      )}
-
-      {/**
-        * ⚠️ ONE FOOTER, BOTH FACTS (Ruling 1). The lock explains why the CONTENTS cannot change; the
-        * pointer controls change which package this query used. A branch showing one or the other
-        * would make correcting a mis-attached package impossible on exactly the sends that matter.
-        */}
-      {/**
-        * ⚠️ THE LOCK NOTICE IS GONE FROM HERE (D11), AND THE POINTER CONTROLS STAY (D12). It read
-        * "Locked — this package has been sent" and explained a rule at the moment it is least
-        * relevant: nobody edits a package's contents from a query's timeline, so the sentence
-        * answered a question the writer was not asking.
-        *
-        * ⚠️ IT IS STILL EXPLAINED WHERE EDITING HAPPENS — verified before removing, not after: the
-        * packages card renders `LOCKED_NOTE` + `LOCKED_WHY` (`PackagesBand`), and the drawer's
-        * "Worth knowing" says a sent package's contents stop changing. Nothing was lost.
-        */}
-      {(onChangePackage || onRemovePackage) && (
-        <div className="qc-strip-foot">
-          <span className="qc-strip-ptrs">
-            {onChangePackage && (
-              <button type="button" className="qp-inplace qc-strip-ptr" onClick={onChangePackage}
-                      title="Change which package this query used">Change package</button>
-            )}
-            {onRemovePackage && (
-              <button type="button" className="qp-inplace qc-strip-ptr" onClick={onRemovePackage}
-                      title="Change this query to carry no package">Remove</button>
-            )}
+    /* ⚠️ THE WRAPPER IS THE HOVER/FOCUS TARGET (D4) — the actions live OUTSIDE the card and are
+       revealed by this element, so they sit below it without being part of the object. */
+    <div className="qc-attach">
+      <div className="qc-stat">
+        {/**
+          * ⚠️ THE LETTERHEAD. Glyph, name and label on one baseline row; the label is pushed right
+          * by `margin-left: auto`, so a long name grows into the space before it and wraps rather
+          * than colliding with it (D6).
+          */}
+        <div className="qc-stat-head">
+          {/**
+            * ⚠️ A SOLID GLYPH, PERMANENTLY — NOT A DASHED PLACEHOLDER (D5). At 15px this is icon
+            * territory, not illustration territory: a commission slot at this size would be a 15px
+            * dashed box saying an artist owes us something. Both query-strip slots leave the
+            * artist's inventory with this change; the rest of the commission stands.
+            */}
+          <span className="qc-stat-glyph" aria-hidden="true">
+            <svg viewBox="0 0 32 32">
+              <path d="M16 4 28 10v12L16 28 4 22V10z" />
+              <path d="M16 15 28 10M16 15v13M16 15 4 10" />
+            </svg>
           </span>
+          {live ? (
+            <button type="button" className="qc-stat-open" onClick={onView}
+                    title={`Open ${group.packageName}`}>
+              <h4>{group.packageName}</h4>
+            </button>
+          ) : <h4>{group.packageName}</h4>}
+          <span className="qc-stat-l">Submission package</span>
+        </div>
+
+        {/* ⚠️ THE PILLS ARE THE LOOSE ROW'S PILL, unchanged (D3). Same component, same markup — one
+            boxed and blue, one free and blush, and that is the whole of the difference. */}
+        <div className="qc-stat-body">{children}</div>
+
+        {/**
+          * ⚠️ DRIFT STAYS, AND STAYS INSIDE THE CARD. It is a fact about THIS package, so it belongs
+          * with the object rather than beside it. Each state appears only when true; a group that
+          * still matches says nothing, because a marker confirming nothing happened is noise on
+          * every send that is behaving normally.
+          */}
+        {state === "deleted" && <p className="qc-stat-note">Package no longer exists</p>}
+        {state === "changed" && (
+          <p className="qc-stat-note">
+            {asSentLabel(sentDate)}
+            {differing.length > 0 ? ` — ${driftNote(differing)}` : ""}
+          </p>
+        )}
+      </div>
+
+      {/* ⚠️ OUTSIDE THE CARD (D4). Which package this query points at is the QUERY's field, not the
+          package's — so the controls that change it sit beside the object rather than on it. */}
+      {(onChangePackage || onRemovePackage) && (
+        <div className="qc-stat-acts">
+          {onChangePackage && (
+            <button type="button" className="qc-stat-a" onClick={onChangePackage}
+                    title="Change which package this query used">Change package</button>
+          )}
+          {onRemovePackage && (
+            <button type="button" className="qc-stat-a qc-stat-a--warm" onClick={onRemovePackage}
+                    title="Change this query to carry no package">Remove</button>
+          )}
         </div>
       )}
     </div>

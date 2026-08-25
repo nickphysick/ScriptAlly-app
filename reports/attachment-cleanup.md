@@ -113,3 +113,52 @@ materials are listed, which is where it means something.
 usual visibility test and does **not** catch `visibility: hidden` — an element taken off the page
 still has an offset parent. The D10 control is hidden that way deliberately, because the fork's
 `List materials` clicks its ref. The census now checks computed visibility too.
+
+---
+
+# The stationery band — Option B (25 Aug)
+
+Ref committed. **Only the packaged attachment changes**; the loose row, the fork, the picker and the
+confirms are untouched (D7).
+
+## Measured at 1440 and 1920
+
+```
+card       white · box-shadow rgb(227,235,243) 0 0 0 3px + the soft drop
+head       linear-gradient(#e3ebf3, #d5e1ec) · glyph 1 · label "SUBMISSION PACKAGE"
+name       "Comps-led variant" · Playfair Display 17px · overflow −0.09 · has a descender
+pills      3 · dashed placeholders 0
+actions    CHANGE PACKAGE · REMOVE — outside the card
+```
+
+⚠️ **The ref gives the name no `line-height`, so it takes the standing floor rather than a mockup
+value.** This file's history records two crops from exactly that shape. Measured on the fractional
+rect with a 1px threshold: **−0.09** at both widths, on a name that carries a `p`.
+
+## D6 — long names wrap, and the label never squeezes
+
+Seeded `"The Complete Autumn Submission Bundle for Literary Agents"`, then restored:
+
+```
+@1440   4 lines · collide false · label intact · overflow −0.38
+@1920   2 lines · collide false · label intact · overflow −0.19
+```
+
+`margin-left: auto` + `flex: none` on the label is what does it: the name grows leftward into the
+space before the label and **wraps** rather than pushing it off the end.
+
+⚠️ **The four-material case cannot be seeded, and that is a fact about the model rather than a gap
+in the test.** `linkedChips` maps `packageItems`, which is the package's **three slots** — letter,
+synopsis, sample. `otherMaterials` is free text the strip does not render. **Three pills is the
+maximum a packaged card can hold today.** The body's wrap was proven anyway: at 1440 the three pills
+already occupy two rows (`bodyRows: 2`), which is the behaviour D6 was asking about.
+
+*(This is the standing open question recorded in CLAUDE.md — `Other` has no home in the package
+model — surfacing again from a different direction. Not resolved here.)*
+
+## D5 — the dashed placeholders are gone from this surface
+
+No dashed border survives anywhere in the card. `PARCEL_SLOT`, `SHEETS_SLOT` and `STRIP_PLATE_PX`
+are deleted; the mark is drawn inline at 15px. **The artist's slot inventory is updated** in
+`reports/packages-two-state.md` with the two retired rows and the reason; the first-visit carousel
+and the three stage discs are unchanged and still wanted.

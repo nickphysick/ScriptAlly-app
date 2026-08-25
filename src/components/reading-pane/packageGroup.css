@@ -43,128 +43,109 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   PACKAGED — one row: slot · seal · chips
+   PACKAGED — the stationery band (Option B, packaged-strip-cuts.html)
    ══════════════════════════════════════════════════════════════════════════════ */
 
 /**
- * ⚠️ `align-items: stretch` IS WHAT MAKES THE SLOT AND SEAL ONE OBJECT. The two cells take the row's
- * full height and share a fill, so parcel and package name read as a single sealed thing rather
- * than as a badge sitting next to a label. `overflow: hidden` is what lets the radius clip them.
+ * ⚠️ THE MAT IS A SPREAD SHADOW, NOT A BORDER OR A PADDED PARENT. `0 0 0 3px` in the fill colour
+ * paints a pale ring outside the card's own rim without taking layout space, so the card keeps its
+ * exact box and still lifts off the pane. A parent with 3px of padding would move everything below
+ * it; a second border would round differently at the corners.
  */
-.qc-strip {
-  display: flex;
-  align-items: stretch;
-  max-width: 600px;
+.qc-attach { max-width: 620px; margin: 6px 0 8px; }
+
+.qc-stat {
+  background: #ffffff;
   border: 1px solid var(--pro-edge);
   border-radius: 10px;
+  box-shadow: 0 0 0 3px var(--pro-fill), 0 3px 10px rgba(57, 88, 122, 0.07);
   overflow: hidden;
-  background: #ffffff;
-  margin: 6px 0 8px;
-  /* ⚠️ THE NOTE WRAPS TO ITS OWN LINE. Without this the drift note would be a fourth cell in the
-     row and squeeze the chips; it belongs under them. */
-  flex-wrap: wrap;
-}
-
-.qc-strip-slot {
-  flex: 0 0 auto;
-  width: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-right: 1px solid var(--pro-edge);
-  background: var(--pro-fill);
-}
-
-/* ⚠️ THE PLATE RECOLOURS IN CONTEXT, AND THE MARK WITH IT. The shared component's dashed plate is
-   burgundy on white everywhere else; on the packed slot's blue ground it takes the strip's ink, so
-   the drawing belongs to the object rather than sitting on it. Overriding here — rather than
-   teaching `IllustrationSlot` a colour prop — keeps the library's one-stroke-rule law intact. */
-.qc-strip .pkgb-plate { border-color: rgba(65, 98, 127, 0.42); background: rgba(255, 255, 255, 0.55); }
-.qc-strip .pkgb-plate svg { stroke: var(--pro-ink); }
-
-.qc-strip-seal {
-  background: var(--pro-fill);
-  border-right: 1px solid var(--pro-edge);
-  padding: 10px 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  justify-content: center;
-  min-width: 142px;
-}
-
-/* Mono over Playfair — the KIND above the instance. */
-.qc-strip-lbl {
-  font-family: var(--f12-mono);
-  font-size: 7px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--pro-ink);
-  opacity: 0.8;
 }
 
 /**
- * ⚠️ `line-height: 1.15` IS SAFE HERE AND WOULD NOT BE ON MIXED-CASE PLAYFAIR AT A LARGER SIZE — the
- * standing descender law asks 1.3 of Playfair, and a package name is writer-supplied, so it can
- * hold a `y` or a `g`. At 15px the line box is 17.25px against roughly 15px of ink including the
- * descender, which clears. It is the ref's value and it is checked by measurement, not assumed.
+ * ⚠️ `align-items: baseline` IS SAFE HERE AND WOULD NOT BE WITH AN IMAGE. The standing trap is that
+ * images have no baseline and align on their bottom margin edge; this row is text plus an inline
+ * SVG, and the SVG is centred out of the baseline by `align-self: center` rather than being left to
+ * drag the row. The name and the label sit on one line because both are text.
  */
-.qc-strip-name {
-  font-family: var(--f12-serif);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--pro-ink);
-  line-height: 1.3;
-  display: block;
-}
-
-/* The name is the strip's ONLY control (D-C6). Underlined on hover and focus, never at rest. */
-.qc-strip-open {
-  background: none;
-  border: none;
-  padding: 0;
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-}
-.qc-strip-open:hover .qc-strip-name,
-.qc-strip-open:focus-visible .qc-strip-name {
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-/* Drift, stated in the seal's own ink — a fact about the template, not a warning. */
-.qc-strip-state {
-  font-family: var(--f12-mono);
-  font-size: 7px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--pro-ink);
-  opacity: 0.75;
-}
-
-/* ⚠️ THE PILLS INSIDE TAKE NOTHING FROM THE STRIP. No colour, no size change, no override — they
-   are ordinary materials and must stay indistinguishable from the loose ones. This rule exists to
-   lay out the row and for no other purpose. */
-.qc-strip-items {
-  padding: 10px 14px;
+.qc-stat-head {
   display: flex;
-  gap: 7px;
-  flex-wrap: wrap;
-  align-items: center;
-  flex: 1;
+  align-items: baseline;
+  gap: 12px;
+  background: linear-gradient(180deg, var(--pro-fill), var(--pro-fill-deep));
+  border-bottom: 1px solid var(--pro-edge);
+  padding: 9px 16px;
+}
+.qc-stat-glyph { align-self: center; display: flex; flex: none; }
+.qc-stat-glyph svg {
+  width: 15px; height: 15px;
+  stroke: var(--pro-ink); stroke-width: 1.5; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+/**
+ * ⚠️ `line-height: 1.3` — THE STANDING FLOOR, AND THE REF GIVES NONE. A package name is
+ * writer-supplied, so it can hold a `g`, a `y` or a `p`; inheriting whatever the pane sets is how
+ * this file's own history records two crops. Measured at 17px rather than assumed.
+ */
+.qc-stat-head h4 {
+  font-family: var(--f12-serif);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--pro-ink);
+  margin: 0;
+  /* ⚠️ THE NAME WRAPS BEFORE IT COLLIDES (D6). `min-width: 0` lets a long name shrink inside the
+     flex row and break, rather than pushing the label off the end. */
   min-width: 0;
 }
+.qc-stat-open { background: none; border: none; padding: 0; text-align: left; cursor: pointer; font: inherit; min-width: 0; }
+.qc-stat-open:hover h4, .qc-stat-open:focus-visible h4 { text-decoration: underline; text-underline-offset: 2px; }
 
-.qc-strip-note {
-  flex: 1 0 100%;
+/* ⚠️ `margin-left: auto` IS WHAT KEEPS THE LABEL RIGHT AND THE NAME GROWING LEFTWARD. `flex: none`
+   stops it shrinking to nothing when the name is long — it would rather the name wrapped. */
+.qc-stat-l {
+  margin-left: auto;
+  flex: none;
+  font-family: var(--f12-mono);
+  font-size: 7px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--pro-ink);
+  opacity: 0.65;
+}
+
+/* ⚠️ THE PILLS TAKE NOTHING FROM THE CARD (D3) — no colour, no size change, no override. They are
+   the loose row's pill, and the two states must read as one component in two moods. */
+.qc-stat-body { padding: 11px 16px 13px; display: flex; gap: 7px; flex-wrap: wrap; }
+
+/* Drift reports; it does not warn. No blush, no icon — a package moving on is ordinary. */
+.qc-stat-note {
   margin: 0;
-  padding: 0 14px 10px;
+  padding: 0 16px 12px;
   font-size: 11.5px;
   line-height: 1.45;
   color: var(--pro-ink);
 }
+
+/* ⚠️ BELOW THE CARD AND OUTSIDE IT (D4). Reveal rules live in the next phase. */
+.qc-stat-acts {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 7px;
+  font-family: var(--f12-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.qc-stat-a {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font: inherit; letter-spacing: inherit; text-transform: inherit;
+  color: var(--pro-ink);
+  border-bottom: 1px solid var(--pro-edge);
+}
+.qc-stat-a--warm { color: var(--burg); border-bottom-color: #e8c8bc; }
 
 /* ══════════════════════════════════════════════════════════════════════════════
    LOOSE — no container at all (ref §2)
@@ -194,34 +175,6 @@
    THE FOOTER — one row, both facts (Ruling 1)
    ══════════════════════════════════════════════════════════════════════════════ */
 
-/**
- * ⚠️ THE LOCK AND THE POINTER CONTROLS SHOW TOGETHER, never as alternatives. The ref branches
- * `foot-unsent` / `foot-sent`, and that branch has NO REACHABLE STATE here: `QueryStatus` has no
- * unsent member, so a query record is a send and the unsent arm could never draw. Branching would
- * have made a mis-attached package uncorrectable on exactly the sends that matter.
- */
-.qc-strip-foot {
-  flex: 1 0 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 0 14px 10px;
-}
-.qc-strip-lock {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--pro-ink);
-}
-.qc-strip-lock svg {
-  width: 10px; height: 10px; stroke: var(--pro-ink); stroke-width: 1.7; fill: none;
-  stroke-linecap: round; stroke-linejoin: round; flex: none;
-}
-/**
- * ⚠️ THE PANE'S OWN IN-PLACE AFFORDANCE, REUSED RATHER THAN INVENTED. `.qp-inplace` is the dashed
- * underline the send method and both dates already wear — this is the fourth of that set, so it
- * takes the same class and the same `title` grammar. A new treatment here would say "this field is
- * special", which is the opposite of what it is.
- */
-.qc-strip-ptrs { margin-left: auto; display: inline-flex; gap: 12px; }
-.qc-strip-ptr { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; }
+/* ⚠️ THE OLD STRIP'S FOOT, LOCK AND POINTER RULES ARE GONE (Option B). The footer held the lock
+   notice — retired from this surface last run — and the pointer controls, which have left the card
+   entirely and are `.qc-stat-acts` now. Nothing renders these classes. */

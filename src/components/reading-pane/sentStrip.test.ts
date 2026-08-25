@@ -20,8 +20,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { PARCEL_SLOT, STRIP_MARK_PX, STRIP_PLATE_PX } from "./PackageGroup";
-import { PACKAGE_ICONS } from "../packages/packageIcons";
+import { STRIP_MARK_PX } from "./PackageGroup";
 
 const root = join(__dirname, "..", "..", "..");
 const read = (p: string) => readFileSync(join(root, p), "utf8");
@@ -53,72 +52,54 @@ describe("D-C1 — attachments hang off a send and nothing else", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe("D-C2 — packaged is a contained strip, and its blue is named once", () => {
-  it("the three tokens carry the ref's values", () => {
-    /* ⚠️ DEEPENED TO OPTION B'S VALUES (D2). The lighter pastille was right for a tinted seal and
-       reads as a smudge behind a printed letterhead. `--pro-mid` keeps the tier's colour under the
-       ref's own name; `--pro-fill-deep` is new, and is the letterhead's bottom stop. */
-    expect(cssD).toContain("--pro-ink: #39587a");
-    expect(cssD).toContain("--pro-fill: #e3ebf3");
-    expect(cssD).toContain("--pro-fill-deep: #d5e1ec");
-    expect(cssD).toContain("--pro-edge: #b9cdde");
-    expect(cssD).toContain("--pro-mid: #6A89A7");
+describe("the stationery band — a letterhead over a body (Option B)", () => {
+  it("is one card: a head, a body, and a mat that lifts it off the pane", () => {
+    expect(tsx).toContain('className="qc-stat-head"');
+    expect(tsx).toContain('className="qc-stat-body"');
+    /* ⚠️ THE MAT IS A SPREAD SHADOW, NOT A BORDER OR A PADDED PARENT — it paints outside the card's
+       rim without taking layout space, so the card keeps its box and everything below it stays put. */
+    expect(rule(".qc-stat")).toContain("box-shadow: 0 0 0 3px var(--pro-fill)");
+    expect(rule(".qc-stat")).toContain("border: 1px solid var(--pro-edge)");
   });
 
-  it("no call site restates a hex — every rule reads a token", () => {
-    /**
-     * ⚠️ THE POINT OF NAMING THEM. A second copy of `#e6edf4` in a rule is a value that will not
-     * move when the token does, and F-M may well move it.
-     */
-    const afterTokens = cssD.slice(cssD.indexOf("}") + 1);
-    const hexes = afterTokens.match(/#[0-9a-fA-F]{6}/g) ?? [];
-    expect(hexes.filter((h) => !["#ffffff", "#7c3a2a", "#e8c8bc", "#3a1c14"].includes(h.toLowerCase())))
-      .toEqual([]);
+  it("the head reads glyph · Playfair name · right-aligned mono label", () => {
+    const head = rule(".qc-stat-head");
+    expect(head).toContain("align-items: baseline");
+    expect(head).toContain("linear-gradient(180deg, var(--pro-fill), var(--pro-fill-deep))");
+    expect(rule(".qc-stat-head h4")).toContain("var(--f12-serif)");
+    /* the label is pushed right and refuses to shrink, so a long name wraps instead (D6) */
+    expect(rule(".qc-stat-l")).toContain("margin-left: auto");
+    expect(rule(".qc-stat-l")).toContain("flex: none");
+    expect(tsx).toContain("Submission package");
   });
 
-  it("the strip is one row: slot, seal, items — and it is bordered and filled", () => {
-    const r = rule(".qc-strip");
-    expect(r).toContain("display: flex");
-    expect(r).toContain("align-items: stretch");
-    expect(r).toContain("border: 1px solid var(--pro-edge)");
-    expect(r).toContain("border-radius: 10px");
-    expect(rule(".qc-strip-slot")).toContain("background: var(--pro-fill)");
-    expect(rule(".qc-strip-seal")).toContain("background: var(--pro-fill)");
+  it("the name clears Playfair's descenders", () => {
+    /* ⚠️ THE REF GIVES NO LINE-HEIGHT, so this is the standing floor rather than a value read off a
+       drawing — and a package name is writer-supplied, so it can hold a `g`, a `y` or a `p`. */
+    expect(rule(".qc-stat-head h4")).toContain("line-height: 1.3");
   });
 
-  it("the seal reads mono PACKAGE over the Playfair name, in that order", () => {
-    const seal = tsx.indexOf('className="qc-strip-seal"');
-    expect(seal, "the seal is not rendered").toBeGreaterThan(-1);
-    const lbl = tsx.indexOf("qc-strip-lbl", seal);
-    const nm = tsx.indexOf("{name}", seal);
-    expect(lbl).toBeGreaterThan(-1);
-    expect(nm).toBeGreaterThan(lbl); // label first
-    expect(rule(".qc-strip-lbl")).toContain("text-transform: uppercase");
-    /* ⚠️ THE TOKEN, NOT THE FAMILY NAME. This read `toContain("Playfair Display")`, which passed on
-       the FALLBACK in `var(--f12-serif, 'Playfair Display', serif)`. The fallback is gone — this
-       sheet renders inside `.t-f12`, which sets `--f12-serif` to exactly that family, so the
-       fallback was provably inert and the token is what the rule should have been asserting all
-       along. The claim is unchanged: the name is Playfair. */
-    expect(rule(".qc-strip-name")).toContain("var(--f12-serif)");
+  it("the glyph is solid and permanent — no dashed placeholder anywhere (D5)", () => {
+    expect(STRIP_MARK_PX).toBe(15);
+    const d = decls(tsx);
+    expect(d).not.toContain("IllustrationSlot");
+    expect(d).not.toContain("PARCEL_SLOT");
+    expect(d).not.toContain("SHEETS_SLOT");
+    expect(cssD).not.toContain("dashed");
+    /* it is drawn, not commissioned */
+    expect(d).toContain("qc-stat-glyph");
   });
 
-  it("the name's line-height clears Playfair's descenders", () => {
-    // ⚠️ A PACKAGE NAME IS WRITER-SUPPLIED, so it can hold a `y` or a `g`. The standing law asks
-    // 1.3 of mixed-case Playfair; the ref drew 1.15 with a name that happened to have none.
-    const lh = rule(".qc-strip-name").match(/line-height:\s*([\d.]+)/);
-    expect(lh, "no line-height on the package name").not.toBeNull();
-    expect(Number(lh![1])).toBeGreaterThanOrEqual(1.3);
-  });
-
-  it("the pills inside take nothing from the strip", () => {
-    const r = rule(".qc-strip-items");
-    for (const forbidden of ["color:", "background:", "font-size:", "border:"]) {
-      expect(r, `.qc-strip-items sets ${forbidden} on its children's row`).not.toContain(forbidden);
-    }
+  it("the pills take nothing from the card (D3)", () => {
+    /* ⚠️ THE BODY LAYS OUT AND NOTHING MORE. No colour, no size, no override — the packaged and
+       loose states must read as one component in two moods. */
+    const body = rule(".qc-stat-body");
+    expect(body).not.toContain("color");
+    expect(body).not.toContain("background");
+    expect(body).toContain("flex-wrap: wrap");
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
 describe("D-C3 — loose materials have NO container", () => {
   /**
    * ⚠️ THE LOAD-BEARING CASE IN THIS FILE. The failure it guards is not a bug someone types by
@@ -140,46 +121,25 @@ describe("D-C3 — loose materials have NO container", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe("D-C6 / D-C7 — display only, and the derivation is untouched", () => {
-  it("the package name is the strip's only control", () => {
-    /**
-     * ⚠️ SUPERSEDED BY RULING 1, AND THE OLD FORM WAS A COUNT. It asserted exactly two buttons — the
-     * name and the promote link — which was right when the strip had no pointer controls. It now
-     * carries `Change package` and `Remove`, because WHICH package a query points at is that
-     * query's own field and can be mistaken like any other.
-     *
-     * ⚠️ THE CLAIM THAT SURVIVES IS THE ONE THAT MATTERED: nothing here edits the package's
-     * CONTENTS. That is a property, not a number, so it is asserted as one.
-     */
-    const d = decls(tsx);
-    expect(d).toContain('className="qc-strip-open"');
-    expect(d).not.toContain("qc-strip-menu");
-    expect(d).not.toMatch(/["\s`]qc-pkggrp-view["\s`]/);
-    /* no way to add to, or remove from, what is inside the package */
-    expect(d, "a per-chip remove inside the strip").not.toContain("qc-mchipx");
-    expect(d, "an attach control inside the strip").not.toContain("qc-mchip-add");
+describe("the actions leave the object (D4), and the derivation is untouched", () => {
+  it("Change package and Remove sit OUTSIDE the card", () => {
+    /* ⚠️ WHICH PACKAGE A QUERY POINTS AT IS THE QUERY'S FIELD, not the package's — so the controls
+       that change it sit beside the object rather than on it. */
+    const acts = tsx.indexOf('className="qc-stat-acts"');
+    const cardEnd = tsx.indexOf('</div>', tsx.indexOf('className="qc-stat-note"') > -1
+      ? tsx.indexOf('className="qc-stat-note"') : tsx.indexOf('className="qc-stat-body"'));
+    expect(acts).toBeGreaterThan(cardEnd);
+    expect(tsx).toContain("Change package");
+    expect(tsx).toContain(">Remove<");
   });
 
-  it("the strip adds no edit affordance of its own", () => {
+  it("offers no way to edit what is INSIDE the package", () => {
     const d = decls(tsx);
-    /* ⚠️ `onRemovePackage` IS THE POINTER, NOT THE CONTENTS — it changes this query's own field and
-       rewrites nothing about the package. The content verbs stay forbidden. */
-    for (const verb of ["onEdit", "onDelete", "onCorrect", "onRemoveMaterial"]) {
-      expect(d, `the strip has grown an ${verb}`).not.toContain(verb);
-    }
-  });
-
-  it("attachments never reach recomputeQuery", () => {
-    // ⚠️ THE SINGLE-WRITER RULE. An attachment is payload on an activity; it must not participate in
-    // deriving status, counts or dates.
-    const rq = decls(read("src/lib/recomputeQuery.ts"));
-    for (const t of ["packageId", "materialsWanted", "otherMaterials", "MaterialGroup"]) {
-      expect(rq, `recomputeQuery reads ${t}`).not.toContain(t);
-    }
+    expect(d).not.toContain("qc-mchipx");
+    expect(d).not.toContain("qc-addmat");
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
 describe("the block shape is gone, not merely unused", () => {
   it("no qc-pkggrp class survives in source or stylesheet", () => {
     // Bounded tokens — `qc-pkggrp` is a prefix of every class the old shape used.
@@ -220,7 +180,9 @@ describe("the loose row is pills and nothing else (D7/D8)", () => {
     const decls = tsx.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
     expect(decls).not.toContain("SHEETS_SLOT");
     expect(decls).not.toContain("onSaveAsPackage");
-    /* ⚠️ THE PACKAGED STRIP KEEPS ITS OWN (D9) — asserted here so the removal above cannot creep. */
-    expect(decls).toContain("PARCEL_SLOT");
+    /* ⚠️ THE PACKAGED CARD KEEPS ITS OWN MARK (D9) — asserted so the loose row's removal cannot
+       creep into it. It is `qc-stat-glyph` now, not `PARCEL_SLOT`: the dashed commission slot was
+       retired with Option B (D5) and the mark is drawn inline at 15px. */
+    expect(decls).toContain("qc-stat-glyph");
   });
 });
