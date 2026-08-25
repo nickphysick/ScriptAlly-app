@@ -145,3 +145,57 @@ src/components/shell/workspacePageGrid.test.tsx  M
 
 Both modified and uncommitted; the page-header session is mid-flight (last commit 9 hours ago,
 *"the retract is withdrawn"*). **Phases 5A–5D not run. The hold stands — that is the gate working.**
+
+---
+
+# Tidy-ups (25 Aug)
+
+## Part 1 — F-AM: the cascade was larger than three components
+
+A fixed-point reachability sweep from `App.tsx` (458 files reachable) found **eight** unreachable
+files in the packages region, not three:
+
+```
+AnalyticsEmpty.tsx      88     PackageWorkshop.tsx    910
+AnalyticsTab.tsx       405     WorkshopEmpty.tsx      193  TESTED
+PackageTabs.tsx         44     WorkshopTab.tsx        583
+lib/communityStats.ts   93 T   lib/packageAnalytics.ts 280  TESTED
+```
+
+`PackageWorkshop.tsx` — the largest of them — was not in the brief at all. The cascade is clean:
+`PackageWorkshop`, `WorkshopEmpty` ← `WorkshopTab`; `AnalyticsEmpty` ← `AnalyticsTab`; both tabs ←
+the deleted `#/pkg-lab`.
+
+⚠️ **And the page's own comment had already recorded it, with one clause that went stale yesterday:**
+
+> *"THE TAB STRIP IS GONE AND THIS IS WHAT REPLACED IT (restructure D1) … The strip's component
+> survives untouched for the DEV `#/pkg-lab` route, which still mounts it."*
+>
+> *"THE `view` STATE IS GONE, AND SO ARE BOTH BRANCHES IT SWITCHED … which made the WorkshopTab and
+> AnalyticsTab branches unreachable code."*
+
+The restructure knew all three were unreachable and kept them **because pkg-lab mounted them**. That
+route went in Part 2 of the last run, so the stated reason for all three expired then.
+
+### Deleted — six views and one test, 2,223 lines
+
+`PackageTabs` · `AnalyticsTab` · `AnalyticsEmpty` · `WorkshopTab` · `WorkshopEmpty` (+
+`workshopEmpty.test.tsx`) · `PackageWorkshop`.
+
+### Kept, and marked at the head — two pure libs
+
+| file | why it survives |
+|---|---|
+| `lib/packageAnalytics.ts` (280, tested) | the reply-rate framing, material ranking, composition read and recommendations. **`TrackingBand` derives from `packageTracking.ts` and reproduces none of it** — deleting this loses work rather than tidying a duplicate |
+| `lib/communityStats.ts` (93, tested) | percentile logic behind `COMMUNITY_STATS_ENABLED`, a feature the live page has no surface for yet |
+
+Both now carry a head note saying they are unmounted, why they survive, and that a later session
+should neither restore a surface for them nor delete them as dead. **D1's duplication question,
+answered:** there is none — the two analytics families derive from different libs, and the live one
+is the smaller.
+
+⚠️ `TypeGlyph` was in the same neighbourhood and is **live** — `Queries.tsx` uses it. It survived the
+sweep on its own merits, not by being missed.
+
+Gate: tsc clean, build clean, Vitest 387 files / 6680 tests green; grep with comments stripped finds
+no reference to any deleted symbol.

@@ -1,4 +1,15 @@
 /**
+ * ⚠️ UNMOUNTED, AND KEPT ON PURPOSE (F-AM). Its only consumer was `AnalyticsTab`, deleted with the
+ * `#/pkg-lab` cascade — so nothing renders these derivations today. They survive because they are
+ * PURE, TESTED, and answer a question the live page does not: the reply-rate framing, the material
+ * ranking, the composition read and the recommendations. `TrackingBand` derives from
+ * `packageTracking.ts` and reproduces none of it, so deleting this would lose the work rather than
+ * tidy a duplicate.
+ *
+ * ⚠️ IF A LATER SESSION FINDS THIS WITH NO CALLER, THAT IS EXPECTED — do not "restore" a surface for
+ * it and do not delete it as dead. It is a shelf, not an orphan, and this note is the difference.
+ */
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
