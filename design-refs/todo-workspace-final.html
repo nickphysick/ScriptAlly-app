@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — task workspace (final)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f7f4ee;--white:#fff;--field:#fdfbf7;--ink:#241209;--ink2:#3a1c14;--muted:#9c8878;--muted2:#8a7a6c;--hair:#e7ddd2;--hair2:#e0d5c8;--edge:#e8e0d8;--burg:#7c3a2a;--sd:#7c3d3d;--sage:#5a6e58;--pink:#f5e2da;--pink-b:#e8c8bc;
+--u1:#f3e0d6;--u2:#eed7ca;--ur:rgba(124,58,42,0.16);}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);min-height:100vh;padding:30px 26px 100px;}
+.wrap{max-width:1180px;margin:0 auto;}
+h2{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2);margin:0 0 3px;}
+.cap{font-size:12px;color:#6a584a;font-weight:300;line-height:1.6;max-width:880px;margin-bottom:16px;}
+.cap b{font-weight:500;color:var(--ink2);}
+.fc{background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);}
+.rim{border:1px solid rgba(124,58,42,0.28);border-radius:9px;overflow:hidden;background:var(--white);}
+.mono{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+
+/* ═══ split: worksheet left, record right ═══ */
+.ws{display:grid;grid-template-columns:minmax(0,1fr) 292px;gap:12px;align-items:stretch;}
+
+/* worksheet */
+.wsheet .rim{display:flex;flex-direction:column;height:100%;}
+.band{padding:13px 20px 12px;background:linear-gradient(135deg,var(--u1),var(--u2));border-bottom:1px solid var(--ur);display:flex;justify-content:space-between;align-items:center;gap:14px;}
+.deed{font-family:'Playfair Display',serif;font-size:18.5px;font-weight:400;color:var(--ink2);line-height:1.3;}
+.deed i{font-weight:500;font-style:italic;color:inherit;}
+.b-nav{display:flex;gap:6px;flex-shrink:0;}
+.b-nav button{cursor:pointer;width:26px;height:26px;border-radius:8px;background:rgba(255,253,250,0.8);border:0.5px solid rgba(58,28,20,0.13);color:var(--ink2);}
+.form{padding:4px 20px 14px;flex:1;}
+
+/* one question per row — answered rows never grow */
+.q{border-bottom:1px solid var(--hair);}
+.q:last-of-type{border-bottom:0;}
+.q .head{display:flex;align-items:center;gap:9px;min-height:40px;padding:5px 0;}
+.q .sqm{width:7px;height:7px;background:var(--burg);border-radius:2px;flex-shrink:0;visibility:hidden;animation:sq 1.6s ease-in-out infinite;}
+.q.open .sqm{visibility:visible;}
+@keyframes sq{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(0.72);opacity:0.55;}}
+.q .ql{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:500;flex-shrink:0;}
+.q.open .ql{color:var(--ink2);}
+.q.done .ql{color:#b3a494;}
+.q .ans{font-size:12.5px;color:var(--ink2);font-weight:500;margin-left:auto;display:flex;align-items:center;gap:9px;}
+.q .ans .tick{color:var(--sage);font-size:11px;}
+.q .edit{font-size:10.5px;color:#b3a494;cursor:pointer;border-bottom:1px solid transparent;font-weight:400;}
+.q .edit:hover{color:var(--burg);border-bottom-color:rgba(124,58,42,0.35);}
+.q .body{display:none;padding:0 0 13px 16px;}
+.q.open .body{display:block;}
+.seg{display:flex;gap:7px;flex-wrap:wrap;}
+.seg button{cursor:pointer;font-size:11.5px;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:7px 12px;color:var(--ink2);}
+.seg button:hover{border-color:#c9a89e;}
+.seg button.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500;}
+.hint{font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:8px;}
+.addrow{padding:11px 0 2px;display:flex;gap:16px;}
+.addlink{font-size:11px;color:var(--burg);cursor:pointer;border-bottom:1px dashed rgba(124,58,42,0.35);}
+.act{display:flex;align-items:center;gap:9px;padding:12px 0 2px;border-top:1px solid var(--hair);margin-top:10px;}
+.wr{font-size:11.5px;color:#6a584a;font-weight:300;}
+.wr .lead{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-right:6px;}
+.wr b{font-weight:500;color:var(--ink2);}
+.ab{cursor:pointer;height:32px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;font-size:11.5px;font-weight:500;white-space:nowrap;}
+.ab.quiet{background:var(--white);border:1px solid var(--edge);color:#57534e;}
+.ab.go{background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600;}
+.ab .n{font-family:'JetBrains Mono',monospace;font-size:8.5px;background:var(--burg);color:#fffdfa;border-radius:999px;padding:2px 6px;margin-left:6px;}
+
+/* record card */
+.rec .rim{display:flex;flex-direction:column;height:100%;}
+.rhead{padding:12px 15px;background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid rgba(90,110,88,0.2);display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.rhead .t{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#3c4a3a;font-weight:500;}
+.rhead .stat{font-family:'Playfair Display',serif;font-size:12px;color:#2e3a2c;font-weight:500;white-space:nowrap;}
+.rtiles{padding:4px 15px;}
+.rtile{padding:9px 0;border-bottom:1px solid #f0e9df;}
+.rtile:last-child{border-bottom:0;}
+.rtile .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.rtile .v{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:500;color:var(--ink2);margin-top:2px;}
+.rtile .v small{font-family:'Inter',sans-serif;font-size:10px;color:var(--muted2);font-weight:300;display:block;}
+.rtile .v.absent{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;}
+.rtl{padding:11px 15px 12px;border-top:1px solid var(--hair);flex:1;}
+.rtl .tl{position:relative;padding-left:19px;}
+.rtl .tl::before{content:'';position:absolute;left:5px;top:7px;bottom:7px;width:1.5px;background:#e1d7d0;}
+.re{position:relative;padding:5px 0;}
+.re .sd{position:absolute;left:-19px;top:6px;}
+.re .t{font-size:11px;font-weight:500;color:var(--ink);}
+.re .d{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.08em;color:var(--muted);margin-top:1px;}
+.gapr{padding:2px 0 2px 1px;}
+.gapr span{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.09em;text-transform:uppercase;color:#c8b8a6;}
+.rfoot{padding:10px 15px;border-top:1px solid var(--hair);}
+.rfoot a{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none;}
+.dot{width:11px;height:11px;display:block;}
+.notes p{font-size:12px;line-height:1.66;color:#6a584a;font-weight:300;margin-bottom:9px;}
+.notes b{font-weight:500;color:var(--ink2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h2>The task workspace</h2>
+<div class="cap">Worksheet left, record right. <b>Answered questions keep their row</b> — label on the left, answer on the right, sage tick, and a muted <b>Edit</b> that reopens it. Nothing grows or collapses in height as you work; the form is a fixed ledger of four rows that fills in. Click through it.</div>
+
+<div class="ws">
+  <div class="wsheet fc"><div class="rim">
+    <div class="band">
+      <div class="deed">Send your <i>full manuscript</i> for <i>Murphy's Day Out</i> to <i>Jonathan Marsh</i> at <i>The Marsh Agency</i></div>
+      <div class="b-nav"><button>‹</button><button>›</button></div>
+    </div>
+    <div class="form">
+      <div id="acc"></div>
+      <div class="addrow">
+        <span class="addlink" id="al1">+ Anything else going with it</span>
+        <span class="addlink" id="al2">+ Add a note for your file</span>
+      </div>
+      <div class="act">
+        <span class="wr" id="wr"><span class="lead">This records</span>—</span>
+        <span style="margin-left:auto;"></span>
+        <button class="ab quiet">Snooze</button>
+        <button class="ab quiet">Dismiss</button>
+        <button class="ab go" id="go">Log as sent<span class="n" id="chip">4 to answer</span></button>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="rec fc"><div class="rim">
+    <div class="rhead"><span class="t">The record</span><span class="stat">Full requested</span></div>
+    <div class="rtiles">
+      <div class="rtile"><div class="k">Jonathan's waited</div><div class="v">7 weeks</div></div>
+      <div class="rtile"><div class="k">Query with him since</div><div class="v">2 Apr<small>20 weeks ago</small></div></div>
+      <div class="rtile"><div class="k">Sent previously</div><div class="v absent">None sent</div></div>
+    </div>
+    <div class="rtl"><div class="tl">
+      <div class="re"><span class="sd"><svg class="dot" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/></svg></span><div class="t">Query sent</div><div class="d">2 Apr · via email</div></div>
+      <div class="gapr"><span>same day</span></div>
+      <div class="re"><span class="sd"><svg class="dot" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#8a9e88" stroke-width="1.5"/><path d="M6 1 A5 5 0 0 1 9.76 3.5 L6 6 Z" fill="#8a9e88"/></svg></span><div class="t">Full requested</div><div class="d">2 Apr · via email</div></div>
+      <div class="gapr"><span>20 weeks quiet</span></div>
+      <div class="re"><span class="sd"><svg class="dot" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="#7c3d3d"/></svg></span><div class="t" style="color:var(--burg);">Your turn</div><div class="d">Today</div></div>
+    </div></div>
+    <div class="rfoot"><a href="#">Open the full query →</a></div>
+  </div></div>
+</div>
+
+<div class="fc notes" style="margin-top:20px;"><div class="rim" style="padding:15px 17px;">
+  <p><b>Why the rows don't move.</b> Each question owns one 40px row whether open or answered — open, the pills sit beneath it; answered, the answer sits in the row's right-hand end. So the form's height changes only by the height of the open question's pills, and the answered ledger above it is stable to read and to click.</p>
+  <p><b>Edit is deliberately quiet</b> — muted until hover, no icon, no button chrome. It is a correction affordance, not an invitation; the writer's eye should go to the open question, not to four ways of changing settled ones.</p>
+  <p><b>The record card fills its own height</b> — status, three tiles, the story with the silences labelled, the query link at the foot. It no longer has to match the worksheet's height, because it is dense by nature and the worksheet is short by design.</p>
+  <p><b>What the strip still does:</b> the answered rows now carry the facts, so "This records" shortens to the consequences the rows can't show — the two future dates. When nothing is answered it is an em-dash; it never repeats a row.</p>
+</div></div>
+
+</div>
+<script>
+const QS=[
+  {id:'unit',l:'What you sent',opts:['3 chapters','10 pages','10,000 words'],hint:'Pick the unit you actually sent in — one only.'},
+  {id:'when',l:'When',opts:['Today','Yesterday','Another date…']},
+  {id:'expect',l:'Reply expected',opts:['4 weeks','6 weeks','8 weeks','12 weeks','A date…'],hint:'Their stated window is 6 weeks.'},
+  {id:'remind',l:'Nudge reminder',opts:['On the day','The week before','A date…','No reminder'],hint:'The reminder lands here, on your list, when the time comes.'},
+];
+const ans=QS.map(()=>null);
+let open=0;
+function render(){
+  const host=document.getElementById('acc');host.innerHTML='';
+  QS.forEach((q,i)=>{
+    const d=document.createElement('div');
+    d.className='q'+(i===open?' open':'')+(ans[i]?' done':'');
+    let h='<div class="head"><span class="sqm"></span><span class="ql">'+q.l+'</span>';
+    if(ans[i]!==null&&i!==open){
+      h+='<span class="ans">'+ans[i]+'<span class="tick">✓</span><span class="edit" data-e="'+i+'">Edit</span></span>';
+    }
+    h+='</div>';
+    h+='<div class="body"><div class="seg">'+q.opts.map(o=>'<button class="'+(ans[i]===o?'on':'')+'">'+o+'</button>').join('')+'</div>'
+      +(q.hint?'<div class="hint">'+q.hint+'</div>':'')+'</div>';
+    d.innerHTML=h;
+    d.querySelectorAll('.seg button').forEach((b,bi)=>b.onclick=()=>{
+      ans[i]=q.opts[bi];
+      const n=ans.findIndex(a=>a===null);
+      open=n;render();
+    });
+    const e=d.querySelector('.edit');
+    if(e)e.onclick=()=>{open=i;render();};
+    host.appendChild(d);
+  });
+  const missing=ans.filter(a=>a===null).length;
+  const chip=document.getElementById('chip');
+  chip.style.display=missing?'':'none';chip.textContent=missing+' to answer';
+  const bits=[];
+  if(ans[2])bits.push('reply expected around <b>'+ans[2].toLowerCase()+' from then</b>');
+  if(ans[3])bits.push(/no reminder/i.test(ans[3])?'no nudge reminder':'a nudge reminder lands here <b>'+ans[3].toLowerCase()+'</b>');
+  document.getElementById('wr').innerHTML='<span class="lead">This records</span>'+(bits.length?bits.join('; ')+'.':'—');
+}
+render();
+</script>
+</body>
+</html>

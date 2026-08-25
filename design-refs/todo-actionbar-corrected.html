@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — the action bar, corrected</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f7f4ee;--white:#fff;--field:#fdfbf7;--ink:#241209;--ink2:#3a1c14;--muted:#9c8878;--muted2:#8a7a6c;--hair:#e7ddd2;--hair2:#e0d5c8;--edge:#e8e0d8;--burg:#7c3a2a;--sage:#5a6e58;--pink:#f5e2da;--pink-b:#e8c8bc;
+--u1:#f3e0d6;--u2:#eed7ca;--ur:rgba(124,58,42,0.16);--gap:12px;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);min-height:100vh;padding:28px 26px 80px;}
+.wrap{max-width:1180px;margin:0 auto;}
+h2{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2);margin:0 0 3px;}
+.cap{font-size:12px;color:#6a584a;font-weight:300;line-height:1.6;max-width:900px;margin-bottom:13px;}
+.cap b{font-weight:500;color:var(--ink2);}
+.fc{background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);}
+.rim{border:1px solid rgba(124,58,42,0.28);border-radius:9px;overflow:hidden;background:var(--white);}
+.band{padding:13px 18px 12px;background:linear-gradient(135deg,var(--u1),var(--u2));border-bottom:1px solid var(--ur);display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.deed{font-family:'Playfair Display',serif;font-size:16px;font-weight:400;color:var(--ink2);line-height:1.34;}
+.deed b{font-weight:600;}
+.deed a{font-weight:600;color:inherit;text-decoration:none;border-bottom:1px dotted rgba(58,28,20,0.42);cursor:pointer;}
+.deed a:hover{border-bottom-style:solid;border-bottom-color:var(--burg);color:var(--burg);}
+.b-nav{display:flex;gap:6px;flex-shrink:0;}
+.b-nav button{cursor:pointer;width:26px;height:26px;border-radius:8px;background:rgba(255,253,250,0.8);border:0.5px solid rgba(58,28,20,0.13);color:var(--ink2);}
+
+/* ═══════════ THE CORRECTED MECHANISM ═══════════
+   No sticky, no page scroll. The pane is a fixed-height column:
+     header card (fixed) · worksheet card (scrolls INSIDE its own rim) · action bar (fixed, last)
+   The rim clips — work scrolls out of sight and never reappears below.
+   The column stretches to the row's height, so the bar's bottom edge always
+   lands on the same line as the record card's bottom edge.                     */
+.ws{display:grid;grid-template-columns:minmax(0,1fr) 288px;gap:var(--gap);align-items:stretch;height:100%;}
+.paneCol{display:flex;flex-direction:column;gap:var(--gap);min-width:0;min-height:0;}
+.hdr{flex:0 0 auto;}
+.work{flex:1 1 auto;min-height:0;display:flex;}            /* the card grows and shrinks   */
+.work .rim{display:flex;flex-direction:column;min-height:0;width:100%;}
+.workscroll{overflow-y:auto;min-height:0;}                  /* the scroller, clipped by rim */
+.workscroll::-webkit-scrollbar{width:9px;}
+.workscroll::-webkit-scrollbar-thumb{background:#e2d6c8;border-radius:5px;border:2px solid var(--white);}
+.actbar{flex:0 0 auto;display:flex;align-items:center;gap:9px;padding:11px 16px;background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05);}
+/* the record hugs its content, and scrolls its story if it would outgrow the pane */
+.rec{align-self:stretch;display:flex;min-height:0;}
+.rec.hug{align-self:start;}
+.rec .rim{display:flex;flex-direction:column;min-height:0;width:100%;}
+.recscroll{overflow-y:auto;min-height:0;}
+.recscroll::-webkit-scrollbar{width:9px;}
+.recscroll::-webkit-scrollbar-thumb{background:#e2d6c8;border-radius:5px;border:2px solid var(--white);}
+
+.wr{font-size:11.5px;color:#6a584a;font-weight:300;}
+.wr .lead{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-right:6px;}
+.ab{cursor:pointer;height:32px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;font-size:11.5px;font-weight:500;}
+.ab.quiet{background:var(--white);border:1px solid var(--edge);color:#57534e;}
+.ab.go{background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600;}
+.ab .n{font-family:'JetBrains Mono',monospace;font-size:8.5px;background:var(--burg);color:#fffdfa;border-radius:999px;padding:2px 6px;margin-left:6px;}
+
+/* form */
+.form{padding:4px 18px 13px;}
+.q{border-bottom:1px solid var(--hair);}
+.q:last-of-type{border-bottom:0;}
+.q .head{display:flex;align-items:center;gap:9px;min-height:40px;padding:5px 0;}
+.q .sqm{width:7px;height:7px;background:var(--burg);border-radius:2px;flex-shrink:0;visibility:hidden;animation:sq 1.6s ease-in-out infinite;}
+.q.open .sqm{visibility:visible;}
+@keyframes sq{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(0.72);opacity:0.55;}}
+.q .ql{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:500;}
+.q.open .ql{color:var(--ink2);}
+.q.done .ql{color:#b3a494;}
+.q .ans{font-size:12.5px;color:var(--ink2);font-weight:500;margin-left:auto;display:flex;align-items:center;gap:9px;}
+.q .ans .tick{color:var(--sage);font-size:11px;}
+.q .edit{font-size:10.5px;color:#b3a494;cursor:pointer;}
+.q .edit:hover{color:var(--burg);}
+.q .body{display:none;padding:0 0 12px 16px;}
+.q.open .body{display:block;}
+.seg{display:flex;gap:7px;flex-wrap:wrap;}
+.seg button{cursor:pointer;font-size:11.5px;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:7px 12px;color:var(--ink2);}
+.seg button.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500;}
+.hint{font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:8px;}
+.filler p{font-size:11.5px;color:var(--muted2);font-weight:300;line-height:1.95;padding:6px 0 0;}
+
+/* record card */
+.rhead{flex:0 0 auto;padding:11px 14px;background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid rgba(90,110,88,0.2);display:flex;justify-content:space-between;align-items:center;}
+.rhead .t{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:#3c4a3a;font-weight:500;}
+.rhead .stat{font-family:'Playfair Display',serif;font-size:11.5px;color:#2e3a2c;font-weight:500;}
+.rtiles{padding:3px 14px;}
+.rtile{padding:8px 0;border-bottom:1px solid #f0e9df;}
+.rtile:last-child{border-bottom:0;}
+.rtile .k{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.rtile .v{font-family:'Playfair Display',serif;font-size:14px;font-weight:500;color:var(--ink2);margin-top:2px;}
+.rtile .v small{font-family:'Inter',sans-serif;font-size:9.5px;color:var(--muted2);font-weight:300;display:block;}
+.rtile .v.absent{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;}
+.rtl{padding:10px 14px 11px;border-top:1px solid var(--hair);}
+.tl{position:relative;padding-left:18px;}
+.tl::before{content:'';position:absolute;left:5px;top:6px;bottom:6px;width:1.5px;background:#e1d7d0;}
+.re{position:relative;padding:4px 0;}
+.re .sd{position:absolute;left:-18px;top:5px;}
+.re .t{font-size:10.5px;font-weight:500;color:var(--ink);}
+.re .d{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.08em;color:var(--muted);margin-top:1px;}
+.gapr span{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:0.09em;text-transform:uppercase;color:#c8b8a6;padding:2px 0;display:block;}
+.rfoot{flex:0 0 auto;padding:9px 14px;border-top:1px solid var(--hair);}
+.rfoot a{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none;}
+.dot{width:10px;height:10px;display:block;}
+
+/* frame simulator — no page scroll anywhere */
+.vp{height:452px;background:var(--ground);border:1px dashed #d8cbbb;border-radius:14px;padding:12px;overflow:hidden;}
+.toggle{display:flex;gap:8px;margin-bottom:11px;flex-wrap:wrap;}
+.toggle button{cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;background:var(--white);border:1px solid var(--edge);border-radius:999px;padding:7px 13px;color:var(--muted2);}
+.toggle button.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500;}
+.notes p{font-size:12px;line-height:1.66;color:#6a584a;font-weight:300;margin-bottom:9px;}
+.notes b{font-weight:500;color:var(--ink2);}
+code{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--field);border:0.5px solid var(--hair2);border-radius:4px;padding:1px 5px;}
+.rule{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;margin:14px 0 6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h2>The action bar — corrected</h2>
+<div class="cap">Two faults fixed. <b>Nothing scrolls behind or beneath the bar</b> — the work scrolls inside its own card, clipped by the card's rim, so it leaves at the card's edge and does not reappear. And <b>the bar's bottom edge sits on exactly the same line as the record card's</b>, because the pane column stretches to the row's height rather than sticking to the screen. Try all three.</div>
+
+<div class="toggle">
+  <button class="on" onclick="mode('short',this)">1 · Short work, tall record</button>
+  <button onclick="mode('even',this)">2 · Evenly matched</button>
+  <button onclick="mode('long',this)">3 · Long work — scroll it</button>
+</div>
+
+<div class="vp">
+  <div class="ws">
+    <div class="paneCol">
+      <div class="hdr fc"><div class="rim"><div class="band">
+        <div class="deed">Consider closing your query for <a>Murphy's Day Out</a> to <a>Jonathan Marsh</a> at <b>The Marsh Agency</b></div>
+        <div class="b-nav"><button>‹</button><button>›</button></div>
+      </div></div></div>
+
+      <div class="work fc" id="work"><div class="rim">
+        <div class="workscroll"><div class="form">
+          <div id="acc"></div>
+          <div class="filler" id="filler" style="display:none;">
+            <p>· stand-in for a long journey — a bulk table, a wide sample list<br>· scroll this card<br>· the work disappears at the card's top and bottom edges<br>· it does not pass behind the bar<br>· and it never reappears beneath it<br>· because the scroller is inside the rim<br>· and the rim clips<br>· the bar is outside the scroller entirely<br>· a sibling, not a lid<br>· keep going<br>· the last line sits flush with the card's foot<br>· nothing is hidden under anything</p>
+          </div>
+        </div></div>
+      </div></div>
+
+      <div class="actbar">
+        <span class="wr"><span class="lead">This records</span>—</span>
+        <span style="margin-left:auto;"></span>
+        <button class="ab quiet">Snooze</button><button class="ab quiet">Dismiss</button>
+        <button class="ab go">Log the close<span class="n">1 to answer</span></button>
+      </div>
+    </div>
+
+    <div class="rec fc" id="rec"><div class="rim">
+      <div class="rhead"><span class="t">The record</span><span class="stat">Full sent</span></div>
+      <div class="recscroll">
+        <div class="rtiles">
+          <div class="rtile"><div class="k">You've waited</div><div class="v">124 weeks</div></div>
+          <div class="rtile"><div class="k">Most recent interaction</div><div class="v">Full sent<small>9 Apr · via email</small></div></div>
+          <div class="rtile"><div class="k">Sent previously</div><div class="v absent">None sent</div></div>
+        </div>
+        <div class="rtl"><div class="tl">
+          <div class="re"><span class="sd"><svg class="dot" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/></svg></span><div class="t">Query sent</div><div class="d">9 Apr · via email</div></div>
+          <div class="gapr"><span>same day</span></div>
+          <div class="re"><span class="sd"><svg class="dot" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#8a9e88" stroke-width="1.5"/><path d="M6 1 A5 5 0 0 1 9.76 3.5 L6 6 Z" fill="#8a9e88"/></svg></span><div class="t">Full requested</div><div class="d">9 Apr · via email</div></div>
+          <div class="gapr"><span>same day</span></div>
+          <div class="re"><span class="sd"><svg class="dot" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/><circle cx="6" cy="6" r="2.5" fill="#7c3d3d"/></svg></span><div class="t">Full sent</div><div class="d">9 Apr · via email</div></div>
+          <div class="gapr"><span>124 weeks quiet</span></div>
+          <div class="re"><span class="sd"><svg class="dot" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="#7c3d3d"/></svg></span><div class="t" style="color:var(--burg);">Your turn</div><div class="d">Today</div></div>
+        </div></div>
+      </div>
+      <div class="rfoot"><a href="#">Open the full query →</a></div>
+    </div></div>
+  </div>
+</div>
+
+<div class="fc notes" style="margin-top:20px;"><div class="rim" style="padding:15px 17px;">
+  <p><b>What changed, and why the old one failed.</b> Sticky positioning can only hold a bar <i>over</i> the scrolling page — the content still exists behind and below it, and it reappears in whatever strip sits beneath. The corrected pane doesn't scroll at all. The worksheet card owns a scroller <b>inside its rim</b>; the rim has <code>overflow: hidden</code>, so work vanishes at the card's edge and there is nothing underneath to reappear. The bar is the card's <b>sibling</b>, not a lid over it.</p>
+  <p><b>Alignment is now structural rather than coincidental.</b> The grid row is <code>align-items: stretch</code>; the pane column is a flex column of three parts — header (fixed), worksheet (<code>flex: 1</code>, shrinks and scrolls), bar (fixed, last). The column therefore always fills the row's height exactly, so the bar's bottom edge and the record card's bottom edge are the same line by construction. Try toggle 1: they end together, with no shadow tricks holding them there.</p>
+  <p><b>The record scrolls its own story</b> the same way if a long history would outgrow the pane — header and the query link stay put, the middle scrolls, and the card still ends where the bar ends.</p>
+  <p><b>The result:</b> one screen, no page scroll, two columns that always finish on the same line, and a bar that is never a lid.</p>
+</div></div>
+
+</div>
+<script>
+const SETS={
+  short:[{l:'When',opts:['Today','Yesterday','Another date…']}],
+  even:[{l:'When',opts:['Today','Yesterday','Another date…']},
+        {l:'Reply expected',opts:['4 weeks','6 weeks','8 weeks','A date…'],hint:'Their stated window is 6 weeks.'},
+        {l:'Nudge reminder',opts:['On the day','The week before','No reminder']}],
+  long:[{l:'What you sent',opts:['3 chapters','10 pages','10,000 words'],hint:'Pick the unit you actually sent in — one only.'},
+        {l:'When',opts:['Today','Yesterday','Another date…']},
+        {l:'Reply expected',opts:['4 weeks','6 weeks','8 weeks','12 weeks','A date…'],hint:'Their stated window is 6 weeks.'},
+        {l:'Nudge reminder',opts:['On the day','The week before','A date…','No reminder'],hint:'The reminder lands here, on your list, when the time comes.'}],
+};
+let SET=SETS.short,ans=[null],open=0;
+function render(){
+  const host=document.getElementById('acc');host.innerHTML='';
+  SET.forEach((q,i)=>{
+    const d=document.createElement('div');
+    d.className='q'+(i===open?' open':'')+(ans[i]?' done':'');
+    let h='<div class="head"><span class="sqm"></span><span class="ql">'+q.l+'</span>';
+    if(ans[i]&&i!==open)h+='<span class="ans">'+ans[i]+'<span class="tick">✓</span><span class="edit">Edit</span></span>';
+    h+='</div><div class="body"><div class="seg">'+q.opts.map(o=>'<button class="'+(ans[i]===o?'on':'')+'">'+o+'</button>').join('')+'</div>'+(q.hint?'<div class="hint">'+q.hint+'</div>':'')+'</div>';
+    d.innerHTML=h;
+    d.querySelectorAll('.seg button').forEach((b,bi)=>b.onclick=()=>{ans[i]=q.opts[bi];const n=ans.findIndex(a=>!a);open=n===-1?-1:n;render();});
+    const e=d.querySelector('.edit');if(e)e.onclick=()=>{open=i;render();};
+    host.appendChild(d);
+  });
+}
+function mode(m,btn){
+  document.querySelectorAll('.toggle button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  SET=SETS[m];ans=SET.map(()=>null);open=0;
+  document.getElementById('filler').style.display=m==='long'?'':'none';
+  /* short/even: the work card hugs its content so the pane's height comes from the record;
+     long: the work card takes the remaining height and scrolls inside itself */
+  document.getElementById('work').style.flex=(m==='long')?'1 1 auto':'0 0 auto';
+  document.querySelector('.workscroll').scrollTop=0;
+  render();
+}
+document.getElementById('work').style.flex='0 0 auto';
+render();
+</script>
+</body>
+</html>
