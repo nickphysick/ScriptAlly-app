@@ -53,7 +53,7 @@ import { materialRowsFromAgent, type MaterialRow } from "../../lib/agentMaterial
 import { formatQueryMaterials } from "../../lib/materials";
 import { journeyKind, isBulkCard, anchorFor, requirementsOf, unansweredOf, firstMissingOf, type GateAnswers } from "../../lib/paneGate";
 import {
-  JOURNEYS, journeyIdFor, flowFor, intentOf, crossoverOf, CROSSOVER_REASON,
+  JOURNEYS, JOURNEY_DEED_BUCKET, journeyIdFor, flowFor, intentOf, crossoverOf, CROSSOVER_REASON,
   type JourneyId, type JourneyFlow,
 } from "../../lib/journeys";
 import { paneCommits, paneCommitValues } from "../../lib/paneCommit";
@@ -1019,6 +1019,7 @@ export function useTaskPaneSession(
                        the fork until an intent is chosen and the receipt afterwards. */
                     ...(activeId ? {
                       band: JOURNEYS[activeId].band,
+                      deedAs: JOURNEY_DEED_BUCKET[activeId],
                       ...(effectiveIntent === null && JOURNEYS[activeId].fork.options.length > 1
                         ? { fork: {
                             label: JOURNEYS[activeId].fork.label,

@@ -88,6 +88,8 @@ export interface JourneyInputs {
   /* ── the fork (journey round, Phase 2) ──────────────────────────────────────────────────── */
   /** the band's paper, from the JOURNEY's declaration — a crossover changes it with everything else */
   band?: "now" | "house" | "yours";
+  /** the sentence the ACTIVE journey would say — see `DeedParts.as`; a crossover needs it */
+  deedAs?: DeedParts["as"];
   fork?: TaskPaneFork;
   receipt?: TaskPaneReceipt;
   /** answers were discarded when the intent changed, and the pane says so once */
@@ -252,6 +254,10 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
       agency: bandUnder(c),
       ...(typeof input.partial === "boolean" ? { partial: input.partial } : {}),
       ...(input.bulk ? { bulkCount: input.bulk.count } : {}),
+      /* ⚠️ THE ACTIVE JOURNEY'S SENTENCE. Without this the deed stays the CARD's while the band,
+         the flow and the primary have all crossed — measured, and it read as the pane describing
+         the act the writer had just decided against. */
+      ...(input.deedAs ? { as: input.deedAs } : {}),
     }, {
       ...(input.onOpenManuscript ? { manuscript: input.onOpenManuscript } : {}),
       ...(input.onOpenAgent ? { agent: input.onOpenAgent } : {}),

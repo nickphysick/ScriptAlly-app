@@ -185,6 +185,19 @@ export interface DeedParts {
   partial?: boolean;
   /** how many queries a cohort stands for */
   bulkCount?: number;
+  /**
+   * ⚠️ THE SENTENCE THE ACTIVE JOURNEY WOULD SAY, RATHER THAN THE CARD'S OWN (journey round,
+   * Phase 3 — found by MEASUREMENT, not by reading).
+   *
+   * A crossover swaps the journey: band, deed, flow and primary together. The band and the flow
+   * both followed, because both read the active journey — the deed did NOT, because it switches on
+   * `cardBucket(c)`, which is a fact about the CARD. Measured on the page: crossing from a send to
+   * a close changed the band `u-now → u-house` and left the deed reading "Send your full
+   * manuscript…" above a close fork. A sentence describing the act you have just decided against.
+   *
+   * Absent everywhere else, so every existing caller keeps the card's own bucket exactly.
+   */
+  as?: Bucket;
 }
 
 /**
@@ -217,7 +230,7 @@ export function deedSentence(c: BoardCard, p: DeedParts = {}): DeedSpan[] {
     return out;
   };
 
-  switch (cardBucket(c)) {
+  switch (p.as ?? cardBucket(c)) {
     case "send": {
       const what = (p.partial ?? c.taskType === "partial_requested") ? "partial manuscript" : "full manuscript";
       return [{ text: "Send your " }, { text: what, em: true }, ...forTitle(), ...to()];

@@ -9,9 +9,10 @@
  */
 import { describe, it, expect } from "vitest";
 import {
-  JOURNEYS, journeyIdFor, flowFor, intentOf, crossoverOf, CROSSOVER_REASON,
+  JOURNEYS, JOURNEY_DEED_BUCKET, journeyIdFor, flowFor, intentOf, crossoverOf, CROSSOVER_REASON,
   type JourneyId,
 } from "./journeys";
+import { deedSentence } from "./todoBuckets";
 import { requiredFor } from "./paneGate";
 import { BoardCard } from "./todoBoard";
 
@@ -305,5 +306,44 @@ describe("⚠️ every delay question is answerable, and no delay invents a date
      stops "hold me to it" reading as a half-finished send. */
   it("the send's hold-me-to-it says nothing is recorded on the query", () => {
     expect(JOURNEYS.send.flows.later.delayHints!.holdday!).toMatch(/nothing is recorded on the query/i);
+  });
+});
+
+/**
+ * ⚠️ A CROSSOVER SWAPS THE WHOLE JOURNEY, INCLUDING THE SENTENCE (journey round, Phase 3 — found by
+ * MEASUREMENT, not by reading).
+ *
+ * The band and the flow both followed the active journey because both read it; the DEED did not,
+ * because `deedSentence` switches on `cardBucket(c)` — a fact about the CARD. Measured on the page:
+ * crossing a send to a close changed the band `u-now → u-house` and left the deed reading "Send your
+ * full manuscript…" above a close fork, describing the act the writer had just decided against.
+ */
+describe("⚠️ the deed follows the journey, not the card", () => {
+  it("every journey declares which sentence its deed is written in", () => {
+    for (const id of IDS) {
+      expect(JOURNEY_DEED_BUCKET[id], `${id} has no deed sentence`).toBeTruthy();
+    }
+    /* the two that share `fix` do so because both are housekeeping about a record */
+    expect(JOURNEY_DEED_BUCKET.fillin).toBe("fix");
+    expect(JOURNEY_DEED_BUCKET.agentgap).toBe("fix");
+    expect(JOURNEY_DEED_BUCKET.nudge).toBe("chase");
+  });
+
+  it("a send card crossed to close says the CLOSE sentence, not the send's", () => {
+    const c = card({ taskType: "full_requested", msTitle: "The Smoke Test", who: "Marcus Reed" });
+    const parts = { title: "The Smoke Test", agent: "Marcus Reed", agency: "Reed & Partners" };
+    const own = deedSentence(c, parts).map((x) => x.text).join("");
+    const crossed = deedSentence(c, { ...parts, as: JOURNEY_DEED_BUCKET.close }).map((x) => x.text).join("");
+    expect(own).toMatch(/^Send your/);
+    expect(crossed, "the deed stayed on the origin journey").toMatch(/^Consider closing/);
+    expect(crossed, "the crossed sentence lost the manuscript").toContain("The Smoke Test");
+    expect(crossed, "the crossed sentence lost the agent").toContain("Marcus Reed");
+  });
+
+  /* ⚠️ AND `as` IS ABSENT EVERYWHERE ELSE, so every existing caller keeps the card's own bucket
+     exactly — the override is what a crossover needs and what nothing else may quietly acquire. */
+  it("without the override the sentence is the card's, unchanged", () => {
+    const c = card({ taskType: "nudge_overdue", who: "Ana Duarte" });
+    expect(deedSentence(c, { agent: "Ana Duarte" }).map((x) => x.text).join("")).toMatch(/^Nudge /);
   });
 });

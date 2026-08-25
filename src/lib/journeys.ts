@@ -417,6 +417,23 @@ export function journeyIdFor(card: BoardCard): JourneyId {
   }
 }
 
+/**
+ * ⚠️ WHICH SENTENCE A JOURNEY'S DEED IS WRITTEN IN. `deedSentence` switches on a `Bucket`, which is
+ * a fact about the CARD — right until a crossover makes the active journey different from the
+ * card's. Measured: crossing a send to a close changed the band and left the deed reading "Send
+ * your full manuscript…" above a close fork. This is the translation, declared once.
+ */
+export const JOURNEY_DEED_BUCKET: Record<JourneyId, "send" | "decide" | "chase" | "close" | "fix" | "note"> = {
+  send: "send",
+  nudge: "chase",
+  close: "close",
+  fillin: "fix",
+  note: "note",
+  offer: "decide",
+  agentgap: "fix",
+  bulk: "fix",
+};
+
 /** A journey's declaration. Total over the union, so there is no absent case to handle. */
 export const journeyOf = (id: JourneyId): Journey => JOURNEYS[id];
 
