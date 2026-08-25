@@ -126,6 +126,17 @@ service cloud.firestore {
         // unlimited comps; the Pro boundary is the Scout). ARTEFACT-LOCKED to MAX_COMPS in
         // src/lib/comps.ts — if the two drift, the client permits a write this rule denies SILENTLY.
         && (!data.keys().hasAll(['comps']) || (data.comps is list && data.comps.size() <= 100))
+        // ── BOOK VERSIONS — named orderings of the book (manuscript-versions pack, D1/D4) ──────
+        // ⚠️ NOT the `versions` SUBCOLLECTION, which holds MATERIALS. Different thing, same word;
+        // the field is `bookVersions` for exactly that reason. See src/types.ts.
+        //
+        // ⚠️ THE SHAPE IS OWNED BY src/lib/bookVersions.ts, WHICH IS THE SINGLE WRITER — the same
+        // division `queryingGoals` above already uses. This rule guards the list and its size; it
+        // does not restate each entry's fields, because two definitions of one shape drift.
+        //
+        // ⚠️ THE CAP IS ARTEFACT-LOCKED TO `MAX_BOOK_VERSIONS`. If the constant moves and this does
+        // not, the client permits an append this rule denies with no message.
+        && (!data.keys().hasAny(['bookVersions']) || (data.bookVersions is list && data.bookVersions.size() <= 50))
         && data.status is string && (
           data.status == 'Drafting' ||
           data.status == 'Revising' ||
@@ -158,6 +169,11 @@ service cloud.firestore {
         && (!data.keys().hasAll(['fileName']) || (data.fileName is string && data.fileName.size() <= 512))
         && (!data.keys().hasAll(['contentDraft']) || (data.contentDraft is string && data.contentDraft.size() <= 262144))
         && (!data.keys().hasAll(['notes']) || (data.notes is string && data.notes.size() <= 16384))
+        // Which BOOK version a sample excerpts (D2). Optional — every material written before this
+        // deploy has none and must stay valid. Sample-pages-only is a CLIENT rule (bookVersionOf in
+        // src/lib/bookVersions.ts): a componentType changed after the fact would otherwise make an
+        // existing, valid document unwritable, which is a worse failure than an ignored field.
+        && (!data.keys().hasAny(['bookVersionId']) || (data.bookVersionId is string && data.bookVersionId.size() <= 128))
         // ⚠️ 'ref' IS THE NAME-ONLY MODE AND IS NOT 'link'. link was a URL to where the text lives;
         // ref records that the material exists elsewhere and names the file. Added rather than
         // repurposing link, which would relabel every stored URL as a filename.
@@ -524,7 +540,15 @@ service cloud.firestore {
         // THIS send — a query-level `materialsWanted` had to carry both "what the agent asks for"
         // and "what you sent", which is the ambiguity that stopped a sent-flag being added.
         && (data.get('materials', null) == null
-            || ((data.materials is list || data.materials is map) && data.materials.size() <= 20));
+            || ((data.materials is list || data.materials is map) && data.materials.size() <= 20))
+        // ── which BOOK version this send carried (D3) ─────────────────────────────────────────
+        // ⚠️ OPTIONAL, and payload only. `recomputeQuery` does not read it — a version annotates an
+        // event, it never decides a status, which is why this feature needed no change there.
+        //
+        // ⚠️ SENDS ONLY IS A CLIENT RULE, not this one. Restating "Full Sent or Partial Sent" here
+        // would make a CORRECTION that moves an event between statuses fail on a field it is not
+        // touching; the client is the single writer and never puts one on another type.
+        && (!data.keys().hasAny(['bookVersionId']) || (data.bookVersionId is string && data.bookVersionId.size() <= 128));
     }
 
     function isValidJournalEntry(data, userId) {
@@ -610,7 +634,7 @@ service cloud.firestore {
         allow create: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly([
-            'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comps', 'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved', 'activePackageId'
+            'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comps', 'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved', 'activePackageId', 'bookVersions'
           ])
         );
 
@@ -633,7 +657,7 @@ service cloud.firestore {
           // be perfectly validated above and still be undeployable, because isValidVersion runs on
           // every write while hasOnly runs only on updates. Archiving IS an update and nothing else,
           // so leaving it out here would deny every archive silently while the validator said yes.
-          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft', 'notes', 'contentType', 'contentLink', 'wordCount', 'status'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft', 'notes', 'contentType', 'contentLink', 'wordCount', 'status', 'bookVersionId'])
         );
       }
 
@@ -748,7 +772,7 @@ service cloud.firestore {
           // filed under a query belonging to a different manuscript while the feed still counted
           // it against the old book — which is worse than the denial it replaces, because it looks
           // correct on the page the writer is standing on.
-          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials', 'queryId', 'manuscriptId'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials', 'queryId', 'manuscriptId', 'bookVersionId'])
         );
       }
 

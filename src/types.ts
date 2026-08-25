@@ -236,6 +236,42 @@ export interface CompTitle {
   verification?: CompVerification;
 }
 
+/**
+ * ⚠️ THE WORD "VERSION" MEANS TWO DIFFERENT THINGS IN THIS REPO, AND THIS IS THE OTHER ONE.
+ *
+ * `ManuscriptVersion` (below) is a MATERIAL — a query letter, a synopsis, a set of sample pages —
+ * living in the `users/{uid}/versions` subcollection. A `BookVersion` is a named ordering or
+ * revision of the BOOK: "Prologue-first", "Worldbuilding-first", "Post-R&R". They are unrelated,
+ * and a sample material REFERENCES a book version (`ManuscriptVersion.bookVersionId`).
+ *
+ * ⚠️ SO THE STORED FIELD IS `bookVersions`, NOT `versions` — a DELIBERATE DEVIATION from the pack's
+ * D1 wording, recorded rather than made quietly. `versions` is not free: it is already the name of
+ * the material-version prop on `ManuscriptDossier`, `ManuscriptPackagesPane`, `PackageModal` and
+ * `TrackingBand` — including the very component that hosts the new panel, where `manuscript.versions`
+ * and `versions` would have sat three lines apart meaning different things. The writer-facing word
+ * stays "version" everywhere in the UI, per the ref; only the identifier is disambiguated.
+ *
+ * Append-only, on the pattern `User.queryingGoals` already ships: entries are added, never removed,
+ * and the shape is owned by one module (lib/bookVersions.ts) rather than by the rules.
+ */
+export type BookVersionKind = "initial" | "reordering" | "revision";
+
+export interface BookVersion {
+  id: string;
+  name: string;
+  kind: BookVersionKind;
+  /** Date-only "YYYY-MM-DD", London calendar — day-granular, like every other dated field here. */
+  createdDate: string;
+  /** The writer's own words about what changed. Absent means unwritten, never "". */
+  note?: string;
+  /**
+   * The activity that prompted this version — an R&R. Absent on every version nobody asked for.
+   * ⚠️ IT IS A LINK, NOT A CAUSE: nothing derives state from it, and a version whose activity has
+   * since been deleted simply stops offering the link (see `rrLink` in lib/bookVersions.ts).
+   */
+  fromActivityId?: string;
+}
+
 export interface Manuscript {
   id: string;
   userId: string;
@@ -286,6 +322,15 @@ export interface Manuscript {
   // Pre-fills `packageId` on a newly logged query. Absent === no active package yet. Resolve via
   // resolveActivePackage() (returns null when it points at a retired/missing/cross-manuscript package).
   activePackageId?: string;
+  /**
+   * Named orderings and revisions of this book — append-only; see `BookVersion` above for why the
+   * key is not `versions`. Absent means the writer has never named one, which is the ordinary case:
+   * a manuscript with fewer than two shows NONE of this feature (no panel, no dropdown, no chip).
+   *
+   * ⚠️ VERSIONS ARE NOT MANUSCRIPTS. They must never count against the free tier's one-manuscript
+   * limit (D6) — orderings of one book are one book. Locked in bookVersions.test.ts.
+   */
+  bookVersions?: BookVersion[];
 }
 
 export enum ComponentType {
@@ -320,6 +365,16 @@ export interface ManuscriptVersion {
    */
   contentType?: "text" | "link" | "file" | "ref";
   contentLink?: string;
+  /**
+   * Which BOOK version these pages come from (D2) — see `BookVersion`. **Sample pages only**: a
+   * letter or a synopsis does not excerpt an ordering of the book, so the field is never offered on
+   * one, and `bookVersionOf()` in lib/bookVersions.ts is the single reader that enforces it.
+   *
+   * ⚠️ THE APP RECORDS THE CLAIM; IT CANNOT VERIFY THE TEXT (D14). Nothing here checks that the
+   * pasted pages match the named version, and nothing ever will — the modal says so in as many
+   * words. Reported, not guaranteed.
+   */
+  bookVersionId?: string;
   /**
    * Put away — the archive model (broadsheet Ruling 2), and the reason there is no blocked delete.
    *
@@ -664,6 +719,15 @@ export interface Activity {
   // these by recomputeQuery — never from parsing description strings. Absent on non-status
   // events (agent added, nudge, …) and on pre-migration records.
   resultingStatus?: QueryStatus;
+  /**
+   * Which BOOK version this send carried (D3) — see `BookVersion`. Present only on a `Full Sent` /
+   * `Partial Sent` event; no other activity type takes one.
+   *
+   * ⚠️ PAYLOAD, NEVER A DETERMINANT. `recomputeQuery` does not read it and must not: a version
+   * annotates an event, it does not decide a status. That is the whole reason the feature could be
+   * built without touching the derivation.
+   */
+  bookVersionId?: string;
 }
 
 export interface JournalEntry {
