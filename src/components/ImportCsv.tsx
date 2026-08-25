@@ -451,7 +451,19 @@ export const ImportCsv: React.FC<{
             ? (starRaw as any)
             : 3;
             
-          const notes = getMappedValue("notes") || "Imported from Zite archives.";
+          /**
+           * ⚠️ NO PROVENANCE IN A FIELD THE WRITER AUTHORS (Ruling 1). This wrote "Imported from Zite
+           * archives." into the agent's own notes — TRUE, and still the same fault as the logline,
+           * only smaller: the app putting its sentence where the writer's belongs. Provenance is
+           * worth keeping; a field the writer thinks is theirs is not the place to keep it.
+           *
+           * ⚠️ AND THE PLACE FOR IT EXISTS BUT IS NOT USED HERE — see F-AJ. `Agent.fieldSources`
+           * records where a value was found and when, and its own docstring states the principle
+           * this ruling restates: "a found fact is never indistinguishable from one the writer
+           * verified/typed". It is per-FIELD, keyed by the field it describes, so it does not model
+           * "this whole record came from a CSV"; and nothing writes it today. Reported, not added.
+           */
+          const notes = getMappedValue("notes");
 
           const agentData = {
             name,
@@ -668,7 +680,10 @@ export const ImportCsv: React.FC<{
         } else if (importType === "activities") {
           const msTitleInput = getMappedValue("manuscriptId");
           const activityTypeInput = getMappedValue("activityType");
-          const description = getMappedValue("description") || "Activity logged via CSV Import.";
+          /* ⚠️ SAME RULING. An activity's description is what HAPPENED, in the writer's words;
+             "Activity logged via CSV Import" is true about the import and says nothing about the
+             event. Empty is honest. */
+          const description = getMappedValue("description");
           const date = getMappedValue("date") ? new Date(getMappedValue("date")).toISOString() : new Date().toISOString();
           const details = getMappedValue("details") || "";
 

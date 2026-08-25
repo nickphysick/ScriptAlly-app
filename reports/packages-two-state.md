@@ -1314,3 +1314,51 @@ The ref's first note says a sent package *"stops changing"*. The pane now offers
 and **Remove**, so the note says which half is frozen: the three materials inside are fixed, and
 which package a query points at stays correctable from the query. A writer who read the ref's
 sentence and then found a Change control would have been told two things.
+
+---
+
+# Ruling 1 — F-AG's three survivors, closed (25 Aug)
+
+**Two stopped.** `notes` no longer writes *"Imported from Zite archives."* and `description` no
+longer writes *"Activity logged via CSV Import."*. Both were **true**, and both were still the
+logline fault at a smaller scale: the app putting its sentence where the writer's belongs.
+
+**One kept.** `responseTimeWeeks: 8` stays. It is the app's stated assumption about agency response
+times rather than a claim about a specific agency, it is visibly editable, and it carries no false
+authorship. **Off the flag list.** It is now asserted in the drive so a later sweep does not remove
+it by pattern-matching the others.
+
+### Measured — an agent imported from a name-only CSV
+
+```
+name  "Empty Fields Probe" · agency "" · email "" · notes "" · mswlNotes ""
+responseTimeWeeks 8
+```
+
+Every column but `Name` was absent from the CSV, which is the whole question: what does the app put
+in a field the writer did not fill? Nothing, now — except the one stated default.
+
+## ⚠️ F-AJ — a writer-neutral provenance field exists, and its own comment about itself is stale
+
+**`Agent.fieldSources`** — `Record<string, { source: string; foundAt: string }>` — is exactly the
+shape the ruling describes, and its docstring already states the principle:
+
+> *"Written ONLY when a found value is saved unedited, so a found fact is never indistinguishable
+> from one the writer verified/typed."*
+
+Its comment says it *"rides a parked firestore.rules edit … saves carrying it are silently denied
+until that deploy lands"*. **That is out of date.** It is in `firestore.rules` at line 251
+(`isValidAgent`) and line 675 (the agent-update allowlist), and `src/lib/hkSave.ts` writes it through
+`withProvenance`. The field is live.
+
+**But it does not fit this job, for two reasons, and neither is a rules problem:**
+
+1. **It is per-FIELD, keyed by the agent field it describes** — "this response time came from the
+   agency page on this date". It has no way to say *"this whole record arrived in a CSV"*.
+2. **It exists on `Agent` only.** Manuscripts and activities have no equivalent, and the two writes
+   just stopped were on an agent's `notes` and an **activity's** `description`.
+
+So carrying import provenance would mean either widening `fieldSources`' meaning to include
+record-level origin, or adding the same shape to `Manuscript` and `Activity` — **a rules-allowlist
+change on two more collections.** Reported, not added, per the red gate. The fields stay empty
+meanwhile, which is the honest state.
