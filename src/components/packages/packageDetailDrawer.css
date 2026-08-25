@@ -7,8 +7,16 @@
  */
 
 .pkgdd-head { position: relative; }
-/* The head repeats the card's band, so the band's own rules paint it — nothing is restated here. */
-.pkgdd-head .pkgb-cardhead { padding: 11px 18px; }
+/**
+ * The head repeats the card's band, so the band's own rules paint it — nothing is restated here
+ * except the room the ✕ needs.
+ *
+ * ⚠️ THE BAND'S RIGHT LABEL AND THE ✕ SHARE A CORNER, AND THEY COLLIDED. `.pkgb-chrt` is pushed
+ * right by `margin-left: auto`; the ✕ is absolutely placed at `right: 10`. On a locked package the
+ * result read `LOCKE✕`. The band's right padding reserves the control's width instead of the ✕
+ * being nudged — moving the ✕ would leave the next label to collide with it from the other side.
+ */
+.pkgdd-head .pkgb-cardhead { padding: 11px 40px 11px 18px; }
 
 .pkgdd-x {
   position: absolute; top: 8px; right: 10px; z-index: 2;

@@ -59,6 +59,14 @@ test("the drawer opens from a card and reads what the card cannot", async ({ pag
       return {
         panelW: Math.round((panel as HTMLElement).getBoundingClientRect().width),
         headBand: t(document.querySelector(".pkgdd-head .pkgb-chlbl")),
+        /* ⚠️ THE ✕ AND THE BAND'S RIGHT LABEL SHARE A CORNER — measured as boxes, because they
+           overlapped and every per-element check passed while the page read `LOCKE✕`. */
+        xOverlapsLabel: (() => {
+          const x = document.querySelector(".pkgdd-x")?.getBoundingClientRect();
+          const l = document.querySelector(".pkgdd-head .pkgb-chrt")?.getBoundingClientRect();
+          if (!x || !l) return false;
+          return !(x.right <= l.left + 1 || x.left >= l.right - 1 || x.bottom <= l.top + 1 || x.top >= l.bottom - 1);
+        })(),
         headBandBg: getComputedStyle(document.querySelector(".pkgdd-head .pkgb-cardhead")!).backgroundImage.slice(0, 60),
         cardBandBg: getComputedStyle(document.querySelector(".pkgb-pkgcard .pkgb-cardhead")!).backgroundImage.slice(0, 60),
         name: t(document.querySelector(".pkgdd-head h2")),
@@ -81,6 +89,7 @@ test("the drawer opens from a card and reads what the card cannot", async ({ pag
     /* D8/D9 — the panel's width, and the head repeating the card's band in the same blue */
     expect(r.panelW, `panel width at ${width}`).toBeGreaterThanOrEqual(440);
     expect(r.headBand.toLowerCase()).toContain("submission package");
+    expect(r.xOverlapsLabel, "the close control sits on the band's right label").toBe(false);
     expect(r.headBandBg, "the drawer's band is not the card's blue").toBe(r.cardBandBg);
     expect(r.score.length).toBe(3);
 
