@@ -37,6 +37,10 @@ export interface PackagesBandProps {
    * property the masthead law is protecting.
    */
   onHowItWorks?: () => void;
+  /** ⚠️ THE HERO'S TWO SURVIVORS (D1). The band head is where the ref puts a band's actions, and
+   *  these are the page's scope control and its primary action — neither could go with the hero. */
+  sent?: number;
+  manuscriptControl?: React.ReactNode;
   /**
    * ⚠️ ARCHIVED ITEMS ARRIVE AS THEIR OWN LIST (F-H, D1/D3). They are never merged into the active
    * array, so the count above cannot see them whatever the toggle says.
@@ -61,7 +65,7 @@ export interface PackagesBandProps {
 }
 
 export const PackagesBand: React.FC<PackagesBandProps> = ({
-  packages, versions, queries, onOpenPackage, onNewPackage, onHowItWorks, onDuplicatePackage, renderRemove, renderTracking,
+  packages, versions, queries, onOpenPackage, onNewPackage, onHowItWorks, sent, manuscriptControl, onDuplicatePackage, renderRemove, renderTracking,
   archived, showArchived, onToggleArchived, onRestore,
 }) => {
   const tiles = packageTiles(packages, versions, queries);
@@ -71,10 +75,17 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
     <section className="pkgb-band" aria-labelledby="pkgb-pkg-h">
       <div className="pkgb-bandhead">
         <h2 id="pkgb-pkg-h">Your packages</h2>
-        <span className="pkgb-tag">{packages.length} built</span>
+        <span className="pkgb-tag">
+          {packages.length} built{typeof sent === "number" ? ` · ${sent} sent` : ""}
+        </span>
+        {manuscriptControl}
         {/* ⚠️ IT CHANGES NOTHING, so it is the quietest control on the page — a ghost beside the
             count, never a filled button competing with the page's actual work. */}
         <ArchivedToggle n={archived.length} on={showArchived} onClick={onToggleArchived} />
+        {/* ⚠️ THE CTA CAME WITH THE SELECTOR (D1). Losing the hero left `＋ New package` reachable
+            only through the ghost card at the END of the grid — a primary action behind a scroll,
+            which is a regression the hero was hiding. The ref puts a band's actions in its head. */}
+        <button type="button" className="pkgb-newpkg" onClick={onNewPackage}>＋ New package</button>
         {onHowItWorks && (
           <button type="button" className="pkgb-how" onClick={onHowItWorks}>
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
@@ -153,12 +164,23 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
           );
         })}
 
-        {/* The ghost is last, and it carries its own illustration slot per the ref. */}
-        <button type="button" className="pkgb-ghost pkgb-pkgghost" onClick={onNewPackage}>
-          <IllustrationSlot id="pkg-ghost" icon="parcelOpen" px={54} />
-          <span className="pkgb-gt">Build another package</span>
-          <span className="pkgb-gs">A different letter, a different length of synopsis.</span>
-        </button>
+        {/**
+          * ⚠️ ONE GHOST, LAST (D2). TWO rendered here — `.pkgb-ghost.pkgb-pkgghost` at 54px and
+          * `.pkgb-ghostpkg` at 44px — both calling `onNewPackage`, with copy differing by one word
+          * ("a different length of synopsis" against "a different synopsis").
+          *
+          * ⚠️ THE CAUSE IS NOT A DOUBLE-RENDER OR A DOUBLE-JOIN (F-AU). They are two hand-written
+          * elements, one a superseded version of the other, left side by side when a later pass
+          * added its replacement without deleting what it replaced. The near-identical copy is what
+          * hid it: a reader skims the pair as one block. Third time in this build that a superseded
+          * thing has survived beside its replacement.
+          *
+          * ⚠️ AND THEY SHARED `id="pkg-ghost"`, so the document carried a duplicate id — the hazard
+          * this repo already records for components that gain a second mount.
+          *
+          * The smaller one survives: a ghost must read as quieter and shorter than a real card
+          * (D10), or a populated page stops reading as populated.
+          */}
         <button type="button" className="pkgb-ghostpkg" onClick={onNewPackage}>
           <IllustrationSlot id="pkg-ghost" icon="parcelOpen" px={44} shape="chip" />
           <span className="pkgb-gt">Build another package</span>

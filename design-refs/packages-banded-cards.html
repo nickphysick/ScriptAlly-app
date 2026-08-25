@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Packages workspace — banded cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f2ede7; --white:#ffffff; --parchment:#fdfaf5;
+    --sage-a:#d7ddd5; --sage-b:#d5dbd3; --sage-deep:#9aa896; --sage-ink:#5c7053;
+    --pink-band:#f3e0d6; --pink-cta:#f5e2da; --pink-cta-edge:#e8c8bc;
+    --burgundy:#7c3a2a; --ink:#3a1c14;
+    --ink-soft:rgba(58,28,20,.62); --ink-faint:rgba(58,28,20,.40);
+    --hairline:rgba(124,58,42,.16); --hairline-soft:rgba(58,28,20,.10);
+
+    /* package — pro blue */
+    --pro-ink:#39587a; --pro-a:#e3ebf3; --pro-b:#d5e1ec; --pro-edge:#b9cdde;
+    /* letter — soft pink */
+    --let-ink:#8a4433; --let-a:#f7e3da; --let-b:#f0d5c9; --let-edge:#e5c3b4;
+    /* synopsis — sage */
+    --syn-ink:#4f6647; --syn-a:#dfe6dc; --syn-b:#d2dccf; --syn-edge:#bccab8;
+    /* sample — note yellow */
+    --sam-ink:#7a6326; --sam-a:#f6eed5; --sam-b:#efe4c2; --sam-edge:#e0d3aa;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--page);font-family:'Inter',sans-serif;color:var(--ink);padding:38px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1150px;margin:0 auto;}
+  h1{font-family:'Playfair Display',serif;font-size:27px;font-weight:700;letter-spacing:-.01em;}
+  .lede{font-size:13.5px;color:var(--ink-soft);line-height:1.65;max-width:740px;margin:12px 0 34px;}
+  .lede b{color:var(--ink);font-weight:600;}
+  .note{font-size:11px;color:var(--ink-faint);line-height:1.6;font-style:italic;max-width:740px;margin-top:16px;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .out{color:var(--burgundy);} .in{color:var(--sage-ink);}
+
+  .btn{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--hairline);background:var(--white);color:var(--ink);display:inline-flex;align-items:center;gap:7px;}
+  .btn.primary{background:var(--pink-cta);border-color:var(--pink-cta-edge);color:var(--burgundy);}
+  .mini{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+  .mini svg{width:12px;height:12px;stroke:currentColor;stroke-width:1.5;fill:none;}
+  .glyph svg{stroke:currentColor;stroke-width:1.3;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+
+  /* ===== page band: rule only ===== */
+  .band{margin-bottom:34px;}
+  .bh{display:flex;align-items:baseline;gap:13px;padding-bottom:10px;margin-bottom:18px;border-bottom:1px solid var(--hairline);position:relative;}
+  .bh::before{content:"";position:absolute;left:0;bottom:-1px;width:56px;height:2px;background:var(--burgundy);opacity:.75;}
+  .bh h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;}
+  .bh .n{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);}
+  .bh .r{margin-left:auto;display:flex;align-items:center;gap:14px;}
+
+  /* ===== shared banded card ===== */
+  .card{
+    background:var(--white);border:1px solid var(--hairline-soft);border-radius:12px;
+    overflow:hidden;display:flex;flex-direction:column;
+    box-shadow:0 2px 10px rgba(58,28,20,.055);
+    transition:transform .16s, box-shadow .16s;
+  }
+  .card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(58,28,20,.1);}
+  .card .head{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 14px;border-bottom:1px solid;
+  }
+  .card .head .g{display:flex;flex:0 0 auto;}
+  .card .head .g svg{width:16px;height:16px;}
+  .card .head .lbl{
+    font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.17em;
+    text-transform:uppercase;font-weight:700;
+  }
+  .card .head .rt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;text-transform:uppercase;opacity:.7;}
+
+  /* package colours */
+  .card.pkg .head{background:linear-gradient(180deg,var(--pro-a),var(--pro-b));border-bottom-color:var(--pro-edge);color:var(--pro-ink);}
+  /* material colours */
+  .card.let .head{background:linear-gradient(180deg,var(--let-a),var(--let-b));border-bottom-color:var(--let-edge);color:var(--let-ink);}
+  .card.syn .head{background:linear-gradient(180deg,var(--syn-a),var(--syn-b));border-bottom-color:var(--syn-edge);color:var(--syn-ink);}
+  .card.sam .head{background:linear-gradient(180deg,var(--sam-a),var(--sam-b));border-bottom-color:var(--sam-edge);color:var(--sam-ink);}
+
+  /* ===== package card ===== */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(262px,1fr));gap:18px;}
+  .pkg .body{padding:14px 16px 12px;display:flex;flex-direction:column;gap:8px;flex:1;}
+  .pkg h4{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;line-height:1.25;}
+  .slotline{display:flex;align-items:baseline;gap:9px;font-size:12px;}
+  .slotline .sl{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);flex:0 0 44px;}
+  .slotline .sv{font-weight:600;}
+  .slotline .sv.none{font-weight:400;font-style:italic;color:var(--ink-faint);}
+  .lockline{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--ink-soft);margin-top:2px;}
+  .lockline svg{width:11px;height:11px;stroke:var(--ink-faint);stroke-width:1.5;fill:none;flex:0 0 auto;}
+  .lockline .dup{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--burgundy);white-space:nowrap;cursor:pointer;}
+  .score{border-top:1px solid var(--hairline-soft);margin-top:auto;display:flex;}
+  .score .c{flex:1;text-align:center;padding:9px 4px 10px;border-left:1px solid var(--hairline-soft);}
+  .score .c:first-child{border-left:none;}
+  .score .n{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;line-height:1;}
+  .score .l{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-top:4px;}
+  .score .idle{flex:1;text-align:center;padding:10px 4px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;color:var(--ink-faint);}
+
+  .ghost{
+    border:1px dashed rgba(124,58,42,.28);border-radius:12px;background:transparent;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:20px;font-family:inherit;
+  }
+  .ghost .g{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--burgundy);}
+  .ghost .gs{font-size:10.5px;color:var(--ink-faint);text-align:center;}
+
+  /* ===== material card ===== */
+  .shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:14px;}
+  .mat .body{padding:12px 14px 12px;display:flex;flex-direction:column;gap:5px;}
+  .mat h5{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;line-height:1.25;}
+  .mat .mm{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--ink-faint);}
+  .mat .mu{font-size:10px;color:var(--ink-soft);}
+  .mat .mu b{font-weight:600;}
+  .mat .mu.idle{color:var(--ink-faint);font-style:italic;}
+  .ghost.mat-ghost{padding:16px;min-height:96px;}
+
+  /* legend */
+  .legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:26px;padding-top:16px;border-top:1px dotted rgba(58,28,20,.16);}
+  .lg{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);}
+  .sw{width:26px;height:13px;border-radius:4px;border:1px solid;}
+  .sw.p{background:linear-gradient(180deg,var(--pro-a),var(--pro-b));border-color:var(--pro-edge);}
+  .sw.l{background:linear-gradient(180deg,var(--let-a),var(--let-b));border-color:var(--let-edge);}
+  .sw.s{background:linear-gradient(180deg,var(--syn-a),var(--syn-b));border-color:var(--syn-edge);}
+  .sw.m{background:linear-gradient(180deg,var(--sam-a),var(--sam-b));border-color:var(--sam-edge);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Open page, banded cards</h1>
+<div class="lede">
+Page structure is rule-only — a Playfair heading over a hairline with a burgundy tick. The containers move down to the objects: <b>every package and every material carries its own band head</b>, coloured by what it is. Blue for packages; pink, sage and note-yellow for letters, synopses and samples.
+</div>
+
+<!-- PACKAGES -->
+<div class="band">
+  <div class="bh">
+    <h3>Your packages</h3><span class="n">2 built · 2 sent</span>
+    <span class="r">
+      <span class="mini"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8.5v.01"/></svg>How it works</span>
+      <button class="btn primary">＋ New package</button>
+    </span>
+  </div>
+  <div class="grid">
+
+    <div class="card pkg">
+      <div class="head">
+        <span class="g glyph"><svg viewBox="0 0 32 32"><path d="M16 4 28 10v12L16 28 4 22V10z"/><path d="M16 15 28 10M16 15v13M16 15 4 10"/><path d="M10 7l12 6"/></svg></span>
+        <span class="lbl">Submission package</span>
+        <span class="rt">Locked</span>
+      </div>
+      <div class="body">
+        <h4>Standard UK</h4>
+        <div class="slotline"><span class="sl">Letter</span><span class="sv">Hook-first</span></div>
+        <div class="slotline"><span class="sl">Syn</span><span class="sv">One-page</span></div>
+        <div class="slotline"><span class="sl">Sample</span><span class="sv">Chapters 1–3</span></div>
+        <div class="lockline"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Contents fixed — sent with 2<span class="dup">Duplicate ›</span></div>
+      </div>
+      <div class="score">
+        <span class="c"><span class="n out">2</span><span class="l">Sent</span></span>
+        <span class="c"><span class="n in">0</span><span class="l">Replied</span></span>
+        <span class="c"><span class="n in">0</span><span class="l">Requests</span></span>
+      </div>
+    </div>
+
+    <div class="card pkg">
+      <div class="head">
+        <span class="g glyph"><svg viewBox="0 0 32 32"><path d="M16 4 28 10v12L16 28 4 22V10z"/><path d="M16 15 28 10M16 15v13M16 15 4 10"/><path d="M10 7l12 6"/></svg></span>
+        <span class="lbl">Submission package</span>
+      </div>
+      <div class="body">
+        <h4>Letter + synopsis</h4>
+        <div class="slotline"><span class="sl">Letter</span><span class="sv">Comps-forward</span></div>
+        <div class="slotline"><span class="sl">Syn</span><span class="sv">Two-page</span></div>
+        <div class="slotline"><span class="sl">Sample</span><span class="sv none">Not included</span></div>
+      </div>
+      <div class="score"><span class="idle">Not yet sent — attach it when you log a query</span></div>
+    </div>
+
+    <button class="ghost"><span class="g">Build another package</span><span class="gs">A different letter, a different synopsis.</span></button>
+  </div>
+</div>
+
+<!-- MATERIALS -->
+<div class="band">
+  <div class="bh">
+    <h3>Your materials</h3><span class="n">7 held</span>
+    <span class="r"><span class="mini">＋ Add material</span></span>
+  </div>
+  <div class="shelf">
+
+    <div class="card mat let">
+      <div class="head"><span class="g glyph"><svg viewBox="0 0 32 32"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h19A2.5 2.5 0 0 1 28 8.5v15a2.5 2.5 0 0 1-2.5 2.5h-19A2.5 2.5 0 0 1 4 23.5z"/><path d="M4.6 7.6 16 17 27.4 7.6"/></svg></span><span class="lbl">Covering letter</span></div>
+      <div class="body"><h5>Hook-first</h5><div class="mm">Text · 412 words</div><div class="mu">In <b>1</b> package</div></div>
+    </div>
+
+    <div class="card mat let">
+      <div class="head"><span class="g glyph"><svg viewBox="0 0 32 32"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h19A2.5 2.5 0 0 1 28 8.5v15a2.5 2.5 0 0 1-2.5 2.5h-19A2.5 2.5 0 0 1 4 23.5z"/><path d="M4.6 7.6 16 17 27.4 7.6"/></svg></span><span class="lbl">Covering letter</span></div>
+      <div class="body"><h5>Comps-forward</h5><div class="mm">Text · 388 words</div><div class="mu">In <b>1</b> package</div></div>
+    </div>
+
+    <div class="card mat let">
+      <div class="head"><span class="g glyph"><svg viewBox="0 0 32 32"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h19A2.5 2.5 0 0 1 28 8.5v15a2.5 2.5 0 0 1-2.5 2.5h-19A2.5 2.5 0 0 1 4 23.5z"/><path d="M4.6 7.6 16 17 27.4 7.6"/></svg></span><span class="lbl">Covering letter</span></div>
+      <div class="body"><h5>Voice-led</h5><div class="mm">Ref · voice-led-v2.docx</div><div class="mu idle">Not in a package</div></div>
+    </div>
+
+    <div class="card mat syn">
+      <div class="head"><span class="g glyph"><svg viewBox="0 0 32 32"><path d="M8 5h13a3 3 0 0 1 3 3v16a3 3 0 0 0 3 3H11a3 3 0 0 1-3-3z"/><path d="M8 5a3 3 0 0 0-3 3v2h3"/><path d="M12 11h8M12 15h8"/></svg></span><span class="lbl">Synopsis</span></div>
+      <div class="body"><h5>One-page</h5><div class="mm">Text · 638 words</div><div class="mu">In <b>1</b> package</div></div>
+    </div>
+
+    <div class="card mat syn">
+      <div class="head"><span class="g glyph"><svg viewBox="0 0 32 32"><path d="M8 5h13a3 3 0 0 1 3 3v16a3 3 0 0 0 3 3H11a3 3 0 0 1-3-3z"/><path d="M8 5a3 3 0 0 0-3 3v2h3"/><path d="M12 11h8M12 15h8"/></svg></span><span class="lbl">Synopsis</span></div>
+      <div class="body"><h5>Two-page</h5><div class="mm">Text · 1,180 words</div><div class="mu">In <b>1</b> package</div></div>
+    </div>
+
+    <div class="card mat sam">
+      <div class="head"><span class="g glyph"><svg viewBox="0 0 32 32"><path d="M9 4h9l5 5v17H9z"/><path d="M18 4v5h5"/><path d="M12 14h9M12 18h9"/></svg></span><span class="lbl">Sample pages</span></div>
+      <div class="body"><h5>Chapters 1–3</h5><div class="mm">Text · 7,412 words</div><div class="mu">In <b>1</b> package</div></div>
+    </div>
+
+    <div class="card mat sam">
+      <div class="head"><span class="g glyph"><svg viewBox="0 0 32 32"><path d="M9 4h9l5 5v17H9z"/><path d="M18 4v5h5"/><path d="M12 14h9M12 18h9"/></svg></span><span class="lbl">Sample pages</span></div>
+      <div class="body"><h5>First 50 pages</h5><div class="mm">Ref · first-50.pdf</div><div class="mu idle">Not in a package</div></div>
+    </div>
+
+    <button class="ghost mat-ghost"><span class="g">Add a material</span><span class="gs">Letter, synopsis or sample</span></button>
+  </div>
+
+  <div class="legend">
+    <span class="lg"><span class="sw p"></span>Package</span>
+    <span class="lg"><span class="sw l"></span>Covering letter</span>
+    <span class="lg"><span class="sw s"></span>Synopsis</span>
+    <span class="lg"><span class="sw m"></span>Sample pages</span>
+  </div>
+</div>
+
+<div class="note">The band head carries the type, so the card body never repeats it — the name gets the Playfair line to itself. Package cards list their slots as rows rather than a comma string, which is what makes a package look like it contains things. Colour is doing real work here: at a glance the shelf tells you you're letter-heavy and short on samples.</div>
+
+</div>
+</body>
+</html>

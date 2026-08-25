@@ -31,7 +31,6 @@ import { PackagesBand } from "./packages/PackagesBand";
 import { TrackingBand } from "./packages/TrackingBand";
 import { FootnoteBand } from "./packages/FootnoteBand";
 import { RemovePopover } from "./packages/RemovePopover";
-import { PackagesHeroBand } from "./packages/PackagesHeroBand";
 import { MaterialsBand } from "./packages/MaterialsBand";
 import { packageHolders, packagedQueries } from "../lib/packagesOverview";
 import { MaterialModal, MaterialDraftResult } from "./packages/MaterialModal";
@@ -385,14 +384,18 @@ export const SubmissionPackages: React.FC = () => {
               so it scrolls with the content exactly as the masthead above it now does. */}
           {msVersions.length + msPackages.length > 0 ? (
             <>
-            <PackagesHeroBand
-              materials={msVersions.length}
-              packages={msPackages.length}
-              sent={trackingTotals(msPackages, msQueries).sent}
-              manuscriptControl={msSelector}
-              canBuild={canBuildPackage(msVersions)}
-              onNewPackage={() => { setPkgEditing(null); setPkgModal(true); }}
-            />
+            {/**
+              * ⚠️ NO HERO IN WORKSPACE STATE (D1). `PackagesHeroBand` rendered here — INSIDE the
+              * populated branch, not leaking from the teach one — so a writer with four materials
+              * and two packages was still being asked "Fed up of guessing which materials are
+              * landing with agents?". A page that has the thing should stop selling it. Measured
+              * before removing: workspace state rendered `heroBand: 1` with the copy present.
+              *
+              * ⚠️ ITS TWO CONTROLS MOVED RATHER THAN GOING WITH IT. The band carried the manuscript
+              * selector and the New-package CTA, and both are load-bearing: the selector is this
+              * page's scope and the CTA is its primary action. They are the packages band head's
+              * now, which is where the ref puts the actions.
+              */}
             {/* ⚠️ THE MATERIALS BAND REPLACES THE RAIL'S MATERIALS PANEL (D1) — mounted here and
                 deleted there in the same commit, so the two never coexist. */}
               {/* ⚠️ PACKAGES LEAD (D-B1). Materials came first and it read as a filing
@@ -424,6 +427,8 @@ export const SubmissionPackages: React.FC = () => {
                 }}
                 onNewPackage={() => { setPkgEditing(null); setPkgDuplicating(null); setPkgModal(true); }}
                 onHowItWorks={() => setHowOpen(true)}
+                sent={trackingTotals(msPackages, msQueries).sent}
+                manuscriptControl={msSelector}
                 archived={archivedPackages}
                 showArchived={showArchived}
                 onToggleArchived={() => setShowArchived((v) => !v)}

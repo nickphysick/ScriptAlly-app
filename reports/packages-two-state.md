@@ -1418,3 +1418,59 @@ archived, on  : 3 HELD · 1 BUILT (unchanged) · 2 rows · hover lift 0px
 actions       : ["Restore"] only                                     (D2)
 after restore : 4 HELD · 2 BUILT · toggle gone                       (D5)
 ```
+
+---
+
+# Banded cards + the package drawer — Part A (25 Aug)
+
+Refs committed: `packages-banded-cards.html`, `package-drawer.html`.
+
+## D1 — the hero was inside the workspace branch, not leaking into it
+
+⚠️ **The premise needs correcting.** The brief asks why it "renders outside the branch". It doesn't:
+`PackagesHeroBand` is mounted at `SubmissionPackages.tsx:388`, in the **true** arm of
+`msVersions.length + msPackages.length > 0` — deliberately placed there by the restructure, whose
+own comment says *"the hero lives on as `PackagesHeroBand`, immediately beneath"*. So a writer with
+four materials and two packages was still being asked *"Fed up of guessing which materials are
+landing with agents?"*. The ruling stands either way; the cause is a decision, not a leak.
+
+**Proven by element count, both states, before and after:**
+
+```
+                teach  heroBand  heroCopy  ghosts  realCards
+before  workspace   0      1       true       2        2
+        teach       1      0       true       0        0     ← its own hero, correctly
+after   workspace   0      0      false       1        2
+        teach       1      0       true       0        0
+```
+
+⚠️ **Its two controls moved rather than going with it.** The band carried the **manuscript
+selector** — this page's scope — and the **New package CTA**, its primary action. Both are now in
+the packages band head, where the ref puts a band's actions. Without that move the CTA would have
+survived only on the ghost card at the *end* of the grid: a primary action behind a scroll, which
+the hero had been hiding.
+
+## F-AU — D2's cause, precisely
+
+**Not a double-render and not a double-join.** Two *distinct hand-written* ghost buttons sat back to
+back in `PackagesBand`:
+
+```jsx
+<button className="pkgb-ghost pkgb-pkgghost">  …px={54}…  "A different letter, a different length of synopsis."
+<button className="pkgb-ghostpkg">             …px={44}…  "A different letter, a different synopsis."
+```
+
+One is a superseded version of the other, left in place when a later pass added its replacement
+without deleting what it replaced. **The near-identical copy is what hid it** — differing by one
+word, a reader skims the pair as a single block.
+
+⚠️ **They also shared `id="pkg-ghost"`**, so the document carried a duplicate id — the hazard this
+repo already records for components that gain a second mount.
+
+**Third instance in this build of a superseded thing surviving beside its replacement** (the
+`#/pkg-lab` cascade, the two auto-create blocks, now this). The pattern is worth the name: a
+replacement that is *added* rather than *swapped* leaves the original reachable, and near-identical
+copy makes the duplication invisible to review.
+
+The smaller ghost survives, per D10 — a ghost must read as quieter and shorter than a real card, or
+a populated page stops reading as populated.

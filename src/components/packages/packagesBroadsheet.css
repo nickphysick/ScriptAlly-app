@@ -161,7 +161,8 @@
 .pkgb-band:last-child { margin-bottom: 0; }
 .pkgb-bandhead {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 14px;
   border-bottom: 1px solid var(--pkgo-hairline);
   padding-bottom: 9px;
@@ -841,3 +842,19 @@
 .pkgb-bar { height: 7px; border-radius: 99px; background: rgba(58, 28, 20, 0.06); overflow: hidden; }
 .pkgb-bsent { height: 100%; background: var(--pkgo-sage-tint); border-radius: 99px; position: relative; }
 .pkgb-bin { height: 100%; background: var(--pkgo-sage-deep); border-radius: 99px; }
+
+/* ⚠️ THE BAND'S PRIMARY ACTION (D1/D3). Soft pink, never burgundy-filled — the house rule. */
+.pkgb-newpkg {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pkg-burg);
+  background: var(--pink-cta, #f5e2da);
+  border: 1px solid var(--pink-cta-edge, #e8c8bc);
+  border-radius: 9px;
+  padding: 8px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pkgb-newpkg:hover { background: #f8e9e2; }
