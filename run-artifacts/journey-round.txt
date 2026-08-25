@@ -1,0 +1,49 @@
+── journey round · Phases 1–3 · 22 assertions · 0 RED · 22 green
+
+SEND fork: [{"t":"I’ve sent it","s":"Note what went, and set the clock","x":""},{"t":"Not yet — hold me to it","s":"Pick a day and it lands back on your list","x":""},{"t":"I’m not going to send it","s":"Record that, and close the query honestly","x":"crosses to close →"}]
+CLOSE fork: [{"t":"Close it now","s":"Records no response — not a rejection. It reopens if a reply ever comes","x":""},{"t":"Nudge them once more first","s":"One more try before the ledger closes","x":"crosses to nudge →"},{"t":"Leave it open for now","s":"Choose when you’d like to be asked again — or not at all","x":""}]
+
+  green  P2.1 · the pane opens on the fork, with its label and its options
+           label="Where are you with it?" options=3
+  green  P2.2 · NO primary is rendered until an intent is chosen
+           primary=null
+  green  P2.3 · Snooze and Dismiss remain — both are honest answers to “not now”
+           ["Snooze","Dismiss"]
+  green  P2.4 · the steer square marks the fork itself
+           sqm=visible
+  green  P2.5 · every option states a title and a subtitle; the crossover says so first
+           ["I’ve sent it","Not yet — hold me to it","I’m not going to send it [crosses to close →]"]
+  green  P2.6 · no ledger row is rendered while the fork is showing
+           rows=0
+  green  P2.7 · choosing collapses the fork to a receipt and opens question 1
+           receipt="You choseI’ve sent itChange" rows=4 open=["s-when"]
+  green  P2.8 · the primary is the FLOW's, and it is there now
+           primary="Log as sent3 to answer"
+  green  P2.9 · Snooze has LEFT the bar once an intent is chosen (Phase 3)
+           ["Dismiss"]
+  green  P2.10 · Change returns to the fork
+           options=3 primary=null
+  green  P2.11 · and the answers given under the old intent are cleared, and the pane says so
+           before=["s-unit","s-when"] clearedLine=true
+  green  P2.12 · a crossover changes the band, the deed and the fork together
+           band pane u-now -> pane u-house · deed "Send your full manuscript " -> "Consider closing your quer"
+  green  P2.13 · and its receipt names where it came from, with the way back
+           receipt="Crossed fromsendGo back"
+  green  P2.14 · Go back restores the origin journey and its fork
+           band=pane u-now options=3
+  green  P3.1 · the delay intent opens ONE question, with its flow's own options
+           label="Hold me to when?" opts=["Tomorrow","In 3 days","Next week","A date…"]
+  green  P3.2 · and it says nothing is recorded on the query
+           hint="This task waits quietly until then — nothing is recorded on the query."
+  green  P3.3 · its primary is the flow's, not the send's
+           primary="Set the reminder1 to answer"
+  green  P3.4 · the close fork names the honourable alternatives first
+           ["Close it now","Nudge them once more first","Leave it open for now"]
+  green  P3.5 · leave-it-open offers the mute as one of its own answers
+           ["In 2 weeks","In a month","In 3 months","A date…","Stop asking about this one"]
+  green  P3.6 · and the hint states what the mute does NOT touch
+           hint="“Stop asking” mutes this suggestion for this query only — it deletes nothing, and every other task still appears."
+  green  P3.7 · a delay writes through the app's own snooze — its toast, its undo, and the card leaves
+           toast="Snoozed until ThursdayUndo" rows 20 -> 19 · undo offered=true
+  green  P3.8 · and the undo restores it — this spec leaves the account as it found it
+           undo pressed=true · rows 19 -> 20 (was 20)
