@@ -451,7 +451,35 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
      does not wrap the text, it lets it spill out of its own box. */
   font-size: var(--mk-hero-h1); line-height: 1.02; letter-spacing: -.022em;
   color: var(--mk-nearblack); margin: 0;
-  grid-row: 1; grid-column: 1 / -1; position: relative; z-index: 2;
+  /* ⚠️ NO GRID PLACEMENT ANY MORE — `.mk-statementrow` is the grid item and this sits inside it.
+     `z-index: 2` stays: it is what keeps the words above the stack plate behind them, and it is
+     also what keeps them above the burst at −1 inside the row's own stacking context. */
+  position: relative; z-index: 2;
+}
+
+/* ⚠️ `isolation: isolate` IS LOAD-BEARING, NOT TIDINESS. The burst is `z-index: -1`, and a
+   negative-z child paints behind the backgrounds of every ancestor up to the nearest stacking
+   context. Without a context here it would sink behind the hero's own ground and vanish
+   completely rather than tucking behind the word — the same trap the marketing pulse halo hit,
+   where the rule applied cleanly and nothing was painted. Verified by screenshot, not by reading
+   the CSS: a computed `z-index: -1` proves the declaration took, never that anything was drawn.
+   ⚠️ AND `align-items: center` IS PER-ROW, NOT INHERITED. `.mk-heroinner` defaults every item to
+   `start`; this row overrides it on itself, which is where per-item alignment belongs. */
+.mk-statementrow {
+  grid-row: 1; grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 16px;
+  isolation: isolate; position: relative; z-index: 2;
+}
+/* ⚠️ THE SECOND SANCTIONED NEGATIVE MARGIN IN THIS HERO, AND LIKE THE PLATE'S IT IS THE EFFECT
+   RATHER THAN A SUBSTITUTE FOR ONE. `-78px` pulls the burst back over the end of the headline;
+   `-14px` lifts it above the line. It is not faking an alignment the layout should produce —
+   there is no layout that puts one element behind the tail of another.
+   ⚠️ AND THESE ARE FIXED PIXELS AGAINST TYPE THAT IS NOT. See CLAUDE.md: if the headline's clamp
+   moves or it wraps below its 901px boundary, the burst lands somewhere else. */
+.mk-fw {
+  flex: 0 0 auto; width: 132px; height: auto; display: block;
+  align-self: flex-start; margin: -14px 0 0 -78px;
+  position: relative; z-index: -1; pointer-events: none;
 }
 
 /* The ticked box that closes the statement.
@@ -812,7 +840,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
     grid-template-columns: 1fr;
     gap: 34px; padding: 40px 26px 0;
   }
-  .mk-statement, .mk-hcopy, .mk-turn, .mk-found { grid-column: 1; }
+  .mk-statementrow, .mk-hcopy, .mk-turn, .mk-found { grid-column: 1; }
   .mk-hcopy { padding-top: 0; }
   /* The artwork takes row 4 when stacked (see its own override), so the panel closes at 5. Its
      98px top margin is the two-column layout's breathing room and is not wanted in a stack that

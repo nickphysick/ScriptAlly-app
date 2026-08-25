@@ -298,9 +298,60 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
    * other side, is back to faking.
    */
   it("no text item in the hero fakes the layout with a negative margin", () => {
-    for (const sel of [".mk-heroinner", ".mk-hcopy", ".mk-statement", ".mk-turn"]) {
+    for (const sel of [".mk-heroinner", ".mk-hcopy", ".mk-statement", ".mk-statementrow", ".mk-turn"]) {
       expect(rule(sel), `${sel} uses no negative margin`).not.toMatch(/margin[^:]*:\s*[^;]*-\d/);
     }
+  });
+
+  /**
+   * ⚠️ THE ISOLATION AND THE NEGATIVE Z ARE ONE MECHANISM AND FAIL TOGETHER. The burst is
+   * `z-index: -1` so it tucks behind the headline; a negative-z child paints behind the
+   * BACKGROUNDS of every ancestor up to the nearest stacking context, so without `isolation` on
+   * the row it sinks behind the hero's own ground and disappears — the rule applying perfectly
+   * and nothing painted, which is the marketing halo's fault exactly.
+   *
+   * Asserted as a PAIR rather than as two properties, because either one alone is meaningless
+   * and someone removing the isolation as an unused declaration is the way this breaks.
+   */
+  it("the burst's negative z-index is paired with a stacking context to live in", () => {
+    expect(rule(".mk-fw"), "the burst tucks behind the words").toMatch(/z-index:\s*-1/);
+    expect(rule(".mk-statementrow"), "…and the row gives it a context to be behind them IN")
+      .toMatch(/isolation:\s*isolate/);
+  });
+
+  /**
+   * ⚠️ THE HERO ALLOWS EXACTLY TWO NEGATIVE MARGINS AND BOTH ARE THE EFFECT ITSELF: the plate's
+   * bleed past the gutter, and the burst's pull back over the headline's last word. Neither
+   * substitutes for an alignment the layout could produce — there is no layout that puts one
+   * element behind the tail of another.
+   *
+   * The claim is the SET, not the values. `.mk-fw`'s offsets are fixed pixels against type that
+   * is not, so they will legitimately be re-tuned; pinning them would be a lock that has to be
+   * rewritten every time the headline's clamp moves, which is a lock being weakened on schedule.
+   * A sixth selector appearing here is the thing worth failing on.
+   *
+   * ⚠️ SWEPT OVER THE WHOLE SHEET, NOT A SLICE OF IT. The first version of this sliced from
+   * `.mk-hero {` to `.mk-featband` — and the plate's rule lives eight hundred lines further down,
+   * so the slice covered neither of the two it was written about while quietly reporting a third.
+   * The hero's rules are not contiguous, and a positional slice over a file that does not group
+   * by feature answers a question nobody asked.
+   */
+  it("…and the whole sheet's negative margins are the five that are meant to be there", () => {
+    const owners = new Set<string>();
+    for (const m of marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
+      if (/margin[^:]*:\s*[^;]*-\d/.test(m[2])) m[1].split(",").forEach((x) => owners.add(x.trim()));
+    }
+    expect([...owners].sort()).toEqual([
+      /* the burst, pulled back over the headline's last word */
+      ".mk-fw",
+      /* the plate, bleeding past the container's own gutter to the page edge */
+      ".mk-hero .mk-illo--tall",
+      /* both sentinels cancel their own height so they occupy no space */
+      ".mk-navsentinel--condense",
+      ".mk-navsentinel--release",
+      /* the highlighter stroke reaches past the text it marks */
+      ".mk-turn-lead",
+    ]);
   });
 
   it("…and the plate's one negative margin is exactly the gutter it cancels", () => {

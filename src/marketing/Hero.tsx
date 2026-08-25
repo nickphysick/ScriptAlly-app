@@ -50,6 +50,9 @@ import { FoundingPanel } from "./FoundingPanel";
    sheets let the ground through. It is one dark background away from failing; a proper transparent
    export is the fix, not more matting. */
 import heroIllustration from "../assets/marketing/hero-stack-plane.png";
+/* ⚠️ 138×115 AT SOURCE AND RENDERED AT 132px — essentially 1:1, so it is SOFT ON A HiDPI SCREEN.
+   Extracted from the ref's base64; if it stays, it wants a 2× export. Flagged, not fixed. */
+import heroFireworks from "../assets/marketing/hero-fireworks.png";
 
 /* ⚠️ THE HEADLINE IS ONE STRING AGAIN. It was split at its last space so the final word and the
    ticked box could be bound into one unbreakable unit — `.mk-tickword`, `STATEMENT_HEAD` and
@@ -65,7 +68,17 @@ export const Hero: React.FC<{
           all — the headline establishes its audience by itself, and a label saying who the page
           is for is the page explaining a sentence that does not need explaining. Every row below
           shifted up one when it went; the artwork's span moved with them. */}
-      <h1 className="mk-statement mk-r mk-r1">{HERO_H1}</h1>
+      {/* ⚠️ A WRAPPER, AND THE `<h1>` KEEPS `.mk-statement`. The row needs to be a flex line and a
+          stacking context so the burst can sit behind the words; the heading needs to stay the
+          element three locks already name. Splitting those two jobs across two elements costs one
+          div and keeps every assertion pointed at the thing it was written about.
+          ⚠️ THE BURST FOLLOWS THE HEADING IN THE DOM. It is pulled back over the last word by a
+          negative left margin, so its position is a property of where the words END — which is
+          what "behind the end of 'book.'" means, and why it cannot be absolutely positioned. */}
+      <div className="mk-statementrow mk-r mk-r1">
+        <h1 className="mk-statement">{HERO_H1}</h1>
+        <img className="mk-fw" src={heroFireworks} alt="" />
+      </div>
 
       <div className="mk-hcopy">
         <div className="mk-after mk-r mk-r2">
