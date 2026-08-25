@@ -475,8 +475,14 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    `-14px` lifts it above the line. It is not faking an alignment the layout should produce —
    there is no layout that puts one element behind the tail of another.
    ⚠️ AND THESE ARE FIXED PIXELS AGAINST TYPE THAT IS NOT. See CLAUDE.md: if the headline's clamp
-   moves or it wraps below its 901px boundary, the burst lands somewhere else. */
-.mk-fw {
+   moves or it wraps below its 901px boundary, the burst lands somewhere else.
+   ⚠️ IT IS `.mk-heroburst`, NOT `.mk-fw`, AND THE SHORT NAME MUST NEVER COME BACK. `/founders`
+   has rendered `<div class="mk-fw">` as its PAGE WRAPPER since the eighth pass — the root of the
+   `mk-fw*` namespace — so this rule landed on the whole page: `z-index: -1` painted it behind the
+   ground, `pointer-events: none` made it inert, and `width: 132px` squeezed it. It deployed, and
+   it read as "the button goes nowhere — just a blank page". Nothing threw, nothing measured
+   wrong, and `innerText` still returned every word on it. */
+.mk-heroburst {
   flex: 0 0 auto; width: 132px; height: auto; display: block;
   align-self: flex-start; margin: -14px 0 0 -78px;
   position: relative; z-index: -1; pointer-events: none;

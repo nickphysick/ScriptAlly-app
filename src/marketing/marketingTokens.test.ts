@@ -8,7 +8,7 @@
  * a rendered page instead.
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "fs";
+import { readFileSync, readdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -18,6 +18,15 @@ const css = (f: string) => readFileSync(resolve(here, f), "utf8");
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
 const marketing = decls(css("marketing.css"));
+
+/**
+ * Every marketing component's source, as `[filename, text]`. Comments are NOT stripped: the check
+ * that uses this looks for a class name inside a `className` attribute, and a prose mention would
+ * be a false positive rather than a false negative — the direction that costs an hour, not a bug.
+ */
+const SOURCES: Array<[string, string]> = readdirSync(here)
+  .filter((f) => f.endsWith(".tsx") && !f.endsWith(".test.tsx"))
+  .map((f) => [f, readFileSync(resolve(here, f), "utf8")]);
 const app = decls(css("../index.css"));
 
 const value = (src: string, token: string) => {
@@ -314,9 +323,51 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
    * and someone removing the isolation as an unused declaration is the way this breaks.
    */
   it("the burst's negative z-index is paired with a stacking context to live in", () => {
-    expect(rule(".mk-fw"), "the burst tucks behind the words").toMatch(/z-index:\s*-1/);
+    expect(rule(".mk-heroburst"), "the burst tucks behind the words").toMatch(/z-index:\s*-1/);
     expect(rule(".mk-statementrow"), "…and the row gives it a context to be behind them IN")
       .toMatch(/isolation:\s*isolate/);
+  });
+
+  /**
+   * ══════════════ One class, one surface ══════════════
+   *
+   * ⚠️ A CLASS THAT CARRIES `pointer-events: none` OR A NEGATIVE `z-index` MAY BE RENDERED BY ONE
+   * COMPONENT AND ONE ONLY — because when it lands on a second, that page becomes INVISIBLE AND
+   * INERT rather than merely wrong, and nothing anywhere reports it.
+   *
+   * This is not hypothetical. The hero's burst was introduced as `.mk-fw`; `/founders` had
+   * rendered `<div class="mk-fw">` as its PAGE WRAPPER since the eighth pass — the root of its own
+   * `mk-fw*` namespace. So a rule written for a 132px image landed on a 7,000px page: `z-index:
+   * -1` painted the whole thing behind the page ground, `pointer-events: none` made every control
+   * on it inert, and `width: 132px` squeezed it. It reached dev.
+   *
+   * ⚠️ AND EVERY INSTRUMENT SAID IT WAS FINE. Nothing threw, no console error, the route resolved,
+   * `innerText` returned all 2,084 characters of the page's copy and `getBoundingClientRect`
+   * reported a 7,263px-tall element. Text and geometry survive being painted behind the ground;
+   * only a screenshot — or this lock — can tell. The repo already records that a computed
+   * `z-index` proves the declaration took and never that anything was drawn.
+   *
+   * THE CHECK IS THE RENDERER COUNT, NOT THE NAME. A naming convention is advice; this fails.
+   */
+  it("no invisibility-making class is rendered by two different components", () => {
+    const RISKY = /pointer-events:\s*none|z-index:\s*-/;
+    const owners: Record<string, string[]> = {};
+    for (const m of marketing.matchAll(/(?:^|\n)([^@{}][^{}]*?)\{([^{}]*)\}/g)) {
+      if (!RISKY.test(m[2])) continue;
+      for (const raw of m[1].split(",")) {
+        const sel = raw.trim();
+        /* Single-class selectors only — a descendant selector cannot collide this way. */
+        const cls = sel.match(/^\.(mk-[a-z0-9-]+)$/);
+        if (cls) owners[cls[1]] = [];
+      }
+    }
+    expect(Object.keys(owners).length, "the sweep found classes to check").toBeGreaterThan(1);
+    for (const cls of Object.keys(owners)) {
+      const bounded = new RegExp(`["\\s\`]${cls}["\\s\`]`);
+      owners[cls] = SOURCES.filter(([, src]) => bounded.test(src)).map(([name]) => name);
+    }
+    const clashes = Object.entries(owners).filter(([, who]) => who.length > 1);
+    expect(clashes, "a class that hides what it touches belongs to one component").toEqual([]);
   });
 
   /**
@@ -342,10 +393,10 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
       if (/margin[^:]*:\s*[^;]*-\d/.test(m[2])) m[1].split(",").forEach((x) => owners.add(x.trim()));
     }
     expect([...owners].sort()).toEqual([
-      /* the burst, pulled back over the headline's last word */
-      ".mk-fw",
       /* the plate, bleeding past the container's own gutter to the page edge */
       ".mk-hero .mk-illo--tall",
+      /* the burst, pulled back over the headline's last word */
+      ".mk-heroburst",
       /* both sentinels cancel their own height so they occupy no space */
       ".mk-navsentinel--condense",
       ".mk-navsentinel--release",

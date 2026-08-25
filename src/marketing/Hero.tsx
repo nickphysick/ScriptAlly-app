@@ -77,7 +77,7 @@ export const Hero: React.FC<{
           what "behind the end of 'book.'" means, and why it cannot be absolutely positioned. */}
       <div className="mk-statementrow mk-r mk-r1">
         <h1 className="mk-statement">{HERO_H1}</h1>
-        <img className="mk-fw" src={heroFireworks} alt="" />
+        <img className="mk-heroburst" src={heroFireworks} alt="" />
       </div>
 
       <div className="mk-hcopy">
