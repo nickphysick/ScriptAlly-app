@@ -168,14 +168,27 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
      * left-constant, §A). One padding here insets EVERY child equally, and the whole point of this
      * amendment is that the masthead and the content no longer share a gutter.
      *
-     * ⚠️ THE SCROLLBAR CLAIM IS UNTOUCHED, and the stylesheet's own note proves why by measurement:
-     * gutter on this row and gutter on an inner measure came out IDENTICAL, because the bar sits
-     * inside the padding box either way. `scrollbar-gutter: stable both-edges` is what reserves it.
+     * ⚠️ AND THE SCROLLBAR RESERVATION IS GONE, WHICH INVERTS WHAT THIS ASSERTED. It required
+     * `scrollbar-gutter: stable both-edges` — a reservation on BOTH sides, to keep the two gutters
+     * equal and stop content jumping when a bar appeared. That reservation lies outside the
+     * scroller's content box, so nothing painted by a child could reach into it, and it was the
+     * third distinct cause of the masthead's wash stopping short of the window's edges.
+     *
+     * ⚠️ IT IS NOT REPLACED BY `stable`, and only measuring the platform shows why: the scrollbar
+     * here is an OVERLAY. Measured on Manuscripts at 1280 — the row overflows by 72px and scrolls,
+     * and `offsetWidth === clientWidth === 1010`. The bar takes no width at all, so a reserved
+     * gutter is not "where the bar goes"; it is ground the band cannot reach, for a bar that never
+     * occupies it. With overlay bars the jump this reservation guarded against cannot happen.
+     *
+     * ⚠️ THE TRADE IS NAMED RATHER THAN HIDDEN: on a machine set to ALWAYS SHOW SCROLLBARS the bar
+     * is classic and takes ~15px, and there this omission does reintroduce the jump. That is Nick's
+     * call, recorded in the run report; what this case now asserts is that NOTHING is reserved, so
+     * the band's edges cannot be lost to a gutter again by accident.
      */
     expect(block(".wpg-scroll"), "the scroll row went back to padding every child by the same amount")
       .not.toContain("padding-inline:");
-    expect(block(".wpg-scroll"), "the scrollbar reservation went — the gutters jitter when a list filters down")
-      .toContain("scrollbar-gutter: stable both-edges");
+    expect(block(".wpg-scroll"), "a scrollbar gutter is reserved again — that strip is outside the scroller's content box, so the masthead's wash cannot reach the window's edge through it")
+      .not.toContain("scrollbar-gutter");
     /* comments stripped: this file's prose NAMES the retired token, so a bare search finds the
        explanation and calls it the code */
     const declsOnly = cssRules.replace(/\/\*[\s\S]*?\*\//g, "");

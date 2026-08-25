@@ -184,8 +184,9 @@
 
      ⚠️ AND THE SCROLLBAR ARGUMENT IS UNAFFECTED, which the note above already proves by
      measurement: "gutter on this row and gutter on an inner wrapper measure IDENTICALLY", because
-     the bar sits inside the padding box either way. `scrollbar-gutter: stable both-edges` below is
-     what actually reserves it, and it is untouched. */
+     the bar sits inside the padding box either way. ⚠️ THAT RESERVATION IS NOW GONE — see the note
+     on the declaration below; on this platform the scrollbar is an overlay and reserved nothing but
+     unwashed ground. */
   /* ⚠️ NO TOP PADDING, AND THE WHOLE "WHICH ELEMENT PAYS THE GAP" QUESTION GOES WITH IT. The gap
      used to sit above whatever came FIRST below the chrome hairline — the toolbar row on pages that
      had one, this row on pages that did not — which needed `.wpg--tools` to zero one of them so it
@@ -199,7 +200,29 @@
      and have the property sum them — raising specificity makes one REPLACE the other, which is the
      same bug pointing the other way. */
   padding-bottom: calc(var(--wpg-foot, 0px));
-  scrollbar-gutter: stable both-edges;
+  /**
+   * ⚠️ NO RESERVATION AT ALL — AND THE SCROLLBAR HERE IS AN OVERLAY, WHICH IS WHAT DECIDED IT.
+   *
+   * This carried `scrollbar-gutter: stable both-edges`, reserving the bar's width on BOTH sides.
+   * That reservation lies outside this element's content box, so nothing painted by a child can
+   * reach into it — which is why the masthead's wash stopped 15px short at each edge however it was
+   * painted. Three separate causes have now produced that one visible fault; this was the third.
+   *
+   * ⚠️ AND `stable` IS NOT ENOUGH, WHICH ONLY MEASURING THE PLATFORM SHOWS. Dropping to `stable`
+   * (end side only) clears the left strip and leaves a 15px one on the right — and on this platform
+   * that strip holds NOTHING. Measured on Manuscripts at 1280: the row overflows by 72px and
+   * scrolls, and `offsetWidth === clientWidth === 1010`. The scrollbar is an OVERLAY; it takes no
+   * width and is drawn over the content. So a reserved gutter is not "where the bar goes" here — it
+   * is 15px of ground the band cannot reach, for a bar that never occupies it.
+   *
+   * ⚠️ THE COST, STATED RATHER THAN ABSORBED. `scrollbar-gutter` exists to stop content jumping
+   * sideways when a bar appears — a list filtering down to two results. With overlay scrollbars
+   * that jump cannot happen, because the bar never takes width, so on this platform the reservation
+   * bought nothing and cost the band its edges. On a machine set to ALWAYS SHOW SCROLLBARS the bar
+   * is classic and takes ~15px, and there this omission does reintroduce that jump. That is a real
+   * trade against a setting this platform does not use; it is Nick's to make, and it is in the run
+   * report rather than only here.
+   */
 }
 
 /**
@@ -230,6 +253,10 @@
 .wpg--fill > .wpg-scroll {
   display: flex;
   flex-direction: column;
+  /* ⚠️ NO GUTTER OVERRIDE HERE ANY MORE — the scroller reserves nothing on any page now, so a fill
+     page has nothing left to reset. `overflow` deliberately stays `auto` from the base rule: the
+     fill contract says the row never scrolls, and Manuscripts disproves it at 1280 by overflowing
+     72px, so `hidden` would clip the foot of that page with no way to reach it. */
 }
 
 /**

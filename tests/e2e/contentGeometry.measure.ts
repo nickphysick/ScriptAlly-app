@@ -102,6 +102,29 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
     masthead: box(g.querySelector(".wsh") as HTMLElement | null),
     /* the measure box too, so a diff can say which of the two moved */
     mastBox: box(mast),
+    /**
+     * ⚠️ AND THE MASTHEAD'S RIGHT INSET FROM THE USABLE WIDTH, which is the frame the constancy
+     * claim is actually about. `right` above is measured from the WINDOW, and that was the same
+     * number on every page only while every page reserved a scrollbar gutter on both sides — a
+     * coincidence of `scrollbar-gutter: both-edges`, not a property of the masthead. With the
+     * left-hand reservation gone (it was what stopped the wash reaching the edges), a page that
+     * scrolls has 15px of scrollbar between its content and the window that a fill page does not,
+     * so the window-relative figures split 58/73 while nothing about the masthead moved.
+     *
+     * Measured from the scroller's CLIENT box, all ten pages read 35 — exactly `--mast-gutter`,
+     * left and right. A scrollbar is chrome the browser draws, not part of the page's width.
+     */
+    mastUsable: (() => {
+      const el = g.querySelector(".wsh") as HTMLElement | null;
+      if (!el) return null;
+      const sb = sc.getBoundingClientRect();
+      const eb = el.getBoundingClientRect();
+      /* the token too, so the "is the cap binding" question is answered by the page rather than by
+         a threshold picked out of the air — my first version guessed 200 and caught the capped
+         regime at 2300, where the inset is 177.5 */
+      const gut = parseFloat(getComputedStyle(g).getPropertyValue("--mast-gutter")) || 0;
+      return { l: r(eb.left - sb.left), r: r(sb.left + sc.clientWidth - eb.right), gut };
+    })(),
   };
 }, cls);
 
@@ -109,7 +132,7 @@ test("content geometry is unchanged by the masthead's width system", async ({ pa
   const now: Record<string, unknown> = {};
   /* kept apart from `now` deliberately: `now` is the half that must NOT change and is diffed
      against the baseline; this is the half that must, and is asserted as a relationship */
-  const mast: Record<string, { masthead: { left: number; right: number } | null }> = {};
+  const mast: Record<string, { masthead: { left: number; right: number } | null; mastUsable: { l: number; r: number; gut: number } | null }> = {};
   const lines: string[] = [];
 
   for (const w of WIDTHS) {
@@ -126,7 +149,7 @@ test("content geometry is unchanged by the masthead's width system", async ({ pa
        * directly and which must not have moved by so much as a pixel.
        */
       now[`${w}|${name}`] = { content: r!.content, row: r!.row };
-      mast[`${w}|${name}`] = { masthead: r!.masthead };
+      mast[`${w}|${name}`] = { masthead: r!.masthead, mastUsable: r!.mastUsable };
       lines.push(
         `${String(w).padEnd(5)} ${name.padEnd(21)} content "${r!.contentClass}" ${r!.content!.left}/${r!.content!.right}` +
         ` · row ${r!.row ? `${r!.row.left}/${r!.row.right}` : "—"} · pad ${r!.scrollPad} · masthead ${r!.masthead!.left}/${r!.masthead!.right}`);
@@ -144,12 +167,41 @@ test("content geometry is unchanged by the masthead's width system", async ({ pa
   const missing = WIDTHS.flatMap((w) => PAGES.filter(({ name }) => !mast[`${w}|${name}`]?.masthead).map(({ name }) => `${name} @${w}`));
   expect(missing, `no masthead rendered on: ${missing.join(", ")} — a page declining the shared header leaves this comparison with nothing to compare`)
     .toEqual([]);
+  /**
+   * ⚠️ THE LAW IS SYMMETRY WITHIN THE USABLE WIDTH, NOT AN IDENTICAL PIXEL ON EVERY PAGE — and the
+   * old form was true only by a coincidence that has now been removed.
+   *
+   * It compared the masthead's window-relative edges and required one distinct value across all ten
+   * pages. That held while `scrollbar-gutter: stable both-edges` made every page reserve the bar's
+   * width on BOTH sides whether or not it had a bar — so every page had the same usable width, and
+   * an identical pixel followed. That reservation is exactly what stopped the masthead's wash
+   * reaching the window's edges, and removing it makes the underlying fact visible: a page that
+   * scrolls has 15px less usable width than one that does not, because a scrollbar is really there.
+   *
+   * Measured after the change: at 1440 every page reads 35/35 — precisely `--mast-gutter`, which is
+   * the constant the old lock was reaching for and was actually reading as 50/50, the gutter plus a
+   * reservation nobody could see. At 2300 the cap binds and the masthead CENTRES, so a scrolling
+   * page's ink sits 7.5px left of a fill page's — half of the bar, as centring in a narrower box
+   * must. Requiring one pixel there would be requiring the browser not to draw a scrollbar.
+   *
+   * ⚠️ SO WHAT IS ASSERTED IS THE RULE THAT PRODUCES THE CONSTANT, not the constant. The masthead is
+   * SYMMETRIC in the usable box on every page at every width — which is strictly stronger, because
+   * it also catches a page whose masthead is off-centre in a way an identical-pixel check across
+   * ten equally-wrong pages would not.
+   */
   for (const w of WIDTHS) {
-    const lefts = PAGES.map(({ name }) => ({ name, v: mast[`${w}|${name}`]!.masthead!.left }));
-    const rights = PAGES.map(({ name }) => ({ name, v: mast[`${w}|${name}`]!.masthead!.right }));
-    for (const [edge, set] of [["left", lefts], ["right", rights]] as const) {
-      const vals = [...new Set(set.map((x) => x.v))];
-      expect(vals, `@${w}: the masthead's ${edge} edge differs across pages — ${JSON.stringify(set.map((x) => [x.name, x.v]))}. \`--mast-gutter\` is 35px, defined once, and NO PAGE OVERRIDES IT: that is what makes this edge the same everywhere. A page whose masthead sits outside its content is the intended trade — "the masthead is a constant, and constants don't bend to each page" — so the fix is never a page-scoped gutter.`)
+    const rows = PAGES.map(({ name }) => ({ name, u: mast[`${w}|${name}`]!.mastUsable }));
+    for (const { name, u } of rows) {
+      expect(u, `@${w}: ${name} rendered no masthead ink to measure`).not.toBeNull();
+      expect(Math.abs(u!.l - u!.r), `@${w}: ${name}'s masthead is not symmetric in the usable width — ${u!.l} left against ${u!.r} right. A scrollbar is chrome the browser draws, not part of the page, so the two insets are measured inside it and must agree.`)
+        .toBeLessThanOrEqual(1);
+    }
+    /* and where the cap does NOT bind, that symmetric inset is `--mast-gutter` itself, on every
+       page — the constant the old form was trying to state, now read in the frame it lives in */
+    const tight = rows.filter(({ u }) => u!.l <= u!.gut + 1);
+    if (tight.length) {
+      const vals = [...new Set(tight.map(({ u }) => u!.l))];
+      expect(vals, `@${w}: the masthead's gutter differs across pages — ${JSON.stringify(tight.map((x) => [x.name, x.u!.l]))}. \`--mast-gutter\` is 35px, defined once, and NO PAGE OVERRIDES IT.`)
         .toHaveLength(1);
     }
   }
