@@ -480,6 +480,36 @@ describe("the app frame — four named adaptations, and only four", () => {
     expect(decls, "the retired tile row's auto-fit is back").not.toContain("repeat(auto-fit, minmax(150px, 1fr))");
   });
 
+  /**
+   * ⚠️ A CONTAINER QUERY CONFERS NO SPECIFICITY, SO ITS OVERRIDE MUST COME AFTER THE RULE IT
+   * OVERRIDES — the repo's own `prefers-reduced-motion` law, and a container query behaves the
+   * same. Written immediately below `.actbar` this block sat two hundred lines ABOVE
+   * `.tpn .willrec`'s own rule; both are 0-2-0, the later won, and `flex: 1 1 240px` put the basis
+   * straight back to 240. The declaration read correctly and did nothing.
+   *
+   * ⚠️ AND NO MEASUREMENT CAN SEE IT. Nothing overlapped and nothing was clipped, so the bar's two
+   * measured assertions stayed green over a bar wrapping into three ragged lines. Ordering is a
+   * SOURCE fact, so this is a source lock — which is what a source lock is genuinely for.
+   */
+  it("the bar's wrap override is declared after the rules it overrides", () => {
+    const q = decls.indexOf("@container (max-width: 560px)");
+    expect(q, "the bar's container query is gone").toBeGreaterThan(-1);
+    /* ⚠️ SEARCHED IN THE TEXT *BEFORE* THE QUERY, not with `lastIndexOf` over the whole file — the
+       query's own body names both selectors, so a whole-file `lastIndexOf` finds a position INSIDE
+       the block it is comparing against and the case fails on a correct sheet. It did, first run. */
+    const above = decls.slice(0, q);
+    for (const sel of [".tpn .willrec {", ".tpn .miss {"]) {
+      expect(above.includes(sel), `${sel} has no rule above the container query that overrides it`)
+        .toBe(true);
+    }
+    /* and nothing restates them BELOW it, which would win the same way */
+    const below = decls.slice(q + 200);
+    for (const sel of [".tpn .willrec {", ".tpn .miss {"]) {
+      expect(below.includes(sel), `${sel} is restated after the override — the override loses again`)
+        .toBe(false);
+    }
+  });
+
   it("4 · the app's tokens — by name, and the shadows removed so the names reach them", () => {
     /* the band's three papers read the app's own surfaces */
     expect(decls).toContain("--u-house-1: var(--sage-band)");

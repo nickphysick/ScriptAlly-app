@@ -458,11 +458,6 @@
    it is 390 at 1440 inside the split and wider outside it, and the viewport cannot tell you which.
    The house idiom, from the journeys pack. */
 .tpn .actbar { flex:0 0 auto;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:10px;padding:12px 16px;background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05);container-type:inline-size; }
-/* the three verbs plus their gaps need ~300px; the strip's own minimum is 240 — below their sum
-   plus the bar's padding, the strip takes the whole line rather than dragging one button with it */
-@container (max-width: 560px) {
-  .tpn .willrec, .tpn .miss { flex-basis: 100%; }
-}
 /* ⚠️ PROSE, NOT A FIELD STRING (deed round, Phase 2). It was uppercase mono with `·` separators and
    `text-overflow: ellipsis` — a database row read aloud, and clipped. It is a sentence now: Inter,
    sentence case, wrapping, capped at a readable measure. The mono survives on the LEAD-IN alone,
@@ -682,3 +677,22 @@
 .tpn .rfoot { flex:0 0 auto;padding:10px 15px;border-top:1px solid var(--hair); }
 .tpn .rfoot a { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none; }
 .tpn .rfoot a:hover { text-decoration:underline; }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * ⚠️ THE BAR'S WRAP OVERRIDE, AND IT LIVES HERE BECAUSE A CONTAINER QUERY CONFERS NO SPECIFICITY.
+ *
+ * This is the repo's own recorded law about `prefers-reduced-motion` — a media query is not a
+ * specificity boost, so an override must come AFTER the rule it overrides — and a container query
+ * behaves identically. Written immediately below `.actbar`, this block sat two hundred lines ABOVE
+ * `.tpn .willrec`'s own rule; both are 0-2-0, the later won, and `flex: 1 1 240px` put the basis
+ * straight back to 240. The declaration read perfectly correctly and did nothing.
+ *
+ * ⚠️ AND THE MEASUREMENTS COULD NOT SEE IT. Nothing overlapped and nothing was clipped, so the two
+ * bar assertions stayed green over a bar wrapping into three ragged lines. The screenshot again.
+ *
+ * The three verbs plus their gaps need ~300px and the strip's own minimum is 240; below their sum
+ * plus the bar's padding the strip takes the whole line rather than dragging one button onto it.
+ * ═════════════════════════════════════════════════════════════════════════════════════════════ */
+@container (max-width: 560px) {
+  .tpn .willrec, .tpn .miss { flex-basis: 100%; }
+}
