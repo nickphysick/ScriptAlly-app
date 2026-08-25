@@ -2,12 +2,17 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * TaskPane — THE PORT of `design-refs/todo-materials-contract.html`'s pane.
+ * TaskPane — THE PORT of `design-refs/todo-actionbar-corrected.html`.
  *
- * ⚠️ THE MARKUP IS THE MOCKUP'S, ELEMENT FOR ELEMENT. `.v` → `.fc` → `.rim` → `.band` + `.tiles`,
- * then `.workrow` as a SIBLING holding `.fc > .rim > .act` and `.fc > .rim > .tl-*`. Class names
- * are the mockup's words; nothing is renamed, nothing is added, and no class from the retired
- * `TodoDock` appears anywhere in this file.
+ * ⚠️ THE MARKUP IS THE CONTRACT'S, ELEMENT FOR ELEMENT: `.pane` → `.ws` → `.paneCol` (`.fc.hdr`,
+ * `.fc.work`, `.actbar`) beside `.fc.rec`. Class names are the contract's words; nothing is
+ * renamed, nothing is added, and no class from the retired `TodoDock` appears anywhere here.
+ *
+ * ⚠️ THIS SUPERSEDES THE MATERIALS CONTRACT AND THE PANE CONTRACT FOR THE CHASSIS (workspace
+ * round). What it replaces: a header band carrying the TILES, and a `.mid` scroller holding a form
+ * card and a story card side by side. The record is a COLUMN now — it does not travel with the
+ * work, and the tiles are inside it, because they are three facts about the record rather than
+ * three facts about the task.
  *
  * ⚠️ THE PROP CONTRACT IS THE MOCKUP'S OWN `DATA` SHAPE. Its render reads
  * `{cls, deed, sub, btns, tiles, actTitle, actSub, body, will, quiet, prim, tl}` and so
@@ -149,12 +154,10 @@ export interface TaskPaneProps {
   nav?: { index: number; total: number; label: string; onPrev: () => void; onNext: () => void };
 }
 
-/**
- * ⚠️ THE MOCKUP COUNTS ENTRIES EXCLUDING THE TERMINUS — `d.tl.filter(e => e[0] !== 'now').length`.
- * Ported rather than reasoned about: "3 entries" beside a rail whose last rung is "Your turn" is a
- * count of things that happened, and the terminus is not one of them.
- */
-const entryCount = (tl: TaskPaneEvent[]): number => tl.filter((e) => e.kind !== "now").length;
+/* (`entryCount` is deleted with the count it fed — workspace round, Phase 1. The story header
+   stopped stating "3 entries" when it became the Query Centre's status band, and the function has
+   had no caller since; a reachability sweep is what this repo asks for rather than a dead symbol
+   kept because it is small.) */
 
 /**
  * ⚠️ ONE RUNG, THREE CASES, CLOSED WITH `never`. The next entry kind cannot be added without
@@ -199,6 +202,15 @@ function rung(e: TaskPaneEvent): React.ReactNode {
 }
 
 export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }) => {
+  /**
+   * ⚠️ THE RECORD CARD RENDERS WHERE THERE IS A RECORD, AND ITS ABSENCE IS THE SPLIT'S OWN ANSWER
+   * (workspace round, Phase 1). `panePresence` already decides this once, per card — tiles and a
+   * timeline for a query, neither for a cohort or a note — so the split reads that decision rather
+   * than taking a second one. A bulk journey concerns MANY queries and a note concerns none, so
+   * neither has a single record to stand beside; both get the full-width worksheet, which is what
+   * `.ws--solo` collapses the grid to.
+   */
+  const hasRecord = !!((d.tiles && d.tiles.length > 0) || (d.tl && d.tl.length > 0));
   return (
     <div className="tpn">
       {/* ⚠️ THE COUNTER ROW IS GONE AND ITS HEIGHT WENT TO THE PANE (pane round, Phase 1). It said
@@ -206,161 +218,163 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
           states, spending ~40px to hold the pane's top edge below the list's. The arrows survive,
           in the band, where the contract puts them; the count does not survive at all, because the
           one that mattered is beside the rows it counts. */}
-      {/* ⚠️ THREE CARDS ON THE GROUND, NOT ONE CARD WITH THREE ZONES (finishing round, Phase 1).
-          The previous round read the contract's chassis as one white card and dropped the rims;
-          the contract draws the Form 11 grammar INSIDE the fixed-zone architecture — a transparent
-          pane column with a 12px gap, and three `.fc > .rim` cards standing on the ground:
+      {/* ⚠️ WORKSHEET LEFT, RECORD RIGHT (workspace round, Phase 1; ref
+          `design-refs/todo-actionbar-corrected.html`). The middle used to be a WRAPPING FLEX ROW of
+          a form card and a story card, both inside one scroller — so the story travelled with the
+          form, the tiles sat in the header band, and a long journey scrolled the record out of
+          sight exactly when it was being consulted. The record is a COLUMN now, 288px, and it does
+          not move.
 
-            header  fixed   band + tiles, tint clipped BY the rim
-            mid     scrolls form card · story card, each its own `.fc > .rim`
-            actbar  fixed   its own white strip
-
-          ⚠️ THE TINT IS CLIPPED BY THE RIM, NEVER LAID OVER IT. `.rim` carries `overflow:hidden`,
-          so the band's gradient meets the rim's 9px radius on all four corners. An overlay approach
-          — a tinted absolute layer inside a square box — reads correct at the top and wrong at the
-          corners, and there is no value you can nudge to fix it. */}
+          ⚠️ THE TILES MOVED WITH IT, and out of the band entirely. They are three facts about the
+          record; the band is the deed and the arrows and nothing else. */}
       <div className={`pane ${d.cls}`}>
-        <div className="fc hdr"><div className="rim">
-        <div className="band">
-          <div style={{ minWidth: 0 }}>
-            <div className={d.hand ? "deed hand" : "deed"}>{d.deed}</div>
-            {/* absent, not empty — a rendered `.b-sub` holding nothing is a blank line under the
-                deed, and blank space under a heading reads as something that failed to load */}
-            {d.sub ? <div className="b-sub">{d.sub}</div> : null}
-          </div>
-          {/* ⚠️ THE ARROWS LIVE HERE, not in a counter row above the card — Phase 1's retirement. */}
-          {nav && (
-            <div className="b-nav">
-              <button type="button" onClick={nav.onPrev} aria-label="Previous task">‹</button>
-              <button type="button" onClick={nav.onNext} aria-label="Next task">›</button>
-            </div>
-          )}
-        </div>
-
-        {/* ⚠️ ABSENT, NOT EMPTY, WHERE A JOURNEY HAS NOTHING TO SUMMARISE. The bulk journey has no
-            single query behind it, so it renders no tile row at all rather than a row of dashes. */}
-        {d.tiles && d.tiles.length > 0 && (
-          <div className="tiles">
-            {d.tiles.map((t, i) => (
-              <div className="tile" key={`${t.k}-${i}`}>
-                <div className="k">{t.k}</div>
-                {t.absent
-                  ? <div className="v absent">{t.val}</div>
-                  : <div className="v">{t.val}{t.small && <small>{t.small}</small>}</div>}
-              </div>
-            ))}
-          </div>
-        )}
-        </div></div>
-
-        {/* ⚠️ THE ONLY SCROLLING ELEMENT IN THE PANE. `flex: 1 1 auto; min-height: 0; overflow-y:
-            auto` — the band above and the bar below are `flex: 0 0 auto`, so a long form scrolls
-            between them and never takes the primary off screen. */}
-        <div className="mid">
-          <div className="formcol"><div className="fc"><div className="rim"><div className="formpad">
-            {d.actTitle && <div className="f-h">{d.actTitle}</div>}
-            {d.actSub && <div className="f-sub">{d.actSub}</div>}
-            {d.body}
-          </div></div></div></div>
-          {/* ⚠️ NO `.story` WRAPPER (steer round, Phase 4). `.fc > .rim` IS the card now, so a
-              `.story` div inside it was a fourth box around a card that already had three edges —
-              the card-within-card this phase retires from the form column, surviving here because
-              nothing had looked at the story column. The new contract has no such element: the
-              head, the body and the foot sit directly in the rim.
-              ⚠️ AND THE COMMENT IS OUTSIDE THE `&&` — a braced comment is a CHILD, and there is no
-              child position at the head of an expression. Second time tonight. */}
-          {d.tl && (
-            <div className="storycol"><div className="fc"><div className="rim">
-                {/* ⚠️ THE HEAD AND THE RAIL WERE IN THE STYLESHEET AND NOT IN THE MARKUP. `.tl-head`,
-                    `.tl-in` and `.tl` had rules — including the rail's own `::before` hairline —
-                    and nothing rendered them, so the story was a bare stack of rungs beside a
-                    stylesheet describing a card. A rule that reaches no element is the trap this
-                    repo has a standing note about; here it had reached none for a whole phase. */}
-                {/* ⚠️ THE STORY HEADER SPEAKS THE QUERY CENTRE'S VOICE (deed round, Phase 3): the
-                    sage band the Tracking panel wears, with the query's own STATUS on the right in
-                    Playfair. It was an entry COUNT — "3 entries" — which is a fact about the list
-                    rather than about the query, and the one thing a writer glancing at a story
-                    wants is where the query stands. Same grammar on both surfaces, so the two read
-                    as one app rather than two. */}
-                <div className="tl-head story-h">
-                  <span className="t">The story so far</span>
-                  {d.statusWord && <span className="stat">{d.statusWord}</span>}
+        <div className={hasRecord ? "ws" : "ws solo"}>
+          {/* ⚠️ THE PANE COLUMN'S THREE PARTS, IN ORDER — header, worksheet, bar. Phase 2 gives
+              them their heights; this is the order they stand in, and the bar is the LAST CHILD of
+              the column rather than anything's footer. */}
+          <div className="paneCol">
+            <div className="fc hdr"><div className="rim">
+              <div className="band">
+                <div style={{ minWidth: 0 }}>
+                  <div className={d.hand ? "deed hand" : "deed"}>{d.deed}</div>
+                  {/* absent, not empty — a rendered `.b-sub` holding nothing is a blank line under
+                      the deed, and blank space under a heading reads as something that failed to
+                      load */}
+                  {d.sub ? <div className="b-sub">{d.sub}</div> : null}
                 </div>
-                <div className="tl-in">
-                  <div className="tl">{d.tl.map(rung)}</div>
-                </div>
-                {d.onOpenQuery && (
-                  <div className="tl-foot">
-                    <a href="#" onClick={(ev) => { ev.preventDefault(); d.onOpenQuery?.(); }}>
-                      Open the full query →
-                    </a>
+                {/* ⚠️ THE ARROWS LIVE HERE, not in a counter row above the card — Phase 1's
+                    retirement. */}
+                {nav && (
+                  <div className="b-nav">
+                    <button type="button" onClick={nav.onPrev} aria-label="Previous task">‹</button>
+                    <button type="button" onClick={nav.onNext} aria-label="Next task">›</button>
                   </div>
                 )}
-            </div></div></div>
-          )}
-        </div>
+              </div>
+            </div></div>
 
-        {/* ⚠️ THE ACTION BAR IS FIXED, and it is where Snooze and Dismiss live now — they act on
-            the OPEN TASK, and this is where the open task is. The will-record strip states the
-            actual values the primary will write, so the button is never the only description of
-            what pressing it does. */}
-        <div className="actbar">
-          {/* ⚠️ THE STRIP YIELDS TO THE MISSING LINE, IT DOES NOT COMPETE WITH IT. Both in the bar
-              at once is two sentences fighting for one row, and the will-record is restated in the
-              form — so when the writer has just been told what is still owed, that is what the bar
-              says. It comes back the moment the line clears. */}
-          {/* ⚠️ THE LEAD-IN IS THE ONLY MONO LEFT, and it is a LABEL — "This records" names what
-              follows and then gets out of the way. The sentence after it is Inter, sentence case and
-              wrapping; the whole strip used to be uppercase mono, which is a database row read
-              aloud. Emphasis inside it is the journey's, on the two future dates.
-              ⚠️ AND THE COMMENT SITS OUTSIDE THE `&&` — a braced comment is a CHILD, and there is
-              no child position at the head of an expression. Third time in two rounds; the shape to
-              recognise is `{cond && (` followed by `{/*`. */}
-          {!(d.showMissing && d.missing && d.missing.length > 0) && (
-            <span className="willrec"><span className="lead">This records</span>{d.will}</span>
+            {/* ⚠️ THE WORK SCROLLS INSIDE THE CARD'S RIM, NEVER BEHIND THE BAR (Phase 2). `.rim`
+                carries `overflow: hidden`, so work leaves at the card's edge and there is nothing
+                underneath it to reappear in. The bar below is a SIBLING, not a lid. */}
+            <div className="fc work"><div className="rim">
+              <div className="workscroll">
+                <div className="form">
+                  {d.actTitle && <div className="f-h">{d.actTitle}</div>}
+                  {d.actSub && <div className="f-sub">{d.actSub}</div>}
+                  {d.body}
+                </div>
+              </div>
+            </div></div>
+
+            {/* ⚠️ THE ACTION BAR IS THE COLUMN'S LAST CHILD, and it is where Snooze and Dismiss
+                live — they act on the OPEN TASK, and this is where the open task is. The
+                will-record strip states the actual values the primary will write, so the button is
+                never the only description of what pressing it does. */}
+            <div className="actbar">
+              {/* ⚠️ THE STRIP YIELDS TO THE MISSING LINE, IT DOES NOT COMPETE WITH IT. Both in the
+                  bar at once is two sentences fighting for one row, and the will-record is restated
+                  in the form — so when the writer has just been told what is still owed, that is
+                  what the bar says. It comes back the moment the line clears. */}
+              {/* ⚠️ THE LEAD-IN IS THE ONLY MONO LEFT, and it is a LABEL — "This records" names what
+                  follows and then gets out of the way. The sentence after it is Inter, sentence
+                  case and wrapping.
+                  ⚠️ AND THE COMMENT SITS OUTSIDE THE `&&` — a braced comment is a CHILD, and there
+                  is no child position at the head of an expression. */}
+              {!(d.showMissing && d.missing && d.missing.length > 0) && (
+                <span className="willrec"><span className="lead">This records</span>{d.will}</span>
+              )}
+              {d.showMissing && d.missing && d.missing.length > 0 && (
+                /* ⚠️ IT WRAPS RATHER THAN TRUNCATING. A line that says which answers are missing is
+                    useless with the last two clipped off — which is what `text-overflow: ellipsis`
+                    would do to it, and why this is not the will-record strip wearing different
+                    words. */
+                <span className="miss">
+                  Still to answer:{" "}
+                  {d.missing.map((m, i) => (
+                    <React.Fragment key={m.id}>
+                      {i > 0 && (i === d.missing!.length - 1 ? " and " : ", ")}
+                      <a href="#" onClick={(e) => { e.preventDefault(); d.onJump?.(m.id); }}>{m.name}</a>
+                    </React.Fragment>
+                  ))}
+                </span>
+              )}
+              {d.onSnooze && (
+                <button type="button" className="ab quiet"
+                  onClick={(e) => d.onSnooze?.(e.currentTarget)}>Snooze</button>
+              )}
+              {d.onDismiss && (
+                /* ⚠️ "Dismiss all" ON A COHORT, and the title says what "all" means. It dismisses
+                   the COHORT TASK, not n queries — the queries are untouched, which is the
+                   distinction the confirm dialog spends a paragraph on and this button has one word
+                   for. */
+                <button type="button" className="ab quiet" onClick={d.onDismiss}
+                  title={d.bulk ? "Dismisses the whole cohort task — the queries are unchanged" : undefined}>
+                  {d.bulk ? "Dismiss all" : "Dismiss"}
+                </button>
+              )}
+              {/* ⚠️ THE COUNT RIDES ON THE PRIMARY, NOT BESIDE IT. A number elsewhere in the bar is
+                  a fact about the form; on the button it is a fact about what pressing it will do —
+                  and the button is where the writer's hand already is. Absent when complete, because
+                  a chip reading "0 to answer" is a control describing its own emptiness. */}
+              <button type="button" className="ab go" disabled={d.primDisabled} onClick={onPrimary}>
+                {d.prim}
+                {/* ⚠️ NEVER ON BULK, WHICH ALREADY COUNTS IN ITS LABEL. "Log 0 queries" beside a
+                    chip reading "1 to answer" is two numbers on one button counting different
+                    things — the queries filled in, and the requirements outstanding — and the reader
+                    has no way to know that. */}
+                {!d.bulk && d.missing && d.missing.length > 0 && (
+                  <span className="n">{d.missing.length} to answer</span>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* ⚠️ THE RECORD — one card, its own column, and it does not scroll with the work.
+              Header and the query link are fixed; only the middle moves (Phase 2). */}
+          {hasRecord && (
+            <div className="fc rec"><div className="rim">
+              {/* ⚠️ THE HEAD SPEAKS THE QUERY CENTRE'S VOICE (deed round, Phase 3): the sage band
+                  the Tracking panel wears, with the query's own STATUS on the right in Playfair. It
+                  was an entry COUNT — "3 entries" — which is a fact about the list rather than about
+                  the query, and the one thing a writer glancing at a record wants is where the
+                  query stands. `statusWord` arrives already through `getStatusLabel`, the app's ONE
+                  status-word function, so this card and the Centre's pill cannot come to call one
+                  status two things. */}
+              <div className="rhead">
+                <span className="t">The record</span>
+                {d.statusWord && <span className="stat">{d.statusWord}</span>}
+              </div>
+              <div className="recscroll">
+                {/* ⚠️ THE TILES ARE STACKED, NOT A ROW. A 288px column cannot carry three cells
+                    side by side, and the facts read better one to a line with a hairline between
+                    them than squeezed into thirds. */}
+                {d.tiles && d.tiles.length > 0 && (
+                  <div className="rtiles">
+                    {d.tiles.map((t, i) => (
+                      <div className="rtile" key={`${t.k}-${i}`}>
+                        <div className="k">{t.k}</div>
+                        {t.absent
+                          ? <div className="v absent">{t.val}</div>
+                          : <div className="v">{t.val}{t.small && <small>{t.small}</small>}</div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {d.tl && d.tl.length > 0 && (
+                  <div className="rtl">
+                    <div className="tl">{d.tl.map(rung)}</div>
+                  </div>
+                )}
+              </div>
+              {d.onOpenQuery && (
+                <div className="rfoot">
+                  <a href="#" onClick={(ev) => { ev.preventDefault(); d.onOpenQuery?.(); }}>
+                    Open the full query →
+                  </a>
+                </div>
+              )}
+            </div></div>
           )}
-          {d.showMissing && d.missing && d.missing.length > 0 && (
-            /* ⚠️ IT WRAPS RATHER THAN TRUNCATING. A line that says which answers are missing is
-                useless with the last two clipped off — which is what `text-overflow: ellipsis`
-                would do to it, and why this is not the will-record strip wearing different words. */
-            <span className="miss">
-              Still to answer:{" "}
-              {d.missing.map((m, i) => (
-                <React.Fragment key={m.id}>
-                  {i > 0 && (i === d.missing!.length - 1 ? " and " : ", ")}
-                  <a href="#" onClick={(e) => { e.preventDefault(); d.onJump?.(m.id); }}>{m.name}</a>
-                </React.Fragment>
-              ))}
-            </span>
-          )}
-          {d.onSnooze && (
-            <button type="button" className="ab quiet"
-              onClick={(e) => d.onSnooze?.(e.currentTarget)}>Snooze</button>
-          )}
-          {d.onDismiss && (
-            /* ⚠️ "Dismiss all" ON A COHORT, and the title says what "all" means. It dismisses the
-               COHORT TASK, not n queries — the queries are untouched, which is the distinction the
-               confirm dialog spends a paragraph on and this button has one word for. */
-            <button type="button" className="ab quiet" onClick={d.onDismiss}
-              title={d.bulk ? "Dismisses the whole cohort task — the queries are unchanged" : undefined}>
-              {d.bulk ? "Dismiss all" : "Dismiss"}
-            </button>
-          )}
-          {/* ⚠️ THE COUNT RIDES ON THE PRIMARY, NOT BESIDE IT. A number elsewhere in the bar is a
-              fact about the form; on the button it is a fact about what pressing it will do — and
-              the button is where the writer's hand already is. Absent when complete, because a
-              chip reading "0 to answer" is a control describing its own emptiness. */}
-          <button type="button" className="ab go" disabled={d.primDisabled} onClick={onPrimary}>
-            {d.prim}
-            {/* ⚠️ NEVER ON BULK, WHICH ALREADY COUNTS IN ITS LABEL. "Log 0 queries" beside a chip
-                reading "1 to answer" is two numbers on one button counting different things — the
-                queries filled in, and the requirements outstanding — and the reader has no way to
-                know that. The cohort's count is the label's job; the chip is for the journeys whose
-                label has no number in it. */}
-            {!d.bulk && d.missing && d.missing.length > 0 && (
-              <span className="n">{d.missing.length} to answer</span>
-            )}
-          </button>
         </div>
       </div>
     </div>

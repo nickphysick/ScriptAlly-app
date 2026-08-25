@@ -164,10 +164,10 @@
 .tpn .more { text-align:center;padding:12px 0 2px; }
 .tpn .more a { font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none; }
 .tpn .caveat { font-size:11px;color:var(--muted2);font-weight:300;margin:11px 0 0;line-height:1.5; }
-.tpn .tl-head { display:flex;align-items:center;justify-content:space-between;padding:12px 17px;border-bottom:1px solid var(--rimline); }
-.tpn .tl-head .t { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:500; }
-.tpn .tl-head .c { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0; }
-.tpn .tl-in { padding:15px 17px 17px;background:var(--white); }
+/* (`.tl-head`, its unused `.c` count and `.tl-in` are retired — the record card's head is `.rhead`
+   and its body is `.rtl`, both the corrected contract's own words. The RUNGS keep `.tl-e`: an entry
+   is the same object wherever it is drawn, and renaming it would have moved `rung()` and the
+   byte-for-byte `StatusDot` assertion for the sake of a wrapper.) */
 .tpn .tl { position:relative;padding-left:18px; }
 .tpn .tl::before { content:'';position:absolute;left:4.5px;top:7px;bottom:7px;width:1.5px;background:#e1d7d0; }
 .tpn .tl-e { position:relative;padding:6px 0; }
@@ -189,14 +189,13 @@
 .tpn .tl-e.minor .t { font-weight:400;color:var(--muted2);font-size:11.5px; }
 .tpn .tl-e.now .t { color:var(--burg); }
 .tpn .tl-e .d { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-top:2px; }
-.tpn .tl-foot { padding:11px 17px;border-top:1px solid var(--rimline); }
-.tpn .tl-foot a { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none; }
+/* (`.tl-foot` is `.rfoot` now — see the record-card block.) */
 
 
-/* the mockup's own narrow step, ported as it stands; the app-frame pass replaces it. */
+/* the mockup's own narrow step, ported as it stands; the app-frame pass replaces it.
+   ⚠️ ITS TWO `.tiles` RULES WENT WITH THE TILE ROW (workspace round, Phase 1) — the tiles are
+   stacked inside the record card now and there is no four-across row left to step down. */
 @media (max-width: 1160px) {
-  .tpn .tiles.n4 { grid-template-columns:repeat(2,1fr); }
-  .tpn .tiles.n4 .tile:nth-child(2) { border-right:0; }
   .tpn .band { flex-direction:column; }
 }
 
@@ -239,9 +238,10 @@
    ⚠️ AND THE TILES COUNT THEMSELVES. `.n3`/`.n4` are a React prop deciding layout; `auto-fit` lets
    the browser decide, which is the same outcome at every width the ref drew and a better one at
    the widths it did not. */
-.tpn .tiles, .tpn .tiles.n3, .tpn .tiles.n4 {
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-}
+/* (adaptation 3's `.tiles` auto-fit is retired with the tile ROW — the record card stacks its
+   three facts one to a line, so there is no column count left for the browser to decide. The
+   remaining half of this adaptation is the pane column's own fluidity, which Phase 2 states as a
+   flex chain rather than as a wrap.) */
 /* the ref's narrow band stacks its figure under the deed; a wrap does it without a threshold */
 
 /* ── 4 · THE APP'S TOKENS ──────────────────────────────────────────────────────────────────────
@@ -323,36 +323,28 @@
 .tpn .b-nav { display:flex;gap:6px;flex-shrink:0; }
 .tpn .b-nav button { cursor:pointer;width:28px;height:28px;border-radius:8px;background:rgba(255,253,250,0.8);border:0.5px solid rgba(58,28,20,0.13);color:var(--ink2);display:flex;align-items:center;justify-content:center; }
 .tpn .b-nav button:hover { background:#fffdfa; }
-.tpn .tiles { flex:0 0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-bottom:1px solid var(--hair); }
-.tpn .tile { padding:10px 18px 11px;border-right:1px solid rgba(124,58,42,0.10);min-width:0; }
-.tpn .tile:last-child { border-right:0; }
-.tpn .tile .k { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:500; }
-.tpn .tile .v { font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:var(--ink2);margin-top:3px;line-height:1.2; }
-.tpn .tile .v small { font-family:'Inter',sans-serif;font-size:10px;color:var(--muted2);font-weight:300;display:block;margin-top:1px; }
-.tpn .tile .v.absent { color:#c0b0a0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase; }
-/* ⚠️ THE MID'S PADDING IS 2px NOW, NOT 20 — the cards inside it carry their own (`.formpad`), and
-   the mid's job is only to hold the scroll and leave 2px so a card's shadow is not clipped by its
-   own scrollport. */
-/* ⚠️ `align-items:flex-start` IS THE HUG (finishing round, Phase 2), and it is the whole of it.
-   A flex row's default is `stretch`, which makes every card as tall as the tallest — so a note's
-   two-line form would be dragged down to the height of a story column beside it, and the ground
-   would never show. Start-aligned, each card stops at its own content and the tops still line up.
-   ⚠️ AND NOTHING IN THE PANE SETS A MINIMUM HEIGHT. The one exception is `textarea.note-in`, which
-   is the contract's own and is about a CONTROL being usable, not a card being padded out. */
-.tpn .mid { flex:1 1 auto;min-height:0;overflow-y:auto;padding:2px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap; }
+/* (`.tiles`/`.tile` are retired with the band's tile row — workspace round, Phase 1. The facts are
+   `.rtiles`/`.rtile` inside the record card now, stacked rather than in a row of thirds, and their
+   rules are in the record-card block at the foot of this file. A rule for an element nothing
+   renders is the trap this file has a standing note about, so they go rather than linger.) */
+/* ⚠️ `.mid` IS RETIRED, AND WITH IT THE ONE SCROLLER THAT CARRIED BOTH COLUMNS (workspace round,
+   Phase 1). It was a wrapping flex row of a form card and a story card inside a single scrollport:
+   so the record travelled with the work, and a long journey scrolled the thing being consulted off
+   the screen. The split below stands them in two columns; Phase 2 gives each its own scroller. */
 /* ⚠️ THE FORM 11 CARD, and the pane holds three of them. `.fc` is the white card with the app's
    edge; `.rim` is the burgundy hairline inside it, and its `overflow:hidden` is what CLIPS the
    band's tint to the 9px radius rather than letting a square fill run under a rounded border. */
 .tpn .fc { background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07); }
 .tpn .rim { border:1px solid rgba(124,58,42,0.28);border-radius:9px;overflow:hidden; }
 .tpn .hdr { flex:0 0 auto; }
-.tpn .formpad { padding:18px 18px 20px; }
-.tpn .mid::-webkit-scrollbar { width:9px; }
-.tpn .mid::-webkit-scrollbar-thumb { background:#e2d6c8;border-radius:5px;border:2px solid var(--white); }
-/* the contract's basis, with the grow factors the retired `.workrow` proved: the form asks for
-   most of the surplus, and the story takes a line to itself when they cannot sit side by side */
-.tpn .formcol { flex:999 1 460px;min-width:0; }
-.tpn .storycol { flex:1 1 280px;min-width:230px; }
+/* ⚠️ THE WORKSHEET'S PADDING IS `.form`'s, WHICH IS THE CONTRACT'S OWN ELEMENT — it replaces the
+   retired `.formpad`. The card, its rim and its scroller carry none, so the scroller's edge is the
+   card's edge and work disappears at the rim rather than inside an inset. */
+.tpn .form { padding:4px 20px 14px; }
+/* (`.formcol`/`.storycol` and their grow factors are retired with `.mid` — a wrapping row needs
+   grow factors to decide who takes the surplus, and a two-track grid with a fixed record column
+   does not. `.formpad` goes the same way: the worksheet's padding is `.form`'s, which is the
+   contract's own element.) */
 .tpn .f-h { font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2); }
 .tpn .f-sub { font-size:11.5px;color:var(--muted2);font-weight:300;margin:3px 0 15px;line-height:1.5; }
 /* ⚠️ THE LAW, VERBATIM: A BACKGROUND TINT INSIDE THE FORM CARD MEANS THE THING IS TOUCHABLE.
@@ -500,11 +492,48 @@
 .tpn .miss { font-size:11.5px;color:var(--ink2);font-weight:300;line-height:1.5;margin-right:auto;min-width:0;flex:1 1 240px; }
 .tpn .miss a { color:var(--burg);text-decoration:underline;text-underline-offset:2px;cursor:pointer; }
 
-/* ── the story header, in the Query Centre's grammar (deed round, Phase 3) ───────────────────
-   ⚠️ THE SAGE BAND IS THE TRACKING PANEL'S, ported by VALUE rather than by importing its rule —
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * THE SPLIT AND THE RECORD CARD (workspace round, Phase 1) — `design-refs/todo-actionbar-corrected.html`.
+ *
+ * ⚠️ WORKSHEET LEFT, RECORD RIGHT. The record is a COLUMN of its own — 288px, the contract's
+ * figure — so it neither travels with the work nor competes with it for the surplus. `minmax(0,
+ * 1fr)` on the left, never a bare `1fr`, or the worksheet refuses to shrink below its content and
+ * pushes the record off its own measure.
+ *
+ * ⚠️ `align-items: stretch` IS PHASE 2's MECHANISM, DECLARED HERE because it is a property of the
+ * ROW rather than of either column: it is what makes the pane column fill the row's height, which
+ * is what puts the action bar's bottom edge on the record card's bottom edge by construction.
+ * ═════════════════════════════════════════════════════════════════════════════════════════════ */
+.tpn .ws { display:grid;grid-template-columns:minmax(0,1fr) 288px;gap:12px;align-items:stretch;min-height:0; }
+/* ⚠️ ONE COLUMN WHERE THERE IS NO RECORD, and the modifier says which case that is rather than the
+   grid guessing from a child count. A cohort concerns many queries and a note concerns none; both
+   take the full width, and `.ws` without `.rec` beside it would otherwise hold a 288px empty
+   track. */
+.tpn .ws.solo { grid-template-columns:minmax(0,1fr); }
+.tpn .paneCol { display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0; }
+
+/* ── the record card ───────────────────────────────────────────────────────────────────────────
+   ⚠️ THE SAGE HEAD IS THE TRACKING PANEL'S, ported by VALUE rather than by importing its rule —
    the two surfaces are in different stylesheets and a shared selector between them would couple a
    task pane to a query page. Same gradient, same rule colour, stated here. */
-.tpn .tl-head.story-h { background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid rgba(90,110,88,0.20); }
-.tpn .story-h .t { font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#3c4a3a;font-weight:500; }
+.tpn .rec { min-width:0; }
+.tpn .rhead { flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 15px;background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid rgba(90,110,88,0.20); }
+.tpn .rhead .t { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#3c4a3a;font-weight:500; }
 /* the status word — Playfair, and the only thing on this row that is not a label */
-.tpn .story-h .stat { font-family:'Playfair Display',serif;font-size:12.5px;color:#2e3a2c;font-weight:500; }
+.tpn .rhead .stat { font-family:'Playfair Display',serif;font-size:12px;color:#2e3a2c;font-weight:500;white-space:nowrap; }
+
+/* ⚠️ STACKED, ONE FACT TO A LINE, SEPARATED BY A HAIRLINE. The band drew three cells side by side
+   because it had the whole pane's width; a 288px column has room for one, and a fact per line with
+   a rule between reads better than three squeezed into thirds. */
+.tpn .rtiles { padding:4px 15px; }
+.tpn .rtile { padding:9px 0;border-bottom:1px solid #f0e9df; }
+.tpn .rtile:last-child { border-bottom:0; }
+.tpn .rtile .k { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);font-weight:500; }
+.tpn .rtile .v { font-family:'Playfair Display',serif;font-size:14.5px;font-weight:500;color:var(--ink2);margin-top:2px;line-height:1.3; }
+.tpn .rtile .v small { font-family:'Inter',sans-serif;font-size:10px;color:var(--muted2);font-weight:300;display:block; }
+.tpn .rtile .v.absent { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0; }
+
+.tpn .rtl { padding:11px 15px 12px;border-top:1px solid var(--hair);background:var(--white); }
+.tpn .rfoot { flex:0 0 auto;padding:10px 15px;border-top:1px solid var(--hair); }
+.tpn .rfoot a { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none; }
+.tpn .rfoot a:hover { text-decoration:underline; }

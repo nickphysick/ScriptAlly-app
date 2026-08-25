@@ -28,12 +28,17 @@ import { TaskPane, TaskPaneJourney } from "./TaskPane";
 import { StatusDot } from "../StatusDot";
 import { TaskPaneBody } from "./TaskPaneBody";
 
-const REF = readFileSync(join(process.cwd(), "design-refs/todo-pane-contract.html"), "utf8");
-/* ⚠️ TWO CONTRACTS ARE IN FORCE, and saying so is more honest than pretending one is. The pane
-   contract owns the CHASSIS — band, middle, action bar — and supersedes the materials contract
-   there. The form's fields and the story's entries are still the materials contract's until
-   Phases 3 and 8 replace them, so its vocabulary is still legitimate. The assertion is that every
-   rendered class comes from ONE OF THE TWO, which is what stops a name being invented here. */
+const REF = readFileSync(join(process.cwd(), "design-refs/todo-actionbar-corrected.html"), "utf8");
+/* ⚠️ FOUR CONTRACTS ARE IN FORCE, AND SAYING SO IS MORE HONEST THAN PRETENDING ONE IS.
+   `todo-actionbar-corrected` owns the CHASSIS — the split, the fixed zones, the accordion, the
+   record card — and supersedes the pane contract there, which superseded the materials contract
+   before it. `todo-workspace-final` owns the in-row answers and the Edit affordance. The two older
+   files are still the authority for what they still draw: the sample control, the bulk table, the
+   note's own words. The assertion is unchanged in kind — every rendered class comes from ONE OF
+   THE FOUR, which is what stops a name being invented here — and the day any of them changes, this
+   suite changes with it. */
+const REF_FINAL = readFileSync(join(process.cwd(), "design-refs/todo-workspace-final.html"), "utf8");
+const REF_PANE = readFileSync(join(process.cwd(), "design-refs/todo-pane-contract.html"), "utf8");
 const REF_MATERIALS = readFileSync(join(process.cwd(), "design-refs/todo-materials-contract.html"), "utf8");
 const PANE_CSS = readFileSync(join(process.cwd(), "src/components/todo/taskPane.css"), "utf8");
 const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
@@ -92,10 +97,10 @@ describe("1 · the pane's class names are the mockup's", () => {
    * port invented, which is the thing the brief forbids.
    */
   const cssOf = (src: string) => strip(src.slice(src.indexOf("<style>"), src.indexOf("</style>")));
-  const mockClasses = new Set([
-    ...[...cssOf(REF).matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1]),
-    ...[...cssOf(REF_MATERIALS).matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1]),
-  ]);
+  const mockClasses = new Set(
+    [REF, REF_FINAL, REF_PANE, REF_MATERIALS].flatMap((r) =>
+      [...cssOf(r).matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1])),
+  );
 
   it("every class the pane renders is a word from the mockup", () => {
     /* ⚠️ THE ONE EXEMPTION IS NAMED AND PREFIXED. Task navigation is behaviour the brief requires
@@ -122,7 +127,12 @@ describe("1 · the pane's class names are the mockup's", () => {
   });
 
   it("the structural names are present, and nested as the mockup nests them", () => {
-    for (const c of ["pane", "band", "deed", "b-sub", "mid", "formcol", "actbar", "willrec"]) {
+    /* ⚠️ RETARGETED, AND THE LAW IT ASSERTS IS UNCHANGED: the pane's structure is the contract's,
+       named in the contract's words, in the contract's order. What moved is WHICH contract — the
+       corrected action-bar file replaces `.mid`/`.formcol`/`.storycol` (one scroller holding a form
+       card beside a story card) with `.ws` → `.paneCol` beside `.rec`. A suite that kept asserting
+       the retired names would be asserting a page the app no longer serves. */
+    for (const c of ["pane", "ws", "paneCol", "band", "deed", "b-sub", "work", "actbar", "willrec"]) {
       expect(rendered.has(c), `${c} is missing from the rendered pane`).toBe(true);
     }
     /* ⚠️ THREE ZONES IN ORDER, AND NOW THREE CARDS — REVERSED DELIBERATELY (finishing round,
@@ -131,16 +141,29 @@ describe("1 · the pane's class names are the mockup's", () => {
        transparent pane column holding `.fc > .rim` cards for the header, the form and the story.
        So the prohibition is deleted rather than argued with, and what it was protecting — the zone
        ORDER — is asserted as it always was, alongside the card count it now expects. */
+    /* ⚠️ THE BAR IS THE COLUMN'S LAST CHILD AND THE RECORD IS THE COLUMN'S SIBLING — the two facts
+       the corrected contract exists to state. Read as source order, which is the only half of it a
+       string can carry; that the bar is not a LID is a rendered-page claim and lives in
+       `tests/e2e/workspaceRound.measure.ts`. */
     const band = HTML.indexOf('class="band"');
-    const mid = HTML.indexOf('class="mid"');
+    const work = HTML.indexOf('class="fc work"');
     const bar = HTML.indexOf('class="actbar"');
+    const rec = HTML.indexOf('class="fc rec"');
     expect(band).toBeGreaterThan(-1);
-    expect(mid).toBeGreaterThan(band);
-    expect(bar).toBeGreaterThan(mid);
-    /* a query journey: header + form + story. The rim is what clips the band's tint, so its
+    expect(work).toBeGreaterThan(band);
+    expect(bar).toBeGreaterThan(work);
+    expect(rec, "the record card is not after the pane column — it is inside it").toBeGreaterThan(bar);
+    /* a query journey: header + worksheet + record. The rim is what clips the band's tint, so its
        presence is the structural half of the claim the measurement makes about the corners. */
     expect((HTML.match(/class="rim"/g) || []).length, "a query journey draws three rim cards").toBe(3);
     expect(HTML, "the header card lost its fixed-zone class").toContain('class="fc hdr"');
+    /* ⚠️ THE TILES ARE IN THE RECORD, AND NOWHERE ELSE. They were three cells in the header band —
+       facts about the record, drawn on the task — and the whole point of the split is that the
+       record owns them. Asserted as absence AND presence, because either alone is satisfiable by a
+       pane that renders no tiles at all. */
+    expect(HTML, "a tile row is back in the band").not.toMatch(/["\s`]tiles["\s`]/);
+    expect(HTML.indexOf('class="rtiles"'), "the tiles are not inside the record card")
+      .toBeGreaterThan(rec);
   });
 
   it("the mockup's own scoping is the only edit to its stylesheet", () => {
@@ -191,8 +214,13 @@ describe("2 · every element of the mockup's Send journey exists in the rendered
      the card, so a `.story` div inside it was a fourth box; the updated contract has no such
      element and the head, body and foot sit directly in the rim. `storycol` stays — the COLUMN is
      still a part, and it is the one this list was really protecting. */
-  const PANE_PARTS = ["pane", "band", "deed", "b-sub", "b-nav", "tiles", "tile",
-    "mid", "formcol", "storycol", "actbar", "willrec", "ab"];
+  /* ⚠️ THE CHECKLIST IS THE CORRECTED CONTRACT'S PARTS (workspace round, Phase 1). `tiles`/`tile`
+     retired with the band's tile row and `mid`/`formcol`/`storycol` with the single scroller; the
+     record card's own parts take their place. The CLAIM is unchanged: the pane is a port of its
+     contract, and the contract is the input rather than a fixture. */
+  const PANE_PARTS = ["pane", "ws", "paneCol", "band", "deed", "b-nav",
+    "work", "workscroll", "form", "actbar", "wr", "ab",
+    "rec", "rhead", "rtiles", "rtile", "rtl", "rfoot"];
 
   it("the mockup emits every part this checks", () => {
     /* the guard on the guard: a part that stopped being in the ref would silently drop out */
@@ -201,7 +229,13 @@ describe("2 · every element of the mockup's Send journey exists in the rendered
   });
 
   it("the rendered Send journey carries all of them", () => {
-    const missing = PANE_PARTS.filter((p) => !rendered.has(p));
+    /* ⚠️ `wr` IS THE CONTRACT'S NAME FOR THE STRIP AND `willrec` IS THIS PANE'S — one deviation,
+       named. The corrected file draws the strip as `.wr`; this pane has carried `.willrec` since
+       the materials port and it is the word four other locks and the measurement suite address it
+       by. Renaming it would be a rename for the sake of a drawing, so the CHECKLIST accepts either
+       and `b-sub` is exempted the same way (a note has one, a query journey does not). */
+    const ALIAS: Record<string, string> = { wr: "willrec" };
+    const missing = PANE_PARTS.filter((p) => !rendered.has(p) && !rendered.has(ALIAS[p] ?? p));
     expect(missing, `missing from the rendered pane: ${missing.join(" ")}`).toHaveLength(0);
   });
 
@@ -214,10 +248,13 @@ describe("2 · every element of the mockup's Send journey exists in the rendered
     expect(noFig, "the retired band figure is back").not.toContain("bandfig");
     expect(noFig, "the retired absence modifier is back").not.toMatch(/["\s`]nofig["\s`]/);
     /* and a journey with no timeline drops the card, leaving the workrow one child */
+    /* ⚠️ NO RECORD, NO COLUMN — and the grid says so rather than holding an empty 288px track. A
+       cohort concerns many queries and a note concerns none; both take the full width. */
     const noTl = renderToStaticMarkup(
       <TaskPane journey={{ ...SEND, tiles: null, tl: null }} onPrimary={() => {}} />);
-    expect(noTl, "the story column survived a journey with no story").not.toContain("storycol");
-    expect(noTl, "an empty tile row rendered").not.toContain('class="tiles"');
+    expect(noTl, "the record card survived a journey with no record").not.toContain('class="fc rec"');
+    expect(noTl, "an empty tile row rendered").not.toMatch(/["\s`]rtiles["\s`]/);
+    expect(noTl, "the grid kept a record track with no record in it").toContain('class="ws solo"');
   });
 
   /**
@@ -319,28 +356,34 @@ describe("the app frame — four named adaptations, and only four", () => {
     /* `flex: 1; min-height: 0` down to a child that owns the overflow — the same chain `/queries`
        runs, and `min-height: 0` on every link because a flex item's automatic minimum is content */
     expect(frame).toContain("flex-direction: column");
-    /* ⚠️ THE SCROLLPORT MOVED WITH THE CHASSIS (pane round, Phase 2). It was `.v`, the materials
-       contract's column; the pane contract's middle zone owns it, between a fixed band and a fixed
-       action bar. Same chain, same three declarations, one element along. */
-    const mid = rule(".tpn .mid");
-    expect(mid).toContain("min-height:0");
-    expect(mid).toContain("overflow-y:auto");
-    expect(mid).toContain("flex:1 1 auto");
+    /* ⚠️ RETARGETED (workspace round, Phase 1) AND THE LAW IS UNCHANGED: this page must not scroll,
+       so the chain runs `flex: 1; min-height: 0` from the pane root down to an element that owns
+       the overflow. What moved is WHERE the chain ends. It was one `.mid` scrollport holding both
+       columns, which meant the record travelled with the work; the split ends the chain inside each
+       column instead, so `.mid` is retired rather than relocated.
+       ⚠️ THE SCROLLERS THEMSELVES ARE PHASE 2's and are asserted there — this case asserts that the
+       chain still reaches them, which is the half a retirement can break silently. */
+    expect(decls, "the single-scrollport middle is back").not.toMatch(/\.tpn \.mid[ .{:,]/);
+    expect(rule(".tpn > .pane")).toContain("min-height: 0");
+    expect(rule(".tpn .ws")).toContain("min-height:0");
+    expect(rule(".tpn .paneCol")).toContain("min-height:0");
   });
 
   it("3 · fluid columns — no breakpoint decides anything", () => {
     /* the ref's `@media (max-width:1160px)` is superseded by rules that reach the same outcomes
        by measure. The block is still in the file, above, and these override it. */
-    /* ⚠️ THE WORKROW IS RETIRED WITH THE CARD-IN-CARD. The pane contract's middle is one flex row
-       of two columns — `.formcol` and `.storycol` — which wrap by measure exactly as the workrow
-       did, without the two framed cards between them. Asserted on the survivors. */
+    /* ⚠️ THE WORKROW IS RETIRED WITH THE CARD-IN-CARD, and `.formcol`/`.storycol` with the wrapping
+       middle that needed them. The split is a two-track GRID: `minmax(0, 1fr)` beside a fixed
+       record column, which is fluid by construction and has no threshold to decide anything at.
+       `minmax(0, …)` rather than a bare `1fr` because a grid item's automatic minimum is its
+       content — without it the worksheet refuses to shrink and pushes the record off its measure. */
     expect(decls, "the retired workrow is back").not.toContain(".tpn .workrow");
-    const mid2 = rule(".tpn .mid");
-    /* ⚠️ WHITESPACE-NORMALISED: one of these rules is PORTED (tight, as the contract writes it)
-       and one is AUTHORED (spaced, as this repo writes it), and the claim is about neither. */
-    expect(mid2.replace(/\s*:\s*/g, ":")).toContain("flex-wrap:wrap");
-    /* the tiles count themselves rather than taking `.n3`/`.n4` from a prop */
-    expect(decls).toContain("repeat(auto-fit, minmax(150px, 1fr))");
+    expect(decls, "the wrapping middle's columns are back").not.toMatch(/\.tpn \.(formcol|storycol)[ .{:,]/);
+    const ws = rule(".tpn .ws").replace(/\s*:\s*/g, ":");
+    expect(ws).toContain("grid-template-columns:minmax(0,1fr) 288px");
+    expect(ws, "a wrap decides the split instead of the grid").not.toContain("flex-wrap");
+    /* the tiles stack in the record column now — there is no column count left to auto-fit */
+    expect(decls, "the retired tile row's auto-fit is back").not.toContain("repeat(auto-fit, minmax(150px, 1fr))");
   });
 
   it("4 · the app's tokens — by name, and the shadows removed so the names reach them", () => {
