@@ -41,8 +41,16 @@ export const FoundingSignup: React.FC<{
   ctaLabel?: string;
   /** The form's own class, so each wrapper owns its own layout. */
   formClass: string;
+  /**
+   * ⚠️ PER-SURFACE OUTCOME COPY, ONE STATE MACHINE. `foundingStore` decides WHICH state; a wrapper
+   * may decide what its surface says in it. Absent, the sealed band's wording is used — which is
+   * what both band mounts want, so neither has to restate it.
+   * Forking the RENDER instead of passing the copy is how two surfaces come to disagree about
+   * what happened to the same submission.
+   */
+  messages?: Partial<Record<FoundingState, React.ReactNode>>;
   onNavigate: (tab: string, subPageName?: string) => void;
-}> = ({ idPrefix, ctaLabel = FOUNDING_CTA, formClass, onNavigate }) => {
+}> = ({ idPrefix, ctaLabel = FOUNDING_CTA, formClass, messages, onNavigate }) => {
   const { state } = useFounding();
   const [email, setEmail] = useState("");
   const [invalid, setInvalid] = useState(false);
@@ -91,14 +99,18 @@ export const FoundingSignup: React.FC<{
           not reliably announced — the outcome has to arrive INTO a region the reader's software is
           already watching. Empty and silent until there is something to say. */}
       <div className="mk-betamsgwrap" role="status" aria-live="polite">
-        {state === "sent" && <p className="mk-betamsg mk-betamsg--ok">{FOUNDING_SENT}</p>}
-        {state === "dupe" && <p className="mk-betamsg mk-betamsg--ok">{FOUNDING_DUPE}</p>}
-        {state === "full" && <p className="mk-betamsg mk-betamsg--warn">{FOUNDING_FULL}</p>}
-        {state === "error" && (
-          <p className="mk-betamsg mk-betamsg--warn"><Runs runs={FOUNDING_ERROR} onNavigate={onNavigate} /></p>
-        )}
-        {state === "down" && (
-          <p className="mk-betamsg mk-betamsg--warn"><Runs runs={FOUNDING_DOWN} onNavigate={onNavigate} /></p>
+        {messages?.[state] ?? (
+          <>
+            {state === "sent" && <p className="mk-betamsg mk-betamsg--ok">{FOUNDING_SENT}</p>}
+            {state === "dupe" && <p className="mk-betamsg mk-betamsg--ok">{FOUNDING_DUPE}</p>}
+            {state === "full" && <p className="mk-betamsg mk-betamsg--warn">{FOUNDING_FULL}</p>}
+            {state === "error" && (
+              <p className="mk-betamsg mk-betamsg--warn"><Runs runs={FOUNDING_ERROR} onNavigate={onNavigate} /></p>
+            )}
+            {state === "down" && (
+              <p className="mk-betamsg mk-betamsg--warn"><Runs runs={FOUNDING_DOWN} onNavigate={onNavigate} /></p>
+            )}
+          </>
         )}
       </div>
     </>

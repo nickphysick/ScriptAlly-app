@@ -28,8 +28,28 @@ import React from "react";
 import { Runs } from "./CopyRuns";
 import {
   FOUNDING_PANEL_KICKER, FOUNDING_ASK, FOUNDING_PERKS, FOUNDING_PANEL_CTA, FOUNDING_LEARN,
+  FOUNDING_PANEL_SENT_H, FOUNDING_PANEL_SENT_B, FOUNDING_PANEL_DUPE_H, FOUNDING_PANEL_DUPE_B,
+  FOUNDING_PANEL_ERROR, FOUNDING_PANEL_DOWN,
 } from "./landingCopy";
 import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
+
+/**
+ * The two outcomes worth celebrating, in the same treatment: a sage block with a solid burgundy
+ * disc and a parchment tick.
+ *
+ * ⚠️ THE DISC AND ITS TICK ARE DRAWN, NOT TYPED — a rotated pair of borders inside a circle, the
+ * same construction as the perks' ticks. A `✓` glyph would be announced, and the text beside it
+ * already says what happened.
+ */
+const Ok: React.FC<{ head: string; body: string }> = ({ head, body }) => (
+  <div className="mk-fmok">
+    <span className="mk-fmokmark" aria-hidden="true" />
+    <div>
+      <p className="mk-fmokh">{head}</p>
+      <p className="mk-fmokb">{body}</p>
+    </div>
+  </div>
+);
 
 export const FoundingPanel: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
@@ -46,10 +66,21 @@ export const FoundingPanel: React.FC<{
         {FOUNDING_PERKS.map((perk) => <li key={perk}>{perk}</li>)}
       </ul>
 
+      {/* ⚠️ THE SAME STATE MACHINE, THIS SURFACE'S WORDING. `foundingStore` decides which state;
+          `messages` decides what the panel says in it, and the sealed band keeps its own. The
+          form is not appended to on success — it is REPLACED, because `HIDES_FORM` stops rendering
+          it, which makes the action feel consumed and forecloses a double submit structurally
+          rather than by disabling a button. */}
       <FoundingSignup
         idPrefix="mk-panel"
         ctaLabel={FOUNDING_PANEL_CTA}
         formClass="mk-fmform"
+        messages={{
+          sent: <Ok head={FOUNDING_PANEL_SENT_H} body={FOUNDING_PANEL_SENT_B} />,
+          dupe: <Ok head={FOUNDING_PANEL_DUPE_H} body={FOUNDING_PANEL_DUPE_B} />,
+          error: <p className="mk-fmwarn"><Runs runs={FOUNDING_PANEL_ERROR} onNavigate={onNavigate} /></p>,
+          down: <p className="mk-fmwarn"><Runs runs={FOUNDING_PANEL_DOWN} onNavigate={onNavigate} /></p>,
+        }}
         onNavigate={onNavigate}
       />
 

@@ -574,12 +574,53 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   height: 100%; background: var(--mk-burg); opacity: .8; border-radius: 999px;
   transition: width .5s ease;
 }
+/* ⚠️ THIS BLOCK SITS AFTER `.mk-fmfill`, AND IT HAS TO. Both are single-class rules at 0-1-0, so
+   SOURCE ORDER decides — placed with the other reduced-motion overrides near the top of the file
+   it lost to a rule declared four hundred lines later, and the bar animated for a reader who had
+   asked it not to. Measured: `transition-duration: 0.5s` under `reducedMotion: "reduce"`, from a
+   declaration that read correctly. A media query confers no specificity of its own.
+   The ease is motion rather than a state change, so it goes entirely rather than running faster. */
+@media (prefers-reduced-motion: reduce) {
+  .mk-fmfill { transition: none; }
+}
 .mk-fmmeta {
   font-family: "JetBrains Mono", monospace; font-size: .62rem; letter-spacing: .14em;
   text-transform: uppercase; color: var(--mk-blush-label); margin: 8px 0 0;
 }
 .mk-fmtally { color: var(--mk-burg); font-weight: 500; }
 .mk-fmof { opacity: .6; }
+/* ── The panel's outcomes ──
+   ⚠️ THE SUCCESS BLOCK REPLACES THE FORM RATHER THAN JOINING IT. `HIDES_FORM` stops rendering the
+   field and button, so the action reads as consumed and a double submit is foreclosed by there
+   being nothing to submit — structurally, rather than by disabling a control that is still there.
+   ⚠️ AND THE TWO GOOD OUTCOMES SHARE A TREATMENT ON PURPOSE. "You're on board" and "You're already
+   on the list" are both good news; giving the second a warning tint would make being on the list
+   look like a problem. */
+.mk-fmok {
+  display: flex; align-items: flex-start; gap: 12px; margin: 16px 0 0;
+  background: var(--mk-msg-ok-bg); border: 1px solid var(--mk-msg-ok-bd);
+  border-radius: 11px; padding: 13px 16px;
+}
+/* The disc and its tick are drawn, not typed — the same construction as the perks' ticks. */
+.mk-fmokmark {
+  flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--mk-burg); position: relative; margin-top: 1px;
+}
+.mk-fmokmark::before {
+  content: ""; position: absolute; left: 6px; top: 6px; width: 9px; height: 5px;
+  border-left: 2px solid var(--mk-parch); border-bottom: 2px solid var(--mk-parch);
+  transform: rotate(-45deg);
+}
+.mk-fmokh { margin: 0; font-weight: 600; color: var(--mk-nearblack); font-size: .98rem; }
+.mk-fmokb { margin: 3px 0 0; font-size: .9rem; color: var(--mk-sage-t); line-height: 1.45; }
+/* ⚠️ WHITE ON BLUSH, NOT A SECOND PINK. The panel's ground is already blush; a warn tint in the
+   same family would not read as a change of state at all. */
+.mk-fmwarn {
+  margin: 14px 0 0; background: rgba(255, 255, 255, .75); border: 1px solid var(--mk-cta-bd);
+  border-radius: 11px; padding: 12px 15px; font-size: .92rem; color: var(--mk-ink);
+}
+.mk-fmwarn a { color: var(--mk-burg); }
+
 /* Pinned bottom-right — see the panel's padding note. */
 .mk-fmlearn {
   position: absolute; right: 22px; bottom: 16px;

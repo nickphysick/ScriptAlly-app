@@ -172,6 +172,32 @@ export const FOUNDING_PERKS = [
   "A direct line to the founder",
 ] as const;
 
+/* ══════════════ The panel's outcomes ══════════════
+   ⚠️ ITS OWN WORDING, THE SAME STATE MACHINE. `foundingStore` decides WHICH state; these decide
+   what the panel says in it, and the sealed band keeps its own — two surfaces asking in two
+   registers off one list. The rendering is `FoundingSignup`'s `messages` prop, not a second
+   component: forking the render is how two surfaces come to disagree about what happened.
+
+   ⚠️ AND THE SUCCESS COPY NEVER REVEALS MORE THAN THE READER ASKED. "You're already on the list"
+   confirms without disclosing when, or from where, or anything else about the address — a sign-up
+   form that tells you what it knows about you is a disclosure, not a courtesy. */
+export const FOUNDING_PANEL_SENT_H = "You're on board.";
+export const FOUNDING_PANEL_SENT_B = "We'll email your invite when your place opens.";
+export const FOUNDING_PANEL_DUPE_H = "You're already on the list.";
+export const FOUNDING_PANEL_DUPE_B = "No need to sign up twice — your invite is still coming.";
+
+/** ⚠️ EM DASH, and `email us` resolves through `SUPPORT_EMAIL` — never a spelled address. */
+export const FOUNDING_PANEL_ERROR: CopyRun[] = [
+  "That didn't send. Check the address and try again, or ",
+  { link: "email us", mailto: supportMailto("ScriptAlly founding members") },
+  ".",
+];
+export const FOUNDING_PANEL_DOWN: CopyRun[] = [
+  "Sign-ups are briefly unavailable — try again shortly, or ",
+  { link: "email us", mailto: supportMailto("ScriptAlly founding members") },
+  ".",
+];
+
 export const FOUNDING_LEARN = "How it works";
 
 export const FOUNDING_FIELD_LABEL = "Email address";
