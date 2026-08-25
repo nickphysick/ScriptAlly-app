@@ -215,3 +215,60 @@ describe("the founding band is the lower surface's only repaint", () => {
     expect(painted).toEqual([".mk-beta"]);
   });
 });
+
+/**
+ * ⚠️ `align-items` ON A GRID IS A ROW DEFAULT; PER-ITEM ALIGNMENT BELONGS ON THE ITEM. The hero
+ * needs `start` for the copy column and `center` for the artwork, and the way to get both is one
+ * container default plus one `align-self` override — not a container set to `center` and the copy
+ * pushed back with something else. Inherited `start` is what pinned the plate to the top-left of
+ * its cell; the override is the fix, and it goes on the plate.
+ *
+ * ⚠️ AND THE OVERLAP, IF ANY, IS NATURAL SIZE PLUS CENTRING — NEVER A NEGATIVE MARGIN. A centred
+ * box taller than its row extends past it by itself; an offset draws the same picture and then has
+ * to be re-tuned on every copy edit, because the row's height is whatever the copy makes it.
+ */
+describe("the hero grid aligns per item, and overlaps by construction", () => {
+  const rule = (sel: string) => {
+    const m = new RegExp("\\" + sel + "\\s*\\{([^}]*)\\}").exec(marketing);
+    expect(m, `${sel} has a rule`).toBeTruthy();
+    return m![1];
+  };
+
+  it("the container states the row default and the artwork overrides it on itself", () => {
+    expect(rule(".mk-heroinner")).toMatch(/align-items:\s*start/);
+    const art = rule(".mk-hero .mk-illo--tall");
+    expect(art).toMatch(/align-self:\s*center/);
+    /* The container must NOT be the thing that centres — that would move the copy column too. */
+    expect(rule(".mk-heroinner")).not.toMatch(/align-items:\s*center/);
+  });
+
+  it("nothing in the hero fakes the layout with a negative margin", () => {
+    for (const sel of [".mk-heroinner", ".mk-hcopy", ".mk-hero .mk-illo--tall", ".mk-statement"]) {
+      expect(rule(sel), `${sel} uses no negative margin`).not.toMatch(/margin[^:]*:\s*[^;]*-\d/);
+    }
+  });
+
+  /**
+   * ⚠️ THE ARTWORK PASSES BEHIND THE WORDS, AND THE LAYERING IS THE GUARANTEE RATHER THAN THE
+   * EFFECT. Measured, the plate does not currently reach the headline — its top sits ~54px below
+   * the statement's bottom at 1440. Remove the z-indexes and a taller asset, or a shorter copy
+   * column, silently prints artwork over the largest text on the site.
+   */
+  it("the words are layered above the artwork", () => {
+    expect(rule(".mk-statement")).toMatch(/z-index:\s*2/);
+    expect(rule(".mk-hcopy")).toMatch(/z-index:\s*2/);
+    expect(rule(".mk-hero .mk-illo--tall")).toMatch(/z-index:\s*1/);
+  });
+
+  /**
+   * ⚠️ THE AREAS COLLAPSE WITH THE COLUMNS OR THE GRID GROWS SIDEWAYS IN SILENCE. Auto-placement
+   * never overlaps: leaving a two-column template on a one-column grid pushes every `"x x"` row
+   * into an implicit SECOND column, and nothing errors.
+   */
+  it("the stacked hero collapses its areas as well as its columns", () => {
+    const block = /@media \(max-width: 900px\) \{([\s\S]*?)\n\}/.exec(marketing);
+    expect(block, "the 900px block exists").toBeTruthy();
+    expect(block![1]).toMatch(/grid-template-columns:\s*1fr/);
+    expect(block![1]).toMatch(/grid-template-areas:\s*"eye"\s*"head"\s*"copy"\s*"art"/);
+  });
+});

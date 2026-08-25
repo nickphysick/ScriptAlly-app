@@ -133,7 +133,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
      mockup's column was wider than ours. A number carried off a ref is a hypothesis until
      measured — and `marketingTokens.test.ts` now runs the arithmetic so nobody has to remember.
      ⚠️ THE REQUIREMENT IS ONE LINE ABOVE THE `nowrap` BOUNDARY, not this number. */
-  --mk-hero-h1: clamp(2.1rem, 4.5vw, 3rem);
+  --mk-hero-h1: clamp(2.5rem, 5.8vw, 4.6rem);
   /* The paper slip's hairline — ink at 10%, pre-computed per the no-colour-mix() rule. */
   --mk-slip-bd: rgba(58, 28, 20, 0.10);
   font-family: "Source Sans Pro", system-ui, -apple-system, sans-serif;
@@ -402,19 +402,35 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-hero { position: relative; padding: 84px 0 64px; min-height: 70vh; }
 .mk-heroinner {
   max-width: 1300px; margin: 0 auto; padding: 0 56px;
-  /* ⚠️ 1.12fr 1fr IS WHAT LETS THE STATEMENT HOLD ONE LINE — load-bearing, not taste. At
-     1fr 1.02fr the copy column is 558px and the headline needs ~546 at its ceiling; the ratio
-     buys ~35px and turns a squeak into real headroom. Narrow it again and the statement goes into
-     an OVERFLOW, not a wrap, because of the `nowrap` below.
-     ⚠️ THE REF EXPRESSES THIS AS A THREE-AREA GRID (`"lead plate" "body plate"`), with the eyebrow
-     and headline in a row of their own. Column 1 computes identically either way, so the DOM is
-     deliberately NOT restructured — if you are diffing the ref against this file, that difference
-     is intentional and nothing is missing. `.mk-mission` keeps 1fr 1.02fr; it is a different
-     headline with its own headroom. */
-  display: grid; grid-template-columns: 1.1fr 1fr; gap: 72px;
-  /* The plate matches the copy column's height rather than declaring one of its own. */
-  align-items: center;
+  /* ⚠️ THE STATEMENT IS ITS OWN FULL-WIDTH ROW NOW, and that changes what constrains it. For four
+     passes the headline was a child of the copy column, so the column's width was the measure and
+     the `1.1fr 1fr` ratio was load-bearing for exactly that reason — it bought ~35px of headroom
+     and turned a squeak into room. Spanning both columns, the headline is measured against the
+     CONTAINER (1188px inner at 1440, against a 585px column), so the ratio no longer decides
+     whether it fits; it only decides how the copy and the artwork share the row beneath.
+     ⚠️ THE REF'S THREE-AREA GRID IS REPRODUCED NOW, and the note that used to say it deliberately
+     was not is retired with it. Column 1 no longer computes identically either way — the point of
+     the areas is that two rows span both columns. */
+  display: grid;
+  grid-template-columns: 1.06fr 1fr;
+  grid-template-areas:
+    "eye  eye"
+    "head head"
+    "copy art";
+  column-gap: 64px;
+  /* ⚠️ THIS IS A ROW DEFAULT, NOT A DECISION ABOUT EVERY ITEM. Everything hangs from the top of
+     its row; the artwork overrides it on ITSELF (`align-self: center`), which is where per-item
+     alignment belongs. Setting `align-items: center` here to centre the art would also centre the
+     copy column against its own row and move nothing else usefully. */
+  align-items: start;
 }
+.mk-hero .mk-eyebrow { grid-area: eye; }
+/* ⚠️ STACKING, AND BOTH HALVES MATTER. The copy and the headline sit above the artwork so that if
+   the plate ever grows tall enough to reach them it passes BEHIND the words rather than over
+   them. Measured against the ref's own geometry it does not currently reach: the statement's
+   bottom edge sits ~86px above the artwork's top at 1440. The layering is the guarantee, not the
+   effect — remove it and a taller asset silently prints over the headline. */
+.mk-hcopy { grid-area: copy; position: relative; z-index: 2; padding-top: 26px; }
 .mk-hcopy { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .mk-eyebrow {
   font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: .22em;
@@ -434,8 +450,9 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
      resolved to 670.8px against a 558px column and never bound. At 3.65rem it resolves to ~490px
      against a natural width of ~546, so it WOULD bind — and under `nowrap` a binding max-width
      does not wrap the text, it lets it spill out of its own box. */
-  font-size: var(--mk-hero-h1); line-height: .96; letter-spacing: -.022em;
+  font-size: var(--mk-hero-h1); line-height: 1.02; letter-spacing: -.022em;
   color: var(--mk-nearblack); margin: 0;
+  grid-area: head; position: relative; z-index: 2;
 }
 
 /* The ticked box that closes the statement.
@@ -461,35 +478,30 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-tickword { white-space: nowrap; }
 .mk-tick {
   display: inline-block; vertical-align: middle;
-  width: 44px; height: auto; margin-left: 14px;
+  width: 60px; height: auto; margin-left: 16px;
 }
 
-/* ⚠️ `nowrap` FAILS BY OVERFLOW, NOT BY WRAPPING — which is why the boundary is measured, never
-   assumed. A ceiling slightly too large does not produce an obviously broken two-line headline; it
-   produces one that runs out of its column, and with `overflow-x` clipped anywhere up the tree it
-   is invisible until someone reads `scrollWidth`. The narrowest width where the rule applies is
-   the boundary itself — smallest column, type still sized from the viewport — so that is the
-   width to measure. Never 1440.
-   ⚠️ 1160, NOT THE 901 THE REF AND THE BRIEF BOTH USE, AND THE REASON IS ARITHMETIC RATHER THAN
-   TASTE. Below the 1300 cap the column grows at 0.528px per px of viewport while the headline
-   grows at only 0.429 (4.5vw x ~9.53px of glyph per px of type), so headroom CLOSES as the
-   viewport narrows: measured 37.1px at 1440, 18.3 at 1120, 6.4 at 1000 and **-3.4 at 901** — the
-   statement was overflowing its own column at the boundary the brief specified.
-   ⚠️ AND `scrollWidth` DOES NOT CATCH IT. The overflow spills into the 64px grid gap, not past the
-   viewport, so the page-level scrollbar check reported "ok" at every failing width. The gate that
-   works is rendered ink against computed column width; the scrollbar check is a second, weaker
-   net. 20px of headroom is first reached at 1140 (20.3px) — too close to sit on — so the boundary
-   is 1260. ⚠️ IT WAS 1160 UNTIL THE HERO'S GRID RATIO CHANGED. `1.12fr 1fr` at a 64px gap gave a
-   593.8px column; `1.1fr 1fr` at 72px gives 584.6, and that ~9px comes straight off the headroom
-   at every width — 22.2 → 13.6 at the old boundary. ⚠️ AND LOWERING THE CEILING CANNOT FIX IT:
-   3.65rem only binds from ~1298 up, so at 1160 the `4.5vw` term is what sets the size and the
-   ceiling is not in the calculation at all. Only the boundary or the vw coefficient can move that
-   width, and the coefficient would shrink the statement everywhere below the cap to serve one
-   band. Measured: 20px is first reached at ~1233, so the boundary is 1260 (23.1px). Below it the
-   statement simply wraps, as it always has.
-   ⚠️ THE FIX IS THE BOUNDARY, NOT A SMALLER CEILING: shrinking the statement at 1440 to serve
-   1024 would pay for one narrow band out of every width above it. */
-@media (min-width: 1260px) { .mk-statement { white-space: nowrap; } }
+/* ⚠️ `nowrap` FAILS BY OVERFLOW, NOT BY WRAPPING, which is why the boundary is measured and never
+   assumed. A ceiling slightly too large does not produce a visibly broken two-line headline; it
+   produces one that runs out of its box, and the spill lands in the grid gap rather than past the
+   viewport — so `scrollWidth === clientWidth` reports "ok" at every failing width. The gate is
+   rendered ink against the computed container width.
+   ⚠️ 901, NOT 1260 — AND NOT THE 696 THE ARITHMETIC ALLOWS. The old boundary was governed by the
+   COPY COLUMN, because the headline lived inside it; spanning both columns it is governed by the
+   container, and the constraint is an order of magnitude looser. Two regimes now:
+     >900  two columns, 56px gutters, `clamp(2.5rem, 5.8vw, 4.6rem)`
+             headroom = (min(V,1300) - 112) - (9.51 x 0.058V + 76); 215.9px at 901, 412.4 at 1440
+     <=900 one column, 26px gutters, `clamp(2.4rem, 10vw, 3.6rem)`
+             the 10vw override makes the type much larger against a much narrower box:
+             headroom = (V - 52) - (9.51 x min(0.1V, 57.6) + 76), which reaches 20px only at ~696
+             and is NEGATIVE below 576 — -100.3 at 560, -103 at 390.
+   So the arithmetic permits 696. The boundary is 901 anyway, and deliberately: 696 sits on a
+   cliff inside the single-column regime with 20px of margin, while 901 sits on the STRUCTURAL
+   break that causes the regime, with 216px. A boundary on a layout break cannot drift out of step
+   with the layout; a boundary on an arithmetic minimum drifts the first time a gutter changes.
+   ⚠️ THE REF SETS `white-space: nowrap` UNCONDITIONALLY and that is not safe here. At 390 it
+   overflows its column by ~103px. The ref draws one width. */
+@media (min-width: 901px) { .mk-statement { white-space: nowrap; } }
 
 /* The continuation: the lede on a paper slip, the postscript tilted against it.
    ⚠️ THE `vh` CEILINGS ON THIS BLOCK, `.mk-turn` AND `.mk-hctas` ARE REACHED AT ~900px OF VIEWPORT
@@ -571,7 +583,15 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    below; the two are deliberately different numbers, not an oversight. */
 @media (max-width: 900px) {
   .mk-scope { --mk-hero-h1: clamp(2.4rem, 10vw, 3.6rem); }
-  .mk-heroinner { grid-template-columns: 1fr; gap: 34px; padding: 40px 26px 0; }
+  /* ⚠️ THE AREAS COLLAPSE WITH THE COLUMNS. Leaving a two-column template on a one-column grid
+     silently pushes every `"x  x"` row into an implicit SECOND column, which is the auto-placement
+     trap this repo already records — the grid grows sideways and nothing errors. */
+  .mk-heroinner {
+    grid-template-columns: 1fr;
+    grid-template-areas: "eye" "head" "copy" "art";
+    gap: 34px; padding: 40px 26px 0;
+  }
+  .mk-hcopy { padding-top: 0; }
 }
 
 
@@ -1332,6 +1352,16 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    width-limited at this column anyway (760x639 contained in ~530px is ~445px tall), so neither
    cap crops it — the ceiling exists only to stop the row growing. About keeps 620. */
 .mk-hero .mk-illo--tall {
+  /* ⚠️ `align-self: center` IS WHAT PUTS THE ART WHERE IT BELONGS, and it is the fix for a fault
+     introduced by the grid's own row default. `align-items: start` is right for the copy column
+     and wrong for the artwork: inherited, it pinned the plate to the top-left of its cell. The
+     override goes on the ITEM, never on the container — centring the container would move the
+     copy column too, and it is not the copy column that needs moving.
+     ⚠️ AND ANY OVERLAP COMES FROM NATURAL SIZE, NEVER FROM A NEGATIVE MARGIN. A centred box taller
+     than its row extends past it top and bottom by itself; an offset fakes the same picture and
+     then has to be re-tuned every time the copy column's height changes, which it does on every
+     copy edit. */
+  grid-area: art; align-self: center; position: relative; z-index: 1;
   height: clamp(300px, 42vh, 430px); min-height: 0; padding: 12px;
   /* ⚠️ THE EXPLICIT ROW IS WHAT MAKES THE IMAGE'S PERCENTAGE BOUNDS RESOLVE. `.mk-illo` is a grid
      whose implicit row is `auto`, i.e. content-sized — and a percentage height or max-height
