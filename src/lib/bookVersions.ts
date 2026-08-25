@@ -281,3 +281,134 @@ export const versionMeta = (samples: number, held: number): string[] => [
  * counts manuscripts, and this is the identity that says so.
  */
 export const manuscriptsForTier = (mss: readonly Manuscript[]): number => mss.length;
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   THE TWO TRACKING PANELS (Part D) — both derived, nothing stored
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+export interface OpeningRow {
+  id: string;
+  name: string;
+  /** `2 samples · 3 packages` — where this opening has travelled. */
+  where: string;
+  /** `2 requests from 18 sent` — an event count, never a rate. */
+  meta: string;
+  /** Bar geometry, mirroring `requestsByMaterial`'s: a share of the busiest row. */
+  sentPct: number;
+  inPct: number;
+}
+
+const pct = (n: number, d: number): number => (d <= 0 ? 0 : Math.round((n / d) * 100));
+
+/**
+ * "Requests by opening" (D15).
+ *
+ * ⚠️ THE BAR IS A PROPORTION OF THE BUSIEST ROW, NOT A RATE, and the number beside it is the claim.
+ * It exists so the eye can rank three openings at a glance. The same construction as
+ * `requestsByMaterial` one level down, deliberately — two ways of drawing the same kind of count
+ * would eventually disagree about what a full bar means.
+ *
+ * ⚠️ AND EVERY VERSION IS LISTED, INCLUDING ONES NOTHING HAS GONE OUT WITH. `requestsByMaterial`
+ * drops its empty rows; this must not. "Nothing has been sent with this opening yet" is the single
+ * most useful thing the panel can say to somebody who has just made a version, and a row that
+ * vanishes says nothing at all.
+ */
+export const openingRows = (
+  versions: readonly BookVersion[],
+  materials: readonly ManuscriptVersion[],
+  packages: readonly { id: string; samplePagesVersionId?: string }[],
+  queries: readonly Query[],
+  isRequestFn: (q: Query) => boolean,
+): OpeningRow[] => {
+  const raw = versions.map((v) => ({ v, r: requestsByVersion(v, materials, packages, queries, isRequestFn) }));
+  const max = Math.max(...raw.map((x) => x.r.sent), 1);
+  return raw.map(({ v, r }) => ({
+    id: v.id,
+    name: v.name,
+    where: `${r.samples} sample${r.samples === 1 ? "" : "s"} · ${r.packages} package${r.packages === 1 ? "" : "s"}`,
+    meta: `${r.requests} request${r.requests === 1 ? "" : "s"} from ${r.sent} sent`,
+    sentPct: pct(r.sent, max),
+    inPct: pct(r.requests, r.sent),
+  }));
+};
+
+export interface HoldingRow {
+  queryId: string;
+  agent: string;
+  /** `FULL · sent 02 Aug` — what they have and when it went. */
+  what: string;
+  /** The version they hold, or null where the send predates the feature. */
+  versionName: string | null;
+}
+
+/**
+ * "Who holds what" (D16) — the six-months-later question, and on its own reason enough to build the
+ * feature. When an agent surfaces after months of silence, this answers "what exactly are they
+ * reading?"
+ *
+ * ⚠️ THE SENTENCE ABOVE IS WRITTEN AROUND A WORD, and that is the module's verdict-word ban working
+ * rather than failing. It reads comments as well as code — deliberately, because prose telling a
+ * future reader which opening to prefer is as much a verdict as code returning one — so the price
+ * is that this file cannot use those words even about ITSELF. Second time it has bitten; both times
+ * the fix was the prose.
+ *
+ * ⚠️ ENTIRELY DERIVED. Nothing here is stored: the holders come from query status, the version from
+ * the latest send event on the log, and the agent's name from the agent record. There is no field
+ * anywhere in the app that says "R. Osei has the prologue-first full".
+ *
+ * ⚠️ AND IT IS SORTED NEWEST FIRST, by the send that put the material in their hands — which is the
+ * order the question is asked in. Undated sends sort last rather than to the top, where a missing
+ * date would otherwise read as "just now".
+ */
+export const holdingRows = (
+  queries: readonly Query[],
+  activities: readonly Activity[],
+  versions: readonly BookVersion[],
+  agentName: (agentId: string) => string,
+  formatDay: (iso: string) => string,
+): HoldingRow[] =>
+  holdings(queries, activities)
+    .map((h) => {
+      const sent = sendDate(h.query, activities);
+      return {
+        queryId: h.query.id,
+        agent: agentName((h.query as { agentId?: string }).agentId ?? ""),
+        what: sent ? `${h.what} · sent ${formatDay(sent)}` : h.what,
+        versionName: bookVersionById(versions, h.versionId)?.name ?? null,
+        _sort: sent ?? "",
+      };
+    })
+    .sort((a, b) => (a._sort < b._sort ? 1 : a._sort > b._sort ? -1 : 0))
+    .map(({ _sort, ...row }) => row);
+
+/** The date of the send that put the material in the agent's hands — the LATEST one, as above. */
+const sendDate = (q: Query, activities: readonly Activity[]): string | null => {
+  const sends = activities
+    .filter((a) => a.queryId === q.id && isSendStatus(a.resultingStatus))
+    .map((a) => a.date)
+    .sort();
+  return sends[sends.length - 1] ?? null;
+};
+
+/**
+ * D17 — "four of five hold a version earlier than your latest", as a COUNT and nothing more.
+ *
+ * ⚠️ NO VERB, NO PROMPT, NO RECOMMENDED ACTION. Whether to send an update is a judgement about a
+ * relationship and the app does not make it. Returns null when there is nothing to say, so the
+ * caller renders no line rather than a line saying zero.
+ */
+export const earlierLine = (
+  queries: readonly Query[],
+  activities: readonly Activity[],
+  versions: readonly BookVersion[],
+): string | null => {
+  /* ⚠️ IT COUNTS THROUGH `holdingEarlier`, NOT BY COMPARING NAMES. An earlier draft of this
+     compared each row's version NAME against the latest one's — which is wrong the moment two
+     versions share a name, and names are writer-supplied and renameable. Ids are the identity;
+     the name is a label. Reusing the tested function also means the panel's sentence and the
+     count it states can never come apart. */
+  const hs = holdings(queries, activities);
+  const earlier = holdingEarlier(hs, latestVersion(versions)?.id ?? null);
+  if (earlier === 0) return null;
+  return `${earlier} of ${hs.length} hold a version earlier than your latest.`;
+};

@@ -26,6 +26,7 @@ import { ArchivedToggle, ArchivedRow, ArchivedSection } from "./ArchivedRow";
 import { TypeGlyph } from "./TypeGlyph";
 import React from "react";
 import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../../types";
+import type { BookVersion } from "../../types";
 import { materialShelf, materialHolders } from "../../lib/packagesOverview";
 import { BUILDER_TYPES } from "./typeMeta";
 import { RemovePopover } from "./RemovePopover";
@@ -47,6 +48,11 @@ const TYPE_BAND: Record<string, string> = {
 export interface MaterialsBandProps {
   versions: ManuscriptVersion[];
   packages: SubmissionPackage[];
+  /**
+   * The manuscript's BOOK versions (see `BookVersion` in types.ts — NOT `ManuscriptVersion` above,
+   * which is a material). Only sample-pages sheets read it, and only above two versions.
+   */
+  bookVersions?: readonly BookVersion[];
   /** Opens the modal on a chosen type — the column's `+ ADD` and its ghost. */
   onAddMaterial: (type: ComponentType) => void;
   /** Opens the modal on an existing material. */
@@ -70,7 +76,7 @@ export interface MaterialsBandProps {
 
 export const MaterialsBand: React.FC<MaterialsBandProps> = ({
   versions, packages, onAddMaterial, onOpenMaterial, onDeleteMaterial, onArchiveMaterial,
-  archived, showArchived, onToggleArchived, onRestore,
+  archived, showArchived, onToggleArchived, onRestore, bookVersions = [],
 }) => {
   /**
    * ⚠️ ONE SHELF, NOT THREE COLUMNS (D-B2). The columns stated a heading, a `0 held` count and a
@@ -80,7 +86,7 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
    * ⚠️ AND THE PER-TYPE `+ ADD` GOES WITH THEM. One add card at the end, because the type is a
    * question the material modal already asks; three adds meant choosing the type twice.
    */
-  const sheets = materialShelf(versions, packages);
+  const sheets = materialShelf(versions, packages, bookVersions);
 
   return (
     <section className="pkgb-band" aria-labelledby="pkgb-mat-h">
@@ -122,6 +128,18 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
               {sh.usedIn > 0
                 ? <>In <b>{sh.usedIn}</b> package{sh.usedIn === 1 ? "" : "s"}</>
                 : sh.usage}
+              {/**
+                * ⚠️ THE VERSION CHIP JOINS THE USAGE LINE (D12), it does not get a row of its own.
+                * "In 2 packages · § Prologue-first" is one fact about where these pages have been
+                * and what they are; splitting it would imply two different kinds of claim.
+                *
+                * The name is already gated three ways in `materialColumns` — sample pages, a stored
+                * reference, and two or more versions — so this renders whenever it is present and
+                * re-tests nothing.
+                */}
+              {sh.bookVersionName && (
+                <span className="pkgb-mver"><span aria-hidden="true">§</span>{sh.bookVersionName}</span>
+              )}
             </div>
             <RemovePopover
               id={sh.id}

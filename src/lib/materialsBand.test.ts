@@ -160,8 +160,14 @@ describe("the sheets (D3)", () => {
     const src = decls(band);
     /* ⚠️ VIA `materialShelf`, WHICH WRAPS `materialColumns` — the shelf deliberately reuses the
        columns' sheets rather than re-deriving them, so `usedIn` is still the one number the usage
-       line prints and the delete guard reads. The claim is unchanged; the call site moved. */
-    expect(src).toContain("materialShelf(versions, packages)");
+       line prints and the delete guard reads. The claim is unchanged; the call site moved.
+
+       ⚠️ AND IT IS MATCHED ON THE CALL'S SHAPE, NOT ITS EXACT ARGUMENT LIST — the second retarget
+       of this line. It pinned `materialShelf(versions, packages)` and went red the day the shelf
+       gained a third argument (the manuscript's book versions), about a claim that had not moved
+       an inch. THE LAW HERE IS "the band derives the number rather than reading a stored field",
+       and an argument the derivation happens to take is not part of it. */
+    expect(src).toMatch(/materialShelf\(\s*versions\s*,\s*packages\b/);
     /* ⚠️ THE PROPERTY, NOT THE VARIABLE NAME. This asserted the literal `s.usedIn`; the shelf's
        loop binds `sh`, so a rename broke a case about where a NUMBER comes from. The claim is that
        the band reads the derived field — which is what the pattern says and a literal did not. */

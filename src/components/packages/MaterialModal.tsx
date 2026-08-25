@@ -18,6 +18,7 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { ComponentType, ManuscriptVersion } from "../../types";
+import type { BookVersion } from "../../types";
 import {
   MatMode, CONTENT_SUB, modeOf, suggestName, sourceLabel, typeTiles,
 } from "../../lib/materialDraft";
@@ -49,6 +50,14 @@ export interface MaterialDraftResult {
   mode: MatMode;
   text: string;
   refName: string;
+  /**
+   * Which BOOK version these pages excerpt (D11) — `""` for none.
+   *
+   * ⚠️ THE EMPTY STRING IS "NOT RECORDED", and the host turns it into an omitted key rather than
+   * storing it. Same convention the package slots already use, and the reason is the same: a stored
+   * `""` and an absent key would be two ways of saying one thing.
+   */
+  bookVersionId: string;
 }
 
 export interface MaterialModalProps {
@@ -56,6 +65,12 @@ export interface MaterialModalProps {
   editing: ManuscriptVersion | null;
   /** Every material on the manuscript — for held counts and the name ladder. */
   versions: ManuscriptVersion[];
+  /**
+   * The manuscript's BOOK versions (see `BookVersion` in types.ts — NOT `ManuscriptVersion` above).
+   * Empty, or fewer than two, and the field never appears: a writer running one version has no
+   * vocabulary to choose from and should not be shown a control offering one.
+   */
+  bookVersions?: readonly BookVersion[];
   /** Skip the type step and open the form on this type (the register's per-type entry). */
   preselect?: ComponentType | null;
   onClose: () => void;
@@ -63,7 +78,7 @@ export interface MaterialModalProps {
 }
 
 export const MaterialModal: React.FC<MaterialModalProps> = ({
-  editing, versions, preselect = null, onClose, onSave,
+  editing, versions, bookVersions = [], preselect = null, onClose, onSave,
 }) => {
   /**
    * ⚠️ SEEDED IN THE `useState` INITIALISERS, NOT AN EFFECT — and driving the real page is what
@@ -85,7 +100,21 @@ export const MaterialModal: React.FC<MaterialModalProps> = ({
   const [mode, setMode] = useState<MatMode>(editing ? modeOf(editing) : "paste");
   const [text, setText] = useState(editing?.contentDraft ?? "");
   const [refName, setRefName] = useState(editing?.fileName ?? editing?.contentLink ?? "");
+  /**
+   * ⚠️ SEEDED FROM THE STORED VALUE AND NOTHING ELSE — never defaulted to the latest version.
+   *
+   * A pre-filled answer the writer did not give is this repo's recorded fault class: the send strip
+   * once stated three facts as the writer's before they had said any of them. On an EDIT the seed is
+   * what is stored, which is a fact; on a CREATE it is empty, because nobody has said yet.
+   */
+  const [bookVersionId, setBookVersionId] = useState(editing?.bookVersionId ?? "");
   const nameRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * ⚠️ SAMPLE PAGES ONLY (D11), AND GATED ON TWO VERSIONS. A letter or a synopsis does not excerpt
+   * an ordering of the book, and a writer with one version sees none of this feature at all.
+   */
+  const showVersionField = type === ComponentType.SAMPLE_PAGES && bookVersions.length >= 2;
 
   /* Select the suggested name on open so it can be typed straight over (the ref's behaviour). */
   useEffect(() => {
@@ -198,11 +227,49 @@ export const MaterialModal: React.FC<MaterialModalProps> = ({
                   )}
                 </div>
 
+                {/**
+                  * ⚠️ SELECTED, NEVER TYPED (D11). The vocabulary is defined on the Manuscripts page
+                  * and nowhere else — a text field here is how "Prologue-first" and "prologue first"
+                  * become two openings that the tracking panels then count separately.
+                  */}
+                {showVersionField && (
+                  <div className="pkgf-field">
+                    <label className="pkgf-lbl" htmlFor="pkgf-bookversion">
+                      From version<span className="pkgf-opt">Optional</span>
+                    </label>
+                    <select
+                      id="pkgf-bookversion" value={bookVersionId}
+                      onChange={(e) => setBookVersionId(e.target.value)}
+                    >
+                      <option value="">— none —</option>
+                      {bookVersions.map((bv) => (
+                        <option key={bv.id} value={bv.id}>{bv.name}</option>
+                      ))}
+                    </select>
+                    {/**
+                      * ⚠️ D14 — THE LIMITATION IS STATED, NOT HIDDEN. The app records which version
+                      * these pages came from; it cannot open the text and check. That is permanent,
+                      * and a writer who thinks the app is verifying will one day trust a claim it
+                      * never made.
+                      */}
+                    <div className="pkgf-sub">
+                      Which version of the manuscript these pages come from. ScriptAlly records the
+                      reference — it can&rsquo;t check that the text matches.
+                    </div>
+                  </div>
+                )}
+
                 <div className="pkgf-actions">
                   <button type="button" className="pkgf-btn" onClick={onClose}>Cancel</button>
                   <button
                     type="button" className="pkgf-btn pkgf-btn--primary"
-                    onClick={() => onSave({ type, name, mode, text, refName })}
+                    onClick={() => onSave({
+                      type, name, mode, text, refName,
+                      /* ⚠️ A VERSION ONLY EVER LEAVES HERE ON SAMPLE PAGES. If the writer picked one
+                         and then changed the type, the choice is dropped rather than carried — the
+                         field they answered no longer exists. */
+                      bookVersionId: showVersionField ? bookVersionId : "",
+                    })}
                   >
                     {editing ? "Save changes" : "Save material"}
                   </button>

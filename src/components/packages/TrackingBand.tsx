@@ -26,6 +26,11 @@ import { ManuscriptVersion, Query, SubmissionPackage } from "../../types";
  * being deleted. Anyone reviving them should ask what they would say that a card does not.
  */
 import { trackingTotals, requestsByMaterial, trackingNudge } from "../../lib/packageTracking";
+import type { Activity, BookVersion } from "../../types";
+import { versionsActive, openingRows, holdingRows, earlierLine } from "../../lib/bookVersions";
+import { isRequest } from "../../lib/packageMetrics";
+import { shortDate } from "../../lib/createSummary";
+import { AGENT_NOT_RECORDED } from "../../lib/agentDisplay";
 import "./packagesBroadsheet.css";
 
 /** The mark per stat cell, from the ref (D4). Briefs are in the report's inventory table. */
@@ -39,17 +44,35 @@ import "./packagesBroadsheet.css";
 
 export interface TrackingBandProps {
   packages: SubmissionPackage[];
+  /** ⚠️ MATERIALS — the repo's older meaning of "version". See `BookVersion` in types.ts. */
   versions: ManuscriptVersion[];
   queries: Query[];
+  /** The manuscript's BOOK versions — named orderings. Below two, neither new panel renders. */
+  bookVersions?: readonly BookVersion[];
+  /** The log — "who holds what" is derived from it and stores nothing. */
+  activities?: readonly Activity[];
+  /** Resolves an agent id to a name for the holders panel. */
+  agentName?: (agentId: string) => string;
   onLogQuery?: () => void;
 }
 
 export const TrackingBand: React.FC<TrackingBandProps> = ({
-  packages, versions, queries, onLogQuery,
+  packages, versions, queries, bookVersions = [], activities = [],
+  agentName = () => AGENT_NOT_RECORDED, onLogQuery,
 }) => {
   const totals = trackingTotals(packages, queries);
   const nudge = trackingNudge(packages, queries);
   const rows = requestsByMaterial(packages, versions, queries);
+
+  /**
+   * ⚠️ ONE GATE FOR BOTH PANELS (D18), READ FROM THE SHARED DERIVATION. Below two versions neither
+   * appears — a writer running one opening has no comparison to draw and a panel offering one would
+   * invent a question they have not asked.
+   */
+  const showVersions = versionsActive({ bookVersions: bookVersions as BookVersion[] });
+  const openings = showVersions ? openingRows(bookVersions, versions, packages, queries, isRequest) : [];
+  const holders = showVersions ? holdingRows(queries, activities, bookVersions, agentName, (iso) => shortDate(iso)) : [];
+  const earlier = showVersions ? earlierLine(queries, activities, bookVersions) : null;
 
   /**
    * ⚠️ ONE PANEL (D-B3), AND "REPLIES BY PACKAGE" IS DELETED. Those figures described packages while
@@ -103,6 +126,69 @@ export const TrackingBand: React.FC<TrackingBandProps> = ({
               </div>
             ))}
           </div>
+
+          {/**
+            * ⚠️ REQUESTS BY OPENING (D15) — the question that started the whole feature: "which way
+            * in do agents prefer?" It reuses the row above's exact markup rather than drawing its
+            * own, because two ways of rendering the same kind of count eventually disagree about
+            * what a full bar means.
+            *
+            * ⚠️ COUNTS, NEVER PERCENTAGES. Two requests from eighteen against none from six is not
+            * a result, and the panel must not imply it is. The bar ranks; the number is the claim.
+            */}
+          {showVersions && (
+            <div className="pkgb-land">
+              <div className="pkgb-landhead">
+                <h3>Requests by opening</h3>
+                <span className="pkgb-tag">Across every sample and package that carries it</span>
+              </div>
+              {openings.map((o) => (
+                <div key={o.id} className="pkgb-drow">
+                  <div className="pkgb-drtop">
+                    <span className="pkgb-drname">
+                      <span className="pkgb-mver"><span aria-hidden="true">§</span>{o.name}</span>
+                      <span className="pkgb-drwhere">{o.where}</span>
+                    </span>
+                    <span className="pkgb-drmeta">{o.meta}</span>
+                  </div>
+                  <div className="pkgb-bar">
+                    <div className="pkgb-bsent" style={{ width: `${o.sentPct}%` }}>
+                      <div className="pkgb-bin" style={{ width: `${o.inPct}%` }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/**
+            * ⚠️ WHO HOLDS WHAT (D16) — the six-months-later question, and the single strongest
+            * reason this feature exists. When an agent surfaces after months of silence, this says
+            * what they are actually reading. Entirely derived: no field anywhere says it.
+            */}
+          {showVersions && holders.length > 0 && (
+            <div className="pkgb-land">
+              <div className="pkgb-landhead">
+                <h3>Manuscripts out with agents</h3>
+                <span className="pkgb-tag">{holders.length} held</span>
+              </div>
+              {holders.map((h) => (
+                <div key={h.queryId} className="pkgb-hrow">
+                  <span className="pkgb-hagent">{h.agent}</span>
+                  <span className="pkgb-hwhat">{h.what}</span>
+                  {/* ⚠️ AN UNRECORDED VERSION SAYS SO. A send that predates the feature is not the
+                      same fact as a send of the earliest version, and a chip guessing one would be
+                      the app inventing a record the writer never made. */}
+                  {h.versionName
+                    ? <span className="pkgb-mver"><span aria-hidden="true">§</span>{h.versionName}</span>
+                    : <span className="pkgb-hnone">Not recorded</span>}
+                </div>
+              ))}
+              {/* ⚠️ D17 — A COUNT AND NOTHING MORE. No verb, no prompt, no recommended action:
+                  whether to send an update is a judgement about a relationship, not a task. */}
+              {earlier && <p className="pkgb-hnote">{earlier}</p>}
+            </div>
+          )}
         </>
       ) : null}
     </section>

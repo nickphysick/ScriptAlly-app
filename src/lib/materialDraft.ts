@@ -112,6 +112,8 @@ export interface DraftInput {
   text: string;
   /** The filename the writer typed — only read in `ref` mode. */
   refName: string;
+  /** Which BOOK version a sample excerpts; `""` means none. Ignored on any other type. */
+  bookVersionId?: string;
 }
 
 /** What `addVersion` is handed. Absent keys are OMITTED, never undefined. */
@@ -132,6 +134,10 @@ export function createPayload(d: DraftInput, manuscriptId: string): Record<strin
   } else if (d.mode === "ref") {
     base.fileName = d.refName.trim() || "untitled.docx";
   }
+  /* ⚠️ OMITTED WHEN EMPTY, NEVER STORED AS `""`. Absent means "not recorded", and a stored empty
+     string would be a second way of saying the same thing — the convention every optional field on
+     this record already follows. The MODAL sends `""` for none; the store never sees it. */
+  if (d.bookVersionId) base.bookVersionId = d.bookVersionId;
   return base;
 }
 
@@ -149,6 +155,12 @@ export function updatePayload(d: DraftInput): { set: Record<string, unknown>; un
     contentType: MODE_TO_CONTENT_TYPE[d.mode],
   };
   const unset: string[] = [];
+
+  /* ⚠️ CLEARING IT IS A REAL ANSWER, so an emptied field UNSETS rather than being left alone. "I
+     picked the wrong version" has to be correctable, and a write that silently skipped the empty
+     case would leave the old reference in place while the form showed none. */
+  if (d.bookVersionId) set.bookVersionId = d.bookVersionId;
+  else unset.push("bookVersionId");
 
   if (d.mode === "paste") {
     set.contentDraft = d.text;

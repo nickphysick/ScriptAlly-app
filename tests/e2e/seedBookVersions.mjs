@@ -116,4 +116,26 @@ for (const [qid, bv, status, day] of SENDS) {
   if (!present) await updateDoc(doc(db, "users", uid, "activities", id), { bookVersionId: deleteField() }).catch(() => {});
 }
 console.log(`samples: ${SAMPLES.length} · sends: ${SENDS.length} (references present for seeded versions only)`);
+
+/* ── one package on the SECOND opening, so the panel has a comparison to draw ─────────────────
+   ⚠️ AND IT MAY LEGITIMATELY REFUSE. The package lock (D-D1) freezes a package's slots once
+   `firstSentAt` is stamped, so retargeting a package that has already gone out is DENIED — which is
+   the lock working, not the seed failing. Reported rather than swallowed: a silent catch here would
+   leave the fixture in a state the measurement then reports as a bug in the panel. */
+if (versions.some((v) => v.id === "bv-world")) {
+  const P2 = doc(db, "users", uid, "packages", "seed-pkg-2");
+  const p2 = await getDoc(P2);
+  if (!p2.exists()) {
+    console.log("  seed-pkg-2 missing — run `node tests/e2e/seedPackages.mjs` first");
+  } else if (p2.data().firstSentAt) {
+    console.log("  seed-pkg-2 is SENT and its slots are frozen (D-D1) — left alone; bv-world stays at zero");
+  } else {
+    try {
+      await updateDoc(P2, { samplePagesVersionId: "seed-mat-pag3" });
+      console.log("  seed-pkg-2 → seed-mat-pag3 (Worldbuilding-first)");
+    } catch (e) {
+      console.log(`  seed-pkg-2 retarget DENIED: ${String(e.message).slice(0, 70)}`);
+    }
+  }
+}
 process.exit(0);

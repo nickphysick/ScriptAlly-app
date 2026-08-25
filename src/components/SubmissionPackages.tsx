@@ -29,6 +29,8 @@ import { useNavigate } from "react-router-dom";
 import { PackagesTeachFirst } from "./packages/PackagesTeachFirst";
 import { PackagesBand } from "./packages/PackagesBand";
 import { TrackingBand } from "./packages/TrackingBand";
+import { bookVersionsOf } from "../lib/bookVersions";
+import { agentLabel, AGENT_NOT_RECORDED } from "../lib/agentDisplay";
 import { FootnoteBand } from "./packages/FootnoteBand";
 import { RemovePopover } from "./packages/RemovePopover";
 import { MaterialsBand } from "./packages/MaterialsBand";
@@ -104,6 +106,14 @@ export const SubmissionPackages: React.FC = () => {
   }, [manuscripts, activeMsId]);
 
   const activeMs = useMemo(() => manuscripts.find((m) => m.id === activeMsId) ?? manuscripts[0], [manuscripts, activeMsId]);
+  /**
+   * The active manuscript's BOOK versions — named orderings of the book, NOT the `versions`
+   * subcollection above, which holds materials. See the note on `BookVersion` in types.ts.
+   *
+   * ⚠️ READ THROUGH `bookVersionsOf`, WHICH IS THE ONE DEFENDED ACCESSOR. A raw
+   * `activeMs?.bookVersions ?? []` would pass a malformed stored value straight to four surfaces.
+   */
+  const msBookVersions = useMemo(() => bookVersionsOf(activeMs), [activeMs]);
   const msId = activeMs?.id;
   const msVersions = useMemo(() => versions.filter((v) => v.manuscriptId === msId), [versions, msId]);
   /**
@@ -439,6 +449,7 @@ export const SubmissionPackages: React.FC = () => {
                 )}
               />
             <MaterialsBand
+              bookVersions={msBookVersions}
               versions={msVersions}
               packages={msPackages}
               onAddMaterial={(type) => { setMatEditing(null); setMatPreselect(type); setMatModal(true); }}
@@ -458,6 +469,12 @@ export const SubmissionPackages: React.FC = () => {
                 packages={msPackages}
                 versions={msVersions}
                 queries={msQueries}
+                bookVersions={msBookVersions}
+                activities={activities}
+                /* ⚠️ THROUGH `agentLabel`, WHICH IS THE APP'S ONE ANSWER TO "what do we call this
+                   agent" — including when there is no record to call anything. A local
+                   `a?.name ?? "Unknown"` here would be a second vocabulary for the same absence. */
+                agentName={(id) => agentLabel(agents.find((a) => a.id === id) ?? null, AGENT_NOT_RECORDED)}
                 onLogQuery={() => navigate("/queries")}
               />
               <FootnoteBand />
@@ -478,6 +495,7 @@ export const SubmissionPackages: React.FC = () => {
           type-grid flash when opening a material to edit. The key makes reopening a DIFFERENT
           material a remount rather than a stale-state hazard. */}
       {matModal && <MaterialModal
+        bookVersions={msBookVersions}
         key={matEditing?.id ?? `new-${matPreselect ?? "material"}`}
         editing={matEditing}
         versions={msVersions}

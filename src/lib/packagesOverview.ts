@@ -25,6 +25,8 @@ import { SLOT_EYEBROW } from "./packageAttach";
 import { versionMeta } from "./packageMetrics";
 import { agoLabel, daysBetween } from "./elapsed";
 import { sourceLabel } from "./materialDraft";
+import type { BookVersion } from "../types";
+import { bookVersionOf } from "./bookVersions";
 
 /* ══════════════════════════════════════════════════════════════════════════════
    MATERIALS
@@ -210,6 +212,15 @@ export interface MaterialSheet {
   usage: string;
   /** How many packages reference it — the delete guard reads the same number. */
   usedIn: number;
+  /**
+   * The BOOK version these pages excerpt, as its name (D12) — absent on everything else.
+   *
+   * ⚠️ IT IS THE NAME, NOT THE ID, because the card renders a chip and nothing on this surface
+   * resolves ids. Absent for three separate reasons that all mean "draw no chip": the material is
+   * not sample pages, it carries no version, or the writer has fewer than two versions and sees
+   * none of this feature at all. One field, one absence, no caller re-deriving the gate.
+   */
+  bookVersionName?: string;
 }
 
 export interface MaterialColumn {
@@ -239,7 +250,16 @@ const GHOST_LABEL: Record<string, string> = {
 export function materialColumns(
   versions: ManuscriptVersion[],
   packages: SubmissionPackage[],
+  /**
+   * The manuscript's BOOK versions — see `BookVersion` in types.ts, which is NOT `ManuscriptVersion`
+   * above. Optional so every existing caller is unchanged; a caller that passes nothing gets no
+   * chips, which is the correct reading of "this surface knows nothing about versions".
+   */
+  bookVersions: readonly BookVersion[] = [],
 ): MaterialColumn[] {
+  /* ⚠️ THE GATE IS READ ONCE, HERE. Below two versions the writer sees no chip anywhere, and every
+     sheet below gets its `bookVersionName` from this one decision rather than re-testing it. */
+  const showChips = bookVersions.length >= 2;
   return BUILDER_TYPES.map((type) => {
     const mine = versions
       /* ⚠️ ACTIVE ONLY HERE, AND THE FULL LIST EVERYWHERE A PACKAGE RESOLVES A SLOT. An archived
@@ -262,6 +282,13 @@ export function materialColumns(
           source: sourceLabel(v),
           usage: usageLine(used),
           usedIn: used,
+          /* `bookVersionOf` enforces sample-pages-only, so a stray id on a letter draws nothing. */
+          ...(showChips
+            ? (() => {
+                const bv = bookVersions.find((x) => x.id === bookVersionOf(v));
+                return bv ? { bookVersionName: bv.name } : {};
+              })()
+            : {}),
         };
       }),
     };
@@ -302,8 +329,9 @@ export function materialColumns(
 export function materialShelf(
   versions: ManuscriptVersion[],
   packages: SubmissionPackage[],
+  bookVersions: readonly BookVersion[] = [],
 ): (MaterialSheet & { type: ComponentType })[] {
-  return materialColumns(versions, packages)
+  return materialColumns(versions, packages, bookVersions)
     .filter((c) => c.sheets.length > 0)
     .flatMap((c) => c.sheets.map((sh) => ({ ...sh, type: c.type })));
 }

@@ -931,3 +931,88 @@
   white-space: nowrap;
 }
 .pkgb-newpkg:hover { background: #f8e9e2; }
+
+/**
+ * ⚠️ THE VERSION CHIP ON A SAMPLE SHEET (manuscript-versions D12) — it joins the usage line rather
+ * than taking a row, so "In 2 packages · § Prologue-first" reads as one fact about these pages.
+ *
+ * ⚠️ AND IT IS THE SAME CHIP AS THE MANUSCRIPTS PANEL'S R&R MARK, DELIBERATELY — the § glyph and
+ * the pink pair are what say "a book version" wherever they appear. Two treatments for one object
+ * is how a reader learns two vocabularies for one thing. The values are restated here rather than
+ * imported because `bookVersions.css` is scoped to `.msv1` and this page is not under it; a shared
+ * token would have to move to index.css, which is a wider decision than this chip.
+ */
+.pkgb-mver {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-left: 7px;
+  font-family: var(--f12-mono, ui-monospace, monospace);
+  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #7c3a2a; background: #f5e2da; border: 1px solid #e8c8bc;
+  padding: 2px 7px; border-radius: 999px; white-space: nowrap;
+  vertical-align: middle;
+}
+.t-edn .pkgb-mver {
+  /* ⚠️ NO PINK IN EDITORIAL — the chroma rule. Every value here is within 3 of neutral. */
+  color: #44484d; background: #e9eaeb; border-color: #c9cacb;
+}
+.t-bold .pkgb-mver { border-width: 1.5px; border-color: #1d1712; color: #1d1712; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE VERSION PANELS (manuscript-versions Part D)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ THE OPENING ROW REUSES `.pkgb-drow` AND ITS BAR WHOLE — only two additions live here. Two ways
+ * of drawing the same kind of count would eventually disagree about what a full bar means.
+ */
+.pkgb-drwhere {
+  font-family: var(--f12-mono, ui-monospace, monospace);
+  font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(58, 28, 20, 0.4);
+  margin-left: 9px;
+}
+.t-edn .pkgb-drwhere { color: #9a9a9a; }
+.t-bold .pkgb-drwhere { color: rgba(29, 23, 18, 0.55); }
+
+/**
+ * ⚠️ THREE COLUMNS, AND THE MIDDLE ONE TAKES THE SLACK. Agent left at a fixed measure so the names
+ * form a column the eye can run down; what-and-when in the middle; the version chip hard right, so
+ * the answer to "what are they reading" is in one place on every row rather than wherever the name
+ * happened to end.
+ */
+.pkgb-hrow {
+  display: grid;
+  grid-template-columns: minmax(120px, 150px) 1fr auto;
+  gap: 14px; align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dotted rgba(58, 28, 20, 0.16);
+  font-size: 12.5px;
+}
+.pkgb-hrow:last-of-type { border-bottom: none; }
+.t-edn .pkgb-hrow { border-bottom-color: #e3e2e0; }
+.t-bold .pkgb-hrow { border-bottom-color: rgba(29, 23, 18, 0.25); }
+
+.pkgb-hagent { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.pkgb-hwhat {
+  font-family: var(--f12-mono, ui-monospace, monospace);
+  font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(58, 28, 20, 0.62);
+}
+.t-edn .pkgb-hwhat { color: #6b6b6b; }
+
+/* ⚠️ AN UNRECORDED VERSION IS PLAIN TEXT, NEVER A CHIP. A chip would read as a version called
+   "Not recorded" — a fact the app would be inventing. */
+.pkgb-hnone {
+  font-family: var(--f12-mono, ui-monospace, monospace);
+  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(58, 28, 20, 0.34);
+}
+.t-edn .pkgb-hnone { color: #9a9a9a; }
+
+/* D17 — a count, in the body voice. Not a callout, not a nudge, not a colour. */
+.pkgb-hnote {
+  margin: 12px 0 0;
+  font-size: 11.5px; line-height: 1.5;
+  color: rgba(58, 28, 20, 0.62);
+}
+.t-edn .pkgb-hnote { color: #6b6b6b; }
