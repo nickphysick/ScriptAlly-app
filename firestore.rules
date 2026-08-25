@@ -896,6 +896,16 @@ service cloud.firestore {
     match /waitlist/{id}  { allow read, write: if false; }
     match /counters/{id}  { allow read, write: if false; }
 
+    // ROUTE: Waitlist rate-limit windows — NO client access.
+    // One document per hashed IP per hour, written only by the `waitlist` function inside the
+    // transaction that decides whether a submission is over the limit. A client READ would hand an
+    // abuser the one thing the limit relies on staying opaque — how close they are to it — and a
+    // client WRITE would be the limit itself, editable by the party it constrains.
+    // ⚠️ THE ADDRESS IS HASHED WITH A SALT AND THE RAW IP IS NEVER STORED. It is personal data;
+    // rate limiting and abuse review both work on a one-way hash, and the salt is what stops the
+    // hash being reversed by enumerating IPv4 space.
+    match /ratelimits/{window} { allow read, write: if false; }
+
     // ROUTE: Contact form (/contact) — NO client writes, admin-only reads.
     // The form posts to the `sendContactMessage` callable, which writes via the Admin SDK and
     // bypasses these rules. A client write path is deliberately absent: the form is PUBLIC, so an
