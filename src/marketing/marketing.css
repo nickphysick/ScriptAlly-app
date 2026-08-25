@@ -470,15 +470,9 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    ⚠️ AND `vertical-align: middle` IS WHAT KEEPS IT OFF THE BASELINE. An image aligns on its bottom
    MARGIN edge by default (this repo has paid for that once already, in the pagebar wordmark), so
    a baseline-aligned tick would sit low against type it is meant to punctuate. */
-/* ⚠️ THE LAST WORD AND THE MARK BREAK AS ONE. Without this the mark is orphaned onto a line of
-   its own at every width where the words fit but the words plus the mark do not — measured at
-   1100, where "You've written a book." fits in 479.8px and the mark's extra 58 does not. The
-   sentence's full stop and the tick that replaces the congratulation belong on the same line. */
-.mk-tickword { white-space: nowrap; }
-.mk-tick {
-  display: inline-block; vertical-align: middle;
-  width: 60px; height: auto; margin-left: 16px;
-}
+/* ⚠️ `.mk-tick` AND `.mk-tickword` ARE BOTH DELETED — the statement stands alone. The mark was an
+   inline image bound to the last word by a `nowrap` span, and with the mark gone the binding has
+   nothing to bind. `hero-tick-placeholder.png` is RETAINED but unreferenced; see CLAUDE.md. */
 
 /* ⚠️ `nowrap` FAILS BY OVERFLOW, NOT BY WRAPPING, which is why the boundary is measured and never
    assumed. A ceiling slightly too large does not produce a visibly broken two-line headline; it

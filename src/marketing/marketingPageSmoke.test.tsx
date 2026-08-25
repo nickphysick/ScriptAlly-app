@@ -287,7 +287,16 @@ describe("the nav's condense is triggered by sentinels ahead of the nav", () => 
  * The mark's placement — that it sits on the same line as the last word at every width, and that
  * the row clears the column — is a rendered-page claim and is measured, not read out of a file.
  */
-describe("the statement's ticked box", () => {
+/**
+ * ⚠️ THE TICKED BOX IS GONE AND THE HEADLINE IS ONE STRING AGAIN. It was split at its last space so
+ * the final word and the mark could be bound in a `nowrap` span; with no mark there is nothing to
+ * bind, so `.mk-tickword`, `STATEMENT_HEAD` and `STATEMENT_TAIL` all went with it.
+ *
+ * The claim that survives is the one that mattered throughout: the headline reads as the whole
+ * sentence. It used to need markup-stripping because of the split — it does not now, which is why
+ * the assertion gets simpler rather than disappearing.
+ */
+describe("the statement", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
   const heading = () => {
     const m = html().match(/<h1[^>]*class="[^"]*mk-statement[^"]*"[^>]*>([\s\S]*?)<\/h1>/);
@@ -295,44 +304,21 @@ describe("the statement's ticked box", () => {
     return m![1];
   };
 
-  it("reads as the whole sentence once the markup is stripped", () => {
-    const text = heading().replace(/<[^>]*>/g, "").replace(/&#x27;/g, "'").replace(/\s+/g, " ").trim();
-    expect(text).toBe(HERO_H1);
-  });
-
-  it("binds the last word and the mark into one unbreakable unit", () => {
+  it("reads as the whole sentence, with no markup inside it", () => {
     const h = heading();
-    const span = h.match(/<span class="mk-tickword">([\s\S]*?)<\/span>/);
-    expect(span, "the last word sits in .mk-tickword").toBeTruthy();
-    /* The mark is INSIDE that span — outside it, the span binds a word to nothing. */
-    expect(span![1]).toContain("mk-tick");
-    /* …and the word it binds is the headline's last. */
-    expect(span![1].replace(/<[^>]*>/g, "").trim()).toBe(HERO_H1.split(" ").pop());
+    expect(h).not.toContain("<");
+    expect(h.replace(/&#x27;/g, "'")).toBe(HERO_H1);
   });
 
-  it("the mark is decorative — it is punctuation, not content", () => {
-    expect(heading()).toMatch(/<img[^>]*class="mk-tick"[^>]*alt=""/);
-  });
-
-  it("the congratulation and its popper are gone from the page", () => {
+  /** ⚠️ Asserting the ABSENCE is what stops the mark and its binding returning from a diff. */
+  it("carries no mark and no binding span", () => {
     const h = html();
-    expect(h).not.toContain("Congratulations.");
-    expect(h).not.toContain("You&#x27;ve got further than most.");
-    expect(h).not.toMatch(/["\s`]mk-popper["\s`]/);
-    expect(h).not.toMatch(/["\s`]mk-congrats["\s`]/);
-    expect(h).not.toMatch(/["\s`]mk-subhead["\s`]/);
+    expect(h).not.toMatch(/["\s`]mk-tick["\s`]/);
+    expect(h).not.toMatch(/["\s`]mk-tickword["\s`]/);
+    expect(h).not.toContain("hero-tick-placeholder");
   });
 });
 
-/**
- * The founding-members band — the page's closing offer, and the first thing on any public page
- * that asks a stranger to type something.
- *
- * ⚠️ THE COUNTER IS LIVE OR ABSENT AND THIS IS THE LOCK THAT SAYS SO. The ref hardcodes
- * "37 of 100 places claimed". On a public page that is a factual claim about how many people have
- * signed up, made by nobody, checkable by nobody. Nothing renders until a real figure comes back —
- * not a zero, not an empty bar, not a dash — so the first render must contain no counter at all.
- */
 describe("the founding sign-up — one component, mounted more than once", () => {
   const html = () => renderPage(<Landing onNavigate={noNavigate} />, "/");
 
