@@ -93,3 +93,23 @@ six `sentStrip` cases — replaced by the inverse assertions, which are stronger
 caught my own comment** on its first run: the stylesheet's prose *names* `.qc-loose-promote` to
 record the retirement, which is exactly the documentation this repo wants and exactly what a bare
 `toContain` fails on. Comments stripped first, per the standing rule.
+
+## Phase 4 — all four states, counted at 1440
+
+**44 of 44 rows swept.**
+
+| state | strip | loose | fork | gone-msg | promote | loose slot | +Attach | lock | parcel | seal | pointers |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **packaged** | 1 | 0 | 0 | 0 | 0 | 0 | 0 | **0** | **1** | **1** | Change package · Remove |
+| **loose** | 0 | 1 | 0 | 0 | **0** | **0** | 1 | 0 | 0 | 0 | — |
+| **unattached** | 0 | 0 | 1 | 0 | 0 | 0 | **0** | 0 | 0 | 0 | — |
+| **package removed** | 0 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | — |
+
+Exactly one attachment block per state. All four removals absent in every state. The packaged strip
+keeps its parcel, its seal and both pointer controls (D9, D12). `+ Attach` survives only where
+materials are listed, which is where it means something.
+
+⚠️ **The first run reported D10 as failing, and the probe was wrong.** `offsetParent !== null` is the
+usual visibility test and does **not** catch `visibility: hidden` — an element taken off the page
+still has an offset parent. The D10 control is hidden that way deliberately, because the fork's
+`List materials` clicks its ref. The census now checks computed visibility too.
