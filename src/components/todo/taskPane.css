@@ -566,6 +566,16 @@
 .tpn .q .edit { font-size:10.5px;color:#b3a494;font-weight:400;border-bottom:1px solid transparent;flex-shrink:0; }
 .tpn .q .head[role="button"]:hover .edit { color:var(--burg);border-bottom-color:rgba(124,58,42,0.35); }
 .tpn .q .body { padding:0 0 13px 16px; }
+/* ── the optional fields, offered rather than presented (workspace round, Phase 4) ─────────────
+   ⚠️ A LINK SAYS SOMETHING MAY GO HERE; AN EMPTY BOX SAYS SOMETHING SHOULD. The two optional
+   fields stood open under every journey, so a form of four questions presented six things to fill
+   in and two of them were empty by design. */
+.tpn .addrow { display:flex;gap:16px;flex-wrap:wrap;padding:11px 0 2px; }
+.tpn .addlink {
+  cursor:pointer;background:none;border:0;padding:0;font-family:'Inter',sans-serif;
+  font-size:11px;color:var(--burg);border-bottom:1px dashed rgba(124,58,42,0.35);
+}
+.tpn .addlink:hover { border-bottom-style:solid; }
 /* the hint belongs to the open question and renders only under it — a form of quiet lines above
    questions nobody is answering is a form explaining itself to no one */
 .tpn .q .hint { font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:8px;line-height:1.5; }

@@ -94,23 +94,11 @@ export function cardBucket(c: BoardCard): Bucket {
  * begins. Two moments, two sentences — folding them would put a commit's promise on a button that
  * only opens something.
  */
-export function cardFootHint(c: BoardCard): string {
-  /* ⚠️ HOISTED so the `never` guard can narrow — calling `cardBucket(c)` again in the default
-     gives TypeScript a fresh `Bucket` it cannot know is exhausted, and the guard stops guarding. */
-  const bucket = cardBucket(c);
-  switch (bucket) {
-    case "send":   return "Nothing is sent from here — this records what you sent.";
-    case "chase":  return "Nothing is sent from here — this records the nudge you sent.";
-    case "close":  return "This closes the record. It does not tell the agent anything.";
-    case "decide": return "This records what you decided. Telling anyone is still your email.";
-    case "fix":    return "This fills in your own record. The query does not move.";
-    case "note":   return "Your own task — ticking it off is what finishes it.";
-    default: {
-      const unhandled: never = bucket;
-      return unhandled;
-    }
-  }
-}
+/* (`cardFootHint` is DELETED — workspace round, Phase 4. Its only caller was the pane's form
+   sub-line, which the chrome diet retires: the deed already says what the card is for, and a
+   generic hint under it said something true and unnecessary. A reachability sweep is what this
+   repo asks for rather than an export nothing imports.) */
+
 
 /**
  * ⚠️ THE TIE TO THE FAMILIES, STATED ONCE. A bucket rolls up to exactly one family, so the pill

@@ -177,8 +177,9 @@ export const rowBucket = (c: BoardCard): Bucket => cardBucket(c);
  * is for tiles and the timeline.
  */
 export interface PaneCopy {
-  /** `.f-h` — null renders no heading at all */
-  heading: string | null;
+  /* (`heading` is RETIRED — workspace round, Phase 4. The pane draws no form heading: the DEED is
+     the heading, and "Sent it? Note it here" restated it in weaker words three centimetres below.
+     Deleted rather than left as a field nobody reads.) */
   /** `.ab.go` */
   primary: string;
   /**
@@ -216,19 +217,22 @@ export const CLOSE_NOTE =
  * ban and a blanket permission are both wrong; the exception is named.
  */
 export const PANE_COPY: Record<Bucket, PaneCopy> = {
-  send:   { heading: "Sent it? Note it here",      primary: "Log as sent" },
-  chase:  { heading: null,                          primary: "I've nudged them" },
-  close:  { heading: "Ready to close this one?",   primary: "Log the close",
+  send:   { primary: "Log as sent" },
+  chase:  { primary: "I've nudged them" },
+  close:  { primary: "Log the close",
             /* ⚠️ COMPOSED FROM `CLOSE_NOTE`, NOT RETYPED. The first sentence is the verbatim line
                and is asserted as such; retyping it here would put the same claim about response
-               rates in two places, and the one that drifts is always the copy. */
+               rates in two places, and the one that drifts is always the copy.
+               ⚠️ IT IS THE `When` ROW'S HINT NOW (workspace round, Phase 4), not the form's
+               sub-line. It reassures about the ACT of closing, and the row where the writer dates
+               that act is where they are deciding whether to go through with it — a sentence three
+               centimetres above the question is read before the question exists. */
             note: `${CLOSE_NOTE} It does not tell the agent anything.` },
-  fix:    { heading: "What went with the query?",  primary: "Log as sent" },
-  note:   { heading: "Your note",                   primary: "Tick it off" },
+  fix:    { primary: "Log as sent" },
+  note:   { primary: "Tick it off" },
   /* ⚠️ DECIDE IS NOT IN THE BRIEF'S TABLE. An offer is answered in its own journey, not by a
-     one-line form, so it keeps the deed as its heading rather than inheriting another bucket's
-     words — reported rather than invented. */
-  decide: { heading: null,                          primary: "Reply to the offer" },
+     one-line form — reported rather than invented. */
+  decide: { primary: "Reply to the offer" },
 };
 
 export const paneCopy = (c: BoardCard): PaneCopy => PANE_COPY[cardBucket(c)];

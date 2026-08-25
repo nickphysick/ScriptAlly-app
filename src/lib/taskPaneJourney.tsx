@@ -5,7 +5,7 @@
  * taskPaneJourney — the data side of the port.
  *
  * ⚠️ THIS FILLS IN THE MOCKUP'S `DATA` SHAPE AND NOTHING MORE. `design-refs/todo-materials-contract.html`
- * declares one object per journey — deed, sub, fig/figU, btns, tiles, actTitle/actSub/body,
+ * declares one object per journey — deed, sub, fig/figU, btns, tiles, body,
  * will/quiet/prim, tl — and the pane renders whatever is in it. So the wiring's whole job is to
  * answer those fields from a `BoardCard`; it never reaches into the pane's markup, and the pane
  * never branches on a task type.
@@ -24,7 +24,7 @@ import { QueryStatus } from "../types";
 import { BoardCard } from "./todoBoard";
 import { GROUP_CLASS, liveFamily } from "./todoFamily";
 import { anchorNoun, bandSubline, bandPreline, bandUnder, panePresence } from "./todoHandoff";
-import { cardFootHint, deedSentence, type DeedParts } from "./todoBuckets";
+import { deedSentence, type DeedParts } from "./todoBuckets";
 import { paneCopy } from "./taskListRow";
 import type { TaskPaneEvent, TaskPaneJourney, TaskPaneTile } from "../components/todo/TaskPane";
 
@@ -217,17 +217,10 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
       : "",
     btns: input.btns,
     tiles,
-    /* ⚠️ THE PANE'S WORDS COME FROM THE ONE TABLE, not from the row's verb. `primaryLabel` is what
-       the LIST says a card is for; the form beside it asks a different question, and the two had
-       drifted into "Consider closing" against "Complete". */
-    /* a note's form has no heading either — the words ARE the heading */
-    actTitle: isNote ? "" : paneCopy(c).heading ?? "",
-    /* ⚠️ THE JOURNEY'S OWN WORDS WHERE IT HAS THEM (Phase 5). Close carries a line that has to be
-       carried verbatim — it is what stops "closing" reading as "rejecting" — and the generic foot
-       hint said something true but weaker in its place. Everything else still falls back. */
-    /* ⚠️ AND A NOTE HAS NO ACT SUB-LINE AT ALL. Its form opens with the writer's own words; a hint
-       above them would be the app speaking first on the one journey that is entirely the writer's. */
-    actSub: isNote ? "" : paneCopy(c).note ?? cardFootHint(c),
+    /* (`actTitle`/`actSub` are RETIRED — workspace round, Phase 4. The heading restated the deed in
+       weaker words; the generic foot hint said something true and unnecessary. The one line that
+       was neither is the close journey's reassurance, and it went to the `When` row's hint rather
+       than being deleted with the row it sat in — see `whenHint` in `useTaskPaneSession`.) */
     body: input.body,
     will: input.will,
     quiet: input.quiet,

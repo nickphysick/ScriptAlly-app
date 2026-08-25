@@ -15,8 +15,7 @@
  * three facts about the task.
  *
  * ⚠️ THE PROP CONTRACT IS THE MOCKUP'S OWN `DATA` SHAPE. Its render reads
- * `{cls, deed, sub, btns, tiles, actTitle, actSub, body, will, quiet, prim, tl}` and so
- * does this. That is what stops the structure bending to suit the data: a journey supplies those
+ * `{cls, deed, sub, btns, tiles, body, will, quiet, prim, tl}` and so does this. That is what stops the structure bending to suit the data: a journey supplies those
  * fields or it supplies null, and `null` is what the hidden tile row and the hidden timeline card
  * are FOR. Nothing here branches on a task type.
  *
@@ -104,11 +103,10 @@ export interface TaskPaneJourney {
   btns?: { label: string; onPress: (anchor: HTMLElement) => void }[];
   /** `.tiles.n{N}` — `null` hides the row, as the mockup's render does */
   tiles: TaskPaneTile[] | null;
-  /** `.act h3` */
-  actTitle: string;
-  /** `.act .sub` */
-  actSub: React.ReactNode;
-  /** the journey's own fields, between the sub-line and `.acts` */
+  /* (`actTitle`/`actSub` are DELETED, not defaulted — workspace round, Phase 4. The whole chain went
+     with them: `PaneCopy.heading`, `paneCopy(c).heading`, and `cardFootHint`, whose only caller was
+     the sub-line. A prop with no reader is the shape this file has a standing note about.) */
+  /** the journey's own fields — the whole of the worksheet */
   body: React.ReactNode;
   /** `.willrec b` — what pressing the primary will write */
   will: React.ReactNode;
@@ -257,12 +255,14 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                 carries `overflow: hidden`, so work leaves at the card's edge and there is nothing
                 underneath it to reappear in. The bar below is a SIBLING, not a lid. */}
             <div className="fc work"><div className="rim">
+              {/* ⚠️ NO FORM HEADING AND NO SUB-LINE (workspace round, Phase 4). "Sent it? Note it
+                  here" sat under a deed reading "Send your full manuscript for Murphy's Day Out to
+                  Jonathan Marsh" — the same instruction, in weaker words, three centimetres below
+                  the sentence that had already given it. The deed IS the heading. The close
+                  journey's reassurance was real content rather than a restatement, so it moved to
+                  the `When` row's hint, which is where it is read. */}
               <div className="workscroll">
-                <div className="form">
-                  {d.actTitle && <div className="f-h">{d.actTitle}</div>}
-                  {d.actSub && <div className="f-sub">{d.actSub}</div>}
-                  {d.body}
-                </div>
+                <div className="form">{d.body}</div>
               </div>
             </div></div>
 

@@ -190,12 +190,20 @@ export interface TaskPaneBodyProps {
   idPrefix?: string;
   /**
    * ⚠️ THE CLOSE JOURNEY'S REASSURANCE, ON THE ROW WHERE IT IS READ (workspace round, Phase 4). It
-   * was the form's sub-line — "Closing records no response — not a rejection…" — three inches above
-   * the question it reassures about. Nothing else supplies one today; the prop exists because the
-   * sentence belongs to the JOURNEY and the row belongs to the form, and neither can state the
-   * other's business.
+   * was the form's sub-line — "Closing records no response — not a rejection…" — above a question
+   * the reader had not reached yet. It reassures about the ACT of closing, and the row where the
+   * writer dates that act is where they are deciding whether to go through with it. Nothing else
+   * supplies one today; the prop exists because the sentence belongs to the JOURNEY and the row
+   * belongs to the form, and neither can state the other's business.
    */
   whenHint?: React.ReactNode;
+  /**
+   * ⚠️ WHICH OPTIONAL FIELDS THE WRITER HAS OPENED. Held by the SESSION rather than here, for the
+   * same reason `openId` is: it has to reset when the card does. A disclosure flag left behind on a
+   * card change would show an empty box on the next task with no explanation of where it came from.
+   */
+  extras?: { alongside: boolean; also: boolean };
+  onOpenExtra?: (which: "alongside" | "also") => void;
   /** the free-plan `.upsell`; omitted for Pro */
   upsell?: React.ReactNode;
 }
@@ -238,12 +246,16 @@ function answerText(field: ReqField, v: SendBodyValues): string | null {
 
 export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
   value, onChange, note, statedWeeks, questions = [], openId = null, onOpen, onAnswered,
-  idPrefix = "", whenHint, upsell,
+  idPrefix = "", whenHint, extras = { alongside: false, also: false }, onOpenExtra, upsell,
 }) => {
   /* ⚠️ THE DOM NAME, WHICH IS NOT THE ROW'S NAME. `openId` carries the BARE id, because that is
      what `paneGate` emits; this is only what the attribute says. Default `""` makes it the identity
      function, so `/todo` renders exactly the ids it has always rendered. */
   const domId = (id: string) => `${idPrefix}${id}`;
+  /* ⚠️ "ANYTHING ELSE GOING WITH IT" IS OFFERED ONLY WHERE THERE IS AN IT. It is about the parcel,
+     so a journey that records no parcel has nothing for it to go alongside — the same absence rule
+     the ledger's own rows follow, read off the same declaration. */
+  const offersAlongside = questions.some((q) => q.field === "unit");
 
   /** the control a row opens onto — chosen by the declaration's field, never by row position */
   const control = (field: ReqField): React.ReactNode => {
@@ -402,29 +414,51 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
       );
     })}
 
-    {/* ⚠️ THE TWO OPTIONAL FIELDS SIT BELOW THE LEDGER, NOT INSIDE A ROW. `Anything else going with
-        it` used to live inside the parcel section, which the ledger now closes the moment the
-        parcel is answered — an optional field that disappears when you answer a required one is a
-        field nobody will find. Phase 4 turns both into links that expand in place. */}
-    {questions.some((q) => q.field === "unit") && (
+    {/* ⚠️ THE OPTIONAL FIELDS ARE LINKS UNTIL THEY ARE ASKED FOR (workspace round, Phase 4). They
+        were two boxes standing open under every journey, so a form of four questions presented six
+        things to fill in and two of them were empty by design. A link states that something MAY go
+        here; an empty box states that something SHOULD.
+
+        ⚠️ AND THE `OPTIONAL` TAG GOES WITH THE FIELD, not with the link. It answers "must I?" about
+        a control that is on screen; beside a link that nobody has opened it answers a question
+        nobody asked. At rest this form holds no textarea and no tag at all. */}
+    {(!extras.alongside || !extras.also) && (
+      <div className="addrow">
+        {offersAlongside && !extras.alongside && (
+          <button type="button" className="addlink" onClick={() => onOpenExtra?.("alongside")}>
+            + Anything else going with it
+          </button>
+        )}
+        {!extras.also && (
+          <button type="button" className="addlink" onClick={() => onOpenExtra?.("also")}>
+            + Add a note for your file
+          </button>
+        )}
+      </div>
+    )}
+
+    {offersAlongside && extras.alongside && (
       <div className="sect">
-        <label className="f-lbl">Anything else going with it? <span className="opttag">OPTIONAL</span></label>
+        <label className="f-lbl" htmlFor={domId("s-alongside")}>Anything else going with it? <span className="opttag">OPTIONAL</span></label>
         <input
+          id={domId("s-alongside")}
           className="txt"
           placeholder="e.g. author bio"
+          autoFocus
           value={value.alongside}
           onChange={(e) => onChange({ ...value, alongside: e.target.value })}
         />
       </div>
     )}
 
-    {/* ⚠️ THE OTHER OPTIONAL FIELD, AND IT SAYS SO. Everything in the ledger is required and
-        carries no mark — Option B, where the exception is named rather than the rule. */}
-    <div className="sect">
-    <label className="f-lbl" style={note ? { marginTop: 16 } : undefined}>Anything else? <span className="opttag">OPTIONAL</span></label>
-    <textarea className="note-in" placeholder="Add any further details you want to keep on file"
-      value={value.also} onChange={(e) => onChange({ ...value, also: e.target.value })} />
-    </div>
+    {extras.also && (
+      <div className="sect">
+        <label className="f-lbl" htmlFor={domId("s-also")}>A note for your file <span className="opttag">OPTIONAL</span></label>
+        <textarea id={domId("s-also")} className="note-in" autoFocus
+          placeholder="Add any further details you want to keep on file"
+          value={value.also} onChange={(e) => onChange({ ...value, also: e.target.value })} />
+      </div>
+    )}
 
     {upsell && <div className="upsell">{upsell}</div>}
   </>

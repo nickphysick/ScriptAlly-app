@@ -57,6 +57,7 @@ import { anchorNoun, bandForward, materialRows, materialName } from "../../lib/t
 import { groupColumn } from "../../lib/todoGroups";
 import { cardMenu } from "../../lib/todoMenu";
 import { rowPrimaryLabel } from "../../lib/taskRow";
+import { paneCopy } from "../../lib/taskListRow";
 import { getStatusLabel } from "../StatusPill";
 import { agentWindowMs } from "../../lib/expectedDate";
 import { elapsedParts } from "../../lib/elapsed";
@@ -189,6 +190,12 @@ export function useTaskPaneSession(
    * explicit id, which is the only way an ANSWERED row can be the open one.
    */
   const [openId, setOpenId] = React.useState<string | null>(null);
+  /**
+   * ⚠️ WHICH OPTIONAL FIELDS ARE OPEN — session state for the same reason `openId` is: it resets
+   * with the card. A flag left behind would put an empty box on the next task with nothing to
+   * explain where it came from.
+   */
+  const [extras, setExtras] = React.useState({ alongside: false, also: false });
 
   const seedRows = React.useCallback((card: BoardCard | null): MaterialRow[] => {
     const q = card?.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
@@ -250,6 +257,7 @@ export function useTaskPaneSession(
     /* back to following the first unanswered — an id pinned on the last card names a row this one
        may not even have */
     setOpenId(null);
+    setExtras({ alongside: false, also: false });
   }, [card?.key]);
 
   const paneFacts = React.useMemo(() => {
@@ -775,6 +783,13 @@ export function useTaskPaneSession(
                         openId={openId ?? unanswered(journeyKind(card), gateAnswers(card))[0]?.id ?? null}
                         onOpen={jumpTo}
                         onAnswered={() => setOpenId(null)}
+                        extras={extras}
+                        onOpenExtra={(w) => setExtras((e) => ({ ...e, [w]: true }))}
+                        /* ⚠️ THE CLOSE JOURNEY'S REASSURANCE, ON THE ROW WHERE IT IS READ. It was
+                           the form's sub-line; the chrome diet retires the sub-line, and this is
+                           the one line in it that was content rather than a restatement of the
+                           deed. `paneCopy` is the one table it has ever lived in. */
+                        whenHint={paneCopy(card).note}
                         statedWeeks={statedWeeks(card)}
                         /* the note's own words and its date — the centrepiece, and the one line
                            beneath. Both derived from the task the writer wrote, never restated. */

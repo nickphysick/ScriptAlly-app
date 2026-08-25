@@ -55,8 +55,6 @@ const SEND: TaskPaneJourney = {
     { k: "Sent previously", val: "3 items", small: "letter · synopsis · ch. 1–3" },
     { k: "Then expect", val: "6–8 weeks", small: "the stated window" },
   ],
-  actTitle: "Record the send",
-  actSub: "One entry updates the query, its timeline and this task.",
   body: (
     <TaskPaneBody
       /* ⚠️ THE FIXTURE'S LEDGER IS THE DECLARATION'S OWN, NOT A HAND-WRITTEN ROW LIST (workspace
@@ -325,6 +323,85 @@ describe("3 · no class from the retired pane survives", () => {
       let found = true;
       try { readFileSync(join(process.cwd(), "src/components/todo", f), "utf8"); } catch { found = false; }
       expect(found, `${f} is still on disk`).toBe(false);
+    }
+  });
+});
+
+/**
+ * ⚠️ THE CHROME DIET (workspace round, Phase 4) — asserted on RENDERED OUTPUT, because every claim
+ * here is about what the writer is shown rather than about what was written.
+ */
+describe("the chrome diet — what the form no longer says", () => {
+  /* the ledger as the session builds it, for each journey that has one */
+  const form = (kind: "send" | "close" | "fix" | "note", over: Partial<React.ComponentProps<typeof TaskPaneBody>> = {}) =>
+    renderToStaticMarkup(
+      <TaskPaneBody
+        questions={requirementsFor(kind).map((r) => ({
+          id: r.id, field: r.field, label: r.label,
+          answered: r.isAnswered({ unit: false, when: false, expect: false, remind: false, rows: false }),
+        }))}
+        openId={requirementsFor(kind)[0]?.id ?? null}
+        value={{ rows: [], alongside: "", when: null, expect: null, remind: null, also: "" }}
+        onChange={() => {}}
+        {...(kind === "note" ? { note: { text: "Chase the agency", added: "18 Aug" } } : {})}
+        {...over}
+      />);
+
+  it("no journey renders a form heading or a sub-line", () => {
+    /* the pane itself carries neither element any more — asserted against the classes that drew
+       them, on a journey that has a body, so an empty render cannot satisfy this */
+    expect(HTML, "the form heading is back").not.toMatch(/["\s`]f-h["\s`]/);
+    expect(HTML, "the form sub-line is back").not.toMatch(/["\s`]f-sub["\s`]/);
+    expect(HTML, "the ledger did not render — this case is measuring nothing").toContain('class="q');
+  });
+
+  it("at rest the form holds no textarea and no OPTIONAL tag, on any journey", () => {
+    for (const k of ["send", "close", "fix", "note"] as const) {
+      const html = form(k);
+      expect(html, `${k} presents an empty box at rest`).not.toContain("<textarea");
+      expect(html, `${k} tags a field nobody has opened`).not.toContain("opttag");
+      /* the guard on the guard: the offer must actually be there to have been declined */
+      expect(html, `${k} offers no optional field at all`).toContain("addlink");
+    }
+  });
+
+  it("opening one optional field renders it, its tag, and no other", () => {
+    const one = form("send", { extras: { alongside: false, also: true } });
+    expect((one.match(/<textarea/g) || []).length, "opening one opened two").toBe(1);
+    expect((one.match(/opttag/g) || []).length, "a tag rendered for a field nobody opened").toBe(1);
+    /* the other is still on offer rather than gone */
+    expect(one).toContain("+ Anything else going with it");
+  });
+
+  /* ⚠️ "ANYTHING ELSE GOING WITH IT" NEEDS AN IT — a journey with no parcel has nothing for it to
+     go alongside, so the offer is absent rather than opening onto a question about nothing. */
+  it("the parcel's own optional field is offered only where a parcel is recorded", () => {
+    expect(form("send")).toContain("+ Anything else going with it");
+    expect(form("fix")).toContain("+ Anything else going with it");
+    expect(form("close"), "a close journey offered to record what went alongside nothing")
+      .not.toContain("+ Anything else going with it");
+    expect(form("note")).not.toContain("+ Anything else going with it");
+  });
+
+  /* ⚠️ A HINT BELONGS TO THE OPEN QUESTION. A column of quiet lines above questions nobody is
+     answering is a form explaining itself to no one. */
+  it("each hint renders only under the row that is open", () => {
+    const openWhen = form("send", { openId: "s-when", whenHint: "Closing records no response." });
+    expect(openWhen, "the open row's hint is missing").toContain("Closing records no response.");
+    expect(openWhen, "a closed row's hint rendered").not.toContain("The reminder lands here");
+    const openRemind = form("send", { openId: "s-remind", whenHint: "Closing records no response." });
+    expect(openRemind).toContain("The reminder lands here");
+    expect(openRemind, "a closed row's hint rendered").not.toContain("Closing records no response.");
+  });
+
+  /* ⚠️ THE LABELS ARE THE DECLARATION'S, so the ledger and the missing line cannot come to name one
+     question two things. Read from `requirementsFor`, never from a list typed here. */
+  it("every row's heading is its requirement's own label", () => {
+    for (const k of ["send", "close", "fix"] as const) {
+      const html = form(k);
+      for (const r of requirementsFor(k)) {
+        expect(html, `${k} lost the label for ${r.field}`).toContain(`>${r.label}</span>`);
+      }
     }
   });
 });
