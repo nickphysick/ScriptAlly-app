@@ -49,7 +49,7 @@ import { ChevronDown, ShieldCheck, Plus } from "lucide-react";
 import "./packages/packageWorkshop.css";
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries, activities, agents, addVersion, updateVersion, deleteVersion, archiveVersion, addPackage, updatePackage, deletePackage, retirePackage, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, activities, agents, addVersion, updateVersion, deleteVersion, archiveVersion, addPackage, updatePackage, deletePackage, retirePackage, restoreVersion, restorePackage, updateUserProfile } = useScriptAllyDb();
   /**
    * ⚠️ NEVER AUTO-OPENS (D7). Plain component state, seeded `false`: no localStorage, no first-run
    * trigger, nothing watching the teach→workspace transition. A drawer that opened itself would
@@ -119,6 +119,21 @@ export const SubmissionPackages: React.FC = () => {
   const activeMs = useMemo(() => manuscripts.find((m) => m.id === activeMsId) ?? manuscripts[0], [manuscripts, activeMsId]);
   const msId = activeMs?.id;
   const msVersions = useMemo(() => versions.filter((v) => v.manuscriptId === msId), [versions, msId]);
+  /**
+   * ⚠️ THE ARCHIVED SETS ARE SEPARATE LISTS, WHICH IS WHAT MAKES D3 STRUCTURAL. `materialShelf` and
+   * `msPackages` are untouched and still active-only, so `N held` / `N built` cannot count an
+   * archived item in any state of the toggle — not because the counts remember to exclude them, but
+   * because the arrays they read never contain them.
+   *
+   * ⚠️ AND THE TOGGLE DOES NOT RENDER WHEN THESE ARE EMPTY (D5). The concept appears when it becomes
+   * true; an always-present "Show archived" on an account with nothing archived teaches a state the
+   * writer has never been in.
+   */
+  const archivedVersions = useMemo(
+    () => versions.filter((v) => v.manuscriptId === msId && v.status === "Retired"), [versions, msId]);
+  const archivedPackages = useMemo(
+    () => packages.filter((p) => p.manuscriptId === msId && p.status === "Retired"), [packages, msId]);
+  const [showArchived, setShowArchived] = useState(false);
   const msPackages = useMemo(() => packages.filter((p) => p.manuscriptId === msId && p.status !== "Retired"), [packages, msId]);
   const msQueries = useMemo(() => queries.filter((q) => q.manuscriptId === msId), [queries, msId]);
   /* ⚠️ THE LEDGER'S EVENTS ARE SCOPED TO THE MANUSCRIPT LIKE EVERY OTHER FIGURE ON THIS PAGE.
@@ -409,6 +424,10 @@ export const SubmissionPackages: React.FC = () => {
                 }}
                 onNewPackage={() => { setPkgEditing(null); setPkgDuplicating(null); setPkgModal(true); }}
                 onHowItWorks={() => setHowOpen(true)}
+                archived={archivedPackages}
+                showArchived={showArchived}
+                onToggleArchived={() => setShowArchived((v) => !v)}
+                onRestore={restorePackage}
                 /* ⚠️ A CREATE, NOT AN EDIT — `pkgEditing` stays null, so Save writes a NEW document
                    and the sent package is untouched, which is the entire point of D-D2. */
                 onDuplicatePackage={(id) => {
@@ -457,6 +476,10 @@ export const SubmissionPackages: React.FC = () => {
                  act performed are three readings of one number. */
               onDeleteMaterial={deleteVersion}
               onArchiveMaterial={archiveVersion}
+              archived={archivedVersions}
+              showArchived={showArchived}
+              onToggleArchived={() => setShowArchived((v) => !v)}
+              onRestore={restoreVersion}
             />
               <TrackingBand
                 packages={msPackages}

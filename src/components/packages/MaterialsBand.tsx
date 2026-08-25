@@ -21,6 +21,8 @@
  * on the button and the act behind it are the same object. The ref's version refused instead, and
  * told the writer to dismantle a package first.
  */
+import { MATERIAL_LABEL } from "../../lib/manuscriptPackages";
+import { ArchivedToggle, ArchivedRow, ArchivedSection } from "./ArchivedRow";
 import React from "react";
 import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../../types";
 import { materialShelf, materialHolders } from "../../lib/packagesOverview";
@@ -56,11 +58,20 @@ export interface MaterialsBandProps {
    * component cannot offer "Archive" and perform a delete.
    */
   onDeleteMaterial: (id: string) => void | Promise<unknown>;
+  /**
+   * ⚠️ ARCHIVED ITEMS ARRIVE AS THEIR OWN LIST (F-H, D1/D3). They are never merged into the active
+   * array, so the count above cannot see them whatever the toggle says.
+   */
+  archived: ManuscriptVersion[];
+  showArchived: boolean;
+  onToggleArchived: () => void;
+  onRestore: (id: string) => void | Promise<unknown>;
   onArchiveMaterial: (id: string) => void | Promise<unknown>;
 }
 
 export const MaterialsBand: React.FC<MaterialsBandProps> = ({
   versions, packages, onAddMaterial, onOpenMaterial, onDeleteMaterial, onArchiveMaterial,
+  archived, showArchived, onToggleArchived, onRestore,
 }) => {
   /**
    * ⚠️ ONE SHELF, NOT THREE COLUMNS (D-B2). The columns stated a heading, a `0 held` count and a
@@ -79,6 +90,7 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
         {/* ⚠️ `0 held` IS TRUE AND STAYS. A count of things you have is a count; the sentence-not-a-
             count rule applies to the usage line, where "In 0 packages" reads as a malfunction. */}
         <span className="pkgb-tag">{sheets.length} held</span>
+        <ArchivedToggle n={archived.length} on={showArchived} onClick={onToggleArchived} />
       </div>
 
       <div className="pkgb-shelf">
@@ -122,6 +134,12 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
           <span className="pkgb-gs">Letter, synopsis or sample</span>
         </button>
       </div>
+      <ArchivedSection show={showArchived} n={archived.length}>
+        {archived.map((v) => (
+          <ArchivedRow key={v.id} name={v.versionName} meta={MATERIAL_LABEL[v.componentType]}
+                       onRestore={() => void onRestore(v.id)} />
+        ))}
+      </ArchivedSection>
     </section>
   );
 };

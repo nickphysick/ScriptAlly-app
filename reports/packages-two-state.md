@@ -1362,3 +1362,44 @@ So carrying import provenance would mean either widening `fieldSources`' meaning
 record-level origin, or adding the same shape to `Manuscript` and `Activity` — **a rules-allowlist
 change on two more collections.** Reported, not added, per the red gate. The fields stay empty
 meanwhile, which is the honest state.
+
+# F-H — archived records have a way back (25 Aug)
+
+A quiet **Show archived · N** in each band head, off by default; archived items appear in place,
+recessed; **Restore** is the only action on them. No page, no empty state, no explanation of why
+something was put away.
+
+### ⚠️ D3 is structural, not remembered
+
+`materialShelf` and `msPackages` are **untouched** and still active-only; the archived items arrive
+as their own separate lists. So `N held` / `N built` cannot count an archived item in any state of
+the toggle — not because the counts exclude them, but because the arrays they read never contain
+them. Measured: the counts read `3 HELD` / `1 BUILT` with the toggle **off** and `3 HELD` / `1 BUILT`
+with it **on**.
+
+### ⚠️ D4 — verified, and it was already true
+
+`archiveVersion` writes **one field on one document** (`status: "Retired"` on the version) and
+touches no package. The interface's own docstring said so — *"IT STAYS RESOLVABLE BY EVERY PACKAGE
+THAT HOLDS IT"* — and the drive confirmed it on the page: **"Hook-first" was archived while
+"Standard UK" references it, and the package still named it.** Nothing to fix; no red gate.
+
+### ⚠️ And the inverse arrived with its surface, exactly as the code asked
+
+`db.tsx` carried the reason there was no `unarchiveVersion`: *"a writer that no surface can reach is
+a claim that the feature exists. It arrives with the surface, not before it."* That reasoning is why
+it waited, and it is why it is written now. `restoreVersion` and `restorePackage` write
+`status: "Active"` — **not `deleteField()`**, though absent also means active: removing the key would
+make a restored record indistinguishable from one that was never archived, and those are different
+histories.
+
+### Measured, at 1440
+
+```
+before        : 4 HELD · 2 BUILT · no toggle rendered                (D5)
+archived, off : 3 HELD · 1 BUILT · "SHOW ARCHIVED · 1" ×2 · 0 rows visible
+D4            : the archived material still named by its package     ✓
+archived, on  : 3 HELD · 1 BUILT (unchanged) · 2 rows · hover lift 0px
+actions       : ["Restore"] only                                     (D2)
+after restore : 4 HELD · 2 BUILT · toggle gone                       (D5)
+```

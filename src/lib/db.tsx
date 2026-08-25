@@ -253,11 +253,15 @@ interface DbContextType {
    * ⚠️ IT STAYS RESOLVABLE BY EVERY PACKAGE THAT HOLDS IT. Archiving removes it from the working
    * list and changes nothing else; a package built with it still names it. See `RecordStatus`.
    *
-   * ⚠️ AND THERE IS NO INVERSE YET — flag F-H. Nothing in the UI brings an archived material back,
-   * so no `unarchiveVersion` is written: a writer that no surface can reach is a claim that the
-   * feature exists. It arrives with the surface, not before it.
+   * ⚠️ THE INVERSE ARRIVED WITH ITS SURFACE (F-H, closed). This note used to say there was none,
+   * because "a writer that no surface can reach is a claim that the feature exists". The shelf and
+   * the packages grid now carry a `Show archived` toggle with Restore on each row, so the claim is
+   * true and `restoreVersion` is written. The reasoning stands and is why it waited.
    */
   archiveVersion: (id: string) => Promise<void>;
+  /** Bring an archived material back to the working list. One field, one document — the exact
+   *  inverse of `archiveVersion`, and it changes nothing else. */
+  restoreVersion: (id: string) => Promise<void>;
 
   // Package Actions
   addPackage: (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">) => Promise<{ success: boolean; error?: string; id?: string }>;
@@ -281,6 +285,8 @@ interface DbContextType {
    */
   setQueryPackage: (queryId: string, packageId: string) => Promise<string | null>;
   retirePackage: (id: string) => Promise<void>;
+  /** Bring an archived package back. Its scorecard and history were never touched. */
+  restorePackage: (id: string) => Promise<void>;
   /**
    * Delete a package outright. Returns `false` WITHOUT writing when any query was sent with it.
    *
@@ -1610,6 +1616,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  /**
+   * ⚠️ `"Active"`, NOT `deleteField()`. Absent also means active (see `RecordStatus`), so removing
+   * the key would work — but it would make a restored record indistinguishable from one that was
+   * never archived, and the two are different histories. Writing the value states what happened.
+   */
+  const restoreVersion = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "versions", id), { status: "Active" });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/versions/${id}`);
+    }
+  };
+
   // Package Action with Pro checking
   const addPackage = async (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">): Promise<{ success: boolean; error?: string; id?: string }> => {
     if (!currentUser) return { success: false, error: "Authentication required." };
@@ -1725,6 +1745,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/packages/${id}`);
       return false;
+    }
+  };
+
+  /** The inverse of `retirePackage` — same shape, same reasoning as `restoreVersion`. */
+  const restorePackage = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "packages", id), { status: "Active" });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
     }
   };
 
@@ -3282,6 +3312,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setQueryPackage,
         retirePackage,
         deletePackage,
+        restoreVersion,
+        restorePackage,
         setActivePackage,
         addAgent,
         updateAgent,

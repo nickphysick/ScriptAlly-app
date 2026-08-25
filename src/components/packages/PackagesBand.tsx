@@ -14,6 +14,7 @@
  * deleted; one that has travelled is ARCHIVED, because it is the record of what went in an envelope
  * and a query still points at it. One component, one decision function, two record types.
  */
+import { ArchivedToggle, ArchivedRow, ArchivedSection } from "./ArchivedRow";
 import React from "react";
 import { ManuscriptVersion, Query, SubmissionPackage } from "../../types";
 import { packageTiles, tileFooter, composition } from "../../lib/packagesOverview";
@@ -37,6 +38,14 @@ export interface PackagesBandProps {
    */
   onHowItWorks?: () => void;
   /**
+   * ⚠️ ARCHIVED ITEMS ARRIVE AS THEIR OWN LIST (F-H, D1/D3). They are never merged into the active
+   * array, so the count above cannot see them whatever the toggle says.
+   */
+  archived: SubmissionPackage[];
+  showArchived: boolean;
+  onToggleArchived: () => void;
+  onRestore: (id: string) => void | Promise<unknown>;
+  /**
    * ⚠️ THE WAY FORWARD FROM A LOCKED PACKAGE (D-D2), AND IT SHIPS WITH THE LOCK. Without it the rule
    * is a dead end — the writer wanted a different combination and the app just refuses.
    */
@@ -53,6 +62,7 @@ export interface PackagesBandProps {
 
 export const PackagesBand: React.FC<PackagesBandProps> = ({
   packages, versions, queries, onOpenPackage, onNewPackage, onHowItWorks, onDuplicatePackage, renderRemove, renderTracking,
+  archived, showArchived, onToggleArchived, onRestore,
 }) => {
   const tiles = packageTiles(packages, versions, queries);
   const byId = new Map(packages.map((p) => [p.id, p]));
@@ -64,6 +74,7 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
         <span className="pkgb-tag">{packages.length} built</span>
         {/* ⚠️ IT CHANGES NOTHING, so it is the quietest control on the page — a ghost beside the
             count, never a filled button competing with the page's actual work. */}
+        <ArchivedToggle n={archived.length} on={showArchived} onClick={onToggleArchived} />
         {onHowItWorks && (
           <button type="button" className="pkgb-how" onClick={onHowItWorks}>
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
@@ -154,6 +165,11 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
           <span className="pkgb-gs">A different letter, a different synopsis.</span>
         </button>
       </div>
+      <ArchivedSection show={showArchived} n={archived.length}>
+        {archived.map((p) => (
+          <ArchivedRow key={p.id} name={p.packageName} onRestore={() => void onRestore(p.id)} />
+        ))}
+      </ArchivedSection>
     </section>
   );
 };
