@@ -22,12 +22,15 @@
 import React, { useState } from "react";
 import { MoreHorizontal, Archive, Trash2, Pencil } from "lucide-react";
 import { Manuscript, ManuscriptVersion, SubmissionPackage, Query, CompTitle } from "../../types";
+import type { Activity, BookVersion } from "../../types";
+import { bookVersionsOf } from "../../lib/bookVersions";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import { plateStats } from "../../lib/manuscriptPlate";
 import { outInTheWorld, comparableTitlesTile, onTheShelf, submissionMaterials } from "../../lib/manuscriptTiles";
 import { ManuscriptPlate } from "./ManuscriptPlate";
 import { ManuscriptTabs, ManuscriptTabKey } from "./ManuscriptTabs";
 import { ManuscriptDetailTiles } from "./ManuscriptDetailTiles";
+import { BookVersionsPanel } from "./BookVersionsPanel";
 import { ManuscriptCompsPane } from "./ManuscriptCompsPane";
 import { ManuscriptPackagesPane } from "./ManuscriptPackagesPane";
 import { ManuscriptPitchPane } from "./ManuscriptPitchPane";
@@ -41,7 +44,14 @@ export interface ManuscriptDossierProps {
   /** Display labels, already resolved through `genreDisplay` — never raw stored ids. */
   genres: string[];
   queries: Query[];
+  /** ⚠️ MATERIALS, not book versions — the repo's older meaning of the word. See types.ts. */
   versions: ManuscriptVersion[];
+  /** Read by the versions panel: the R&R link, and which version each holder holds. */
+  activities: Activity[];
+  /** Today, date-only, so a new version is stamped in the writer's own calendar. */
+  today: string;
+  /** Append or rename a book version — the panel hands back the whole next list. */
+  onSaveBookVersions: (next: BookVersion[]) => void;
   packages: SubmissionPackage[];
   comps: CompTitle[];
   isPro: boolean;
@@ -108,7 +118,7 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   onCopyPitch,
   onOpenPlans,
   onOpenQueriesHub,
-  onOpenPackageBuilder,
+  onOpenPackageBuilder, activities, today, onSaveBookVersions,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const shelved = isShelvedPresentation(manuscript);
@@ -226,6 +236,20 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
                 onOpenShelf={() => onTabChange("comps")}
                 onEditDetails={onEditDetails}
                 onOpenPackageBuilder={onOpenPackageBuilder}
+              />
+              {/**
+                * ⚠️ THE VERSIONS PANEL LIVES ON "THE RECORD", not on its own tab. It is a fact
+                * about the manuscript's own shape, which is what this tab is; a fifth tab would
+                * advertise the feature to every writer who has never used it, which is exactly what
+                * the gate exists to prevent.
+                */}
+              <BookVersionsPanel
+                versions={bookVersionsOf(manuscript)}
+                materials={versions}
+                queries={queries}
+                activities={activities}
+                today={today}
+                onSave={onSaveBookVersions}
               />
             </div>
           )}

@@ -289,4 +289,68 @@ await dropPkg().catch(() => {});
 const pkgGone = await getDoc(PKG);
 console.log(`  probe package removed: ${pkgGone.exists() ? "NO — still present" : "yes"}`);
 
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   BOOK VERSIONS — named orderings of the book (manuscript-versions pack, D4)
+   ══════════════════════════════════════════════════════════════════════════════════════════════
+
+   ⚠️ NOT the `versions` SUBCOLLECTION probed above, which holds MATERIALS. Three separate fields on
+   three separate documents, and each needs BOTH halves — the shape guard on the validator AND the
+   key on the update allowlist. Either alone is broken, and the broken half fails SILENTLY: a
+   permission error the UI shows as nothing happening.
+
+   ⚠️ AND EACH PROBE PROVES ITS DENIAL AS WELL AS ITS ACCEPTANCE. An allowlist that accepts
+   everything is not a lock, and a validator that accepts a string where a list belongs would let
+   the single writer's shape rot without anything noticing.
+*/
+console.log("\nbook versions — the three optional fields:");
+const MSREF = doc(db, "users", uid, "manuscripts", "seed-ms-1");
+const msSnap = await getDoc(MSREF);
+if (!msSnap.exists()) {
+  console.log("  ⚠️  seed-ms-1 missing — run `node tests/e2e/seed.mjs` first");
+} else {
+  const beforeBV = msSnap.data().bookVersions;
+  const undoBV = () => updateDoc(MSREF, beforeBV === undefined ? { bookVersions: deleteField() } : { bookVersions: beforeBV });
+  await attempt("bookVersions (a real list)", "Part A", () => updateDoc(MSREF, {
+    bookVersions: [{ id: "bv-probe", name: "Probe", kind: "initial", createdDate: "2026-08-25" }],
+  }), null);
+  /* ⚠️ THE SHAPE IS OWNED BY lib/bookVersions.ts, so the rule guards the CONTAINER — which means a
+     string where a list belongs must be refused, or the guard is doing nothing at all. */
+  await attempt("bookVersions as a string (must be DENIED)", "Part A",
+    () => updateDoc(MSREF, { bookVersions: "not a list" }), null);
+  /* and the cap is artefact-locked to MAX_BOOK_VERSIONS — 51 entries must not land */
+  await attempt("bookVersions over the cap (must be DENIED)", "Part A", () => updateDoc(MSREF, {
+    bookVersions: Array.from({ length: 51 }, (_, i) => ({ id: `bv-${i}`, name: `v${i}`, kind: "reordering", createdDate: "2026-08-25" })),
+  }), null);
+  await undoBV().catch(() => {});
+}
+
+const MATREF = doc(db, "users", uid, "versions", "seed-mat-ql1");
+if ((await getDoc(MATREF)).exists()) {
+  await attempt("material bookVersionId", "Part A",
+    () => updateDoc(MATREF, { bookVersionId: "bv-probe" }),
+    () => updateDoc(MATREF, { bookVersionId: deleteField() }));
+  await attempt("material bookVersionId as a number (DENIED)", "Part A",
+    () => updateDoc(MATREF, { bookVersionId: 7 }),
+    () => updateDoc(MATREF, { bookVersionId: deleteField() }));
+} else {
+  console.log("  ⚠️  seed-mat-ql1 missing — run `node tests/e2e/seedPackages.mjs` first");
+}
+
+/* ⚠️ ON A THROWAWAY ACTIVITY, not a seeded one. A send's version is payload the correction pack can
+   also move, and probing a real log entry would leave the feed carrying a probe value if the undo
+   failed. Created and removed here. */
+const ACT = doc(db, "users", uid, "activities", "probe-bookversion-act");
+const baseAct = () => ({
+  id: "probe-bookversion-act", userId: uid, queryId: "seed-query-1", manuscriptId: "seed-ms-1",
+  activityType: "Materials Sent", description: "Rules probe", date: new Date().toISOString(),
+  details: "", resultingStatus: "Full Sent",
+});
+await setDoc(ACT, baseAct()).catch(() => {});
+await attempt("activity bookVersionId", "Part A",
+  () => updateDoc(ACT, { bookVersionId: "bv-probe" }), null);
+await attempt("activity bookVersionId as a list (DENIED)", "Part A",
+  () => updateDoc(ACT, { bookVersionId: ["bv-probe"] }), null);
+await deleteDoc(ACT).catch(() => {});
+console.log(`  probe activity removed: ${(await getDoc(ACT)).exists() ? "NO — still present" : "yes"}`);
+
 process.exit(0);

@@ -42,6 +42,8 @@ import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
 import { ManuscriptLibraryCard, ManuscriptAddTile } from "./manuscripts/ManuscriptLibraryCard";
 import { pitchAssets, pitchMeter, PitchAssetKey, synopsisVersions } from "../lib/manuscriptPitch";
 import { genreDisplay } from "../lib/genres";
+import { londonDay } from "../lib/queryingGoals";
+import type { BookVersion } from "../types";
 import { genreList, splitGenres } from "./manuscripts/plateEdit";
 import "./manuscripts/manuscripts.css";
 
@@ -228,6 +230,21 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
      records. No counter is stored and none is written. */
   const msQueries = selected ? queries.filter((q) => q.manuscriptId === selected.id) : [];
   const msVersions = selected ? versions.filter((v) => v.manuscriptId === selected.id) : [];
+
+  /**
+   * Append or rename a book version.
+   *
+   * ⚠️ THE QUIET WRITER, DELIBERATELY. `updateManuscript` appends a `Manuscript Updated` activity;
+   * naming an ordering of your own book is not an event on a query's timeline, and every query for
+   * this manuscript would have carried one. Same reasoning as the plate's in-place edits above.
+   *
+   * ⚠️ AND THE NEXT LIST COMES FROM `lib/bookVersions`, WHICH IS THE SINGLE WRITER OF THE SHAPE.
+   * This function stores what it is handed and computes nothing.
+   */
+  const saveBookVersions = (next: BookVersion[]) => {
+    if (!selected) return;
+    void updateManuscriptQuiet(selected.id, { bookVersions: next });
+  };
   const msPackages = selected
     ? packages.filter((p) => p.manuscriptId === selected.id && p.status !== "Retired")
     : [];
@@ -365,6 +382,10 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
               versions={msVersions}
               packages={msPackages}
               comps={msComps}
+              /* The versions panel reads the log for its R&R links and its holder counts. */
+              activities={activities}
+              today={londonDay(new Date())}
+              onSaveBookVersions={saveBookVersions}
               isPro={isProUser(currentUser)}
               scoutAvailable={scoutLive()}
               pitchAssets={msPitch}

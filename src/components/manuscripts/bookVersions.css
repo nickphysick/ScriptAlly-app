@@ -1,0 +1,153 @@
+/**
+ * The versions panel on the Manuscripts card (design-refs/manuscript-loop-design.html §2).
+ *
+ * ⚠️ THE REF'S BAND IS SAGE AND EDITORIAL MUST NOT BE. `manuscriptPlate.css` already carries the
+ * ruling in as many words — "Editorial is monochrome and has no sage at all; a sage band there is
+ * not 'the theme with a green tint', it is the wrong theme" — so the band is a token, sage in
+ * Cappuccino and Bold, a pale grey step in Editorial. The mockup wins on what it shows; a standing,
+ * reasoned lock wins over an artefact that could not know about it.
+ *
+ * ⚠️ TOKENS ARE PAGE-SCOPED TO `.msv1`, like every other `--msv-*` on this card. They are `--bv-*`
+ * rather than `--msv-*` so the feature is one file to read and one file to revert.
+ */
+.t-capp .msv1, .msv1 {
+  --bv-bandA: #dadfd7; --bv-bandB: #d5dbd3;
+  --bv-bandline: 1px solid rgba(138, 158, 136, 0.35);
+  --bv-card: #ffffff;
+  --bv-line: 1px solid rgba(58, 28, 20, 0.10);
+  --bv-ink: #3a1c14;
+  --bv-soft: rgba(58, 28, 20, 0.62);
+  --bv-faint: rgba(58, 28, 20, 0.40);
+  --bv-dash: 1.5px dashed rgba(124, 58, 42, 0.32);
+  --bv-burg: #7c3a2a;
+  /* the R&R chip — the pink CTA pair, which is this app's "something happened here" */
+  --bv-rr-bg: #f5e2da; --bv-rr-bd: #e8c8bc; --bv-rr-ink: #7c3a2a;
+  /* the kind chip — quiet, because a kind is a classification and not an event */
+  --bv-kind-bg: rgba(58, 28, 20, 0.05); --bv-kind-bd: rgba(58, 28, 20, 0.14); --bv-kind-ink: rgba(58, 28, 20, 0.55);
+  --bv-latest-bg: rgba(215, 221, 213, 0.55); --bv-latest-bd: rgba(154, 168, 150, 0.6); --bv-latest-ink: #5c7053;
+  --bv-field: #ffffff; --bv-fieldbd: 1px solid rgba(58, 28, 20, 0.14);
+}
+.t-bold .msv1 {
+  --bv-bandA: #f4c7c2; --bv-bandB: #f4c7c2;
+  --bv-bandline: 1.5px solid #1d1712;
+  --bv-line: 1.5px solid #1d1712;
+  --bv-ink: #1d1712;
+  --bv-dash: 1.5px dashed #1d1712;
+  --bv-kind-bg: #ffffff; --bv-kind-bd: #1d1712; --bv-kind-ink: #1d1712;
+  --bv-latest-bg: #f5e2da; --bv-latest-bd: #1d1712; --bv-latest-ink: #1d1712;
+  --bv-fieldbd: 1.5px solid #1d1712;
+}
+.t-edn .msv1 {
+  /* ⚠️ NO SAGE AND NO PINK — the chroma rule. Every distinction here is a step in VALUE. */
+  --bv-bandA: #f4f4f5; --bv-bandB: #efeff0;
+  --bv-bandline: 1px solid #e3e2e0;
+  --bv-line: 1px solid #ececeb;
+  --bv-ink: #1a1a1a;
+  --bv-soft: #6b6b6b;
+  --bv-faint: #9a9a9a;
+  --bv-dash: 1.5px dashed #d6d6d4;
+  --bv-burg: #44484d;
+  --bv-rr-bg: #e9eaeb; --bv-rr-bd: #c9cacb; --bv-rr-ink: #44484d;
+  --bv-kind-bg: #f4f4f5; --bv-kind-bd: #e3e2e0; --bv-kind-ink: #6b6b6b;
+  --bv-latest-bg: #dcdddf; --bv-latest-bd: #c2c3c5; --bv-latest-ink: #33363a;
+  --bv-fieldbd: 1px solid #e3e2e0;
+}
+
+.bv-panel {
+  background: var(--bv-card);
+  border: var(--bv-line);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 22px;
+  max-width: 720px;
+}
+/* Below two versions the panel is only its door — no band, no frame, nothing to read. */
+.bv-panel--bare { border: none; background: none; overflow: visible; }
+
+.bv-band {
+  background: linear-gradient(180deg, var(--bv-bandA), var(--bv-bandB));
+  border-bottom: var(--bv-bandline);
+  padding: 11px 17px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.bv-eyebrow {
+  font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; font-weight: 700; color: var(--bv-ink);
+}
+.bv-count { font-family: var(--f12-mono); font-size: 9px; color: var(--bv-soft); }
+
+.bv-body { padding: 14px 17px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+.bv-row {
+  background: var(--bv-card);
+  border: var(--bv-line);
+  border-radius: 10px;
+  padding: 13px 16px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+/**
+ * ⚠️ `line-height: 1.3` — THE STANDING FLOOR FOR MIXED-CASE TYPE, and a version name is
+ * writer-supplied, so it can hold a `g`, a `y` or a `p`. This repo has recorded three crops from a
+ * tighter value taken off a drawing whose sample text happened to have no descenders.
+ */
+.bv-name {
+  font-size: 13.5px; font-weight: 600; line-height: 1.3; color: var(--bv-ink);
+  background: none; border: none; padding: 0; cursor: pointer; font-family: inherit;
+  text-align: left; min-width: 0;
+}
+.bv-name:hover, .bv-name:focus-visible { text-decoration: underline; text-underline-offset: 2px; }
+
+.bv-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 999px; white-space: nowrap; flex: none;
+  border: 1px solid transparent;
+}
+.bv-chip--rr { color: var(--bv-rr-ink); background: var(--bv-rr-bg); border-color: var(--bv-rr-bd); }
+.bv-chip--kind { color: var(--bv-kind-ink); background: var(--bv-kind-bg); border-color: var(--bv-kind-bd); }
+.bv-chip--latest { color: var(--bv-latest-ink); background: var(--bv-latest-bg); border-color: var(--bv-latest-bd); }
+
+/* The meta is pushed right and wraps whole; the note takes its own line beneath everything. */
+.bv-meta {
+  font-family: var(--f12-mono); font-size: 8.5px; color: var(--bv-faint);
+  display: flex; gap: 12px; flex-wrap: wrap; margin-left: auto;
+}
+.bv-note {
+  font-size: 11px; color: var(--bv-soft); width: 100%; margin-top: 2px; line-height: 1.5;
+}
+
+.bv-ghost {
+  border: var(--bv-dash); border-radius: 10px; padding: 13px; text-align: center;
+  background: transparent; font-family: inherit; width: 100%; cursor: pointer;
+}
+.bv-ghost-t { font-family: var(--f12-serif); font-style: italic; font-size: 13.5px; color: var(--bv-burg); }
+.bv-ghost:hover .bv-ghost-t, .bv-ghost:focus-visible .bv-ghost-t { text-decoration: underline; text-underline-offset: 3px; }
+
+.bv-form {
+  border: var(--bv-line); border-radius: 10px; padding: 15px 16px 13px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.bv-fld { display: block; }
+.bv-fld > span {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--bv-soft); margin-bottom: 6px;
+}
+.bv-fld > span em { font-style: normal; font-size: 8px; color: var(--bv-faint); }
+.bv-fld input, .bv-fld select, .bv-fld textarea {
+  width: 100%; font-family: inherit; font-size: 13px; line-height: 1.4; color: var(--bv-ink);
+  border: var(--bv-fieldbd); border-radius: 8px; padding: 9px 11px;
+  background: var(--bv-field, #fff); outline: none; resize: vertical;
+}
+.bv-formacts { display: flex; justify-content: flex-end; gap: 12px; align-items: center; }
+.bv-cancel {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--bv-soft); border-bottom: 1px solid var(--bv-kind-bd);
+}
+.bv-save {
+  font-family: inherit; font-size: 12.5px; font-weight: 600; color: var(--bv-rr-ink);
+  background: var(--bv-rr-bg); border: 1px solid var(--bv-rr-bd);
+  border-radius: 8px; padding: 7px 15px; cursor: pointer;
+}
+.bv-save:disabled { opacity: 0.45; cursor: default; }
