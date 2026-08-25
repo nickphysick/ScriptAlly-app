@@ -1623,3 +1623,214 @@ feature working, not damage*) is now asserted as the absence of any caution colo
 
 **The card's Playfair name is unchanged at 19px** and was not re-measured for descenders — the size
 did not move, only what sits above it.
+
+---
+
+# Band faults, Part B's finish, and the package drawer
+
+Refs: `design-refs/packages-banded-cards.html` (Parts 1–2) · `design-refs/package-drawer.html` (Part 3).
+Baseline at start: **tsc 0 · build clean · 391 files / 6800 tests**.
+
+## Part 1 — the band faults
+
+### F-BA — the letter glyph was a question mark *by construction*
+
+Not a missing map entry, not a failed render, not a font fallback. The entry existed, resolved and
+painted perfectly; the **artwork** was a `?`:
+
+```
+<path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1" />   ← the hook
+<circle cx="12" cy="19" r="0.6" fill="currentColor" />        ← the dot
+```
+
+It arrived in `e4685f53` ("canonical type glyphs") and every covering-letter card has drawn it since.
+
+**⚠️ THE TELL IS THAT EVERY OTHER TYPE RESOLVED.** A missing entry renders *nothing* here
+(`if (!g) return null`), and a broken path renders nothing either. A `?` drawn at the right weight in
+the right colour is a `?` somebody drew. Replaced with the ref's envelope, transposed from its 32
+viewBox to the component's 24.
+
+### D2/D3 — the inset came from a rule nobody was reading
+
+`.pkgb-pkgcard` was declared **twice**. The banded block superseded the older one and was **added
+rather than swapped**, so both were live. The later wins *per property* — but it declares no
+`padding`, so `18px 20px 13px` survived from the earlier block.
+
+**⚠️ THE TELL IS AN OFFSET THAT IS EXACTLY A PADDING VALUE NOBODY CAN FIND.** Grepping the winning
+rule shows no padding at all, which reads as "already clean" rather than "declared somewhere else" —
+the same shape as a `var()` fallback on a retired token.
+
+Two dead things went with it: `.pkgb-pkgcard > .pkgb-plate--stamp` positioned a stamp **no packages
+component renders**, and `.pkgb-pkgname`'s `padding-right: 64px` reserved a gutter for that stamp —
+so every package name has been indented 64px on its right for an element that is not there.
+
+The material cards had the same fault by a different route: `padding: 13px 15px 12px` on the frame.
+Both frames are bare now; the inset lives on `.pkgb-pkgbody` and a new `.pkgb-mbody`, so the band is
+a direct child reaching all three edges and `overflow: hidden` clips it — the MountCard construction.
+
+### ⚠️ D3's premise was half wrong
+
+The brief reported the package band as *"visibly deeper"* than the material bands. **Measured, every
+band on the page was 33px** — package and material alike. What differed was the **inset**, which
+reads as a deeper, floatier strip. The height needed nothing. The paleness did: at `#e3ebf3 → #d5e1ec`
+the package band was *lighter* than the three material tints, which inverts the hierarchy — the
+package is the parent object. Deepened to `#cfdcea → #bccfe2`, locked as a lightness comparison
+against all three material tints rather than as a hex. Input to **F-AK**; Nick's ruling still pending.
+
+### Measured, before and after — 1440 and 1920, identical at both
+
+| | band height | gap top | gap left | gap right | fold | radius |
+|---|---|---|---|---|---|---|
+| material, **before** | 33 | **13** | **15** | **15** | **yes** | 10/16/10/10 |
+| package, **before** | 33 | **18** | **20** | **20** | no | 16 |
+| **all eight cards, after** | 33 | **0** | **0** | **0** | no | 10 / 16 |
+
+Slot row: label **44 → 28.5px**, gap **9 → 6px**. Letter glyph: `path+circle` → `rect+path`.
+
+D4's folded corner is deleted and the 16px top-right radius went with it — that corner existed only
+to make room for the fold. **F-AT is answered: the note-yellow stays.**
+
+## Part 2 — the legend, and the commission plates
+
+### D6 — the band had to become a component before a legend could render it
+
+The page already had **two** ways of drawing a band head: the material cards went through
+`TypeGlyph`, the package card hand-wrote its own parcel `<svg>`. A legend drawing its own swatch
+would have made three. `CardBand` is the one head now, and the material cards, the package card and
+the legend all mount it — the same law as `StatusDot`'s legends.
+
+`kind` is `ComponentType | "package"`, **not a class name**: the caller says what the card *is*. A
+caller passing `pkgb-t-let` could pass a class that does not exist and get an unstyled band with
+nothing to point at. The parcel is drawn inside `CardBand` rather than added to `TypeGlyph`, because
+that enum is the data model and a package is not a material.
+
+### D7 — three live commission plates, now bare
+
+The dashed rim lives on `.pkgb-plate` and is dropped only by the `bare` variant, so the sweep is
+about which **shape** each call site asks for — `chip`, `disc` and the default `rect` all draw it.
+
+| | was | now |
+|---|---|---|
+| `FootnoteBand` | 64px `disc` under "How these figures are counted" | `bare` |
+| `PackagesBand` | a 44px `chip` **inside the ghost's own dashed border** | `bare` |
+| `PackagesDrawer` | the explainer's `chip`s | `bare` |
+
+The ghost buttons keep their dashed borders — an add affordance is dashed by house convention across
+the app, and that is a different device from a plate saying "artwork pending". Asserted, so the sweep
+cannot creep into it.
+
+**Two things found and not touched:** `PackagesHeroBand` renders a 92px default-shape (dashed) slot
+and is **unreachable** — `SubmissionPackages` names it in two comments and never mounts it, so it is
+not a D7 offender on the served page, and deleting a component is not a dashed sweep's business.
+`QueryAnalytics` imports a **different** `IllustrationSlot` from `./analytics/`, with different props.
+
+## Part 3 — the package drawer
+
+**⚠️ D8's premise, corrected.** Clicking a card was not doing nothing — it opened the **composer**.
+That is an edit the lock refuses on any sent package, and it answers "change this" when the question
+a card provokes is "what *is* this?". The card opens the drawer now; Edit and Duplicate are its
+footer.
+
+It is `PackageDetailDrawer`, not `PackageDrawer`: the existing `PackagesDrawer` is the explainer and
+the two would have differed by **one letter**. Both headers name the other; class prefixes are
+`pkgd-` and `pkgdd-`. It reuses `Form11Drawer`, which owns the scrim, the slide, Escape and
+outside-click.
+
+**⚠️ Two clamps that are not substrings.** `drawerSlots` returns the *whole* opening and the
+stylesheet clamps to two lines — cutting the string in JS bakes a line count into the data, wrong at
+every width but the one it was cut for. The measurement proves it **on a slot that actually
+overflows**; asserting two lines on a short opening would be asserting the content, not the rule.
+
+**⚠️ D13 supersedes the ref.** The ref draws a row per material and all three read *"2 requests from
+6 sent"* — because every material in a package rides the same sends. Identical rows are true, look
+broken, and invite a hunt for a difference that cannot exist. One line.
+
+**⚠️ D17 applied one surface along.** An unresolvable agent is **named** as unrecorded, never
+dropped: dropping the row would make the list disagree with the scorecard's "3 sent" — three counted,
+two shown, nothing saying why.
+
+**⚠️ And my own fixture was wrong before the code was.** The returns test expected `replied: 2` from
+a bare `Rejected` query. `isResponse` is `hasAgentResponded === true || isRequest`, and a bare
+`Rejected` satisfies neither; `recomputeQuery` writes that flag, so a hand-built query without it is
+an input the app cannot produce. Fixed, and the behaviour it surfaced — the repo's known global
+under-count — kept as its own case rather than papered over.
+
+### F-AV — a material drawer: the shape, not the build
+
+Reported as asked, not built. The material record carries `versionName`, `contentDraft`, `wordCount`,
+`contentType`/`fileName`, `notes` and `bookVersionId` — enough for a genuine reader: **the full
+opening** (unclamped, which is the whole difference from the package drawer's two lines), the source
+line, which packages carry it, its version chip, and the writer's own notes. The derivations exist:
+`materialUsage` already answers "in N packages · N requests", and `packagesUsingVersion` names them.
+
+Two questions decide whether it is worth building, and neither is mine:
+
+1. **Does it displace `MaterialModal`, or sit beside it?** The modal is an editor with eleven pieces
+   of state. A reader beside it means two ways into one object; a reader *instead* of it means the
+   same retarget the package card just had — click reads, footer edits. The second is consistent with
+   what Part 3 just did, and it is a bigger change than it sounds.
+2. **What does it add that the card does not?** The package drawer earns its place because a card
+   cannot show three openings or name six holders. A material card already shows its name, source and
+   usage; the drawer would add the *full* text and the notes. That is real, but it is one step, not
+   the three the package drawer collapses.
+
+**Recommendation: yes, but as its own pass**, and shaped as "click reads, footer edits" so the two
+surfaces match. Building it inside this run would have meant retargeting `onOpenMaterial` across four
+call sites with no measurement budget left for it.
+
+### Measured — 1440 and 1920, identical at both
+
+```
+drawer "Standard UK"   score  5 SENT · 2 REPLIED · 2 REQUESTS   writable 0
+  head band            SUBMISSION PACKAGE — the SAME computed blue as the card's
+  COVERING LETTER      Hook-first          v=—
+  SYNOPSIS             One-page            v=—
+  SAMPLE PAGES         Chapters 1-3        v=§ PROLOGUE-FIRST   lines=2  clamped=true
+  who has it           5 holders, each with a StatusDot and a date
+  what came back       5 SENT · 2 REPLIED · 2 REQUESTS      (one line)
+  footer               DUPLICATE & EDIT · ARCHIVE · Close
+  panel                left 972, right gap 52  → hugs the right
+  ✕ over the band's label   false
+dismissal   × ✓   footer Close ✓   Escape ✓   scrim ✓
+```
+
+### ⚠️ THREE FAULTS THE DRAWER FOUND IN THE SHARED PRIMITIVE
+
+None was in this pass's code, and **all three were live on both drawers** — the How-it-works
+explainer has had them since it shipped.
+
+1. **Both drawers opened on the LEFT.** The wrapper carries an inline `right: 0` and no `left`,
+   which should shrink-wrap a fixed box; measured, it resolves to the **full viewport width**, so the
+   flex row's default `flex-start` put the panel at x=24 in a 1440 viewport. The inline `right: 0`
+   read as though it were right-anchored and was not.
+2. **The wrapper swallowed every scrim click.** Full-width at `z-index: 1001` over an overlay at
+   1000 — so every click landed on a `div` with no handler, and the outside-click dismissal was
+   **dead** while the overlay's `onClick` read as perfectly correct. `pointer-events: none` on the
+   wrapper, `auto` on the panel.
+3. **The ✕ sat on the band's `LOCKED` label**, rendering `LOCKE✕`. Found in a screenshot; every
+   per-element assertion passed while the two boxes overlapped.
+
+**⚠️ THE SECOND WAS INVISIBLE UNTIL THE FIRST WAS FIXED.** While the panel sat at x=24 there was no
+"outside" a tester would think to click. And the scrim case that found it was *right about the
+symptom and wrong about the cause* — it clicked a hardcoded x=60 "clear of the panel, on its left",
+which was inside the panel. **A fixed coordinate cannot tell "the scrim is broken" from "the panel is
+not where I assumed."** The click point is derived from the measured box now.
+
+### ⚠️ AND THE HASH GATE HAS A BLIND SPOT — walked into twice in this run
+
+`git checkout --detach $(git rev-parse HEAD)` **run inside the worktree** resolves the *worktree's*
+HEAD, not main's — so it silently re-checked-out the commit it already had. The hash compare then
+**passed**, because served and local were both built from the same stale tree.
+
+**The hash gate proves the deploy matches what you built. It does not prove what you built is what
+you committed.** The close now checks both: the worktree's HEAD against main's tip *by commit*, then
+served against local *by hash*. The tip is read in the main tree and passed in.
+
+Separately, the served hash must be re-read once after the deploy: two comparisons in this run failed
+on the first read and matched on the second — the CDN had not finished swapping. A single strict read
+reports a false mismatch.
+
+### F-BA, answered
+
+The letter glyph was **a question mark by construction** — not a missing map entry, not a failed
+render, not a font fallback. See Part 1 above.
