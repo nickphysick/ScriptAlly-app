@@ -29,11 +29,21 @@ export const FOUNDERS_DOCUMENT_TITLE = "Founding Writers — ScriptAlly";
 /* ══════════════ Hero ══════════════ */
 export const FOUNDERS_EYEBROW = "For founding writers";
 export const FOUNDERS_H1 = "Help build our world.";
+/**
+ * ⚠️ THE COMMAS AROUND "totally free of charge" ARE LOAD-BEARING. Without them the phrase can be
+ * read as attached to "the full version of ScriptAlly" — i.e. as describing the product rather
+ * than the offer, which is a claim this app does not make. A comma is exactly what a well-meaning
+ * edit removes, so a lock asserts the punctuation as well as the sentence.
+ *
+ * ⚠️ AND "We're almost done. The app works." IS DELETED, NOT RELOCATED. The subheading states the
+ * ask; reporting on the state of the build first spent two sentences on the wrong subject and
+ * asked a reader to take reassurance from a claim they cannot check.
+ */
 export const FOUNDERS_LEDE: CopyRun[] = [
-  "We're almost done. The app works. And we're looking for ",
+  "We're looking for ",
   { b: "one hundred writers" },
-  " to bring their querying journey into the full version of ScriptAlly totally free of charge " +
-  "and let us know how it does. Interested?",
+  " to bring their querying journey into the full version of ScriptAlly, totally free of charge, " +
+  "and let us know how it does. Interested? Sign up below and we'll be in touch.",
 ];
 export const FOUNDERS_CTA = "Become a Founding Writer";
 

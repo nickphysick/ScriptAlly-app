@@ -34,6 +34,38 @@ describe("the hero", () => {
     expect(FOUNDERS_CTA).toBe("Become a Founding Writer");
   });
 
+  it("the subheading, verbatim", () => {
+    expect(text(FOUNDERS_LEDE)).toBe(
+      "We're looking for one hundred writers to bring their querying journey into the full " +
+      "version of ScriptAlly, totally free of charge, and let us know how it does. Interested? " +
+      "Sign up below and we'll be in touch.",
+    );
+  });
+
+  /**
+   * ⚠️ THE COMMAS AROUND "totally free of charge" ARE LOAD-BEARING. Without them the phrase can be
+   * read as attached to "the full version of ScriptAlly" — i.e. as describing the product rather
+   * than the offer. This asserts the punctuation rather than trusting the sentence above to carry
+   * it, because a comma is exactly what a well-meaning edit removes.
+   */
+  it("keeps the commas that stop the offer attaching to the product", () => {
+    expect(text(FOUNDERS_LEDE)).toContain(", totally free of charge, and let us know");
+  });
+
+  /** One phrase carries weight, and it is the number of places. */
+  it("marks `one hundred writers`, and nothing else", () => {
+    const bold = FOUNDERS_LEDE.filter((r) => typeof r !== "string" && "b" in r);
+    expect(bold).toEqual([{ b: "one hundred writers" }]);
+  });
+
+  /**
+   * ⚠️ RETIRED AND NOT RELOCATED. "We're almost done. The app works." opened the lede and is gone
+   * — the subheading states the ask rather than the state of the build.
+   */
+  it("no longer reports on the state of the build", () => {
+    expect(text(FOUNDERS_LEDE)).not.toContain("We're almost done");
+    expect(text(FOUNDERS_LEDE)).not.toContain("The app works");
+  });
 });
 
 describe("the deal", () => {
