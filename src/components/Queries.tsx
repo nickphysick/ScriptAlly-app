@@ -6107,20 +6107,7 @@ export const Queries: React.FC<{
                                   </>
                                 );
                                 })()}
-                                {/**
-                                  * ⚠️ THE TWO DERIVED LINES SIT WITH WHAT WENT OUT (Part E, D7).
-                                  * They are statements about the package and the log — the sent
-                                  * strip immediately above is the rest of that story, and putting
-                                  * them among the query's own stat cells would file a fact about
-                                  * the PACKAGE under the query's identity.
-                                  */}
-                                <VersionLines
-                                  query={activeQuery}
-                                  packages={packages}
-                                  materials={versions}
-                                  activities={activities}
-                                  bookVersions={activeBookVersions}
-                                />
+
                                 {/* ⚠️ THE SAMPLE CHIP OPENS ITS EDITOR RATHER THAN TOGGLING, because a
                                     sample is a quantity and a unit, not a yes. Its label carries what
                                     was sent; Remove keeps its own control, since a chip that both
@@ -6195,6 +6182,20 @@ export const Queries: React.FC<{
                                     ))}
                                   </PackageGroup>
                                 ) : null}
+                                {/**
+                                * ⚠️ THE TWO DERIVED LINES SIT WITH WHAT WENT OUT (Part E, D7).
+                                * They are statements about the package and the log — the sent
+                                * strip immediately above is the rest of that story, and putting
+                                * them among the query's own stat cells would file a fact about
+                                * the PACKAGE under the query's identity.
+                                */}
+                                <VersionLines
+                                query={activeQuery}
+                                packages={packages}
+                                materials={versions}
+                                activities={activities}
+                                bookVersions={activeBookVersions}
+                                />
                                 {/* ══ §5 · + ATTACH ═══════════════════════════════════════════════
                                     ⚠️ ALREADY-ADDED TYPES STAY IN THE MENU, MARKED `Added`. The menu
                                     is a complete statement of what a query CAN carry; hiding what is

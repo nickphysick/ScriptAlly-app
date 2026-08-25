@@ -65,6 +65,20 @@ test("the two derived lines, against a seeded match / differs / unrecorded", asy
        * working perfectly. This repo has recorded that trap repeatedly and it has now caught me in
        * three separate packs; writing the expectation from the JSX is what does it every time.
        */
+      /**
+       * ⚠️ THE LINES COME AFTER WHAT WENT OUT, and the first build had them BEFORE it — measured at
+       * 16px ABOVE the strip, so a reader met "Opening read: Prologue-first" before seeing which
+       * package produced it. The ref's order is Package → Materials → Opening read → Manuscript
+       * held, and reading the JSX had told me it was right.
+       */
+      const order = await page.evaluate(() => {
+        const strip = document.querySelector(".qc-attach")?.getBoundingClientRect();
+        const lines = document.querySelector(".qv-lines")?.getBoundingClientRect();
+        return strip && lines ? Math.round(lines.top - strip.bottom) : null;
+      });
+      expect(order, `${c.q}: no strip or no lines to order`).not.toBeNull();
+      expect(order!, `${c.q}: the version lines sit ${-order!}px ABOVE what went out`).toBeGreaterThanOrEqual(0);
+
       const keys = r.lines.map((l) => (l.key ?? "").toLowerCase());
       expect(keys, `${c.q} at ${width}: no version lines`).toContain("opening read");
       expect(keys, `${c.q} at ${width}: no held line`).toContain("manuscript held");
