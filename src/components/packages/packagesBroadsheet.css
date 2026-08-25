@@ -766,12 +766,14 @@
 
 /* ⚠️ THE ONE BLUSH SURFACE ON THE CARD. Tint here says "this is the object's face"; anywhere else on
    the card it would start to mean something a second time. */
-/* ⚠️ `.pkgb-pkgart` / `.pkgb-pkgslot` ARE GONE (D7) — the art panel is deleted and its
-   glyph lives in the card's band head. */
-.pkgb-pkgslot { width: 100%; display: block; }
-.pkgb-pkgslot .pkgb-plate {
-  width: 100%; height: 104px; border-radius: 10px; background: rgba(255, 255, 255, 0.55);
-}
+/* ⚠️ `.pkgb-pkgart` / `.pkgb-pkgslot` ARE GONE (D7) — the art panel is deleted and its glyph lives
+   in the card's band head.
+
+   ⚠️ AND THE `.pkgb-pkgslot` RULES OUTLIVED THIS COMMENT BY ONE COMMIT. The sweep that removed the
+   blocks split on `\n.pkgb-`, so it took `.pkgb-pkgart` and left the two rules sitting directly
+   BENEATH the note announcing their removal — a comment asserting the opposite of the code, which
+   is the fault this repo forbids most plainly. Found by grepping the SERVED stylesheet after the
+   deploy, not by reading the source: `pkgb-pkgslot` came back 1 where the others came back 0. */
 
 .pkgb-pkgbody { padding: 15px 18px 13px; display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
 
