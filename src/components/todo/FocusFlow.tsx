@@ -158,7 +158,7 @@ export interface FocusFlowProps {
    * forget to pass, and the fallback would have to be an inline completion — which is the thing
    * being removed.
    */
-  quickDone: (c: BoardCard) => Promise<void>;
+  quickDone: (c: BoardCard) => Promise<boolean>;
 }
 
 export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast, prefill, mode = "journey", ritual = false, quickDone }) => {
@@ -1327,9 +1327,21 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   async function sweepDone(c: BoardCard) {
     const nowIso = new Date().toISOString();
     if (c.userTaskId) {
-      await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });
-      onToast(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await updateUserTask(c.userTaskId!, { done: false }); onToast("Restored"); } });
-      advanceAfterReceipt(`${c.title} — struck through on Today.`);
+      /**
+       * ⚠️ THE PRIMITIVE, NOT A SECOND COPY OF IT (completion-paths Phase 2). This wrote
+       * `{ done: true, completedAt }` inline and raised its own toast — the same write `quickDone`
+       * makes, from a second place. CLAUDE.md's law: *"an inline completion is how the undo was
+       * bypassed once already. One primitive, four entrances."*
+       *
+       * ⚠️ AND THE ADVANCE IS GATED ON THE WRITE, which it never used to be. `quickDone` CATCHES a
+       * denied write and offers Try again, so advancing regardless would carry the writer past a
+       * task that was never completed — telling them it was done by moving on. The inline version
+       * escaped that only by throwing, which left an unhandled rejection instead.
+       *
+       * The receipt line and the 900ms pause are `FocusFlow`'s own sequencing and stay exactly as
+       * they were; only the write and its toast moved.
+       */
+      if (await quickDone(c)) advanceAfterReceipt(`${c.title} — struck through on Today.`);
       return;
     }
     const q = cardQuery(c);

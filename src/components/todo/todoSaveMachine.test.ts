@@ -123,6 +123,11 @@ describe("save machine P1 — the tick is a write too (no silent no-op)", () => 
     const writer = readFileSync(join(here, "useTaskCommit.tsx"), "utf8");
     const qd = sliceBetween(writer, "async function quickDone", "function writeQueryMaterials");
     expect(qd).toContain("try {\n        await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });");
-    expect(qd).toContain('flash("Couldn’t mark that done — try again?", { label: "Try again", fn: () => quickDone(c) })');
+    /* ⚠️ THE RETRY CLOSURE DISCARDS THE VERDICT NOW (completion-paths Phase 2). `quickDone` reports
+       whether it wrote, so callers can stop advancing past a refused completion — and a toast
+       action returns void, so the retry wraps the call rather than returning it. The law is the one
+       this case was written for and is unchanged: a denied tick surfaces a Try-again toast that
+       calls the primitive again, instead of throwing silently. */
+    expect(qd).toContain('flash("Couldn’t mark that done — try again?", { label: "Try again", fn: () => { void quickDone(c); } })');
   });
 });

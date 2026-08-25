@@ -53,8 +53,9 @@ export interface TaskCommitHost {
 
 export interface TaskCommit {
   commit: (card: BoardCard, v: JourneySendValues, bulkRows: RecordSweepRow[]) => Promise<boolean>;
-  /** the quick ✓'s primitive — the page's row taps reach it; `commit`'s note arm goes through it too */
-  quickDone: (c: BoardCard) => Promise<void>;
+  /** the quick ✓'s primitive — the page's row taps reach it; `commit`'s note arm goes through it
+   *  too. Resolves TRUE only if the record changed; see the note on the function. */
+  quickDone: (c: BoardCard) => Promise<boolean>;
 }
 
 export function useTaskCommit(host: TaskCommitHost): TaskCommit {
@@ -75,39 +76,49 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
     rememberUndo(c.key, fn);
     flash(`Done — “${c.title}”`, { label: "Undo", fn });
   }
-  async function quickDone(c: BoardCard) {
+  /**
+   * ⚠️ IT REPORTS WHETHER IT WROTE (completion-paths Phase 2), and the reason is a bug that would
+   * otherwise have arrived with the first caller that acts on the answer. `quickDone` CATCHES a
+   * denied write and toasts "try again" — so a caller that advances afterwards moves the writer
+   * past a task that was never completed, telling them it was done by moving on. `commitFromPane`
+   * has said the same thing about its own arms all along: every arm reports for itself.
+   *
+   * `false` means NOTHING WAS WRITTEN — a kind with no arm, a missing query, a refused write, or a
+   * duplicate-send the writer declined. `true` means the record changed and a toast is up.
+   */
+  async function quickDone(c: BoardCard): Promise<boolean> {
     const nowIso = new Date().toISOString();
     /* ⚠️ WHICH WRITE PATH A KIND TAKES IS `completionVia` (tasks-consolidation, extraction). It
        was an if-ladder here, so "which kinds can be ticked at all" was answerable only by reading
        this function to its end — and the row needs that answer BEFORE it draws a tick. */
     const via = completionVia(c);
-    if (via === "none") return;
+    if (via === "none") return false;
     if (via === "user-task") {
       // save-and-today P1 — ticking is a write like any other: it must not silently no-op. On a
       // denied/dropped write, surface a Try-again toast rather than the old unhandled throw.
       try {
         await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });
       } catch {
-        flash("Couldn’t mark that done — try again?", { label: "Try again", fn: () => quickDone(c) });
-        return;
+        flash("Couldn’t mark that done — try again?", { label: "Try again", fn: () => { void quickDone(c); } });
+        return false;
       }
       const undo = () => updateUserTask(c.userTaskId!, { done: false });
       doneToast(c, async () => { await undo(); flash("Restored"); });
-      return;
+      return true;
     }
     const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
-    if (!q) return;
+    if (!q) return false;
     if (via === "close-query") {
       const prev = q.status as QueryStatus;
       await updateQueryStatus(q.id, QueryStatus.NO_RESPONSE, "Closed as no response from the quick rail");
       const undo = () => undoQueryStatus(q.id, prev, QueryStatus.NO_RESPONSE);
       doneToast(c, async () => { await undo(); flash("Restored"); });
-      return;
+      return true;
     }
     if (via === "log-nudge") {
       const p = quickNudgePayload({ cardKey: c.key, label: c.title, queryId: q.id, method: q.sendMethod, nowIso });
       const r = await logNudge(...nudgeWriteArgs(p, new Date().toISOString()));
-      if (!r.success) { flash(r.error || "Couldn’t log the nudge."); return; }
+      if (!r.success) { flash(r.error || "Couldn’t log the nudge."); return false; }
       // deleteActivity on a NUDGE_SENT fully unwinds it (twins + nudgeDate fields + the flag).
       const undo = async () => {
         const acts = activitiesRef.current
@@ -116,14 +127,14 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
         if (acts[0]?.id) await deleteActivity(acts[0].id);
       };
       doneToast(c, async () => { await undo(); flash("Restored"); });
-      return;
+      return true;
     }
     const action = getPrimaryAction(q.status as QueryStatus);
-    if (action.kind !== "mark-sent") return;
+    if (action.kind !== "mark-sent") return false;
     // B3 — the soft duplicate-send guard in the quick-✓'s grammar (the styled ConfirmAsk;
     // decline writes nothing, the card stays). R&R resubmissions are never guarded.
     const prior = priorSameTypeSend(activitiesRef.current, q.id, action.target as QueryStatus, action.markKind === "resubmit");
-    if (prior && !(await confirmAsk(duplicateSendPrompt(action.target as QueryStatus, c.who, prior), { confirmLabel: "Send again", cancelLabel: "Cancel" }))) return;
+    if (prior && !(await confirmAsk(duplicateSendPrompt(action.target as QueryStatus, c.who, prior), { confirmLabel: "Send again", cancelLabel: "Cancel" }))) return false;
     const p = quickSendPayload({ cardKey: c.key, label: c.title, taskType: c.taskType, queryId: q.id, targetStatus: action.target as QueryStatus, isResubmit: action.markKind === "resubmit", method: q.sendMethod, nowIso });
     const prev = q.status as QueryStatus;
     await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path
@@ -134,6 +145,7 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
        what was just logged is a good affordance and it belongs to whatever surface next draws a
        receipt — designed for that surface, not carried forward as an orphan. */
     doneToast(c, async () => { await undo(); flash("Restored"); });
+    return true;
   }
   async function writeQueryMaterials(card: BoardCard, rows: MaterialRow[]): Promise<(() => Promise<void>) | null> {
     const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
@@ -324,9 +336,9 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
       /* ⚠️ `completionVia` DECIDES WHETHER A TICK CAN WRITE AT ALL, and it is asked rather than
          assumed: a kind it answers "none" for has nothing to record, so there is nothing to advance
          past. `quickDone` surfaces its own failure toast where the write is attempted and denied. */
-      if (completionVia(card) === "none") return false;
-      await quickDone(card);
-      return true;
+      /* ⚠️ THE PRIMITIVE'S OWN ANSWER, not an assumption. This used to run `quickDone` and return
+         `true` regardless, so a refused write advanced the pane and reported success by moving. */
+      return quickDone(card);
     }
     if (kind === "fix") return commitFixFromPane(card, v);
     if (kind === "materials") return commitMaterialsFromPane(card, v);
