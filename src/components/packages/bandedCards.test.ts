@@ -144,3 +144,58 @@ describe("F-BA — the letter mark is an envelope, not a question mark", () => {
     }
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("D6 — the legend renders the real band", () => {
+  const legend = readFileSync(join(root, "src/components/packages/CardBand.tsx"), "utf8");
+  const mats = readFileSync(join(root, "src/components/packages/MaterialsBand.tsx"), "utf8");
+  const pkgs = readFileSync(join(root, "src/components/packages/PackagesBand.tsx"), "utf8");
+  const strip = (x: string) => x.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  it("the legend mounts CardBand rather than drawing a swatch", () => {
+    /* Same law as StatusDot's legends: a key that reproduces its subject goes on being right about
+       a band that has since changed. */
+    expect(strip(legend)).toMatch(/<CardBand kind=\{k\}/);
+    expect(strip(legend)).not.toMatch(/pkgb-legcell[\s\S]{0,200}background/);
+  });
+
+  it("names all four kinds, parent first", () => {
+    expect(strip(legend)).toContain('"package", ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS, ComponentType.SAMPLE_PAGES');
+  });
+
+  it("⚠️ and BOTH card surfaces render the same component — there is one band head now", () => {
+    /* The package card used to hand-write its own parcel <svg> while the material cards went
+       through TypeGlyph: two implementations of one head, before a legend asked for a third. */
+    expect(strip(mats)).toContain("<CardBand kind={sh.type}");
+    expect(strip(pkgs)).toContain('<CardBand kind="package"');
+    expect(strip(pkgs), "the package head still hand-draws a parcel").not.toContain("M16 4 28 10v12L16 28 4 22V10z");
+  });
+
+  it("the tint map lives in one place", () => {
+    expect(strip(mats), "MaterialsBand keeps a local copy of the tint map").not.toContain("TYPE_BAND");
+    expect(strip(mats)).toContain("BAND_CLASS[sh.type]");
+  });
+});
+
+describe("D7 — no dashed placeholder on a user-facing slot", () => {
+  const strip = (x: string) => x.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  /**
+   * ⚠️ THE DASHED RIM LIVES ON `.pkgb-plate` AND IS DROPPED BY `--bare` ONLY. So the check is not
+   * "does the file say dashed" — it is which SHAPE each live call site asks for. A `chip`, a `disc`
+   * or the default `rect` all draw the commission border.
+   */
+  for (const f of ["FootnoteBand", "PackagesBand", "PackagesDrawer"]) {
+    it(`${f} renders no plated slot`, () => {
+      const src = strip(readFileSync(join(root, `src/components/packages/${f}.tsx`), "utf8"));
+      for (const m of src.matchAll(/<IllustrationSlot([^>]*)>/g)) {
+        expect(m[1], `${f} draws a plated slot: ${m[1].trim()}`).toMatch(/shape="bare"/);
+      }
+    });
+  }
+
+  it("the ghost buttons keep their own dashed border — a different device", () => {
+    /* An add affordance is dashed by house convention across the app (the versions panel, the
+       materials ghost). What D7 retires is the COMMISSION plate, which says "artwork pending". */
+    expect(decls).toMatch(/\.pkgb-msheetadd \{[^}]*dashed/);
+  });
+});

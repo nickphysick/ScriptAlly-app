@@ -1046,3 +1046,22 @@
   color: rgba(58, 28, 20, 0.62);
 }
 .t-edn .pkgb-hnote { color: #6b6b6b; }
+
+/**
+ * ⚠️ THE LEGEND (D6) — four real bands, at their real size, under the shelf they explain.
+ *
+ * Each cell is a stub CARD: the same frame, the same clip, the same radius, so the band inside it
+ * is the identical box the cards above carry. Anything that styled the band differently here would
+ * be a reproduction wearing the component's name.
+ */
+.pkgb-legend {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-top: 18px; padding-top: 15px;
+  border-top: 1px solid var(--pkgo-hairline-soft);
+}
+.pkgb-legcell {
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 8px;
+  overflow: hidden;
+  min-width: 152px;
+}

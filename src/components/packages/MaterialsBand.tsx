@@ -23,7 +23,7 @@
  */
 import { MATERIAL_LABEL } from "../../lib/manuscriptPackages";
 import { ArchivedToggle, ArchivedRow, ArchivedSection } from "./ArchivedRow";
-import { TypeGlyph } from "./TypeGlyph";
+import { CardBand, BandLegend, BAND_CLASS } from "./CardBand";
 import React from "react";
 import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../../types";
 import type { BookVersion } from "../../types";
@@ -34,11 +34,9 @@ import "./packagesBroadsheet.css";
 
 /** ⚠️ THE BAND CLASS PER TYPE (D4) — colour IS the type, which is what makes the shelf scannable
  *  without reading it. The four sets are page-local pending F-AK. */
-const TYPE_BAND: Record<string, string> = {
-  [ComponentType.QUERY_LETTER]: "pkgb-t-let",
-  [ComponentType.SYNOPSIS]: "pkgb-t-syn",
-  [ComponentType.SAMPLE_PAGES]: "pkgb-t-sam",
-};
+/* ⚠️ `TYPE_BAND` IS GONE — the map moved to `CardBand.tsx` as `BAND_CLASS`, so the legend, the
+   material cards and the package card all read ONE table. A local copy here is how a legend comes
+   to describe a band nobody renders. */
 
 /* ⚠️ `TYPE_ICON` IS GONE (D4/D12) — it named the icons for a 34px dashed `IllustrationSlot`
    watermark, and the band head draws a solid `TypeGlyph` at 16px instead. The written brief it
@@ -102,7 +100,7 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
         {sheets.map((sh) => (
           /* ⚠️ THE WATERMARK IS THE TYPE, FAINT AND BEHIND THE WORDS. It repeats the eyebrow on
              purpose — the eyebrow is for reading, the mark is for scanning a shelf at a glance. */
-          <div key={sh.id} className={`pkgb-msheet ${TYPE_BAND[sh.type] ?? ""}`} data-material={sh.id} data-type={sh.type}>
+          <div key={sh.id} className={`pkgb-msheet ${BAND_CLASS[sh.type] ?? ""}`} data-material={sh.id} data-type={sh.type}>
             {/**
               * ⚠️ THE BAND HEAD CARRIES THE TYPE (D4/D5), so the body no longer repeats it. The card
               * used to say it three times over — a faint watermark, a mono eyebrow, and the colour
@@ -112,10 +110,7 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
               * ⚠️ AND THE MARK IS SOLID (D12). It was a 34px `IllustrationSlot` — a dashed
               * commission plate on a user-facing card. At 16px in a band head it is an icon.
               */}
-            <div className="pkgb-cardhead">
-              <TypeGlyph type={sh.type} size={16} />
-              <span className="pkgb-chlbl">{sh.typeLabel}</span>
-            </div>
+            <CardBand kind={sh.type} label={sh.typeLabel} />
             {/* ⚠️ THE BODY CARRIES THE INSET, NOT THE CARD (D2). The band is a direct child of the
                 card so it can reach all three edges; everything below it is padded here instead. */}
             <div className="pkgb-mbody">
@@ -164,6 +159,12 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
           <span className="pkgb-gs">Letter, synopsis or sample</span>
         </button>
       </div>
+      {/**
+        * ⚠️ THE LEGEND RENDERS THE REAL BAND (D6), not a swatch drawn to look like one. Same law as
+        * `StatusDot`'s legends: a key that reproduces its subject goes on being right about a thing
+        * that has since changed. It sits UNDER the shelf because it explains what is above it.
+        */}
+      <BandLegend />
       <ArchivedSection show={showArchived} n={archived.length}>
         {archived.map((v) => (
           <ArchivedRow key={v.id} name={v.versionName} meta={MATERIAL_LABEL[v.componentType]}

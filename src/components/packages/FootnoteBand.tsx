@@ -55,7 +55,10 @@ export const FootnoteBand: React.FC = () => (
     <div className="pkgb-hownote">
       {CELLS.map((c) => (
         <div key={c.id} className="pkgb-hncell">
-          <IllustrationSlot id={c.id} icon={c.icon} px={34} shape="disc" width={64} height={64} />
+          {/* ⚠️ `bare` — NO DASHED RIM (D7). The plate's dashed border says "artwork pending", which is
+                 true of the inventory and not of a page a writer is reading. The mark stays; the
+                 commission chrome does not. */}
+            <IllustrationSlot id={c.id} icon={c.icon} px={34} shape="bare" width={64} height={64} />
           <div>
             <div className={`pkgb-hnt pkgb-dir--${c.direction}`}>
               {c.direction === "out" ? "→" : "←"} {c.title}

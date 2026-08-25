@@ -21,6 +21,7 @@ import { packageTiles, tileFooter, composition } from "../../lib/packagesOvervie
 import { isPackageLocked } from "../../lib/packageMetrics";
 import { packageStamp } from "../../lib/packageTracking";
 import { IllustrationSlot } from "./IllustrationSlot";
+import { CardBand } from "./CardBand";
 import "./packagesBroadsheet.css";
 
 export interface PackagesBandProps {
@@ -124,14 +125,11 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
                 * commission slot; at 16px this is an icon. The mockups and the artist's inventory
                 * keep dashed, the served page does not.
                 */}
-              <div className="pkgb-cardhead">
-                <svg viewBox="0 0 32 32" aria-hidden="true">
-                  <path d="M16 4 28 10v12L16 28 4 22V10z" />
-                  <path d="M16 15 28 10M16 15v13M16 15 4 10" />
-                </svg>
-                <span className="pkgb-chlbl">Submission package</span>
-                {pkg && isPackageLocked(pkg) && <span className="pkgb-chrt">Locked</span>}
-              </div>
+              {/* ⚠️ THE SAME COMPONENT THE MATERIAL CARDS AND THE LEGEND RENDER. This head used to
+                  hand-write its own parcel `<svg>` while the material cards went through
+                  `TypeGlyph` — two ways of drawing one band head, before a legend asked for a
+                  third. */}
+              <CardBand kind="package" right={pkg && isPackageLocked(pkg) ? "Locked" : undefined} />
               <div className="pkgb-pkgbody">
                 <h3 className="pkgb-pkgname">
                   <button type="button" className="pkgb-sopen" onClick={() => onOpenPackage(t.id)}>
@@ -213,7 +211,10 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
           * (D10), or a populated page stops reading as populated.
           */}
         <button type="button" className="pkgb-ghostpkg" onClick={onNewPackage}>
-          <IllustrationSlot id="pkg-ghost" icon="parcelOpen" px={44} shape="chip" />
+          {/* ⚠️ `bare` — NO DASHED RIM (D7). The plate's dashed border says "artwork pending", which is
+                 true of the inventory and not of a page a writer is reading. The mark stays; the
+                 commission chrome does not. */}
+            <IllustrationSlot id="pkg-ghost" icon="parcelOpen" px={44} shape="bare" />
           <span className="pkgb-gt">Build another package</span>
           <span className="pkgb-gs">A different letter, a different synopsis.</span>
         </button>

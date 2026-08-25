@@ -131,7 +131,10 @@ export const PackagesDrawer: React.FC<PackagesDrawerProps> = ({ open, onClose })
               {/* ⚠️ DASHED PLACEHOLDER, UNCHANGED IN NATURE (D9). Same three subjects as the
                   first-visit strip — one asset, two placements. */}
               <span className="pkgd-art">
-                <IllustrationSlot icon={s.icon} px={DRAWER_MARK_PX} shape="chip" id={s.slot} />
+                {/* ⚠️ `bare` — NO DASHED RIM (D7). The plate's dashed border says "artwork pending", which is
+                 true of the inventory and not of a page a writer is reading. The mark stays; the
+                 commission chrome does not. */}
+            <IllustrationSlot icon={s.icon} px={DRAWER_MARK_PX} shape="bare" id={s.slot} />
               </span>
               <h4>{s.title}</h4>
               <p>{s.body}</p>
