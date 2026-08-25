@@ -43,7 +43,13 @@ import {
 } from "./landingCopy";
 import { MarketingIllustration } from "./marketingMarks";
 import { FoundingPanel } from "./FoundingPanel";
-import heroIllustration from "../assets/marketing/hero-illustration-placeholder.png";
+/* ⚠️ MATTED, NOT NATIVELY TRANSPARENT — see CLAUDE.md. The supplied file was RGB on near-white
+   and its alpha was derived by luminance: 45.5% fully clear, 25.7% fully opaque, 28.8% PARTIAL,
+   which is the signature of a matte rather than an export. Verified not to fringe on this page's
+   cream at render size and at 2.6x, and the partial alpha helps here because the drawing's pale
+   sheets let the ground through. It is one dark background away from failing; a proper transparent
+   export is the fix, not more matting. */
+import heroIllustration from "../assets/marketing/hero-stack-plane.png";
 
 /* ⚠️ THE HEADLINE IS ONE STRING AGAIN. It was split at its last space so the final word and the
    ticked box could be bound into one unbreakable unit — `.mk-tickword`, `STATEMENT_HEAD` and
@@ -80,21 +86,28 @@ export const Hero: React.FC<{
           </p>
         </div>
 
-        <div className="mk-turn mk-r mk-r4">
-          <span className="mk-turn-b">{HERO_TURN_B}</span>
-        </div>
-
-        {/* ⚠️ THE ACTIONS ROW IS GONE, BOTH HALVES. `Start tracking — it's free` left because
-            pre-launch there is nothing self-serve behind it, and `Learn more` left with the row it
-            shared — an in-page anchor to `#pulse` competing with a real offer three inches below
-            it. The panel is the hero's only action now. */}
-        <div className="mk-r mk-r4">
-          <FoundingPanel onNavigate={onNavigate} />
-        </div>
       </div>
 
-      {/* `finished` is the slot primitive's own prop — the component is not forked, and the
-          About page's vision plates keep every piece of chrome this drops. */}
+      {/* ⚠️ THE TURN AND THE PANEL ARE GRID ROWS OF THEIR OWN NOW, not children of the copy
+          column — which is what lets the artwork SPAN them. An item can only be spanned by a
+          sibling in the same grid; nested inside `.mk-hcopy` they were invisible to the row
+          machinery, and the art could reach at most the copy row. */}
+      <div className="mk-turn mk-r mk-r4">
+        <span className="mk-turn-b">{HERO_TURN_B}</span>
+      </div>
+
+      {/* ⚠️ THE ACTIONS ROW IS GONE, BOTH HALVES. `Start tracking — it's free` left because
+          pre-launch there is nothing self-serve behind it, and `Learn more` left with the row it
+          shared — an in-page anchor to `#pulse` competing with a real offer three inches below
+          it. The panel is the hero's only action now. */}
+      <div className="mk-r mk-r4">
+        <FoundingPanel onNavigate={onNavigate} />
+      </div>
+
+      {/* ⚠️ THE ARTWORK SPANS ROWS 2–4 AND PASSES BEHIND THE WORDS. Grid items may share cells;
+          the statement and the copy sit at `z-index: 2`, the plate at `1`. `finished` is the slot
+          primitive's own prop — the component is not forked, and the About page's vision plates
+          keep every piece of chrome this drops. */}
       <MarketingIllustration slot="landingHero" finished>
         <img className="mk-illoart" src={heroIllustration} alt="" />
       </MarketingIllustration>

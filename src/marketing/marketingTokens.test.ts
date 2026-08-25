@@ -248,10 +248,32 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
     expect(rule(".mk-heroinner")).not.toMatch(/align-items:\s*center/);
   });
 
-  it("nothing in the hero fakes the layout with a negative margin", () => {
-    for (const sel of [".mk-heroinner", ".mk-hcopy", ".mk-hero .mk-illo--tall", ".mk-statement"]) {
+  /**
+   * ⚠️ RETARGET, AND THE CLAIM NARROWS RATHER THAN RELAXES. The rule was "no negative margin
+   * anywhere in the hero", written when one would only ever have been faking an alignment the
+   * layout should produce. The artwork now carries `margin-right: -56px` DELIBERATELY: it is the
+   * bleed itself, cancelling the container's own 56px gutter so the plate reaches the page edge.
+   * That is the effect, not a substitute for it.
+   *
+   * So the text items keep the absolute prohibition, and the plate is allowed exactly one — a
+   * right margin that equals the gutter it cancels. A different value, or a negative margin on any
+   * other side, is back to faking.
+   */
+  it("no text item in the hero fakes the layout with a negative margin", () => {
+    for (const sel of [".mk-heroinner", ".mk-hcopy", ".mk-statement", ".mk-turn"]) {
       expect(rule(sel), `${sel} uses no negative margin`).not.toMatch(/margin[^:]*:\s*[^;]*-\d/);
     }
+  });
+
+  it("…and the plate's one negative margin is exactly the gutter it cancels", () => {
+    const art = rule(".mk-hero .mk-illo--tall");
+    const gutter = /padding:\s*0\s+(\d+)px/.exec(rule(".mk-heroinner"));
+    expect(gutter, ".mk-heroinner declares a horizontal padding").toBeTruthy();
+    const m = /margin-right:\s*-(\d+)px/.exec(art);
+    expect(m, "the plate declares a negative right margin").toBeTruthy();
+    expect(m![1], "the bleed must equal the gutter, or it is not a bleed").toBe(gutter![1]);
+    /* …and nothing else negative on it. */
+    expect(art).not.toMatch(/margin-(top|bottom|left)[^:]*:\s*-\d/);
   });
 
   /**
@@ -271,11 +293,23 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
    * never overlaps: leaving a two-column template on a one-column grid pushes every `"x x"` row
    * into an implicit SECOND column, and nothing errors.
    */
-  it("the stacked hero collapses its areas as well as its columns", () => {
+  /**
+   * ⚠️ RETARGET, SAME LAW: the hero places every item by hand now, because the artwork spans rows
+   * and a named area cannot overlap another item's. So the thing that must collapse with the
+   * columns is the PLACEMENTS, not a template. An item left at `grid-column: 2` on a one-column
+   * grid is pushed into an implicit second column and the grid grows sideways in silence — the
+   * same auto-placement trap, reached by a different route.
+   */
+  it("the stacked hero collapses its placements as well as its columns", () => {
     const block = /@media \(max-width: 900px\) \{([\s\S]*?)\n\}/.exec(marketing);
     expect(block, "the 900px block exists").toBeTruthy();
     expect(block![1]).toMatch(/grid-template-columns:\s*1fr/);
-    expect(block![1]).toMatch(/grid-template-areas:\s*"eye"\s*"head"\s*"copy"\s*"art"/);
+    /* Every item the two-column grid places by hand is put back into column 1. */
+    for (const sel of [".mk-statement", ".mk-hcopy", ".mk-turn", ".mk-found"]) {
+      expect(block![1], `${sel} returns to column 1 when stacked`).toContain(sel);
+    }
+    /* And the areas are gone entirely — a stale template is worse than none. */
+    expect(marketing).not.toContain("grid-template-areas");
   });
 });
 

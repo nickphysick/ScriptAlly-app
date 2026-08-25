@@ -387,7 +387,6 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   .mk-scope { --mk-nav-h: 129px; }
 }
 
-
 /* ⚠️ EVERYTHING FROM THE SECTION BREAK DOWN, FOOTER INCLUDED. One wrapper, one token, no
    hairline — see the note on the tokens. Nothing inside this may repaint the ground. */
 .mk-lower { background: var(--mk-lower); }
@@ -401,41 +400,37 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 .mk-hero { position: relative; padding: 84px 0 64px; min-height: 70vh; }
 .mk-heroinner {
   max-width: 1300px; margin: 0 auto; padding: 0 56px;
-  /* ⚠️ THE STATEMENT IS ITS OWN FULL-WIDTH ROW NOW, and that changes what constrains it. For four
-     passes the headline was a child of the copy column, so the column's width was the measure and
-     the `1.1fr 1fr` ratio was load-bearing for exactly that reason — it bought ~35px of headroom
-     and turned a squeak into room. Spanning both columns, the headline is measured against the
-     CONTAINER (1188px inner at 1440, against a 585px column), so the ratio no longer decides
-     whether it fits; it only decides how the copy and the artwork share the row beneath.
-     ⚠️ THE REF'S THREE-AREA GRID IS REPRODUCED NOW, and the note that used to say it deliberately
-     was not is retired with it. Column 1 no longer computes identically either way — the point of
-     the areas is that two rows span both columns. */
+  /* ⚠️ EXPLICIT ROW/COLUMN PLACEMENTS, NOT AREAS — because the artwork now SPANS rows and a named
+     area cannot overlap another item's. Five rows: eyebrow, statement, copy, turn, panel; the
+     plate is placed across 2–4 in column 2 and shares those cells with the words.
+     ⚠️ GRID ITEMS MAY OVERLAP, AND THAT IS THE MECHANISM HERE. Auto-placement never overlaps, so
+     every item in this grid is placed by hand; the moment one is not, it is pushed into an
+     implicit row and the layout silently grows downward. */
   display: grid;
   grid-template-columns: 1.06fr 1fr;
-  grid-template-areas:
-    "eye  eye"
-    "head head"
-    "copy art";
   column-gap: 64px;
-  /* ⚠️ THIS IS A ROW DEFAULT, NOT A DECISION ABOUT EVERY ITEM. Everything hangs from the top of
-     its row; the artwork overrides it on ITSELF (`align-self: center`), which is where per-item
-     alignment belongs. Setting `align-items: center` here to centre the art would also centre the
-     copy column against its own row and move nothing else usefully. */
+  /* ⚠️ A ROW DEFAULT, NOT A DECISION ABOUT EVERY ITEM. Everything hangs from the top of its row;
+     the artwork overrides it on ITSELF, which is where per-item alignment belongs. */
   align-items: start;
 }
-.mk-hero .mk-eyebrow { grid-area: eye; }
-/* ⚠️ STACKING, AND BOTH HALVES MATTER. The copy and the headline sit above the artwork so that if
-   the plate ever grows tall enough to reach them it passes BEHIND the words rather than over
-   them. Measured against the ref's own geometry it does not currently reach: the statement's
-   bottom edge sits ~86px above the artwork's top at 1440. The layering is the guarantee, not the
-   effect — remove it and a taller asset silently prints over the headline. */
-.mk-hcopy { grid-area: copy; position: relative; z-index: 2; padding-top: 26px; }
-.mk-hcopy { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+
+/* ⚠️ STACKING, AND BOTH HALVES MATTER. The words sit above the plate so that where it reaches them
+   it passes BEHIND rather than over. It now genuinely does reach them — the plate spans this row —
+   so the layering is doing work rather than standing guard. */
+/* ⚠️ ONE RULE, NOT TWO. `.mk-hcopy` was declared twice — adjacent, no property in common, so
+   nothing was silently winning — but this pass touches the selector and therefore owns every
+   declaration of it. Two rules for one element is how the fault that cost sixty-five rules in the
+   ref begins. */
+.mk-hcopy {
+  grid-row: 3; grid-column: 1;
+  position: relative; z-index: 2; padding-top: 26px;
+  display: flex; flex-direction: column; justify-content: center; min-width: 0;
+}
 .mk-eyebrow {
   font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: .22em;
   text-transform: uppercase; color: var(--mk-label);
 }
-.mk-hero .mk-eyebrow { margin-bottom: 30px; }
+.mk-hero .mk-eyebrow { grid-row: 1; grid-column: 1 / -1; margin-bottom: 30px; }
 .mk-statement {
   font-family: "Playfair Display", Georgia, serif; font-weight: 700;
   /* ⚠️ .96 IS SAFE FOR THIS STRING AND WOULD NOT BE FOR EVERY STRING. "You've written a book."
@@ -451,7 +446,7 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
      does not wrap the text, it lets it spill out of its own box. */
   font-size: var(--mk-hero-h1); line-height: 1.02; letter-spacing: -.022em;
   color: var(--mk-nearblack); margin: 0;
-  grid-area: head; position: relative; z-index: 2;
+  grid-row: 2; grid-column: 1 / -1; position: relative; z-index: 2;
 }
 
 /* The ticked box that closes the statement.
@@ -728,17 +723,20 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 
 @media (max-width: 900px) {
   .mk-scope { --mk-hero-h1: clamp(2.4rem, 10vw, 3.6rem); }
-  /* ⚠️ THE AREAS COLLAPSE WITH THE COLUMNS. Leaving a two-column template on a one-column grid
-     silently pushes every `"x  x"` row into an implicit SECOND column, which is the auto-placement
-     trap this repo already records — the grid grows sideways and nothing errors. */
+  /* ⚠️ EVERY PLACEMENT COLLAPSES WITH THE COLUMNS, NOT JUST THE TEMPLATE. The two-column grid
+     places items by hand, so a one-column grid has to unplace them by hand too — an item left at
+     `grid-column: 2` is pushed into an implicit SECOND column and the grid grows sideways in
+     silence, which is the auto-placement trap this repo already records. The areas that used to
+     do this job are gone; these are their replacement, and they must stay in step with the
+     placements above. */
   .mk-heroinner {
     grid-template-columns: 1fr;
-    grid-template-areas: "eye" "head" "copy" "art";
     gap: 34px; padding: 40px 26px 0;
   }
+  .mk-hero .mk-eyebrow, .mk-statement, .mk-hcopy, .mk-turn, .mk-found { grid-column: 1; }
   .mk-hcopy { padding-top: 0; }
+  /* The plate's own stacked override lives beside its base rule — see the note there. */
 }
-
 
 /* ── Features: one parchment band, centred header, seven alternating hairline rows ── */
 /* ⚠️ THE TOP PADDING HOLDS THE ECG INSIDE THE BAND. The trace is 150px tall and centred on the
@@ -1371,7 +1369,6 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   font-size: 12.5px; line-height: 1.6; color: var(--mk-muted); text-align: center;
 }
 
-
 @media (max-width: 760px) {
   .mk-pricehead { padding: 36px 26px 4px; }
   .mk-pricehead h1 { font-size: 32px; }
@@ -1688,15 +1685,39 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
      than its row extends past it top and bottom by itself; an offset fakes the same picture and
      then has to be re-tuned every time the copy column's height changes, which it does on every
      copy edit. */
-  grid-area: art; align-self: center; position: relative; z-index: 1;
-  height: clamp(300px, 42vh, 430px); min-height: 0; padding: 12px;
-  /* ⚠️ THE EXPLICIT ROW IS WHAT MAKES THE IMAGE'S PERCENTAGE BOUNDS RESOLVE. `.mk-illo` is a grid
-     whose implicit row is `auto`, i.e. content-sized — and a percentage height or max-height
-     against an auto row is INDEFINITE, so the browser drops it. Both `height: 100%` and
-     `max-height: 100%` were therefore ignored in turn, the image took its intrinsic ratio off the
-     resolved width, and `overflow: hidden` cropped ~70px of artwork without a word. A definite
-     row makes the bound mean something. */
-  grid-template-rows: minmax(0, 1fr);
+  /* ⚠️ ROWS 2–4, COLUMN 2, AND IT SHARES THOSE CELLS WITH THE WORDS. `grid-row: 2 / 5` is rows 2,
+     3 and 4 — statement, copy, turn. The statement spans both columns in row 2 and this sits
+     under it at `z-index: 1`, which is the overlap the design asks for and the reason every item
+     in this grid is placed by hand.
+     ⚠️ AND THE BLEED IS A NEGATIVE MARGIN THAT IS NOT FAKING ANYTHING. Elsewhere in this file a
+     negative margin is forbidden because it fakes an alignment the layout should produce; here it
+     is the effect itself — the plate is meant to run past the container's own 56px gutter to the
+     page edge, and `margin-right: -56px` is exactly the gutter it cancels. `justify-content:
+     flex-end` is what pins the artwork to that edge rather than centring it in the surplus. */
+  grid-row: 2 / 5; grid-column: 2; align-self: center;
+  position: relative; z-index: 1;
+  display: flex; justify-content: flex-end; align-items: center;
+  margin-right: -56px;
+  height: auto; min-height: 0; padding: 0;
+  /* ⚠️ NO `grid-template-rows` AND NO PERCENTAGE BOUNDS ANY MORE. This plate was a grid whose
+     definite row existed so the image's `max-height: 100%` could resolve; it is a flex row now
+     and the image is sized by WIDTH alone, so there is no percentage left to resolve and the
+     row would be describing a layout that no longer exists. */
+}
+
+/* ⚠️ THIS BLOCK SITS IMMEDIATELY AFTER THE RULE IT OVERRIDES, AND IT HAS TO. Both selectors are
+   0-2-0, so SOURCE ORDER decides — placed with the hero's other stacked rules a thousand lines
+   earlier it LOST to the base, and the plate kept `grid-row: 2 / 5`, `grid-column: 2` and its
+   negative margin on a one-column grid. Measured: 30px of real horizontal overflow at 390 from a
+   media query that read perfectly correctly. A media query confers no specificity of its own.
+   ⚠️ AND THE BLEED MUST BE UNDONE, NOT INHERITED. `margin-right: -56px` cancels the two-column
+   layout's own 56px gutter; stacked, the gutter is 26px, so the same margin over-cancels by 30.
+   The art also stops spanning rows it no longer shares and returns to the flow beneath the copy. */
+@media (max-width: 900px) {
+  .mk-hero .mk-illo--tall {
+    grid-row: auto; grid-column: 1;
+    margin-right: 0; justify-content: center; margin-top: 24px;
+  }
 }
 .mk-illo--tall svg { width: min(56%, 300px); stroke-width: 1.4; opacity: .62; }
 /* ⚠️ `--done` DROPS THE GROUND AS WELL AS THE RIM AND THE CAPTION. All three are placeholder
@@ -1720,10 +1741,11 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    what the ref asks for; `max-height: 100%` is what stops a short plate cropping it, and it only
    resolves because the plate declares a definite grid row — see the note there. Both bounds are
    load-bearing: the width sets the size, the height stops the crop. */
-.mk-illoart {
-  width: 92%; max-width: 400px; height: auto; max-height: 100%;
-  object-fit: contain; display: block;
-}
+/* ⚠️ WIDTH-DRIVEN, AND THE HEIGHT BOUND IS GONE WITH THE PLATE THAT GAVE IT MEANING. `max-height:
+   100%` only ever resolved because the old plate declared a definite grid row; the plate is a flex
+   row now, the image sets its own height from its ratio, and a percentage bound here would be
+   indefinite and silently dropped — which is the fault this file already records. */
+.mk-illoart { width: 100%; max-width: 486px; height: auto; display: block; }
 .mk-illo svg {
   width: 190px; max-width: 100%; height: auto; fill: none;
   stroke: var(--mk-burg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; opacity: .55;
