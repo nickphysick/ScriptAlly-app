@@ -63,7 +63,7 @@ const SEND: TaskPaneJourney = {
          fault: the rows would keep rendering after the declaration stopped naming them. */
       questions={requirementsFor("send").map((r) => ({
         id: r.id, field: r.field, label: r.label,
-        answered: r.isAnswered({ unit: true, when: false, expect: false, remind: false, rows: false }),
+        answered: r.isAnswered({ unit: true, when: false, expect: false, remind: false, rows: false, holdday: false, checkin: false, again: false }),
       }))}
       openId="s-when"
       value={{
@@ -71,6 +71,7 @@ const SEND: TaskPaneJourney = {
         /* ⚠️ THE FIXTURE OPENS UNCHOSEN, like the real form. A fixture with answers in it would
            render every pill lit and quietly assert the opposite of Phase 3's rule. */
         alongside: "", when: null, expect: null, remind: null, also: "",
+        hold: null, checkin: null, again: null,
       }}
       onChange={() => {}}
       upsell={<><span className="tag">Pro</span><span>Records which draft went to each agent.</span></>}
@@ -346,10 +347,11 @@ describe("the chrome diet — what the form no longer says", () => {
       <TaskPaneBody
         questions={requirementsFor(kind).map((r) => ({
           id: r.id, field: r.field, label: r.label,
-          answered: r.isAnswered({ unit: false, when: false, expect: false, remind: false, rows: false }),
+          answered: r.isAnswered({ unit: false, when: false, expect: false, remind: false, rows: false, holdday: false, checkin: false, again: false }),
         }))}
         openId={requirementsFor(kind)[0]?.id ?? null}
-        value={{ rows: [], alongside: "", when: null, expect: null, remind: null, also: "" }}
+        value={{ rows: [], alongside: "", when: null, expect: null, remind: null, also: "",
+                 hold: null, checkin: null, again: null }}
         onChange={() => {}}
         {...(kind === "note" ? { note: { text: "Chase the agency", added: "18 Aug" } } : {})}
         {...over}

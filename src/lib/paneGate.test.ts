@@ -18,8 +18,10 @@ import { firstMissing, gateOpen, requiredFor, journeyKind, isBulkCard, requireme
 import { BoardCard } from "./todoBoard";
 import { recordSweepRow, fillFromAsks, copyFirstDown, type RecordSweepRow } from "./materialsSweep";
 
-const NOTHING: GateAnswers = { unit: false, when: false, expect: false, remind: false, rows: false };
-const ALL: GateAnswers = { unit: true, when: true, expect: true, remind: true, rows: true };
+const NOTHING: GateAnswers = { unit: false, when: false, expect: false, remind: false, rows: false,
+  holdday: false, checkin: false, again: false };
+const ALL: GateAnswers = { unit: true, when: true, expect: true, remind: true, rows: true,
+  holdday: true, checkin: true, again: true };
 
 const card = (over: Partial<BoardCard> = {}): BoardCard =>
   ({ key: "k", stream: "do", title: "t", who: "", subtitle: "", due: "", kind: "", warn: false,
@@ -51,7 +53,8 @@ const KINDS: JourneyKind[] = ["send", "decide", "chase", "close", "fix", "bulk",
 const renderForm = (kind: JourneyKind): string | null =>
   kind === "bulk" ? null :
   renderToStaticMarkup(React.createElement(TaskPaneBody, {
-    value: { rows: [], alongside: "", when: null, expect: null, remind: null, also: "" },
+    value: { rows: [], alongside: "", when: null, expect: null, remind: null, also: "",
+             hold: null, checkin: null, again: null },
     onChange: () => {},
     questions: requirementsFor(kind).map((r) => ({
       id: r.id, field: r.field, label: r.label, answered: false,
@@ -165,7 +168,7 @@ describe("⚠️ the bulk table's two fills", () => {
  */
 describe("⚠️ the four surfaces read one declaration", () => {
   it("with two answers missing, chip, line and square all name the same two", () => {
-    const a: GateAnswers = { unit: true, when: false, expect: true, remind: false, rows: false };
+    const a: GateAnswers = { unit: true, when: false, expect: true, remind: false, rows: false, holdday: false, checkin: false, again: false };
     const missing = unanswered("send", a);
 
     /* the chip's number */
@@ -229,7 +232,7 @@ describe("⚠️ the four surfaces read one declaration", () => {
   });
 
   it("a note declares nothing, so no surface has anything to say", () => {
-    const none: GateAnswers = { unit: false, when: false, expect: false, remind: false, rows: false };
+    const none: GateAnswers = { unit: false, when: false, expect: false, remind: false, rows: false, holdday: false, checkin: false, again: false };
     expect(requirementsFor("note")).toEqual([]);
     expect(unanswered("note", none)).toEqual([]);
     expect(missingPhrase([])).toBe("");

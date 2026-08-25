@@ -69,6 +69,22 @@ export type RemindChoice =
   | { kind: "date"; ymd: string }
   | { kind: "none" };
 
+/**
+ * ⚠️ ONE SHAPE FOR EVERY "WHEN SHOULD THIS COME BACK" ANSWER (journey round, Phase 1). The fork adds
+ * three questions that are the same question in three registers — *hold me to when?*, *if nothing
+ * comes back…*, *ask you again…* — and each offers presets, a date, and (where the contract offers
+ * it) an explicit end to the asking.
+ *
+ * ⚠️ `never` IS A MEMBER BECAUSE IT IS AN ANSWER. "Don’t ask again" and "Stop asking about this one"
+ * are choices the writer makes, not absences — the same law `RemindChoice` was extended under after
+ * "A custom date…" was mapped onto an invented fortnight. Whether a flow OFFERS it is the options
+ * table's business; whether the type can express it is this file's.
+ */
+export type DelayChoice =
+  | { kind: "days"; days: number }
+  | { kind: "date"; ymd: string }
+  | { kind: "never" };
+
 export interface SendBodyValues {
   /**
    * ⚠️ THE SAMPLE ROWS, IN THE ONE SHAPE THE APP ALREADY STORES. `MaterialRow[]` is what
@@ -86,6 +102,13 @@ export interface SendBodyValues {
   remind: RemindChoice | null;
   /** the free text under "Anything else?" */
   also: string;
+  /* ── the fork's three, `null` until the writer says (journey round, Phase 1) ─────────────── */
+  /** the delay intents' day — Send's *hold me to it*, Nudge's *give it longer*, Note's *give it a date* */
+  hold: DelayChoice | null;
+  /** the nudge's next clock — *if nothing comes back…* */
+  checkin: DelayChoice | null;
+  /** the close's *ask you again…*, whose `never` is the per-query mute */
+  again: DelayChoice | null;
 }
 
 /** the contract's four windows, in its order */

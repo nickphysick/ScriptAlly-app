@@ -240,7 +240,8 @@ export function useTaskPaneSession(
   /* ⚠️ EVERY CHOICE STARTS UNCHOSEN. The count fields still seed on a unit choice — a starting
      number is not a decision — but nothing here is an answer until the writer gives one. */
   const BLANK: Omit<SendBodyValues, "rows"> =
-    { alongside: "", when: null, expect: null, remind: null, also: "" };
+    { alongside: "", when: null, expect: null, remind: null, also: "",
+      hold: null, checkin: null, again: null };
   const [paneBody, setPaneBody] = React.useState<SendBodyValues>(
     { rows: seedRows(null), ...BLANK });
   /* the answers reset with the card — a half-filled form carried onto another task is answers
@@ -615,7 +616,17 @@ export function useTaskPaneSession(
          a question counted as answered because a control had been touched. */
       remind: !!paneBody.remind && (paneBody.remind.kind !== "date" || !!paneBody.remind.ymd),
       rows: bulkTouched > 0,
+      /* ⚠️ THE SAME REVEALED-BUT-EMPTY TEST AS THE OTHERS. A picked preset or an explicit `never` is
+         an answer; a date control that has been opened and not filled is not. */
+      holdday: answeredDelay(paneBody.hold),
+      checkin: answeredDelay(paneBody.checkin),
+      again: answeredDelay(paneBody.again),
     };
+  }
+
+  /** a delay is answered when it names a day or explicitly ends the asking — never when it is open and blank */
+  function answeredDelay(d: SendBodyValues["hold"]): boolean {
+    return !!d && (d.kind !== "date" || !!d.ymd);
   }
 
   /* ⚠️ THE VERBS ARE `cardMenu`'s, NOT A SECOND LIST. The band's Snooze and Dismiss are the same

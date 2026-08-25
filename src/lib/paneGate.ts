@@ -28,8 +28,18 @@ import { cardBucket } from "./todoBuckets";
  */
 export type JourneyKind = "send" | "decide" | "chase" | "close" | "fix" | "bulk" | "note";
 
-/** The keys the pane's labels carry as `data-req`, so the gate can find the field it names. */
-export type ReqField = "unit" | "when" | "expect" | "remind" | "rows";
+/**
+ * The keys the pane's labels carry as `data-req`, so the gate can find the field it names.
+ *
+ * ⚠️ THREE ARRIVED WITH THE FORK (journey round, Phase 1), and each is a question no journey could
+ * ask before it had intents: `holdday` — "hold me to when?", the delay intents' only question;
+ * `checkin` — "if nothing comes back…", the nudge's new clock; `again` — "ask you again…", the
+ * close's leave-it-open. All three are REQUIRED by the flows that draw them, which is the point:
+ * a delay with no date is not a delay, and a nudge with no check-in is the limbo recon found.
+ */
+export type ReqField =
+  | "unit" | "when" | "expect" | "remind" | "rows"
+  | "holdday" | "checkin" | "again";
 
 /**
  * ⚠️ A REQUIREMENT IS DATA, AND FOUR SURFACES READ IT (steer round, Phase 1).
@@ -81,6 +91,10 @@ const REQ: Record<ReqField, Omit<Requirement, "isAnswered">> = {
      field to open, which is the same reason its primary is the one that goes inert rather than
      pointing at a first missing answer. */
   rows:   { id: "s-rows",   name: "at least one query",          label: "The queries",    field: "rows" },
+  /* the fork's own three — see `ReqField` for why each is required rather than defaulted */
+  holdday: { id: "s-holdday", name: "when to be reminded",         label: "Hold me to when?", field: "holdday" },
+  checkin: { id: "s-checkin", name: "when the app checks in",      label: "If nothing comes back…", field: "checkin" },
+  again:   { id: "s-again",   name: "when to be asked again",      label: "Ask you again…",   field: "again" },
 };
 
 /** The journey's requirements, as data — the ONE list all four surfaces read. */
@@ -157,6 +171,12 @@ export interface GateAnswers {
   remind: boolean;
   /** bulk: at least one row touched */
   rows: boolean;
+  /** the delay intents' day — a delay with no date is not a delay */
+  holdday: boolean;
+  /** the nudge's next clock. Its "Don't ask again" answer counts as answered: it IS an answer. */
+  checkin: boolean;
+  /** the close's leave-it-open. "Stop asking about this one" likewise. */
+  again: boolean;
 }
 
 /**
