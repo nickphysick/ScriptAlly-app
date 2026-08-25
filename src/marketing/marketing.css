@@ -775,6 +775,11 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   margin: 0 -9px; padding: 0 9px; border-radius: 3px;
 }
 .mk-turn-body { font-family: inherit; display: block; margin-top: 10px; }
+/* ⚠️ THE ONE EMPHASISED WORD IS THE SENTENCE'S PAYLOAD, so it takes the statement's ink rather
+   than the body's — `--mk-nearblack` against the surrounding `--mk-ink`, which is the same pairing
+   `.mk-lede strong` and `.mk-fwlede strong` already use. 700 here rather than their 600: the turn
+   is set in Playfair at 1.42rem and 600 barely reads as a change at that size. */
+.mk-turn-body strong { font-weight: 700; color: var(--mk-nearblack); }
 
 /* ⚠️ THE CARET IS SIZED IN `em` SO IT SCALES WITH THE LINE IT CLOSES. `.mk-turn-lead` sets its own
    font-size (1.34em of the turn's clamp), so every value here is a fraction of the glyphs beside

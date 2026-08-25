@@ -88,8 +88,19 @@ export const HERO_GRIND: Array<{ text: string; underline?: boolean }> = [
    character in this string, because a screen reader announcing a decorative bar is noise and a
    character could not blink. */
 export const HERO_TURN_LEAD = "Introducing ScriptAlly";
-export const HERO_TURN_BODY =
-  "An end-to-end querying companion built to tip the odds back in your favour.";
+/**
+ * ⚠️ `CopyRun[]`, NOT A STRING, AND THE REASON IS ONE WORD. `fly` is the sentence's whole payload
+ * and carries the emphasis; `CopyRuns`' existing `{ b }` member renders it, rather than markup in
+ * the component or a second constant holding the tail. The tier has ONE copy-rendering path and
+ * this stays on it.
+ * ⚠️ AND THE FULL STOP BELONGS TO THE PLAIN RUN, NOT TO THE BOLD ONE. Bolding the stop makes the
+ * emphasis look like a typographic accident at the size this renders.
+ */
+export const HERO_TURN_BODY: CopyRun[] = [
+  "An end-to-end querying companion built to help your manuscript ",
+  { b: "fly" },
+  ".",
+];
 
 /**
  * ⚠️ THE HERO ENDS ON ONE CTA. `See pricing` and the `Free to start` microline are both gone —

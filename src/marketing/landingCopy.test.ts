@@ -20,6 +20,13 @@ import {
 
 /** The lede is segments now (one is bold); this is the sentence a reader actually sees. */
 const ledeText = () => HERO_LEDE.map((s) => s.text).join("");
+/**
+ * ⚠️ THE TURN'S BODY IS `CopyRun[]` NOW — one word in it is bold — so every lock below reads the
+ * SENTENCE rather than the structure. A verbatim lock that asserted the array shape would go red
+ * on a copy edit that only moved the emphasis, which is a lock about the wrong thing.
+ */
+const turnBodyText = () =>
+  HERO_TURN_BODY.map((r) => (typeof r === "string" ? r : "b" in r ? r.b : "")).join("");
 
 describe("landing copy — verbatim locks", () => {
   it("strapline", () => {
@@ -101,20 +108,23 @@ describe("landing copy — verbatim locks", () => {
    */
   it("the turn is two sentences, and the lead is short enough never to wrap", () => {
     expect(HERO_TURN_LEAD).toBe("Introducing ScriptAlly");
-    expect(HERO_TURN_BODY).toBe(
-      "An end-to-end querying companion built to tip the odds back in your favour.",
+    expect(turnBodyText()).toBe(
+      "An end-to-end querying companion built to help your manuscript fly.",
     );
     expect(HERO_TURN_LEAD.length).toBeLessThan(30);
-    expect(HERO_TURN_BODY).not.toContain("  ");
+    expect(turnBodyText()).not.toContain("  ");
+    /* ⚠️ ONE EMPHASISED RUN, AND IT IS THE PAYLOAD WORD. The sentence's whole point is `fly`;
+       a second bold run would leave the reader deciding which half to weigh. The full stop is
+       deliberately outside it — bolding a stop reads as a typographic slip at this size. */
+    expect(HERO_TURN_BODY.filter((r) => typeof r !== "string")).toEqual([{ b: "fly" }]);
   });
 
   it("the turn is one line, and the reassurance in front of it is gone", async () => {
     /* ⚠️ NO FULL STOP AFTER `ScriptAlly` — a blinking caret closes that line instead, and it is
        an `aria-hidden` element rather than a character. If someone puts the stop back, this is
        the assertion that says the caret then follows a finished sentence. */
-    expect(`${HERO_TURN_LEAD} ${HERO_TURN_BODY}`).toBe(
-      "Introducing ScriptAlly An end-to-end querying companion built to tip the odds back in " +
-      "your favour.",
+    expect(`${HERO_TURN_LEAD} ${turnBodyText()}`).toBe(
+      "Introducing ScriptAlly An end-to-end querying companion built to help your manuscript fly.",
     );
     const copy = await import("./landingCopy");
     expect("HERO_TURN_A" in copy).toBe(false);
@@ -165,7 +175,7 @@ describe("landing copy — verbatim locks", () => {
       PULSE_HEADING,
       ...FEATURE_ROWS.map((r) => r.heading),
       ...FEATURE_ROWS.flatMap((r) => r.body.map((b) => b.text)),
-      HERO_H1, ledeText(), HERO_TURN_LEAD, HERO_TURN_BODY,
+      HERO_H1, ledeText(), HERO_TURN_LEAD, turnBodyText(),
       FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_SENT, FOUNDING_DUPE, FOUNDING_FULL,
     ].filter((t) => t.toLowerCase().includes("finger on the pulse"));
     expect(said).toEqual(["A finger on the pulse of your querying journey"]);

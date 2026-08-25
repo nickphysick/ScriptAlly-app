@@ -41,6 +41,7 @@ import React from "react";
 import {
   HERO_H1, HERO_LEDE, HERO_GRIND, HERO_TURN_LEAD, HERO_TURN_BODY,
 } from "./landingCopy";
+import { Runs } from "./CopyRuns";
 import { MarketingIllustration } from "./marketingMarks";
 import { FoundingPanel } from "./FoundingPanel";
 /* ⚠️ MATTED, NOT NATIVELY TRANSPARENT — see CLAUDE.md. The supplied file was RGB on near-white
@@ -116,7 +117,7 @@ export const Hero: React.FC<{
               would be noise in the middle of the page's one statement of what ScriptAlly is. */}
           <span className="mk-caret" aria-hidden="true" />
         </span>
-        <span className="mk-turn-body">{HERO_TURN_BODY}</span>
+        <span className="mk-turn-body"><Runs runs={HERO_TURN_BODY} onNavigate={onNavigate} /></span>
       </div>
 
       {/* ⚠️ THE ACTIONS ROW IS GONE, BOTH HALVES. `Start tracking — it's free` left because
