@@ -447,9 +447,24 @@ describe("⚠️ COMMITTING WRITES ONCE, THROUGH THE PRIMITIVE THAT ALREADY EXIS
     expect(body).toContain("undoQueryStatus(q.id, prev, chosen.status)");
   });
 
-  it("a note writes ONE task update and logs nothing against a query", () => {
+  /**
+   * ⚠️ RESTATED, AND STRONGER (completion-paths Phase 3). This asserted exactly ONE
+   * `updateUserTask({ done: true …})` here — a completion written in place. That single write also
+   * carried the note's edited text, and its Undo restored `{ done: false }` alone, so undoing left
+   * the edit applied with no way back. The two are separate writes now: the text through the same
+   * `updateUserTask({ text })` the "Keep it" button already made, and the completion through
+   * `quickDone`.
+   *
+   * So the claim becomes the law it was always standing in for: **this journey never writes `done`
+   * itself, and it still logs nothing against a query.** Both halves are asserted, because
+   * "no inline completion" alone would pass on a sheet that had stopped completing at all.
+   */
+  it("a note completes through the primitive, writes no `done` of its own, and logs nothing against a query", () => {
     const body = slice("function noteSheet(c: BoardCard) {", "const advanceAfterReceipt");
-    expect((body.match(/updateUserTask\(c\.userTaskId, \{ done: true/g) ?? [])).toHaveLength(1);
+    expect(body, "the note journey writes a completion in place again").not.toMatch(/done:\s*true/);
+    expect(body, "the note journey stopped reaching the completion primitive").toContain("await quickDone(c)");
+    /* the edit survives as its own write — silent, and the same one "Keep it" makes */
+    expect(body, "the note's edit is no longer saved on its own").toContain("updateUserTask(c.userTaskId, { text: text.trim() })");
     for (const w of ["recordMaterialsSent", "logNudge", "updateQueryStatus", "recordOfferDecision"]) {
       expect(body, `the note journey reached for ${w}`).not.toContain(w);
     }

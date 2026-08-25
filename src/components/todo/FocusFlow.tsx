@@ -1269,7 +1269,6 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   function noteSheet(c: BoardCard) {
     const text = noteText ?? c.title;
     const dirty = text.trim() !== c.title && text.trim().length > 0;
-    const saveText = dirty && c.userTaskId ? { text: text.trim() } : {};
     return journeySheet({
       steps: [{
         id: "note",
@@ -1296,13 +1295,31 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         label: "Cross it off",
         hint: "Nothing is logged against a query.",
         disabled: !text.trim(),
-        onCommit: () => {
-          if (c.userTaskId) {
-            updateUserTask(c.userTaskId, { done: true, completedAt: new Date().toISOString(), ...saveText });
-            onToast(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await updateUserTask(c.userTaskId!, { done: false }); onToast("Restored"); } });
-          }
-          advance();
-        },
+        /**
+         * ⚠️ TWO WRITES, EACH UNDOABLE BY ITS OWN PRIMITIVE (completion-paths Phase 3). This was
+         * ONE write — `{ done: true, completedAt, ...saveText }` — and its Undo restored
+         * `{ done: false }` alone. So a writer who edited the note and crossed it off, then
+         * pressed Undo, got the task back UNCROSSED WITH THE EDIT STILL APPLIED, and no way to the
+         * original from that toast. One write made two changes and the inverse undid one.
+         *
+         * The edit is now its own write — the same `updateUserTask({ text })` the "Keep it" button
+         * ten lines below already makes, so this composes writes that existed rather than adding
+         * one — and the completion goes through `quickDone`, whose Undo is the completion's own.
+         * Undo now un-crosses the note and leaves the edit standing, which is what the writer did.
+         *
+         * ⚠️ ORDER MATTERS: text first, completion second. The reverse would leave a completed task
+         * carrying its old words if the second write failed, which is the worse half to lose.
+         * ⚠️ AND ONE TOAST, not two: the text save is silent, exactly as "Keep it" is silent, and
+         * `quickDone` raises the only receipt.
+         * ⚠️ AND THE ADVANCE IS GATED ON THE COMPLETION, as the sweep arm's is. A refused write
+         * leaves the writer on the sheet with the edit saved and the Try-again toast up, rather
+         * than moved on and told it was done.
+         */
+        onCommit: () => void (async () => {
+          if (!c.userTaskId) { advance(); return; }
+          if (dirty) await updateUserTask(c.userTaskId, { text: text.trim() });
+          if (await quickDone(c)) advance();
+        })(),
       },
       /* ⚠️ "Keep it" SURVIVES AS A SECOND FOOTER ACTION, deliberately beyond the ref's three. The
          note is EDITABLE here, so without it an edit could only be saved by also completing the
