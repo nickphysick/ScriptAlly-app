@@ -1475,7 +1475,7 @@ copy makes the duplication invisible to review.
 The smaller ghost survives, per D10 — a ghost must read as quieter and shorter than a real card, or
 a populated page stops reading as populated.
 
-## Next session — start here, in this order
+## ~~Next session — start here~~ · SETTLED, see the handover at the foot of this file
 
 **1 · The manuscript selector check (before D3).** Part A moved it into the packages band head out of
 necessity — the hero carried it and removing the hero would have stranded it. **It does not stay
@@ -1546,3 +1546,42 @@ heroBand 0 · heroCopy false · ghostCards 1 · realCards 2
 
 `＋ New package` stays in the band head (D0d) — it genuinely acts on that band, and the ref puts it
 there.
+
+---
+
+## Next session — starts at D3
+
+⚠️ **Phase 0 is DONE.** The earlier "start here" block above is superseded and struck through: the
+manuscript selector question is settled (duplicate → deleted, `activeMs` kept), and `＋ New package`
+is already in the band head. **Do not redo it.**
+
+### The band head is a RE-ORDER, not a restyle
+
+It already holds everything the ref asks for — heading, count, and three right-aligned actions. D3's
+work on the head is arrangement plus the rule-and-tick treatment, not new controls.
+
+**Ruled, so it is not decided mid-flight — order on the right:**
+
+1. `How it works`
+2. `Show archived`
+3. `＋ New package`
+
+⚠️ **`Show archived` sits with the actions but is the quietest of the three.** It modifies what the
+band *displays* rather than acting on the page, so it belongs in the group without competing with
+the two that do something. It is already the quietest treatment (bare mono, no fill); keep it that
+way when the head is re-ordered.
+
+### Then D3 onward
+
+Rule-only bands → banded cards (D4–D10) → legend and marks (D11, D12) → the drawer (D13–D20).
+**Deploy A–C together at the end.**
+
+### What is in place
+
+* Both refs committed: `packages-banded-cards.html`, `package-drawer.html`.
+* `tests/e2e/partA.measure.ts` — the counts harness. **Extend it; do not start a parallel one.** It
+  currently reports `teachState · heroBand · heroCopy · ghostCards · realCards · bandHeads ·
+  pageSelector · newPkgCta · sidebarScope`, in both data states.
+* Current workspace baseline to compare against:
+  `heroBand 0 · ghostCards 1 · realCards 2 · pageSelector 0 · newPkgCta 1`.
+* Dev serves `3ffd3ac5`, which now trails `main` by Phase 0.
