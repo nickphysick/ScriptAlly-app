@@ -200,13 +200,10 @@ for (const vp of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }]) {
          then sees one large downward delta and no upward travel at all. Two separated steps cannot
          both be swallowed, and the wait after the arrival also puts the retract's transition behind
          us so the restore is not racing it. */
-      const nudgeUp = async (to: number) => {
-        await scrollTo(to);
-        await page.waitForTimeout(320);
-        await scrollTo(to - 8);
-        await page.waitForTimeout(80);
-        return scrollTo(to - 16);
-      };
+      /* ⚠️ THE NUDGE IS GONE WITH THE RETRACT (header fix, §4 withdrawn). It existed to put both
+         photographs in the same toolbar state; with the toolbar no longer folding there is only one
+         state, and the equal-height assertion below is what proves it. */
+      const nudgeUp = (to: number) => scrollTo(to);
       const first = await nudgeUp(Math.round(range.max * 0.15) + 42);
       if (!first.max) { lines.push(`${name.padEnd(21)} — nothing to scroll at this viewport`); continue; }
       await page.waitForTimeout(800);          /* past the .22s settle, so the posture is stable */

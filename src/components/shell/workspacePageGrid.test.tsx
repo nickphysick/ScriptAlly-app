@@ -235,31 +235,28 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     /* ⚠️ THE CONTROL ROW MUST NOT RE-GUTTER. It is inside the scroller, so a `padding-inline` here
        would inset it a second time and pull the page's controls off the vertical its cards sit on —
        the doubled-gutter fault, in the one row most likely to be measured against them. */
+    /* ⚠️ THE BAND IS HELD TO THE SAME RULE AS THE ROW (header fix, §2). It is full-bleed by design —
+       that is what lets it cover the masthead's wash edge to edge — so a horizontal inset on it
+       would be a second gutter inside a box whose whole job is not to have one. */
     for (const sel of [".wpg-tools", ".wpg-toolband"]) {
       expect(block(sel), `${sel} re-states a horizontal inset it has already inherited`)
         .not.toContain("padding-inline");
     }
+    /* the band paints the page's ground, and paints it as a COLOUR — a gradient here would be the
+       masthead's wash reaching the toolbar, which §2 exists to prevent */
+    expect(block(".wpg-toolband"), "the toolbar's band does not paint the page's ground")
+      .toContain("background: var(--ws-window)");
+    expect(block(".wpg-toolband"), "the toolbar's band paints a gradient — the wash has reached it")
+      .not.toContain("gradient");
     const tools = block(".wpg-tools");
-    /**
-     * ⚠️ RETARGETED TO THE BAND, AND THE LAW IS UNCHANGED: the control row's vertical rhythm is the
-     * chrome's business and its HORIZONTAL inset is the scroller's, so neither element may pay for
-     * a horizontal one. What moved is which element states the vertical half — the band does now,
-     * because the retract animates the band's box and a padding that changed with the settle made
-     * that box's height depend on a second piece of state (measured: a ±16px limit cycle).
-     *
-     * ⚠️ ASSERTED ON BOTH, or the rule could be satisfied by moving an inset from one to the other.
-     */
-    const bandPad = /padding:\s*([^;]+);/.exec(block(".wpg-toolband"));
-    expect(bandPad, "the band states no padding at all — the row has no vertical rhythm").toBeTruthy();
+    const pad = /padding:\s*([^;]+);/.exec(tools);
+    expect(pad, "the control row states no padding at all").toBeTruthy();
     /* ⚠️ EXTRACTED AND COMPARED, NEVER A `(?!…)` LOOKAHEAD — after optional whitespace a lookahead
        backtracks to zero width and tests against the SPACE, so `padding: 12px 80px` would pass a
        rule written to forbid it. */
-    const bandSides = bandPad![1].trim().split(/\s+/);
-    expect(bandSides.length, "the band's padding names more than a vertical pair").toBe(2);
-    expect(bandSides[1], "the band gained a horizontal inset — the scroller pays those").toBe("0");
-    const pad = /padding:\s*([^;]+);/.exec(tools);
-    expect(pad, "the control row states no padding at all").toBeTruthy();
-    expect(pad![1].trim(), "the control row took vertical rhythm back off the band — the two would then both contribute").toBe("0");
+    const sides = pad![1].trim().split(/\s+/);
+    expect(sides.length, "the control row's padding names horizontal values — the scroller pays those").toBe(2);
+    expect(sides[1], "the control row gained a horizontal inset").toBe("0");
 
     /* ⚠️ AND THE RETIRED TOKEN HAS NO READER. `--header-inset` survives its own declaration until
        step 4; what must be true now is that nothing consumes it, or the masthead is being inset
@@ -584,28 +581,8 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        it reads the page's primary scroller, which on the Tasks family is an internal zone. The
        shape asserted is therefore "one bare comparison against the threshold, assigned to a local,
        and that local is what is written" rather than the comparison appearing inside `setStuck`. */
-    /**
-     * ⚠️ AMENDED A THIRD TIME, AND THE CLAIM NARROWS HONESTLY RATHER THAN LOOSENING. What this case
-     * has always been about is that the settle is DERIVED every frame from the scroll position and
-     * nothing is cached or latched — the shape that produced a dead zone the last time it was not.
-     * That still holds. What is no longer true is that the whole decision is one comparison: a page
-     * whose scroller overflows by less than its chrome is tall cannot settle without destroying the
-     * scroll it depends on, so the state is now "past the threshold AND the page can afford it".
-     *
-     * ⚠️ AND THE AFFORDABILITY TERM IS THE ONE THING HERE THAT IS DELIBERATELY CACHED, so the case
-     * says so instead of the next reader finding it and assuming it slipped through. It is captured
-     * at REST, because gating on the current overflow re-creates the oscillation one level up — the
-     * page settles, its overflow falls below the bar as a consequence, and the guard un-settles it.
-     * Measured on Noteboard before the guard: 37 state changes on one downward pass.
-     */
-    const atTop = /const atTop = [^;]*?\.scrollTop <= 2;/.exec(srcCode);
-    expect(atTop, "the top of the page is no longer one bare comparison of a scrollTop against the threshold").toBeTruthy();
-    const derived = /const settled = [^;]*?!atTop[^;]*?;/.exec(srcCode);
-    expect(derived, "the settle is not derived from that comparison").toBeTruthy();
-    expect(srcCode, "the affordability term is gone — a page that cannot afford to settle will oscillate").toContain("canSettle");
-    /* the cached half names WHERE it is captured, so "at rest" cannot quietly become "every frame" */
-    expect(srcCode, "the resting overflow is no longer captured — gating on the live figure oscillates")
-      .toContain("restOverflowRef.current = settleEl");
+    const derived = /const settled = [^;]*?\.scrollTop > 2;/.exec(srcCode);
+    expect(derived, "the settle is no longer one bare comparison of a scrollTop against the threshold").toBeTruthy();
     const setter = /setStuck\(([^;]+)\);/.exec(srcCode);
     expect(setter, "the state is not written in one place").toBeTruthy();
     expect(setter![1].trim(), "the state stopped being the derived value written straight through")

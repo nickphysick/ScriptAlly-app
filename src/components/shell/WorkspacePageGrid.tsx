@@ -206,12 +206,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * and invisible is still the wrong side of a boundary the lock asserts.
    */
   /* what the settle takes out of `scrollHeight`, given back as padding so max scroll cannot move */
-  /* ⚠️ THE RECLAIM IS NOT STATE. It is written straight to the element in the frame it is measured
-     — see `evaluate` — because a render's worth of latency showed up as a 20px dip in max scroll
-     mid-transition. Nothing renders from it, so nothing needs to re-render when it changes. */
-  const restOverflowRef = React.useRef(0);
-  /* the masthead's own resting height — what the JS half of the compensation is measured against */
-  const restMastRef = React.useRef(0);
+  const [reclaim, setReclaim] = React.useState(0);
   const toolsRef = React.useRef<HTMLDivElement>(null);
   /* the slab — one box whose rendered height IS the stuck chrome, so the hem has one thing to read */
   const chromeRef = React.useRef<HTMLDivElement>(null);
@@ -294,38 +289,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    */
   const pinned = !fill || !!settleOn;
 
-  /**
-   * ══ THE RETRACT'S TWO THRESHOLDS (header fix, §4) ════════════════════════════════════════════
-   *
-   * ⚠️ THEY DIFFER ON PURPOSE, AND EQUAL VALUES ARE THE BUG THEY EXIST TO PREVENT. With one
-   * threshold the state flips back and forth across a single boundary — a trackpad reports a
-   * continuous glide as a stream of small deltas either side of it, so the row would beat. Asking
-   * for more travel to retract than to restore means the two decisions cannot both be true of the
-   * same gesture, and the row settles.
-   *
-   * ⚠️ AND THE RESTORE IS THE CHEAPER OF THE TWO because the costs are not symmetric. Retracting
-   * when the reader did not mean it takes their controls away; restoring when they did not mean it
-   * gives them back. The direction that can only ever return something asks for less.
-   */
-  const RETRACT_AFTER = 8;
-  const RESTORE_AFTER = 4;
-
   const [hidden, setHidden] = React.useState(false);
-  /* one state variable for the retract, written at most once per painted frame — see `evaluate` */
-  const [retracted, setRetracted] = React.useState(false);
-  /* the accumulated travel since the last direction reversal, and the position it is measured from.
-     Refs rather than state: they change on frames where nothing renders, and rendering on each
-     would be a re-render per wheel tick to no visible end. */
-  const travelRef = React.useRef(0);
-  const lastTopRef = React.useRef(0);
-  /* the control row's natural height, measured and handed to the band it animates — see `evaluate` */
-  const [toolsH, setToolsH] = React.useState(0);
-  /* the band's whole expanded height, which the reclaim spacer takes on when the toolbar retracts */
-  const [bandH, setBandH] = React.useState(0);
-  const bandRef = React.useRef<HTMLDivElement>(null);
-  /* ⚠️ A REF BESIDE THE STATE, because `evaluate` runs inside an effect that closes over the value
-     from the render it was created in — reading the state there would test a stale `retracted`. */
-  const retractedRef = React.useRef(false);
 
   /* the journey latch went with engagement — see the note above */
 
@@ -389,104 +353,8 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
       /* the hems and the reclaim are the SCROLL ROW's — they describe that box and nothing else */
       const top = root.scrollTop;
       const settleEl = primaryScroller();
-      /**
-       * ══ A PAGE ONLY SETTLES IF IT CAN AFFORD TO ══════════════════════════════════════════════
-       *
-       * ⚠️ MEASURED, NOT FEARED: Noteboard's zone overflows by **47px** at 1440. Settling reclaims
-       * ~62 and retracting the toolbar another ~64 — between them more than the page's entire scroll
-       * range. Frame by frame: max scroll 47 → 0, `scrollTop` clamped to 0 by the browser, `settled`
-       * back to false, the chrome grows, max returns to 47, and round again. The toolbar changed
-       * state 37 times on one pass.
-       *
-       * ⚠️ THIS IS THE HAZARD THE SETTLE'S OWN NOTE ALREADY DESCRIBES — "shrink, clamp, un-shrink,
-       * repeat" — and the reclaim spacer is what answers it on a SCROLLING page. It cannot answer it
-       * on a fill page, because there the freed height goes to the zone by design, so the zone's own
-       * scroll range is what shrinks. The guard has to be "do not start" rather than "compensate".
-       *
-       * ⚠️ AND IT READS THE RESTING OVERFLOW, NEVER THE CURRENT ONE. Gating on what the page
-       * overflows by RIGHT NOW re-creates the oscillation one level up: a page settles, its overflow
-       * falls below the bar as a result, and the guard un-settles it. The figure is captured while
-       * the page is at rest and is not touched again until it returns there, so the decision cannot
-       * be undone by its own consequence.
-       *
-       * ⚠️ THE BAR IS THE CHROME'S OWN RESTING HEIGHT — derived, not a constant. The chrome can
-       * never shed more than it is tall, so a page with more overflow than that has room to settle
-       * whatever the settle turns out to cost. It is conservative: a page overflowing by 150 against
-       * a 166 chrome could settle safely and will not. That is the right way round — the pages it
-       * declines are the ones with least to gain, and the alternative is a page that beats.
-       */
-      const atTop = !settleEl || settleEl.scrollTop <= 2;
-      const canSettle = restOverflowRef.current > restHRef.current;
-      const settled = !!settleEl && !atTop && canSettle;
+      const settled = !!settleEl && settleEl.scrollTop > 2;
       setStuck(settled);
-
-      /**
-       * ══ THE TOOLBAR RETRACTS ON DOWNWARD TRAVEL (header fix, §4) ═══════════════════════════
-       *
-       * ⚠️ DIRECTION IS ACCUMULATED TRAVEL, NEVER THE SIGN OF ONE EVENT. A trackpad glide is not a
-       * monotonic sequence — it reports jitter in both directions around the trend, so a per-event
-       * sign test flips state several times inside one gesture. The accumulator resets when the
-       * sign genuinely reverses and otherwise sums, so the thresholds describe how far the reader
-       * has actually travelled since they changed their mind.
-       *
-       * ⚠️ OVERSCROLL IS NOT SCROLLING. Rubber-banding past either end produces deltas that mean
-       * nothing about intent, so a position outside the scrollable range is not measured at all —
-       * and `lastTop` is deliberately NOT advanced there either, so the next in-range reading
-       * measures real travel from the last real position rather than from the bounce.
-       *
-       * ⚠️ AND THIS RUNS ONCE PER PAINTED FRAME because `evaluate` does. Attaching thresholds to a
-       * value recomputed per event would sample the same gesture at whatever rate the device
-       * happens to report, which is how one trackpad beats and another does not.
-       */
-      if (settleEl) {
-        const st = settleEl.scrollTop;
-        const maxTop = settleEl.scrollHeight - settleEl.clientHeight;
-        /**
-         * ⚠️ AND NOT UNTIL THE READER IS CLEAR OF THE TOP, which is a fix for a measured fault
-         * rather than a taste. The SETTLE's own compensation is sampled per frame while the
-         * masthead eases through ~62px, so it lags — content moves, scroll anchoring answers by
-         * pulling `scrollTop` down, and within 12px of the top that pull reaches 0 and un-settles
-         * the page. Retracting 8px in put the two events on top of each other: measured, the toolbar
-         * changed state five times between `scrollTop` 12 and 44 and the position was dragged back
-         * to 0 each time.
-         *
-         * ⚠️ THE BAR IS THE CHROME'S RESTING HEIGHT — derived, and it is the right quantity twice
-         * over. Past it the settle has long finished, so there is no lag left to amplify; and the
-         * anchoring pull is bounded by what the chrome can shed, which is less than its own height,
-         * so it can no longer reach 0. The toolbar simply stays for the first screenful.
-         */
-        const clearOfTop = st > restHRef.current;
-        if (st >= 0 && st <= maxTop) {
-          const d = st - lastTopRef.current;
-          lastTopRef.current = st;
-          if (d !== 0) {
-            if (travelRef.current !== 0 && Math.sign(d) !== Math.sign(travelRef.current)) travelRef.current = 0;
-            travelRef.current += d;
-            /* ⚠️ THE DEPTH GATE APPLIES TO RETRACTING ONLY, and gating the whole block was a bug I
-               wrote and then measured: with the accumulator skipped near the top, a toolbar that had
-               retracted deep in the page could never come BACK on the way up — it stayed folded
-               until the reader hit the very top, because the only other thing that clears the state
-               is the `!settled` reset. Taking something away asks for depth as well as travel;
-               giving it back asks for travel alone. */
-            if (travelRef.current >= RETRACT_AFTER && clearOfTop) { retractedRef.current = true; setRetracted(true); }
-            else if (travelRef.current <= -RESTORE_AFTER) { retractedRef.current = false; setRetracted(false); }
-          }
-        }
-      }
-      /**
-       * ⚠️ ANCHORED AT THE TOP — THERE IS NO RETRACTED STATE AT REST (§4.3). Below the settle
-       * threshold the row is always shown, whatever direction the reader arrived from. A page that
-       * opened with its controls already gone would be a page missing its controls, and no amount
-       * of scrolling up would be an obvious way to ask for them.
-       *
-       * ⚠️ AND THE ACCUMULATOR RESETS WITH IT, so the first downward travel from rest starts from
-       * zero rather than inheriting whatever was left over from the gesture that returned here.
-       */
-      if (!settled) {
-        travelRef.current = 0;
-        retractedRef.current = false;
-        setRetracted(false);
-      }
       /* ⚠️ COMPARED BEFORE IT IS WRITTEN. A fresh object every frame would re-render the whole
          page on every wheel tick even when nothing changed — the header's `setStuck` is free of
          that only because a boolean compares by value. */
@@ -523,13 +391,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
        * follows them. Asking only this element reports "nothing is animating" throughout.
        */
       const settling = chromeRef.current?.getAnimations?.({ subtree: true }).length ?? 0;
-      if (!settled && h > 0 && settling === 0) {
-        restHRef.current = h;
-        restMastRef.current = mastRef.current?.getBoundingClientRect().height ?? 0;
-        /* ⚠️ CAPTURED TOGETHER, because they are compared to each other. Reading the overflow on a
-           different frame from the height would compare two states of the page. */
-        restOverflowRef.current = settleEl ? settleEl.scrollHeight - settleEl.clientHeight : 0;
-      }
+      if (!settled && h > 0 && settling === 0) restHRef.current = h;
       /* ⚠️ THE STUCK CHROME'S HEIGHT IS NO LONGER MEASURED OR PUBLISHED (pinned header ground, §2).
          `--wpg-stuck-h` existed so the TOP HEM could clear the pinned chrome, and the top hem is
          deleted — swept for reads before removing it, and the hem's `margin-top` was the only one.
@@ -551,68 +413,8 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
        * control row reclaims less, a title that wraps reclaims more — so a literal would be right
        * for one page on one day.
        */
-      /**
-       * ⚠️ NOT ON A FILL PAGE, AND THE STYLESHEET'S CLAIM THAT IT IS "INERT" THERE WAS STALE.
-       * It said a fill page "cannot scroll, so it never settles, so the reclaim is 0" — true when it
-       * was written and false since the settle was bound to each page's own primary scroller. A fill
-       * page settles on its ZONE, so this fired, and the spacer grew by exactly what the slab lost.
-       *
-       * MEASURED at 1440 before the fix: Calendar's chrome 166 → 104 and its reclaim 16 → 78, body
-       * top 293 → 293, zone height 408 → 408. The settle gave the reader NOTHING — it shrank the
-       * chrome and put the same 62px back as a spacer, on both fill pages.
-       *
-       * ⚠️ THE SPACER EXISTS TO HOLD A SCROLL HEIGHT CONSTANT, and a fill page has no scroll to
-       * hold. Its row does not move; the reader scrolls a zone INSIDE it, and the freed 62px is
-       * meant to go to that zone. Compensating there is not conservative, it is the feature
-       * cancelling itself.
-       */
-      /**
-       * ⚠️ THE MASTHEAD'S SHRINK ONLY — THE BAND'S IS COMPENSATED IN CSS, AND MEASURING BOTH HERE
-       * DOUBLE-COUNTED IT. `h` is the whole slab, so `restH - h` already contains whatever the
-       * toolbar gave up; adding the CSS rule on top of that put the spacer 74px too tall and the
-       * column's total went from 184 to 242. Each mechanism now compensates exactly the thing it can
-       * see exactly: this one the masthead, which only JS knows the resting height of, and the
-       * stylesheet the band, whose collapse it is already interpolating frame for frame.
-       */
-      const mastH = mastRef.current?.getBoundingClientRect().height ?? 0;
-      const reclaim = settled && !fill ? Math.max(0, restMastRef.current - mastH) : 0;
-      /**
-       * ⚠️ WRITTEN IMPERATIVELY, IN THE FRAME IT WAS MEASURED — and going through React state was a
-       * measurable fault, not a style preference. The slab's height is read here and the spacer that
-       * compensates it was published on the NEXT render, so for one frame the column was short by
-       * whatever the transition had moved in between. Measured on Contact list: chrome 168 → 131
-       * while the spacer had only reached 33, a 20px dip in max scroll mid-retract. Harmless where
-       * the reader is, and a clamp — and a visible jump — for anyone scrolled near the bottom.
-       *
-       * ⚠️ IT IS NOT ALSO IN THE `style` PROP. React removes only properties it set itself, so one
-       * owner and no contest; listing it in both would have the next render erase this write.
-       */
-      rootRef.current?.style.setProperty("--wpg-reclaim-pad", `${reclaim}px`);
-
-      /**
-       * ⚠️ THE ROW'S OWN HEIGHT, PUBLISHED FOR THE BAND TO ANIMATE TO (§4). The band cannot use
-       * `height: auto` — `auto` does not transition — so it needs the number, and the number has to
-       * come from the rendered row rather than a literal: a control row wraps at narrow widths and
-       * a page can put anything in it.
-       *
-       * ⚠️ NO FEEDBACK LOOP, AND THAT IS WHY THE BAND EXISTS RATHER THAN THIS ELEMENT ANIMATING.
-       * The height is MEASURED on the row and APPLIED to its parent, and the parent's height does
-       * not constrain the child (nothing clips), so the measurement cannot be an echo of the value
-       * just written. Animating the row itself would measure exactly what it had been told.
-       */
-      const th = toolsRef.current?.offsetHeight ?? 0;
-      if (th > 0) setToolsH((prev) => (Math.abs(prev - th) < 0.5 ? prev : th));
-      /**
-       * ⚠️ THE BAND'S WHOLE HEIGHT, CAPTURED ONLY WHILE IT IS EXPANDED AND STILL. The spacer grows
-       * by exactly this when the toolbar retracts, in CSS, on the same clock as the band's shrink —
-       * so it has to be the band's real total (row plus the settle's padding) and it has to be a
-       * value that is not itself moving. Sampling it mid-retract would publish a number on its way
-       * to zero, and the spacer would chase it down instead of replacing it.
-       */
-      const bh = bandRef.current?.offsetHeight ?? 0;
-      if (!retractedRef.current && bh > 0 && settling === 0) {
-        setBandH((prev) => (Math.abs(prev - bh) < 0.5 ? prev : bh));
-      }
+      const reclaim = settled ? Math.max(0, restHRef.current - h) : 0;
+      setReclaim((prev) => (Math.abs(prev - reclaim) < 0.5 ? prev : reclaim));
     };
     /* rAF-throttled: at most one evaluation per painted frame, however fast the wheel reports */
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(evaluate); };
@@ -722,19 +524,14 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
         /* ⚠️ A CUSTOM PROPERTY RATHER THAN A CLASS, because the value is a MEASUREMENT and classes
            carry states. The stylesheet reads it; nothing else needs to know it exists. */
         style={{
-          /* ⚠️ `--wpg-reclaim-pad` IS DELIBERATELY ABSENT HERE — `evaluate` owns it, and listing it
-             in both places would have every render erase the write it had just made. */
-          /* the retract's target height — absent until the row has been measured, so the band's
-             `auto` fallback holds until then rather than collapsing to nothing */
-          ...(toolsH > 0 ? { ["--wpg-tools-h" as string]: `${toolsH}px` } : {}),
-          ...(bandH > 0 ? { ["--wpg-band-h" as string]: `${bandH}px` } : {}),
+          ["--wpg-reclaim-pad" as string]: `${reclaim}px`,
         } as React.CSSProperties}
         /* ⚠️ `wpg--tools` IS GONE FROM THIS LIST. It existed for ONE rule — `.wpg--tools > .wpg-scroll`,
            which zeroed the scroller's top gap when a toolbar row had already paid it — and that
            arbitration died with the chrome rows. Grepped before removing: no stylesheet in `src/`
            reads it. A class the markup emits and nothing consumes is what a bundle sweep exists to
            find, and leaving it would imply a rule someone would go looking for. */
-        className={`wpg${hidden ? " wpg--hidden" : ""}${fill ? " wpg--fill" : ""}${pinned ? "" : " wpg--static"}${retracted ? " wpg--retracted" : ""}${className ? ` ${className}` : ""}`}
+        className={`wpg${hidden ? " wpg--hidden" : ""}${fill ? " wpg--fill" : ""}${pinned ? "" : " wpg--static"}${className ? ` ${className}` : ""}`}
         /**
          * ⚠️ THE BINDING IS DECLARED IN THE DOM, so it can be asserted by IDENTITY rather than by a
          * list of page names — and page lists are what have been wrong twice about this app.
@@ -848,7 +645,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
                paints the masthead's wash edge to edge; without a band of its own the toolbar would
                sit ON that wash, and painting the ROW instead would leave the wash showing in the
                gutters either side of it. See the stylesheet. */
-            <div className="wpg-toolband" ref={bandRef}>
+            <div className="wpg-toolband">
               <div ref={toolsRef} className="wpg-tools">{toolbar}</div>
             </div>
           )}

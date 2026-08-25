@@ -144,124 +144,45 @@ test("⚠️ A PAGE WITH NO CONTROLS RENDERS NO CONTROL ROW — structural, not 
 });
 
 /**
- * ══ THE RETRACT, DRIVEN RATHER THAN EYEBALLED (§5) ═════════════════════════════════════════════
- *
- * ⚠️ OSCILLATION SHOWS AS MULTIPLE FLIPS WITHIN ONE DIRECTION, which is why the count is per
- * direction and not overall. A correct retract flips exactly once going down and once coming back;
- * a beating one flips on most steps. Verified red by setting both thresholds to 4: Contact list went
- * from 1 flip on the way up to ELEVEN, and its `scrollTop` drift went from 0 to ±8.
- *
- * ⚠️ AND THE SCROLL POSITION IS COMPARED AFTER THE MOVEMENT HAS FINISHED, not two frames in. The
- * height change is absorbed by the reclaim spacer over the transition's whole 220ms, so a reading
- * taken while it is still running would be measuring the middle of the compensation rather than its
- * result — and would pass on a mechanism that ended up somewhere else entirely.
+ * ⚠️ THE RETRACT'S CASES ARE NOT HERE, BECAUSE THE RETRACT IS NOT BUILT (header fix, §4 withdrawn).
+ * It was built, measured, and taken back out: every mechanism that reclaims the toolbar's height
+ * interacts with the browser's scroll anchoring, and the two that behaved at the ends were wrong in
+ * the middle. The measurements and what each one cost are in the run report; what belongs HERE is
+ * the absence, asserted, so a half-landed retract cannot arrive unnoticed.
  */
-const RETRACT_PAGES = [
-  { name: "Contact list", cls: "agl-wpg", route: "/agents" },
-  { name: "Analytics",    cls: "qa-wpg",  route: "/queries/analytics" },
-  { name: "Calendar",     cls: "tpl-wpg", route: "/todo/calendar" },
-  { name: "Noteboard",    cls: "tpl-wpg", route: "/todo/noteboard" },
-];
-
-for (const width of [1280, 1440]) {
-  test(`⚠️ THE RETRACT FLIPS ONCE PER DIRECTION AND MOVES NOTHING — ${width}`, async ({ page }) => {
-    const lines: string[] = [];
-    const results: { name: string; down: number[]; up: number[]; drift: number[] }[] = [];
-    let measured = 0, declined = 0;
-    for (const { name, route, cls } of RETRACT_PAGES) {
-      await openRoute(page, route, { width, height: 900 });
-      await liftMotionSuppression(page);
-      const r = await page.evaluate(async (c) => {
-        const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-        if (!g) return null;
-        const sel = g.getAttribute("data-wpg-settle")!;
-        const el = [...g.querySelectorAll(sel)].map((e) => e as HTMLElement).find((e) => e.scrollHeight - e.clientHeight > 2);
-        if (!el) return { skip: "nothing scrolls here", overflow: 0, chromeH: 0 } as const;
-        /**
-         * ⚠️ A PAGE MAY DECLINE TO SETTLE, AND THAT IS A READING RATHER THAN A SKIP. A page whose
-         * scroller overflows by less than its chrome is tall cannot settle without destroying the
-         * scroll the settle depends on — so it does not, and it therefore never retracts either.
-         * Reported with the two numbers that decide it, so the next reader can see WHY rather than
-         * finding a page quietly absent from the results.
-         */
-        const chromeH = Math.round((g.querySelector(".wpg-chrome") as HTMLElement).getBoundingClientRect().height);
-        const overflow = Math.round(el.scrollHeight - el.clientHeight);
-        if (overflow <= chromeH) return { skip: `declines to settle — overflows by ${overflow} against a ${chromeH} chrome`, overflow, chromeH } as const;
-        const frame = () => new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
-        const settle = async () => {
-          /* wait for the movement itself, rather than a fixed sleep that might outlast or undercut it */
-          for (let i = 0; i < 60; i += 1) {
-            if ((g.getAnimations?.({ subtree: true }) ?? []).length === 0) return;
-            await frame();
-          }
-        };
-        const down: number[] = [], up: number[] = [], drift: number[] = [];
-        let prev = g.classList.contains("wpg--retracted");
-        let dir: "down" | "up" = "down";
-        const step = async (to: number) => {
-          const before = el.scrollTop;
-          el.scrollTop = to;
-          await frame();
-          const now = g.classList.contains("wpg--retracted");
-          if (now !== prev) {
-            (dir === "down" ? down : up).push(to);
-            /* the transition's whole run, then the comparison */
-            await settle();
-            drift.push(Math.round(el.scrollTop - to));
-            void before;
-            prev = now;
-          }
-        };
-        for (let t = 0; t <= 300; t += 4) await step(t);
-        dir = "up";
-        for (let t = 300; t >= 0; t -= 4) await step(t);
-        return { down, up, drift, skip: null };
-      }, cls);
-      expect(r, `${name}: no grid`).not.toBeNull();
-      if (r!.skip) { lines.push(`${name.padEnd(14)} — ${r!.skip}`); declined += 1; continue; }
-      measured += 1;
-      const { down, up, drift } = r as { down: number[]; up: number[]; drift: number[] };
-      lines.push(`${name.padEnd(14)} retract@[${down.join(",")}] · restore@[${up.join(",")}] · drift ${JSON.stringify(drift)}`);
-      results.push({ name, down, up, drift });
-      continue;
-    }
-    console.log(`\n══ RETRACT DRIVEN 0→300→0 IN 4px STEPS — ${width}\n` + lines.join("\n"));
-    expect(measured, "no page exercised the retract").toBeGreaterThan(2);
-    /* ⚠️ AND THE DECLINED COUNT IS ASSERTED, NOT IGNORED. A page silently leaving the system is
-       exactly what a census exists to catch — if this ever rises, a page has stopped settling and
-       the reason belongs in a report rather than in a skipped row nobody reads. */
-    expect(declined, "more pages declined to settle than expected — see the reasons above").toBeLessThanOrEqual(1);
-    /* ⚠️ ASSERTED AFTER THE WHOLE CENSUS IS REPORTED. Throwing inside the loop stops at the first
-       page and prints one line about it, which is how a run tells you least at the moment you need
-       most — the first version of this file failed on page one and showed nothing about the rest. */
-    for (const { name, down, up, drift } of results) {
-      expect(down.length, `${name}: the toolbar retracted ${down.length} times on one downward pass — it is oscillating`).toBe(1);
-      expect(up.length, `${name}: the toolbar restored ${up.length} times on one upward pass — it is oscillating`).toBe(1);
-      expect(down[0], `${name}: retracted after only ${down[0]}px of downward travel`).toBeGreaterThanOrEqual(8);
-      for (const d of drift) {
-        expect(Math.abs(d), `${name}: the scroll position moved ${d}px across a transition`).toBeLessThanOrEqual(1);
-      }
-    }
-  });
-}
-
-test("⚠️ NO RETRACTED STATE AT REST, AND NONE ON A STATIC PAGE", async ({ page }) => {
+test("⚠️ NO PAGE RETRACTS ITS TOOLBAR — the mechanism is withdrawn, not half-present", async ({ page }) => {
   const lines: string[] = [];
-  let statics = 0, pinned = 0;
   for (const { name, route, cls } of PAGES) {
     await openRoute(page, route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
-    const r = await page.evaluate((c) => {
+    const r = await page.evaluate(async (c) => {
       const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-      return g ? { type: g.getAttribute("data-wpg-type"), retracted: g.classList.contains("wpg--retracted") } : null;
+      if (!g) return null;
+      const sel = g.getAttribute("data-wpg-settle");
+      const el = sel ? [...g.querySelectorAll(sel)].map((e) => e as HTMLElement).find((e) => e.scrollHeight - e.clientHeight > 2) : null;
+      const band = g.querySelector(".wpg-toolband") as HTMLElement | null;
+      const before = band ? Math.round(band.getBoundingClientRect().height) : null;
+      if (el) { for (let t = 0; t <= 300; t += 20) { el.scrollTop = t; await new Promise((r) => requestAnimationFrame(r)); } }
+      await new Promise((r) => setTimeout(r, 500));
+      return {
+        retractedClass: g.className.includes("wpg--retracted"),
+        before, after: band ? Math.round(band.getBoundingClientRect().height) : null,
+      };
     }, cls);
     expect(r, `${name}: no grid`).not.toBeNull();
-    /* at rest, every page — a page that opened with its controls gone would be a page missing them */
-    expect(r!.retracted, `${name}: is retracted at rest`).toBe(false);
-    if (r!.type === "static") statics += 1; else pinned += 1;
-    lines.push(`${name.padEnd(21)} ${r!.type} · retracted ${r!.retracted}`);
+    /**
+     * ⚠️ THE CLAIM IS THAT IT DOES NOT FOLD, NOT THAT IT DOES NOT MOVE — and the first version of
+     * this case got that wrong. The row's padding tightens when the chrome pins (14/14 → 0/12), so
+     * its band is legitimately ~16px shorter once scrolled; asserting an unchanged height failed on
+     * correct behaviour. What must not happen is the row going AWAY, so the floor is what is
+     * asserted: it is still a row, still most of its resting height, still there.
+     */
+    if (r!.before !== null) {
+      expect(r!.after, `${name}: the toolbar folded away on scroll — the retract is not built`)
+        .toBeGreaterThan(r!.before * 0.6);
+    }
+    expect(r!.retractedClass, `${name}: a retracted state has appeared`).toBe(false);
+    lines.push(`${name.padEnd(21)} band ${r!.before ?? "—"} → ${r!.after ?? "—"}`);
   }
-  console.log("\n══ AT REST (1440)\n" + lines.join("\n"));
-  expect(statics, "no static page was measured").toBeGreaterThan(0);
-  expect(pinned, "no pinned page was measured").toBeGreaterThan(4);
+  console.log("\n══ THE TOOLBAR TRAVELS, IT DOES NOT FOLD (1440)\n" + lines.join("\n"));
 });
