@@ -34,6 +34,7 @@
 import React from "react";
 import { QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
+import type { TaskPaneFork, TaskPaneReceipt } from "../../lib/taskPaneJourney";
 import "./taskPane.css";
 
 /**
@@ -112,8 +113,12 @@ export interface TaskPaneJourney {
   will: React.ReactNode;
   /** `.b-quiet` */
   quiet?: { label: string; onPress: () => void };
-  /** `.b-primary` */
-  prim: string;
+  /**
+   * ⚠️ `.b-primary` — AND `null` IS THE FORK'S OWN STATE (journey round, Phase 2). While the fork is
+   * showing, the pane has not been told what the writer wants, so there is no verb to offer and no
+   * button is rendered. Snooze and Dismiss stay: both are honest answers to "not now".
+   */
+  prim: string | null;
   /** disables `.b-primary` — the mockup styles the state, so the pane can offer it */
   primDisabled?: boolean;
   /** the timeline card — `null` hides it, and the mid drops to one column */
@@ -143,6 +148,14 @@ export interface TaskPaneJourney {
    *  because "this task cannot be snoozed" and "nothing is selected" are different sentences. */
   onSnooze?: (anchor: HTMLElement) => void;
   onDismiss?: () => void;
+  /** the intent fork — present only while no intent is chosen */
+  fork?: TaskPaneFork;
+  /** the collapsed fork, once one is */
+  receipt?: TaskPaneReceipt;
+  /** answers were discarded when the intent changed */
+  clearedNote?: boolean;
+  /** the flow's own standing line — the fill-in's "records nothing and invents nothing" */
+  flowInfo?: string;
 }
 
 export interface TaskPaneProps {
@@ -272,7 +285,68 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                   journey's reassurance was real content rather than a restatement, so it moved to
                   the `When` row's hint, which is where it is read. */}
               <div className="workscroll">
-                <div className="form">{d.body}</div>
+                <div className="form">
+                  {/* ⚠️ THE FORK IS THE FIRST QUESTION (journey round, Phase 2; ref
+                      `design-refs/todo-journey-logic.html`). A journey starts with the DECISION, not
+                      the paperwork: the pane asks what the writer wants to do, and each intent gets
+                      its own short ledger, its own primary verb, and where it belongs a crossover
+                      into a neighbouring journey. Before this the pane opened straight onto a form
+                      that assumed the answer — a send card assumed you had sent it. */}
+                  {d.fork && (
+                    <div className="forkwrap">
+                      <div className="forklbl">
+                        {/* the steer square marks the FORK until an intent is chosen — one marker,
+                            and it points at the thing you are up to, which is this */}
+                        <span className="sqm" aria-hidden />
+                        {d.fork.label}
+                      </div>
+                      <div className="fork" role="group" aria-label={d.fork.label}>
+                        {d.fork.options.map((o) => (
+                          <button type="button" className="fk" key={o.id}
+                            onClick={() => d.fork!.onChoose(o.id)}>
+                            <span className="t">{o.title}</span>
+                            <span className="s">{o.subtitle}</span>
+                            {/* ⚠️ A CROSSOVER SAYS SO BEFORE IT IS PRESSED. Swapping the whole
+                                journey without warning would read as the pane losing its place. */}
+                            {o.crossesTo && <span className="x">crosses to {o.crossesTo} →</span>}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* the collapsed fork — one line, and the way back */}
+                  {d.receipt && (
+                    <div className="receipt">
+                      {d.receipt.kind === "chose" ? (
+                        <>
+                          <span className="rk">You chose</span>
+                          <span className="rv">{d.receipt.label}</span>
+                          <button type="button" className="rlink"
+                            onClick={d.receipt.onChange}>Change</button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="rk">Crossed from</span>
+                          <span className="rv">{d.receipt.journey}</span>
+                          <button type="button" className="rlink"
+                            onClick={d.receipt.onBack}>Go back</button>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ⚠️ SAID ONCE, AND ONLY WHERE ANSWERS WERE ACTUALLY DISCARDED. They answered a
+                      different question, so keeping them would put the old intent's answers under
+                      the new one's verb. */}
+                  {d.clearedNote && (
+                    <div className="cleared">Your answers to the previous choice were cleared.</div>
+                  )}
+
+                  {d.flowInfo && <div className="flowinfo">{d.flowInfo}</div>}
+
+                  {d.body}
+                </div>
               </div>
             </div></div>
 
@@ -326,6 +400,11 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                   a fact about the form; on the button it is a fact about what pressing it will do —
                   and the button is where the writer's hand already is. Absent when complete, because
                   a chip reading "0 to answer" is a control describing its own emptiness. */}
+              {/* ⚠️ NO PRIMARY UNTIL AN INTENT IS CHOSEN — there is no verb to offer yet, and a
+                  button that guessed would be the pane assuming the answer to its own first
+                  question. Snooze and Dismiss above stay, because both are honest answers to
+                  "not now". */}
+              {d.prim !== null && (
               <button type="button" className="ab go" disabled={d.primDisabled} onClick={onPrimary}>
                 {d.prim}
                 {/* ⚠️ NEVER ON BULK, WHICH ALREADY COUNTS IN ITS LABEL. "Log 0 queries" beside a
@@ -336,6 +415,7 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                   <span className="n">{d.missing.length} to answer</span>
                 )}
               </button>
+              )}
             </div>
           </div>
 

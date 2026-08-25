@@ -337,6 +337,90 @@ describe("3 · no class from the retired pane survives", () => {
 });
 
 /**
+ * ⚠️ THE FORK IS THE FIRST QUESTION (journey round, Phase 2) — asserted on RENDERED output, because
+ * every claim here is about what the writer is shown and offered.
+ */
+describe("the fork — the pane opens on the decision, not the paperwork", () => {
+  const FORK = {
+    label: "Where are you with it?",
+    options: [
+      { id: "sent", title: "I’ve sent it", subtitle: "Note what went, and set the clock" },
+      { id: "later", title: "Not yet — hold me to it", subtitle: "Pick a day and it lands back on your list" },
+      { id: "wont", title: "I’m not going to send it", subtitle: "Record that, and close the query honestly", crossesTo: "close" },
+    ],
+    onChoose: () => {},
+  };
+  const forked = (over: Partial<TaskPaneJourney> = {}) =>
+    renderToStaticMarkup(<TaskPane journey={{ ...SEND, ...over }} onPrimary={() => {}} nav={NAV} />);
+
+  it("no primary is rendered until an intent is chosen", () => {
+    const html = forked({ fork: FORK, prim: null, missing: [] });
+    expect(html, "a verb was offered before the pane knew what the writer wanted")
+      .not.toContain('class="ab go"');
+    /* ⚠️ AND THE GUARD ON THE GUARD: the fork must actually be there, or an empty render satisfies
+       this without the pane having drawn anything. */
+    expect(html).toContain('class="fork"');
+    expect(html).toContain("Where are you with it?");
+  });
+
+  it("Snooze and Dismiss remain — both are honest answers to “not now”", () => {
+    const html = forked({ fork: FORK, prim: null, missing: [], onSnooze: () => {}, onDismiss: () => {} });
+    expect(html).toContain(">Snooze<");
+    expect(html).toContain(">Dismiss<");
+  });
+
+  it("every option states a title and a subtitle, and a crossover says so before it is pressed", () => {
+    const html = forked({ fork: FORK, prim: null, missing: [] });
+    for (const o of FORK.options) {
+      expect(html, `the fork lost "${o.title}"`).toContain(o.title);
+      expect(html, `"${o.title}" offers no subtitle`).toContain(o.subtitle);
+    }
+    expect(html, "a crossover gave no warning that it swaps the journey").toContain("crosses to close");
+    /* the two that stay in the journey do NOT wear the crossover line */
+    expect((html.match(/crosses to/g) || []).length, "a non-crossover was labelled as one").toBe(1);
+  });
+
+  it("the steer square marks the fork itself while no intent is chosen", () => {
+    const html = forked({ fork: FORK, prim: null, missing: [] });
+    const lbl = html.slice(html.indexOf('class="forklbl"'), html.indexOf("</div>", html.indexOf('class="forklbl"')));
+    expect(lbl, "the fork carries no marker").toContain('class="sqm"');
+  });
+
+  /* ⚠️ THE FORK OR THE RECEIPT — NEVER BOTH. Two states of one thing on screen at once is how a
+     reader comes to believe the choice has not been made. */
+  it("choosing collapses the fork to a one-line receipt with a way back", () => {
+    const html = forked({ receipt: { kind: "chose", label: "I’ve sent it", onChange: () => {} } });
+    expect(html, "the fork survived the choice").not.toContain('class="fork"');
+    expect(html).toContain("You chose");
+    expect(html).toContain("I’ve sent it");
+    expect(html).toContain(">Change<");
+    /* and the primary is back, because there is a verb now */
+    expect(html).toContain('class="ab go"');
+  });
+
+  it("a crossover's receipt names where it came from and offers the way back", () => {
+    const html = forked({ receipt: { kind: "crossed", label: "x", journey: "send", onBack: () => {} } });
+    expect(html).toContain("Crossed from");
+    expect(html).toContain(">Go back<");
+    expect(html, "a crossover receipt offered Change, which would return to the wrong fork")
+      .not.toContain(">Change<");
+  });
+
+  it("the cleared-answers line renders only when answers were actually discarded", () => {
+    expect(forked({ receipt: { kind: "chose", label: "x", onChange: () => {} } }),
+      "the pane narrated a discard that did not happen")
+      .not.toContain("were cleared");
+    expect(forked({ clearedNote: true })).toContain("Your answers to the previous choice were cleared.");
+  });
+
+  it("a flow's standing line renders where the flow declares one, and nowhere else", () => {
+    expect(forked({})).not.toContain('class="flowinfo"');
+    expect(forked({ flowInfo: "Nothing is recorded and nothing is invented." }))
+      .toContain("Nothing is recorded and nothing is invented.");
+  });
+});
+
+/**
  * ⚠️ THE CHROME DIET (workspace round, Phase 4) — asserted on RENDERED OUTPUT, because every claim
  * here is about what the writer is shown rather than about what was written.
  */

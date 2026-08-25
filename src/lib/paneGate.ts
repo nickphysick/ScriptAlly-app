@@ -97,9 +97,20 @@ const REQ: Record<ReqField, Omit<Requirement, "isAnswered">> = {
   again:   { id: "s-again",   name: "when to be asked again",      label: "Ask you again…",   field: "again" },
 };
 
+/**
+ * ⚠️ REQUIREMENTS FROM A LIST OF FIELDS — the per-FLOW entry point (journey round, Phase 2). The
+ * fork made "what does this journey require" a question with no answer: a close's *close it now*
+ * needs a day and its *leave it open* needs a return date. The flow names its fields; this turns
+ * them into the same `Requirement` objects the four surfaces have always read, so nothing
+ * downstream learns that anything changed.
+ */
+export function requirementsOf(fields: readonly ReqField[]): Requirement[] {
+  return fields.map((f) => ({ ...REQ[f], isAnswered: (a: GateAnswers) => a[f] }));
+}
+
 /** The journey's requirements, as data — the ONE list all four surfaces read. */
 export function requirementsFor(kind: JourneyKind): Requirement[] {
-  return requiredFor(kind).map((f) => ({ ...REQ[f], isAnswered: (a: GateAnswers) => a[f] }));
+  return requirementsOf(requiredFor(kind));
 }
 
 /**
@@ -113,6 +124,16 @@ export const anchorFor = (f: ReqField): string => REQ[f].id;
 /** Those still unanswered, in the form's own order. */
 export const unanswered = (kind: JourneyKind, a: GateAnswers): Requirement[] =>
   requirementsFor(kind).filter((r) => !r.isAnswered(a));
+
+/** The same, from a flow's own list — what the pane reads now the fork exists. */
+export const unansweredOf = (fields: readonly ReqField[], a: GateAnswers): Requirement[] =>
+  requirementsOf(fields).filter((r) => !r.isAnswered(a));
+
+/** The first unmet requirement in a flow's own order, or `null` when it may commit. */
+export function firstMissingOf(fields: readonly ReqField[], a: GateAnswers): ReqField | null {
+  for (const f of fields) if (!a[f]) return f;
+  return null;
+}
 
 /**
  * ⚠️ THE MISSING LINE'S GRAMMAR, BUILT ONCE. "a, b and c" — an Oxford-less list with "and" before

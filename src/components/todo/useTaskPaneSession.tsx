@@ -51,7 +51,11 @@ import { rowHasAnswer, type RecordSweepRow } from "../../lib/materialsSweep";
    now, in the writer's own words, and the strip stating it too was the same fact twice.) */
 import { materialRowsFromAgent, type MaterialRow } from "../../lib/agentMaterials";
 import { formatQueryMaterials } from "../../lib/materials";
-import { journeyKind, firstMissing, isBulkCard, unanswered, anchorFor, requirementsFor, type GateAnswers } from "../../lib/paneGate";
+import { journeyKind, isBulkCard, anchorFor, requirementsOf, unansweredOf, firstMissingOf, type GateAnswers } from "../../lib/paneGate";
+import {
+  JOURNEYS, journeyIdFor, flowFor, intentOf, crossoverOf, CROSSOVER_REASON,
+  type JourneyId, type JourneyFlow,
+} from "../../lib/journeys";
 import { paneCommits, paneCommitValues } from "../../lib/paneCommit";
 import { sendSpecFor, collapseTimelineDuplicates } from "../../lib/todoDock";
 import { cardBucket, waitAnchorMs } from "../../lib/todoBuckets";
@@ -210,6 +214,24 @@ export function useTaskPaneSession(
    * explain where it came from.
    */
   const [extras, setExtras] = React.useState({ alongside: false, also: false });
+  /**
+   * ⚠️ THE FORK'S STATE — WHICH INTENT, AND WHERE THE WRITER CAME FROM (journey round, Phase 2).
+   *
+   * `intentId` is `null` while the fork is showing: the pane opens on the DECISION, not on the
+   * paperwork, and until one is chosen there is no verb to offer. `crossed` is the provenance of a
+   * crossover — closing and nudging are each other's second thoughts — and it is what `Go back`
+   * restores and what the close's REASON is read from.
+   *
+   * ⚠️ A SINGLE-OPTION FORK RESOLVES WITHOUT BEING DRAWN. `offer`, `agentgap` and `bulk` each
+   * declare one intent, because the declaration must be TOTAL — every journey has a fork. A fork
+   * with one option is not a choice, and drawing it would put a click in front of a hand-off and a
+   * cohort table purely to honour a shape. The declaration stays whole; the renderer skips it.
+   */
+  const [intentId, setIntentId] = React.useState<string | null>(null);
+  const [crossed, setCrossed] = React.useState<{ from: JourneyId; fromIntent: string; to: JourneyId } | null>(null);
+  /* ⚠️ SET ONLY WHEN ANSWERS WERE ACTUALLY DISCARDED. A line saying "your answers were cleared" on a
+     fork nobody had answered is the app narrating an event that did not happen. */
+  const [clearedNote, setClearedNote] = React.useState(false);
 
   const seedRows = React.useCallback((card: BoardCard | null): MaterialRow[] => {
     const q = card?.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
@@ -273,6 +295,9 @@ export function useTaskPaneSession(
        may not even have */
     setOpenId(null);
     setExtras({ alongside: false, also: false });
+    setIntentId(null);
+    setCrossed(null);
+    setClearedNote(false);
   }, [card?.key]);
 
   const paneFacts = React.useMemo(() => {
@@ -678,8 +703,12 @@ export function useTaskPaneSession(
   }, [host.jumpToSection]);
 
   function dockPrimary(card: BoardCard) {
+    /* ⚠️ NO INTENT, NO PRIMARY — so there is nothing to gate. The bar renders no primary while the
+       fork is showing, which makes this unreachable rather than merely unnecessary; the guard is
+       here because a caller could still reach it. */
+    if (!activeFlow) return;
     const kind = journeyKind(card);
-    const missing = firstMissing(kind, gateAnswers(card));
+    const missing = firstMissingOf(activeFlow.questions, gateAnswers(card));
     if (missing) {
       /* ⚠️ THE BAR NAMES ALL OF THEM AND THE PANE OPENS THE FIRST. Naming only the first would
          make the writer press the button once per missing answer to discover the next. */
@@ -741,6 +770,85 @@ export function useTaskPaneSession(
     })();
   }
 
+  /* ══ THE FORK, DERIVED (journey round, Phase 2) ═════════════════════════════════════════════
+     Everything below reads the declaration and the two pieces of state above; nothing branches on
+     a task type, and nothing is stored. */
+
+  /** which journey the pane is showing — the card's, unless a crossover swapped it */
+  const activeId: JourneyId | null = !card ? null : (crossed?.to ?? journeyIdFor(card));
+
+  /** the intent in force: the writer's choice, or the only one there is */
+  const effectiveIntent: string | null = (() => {
+    if (!activeId) return null;
+    if (intentId) return intentId;
+    const opts = JOURNEYS[activeId].fork.options;
+    return opts.length === 1 ? opts[0].id : null;
+  })();
+
+  /** the flow that intent opens — `null` while the fork is showing */
+  const activeFlow: JourneyFlow | null =
+    activeId && effectiveIntent ? flowFor(activeId, effectiveIntent) ?? null : null;
+
+  /**
+   * ⚠️ CHOOSING AN INTENT IS THE WHOLE OF THIS FUNCTION, INCLUDING THE CROSSOVER. A crossover swaps
+   * the JOURNEY — band, deed, flow and primary together — because it is a different act, not a
+   * different branch of the same one. Doing it here rather than at the button means the pane cannot
+   * end up half-crossed.
+   */
+  function chooseIntent(id: string) {
+    if (!activeId) return;
+    const to = crossoverOf(activeId, id);
+    if (to) {
+      /* ⚠️ THE ORIGIN IS REMEMBERED, NOT DISCARDED. `Go back` restores it, and the close's REASON is
+         read from it — arriving from the send fork means a withdrawal, arriving from the nudge fork
+         means a silence, and the writer is never asked to categorise their own disappointment. */
+      setCrossed({ from: activeId, fromIntent: id, to });
+      setIntentId(null);
+      setClearedNote(false);
+      setPaneBody({ rows: seeds.current.rows(card ?? null), ...BLANK });
+      setOpenId(null);
+      setExtras({ alongside: false, also: false });
+      setShowMissing(false);
+      return;
+    }
+    /* ⚠️ CHANGING INTENT DISCARDS THE ANSWERS GIVEN UNDER THE OLD ONE — they answered a different
+       question. Only where some were actually given does the pane say so. */
+    const hadAnswers = !!activeFlow && activeFlow.questions.some((f) => gateAnswers(card!)[f]);
+    if (effectiveIntent && effectiveIntent !== id && hadAnswers) {
+      setPaneBody({ rows: seeds.current.rows(card ?? null), ...BLANK });
+      setExtras({ alongside: false, also: false });
+      setClearedNote(true);
+    } else if (effectiveIntent !== id) {
+      setClearedNote(false);
+    }
+    setIntentId(id);
+    setOpenId(null);
+    setShowMissing(false);
+  }
+
+  /** back to the fork — the receipt's `Change`. Answers under the old intent go with it. */
+  function changeIntent() {
+    if (!card) return;
+    const hadAnswers = !!activeFlow && activeFlow.questions.some((f) => gateAnswers(card)[f]);
+    setPaneBody({ rows: seeds.current.rows(card), ...BLANK });
+    setExtras({ alongside: false, also: false });
+    setOpenId(null);
+    setShowMissing(false);
+    setIntentId(null);
+    setClearedNote(hadAnswers);
+  }
+
+  /** the crossover receipt's `Go back` — restores the origin journey and its fork */
+  function goBack() {
+    setCrossed(null);
+    setIntentId(null);
+    setClearedNote(false);
+    setPaneBody({ rows: seeds.current.rows(card ?? null), ...BLANK });
+    setExtras({ alongside: false, also: false });
+    setOpenId(null);
+    setShowMissing(false);
+  }
+
   const journey: TaskPaneJourney | null = !card ? null : buildJourney({
                     card: card,
                     facts: paneFacts,
@@ -768,6 +876,9 @@ export function useTaskPaneSession(
                       const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
                       return q?.status ? { statusWord: getStatusLabel(q.status) } : {};
                     })(),
+                    /* ⚠️ THE PRIMARY IS THE FLOW'S — `null` while the fork is showing, which is
+                       what removes the button rather than disabling it. */
+                    primary: activeFlow ? activeFlow.primary : null,
                     will: paneWill,
                     body: (
                       isBulkCard(card) ? (
@@ -797,7 +908,7 @@ export function useTaskPaneSession(
                          * `requirementsFor(kind)`, and each row's `answered` is the gate's own
                          * predicate over the gate's own answers.
                          */
-                        questions={requirementsFor(journeyKind(card)).map((r) => ({
+                        questions={requirementsOf(activeFlow?.questions ?? []).map((r) => ({
                           id: r.id, field: r.field, label: r.label,
                           answered: r.isAnswered(gateAnswers(card)),
                           /* ⚠️ THE WHOLE-MANUSCRIPT PARCEL IS ANSWERED BY THE CARD, NOT BY A
@@ -813,7 +924,7 @@ export function useTaskPaneSession(
                            and the missing line names, so the open row cannot point somewhere the
                            sentence does not mention. Nothing open once the last is answered, and
                            nothing open on a note, which requires nothing. */
-                        openId={openId ?? unanswered(journeyKind(card), gateAnswers(card))[0]?.id ?? null}
+                        openId={openId ?? unansweredOf(activeFlow?.questions ?? [], gateAnswers(card))[0]?.id ?? null}
                         onOpen={jumpTo}
                         onAnswered={() => setOpenId(null)}
                         extras={extras}
@@ -839,6 +950,38 @@ export function useTaskPaneSession(
                        command bar and act on the open task; the band's copies put two of each on one screen,
                        and two controls for one act is how they come to disagree about whether it is available. */
                     btns: [],
+                    /* ⚠️ THE FORK, OR THE RECEIPT — never both, and never neither. A journey whose
+                       fork has one option resolves without drawing it; every other journey shows
+                       the fork until an intent is chosen and the receipt afterwards. */
+                    ...(activeId ? {
+                      band: JOURNEYS[activeId].band,
+                      ...(effectiveIntent === null && JOURNEYS[activeId].fork.options.length > 1
+                        ? { fork: {
+                            label: JOURNEYS[activeId].fork.label,
+                            options: JOURNEYS[activeId].fork.options.map((o) => ({
+                              id: o.id, title: o.title, subtitle: o.subtitle,
+                              crossesTo: crossoverOf(activeId, o.id) ?? undefined,
+                            })),
+                            onChoose: chooseIntent,
+                          } }
+                        : {}),
+                      ...(effectiveIntent && JOURNEYS[activeId].fork.options.length > 1
+                        ? { receipt: crossed
+                            ? { kind: "crossed" as const, label: JOURNEYS[crossed.from].fork.label,
+                                journey: crossed.from, onBack: goBack }
+                            : { kind: "chose" as const,
+                                label: intentOf(activeId, effectiveIntent)?.title ?? "",
+                                onChange: changeIntent } }
+                        : {}),
+                      /* a crossover arrived here without choosing THIS journey's intent, so its own
+                         fork still has to be answered — the receipt above says where it came from */
+                      ...(crossed && effectiveIntent === null
+                        ? { receipt: { kind: "crossed" as const, label: JOURNEYS[crossed.from].fork.label,
+                                       journey: crossed.from, onBack: goBack } }
+                        : {}),
+                      ...(clearedNote ? { clearedNote: true } : {}),
+                      ...(activeFlow?.info ? { flowInfo: activeFlow.info } : {}),
+                    } : {}),
                     onOpenQuery: () => paneVerbs.openQuery.onPress(),
                     /* ⚠️ THE IDS COME FROM THE QUERY, AND ABSENCE IS AN ABSENT LINK. The card holds
                        `msTitle` and an `agentId`; the manuscript's id is the query's. Where either
@@ -867,7 +1010,10 @@ export function useTaskPaneSession(
                     /* ⚠️ THE ONE LIST, HANDED OVER ONCE. The chip counts it, the line names it and
                        the square sits on its first entry — so the three cannot come to disagree,
                        because there is one array between them. */
-                    missing: unanswered(journeyKind(card), gateAnswers(card))
+                    /* ⚠️ THE FLOW'S LIST, NOT THE JOURNEY'S. While the fork is showing there is
+                       nothing to be missing — no intent means no questions — so this is empty and
+                       the primary is absent rather than counting zero. */
+                    missing: unansweredOf(activeFlow?.questions ?? [], gateAnswers(card))
                       .map((r) => ({ id: r.id, name: r.name })),
                     showMissing,
                     /* ⚠️ THE MISSING LINE'S LINKS TAKE THE SAME ROUTE AS THE PRIMARY'S GATE —

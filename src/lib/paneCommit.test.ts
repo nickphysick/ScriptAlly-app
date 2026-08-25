@@ -392,8 +392,20 @@ describe("⚠️ a question the gate can require is a question the form asks", (
        ⚠️ AND THE `answered` HALF IS ASSERTED TOO. A ledger built from the declaration but ticked
        from a second reading of the values would still drift — so the row's `answered` must come
        from the requirement's own predicate over the gate's own answers. */
+    /* ⚠️ RETARGETED, AND THE LAW IS UNCHANGED: the form draws what the gate requires. What moved is
+       the LEVEL — the fork made "what does this journey require" a question with no answer, since a
+       close's *close it now* needs a day and its *leave it open* needs a return date. The ledger
+       reads the FLOW's list now, and while the fork is showing that list is empty, which is why the
+       primary is absent rather than counting zero. */
     expect(hook, "the ledger stopped reading the declaration")
-      .toContain("requirementsFor(journeyKind(card)).map");
+      .toContain("requirementsOf(activeFlow?.questions ?? []).map");
+    expect(hook, "the open row stopped reading the same list")
+      .toContain("unansweredOf(activeFlow?.questions ?? [], gateAnswers(card))");
+    expect(hook, "the gate stopped reading the flow it is gating")
+      .toContain("firstMissingOf(activeFlow.questions, gateAnswers(card))");
+    /* the per-JOURNEY readings are gone from the pane — a survivor would be a second source */
+    expect(hook, "a per-journey required list is back beside the flow's")
+      .not.toMatch(/requirementsFor\(journeyKind|unanswered\(journeyKind|firstMissing\(kind/);
     expect(hook, "a row's tick stopped reading the gate's own predicate")
       .toContain("answered: r.isAnswered(gateAnswers(card))");
     expect(hook, "`sendSpecFor` decides the parcel section again — a fill-in has none")

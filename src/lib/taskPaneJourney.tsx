@@ -85,6 +85,21 @@ export interface JourneyInputs {
   /** the action bar's verbs — see `TaskPaneJourney` for why absence is not the same as disabled */
   onSnooze?: (anchor: HTMLElement) => void;
   onDismiss?: () => void;
+  /* ── the fork (journey round, Phase 2) ──────────────────────────────────────────────────── */
+  /** the band's paper, from the JOURNEY's declaration — a crossover changes it with everything else */
+  band?: "now" | "house" | "yours";
+  fork?: TaskPaneFork;
+  receipt?: TaskPaneReceipt;
+  /** answers were discarded when the intent changed, and the pane says so once */
+  clearedNote?: boolean;
+  /** a standing line above the ledger where the flow declares one */
+  flowInfo?: string;
+  /**
+   * ⚠️ THE PRIMARY IS THE FLOW'S, AND `null` MEANS THERE IS NO VERB TO OFFER YET. While the fork is
+   * showing the pane has not been told what the writer wants, so a button would have to guess.
+   * Snooze and Dismiss stay — both are honest answers to "not now".
+   */
+  primary?: string | null;
 }
 
 /**
@@ -143,6 +158,23 @@ function toEntry(e: JourneyInputs["events"][number]): TaskPaneEvent {
     ? { ...base, kind: "status", status }
     : { ...base, kind: "mark", ...(e.incoming ? { incoming: true } : {}) };
 }
+
+export interface TaskPaneForkOption {
+  id: string;
+  title: string;
+  subtitle: string;
+  /** the journey this intent crosses to, where it does — the contract's "crosses to closing →" */
+  crossesTo?: string;
+}
+export interface TaskPaneFork {
+  label: string;
+  options: TaskPaneForkOption[];
+  onChoose: (id: string) => void;
+}
+/** the collapsed fork: what the writer chose, or where they crossed from */
+export type TaskPaneReceipt =
+  | { kind: "chose"; label: string; onChange: () => void }
+  | { kind: "crossed"; label: string; journey: string; onBack: () => void };
 
 export function buildJourney(input: JourneyInputs): TaskPaneJourney {
   const { card: c } = input;
@@ -206,7 +238,11 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
     : null;
 
   return {
-    cls: `u-${GROUP_CLASS[liveFamily(c)]}` as TaskPaneJourney["cls"],
+    /* ⚠️ THE BAND IS THE JOURNEY'S WHERE THE JOURNEY DECLARES ONE (Phase 2) — a crossover changes
+       band, deed, flow and primary TOGETHER, and reading `liveFamily` here would leave the paper
+       behind on the origin journey. `liveFamily` is still the fallback for any caller that supplies
+       no journey, which is what keeps the older locks and the fixtures working. */
+    cls: `u-${input.band ?? GROUP_CLASS[liveFamily(c)]}` as TaskPaneJourney["cls"],
     /* ⚠️ THE SENTENCE'S PARTS COME FROM THE CARD THE LIST ALREADY BUILT — `msTitle`, `who`, and the
        agency the band already splits out of `record`. Nothing is looked up again, so the pane and
        the row cannot name different people. */
@@ -264,13 +300,21 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
     missing: input.missing,
     showMissing: input.showMissing,
     onJump: input.onJump,
-    prim: input.bulk
-      ? `Log ${input.bulk.touched} ${input.bulk.touched === 1 ? "query" : "queries"}`
-      : paneCopy(c).primary,
+    /* ⚠️ THE PRIMARY COMES FROM THE FLOW NOW (Phase 2), and `null` is the fork's own state — no
+       intent, no verb. The bulk journey keeps its counted label, which is the flow's primary with
+       the cohort's number in it rather than a second source. */
+    prim: input.primary === null ? null
+      : input.bulk
+        ? `Log ${input.bulk.touched} ${input.bulk.touched === 1 ? "query" : "queries"}`
+        : input.primary ?? paneCopy(c).primary,
     primDisabled: input.bulk ? input.bulk.touched === 0 : input.primDisabled,
     tl,
     onOpenQuery: c.relatedRecordId ? input.onOpenQuery : undefined,
     onSnooze: input.onSnooze,
     onDismiss: input.onDismiss,
+    fork: input.fork,
+    receipt: input.receipt,
+    clearedNote: input.clearedNote,
+    flowInfo: input.flowInfo,
   };
 }

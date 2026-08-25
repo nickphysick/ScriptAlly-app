@@ -168,3 +168,72 @@ describe("⚠️ one resolver, and it agrees with the shipped behaviour", () => 
     expect(intentOf("send", "not-an-intent")).toBeUndefined();
   });
 });
+
+/**
+ * ⚠️ THE FORK'S BEHAVIOUR, AS PURE FUNCTIONS (journey round, Phase 2). What the SESSION does with
+ * these — clearing answers, remembering the origin — is measured on the page; what the declaration
+ * says about them is here, so a crossover that lost its way back fails without a browser.
+ */
+describe("⚠️ the fork resolves, and a single-option fork is not a choice", () => {
+  /* ⚠️ THE THREE ONE-OPTION FORKS ARE DECLARED AND DELIBERATELY NOT DRAWN. The declaration must be
+     TOTAL — every journey has a fork — but a fork with one option is not a choice, and drawing it
+     would put a click in front of a hand-off and a cohort table purely to honour a shape. */
+  it("exactly the three journeys the contract does not draw carry a single intent", () => {
+    const single = IDS.filter((id) => JOURNEYS[id].fork.options.length === 1);
+    expect(single.sort()).toEqual(["agentgap", "bulk", "offer"]);
+    /* and every one of them opens onto a flow rather than crossing somewhere */
+    for (const id of single) {
+      expect(JOURNEYS[id].fork.options[0].target.kind, `${id} crosses instead of resolving`).toBe("flow");
+    }
+  });
+
+  it("the contract's five each offer a real choice", () => {
+    for (const id of ["send", "nudge", "close", "fillin", "note"] as JourneyId[]) {
+      expect(JOURNEYS[id].fork.options.length, `${id} offers no choice`).toBeGreaterThan(1);
+    }
+  });
+
+  /* ⚠️ EVERY CROSSOVER HAS A WAY BACK, and it is the origin journey rather than a default. A "go
+     back" that landed somewhere else would be worse than none. */
+  it("every crossover names a journey that exists and is not itself", () => {
+    let n = 0;
+    for (const id of IDS) {
+      for (const o of JOURNEYS[id].fork.options) {
+        const to = crossoverOf(id, o.id);
+        if (!to) continue;
+        n++;
+        expect(JOURNEYS[to], `${id}:${o.id} crosses nowhere`).toBeTruthy();
+        expect(to, `${id}:${o.id} crosses to itself`).not.toBe(id);
+      }
+    }
+    expect(n, "no crossovers found — this case measured nothing").toBeGreaterThan(1);
+  });
+
+  /* ⚠️ A DELAY INTENT NEVER WRITES TO THE QUERY. Recon confirmed the snooze primitive touches a
+     TASK FLAG and nothing else; a delay flow that declared `record-send` would be a "not yet" that
+     recorded a send. */
+  it("no delay flow writes to the query", () => {
+    const delays = [["send", "later"], ["nudge", "wait"], ["close", "leave"]] as const;
+    for (const [id, intent] of delays) {
+      const w = flowFor(id, intent)!.writes.kind;
+      expect(["snooze", "mute"], `${id}:${intent} writes ${w} — a delay must not touch the query`)
+        .toContain(w);
+    }
+  });
+
+  /* ⚠️ AND EVERY FLOW THAT REQUIRES NOTHING SAYS WHY. `[]` is a decision on four flows — the tick,
+     "I can't remember", and the two hand-offs — and each carries either an `info` line or a
+     hand-off write, so an empty list can never be a forgotten one. */
+  it("every flow requiring nothing is either a hand-off or says what it does", () => {
+    let n = 0;
+    for (const id of IDS) {
+      for (const [flowId, f] of Object.entries(JOURNEYS[id].flows)) {
+        if (f.questions.length) continue;
+        n++;
+        const excused = f.writes.kind === "hand-off" || !!f.info;
+        expect(excused, `${id}.${flowId} requires nothing and does not say why`).toBe(true);
+      }
+    }
+    expect(n, "no question-free flows found — this case measured nothing").toBeGreaterThan(2);
+  });
+});
