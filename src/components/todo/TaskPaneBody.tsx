@@ -2,28 +2,41 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * TaskPaneBody — the pane's send form.
+ * TaskPaneBody — the pane's send form, as a LEDGER OF FIXED ROWS (workspace round, Phase 3; ref
+ * `design-refs/todo-actionbar-corrected.html` and `todo-workspace-final.html`).
  *
- * ⚠️ THE MATERIALS ARE A CONTROL NOW, NOT A ROW OF TICKS (pane round, Phase 3). It was
- * `todo-materials-contract.html`'s `What goes` — a read-only row of `.chip`s stating what the
- * agency asked for. The pane contract asks the question the writer can actually answer: *what did
- * you put in the envelope?* — a unit, an amount, and anything that went alongside. Those are not
- * the same fact, and the old one could not be corrected: an agency that asked for three chapters
- * and got five had nowhere to say so.
+ * ⚠️ ONE QUESTION AT A TIME, AND THE ROW NEVER MOVES. Each required answer owns a 40px row whether
+ * it is open, unanswered or answered — open, the control sits beneath it; answered and closed, the
+ * answer sits at the row's right-hand end with a sage tick and a muted `Edit`. So the form's height
+ * changes only by the height of the OPEN question's body, and the ledger above it is stable to read
+ * and to click. What this replaces is a stack of `.sect`s all open at once, where four questions
+ * competed for attention and the answers were only visible as lit pills.
  *
- * ⚠️ THE CONTROL IS `SampleSpecPicker`, MOUNTED DIRECTLY — not a copy of it, and not the retired
- * `PaneJourney` wrapper it used to live inside. It already owns the sample's vocabulary, its
- * physics and its encoding; what it did not have was a way to say "one parcel, one measure", and
- * that is `mode="sent"`. The rest of the form is the contract's: `When`, and `Anything else?`.
+ * ⚠️ THE ROWS ARE THE GATE'S OWN DECLARATION, RENDERED. `questions` is `requirementsFor(kind)` with
+ * each row's `answered` taken from the same predicate the gate refuses on — so the chip's count,
+ * the missing line's names, the open row and the ledger are five readings of ONE array rather than
+ * five derivations that can drift. A question the gate can require is a question the form asks, by
+ * construction: there is no second table saying which sections to draw.
  *
- * ⚠️ THE FIELDS REPORT UPWARD; THEY DO NOT WRITE. The pane's primary is the one completion path, so
- * the body's whole job is to hold what the writer typed and hand it over when asked. That is the
- * carried behaviour — a body that wrote on its own would be a second way to finish a task.
+ * ⚠️ THE STEER SQUARE IS THE OPEN ROW'S. Disclosure and steer were two mechanisms pointing at the
+ * same thing — a `.sect.next` pseudo-element beside a form where everything was visible — and they
+ * are one now: the row that is open IS the one you are up to.
+ *
+ * ⚠️ THE FIELDS REPORT UPWARD; THEY DO NOT WRITE, AND THEY DO NOT OWN WHICH ROW IS OPEN. The pane's
+ * primary is the one completion path, and the session owns `openId` because the GATE has to be able
+ * to open a row: pressing an incomplete primary opens the first unanswered question. A body that
+ * held that state would need the gate to reach into it.
+ *
+ * ⚠️ THE PARCEL'S CONTROL IS `SampleSpecPicker`, MOUNTED DIRECTLY — not a copy of it. It already
+ * owns the sample's vocabulary, its physics and its encoding; what it did not have was a way to say
+ * "one parcel, one measure", and that is `mode="sent"`. It is also the reason the parcel row is the
+ * one that does not auto-advance: see `onAnswered`.
  */
 import React from "react";
 import { SampleSpecPicker } from "../materials/SampleSpecPicker";
 import { BrandDatePicker } from "../forms/BrandDatePicker";
-import type { MaterialRow } from "../../lib/agentMaterials";
+import { formatSampleSpecs, type MaterialRow } from "../../lib/agentMaterials";
+import type { ReqField } from "../../lib/paneGate";
 
 /**
  * ⚠️ EVERY CHOICE IS A UNION WITH `null` FOR UNCHOSEN, AND `null` IS NEVER A DEFAULT (finishing
@@ -109,74 +122,83 @@ export const remindIsOn = (v: RemindChoice | null, label: string): boolean =>
        /* the custom option is the DATE member now — it was a lead with an invented number */
        || (v.kind === "date" && label === "A custom date…"));
 
+/**
+ * One row of the ledger. Built by the session from `requirementsFor(kind)` and the gate's own
+ * answers — never assembled here, so the form cannot ask a question the gate does not know about
+ * or skip one it does.
+ */
+export interface PaneQuestion {
+  /** the requirement's DOM anchor — `s-unit`, `s-when`, … (bare; this mount prefixes it) */
+  id: string;
+  /** the field key, so the control is chosen by the declaration rather than by row position */
+  field: ReqField;
+  /** the ledger's own heading, from the declaration */
+  label: string;
+  /** answered? — the GATE's predicate, never a second reading of the same values */
+  answered: boolean;
+}
+
 export interface TaskPaneBodyProps {
   value: SendBodyValues;
   onChange: (v: SendBodyValues) => void;
   /**
-   * ⚠️ SHOWN, NEVER CHOSEN (Phase 3). The agency's own stated window is the best information on
-   * record and the worst possible default: pre-selecting it would put the agency's answer in the
-   * writer's mouth, and the strip would then record it as something they said. It renders as a
-   * quiet line under the pills instead — there to be agreed with, or not.
+   * ⚠️ SHOWN, NEVER CHOSEN (Phase 3, finishing round). The agency's own stated window is the best
+   * information on record and the worst possible default: pre-selecting it would put the agency's
+   * answer in the writer's mouth, and the strip would then record it as something they said. It
+   * renders as a quiet line under the pills instead — there to be agreed with, or not.
    */
   statedWeeks?: number | null;
   /**
-   * ⚠️ THE SAMPLE QUESTION IS ASKED ONLY WHERE A SAMPLE IS GOING. A nudge, a close and a note have
-   * no parcel, so the whole section is absent rather than an empty control — the same rule the tile
-   * row and the story column already follow.
-   */
-  sample?: boolean;
-  /**
-   * ⚠️ THE EXPECTATION PAIR IS ITS OWN FLAG, because it answers a different question from the
-   * parcel (popup round, Phase 3). Both hung off `sample`, so drawing the parcel section on the
-   * materials fill-in — which records what ALREADY went — also asked when a reply is expected and
-   * when to be reminded about it. Those are questions about a send that is about to happen, and
-   * this journey is about one that already did.
-   *
-   * Each section is drawn where the declaration names it, which is the same list the gate refuses
-   * on: a question the writer is asked is a question that can be required, and the reverse.
-   */
-  expectations?: boolean;
-  /**
    * ⚠️ A NOTE'S OWN WORDS, AS THE CENTREPIECE (finishing round, Phase 5). Present only on the note
-   * journey, and its presence is also what removes the When section: a note is dated by the tick,
-   * so asking when it happened is asking about an event that has not happened yet.
+   * journey, and a note requires nothing — so it has no ledger at all, which is the same statement
+   * made twice from one place rather than a second branch.
    */
   note?: { text: string; added: string };
+  /** the ledger's rows, in the declaration's own order */
+  questions?: PaneQuestion[];
+  /** which row is open — the session's, because the gate has to be able to change it */
+  openId?: string | null;
+  /** open a row: `Edit`, a click on a closed row's head, or the gate pointing at what is missing */
+  onOpen?: (id: string) => void;
   /**
-   * ⚠️ THE STEER SQUARE'S SECTION — the id of the FIRST unanswered requirement, from the one
-   * declaration (steer round, Phase 2). `null` when the journey is complete and on journeys that
-   * require nothing, and in both cases no square renders at all: a marker pointing at the next
-   * thing to do is a lie when there is no next thing.
+   * ⚠️ "THE WRITER HAS FINISHED THIS ROW", WHICH IS NOT THE SAME EVENT AS "THIS ROW IS NOW
+   * ANSWERED" — and the difference is the whole reason this is a callback rather than an effect.
    *
-   * ⚠️ IT IS AN ID, NOT A BOOLEAN PER SECTION. Passing "am I next?" down to each section would
-   * make every section a place the answer could be wrong; passing the id means exactly one can
-   * match, by construction.
+   * A pill click is one act and completes its question, so it advances. The PARCEL is two acts —
+   * which unit, and how many — and `SampleSpecPicker` seeds a default amount and puts the caret in
+   * it the moment a unit is chosen, so advancing there would close the row under a caret the
+   * control had just placed. The unit row therefore does NOT auto-advance; the writer moves on by
+   * clicking the next row, which every closed row accepts. Stated as a decision, not an omission.
    */
-  nextId?: string | null;
+  onAnswered?: () => void;
   /**
-   * ⚠️ A PREFIX FOR THIS MOUNT'S SECTION IDS, defaulting to `""` so `/todo` is byte-identical
+   * ⚠️ A PREFIX FOR THIS MOUNT'S ROW IDS, defaulting to `""` so `/todo` is byte-identical
    * (tasks-workflow, Pack B Phase 1).
    *
    * Every workspace page in this app stays MOUNTED, so the moment a second surface renders this
    * component the document holds two `id="s-unit"`, two `id="s-when"`, and so on. Two things break,
    * and the first looks like a feature bug rather than an HTML one:
    * `document.querySelector('.tpn #s-unit')` returns the FIRST match, so a "jump to the missing
-   * answer" scrolls a pane the writer cannot see; and duplicate ids make any `aria-labelledby` or
+   * answer" reaches a pane the writer cannot see; and duplicate ids make any `aria-labelledby` or
    * label-`for` resolving by id ambiguous. Scoping the query to a ref fixes the first and NOT the
    * second — only unique ids fix the second.
    *
-   * ⚠️ IT PREFIXES THE RENDERED ATTRIBUTE ONLY. `nextId` and `paneGate`'s `REQ` table keep the BARE
-   * names, so `sect()`'s comparison and `anchorFor` are untouched — one vocabulary for what a
-   * section IS, and a per-mount name for where it lives in the document.
+   * ⚠️ IT PREFIXES THE RENDERED ATTRIBUTE ONLY. `openId` and `paneGate`'s `REQ` table keep the BARE
+   * names, so the comparison below and `anchorFor` are untouched — one vocabulary for what a row
+   * IS, and a per-mount name for where it lives in the document.
    */
   idPrefix?: string;
+  /**
+   * ⚠️ THE CLOSE JOURNEY'S REASSURANCE, ON THE ROW WHERE IT IS READ (workspace round, Phase 4). It
+   * was the form's sub-line — "Closing records no response — not a rejection…" — three inches above
+   * the question it reassures about. Nothing else supplies one today; the prop exists because the
+   * sentence belongs to the JOURNEY and the row belongs to the form, and neither can state the
+   * other's business.
+   */
+  whenHint?: React.ReactNode;
   /** the free-plan `.upsell`; omitted for Pro */
   upsell?: React.ReactNode;
 }
-
-/* (the three When options are `DAY_OPTIONS` now — each carries what choosing it MAKES, so the
-   label and the value it produces cannot drift apart, and "Another date…" says "picker" rather
-   than pretending to be a value.) */
 
 /** today as YYYY-MM-DD, local — the picker's own vocabulary */
 const todayYmd = (): string => {
@@ -184,13 +206,147 @@ const todayYmd = (): string => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
-export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sample, expectations, note, statedWeeks, nextId, idPrefix = "", upsell }) => {
-  /* one helper, so no section can decide for itself whether it is next */
-  const sect = (id: string) => (id === nextId ? "sect next" : "sect");
-  /* ⚠️ THE DOM NAME, WHICH IS NOT THE SECTION'S NAME. `sect()` above compares the BARE id, because
-     that is what `paneGate` emits and what `nextId` carries; this is only what the attribute says.
-     Default `""` makes it the identity function, so `/todo` renders exactly what it rendered. */
+/** "12 August" — a date in the ledger's own register, which is prose rather than a stamp */
+const longDay = (ymd: string): string =>
+  new Date(`${ymd}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+
+/**
+ * ⚠️ THE ANSWER, IN THE WORDS THE WRITER CHOSE IT BY. Every one of these reads the option tables
+ * above rather than restating a label, so the pill that is lit and the answer in the row cannot
+ * come to say different things. A date is the exception and reads as a date, because "Another
+ * date…" is the name of a control and not the name of an answer.
+ */
+function answerText(field: ReqField, v: SendBodyValues): string | null {
+  if (field === "unit") return formatSampleSpecs(v.rows, "and");
+  if (field === "when") {
+    if (!v.when) return null;
+    if (v.when.kind === "date") return v.when.ymd ? longDay(v.when.ymd) : null;
+    return DAY_OPTIONS.find((o) => dayIsOn(v.when, o.label))?.label ?? null;
+  }
+  if (field === "expect") {
+    if (!v.expect) return null;
+    if (v.expect.kind === "date") return v.expect.ymd ? longDay(v.expect.ymd) : null;
+    return `${v.expect.weeks} weeks`;
+  }
+  if (field === "remind") {
+    if (!v.remind) return null;
+    if (v.remind.kind === "date") return v.remind.ymd ? longDay(v.remind.ymd) : null;
+    return REMIND_OPTIONS.find((o) => remindIsOn(v.remind, o.label))?.label ?? null;
+  }
+  return null;
+}
+
+export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
+  value, onChange, note, statedWeeks, questions = [], openId = null, onOpen, onAnswered,
+  idPrefix = "", whenHint, upsell,
+}) => {
+  /* ⚠️ THE DOM NAME, WHICH IS NOT THE ROW'S NAME. `openId` carries the BARE id, because that is
+     what `paneGate` emits; this is only what the attribute says. Default `""` makes it the identity
+     function, so `/todo` renders exactly the ids it has always rendered. */
   const domId = (id: string) => `${idPrefix}${id}`;
+
+  /** the control a row opens onto — chosen by the declaration's field, never by row position */
+  const control = (field: ReqField): React.ReactNode => {
+    if (field === "unit") return (
+      <>
+        <SampleSpecPicker
+          rows={value.rows}
+          onChange={(rows) => onChange({ ...value, rows })}
+          /* ⚠️ "and", NOT "or". A requirement offers a choice; a record describes one parcel. */
+          join="and"
+          mode="sent"
+          idPrefix="tpn-sent"
+        />
+        <div className="hint">Pick the unit you actually sent in — one only.</div>
+      </>
+    );
+    if (field === "when") return (
+      <>
+        <div className="seg">
+          {DAY_OPTIONS.map((o) => (
+            <button type="button" key={o.label}
+              className={dayIsOn(value.when, o.label) ? "on" : undefined}
+              onClick={() => {
+                const made = o.make();
+                onChange({ ...value, when: made === "picker" ? { kind: "date", ymd: "" } : made });
+                /* ⚠️ THE PICKER IS NOT AN ANSWER YET — it reveals a field, so advancing here would
+                   skip past a question the gate still counts as unanswered. */
+                if (made !== "picker") onAnswered?.();
+              }}>{o.label}</button>
+          ))}
+        </div>
+        {/* ⚠️ THE PICKER IS THE APP'S OWN, and expect-back opens the SAME one — the brief's rule,
+            and the reason a second date control would be wrong is that two pickers on one form is
+            two places for a date to come from. */}
+        {value.when?.kind === "date" && (
+          <div style={{ marginTop: 8 }}>
+            <BrandDatePicker value={value.when.ymd} placeholder="Pick the day it went"
+              max={todayYmd()}
+              onChange={(ymd) => { onChange({ ...value, when: { kind: "date", ymd } }); if (ymd) onAnswered?.(); }} />
+          </div>
+        )}
+        {whenHint && <div className="hint">{whenHint}</div>}
+      </>
+    );
+    if (field === "expect") return (
+      <>
+        <div className="seg">
+          {EXPECT_WEEKS.map((w) => (
+            <button type="button" key={w}
+              className={value.expect?.kind === "weeks" && value.expect.weeks === w ? "on" : undefined}
+              onClick={() => { onChange({ ...value, expect: { kind: "weeks", weeks: w } }); onAnswered?.(); }}>{w} weeks</button>
+          ))}
+          <button type="button"
+            className={value.expect?.kind === "date" ? "on" : undefined}
+            onClick={() => onChange({ ...value, expect: { kind: "date", ymd: "" } })}>Another date…</button>
+        </div>
+        {value.expect?.kind === "date" && (
+          <div style={{ marginTop: 8 }}>
+            <BrandDatePicker value={value.expect.ymd} placeholder="Pick when you expect to hear"
+              min={todayYmd()}
+              onChange={(ymd) => { onChange({ ...value, expect: { kind: "date", ymd } }); if (ymd) onAnswered?.(); }} />
+          </div>
+        )}
+        {/* ⚠️ THE AGENCY'S OWN FIGURE, STATED AND NOT CHOSEN. Absent where the record holds none —
+            a line reading "Their stated window is —" would be the app talking about its own gap. */}
+        {typeof statedWeeks === "number" && statedWeeks > 0 && (
+          <div className="hint">Their stated window is {statedWeeks} weeks.</div>
+        )}
+      </>
+    );
+    if (field === "remind") return (
+      <>
+        <div className="seg">
+          {REMIND_OPTIONS.map((o) => (
+            <button type="button" key={o.label}
+              className={remindIsOn(value.remind, o.label) ? "on" : undefined}
+              onClick={() => {
+                const made = o.make();
+                /* ⚠️ THE PICKER OPENS EMPTY, and an empty date is NOT an answer — the gate checks
+                   the date's presence, not the pill's selection. Seeding a number here is exactly
+                   what the finishing round removed. */
+                onChange({ ...value, remind: made === "picker" ? { kind: "date", ymd: "" } : made });
+                if (made !== "picker") onAnswered?.();
+              }}>{o.label}</button>
+          ))}
+        </div>
+        {/* ⚠️ THE SAME COMPONENT AND THE SAME REVEAL PATH AS `When` — not a second date field. The
+            reminder row had none at all, which is why the option selected and showed nothing. */}
+        {value.remind?.kind === "date" && (
+          <div style={{ marginTop: 8 }}>
+            <BrandDatePicker value={value.remind.ymd} placeholder="Pick the day to be reminded"
+              onChange={(ymd) => { onChange({ ...value, remind: { kind: "date", ymd } }); if (ymd) onAnswered?.(); }} />
+          </div>
+        )}
+        {/* ⚠️ AND IT SAYS WHERE THE REMINDER GOES. The contract's own line, and it is the honest
+            one: this app has no notification delivery of any kind, so a reminder that implied a
+            push or an email would be promising something nothing sends. It lands on this list. */}
+        <div className="hint">The reminder lands here, on your list, when the time comes.</div>
+      </>
+    );
+    return null;
+  };
+
   return (
   <>
     {/* ⚠️ THE WRITER'S OWN SENTENCE, AT READING SIZE. It was a label above a form; it is the thing
@@ -203,125 +359,66 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
         <div className="notemeta">Added {note.added} · ticking it off is what finishes it</div>
       </>
     )}
-    {/* ⚠️ A LABEL WITH NOTHING BENEATH IT DOES NOT RENDER (frame2 Phase 4). A note has no parcel,
-        so the question stood over an empty row — a question the page then declined to answer.
-        Absence is a value: no sample, no section. */}
-    {sample && (
-      <div className={sect("s-unit")} id={domId("s-unit")}>
-        <label className="f-lbl" data-req="unit">What are you sending?</label>
-        <div className="f-sub" style={{ margin: "-3px 0 9px" }}>
-          Pick the unit you actually sent in — one only.
+
+    {questions.map((q) => {
+      const open = q.id === openId;
+      const ans = q.answered ? answerText(q.field, value) : null;
+      /* ⚠️ EVERY CLOSED ROW OPENS ON A CLICK, ANSWERED OR NOT. `Edit` is the visible cue on an
+         answered one; an UNANSWERED closed row has no cue and still has to be reachable, because
+         editing an earlier answer closes a later unanswered row behind it. One target, not two
+         controls — which is why `Edit` is a span inside the head rather than a button beside it. */
+      const openable = !open;
+      return (
+        <div className={`q${open ? " open" : ""}${q.answered ? " done" : ""}`} id={domId(q.id)} key={q.id}>
+          <div
+            className="head"
+            {...(openable
+              ? {
+                  role: "button" as const,
+                  tabIndex: 0,
+                  onClick: () => onOpen?.(q.id),
+                  onKeyDown: (e: React.KeyboardEvent) => {
+                    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen?.(q.id); }
+                  },
+                }
+              : {})}
+          >
+            {/* the steer square — the contract's own node, shown by `.q.open` and nothing else */}
+            <span className="sqm" aria-hidden />
+            <span className="ql" data-req={q.field}>{q.label}</span>
+            {ans && !open && (
+              <span className="ans">
+                {ans}
+                <span className="tick" aria-hidden>✓</span>
+                <span className="edit">Edit</span>
+              </span>
+            )}
+          </div>
+          {/* ⚠️ RENDERED ONLY WHEN OPEN, not hidden with `display: none`. A hidden control is still
+              in the tab order and still in the document, so "at rest this form holds no textarea"
+              would be a claim about paint rather than about the page. */}
+          {open && <div className="body">{control(q.field)}</div>}
         </div>
-        <SampleSpecPicker
-          rows={value.rows}
-          onChange={(rows) => onChange({ ...value, rows })}
-          /* ⚠️ "and", NOT "or". A requirement offers a choice; a record describes one parcel. */
-          join="and"
-          mode="sent"
-          idPrefix="tpn-sent"
-        />
+      );
+    })}
+
+    {/* ⚠️ THE TWO OPTIONAL FIELDS SIT BELOW THE LEDGER, NOT INSIDE A ROW. `Anything else going with
+        it` used to live inside the parcel section, which the ledger now closes the moment the
+        parcel is answered — an optional field that disappears when you answer a required one is a
+        field nobody will find. Phase 4 turns both into links that expand in place. */}
+    {questions.some((q) => q.field === "unit") && (
+      <div className="sect">
+        <label className="f-lbl">Anything else going with it? <span className="opttag">OPTIONAL</span></label>
         <input
           className="txt"
-          placeholder="Anything else going with it? e.g. author bio"
+          placeholder="e.g. author bio"
           value={value.alongside}
           onChange={(e) => onChange({ ...value, alongside: e.target.value })}
         />
       </div>
     )}
 
-    {/* ⚠️ A NOTE HAS NO `When`. Ticking it off IS the act and the tick carries its own date, so the
-        question has no subject — an empty segmented control here would be asking the writer to date
-        something that has not happened. Absent, not disabled. */}
-    {!note && <div className={sect("s-when")} id={domId("s-when")}>
-      <label className="f-lbl" data-req="when">When</label>
-      <div className="seg">
-        {DAY_OPTIONS.map((o) => (
-          <button type="button" key={o.label}
-            className={dayIsOn(value.when, o.label) ? "on" : undefined}
-            onClick={() => {
-              const made = o.make();
-              onChange({ ...value, when: made === "picker" ? { kind: "date", ymd: "" } : made });
-            }}>{o.label}</button>
-        ))}
-      </div>
-      {/* ⚠️ THE PICKER IS THE APP'S OWN, and expect-back opens the SAME one — the brief's rule, and
-          the reason a second date control would be wrong is that two pickers on one form is two
-          places for a date to come from. */}
-      {value.when?.kind === "date" && (
-        <div style={{ marginTop: 8 }}>
-          <BrandDatePicker value={value.when.ymd} placeholder="Pick the day it went"
-            max={todayYmd()}
-            onChange={(ymd) => onChange({ ...value, when: { kind: "date", ymd } })} />
-        </div>
-      )}
-    </div>}
-
-    {/* ⚠️ THE EXPECTATION BLOCK IS THE SEND JOURNEY'S ALONE. It asks when a reply is due and when
-        to be reminded — both facts about a parcel in transit — so a nudge, a close and a note have
-        nothing to answer here and the block is absent rather than disabled. */}
-    {/* ⚠️ TWO ORDINARY SECTIONS, NOT A BOX (steer round, Phase 4). These sat inside a field-tinted,
-        bordered `.expect` wrapper — a card within the card, and a TINT around things that are not
-        touchable. The law the contract now carries: A BACKGROUND TINT INSIDE THE FORM CARD MEANS
-        THE THING IS TOUCHABLE. The questions keep their quiet hint lines and nothing else.
-        ⚠️ AND THE COMMENT IS OUTSIDE THE `&&`, not braced inside it — a braced comment is a CHILD,
-        and there is no child position at the head of an expression. */}
-    {expectations && (<>
-      <div className={sect("s-expect")} id={domId("s-expect")}>
-        <label className="f-lbl" data-req="expect">When do you expect to hear back?</label>
-        <div className="seg" style={{ marginBottom: 11 }}>
-          {EXPECT_WEEKS.map((w) => (
-            <button type="button" key={w}
-              className={value.expect?.kind === "weeks" && value.expect.weeks === w ? "on" : undefined}
-              onClick={() => onChange({ ...value, expect: { kind: "weeks", weeks: w } })}>{w} weeks</button>
-          ))}
-          <button type="button"
-            className={value.expect?.kind === "date" ? "on" : undefined}
-            onClick={() => onChange({ ...value, expect: { kind: "date", ymd: "" } })}>Another date…</button>
-        </div>
-        {value.expect?.kind === "date" && (
-          <div style={{ marginBottom: 11 }}>
-            <BrandDatePicker value={value.expect.ymd} placeholder="Pick when you expect to hear"
-              min={todayYmd()}
-              onChange={(ymd) => onChange({ ...value, expect: { kind: "date", ymd } })} />
-          </div>
-        )}
-        {/* ⚠️ THE AGENCY'S OWN FIGURE, STATED AND NOT CHOSEN. Absent where the record holds none —
-            a line reading "Their stated window is —" would be the app talking about its own gap. */}
-        {typeof statedWeeks === "number" && statedWeeks > 0 && (
-          <div className="hintline">Their stated window is {statedWeeks} weeks.</div>
-        )}
-      </div>
-      <div className={sect("s-remind")} id={domId("s-remind")}>
-        <label className="f-lbl" data-req="remind">Remind you to nudge?</label>
-        <div className="seg">
-          {REMIND_OPTIONS.map((o) => (
-            <button type="button" key={o.label}
-              className={remindIsOn(value.remind, o.label) ? "on" : undefined}
-              onClick={() => {
-                const made = o.make();
-                /* ⚠️ THE PICKER OPENS EMPTY, and an empty date is NOT an answer — the gate checks
-                   the date's presence, not the pill's selection. Seeding a number here is exactly
-                   what this phase removes. */
-                onChange({ ...value, remind: made === "picker" ? { kind: "date", ymd: "" } : made });
-              }}>{o.label}</button>
-          ))}
-        </div>
-        {/* ⚠️ THE SAME COMPONENT AND THE SAME REVEAL PATH AS `When` — not a second date field. The
-            reminder row had none at all, which is why the option selected and showed nothing. */}
-        {value.remind?.kind === "date" && (
-          <div style={{ marginTop: 8 }}>
-            <BrandDatePicker value={value.remind.ymd} placeholder="Pick the day to be reminded"
-              onChange={(ymd) => onChange({ ...value, remind: { kind: "date", ymd } })} />
-          </div>
-        )}
-        {/* ⚠️ AND IT SAYS WHERE THE REMINDER GOES. The contract's own line, and it is the honest
-            one: this app has no notification delivery of any kind, so a reminder that implied a
-            push or an email would be promising something nothing sends. It lands on this list. */}
-        <div className="hintline">The reminder lands here, on your list, when the time comes.</div>
-      </div>
-    </>)}
-
-    {/* ⚠️ THE ONE OPTIONAL FIELD ON THIS FORM, AND IT SAYS SO. Everything above is required and
+    {/* ⚠️ THE OTHER OPTIONAL FIELD, AND IT SAYS SO. Everything in the ledger is required and
         carries no mark — Option B, where the exception is named rather than the rule. */}
     <div className="sect">
     <label className="f-lbl" style={note ? { marginTop: 16 } : undefined}>Anything else? <span className="opttag">OPTIONAL</span></label>

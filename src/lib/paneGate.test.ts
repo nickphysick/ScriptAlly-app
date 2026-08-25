@@ -11,6 +11,9 @@
  * cannot make that claim: it can only pass a value the type system already permits.
  */
 import { describe, it, expect } from "vitest";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { TaskPaneBody } from "../components/todo/TaskPaneBody";
 import { firstMissing, gateOpen, requiredFor, journeyKind, isBulkCard, requirementsFor, unanswered, missingPhrase, type JourneyKind, type GateAnswers } from "./paneGate";
 import { BoardCard } from "./todoBoard";
 import { recordSweepRow, fillFromAsks, copyFirstDown, type RecordSweepRow } from "./materialsSweep";
@@ -25,6 +28,36 @@ const card = (over: Partial<BoardCard> = {}): BoardCard =>
 
 /* every member of the union, listed once — the test's own exhaustiveness, checked by the compiler */
 const KINDS: JourneyKind[] = ["send", "decide", "chase", "close", "fix", "bulk", "note"];
+
+/**
+ * ⚠️ THE FORM, RENDERED FROM THE DECLARATION — never a hand-written row list (workspace round,
+ * Phase 3). The two locks below used to SCRAPE `TaskPaneBody.tsx` for `data-req="when"` and
+ * `sect("s-when")` literals, and the ledger emits both from an expression now, so both went red
+ * over a form that had become MORE correct rather than less: the rows ARE `requirementsFor(kind)`,
+ * so a requirement the form does not ask about is no longer expressible.
+ *
+ * A rendered artefact is what a claim about "the form marks this" was always about. It also
+ * survives the relocation a source scrape cannot: move the component and this follows it by import
+ * rather than by path.
+ */
+/**
+ * ⚠️ `null` FOR A COHORT, BECAUSE THE SESSION NEVER MOUNTS THIS COMPONENT FOR ONE. A bulk card gets
+ * `BulkFillTable`; handing `TaskPaneBody` a `rows` requirement renders a ledger row with no control
+ * under it — a state no caller can produce, which is the "test the function with an input its
+ * callers cannot supply" fault. The cohort's anchor is asserted against the table that really draws
+ * it. This refusal is also what caught the case: the first version of this helper rendered bulk and
+ * the new completeness half went red on a row the app has never shown anyone.
+ */
+const renderForm = (kind: JourneyKind): string | null =>
+  kind === "bulk" ? null :
+  renderToStaticMarkup(React.createElement(TaskPaneBody, {
+    value: { rows: [], alongside: "", when: null, expect: null, remind: null, also: "" },
+    onChange: () => {},
+    questions: requirementsFor(kind).map((r) => ({
+      id: r.id, field: r.field, label: r.label, answered: false,
+    })),
+    openId: null,
+  }));
 
 describe("⚠️ one required-fields declaration per journey", () => {
   it("every journey declares, and the empty ones are decisions rather than gaps", () => {
@@ -60,16 +93,21 @@ describe("⚠️ one required-fields declaration per journey", () => {
    * return is a `data-req` the form renders; a requirement the pane cannot scroll to would gate the
    * primary with no way for the writer to satisfy it.
    */
-  it("every requirable key is a key the form marks", async () => {
-    const body = await import("node:fs").then((fs) =>
-      fs.readFileSync(new URL("../components/todo/TaskPaneBody.tsx", import.meta.url), "utf8"));
-    const marked = new Set([...body.matchAll(/data-req="([a-z]+)"/g)].map((m) => m[1]));
+  it("every requirable key is a key the form marks", () => {
     for (const k of KINDS) {
-      for (const f of requiredFor(k)) {
-        /* `rows` is the bulk table's, and the table marks its own — asserted in the bulk suite */
-        if (f === "rows") continue;
-        expect(marked.has(f), `${k} requires "${f}" and no label carries data-req="${f}"`).toBe(true);
+      const html = renderForm(k);
+      /* `rows` is the bulk table's, and the table marks its own — asserted in the bulk suite */
+      if (html === null) { expect(requiredFor(k)).toEqual(["rows"]); continue; }
+      const marked = new Set([...html.matchAll(/data-req="([a-z]+)"/g)].map((m) => m[1]));
+      const want = requiredFor(k).filter((f) => f !== "rows");
+      for (const f of want) {
+        expect(marked.has(f), `${k} requires "${f}" and no row carries data-req="${f}"`).toBe(true);
       }
+      /* ⚠️ AND NOTHING ELSE IS MARKED. The old scrape could only ever say "the form contains this
+         key somewhere"; a render says the form asks exactly the questions the gate refuses on,
+         which is the half that catches a form asking about something nobody requires. */
+      expect([...marked].sort(), `${k} asks a question the declaration does not require`)
+        .toEqual([...want].sort());
     }
   });
 });
@@ -169,24 +207,23 @@ describe("⚠️ the four surfaces read one declaration", () => {
    * element that exists. A source test can only ever prove the code was written; that one proves
    * the section is there to be scrolled to, which is the thing the gate actually promises.
    */
-  it("every requirement's id is a section the form declares", async () => {
-    const fs = await import("node:fs");
-    const body = fs.readFileSync(new URL("../components/todo/TaskPaneBody.tsx", import.meta.url), "utf8");
-    const table = fs.readFileSync(new URL("../components/todo/BulkFillTable.tsx", import.meta.url), "utf8");
-    const src = body + table;
-    /* ⚠️ TWO SPELLINGS, BECAUSE THE TWO FORMS DECLARE THEIR ANCHORS DIFFERENTLY — and the first
-       version of this retarget missed it and went red, correctly. `TaskPaneBody`'s sections are
-       `sect("s-unit")` (the id is now an expression, so it is the CLASS helper that names them);
-       `BulkFillTable`'s cohort is a single `<table id="s-rows">`, still a literal because that
-       component has one anchor and no prefix. Matching both is what keeps the law whole. */
-    const ids = new Set([
-      ...[...src.matchAll(/sect\("(s-[a-z]+)"\)/g)].map((m) => m[1]),
-      ...[...src.matchAll(/id="(s-[a-z]+)"/g)].map((m) => m[1]),
-    ]);
-    expect(ids.size, "no sections found at all — the scrape is broken, not the form").toBeGreaterThan(0);
+  it("every requirement's id is a row the form declares", async () => {
+    /* ⚠️ THE COHORT'S ANCHOR IS STILL READ FROM SOURCE, AND THAT IS THE RIGHT TOOL FOR IT.
+       `BulkFillTable` renders one `<table id="s-rows">` — a literal, one anchor, no prefix — so
+       "this literal is still emitted" is exactly the claim a source read makes well. Everything
+       else is a RENDERED row, because "the form declares a row for this requirement" is a claim
+       about output. */
+    const table = await import("node:fs").then((fs) =>
+      fs.readFileSync(new URL("../components/todo/BulkFillTable.tsx", import.meta.url), "utf8"));
+    const cohortIds = new Set([...table.matchAll(/id="(s-[a-z]+)"/g)].map((m) => m[1]));
+    expect(cohortIds.size, "no cohort anchor found at all — the scrape is broken, not the table")
+      .toBeGreaterThan(0);
     for (const k of KINDS) {
+      const html = renderForm(k) ?? "";
+      const ids = new Set([...html.matchAll(/id="(s-[a-z]+)"/g)].map((m) => m[1]));
       for (const r of requirementsFor(k)) {
-        expect(ids.has(r.id), `${k} requires "${r.name}" at #${r.id} and no section carries it`).toBe(true);
+        const found = ids.has(r.id) || cohortIds.has(r.id);
+        expect(found, `${k} requires "${r.name}" at #${r.id} and no row carries it`).toBe(true);
       }
     }
   });

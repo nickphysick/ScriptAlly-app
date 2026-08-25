@@ -27,6 +27,7 @@ import { QueryStatus } from "../../types";
 import { TaskPane, TaskPaneJourney } from "./TaskPane";
 import { StatusDot } from "../StatusDot";
 import { TaskPaneBody } from "./TaskPaneBody";
+import { requirementsFor } from "../../lib/paneGate";
 
 const REF = readFileSync(join(process.cwd(), "design-refs/todo-actionbar-corrected.html"), "utf8");
 /* ⚠️ FOUR CONTRACTS ARE IN FORCE, AND SAYING SO IS MORE HONEST THAN PRETENDING ONE IS.
@@ -58,7 +59,15 @@ const SEND: TaskPaneJourney = {
   actSub: "One entry updates the query, its timeline and this task.",
   body: (
     <TaskPaneBody
-      sample
+      /* ⚠️ THE FIXTURE'S LEDGER IS THE DECLARATION'S OWN, NOT A HAND-WRITTEN ROW LIST (workspace
+         round, Phase 3). `requirementsFor("send")` is what the real session passes down, so a
+         literal here would be the "test the function with an input its callers cannot produce"
+         fault: the rows would keep rendering after the declaration stopped naming them. */
+      questions={requirementsFor("send").map((r) => ({
+        id: r.id, field: r.field, label: r.label,
+        answered: r.isAnswered({ unit: true, when: false, expect: false, remind: false, rows: false }),
+      }))}
+      openId="s-when"
       value={{
         rows: [{ key: "sample", kind: "qty", name: "Opening sample", on: true, unit: "Chapters", amount: "3" }],
         /* ⚠️ THE FIXTURE OPENS UNCHOSEN, like the real form. A fixture with answers in it would

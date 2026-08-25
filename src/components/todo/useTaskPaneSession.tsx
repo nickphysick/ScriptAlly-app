@@ -49,7 +49,7 @@ import { BulkFillTable } from "./BulkFillTable";
 import { rowHasAnswer, type RecordSweepRow } from "../../lib/materialsSweep";
 import { materialRowsFromAgent, formatSampleSpecs, type MaterialRow } from "../../lib/agentMaterials";
 import { formatQueryMaterials } from "../../lib/materials";
-import { journeyKind, firstMissing, isBulkCard, unanswered, anchorFor, requiredFor, type GateAnswers } from "../../lib/paneGate";
+import { journeyKind, firstMissing, isBulkCard, unanswered, anchorFor, requirementsFor, type GateAnswers } from "../../lib/paneGate";
 import { paneCommits, paneCommitValues } from "../../lib/paneCommit";
 import { sendSpecFor, collapseTimelineDuplicates } from "../../lib/todoDock";
 import { cardBucket, waitAnchorMs } from "../../lib/todoBuckets";
@@ -177,6 +177,18 @@ export function useTaskPaneSession(
    * answers are: a half-filled table carried onto another cohort is answers about other queries.
    */
   const [bulkRows, setBulkRows] = React.useState<RecordSweepRow[]>([]);
+  /**
+   * ⚠️ WHICH LEDGER ROW IS OPEN, AND `null` MEANS "FOLLOW THE FIRST UNANSWERED" (workspace round,
+   * Phase 3). It is a session state rather than the body's for one reason: the GATE has to be able
+   * to open a row. Pressing an incomplete primary opens the first unanswered question, and a body
+   * that owned this would have to be reached into from here.
+   *
+   * ⚠️ `null` IS A MODE, NOT AN ABSENCE. Answering a question sets it back to `null`, so the open
+   * row RE-DERIVES: the next unanswered, or none at all once the last is answered — which is what
+   * "answering the last closes all" is, without a second rule saying so. `Edit` and the gate set an
+   * explicit id, which is the only way an ANSWERED row can be the open one.
+   */
+  const [openId, setOpenId] = React.useState<string | null>(null);
 
   const seedRows = React.useCallback((card: BoardCard | null): MaterialRow[] => {
     const q = card?.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
@@ -235,6 +247,9 @@ export function useTaskPaneSession(
     const cohort = card ? seeds.current.sweep(card) : undefined;
     setBulkRows(cohort ?? []);
     setBulkTouched(0);
+    /* back to following the first unanswered — an id pinned on the last card names a row this one
+       may not even have */
+    setOpenId(null);
   }, [card?.key]);
 
   const paneFacts = React.useMemo(() => {
@@ -613,11 +628,27 @@ export function useTaskPaneSession(
    * ⚠️ BULK IS THE STATED EXCEPTION and it is inert at zero, because there is no single field to
    * scroll to — the answer is "touch a row", and every row is equally the one meant.
    */
+  /**
+   * ⚠️ THE GATE OPENS THE QUESTION; IT NO LONGER SCROLLS TO IT (workspace round, Phase 3). With the
+   * form a ledger of closed rows, the first unanswered one may not be visible at all — so pointing
+   * at it means OPENING it, and the focus that follows brings it into view for free (the browser
+   * scrolls a focused element into its scrollport). One route for all three callers: the primary's
+   * gate, every link in the missing line, and `Edit`.
+   *
+   * ⚠️ AND IT OPENS BEFORE IT FOCUSES, ON THE NEXT TICK. The row's control does not exist until the
+   * row is open, so focusing in the same statement would target a node React has not rendered —
+   * the same flush the missing line already had to wait for.
+   */
+  const jumpTo = React.useCallback((id: string) => {
+    setOpenId(id);
+    setTimeout(() => host.jumpToSection(id), 0);
+  }, [host.jumpToSection]);
+
   function dockPrimary(card: BoardCard) {
     const kind = journeyKind(card);
     const missing = firstMissing(kind, gateAnswers(card));
     if (missing) {
-      /* ⚠️ THE BAR NAMES ALL OF THEM AND THE PANE GOES TO THE FIRST. Naming only the first would
+      /* ⚠️ THE BAR NAMES ALL OF THEM AND THE PANE OPENS THE FIRST. Naming only the first would
          make the writer press the button once per missing answer to discover the next. */
       setShowMissing(true);
       /* ⚠️ AFTER THE RENDER, NOT BEFORE IT. `setShowMissing` re-renders the pane, and React had not
@@ -625,7 +656,7 @@ export function useTaskPaneSession(
          and both the caret and the scroll were discarded. Measured: `activeElement` came back BODY
          and `scrollTop` never moved, with the missing line correctly on screen beside them. The
          next tick is after the flush. */
-      setTimeout(() => host.jumpToSection(anchorFor(missing)), 0);
+      jumpTo(anchorFor(missing));
       return;
     }
     setShowMissing(false);
@@ -717,35 +748,39 @@ export function useTaskPaneSession(
                       ) : (
                       <TaskPaneBody
                         /**
-                         * ⚠️ THE PARCEL SECTION IS DRAWN WHERE THE DECLARATION REQUIRES A PARCEL —
-                         * the same list the gate refuses on (steer round's law, applied where it
-                         * had not been).
+                         * ⚠️ THE LEDGER IS THE DECLARATION, RENDERED — the same list the gate
+                         * refuses on (steer round's law, now structural rather than aspired to).
                          *
-                         * It asked `sendSpecFor`, which answers a DIFFERENT question: "what should
-                         * go now". A materials fill-in is recording what ALREADY went, so that is
-                         * null — and the section vanished while `requiredFor("fix")` still demanded
-                         * a parcel. Measured: the single fill-in's primary read "Log as sent · 1 to
-                         * answer" with no unit section anywhere on the page, so it could never be
-                         * satisfied and the jump target `#s-unit` did not exist. A permanently
-                         * inert primary, and the gate was correct throughout — the form was short a
-                         * section.
+                         * The form used to decide which sections to draw from `sendSpecFor`, which
+                         * answers a DIFFERENT question: "what should go now". A materials fill-in
+                         * records what ALREADY went, so that was null — and the parcel section
+                         * vanished while `requiredFor("fix")` still demanded a parcel. Measured:
+                         * the single fill-in's primary read "Log as sent · 1 to answer" with no
+                         * unit section anywhere on the page, so it could never be satisfied and the
+                         * jump target `#s-unit` did not exist. A permanently inert primary, and the
+                         * gate was correct throughout — the form was short a section.
                          *
-                         * Reading one list makes that shape impossible: a question the gate can
-                         * require is a question the form asks, by construction.
+                         * There is now no second table to be short: the rows ARE
+                         * `requirementsFor(kind)`, and each row's `answered` is the gate's own
+                         * predicate over the gate's own answers.
                          */
-                        sample={requiredFor(journeyKind(card)).includes("unit")}
-                        expectations={requiredFor(journeyKind(card)).includes("expect")}
+                        questions={requirementsFor(journeyKind(card)).map((r) => ({
+                          id: r.id, field: r.field, label: r.label,
+                          answered: r.isAnswered(gateAnswers(card)),
+                        }))}
+                        /* ⚠️ `null` FOLLOWS THE FIRST UNANSWERED — the same array the chip counts
+                           and the missing line names, so the open row cannot point somewhere the
+                           sentence does not mention. Nothing open once the last is answered, and
+                           nothing open on a note, which requires nothing. */
+                        openId={openId ?? unanswered(journeyKind(card), gateAnswers(card))[0]?.id ?? null}
+                        onOpen={jumpTo}
+                        onAnswered={() => setOpenId(null)}
                         statedWeeks={statedWeeks(card)}
                         /* the note's own words and its date — the centrepiece, and the one line
                            beneath. Both derived from the task the writer wrote, never restated. */
                         note={card.userTaskId
                           ? { text: card.title, added: noteAddedDate(card) }
                           : undefined}
-                        /* ⚠️ THE SQUARE'S SECTION, FROM THE ONE DECLARATION. `unanswered` is what
-                           the chip counts and the line names, so the marker cannot point somewhere
-                           the sentence does not mention. `null` when complete — and on a note,
-                           which requires nothing, so there is never a next thing to point at. */
-                        nextId={unanswered(journeyKind(card), gateAnswers(card))[0]?.id ?? null}
                         idPrefix={idPrefix}
                         value={paneBody}
                         onChange={setPaneBody}
@@ -774,7 +809,11 @@ export function useTaskPaneSession(
                     missing: unanswered(journeyKind(card), gateAnswers(card))
                       .map((r) => ({ id: r.id, name: r.name })),
                     showMissing,
-                    onJump: host.jumpToSection,
+                    /* ⚠️ THE MISSING LINE'S LINKS TAKE THE SAME ROUTE AS THE PRIMARY'S GATE —
+                       `jumpTo`, which OPENS the row and then focuses it. Handing `host.jumpToSection`
+                       over directly would focus a control that is not rendered, because the row it
+                       names is closed: the whole point of a ledger. One route, three callers. */
+                    onJump: jumpTo,
                     ...(isBulkCard(card)
                       ? { bulk: { count: listRowInputs(card).bulkCount ?? 0, touched: bulkTouched } }
                       : {}),

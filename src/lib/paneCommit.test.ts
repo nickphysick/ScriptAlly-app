@@ -334,13 +334,25 @@ describe("⚠️ the chase commits with a real day", () => {
  */
 describe("⚠️ a question the gate can require is a question the form asks", () => {
   it("the parcel section is drawn from the declaration, not from what should go next", () => {
-    /* ⚠️ THE LAW IS UNCHANGED — the form draws what the gate requires. The journey argument moved
-       into the session with the rest of the pane, and the pane's card is the hook's parameter, so
-       the identifier is `card`. Both halves are read from the one file that now holds them. */
-    expect(hook, "the parcel section stopped reading the declaration")
-      .toContain('requiredFor(journeyKind(card)).includes("unit")');
+    /* ⚠️ THE LAW IS UNCHANGED AND ITS EXPRESSION IS STRONGER (workspace round, Phase 3). This read
+       `sample={requiredFor(journeyKind(card)).includes("unit")}` — one boolean per section, which
+       is a per-section chance to get it wrong. The form is a LEDGER now and its rows ARE
+       `requirementsFor(kind)`, so "the form draws what the gate requires" stopped being something
+       the wiring has to remember and became something it cannot express otherwise: there is no
+       per-section flag left to disagree with the declaration.
+
+       ⚠️ AND THE `answered` HALF IS ASSERTED TOO. A ledger built from the declaration but ticked
+       from a second reading of the values would still drift — so the row's `answered` must come
+       from the requirement's own predicate over the gate's own answers. */
+    expect(hook, "the ledger stopped reading the declaration")
+      .toContain("requirementsFor(journeyKind(card)).map");
+    expect(hook, "a row's tick stopped reading the gate's own predicate")
+      .toContain("answered: r.isAnswered(gateAnswers(card))");
     expect(hook, "`sendSpecFor` decides the parcel section again — a fill-in has none")
       .not.toContain("sample={!!sendSpecFor(card)}");
+    /* the retired per-section booleans, asserted GONE — a survivor would be a second table */
+    expect(hook, "a per-section flag is back beside the declaration")
+      .not.toMatch(/\bsample=\{|\bexpectations=\{|\bnextId=\{/);
   });
 
   /**

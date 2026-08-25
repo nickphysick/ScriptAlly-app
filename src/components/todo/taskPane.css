@@ -456,14 +456,18 @@
    is a FIELD-COLOURED BOX rather than another run of labels: the two questions inside it are
    about the future, and everything above them is about what just happened. */
 .tpn .txt { width:100%;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:12px;color:var(--ink);outline:none;margin-top:4px; }
-.tpn .expect { background:var(--field);border:0.5px solid var(--hair2);border-radius:11px;padding:14px 15px;margin-bottom:16px; }
-.tpn .expect .f-lbl { margin-top:0; }
-.tpn .inherit { font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:8px;line-height:1.5; }
+/* ⚠️ `.expect`, `.expect .f-lbl`, `.inherit` AND `.stated` ARE RETIRED — four rules that reached no
+   element (workspace round, Phase 3, found by sweeping the sheet against what the form renders).
+   `.expect` was the field-tinted box the steer round removed; the other three were its furniture,
+   and nothing has rendered any of them since. A rule for an element nothing renders is the trap
+   this file already has a standing note about, pointing the other way.
 
-/* ⚠️ THE AGENCY'S OWN FIGURE, SHOWN AND NOT CHOSEN (finishing round, Phase 3). Quiet by design: it
-   sits under the pills as information, and anything with the weight of an option would read as one
-   more thing to pick. */
-.tpn .stated { font-size:10.5px;color:var(--muted2);font-weight:300;margin:-4px 0 11px;line-height:1.5; }
+   ⚠️ AND ITS MIRROR WAS LIVE HERE THE WHOLE TIME: the form rendered `.hintline` on two of its
+   quiet lines — the agency's stated window and where the reminder lands — and this stylesheet has
+   NEVER carried a rule for that class. They painted as unstyled inherited text under a design that
+   specifies 10.5px muted 300. The ledger's hints are `.hint`, which is the contract's own word and
+   has a rule below. Checking that a rule reaches an element and that an element has a rule are two
+   different sweeps, and only the first one had ever been run on this sheet. */
 
 /* ⚠️ THE FLASH ON A MISSING ANSWER (finishing round, Phase 4). It runs on the LABEL rather than the
    control, because the label is what names the thing that is missing — a ring around a row of pills
@@ -502,23 +506,42 @@
 .tpn .fb { cursor:pointer;font-size:11.5px;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:7px 12px;color:var(--ink2); }
 .tpn .fb:hover { background:var(--white);border-color:var(--hair); }
 .tpn .caveat { font-size:10.5px;color:var(--muted2);font-weight:300;margin-left:auto; }
-.tpn .tick { width:17px;height:17px;border-radius:5px;border:1.5px solid var(--hair2);background:var(--field);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:transparent;transition:all .13s; }
-.tpn .tick.on { background:var(--pink);border-color:var(--pink-b);color:var(--burg); }
+/* ⚠️ SCOPED TO THE TABLE IT RENDERS IN (workspace round, Phase 3). `.tick` was `.tpn .tick`, and
+   the ledger's answered row wears the contract's own `.tick` for its sage check — two very
+   different objects under one name. `BulkFillTable` renders this one inside `table.bulk` and
+   nowhere else, so scoping it removes the collision at the root instead of fighting it with
+   specificity further down. */
+.tpn .bulk .tick { width:17px;height:17px;border-radius:5px;border:1.5px solid var(--hair2);background:var(--field);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:transparent;transition:all .13s; }
+.tpn .bulk .tick.on { background:var(--pink);border-color:var(--pink-b);color:var(--burg); }
 .tpn .samp { cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted2);border-bottom:1px dashed #d5c7b5;white-space:nowrap;background:none;border-top:0;border-left:0;border-right:0;padding:0; }
 .tpn .bulk-foot { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;margin-top:10px; }
 .tpn .bulk-foot a { color:var(--burg);text-decoration:none; }
 
-/* ── the steer square (steer round, Phase 2) ────────────────────────────────────────────────
-   ⚠️ A 7px BURGUNDY SQUARE BEFORE THE NEXT UNANSWERED LABEL, and it is a PSEUDO-ELEMENT on the
-   section rather than a node in the markup. One class on one section decides it, so there is no
-   way for two squares to render — the fault a per-section boolean invites.
-   ⚠️ AND IT BREATHES RATHER THAN BLINKS: scale 1 → 0.72 with opacity 1 → 0.55, 1.6s, infinite. A
-   blink is an alarm; this is a finger pointing at where you are up to. */
-.tpn .sect.next > .f-lbl::before {
-  content: ''; width: 7px; height: 7px; background: var(--burg); border-radius: 2px;
-  display: inline-block; flex-shrink: 0;
-  animation: tpn-sqPulse 1.6s ease-in-out infinite;
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * THE LEDGER (workspace round, Phase 3) — `design-refs/todo-workspace-final.html`.
+ *
+ * ⚠️ ONE 40px ROW PER QUESTION, WHETHER OPEN, UNANSWERED OR ANSWERED. `min-height` on `.head`, not
+ * a fixed height: the row must not CROP if a label ever wraps, and the claim is that answering a
+ * question does not change its row's height — which a minimum satisfies and a maximum would break
+ * in the one direction that matters. The form's height changes only by the open question's body.
+ *
+ * ⚠️ THE STEER SQUARE IS A NODE NOW, NOT A PSEUDO-ELEMENT, and it is on the OPEN row rather than on
+ * "the next unanswered section". Those were two mechanisms pointing at one thing while the whole
+ * form was visible at once; disclosure has absorbed the steer, so `.sect.next` and its `::before`
+ * are retired with the sections they marked. `visibility` rather than `display` so the square
+ * occupies its 7px on every row — the labels line up whether or not one is open.
+ * ═════════════════════════════════════════════════════════════════════════════════════════════ */
+.tpn .q { border-bottom:1px solid var(--hair); }
+.tpn .q:last-of-type { border-bottom:0; }
+.tpn .q .head { display:flex;align-items:center;gap:9px;min-height:40px;padding:5px 0; }
+/* every closed row opens on a click — see `TaskPaneBody` for why that is one target and not two */
+.tpn .q .head[role="button"] { cursor:pointer; }
+.tpn .q .head[role="button"]:focus-visible { outline:2px solid var(--burg);outline-offset:2px;border-radius:6px; }
+.tpn .q .sqm {
+  width:7px;height:7px;background:var(--burg);border-radius:2px;flex-shrink:0;visibility:hidden;
+  animation:tpn-sqPulse 1.6s ease-in-out infinite;
 }
+.tpn .q.open .sqm { visibility:visible; }
 @keyframes tpn-sqPulse {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(0.72); opacity: 0.55; }
@@ -527,8 +550,25 @@
    you are up to — and the animation is emphasis. Hiding it would take the answer away from the
    reader who asked for less movement, not less help. */
 @media (prefers-reduced-motion: reduce) {
-  .tpn .sect.next > .f-lbl::before { animation: none; }
+  .tpn .q .sqm { animation: none; }
 }
+.tpn .q .ql { font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:500;flex-shrink:0; }
+.tpn .q.open .ql { color:var(--ink2); }
+.tpn .q.done .ql { color:#b3a494; }
+/* ⚠️ THE ANSWER IS INTER, NOT MONO — it is the WRITER'S answer, not metadata about the form. The
+   labels around it are mono because they are labels; treating an answer the same way would file it
+   under "system output", which is the one thing it is not. */
+.tpn .q .ans { font-size:12.5px;color:var(--ink2);font-weight:500;margin-left:auto;display:flex;align-items:center;gap:9px;min-width:0; }
+.tpn .q .ans .tick { color:var(--sage);font-size:11px;flex-shrink:0; }
+/* ⚠️ EDIT IS DELIBERATELY QUIET — muted until hover, no icon, no button chrome. It is a correction
+   affordance, not an invitation: the writer's eye should go to the open question, not to four ways
+   of changing settled ones. */
+.tpn .q .edit { font-size:10.5px;color:#b3a494;font-weight:400;border-bottom:1px solid transparent;flex-shrink:0; }
+.tpn .q .head[role="button"]:hover .edit { color:var(--burg);border-bottom-color:rgba(124,58,42,0.35); }
+.tpn .q .body { padding:0 0 13px 16px; }
+/* the hint belongs to the open question and renders only under it — a form of quiet lines above
+   questions nobody is answering is a form explaining itself to no one */
+.tpn .q .hint { font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:8px;line-height:1.5; }
 
 /* ── the count chip and the missing line (steer round, Phase 5) ─────────────────────────────── */
 .tpn .ab .n { font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--burg);color:#fffdfa;border-radius:999px;padding:2px 7px;margin-left:7px; }

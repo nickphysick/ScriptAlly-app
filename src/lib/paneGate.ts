@@ -56,6 +56,14 @@ export interface Requirement {
   id: string;
   /** the phrase the missing line uses, mid-sentence and lower case */
   name: string;
+  /**
+   * ⚠️ THE LEDGER'S OWN LABEL, AND IT IS A FIFTH READING OF THIS DECLARATION RATHER THAN A SECOND
+   * TABLE (workspace round, Phase 3). The form is a ledger of fixed rows now — one row per required
+   * answer — so the row's heading is a property of the requirement, beside the phrase the missing
+   * line uses. Two registers, one entry: `name` is mid-sentence prose ("when it went"), `label` is
+   * a heading ("When"), and splicing either into the other's place reads wrong.
+   */
+  label: string;
   /** the field key, kept so `data-req` and the answers map stay in step */
   field: ReqField;
   /** answered? — a predicate over the journey's own state */
@@ -64,11 +72,15 @@ export interface Requirement {
 
 /** The declaration, one entry per requirable answer. `id` is the anchor the pane renders. */
 const REQ: Record<ReqField, Omit<Requirement, "isAnswered">> = {
-  unit:   { id: "s-unit",   name: "what you're sending",         field: "unit" },
-  when:   { id: "s-when",   name: "when it went",                field: "when" },
-  expect: { id: "s-expect", name: "when you expect to hear back", field: "expect" },
-  remind: { id: "s-remind", name: "your reminder",               field: "remind" },
-  rows:   { id: "s-rows",   name: "at least one query",          field: "rows" },
+  unit:   { id: "s-unit",   name: "what you're sending",         label: "What you sent",  field: "unit" },
+  when:   { id: "s-when",   name: "when it went",                label: "When",           field: "when" },
+  expect: { id: "s-expect", name: "when you expect to hear back", label: "Reply expected", field: "expect" },
+  remind: { id: "s-remind", name: "your reminder",               label: "Nudge reminder", field: "remind" },
+  /* ⚠️ `rows` NEVER APPEARS IN A LEDGER, and it carries a label anyway because the record is
+     exhaustive. A cohort's form is `BulkFillTable`, not a row of questions — there is no single
+     field to open, which is the same reason its primary is the one that goes inert rather than
+     pointing at a first missing answer. */
+  rows:   { id: "s-rows",   name: "at least one query",          label: "The queries",    field: "rows" },
 };
 
 /** The journey's requirements, as data — the ONE list all four surfaces read. */

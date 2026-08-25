@@ -589,10 +589,15 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      * page stays MOUNTED, so `/todo`'s pane is in the document too — a bare `document.querySelector`
      * would find ITS section and scroll a page the reader cannot see.
      */
+    /* ⚠️ FOCUS, NOT SCROLL — the same change `/todo` made in the workspace round, for the same
+       reason: the session has already opened the row, and focusing brings it into its scrollport
+       without a second mechanism deciding where to put it. Scoped to `paneRef` because every
+       workspace page stays mounted and `/todo`'s pane is in the document too. */
     jumpToSection: (id) => {
       const root = paneRef.current;
       const sect = root?.querySelector<HTMLElement>(`#${CAL_PANE_PREFIX}${id}`);
-      sect?.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (!sect) return;
+      (sect.querySelector<HTMLElement>("button, input, textarea, [tabindex]") ?? sect).focus?.();
     },
     /* the `offer`/`fix` hand-off — parity with `/todo`, which is why the sheet stays mounted */
     openFlow: (c) => { setPaneCard(null); setFlowCard(c); },

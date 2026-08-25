@@ -2530,13 +2530,22 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * writer is looking at the other. Unique ids make the lookup unambiguous; scoping alone would
    * only have hidden the collision behind a selector that still matched twice.
    */
+  /**
+   * ⚠️ IT FOCUSES; IT NO LONGER SCROLLS (workspace round, Phase 3). The session has already OPENED
+   * the row by the time this runs, and focusing an element brings it into its scrollport for free —
+   * so an explicit `scrollIntoView` was a second mechanism for a thing the browser already does,
+   * and a `block: "center"` one at that, which yanked a four-row ledger about for no reason.
+   *
+   * ⚠️ AND THE FLASH IS ON `.ql` NOW — the ledger's label. `.f-lbl` survives on the two optional
+   * fields beneath the ledger and is not what the gate ever points at; leaving the selector alone
+   * would have made this a no-op that still looked correct in source.
+   */
   function jumpToSection(id: string) {
     const sect = document.querySelector<HTMLElement>(`.tpn #${PANE_ID_PREFIX}${id}`);
     if (!sect) return;
-    sect.scrollIntoView({ block: "center", behavior: "smooth" });
     const focusable = sect.querySelector<HTMLElement>("button, input, textarea, [tabindex]");
-    const label = sect.querySelector<HTMLElement>(".f-lbl");
-    (focusable ?? label ?? sect).focus?.();
+    const label = sect.querySelector<HTMLElement>(".ql");
+    (focusable ?? sect).focus?.();
     /* ⚠️ THE FLASH IS RETRIGGERABLE. Adding a class that is already there restarts no animation, so
        a second press on the same missing answer would look like the page ignoring it. */
     if (label) { label.classList.remove("askme"); void label.offsetWidth; label.classList.add("askme"); }
