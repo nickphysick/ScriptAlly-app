@@ -339,6 +339,16 @@ who holds what — 4 HELD
 Every non-sample sheet carries no chip. Every holder row answers **exactly once** — a chip or the
 words, never both and never neither. No rate anywhere on either panel.
 
+**The gate's closed side, measured the same way** (reseeded to one version, both widths):
+
+| | sheets | chips | openings panel | holders panel | *materials* panel |
+|---|---|---|---|---|---|
+| 1 version | 6 | **0** | absent | absent | **present** |
+
+The modal's `From version` field is absent there too. The last column matters: the panel this feature
+sits beside is untouched by the gate, so a writer who never uses versions sees exactly the page they
+saw before.
+
 ### ⚠️ AND ONE OF MY OWN ASSERTIONS WAS MEASURING A PROXY
 
 The chip's containment check first read `use).toMatch(/package.*·.*§/)`. It passed, and it was
