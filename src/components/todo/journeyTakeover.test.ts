@@ -441,6 +441,21 @@ describe("⚠️ COMMITTING WRITES ONCE, THROUGH THE PRIMITIVE THAT ALREADY EXIS
     expect(flow).toContain("const [checkBack, setCheckBack] = useState<number>(DEFAULT_CHECKBACK_DAYS);");
   });
 
+  /**
+   * ⚠️ THE SWEEP ARM COMPLETES THROUGH THE PRIMITIVE, AND ITS ADVANCE IS GATED ON THE WRITE
+   * (completion-paths Phase 2). This is a SOURCE claim deliberately: the arm is unreachable from
+   * the UI — nothing in `src/` sets `mode: "sweep"`, and the weekly review's only entrance sits
+   * inside `renderHero`, which has no caller — so there is no rendered page on which to press it.
+   * Stating the route in source is the strongest artefact available, and saying which kind of
+   * claim it is matters more than the claim.
+   */
+  it("the sweep arm completes through quickDone, and only advances if the write happened", () => {
+    const body = slice("async function sweepDone(c: BoardCard) {", "function sweepSnooze");
+    expect(body, "the sweep arm writes a completion in place again").not.toMatch(/done:\s*true/);
+    expect(body, "the sweep arm stopped reaching the completion primitive")
+      .toContain("if (await quickDone(c)) advanceAfterReceipt(");
+  });
+
   it("a close writes ONE status change and undoes by DELETING it, never by compensating", () => {
     const body = slice("function staleSheet(c: BoardCard) {", "function dqSheet(c: BoardCard)");
     expect((body.match(/await updateQueryStatus\(/g) ?? [])).toHaveLength(1);
