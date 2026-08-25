@@ -88,8 +88,21 @@ describe("landing copy — verbatim locks", () => {
     expect(strings).not.toContain("You've got further than most.");
   });
 
+  /**
+   * ⚠️ 89 CHARACTERS, AND THE LENGTH IS THE CONSTRAINT. It cannot hold one line at any readable
+   * size, so it must never be given `nowrap`; the target is two lines and the failure mode is a
+   * third carrying two or three orphaned words. The rendered line count is measured on a page —
+   * this asserts the property that makes the measurement possible to reason about.
+   */
+  it("the turn is too long for one line, which is why the measure is in `em`", () => {
+    expect(HERO_TURN_B.length).toBeGreaterThan(80);
+    expect(HERO_TURN_B).not.toContain("  ");
+  });
+
   it("the turn is one line, and the reassurance in front of it is gone", async () => {
-    expect(HERO_TURN_B).toBe("ScriptAlly tips the odds back in your favour.");
+    expect(HERO_TURN_B).toBe(
+      "ScriptAlly is an end-to-end querying companion built to tip the odds back in your favour.",
+    );
     const copy = await import("./landingCopy");
     expect("HERO_TURN_A" in copy).toBe(false);
     expect(Object.values(copy).filter((v): v is string => typeof v === "string"))

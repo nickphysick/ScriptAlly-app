@@ -601,12 +601,24 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 
 /* The turn: one line behind a burgundy rule. */
 .mk-turn {
-  margin: 42px 0 0; padding-left: 18px;
-  border-left: 2px solid var(--mk-burg); max-width: 21rem;
+  margin: 36px 0 0; padding-left: 18px;
+  border-left: 2px solid var(--mk-burg);
 }
+/* ⚠️ THE MEASURE IS IN `em`, ON THE ELEMENT THAT SETS THE FONT-SIZE, AND THAT UNIT IS THE WHOLE
+   POINT. A `rem` measure is FROZEN — the ref's `33rem` is 528px at every width — while
+   `1.68vw` grows the type until 1276px, so between ~1050 and there the type climbs against a
+   fixed column and the line count can flip to three. That is the container-cap fault in its
+   purest form: type growing against a measure that has stopped growing.
+   In `em` the two are expressed in the same units and cannot diverge. The line count is then a
+   property of the SENTENCE, not of the viewport, and the 1276px cap becomes irrelevant.
+   ⚠️ DO NOT "TIDY" THIS TO `rem`. It reads like an inconsistency beside every other measure in
+   this sheet and it is the one place that must not be one. Same carve-out as `/founders`'s lifted
+   line, for the same reason. */
 .mk-turn-b {
   display: block; font-family: "Playfair Display", Georgia, serif;
-  font-size: 1.72rem; line-height: 1.22; color: var(--mk-ink); letter-spacing: -.012em;
+  font-size: clamp(1.1rem, 1.68vw, 1.34rem); line-height: 1.3;
+  color: var(--mk-ink); letter-spacing: -.012em;
+  max-width: 24.5em;
 }
 /* ⚠️ THE ENTRANCE IS DECLARED ONLY INSIDE `no-preference`, SO REDUCED MOTION IS INERT BY
    CONSTRUCTION — not "the same animation, faster". Outside the query these elements have no
@@ -628,6 +640,20 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
    a statement and a plate — they hold their proportions far longer than a copy-and-tableau
    showreel row does, and the ref sets the break at 900. The showreel keeps its own 1080 break
    below; the two are deliberately different numbers, not an oversight. */
+/* ⚠️ THE TURN'S MEASURE NARROWS ON A NARROW PHONE, AND IT IS THE THIRD LINE'S SHAPE THAT FORCES IT.
+   Two lines is unreachable below ~440: the COLUMN binds there — 320px at 390 against the measure's
+   431 — and getting the sentence into two lines would need ~13px type, smaller than the body copy
+   beneath it, which is the thing this size was chosen to avoid. So the third line is a fact, and
+   the only question left is whether it is a full line or an orphan.
+   Measured at 390: at 24.5em the wrap is [282, 300, 92] with TWO words stranded; at 15em it is
+   [209, 243, 222] with six, a 34px spread against 208. Narrowing the measure makes the block worse
+   on paper and better on the page, which is why the number came from a render and not a ratio.
+   ⚠️ THE BAND IS ≤440 — it is two lines from 460 up — and 15em rather than 14 because 13.5em tips
+   to FOUR lines. 14–15em is the entire safe window; this sits at the top of it. */
+@media (max-width: 440px) {
+  .mk-turn-b { max-width: 15em; }
+}
+
 @media (max-width: 900px) {
   .mk-scope { --mk-hero-h1: clamp(2.4rem, 10vw, 3.6rem); }
   /* ⚠️ THE AREAS COLLAPSE WITH THE COLUMNS. Leaving a two-column template on a one-column grid

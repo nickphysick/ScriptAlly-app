@@ -65,7 +65,14 @@ export const HERO_GRIND: Array<{ text: string; underline?: boolean }> = [
  * ⚠️ THE TURN IS ONE LINE. "You are not alone." preceded it and is deleted — the promise carries
  * itself, and a flat reassurance in front of it softened the thing it was introducing.
  */
-export const HERO_TURN_B = "ScriptAlly tips the odds back in your favour.";
+/**
+ * ⚠️ 89 CHARACTERS AGAINST THE OLD 44 — IT CANNOT HOLD ONE LINE AND MUST NEVER BE GIVEN `nowrap`.
+ * At the copy column's width one line would need ~11px type, smaller than the body beneath it.
+ * The target is TWO lines at every width; three, carrying two or three orphaned words, is the
+ * failure mode. See `.mk-turn-b`, where the measure is expressed in `em` for exactly that reason.
+ */
+export const HERO_TURN_B =
+  "ScriptAlly is an end-to-end querying companion built to tip the odds back in your favour.";
 
 /**
  * ⚠️ THE HERO ENDS ON ONE CTA. `See pricing` and the `Free to start` microline are both gone —

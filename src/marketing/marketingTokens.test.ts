@@ -334,3 +334,41 @@ describe("every specific rule on /founders outranks the generic one beside it", 
     expect(/(?:^|\n)\s*\.mk-fwcard p\s*\{/.test(marketing)).toBe(true);
   });
 });
+
+/**
+ * ⚠️ WHEN TYPE AND MEASURE MUST NOT DIVERGE, THE MEASURE BELONGS IN THE TYPE'S OWN UNITS.
+ *
+ * The hero's turn is 89 characters that cannot hold one line, so its line count is the thing under
+ * control. A `rem` measure is FROZEN — the ref's `33rem` is 528px at every width — while its
+ * `1.68vw` type grows until 1276px, so between ~1050 and there the type climbs against a fixed
+ * column and the count can flip to three. Expressed in `em` on the element that sets the
+ * font-size, the two grow together and the count becomes a property of the SENTENCE rather than
+ * of the viewport.
+ *
+ * This is the same carve-out `/founders`'s lifted line carries, and it is the second time this
+ * month the fix has been to change the UNIT rather than the value. Asserting the unit is what
+ * stops the next person tidying it to `rem` — where it would look consistent with every other
+ * measure in the sheet and be the one place that must not be.
+ */
+describe("measures that must track their type are expressed in `em`", () => {
+  const IN_EM = [".mk-turn-b", ".mk-fwhonest .mk-fwlead"];
+
+  it("each is declared with a max-width in `em` or `ch`, never `rem` or `px`", () => {
+    for (const sel of IN_EM) {
+      const m = new RegExp("(?:^|\\n)\\s*" + sel.replace(/\./g, "\\.") + "\\s*\\{([^}]*)\\}").exec(marketing);
+      expect(m, `${sel} has a rule`).toBeTruthy();
+      const mw = /max-width:\s*([\d.]+)(em|ch|rem|px|%)/.exec(m![1]);
+      expect(mw, `${sel} declares a max-width`).toBeTruthy();
+      expect(["em", "ch"], `${sel} measures in ${mw![2]} — it must track its own type`)
+        .toContain(mw![2]);
+    }
+  });
+
+  /** …and each of them sets the font-size the measure is counting. */
+  it("…on the element that sets the font-size it is counting", () => {
+    for (const sel of IN_EM) {
+      const m = new RegExp("(?:^|\\n)\\s*" + sel.replace(/\./g, "\\.") + "\\s*\\{([^}]*)\\}").exec(marketing);
+      expect(m![1], `${sel} sets its own font-size`).toMatch(/font-size:/);
+    }
+  });
+});
