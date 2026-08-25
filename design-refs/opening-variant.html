@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opening variant — sample to full request</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f2ede7; --white:#ffffff;
+    --sage-a:#d7ddd5; --sage-b:#d5dbd3; --sage-deep:#9aa896; --sage-ink:#5c7053;
+    --pink-band:#f3e0d6; --pink-cta:#f5e2da; --pink-cta-edge:#e8c8bc;
+    --burgundy:#7c3a2a; --ink:#3a1c14;
+    --ink-soft:rgba(58,28,20,.62); --ink-faint:rgba(58,28,20,.40);
+    --hairline:rgba(124,58,42,.16); --hairline-soft:rgba(58,28,20,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--page);font-family:'Inter',sans-serif;color:var(--ink);padding:40px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;}
+  h2{font-family:'Playfair Display',serif;font-size:23px;font-weight:600;}
+  .band-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--hairline);padding-bottom:9px;margin-bottom:18px;}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--ink-faint);text-transform:uppercase;}
+  .section{margin-bottom:46px;}
+  .note{font-size:12.5px;color:var(--ink-soft);line-height:1.65;max-width:760px;margin-bottom:22px;}
+  .note b{color:var(--ink);font-weight:600;}
+  .caption{font-size:11px;color:var(--ink-faint);margin-top:12px;line-height:1.6;font-style:italic;max-width:760px;}
+
+  /* the variant chip — one component, four contexts */
+  .vchip{
+    display:inline-flex;align-items:center;gap:5px;
+    font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--burgundy);background:var(--pink-cta);border:1px solid var(--pink-cta-edge);
+    padding:2px 8px;border-radius:999px;white-space:nowrap;
+  }
+  .vchip .mk{font-size:9px;line-height:1;}
+  .vchip.sage{color:var(--sage-ink);background:rgba(215,221,213,.55);border-color:rgba(154,168,150,.6);}
+  .vchip.ghost{color:var(--ink-faint);background:transparent;border-style:dashed;border-color:rgba(124,58,42,.28);}
+
+  /* sheets */
+  .cols{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;align-items:start;}
+  .sheet{
+    position:relative;background:var(--white);border:1px solid var(--hairline-soft);
+    border-radius:10px 14px 10px 10px;padding:14px 16px 13px;box-shadow:0 2px 6px rgba(58,28,20,.05);overflow:hidden;
+  }
+  .sheet::before{content:"";position:absolute;top:0;right:0;width:15px;height:15px;background:linear-gradient(225deg, var(--page) 48%, rgba(58,28,20,.12) 50%, var(--white) 52%);border-bottom-left-radius:6px;}
+  .sheet .s-type{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;display:block;margin-bottom:4px;}
+  .sheet .s-name{font-size:13.5px;font-weight:600;display:block;}
+  .sheet .s-meta{display:flex;align-items:center;gap:9px;margin-top:7px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-faint);}
+  .sheet .s-meta .dot{width:2.5px;height:2.5px;border-radius:50%;background:var(--ink-faint);}
+  .sheet .s-meta .use{font-family:'Inter',sans-serif;font-size:10px;}
+  .sheet .s-meta .use b{color:var(--ink-soft);font-weight:600;}
+
+  /* modal fragment */
+  .modal{background:var(--white);border-radius:14px;padding:10px;width:520px;box-shadow:0 20px 50px rgba(58,28,20,.18);}
+  .frame{border:1px solid var(--hairline);border-radius:8px;overflow:hidden;}
+  .m-band{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));padding:11px 16px;}
+  .m-title{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;}
+  .m-body{padding:20px 22px 22px;}
+  .fld{margin-bottom:14px;}
+  .fld label{display:flex;align-items:baseline;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;}
+  .fld label .opt{font-size:8px;letter-spacing:.1em;color:var(--ink-faint);}
+  .fld input{width:100%;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);border:1px solid var(--hairline-soft);border-radius:8px;padding:9px 11px;background:var(--white);outline:none;}
+  .fld .sub{font-size:10.5px;color:var(--ink-faint);margin-top:5px;line-height:1.5;}
+  .chipbar{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  .chipbar button{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;border:1px dashed rgba(124,58,42,.3);background:transparent;color:var(--ink-faint);padding:3px 9px;border-radius:999px;cursor:pointer;}
+  .chipbar button:hover{background:var(--pink-cta);border-style:solid;border-color:var(--pink-cta-edge);color:var(--burgundy);}
+
+  /* package cards */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;}
+  .pkg-card{background:var(--white);border:1px solid var(--hairline-soft);border-radius:14px;box-shadow:0 4px 14px rgba(58,28,20,.06);padding:20px 22px 14px;display:flex;flex-direction:column;gap:14px;min-height:190px;}
+  .pkg-card h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;}
+  .slots{display:flex;flex-direction:column;gap:7px;}
+  .slot{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
+  .slot .sl-t{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase;flex:0 0 58px;}
+  .slot .sl-n{font-size:13px;font-weight:600;}
+  .slot .sl-n.none{color:var(--ink-faint);font-weight:400;font-style:italic;}
+  .pkg-foot{border-top:1px solid var(--hairline-soft);padding-top:10px;margin-top:auto;font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;gap:14px;flex-wrap:wrap;}
+  .out{color:var(--burgundy);} .in{color:var(--sage-ink);}
+
+  /* tracking panel */
+  .panel{background:var(--white);border:1px solid var(--hairline-soft);border-radius:12px;overflow:hidden;}
+  .panel-band{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));padding:11px 17px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--ink);text-transform:uppercase;font-weight:700;}
+  .panel-body{padding:14px 17px 16px;display:flex;flex-direction:column;gap:14px;}
+  .drow .dr-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:12px;}
+  .drow .dr-name{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .drow .dr-name .dr-eyebrow{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase;display:block;font-weight:400;margin-bottom:3px;width:100%;}
+  .drow .dr-meta{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-soft);white-space:nowrap;}
+  .bar{height:8px;border-radius:4px;background:rgba(58,28,20,.07);overflow:hidden;}
+  .bar .b-sent{height:100%;background:var(--pink-band);border-radius:4px;overflow:hidden;}
+  .bar .b-in{height:100%;background:var(--sage-deep);border-radius:4px 0 0 4px;}
+
+  /* full-request activity row */
+  .actrow{
+    background:var(--white);border:1px solid var(--hairline-soft);border-left:3px solid var(--sage-deep);
+    border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .actrow .a-date{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-faint);}
+  .actrow .a-dir{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--sage-ink);}
+  .actrow .a-what{font-size:13px;}
+  .actrow .a-what b{font-weight:600;}
+  .actrow .a-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+  .match{
+    font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--sage-ink);display:flex;align-items:center;gap:5px;
+  }
+  .mismatch{color:var(--burgundy);}
+  .readnote{
+    font-size:11.5px;color:var(--ink-soft);line-height:1.6;margin-top:12px;
+    border-left:2px solid var(--hairline);padding-left:14px;
+  }
+  .readnote b{color:var(--ink);font-weight:600;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="section">
+    <div class="band-head"><h2>The amendment</h2><span class="tag">One optional label</span></div>
+    <div class="note">
+      Sample materials gain an optional <b>opening variant</b> label — free text, suggested from what you've used before. It rides through packages into tracking, and the same label goes on a full request. Nothing else changes: no version records, no second manuscript library, no new collection.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="band-head"><h2>1 · On the material</h2><span class="tag">Add / edit sample pages</span></div>
+    <div class="cols">
+      <div class="modal">
+        <div class="frame">
+          <div class="m-band"><span class="m-title">Add a material · Sample pages</span></div>
+          <div class="m-body">
+            <div class="fld">
+              <label>Name this sample</label>
+              <input type="text" value="Chapters 1–3">
+            </div>
+            <div class="fld">
+              <label>Opening variant <span class="opt">Optional</span></label>
+              <input type="text" value="Prologue-first">
+              <div class="sub">How this opening is ordered. Use it when you're testing more than one way in — it follows the sample through to tracking, and tells you which manuscript to send if a full is requested.</div>
+              <div class="chipbar">
+                <button>Prologue-first</button><button>Ch. 1 opening</button><button>Worldbuilding-first</button><button>+ new</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="sheet">
+            <span class="s-type">Sample pages</span>
+            <span class="s-name">Chapters 1–3</span>
+            <div class="s-meta"><span>Text · 7,412 words</span><span class="dot"></span><span class="use">In <b>2</b> packages</span><span class="vchip"><span class="mk">§</span>Prologue-first</span></div>
+          </div>
+          <div class="sheet">
+            <span class="s-type">Sample pages</span>
+            <span class="s-name">First fifty pages</span>
+            <div class="s-meta"><span>Text · 12,100 words</span><span class="dot"></span><span class="use">In <b>1</b> package</span><span class="vchip"><span class="mk">§</span>Worldbuilding-first</span></div>
+          </div>
+          <div class="sheet">
+            <span class="s-type">Sample pages</span>
+            <span class="s-name">Opening chapter</span>
+            <div class="s-meta"><span>Text · 3,050 words</span><span class="dot"></span><span class="use">Not in a package</span><span class="vchip ghost"><span class="mk">§</span>No variant</span></div>
+          </div>
+        </div>
+        <div class="caption">The chip only appears when a variant is set. A writer testing one opening never sees it.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="band-head"><h2>2 · On the package</h2><span class="tag">Inherited, not re-entered</span></div>
+    <div class="cards">
+      <div class="pkg-card">
+        <h3>Standard UK</h3>
+        <div class="slots">
+          <span class="slot"><span class="sl-t">Letter</span><span class="sl-n">Hook-first</span></span>
+          <span class="slot"><span class="sl-t">Synopsis</span><span class="sl-n">One-page</span></span>
+          <span class="slot"><span class="sl-t">Sample</span><span class="sl-n">Chapters 1–3</span><span class="vchip"><span class="mk">§</span>Prologue-first</span></span>
+        </div>
+        <div class="pkg-foot"><span class="out">→ 12 sent</span><span class="in">← 4 replied</span><span class="in">1 request</span></div>
+      </div>
+      <div class="pkg-card">
+        <h3>Slow-burn opener</h3>
+        <div class="slots">
+          <span class="slot"><span class="sl-t">Letter</span><span class="sl-n">Hook-first</span></span>
+          <span class="slot"><span class="sl-t">Synopsis</span><span class="sl-n">One-page</span></span>
+          <span class="slot"><span class="sl-t">Sample</span><span class="sl-n">First fifty pages</span><span class="vchip"><span class="mk">§</span>Worldbuilding-first</span></span>
+        </div>
+        <div class="pkg-foot"><span class="out">→ 10 sent</span><span class="in">← 2 replied</span></div>
+      </div>
+    </div>
+    <div class="caption">The variant comes from the sample. It isn't set on the package and can't disagree with the material it names.</div>
+  </div>
+
+  <div class="section">
+    <div class="band-head"><h2>3 · In tracking</h2><span class="tag">Requests by material</span></div>
+    <div class="panel" style="max-width:620px;">
+      <div class="panel-band"><span class="eyebrow">Requests by material</span></div>
+      <div class="panel-body">
+        <div class="drow">
+          <div class="dr-top"><span class="dr-name"><span class="dr-eyebrow">Sample pages</span>Chapters 1–3 <span class="vchip"><span class="mk">§</span>Prologue-first</span></span><span class="dr-meta">1 request from 12 sent</span></div>
+          <div class="bar"><div class="b-sent" style="width:100%"><div class="b-in" style="width:8.3%"></div></div></div>
+        </div>
+        <div class="drow">
+          <div class="dr-top"><span class="dr-name"><span class="dr-eyebrow">Sample pages</span>First fifty pages <span class="vchip"><span class="mk">§</span>Worldbuilding-first</span></span><span class="dr-meta">0 requests from 10 sent</span></div>
+          <div class="bar"><div class="b-sent" style="width:83%"><div class="b-in" style="width:0%"></div></div></div>
+        </div>
+        <div class="drow">
+          <div class="dr-top"><span class="dr-name"><span class="dr-eyebrow">Covering letter</span>Hook-first</span><span class="dr-meta">1 request from 22 sent</span></div>
+          <div class="bar"><div class="b-sent" style="width:100%"><div class="b-in" style="width:4.5%"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">This is the whole point, and it needed no new machinery — the variant is just a label on a material that was already being counted.</div>
+  </div>
+
+  <div class="section">
+    <div class="band-head"><h2>4 · When a full is requested</h2><span class="tag">The consistency check</span></div>
+    <div style="display:flex;flex-direction:column;gap:14px;max-width:820px;">
+      <div class="actrow">
+        <span class="a-date">18 AUG</span>
+        <span class="a-dir">←</span>
+        <span class="a-what"><b>Full manuscript requested</b> by R. Osei</span>
+        <span class="a-right">
+          <span class="vchip"><span class="mk">§</span>Read: Prologue-first</span>
+        </span>
+      </div>
+      <div class="actrow">
+        <span class="a-date">19 AUG</span>
+        <span class="a-dir" style="color:var(--burgundy);">→</span>
+        <span class="a-what"><b>Full manuscript sent</b> to R. Osei</span>
+        <span class="a-right">
+          <span class="vchip sage"><span class="mk">§</span>Sent: Prologue-first</span>
+          <span class="match">✓ matches what they read</span>
+        </span>
+      </div>
+      <div class="readnote">
+        The <b>Read</b> chip is derived — it's the variant on the sample in the package that went out with that query, so the app already knows it. The <b>Sent</b> chip is the one thing the writer records, and it defaults to the read variant.<br><br>
+        If they differ, the row says so plainly — <span class="match mismatch" style="display:inline-flex;">△ differs from what they read</span> — and stops there. It's a fact worth seeing, not a mistake worth scolding: sending a revised opening can be deliberate.
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

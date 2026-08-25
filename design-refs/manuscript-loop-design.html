@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The manuscript loop — settled design</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f2ede7; --white:#ffffff;
+    --sage-a:#d7ddd5; --sage-b:#d5dbd3; --sage-deep:#9aa896; --sage-ink:#5c7053;
+    --pink-band:#f3e0d6; --pink-cta:#f5e2da; --pink-cta-edge:#e8c8bc;
+    --burgundy:#7c3a2a; --ink:#3a1c14;
+    --ink-soft:rgba(58,28,20,.62); --ink-faint:rgba(58,28,20,.40);
+    --hairline:rgba(124,58,42,.16); --hairline-soft:rgba(58,28,20,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--page);font-family:'Inter',sans-serif;color:var(--ink);padding:44px 40px 90px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1150px;margin:0 auto;}
+  h1{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;letter-spacing:-.01em;}
+  h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;}
+  .lede{font-size:14px;color:var(--ink-soft);line-height:1.65;max-width:740px;margin:12px 0 46px;}
+  .lede b{color:var(--ink);font-weight:600;}
+  .section{margin-bottom:52px;}
+  .band-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--hairline);padding-bottom:9px;margin-bottom:8px;}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--ink-faint);text-transform:uppercase;}
+  .value{
+    font-size:12px;color:var(--sage-ink);line-height:1.6;margin:0 0 18px;
+    padding:9px 14px;background:rgba(215,221,213,.35);border-left:3px solid var(--sage-deep);border-radius:0 8px 8px 0;
+    max-width:740px;
+  }
+  .value b{font-weight:700;}
+  .caption{font-size:11px;color:var(--ink-faint);margin-top:12px;line-height:1.6;font-style:italic;max-width:760px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--ink);text-transform:uppercase;font-weight:700;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .out{color:var(--burgundy);} .in{color:var(--sage-ink);}
+
+  .vchip{
+    display:inline-flex;align-items:center;gap:5px;
+    font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--burgundy);background:var(--pink-cta);border:1px solid var(--pink-cta-edge);
+    padding:2px 8px;border-radius:999px;white-space:nowrap;
+  }
+  .vchip.sage{color:var(--sage-ink);background:rgba(215,221,213,.55);border-color:rgba(154,168,150,.6);}
+  .vchip.grey{color:var(--ink-faint);background:rgba(58,28,20,.05);border-color:rgba(58,28,20,.14);}
+
+  /* ---------- S1 loop map ---------- */
+  .loop{
+    background:var(--white);border:1px solid var(--hairline-soft);border-radius:14px;
+    padding:34px 30px 30px;overflow-x:auto;
+  }
+  .loop-grid{display:grid;grid-template-columns:repeat(6, 1fr);gap:0;align-items:start;min-width:900px;}
+  .node{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:0 6px;}
+  .node .n-disc{
+    width:64px;height:64px;border-radius:50%;border:1.5px solid var(--hairline);
+    display:flex;align-items:center;justify-content:center;background:var(--white);
+  }
+  .node.new .n-disc{border:1.5px dashed rgba(124,58,42,.4);background:rgba(245,226,218,.3);}
+  .node .n-disc svg{width:30px;height:30px;stroke:var(--burgundy);stroke-width:1.2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .node .n-name{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;}
+  .node.new .n-name{color:var(--burgundy);}
+  .node .n-sub{font-size:10px;color:var(--ink-faint);line-height:1.45;max-width:130px;}
+  .loop-arrows{display:grid;grid-template-columns:repeat(6,1fr);min-width:900px;margin-top:6px;}
+  .loop-return{
+    min-width:900px;margin-top:18px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .ret-line{flex:1;border-top:2px dotted var(--sage-deep);position:relative;}
+  .ret-line::before{content:"";position:absolute;left:-1px;top:-5px;border-right:7px solid var(--sage-deep);border-top:4.5px solid transparent;border-bottom:4.5px solid transparent;}
+  .ret-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--sage-ink);text-transform:uppercase;white-space:nowrap;}
+  .fwd{position:relative;height:2px;border-top:2px dotted var(--burgundy);margin:0 34%;top:-46px;}
+  .fwd::after{content:"";position:absolute;right:-1px;top:-5.5px;border-left:7px solid var(--burgundy);border-top:4.5px solid transparent;border-bottom:4.5px solid transparent;}
+
+  /* ---------- panels & rows ---------- */
+  .panel{background:var(--white);border:1px solid var(--hairline-soft);border-radius:12px;overflow:hidden;}
+  .panel-band{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));padding:11px 17px;display:flex;justify-content:space-between;align-items:center;}
+  .panel-body{padding:14px 17px 16px;display:flex;flex-direction:column;gap:10px;}
+
+  .vrow{
+    background:var(--white);border:1px solid var(--hairline-soft);border-radius:10px;
+    padding:13px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .vrow .v-name{font-size:13.5px;font-weight:600;}
+  .vrow .v-note{font-size:11px;color:var(--ink-soft);width:100%;margin-top:2px;line-height:1.5;}
+  .vrow .v-meta{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-faint);display:flex;gap:12px;flex-wrap:wrap;margin-left:auto;}
+  .ghost{
+    border:1.5px dashed rgba(124,58,42,.32);border-radius:10px;padding:13px;text-align:center;
+    background:transparent;font-family:inherit;width:100%;
+  }
+  .ghost .g-t{font-family:'Playfair Display',serif;font-style:italic;font-size:13.5px;color:var(--burgundy);}
+
+  .fld{margin-bottom:14px;max-width:460px;}
+  .fld label{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;}
+  .fld label .opt{font-size:8px;color:var(--ink-faint);}
+  .fld select,.fld input{width:100%;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);border:1px solid var(--hairline-soft);border-radius:8px;padding:9px 11px;background:var(--white);outline:none;}
+  .fld select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237c3a2a' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+  .fld .sub{font-size:10.5px;color:var(--ink-faint);margin-top:5px;line-height:1.5;}
+
+  .drow .dr-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:12px;}
+  .drow .dr-name{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .drow .dr-meta{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-soft);white-space:nowrap;}
+  .bar{height:8px;border-radius:4px;background:rgba(58,28,20,.07);overflow:hidden;}
+  .bar .b-sent{height:100%;background:var(--pink-band);border-radius:4px;overflow:hidden;}
+  .bar .b-in{height:100%;background:var(--sage-deep);border-radius:4px 0 0 4px;}
+
+  .hrow{
+    display:grid;grid-template-columns:150px 1fr auto;gap:14px;align-items:center;
+    padding:10px 0;border-bottom:1px dotted rgba(58,28,20,.16);font-size:12.5px;
+  }
+  .hrow:last-child{border-bottom:none;}
+  .hrow .h-agent{font-weight:600;}
+  .hrow .h-what{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-soft);}
+
+  .actrow{
+    background:var(--white);border:1px solid var(--hairline-soft);border-left:3px solid var(--sage-deep);
+    border-radius:10px;padding:13px 17px;display:flex;align-items:center;gap:13px;flex-wrap:wrap;font-size:12.5px;
+  }
+  .actrow .a-date{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-faint);}
+  .actrow b{font-weight:600;}
+  .actrow .a-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+  .match{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--sage-ink);}
+
+  .notgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  .notcell{
+    background:var(--white);border:1px solid var(--hairline-soft);border-radius:10px;padding:14px 17px;
+    font-size:12px;color:var(--ink-soft);line-height:1.6;
+  }
+  .notcell b{color:var(--ink);font-weight:600;display:block;margin-bottom:3px;}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+  @media(max-width:1000px){.cols2,.notgrid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>The manuscript loop</h1>
+  <div class="lede">
+    ScriptAlly currently models the <b>outbound</b> half of querying: materials are bundled into packages, packages ride queries, tracking reports what came back. The <b>inbound</b> half — an agent's feedback prompting a revision, and that revision going back out — has no object in the app, even though R&R is already a first-class status. <b>Versions close the loop.</b> One append-only list on the manuscript; everything else references it.
+  </div>
+
+  <!-- ============ S1 ============ -->
+  <div class="section">
+    <div class="band-head"><h2>1 · The loop</h2><span class="tag">One new entity, three references</span></div>
+    <div class="value"><b>Value:</b> every arrow below is a fact the app can already record or derive — versions add the dotted sage return path, which today ends in a status change and nothing else.</div>
+    <div class="loop">
+      <div class="loop-grid">
+        <div class="node">
+          <div class="n-disc"><svg viewBox="0 0 32 32"><path d="M7 4h13l5 5v19H7z"/><path d="M20 4v5h5"/><path d="M11 13h10M11 17h10M11 21h7"/></svg></div>
+          <span class="n-name">Manuscript</span>
+          <span class="n-sub">The work. One record.</span>
+        </div>
+        <div class="node new">
+          <div class="n-disc"><svg viewBox="0 0 32 32"><path d="M6 7h12l4 4v14H6z"/><path d="M10 3h12l4 4v14"/><path d="M9 14h8M9 18h8M9 22h5"/></svg></div>
+          <span class="n-name">Versions</span>
+          <span class="n-sub">Named orderings &amp; revisions. Append-only.</span>
+        </div>
+        <div class="node">
+          <div class="n-disc"><svg viewBox="0 0 32 32"><path d="M9 4h9l5 5v17H9z"/><path d="M18 4v5h5"/><path d="M12 14h9M12 18h9M12 22h6"/></svg></div>
+          <span class="n-name">Samples</span>
+          <span class="n-sub">Excerpts <i>from a version</i>. Letters &amp; synopses unchanged.</span>
+        </div>
+        <div class="node">
+          <div class="n-disc"><svg viewBox="0 0 32 32"><path d="M16 4 28 10v12L16 28 4 22V10z"/><path d="M16 15 28 10M16 15v13M16 15 4 10"/></svg></div>
+          <span class="n-name">Packages</span>
+          <span class="n-sub">Combinations of materials. Inherit the version through the sample.</span>
+        </div>
+        <div class="node">
+          <div class="n-disc"><svg viewBox="0 0 32 32"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h19A2.5 2.5 0 0 1 28 8.5v15a2.5 2.5 0 0 1-2.5 2.5h-19A2.5 2.5 0 0 1 4 23.5z"/><path d="M4.6 7.6 16 17 27.4 7.6"/></svg></div>
+          <span class="n-name">Queries</span>
+          <span class="n-sub">The activity log records which version each full or partial send carried.</span>
+        </div>
+        <div class="node">
+          <div class="n-disc"><svg viewBox="0 0 32 32"><path d="M5 26h22M5 26V5"/><rect x="9" y="17" width="4" height="9"/><rect x="15" y="12" width="4" height="14"/><rect x="21" y="7" width="4" height="19"/></svg></div>
+          <span class="n-name">Tracking</span>
+          <span class="n-sub">Requests by opening. Who holds what.</span>
+        </div>
+      </div>
+      <div class="loop-return">
+        <span class="ret-lbl">← feedback · R&amp;R · revision — a new version, linked to the activity that prompted it</span>
+        <div class="ret-line"></div>
+      </div>
+    </div>
+    <div class="caption">Packages never reference versions directly — one edge only, sample → version, so the two can never disagree. This is the point I'm holding even though "versions inside packages" was the original suggestion.</div>
+  </div>
+
+  <!-- ============ S2 ============ -->
+  <div class="section">
+    <div class="band-head"><h2>2 · On the Manuscripts page</h2><span class="tag">Append-only · invisible until needed</span></div>
+    <div class="value"><b>Value:</b> one place the vocabulary is defined. Selected everywhere else, typed nowhere else — the drift that free text invites ("Prologue-first" vs "prologue first") cannot happen.</div>
+    <div class="panel" style="max-width:720px;">
+      <div class="panel-band"><span class="eyebrow">Versions</span><span class="mono" style="font-size:9px;color:var(--ink-soft);">3 · + NEW</span></div>
+      <div class="panel-body">
+        <div class="vrow">
+          <span class="v-name">Prologue-first</span>
+          <span class="vchip grey">Initial</span>
+          <span class="v-meta"><span>MAR 2026</span><span>2 samples</span><span>held by 4 agents</span></span>
+          <span class="v-note">Opens on the prologue — the storm, then chapter one.</span>
+        </div>
+        <div class="vrow">
+          <span class="v-name">Worldbuilding-first</span>
+          <span class="vchip grey">Reordering</span>
+          <span class="v-meta"><span>MAY 2026</span><span>1 sample</span><span>held by 1 agent</span></span>
+          <span class="v-note">Prologue cut; opens inside the settlement. Testing against the slow-burn crowd.</span>
+        </div>
+        <div class="vrow">
+          <span class="v-name">Post-R&amp;R (T. Marsh)</span>
+          <span class="vchip"><span>§</span>From R&amp;R</span>
+          <span class="vchip sage">Latest</span>
+          <span class="v-meta"><span>JUL 2026</span><span>1 sample</span><span>held by 1 agent</span></span>
+          <span class="v-note">Marsh's notes: tightened part two, new final chapter. Linked to her R&amp;R on the query log.</span>
+        </div>
+        <div class="ghost"><span class="g-t">Add a version</span></div>
+      </div>
+    </div>
+    <div class="caption">"Latest" is a date fact, not a verdict. "From R&amp;R" links to the activity that prompted it — the loop's return path made concrete. A manuscript with no versions shows none of this; the panel appears when the second version is created, because one version is just the book. Versions never count against the free tier's one-manuscript limit — orderings of one book are not multiple books.</div>
+  </div>
+
+  <!-- ============ S3 ============ -->
+  <div class="section">
+    <div class="band-head"><h2>3 · On a sample material</h2><span class="tag">Selected, never typed</span></div>
+    <div class="value"><b>Value:</b> the test becomes attributable. A sample now says which book-shape it excerpts — so tracking's claims about openings rest on a controlled reference, not a memory.</div>
+    <div class="cols2">
+      <div>
+        <div class="fld">
+          <label>Name this sample</label>
+          <input type="text" value="Chapters 1–3">
+        </div>
+        <div class="fld">
+          <label>From version <span class="opt">Optional</span></label>
+          <select>
+            <option>Prologue-first</option>
+            <option>Worldbuilding-first</option>
+            <option>Post-R&amp;R (T. Marsh)</option>
+            <option>— none —</option>
+          </select>
+          <div class="sub">Which version of the manuscript these pages come from. Defined on the Manuscripts page; if you're only running one version, leave it and you'll never see this again.</div>
+        </div>
+      </div>
+      <div>
+        <div class="vrow" style="border-radius:10px 14px 10px 10px;">
+          <div>
+            <span class="mono" style="font-size:7.5px;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;">Sample pages</span><br>
+            <span class="v-name">Chapters 1–3</span>
+            <div class="mono" style="font-size:8.5px;color:var(--ink-faint);margin-top:5px;">Text · 7,412 words &nbsp;·&nbsp; In 2 packages &nbsp;·&nbsp; <span class="vchip"><span>§</span>Prologue-first</span></div>
+          </div>
+        </div>
+        <div class="caption" style="margin-top:10px;">The app records the reference; it cannot verify the paste matches the file. Reported, not guaranteed — that limitation is permanent and worth stating rather than hiding.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ S4 ============ -->
+  <div class="section">
+    <div class="band-head"><h2>4 · In tracking</h2><span class="tag">Requests by opening</span></div>
+    <div class="value"><b>Value:</b> the question that started all this — <b>"which way in do agents prefer?"</b> — answered as counts, aggregated across every sample and package that carries each version.</div>
+    <div class="panel" style="max-width:640px;">
+      <div class="panel-band"><span class="eyebrow">Requests by opening</span></div>
+      <div class="panel-body">
+        <div class="drow">
+          <div class="dr-top"><span class="dr-name"><span class="vchip"><span>§</span>Prologue-first</span><span style="font-weight:400;font-size:10.5px;color:var(--ink-faint);">2 samples · 3 packages</span></span><span class="dr-meta">2 requests from 18 sent</span></div>
+          <div class="bar"><div class="b-sent" style="width:100%"><div class="b-in" style="width:11%"></div></div></div>
+        </div>
+        <div class="drow">
+          <div class="dr-top"><span class="dr-name"><span class="vchip"><span>§</span>Worldbuilding-first</span><span style="font-weight:400;font-size:10.5px;color:var(--ink-faint);">1 sample · 1 package</span></span><span class="dr-meta">0 requests from 6 sent</span></div>
+          <div class="bar"><div class="b-sent" style="width:33%"><div class="b-in" style="width:0%"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">Counts, never percentages — 2-from-18 against 0-from-6 is not a result, and the panel must never imply it is. The app reports; the writer decides when the numbers are big enough to mean something.</div>
+  </div>
+
+  <!-- ============ S5 ============ -->
+  <div class="section">
+    <div class="band-head"><h2>5 · Who holds what</h2><span class="tag">Derived · the six-months-later question</span></div>
+    <div class="value"><b>Value:</b> the strongest single reason to build this. When an agent surfaces after months of silence, this panel answers "what exactly are they reading?" — and shows, as a fact, which readers hold an earlier version than your latest.</div>
+    <div class="panel" style="max-width:720px;">
+      <div class="panel-band"><span class="eyebrow">Manuscripts out with agents</span><span class="mono" style="font-size:9px;color:var(--ink-soft);">5 held</span></div>
+      <div class="panel-body" style="gap:0;">
+        <div class="hrow"><span class="h-agent">T. Marsh</span><span class="h-what">FULL · sent 02 Aug</span><span class="vchip sage"><span>§</span>Post-R&amp;R (T. Marsh)</span></div>
+        <div class="hrow"><span class="h-agent">R. Osei</span><span class="h-what">FULL · sent 19 Jun</span><span class="vchip"><span>§</span>Prologue-first</span></div>
+        <div class="hrow"><span class="h-agent">A. Whitmore</span><span class="h-what">PARTIAL · sent 11 Jun</span><span class="vchip"><span>§</span>Prologue-first</span></div>
+        <div class="hrow"><span class="h-agent">J. Fairfax</span><span class="h-what">FULL · sent 30 May</span><span class="vchip"><span>§</span>Prologue-first</span></div>
+        <div class="hrow"><span class="h-agent">S. Okonkwo</span><span class="h-what">PARTIAL · sent 24 May</span><span class="vchip"><span>§</span>Worldbuilding-first</span></div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:10px;">Four of five hold a version earlier than your latest — stated as a count on the panel, nothing more. Whether to send updates is a judgement about relationships, and the app doesn't make it.</div>
+  </div>
+
+  <!-- ============ S6 ============ -->
+  <div class="section">
+    <div class="band-head"><h2>6 · On the query</h2><span class="tag">Activity log · one field</span></div>
+    <div class="value"><b>Value:</b> consistency at the moment it matters. The agent read an opening; the app knows which; recording the send takes one pre-filled selection.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;max-width:820px;">
+      <div class="actrow">
+        <span class="a-date">18 AUG</span><span class="in mono">←</span>
+        <span><b>Full manuscript requested</b> by R. Osei</span>
+        <span class="a-right"><span class="vchip"><span>§</span>Read: Prologue-first</span></span>
+      </div>
+      <div class="actrow" style="border-left-color:var(--pink-cta-edge);">
+        <span class="a-date">19 AUG</span><span class="out mono">→</span>
+        <span><b>Full manuscript sent</b> to R. Osei</span>
+        <span class="a-right">
+          <span class="vchip sage"><span>§</span>Sent: Prologue-first</span>
+          <span class="match">✓ matches what they read</span>
+        </span>
+      </div>
+    </div>
+    <div class="caption">"Read" is derived from the package that went out with the query. "Sent" is the one thing the writer selects, defaulting to what was read. A difference is stated — <span class="mono" style="color:var(--burgundy);font-size:10px;">△ DIFFERS FROM WHAT THEY READ</span> — and left alone, because sending a revision can be deliberate. `recomputeQuery` is untouched: the version is payload on the activity, never status.</div>
+  </div>
+
+  <!-- ============ S7 ============ -->
+  <div class="section">
+    <div class="band-head"><h2>7 · Deliberately not built</h2><span class="tag">The fence</span></div>
+    <div class="notgrid">
+      <div class="notcell"><b>No file storage yet.</b> Versions are records, not documents. When Storage lands, a version gains an optional file attachment — the design doesn't change, it gets a pocket.</div>
+      <div class="notcell"><b>No content verification, ever.</b> The app cannot check that a sample's text matches its version. It records the writer's claim and says so.</div>
+      <div class="notcell"><b>No version editing beyond rename and note.</b> A revision of the book is a new version, not an edit — append-only, like the activity log and querying goals. Archive hides; nothing is deleted while referenced.</div>
+      <div class="notcell"><b>No verdicts.</b> "Latest" is a date. "Earlier version" is a count. No "outdated!", no prompts to chase agents, no recommended opening.</div>
+      <div class="notcell"><b>Queries never fragment.</b> An R&R producing a new version continues the same query and the same log. Versions annotate the story; they never restart it.</div>
+      <div class="notcell"><b>Packages stay version-blind.</b> They combine materials; the version rides in through the sample. One edge, no disagreement possible.</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
