@@ -20,7 +20,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { PARCEL_SLOT, SHEETS_SLOT, STRIP_MARK_PX, STRIP_PLATE_PX } from "./PackageGroup";
+import { PARCEL_SLOT, STRIP_MARK_PX, STRIP_PLATE_PX } from "./PackageGroup";
 import { PACKAGE_ICONS } from "../packages/packageIcons";
 
 const root = join(__dirname, "..", "..", "..");
@@ -133,101 +133,6 @@ describe("D-C3 — loose materials have NO container", () => {
     expect(cssD).not.toContain("qc-loose-slug");
   });
 
-  it("slot B sits on a transparent ground, so the drawing is not given a container either", () => {
-    expect(cssD).toContain(".qc-loose .pkgb-plate { background: transparent; }");
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-describe("D-C4 — Save as package is offered once and never insisted on", () => {
-  it("it is at the END of the row, after the materials", () => {
-    const d = decls(tsx);
-    expect(d.indexOf("{children}")).toBeLessThan(d.indexOf("qc-loose-promote"));
-    expect(rule(".qc-loose-promote")).toContain("margin-left: auto");
-  });
-
-  it("it carries no colour weight — no fill, no pill", () => {
-    const r = rule(".qc-loose-promote");
-    expect(r).toContain("background: none");
-    expect(r).not.toContain("border-radius");
-    expect(r).not.toContain("padding: 4px");
-  });
-
-  it("nothing stores a dismissal", () => {
-    // ⚠️ A THING YOU MAY IGNORE FOREVER NEEDS NOWHERE TO REMEMBER THAT YOU DID. A persisted
-    // "dismissed" flag would be a rules field, a write and a migration for an offer with no state.
-    const d = decls(tsx);
-    expect(d).not.toMatch(/dismiss|localStorage|sessionStorage/i);
-  });
-
-  it("it is absent — not inert — when there is a package, and it shares the attach gate", () => {
-    expect(queries).toContain("groups.length === 0 && canAttachPackages(currentUser)");
-    /**
-     * ⚠️ THE OFFER NOW SWITCHES IN PLACE; IT NO LONGER LEAVES THE PAGE. This assertion read
-     * `? openPackages` — the earlier build, where "Save as package" navigated to Submission
-     * packages and the writer had to come back and attach by hand. It asks first, because taking
-     * it REPLACES the listed materials with the package's contents.
-     *
-     * ⚠️ AND THE GATE GAINED A THIRD CLAUSE, `attachablePkgs.length > 0`, for the same reason:
-     * with nowhere to switch TO, the offer would open a confirm onto an empty picker.
-     */
-    expect(queries).toContain("? () => void switchToPackage(activeQuery, loose.length)");
-    expect(queries).toContain("attachablePkgs.length > 0");
-    expect(queries, "the offer still navigates away instead of switching in place")
-      .not.toContain("? openPackages");
-    // absent, because the prop is optional and the component omits the button when unset
-    expect(decls(tsx)).toContain("{onSaveAsPackage && (");
-  });
-
-  it("the loose row itself is absent when there is nothing loose", () => {
-    expect(queries).toContain("{loose.length > 0 && (");
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-describe("D-C5 — two slots, one shared component, one library", () => {
-  it("both marks exist in the shared library", () => {
-    expect(Object.keys(PACKAGE_ICONS)).toContain(PARCEL_SLOT);
-    expect(Object.keys(PACKAGE_ICONS)).toContain(SHEETS_SLOT);
-  });
-
-  it("both render at 22px inside a 38px plate", () => {
-    expect(STRIP_MARK_PX).toBe(22);
-    expect(STRIP_PLATE_PX).toBe(38);
-    expect((decls(tsx).match(/px=\{STRIP_MARK_PX\}/g) ?? []).length).toBe(2);
-    expect((decls(tsx).match(/width=\{STRIP_PLATE_PX\} height=\{STRIP_PLATE_PX\}/g) ?? []).length).toBe(2);
-  });
-
-  it("they go through IllustrationSlot, not a bespoke plate", () => {
-    // ⚠️ ONE LIBRARY OR THEY DRIFT INTO TWO SETS. R1 established IllustrationSlot as the single
-    // implementation for every slot; a hand-rolled 38px plate here would be the second.
-    expect(tsx).toContain('import { IllustrationSlot } from "../packages/IllustrationSlot"');
-    /**
-     * ⚠️ THE CLAIM IS ABOUT THE SLOTS, NOT ABOUT EVERY `<svg>` IN THE FILE. It forbade inline SVG
-     * outright, which was a fair shorthand while the strip drew nothing but its two marks. Ruling 1
-     * added a footer with a padlock glyph — a 10px icon inside a label, not a commissioned
-     * illustration — so the shorthand now fails on correct code. What must not happen is a bespoke
-     * PLATE beside the shared component's.
-     */
-    expect(decls(tsx)).not.toContain("pkgb-plate");
-    const svgs = (decls(tsx).match(/<svg/g) ?? []).length;
-    expect(svgs, "an inline mark has appeared beside the shared slots").toBeLessThanOrEqual(1);
-  });
-
-  it("the chip plate has room for the mark — 8px radius and no padding", () => {
-    const b = decls(read("src/components/packages/packagesBroadsheet.css"));
-    const i = b.indexOf(".pkgb-plate--chip");
-    expect(i, "the chip shape is not declared").toBeGreaterThan(-1);
-    const r = b.slice(i, b.indexOf("}", i));
-    expect(r).toContain("padding: 0");
-    expect(r).toContain("border-radius: 8px");
-  });
-
-  it("the plate stays DASHED — these are still placeholders", () => {
-    const b = decls(read("src/components/packages/packagesBroadsheet.css"));
-    const i = b.indexOf(".pkgb-plate {");
-    expect(b.slice(i, b.indexOf("}", i))).toContain("dashed");
-  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -285,5 +190,33 @@ describe("the block shape is gone, not merely unused", () => {
     for (const t of ["--pastille:", "--pastille-tint", "--pastille-ink"]) {
       expect(cssD, `${t} survives`).not.toContain(t);
     }
+  });
+});
+
+/**
+ * ⚠️ THE LOOSE ROW'S SLOT AND ITS `Save as package ›` ARE RETIRED (D7/D8), so the cases that
+ * asserted them are gone rather than adjusted — a lock kept alive against a deleted surface is how
+ * that surface gets restored. What replaces them is the inverse, which is the stronger claim: the
+ * row now carries pills and nothing else.
+ *
+ * ⚠️ AND `D-C5 — two slots` WENT WITH THEM, because there is one slot now. The packaged strip keeps
+ * its parcel; the loose row never needed an emblem, and the contrast between the two is the design.
+ */
+describe("the loose row is pills and nothing else (D7/D8)", () => {
+  it("declares no promote control and no slot rule", () => {
+    /* ⚠️ COMMENTS STRIPPED FIRST — the standing rule, and it caught this on the first run. The
+       sheet's own prose NAMES `.qc-loose-promote` to record that it is retired, which is exactly
+       the documentation this repo wants and exactly what a bare `toContain` fails on. */
+    const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(rules).not.toMatch(/["\s`.]qc-loose-promote["\s`{,:]/);
+    expect(rules).not.toContain(".qc-loose .pkgb-plate");
+  });
+
+  it("renders no illustration and no promote in the component", () => {
+    const decls = tsx.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(decls).not.toContain("SHEETS_SLOT");
+    expect(decls).not.toContain("onSaveAsPackage");
+    /* ⚠️ THE PACKAGED STRIP KEEPS ITS OWN (D9) — asserted here so the removal above cannot creep. */
+    expect(decls).toContain("PARCEL_SLOT");
   });
 });

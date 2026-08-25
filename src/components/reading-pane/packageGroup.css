@@ -174,32 +174,10 @@
   margin: 6px 0 8px;
 }
 
-/* Slot B sits on the bare pane — transparent ground, and the library's own burgundy mark. */
-.qc-loose .pkgb-plate { background: transparent; }
 
-/* ⚠️ NO COLOUR WEIGHT (D-C4). A hairline under mono text, in the page's own burgundy — it must be
-   findable and never the first thing the eye lands on. `margin-left: auto` puts it at the row's
-   end, after the materials, where it can be ignored. */
-.qc-loose-promote {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  font-family: var(--f12-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--burg);
-  /* ⚠️ THE LITERAL, NOT `var(--pink-cta-edge, …)`. No such token is defined anywhere, so the
-     hex WAS the value wearing a knob's clothes — and a reader would go looking for a knob that
-     does not exist. The three above lost their fallbacks for the opposite reason: this sheet
-     renders inside `.t-f12`, which SETS `--f12-serif`, `--burg` and `--ink`, so those fallbacks
-     were provably inert. */
-  border-bottom: 1px solid #e8c8bc;
-  margin-left: auto;
-  white-space: nowrap;
-}
-.qc-loose-promote:hover { color: var(--ink); }
+/* ⚠️ `.qc-loose-promote` AND THE SLOT RULE ARE GONE (D7/D8). The promote was a conversion nudge in
+   a record of what was sent, and the slot drew a dashed plate that rendered empty. What is left is
+   the row's layout and nothing else — no border, no fill, no radius, which is the standing rule. */
 
 /* ══════════════════════════════════════════════════════════════════════════════
    THE FOOTER — one row, both facts (Ruling 1)

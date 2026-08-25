@@ -51,3 +51,45 @@ Deleted with it: `overlaps`, `overlapNote`, their tests, the `.qc-pkgclash` rule
 — one shape or the other, never a merge. The replacement is stated once, in `switchToPackage`'s
 confirm, which is the honest place: a sentence about what happens to the whole send rather than a
 warning stapled to each option.
+
+## Parts 3–5 — the four removals
+
+**D7 · `SAVE AS PACKAGE ›` gone.** Building a package is packages-page work; offering it inside a
+record of what was sent is a conversion nudge where facts belong.
+
+**D8 · the loose row's dashed slot gone.** It rendered empty on the live page, and loose materials
+are not an object needing an emblem. **D9: the packaged strip keeps its parcel and seal** — it *is*
+a named, contained thing, and the contrast between the two rows is the design. Asserted, so the
+removal cannot creep: the lock now requires `PARCEL_SLOT` to survive.
+
+**D10 · the third `+ Attach` gone from the fork's state.** The fork already asks the whole question;
+this repeated one of its two answers three inches below. ⚠️ **It is hidden, not unmounted** — the
+fork's `List materials` opens this very menu by clicking its trigger ref, so removing the element
+would break the branch it duplicates.
+
+**D11 · the lock notice gone from the strip. D12: `CHANGE PACKAGE` and `REMOVE` stay.** ⚠️ **D13
+verified before removing, not after:** the packages card renders `LOCKED_NOTE` + `LOCKED_WHY`
+(`PackagesBand:127`) and the drawer's "Worth knowing" says a sent package's contents stop changing
+(`PackagesDrawer:58`). Nothing was lost.
+
+### ⚠️ Removing the promote orphaned the replacement confirm — and D5 wanted it kept
+
+`switchToPackage` sat behind `Save as package ›`: confirm, *then* open the picker. With that control
+retired its only caller went, which would have left a package silently replacing a listed set from
+the Attach menu. So the question **moved to where the write happens**: choosing a package while
+materials are listed now asks first, and — because the writer has chosen by then — **it can name the
+package**, which the old wording could not.
+
+### ⚠️ An existing lock forbade the expression D10 needed, and it was right to
+
+`queryCentreChassis` forbids `baseMaterialsFor(activeQuery, activeAgent).length`, because a count
+over three visible rows states what the reader can already see. D10 needs that length as a
+**branch** — it renders no number. The lock was a substring test, so it caught a use it was never
+written about; it now names the **rendering** shapes (`meta={…}`, `{…}`) instead. The law is
+unchanged and stated more precisely than before.
+
+Also retired with their subjects: `SHEETS_SLOT`, `.qc-loose-promote`, the loose slot's CSS rule, and
+six `sentStrip` cases — replaced by the inverse assertions, which are stronger. ⚠️ **My own new lock
+caught my own comment** on its first run: the stylesheet's prose *names* `.qc-loose-promote` to
+record the retirement, which is exactly the documentation this repo wants and exactly what a bare
+`toContain` fails on. Comments stripped first, per the standing rule.

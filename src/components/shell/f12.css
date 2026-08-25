@@ -4556,3 +4556,11 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 /* ⚠️ DISABLED STATES ITS REASON IN THE TITLE — with no package built there is nowhere to go, and a
    control that can only disappoint should say why rather than simply refuse. */
 .qc-forkbtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/**
+ * ⚠️ THE ATTACH TRIGGER IS HIDDEN, NOT UNMOUNTED, IN THE FORK'S STATE (D10). The fork's
+ * `List materials` opens this menu by clicking the trigger, so removing the element would break the
+ * branch it duplicates. `visibility: hidden` keeps the ref clickable in code while taking the
+ * control off the page; `display: none` would not, and neither would unmounting it.
+ */
+.qc-addmat-quiet { visibility: hidden; position: absolute; pointer-events: none; }

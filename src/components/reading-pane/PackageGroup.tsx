@@ -37,14 +37,14 @@
 import React from "react";
 import { IllustrationSlot } from "../packages/IllustrationSlot";
 import { packageDrift, driftNote, asSentLabel, type MaterialGroup } from "../../lib/packageAttach";
-import { LOCKED_NOTE } from "../../lib/packageMetrics";
 import type { QueryMaterial, SubmissionPackage } from "../../types";
 import "./packageGroup.css";
 
 /** Slot A — the parcel, on pastille blue. Shared library, shared plate, one stroke rule. */
 export const PARCEL_SLOT = "parcel";
-/** Slot B — loose sheets, on the bare pane. */
-export const SHEETS_SLOT = "sheets";
+/* ⚠️ `SHEETS_SLOT` IS GONE (D8). It named the loose row's dashed plate, which rendered empty and
+   is retired — loose materials are not an object needing an emblem. `PARCEL_SLOT` stays: the
+   packaged strip IS one. */
 /** Both marks render at 22px inside a 38px plate. The ref's constraint, and the artist's. */
 export const STRIP_MARK_PX = 22;
 export const STRIP_PLATE_PX = 38;
@@ -79,13 +79,13 @@ export interface PackageGroupProps {
    */
   onChangePackage?: () => void;
   onRemovePackage?: () => void;
-  /** Stamped sent — its contents are fixed. Shown, never used to hide the pointer controls. */
-  locked?: boolean;
+  /* ⚠️ NO `locked` PROP. It drove the retired notice and nothing else (D11); leaving it accepted
+     and unread is how a caller ends up passing state that silently goes nowhere. */
   children: React.ReactNode;
 }
 
 export const PackageGroup: React.FC<PackageGroupProps> = ({
-  group, live, sent, sentDate, onView, onChangePackage, onRemovePackage, locked, children,
+  group, live, sent, sentDate, onView, onChangePackage, onRemovePackage, children,
 }) => {
   /**
    * ⚠️ EACH STATE APPEARS ONLY WHEN TRUE, AND THERE IS NO "MATCHES" STATE. A group that still
@@ -140,16 +140,18 @@ export const PackageGroup: React.FC<PackageGroupProps> = ({
         * pointer controls change which package this query used. A branch showing one or the other
         * would make correcting a mis-attached package impossible on exactly the sends that matter.
         */}
-      {(locked || onChangePackage || onRemovePackage) && (
+      {/**
+        * ⚠️ THE LOCK NOTICE IS GONE FROM HERE (D11), AND THE POINTER CONTROLS STAY (D12). It read
+        * "Locked — this package has been sent" and explained a rule at the moment it is least
+        * relevant: nobody edits a package's contents from a query's timeline, so the sentence
+        * answered a question the writer was not asking.
+        *
+        * ⚠️ IT IS STILL EXPLAINED WHERE EDITING HAPPENS — verified before removing, not after: the
+        * packages card renders `LOCKED_NOTE` + `LOCKED_WHY` (`PackagesBand`), and the drawer's
+        * "Worth knowing" says a sent package's contents stop changing. Nothing was lost.
+        */}
+      {(onChangePackage || onRemovePackage) && (
         <div className="qc-strip-foot">
-          {locked && (
-            <span className="qc-strip-lock">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" />
-              </svg>
-              {LOCKED_NOTE}
-            </span>
-          )}
           <span className="qc-strip-ptrs">
             {onChangePackage && (
               <button type="button" className="qp-inplace qc-strip-ptr" onClick={onChangePackage}
@@ -166,44 +168,22 @@ export const PackageGroup: React.FC<PackageGroupProps> = ({
   );
 };
 
-export interface LooseMaterialsProps {
-  /** The pills that came with the send but not from a package. */
-  children: React.ReactNode;
-  /**
-   * Offered once, at the end of the row. Omitted entirely when there is nothing to promote or no
-   * destination — never rendered inert.
-   */
-  onSaveAsPackage?: () => void;
-}
-
 /**
- * ══ LOOSE MATERIALS — no container at all (ref §2) ════════════════════════════════════════════
+ * ══ LOOSE MATERIALS — the pills, and nothing else (ref §2, stripped D7/D8) ═══════════════════
  *
- * ⚠️ NO STRIP, NO BORDER, NO FILL, NO "SENT" SLUG. Chips and a sheets plate float directly on the
- * pane. **Lighter than the packaged row, not lesser than it** — and the ref's own CSS is instructive
- * here: it defines a `.mslug` wrapper label and then never renders one, because a label would start
- * turning the floating row back into a box.
+ * ⚠️ NO ILLUSTRATION SLOT (D8). The row carried a dashed `sheets` plate that rendered EMPTY on the
+ * live page, and loose materials are not an object needing an emblem. The packaged strip has a
+ * parcel and a seal because it IS one — a named, contained thing — and the contrast between the two
+ * rows is the design. Giving both an emblem erases the distinction the slot exists to draw.
  *
- * ⚠️ THIS IS THE COMMON CASE, NOT THE EDGE CASE. A partial send is loose by nature — the agent
- * named what they wanted — so further down a query this is the shape most sends take.
+ * ⚠️ NO `Save as package ›` (D7). Building a package is packages-page work; offering it inside a
+ * record of what was sent is a conversion nudge in a place reserved for facts. The Attach menu
+ * already reaches the packages page for anyone who wants one.
+ *
+ * ⚠️ AND STILL NO BORDER, FILL OR RADIUS. Anything that boxes this row turns "different" into
+ * "lesser", which is the one reading the design forbids: a package is a convenience, not a status.
  */
-export const LooseMaterials: React.FC<LooseMaterialsProps> = ({ children, onSaveAsPackage }) => (
-  <div className="qc-loose">
-    <span className="qc-loose-slot">
-      <IllustrationSlot
-        icon={SHEETS_SLOT} px={STRIP_MARK_PX} shape="chip"
-        width={STRIP_PLATE_PX} height={STRIP_PLATE_PX} id="strip-sheets"
-      />
-    </span>
-    {children}
-    {/* ⚠️ OFFERED ONCE, NEVER INSISTED ON (D-C4). No colour weight, no repetition, and no dismissal
-        state stored — a thing you can ignore forever does not need somewhere to remember that you
-        did. It sits at the END of the row, after the materials, where it can be passed over. */}
-    {onSaveAsPackage && (
-      <button type="button" className="qc-loose-promote" onClick={onSaveAsPackage}
-              title="Open Submission packages to build one from these">
-        Save as package ›
-      </button>
-    )}
-  </div>
+export const LooseMaterials: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="qc-loose">{children}</div>
 );
+

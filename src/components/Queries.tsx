@@ -2004,15 +2004,22 @@ export const Queries: React.FC<{
    * ⚠️ THE COUNT IS DERIVED, so the sentence says "two materials" when there are two. A fixed
    * "your materials" would be vaguer than the app's own knowledge.
    */
-  const switchToPackage = async (q: Query, count: number) => {
-    const ok = await askConfirm(
-      `Use a package instead? The ${count === 1 ? "material" : `${count} materials`} listed here will be replaced by the package's contents. Nothing else about this query changes.`,
-      { confirmLabel: "Choose a package", cancelLabel: "Cancel" },
+  /**
+   * ⚠️ IT ASKS AT THE POINT OF THE WRITE NOW, NOT BEFORE THE PICKER (D5). It used to sit behind
+   * `Save as package ›` — confirm, then open the picker — and that control is retired (D7), which
+   * would have left the replacement happening silently from the Attach menu. So the question moved
+   * to where the replacement actually occurs: choose a package while materials are listed, and it
+   * asks before writing.
+   *
+   * ⚠️ AND IT NAMES THE PACKAGE, because by this point the writer has chosen one. The old wording
+   * could not — it ran before the picker opened.
+   */
+  const confirmReplace = async (count: number, pkgName: string): Promise<boolean> =>
+    count === 0 ||
+    askConfirm(
+      `Attach ${pkgName}? The ${count === 1 ? "material" : `${count} materials`} listed here will be replaced by the package's contents. Nothing else about this query changes.`,
+      { confirmLabel: "Attach the package", cancelLabel: "Cancel" },
     );
-    if (!ok) return;
-    (pkgPickTrigRef as React.MutableRefObject<HTMLElement | null>).current = addMatTrigRef.current;
-    setPkgPickOpen(true);
-  };
 
   const changeQueryPackage = async (q: Query, pkg: SubmissionPackage) => {
     const before = q.packageId || "";
@@ -6051,22 +6058,7 @@ export const Queries: React.FC<{
                                       </div>
                                     )}
                                     {loose.length > 0 && (
-                                      <LooseMaterials
-                                        /* ⚠️ OFFERED ONLY WHEN THERE IS NOTHING TO PROMOTE INTO
-                                           (D-C4). Beside an attached package these pills are
-                                           additions to it, and "save as package" would be asking
-                                           which of two packages the writer meant.
-
-                                           ⚠️ AND IT SHARES THE ATTACH GATE, not a second one of its
-                                           own — `canAttachPackages` is `true` for everyone today and
-                                           becomes `isProUser` when billing arrives. Two predicates
-                                           for one feature is two things to remember to flip. */
-                                        onSaveAsPackage={
-                                          groups.length === 0 && canAttachPackages(currentUser) && attachablePkgs.length > 0
-                                            ? () => void switchToPackage(activeQuery, loose.length)
-                                            : undefined
-                                        }
-                                      >
+                                      <LooseMaterials>
                                         {loose.map((p) => p.node)}
                                       </LooseMaterials>
                                     )}
@@ -6120,7 +6112,6 @@ export const Queries: React.FC<{
                                     sent={[]}
                                     sentDate={activeQuery.dateSent}
                                     onView={openPackages}
-                                    locked={isPackageLocked(linkedPackage)}
                                     onChangePackage={() => {
                                       (pkgPickTrigRef as React.MutableRefObject<HTMLElement | null>).current = addMatTrigRef.current;
                                       setPkgPickOpen(true);
@@ -6154,8 +6145,28 @@ export const Queries: React.FC<{
                                   * ⚠️ IT IS ABSENT, NOT DISABLED. A greyed control here would pose a
                                   * question the writer cannot act on and cannot see the answer to.
                                   */}
-                                {!attachedHere && (
-                                <span className="f12-popwrap">
+                                {/**
+                                  * ⚠️ NOT IN THE FORK'S STATE EITHER (D10). The fork already asks the
+                                  * whole question — `Attach a package` / `List materials` — and this
+                                  * control is one of those two answers a second time, three inches
+                                  * below, in different words. `loose.length > 0` is the state where
+                                  * it earns its place: materials are listed and adding another is a
+                                  * real thing to want.
+                                  *
+                                  * ⚠️ THE TRIGGER REF STILL EXISTS IN BOTH STATES, deliberately — the
+                                  * fork's `List materials` clicks it to open this very menu, so the
+                                  * button renders hidden rather than not at all.
+                                  */}
+                                {!attachedHere && (() => {
+                                  /* ⚠️ ONE DERIVATION, READ ONCE AND RENDERED NEVER. The fork draws
+                                     when this query has nothing listed, and this control is the
+                                     fork's own second answer in that state — so it hides then. The
+                                     LENGTH is a branch, not a figure: `queryCentreChassis` forbids
+                                     a materials COUNT over rows the reader can already see, and
+                                     that law is about printing a number, which this does not. */
+                                  const forkShowing = baseMaterialsFor(activeQuery, activeAgent).length === 0;
+                                  return (
+                                <span className={`f12-popwrap${forkShowing ? " qc-addmat-quiet" : ""}`}>
                                   <button
                                     ref={addMatTrigRef}
                                     type="button"
@@ -6238,7 +6249,7 @@ export const Queries: React.FC<{
                                     ]}
                                   />
                                 </span>
-                                )}
+                                ); })()}
                               </div>
 
                               {/* ⚠️ THE ORIGIN TAG IS PROVENANCE, NOT A CONTROL OVER THE PILLS (§2).
@@ -6271,7 +6282,14 @@ export const Queries: React.FC<{
                                      contributed to no scorecard. The lock is what makes the link
                                      safe — a sent package cannot change, so there is nothing to
                                      snapshot against. */
-                                  onPick={(pkg) => void changeQueryPackage(activeQuery, pkg)}
+                                  onPick={(pkg) => void (async () => {
+                                    /* ⚠️ THE COUNT IS THE LOOSE LIST'S, read at the moment of the
+                                       write — the only number that describes what is about to be
+                                       replaced. */
+                                    const listed = (materialsOf(activeQuery) ?? []).length;
+                                    if (!(await confirmReplace(listed, pkg.packageName))) return;
+                                    await changeQueryPackage(activeQuery, pkg);
+                                  })()}
                                   onManage={() => { setPkgPickOpen(false); openPackages(); }}
                                   onClose={() => setPkgPickOpen(false)}
                                 />

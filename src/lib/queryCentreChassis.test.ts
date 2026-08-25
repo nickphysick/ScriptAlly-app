@@ -1044,8 +1044,15 @@ describe("§2 · the reading pane", () => {
          the agency's asks beside a package made them read as a second thing that was sent. The
          claim, one materials derivation with no second copy, is unchanged. */
       .toContain("baseMaterialsFor(activeQuery, activeAgent)");
+    /* ⚠️ THE LAW IS ABOUT PRINTING A NUMBER, NOT ABOUT MEASURING ONE — tightened when the fork's
+       duplicate `+ Attach` needed to know whether it was in the empty state (D10). A count over
+       three visible rows STATES what the reader can already see; a length read into a className
+       branch states nothing and renders nothing. So the assertion names the rendering shapes rather
+       than the substring, which forbade a legitimate use it was never written about. */
     expect(code, "a materials count came back over rows the reader can see")
-      .not.toContain("baseMaterialsFor(activeQuery, activeAgent).length");
+      .not.toMatch(/meta=\{[^}]*baseMaterialsFor\([^)]*\)\.length/);
+    expect(code, "a materials count is being printed into the pane")
+      .not.toMatch(/\{\s*baseMaterialsFor\(activeQuery, activeAgent\)\.length\s*\}/);
     /* ⚠️ NOTES COUNTS *THIS QUERY'S* ENTRIES, and it did not — `journalEntries` is every note in
        the account while the body filters by `queryId`, so the band stated one number and the list
        showed another. Fixed in fix pack §4; asserted on the filter, because the count alone was
