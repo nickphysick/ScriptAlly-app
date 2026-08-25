@@ -1422,74 +1422,162 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
   .mk-fv { transform: scale(.82); transform-origin: top left; }
 }
 
-/* ══════════════ Pricing + legal (public marketing routes) ══════════════
-   Same token set as the rest of the tier — surfaces from --mk-card/--mk-parch, hairlines from
-   --mk-hair, heads in --mk-head Playfair. No new colour is introduced here; every value below is
-   a var() or a neutral already used above. */
+/* ══════════════ Pricing (public marketing route) ══════════════
+   ⚠️ ONE AUTHORITATIVE BLOCK. Every `.mk-price*` / `.mk-tier*` / `.mk-cmp*` / `.mk-faq*` rule was
+   deleted and rewritten here rather than patched. A second declaration of any selector below is
+   the beginning of the fault this file already records twice — the cascade takes the LAST rule
+   while a reader takes the FIRST — so if this section needs more than a one-line change it is
+   rewritten again.
+   ⚠️ THE OLD PAGE'S CLASSES ARE GONE: `.mk-pricegrid`, `.mk-pricecard`, `.mk-pricecard-pro`,
+   `.mk-pricecardhead`, `.mk-priceline`, `.mk-priceamount`, `.mk-pricenote`, `.mk-pricesum`,
+   `.mk-pricelist`, `.mk-priceaction`, `.mk-comingsoon`. Nothing else in `src/` renders any of
+   them — checked after the removal, not from the diff. `.mk-pricehead` and `.mk-pricefoot` keep
+   their names and are restated below.
+   Surfaces from --mk-parch/--mk-blush, hairlines from --mk-hair. No new colour. */
 
-.mk-pricehead { max-width: 1300px; margin: 0 auto; padding: 54px 56px 8px; text-align: center; }
+.mk-pricehead { max-width: 1300px; margin: 0 auto; padding: 70px 56px 44px; text-align: center; }
 .mk-pricehead h1 {
-  font-family: "Playfair Display", Georgia, serif; font-size: 42px; font-weight: 500;
-  line-height: 1.12; color: var(--mk-head); margin-top: 14px;
+  font-family: "Playfair Display", Georgia, serif; font-size: clamp(2rem, 3.2vw, 2.6rem);
+  font-weight: 500; line-height: 1.14; color: var(--mk-head); margin: 0;
 }
 .mk-pricehead p {
-  font-size: 15px; font-weight: 300; line-height: 1.65; color: #5a4a40;
-  margin: 14px auto 0; max-width: 560px;
+  font-size: 1.06rem; font-weight: 300; line-height: 1.6; color: var(--mk-muted);
+  margin: 18px auto 0; max-width: 52ch;
+}
+.mk-pricebody { max-width: 1300px; margin: 0 auto; padding: 0 56px 100px; }
+
+/* ⚠️ `1fr 1.16fr 1fr`, AND THE WIDE ONE IS THE MIDDLE. The tier a reader can act on is the one
+   with room for a places bar and a real button; the other two carry a label. */
+.mk-tiers {
+  display: grid; grid-template-columns: 1fr 1.16fr 1fr; gap: 20px;
+  align-items: stretch; padding: 22px 0 0;
+}
+.mk-tier {
+  position: relative; display: flex; flex-direction: column;
+  background: var(--mk-parch); border: 1px solid var(--mk-hair); border-radius: 16px;
+  padding: 30px 28px 28px;
+}
+/* ⚠️ ONE ATTRIBUTE DRIVES BOTH THE SEMANTICS AND THE TREATMENT. `aria-disabled` is what a screen
+   reader hears and what this rule dims, so the two cannot drift apart — and there is no separate
+   `.mk-tier--off` class that someone could apply to a tier that is actually buyable. */
+.mk-tier[aria-disabled="true"] { opacity: .5; box-shadow: none; cursor: default; }
+.mk-tier--founding {
+  background: var(--mk-blush); border-color: var(--mk-cta-bd); cursor: default;
+  box-shadow: 0 18px 44px rgba(124, 58, 42, .14); transform: translateY(-6px);
+}
+/* ⚠️ THE TAB BREAKS THE TOP EDGE, which is why it is absolutely positioned and the card is
+   `position: relative`. It says what is true of this tier and nothing persuasive. */
+.mk-tiertag {
+  position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+  font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: .58rem;
+  letter-spacing: .2em; text-transform: uppercase;
+  background: var(--mk-nearblack); color: var(--mk-cta-ink);
+  border-radius: 999px; padding: 6px 15px; white-space: nowrap;
+}
+.mk-tiername {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.5rem;
+  color: var(--mk-nearblack); margin: 0;
+}
+/* ⚠️ `min-height` ON THE TWO PROSE LINES, so three cards of different wordiness still line their
+   prices and their feature lists up with each other. Without it the columns cannot be read
+   across, which is the only thing a three-card layout is for. */
+.mk-tierline { font-size: .95rem; color: var(--mk-muted); margin: 6px 0 0; min-height: 2.6em; line-height: 1.4; }
+.mk-tierprice { display: flex; align-items: baseline; gap: 8px; margin: 20px 0 0; flex-wrap: wrap; }
+.mk-tieramount {
+  font-family: "Playfair Display", Georgia, serif; font-size: 2.1rem; font-weight: 500;
+  color: var(--mk-nearblack); line-height: 1.1;
+}
+.mk-tierper {
+  font-family: "JetBrains Mono", monospace; font-size: .62rem; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--mk-muted);
+}
+.mk-tierafter { font-size: .88rem; color: var(--mk-muted); margin: 8px 0 0; line-height: 1.45; min-height: 2.6em; }
+.mk-tierafter strong { color: var(--mk-nearblack); font-weight: 600; }
+
+.mk-tierfeats {
+  list-style: none; margin: 22px 0 0; padding: 20px 0 0;
+  border-top: 1px solid var(--mk-hair); display: grid; gap: 10px;
+}
+.mk-tier--founding .mk-tierfeats { border-top-color: rgba(124, 58, 42, .18); }
+.mk-tierfeats li { position: relative; padding-left: 22px; font-size: .95rem; line-height: 1.45; color: var(--mk-blush-body); }
+/* Drawn, not typed — a glyph would be announced once per item and the list already says how many. */
+.mk-tierfeats li::before {
+  content: ""; position: absolute; left: 1px; top: .36em; width: 9px; height: 6px;
+  border-left: 2px solid var(--mk-burg); border-bottom: 2px solid var(--mk-burg);
+  transform: rotate(-45deg); opacity: .8;
+}
+.mk-tierfeats li.mk-tieroff { color: var(--mk-kicker); }
+.mk-tierfeats li.mk-tieroff::before { border-color: var(--mk-kicker); transform: rotate(-45deg) scale(.85); opacity: .7; }
+
+.mk-tierplaces { margin: 16px 0 0; }
+/* `margin-top: auto` pins the call to action to the card's foot whatever the list above it does. */
+.mk-tiercta { margin-top: auto; padding-top: 24px; }
+.mk-tiercta .mk-btn { display: block; width: 100%; text-align: center; padding: 13px 20px; border-radius: 11px; }
+.mk-tiernote {
+  font-family: "JetBrains Mono", monospace; font-size: .58rem; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--mk-kicker); margin: 11px 0 0; text-align: center;
+}
+/* ⚠️ A LABEL, AND IT MUST NOT LOOK LIKE A BUTTON. Dashed, mono, no fill — the same grammar the
+   rest of the app uses for "not yet". A solid outline here would read as a control. */
+.mk-tierlater {
+  display: block; text-align: center;
+  font-family: "JetBrains Mono", monospace; font-size: .6rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--mk-muted);
+  border: 1px dashed var(--mk-hair); border-radius: 11px; padding: 13px 20px;
 }
 
-.mk-pricegrid {
-  max-width: 940px; margin: 0 auto; padding: 30px 56px 0;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start;
-}
-.mk-pricecard {
-  background: var(--mk-card); border: 1px solid var(--mk-hair); border-radius: 16px;
-  padding: 26px 26px 22px; display: flex; flex-direction: column; gap: 18px;
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
-}
-/* The Pro card is distinguished by paper, never by a louder button — it has no button. */
-.mk-pricecard-pro { background: var(--mk-parch); }
-
-.mk-pricecardhead h2 {
-  font-family: "Playfair Display", Georgia, serif; font-size: 25px; font-weight: 500;
-  color: var(--mk-head);
-}
-.mk-priceline { display: flex; align-items: baseline; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-.mk-priceamount {
-  font-family: "Playfair Display", Georgia, serif; font-size: 27px; font-weight: 500; color: var(--mk-ink);
-}
-.mk-pricenote {
-  font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--mk-label);
-}
-.mk-pricesum { font-size: 13.5px; font-weight: 300; line-height: 1.6; color: var(--mk-muted); margin-top: 10px; }
-
-.mk-pricelist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
-.mk-pricelist li {
-  position: relative; padding-left: 20px; font-size: 13.5px; line-height: 1.55; color: var(--mk-ink);
-}
-.mk-pricelist li::before {
-  content: ""; position: absolute; left: 2px; top: 8px; width: 7px; height: 7px; border-radius: 50%;
-  background: var(--mk-sage); border: 1px solid var(--mk-sage-t);
-}
-
-.mk-priceaction { margin-top: auto; }
-/* The honest non-interactive marker — the ComingSoonPill pattern, in marketing tokens. */
-.mk-comingsoon {
-  display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 9px;
-  letter-spacing: .08em; text-transform: uppercase; color: var(--mk-muted);
-  background: rgba(124, 58, 42, 0.06); border: 1px solid rgba(124, 58, 42, 0.16);
-  border-radius: 999px; padding: 6px 12px;
-}
 .mk-pricefoot {
-  max-width: 940px; margin: 22px auto 0; padding: 0 56px;
-  font-size: 12.5px; line-height: 1.6; color: var(--mk-muted); text-align: center;
+  text-align: center; padding: 46px 0 0; color: var(--mk-muted); font-size: .95rem; margin: 0;
 }
+.mk-pricefoot--quiet { padding-top: 10px; font-size: .82rem; }
 
-@media (max-width: 760px) {
-  .mk-pricehead { padding: 36px 26px 4px; }
-  .mk-pricehead h1 { font-size: 32px; }
-  .mk-pricegrid { grid-template-columns: 1fr; padding: 22px 26px 0; gap: 16px; }
-  .mk-pricefoot { padding: 0 26px; }
+.mk-cmp {
+  margin: 72px 0 0; background: var(--mk-parch); border: 1px solid var(--mk-hair);
+  border-radius: 16px; overflow: hidden;
+}
+.mk-cmp h2 {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.35rem;
+  color: var(--mk-nearblack); margin: 0; padding: 22px 26px 18px;
+}
+/* The scroll lives on a wrapper, so the card's own radius and border stay unclipped. */
+.mk-cmpscroll { overflow-x: auto; }
+.mk-cmp table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+/* ⚠️ THE SHARED PROPERTIES ARE REPEATED RATHER THAN GROUPED, and that is deliberate. A grouped
+   `.mk-cmp th, .mk-cmp td { … }` above these two makes each selector's BASE rule ambiguous: a
+   lock that finds a rule by its selector reads whichever comes first, and this file has already
+   had two assertions silently repointed at a stub that way. One rule per selector, always. */
+.mk-cmp th {
+  text-align: left; padding: 12px 26px; border-top: 1px solid var(--mk-hair);
+  font-family: "JetBrains Mono", monospace; font-size: .6rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--mk-muted); font-weight: 400;
+}
+.mk-cmp td {
+  text-align: left; padding: 12px 26px; border-top: 1px solid var(--mk-hair);
+  color: var(--mk-blush-body);
+}
+.mk-cmp .mk-c { text-align: center; width: 132px; }
+/* The live tier's column is tinted the whole way down, so the eye can follow it out of the card. */
+.mk-cmp .mk-colfound { background: rgba(248, 232, 225, .5); }
+
+.mk-faq { margin: 64px 0 0; }
+.mk-faq h2 {
+  font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.35rem;
+  color: var(--mk-nearblack); margin: 0 0 18px;
+}
+.mk-qa { border-top: 1px solid var(--mk-hair); padding: 16px 0; }
+.mk-qa p { margin: 0; }
+.mk-q { font-weight: 600; color: var(--mk-nearblack); }
+.mk-a { color: var(--mk-muted); margin-top: 5px; line-height: 1.6; max-width: 76ch; }
+
+@media (max-width: 960px) {
+  .mk-pricehead { padding: 44px 26px 30px; }
+  .mk-pricebody { padding: 0 26px 72px; }
+  /* One column, and the lift comes off — a card raised above nothing reads as misaligned. */
+  .mk-tiers { grid-template-columns: 1fr; gap: 26px; }
+  .mk-tier--founding { transform: none; }
+  .mk-cmp .mk-c { width: auto; }
+  /* Stacked, the two prose lines have nothing to line up WITH, so the reserved height is dead. */
+  .mk-tierline, .mk-tierafter { min-height: 0; }
 }
 
 /* ══════════════ Shared footer (every public page) ══════════════

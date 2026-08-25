@@ -134,6 +134,12 @@ export const FoundingSignup: React.FC<{
  * where its own layout wants it; the figure itself comes from the one shared store.
  */
 export const FoundingCounter: React.FC<{ variant: "bar" | "line" | "tally" }> = ({ variant }) => {
+  /* ⚠️ THE COUNTER ASKS FOR ITS OWN FIGURE. It used to rely on a `FoundingSignup` being mounted
+     beside it, which held on every surface until the pricing page rendered a counter with no form
+     — and the failure is silent, because "no count yet" and "never asked" both render nothing.
+     `ensureCount` is idempotent for the life of the module, so a page with both still makes one
+     request. */
+  useEffect(ensureCount, []);
   const { count, state } = useFounding();
   if (!count || state === "down") return null;
   const pct = Math.min(100, Math.round((count.claimed / count.cap) * 100));

@@ -396,26 +396,57 @@ export const FEATURE_ROWS: FeatureRow[] = [
 ];
 
 /* ══════════════ Pricing (public, marketing tier) ══════════════
-   ⚠️ THE PRO CARD DESCRIBES WHAT PRO WILL INCLUDE AND SELLS NOTHING. There is no payment path, so
-   the page states the position and offers no control — the honest shape, and the opposite of the
-   sandbox page it replaces (which wrote `plan: 'Pro'` from the browser for free).
-   Every Pro line below is a feature that EXISTS in the product and is gated today; nothing here is
-   a roadmap promise. If a line stops being true, delete it rather than softening it. */
+   ⚠️ THREE FIGURES ARE UNSET AND NOTHING HERE MAY INVENT THEM. The design this page was rebuilt
+   from carries £7/mo, £70/yr and £3.50/mo, plus a sentence about what happens when six free
+   months end. All four were written so a mockup could be judged; none has been set. Shipping them
+   would make a correct page incorrect — the repo's own law is that copy asserts what the code does
+   today, and today there is no payment path at all.
+   So the page makes the founding offer plainly and states no rate. `PRO_PRICE_MONTHLY`,
+   `PRO_PRICE_YEARLY` and `FOUNDING_RATE_AFTER` below are the three lines to fill; every surface
+   reads them, so filling one changes every place it is stated.
+   ⚠️ AND `PRICING_TIERS` IS READ BY THE SIGNED-IN `/plans` PAGE, which finds `free` and `pro` by
+   key. The `founding` entry is additive and that page never sees it; `pro.price` and
+   `pro.priceNote` are asserted there and must keep saying there is no payment path. */
 
 export const PRICING_DOCUMENT_TITLE = "ScriptAlly — Plans";
-export const PRICING_H1 = "Start free. Stay free if it suits you.";
+export const PRICING_EYEBROW = "Pricing";
+export const PRICING_H1 = "Pick the plan that fits the search you're on.";
 export const PRICING_SUB =
-  "Tracking your querying is the whole job, and it costs nothing. Pro adds the parts that read " +
-  "your post for you.";
+  "Free for as long as you want it. Pro when you're querying in earnest. And for the next hundred " +
+  "writers, something better than both.";
+
+/**
+ * ⚠️ THE THREE UNSET FIGURES. `null` means "nobody has decided", and every consumer falls back to
+ * wording that states no number rather than to a guess. Set one to a string — `"£7"` — and it
+ * appears wherever it belongs; that is the whole change.
+ */
+export const PRO_PRICE_MONTHLY: string | null = null;
+export const PRO_PRICE_YEARLY: string | null = null;
+export const FOUNDING_RATE_AFTER: string | null = null;
 
 export interface PricingTier {
-  key: "free" | "pro";
+  key: "free" | "founding" | "pro";
   name: string;
+  /** A black tab breaking the card's top edge. Only the live tier has one. */
+  tag?: string;
   price: string;
+  /** Mono unit beside the amount — "forever", "for six months". */
+  priceUnit?: string;
+  /** ⚠️ Asserted by `planComparison.test.ts` for Pro; it must keep saying there is no path. */
   priceNote?: string;
   summary: string;
+  /** The sentence under the price. `b` is the one emphasised run. */
+  after: CopyRun[];
   includes: string[];
+  /** Features this tier does NOT have, rendered muted rather than omitted. */
+  excludes?: string[];
   action: string;
+  /**
+   * ⚠️ `later` IS NOT A DISABLED BUTTON. A tier that cannot be bought renders a label, not a
+   * control — no `role`, no `tabindex`, nothing in the tab order. A greyed-out button still
+   * announces itself as a button and still invites a click.
+   */
+  cta: "live" | "later";
 }
 
 export const PRICING_TIERS: PricingTier[] = [
@@ -423,7 +454,9 @@ export const PRICING_TIERS: PricingTier[] = [
     key: "free",
     name: "Free",
     price: "£0",
-    summary: "Everything you need to run a querying campaign.",
+    priceUnit: "forever",
+    summary: "Everything you need to run one manuscript's campaign.",
+    after: ["No card, no trial clock. Stays free."],
     includes: [
       "One manuscript",
       "Unlimited agents and queries",
@@ -432,14 +465,44 @@ export const PRICING_TIERS: PricingTier[] = [
       "Notes to self, and your to-do list",
       "One Smart Import to bring your history across",
     ],
-    action: "Start tracking — it's free",
+    excludes: ["Smart Email Drop", "The Comp Scout"],
+    action: "Available at launch",
+    cta: "later",
+  },
+  {
+    /* ⚠️ THE ONLY TIER THAT CAN BE ACTED ON TODAY, WHICH IS WHY IT IS THE CENTRE AND THE LIVE ONE.
+       The order is by what a reader can DO, not by price. */
+    key: "founding",
+    name: "Founding Writer",
+    tag: "Available now · 100 places",
+    price: "Free",
+    priceUnit: "for six months",
+    summary: "For the hundred writers who put ScriptAlly through its paces.",
+    /* ⚠️ NO FIGURE AND NO STRUCK-THROUGH PRICE. The ref draws "£0 for six months" against a
+       struck "£7/mo" and then "half price for life"; both halves of that are arithmetic on a
+       number nobody has set. `FOUNDING_RATE_AFTER` is where a real one goes. */
+    after: FOUNDING_RATE_AFTER
+      ? ["Then ", { b: FOUNDING_RATE_AFTER }, " for life — a founding rate that never expires."]
+      : ["Then ", { b: "a founding writers' rate for life" }, " — set before launch, and kept."],
+    includes: [
+      "Everything in Pro",
+      ...FOUNDING_PERKS,
+      "A hand in what gets built next",
+    ],
+    action: "Claim your spot",
+    cta: "live",
   },
   {
     key: "pro",
     name: "Pro",
-    price: "Price to be confirmed",
-    priceNote: "no payment path yet",
-    summary: "For writers running more than one book, or more than one campaign.",
+    /* ⚠️ BOTH OF THESE ARE ASSERTED BY `planComparison.test.ts`, which renders them in the app. */
+    price: PRO_PRICE_MONTHLY ?? "Price to be confirmed",
+    priceUnit: PRO_PRICE_MONTHLY ? "per month" : undefined,
+    priceNote: PRO_PRICE_MONTHLY ? undefined : "no payment path yet",
+    summary: "For writers running several manuscripts, or querying hard.",
+    after: PRO_PRICE_YEARLY
+      ? [`Or ${PRO_PRICE_YEARLY} a year. Cancel whenever you like.`]
+      : ["Not on sale yet. Nothing here charges you, and nothing changes on your account."],
     includes: [
       "Unlimited manuscripts",
       "A Smart Import every month",
@@ -447,10 +510,54 @@ export const PRICING_TIERS: PricingTier[] = [
       "Comparable-title suggestions from your manuscript",
       "Everything in Free",
     ],
-    action: "Coming soon",
+    action: "Available at launch",
+    cta: "later",
   },
 ];
+
+/**
+ * ⚠️ THE CLOSING LINE STATES THE SCARCITY AND NOT THE PRICE. The ref ends it "…Pro is £7 a month";
+ * that figure does not exist yet.
+ */
+export const PRICING_PLACES_NOTE =
+  "Founding places are limited to a hundred. When they're gone, the founding rate goes with them.";
+export const PRICING_PLACES_LINK = "How founding access works";
 
 export const PRICING_FOOTNOTE =
   "Pro is not on sale yet. When it is, you will be able to upgrade from inside the app — nothing " +
   "here charges you, and nothing changes on your account.";
+
+/* ── The comparison table ──
+   ⚠️ EVERY ROW IS A CLAIM THE CARDS ABOVE ALREADY MAKE. The ref carries a "Querying analytics" row
+   and a "Price after six months" row; the first is a feature no tier's list mentions, and the
+   second is arithmetic on the unset rate. Both are absent rather than softened. */
+export const PRICING_COMPARISON_H2 = "What's in each plan";
+export interface ComparisonRow { label: string; free: string; founding: string; pro: string }
+/** `—` is an absence; `✓` is presence. Both are rendered as text, not as glyphs to be announced. */
+export const PRICING_COMPARISON: ComparisonRow[] = [
+  { label: "Manuscripts", free: "1", founding: "Unlimited", pro: "Unlimited" },
+  { label: "Agents & queries", free: "Unlimited", founding: "Unlimited", pro: "Unlimited" },
+  { label: "Smart Import", free: "Once", founding: "Monthly", pro: "Monthly" },
+  { label: "Smart Email Drop", free: "—", founding: "✓", pro: "✓" },
+  { label: "The Comp Scout", free: "—", founding: "✓", pro: "✓" },
+  { label: "A direct line to the founder", free: "—", founding: "✓", pro: "—" },
+];
+
+/* ── Questions ──
+   ⚠️ THE REF'S FIRST QUESTION IS CUT, NOT LEFT UNANSWERED. "What happens when my six free months
+   end?" has exactly one useful answer and that answer is a billing commitment nobody has made. A
+   question printed with no answer on a pricing page reads worse than no question at all. */
+export interface PricingQuestion { q: string; a: string }
+export const PRICING_FAQ_H2 = "Questions";
+export const PRICING_FAQ: PricingQuestion[] = [
+  {
+    q: "What if I don't want to pay anything?",
+    a: "Stay on Free. One manuscript, unlimited agents and queries, the full timeline — it isn't " +
+       "a trial and it doesn't expire.",
+  },
+  {
+    q: "What happens when the hundred places are gone?",
+    a: "Founding access closes. Everyone who joined as a Founding Writer keeps their founding " +
+       "rate.",
+  },
+];

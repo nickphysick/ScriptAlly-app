@@ -45,7 +45,8 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
      in the markup. That the sentence still reads whole is a stronger claim than a landmark can
      make, and it is asserted below against the h1's stripped text. */
   ["/", () => <Landing onNavigate={noNavigate} />, "You&#x27;ve written a"],
-  ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "Start free"],
+  /* Retarget, same law: the page is three tiers now and its h1 changed with them. */
+  ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "Pick the plan that fits"],
   /* Retarget, same law: the mission statement replaced the old About headline as this page's h1. */
   ["/about", () => <AboutPage onNavigate={noNavigate} />, "Get good stories told."],
   ["/contact", () => <ContactPage onNavigate={noNavigate} />, "Get in touch"],
@@ -107,10 +108,84 @@ describe("the public pricing page sells nothing and writes nothing", () => {
     });
   }
 
-  it("marks the Pro tier as unavailable rather than offering a control", () => {
+  /**
+   * ⚠️ AN UNBUYABLE TIER RENDERS A LABEL, NOT A DISABLED BUTTON. A `<button disabled>` still
+   * announces itself as a button and still invites the click it will refuse; a `<span>` says the
+   * thing is not available and offers nothing. The claim is therefore about the ELEMENT, not
+   * about a `disabled` attribute — asserting the attribute would pass on exactly the markup this
+   * forbids.
+   */
+  /**
+   * ⚠️ THE CARD IS BOUNDED BY THE TIER SECTION, NOT BY "the rest of the document". Pro is the LAST
+   * card, so an unbounded slice ran to the footer and caught the foot link's button and four
+   * footer buttons — reporting a control inside a card that has none. Same slicing fault this repo
+   * records twice; the tail of a document is not the tail of an element.
+   */
+  const tierCard = (html: string, key: string): string => {
+    const tiers = html.slice(html.indexOf('class="mk-tiers"'), html.indexOf("</section>"));
+    const from = tiers.indexOf(`mk-tier--${key}`);
+    expect(from, `the ${key} card renders`).toBeGreaterThan(-1);
+    const next = tiers.indexOf("mk-tier--", from + 12);
+    return next === -1 ? tiers.slice(from) : tiers.slice(from, next);
+  };
+
+  it("Free and Pro state their unavailability and offer no control at all", () => {
     const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
-    expect(html).toContain("Coming soon");
     expect(html).not.toMatch(/Activate Pro/i);
+    for (const key of ["free", "pro"]) {
+      const card = tierCard(html, key);
+      expect(card, `${key} is marked unavailable`).toContain('aria-disabled="true"');
+      expect(card, `${key} offers a label`).toContain("Available at launch");
+      expect(card, `${key} renders no button`).not.toContain("<button");
+      expect(card, `${key} is not focusable`).not.toContain("tabindex");
+      expect(card, `${key} is not a tab`).not.toContain('role="tab"');
+    }
+  });
+
+  it("…and the one live tier does render a real control", () => {
+    const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
+    const card = tierCard(html, "founding");
+    expect(card).not.toContain("aria-disabled");
+    expect(card).toContain("<button");
+    expect(card).toContain("Claim your spot");
+  });
+
+  /**
+   * ⚠️ NO INVENTED FIGURE, ANYWHERE ON THE PAGE. The design this was rebuilt from carries £7/mo,
+   * £70/yr and £3.50/mo; none has been set, and a price on a public page is a claim about what
+   * something costs. `£0` is the one figure that is true today.
+   *
+   * The assertion is a SWEEP for any currency amount rather than a list of the three, because the
+   * next invented figure will not be one of those three.
+   */
+  it("quotes no price but £0, because no other price exists yet", () => {
+    const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
+    const amounts = [...html.matchAll(/£\s*[\d.,]+/g)].map((m) => m[0]);
+    expect(amounts).toEqual(["£0"]);
+    expect(html).toContain("Price to be confirmed");
+  });
+
+  /**
+   * ⚠️ THE PLACES BAR IS LIVE OR ABSENT — never the ref's hardcoded "37 of 100 places claimed".
+   * Rendered with no count in the store, the slot exists and holds nothing.
+   */
+  it("renders no places figure until a real one comes back", () => {
+    const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
+    expect(html).toContain("mk-tierplaces");
+    expect(html).not.toMatch(/\d+\s*(?:of|\/)\s*\d+/);
+    expect(html).not.toContain("places claimed");
+  });
+
+  /**
+   * ⚠️ THE SIX-MONTHS QUESTION IS CUT, NOT LEFT UNANSWERED. Its only useful answer is a billing
+   * commitment nobody has made. This asserts the question is absent as well as the answer — a
+   * question printed with no answer reads worse than no question at all.
+   */
+  it("makes no commitment about what happens after the free months", () => {
+    const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
+    expect(html).not.toMatch(/six free months end/i);
+    expect(html).not.toMatch(/half price for life[^<]*\u2014/i);
+    expect(html).not.toMatch(/charged automatically/i);
   });
 });
 
