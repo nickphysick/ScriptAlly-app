@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — the logic of each journey</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f7f4ee;--white:#fff;--field:#fdfbf7;--ink:#241209;--ink2:#3a1c14;--muted:#9c8878;--muted2:#8a7a6c;--hair:#e7ddd2;--hair2:#e0d5c8;--edge:#e8e0d8;--burg:#7c3a2a;--sage:#5a6e58;--pink:#f5e2da;--pink-b:#e8c8bc;
+--u1:#f3e0d6;--u2:#eed7ca;--ur:rgba(124,58,42,0.16);--h1:#d7ddd5;--h2:#d5dbd3;--hr:rgba(90,110,88,0.2);--y1:#f7f0e2;--y2:#f2e9d6;--yr:rgba(138,116,64,0.16);}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);min-height:100vh;padding:28px 26px 120px;}
+.wrap{max-width:900px;margin:0 auto;}
+h1{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;color:var(--ink2);}
+.intro{font-size:12.5px;color:#6a584a;font-weight:300;line-height:1.65;margin:5px 0 18px;max-width:860px;}
+.intro b{font-weight:500;color:var(--ink2);}
+.fc{background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);}
+.rim{border:1px solid rgba(124,58,42,0.28);border-radius:9px;overflow:hidden;background:var(--white);}
+.band{padding:13px 18px 12px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.band.now{background:linear-gradient(135deg,var(--u1),var(--u2));border-bottom:1px solid var(--ur);}
+.band.house{background:linear-gradient(135deg,var(--h1),var(--h2));border-bottom:1px solid var(--hr);}
+.band.yours{background:linear-gradient(135deg,var(--y1),var(--y2));border-bottom:1px solid var(--yr);}
+.deed{font-family:'Playfair Display',serif;font-size:16.5px;font-weight:400;color:var(--ink2);line-height:1.34;}
+.deed b{font-weight:600;}
+.deed a{font-weight:600;color:inherit;text-decoration:none;border-bottom:1px dotted rgba(58,28,20,0.42);cursor:pointer;}
+.register{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:#b3a494;margin:16px 2px 5px;}
+.crumb{display:none;font-size:10.5px;color:var(--muted2);font-weight:300;padding:9px 18px 0;}
+.crumb a{color:var(--burg);cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
+
+/* fork */
+.forkwrap{padding:14px 18px 6px;}
+.forklbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink2);font-weight:500;display:flex;gap:7px;align-items:center;margin-bottom:10px;}
+.forklbl::before{content:'';width:7px;height:7px;background:var(--burg);border-radius:2px;animation:sq 1.6s ease-in-out infinite;}
+@keyframes sq{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(0.72);opacity:0.55;}}
+.fork{display:flex;flex-direction:column;gap:8px;}
+.fk{cursor:pointer;text-align:left;background:var(--field);border:0.5px solid var(--hair2);border-radius:10px;padding:11px 14px;display:flex;align-items:baseline;gap:10px;transition:border-color .12s;}
+.fk:hover{border-color:#c9a89e;}
+.fk.on{background:var(--pink);border-color:var(--pink-b);}
+.fk .t{font-size:12.5px;font-weight:500;color:var(--ink2);white-space:nowrap;}
+.fk.on .t{color:var(--burg);}
+.fk .s{font-size:11px;color:var(--muted2);font-weight:300;}
+.fk .x{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;white-space:nowrap;}
+
+/* ledger */
+.form{padding:2px 18px 13px;}
+.q{border-bottom:1px solid var(--hair);}
+.q:last-of-type{border-bottom:0;}
+.q .head{display:flex;align-items:center;gap:9px;min-height:40px;padding:5px 0;}
+.q .sqm{width:7px;height:7px;background:var(--burg);border-radius:2px;flex-shrink:0;visibility:hidden;animation:sq 1.6s ease-in-out infinite;}
+.q.open .sqm{visibility:visible;}
+.q .ql{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:500;}
+.q.open .ql{color:var(--ink2);}
+.q.done .ql{color:#b3a494;}
+.q .ans{font-size:12.5px;color:var(--ink2);font-weight:500;margin-left:auto;display:flex;align-items:center;gap:9px;}
+.q .ans .tick{color:var(--sage);font-size:11px;}
+.q .edit{font-size:10.5px;color:#b3a494;cursor:pointer;}
+.q .edit:hover{color:var(--burg);}
+.q .body{display:none;padding:0 0 12px 16px;}
+.q.open .body{display:block;}
+.seg{display:flex;gap:7px;flex-wrap:wrap;}
+.seg button{cursor:pointer;font-size:11.5px;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:7px 12px;color:var(--ink2);}
+.seg button.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500;}
+.hint{font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:8px;}
+/* expanding unit pill — the corrected behaviour */
+.units{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.upill{cursor:pointer;display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.06em;background:var(--white);border:0.5px solid var(--hair2);border-radius:22px;color:#a99a8a;height:38px;padding:0 17px;transition:all .18s;}
+.upill:hover{border-color:#c9a89e;}
+.upill.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500;padding-right:8px;}
+.upill .qty{display:none;align-items:center;gap:5px;margin-left:12px;padding-left:12px;border-left:1px solid rgba(124,58,42,0.22);}
+.upill.on .qty{display:inline-flex;}
+.qty button{cursor:pointer;width:24px;height:24px;border-radius:50%;border:0.5px solid var(--pink-b);background:rgba(255,253,250,0.85);color:var(--burg);font-size:11px;display:flex;align-items:center;justify-content:center;}
+.qty input{width:64px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--burg);font-weight:500;background:rgba(255,253,250,0.9);border:0.5px solid var(--pink-b);border-radius:8px;height:26px;outline:none;-moz-appearance:textfield;}
+.qty input::-webkit-outer-spin-button,.qty input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.qty input:focus{border-color:#c9a89e;box-shadow:0 0 0 3px rgba(232,200,188,0.35);}
+.qty .u{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:#b08a7a;}
+/* materials multi (fill-in) */
+.mats{display:flex;gap:8px;flex-wrap:wrap;}
+.mat{cursor:pointer;font-size:11.5px;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:7px 12px;color:var(--ink2);display:inline-flex;gap:7px;align-items:center;}
+.mat.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500;}
+.mat .c{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--hair2);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:transparent;background:var(--white);}
+.mat.on .c{background:var(--burg);border-color:var(--burg);color:#fff;}
+
+.addrow{padding:10px 0 2px;display:flex;gap:16px;}
+.addlink{font-size:11px;color:var(--burg);cursor:pointer;border-bottom:1px dashed rgba(124,58,42,0.35);}
+.act{display:flex;align-items:center;gap:9px;padding:11px 16px;background:var(--white);border-top:1px solid var(--hair);}
+.wr{font-size:11.5px;color:#6a584a;font-weight:300;min-width:0;}
+.wr .lead{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-right:6px;}
+.wr b{font-weight:500;color:var(--ink2);}
+.ab{cursor:pointer;height:32px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;font-size:11.5px;font-weight:500;white-space:nowrap;}
+.ab.quiet{background:var(--white);border:1px solid var(--edge);color:#57534e;}
+.ab.go{background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600;}
+.ab .n{font-family:'JetBrains Mono',monospace;font-size:8.5px;background:var(--burg);color:#fffdfa;border-radius:999px;padding:2px 6px;margin-left:6px;}
+.switch{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;background:var(--white);border:1px solid var(--edge);border-radius:999px;padding:6px;box-shadow:0 6px 24px rgba(58,28,20,0.14);z-index:60;}
+.sw{cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9px;background:transparent;border:0;border-radius:999px;padding:7px 11px;color:var(--muted2);}
+.sw.on{background:var(--pink);color:var(--burg);font-weight:500;}
+.jnote{font-size:11.5px;color:#6a584a;font-weight:300;line-height:1.6;margin:10px 2px 0;max-width:860px;}
+.jnote b{font-weight:500;color:var(--ink2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>The logic of each journey</h1>
+<div class="intro">The rule applied throughout: <b>a journey starts with the decision, not the paperwork.</b> The first thing the pane asks is what the writer wants to do — and each intent gets its own short ledger, its own primary verb, and where it belongs, a crossover into a neighbouring journey (closing and nudging are each other's second thoughts). The quantity pill is also corrected here: choosing a unit <b>opens the picker with the value focused and selected</b> — type to replace, or nudge — it never silently accepts a default. Click through each journey below; the crossovers work.</div>
+
+<div id="stage"></div>
+
+</div>
+<div class="switch" id="switch"></div>
+
+<script>
+/* ───────────────────────── flow definitions ───────────────────────── */
+const J = {
+
+send: {
+  band:'now',
+  deed:'Send your <b>partial manuscript</b> for <a>Murphy\u2019s Day Out</a> to <a>Daniel O\u2019Rourke</a> at <b>Inkwell &amp; Stone</b>',
+  register:'Register: a request is good news \u2014 brisk, warm, no ceremony. The fork honours that "your turn" doesn\u2019t always mean "done".',
+  fork:{label:'Where are you with it?',opts:[
+    {t:'I\u2019ve sent it',s:'Note what went, and set the clock',flow:'sent'},
+    {t:'Not yet \u2014 hold me to it',s:'Pick a day and it lands back on your list',flow:'later'},
+    {t:'I\u2019m not going to send it',s:'Record that, and close the query honestly',x:'close',xlabel:'crosses to closing'},
+  ]},
+  flows:{
+    sent:{qs:[
+      {k:'unit',l:'What you sent',type:'unit'},
+      {k:'when',l:'When',opts:['Today','Yesterday','Another date\u2026']},
+      {k:'expect',l:'Reply expected',opts:['4 weeks','6 weeks','8 weeks','A date\u2026'],hint:'Their stated window is 6 weeks.'},
+      {k:'remind',l:'Nudge reminder',opts:['On the day','The week before','A date\u2026','No reminder'],hint:'The reminder lands here, on your list, when the time comes.'},
+    ],primary:'Log as sent',links:['+ Anything else going with it','+ Add a note for your file'],
+    wr:a=>{const b=[];if(a.expect)b.push('reply expected around <b>'+a.expect.toLowerCase()+' from then</b>');if(a.remind)b.push(/no rem/i.test(a.remind)?'no nudge reminder':'a nudge reminder lands here <b>'+a.remind.toLowerCase()+'</b>');return b.join('; ');}},
+    later:{qs:[
+      {k:'day',l:'Hold me to when?',opts:['Tomorrow','In 3 days','Next week','A date\u2026'],hint:'This task waits quietly until then \u2014 nothing is recorded on the query.'},
+    ],primary:'Set the reminder',
+    wr:a=>a.day?('this send lands back on your list <b>'+a.day.toLowerCase()+'</b>'):''},
+  }
+},
+
+close: {
+  band:'house',
+  deed:'Consider closing your query for <a>Murphy\u2019s Day Out</a> to <a>Jonathan Marsh</a> at <b>The Marsh Agency</b>',
+  register:'Register: closing can feel like defeat \u2014 the fork names the honourable alternatives first, and the copy keeps it a bookkeeping act, not a verdict.',
+  fork:{label:'What would you like to do?',opts:[
+    {t:'Close it now',s:'Records no response \u2014 not a rejection. It reopens if a reply ever comes',flow:'closenow'},
+    {t:'Nudge them once more first',s:'One more try before the ledger closes',x:'nudge',xlabel:'crosses to nudging'},
+    {t:'Leave it open for now',s:'Choose when you\u2019d like to be asked again \u2014 or not at all',flow:'leave'},
+  ]},
+  flows:{
+    closenow:{qs:[
+      {k:'when',l:'When',opts:['Today','Yesterday','Another date\u2026'],hint:'Closing keeps your response rate honest. It does not tell the agent anything.'},
+    ],primary:'Log the close',links:['+ Add a note for your file'],
+    wr:a=>a.when?('closed as no response, <b>'+a.when.toLowerCase()+'</b>'):''},
+    leave:{qs:[
+      {k:'again',l:'Ask you again\u2026',opts:['In 2 weeks','In a month','In 3 months','A date\u2026','Stop asking about this one'],hint:'"Stop asking" mutes this suggestion for this query only \u2014 it deletes nothing, and every other task still appears.'},
+    ],primary:'Set it aside',
+    wr:a=>a.again?(/stop/i.test(a.again)?'no more closing suggestions for this query':'this suggestion returns <b>'+a.again.toLowerCase()+'</b>'):''},
+  }
+},
+
+nudge: {
+  band:'now',
+  deed:'Nudge <a>Jonathan Marsh</a> at <b>The Marsh Agency</b> about <a>Murphy\u2019s Day Out</a>',
+  register:'Register: matter-of-fact courage \u2014 nudging is normal, the app hands the writer the clock, not the anxiety.',
+  fork:{label:'Where are you with it?',opts:[
+    {t:'I\u2019ve nudged them',s:'Record it, and reset the clock',flow:'nudged'},
+    {t:'I\u2019ll give it a little longer',s:'Choose when this should come back',flow:'wait'},
+    {t:'Actually \u2014 time to close',s:'Enough waiting; record it honestly',x:'close',xlabel:'crosses to closing'},
+  ]},
+  flows:{
+    nudged:{qs:[
+      {k:'when',l:'When',opts:['Today','Yesterday','Another date\u2026']},
+      {k:'expect',l:'If nothing comes back\u2026',opts:['Ask me in 2 weeks','Ask me in a month','A date\u2026','Don\u2019t ask again'],hint:'A nudge deserves its own clock \u2014 this is when the app checks in next.'},
+    ],primary:'Log the nudge',links:['+ Add a note for your file'],
+    wr:a=>{const b=[];if(a.when)b.push('nudge sent <b>'+a.when.toLowerCase()+'</b>');if(a.expect)b.push(/don/i.test(a.expect)?'no follow-up':'the app checks in <b>'+a.expect.toLowerCase().replace('ask me ','')+'</b>');return b.join('; ');}},
+    wait:{qs:[
+      {k:'again',l:'Come back\u2026',opts:['In a week','In 2 weeks','In a month','A date\u2026'],hint:'The task waits quietly until then.'},
+    ],primary:'Set it aside',
+    wr:a=>a.again?('this returns <b>'+a.again.toLowerCase()+'</b>'):''},
+  }
+},
+
+fillin: {
+  band:'house',
+  deed:'Fill in what you sent with your query to <a>Priya Raman</a> for <a>Murphy\u2019s Day Out</a>',
+  register:'Register: housekeeping \u2014 quick, forgiving, and honest about not remembering. "Can\u2019t recall" is a legitimate answer that ends the asking without inventing a record.',
+  fork:{label:'This query came in by import \u2014 what went with it?',opts:[
+    {t:'I can fill it in',s:'Tick what went; set the sample if there was one',flow:'fill'},
+    {t:'I can\u2019t remember',s:'Fair enough \u2014 stop asking, record nothing',flow:'forget'},
+  ]},
+  flows:{
+    fill:{qs:[
+      {k:'mats',l:'What went',type:'mats',hint:'Tick all that apply \u2014 the sample opens its own picker.'},
+      {k:'when',l:'Sent when?',opts:['I know the date\u2026','Around then \u2014 keep the import date','Not sure'],hint:'"Not sure" leaves the date blank rather than guessing.'},
+    ],primary:'Record what went',
+    wr:a=>{const b=[];if(a.mats)b.push('materials on this query');if(a.when)b.push(/not sure/i.test(a.when)?'no date':'its sent date');return b.join(' and ');}},
+    forget:{qs:[],primary:'Stop asking',info:'Nothing is recorded and nothing is invented. This gap stops appearing on your list; the query itself is untouched.',
+    wr:()=>'no more fill-in asks for this query'},
+  }
+},
+
+note: {
+  band:'yours',
+  deed:'Nudge Marcus Reed',
+  noteMeta:'Your own note \u00b7 added 2 days ago',
+  register:'Register: the writer\u2019s own words on their own paper \u2014 the app\u2019s only jobs are the tick and, if wanted, a date.',
+  fork:{label:'Your note \u2014 what now?',opts:[
+    {t:'Tick it off',s:'Done is done \u2014 the tick is dated today',flow:'tick'},
+    {t:'Give it a date',s:'Turn it into a reminder that comes back',flow:'date'},
+  ]},
+  flows:{
+    tick:{qs:[],primary:'Tick it off',info:'Ticking it off is what finishes it.',links:['+ Add any last details'],
+    wr:()=>'your note, ticked off today'},
+    date:{qs:[
+      {k:'day',l:'Come back\u2026',opts:['Tomorrow','Next week','A date\u2026']},
+    ],primary:'Set the date',
+    wr:a=>a.day?('this note returns <b>'+a.day.toLowerCase()+'</b>'):''},
+  }
+},
+};
+
+/* ───────────────────────── engine ───────────────────────── */
+let cur='send', intent=null, ans={}, openQ=0, crumb=null;
+
+function el(h){const d=document.createElement('div');d.innerHTML=h;return d.firstElementChild;}
+
+function renderStage(){
+  const j=J[cur];
+  const stage=document.getElementById('stage');
+  stage.innerHTML='';
+  stage.appendChild(el('<div class="register">'+j.register+'</div>'));
+  const card=el('<div class="fc"><div class="rim"></div></div>');
+  const rim=card.querySelector('.rim');
+  rim.appendChild(el('<div class="band '+j.band+'"><div class="deed">'+j.deed+'</div></div>'));
+  if(crumb)rim.appendChild(el('<div class="crumb" style="display:block;">Crossed over from <b>'+crumb+'</b> \u2014 <a onclick="goBack()">go back</a></div>'));
+  if(j.noteMeta)rim.appendChild(el('<div style="padding:12px 18px 0;font-family:Caveat,cursive;font-size:24px;color:#4a3a28;">'+j.deed.replace(/<[^>]*>/g,'')+'</div><div style="padding:2px 18px 0;font-family:\'JetBrains Mono\',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#9c8878;">'+j.noteMeta+'</div>'));
+
+  /* fork */
+  const fw=el('<div class="forkwrap"><div class="forklbl" style="'+(intent!==null?'visibility:hidden;':'')+'">'+j.fork.label+'</div><div class="fork"></div></div>');
+  const fk=fw.querySelector('.fork');
+  j.fork.opts.forEach((o,i)=>{
+    const b=el('<button class="fk'+(intent===i?' on':'')+'"><span class="t">'+o.t+'</span><span class="s">'+o.s+'</span>'+(o.x?'<span class="x">'+o.xlabel+' \u2192</span>':'')+'</button>');
+    b.onclick=()=>{
+      if(o.x){crumb=deedName(cur);cur=o.x;intent=null;ans={};openQ=0;renderStage();renderSwitch();return;}
+      intent=i;ans={};openQ=0;renderStage();
+    };
+    fk.appendChild(b);
+  });
+  rim.appendChild(fw);
+
+  /* ledger for chosen intent */
+  if(intent!==null){
+    const flowId=j.fork.opts[intent].flow;
+    const flow=j.flows[flowId];
+    const form=el('<div class="form"></div>');
+    if(flow.info)form.appendChild(el('<div class="hint" style="padding:6px 0 4px;">'+flow.info+'</div>'));
+    flow.qs.forEach((q,i)=>{
+      const done=ans[q.k]!==undefined;
+      const d=el('<div class="q'+(i===openQ?' open':'')+(done?' done':'')+'"></div>');
+      let h='<div class="head"><span class="sqm"></span><span class="ql">'+q.l+'</span>';
+      if(done&&i!==openQ)h+='<span class="ans">'+ans[q.k]+'<span class="tick">\u2713</span><span class="edit">Edit</span></span>';
+      h+='</div><div class="body"></div>';
+      d.innerHTML=h;
+      const body=d.querySelector('.body');
+      if(q.type==='unit')body.appendChild(unitPicker(q));
+      else if(q.type==='mats')body.appendChild(matsPicker(q));
+      else{
+        const seg=el('<div class="seg"></div>');
+        q.opts.forEach(o=>{
+          const b=el('<button class="'+(ans[q.k]===o?'on':'')+'">'+o+'</button>');
+          b.onclick=()=>{ans[q.k]=o;advance(flow);};
+          seg.appendChild(b);
+        });
+        body.appendChild(seg);
+      }
+      if(q.hint)body.appendChild(el('<div class="hint">'+q.hint+'</div>'));
+      const e=d.querySelector('.edit');if(e)e.onclick=()=>{openQ=i;renderStage();};
+      form.appendChild(d);
+    });
+    if(flow.links)form.appendChild(el('<div class="addrow">'+flow.links.map(l=>'<span class="addlink">'+l+'</span>').join('')+'</div>'));
+    rim.appendChild(form);
+
+    const missing=flow.qs.filter(q=>ans[q.k]===undefined).length;
+    const wrTxt=flow.wr(ans);
+    rim.appendChild(el('<div class="act"><span class="wr"><span class="lead">This records</span>'+(wrTxt||'\u2014')+'</span><span style="margin-left:auto;"></span><button class="ab quiet">Snooze</button><button class="ab quiet">Dismiss</button><button class="ab go">'+flow.primary+(missing?'<span class="n">'+missing+' to answer</span>':'')+'</button></div>'));
+  }
+  stage.appendChild(card);
+  const jn={send:'<b>The fork protects the record:</b> "your turn" has three honest endings \u2014 done, deferred with a date, or declined. Only the first touches the query; the second is a task; the third is a close wearing its real reason.',
+    close:'<b>"Leave it open" is where the mute finally lives</b> \u2014 the gap the popup round reported. "Stop asking about this one" is a choice inside a decision, not a hidden setting, and the copy says exactly what it does and doesn\u2019t do.',
+    nudge:'<b>A nudge resets the clock, so the flow asks for the new clock</b> \u2014 "if nothing comes back, when should the app check in?" \u2014 which is the question the old flow never asked, leaving nudged queries in limbo.',
+    fillin:'<b>"I can\u2019t remember" is a first-class answer.</b> The alternative is a writer inventing history to make a prompt go away \u2014 the exact opposite of what this app is for. Recording nothing and going quiet is the honest transaction.',
+    note:'<b>A note is the writer\u2019s object</b>, so the fork offers only the two things the app can add: the tick, or a date that brings it back.'};
+  stage.appendChild(el('<div class="jnote">'+jn[cur]+'</div>'));
+}
+
+function advance(flow){
+  const n=flow.qs.findIndex(q=>ans[q.k]===undefined);
+  openQ=n===-1?-1:n;renderStage();
+}
+
+function deedName(k){return {send:'Send your partial',close:'Consider closing',nudge:'Worth a nudge',fillin:'Fill in what you sent',note:'Your note'}[k];}
+function goBack(){const back={close:crumb&&/nudge/i.test(crumb)?'nudge':/send/i.test(crumb||'')?'send':'send',nudge:'close'};cur=Object.keys(J).find(k=>deedName(k)===crumb)||'send';crumb=null;intent=null;ans={};openQ=0;renderStage();renderSwitch();}
+
+/* corrected unit pill: select opens the picker, focuses AND selects the value */
+function unitPicker(q){
+  const wrap=el('<div class="units"></div>');
+  const cfg=[{u:'Chapters',seed:3,inc:1,min:1},{u:'Pages',seed:10,inc:5,min:1},{u:'Words',seed:10000,inc:500,min:500}];
+  const st=ans.__unit||(ans.__unit={sel:null,val:{}});
+  cfg.forEach(c=>{
+    const on=st.sel===c.u;
+    const v=st.val[c.u]??c.seed;
+    const p=el('<span class="upill'+(on?' on':'')+'">'+c.u+'<span class="qty"><button data-d="-1">\u2212</button><input inputmode="numeric" type="number" value="'+v+'"><span class="u">'+c.u.toLowerCase()+'</span><button data-d="1">+</button></span></span>');
+    p.addEventListener('click',e=>{
+      if(e.target.closest('.qty')){
+        const b=e.target.closest('button');
+        if(b){st.val[c.u]=Math.max(c.min,(st.val[c.u]??c.seed)+(+b.dataset.d)*c.inc);commit();renderStage();refocus(c.u);}
+        return;
+      }
+      if(st.sel===c.u)return;
+      st.sel=c.u;st.val[c.u]=st.val[c.u]??c.seed;commit();renderStage();refocus(c.u,true);
+    });
+    p.querySelector('input').addEventListener('change',e=>{
+      const n=parseInt(e.target.value,10);
+      st.val[c.u]=isNaN(n)?c.min:Math.max(c.min,n);commit();renderStage();
+    });
+    wrap.appendChild(p);
+  });
+  function commit(){ans[q.k]=st.sel?((st.val[st.sel]).toLocaleString('en-GB')+' '+st.sel.toLowerCase()):undefined;}
+  function refocus(u,selectAll){
+    requestAnimationFrame(()=>{
+      const inp=document.querySelector('.upill.on .qty input');
+      if(inp){inp.focus();if(selectAll)inp.select();}   /* type to replace \u2014 the fix */
+    });
+  }
+  return wrap;
+}
+
+function matsPicker(q){
+  const wrap=el('<div class="mats"></div>');
+  const st=ans.__mats||(ans.__mats={cl:false,sy:false,sm:null});
+  [['cl','Covering letter'],['sy','Synopsis']].forEach(([k,label])=>{
+    const m=el('<span class="mat'+(st[k]?' on':'')+'"><span class="c">\u2713</span>'+label+'</span>');
+    m.onclick=()=>{st[k]=!st[k];commit();renderStage();};
+    wrap.appendChild(m);
+  });
+  const sm=el('<span class="mat'+(st.sm?' on':'')+'"><span class="c">\u2713</span>'+(st.sm||'Opening sample\u2026')+'</span>');
+  sm.onclick=()=>{const v=prompt('Sample (build uses the expanding pill):',st.sm||'3 chapters');if(v!==null){st.sm=v||null;commit();renderStage();}};
+  wrap.appendChild(sm);
+  function commit(){ans[q.k]=(st.cl||st.sy||st.sm)?[st.cl&&'letter',st.sy&&'synopsis',st.sm].filter(Boolean).join(' \u00b7 '):undefined;}
+  return wrap;
+}
+
+function renderSwitch(){
+  const sw=document.getElementById('switch');sw.innerHTML='';
+  [['send','Send'],['close','Consider closing'],['nudge','Worth a nudge'],['fillin','Fill in'],['note','Note']].forEach(([k,label])=>{
+    const b=el('<button class="sw'+(cur===k?' on':'')+'">'+label+'</button>');
+    b.onclick=()=>{cur=k;intent=null;ans={};openQ=0;crumb=null;renderStage();renderSwitch();};
+    sw.appendChild(b);
+  });
+}
+renderStage();renderSwitch();
+</script>
+</body>
+</html>

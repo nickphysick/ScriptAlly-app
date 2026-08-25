@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — two journeys in full</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f7f4ee;--white:#fff;--field:#fdfbf7;--ink:#241209;--ink2:#3a1c14;--muted:#9c8878;--muted2:#8a7a6c;--hair:#e7ddd2;--hair2:#e0d5c8;--edge:#e8e0d8;--burg:#7c3a2a;--sage:#5a6e58;--pink:#f5e2da;--pink-b:#e8c8bc;
+--u1:#f3e0d6;--u2:#eed7ca;--ur:rgba(124,58,42,0.16);--h1:#d7ddd5;--h2:#d5dbd3;--hr:rgba(90,110,88,0.2);}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:30px 26px 90px;}
+.wrap{max-width:1000px;margin:0 auto;}
+h1{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;color:var(--ink2);margin-bottom:4px;}
+h2{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--ink2);margin:38px 0 4px;padding-top:22px;border-top:1px solid var(--hair);}
+.lede{font-size:12.5px;color:#6a584a;font-weight:300;line-height:1.65;max-width:880px;margin-bottom:8px;}
+.lede b{font-weight:500;color:var(--ink2);}
+.step{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.13em;text-transform:uppercase;color:#b3a494;margin:22px 2px 6px;display:flex;align-items:center;gap:8px;}
+.step .n{background:#e8ded1;color:#7a6551;border-radius:3px;padding:2px 6px;font-size:8px;}
+.step.branch .n{background:var(--pink);color:var(--burg);}
+.note{font-size:11.5px;color:#6a584a;font-weight:300;line-height:1.6;margin:7px 2px 0;max-width:880px;}
+.note b{font-weight:500;color:var(--ink2);}
+.writes{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.05em;color:#6f7a6c;background:#eef1ec;border:0.5px solid #dbe2d8;border-radius:8px;padding:8px 11px;margin:8px 2px 0;line-height:1.7;max-width:880px;}
+.writes b{color:#3c4a3a;}
+.writes .none{color:#a8b0a5;}
+/* pane */
+.fc{background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);}
+.rim{border:1px solid rgba(124,58,42,0.28);border-radius:9px;overflow:hidden;background:var(--white);}
+.band{padding:12px 17px 11px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.band.now{background:linear-gradient(135deg,var(--u1),var(--u2));border-bottom:1px solid var(--ur);}
+.band.house{background:linear-gradient(135deg,var(--h1),var(--h2));border-bottom:1px solid var(--hr);}
+.deed{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:400;color:var(--ink2);line-height:1.34;}
+.deed b{font-weight:600;}
+.deed a{font-weight:600;border-bottom:1px dotted rgba(58,28,20,0.42);}
+.nav{display:flex;gap:5px;}
+.nav i{width:24px;height:24px;border-radius:7px;background:rgba(255,253,250,0.8);border:0.5px solid rgba(58,28,20,0.13);display:inline-block;}
+.forkwrap{padding:13px 17px 5px;}
+.forklbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink2);font-weight:500;display:flex;gap:7px;align-items:center;margin-bottom:9px;}
+.sq{width:7px;height:7px;background:var(--burg);border-radius:2px;flex-shrink:0;}
+.fork{display:flex;flex-direction:column;gap:7px;}
+.fk{background:var(--field);border:0.5px solid var(--hair2);border-radius:10px;padding:10px 13px;display:flex;align-items:baseline;gap:9px;}
+.fk.on{background:var(--pink);border-color:var(--pink-b);}
+.fk .t{font-size:12px;font-weight:500;color:var(--ink2);white-space:nowrap;}
+.fk.on .t{color:var(--burg);}
+.fk .s{font-size:10.5px;color:var(--muted2);font-weight:300;}
+.fk .x{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;white-space:nowrap;}
+.chosen{padding:12px 17px 2px;display:flex;align-items:center;gap:9px;}
+.chosen .lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.11em;text-transform:uppercase;color:#b3a494;}
+.chosen .v{font-size:12px;font-weight:500;color:var(--ink2);}
+.chosen .edit{font-size:10px;color:#b3a494;margin-left:4px;}
+.form{padding:2px 17px 12px;}
+.q{border-bottom:1px solid var(--hair);}
+.q:last-child{border-bottom:0;}
+.q .head{display:flex;align-items:center;gap:9px;min-height:38px;padding:4px 0;}
+.q .ql{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:500;}
+.q.open .ql{color:var(--ink2);}
+.q.done .ql{color:#b3a494;}
+.q .ans{font-size:12px;color:var(--ink2);font-weight:500;margin-left:auto;display:flex;align-items:center;gap:8px;}
+.q .ans .tick{color:var(--sage);font-size:10px;}
+.q .ans .edit{font-size:10px;color:#b3a494;}
+.q .body{padding:0 0 11px 16px;}
+.seg{display:flex;gap:6px;flex-wrap:wrap;}
+.seg span{font-size:11px;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:6px 11px;color:var(--ink2);}
+.seg span.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500;}
+.hint{font-size:10px;color:var(--muted2);font-weight:300;margin-top:7px;}
+.upill{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--white);border:0.5px solid var(--hair2);border-radius:20px;color:#a99a8a;height:34px;padding:0 15px;}
+.upill.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500;padding-right:7px;}
+.upill .qty{display:inline-flex;align-items:center;gap:5px;margin-left:11px;padding-left:11px;border-left:1px solid rgba(124,58,42,0.22);}
+.upill .qty i{width:21px;height:21px;border-radius:50%;border:0.5px solid var(--pink-b);background:rgba(255,253,250,0.85);color:var(--burg);font-size:10px;display:flex;align-items:center;justify-content:center;font-style:normal;}
+.upill .qty .val{width:58px;text-align:center;font-size:11px;color:var(--burg);font-weight:500;background:#fffdfa;border:0.5px solid var(--pink-b);border-radius:7px;height:24px;line-height:23px;}
+.upill .qty .val.sel{background:#f6d9cd;box-shadow:0 0 0 3px rgba(232,200,188,0.4);}
+.upill .qty .u{font-size:8.5px;letter-spacing:0.08em;text-transform:uppercase;color:#b08a7a;}
+.addrow{padding:9px 0 2px;display:flex;gap:15px;}
+.addlink{font-size:10.5px;color:var(--burg);border-bottom:1px dashed rgba(124,58,42,0.35);}
+.act{display:flex;align-items:center;gap:8px;padding:10px 15px;border-top:1px solid var(--hair);}
+.wr{font-size:11px;color:#6a584a;font-weight:300;}
+.wr .lead{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-right:6px;}
+.wr b{font-weight:500;color:var(--ink2);}
+.ab{height:30px;display:inline-flex;align-items:center;padding:0 13px;border-radius:999px;font-size:11px;font-weight:500;}
+.ab.quiet{background:var(--white);border:1px solid var(--edge);color:#57534e;}
+.ab.go{background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600;}
+.ab .n{font-family:'JetBrains Mono',monospace;font-size:8px;background:var(--burg);color:#fffdfa;border-radius:999px;padding:2px 6px;margin-left:6px;}
+.receipt{display:flex;align-items:center;gap:10px;background:#eef1ec;border:1px solid #dbe2d8;border-radius:10px;padding:10px 14px;font-size:12px;color:#3c4a3a;}
+.receipt .u{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);border-bottom:1px solid rgba(124,58,42,0.4);}
+.map{display:flex;flex-direction:column;gap:6px;background:var(--white);border:1px solid var(--edge);border-radius:11px;padding:13px 15px;margin:10px 0 4px;}
+.mrow{display:flex;align-items:baseline;gap:9px;font-size:11.5px;}
+.mrow .k{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);min-width:104px;}
+.mrow .v{color:#6a584a;font-weight:300;}
+.mrow .v b{font-weight:500;color:var(--ink2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Two journeys, end to end</h1>
+<div class="lede">Every state of the <b>partial requested</b> and <b>nudge</b> journeys — each intent, each question, what commits, and what the board does next. The green blocks say exactly what is written; <b>nothing is written until the primary is pressed</b>.</div>
+
+<!-- ══════════════════════ PARTIAL REQUESTED ══════════════════════ -->
+<h2>Journey 1 · Partial requested — the agent asked, it's your turn</h2>
+<div class="lede"><b>Register:</b> a request is good news. Brisk, warm, no ceremony — and the fork admits that "your turn" doesn't always end in "sent".</div>
+<div class="map">
+  <div class="mrow"><span class="k">Arrives when</span><span class="v">the agent's reply records a partial request \u2014 the query is <b>Partial requested</b> and the turn is the writer's</span></div>
+  <div class="mrow"><span class="k">Intent A</span><span class="v"><b>I've sent it</b> \u2192 4 questions \u2192 query becomes <b>Partial sent</b></span></div>
+  <div class="mrow"><span class="k">Intent B</span><span class="v"><b>Not yet \u2014 hold me to it</b> \u2192 1 question \u2192 a dated task; the query does not move</span></div>
+  <div class="mrow"><span class="k">Intent C</span><span class="v"><b>I'm not going to send it</b> \u2192 crosses to closing, with withdrawn as the reason</span></div>
+</div>
+
+<div class="step"><span class="n">1</span> The pane opens — the decision first, nothing else</div>
+<div class="fc"><div class="rim">
+  <div class="band now"><div class="deed">Send your <b>partial manuscript</b> for <a>Murphy's Day Out</a> to <a>Daniel O'Rourke</a> at <b>Inkwell &amp; Stone</b></div><div class="nav"><i></i><i></i></div></div>
+  <div class="forkwrap">
+    <div class="forklbl"><span class="sq"></span>Where are you with it?</div>
+    <div class="fork">
+      <div class="fk"><span class="t">I've sent it</span><span class="s">Note what went, and set the clock</span></div>
+      <div class="fk"><span class="t">Not yet — hold me to it</span><span class="s">Pick a day and it lands back on your list</span></div>
+      <div class="fk"><span class="t">I'm not going to send it</span><span class="s">Record that, and close the query honestly</span><span class="x">crosses to closing →</span></div>
+    </div>
+  </div>
+  <div class="act"><span class="wr"><span class="lead">This records</span>—</span><span style="margin-left:auto;"></span><span class="ab quiet">Snooze</span><span class="ab quiet">Dismiss</span></div>
+</div></div>
+<div class="note">No primary yet — until an intent is chosen there is no verb to offer. Snooze and Dismiss remain, because both are answers to "not now" that don't need a branch.</div>
+
+<div class="step branch"><span class="n">A1</span> "I've sent it" — the fork collapses to one line, the first question opens</div>
+<div class="fc"><div class="rim">
+  <div class="band now"><div class="deed">Send your <b>partial manuscript</b> for <a>Murphy's Day Out</a> to <a>Daniel O'Rourke</a> at <b>Inkwell &amp; Stone</b></div><div class="nav"><i></i><i></i></div></div>
+  <div class="chosen"><span class="lbl">You chose</span><span class="v">I've sent it</span><span class="edit">Change</span></div>
+  <div class="form">
+    <div class="q open"><div class="head"><span class="sq"></span><span class="ql">What you sent</span></div>
+      <div class="body">
+        <div class="seg" style="gap:8px;"><span class="upill">Chapters</span><span class="upill">Pages</span><span class="upill">Words</span></div>
+        <div class="hint">Pick the unit you actually sent in — one only.</div>
+      </div></div>
+    <div class="q"><div class="head"><span class="ql">When</span></div></div>
+    <div class="q"><div class="head"><span class="ql">Reply expected</span></div></div>
+    <div class="q"><div class="head"><span class="ql">Nudge reminder</span></div></div>
+  </div>
+  <div class="addrow" style="padding:0 17px 10px;"><span class="addlink">+ Anything else going with it</span><span class="addlink">+ Add a note for your file</span></div>
+  <div class="act"><span class="wr"><span class="lead">This records</span>—</span><span style="margin-left:auto;"></span><span class="ab quiet">Snooze</span><span class="ab quiet">Dismiss</span><span class="ab go">Log as sent<span class="n">4 to answer</span></span></div>
+</div></div>
+<div class="note">The chosen intent becomes a one-line receipt with <b>Change</b>, so the decision stays visible and reversible without occupying the fork's height.</div>
+
+<div class="step"><span class="n">A2</span> Choosing a unit opens the picker with the number <b>selected</b> — type to replace</div>
+<div class="fc"><div class="rim"><div class="form" style="padding-top:12px;">
+  <div class="q open"><div class="head"><span class="sq"></span><span class="ql">What you sent</span></div>
+    <div class="body">
+      <div class="seg" style="gap:8px;">
+        <span class="upill on">Chapters<span class="qty"><i>−</i><span class="val sel">3</span><span class="u">chapters</span><i>+</i></span></span>
+        <span class="upill">Pages</span><span class="upill">Words</span>
+      </div>
+      <div class="hint">Pick the unit you actually sent in — one only.</div>
+    </div></div>
+</div></div></div>
+<div class="note"><b>This is the bug from your screenshot.</b> Today, clicking "Chapters" silently accepts 3. Here the value is focused <i>and selected</i> — typing 5 replaces it, the steppers still work, and the seed is a starting point rather than an answer. The pill only counts as answered once the writer has left it.</div>
+
+<div class="step"><span class="n">A3</span> Two answered, third open — answered rows hold their height</div>
+<div class="fc"><div class="rim">
+  <div class="band now"><div class="deed">Send your <b>partial manuscript</b> for <a>Murphy's Day Out</a> to <a>Daniel O'Rourke</a> at <b>Inkwell &amp; Stone</b></div><div class="nav"><i></i><i></i></div></div>
+  <div class="chosen"><span class="lbl">You chose</span><span class="v">I've sent it</span><span class="edit">Change</span></div>
+  <div class="form">
+    <div class="q done"><div class="head"><span class="ql">What you sent</span><span class="ans">5 chapters<span class="tick">✓</span><span class="edit">Edit</span></span></div></div>
+    <div class="q done"><div class="head"><span class="ql">When</span><span class="ans">Today<span class="tick">✓</span><span class="edit">Edit</span></span></div></div>
+    <div class="q open"><div class="head"><span class="sq"></span><span class="ql">Reply expected</span></div>
+      <div class="body"><div class="seg"><span>4 weeks</span><span>6 weeks</span><span>8 weeks</span><span>A date…</span></div>
+      <div class="hint">Their stated window is 6 weeks.</div></div></div>
+    <div class="q"><div class="head"><span class="ql">Nudge reminder</span></div></div>
+  </div>
+  <div class="act"><span class="wr"><span class="lead">This records</span>—</span><span style="margin-left:auto;"></span><span class="ab quiet">Snooze</span><span class="ab quiet">Dismiss</span><span class="ab go">Log as sent<span class="n">2 to answer</span></span></div>
+</div></div>
+<div class="note">The strip is still an em-dash: <b>it carries only what the rows can't</b> — the two future consequences — and neither has been chosen yet.</div>
+
+<div class="step"><span class="n">A4</span> Complete — the strip finally has something of its own to say</div>
+<div class="fc"><div class="rim">
+  <div class="band now"><div class="deed">Send your <b>partial manuscript</b> for <a>Murphy's Day Out</a> to <a>Daniel O'Rourke</a> at <b>Inkwell &amp; Stone</b></div><div class="nav"><i></i><i></i></div></div>
+  <div class="chosen"><span class="lbl">You chose</span><span class="v">I've sent it</span><span class="edit">Change</span></div>
+  <div class="form">
+    <div class="q done"><div class="head"><span class="ql">What you sent</span><span class="ans">5 chapters<span class="tick">✓</span><span class="edit">Edit</span></span></div></div>
+    <div class="q done"><div class="head"><span class="ql">When</span><span class="ans">Today<span class="tick">✓</span><span class="edit">Edit</span></span></div></div>
+    <div class="q done"><div class="head"><span class="ql">Reply expected</span><span class="ans">6 weeks<span class="tick">✓</span><span class="edit">Edit</span></span></div></div>
+    <div class="q done"><div class="head"><span class="ql">Nudge reminder</span><span class="ans">The week before<span class="tick">✓</span><span class="edit">Edit</span></span></div></div>
+  </div>
+  <div class="addrow" style="padding:0 17px 10px;"><span class="addlink">+ Anything else going with it</span><span class="addlink">+ Add a note for your file</span></div>
+  <div class="act"><span class="wr"><span class="lead">This records</span>reply expected around <b>6 October</b>; a nudge reminder lands here <b>29 September</b>.</span><span style="margin-left:auto;"></span><span class="ab quiet">Snooze</span><span class="ab quiet">Dismiss</span><span class="ab go">Log as sent</span></div>
+</div></div>
+<div class="writes"><b>On press:</b> materials <b>5 chapters</b> · sent date <b>25 Aug</b> · <b>responseDeadline</b> 6 Oct · <b>nudgeDate</b> 29 Sept · activity <i>Partial sent</i> → status derives to <b>Partial sent</b><br><b>Board:</b> this task resolves and leaves; a nudge task is scheduled for 29 Sept; the counts move by one from the single array.</div>
+
+<div class="step"><span class="n">A5</span> Committed — the receipt, in place, reversible</div>
+<div class="receipt">Logged — your partial to Daniel O'Rourke, 5 chapters. Next: 29 September.<span class="u">Undo</span></div>
+<div class="note">No dialog, no page change. The pane advances to the next task; the receipt stays for a few seconds carrying <b>Undo</b>, which reverses the write rather than opening a correction flow.</div>
+
+<div class="step branch"><span class="n">B1</span> "Not yet — hold me to it" — one question, no query change</div>
+<div class="fc"><div class="rim">
+  <div class="band now"><div class="deed">Send your <b>partial manuscript</b> for <a>Murphy's Day Out</a> to <a>Daniel O'Rourke</a> at <b>Inkwell &amp; Stone</b></div><div class="nav"><i></i><i></i></div></div>
+  <div class="chosen"><span class="lbl">You chose</span><span class="v">Not yet — hold me to it</span><span class="edit">Change</span></div>
+  <div class="form">
+    <div class="q open"><div class="head"><span class="sq"></span><span class="ql">Hold me to when?</span></div>
+      <div class="body"><div class="seg"><span>Tomorrow</span><span>In 3 days</span><span class="on">Next week</span><span>A date…</span></div>
+      <div class="hint">This task waits quietly until then — nothing is recorded on the query.</div></div></div>
+  </div>
+  <div class="act"><span class="wr"><span class="lead">This records</span>this send lands back on your list <b>1 September</b>.</span><span style="margin-left:auto;"></span><span class="ab quiet">Dismiss</span><span class="ab go">Set the reminder</span></div>
+</div></div>
+<div class="writes"><b>On press:</b> <span class="none">no query fields, no activity</span> — a dated task only.<br><b>Board:</b> the task leaves today's list and returns on 1 Sept. The agent still shows as waiting, because they are.</div>
+<div class="note">This is the intent the old form had no room for, so writers either logged a send that hadn't happened or dismissed a task they still meant to do. <b>Neither was true.</b></div>
+
+<div class="step branch"><span class="n">C1</span> "I'm not going to send it" — the crossover</div>
+<div class="fc"><div class="rim">
+  <div class="band house"><div class="deed">Close your query for <a>Murphy's Day Out</a> to <a>Daniel O'Rourke</a> at <b>Inkwell &amp; Stone</b></div><div class="nav"><i></i><i></i></div></div>
+  <div class="chosen"><span class="lbl">Crossed from</span><span class="v">Send your partial</span><span class="edit">Go back</span></div>
+  <div class="form">
+    <div class="q open"><div class="head"><span class="sq"></span><span class="ql">When</span></div>
+      <div class="body"><div class="seg"><span class="on">Today</span><span>Yesterday</span><span>Another date…</span></div>
+      <div class="hint">Recorded as withdrawn, not as a rejection — the agent asked and you decided not to send. Your response rate is unaffected.</div></div></div>
+  </div>
+  <div class="act"><span class="wr"><span class="lead">This records</span>closed as <b>withdrawn</b>, today.</span><span style="margin-left:auto;"></span><span class="ab quiet">Dismiss</span><span class="ab go">Close the query</span></div>
+</div></div>
+<div class="writes"><b>On press:</b> activity <i>Closed — withdrawn</i> · close date <b>25 Aug</b> → status derives to <b>Closed</b><br><b>Board:</b> every open task on this query resolves. <span class="none">No rejection is recorded anywhere.</span></div>
+<div class="note">The band changes to the housekeeping register and the deed becomes the close sentence — the writer is in a different journey and the pane says so. <b>Withdrawn is its own reason</b>, distinct from no-response and from rejection, because the app's whole claim is that the record is true.</div>
+
+<!-- ══════════════════════ NUDGE ══════════════════════ -->
+<h2>Journey 2 · Worth a nudge — the silence has gone on long enough</h2>
+<div class="lede"><b>Register:</b> matter-of-fact courage. Nudging is a normal part of querying; the app hands over the clock, not the anxiety. No "overdue", no red, no implication the agent has misbehaved.</div>
+<div class="map">
+  <div class="mrow"><span class="k">Arrives when</span><span class="v">the agency's window has passed, <b>or</b> a nudge reminder the writer set has come due</span></div>
+  <div class="mrow"><span class="k">Intent A</span><span class="v"><b>I've nudged them</b> \u2192 2 questions \u2192 activity recorded, and a <i>new</i> clock set</span></div>
+  <div class="mrow"><span class="k">Intent B</span><span class="v"><b>I'll give it longer</b> \u2192 1 question \u2192 the task returns later; nothing recorded</span></div>
+  <div class="mrow"><span class="k">Intent C</span><span class="v"><b>Time to close</b> \u2192 crosses to closing as no response</span></div>
+</div>
+
+<div class="step"><span class="n">1</span> The pane opens</div>
+<div class="fc"><div class="rim">
+  <div class="band now"><div class="deed">Nudge <a>Jonathan Marsh</a> at <b>The Marsh Agency</b> about <a>Murphy's Day Out</a></div><div class="nav"><i></i><i></i></div></div>
+  <div class="forkwrap">
+    <div class="forklbl"><span class="sq"></span>Where are you with it?</div>
+    <div class="fork">
+      <div class="fk"><span class="t">I've nudged them</span><span class="s">Record it, and reset the clock</span></div>
+      <div class="fk"><span class="t">I'll give it a little longer</span><span class="s">Choose when this should come back</span></div>
+      <div class="fk"><span class="t">Actually — time to close</span><span class="s">Enough waiting; record it honestly</span><span class="x">crosses to closing →</span></div>
+    </div>
+  </div>
+  <div class="act"><span class="wr"><span class="lead">This records</span>—</span><span style="margin-left:auto;"></span><span class="ab quiet">Snooze</span><span class="ab quiet">Dismiss</span></div>
+</div></div>
+<div class="note">The record card beside this (not shown) carries the fact that makes the decision: <b>quiet for 8 weeks · their window is 6 weeks</b>. The pane never says "overdue" — it states the two numbers and lets the writer judge.</div>
+
+<div class="step branch"><span class="n">A1</span> "I've nudged them" — and the question the old flow never asked</div>
+<div class="fc"><div class="rim">
+  <div class="band now"><div class="deed">Nudge <a>Jonathan Marsh</a> at <b>The Marsh Agency</b> about <a>Murphy's Day Out</a></div><div class="nav"><i></i><i></i></div></div>
+  <div class="chosen"><span class="lbl">You chose</span><span class="v">I've nudged them</span><span class="edit">Change</span></div>
+  <div class="form">
+    <div class="q done"><div class="head"><span class="ql">When</span><span class="ans">Today<span class="tick">✓</span><span class="edit">Edit</span></span></div></div>
+    <div class="q open"><div class="head"><span class="sq"></span><span class="ql">If nothing comes back…</span></div>
+      <div class="body"><div class="seg"><span>Ask me in 2 weeks</span><span class="on">Ask me in a month</span><span>A date…</span><span>Don't ask again</span></div>
+      <div class="hint">A nudge deserves its own clock — this is when the app checks in next.</div></div></div>
+  </div>
+  <div class="addrow" style="padding:0 17px 10px;"><span class="addlink">+ Add a note for your file</span></div>
+  <div class="act"><span class="wr"><span class="lead">This records</span>nudge sent <b>today</b>; the app checks in <b>25 September</b>.</span><span style="margin-left:auto;"></span><span class="ab quiet">Dismiss</span><span class="ab go">Log the nudge</span></div>
+</div></div>
+<div class="writes"><b>On press:</b> activity <i>Nudge sent</i> · <b>nudgeDate</b> 25 Sept → status <b>unchanged</b> (a nudge is not a new submission)<br><b>Board:</b> this task resolves; a fresh check-in is scheduled for 25 Sept. <span class="none">The query's own status does not move.</span></div>
+<div class="note"><b>This is the fix that matters most here.</b> Without the second question, a nudged query fell silent — the task resolved, no new clock existed, and the query only resurfaced once the stale-close threshold caught it months later. "Don't ask again" is available and honest: it mutes the check-in without pretending the query is closed.</div>
+
+<div class="step branch"><span class="n">B1</span> "I'll give it a little longer"</div>
+<div class="fc"><div class="rim">
+  <div class="band now"><div class="deed">Nudge <a>Jonathan Marsh</a> at <b>The Marsh Agency</b> about <a>Murphy's Day Out</a></div><div class="nav"><i></i><i></i></div></div>
+  <div class="chosen"><span class="lbl">You chose</span><span class="v">I'll give it a little longer</span><span class="edit">Change</span></div>
+  <div class="form">
+    <div class="q open"><div class="head"><span class="sq"></span><span class="ql">Come back…</span></div>
+      <div class="body"><div class="seg"><span>In a week</span><span class="on">In 2 weeks</span><span>In a month</span><span>A date…</span></div>
+      <div class="hint">The task waits quietly until then.</div></div></div>
+  </div>
+  <div class="act"><span class="wr"><span class="lead">This records</span>this returns <b>8 September</b>.</span><span style="margin-left:auto;"></span><span class="ab quiet">Dismiss</span><span class="ab go">Set it aside</span></div>
+</div></div>
+<div class="writes"><b>On press:</b> <span class="none">no query fields, no activity</span> — the task's own return date only.<br><b>Board:</b> leaves today's list, returns 8 Sept.</div>
+<div class="note">Deliberately identical in shape to Send's "hold me to it": <b>one mechanism</b> — a task with a return date — wearing the wording of whichever journey it's in.</div>
+
+<div class="step branch"><span class="n">C1</span> "Time to close" — crossing, with the right reason</div>
+<div class="fc"><div class="rim">
+  <div class="band house"><div class="deed">Close your query for <a>Murphy's Day Out</a> to <a>Jonathan Marsh</a> at <b>The Marsh Agency</b></div><div class="nav"><i></i><i></i></div></div>
+  <div class="chosen"><span class="lbl">Crossed from</span><span class="v">Worth a nudge</span><span class="edit">Go back</span></div>
+  <div class="form">
+    <div class="q open"><div class="head"><span class="sq"></span><span class="ql">When</span></div>
+      <div class="body"><div class="seg"><span class="on">Today</span><span>Yesterday</span><span>Another date…</span></div>
+      <div class="hint">Closing records no response — not a rejection, so your response rate stays honest. It does not tell the agent anything.</div></div></div>
+  </div>
+  <div class="addrow" style="padding:0 17px 10px;"><span class="addlink">+ Add a note for your file</span></div>
+  <div class="act"><span class="wr"><span class="lead">This records</span>closed as <b>no response</b>, today.</span><span style="margin-left:auto;"></span><span class="ab quiet">Dismiss</span><span class="ab go">Close the query</span></div>
+</div></div>
+<div class="writes"><b>On press:</b> activity <i>Closed — no response</i> · close date <b>25 Aug</b> → status derives to <b>Closed</b><br><b>Board:</b> every open task on this query resolves, including any scheduled check-in.</div>
+<div class="note">Note the difference from the send crossover: that one closed as <b>withdrawn</b>, this one as <b>no response</b>. <b>The reason is carried by the journey the writer came from</b>, so the ledger stays true without ever asking them to categorise their own disappointment.</div>
+
+<div class="step"><span class="n">EDGE</span> Three cases each journey must handle, and how</div>
+<div class="map">
+  <div class="mrow"><span class="k">Reply arrives first</span><span class="v">the writer records the reply elsewhere; this task's cause is gone, so it resolves itself — a reminder must never fire into a world that has moved on</span></div>
+  <div class="mrow"><span class="k">Changed their mind</span><span class="v"><b>Change</b> on the intent line returns to the fork; answers given under the old intent are discarded rather than carried across, because they answered a different question</span></div>
+  <div class="mrow"><span class="k">Wrong entry</span><span class="v"><b>Undo</b> on the receipt reverses the write. After that window, correction is the Query Centre's job — the pane records, it does not audit</span></div>
+</div>
+
+</div>
+</body>
+</html>

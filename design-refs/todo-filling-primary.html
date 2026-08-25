@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — the filling primary</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f7f4ee;--white:#fff;--field:#fdfbf7;--ink:#241209;--ink2:#3a1c14;--muted:#9c8878;--muted2:#8a7a6c;--hair:#e7ddd2;--hair2:#e0d5c8;--edge:#e8e0d8;--burg:#7c3a2a;--sage:#5a6e58;--pink:#f5e2da;--pink-b:#e8c8bc;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:30px 26px 90px;}
+.wrap{max-width:940px;margin:0 auto;}
+h1{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;color:var(--ink2);margin-bottom:4px;}
+h2{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink2);margin:30px 0 8px;}
+.lede{font-size:12.5px;color:#6a584a;font-weight:300;line-height:1.65;max-width:900px;margin-bottom:16px;}
+.lede b{font-weight:500;color:var(--ink2);}
+.fc{background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);}
+.rim{border:1px solid rgba(124,58,42,0.28);border-radius:9px;background:var(--white);overflow:hidden;}
+.form{padding:4px 18px 12px;}
+.q{border-bottom:1px solid var(--hair);}
+.q:last-of-type{border-bottom:0;}
+.q .head{display:flex;align-items:center;gap:9px;min-height:40px;padding:5px 0;}
+.q .sqm{width:7px;height:7px;background:var(--burg);border-radius:2px;flex-shrink:0;visibility:hidden;animation:sq 1.6s ease-in-out infinite;}
+.q.open .sqm{visibility:visible;}
+@keyframes sq{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(0.72);opacity:0.55;}}
+.q .ql{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:500;}
+.q.open .ql{color:var(--ink2);}
+.q.done .ql{color:#b3a494;}
+.q .ans{font-size:12.5px;color:var(--ink2);font-weight:500;margin-left:auto;display:flex;align-items:center;gap:9px;}
+.q .ans .tick{color:var(--sage);font-size:11px;}
+.q .edit{font-size:10.5px;color:#b3a494;cursor:pointer;}
+.q .edit:hover{color:var(--burg);}
+.q .body{display:none;padding:0 0 12px 16px;}
+.q.open .body{display:block;}
+.seg{display:flex;gap:7px;flex-wrap:wrap;}
+.seg button{cursor:pointer;font-size:11.5px;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:7px 12px;color:var(--ink2);}
+.seg button:hover{border-color:#c9a89e;}
+.seg button.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500;}
+.hint{font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:8px;}
+
+/* ═══ the action bar ═══ */
+.act{display:flex;align-items:center;gap:10px;padding:11px 15px;border-top:1px solid var(--hair);background:var(--white);}
+.wr{font-size:11.5px;color:#6a584a;font-weight:300;}
+.wr .lead{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-right:6px;}
+.wr b{font-weight:500;color:var(--ink2);}
+.ab{height:34px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;font-size:11.5px;font-weight:500;cursor:pointer;white-space:nowrap;}
+.ab.quiet{background:var(--white);border:1px solid var(--edge);color:#57534e;}
+
+/* count outside — C */
+.count{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.11em;text-transform:uppercase;color:#a89684;white-space:nowrap;transition:opacity .2s;}
+.count b{color:#7a6551;font-weight:500;}
+
+/* the filling primary — C + D */
+.prime{position:relative;overflow:hidden;height:34px;display:inline-flex;align-items:center;padding:0 17px;border-radius:999px;
+  background:#f1ece5;border:1px solid #e2d9cd;color:#a89684;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;
+  transition:color .28s ease,border-color .28s ease,background .28s ease;}
+.prime .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#f7e7e0,var(--pink));transition:width .34s cubic-bezier(.4,0,.2,1);}
+.prime .t{position:relative;z-index:1;}
+.prime.ready{background:var(--pink);border-color:var(--pink-b);color:var(--burg);}
+.prime.ready .fill{width:100%;}
+.prime:focus-visible{outline:2px solid rgba(138,158,136,0.6);outline-offset:2px;}
+.prime.nudge{animation:nudgeIn .34s ease;}
+@keyframes nudgeIn{0%{transform:scale(1);}45%{transform:scale(1.035);}100%{transform:scale(1);}}
+
+.note{font-size:11.5px;color:#6a584a;font-weight:300;line-height:1.62;margin:9px 2px 0;max-width:900px;}
+.note b{font-weight:500;color:var(--ink2);}
+.states{display:flex;flex-direction:column;gap:0;}
+.srow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--hair);}
+.srow:last-child{border-bottom:0;}
+.slab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;width:96px;}
+.sdesc{font-size:11px;color:var(--muted2);font-weight:300;margin-left:auto;text-align:right;max-width:300px;line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>The filling primary</h1>
+<div class="lede">The count sits outside the button; the button itself is <b>faded until the form is complete</b>, filling with soft pink as each answer lands and turning fully pink and live on the last one. Answer the questions below and watch it fill — then use <b>Edit</b> to remove an answer and watch it recede.</div>
+
+<div class="fc"><div class="rim">
+  <div class="form"><div id="acc"></div></div>
+  <div class="act">
+    <span class="wr" id="wr"><span class="lead">This records</span>—</span>
+    <span style="margin-left:auto;"></span>
+    <span class="count" id="count"><b>4</b> still to answer</span>
+    <span class="ab quiet">Snooze</span>
+    <span class="ab quiet">Dismiss</span>
+    <button class="prime" id="prime" onclick="press()"><span class="fill" id="fill"></span><span class="t">Log as sent</span></button>
+  </div>
+</div></div>
+
+<h2>The four states</h2>
+<div class="fc"><div class="rim"><div class="states">
+  <div class="srow"><span class="slab">Nothing yet</span><span class="count"><b>4</b> still to answer</span><span class="prime"><span class="fill"></span><span class="t">Log as sent</span></span><span class="sdesc">Faded stone, no fill. Reads as "not yet", not as broken.</span></div>
+  <div class="srow"><span class="slab">Half done</span><span class="count"><b>2</b> still to answer</span><span class="prime"><span class="fill" style="width:50%;"></span><span class="t">Log as sent</span></span><span class="sdesc">The pink advances from the left. The label stays muted — it is still not the moment.</span></div>
+  <div class="srow"><span class="slab">One left</span><span class="count"><b>1</b> still to answer</span><span class="prime"><span class="fill" style="width:75%;"></span><span class="t">Log as sent</span></span><span class="sdesc">Nearly there, and visibly so.</span></div>
+  <div class="srow"><span class="slab">Ready</span><span class="count" style="opacity:0;"><b>0</b></span><span class="prime ready"><span class="fill"></span><span class="t">Log as sent</span></span><span class="sdesc">Full pink, burgundy label, count gone. The one moment the button changes character.</span></div>
+</div></div></div>
+
+<h2>What the build needs to know</h2>
+<div class="note"><b>It looks disabled; it must not be disabled.</b> A truly disabled button is a dead end — no click, no focus, nothing for a screen reader to explain, and no way to discover what is missing. So the faded state stays clickable: pressing it opens the first unanswered question and focuses it, exactly as the gate does today. <code>aria-disabled="true"</code> plus a live description ("4 questions still to answer") gives assistive tech the truth without removing the route.</div>
+<div class="note"><b>The fill is proportional, not decorative</b> — it reads the same required-fields declaration as the count, the steer square and the missing-answers line. One source, four expressions; if a journey has one required question the fill goes 0 → 100 in a single step, which is correct rather than a special case.</div>
+<div class="note"><b>The fill recedes.</b> Removing an answer through Edit runs the animation backwards. A progress indicator that only ever advances is lying about a form you can revise.</div>
+<div class="note"><b>Motion:</b> 340ms with a standard ease, and a single 3.5% scale nudge at the moment it becomes ready — the one "you can go now" beat. Under <code>prefers-reduced-motion</code> the fill jumps and the nudge is suppressed.</div>
+<div class="note"><b>Bulk keeps its exception:</b> its primary counts rows ("Log 6 queries") rather than questions, and its fill tracks touched rows against the cohort — at zero it is faded with an empty fill and its count reads "no queries filled in yet".</div>
+
+</div>
+<script>
+const QS=[
+ {k:'unit',l:'What you sent',opts:['3 chapters','10 pages','10,000 words'],hint:'Pick the unit you actually sent in — one only.'},
+ {k:'when',l:'When',opts:['Today','Yesterday','Another date…']},
+ {k:'expect',l:'Reply expected',opts:['4 weeks','6 weeks','8 weeks','A date…'],hint:'Their stated window is 6 weeks.'},
+ {k:'remind',l:'Nudge reminder',opts:['On the day','The week before','A date…','No reminder'],hint:'The reminder lands here, on your list, when the time comes.'},
+];
+const ans={};let open=0,wasReady=false;
+function render(){
+  const host=document.getElementById('acc');host.innerHTML='';
+  QS.forEach((q,i)=>{
+    const done=ans[q.k]!==undefined;
+    const d=document.createElement('div');
+    d.className='q'+(i===open?' open':'')+(done?' done':'');
+    let h='<div class="head"><span class="sqm"></span><span class="ql">'+q.l+'</span>';
+    if(done&&i!==open)h+='<span class="ans">'+ans[q.k]+'<span class="tick">✓</span><span class="edit">Edit</span></span>';
+    h+='</div><div class="body"><div class="seg">'+q.opts.map(o=>'<button class="'+(ans[q.k]===o?'on':'')+'">'+o+'</button>').join('')+'</div>'+(q.hint?'<div class="hint">'+q.hint+'</div>':'')+'</div>';
+    d.innerHTML=h;
+    d.querySelectorAll('.seg button').forEach((b,bi)=>b.onclick=()=>{
+      if(ans[q.k]===q.opts[bi]){delete ans[q.k];}      /* click again to unset — lets the fill recede */
+      else ans[q.k]=q.opts[bi];
+      const n=QS.findIndex(x=>ans[x.k]===undefined);open=n===-1?-1:n;render();
+    });
+    const e=d.querySelector('.edit');if(e)e.onclick=()=>{open=i;render();};
+    host.appendChild(d);
+  });
+  sync();
+}
+function sync(){
+  const done=QS.filter(q=>ans[q.k]!==undefined).length;
+  const missing=QS.length-done;
+  const c=document.getElementById('count');
+  c.style.opacity=missing?1:0;
+  c.innerHTML='<b>'+missing+'</b> still to answer';
+  const p=document.getElementById('prime');
+  document.getElementById('fill').style.width=(done/QS.length*100)+'%';
+  p.classList.toggle('ready',missing===0);
+  p.setAttribute('aria-disabled',missing?'true':'false');
+  p.setAttribute('aria-description',missing?(missing+' questions still to answer'):'Ready to record');
+  if(missing===0&&!wasReady){p.classList.add('nudge');setTimeout(()=>p.classList.remove('nudge'),380);}
+  wasReady=missing===0;
+  const b=[];
+  if(ans.expect)b.push('reply expected around <b>'+ans.expect.toLowerCase()+' from then</b>');
+  if(ans.remind)b.push(/no rem/i.test(ans.remind)?'no nudge reminder':'a nudge reminder lands here <b>'+ans.remind.toLowerCase()+'</b>');
+  document.getElementById('wr').innerHTML='<span class="lead">This records</span>'+(b.length?b.join('; ')+'.':'—');
+}
+function press(){
+  const n=QS.findIndex(q=>ans[q.k]===undefined);
+  if(n===-1){alert('Commits through the one write path.');return;}
+  open=n;render();
+  const el=document.querySelectorAll('.q')[n];
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  const l=el.querySelector('.ql');l.style.transition='color .2s';l.style.color='var(--burg)';
+  setTimeout(()=>l.style.color='',1200);
+}
+render();
+</script>
+</body>
+</html>
