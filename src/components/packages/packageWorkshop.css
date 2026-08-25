@@ -20,6 +20,19 @@
 .pkgw {
   /* — surfaces + ink: straight from the shell system — */
   --pkg-ink: var(--shell-ink);
+  /**
+   * ⚠️ ONE PRO-BLUE SET FOR THIS PAGE (F-M, D8), derived from Pro slate `#6A89A7`. Every blue on the
+   * packages surface reads these three and nothing else — no hex at a call site, and no `var()` with
+   * a hex fallback, which is the same thing wearing a knob's clothes.
+   *
+   * ⚠️ SCOPED TO THIS PAGE ON PURPOSE. The app carries four near-identical blue families and an exact
+   * duplicate of `--slate`; consolidating them means editing files other sessions own, so the audit
+   * in reports/closeout.md is the input to that decision and this is not it.
+   */
+  --pkg-pro: #6A89A7;
+  --pkg-pro-fill: #e6edf4;
+  --pkg-pro-edge: #c3d5e4;
+  --pkg-pro-ink: #41627f;
   --pkg-ink-soft: var(--shell-ink-soft);
   --pkg-muted: var(--shell-muted);
   --pkg-paper: #ffffff;            /* the card face — brighter than --shell-card, per the ref */
@@ -605,7 +618,7 @@
   font-family: 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase;
   /* the value, not a `var()` on a retired token — see the note in discover.css */
   font-size: 8px;
-  color: var(--slate); background: var(--slate-tint, #eef2f7); border: 1px solid var(--slate-line, #c7d6e3);
+  color: var(--pkg-pro); background: var(--pkg-pro-fill); border: 1px solid var(--pkg-pro-edge);
   border-radius: 99px; padding: 4px 10px;
   position: relative; top: 2px; flex: none;
 }
@@ -644,15 +657,15 @@
  */
 .pkgw-strip {
   display: flex; align-items: center; gap: 11px;
-  background: var(--slate-tint, #eef2f7); border: 1px solid var(--slate-line, #c7d6e3);
+  background: var(--pkg-pro-fill); border: 1px solid var(--pkg-pro-edge);
   border-radius: 12px; padding: 11px 16px;
 }
-.pkgw-strip .sh { width: 20px; height: 20px; color: var(--slate); flex: none; }
+.pkgw-strip .sh { width: 20px; height: 20px; color: var(--pkg-pro); flex: none; }
 .pkgw-strip .stx { font-size: 12px; color: var(--pkg-ink-soft); line-height: 1.5; }
 .pkgw-strip .stx b { color: var(--pkg-ink); font-weight: 600; }
 .pkgw-strip .lnk {
-  margin-left: auto; font-size: 11.5px; color: var(--slate); white-space: nowrap; cursor: pointer;
-  background: none; border: 0; border-bottom: 1px solid var(--slate-line, #c7d6e3); padding: 0; font-family: inherit;
+  margin-left: auto; font-size: 11.5px; color: var(--pkg-pro); white-space: nowrap; cursor: pointer;
+  background: none; border: 0; border-bottom: 1px solid var(--pkg-pro-edge); padding: 0; font-family: inherit;
 }
 .pkgw .pkgw-tabs { margin-top: 22px; }
 

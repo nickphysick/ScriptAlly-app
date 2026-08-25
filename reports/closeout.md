@@ -110,3 +110,38 @@ follow-up rather than taken now.
 
 Gate: tsc clean, build clean, **Vitest 387 files / 6670 tests, all green.** Grep with comments
 stripped: no live reference to the route, the component, or the three exports.
+
+## Part 3 — the packages page's blue is one set now (D8)
+
+`--pkg-pro` · `--pkg-pro-fill` · `--pkg-pro-edge` · `--pkg-pro-ink`, defined in
+`packageWorkshop.css` and read by every blue on the page. **No hex at a call site.**
+
+⚠️ **What the call sites actually held was worse than a hex — it was `var(--slate-tint, #eef2f7)`.**
+The token exists (`index.css:48`), so the fallback was dead weight *and* a hard-coded value, wearing
+a knob's clothes. Third time this session that a `var()` fallback has stood in for a token; the
+other two were tokens that did not exist at all.
+
+## F-AK — the blue audit, as input to a later app-wide ruling
+
+| family | where | values | used by | proposed |
+|---|---|---|---|---|
+| **`--slate`** + `-deep` `-tint` `-line` | `index.css:43,47–49` | `#6A89A7` `#4f6b86` `#eef2f7` `#c7d6e3` | Pro pill, slate accents, app-wide | **the canonical root.** Everything else should derive from it |
+| **`--pro`** | `index.css:977` | `#6A89A7` | — | ⚠️ **exact duplicate of `--slate`.** Recommend deleting and repointing readers. **Not touched** (D10): `index.css` is do-not-touch |
+| **`--blue-t/-b/-i`** | `index.css:955` | `#e7eef6` `#d3e0ee` `#2b4a6b` | the post-it band triple | **a different job** — a note colour, not a tier colour. Recommend renaming so it stops reading as a fourth Pro blue |
+| **`--pro-fill/-edge/-ink`** | `packageGroup.css` (reading pane) | `#e6edf4` `#c3d5e4` `#41627f` | the Query Centre sent strip | **merge with `--pkg-pro-*`** — same three values, two page-local copies |
+| **`--pkg-pro*`** | `packageWorkshop.css` *(new)* | as above | the packages page | this run's canonical set |
+
+**The shape of the ruling this is input to:** one root (`--slate`), one derived Pro set the tier's
+surfaces read, and a rename for `--blue-*` so a note colour stops looking like a fifth Pro blue. That
+touches `index.css` and two page sheets other sessions own, which is why it is a report and not a
+change.
+
+## Part 4 — the hold gate is CLOSED
+
+```
+src/components/shell/workspacePageGrid.css       M
+src/components/shell/workspacePageGrid.test.tsx  M
+```
+
+Both modified and uncommitted; the page-header session is mid-flight (last commit 9 hours ago,
+*"the retract is withdrawn"*). **Phases 5A–5D not run. The hold stands — that is the gate working.**
