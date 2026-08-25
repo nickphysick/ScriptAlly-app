@@ -1,0 +1,299 @@
+/**
+ * waitlist — the transactions, against a real Firestore.
+ *
+ * ⚠️ `.emulator.spec.ts`, NOT `.test.ts`, AND THE NAME IS LOad-BEARING. `vitest.config.ts` includes
+ * `functions/src/**\/*.test.ts` in the ROOT suite, which runs on every `npm test` with no emulator
+ * anywhere. A file named `.test.ts` here would fail for everyone, always. This extension is picked
+ * up only by `vitest.config.emulator.ts`, which `npm run test:functions` wraps in
+ * `firebase emulators:exec`.
+ *
+ * ⚠️ AND THESE CANNOT RUN ON THE AUTHOR'S MACHINE. The Firestore emulator is a JVM jar and no JDK
+ * is installed here (`/usr/bin/java` is macOS's "install a runtime" stub), so CI is the first
+ * place they execute. Said here rather than discovered later: everything below is reasoned and
+ * typechecked, and only CI has actually run it.
+ *
+ * What is tested here is the part that pure functions cannot reach: whether two writers racing for
+ * the last founding place both get it. That question has no answer outside a real transaction.
+ */
+
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
+import * as admin from "firebase-admin";
+import {
+  COUNTER_PATH, DEFAULT_CAP, COUNTER_FLOOR, RATE_LIMIT_MAX, VERIFY_TTL_MS,
+  countPayload, emailHash, newVerifyToken, tokenHash,
+} from "./waitlistModel";
+import {
+  consumeRateLimit, joinWaitlist, readCounterState, unsubscribe, verifyWaitlist,
+} from "./waitlistStore";
+
+/* `firebase emulators:exec` exports FIRESTORE_EMULATOR_HOST; the Admin SDK reads it itself. */
+const PROJECT = process.env.GCLOUD_PROJECT || "demo-scriptally-test";
+let db: admin.firestore.Firestore;
+
+beforeAll(() => {
+  expect(
+    process.env.FIRESTORE_EMULATOR_HOST,
+    "these tests must run under `firebase emulators:exec` — see npm run test:functions",
+  ).toBeTruthy();
+  if (admin.apps.length === 0) admin.initializeApp({ projectId: PROJECT });
+  db = admin.firestore();
+});
+
+afterAll(async () => { await Promise.all(admin.apps.map((a) => a?.delete())); });
+
+/** Every test starts from an empty collection set — nothing carries between them. */
+const wipe = async () => {
+  for (const path of ["waitlist", "ratelimits"]) {
+    const snap = await db.collection(path).get();
+    await Promise.all(snap.docs.map((d) => d.ref.delete()));
+  }
+  await db.doc(COUNTER_PATH).delete().catch(() => undefined);
+};
+beforeEach(wipe);
+
+const setCounter = (verifiedCount: number, cap = DEFAULT_CAP) =>
+  db.doc(COUNTER_PATH).set({ verifiedCount, cap });
+
+const join = (email: string, opts: Partial<{ requireVerification: boolean }> = {}) =>
+  joinWaitlist(db, {
+    emailNormalised: email, hashedIp: null, source: "landing-panel",
+    nowMs: Date.now(), requireVerification: opts.requireVerification ?? false,
+  });
+
+/** A pending document with a known token, as double opt-in would have written it. */
+const seedPending = async (email: string, expiresInMs = VERIFY_TTL_MS) => {
+  const token = newVerifyToken();
+  await db.doc(`waitlist/${emailHash(email)}`).set({
+    email, emailNormalised: email,
+    createdAt: new Date(), lastInteractionAt: new Date(),
+    verified: false, status: "pending", position: null,
+    verifyTokenHash: tokenHash(token),
+    verifyTokenExpiresAt: new Date(Date.now() + expiresInMs),
+    source: "landing-panel",
+  });
+  return token;
+};
+
+/* ══════════════ The one that matters ══════════════ */
+
+describe("the cap holds under a race", () => {
+  /**
+   * ⚠️ THIS TEST IS THE REASON THE TRANSACTION EXISTS. Read-then-write outside one lets every
+   * racer see 99, every racer take place 100, and the founding hundred quietly become a hundred
+   * and eight — with no error, no log line, and afterwards no way to tell which were the extras.
+   * The failure is silent and permanent, which is why it is worth a dedicated test.
+   */
+  it("eight simultaneous verifications at cap−1 produce exactly one founding place", async () => {
+    await setCounter(DEFAULT_CAP - 1);
+    const emails = Array.from({ length: 8 }, (_, i) => `race${i}@example.com`);
+    const tokens = await Promise.all(emails.map((e) => seedPending(e)));
+
+    const now = Date.now();
+    const outcomes = await Promise.all(tokens.map((t) => verifyWaitlist(db, t, now)));
+
+    const verified = outcomes.filter((o) => o.kind === "verified");
+    const waiting = outcomes.filter((o) => o.kind === "waiting");
+    expect(verified).toHaveLength(1);
+    expect(waiting).toHaveLength(7);
+
+    const counter = await readCounterState(db);
+    expect(counter.verifiedCount, "the counter never exceeds the cap").toBe(DEFAULT_CAP);
+    expect(counter.verifiedCount).toBeLessThanOrEqual(counter.cap);
+
+    /* …and the documents agree with the counter, which is the half a counter check can miss. */
+    const docs = await db.collection("waitlist").where("status", "==", "verified").get();
+    expect(docs.size).toBe(1);
+    expect(docs.docs[0].get("position")).toBe(DEFAULT_CAP);
+  });
+
+  it("and the same race through joins, with verification off", async () => {
+    await setCounter(DEFAULT_CAP - 1);
+    const outcomes = await Promise.all(
+      Array.from({ length: 8 }, (_, i) => join(`j${i}@example.com`)),
+    );
+    expect(outcomes.filter((o) => o.outcome === "joined")).toHaveLength(1);
+    expect(outcomes.filter((o) => o.outcome === "waiting")).toHaveLength(7);
+    expect((await readCounterState(db)).verifiedCount).toBe(DEFAULT_CAP);
+  });
+
+  it("a join past the cap is written `waiting` and answered as full", async () => {
+    await setCounter(DEFAULT_CAP);
+    const r = await join("late@example.com");
+    expect(r.outcome).toBe("waiting");
+    expect(r.status).toBe("waiting");
+    expect(r.position).toBeNull();
+    expect((await readCounterState(db)).verifiedCount).toBe(DEFAULT_CAP);
+    /* They are on the list — refused a founding place, not refused entirely. */
+    const doc = await db.doc(`waitlist/${emailHash("late@example.com")}`).get();
+    expect(doc.exists).toBe(true);
+    expect(doc.get("status")).toBe("waiting");
+  });
+});
+
+/* ══════════════ Dedupe ══════════════ */
+
+describe("one address, one document", () => {
+  it("a second submission returns `already` and moves no number", async () => {
+    const first = await join("dupe@example.com");
+    expect(first.outcome).toBe("joined");
+    expect((await readCounterState(db)).verifiedCount).toBe(1);
+
+    const second = await join("dupe@example.com");
+    expect(second.outcome).toBe("already");
+    expect((await readCounterState(db)).verifiedCount, "a duplicate must not count twice").toBe(1);
+    expect((await db.collection("waitlist").get()).size).toBe(1);
+  });
+
+  /**
+   * ⚠️ ONE NEUTRAL ANSWER WHATEVER THE STATE. Pending, verified and waiting all return `already`,
+   * because a caller who can tell them apart has an oracle: feed it addresses and it reports which
+   * are registered and how far along.
+   */
+  it("…and it says the same thing for a pending address as for a verified one", async () => {
+    await seedPending("pending@example.com");
+    expect((await join("pending@example.com")).outcome).toBe("already");
+  });
+
+  it("touching an existing document updates lastInteractionAt, for retention", async () => {
+    await join("touch@example.com");
+    const before = (await db.doc(`waitlist/${emailHash("touch@example.com")}`).get())
+      .get("lastInteractionAt").toMillis();
+    await new Promise((r) => setTimeout(r, 30));
+    await join("touch@example.com");
+    const after = (await db.doc(`waitlist/${emailHash("touch@example.com")}`).get())
+      .get("lastInteractionAt").toMillis();
+    expect(after).toBeGreaterThan(before);
+  });
+});
+
+/* ══════════════ Verification ══════════════ */
+
+describe("verify tokens", () => {
+  it("a good token verifies once, takes a position and raises the count", async () => {
+    await setCounter(4);
+    const token = await seedPending("v@example.com");
+    const out = await verifyWaitlist(db, token, Date.now());
+    expect(out.kind).toBe("verified");
+    if (out.kind === "verified") expect(out.position).toBe(5);
+    expect((await readCounterState(db)).verifiedCount).toBe(5);
+  });
+
+  /** ⚠️ A SPENT TOKEN IS A SPENT TOKEN. Leaving it usable makes a verify link a permanent credential. */
+  it("the same token a second time is `already`, and does not count twice", async () => {
+    await setCounter(4);
+    const token = await seedPending("twice@example.com");
+    await verifyWaitlist(db, token, Date.now());
+    const again = await verifyWaitlist(db, token, Date.now());
+    expect(again.kind).toBe("already");
+    expect((await readCounterState(db)).verifiedCount).toBe(5);
+  });
+
+  it("an expired token is refused and cleared, so it cannot be replayed later", async () => {
+    const token = await seedPending("old@example.com", -1000);
+    const out = await verifyWaitlist(db, token, Date.now());
+    expect(out.kind).toBe("expired");
+    const doc = await db.doc(`waitlist/${emailHash("old@example.com")}`).get();
+    expect(doc.get("verifyTokenHash")).toBeNull();
+    /* The person is still on the list — they asked to join; only the link died. */
+    expect(doc.exists).toBe(true);
+    expect((await readCounterState(db)).verifiedCount).toBe(0);
+  });
+
+  it("an unknown token is refused without saying why", async () => {
+    expect((await verifyWaitlist(db, newVerifyToken(), Date.now())).kind).toBe("unknown");
+  });
+
+  /**
+   * ⚠️ THE PLAIN TOKEN IS NEVER WRITTEN. A dump of plain verify tokens is a dump of claimable
+   * founding places. Asserted against the stored document rather than against the code.
+   */
+  it("only the hash is stored — the token itself appears nowhere in the document", async () => {
+    const token = await seedPending("hash@example.com");
+    const data = (await db.doc(`waitlist/${emailHash("hash@example.com")}`).get()).data() ?? {};
+    expect(JSON.stringify(data)).not.toContain(token);
+    expect(data.verifyTokenHash).toBe(tokenHash(token));
+  });
+});
+
+/* ══════════════ Rate limiting ══════════════ */
+
+describe("the rate limit is persisted, not in memory", () => {
+  it("the sixth attempt in a window is refused", async () => {
+    const ip = "hashed-ip-aaa";
+    const now = Date.now();
+    for (let i = 1; i <= RATE_LIMIT_MAX; i++) {
+      expect((await consumeRateLimit(db, ip, now)).allowed, `attempt ${i}`).toBe(true);
+    }
+    expect((await consumeRateLimit(db, ip, now)).allowed, "attempt 6").toBe(false);
+  });
+
+  it("a different address is unaffected", async () => {
+    const now = Date.now();
+    for (let i = 0; i < RATE_LIMIT_MAX; i++) await consumeRateLimit(db, "ip-a", now);
+    expect((await consumeRateLimit(db, "ip-b", now)).allowed).toBe(true);
+  });
+
+  it("and the next window starts clean", async () => {
+    const now = Date.now();
+    for (let i = 0; i < RATE_LIMIT_MAX; i++) await consumeRateLimit(db, "ip-c", now);
+    expect((await consumeRateLimit(db, "ip-c", now)).allowed).toBe(false);
+    const later = now + 60 * 60 * 1000 + 1000;
+    expect((await consumeRateLimit(db, "ip-c", later)).allowed).toBe(true);
+  });
+});
+
+/* ══════════════ The floor, end to end ══════════════ */
+
+describe("the floor is decided from what is actually stored", () => {
+  it("at one below the floor the payload carries no count", async () => {
+    await setCounter(COUNTER_FLOOR - 1);
+    const payload = countPayload(await readCounterState(db));
+    expect(payload.visible).toBe(false);
+    expect(JSON.parse(JSON.stringify(payload))).toEqual({ visible: false, cap: DEFAULT_CAP });
+  });
+
+  it("at the floor it appears", async () => {
+    await setCounter(COUNTER_FLOOR);
+    expect(countPayload(await readCounterState(db)))
+      .toEqual({ visible: true, cap: DEFAULT_CAP, count: COUNTER_FLOOR });
+  });
+
+  /**
+   * ⚠️ THE LEGACY FIELD CARRIES OVER RATHER THAN RESETTING — asserted against a real document,
+   * because this is the case that decides whether prod says it has 37 founding writers or none.
+   */
+  it("a counter holding only the legacy `count` reads as that many verified", async () => {
+    await db.doc(COUNTER_PATH).set({ count: 37, cap: DEFAULT_CAP });
+    expect((await readCounterState(db)).verifiedCount).toBe(37);
+    const r = await join("after-migration@example.com");
+    expect(r.position).toBe(38);
+    const after = await db.doc(COUNTER_PATH).get();
+    expect(after.get("verifiedCount"), "an explicit set, not an increment from nothing").toBe(38);
+  });
+});
+
+/* ══════════════ Unsubscribe ══════════════ */
+
+describe("unsubscribing gives the place back", () => {
+  it("a verified unsubscribe decrements in the same transaction", async () => {
+    await setCounter(9);
+    await join("bye@example.com");
+    expect((await readCounterState(db)).verifiedCount).toBe(10);
+    const r = await unsubscribe(db, "bye@example.com", Date.now());
+    expect(r).toEqual({ found: true, wasVerified: true });
+    expect((await readCounterState(db)).verifiedCount).toBe(9);
+  });
+
+  it("a pending unsubscribe changes no number", async () => {
+    await setCounter(9);
+    await seedPending("quiet@example.com");
+    const r = await unsubscribe(db, "quiet@example.com", Date.now());
+    expect(r).toEqual({ found: true, wasVerified: false });
+    expect((await readCounterState(db)).verifiedCount).toBe(9);
+  });
+
+  it("an unknown address is not an error", async () => {
+    expect(await unsubscribe(db, "nobody@example.com", Date.now()))
+      .toEqual({ found: false, wasVerified: false });
+  });
+});

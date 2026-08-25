@@ -69,6 +69,13 @@ jobs:
       - name: Rules tests (Firestore emulator)
         run: npm run test:rules
 
+      # ⚠️ THE FIRST PLACE THESE EVER RUN. The Firestore emulator is a JVM jar and the author's
+      # machine has no JDK, so the waitlist's transactions — the cap race above all — are
+      # typechecked locally and EXECUTED here. If this step is ever removed, the only test that
+      # can catch two writers taking the same founding place goes with it.
+      - name: Functions tests (Firestore emulator)
+        run: npm run test:functions
+
       - name: Build
         run: npm run build
 
