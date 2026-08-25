@@ -302,8 +302,22 @@ export const Form11Drawer = forwardRef<Form11DrawerHandle, Form11DrawerProps>(fu
       <div onClick={() => close(true)} style={{ position: "fixed", inset: 0, background: "rgba(58,28,20,0.18)", zIndex: 1000 }} />
       <div className={`f11-slide${closing ? " f11-closing" : ""}`} style={{ position: "fixed", top: 0, right: 0, height: "100vh", zIndex: 1001, display: "flex", alignItems: "center", padding: "0 24px", boxSizing: "border-box" }}>
         <div style={{ position: "relative" }} onAnimationEnd={() => { if (closing) onClose(); }}>
-          {/* die-cut "editing" spine tab — parchment, shadow-defined, vertical mono label */}
-          <div style={{ position: "absolute", top: 12, left: -21, width: 24, height: 92, zIndex: 3, background: F11.parchment, borderRadius: "8px 0 0 8px", boxShadow: "-3px 3px 7px rgba(58,28,20,0.10)", display: "flex", alignItems: "center", justifyContent: "center", paddingRight: 4 }}>
+          {/**
+            * die-cut spine tab — parchment, shadow-defined, vertical mono label.
+            *
+            * ⚠️ IT WAS A FIXED 92px BOX WITH NO OVERFLOW RULE, AND TWO OF FOUR CALLERS OVERFLOWED IT.
+            * At 10px mono with 0.18em tracking, 92px holds about nine characters. `EditAgentDrawer`
+            * and `EditQueryDrawer` pass nothing and get the default "editing", which fits — so the
+            * fault was invisible on the two oldest consumers. `PackagesDrawer` passes "how packages
+            * work" and has been clipped since it shipped; the package drawer passed a whole package
+            * name and read as "(DRAFT)".
+            *
+            * `minHeight` lets the box grow to its label. The tab is absolutely positioned at
+            * `top: 12`, so growing downward reflows nothing. **This is the half that cannot be
+            * broken by the next caller** — the other half is that a label should be a MODE WORD
+            * ("editing", "package") rather than a sentence, and nothing here can enforce that.
+            */}
+          <div style={{ position: "absolute", top: 12, left: -21, width: 24, minHeight: 92, zIndex: 3, background: F11.parchment, borderRadius: "8px 0 0 8px", boxShadow: "-3px 3px 7px rgba(58,28,20,0.10)", display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 4px 10px 0" }}>
             <span style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontFamily: F11_MONO, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#a89a8a", fontWeight: 500 }}>{tabLabel}</span>
           </div>
 

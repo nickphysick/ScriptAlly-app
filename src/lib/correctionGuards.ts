@@ -156,8 +156,21 @@ export interface MoveTarget {
   closed: boolean;
 }
 
+/**
+ * The destination row's note in the picker.
+ *
+ * ⚠️ IT USED TO PROMISE "moving an entry here will not reopen it", AND THAT WAS FALSE.
+ * `deriveStatus` takes the LAST status-bearing activity in chronological order, so an event dated
+ * AFTER the closure and carrying a `resultingStatus` becomes the last rung and the query's status
+ * becomes that event's. The promise holds only for an event dated before the closure — which this
+ * function cannot know, because a picker row is drawn before any event is chosen.
+ *
+ * ⚠️ SO IT STATES THE FACT IT HAS AND STOPS. Which case applies is resolved by `moveNotices`, which
+ * is given the event. A control that cannot know the answer must not offer one — the alternative
+ * here was a confident wrong promise, which is the worse of the two failures.
+ */
 export const moveTargetNote = (t: MoveTarget): string =>
-  t.closed ? `${t.status} — moving an entry here will not reopen it` : t.status;
+  t.closed ? `${t.status} — closed` : t.status;
 
 /**
  * ⚠️ A NOTE THAT NAMES THE OLD QUERY MUST NOT TRAVEL SILENTLY. "Priya asked for fifty pages" is

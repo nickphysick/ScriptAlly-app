@@ -130,11 +130,26 @@ describe("Phase 3 · move", () => {
     expect(moveGuard(log[2], log).kind).toBe("allow");
   });
 
-  /** ⚠️ CLOSED TARGETS ARE OFFERED AND STATED TRUTHFULLY — hiding them would leave a misfiled event
-   *  unfixable, and implying a move reopens the query would be worse than either. */
-  it("a closed destination says what it will not do", () => {
-    expect(moveTargetNote({ queryId: "q", agentName: "A", status: QueryStatus.REJECTED, closed: true }))
-      .toContain("will not reopen it");
+  /**
+   * ⚠️ CLOSED TARGETS ARE OFFERED AND STATED TRUTHFULLY — hiding them would leave a misfiled event
+   * unfixable.
+   *
+   * ⚠️ THIS CASE PINNED A FALSE PROMISE AND IS RETARGETED. It required the row to say "will not
+   * reopen it", which `deriveStatus` contradicts: it takes the LAST status-bearing activity
+   * chronologically, so an event dated AFTER the closure and carrying a `resultingStatus` becomes
+   * the last rung and the status becomes that event's.
+   *
+   * THE LAW IS UNCHANGED — *a closed destination is honest about what moving an entry there does* —
+   * and the honest answer depends on the event, which a picker row drawn before any event is chosen
+   * cannot know. So the row states the fact it has and `moveNotices` resolves the case. What this
+   * now forbids is the row making ANY promise about the outcome.
+   */
+  it("a closed destination is marked closed and promises nothing about the outcome", () => {
+    const note = moveTargetNote({ queryId: "q", agentName: "A", status: QueryStatus.REJECTED, closed: true });
+    expect(note).toContain("closed");
+    for (const promise of ["will not reopen", "won't reopen", "stays closed", "without reopening"]) {
+      expect(note, `the picker row promises "${promise}" without knowing the event`).not.toContain(promise);
+    }
     expect(moveTargetNote({ queryId: "q", agentName: "A", status: QueryStatus.QUERIED, closed: false }))
       .toBe(QueryStatus.QUERIED);
   });

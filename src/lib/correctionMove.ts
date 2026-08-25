@@ -83,14 +83,38 @@ export interface MoveNotices {
   staleNote?: string;
 }
 
+/**
+ * What moving THIS event to a closed query actually does (D4).
+ *
+ * ⚠️ THE OLD COPY SET HOMEWORK. It said "An event dated before the closure slots into the record
+ * without reopening it" — a RULE, stated without the event's date, leaving the reader to compare two
+ * dates the app already had and work out which case they were in.
+ *
+ * ⚠️ AND THERE ARE THREE CASES, NOT ONE. `deriveStatus` takes the LAST status-bearing activity in
+ * chronological order:
+ *
+ *   · the event carries no `resultingStatus` → it cannot move a status at all, whatever its date
+ *   · it carries one and is dated BEFORE the closure → the closure is still last; nothing changes
+ *   · it carries one and is dated AFTER the closure → it becomes the last rung, and the query's
+ *     status becomes that event's. The closure IS superseded.
+ *
+ * The third case is why `moveTargetNote`'s old flat promise was false. Stated plainly, without a
+ * verdict and without telling the writer whether to do it: it is a correction, and correcting a
+ * misfiling is exactly what this flow is for.
+ */
 export function moveNotices(
   target: MoveCandidate,
   note: string,
   sourceAgentName: string,
+  /** The event being moved. Omit and the notice states only that the target is closed. */
+  event?: { date?: string; resultingStatus?: string | null },
+  /** When the target closed — the date of its last status-bearing rung. */
+  closedAt?: string | null,
 ): MoveNotices {
   const out: MoveNotices = {};
   if (target.closed) {
-    out.closedNote = `${target.agentName}'s query is closed — ${target.status.toLowerCase()}. An event dated before the closure slots into the record without reopening it.`;
+    const head = `${target.agentName}'s query is closed — ${target.status.toLowerCase()}.`;
+    out.closedNote = `${head} ${closureEffect(event, closedAt)}`;
   }
   const stale = staleNoteCheck(note, sourceAgentName);
   if (stale.stale) out.staleNote = stale.message;
@@ -105,3 +129,48 @@ export function moveNotices(
  * there is stated in the notice above both blocks instead.
  */
 export const MOVE_BLOCK_TITLES = { source: "This query", target: "The query it moves to" } as const;
+
+/**
+ * Which of the three cases this move is, in words.
+ *
+ * ⚠️ IT COMPARES THE SAME KEY THE DERIVATION SORTS ON — the activity's own `date`. Comparing
+ * anything else would let the sentence and the outcome disagree, which is the fault the whole
+ * correction pack exists to avoid.
+ *
+ * ⚠️ AND AN UNKNOWN DATE IS SAID, NOT GUESSED. Without the event, or without a closure date to
+ * compare it to, the notice states that the query is closed and stops — it does not fall back to
+ * the reassuring branch. The standing rule: an unknown is never folded into a known.
+ */
+export const closureEffect = (
+  event?: { date?: string; resultingStatus?: string | null },
+  closedAt?: string | null,
+): string => {
+  if (!event) return "Moving an entry here does not by itself reopen it.";
+  if (!event.resultingStatus) {
+    return "This entry carries no status, so it records against that query without changing where it stands.";
+  }
+  if (!event.date || !closedAt) {
+    return "This entry carries a status; whether it lands before or after the closure is not recorded, so what it does to that query cannot be stated here.";
+  }
+  return event.date < closedAt
+    ? "This entry is dated before that closure, so it slots into the record and the query stays closed."
+    : `This entry is dated after that closure, so it becomes the query's latest event and its status changes to ${event.resultingStatus}.`;
+};
+
+/**
+ * When a query closed — the date of its LAST status-bearing rung.
+ *
+ * ⚠️ IT ORDERS BY THE SAME KEY THE STATUS DERIVATION DOES. On a closed query the last rung IS the
+ * closure, so this needs no separate notion of "the closing event" that could drift from what
+ * `deriveStatus` actually picked. Null when the log carries no status-bearing rung at all, which the
+ * notice then says rather than guessing.
+ */
+export const closureDateOf = (
+  docs: readonly { data: { date?: string; resultingStatus?: string } }[],
+): string | null => {
+  const dated = docs
+    .filter((d) => !!d.data.resultingStatus && !!d.data.date)
+    .map((d) => d.data.date as string)
+    .sort();
+  return dated.length > 0 ? dated[dated.length - 1] : null;
+};

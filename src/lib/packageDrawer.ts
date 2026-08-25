@@ -19,6 +19,7 @@ import type { Agent, BookVersion, ManuscriptVersion, Query, SubmissionPackage } 
 import { SLOT_FIELD, TYPE_META, BUILDER_TYPES } from "../components/packages/typeMeta";
 import { isSlotFilled, isRequest, isResponse } from "./packageMetrics";
 import { bookVersionOf } from "./bookVersions";
+import { wordsPhrase } from "./materialDraft";
 import { agentPrimary, agentSecondary, AGENT_NOT_RECORDED } from "./agentDisplay";
 
 export interface DrawerSlot {
@@ -29,7 +30,13 @@ export interface DrawerSlot {
   materialId: string | null;
   /** The material's name, or null when the slot is empty. */
   name: string | null;
-  /** `412 words`, or null where nothing was counted (a `ref` material counts nothing). */
+  /**
+   * `412 words` / `1 word`, or **null where nothing is known** (D1/D2).
+   *
+   * ⚠️ IT COMES FROM `wordsPhrase`, THE ONE PHRASE, because this field used to interpolate
+   * `${wordCount} words` and rendered "1 WORDS" and "0 WORDS" in the band. The correct form already
+   * existed in `sourceLabel` three files away — the fault was a second copy, not a missing rule.
+   */
   words: string | null;
   /** The material's opening prose. The two-line clamp is the STYLESHEET's job, not a substring. */
   opening: string | null;
@@ -65,7 +72,7 @@ export const drawerSlots = (
       label: TYPE_META[type].label,
       materialId: m?.id ?? null,
       name: m?.versionName ?? null,
-      words: typeof m?.wordCount === "number" ? `${m.wordCount.toLocaleString("en-GB")} words` : null,
+      words: m ? wordsPhrase(m) : null,
       /* ⚠️ THE WHOLE BODY, NOT A SUBSTRING. Clamping in JS bakes a line count into the data, which
          is wrong at every width but the one it was cut for; `-webkit-line-clamp` clamps what is
          rendered. A material with no pasted body (a `ref`) has no opening to show. */

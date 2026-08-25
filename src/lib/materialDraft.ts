@@ -92,12 +92,30 @@ export const countWords = (text: string): number =>
  * written before Phase 1 have no stored count, and showing a bare "Text" for them would look like a
  * material with no content rather than one whose count predates the field.
  */
+/**
+ * `412 words` / `1 word`, or **null where nothing is known** (D1/D2).
+ *
+ * ⚠️ ZERO IS A CLAIM ABOUT THE TEXT; ABSENCE IS THE TRUTH. A material with no recorded length has
+ * not been measured at nought words — nobody has counted it. `0 words` states something false about
+ * every `ref` material and every unpasted draft, and this is the same family as an unsent package's
+ * scorecard reading three noughts: a figure rendered where nothing is known.
+ *
+ * ⚠️ AND IT IS EXPORTED BECAUSE THE PACKAGE DRAWER WROTE A SECOND, WORSE COPY. `sourceLabel` below
+ * had the plural and the zero-guard right from the start; the drawer's band interpolated
+ * `${wordCount} words` and rendered "1 WORDS" and "0 WORDS". The fix is not to patch the copy — it
+ * is that there is one phrase now and both callers read it.
+ */
+export const wordsPhrase = (v: Pick<ManuscriptVersion, "wordCount" | "contentDraft" | "contentType" | "fileName" | "contentLink">): string | null => {
+  const words = v.wordCount ?? (v.contentDraft ? countWords(v.contentDraft) : 0);
+  return words > 0 ? `${words.toLocaleString("en-GB")} ${words === 1 ? "word" : "words"}` : null;
+};
+
 export function sourceLabel(v: ManuscriptVersion): string {
   const mode = modeOf(v);
   if (mode === "file") return `${v.fileName ?? "document"} · attached`;
   if (mode === "ref") return `Ref · ${v.fileName ?? v.contentLink ?? "untitled"}`;
-  const words = v.wordCount ?? (v.contentDraft ? countWords(v.contentDraft) : 0);
-  return words > 0 ? `Text · ${words.toLocaleString()} ${words === 1 ? "word" : "words"}` : "Text";
+  const w = wordsPhrase(v);
+  return w ? `Text · ${w}` : "Text";
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════

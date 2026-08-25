@@ -108,7 +108,9 @@ export const PackagesDrawer: React.FC<PackagesDrawerProps> = ({ open, onClose })
       /* The ref's 452; `Form11Drawer` caps to the viewport itself, and `max-width: 92vw` on the
          body keeps the narrow case honest. */
       width={452}
-      tabLabel="how packages work"
+      /* ⚠️ SHORTENED — "how packages work" is a sentence in a 24px-wide vertical strip. The tab
+         states the mode; the header states the subject. */
+      tabLabel="how it works"
       header={
         <div className="pkgd-head">
           <button type="button" className="pkgd-x" aria-label="Close"

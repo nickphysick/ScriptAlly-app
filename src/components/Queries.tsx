@@ -112,7 +112,7 @@ import { subcollectionDocToDerivable } from "../lib/recomputeQuery";
 import { previewCorrection, type CorrectionDiff } from "../lib/correctionPreview";
 import { canCorrect, rootGuard, dependencyGuard, type GuardEvent, moveGuard } from "../lib/correctionGuards";
 import { undoMessage, undoMoveMessage, undoStillValid, type PendingUndo } from "../lib/correctionUndo";
-import { moveCandidates, moveNotices, type MoveCandidate, type MoveNotices } from "../lib/correctionMove";
+import { moveCandidates, moveNotices, closureDateOf, type MoveCandidate, type MoveNotices } from "../lib/correctionMove";
 import { CorrectionFork, CorrectionEdit, ConsequenceSheet, MovePicker, MoveSheet } from "./reading-pane/CorrectionSheet";
 import { TasksPopover } from "./TasksPopover";
 import { MountCard } from "./MountCard";
@@ -1173,7 +1173,19 @@ export const Queries: React.FC<{
       step: "move",
       entry,
       target,
-      notices: moveNotices(target, entry.note, agentPrimary(activeAgent)),
+      /**
+       * ⚠️ THE NOTICE IS GIVEN THE EVENT AND THE CLOSURE DATE (D4), so it can state which case this
+       * move is rather than reciting a rule the reader has to apply. `closedAt` is the target's LAST
+       * status-bearing rung, which on a closed query IS the closure — derived here from the same log
+       * the status derivation reads, so the sentence and the outcome cannot disagree.
+       */
+      notices: moveNotices(
+        target,
+        entry.note,
+        agentPrimary(activeAgent),
+        { date: (moving as { date?: string }).date, resultingStatus: (moving as { resultingStatus?: string }).resultingStatus ?? null },
+        target.closed ? closureDateOf(targetDocs as never) : null,
+      ),
       sourceDiff,
       targetDiff,
       note: entry.note,

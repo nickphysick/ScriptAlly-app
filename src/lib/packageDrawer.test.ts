@@ -11,6 +11,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { drawerSlots, drawerHolders, drawerReturns, returnsLine, LOCK_FOOTNOTE } from "./packageDrawer";
+import { wordsPhrase, sourceLabel } from "./materialDraft";
 import { ComponentType, QueryStatus } from "../types";
 import type { Agent, BookVersion, ManuscriptVersion, Query, SubmissionPackage } from "../types";
 
@@ -242,5 +243,77 @@ describe("D14 / D15 / D16 — the lock, the two variants, and no editing", () =>
   it("the head renders the card's own band component", () => {
     expect(tsx).toContain('<CardBand kind="package"');
     expect(tsx).toContain("BAND_CLASS.package");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("D1/D2 — one words-phrase, pluralised, absent where nothing is known", () => {
+  /**
+   * ⚠️ THE FAULT WAS A SECOND COPY, NOT A MISSING RULE. `sourceLabel` in materialDraft.ts had the
+   * plural and the zero-guard right from the start; the drawer's band interpolated
+   * `${wordCount} words` and rendered "1 WORDS" and "0 WORDS". Both read `wordsPhrase` now.
+   */
+  const mv = (over: Partial<ManuscriptVersion>): ManuscriptVersion =>
+    ({ id: "m", manuscriptId: "m1", userId: "u", componentType: ComponentType.QUERY_LETTER,
+       versionName: "n", fileAttached: false, createdDate: "", ...over } as ManuscriptVersion);
+
+  it("agrees its noun at one", () => {
+    expect(wordsPhrase(mv({ wordCount: 1 }))).toBe("1 word");
+    expect(wordsPhrase(mv({ wordCount: 2 }))).toBe("2 words");
+    expect(wordsPhrase(mv({ wordCount: 7412 }))).toBe("7,412 words");
+  });
+
+  it("⚠️ SAYS NOTHING AT ZERO — zero is a claim about the text; absence is the truth", () => {
+    expect(wordsPhrase(mv({ wordCount: 0 }))).toBeNull();
+    expect(wordsPhrase(mv({}))).toBeNull();
+    expect(wordsPhrase(mv({ contentType: "ref", fileName: "draft.docx" }))).toBeNull();
+  });
+
+  it("the drawer's slot reads the same phrase", () => {
+    const s = drawerSlots(pkg(), [mv({ id: "ql1", wordCount: 1 }), ...MATS.slice(1)], BV);
+    expect(s[0].words).toBe("1 word");
+    const none = drawerSlots(pkg(), [mv({ id: "ql1" }), ...MATS.slice(1)], BV);
+    expect(none[0].words).toBeNull();
+  });
+
+  it("⚠️ and the source label is built FROM it, so the two cannot drift", () => {
+    expect(sourceLabel(mv({ wordCount: 1, contentType: "text" }))).toBe("Text · 1 word");
+    expect(sourceLabel(mv({ contentType: "text" }))).toBe("Text");
+    const src = readFileSync(join(root, "src/lib/materialDraft.ts"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(src).toContain("const w = wordsPhrase(v);");
+  });
+
+  it("⚠️ no interpolated count in this pack states a bare plural", () => {
+    /**
+     * The family, not the instance: every `${n} noun` in these modules must be followed by a
+     * conditional suffix.
+     *
+     * ⚠️ THE FIRST VERSION OF THIS CHECK WAS ITSELF THE PROXY FAULT. It matched
+     * `/\$\{[^}]+\}\s+(word|sample|…)[a-z]*​/` and then asserted the MATCH contained a ternary — but
+     * the match STOPS at the noun, so it never saw the `${n === 1 ? "" : "s"}` immediately after it.
+     * It reported correct code as broken. A check that slices its subject and then asks a question
+     * about the whole is the same shape as a separator supplied by the probe.
+     *
+     * It reads the TRAILING CONTEXT now — the 40 characters after the noun — which is where a
+     * suffix would be.
+     */
+    let found = 0;
+    for (const f of ["src/lib/packageDrawer.ts", "src/lib/bookVersions.ts"]) {
+      const src = readFileSync(join(root, f), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+      for (const m of src.matchAll(/\$\{[^}]+\}\s+(word|sample|package|agent|request|quer)[a-z]*/g)) {
+        found += 1;
+        const after = src.slice((m.index ?? 0) + m[0].length, (m.index ?? 0) + m[0].length + 40);
+        expect(after, `"${m[0]}" in ${f} states a fixed noun after a count`).toMatch(/^\$\{[^}]*\?/);
+      }
+    }
+    /**
+     * ⚠️ THE FLOOR IS ACROSS THE SET, NOT PER FILE — and finding that out was the point of having
+     * one. Written per file it went red on `packageDrawer.ts`, correctly: that module's only counted
+     * noun was the `${wordCount} words` this pack replaced with `wordsPhrase`, so it legitimately
+     * has none now. A file may honestly contain zero; the PACK containing zero would mean the
+     * pattern had drifted and the check was passing on an empty set.
+     */
+    expect(found, "no counted nouns anywhere in the pack — has the pattern drifted?").toBeGreaterThan(0);
   });
 });

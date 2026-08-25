@@ -46,10 +46,60 @@ describe("what the sheet must say first", () => {
   const closed = all.find((c) => c.queryId === "b")!;
   const open = all.find((c) => c.queryId === "c")!;
 
-  it("⚠️ states that a closed target stays closed (card 11)", () => {
+  /**
+   * ⚠️ THIS CASE PINNED A RULE THE READER HAD TO APPLY, AND HALF OF IT WAS FALSE (D4).
+   *
+   * It required "without reopening it" — the old copy's flat claim. `deriveStatus` takes the LAST
+   * status-bearing activity chronologically, so that holds only for an event dated BEFORE the
+   * closure. The notice is given the event now and states which of three cases applies.
+   *
+   * THE LAW IS UNCHANGED: *the notice says what moving THIS event to THIS query does.* What it may
+   * no longer do is recite a rule and leave the reader to compare two dates the app already has.
+   */
+  it("⚠️ names the closure, and states the case rather than the rule (card 11)", () => {
     const n = moveNotices(closed, "", "Marcus Reed");
     expect(n.closedNote).toContain("is closed");
-    expect(n.closedNote).toContain("without reopening it");
+  });
+
+  it("an entry carrying no status cannot move where the query stands", () => {
+    const n = moveNotices(closed, "", "Marcus Reed",
+      { date: "2026-08-01", resultingStatus: null }, "2026-06-01");
+    expect(n.closedNote).toContain("carries no status");
+  });
+
+  it("dated BEFORE the closure: it slots in and the query stays closed", () => {
+    const n = moveNotices(closed, "", "Marcus Reed",
+      { date: "2026-05-01", resultingStatus: "Full Sent" }, "2026-06-01");
+    expect(n.closedNote).toContain("dated before that closure");
+    expect(n.closedNote).toContain("stays closed");
+  });
+
+  it("⚠️ dated AFTER the closure: it becomes the latest event and the status changes", () => {
+    /* The case the old copy denied. Naming the resulting status is the point — "something will
+       change" would be the same homework one step along. */
+    const n = moveNotices(closed, "", "Marcus Reed",
+      { date: "2026-07-01", resultingStatus: "Full Sent" }, "2026-06-01");
+    expect(n.closedNote).toContain("dated after that closure");
+    expect(n.closedNote).toContain("Full Sent");
+  });
+
+  it("⚠️ an unknown date is SAID, not folded into the reassuring branch (D9)", () => {
+    for (const [ev, closedAt] of [
+      [{ date: undefined, resultingStatus: "Full Sent" }, "2026-06-01"],
+      [{ date: "2026-07-01", resultingStatus: "Full Sent" }, null],
+    ] as const) {
+      const n = moveNotices(closed, "", "Marcus Reed", ev, closedAt);
+      expect(n.closedNote).toContain("cannot be stated here");
+      expect(n.closedNote, "an unknown fell into the 'stays closed' branch").not.toContain("stays closed");
+    }
+  });
+
+  it("⚠️ and it carries no verdict — a correction is what this flow is for", () => {
+    const n = moveNotices(closed, "", "Marcus Reed",
+      { date: "2026-07-01", resultingStatus: "Full Sent" }, "2026-06-01") ;
+    for (const w of ["should", "careful", "warning", "make sure", "consider", "avoid", "correct this"]) {
+      expect((n.closedNote ?? "").toLowerCase(), `the notice urges: "${w}"`).not.toContain(w);
+    }
   });
 
   it("⚠️ uses NO GENDERED PRONOUN for the agent, unlike the ref's own copy", () => {

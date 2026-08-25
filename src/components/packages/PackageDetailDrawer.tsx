@@ -65,7 +65,11 @@ export const PackageDetailDrawer: React.FC<PackageDetailDrawerProps> = ({
       isOpen
       onClose={onClose}
       width={472}
-      tabLabel={`the package ${pkg.packageName}`}
+      /* ⚠️ A MODE WORD, NOT THE OBJECT'S NAME. The spine tab is a vertical strip beside the panel —
+         it says what KIND of drawer this is, the way "editing" does on the agent and query drawers.
+         A package name there was both unbounded and the wrong register: the name is already the
+         largest thing in the head, two inches to the right. */
+      tabLabel="package"
       header={
         /**
          * ⚠️ THE HEAD REPEATS THE CARD'S BAND, IN THE SAME BLUE (D9) — so opening reads as the card
