@@ -52,9 +52,17 @@ interface AllManuscriptsProps {
   searchQuery?: string;
   /** App's handleNavigate bridge — opts.manuscriptId preselects the Log-a-Query manuscript (additive). */
   onNavigate?: (tab: string, subPageName?: string, opts?: { manuscriptId?: string }) => void;
+  /**
+   * ⚠️ TRUE WHILE `/manuscripts` IS THE VISIBLE ROUTE, and it is load-bearing rather than
+   * informational (workspace round, Phase 5). `StagePage` toggles DISPLAY and keeps every workspace
+   * page mounted, so "the page arrived" is not an event this component can otherwise observe — and
+   * the one-shot reveal below needs exactly that moment. `Agents` has carried the same prop unused
+   * for the same reason its own reveal has been silently dead; see the run report.
+   */
+  active?: boolean;
 }
 
-export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) => {
+export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, active = true }) => {
   const { currentUser, manuscripts, queries, packages, versions, activities, taskFlags, updateManuscript, updateManuscriptQuiet, deleteManuscript, setManuscriptShelved, addPersonalGenre } =
     useScriptAllyDb();
 
@@ -97,8 +105,17 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
    * ⚠️ ABOVE THE `currentUser` GUARD, because a hook after a conditional return is a hook that
    * sometimes does not run — the rule React states and this file's early return makes easy to
    * break.
+   *
+   * ⚠️ AND IT KEYS ON `active`, BECAUSE THIS PAGE IS ALWAYS MOUNTED. Found by measurement, not by
+   * reading: `StagePage` toggles DISPLAY and keeps every workspace page in the document, so by the
+   * time anyone sets the key this component has long since mounted and `manuscripts.length` has
+   * long since settled. An effect keyed on the count alone therefore fires ONCE, early, with no key
+   * to read — and never again. Measured: the deed's manuscript link set
+   * `sa.manuscriptReveal=seed-ms-1`, navigated to `/manuscripts`, and landed on the SHELF with the
+   * key still sitting in sessionStorage. `active` is what changes on arrival.
    */
   useEffect(() => {
+    if (!active) return;
     let id: string | null = null;
     try { id = sessionStorage.getItem("sa.manuscriptReveal"); } catch { /* private mode */ }
     if (!id || manuscripts.length === 0) return;
@@ -107,7 +124,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
     try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* private mode */ }
     setOpenId(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [manuscripts.length]);
+  }, [active, manuscripts.length]);
 
   if (!currentUser) return null;
 

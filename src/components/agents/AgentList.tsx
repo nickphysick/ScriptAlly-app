@@ -91,9 +91,11 @@ interface AgentListProps {
   searchQuery?: string;
   /** App's navigate bridge — opts.agentId preselects the Log-a-Query agent. */
   onNavigate?: (tab: string, subPageName?: string, opts?: { agentId?: string }) => void;
+  /** True while `/agents` is the visible route — the one-shot reveal keys on it; see below. */
+  active?: boolean;
 }
 
-export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate }) => {
+export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, active = true }) => {
   const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser, collectionsReady } =
     useScriptAllyDb();
 
@@ -193,7 +195,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
      a reveal is a GESTURE, not an address — it must not survive the tab, must not enter history,
      and must fire exactly once (the key is cleared the moment it is read). Same scroll mechanics
      as the new-agent land above; an id that no longer exists simply clears and does nothing. */
+  /**
+   * ⚠️ IT KEYS ON `active`, AND WITHOUT THAT IT HAS BEEN DEAD (found by measurement, workspace
+   * round, Phase 5 — a PRE-EXISTING fault this round surfaced rather than caused).
+   *
+   * `StagePage` toggles DISPLAY and keeps every workspace page mounted, so this component has long
+   * since mounted and `agents.length` has long since settled by the time anyone writes the key.
+   * Keyed on the count alone the effect fired ONCE, on first load, with nothing to read — and never
+   * again. So the ⋯ menu's "View agent" set the key, navigated, and landed at the top of the list
+   * with the key still in sessionStorage. `Agents` has ACCEPTED an `active` prop this whole time
+   * and threw it away; it is threaded now, which is what makes "the page arrived" observable.
+   */
   useLayoutEffect(() => {
+    if (!active) return;
     let id: string | null = null;
     try { id = sessionStorage.getItem("sa.agentReveal"); } catch { /* private mode */ }
     if (!id || agents.length === 0) return;        // hold the key until the list can answer
@@ -202,7 +216,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     const card = document.querySelector<HTMLElement>(`[data-agent-card="${id}"]`);
     card?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agents.length]);
+  }, [active, agents.length]);
 
   // Both axes counted over the WHOLE list — a filter row must state what it would reveal, so it
   // can never read from the already-filtered view.

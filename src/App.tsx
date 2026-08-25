@@ -763,6 +763,9 @@ function AppContent() {
             <AllManuscripts
               searchQuery={searchQuery}
               onNavigate={handleNavigate}
+              /* ⚠️ LOAD-BEARING: the page stays MOUNTED, so this is the only signal that it has
+                 become visible — which is what the one-shot manuscript reveal keys on. */
+              active={routeKey === "manuscripts" && !manuscriptsPackages && !manuscriptsComps}
             />
           )}
         </StagePage>

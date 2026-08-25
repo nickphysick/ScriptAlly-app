@@ -17,11 +17,15 @@ interface AgentsProps {
   searchQuery?: string;
   /** App's handleNavigate bridge — opts.agentId preselects the Log-a-Query agent. */
   onNavigate?: (tab: string, subPageName?: string, opts?: { agentId?: string }) => void;
-  /** True while /agents is the visible route. Retained for App.tsx's call site; the rebuilt page
-   *  has no global key bindings yet (the flip editor owns Escape locally, from Phase 3). */
+  /**
+   * ⚠️ TRUE WHILE `/agents` IS THE VISIBLE ROUTE, AND IT IS THREADED NOW (workspace round, Phase 5).
+   * It was accepted here and dropped on the floor — "retained for App.tsx's call site" — and the
+   * one-shot agent reveal has been silently dead ever since, because a page that never unmounts has
+   * no other way to observe that it has arrived. See `AgentList`'s own note.
+   */
   active?: boolean;
 }
 
-export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => (
-  <AgentList searchQuery={searchQuery} onNavigate={onNavigate} />
+export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active }) => (
+  <AgentList searchQuery={searchQuery} onNavigate={onNavigate} active={active} />
 );
