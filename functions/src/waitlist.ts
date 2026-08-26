@@ -35,6 +35,42 @@ import { prepareConfirm, prepareWelcome } from "./emailTemplates";
 import { parseUnsubscribeToken, unsubscribeToken } from "./waitlistModel";
 import { unsubscribeById } from "./waitlistStore";
 import { unsubscribePage } from "./unsubscribePage";
+import * as admin from "firebase-admin";
+
+/**
+ * ⚠️ MONITOR MODE. The verdict is LOGGED AND NOTHING ELSE — no request is refused on this basis,
+ * and the caller never learns the answer. A misconfigured App Check that rejected real users would
+ * look exactly like an outage, and the dev key is bound to `scriptally-dev.web.app` and
+ * `localhost`, so on any other host every genuine request is unverified by construction.
+ *
+ * ⚠️ ENFORCEMENT IS A SEPARATE, LATER DECISION, taken after several days of a clean pass rate.
+ * Turning it on is a branch here, not a rewrite — but it must not be turned on because the code
+ * looks ready. It is turned on because the numbers say real traffic is passing.
+ *
+ * ⚠️ `onRequest` GETS NO AUTOMATIC ENFORCEMENT. A callable would; an HTTP function has to read the
+ * header and verify the token itself, which is also why this can be monitor-only at all.
+ */
+const APP_CHECK_HEADER = "x-firebase-appcheck";
+
+const monitorAppCheck = async (
+  header: unknown, route: string,
+): Promise<void> => {
+  const token = typeof header === "string" ? header : "";
+  if (!token) {
+    console.info(JSON.stringify({ event: "appcheck.monitor", route, verdict: "absent" }));
+    return;
+  }
+  try {
+    await admin.appCheck().verifyToken(token);
+    console.info(JSON.stringify({ event: "appcheck.monitor", route, verdict: "verified" }));
+  } catch (e) {
+    /* An invalid, expired or wrong-project token. Still not a rejection. */
+    console.info(JSON.stringify({
+      event: "appcheck.monitor", route, verdict: "invalid",
+      reason: e instanceof Error ? e.message.slice(0, 120) : "unknown",
+    }));
+  }
+};
 
 /**
  * ⚠️ THE IP SALT IS A SECRET AND NEVER HAS A DEFAULT IN CODE. A hard-coded fallback would look
@@ -191,6 +227,10 @@ export const waitlist = onRequest(
         let body: Record<string, unknown> = {};
         if (req.body && typeof req.body === "object") body = req.body as Record<string, unknown>;
         else if (typeof req.body === "string") { try { body = JSON.parse(req.body); } catch { body = {}; } }
+
+        /* ⚠️ AWAITED BUT NEVER ACTED ON — the verdict is a log line. Awaiting it keeps the log
+           ordered against the request it describes, which is what makes a pass rate readable. */
+        await monitorAppCheck(req.headers[APP_CHECK_HEADER], "join");
 
         const email = normaliseEmail(body.email);
         const source = readSource(body.source);

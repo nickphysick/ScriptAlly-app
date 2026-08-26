@@ -22,7 +22,11 @@ const firebaseConfig = {
 };
 
 // Initialize the Firebase app
-const app = initializeApp(firebaseConfig);
+/* ⚠️ EXPORTED SO APP CHECK CAN ATTACH TO THE SAME APP. One Firebase app, not two — a second
+   `initializeApp` would give App Check a different instance from the one Auth and Firestore use,
+   and its tokens would be minted for an app the backend is not checking. Additive: every existing
+   consumer imports `db` or `auth` and is untouched. */
+export const app = initializeApp(firebaseConfig);
 
 // Non-prod safety beacon: make the active backend obvious at a glance, so "which project am I on?"
 // is never a guessing game again. Production builds (import.meta.env.PROD) stay silent.

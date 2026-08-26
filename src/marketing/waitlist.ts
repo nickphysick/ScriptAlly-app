@@ -34,6 +34,8 @@
  * rewrite in `firebase.json` / `firebase.dev.json` — Nick's to run.
  */
 
+import { appCheckToken } from "./appCheck";
+
 export const WAITLIST_ENDPOINT = "/api/waitlist";
 
 /**
@@ -164,10 +166,19 @@ export interface JoinFields {
  * The reverse holds too: these fields on the pre-cap server are simply ignored properties on a
  * parsed body. Neither end has to ship first.
  */
-export const joinWaitlist = async (fields: JoinFields): Promise<JoinOutcome> =>
-  classifyJoin(await request({
+export const joinWaitlist = async (fields: JoinFields): Promise<JoinOutcome> => {
+  /* ⚠️ ATTACHED WHEN AVAILABLE, NEVER WAITED ON FOR PERMISSION. App Check is in monitor mode: a
+     token makes the server log the request as verified, and its absence makes it log the request
+     as unverified. Neither decides anything. A signup must not depend on a bot defence that is
+     being trialled, so every failure path yields `null` and the request goes without the header. */
+  const token = await appCheckToken();
+  return classifyJoin(await request({
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      ...(token ? { "X-Firebase-AppCheck": token } : {}),
+    },
     body: JSON.stringify({
       email: fields.email,
       [WAITLIST_HONEYPOT_FIELD]: fields.trap,
@@ -175,6 +186,7 @@ export const joinWaitlist = async (fields: JoinFields): Promise<JoinOutcome> =>
       source: fields.source,
     }),
   }));
+};
 
 /**
  * The live count, or `null`.
