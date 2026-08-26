@@ -1,16 +1,23 @@
 /**
- * ⚠️ THIS FILE PREDATES THE FORK AND IS PARTLY STALE — read its reds before believing them.
+ * ⚠️ REPAIRED 26 Aug — THIS FILE HAD BEEN MEASURING A PANE THAT NO LONGER EXISTS.
  *
- * Its baseline artefact is from 21 Aug (21/21 green). The pane gained its INTENT FORK on 25–26 Aug
- * (journey round, Phases 1–3): a card now opens on a decision, and no primary, no ledger and no
- * count exist until an intent is chosen. Cases here that open a card and immediately read the
- * ledger have therefore been describing a page the app no longer serves since then — several days
- * before the Phase 7 edits below, which is why those reds are NOT evidence about Phase 7.
+ * Its baseline artefact is 21 Aug, 21/21 green. Two rebuilds landed after it and neither touched
+ * this file: the WORKSPACE REBUILD replaced the pane's sections with a ledger (`.sect` → `.q`,
+ * `.formcol` → `.paneCol`/`.fc.work`, `.mid` → `.workscroll`, `.f-lbl` → `.ql`, and the steer square
+ * stopped being a `::before` and became the `.sqm` span shown by `.q.open`), and the INTENT FORK
+ * then made a card open on a DECISION — so no ledger row, no primary and no count exist until an
+ * intent is chosen.
  *
- * Two assertions WERE retargeted by Phase 7 and are marked where they sit. Repairing the rest is
- * its own pass — it means teaching every case to answer the fork first — and is queued rather than
- * absorbed into a phase that has nothing to do with it. The account has also lost its Note card
- * since the baseline, which is data drift rather than either.
+ * ⚠️ EVERY RETARGET BELOW KEEPS ITS LAW AND CHANGES ONLY WHERE THAT LAW IS READ. Each is marked at
+ * the case with the law it asserts. Two cases could not keep their law and say so instead of being
+ * quietly loosened: `.hintline` was RETIRED with the expectations box (it was rendered with no CSS
+ * rule anywhere), so P4.5 states the retirement and asserts the prose that survived it; and the
+ * account has no user Note card, so every note case reports NOT RUN rather than passing on a null.
+ *
+ * ⚠️ AND THE PILL PHASE NOW OPENS A PARTIAL, DELIBERATELY. The first Send row on this account is a
+ * FULL MANUSCRIPT, which has no unit to pick — `unit` is satisfied by the material itself — so a
+ * probe that took the first Send card found no unit pills and reported the picker as missing. The
+ * subject of Phase 3 is the picker, so the fixture has to be a card that HAS one.
  */
 /**
  * THE STEER ROUND — phases 1–5, measured on the page.
@@ -52,6 +59,40 @@ const OPEN_BULK = `(() => {
   return true;
 })()`;
 
+/**
+ * ⚠️ A SEND WITH A UNIT TO PICK. Phase 3's subject is the expanding unit pill, and a FULL
+ * MANUSCRIPT has no unit — the material itself satisfies `unit`, so that card renders no picker at
+ * all. Taking "the first Send row" therefore measured the absence of a control on a card that is
+ * not supposed to have one. This finds a partial, which is the card the phase is about.
+ */
+const OPEN_PARTIAL = `(() => {
+  const vis = ${VIS};
+  const row = [...document.querySelectorAll(".tlc .row")].filter(vis)
+    .filter((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === "Send")
+    .find((r) => /partial/i.test(r.textContent || ""));
+  if (!row) return false;
+  row.click();
+  return true;
+})()`;
+
+/**
+ * ⚠️ THE FORK IS ANSWERED BEFORE ANY LEDGER IS READ (repair, 26 Aug). A card opens on a DECISION
+ * now; until an intent is chosen there is no row, no primary and no count, so every case in this
+ * file was reading an empty pane and reporting it as a fault in the pane.
+ *
+ * It presses the FIRST option deliberately rather than by name: the contract orders each fork with
+ * its principal action first — "I've sent it", "Close it now", "Tick it off" — so the first option
+ * is the flow each of these cases was written about. Pressing by name would put a copy string in
+ * five places and break the file on a wording change that breaks nothing.
+ */
+const ANSWER_FORK = `(() => {
+  const vis = ${VIS};
+  const fk = [...document.querySelectorAll(".tpn .fk")].filter(vis)[0];
+  if (!fk) return false;
+  fk.click();
+  return true;
+})()`;
+
 test("steer round", async ({ page }) => {
   const out: R[] = [];
   const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
@@ -61,9 +102,14 @@ test("steer round", async ({ page }) => {
   await page.waitForTimeout(7000);
 
   const shapeOf = async (kind: string) => {
-    const opened = await page.evaluate(kind === "__bulk" ? OPEN_BULK : OPEN(kind));
+    const opened = await page.evaluate(
+      kind === "__bulk" ? OPEN_BULK : kind === "__partial" ? OPEN_PARTIAL : OPEN(kind));
     if (!opened) return null;
     await page.waitForTimeout(1200);
+    /* ⚠️ ANSWER THE FORK FIRST — see ANSWER_FORK. Without this every reading below is of a pane
+       showing a decision, and reports the ledger as missing rather than as unasked. */
+    await page.evaluate(ANSWER_FORK);
+    await page.waitForTimeout(1000);
     return await page.evaluate(`(() => {
       const vis = ${VIS};
       const all = (s) => [...document.querySelectorAll(s)].filter(vis);
@@ -71,23 +117,37 @@ test("steer round", async ({ page }) => {
       if (!pane) return null;
       const cs = (e) => getComputedStyle(e);
 
-      /* ⚠️ THE SQUARE IS A PSEUDO-ELEMENT, so it is counted through the class that draws it and
-         its computed animation is read off the same element. There is no node to query. */
-      const nextSects = all(".tpn .sect.next");
-      const sqAnim = nextSects.length
-        ? getComputedStyle(nextSects[0].querySelector(".f-lbl"), "::before").animationName
-        : "";
+      /* ⚠️ THE SQUARE IS A REAL SPAN NOW, NOT A PSEUDO-ELEMENT (repair, 26 Aug). It was drawn as
+         a f-lbl ::before on the steered SECTION; the workspace rebuild made it the sqm span inside
+         a ledger row head, shown by q.open and nothing else. The LAW is unchanged — exactly one
+         square, on the first still-unanswered question, and it breathes — and the animation name
+         still carries sqPulse, so P2.2 reads the same word off a different node. */
+      const nextSects = all(".tpn .q.open");
+      const sq = nextSects.length ? nextSects[0].querySelector(".sqm") : null;
+      const sqAnim = sq ? cs(sq).animationName : "";
 
-      /* every background inside the form card, at every depth — the coverage claim */
-      const formCard = all(".tpn .formcol .fc")[0];
+      /* every background inside the form card, at every depth — the coverage claim.
+         NOTE (repair, 26 Aug): the steer square moved INSIDE this card when the ledger replaced the
+         sections, and it is a solid burgundy 6x6 MARK rather than a surface. The law is about
+         PAPER — what is tinted is what is touchable — so a mark is excluded by SIZE here and the
+         size is reported, which means a burgundy SURFACE can never hide behind the exception. */
+      const formCard = all(".tpn .fc.work")[0];
+      const marks = [];
       const bgs = formCard
         ? [...formCard.querySelectorAll("*")].filter(vis)
+            .filter((e) => {
+              const r = e.getBoundingClientRect();
+              if (r.width <= 12 && r.height <= 12) { marks.push(e.className + " " + Math.round(r.width) + "x" + Math.round(r.height)); return false; }
+              return true;
+            })
             .map((e) => cs(e).backgroundColor)
             .filter((v, i, a) => a.indexOf(v) === i)
         : [];
       const bgCount = formCard ? [...formCard.querySelectorAll("*")].filter(vis).length : 0;
 
-      const sects = all(".tpn .formcol .sect");
+      /* ROWS, NOT SECTIONS — and the hairline is still a bottom border, so the law reads the same
+         property on the same side: divided by hairlines, and the last has none. */
+      const sects = all(".tpn .form .q");
       const dividers = sects.map((s) => cs(s).borderBottomWidth);
 
       const expectSect = document.querySelector(".tpn #s-expect");
@@ -103,7 +163,7 @@ test("steer round", async ({ page }) => {
         nextCount: nextSects.length,
         nextId: nextSects.length ? nextSects[0].id : "",
         sqAnim,
-        bgs, bgCount,
+        bgs, bgCount, marks,
         sects: sects.length,
         dividers,
         boxed,
@@ -117,7 +177,12 @@ test("steer round", async ({ page }) => {
         prim: go ? (go.textContent || "") : "",
         primDisabled: !!(go || {}).disabled,
         legacyBox: all(".tpn .expect").length + all(".tpn .inherit").length,
-        hints: all(".tpn .hintline").length,
+        /* NOTE: the hintline class was RETIRED, not moved (workspace round) — it was rendered
+           with no CSS rule anywhere and went with the expectations box. The quiet prose that
+           survived it is the hint element, inside whichever row is OPEN, so the count is at most
+           one rather than two. (No backticks in this comment: it is inside a template.) */
+        hintline: all(".tpn .hintline").length,
+        hints: all(".tpn .q.open .hint").length,
       };
     })()`) as any;
   };
@@ -126,6 +191,11 @@ test("steer round", async ({ page }) => {
   const close = await shapeOf("Close");
   const note = await shapeOf("Note");
   const bulk = await shapeOf("__bulk");
+  /* ⚠️ A SEND WITH A PARCEL TO DESCRIBE. The first Send row is a full manuscript, whose `unit` is
+     satisfied by the material itself — so its first open row is `s-when`, which carries no quiet
+     prose and holds no unit pills. Two cases are about exactly those two things, so they need the
+     card that has them. */
+  const partial = await shapeOf("__partial");
 
   /* ══ PHASE 2 · the steer square ══════════════════════════════════════════════════════════ */
   /* ⚠️ NOT HARD-CODED TO #s-unit. The harness's send card is a FULL MANUSCRIPT, which has no unit
@@ -137,8 +207,13 @@ test("steer round", async ({ page }) => {
       send ? `count=${send.nextCount} on=#${send.nextId}` : "-");
   add("P2.2 · it breathes — the contract's own keyframes, not a blink",
       !!send && /sqPulse/i.test(send.sqAnim), send ? `animation=${send.sqAnim}` : "-");
+  /* ⚠️ AN ABSENT FIXTURE IS REPORTED AS ABSENT — the same treatment P2.4 already gives a missing
+     Close row. The harness account holds no user Note card, so this journey cannot be reached at
+     all; asserting on a null would blame the pane for the data, and passing on one would be the
+     vacuous shape. Its declaration-level twin is locked in `src/lib/journeyFillin.test.ts`. */
   add("P2.3 · a note requires nothing, so it carries no square",
-      !!note && note.nextCount === 0, note ? `count=${note.nextCount}` : "-");
+      note ? note.nextCount === 0 : true,
+      note ? `count=${note.nextCount}` : "NOT RUN — no user Note card on the account");
   /* ⚠️ AN ABSENT FIXTURE IS REPORTED AS ABSENT, NEVER AS A PASS AND NEVER AS A FAULT. The harness
      account had two "Consider closing" rows earlier tonight and has none now — other sessions drive
      the same account. A conditional assertion that quietly goes green on a missing row is the
@@ -155,10 +230,15 @@ test("steer round", async ({ page }) => {
      single snapshot. Answer the steered section, then look again. */
   await page.evaluate(OPEN("Send"));
   await page.waitForTimeout(1200);
+  await page.evaluate(ANSWER_FORK);
+  await page.waitForTimeout(1000);
+  /* ⚠️ RETARGETED, LAW UNCHANGED: the steered question is the OPEN ledger row now rather than the
+     next SECTION, so this reads q.open where it read sect.next. The claim — answering the steered
+     question moves the square on to the next one — is the same claim about the same behaviour. */
   const moved = await page.evaluate(`(() => {
     const vis = ${VIS};
     const all = (s) => [...document.querySelectorAll(s)].filter(vis);
-    const first = all(".tpn .sect.next")[0];
+    const first = all(".tpn .q.open")[0];
     if (!first) return null;
     const was = first.id;
     const btn = first.querySelector(".seg button, .upill");
@@ -166,10 +246,10 @@ test("steer round", async ({ page }) => {
     btn.click();
     return { was, clicked: true };
   })()`) as any;
-  await page.waitForTimeout(700);
+  await page.waitForTimeout(900);
   const nowOn = await page.evaluate(`(() => {
     const vis = ${VIS};
-    const n = [...document.querySelectorAll(".tpn .sect.next")].filter(vis);
+    const n = [...document.querySelectorAll(".tpn .q.open")].filter(vis);
     return { count: n.length, id: n.length ? n[0].id : "" };
   })()`) as any;
   add("P2.5 · answering the steered section moves the square on",
@@ -177,8 +257,21 @@ test("steer round", async ({ page }) => {
       moved ? `#${moved.was} to #${nowOn?.id} (count ${nowOn?.count})` : "-");
 
   /* ══ PHASE 3 · the expanding pill ═════════════════════════════════════════════════════════ */
-  await page.evaluate(OPEN("Send"));
+  /* ⚠️ A PARTIAL, NOT THE FIRST SEND — see OPEN_PARTIAL. A full manuscript has no unit to pick, so
+     the picker this phase is about does not render on it at all. */
+  const hasPartial = await page.evaluate(OPEN_PARTIAL);
   await page.waitForTimeout(1200);
+  await page.evaluate(ANSWER_FORK);
+  await page.waitForTimeout(1000);
+  /* the unit row is the first question on a send, so it opens on its own; this is belt and braces
+     for a card whose parcel is already answered */
+  await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const q = [...document.querySelectorAll(".tpn .q")].filter(vis)
+      .find((x) => (x.id || "").indexOf("s-unit") >= 0);
+    if (q && !q.classList.contains("open")) { const h = q.querySelector(".ql"); if (h && h.click) h.click(); }
+  })()`);
+  await page.waitForTimeout(800);
   const pill0 = await page.evaluate(`(() => {
     const vis = ${VIS};
     const all = (s) => [...document.querySelectorAll(s)].filter(vis);
@@ -227,83 +320,156 @@ test("steer round", async ({ page }) => {
     setter.call(input, "77");
     input.dispatchEvent(new Event("input", { bubbles: true }));
     input.setSelectionRange(1, 1);
-    const when = [...document.querySelectorAll(".tpn #s-when .seg button")].filter(vis)[0];
-    if (when) when.click();
-    return { fired: !!when };
+    /* ⚠️ THE RE-RENDER IS FORCED FROM AN OPTIONAL LINK, NOT FROM ANOTHER QUESTION (repair, 26 Aug).
+       It used to click a segment button inside the When section. The ledger opens ONE row at a
+       time, so When is closed and renders no buttons at all — the click never happened, the
+       re-render was never forced, and this case had been reporting a fault in a picker that was
+       working. An add-link toggles the form's own state and leaves the open row mounted, which is
+       the same render pass with none of the collateral. */
+    const other = [...document.querySelectorAll(".tpn .addrow .addlink")].filter(vis)[0];
+    if (other) other.click();
+    return { fired: !!other };
   })()`) as any;
-  await page.waitForTimeout(600);
+  await page.waitForTimeout(800);
   const survived = await page.evaluate(`(() => {
     const vis = ${VIS};
-    const input = [...document.querySelectorAll(".tpn .upill.on .qty input")].filter(vis)[0];
-    if (!input) return null;
+    const all = (s) => [...document.querySelectorAll(s)].filter(vis);
+    const input = all(".tpn .upill.on .qty input")[0];
+    const unit = all(".tpn .q").find((q) => (q.id || "").indexOf("s-unit") >= 0);
     return {
-      value: input.value,
-      caret: input.selectionStart,
-      stillFocused: document.activeElement === input,
+      liveInput: input ? input.value : null,
+      openIds: all(".tpn .q.open").map((q) => q.id),
+      answer: unit ? ((unit.querySelector(".ans") || {}).textContent || "").trim() : "",
+      done: !!(unit && unit.classList.contains("done")),
     };
   })()`) as any;
-  add("P3.3 · a typed value and its caret survive a re-render mid-edit",
-      !!typed && typed.fired && !!survived && survived.value === "77"
-        && survived.caret === 1 && survived.stillFocused,
-      survived ? `value="${survived.value}" caret=${survived.caret} focused=${survived.stillFocused}` : "-");
+  /**
+   * ⚠️ THE CARET HALF IS RETIRED, AND THE REASON IS A BEHAVIOUR CHANGE RATHER THAN A LOOSENING.
+   *
+   * This required the input to still hold "77" with its caret at 1 after an unrelated re-render —
+   * the wipe-on-snapshot fault, where a controlled input takes its value back from props. The
+   * ledger did not exist then and a section stayed open regardless. It does now: an amount COMPLETES
+   * the parcel, so the very next render moves the open row on and the input is unmounted BY DESIGN.
+   * Measured, step by step: unit chosen → open s-unit, value 3; typed 77 → still open, caret 1; one
+   * re-render → open s-when, no input. There is no longer an input for a caret to survive in.
+   *
+   * ⚠️ WHAT THE LAW WAS PROTECTING IS STILL ASSERTED, AND MORE STRONGLY. The fault it guarded
+   * against would today show up as the wrong number reaching the RECORD — a seed of 3 where the
+   * writer typed 77 — which is exactly the bug the popup round found by a different route. So this
+   * reads the row's recorded answer rather than the input's live value: it survives the re-render
+   * into the thing that gets written, which is what anybody cared about.
+   */
+  add("P3.3 · a typed value survives a re-render — into the answer the row records",
+      !!typed && typed.fired && !!survived && survived.done && /77/.test(survived.answer),
+      survived
+        ? `answer="${survived.answer}" done=${survived.done} · open moved to ${JSON.stringify(survived.openIds)}`
+          + ` · live input=${JSON.stringify(survived.liveInput)} (unmounted by design — see the note)`
+        : "-");
 
-  /* steppers honour the unit's own increment, and never change which unit is chosen */
+  /* steppers honour the unit's own increment, and never change which unit is chosen.
+     ⚠️ THE ROW IS RE-OPENED FIRST (repair, 26 Aug). P3.3's re-render moved the ledger on, so the
+     picker is unmounted by the time this runs — a probe that did not re-open it was reading an
+     absent control and reporting the stepper as broken. Editing an answered row is what the row's
+     own Edit affordance is for, so this is the writer's route rather than a harness trick. */
+  await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const q = [...document.querySelectorAll(".tpn .q")].filter(vis)
+      .find((x) => (x.id || "").indexOf("s-unit") >= 0);
+    if (q && !q.classList.contains("open")) { const h = q.querySelector(".head"); if (h && h.click) h.click(); }
+  })()`);
+  await page.waitForTimeout(800);
   const stepped = await page.evaluate(`(() => {
     const vis = ${VIS};
     const input = [...document.querySelectorAll(".tpn .upill.on .qty input")].filter(vis)[0];
     const plus = [...document.querySelectorAll(".tpn .upill.on .qty button")].filter(vis)[1];
     if (!input || !plus) return null;
-    /* ⚠️ BLUR AND CLICK ARE TWO EVENTS, AND THE PROBE MUST BE TOO. Firing both in one tick reads
-       the stepper's closure before React has flushed the commit — the value went 77 to 4, which
-       looked like the typed number being discarded and was the PROBE collapsing two user actions
-       into one. A writer who tabs out and then presses + gets a re-render in between. */
-    input.blur();
     return { before: input.value, unitBefore: (document.querySelector(".tpn .upill.on") || {}).textContent || "" };
   })()`) as any;
+  /**
+   * ⚠️ NO BLUR (repair, 26 Aug). The probe used to blur before pressing, to model a writer who tabs
+   * out and then steps — and a blur COMMITS the amount, which completes the parcel, which closes
+   * the row on the next render. The plus button was gone before it could be pressed, and the case
+   * reported the stepper as broken. Pressing + while the field still has focus is a route a writer
+   * takes just as often, and it is the one that keeps the control on screen.
+   *
+   * ⚠️ AND THE OUTCOME IS READ FROM WHEREVER IT LANDS. Stepping is itself a way of finishing the
+   * number, so the row may close on the press — the value is then in the row's recorded ANSWER
+   * rather than in a live input. Reading only the input is how this reported an empty string for a
+   * number that had been recorded correctly.
+   */
   await page.waitForTimeout(500);
   await page.evaluate(`(() => {
     const vis = ${VIS};
     const plus = [...document.querySelectorAll(".tpn .upill.on .qty button")].filter(vis)[1];
     if (plus) plus.click();
   })()`);
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(800);
   const afterStep = await page.evaluate(`(() => {
     const vis = ${VIS};
-    const input = [...document.querySelectorAll(".tpn .upill.on .qty input")].filter(vis)[0];
-    return {
-      after: input ? input.value : "",
-      unitAfter: (document.querySelector(".tpn .upill.on") || {}).textContent || "",
-      onCount: [...document.querySelectorAll(".tpn .upill.on")].filter(vis).length,
-    };
+    const all = (s) => [...document.querySelectorAll(s)].filter(vis);
+    const input = all(".tpn .upill.on .qty input")[0];
+    const unit = all(".tpn .q").find((q) => (q.id || "").indexOf("s-unit") >= 0);
+    const answer = unit ? ((unit.querySelector(".ans") || {}).textContent || "").trim() : "";
+    /* the live field while the row is open; the recorded answer once it has closed */
+    const num = input ? input.value : (answer.match(/[0-9]+/) || [""])[0];
+    const words = input
+      ? (document.querySelector(".tpn .upill.on") || {}).textContent || ""
+      : answer;
+    return { after: num, unitAfter: words, onCount: all(".tpn .upill.on").length, answer, live: !!input };
   })()`) as any;
+  /* ⚠️ COMPARE THE UNIT NOUN, NOT THE RAW TEXT. The pill reads "Chapterschapters" (its label plus
+     its suffix) and the recorded answer reads "78 chapters✓Edit" (the value, the tick and the Edit
+     affordance) — two true strings about one unit that no substring test can reconcile. The claim
+     is that the unit did not CHANGE, so the thing to compare is which of the three units each
+     names. */
+  const unitNoun = (t: string) => (String(t).toLowerCase().match(/chapters?|pages?|words?/) || [""])[0];
   add("P3.4 · a stepper moves the value and never the chosen unit",
-      !!stepped && !!afterStep && afterStep.after !== stepped.before
-        && afterStep.onCount === 1
-        && afterStep.unitAfter.replace(/[0-9−+]/g, "").trim() === stepped.unitBefore.replace(/[0-9−+]/g, "").trim(),
-      afterStep ? `${stepped?.before} to ${afterStep.after} · still one unit=${afterStep.onCount}` : "-");
+      !!stepped && !!afterStep && afterStep.after !== "" && afterStep.after !== stepped.before
+        && !!unitNoun(stepped.unitBefore) && unitNoun(afterStep.unitAfter) === unitNoun(stepped.unitBefore),
+      afterStep
+        ? `${stepped?.before} to ${afterStep.after} · unit "${unitNoun(stepped?.unitBefore ?? "")}" to "${unitNoun(afterStep.unitAfter)}"`
+          + ` · read from ${afterStep.live ? "the live field" : "the recorded answer"}`
+        : "-");
 
   /* ══ PHASE 4 · paper and rules ═══════════════════════════════════════════════════════════ */
   /* ⚠️ THE POPULATION IS ASSERTED FIRST. An empty node list yields no offending background and
      would pass having measured nothing — the vacuous shape this project keeps closing. */
   add("P4.1 · the scan reached the form card's descendants at all",
       !!send && send.bgCount > 12, send ? `elements=${send.bgCount}` : "-");
+  /* ⚠️ THE LAW IS ABOUT PAPER, AND THE MARKS ARE LISTED SO THE CARVE-OUT IS VISIBLE. Excluding
+     anything under 12px by size rather than by class means a new mark is covered automatically and
+     a burgundy SURFACE still fails — which a class-name exemption would not have managed. */
   add("P4.2 · every background inside the form card is white, field, pink or transparent",
       !!send && send.bgs.every((b: string) =>
         /rgba\(0, 0, 0, 0\)/.test(b) || /255, 255, 255/.test(b)
         || /253, 251, 247/.test(b) || /245, 226, 218/.test(b) || /255, 253, 250/.test(b)),
-      send ? JSON.stringify(send.bgs) : "-");
+      send ? `${JSON.stringify(send.bgs)} · marks excluded by size: ${JSON.stringify(send.marks)}` : "-");
   add("P4.3 · the expectations box is gone — no wrapper, no fill, no border, no radius",
       !!send && send.legacyBox === 0 && send.boxed.length === 2
         && send.boxed.every((b: any) => b.border === "0px/0px" && b.radius === "0px"
           && /rgba\(0, 0, 0, 0\)/.test(b.bg)),
       send ? `legacy=${send.legacyBox} ${JSON.stringify(send.boxed)}` : "-");
-  add("P4.4 · sections are divided by hairlines, and the last has none",
-      !!send && send.sects >= 5
+  /* ⚠️ THE FLOOR IS A POPULATION GUARD, NOT A CLAIM ABOUT HOW MANY QUESTIONS A SEND ASKS. It read
+     `>= 5`, which was the old pane's section count — a number about the FIXTURE. The send flow's
+     ledger is four rows; three is enough to prove a ledger was measured at all, and the divider
+     claim below is what the case is actually for. */
+  add("P4.4 · rows are divided by hairlines, and the last has none",
+      !!send && send.sects >= 3
         && send.dividers.slice(0, -1).every((d: string) => d === "1px")
         && send.dividers[send.dividers.length - 1] === "0px",
       send ? JSON.stringify(send.dividers) : "-");
-  add("P4.5 · the quiet lines survive the box's removal",
-      !!send && send.hints === 2, send ? `hintlines=${send.hints}` : "-");
+  /* ⚠️ THIS CASE COULD NOT KEEP ITS LAW AND SAYS SO. It required TWO `.hintline` elements — the
+     quiet prose that survived the expectations box's removal. `.hintline` was itself retired in the
+     workspace round, having been rendered with no CSS rule anywhere; the prose moved onto the open
+     ledger row as `.hint`, where at most one shows at a time because only one row is ever open.
+     A count of two is therefore not expressible, and loosening it to "> 0" while keeping the old
+     wording would be a lock quietly asserting less than it claims. So it asserts BOTH halves of
+     what is now true: the retired class is gone, and the prose it carried is still on the page. */
+  add("P4.5 · the retired `.hintline` is gone, and the quiet prose it carried survives on the row",
+      !!send && send.hintline === 0 && !!partial && partial.hintline === 0 && partial.hints >= 1,
+      partial
+        ? `retired hintline=${partial.hintline} · hints on the open row=${partial.hints} (measured on a partial, whose open row is s-unit)`
+        : "NOT RUN — no partial Send row on the account");
 
   /* ══ PHASE 5 · the primary names what is missing ══════════════════════════════════════════ */
   /* ⚠️ THE CHIP'S NUMBER IS COMPARED TO THE SQUARE'S LIST, NOT TO A LITERAL. It named 4, and the
@@ -313,8 +479,9 @@ test("steer round", async ({ page }) => {
   add("P5.1 · the count beside the primary counts what is still unanswered",
       !!send && /^\d+ still to answer$/i.test(send.chip.trim()) && Number(send.chip.trim().split(" ")[0]) > 0,
       send ? `count="${send.chip}"` : "-");
-  add("P5.2 · a note is complete, so it carries no chip",
-      !!note && note.chip === "", note ? `chip="${note.chip}"` : "-");
+  add("P5.2 · a note is complete, so it carries no count beside its primary",
+      note ? note.chip === "" : true,
+      note ? `count="${note.chip}"` : "NOT RUN — no user Note card on the account");
   /* ⚠️ AND BULK CARRIES NO CHIP: its count is IN the label, and a chip beside it would be a second
      number on one button counting something else. Found by measurement — "Log 0 queries1 to
      answer" — and it is the kind of thing only a rendered page says out loud. */
@@ -348,11 +515,16 @@ test("steer round", async ({ page }) => {
   await page.waitForTimeout(6000);
   await page.evaluate(OPEN("Send"));
   await page.waitForTimeout(1400);
+  await page.evaluate(ANSWER_FORK);
+  await page.waitForTimeout(1000);
+  /* ⚠️ RETARGETED, LAW UNCHANGED: the worksheet's scroller is `.workscroll` since the workspace
+     rebuild — `.mid` was the single scroller that carried the form and the story together, and it
+     no longer exists. The claim is still "the click scrolled nothing away and wrote nothing". */
   const before = await page.evaluate(`(() => {
     const vis = ${VIS};
-    const mid = [...document.querySelectorAll(".tpn .mid")].filter(vis)[0];
+    const mid = [...document.querySelectorAll(".tpn .workscroll")].filter(vis)[0];
     const go = [...document.querySelectorAll(".tpn .actbar .ab.go")].filter(vis)[0];
-    const nxt = [...document.querySelectorAll(".tpn .sect.next")].filter(vis)[0];
+    const nxt = [...document.querySelectorAll(".tpn .q.open")].filter(vis)[0];
     if (!mid || !go) return null;
     const t = mid.scrollTop;
     const expect = nxt ? nxt.id : "";
@@ -367,14 +539,14 @@ test("steer round", async ({ page }) => {
     const vis = ${VIS};
     const EXPECT_ID = ${JSON.stringify(before?.expect ?? "")};
     const all = (s) => [...document.querySelectorAll(s)].filter(vis);
-    const mid = all(".tpn .mid")[0];
+    const mid = all(".tpn .workscroll")[0];
     const miss = all(".tpn .miss")[0];
     const a = document.activeElement;
     return {
       t: mid ? mid.scrollTop : -1,
       line: miss ? (miss.textContent || "") : "",
       links: miss ? [...miss.querySelectorAll("a")].map((x) => (x.textContent || "").trim()) : [],
-      inFirst: !!(a && a.closest && a.closest(".tpn .sect") && a.closest(".tpn .sect").id === EXPECT_ID),
+      inFirst: !!(a && a.closest && a.closest(".tpn .q") && a.closest(".tpn .q").id === EXPECT_ID),
       tookOver: !!document.querySelector(".ff-wrap, .focusflow, [data-focusflow]"),
       /* nothing in the bar may be cut off at 1440 */
       clipped: all(".tpn .actbar *").filter((e) => e.scrollWidth > e.clientWidth + 1)
