@@ -383,7 +383,11 @@ describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local 
        the five stops carry their own day counts — so the argument is `range.days`. The claim is
        the one above: the view reaches the ONE derivation, asserted as an argument rather than as a
        line of source. */
-    expect(cal).toMatch(/timelineWeek\(\s*\{[\s\S]{0,400}?\},\s*winStart,\s*range\.days,\s*view,?\s*\)/);
+    /* ⚠️ THE ARGUMENT IS `winFrom` NOW (grouped pack, Phase 6). `winStart` is the ANCHOR day and
+       the window opens a slice BEFORE it, so the first day handed to the derivation is derived
+       rather than stored. The claim is unchanged and is the one that matters: the view reaches
+       the ONE derivation, asserted as an argument rather than as a line of source. */
+    expect(cal).toMatch(/timelineWeek\(\s*\{[\s\S]{0,400}?\},\s*winFrom,\s*range\.days,\s*view,?\s*\)/);
     expect(decomment(cal)).not.toContain("itemInKinds");
     expect(decomment(cal)).not.toContain("recordInKinds");
   });

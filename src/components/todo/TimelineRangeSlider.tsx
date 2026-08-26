@@ -28,6 +28,14 @@ export interface TimelineRange {
   grain: "day" | "week" | "month";
   /** the density tier — 1 and 2 keep bar text, 3 and 4 do not (ref timeline-range v18) */
   dense: 1 | 2 | 3 | 4;
+  /**
+   * How much of the range opens BEFORE today, as a fraction of it.
+   *
+   * ⚠️ A FRACTION RATHER THAN A DAY COUNT, so a call site never holds the number and the two long
+   * ranges are not left with a slice too thin to see. It is what makes the long view worth having:
+   * a board that only looks forward is emptiest exactly when it is zoomed out.
+   */
+  past: number;
 }
 
 /**
@@ -36,13 +44,26 @@ export interface TimelineRange {
  * decided, and the two would drift the first time a stop moved. One table, read by the column
  * builder, the density class and the readout alike.
  */
+/**
+ * ⚠️ `past` IS A FRACTION OF THE RANGE, NOT A NUMBER OF DAYS, AND IT LIVES HERE (grouped pack,
+ * Phase 6). The ref hard-codes `PAST = 3` against `DAYS = 14`; three days is a fifth of a
+ * fortnight and a sixtieth of six months, so carrying the literal across would have given the
+ * long ranges no history at all — which is exactly the emptiness the past slice exists to fix.
+ *
+ * ⚠️ AND IT IS A PROPERTY OF THE RANGE, so there is one place to change it and no call site holds
+ * a number. The two long ranges take a quarter; the three short ones take the ref's own proportion
+ * (3/14), which lands the fortnight on the ref's exact 3 days.
+ */
 export const TIMELINE_RANGES: readonly TimelineRange[] = [
-  { label: "1 week",   days: 7,   grain: "day",   dense: 1 },
-  { label: "2 weeks",  days: 14,  grain: "day",   dense: 2 },
-  { label: "1 month",  days: 31,  grain: "day",   dense: 2 },
-  { label: "3 months", days: 91,  grain: "week",  dense: 3 },
-  { label: "6 months", days: 182, grain: "month", dense: 4 },
+  { label: "1 week",   days: 7,   grain: "day",   dense: 1, past: 3 / 14 },
+  { label: "2 weeks",  days: 14,  grain: "day",   dense: 2, past: 3 / 14 },
+  { label: "1 month",  days: 31,  grain: "day",   dense: 2, past: 3 / 14 },
+  { label: "3 months", days: 91,  grain: "week",  dense: 3, past: 0.25 },
+  { label: "6 months", days: 182, grain: "month", dense: 4, past: 0.25 },
 ];
+
+/** How many days of the range sit BEFORE today — the fraction resolved, in one place. */
+export const pastDaysOf = (r: TimelineRange): number => Math.round(r.days * r.past);
 
 /** The default, and the one every earlier pack measured against. */
 export const DEFAULT_RANGE_INDEX = 0;

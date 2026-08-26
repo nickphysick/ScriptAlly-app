@@ -123,32 +123,58 @@ test("Phase 4 — captions at rest, on hover, and on keyboard focus", async ({ p
      ⚠️ `page.hover()` CANNOT BE USED HERE and its refusal would be correct: the upright takes no
      pointer events, so Playwright's actionability check rejects it. The reach is a pseudo-element,
      which no locator can address — so the pointer is moved to the upright's own coordinates and
-     the question is whether anything answers. That is exactly the reader's question too. */
-  await page.mouse.move(4, 4);
-  await page.waitForTimeout(200);
-  const wpBox = await page.evaluate(() => {
-    const all = Array.from(document.querySelectorAll(".tl")) as HTMLElement[];
-    const b = all.find((e) => e.getBoundingClientRect().height > 0)!;
-    const w = b.querySelector(".tl-wp") as HTMLElement | null;
-    if (!w) return null;
-    const r = w.getBoundingClientRect();
-    return { x: r.left + r.width / 2, y: r.top + r.height / 2, kind: w.getAttribute("data-kind") };
-  });
-  if (!wpBox) {
-    console.log("waypoint · none in this window — not asserted");
-  } else {
-    await page.mouse.move(wpBox.x, wpBox.y);
-    await page.waitForTimeout(300);
-    const wpLit = await page.evaluate(() => {
+     the question is whether anything answers. That is exactly the reader's question too.
+
+     ⚠️ AND NOTHING IS SCROLLED TO REACH ONE. Scrolling a candidate into view and measuring it in
+     the same frame gave coordinates that were stale by the time the pointer arrived — the symptom
+     was exact and misleading: a reachable waypoint, a clean hit test, and a caption reading empty,
+     which looks like the reach failing rather than the aim. The board holds 2 to 14 waypoints
+     depending on range, so widening the SEARCH costs nothing and moves nothing. */
+  let wpDone = false;
+  for (let i = 0; i < STOPS.length && !wpDone; i++) {
+    await slider.fill(String(i));
+    await page.waitForTimeout(600);
+    await page.mouse.move(4, 4);
+    await page.waitForTimeout(150);
+
+    const box = await page.evaluate(() => {
       const all = Array.from(document.querySelectorAll(".tl")) as HTMLElement[];
       const b = all.find((e) => e.getBoundingClientRect().height > 0)!;
-      const w = b.querySelector(".tl-wp") as HTMLElement;
-      const t = w.querySelector(".tl-tip") as HTMLElement;
-      return { op: getComputedStyle(t).opacity, text: (t.textContent || "").trim() };
+      const vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
+      const ways = [...b.querySelectorAll(".tl-wp")] as HTMLElement[];
+      for (const w of ways) {
+        const r = w.getBoundingClientRect();
+        const x = r.left + r.width / 2, y = r.top + r.height / 2;
+        /* ⚠️ ON SCREEN FIRST — `elementFromPoint` outside the viewport returns null, so an
+           off-screen waypoint would be rejected for the wrong reason entirely. */
+        if (x < 4 || y < 4 || x > vw - 4 || y > vh - 4) continue;
+        const hit = document.elementFromPoint(x, y);
+        if (hit && (hit === w || w.contains(hit))) {
+          return { x, y, kind: w.getAttribute("data-kind"), of: ways.length };
+        }
+      }
+      return null;
     });
-    console.log(`waypoint · ${wpBox.kind} · opacity ${wpLit.op} · "${wpLit.text}"`);
-    expect(wpLit.op, "a waypoint's caption cannot be reached — its forecast has no label at all").toBe("1");
+    if (!box) { console.log(`  waypoint · none reachable at ${STOPS[i]}`); continue; }
+
+    await page.mouse.move(box.x, box.y);
+    await page.waitForTimeout(300);
+    const lit = await page.evaluate(({ x, y }) => {
+      const hit = document.elementFromPoint(x, y) as HTMLElement | null;
+      const w = hit?.closest(".tl-wp") as HTMLElement | null;
+      if (!w) return { op: "0", text: "", found: false };
+      const t = w.querySelector(".tl-tip") as HTMLElement;
+      return { op: getComputedStyle(t).opacity, text: (t.textContent || "").trim(), found: true };
+    }, { x: box.x, y: box.y });
+    console.log(`  waypoint · ${STOPS[i]} · ${box.kind} (1 of ${box.of}) · opacity ${lit.op} · "${lit.text}"`);
+    expect(lit.found, "the waypoint moved between being found and being aimed at").toBe(true);
+    expect(lit.op, "a waypoint's caption cannot be reached — its forecast has no label at all").toBe("1");
+    expect(lit.text.length, "a waypoint's caption is empty").toBeGreaterThan(0);
+    wpDone = true;
   }
+  /* ⚠️ A SKIP IS REPORTED, NEVER SILENT — an unexercised claim that reads as a pass is the whole
+     failure mode this file's population checks exist for. */
+  if (!wpDone) console.log("  NOTE: no waypoint reachable at any range — the reach is unit-locked only");
 
   console.log(`console errors: ${errs.length ? errs.join(" | ") : "none"}`);
   expect(errs, "console errors").toEqual([]);

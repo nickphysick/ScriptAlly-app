@@ -91,15 +91,17 @@ test("Phase 5 — four widths, five ranges, one table", async ({ page }) => {
       expect(m.spines, `${say} — the today spine is back`).toBe(0);
       expect(m.docScrollW, `${say} — the page scrolls sideways`).toBeLessThanOrEqual(m.docClientW + 1);
 
-      /* ⚠️ THE MARKER SIZE HAS TO BE MEASURED IN A WINDOW THAT HAS MARKERS, and the window at rest
-         does not have any. The board opens at TODAY and runs forward (the ref anchors the same
-         way) while a marker is a RECORD, which is in the past — so `disc` came back `null` at all
-         twenty stops and a guarded `if (disc !== null)` skipped the whole row of the table in
-         silence. That is the vacuous shape this repo records against every population-free check:
-         it is not that the assertion failed, it is that it never ran and said nothing about it.
-         One window back, measure, one window forward again. */
-      await page.getByRole("button", { name: "Previous window" }).click();
-      await page.waitForTimeout(420);
+      /**
+       * ⚠️ MEASURED IN PLACE NOW, AND THAT IS PHASE 6's DOING. This used to page one window back
+       * and forward again, because the board opened at today and ran forward while a marker is a
+       * RECORD, which is in the past — so `disc` came back `null` at all twenty stops and a
+       * guarded `if (disc !== null)` skipped the whole row of the table in silence. Every range
+       * opens a slice before today now, so the markers are simply here.
+       *
+       * ⚠️ AND IT IS ASSERTED NON-NULL RATHER THAN GUARDED. That is the actual repair: a guard
+       * that skips is a check that says nothing and does not admit it, which is why the fault
+       * survived twenty stops looking like a clean run.
+       */
       const k = await page.evaluate(() => {
         const all = Array.from(document.querySelectorAll(".tl")) as HTMLElement[];
         const tl = all.find((e) => e.getBoundingClientRect().height > 0)!;
@@ -107,15 +109,13 @@ test("Phase 5 — four widths, five ranges, one table", async ({ page }) => {
           .map((e) => Math.round(e.getBoundingClientRect().width));
         return { status: wide('.tl-node[data-marker="status"]'), dir: wide('.tl-node[data-marker="direction"]') };
       });
-      const marks = `[${width}] ${w.name.padEnd(9)} back one · status ${JSON.stringify([...new Set(k.status)])}` +
+      const marks = `[${width}] ${w.name.padEnd(9)} status ${JSON.stringify([...new Set(k.status)])}` +
         ` · direction ${JSON.stringify([...new Set(k.dir)])}`;
       console.log(marks);
-      expect(k.status.length + k.dir.length, `${marks} — no marker in the previous window either`).toBeGreaterThan(0);
+      expect(k.status.length + k.dir.length, `${marks} — no marker in view at all`).toBeGreaterThan(0);
       for (const px of k.status) expect(px, `${marks} — a status marker is off its tier`).toBe(w.disc);
       /* the direction dot owns its own size and is always the smaller of the pair */
       for (const px of k.dir) expect(px, `${marks} — a direction dot is not smaller than the disc`).toBeLessThan(w.disc);
-      await page.getByRole("button", { name: "Next window" }).click();
-      await page.waitForTimeout(380);
     }
   }
   console.log(`console errors: ${errs.length ? errs.join(" | ") : "none"}`);

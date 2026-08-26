@@ -355,6 +355,25 @@
    ⚠️ THE LINE IS ON THE CELL THAT STARTS THE PERIOD, never the one that ends it — a trailing
    border would double with `.tl-cell:last-child`'s removal at the board's own edge. */
 .tl-cell.bound { border-left: 1px solid #e2d7c6; }
+/* ══ THE PAST SLICE ════════════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ A DEEPER GROUND, NOT A DIFFERENT COLOUR. The past is the same board seen from behind, so it
+ * takes a shade more of the ground it already has — anything with a hue of its own would read as a
+ * state (a warning, a selection) rather than as time that has passed. This is also what the today
+ * spine used to say, and says it by BEING the thing rather than by labelling it.
+ *
+ * ⚠️ AND THE STEP IS SMALL ON PURPOSE. Half the board is past at three and six months; a strong
+ * step there would divide the board in two and make the boundary the loudest thing on it, when
+ * what the boundary is worth is a glance. */
+/* ⚠️ `.tl-cell.past` IS NOT DECLARED HERE — it already exists below, and a second rule for one
+   selector is how the cascade and a reader come to disagree (the reader takes the first, the
+   browser takes the last). It was written for the PAGER's past windows and is exactly the deeper
+   ground this phase wanted, so the phase changed nothing about it. */
+/* the header above a past column is muted the same way its own text already is elsewhere */
+.tl-dh.past { opacity: 0.55; }
+/* ⚠️ TODAY WINS OVER PAST WHERE THEY MEET — they cannot both be true, but the rules are separate
+   and the cascade decides. Declared after, so the rule that follows is the one that applies. */
+.tl-dh.today { opacity: 1; }
 .tl-cell:last-child { border-right: 0; }
 .tl-cell.today { background: #fdf5f2; }
 .tl-cell.past { background: #faf7f2; }

@@ -28,7 +28,7 @@ import { FocusFlow } from "./FocusFlow";
 import { TaskPane } from "./TaskPane";
 import { useTaskPaneSession, type TaskPaneHost } from "./useTaskPaneSession";
 import { useTaskCommit } from "./useTaskCommit";
-import { TimelineRangeSlider, TIMELINE_RANGES, DEFAULT_RANGE_INDEX } from "./TimelineRangeSlider";
+import { TimelineRangeSlider, TIMELINE_RANGES, DEFAULT_RANGE_INDEX, pastDaysOf } from "./TimelineRangeSlider";
 import { GROUP_ORDER, GROUP_LABEL, COLLAPSED_BY_DEFAULT, type RowGroup } from "../../lib/timelineGroups";
 import { useConfirmAsk } from "./ConfirmAsk";
 /** this mount's pane section-id prefix — every workspace page stays mounted, so ids must not collide */
@@ -352,7 +352,26 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    */
   const [shut, setShut] = useState<readonly RowGroup[]>(COLLAPSED_BY_DEFAULT);
   const range = TIMELINE_RANGES[Math.min(Math.max(rangeIdx, 0), TIMELINE_RANGES.length - 1)];
-  const visible = useMemo(() => windowDays(winStart, range.days), [winStart, range.days]);
+  /**
+   * ⚠️ `winStart` IS THE ANCHOR DAY, AND THE WINDOW OPENS BEFORE IT (grouped pack, Phase 6).
+   *
+   * Every range now shows a slice of the past — roughly a fifth at the short ranges and a quarter
+   * at three and six months. Keeping the ANCHOR as the state rather than the window's first day is
+   * what makes that free: the pager moves the anchor, `Today` resets it to today, and changing the
+   * range recomputes the slice without any of them knowing the slice exists. Storing the first day
+   * instead would have put the same arithmetic in the pager, the Today button and the range
+   * handler, three places to keep in step.
+   *
+   * ⚠️ AND IT IS WHAT MAKES THE LONG RANGES WORTH HAVING. Markers are RECORDS, which are in the
+   * past; a forward-only six-month board is 182 days of forecast with nothing that happened on it.
+   * Measured before this: 16 rows, 18 bar segments, one waypoint and ZERO markers at rest.
+   */
+  const pastDays = useMemo(() => pastDaysOf(range), [range]);
+  const winFrom = useMemo(
+    () => (pastDays > 0 ? shiftWindow(winStart, pastDays, -1) : winStart),
+    [winStart, pastDays],
+  );
+  const visible = useMemo(() => windowDays(winFrom, range.days), [winFrom, range.days]);
   /**
    * ⚠️ THE COLUMNS ARE WHAT IS DRAWN; `visible` IS WHAT IS TRUE. Every derivation below reads the
    * DAYS — a bar's span, a marker's date, the record — and nothing is positioned by a column. At
@@ -362,10 +381,21 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    */
   const columns = useMemo(() => {
     const step = range.grain === "day" ? 1 : range.grain === "week" ? 7 : 30;
-    const out: { ymd: string; from: number }[] = [];
-    for (let i = 0; i < range.days; i += step) out.push({ ymd: visible[i] ?? visible[visible.length - 1], from: i });
+    const out: { ymd: string; from: number; now: boolean }[] = [];
+    for (let i = 0; i < range.days; i += step) {
+      const ymd = visible[i] ?? visible[visible.length - 1];
+      /**
+       * ⚠️ THE COLUMN THAT CONTAINS TODAY, NOT THE ONE THAT STARTS ON IT. At day grain those are
+       * the same and the difference is invisible; at week and month grain no column starts on
+       * today, so `ymd === today` marked nothing at all and today fell off the board entirely at
+       * two ranges out of five. The past slice is what exposed it — before it, today was always
+       * column zero.
+       */
+      const span = visible.slice(i, i + step);
+      out.push({ ymd, from: i, now: span.includes(today) });
+    }
     return out;
-  }, [visible, range.grain, range.days]);
+  }, [visible, range.grain, range.days, today]);
   /**
    * ⚠️ WHERE ONE PERIOD ENDS AND THE NEXT BEGINS — the rhythm a weekend tint would have given, and
    * the reason it is not one. Shading Saturday and Sunday states that a reply window pauses at the
@@ -455,9 +485,9 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const { rows, segments, nodes, waypoints } = useMemo(
     () => timelineWeek(
       { queries, agents, activities, manuscripts, taskFlags, today, itemsFor, recordFor, ghostsOn },
-      winStart, range.days, view,
+      winFrom, range.days, view,
     ),
-    [queries, agents, activities, manuscripts, taskFlags, today, itemsFor, recordFor, ghostsOn, winStart, view],
+    [queries, agents, activities, manuscripts, taskFlags, today, itemsFor, recordFor, ghostsOn, winFrom, view],
   );
   /** the bar's three parts, grouped by the row they belong to — one pass, read three times */
   const barsByRow = useMemo(() => {
@@ -1052,7 +1082,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                 <div className="tl-grid tl-head">
                   <div className="tl-corner" style={{ gridColumn: 1, gridRow: 1 }}>Agents &amp; you</div>
                   {columns.map((c, i) => (
-                    <div key={c.ymd} className={`tl-dh${c.ymd === today ? " today" : ""}${i > 0 && startsPeriod(c.ymd) ? " bound" : ""}`}
+                    <div key={c.ymd} className={`tl-dh${c.now ? " today" : ""}${!c.now && c.ymd < today ? " past" : ""}${i > 0 && startsPeriod(c.ymd) ? " bound" : ""}`}
                       style={{ gridColumn: i + 2, gridRow: 1 }}>
                       {/* ⚠️ THE WEEKDAY INITIAL DROPS AT A MONTH AND BEYOND (ref v18): seven letters
                           repeating thirty-one times is noise, and at week or month grain a column is
