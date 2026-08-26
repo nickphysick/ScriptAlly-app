@@ -26,7 +26,7 @@ import {
   consumeRateLimit, joinWaitlist, readCounterState, unsubscribeById, verifyWaitlist,
 } from "./waitlistStore";
 import { runRetention } from "./waitlistRetention";
-import { RETENTION_MS, UNSUBSCRIBED_GRACE_MS } from "./waitlistModel";
+import { RETENTION_MS, UNSUBSCRIBED_GRACE_MS, CONFIRM_RESEND_MS } from "./waitlistModel";
 
 /* `firebase emulators:exec` exports FIRESTORE_EMULATOR_HOST; the Admin SDK reads it itself. */
 const PROJECT = process.env.GCLOUD_PROJECT || "demo-scriptally-test";
@@ -510,5 +510,66 @@ describe("the retention job deletes nothing until it is armed", () => {
     await setCounter(0);
     expect(await runRetention(db, Date.now(), true))
       .toEqual({ dormant: 0, unsubscribed: 0, released: 0, scanned: 0 });
+  });
+});
+
+/* ══════════════ The confirmation throttle ══════════════ */
+
+describe("a confirmation is not re-sent on every submit", () => {
+  const joinPending = (email: string, nowMs: number) =>
+    joinWaitlist(db, {
+      emailNormalised: email, hashedIp: null, source: "landing-panel",
+      nowMs, requireVerification: true,
+    });
+
+  /**
+   * ⚠️ WITHOUT THIS THE FORM IS A MAIL CANNON AIMED AT WHOEVER'S ADDRESS WAS TYPED. Five clicks,
+   * five emails — and somebody who types a stranger's address can do it deliberately. The token is
+   * the send signal: the handler sends if and only if one comes back, so an absent token IS the
+   * throttle.
+   */
+  it("a second submit inside ten minutes returns no token, so no second email", async () => {
+    const t0 = Date.now();
+    const first = await joinPending("throttle@example.com", t0);
+    expect(first.outcome).toBe("joined");
+    expect(first.verifyToken, "the first submit sends").toBeTruthy();
+
+    const second = await joinPending("throttle@example.com", t0 + CONFIRM_RESEND_MS - 1000);
+    expect(second.outcome).toBe("already");
+    expect(second.verifyToken, "the second does not").toBeUndefined();
+  });
+
+  /** Past the window a fresh confirmation is due — somebody who genuinely lost the first one. */
+  it("…and past ten minutes a fresh one is issued", async () => {
+    const t0 = Date.now();
+    await joinPending("later@example.com", t0);
+    const again = await joinPending("later@example.com", t0 + CONFIRM_RESEND_MS + 1000);
+    expect(again.verifyToken).toBeTruthy();
+  });
+
+  /**
+   * ⚠️ AND THE NEW TOKEN REPLACES THE OLD ONE, so a reader always has exactly one live
+   * confirmation. Two valid links to the same place is two ways to be told different things.
+   */
+  it("the re-sent token replaces the first — the old link stops working", async () => {
+    const t0 = Date.now();
+    const first = await joinPending("replaced@example.com", t0);
+    const second = await joinPending("replaced@example.com", t0 + CONFIRM_RESEND_MS + 1000);
+    expect(second.verifyToken).not.toBe(first.verifyToken);
+
+    expect((await verifyWaitlist(db, first.verifyToken!, Date.now())).kind, "the old link is dead")
+      .toBe("unknown");
+    expect((await verifyWaitlist(db, second.verifyToken!, Date.now())).kind, "the new one works")
+      .toBe("verified");
+  });
+
+  /** A verified address gets no confirmation however many times it submits — it is already in. */
+  it("a verified address is never sent another confirmation", async () => {
+    const t0 = Date.now();
+    const j = await joinPending("done@example.com", t0);
+    await verifyWaitlist(db, j.verifyToken!, t0);
+    const again = await joinPending("done@example.com", t0 + CONFIRM_RESEND_MS * 10);
+    expect(again.outcome).toBe("already");
+    expect(again.verifyToken).toBeUndefined();
   });
 });

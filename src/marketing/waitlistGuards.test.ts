@@ -29,7 +29,13 @@ vi.mock("../lib/firebase", async () => (await import("../test/pageSmoke")).fireb
 vi.mock("../components/toast/ToastProvider", async () => (await import("../test/pageSmoke")).toastMock());
 
 import { renderPage } from "../test/pageSmoke";
-import { joinWaitlist, WAITLIST_HONEYPOT_FIELD, WAITLIST_ENDPOINT, WaitlistSource } from "./waitlist";
+import {
+  joinWaitlist, classifyJoin, RawResponse,
+  WAITLIST_HONEYPOT_FIELD, WAITLIST_ENDPOINT, WaitlistSource,
+} from "./waitlist";
+
+const json = (status: number, body: unknown): RawResponse =>
+  ({ kind: "json", status, ok: status >= 200 && status < 300, body });
 import { FoundingPanel } from "./FoundingPanel";
 import { FoundingBand } from "./FoundingBand";
 import { FoundersPage } from "./FoundersPage";
@@ -257,5 +263,40 @@ describe("a caught bot cannot tell it was caught", () => {
     /* ⚠️ NO ADDRESS, hashed or otherwise. Logs are read by more people, kept in more places and
        retained on someone else's schedule than a Firestore document is. */
     expect(branch, "no address in a log line").not.toMatch(/\bemail\b/);
+  });
+});
+
+/* ══════════════ 5 · The four states, with double opt-in ON ══════════════ */
+
+describe("verification changed the server and not the client", () => {
+  /**
+   * ⚠️ A PENDING JOIN IS STILL `sent` FROM THE FORM'S SIDE, AND THAT IS THE POINT. The person did
+   * what was asked; whether the place is counted yet is a fact about the server, not about them.
+   * The server answers a pending join with no `alreadyJoined`, no `full` and no `position` —
+   * exactly what it answered before the flag moved — so `classifyJoin` reads it as `sent` and
+   * `foundingStore`'s state machine never had to change.
+   *
+   * This is the assertion that would have caught it if turning verification on had quietly
+   * altered the contract, which is the one thing §4 could have broken invisibly.
+   */
+  it("a pending join reads as `sent`", () => {
+    expect(classifyJoin(json(200, { ok: true, visible: true, cap: 100, count: 3 })))
+      .toEqual({ state: "sent", count: { claimed: 3, cap: 100 } });
+  });
+
+  it("…and the other three are unmoved", () => {
+    expect(classifyJoin(json(200, { ok: true, alreadyJoined: true, cap: 100 })).state).toBe("dupe");
+    expect(classifyJoin(json(200, { ok: true, full: true, cap: 100 })).state).toBe("full");
+    expect(classifyJoin({ kind: "non-json", status: 200 }).state).toBe("down");
+  });
+
+  /**
+   * ⚠️ A PENDING JOIN MOVES NO NUMBER, and the client must not invent one. The count in the
+   * response is whatever the counter already held — the reader's own place is not in it yet.
+   */
+  it("the count in a pending response is the counter's, not the reader's place", () => {
+    const out = classifyJoin(json(200, { ok: true, cap: 100, count: 7 }));
+    expect(out.state).toBe("sent");
+    expect("count" in out && out.count).toEqual({ claimed: 7, cap: 100 });
   });
 });
