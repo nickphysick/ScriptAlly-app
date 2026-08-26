@@ -54,7 +54,7 @@ const renderForm = (kind: JourneyKind): string | null =>
   kind === "bulk" ? null :
   renderToStaticMarkup(React.createElement(TaskPaneBody, {
     value: { rows: [], alongside: "", when: null, expect: null, remind: null, also: "",
-             hold: null, checkin: null, again: null },
+             hold: null, checkin: null, again: null, unitCommitted: false },
     onChange: () => {},
     questions: requirementsFor(kind).map((r) => ({
       id: r.id, field: r.field, label: r.label, answered: false,
@@ -112,6 +112,57 @@ describe("⚠️ one required-fields declaration per journey", () => {
       expect([...marked].sort(), `${k} asks a question the declaration does not require`)
         .toEqual([...want].sort());
     }
+  });
+});
+
+/**
+ * ⚠️ THE SEEDED NUMBER IS NOT AN ANSWER (journey round, Phase 4) — the bug that was live on dev.
+ *
+ * `SampleSpecPicker` in `mode="sent"` SEEDS a default the moment a unit is chosen, so the picker
+ * opens on something rather than on nothing. The gate read the amount's presence, so clicking
+ * "Chapters" silently accepted 3: the primary went live on a number nobody had chosen, and it would
+ * have been recorded with the same confidence as one the writer typed.
+ */
+describe("⚠️ the parcel's amount must be committed, not merely seeded", () => {
+  const seeded = { unit: false, when: false, expect: false, remind: false, rows: false,
+                   holdday: false, checkin: false, again: false };
+
+  it("the gate refuses a unit whose amount has only been seeded", () => {
+    /* the shape the session builds: a unit chosen, an amount present, no commit */
+    expect(gateOpen("fix", { ...seeded, unit: false, when: true }),
+      "a seeded amount satisfied the gate").toBe(false);
+  });
+
+  it("and accepts it once the writer has committed the value", () => {
+    expect(gateOpen("fix", { ...seeded, unit: true, when: true })).toBe(true);
+  });
+
+  /* ⚠️ THE PREDICATE ITSELF IS ASSERTED AT THE SESSION, because that is where the two facts meet —
+     `picked` and `unitCommitted`. A gate test can only say the gate honours its input. */
+  it("the session requires BOTH the pick and the commit", async () => {
+    const fs = await import("node:fs");
+    const hook = fs.readFileSync(new URL("../components/todo/useTaskPaneSession.tsx", import.meta.url), "utf8");
+    expect(hook, "the gate stopped requiring the commit")
+      .toContain("unit: wholeThing || (picked && paneBody.unitCommitted)");
+    /* and a whole manuscript still needs neither — it has no unit to pick */
+    expect(hook).toContain("wholeThing");
+  });
+
+  /* ⚠️ AND THE COMMIT COMES FROM THE CONTROL, not from the body guessing. Blur, Enter, a stepper
+     and an arrow key are the four moments the writer has said what the amount is. */
+  it("the picker fires its commit on every way of finishing the number, and not on choosing a unit", async () => {
+    const fs = await import("node:fs");
+    const picker = fs.readFileSync(new URL("../components/materials/SampleSpecPicker.tsx", import.meta.url), "utf8");
+    const decls = picker.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect((decls.match(/onCommit\?\.\(\)/g) || []).length,
+      "not every way of finishing the number commits").toBeGreaterThanOrEqual(4);
+    /* the unit button focuses AND SELECTS, so the first keystroke replaces the seed */
+    expect(decls, "the seed is focused but not selected — typing would append to it")
+      .toContain("el?.select()");
+    /* choosing a unit must NOT commit: the seed is the app's guess */
+    const unitClick = decls.slice(decls.indexOf("if (mode === \"sent\" && on) return;"),
+                                 decls.indexOf("{u}"));
+    expect(unitClick, "choosing a unit committed the app's own guess").not.toContain("onCommit");
   });
 });
 

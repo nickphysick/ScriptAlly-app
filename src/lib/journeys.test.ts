@@ -9,7 +9,7 @@
  */
 import { describe, it, expect } from "vitest";
 import {
-  JOURNEYS, JOURNEY_DEED_BUCKET, journeyIdFor, flowFor, intentOf, crossoverOf, CROSSOVER_REASON,
+  JOURNEYS, JOURNEY_DEED_BUCKET, journeyIdFor, flowFor, intentOf, crossoverOf, CROSSOVERS, crossoverReason,
   type JourneyId,
 } from "./journeys";
 import { deedSentence } from "./todoBuckets";
@@ -95,13 +95,13 @@ describe("⚠️ crossovers carry their reason", () => {
         const to = crossoverOf(id, o.id);
         if (to !== "close") continue;
         crossings.push(`${id}:${o.id}`);
-        expect(CROSSOVER_REASON[`${id}:${o.id}`], `${id}:${o.id} crosses to close without a reason`)
+        expect(crossoverReason(id, o.id), `${id}:${o.id} crosses to close without a reason`)
           .toBeTruthy();
       }
     }
     expect(crossings.length, "no crossover into close — this case measured nothing").toBeGreaterThan(0);
-    expect(CROSSOVER_REASON["send:wont"], "not sending is a WITHDRAWAL, not a silence").toBe("withdrawn");
-    expect(CROSSOVER_REASON["nudge:toclose"], "giving up after silence is a no-reply").toBe("no_reply");
+    expect(crossoverReason("send", "wont"), "not sending is a WITHDRAWAL, not a silence").toBe("withdrawn");
+    expect(crossoverReason("nudge", "toclose"), "giving up after silence is a no-reply").toBe("no_reply");
   });
 
   it("a crossover has no flow in its own journey — it swaps the journey", () => {

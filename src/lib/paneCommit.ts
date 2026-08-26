@@ -115,6 +115,11 @@ export function paneCommits(kind: JourneyKind): boolean {
 
 export interface PaneCommitInput {
   /**
+   * ⚠️ WHICH OF THE THREE WAYS THIS QUERY ENDED — supplied by the journey the writer came from, and
+   * never asked of the writer. See the note at `reason` below.
+   */
+  closeReason?: "no_reply" | "off_record" | "withdrawn";
+  /**
    * ⚠️ `"bulk"` IS NOT A `JourneyKind`, AND SAYING SO IS THE POINT. `paneJourneyKind` predates the
    * cohort table and has no member for it; the cohort is decided by the CARD, and its committer
    * reads the page's row state rather than these values. Naming it here rather than passing a
@@ -175,7 +180,20 @@ export function paneCommitValues(inp: PaneCommitInput): JourneySendValues {
     /* "Anything else? OPTIONAL" is the remembered note, not part of the parcel */
     note: body.also,
     checkBackDays: DEFAULT_CHECKBACK_DAYS,
-    reason: kind === "close" ? "no_reply" : null,
+    /**
+     * ⚠️ THE CLOSE'S REASON IS THE JOURNEY'S NOW, NOT A CONSTANT (journey round, Phase 4).
+     *
+     * This read `kind === "close" ? "no_reply" : null` — a hard-coded reason — so every close from
+     * the pane recorded a NO-RESPONSE whatever the writer had meant, while `CLOSE_REASONS` was
+     * fully able to express all three and `commitCloseFromPane` already routed through it. The
+     * plumbing was complete and unused.
+     *
+     * It arrives from the FORK: crossing from the send journey's "I'm not going to send it" is a
+     * WITHDRAWAL, crossing from the nudge's "time to close" is a silence, and the close task itself
+     * is a silence. The default stays `no_reply` for a caller that supplies none, because that is
+     * the close bucket's own meaning — but a caller that knows is now able to say.
+     */
+    reason: kind === "close" ? (inp.closeReason ?? "no_reply") : null,
     /* the agent-gaps fields — the pane asks none of them, which is why `paneCommits("fix")` is false */
     fixResponseWeeks: "",
     fixNoMeansNo: false,

@@ -14,6 +14,8 @@ import { readFileSync } from "node:fs";
 import { paneCommits, paneCommitValues, paneSentYMD, paneExpectISO, paneNudgeISO } from "./paneCommit";
 import type { JourneyKind } from "./paneJourney";
 import { requiredFor as requiredForGate } from "./paneGate";
+import { CLOSE_REASONS } from "./todoJourneys";
+import { QueryStatus } from "../types";
 import type { SendBodyValues } from "../components/todo/TaskPaneBody";
 import { materialRowsFromAgent } from "./agentMaterials";
 import { DEFAULT_CHECKBACK_DAYS } from "./todoWalk";
@@ -50,7 +52,7 @@ function slice(name: string): string {
 const NOW = new Date("2026-08-21T09:00:00");
 const body = (over: Partial<SendBodyValues> = {}): SendBodyValues => ({
   rows: materialRowsFromAgent([]), alongside: "", when: null, expect: null, remind: null, also: "",
-  hold: null, checkin: null, again: null, ...over,
+  hold: null, checkin: null, again: null, unitCommitted: true, ...over,
 });
 
 /* every member of the union, listed once — the compiler checks this list is complete */
@@ -496,5 +498,81 @@ describe("⚠️ a question the gate can require is a question the form asks", (
     const withUnit = (["send", "chase", "close", "fix", "bulk", "note", "decide"] as const)
       .filter((k) => requiredForGate(k).includes("unit"));
     expect(withUnit).toEqual(["send", "fix"]);
+  });
+});
+
+/**
+ * ⚠️ THE SEND JOURNEY'S THREE TERMINI, AGAINST THE CONTRACT'S GREEN BLOCKS (journey round, Phase 4;
+ * `design-refs/todo-two-journeys-full.html`). Each block says exactly what is written; these assert
+ * that and — the harder half — that nothing else is.
+ */
+describe("⚠️ the send journey writes what the contract says, and nothing else", () => {
+  /* "On press: materials 5 chapters · sent date 25 Aug · responseDeadline 6 Oct · nudgeDate 29 Sept
+      · activity Partial sent → status derives to Partial sent" */
+  it("I’ve sent it — the parcel, the day, the expectation and the reminder, all four", () => {
+    const v = paneCommitValues({
+      kind: "send", now: NOW, queryMethod: "Email",
+      body: body({
+        rows: [{ key: "sample", kind: "qty", name: "Opening sample", on: true, unit: "Chapters", amount: "5" }],
+        when: { kind: "today" }, expect: { kind: "weeks", weeks: 6 }, remind: { kind: "lead", days: 7 },
+      }),
+    });
+    expect(v.sentDate).toBe("2026-08-21");
+    expect(v.materials.join(" ").toLowerCase()).toContain("chapters");
+    expect(v.writerExpectedDate, "the expectation was dropped").toBeTruthy();
+    expect(v.nudgeDate, "the reminder was dropped").toBeTruthy();
+    /* ⚠️ AND NOTHING ELSE. A send is not a close, so it carries no reason — a `no_reply` riding
+       along here would be a second fact the writer never stated. */
+    expect(v.reason, "a send carried a close reason").toBeNull();
+  });
+
+  /**
+   * ⚠️ "On press: activity Closed — withdrawn · close date 25 Aug → status derives to Closed.
+   *    Board: every open task on this query resolves. NO REJECTION IS RECORDED ANYWHERE."
+   */
+  it("I’m not going to send it — the close records WITHDRAWN, and no rejection", () => {
+    const v = paneCommitValues({
+      kind: "close", now: NOW, closeReason: "withdrawn", body: body({ when: { kind: "today" } }),
+    });
+    expect(v.reason, "the withdrawal was recorded as a silence").toBe("withdrawn");
+    /* the status the committer will write, read from the ONE table rather than restated here */
+    const target = CLOSE_REASONS.find((r) => r.key === v.reason);
+    expect(target?.status, "a withdrawal wrote a rejection").toBe(QueryStatus.WITHDRAWN);
+    expect(target?.status).not.toBe(QueryStatus.REJECTED);
+    expect(v.sentDate, "the close lost its day").toBe("2026-08-21");
+  });
+
+  /* and the close TASK's own close is still a silence — the default is unchanged */
+  it("the close task itself still records no-response, and a nudge's crossover does too", () => {
+    expect(paneCommitValues({ kind: "close", now: NOW, body: body({ when: { kind: "today" } }) }).reason)
+      .toBe("no_reply");
+    expect(paneCommitValues({ kind: "close", now: NOW, closeReason: "no_reply", body: body({ when: { kind: "today" } }) }).reason)
+      .toBe("no_reply");
+  });
+
+  /* ⚠️ AND THE THREE REASONS REACH THREE DIFFERENT STATUSES. Asserted together so a future edit
+     cannot collapse two of them onto one and leave the third looking correct. */
+  it("the three close reasons are three different statuses", () => {
+    const statuses = (["no_reply", "off_record", "withdrawn"] as const)
+      .map((k) => CLOSE_REASONS.find((r) => r.key === k)?.status);
+    expect(new Set(statuses).size, "two reasons write the same status").toBe(3);
+    expect(statuses).toEqual([QueryStatus.NO_RESPONSE, QueryStatus.REJECTED, QueryStatus.WITHDRAWN]);
+  });
+
+  /**
+   * ⚠️ "On press: no query fields, no activity — a dated task only." The delay terminus is asserted
+   * at the SEAM in the delay-writes-through-snooze block above; this is its other half — that the
+   * pane never builds commit values for it at all, because it never reaches a committer.
+   */
+  it("Not yet — hold me to it reaches no committer, so it can write no query field", () => {
+    const body2 = slice("dockPrimary");
+    const snoozeArm = body2.indexOf('w.kind === "snooze"');
+    const commit = body2.indexOf("host.commit(");
+    expect(snoozeArm, "the delay arm is gone").toBeGreaterThan(-1);
+    expect(snoozeArm, "the delay arm is reached after a committer").toBeLessThan(commit);
+    /* it returns rather than falling through — a delay that reached the commit below would write
+       the send the contract says it must not */
+    const arm = body2.slice(snoozeArm, commit);
+    expect(arm, "the delay arm falls through to the committer").toContain("return;");
   });
 });

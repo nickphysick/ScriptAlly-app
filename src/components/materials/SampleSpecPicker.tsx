@@ -60,6 +60,16 @@ export interface SampleSpecPickerProps {
    * can never be a second one.
    */
   mode?: "wanted" | "sent";
+  /**
+   * ⚠️ THE WRITER HAS COMMITTED THE AMOUNT — fired on blur, on Enter, on a stepper press and on an
+   * arrow key, and NOT on choosing a unit (journey round, Phase 4).
+   *
+   * Choosing a unit SEEDS a default so the picker opens on something rather than on nothing. That
+   * seed is the app's guess, not the writer's answer, and the gate could not tell the two apart:
+   * clicking "Chapters" silently accepted 3. This is the signal that separates them, and it is
+   * OPTIONAL so `mode="wanted"` and every other caller are byte-identical.
+   */
+  onCommit?: () => void;
   /** Distinguishes this instance's inputs when several sit on one page (the bulk table). */
   idPrefix?: string;
   /** The bulk table renders many of these — it states its own summary instead. */
@@ -73,7 +83,7 @@ export function selectedUnits(rows: readonly MaterialRow[]): SampleUnit[] {
 }
 
 export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
-  rows, onChange, join, mode = "wanted", idPrefix = "ssp", hideSummary, disabled,
+  rows, onChange, join, mode = "wanted", idPrefix = "ssp", hideSummary, disabled, onCommit,
 }) => {
   const chosen = selectedUnits(rows);
   const qtyRows = rows.filter(isQty).filter((r) => r.on);
@@ -127,6 +137,8 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
        nonsense for chapters, which is why the floor lives in `UNIT_CFG` beside the step. */
     patch(row, String(Number.isFinite(n) ? Math.max(cfg.min, n) : cfg.min));
     setDraft(null);
+    /* the writer has said what the amount is — blur or Enter both reach here */
+    onCommit?.();
   };
 
   return (
@@ -153,9 +165,15 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
                  unit would leave a parcel with no measure, which is not a state the record has. */
               if (mode === "sent" && on) return;
               toggleUnit(u);
-              /* choosing a unit puts the caret where the next answer goes */
+              /* ⚠️ FOCUS AND SELECT, so the first keystroke REPLACES the seed rather than being
+                 appended to it (journey round, Phase 4). It focused only, so typing "5" after
+                 choosing Chapters gave "35" — the writer's answer glued onto the app's guess, and
+                 the guess winning the leading digit. Selecting the text makes the seed a
+                 PLACEHOLDER the writer types over, which is what the contract draws. */
               if (mode === "sent") setTimeout(() => {
-                document.getElementById(`${idPrefix}-${u.toLowerCase()}`)?.focus();
+                const el = document.getElementById(`${idPrefix}-${u.toLowerCase()}`) as HTMLInputElement | null;
+                el?.focus();
+                el?.select();
               }, 0);
             }}
           >
@@ -174,7 +192,7 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
                 onPointerDown={(e) => e.stopPropagation()}
               >
                 <button type="button" aria-label={`Fewer ${u.toLowerCase()}`} disabled={disabled}
-                  onClick={() => patch(row, stepAmount(row.amount, u, -1))}>−</button>
+                  onClick={() => { patch(row, stepAmount(row.amount, u, -1)); onCommit?.(); }}>−</button>
                 <input
                   id={`${idPrefix}-${u.toLowerCase()}`}
                   type="text" inputMode="numeric"
@@ -189,11 +207,12 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
                     e.preventDefault();
                     setDraft(null);
                     patch(row, stepAmount(row.amount, u, e.key === "ArrowUp" ? 1 : -1));
+                    onCommit?.();
                   }}
                 />
                 <span className="u">{u.toLowerCase()}</span>
                 <button type="button" aria-label={`More ${u.toLowerCase()}`} disabled={disabled}
-                  onClick={() => patch(row, stepAmount(row.amount, u, 1))}>+</button>
+                  onClick={() => { patch(row, stepAmount(row.amount, u, 1)); onCommit?.(); }}>+</button>
               </span>
             )}
           </button>

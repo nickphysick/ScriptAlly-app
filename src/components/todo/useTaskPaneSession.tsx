@@ -53,7 +53,7 @@ import { materialRowsFromAgent, type MaterialRow } from "../../lib/agentMaterial
 import { formatQueryMaterials } from "../../lib/materials";
 import { journeyKind, isBulkCard, anchorFor, requirementsOf, unansweredOf, firstMissingOf, type GateAnswers } from "../../lib/paneGate";
 import {
-  JOURNEYS, JOURNEY_DEED_BUCKET, journeyIdFor, flowFor, intentOf, crossoverOf, CROSSOVER_REASON,
+  JOURNEYS, JOURNEY_DEED_BUCKET, journeyIdFor, flowFor, intentOf, crossoverOf, CROSSOVERS, crossoverReason,
   type JourneyId, type JourneyFlow,
 } from "../../lib/journeys";
 import { paneCommits, paneCommitValues } from "../../lib/paneCommit";
@@ -279,7 +279,7 @@ export function useTaskPaneSession(
      number is not a decision — but nothing here is an answer until the writer gives one. */
   const BLANK: Omit<SendBodyValues, "rows"> =
     { alongside: "", when: null, expect: null, remind: null, also: "",
-      hold: null, checkin: null, again: null };
+      hold: null, checkin: null, again: null, unitCommitted: false };
   const [paneBody, setPaneBody] = React.useState<SendBodyValues>(
     { rows: seedRows(null), ...BLANK });
   /* the answers reset with the card — a half-filled form carried onto another task is answers
@@ -378,9 +378,16 @@ export function useTaskPaneSession(
      * own verbatim line spends a sentence on — closing is not a rejection — so the record's summary
      * should not quietly drop it.
      */
-    if (cardBucket(card) === "close") {
+    /* ⚠️ THE STRIP SAYS WHICH CLOSE, AND IT READS THE JOURNEY RATHER THAN THE BUCKET (Phase 4).
+       It said "Closed as no response" on every close, so a writer crossing from "I'm not going to
+       send it" read a sentence about a silence over a withdrawal — the strip stating something the
+       write would not do, on the one surface whose whole job is to say what the write will do.
+       ⚠️ AND IT IS DRIVEN BY THE ACTIVE FLOW, NOT THE CARD. A crossover's card is still a send. */
+    if (activeFlow?.writes.kind === "close-query") {
       const day = dayPartLong(paneBody.when);
-      return day ? <>Closed as <b>no response</b>, {day}.</> : "—";
+      const word = closeReason === "withdrawn" ? "withdrawn"
+        : closeReason === "off_record" ? "a pass off the record" : "no response";
+      return day ? <>Closed as <b>{word}</b>, {day}.</> : "—";
     }
 
     const longDay = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
@@ -648,7 +655,12 @@ export function useTaskPaneSession(
     const wholeThing = spec?.material === "full";
     const picked = paneBody.rows.some((r) => r.kind === "qty" && r.on && String(r.amount).trim() !== "");
     return {
-      unit: wholeThing || picked,
+      /* ⚠️ A SEEDED NUMBER IS NOT AN ANSWER (journey round, Phase 4). Choosing a unit fills the
+         amount with the app's default so the picker opens on something; `picked` was true the
+         instant that happened, so pressing "Chapters" silently accepted 3 and the primary went
+         live. The writer has to COMMIT the value — blur, Enter, a stepper, an arrow — and a whole
+         manuscript still needs neither, because it has no unit to pick. */
+      unit: wholeThing || (picked && paneBody.unitCommitted),
       when: !!paneBody.when && (paneBody.when.kind !== "date" || !!paneBody.when.ymd),
       expect: !!paneBody.expect && (paneBody.expect.kind !== "date" || !!paneBody.expect.ymd),
       /* ⚠️ A REVEALED-BUT-EMPTY DATE IS NOT AN ANSWER (deed round, Phase 4). The predicate read the
@@ -817,6 +829,8 @@ export function useTaskPaneSession(
       const wrote = await host.commit(card, paneCommitValues({
         kind: bulk ? "bulk" : jk!,
         body: paneBody,
+        /* the fork's own answer — a withdrawal is not a silence, and the origin is what knows */
+        closeReason,
         ...(q?.sendMethod ? { queryMethod: q.sendMethod } : {}),
         now: new Date(),
       }), bulkRows);
@@ -844,9 +858,28 @@ export function useTaskPaneSession(
     return opts.length === 1 ? opts[0].id : null;
   })();
 
+  /** the verb a crossover arrives under, where the contract gives it one */
+  const crossedPrimary: string | undefined =
+    crossed ? CROSSOVERS[`${crossed.from}:${crossed.fromIntent}`]?.primary : undefined;
+
   /** the flow that intent opens — `null` while the fork is showing */
   const activeFlow: JourneyFlow | null =
     activeId && effectiveIntent ? flowFor(activeId, effectiveIntent) ?? null : null;
+
+  /**
+   * ⚠️ THE REASON THE CLOSE RECORDS, AND THE ORIGIN IS WHAT KNOWS IT. Arriving from the send fork's
+   * "I'm not going to send it" is a WITHDRAWAL; arriving from the nudge fork's "time to close" is a
+   * silence; arriving at the close task itself is a silence too. The writer is never asked to
+   * categorise their own disappointment — the journey they came from already said.
+   *
+   * ⚠️ DECLARED BELOW `activeFlow`, WHICH IT READS. Written above it, `tsc` refused with TS2448 —
+   * "used before its declaration" — because the reference shares the declaration's scope. That is
+   * the one shape of this trap the compiler CAN see; the shape it cannot is the same read from a
+   * hoisted helper, which is why this repo's rule is that initialisation goes at the end.
+   */
+  const closeReason: "no_reply" | "off_record" | "withdrawn" =
+    (crossed ? crossoverReason(crossed.from, crossed.fromIntent) : undefined)
+    ?? (activeFlow?.writes.kind === "close-query" ? activeFlow.writes.reason : "no_reply");
 
   /**
    * ⚠️ CHOOSING AN INTENT IS THE WHOLE OF THIS FUNCTION, INCLUDING THE CROSSOVER. A crossover swaps
@@ -937,7 +970,11 @@ export function useTaskPaneSession(
                     })(),
                     /* ⚠️ THE PRIMARY IS THE FLOW'S — `null` while the fork is showing, which is
                        what removes the button rather than disabling it. */
-                    primary: activeFlow ? activeFlow.primary : null,
+                    /* ⚠️ THE CROSSOVER'S VERB WHERE IT HAS ONE. Arriving at a close TASK you are
+                       recording a state the query has reached — "Log the close"; arriving from a
+                       send or a nudge you are ending it now — "Close the query". The contract draws
+                       both, and the difference is the act rather than the write. */
+                    primary: activeFlow ? (crossedPrimary ?? activeFlow.primary) : null,
                     will: paneWill,
                     body: (
                       isBulkCard(card) ? (

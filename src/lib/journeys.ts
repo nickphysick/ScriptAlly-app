@@ -461,10 +461,30 @@ export function flowFor(id: JourneyId, intentId: string): JourneyFlow | undefine
  * would inherit the destination's own reason, which is exactly how a withdrawal would come to be
  * recorded as a silence.
  */
-export const CROSSOVER_REASON: Partial<Record<`${JourneyId}:${string}`, "no_reply" | "off_record" | "withdrawn">> = {
-  "send:wont": "withdrawn",
-  "nudge:toclose": "no_reply",
+export interface Crossover {
+  /** the fact the destination flow records, because the ORIGIN is what knows it */
+  reason?: "no_reply" | "off_record" | "withdrawn";
+  /**
+   * ⚠️ THE VERB A CROSSOVER ARRIVES UNDER, where the contract gives it one.
+   * `todo-two-journeys-full.html` draws both crossed closes with **"Close the query"** while the
+   * close journey's own flow keeps **"Log the close"** — and the difference is real. Arriving at a
+   * CLOSE TASK, you are recording a state the query has already reached; arriving from a send or a
+   * nudge, you are ending it now. Same write, two acts, and the button says which.
+   */
+  primary?: string;
+}
+
+export const CROSSOVERS: Partial<Record<`${JourneyId}:${string}`, Crossover>> = {
+  "send:wont": { reason: "withdrawn", primary: "Close the query" },
+  "nudge:toclose": { reason: "no_reply", primary: "Close the query" },
+  /* close → nudge carries no reason: nudging records a nudge, and its own flow asks its own
+     questions. A `primary` would override a verb the destination already states correctly. */
+  "close:nudgefirst": {},
 };
+
+/** the reason a crossover carries, where it carries one */
+export const crossoverReason = (from: JourneyId, intentId: string): Crossover["reason"] =>
+  CROSSOVERS[`${from}:${intentId}`]?.reason;
 
 /** Every intent that leaves its journey, with where it goes — read by the receipt and by Go back. */
 export function crossoverOf(id: JourneyId, intentId: string): JourneyId | undefined {

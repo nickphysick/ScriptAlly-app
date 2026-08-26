@@ -103,6 +103,17 @@ export interface SendBodyValues {
   remind: RemindChoice | null;
   /** the free text under "Anything else?" */
   also: string;
+  /**
+   * ⚠️ THE WRITER HAS COMMITTED THE PARCEL'S AMOUNT, and the seed alone does not (journey round,
+   * Phase 4). Choosing a unit SEEDS a default so the picker opens on something; that seed is the
+   * app's guess. `unit` was answered the moment a unit was pressed, so clicking "Chapters" silently
+   * accepted 3 and the primary went live on a number nobody had chosen — a fabricated answer
+   * rendered with the same confidence as a real one, which is the fault this pane exists to remove.
+   *
+   * Set by `SampleSpecPicker`'s `onCommit` — blur, Enter, a stepper, an arrow key — and cleared
+   * whenever the unit changes, because a new unit is a new question.
+   */
+  unitCommitted: boolean;
   /* ── the fork's three, `null` until the writer says (journey round, Phase 1) ─────────────── */
   /** the delay intents' day — Send's *hold me to it*, Nudge's *give it longer*, Note's *give it a date* */
   hold: DelayChoice | null;
@@ -380,7 +391,17 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
       <>
         <SampleSpecPicker
           rows={value.rows}
-          onChange={(rows) => onChange({ ...value, rows })}
+          /* ⚠️ A UNIT CHANGE CLEARS THE COMMIT. `mode="sent"` REPLACES the sample row rather than
+             joining, so a different unit is a different parcel and its seeded amount is the app's
+             guess again — carrying the flag across would let one committed answer vouch for a
+             number the writer never saw. */
+          onChange={(rows) => {
+            const was = value.rows.find((r) => r.kind === "qty" && r.on);
+            const now = rows.find((r) => r.kind === "qty" && r.on);
+            const unitChanged = (was?.kind === "qty" ? was.unit : null) !== (now?.kind === "qty" ? now.unit : null);
+            onChange({ ...value, rows, ...(unitChanged ? { unitCommitted: false } : {}) });
+          }}
+          onCommit={() => { onChange({ ...value, unitCommitted: true }); onAnswered?.(); }}
           /* ⚠️ "and", NOT "or". A requirement offers a choice; a record describes one parcel. */
           join="and"
           mode="sent"
