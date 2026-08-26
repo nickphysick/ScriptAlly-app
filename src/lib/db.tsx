@@ -383,7 +383,17 @@ interface DbContextType {
   editActivity: (
     queryId: string,
     activityId: string,
+    /**
+     * ⚠️ `bookVersionId` TAKES `null` TO MEAN "CLEAR IT", not `""`.
+     *
+     * Checked rather than assumed (D1): `""` is a FORM-level value here — the modal's select uses it
+     * for "none" and the write path turns it into an omitted key. Package SLOTS are the opposite,
+     * because `isValidPackage` requires all three keys present, so `UNFILLED_SLOT` is a stored `""`.
+     * Two conventions in one feature area, and copying the wrong one would store a version id of the
+     * empty string that every reader would then have to special-case.
+     */
     patch: Partial<Pick<Activity, "description" | "details" | "date" | "resultingStatus">>
+      & { bookVersionId?: string | null }
   ) => Promise<void>;
 
   // User Actions
@@ -3000,7 +3010,17 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const editActivity = async (
     queryId: string,
     activityId: string,
+    /**
+     * ⚠️ `bookVersionId` TAKES `null` TO MEAN "CLEAR IT", not `""`.
+     *
+     * Checked rather than assumed (D1): `""` is a FORM-level value here — the modal's select uses it
+     * for "none" and the write path turns it into an omitted key. Package SLOTS are the opposite,
+     * because `isValidPackage` requires all three keys present, so `UNFILLED_SLOT` is a stored `""`.
+     * Two conventions in one feature area, and copying the wrong one would store a version id of the
+     * empty string that every reader would then have to special-case.
+     */
     patch: Partial<Pick<Activity, "description" | "details" | "date" | "resultingStatus">>
+      & { bookVersionId?: string | null }
   ) => {
     if (!currentUser) return;
 
@@ -3026,6 +3046,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       if (patch.resultingStatus !== undefined) {
         subPatch.type = patch.resultingStatus;
         subPatch.resultingStatus = patch.resultingStatus;
+      }
+      /**
+       * ⚠️ THE VERSION A SEND CARRIED (Part E, D1). Absent means "not recorded", so clearing it
+       * DELETES the key rather than storing an empty string — `deleteField()`, matching every other
+       * optional field on this record.
+       *
+       * ⚠️ AND IT IS PAYLOAD: `recomputeQuery` does not read it, so correcting a version cannot move
+       * a status, a count or a date. That is the whole reason this field could be added to an
+       * append-only log without touching the derivation.
+       */
+      if (patch.bookVersionId !== undefined) {
+        subPatch.bookVersionId = patch.bookVersionId === null || patch.bookVersionId === ""
+          ? deleteField()
+          : patch.bookVersionId;
       }
       if (Object.keys(subPatch).length > 0) {
         await updateDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", activityId), subPatch);

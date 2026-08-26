@@ -168,3 +168,36 @@ describe("⚠️ D10 — recomputeQuery is untouched, and this is the load-beari
     expect(src).not.toMatch(/resultingStatus\s*[:=][^=]/);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("D1 — editActivity accepts the version, and clears by DELETING", () => {
+  const db = readFileSync(join(root, "src/lib/db.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  it("takes it in the patch type, as string | null", () => {
+    expect(db).toContain("{ bookVersionId?: string | null }");
+  });
+
+  it("⚠️ CLEARS BY `deleteField()`, NEVER BY STORING `\"\"`", () => {
+    /**
+     * Checked rather than assumed (D1). `""` is a FORM-level value in this feature — the material
+     * modal's select uses it for "none" and the write path turns it into an omitted key. Package
+     * SLOTS are the opposite: `isValidPackage` requires all three keys present, so `UNFILLED_SLOT`
+     * is a stored `""`. Two conventions in one feature area, and copying the wrong one would store a
+     * version id of the empty string that every reader would then special-case.
+     */
+    expect(db).toMatch(/patch\.bookVersionId === null \|\| patch\.bookVersionId === ""/);
+    expect(db).toMatch(/\?\s*deleteField\(\)/);
+  });
+
+  it("maps onto the subcollection doc, like every other patched field", () => {
+    expect(db).toContain("subPatch.bookVersionId =");
+  });
+
+  it("⚠️ and the rules already permit it — the allowlist was the half that shipped first", () => {
+    const rules = readFileSync(join(root, "firestore.rules"), "utf8");
+    const i = rules.indexOf("'activityType', 'description', 'date', 'details'");
+    expect(i, "the activity update allowlist has moved").toBeGreaterThan(-1);
+    expect(rules.slice(i, rules.indexOf("])", i))).toContain("'bookVersionId'");
+  });
+});
