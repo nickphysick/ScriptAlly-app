@@ -23,7 +23,7 @@ type R = { id: string; ok: boolean; note: string };
 function lines0(out: R[], notes: string[]): string {
   const red = out.filter((r) => !r.ok);
   const ls = [
-    "── journey round · Phases 1–6 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
+    "── journey round · Phases 1–7 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
     "",
     ...notes,
     "",
@@ -180,6 +180,28 @@ test("journey round", async ({ page }) => {
     await page.waitForTimeout(900);
     return hit;
   };
+  /** the primary's own facts — the attribute, the classes, and the fill against the button */
+  const primaryFacts = async () => page.evaluate(`(() => {
+    const vis = ${VIS};
+    const t = (e) => (e ? (e.textContent || "").replace(/\\s+/g, " ").trim() : "");
+    const btn = [...document.querySelectorAll(".tpn .actbar .ab.go")].filter(vis)[0];
+    if (!btn) return null;
+    const fill = btn.querySelector(".fill");
+    const w = btn.clientWidth;
+    return {
+      label: t(btn.querySelector(".t")) || t(btn),
+      disabled: btn.disabled === true || btn.hasAttribute("disabled"),
+      ariaDisabled: btn.getAttribute("aria-disabled"),
+      describedBy: btn.getAttribute("aria-describedby"),
+      ready: btn.classList.contains("ready"),
+      hasFill: !!fill,
+      pct: fill && w > 0 ? Math.round((fill.getBoundingClientRect().width / w) * 1000) / 10 : null,
+      count: t([...document.querySelectorAll(".tpn .actbar .count")].filter(vis)[0]),
+      countId: ([...document.querySelectorAll(".tpn .actbar .count")].filter(vis)[0] || {}).id || null,
+      chipInside: !!btn.querySelector(".n"),
+    };
+  })()`) as any;
+
   const clickIn = async (sel: string) => {
     const hit = await page.evaluate(`(() => {
       const vis = ${VIS};
@@ -517,9 +539,19 @@ test("journey round", async ({ page }) => {
     add("P5.3 · and Don\u2019t ask again is one of its answers",
         !!checkinRow && (checkinRow.opts ?? []).some((o: string) => /don.t ask again/i.test(o)),
         checkinRow ? JSON.stringify(checkinRow.opts) : "(no check-in row on screen)");
-    add("P5.4 · the primary is absent until the clock is answered",
-        !!nudged && /to answer/.test(nudged.primary ?? ""),
-        "primary=" + JSON.stringify(nudged?.primary));
+    /* ⚠️ RETARGETED, AND THE LAW IS UNCHANGED (Phase 7). This read the words "to answer" out of the
+       primary's own text, because the count used to ride ON the button as a chip. Phase 7 moved the
+       count OUTSIDE it, so the button now reads "Log the nudge" and the chip is gone — the claim
+       being made is the same one, *the primary is not live until the clock is answered*, and its
+       expression is now `aria-disabled` plus the count beside it. The case's own NAME was already
+       wrong: it said "absent" while measuring a chip on a button that was present throughout. */
+    const nudgeBtn = await primaryFacts();
+    add("P5.4 · the primary is not live until the clock is answered — and it is not switched off either",
+        !!nudgeBtn && nudgeBtn.ariaDisabled === "true" && nudgeBtn.disabled === false
+          && /still to answer/i.test(nudgeBtn.count || ""),
+        nudgeBtn ? "label=" + JSON.stringify(nudgeBtn.label) + " aria-disabled=" + nudgeBtn.ariaDisabled
+                   + " disabled=" + nudgeBtn.disabled + " count=" + JSON.stringify(nudgeBtn.count)
+                 : "no primary on screen");
   } else {
     notes.push("no Chase card on this account — P5.1\u2013P5.4 not measured");
   }
@@ -733,6 +765,175 @@ test("journey round", async ({ page }) => {
       + "needs one user-written note.");
   }
 
+  /* ══ PHASE 7 · the filling primary ════════════════════════════════════════════════════════ */
+
+  /**
+   * ⚠️ THE ONE ASSERTION THIS PHASE EXISTS FOR. A truly disabled button is a dead end — no click,
+   * no focus, nothing for a screen reader to explain, and no route to what is missing. It was set
+   * for exactly one journey (the cohort at zero touched rows) and it was preventing the gate's own
+   * handler from doing the thing that would have helped.
+   */
+  const neverDisabled: string[] = [];
+  for (const kind of ["Send", "Close", "Chase", "Fix"]) {
+    await page.goto("/todo");
+    await boardReady();
+    await liftMotionSuppression(page);
+    if (!(await openCard(kind))) continue;
+    let f = await primaryFacts();
+    /* a fork is showing on most: choose the first option so a primary exists */
+    if (!f || !f.label) {
+      await page.evaluate(`(() => {
+        const vis = ${VIS};
+        const b = [...document.querySelectorAll(".tpn .fk")].filter(vis)[0];
+        if (b) b.click();
+      })()`);
+      await page.waitForTimeout(1100);
+      f = await primaryFacts();
+    }
+    if (!f) continue;
+    neverDisabled.push(kind + "=" + (f.disabled ? "DISABLED" : "live") + "/aria:" + f.ariaDisabled);
+  }
+  add("P7.1 · no journey's primary is ever the `disabled` attribute",
+      neverDisabled.length >= 3 && neverDisabled.every((s) => !s.includes("DISABLED")),
+      neverDisabled.join(" · ") || "no primaries were reached");
+
+  /* ── the fill, measured against the required list the count reads ── */
+  await page.goto("/todo");
+  await boardReady();
+  await liftMotionSuppression(page);
+  if (await openCard("Send")) {
+    await choose("I’ve sent it");
+    const a = await primaryFacts();
+    add("P7.2 · the count sits OUTSIDE the button, and the burgundy chip is gone from inside it",
+        !!a && !a.chipInside && /still to answer/i.test(a.count || ""),
+        a ? "count=" + JSON.stringify(a.count) + " chipInsideButton=" + a.chipInside : "-");
+
+    add("P7.3 · and the button carries the truth for assistive tech without being switched off",
+        !!a && a.disabled === false && a.ariaDisabled === "true"
+          && !!a.describedBy && a.describedBy === a.countId,
+        a ? "disabled=" + a.disabled + " aria-disabled=" + a.ariaDisabled
+            + " describedby=" + (a.describedBy === a.countId ? "points at the count" : a.describedBy)
+          : "-");
+
+    /* ⚠️ THE FILL IS PROPORTIONAL, and this reads it against the SAME list the count states, so a
+       bar that drifted from the sentence beside it could not pass. */
+    const need = Number((a?.count || "").match(/^(\d+)/)?.[1] ?? NaN);
+    const answered = 4 - need;
+    add("P7.4 · the fill's width is answered ÷ required, within 1 point",
+        !!a && a.hasFill && Number.isFinite(need) && a.pct !== null
+          && Math.abs(a.pct - (answered / 4) * 100) <= 1,
+        a ? "count says " + need + " of 4 outstanding → expect " + Math.round((answered / 4) * 100)
+            + "% · measured " + a.pct + "%" : "-");
+
+    /* ── answer one, and it advances ── */
+    await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const q = [...document.querySelectorAll(".tpn .q.open")].filter(vis)[0];
+      const b = q ? [...q.querySelectorAll(".seg button")][0] : null;
+      if (b) b.click();
+    })()`);
+    await page.waitForTimeout(1200);
+    const b2 = await primaryFacts();
+    add("P7.5 · answering advances it",
+        !!b2 && b2.pct !== null && !!a && a.pct !== null && b2.pct > a.pct,
+        (a?.pct ?? "-") + "% → " + (b2?.pct ?? "-") + "%");
+
+    /**
+     * ⚠️ AND IT RECEDES. A progress indicator that only ever advances is lying about a form you can
+     * revise. Reopening the answered day and choosing the picker leaves it revealed and EMPTY,
+     * which the gate does not count as an answer — the same path a writer takes to change a date.
+     */
+    await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const q = [...document.querySelectorAll(".tpn .q")].filter(vis)
+        .find((x) => (x.id || "").indexOf("s-when") >= 0);
+      if (q && !q.classList.contains("open")) { const h = q.querySelector(".ql"); if (h && h.click) h.click(); }
+    })()`);
+    await page.waitForTimeout(900);
+    const removed = await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const q = [...document.querySelectorAll(".tpn .q")].filter(vis)
+        .find((x) => (x.id || "").indexOf("s-when") >= 0);
+      if (!q) return false;
+      const b = [...q.querySelectorAll(".seg button")]
+        .find((x) => /another date|know the date/i.test((x.textContent || "")));
+      if (!b) return false; b.click(); return true;
+    })()`) as boolean;
+    await page.waitForTimeout(1200);
+    const b3 = await primaryFacts();
+    add("P7.6 · and it RECEDES when an answer is removed",
+        removed && !!b3 && b3.pct !== null && !!b2 && b2.pct !== null && b3.pct < b2.pct,
+        "removed=" + removed + " · " + (b2?.pct ?? "-") + "% → " + (b3?.pct ?? "-") + "%");
+  } else {
+    notes.push("no Send card — P7.2 to P7.6 not measured");
+  }
+
+  /**
+   * ⚠️ PRESSING IT WHILE FADED OPENS THE FIRST UNANSWERED QUESTION AND FOCUSES IT. This is the
+   * route the `disabled` attribute was removing, so it is the assertion that says the removal was
+   * worth making rather than merely permitted.
+   */
+  await page.goto("/todo");
+  await boardReady();
+  await liftMotionSuppression(page);
+  if (await openCard("Send")) {
+    await choose("I’ve sent it");
+    /* close whatever is open so the jump has somewhere to go, then press the faded primary */
+    await clickIn(".tpn .actbar .ab.go");
+    await page.waitForTimeout(1100);
+    const jumped = await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const open = [...document.querySelectorAll(".tpn .q.open")].filter(vis)[0];
+      const miss = [...document.querySelectorAll(".tpn .miss")].filter(vis)[0];
+      const act = document.activeElement;
+      const inOpen = !!(open && act && open.contains(act));
+      return {
+        openId: open ? open.id : null,
+        missing: miss ? (miss.textContent || "").replace(/\\s+/g, " ").trim() : "",
+        focusInsideOpenRow: inOpen,
+        activeTag: act ? act.tagName.toLowerCase() : "none",
+      };
+    })()`) as any;
+    add("P7.7 · pressing it while faded opens the first unanswered question and names what is left",
+        !!jumped && !!jumped.openId && /still to answer/i.test(jumped.missing),
+        jumped ? "opened " + jumped.openId + " · line = " + JSON.stringify(jumped.missing.slice(0, 70))
+          + " · focus in the row = " + jumped.focusInsideOpenRow + " (" + jumped.activeTag + ")" : "-");
+  }
+
+  /* ── the cohort's exception: faded, empty, and saying so in words ── */
+  await page.goto("/todo");
+  await boardReady();
+  await liftMotionSuppression(page);
+  const bulkOpened = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const rows = [...document.querySelectorAll(".tlc .row")].filter(vis)
+      .filter((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === "Fix");
+    for (const r of rows) { r.click(); return true; }
+    return false;
+  })()`) as boolean;
+  if (bulkOpened) {
+    /* the census above named which card is which; find the cohort by its counted label */
+    for (let i = 0; i < census.length; i++) {
+      if (census[i] !== "bulk") continue;
+      await page.goto("/todo");
+      await boardReady();
+      await liftMotionSuppression(page);
+      await page.evaluate(`(() => {
+        const vis = ${VIS};
+        const fx = [...document.querySelectorAll(".tlc .row")].filter(vis)
+          .filter((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === "Fix");
+        if (fx[${i}]) fx[${i}].click();
+      })()`);
+      await page.waitForTimeout(1600);
+      const bf = await primaryFacts();
+      add("P7.8 · an untouched cohort is faded with an empty fill, and says so in words",
+          !!bf && bf.disabled === false && bf.pct === 0 && /no queries filled in yet/i.test(bf.count || ""),
+          bf ? "label=" + JSON.stringify(bf.label) + " disabled=" + bf.disabled
+               + " fill=" + bf.pct + "% count=" + JSON.stringify(bf.count) : "-");
+      break;
+    }
+  }
+
   /* ══ SCREENSHOTS ══════════════════════════════════════════════════════════════════════════ */
   const shoot = async (name: string, kind: string, steps?: () => Promise<void>) => {
     await page.goto("/todo");
@@ -759,7 +960,7 @@ test("journey round", async ({ page }) => {
 
   const red = out.filter((r) => !r.ok);
   const lines = [
-    "── journey round · Phases 1–6 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
+    "── journey round · Phases 1–7 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
     "",
     ...notes,
     "",

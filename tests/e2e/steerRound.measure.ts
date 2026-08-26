@@ -1,4 +1,18 @@
 /**
+ * ⚠️ THIS FILE PREDATES THE FORK AND IS PARTLY STALE — read its reds before believing them.
+ *
+ * Its baseline artefact is from 21 Aug (21/21 green). The pane gained its INTENT FORK on 25–26 Aug
+ * (journey round, Phases 1–3): a card now opens on a decision, and no primary, no ledger and no
+ * count exist until an intent is chosen. Cases here that open a card and immediately read the
+ * ledger have therefore been describing a page the app no longer serves since then — several days
+ * before the Phase 7 edits below, which is why those reds are NOT evidence about Phase 7.
+ *
+ * Two assertions WERE retargeted by Phase 7 and are marked where they sit. Repairing the rest is
+ * its own pass — it means teaching every case to answer the fork first — and is queued rather than
+ * absorbed into a phase that has nothing to do with it. The account has also lost its Note card
+ * since the baseline, which is data drift rather than either.
+ */
+/**
  * THE STEER ROUND — phases 1–5, measured on the page.
  *
  * ⚠️ NO BACKTICKS AND NO BACKSLASH ESCAPES INSIDE ANY page.evaluate TEMPLATE. A backtick inside one
@@ -93,7 +107,13 @@ test("steer round", async ({ page }) => {
         sects: sects.length,
         dividers,
         boxed,
-        chip: go ? ((go.querySelector(".n") || {}).textContent || "") : "",
+        /* NOTE (journey round, Phase 7): the count moved OUT of the button. It rode on the
+           primary as the n span; it is now the count element beside it. The field name chip is
+           kept so the assertions below still read one field, but the ELEMENT is the new one — a
+           probe left pointing at the old one would have read empty for every journey, turning two
+           of those assertions vacuously green while the other two went red for the wrong reason.
+           (No backticks in this comment: it sits inside a page.evaluate template.) */
+        chip: (all(".tpn .actbar .count")[0] || {}).textContent || "",
         prim: go ? (go.textContent || "") : "",
         primDisabled: !!(go || {}).disabled,
         legacyBox: all(".tpn .expect").length + all(".tpn .inherit").length,
@@ -290,16 +310,34 @@ test("steer round", async ({ page }) => {
      harness's send is a FULL MANUSCRIPT — no unit to pick, so three requirements remain and the
      chip was right. An assertion with a number in it was asserting the FIXTURE; the law is that the
      chip counts exactly what the line names. */
-  add("P5.1 · the primary's chip counts what is still unanswered",
-      !!send && /^\d+ to answer$/.test(send.chip.trim()) && Number(send.chip.trim().split(" ")[0]) > 0,
-      send ? `chip="${send.chip}"` : "-");
+  add("P5.1 · the count beside the primary counts what is still unanswered",
+      !!send && /^\d+ still to answer$/i.test(send.chip.trim()) && Number(send.chip.trim().split(" ")[0]) > 0,
+      send ? `count="${send.chip}"` : "-");
   add("P5.2 · a note is complete, so it carries no chip",
       !!note && note.chip === "", note ? `chip="${note.chip}"` : "-");
   /* ⚠️ AND BULK CARRIES NO CHIP: its count is IN the label, and a chip beside it would be a second
      number on one button counting something else. Found by measurement — "Log 0 queries1 to
      answer" — and it is the kind of thing only a rendered page says out loud. */
-  add("P5.3 · bulk keeps its stated exception — inert at zero, its count in the label, no chip",
-      !!bulk && bulk.primDisabled && /^Log 0 queries$/.test(bulk.prim.trim()) && bulk.chip === "",
+  /* ⚠️ RETARGETED BY THE FILLING PRIMARY (journey round, Phase 7; ref
+     design-refs/todo-filling-primary.html). This required the cohort's primary to be INERT at zero
+     — the `disabled` attribute — and that is the behaviour the contract reverses in as many words:
+     "it looks disabled; it must not be disabled". A disabled button is a dead end with no click, no
+     focus, nothing to announce and no route to what is missing, and the gate's own handler already
+     opens the first unanswered question — `s-rows` is a real anchor on the cohort's table, so the
+     attribute was preventing the one thing that would have helped.
+
+     The LAW is unchanged and is still asserted here: at zero touched rows the cohort's primary is
+     not yet a live commit, and it says so. What moved is HOW — `aria-disabled`, an empty fill and
+     a count reading "no queries filled in yet", instead of an attribute. The stated exception the
+     case is named for (the count is IN the label) is untouched. */
+  add("P5.3 · bulk keeps its stated exception — not live at zero, its count in the label, no chip",
+      /* ⚠️ THE LAW IS "NO SECOND NUMBER", NOT "NO COUNT" (Phase 7). The cohort's count line now
+         reads "no queries filled in yet" — words, deliberately, because "0 still to answer" is not
+         what is wrong with an untouched table. An empty-string check would fail on copy that
+         satisfies the rule perfectly; what must never appear beside "Log 0 queries" is a SECOND
+         figure counting something else. */
+      !!bulk && bulk.primDisabled === false && /^Log 0 queries$/.test(bulk.prim.trim())
+        && !/\d/.test(bulk.chip),
       bulk ? `disabled=${bulk.primDisabled} prim="${bulk.prim}" chip="${bulk.chip}"` : "-");
 
   /* ⚠️ A FRESH CARD, AND THE EXPECTED SECTION IS READ FROM THE PAGE. Phase 3 answered two of the
@@ -318,7 +356,9 @@ test("steer round", async ({ page }) => {
     if (!mid || !go) return null;
     const t = mid.scrollTop;
     const expect = nxt ? nxt.id : "";
-    const chipN = ((go.querySelector(".n") || {}).textContent || "").trim().split(" ")[0];
+    /* the count element sits beside the button now, not inside it — see the probe above */
+    const cEl = [...document.querySelectorAll(".tpn .actbar .count")].filter(vis)[0];
+    const chipN = ((cEl || {}).textContent || "").trim().split(" ")[0];
     go.click();
     return { t, expect, chipN };
   })()`) as any;

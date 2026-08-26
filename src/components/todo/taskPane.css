@@ -471,7 +471,6 @@
 .tpn .ab.quiet:hover { background:#f5f2ee; }
 .tpn .ab.go { background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600; }
 .tpn .ab.go:hover { background:#efd5ca; }
-.tpn .ab.go:disabled { background:var(--field);border-color:var(--hair2);color:#c0b0a0;cursor:not-allowed; }
 .tpn .dlg { position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(40,20,14,0.35); }
 .tpn .dlg.open { display:flex; }
 .tpn .dlg-card { width:380px;background:var(--white);border:1px solid var(--edge);border-radius:13px;box-shadow:0 20px 60px rgba(40,20,14,0.3);padding:20px 22px; }
@@ -663,7 +662,6 @@
 .tpn .q .hint { font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:8px;line-height:1.5; }
 
 /* ── the count chip and the missing line (steer round, Phase 5) ─────────────────────────────── */
-.tpn .ab .n { font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--burg);color:#fffdfa;border-radius:999px;padding:2px 7px;margin-left:7px; }
 /* ⚠️ IT WRAPS, IT DOES NOT TRUNCATE. A line naming the missing answers is useless with the last two
    clipped off — which is exactly what the will-record strip's `text-overflow: ellipsis` would do to
    it, and the reason this is its own element rather than that strip wearing different words. */
@@ -733,4 +731,50 @@
  * ═════════════════════════════════════════════════════════════════════════════════════════════ */
 @container (max-width: 560px) {
   .tpn .willrec, .tpn .miss { flex-basis: 100%; }
+}
+
+/* ── THE FILLING PRIMARY (journey round, Phase 7; ref design-refs/todo-filling-primary.html) ───
+   ⚠️ IT LOOKS DISABLED AND MUST NOT BE DISABLED. There is no `:disabled` rule here on purpose —
+   the button is never given the attribute, because a disabled control is a dead end: no click, no
+   focus, nothing to announce, and no way to discover what is missing. The faded look is the RESTING
+   state of `.prime`, and pressing it opens the first unanswered question. The old
+   `.tpn .ab.go:disabled` rule is retired with the attribute it styled. */
+.tpn .ab.go.prime {
+  position: relative; overflow: hidden;
+  background: var(--field); border: 1px solid var(--hair2); color: #a89684;
+  transition: color .28s ease, border-color .28s ease, background .28s ease;
+}
+.tpn .ab.go.prime:hover { background: var(--field); }
+.tpn .ab.go.prime .fill {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 0;
+  background: linear-gradient(90deg, #f7e7e0, var(--pink));
+  /* ⚠️ THE SAME DURATION IN BOTH DIRECTIONS — the fill RECEDES when an answer is removed, and a
+     progress indicator that only ever advances is lying about a form you can revise. */
+  transition: width .34s cubic-bezier(.4, 0, .2, 1);
+}
+/* the label rides above the fill; without this the pink paints over the words */
+.tpn .ab.go.prime .t { position: relative; z-index: 1; }
+/* ⚠️ THE ONE MOMENT THE BUTTON CHANGES CHARACTER */
+.tpn .ab.go.prime.ready {
+  background: var(--pink); border-color: var(--pink-b); color: var(--burg);
+}
+.tpn .ab.go.prime.ready:hover { background: #efd5ca; }
+.tpn .ab.go.prime.nudge { animation: tpnNudgeIn .34s ease; }
+@keyframes tpnNudgeIn {
+  0% { transform: scale(1); } 45% { transform: scale(1.035); } 100% { transform: scale(1); }
+}
+
+/* ⚠️ THE COUNT SITS OUTSIDE THE BUTTON, and `.tpn .ab .n` — the burgundy chip that used to ride ON
+   it — is retired with the markup that carried it. */
+.tpn .actbar .count {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .11em;
+  text-transform: uppercase; color: #a89684; white-space: nowrap; transition: opacity .2s;
+}
+
+/* ⚠️ THE FILL JUMPS AND THE NUDGE IS SUPPRESSED — the ref draws no reduced-motion block, and the
+   brief requires one. Declared AFTER the rules it overrides: a media query confers no specificity,
+   so above them it would lose at equal weight and read as correct while doing nothing. */
+@media (prefers-reduced-motion: reduce) {
+  .tpn .ab.go.prime .fill { transition: none; }
+  .tpn .ab.go.prime.nudge { animation: none; }
 }

@@ -25,6 +25,7 @@ import { BoardCard } from "./todoBoard";
 import { GROUP_CLASS, liveFamily } from "./todoFamily";
 import { anchorNoun, bandSubline, bandPreline, bandUnder, panePresence } from "./todoHandoff";
 import { deedSentence, type DeedParts } from "./todoBuckets";
+import { primaryFill } from "./paneFill";
 import { paneCopy } from "./taskListRow";
 import type { TaskPaneEvent, TaskPaneJourney, TaskPaneTile } from "../components/todo/TaskPane";
 
@@ -55,6 +56,13 @@ export interface JourneyInputs {
   noteAddedDate?: string;
   /** what is still unanswered — the ONE list the chip, the line and the square all read */
   missing?: { id: string; name: string }[];
+  /**
+   * ⚠️ HOW MANY THE FLOW REQUIRES — the denominator the fill needs, and the ONE number that was
+   * missing from this interface. `missing` alone cannot say how full the button should be: two
+   * outstanding out of two is empty and two out of four is half, and the pane has always known the
+   * difference without ever passing it down.
+   */
+  required?: number;
   /** the writer pressed an incomplete primary */
   showMissing?: boolean;
   onJump?: (id: string) => void;
@@ -75,7 +83,6 @@ export interface JourneyInputs {
    */
   onOpenManuscript?: () => void;
   onOpenAgent?: () => void;
-  primDisabled?: boolean;
   /**
    * ⚠️ THE COHORT'S TWO NUMBERS. `count` is how many queries the gap stands for; `touched` is how
    * many the writer has filled in. One source for the band, the strip and the primary's own label —
@@ -313,7 +320,23 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
       : input.bulk
         ? `Log ${input.bulk.touched} ${input.bulk.touched === 1 ? "query" : "queries"}`
         : input.primary ?? paneCopy(c).primary,
-    primDisabled: input.bulk ? input.bulk.touched === 0 : input.primDisabled,
+    /**
+     * ⚠️ `primDisabled` IS RETIRED, AND ITS RETIREMENT IS THE POINT OF THIS PHASE (Phase 7).
+     *
+     * It was set for exactly one journey — the cohort at zero touched rows — and a truly disabled
+     * button is a dead end: no click, no focus, nothing for a screen reader to explain, and no way
+     * to find out what is missing. The gate's own handler already does the right thing (open the
+     * first unanswered question and focus it) and `s-rows` is a real anchor on the cohort's table,
+     * so the `disabled` attribute was preventing the route it needed.
+     *
+     * What replaces it is `fill.ready`: the button LOOKS not-yet and stays clickable, with
+     * `aria-disabled` and a live count carrying the truth to assistive tech.
+     */
+    fill: primaryFill({
+      required: input.required ?? 0,
+      missing: input.missing?.length ?? 0,
+      ...(input.bulk ? { bulk: input.bulk } : {}),
+    }),
     tl,
     onOpenQuery: c.relatedRecordId ? input.onOpenQuery : undefined,
     onSnooze: input.onSnooze,

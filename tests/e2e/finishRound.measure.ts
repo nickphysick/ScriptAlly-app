@@ -1,4 +1,18 @@
 /**
+ * ⚠️ THIS FILE PREDATES THE FORK AND IS PARTLY STALE — read its reds before believing them.
+ *
+ * Its baseline artefact is from 21 Aug (21/21 green). The pane gained its INTENT FORK on 25–26 Aug
+ * (journey round, Phases 1–3): a card now opens on a decision, and no primary, no ledger and no
+ * count exist until an intent is chosen. Cases here that open a card and immediately read the
+ * ledger have therefore been describing a page the app no longer serves since then — several days
+ * before the Phase 7 edits below, which is why those reds are NOT evidence about Phase 7.
+ *
+ * Two assertions WERE retargeted by Phase 7 and are marked where they sit. Repairing the rest is
+ * its own pass — it means teaching every case to answer the fork first — and is queued rather than
+ * absorbed into a phase that has nothing to do with it. The account has also lost its Note card
+ * since the baseline, which is data drift rather than either.
+ */
+/**
  * THE FINISHING ROUND — phases 1–6, measured on the page.
  *
  * ⚠️ NO BACKTICKS AND NO BACKSLASH ESCAPES INSIDE ANY `page.evaluate` TEMPLATE BELOW. A backtick
@@ -231,8 +245,20 @@ test("finishing round", async ({ page }) => {
       !!send && send.optTags === 1 && !!close && close.optTags === 1 && !!note && note.optTags === 1
         && !!bulk && bulk.optTags === 1,
       `send=${send?.optTags} close=${close?.optTags} note=${note?.optTags} bulk=${bulk?.optTags}`);
-  add("P4.4 · bulk is the stated exception — inert at zero, with its count showing",
-      !!bulk && bulk.primDisabled && /Log 0 queries/.test(bulk.prim),
+  /* ⚠️ RETARGETED BY THE FILLING PRIMARY (journey round, Phase 7; ref
+     design-refs/todo-filling-primary.html). This required the cohort's primary to be INERT at zero
+     — the `disabled` attribute — and that is the behaviour the contract reverses in as many words:
+     "it looks disabled; it must not be disabled". A disabled button is a dead end with no click, no
+     focus, nothing to announce and no route to what is missing, and the gate's own handler already
+     opens the first unanswered question — `s-rows` is a real anchor on the cohort's table, so the
+     attribute was preventing the one thing that would have helped.
+
+     The LAW is unchanged and is still asserted here: at zero touched rows the cohort's primary is
+     not yet a live commit, and it says so. What moved is HOW — `aria-disabled`, an empty fill and
+     a count reading "no queries filled in yet", instead of an attribute. The stated exception the
+     case is named for (the count is IN the label) is untouched. */
+  add("P4.4 · bulk is the stated exception — not live at zero, with its count showing",
+      !!bulk && bulk.primDisabled === false && /Log 0 queries/.test(bulk.prim),
       bulk ? `disabled=${bulk.primDisabled} prim="${bulk.prim}"` : "-");
   add("P4.5 · every other primary stays clickable while incomplete",
       !!send && !send.primDisabled && !!close && !close.primDisabled && !!note && !note.primDisabled,

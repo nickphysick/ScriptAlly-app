@@ -35,6 +35,7 @@ import React from "react";
 import { QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
 import type { TaskPaneFork, TaskPaneReceipt } from "../../lib/taskPaneJourney";
+import { fillWidth, type PrimaryFill } from "../../lib/paneFill";
 import "./taskPane.css";
 
 /**
@@ -120,7 +121,8 @@ export interface TaskPaneJourney {
    */
   prim: string | null;
   /** disables `.b-primary` — the mockup styles the state, so the pane can offer it */
-  primDisabled?: boolean;
+  /** the primary's fill, its count and whether it has become ready — from `primaryFill` */
+  fill?: PrimaryFill;
   /** the timeline card — `null` hides it, and the mid drops to one column */
   tl: TaskPaneEvent[] | null;
   /**
@@ -222,6 +224,37 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
    * `.ws--solo` collapses the grid to.
    */
   const hasRecord = !!((d.tiles && d.tiles.length > 0) || (d.tl && d.tl.length > 0));
+
+  /**
+   * ⚠️ `useId`, NOT A LITERAL. Workspace pages stay MOUNTED under the display-toggling shell, so a
+   * hard-coded id becomes a duplicate the moment a second surface renders this component — and an
+   * `aria-describedby` resolving by id then points at whichever copy comes first in the document.
+   * `TaskPaneBody` takes an `idPrefix` prop for the same reason; this needs one id, so it generates
+   * one rather than growing a prop for it.
+   */
+  const countId = React.useId();
+
+  /**
+   * ⚠️ ONE NUDGE, AT THE TRANSITION, AND NEVER ON MOUNT (Phase 7). The contract asks for a single
+   * 3.5% beat "at the moment it becomes ready" — the one "you can go now". A journey that requires
+   * nothing (a note's tick, the fill-in's "I can't remember") is ready on its first render, so a
+   * naive rising-edge check would fire the beat as the pane opens, where it means nothing.
+   *
+   * `null` is the never-rendered state, which is why the ref is not simply `false`: the first pass
+   * records where the button started and beats for nothing.
+   */
+  const ready = d.fill?.ready ?? true;
+  const [nudge, setNudge] = React.useState(false);
+  const wasReady = React.useRef<boolean | null>(null);
+  React.useEffect(() => {
+    const first = wasReady.current === null;
+    const rose = !first && ready && wasReady.current === false;
+    wasReady.current = ready;
+    if (!rose) return;
+    setNudge(true);
+    const t = setTimeout(() => setNudge(false), 420);
+    return () => clearTimeout(t);
+  }, [ready]);
   return (
     <div className="tpn">
       {/* ⚠️ THE COUNTER ROW IS GONE AND ITS HEIGHT WENT TO THE PANE (pane round, Phase 1). It said
@@ -404,18 +437,38 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                   button that guessed would be the pane assuming the answer to its own first
                   question. Snooze and Dismiss above stay, because both are honest answers to
                   "not now". */}
-              {d.prim !== null && (
-              <button type="button" className="ab go" disabled={d.primDisabled} onClick={onPrimary}>
-                {d.prim}
-                {/* ⚠️ NEVER ON BULK, WHICH ALREADY COUNTS IN ITS LABEL. "Log 0 queries" beside a
-                    chip reading "1 to answer" is two numbers on one button counting different
-                    things — the queries filled in, and the requirements outstanding — and the reader
-                    has no way to know that. */}
-                {!d.bulk && d.missing && d.missing.length > 0 && (
-                  <span className="n">{d.missing.length} to answer</span>
-                )}
-              </button>
-              )}
+              {d.prim !== null && (() => {
+                const f = d.fill ?? { pct: 1, count: null, ready: true };
+                return (
+                  <>
+                    {/* ⚠️ THE COUNT SITS OUTSIDE THE BUTTON NOW (Phase 7), and this reverses an
+                        earlier decision rather than drifting from it. It rode ON the primary as a
+                        burgundy chip, which put a number counting REQUIREMENTS on a control whose
+                        own label already counts something else on the cohort — and, once the
+                        button fills in proportion to the same set, a chip restating it is the
+                        third expression of one fact within four centimetres. Absent at zero. */}
+                    {f.count && <span className="count" id={countId} aria-live="polite">{f.count}</span>}
+                    <button
+                      type="button"
+                      className={"ab go prime" + (f.ready ? " ready" : "") + (nudge ? " nudge" : "")}
+                      /**
+                       * ⚠️ IT LOOKS DISABLED AND IS NOT, WHICH IS THE WHOLE OF THIS PHASE. A truly
+                       * disabled button is a dead end — no click, no focus, nothing to announce and
+                       * no way to discover what is missing. `onPrimary` already opens the first
+                       * unanswered question and focuses it; `disabled` was preventing the one route
+                       * out of the state it described.
+                       */
+                      aria-disabled={f.ready ? undefined : true}
+                      aria-describedby={f.count ? countId : undefined}
+                      onClick={onPrimary}
+                    >
+                      {/* the fill is a sibling, beneath the label — see `.prime .t`'s z-index */}
+                      <span className="fill" style={{ width: fillWidth(f) }} aria-hidden />
+                      <span className="t">{d.prim}</span>
+                    </button>
+                  </>
+                );
+              })()}
             </div>
           </div>
 

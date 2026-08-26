@@ -1233,6 +1233,11 @@ export function useTaskPaneSession(
                        the primary is absent rather than counting zero. */
                     missing: unansweredOf(activeFlow?.questions ?? [], gateAnswers(card))
                       .map((r) => ({ id: r.id, name: r.name })),
+                    /* ⚠️ THE FOURTH EXPRESSION OF THE SAME LIST (Phase 7). The chip counts it, the
+                       line names it, the square sits on its first entry — and now the primary FILLS
+                       in proportion to it. That needs the denominator, which is the flow's own
+                       `questions.length` rather than anything recounted here. */
+                    required: (activeFlow?.questions ?? []).length,
                     showMissing,
                     /* ⚠️ THE MISSING LINE'S LINKS TAKE THE SAME ROUTE AS THE PRIMARY'S GATE —
                        `jumpTo`, which OPENS the row and then focuses it. Handing `host.jumpToSection`

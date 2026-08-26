@@ -1,4 +1,4 @@
-── journey round · Phases 1–6 · 39 assertions · 0 RED · 39 green
+── journey round · Phases 1–7 · 47 assertions · 0 RED · 47 green
 
 SEND fork: [{"t":"I’ve sent it","s":"Note what went, and set the clock","x":""},{"t":"Not yet — hold me to it","s":"Pick a day and it lands back on your list","x":""},{"t":"I’m not going to send it","s":"Record that, and close the query honestly","x":"crosses to close →"}]
 CLOSE fork: [{"t":"Close it now","s":"Records no response — not a rejection. It reopens if a reply ever comes","x":""},{"t":"Nudge them once more first","s":"One more try before the ledger closes","x":"crosses to nudge →"},{"t":"Leave it open for now","s":"Choose when you’d like to be asked again — or not at all","x":""}]
@@ -25,7 +25,7 @@ shot fork-note: no Note card
   green  P2.7 · choosing collapses the fork to a receipt and opens question 1
            receipt="You choseI’ve sent itChange" rows=4 open=["s-when"]
   green  P2.8 · the primary is the FLOW's, and it is there now
-           primary="Log as sent3 to answer"
+           primary="Log as sent"
   green  P2.9 · Snooze has LEFT the bar once an intent is chosen (Phase 3)
            ["Dismiss"]
   green  P2.10 · Change returns to the fork
@@ -43,7 +43,7 @@ shot fork-note: no Note card
   green  P3.2 · and it says nothing is recorded on the query
            hint="This task waits quietly until then — nothing is recorded on the query."
   green  P3.3 · its primary is the flow's, not the send's
-           primary="Set the reminder1 to answer"
+           primary="Set the reminder"
   green  P3.4 · the close fork names the honourable alternatives first
            ["Close it now","Nudge them once more first","Leave it open for now"]
   green  P3.5 · leave-it-open offers the mute as one of its own answers
@@ -70,10 +70,10 @@ shot fork-note: no Note card
            ["When","If nothing comes back…"]
   green  P5.3 · and Don’t ask again is one of its answers
            ["Ask me in 2 weeks","Ask me in a month","A date…","Don’t ask again"]
-  green  P5.4 · the primary is absent until the clock is answered
-           primary="Log the nudge2 to answer"
+  green  P5.4 · the primary is not live until the clock is answered — and it is not switched off either
+           label="Log the nudge" aria-disabled=true disabled=false count="2 still to answer"
   green  P5.5 · the pane calls nobody overdue or late
-           overdue=false late=false (chars scanned 485)
+           overdue=false late=false (chars scanned 491)
   green  P6.1 · the census recognised every card wearing the Fix pill
            2 card(s): agentgap · bulk
   green  P6.2 · a delay's strip says when the task returns, not a bare dash
@@ -86,3 +86,19 @@ shot fork-note: no Note card
            strip = "Closed as no response, today."
   green  P6.6 · and the send still reads the consequences grammar rather than a dash
            strip = "—" (unanswered send: a dash here is correct)
+  green  P7.1 · no journey's primary is ever the `disabled` attribute
+           Send=live/aria:true · Close=live/aria:true · Chase=live/aria:true · Fix=live/aria:null
+  green  P7.2 · the count sits OUTSIDE the button, and the burgundy chip is gone from inside it
+           count="3 still to answer" chipInsideButton=false
+  green  P7.3 · and the button carries the truth for assistive tech without being switched off
+           disabled=false aria-disabled=true describedby=points at the count
+  green  P7.4 · the fill's width is answered ÷ required, within 1 point
+           count says 3 of 4 outstanding → expect 25% · measured 25%
+  green  P7.5 · answering advances it
+           25% → 50.1%
+  green  P7.6 · and it RECEDES when an answer is removed
+           removed=true · 50.1% → 25%
+  green  P7.7 · pressing it while faded opens the first unanswered question and names what is left
+           opened s-when · line = "Still to answer: when it went, when you expect to hear back and your r" · focus in the row = true (button)
+  green  P7.8 · an untouched cohort is faded with an empty fill, and says so in words
+           label="Log 0 queries" disabled=false fill=0% count="no queries filled in yet"

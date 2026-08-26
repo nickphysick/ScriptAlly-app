@@ -41,6 +41,11 @@ const REF = readFileSync(join(process.cwd(), "design-refs/todo-actionbar-correct
 const REF_FINAL = readFileSync(join(process.cwd(), "design-refs/todo-workspace-final.html"), "utf8");
 const REF_PANE = readFileSync(join(process.cwd(), "design-refs/todo-pane-contract.html"), "utf8");
 const REF_MATERIALS = readFileSync(join(process.cwd(), "design-refs/todo-materials-contract.html"), "utf8");
+/* ⚠️ THE FILLING PRIMARY IS ITS OWN CONTRACT (journey round, Phase 7), and it joins the vocabulary
+   rather than being exempted from it. `prime`, `fill`, `ready`, `nudge` and `count` are the ref's
+   own words; adding the FILE keeps the law intact — every class the pane renders comes from a
+   contract — where a hand-written exemption list would have quietly suspended it. */
+const REF_PRIMARY = readFileSync(join(process.cwd(), "design-refs/todo-filling-primary.html"), "utf8");
 const PANE_CSS = readFileSync(join(process.cwd(), "src/components/todo/taskPane.css"), "utf8");
 const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
@@ -106,7 +111,7 @@ describe("1 · the pane's class names are the mockup's", () => {
    */
   const cssOf = (src: string) => strip(src.slice(src.indexOf("<style>"), src.indexOf("</style>")));
   const mockClasses = new Set(
-    [REF, REF_FINAL, REF_PANE, REF_MATERIALS].flatMap((r) =>
+    [REF, REF_FINAL, REF_PANE, REF_MATERIALS, REF_PRIMARY].flatMap((r) =>
       [...cssOf(r).matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1])),
   );
 
@@ -355,8 +360,13 @@ describe("the fork — the pane opens on the decision, not the paperwork", () =>
 
   it("no primary is rendered until an intent is chosen", () => {
     const html = forked({ fork: FORK, prim: null, missing: [] });
+    /* ⚠️ MATCH THE CLASS LIST, NOT AN EXACT ATTRIBUTE (journey round, Phase 7). This read
+       `not.toContain('class="ab go"')`, and the moment the primary gained its Phase 7 modifiers the
+       rendered attribute became `class="ab go prime ready"` — which this would have PASSED, while a
+       verb was being offered before the fork was answered. The positive twin at least went red; the
+       negative one is the direction that fails silently, which is this repo's most-recorded trap. */
     expect(html, "a verb was offered before the pane knew what the writer wanted")
-      .not.toContain('class="ab go"');
+      .not.toMatch(/class="ab go(\s|")/);
     /* ⚠️ AND THE GUARD ON THE GUARD: the fork must actually be there, or an empty render satisfies
        this without the pane having drawn anything. */
     expect(html).toContain('class="fork"');
@@ -394,8 +404,9 @@ describe("the fork — the pane opens on the decision, not the paperwork", () =>
     expect(html).toContain("You chose");
     expect(html).toContain("I’ve sent it");
     expect(html).toContain(">Change<");
-    /* and the primary is back, because there is a verb now */
-    expect(html).toContain('class="ab go"');
+    /* and the primary is back, because there is a verb now — matched on the class LIST, so a
+       modifier added later cannot turn this into a lock about a button that stopped rendering */
+    expect(html).toMatch(/class="ab go(\s|")/);
   });
 
   it("a crossover's receipt names where it came from and offers the way back", () => {
