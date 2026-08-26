@@ -42,6 +42,7 @@ import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
 import { ManuscriptLibraryCard, ManuscriptAddTile } from "./manuscripts/ManuscriptLibraryCard";
 import { pitchAssets, pitchMeter, PitchAssetKey, synopsisVersions } from "../lib/manuscriptPitch";
 import { genreDisplay } from "../lib/genres";
+import { agentPrimary, AGENT_NOT_RECORDED } from "../lib/agentDisplay";
 import { londonDay } from "../lib/queryingGoals";
 import type { BookVersion } from "../types";
 import { genreList, splitGenres } from "./manuscripts/plateEdit";
@@ -67,7 +68,7 @@ interface AllManuscriptsProps {
 }
 
 export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, active = true }) => {
-  const { currentUser, manuscripts, queries, packages, versions, activities, taskFlags, updateManuscript, updateManuscriptQuiet, deleteManuscript, setManuscriptShelved, addPersonalGenre } =
+  const { currentUser, manuscripts, queries, packages, versions, activities, agents, taskFlags, updateManuscript, updateManuscriptQuiet, deleteManuscript, setManuscriptShelved, addPersonalGenre } =
     useScriptAllyDb();
 
   /**
@@ -421,6 +422,17 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
               pitchAssets={msPitch}
               pitch={pitchLine(msComps)}
               pitchText={pitchLineText(msComps)}
+              /* ⚠️ THE STORED FIELD, NOT THE SHELF'S DERIVED ASSET. `pitchAssets` resolves an
+                 unwritten pitch to `null` through one `has()`; reading `elevatorPitch` straight
+                 would treat `""` and an absent key as different things, which they are in the
+                 model and are not to a reader. */
+              elevatorPitch={msPitch.find((a) => a.key === "elevator")?.text ?? null}
+              /* One naming helper, app-wide — a local format here would eventually disagree with
+                 the Contact list about what an agent is called. */
+              agentName={(id) => {
+                const a = agents.find((x) => x.id === id);
+                return a ? agentPrimary(a) : AGENT_NOT_RECORDED;
+              }}
               synopsisVersionCount={msSynVersions.length}
               synopsisDate={msSynDate ? formatPlateDate(Date.parse(msSynDate)) : null}
               onSavePitch={savePitch}

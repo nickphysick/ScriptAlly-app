@@ -92,3 +92,64 @@ export const heroFacts = (
  */
 export const shelfMeta = (manuscripts: number, queries: number): string =>
   `${manuscripts} manuscript${manuscripts === 1 ? "" : "s"} · ${queries} quer${queries === 1 ? "y" : "ies"}`;
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   OVERVIEW — the at-a-glance row
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+export interface GlanceCell {
+  key: string;
+  label: string;
+  value: number;
+  /** Drawn in the quieter ink. Closed is a fact about the past, not a figure to lead with. */
+  soft?: boolean;
+}
+
+/**
+ * The five figures over the manuscript's own queries.
+ *
+ * ⚠️ `stillOpen` AND `closed` PARTITION THE SET, so the two always sum to `queriesSent`. They are
+ * derived from the ONE closed set (`CLOSED_STATUSES` in manuscriptPage) rather than from two
+ * hand-written status lists, which is how two figures on one card come to disagree.
+ *
+ * ⚠️ `responses` COUNTS THROUGH `plateStats`, WHICH COUNTS THROUGH `isResponse` — the canonical
+ * predicate the package maths uses. It is deliberately NOT recomputed here: a local "has the agent
+ * replied" test would eventually disagree with the rest of the app about what a response is.
+ *
+ * ⚠️ AND `agentsHolding` COUNTS AGENTS, NOT QUERIES. Two live sends to one agent is one agent
+ * holding something; counting rows would state a number of people that does not exist. Holding
+ * comes from `HOLDING_STATUSES` — the two send statuses — never a hand-kept "active" list.
+ *
+ * ⚠️ NO VERDICT ANYWHERE. Five counts, five nouns, no ordering by outcome, no colour that means
+ * good or bad. `closed` is quieter than the rest and that is a reading weight, not a judgement.
+ */
+export const atAGlance = (
+  queriesSent: number,
+  responses: number,
+  closed: number,
+  agentsHolding: number,
+): GlanceCell[] => [
+  { key: "sent", label: "Queries sent", value: queriesSent },
+  { key: "responses", label: "Responses", value: responses },
+  { key: "open", label: "Still open", value: queriesSent - closed },
+  { key: "closed", label: "Closed", value: closed, soft: true },
+  { key: "holding", label: "Agents holding", value: agentsHolding },
+];
+
+/** The Overview header's meta — `26 queries · 4 agents holding`. */
+export const glanceMeta = (queriesSent: number, agentsHolding: number): string =>
+  `${queriesSent} quer${queriesSent === 1 ? "y" : "ies"} · ${agentsHolding} agent${agentsHolding === 1 ? "" : "s"} holding`;
+
+/**
+ * The pitch header's meta — `38 words`.
+ *
+ * ⚠️ THE REF ALSO STATES `last edited 2 Jun` AND THAT IS NOT BUILT. No field on the manuscript
+ * records when the elevator pitch was last written; the nearest thing is the document's own
+ * `statusChangedDate`, which is about the STATUS and would be a plausible number labelled with
+ * something it does not measure. Null where there is no pitch, so the caller states no meta at all.
+ */
+export const pitchMeta = (text: string | null): string | null => {
+  if (!text) return null;
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return `${words} word${words === 1 ? "" : "s"}`;
+};

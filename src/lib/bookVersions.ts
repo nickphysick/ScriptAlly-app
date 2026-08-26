@@ -335,8 +335,23 @@ export const openingRows = (
 export interface HoldingRow {
   queryId: string;
   agent: string;
-  /** `FULL · sent 02 Aug` — what they have and when it went. */
+  /** `FULL · sent 02 Aug` — what they have and when it went, as one string. */
   what: string;
+  /**
+   * The two halves of `what`, separately — the book profile's Overview tables them as their own
+   * columns and the packages panel keeps the joined string.
+   *
+   * ⚠️ ADDITIVE, AND DERIVED HERE RATHER THAN SPLIT BY THE CALLER. Parsing `what` back apart on
+   * `·` would be a second derivation of the same two facts, and it would break the day a date
+   * format contained one.
+   *
+   * ⚠️ AND `holds` SAYS `Full manuscript` OR `Partial` AND NOTHING MORE. The ref writes
+   * `Partial · 50 pp`; the page count of what was sent is not on the holding — the status is all
+   * the record carries — so stating one would be inventing a quantity.
+   */
+  holds: "Full manuscript" | "Partial";
+  /** The send date, already formatted, or null where the send is undated. */
+  sentDay: string | null;
   /** The version they hold, or null where the send predates the feature. */
   versionName: string | null;
 }
@@ -370,10 +385,13 @@ export const holdingRows = (
   holdings(queries, activities)
     .map((h) => {
       const sent = sendDate(h.query, activities);
+      const sentDay = sent ? formatDay(sent) : null;
       return {
         queryId: h.query.id,
         agent: agentName((h.query as { agentId?: string }).agentId ?? ""),
-        what: sent ? `${h.what} · sent ${formatDay(sent)}` : h.what,
+        what: sentDay ? `${h.what} · sent ${sentDay}` : h.what,
+        holds: h.what === "FULL" ? ("Full manuscript" as const) : ("Partial" as const),
+        sentDay,
         versionName: bookVersionById(versions, h.versionId)?.name ?? null,
         _sort: sent ?? "",
       };

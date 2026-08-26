@@ -196,3 +196,103 @@
   .msp-heroacts { padding-top: 0; padding-bottom: 8px; }
   .msp-duo { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ══ OVERVIEW ═════════════════════════════════════════════════════════════════════════════════ */
+
+.msp-pitchtext {
+  font-family: var(--font-serif);
+  font-size: 16.5px;
+  /* ⚠️ 1.55, NOT THE TIGHT LEADING THE HEADINGS TAKE. This is mixed-case Playfair at length; the
+     house floor for it is 1.3 and prose wants more than the floor. */
+  line-height: 1.55;
+  color: var(--ink);
+  margin: 0;
+}
+.msp-empty {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--shell-muted);
+  margin: 0;
+}
+
+/**
+ * ⚠️ `repeat(N, minmax(0, 1fr))` WITH THE COUNT FROM THE DATA — never `auto-fit`. A zero minimum
+ * gives auto-fit no reason to stop, and this repo has measured a stat block resolving to its two
+ * real tracks followed by a hundred phantom `0px` ones. It rendered correctly by luck.
+ */
+.msp-glancecard { margin-bottom: 22px; }
+.msp-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 18px 15px;
+}
+.msp-stat { text-align: center; }
+.msp-stat + .msp-stat { border-left: 1px solid var(--hair-soft); }
+.msp-statn {
+  font-family: var(--font-serif);
+  font-size: 27px;
+  font-weight: 600;
+  /* Mixed-case Playfair floor — digits have no descenders, but the rule is about the box. */
+  line-height: 1.3;
+  color: var(--ink);
+}
+/* ⚠️ QUIETER, NOT COLOURED. Closed reads as past rather than as bad; no red anywhere on this page. */
+.msp-statn.soft { color: var(--shell-muted); }
+.msp-statl {
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+}
+
+/* ══ TABLES ═══════════════════════════════════════════════════════════════════════════════════ */
+
+.msp-table { width: 100%; border-collapse: collapse; }
+.msp-table th {
+  text-align: left;
+  padding: 0 0 7px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  font-weight: 400;
+  color: var(--shell-muted);
+  border-bottom: 1px solid var(--hair-soft);
+}
+.msp-table td {
+  padding: 9px 0;
+  font-size: 13.5px;
+  color: var(--ink);
+  border-bottom: 1px solid var(--hair-soft);
+  vertical-align: top;
+}
+.msp-table tr:last-child td { border-bottom: 0; }
+.msp-table td.msp-num { font-family: var(--font-mono); font-size: 11.5px; text-align: right; white-space: nowrap; }
+.msp-table td.soft, .msp-table td .soft { color: var(--shell-muted); }
+
+.msp-footnote {
+  margin: 11px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--shell-muted);
+}
+.msp-inlinelink {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: var(--burg);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  /* Five columns at 1fr each squeeze the labels below ~700px; two rows of three reads. */
+  .msp-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 16px; }
+  .msp-stat:nth-child(3n + 1) { border-left: 0; }
+}

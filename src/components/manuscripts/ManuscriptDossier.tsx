@@ -23,12 +23,13 @@ import React, { useState } from "react";
 import { MoreHorizontal, Archive, Trash2, Pencil } from "lucide-react";
 import { Manuscript, ManuscriptVersion, SubmissionPackage, Query, CompTitle } from "../../types";
 import type { Activity, BookVersion } from "../../types";
-import { bookVersionsOf } from "../../lib/bookVersions";
-import { isShelvedPresentation } from "../../lib/manuscriptPage";
+import { bookVersionsOf, holdingRows } from "../../lib/bookVersions";
+import { isShelvedPresentation, CLOSED_STATUSES } from "../../lib/manuscriptPage";
 import { plateStats } from "../../lib/manuscriptPlate";
-import { heroFacts, queryingSinceMs } from "../../lib/manuscriptProfile";
+import { heroFacts, queryingSinceMs, atAGlance, glanceMeta, pitchMeta, profileDate } from "../../lib/manuscriptProfile";
 import { ManuscriptTabKey } from "./ManuscriptTabs";
 import { ManuscriptHero } from "./ManuscriptHero";
+import { OverviewPane } from "./OverviewPane";
 import { BookVersionsPanel } from "./BookVersionsPanel";
 import { ManuscriptCompsPane } from "./ManuscriptCompsPane";
 import { PitchAsset, PitchAssetKey } from "../../lib/manuscriptPitch";
@@ -58,6 +59,10 @@ export interface ManuscriptDossierProps {
   pitchAssets: PitchAsset[];
   pitch: PitchLine;
   pitchText: string | null;
+  /** The elevator pitch as stored, or null when it has not been written. */
+  elevatorPitch: string | null;
+  /** Resolves an agent id to a display name — the canonical helper, never a local format. */
+  agentName: (agentId: string) => string;
   synopsisVersionCount: number;
   synopsisDate: string | null;
   onSavePitch: (key: PitchAssetKey, text: string) => void;
@@ -98,6 +103,8 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   pitchAssets,
   pitch,
   pitchText,
+  elevatorPitch,
+  agentName,
   synopsisVersionCount,
   synopsisDate,
   onSavePitch,
@@ -121,6 +128,15 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const shelved = isShelvedPresentation(manuscript);
   const stats = plateStats(queries);
+  /**
+   * ⚠️ THE HOLDERS ARE DERIVED ONCE AND READ TWICE — the Overview's table and the count in its
+   * section header. Deriving them separately for the two is how a card comes to state a number its
+   * own rows do not add up to.
+   */
+  const holders = holdingRows(queries, activities, bookVersionsOf(manuscript), agentName, (iso) => profileDate(Date.parse(iso)));
+  const closed = queries.filter((q) => CLOSED_STATUSES.includes(q.status)).length;
+  /* Distinct AGENTS, not rows: two live sends to one agent is one agent holding something. */
+  const agentsHolding = new Set(holders.map((h) => h.agent)).size;
 
   return (
     <div className="msv-doss">
@@ -225,9 +241,19 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
           shorter than its content instead of pushing the card past the viewport.
         */}
         <div className="msv-dpane msp-pane">
-          {/* ⚠️ PHASE 2 IS THE SCAFFOLD. Overview, Journey and Notes arrive in Phases 3, 4 and 6;
-              Comparable titles and Versions carry their existing panes across so nothing that
-              worked before this re-cut stops working during it. */}
+          {/* ⚠️ Journey and Notes arrive in Phases 4 and 6; Comparable titles and Versions carry
+              their existing panes across until Phase 5 re-cuts them. */}
+          {tab === "overview" && (
+            <OverviewPane
+              pitch={elevatorPitch}
+              pitchMeta={pitchMeta(elevatorPitch)}
+              glance={atAGlance(stats.queriesSent, stats.responses, closed, agentsHolding)}
+              glanceMeta={glanceMeta(stats.queriesSent, agentsHolding)}
+              holders={holders}
+              onOpenVersions={() => onTabChange("versions")}
+            />
+          )}
+
           {tab === "comps" && (
             <ManuscriptCompsPane
               comps={comps}

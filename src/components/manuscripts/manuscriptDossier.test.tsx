@@ -47,6 +47,8 @@ const BASE: ManuscriptDossierProps = {
   activities: [],
   today: "2026-08-25",
   onSaveBookVersions: noop,
+  elevatorPitch: "When fourteen-year-old Murphy pockets a fly that shouldn't exist, the men who lost it come looking.",
+  agentName: (id) => (id === "a1" ? "T. Marsh" : "Agent not recorded"),
   comps: [],
   isPro: false,
   scoutAvailable: true,

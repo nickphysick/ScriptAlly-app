@@ -100,8 +100,17 @@ describe("D16 — who holds what", () => {
   it("lists only who is currently holding something, with what and when", () => {
     const rows = holdingRows(queries, acts, versions, nameOf, day);
     expect(rows.map((r) => r.queryId)).toEqual(["q2", "q3", "q1"]);   // newest send first
-    expect(rows[0]).toEqual({ queryId: "q2", agent: "T. Marsh", what: "FULL · sent 02 08", versionName: "Post-R&R" });
+    expect(rows[0]).toEqual({
+      queryId: "q2", agent: "T. Marsh", what: "FULL · sent 02 08", versionName: "Post-R&R",
+      /* ⚠️ THE TWO HALVES, DERIVED HERE RATHER THAN SPLIT BACK OUT OF `what` BY A CALLER — the
+         book profile's Overview tables them as columns. `holds` states the two things the record
+         actually carries; the ref's `Partial · 50 pp` would be inventing a quantity, because the
+         holding knows the STATUS and not how many pages went. */
+      holds: "Full manuscript", sentDay: "02 08",
+    });
     expect(rows[1].what).toBe("PARTIAL · sent 11 06");
+    expect(rows[1].holds).toBe("Partial");
+    expect(rows[1].sentDay).toBe("11 06");
   });
 
   it("⚠️ NEWEST FIRST, and an undated send sorts LAST rather than reading as 'just now'", () => {
@@ -113,6 +122,9 @@ describe("D16 — who holds what", () => {
   it("says nothing rather than guessing where the send predates the feature", () => {
     const rows = holdingRows([q("q9", QueryStatus.FULL_SENT)], [], versions, nameOf, day);
     expect(rows[0].versionName).toBeNull();
+    /* An undated send states no date rather than a fabricated one — and still lists what they hold. */
+    expect(rows[0].sentDay).toBeNull();
+    expect(rows[0].holds).toBe("Full manuscript");
     /* and the row still renders — what they hold is a fact even when which version is not */
     expect(rows[0].what).toBe("FULL");
   });
