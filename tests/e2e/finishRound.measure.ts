@@ -30,6 +30,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { maybeMutate } from "./mutate";
 import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -84,6 +85,11 @@ test("finishing round", async ({ page }) => {
   const out: R[] = [];
   const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
   await ensureSignedIn(page);
+  /* ⚠️ THE MUTATION HOOK — how this suite proves it can still fail. With `SA_MUTATE` set, one named
+     thing on the page is broken before anything is measured, and the assertions that name it must
+     go RED. See `tests/e2e/mutate.ts` for why a suite that has never been watched failing is worth
+     nothing, and `proveReds.mjs` for the run that walks the whole catalogue. */
+  const mutation = await maybeMutate(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/todo");
   await page.waitForTimeout(7000);
@@ -559,7 +565,8 @@ test("finishing round", async ({ page }) => {
       table ? JSON.stringify(table.dismissAll) : "-");
 
   const red = out.filter((r) => !r.ok);
-  const lines = [`── finishing round · ${out.length} assertions · ${red.length} RED · ${out.length - red.length} green`];
+  const lines = [`── finishing round · ${out.length} assertions · ${red.length} RED · ${out.length - red.length} green`
+    + (mutation ? ` · MUTATED: ${mutation}` : "")];
   for (const r of out) lines.push(`  ${r.ok ? "green" : "RED  "}  ${r.id}\n           ${r.note}`);
   const report = lines.join("\n");
   writeFileSync(OUT, report);

@@ -32,6 +32,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
+import { maybeMutate } from "./mutate";
 import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
@@ -97,6 +98,11 @@ test("steer round", async ({ page }) => {
   const out: R[] = [];
   const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
   await ensureSignedIn(page);
+  /* ⚠️ THE MUTATION HOOK — how this suite proves it can still fail. With `SA_MUTATE` set, one named
+     thing on the page is broken before anything is measured, and the assertions that name it must
+     go RED. See `tests/e2e/mutate.ts` for why a suite that has never been watched failing is worth
+     nothing, and `proveReds.mjs` for the run that walks the whole catalogue. */
+  const mutation = await maybeMutate(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/todo");
   await page.waitForTimeout(7000);
@@ -125,6 +131,12 @@ test("steer round", async ({ page }) => {
       const nextSects = all(".tpn .q.open");
       const sq = nextSects.length ? nextSects[0].querySelector(".sqm") : null;
       const sqAnim = sq ? cs(sq).animationName : "";
+      /* ⚠️ THE SQUARE'S OWN VISIBILITY, ADDED BECAUSE THE CASE DID NOT CHECK IT (prove-reds, 26 Aug).
+         P2.1 counted OPEN ROWS and called that "exactly one square renders" — so deleting the rule
+         that shows the square (q.open .sqm { visibility: visible }) left the writer with no marker
+         at all and the assertion green. Found by aiming a mutation straight at it and watching
+         nothing happen. */
+      const sqShown = sq ? cs(sq).visibility : "none";
 
       /* every background inside the form card, at every depth — the coverage claim.
          NOTE (repair, 26 Aug): the steer square moved INSIDE this card when the ledger replaced the
@@ -161,6 +173,7 @@ test("steer round", async ({ page }) => {
       const go = all(".tpn .actbar .ab.go")[0];
       return {
         nextCount: nextSects.length,
+        sqShown,
         nextId: nextSects.length ? nextSects[0].id : "",
         sqAnim,
         bgs, bgCount, marks,
@@ -202,9 +215,9 @@ test("steer round", async ({ page }) => {
      to pick — `unit` is satisfied by the material itself, so the first unanswered really is
      `s-when` and the square is right. An assertion naming the section was asserting a property of
      the FIXTURE, not the law; the law is "exactly one, and it is the first still unanswered". */
-  add("P2.1 · exactly one square renders, and it is on a requirable section",
-      !!send && send.nextCount === 1 && /^s-/.test(send.nextId),
-      send ? `count=${send.nextCount} on=#${send.nextId}` : "-");
+  add("P2.1 · exactly one square renders, visibly, and it is on a requirable section",
+      !!send && send.nextCount === 1 && /^s-/.test(send.nextId) && send.sqShown === "visible",
+      send ? `count=${send.nextCount} on=#${send.nextId} visibility=${send.sqShown}` : "-");
   add("P2.2 · it breathes — the contract's own keyframes, not a blink",
       !!send && /sqPulse/i.test(send.sqAnim), send ? `animation=${send.sqAnim}` : "-");
   /* ⚠️ AN ABSENT FIXTURE IS REPORTED AS ABSENT — the same treatment P2.4 already gives a missing
@@ -568,7 +581,8 @@ test("steer round", async ({ page }) => {
       !!after && after.clipped.length === 0, after ? JSON.stringify(after.clipped) : "-");
 
   const red = out.filter((r) => !r.ok);
-  const lines = [`── steer round · ${out.length} assertions · ${red.length} RED · ${out.length - red.length} green`];
+  const lines = [`── steer round · ${out.length} assertions · ${red.length} RED · ${out.length - red.length} green`
+    + (mutation ? ` · MUTATED: ${mutation}` : "")];
   for (const r of out) lines.push(`  ${r.ok ? "green" : "RED  "}  ${r.id}\n           ${r.note}`);
   const report = lines.join("\n");
   writeFileSync(OUT, report);
