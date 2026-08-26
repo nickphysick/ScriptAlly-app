@@ -555,9 +555,16 @@
    takes pointer events so the caption can be reached; the element still has no handler, is still
    not a button and is still `aria-hidden`. Nothing became openable. Read the two together. */
 .tl-wp {
+  /* ⚠️ THE NUDGE IS HALF THE UPRIGHT'S OWN LINE, and it was the literal `-1px` — the last of the
+     four instances this pack's standing rule names. A zero-width element draws its whole border on
+     one side of its position, so it has to be pulled back by half of it to sit ON the day rather
+     than beside it. Written as `-1px` that is a number in one declaration silently depending on a
+     number in another; the day someone thickens the line to 3px, the upright is off by half a
+     pixel and nothing says why. */
+  --wp-line: 2px;
   width: 0; height: calc(var(--bar-h) + var(--wp-over) * 2);
-  transform: translate(-1px, -50%);
-  z-index: 3; border-left: 2px dashed #8a9e88;
+  transform: translate(calc(var(--wp-line) / -2), -50%);
+  z-index: 3; border-left: var(--wp-line) dashed #8a9e88;
   pointer-events: none;
 }
 .tl-wp.yours { border-left-color: #c9a89e; }
