@@ -17,6 +17,7 @@
 import { BoardCard } from "./todoBoard";
 import { sendSpecFor } from "./todoDock";
 import { ADDED_LABEL, cardBucket, taskDeed, Bucket } from "./todoBuckets";
+import { csvCell } from "./csvCell";
 
 export interface HandoffLink {
   /** The href, or null where the record has nothing to build one from. */
@@ -222,8 +223,11 @@ export function showingLine(shown: number, total: number): string {
  * comma in an agency name silently shifts every column after it, and without the BOM Excel reads
  * a manuscript title's curly apostrophe as mojibake.
  */
-const csvField = (v: string): string =>
-  /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+/* ⚠️ THE QUOTING WAS RIGHT AND IT WAS NOT ENOUGH. This escaped `"`, `,` and `\n` and never looked
+   at the first character, so a task or agency beginning `=` was written out and evaluated on open —
+   RFC quoting does not neutralise a formula. `csvCell` does both, in that order; see the reasoning
+   at its definition. Nothing else about this function's output changes. */
+const csvField = csvCell;
 
 export interface CsvRow {
   bucket: string;

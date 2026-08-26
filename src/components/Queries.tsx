@@ -188,6 +188,7 @@ import {
   ListChecks,
   RotateCcw
 } from "lucide-react";
+import { csvCell } from "../lib/csvCell";
 
 // Materials are rendered through the single formatQueryMaterial helper (src/lib/materials.ts) —
 // the one place a material (legacy string or structured QueryMaterial) becomes display text.
@@ -2744,13 +2745,16 @@ export const Queries: React.FC<{
   };
 
   const exportQueriesToCSV = (listToExport: Query[], baseFilename: string) => {
+    /* ⚠️ THE QUOTING WAS RIGHT AND IT WAS NOT ENOUGH. This escaped `"`, `,`, CR and LF and never
+       looked at the first character, so a cell beginning `=`/`+`/`-`/`@` was written out and
+       EVALUATED when the file opened — RFC quoting cannot neutralise a formula, because the
+       spreadsheet strips the CSV quotes before it parses the cell. And the text is not always the
+       writer's own: agent name, agency and email reach these rows through Smart Import, which
+       parses third-party CSVs and pasted emails. `csvCell` neutralises then quotes; the null /
+       number / trim handling that is this caller's own stays here. */
     const escapeCSVField = (val: string | number | undefined | null): string => {
       if (val === undefined || val === null) return "";
-      const str = String(val).trim();
-      if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
-        return `"${str.replace(/"/g, '""')}"`;
-      }
-      return str;
+      return csvCell(String(val).trim());
     };
 
     const formatCSVDate = (isoString?: string): string => {
