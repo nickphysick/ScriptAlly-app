@@ -13,7 +13,7 @@
  * ⚠️ IT WRITES THROUGH THE ADMIN SDK AND BYPASSES SECURITY RULES. `waitlist`, `counters` and
  * `ratelimits` are denied to every client in `firestore.rules`; this function is the only writer.
  *
- *   GET  /api/waitlist          → { visible, cap, count? }        — `count` ABSENT below the floor
+ *   GET  /api/waitlist          → { visible, cap, count? }   — `count` absent only when unreadable
  *   POST /api/waitlist          → { ok, alreadyJoined?, full?, count?, cap, position? }
  *   GET  /api/waitlist/verify?token=…  → 302 to /founders?verified=…
  *

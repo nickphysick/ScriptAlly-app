@@ -250,10 +250,15 @@ describe("rate limiting is per hashed IP per rolling window", () => {
 });
 
 describe("the settled decisions are pinned where a future edit will trip over them", () => {
-  it("double opt-in is built and OFF until mail sends", () => {
-    /* ⚠️ THIS IS THE ONE LINE THAT TURNS VERIFICATION ON. With it `true` and no email transport,
-       every signup sits `pending` forever and the counter never moves. */
-    expect(REQUIRE_VERIFICATION).toBe(false);
+  /**
+   * ⚠️ RETARGETED WITH THE FLAG, IN THE SAME COMMIT. It asserted `false` for two passes, correctly:
+   * with verification on and no transport, every signup sits `pending` for ever and the counter
+   * never moves. Mail is proven on dev now, so the honest claim is the opposite one — and it stays
+   * a lock rather than being deleted, because switching this back is a decision somebody should
+   * have to make deliberately rather than by editing a constant.
+   */
+  it("double opt-in is ON — nothing counts until a link is clicked", () => {
+    expect(REQUIRE_VERIFICATION).toBe(true);
   });
 
   it("the cap is a hundred and the floor is zero", () => {

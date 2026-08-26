@@ -43,7 +43,20 @@ export const COUNTER_FLOOR = 0;
  *
  * FLIPPING THIS IS THE WHOLE OF TURNING DOUBLE OPT-IN ON, once mail sends.
  */
-export const REQUIRE_VERIFICATION = false;
+/**
+ * ⚠️ DOUBLE OPT-IN IS ON. A join writes `pending` with a verify token and sends a confirmation;
+ * NOTHING counts until the link is clicked, and the cap is decided at verification rather than at
+ * submission. It was built `false` and stayed that way for two passes because verification needs
+ * an email — with no transport, every signup would have sat `pending` for ever and the counter
+ * would never have moved: a mechanic that looks finished and silently does nothing.
+ *
+ * ⚠️ IT WAS ONLY FLIPPED AFTER THE WHOLE ROUND TRIP WAS WATCHED ON DEV — confirmation received,
+ * verify link clicked, welcome received, unsubscribe clicked, and the counter seen moving both
+ * ways. Turning it on before that would have put every signup into a state nobody could leave.
+ * If mail ever stops working, this goes back to `false` before anything else is investigated:
+ * a pending queue nobody can clear is worse than single opt-in.
+ */
+export const REQUIRE_VERIFICATION = true;
 
 /** A verify link is good for 48 hours. */
 export const VERIFY_TTL_MS = 48 * 60 * 60 * 1000;
