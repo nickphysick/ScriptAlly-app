@@ -89,13 +89,33 @@ describe("the dossier renders one manuscript", () => {
     expect(html).not.toContain("⚠️");
   });
 
+  /**
+   * ⚠️ THE FIGURES MOVED FROM A STAT STRIP TO ONE MONO LINE, which is the re-cut and not a loss.
+   * They used to be `<div class="msv-statn">1</div>` in a three-cell column beside the title; the
+   * profile states them as clauses in the hero's facts line, and both counts are still there.
+   */
   it("states the manuscript's identity and its derived figures", () => {
     const html = doss();
     expect(html).toContain("Murphy&#x27;s Day Out");
     expect(html).toContain("Young Adult");
     expect(html).toContain("Thriller");
     expect(html).toContain("50,000 words");
-    expect(html).toContain('<div class="msv-statn">1</div>');
+    expect(html).toContain("<b>1</b> query sent");
+    expect(html).toContain("<b>0</b> responses");
+    // The stat strip is gone from this variant, not merely restyled.
+    expect(html).not.toContain("msv-statn");
+  });
+
+  /**
+   * ⚠️ A COUNT OF NOUGHT IS STATED; A DATE NOBODY HAS IS NOT. `0 queries sent` is a fact the writer
+   * needs. `Querying since` has no date behind it until something has gone out, and a dash there
+   * would be the app asserting a start it does not know — so the clause omits itself, and its
+   * separator goes with it because the separator is a `::before` rather than an element.
+   */
+  it("omits Querying since where nothing has been sent, and states it where something has", () => {
+    expect(doss({ queries: [] })).not.toContain("Querying since");
+    expect(doss({ queries: [] })).toContain("<b>0</b> queries sent");
+    expect(doss()).toContain("Querying since");
   });
 
   /* Genres arrive already resolved; the dossier must not be handed raw ids to print. */
@@ -152,41 +172,34 @@ describe("the dossier renders one manuscript", () => {
 });
 
 describe("the tab row", () => {
-  it("renders the four tabs, opening on The pitch", () => {
+  it("renders the five tabs, opening on Overview", () => {
     const html = doss();
     for (const t of MANUSCRIPT_TABS) expect(html).toContain(t.label);
-    expect(/aria-selected="true"[^>]*>The pitch</.test(html)).toBe(true);
+    expect(/aria-selected="true"[^>]*>Overview</.test(html)).toBe(true);
   });
 
   /**
-   * ⚠️ THE TAB AND ITS PANE ARRIVED TOGETHER, which is why the Phase 2 lock that forbade the tab
-   * could come out here. A tab is only allowed to exist once something is behind it — this asserts
-   * the pairing directly, so neither half can ship alone.
+   * ⚠️ PHASE 2 IS THE SCAFFOLD AND THE LOCK SAYS SO RATHER THAN PRETENDING OTHERWISE. The rule this
+   * replaces — "advertises no tab without a pane behind it" — is the right rule and it is coming
+   * back; Overview, Journey and Notes arrive in Phases 3, 4 and 6, and it is restated then over all
+   * five. Asserting it now would either go red on a deliberate intermediate state or, worse, be
+   * loosened to something that passes and never tightened again. What IS locked meanwhile is that
+   * the two panes carried across the re-cut still render, so nothing that worked before it stopped
+   * working during it.
    */
-  it("advertises no tab without a pane behind it", () => {
-    for (const t of MANUSCRIPT_TABS) {
-      const html = doss({ tab: t.key });
-      expect(html, `${t.label} renders an empty pane`).toContain('class="msv-dpane"');
-      expect(html.split('class="msv-dpane"')[1]?.trim().startsWith("></div>"), `${t.label} has nothing behind it`).toBe(false);
-    }
-  });
-
-  /* Each assertion names something only THAT pane renders — a marker common to all three (the back
-     link, the plateband) would pass on every tab and prove nothing about switching. */
-  it("renders each pane on its own tab, and only its own", () => {
-    expect(doss({ tab: "pitch" })).toContain("of your pitch");
-
-    const record = doss({ tab: "details" });
-    expect(record).toContain("Out in the world");
-    expect(record).not.toContain("Materials on file");
-
+  it("carries Comparable titles and Versions across the re-cut", () => {
     const comps = doss({ tab: "comps", comps: [{ title: "The Salt Path", year: 2018 }] });
     expect(comps).toContain("The Salt Path");
-    expect(comps).not.toContain("Out in the world");
 
-    const packages = doss({ tab: "packages" });
-    expect(packages).toContain("Materials on file");
-    expect(packages).not.toContain("Out in the world");
+    const versions = doss({ tab: "versions" });
+    expect(versions).toContain('class="msv-dpane msp-pane"');
+    expect(versions.split('class="msv-dpane msp-pane"')[1]?.trim().startsWith("></div>")).toBe(false);
+  });
+
+  it("renders each carried pane on its own tab, and only its own", () => {
+    const comps = doss({ tab: "comps", comps: [{ title: "The Salt Path", year: 2018 }] });
+    expect(doss({ tab: "versions" })).not.toContain("The Salt Path");
+    expect(comps).toContain("The Salt Path");
   });
 });
 

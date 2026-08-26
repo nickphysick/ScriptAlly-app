@@ -45,6 +45,8 @@ import { genreDisplay } from "../lib/genres";
 import { londonDay } from "../lib/queryingGoals";
 import type { BookVersion } from "../types";
 import { genreList, splitGenres } from "./manuscripts/plateEdit";
+import { SectionHeader } from "./containers/SectionHeader";
+import { shelfMeta } from "../lib/manuscriptProfile";
 import "./manuscripts/manuscripts.css";
 
 /** Shared with the comps + packages sub-pages — the section's single active-manuscript pointer. */
@@ -342,6 +344,34 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
           </div>
         ) : (
           <>
+            {/**
+              * ⚠️ ONE SECTION HEADER, AND IT IS TRUE IN BOTH STATES. "Your shelf" introduces the
+              * library whether you are browsing it or reading one book off it, so it renders above
+              * the grid and above an open profile alike — the alternative was two headers saying
+              * the same thing in two places, which is how they come to disagree.
+              *
+              * ⚠️ NO ACCENT UNDERLINE. Packages puts a burgundy tick on its band heads; this page
+              * does not, by ruling — which is why `SectionHeader` takes the tick as a prop instead
+              * of defaulting to one.
+              *
+              * ⚠️ AND `How it works` IS NOT RENDERED. The ref draws one beside the CTA; this page
+              * has no explainer surface for it to open, and the house rule is that the shell
+              * renders what EXISTS. A control that goes nowhere teaches the wrong shape of the app.
+              */}
+            <SectionHeader
+              title="Your shelf"
+              meta={shelfMeta(ordered.length, queries.length)}
+              actions={
+                <button
+                  type="button"
+                  className="msv-btn sm"
+                  onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
+                >
+                  <Plus />
+                  Add a manuscript
+                </button>
+              }
+            />
             {/*
               ⚠️ THE GRID IS THE SWITCHER NOW. The shelf switcher that used to sit here is DELETED,
               not hidden: it existed to pick the one card's subject, and the library does that by

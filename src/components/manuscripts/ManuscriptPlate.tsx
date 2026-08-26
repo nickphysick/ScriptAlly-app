@@ -49,8 +49,11 @@ import "./manuscriptPlate.css";
 export interface ManuscriptPlateEdit {
   onTitle: (title: string) => void;
   onWordCount: (words: number) => void;
-  /** The logline is a pitch-shelf asset — this jumps to it rather than editing here. One home each. */
-  onLogline: () => void;
+  /** The logline is a pitch asset — this jumps to it rather than editing here. One home each.
+   *  ⚠️ OPTIONAL, because the `hero` variant does not render the logline at all: requiring a
+   *  handler there would have meant passing a closure that can never run, and a control wired to
+   *  nothing is worse than no control. Absent → the logline renders, un-editable. */
+  onLogline?: () => void;
   genre: {
     ageCategory: string;
     /** Stored ids, primary first. */
@@ -81,6 +84,22 @@ export interface ManuscriptPlateProps {
    * clothes; the Agents page keeps its ⋯ for the same reason.
    */
   lifecycle?: React.ReactNode;
+  /**
+   * ⚠️ `hero` IS THE BOOK PROFILE'S IDENTITY BLOCK, AND IT EXISTS SO THE THREE INLINE EDITORS
+   * SURVIVE THE RE-CUT. The profile's hero draws its own cover (overlapping the banner), its own
+   * actions and its own facts line, so in that variant this component drops its mark, its stat
+   * strip, its action column and the logline, and renders the identity alone. Building the hero's
+   * identity fresh instead would have meant a second title/genre/word-count editor — three
+   * popovers, their portals, their validation and a 585-line spec — or losing them, which is a
+   * functional regression wearing a design decision's clothes.
+   *
+   * ⚠️ AND THE STATUS PILL MOVES ONTO THE TITLE'S ROW. In `plate` it sits above the title; the
+   * profile puts the two side by side. That is a DOM change rather than a CSS one, because a
+   * `flex` reorder would leave the reading order disagreeing with the visual one.
+   */
+  variant?: "plate" | "hero";
+  /** Hero only — the derived clauses appended to the facts line (counts, querying-since). */
+  facts?: React.ReactNode;
 }
 
 export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
@@ -94,7 +113,10 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
   onSendQuery,
   edit,
   lifecycle,
+  variant = "plate",
+  facts,
 }) => {
+  const hero = variant === "hero";
   const [open, setOpen] = useState<"title" | "words" | "genre" | null>(null);
   const [receipt, setReceipt] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
@@ -231,43 +253,56 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
     : genres;
   const pills = edit ? [edit.genre.ageCategory, ...genreLabels].filter(Boolean) : genres;
 
+  /**
+   * ⚠️ ONE DECLARATION EACH, RENDERED IN TWO ORDERS. Writing the hero's toprow as a second copy of
+   * the title is how the editable branch and the read-only one come to disagree — and only one of
+   * the two would be under test.
+   */
+  const pillNode = (
+    <span className={`msv-statuspill${shelved ? " grey" : ""}`}>
+      <span className="msv-dt" />
+      {status}
+    </span>
+  );
+  const titleNode = open === "title" && edit ? (
+    <input
+      ref={titleRef}
+      className="msv-platetitle msv-titleinput"
+      value={titleDraft}
+      aria-label="Title"
+      onChange={(e) => setTitleDraft(e.target.value)}
+      onKeyDown={(e) => onKey(e, saveTitle)}
+      onBlur={saveTitle}
+    />
+  ) : (
+    <h2
+      className={`msv-platetitle${edit ? " editable" : ""}`}
+      onClick={openTitle}
+      {...(edit ? { role: "button", tabIndex: 0, "aria-label": `Edit title — ${title}`,
+                    onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter") openTitle(); } } : {})}
+    >
+      {title}
+    </h2>
+  );
+
   return (
-    <div className="msv-plateband" ref={bandRef}>
+    <div className={`msv-plateband${hero ? " msv-plateband--hero" : ""}`} ref={bandRef}>
       {/*
         ⚠️ THE PLATE MARK IS THE DASHBOARD'S PNG, IMPORTED — not a traced SVG sibling of the four in
         manuscriptMarks.tsx. `OneScreenAuthor` already renders this exact asset the same way
         (contained, no blend mode). One asset, one home.
       */}
-      <div className="msv-plateimg">
-        <img src={manuscriptIcon} alt="" />
-      </div>
+      {/* The hero draws its own cover, overlapping the banner — one book image per card. */}
+      {!hero && (
+        <div className="msv-plateimg">
+          <img src={manuscriptIcon} alt="" />
+        </div>
+      )}
 
       <div className="msv-plateid">
-        <span className={`msv-statuspill${shelved ? " grey" : ""}`}>
-          <span className="msv-dt" />
-          {status}
-        </span>
-
-        {open === "title" && edit ? (
-          <input
-            ref={titleRef}
-            className="msv-platetitle msv-titleinput"
-            value={titleDraft}
-            aria-label="Title"
-            onChange={(e) => setTitleDraft(e.target.value)}
-            onKeyDown={(e) => onKey(e, saveTitle)}
-            onBlur={saveTitle}
-          />
-        ) : (
-          <h2
-            className={`msv-platetitle${edit ? " editable" : ""}`}
-            onClick={openTitle}
-            {...(edit ? { role: "button", tabIndex: 0, "aria-label": `Edit title — ${title}`,
-                          onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter") openTitle(); } } : {})}
-          >
-            {title}
-          </h2>
-        )}
+        {hero
+          ? <div className="msv-toprow">{titleNode}{pillNode}</div>
+          : <>{pillNode}{titleNode}</>}
 
         <div className="msv-platemeta">
           {/* One anchor around the pills — the popover hangs off the group, not off whichever pill
@@ -299,6 +334,7 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
               <span className="msv-wc">{wordCount.toLocaleString("en-GB")} words</span>
             )
           )}
+          {facts}
           {receipt && <span className="msv-receipt" role="status">{SAVED_RECEIPT}</span>}
         </div>
 
@@ -367,9 +403,11 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
           document.body
         )}
 
-        {/* No logline → nothing. A prompt to write one belongs on the pitch shelf, which owns it. */}
-        {logline ? (
-          edit ? (
+        {/* No logline → nothing. A prompt to write one belongs on the pitch shelf, which owns it.
+            The hero states no logline at all: the profile's Overview opens on the elevator pitch,
+            and two versions of the same sentence a screen apart is one too many. */}
+        {!hero && logline ? (
+          edit?.onLogline ? (
             <button type="button" className="msv-platelog editable" onClick={edit.onLogline}>
               {logline}
             </button>
@@ -379,7 +417,8 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
         ) : null}
       </div>
 
-      <div className="msv-plateside">
+      {/* The hero carries the counts in its facts line and its actions beside the title. */}
+      {!hero && <div className="msv-plateside">
         <div className="msv-statstrip">
           {plateStatCells(stats).map((cell) => (
             <div key={cell.key} className="msv-stat">
@@ -397,7 +436,7 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
           )}
           {lifecycle}
         </div>
-      </div>
+      </div>}
 
       {open === "words" && edit && createPortal(
         <div className={themeClass}><div className="msv1 msv-portal">

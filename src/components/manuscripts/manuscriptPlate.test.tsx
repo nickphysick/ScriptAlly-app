@@ -13,7 +13,7 @@ import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ManuscriptPlate, ManuscriptPlateProps } from "./ManuscriptPlate";
-import { ManuscriptTabs, MANUSCRIPT_TABS, DEFAULT_MANUSCRIPT_TAB } from "./ManuscriptTabs";
+import { ManuscriptTabs, MANUSCRIPT_TABS, DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./ManuscriptTabs";
 import { plateStats, plateStatCells, formatPlateDate } from "../../lib/manuscriptPlate";
 import { Query, QueryStatus } from "../../types";
 
@@ -172,24 +172,59 @@ describe("⚠️ the plate mark is the dashboard PNG, not a fifth traced SVG", (
 });
 
 describe("the tab row", () => {
-  const tabs = (active = DEFAULT_MANUSCRIPT_TAB) =>
-    renderToStaticMarkup(React.createElement(ManuscriptTabs, { active, onChange: () => {} }));
+  const tabs = (active = DEFAULT_MANUSCRIPT_TAB, counts?: Partial<Record<ManuscriptTabKey, number>>) =>
+    renderToStaticMarkup(React.createElement(ManuscriptTabs, { active, onChange: () => {}, counts }));
 
-  /* ⚠️ THE KEYS ARE INTERNAL, THE LABELS ARE THE PRODUCT. The reframe renames the first pane to
-     "The record"; the key stays `details` because renaming it would churn every call site to say
-     the same thing twice. */
-  it("is the four tabs, in order", () => {
-    expect(MANUSCRIPT_TABS.map((t) => t.key)).toEqual(["pitch", "details", "comps", "packages"]);
+  /**
+   * ⚠️ THE BOOK PROFILE'S FIVE, AND THE ABSENCE IS AS DELIBERATE AS THE PRESENCE. There is no
+   * Packages tab: sample material points at a book version and packages never reference a version,
+   * so a tab here would advertise an edge that does not exist and must not be created. Packages
+   * reach this page as a footer link.
+   */
+  it("is the five tabs, in order", () => {
+    expect(MANUSCRIPT_TABS.map((t) => t.key)).toEqual(["overview", "journey", "comps", "versions", "notes"]);
     expect(MANUSCRIPT_TABS.map((t) => t.label)).toEqual([
-      "The pitch", "The record", "Comparable titles", "Submission packages",
+      "Overview", "Journey", "Comparable titles", "Versions", "Notes",
     ]);
   });
 
-  /* ⚠️ THE PITCH IS FIRST AND IS THE DEFAULT because it is what the page is FOR. The reframe's
-     complaint about the old page was that nothing on it had been put there by the writer; the pitch
-     shelf is the answer, so it is what the dossier opens on. */
-  it("opens on The pitch", () => {
-    expect(DEFAULT_MANUSCRIPT_TAB).toBe("pitch");
+  it("has no packages tab, by either name", () => {
+    expect(MANUSCRIPT_TABS.map((t) => t.key)).not.toContain("packages");
+    expect(tabs().toLowerCase()).not.toContain("package");
+  });
+
+  it("opens on Overview", () => {
+    expect(DEFAULT_MANUSCRIPT_TAB).toBe("overview");
+  });
+
+  /**
+   * ⚠️ ONLY VERSIONS IS PRO. Comparable titles is a free tab (only its Scout is gated) and
+   * packages have no gate at all — a pill on either sells a writer what they already have, which
+   * this page has got wrong once before.
+   */
+  it("carries exactly one Pro pill, on Versions", () => {
+    expect(MANUSCRIPT_TABS.filter((t) => t.pro).map((t) => t.key)).toEqual(["versions"]);
+    expect(tabs().match(/msp-tabpro/g)).toHaveLength(1);
+  });
+
+  it("states a count where one is given, and renders none where it is not", () => {
+    const html = tabs("overview", { comps: 6, versions: 3 });
+    expect(html).toContain('<span class="msp-tabcnt">6</span>');
+    expect(html).toContain('<span class="msp-tabcnt">3</span>');
+    // Notes declares itself counted; nobody supplied one, so nothing is stated.
+    expect(html.match(/msp-tabcnt/g)).toHaveLength(2);
+  });
+
+  /* ⚠️ A COUNT OF NOUGHT IS A FACT AND IS STATED — "the shelf is empty" is the single most useful
+     thing that tab can say. A falsy guard here would silently swallow it. */
+  it("states a count of nought", () => {
+    expect(tabs("overview", { comps: 0 })).toContain('<span class="msp-tabcnt">0</span>');
+  });
+
+  it("never invents a count for an uncounted tab", () => {
+    // Overview and Journey are not counted; handing them a number changes nothing.
+    const html = tabs("overview", { overview: 9, journey: 9 } as Partial<Record<ManuscriptTabKey, number>>);
+    expect(html).not.toContain("9");
   });
 
   /** The selected label, read back off the rendered row — attribute order is React's, not ours. */
@@ -197,33 +232,43 @@ describe("the tab row", () => {
     /aria-selected="true"[^>]*>([^<]+)</.exec(html)?.[1] ?? null;
 
   it("marks exactly one tab active, and it moves with the prop", () => {
-    expect(selectedLabel(tabs("pitch"))).toBe("The pitch");
-    expect(selectedLabel(tabs("details"))).toBe("The record");
+    expect(selectedLabel(tabs("overview"))).toBe("Overview");
+    expect(selectedLabel(tabs("journey"))).toBe("Journey");
     expect(selectedLabel(tabs("comps"))).toBe("Comparable titles");
-    expect(selectedLabel(tabs("packages"))).toBe("Submission packages");
-    for (const active of ["pitch", "details", "comps", "packages"] as const) {
+    expect(selectedLabel(tabs("versions"))).toBe("Versions");
+    expect(selectedLabel(tabs("notes"))).toBe("Notes");
+    for (const active of ["overview", "journey", "comps", "versions", "notes"] as const) {
       expect(tabs(active).match(/aria-selected="true"/g)).toHaveLength(1);
-      expect(tabs(active).match(/msv-tab on/g)).toHaveLength(1);
+      expect(tabs(active).match(/msp-tab on/g)).toHaveLength(1);
     }
   });
 
   it("calls onChange with the tab's key", () => {
     const seen: string[] = [];
-    const row = ManuscriptTabs({ active: "details", onChange: (k) => seen.push(k) }) as React.ReactElement;
+    const row = ManuscriptTabs({ active: "overview", onChange: (k) => seen.push(k) }) as React.ReactElement;
     const children = (row.props as { children: React.ReactElement[] }).children;
     children.forEach((c) => (c.props as { onClick: () => void }).onClick());
-    expect(seen).toEqual(["pitch", "details", "comps", "packages"]);
+    expect(seen).toEqual(["overview", "journey", "comps", "versions", "notes"]);
   });
 
   /**
-   * ⚠️ THE MOCKUP DRAWS A PRO CHIP ON SUBMISSION PACKAGES AND IT IS NOT BUILT. That route has no
-   * Pro gate, so the chip would sell a feature the user already has — the same bug that already
-   * caused a Pro-selling landing to be retired from packages once.
+   * ⚠️ THE RULE IS UNCHANGED AND ITS ANSWER MOVED, WHICH IS WORTH SAYING PLAINLY. It used to read
+   * "no Pro chip on ANY tab", because the mockup drew one on Submission packages — a route with no
+   * gate, where a chip sells a writer what they already have. The book profile has no packages tab
+   * at all, and it has one tab that IS gated. So the law survives verbatim — a chip only where
+   * there is a gate — and the tab set is what changed underneath it.
    */
-  it("carries NO Pro chip on any tab", () => {
-    for (const active of ["pitch", "details", "comps", "packages"] as const) {
-      expect(tabs(active)).not.toMatch(/prochip|>Pro</i);
-    }
+  it("chips only what is actually gated", () => {
+    /* ⚠️ PER BUTTON, NOT PER ROW. `tabs()` renders the whole rail, so asking whether the ROW
+       contains a chip is answered by Versions' own chip whatever tab you name — a check that
+       would pass with a chip on all five. The claim is about each tab, so each tab is measured. */
+    const buttons = tabs().match(/<button[\s\S]*?<\/button>/g) ?? [];
+    expect(buttons).toHaveLength(MANUSCRIPT_TABS.length);
+    buttons.forEach((b, i) => {
+      const spec = MANUSCRIPT_TABS[i];
+      expect(/msp-tabpro/.test(b), `${spec.label}: chip ${spec.pro ? "missing" : "present"}`)
+        .toBe(!!spec.pro);
+    });
   });
 
   /** No route, no URL param — a tab is a toggle inside the card, not navigation. */

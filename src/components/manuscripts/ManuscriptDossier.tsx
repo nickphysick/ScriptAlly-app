@@ -26,18 +26,16 @@ import type { Activity, BookVersion } from "../../types";
 import { bookVersionsOf } from "../../lib/bookVersions";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import { plateStats } from "../../lib/manuscriptPlate";
-import { outInTheWorld, comparableTitlesTile, onTheShelf, submissionMaterials } from "../../lib/manuscriptTiles";
-import { ManuscriptPlate } from "./ManuscriptPlate";
-import { ManuscriptTabs, ManuscriptTabKey } from "./ManuscriptTabs";
-import { ManuscriptDetailTiles } from "./ManuscriptDetailTiles";
+import { heroFacts, queryingSinceMs } from "../../lib/manuscriptProfile";
+import { ManuscriptTabKey } from "./ManuscriptTabs";
+import { ManuscriptHero } from "./ManuscriptHero";
 import { BookVersionsPanel } from "./BookVersionsPanel";
 import { ManuscriptCompsPane } from "./ManuscriptCompsPane";
-import { ManuscriptPackagesPane } from "./ManuscriptPackagesPane";
-import { ManuscriptPitchPane } from "./ManuscriptPitchPane";
 import { PitchAsset, PitchAssetKey } from "../../lib/manuscriptPitch";
 import { ManuscriptPlateEdit } from "./ManuscriptPlate";
 import { PitchLine } from "../../lib/comps";
 import "./manuscriptLibrary.css";
+import "./bookProfile.css";
 
 export interface ManuscriptDossierProps {
   manuscript: Manuscript;
@@ -122,6 +120,7 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const shelved = isShelvedPresentation(manuscript);
+  const stats = plateStats(queries);
 
   return (
     <div className="msv-doss">
@@ -134,19 +133,35 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
         at one manuscript and at five.
       */}
       <div className="msv-card msv-dcard">
-        <ManuscriptPlate
+        <ManuscriptHero
           title={manuscript.title}
           status={shelved ? "Shelved" : manuscript.status}
           shelved={shelved}
           genres={genres}
           wordCount={manuscript.wordCount}
-          logline={manuscript.logline}
-          stats={plateStats(queries)}
-          onSendQuery={onSendQuery}
-          edit={plateEdit ? { ...plateEdit, onLogline: () => onTabChange("pitch") } : undefined}
-          /* Shelve / reactivate / guarded delete — the design draws two actions and this is a third,
-             quiet one. It has no other surface on this page; see ManuscriptPlate's prop note. */
-          lifecycle={
+          stats={stats}
+          facts={heroFacts(stats.queriesSent, stats.responses, queryingSinceMs(queries))}
+          edit={plateEdit}
+          tab={tab}
+          onTabChange={onTabChange}
+          /* ⚠️ `notes` IS DELIBERATELY ABSENT UNTIL ITS PANE EXISTS. The tab declares itself
+             counted and renders no count while the caller supplies none — which is the honest
+             state, and the opposite of writing `0` for data nobody has fetched. */
+          counts={{ comps: comps.length, versions: bookVersionsOf(manuscript).length }}
+          actions={
+            <>
+              {/* A shelved manuscript offers no Send — the same rule the library grid applies. */}
+              {!shelved && (
+                <button type="button" className="msv-btn sm msv-primary" onClick={onSendQuery}>
+                  Send a query
+                </button>
+              )}
+              <button type="button" className="msv-btn sm" onClick={onOpenQueriesHub}>
+                Query Centre ›
+              </button>
+              {/* Shelve / reactivate / guarded delete, and the three fields with no inline editor
+                  (status, shelved reason, notes) reach their form through here. The design draws
+                  two actions; dropping this would be a functional regression in a mockup's clothes. */}
             <div style={{ position: "relative" }}>
               <button
                 type="button"
@@ -199,61 +214,20 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
                 </>
               )}
             </div>
+            </>
           }
         />
 
-        <ManuscriptTabs active={tab} onChange={onTabChange} />
 
         {/*
           ⚠️ THE PANE BODY IS THE ONLY THING THAT SCROLLS. The plateband and the tab row are
           `flex: 0 0 auto` above it; this takes the remainder with `min-height: 0` so it can be
           shorter than its content instead of pushing the card past the viewport.
         */}
-        <div className="msv-dpane">
-          {tab === "pitch" && (
-            <ManuscriptPitchPane
-              assets={pitchAssets}
-              pitch={pitch}
-              pitchText={pitchText}
-              synopsisVersionCount={synopsisVersionCount}
-              synopsisDate={synopsisDate}
-              onCopy={onCopyPitch}
-              onSave={onSavePitch}
-              /* Both the synopsis's Edit and its Write it land in the Workshop — the single home. */
-              onOpenWorkshop={onOpenPackageBuilder}
-            />
-          )}
-
-          {tab === "details" && (
-            <div className="msv-dbody">
-              <ManuscriptDetailTiles
-                world={outInTheWorld(queries)}
-                comps={comparableTitlesTile(comps)}
-                shelf={onTheShelf(manuscript, now)}
-                materials={submissionMaterials(packages, versions)}
-                onOpenQueriesHub={onOpenQueriesHub}
-                /* A TAB SWITCH, not a navigation — the shelf is a pane of this card. */
-                onOpenShelf={() => onTabChange("comps")}
-                onEditDetails={onEditDetails}
-                onOpenPackageBuilder={onOpenPackageBuilder}
-              />
-              {/**
-                * ⚠️ THE VERSIONS PANEL LIVES ON "THE RECORD", not on its own tab. It is a fact
-                * about the manuscript's own shape, which is what this tab is; a fifth tab would
-                * advertise the feature to every writer who has never used it, which is exactly what
-                * the gate exists to prevent.
-                */}
-              <BookVersionsPanel
-                versions={bookVersionsOf(manuscript)}
-                materials={versions}
-                queries={queries}
-                activities={activities}
-                today={today}
-                onSave={onSaveBookVersions}
-              />
-            </div>
-          )}
-
+        <div className="msv-dpane msp-pane">
+          {/* ⚠️ PHASE 2 IS THE SCAFFOLD. Overview, Journey and Notes arrive in Phases 3, 4 and 6;
+              Comparable titles and Versions carry their existing panes across so nothing that
+              worked before this re-cut stops working during it. */}
           {tab === "comps" && (
             <ManuscriptCompsPane
               comps={comps}
@@ -269,11 +243,14 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
             />
           )}
 
-          {tab === "packages" && (
-            <ManuscriptPackagesPane
-              versions={versions}
-              packages={packages}
-              onOpenBuilder={onOpenPackageBuilder}
+          {tab === "versions" && (
+            <BookVersionsPanel
+              versions={bookVersionsOf(manuscript)}
+              materials={versions}
+              queries={queries}
+              activities={activities}
+              today={today}
+              onSave={onSaveBookVersions}
             />
           )}
         </div>

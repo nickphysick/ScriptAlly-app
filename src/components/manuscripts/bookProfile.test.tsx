@@ -1,0 +1,239 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * ══ THE BOOK PROFILE — the hero, and the facts line's honesty rule ════════════════════════════
+ *
+ * ⚠️ THE ONE RULE WORTH THE MOST HERE IS THE ASYMMETRY BETWEEN A NOUGHT AND AN ABSENCE. `0 queries
+ * sent` is a fact the writer needs; `Querying since —` is the app asserting a start it does not
+ * know. They look alike in a template and are opposites, and this repo has shipped the second kind
+ * before (an "Added" date derived from an imported query's send).
+ */
+import { describe, it, expect } from "vitest";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { ManuscriptHero, HERO_BANNER_SLOT } from "./ManuscriptHero";
+import { heroFacts, queryingSinceMs, shelfMeta, profileDate } from "../../lib/manuscriptProfile";
+import { Query, QueryStatus } from "../../types";
+
+const css = readFileSync(join(__dirname, "bookProfile.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+/**
+ * ⚠️ MEDIA BLOCKS ARE STRIPPED BEFORE THE ONE-RULE SCAN, and that is a real distinction rather
+ * than a convenience. A responsive override is a SECOND declaration on purpose — `.msp-herorow`
+ * wraps below 900 — so counting it as a duplicate would either fail on correct CSS or force the
+ * check to be loosened until it caught nothing. The fault this scan exists for is two base rules
+ * at the same breakpoint, where the cascade silently takes half of each.
+ */
+const base = css.replace(/@media[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, "");
+/** Every metacharacter escaped — these selectors carry `>`, `+`, `*` and `::`. */
+const rx = (sel: string) => sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const baseRules = (sel: string): string[] => {
+  const out: string[] = [];
+  const re = new RegExp(`(?:^|\\n)\\s*${rx(sel)}\\s*\\{([^}]*)\\}`, "g");
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(base))) out.push(m[1]);
+  return out;
+};
+const theRule = (sel: string): string => {
+  const all = baseRules(sel);
+  expect(all.length, `${sel} has ${all.length} base rules, expected exactly 1`).toBe(1);
+  return all[0];
+};
+
+const q = (id: string, dateSent: string): Query =>
+  ({ id, userId: "u", manuscriptId: "m1", agentId: "a1", packageId: "", status: QueryStatus.QUERIED,
+     dateSent, materialsWanted: [] } as unknown as Query);
+
+const hero = (over: Partial<React.ComponentProps<typeof ManuscriptHero>> = {}) =>
+  renderToStaticMarkup(
+    <ManuscriptHero
+      title="Murphy's Day Out"
+      status="Querying"
+      shelved={false}
+      genres={["Young Adult", "Thriller"]}
+      wordCount={50000}
+      stats={{ queriesSent: 26, responses: 12, lastActivity: "2 Jun" }}
+      facts={heroFacts(26, 12, Date.parse("2026-01-14"))}
+      tab="overview"
+      onTabChange={() => {}}
+      {...over}
+    />,
+  );
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("queryingSinceMs — the EARLIEST send, and never a stand-in for it", () => {
+  it("is the first query out, not the last and not the manuscript's own age", () => {
+    const ms = queryingSinceMs([q("a", "2026-05-02"), q("b", "2026-01-14"), q("c", "2026-03-09")]);
+    expect(profileDate(ms!)).toBe("14 Jan 2026");
+  });
+
+  /** Nothing sent → no date exists. The caller then states no clause, rather than dashing one. */
+  it("is null when nothing has gone out", () => {
+    expect(queryingSinceMs([])).toBeNull();
+  });
+
+  /** An undated import must not become "today" by falling through a coercion. */
+  it("ignores a query with no send date rather than inventing one", () => {
+    const undated = { ...q("x", ""), dateSent: undefined } as unknown as Query;
+    expect(queryingSinceMs([undated])).toBeNull();
+    expect(profileDate(queryingSinceMs([undated, q("b", "2026-02-01")])!)).toBe("1 Feb 2026");
+  });
+
+  it("reads a Firestore Timestamp as well as an ISO string", () => {
+    const stamped = { ...q("t", ""), dateSent: { seconds: Date.parse("2026-04-05") / 1000 } } as unknown as Query;
+    expect(profileDate(queryingSinceMs([stamped])!)).toBe("5 Apr 2026");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("heroFacts — a nought is stated, a missing date is not", () => {
+  it("states both counts at nought and omits the date entirely", () => {
+    expect(heroFacts(0, 0, null)).toEqual([
+      { key: "sent", label: "queries sent", value: "0" },
+      { key: "responses", label: "responses", value: "0" },
+    ]);
+  });
+
+  it("never emits a dash, an em dash or an empty value for the missing date", () => {
+    for (const f of heroFacts(0, 0, null)) {
+      expect(f.value).not.toMatch(/^[—–-]?$/);
+    }
+    expect(heroFacts(0, 0, null).map((f) => f.key)).not.toContain("since");
+  });
+
+  it("agrees with its own verbs", () => {
+    expect(heroFacts(1, 1, null).map((f) => f.label)).toEqual(["query sent", "response"]);
+    expect(heroFacts(2, 0, null).map((f) => f.label)).toEqual(["queries sent", "responses"]);
+  });
+
+  it("states the date once there is one", () => {
+    const facts = heroFacts(26, 12, Date.parse("2026-01-14"));
+    expect(facts[2]).toEqual({ key: "since", label: "Querying since", value: "14 Jan 2026" });
+  });
+});
+
+describe("shelfMeta", () => {
+  it("agrees with its own verbs, at one and at many", () => {
+    expect(shelfMeta(1, 1)).toBe("1 manuscript · 1 query");
+    expect(shelfMeta(2, 26)).toBe("2 manuscripts · 26 queries");
+    expect(shelfMeta(0, 0)).toBe("0 manuscripts · 0 queries");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("the hero", () => {
+  it("declares the banner as a commission slot rather than pretending it is artwork", () => {
+    const html = hero();
+    expect(html).toContain(`data-slot="${HERO_BANNER_SLOT}"`);
+    // The mono key is the only thing on the page that says the drawing has not arrived.
+    expect(html).toContain(`<span class="msp-artkey">${HERO_BANNER_SLOT}</span>`);
+  });
+
+  /**
+   * ⚠️ THE TITLE COMES BEFORE THE STATUS IN THE DOM, not just on screen. Reordering with flex would
+   * leave a screen reader hearing "Querying, Murphy's Day Out" — the pill first, as it is in the
+   * plate variant, where it sits above the title and that reading is correct.
+   */
+  it("puts the title before its status pill, in one row", () => {
+    const html = hero();
+    const row = /<div class="msv-toprow">([\s\S]*?)<\/div><\/div>/.exec(html)?.[1] ?? "";
+    expect(row).toContain("Murphy");
+    expect(row.indexOf("msv-platetitle")).toBeGreaterThan(-1);
+    expect(row.indexOf("msv-platetitle")).toBeLessThan(row.indexOf("msv-statuspill"));
+  });
+
+  /**
+   * ⚠️ THE COVER OVERLAPS IN FLOW. A negative margin against a white keyline, never
+   * `position: absolute` — positioned, it leaves the flow and a wrapped title runs underneath it.
+   */
+  it("overlaps the banner with a margin, not by leaving the flow", () => {
+    const rule = theRule(".msp-cover");
+    expect(rule).toMatch(/margin-top:\s*-\d+px/);
+    expect(rule).not.toMatch(/position:\s*absolute/);
+    expect(rule).toContain("flex: none");
+  });
+
+  it("draws exactly one book image — the hero's cover, not the plate's mark too", () => {
+    expect(hero().match(/<img/g)).toHaveLength(1);
+    expect(hero()).not.toContain("msv-plateimg");
+  });
+
+  /** The counts and the actions moved to the hero; the plate's own side column must not render. */
+  it("drops the plate's stat strip and action column", () => {
+    const html = hero();
+    expect(html).not.toContain("msv-plateside");
+    expect(html).not.toContain("msv-statstrip");
+  });
+
+  it("states the derived facts as one line, figures in the stronger ink", () => {
+    const html = hero();
+    expect(html).toContain("<b>26</b> queries sent");
+    expect(html).toContain("<b>12</b> responses");
+    expect(html).toContain("Querying since <b>14 Jan 2026</b>");
+  });
+
+  /**
+   * ⚠️ THE SEPARATOR IS A `::before`, NOT AN ELEMENT — which is the whole reason an omitted clause
+   * cannot leave a stray interpunct behind it. The ref draws `<span class="ip">·</span>` between
+   * its clauses; taken literally, dropping `Querying since` would have left the dot before it.
+   */
+  it("carries no punctuation-only markup between the clauses", () => {
+    const html = hero({ facts: heroFacts(0, 0, null) });
+    expect(html).not.toContain("·");
+    expect(theRule(".msv-plateband--hero .msv-platemeta > * + *::before")).toContain('content: "·"');
+  });
+
+  it("seats the tab rail inside the hero, under the identity", () => {
+    const html = hero();
+    expect(html.indexOf("msp-tabs")).toBeGreaterThan(html.indexOf("msv-toprow"));
+    expect(html.indexOf("msp-tabs")).toBeLessThan(html.lastIndexOf("</div>"));
+  });
+
+  it("offers no Send on a shelved manuscript when the caller withholds it", () => {
+    expect(hero({ actions: undefined })).not.toContain("msp-heroacts");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("the stylesheet", () => {
+  for (const sel of [".msp-hero", ".msp-banner", ".msp-cover", ".msp-heroin", ".msp-herorow",
+                     ".msp-tabs", ".msp-tab", ".msv-plateband--hero"]) {
+    it(`${sel} has exactly one base rule`, () => { theRule(sel); });
+  }
+
+  /**
+   * ⚠️ A `var()` ON A TOKEN NOBODY DEFINES PAINTS NOTHING, SILENTLY — and one on a THEME-scoped
+   * token is worse, because it resolves on some pages and not on others. `--sage-band` is declared
+   * on `.t-f12` alone; read here it would have looked parameterised and painted its fallback.
+   */
+  it("reads no token that this page cannot resolve", () => {
+    const root = readFileSync(join(__dirname, "..", "..", "index.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    /* ⚠️ EVERY `:root` BLOCK, NOT THE FIRST. index.css opens several; slicing one is the
+       first-match fault this repo keeps rediscovering, and here it would have reported five live
+       tokens as undefined. A THEME class is still excluded on purpose — it is not an ancestor of
+       every page, which is the whole point of the check. */
+    const defined = new Set<string>();
+    /* ⚠️ `@theme` COUNTS. Tailwind v4 emits that block's custom properties into `:root`, so
+       `--font-sans` / `--font-mono` are as global as anything in it — verified by the check going
+       red on exactly those two before this line existed. */
+    for (const blk of root.matchAll(/(?:^|\n)\s*(?::root|@theme)\s*\{([\s\S]*?)\n\}/g)) {
+      for (const m = blk[1].matchAll(/(--[a-z0-9-]+)\s*:/gi), it = m; ;) {
+        const n = it.next();
+        if (n.done) break;
+        defined.add(n.value[1]);
+      }
+    }
+    for (const m of css.matchAll(/(--[a-z0-9-]+)\s*:/gi)) defined.add(m[1]);
+    const unresolved = [...css.matchAll(/var\(\s*(--[a-z0-9-]+)/gi)]
+      .map((m) => m[1]).filter((t) => !defined.has(t));
+    expect([...new Set(unresolved)]).toEqual([]);
+  });
+
+  it("declares its one stand-in colour rather than borrowing a theme's", () => {
+    expect(css).not.toContain("--sage-band");
+    expect(theRule(".msp-hero")).toContain("--msp-banner-a:");
+  });
+});
