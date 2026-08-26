@@ -77,12 +77,11 @@ export const MUTATIONS: Record<string, Mutation> = {
   },
   "bulk-disabled": {
     targets: ["steer:P5.3"],
-    script: `(() => {
+    script: `
       const fix = () => document.querySelectorAll(".tpn .actbar .ab.go").forEach((b) => {
         if (/Log 0 queries/.test(b.textContent || "")) b.disabled = true;
       });
-      new MutationObserver(fix).observe(document.documentElement, { childList: true, subtree: true });
-    })()`,
+      fix();`,
   },
   "bar-truncates": {
     targets: ["steer:P5.6"],
@@ -116,22 +115,20 @@ export const MUTATIONS: Record<string, Mutation> = {
   },
   "option-preselected": {
     targets: ["finish:P3.1"],
-    script: `(() => {
+    script: `
       const fix = () => {
         const b = document.querySelector(".tpn .form .seg button");
         if (b && !b.classList.contains("on")) b.classList.add("on");
       };
-      new MutationObserver(fix).observe(document.documentElement, { childList: true, subtree: true });
-    })()`,
+      fix();`,
   },
   "asterisk-required": {
     targets: ["finish:P4.2"],
-    script: `(() => {
+    script: `
       const fix = () => document.querySelectorAll(".tpn .form .ql").forEach((l) => {
         if (!/\\*/.test(l.textContent || "")) l.textContent = (l.textContent || "") + " *";
       });
-      new MutationObserver(fix).observe(document.documentElement, { childList: true, subtree: true });
-    })()`,
+      fix();`,
   },
   "addlinks-gone": {
     targets: ["finish:P4.3"],
@@ -153,23 +150,21 @@ export const MUTATIONS: Record<string, Mutation> = {
   /* ── added after the first walk, to cover cases nothing was aimed at ─────────────────────── */
   "steer-pinned": {
     targets: ["steer:P2.5"],
-    script: `(() => {
+    script: `
       const fix = () => {
         const rows = [...document.querySelectorAll(".tpn .form .q")];
         if (!rows.length) return;
         rows.forEach((r, i) => { if (i === 0) r.classList.add("open"); else r.classList.remove("open"); });
       };
-      new MutationObserver(fix).observe(document.documentElement, { childList: true, subtree: true });
-    })()`,
+      fix();`,
   },
   "unit-unseeded": {
     targets: ["steer:P3.2"],
-    script: `(() => {
+    script: `
       const fix = () => document.querySelectorAll(".tpn .upill.on .qty input").forEach((i) => {
         if (i.value !== "") { i.value = ""; }
       });
-      new MutationObserver(fix).observe(document.documentElement, { childList: true, subtree: true });
-    })()`,
+      fix();`,
   },
   "form-emptied": {
     targets: ["steer:P4.1"],
@@ -185,7 +180,7 @@ export const MUTATIONS: Record<string, Mutation> = {
   },
   "strip-prefilled": {
     targets: ["finish:P3.2"],
-    script: `(() => {
+    script: `
       const fix = () => document.querySelectorAll(".tpn .willrec").forEach((w) => {
         if (!/PREFILLED/.test(w.textContent || "")) {
           const s = document.createElement("span");
@@ -193,51 +188,45 @@ export const MUTATIONS: Record<string, Mutation> = {
           w.appendChild(s);
         }
       });
-      new MutationObserver(fix).observe(document.documentElement, { childList: true, subtree: true });
-    })()`,
+      fix();`,
   },
   "primary-renamed": {
     targets: ["finish:P4.1"],
-    script: `(() => {
+    script: `
       const fix = () => document.querySelectorAll(".tpn .actbar .ab.go .t").forEach((t) => {
         if (t.textContent !== "Submit") t.textContent = "Submit";
       });
-      new MutationObserver(fix).observe(document.documentElement, { childList: true, subtree: true });
-    })()`,
+      fix();`,
   },
   "primaries-disabled": {
     targets: ["finish:P4.4", "finish:P4.5"],
-    script: `(() => {
+    script: `
       const fix = () => document.querySelectorAll(".tpn .actbar .ab.go").forEach((b) => { b.disabled = true; });
-      new MutationObserver(fix).observe(document.documentElement, { childList: true, subtree: true });
-    })()`,
+      fix();`,
   },
   "bulk-columns-renamed": {
     targets: ["finish:P6.2"],
-    script: `(() => {
+    script: `
       const fix = () => document.querySelectorAll(".tpn .bulk th").forEach((h) => {
         if (h.textContent !== "Col") h.textContent = "Col";
       });
-      new MutationObserver(fix).observe(document.documentElement, { childList: true, subtree: true });
-    })()`,
+      fix();`,
   },
   "bulk-deed-generic": {
     targets: ["finish:P6.5"],
-    script: `(() => {
+    script: `
       const fix = () => document.querySelectorAll(".tpn .deed").forEach((d) => {
         if (/imported quer/.test(d.textContent || "")) d.textContent = "A gap on the record for this query";
       });
-      new MutationObserver(fix).observe(document.documentElement, { childList: true, subtree: true });
-    })()`,
+      fix();`,
   },
   "bulk-actions-reworded": {
     targets: ["finish:P6.4"],
-    script: `(() => {
+    script: `
       const fix = () => document.querySelectorAll(".tpn .fillrow button, .tpn .fb").forEach((b) => {
         if (b.textContent !== "Fill") b.textContent = "Fill";
       });
-      new MutationObserver(fix).observe(document.documentElement, { childList: true, subtree: true });
-    })()`,
+      fix();`,
   },
 };
 
@@ -245,7 +234,33 @@ export const MUTATIONS: Record<string, Mutation> = {
 export async function applyMutation(page: Page, name: string): Promise<void> {
   const m = MUTATIONS[name];
   if (!m) throw new Error(`unknown mutation "${name}" — see MUTATIONS in tests/e2e/mutate.ts`);
-  if (m.script) await page.addInitScript(m.script);
+  /* ⚠️ AN INTERVAL, NOT A MutationObserver, AND THE FIRST WALK IS WHY (26 Aug). Nine DOM mutations
+     were installed as observers and NOT ONE took effect: React owns those nodes, re-renders after
+     the patch, and restores its own text — so every probe read the unmutated page and reported nine
+     assertions as unbreakable. They were not; the instrument was.
+     ⚠️ AND THAT IS THE HONEST LIMIT OF A DOM PATCH. CSS wins because React does not own the
+     cascade. Anything React RENDERS — text, an attribute, a class it controls — can only be held
+     patched by re-applying faster than it re-renders, which is what this does, or by changing the
+     SOURCE and rebuilding, which is the real instrument for those. A case that stays green under an
+     interval patch is still UNPROVED rather than proved safe. */
+  /**
+   * ⚠️ AN INTERVAL, NOT A `MutationObserver`, AND THE FIRST WALK IS WHY (26 Aug). Nine DOM mutations
+   * were installed as observers and NOT ONE took effect: React owns those nodes, re-renders after
+   * the patch and restores its own text — so every probe read an unmutated page and reported nine
+   * assertions as unbreakable. They were not; the instrument was.
+   *
+   * ⚠️ AND THIS IS THE HONEST LIMIT OF A DOM PATCH. CSS wins because React does not own the cascade.
+   * Anything React RENDERS — text, an attribute, a class it controls — can only be held patched by
+   * re-applying faster than it re-renders, which is what this does. A case that stays green under
+   * an interval patch is STILL UNPROVED rather than proved safe; the real instrument for those is a
+   * source change and a rebuild, and the report must say which of the two it had.
+   */
+  if (m.script) await page.addInitScript(`(() => {
+    const body = () => { ${m.script} };
+    const apply = () => { try { body(); } catch (e) { /* the page is mid-render; the next tick will do */ } };
+    setInterval(apply, 120);
+    apply();
+  })()`);
   if (m.css) {
     /* ⚠️ ON EVERY NAVIGATION, not once. These suites reload `/todo` several times, and a stylesheet
        added to one document is gone from the next — a mutation that quietly stopped applying would
