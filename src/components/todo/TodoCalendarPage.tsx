@@ -38,7 +38,8 @@ import { assembleBoardColumns } from "../../lib/todoColumns";
 import { BoardCard } from "../../lib/todoBoard";
 import {
   calendarDays, recordDays, dedupeAgainstRecord, ghostsFor,
-  shortCalDate, REC_TONE, CalendarItem, RecordItem, GhostItem,
+  shortCalDate, carriedLine, expectedLine, REC_TONE,
+  CalendarItem, RecordItem, GhostItem,
 } from "../../lib/todoCalendar";
 import {
   windowDays, shiftWindow, timelineWeek, defaultView,
@@ -48,6 +49,14 @@ import {
   type ShowMode, type RowSort, type TimelineFilter,
 } from "../../lib/todoTimeline";
 import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
+import { useDockActivity } from "./useDockActivity";
+/* ⚠️ THE QUERY CENTRE'S OWN ROWS, NOT A SECOND READING PANE. `FocusFlow` already mounts these two
+   from the To-do world (`FocusFlow.tsx:33`), so the precedent and the shape are both established;
+   building a calendar-local conversation would be the second implementation this repo forbids. */
+import { TimelineRows, buildTimelineRows } from "../reading-pane/QueryTimeline";
+import { formatQueryMaterial } from "../../lib/materials";
+import { getPrimaryAction } from "../../lib/queryPrimaryAction";
+import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
 import "./tasksLayout.css";
 import "./taskChrome.css";
 import "./todoCalendar.css";
@@ -185,9 +194,19 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      Monday, so there is no anchor to keep in step with a title and no other-month days to dim. */
   const [winStart, setWinStart] = useState(today);
   const [view, setView] = useState<TimelineView>(defaultView);
-  /* ⚠️ SELECTING IS FREE — nothing is written and nothing opens. The ring is the whole of it here;
-     the workspace it fills arrives in Phase 4. */
+  /* ⚠️ SELECTING IS FREE — nothing is written, nothing opens. It rings the chip and fills the band
+     below, and that is the whole of it. */
   const [sel, setSel] = useState<string | null>(null);
+  /**
+   * ⚠️ ACTING IS A DIFFERENT GESTURE FROM SELECTING, and the workspace is a STATE OF THE PAGE
+   * rather than a thing that floats over it. The board collapses to one day's column, every agent
+   * still listed and every row but this one dimmed, and the rest of the page becomes the work.
+   *
+   * ⚠️ THE DAY FOLLOWS THE ITEM RATHER THAN PINNING TO TODAY (one of Nick's open questions;
+   * `follows` is the stated default). Opening a Friday task and being shown Wednesday would be the
+   * page answering a question the writer did not ask.
+   */
+  const [work, setWork] = useState<{ rowKey: string; ymd: string; itemKey: string | null } | null>(null);
   const pageRef = React.useRef<HTMLDivElement>(null);
 
 
@@ -274,6 +293,54 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const shown = rows.reduce((n, r) => n + r.items.length, 0) + bands.length;
   const agentRows = rows.filter((r) => r.key !== YOU_ROW).length;
 
+  /* ══ WHAT IS SELECTED, AND WHAT IS BEING WORKED ══════════════════════════════════════════ */
+  const allItems = useMemo(() => rows.flatMap((r) => r.items.map((it) => ({ it, row: r }))), [rows]);
+  const selItem = allItems.find((x) => x.it.key === sel) ?? null;
+  const selBand = bands.find((b) => b.key === sel) ?? null;
+  /* a selection the filters have taken off the board is no longer a selection */
+  React.useEffect(() => {
+    if (sel && !selItem && !selBand) setSel(null);
+  }, [sel, selItem, selBand]);
+
+  const workRow = work ? rows.find((r) => r.key === work.rowKey) ?? null : null;
+  /* the workspace lost its row — a filter, a page, or the card completing and evaporating */
+  React.useEffect(() => {
+    if (work && !workRow) { setWork(null); setPaneCard(null); }
+  }, [work, workRow]);
+
+  /**
+   * ⚠️ THE QUERY THE WORKSPACE IS ABOUT — the worked item's, falling back to whatever else in the
+   * row names one. A row is a RELATIONSHIP and can hold several queries; the item decides, and the
+   * fallback is only for a row head opened with nothing selected.
+   */
+  const workQueryId = useMemo(() => {
+    if (!workRow) return undefined;
+    const picked = work?.itemKey ? workRow.items.find((i) => i.key === work.itemKey) : undefined;
+    return picked?.queryId
+      ?? bandsByRow.get(workRow.key)?.[0]?.queryId
+      ?? workRow.items.find((i) => i.queryId)?.queryId;
+  }, [workRow, work, bandsByRow]);
+  const workQuery = workQueryId ? queries.find((q) => q.id === workQueryId) ?? null : null;
+  const workAgent = workRow?.agentId ? agents.find((a) => a.id === workRow.agentId) ?? null : null;
+  const workBand = workRow ? bandsByRow.get(workRow.key)?.[0] ?? null : null;
+
+  /**
+   * ⚠️ THE AUTHORITATIVE ROWS, from the query's own subcollection — the store the Query Centre
+   * reads. The global `activities` feed this page holds is a best-effort projection twin, and
+   * reading the conversation out of it is how the dock came to say "Nothing logged yet." about a
+   * query with history.
+   *
+   * ⚠️ AND IT IS A SECOND LISTENER ON THE SAME SUBCOLLECTION while a card is docked, because
+   * `useTaskPaneSession` opens its own and exposes only `{ journey, onPrimary }`. Wasteful, not
+   * wrong — one query, one document each — and the fix is to surface `dockRows` from the session,
+   * which is a file this session does not own. Flagged in the report.
+   */
+  const convo = useDockActivity(currentUser?.id, workQueryId);
+  const convoRows = useMemo(
+    () => (workQuery ? buildTimelineRows(convo, workQuery, workAgent) : []),
+    [convo, workQuery, workAgent],
+  );
+
   /* ══ THE TASK PANE, OVER THE TIMELINE ═══════════════════════════════════════════════════ */
   /* `offer` and `fix` still reach `FocusFlow` — but the way `/todo` reaches it, through the pane's
      own primary, past `paneCommits`. It is never a second entrance. */
@@ -303,9 +370,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     /* the `offer`/`fix` hand-off — parity with `/todo`, which is why the sheet stays mounted */
     openFlow: (c) => { setPaneCard(null); setFlowCard(c); },
     commit,
-    /* ⚠️ NO DOCK CURSOR HERE. `/todo` advances to the next card in its dock; a calendar day is not
-       a queue, so a completed card simply leaves the day and the pane closes with it. */
-    advance: () => setPaneCard(null),
+    /* ⚠️ NO DOCK CURSOR HERE. `/todo` advances to the next card in its dock; a week is not a queue,
+       so a completed card leaves the board and the workspace closes with it — which is the
+       catalogue's "settle" step: the card evaporates from every surface at once, because the
+       condition that derived it stopped holding. */
+    advance: () => { setPaneCard(null); setWork(null); },
     openQuery: (c) => { if (c.relatedRecordId) onNavigate("queries", c.relatedRecordId); },
     /* ⚠️ THE CALENDAR SUPPLIES NEITHER `snooze` NOR `mute`, AND ABSENCE IS NOT DISABLED. Its snooze
        is DRAG — on the surface where days are the subject — and it shows no dismissed cards at all,
@@ -328,22 +397,27 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const paneSession = useTaskPaneSession(paneCard, paneHost, CAL_PANE_PREFIX);
 
   /**
-   * ⚠️ ESCAPE CLOSES THE PANE, AND ONLY WHILE IT IS OPEN. It is captured so it does not also reach
-   * the page beneath — a day expansion or a peek would otherwise close at the same time, and the
-   * writer pressed once. `FocusFlow` keeps its own handler; the two are mutually exclusive, since
-   * the pane closes itself before handing a card over.
+   * ⚠️ ESCAPE RETURNS TO THE WEEK, and only while the workspace is open. It is captured so it does
+   * not also reach the page beneath — a menu and the workspace would otherwise close on one press.
+   * `FocusFlow` keeps its own handler; the two are mutually exclusive, since the pane closes itself
+   * before handing a card over.
+   *
+   * ⚠️ IT ALWAYS DID CLOSE THE PANE, so nothing about typed answers changed here. What the retired
+   * scrim carried — "a stray click on the ground is not a decision to discard them" — is vacuous
+   * now rather than lost: there is no ground to click.
    */
   React.useEffect(() => {
-    if (!paneCard) return;
+    if (!work) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.preventDefault();
       e.stopPropagation();
+      setWork(null);
       setPaneCard(null);
     };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
-  }, [paneCard]);
+  }, [work]);
 
 
   /* ══ DRAG A TASK TO A NEW DAY ════════════════════════════════════════════════════════════
@@ -365,7 +439,21 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     endDrag();
   };
 
-  const openSheet = (card?: BoardCard) => { if (card) setPaneCard(card); };
+  /**
+   * ⚠️ TWO GESTURES, TWO OUTCOMES. A chip that carries a CARD is work, so it opens the workspace;
+   * anything else — a record entry, a ghost, a band — is a fact, so it selects and fills the band
+   * below. The brief names a your-turn chip; a writer's own task carries a card too, and refusing
+   * it would be a regression against the month, where every carded pip opened the pane.
+   */
+  const openWork = (rowKey: string, ymd: string, itemKey: string | null, card?: BoardCard) => {
+    setSel(itemKey);
+    setWork({ rowKey, ymd, itemKey });
+    setPaneCard(card ?? null);
+  };
+  const pick = (rowKey: string, it: TimelineItem) => {
+    if (it.card) { openWork(rowKey, it.ymd, it.key, it.card); return; }
+    setSel((c) => (c === it.key ? null : it.key));
+  };
 
   const subtitle = `${shortCalDate(visible[0])} – ${shortCalDate(visible[visible.length - 1])} — every relationship, and the time between.`;
 
@@ -386,13 +474,16 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         className={`tl-grid tl-row${r.key === YOU_ROW ? " tl-row--pin" : ""}${r.closed ? " closed" : ""}`}
         style={{ minHeight: lanes * LANE_STEP + 18 }}
       >
-        <div className="tl-rowhead" style={{ gridColumn: 1 }}>
+        {/* ⚠️ THE ROW HEAD IS A CONTROL — it opens the relationship's workspace with nothing
+            selected, which is how you reach a query that has no card raised against it. */}
+        <button type="button" className="tl-rowhead" style={{ gridColumn: 1 }}
+          onClick={() => openWork(r.key, today, null)}>
           <span className="tl-nm">
             <i className="tl-sd" data-dot={r.dot} aria-hidden />
             <span className="tl-nmtxt">{r.name}</span>
           </span>
           {r.agency && <span className="tl-ag">{r.agency}</span>}
-        </div>
+        </button>
         {/* ⚠️ EVERY PARTICIPANT NAMES ITS OWN COLUMN. Auto-placement never overlaps: an auto-placed
             cell beside the explicitly placed lane would be pushed into an implicit new column and
             the grid would silently grow sideways — measured at 688px of phantom right margin the
@@ -420,7 +511,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               key={it.key}
               it={it}
               selected={sel === it.key}
-              onPick={() => setSel((c) => (c === it.key ? null : it.key))}
+              onPick={() => pick(r.key, it)}
               drag={it.draggable && it.card?.userTaskId ? {
                 onStart: (e) => {
                   /* the payload rides the event for protocol correctness — the STATE is what the
@@ -437,6 +528,166 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       </div>
     );
   };
+
+  /* ── the focus band: what a selection says, full width and nothing truncated ─────────────── */
+  const facts: { k: string; v: string }[] = [];
+  let head: React.ReactNode = null;
+  let ctx = "";
+  let acts: React.ReactNode = null;
+  if (selBand) {
+    const b = selBand;
+    head = <>Waiting — <em>{b.expected.agent || "this agency"}</em></>;
+    ctx = `${expectedLine(b.expected)}. The window ${b.passed ? "closed" : "runs to"} ${shortCalDate(b.endYmd)}.`;
+    facts.push({ k: "Window", v: shortCalDate(b.endYmd) });
+    if (b.expected.fromYmd) facts.push({ k: "Sent", v: shortCalDate(b.expected.fromYmd) });
+    acts = <button type="button" className="tl-btn" onClick={() => onNavigatePath(`/queries?q=${encodeURIComponent(b.queryId)}`)}>Open query ›</button>;
+  } else if (selItem) {
+    const { it, row } = selItem;
+    head = <>{it.label}{row.key !== YOU_ROW && <> — <em>{row.name}</em></>}</>;
+    ctx = it.kind === "ghost"
+      ? "Fell due here · the live item is on today."
+      : it.rolledFrom ? carriedLine(it.rolledFrom, today) : "";
+    if (it.rolledFrom) facts.push({ k: "Since", v: shortCalDate(it.rolledFrom) });
+    facts.push({ k: "Kind", v: FILTER_LABEL[it.kind] });
+    acts = (
+      <>
+        {it.card && (
+          <button type="button" className="tl-btn primary"
+            onClick={() => openWork(row.key, it.ymd, it.key, it.card)}>Open the task</button>
+        )}
+        {it.kind === "ghost" && (
+          <button type="button" className="tl-btn" onClick={() => setSel(null)}>Go to the task</button>
+        )}
+        {it.queryId && (
+          <button type="button" className="tl-btn"
+            onClick={() => onNavigatePath(`/queries?q=${encodeURIComponent(it.queryId!)}`)}>Open query ›</button>
+        )}
+      </>
+    );
+  }
+
+  const focusBand = (selBand || selItem) && (
+    <div className="tl-below">
+      <div className="tl-fx">
+        <div className="tl-fxmain">
+          <span className="tl-lbl2">In focus</span>
+          <h3 className="tl-fxh">{head}</h3>
+          {ctx && <p className="tl-fxctx">{ctx}</p>}
+          {facts.length > 0 && (
+            <div className="tl-facts">
+              {facts.map((f) => (
+                <div key={f.k} className="tl-fact"><div className="k">{f.k}</div><div className="v">{f.v}</div></div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="tl-acts">{acts}</div>
+      </div>
+    </div>
+  );
+
+  /* ── the collapsed day column: the week's whole cast, all but one dimmed ─────────────────── */
+  const collapsed = work && (
+    <div className="tl-col">
+      <div className="tl-colhd">
+        <span className="tl-lbl2">Everyone</span>
+        <span className="tl-coldt">
+          {DOW[new Date(`${work.ymd}T12:00:00`).getDay()]} {Number(work.ymd.slice(8))}
+        </span>
+      </div>
+      <div className="tl-colbd">
+        {rows.map((r) => {
+          const its = r.items.filter((i) => i.ymd === work.ymd);
+          const bs = (bandsByRow.get(r.key) ?? []).filter((b) => {
+            const i = visible.indexOf(work.ymd);
+            return i >= b.fromIdx && i <= b.toIdx;
+          });
+          const on = r.key === work.rowKey;
+          return (
+            <button key={r.key} type="button" className={`tl-crow${on ? " on" : " off"}`}
+              aria-current={on || undefined}
+              onClick={() => openWork(r.key, work.ymd, null)}>
+              <span className="tl-cwho">
+                <span className="tl-cn">
+                  <i className="tl-sd" data-dot={r.dot} aria-hidden />
+                  <span className="tl-nmtxt">{r.name}</span>
+                </span>
+                {r.agency && <span className="tl-ag">{r.agency}</span>}
+                {its.length + bs.length === 0 ? (
+                  <span className="tl-cempty">nothing today</span>
+                ) : (
+                  <span className="tl-cits">
+                    {bs.map((b) => <span key={b.key} className="tl-mini" data-kind="wait">{b.label}</span>)}
+                    {its.map((i) => <span key={i.key} className="tl-mini" data-kind={i.kind}>{i.label}</span>)}
+                  </span>
+                )}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  /* ── the workspace: do, read, know ───────────────────────────────────────────────────────── */
+  const know: { k: string; v: string }[] = [];
+  if (workQuery) {
+    know.push({ k: "Status", v: workQuery.status });
+    know.push({ k: "Reply window", v: workBand ? `To ${shortCalDate(workBand.endYmd)} · ${expectedLine(workBand.expected)}` : "None resolvable" });
+    const mats = (workQuery.materialsWanted ?? []).map(formatQueryMaterial).filter(Boolean);
+    if (mats.length) know.push({ k: "Materials", v: mats.join(", ") });
+    if (workQuery.personalisationNotes) know.push({ k: "Your note", v: workQuery.personalisationNotes });
+  }
+  if (workAgent) know.push({ k: "Agency", v: agentSecondary(workAgent) || agentPrimary(workAgent) });
+
+  const workspace = work && workRow && (
+    <div className="tl-ws">
+      <div className="tl-wshd">
+        <span className="tl-lbl2">
+          {workQuery ? `${getPrimaryAction(workQuery.status).ballHolder === "writer" ? "Your turn" : "Waiting"} · ` : ""}
+          {workRow.name}
+        </span>
+        <button type="button" className="tl-btn" onClick={() => { setWork(null); setPaneCard(null); }}>
+          Esc · back to the week
+        </button>
+      </div>
+      <div className="tl-wsbd">
+        <div className="tl-two">
+          {/* DO — the same pane `/todo` draws, driven by the same session hook and writing through
+              the same committer. It is the point of the whole stream: one task workflow, wherever
+              you meet a task. */}
+          <div className="tl-do" ref={paneRef}>
+            {paneSession.journey
+              ? <TaskPane journey={paneSession.journey} onPrimary={paneSession.onPrimary} />
+              : <div className="tl-readbd">Nothing to do on this relationship just now.</div>}
+          </div>
+          {/* READ — the Query Centre's OWN rows, off the authoritative subcollection */}
+          <div className="tl-read">
+            <div className="tl-readhd">
+              <span className="tl-lbl2">The whole conversation</span>
+              {workQueryId && (
+                <button type="button" className="tl-btn"
+                  onClick={() => onNavigatePath(`/queries?q=${encodeURIComponent(workQueryId)}`)}>
+                  Open in Query Centre →
+                </button>
+              )}
+            </div>
+            <div className="tl-readbd">
+              {convoRows.length > 0
+                ? <TimelineRows rows={convoRows} />
+                : <span className="tl-cempty">Nothing logged yet</span>}
+            </div>
+          </div>
+          {/* KNOW — facts, each omitting itself when there is nothing to state */}
+          <div className="tl-know">
+            {know.map((b) => (
+              <div key={b.k} className="tl-box"><div className="k">{b.k}</div><div className="v">{b.v}</div></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="t-f12 spine-root" ref={pageRef}>
@@ -503,6 +754,16 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
             </span>
           </div>
 
+          {/* ⚠️ ONE STATE OR THE OTHER, NEVER BOTH ON SCREEN. Acting collapses the board to a day's
+              column and gives the rest of the page to the work; the full board and its focus band
+              are what the week looks like when nothing is being worked. */}
+          {work ? (
+            <div className="tl-split">
+              {collapsed}
+              {workspace}
+            </div>
+          ) : (
+          <>
           <div className="tl-board">
             <TplZone className="tl-zone" hem={false} label="The week">
               <div className="tl">
@@ -528,6 +789,9 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               )}
             </TplZone>
           </div>
+          {focusBand}
+          </>
+          )}
         </TasksPageLayout>
       </div>
 
@@ -542,24 +806,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         </div>
       )}
 
-      {/**
-        * ⚠️ THE PANE'S WINDOW — scrim, one lifted card, its own scroll region, and it closes on
-        * ESCAPE AND THE × ONLY. Scrim-click is deliberately not a close: the pane holds answers the
-        * writer has typed, and a stray click on the ground is not a decision to discard them.
-        */}
-      {paneCard && (
-        <div className="cal-panescrim" role="presentation">
-          <div className="cal-panewin" role="dialog" aria-modal="true" aria-label="Task"
-               ref={paneRef} onClick={(e) => e.stopPropagation()}>
-            <button type="button" className="cal-panex" aria-label="Close" onClick={() => setPaneCard(null)}>×</button>
-            <div className="cal-panescroll">
-              {paneSession.journey && (
-                <TaskPane journey={paneSession.journey} onPrimary={paneSession.onPrimary} />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
       {confirmAskNode}
 
       {flowCard && (

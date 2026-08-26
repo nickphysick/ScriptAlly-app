@@ -155,6 +155,8 @@
 .tl-row--pin { position: sticky; top: var(--tl-head-h); z-index: 3; background: #fdfaf5; }
 .tl-rowhead {
   grid-row: 1;
+  /* it is a button now — strip the UA chrome rather than inventing a look for it */
+  background: none; text-align: left; cursor: pointer; font: inherit; color: inherit;
   border-right: 1px solid #ece0d2; border-bottom: 1px solid #f0e9dd;
   padding: 9px 13px; display: flex; flex-direction: column; justify-content: center; gap: 2px;
   min-width: 0;
@@ -180,6 +182,8 @@
 .tl-sd[data-dot="them"] { background: #f8e2d9; }
 .tl-sd[data-dot="quiet"] { background: transparent; border-color: #d3c4b3; }
 .tl-sd[data-dot="self"] { border-radius: 3px; background: transparent; }
+.tl-rowhead:hover { background: #faf5ee; }
+.tl-rowhead:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
 .tl-row.closed .tl-rowhead { opacity: 0.55; }
 
 .tl-cell { grid-row: 1; border-bottom: 1px solid #f0e9dd; border-right: 1px solid #f4efe6; }
@@ -312,47 +316,167 @@
    specificity argument, and this file's lock asserts the whole family rather than case by case. */
 .cal-flow .tdb-ffstage .tdb-ffbody { padding: 24px 22px 20px; }
 
-/**
- * ⚠️ THE TASK PANE'S WINDOW (Pack C Phase 2) — the same `TaskPane` `/todo` draws, over the calendar.
+/* ⚠️ THE PANE'S FLOATING WINDOW IS RETIRED (timeline pack, Phase 4) — `.cal-panescrim`,
+   `.cal-panewin`, `.cal-panex` and `.cal-panescroll`. The pane is a COLUMN of the workspace now,
+   beside the conversation it is about, so there is no scrim, no modal and nothing floating.
+
+   ⚠️ THE RULING THE SCRIM CARRIED IS NOT LOST, IT IS VACUOUS: "clicking the scrim never closes,
+   because the pane holds answers the writer has typed". There is no scrim to click. Escape still
+   leaves — which it always did — and it now returns to the week rather than closing a dialogue.
+   `.cal-flow` below is untouched: `FocusFlow` is still a modal and keeps its own behaviour. */
+
+
+/* ══ WHAT SITS BELOW THE BOARD (timeline pack, Phase 4; ref timeline-week-ref.html, scheme C) ══
  *
- * ⚠️ THE SCRIM TAKES NO CLICK HANDLER, and that is the ruling rather than an omission. The pane
- * holds answers the writer has typed; a stray click on the ground is not a decision to discard
- * them. Escape and the × are the two ways out. `.cal-flow`'s `FocusFlow` beside it keeps its own
- * behaviour, which is why neither is expressed here as a shared rule.
+ * ⚠️ TWO STATES, AND NEITHER FLOATS. Selecting a chip or a band fills a FOCUS BAND beneath the
+ * board — full width, nothing truncated, and nothing written. Acting on one collapses the board to
+ * a single day's column and gives the rest of the page to the workspace. No scrim, no modal, no
+ * dialogue: Escape returns to the week.
  */
-.cal-panescrim {
-  position: fixed; inset: 0; z-index: 80;
-  background: rgba(36, 18, 9, 0.28);
-  display: flex; align-items: flex-start; justify-content: center;
-  padding: 44px 16px 24px;
+
+/* ⚠️ THE BAND RENDERS ONLY WHEN SOMETHING IS SELECTED, which is a deviation from the ref's scheme
+   A — it draws the band permanently and says so itself: "it is empty most of the time". An empty
+   250px strip under every week is a standing tax on the board's height for a state the reader is
+   usually not in. */
+.tl-below {
+  flex: 0 0 auto; margin-top: 12px;
+  background: #fff; border: 1px solid #ece0d2; border-top: 4px solid #8a9e88;
+  border-radius: 4px; padding: 14px 18px 16px;
 }
-/* ⚠️ 440px IS THE PANE'S OWN MEASURE, not a number chosen here — `.cal-flow` narrows `FocusFlow` to
-   430 for the same reason, and the two sit within a few pixels so the surface reads as one family. */
-.cal-panewin {
-  position: relative;
-  width: min(440px, 94vw);
-  /* ⚠️ NO VIEWPORT ARITHMETIC. The scrim is `position: fixed; inset: 0` and carries the padding, so
-     `100%` here is already "the scrim's content box" — the same height, derived rather than
-     restated. `calc(100vh - 68px)` was the first version and it is exactly the shape this repo
-     forbids: a number that encodes another element's size and goes wrong the day that size moves. */
-  max-height: 100%;
-  display: flex; flex-direction: column;
-  background: #fefcfa;
-  border: 1px solid #e8e0d8;
-  border-radius: 14px;
-  /* the lift — a card resting on the month, not a hole cut through it */
-  box-shadow: 0 18px 44px rgba(36, 18, 9, 0.22), 0 2px 6px rgba(36, 18, 9, 0.10);
-  overflow: hidden;
+.tl-fx { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; max-width: 1100px; }
+.tl-fxmain { flex: 1 1 340px; min-width: 0; }
+.tl-lbl2 {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8px;
+  letter-spacing: 0.13em; text-transform: uppercase; color: #a2937f;
 }
-/* ⚠️ THE WINDOW SCROLLS, NOT THE PAGE. `.tpn` is a panel with no scroll of its own — on `/todo` its
-   container provides one — so the window must, or a long journey would run past the viewport with
-   the document unable to reach it. Same fault the chassis note in CLAUDE.md records. */
-.cal-panescroll { overflow-y: auto; overscroll-behavior: contain; }
-.cal-panex {
-  position: absolute; top: 8px; right: 10px; z-index: 2;
-  width: 26px; height: 26px; line-height: 1;
-  border: 1px solid #e7ddd2; border-radius: 999px;
-  background: #fffdfa; color: #8a7a6c; font-size: 15px;
-  cursor: pointer;
+.tl-fxh {
+  font-family: "Playfair Display", Georgia, serif; font-size: 21px; font-weight: 500;
+  /* the house descender floor — mixed-case Playfair is never set below 1.3 */
+  line-height: 1.3; margin-top: 4px; color: #2e2118;
 }
-.cal-panex:hover { background: #f7f4ee; color: #241209; }
+/* ⚠️ EMPHASIS IS ITALIC IN THE HEADING'S OWN INK ON A HEADING; the agent's name here is not
+   emphasis but IDENTITY — the subject of the line — and the ref sets it burgundy for that reason.
+   It is a `<em>` inside a Playfair headline, which is the one construction the standing rule
+   permits a colour on, because the colour is naming a person rather than stressing a word. */
+.tl-fxh em { font-style: italic; color: #7c3a2a; }
+.tl-fxctx { font-size: 12.5px; color: #6b5a4d; margin-top: 6px; line-height: 1.5; max-width: 62ch; }
+.tl-facts { display: flex; gap: 18px; margin-top: 11px; flex-wrap: wrap; }
+.tl-fact .k {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8px;
+  letter-spacing: 0.13em; text-transform: uppercase; color: #a2937f;
+}
+.tl-fact .v { font-size: 12.5px; margin-top: 3px; color: #3a2c22; }
+.tl-acts { display: flex; gap: 7px; align-items: flex-start; padding-top: 20px; flex: none; }
+.tl-btn {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8.5px;
+  letter-spacing: 0.11em; text-transform: uppercase; white-space: nowrap;
+  padding: 8px 12px; border-radius: 8px; cursor: pointer;
+  border: 1px solid #e6dcce; background: #fff; color: #6a5a50;
+}
+.tl-btn:hover { border-color: #d3c4b3; color: #7c3a2a; }
+.tl-btn.primary { background: #f8e7e2; border-color: #eecfc2; color: #7c3a2a; }
+.tl-btn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+
+/* ══ THE WORKSPACE ═════════════════════════════════════════════════════════════════════════ */
+
+.tl-split { display: grid; grid-template-columns: 352px minmax(0, 1fr); gap: 14px; flex: 1; min-height: 0; }
+.tl-col {
+  background: #fdfaf5; border: 1px solid #ece0d2; border-radius: 14px; overflow: hidden;
+  display: flex; flex-direction: column; min-height: 0;
+}
+.tl-colhd {
+  background: linear-gradient(135deg, #d7ddd5, #d5dbd3); border-bottom: 1px solid #ece0d2;
+  padding: 9px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  flex: none;
+}
+.tl-coldt {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10px; font-weight: 500;
+  color: #3f4d3d; letter-spacing: 0.1em;
+}
+.tl-colbd { overflow-y: auto; min-height: 0; }
+.tl-crow {
+  display: flex; align-items: flex-start; gap: 10px; width: 100%; text-align: left;
+  padding: 10px 13px; border: 0; border-bottom: 1px solid #f0e9dd;
+  background: none; cursor: pointer;
+}
+.tl-crow:hover { background: #faf5ee; }
+/* ⚠️ EVERY AGENT STAYS LISTED AND THE REST DIM — the collapsed column is still the week's cast,
+   so the reader keeps the context they were working in. Dimming is opacity on the ROW, never a
+   filter that removes it: a row that vanished would say the relationship had. */
+.tl-crow.off { opacity: 0.3; }
+.tl-crow.on { background: #fdf5f2; box-shadow: inset 2px 0 0 #7c3a2a; }
+.tl-cwho { flex: 1; min-width: 0; }
+.tl-cn {
+  font-family: "Playfair Display", Georgia, serif; font-size: 13.5px; font-weight: 500;
+  line-height: 1.3; display: flex; align-items: center; gap: 7px; min-width: 0; color: #2e2118;
+}
+.tl-cits { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 5px; }
+/* the mini chips are the board's grammar at rest — same kinds, same tones, no absolute position */
+.tl-mini {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 8px; border-radius: 999px; font-size: 9.5px; font-weight: 600;
+  border: 1px solid transparent; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.tl-mini[data-kind="turn"] { background: #f8e2d9; border-color: #eecfc2; color: #7a3a28; }
+.tl-mini[data-kind="rec"] { background: #fff; border-color: #ece0d2; color: #6b5a4d; font-weight: 500; }
+.tl-mini[data-kind="task"] { background: #fff; border-color: #d9d0c4; color: #3f5a3d; }
+.tl-mini[data-kind="ghost"] { background: transparent; border: 1px dashed #d3c4b3; color: #a08f80; font-weight: 500; }
+.tl-mini[data-kind="wait"] { background: #e9ede6; border-color: #c9d6c5; color: #3f5a3d; font-weight: 500; }
+.tl-cempty {
+  margin-top: 6px;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
+  letter-spacing: 0.12em; text-transform: uppercase; color: #c3b6a6;
+}
+
+.tl-ws {
+  background: #fff; border: 1px solid #ece0d2; border-top: 4px solid #8a9e88; border-radius: 4px;
+  display: flex; flex-direction: column; min-height: 0;
+}
+.tl-wshd {
+  padding: 13px 18px 11px; border-bottom: 1px solid #ece0d2; flex: none;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+}
+.tl-wsbd { overflow-y: auto; min-height: 0; padding: 16px 20px 20px; }
+/* ⚠️ WIDTH IS SPENT ON THE CONVERSATION — it is the only column that benefits from it. The pane
+   has a measure of its own (430 is a live house width, and the journey's container query folds
+   below 640 on its own), and the facts are short lines that do not read better wider. */
+.tl-two {
+  display: grid; grid-template-columns: 430px minmax(320px, 1fr) 300px;
+  gap: 26px; align-items: start;
+}
+.tl-do { min-width: 0; border: 1px solid #ece0d2; border-radius: 10px; overflow: hidden; background: #fff; }
+.tl-read { min-width: 0; border: 1px solid #ece0d2; border-radius: 11px; background: #fdfaf5; overflow: hidden; }
+.tl-readhd {
+  padding: 11px 14px; border-bottom: 1px solid #ece0d2;
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+}
+/* ⚠️ THE MEASURE AND THE TYPE IT MEASURES ARE ON THE SAME ELEMENT, in the same units. `ch` is the
+   width of a `0` in the ELEMENT'S OWN font — on a container that inherits 16px while its children
+   paint at 12.5 it applies at a size nobody chose. This rule sets both, so they cannot diverge. */
+.tl-readbd { padding: 12px 14px 14px; font-size: 12.5px; max-width: 60ch; }
+.tl-know { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.tl-box { border: 1px solid #ece0d2; border-radius: 10px; padding: 12px 13px; background: #fdfaf5; }
+.tl-box .k {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8px;
+  letter-spacing: 0.13em; text-transform: uppercase; color: #a2937f; margin-bottom: 5px;
+}
+.tl-box .v { font-size: 12.5px; line-height: 1.45; color: #3a2c22; }
+
+/* ⚠️ NARROW LAST. Equal specificity is decided by order, so a wider query below a narrower one
+   silently overrides it — which is exactly the fault the REF ships: its blocks run 1500 → 1080 →
+   1240, so at 1080 and below the 1240 rule wins and the workspace collapses to one 430px column
+   instead of stacking. The ref draws one width; this has to survive four. */
+@media (max-width: 1500px) {
+  .tl-two { grid-template-columns: 430px minmax(320px, 1fr); }
+  /* Know drops beneath as a four-across strip — the facts are short, so four fit and none wraps */
+  .tl-know { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+}
+@media (max-width: 1240px) {
+  .tl-split { grid-template-columns: 288px minmax(0, 1fr); }
+}
+@media (max-width: 1080px) {
+  .tl-split { grid-template-columns: minmax(0, 1fr); }
+  .tl-two { grid-template-columns: minmax(0, 1fr); }
+  .tl-know { grid-template-columns: repeat(2, 1fr); }
+}
