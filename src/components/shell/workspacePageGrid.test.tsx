@@ -14,7 +14,7 @@ import { describe, it, expect } from "vitest";
 import { sliceBetween } from "../../test/sliceBetween";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { WorkspacePageGrid, PageTally } from "./WorkspacePageGrid";
 import { PageHeader } from "./PageHeader";
@@ -187,6 +187,37 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
      */
     expect(block(".wpg-scroll"), "the scroll row went back to padding every child by the same amount")
       .not.toContain("padding-inline:");
+    /**
+     * ⚠️ THE TWO WASH STOPS ARE THE SINGLE SOURCE — no page, and no other rule, may state either as
+     * a literal. The tokens exist precisely because the palette keeps moving: parchment until 25
+     * Aug, terracotta since, and both moves were one edit only because nothing else spelled the hex
+     * out. A second copy is how a surface gets left behind on the old colour and nobody notices,
+     * since a stale wash still looks like a wash.
+     *
+     * ⚠️ SWEPT OVER `src/`, NOT JUST THIS FILE, and the value is read from the token rather than
+     * repeated here — a lock that restates the hex it is forbidding is itself the second copy.
+     * `todo.css` legitimately holds `#f5efe6` as `--lat-1`, an unrelated latte token, which is why
+     * the sweep is for the CURRENT stops and scoped to whoever is not their declaration.
+     */
+    for (const which of ["--mast-wash-top", "--mast-wash-bottom"] as const) {
+      const decl = new RegExp(`${which}:\\s*(#[0-9a-f]{6})`, "i").exec(cssRules);
+      expect(decl, `${which} is not declared on the grid — the wash has no single source`).toBeTruthy();
+      const hex = decl![1];
+      const bare = hex.slice(1).toLowerCase();
+      const offenders: string[] = [];
+      const walk = (dir: string) => {
+        for (const e of readdirSync(dir, { withFileTypes: true })) {
+          const full = resolve(dir, e.name);
+          if (e.isDirectory()) { walk(full); continue; }
+          if (!/\.(css|tsx?)$/.test(e.name)) continue;
+          if (e.name === "workspacePageGrid.css" || e.name === "workspacePageGrid.test.tsx") continue;
+          if (readFileSync(full, "utf8").toLowerCase().includes(bare)) offenders.push(e.name);
+        }
+      };
+      walk(resolve(__dirname, "../.."));
+      expect(offenders, `${which} (${hex}) is spelled out somewhere other than its own declaration — the token is no longer the single source`)
+        .toEqual([]);
+    }
     expect(block(".wpg-scroll"), "a scrollbar gutter is reserved again — that strip is outside the scroller's content box, so the masthead's wash cannot reach the window's edge through it")
       .not.toContain("scrollbar-gutter");
     /* comments stripped: this file's prose NAMES the retired token, so a bare search finds the

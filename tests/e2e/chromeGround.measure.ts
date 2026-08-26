@@ -180,7 +180,17 @@ for (const vp of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }]) {
        * was behaving perfectly. A fraction of whatever the page actually has always separates.
        */
       const range = await scrollTo(0);
-      if (range.max < 140) { lines.push(`${name.padEnd(21)} — only ${range.max}px of scroll; too little to move a backdrop`); continue; }
+      /**
+       * ⚠️ THE SKIP AND THE SEPARATION CHECK ARE ONE PIECE OF ARITHMETIC, and having them as two
+       * round numbers let a page through the first and fail the second. The positions below are
+       * `15% + 42` and `85%`, so the gap between them is `0.7 × max − 42`; asking for 60px of
+       * separation therefore needs a range above ~146. At 140 the skip passed Calendar through and
+       * the separation assertion then failed it at 63 → 119 — a page with too little scroll being
+       * reported as a broken measurement. The floor is now derived from what it has to produce.
+       */
+      const MIN_SEP = 60;
+      const needed = Math.ceil((MIN_SEP + 42) / 0.7);
+      if (range.max < needed) { lines.push(`${name.padEnd(21)} — only ${range.max}px of scroll, under the ${needed} two positions ${MIN_SEP}px apart would need`); continue; }
       /**
        * ⚠️ BOTH READINGS ARE TAKEN WITH THE TOOLBAR IN THE SAME STATE, and the retract is why this
        * had to be added. The claim is that the chrome renders identically over two different
@@ -226,7 +236,7 @@ for (const vp of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }]) {
          about two different elements and its answer means nothing either way. */
       expect(after.height, `${name}: the chrome is ${before.height}px in one reading and ${after.height}px in the other — they are not the same object`).toBe(before.height);
       const scrolled = second.at - first.at;
-      expect(scrolled, `${name}: the second scroll position is not past the first (${first.at} → ${second.at})`).toBeGreaterThan(60);
+      expect(scrolled, `${name}: the second scroll position is not past the first (${first.at} → ${second.at})`).toBeGreaterThan(MIN_SEP - 1);
 
       /* the precondition: what is behind the chrome genuinely changed between the two readings */
       let movedBelow = 0;
@@ -264,7 +274,21 @@ for (const vp of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }]) {
         for (let x = 4; x < after.width - 4; x += 40) {
           sampled += 1;
           const p1 = before.at(x, y), p2 = after.at(x, y);
-          if (p1[0] !== p2[0] || p1[1] !== p2[1] || p1[2] !== p2[2]) bad.push(`(${x},${y}) ${p1.join(",")} → ${p2.join(",")}`);
+          /**
+           * ⚠️ A TOLERANCE OF 2 PER CHANNEL, ADDED WHEN THE WASH TURNED TERRACOTTA — and it is not
+           * a loosening. An exact comparison was right while the wash spanned two units of colour
+           * from top to bottom; the terracotta stops span about twenty in blue, which the compositor
+           * DITHERS, and the dither pattern is not identical between two paints. Measured: six of 78
+           * points differing as `249,230,223 → 249,230,222`, one unit, on a header nothing was
+           * showing through.
+           *
+           * A real read-through is an order of magnitude bigger — the page's own ground against the
+           * band is 13 to 17 per channel, which is what the `both-edges` red check produced. The
+           * tolerance admits the rendering and cannot admit the fault.
+           */
+          if (Math.abs(p1[0] - p2[0]) > 2 || Math.abs(p1[1] - p2[1]) > 2 || Math.abs(p1[2] - p2[2]) > 2) {
+            bad.push(`(${x},${y}) ${p1.join(",")} → ${p2.join(",")}`);
+          }
         }
       }
       checked += 1;
