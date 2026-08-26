@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — what sits below the timeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ground:#f2ede7;--parchment:#fdfaf5;--white:#fff;--ink:#3a1c14;--muted:#8a7a6c;--label:#9c8878;
+--burgundy:#7c3a2a;--pink:#f5e2da;--pinkb:#e8c8bc;--pinkband:#f3e0d6;--sage:#8a9e88;--sagetint:#eef1ec;
+--sagetxt:#5a6e58;--hair:#ece0d2;--line:#e0d0c4;--dash:#c9a89e;--rec:#b9a48f}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--ground);font-family:Inter,sans-serif;color:var(--ink);padding:16px 22px;display:flex;flex-direction:column;gap:12px;-webkit-font-smoothing:antialiased}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;color:var(--label)}
+.btn{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;font-weight:500;border-radius:9px;
+padding:8px 13px;cursor:pointer;background:var(--white);border:1px solid var(--line);color:#6a5a50;line-height:1}
+.btn:hover{border-color:var(--dash);color:var(--burgundy)}
+.btn.primary{background:var(--pink);border-color:var(--pinkb);color:var(--burgundy)}
+
+/* scheme switcher */
+.sw{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:0 0 auto}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--white)}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;
+padding:9px 13px;border:none;background:var(--white);color:var(--label);cursor:pointer}
+.seg button[data-on="true"]{background:var(--pink);color:var(--burgundy)}
+.seg button+button{border-left:1px solid var(--line)}
+.note{font-size:12px;color:var(--muted);max-width:640px;line-height:1.45}
+
+/* page shell — no page scroll */
+.page{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:12px}
+.board{background:var(--parchment);border:1px solid var(--hair);border-radius:14px;overflow:hidden;
+display:flex;flex-direction:column;min-height:0}
+.board.grow{flex:1 1 auto}
+.board.only{flex:0 0 auto}
+.bscroll{overflow-y:auto;min-height:0}
+.tl{display:grid;grid-template-columns:210px repeat(7,1fr)}
+.dh{position:sticky;top:0;z-index:4;background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid var(--hair);padding:7px 0 6px;text-align:center}
+.dh .dw{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;color:var(--sagetxt)}
+.dh .dd{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:#3f4d3d;margin-top:2px}
+.dh.today .dd{background:var(--burgundy);color:#f8f5f0;border-radius:50%;width:19px;height:19px;display:inline-flex;align-items:center;justify-content:center}
+.corner{position:sticky;top:0;left:0;z-index:5;background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid var(--hair);border-right:1px solid var(--hair);display:flex;align-items:center;padding:0 13px}
+.rowhead{background:var(--parchment);border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);padding:9px 13px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.rowhead.pin{position:sticky;top:34px;z-index:3}
+.rowhead .nm{font-family:'Playfair Display',serif;font-size:14px;font-weight:500;display:flex;align-items:center;gap:7px}
+.rowhead .ag{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--label)}
+.sd{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.sd.out{background:var(--pink);border:1.5px solid var(--burgundy)}
+.sd.half{background:linear-gradient(90deg,var(--burgundy) 50%,var(--pink) 50%);border:1.5px solid var(--burgundy)}
+.sd.you{border-radius:3px;border:1.5px solid var(--burgundy);background:transparent}
+.dcell{border-bottom:1px solid var(--hair);border-right:1px solid #f2e9dd;min-height:58px;position:relative}
+.dcell.wkend{background:#faf6ef}.dcell.today{background:#fdf5f2}
+.rowpin{position:sticky;top:34px;z-index:3;background:var(--parchment)}
+.lane{position:relative;grid-column:2 / -1;height:0}
+.dim{opacity:.32}
+.chipx,.span{position:absolute;top:-50px;height:26px;border-radius:999px;display:flex;align-items:center;gap:6px;
+padding:0 11px;font-size:10.5px;font-weight:500;cursor:pointer;white-space:nowrap;overflow:hidden}
+.chipx.sel,.span.sel{box-shadow:0 0 0 1.5px var(--burgundy)}
+.span.wait{background:var(--sagetint);border:1px solid #dde3da;color:var(--sagetxt);border-right:2px dashed var(--sage)}
+.span.wait .d{width:7px;height:7px;border-radius:50%;background:var(--burgundy)}
+.chipx .d{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.chipx.turn{background:var(--pinkband);border:1px solid var(--pinkb)}
+.chipx.turn .d{background:var(--pink);border:1.5px solid var(--burgundy)}
+.chipx.rec{background:var(--white);border:1px solid var(--hair);color:#6b5a4d}
+.chipx.rec .d{width:7px;height:7px;background:var(--rec)}
+.chipx.rec.in .d{background:var(--sage)}
+.chipx.task{background:var(--white);border:1px solid var(--line)}
+.chipx.task .d{border-radius:2px;border:1.5px solid var(--burgundy);background:transparent}
+.chipx.ghost{background:transparent;border:1px dashed var(--dash);color:#a08f80}
+.chipx.ghost .d{border:1.5px dashed var(--dash);background:transparent}
+
+/* below region */
+.below{flex:0 0 auto;background:var(--white);border:1px solid var(--hair);border-top:5px solid var(--sage);
+border-radius:4px;box-shadow:0 4px 14px rgba(58,28,20,.06);display:flex;flex-direction:column;min-height:0}
+.below.grow{flex:1 1 auto}
+.bhead{padding:13px 18px 11px;border-bottom:1px solid var(--hair);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.bbody{overflow-y:auto;min-height:0;padding:15px 20px 18px}
+.bfix{padding:14px 18px 16px}
+
+/* focus content */
+.fx{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;max-width:1100px}
+.fx h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;line-height:1.2;margin-top:4px}
+.fx h3 em{font-style:italic;color:var(--burgundy)}
+.fx .ctx{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+.facts{display:flex;gap:18px;margin-top:11px;flex-wrap:wrap}
+.fact .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--label)}
+.fact .v{font-size:12.5px;margin-top:3px}
+.acts{display:flex;gap:7px;align-items:flex-start;padding-top:20px}
+.empty{color:var(--muted);font-family:'Playfair Display',serif;font-style:italic;font-size:16px;text-align:center;padding:16px 0 6px}
+
+/* worklist */
+.wl{display:flex;flex-direction:column;gap:7px;max-width:760px}
+.wr{display:flex;align-items:center;gap:11px;padding:9px 12px;border:1px solid var(--hair);border-radius:10px;background:var(--parchment);cursor:pointer}
+.wr:hover{border-color:var(--dash)}
+.wr .when{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--label);width:74px;flex:0 0 auto}
+.wr .what{flex:1;min-width:0;font-size:12.5px;max-width:58ch}
+.wr .what em{font-style:italic;color:var(--burgundy)}
+.wr .far{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--dash)}
+.divider{display:flex;align-items:center;gap:10px;margin:12px 0 4px}
+.divider::after{content:'';flex:1;height:1px;background:var(--hair)}
+
+.split{display:grid;grid-template-columns:352px 1fr;gap:14px;flex:1 1 auto;min-height:0}
+.colBoard{background:var(--parchment);border:1px solid var(--hair);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.colHd{background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid var(--hair);padding:9px 14px;
+display:flex;justify-content:space-between;align-items:center}
+.colHd .dt{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;color:#3f4d3d;letter-spacing:.1em}
+.colBody{overflow-y:auto;min-height:0}
+.crow{display:flex;align-items:center;gap:10px;padding:10px 13px;border-bottom:1px solid var(--hair);cursor:pointer}
+.crow:hover{background:#faf5ee}
+.crow.off{opacity:.3}
+.crow.on{background:#fdf5f2;box-shadow:inset 2px 0 0 var(--burgundy)}
+.crow .who{flex:1;min-width:0}
+.crow .who .n{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:500;line-height:1.2;display:flex;align-items:center;gap:7px}
+.crow .who .g{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--label);margin-top:3px}
+.crow .it{margin-top:6px}
+.cempty{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--dash)}
+.wsRight{background:var(--white);border:1px solid var(--hair);border-top:5px solid var(--sage);border-radius:4px;
+box-shadow:0 4px 14px rgba(58,28,20,.06);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.wsRight .hd{padding:13px 18px 11px;border-bottom:1px solid var(--hair);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.wsRight .bd{overflow-y:auto;min-height:0;padding:16px 20px 20px}
+/* WORKSPACE: three columns, each with a different job.
+   do (fixed 430) · read (flexes, capped by measure) · know (fixed 300)
+   Width is spent on the conversation, which is the only thing that benefits. */
+.two{display:grid;grid-template-columns:430px minmax(320px,1fr) 300px;gap:26px;align-items:start}
+@media(max-width:1500px){.two{grid-template-columns:430px minmax(320px,1fr);}
+  .knowCol{grid-column:1 / -1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}}
+@media(max-width:1080px){.two{grid-template-columns:1fr}
+  .knowCol{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1240px){.two{grid-template-columns:minmax(0,430px)}}
+
+/* WIDTH RULES
+   pane 430 fixed (its natural column) · context capped at 560 (~68ch, a readable measure)
+   workspace capped at 1018 and left-aligned; surplus viewport stays as ground, never stretched */
+.wsx{display:grid;grid-template-columns:430px minmax(320px,1fr) 300px;gap:26px;min-height:0;align-items:start}
+.paneCol{border:1px solid var(--hair);border-radius:10px;display:flex;flex-direction:column;min-height:0;overflow:hidden;align-self:start}
+.paneHd{padding:13px 16px 11px;border-bottom:1px solid var(--hair);background:var(--white)}
+.paneHd h4{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;margin-top:5px;line-height:1.2}
+.paneHd h4 em{font-style:italic;color:var(--burgundy)}
+.paneBd{padding:14px 16px;background:var(--white)}
+.paneFt{border-top:1px solid var(--hair);padding:11px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fdfbf7}
+.pgroup{margin-bottom:15px}
+.pgroup>.lbl{display:block;margin-bottom:7px}
+.pwill{font-size:12.5px;line-height:1.5;color:#4a382e;background:var(--parchment);border:1px solid var(--hair);border-radius:9px;padding:10px 12px}
+.fk{display:flex;gap:7px;flex-wrap:wrap}
+.fkb{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.09em;text-transform:uppercase;padding:9px 12px;
+border-radius:9px;border:1px solid var(--line);background:var(--white);color:#6a5a50;cursor:pointer}
+.fkb[data-on="true"]{background:var(--pink);border-color:var(--pinkb);color:var(--burgundy)}
+.gate{display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--hair);border-radius:9px;
+background:var(--parchment);font-size:12.5px;margin-bottom:6px;cursor:pointer}
+.gate[data-on="true"]{background:var(--pink);border-color:var(--pinkb)}
+.gate .r{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--dash);position:relative;flex:0 0 auto}
+.gate[data-on="true"] .r::after{content:'';position:absolute;inset:2.5px;border-radius:50%;background:var(--burgundy)}
+.ctxCol{min-height:0;max-width:560px}
+.pta{width:100%;min-height:110px;font-family:Inter,sans-serif;font-size:12.5px;line-height:1.55;border:1px solid var(--line);
+border-radius:9px;padding:10px 12px;outline:none;resize:vertical}
+.boxgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+
+/* scheme C workspace */
+.ws{display:grid;grid-template-columns:1fr 250px;gap:20px}
+.tlog{display:flex;flex-direction:column;gap:0}
+.readCol{border:1px solid var(--hair);border-radius:11px;background:var(--parchment);overflow:hidden}
+.readHd{padding:11px 15px;border-bottom:1px solid var(--hair);background:var(--white);display:flex;justify-content:space-between;align-items:center}
+.readBd{padding:6px 15px 13px}
+.te{display:flex;gap:13px;padding:10px 0;border-left:2px solid var(--hair);padding-left:15px;margin-left:5px;position:relative}
+.te::before{content:'';position:absolute;left:-5px;top:14px;width:8px;height:8px;border-radius:50%;background:var(--rec)}
+.te.in::before{background:var(--sage)}
+.te .d{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:var(--label);width:56px;flex:0 0 auto;padding-top:2px}
+.te .b{font-size:12.5px;line-height:1.5;max-width:60ch}
+.te .b b{font-weight:600}
+.side .box{border:1px solid var(--hair);border-radius:10px;padding:11px 12px;margin-bottom:9px;background:var(--parchment)}
+.knowCol .box{border:1px solid var(--hair);border-radius:10px;padding:12px 13px;background:var(--parchment);margin:0}
+.knowCol{display:flex;flex-direction:column;gap:9px}
+.knowCol .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);margin-bottom:5px}
+.knowCol .v{font-size:12.5px;line-height:1.45}
+.side .box .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);margin-bottom:5px}
+.side .box .v{font-size:12.5px;line-height:1.4}
+.esc{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:var(--label)}
+kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:1px 5px;background:var(--white);font-family:'JetBrains Mono',monospace;font-size:8.5px}
+</style>
+</head>
+<body>
+
+<div class="sw">
+  <div class="seg" id="seg">
+    <button data-s="A" data-on="true">A · caption</button>
+    <button data-s="B" data-on="false">B · worklist</button>
+    <button data-s="C" data-on="false">C · row workspace</button><button data-s="D" data-on="false">D · column + right</button>
+  </div>
+  <div class="note" id="note"></div>
+</div>
+
+<div class="page" id="page"></div>
+
+<script>
+var SCHEME='A', sel=null, selRow=null;
+var TODAY=new Date(2026,7,26);
+var W=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function addD(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x}
+
+var ROWS=[
+ {id:'you',nm:'Your tasks',ag:'Murphy\u2019s Day Out',dot:'you',items:[
+   {t:'task',label:'Book the library room',day:0,id:'t1'},
+   {t:'ghost',label:'Follow up \u21a6',day:1,id:'t2g'},
+   {t:'task',label:'Follow up with Castle Lane',day:3,id:'t2'}]},
+ {id:'ash',nm:'J. Ashworth',ag:'Ashworth & Vale',dot:'half',items:[
+   {t:'turn',label:'Send your full',day:3,id:'a1'}]},
+ {id:'mar',nm:'L. Marchetti',ag:'Marchetti Literary',dot:'half',items:[
+   {t:'wait',label:'Reply window \u00b7 partial with her',from:-2,to:11,id:'m1'}]},
+ {id:'whi',nm:'R. Whitmore',ag:'Whitmore & Bond',dot:'out',items:[
+   {t:'rec',dir:'in',label:'Holding reply',day:-1,id:'w0'},
+   {t:'wait',label:'Reply window',from:0,to:13,id:'w1'}]},
+ {id:'kau',nm:'P. Kaur',ag:'Kaur & Finch',dot:'out',items:[
+   {t:'turn',label:'Nudge due',day:0,id:'k1'}]},
+ {id:'oka',nm:'D. Okafor',ag:'Castle Lane Literary',dot:'out',items:[
+   {t:'rec',dir:'out',label:'Nudge sent',day:-2,id:'o0'},
+   {t:'wait',label:'Reply window',from:-2,to:7,id:'o1'}]},
+ {id:'far',nm:'I. Farr',ag:'Farr Literary',dot:'out',items:[
+   {t:'rec',dir:'out',label:'Query sent',day:-1,id:'f0'}]},
+ {id:'ell',nm:'T. Ellery',ag:'Ellery & Co',dot:'out',items:[
+   {t:'wait',label:'Reply window',from:-5,to:4,id:'e1'}]}
+];
+var DET={
+ t1:{r:'you',h:'Book the library room',c:'Your task \u00b7 due today.',f:[['Kind','Your task'],['Due','26 Aug']],a:['TICK IT OFF','GIVE IT A DATE']},
+ t2:{r:'you',h:'Follow up with Castle Lane',c:'Your task \u00b7 due Saturday.',f:[['Kind','Your task'],['Due','29 Aug']],a:['TICK IT OFF','GIVE IT A DATE']},
+ t2g:{r:'you',h:'Follow up with Castle Lane',c:'Fell due here \u00b7 carried to its new day.',f:[['Kind','Carried task']],a:['GO TO THE TASK']},
+ a1:{r:'ash',h:'Send your full \u2014 |J. Ashworth|',c:'Full requested 29 Jul \u00b7 Murphy\u2019s Day Out.',f:[['Your turn','Since 29 Jul \u00b7 28 days'],['Manuscript','Murphy\u2019s Day Out']],a:['OPEN THE TASK','SNOOZE']},
+ m1:{r:'mar',h:'Waiting \u2014 |L. Marchetti|',c:'Partial sent 24 Aug \u00b7 her stated window runs to 6 Sep.',f:[['Sent','24 Aug \u00b7 partial'],['Window','Her stated 2 weeks']],a:['OPEN QUERY']},
+ w0:{r:'whi',h:'Holding reply \u2014 |R. Whitmore|',c:'\u201cStill reading \u2014 will be in touch.\u201d The clock restarted.',f:[['From her','25 Aug'],['Window','To 8 Sep']],a:['OPEN QUERY']},
+ w1:{r:'whi',h:'Waiting \u2014 |R. Whitmore|',c:'Holding reply 25 Aug \u00b7 window restarted to 8 Sep.',f:[['Window','To 8 Sep']],a:['OPEN QUERY']},
+ k1:{r:'kau',h:'Nudge due \u2014 |P. Kaur|',c:'Queried 1 Jul \u00b7 8 weeks \u00b7 no reply yet.',f:[['Queried','1 Jul'],['Replies','None recorded']],a:['OPEN THE TASK','SNOOZE']},
+ o0:{r:'oka',h:'Nudge sent \u2014 |D. Okafor|',c:'Polite follow-up on the query.',f:[['Sent','24 Aug'],['Exchange','2']],a:['OPEN QUERY']},
+ o1:{r:'oka',h:'Waiting \u2014 |D. Okafor|',c:'Nudged 24 Aug \u00b7 your expected date 2 Sep.',f:[['Window','Your date \u00b7 2 Sep']],a:['OPEN QUERY']},
+ f0:{r:'far',h:'Query sent \u2014 |I. Farr|',c:'Query letter, synopsis, first ten pages.',f:[['Sent','25 Aug'],['Exchange','1']],a:['OPEN QUERY']},
+ e1:{r:'ell',h:'Waiting \u2014 |T. Ellery|',c:'Query sent 21 Aug \u00b7 his stated window runs to 30 Aug.',f:[['Window','His stated 6 weeks']],a:['OPEN QUERY']}
+};
+var WORK=[
+ {when:'Today',what:'<b>Nudge due</b> — <em>P. Kaur</em>',id:'k1'},
+ {when:'Today',what:'Book the library room',id:'t1'},
+ {when:'Sat 29',what:'<b>Send your full</b> — <em>J. Ashworth</em>',id:'a1'},
+ {when:'Sat 29',what:'Follow up with Castle Lane',id:'t2'}
+];
+var FAR=[
+ {when:'8 Sep',what:'<b>Nudge due</b> — <em>R. Whitmore</em> <span class="far">in 13 days</span>'},
+ {when:'12 Sep',what:'<b>Nudge due</b> — <em>L. Marchetti</em> <span class="far">in 17 days</span>'},
+ {when:'2 Oct',what:'<b>Window closes</b> — <em>D. Okafor</em> <span class="far">in 37 days</span>'}
+];
+var NOTES={
+ D:'The board narrows to the selected day \u2014 every agent still listed, everything dimmed but the item you are working on \u2014 and the workflow takes the whole right-hand side. Vertical space used, context kept.',
+ A:'The timeline is the page; the band below is a caption that fills when you select. Calmest, and honest \u2014 but it is empty most of the time.',
+ B:'The space below defaults to your worklist \u2014 including work beyond this week, which the timeline cannot show. Selecting anything replaces it with the detail; deselecting brings it back.',
+ C:'Click a row head \u2014 or any pink \u201cyour turn\u201d chip \u2014 and the board collapses to that row alone; everything beneath becomes its workspace. The task pane sits at its own width, the conversation beside it. Esc returns to the week.'
+};
+
+function chip(it,dim){
+  var a=(it.t==='wait'?it.from:it.day), b=(it.t==='wait'?it.to:it.day);
+  if(b<0||a>6) return '';
+  var ca=Math.max(a,0), cb=Math.min(b,6);
+  var L=(ca/7)*100, Wd=((cb-ca+1)/7)*100;
+  var s=(sel===it.id?' sel':'')+(dim?' dim':'');
+  if(it.t==='wait') return '<div class="span wait'+s+'" data-id="'+it.id+'" style="left:calc('+L+'% + 5px);width:calc('+Wd+'% - 10px)"><span class="d"></span>'+it.label+'</div>';
+  var cls={turn:'turn',rec:'rec'+(it.dir==='in'?' in':''),ghost:'ghost',task:'task'}[it.t];
+  return '<div class="chipx '+cls+s+'" data-id="'+it.id+'" style="left:calc('+L+'% + 5px);max-width:calc('+(100-L)+'% - 10px)"><span class="d"></span>'+it.label+'</div>';
+}
+function boardHTML(rows,dimOthers){
+  var h='<div class="corner"><span class="lbl">Agents &amp; you</span></div>';
+  for(var i=0;i<7;i++){var d=addD(TODAY,i);
+    h+='<div class="dh'+(i===0?' today':'')+'"><div class="dw">'+W[d.getDay()].toUpperCase()+'</div><div class="dd">'+d.getDate()+'</div></div>';}
+  rows.forEach(function(r,ix){
+    var dim=dimOthers&&selRow&&r.id!==selRow;
+    h+='<div class="rowhead'+(ix===0&&SCHEME!=='C'?' pin':'')+(dim?' dim':'')+'" data-row="'+r.id+'"><div class="nm"><span class="sd '+r.dot+'"></span>'+r.nm+'</div><div class="ag">'+r.ag+'</div></div>';
+    for(var i=0;i<7;i++){var d=addD(TODAY,i),dw=d.getDay();
+      h+='<div class="dcell'+((dw===0||dw===6)?' wkend':'')+(i===0?' today':'')+'"></div>';}
+    h+='<div class="lane">'+r.items.map(function(it){return chip(it,dim)}).join('')+'</div>';
+  });
+  return h;
+}
+function focusHTML(){
+  if(!sel) return '<div class="empty">Select anything above \u2014 its detail and actions appear here, full width.</div>';
+  var d=DET[sel];
+  return '<div class="fx"><div style="flex:1 1 340px;min-width:0"><span class="lbl">In focus</span><h3>'+d.h.replace(/\|([^|]+)\|/g,'<em>$1</em>')+'</h3>'
+   +'<div class="ctx">'+d.c+'</div><div class="facts">'+d.f.map(function(x){return '<div class="fact"><div class="k">'+x[0]+'</div><div class="v">'+x[1]+'</div></div>'}).join('')+'</div></div>'
+   +'<div class="acts">'+d.a.map(function(a,i){return '<button class="btn'+(i===0?' primary':'')+'">'+a+'</button>'}).join('')+'</div></div>';
+}
+function worklistHTML(){
+  return '<div class="wl">'+WORK.map(function(w){return '<div class="wr" data-id="'+w.id+'"><span class="when">'+w.when+'</span><span class="what">'+w.what+'</span><button class="btn">OPEN</button></div>'}).join('')+'</div>'
+   +'<div class="divider"><span class="lbl">Beyond this week</span></div>'
+   +'<div class="wl">'+FAR.map(function(w){return '<div class="wr"><span class="when">'+w.when+'</span><span class="what">'+w.what+'</span></div>'}).join('')+'</div>';
+}
+function workspaceHTML(){
+  var r=ROWS.filter(function(x){return x.id===selRow})[0];
+  return '<div class="wsx"><div class="paneCol">'
+   +'<div class="paneHd"><span class="lbl">Your turn</span><h4>Nudge <em>'+r.nm+'</em></h4></div>'
+   +'<div class="paneBd">'
+   +'<div class="pgroup"><span class="lbl">What this will do</span><div class="pwill">Records a nudge sent today, and restarts the waiting clock on this query.</div></div>'
+   +'<div class="pgroup"><span class="lbl">How do you want to handle it?</span><div class="fk">'
+   +'<button class="fkb" data-on="true">Write the nudge</button><button class="fkb">Just log it</button><button class="fkb">Give it a date</button></div></div>'
+   +'<div class="pgroup"><span class="lbl">Your message</span><textarea class="pta">Dear '+r.nm+',\n\nI queried you on 1 July about Murphy\u2019s Day Out and wanted to check the submission arrived safely. I\u2019m happy to wait.\n\nWith thanks,\nBethany Carter</textarea></div>'
+   +'<div class="pgroup"><span class="lbl">When did you send it?</span>'
+   +'<div class="gate" data-on="true"><span class="r"></span>Today \u00b7 26 August</div>'
+   +'<div class="gate"><span class="r"></span>Another day\u2026</div></div>'
+   +'</div>'
+   +'<div class="paneFt"><div style="display:flex;gap:7px"><button class="btn">SNOOZE</button><button class="btn">DISMISS</button></div>'
+   +'<button class="btn primary">LOG THE NUDGE</button></div></div>'
+   +readHTML()+knowHTML()+'</div>';
+}
+
+function syncSeg(){document.querySelectorAll('#seg button').forEach(function(x){x.dataset.on=(x.dataset.s===SCHEME)});}
+function dayOf(it){return it.t==='wait'?it.from:it.day;}
+function itemsOnDay(r,dy){return r.items.filter(function(it){
+  if(it.t==='wait') return it.from<=dy&&it.to>=dy;
+  return it.day===dy;});}
+function miniChip(it,on){
+  var cls={turn:'turn',rec:'rec'+(it.dir==='in'?' in':''),ghost:'ghost',task:'task',wait:'wait'}[it.t];
+  var st='position:static;height:auto;padding:3px 9px;';
+  if(it.t==='wait') return '<span class="span wait" style="'+st+'position:relative;display:inline-flex" data-id="'+it.id+'"><span class="d"></span>'+it.label+'</span>';
+  return '<span class="chipx '+cls+'" style="'+st+'position:relative;display:inline-flex" data-id="'+it.id+'"><span class="d"></span>'+it.label+'</span>';
+}
+function columnHTML(){
+  var dy=0, d=addD(TODAY,dy);
+  var rows=ROWS.map(function(r){
+    var its=itemsOnDay(r,dy);
+    var mine=sel&&its.some(function(i){return i.id===sel});
+    var cls=sel?(mine?'on':'off'):'';
+    return '<div class="crow '+cls+'" data-row="'+r.id+'"><div class="who"><div class="n"><span class="sd '+r.dot+'"></span>'+r.nm+'</div>'
+      +'<div class="g">'+r.ag+'</div>'
+      +(its.length?'<div class="it">'+its.map(function(i){return miniChip(i)}).join(' ')+'</div>':'<div class="it cempty">nothing today</div>')
+      +'</div></div>';
+  }).join('');
+  var right;
+  if(sel){
+    var dd=DET[sel], r=ROWS.filter(function(x){return x.id===dd.r})[0];
+    right='<div class="hd"><span class="lbl">Your turn \u00b7 '+r.nm+'</span><span class="esc"><kbd>Esc</kbd> back</span></div>'
+      +'<div class="bd"><div class="two"><div>'+paneHTML(r)+'</div>'+readHTML()+knowHTML()+'</div></div>';
+  } else {
+    right='<div class="hd"><span class="lbl">Over to you</span><span class="lbl">4 today \u00b7 3 beyond</span></div>'
+      +'<div class="bd">'+worklistHTML()+'</div>';
+  }
+  return '<div class="split"><div class="colBoard"><div class="colHd"><span class="lbl">Everyone</span>'
+    +'<span class="dt">'+W[d.getDay()].toUpperCase()+' '+d.getDate()+' '+M[d.getMonth()].toUpperCase()+'</span></div>'
+    +'<div class="colBody">'+rows+'</div></div>'
+    +'<div class="wsRight">'+right+'</div></div>';
+}
+function paneHTML(r){
+  return '<div class="paneCol" style="border:none"><div class="paneHd" style="padding-left:0;padding-top:0;border:none">'
+   +'<h4 style="margin-top:0">Nudge <em>'+r.nm+'</em></h4></div><div class="paneBd" style="padding:12px 0 0">'
+   +'<div class="pgroup"><span class="lbl">What this will do</span><div class="pwill">Records a nudge sent today, and restarts the waiting clock on this query.</div></div>'
+   +'<div class="pgroup"><span class="lbl">How do you want to handle it?</span><div class="fk">'
+   +'<button class="fkb" data-on="true">Write the nudge</button><button class="fkb">Just log it</button><button class="fkb">Give it a date</button></div></div>'
+   +'<div class="pgroup"><span class="lbl">Your message</span><textarea class="pta">Dear '+r.nm+',\n\nI queried you on 1 July about Murphy\u2019s Day Out and wanted to check the submission arrived safely. I\u2019m happy to wait.\n\nWith thanks,\nBethany Carter</textarea></div>'
+   +'<div class="pgroup"><span class="lbl">When did you send it?</span>'
+   +'<div class="gate" data-on="true"><span class="r"></span>Today \u00b7 26 August</div>'
+   +'<div class="gate"><span class="r"></span>Another day\u2026</div></div></div>'
+   +'<div class="paneFt" style="padding:12px 0 0;background:none"><div style="display:flex;gap:7px">'
+   +'<button class="btn">SNOOZE</button><button class="btn">DISMISS</button></div>'
+   +'<button class="btn primary">LOG THE NUDGE</button></div></div>';
+}
+function readHTML(){
+  return '<div class="readCol"><div class="readHd"><span class="lbl">The whole conversation</span>'
+   +'<button class="btn" style="padding:6px 10px">OPEN IN QUERY CENTRE \u2192</button></div><div class="readBd">'
+   +'<div class="te"><span class="d">1 JUL</span><span class="b"><b>Query sent</b> \u2014 query letter, synopsis and the first ten pages, by email.</span></div>'
+   +'<div class="te in"><span class="d">14 AUG</span><span class="b"><b>Holding reply</b> \u2014 \u201cStill reading \u2014 will be in touch.\u201d The waiting clock restarted.</span></div>'
+   +'<div class="te"><span class="d">24 AUG</span><span class="b"><b>Nudge sent</b> \u2014 polite follow-up on the query.</span></div>'
+   +'<div class="te in"><span class="d">25 AUG</span><span class="b"><b>Holding reply</b> \u2014 second holding note; the clock restarted again.</span></div>'
+   +'</div></div>';
+}
+function knowHTML(){
+  return '<div class="knowCol">'
+   +'<div class="box"><div class="k">Status</div><div class="v">Queried \u00b7 exchange 4</div></div>'
+   +'<div class="box"><div class="k">Reply window</div><div class="v">To 8 Sep \u00b7 her stated 6 weeks</div></div>'
+   +'<div class="box"><div class="k">Materials sent</div><div class="v">Query letter, synopsis, first 10 pages</div></div>'
+   +'<div class="box"><div class="k">Your note</div><div class="v">Prefers .docx, single spaced.</div></div>'
+   +'<div class="box"><div class="k">Agency</div><div class="v">Kaur &amp; Finch \u00b7 London</div></div>'
+   +'</div>';
+}
+function render(){
+  document.getElementById('note').textContent=NOTES[SCHEME];
+  var p=document.getElementById('page'), h='';
+  if(SCHEME==='C'&&selRow){
+    var one=ROWS.filter(function(r){return r.id===selRow});
+    h='<div class="board only"><div class="bscroll"><div class="tl">'+boardHTML(one,false)+'</div></div></div>'
+     +'<div class="below grow"><div class="bhead"><span class="lbl">Workspace \u00b7 '+one[0].nm+'</span>'
+     +'<span class="esc"><kbd>Esc</kbd> back to the week</span></div><div class="bbody">'+workspaceHTML()+'</div></div>';
+  } else if(SCHEME==='D'){
+    h=columnHTML();
+  } else if(SCHEME==='B'){
+    h='<div class="board grow"><div class="bscroll"><div class="tl">'+boardHTML(ROWS,false)+'</div></div></div>'
+     +'<div class="below" style="flex:0 0 250px"><div class="bhead"><span class="lbl">'+(sel?'In focus':'Over to you')+'</span>'
+     +(sel?'<button class="btn" id="clr">CLEAR</button>':'<span class="lbl">4 this week \u00b7 3 beyond</span>')+'</div>'
+     +'<div class="bbody">'+(sel?focusHTML():worklistHTML())+'</div></div>';
+  } else {
+    h='<div class="board grow"><div class="bscroll"><div class="tl">'+boardHTML(ROWS,SCHEME==='C')+'</div></div></div>'
+     +'<div class="below"><div class="bfix">'+focusHTML()+'</div></div>';
+  }
+  p.innerHTML=h;
+  p.querySelectorAll('[data-id]').forEach(function(el){el.onclick=function(){
+    sel=el.dataset.id; selRow=DET[sel]?DET[sel].r:null;
+    if(el.classList.contains('turn')){SCHEME='C';sel=null;syncSeg();}
+    render();}});
+  p.querySelectorAll('[data-row]').forEach(function(el){el.onclick=function(){
+    selRow=el.dataset.row;sel=null;SCHEME='C';syncSeg();render();}});
+  var c=document.getElementById('clr'); if(c)c.onclick=function(){sel=null;selRow=null;render();};
+}
+document.getElementById('seg').onclick=function(e){var b=e.target.closest('button');if(!b)return;
+  SCHEME=b.dataset.s;sel=null;selRow=null;
+  document.querySelectorAll('#seg button').forEach(function(x){x.dataset.on=(x.dataset.s===SCHEME)});
+  render();};
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){sel=null;selRow=null;render();}});
+render();
+</script>
+</body>
+</html>
