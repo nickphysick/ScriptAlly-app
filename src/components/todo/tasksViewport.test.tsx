@@ -541,7 +541,14 @@ describe("⚠️ THE LEFT GUTTER IS LAW — all four pages, sidebar or not", () 
     for (const [name, src] of [
       ["To-do list", board], ["Calendar", cal], ["Noteboard", note],
     ] as const) {
-      expect(src, name).toContain('className="t-f12 spine-root"');
+      /* ⚠️ RETARGETED by the `calendar` session (journey-bars pack, Phase 2), flagged in
+         reports/calendar-bars.md. THE LAW IS UNCHANGED — all four pages wear the same column, and
+         they still wear it FIRST. What the exact string could not express is a page-scoping
+         MODIFIER alongside it: the Calendar carries `cal-timeline` so its own stylesheet can opt
+         out of the settle's reclaim spacer, which is a fact about that page and not about the
+         column. The column classes are still both present, still in this order, and still the
+         first thing on the element. */
+      expect(src, name).toMatch(/className="t-f12 spine-root( [a-z-]+)*"/);
       expect(src, name).toContain("<TasksPageLayout");
       // and none of them caps or centres a measure of its own
       expect(src, name).not.toMatch(/margin(-inline)?:\s*(0 )?auto/);

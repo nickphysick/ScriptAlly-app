@@ -31,31 +31,34 @@
  */
 .tpl-tools .calm-nav { width: auto; justify-content: flex-start; }
 
-/* ══ THE FILTER BAR ════════════════════════════════════════════════════════════════════════
+/* ══ ONE CONTROL ROW (bars pack, Phase 2) ═══════════════════════════════════════════════════
  *
- * ⚠️ ABOVE THE BOARD, NOT IN THE TOOL ROW. The tool row carries NAVIGATION — the pager and the
- * creation action — and this carries what the board is showing. Two rows, two jobs; folding the
- * filters into the pager would put "which week" and "which kinds" in one undifferentiated strip.
+ * ⚠️ THE SECOND CONTROL ROW IS GONE. The filters sat in a strip of their own directly beneath the
+ * tool row — two rows of controls stacked, 42.25px of a 900px viewport spent on the fact that they
+ * had been built at different times. They are one line now, and it MUST NOT WRAP: `.tpl-tools` is
+ * a flex row with no `flex-wrap`, so anything too wide pushes the row's height up silently rather
+ * than erroring. The count elides first and the search narrows second — a tally answers a question
+ * nobody has asked yet, so it is the one thing here that can go.
  */
-.tl-bar {
-  flex: none; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  padding: 0 0 11px;
+.tl-sep {
+  width: 1px; height: 18px; background: #e6dcce; flex: none; margin: 0 3px;
 }
-.tl-kinds { display: flex; gap: 5px; flex-wrap: wrap; }
+.tl-kinds { display: flex; gap: 5px; flex: none; }
 .tl-kind {
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8.5px;
-  letter-spacing: 0.11em; text-transform: uppercase;
-  padding: 6px 10px; border-radius: 999px; cursor: pointer;
+  letter-spacing: 0.11em; text-transform: uppercase; white-space: nowrap;
+  padding: 0 10px; height: 26px; border-radius: 999px; cursor: pointer; flex: none;
   border: 1px solid #e6dcce; background: #fff; color: #8a7a6c;
 }
 .tl-kind:hover { border-color: #d3c4b3; color: #6a5a50; }
 /* one selection grammar page-wide — the pink the chosen segment already wore */
 .tl-kind[data-on="true"] { background: #f8e7e2; border-color: #eecfc2; color: #7c3a2a; }
+.tl-kind:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
 .tl-menuwrap { position: relative; display: inline-flex; flex: none; }
 .tl-mbtn {
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8.5px;
   letter-spacing: 0.11em; text-transform: uppercase; white-space: nowrap;
-  padding: 6px 10px; border-radius: 8px; cursor: pointer;
+  padding: 0 10px; height: 26px; border-radius: 8px; cursor: pointer;
   border: 1px solid #e6dcce; background: #fff; color: #6a5a50;
 }
 .tl-mbtn:hover { border-color: #d3c4b3; color: #7c3a2a; }
@@ -73,18 +76,44 @@
 .tl-menu button:hover { background: #faf6ef; }
 .tl-menu button[aria-current="true"] { background: #f2ede7; font-weight: 600; color: #2b2118; }
 .tl-search {
-  flex: none; width: 190px; padding: 6px 10px; font-size: 11.5px;
+  flex: 0 1 190px; min-width: 90px; height: 26px; padding: 0 10px; font-size: 11.5px;
   border: 1px solid #e6dcce; border-radius: 8px; background: #fff; color: #3a2c22;
 }
 .tl-search::placeholder { color: #b3a796; }
 .tl-search:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
-/* ⚠️ THE COUNT IS LIVE AND STATES WHAT IS ON SCREEN — never a total the filters have stopped
-   describing. `margin-left: auto` holds it out at the right so it reads as a tally, not a control. */
+/* ⚠️ THE COUNT STATES WHAT IS ON SCREEN, never a total the filters have stopped describing. */
 .tl-count {
-  margin-left: auto; flex: none;
+  flex: none; white-space: nowrap;
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8.5px;
   letter-spacing: 0.13em; text-transform: uppercase; color: #a2937f;
 }
+
+/* ⚠️ NARROW LAST — equal specificity is decided by order, and a wider query below a narrower one
+   silently overrides it. The count goes first; the search's basis follows. */
+@media (max-width: 1360px) {
+  .tl-search { flex-basis: 150px; }
+}
+@media (max-width: 1180px) {
+  .tl-count { display: none; }
+  .tl-search { flex-basis: 120px; }
+}
+
+/* ══ THE SETTLE'S RECLAIM GOES TO THE BOARD, NOT TO A SPACER ════════════════════════════════
+ *
+ * ⚠️ SCOPED TO THIS PAGE, AND THE SHARED MECHANISM IS UNTOUCHED. `.wpg-reclaim` is
+ * `calc(var(--wpg-chrome-gap) + var(--wpg-reclaim-pad, 0px))`, and the pad exists so that a
+ * SCROLLING scroll row keeps its `scrollTop` when the masthead shrinks — remove it there and the
+ * reader's place jumps by the whole settle. That reasoning does not reach this page: the Calendar
+ * is `fill`, its scroll row does not scroll at all, and the only scrollport is the board's own
+ * zone, whose `scrollTop` is unaffected by its `clientHeight` growing. Measured before this rule,
+ * the masthead shed 45.89px on settle and the spacer took 45.89px of it: the board gained nothing.
+ *
+ * ⚠️ IT IS DECLARED ON THE SPACER ITSELF, which is where the `calc()` reads it. The pad is set as
+ * an INLINE custom property on the grid root and inherits down; a declaration on the element that
+ * consumes it wins over an inherited one without needing `!important` and without touching the
+ * root's inline style.
+ */
+.cal-timeline .wpg-reclaim { --wpg-reclaim-pad: 0px; }
 
 /* ══ THE BOARD ═════════════════════════════════════════════════════════════════════════════ */
 

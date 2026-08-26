@@ -43,10 +43,10 @@ import {
 } from "../../lib/todoCalendar";
 import {
   windowDays, shiftWindow, timelineWeek, defaultView,
-  TIMELINE_FILTERS, FILTER_LABEL, SHOW_LABEL, SHOW_ORDER, SORT_LABEL, SORT_ORDER,
+  TIMELINE_FILTERS, FILTER_LABEL, SORT_LABEL, SORT_ORDER,
   allFilters, YOU_ROW,
   type TimelineItem, type TimelineBand, type TimelineRow, type TimelineView,
-  type ShowMode, type RowSort, type TimelineFilter,
+  type RowSort, type TimelineFilter,
 } from "../../lib/todoTimeline";
 import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
 import { useDockActivity } from "./useDockActivity";
@@ -455,7 +455,14 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     setSel((c) => (c === it.key ? null : it.key));
   };
 
-  const subtitle = `${shortCalDate(visible[0])} – ${shortCalDate(visible[visible.length - 1])} — every relationship, and the time between.`;
+  /**
+   * ⚠️ THE MASTHEAD STATES NO SUBTITLE, AND THAT IS WHERE ITS HEIGHT WENT. It read
+   * "26 Aug – 1 Sept — every relationship, and the time between." Both halves are already on
+   * screen: the day header names all seven dates in the writer's own week, and the pager beside
+   * the title offers `‹ Today ›`. A masthead line restating the row beneath it is a line spent
+   * saying nothing, and on a page whose whole difficulty is vertical room it is the cheapest thing
+   * to give back.
+   */
 
   const setView1 = <K extends keyof TimelineView>(k: K, v: TimelineView[K]) =>
     setView((cur) => ({ ...cur, [k]: v }));
@@ -690,12 +697,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   );
 
   return (
-    <div className="t-f12 spine-root" ref={pageRef}>
+    <div className="t-f12 spine-root cal-timeline" ref={pageRef}>
       <div className="tdb-wrap today-off">
         <TasksPageLayout
           title="Calendar"
           mark="calendar"
-          subtitle={subtitle}
           tools={
             <>
               <button type="button" className="cal-nav calm-nav" aria-label="Previous week"
@@ -708,7 +714,38 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                 onClick={() => setWinStart((s) => shiftWindow(s, TL_DAYS, 1))}>
                 <ChevronRight size={14} aria-hidden />
               </button>
+
+              {/* ⚠️ ONE CONTROL ROW, AND THE SECOND ONE IS GONE. The filters used to sit in a row of
+                  their own directly beneath this one — two strips of controls stacked, 42px of a
+                  900px viewport spent on the fact that they had been built at different times.
+                  They are one line now: which week, which kinds, which order, what you are looking
+                  for, and how much of it there is. */}
+              <span className="tl-sep" aria-hidden />
+              <span className="tl-kinds" role="group" aria-label="Kinds">
+                {TIMELINE_FILTERS.map((k) => (
+                  <button key={k} type="button" className="tl-kind"
+                    data-on={view.kinds.includes(k)} aria-pressed={view.kinds.includes(k)}
+                    onClick={() => toggleKind(k)}>
+                    {FILTER_LABEL[k]}
+                  </button>
+                ))}
+              </span>
+              <Menu<RowSort> label="Sort" value={view.sort} options={SORT_ORDER}
+                labels={SORT_LABEL} onPick={(v) => setView1("sort", v)} />
+              <input
+                className="tl-search" type="search" value={view.search}
+                aria-label="Search agents, agencies and tasks"
+                placeholder="Search…"
+                onChange={(e) => setView1("search", e.target.value)}
+              />
               <TplGrow />
+              {/* ⚠️ THE COUNT ELIDES FIRST when the row runs short of room, then the search
+                  narrows — a tally is the one thing here that answers a question nobody has asked
+                  yet, so it is the one that can go. Neither the week, the kinds, the order nor the
+                  search may ever be the thing that wraps. */}
+              <span className="tl-count">
+                {agentRows} {agentRows === 1 ? "row" : "rows"} · {shown} {shown === 1 ? "item" : "items"}
+              </span>
               {/* the pink creation action: the ONE composer lives on the To-do list page — go
                   there and announce, never a second create surface */}
               <button type="button" className="tdb-addb" onClick={() => {
@@ -720,40 +757,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
             </>
           }
         >
-          {/* ⚠️ THE FILTERS SIT ABOVE THE BOARD, NOT IN THE TOOL ROW. The tool row is navigation —
-              which week, and the creation action; this is what the board is showing. */}
-          <div className="tl-bar">
-            <div className="tl-kinds" role="group" aria-label="Kinds">
-              {TIMELINE_FILTERS.map((k) => (
-                <button key={k} type="button" className="tl-kind"
-                  data-on={view.kinds.includes(k)} aria-pressed={view.kinds.includes(k)}
-                  onClick={() => toggleKind(k)}>
-                  {FILTER_LABEL[k]}
-                </button>
-              ))}
-              {/* ⚠️ THE RESET RESTORES FROM THE LIST, never a hand-written literal — a literal
-                  silently misses the facet added the day after it was typed. */}
-              {view.kinds.length !== TIMELINE_FILTERS.length && (
-                <button type="button" className="tl-kind" onClick={() => setView1("kinds", allFilters())}>
-                  Show every kind
-                </button>
-              )}
-            </div>
-            <Menu<ShowMode> label="Which rows" value={view.show} options={SHOW_ORDER}
-              labels={SHOW_LABEL} onPick={(v) => setView1("show", v)} />
-            <Menu<RowSort> label="Sort" value={view.sort} options={SORT_ORDER}
-              labels={SORT_LABEL} onPick={(v) => setView1("sort", v)} />
-            <input
-              className="tl-search" type="search" value={view.search}
-              aria-label="Search agents, agencies and tasks"
-              placeholder="Search…"
-              onChange={(e) => setView1("search", e.target.value)}
-            />
-            <span className="tl-count">
-              {agentRows} {agentRows === 1 ? "row" : "rows"} · {shown} {shown === 1 ? "item" : "items"}
-            </span>
-          </div>
-
           {/* ⚠️ ONE STATE OR THE OTHER, NEVER BOTH ON SCREEN. Acting collapses the board to a day's
               column and gives the rest of the page to the work; the full board and its focus band
               are what the week looks like when nothing is being worked. */}
