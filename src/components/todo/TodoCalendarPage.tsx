@@ -29,6 +29,7 @@ import { TaskPane } from "./TaskPane";
 import { useTaskPaneSession, type TaskPaneHost } from "./useTaskPaneSession";
 import { useTaskCommit } from "./useTaskCommit";
 import { TimelineRangeSlider, TIMELINE_RANGES, DEFAULT_RANGE_INDEX } from "./TimelineRangeSlider";
+import { GROUP_ORDER, GROUP_LABEL, COLLAPSED_BY_DEFAULT, type RowGroup } from "../../lib/timelineGroups";
 import { useConfirmAsk } from "./ConfirmAsk";
 /** this mount's pane section-id prefix — every workspace page stays mounted, so ids must not collide */
 const CAL_PANE_PREFIX = "cal-";
@@ -339,6 +340,13 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * readout all read one row of one table and cannot drift apart.
    */
   const [rangeIdx, setRangeIdx] = useState(DEFAULT_RANGE_INDEX);
+  /**
+   * ⚠️ WHICH GROUPS ARE OPEN, AND SNOOZED IS THE ONLY ONE THAT IS NOT. A snoozed row vanishes from
+   * the board entirely today; a collapsed group with its count on the header is honest about what
+   * is being held back, which disappearance never is. State is session-only and deliberately not
+   * persisted — a group that stays shut across visits is a group a writer forgets they closed.
+   */
+  const [shut, setShut] = useState<readonly RowGroup[]>(COLLAPSED_BY_DEFAULT);
   const range = TIMELINE_RANGES[Math.min(Math.max(rangeIdx, 0), TIMELINE_RANGES.length - 1)];
   const visible = useMemo(() => windowDays(winStart, range.days), [winStart, range.days]);
   /**
@@ -1022,7 +1030,38 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                     </div>
                   ))}
                 </div>
-                {rows.map(row)}
+                {/**
+                  * ⚠️ THE PINNED ROW IS ABOVE THE GROUPS, NOT IN ONE. It holds tasks from every
+                  * manuscript and from none, so no group is true of it; its `group` is `null` and
+                  * that is what filters it out of the buckets below rather than a special case.
+                  */}
+                {rows.filter((r) => r.group === null).map(row)}
+                {GROUP_ORDER.map((g) => {
+                  const mine = rows.filter((r) => r.group === g);
+                  /* ⚠️ AN EMPTY GROUP IS OMITTED ENTIRELY, HEADER AND ALL. A header reading "0"
+                     is a heading for nothing — it teaches the shape of a board the writer does
+                     not have, and at six groups it would be most of the page. */
+                  if (!mine.length) return null;
+                  const open = !shut.includes(g);
+                  return (
+                    <React.Fragment key={g}>
+                      <div className="tl-ghead">
+                        <button type="button" className="tl-ghbtn"
+                          aria-expanded={open}
+                          onClick={() => setShut((cur) =>
+                            cur.includes(g) ? cur.filter((x) => x !== g) : [...cur, g])}>
+                          <span className="tl-ghcar" data-open={open ? "1" : "0"} aria-hidden>▸</span>
+                          <span className="tl-ghname">{GROUP_LABEL[g]}</span>
+                          {/* ⚠️ THE COUNT IS THE RENDERED ROWS, so it cannot disagree with what is
+                              on screen. Filters run before grouping, so this is the filtered
+                              figure by construction rather than by a second count. */}
+                          <span className="tl-ghn">{mine.length}</span>
+                        </button>
+                      </div>
+                      {open && mine.map(row)}
+                    </React.Fragment>
+                  );
+                })}
               </div>
               {/* ⚠️ AN EMPTY BOARD IS NOT A FAILURE STATE. No apology, no prompt to do more — a
                   writer with a quiet week is entitled to read that as good news, or as nothing. */}

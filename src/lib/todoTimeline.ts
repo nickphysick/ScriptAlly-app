@@ -33,6 +33,7 @@ import {
   CalendarItem, RecordItem, GhostItem, RecordDir,
   pillLabel, draggableTask, toYmd,
 } from "./todoCalendar";
+import { rowGroupOf, type RowGroup, type QueryFacts } from "./timelineGroups";
 import {
   laneBars, statusIndex, sideOf,
   type Segment, type BarNode, type Waypoint, type BarWindow,
@@ -54,6 +55,28 @@ const parseYmd = (ymd: string): Date => {
  * runs `days` forward, so there are no other-month days, no lead-in, and nothing to dim. The `.off`
  * and `.lead` states go with it.
  */
+/**
+ * A stored ISO date as a ymd, or null.
+ *
+ * ⚠️ IT TAKES `unknown` BECAUSE THE FIELDS DO. `lastStatusChange` is `Timestamp | string` and
+ * several of these are optional, so a signature promising `string | undefined` would be a claim
+ * about the record that the record does not make. An unparseable value is null, which is the
+ * honest answer for "there is no date here" and the one the grouping already handles.
+ */
+const ymdOf = (v: unknown): string | null => {
+  if (!v) return null;
+  const iso = typeof v === "string" ? v
+    : typeof (v as { toDate?: () => Date }).toDate === "function" ? (v as { toDate: () => Date }).toDate().toISOString()
+    : null;
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : toYmd(d);
+};
+
+/** whole days between two ymds, midday-anchored so a DST shift cannot round one off */
+const ymdGap = (from: string, to: string): number =>
+  Math.round((new Date(`${to}T12:00:00`).getTime() - new Date(`${from}T12:00:00`).getTime()) / 86_400_000);
+
 export function windowDays(startYmd: string, days: number): string[] {
   const out: string[] = [];
   const d = parseYmd(startYmd);
@@ -160,6 +183,11 @@ export interface TimelineRow {
   manuscripts: { id: string; title: string }[];
   /** No live query — the row is history. Sinks below live rows in every sort. */
   closed: boolean;
+  /**
+   * Which group the board files this row under — `null` on the pinned "Your tasks" row alone,
+   * which sits ABOVE the groups and belongs to none of them.
+   */
+  group: RowGroup | null;
 }
 
 /* ⚠️ `TimelineBand`, `BandSource` AND THE `ExpectedItem` IT CARRIED ARE RETIRED (bars pack,
@@ -295,6 +323,16 @@ interface Draft {
   /** everything the row held BEFORE the filters — see the emptying rule below */
   held: number;
   hasLive: boolean;
+  /**
+   * What the GROUPING reads — one entry per LIVE query, and `lastClosed` for a row with none.
+   *
+   * ⚠️ BUILT FROM EVERY QUERY THE RELATIONSHIP HOLDS, NOT FROM WHAT IS IN VIEW. A partial
+   * requested six weeks ago still needs the writer today, at a seven-day window that cannot draw
+   * it. Deriving the group from the drawn lanes would have moved a row between groups as the
+   * range slider moved, which is the range deciding what is urgent.
+   */
+  facts: QueryFacts[];
+  lastClosed: string | null;
   /** sort keys, all derived */
   soonest: number;
   waitingFrom: number;
@@ -335,6 +373,12 @@ export function timelineWeek(
        has nothing to say on its second line says nothing (the rows-omit-themselves law). */
     agency: "",
     dot: "self", closed: false, items: [], manuscripts: [], held: 0, hasLive: true,
+    /* ⚠️ THE PINNED ROW BELONGS TO NO GROUP, and this is how it says so rather than by a flag.
+       It holds no query, so it has no facts and no closure — and it is prepended ABOVE the groups
+       rather than filed inside one. Handing it empty facts would file it under a closure that has
+       outstayed its week and delete it, which is why the group is assigned per row below and the
+       pinned row is exempted there in one place. */
+    facts: [], lastClosed: null,
     soonest: Infinity, waitingFrom: Infinity, stage: -1, order: -1,
   };
   drafts.set(YOU_ROW, you);
@@ -365,6 +409,25 @@ export function timelineWeek(
         return Math.max(best, STATUS_ORDER.indexOf(q.status as QueryStatus));
       }, -1),
       order: drafts.size,
+      facts: mine
+        .filter((q) => !isTerminalStatus(q.status))
+        .map((q) => ({
+          status: q.status as QueryStatus,
+          nudgeYmd: ymdOf(q.nudgeDate),
+          /* the snooze the writer set on THIS query — the same lookup the bars make for its waypoint */
+          backYmd: ymdOf(
+            data.taskFlags.find((f) => f.queryId === q.id && !!f.snoozedUntil)?.snoozedUntil,
+          ),
+        })),
+      /* ⚠️ THE CLOSURE DATE COMES FROM `recomputeQuery`'s OUTPUT, never from a scan of the feed.
+         `rejectedDate` is the specific answer where there is one and `lastStatusChange` the general
+         one; both have a single writer, so this cannot disagree with what the record says. */
+      lastClosed: mine
+        .filter((q) => isTerminalStatus(q.status))
+        .map((q) => ymdOf(q.rejectedDate) ?? ymdOf(q.lastStatusChange))
+        .filter((x): x is string => !!x)
+        .sort()
+        .pop() ?? null,
     };
     drafts.set(key, d);
     return d;
@@ -631,7 +694,23 @@ export function timelineWeek(
 
   /* ⚠️ THE PINNED ROW IS PINNED, NOT EXEMPT. It is prepended only if it survived the one rule —
      prepending it unconditionally was how it kept drawing itself empty after the exemption went. */
-  const ordered = kept.includes(you) ? [you, ...rest] : rest;
+  /* ── groups ─────────────────────────────────────────────────────────────────────────────── */
+  /**
+   * ⚠️ THE GROUP IS ASSIGNED AFTER THE SORT, WHICH IS WHY "sort applies within groups" NEEDS NO
+   * CODE. `rest` is already in the view's order; the page buckets it by `GROUP_ORDER` and each
+   * bucket comes out in that same order. A second ordering pass inside each group would be a
+   * second thing to keep in step, and the two would eventually disagree.
+   *
+   * ⚠️ AND A `null` GROUP MEANS THE ROW IS NOT DRAWN — today's closures never leave the board.
+   * Dropping here rather than in the survival rule above keeps that rule about FILTERS, which is
+   * what it says it is about.
+   */
+  const grouped = rest
+    .map((r) => ({ r, group: rowGroupOf(r.facts, r.lastClosed, data.today, ymdGap) }))
+    .filter((x): x is { r: Draft; group: RowGroup } => x.group !== null);
+
+  const ordered = kept.includes(you) ? [you, ...grouped.map((x) => x.r)] : grouped.map((x) => x.r);
+  const groupOf = new Map(grouped.map((x) => [x.r.key, x.group]));
 
   /* ── lanes ──────────────────────────────────────────────────────────────────────────────── */
   /**
@@ -658,6 +737,7 @@ export function timelineWeek(
     }
     rows.push({
       key: row.key, agentId: row.agentId, name: row.name, agency: row.agency,
+      group: groupOf.get(row.key) ?? null,
       dot: row.dot, items: row.items,
       lanes: Math.max(1, barLanes + (row.items.length ? packed : 0)),
       manuscripts: row.manuscripts, closed: row.closed,

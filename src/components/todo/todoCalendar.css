@@ -294,6 +294,50 @@
 .tl-rowhead:hover { background: #faf5ee; }
 .tl-rowhead:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
 .tl-row.closed .tl-rowhead { opacity: 0.55; }
+/* ⚠️ A CLOSED JOURNEY IS AN OUTLINE — no fill, and nothing that moves. It is history sitting among
+   work, and a filled bar in the writer's own colours would read as something still running. The
+   `!important` is not laziness: the fill is set per direction by four separate rules further down,
+   and matching each of them would put the closed treatment in four places to be kept in step. */
+.tl-row.closed .tl-seg {
+  background: transparent !important;
+  border-color: #cbbba9 !important;
+  border-style: dashed !important;
+  color: #9c8b78 !important;
+  animation: none !important;
+}
+.tl-row.closed .tl-node, .tl-row.closed .tl-wp { opacity: 0.6; }
+
+/* ══ A GROUP HEADER ═════════════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ IT SPANS THE BOARD RATHER THAN SITTING IN THE HEAD COLUMN. A heading indented to the rows'
+ * own left edge would read as another row; running the full width says it is a division of the
+ * board. It is a flex child of `.tl`, not a `.tl-grid`, so it takes the whole width by default and
+ * has no column template to keep in step with the rows.
+ */
+.tl-ghead { position: sticky; top: var(--tl-head-h); z-index: 2; background: var(--ws-ground, #f7f4ee); }
+.tl-ghbtn {
+  width: 100%; display: flex; align-items: center; gap: 8px;
+  background: none; border: 0; cursor: pointer; font: inherit; color: inherit;
+  padding: 13px var(--gh-pad, 13px) 6px;
+  border-bottom: 1px solid #e2d7c6;
+}
+.tl-ghname {
+  font-family: "Playfair Display", Georgia, serif; font-size: 15px; font-weight: 600;
+  color: #3d2f22; letter-spacing: -0.1px;
+}
+.tl-ghn {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 9px;
+  letter-spacing: 0.1em; color: #9c8b78;
+  border: 1px solid #ded2c1; border-radius: 999px; padding: 1px 6px;
+}
+/* ⚠️ THE CARET IS THE ONLY THING THAT TURNS, and it turns by transform rather than by swapping a
+   glyph — a second character would be a second thing to translate and to get the direction of. */
+.tl-ghcar {
+  font-size: 9px; color: #9c8b78; line-height: 1;
+  transition: transform 0.16s ease;
+}
+.tl-ghcar[data-open="1"] { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .tl-ghcar { transition: none; } }
 
 .tl-cell { grid-row: 1; border-bottom: 1px solid #f0e9dd; border-right: 1px solid #f4efe6; }
 /* ⚠️ BOUNDARY RULES, NOT A WEEKEND TINT (range pack, Phase 2). Shading Saturday and Sunday would
