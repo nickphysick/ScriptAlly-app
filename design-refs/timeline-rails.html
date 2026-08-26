@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — rails and bars (realistic week)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ground:#f2ede7;--parchment:#fdfaf5;--white:#fff;--ink:#3a1c14;--muted:#8a7a6c;--label:#9c8878;
+--burgundy:#7c3a2a;--pink:#f5e2da;--pinkb:#e8c8bc;--pinkband:#f3e0d6;--sage:#8a9e88;--sagetint:#e9efe6;
+--sagetxt:#5a6e58;--hair:#ece0d2;--line:#e0d0c4;--dash:#c9a89e;--rec:#b9a48f;
+/* row geometry lives in tokens — the bar's position derives from them, never a literal */
+--row-h:64px; --row-h-tall:82px; --bar-h:34px; --rail-h:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ground);font-family:Inter,sans-serif;color:var(--ink);padding:18px 24px 30px;-webkit-font-smoothing:antialiased}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;color:var(--label)}
+h1{font-family:'Playfair Display',serif;font-size:25px;font-weight:500;margin:4px 0 4px}
+.sub{color:var(--muted);font-size:12.5px;max-width:780px;line-height:1.5;margin-bottom:14px}
+.seg-ctl{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;width:max-content;margin-bottom:8px;background:var(--white)}
+.seg-ctl button{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;
+padding:9px 13px;border:none;background:var(--white);color:var(--label);cursor:pointer}
+.seg-ctl button[data-on="true"]{background:var(--pink);color:var(--burgundy)}
+.seg-ctl button+button{border-left:1px solid var(--line)}
+.note{font-size:12.5px;color:var(--muted);line-height:1.5;max-width:800px;margin:8px 0 14px;min-height:32px}
+
+.board{background:var(--parchment);border:1px solid var(--hair);border-radius:14px;overflow:hidden}
+.tl{display:grid;grid-template-columns:210px repeat(7,1fr)}
+.dh{background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid var(--hair);padding:7px 0 6px;text-align:center}
+.dh .dw{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;color:var(--sagetxt)}
+.dh .dd{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:#3f4d3d;margin-top:2px}
+.dh.today .dd{background:var(--burgundy);color:#f8f5f0;border-radius:50%;width:19px;height:19px;display:inline-flex;align-items:center;justify-content:center}
+.corner{background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid var(--hair);border-right:1px solid var(--hair);display:flex;align-items:center;padding:0 14px}
+.rowhead{background:var(--parchment);border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+padding:0 14px;display:flex;flex-direction:column;justify-content:center;gap:2px;height:var(--row-h)}
+.rowhead.tall{height:var(--row-h-tall)}
+.rowhead .nm{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:500;display:flex;align-items:center;gap:8px}
+.rowhead .ag{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--label)}
+.sd{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.sd.out{background:var(--pink);border:1.5px solid var(--burgundy)}
+.sd.half{background:linear-gradient(90deg,var(--burgundy) 50%,var(--pink) 50%);border:1.5px solid var(--burgundy)}
+.sd.you{border-radius:3px;border:1.5px solid var(--burgundy);background:transparent}
+.dcell{border-bottom:1px solid var(--hair);border-right:1px solid #f2e9dd;height:var(--row-h)}
+.dcell.tall{height:var(--row-h-tall)}
+.dcell.wkend{background:#faf6ef}.dcell.today{background:#fdf5f2}
+
+/* the lane sits at the row's baseline; every child is centred off the row token */
+.lane{position:relative;grid-column:2 / -1;height:0}
+.mid{position:absolute;left:0;right:0;top:calc(var(--row-h) / -2);height:0}
+.lane.tall .mid{top:calc(var(--row-h-tall) / -2)}
+
+/* --- QUIET RAIL: a window with no event this week --- */
+.rail{position:absolute;height:var(--rail-h);top:calc(var(--rail-h) / -2);border-radius:999px;
+background:#fff;border:1px solid #d9e2d5;box-shadow:0 1px 2px rgba(58,28,20,.05);
+animation:breathe 4.6s ease-in-out infinite}
+.rail.openleft{border-left-style:dotted;border-top-left-radius:0;border-bottom-left-radius:0}
+.rail.future{border-right:2px dashed #8a9e88;border-top-right-radius:0;border-bottom-right-radius:0}
+.raillab{position:absolute;top:calc(-1 * (var(--rail-h) / 2) - 20px);font-family:'JetBrains Mono',monospace;
+font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--sagetxt);white-space:nowrap}
+.raillab.right{transform:translateX(-100%)}
+@keyframes breathe{0%,100%{background:#ffffff;border-color:#d9e2d5}50%{background:#f3f8f1;border-color:#c7d4c2}}
+
+/* --- FULL BAR: something happens in this week --- */
+.seg{position:absolute;height:var(--bar-h);top:calc(var(--bar-h) / -2);display:flex;align-items:center;gap:9px;
+padding:0 13px;font-size:11.5px;font-weight:500;white-space:nowrap;overflow:hidden;border-radius:999px}
+.seg .cnt{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;opacity:.75}
+.seg.their{background:#fff;border:1px solid #d9e2d5;color:#5a6e58;box-shadow:0 1px 2px rgba(58,28,20,.05);
+animation:breathe 4.6s ease-in-out infinite}
+.seg.y1{background:#fdf3ef;border:1px solid #eed8ce;color:#8a5442}
+.seg.y2{background:var(--pinkband);border:1px solid var(--pinkb);color:#7a4636}
+.seg.y3{background:#eec9ba;border:1px solid #dba892;color:#5f2a1c;font-weight:600}
+.seg.future{border-top-right-radius:0;border-bottom-right-radius:0;border-right:2px dashed var(--dash)}
+.seg.their.future{border-right:2px dashed #8a9e88}
+.seg.openleft{border-top-left-radius:0;border-bottom-left-radius:0}
+/* ONE bar: the hatch is its left portion, not a separate object */
+.seg.hatched{background:repeating-linear-gradient(-45deg,#e8c2ae 0 7px,#f0d3c5 7px 14px)}
+.node{position:absolute;width:var(--bar-h);height:var(--bar-h);top:calc(var(--bar-h) / -2);border-radius:50%;z-index:2;
+display:flex;align-items:center;justify-content:center;font-size:12.5px;transform:translateX(calc(var(--bar-h) / -2))}
+.node.out{background:var(--pink);border:2px solid var(--burgundy);color:var(--burgundy)}
+.node.in{background:var(--sagetint);border:2px solid var(--sage);color:var(--sagetxt)}
+.node .tip{position:absolute;top:calc(var(--bar-h) + 3px);left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;
+font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--label);white-space:nowrap}
+.wp{position:absolute;width:0;height:calc(var(--bar-h) + 8px);top:calc((var(--bar-h) + 8px) / -2);
+border-left:2px dashed var(--dash);z-index:3}
+.wp .tip{position:absolute;top:calc(var(--bar-h) / 2 + 7px);left:50%;transform:translateX(-50%);
+font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:#a06a55;white-space:nowrap}
+
+/* your-task chips — restored, real pills */
+.chipx{position:absolute;height:26px;top:-13px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;
+padding:0 11px;font-size:11px;font-weight:500;background:var(--white);border:1px solid var(--line);color:var(--ink);white-space:nowrap}
+.chipx .d{width:8px;height:8px;border-radius:2px;border:1.5px solid var(--burgundy);flex:0 0 auto}
+.chipx+.chipx{margin-left:0}
+@media(prefers-reduced-motion:reduce){.rail,.seg.their{animation:none !important}}
+.foot{margin-top:20px;padding-top:15px;border-top:1px solid var(--hair);color:var(--muted);font-size:12.5px;line-height:1.6;max-width:840px}
+.foot b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<span class="lbl">ScriptAlly · design ref v8</span>
+<h1>A realistic week — mostly nothing happening</h1>
+<div class="sub">Reply windows run for months, so in any given week most rows have no boundary in them at all. Eleven full-width stripes carry no information. Here quiet windows are <b>rails</b>, and full height is reserved for rows where something actually happens.</div>
+
+<div class="seg-ctl" id="seg">
+  <button data-t="rail" data-on="true">A · rails for quiet rows</button>
+  <button data-t="bar" data-on="false">B · bars everywhere (what shipped)</button>
+</div>
+<div class="note" id="note"></div>
+
+<div class="board"><div class="tl" id="tl"></div></div>
+
+<div class="foot">
+<b>What changed, and why.</b> A rail is 12px and carries its label at the end it points to — near the future, where the information is. A bar is 34px and earns that height by containing an event: a node, a handover, a hatched overrun. Scanning the board, your eye now finds the three rows that matter without reading a word.<br><br>
+<b>Geometry from tokens.</b> Every element centres on <code>--row-h</code> rather than a tuned offset, so a row height change can't leave the bars floating — the fault in the shipped build, and the same class as <code>--tl-head-h</code> before it.<br><br>
+<b>One bar, one count.</b> Ellery's overrun is the left portion of a single bar, not a second object beside it, and the duration is stated once.
+</div>
+
+<script>
+var GAP=0.34, MODE='rail';
+/* a realistic fortnight: nine relationships, three with anything in the week */
+var ROWS=[
+ {kind:'tasks',nm:'Your tasks',ag:"Murphy's Day Out",dot:'you',
+  tasks:[[0,'Nudge Marcus Reed'],[2,'Book the library room'],[5,'Follow up with Castle Lane']]},
+
+ {nm:'E. Whitfield',ag:'Greenfield Literary',dot:'half',quiet:{lab:'Reply window · to 10 Sept'}},
+ {nm:'D. O\u2019Rourke',ag:'Inkwell & Stone',dot:'out',quiet:{lab:'Next reminder due 25 Sept'}},
+ {nm:'H. Vane-Coe',ag:'Stillwater Reps',dot:'out',quiet:{lab:'Next reminder due 7 Oct'}},
+ {nm:'P. Raman',ag:'Raman Literary',dot:'half',quiet:{lab:'Reply window · to 2 Oct'}},
+
+ /* something happens: they answer on Friday */
+ {nm:'J. Ashworth',ag:'Ashworth & Vale',dot:'half',
+  nodes:[[2.5,'in','\u21a4','Full requested']],
+  segs:[[0,2.5-GAP,'their','openleft','Reply window',''],
+        [2.5+GAP,7,'y1 future','','Your move · send the full','3 days']]},
+
+ /* something happens: their window closes mid-week and it becomes yours */
+ {nm:'J. Marsh',ag:'The Marsh Agency',dot:'out',
+  segs:[[0,4.5-GAP,'their','openleft','Reply window · closes Sun',''],
+        [4.5+GAP,7,'y2 future','','Your move · nudge due','12 days']],
+  wps:[[4.5,'Window closes']]},
+
+ /* long-standing: ONE bar, hatch on the left, count stated once */
+ {nm:'T. Ellery',ag:'Curtis Vane',dot:'out',
+  segs:[[0,3.2,'y3 hatched','openleft',' ',''],
+        [3.2,7,'y3 future','','Your move · nudge due','40 days']],
+  wps:[[3.2,'Expected 16 Apr']]},
+
+ {nm:'S. Dunn',ag:'Dunn & Hollis',dot:'out',quiet:{lab:'Reply window · to 30 Sept'}}
+];
+var W=['SUN','MON','TUE','WED','THU','FRI','SAT'],TODAY=new Date(2026,7,26);
+var NOTES={rail:'Quiet windows are rails. Three rows have full-height bars, and they are exactly the three where something happens this week — Ashworth, Marsh, Ellery.',
+ bar:'Every window a full bar, as shipped. Nine near-identical stripes; the two that need you are indistinguishable from the seven that do not.'};
+function addD(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x}
+function build(){
+  var h='<div class="corner"><span class="lbl">Agents &amp; you</span></div>';
+  for(var i=0;i<7;i++){var d=addD(TODAY,i);
+    h+='<div class="dh'+(i===0?' today':'')+'"><div class="dw">'+W[d.getDay()]+'</div><div class="dd">'+d.getDate()+'</div></div>';}
+  ROWS.forEach(function(r){
+    var tall=(r.kind==='tasks')?' tall':'';
+    h+='<div class="rowhead'+tall+'"><div class="nm"><span class="sd '+r.dot+'"></span>'+r.nm+'</div><div class="ag">'+r.ag+'</div></div>';
+    for(var i=0;i<7;i++){var d=addD(TODAY,i),dw=d.getDay();
+      h+='<div class="dcell'+tall+((dw===0||dw===6)?' wkend':'')+(i===0?' today':'')+'"></div>';}
+    var lane='';
+    if(r.quiet){
+      if(MODE==='rail'){
+        lane+='<div class="rail openleft future" style="left:2px;right:8px"></div>'
+             +'<div class="raillab right" style="left:calc(100% - 10px)">'+r.quiet.lab+'</div>';
+      } else {
+        lane+='<div class="seg their openleft future" style="left:2px;width:calc(100% - 10px)">'+r.quiet.lab+'</div>';
+      }
+    }
+    (r.segs||[]).forEach(function(sg){
+      var L=(sg[0]/7)*100,Wd=((sg[1]-sg[0])/7)*100;
+      lane+='<div class="seg '+sg[2]+' '+(sg[3]||'')+'" style="left:'+L+'%;width:'+Wd+'%">'+sg[4]
+        +(sg[5]?'<span class="cnt">'+sg[5]+'</span>':'')+'</div>';});
+    (r.wps||[]).forEach(function(w){
+      lane+='<div class="wp" style="left:'+((w[0]/7)*100)+'%"><span class="tip">'+w[1]+'</span></div>';});
+    (r.nodes||[]).forEach(function(n){
+      lane+='<div class="node '+n[1]+'" style="left:'+((n[0]/7)*100)+'%">'+n[2]+'<span class="tip">'+n[3]+'</span></div>';});
+    (r.tasks||[]).forEach(function(t){
+      lane+='<div class="chipx" style="left:calc('+((t[0]/7)*100)+'% + 6px)"><span class="d"></span>'+t[1]+'</div>';});
+    h+='<div class="lane'+(r.kind==='tasks'?' tall':'')+'"><div class="mid">'+lane+'</div></div>';
+  });
+  document.getElementById('tl').innerHTML=h;
+  document.getElementById('note').textContent=NOTES[MODE];
+}
+document.getElementById('seg').onclick=function(e){var b=e.target.closest('button');if(!b)return;
+  MODE=b.dataset.t;
+  document.querySelectorAll('#seg button').forEach(function(x){x.dataset.on=(x===b)});
+  build();};
+build();
+</script>
+</body>
+</html>
