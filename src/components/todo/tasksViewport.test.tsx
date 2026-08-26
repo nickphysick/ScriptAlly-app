@@ -271,7 +271,13 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
        another selector's text is the first-match trap in CSS clothing, and it caught this very
        assertion once before the stylesheet was restructured to make it impossible. */
     const tracks = rule(calCss, ".tl-grid {");
-    expect(tracks).toContain("grid-template-columns: var(--tl-head-w) repeat(7, minmax(0, 1fr))");
+    /* ⚠️ THE COUNT IS THE BOARD'S TOKEN NOW (range pack, Phase 3). It was the literal `7`, which
+       is why a row could only ever be a week; the board declares `--tl-cols` and every row reads
+       it, so six month-columns and thirty-one day-columns are the same template. The law this
+       asserts is unchanged and is the one that matters: the head column takes its own width token
+       and every OTHER track is `minmax(0, 1fr)` — a bare `1fr` would floor at min-content and let
+       one long chip push the board wider than its container. */
+    expect(tracks).toContain("grid-template-columns: var(--tl-head-w) repeat(var(--tl-cols, 7), minmax(0, 1fr))");
     expect(tracks).not.toMatch(/repeat\(7,\s*1fr\)/);
 
     /* seven columns FILL — they never earn a horizontal scrollbar, so any horizontal overflow is
@@ -373,7 +379,11 @@ describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local 
        source. The literal `TL_DAYS, view)` was the whole call on one line; the call grew a second
        argument and wrapped, and the lock went red over a reformat. What it is FOR is that nothing
        filters anywhere else, which the two clauses below say. */
-    expect(cal).toMatch(/timelineWeek\(\s*\{[\s\S]{0,400}?\},\s*winStart,\s*TL_DAYS,\s*view,?\s*\)/);
+    /* ⚠️ THE WINDOW'S LENGTH IS THE RANGE'S NOW, not a module constant. `TL_DAYS = 7` is gone —
+       the five stops carry their own day counts — so the argument is `range.days`. The claim is
+       the one above: the view reaches the ONE derivation, asserted as an argument rather than as a
+       line of source. */
+    expect(cal).toMatch(/timelineWeek\(\s*\{[\s\S]{0,400}?\},\s*winStart,\s*range\.days,\s*view,?\s*\)/);
     expect(decomment(cal)).not.toContain("itemInKinds");
     expect(decomment(cal)).not.toContain("recordInKinds");
   });

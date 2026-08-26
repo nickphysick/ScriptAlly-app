@@ -135,7 +135,38 @@
    rows, not a descendant) could not inherit it and would have needed a constant of its own. One
    owner on the board, and the rows and the spine are both readers. It steps down twice so seven
    day columns still fit a narrow laptop; the breakpoints move with it. */
-.tl { display: flex; flex-direction: column; position: relative; --tl-head-w: 210px; }
+.tl {
+  display: flex; flex-direction: column; position: relative;
+  --tl-head-w: 210px;
+}
+/**
+ * ⚠️ THE MARKER CLEARANCE IS NOT MIGRATED YET, AND THE TOKEN IS DELIBERATELY ABSENT RATHER THAN
+ * DECLARED-AND-UNREAD (range pack, Phase 3).
+ *
+ * It is `GAP = 0.34` in `journeyBars.ts` — a third of a DAY, which is 4.9% of the board at one week
+ * and 0.19% at six months: right where it was designed and invisible everywhere else. A clearance
+ * is a fact about how close two INK MARKS may sit, so it belongs in ink, and the ref's shape is
+ * `--clear` at 20 / 14 / 11 applied as padding at a bar's end where a marker abuts it.
+ *
+ * That is a change to the bar DERIVATION, not to this stylesheet: `laneBars` cuts its pieces in
+ * days and knows nothing about pixels. Declaring the token here first would leave three values
+ * nothing reads — a rule that looks parameterised and is not, which this repo has been caught by
+ * twice. Stated as outstanding instead.
+ */
+/**
+ * ⚠️ THE MARKERS SHRINK BY TIER, AND THEY KEEP A HALO AGAINST THE GROUND. At week and month grain
+ * two markers can fall within a few pixels of one another, so each carries a ring of the board's
+ * own colour — which is what keeps a crowd legible as several marks rather than one blob.
+ */
+.tl.dense3 .tl-node, .tl.dense4 .tl-node { --disc: 22px; --ddot: 15px; }
+.tl.dense3 .tl-node[data-marker], .tl.dense4 .tl-node[data-marker] {
+  box-shadow: 0 0 0 2px var(--ws-ground, #f7f4ee);
+}
+/* ⚠️ AT THREE MONTHS AND BEYOND A BAR IS SHAPE, NOT A LABEL. The text does not shrink and it is
+   not truncated — it LEAVES, and the row head says the sentence instead (see `.tl-rowsay`). A
+   half-legible word inside a 9px bar is worse than no word. */
+.tl.dense3 .tl-seg .tl-lbl, .tl.dense4 .tl-seg .tl-lbl,
+.tl.dense3 .tl-seg .tl-cnt, .tl.dense4 .tl-seg .tl-cnt { display: none; }
 /**
  * ⚠️ THE TODAY SPINE READS THE HEAD COLUMN'S OWN TOKEN (range pack, Phase 2), which is this pack's
  * standing rule applied to its own new element. `--tl-head-w` steps 210 → 168 → 132 at two
@@ -169,7 +200,10 @@
    the board and earn the horizontal scrollbar the design forbids. */
 .tl-grid {
   display: grid;
-  grid-template-columns: var(--tl-head-w) repeat(7, minmax(0, 1fr));
+  /* ⚠️ THE COLUMN COUNT IS THE BOARD'S FACT, read here. It was a literal `7` in every row's
+     template, so a row could only ever be a week; the board declares `--tl-cols` and the rows read
+     it, which is the same ownership the head width now has. */
+  grid-template-columns: var(--tl-head-w) repeat(var(--tl-cols, 7), minmax(0, 1fr));
 }
 /* ⚠️ THE TOKEN IS THE HEADER'S HEIGHT, NOT A DESCRIPTION OF IT — and it had to become one. It was
    `min-height: 36px` against a header whose content rendered at 46, so the pinned row stuck ten
@@ -807,4 +841,20 @@
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7px;
   letter-spacing: 0.1em; text-transform: uppercase; color: #c9a89e;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 1px;
+}
+
+/* ⚠️ THE RANGE CONTROL IN THE TOOL ROW. The slider itself is the app's own `.sa-wk-*` treatment,
+   untouched; this only gives it a width in a row built for buttons, and keeps its label and
+   readout on one line so the tool row does not grow a second one. */
+.tl-range { width: 190px; margin: 0; }
+.tl-range .sa-wk-head { margin-bottom: 3px; }
+.tl-range .sa-wk-ends { display: none; }
+
+/* ⚠️ THE SENTENCE THE BARS CANNOT HOLD (range pack, Phase 3). Same words, different place — it is
+   the live segment's own label, so the head and the bar can never state two different things. */
+.tl-rowsay {
+  display: block; margin-top: 3px;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
+  letter-spacing: 0.09em; text-transform: uppercase; color: #7b6a58;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }

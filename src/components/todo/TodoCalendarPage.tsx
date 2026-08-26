@@ -28,6 +28,7 @@ import { FocusFlow } from "./FocusFlow";
 import { TaskPane } from "./TaskPane";
 import { useTaskPaneSession, type TaskPaneHost } from "./useTaskPaneSession";
 import { useTaskCommit } from "./useTaskCommit";
+import { TimelineRangeSlider, TIMELINE_RANGES, DEFAULT_RANGE_INDEX } from "./TimelineRangeSlider";
 import { useConfirmAsk } from "./ConfirmAsk";
 /** this mount's pane section-id prefix — every workspace page stays mounted, so ids must not collide */
 const CAL_PANE_PREFIX = "cal-";
@@ -72,7 +73,6 @@ export interface TodoCalendarPageProps {
 }
 
 /** Seven days. The window is rolling, so there is no month to be a subset of. */
-const TL_DAYS = 7;
 const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
 /**
@@ -81,7 +81,19 @@ const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
  * boundaries the cells do at every width — which is what makes "seven columns fill, no horizontal
  * scroll" survive a resize with nothing to recompute.
  */
-const pct = (n: number) => `${(n / TL_DAYS) * 100}%`;
+/**
+ * ⚠️ A POSITION IS A FRACTION OF THE WINDOW, AND THE WINDOW'S LENGTH IS THE BOARD'S FACT.
+ *
+ * `pct` was `n / TL_DAYS` against a module constant of 7, so every position on the board was
+ * computed against a number that could only ever be one range. It is now `calc()` against
+ * `--tl-days`, declared once on `.tl` and inherited by everything inside it: the page supplies
+ * only the day INDEX — data — exactly as it supplies the spine's fraction, and the geometry is the
+ * stylesheet's. That is the pack's standing rule, and it is also what makes the range cost no
+ * second derivation: change one custom property and every bar, marker and chip reprices itself.
+ *
+ * The columns change what a reader SEES. They are not what anything is positioned by.
+ */
+const pct = (n: number) => `calc(${n} / var(--tl-days) * 100%)`;
 /**
  * ⚠️ THE PAGE DECLARES WHICH LANE; THE STYLESHEET DECIDES WHERE THAT IS.
  *
@@ -320,7 +332,27 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser?.mutedTaskRules],
   );
 
-  const visible = useMemo(() => windowDays(winStart, TL_DAYS), [winStart]);
+  /**
+   * ⚠️ THE RANGE IS THE STOP, NOT A DAY COUNT SOMEONE DERIVED. `TIMELINE_RANGES` carries the days,
+   * the column grain and the density tier together, so the columns, the `dense` class and the
+   * readout all read one row of one table and cannot drift apart.
+   */
+  const [rangeIdx, setRangeIdx] = useState(DEFAULT_RANGE_INDEX);
+  const range = TIMELINE_RANGES[Math.min(Math.max(rangeIdx, 0), TIMELINE_RANGES.length - 1)];
+  const visible = useMemo(() => windowDays(winStart, range.days), [winStart, range.days]);
+  /**
+   * ⚠️ THE COLUMNS ARE WHAT IS DRAWN; `visible` IS WHAT IS TRUE. Every derivation below reads the
+   * DAYS — a bar's span, a marker's date, the record — and nothing is positioned by a column. At
+   * week and month grain the columns are a coarser ruler laid over the same window, stepping 7 and
+   * 30 as the ref does, so a 182-day board draws six columns and still places a marker on its own
+   * day.
+   */
+  const columns = useMemo(() => {
+    const step = range.grain === "day" ? 1 : range.grain === "week" ? 7 : 30;
+    const out: { ymd: string; from: number }[] = [];
+    for (let i = 0; i < range.days; i += step) out.push({ ymd: visible[i] ?? visible[visible.length - 1], from: i });
+    return out;
+  }, [visible, range.grain, range.days]);
   /**
    * ⚠️ WHERE ONE PERIOD ENDS AND THE NEXT BEGINS — the rhythm a weekend tint would have given, and
    * the reason it is not one. Shading Saturday and Sunday states that a reply window pauses at the
@@ -328,7 +360,27 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * the boundary is a Monday. (Week and month grain arrive with the range control in Phase 3, and
    * this is the one function that will answer for all three.)
    */
-  const startsPeriod = (ymd: string) => new Date(`${ymd}T12:00:00`).getDay() === 1;
+  const startsPeriod = (ymd: string) => {
+    const d = new Date(`${ymd}T12:00:00`);
+    if (range.grain === "day") return d.getDay() === 1;      // a week begins
+    if (range.grain === "week") return d.getDate() <= 7;     // the week that opens a month
+    return true;                                             // every month column is a boundary
+  };
+  /**
+   * ⚠️ WHAT THE ROW HEAD SAYS WHEN THE BARS CANNOT. The live segment's own label — the one the bar
+   * carries at day grain — read from the same row the bars are drawn from, so the two cannot
+   * disagree. Empty where the row has no speaking segment, because a head that says nothing is
+   * better than one that invents something to say.
+   */
+  const rowSay = (key: string): string =>
+    (barsByRow.get(key)?.segs ?? []).map((sg) => sg.label).find(Boolean) ?? "";
+  /** the column's own label: a date at day grain, a date and month at week, a month name at month */
+  const colLabel = (ymd: string, grain: "day" | "week" | "month") => {
+    const d = new Date(`${ymd}T12:00:00`);
+    if (grain === "day") return String(d.getDate());
+    if (grain === "week") return `${d.getDate()} ${d.toLocaleDateString("en-GB", { month: "short" })}`;
+    return d.toLocaleDateString("en-GB", { month: "short" });
+  };
   /* ⚠️ A PAST WEEK IS A PROPERTY OF THE WINDOW, not of a row — nothing in it is provisional any
      more, so the dashes go solid, the waypoints render as passed, and the pulse stops. */
   const pastWeek = visible[visible.length - 1] < today;
@@ -343,8 +395,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       const tag = el?.tagName;
       if (el?.isContentEditable || tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === "ArrowLeft") { e.preventDefault(); setWinStart((s) => shiftWindow(s, TL_DAYS, -1)); }
-      else if (e.key === "ArrowRight") { e.preventDefault(); setWinStart((s) => shiftWindow(s, TL_DAYS, 1)); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); setWinStart((s) => shiftWindow(s, range.days, -1)); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); setWinStart((s) => shiftWindow(s, range.days, 1)); }
       else if (e.key === "t" || e.key === "T") { e.preventDefault(); setWinStart(today); }
     };
     window.addEventListener("keydown", onKey);
@@ -394,7 +446,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const { rows, segments, nodes, waypoints } = useMemo(
     () => timelineWeek(
       { queries, agents, activities, manuscripts, taskFlags, today, itemsFor, recordFor, ghostsOn },
-      winStart, TL_DAYS, view,
+      winStart, range.days, view,
     ),
     [queries, agents, activities, manuscripts, taskFlags, today, itemsFor, recordFor, ghostsOn, winStart, view],
   );
@@ -635,12 +687,23 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
           {r.manuscripts.length > 1 && (
             <span className="tl-ms">{r.manuscripts.map((m) => m.title).filter(Boolean).join(" · ")}</span>
           )}
+          {/**
+            * ⚠️ THE SENTENCE RELOCATES; IT IS NOT TRUNCATED (range pack, Phase 3). At three months a
+            * bar is a few pixels of shape and its label cannot be read, so the label LEAVES the bar
+            * and the row head says it instead. A half-legible word inside a 9px bar is worse than
+            * no word, and an ellipsis is a promise that the rest is somewhere — it is not.
+            *
+            * ⚠️ IT IS THE BAR'S OWN LABEL, not a second sentence written for this tier. Rendering
+            * something else here would give one relationship two descriptions that could disagree;
+            * the row head is a different PLACE for the same words, which is the whole claim.
+            */}
+          {range.dense >= 3 && rowSay(r.key) && <span className="tl-rowsay">{rowSay(r.key)}</span>}
         </button>
         {/* ⚠️ EVERY PARTICIPANT NAMES ITS OWN COLUMN. Auto-placement never overlaps: an auto-placed
             cell beside the explicitly placed lane would be pushed into an implicit new column and
             the grid would silently grow sideways — measured at 688px of phantom right margin the
             last time this page mixed the two. */}
-        {visible.map((ymd, i) => (
+        {columns.map(({ ymd }, i) => (
           <div
             key={ymd}
             /* ⚠️ THE BOUNDARY IS ON THE CELL THAT STARTS THE WEEK, and `i > 0` keeps it off the
@@ -861,14 +924,17 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
           mark="calendar"
           tools={
             <>
-              <button type="button" className="cal-nav calm-nav" aria-label="Previous week"
-                onClick={() => setWinStart((s) => shiftWindow(s, TL_DAYS, -1))}>
+              {/* ⚠️ THE RANGE SITS WITH THE PAGER, because they answer one question between them —
+                  the pager moves the window and this sets how much of it there is. */}
+              <TimelineRangeSlider index={rangeIdx} onChange={setRangeIdx} />
+              <button type="button" className="cal-nav calm-nav" aria-label="Previous window"
+                onClick={() => setWinStart((s) => shiftWindow(s, range.days, -1))}>
                 <ChevronLeft size={14} aria-hidden />
               </button>
               <button type="button" className="cal-nav calm-nav cal-today"
                 onClick={() => setWinStart(today)}>Today</button>
-              <button type="button" className="cal-nav calm-nav" aria-label="Next week"
-                onClick={() => setWinStart((s) => shiftWindow(s, TL_DAYS, 1))}>
+              <button type="button" className="cal-nav calm-nav" aria-label="Next window"
+                onClick={() => setWinStart((s) => shiftWindow(s, range.days, 1))}>
                 <ChevronRight size={14} aria-hidden />
               </button>
 
@@ -926,7 +992,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
           <>
           <div className="tl-board">
             <TplZone className="tl-zone" hem={false} label="The week">
-              <div className="tl">
+              <div
+                className={`tl dense${range.dense}`}
+                style={{ "--tl-days": range.days, "--tl-cols": columns.length } as React.CSSProperties}
+              >
                 {/**
                   * ⚠️ THE TODAY SPINE, POSITIONED BY THE HEAD COLUMN'S OWN TOKEN. The page supplies
                   * only the FRACTION of the window today sits at — data, not another element's
@@ -947,11 +1016,16 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                 })()}
                 <div className="tl-grid tl-head">
                   <div className="tl-corner" style={{ gridColumn: 1, gridRow: 1 }}>Agents &amp; you</div>
-                  {visible.map((ymd, i) => (
-                    <div key={ymd} className={`tl-dh${ymd === today ? " today" : ""}`}
+                  {columns.map((c, i) => (
+                    <div key={c.ymd} className={`tl-dh${c.ymd === today ? " today" : ""}${i > 0 && startsPeriod(c.ymd) ? " bound" : ""}`}
                       style={{ gridColumn: i + 2, gridRow: 1 }}>
-                      <span className="tl-dw">{DOW[new Date(`${ymd}T12:00:00`).getDay()]}</span>
-                      <span className="tl-dd">{Number(ymd.slice(8))}</span>
+                      {/* ⚠️ THE WEEKDAY INITIAL DROPS AT A MONTH AND BEYOND (ref v18): seven letters
+                          repeating thirty-one times is noise, and at week or month grain a column is
+                          not a weekday at all. The date below it carries the column either way. */}
+                      {range.grain === "day" && range.days <= 14 && (
+                        <span className="tl-dw">{DOW[new Date(`${c.ymd}T12:00:00`).getDay()]}</span>
+                      )}
+                      <span className="tl-dd">{colLabel(c.ymd, range.grain)}</span>
                     </div>
                   ))}
                 </div>
