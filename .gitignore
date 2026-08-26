@@ -39,3 +39,8 @@ RECON_PACKAGES_REDESIGN.md
 # lives. Only the deploy transcripts are excluded, by name.
 run-artifacts/**/*-deploy.txt
 run-artifacts/*-deploy.txt
+
+# ⚠️ functions/.env HOLDS VALUES THAT MUST NOT BE PUBLISHED. This repository is public; the bare
+# `.env` is where a personal reply-to address lives, while `.env.<projectId>` stays tracked for the
+# values that are safe to publish (a database id, a public host). See functions/.env.example.
+functions/.env
