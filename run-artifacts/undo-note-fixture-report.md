@@ -1,7 +1,7 @@
 # The undo's second store — Phase 1
 
-**Stopped at the Phase 1 boundary.** Phases 2 (the invisible Note) and 3 (the fixture in two shapes)
-are not started. Phase 1 is complete: root cause, fix at the writer, all four primitives, locks
+**Stopped after Phase 2's diagnosis.** Phase 1 is complete and committed. Phase 2's cause is found
+and measured; its two remaining fixes are named but not applied. Phase 3 is not started. Phase 1 is complete: root cause, fix at the writer, all four primitives, locks
 proved red, and a consistency audit that can be run against the account.
 
 SHA: see `git log` for `todo: an undo removes both stores`.
@@ -124,3 +124,87 @@ in the other direction. Stated rather than quietly re-balanced.
 This session owned the activity writers and `db.tsx`. Other sessions committed to the calendar and
 waitlist areas throughout; no overlap. Gates run against my own baseline: tsc clean, 7,093 unit
 tests, production build clean.
+
+
+---
+
+# Phase 2 — the Note that exists and never renders
+
+## The cause, before any fix
+
+**`boardEligible` (`src/lib/todoColumns.ts`) removes every card whose `nature` is `"note"` from all
+four board columns**, deliberately, with its reason written at the rule:
+
+> *NOTES NEVER RENDER ON THE BOARD. A note has no date, so it cannot be snoozed; it has no tick, so
+> it cannot be done. Three of the four columns are meaningless for it … it is a note, and the
+> Noteboard is where it belongs.*
+
+`dockQueue` says the same thing for the pane's queue: *"Notes never enter it (they are not on the
+board)."* The To-do list (`TaskList`, `.tlc .row`) is fed by `railGroups()` → `boardCols`, so a
+dateless note can never be a row there. It renders on the **Noteboard**, which has its own surface
+and fourteen test files.
+
+## Is it a product bug? No — and this is the important half
+
+**A writer's note cannot be lost.** It has a dedicated page. Nothing about it is silent: it is
+counted on the To-do page (`deskState`, `filterCounts`, the search total) and rendered on the
+Noteboard. The exclusion is a design decision with a stated argument, not an oversight.
+
+## So it is fixture-shaped, and the field is `dueDate`
+
+Last night's fixture wrote a **dateless** note — `nature: "note"` — which `boardEligible` correctly
+excludes. A user task **with a `dueDate`** has `nature: "task"`, renders as a row, and reaches the
+note journey, because `journeyIdFor` keys on `userTaskId` rather than on nature.
+
+⚠️ **AND THAT NAMING IS ITSELF A TRAP WORTH RECORDING.** The row's pill reads **"Note"** for a card
+whose nature is **"task"** — the pill comes from `cardBucket` (which journey), the exclusion from
+`nature` (which kind). Two words, one of them used for both, pointing at different things. It is why
+"seed a Note" produced something the board would never draw.
+
+## Measured, not reasoned
+
+Seeded one undone, dated user task and measured both surfaces:
+
+```
+TODO LIST: pills [Decide, Send, Chase, Close, Fix, Note] · the task present as a row
+CALENDAR : the same task opens the pane — fork ["Tick it off","Give it a date"], .notebody rendered
+```
+
+⚠️ **This overturned my own diagnosis mid-phase and the correction is the finding.** I had traced
+`boardEligible` and `dockQueue` and concluded the note JOURNEY was unreachable dead code from every
+surface. It is not: a dated user task reaches it from both the list and the calendar. Reading two
+filters and reasoning forward gave a confident wrong answer; one seeded row and a probe gave the
+right one.
+
+## The six now execute — four green, two red
+
+| assertion | result |
+|---|---|
+| `steer:P2.3` a note requires nothing, so it carries no square | green — `count=0` |
+| `steer:P5.2` a note carries no count beside its primary | green — `count=""` |
+| `finish:P5.2` a note has no When segment | green — `segs=0` |
+| `finish:P5.3` the note's words are the centrepiece, Caveat 26px | green — `26px Caveat, cursive` |
+| **`finish:P2.3`** a note's form card is content-driven; Send's is taller | **RED** — `note 359/343 = 1.05 · send 326` |
+| **`finish:P5.1`** the finishing sentence appears exactly once | **RED** — `count=2` |
+
+**`finish:P2.3` looks superseded rather than broken.** The note's card is 359 inside a 343 scroller
+and the send's is 326 — the note is TALLER. That is the same shape as P2.1 last night: the workspace
+rebuild made the worksheet card FILL its column, so "content-driven, and shorter than a send" is a
+claim about the pre-rebuild pane. Not fixed here; it is a retarget, and it needs measuring rather
+than assuming.
+
+**`finish:P5.1` is a TRANSITION artefact, not a duplication.** Measured three ways: exactly one leaf
+element carries the sentence (`.flowinfo`, visible, 634×28), and once the pane has settled
+`pane.textContent` contains it once. The count of two is read while the fork is still collapsing,
+when the outgoing and incoming states momentarily coexist — `liftMotionSuppression` means animations
+really run. The fix is a settle-wait in the assertion, not a change to the app.
+
+## What is left of Phase 2
+
+Two assertion fixes (retarget `finish:P2.3`, settle-wait `finish:P5.1`) and formalising the dated
+task into the fixture. Neither is applied; both are one measured run each.
+
+## Concurrency
+
+Unchanged. The account was left as found: the probe task was removed and verified absent (4 user
+tasks, 0 undone, probe gone).
