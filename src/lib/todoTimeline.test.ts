@@ -113,6 +113,24 @@ describe("rows are relationships — one per agent, and Your tasks pinned above 
     const rows = timelineRows(dataFor(MINE), TODAY, 7);
     expect(rows[0].key).toBe(YOU_ROW);
     expect(rows[0].name).toBe(YOU_ROW_NAME);
+    /**
+     * ⚠️ THE PINNED ROW HAS NO STATUS AND NO GROUP, AND BOTH ABSENCES ARE THE POINT.
+     *
+     * It holds tasks from every manuscript and from none, so no group is true of it — it sits
+     * ABOVE the groups rather than inside one, and `group: null` is how it says so rather than a
+     * flag somewhere else. And it holds no query, so a `StatusDot` here would state a journey that
+     * does not exist; the head falls back to the square mark it already had.
+     *
+     * Locked in the unit suite because the harness account has no task due, so the rendered check
+     * reports "not exercised" — which is honest and is not evidence.
+     */
+    expect(rows[0].group, "the pinned row was filed inside a group").toBeNull();
+    expect(rows[0].status, "the pinned row grew a status it has no query for").toBeNull();
+    /* ⚠️ NO POPULATION CLAUSE IS NEEDED HERE and adding one was wrong: this fixture holds the
+       pinned row and nothing else, by design. The subject is a SINGLE NAMED ROW whose existence
+       the two lines above already assert, so "it has no group" cannot pass by vacancy. The
+       positive half — that every agent row DOES carry both — belongs with a fixture that has
+       agent rows, and is asserted in its own case below. */
     expect(rows[0].agentId).toBeNull();
   });
 
@@ -374,6 +392,28 @@ describe("the kind filters — five, and each is a thing to switch off", () => {
 const threeAgents = (statuses: QueryStatus[], sends: string[]) => input({
   queries: statuses.map((s, i) => q({ id: `q${i}`, agentId: `a${i}`, status: s, dateSent: sends[i] })),
   agents: statuses.map((_, i) => agent({ id: `a${i}`, name: `Agent ${"CBA"[i]}`, responseTimeWeeks: 8 } as Partial<Agent>)),
+});
+
+describe("every agent row carries a group and a status", () => {
+  /**
+   * ⚠️ THE POSITIVE HALF OF THE PINNED ROW'S TWO ABSENCES. Without this, "the pinned row has no
+   * group and no status" is satisfied by a build where NOTHING has either — the field could be
+   * deleted outright and both assertions would still pass. Two halves, two fixtures, because the
+   * pinned row's own fixture has no agent rows to compare it against.
+   */
+  it("a row with a live query has both; the head cannot draw a dot without one", () => {
+    const inp = input({
+      queries: [q({ id: "q1", agentId: "a1" }), q({ id: "q2", agentId: "a2" })],
+      agents: [agent({ id: "a1" }), agent({ id: "a2" })],
+    });
+    const { rows } = timelineWeek(dataFor(inp), TODAY, 7);
+    const agents = rows.filter((r) => r.key !== YOU_ROW);
+    expect(agents.length, "no agent rows in this fixture — nothing was measured").toBeGreaterThan(0);
+    for (const r of agents) {
+      expect(r.group, `${r.name} has no group, so no header can hold it`).not.toBeNull();
+      expect(r.status, `${r.name} has no status, so its head cannot draw a StatusDot`).not.toBeNull();
+    }
+  });
 });
 
 describe("order — Your tasks ignores it, closed rows sink, and ties keep their input order", () => {

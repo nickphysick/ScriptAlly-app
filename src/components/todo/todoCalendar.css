@@ -286,6 +286,14 @@
 /* ⚠️ THE MARK IS WHOSE MOVE IT IS, from `agentTurn` — the CTA engine, not a colour off a drawing.
    Filled burgundy = yours; hollow = theirs; faint = no live query; a SQUARE = your own tasks,
    because the pinned row is a checkbox row and not a relationship. */
+/* ⚠️ THE REAL `StatusDot` LEADS EVERY ROW HEAD THAT HAS A QUERY (grouped pack, Phase 4), AND THIS
+   SHEET STYLES IT NOWHERE. A `flex: 0 0 auto` was written here first, to stop the name squashing
+   it — and the component already sets `flexShrink: 0` inline, so the rule matched nothing and
+   looked like a knob that did something. It takes no `className` here either. A locked component
+   that needs no help from the page is the point of it being locked.
+   ⚠️ `.tl-sd` SURVIVES FOR THE PINNED ROW ALONE — it holds no query, so it has no status and a
+   dot invented for it would state a journey that does not exist. The four `data-dot` variants stay
+   because the fallback still reads `r.dot`; only `self` is reachable today. */
 .tl-sd { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; border: 1.5px solid #7c3a2a; }
 .tl-sd[data-dot="you"] { background: #7c3a2a; }
 .tl-sd[data-dot="them"] { background: #f8e2d9; }

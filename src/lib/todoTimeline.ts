@@ -188,6 +188,15 @@ export interface TimelineRow {
    * which sits ABOVE the groups and belongs to none of them.
    */
   group: RowGroup | null;
+  /**
+   * What the row head's `StatusDot` draws — `null` on the pinned "Your tasks" row alone.
+   *
+   * ⚠️ A STATUS, NOT A DRAWING. `dot` (below) is whose-move and is expressed as a 10px CSS disc;
+   * this is the query's real status and is rendered through the LOCKED component, which owns the
+   * ring, the glyph, the pulse and the palette. Nothing about any of those is restated on this
+   * page — that is the difference between the two fields and the reason both exist.
+   */
+  status: QueryStatus | null;
 }
 
 /* ⚠️ `TimelineBand`, `BandSource` AND THE `ExpectedItem` IT CARRIED ARE RETIRED (bars pack,
@@ -333,6 +342,8 @@ interface Draft {
    */
   facts: QueryFacts[];
   lastClosed: string | null;
+  /** what the row's own StatusDot draws — null only on the pinned row, which holds no query */
+  status: QueryStatus | null;
   /** sort keys, all derived */
   soonest: number;
   waitingFrom: number;
@@ -378,7 +389,7 @@ export function timelineWeek(
        rather than filed inside one. Handing it empty facts would file it under a closure that has
        outstayed its week and delete it, which is why the group is assigned per row below and the
        pinned row is exempted there in one place. */
-    facts: [], lastClosed: null,
+    facts: [], lastClosed: null, status: null,
     soonest: Infinity, waitingFrom: Infinity, stage: -1, order: -1,
   };
   drafts.set(YOU_ROW, you);
@@ -408,6 +419,29 @@ export function timelineWeek(
         if (isTerminalStatus(q.status)) return best;
         return Math.max(best, STATUS_ORDER.indexOf(q.status as QueryStatus));
       }, -1),
+      /**
+       * The status the row's own `StatusDot` draws.
+       *
+       * ⚠️ THE SAME RANKING AS `stage`, NOT A SECOND ONE. `stage` is that ranking's INDEX and this
+       * is the status at it, so a row cannot be sorted by one journey depth and marked with
+       * another. Written as one reduce over the same `STATUS_ORDER` rather than as
+       * `STATUS_ORDER[stage]` at the call site, because the closed case has no index to read.
+       *
+       * ⚠️ AND A CLOSED ROW TAKES ITS TERMINAL STATUS, which is the whole reason the row head can
+       * say how a relationship ended rather than only that it did. Rejected, Withdrawn and No
+       * Response are three different endings and `StatusDot` already draws them apart.
+       */
+      status: (() => {
+        const live = mine.filter((q) => !isTerminalStatus(q.status));
+        const pool = live.length ? live : mine;
+        let best: QueryStatus | null = null;
+        let at = -Infinity;
+        for (const q of pool) {
+          const i = STATUS_ORDER.indexOf(q.status as QueryStatus);
+          if (i > at) { at = i; best = q.status as QueryStatus; }
+        }
+        return best;
+      })(),
       order: drafts.size,
       facts: mine
         .filter((q) => !isTerminalStatus(q.status))
@@ -737,7 +771,7 @@ export function timelineWeek(
     }
     rows.push({
       key: row.key, agentId: row.agentId, name: row.name, agency: row.agency,
-      group: groupOf.get(row.key) ?? null,
+      group: groupOf.get(row.key) ?? null, status: row.status,
       dot: row.dot, items: row.items,
       lanes: Math.max(1, barLanes + (row.items.length ? packed : 0)),
       manuscripts: row.manuscripts, closed: row.closed,

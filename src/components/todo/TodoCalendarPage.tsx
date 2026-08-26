@@ -687,7 +687,24 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         <button type="button" className="tl-rowhead" style={{ gridColumn: 1 }}
           onClick={() => openWork(r.key, today, null)}>
           <span className="tl-nm">
-            <i className="tl-sd" data-dot={r.dot} aria-hidden />
+            {/**
+              * ⚠️ THE LOCKED COMPONENT, AT ITS OWN SMALLEST SUPPORTED SIZE — never a drawing of
+              * one. `StatusDot` owns the ring, the glyph, the pulse and the palette, and its
+              * amended lock says direction and stage are carried by SHAPE while the six pipeline
+              * statuses take one hue per theme. So reproducing "colour for direction" here would
+              * be a fork of a locked component wearing a helpful face. Nothing is restated.
+              *
+              * ⚠️ `overrideSize` EXISTS FOR EXACTLY THIS — "the dense timelines, where a full-size
+              * dot would be clipped" — and clamps at 12. 18 is inside the supported range and
+              * already has siblings at 19 on the Agents page and 22 in the query list.
+              *
+              * ⚠️ THE PINNED ROW KEEPS ITS SQUARE. It holds no query, so it has no status, and a
+              * dot invented for it would state a journey that does not exist. The fallback is the
+              * mark it already had rather than a blank space.
+              */}
+            {r.status
+              ? <StatusDot status={r.status} overrideSize={18} decorative />
+              : <i className="tl-sd" data-dot={r.dot} aria-hidden />}
             <span className="tl-nmtxt">{r.name}</span>
           </span>
           {r.agency && <span className="tl-ag">{r.agency}</span>}
