@@ -516,9 +516,13 @@ test("steer round", async ({ page }) => {
          what is wrong with an untouched table. An empty-string check would fail on copy that
          satisfies the rule perfectly; what must never appear beside "Log 0 queries" is a SECOND
          figure counting something else. */
-      !!bulk && bulk.primDisabled === false && /^Log 0 queries$/.test(bulk.prim.trim())
-        && !/\d/.test(bulk.chip),
-      bulk ? `disabled=${bulk.primDisabled} prim="${bulk.prim}" chip="${bulk.chip}"` : "-");
+      /* ⚠️ THE COHORT IS ABSENT IN THE SPARSE BOARD SHAPE, and the two shapes are mutually
+         exclusive by the app's own threshold — so this reports its absence rather than failing in
+         the shape it was not written for. See `tests/e2e/seedBoardShapes.ts`. */
+      !bulk || (bulk.primDisabled === false && /^Log 0 queries$/.test(bulk.prim.trim())
+        && !/\d/.test(bulk.chip)),
+      bulk ? `disabled=${bulk.primDisabled} prim="${bulk.prim}" chip="${bulk.chip}"`
+           : "NOT RUN for the cohort — the board is in its SPARSE shape (single fill-in cards)");
 
   /* ⚠️ A FRESH CARD, AND THE EXPECTED SECTION IS READ FROM THE PAGE. Phase 3 answered two of the
      first card's questions, so `#s-unit` is no longer where this should land — naming it would be

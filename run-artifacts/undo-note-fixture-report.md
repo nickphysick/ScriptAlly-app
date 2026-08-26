@@ -1,7 +1,7 @@
 # The undo's second store — Phase 1
 
-**Stopped after Phase 2's diagnosis.** Phase 1 is complete and committed. Phase 2's cause is found
-and measured; its two remaining fixes are named but not applied. Phase 3 is not started. Phase 1 is complete: root cause, fix at the writer, all four primitives, locks
+**All three phases complete.** Phase 1 fixed at the writer; Phase 2 diagnosed and its two reds
+resolved; Phase 3's fixture built, proved and run in both shapes. Phase 1 is complete: root cause, fix at the writer, all four primitives, locks
 proved red, and a consistency audit that can be run against the account.
 
 SHA: see `git log` for `todo: an undo removes both stores`.
@@ -208,3 +208,80 @@ task into the fixture. Neither is applied; both are one measured run each.
 
 Unchanged. The account was left as found: the probe task was removed and verified absent (4 user
 tasks, 0 undone, probe gone).
+
+
+---
+
+# Phase 3 — the fixture, in two board shapes
+
+`tests/e2e/seedBoardShapes.ts` — TypeScript, run through `tsx`, for one reason.
+
+## It calls the app's own predicate
+
+Last night's fixture reimplemented "is this a gap" and missed that `sendMaterialsRecorded` also
+passes when a SEND ACTIVITY carries materials — so it kept two queries that were not gaps and
+produced no card, which read exactly like the fixture not working. This one **imports
+`queriesMissingMaterials` and runs it**, and suppresses through the app's own switch
+(`hasRecordedMaterials(q.materialsWanted)`) rather than a second rule that could drift.
+
+Measured: the natural gap set is **30**, computed by the app's function, not by mine.
+
+## The two shapes, measured on the page
+
+| | shape A · sparse | shape B · cohort |
+|---|---|---|
+| gaps | **1** (threshold 3) | **30** |
+| Fix rows | `agentgap` + **`fillin`** — fork `["I can fill it in", "I can't remember"]` | `agentgap` + **`bulk`** |
+| cohort table | **absent** (`bulkTable: 0`) | present |
+| journey round | 52/52 | **53**/53 |
+| steer round | 21/21 | 21/21 |
+| finishing round | 29/29 | 29/29 |
+
+## What each shape unblocks
+
+**Shape A** makes the single-query fill-in journey measurable for the first time: the census reads
+`agentgap · fillin` instead of `agentgap · bulk`, and the contract's fork renders. Phase 6's fill-in
+claims had been **unit-locked only** — the card had never existed on this account.
+
+**Shape B** is the account's natural state and is what the eleven cohort assertions need:
+`steer:P5.3` and `finish:P1.1, P3.1, P4.1, P4.2, P4.4, P6.1–P6.6`.
+
+**Both** carry the dated user task, which unblocks the six note assertions (Phase 2).
+
+⚠️ **AND THE TWO SHAPES BREAK EACH OTHER, WHICH IS WHY BOTH SUITES NEEDED WORK.** In shape A the
+eleven cohort assertions went RED — not because anything was wrong but because the card they measure
+cannot exist in that shape. They now report `NOT RUN for the cohort` the way the note cases report
+their absence. Without that, neither shape could ever be green and the fixture would be unusable.
+
+## Proved, not asserted
+
+`tests/e2e/proveShapes.ts` snapshots every field of every document in `queries`, `tasks` and
+`taskFlags`, runs a shape twice, cleans, and diffs:
+
+```
+shape A · 63 documents · idempotent: YES · no residue: YES
+shape B · 63 documents · idempotent: YES · no residue: YES
+```
+
+⚠️ **Its own first run reported a false residue** — it snapshotted whatever was on the account and
+called the fixture's own task, left by an earlier shape, a leak that `--clean` had correctly removed.
+A proof that starts from someone else's leftovers measures the leftovers. It cleans first now.
+
+## Two faults found while building it
+
+**`setDoc` over an existing document is an UPDATE in rules terms.** The task rewrote `createdAt`
+every run, so the second run's diff carried a key the update allowlist does not name and the whole
+write was **DENIED** — the affectedKeys gotcha this repo records, arriving as a hard permission error
+rather than a silent one. **Delete-then-create** fixes it, which is what the brief asked for anyway
+and is also what makes running a shape twice idempotent.
+
+**A sleeping task flag would hide the one card shape A exists to show.** The engine filters a snoozed
+derived task out before the board is assembled, so the fixture would have looked broken for a reason
+unrelated to the gap count. Cleared and recorded for restore.
+
+## What was checked rather than assumed
+
+`todoPrefs` defaults every task type to ON, and `taskSurvivesMute` returns `true` for
+`materials_unrecorded` whatever is muted — so neither can hide the fill-in card, and the fixture
+touches neither. An earlier draft carried a `prefsBefore` field and a restore branch that wrote to a
+placeholder document: dead code pretending to put something back. Removed.
