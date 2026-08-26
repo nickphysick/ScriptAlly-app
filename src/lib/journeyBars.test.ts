@@ -435,3 +435,45 @@ describe("⚠️ a bar says what it is ONCE, where there is room to read it", ()
     expect(bars.segments.every((s) => !!s.label)).toBe(true);
   });
 });
+
+describe("⚠️ two events on one day are not drawn in one place", () => {
+  it("spreads them inside their own day, in the order the record gives them", () => {
+    /* ⚠️ MEASURED ON THE DEPLOYED SITE BEFORE THIS EXISTED: a row with two sends on one day drew
+       two 36px nodes at identical coordinates, so the writer saw one event where the record holds
+       two. A day is all the record knows, so the middle of the column was a convention rather than
+       a claim, and sharing the column between the events that happened in it states nothing new. */
+    const bars = laneBars(lane({
+      query: q({ status: QueryStatus.QUERIED }),
+      records: [
+        rec({ key: "r1", ymd: day(3), label: "Query sent", dir: "out", activityId: "s1" }),
+        rec({ key: "r2", ymd: day(3), label: "Nudge sent", dir: "out", activityId: "s2" }),
+      ],
+    }), WIN);
+    const ats = bars.nodes.map((n) => n.at);
+    expect(new Set(ats).size, "two events share a coordinate").toBe(2);
+    /* both stay inside the day they happened in */
+    for (const a of ats) { expect(a).toBeGreaterThan(3); expect(a).toBeLessThan(4); }
+    /* and in the record's own order */
+    expect(ats[0]).toBeLessThan(ats[1]);
+    expect(bars.nodes.map((n) => n.caption)).toEqual(["Query sent", "Nudge sent"]);
+  });
+
+  it("a lone event still sits at the middle of its day", () => {
+    const bars = laneBars(lane({
+      query: q({ status: QueryStatus.QUERIED }),
+      records: [rec({ key: "r1", ymd: day(3), label: "Query sent", dir: "out", activityId: "s1" })],
+    }), WIN);
+    expect(bars.nodes[0].at).toBe(3 + EVENT_AT);
+  });
+
+  it("three on one day still fit inside it", () => {
+    const bars = laneBars(lane({
+      query: q({ status: QueryStatus.QUERIED }),
+      records: ["a", "b", "c"].map((id) =>
+        rec({ key: `r${id}`, ymd: day(2), label: "Nudge sent", dir: "out", activityId: id })),
+    }), WIN);
+    const ats = bars.nodes.map((n) => n.at);
+    expect(new Set(ats).size).toBe(3);
+    for (const a of ats) { expect(a).toBeGreaterThan(2); expect(a).toBeLessThan(3); }
+  });
+});

@@ -269,6 +269,32 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
   }
   nodes.sort((a, b) => a.at - b.at);
 
+  /**
+   * ⚠️ TWO EVENTS ON ONE DAY MUST NOT BE DRAWN IN ONE PLACE — one of them disappears, and nothing
+   * says it did. Measured on the deployed site: a row with two sends on the same day rendered two
+   * 36px nodes at identical coordinates, so the writer saw one event where the record holds two.
+   *
+   * ⚠️ SPREADING THEM INSIDE THEIR OWN DAY INVENTS NO TIME. A day is all the record knows, so the
+   * middle of the column was always a convention rather than a claim; sharing the column between
+   * the events that happened in it keeps every one of them inside the day it belongs to and states
+   * nothing new about when. They stay in the order the record gives them.
+   */
+  for (let i = 0; i < nodes.length;) {
+    let j = i;
+    while (j + 1 < nodes.length && Math.abs(nodes[j + 1].at - nodes[i].at) < 0.001) j += 1;
+    const n = j - i + 1;
+    if (n > 1) {
+      const day = Math.floor(nodes[i].at);
+      /* ⚠️ THE SPREAD STAYS WELL INSIDE THE COLUMN — a node is 36px wide and a column can be 104,
+         so crowding them to the edges would put one over the day beside it. */
+      const room = 0.62;
+      for (let k = 0; k < n; k += 1) {
+        nodes[i + k].at = day + 0.5 + room * ((k + 0.5) / n - 0.5);
+      }
+    }
+    i = j + 1;
+  }
+
   /* ⚠️ A CLOSURE STOPS THE BAR DEAD AND NOTHING FOLLOWS IT, EVER. Everything after the first
      closure is dropped here rather than filtered later, so no forecast, waypoint or segment can
      be emitted past it by some other branch. */
