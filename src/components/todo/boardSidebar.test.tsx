@@ -131,11 +131,21 @@ describe("⚠️ TAGS: the live list, plus an inline ＋ New tag opening the PIC
     /* Three pages since 9 Aug (tasks-consolidation P1) — Today is retired. The rule is unchanged:
        the write lives in the hook, and no page grows a copy of it. */
     expect(hook).toContain("updateUserProfile({ tags: [...(currentUser?.tags ?? []), tag] })");
-    for (const page of ["ToDoPage.tsx", "TodoCalendarPage.tsx", "TodoNoteboardPage.tsx"]) {
+    /* ⚠️ RETARGETED by the `calendar` session (timeline pack, Phase 3), flagged in
+       reports/calendar-timeline.md. THE LAW IS UNCHANGED: the write lives in the hook and no page
+       grows a copy. What changed is the population — the Calendar has no tag-CREATION surface, so
+       it holds no writer to have a home for. Its `createTagDef` was destructured and never called
+       once the tag sheet moved to the board, which is dead weight rather than a shared home. */
+    for (const page of ["ToDoPage.tsx", "TodoNoteboardPage.tsx"]) {
       const p = readFileSync(join(here, page), "utf8");
       expect(p, page).toContain("useTagWrites(flash)");
       // the per-page copies are gone
       expect(p, page).not.toContain("const createTagDef = async (tag: TagDef)");
+    }
+    /* the no-second-copy half still binds on every page, the Calendar included */
+    for (const page of ["ToDoPage.tsx", "TodoCalendarPage.tsx", "TodoNoteboardPage.tsx"]) {
+      expect(readFileSync(join(here, page), "utf8"), page)
+        .not.toContain("const createTagDef = async (tag: TagDef)");
     }
   });
 

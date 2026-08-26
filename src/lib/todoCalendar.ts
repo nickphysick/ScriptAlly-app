@@ -89,38 +89,16 @@ const isoToYmd = (iso: string | undefined): string | null => {
 /** Monday-start: 0 for Monday … 6 for Sunday (the ref's DOW row starts MON). */
 const mondayIndex = (d: Date): number => (d.getDay() + 6) % 7;
 
-/** The full Monday-start weeks covering the anchor's month — 35 or 42 cells, never a torn row. */
-export function monthGridDays(anchorYmd: string): string[] {
-  const anchor = parseYmd(anchorYmd);
-  const first = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
-  const last = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0);
-  const start = new Date(first);
-  start.setDate(first.getDate() - mondayIndex(first));
-  const end = new Date(last);
-  end.setDate(last.getDate() + (6 - mondayIndex(last)));
-  const days: string[] = [];
-  for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) days.push(toYmd(d));
-  return days;
-}
+/* ⚠️ THE MONTH GRID'S MATHS IS RETIRED (calendar timeline pack, Phase 3) — `monthGridDays`,
+   `monthLabel`, `shiftMonth` and `sameMonth`, along with the `.off` dimming and the "torn row"
+   law they served. A rolling seven-day window starts where it is told and runs forward, so there
+   is no month to be a subset of, no padding to whole weeks and no other-month day to dim. The
+   window is `windowDays` in `todoTimeline`. Recover from the commit before this one if a
+   far-horizon month view is ever wanted back — it is one of Nick's open questions.
 
-export function monthLabel(anchorYmd: string): string {
-  return parseYmd(anchorYmd).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
-}
-
-/* ⚠️ `weekDays`, `weekLabel` and `shiftWeek` ARE RETIRED (record-layer P6) along with the week
-   view they served — traced to zero remaining callers before removal. The `weekLabel` still in the
-   dashboard files is a DIFFERENT symbol: a local const in DeskStats and an object property in
-   StatCards, neither of which ever imported this module. */
-export function shiftMonth(anchorYmd: string, delta: number): string {
-  const d = parseYmd(anchorYmd);
-  return toYmd(new Date(d.getFullYear(), d.getMonth() + delta, 1));
-}
-
-export function sameMonth(aYmd: string, bYmd: string): boolean {
-  const a = parseYmd(aYmd);
-  const b = parseYmd(bYmd);
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
-}
+   ⚠️ AND `weekDays`/`weekLabel`/`shiftWeek` ARE NOT COMING BACK EITHER, despite a week view being
+   back. Those served a week of seven CELLS showing what the month already showed; this is a week
+   of rows and spans. The name collides; the thing does not. */
 
 /* ── placement ─────────────────────────────────────────────────────────────────────────────── */
 
@@ -225,187 +203,15 @@ export function calendarDays(input: CalendarInput, visible: string[]): Map<strin
   return byDay;
 }
 
-/** Busy days fold past this many pips to "+N MORE" (the ref draws 3 + the fold). */
-export const CAL_CELL_CAP = 3;
+/* ⚠️ THE FOLD IS RETIRED (calendar timeline pack, Phase 3) — `CAL_CELL_CAP`, `CAL_CELL_FLOOR`,
+   `CAL_PIP_H`, `CAL_CELL_CHROME`, `CAL_MORE_H`, `FoldMetrics`, `FOLD_FALLBACK`, `FoldResult`,
+   `foldFor`, `calFoldCap`, `calFoldCapFolded` and `foldMetricsFrom`, with the measured-pill
+   machinery and `data-fold-short` that reported when the floor could not be honoured.
 
-/**
- * ⚠️ THE DENSITY FLOOR: a cell never shows fewer than two occupants — one pip plus the counter's
- * line — at any supported width (dedupe pack, Phase 3, Nick's ruling).
- *
- * A one-pip month is not a calendar; it is a list of counters. Measured before this change, at
- * 1000px wide the collapsed layout gave `rowPx 66` and a cap of **1**, so every busy day read
- * "1 item and eleven you cannot see".
- *
- * ⚠️ THIS CONSTANT CANNOT CREATE SPACE — it only states the rule. The room has to come from
- * `.cal-grid`'s `min-height` at the collapsed width, which was raised to 600px in the same change
- * (derived: a folded cell needs `2 × CAL_PIP_H + CAL_MORE_H = 62px` of room, so
- * `rowPx >= 33 + 62 = 95`, so `6 × 95 + 13 = 583` — 600 with margin). If the two ever disagree the
- * cell OVERFLOWS rather than squashing, because `.cal-pip` is `flex: none` — a loud failure, and
- * the acceptance run asserts against it at every width. The floor and the CSS are reconciled by
- * measurement, never by this comment.
- */
-export const CAL_CELL_FLOOR = 2;
-
-/* ══ THE FOLD THRESHOLD (tasks-viewport pack, Phase 3) ══════════════════════════════════════ */
-
-/**
- * A pip's own height plus its top margin.
- *
- * ⚠️ 27, RE-MEASURED — the pill grammar changed the box (pill pack, Phase 5). The label went
- * 8.5px/12.75 to 10px/15 and the padding 3px 6px to 3px 9px, so the flow height a stack divides by
- * moved from 24.75 to 27 (browser-measured at 1000, 1440 and 1920, all three identical). Leaving
- * this at 25 would have been the SAME fault this constant was created to fix, one pack later: a
- * cap promising room the cell does not have.
- *
- * ⚠️ AND IT DOES NOT MOVE ALONE. At 27 the collapsed width's grid floor was 1.2px short of two
- * pips plus the counter, so `.cal-grid`'s `min-height` went 600 -> 620 in the same change. The two
- * are one decision; changing either by itself re-opens the gap.
- *
- * ⚠️ 25, NOT 19 — MEASURED, after the `cal-` collision was fixed (fixes pack, Phase 1). The old
- * value was taken from the ref's `.pip2` and understated the shipped pip by about six pixels:
- * the browser reports `font-size: 8.5px / line-height: 12.75px`, `padding: 3px 6px` and a 1px
- * border, which is 20.75px, plus the 4px `margin-top` — **24.75px**. Rounded UP, because the
- * error that matters is over-promising: a cap one too high puts a pip into space that does not
- * exist, and a fixed-height flex column answers that by SHRINKING every pip rather than dropping
- * the last, which is silent and illegible. One too few is merely one fewer.
- */
-export const CAL_PIP_H = 25;
-/**
- * The date line at the cell's head, plus the cell's vertical padding and border.
- *
- * ⚠️ 33, NOT 26 — the numeral moved into a fixed 20px box (fixes pack, Phase 3) so the head row
- * grew from ~13px to 20px, and the cell's border is now right+bottom only. 20 + 12 padding + 1
- * border = 33. **It is a claim about a rendered cell, so it is verified by measurement, not by
- * this arithmetic** — `tests/e2e/calFold.measure.ts` reports the real `.cal-d` and cell heights,
- * and the acceptance run checks that no cell overflows.
- */
-export const CAL_CELL_CHROME = 35;
-
-/**
- * The "+N MORE" line's own height — browser-measured at 12px (6px mono + 3px padding-top).
- *
- * ⚠️ IT IS NOT A PIP, AND RESERVING A WHOLE PIP SLOT FOR IT COSTS A ROW. The first version of the
- * counter's reservation took one slot out of the cap, which is 25px for a 12px line: on a 900px
- * viewport that turned a two-pip cell into a ONE-pip cell, measured. The fold reserves the
- * counter's real height instead.
- */
-export const CAL_MORE_H = 11;
-
-/**
- * ⚠️ THE FOLD DERIVES FROM THE CELL, NOT FROM A CONSTANT. `CAL_CELL_CAP` was a flat 3 whatever
- * the screen did — right on a desktop, and on a short laptop it asked a 44px row to hold three
- * 19px pips, so the third was sheared in half. A clipped pip is worse than an honest fold: the
- * fold says "there are more", a half-pip says the app is broken.
- *
- * So the cap is a function of the row height the grid actually resolved to, and the page measures
- * that rather than guessing. At least ONE pip always shows — a cell that folds everything says
- * only "+3 MORE", which tells you a day is busy but not what it holds.
- *
- * `rowPx` of 0 (before the first measure, and in any test with no layout) yields the default cap,
- * so nothing renders emptier than it used to while the measurement settles.
- */
-/**
- * The cell's real metrics, read from a rendered sample rather than assumed.
- *
- * ⚠️ THE CONSTANTS WERE A HAND-KEPT COPY OF THE STYLESHEET, AND THEY WENT STALE SILENTLY. When the
- * numeral box and the cell's padding moved by 8.75px in this very pack, `CAL_CELL_CHROME = 35`
- * became wrong by that amount and **the whole suite stayed green** — nothing tied the number to the
- * CSS it described. That is why the pill's height is now measured: the fold asking the page what a
- * pill costs cannot drift from what a pill costs.
- *
- * ⚠️ `chrome` IS EVERYTHING THE CELL SPENDS BEFORE THE FIRST PILL — its vertical padding plus the
- * numeral row — measured as `clientHeight - (available for pills)`, so it needs no list of terms to
- * keep in step. Add a subtitle to the cell tomorrow and this follows without an edit.
- */
-export interface FoldMetrics {
-  /** a pill's own box plus its top margin — what one costs in the flow */
-  pipH: number;
-  /** the "+N MORE" line's height, including its padding */
-  moreH: number;
-  /** the cell's padding and numeral row — everything above the first pill */
-  chrome: number;
-}
-
-/**
- * The declared values, used ONLY until a real cell has been measured.
- *
- * ⚠️ A FALLBACK, NOT A SOURCE OF TRUTH. Before the first measurement — the initial render, and any
- * test with no layout — there is no rendered pill to ask, and rendering emptier than necessary for
- * one frame is worse than using the last known good numbers. Once `foldMetricsFrom` has read a
- * cell, these are never consulted again.
- */
-export const FOLD_FALLBACK: FoldMetrics = { pipH: CAL_PIP_H, moreH: CAL_MORE_H, chrome: CAL_CELL_CHROME };
-
-/**
- * How many pills fit, and whether the floor could be honoured.
- *
- * ⚠️ `fits` IS THE HONEST ANSWER AND `cap` IS THE RULED ONE. `CAL_CELL_FLOOR` is a product ruling —
- * a one-pill month is close to information-free — and it cannot create space. Keeping both means
- * the caller can render the ruling *and* know when the cell cannot afford it, instead of the fold
- * quietly returning 2 into a cell with room for 1 and the pills overflowing to say so.
- */
-export interface FoldResult {
-  /** what the ruling says to draw */
-  cap: number;
-  /** what actually fits — below `cap` when the floor is unsatisfiable */
-  fits: number;
-  /** pixels short of honouring the floor; 0 when it is satisfiable */
-  shortfall: number;
-}
-
-/** The cap, the honest fit, and the shortfall — one derivation, three answers. */
-export function foldFor(rowPx: number, m: FoldMetrics = FOLD_FALLBACK, withCounter = false): FoldResult {
-  if (!rowPx || rowPx <= 0) {
-    const cap = withCounter ? Math.max(CAL_CELL_FLOOR, CAL_CELL_CAP - 1) : CAL_CELL_CAP;
-    return { cap, fits: cap, shortfall: 0 };
-  }
-  const room = rowPx - m.chrome - (withCounter ? m.moreH : 0);
-  const fits = Math.max(0, Math.floor(room / m.pipH));
-  const cap = Math.max(CAL_CELL_FLOOR, Math.min(CAL_CELL_CAP, fits));
-  /* what honouring the floor would cost beyond the room there is */
-  const shortfall = fits >= CAL_CELL_FLOOR ? 0
-    : Math.max(0, Math.round((CAL_CELL_FLOOR * m.pipH + (withCounter ? m.moreH : 0) + m.chrome - rowPx) * 100) / 100);
-  return { cap, fits: Math.min(fits, CAL_CELL_CAP), shortfall };
-}
-
-export function calFoldCap(rowPx: number, m: FoldMetrics = FOLD_FALLBACK): number {
-  return foldFor(rowPx, m, false).cap;
-}
-
-/**
- * How many pips fit ALONGSIDE the "+N MORE" line — the cap for a day that folds.
- *
- * ⚠️ TWO CAPS, BECAUSE THE COUNTER IS SHORTER THAN A PIP. A single cap has to assume the worst and
- * reserve a full pip's height for a 12px line, which measurably costs a row. Asking the question
- * twice — "how many fit alone" and "how many fit beside the counter" — lets a cell show everything
- * when it can and still show as much as possible when it cannot. At the sizes that ship these are
- * often the SAME number, which is exactly the row the single-cap version was throwing away.
- */
-export function calFoldCapFolded(rowPx: number, m: FoldMetrics = FOLD_FALLBACK): number {
-  return foldFor(rowPx, m, true).cap;
-}
-
-/**
- * Read the cell's real metrics off a rendered cell. Returns null when there is nothing to read —
- * an empty month has no pill, and inventing one would be the assumption this replaces.
- *
- * ⚠️ IT TAKES THE CELL, NOT THE DOCUMENT. Every workspace page stays mounted, so a query across the
- * document can return a hidden page's zero-sized copy — which has already produced a false chain
- * reading and an unclickable-button hunt in this repo. The caller passes the element it is
- * rendering into.
- */
-export function foldMetricsFrom(
-  cell: { clientHeight: number; paddingY: number; headH: number },
-  pill: { height: number; marginTop: number } | null,
-  moreH: number | null,
-): FoldMetrics | null {
-  if (!pill || pill.height <= 0) return null;
-  return {
-    pipH: pill.height + pill.marginTop,
-    moreH: moreH && moreH > 0 ? moreH : FOLD_FALLBACK.moreH,
-    chrome: cell.paddingY + cell.headH,
-  };
-}
+   ⚠️ THE WHOLE FAMILY EXISTED BECAUSE A DAY CELL HAD A FIXED HEIGHT. A timeline row grows to hold
+   what it holds — lanes are packed, and the board scrolls — so there is nothing to overflow, no
+   "+N MORE" to count and no density floor to fall short of. Three packs of careful arithmetic,
+   every value of it measured and correct, about a box that no longer exists. */
 
 /* ══ THE RECORD LAYER (record-layer pack, Phase 2; ref design-refs/calendar-month-focus-v2.html) ═
  *
@@ -686,35 +492,10 @@ export const REC_LEGEND: { dir: RecordDir; label: string }[] = [
    is why that one is data-driven and inline. A constant nothing reads is a slot a later change
    fills without anyone deciding it should exist. */
 
-/**
- * ⚠️ THE CELL'S SLOT ARITHMETIC IS A FUNCTION, NOT A LINE OF JSX — because a source-string lock
- * proves the expression was written and never that it computes the right thing. The two layers
- * share one cap, and the order is the rule: LIVE WORK TAKES ITS SLOTS FIRST, the record takes what
- * is left, and the fold counts everything that did not fit. A busy day therefore never pushes
- * today's work under a "+N MORE" to make room for last week's history.
- *
- * `cap` comes from `calFoldCap`, which is untouched by this pack: it answers "how many pips fit",
- * and a record pip is a pip — same box, same `CAL_PIP_H`.
- */
-export interface CellSlots<T, R> { shownItems: T[]; shownRecs: R[]; overflow: number }
-
-export function cellSlots<T, R>(
-  items: readonly T[], recs: readonly R[], cap: number, capFolded = Math.max(0, cap - 1),
-): CellSlots<T, R> {
-  const cells = Math.max(0, cap);
-  const total = items.length + recs.length;
-  /* ⚠️ THE COUNTER TAKES A SLOT, AND UNTIL NOW IT DID NOT (fixes pack, Phase 1). `calFoldCap`'s
-     own comment claimed a row was reserved for "+N MORE"; the arithmetic never reserved one, so a
-     day at exactly the cap drew `cap` pips AND a counter into room for `cap`. The cell is a
-     fixed-height flex column, so the overflow was absorbed by SHRINKING every pip — the failure is
-     silent and looks like an empty month.
-     The ref's rule, and now the code's: everything fits, or one slot goes to the counter. */
-  const room = total <= cells ? cells : Math.max(0, Math.min(capFolded, cells));
-  const shownItems = items.slice(0, room);
-  const shownRecs = recs.slice(0, Math.max(0, room - shownItems.length));
-  const overflow = total - shownItems.length - shownRecs.length;
-  return { shownItems, shownRecs, overflow: Math.max(0, overflow) };
-}
+/* ⚠️ `cellSlots` IS RETIRED WITH THE FOLD (Phase 3). It divided a cell's fixed number of slots
+   between the live work and the record, live work first. A lane holds every occupant it is given,
+   so there is no division left to make — but the ORDER it encoded survives as a fact about the
+   render: bands are drawn beneath chips, so a span never covers the work sitting on it. */
 
 /**
  * ⚠️ ONE FACT, ONE PIP — the record supersedes the done card that reports the same activity.
@@ -822,208 +603,27 @@ export function pillLabel(item: CalendarItem | RecordItem): string {
   return (t && PILL_BY_TASK[t]) || item.label;
 }
 
-/* ══ THE HOVER PEEK (finishing pack, Phase 2; ref calendar-month-focus-v5.html) ═══════════════
- *
- * ⚠️ THE PEEK IS PORTALLED, SO IT SPENDS NO CELL CUSHION. The reclaim pack left exactly +4.0px in
- * a cell at 1280 and above; a peek that grew the cell, or that added so much as a pill's margin to
- * it, would spend a budget three packs went into earning. It is `position: fixed` over the grid and
- * the cell underneath is untouched.
- *
- * ⚠️ AND IT IS A PEEK, NOT A READING SURFACE — `pointer-events: none`, no actions, clicks pass
- * through to the cell. Anything else and it becomes a second day panel with a worse shape.
- */
+/* ⚠️ THE HOVER PEEK IS RETIRED (Phase 3) — `PEEK_DELAY_MS`, `PEEK_SCALE`, `PEEK_OPACITY`,
+   `PEEK_PAD`, `PEEK_LIFT`, `PeekRect` and `peekBox`, with the portal, the two clamps and the
+   parked-pointer guard. It was the answer to "+N MORE": a way to unfold a cell that was hiding
+   something. Nothing is hidden now, so the answer has no question. */
 
-/** How long the pointer must rest on a populated cell before it opens. */
-export const PEEK_DELAY_MS = 450;
-/** The peek's footprint as a multiple of the cell's own. */
-export const PEEK_SCALE = 1.6;
-/** Parchment at not-quite-opaque, so it reads as laid over the month rather than cut into it. */
-export const PEEK_OPACITY = 0.97;
-/** Breathing room between the peek and the grid's edge, both axes. */
-export const PEEK_PAD = 4;
-/** How far above the cell's own top edge it starts, before clamping. */
-export const PEEK_LIFT = 10;
+/* ⚠️ THE VIEW MODES AND THE EVENT-KIND VOCABULARY ARE RETIRED (Phase 3) — `CalMode`,
+   `upcomingGridDays`, `CalKind`, `CalKindRule`, `CAL_KINDS`, `CAL_KIND_ORDER`, `allKinds`,
+   `itemKind`, `recordKind`, `itemInKinds`, `recordInKinds` and `expectedInKinds`.
 
-export interface PeekRect { left: number; top: number; width: number; height: number }
+   ⚠️ `Upcoming only` WAS A MONTH-BOUNDED RANGE, and a rolling window that starts at today already
+   is one — the mode's whole job was to stop a month showing three weeks of finished days, which a
+   seven-day window starting today cannot do.
 
-/**
- * Where the peek goes — pure, so the clamping is testable without a browser.
- *
- * ⚠️ EDGE CELLS GROW INWARD. A cell in the first or last column would otherwise put a 1.6×
- * footprint half outside the month; clamping the left edge to the grid's box turns "centred on the
- * cell" into "as centred as it can be while staying on the page", which is the ref's behaviour.
- *
- * ⚠️ AND THE HEIGHT IS PASSED IN, MEASURED, NEVER ASSUMED. The peek holds every item on the day
- * with no cap, so its height is whatever that many pills come to — the one number this function
- * cannot derive. Callers pass 0 on the first pass and re-clamp once it has been laid out.
- */
-export function peekBox(
-  cell: { left: number; top: number; width: number },
-  grid: { left: number; top: number; right: number; bottom: number },
-  peekH = 0,
-  scale = PEEK_SCALE,
-): PeekRect {
-  const width = Math.round(cell.width * scale);
-  const centred = cell.left - (width - cell.width) / 2;
-  const maxLeft = grid.right - width - PEEK_PAD;
-  /* ⚠️ `Math.min` BEFORE `Math.max`, so a peek wider than the grid pins to the LEFT edge rather
-     than to a negative one. Reversed, an over-wide peek would be clamped off the left of the page. */
-  const left = Math.max(grid.left + PEEK_PAD, Math.min(centred, maxLeft));
-  const wanted = cell.top - PEEK_LIFT;
-  const maxTop = grid.bottom - peekH - PEEK_PAD;
-  const top = Math.max(grid.top + PEEK_PAD, Math.min(wanted, maxTop));
-  return { left, top, width, height: peekH };
-}
+   ⚠️ THE KINDS ARE SUPERSEDED RATHER THAN DELETED IN SPIRIT. `CAL_KINDS` named EVENTS by their
+   place in the querying story (queries · materials · responses · nudges · closures · tasks), which
+   is the right vocabulary for a month of history. A timeline's rows are relationships, so the
+   useful question is which LAYER you are looking at — your turn, waiting, on the record, your
+   tasks, carried — and that is `TIMELINE_FILTERS` in `todoTimeline`. Five, not six, and each one
+   names a thing on the board rather than a category of event.
 
-/* ══ VIEW MODES (finishing pack, Phase 3; ref calendar-month-focus-v5.html) ════════════════════
- *
- * ⚠️ THIS REPLACES "THE RECORD" TOGGLE, WHOSE MEANING WAS OPAQUE. A control labelled with the name
- * of a layer asks the reader to know what that layer is before they can decide whether they want
- * it. The two modes name what you get instead of what gets switched.
- */
-export type CalMode = "both" | "upcoming";
-
-/**
- * The visible days in `Upcoming only` — whole weeks, from the week containing today.
- *
- * ⚠️ MONTH-BOUNDED, NOT A ROLLING FIVE WEEKS, and the inventory is the reason. The existing
- * machinery is `monthGridDays(anchor)` → `monthLabel(anchor)` → `sameMonth(ymd, anchor)`: a
- * month-bounded range keeps ALL THREE unchanged, because what is shown is still a subset of the
- * anchor's own month. A rolling five weeks spans two months, so it would need a second labelling
- * rule for a title naming two of them AND a second dimming rule, since `sameMonth` would then dim
- * a third of the grid as "not this month" when those days are exactly what the mode exists to
- * show. Two new rules against none is not a close call.
- *
- * ⚠️ WHOLE WEEKS ARE PRESERVED — a week is dropped only when ALL of it is behind today. So the
- * first surviving row still carries its pre-today days, which the page dims rather than deletes:
- * a row starting on a Thursday because that is when today falls would misrepresent the week.
- *
- * ⚠️ A PAST MONTH LEGITIMATELY YIELDS NOTHING. Navigating to July and asking what is still ahead
- * in it has an honest answer, and the answer is nothing — so this returns `[]` and the page states
- * it. Clamping to "the last week anyway" would put a week of finished days under a heading that
- * promises upcoming work.
- */
-export function upcomingGridDays(anchorYmd: string, todayYmd: string): string[] {
-  const all = monthGridDays(anchorYmd);
-  const out: string[] = [];
-  for (let i = 0; i < all.length; i += 7) {
-    const week = all.slice(i, i + 7);
-    /* the week survives if ANY of it is today or later — i.e. if its last day is */
-    if (week[week.length - 1] >= todayYmd) out.push(...week);
-  }
-  return out;
-}
-
-/* ══ KIND FILTERS (finishing pack, Phase 4; ref calendar-month-focus-v5.html) ══════════════════
- *
- * ⚠️ THIS SUPERSEDES A RECORDED RULING, DELIBERATELY AND WITH ITS REASON. The standing lock said
- * "the calendar uses `TODO_FACETS` as the single shared vocabulary", and that was right when the
- * calendar was a projection of TASKS: the same four buckets the board and the sidebar badge read,
- * narrowing the same live cards. The record layer changed what the page IS. It now shows EVENTS —
- * things that happened, in both directions, most of which are not tasks and never were — and a
- * vocabulary built for live work cannot name them. "Urgent" has no meaning applied to a query sent
- * three weeks ago. So the calendar gets its own event-kind filters, and **`TODO_FACETS` is
- * untouched**: the board keeps it, the sidebar badge keeps it, and this control is calendar-local.
- *
- * ⚠️ ONE CONST STATES BOTH VOCABULARIES, which is the point of putting it beside `RECORD_TYPES`.
- * The calendar has two of them — record labels (from the activity log) and card pills (from the
- * board's task types) — and a kind is a claim about BOTH. Split across two files they would drift;
- * here, adding a record label or a task type without filing it under a kind is visible in one
- * screen, and the lock below asserts the coverage rather than trusting the eye.
- */
-export type CalKind =
-  | "queries" | "materials" | "responses" | "nudges" | "closures" | "tasks";
-
-export interface CalKindRule {
-  label: string;
-  /** Record labels (as `RECORD_STATUS`/`RECORD_TYPES` emit them) that belong to this kind. */
-  record: string[];
-  /** Board task types whose CARD belongs to this kind. */
-  task: TaskType[];
-  /** Live families that belong to this kind regardless of task type. */
-  family?: CalFamily[];
-  /** Whether the EXPECTED-DATE layer files under this kind (proposals pack, Phase 3). */
-  expected?: boolean;
-}
-
-/**
- * ⚠️ THE LABELS ARE THE MATCH KEY, NOT A SECOND ENUM. `RECORD_STATUS` and `RECORD_TYPES` already
- * decide what an entry is CALLED, and every one of those strings is a closed set this file owns.
- * Matching on the label means a new record label that nobody files here fails the coverage lock
- * loudly, instead of being silently filtered out of — or into — a kind it was never considered for.
- */
-export const CAL_KINDS: Record<CalKind, CalKindRule> = {
-  queries: { label: "Queries sent", record: ["Query sent"], task: [] },
-  /* the writer sending what was asked for — the three materials, and nothing else */
-  materials: { label: "Materials sent", record: ["Partial sent", "Full sent"], task: ["partial_requested", "full_requested", "revise_resubmit"] },
-  /* the agency moving: a request, a holding line, or an offer */
-  /* ⚠️ EXPECTED DATES FILE HERE, NOT AS A SEVENTH KIND (proposals pack, Phase 3). A reply window
-     is an agent response that has not happened yet — same conversation, same direction — and a
-     seventh checkbox would make the writer learn a distinction the model does not draw. The flag
-     keeps the one-const-states-every-vocabulary property: the layer's kind membership is written
-     HERE, beside the labels and task types, not in a reader somewhere. */
-  responses: {
-    label: "Agent responses",
-    record: ["Partial requested", "Full requested", "Revise & resubmit", "Holding reply", "Offer received"],
-    task: [],
-    expected: true,
-  },
-  nudges: { label: "Nudges", record: ["Nudge sent"], task: ["nudge_overdue"] },
-  /* ⚠️ THE WRITER'S ANSWER TO AN OFFER IS A CLOSURE, NOT A RESPONSE. `Offer accepted` and
-     `Offer declined` end the conversation; `Offer received` starts the last part of it. They read
-     as a pair and belong on opposite sides of this line — which is exactly why `RECORD_TYPES`
-     keeps the two answers' own labels rather than filing them under the generic "Closed". */
-  closures: { label: "Closures", record: ["Closed", "Offer accepted", "Offer declined"], task: [] },
-  /* ⚠️ THE WRITER'S OWN WORK, whatever shape it arrives in: their own dated tasks, anything
-     returning from a snooze, and the offer decision — which is a decision only they can make. */
-  tasks: { label: "Your tasks", record: [], task: ["offer_received"], family: ["task", "snoozed"] },
-};
-
-/** Every kind, in the order the checklist draws them. */
-export const CAL_KIND_ORDER: CalKind[] = ["queries", "materials", "responses", "nudges", "closures", "tasks"];
-
-/** All of them — the default, and what "nothing is filtered" means. */
-export const allKinds = (): CalKind[] => [...CAL_KIND_ORDER];
-
-/**
- * ⚠️ A DONE ITEM IS FILED BY WHAT IT WAS, and when that cannot be told, it is KEPT.
- *
- * Completed cards carry no `taskType` — they are built from the activity log — so the only handle
- * on them is their label, which `terseDoneLabel` wrote. Rather than guess, an item no kind claims
- * survives every filter: a filter that silently swallows what it does not recognise reports a
- * quieter month than the writer has, which is the one direction this must not fail in.
- */
-export function itemKind(item: CalendarItem): CalKind | null {
-  for (const k of CAL_KIND_ORDER) {
-    const rule = CAL_KINDS[k];
-    if (rule.family?.includes(item.family)) return k;
-    const t = item.card?.taskType as TaskType | undefined;
-    if (t && rule.task.includes(t)) return k;
-  }
-  /* a done item: match on the label the record uses for the same event */
-  for (const k of CAL_KIND_ORDER) {
-    if (CAL_KINDS[k].record.some((l) => item.label.toLowerCase().startsWith(l.toLowerCase()))) return k;
-  }
-  return null;
-}
-
-/** The record's kind — its label is already one of the closed set. */
-export function recordKind(r: RecordItem): CalKind | null {
-  for (const k of CAL_KIND_ORDER) if (CAL_KINDS[k].record.includes(r.label)) return k;
-  return null;
-}
-
-/** Kept when its kind is on, or when nothing claims it. */
-export const itemInKinds = (item: CalendarItem, on: CalKind[]): boolean => {
-  const k = itemKind(item);
-  return k === null || on.includes(k);
-};
-export const recordInKinds = (r: RecordItem, on: CalKind[]): boolean => {
-  const k = recordKind(r);
-  return k === null || on.includes(k);
-};
-/** The expected layer survives while any kind claiming it is on — read from the const, never a literal. */
-export const expectedInKinds = (on: CalKind[]): boolean => on.some((k) => CAL_KINDS[k].expected === true);
+   `TODO_FACETS` is untouched by both, as it always was: the board and the sidebar badge keep it. */
 
 /* ══ CARRIED-TASK ORIGIN GHOSTS (finishing pack, Phase 5; ref calendar-month-focus-v5.html) ════
  *
@@ -1146,61 +746,11 @@ export interface ExpectedItem {
   setYmd?: string;
 }
 
-/**
- * One item per waiting query whose resolved window lands on a visible, not-yet-passed day.
- *
- * ⚠️ WAITING QUERIES ONLY — `queryBucket(status) === "waiting"`, the CTA engine's own split. A
- * closed query expects nothing; a writer's-turn query is not waiting on a reply, so a window on it
- * would state an expectation the pipeline says does not exist. This is also what makes "a query
- * closed before its window renders nothing" true by construction rather than by a filter.
- *
- * ⚠️ A DATE THAT HAS PASSED SIMPLY STOPS RENDERING. No "window expired" pill, no expiry state —
- * that copy needs its own ruling (flagged). And a dashed pill on a past day would break the house
- * grammar besides: dashed means provisional, and the past is not provisional.
- */
-export function expectedDays(
-  queries: readonly Query[],
-  agents: readonly Agent[],
-  visible: readonly string[],
-  todayYmd: string,
-): Map<string, ExpectedItem[]> {
-  const out = new Map<string, ExpectedItem[]>();
-  const inView = new Set(visible);
-  const byId = new Map(agents.map((a) => [a.id, a]));
-  for (const q of queries) {
-    if (queryBucket(q.status) !== "waiting") continue;
-    const agent = q.agentId ? byId.get(q.agentId) : undefined;
-    /* the send anchor — the latest of the three stage sends, dashboardStats' own pattern */
-    const sends = [q.dateSent, q.partialSentDate, q.fullSentDate]
-      .map((iso) => (iso ? new Date(iso as string).getTime() : NaN))
-      .filter((t) => !Number.isNaN(t));
-    const sentMs = sends.length ? Math.max(...sends) : null;
-    const resolved = resolveExpectedDate(q, sentMs, agent?.responseTimeWeeks ?? null, null);
-    if (resolved.ms == null || (resolved.source !== "agent" && resolved.source !== "writer")) continue;
-    const ymd = isoToYmd(new Date(resolved.ms).toISOString());
-    if (!ymd || !inView.has(ymd) || ymd < todayYmd) continue;
-    const item: ExpectedItem = {
-      key: `exp-${q.id}`,
-      ymd,
-      queryId: q.id,
-      agent: agent ? agentPrimary(agent) : "",
-      source: resolved.source,
-      ...(resolved.source === "agent"
-        ? {
-            ...(typeof agent?.responseTimeWeeks === "number" ? { weeks: agent.responseTimeWeeks } : {}),
-            ...(sentMs != null ? { fromYmd: isoToYmd(new Date(sentMs).toISOString()) ?? undefined } : {}),
-          }
-        : (() => {
-            const setAt = (q as { writerExpectedSetAt?: string }).writerExpectedSetAt;
-            const setYmd = setAt ? isoToYmd(setAt) : null;
-            return setYmd ? { setYmd } : {};
-          })()),
-    };
-    const cur = out.get(ymd);
-    if (cur) cur.push(item); else out.set(ymd, [item]);
-  }
-  return out;
-}
+/* ⚠️ `expectedDays` IS RETIRED (Phase 3) AND ITS TWO NEIGHBOURS ARE NOT. It placed a "Reply
+   window" pill on the window's own day, because a grid of cells cannot draw a span; the band is
+   that span, so the pill would state one fact twice. `ExpectedItem` and `expectedLine` survive
+   with a real caller — `timelineWeek` builds the item onto each band, so this construction moved
+   rather than being duplicated, and `expectedLine` is still the ONE producer of that copy. */
 
 /** The pill's one label — no agent name on a pill; the grid is a density map. */
 export const EXPECTED_PILL = "Reply window";

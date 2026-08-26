@@ -239,45 +239,56 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
     expect(board).not.toContain("batchScroll.current[rule] = wrapRef.current?.scrollTop");
   });
 
+  /* ⚠️ RETARGETED by the `calendar` session (timeline pack, Phase 3), flagged in
+     reports/calendar-timeline.md — and this is the rare retarget that makes a page MORE
+     conformant, not less. The Calendar was the file's one stated exception: it answered the
+     viewport lock by COMPRESSING, because a month grid can divide whatever height it is given.
+     A timeline cannot — the rows are however many relationships there are — so the board scrolls,
+     and it scrolls in the family's own primitive rather than inventing an overflow of its own.
+     `TasksPageLayout` already names `.tpl-zone` in its `settleOn`, so the page's Type A settle
+     kept working with nothing edited in a shared file. */
   it("the Calendar and the Noteboard each declare their own region", () => {
     /* Today's clause went with the page (tasks-consolidation P1, 9 Aug). */
     expect(note).toContain("<TplZone");
-    /* ⚠️ THE CALENDAR IS THE EXCEPTION AND IT IS DELIBERATE: it answers the lock by COMPRESSING,
-       not scrolling — the whole month stays on screen. So it has no zone, and that is the
-       design rather than an omission. */
-    expect(cal).not.toContain("<TplZone");
+    expect(cal).toContain("<TplZone");
   });
 
-  it("⚠️ THE CALENDAR COMPRESSES: the grid takes the remaining height with ZERO-MIN 1fr rows", () => {
-    const grid = rule(calCss, ".cal-grid {");
-    expect(grid).toMatch(/flex:\s*1/);
-    expect(grid).toContain("min-height: 0");
-    expect(grid).not.toContain("overflow: auto");
+  it("⚠️ THE BOARD FILLS AND SCROLLS: the frame takes the height, the zone takes the overflow", () => {
+    const board = rule(calCss, ".tl-board {");
+    expect(board).toMatch(/flex:\s*1/);
+    expect(board).toContain("min-height: 0");
+    /* the FRAME never scrolls — the zone inside it does, so the day header can stick to the top
+       of the scrollport rather than to a box that is itself moving */
+    expect(board).toContain("overflow: hidden");
 
-    /* ⚠️ minmax(0, 1fr), NEVER a bare `1fr` — THIS IS THE WHOLE FIX and it shipped wrong once.
-       A bare `1fr` grid row is `minmax(auto, 1fr)`: its floor is the content's min-content
-       height, so the rows could not shrink and the month overflowed instead of compressing.
-       Browser-measured at 1440×900 with the bare version: rows resolved to
-       `12.75px 104px 104px 104px 104px 104px 104px` and the grid ran 17px past its frame.
-       Same law as the board's column measure — a capped track needs a zero minimum, or the cap
-       is the only thing that ever applies. */
-    expect(grid).toContain("grid-auto-rows: minmax(0, 1fr)");
-    expect(grid).not.toMatch(/grid-auto-rows:\s*1fr/);
+    /* ⚠️ minmax(0, 1fr), NEVER A BARE `1fr` — THE SAME LAW, NOW ON THE COLUMNS. A bare `1fr`
+       track is `minmax(auto, 1fr)`: its floor is the content's min-content width, so a long agent
+       name or an un-ellipsised chip would push the seven day columns wider than the board and
+       earn a horizontal scrollbar the design forbids. A capped track needs a zero minimum, or the
+       cap is the only thing that ever applies. It shipped wrong once as rows; it is the same
+       mistake sideways. */
+    /* ⚠️ ONE CLASS, so this lookup cannot slice a stub — a grouped selector containing
+       another selector's text is the first-match trap in CSS clothing, and it caught this very
+       assertion once before the stylesheet was restructured to make it impossible. */
+    const tracks = rule(calCss, ".tl-grid {");
+    expect(tracks).toContain("grid-template-columns: var(--tl-head-w) repeat(7, minmax(0, 1fr))");
+    expect(tracks).not.toMatch(/repeat\(7,\s*1fr\)/);
 
-    /* row 1 is the day-name strip and must stay `auto` — the DOW labels share this grid, so
-       without it they take a week row's share and you get a 100px-tall "MON TUE WED" */
-    expect(grid).toContain("grid-template-rows: auto");
+    /* seven columns FILL — they never earn a horizontal scrollbar, so any horizontal overflow is
+       a fault to see rather than a thing to scroll */
+    expect(rule(calCss, ".tl-zone {")).toContain("overflow-x: hidden");
   });
 
-  it("⚠️ AND THE CELL CARRIES NO HEIGHT FLOOR — a floor on the cell is a floor on its row", () => {
-    /* `.cal-cell` had `min-height: 104px`. Six of those plus the header block cannot fit a
-       laptop, so the month scrolled however the grid was declared. Measured after removing it:
-       zero overflow at every height from 900px down to 560px, week rows compressing 101 → 44px. */
-    const cell = rule(calCss, ".cal-cell {");
-    expect(cell).not.toMatch(/min-height:\s*\d+px/);
-    expect(cell).toContain("min-height: 0");
-    // and it clips tidily rather than spilling into its neighbour
-    expect(cell).toContain("overflow: hidden");
+  it("⚠️ AND A ROW'S HEIGHT COMES FROM ITS LANES, never from a floor in the stylesheet", () => {
+    /* ⚠️ THE OLD LAW WAS THE OPPOSITE AND BOTH ARE RIGHT FOR THEIR OWN LAYOUT. A month cell could
+       not carry `min-height` because six of them plus the header cannot fit a laptop, so the cell
+       had to shrink and clip. A timeline row must GROW instead — it holds however many lanes its
+       occupants packed into — and it cannot clip, because clipping a lane hides an item with
+       nothing to say so. The height is therefore derived per row and set inline, and a fixed
+       floor in the stylesheet is what would break it. */
+    expect(rule(calCss, ".tl-cell {")).not.toMatch(/min-height:\s*\d+px/);
+    expect(rule(calCss, ".tl-row {")).not.toMatch(/min-height/);
+    expect(cal).toContain("minHeight: lanes * LANE_STEP");
   });
 });
 
@@ -297,9 +308,15 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
    cannot reach the pips and miss the panel. */
 describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local (finishing P4)", () => {
   it("it exists, and it reads the ONE kind definition rather than a second label list", () => {
-    expect(cal).toContain("cal-kwrap");
-    expect(cal).toContain("CAL_KIND_ORDER.map");
-    expect(cal).toContain("CAL_KINDS[k].label");
+    /* ⚠️ RETARGETED a third time, by the `calendar` session (timeline pack, Phase 3), flagged in
+       reports/calendar-timeline.md. BOTH LAWS SURVIVE VERBATIM and only the vocabulary moved:
+       `CAL_KINDS` named EVENTS by their place in the querying story, which is the right question
+       for a month of history; a timeline's rows are relationships, so the useful question is which
+       LAYER you are looking at — your turn, waiting, on the record, your tasks, carried. Five, not
+       six, and each names a thing on the board rather than a category of event. */
+    expect(cal).toContain("tl-kind");
+    expect(cal).toContain("TIMELINE_FILTERS.map");
+    expect(cal).toContain("FILTER_LABEL[k]");
     expect(cal).not.toContain("KIND_LABEL"); // no per-page vocabulary
     /* and the superseded control is gone from the page, not merely unrendered */
     /* ⚠️ STRIPPED, NOT RAW — and this caught me twice in one pack. The page now carries COMMENTS
@@ -319,12 +336,15 @@ describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local 
     expect(decomment(cal)).not.toContain("liveBoardCards");
   });
 
-  it("the filter reaches the pips, the day lists AND the peek — all read the same two functions", () => {
-    /* the kinds are applied inside `itemsFor`/`recordFor`, which every surface calls, so narrowing
-       cannot reach one and miss another — the same shape the facet had at the derivation. */
-    expect(cal).toContain("itemInKinds(it, kinds)");
-    expect(cal).toContain("recordInKinds(r, kinds)");
-    expect(cal).toContain("dayData(ymd)");
+  it("the filter is applied ONCE, inside the derivation every surface reads", () => {
+    /* ⚠️ THE LAW IS STRONGER NOW, NOT WEAKER. It used to be that two functions applied the kinds
+       and every surface called both — which held only while every surface remembered to. The
+       narrowing now happens inside `timelineWeek`, which is the ONLY producer of rows and bands,
+       so a surface cannot read an unfiltered set: there is no unfiltered set to read. */
+    expect(cal).toContain("timelineWeek(");
+    expect(cal).toContain("TL_DAYS, view)");
+    expect(decomment(cal)).not.toContain("itemInKinds");
+    expect(decomment(cal)).not.toContain("recordInKinds");
   });
 
   /* ⚠️ RETARGETED 20 Aug 2026 by the `calendar` session (record-layer P6), which retired the week
@@ -342,11 +362,17 @@ describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local 
      it is and the fold caps tighter than it needs to — silently, with no error and no overflow to
      notice. The divisor is now COUNTED from the rendered cells, which is the law stated more
      strongly than the constant ever stated it: it cannot go stale. */
-  it("the month grid obeys the same lock — no zone, the grid still fills", () => {
-    expect(cal).not.toContain("<TplZone");
-    // the row divisor is the week rows the grid HOLDS — counted, so it survives a shorter view
-    expect(cal).toContain('el.querySelectorAll(".cal-cell").length / 7');
-    expect(cal).not.toContain("const rows = 6;");
+  /* ⚠️ RETARGETED A THIRD TIME, 26 Aug 2026, by the same session (timeline pack, Phase 3), and
+     this time the law itself is superseded rather than restated. The row divisor existed to feed
+     the FOLD: the grid measured how tall a week row had resolved to so it could work out how many
+     pills fitted before "+N MORE". There is no fold, no cap and no counter — a row grows to hold
+     what it holds — so there is nothing left to divide. What replaces it is the assertion above:
+     the board scrolls in a `TplZone`, which is the lock this file exists to enforce. */
+  it("⚠️ the fold's measurement is retired with the fold — nothing divides a height here", () => {
+    expect(decomment(cal)).not.toContain("calFoldCap");
+    expect(decomment(cal)).not.toContain("ResizeObserver");
+    expect(decomment(cal)).not.toContain("data-fold-short");
+    expect(decomment(cal)).not.toContain("const rows = 6;");
   });
 });
 

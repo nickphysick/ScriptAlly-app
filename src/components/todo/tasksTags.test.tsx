@@ -125,8 +125,16 @@ describe("⚠️ tag filters combine ADDITIVELY with FILTERS (Urgent AND #synops
        as a set of one rather than growing a second comparison for one-versus-many. */
     const listPage2 = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
     expect(listPage2).toContain("matchesTags(c.tags, [tagSel])");
+    /* ⚠️ RETARGETED by the `calendar` session (timeline pack, Phase 3), flagged in
+       reports/calendar-timeline.md. THE LAW IS UNCHANGED — no page grows a second predicate — and
+       it is asserted here from the other side: the Calendar narrows by no tags at all.
+       It never really did. `tagSel` was a `useState<string[]>([])` whose setter had no caller
+       after the tag sheet moved to the board, and `matchesTags(x, [])` is provably identity, so
+       the narrowing was a no-op with a live-looking call site. The rewrite dropped it rather than
+       carrying four dead symbols into a new file. If a tag control returns to this page it comes
+       back through `matchesTags`, like everything else. */
     const cal = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
-    expect(cal).toContain("matchesTags(c.tags, tagSel)");
+    expect(cal).not.toContain("matchesTags");
   });
 
   it("⚠️ ONE TAG IDEA, TWO SURFACES — and neither invents its own vocabulary", () => {

@@ -15,12 +15,22 @@ const family = readFileSync(join(here, "..", "..", "lib", "todoFamily.ts"), "utf
 const cal = readFileSync(join(here, "..", "..", "lib", "todoCalendar.ts"), "utf8");
 const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");
 
-describe("⚠️ the legend ships, and names exactly the LIVE families", () => {
-  it("a legend row renders beneath the grid, from the one record", () => {
-    expect(page).toContain('className="cal-legend"');
-    expect(page).toContain("CAL_LEGEND.map");
-    // the legend follows the grid in the JSX
-    expect(page.indexOf("cal-legend")).toBeGreaterThan(page.indexOf("cal-grid"));
+/* ⚠️ RETARGETED by the `calendar` session (timeline pack, Phase 3), flagged in
+   reports/calendar-timeline.md.
+
+   THE FIRST LAW HAS NO SUBJECT: there is no legend. `CAL_LEGEND` named the four CARD families and
+   `CAL_PIP` painted them; the timeline's grammar is five kinds — your turn, waiting, on the
+   record, your tasks, carried — which the filter chips name in words. Neither map has a
+   PRODUCTION consumer any more; both are left in `todoFamily.ts` untouched, because deleting a
+   shared map on the strength of one page's redesign is not this session's call.
+
+   THE SECOND LAW SURVIVES AND IS THE ONE WORTH KEEPING: legend and map may not disagree about
+   which families exist. It is a claim about the two records, not about a page, so it is asserted
+   exactly as it was. */
+describe("⚠️ the family map and its legend still agree, though nothing renders them", () => {
+  it("⚠️ the legend has no render site — stated, so its absence is not read as a regression", () => {
+    expect(page).not.toContain("cal-legend");
+    expect(page).not.toContain("CAL_LEGEND");
   });
 
   it("exactly the four live families, in the ref's order", () => {

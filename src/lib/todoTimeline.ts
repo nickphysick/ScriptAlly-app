@@ -30,7 +30,7 @@ import { queryBucket } from "./queryAmbient";
 import { resolveExpectedDate } from "./expectedDate";
 import { STATUS_ORDER } from "./statusOrder";
 import {
-  CalendarItem, RecordItem, GhostItem, RecordDir,
+  CalendarItem, RecordItem, GhostItem, RecordDir, ExpectedItem,
   EXPECTED_PILL, pillLabel, draggableTask, toYmd,
 } from "./todoCalendar";
 
@@ -161,6 +161,16 @@ export interface TimelineBand {
   source: BandSource;
   /** The resolved end, as a ymd — the fact the band was drawn from, carried rather than re-derived. */
   endYmd: string;
+  /**
+   * The window as an `ExpectedItem`, so `expectedLine` stays the ONE producer of this copy.
+   *
+   * ⚠️ BUILT HERE BECAUSE `expectedDays` IS RETIRED, NOT ALONGSIDE IT. That function placed a pill
+   * on the window's own day, which a band supersedes; keeping it would have left a second
+   * construction of one shape, and two constructions of a shape are how two readings of it come to
+   * disagree. This is its construction, moved to its one remaining caller — the copy, its
+   * no-gendered-pronouns rule and its absent-clause handling are all still `expectedLine`'s.
+   */
+  expected: ExpectedItem;
   queryId: string;
   label: string;
   lane: number;
@@ -473,6 +483,25 @@ export function timelineWeek(
       passed: toYmdEnd < data.today,
       source: resolved.source,
       endYmd: toYmdEnd,
+      expected: {
+        key: `exp-${q.id}`,
+        ymd: toYmdEnd,
+        queryId: q.id,
+        agent: agentPrimary(agent),
+        source: resolved.source,
+        ...(resolved.source === "agent"
+          ? {
+              ...(typeof agent?.responseTimeWeeks === "number" ? { weeks: agent.responseTimeWeeks } : {}),
+              fromYmd,
+            }
+          : (() => {
+              /* ⚠️ AN UNSTAMPED WRITER'S DATE OMITS THE CLAUSE rather than inventing a moment —
+                 the rows-omit-themselves law, and `expectedLine` is written to expect the gap. */
+              const setAt = (q as { writerExpectedSetAt?: string }).writerExpectedSetAt;
+              const setYmd = setAt ? toYmd(new Date(setAt)) : null;
+              return setYmd ? { setYmd } : {};
+            })()),
+      },
       queryId: q.id,
       label: EXPECTED_PILL,
       lane: 0,

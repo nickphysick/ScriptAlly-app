@@ -148,12 +148,20 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     expect(() => render(<TodoCalendarPage onNavigate={() => {}} />)).not.toThrow();
   });
 
-  it("…and carries its grid, its legend and its tools", () => {
+  /* ⚠️ RETARGETED by the `calendar` session (timeline pack, Phase 3), flagged in
+     reports/calendar-timeline.md. THE LAW IS UNCHANGED — the page renders its board, its day
+     header and its tools — and the classes it names moved with the month grid.
+     ⚠️ THE LEGEND CLAUSE HAS NO SUBJECT and is not replaced. `CAL_LEGEND` taught the four CARD
+     families' colours; the timeline's grammar is five kinds, and the filter chips name all five in
+     words. A colour swatch on a chip would also fight the chip's own pink selected state — two
+     colour meanings on one control. Reported for Nick, not decided here. */
+  it("…and carries its board, its day header and its tools", () => {
     const html = render(<TodoCalendarPage onNavigate={() => {}} />);
     expect(html).toContain("Calendar");
-    expect(html).toContain("cal-grid");
-    expect(html).toContain("AGENT DEADLINES"); // the legend renders from CAL_LEGEND
-    expect(html).toContain("MON");
+    expect(html).toContain("tl-board");
+    expect(html).toContain("tl-head");
+    expect(html).toContain("Your tasks");   // the pinned row, which always renders
+    expect(html).toContain("WED");          // a weekday name, whichever day it is run
   });
 
   it("…and a dated task REACHES its day (the populated smoke)", () => {
@@ -162,7 +170,7 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     seed.userTasks = [{ id: "t1", userId: "u1", text: "Redraft the opening", done: false, dueDate: ymd, createdAt: "", updatedAt: "" }];
     const html = render(<TodoCalendarPage onNavigate={() => {}} />);
     expect(html).toContain("Redraft the opening");
-    expect(html).toContain("cal-pip");
+    expect(html).toContain("tl-chip");
   });
 
   /* tasks-pages P4 — the Noteboard is real too. Empty AND populated. */

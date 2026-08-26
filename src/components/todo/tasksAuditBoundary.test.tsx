@@ -26,7 +26,12 @@ import { TaskFlag, UserTask, Task } from "../../types";
 import { flagSleeps, flagReturnedToday, isFlagSuppressing } from "../../lib/taskFlags";
 import { assembleBoardColumns, snoozedCards, liveBoardCards } from "../../lib/todoColumns";
 import { facetCounts } from "../../lib/todoBoardSort";
-import { calendarDays, monthGridDays } from "../../lib/todoCalendar";
+import { calendarDays } from "../../lib/todoCalendar";
+/* ⚠️ `monthGridDays` RETIRED WITH THE MONTH GRID (calendar timeline pack). This suite only ever
+   wanted A LIST OF VISIBLE DAYS to hand `calendarDays`; the law it asserts — a returned flag is
+   ONE parchment pip on today — is about placement and is untouched. The window producer is the
+   timeline's now. */
+import { windowDays } from "../../lib/todoTimeline";
 import { TodoBoard } from "./TodoBoard";
 
 const here = __dirname;
@@ -121,7 +126,7 @@ describe("⚠️ THE BOUNDARY FIXTURE — snoozed-until-TODAY renders ONCE, in t
   });
 
   it("⚠️ the CALENDAR shows one pip today — parchment (the returned family), never a second", () => {
-    const AUG = monthGridDays(TODAY);
+    const AUG = windowDays("2026-08-01", 31);
     const days = calendarDays({
       cols: returned.cols, flags: [flag("2026-08-07T09:00:00")], queries: [], agents: [],
       userTasks: [], activities: [], today: TODAY, nowMs: NOW,
