@@ -182,13 +182,35 @@
 
 /* ══ A ROW ═════════════════════════════════════════════════════════════════════════════════ */
 
-.tl-row { position: relative; }
+.tl-row {
+  position: relative;
+  /* ── the geometry, in tokens (markers pack, Phase 2) ────────────────────────────────────────
+     ⚠️ DECLARED IN THIS RULE RATHER THAN A SECOND `.tl-row`. Two declarations of one selector is
+     how the cascade and a reader come to disagree — the reader takes the first, the browser takes
+     the last — and it is the same family as the grouped rule that took the chip's whole treatment
+     out with the band's. One selector, one rule, whatever it has to carry. */
+  /* one line of a row: what a lane is worth. A row is `--lanes` of these and nothing else. */
+  --lane-h: 70px;
+  --bar-h: 34px;
+  /* the StatusDot's own app-wide size — stated so the markers position against it, never restated */
+  --disc: 30px;
+  --chip-h: 26px;
+  /* how far a waypoint's upright stands proud of the bar, top and bottom */
+  --wp-over: 6px;
+  min-height: calc(var(--lanes, 1) * var(--lane-h));
+}
 /* ⚠️ THE PINNED ROW IS ONE STICKY ELEMENT, WHICH IS WHY EACH ROW IS ITS OWN GRID. A grid ROW
    cannot be made sticky — only its items can — so a single 8-column grid would have needed all
    eight cells stuck at the same offset and moving in step by coincidence. A flex column of
    per-row grids sticks the row itself, and the columns still align because every row resolves the
    same template against the same width. */
-.tl-row--pin { position: sticky; top: var(--tl-head-h); z-index: 3; background: #fdfaf5; }
+.tl-row--pin {
+  position: sticky; top: var(--tl-head-h); z-index: 3; background: #fdfaf5;
+  /* ⚠️ THE PINNED ROW'S LINE IS SHORTER, AND IT IS THE SAME FORMULA. Its occupants are 26px chips,
+     not 34px bars with captions hanging beneath them; a bar's line would spend 70px on a row that
+     needs 40. One token per row type, one derivation for both. */
+  --lane-h: 40px;
+}
 .tl-rowhead {
   grid-row: 1;
   /* it is a button now — strip the UA chrome rather than inventing a look for it */
@@ -230,24 +252,50 @@
    overflow by its own highlight. Sage: the receptive tone in this grammar. */
 .tl-cell.dropok { box-shadow: inset 0 0 0 1.5px #8a9e88; background: #f4f7f2; }
 
-/* ⚠️ THE LANE OVERLAY IS AN EXPLICITLY PLACED GRID ITEM, AND SO IS EVERY CELL BESIDE IT.
-   Auto-placement never overlaps: an auto-placed item beside an explicitly placed one is pushed
-   into an implicit new COLUMN and the grid silently grows sideways. Every participant in this row
-   therefore names its own `grid-column` and `grid-row` — the cells, the head and this. */
+/* ══ THE GEOMETRY, IN TOKENS (markers pack, Phase 2; ref timeline-rails.html) ═══════════════
+ *
+ * ⚠️ NOT ONE VERTICAL POSITION IN THIS BLOCK IS A LITERAL. Every offset is a `calc()` over the
+ * four tokens below, and the ACCEPTANCE GREPS THIS FILE for a bare `top:` in pixels — because the
+ * fault this replaces was not a wrong number, it was the right number owned by the wrong element.
+ * A 36px bar sat at `top: 0` in a 132px row with 96px of empty ground beneath it: the row's height
+ * was `lanes * 52 + 28` and the bar's offset was `lane * 52`, both reading 52, neither being the
+ * other's. Exactly the shape `--tl-head-h` had.
+ *
+ * ⚠️ AND THE ELEMENT'S OWN HEIGHT NEVER ENTERS ITS OFFSET. Everything is centred on its lane with
+ * `top: <lane centre>; transform: translateY(-50%)`, so there is no `/ 2` anywhere to go stale
+ * when a height moves. `translateY(-50%)` knows the height; the stylesheet does not have to.
+ */
 .tl-lane {
   grid-row: 1; grid-column: 2 / -1;
   position: relative; pointer-events: none;
-  padding: 12px 0;
+  /* ⚠️ NO PADDING. It offset every `top` in here by 12px, so a lane index no longer meant a lane
+     centre — the reason the derivation has to own the whole box rather than share it. */
 }
 
-/* ══ THE JOURNEY BAR (bars pack, Phase 4; refs v4 grammar, v6 treatment C, v7 weights) ═══════
+
+/**
+ * ⚠️ THE ONE EXPRESSION EVERY OFFSET READS — AND IT IS A CLASS, NOT A GROUPED SELECTOR.
  *
- * ⚠️ ONE BAR PER AGENT × MANUSCRIPT, CUT BY WHAT HAPPENED. Every piece is positioned in fractional
- * days as a percentage of the seven columns, so a break lands on the same boundary the cells do at
- * every width and a resize recomputes nothing.
+ * The first version of this rule was `.tl-seg, .tl-over, .tl-node, .tl-wp, .tl-chip { … }`, which
+ * is precisely how the chip lost its treatment in the first place: retire any one member and the
+ * rest go with it, because a grouped selector is ONE RULE. The sweep in
+ * `calendarStyleReach.test.ts` went red on it within a minute of being written, which is the
+ * cheapest possible evidence that the sweep was worth writing.
+ *
+ * "Positioned on a lane" is a real shared property, so it gets a class of its own that the page
+ * applies. Nothing here can now be retired by an edit aimed at something else.
  */
+.tl-at {
+  position: absolute;
+  top: calc(var(--lane-h) * (var(--lane, 0) + 0.5));
+}
+
+/* ══ THE JOURNEY BAR (bars pack Phase 4; treatment C, v7 weights) ═══════════════════════════ */
+
 .tl-seg, .tl-over {
-  position: absolute; height: 36px; box-sizing: border-box;
+  height: var(--bar-h);
+  transform: translateY(-50%);
+  box-sizing: border-box;
   display: inline-flex; align-items: center; gap: 9px;
   padding: 0 14px;
   font-size: 11.5px; font-weight: 500; font-family: inherit;
@@ -266,8 +314,7 @@
 /* ── their move: white, still, and breathing (v6, treatment C) ─────────────────────────────── */
 /* ⚠️ WHITE RATHER THAN FILLED, AND THE PULSE IS WHY. A reply window is real time passing, so
    motion is not a lie — but a filled sage bar that also moves reads as something wanting
-   attention, and the whole point of a waiting bar is that nothing is being asked of you. White
-   plus a slow breath says live without saying urgent. */
+   attention, and the whole point of a waiting bar is that nothing is being asked of you. */
 .tl-seg.theirs {
   background: #fff; border-color: #dfe6dc; color: #5a6e58;
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04);
@@ -275,27 +322,20 @@
 }
 .tl-seg.theirs .d { background: #8a9e88; }
 /* ⚠️ LITERAL COLOURS IN THE KEYFRAMES. A `var()` inside `@keyframes` fails SILENTLY in this setup —
-   no error, no animation, no warning — and this project has shipped that bug. The two stops are
-   the only place these values may be written; the resting pair above is the same white and the
-   same hairline, so the animation starts where the rule leaves off. */
+   no error, no animation, no warning — and this project has shipped that bug. */
 @keyframes tlBreathe {
   0%, 100% { background: #ffffff; border-color: #dfe6dc; }
   50% { background: #f4f8f2; border-color: #cdd8c9; }
 }
 /* ⚠️ THE OVERRIDE SITS IMMEDIATELY AFTER THE RULE IT OVERRIDES. A media query confers NO
-   specificity, so at equal specificity the later declaration wins — this repo has already shipped
-   an `animation: none` that lost to a rule four hundred lines below it. */
+   specificity, so at equal specificity the later declaration wins. */
 @media (prefers-reduced-motion: reduce) {
   .tl-seg.theirs { animation: none; }
 }
-/* ⚠️ AND NO MOTION IN A PAST WEEK, where nothing is live. v6 states this as a condition of the
-   pulse shipping at all, alongside reduced motion and the your-move bars. */
+/* ⚠️ AND NO MOTION IN A PAST WEEK, where nothing is live. */
 .tl-row.past .tl-seg.theirs { animation: none; }
 
 /* ── your move: blush, three weights by duration (v7) ──────────────────────────────────────── */
-/* ⚠️ WEIGHT, NOT MOTION, AND NEVER RED. The waiting bars already breathe; if long-standing work
-   also moved, the two would compete and the page would read as agitated. Weight is loud in a still
-   frame and silent in a moving one, which is exactly the right way round. */
 .tl-seg.yours .d { background: #f8e2d9; border: 1.5px solid #7c3a2a; }
 .tl-seg.yours.w-fresh { background: #fdf3ef; border-color: #eed8ce; color: #8a5442; }
 .tl-seg.yours.w-settled { background: #f3e0d6; border-color: #e8c8bc; color: #7a4636; }
@@ -303,44 +343,36 @@
 /* a your-move stretch with no weight yet (a closed journey's last stretch) takes the middle one */
 .tl-seg.yours { background: #f3e0d6; border-color: #e8c8bc; color: #7a4636; }
 
-/* ⚠️ THE OVERRUN IS A MARKER AND THE COUNT ON IT IS THE FACT. It cannot be to scale — a 41-day
-   overrun does not fit in a seven-day window, and on a window starting today the whole of it is in
-   the past — so the hatch says "this ran over" and the number says by how much. Same hue as the
-   long-standing weight, because it is the same condition seen from its other end. */
-.tl-over {
-  background: repeating-linear-gradient(-45deg, #e6bda9 0 6px, #efd0c1 6px 12px);
-  border-color: #dba892; border-right: none;
-  border-radius: 999px 0 0 999px;
-  font-weight: 600; color: #5f2a1c; font-size: 11px;
+/* ⚠️ THE OVERRUN IS A BACKGROUND TREATMENT ON ONE BAR, NOT A SECOND OBJECT BESIDE IT (Phase 4).
+   It used to be its own element with its own count, so a long-standing row drew two capsules and
+   printed the duration twice. It is the left PORTION of a single continuous bar now: the same
+   element, the same statement, hatched where it ran over. */
+.tl-seg.hatched {
+  background-image: repeating-linear-gradient(-45deg, #e6bda9 0 6px, #efd0c1 6px 12px);
+  background-repeat: no-repeat;
 }
 
 /* ── the edges: what each one claims ───────────────────────────────────────────────────────── */
-/* a round cap where the bar stopped at an interruption, and where it resumed past one */
 .tl-seg.capl { border-top-left-radius: 999px; border-bottom-left-radius: 999px; }
 .tl-seg.capr { border-top-right-radius: 999px; border-bottom-right-radius: 999px; }
-/* it began before the window: dotted, squared off, and it does not pretend to start here */
 .tl-seg.openleft { border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: 2px dotted #8a9e88; }
 .tl-seg.yours.openleft { border-left-color: #c9a89e; }
-/* it continues past the window: dashed, squared off — the close is a forecast, the send is a fact */
 .tl-seg.future { border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: 2px dashed #8a9e88; }
 .tl-seg.yours.future { border-right-color: #c9a89e; }
 .tl-seg.yours.w-long.future { border-right-color: #c08a72; }
-/* ⚠️ IN A PAST WEEK NOTHING IS PROVISIONAL ANY MORE — the dashes go solid and the edge rounds off,
-   because a week that has happened holds no forecast. v5's own rule, drawn. */
+/* ⚠️ IN A PAST WEEK NOTHING IS PROVISIONAL ANY MORE — the dashes go solid and the edge rounds. */
 .tl-row.past .tl-seg.future {
   border-right-style: solid; border-right-width: 1px;
   border-top-right-radius: 999px; border-bottom-right-radius: 999px;
 }
 .tl-row.past .tl-seg.openleft { border-left-style: solid; border-left-width: 1px; }
-/* ⚠️ NO REPLY TIME RECORDED — a dashed rail, no cap, no forecast. The app does not know when to
-   expect an answer, and a solid bar with an end would be inventing the date nobody has given. */
+/* ⚠️ NO REPLY TIME RECORDED — a dashed rail, no cap, no forecast. */
 .tl-seg.norail {
   background: transparent; border: 1px dashed #e0d0c4; color: #c9a89e;
   border-right: none; border-radius: 999px; box-shadow: none; animation: none;
 }
 .tl-seg.norail .d { background: transparent; border: 1.5px dashed #e0d0c4; }
-/* ⚠️ OPEN-ENDED BY NATURE — an R&R or an offer with no stated deadline has no end to draw, so the
-   bar FADES rather than stopping. A hard edge would state a boundary the model does not hold. */
+/* ⚠️ OPEN-ENDED BY NATURE — an R&R or an offer with no stated deadline FADES rather than stopping. */
 .tl-seg.openend {
   border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0;
   -webkit-mask-image: linear-gradient(90deg, #000 78%, transparent);
@@ -348,12 +380,22 @@
 }
 
 .tl-seg.sel, .tl-node.sel { box-shadow: 0 0 0 1.5px #7c3a2a; }
-.tl-seg:focus-visible, .tl-node:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+/* ⚠️ THE FOCUS RING RIDES `.tl-at` FOR THE SAME REASON THE POSITION DOES. Grouped as
+   `.tl-seg:focus-visible, .tl-node:focus-visible, .tl-chip:focus-visible` it was three members of
+   one rule again, and retiring any of them would have taken the other two's focus ring with it.
+   A waypoint is `pointer-events: none` and takes no focus, so it costs nothing to be included. */
+.tl-at:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
 
-/* ── nodes: the events, sitting IN the break ───────────────────────────────────────────────── */
+/* ══ NODES AND WAYPOINTS — geometry only in this phase ══════════════════════════════════════
+ *
+ * ⚠️ THE MARKER GRAMMAR IS PHASE 3. What changes here is only WHERE these sit: centred on their
+ * lane rather than offset by a literal, and sized from `--disc` rather than from a number that
+ * happened to match the bar. The three-marker treatment replaces the look below.
+ */
 .tl-node {
-  position: absolute; width: 36px; height: 36px; border-radius: 50%; z-index: 2;
-  transform: translateX(-18px);
+  width: var(--disc); height: var(--disc);
+  transform: translate(-50%, -50%);
+  border-radius: 50%; z-index: 3;
   display: inline-flex; align-items: center; justify-content: center;
   font-size: 13px; cursor: pointer; pointer-events: auto; padding: 0;
   background: #fff; border: 2px solid #ece0d2; color: #6b5a4d;
@@ -361,20 +403,21 @@
 .tl-node.out { background: #f8e2d9; border-color: #7c3a2a; color: #7c3a2a; }
 .tl-node.in { background: #e9efe6; border-color: #8a9e88; color: #5a6e58; }
 .tl-node.close { background: #fff; border-color: #b9a48f; color: #b9a48f; }
-/* the caption hangs beneath the bar, on the page's ground, so it never sits on the bar's ink */
+/* the caption hangs beneath the marker, measured from the marker's OWN box — never from a number
+   that describes how tall the marker happens to be */
 .tl-tip {
-  position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+  position: absolute; top: calc(100% + 5px); left: 50%; transform: translateX(-50%);
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
   letter-spacing: 0.09em; text-transform: uppercase; color: #a2937f;
   white-space: nowrap; background: #fdfaf5; padding: 1px 5px; border-radius: 5px;
   pointer-events: none;
 }
 
-/* ── waypoints: a forecast, and nothing about it claims an event ───────────────────────────── */
 .tl-wp {
-  position: absolute; width: 0; height: 32px; z-index: 3;
-  border-left: 2px dashed #8a9e88; transform: translateX(-1px);
-  margin-top: 2px;
+  width: 0; height: calc(var(--bar-h) + var(--wp-over) * 2);
+  transform: translate(-1px, -50%);
+  z-index: 3; border-left: 2px dashed #8a9e88;
+  pointer-events: none;
 }
 .tl-wp.yours { border-left-color: #c9a89e; }
 .tl-wp .tl-tip { color: #5a6e58; background: transparent; }
@@ -383,23 +426,52 @@
    forecast that was met or missed is part of what happened. */
 .tl-wp.passed { border-left-style: solid; opacity: 0.55; }
 
-/* ⚠️ A ROW WITH NOTHING IN IT SAYS SO, QUIETLY. A live query with no window resolvable and nothing
-   scheduled is a real state — the row exists because the query does — and a blank strip reads as a
-   rendering fault rather than as an answer. */
-.tl-quiet {
-  position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
-  letter-spacing: 0.12em; text-transform: uppercase; color: #c3b6a6;
+/* ══ THE WRITER'S OWN CHIPS ═════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ RESTORED. `.tl-chip` and `.tl-band` were ONE GROUPED RULE, and retiring the band took the
+ * chip's whole treatment with it — base box, bullet, four kinds, struck and hover — while the chip
+ * was still being rendered. An unstyled inline-flex with no padding, border or radius renders its
+ * parts as bare concatenated text, which is exactly what shipped.
+ *
+ * ⚠️ SO THE CHIP IS DECLARED ALONE NOW, sharing no selector with anything. The bar above shares
+ * one with `.tl-over` and that is deliberate and safe — they are two states of the same object —
+ * but nothing that can be retired independently shares a rule with the chip again.
+ */
+.tl-chip {
+  height: var(--chip-h);
+  transform: translateY(-50%);
+  box-sizing: border-box;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0 11px; border-radius: 999px;
+  font-size: 11px; font-weight: 500; font-family: inherit;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  background: #fff; border: 1px solid #e0d0c4; color: #3a2c22;
+  pointer-events: auto; cursor: pointer; text-align: left;
 }
+.tl-chip .d { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+/* ⚠️ THE WRITER'S OWN TASK TAKES A CHECKBOX SQUARE — the one thing on this page you tick. */
+.tl-chip[data-kind="task"] .d {
+  border-radius: 2px; border: 1.5px solid #7c3a2a; background: transparent;
+}
+.tl-chip[data-kind="task"] { color: #3f5a3d; }
+.tl-chip[data-kind="ghost"] {
+  background: transparent; border-style: dashed; border-color: #d3c4b3; color: #a08f80;
+}
+.tl-chip[data-kind="ghost"] .d { border: 1.5px dashed #d3c4b3; background: transparent; }
+.tl-chip[data-kind="rec"] { color: #6b5a4d; }
+.tl-chip.struck .tl-lbl { text-decoration: line-through; opacity: 0.62; }
+.tl-chip:hover { border-color: #c9b8a6; }
+.tl-chip.sel { box-shadow: 0 0 0 1.5px #7c3a2a; }
+.tl-chip.grab { cursor: grab; }
+.tl-chip.grab:active { cursor: grabbing; }
+/* the carried mark's arrow — it points at the live item, which sits on today */
+.tl-fwd { font-size: 9px; color: #c0ae9c; flex: none; margin-left: 2px; }
+
 
 .tl-none { padding: 40px 16px; text-align: center; }
 .tl-none-t {
   font-family: "Playfair Display", Georgia, serif; font-size: 19px; color: #4a3a30;
   margin: 0; line-height: 1.3;
-}
-.tl-none-s {
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8.5px;
-  letter-spacing: 0.13em; text-transform: uppercase; color: #a2937f; margin-top: 7px;
 }
 
 /* ⚠️ NARROW GOES LAST. Two blocks at equal specificity are decided by order, and a wide query
@@ -414,7 +486,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tl-chip, .tl-band, .tl-kind, .tl-mbtn { transition: none; }
+  /* ⚠️ `.tl-band` IS GONE FROM THIS LIST TOO. It was retired with the bars pack and left behind
+     here, which is harmless in itself — but a retired class still named in a live rule is how the
+     next reader concludes it exists. */
+  .tl-chip, .tl-kind, .tl-mbtn { transition: none; }
 }
 
 /* ══ THE ACTION OVERLAY (finishing pack, Phase 6; ref calendar-month-focus-v5.html) ════════════

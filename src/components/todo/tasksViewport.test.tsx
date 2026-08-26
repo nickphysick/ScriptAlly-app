@@ -284,11 +284,38 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
        not carry `min-height` because six of them plus the header cannot fit a laptop, so the cell
        had to shrink and clip. A timeline row must GROW instead — it holds however many lanes its
        occupants packed into — and it cannot clip, because clipping a lane hides an item with
-       nothing to say so. The height is therefore derived per row and set inline, and a fixed
-       floor in the stylesheet is what would break it. */
+       nothing to say so.
+
+       ⚠️ RETARGETED by the `calendar` session (markers pack, Phase 2), flagged in
+       reports/calendar-markers.md. THE LAW IS UNCHANGED — a row's height comes from its lanes and
+       never from a fixed floor. What moved is WHERE the arithmetic lives. `lanes * LANE_STEP + 28`
+       in the page was a literal that a different element also owned: the bar's offset read the same
+       52 and was not the same number, so a 36px bar sat at the top of a 132px row with 96px of
+       empty ground beneath it. The page supplies `--lanes`, which is data — how many lines does
+       this row need — and the sheet multiplies it by `--lane-h`, which is geometry and belongs
+       where the tokens are. A FLOOR is still forbidden; a derivation is what replaced it. */
     expect(rule(calCss, ".tl-cell {")).not.toMatch(/min-height:\s*\d+px/);
-    expect(rule(calCss, ".tl-row {")).not.toMatch(/min-height/);
-    expect(cal).toContain("minHeight: lanes * LANE_STEP");
+    /* ⚠️ COMMENTS STRIPPED FIRST, AND THIS FILE'S `rule()` DOES NOT DO IT. Its `indexOf` found
+       `.tl-row {` inside a COMMENT explaining a grouped selector and sliced prose — the house law
+       ("a source-string lock strips comments before it asserts") in its plainest form. The shared
+       helper is left alone: changing it would repoint every other caller in this file at a
+       different block, which is not a change to make on the way past. */
+    const calDecls = calCss.replace(/\/\*[\s\S]*?\*\//g, "");
+    const rowRule = calDecls.slice(calDecls.indexOf("\n.tl-row {"), calDecls.indexOf("}", calDecls.indexOf("\n.tl-row {")));
+    expect(rowRule, "no .tl-row rule found once comments are stripped").toContain("--lane-h");
+    /* still no literal floor — the height is a calc over the lane token */
+    expect(rowRule).not.toMatch(/min-height:\s*\d+px/);
+    expect(rowRule).toContain("min-height: calc(var(--lanes, 1) * var(--lane-h))");
+    /* and the page hands down the COUNT, never a position */
+    expect(cal).toContain('["--lanes" as string]: String(lanes)');
+    /* ⚠️ AND THE PAGE IS STRIPPED TOO, for the reason this repo has paid for seven times: every
+       retirement here is documented by QUOTING what it retired, so the page's own comment explains
+       `LANE_STEP` at length. A bare `not.toContain` over prose that names the token it forbids is
+       this codebase's most-recorded false red, and it caught me one line after I wrote the fix for
+       it in the rule above. */
+    const calSrc = cal.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(calSrc, "the page is computing a position again").not.toContain("LANE_STEP");
+    expect(calSrc, "the page is computing a position again").not.toContain("laneTop");
   });
 });
 

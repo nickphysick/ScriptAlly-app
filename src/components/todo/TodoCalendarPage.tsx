@@ -82,16 +82,20 @@ const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
  */
 const pct = (n: number) => `${(n / TL_DAYS) * 100}%`;
 /**
- * The lane's vertical step.
+ * ⚠️ THE PAGE DECLARES WHICH LANE; THE STYLESHEET DECIDES WHERE THAT IS.
  *
- * ⚠️ IT IS THE BAR'S BOX PLUS ITS CAPTION, not the chip's. A node's caption hangs 40px below the
- * bar's top edge, so a lane that only cleared the 36px bar would put one lane's captions on the
- * next lane's ink. 52 is 36 + the caption's line + its breathing room, measured against the
- * rendered page rather than added up here.
+ * `LANE_STEP = 52` and `laneTop(lane) = lane * 52` are retired, and so is `minHeight: lanes * 52
+ * + 28`. Both read 52 and neither was the other's: the row's height was one expression and the
+ * bar's offset was another, so the bar sat at the TOP of its row — measured, a 36px bar at `top:
+ * 0` in a 132px row with 96px of empty ground beneath it. It is the shape `--tl-head-h` had, where
+ * one element's position was written as a number a different element owns.
+ *
+ * A lane index is DATA — which line of this row does this belong to. Where that line is, and how
+ * tall it is, are geometry, and geometry belongs where the tokens are. The page hands down
+ * `--lane` and `--lanes`; every offset in the sheet is a `calc()` over `--lane-h`.
  */
-const LANE_STEP = 52;
-
-const laneTop = (lane: number) => lane * LANE_STEP;
+const laneVar = (lane: number): React.CSSProperties =>
+  ({ ["--lane" as string]: String(lane) } as React.CSSProperties);
 
 const Chip: React.FC<{
   it: TimelineItem;
@@ -101,7 +105,7 @@ const Chip: React.FC<{
 }> = ({ it, selected, onPick, drag }) => (
   <button
     type="button"
-    className={`tl-chip${selected ? " sel" : ""}${it.struck ? " struck" : ""}${drag ? " grab" : ""}`}
+    className={`tl-at tl-chip${selected ? " sel" : ""}${it.struck ? " struck" : ""}${drag ? " grab" : ""}`}
     data-kind={it.kind}
     {...(it.dir ? { "data-dir": it.dir } : {})}
     style={{
@@ -109,7 +113,7 @@ const Chip: React.FC<{
       /* the chip runs to the column before the next occupant of its own lane — the room that is
          actually free, rather than all the width there is (which is what the ref gives it) */
       maxWidth: `calc(${pct(it.spanTo - it.idx + 1)} - 8px)`,
-      top: laneTop(it.lane),
+      ...laneVar(it.lane),
     }}
     draggable={!!drag}
     onDragStart={drag?.onStart}
@@ -137,7 +141,7 @@ const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({
   <button
     type="button"
     className={[
-      "tl-seg",
+      "tl-at tl-seg",
       sg.overrun ? "tl-over" : sg.side === "yours" ? "yours" : "theirs",
       sg.weight && !sg.overrun ? `w-${sg.weight}` : "",
       sg.openLeft ? "openleft" : "", sg.openRight ? "future" : "",
@@ -148,7 +152,7 @@ const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({
     style={{
       left: `calc(${pct(sg.from)} + 4px)`,
       width: `calc(${pct(sg.to - sg.from)} - 8px)`,
-      top: laneTop(sg.lane),
+      ...laneVar(sg.lane),
     }}
     onClick={onPick}
   >
@@ -165,8 +169,8 @@ const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({
 const Node: React.FC<{ n: BarNode; selected: boolean; onPick: () => void }> = ({ n, selected, onPick }) => (
   <button
     type="button"
-    className={`tl-node ${n.dir}${selected ? " sel" : ""}`}
-    style={{ left: pct(n.at), top: laneTop(n.lane) }}
+    className={`tl-at tl-node ${n.dir}${selected ? " sel" : ""}`}
+    style={{ left: pct(n.at), ...laneVar(n.lane) }}
     onClick={onPick}
     aria-label={n.caption}
   >
@@ -178,8 +182,8 @@ const Node: React.FC<{ n: BarNode; selected: boolean; onPick: () => void }> = ({
 /** A forecast: a dashed upright with its caption below. Nothing about it claims an event. */
 const Way: React.FC<{ w: Waypoint }> = ({ w }) => (
   <span
-    className={`tl-wp${w.side === "yours" ? " yours" : ""}${w.passed ? " passed" : ""}`}
-    style={{ left: pct(w.at), top: laneTop(w.lane) }}
+    className={`tl-at tl-wp${w.side === "yours" ? " yours" : ""}${w.passed ? " passed" : ""}`}
+    style={{ left: pct(w.at), ...laneVar(w.lane) }}
     aria-hidden
   >
     <span className="tl-tip">{w.caption}</span>
@@ -561,8 +565,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         key={r.key}
         className={`tl-grid tl-row${r.key === YOU_ROW ? " tl-row--pin" : ""}${r.closed ? " closed" : ""}${pastWeek ? " past" : ""}`}
         /* ⚠️ THE ROW GROWS TO HOLD ITS LANES — it never clips one. A clipped lane hides a journey
-           with nothing to say so, which is the one failure a bar must not have. */
-        style={{ minHeight: lanes * LANE_STEP + 28 }}
+           with nothing to say so, which is the one failure a bar must not have. The HEIGHT is the
+           sheet's: `--lanes` is how many lines this row needs, which is data, and what a line is
+           worth is `--lane-h`, which is geometry. */
+        style={{ ["--lanes" as string]: String(lanes) } as React.CSSProperties}
       >
         {/* ⚠️ THE ROW HEAD IS A CONTROL — it opens the relationship's workspace with nothing
             selected, which is how you reach a query that has no card raised against it. */}
