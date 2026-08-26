@@ -224,3 +224,106 @@ The fix is two lines — widen the patch type, map the field — but adding it n
 unreachable capability, because nothing would call it. It belongs with D6, where the field that can
 be got wrong first exists. This is precisely what the ref means by *"versions add a field inside the
 thing being edited"*.
+
+
+---
+
+# Phase 4 — the write path and the list
+
+Baseline: **tsc 0 · build clean · 396 files / 6963 tests**. No red gate tripped: `recomputeQuery`
+untouched, no rules change at all, and nobody else in Correction UI's files.
+
+## Phase 1 — the fixtures, before any feature code
+
+| fixture | state |
+|---|---|
+| `seed-query-8` | **match** — sent what they read |
+| `seed-query-10` | **differs** — sent another opening, deliberately |
+| `seed-query-12` | **send unrecorded** — a send from before the feature |
+| `seed-query-14` | **nothing known** — the package's sample carries no version *and* the send carries none |
+| `seed-ms-2` | **a one-version book** — "The Quiet Second", 1 version, 2 queries |
+
+Census read back from the database: `seed-ms-1` 3 versions / 34 queries · `seed-ms-2` 1 / 2 ·
+`thin-ms` 0 / 10 — **46 total**. That is the number a scope-All sweep must reach; a default sweep
+sees 34 and looks complete.
+
+## ⚠️ F-BD — the fork did not need to know; the *form* does
+
+The fork (change · mistake · move) is **field-agnostic** — it asks *why* you are correcting, which is
+true of any field. But `CorrectionDraft` is `{ dateISO, note }`: a **closed two-field shape**.
+
+So **a field added after Correction UI shipped does not automatically become correctable**, and
+`bookVersionId` is the *second* — `Activity.materials` was the first, and the sheet cannot edit that
+either. The fork composes; the form does not.
+
+**What it implies:** Correction UI established the affordance and the fork, and the ref was right
+that versions inherit both. What it did not establish is an extensible *draft*. Making the version
+correctable means widening that draft — a Correction UI design decision about how fields are added,
+not a version-specific path, and deliberately not taken here because D2 forbade the latter and the
+former is a bigger question than this pack.
+
+## Part 1 — `editActivity`
+
+Clears by **`deleteField()`**, not `""` — checked rather than assumed, as D1 asked. `""` is a
+*form-level* value in this feature; package **slots** are the opposite, because `isValidPackage`
+requires all three keys present. Two conventions in one feature area.
+
+Round trip, live database, fresh read each time, both stores:
+
+```
+1 · recorded bv-prologue    feed=bv-prologue  log=bv-prologue  agree
+2 · corrected to bv-world   feed=bv-world     log=bv-world     agree
+3 · cleared                 feed=null         log=null         agree
+```
+
+## Part 2 — the field
+
+**⚠️ THE TWO-TYPE RULE IS THE TYPE SYSTEM'S, NOT A CHECK I WROTE.** `recordMaterialsSent`'s
+`targetStatus` was *already* typed `PARTIAL_SENT | FULL_SENT`, so the seam that attaches a version
+cannot reach any other event. That constraint predates the feature. The lock asserts it against the
+real `ActivityType` enum and names each other status individually.
+
+D7 holds end to end: an empty select sends `undefined`, and the write path omits the key. Where the
+sample carries no version the note **says so** rather than letting the empty option read as a choice.
+
+**⚠️ My first no-verdict lock banned the word "mistake"** — where it caught the ref's own sentence,
+*"a fact worth recording, not a mistake"*, which is the **opposite** of a warning. Banning the token
+rather than the act is the same shape as a rule naming one hue. The copy is asserted positively now.
+
+## Part 3 — the column and the filter
+
+Census at scope All: **46 rows swept**, 10 carrying a version, chips `§ PROLOGUE-FIRST` and
+`§ WORLDBUILDING-FIRST`, **0 dashes**. The one-version and zero-version books contribute none — the
+gate's closed side, proven in the same pass.
+
+**⚠️ The `All manuscripts` control is `role="radio"`, not `"button"`.** `getByRole("button")` matched
+nothing and the assertion **caught it** — earlier censuses in this project guarded that miss with
+`if (await x.count())`, which made a failed widening indistinguishable from a successful one.
+
+The Version filter renders only when a **single** manuscript is selected and has two or more: at "All
+manuscripts" it would offer every book's versions in one list, where two books can each have an
+opening called "Draft two". `Not recorded` is its own option, never the resting state.
+
+## Phase 5 — read aloud, and it found one
+
+```
+seed-query-8     § PROLOGUE-FIRST   OPENING READ § PROLOGUE-FIRST FROM THE SAMPLE IN THIS PACKAGE
+                                    MANUSCRIPT HELD § PROLOGUE-FIRST ✓ MATCHES WHAT THEY READ
+seed-query-10    § PROLOGUE-FIRST   OPENING READ § PROLOGUE-FIRST FROM THE SAMPLE IN THIS PACKAGE
+                                    MANUSCRIPT HELD § WORLDBUILDING-FIRST △ DIFFERS FROM WHAT THEY READ
+seed-query-12    § PROLOGUE-FIRST   OPENING READ § PROLOGUE-FIRST FROM THE SAMPLE IN THIS PACKAGE
+                                    MANUSCRIPT HELD NOT RECORDED
+seed-query-14    (none)             MANUSCRIPT HELD NOT RECORDED
+seed-query-ms2-b (none)             (nothing rendered)
+```
+
+**⚠️ THE HELD LINE WAS SAYING "NOT RECORDED" TWICE.** Before the fix, `seed-query-12` and
+`seed-query-14` read `MANUSCRIPT HELD · NOT RECORDED · VERSION NOT RECORDED` — the same fact twice,
+as a stutter. **Every assertion passed**, because each half was individually correct: the value slot
+honestly said the version was unrecorded, and the note honestly said the match state was unknown.
+**The fault existed only in the composed line**, which is why it took reading it rather than checking
+it — and it is the third time in this feature that a sentence has been arithmetically true and read
+wrongly.
+
+The anti-silence rule survives where it was written for: silence beside a *known* version would read
+as agreement, and that case still gets its note.
