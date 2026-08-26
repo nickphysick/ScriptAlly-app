@@ -123,28 +123,33 @@ test("Option A — one row, two cells, and the parcel", async ({ page }) => {
 });
 
 /**
- * ⚠️ THE SLOTS NEVER WRAP — AT EITHER WIDTH, ON EVERY STRIP.
+ * ⚠️ THE NARROW BRANCH IS ONE SLOT PER ROW, WITH ITS LABEL STILL ATTACHED TO ITS VALUE.
  *
- * The first Option A shipped believing the stack fixed this, because the comment in the stylesheet
- * asserted "the slots get the full width and fit on one line" from the arithmetic of the three
- * values rather than from a render. Measured, they wrapped: 392.4px of pairs into 321.2px of cell,
- * a second line, and a 124px strip — the same number as the accidental stack it replaced, which is
- * why it read as leftover chrome rather than as content that does not fit.
+ * Three shapes have now been through this cell and two of them were compression artefacts:
+ * side-by-side pairs that WRAPPED (392.4px of pairs into 321.2px of cell, a 124px strip), and
+ * pairs turned UPRIGHT to make them fit, where `LETTER` above `Hook-first` reads as a column
+ * header rather than a lead-in. The third is the package card's own construction — a column of
+ * rows, each row `LABEL value` on one line — which is designed rather than derived from a width.
  *
- * This asserts the composed result rather than the declaration: the number of distinct top edges
- * among the slot cell's children, per strip, at both widths. A rule can be perfectly written and
- * still wrap, and nothing about `flex-wrap` read out of a file would have caught it.
+ * So the assertion is about ARRANGEMENT, which is the only thing that separates the three: a
+ * property read off any single element is identical in all of them. Narrow, the slots share one
+ * left edge and each has its own row; wide, they sit side by side. In BOTH, a slot's own label and
+ * value must overlap vertically — that is what "attached" means, and it is what upright broke.
  *
- * The census is swept and COUNTED — an empty sweep would satisfy every per-strip assertion below.
+ * ⚠️ VERTICAL OVERLAP, NOT EQUAL TOPS. The label is 6.5px and the value 11.5px on a shared
+ * baseline, so their `top` values differ by ~4px while they plainly sit on one line. An equal-tops
+ * check reports every correct row as broken, and it did.
+ *
+ * The census is swept and COUNTED — an empty sweep satisfies every per-strip assertion below.
  */
-for (const [w, want] of [[1440, 81], [1920, 42]] as const) {
-  test(`Option A — the slots hold one line at ${w}`, async ({ page }) => {
+for (const [w, narrow, maxH] of [[1440, true, 110], [1920, false, 62]] as const) {
+  test(`Option A — the slots at ${w}`, async ({ page }) => {
     await openRoute(page, "/queries", { width: w, height: 1200 });
     const opts = page.getByRole("option");
     await expect(opts.first()).toBeVisible({ timeout: 25000 });
     const n = await opts.count();
     expect(n, "the query list must have rows to sweep").toBeGreaterThan(3);
-    const seen: { lines: number; slots: number; h: number }[] = [];
+    const seen: { slots: number; rows: number; cols: number; attached: boolean; h: number }[] = [];
     for (let i = 0; i < n; i++) {
       await opts.nth(i).click();
       await page.waitForTimeout(400);
@@ -152,15 +157,33 @@ for (const [w, want] of [[1440, 81], [1920, 42]] as const) {
         [...document.querySelectorAll(".qc-pstrip")].map((s) => {
           const el = s as HTMLElement;
           const sl = el.querySelector(".qc-ps-sl") as HTMLElement;
-          const tops = [...sl.children].map((k) => Math.round((k as HTMLElement).getBoundingClientRect().top));
-          return { lines: new Set(tops).size, slots: tops.length, h: Math.round(el.getBoundingClientRect().height) };
+          const kids = [...sl.children] as HTMLElement[];
+          const box = (e: Element) => e.getBoundingClientRect();
+          return {
+            slots: kids.length,
+            rows: new Set(kids.map((k) => Math.round(box(k).top))).size,
+            cols: new Set(kids.map((k) => Math.round(box(k).left))).size,
+            // a slot's label and value share a line when their boxes overlap vertically
+            attached: kids.every((k) => {
+              const c = [...k.children];
+              if (c.length < 2) return true;
+              return Math.max(...c.map((x) => box(x).top)) < Math.min(...c.map((x) => box(x).bottom));
+            }),
+            h: Math.round(box(el).height * 10) / 10,
+          };
         })));
     }
-    expect(seen.length, `swept ${n} queries and found no packaged strip to measure`).toBeGreaterThan(3);
+    expect(seen.length, `swept ${n} queries and found no packaged strip`).toBeGreaterThan(3);
     for (const s of seen) {
-      expect(s.slots, "a strip with no slots proves nothing about wrapping").toBeGreaterThan(0);
-      expect(s.lines, `slots wrapped onto ${s.lines} lines (strip ${s.h}px)`).toBe(1);
-      expect(s.h, "the strip is its two rows and nothing more").toBe(want);
+      expect(s.slots, "a strip with no slots proves nothing about arrangement").toBeGreaterThan(0);
+      expect(s.attached, "a slot's label and value must sit on one line").toBe(true);
+      if (narrow) {
+        expect(s.cols, `the narrow branch is a column: ${s.cols} left edges among ${s.slots} slots`).toBe(1);
+        expect(s.rows, `one slot per row: ${s.rows} rows for ${s.slots} slots`).toBe(s.slots);
+      } else {
+        expect(s.cols, "the wide branch keeps the slots side by side").toBeGreaterThan(1);
+      }
+      expect(s.h, `strip is ${s.h}px`).toBeLessThanOrEqual(maxH);
     }
   });
 }

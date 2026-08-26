@@ -4,7 +4,14 @@
  * ⚠️ THEY SIT WITH WHAT WENT OUT, not with the query's own facts — they are statements about the
  * package and the log, and the sent strip immediately above is the rest of that story.
  */
-.qv-lines { max-width: 620px; margin: 10px 0 4px; display: flex; flex-direction: column; gap: 6px; }
+/**
+ * ⚠️ NO TOP MARGIN — the host is `.qc-msub`, a WRAPPING FLEX ROW whose 6px gap already separates
+ * the wrapped lines. A margin here does not collapse with that gap, it adds to it; with the
+ * strip's own 8px (itself inherited from the retired stationery band) that made 24px between the
+ * strip and these lines out of three rules, none of which asked for more than ten. The bottom
+ * margin stays: nothing follows inside `.qc-msub`, so it has no gap to double with.
+ */
+.qv-lines { max-width: 620px; margin: 0 0 4px; display: flex; flex-direction: column; gap: 6px; }
 
 .qv-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; }
 

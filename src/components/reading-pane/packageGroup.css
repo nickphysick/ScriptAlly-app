@@ -70,7 +70,16 @@
 .qc-attach {
   max-width: 620px;
   width: 100%;
-  margin: 6px 0 8px;
+  /**
+   * ⚠️ NO VERTICAL MARGIN — `.qc-msub` IS A WRAPPING FLEX ROW AND ITS GAP DOES NOT COLLAPSE.
+   *
+   * This was `6px 0 8px`, unchanged from the retired stationery band (754e49f5:60), where the
+   * host was read as a block context. It is not one: `.qc-msub` is `display:flex; flex-wrap:wrap`
+   * with `gap: 6px`, so the strip is wrapped into it like a chip and the 8px ADDED to the 6px gap
+   * and to `.qv-lines`'s own 10px top margin — 24px of stacked spacing between the strip and the
+   * version lines, from three rules none of which asked for more than ten.
+   */
+  margin: 0;
   container: qc-strip / inline-size;
 }
 
@@ -144,8 +153,8 @@
 .qc-ps-sl {
   padding: 7px 14px;
   display: flex;
-  gap: 12px;
-  flex-wrap: nowrap;
+  gap: 17px;
+  flex-wrap: wrap;
   align-items: center;
   min-width: 0;
 }
@@ -164,11 +173,20 @@
   border-radius: 0;
   padding: 0;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1px;
+  align-items: baseline;
+  gap: 6px;
   min-width: 0;
   font-size: 11.5px;
+  /**
+   * ⚠️ `height: auto` UNDOES THE HOST PILL'S FIXED 26px, WHICH THE STRIPPED TREATMENT LEFT BEHIND.
+   *
+   * `.qc-mchip` is `height: 26px; padding: 0 10px` — right for a tappable pill, and the padding was
+   * already zeroed above when the pill treatment came off. The HEIGHT was not, so a slot that is
+   * now a line of text still reserved a pill's box: measured, a row whose tallest child is 14px
+   * (the version chip) or 11.5px (the value alone) stood 26px tall. Side by side that hid inside
+   * the blue cell's 39px; one slot per row it is paid three times, and the strip measured 143px.
+   */
+  height: auto;
 }
 .qc-ps-sl .qc-mchipeye {
   font-family: var(--f12-mono);
@@ -201,28 +219,24 @@
   .qc-pstrip { flex-direction: column; align-items: stretch; }
   .qc-ps-nm { border-right: none; border-bottom: 1px solid var(--pro-edge); }
   /**
-   * ⚠️ STACKING THE ROW WAS NOT ENOUGH, AND THE COMMENT ABOVE ASSERTED THAT IT WAS.
+   * ⚠️ THE NARROW BRANCH RENDERS ONE SLOT PER ROW — it does not compress the inline pair.
    *
-   * "The slots get the full width and fit on one line" was written from the arithmetic of the
-   * three VALUES and never measured. With their eyebrows beside them the three pills are
-   * 111.7 + 68 + 212.7 = 392.4px, plus 34px of gaps, against 321.2px of usable cell — so they
-   * wrapped to a second line and the strip measured **124px**, not the 72 predicted. That is the
-   * same number as the accidental stack this replaced, which is what made it read as leftover
-   * chrome rather than as content that does not fit.
+   * Side by side, the three `LABEL value` pairs are 111.7 + 68 + 212.7 = 392.4px plus 34px of
+   * gaps, against 321.2px of cell, so they wrapped and the strip measured 124px. Turning each
+   * pair upright fitted them on one line and was the wrong answer: `LETTER` above `Hook-first`
+   * reads as a column header rather than as a lead-in, and every slot looks like it is spilling
+   * onto two lines. It was a compression artefact wearing the shape of a design.
    *
-   * What gives is the PAIR, not the mark and not the text: each slot turns its `EYEBROW value`
-   * row upright, so its width is the wider of the two rather than their sum — 235px against 321,
-   * one line, nothing dropped and nothing truncated.
+   * What it renders instead is the construction the package card already uses and that already
+   * reads — `.pkgb-slots` (column, gap 5) of `.pkgb-slotline` (row, baseline, gap 6). The label
+   * stays attached to its value; the ROW is what stacks. Marginally taller than upright pairs,
+   * and the height is the honest one for three rows rather than the smallest number available.
    *
-   * ⚠️ AND IT IS A BASE RULE, NOT A NARROW-FORM ONE, BECAUSE THE WIDE FORM HAD THE SAME FAULT.
-   * Scoping it here was the first repair, and a census at 1920 measured heights of **42 AND 85**
-   * across the same eleven strips: the side-by-side pairs also wrapped in the 620px container,
-   * for the queries whose slots carry longer values. 575 was measured on a short-slot query and
-   * described that query rather than the component. Upright everywhere, both forms are one line
-   * of slots — 42px wide, 81px stacked — and the container query is left saying only the thing it
-   * is for: that the two CELLS do not fit beside each other.
+   * ⚠️ THE PILL ITSELF IS UNTOUCHED HERE. It is already `align-items: baseline; gap: 6px` at the
+   * base rule, which is what a row wants — only the CELL changes axis. Restating the pill's own
+   * direction in this block is how the two forms come to disagree about what a slot looks like.
    */
-
+  .qc-ps-sl { flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: 5px; }
 }
 
 /* Drift reports; it does not warn. No blush, no icon — a package moving on is ordinary. */
