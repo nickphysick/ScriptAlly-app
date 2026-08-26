@@ -57,8 +57,19 @@ jobs:
           node-version: '24'
           cache: 'npm'
 
+      # ⚠️ THE ROOT INSTALL DOES NOT REACH `functions/` — IT HAS ITS OWN package.json.
+      # `functions/src/waitlist.emulator.spec.ts` imports `firebase-admin`, declared only in
+      # functions/package.json. Node resolves it by walking up from the spec:
+      # functions/src/node_modules → functions/node_modules → root node_modules. Without the
+      # second install the middle directory does not exist here and the emulator step dies with
+      # "Cannot find package 'firebase-admin'" — while passing on the author's machine, where
+      # functions/node_modules is present from a `firebase deploy` build. Five consecutive red
+      # runs on exactly this, from 89ca6ccb (25 Aug), the commit that added both the spec and
+      # the step that runs it.
       - name: Install
-        run: npm ci --cache /tmp/npm-cache
+        run: |
+          npm ci --cache /tmp/npm-cache
+          npm ci --prefix functions --cache /tmp/npm-cache
 
       - name: Typecheck
         run: npx tsc --noEmit
