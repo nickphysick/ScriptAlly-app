@@ -49,6 +49,8 @@ const BASE: ManuscriptDossierProps = {
   onSaveBookVersions: noop,
   elevatorPitch: "When fourteen-year-old Murphy pockets a fly that shouldn't exist, the men who lost it come looking.",
   agentName: (id) => (id === "a1" ? "T. Marsh" : "Agent not recorded"),
+  notes: [],
+  onOpenNoteboard: noop,
   comps: [],
   isPro: false,
   scoutAvailable: true,
@@ -181,27 +183,36 @@ describe("the tab row", () => {
   });
 
   /**
-   * ⚠️ PHASE 2 IS THE SCAFFOLD AND THE LOCK SAYS SO RATHER THAN PRETENDING OTHERWISE. The rule this
-   * replaces — "advertises no tab without a pane behind it" — is the right rule and it is coming
-   * back; Overview, Journey and Notes arrive in Phases 3, 4 and 6, and it is restated then over all
-   * five. Asserting it now would either go red on a deliberate intermediate state or, worse, be
-   * loosened to something that passes and never tightened again. What IS locked meanwhile is that
-   * the two panes carried across the re-cut still render, so nothing that worked before it stopped
-   * working during it.
+   * ⚠️ THE RULE PHASE 2 HAD TO SUSPEND, RESTORED OVER ALL FIVE TABS. A tab is only allowed to exist
+   * once something is behind it. It was suspended for exactly three commits while Overview, Journey
+   * and Notes were being built, and the suspension was stated in the file rather than achieved by
+   * loosening this into something that would pass and never be tightened again.
    */
-  it("carries Comparable titles and Versions across the re-cut", () => {
-    const comps = doss({ tab: "comps", comps: [{ title: "The Salt Path", year: 2018 }] });
-    expect(comps).toContain("The Salt Path");
-
-    const versions = doss({ tab: "versions" });
-    expect(versions).toContain('class="msv-dpane msp-pane"');
-    expect(versions.split('class="msv-dpane msp-pane"')[1]?.trim().startsWith("></div>")).toBe(false);
+  it("advertises no tab without a pane behind it", () => {
+    for (const t of MANUSCRIPT_TABS) {
+      const html = doss({ tab: t.key, comps: [{ title: "The Salt Path", year: 2018 }] });
+      const pane = html.split('class="msv-dpane msp-pane"')[1] ?? "";
+      expect(pane, `${t.label}: no pane element at all`).not.toBe("");
+      expect(pane.trim().startsWith("></div>"), `${t.label} has nothing behind it`).toBe(false);
+    }
   });
 
-  it("renders each carried pane on its own tab, and only its own", () => {
+  it("renders each pane on its own tab, and only its own", () => {
+    const overview = doss({ tab: "overview" });
+    expect(overview).toContain("Elevator pitch");
+    expect(overview).not.toContain("Current standing");
+
+    const journey = doss({ tab: "journey" });
+    expect(journey).toContain("Current standing");
+    expect(journey).not.toContain("Elevator pitch");
+
     const comps = doss({ tab: "comps", comps: [{ title: "The Salt Path", year: 2018 }] });
-    expect(doss({ tab: "versions" })).not.toContain("The Salt Path");
     expect(comps).toContain("The Salt Path");
+    expect(comps).not.toContain("Current standing");
+
+    const notes = doss({ tab: "notes" });
+    expect(notes).toContain("on this manuscript");
+    expect(notes).not.toContain("The Salt Path");
   });
 });
 

@@ -457,3 +457,78 @@
 .msp-unrec b { color: var(--ink); font-weight: 600; }
 
 .msp-offeracts { margin-top: 15px; display: flex; gap: 10px; }
+
+/* ══ NOTES ════════════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ `repeat(3, minmax(0, 1fr))` WITH THE COUNT STATED. Not `auto-fill` and not `auto-fit`: a zero
+ * minimum gives auto-fit no reason to stop, and a three-up grid is what the design asks for rather
+ * than whatever the width happens to allow.
+ */
+.msp-notegrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+.msp-ptitle {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.msp-ptext { margin-top: 7px; font-size: 13px; line-height: 1.55; color: var(--ink); }
+.msp-pdate {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+}
+
+/** ⚠️ DASHED MEANS PROVISIONAL — the app's own grammar for a thing that is not there yet. */
+.msp-ghostcard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 150px;
+  padding: 22px 18px;
+  border: 1px dashed var(--pink-b);
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+}
+.msp-ghostcard:hover { background: var(--shell-card); }
+.msp-gicon { font-size: 24px; color: var(--burg); opacity: 0.6; margin-bottom: 10px; }
+.msp-gtitle { font-family: var(--font-serif); font-size: 17px; color: var(--burg); }
+.msp-gsub {
+  margin-top: 6px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 13.5px;
+  color: var(--shell-muted);
+}
+
+.msp-composer { grid-column: span 2; }
+.msp-cinput, .msp-cbody {
+  width: 100%;
+  border: 1px solid var(--hair);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--ws-window);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+}
+.msp-cinput { font-family: var(--font-serif); font-size: 15px; font-weight: 600; }
+.msp-cbody { margin-top: 9px; resize: vertical; line-height: 1.5; }
+.msp-cacts { margin-top: 11px; display: flex; gap: 9px; justify-content: flex-end; }
+
+@media (max-width: 900px) {
+  .msp-notegrid { grid-template-columns: minmax(0, 1fr); }
+  .msp-composer { grid-column: auto; }
+}

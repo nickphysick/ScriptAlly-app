@@ -25,6 +25,7 @@
  */
 import React, { useEffect, useState } from "react";
 import { deleteField } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../lib/db";
 import { destroyManifest } from "../lib/cascade";
 import { ConfirmDestroy } from "./ConfirmDestroy";
@@ -43,6 +44,7 @@ import { ManuscriptLibraryCard, ManuscriptAddTile } from "./manuscripts/Manuscri
 import { pitchAssets, pitchMeter, PitchAssetKey, synopsisVersions } from "../lib/manuscriptPitch";
 import { genreDisplay } from "../lib/genres";
 import { agentPrimary, AGENT_NOT_RECORDED } from "../lib/agentDisplay";
+import { manuscriptNotes } from "../lib/manuscriptProfile";
 import { londonDay } from "../lib/queryingGoals";
 import type { BookVersion } from "../types";
 import { genreList, splitGenres } from "./manuscripts/plateEdit";
@@ -68,7 +70,7 @@ interface AllManuscriptsProps {
 }
 
 export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, active = true }) => {
-  const { currentUser, manuscripts, queries, packages, versions, activities, agents, taskFlags, updateManuscript, updateManuscriptQuiet, deleteManuscript, setManuscriptShelved, addPersonalGenre } =
+  const { currentUser, manuscripts, queries, packages, versions, activities, agents, userTasks, addUserTask, taskFlags, updateManuscript, updateManuscriptQuiet, deleteManuscript, setManuscriptShelved, addPersonalGenre } =
     useScriptAllyDb();
 
   /**
@@ -84,6 +86,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
    * ⚠️ TAB STATE LIVES ABOVE THE CARD so the chosen tab survives a manuscript switch. It is LOCAL:
    * no route, no URL param, no persistence.
    */
+  const navigate = useNavigate();
   const [openId, setOpenId] = useState<string | null>(null);
   const [tab, setTab] = useState<ManuscriptTabKey>(DEFAULT_MANUSCRIPT_TAB);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -475,6 +478,24 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
               onCopyPitch={(text) => { void navigator.clipboard?.writeText(text); }}
               onOpenPlans={() => onNavigate?.("plans")}
               onOpenQueriesHub={() => onNavigate?.("queries")}
+              /* ⚠️ NOTES, NOT TASKS, AND SCOPED EXACTLY. `manuscriptNotes` takes only the dateless
+                 items whose `manuscriptId` IS this one — an unattached note is not a note about
+                 this book, and a dated one is a task that belongs on the To-do list. */
+              notes={manuscriptNotes(userTasks, selected.id)}
+              /**
+               * ⚠️ THE FIRST WRITER OF `manuscriptId` ON A DATELESS NOTE — not the first in the app.
+               * The Query Centre's `Remind me later` already sets it (Queries.tsx), and it ALWAYS
+               * sets `dueDate` alongside, so what it makes is a TASK. That is precisely why
+               * `manuscriptNotes` filters on datelessness rather than on scope alone: without it,
+               * every two-week nudge reminder a writer has ever set would appear on their
+               * manuscript's Notes tab as though they had written it there.
+               *
+               * ⚠️ AND THE KEY IS ALLOWLISTED, CHECKED BEFORE WIRING. A field outside
+               * firestore.rules' `hasOnly` list is denied in SILENCE — the affectedKeys gotcha.
+               */
+              onWriteNote={(text, detail) =>
+                void addUserTask({ text, ...(detail ? { detail } : {}), manuscriptId: selected.id })}
+              onOpenNoteboard={() => navigate("/todo/noteboard")}
               onOpenPackageBuilder={() => {
                 selectMs(selected.id);
                 onNavigate?.("manuscripts", "Submission packages");

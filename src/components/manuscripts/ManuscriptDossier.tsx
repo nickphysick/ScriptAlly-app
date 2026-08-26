@@ -21,7 +21,7 @@
  */
 import React, { useState } from "react";
 import { MoreHorizontal, Archive, Trash2, Pencil } from "lucide-react";
-import { Manuscript, ManuscriptVersion, SubmissionPackage, Query, CompTitle } from "../../types";
+import { Manuscript, ManuscriptVersion, SubmissionPackage, Query, CompTitle, UserTask } from "../../types";
 import type { Activity, BookVersion } from "../../types";
 import { bookVersionsOf, holdingRows, openingRows, unattributedOpening, unrecordedHolders } from "../../lib/bookVersions";
 import { isRequest } from "../../lib/packageMetrics";
@@ -35,6 +35,7 @@ import { OverviewPane } from "./OverviewPane";
 import { JourneyPane } from "./JourneyPane";
 import { CompsPane } from "./CompsPane";
 import { VersionsPane } from "./VersionsPane";
+import { NotesPane } from "./NotesPane";
 import { BookVersionsPanel } from "./BookVersionsPanel";
 import { PitchAsset, PitchAssetKey } from "../../lib/manuscriptPitch";
 import { ManuscriptPlateEdit } from "./ManuscriptPlate";
@@ -67,6 +68,11 @@ export interface ManuscriptDossierProps {
   elevatorPitch: string | null;
   /** Resolves an agent id to a display name — the canonical helper, never a local format. */
   agentName: (agentId: string) => string;
+  /** This manuscript's own notes — `UserTask` documents, the collection the Noteboard reads. */
+  notes: UserTask[];
+  /** Writes one against this manuscript. Absent → the pane reads without offering to write. */
+  onWriteNote?: (text: string, detail: string) => void;
+  onOpenNoteboard: () => void;
   synopsisVersionCount: number;
   synopsisDate: string | null;
   onSavePitch: (key: PitchAssetKey, text: string) => void;
@@ -109,6 +115,9 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   pitchText,
   elevatorPitch,
   agentName,
+  notes,
+  onWriteNote,
+  onOpenNoteboard,
   synopsisVersionCount,
   synopsisDate,
   onSavePitch,
@@ -168,10 +177,7 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
           edit={plateEdit}
           tab={tab}
           onTabChange={onTabChange}
-          /* ⚠️ `notes` IS DELIBERATELY ABSENT UNTIL ITS PANE EXISTS. The tab declares itself
-             counted and renders no count while the caller supplies none — which is the honest
-             state, and the opposite of writing `0` for data nobody has fetched. */
-          counts={{ comps: comps.length, versions: bookVersionsOf(manuscript).length }}
+          counts={{ comps: comps.length, versions: bookVersionsOf(manuscript).length, notes: notes.length }}
           actions={
             <>
               {/* A shelved manuscript offers no Send — the same rule the library grid applies. */}
@@ -249,8 +255,6 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
           shorter than its content instead of pushing the card past the viewport.
         */}
         <div className="msv-dpane msp-pane">
-          {/* ⚠️ Notes arrives in Phase 6; Comparable titles and Versions carry their existing
-              panes across until Phase 5 re-cuts them. */}
           {tab === "overview" && (
             <OverviewPane
               pitch={elevatorPitch}
@@ -292,6 +296,10 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
               holders={holders}
               onUpgrade={onOpenPlans}
             />
+          )}
+
+          {tab === "notes" && (
+            <NotesPane notes={notes} onWrite={onWriteNote} onOpenNoteboard={onOpenNoteboard} />
           )}
         </div>
       </div>

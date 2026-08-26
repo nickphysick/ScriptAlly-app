@@ -153,3 +153,45 @@ export const pitchMeta = (text: string | null): string | null => {
   const words = text.trim().split(/\s+/).filter(Boolean).length;
   return `${words} word${words === 1 ? "" : "s"}`;
 };
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   NOTES — the manuscript's own
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * The notes a writer has written ABOUT this book.
+ *
+ * ⚠️ NOTES, NOT TASKS — and the app already decides which is which. The two natures are DERIVED
+ * from `dueDate`: absent is a NOTE (dateless, nothing chases you), present is a TASK (dated, joins
+ * the work). A dated task scoped to this manuscript belongs on the To-do list, which is where it
+ * will surface on its day; showing it here as well would give one item two homes that disagree the
+ * moment it is completed in one of them.
+ *
+ * ⚠️ AND `manuscriptId` IS AN EXACT MATCH, NOT `scopeTasks`'s RULE. That helper deliberately keeps
+ * UNSCOPED items in view — an unattached note floats and belongs to every scope — which is right
+ * for a page filtering the whole board and wrong here: a note about nothing in particular is not a
+ * note about THIS book, and listing it under a manuscript would claim the writer said something
+ * about it that they did not.
+ *
+ * ⚠️ DONE NOTES ARE OUT. A note the writer has ticked off is finished; the Noteboard is where the
+ * completed ones live.
+ *
+ * Newest first, undated last — the same ordering rule the rest of the app uses for a written record.
+ */
+export const manuscriptNotes = <T extends {
+  manuscriptId?: string; dueDate?: string; done?: boolean; createdAt?: string;
+}>(tasks: readonly T[], manuscriptId: string): T[] =>
+  tasks
+    .filter((t) => t.manuscriptId === manuscriptId && !t.dueDate && !t.done)
+    .slice()
+    .sort((a, b) => (a.createdAt ?? "") < (b.createdAt ?? "") ? 1 : (a.createdAt ?? "") > (b.createdAt ?? "") ? -1 : 0);
+
+/** `4 on this manuscript` — the Notes header's meta. */
+export const notesMeta = (n: number): string => `${n} on this manuscript`;
+
+/** `14 Jun 2026` from an ISO datetime, or null where there is none to state. */
+export const noteDay = (createdAt: string | undefined): string | null => {
+  if (!createdAt) return null;
+  const t = Date.parse(createdAt);
+  return Number.isNaN(t) ? null : profileDate(t);
+};
