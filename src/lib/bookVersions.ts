@@ -352,6 +352,16 @@ export interface HoldingRow {
   holds: "Full manuscript" | "Partial";
   /** The send date, already formatted, or null where the send is undated. */
   sentDay: string | null;
+  /**
+   * The ASK that led to this send — `Full requested` / `Partial requested`, and when it came.
+   *
+   * ⚠️ `askedOn` IS NULL WHERE THE LOG DOES NOT CARRY THE REQUEST, and the caller then states the
+   * ask without a date rather than dating it from the send. They are different events: an agent
+   * asked in May and the writer sent in June, and stamping one with the other's date is the shape
+   * of fabrication this file already refuses for an unrecorded version.
+   */
+  askedFor: "Full requested" | "Partial requested";
+  askedOn: string | null;
   /** The version they hold, or null where the send predates the feature. */
   versionName: string | null;
 }
@@ -386,12 +396,20 @@ export const holdingRows = (
     .map((h) => {
       const sent = sendDate(h.query, activities);
       const sentDay = sent ? formatDay(sent) : null;
+      /* The EARLIEST matching request rung — an arrival, so a re-recorded event must not move it. */
+      const askStatus = h.what === "FULL" ? QueryStatus.FULL_REQUESTED : QueryStatus.PARTIAL_REQUESTED;
+      const asks = activities
+        .filter((a) => a.queryId === h.query.id && a.resultingStatus === askStatus && !!a.date)
+        .map((a) => a.date)
+        .sort();
       return {
         queryId: h.query.id,
         agent: agentName((h.query as { agentId?: string }).agentId ?? ""),
         what: sentDay ? `${h.what} · sent ${sentDay}` : h.what,
         holds: h.what === "FULL" ? ("Full manuscript" as const) : ("Partial" as const),
         sentDay,
+        askedFor: h.what === "FULL" ? ("Full requested" as const) : ("Partial requested" as const),
+        askedOn: asks[0] ? formatDay(asks[0]) : null,
         versionName: bookVersionById(versions, h.versionId)?.name ?? null,
         _sort: sent ?? "",
       };

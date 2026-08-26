@@ -27,9 +27,11 @@ import { bookVersionsOf, holdingRows } from "../../lib/bookVersions";
 import { isShelvedPresentation, CLOSED_STATUSES } from "../../lib/manuscriptPage";
 import { plateStats } from "../../lib/manuscriptPlate";
 import { heroFacts, queryingSinceMs, atAGlance, glanceMeta, pitchMeta, profileDate } from "../../lib/manuscriptProfile";
+import { standingTrack, furthestTrack, furthestReached, journeyMeta } from "../../lib/manuscriptJourney";
 import { ManuscriptTabKey } from "./ManuscriptTabs";
 import { ManuscriptHero } from "./ManuscriptHero";
 import { OverviewPane } from "./OverviewPane";
+import { JourneyPane } from "./JourneyPane";
 import { BookVersionsPanel } from "./BookVersionsPanel";
 import { ManuscriptCompsPane } from "./ManuscriptCompsPane";
 import { PitchAsset, PitchAssetKey } from "../../lib/manuscriptPitch";
@@ -135,6 +137,10 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
    */
   const holders = holdingRows(queries, activities, bookVersionsOf(manuscript), agentName, (iso) => profileDate(Date.parse(iso)));
   const closed = queries.filter((q) => CLOSED_STATUSES.includes(q.status)).length;
+  /* ⚠️ DERIVED ONCE AND READ THREE TIMES — the table, the track's footer and the section header's
+     meta. Deriving it per consumer is how a card comes to state a furthest rung its own rows do
+     not show. */
+  const furthest = furthestTrack(queries, activities);
   /* Distinct AGENTS, not rows: two live sends to one agent is one agent holding something. */
   const agentsHolding = new Set(holders.map((h) => h.agent)).size;
 
@@ -241,8 +247,8 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
           shorter than its content instead of pushing the card past the viewport.
         */}
         <div className="msv-dpane msp-pane">
-          {/* ⚠️ Journey and Notes arrive in Phases 4 and 6; Comparable titles and Versions carry
-              their existing panes across until Phase 5 re-cuts them. */}
+          {/* ⚠️ Notes arrives in Phase 6; Comparable titles and Versions carry their existing
+              panes across until Phase 5 re-cuts them. */}
           {tab === "overview" && (
             <OverviewPane
               pitch={elevatorPitch}
@@ -251,6 +257,17 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
               glanceMeta={glanceMeta(stats.queriesSent, agentsHolding)}
               holders={holders}
               onOpenVersions={() => onTabChange("versions")}
+            />
+          )}
+
+          {tab === "journey" && (
+            <JourneyPane
+              track={standingTrack(queries)}
+              furthest={furthest}
+              furthestLabel={furthestReached(furthest)}
+              holders={holders}
+              queriesSent={stats.queriesSent}
+              journeyMeta={journeyMeta(stats.queriesSent, furthestReached(furthest))}
             />
           )}
 

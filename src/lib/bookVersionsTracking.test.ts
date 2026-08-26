@@ -91,7 +91,9 @@ describe("D15 — requests by opening", () => {
 describe("D16 — who holds what", () => {
   const versions = [bv("va", "Prologue-first", "2026-03-01"), bv("vb", "Post-R&R", "2026-07-01")];
   const acts = [send("q1", "va", "2026-05-30"), send("q2", "vb", "2026-08-02"),
-                send("q3", "va", "2026-06-11", QueryStatus.PARTIAL_SENT)];
+                send("q3", "va", "2026-06-11", QueryStatus.PARTIAL_SENT),
+                /* The ASK that led to q2's send — a different event, on a different day. */
+                send("q2", "", "2026-08-01", QueryStatus.FULL_REQUESTED)];
   const queries = [q("q1", QueryStatus.FULL_SENT, undefined, "ag2"),
                    q("q2", QueryStatus.FULL_SENT, undefined, "ag1"),
                    q("q3", QueryStatus.PARTIAL_SENT, undefined, "ag3"),
@@ -107,7 +109,16 @@ describe("D16 — who holds what", () => {
          actually carries; the ref's `Partial · 50 pp` would be inventing a quantity, because the
          holding knows the STATUS and not how many pages went. */
       holds: "Full manuscript", sentDay: "02 08",
+      /* ⚠️ THE ASK AND THE SEND ARE DIFFERENT EVENTS. The agent asked on the 1st and the writer
+         sent on the 2nd; dating the ask from the send would be a fabrication of the same kind this
+         file already refuses for an unrecorded version. */
+      askedFor: "Full requested", askedOn: "01 08",
     });
+    /* ⚠️ AND WHERE THE LOG DOES NOT CARRY THE ASK, THE DATE IS NULL RATHER THAN THE SEND'S. The
+       caller then states the ask without a day; stamping it from the send would put the agent's
+       request on the date the writer answered it. */
+    expect(rows[2].askedFor).toBe("Full requested");
+    expect(rows[2].askedOn).toBeNull();
     expect(rows[1].what).toBe("PARTIAL · sent 11 06");
     expect(rows[1].holds).toBe("Partial");
     expect(rows[1].sentDay).toBe("11 06");

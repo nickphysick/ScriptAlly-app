@@ -296,3 +296,106 @@
   .msp-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 16px; }
   .msp-stat:nth-child(3n + 1) { border-left: 0; }
 }
+
+/* ══ JOURNEY ══════════════════════════════════════════════════════════════════════════════════ */
+
+.msp-track { display: flex; align-items: flex-start; gap: 22px; }
+
+/**
+ * ⚠️ THE COLUMN COUNT COMES FROM THE STATIONS, NOT FROM `auto-fit`. Seven is a fact about the
+ * pipeline; `repeat(auto-fit, minmax(0, 1fr))` with a zero minimum has no reason to stop and this
+ * repo has measured exactly that grow a hundred phantom `0px` tracks past its real ones.
+ */
+.msp-stations {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  padding-top: 4px;
+}
+/* The rail sits behind the dots, spanning the middle of the first and last stations. */
+.msp-rail, .msp-railfill {
+  position: absolute;
+  top: 17px;
+  left: calc(100% / 14);
+  right: calc(100% / 14);
+  height: 2px;
+  border-radius: 2px;
+}
+.msp-rail { background: var(--hair); }
+/**
+ * ⚠️ THE FILL IS A FACT, NOT A PROGRESS BAR — it reaches the furthest station anything occupies.
+ * It shares the rail's inset, so its own `width` is a share of the rail rather than of the card;
+ * `right` is dropped so the width takes effect.
+ */
+.msp-railfill { right: auto; background: var(--burg); opacity: 0.55; max-width: calc(100% - 100% / 7); }
+.msp-station { position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.msp-stationn {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+}
+.msp-stationl {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  line-height: 1.4;
+}
+
+/**
+ * ⚠️ CLOSED IS OFF THE RAIL, BEHIND A HAIRLINE. A closed query is not further along the pipeline,
+ * it is elsewhere — so it sits outside the track rather than as an eighth station. Grey is the
+ * whole treatment; there is no red on this page.
+ */
+.msp-closedblock {
+  flex: none;
+  padding-left: 22px;
+  border-left: 1px solid var(--hair);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding-top: 4px;
+}
+.msp-closedblock .msp-stationn { color: var(--shell-muted); }
+.msp-closeddot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--hair);
+  background: var(--shell-panel);
+}
+
+.msp-journeyfoot {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hair-soft);
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--shell-muted);
+}
+.msp-reached b { color: var(--ink); font-weight: 600; }
+
+/** The agent's ask, under their name — its own line, so `margin-top` has a block box to apply to. */
+.msp-sub {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+}
+
+@media (max-width: 900px) {
+  .msp-track { flex-direction: column; }
+  .msp-closedblock { padding-left: 0; padding-top: 14px; border-left: 0; border-top: 1px solid var(--hair); align-self: stretch; }
+}

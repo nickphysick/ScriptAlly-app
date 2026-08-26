@@ -149,7 +149,8 @@ describe("pitchMeta — what the record can support, and no more", () => {
 describe("the pane", () => {
   const row = (over: Partial<HoldingRow> = {}): HoldingRow =>
     ({ queryId: "q1", agent: "T. Marsh", what: "FULL · sent 2 Jun 2026",
-       holds: "Full manuscript", sentDay: "2 Jun 2026", versionName: null, ...over });
+       holds: "Full manuscript", sentDay: "2 Jun 2026",
+       askedFor: "Full requested", askedOn: "28 May 2026", versionName: null, ...over });
 
   const pane = (over: Partial<React.ComponentProps<typeof OverviewPane>> = {}) =>
     renderToStaticMarkup(
