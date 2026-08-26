@@ -1,15 +1,15 @@
-── journey round · Phases 1–7 · 47 assertions · 0 RED · 47 green
+── journey round · Phases 1–8 · 51 assertions · 0 RED · 51 green
 
 SEND fork: [{"t":"I’ve sent it","s":"Note what went, and set the clock","x":""},{"t":"Not yet — hold me to it","s":"Pick a day and it lands back on your list","x":""},{"t":"I’m not going to send it","s":"Record that, and close the query honestly","x":"crosses to close →"}]
 CLOSE fork: [{"t":"Close it now","s":"Records no response — not a rejection. It reopens if a reply ever comes","x":""},{"t":"Nudge them once more first","s":"One more try before the ledger closes","x":"crosses to nudge →"},{"t":"Leave it open for now","s":"Choose when you’d like to be asked again — or not at all","x":""}]
 NUDGE fork: ["I’ve nudged them","I’ll give it a little longer","Actually — time to close"]
-FIX-BUCKET CENSUS: agentgap · bulk
+FIX-BUCKET CENSUS: agentgap · bulk · agentgap · agentgap · agentgap · agentgap
 NO SINGLE-QUERY FILL-IN ON THIS BOARD — the card is raised only below BULK_MATERIALS_THRESHOLD (3) gaps and this account has enough to show the cohort instead. Phase 6's fill-in claims are unit-locked in src/lib/journeyFillin.test.ts and are NOT measured here. To measure them, an account with one or two unrecorded sends is needed.
 NO NOTE CARD ON THIS BOARD — the note journey's claims are unit-locked in src/lib/journeyFillin.test.ts and are NOT measured here. To measure them, the account needs one user-written note.
 shot fork-note: no Note card
 
   green  P0 · the board rendered before anything was measured
-           rows on screen at start = 20
+           rows on screen at start = 21
   green  P2.1 · the pane opens on the fork, with its label and its options
            label="Where are you with it?" options=3
   green  P2.2 · NO primary is rendered until an intent is chosen
@@ -51,9 +51,9 @@ shot fork-note: no Note card
   green  P3.6 · and the hint states what the mute does NOT touch
            hint="“Stop asking” mutes this suggestion for this query only — it deletes nothing, and every other task still appears."
   green  P3.7 · a delay writes through the app's own snooze — its toast, its undo, and the card leaves
-           toast="Snoozed until ThursdayUndo" rows 20 -> 19 · undo offered=true
+           toast="Snoozed until ThursdayUndo" rows 21 -> 20 · undo offered=true
   green  P3.8 · and the undo restores it — this spec leaves the account as it found it
-           undo pressed=true · rows 19 -> 20 (was 20)
+           undo pressed=true · rows 20 -> 21 (was 21)
   green  P4.1 · choosing a unit does NOT mark the parcel answered
            pressed=true row.done after pressing a unit = false
   green  P4.2 · and the seed is focused AND selected, so typing replaces it
@@ -75,7 +75,7 @@ shot fork-note: no Note card
   green  P5.5 · the pane calls nobody overdue or late
            overdue=false late=false (chars scanned 491)
   green  P6.1 · the census recognised every card wearing the Fix pill
-           2 card(s): agentgap · bulk
+           6 of 6 card(s): agentgap · bulk · agentgap · agentgap · agentgap · agentgap
   green  P6.2 · a delay's strip says when the task returns, not a bare dash
            strip = "nothing on the query. This task returns 27 August."
   green  P6.3 · the close's leave-it-open reads the same grammar, not the send's
@@ -102,3 +102,11 @@ shot fork-note: no Note card
            opened s-when · line = "Still to answer: when it went, when you expect to hear back and your r" · focus in the row = true (button)
   green  P7.8 · an untouched cohort is faded with an empty fill, and says so in words
            label="Log 0 queries" disabled=false fill=0% count="no queries filled in yet"
+  green  P8.1 · a close commits IN PLACE and raises a receipt — no dialog, before or after
+           dialogs before=0 after=0 · receipt = "Done — “No response from Rosalind Vale for 13 months”Undo"
+  green  P8.2 · the receipt names the card that was on the board, and offers the way back
+           agent "Rosalind Vale" · among the close cards before = true (4) · undo offered = true · receipt opens with Done = true
+  green  P8.3 · Undo brings that card back, and restores its derived status
+           undo pressed=true · card back = true (4 close cards) · status "Queried" → "Queried"
+  green  P8.4 · no journey raises a dialog on the way to its terminus
+           Send=0 · Chase=0 · Close=0 · Fix=0 · Decide=0

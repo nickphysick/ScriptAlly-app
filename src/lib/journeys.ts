@@ -165,6 +165,18 @@ export interface Journey {
    * The register this journey's copy is written in — the contract states one per journey, and it
    * is carried here so it is reviewable rather than an intention someone had once.
    */
+  /**
+   * ⚠️ THE TONE THIS JOURNEY'S COPY IS WRITTEN IN — DOCUMENTATION THAT IS ENFORCED, AND
+   * DELIBERATELY NOT RENDERED (journey round, Phase 8).
+   *
+   * It is not a string for the page: it is the author's contract, and `journeyRegister.test.ts`
+   * turns each one into a checkable vocabulary — the nudge may use no anxious word, the close may
+   * pass no verdict, the fill-in may not blame, and no journey may guess an agent's pronouns.
+   *
+   * So: anyone wiring this into the UI is misreading it, and anyone deleting it as an unread field
+   * is deleting the reason those lists exist. It was genuinely unread until Phase 8, which is the
+   * state this file has now closed twice — see `strip`, whose seven grammars had no reader.
+   */
   register: string;
   fork: JourneyFork;
   flows: Record<string, JourneyFlow>;

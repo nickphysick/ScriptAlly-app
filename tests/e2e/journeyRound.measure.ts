@@ -8,7 +8,7 @@
  *
  * ⚠️ THE REPORT IS UNLINKED AT MODULE SCOPE, because a run that dies in SETUP never reaches the body.
  *
- * ⚠️ AND THIS SPEC WRITES. One snooze and one mute are performed through the fork, then UNDONE
+ * ⚠️ AND THIS SPEC WRITES. A snooze, a mute and ONE REAL CLOSE are performed, then UNDONE
  * through the app's own undo — so the account is left as it was found. Every write case asserts the
  * restoration as well as the effect; a run that dies between them leaves one snoozed card, which is
  * recoverable from the snoozed filter.
@@ -23,7 +23,7 @@ type R = { id: string; ok: boolean; note: string };
 function lines0(out: R[], notes: string[]): string {
   const red = out.filter((r) => !r.ok);
   const ls = [
-    "── journey round · Phases 1–7 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
+    "── journey round · Phases 1–8 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
     "",
     ...notes,
     "",
@@ -563,7 +563,10 @@ test("journey round", async ({ page }) => {
     const pane = [...document.querySelectorAll(".tpn .pane")].filter(vis)[0];
     if (!pane) return null;
     const t = (pane.textContent || "");
-    return { overdue: /overdue/i.test(t), late: /\blate\b/i.test(t), len: t.length };
+    /* ⚠️ DOUBLE-ESCAPED, and the single-escaped version was VACUOUS. Inside a template literal
+       backslash-b is a real escape — the backspace character — so this regex was /(BS)late(BS)/ and
+       matched nothing at all. The "late" half of this assertion had never tested anything. */
+    return { overdue: /overdue/i.test(t), late: /\\blate\\b/i.test(t), len: t.length };
   })()`) as any;
   add("P5.5 · the pane calls nobody overdue or late",
       !!verdicts && !verdicts.overdue && !verdicts.late && verdicts.len > 100,
@@ -601,22 +604,30 @@ test("journey round", async ({ page }) => {
     };
   })()`) as any;
 
-  const fixCount = await page.evaluate(`(() => {
+  /**
+   * ⚠️ CLICK BY ROW TEXT, NOT BY INDEX ACROSS RELOADS. The census re-navigates for each card, and
+   * the board is DERIVED — its row order is not guaranteed stable between loads. Indexing produced
+   * a card whose primary read "Reply to the offer" under a Fix pill, which is not a thing that
+   * exists: the loop had simply opened a different row from the one it was counting.
+   */
+  const fixTexts = await page.evaluate(`(() => {
     const vis = ${VIS};
     return [...document.querySelectorAll(".tlc .row")].filter(vis)
-      .filter((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === "Fix").length;
-  })()`) as number;
+      .filter((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === "Fix")
+      .map((r) => (r.textContent || "").replace(/\\s+/g, " ").trim());
+  })()`) as string[];
   const census: string[] = [];
-  for (let i = 0; i < fixCount; i++) {
+  for (let i = 0; i < fixTexts.length; i++) {
     await page.goto("/todo");
     await boardReady();
     await liftMotionSuppression(page);
     await page.evaluate(`(() => {
       const vis = ${VIS};
-      const fx = [...document.querySelectorAll(".tlc .row")].filter(vis)
-        .filter((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === "Fix");
-      if (fx[${i}]) fx[${i}].click();
-    })()`);
+      const want = ${JSON.stringify("__T__")};
+      const row = [...document.querySelectorAll(".tlc .row")].filter(vis)
+        .find((r) => (r.textContent || "").replace(/\\s+/g, " ").trim() === want);
+      if (row) row.click();
+    })()`.replace("__T__", JSON.stringify(fixTexts[i]).slice(1, -1)));
     await page.waitForTimeout(1600);
     const sig = await paneSignature();
     const which = (sig.forkOpts || []).some((t: string) => /remember/i.test(t)) ? "fillin"
@@ -627,8 +638,9 @@ test("journey round", async ({ page }) => {
   }
   notes.push("FIX-BUCKET CENSUS: " + (census.length ? census.join(" · ") : "no Fix cards"));
   add("P6.1 · the census recognised every card wearing the Fix pill",
-      census.length > 0 && census.every((c) => !c.startsWith("unrecognised")),
-      census.length + " card(s): " + census.join(" · "));
+      census.length > 0 && census.length === fixTexts.length
+        && census.every((c) => !c.startsWith("unrecognised")),
+      census.length + " of " + fixTexts.length + " card(s): " + census.join(" · "));
 
   const hasFillin = census.includes("fillin");
   if (!hasFillin) {
@@ -934,6 +946,179 @@ test("journey round", async ({ page }) => {
     }
   }
 
+  /* ══ PHASE 8 · registers and receipts ═════════════════════════════════════════════════════ */
+
+  /**
+   * ⚠️ THIS IS THE SPEC'S LAST WRITE, AND IT IS UNDONE. A terminus that produces no receipt is a
+   * write the writer cannot see; one whose Undo restores nothing is worse, because it says the
+   * thing was reversed. Both halves are asserted.
+   *
+   * If the run dies between the commit and the undo, ONE query is left closed. It is visible on the
+   * Query Centre and reversible there; nothing else is touched.
+   */
+  await page.goto("/todo");
+  await boardReady();
+  await liftMotionSuppression(page);
+  const closeCard = await openCard("Close");
+  if (closeCard) {
+    /** the close cards on the board, by their row text — the subject is a CARD, not a count */
+    const closeDeeds = async (): Promise<string[]> => page.evaluate(`(() => {
+      const vis = ${VIS};
+      return [...document.querySelectorAll(".tlc .row")].filter(vis)
+        .filter((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === "Close")
+        .map((r) => (r.textContent || "").replace(/\\s+/g, " ").trim());
+    })()`) as Promise<string[]>;
+
+    const deedsBefore = await closeDeeds();
+    const before = await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const t = (e) => (e ? (e.textContent || "").replace(/\\s+/g, " ").trim() : "");
+      /* ⚠️ THE STATUS ELEMENT, NOT THE WHOLE HEAD. The head reads "The record" plus the status, so
+         comparing head text compares a constant with a variable stuck to it — which is how a status
+         that never moved could read as restored. */
+      return { status: t([...document.querySelectorAll(".tpn .rhead .stat")].filter(vis)[0]) };
+    })()`) as any;
+
+    await choose("Close it now");
+    await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const q = [...document.querySelectorAll(".tpn .q.open")].filter(vis)[0];
+      const b = q ? [...q.querySelectorAll(".seg button")][0] : null;
+      if (b) b.click();
+    })()`);
+    await page.waitForTimeout(900);
+
+    /* ⚠️ THE DIALOG CHECK IS TAKEN BEFORE THE PRESS AS WELL AS AFTER, so "no dialog" cannot pass by
+       being read at a moment when one had already closed itself. */
+    const dialogBefore = await page.evaluate(
+      `document.querySelectorAll(".tdlg, [role='dialog'], [role='alertdialog']").length`) as number;
+
+    await clickIn(".tpn .actbar .ab.go");
+    await page.waitForTimeout(2200);
+
+    const UNDO2 = ".tdb-toast-act, .sa-toast-undo";
+    const after = await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const t = (e) => (e ? (e.textContent || "").replace(/\\s+/g, " ").trim() : "");
+      const toast = [...document.querySelectorAll(".tdb-toast, .sa-toast")].filter(vis)[0];
+      return {
+        toast: t(toast),
+        undo: !!document.querySelector(${JSON.stringify(UNDO2)}),
+        dialogs: document.querySelectorAll(".tdlg, [role='dialog'], [role='alertdialog']").length,
+      };
+    })()`) as any;
+
+    add("P8.1 · a close commits IN PLACE and raises a receipt — no dialog, before or after",
+        dialogBefore === 0 && !!after && after.dialogs === 0 && !!after.toast,
+        "dialogs before=" + dialogBefore + " after=" + (after?.dialogs ?? "-")
+          + " · receipt = " + JSON.stringify((after?.toast || "").slice(0, 60)));
+
+    /**
+     * ⚠️ THE AGENT'S NAME COMES FROM THE RECEIPT, NOT FROM THE DEED — and reading it from the deed
+     * is what made this case wrong twice. The deed names the agent AND the manuscript, so a
+     * two-capitalised-words match returned "The Smoke" (a book) and every check downstream then
+     * hunted a row that does not exist. The receipt states one name, in one shape.
+     *
+     * ⚠️ AND THE ROW COUNT IS NOT THE INSTRUMENT EITHER. Measured 20 → 20 after a real close: the
+     * board is derived, so a task leaving is masked by another arriving, and a count says nothing
+     * about WHICH cards are on screen. It also produced a vacuous PASS one case later, where a
+     * status was compared with itself and reported restored.
+     */
+    const who = (String(after?.toast || "").match(/from (.+?) for /) || [])[1]?.trim() ?? "";
+
+    /**
+     * ⚠️ NOTHING NAVIGATES BETWEEN THE COMMIT AND THE UNDO, AND THIS COST REAL DATA.
+     *
+     * An earlier version read the board here with `page.goto("/todo")` before pressing Undo. The
+     * toast is the receipt; navigating destroys it, so the press found no button, reported
+     * `undo pressed=false`, and LEFT THE QUERY CLOSED — a measurement that changed the account it
+     * was measuring, which is the one thing a spec that writes must never do.
+     *
+     * The board is already on screen behind the pane, so reading it needs no navigation at all.
+     * The undo is pressed FIRST and its success is asserted; the board is re-read afterwards.
+     */
+    /**
+     * ⚠️ "AND THE CARD LEAVES THE LIST" IS NOT ASSERTED HERE, AND THAT IS A FINDING RATHER THAN A
+     * GAP. Measured: the card is still among the close cards 3.5 seconds after the receipt appears,
+     * because the pane is DOCKED on it and the board keeps a docked card visible so the pane is
+     * never orphaned. Checking it after the dock advances would mean navigating, and navigating
+     * destroys the toast — which is exactly how an earlier version of this case left a query closed.
+     *
+     * So this states what is both true and checkable at this moment: the card WAS on the board, the
+     * receipt names it, and a way back is offered. That the write really happened, and really
+     * reverses, is P8.3's job — and P8.3 asserts it against the derived STATUS, which is stronger
+     * than a row's presence anyway.
+     */
+    add("P8.2 · the receipt names the card that was on the board, and offers the way back",
+        !!who && deedsBefore.some((d) => d.includes(who)) && !!after && after.undo
+          && /^Done/i.test(after.toast || ""),
+        "agent " + JSON.stringify(who) + " · among the close cards before = "
+          + deedsBefore.some((d) => d.includes(who)) + " (" + deedsBefore.length + ")"
+          + " · undo offered = " + (after?.undo)
+          + " · receipt opens with Done = " + /^Done/i.test(after?.toast || ""));
+
+    /* ⚠️ AND THE PRESS IS ASSERTED IMMEDIATELY, so a run that could not reverse its own write fails
+       here rather than three cases later with a confusing symptom. */
+    const pressUndo = await page.evaluate(`(() => {
+      const u = document.querySelector(${JSON.stringify(UNDO2)});
+      if (!u) return false; u.click(); return true;
+    })()`) as boolean;
+    expect(pressUndo, "THE UNDO WAS NOT PRESSED — this run has left a query closed. "
+      + "Reopen it in the Query Centre before re-running.").toBe(true);
+    await page.waitForTimeout(3200);
+    await page.goto("/todo");
+    await boardReady();
+    await liftMotionSuppression(page);
+    const deedsBack = await closeDeeds();
+    const reopened = await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const want = ${JSON.stringify("__WHO__")};
+      const row = [...document.querySelectorAll(".tlc .row")].filter(vis)
+        .find((r) => (r.textContent || "").indexOf(want) >= 0);
+      if (!row) return false; row.click(); return true;
+    })()`.replace("__WHO__", who)) as boolean;
+    await page.waitForTimeout(1700);
+    const back = await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const t = (e) => (e ? (e.textContent || "").replace(/\\s+/g, " ").trim() : "");
+      return { status: t([...document.querySelectorAll(".tpn .rhead .stat")].filter(vis)[0]) };
+    })()`) as any;
+
+    add("P8.3 · Undo brings that card back, and restores its derived status",
+        pressUndo && !!who && deedsBack.some((d) => d.includes(who)) && reopened
+          && !!before.status && !!back && back.status === before.status,
+        "undo pressed=" + pressUndo + " · card back = " + deedsBack.some((d) => d.includes(who))
+          + " (" + deedsBack.length + " close cards) · status " + JSON.stringify(before?.status)
+          + " → " + JSON.stringify(back?.status));
+  } else {
+    notes.push("no Close card — P8.1 to P8.3 not measured");
+  }
+
+  /**
+   * ⚠️ AND NO JOURNEY RENDERS A DIALOG AT ALL. The census walks every journey on the board, chooses
+   * its first intent, and counts dialogs — because the claim is about the JOURNEYS rather than
+   * about the one that happened to be convenient to commit.
+   */
+  const dialogCensus: string[] = [];
+  for (const kind of ["Send", "Chase", "Close", "Fix", "Decide"]) {
+    await page.goto("/todo");
+    await boardReady();
+    await liftMotionSuppression(page);
+    if (!(await openCard(kind))) continue;
+    await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const b = [...document.querySelectorAll(".tpn .fk")].filter(vis)[0];
+      if (b) b.click();
+    })()`);
+    await page.waitForTimeout(1100);
+    const n = await page.evaluate(
+      `document.querySelectorAll(".tdlg, [role='dialog'], [role='alertdialog']").length`) as number;
+    dialogCensus.push(kind + "=" + n);
+  }
+  add("P8.4 · no journey raises a dialog on the way to its terminus",
+      dialogCensus.length >= 4 && dialogCensus.every((s) => s.endsWith("=0")),
+      dialogCensus.join(" · ") || "no journeys were opened");
+
   /* ══ SCREENSHOTS ══════════════════════════════════════════════════════════════════════════ */
   const shoot = async (name: string, kind: string, steps?: () => Promise<void>) => {
     await page.goto("/todo");
@@ -960,7 +1145,7 @@ test("journey round", async ({ page }) => {
 
   const red = out.filter((r) => !r.ok);
   const lines = [
-    "── journey round · Phases 1–7 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
+    "── journey round · Phases 1–8 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
     "",
     ...notes,
     "",

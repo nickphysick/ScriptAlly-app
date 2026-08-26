@@ -245,7 +245,9 @@ test("pane round", async ({ page }) => {
       lands: /the reminder lands here, on your list/i.test(txt),
       will: (all(".tpn .willrec")[0] || {}).textContent || "",
       /* carried so a failure here is diagnosable without a second run */
-      head: txt.replace(/\s+/g, " ").slice(0, 90),
+      /* ⚠️ DOUBLE-ESCAPED: inside a template literal a single backslash-s is eaten, leaving /s+/g,
+         which strips every letter "s" from the string this reports. */
+      head: txt.replace(/\\s+/g, " ").slice(0, 90),
     };
   })()`) as any;
   add("P3.1 · the send form asks what went, not what was asked for",
