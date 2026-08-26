@@ -1,0 +1,66 @@
+── prove-reds · MERGED over two walks · 45 mutation runs
+
+   walk 1 · 34 mutations. Nine DOM ones took NO EFFECT — installed as MutationObservers, and
+            React re-renders over a patched node — so they reported nine assertions as
+            unbreakable that are nothing of the kind.
+   walk 2 · the same DOM mutations, re-applied on a 120ms interval. All eleven reddened.
+
+  PROVED RED   steer:P2.1   by form-emptied, square-gone
+  PROVED RED   steer:P2.2   by form-emptied, square-still
+  NOT PROVED   steer:P2.3   — NOTE case — reads NOT RUN; the account holds no user note. Unfalsifiable until the fixture lands.
+  PROVED RED   steer:P2.4   by form-emptied
+  PROVED RED   steer:P2.5   by form-emptied, steer-pinned
+  NOT PROVED   steer:P2.6   — the COVERAGE FLOOR (at least three journeys reached). Breaking it means removing cards from a shared account; no mutation written.
+  PROVED RED   steer:P3.1   by form-emptied, pill-collapses
+  PROVED RED   steer:P3.2   by form-emptied, unit-unseeded
+  PROVED RED   steer:P3.3   by form-emptied
+  PROVED RED   steer:P3.4   by form-emptied, steer-pinned
+  PROVED RED   steer:P4.1   by form-emptied
+  PROVED RED   steer:P4.2   by expectations-box, paper-tinted
+  PROVED RED   steer:P4.3   by expectations-box, form-emptied
+  PROVED RED   steer:P4.4   by expectations-box, form-emptied, hairline-last, hairline-none
+  PROVED RED   steer:P4.5   by form-emptied, hint-gone
+  PROVED RED   steer:P5.1   by count-gone, form-emptied
+  NOT PROVED   steer:P5.2   — NOTE case — same.
+  PROVED RED   steer:P5.3   by bulk-disabled
+  PROVED RED   steer:P5.4   by form-emptied, steer-pinned
+  PROVED RED   steer:P5.5   by count-gone, form-emptied
+  PROVED RED   steer:P5.6   by bar-truncates
+  PROVED RED   finish:P1.1  by rec-card-gone
+  PROVED RED   finish:P1.2  by pane-opaque
+  PROVED RED   finish:P1.3  by rim-shows
+  PROVED RED   finish:P1.4  by second-scroller
+  PROVED RED   finish:P2.1  by scroller-overflows-card
+  PROVED RED   finish:P2.2  by card-min-height, rec-card-gone
+  NOT PROVED   finish:P2.3  — NOTE case — same.
+  PROVED RED   finish:P2.4  by bar-floats-up, card-min-height
+  PROVED RED   finish:P3.1  by option-preselected
+  PROVED RED   finish:P3.2  by strip-prefilled
+  PROVED RED   finish:P3.3  by option-preselected
+  NOT PROVED   finish:P3.4  — no mutation written — the expect row's Another date could be hidden by CSS. A gap in the catalogue, not evidence about the case.
+  PROVED RED   finish:P3.5  by strip-prefilled
+  NOT PROVED   finish:P3.6  — no mutation written — as above, plus the mounted-picker count.
+  PROVED RED   finish:P4.1  by primary-renamed
+  PROVED RED   finish:P4.2  by asterisk-required
+  PROVED RED   finish:P4.3  by addlinks-gone
+  PROVED RED   finish:P4.4  by primaries-disabled, primary-renamed
+  PROVED RED   finish:P4.5  by primaries-disabled
+  PROVED RED   finish:P4.6  by primaries-disabled
+  NOT PROVED   finish:P5.1  — NOTE case — same.
+  NOT PROVED   finish:P5.2  — NOTE case — same.
+  NOT PROVED   finish:P5.3  — NOTE case — same.
+  PROVED RED   finish:P6.1  by bulk-rows-gone
+  PROVED RED   finish:P6.2  by bulk-columns-renamed
+  PROVED RED   finish:P6.3  by bulk-rows-gone
+  PROVED RED   finish:P6.4  by bulk-actions-reworded
+  PROVED RED   finish:P6.5  by bulk-deed-generic
+  PROVED RED   finish:P6.6  by bulk-dismiss-gone
+
+41 of 50 proved red · 9 not proved
+
+⚠️ SIX OF THE NOT-PROVED ARE ONE MISSING FIXTURE — steer:P2.3, steer:P5.2, finish:P2.3,
+   finish:P5.1, finish:P5.2, finish:P5.3. All read NOT RUN because the account holds no user
+   Note. They pass on an ABSENCE and would pass through any regression: these are the dangerous
+   ones, and a single seeded note retires all six at once.
+
+   The other three are gaps in the CATALOGUE rather than findings about the assertions.

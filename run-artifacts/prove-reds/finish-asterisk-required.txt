@@ -1,0 +1,59 @@
+── finishing round · 29 assertions · 1 RED · 28 green · MUTATED: asterisk-required
+  green  P1.1 · a query journey draws three rim cards; bulk draws two
+           send=3 close=3 bulk=2 · NOT RUN for the note — no user Note card on the account
+  green  P1.2 · the pane column is transparent on the ground, gap 12
+           bg=rgba(0, 0, 0, 0) gap=12px
+  green  P1.3 · the band tint reaches all four corners inside the rim, which clips
+           onScreen=true hits=[1,1,1,1] rimOverflow=hidden
+  green  P1.4 · nothing in the pane scrolls except the worksheet
+           [] (none is expected while the ledger fits)
+  green  P2.1 · the scroller sits inside the worksheet card and absorbs the content
+           card 326 holding a 310 scroller (align-items=normal — a block, not a flex column)
+  green  P2.2 · no card in the pane declares a minimum height
+           send=["0px","0px"] · NOT RUN for the note — no user Note card on the account
+  green  P2.3 · a note's form card is content-driven; Send's is taller
+           NOT RUN for the note — no user Note card on the account
+  green  P2.4 · the action bar stays at the pane's foot on the shortest journey present
+           close (the note is absent): bar=847 pane=847
+  green  P3.1 · no option is pre-selected on first render, on any journey reached
+           send=0 close=0 bulk=0 · NOT RUN for the note — no user Note card on the account
+  green  P3.2 · the strip starts at an em dash and states nothing unchosen
+           will="This records—"
+  green  P3.3 · the agent's stated window is shown, not chosen
+           present · pre-chosen options=0
+  green  P3.4 · expect-back offers Another date
+           occurrences on the expect row=1
+  green  P3.5 · the strip grows with a choice — the day stays in the ledger, the consequence arrives
+           "This records—" → after the day "This records—" → after the window "This recordsreply expected around 23 September."
+  green  P3.6 · each date question offers Another date, and only one picker is ever mounted
+           when=1 expect=1 · pickers mounted=0
+  green  P4.1 · the primaries are the owner's override wording
+           send="Log as sent" close="Log the close" bulk="Log 0 queries" · NOT RUN for the note — no user Note card on the account
+  RED    P4.2 · no asterisk marks a required field anywhere in the pane
+           first * at: send=41 close=32 bulk=-1 · NOT RUN for the note — no user Note card on the account
+  green  P4.3 · optional fields are OFFERED as links, and carry no tag until one is opened
+           add-links: send=2 close=1 bulk=0 · OPTIONAL tags at rest: send=0 close=0 bulk=1 · NOT RUN for the note — no user Note card on the account
+  green  P4.4 · bulk is the stated exception — not live at zero, with its count showing
+           disabled=false prim="Log 0 queries"
+  green  P4.5 · every other primary stays clickable while incomplete
+           disabled: send=false close=false · NOT RUN for the note — no user Note card on the account
+  green  P4.6 · an incomplete click writes nothing and lands focus in the form
+           scrollTop 0→0 · active=BUTTON inPane=true tookOver=false
+  green  P5.1 · the finishing sentence appears exactly once in the pane, total
+           NOT RUN for the note — no user Note card on the account
+  green  P5.2 · a note has no When segment
+           NOT RUN for the note — no user Note card on the account
+  green  P5.3 · the note's own words are the centrepiece, Caveat at 26px
+           NOT RUN for the note — no user Note card on the account
+  green  P6.1 · the bulk table renders one row per query, five visible with the rest folded
+           rows=5 showAll=1
+  green  P6.2 · its columns are the contract's six
+           ["Agent","Sent","Covering letter","Synopsis","Opening sample","Something else OPTIONAL"]
+  green  P6.3 · rows are ordered oldest sent first
+           ["1770057945626","1770835545626","1771613145626","1772390745626","1773168345626"]
+  green  P6.4 · both fill actions are offered, with the requirements caveat verbatim
+           ["Start from what each agent asks for","Copy the first row down"]
+  green  P6.5 · the band states the cohort, and never a single query's wording
+           deed="Fill in what you sent with 30 imported queries" sub=""
+  green  P6.6 · the bar offers Dismiss all beside the counted primary
+           ["Dismiss all","Log 0 queries"]

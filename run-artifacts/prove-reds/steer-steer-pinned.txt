@@ -1,0 +1,43 @@
+── steer round · 21 assertions · 3 RED · 18 green · MUTATED: steer-pinned
+  green  P2.1 · exactly one square renders, visibly, and it is on a requirable section
+           count=1 on=#s-unit visibility=visible
+  green  P2.2 · it breathes — the contract's own keyframes, not a blink
+           animation=tpn-sqPulse
+  green  P2.3 · a note requires nothing, so it carries no square
+           NOT RUN — no user Note card on the account
+  green  P2.4 · close steers to its own single requirement
+           count=1 on=#s-when
+  green  P2.6 · the suite reached at least three journeys
+           measured: send, close, bulk
+  RED    P2.5 · answering the steered section moves the square on
+           #s-unit to #s-unit (count 1)
+  green  P3.1 · the pill expands in place — one chosen, quantity inside it, row height unchanged
+           on=1 qty=1 h [38,38,38] to [38,38,38]
+  green  P3.2 · choosing a unit seeds its own default and puts the caret in the value
+           value="3" focused=true
+  green  P3.3 · a typed value survives a re-render — into the answer the row records
+           answer="77 chapters✓Edit" done=true · open moved to ["s-unit"] · live input=null (unmounted by design — see the note)
+  RED    P3.4 · a stepper moves the value and never the chosen unit
+           undefined to 77 · unit "" to "chapters" · read from the recorded answer
+  green  P4.1 · the scan reached the form card's descendants at all
+           elements=34
+  green  P4.2 · every background inside the form card is white, field, pink or transparent
+           ["rgba(0, 0, 0, 0)","rgb(253, 251, 247)"] · marks excluded by size: ["sqm 5x5","sqm 5x5","sqm 5x5","sqm 5x5"]
+  green  P4.3 · the expectations box is gone — no wrapper, no fill, no border, no radius
+           legacy=0 [{"border":"0px/0px","radius":"0px","bg":"rgba(0, 0, 0, 0)"},{"border":"0px/0px","radius":"0px","bg":"rgba(0, 0, 0, 0)"}]
+  green  P4.4 · rows are divided by hairlines, and the last has none
+           ["1px","1px","1px","0px"]
+  green  P4.5 · the retired `.hintline` is gone, and the quiet prose it carried survives on the row
+           retired hintline=0 · hints on the open row=1 (measured on a partial, whose open row is s-unit)
+  green  P5.1 · the count beside the primary counts what is still unanswered
+           count="3 still to answer"
+  green  P5.2 · a note is complete, so it carries no count beside its primary
+           NOT RUN — no user Note card on the account
+  green  P5.3 · bulk keeps its stated exception — not live at zero, its count in the label, no chip
+           disabled=false prim="Log 0 queries" chip="no queries filled in yet"
+  RED    P5.4 · an incomplete click writes nothing and lands focus in the first missing section
+           scrollTop 0 to 0 · inFirst=false tookOver=false
+  green  P5.5 · the line names every missing answer, and the chip counts the same set
+           chip=3 links=["when it went","when you expect to hear back","your reminder"]
+  green  P5.6 · nothing in the action bar truncates at 1440
+           []
