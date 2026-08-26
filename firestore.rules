@@ -415,10 +415,69 @@ service cloud.firestore {
         && (data.get('hasAgentResponded', null) == null || data.hasAgentResponded is bool);
     }
 
+    /**
+     * ⚠️ THE AUTHORITATIVE STORE — AND UNTIL 26 Aug 2026 IT WAS THE LOOSELY-VALIDATED ONE.
+     * `recomputeQuery` derives status and every pipeline date from THIS collection
+     * (`subcollectionDocToDerivable`, src/lib/recomputeQuery.ts:31), while the DISPLAY projection
+     * beside it — /users/{uid}/activities, `isValidActivity` below — already enforced the full
+     * ten-value enum. The store that DECIDES status restricted no keys and never looked at
+     * `resultingStatus` at all. The asymmetry was exactly backwards.
+     *
+     * The `queries` block's "the door this leaves open is closed at the source instead" reasoning
+     * covers the query document's own `status` field. It never covered the subcollection that
+     * DERIVES it, and nothing else did either.
+     *
+     * ⚠️ THE ALLOWLIST IS DERIVED FROM THE WRITE PATHS, NOT FROM A SPEC — and it is a SUPERSET of
+     * every shape any writer has ever produced, because the move (db.tsx:3084) and the
+     * correction-restore (:2985) write back whatever they READ, and `saveQueryEdits` patches with
+     * `batch.update`, where `incoming()` is the MERGED document. An allowlist narrower than real
+     * data denies those paths silently, on legacy rows, with a permission error the UI shows as
+     * nothing happening.
+     *   type/resultingStatus/createdAt/note/queryId/agentName/manuscriptTitle
+     *                     db.tsx logDoc (:2152) + updateQueryStatus (:2340) + recordMaterialsSent
+     *                     (:2463) + saveQueryEdits.ts (:126) + smartImportCommit.ts (:216)
+     *   dateProvisional   smartImportCommit.ts:222 (true) · saveQueryEdits.ts:161 (false)
+     *   reminderDate      logNudge.ts:133
+     *   replyWeeks        holdingReply.ts:126
+     *
+     * ⚠️ `type` DOES NOT TAKE THE ENUM CHECK, AND MUST NOT. Four non-enum values are load-bearing —
+     * 'Nudge sent' (logNudge.ts:86), 'Holding reply' (holdingReply.ts:43), 'Offer accepted' and
+     * 'Offer declined' (offerDecision.ts:28-29) — and QueryTimeline.tsx:280,304 FILTERS on them to
+     * render the nudge and holding-reply rows. Constraining `type` here would deny every nudge,
+     * holding reply and offer decision AND blank those rows. The enum belongs on `resultingStatus`,
+     * which those shapes correctly omit: they are not status-bearing, which is the whole point of
+     * them (recomputeQuery ignores a rung with no recognised status).
+     *
+     * Locked in tests/rules/firestore.rules.test.ts — five REJECT cases and four ALLOW cases,
+     * including a legacy migration-heal row proved both creatable and EDITABLE.
+     */
     function isValidActivityNested(data) {
-      return data.type is string && data.type.size() <= 128
+      return data.keys().hasOnly([
+          'type', 'resultingStatus', 'createdAt', 'note',
+          'queryId', 'agentName', 'manuscriptTitle',
+          'dateProvisional', 'reminderDate', 'replyWeeks'
+        ])
+        && data.type is string && data.type.size() <= 128
         && (data.createdAt is timestamp || data.createdAt is string)
-        && data.note is string && data.note.size() <= 16384;
+        && data.note is string && data.note.size() <= 16384
+        && (!data.keys().hasAny(['resultingStatus']) || (data.resultingStatus is string && (
+          data.resultingStatus == 'Queried' ||
+          data.resultingStatus == 'Partial Requested' ||
+          data.resultingStatus == 'Partial Sent' ||
+          data.resultingStatus == 'Full Requested' ||
+          data.resultingStatus == 'Full Sent' ||
+          data.resultingStatus == 'Revise & Resubmit' ||
+          data.resultingStatus == 'Offer' ||
+          data.resultingStatus == 'Rejected' ||
+          data.resultingStatus == 'Withdrawn' ||
+          data.resultingStatus == 'No Response'
+        )))
+        && (!data.keys().hasAny(['queryId']) || (data.queryId is string && data.queryId.size() <= 128))
+        && (!data.keys().hasAny(['agentName']) || (data.agentName is string && data.agentName.size() <= 256))
+        && (!data.keys().hasAny(['manuscriptTitle']) || (data.manuscriptTitle is string && data.manuscriptTitle.size() <= 512))
+        && (!data.keys().hasAny(['dateProvisional']) || data.dateProvisional is bool)
+        && (!data.keys().hasAny(['reminderDate']) || (data.reminderDate is string && data.reminderDate.size() <= 64))
+        && (!data.keys().hasAny(['replyWeeks']) || (data.replyWeeks is number && data.replyWeeks >= 0 && data.replyWeeks <= 520));
     }
 
     // (isValidTopLevelActivity is gone with the RETIRED users/{uid}/activity store — Tier 3 ·
