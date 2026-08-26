@@ -82,6 +82,23 @@ export type Side = "theirs" | "yours";
 export type Weight = "fresh" | "settled" | "long";
 export type NodeDir = "out" | "in" | "close";
 
+/**
+ * ⚠️ WHICH MARKER, AND THE SHAPE IS THE CLAIM (markers pack, Phase 3; ref v11).
+ *
+ * `status` — the query's status changed here, so the marker is the locked `StatusDot`: the same
+ *   symbol the writer reads everywhere else, at its own app-wide size.
+ * `direction` — an activity was recorded and the status HELD. A StatusDot here would draw the same
+ *   symbol on both sides of the join, which reads as nothing having happened; a smaller ringless
+ *   dot says "on the record, not a step in the journey".
+ *
+ * The third marker is not here because it is not a node: a date that arrived with nothing recorded
+ * against it is a `Waypoint`, and the absence of a node IS the claim.
+ */
+export type MarkerKind = "status" | "direction";
+
+/** Which of the five dated things a waypoint is — the view draws the reminder differently. */
+export type WaypointKind = "expected" | "reminder" | "deadline" | "snooze" | "overrun";
+
 export interface Segment {
   key: string;
   rowKey: string;
@@ -118,6 +135,15 @@ export interface BarNode {
   lane: number;
   at: number;
   dir: NodeDir;
+  /**
+   * ⚠️ DERIVED FROM WHETHER THE ACTIVITY WROTE A STATUS, which is the one fact that separates the
+   * two: a nudge writes no `resultingStatus` by construction, and so does a holding reply and a
+   * logged note. The same absence the side walk already reads to decide that no hands changed.
+   */
+  marker: MarkerKind;
+  /** the status it moved to — present iff `marker` is `"status"`, and it IS the marker's input */
+  status?: QueryStatus;
+  /** the direction marker's own symbol; a status marker draws `StatusDot` and ignores this */
   glyph: string;
   caption: string;
   queryId: string;
@@ -130,6 +156,7 @@ export interface Waypoint {
   lane: number;
   at: number;
   side: Side;
+  kind: WaypointKind;
   caption: string;
   /** the week is behind us: the dashes go solid and this renders as already passed */
   passed?: true;
@@ -216,7 +243,12 @@ export const weightFor = (days: number): Weight =>
 /** The count, stated as a duration and never as a verdict. */
 export const durationCount = (days: number): string => plural(days, "day");
 
-const GLYPH: Record<NodeDir, string> = { out: "↑", in: "↤", close: "×" };
+/**
+ * ⚠️ v11's OWN SYMBOLS, and only the direction marker uses them. A status marker draws the locked
+ * component, which brings its own glyph — so a symbol here would be a second vocabulary for a
+ * thing that already has one.
+ */
+const GLYPH: Record<NodeDir, string> = { out: "↑", in: "←", close: "●" };
 
 /* ══ the pass ═════════════════════════════════════════════════════════════════════════════════ */
 
@@ -258,10 +290,17 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
     const a = at(r.ymd);
     if (a == null) continue;
     const closes = /^closed$/i.test(r.label);
+    const dir: NodeDir = closes ? "close" : r.dir;
+    /* ⚠️ THE MARKER IS DECIDED BY THE ACTIVITY, NOT BY THE LABEL. A closure IS a status change, so
+       it takes the StatusDot like every other transition — v11 draws all three closure kinds the
+       same, and the terminus is the dot's own business rather than a symbol invented here. */
+    const st = statusOf(r.activityId);
     nodes.push({
       key: `nd-${r.key}`, rowKey, lane, at: a,
-      dir: closes ? "close" : r.dir,
-      glyph: GLYPH[closes ? "close" : r.dir],
+      dir,
+      marker: st ? "status" : "direction",
+      ...(st ? { status: st } : {}),
+      glyph: GLYPH[dir],
       caption: r.label,
       queryId: r.queryId,
       activityId: r.activityId,
@@ -362,12 +401,12 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
   const expectedYmd = resolved.ms == null ? null : isoToYmd(new Date(resolved.ms).toISOString());
   const expectedPassed = !!expectedYmd && expectedYmd < win.today;
 
-  const addWp = (ymd: string | null, side: Side, caption: string) => {
+  const addWp = (ymd: string | null, side: Side, kind: WaypointKind, caption: string) => {
     if (!ymd || !caption) return;
     const a = at(ymd);
     if (a == null || a > stopAt) return;
     waypoints.push({
-      key: `wp-${rowKey}-${lane}-${ymd}-${caption}`, rowKey, lane, at: a, side, caption,
+      key: `wp-${rowKey}-${lane}-${ymd}-${caption}`, rowKey, lane, at: a, side, kind, caption,
       ...(ymd < win.today ? { passed: true as const } : {}),
       queryId: query.id,
     });
@@ -378,16 +417,20 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
      where v5's whole rule is that overtaken waypoints still render — as passed. In a window that
      starts today, in-window and not-yet-passed are the same thing, so one test does both jobs. */
   if (expectedYmd) {
+    /* ⚠️ ONE DATE, TWO OF v11's FIVE. While it is theirs it is the reply window's close; once the
+       move is the writer's it is the deadline the agency stated for THEM. The same resolved date,
+       named for whose it is — not two derivations. */
     addWp(expectedYmd, now === "yours" ? "yours" : "theirs",
+      now === "yours" ? "deadline" : "expected",
       now === "yours" ? `They asked by ${shortCalDate(expectedYmd)}` : `Expected ${shortCalDate(expectedYmd)}`);
   }
   /* the next reminder the writer set — a forecast, never a fact */
   const nudgeYmd = terminal ? null : isoToYmd(query.nudgeDate as string | undefined);
-  addWp(nudgeYmd, "theirs", nudgeYmd ? `Reminder due ${shortCalDate(nudgeYmd)}` : "");
+  addWp(nudgeYmd, "theirs", "reminder", nudgeYmd ? `Reminder due ${shortCalDate(nudgeYmd)}` : "");
   /* ⚠️ A SNOOZE PAUSES YOUR ATTENTION, NOT THE AGENT'S CLOCK — so it is a waypoint and the bar is
      untouched by it. Drawing a break in the journey would say something stopped; nothing did. */
   const backYmd = flag?.snoozedUntil ? isoToYmd(flag.snoozedUntil) : null;
-  if (backYmd) addWp(backYmd, "yours", `Back on ${shortCalDate(backYmd)}`);
+  if (backYmd) addWp(backYmd, "yours", "snooze", `Back on ${shortCalDate(backYmd)}`);
 
   /* ── the overrun: a long-standing your-move stretch, hatched back to the expectation ────── */
   const sinceYmd = (() => {
@@ -429,6 +472,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
     breaks.push({ at: OVERRUN_SPAN, kind: "waypoint" });
     waypoints.push({
       key: `wp-${rowKey}-${lane}-overrun`, rowKey, lane, at: OVERRUN_SPAN, side: "yours",
+      kind: "overrun",
       caption: expectedYmd ? `Expected ${shortCalDate(expectedYmd)}` : "Expected",
       queryId: query.id,
     });

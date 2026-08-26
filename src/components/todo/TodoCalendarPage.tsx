@@ -58,6 +58,7 @@ import { useDockActivity } from "./useDockActivity";
    from the To-do world (`FocusFlow.tsx:33`), so the precedent and the shape are both established;
    building a calendar-local conversation would be the second implementation this repo forbids. */
 import { TimelineRows, buildTimelineRows } from "../reading-pane/QueryTimeline";
+import { StatusDot } from "../StatusDot";
 import { formatQueryMaterial } from "../../lib/materials";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
@@ -165,24 +166,62 @@ const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({
   </button>
 );
 
-/** An event on the bar — it sits IN the break, and its caption hangs beneath. */
+/**
+ * An event on the bar — it sits IN the break the derivation left, and its caption hangs beneath.
+ *
+ * ⚠️ TWO MARKERS, AND THE SHAPE IS THE CLAIM (v11). Where the status CHANGED the marker is the
+ * locked `StatusDot` — the same symbol the writer reads on every other surface, at its own
+ * app-wide size, with nothing about it restated here. Where an activity was recorded and the
+ * status HELD, a StatusDot would draw the same symbol on both sides of the join and read as
+ * nothing having happened, so the marker is a smaller ringless dot carrying the direction alone.
+ *
+ * ⚠️ BOTH ARE CLICKABLE, because both have an entry behind them. That is not a second rule: it is
+ * the same rule the shape states, which is what stops the two drifting apart.
+ */
 const Node: React.FC<{ n: BarNode; selected: boolean; onPick: () => void }> = ({ n, selected, onPick }) => (
   <button
     type="button"
-    className={`tl-at tl-node ${n.dir}${selected ? " sel" : ""}`}
+    className={`tl-at tl-node${selected ? " sel" : ""}`}
+    data-marker={n.marker}
+    data-dir={n.dir}
     style={{ left: pct(n.at), ...laneVar(n.lane) }}
     onClick={onPick}
     aria-label={n.caption}
+    /* ⚠️ THE CAPTION IS ALSO A `title`, because two markers on one day put their captions on top of
+       each other — measured at 1440: two 30px dots clear each other by 10px while their captions
+       need about eighty each, so the later one overprints the earlier. The markers are legible and
+       the captions are not; a policy for that is a design decision and is flagged rather than
+       invented here. This costs nothing and makes the overprinted one readable meanwhile. */
+    title={n.caption}
   >
-    <span aria-hidden>{n.glyph}</span>
+    {/* ⚠️ THE HALO IS THE WRAPPER'S, NOT THE DOT'S. `StatusDot` is locked and takes no ring of its
+        own; punching the marker out of the board's parchment is this page's business, so it is
+        this page's element that does it. */}
+    <span className="tl-mk">
+      {n.marker === "status" && n.status
+        ? <StatusDot status={n.status} decorative />
+        : <span aria-hidden>{n.glyph}</span>}
+    </span>
     <span className="tl-tip">{n.caption}</span>
   </button>
 );
 
-/** A forecast: a dashed upright with its caption below. Nothing about it claims an event. */
+/**
+ * A date that arrived with nothing recorded against it.
+ *
+ * ⚠️ NOT CLICKABLE, AND NOT BECAUSE OF A FLAG. It is a `<span>` with no handler, because there is
+ * nothing behind it to open — v11's rule is that the interaction and the shape are the SAME rule,
+ * so neither can drift from the other. Dashed throughout, because dashed already means provisional
+ * everywhere else in this app.
+ *
+ * ⚠️ THE REMINDER TAKES A DASHED RING RATHER THAN AN UPRIGHT, and no exclamation mark. A reminder
+ * falling due is the date you chose, arriving; an exclamation adds alarm the app has no business
+ * feeling, which is the ground the forbidden word was ruled out on.
+ */
 const Way: React.FC<{ w: Waypoint }> = ({ w }) => (
   <span
     className={`tl-at tl-wp${w.side === "yours" ? " yours" : ""}${w.passed ? " passed" : ""}`}
+    data-kind={w.kind}
     style={{ left: pct(w.at), ...laneVar(w.lane) }}
     aria-hidden
   >

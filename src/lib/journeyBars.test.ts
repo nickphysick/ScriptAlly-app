@@ -210,7 +210,11 @@ describe("⚠️ v5 · a closure stops the bar dead, and nothing follows it, eve
 
   it("keeps the closure node and drops everything after it", () => {
     expect(bars.nodes.map((n) => n.dir)).toEqual(["close"]);
-    expect(bars.nodes[0].glyph).toBe("×");
+    /* ⚠️ A CLOSURE IS A STATUS CHANGE, SO IT TAKES THE STATUSDOT — v11 draws all three closure
+       kinds the same and the terminus is the dot's own business. The glyph this node carries is
+       the DIRECTION marker's, and a status marker never reads it. */
+    expect(bars.nodes[0].marker).toBe("status");
+    expect(bars.nodes[0].status).toBe(QueryStatus.REJECTED);
   });
 
   it("draws one stretch, up to the closure, and no continuation", () => {
@@ -504,5 +508,144 @@ describe("⚠️ how long it has been your move is stamped, not inferred from th
       moveLabel: "Send full",
     }), WIN);
     expect(bars.segments.filter((s) => s.side === "yours")[0].weight).toBe("long");
+  });
+});
+
+
+/* ══ THE MARKER GRAMMAR (markers pack, Phase 3; v11 is normative) ═══════════════════════════ */
+
+describe("⚠️ marker 1 — the StatusDot, wherever the status changed", () => {
+  const at = (label: string, dir: "out" | "in", status: QueryStatus) => laneBars(lane({
+    query: q({ status }),
+    records: [rec({ key: "r1", ymd: day(2), label, dir, activityId: "s1" })],
+    statusOf: () => status,
+  }), WIN).nodes[0];
+
+  it("takes it for every one of v11's six status transitions", () => {
+    const six: [string, "out" | "in", QueryStatus][] = [
+      ["Query sent", "out", QueryStatus.QUERIED],
+      ["Full requested", "in", QueryStatus.FULL_REQUESTED],
+      ["Full sent", "out", QueryStatus.FULL_SENT],
+      ["Revise & resubmit", "in", QueryStatus.REVISE_RESUBMIT],
+      ["Offer received", "in", QueryStatus.OFFER],
+      ["Closed", "in", QueryStatus.REJECTED],
+    ];
+    for (const [label, dir, status] of six) {
+      const n = at(label, dir, status);
+      expect(n.marker, `${label} did not take the StatusDot`).toBe("status");
+      /* ⚠️ AND IT CARRIES THE STATUS ITSELF, because that is the component's input. A marker that
+         knew only "a status changed" would have to be told WHICH by something else, and the
+         something else would be a second reading of the same activity. */
+      expect(n.status, `${label} carries no status for the dot to draw`).toBe(status);
+    }
+  });
+
+  it("⚠️ AND NOTHING HERE INVENTS A SYMBOL — the locked component brings its own", () => {
+    /* the glyph field is the DIRECTION marker's; a status marker never reads it, which is why
+       there is no per-status symbol table in this module to drift from `StatusDot`'s */
+    const n = at("Offer received", "in", QueryStatus.OFFER);
+    expect(n.marker).toBe("status");
+    expect(Object.keys(n)).not.toContain("symbol");
+  });
+});
+
+describe("⚠️ marker 2 — the direction dot, where an activity held the status", () => {
+  const held = (label: string, dir: "out" | "in") => laneBars(lane({
+    query: q({ status: QueryStatus.QUERIED }),
+    agent: agent({ responseTimeWeeks: 12 } as Partial<Agent>),
+    records: [rec({ key: "r1", ymd: day(2), label, dir, activityId: "n1" })],
+    statusOf: () => null,
+  }), WIN).nodes[0];
+
+  it("takes it for v11's three: a nudge, a holding reply, and a note you logged", () => {
+    for (const [label, dir] of [["Nudge sent", "out"], ["Holding reply", "in"], ["Note", "out"]] as const) {
+      const n = held(label, dir);
+      expect(n.marker, `${label} took the wrong marker`).toBe("direction");
+      expect(n.status, `${label} carries a status it did not write`).toBeUndefined();
+    }
+  });
+
+  it("⚠️ THE ABSENCE OF A `resultingStatus` IS THE WHOLE TEST, and it is not a special case", () => {
+    /* `logNudge` writes a NON-status activity deliberately so `recomputeQuery` ignores it. The
+       marker reads exactly that absence — the same absence the side walk reads to decide that no
+       hands changed. One fact, two consumers, no second table. */
+    expect(held("Nudge sent", "out").marker).toBe("direction");
+    const changed = laneBars(lane({
+      query: q({ status: QueryStatus.FULL_REQUESTED }),
+      records: [rec({ key: "r1", ymd: day(2), label: "Full requested", dir: "in", activityId: "f1" })],
+      statusOf: () => QueryStatus.FULL_REQUESTED,
+    }), WIN).nodes[0];
+    expect(changed.marker).toBe("status");
+  });
+
+  it("carries v11's own symbols, and only this marker reads them", () => {
+    expect(held("Nudge sent", "out").glyph).toBe("↑");
+    expect(held("Holding reply", "in").glyph).toBe("←");
+  });
+});
+
+describe("⚠️ marker 3 — the dashed flag, where only a date arrived", () => {
+  it("names each of v11's five, so the view can draw the reminder differently", () => {
+    /* the reply window, still theirs */
+    const win1 = laneBars(lane({
+      query: q({ status: QueryStatus.QUERIED, dateSent: `${day(0)}T09:00:00Z` }),
+      agent: agent({ responseTimeWeeks: 0.5 } as Partial<Agent>),
+    }), WIN);
+    expect(win1.waypoints.map((w) => w.kind)).toContain("expected");
+
+    /* the agency's own deadline, once the move is the writer's */
+    const deal = laneBars(lane({
+      query: q({ status: QueryStatus.OFFER, writerExpectedDate: `${day(4)}T12:00:00Z` } as Partial<Query>),
+    }), WIN);
+    expect(deal.waypoints.map((w) => w.kind)).toEqual(["deadline"]);
+
+    /* the reminder the writer set */
+    const rem = laneBars(lane({
+      query: q({ status: QueryStatus.QUERIED, nudgeDate: `${day(3)}T09:00:00Z` }),
+      agent: agent({ responseTimeWeeks: 12 } as Partial<Agent>),
+    }), WIN);
+    expect(rem.waypoints.map((w) => w.kind)).toEqual(["reminder"]);
+
+    /* attention coming back */
+    const flag = { id: "f1", userId: "u", taskType: "nudge_overdue", queryId: "q1",
+      snoozeCount: 1, snoozedUntil: `${day(3)}T09:00:00Z` } as TaskFlag;
+    const snz = laneBars(lane({ query: q({ status: QueryStatus.FULL_REQUESTED }), flag }), WIN);
+    expect(snz.waypoints.map((w) => w.kind)).toEqual(["snooze"]);
+
+    /* and the expectation that has already passed, which the overrun runs back to */
+    const over = laneBars(lane({
+      query: q({ status: QueryStatus.FULL_REQUESTED, dateSent: "2026-06-01T09:00:00Z" }),
+      agent: agent({ responseTimeWeeks: 2 } as Partial<Agent>),
+      moveLabel: "Send full",
+    }), WIN);
+    expect(over.waypoints.map((w) => w.kind)).toContain("overrun");
+  });
+
+  it("⚠️ ONE RESOLVED DATE, TWO OF THE FIVE — named for whose move it is, not derived twice", () => {
+    const theirs = laneBars(lane({
+      query: q({ status: QueryStatus.QUERIED, dateSent: `${day(0)}T09:00:00Z` }),
+      agent: agent({ responseTimeWeeks: 0.5 } as Partial<Agent>),
+    }), WIN).waypoints[0];
+    const yours = laneBars(lane({
+      query: q({ status: QueryStatus.OFFER, writerExpectedDate: `${day(4)}T12:00:00Z` } as Partial<Query>),
+    }), WIN).waypoints[0];
+    expect(theirs.kind).toBe("expected");
+    expect(yours.kind).toBe("deadline");
+    expect(theirs.caption).toMatch(/^Expected /);
+    expect(yours.caption).toMatch(/^They asked by /);
+  });
+
+  it("⚠️ NO CAPTION THIS MODULE PRODUCES CARRIES AN ALARM — no exclamation, and not the word", () => {
+    const all = [
+      ...laneBars(lane({
+        query: q({ status: QueryStatus.QUERIED, nudgeDate: `${day(3)}T09:00:00Z` }),
+        agent: agent({ responseTimeWeeks: 12 } as Partial<Agent>),
+      }), WIN).waypoints,
+      ...laneBars(lane({
+        query: q({ status: QueryStatus.FULL_REQUESTED, dateSent: "2026-06-01T09:00:00Z" }),
+        agent: agent({ responseTimeWeeks: 2 } as Partial<Agent>), moveLabel: "Send full",
+      }), WIN).waypoints,
+    ].map((w) => w.caption).join(" | ");
+    expect(all).not.toMatch(/!|overdue|late|urgent|action required/i);
   });
 });

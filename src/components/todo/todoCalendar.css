@@ -386,25 +386,53 @@
    A waypoint is `pointer-events: none` and takes no focus, so it costs nothing to be included. */
 .tl-at:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
 
-/* ══ NODES AND WAYPOINTS — geometry only in this phase ══════════════════════════════════════
+/* ══ THE MARKERS (markers pack, Phase 3; ref timeline-marker-grammar.html) ══════════════════
  *
- * ⚠️ THE MARKER GRAMMAR IS PHASE 3. What changes here is only WHERE these sit: centred on their
- * lane rather than offset by a literal, and sized from `--disc` rather than from a number that
- * happened to match the bar. The three-marker treatment replaces the look below.
+ * ⚠️ THREE MARKERS, AND THE SHAPE STATES WHETHER A FACT EXISTS. A StatusDot where the status
+ * changed, a smaller ringless dot where an activity was recorded and the status held, a dashed
+ * flag where only a date arrived. The interaction rule is the same rule — solid is clickable
+ * because something is behind it, dashed is not because nothing is — so the two cannot drift.
+ *
+ * ⚠️ THE MARKER OCCUPIES THE GAP; IT DOES NOT SIT ON A BAR. The `GAP` clearance either side is the
+ * derivation's and is correct as shipped, so the halo below separates the marker from the ground
+ * rather than covering a bar that runs under it.
  */
 .tl-node {
-  width: var(--disc); height: var(--disc);
   transform: translate(-50%, -50%);
-  border-radius: 50%; z-index: 3;
+  z-index: 3; padding: 0; border: 0; background: none;
   display: inline-flex; align-items: center; justify-content: center;
-  font-size: 13px; cursor: pointer; pointer-events: auto; padding: 0;
-  background: #fff; border: 2px solid #ece0d2; color: #6b5a4d;
+  pointer-events: auto; cursor: pointer;
 }
-.tl-node.out { background: #f8e2d9; border-color: #7c3a2a; color: #7c3a2a; }
-.tl-node.in { background: #e9efe6; border-color: #8a9e88; color: #5a6e58; }
-.tl-node.close { background: #fff; border-color: #b9a48f; color: #b9a48f; }
-/* the caption hangs beneath the marker, measured from the marker's OWN box — never from a number
-   that describes how tall the marker happens to be */
+/* ⚠️ THE HALO IS PARCHMENT, NOT WHITE — it punches the marker out of the board's own ground, and
+   the board is parchment. White here would draw a ring nobody asked for. */
+.tl-mk {
+  border-radius: 50%; box-shadow: 0 0 0 3px #fdfaf5;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+}
+
+/* ── MARKER 1 · the status changed ────────────────────────────────────────────────────────────
+   ⚠️ THIS RULE SETS NO COLOUR, NO RING AND NO GLYPH, because every one of those is `StatusDot`'s
+   and the component is locked app-wide. It sets a box the size of the dot's own `DOT_SIZE`, which
+   is what `--disc` is, and gets out of the way. */
+.tl-node[data-marker="status"] { width: var(--disc); height: var(--disc); }
+
+/* ── MARKER 2 · recorded, but the status held ─────────────────────────────────────────────────
+   ⚠️ SMALLER AND RINGLESS. A StatusDot here would draw the same symbol on both sides of the join,
+   which reads as nothing having happened — the whole reason this marker exists. */
+.tl-node[data-marker="direction"] { width: calc(var(--disc) - 8px); height: calc(var(--disc) - 8px); }
+.tl-node[data-marker="direction"] .tl-mk { font-size: 11px; line-height: 1; }
+.tl-node[data-marker="direction"][data-dir="out"] .tl-mk {
+  background: #f8e7dc; border: 1.5px solid #7c3a2a; color: #7c3a2a;
+}
+.tl-node[data-marker="direction"][data-dir="in"] .tl-mk {
+  background: #e9efe6; border: 1.5px solid #8a9e88; color: #5a6e58;
+}
+.tl-node[data-marker="direction"][data-dir="close"] .tl-mk {
+  background: #fff; border: 1.5px solid #b9a48f; color: #b9a48f;
+}
+
+/* the caption hangs beneath the marker, measured from the marker's OWN box */
 .tl-tip {
   position: absolute; top: calc(100% + 5px); left: 50%; transform: translateX(-50%);
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
@@ -413,6 +441,9 @@
   pointer-events: none;
 }
 
+/* ── MARKER 3 · a date arrived, and nothing is behind it ──────────────────────────────────────
+   ⚠️ `pointer-events: none` IS THE INTERACTION HALF OF THE SAME RULE. There is nothing to open, so
+   there is nothing to click — stated once, in the place that also makes it dashed. */
 .tl-wp {
   width: 0; height: calc(var(--bar-h) + var(--wp-over) * 2);
   transform: translate(-1px, -50%);
@@ -425,6 +456,21 @@
 /* ⚠️ AN OVERTAKEN WAYPOINT STILL RENDERS — as passed. A past week states what happened, and a
    forecast that was met or missed is part of what happened. */
 .tl-wp.passed { border-left-style: solid; opacity: 0.55; }
+
+/* ⚠️ THE REMINDER TAKES A DASHED RING, NOT AN EXCLAMATION MARK. A reminder falling due is the date
+   you chose, arriving; an exclamation adds alarm the app has no business feeling — the same ground
+   the forbidden word was ruled out on. The ring reads as a sibling of the StatusDot rather than a
+   warning, which is exactly what it is: the same size as the direction marker, dashed instead of
+   solid, because the thing behind it is a date rather than a fact. */
+.tl-wp[data-kind="reminder"] { border-left: none; }
+.tl-wp[data-kind="reminder"]::before {
+  content: ""; position: absolute;
+  top: 50%; left: 0; transform: translate(-50%, -50%);
+  width: calc(var(--disc) - 8px); height: calc(var(--disc) - 8px);
+  border-radius: 50%; border: 2px dashed #c9a89e;
+  background: #fdfaf5; box-shadow: 0 0 0 3px #fdfaf5;
+}
+.tl-wp[data-kind="reminder"] .tl-tip { top: calc(50% + var(--disc) / 2); }
 
 /* ══ THE WRITER'S OWN CHIPS ═════════════════════════════════════════════════════════════════
  *
