@@ -43,8 +43,23 @@ export const VERIFY_TTL_MS = 48 * 60 * 60 * 1000;
 export const RATE_LIMIT_MAX = 5;
 export const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
-/** A submission faster than this was not typed by a person. */
-export const MIN_SUBMIT_MS = 1500;
+/**
+ * A submission faster than this was not typed by a person.
+ *
+ * ⚠️ 800, NOT 1500, AND THE REASON IS THAT THIS GUARD FAILS SILENTLY. A too-fast submission gets
+ * the SUCCESS shape and no write — so a real writer who trips it is told they hold a founding
+ * place and does not. Invisible to them, invisible to us, and permanent, because nobody signs up
+ * for the same thing twice.
+ *
+ * The two errors are not close. A bot slipping through at 900ms puts one address onto a list that
+ * already has dedupe, a rate limit and a hundred-place cap — cost near zero. A writer with
+ * autofill submitting at 1.2s costs one of the hundred and is never discovered. 800ms is still
+ * unreachable by a person doing this deliberately and still catches every naive script.
+ *
+ * The clock starts when the FORM MOUNTS, not when the page loads — see `mountedAt` in
+ * `FoundingSignup`. Reading for a minute and then signing up is a long elapsed time and fine.
+ */
+export const MIN_SUBMIT_MS = 800;
 
 /** POST bodies larger than this are refused unread. */
 export const MAX_BODY_BYTES = 1024;

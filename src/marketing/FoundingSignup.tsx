@@ -21,7 +21,7 @@
  * agree. See that file for why.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Runs } from "./CopyRuns";
 import { isValidEmail } from "../lib/authActions";
 import {
@@ -30,6 +30,7 @@ import {
   foundingCounterLabel,
 } from "./landingCopy";
 import { useFounding, ensureCount, submitFounding, FoundingState } from "./foundingStore";
+import { WAITLIST_HONEYPOT_FIELD, WaitlistSource } from "./waitlist";
 
 /** Which outcomes replace the form, and which leave it there to try again. */
 const HIDES_FORM: ReadonlySet<FoundingState> = new Set<FoundingState>(["sent", "dupe", "full", "down"]);
@@ -57,11 +58,30 @@ export const FoundingSignup: React.FC<{
    * what happened to the same submission.
    */
   messages?: Partial<Record<FoundingState, React.ReactNode>>;
+  /**
+   * ⚠️ WHICH SURFACE THIS IS, PASSED EXPLICITLY AND NEVER DERIVED. `idPrefix` happens to be one
+   * value per mount today, but it exists to keep DOM ids unique — the day somebody renames one for
+   * a DOM reason, the analytics would quietly start lying with nothing to notice it. And it cannot
+   * come from the URL: the sealed band renders on two different pages.
+   */
+  source: WaitlistSource;
   onNavigate: (tab: string, subPageName?: string) => void;
-}> = ({ idPrefix, ctaLabel = FOUNDING_CTA, formClass, messages, onNavigate }) => {
+}> = ({ idPrefix, ctaLabel = FOUNDING_CTA, formClass, messages, source, onNavigate }) => {
   const { state } = useFounding();
   const [email, setEmail] = useState("");
   const [invalid, setInvalid] = useState(false);
+  /**
+   * ⚠️ THE HONEYPOT'S VALUE IS STATE, NOT A READ OFF THE DOM. A controlled input is the only way
+   * a scripted fill is guaranteed to reach the submit — and it keeps the field's value out of
+   * `document.querySelector` guesswork at send time.
+   */
+  const [trap, setTrap] = useState("");
+  /**
+   * ⚠️ FROM THE FORM MOUNTING, NOT FROM PAGE LOAD, AND PER MOUNT. A reader can land, read for a
+   * minute and then use the panel — a long elapsed time, and fine. A `useRef` rather than state
+   * because it must never trigger a render, and it must survive every keystroke.
+   */
+  const mountedAt = useRef(Date.now());
 
   useEffect(ensureCount, []);
 
@@ -69,11 +89,18 @@ export const FoundingSignup: React.FC<{
     e.preventDefault();
     if (!isValidEmail(email)) { setInvalid(true); return; }
     setInvalid(false);
-    await submitFounding(email.trim());
+    await submitFounding({
+      email: email.trim(),
+      trap,
+      elapsedMs: Date.now() - mountedAt.current,
+      source,
+    });
   };
 
   const fieldId = `${idPrefix}-email`;
   const invalidId = `${idPrefix}-invalid`;
+  /* Prefixed like the others — `/founders` renders two of these forms on one document. */
+  const trapId = `${idPrefix}-website`;
 
   return (
     <>
@@ -95,6 +122,25 @@ export const FoundingSignup: React.FC<{
             aria-describedby={invalid ? invalidId : undefined}
             onChange={(ev) => { setEmail(ev.target.value); if (invalid) setInvalid(false); }}
           />
+          {/* ⚠️ THE HONEYPOT. `.mk-trap` is the contact form's, reused rather than reinvented:
+              off-screen at `left: -9999px` rather than `display: none`, because competent bots skip
+              hidden fields and fill positioned ones. `aria-hidden` and `tabIndex={-1}` keep it out
+              of the accessibility tree AND the tab order — a honeypot that traps screen-reader
+              users is worse than no honeypot, and this one cannot be reached by anyone moving
+              through the form by keyboard. The visible-in-markup label is for a person reading the
+              source, not for a user. */}
+          <div className="mk-trap" aria-hidden="true">
+            <label htmlFor={trapId}>Leave this field empty</label>
+            <input
+              id={trapId}
+              name={WAITLIST_HONEYPOT_FIELD}
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={trap}
+              onChange={(ev) => setTrap(ev.target.value)}
+            />
+          </div>
           <button type="submit" className="mk-btn mk-btn--ink" disabled={state === "sending"}>
             {ctaLabel}
           </button>

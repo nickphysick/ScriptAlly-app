@@ -36,6 +36,26 @@
 
 export const WAITLIST_ENDPOINT = "/api/waitlist";
 
+/**
+ * ⚠️ THE HONEYPOT'S FIELD NAME IS THE BAIT, and it is deliberately the same string as
+ * `CONTACT_HONEYPOT_FIELD` in `src/lib/contactTransport.ts` WITHOUT sharing a constant with it.
+ * A shared one would couple two unrelated forms so that renaming this form's bait silently
+ * renames the contact form's — and the rename would look correct in the diff. Same value, two
+ * declarations, on purpose. `functions/src/waitlist.ts` reads `body.website`.
+ */
+export const WAITLIST_HONEYPOT_FIELD = "website";
+
+/**
+ * Which surface a sign-up came from. These strings are the server's — `readSource` in
+ * `functions/src/waitlistModel.ts` accepts exactly these and folds anything else to `unknown`.
+ *
+ * ⚠️ PASSED EXPLICITLY BY EACH MOUNT, NEVER DERIVED. `idPrefix` happens to be one value per
+ * surface today, but it exists to keep DOM ids unique — the day someone renames one for a DOM
+ * reason the analytics would quietly lie. And it cannot come from the URL either: the sealed band
+ * renders on two different pages.
+ */
+export type WaitlistSource = "landing-panel" | "founders-hero" | "sealed-band";
+
 /** How long to wait before treating a request as unanswerable. */
 export const WAITLIST_TIMEOUT_MS = 10_000;
 
@@ -128,11 +148,32 @@ const request = async (init: RequestInit): Promise<RawResponse> => {
   }
 };
 
-export const joinWaitlist = async (email: string): Promise<JoinOutcome> =>
+export interface JoinFields {
+  email: string;
+  /** The honeypot's value. Empty for every real person; sent regardless. */
+  trap: string;
+  /** Milliseconds from the FORM MOUNTING to the submit — not from page load. */
+  elapsedMs: number;
+  source: WaitlistSource;
+}
+
+/**
+ * ⚠️ ADDITIVE, AND BOTH DIRECTIONS STILL WORK. The server tolerates all three new fields being
+ * absent — `judgeJoin` treats a missing trap and a missing timer as a pass, and `readSource` folds
+ * a missing source to `unknown` — so an older client against this server behaves exactly as it did.
+ * The reverse holds too: these fields on the pre-cap server are simply ignored properties on a
+ * parsed body. Neither end has to ship first.
+ */
+export const joinWaitlist = async (fields: JoinFields): Promise<JoinOutcome> =>
   classifyJoin(await request({
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({
+      email: fields.email,
+      [WAITLIST_HONEYPOT_FIELD]: fields.trap,
+      elapsedMs: fields.elapsedMs,
+      source: fields.source,
+    }),
   }));
 
 /**

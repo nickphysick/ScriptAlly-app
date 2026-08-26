@@ -22,7 +22,7 @@
  */
 
 import { useSyncExternalStore } from "react";
-import { joinWaitlist, fetchWaitlistCount, WaitlistCount } from "./waitlist";
+import { joinWaitlist, fetchWaitlistCount, JoinFields, WaitlistCount } from "./waitlist";
 
 /**
  * ⚠️ `full` IS REACHABLE NOW, AND IT ARRIVES FROM THE SERVER RATHER THAN FROM ARITHMETIC.
@@ -72,13 +72,18 @@ export const ensureCount = (): void => {
 /**
  * One submission, whichever form it came from.
  *
+ * ⚠️ IT TAKES THE WHOLE FIELD SET NOW, NOT JUST AN ADDRESS. The honeypot's value, the time since
+ * the form mounted and which surface it was are all decided by the MOUNT and travel with the
+ * submission; the store forwards them and reads none of them. Its state machine is untouched —
+ * the same five outcomes, decided by the same `classifyJoin`.
+ *
  * ⚠️ THE COUNT FROM A SUCCESSFUL JOIN REPLACES THE ONE WE HAD, so the reader who has just claimed
  * a place sees a bar that includes them. A failure leaves the previous count alone — a request
  * that did not answer is not evidence that the number changed.
  */
-export const submitFounding = async (email: string): Promise<void> => {
+export const submitFounding = async (fields: JoinFields): Promise<void> => {
   set({ ...snapshot, state: "sending" });
-  const outcome = await joinWaitlist(email);
+  const outcome = await joinWaitlist(fields);
   set({
     state: outcome.state,
     count: "count" in outcome && outcome.count ? outcome.count : snapshot.count,

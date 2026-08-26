@@ -62,7 +62,12 @@ export const FoundingBand: React.FC<{
       <h2 id="mk-band-h">{FOUNDING_HEADING}</h2>
       <p className="mk-betablurb">{FOUNDING_BLURB}</p>
 
-      <FoundingSignup idPrefix="mk-band" formClass="mk-betaform" onNavigate={onNavigate} />
+      <FoundingSignup
+        idPrefix="mk-band"
+        source="sealed-band"
+        formClass="mk-betaform"
+        onNavigate={onNavigate}
+      />
       <FoundingCounter variant="bar" />
 
       <p className="mk-betanote"><Runs runs={FOUNDING_NOTE} onNavigate={onNavigate} /></p>

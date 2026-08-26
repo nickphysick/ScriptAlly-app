@@ -98,6 +98,7 @@ export const FoundingPanel: React.FC<{
       <div className="mk-fmrow">
         <FoundingSignup
           idPrefix="mk-panel"
+          source="landing-panel"
           ctaLabel={FOUNDING_PANEL_CTA}
           formClass="mk-fmform"
           messages={{

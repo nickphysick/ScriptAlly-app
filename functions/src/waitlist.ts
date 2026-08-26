@@ -25,7 +25,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import {
-  ALLOWED_ORIGINS, GET_CACHE_SECONDS, MAX_BODY_BYTES, REQUIRE_VERIFICATION,
+  ALLOWED_ORIGINS, GET_CACHE_SECONDS, MAX_BODY_BYTES, MIN_SUBMIT_MS, REQUIRE_VERIFICATION,
   countPayload, ipHash, judgeJoin, normaliseEmail, readSource,
 } from "./waitlistModel";
 import { consumeRateLimit, joinWaitlist, readCounterState, verifyWaitlist } from "./waitlistStore";
@@ -114,21 +114,43 @@ export const waitlist = onRequest(
         else if (typeof req.body === "string") { try { body = JSON.parse(req.body); } catch { body = {}; } }
 
         const email = normaliseEmail(body.email);
+        const source = readSource(body.source);
         const verdict = judgeJoin({ email, trap: body.website, elapsedMs: body.elapsedMs });
+
+        /* Hashed here rather than at the rate limit, so a SILENT rejection can be logged with it.
+           No I/O — the rate limit's transaction still runs where it did. */
+        const rawIp = String(req.headers["x-forwarded-for"] ?? "").split(",")[0].trim()
+          || req.ip || "";
+        const salt = IP_HASH_SALT.value();
+        const hashedIp = rawIp && salt ? ipHash(rawIp, salt) : null;
 
         /* ⚠️ A HONEYPOT HIT AND A TOO-FAST SUBMIT BOTH LOOK LIKE SUCCESS AND WRITE NOTHING.
            Telling a bot which check it failed is telling it what to change. */
         if (verdict.kind === "honeypot" || verdict.kind === "too-fast") {
+          /* ⚠️ THE ONLY TRACE A SILENT GUARD LEAVES. Both branches answer `ok` and write no
+             document, so without this line there is no way to know whether they are catching bots
+             or customers — and the timing guard's false positive is a real writer who believes
+             they hold a founding place and does not. If this fires twenty times a day on
+             `landing-panel`, it is eating signups and the number is how we find out.
+             ⚠️ AND IT CARRIES NO ADDRESS, hashed or otherwise. A log line is not the place for one:
+             logs are read by more people, kept in more places and retained on someone else's
+             schedule. The hashed IP is enough to tell one abuser from twenty writers. */
+          console.warn(JSON.stringify({
+            event: "waitlist.silent_reject",
+            guard: verdict.kind,
+            source,
+            ipHash: hashedIp ?? null,
+            ...(verdict.kind === "too-fast"
+              ? { elapsedMs: typeof body.elapsedMs === "number" ? body.elapsedMs : null,
+                  thresholdMs: MIN_SUBMIT_MS }
+              : {}),
+          }));
           const counter = await readCounterState(db);
           res.status(200).json({ ok: true, ...countPayload(counter) });
           return;
         }
 
         /* ⚠️ THE RATE LIMIT RUNS BEFORE VALIDATION, so malformed attempts are not free. */
-        const rawIp = String(req.headers["x-forwarded-for"] ?? "").split(",")[0].trim()
-          || req.ip || "";
-        const salt = IP_HASH_SALT.value();
-        const hashedIp = rawIp && salt ? ipHash(rawIp, salt) : null;
         if (hashedIp) {
           const { allowed } = await consumeRateLimit(db, hashedIp, Date.now());
           if (!allowed) {
@@ -145,7 +167,7 @@ export const waitlist = onRequest(
         const result = await joinWaitlist(db, {
           emailNormalised: email,
           hashedIp,
-          source: readSource(body.source),
+          source,
           nowMs: Date.now(),
           requireVerification: REQUIRE_VERIFICATION,
         });
