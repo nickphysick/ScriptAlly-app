@@ -319,3 +319,20 @@ to fix the last one.**
 3. **The word `overdue` in the bundle.** None of it is the calendar's; it is a stored `TaskType`
    (`nudge_overdue`, in Firestore), a `Task.priority` union member, a popover class and a nav
    count. A sweep is a data-layer pack with a migration in it, not a line here.
+
+## Gates, at close
+
+Re-run on the tip after the report landed, on a tree clean of my paths:
+
+| | |
+|---|---|
+| `tsc --noEmit` | **exit 0**, no diagnostics |
+| `vite build` | **exit 0**; read by `grep -inE "error\|\[WARNING\]"`, not by `tail` — the only match is the expected chunk-size note |
+| Vitest | **411 files · 7,117 passed · 3 skipped**, none failing |
+
+⚠️ **The mid-run red is gone and it was never mine.** For most of this run
+`manuscriptPlate.test.tsx` was red (7 cases) with two `tsc` errors beside it, from the book-profile
+session editing under me; it cleared when their later phases landed. My owned suites were green at
+every phase gate — the four of them are **172 cases** — and nothing of theirs was ever staged in
+one of my commits. Recording it because a red gate that belongs to another session is
+indistinguishable, in a run summary, from one you caused.
