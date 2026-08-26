@@ -477,3 +477,32 @@ describe("⚠️ two events on one day are not drawn in one place", () => {
     for (const a of ats) { expect(a).toBeGreaterThan(2); expect(a).toBeLessThan(3); }
   });
 });
+
+describe("⚠️ how long it has been your move is stamped, not inferred from the send", () => {
+  it("reads `lastStatusChange` — when the CURRENT status began", () => {
+    /* ⚠️ THE SEND DATE WAS THE WRONG SUBSTITUTE and the census proved it: 35 stretches sat in the
+       heaviest weight while not one of them had an expectation that had passed. A send dates the
+       whole relationship; the hand-change dates the stretch, and it is usually outside the week.
+       `lastStatusChange` is the same audit stamp `cardActionYmd` reads to place an agent task on
+       the day it landed — one derivation, two readers. */
+    const bars = laneBars(lane({
+      query: q({
+        status: QueryStatus.FULL_REQUESTED,
+        dateSent: "2026-05-01T09:00:00Z",          // months ago
+        lastStatusChange: "2026-08-24T09:00:00Z",  // two days ago
+      } as Partial<Query>),
+      moveLabel: "Send full",
+    }), WIN);
+    const yours = bars.segments.filter((s) => s.side === "yours");
+    expect(yours[0].weight, "the send date decided the weight").toBe("fresh");
+    expect(yours[0].count).toBe("2 days");
+  });
+
+  it("falls back to the send only when nothing has stamped the change", () => {
+    const bars = laneBars(lane({
+      query: q({ status: QueryStatus.FULL_REQUESTED, dateSent: "2026-05-01T09:00:00Z" }),
+      moveLabel: "Send full",
+    }), WIN);
+    expect(bars.segments.filter((s) => s.side === "yours")[0].weight).toBe("long");
+  });
+});

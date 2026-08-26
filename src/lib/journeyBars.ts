@@ -391,8 +391,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
 
   /* ── the overrun: a long-standing your-move stretch, hatched back to the expectation ────── */
   const sinceYmd = (() => {
-    /* when it became the writer's move: the last hand-changing event, else the expectation
-       passing, else the latest send — in that order, because each is more specific than the next */
+    /* the last hand-changing event IN VIEW is the most specific answer there is */
     for (let i = live.length - 1; i >= 0; i -= 1) {
       const ymd = win.days[Math.floor(live[i].at)];
       /* ⚠️ AN EVENT AFTER TODAY CANNOT BE WHEN SOMETHING STARTED. Records are past by nature, so
@@ -401,6 +400,20 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
       if (ymd > win.today) continue;
       if (statusOf(live[i].activityId) && sides[i + 1] === "yours") return ymd;
     }
+    /**
+     * ⚠️ `lastStatusChange`, AND FALLING BACK TO THE SEND WAS MEASURABLY WRONG. The hand-change is
+     * usually OUTSIDE the visible week — a full requested last month, a bar drawn this one — and
+     * the send date is the wrong substitute: it dates the whole relationship, not the stretch. On
+     * the harness account that put 35 stretches into the heaviest weight while none of them had an
+     * expectation that had passed, which is the contradiction that gave it away.
+     *
+     * `lastStatusChange` is the audit stamp for when the CURRENT status began, and for a
+     * writer's-move query that is exactly when it became the writer's move. It is the same field
+     * `cardActionYmd` reads to place an agent task on the day it landed on the desk — one
+     * derivation, two readers, rather than a second guess at the same fact.
+     */
+    const stamped = isoToYmd(query.lastStatusChange as string | undefined);
+    if (stamped) return stamped;
     if (expectedPassed && expectedYmd) return expectedYmd;
     return sentMs != null ? isoToYmd(new Date(sentMs).toISOString()) : null;
   })();
