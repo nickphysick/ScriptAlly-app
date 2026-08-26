@@ -356,3 +356,82 @@ describe("statusIndex — the join the side derivation needs", () => {
     expect(statusIndex([act({ id: "n1", activityType: ActivityType.NUDGE_SENT })]).size).toBe(0);
   });
 });
+
+/* ══ the two faults the pictures found ═══════════════════════════════════════════════════════ */
+
+describe("⚠️ the side walk runs FORWARDS — a send hands the move over, and the bar must say so", () => {
+  it("after you send, the next stretch is theirs — not still yours", () => {
+    /* ⚠️ THIS IS THE BUG A SCREENSHOT FOUND AND EVERY NUMBER PASSED. Walking backwards from the
+       current side made each earlier stretch equal to the one after it, so a row with two sends in
+       a week drew "Your move" three times running. After you send a partial it is plainly THEIR
+       move, and the bar said it was still yours. */
+    const bars = laneBars(lane({
+      query: q({ status: QueryStatus.PARTIAL_REQUESTED }),
+      records: [
+        rec({ key: "r1", ymd: day(1), label: "Partial sent", dir: "out", activityId: "s1" }),
+        rec({ key: "r2", ymd: day(4), label: "Partial sent", dir: "out", activityId: "s2" }),
+      ],
+      statusOf: () => QueryStatus.PARTIAL_SENT,
+      moveLabel: "Send partial",
+    }), WIN);
+    expect(bars.segments.map((s) => s.side)).toEqual(["yours", "theirs", "yours"]);
+  });
+
+  it("a nudge between two stretches leaves both on the same side", () => {
+    const bars = laneBars(lane({
+      query: q({ status: QueryStatus.QUERIED, nudgeDate: "2026-09-09T09:00:00Z" }),
+      agent: agent({ responseTimeWeeks: 12 } as Partial<Agent>),
+      records: [rec({ key: "r1", ymd: day(2), label: "Nudge sent", dir: "out", activityId: "n1" })],
+      statusOf: () => null,
+    }), WIN);
+    expect(bars.segments.map((s) => s.side)).toEqual(["theirs", "theirs"]);
+  });
+
+  it("⚠️ AND THE LAST STRETCH TAKES THE QUERY'S OWN STATUS, whatever the visible record says", () => {
+    /* the record in view says the partial went out; the query says a full has since been
+       requested. Something happened the window cannot see, and the status is the ground truth. */
+    const bars = laneBars(lane({
+      query: q({ status: QueryStatus.FULL_REQUESTED }),
+      records: [rec({ key: "r1", ymd: day(1), label: "Partial sent", dir: "out", activityId: "s1" })],
+      statusOf: () => QueryStatus.PARTIAL_SENT,
+      moveLabel: "Send full",
+    }), WIN);
+    expect(bars.segments[bars.segments.length - 1].side).toBe("yours");
+  });
+});
+
+describe("⚠️ a bar says what it is ONCE, where there is room to read it", () => {
+  const twice = () => laneBars(lane({
+    /* ⚠️ A REAL SEND DATE, because the duration is counted from when it became the writer's move
+       and the first version of this fixture put its events two days in the FUTURE — where nothing
+       has elapsed, so the count was correctly omitted and the case was measuring that instead. */
+    query: q({ status: QueryStatus.FULL_REQUESTED, dateSent: "2026-07-01T09:00:00Z" }),
+    records: [
+      rec({ key: "r1", ymd: day(2), label: "Full requested", dir: "in", activityId: "f1" }),
+      rec({ key: "r2", ymd: day(4), label: "Holding reply", dir: "in", activityId: "h1" }),
+    ],
+    statusOf: (id) => (id === "f1" ? QueryStatus.FULL_REQUESTED : null),
+    moveLabel: "Send full",
+  }), WIN);
+
+  it("labels one piece of each contiguous same-side run and leaves the rest silent", () => {
+    const bars = twice();
+    const yours = bars.segments.filter((s) => s.side === "yours");
+    expect(yours.length, "the run was not broken into pieces").toBeGreaterThan(1);
+    expect(yours.filter((s) => s.label).length, "the run states itself more than once").toBe(1);
+    expect(yours.filter((s) => s.count).length, "the count is restated").toBe(1);
+  });
+
+  it("⚠️ AND IT IS THE WIDEST PIECE, because the opening one is often a sliver", () => {
+    const bars = twice();
+    const yours = bars.segments.filter((s) => s.side === "yours");
+    const speaking = yours.find((s) => !!s.label)!;
+    const widest = yours.reduce((a, b) => (b.to - b.from > a.to - a.from ? b : a));
+    expect(speaking.key).toBe(widest.key);
+  });
+
+  it("a run of one piece still speaks", () => {
+    const bars = laneBars(lane({ query: q({ status: QueryStatus.QUERIED }) }), WIN);
+    expect(bars.segments.every((s) => !!s.label)).toBe(true);
+  });
+});

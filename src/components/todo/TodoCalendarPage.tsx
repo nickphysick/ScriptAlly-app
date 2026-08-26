@@ -152,7 +152,10 @@ const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({
     }}
     onClick={onPick}
   >
-    {!sg.overrun && <span className="d" aria-hidden />}
+    {/* ⚠️ THE DOT IS THE STATEMENT'S BULLET, so a piece that says nothing does not draw one. A bar
+        states itself once per run; the pieces that stay silent are the same bar continuing, and a
+        lone dot in an empty capsule reads as a pill that failed to load. */}
+    {!sg.overrun && !!sg.label && <span className="d" aria-hidden />}
     <span className="tl-lbl">{sg.overrun ? sg.count : sg.label}</span>
     {!sg.overrun && sg.count && <span className="tl-cnt">{sg.count}</span>}
   </button>

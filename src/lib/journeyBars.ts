@@ -288,19 +288,39 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
   /* ── the sides, walked backwards from today ────────────────────────────────────────────── */
   const now = sideOf(query.status);
   const terminal = isTerminalStatus(query.status);
-  /* sides[i] is the side of the stretch BEFORE node i; sides[live.length] is after the last one.
-     ⚠️ On a closed journey the last node IS the closure, so the tail is never drawn — the fallback
-     exists to keep the array total, not to state anything. */
+  /**
+   * `sides[i]` is the stretch BEFORE node i; `sides[live.length]` is the stretch after the last.
+   *
+   * ⚠️ IT WALKS FORWARDS, AND THE FIRST VERSION WALKED BACKWARDS — which was wrong in a way no
+   * number caught and one screenshot did. Carrying the current side back through every node made
+   * each earlier stretch equal to the one after it unless the node itself flipped it, so a row
+   * with two sends in a week drew "Your move" three times in a row: after you send a partial it is
+   * plainly THEIR move, and the bar said it was still yours.
+   *
+   * Forwards, each stretch is stated by the event that opened it, which is the only thing that can
+   * state it: `getPrimaryAction(resultingStatus)` for an event that moved the status, and the
+   * PREVIOUS stretch for one that did not — a nudge is something you do while waiting, and it
+   * carries no `resultingStatus` by construction.
+   *
+   * ⚠️ THE OPENING STRETCH IS THE ONE THE WINDOW CANNOT SEE THE CAUSE OF, so it is inferred from
+   * the first event instead: you author when it is your move, they author when it is theirs, and
+   * `dir` is already the record layer's word for authorship. Where the first event changed no
+   * hands there is nothing to infer from and nothing changed, so the side is simply the query's.
+   *
+   * ⚠️ AND THE LAST STRETCH TAKES THE QUERY'S OWN STATUS, not the walk's answer. The status is the
+   * ground truth for what is true NOW; a disagreement means something happened that the visible
+   * record does not hold, and in that argument the status wins.
+   */
   const sides: Side[] = new Array(live.length + 1);
-  sides[live.length] = now ?? "theirs";
-  for (let i = live.length - 1; i >= 0; i -= 1) {
+  const firstStatus = live.length ? statusOf(live[0].activityId) : null;
+  sides[0] = live.length && firstStatus
+    ? (live[0].dir === "out" ? "yours" : "theirs")
+    : (now ?? "theirs");
+  for (let i = 0; i < live.length; i += 1) {
     const st = statusOf(live[i].activityId);
-    /* an event that changed no status changed no hands — a nudge is something you do WHILE
-       waiting, and it carries no `resultingStatus` by construction */
-    if (!st) { sides[i] = sides[i + 1]; continue; }
-    /* before a hand-changing event the side is the opposite of who authored it */
-    sides[i] = live[i].dir === "out" ? "yours" : "theirs";
+    sides[i + 1] = st ? (sideOf(st) ?? sides[i]) : sides[i];
   }
+  if (live.length) sides[live.length] = now ?? sides[live.length];
 
   /* ── waypoints: what is forecast, and what comes back ──────────────────────────────────── */
   const waypoints: Waypoint[] = [];
@@ -348,7 +368,12 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
     /* when it became the writer's move: the last hand-changing event, else the expectation
        passing, else the latest send — in that order, because each is more specific than the next */
     for (let i = live.length - 1; i >= 0; i -= 1) {
-      if (statusOf(live[i].activityId) && sides[i + 1] === "yours") return win.days[Math.floor(live[i].at)];
+      const ymd = win.days[Math.floor(live[i].at)];
+      /* ⚠️ AN EVENT AFTER TODAY CANNOT BE WHEN SOMETHING STARTED. Records are past by nature, so
+         this only bites on a window paged forward — where it would otherwise produce a negative
+         elapsed time, clamped to zero, and a stretch that silently lost its duration. */
+      if (ymd > win.today) continue;
+      if (statusOf(live[i].activityId) && sides[i + 1] === "yours") return ymd;
     }
     if (expectedPassed && expectedYmd) return expectedYmd;
     return sentMs != null ? isoToYmd(new Date(sentMs).toISOString()) : null;
@@ -385,8 +410,34 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
   const openEndKind = query.status === QueryStatus.REVISE_RESUBMIT || query.status === QueryStatus.OFFER;
   const openEnd = now === "yours" && openEndKind && resolved.ms == null;
 
+  /**
+   * ⚠️ A BAR SAYS WHAT IT IS ONCE, WHERE THERE IS ROOM TO READ IT.
+   *
+   * Every piece of a run used to carry the label and the count, so a row broken by two events drew
+   * "Your move · 3 days" three times across one week. It reads as three separate things, which is
+   * the exact impression a continuous bar exists to remove — and no assertion could see it,
+   * because each piece was individually correct.
+   *
+   * The label goes on the WIDEST piece of each contiguous same-side run rather than the first: a
+   * run's opening piece is often the sliver left before an event, where the words would be
+   * truncated to nothing. Where it fits is where it is legible.
+   */
+  const runOf: number[] = [];
+  const sideAt = (idx: number) => sides[Math.min(live.filter((n) => n.at <= pieces[idx].from).length, sides.length - 1)];
+  let run = 0;
+  pieces.forEach((_, i) => {
+    if (i > 0 && sideAt(i) !== sideAt(i - 1)) run += 1;
+    runOf[i] = run;
+  });
+  const widestOfRun = new Map<number, number>();
+  pieces.forEach((p, i) => {
+    const cur = widestOfRun.get(runOf[i]);
+    if (cur === undefined || p.to - p.from > pieces[cur].to - pieces[cur].from) widestOfRun.set(runOf[i], i);
+  });
+
   const segments: Segment[] = [];
   pieces.forEach((p, i) => {
+    const speaks = widestOfRun.get(runOf[i]) === i;
     /* which stretch is this? the one after however many nodes precede it */
     const before = live.filter((n) => n.at <= p.from).length;
     const side = sides[Math.min(before, sides.length - 1)];
@@ -405,11 +456,11 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
       openRight: endsAtEdge && !terminal && closeIdx < 0 && !openEnd && !norail,
       capLeft: !startsAtEdge,
       capRight: !endsAtEdge,
-      label: isOverrun ? "" : labelFor(side, {
+      label: isOverrun || !speaks ? "" : labelFor(side, {
         norail, openEnd, query, expectedYmd, expectedPassed, nudgeYmd, moveLabel, terminal,
       }),
       ...(isOverrun ? { overrun: true as const, count: `${durationCount(yoursDays)} your move` } : {}),
-      ...(!isOverrun && side === "yours" && !terminal && yoursDays > 0
+      ...(!isOverrun && speaks && side === "yours" && !terminal && yoursDays > 0
         ? { count: durationCount(yoursDays) } : {}),
       ...(!isOverrun && side === "yours" && !terminal ? { weight } : {}),
       ...(norail && first ? { norail: true as const } : {}),
