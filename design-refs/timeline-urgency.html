@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — when it's been your move a long time</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ground:#f2ede7;--parchment:#fdfaf5;--white:#fff;--ink:#3a1c14;--muted:#8a7a6c;--label:#9c8878;
+--burgundy:#7c3a2a;--pink:#f5e2da;--pinkb:#e8c8bc;--pinkband:#f3e0d6;--sage:#8a9e88;--sagetint:#e9efe6;
+--sagetxt:#5a6e58;--hair:#ece0d2;--line:#e0d0c4;--dash:#c9a89e;--rec:#b9a48f}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ground);font-family:Inter,sans-serif;color:var(--ink);padding:22px 26px 34px;-webkit-font-smoothing:antialiased}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;color:var(--label)}
+h1{font-family:'Playfair Display',serif;font-size:27px;font-weight:500;margin:5px 0 4px}
+.sub{color:var(--muted);font-size:13px;max-width:760px;line-height:1.55;margin-bottom:18px}
+.board{background:var(--parchment);border:1px solid var(--hair);border-radius:14px;overflow:hidden;margin-bottom:8px}
+.tl{display:grid;grid-template-columns:206px repeat(7,1fr)}
+.dh{background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid var(--hair);padding:8px 0 7px;text-align:center}
+.dh .dw{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;color:var(--sagetxt)}
+.dh .dd{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:500;color:#3f4d3d;margin-top:2px}
+.dh.today .dd{background:var(--burgundy);color:#f8f5f0;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center}
+.corner{background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid var(--hair);border-right:1px solid var(--hair);display:flex;align-items:center;padding:0 15px}
+.rowhead{background:var(--parchment);border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+padding:0 15px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-height:80px}
+.rowhead .nm{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;display:flex;align-items:center;gap:8px}
+.rowhead .ag{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--label)}
+.sd{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
+.sd.out{background:var(--pink);border:1.5px solid var(--burgundy)}
+.sd.half{background:linear-gradient(90deg,var(--burgundy) 50%,var(--pink) 50%);border:1.5px solid var(--burgundy)}
+.dcell{border-bottom:1px solid var(--hair);border-right:1px solid #f2e9dd;min-height:80px}
+.dcell.wkend{background:#faf6ef}.dcell.today{background:#fdf5f2}
+.lane{position:relative;grid-column:2 / -1;height:0}
+.seg{position:absolute;top:-58px;height:36px;display:flex;align-items:center;gap:9px;padding:0 14px;
+font-size:11.5px;font-weight:500;white-space:nowrap;overflow:hidden;border-radius:999px}
+.seg .cnt{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.09em;text-transform:uppercase;opacity:.8}
+.seg.future{border-top-right-radius:0;border-bottom-right-radius:0}
+.seg.openleft{border-top-left-radius:0;border-bottom-left-radius:0}
+
+/* waiting — white, gentle breath (decided) */
+.seg.their{background:#fff;border:1px solid #dfe6dc;color:#5a6e58;box-shadow:0 1px 2px rgba(58,28,20,.04);
+animation:breathe 4.2s ease-in-out infinite}
+.seg.their.future{border-right:2px dashed #8a9e88}
+.seg.their.openleft{border-left:2px dotted #8a9e88}
+@keyframes breathe{0%,100%{background:#ffffff;border-color:#dfe6dc}50%{background:#f4f8f2;border-color:#cdd8c9}}
+
+/* ---- YOUR MOVE: one hue, three weights. No red, no motion, no verdict. ---- */
+.seg.y1{background:#fdf3ef;border:1px solid #eed8ce;color:#8a5442}                    /* fresh */
+.seg.y2{background:var(--pinkband);border:1px solid var(--pinkb);color:#7a4636}       /* settled */
+.seg.y3{background:#eec9ba;border:1px solid #dba892;color:#5f2a1c;font-weight:600}    /* long-standing */
+.seg.y1.future{border-right:2px dashed #e0bcae}
+.seg.y2.future{border-right:2px dashed var(--dash)}
+.seg.y3.future{border-right:2px dashed #c08a72}
+/* the overrun: the stretch beyond the date it was expected, hatched in the same hue */
+.overrun{position:absolute;top:-58px;height:36px;border-radius:999px 0 0 999px;
+background:repeating-linear-gradient(-45deg,#e6bda9 0 6px,#efd0c1 6px 12px);
+border:1px solid #dba892;border-right:none;display:flex;align-items:center;padding:0 13px;
+font-size:11px;font-weight:600;color:#5f2a1c;white-space:nowrap;overflow:hidden}
+.wp{position:absolute;top:-56px;width:0;height:32px;border-left:2px dashed var(--dash);z-index:3}
+.wp .tip{position:absolute;top:34px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;
+font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:#a06a55;white-space:nowrap}
+.node{position:absolute;top:-58px;width:36px;height:36px;border-radius:50%;z-index:2;
+display:flex;align-items:center;justify-content:center;font-size:13px;transform:translateX(-18px)}
+.node.in{background:var(--sagetint);border:2px solid var(--sage);color:var(--sagetxt)}
+.node .tip{position:absolute;top:40px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;
+font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--label);white-space:nowrap;background:var(--parchment);padding:1px 5px;border-radius:5px}
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:20px}
+.card{background:var(--white);border:1px solid var(--hair);border-radius:11px;padding:13px 15px}
+.card h4{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:500;margin-bottom:6px}
+.card p{font-size:12.5px;color:var(--muted);line-height:1.5}
+.foot{margin-top:22px;padding-top:16px;border-top:1px solid var(--hair);color:var(--muted);font-size:12.5px;line-height:1.6;max-width:840px}
+.foot b{color:var(--ink)}
+@media(prefers-reduced-motion:reduce){.seg.their{animation:none !important}}
+</style>
+</head>
+<body>
+
+<span class="lbl">ScriptAlly · design ref</span>
+<h1>When it's been your move a long time</h1>
+<div class="sub">Waiting is white and breathing. Your move is blush — and it <i>gains weight with duration</i>, in one hue, with no motion, no red, and no word that judges. The hatched stretch is the time beyond when it was expected: not a penalty, just the length of the wait made visible.</div>
+
+<div class="board"><div class="tl" id="tl"></div></div>
+
+<div class="why">
+  <div class="card"><h4>Fresh</h4><p>It became your move in the last few days. Pale blush, quiet. It is on the list; it is not shouting.</p></div>
+  <div class="card"><h4>Settled</h4><p>A week or two. Standard blush — the weight the your-move bars have always had.</p></div>
+  <div class="card"><h4>Long-standing</h4><p>Deeper blush, heavier text, and the hatched overrun stretching back to the date it was expected. The count is stated as a fact: <i>41 days</i>.</p></div>
+</div>
+
+<div class="foot">
+<b>Why not red, and why not the word.</b> Red is reserved in this app, and lateness isn't a rejection. "Overdue" is a verdict — it says someone failed. Neither is true: an agent hasn't broken a promise by being slow, and a writer hasn't failed by not having sent the full yet. What is true is the duration, so that is what's drawn and what's counted.<br><br>
+<b>Why weight rather than motion.</b> The waiting bars already breathe. If long-standing work also moved, the two would compete and the page would read as agitated. Weight is loud in a still frame and silent in a moving one — which is exactly the right way round.<br><br>
+<b>The other half of urgency is sort, not colour.</b> "Longest waiting" lifts these to the top of the board. A bar that is both heaviest and first is unmissable without raising its voice.
+</div>
+
+<script>
+var GAP=0.34;
+var ROWS=[
+ {nm:'E. Whitfield',ag:'Greenfield Literary',dot:'half',
+  nodes:[[1.5,'in','\u21a4','Partial requested']],
+  segs:[[0,1.5-GAP,'their','openleft','Reply window'],
+        [1.5+GAP,7,'y1 future','','Your move \u00b7 send the partial','3 days']]},
+ {nm:'J. Ashworth',ag:'Ashworth & Vale',dot:'half',
+  segs:[[0,7,'y2 future openleft','','Your move \u00b7 send the full','12 days']]},
+ {nm:'P. Kaur',ag:'Kaur & Finch',dot:'out',
+  over:[0,3.2,'41 days'],
+  segs:[[3.2,7,'y3 future','','Nudge due','']],
+  wps:[[3.2,'Expected 16 Jul']]},
+ {nm:'D. Okafor',ag:'Castle Lane',dot:'out',
+  over:[0,5.1,'23 days'],
+  segs:[[5.1,7,'y3 future','','Send the resubmission','']],
+  wps:[[5.1,'Expected 3 Aug']]},
+ {nm:'L. Marchetti',ag:'Marchetti Literary',dot:'half',
+  segs:[[0,7,'their future openleft','','Reply window \u00b7 to 6 Sep','']]}
+];
+var W=['SUN','MON','TUE','WED','THU','FRI','SAT'],TODAY=new Date(2026,7,26);
+function addD(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x}
+var h='<div class="corner"><span class="lbl">Agents</span></div>';
+for(var i=0;i<7;i++){var d=addD(TODAY,i);
+  h+='<div class="dh'+(i===0?' today':'')+'"><div class="dw">'+W[d.getDay()]+'</div><div class="dd">'+d.getDate()+'</div></div>';}
+ROWS.forEach(function(r){
+  h+='<div class="rowhead"><div class="nm"><span class="sd '+r.dot+'"></span>'+r.nm+'</div><div class="ag">'+r.ag+'</div></div>';
+  for(var i=0;i<7;i++){var d=addD(TODAY,i),dw=d.getDay();
+    h+='<div class="dcell'+((dw===0||dw===6)?' wkend':'')+(i===0?' today':'')+'"></div>';}
+  var lane='';
+  if(r.over){var oL=(r.over[0]/7)*100,oW=((r.over[1]-r.over[0])/7)*100;
+    lane+='<div class="overrun" style="left:'+oL+'%;width:'+oW+'%">'+r.over[2]+' your move</div>';}
+  (r.segs||[]).forEach(function(sg){
+    var L=(sg[0]/7)*100,Wd=((sg[1]-sg[0])/7)*100;
+    lane+='<div class="seg '+sg[2]+' '+(sg[3]||'')+'" style="left:'+L+'%;width:'+Wd+'%">'+sg[4]
+      +(sg[5]?'<span class="cnt">'+sg[5]+'</span>':'')+'</div>';});
+  (r.wps||[]).forEach(function(w){
+    lane+='<div class="wp" style="left:'+((w[0]/7)*100)+'%"><span class="tip">'+w[1]+'</span></div>';});
+  (r.nodes||[]).forEach(function(n){
+    lane+='<div class="node '+n[1]+'" style="left:'+((n[0]/7)*100)+'%">'+n[2]+'<span class="tip">'+n[3]+'</span></div>';});
+  h+='<div class="lane">'+lane+'</div>';
+});
+document.getElementById('tl').innerHTML=h;
+</script>
+</body>
+</html>
