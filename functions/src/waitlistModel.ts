@@ -20,11 +20,20 @@ import { createHash, randomBytes, timingSafeEqual } from "crypto";
 export const DEFAULT_CAP = 100;
 
 /**
- * ⚠️ THE COUNTER DOES NOT RENDER BELOW THIS, AND THE FLOOR IS SERVER-SIDE. A client-side hide is
- * not a floor: if the number is in the payload it is public, whatever the page chooses to draw.
- * Below the floor the GET omits `count` entirely rather than sending a zero.
+ * ⚠️ ZERO — THE REAL COUNT SHOWS FROM THE FIRST SIGN-UP. It was 20 so that `3/100` would not sit
+ * on the page saying nobody wants this; the better answer is to seed the list with genuine
+ * sign-ups rather than hide the number, so the floor's job is gone. A threshold that no longer
+ * serves a purpose is just a thing that surprises someone later.
+ *
+ * The MECHANISM stays, which is why this is a constant and not a deleted branch: raising it again
+ * is one number, not a redesign. And the floor is still SERVER-SIDE — a client-side hide is not a
+ * floor, because a number in the payload is public whatever the page chooses to draw.
+ *
+ * ⚠️ ZERO AS A FLOOR IS FINE; ZERO AS A FALLBACK IS NOT. An unreadable count must render NOTHING,
+ * never `0/100` — that would be a false claim by accident, on the one page whose whole design is
+ * that the number is the number. `countPayload(null)` is what keeps those two apart.
  */
-export const COUNTER_FLOOR = 20;
+export const COUNTER_FLOOR = 0;
 
 /**
  * ⚠️ DOUBLE OPT-IN IS BUILT AND OFF. Verification needs an email, and there is no transport yet —
@@ -230,15 +239,23 @@ export interface CountPayload {
 }
 
 /**
- * ⚠️ BELOW THE FLOOR THE NUMBER IS ABSENT FROM THE PAYLOAD, NOT FALSE IN A FLAG. `visible: false`
- * with a `count` beside it would be a request to please not look; the count simply is not sent.
- * The client already renders live-or-absent, so an absent count needs no new UI — `readCount` in
+ * ⚠️ THE NUMBER IS ABSENT FROM THE PAYLOAD, NOT FALSE IN A FLAG. `visible: false` with a `count`
+ * beside it would be a request to please not look; the count simply is not sent. The client
+ * already renders live-or-absent, so an absent count needs no new UI — `readCount` in
  * `src/marketing/waitlist.ts` requires a numeric `count` and yields `null` without one.
+ *
+ * ⚠️ `null` MEANS THE COUNT COULD NOT BE READ, AND IT IS NOT THE SAME AS ZERO. A missing counter
+ * document is not evidence that nobody has signed up — it is evidence that we do not know. With
+ * the floor at 0 the two would otherwise collapse into each other and an outage would render
+ * `0/100`: a false claim about how many founding writers there are, made by accident, on the one
+ * page whose entire design is that the number is the number.
  */
-export const countPayload = (c: CounterState): CountPayload =>
-  c.verifiedCount < COUNTER_FLOOR
-    ? { visible: false, cap: c.cap }
-    : { visible: true, cap: c.cap, count: c.verifiedCount };
+export const countPayload = (c: CounterState | null): CountPayload =>
+  c === null
+    ? { visible: false, cap: DEFAULT_CAP }
+    : c.verifiedCount < COUNTER_FLOOR
+      ? { visible: false, cap: c.cap }
+      : { visible: true, cap: c.cap, count: c.verifiedCount };
 
 /* ══════════════ Rate limiting ══════════════ */
 

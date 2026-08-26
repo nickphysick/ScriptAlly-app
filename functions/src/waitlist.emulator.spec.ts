@@ -54,6 +54,17 @@ beforeEach(wipe);
 const setCounter = (verifiedCount: number, cap = DEFAULT_CAP) =>
   db.doc(COUNTER_PATH).set({ verifiedCount, cap });
 
+/**
+ * ⚠️ `readCounterState` RETURNS `null` WHEN THE DOCUMENT IS ABSENT, which is not the same as zero
+ * — see its docblock. Every test below that reads a number has seeded one, so this asserts the
+ * document is there rather than silently reading `undefined.verifiedCount`.
+ */
+const counterOf = async () => {
+  const c = await readCounterState(db);
+  expect(c, "the counter document exists").not.toBeNull();
+  return c!;
+};
+
 const join = (email: string, opts: Partial<{ requireVerification: boolean }> = {}) =>
   joinWaitlist(db, {
     emailNormalised: email, hashedIp: null, source: "landing-panel",
@@ -96,7 +107,7 @@ describe("the cap holds under a race", () => {
     expect(verified).toHaveLength(1);
     expect(waiting).toHaveLength(7);
 
-    const counter = await readCounterState(db);
+    const counter = await counterOf();
     expect(counter.verifiedCount, "the counter never exceeds the cap").toBe(DEFAULT_CAP);
     expect(counter.verifiedCount).toBeLessThanOrEqual(counter.cap);
 
@@ -113,7 +124,7 @@ describe("the cap holds under a race", () => {
     );
     expect(outcomes.filter((o) => o.outcome === "joined")).toHaveLength(1);
     expect(outcomes.filter((o) => o.outcome === "waiting")).toHaveLength(7);
-    expect((await readCounterState(db)).verifiedCount).toBe(DEFAULT_CAP);
+    expect((await counterOf()).verifiedCount).toBe(DEFAULT_CAP);
   });
 
   it("a join past the cap is written `waiting` and answered as full", async () => {
@@ -122,7 +133,7 @@ describe("the cap holds under a race", () => {
     expect(r.outcome).toBe("waiting");
     expect(r.status).toBe("waiting");
     expect(r.position).toBeNull();
-    expect((await readCounterState(db)).verifiedCount).toBe(DEFAULT_CAP);
+    expect((await counterOf()).verifiedCount).toBe(DEFAULT_CAP);
     /* They are on the list — refused a founding place, not refused entirely. */
     const doc = await db.doc(`waitlist/${emailHash("late@example.com")}`).get();
     expect(doc.exists).toBe(true);
@@ -136,11 +147,11 @@ describe("one address, one document", () => {
   it("a second submission returns `already` and moves no number", async () => {
     const first = await join("dupe@example.com");
     expect(first.outcome).toBe("joined");
-    expect((await readCounterState(db)).verifiedCount).toBe(1);
+    expect((await counterOf()).verifiedCount).toBe(1);
 
     const second = await join("dupe@example.com");
     expect(second.outcome).toBe("already");
-    expect((await readCounterState(db)).verifiedCount, "a duplicate must not count twice").toBe(1);
+    expect((await counterOf()).verifiedCount, "a duplicate must not count twice").toBe(1);
     expect((await db.collection("waitlist").get()).size).toBe(1);
   });
 
@@ -175,7 +186,7 @@ describe("verify tokens", () => {
     const out = await verifyWaitlist(db, token, Date.now());
     expect(out.kind).toBe("verified");
     if (out.kind === "verified") expect(out.position).toBe(5);
-    expect((await readCounterState(db)).verifiedCount).toBe(5);
+    expect((await counterOf()).verifiedCount).toBe(5);
   });
 
   /** ⚠️ A SPENT TOKEN IS A SPENT TOKEN. Leaving it usable makes a verify link a permanent credential. */
@@ -185,7 +196,7 @@ describe("verify tokens", () => {
     await verifyWaitlist(db, token, Date.now());
     const again = await verifyWaitlist(db, token, Date.now());
     expect(again.kind).toBe("already");
-    expect((await readCounterState(db)).verifiedCount).toBe(5);
+    expect((await counterOf()).verifiedCount).toBe(5);
   });
 
   it("an expired token is refused and cleared, so it cannot be replayed later", async () => {
@@ -196,7 +207,7 @@ describe("verify tokens", () => {
     expect(doc.get("verifyTokenHash")).toBeNull();
     /* The person is still on the list — they asked to join; only the link died. */
     expect(doc.exists).toBe(true);
-    expect((await readCounterState(db)).verifiedCount).toBe(0);
+    expect((await counterOf()).verifiedCount).toBe(0);
   });
 
   it("an unknown token is refused without saying why", async () => {
@@ -244,18 +255,47 @@ describe("the rate limit is persisted, not in memory", () => {
 
 /* ══════════════ The floor, end to end ══════════════ */
 
-describe("the floor is decided from what is actually stored", () => {
-  it("at one below the floor the payload carries no count", async () => {
-    await setCounter(COUNTER_FLOOR - 1);
-    const payload = countPayload(await readCounterState(db));
-    expect(payload.visible).toBe(false);
-    expect(JSON.parse(JSON.stringify(payload))).toEqual({ visible: false, cap: DEFAULT_CAP });
+describe("the count is the count, from the very first sign-up", () => {
+  /**
+   * ⚠️ RETARGETED WHEN THE FLOOR WENT TO ZERO, AND IT TESTS SOMETHING MORE USEFUL THAN IT DID.
+   * It used to assert absent-at-19 and present-at-20 — a claim about a threshold that no longer
+   * exists. What matters now is the distinction the floor's removal could have destroyed: a real
+   * zero is shown, and an UNREADABLE count is not shown at all.
+   */
+  it("zero verified is a real number and is rendered", async () => {
+    await setCounter(0);
+    expect(countPayload(await counterOf()))
+      .toEqual({ visible: true, cap: DEFAULT_CAP, count: 0 });
   });
 
-  it("at the floor it appears", async () => {
-    await setCounter(COUNTER_FLOOR);
-    expect(countPayload(await readCounterState(db)))
-      .toEqual({ visible: true, cap: DEFAULT_CAP, count: COUNTER_FLOOR });
+  it("one verified shows one", async () => {
+    await join("first@example.com");
+    expect(countPayload(await counterOf()))
+      .toEqual({ visible: true, cap: DEFAULT_CAP, count: 1 });
+  });
+
+  /**
+   * ⚠️ THE CASE THAT MATTERS. A missing counter document is not evidence that nobody has signed
+   * up — it is evidence that we do not know. Rendering `0/100` on an outage would be a false claim
+   * about how many founding writers there are, made by accident, on the one page whose entire
+   * design is that the number is the number.
+   */
+  it("an unreadable count renders nothing — never a zero", async () => {
+    await db.doc(COUNTER_PATH).delete();
+    expect(await readCounterState(db), "absent, not zero").toBeNull();
+    const payload = countPayload(await readCounterState(db));
+    expect(payload.visible).toBe(false);
+    expect(JSON.parse(JSON.stringify(payload)), "no count on the wire")
+      .toEqual({ visible: false, cap: DEFAULT_CAP });
+  });
+
+  /** The mechanism is intact: raising the floor again is one number, not a redesign. */
+  it("…and the floor still works if it is ever raised", async () => {
+    await setCounter(3);
+    expect(countPayload({ verifiedCount: 3, cap: DEFAULT_CAP }).visible).toBe(true);
+    expect(countPayload({ verifiedCount: 3, cap: DEFAULT_CAP }).count).toBe(3);
+    /* With a floor of 5 the same three would be withheld — the branch is still there. */
+    expect(COUNTER_FLOOR).toBe(0);
   });
 
   /**
@@ -264,7 +304,7 @@ describe("the floor is decided from what is actually stored", () => {
    */
   it("a counter holding only the legacy `count` reads as that many verified", async () => {
     await db.doc(COUNTER_PATH).set({ count: 37, cap: DEFAULT_CAP });
-    expect((await readCounterState(db)).verifiedCount).toBe(37);
+    expect((await counterOf()).verifiedCount).toBe(37);
     const r = await join("after-migration@example.com");
     expect(r.position).toBe(38);
     const after = await db.doc(COUNTER_PATH).get();
@@ -278,10 +318,10 @@ describe("unsubscribing gives the place back", () => {
   it("a verified unsubscribe decrements in the same transaction", async () => {
     await setCounter(9);
     await join("bye@example.com");
-    expect((await readCounterState(db)).verifiedCount).toBe(10);
+    expect((await counterOf()).verifiedCount).toBe(10);
     const r = await unsubscribe(db, "bye@example.com", Date.now());
     expect(r).toEqual({ found: true, wasVerified: true });
-    expect((await readCounterState(db)).verifiedCount).toBe(9);
+    expect((await counterOf()).verifiedCount).toBe(9);
   });
 
   it("a pending unsubscribe changes no number", async () => {
@@ -289,7 +329,7 @@ describe("unsubscribing gives the place back", () => {
     await seedPending("quiet@example.com");
     const r = await unsubscribe(db, "quiet@example.com", Date.now());
     expect(r).toEqual({ found: true, wasVerified: false });
-    expect((await readCounterState(db)).verifiedCount).toBe(9);
+    expect((await counterOf()).verifiedCount).toBe(9);
   });
 
   it("an unknown address is not an error", async () => {

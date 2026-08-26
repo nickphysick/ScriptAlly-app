@@ -55,9 +55,17 @@ export const consumeRateLimit = async (
 
 /* ══════════════ Reading the count ══════════════ */
 
-export const readCounterState = async (db: Db): Promise<CounterState> => {
+/**
+ * ⚠️ `null` WHEN THE DOCUMENT DOES NOT EXIST, rather than a zero. With the floor at 0 those two
+ * would otherwise be the same payload, and an outage or a wiped database would render `0/100` —
+ * a false claim about how many founding writers there are. Inside the transactions below a
+ * missing counter genuinely does mean zero (it is created lazily on the first join), which is why
+ * they keep using `readCounter` directly and only this reader distinguishes them.
+ */
+export const readCounterState = async (db: Db): Promise<CounterState | null> => {
   const snap = await db.doc(COUNTER_PATH).get();
-  return readCounter(snap.exists ? (snap.data() as Record<string, unknown>) : undefined);
+  if (!snap.exists) return null;
+  return readCounter(snap.data() as Record<string, unknown>);
 };
 
 /* ══════════════ Joining ══════════════ */

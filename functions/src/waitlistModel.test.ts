@@ -70,29 +70,52 @@ describe("email verdicts", () => {
   });
 });
 
-describe("the counter floor lives in the payload, not in the client", () => {
-  it("below the floor, `count` is ABSENT — not zero, not hidden by a flag", () => {
-    const p = countPayload({ verifiedCount: COUNTER_FLOOR - 1, cap: 100 });
-    expect(p.visible).toBe(false);
-    expect("count" in p).toBe(false);
-    expect(p.cap).toBe(100);
-  });
-
-  it("at the floor it appears", () => {
-    const p = countPayload({ verifiedCount: COUNTER_FLOOR, cap: 100 });
-    expect(p).toEqual({ visible: true, cap: 100, count: COUNTER_FLOOR });
+describe("the count is the count — shown from zero, absent when unknown", () => {
+  /**
+   * ⚠️ RETARGETED WHEN THE FLOOR WENT TO ZERO, AND THE NEW CLAIM IS THE MORE USEFUL ONE. This
+   * used to assert absent-at-19 and present-at-20 — a fact about a threshold that no longer
+   * exists. The floor was 20 so `3/100` would not sit on the page saying nobody wants this; the
+   * better answer is to seed the list with genuine sign-ups than to hide the number.
+   */
+  it("the floor is zero, so the real figure shows from the first sign-up", () => {
+    expect(COUNTER_FLOOR).toBe(0);
+    expect(countPayload({ verifiedCount: 0, cap: 100 }))
+      .toEqual({ visible: true, cap: 100, count: 0 });
+    expect(countPayload({ verifiedCount: 1, cap: 100 }))
+      .toEqual({ visible: true, cap: 100, count: 1 });
   });
 
   /**
-   * ⚠️ THE CLIENT NEEDS NO CHANGE FOR THIS, and that is asserted rather than assumed.
+   * ⚠️ ZERO AS A FLOOR IS FINE; ZERO AS A FALLBACK IS NOT. An unreadable count must render
+   * NOTHING, never `0/100` — that would be a false claim about how many founding writers there
+   * are, made by accident, on the one page whose whole design is that the number is the number.
+   * `null` is how a missing counter document stays distinguishable from a genuine zero.
+   */
+  it("an unreadable count is absent from the payload, never a zero", () => {
+    const p = countPayload(null);
+    expect(p.visible).toBe(false);
+    expect("count" in p, "no count at all").toBe(false);
+    expect(JSON.parse(JSON.stringify(p))).toEqual({ visible: false, cap: DEFAULT_CAP });
+  });
+
+  /**
+   * ⚠️ THE MECHANISM SURVIVES THE NUMBER GOING TO ZERO — raising the floor again is one constant,
+   * not a redesign, which is why this is still a comparison rather than a deleted branch.
+   */
+  it("…and the withholding branch still works if the floor is ever raised", () => {
+    const p = countPayload({ verifiedCount: 4, cap: 100 });
+    expect(p).toEqual({ visible: true, cap: 100, count: 4 });
+    /* The same shape a floor of 5 would produce for this count. */
+    expect(countPayload(null)).toEqual({ visible: false, cap: DEFAULT_CAP });
+  });
+
+  /**
+   * ⚠️ THE CLIENT NEEDS NO CHANGE FOR ANY OF THIS, and that is asserted rather than assumed.
    * `src/marketing/waitlist.ts`'s `readCount` requires a numeric `count` and yields `null`
    * without one; `null` renders nothing on all three surfaces.
    */
   it("an absent count is exactly what the existing client reads as `no figure`", () => {
-    const p = countPayload({ verifiedCount: 3, cap: 100 });
-    expect(p.count).toBeUndefined();
-    /* The wire format the client actually receives — `count` must not survive serialisation. */
-    expect(JSON.parse(JSON.stringify(p))).toEqual({ visible: false, cap: 100 });
+    expect(JSON.parse(JSON.stringify(countPayload(null)))).toEqual({ visible: false, cap: DEFAULT_CAP });
   });
 });
 
@@ -232,9 +255,11 @@ describe("the settled decisions are pinned where a future edit will trip over th
     expect(REQUIRE_VERIFICATION).toBe(false);
   });
 
-  it("the cap is a hundred and the floor is twenty", () => {
+  it("the cap is a hundred and the floor is zero", () => {
     expect(DEFAULT_CAP).toBe(100);
-    expect(COUNTER_FLOOR).toBe(20);
+    /* ⚠️ ZERO BY DECISION, NOT BY DEFAULT. The real figure is shown from the first sign-up
+       because the list is seeded with genuine ones rather than padded or hidden. */
+    expect(COUNTER_FLOOR).toBe(0);
   });
 
   /**
