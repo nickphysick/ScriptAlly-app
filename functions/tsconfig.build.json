@@ -1,0 +1,14 @@
+{
+  // ⚠️ THE BUILD CONFIG, AND IT EXISTS ONLY TO KEEP TEST CODE OUT OF PRODUCTION.
+  // `firebase deploy` uploads this directory, `lib/` included, so anything tsc emits there SHIPS.
+  // Before this file existed every .test.ts and the emulator .spec.ts compiled into lib/ and went
+  // to prod with each deploy — inert, but shipping test code is a habit that eventually ships
+  // something that is not.
+  //
+  // ⚠️ tsconfig.json STAYS INCLUSIVE ON PURPOSE. It is what CI's "Typecheck (functions)" step and
+  // `npx tsc --noEmit -p functions/tsconfig.json` run, so the tests are still typechecked — they
+  // are just not emitted. Narrowing the base config instead would have silently dropped them from
+  // every typecheck as well, which is a coverage loss wearing a cleanup's clothes.
+  "extends": "./tsconfig.json",
+  "exclude": ["src/**/*.test.ts", "src/**/*.spec.ts"]
+}

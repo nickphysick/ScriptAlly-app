@@ -6,7 +6,7 @@
   },
   "main": "lib/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf lib && tsc -p tsconfig.build.json",
     "deploy": "firebase deploy --only functions"
   },
   "dependencies": {
