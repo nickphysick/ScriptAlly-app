@@ -41,6 +41,7 @@ import { plateStats, formatPlateDate } from "../lib/manuscriptPlate";
 import { DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./manuscripts/ManuscriptTabs";
 import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
 import { ManuscriptLibraryCard, ManuscriptAddTile } from "./manuscripts/ManuscriptLibraryCard";
+import { ManuscriptsEmpty } from "./manuscripts/ManuscriptsEmpty";
 import { pitchAssets, pitchMeter, PitchAssetKey, synopsisVersions } from "../lib/manuscriptPitch";
 import { genreDisplay } from "../lib/genres";
 import { agentPrimary, AGENT_NOT_RECORDED } from "../lib/agentDisplay";
@@ -329,23 +330,10 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
           parent and the row scrolls instead of the pane. The library keeps flowing. */}
       <div className={`msv-wrap${selected ? " msv-wrap--doss" : ""}`}>
         {ordered.length === 0 ? (
-          /* ── zero-manuscript state: minimal, in the plate grammar ── */
-          <div className="msv-panel">
-            <div className="msv-empty">
-              <div className="msv-qm">Your library is empty.</div>
-              <span className="msv-lab">NO MANUSCRIPTS YET</span>
-              <div>
-                <button
-                  type="button"
-                  className="msv-btn"
-                  onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
-                >
-                  <Plus />
-                  Add manuscript
-                </button>
-              </div>
-            </div>
-          </div>
+          /* ⚠️ THE EMPTY SHELF CARRIES ITS OWN `Your shelf` HEADER, so this branch is not wrapped
+             in the populated one's. Two headers for one page state is how a count comes to be
+             rendered twice and disagree. */
+          <ManuscriptsEmpty onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")} />
         ) : (
           <>
             {/**

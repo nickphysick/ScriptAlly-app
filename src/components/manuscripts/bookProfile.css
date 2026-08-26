@@ -532,3 +532,44 @@
   .msp-notegrid { grid-template-columns: minmax(0, 1fr); }
   .msp-composer { grid-column: auto; }
 }
+
+/* ══ EMPTY SHELF ══════════════════════════════════════════════════════════════════════════════ */
+
+.msp-emptyin { padding: 26px 26px 30px; text-align: center; }
+.msp-emptyh {
+  font-family: var(--font-serif);
+  font-size: 27px;
+  font-weight: 600;
+  /* Mixed-case Playfair floor — "yet." carries a descender. */
+  line-height: 1.3;
+  color: var(--ink);
+  margin: 0;
+}
+.msp-emptylede {
+  max-width: 34em;
+  margin: 10px auto 20px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--shell-muted);
+}
+
+.msp-stages {
+  margin-top: 26px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+/** The commission slot. Dashed, keyed, and it goes when the drawing lands. */
+.msp-stageslot {
+  position: relative;
+  height: 96px;
+  border: 1px dashed var(--pink-b);
+  border-radius: 8px;
+  background: var(--shell-card);
+}
+.msp-stagebody { margin: 12px 0 0; font-size: 13px; line-height: 1.55; color: var(--shell-muted); }
+
+@media (max-width: 900px) {
+  .msp-stages { grid-template-columns: minmax(0, 1fr); }
+}

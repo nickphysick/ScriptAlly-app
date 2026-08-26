@@ -237,3 +237,46 @@ describe("the stylesheet", () => {
     expect(theRule(".msp-hero")).toContain("--msp-banner-a:");
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("the re-cut's cascade — what went, and the one thing knowingly left", () => {
+  const exists = (p: string) => {
+    try { readFileSync(join(__dirname, p), "utf8"); return true; } catch { return false; }
+  };
+
+  /**
+   * ⚠️ A REPLACEMENT THAT IS *ADDED* LEAVES THE ORIGINAL REACHABLE; ONLY ONE THAT IS *SWAPPED*
+   * RETIRES IT. Four panes were swapped out by this re-cut and a fifth module fell with them:
+   *   ManuscriptPitchPane · ManuscriptDetailTiles · ManuscriptPackagesPane — unreached at Phase 2
+   *   ManuscriptCompsPane — unreached at Phase 5, replaced by the read-only `CompsPane`
+   *   manuscriptMarks — the cascade: its five marks had no other consumer
+   * Verified by a fixed-point sweep and then symbol by symbol, because a grep for `MARK` matches
+   * forty unrelated files and would have reported every one of them as alive.
+   */
+  it("the swapped-out panes are gone, not merely unimported", () => {
+    for (const f of ["ManuscriptPitchPane.tsx", "ManuscriptDetailTiles.tsx",
+                     "ManuscriptPackagesPane.tsx", "ManuscriptCompsPane.tsx", "manuscriptMarks.tsx"]) {
+      expect(exists(f), `${f} is still on disk`).toBe(false);
+    }
+  });
+
+  /**
+   * ⚠️ AND `manuscriptTiles.ts` IS UNREFERENCED ON PURPOSE, PENDING A DECISION THAT IS NOT MINE.
+   * It holds `PITCH_PHRASE` / `PITCH_LABEL` and the ‘X meets Y’ pitch line, whose only renderers
+   * were three of the panes above — and the Comparable titles PAGE does not render it either. So
+   * that line now appears nowhere in the app. Deleting the module would foreclose the choice;
+   * leaving it silent is how an inert file comes to be read as live. This assertion is the third
+   * option: it states the situation where a reader will meet it, and fails the day somebody either
+   * gives the line a home or removes the module — both of which are answers.
+   */
+  it("manuscriptTiles is inert and says so, awaiting the pitch line's home", () => {
+    expect(exists("../../lib/manuscriptTiles.ts"), "manuscriptTiles.ts was removed — was the pitch line rehomed?").toBe(true);
+    const src = readFileSync(join(__dirname, "..", "..", "lib", "manuscriptTiles.ts"), "utf8");
+    expect(src).toContain("PITCH_PHRASE");
+    /* If anything imports it again, the ‘X meets Y’ line has a home and this note is spent. */
+    const importers = ["OverviewPane.tsx", "JourneyPane.tsx", "CompsPane.tsx", "VersionsPane.tsx",
+                       "NotesPane.tsx", "ManuscriptDossier.tsx", "ManuscriptHero.tsx"]
+      .filter((f) => exists(f) && readFileSync(join(__dirname, f), "utf8").includes("manuscriptTiles"));
+    expect(importers, "the pitch line found a home — retire this assertion with the flag").toEqual([]);
+  });
+});
