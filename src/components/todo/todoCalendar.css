@@ -415,7 +415,17 @@
   border: 1px solid transparent; border-radius: 999px;
 }
 .tl-seg .d { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
-.tl-lbl { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+/* ⚠️ THE LABEL GROWS SO THE DATE IS PUSHED RIGHT — never an auto margin, which this repo's
+   Tasks work already rules out, and never `space-between`, which would spread the bullet and the
+   count as well. One growing child does the whole job. */
+.tl-lbl { overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1 1 auto; }
+.tl-when {
+  flex: 0 0 auto;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 9.5px;
+  letter-spacing: 0.05em; opacity: 0.78;
+}
+/* the date leaves with the label when a bar is too small to carry words */
+.tl.dense3 .tl-seg .tl-when, .tl.dense4 .tl-seg .tl-when { display: none; }
 /* the duration, riding inside the piece — mono, quiet, and a fact rather than a warning */
 .tl-cnt {
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 9px;

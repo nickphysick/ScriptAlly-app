@@ -578,13 +578,18 @@ describe("⚠️ the derivations underneath are untouched, and the rows prove it
   });
 
   it("labels come from `pillLabel` and are not re-summarised here", () => {
-    /* the bar's your-move stretch takes the card's own two words, lower-cased into a sentence —
-       the summarising still happens in exactly one place and it is not this module */
+    /* the bar's writer's-move stretch takes the card's own words, whole — the summarising still
+       happens in exactly one place and it is not this module */
     const raw = dataFor(TURN).itemsFor(TODAY)[0];
     expect(pillLabel(raw)).toBe("Send full");
     const yours = timelineSegments(dataFor(TURN), TODAY, 7).filter((sg) => sg.side === "yours");
     expect(yours.length).toBeGreaterThan(0);
-    expect(yours[0].label).toBe(`Your move · ${pillLabel(raw).toLowerCase()}`);
+    /* ⚠️ THE CARD'S OWN WORDS, BARE AND UNCHANGED IN CASE (grouped pack, Phase 5). It was
+       `Your move · ${label.toLowerCase()}` — a derivation name the writer never uses, plus a
+       lower-casing that existed only to make the card's words read as a clause after it. The
+       claim this case exists for is unchanged and is stronger without either: the label IS
+       `pillLabel`'s output, never a re-summary of it. */
+    expect(yours[0].label).toBe(pillLabel(raw));
   });
 
   it("a writer's own task is draggable and a fact is not — `draggableTask`, unchanged", () => {

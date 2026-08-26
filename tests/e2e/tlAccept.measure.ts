@@ -16,9 +16,9 @@ interface Want {
   initials: boolean; barText: boolean; rowSay: boolean; disc: number;
 }
 const WANT: Want[] = [
-  { name: "1 week",   days: 7,   cols: 7,  dense: 1, initials: true,  barText: true,  rowSay: false, disc: 34 },
-  { name: "2 weeks",  days: 14,  cols: 14, dense: 2, initials: true,  barText: true,  rowSay: false, disc: 34 },
-  { name: "1 month",  days: 31,  cols: 31, dense: 2, initials: false, barText: true,  rowSay: false, disc: 34 },
+  { name: "1 week",   days: 7,   cols: 7,  dense: 1, initials: true,  barText: true,  rowSay: true , disc: 34 },
+  { name: "2 weeks",  days: 14,  cols: 14, dense: 2, initials: true,  barText: true,  rowSay: true , disc: 34 },
+  { name: "1 month",  days: 31,  cols: 31, dense: 2, initials: false, barText: true,  rowSay: true , disc: 34 },
   { name: "3 months", days: 91,  cols: 13, dense: 3, initials: false, barText: false, rowSay: true,  disc: 22 },
   { name: "6 months", days: 182, cols: 7,  dense: 4, initials: false, barText: false, rowSay: true,  disc: 22 },
 ];
@@ -76,6 +76,11 @@ test("Phase 5 — four widths, five ranges, one table", async ({ page }) => {
       expect(m.headers, `${say} — a header per division`).toBe(w.cols);
       expect(m.initials > 0, `${say} — weekday initials`).toBe(w.initials);
       if (m.barText !== null) expect(m.barText, `${say} — bar text`).toBe(w.barText);
+      /* ⚠️ THE HEAD SPEAKS AT EVERY RANGE NOW (grouped pack, Phase 5), so this column is `true`
+         throughout and the table keeps it rather than dropping it. It read false at the three day
+         grains because the head's text used to be the BAR's label, lifted up only where a bar was
+         too small to carry words. The head has its own sentence now; a column that is true
+         everywhere still fails loudly the day one range stops saying anything. */
       expect(m.rowSays > 0, `${say} — the row head carries the sentence`).toBe(w.rowSay);
 
       /* ⚠️ NO CAPTION AT REST, AT ANY WIDTH OR RANGE (Phase 4). */

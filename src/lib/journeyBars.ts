@@ -116,6 +116,8 @@ export interface Segment {
   /** stopped at a break — a round cap on the right */
   capRight: boolean;
   label: string;
+  /** the date the stretch runs to, drawn at the bar's right end; "" where there is none */
+  when: string;
   /** the duration, stated as a fact and never as a verdict */
   count?: string;
   /** no reply time recorded — a dashed rail, no cap and no forecast */
@@ -552,9 +554,14 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
       openRight: endsAtEdge && !terminal && closeIdx < 0 && !openEnd && !norail,
       capLeft: !startsAtEdge,
       capRight: !endsAtEdge,
-      label: !speaks ? "" : labelFor(side, {
-        norail, openEnd, query, expectedYmd, expectedPassed, nudgeYmd, moveLabel, terminal,
-      }),
+      ...(!speaks
+        ? { label: "", when: "" }
+        : (() => {
+            const l = labelFor(side, {
+              norail, openEnd, query, expectedYmd, expectedPassed, nudgeYmd, moveLabel, terminal,
+            });
+            return { label: l.text, when: l.when };
+          })()),
       ...(hatch > 0 ? { hatchPct: Math.round(hatch * 1000) / 10 } : {}),
       /* ⚠️ THE DURATION IS STATED ONCE, on the one piece of the run that speaks. It used to ride
          the overrun AND the piece after it, so a long-standing row printed it twice; the phrasing
@@ -591,22 +598,38 @@ interface LabelInput {
  * being slow. `Next reminder due {date}` is the one forward-looking clause and it names something
  * the WRITER set.
  */
-export function labelFor(side: Side, i: LabelInput): string {
-  if (i.terminal) return "Closed";
+export interface BarLabel {
+  /** what the stretch is; "" where the bar has nothing true to add to the row's own sentence */
+  text: string;
+  /** the date, drawn at the bar's RIGHT end so a run of bars line their dates up */
+  when: string;
+}
+
+export function labelFor(side: Side, i: LabelInput): BarLabel {
+  if (i.terminal) return { text: "Closed", when: "" };
   if (side === "theirs") {
-    if (i.norail) return "No reply time recorded · give it a date";
+    if (i.norail) return { text: "No reply time given", when: "" };
     /* ⚠️ THE BAR ALWAYS RUNS TO THE NEXT THING DUE. After a nudge the clock restarts, so the
-       stretch is not "still waiting" — it is waiting until the reminder the writer set. */
-    if (i.nudgeYmd) return `Next reminder due ${shortCalDate(i.nudgeYmd)}`;
-    if (i.expectedYmd && !i.expectedPassed) return `Reply window · to ${shortCalDate(i.expectedYmd)}`;
-    return "Reply window";
+       stretch is not waiting on the agent in general — it is waiting until the reminder the
+       writer set. */
+    if (i.nudgeYmd) return { text: "Reminder", when: shortCalDate(i.nudgeYmd) };
+    if (i.expectedYmd && !i.expectedPassed) return { text: "Reply by", when: shortCalDate(i.expectedYmd) };
+    /**
+     * ⚠️ NOTHING, AND THAT IS THE HONEST ANSWER. This was "Reply window" — a phrase from the
+     * derivation rather than from the writer, naming a window that has closed with nothing in it.
+     * The row's head says what is true here ("No word in 40 days"); the bar repeating it in the
+     * code's own vocabulary added a second, worse description of one fact.
+     */
+    return { text: "", when: "" };
   }
   if (i.openEnd) {
     return i.query.status === QueryStatus.OFFER
-      ? "Decide on the offer · no date set"
-      : "Your move · revise & resubmit · no date set";
+      ? { text: "Offer to answer — no date set", when: "" }
+      : { text: "Revise and resubmit — no date set", when: "" };
   }
-  return i.moveLabel ? `Your move · ${i.moveLabel.toLowerCase()}` : "Your move";
+  /* ⚠️ THE CARD'S OWN WORDS, BARE. They were prefixed "Your move · ", which is how this codebase
+     talks to itself and not how a writer talks about their own submission. */
+  return { text: i.moveLabel ?? "", when: "" };
 }
 
 /** Which activities wrote a status — the join the side derivation needs, built once per render. */

@@ -17,6 +17,7 @@ test("Phase 4 — captions at rest, on hover, and on keyboard focus", async ({ p
   await page.waitForTimeout(900);
 
   const slider = page.getByRole("slider", { name: /range/i });
+  let tipsSeen = 0;
   const STOPS = ["1 week", "2 weeks", "1 month", "3 months", "6 months"];
 
   for (let i = 0; i < STOPS.length; i++) {
@@ -35,9 +36,17 @@ test("Phase 4 — captions at rest, on hover, and on keyboard focus", async ({ p
       };
     });
     console.log(`${STOPS[i].padEnd(9)} rest: ${rest.showing}/${rest.total} showing · ${rest.markers} markers · ${rest.ways} waypoints`);
-    expect(rest.total, `${STOPS[i]}: no captions exist at all — nothing was measured`).toBeGreaterThan(0);
+    /* ⚠️ THE POPULATION IS ACCUMULATED ACROSS THE RANGES, NOT DEMANDED AT EACH ONE. It was
+       per-range and went red the day grouping began dropping stale closures — a range can
+       legitimately hold no waypoint, and requiring one there fails on a correct board. The guard
+       against the vacuous case is unchanged and is asserted once, below: `0 painted` means
+       nothing if nothing was ever there. */
+    tipsSeen += rest.total;
     expect(rest.showing, `${STOPS[i]}: ${rest.showing} captions are painted with nothing hovered`).toBe(0);
   }
+
+  console.log(`captions over the five ranges: ${tipsSeen}, none of them painted`);
+  expect(tipsSeen, "no caption exists at any range — the rest-state check measured nothing").toBeGreaterThan(0);
 
   /* ── one caption, and it is the one under the pointer ─────────────────────────────────────
      ⚠️ THE WINDOW OPENS AT TODAY AND RUNS FORWARD — the ref anchors the same way (`addD(TODAY, i)`

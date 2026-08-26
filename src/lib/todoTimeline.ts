@@ -34,6 +34,7 @@ import {
   pillLabel, draggableTask, toYmd,
 } from "./todoCalendar";
 import { rowGroupOf, type RowGroup, type QueryFacts } from "./timelineGroups";
+import { rowSentence, agentSurname } from "./timelineCopy";
 import {
   laneBars, statusIndex, sideOf,
   type Segment, type BarNode, type Waypoint, type BarWindow,
@@ -197,6 +198,13 @@ export interface TimelineRow {
    * page — that is the difference between the two fields and the reason both exist.
    */
   status: QueryStatus | null;
+  /**
+   * What the head says about this relationship, in the writer's own words.
+   *
+   * ⚠️ EMPTY ONLY ON THE PINNED ROW. Every other row has something true to say; a row that cannot
+   * say anything would be a row with no query, which is the pinned one by definition.
+   */
+  sentence: string;
 }
 
 /* ⚠️ `TimelineBand`, `BandSource` AND THE `ExpectedItem` IT CARRIED ARE RETIRED (bars pack,
@@ -344,6 +352,8 @@ interface Draft {
   lastClosed: string | null;
   /** what the row's own StatusDot draws — null only on the pinned row, which holds no query */
   status: QueryStatus | null;
+  /** the row head's sentence, in the writer's words — "" only on the pinned row */
+  sentence: string;
   /** sort keys, all derived */
   soonest: number;
   waitingFrom: number;
@@ -389,7 +399,7 @@ export function timelineWeek(
        rather than filed inside one. Handing it empty facts would file it under a closure that has
        outstayed its week and delete it, which is why the group is assigned per row below and the
        pinned row is exempted there in one place. */
-    facts: [], lastClosed: null, status: null,
+    facts: [], lastClosed: null, status: null, sentence: "",
     soonest: Infinity, waitingFrom: Infinity, stage: -1, order: -1,
   };
   drafts.set(YOU_ROW, you);
@@ -403,6 +413,23 @@ export function timelineWeek(
     const mine = data.queries.filter((q) => q.agentId === agentId);
     const hasLive = mine.some((q) => !isTerminalStatus(q.status));
     const turn = agent ? agentTurn(agent, mine as Query[]) : null;
+    /**
+     * ⚠️ ONE QUERY SPEAKS FOR THE ROW HEAD, and it is the most advanced LIVE one — falling back to
+     * the most advanced terminal one when nothing is live, which is what lets a closed row say HOW
+     * it ended rather than only that it did. Chosen once here so the dot, the status and the
+     * sentence cannot describe three different journeys under one name.
+     */
+    const lead = (() => {
+      const live = mine.filter((q) => !isTerminalStatus(q.status));
+      const pool = live.length ? live : mine;
+      let best: Query | null = null;
+      let at = -Infinity;
+      for (const q of pool) {
+        const i = STATUS_ORDER.indexOf(q.status as QueryStatus);
+        if (i > at) { at = i; best = q as Query; }
+      }
+      return best;
+    })();
     const d: Draft = {
       key,
       agentId,
@@ -431,17 +458,42 @@ export function timelineWeek(
        * say how a relationship ended rather than only that it did. Rejected, Withdrawn and No
        * Response are three different endings and `StatusDot` already draws them apart.
        */
-      status: (() => {
-        const live = mine.filter((q) => !isTerminalStatus(q.status));
-        const pool = live.length ? live : mine;
-        let best: QueryStatus | null = null;
-        let at = -Infinity;
-        for (const q of pool) {
-          const i = STATUS_ORDER.indexOf(q.status as QueryStatus);
-          if (i > at) { at = i; best = q.status as QueryStatus; }
-        }
-        return best;
-      })(),
+      status: lead ? (lead.status as QueryStatus) : null,
+      /**
+       * The row's own sentence.
+       *
+       * ⚠️ IT DESCRIBES THE SAME QUERY THE DOT DRAWS. Both read `lead` — the most advanced query
+       * by the ranking `stage` already uses — so a head cannot show one journey's mark above
+       * another journey's words. Choosing them separately is how two true statements come to sit
+       * on one line describing different things.
+       *
+       * ⚠️ AND THE EXPECTED DATE COMES FROM `resolveExpectedDate`, the same resolver the bars use.
+       * Its rule is subtle — recency between the writer's date and the agency's reply, with the
+       * agency window as a floor — and a second copy here would eventually disagree with the bar
+       * drawn beside it.
+       */
+      sentence: lead
+        ? rowSentence({
+            surname: agentSurname(agentPrimary(agent)),
+            status: lead.status as QueryStatus,
+            expectedYmd: isTerminalStatus(lead.status) ? null : ymdOf(
+              (() => {
+                const sends = [lead.dateSent, lead.partialSentDate, lead.fullSentDate]
+                  .map((iso) => (iso ? new Date(iso as string).getTime() : NaN))
+                  .filter((t) => !Number.isNaN(t));
+                const r = resolveExpectedDate(
+                  lead, sends.length ? Math.min(...sends) : null, agent?.responseTimeWeeks ?? null, null);
+                return r.ms == null ? null : new Date(r.ms).toISOString();
+              })(),
+            ),
+            nudgeYmd: isTerminalStatus(lead.status) ? null : ymdOf(lead.nudgeDate),
+            nudgedOnYmd: ymdOf(lead.lastNudgeSentDate),
+            lastWordYmd: ymdOf(lead.lastStatusChange) ?? ymdOf(lead.dateSent),
+            closedYmd: isTerminalStatus(lead.status)
+              ? (ymdOf(lead.rejectedDate) ?? ymdOf(lead.lastStatusChange))
+              : null,
+          }, data.today)
+        : "",
       order: drafts.size,
       facts: mine
         .filter((q) => !isTerminalStatus(q.status))
@@ -771,7 +823,7 @@ export function timelineWeek(
     }
     rows.push({
       key: row.key, agentId: row.agentId, name: row.name, agency: row.agency,
-      group: groupOf.get(row.key) ?? null, status: row.status,
+      group: groupOf.get(row.key) ?? null, status: row.status, sentence: row.sentence,
       dot: row.dot, items: row.items,
       lanes: Math.max(1, barLanes + (row.items.length ? packed : 0)),
       manuscripts: row.manuscripts, closed: row.closed,

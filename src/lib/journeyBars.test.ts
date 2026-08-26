@@ -122,7 +122,11 @@ describe("⚠️ the side comes from the CTA engine, and nothing here re-lists a
       moveLabel: "Send full",
     }), WIN);
     expect(bars.segments.map((s) => s.side)).toEqual(["theirs", "yours"]);
-    expect(bars.segments[1].label).toBe("Your move · send full");
+    /* ⚠️ THE CARD'S OWN WORDS, BARE (grouped pack, Phase 5). It was `Your move · send full`;
+       "Your move" is how this codebase talks to itself and never how a writer talks about their
+       own submission. The label the card supplies is the whole label now. */
+    expect(bars.segments[1].label).toBe("Send full");
+    expect(bars.segments[1].when, "a writer's-move stretch has no date to line up").toBe("");
   });
 
   it("and the other way round — you send, and it becomes theirs", () => {
@@ -147,7 +151,10 @@ describe("⚠️ v5 · after a nudge the bar runs to the NEXT THING DUE", () => 
     }), WIN);
     /* the date comes from `shortCalDate`, the shared helper — which renders September as
        "Sept" in this locale. The literal is the helper's output, not a second formatting. */
-    expect(bars.segments[bars.segments.length - 1].label).toBe(`Next reminder due ${shortCalDate("2026-09-09")}`);
+    /* ⚠️ THE DATE MOVED TO THE BAR'S RIGHT END, so this asserts BOTH halves. Checking only the
+       text would pass on a bar that lost its date entirely, which is the fault a split invites. */
+    expect(bars.segments[bars.segments.length - 1].label).toBe("Reminder");
+    expect(bars.segments[bars.segments.length - 1].when).toBe(shortCalDate("2026-09-09"));
   });
 });
 
@@ -160,7 +167,8 @@ describe("⚠️ v5 · no reply time recorded — nothing is forecast, so nothin
   it("draws one dashed rail across the week and says why", () => {
     expect(bars.segments).toHaveLength(1);
     expect(bars.segments[0].norail).toBe(true);
-    expect(bars.segments[0].label).toBe("No reply time recorded · give it a date");
+    /* shortened, and it no longer instructs — the head says what is true, the bar names the gap */
+    expect(bars.segments[0].label).toBe("No reply time given");
   });
 
   it("⚠️ AND FORECASTS NOTHING — no waypoint, and no open right edge to imply one", () => {
@@ -176,12 +184,12 @@ describe("⚠️ v5 · R&R and offers are open-ended by nature", () => {
     expect(last.side).toBe("yours");
     expect(last.openEnd).toBe(true);
     expect(last.openRight).toBe(false); // it fades; it does not claim a continuation
-    expect(last.label).toBe("Your move · revise & resubmit · no date set");
+    expect(last.label).toBe("Revise and resubmit — no date set");
   });
 
   it("an offer with no stated deadline does the same, in its own words", () => {
     const bars = laneBars(lane({ query: q({ status: QueryStatus.OFFER }) }), WIN);
-    expect(bars.segments[bars.segments.length - 1].label).toBe("Decide on the offer · no date set");
+    expect(bars.segments[bars.segments.length - 1].label).toBe("Offer to answer — no date set");
   });
 
   it("⚠️ AN AGENT-STATED DEADLINE IS A REAL CAP AND A REAL WAYPOINT", () => {
@@ -302,9 +310,12 @@ describe("⚠️ weight is the whole urgency grammar — three steps, no red, no
       labelFor("yours", { norail: false, openEnd: true, query: q({ status: QueryStatus.OFFER }), expectedYmd: null, expectedPassed: false, nudgeYmd: null, terminal: false }),
       labelFor("yours", { norail: false, openEnd: false, query: q({}), expectedYmd: null, expectedPassed: false, nudgeYmd: null, moveLabel: "Send full", terminal: false }),
       labelFor("yours", { norail: false, openEnd: false, query: q({}), expectedYmd: null, expectedPassed: false, nudgeYmd: null, terminal: true }),
-      durationCount(41), `${durationCount(41)} your move`,
-    ].join(" | ");
+    ].map((l) => `${l.text} ${l.when}`).concat([durationCount(41)]).join(" | ");
     expect(all).not.toMatch(/overdue|late|behind|chase|urgent|failed|should have|too long/i);
+    /* ⚠️ AND NO DERIVATION NAME (grouped pack, Phase 5). "Your move", "Their move" and "Reply
+       window" are this codebase's vocabulary for whose turn it is; none of them is how a writer
+       describes their own submission, and none reaches a bar any more. */
+    expect(all).not.toMatch(/your move|their move|reply window|your turn/i);
   });
 
   it("a long-standing your-move stretch draws the hatched overrun, with the count as fact", () => {

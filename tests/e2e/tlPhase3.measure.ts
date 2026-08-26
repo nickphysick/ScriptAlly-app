@@ -52,6 +52,10 @@ test("Phase 3 — five ranges, four density tiers", async ({ page }) => {
        it, so its removal would have been silent here. Counting without asserting is the shape
        that lets a deletion look like a clean run. */
     expect(m.spine, `${STOPS[i]}: the today spine is back`).toBe(0);
+    /* ⚠️ THE HEAD SPEAKS AT EVERY RANGE (grouped pack, Phase 5). This file used to watch the
+       sentence ARRIVE at three months, because the head's words were the bar's label lifted up
+       where a bar was too small to carry them. The head has its own sentence now. */
+    expect(m.rowSays, `${STOPS[i]}: no row head says anything`).toBeGreaterThan(0);
     /* weekday initials drop at a month and beyond */
     if (i >= 2) expect(m.weekdayInitials, `${STOPS[i]}: weekday initials should have dropped`).toBe(0);
     /* bar text leaves at 3 months, and the row head takes the sentence */

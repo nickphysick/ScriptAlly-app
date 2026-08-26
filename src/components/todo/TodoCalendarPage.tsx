@@ -180,6 +180,10 @@ const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({
     {!!sg.label && <span className="d" aria-hidden />}
     <span className="tl-lbl">{sg.label}</span>
     {sg.count && <span className="tl-cnt">{sg.count}</span>}
+    {/* ⚠️ THE DATE SITS AT THE BAR'S RIGHT END so a run of bars line their dates up rather than
+        having them land wherever each label happens to stop. It is pushed there by `.tl-lbl`
+        growing, never by an auto margin. */}
+    {sg.when && <span className="tl-when">{sg.when}</span>}
   </button>
 );
 
@@ -375,14 +379,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     if (range.grain === "week") return d.getDate() <= 7;     // the week that opens a month
     return true;                                             // every month column is a boundary
   };
-  /**
-   * ⚠️ WHAT THE ROW HEAD SAYS WHEN THE BARS CANNOT. The live segment's own label — the one the bar
-   * carries at day grain — read from the same row the bars are drawn from, so the two cannot
-   * disagree. Empty where the row has no speaking segment, because a head that says nothing is
-   * better than one that invents something to say.
-   */
-  const rowSay = (key: string): string =>
-    (barsByRow.get(key)?.segs ?? []).map((sg) => sg.label).find(Boolean) ?? "";
+  /* ⚠️ `rowSay` IS GONE (Phase 5). It lifted the live segment's own LABEL into the head at three
+     months and above, where a bar is too small to carry words. The head has its own sentence now,
+     at every range, so the relocation has nothing left to relocate — and leaving the helper would
+     have left a second, quieter source of head text for someone to reach for. */
   /** the column's own label: a date at day grain, a date and month at week, a month name at month */
   const colLabel = (ymd: string, grain: "day" | "week" | "month") => {
     const d = new Date(`${ymd}T12:00:00`);
@@ -714,16 +714,18 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
             <span className="tl-ms">{r.manuscripts.map((m) => m.title).filter(Boolean).join(" · ")}</span>
           )}
           {/**
-            * ⚠️ THE SENTENCE RELOCATES; IT IS NOT TRUNCATED (range pack, Phase 3). At three months a
-            * bar is a few pixels of shape and its label cannot be read, so the label LEAVES the bar
-            * and the row head says it instead. A half-legible word inside a 9px bar is worse than
-            * no word, and an ellipsis is a promise that the rest is somewhere — it is not.
+            * ⚠️ THE SENTENCE IS ALWAYS HERE NOW (grouped pack, Phase 5), at every range — it is
+            * what the row SAYS, not a fallback for a range where the bar cannot carry a label.
+            * The relocation this replaces was the bar's own words moved for legibility at three
+            * months and above; a head that only speaks when the board is zoomed out is a head that
+            * has nothing to say when the writer is closest to the work.
             *
-            * ⚠️ IT IS THE BAR'S OWN LABEL, not a second sentence written for this tier. Rendering
-            * something else here would give one relationship two descriptions that could disagree;
-            * the row head is a different PLACE for the same words, which is the whole claim.
+            * ⚠️ AND IT IS THE ROW'S SENTENCE, NOT THE BAR'S LABEL. The two are deliberately
+            * different registers now: the bar names its own stretch in as few words as fit inside
+            * it, and the head says what is happening in this relationship in the writer's voice.
+            * They come from one lead query, so they cannot describe different journeys.
             */}
-          {range.dense >= 3 && rowSay(r.key) && <span className="tl-rowsay">{rowSay(r.key)}</span>}
+          {r.sentence && <span className="tl-rowsay">{r.sentence}</span>}
         </button>
         {/* ⚠️ EVERY PARTICIPANT NAMES ITS OWN COLUMN. Auto-placement never overlaps: an auto-placed
             cell beside the explicitly placed lane would be pushed into an implicit new column and
@@ -785,10 +787,19 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   if (selSeg) {
     const sg = selSeg;
     const who = workRowNameFor(sg.rowKey);
-    head = <>{sg.side === "yours" ? "Your move" : "Waiting"}{who && <> — <em>{who}</em></>}</>;
-    ctx = sg.hatchPct ? "It has been your move since the date it was expected." : sg.label;
+    /* ⚠️ "Your move" / "Their move" ARE THE CODE'S WORDS. `sideOf` is what the app calls whose
+       turn it is; a writer calls it being asked for something, or waiting to hear.
+       ⚠️ AND IT IS NOT THE OBVIOUS REWORD EITHER. That phrase is a RETIRED To-do family name,
+       renamed to AGENT WAITING, and `todoWorkbench.test.ts` greps every file under `src/` for it —
+       so the rename is app-wide rather than To-do-local, and a calendar drawer is inside `src/`
+       like anything else. It caught the reword within one run, and then caught the COMMENT that
+       explained the catch: that lock reads raw file contents and does not strip comments, which
+       is why this note describes the phrase instead of quoting it. (Its own needle is split in
+       two "so this lock never matches itself" — the author knew.) */
+    head = <>{sg.side === "yours" ? "With you" : "Waiting to hear"}{who && <> — <em>{who}</em></>}</>;
+    ctx = sg.hatchPct ? "This has been with you since the date a reply was expected." : [sg.label, sg.when].filter(Boolean).join(" ");
     if (sg.count) facts.push({ k: "Duration", v: sg.count });
-    facts.push({ k: "Side", v: sg.side === "yours" ? "Your move" : "Their move" });
+    facts.push({ k: "With", v: sg.side === "yours" ? "You" : "The agent" });
     acts = <button type="button" className="tl-btn" onClick={() => onNavigatePath(`/queries?q=${encodeURIComponent(sg.queryId)}`)}>Open query ›</button>;
   } else if (selNode) {
     const n = selNode;
@@ -886,7 +897,13 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const know: { k: string; v: string }[] = [];
   if (workQuery) {
     know.push({ k: "Status", v: workQuery.status });
-    know.push({ k: "Reply window", v: workSeg ? workSeg.label : "None resolvable" });
+    /* ⚠️ "Reply window" WAS THE KEY HERE and it is the code's phrase, not a writer's. The bar's
+       own words are what this row shows, so it names them rather than a derivation. */
+    know.push({
+      k: "Waiting until",
+      v: workSeg ? [workSeg.label, workSeg.when].filter(Boolean).join(" ") || "No date resolvable"
+                 : "No date resolvable",
+    });
     const mats = (workQuery.materialsWanted ?? []).map(formatQueryMaterial).filter(Boolean);
     if (mats.length) know.push({ k: "Materials", v: mats.join(", ") });
     if (workQuery.personalisationNotes) know.push({ k: "Your note", v: workQuery.personalisationNotes });
@@ -897,7 +914,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     <div className="tl-ws">
       <div className="tl-wshd">
         <span className="tl-lbl2">
-          {workQuery ? `${getPrimaryAction(workQuery.status).ballHolder === "writer" ? "Your turn" : "Waiting"} · ` : ""}
+          {workQuery ? `${getPrimaryAction(workQuery.status).ballHolder === "writer" ? "With you" : "Waiting to hear"} · ` : ""}
           {workRow.name}
         </span>
         <button type="button" className="tl-btn" onClick={() => { setWork(null); setPaneCard(null); }}>
@@ -1081,13 +1098,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                 })}
               </div>
               {/* ⚠️ AN EMPTY BOARD IS NOT A FAILURE STATE. No apology, no prompt to do more — a
-                  writer with a quiet week is entitled to read that as good news, or as nothing. */}
-              {/* ⚠️ ONE LINE, NO ILLUSTRATION, NO ENCOURAGEMENT. A week with nothing in it is a
-                  fact, and a writer with a quiet week is entitled to read it as good news or as
-                  nothing at all. The EMPTY ROW is what this pack removed; the empty WEEK still
-                  says its one line, once. */}
+                  writer with a quiet window is entitled to read that as good news, or as nothing. */}
+              {/* ⚠️ NOT "this week" — the window is seven days at one range out of five and it said
+                  week at all of them. The board does not name its own span here: the range control
+                  above states it and the column headers show it. */}
               {rows.length === 0 && (
-                <div className="tl-none"><p className="tl-none-t">Nothing this week.</p></div>
+                <div className="tl-none"><p className="tl-none-t">Nothing in this window.</p></div>
               )}
             </TplZone>
           </div>
