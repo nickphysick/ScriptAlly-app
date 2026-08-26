@@ -134,6 +134,50 @@ export const tokenHash = (token: string): string => sha256(token);
  */
 export const ipHash = (ip: string, salt: string): string => sha256(`${salt}:${ip}`);
 
+/**
+ * ⚠️ THE UNSUBSCRIBE TOKEN IS SIGNED, NOT STORED, AND THAT IS WHAT MAKES IT PERMANENT. Every other
+ * approach fails a real case:
+ *   · storing a hash and minting a fresh token per email kills the link in every PREVIOUS email —
+ *     so a reader who keeps the confirmation and unsubscribes from it a month later finds a dead
+ *     link, which is a compliance failure, not an inconvenience;
+ *   · storing the token in plain puts a bearer credential at rest for no benefit.
+ * A `<docId>.<hmac>` pair needs no storage at all: the id is the lookup key, the signature proves
+ * we issued it, and the same token is valid for the life of the document.
+ *
+ * ⚠️ DOMAIN-SEPARATED (`unsub:`) so this signature can never be confused with any other use of the
+ * same salt. Reusing the salt without a context string is how one token becomes valid somewhere it
+ * was never meant to be.
+ */
+export const unsubscribeToken = (docId: string, salt: string): string =>
+  `${docId}.${sha256(`unsub:${salt}:${docId}`)}`;
+
+/**
+ * Returns the document id a token authenticates, or `null`.
+ *
+ * ⚠️ COMPARED IN CONSTANT TIME, and shape-checked first — `tokensMatch` refuses anything that is
+ * not a sha256 hex digest, which is what stops two malformed halves comparing equal.
+ */
+export const parseUnsubscribeToken = (raw: unknown, salt: string): string | null => {
+  if (typeof raw !== "string" || !salt) return null;
+  const dot = raw.indexOf(".");
+  if (dot < 1) return null;
+  const docId = raw.slice(0, dot);
+  const sig = raw.slice(dot + 1);
+  /* The id is a document path segment; anything outside the id charset is not one of ours. */
+  if (!/^[0-9a-f]{64}$/.test(docId)) return null;
+  return tokensMatch(sig, sha256(`unsub:${salt}:${docId}`)) ? docId : null;
+};
+
+/**
+ * ⚠️ A CONFIRMATION IS NOT RE-SENT ON EVERY SUBMIT. Without this the form is a mail cannon aimed
+ * at whoever's address was typed: hit the button five times and they get five emails, and someone
+ * who types a stranger's address can do it deliberately.
+ */
+export const CONFIRM_RESEND_MS = 10 * 60 * 1000;
+
+export const mayResendConfirm = (lastSentMs: number | null, nowMs: number): boolean =>
+  lastSentMs === null || nowMs - lastSentMs >= CONFIRM_RESEND_MS;
+
 /** 32 bytes of CSPRNG, url-safe. */
 export const newVerifyToken = (): string => randomBytes(32).toString("base64url");
 

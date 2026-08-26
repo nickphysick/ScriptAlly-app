@@ -29,6 +29,10 @@ import {
   countPayload, ipHash, judgeJoin, normaliseEmail, readSource,
 } from "./waitlistModel";
 import { consumeRateLimit, joinWaitlist, readCounterState, verifyWaitlist } from "./waitlistStore";
+import { RESEND_API_KEY, sendEmail } from "./email";
+import { resolveMailConfig } from "./emailConfig";
+import { prepareConfirm, prepareWelcome } from "./emailTemplates";
+import { unsubscribeToken } from "./waitlistModel";
 
 /**
  * ⚠️ THE IP SALT IS A SECRET AND NEVER HAS A DEFAULT IN CODE. A hard-coded fallback would look
@@ -52,8 +56,56 @@ const jsonHeaders = (res: { set: (k: string, v: string) => void }, origin: strin
   }
 };
 
+/**
+ * ⚠️ A MESSAGE WITH A MISSING LINK IS NOT SENT, AND THE REFUSAL IS LOUD. `prepare*` returns what
+ * was missing rather than a message with an empty href — refusing is recoverable (fix the config,
+ * run it again) and a hundred invites carrying a dead link is not. An absent unsubscribe link
+ * refuses too: that is a compliance failure, not a cosmetic one.
+ *
+ * ⚠️ THE UNSUBSCRIBE TOKEN NEEDS THE SALT, so an unset `WAITLIST_IP_SALT` refuses the send rather
+ * than emailing an unsigned link. That is the one place the salt is load-bearing beyond rate
+ * limiting, and it is why the refusal names it.
+ */
+const sendConfirm = async (to: string, docId: string, verifyToken: string, salt: string) => {
+  const cfg = resolveMailConfig(process.env);
+  if (!salt) {
+    console.error(JSON.stringify({ event: "email.refused", template: "confirm", missing: ["salt"] }));
+    return;
+  }
+  const prepared = prepareConfirm(cfg, verifyToken, unsubscribeToken(docId, salt));
+  if (!prepared.ok) {
+    console.error(JSON.stringify({
+      event: "email.refused", template: "confirm", missing: prepared.missing,
+    }));
+    return;
+  }
+  await sendEmail(to, "confirm", prepared.email);
+};
+
+const sendWelcome = async (docId: string, position: number, cap: number, salt: string) => {
+  const cfg = resolveMailConfig(process.env);
+  /* The address is not in the verify request — it is on the document the token just verified. */
+  const snap = await db.doc(`waitlist/${docId}`).get();
+  const to = (snap.get("email") as string) ?? "";
+  if (!to || !salt) {
+    console.error(JSON.stringify({
+      event: "email.refused", template: "welcome",
+      missing: [...(to ? [] : ["recipient"]), ...(salt ? [] : ["salt"])],
+    }));
+    return;
+  }
+  const prepared = prepareWelcome(cfg, position, cap, unsubscribeToken(docId, salt));
+  if (!prepared.ok) {
+    console.error(JSON.stringify({
+      event: "email.refused", template: "welcome", missing: prepared.missing,
+    }));
+    return;
+  }
+  await sendEmail(to, "welcome", prepared.email);
+};
+
 export const waitlist = onRequest(
-  { region: "europe-west2", timeoutSeconds: 30, memory: "256MiB", secrets: [IP_HASH_SALT] },
+  { region: "europe-west2", timeoutSeconds: 30, memory: "256MiB", secrets: [IP_HASH_SALT, RESEND_API_KEY] },
   async (req, res) => {
     const origin = typeof req.headers.origin === "string" ? req.headers.origin : undefined;
     jsonHeaders(res, origin);
@@ -75,6 +127,10 @@ export const waitlist = onRequest(
         const token = typeof req.query.token === "string" ? req.query.token : "";
         if (!token) { res.redirect(302, `${FOUNDERS_PATH}?verified=unknown`); return; }
         const outcome = await verifyWaitlist(db, token, Date.now());
+        if (outcome.kind === "verified") {
+          await sendWelcome(outcome.docId, outcome.position, outcome.counter.cap,
+                            IP_HASH_SALT.value());
+        }
         /* ⚠️ A REDIRECT, NOT JSON. This URL is opened by a person from their email client, so the
            answer has to be a page. `/founders` reads the parameter and says what happened. */
         res.redirect(302, `${FOUNDERS_PATH}?verified=${outcome.kind}`);
@@ -174,6 +230,17 @@ export const waitlist = onRequest(
            does not know it simply reads a successful join — which is what a waiting-list place is.
            The counter fields come from `countPayload`, so the floor applies to the join response
            too: a number that is public here is public. */
+        /* ⚠️ AFTER THE TRANSACTION, NEVER INSIDE ONE. A Firestore transaction may be retried, and a
+           retried transaction that sends email sends it twice. The store hands back a token only
+           when a confirmation is actually due — new document, or a pending one past the ten-minute
+           throttle — so "send if present" is the whole of the decision here.
+           ⚠️ AND IT IS AWAITED BUT NEVER ALLOWED TO FAIL THE REQUEST. `sendEmail` returns an
+           outcome; the document stands either way, and the reader is told they are in. Losing a
+           founding place because a mail provider hiccuped would be the worse error by far. */
+        if (result.verifyToken) {
+          await sendConfirm(email, result.docId, result.verifyToken, salt);
+        }
+
         res.status(200).json({
           ok: true,
           ...countPayload(result.counter),

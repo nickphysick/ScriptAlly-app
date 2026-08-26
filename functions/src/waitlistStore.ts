@@ -18,7 +18,8 @@ import type { firestore } from "firebase-admin";
 import {
   CounterState, COUNTER_PATH, DEFAULT_CAP, RATELIMIT_COLLECTION, RATE_LIMIT_WINDOW_MS,
   VERIFY_TTL_MS, WaitlistSource, WaitlistStatus,
-  emailHash, newVerifyToken, overRateLimit, rateLimitKey, readCounter, tokenHash, tokensMatch,
+  emailHash, mayResendConfirm, newVerifyToken, overRateLimit, rateLimitKey, readCounter,
+  tokenHash, tokensMatch,
 } from "./waitlistModel";
 
 type Db = firestore.Firestore;
@@ -86,10 +87,14 @@ export interface JoinResult {
   position: number | null;
   counter: CounterState;
   /**
-   * The plain token, returned ONLY when a new pending document was created, so the caller can put
-   * it in an email. It is never stored in plain and never returned to the browser.
+   * The plain token, returned ONLY when a pending document was created OR its confirmation is due
+   * a resend, so the caller can put it in an email. Never stored in plain, never returned to the
+   * browser, and absent whenever no confirmation should go out — which is what makes "send if
+   * present" the whole of the caller's decision.
    */
   verifyToken?: string;
+  /** The document id, so the caller can build the signed unsubscribe token without re-hashing. */
+  docId: string;
 }
 
 /**
@@ -100,7 +105,8 @@ export interface JoinResult {
  */
 export const joinWaitlist = async (db: Db, args: JoinArgs): Promise<JoinResult> => {
   const { emailNormalised, hashedIp, source, nowMs, requireVerification } = args;
-  const sRef = db.doc(`waitlist/${emailHash(emailNormalised)}`);
+  const docId = emailHash(emailNormalised);
+  const sRef = db.doc(`waitlist/${docId}`);
   const cRef = db.doc(COUNTER_PATH);
   const now = new Date(nowMs);
 
@@ -115,7 +121,27 @@ export const joinWaitlist = async (db: Db, args: JoinArgs): Promise<JoinResult> 
       /* Touching `lastInteractionAt` is what makes retention "since we last heard from you"
          rather than "since you first signed up". */
       tx.set(sRef, { lastInteractionAt: now }, { merge: true });
-      return { outcome: "already" as const, status, position, counter };
+      /* ⚠️ A PENDING DOCUMENT MAY BE DUE A FRESH CONFIRMATION, and only here can that be decided
+         atomically. Past the throttle we mint a NEW token, replace the stored hash and stamp the
+         send — so the old link dies with the old email, and a reader always has exactly one live
+         confirmation. Inside the throttle, no token comes back and the caller sends nothing. */
+      let verifyToken: string | undefined;
+      if (status === "pending") {
+        const lastRaw = sSnap.get("lastConfirmSentAt") as { toMillis?: () => number } | Date | undefined;
+        const lastMs =
+          lastRaw instanceof Date ? lastRaw.getTime()
+          : typeof lastRaw?.toMillis === "function" ? lastRaw.toMillis()
+          : null;
+        if (mayResendConfirm(lastMs, nowMs)) {
+          verifyToken = newVerifyToken();
+          tx.set(sRef, {
+            verifyTokenHash: tokenHash(verifyToken),
+            verifyTokenExpiresAt: new Date(nowMs + VERIFY_TTL_MS),
+            lastConfirmSentAt: now,
+          }, { merge: true });
+        }
+      }
+      return { outcome: "already" as const, status, position, counter, docId, verifyToken };
     }
 
     const roomLeft = counter.verifiedCount < counter.cap;
@@ -128,7 +154,7 @@ export const joinWaitlist = async (db: Db, args: JoinArgs): Promise<JoinResult> 
         verified: false, status: "waiting" as WaitlistStatus,
         position: null, source, ...(hashedIp ? { ipHash: hashedIp } : {}),
       });
-      return { outcome: "waiting" as const, status: "waiting" as WaitlistStatus, position: null, counter };
+      return { outcome: "waiting" as const, status: "waiting" as WaitlistStatus, position: null, counter, docId };
     }
 
     /* ── Double opt-in ON: a pending document and a token to email them. Not counted yet. ── */
@@ -140,11 +166,13 @@ export const joinWaitlist = async (db: Db, args: JoinArgs): Promise<JoinResult> 
         verified: false, status: "pending" as WaitlistStatus, position: null,
         verifyTokenHash: tokenHash(token),
         verifyTokenExpiresAt: new Date(nowMs + VERIFY_TTL_MS),
+        /* The throttle's clock starts when the first confirmation is issued, not when it lands. */
+        lastConfirmSentAt: now,
         source, ...(hashedIp ? { ipHash: hashedIp } : {}),
       });
       return {
         outcome: "joined" as const, status: "pending" as WaitlistStatus,
-        position: null, counter, verifyToken: token,
+        position: null, counter, docId, verifyToken: token,
       };
     }
 
@@ -159,7 +187,7 @@ export const joinWaitlist = async (db: Db, args: JoinArgs): Promise<JoinResult> 
     writeCounter(tx, cRef, counter, position, now);
     return {
       outcome: "joined" as const, status: "verified" as WaitlistStatus,
-      position, counter: { ...counter, verifiedCount: position },
+      position, counter: { ...counter, verifiedCount: position }, docId,
     };
   });
 };
@@ -179,7 +207,7 @@ const writeCounter = (
 /* ══════════════ Verifying ══════════════ */
 
 export type VerifyOutcome =
-  | { kind: "verified"; position: number; counter: CounterState }
+  | { kind: "verified"; position: number; counter: CounterState; docId: string }
   /** Verified after the cap filled — a real race with an honest answer. */
   | { kind: "waiting"; counter: CounterState }
   /** Already done. Clicking the link twice is not an error. */
@@ -288,7 +316,7 @@ export const verifyWaitlist = async (
       verifyTokenSpentAt: now, verifyTokenExpiresAt: null,
     }, { merge: true });
     writeCounter(tx, cRef, counter, position, now);
-    return { kind: "verified" as const, position, counter: { ...counter, verifiedCount: position } };
+    return { kind: "verified" as const, position, counter: { ...counter, verifiedCount: position }, docId: doc.id };
   });
 };
 

@@ -27,6 +27,12 @@ export const DEFAULT_FROM = "Nick at ScriptAlly <nick@scriptally.ink>";
  * ⚠️ A VISIBLE CONTACT ROUTE IN THE BODY, NOT JUST A HEADER. Replies to the from-address are
  * currently diverted (see `replyTo` below) and a reader cannot see a `Reply-To` header. Someone who
  * wants a human needs an address they can read.
+ *
+ * ⚠️ THE SAME STRING AS `SUPPORT_EMAIL` IN `src/lib/companyInfo.ts`, DELIBERATELY DUPLICATED.
+ * `functions/` cannot import from `src/` (they are separate TypeScript projects with their own
+ * dependency trees — the enum duplication that forced that split is recorded in CLAUDE.md), so the
+ * value is stated twice on purpose. The Help Centre, the landing copy and the legal copy all read
+ * the other one; if either moves, both move.
  */
 export const SUPPORT_EMAIL = "hello@scriptally.ink";
 

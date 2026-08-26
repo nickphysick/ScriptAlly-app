@@ -140,14 +140,31 @@ describe("only the transport talks to Resend", () => {
     expect(sources).toContain("email.ts");
   });
 
-  it("no file but the transport names the Resend endpoint or its key", () => {
-    const offenders = sources.filter((f) => {
-      if (f === SCANNER || TRANSPORT.includes(f)) return false;
-      const body = readFileSync(join(dir, f), "utf8")
-        .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-      return /api\.resend\.com|RESEND_API_KEY/.test(body);
-    });
+  const bodies = () => sources
+    .filter((f) => f !== SCANNER && !TRANSPORT.includes(f))
+    .map((f) => [f, readFileSync(join(dir, f), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "")] as const);
+
+  it("no file but the transport names the Resend endpoint", () => {
+    const offenders = bodies().filter(([, b]) => /api\.resend\.com/.test(b)).map(([f]) => f);
     expect(offenders, "a template must not call the provider directly").toEqual([]);
+  });
+
+  /**
+   * ⚠️ THE CLAIM IS THE *DEFINITION*, NOT THE NAME — and this assertion was too coarse first, which
+   * is worth recording. It forbade the string `RESEND_API_KEY` anywhere, and went red on
+   * `waitlist.ts` importing the exported handle to list it in `secrets: [...]`. That import is
+   * REQUIRED: a v2 function only gets access to a secret it declares. What must be unique is the
+   * `defineSecret` call — a second one is a second binding of the same secret, which is the actual
+   * fault. Loosening the pattern until the false positive stopped would have loosened it for a real
+   * one too; naming the right thing is the fix.
+   */
+  it("…and only the transport DEFINES the key — importing it to bind it is required", () => {
+    const offenders = bodies()
+      .filter(([, b]) => /defineSecret\(\s*["'`]RESEND_API_KEY/.test(b)).map(([f]) => f);
+    expect(offenders, "one definition, or two bindings of one secret").toEqual([]);
+    expect(readFileSync(join(dir, "waitlist.ts"), "utf8"), "the handler binds it")
+      .toMatch(/secrets:\s*\[[^\]]*RESEND_API_KEY/);
   });
 
   it("…and the exempt set is exactly one file", () => {
