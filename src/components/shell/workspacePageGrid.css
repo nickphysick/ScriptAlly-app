@@ -55,8 +55,8 @@
   /* the masthead's wash, top and bottom stops. Parchment (ref 179) until 25 Aug, terracotta since —
      the same two tokens, which is the whole point of their being tokens: the palette has now moved
      three times and every surface that reads them moved with it in one edit. */
-  --mast-wash-top: #f6ddd4;
-  --mast-wash-bottom: #fbeee8;
+  --mast-wash-top: #f2e4dd;
+  --mast-wash-bottom: #fbf3ee;
   /* the air between the chrome's closing hairline and the page's content */
   --wpg-chrome-gap: 16px;
   /* ⚠️ THE FOLDED BAR'S FOUR TOKENS ARE DELETED WITH IT (pinned chrome, §4) — `--wpg-mini-pad`,
