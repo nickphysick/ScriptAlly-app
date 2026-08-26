@@ -8,7 +8,7 @@
  * and the attention chip pluralisation.
  */
 import { describe, expect, it } from "vitest";
-import { QueryStatus } from "../types";
+import { QueryStatus, type Query } from "../types";
 import { STATUS_ORDER } from "./statusOrder";
 import {
   activeQueriesOf,
@@ -546,5 +546,66 @@ describe("⚠️ the agents pictogram's glyph tone follows YOUR QUERY, not their
   it("every tone has words, and they are the axes' own", () => {
     expect(GLYPH_TONE_LABEL.yours).toBe("Awaiting your pages");
     expect(Object.keys(GLYPH_TONE_LABEL).sort()).toEqual(["closed", "queried", "yours"]);
+  });
+});
+
+/**
+ * ⚠️ THE RESPONSE RATE READS REPLIES, NOT CLOSES (journey round, on the owner's correction).
+ *
+ * The derived `hasAgentResponded` always read the activity log. The FALLBACK, for docs
+ * `recomputeQuery` has not migrated, read `q.status` — how the query ENDED — and a close erases
+ * the history from the status. These assert the numerator against the evidence of a reply rather
+ * than against the ending, on all three closes at once so "rejected happens to be right" cannot
+ * stand in for a rule.
+ */
+describe("⚠️ the response rate counts replies, not endings", () => {
+  const q = (over: Partial<Query>): Query =>
+    ({ id: "q", agentId: "a", manuscriptId: "m", status: QueryStatus.QUERIED,
+       dateSent: "2026-01-01", ...over }) as Query;
+
+  it("a WITHDRAWN query whose agent had asked for a full still counts as answered", () => {
+    const withdrawn = q({ status: QueryStatus.WITHDRAWN, fullRequestedDate: "2026-02-01" });
+    expect(responsesReceivedCount([withdrawn]), "the close erased a reply that happened").toBe(1);
+  });
+
+  it("a NO_RESPONSE close after a partial request counts as answered too", () => {
+    const stale = q({ status: QueryStatus.NO_RESPONSE, partialRequestedDate: "2026-03-01" });
+    expect(responsesReceivedCount([stale])).toBe(1);
+  });
+
+  /* ⚠️ AND REJECTED IS NO LONGER RIGHT BY LUCK. It read correctly before only because a rejection
+     IS a reply, so the status happened to imply what the log would have said. It is now right for
+     the same reason as the other two — the evidence, not the ending. */
+  it("a REJECTED close counts, and so does one carrying only its derived stamp", () => {
+    expect(responsesReceivedCount([q({ status: QueryStatus.REJECTED })])).toBe(1);
+    expect(responsesReceivedCount([q({ status: QueryStatus.NO_RESPONSE, rejectedDate: "2026-04-01" })])).toBe(1);
+  });
+
+  /* ⚠️ AND THE OTHER DIRECTION, which is what stops this becoming "count everything". A query
+     nobody ever replied to is not a response however it ended. */
+  it("a close with no evidence of a reply counts as none — in both halves", () => {
+    const silent = q({ status: QueryStatus.NO_RESPONSE });
+    const pulled = q({ status: QueryStatus.WITHDRAWN });
+    expect(responsesReceivedCount([silent, pulled])).toBe(0);
+    /* the denominator is unchanged and needs no special case — the arithmetic simply works */
+    expect(responseRatePercent([silent, pulled])).toBe(0);
+  });
+
+  /* ⚠️ THE DERIVED FLAG STILL WINS WHERE IT EXISTS. The fallback is for unmigrated docs only, and a
+     doc that has been recomputed carries the log's own answer — including a `false` that must not
+     be overridden by a stamp. */
+  it("the derived flag wins over the fallback, in both directions", () => {
+    expect(responsesReceivedCount([q({ status: QueryStatus.WITHDRAWN, hasAgentResponded: true })])).toBe(1);
+    expect(responsesReceivedCount([
+      q({ status: QueryStatus.REJECTED, fullRequestedDate: "2026-02-01", hasAgentResponded: false }),
+    ]), "a stamp overrode the log's own answer").toBe(0);
+  });
+
+  it("a live query the agent has answered counts, and one they have not does not", () => {
+    expect(responsesReceivedCount([q({ status: QueryStatus.FULL_REQUESTED })])).toBe(1);
+    expect(responsesReceivedCount([q({ status: QueryStatus.QUERIED })])).toBe(0);
+    expect(responseRatePercent([
+      q({ status: QueryStatus.FULL_REQUESTED }), q({ status: QueryStatus.QUERIED }),
+    ])).toBe(50);
   });
 });

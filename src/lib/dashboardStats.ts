@@ -99,6 +99,41 @@ const LEGACY_RESPONSE_STATUSES: ReadonlySet<QueryStatus> = new Set([
   QueryStatus.REJECTED,
 ]);
 
+/**
+ * ⚠️ THE RESPONSE RATE READS REPLIES, NOT CLOSES — and this fallback was reading closes.
+ *
+ * `hasAgentResponded` is DERIVED from the activity log (`deriveResponseFlags`): it asks whether an
+ * agent-response rung EXISTS, which is the honest question. The fallback below it, for docs
+ * `recomputeQuery` has not migrated, asked a different one — `LEGACY_RESPONSE_STATUSES.has(q.status)`,
+ * which is how the query ENDED. A close erases the history from the status, so:
+ *
+ *   · WITHDRAWN — you pulled a query the agent had already asked to see. The agent DID respond;
+ *     the status says nothing about it, so the query counted as unanswered and the writer's own
+ *     response rate fell for a decision they made.
+ *   · NO_RESPONSE — the same, wherever a request preceded the silence: a partial requested in
+ *     March and closed unanswered in December is a reply that the close hid.
+ *   · REJECTED read correctly BY LUCK, because a rejection is itself a reply, so the status
+ *     happened to imply what the log would have said. One of three right for the wrong reason is
+ *     not a rule; it is a coincidence that made the fault harder to see.
+ *
+ * The fix is not to special-case withdrawn. It is to stop reading the ending at all: the four
+ * stamps below are each written from the activity log, so any one of them present means the agent
+ * acted — whatever the query did afterwards. `packageMetrics.reachedRequest` already reads the
+ * pair this way (`REQUEST_OR_BEYOND.has(q.status) || !!q.partialRequestedDate || …`); this brings
+ * the response rate into line with it.
+ *
+ * ⚠️ AND THE DENOMINATOR IS UNCHANGED, deliberately. A query withdrawn before the agent ever acted
+ * has no response and is counted as one that got none — which is true. It needs no special case in
+ * either half; the arithmetic simply works once the numerator stops reading the close.
+ */
+const agentEverActed = (q: Query): boolean =>
+  !!q.responseReceivedAt
+  || !!q.partialRequestedDate
+  || !!q.fullRequestedDate
+  || !!q.rejectedDate
+  /* position in the journey, for a doc carrying neither the flag nor a stamp */
+  || LEGACY_RESPONSE_STATUSES.has(q.status);
+
 export const activeQueriesOf = (queries: Query[]): Query[] =>
   queries.filter((q) => ACTIVE_STATUSES.has(q.status));
 
@@ -107,7 +142,7 @@ export const awaitingReplyCount = (queries: Query[]): number =>
 
 export const responsesReceivedCount = (queries: Query[]): number =>
   queries.filter((q) =>
-    q.hasAgentResponded !== undefined ? q.hasAgentResponded : LEGACY_RESPONSE_STATUSES.has(q.status),
+    q.hasAgentResponded !== undefined ? q.hasAgentResponded : agentEverActed(q),
   ).length;
 
 export const responseRatePercent = (queries: Query[]): number =>
