@@ -18,6 +18,19 @@ import { ensureSignedIn, liftMotionSuppression } from "./measure";
 import { writeFileSync, rmSync, mkdirSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
+
+/** the report, in one shape, so an early exit and a full run cannot format differently */
+function lines0(out: R[], notes: string[]): string {
+  const red = out.filter((r) => !r.ok);
+  const ls = [
+    "── journey round · Phases 1–5 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
+    "",
+    ...notes,
+    "",
+  ];
+  for (const r of out) ls.push("  " + (r.ok ? "green" : "RED  ") + "  " + r.id + "\n           " + r.note);
+  return ls.join("\n");
+}
 const OUT = process.env.SA_JR_OUT ?? "run-artifacts/journey-round.txt";
 const SHOTS = "run-artifacts/journey-round";
 rmSync(OUT, { force: true });
@@ -72,11 +85,45 @@ test("journey round", async ({ page }) => {
   const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
   const notes: string[] = [];
 
+  /**
+   * ⚠️ WAIT FOR THE BOARD, NOT FOR A DURATION — and assert it arrived before measuring anything.
+   *
+   * This spec used `waitForTimeout(7000)`. Under a load average of 14, with three other sessions
+   * building in the same checkout, seven seconds was not enough: the run opened a page whose list
+   * had not rendered and every one of 32 assertions read `-`. It reported that as 32 RED, which
+   * looks exactly like a total regression and is not — the same page probed moments later held 27
+   * rows and logged no console error.
+   *
+   * A fixed wait is a guess about a machine. `boardReady` is the condition itself, and the
+   * population assertion below turns "the board never came" into ONE honest failure that says so,
+   * rather than into a wall of red about a page nobody looked at.
+   */
+  const boardReady = async (): Promise<number> => {
+    try {
+      await page.waitForFunction(
+        "document.querySelectorAll('.tlc .row').length > 0", null, { timeout: 45_000 });
+    } catch { /* the count below reports it; the assertion is what fails, not this */ }
+    return page.evaluate("document.querySelectorAll('.tlc .row').length") as Promise<number>;
+  };
+
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/todo");
-  await page.waitForTimeout(7000);
+  const rowsAtStart = await boardReady();
   await liftMotionSuppression(page);
+  /* ⚠️ THE PRECONDITION, ASSERTED FIRST. Every claim below is about a docked card; with no rows
+     there is nothing to dock and each would fail for a reason that has nothing to do with its own
+     subject. */
+  add("P0 · the board rendered before anything was measured",
+      rowsAtStart > 0, "rows on screen at start = " + rowsAtStart);
+  if (rowsAtStart === 0) {
+    notes.push("THE BOARD NEVER RENDERED — every assertion below is vacuous and is not reported");
+    const report0 = lines0(out, notes);
+    writeFileSync(OUT, report0);
+    console.log("\n" + report0 + "\n");
+    expect(rowsAtStart, "the board never rendered — nothing was measured").toBeGreaterThan(0);
+    return;
+  }
 
   /**
    * ⚠️ THE ACCOUNT IS CLEANED BEFORE ANYTHING IS MEASURED, because the first run of this spec died
@@ -237,7 +284,7 @@ test("journey round", async ({ page }) => {
 
   /* the close journey's leave-it-open — the mute's home */
   await page.goto("/todo");
-  await page.waitForTimeout(6000);
+  await boardReady();
   await liftMotionSuppression(page);
   const gotClose = await openCard("Close");
   if (gotClose) {
@@ -265,7 +312,7 @@ test("journey round", async ({ page }) => {
      observable as the app's own snooze toast and the card leaving the list — and the undo must put
      it back, which is what leaves the account as it was found. */
   await page.goto("/todo");
-  await page.waitForTimeout(6000);
+  await boardReady();
   await liftMotionSuppression(page);
   await openCard("Send");
   const rowsBefore = await page.evaluate(`(() => {
@@ -317,10 +364,138 @@ test("journey round", async ({ page }) => {
       undone && restored === rowsBefore,
       "undo pressed=" + undone + " · rows " + afterSnooze.rows + " -> " + restored + " (was " + rowsBefore + ")");
 
+  /* ══ PHASE 4 · the send journey ═══════════════════════════════════════════════════════════ */
+  await page.goto("/todo");
+  await boardReady();
+  await liftMotionSuppression(page);
+  await openCard("Send");
+  await choose("I\u2019ve sent it");
+
+  /* ⚠️ THE SEEDED NUMBER IS NOT AN ANSWER — the bug that was live on dev. Open the parcel row,
+     press a unit, and read the gate WITHOUT touching the amount. */
+  const unitProbe = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const all = (s) => [...document.querySelectorAll(s)].filter(vis);
+    const row = all(".tpn .q").find((q) => q.id.indexOf("s-unit") >= 0);
+    if (!row) return { skipped: "no parcel row on this card" };
+    if (!row.classList.contains("open")) (row.querySelector(".head")).click();
+    return { opened: true };
+  })()`) as any;
+  await page.waitForTimeout(600);
+  const beforeUnit = await read();
+  const pressedUnit = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const row = [...document.querySelectorAll(".tpn .q")].filter(vis).find((q) => q.id.indexOf("s-unit") >= 0);
+    const pill = row ? [...row.querySelectorAll(".ssp-units button, .upill")].filter(vis)[0] : null;
+    if (!pill) return null;
+    pill.click();
+    return true;
+  })()`) as any;
+  await page.waitForTimeout(700);
+  const afterUnit = await read();
+  const seedState = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const inp = [...document.querySelectorAll(".tpn .q .qty input")].filter(vis)[0];
+    const a = document.activeElement;
+    return inp ? {
+      value: inp.value,
+      focused: a === inp,
+      /* the whole value selected, so the first keystroke REPLACES the seed */
+      selected: inp.selectionStart === 0 && inp.selectionEnd === String(inp.value).length && String(inp.value).length > 0,
+    } : null;
+  })()`) as any;
+  const unitRowAfter = (afterUnit?.rows ?? []).find((r: any) => r.id.indexOf("s-unit") >= 0);
+  add("P4.1 · choosing a unit does NOT mark the parcel answered",
+      !!pressedUnit && !!unitRowAfter && !unitRowAfter.done,
+      unitProbe?.skipped ? unitProbe.skipped
+        : "pressed=" + !!pressedUnit + " row.done=" + unitRowAfter?.done
+          + " (was " + ((beforeUnit?.rows ?? []).find((r: any) => r.id.indexOf("s-unit") >= 0)?.done) + ")");
+  add("P4.2 · and the seed is focused AND selected, so typing replaces it",
+      !!seedState && seedState.focused && seedState.selected,
+      seedState ? "value=" + JSON.stringify(seedState.value) + " focused=" + seedState.focused
+        + " selected=" + seedState.selected : "no amount input on screen");
+
+  /* type over the seed and commit — no keystroke may be lost */
+  await page.keyboard.type("7");
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(800);
+  const typed = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const inp = [...document.querySelectorAll(".tpn .q .qty input")].filter(vis)[0];
+    const row = [...document.querySelectorAll(".tpn .q")].filter(vis).find((q) => q.id.indexOf("s-unit") >= 0);
+    return { value: inp ? inp.value : null, done: row ? row.classList.contains("done") : null };
+  })()`) as any;
+  add("P4.3 · typing replaces the seed without a keystroke being lost, and THEN it is answered",
+      typed.value === "7" && typed.done === true,
+      "value=" + JSON.stringify(typed.value) + " (7 expected, not 37) · answered=" + typed.done);
+
+  /* the crossover to close — its verb and its strip */
+  await page.goto("/todo");
+  await boardReady();
+  await liftMotionSuppression(page);
+  await openCard("Send");
+  await choose("I\u2019m not going to send it");
+  const crossed = await read();
+  add("P4.4 · the crossed close arrives under the contract's own verb",
+      /Close the query/.test(crossed?.primary ?? "") || crossed?.primary === null,
+      "primary=" + JSON.stringify(crossed?.primary));
+  await choose("Close it now");
+  await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const q = [...document.querySelectorAll(".tpn .q.open")].filter(vis)[0];
+    const b = q ? [...q.querySelectorAll(".seg button")][0] : null;
+    if (b) b.click();
+  })()`);
+  await page.waitForTimeout(800);
+  const wStrip = await read();
+  add("P4.5 · and its strip says WITHDRAWN, not no-response",
+      /withdrawn/i.test(wStrip?.strip ?? "") && !/no response/i.test(wStrip?.strip ?? ""),
+      "strip=" + JSON.stringify(wStrip?.strip));
+
+  /* ══ PHASE 5 · the nudge journey ═══════════════════════════════════════════════════════════ */
+  await page.goto("/todo");
+  await boardReady();
+  await liftMotionSuppression(page);
+  const gotNudge = await openCard("Chase");
+  if (gotNudge) {
+    const nf = await read();
+    notes.push("NUDGE fork: " + JSON.stringify(nf?.forkOpts?.map((o: any) => o.t)));
+    add("P5.1 · the nudge fork offers record, wait, and the crossover to close",
+        !!nf && nf.forkOpts.length === 3 && /close/i.test(nf.forkOpts[2]?.x ?? ""),
+        nf ? JSON.stringify(nf.forkOpts.map((o: any) => o.t)) : "-");
+    await choose("I\u2019ve nudged them");
+    const nudged = await read();
+    add("P5.2 · logging a nudge REQUIRES its own clock — the question is on the ledger",
+        !!nudged && nudged.rows.some((r: any) => /if nothing comes back/i.test(r.label)),
+        nudged ? JSON.stringify(nudged.rows.map((r: any) => r.label)) : "-");
+    const checkinRow = (nudged?.rows ?? []).find((r: any) => /if nothing comes back/i.test(r.label));
+    add("P5.3 · and Don\u2019t ask again is one of its answers",
+        !!checkinRow && (checkinRow.opts ?? []).some((o: string) => /don.t ask again/i.test(o)),
+        checkinRow ? JSON.stringify(checkinRow.opts) : "(row not open)");
+    add("P5.4 · the primary is absent until the clock is answered",
+        !!nudged && /to answer/.test(nudged.primary ?? ""),
+        "primary=" + JSON.stringify(nudged?.primary));
+  } else {
+    notes.push("no Chase card on this account — P5.1\u2013P5.4 not measured");
+  }
+
+  /* ⚠️ THE JOURNEY REPORTS, IT DOES NOT JUDGE. Read the RENDERED pane rather than the source, so a
+     task-type identifier cannot satisfy a claim about copy. */
+  const verdicts = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const pane = [...document.querySelectorAll(".tpn .pane")].filter(vis)[0];
+    if (!pane) return null;
+    const t = (pane.textContent || "");
+    return { overdue: /overdue/i.test(t), late: /\blate\b/i.test(t), len: t.length };
+  })()`) as any;
+  add("P5.5 · the pane calls nobody overdue or late",
+      !!verdicts && !verdicts.overdue && !verdicts.late && verdicts.len > 100,
+      verdicts ? "overdue=" + verdicts.overdue + " late=" + verdicts.late + " (chars scanned " + verdicts.len + ")" : "-");
+
   /* ══ SCREENSHOTS ══════════════════════════════════════════════════════════════════════════ */
   const shoot = async (name: string, kind: string, steps?: () => Promise<void>) => {
     await page.goto("/todo");
-    await page.waitForTimeout(5500);
+    await boardReady();
     await liftMotionSuppression(page);
     if (!(await page.evaluate(OPEN(kind)))) { notes.push("shot " + name + ": no " + kind + " card"); return; }
     await page.waitForTimeout(1200);
@@ -335,10 +510,15 @@ test("journey round", async ({ page }) => {
   await shoot("fork-close-leave", "Close", async () => { await choose("Leave it open for now"); });
   await shoot("fork-nudge", "Chase");
   await shoot("fork-note", "Note");
+  await shoot("send-crossed-close", "Send", async () => {
+    await choose("I\u2019m not going to send it"); await choose("Close it now");
+  });
+  await shoot("nudge-nudged", "Chase", async () => { await choose("I\u2019ve nudged them"); });
+  await shoot("fillin-fork", "Fix");
 
   const red = out.filter((r) => !r.ok);
   const lines = [
-    "── journey round · Phases 1–3 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
+    "── journey round · Phases 1–5 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
     "",
     ...notes,
     "",
