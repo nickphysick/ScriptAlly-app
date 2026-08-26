@@ -202,3 +202,97 @@ to the attachment block and cannot be tripped by the pane's own editing.
 
 **Zero regressions** against the previous report's per-state counts — the loose row, the fork and the
 removed-package message are unchanged (D7).
+
+---
+
+# The packaged strip: Option A, and the first commissioned asset
+
+Ref: `design-refs/package-strip-parcel.html`. Asset: `src/assets/packages/package-mark.png`.
+
+## ⚠️ THE FINDING — the ~40px row needs ~575px, and at 1440 the column gives 337
+
+| viewport | timeline column | strip width | form | **row height** |
+|---|---|---|---|---|
+| 1920 | 625px | 580 | one row, as drawn | **42px** |
+| 1440 | 337px | 337 | stacked | **124px** |
+| *(the band it replaces)* | — | — | — | *~92px* |
+
+**At 1440 this is taller than what it replaces, and that is a real regression I am surfacing rather
+than hiding.** The arithmetic, measured: with the sample's version chip the three slots need
+**398.1px** on one line and the blue cell **149px**, so the single row needs **~575px**. The column
+at 1440 is 337. Nothing can put 398px of slots on one line in 337px — not a smaller mark, not a
+tighter gap, not a different arrangement.
+
+**⚠️ D3's PREMISE DID NOT HOLD.** It said anything above ~48px means something was carried over.
+Nothing was: the band is gone entirely (verified in the served stylesheet). The ref was drawn at
+560px in isolation, and the surface it lives in is narrower.
+
+**⚠️ AND THE VERSION CHIP IS WHY 560 WAS NEVER ENOUGH.** The ref draws three slots and no chip; the
+sample now carries one (Part E, D5) costing ~100px. The row's cap is 580 rather than 560 for exactly
+that — **the mark did not give**, because 24px is a floor and trading the thing the commission was
+for against 20px of width would be the wrong economy.
+
+**This needs a decision I did not take**: either the timeline column gets wider, or the strip at
+narrow widths shows fewer slots, or ~124px at 1440 is accepted. Ship state is the third by default.
+
+## What landed
+
+**Option A** — one row, two cells: blue cell (`--pro-fill → --pro-fill-deep`, right border, the
+parcel then the Playfair name), white cell (three slots as `LABEL Value` pairs). Radius 9,
+`overflow: hidden` clipping the blue cell's corners.
+
+**The stationery band is deleted in the same commit** — the mat's `0 0 0 3px` spread shadow, the
+gradient head, the separate body, `.qc-stat-l`, `.qc-stat-glyph`, `.qc-stat-open`, and the fourteen
+cases that locked them. Verified in the **served** stylesheet: all six at 0, the mat's shadow absent
+from every strip rule.
+
+**The slots are the host's own children, stripped of their pill treatment** — not rebuilt. They come
+from `linkedChips` and already carry the eyebrow-and-name shape plus the version chip; rebuilding
+them would have put a second place in the app that decides what a package contains.
+
+## ⚠️ Three faults on the way, all mine, all caught by measuring
+
+1. **`--pro-a` / `--pro-b` do not exist.** I took the token names from the *ref*, which uses its own.
+   A `var()` on an undefined property invalidates the whole declaration and the browser drops it in
+   silence — so **the blue cell had no blue in it**, through a green build and a green suite. Caught
+   because the measurement asserts the *composed* result (computed `background-image` contains a
+   gradient) rather than that the rule was written. There is now a sweep over every `var()` this
+   sheet **reads**, and a case naming `--pro-a`/`--pro-b` specifically.
+2. **`container-type: inline-size` collapsed the row to 2px.** It sizes the element independently of
+   its contents, and this one sits in a flex context, so it became shrink-to-fit with nothing to fit.
+   `width: 100%` beside it is the remedy.
+3. **I stacked the row before measuring what stacking would give**, and it went 128 → 184. Both
+   guesses were wrong; the third change was measured first.
+
+## F-BF — the asset convention
+
+**`src/assets/<feature-area>/`, imported.** That is what every recent asset does (`shell` 9,
+`marketing` 8, `todo` 2, `journeys` 1): a hashed filename, a build-time error if the file goes
+missing, one folder per area. `public/` is the older pile — brand one-offs referenced by URL, with
+spaces in their filenames (`Sent queries final.png`, `corkboard splash.png`).
+
+**It scales unchanged for the rest of the commission**; no decision is needed before more artwork
+lands. Served as `/assets/package-mark-C48rszvc.png`, HTTP 200, 16,241 bytes — byte-identical to the
+source, so nothing re-encoded it.
+
+**D7 — no 2× file**, and the suite asserts one does not appear: 100×100 against a 24px box is better
+than 4×.
+
+## F-BE — where the stroke parcel still lives, and the room each has
+
+| site | draws at | against the 20px floor |
+|---|---|---|
+| `CardBand` — package-card band heads, the drawer head, the legend | **16px** | **below the floor** — the parcel would be a brown blob. The row would have to grow first. |
+| `packageIcons` — the commission set | **22px** in a 38px plate | above the floor; would read, just |
+| `PackagesTeachFirst` | a 320px slot | ample room |
+
+**The 16px sites are the finding**: they cannot take the parcel without their rows growing, which is
+D2's point restated one surface along. That is the input to the next drop.
+
+## ⚠️ The dev fixture drifts between sessions
+
+Twice during this run the fixture changed under the measurement: `seed-query-8` lost its package, and
+`seed-ms-1`'s `bookVersions` were wiped to zero — which made the version chip vanish and looked
+exactly like a regression in the strip. Both were other sessions' seeding. **"It renders" is a claim
+about a moment on a shared database**, so anything measured here re-seeds first or reports what it
+found.

@@ -57,7 +57,22 @@
    be readable as "the band became a row".
    ══════════════════════════════════════════════════════════════════════════════ */
 
-.qc-attach { max-width: 620px; margin: 6px 0 8px; }
+/* ⚠️ THE CONTAINER THE STRIP MEASURES ITSELF AGAINST — see the stacking rule below. */
+/**
+ * ⚠️ `width: 100%` IS REQUIRED BESIDE THE CONTAINER DECLARATION, AND WITHOUT IT THE ROW COLLAPSED
+ * TO 2px. `container-type: inline-size` applies inline-size containment, so the element sizes
+ * independently of its contents — and this one sits in a flex context, where that made it
+ * shrink-to-fit with nothing left to fit. Measured: `rowW: 2`, both cells 28px wide.
+ *
+ * The container itself is what the stacking rule below measures against: the strip's width comes
+ * from the timeline column, not the viewport.
+ */
+.qc-attach {
+  max-width: 620px;
+  width: 100%;
+  margin: 6px 0 8px;
+  container: qc-strip / inline-size;
+}
 
 /**
  * ⚠️ `overflow: hidden` IS LOAD-BEARING. It clips the blue cell's square corners to the row's
@@ -67,7 +82,18 @@
 .qc-pstrip {
   display: flex;
   align-items: stretch;
-  max-width: 560px;
+  /**
+   * ⚠️ 580, NOT THE REF'S 560 — AND THE 20px IS FOR A FEATURE THE REF PREDATES.
+   *
+   * The ref draws three slots and no version chip; the sample now carries one (Part E, D5), which
+   * costs ~100px. Measured with it: the slots need 398.1px and the blue cell 149, so the single row
+   * needs **575** — 15px more than the ref's width, and it was stacking at 1920 for want of them.
+   *
+   * The MARK is not what gives (D2): 24px is a floor, and shrinking it to buy 20px would trade the
+   * thing the commission was for against a number nobody would notice. The row's cap is the value
+   * that was drawn before the chip existed.
+   */
+  max-width: 580px;
   border: 1px solid var(--pro-edge);
   border-radius: 9px;
   overflow: hidden;
@@ -79,7 +105,19 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  background: linear-gradient(180deg, var(--pro-a), var(--pro-b));
+  /**
+   * ⚠️ `--pro-fill` / `--pro-fill-deep`, NOT the ref's `--pro-a` / `--pro-b`.
+   *
+   * The first build took the token NAMES straight from the design ref, which uses its own. Neither
+   * is defined in this sheet, so the gradient was invalid and dropped — `background-image: none`,
+   * **a blue cell with no blue in it**, through a green build and a green suite. This is the fault
+   * this repo records most prominently: a `var()` on an undefined property fails silently, and
+   * checking that what you WROTE arrived cannot catch what you REFERENCED and never wrote.
+   *
+   * Caught by the measurement asserting the COMPOSED result — that the computed `background-image`
+   * contains a gradient — rather than that the rule was written.
+   */
+  background: linear-gradient(180deg, var(--pro-fill), var(--pro-fill-deep));
   border-right: 1px solid var(--pro-edge);
   padding: 7px 14px;
   color: var(--pro-ink);
@@ -138,6 +176,29 @@
   color: rgba(58, 28, 20, 0.4);
 }
 .qc-ps-sl .qc-mchiptx { font-weight: 600; }
+
+/**
+ * ⚠️ THE ROW STACKS WHEN ITS COLUMN CANNOT HOLD IT — and the number came from measuring, not taste.
+ *
+ * The ref draws Option A at 560px. The timeline body it actually lives in is **337px at 1440** and
+ * 625px at 1920, so at the common width the three slots (282px including gaps) were being squeezed
+ * into a 186px cell and wrapping onto THREE lines: a 128px row, worse than the 92px band it
+ * replaces. Nothing had been carried over — the premise that a tall row means leftover chrome was
+ * simply false here. The container is narrower than the drawing assumed.
+ *
+ * ⚠️ THE MARK DOES NOT SHRINK (D2). 24px is a floor: below it the string and the label go and the
+ * parcel is a brown blob. What gives instead is the ROW, which stacks its two cells — blue above,
+ * white below — so the slots get the full width and fit on one line. ~72px stacked, against 128
+ * wrapped and 92 for the band.
+ *
+ * ⚠️ AND IT IS A CONTAINER QUERY, NOT A MEDIA QUERY. The strip's width is set by the timeline
+ * column, not by the viewport — the same 1440 viewport gives it 337px here and more elsewhere, so a
+ * viewport breakpoint would stack it in places that have the room and not in places that do not.
+ */
+@container qc-strip (max-width: 574px) {
+  .qc-pstrip { flex-direction: column; align-items: stretch; }
+  .qc-ps-nm { border-right: none; border-bottom: 1px solid var(--pro-edge); }
+}
 
 /* Drift reports; it does not warn. No blush, no icon — a package moving on is ordinary. */
 .qc-stat-note {

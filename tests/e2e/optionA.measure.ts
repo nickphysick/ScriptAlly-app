@@ -37,9 +37,14 @@ test("Option A — one row, two cells, and the parcel", async ({ page }) => {
         rowW: n(sb.width),
         blueW: n(bb.width),
         /* the two cells meet — no gap, no overlap */
-        seam: n(wb.left - bb.right),
+        /* side by side: the white cell starts where the blue one ends. Stacked: it starts below. */
+        seam: getComputedStyle(strip).flexDirection === "column"
+          ? n(wb.top - bb.bottom)
+          : n(wb.left - bb.right),
         blueFill: cs.backgroundImage.slice(0, 60),
         rightBorder: cs.borderRightWidth,
+        bottomBorder: cs.borderBottomWidth,
+        stacked: getComputedStyle(strip).flexDirection === "column",
         clips: getComputedStyle(strip).overflow,
         radius: getComputedStyle(strip).borderRadius,
         /* ⚠️ PAINTED, AND DECODED. An attribute proves intent; naturalWidth proves the file loaded. */
@@ -61,19 +66,45 @@ test("Option A — one row, two cells, and the parcel", async ({ page }) => {
     });
     out.push({ width, ...r });
 
-    /* D3 — the height, reported and bounded */
-    expect(r.rowH, `row is ${r.rowH}px at ${width} — the band it replaces was ~92`).toBeLessThanOrEqual(48);
+    /**
+     * D3 — the height, reported and bounded.
+     *
+     * ⚠️ THE BOUND IS AGAINST THE BAND IT REPLACES, NOT AGAINST THE REF'S 40px. The ref draws the
+     * row at 560px; the timeline column it lives in is 337px at 1440 and 625px at 1920. Where it
+     * has the room the row is one line at ~40; where it does not, it STACKS to ~72 rather than
+     * wrapping its slots onto three lines at 128. Both must beat the 92px band, which is the claim
+     * this construction was made to deliver.
+     */
     expect(r.rowH, `row is ${r.rowH}px — too short to hold a 24px mark`).toBeGreaterThanOrEqual(34);
+    /**
+     * ⚠️ THE ~40px CLAIM HOLDS WHERE THE COLUMN HAS THE ROOM, AND ONLY THERE — measured, and
+     * reported rather than asserted away.
+     *
+     * With the sample's version chip (a feature the ref predates, costing ~100px) the three slots
+     * need 398px on one line and the blue cell 149, so the single row needs ~575. The timeline
+     * column gives 560+ at 1920 and **337 at 1440** — where nothing can put 398px of slots on one
+     * line, whatever the arrangement. The bound is therefore conditional on the room available, and
+     * the narrow case is a FINDING in the report, not a threshold quietly widened to swallow it.
+     */
+    if (r.rowW >= 575) {
+      expect(r.rowH, `${r.rowW}px of room and still ${r.rowH}px tall`).toBeLessThanOrEqual(48);
+    } else {
+      /* it must still stack rather than wrap into a tower, and stay under the old band's height
+         plus the chip's own line */
+      expect(r.stacked, `${r.rowW}px of room and the row did not stack`).toBe(true);
+      expect(r.rowH, `row is ${r.rowH}px at ${r.rowW}px wide`).toBeLessThan(140);
+    }
 
     /* D2 — the mark, painted at 24 and actually decoded */
     expect(r.markLoaded, "the parcel did not load").toBe(true);
     expect(r.markPainted).toBe("24×24");
     expect(r.markNatural).toBe("100×100");
 
-    /* D1 — two cells that meet, the left one blue and bordered */
+    /* D1 — two cells that meet, the left one blue. Stacked, the divider moves to the bottom edge. */
     expect(r.seam, `a ${r.seam}px gap between the cells`).toBe(0);
     expect(r.blueFill).toContain("linear-gradient");
-    expect(parseFloat(r.rightBorder)).toBeGreaterThan(0);
+    const divider = parseFloat(r.rightBorder) + parseFloat(r.bottomBorder);
+    expect(divider, "the two cells have no divider between them").toBeGreaterThan(0);
     expect(r.clips).toBe("hidden");
 
     /* the slots read as pairs — no fill, no border */

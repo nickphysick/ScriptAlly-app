@@ -56,13 +56,15 @@ describe("Option A — one row, two cells (D1)", () => {
     expect(r).toContain("display: flex");
     expect(r).toContain("border: 1px solid var(--pro-edge)");
     expect(r).toContain("border-radius: 9px");
+    /* ⚠️ 580, not the ref's 560: the sample's version chip costs ~100px and the ref predates it. */
+    expect(r).toContain("max-width: 580px");
     /* ⚠️ LOAD-BEARING, NOT TIDINESS: without it the blue cell's square corners stick out. */
     expect(r).toContain("overflow: hidden");
   });
 
   it("the left cell is the blue one, bordered on its right", () => {
     const r = rule(".qc-ps-nm");
-    expect(r).toContain("linear-gradient(180deg, var(--pro-a), var(--pro-b))");
+    expect(r).toContain("linear-gradient(180deg, var(--pro-fill), var(--pro-fill-deep))");
     expect(r).toContain("border-right: 1px solid var(--pro-edge)");
     expect(r).toContain("color: var(--pro-ink)");
     /* it sizes to its content so the white cell takes the slack */
@@ -201,5 +203,36 @@ describe("no dashed placeholder anywhere in this strip", () => {
     expect(d).not.toContain("PARCEL_SLOT");
     expect(d).not.toContain("SHEETS_SLOT");
     expect(cssD).not.toContain("dashed");
+  });
+});
+
+describe("⚠️ every var() this sheet reads resolves to something", () => {
+  /**
+   * The fault this catches shipped in the first build of Option A: the token names were taken from
+   * the DESIGN REF, which uses its own (`--pro-a` / `--pro-b`), and neither is defined anywhere in
+   * the app. A `var()` on an undefined property makes the whole declaration invalid and the browser
+   * drops it in silence — so the blue cell had no blue in it, through a green build and a green
+   * suite.
+   *
+   * ⚠️ THE SWEEP IS FOR READS, NOT DEFINITIONS. Grepping for what you wrote cannot catch what you
+   * referenced and never wrote; that direction is the whole reason this class survives review.
+   */
+  it("names no token the sheet does not define and the app does not provide", () => {
+    const d = cssD;
+    const reads = new Set([...d.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
+    const defines = new Set([...d.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+    /** Declared app-wide rather than here — each verified present in index.css or a page sheet. */
+    const appWide = new Set(["--f12-serif", "--f12-mono", "--burg"]);
+    const orphans = [...reads].filter((t) => !defines.has(t) && !appWide.has(t));
+    expect(orphans, `reads tokens nothing defines: ${orphans.join(", ")}`).toEqual([]);
+    /* and the population floor — a sheet that read nothing would pass having checked nothing */
+    expect(reads.size, "no var() reads found — has the sheet changed shape?").toBeGreaterThan(3);
+  });
+
+  it("⚠️ specifically, the ref's own token names are NOT used", () => {
+    for (const t of ["--pro-a", "--pro-b"]) {
+      expect(cssD, `${t} is the REF's name, not this app's`).not.toContain(`var(${t})`);
+    }
+    expect(cssD).toContain("var(--pro-fill)");
   });
 });
