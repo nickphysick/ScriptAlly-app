@@ -34,6 +34,7 @@ test("Phase 3 — five ranges, four density tiers", async ({ page }) => {
         bounds: document.querySelectorAll(".tl-cell.bound").length,
         barText: lbl ? getComputedStyle(lbl).display : (seg ? "no-label" : "no-bar"),
         rowSays: document.querySelectorAll(".tl-rowsay").length,
+        /* retired in the grouped pack — counted so its return is a failure, not a surprise */
         spine: document.querySelectorAll(".tl-spine").length,
       };
     });
@@ -47,6 +48,10 @@ test("Phase 3 — five ranges, four density tiers", async ({ page }) => {
        bar derivation rather than to the stylesheet. The token is deliberately NOT declared, so this
        checks it stays undeclared rather than pretending the migration happened. */
     expect(m.clear, `${STOPS[i]}: --clear is declared but nothing reads it`).toBe("");
+    /* ⚠️ THE TODAY SPINE IS RETIRED (grouped pack, Phase 2). This counted it and never asserted
+       it, so its removal would have been silent here. Counting without asserting is the shape
+       that lets a deletion look like a clean run. */
+    expect(m.spine, `${STOPS[i]}: the today spine is back`).toBe(0);
     /* weekday initials drop at a month and beyond */
     if (i >= 2) expect(m.weekdayInitials, `${STOPS[i]}: weekday initials should have dropped`).toBe(0);
     /* bar text leaves at 3 months, and the row head takes the sentence */

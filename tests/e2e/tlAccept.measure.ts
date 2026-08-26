@@ -42,17 +42,11 @@ test("Phase 5 — four widths, five ranges, one table", async ({ page }) => {
         const all = Array.from(document.querySelectorAll(".tl")) as HTMLElement[];
         const tl = all.find((e) => e.getBoundingClientRect().height > 0)!;
         const cs = getComputedStyle(tl);
-        /* ⚠️ THE SPINE'S `100%` IS `.tl`'s, NOT THE BOARD'S. `.tl-board` is an ANCESTOR
-           (`.tl-board > .tl-zone > .tl`) and `.tl` is the positioned one, so the spine resolves
-           its percentage against `.tl`. Measuring the board would have compared the spine to a
-           box it was never placed against — a true number about the wrong subject. */
         const B = tl.getBoundingClientRect();
-        const headW = parseFloat(cs.getPropertyValue("--tl-head-w"));
         const lbl = tl.querySelector(".tl-seg .tl-lbl") as HTMLElement | null;
         const node = tl.querySelector('.tl-node[data-marker="status"]') as HTMLElement | null;
-        const spine = tl.querySelector(".tl-spine") as HTMLElement | null;
-        const at = spine ? parseFloat(getComputedStyle(spine).getPropertyValue("--spine-at")) : NaN;
-        const S = spine?.getBoundingClientRect();
+        /* ⚠️ RETIRED (grouped pack, Phase 2) — counted so its return fails rather than passes. */
+        const spines = tl.querySelectorAll(".tl-spine").length;
         const tips = [...tl.querySelectorAll(".tl-tip")] as HTMLElement[];
         return {
           dense: Number((tl.className.match(/dense(\d)/) ?? [])[1] ?? 0),
@@ -63,9 +57,7 @@ test("Phase 5 — four widths, five ranges, one table", async ({ page }) => {
           barText: lbl ? getComputedStyle(lbl).display !== "none" : null,
           rowSays: tl.querySelectorAll(".tl-rowsay").length,
           disc: node ? Math.round(node.getBoundingClientRect().width) : null,
-          /* the spine marks the DAY, so at week and month grain it is not a column centre */
-          spineWant: Number.isFinite(at) ? Math.round(B.left + headW + (B.width - headW) * at) : null,
-          spineGot: S ? Math.round(S.left + S.width / 2) : null,
+          spines,
           tips: tips.length,
           tipsPainted: tips.filter((e) => getComputedStyle(e).opacity !== "0").length,
           docScrollW: document.documentElement.scrollWidth,
@@ -75,7 +67,7 @@ test("Phase 5 — four widths, five ranges, one table", async ({ page }) => {
 
       const say = `[${width}] ${w.name.padEnd(9)} dense ${m.dense} · ${m.days}d/${m.cols}c · heads ${m.headers}` +
         ` · initials ${m.initials} · barText ${m.barText} · rowSays ${m.rowSays} · disc ${m.disc}` +
-        ` · spine ${m.spineGot}~${m.spineWant} · tips ${m.tipsPainted}/${m.tips}`;
+        ` · spines ${m.spines} · tips ${m.tipsPainted}/${m.tips}`;
       console.log(say);
 
       expect(m.dense, `${say} — density tier`).toBe(w.dense);
@@ -88,10 +80,10 @@ test("Phase 5 — four widths, five ranges, one table", async ({ page }) => {
 
       /* ⚠️ NO CAPTION AT REST, AT ANY WIDTH OR RANGE (Phase 4). */
       expect(m.tipsPainted, `${say} — captions painted with nothing hovered`).toBe(0);
-      /* ⚠️ THE SPINE IS DERIVED, NOT DRAWN — it must land where its own token says. */
-      if (m.spineGot !== null) {
-        expect(Math.abs(m.spineGot - m.spineWant!), `${say} — the spine is off its own token`).toBeLessThanOrEqual(2);
-      }
+      /* ⚠️ THE SPINE IS RETIRED, AND ITS ABSENCE IS ASSERTED RATHER THAN ASSUMED (Phase 2).
+         Today is where the board starts, so a line marking it stated what the layout already
+         guarantees; the ref draws none either. */
+      expect(m.spines, `${say} — the today spine is back`).toBe(0);
       expect(m.docScrollW, `${say} — the page scrolls sideways`).toBeLessThanOrEqual(m.docClientW + 1);
 
       /* ⚠️ THE MARKER SIZE HAS TO BE MEASURED IN A WINDOW THAT HAS MARKERS, and the window at rest

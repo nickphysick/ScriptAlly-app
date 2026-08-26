@@ -1001,24 +1001,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                 className={`tl dense${range.dense}`}
                 style={{ "--tl-days": range.days, "--tl-cols": columns.length } as React.CSSProperties}
               >
-                {/**
-                  * ⚠️ THE TODAY SPINE, POSITIONED BY THE HEAD COLUMN'S OWN TOKEN. The page supplies
-                  * only the FRACTION of the window today sits at — data, not another element's
-                  * dimension — and `.tl-spine` does the geometry against `--tl-head-w`, which steps
-                  * down twice at breakpoints. A spine placed by any constant would be right at one
-                  * width and wrong at the other two, which is the fault this pack exists to end.
-                  *
-                  * ⚠️ ABSENT WHEN TODAY IS OUTSIDE THE WINDOW, rather than clamped to an edge. A
-                  * line pinned to the first column would say "today is here" about a day that is
-                  * not on the board.
-                  */}
-                {(() => {
-                  const at = visible.indexOf(today);
-                  return at < 0 ? null : (
-                    <div className="tl-spine" aria-hidden
-                      style={{ "--spine-at": (at + 0.5) / visible.length } as React.CSSProperties} />
-                  );
-                })()}
+                {/* ⚠️ THE TODAY SPINE IS GONE (grouped pack, Phase 2), and the ref draws none
+                    either. Today is where the board STARTS — every range opens a small slice
+                    before it and the rest ahead — so a line marking today restated what the
+                    layout already guarantees, in the one place a reader was least likely to
+                    need telling. The past columns' deeper ground says the same thing by being
+                    the thing itself rather than a label on it. */}
                 <div className="tl-grid tl-head">
                   <div className="tl-corner" style={{ gridColumn: 1, gridRow: 1 }}>Agents &amp; you</div>
                   {columns.map((c, i) => (
