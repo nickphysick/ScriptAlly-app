@@ -686,9 +686,57 @@ describe("⚠️ nothing the strip reads is declared below the strip", () => {
   /* ⚠️ AND THE STRIP REALLY DOES READ THEM, or the ordering claim above is about nothing. Both
      halves, because a lock that only asserts the order passes forever on a strip that stopped
      reading the flow — and that strip would be back to asserting a silence over a withdrawal. */
+  /**
+   * ⚠️ RETARGETED, AND THE LAW IS UNCHANGED (journey round, Phase 6). This required the strip to
+   * read `activeFlow?.writes.kind`; Phase 6 made it read `activeFlow?.strip` instead, because the
+   * grammar the flow DECLARES is the thing that should decide the sentence, and `writes.kind` was
+   * standing in for it. The law being asserted is the same one — *the strip reads the active flow,
+   * so the active flow must be declared above it* — and it survives the move: `activeFlow` is
+   * still the identifier, still read during render, still above `paneWill`.
+   *
+   * ⚠️ AND WITHOUT THIS HALF THE ORDER LOCK IS VACUOUS. An ordering assertion over a consumer that
+   * has stopped reading its dependencies passes forever.
+   */
   it("and the strip does read them — so the order is load-bearing rather than incidental", () => {
-    const will = hook.slice(hook.indexOf("const paneWill"), hook.indexOf("const paneWill") + 3000);
-    expect(will, "the strip stopped reading the flow").toContain("activeFlow?.writes.kind");
+    const will = hook.slice(hook.indexOf("const paneWill"), hook.indexOf("const paneWill") + 4000);
+    expect(will, "the strip stopped reading the flow").toContain("activeFlow?.strip");
     expect(will, "the strip stopped reading the close's reason").toContain("closeReason");
+  });
+
+  /**
+   * ⚠️ THE HOISTED-HELPER SHAPE, WHICH IS THE ONE THAT ACTUALLY CRASHED. A `function` declared
+   * below `paneWill` is hoisted, so CALLING it from the strip is safe — but what it READS is not:
+   * if the helper touches a `const` declared below `paneWill`, the strip's IIFE hits a temporal
+   * dead zone at its own declaration and the whole page falls into its error boundary. `tsc`
+   * cannot see through a helper, so this is the half no compiler covers.
+   *
+   * The strip calls `delayAnswerOf` and `dayPartLong`. `dayPartLong` reads only its argument;
+   * `delayAnswerOf` reads `activeFlow` and `paneBody`, and both must be above the strip.
+   */
+  it("every const a strip-called helper reads is itself declared above the strip", () => {
+    const at = (needle: string) => {
+      const i = hook.indexOf(needle);
+      expect(i, `${needle} is gone — this lock is reading a file that has moved on`).toBeGreaterThan(-1);
+      return i;
+    };
+    const will = at("const paneWill");
+    const willBody = hook.slice(will, will + 4000);
+    /* BOTH halves: the strip really does call the helper, and the helper's own reads are above */
+    expect(willBody, "the strip stopped calling delayAnswerOf").toContain("delayAnswerOf(");
+    const helper = hook.slice(at("function delayAnswerOf"), at("function delayAnswerOf") + 400);
+    /* a binding is either `const x =` or a destructured `const [x, setX] =` — find whichever */
+    const declaredAt = (name: string) => {
+      const plain = hook.indexOf(`const ${name}`);
+      const destructured = hook.indexOf(`const [${name}`);
+      const i = plain === -1 ? destructured : destructured === -1 ? plain : Math.min(plain, destructured);
+      expect(i, `${name} is gone — this lock is reading a file that has moved on`).toBeGreaterThan(-1);
+      return i;
+    };
+    for (const dep of ["activeFlow", "paneBody"]) {
+      expect(helper, `delayAnswerOf stopped reading ${dep}`).toContain(dep);
+      expect(declaredAt(dep),
+        `${dep} is declared BELOW paneWill, which reads it through delayAnswerOf during render`)
+        .toBeLessThan(will);
+    }
   });
 });

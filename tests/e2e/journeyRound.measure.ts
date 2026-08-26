@@ -23,7 +23,7 @@ type R = { id: string; ok: boolean; note: string };
 function lines0(out: R[], notes: string[]): string {
   const red = out.filter((r) => !r.ok);
   const ls = [
-    "── journey round · Phases 1–5 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
+    "── journey round · Phases 1–6 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
     "",
     ...notes,
     "",
@@ -537,6 +537,202 @@ test("journey round", async ({ page }) => {
       !!verdicts && !verdicts.overdue && !verdicts.late && verdicts.len > 100,
       verdicts ? "overdue=" + verdicts.overdue + " late=" + verdicts.late + " (chars scanned " + verdicts.len + ")" : "-");
 
+  /* ══ PHASE 6 · close, fill-in and note ════════════════════════════════════════════════════ */
+
+  /**
+   * ⚠️ THE FIRST RUN OF THIS BLOCK REPORTED SEVEN RED ABOUT A JOURNEY THAT IS NOT ON THIS BOARD.
+   *
+   * It opened the first card wearing the "Fix" pill and asked the fill-in's questions of it. Three
+   * different journeys wear that pill — the single-query fill-in, the cohort, and an agent-record
+   * gap, which is the DEFAULT bucket — so "the Fix card" is not a subject. The single fill-in is
+   * raised only BELOW three gaps (above it the board shows one cohort card instead) and this
+   * account has thirty-two, so it cannot appear here at all.
+   *
+   * That is the wrong-subject fault this round has now hit three times, and the fix is the same
+   * every time: take a CENSUS first, name what is present, and let the absences be reported rather
+   * than measured. Seven plausible reds about a page nobody was looking at is worse than one honest
+   * "not on this board".
+   */
+  await page.goto("/todo");
+  await boardReady();
+  await liftMotionSuppression(page);
+
+  /** which journey a card resolves to, read from the pane rather than guessed from the pill */
+  const paneSignature = async () => page.evaluate(`(() => {
+    const vis = ${VIS};
+    const t = (e) => (e ? (e.textContent || "").replace(/\\s+/g, " ").trim() : "");
+    const one = (s) => [...document.querySelectorAll(s)].filter(vis)[0] || null;
+    return {
+      primary: t(one(".tpn .actbar .ab.go")),
+      forkOpts: [...document.querySelectorAll(".tpn .fk")].filter(vis).map((x) => t(x.querySelector(".t"))),
+      strip: t(one(".tpn .willrec")).replace(/^This records/, "").trim(),
+    };
+  })()`) as any;
+
+  const fixCount = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    return [...document.querySelectorAll(".tlc .row")].filter(vis)
+      .filter((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === "Fix").length;
+  })()`) as number;
+  const census: string[] = [];
+  for (let i = 0; i < fixCount; i++) {
+    await page.goto("/todo");
+    await boardReady();
+    await liftMotionSuppression(page);
+    await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const fx = [...document.querySelectorAll(".tlc .row")].filter(vis)
+        .filter((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === "Fix");
+      if (fx[${i}]) fx[${i}].click();
+    })()`);
+    await page.waitForTimeout(1600);
+    const sig = await paneSignature();
+    const which = (sig.forkOpts || []).some((t: string) => /remember/i.test(t)) ? "fillin"
+      : /Log \d+ queries|Log the queries/.test(sig.primary || "") ? "bulk"
+      : /Update the record/.test(sig.primary || "") ? "agentgap"
+      : "unrecognised(" + JSON.stringify(sig.primary) + ")";
+    census.push(which);
+  }
+  notes.push("FIX-BUCKET CENSUS: " + (census.length ? census.join(" · ") : "no Fix cards"));
+  add("P6.1 · the census recognised every card wearing the Fix pill",
+      census.length > 0 && census.every((c) => !c.startsWith("unrecognised")),
+      census.length + " card(s): " + census.join(" · "));
+
+  const hasFillin = census.includes("fillin");
+  if (!hasFillin) {
+    notes.push("NO SINGLE-QUERY FILL-IN ON THIS BOARD — the card is raised only below "
+      + "BULK_MATERIALS_THRESHOLD (3) gaps and this account has enough to show the cohort instead. "
+      + "Phase 6's fill-in claims are unit-locked in src/lib/journeyFillin.test.ts and are NOT "
+      + "measured here. To measure them, an account with one or two unrecorded sends is needed.");
+  }
+
+  /* ── the strip grammars, on the flows this board DOES carry ─────────────────────────────── */
+
+  /**
+   * ⚠️ THE SEAM THIS PHASE OPENED. `JourneyFlow.strip` declared seven grammars and had no reader,
+   * so every flow but the close and the send fell through to the CONSEQUENCES sentence — which
+   * reads the expected reply and the nudge reminder, two answers a delay never asks for. Measured
+   * before the fix: "Not yet — hold me to it" rendered "This records —".
+   */
+  await page.goto("/todo");
+  await boardReady();
+  await liftMotionSuppression(page);
+  if (await openCard("Send")) {
+    await choose("Not yet — hold me to it");
+    await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const q = [...document.querySelectorAll(".tpn .q.open")].filter(vis)[0];
+      const b = q ? [...q.querySelectorAll(".seg button")][0] : null;
+      if (b) b.click();
+    })()`);
+    await page.waitForTimeout(900);
+    const s1 = await paneSignature();
+    add("P6.2 · a delay's strip says when the task returns, not a bare dash",
+        !!s1.strip && s1.strip !== "—" && /returns/i.test(s1.strip) && /nothing on the query/i.test(s1.strip),
+        "strip = " + JSON.stringify(s1.strip));
+  } else {
+    notes.push("no Send card — P6.2 not measured");
+  }
+
+  await page.goto("/todo");
+  await boardReady();
+  await liftMotionSuppression(page);
+  if (await openCard("Close")) {
+    await choose("Leave it open for now");
+    await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const q = [...document.querySelectorAll(".tpn .q.open")].filter(vis)[0];
+      const b = q ? [...q.querySelectorAll(".seg button")][0] : null;
+      if (b) b.click();
+    })()`);
+    await page.waitForTimeout(900);
+    const s2 = await paneSignature();
+    add("P6.3 · the close's leave-it-open reads the same grammar, not the send's",
+        !!s2.strip && s2.strip !== "—" && /returns/i.test(s2.strip),
+        "strip = " + JSON.stringify(s2.strip));
+
+    /* ⚠️ AND THE MUTE IS ONE OF THAT QUESTION'S ANSWERS, so the same grammar must speak for it */
+    /* ⚠️ THE REOPEN AND THE PRESS ARE TWO EVALUATES, and the first version made them one — which
+       reported "no Stop asking button" about a control that renders perfectly. The row's body is
+       rendered only while it is OPEN (never hidden), so the buttons do not exist until React has
+       re-rendered, and a synchronous query after the click reads the closed row. */
+    await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const q = [...document.querySelectorAll(".tpn .q")].filter(vis)
+        .find((x) => (x.id || "").indexOf("s-again") >= 0);
+      if (q && !q.classList.contains("open")) { const h = q.querySelector(".ql"); if (h && h.click) h.click(); }
+    })()`);
+    await page.waitForTimeout(900);
+    const mutePicked = await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const q = [...document.querySelectorAll(".tpn .q")].filter(vis)
+        .find((x) => (x.id || "").indexOf("s-again") >= 0);
+      if (!q) return false;
+      const b = [...q.querySelectorAll(".seg button")]
+        .find((x) => /stop asking/i.test((x.textContent || "")));
+      if (!b) return false; b.click(); return true;
+    })()`) as boolean;
+    await page.waitForTimeout(900);
+    const s3 = await paneSignature();
+    add("P6.4 · and “Stop asking” states that it stops appearing, rather than naming a date",
+        mutePicked && !!s3.strip && /stops appearing/i.test(s3.strip),
+        "pressed=" + mutePicked + " strip = " + JSON.stringify(s3.strip));
+  } else {
+    notes.push("no Close card — P6.3 and P6.4 not measured");
+  }
+
+  /* ── the two grammars that were already right, kept as regression guards ─────────────────── */
+  await page.goto("/todo");
+  await boardReady();
+  await liftMotionSuppression(page);
+  if (await openCard("Close")) {
+    await choose("Close it now");
+    await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const q = [...document.querySelectorAll(".tpn .q.open")].filter(vis)[0];
+      const b = q ? [...q.querySelectorAll(".seg button")][0] : null;
+      if (b) b.click();
+    })()`);
+    await page.waitForTimeout(900);
+    const s4 = await paneSignature();
+    add("P6.5 · the close's own grammar survived the change — it still says WHICH close",
+        !!s4.strip && /closed as/i.test(s4.strip) && /no response/i.test(s4.strip),
+        "strip = " + JSON.stringify(s4.strip));
+  }
+
+  await page.goto("/todo");
+  await boardReady();
+  await liftMotionSuppression(page);
+  if (await openCard("Send")) {
+    await choose("I’ve sent it");
+    const s5 = await paneSignature();
+    add("P6.6 · and the send still reads the consequences grammar rather than a dash",
+        !!s5.strip,
+        "strip = " + JSON.stringify(s5.strip) + " (unanswered send: a dash here is correct)");
+  }
+
+  /* ── the note journey: no card on this account, and the absence is reported ─────────────── */
+  await page.goto("/todo");
+  await boardReady();
+  await liftMotionSuppression(page);
+  if (await openCard("Note")) {
+    const n0 = await read();
+    const nTitles = (n0?.forkOpts ?? []).map((o: any) => o.t);
+    add("P6.7 · the note fork offers only the two things the app can add",
+        nTitles.length === 2 && /tick it off/i.test(nTitles[0] || "") && /date/i.test(nTitles[1] || ""),
+        "fork = " + JSON.stringify(nTitles));
+    await choose("Tick it off");
+    const tick = await read();
+    const hasWhen = (tick?.rows ?? []).some((r: any) => (r.id || "").indexOf("s-when") >= 0);
+    add("P6.8 · and ticking it off asks no When — the tick carries its own date",
+        !!tick && !hasWhen,
+        tick ? "rows = " + JSON.stringify((tick.rows || []).map((r: any) => r.label)) : "-");
+  } else {
+    notes.push("NO NOTE CARD ON THIS BOARD — the note journey's claims are unit-locked in "
+      + "src/lib/journeyFillin.test.ts and are NOT measured here. To measure them, the account "
+      + "needs one user-written note.");
+  }
+
   /* ══ SCREENSHOTS ══════════════════════════════════════════════════════════════════════════ */
   const shoot = async (name: string, kind: string, steps?: () => Promise<void>) => {
     await page.goto("/todo");
@@ -563,7 +759,7 @@ test("journey round", async ({ page }) => {
 
   const red = out.filter((r) => !r.ok);
   const lines = [
-    "── journey round · Phases 1–5 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
+    "── journey round · Phases 1–6 · " + out.length + " assertions · " + red.length + " RED · " + (out.length - red.length) + " green",
     "",
     ...notes,
     "",

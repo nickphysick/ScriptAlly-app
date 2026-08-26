@@ -55,7 +55,21 @@ import type { DelayOption } from "../../lib/journeys";
 export type DayChoice =
   | { kind: "today" }
   | { kind: "yesterday" }
-  | { kind: "date"; ymd: string };
+  | { kind: "date"; ymd: string }
+  /**
+   * ⚠️ THE IMPORT'S TWO ANSWERS, AND THEY EXIST BECAUSE THE TYPE HAD NOWHERE TO PUT THEM (journey
+   * round, Phase 6). The fill-in journey asks "sent when?" of a query nobody typed, so its honest
+   * answers are not the send's three: the import's own date may stand, or the writer may simply
+   * not know. Neither is a date, and mapping either onto `today` or onto an empty `date` would be
+   * the fabricated-value fault this app has closed three times — a confident wrong answer rendered
+   * exactly like one a person gave.
+   *
+   * ⚠️ AND THE TWO WRITE THE SAME THING — NOTHING — WHICH IS NOT A REASON TO MERGE THEM. There is
+   * no field for "I do not know", so the record is identical; what differs is what the strip says
+   * and what the writer meant. Collapsing them would put the app back to inventing the difference.
+   */
+  | { kind: "keep" }
+  | { kind: "unsure" };
 export type ExpectChoice =
   | { kind: "weeks"; weeks: number }
   | { kind: "date"; ymd: string };
@@ -127,11 +141,27 @@ export interface SendBodyValues {
 export const EXPECT_WEEKS = [4, 6, 8, 12] as const;
 
 /** the contract's three When options, in its order */
-export const DAY_OPTIONS: { label: string; make: () => DayChoice | "picker" }[] = [
+export type DayOption = { label: string; make: () => DayChoice | "picker" };
+
+export const DAY_OPTIONS: DayOption[] = [
   { label: "Today", make: () => ({ kind: "today" }) },
   { label: "Yesterday", make: () => ({ kind: "yesterday" }) },
   { label: "Another date…", make: () => "picker" },
 ];
+
+/**
+ * ⚠️ THE IMPORT'S OWN THREE — the contract's wording, verbatim, because these are answers about a
+ * record the writer did not make and the send's "Today / Yesterday" are not among them.
+ */
+export const IMPORT_DAY_OPTIONS: DayOption[] = [
+  { label: "I know the date…", make: () => "picker" },
+  { label: "Around then — keep the import date", make: () => ({ kind: "keep" }) },
+  { label: "Not sure", make: () => ({ kind: "unsure" }) },
+];
+
+/** the flow's key resolved to its table — `dayset` is a KEY in `journeys.ts`, which is pure */
+export const daySetFor = (k: "sent" | "import" | undefined): DayOption[] =>
+  k === "import" ? IMPORT_DAY_OPTIONS : DAY_OPTIONS;
 
 /**
  * ⚠️ THE REMINDER IS EXPRESSED AS A LEAD, NOT A DATE. "The week before" has to keep meaning the
@@ -149,7 +179,10 @@ export const REMIND_OPTIONS: { label: string; make: () => RemindChoice | "picker
 export const dayIsOn = (v: DayChoice | null, label: string): boolean =>
   !!v && ((v.kind === "today" && label === "Today")
        || (v.kind === "yesterday" && label === "Yesterday")
-       || (v.kind === "date" && label === "Another date…"));
+       /* both day sets reveal the picker, so the `date` member lights whichever asked for it */
+       || (v.kind === "date" && (label === "Another date…" || label === "I know the date…"))
+       || (v.kind === "keep" && label === "Around then — keep the import date")
+       || (v.kind === "unsure" && label === "Not sure"));
 export const remindIsOn = (v: RemindChoice | null, label: string): boolean =>
   !!v && ((v.kind === "none" && label === "No reminder")
        || (v.kind === "lead" && v.days === 0 && label === "On the day")
@@ -165,6 +198,13 @@ export const remindIsOn = (v: RemindChoice | null, label: string): boolean =>
 export interface PaneQuestion {
   /** the requirement's DOM anchor — `s-unit`, `s-when`, … (bare; this mount prefixes it) */
   id: string;
+  /**
+   * ⚠️ THE `when` QUESTION'S OWN ANSWERS, FROM ITS FLOW — the same shape as `delays` and for the
+   * same reason: "sent when?" asked of a query you typed and of one an import made are the same
+   * FIELD in two registers. Absent means the send's set, which is what every flow but the fill-in
+   * means.
+   */
+  days?: DayOption[];
   /** the field key, so the control is chosen by the declaration rather than by row position */
   field: ReqField;
   /** the ledger's own heading, from the declaration */
@@ -386,7 +426,8 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
   };
 
   /** the control a row opens onto — chosen by the declaration's field, never by row position */
-  const control = (field: ReqField): React.ReactNode => {
+  const control = (q: PaneQuestion): React.ReactNode => {
+    const field = q.field;
     if (field === "unit") return (
       <>
         <SampleSpecPicker
@@ -416,7 +457,8 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
     if (field === "when") return (
       <>
         <div className="seg">
-          {DAY_OPTIONS.map((o) => (
+          {/* ⚠️ THE FLOW'S OWN ANSWERS, falling back to the send's — see `PaneQuestion.days` */}
+          {(q.days ?? DAY_OPTIONS).map((o) => (
             <button type="button" key={o.label}
               className={dayIsOn(value.when, o.label) ? "on" : undefined}
               onClick={() => {
@@ -553,7 +595,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
               would be a claim about paint rather than about the page. */}
           {open && (
             <div className="body">
-              {DELAY_SLOT[q.field] ? delayControl(q) : control(q.field)}
+              {DELAY_SLOT[q.field] ? delayControl(q) : control(q)}
             </div>
           )}
         </div>

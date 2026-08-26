@@ -38,13 +38,14 @@ import { dropSupersededProvisional, normalizeResultingStatus } from "../../lib/q
 import { activityEventLabel } from "../../lib/activityEvent";
 import { AgentDataNeed, agentDataQualityNeeds } from "../../lib/agentDataQuality";
 import { JourneyKind } from "../../lib/paneJourney";
+import { willRecordText } from "../../lib/agentMaterials";
 import {
   figureFor as libFigureFor,
   listRowInputs as libListRowInputs,
   recordSweepFor as libRecordSweepFor,
   isoOf,
 } from "../../lib/taskCardFacts";
-import { TaskPaneBody, SendBodyValues } from "./TaskPaneBody";
+import { TaskPaneBody, SendBodyValues, daySetFor } from "./TaskPaneBody";
 import { BulkFillTable } from "./BulkFillTable";
 import { rowHasAnswer, type RecordSweepRow } from "../../lib/materialsSweep";
 /* (`formatSampleSpecs` left with the strip's first sentence — the LEDGER states the parcel
@@ -418,12 +419,70 @@ export function useTaskPaneSession(
    * `setDate` loop, so the strip cannot come to disagree with the write.
    */
   const paneWill: React.ReactNode = !card ? "" : (() => {
-    if (isBulkCard(card)) {
+    /**
+     * ⚠️ THE STRIP READS THE FLOW'S OWN GRAMMAR (journey round, Phase 6), AND UNTIL NOW IT DID NOT.
+     *
+     * `JourneyFlow.strip` declared seven grammars and was READ BY NOTHING — the same reachability
+     * fault `links` carried two phases ago, and `journeys.test.ts` asserted only that each flow
+     * declared one, which is a test that a field is filled in rather than that anything uses it.
+     *
+     * The cost was on screen: every flow but the close and the send fell through to the CONSEQUENCES
+     * grammar, which reads the expected reply and the reminder. A delay asks for neither, so
+     * "Not yet — hold me to it" — a flow whose whole purpose is to say when a task comes back —
+     * rendered "This records —". So did "I can't remember", whose entire point is a sentence about
+     * what it does not record.
+     *
+     * ⚠️ AND THE CARD-LEVEL GUARDS SURVIVE AS FALLBACKS, because the strip renders while the FORK
+     * is showing and no flow is chosen yet. A grammar and a card fact answer different questions.
+     */
+    const g = activeFlow?.strip;
+
+    if (g === "cohort" || (!g && isBulkCard(card))) {
       return bulkTouched > 0
         ? <>materials on <b>{bulkTouched}</b> {bulkTouched === 1 ? "query" : "queries"}</>
         : "nothing yet";
     }
-    if (card.userTaskId) return "Your note, ticked off today.";
+    /* ⚠️ THE FLOW WINS OVER THE CARD HERE, and `note:date` is why: it is a note card whose flow
+       gives it a DATE rather than a tick, so the card-level test alone said "ticked off today"
+       about a press that ticks nothing. */
+    if (g === "note" || (!g && card.userTaskId)) return "Your note, ticked off today.";
+
+    /* ── the delay grammars: nothing reaches the query, and the sentence says when it returns ── */
+    if (g === "snoozed") {
+      const d = delayAnswerOf("holdday") ?? delayAnswerOf("again");
+      if (!d) return "—";
+      if (d.kind === "never") return <>nothing on the query. This <b>stops appearing</b> on your list.</>;
+      const ms = d.kind === "days"
+        ? Date.now() + d.days * 86400000
+        : (d.ymd ? new Date(`${d.ymd}T12:00:00`).getTime() : NaN);
+      if (!Number.isFinite(ms)) return "—";
+      return <>nothing on the query. This task returns <b>{new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}</b>.</>;
+    }
+
+    /* ⚠️ THE ONE FLOW WHOSE STRIP IS ENTIRELY ABOUT ABSENCE. Saying "—" here would read as a value
+       the page failed to compute, when what it means is that nothing is written on purpose. */
+    if (g === "muted") return <>nothing at all. This gap <b>stops appearing</b> on your list.</>;
+
+    /* ⚠️ A HAND-OFF RECORDS NOTHING ITSELF, and states that rather than rendering an empty dash. */
+    if (g === "nothing") return <>nothing yet — the next step is where it is recorded.</>;
+
+    /**
+     * ⚠️ THE FILL-IN'S OWN GRAMMAR, AND IT IS THE PARCEL PLUS WHETHER A DATE GOES WITH IT.
+     *
+     * It used to declare `consequences`, which reads the expected reply and the nudge reminder —
+     * two questions the fill-in does not ask — so the strip read "—" on every fill-in ever opened.
+     */
+    if (g === "materials") {
+      const what = willRecordText(paneBody.rows, "and");
+      const w = paneBody.when;
+      const dated = !w ? null
+        : w.kind === "unsure" ? <><b>no date</b></>
+        : w.kind === "keep" ? <>its <b>existing sent date</b></>
+        : (() => { const p = dayPartLong(w); return p ? <>its sent date, <b>{p}</b></> : null; })();
+      if (!what && !dated) return "—";
+      const parcel = what ? <>{what.toLowerCase()} on this query</> : null;
+      return <>{parcel}{parcel && dated ? " and " : ""}{dated}.</>;
+    }
 
     /**
      * ⚠️ A CLOSE IS NOT A SEND, AND THE STRIP WAS SAYING IT WAS (reminder round, found in the first
@@ -441,12 +500,17 @@ export function useTaskPaneSession(
        send it" read a sentence about a silence over a withdrawal — the strip stating something the
        write would not do, on the one surface whose whole job is to say what the write will do.
        ⚠️ AND IT IS DRIVEN BY THE ACTIVE FLOW, NOT THE CARD. A crossover's card is still a send. */
-    if (activeFlow?.writes.kind === "close-query") {
+    if (g === "closed") {
       const day = dayPartLong(paneBody.when);
       const word = closeReason === "withdrawn" ? "withdrawn"
         : closeReason === "off_record" ? "a pass off the record" : "no response";
       return day ? <>Closed as <b>{word}</b>, {day}.</> : "—";
     }
+
+    /* ⚠️ THE SEND'S AND THE NUDGE'S GRAMMAR, NAMED. It was the fall-through, which is how five
+       other flows ended up rendering it — `!g` keeps it for the fork, where no flow is chosen. */
+    const isConsequences = g === "consequences" || !g;
+    if (!isConsequences) return "—";
 
     const longDay = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
     const sentIso = sentDateISO();
@@ -522,6 +586,10 @@ export function useTaskPaneSession(
     if (!w) return null;
     if (w.kind === "today") return "today";
     if (w.kind === "yesterday") return "yesterday";
+    /* ⚠️ THE IMPORT'S TWO ANSWERS HAVE NO DAY TO STATE, and saying so here is what stops the strip
+       inventing one. What they DO mean is said by the `materials` grammar, which reads the answer
+       itself rather than a date derived from it. */
+    if (w.kind === "keep" || w.kind === "unsure") return null;
     return w.ymd
       ? `on ${new Date(`${w.ymd}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`
       : null;
@@ -1045,6 +1113,10 @@ export function useTaskPaneSession(
                              answer", so the tick and the words cannot disagree. */
                           ...(r.field === "unit" && sendSpecFor(card)?.material === "full"
                             ? { answer: "The full manuscript" } : {}),
+                          /* ⚠️ THE `when` ROW'S ANSWERS ARE THE FLOW'S — the fill-in asks about a
+                             query nobody typed, so its three are not the send's three. */
+                          ...(r.field === "when" && activeFlow?.dayset
+                            ? { days: daySetFor(activeFlow.dayset) } : {}),
                           /* the delay options and hint are the FLOW's — see `JourneyFlow.delays` */
                           ...((activeFlow?.delays as Record<string, unknown> | undefined)?.[r.field]
                             ? { delays: (activeFlow!.delays as any)[r.field] } : {}),
@@ -1068,7 +1140,11 @@ export function useTaskPaneSession(
                            the form's sub-line; the chrome diet retires the sub-line, and this is
                            the one line in it that was content rather than a restatement of the
                            deed. `paneCopy` is the one table it has ever lived in. */
-                        whenHint={paneCopy(card).note}
+                        /* ⚠️ THE FLOW'S WORDING WINS WHERE IT HAS ONE (journey round, Phase 6).
+                           The fill-in's When question needs a sentence the send's does not — what
+                           "Not sure" does with the date — and `paneCopy` is keyed on the CARD, so
+                           it cannot say two different things for two flows on one card. */
+                        whenHint={activeFlow?.whenHint ?? paneCopy(card).note}
                         statedWeeks={statedWeeks(card)}
                         /* the note's own words and its date — the centrepiece, and the one line
                            beneath. Both derived from the task the writer wrote, never restated. */

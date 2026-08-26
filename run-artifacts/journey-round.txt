@@ -1,8 +1,11 @@
-── journey round · Phases 1–5 · 33 assertions · 0 RED · 33 green
+── journey round · Phases 1–6 · 39 assertions · 0 RED · 39 green
 
 SEND fork: [{"t":"I’ve sent it","s":"Note what went, and set the clock","x":""},{"t":"Not yet — hold me to it","s":"Pick a day and it lands back on your list","x":""},{"t":"I’m not going to send it","s":"Record that, and close the query honestly","x":"crosses to close →"}]
 CLOSE fork: [{"t":"Close it now","s":"Records no response — not a rejection. It reopens if a reply ever comes","x":""},{"t":"Nudge them once more first","s":"One more try before the ledger closes","x":"crosses to nudge →"},{"t":"Leave it open for now","s":"Choose when you’d like to be asked again — or not at all","x":""}]
 NUDGE fork: ["I’ve nudged them","I’ll give it a little longer","Actually — time to close"]
+FIX-BUCKET CENSUS: agentgap · bulk
+NO SINGLE-QUERY FILL-IN ON THIS BOARD — the card is raised only below BULK_MATERIALS_THRESHOLD (3) gaps and this account has enough to show the cohort instead. Phase 6's fill-in claims are unit-locked in src/lib/journeyFillin.test.ts and are NOT measured here. To measure them, an account with one or two unrecorded sends is needed.
+NO NOTE CARD ON THIS BOARD — the note journey's claims are unit-locked in src/lib/journeyFillin.test.ts and are NOT measured here. To measure them, the account needs one user-written note.
 shot fork-note: no Note card
 
   green  P0 · the board rendered before anything was measured
@@ -71,3 +74,15 @@ shot fork-note: no Note card
            primary="Log the nudge2 to answer"
   green  P5.5 · the pane calls nobody overdue or late
            overdue=false late=false (chars scanned 485)
+  green  P6.1 · the census recognised every card wearing the Fix pill
+           2 card(s): agentgap · bulk
+  green  P6.2 · a delay's strip says when the task returns, not a bare dash
+           strip = "nothing on the query. This task returns 27 August."
+  green  P6.3 · the close's leave-it-open reads the same grammar, not the send's
+           strip = "nothing on the query. This task returns 9 September."
+  green  P6.4 · and “Stop asking” states that it stops appearing, rather than naming a date
+           pressed=true strip = "nothing on the query. This stops appearing on your list."
+  green  P6.5 · the close's own grammar survived the change — it still says WHICH close
+           strip = "Closed as no response, today."
+  green  P6.6 · and the send still reads the consequences grammar rather than a dash
+           strip = "—" (unanswered send: a dash here is correct)

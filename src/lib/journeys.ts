@@ -133,7 +133,7 @@ export interface JourneyFlow {
    * The strip's grammar for this flow — a key, not a sentence. The sentence is built where the
    * VALUES are (`useTaskPaneSession`), because the strip resolves dates and this file is pure.
    */
-  strip: "consequences" | "closed" | "note" | "cohort" | "snoozed" | "muted" | "nothing";
+  strip: "consequences" | "closed" | "note" | "cohort" | "snoozed" | "muted" | "nothing" | "materials";
   /** a standing line above the ledger where the flow has one — the fill-in's "records nothing" */
   info?: string;
   /**
@@ -145,6 +145,17 @@ export interface JourneyFlow {
   delays?: Partial<Record<"holdday" | "checkin" | "again", DelayOption[]>>;
   /** the hint under a delay question, where the contract gives one */
   delayHints?: Partial<Record<"holdday" | "checkin" | "again", string>>;
+  /**
+   * ⚠️ WHICH SET OF ANSWERS THE `when` QUESTION OFFERS — a KEY, not a table, for the same reason
+   * `strip` is a key: this file is pure and the tables carry functions that build a `DayChoice`.
+   *
+   * `sent` (the default) is the send's Today / Yesterday / Another date. `import` is the fill-in's,
+   * because a query nobody typed has two answers the send does not — the import's own date may
+   * stand, and the writer may not know. Omitted means `sent`, which is what every other flow means.
+   */
+  dayset?: "sent" | "import";
+  /** the hint under the `when` question, where the flow's own wording differs from the send's */
+  whenHint?: string;
 }
 
 export interface Journey {
@@ -289,7 +300,12 @@ export const JOURNEYS: Record<JourneyId, Journey> = {
     },
     flows: {
       fill: { questions: ["unit", "when"], primary: "Record what went", links: ["also"],
-              writes: { kind: "record-materials" }, strip: "consequences" },
+              writes: { kind: "record-materials" }, strip: "materials",
+              /* ⚠️ THE IMPORT'S OWN ANSWERS. This asked the SEND's three — Today / Yesterday /
+                 Another date — of a query the writer did not type, so the only honest answer
+                 ("I don't know") was not among them and the only way out was to name a day. */
+              dayset: "import",
+              whenHint: "“Not sure” leaves the date blank rather than guessing." },
       /* ⚠️ A FLOW WITH NO QUESTIONS IS NOT A FLOW WITH A MISSING LIST. "I can't remember" records
          nothing and invents nothing; the alternative is a writer making up history to stop a
          prompt, which is the opposite of what this app is for. */

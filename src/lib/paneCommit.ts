@@ -45,6 +45,16 @@ const noonISO = (y: string): string => new Date(`${y}T12:00:00`).toISOString();
 export function paneSentYMD(when: DayChoice | null, now: Date): string | null {
   if (!when) return null;
   if (when.kind === "date") return when.ymd || null;
+  /**
+   * ⚠️ THE IMPORT'S TWO ANSWERS ARE NOT DATES, AND THEY ARE NAMED RATHER THAN LEFT TO FALL THROUGH.
+   *
+   * "Around then — keep the import date" says the record's own date stands; "Not sure" says the
+   * writer does not know. Neither produces a day, and both used to be unreachable — the fill-in
+   * asked the SEND's three answers, so the only way past the question was to name a day the writer
+   * may never have known. Falling through to the lines below would return TODAY for both, which is
+   * the fabricated value this function was written to remove.
+   */
+  if (when.kind === "keep" || when.kind === "unsure") return null;
   const d = new Date(now.getTime());
   if (when.kind === "yesterday") d.setDate(d.getDate() - 1);
   return ymd(d);

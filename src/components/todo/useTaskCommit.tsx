@@ -162,6 +162,23 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
     await updateQuery(q.id, { materialsWanted: wanted });
     return async () => { await updateQuery(q.id, { materialsWanted: before ?? [] }); };
   }
+
+  /**
+   * ⚠️ THE FILL-IN'S `When` ANSWER GOES NOWHERE, AND THAT IS REPORTED RATHER THAN PATCHED (journey
+   * round, Phase 6). `requiredFor("fix")` is `["unit", "when"]`, so the gate refuses to commit
+   * until the writer names a day — and this committer writes the materials alone.
+   *
+   * The obvious fix is wrong. `dateSent` is DERIVED: `recomputeQuery` is its single writer and
+   * computes it from the activity log, so an `updateQuery` here would be overwritten by the next
+   * recompute, and until then would leave `responseDeadline` describing a send date the record no
+   * longer claims. `materialsAcceptance.test.ts` forbids exactly that, and was right to — the write
+   * was tried in this phase and the lock caught it.
+   *
+   * So the real question is a design one: either this journey should write an ACTIVITY (which is
+   * what would legitimately move the date), or its When question should stop being required. Both
+   * are decisions, not repairs. What Phase 6 did change is that the writer can now answer honestly
+   * — "Not sure" opens the gate without naming a day, which was previously impossible.
+   */
   async function commitMaterialsFromPane(card: BoardCard, v: JourneySendValues): Promise<boolean> {
     const undo = await writeQueryMaterials(card, v.recordRows);
     /* nothing ticked is not a save — the escape hatch is how you leave without recording */
