@@ -43,103 +43,117 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   PACKAGED — the stationery band (Option B, packaged-strip-cuts.html)
+   PACKAGED — Option A: one row, two cells (design-refs/package-strip-parcel.html)
+   ══════════════════════════════════════════════════════════════════════════════
+
+   ⚠️ THIS REPLACES THE STATIONERY BAND ENTIRELY, AND THE BAND'S RULES ARE DELETED IN THE SAME
+   COMMIT — not left beside it. What went: `.qc-stat` and its MAT (a `0 0 0 3px` spread shadow),
+   `.qc-stat-head` and its gradient, `.qc-stat-body`, `.qc-stat-l` and `.qc-stat-glyph`. That
+   construction stood ~92px tall for three slot names; this one is ~40px.
+
+   ⚠️ WHAT SURVIVES, DELIBERATELY: `.qc-attach` (the hover/focus target), `.qc-stat-note` (drift,
+   now below the row), and `.qc-stat-acts` / `.qc-stat-a` (the pointer controls, which D6 leaves
+   alone). Their names still say `stat`; renaming them would be churn in a commit whose diff should
+   be readable as "the band became a row".
    ══════════════════════════════════════════════════════════════════════════════ */
 
-/**
- * ⚠️ THE MAT IS A SPREAD SHADOW, NOT A BORDER OR A PADDED PARENT. `0 0 0 3px` in the fill colour
- * paints a pale ring outside the card's own rim without taking layout space, so the card keeps its
- * exact box and still lifts off the pane. A parent with 3px of padding would move everything below
- * it; a second border would round differently at the corners.
- */
 .qc-attach { max-width: 620px; margin: 6px 0 8px; }
 
-.qc-stat {
-  background: #ffffff;
-  border: 1px solid var(--pro-edge);
-  border-radius: 10px;
-  box-shadow: 0 0 0 3px var(--pro-fill), 0 3px 10px rgba(57, 88, 122, 0.07);
-  overflow: hidden;
-}
-
 /**
- * ⚠️ `align-items: baseline` IS SAFE HERE AND WOULD NOT BE WITH AN IMAGE. The standing trap is that
- * images have no baseline and align on their bottom margin edge; this row is text plus an inline
- * SVG, and the SVG is centred out of the baseline by `align-self: center` rather than being left to
- * drag the row. The name and the label sit on one line because both are text.
+ * ⚠️ `overflow: hidden` IS LOAD-BEARING. It clips the blue cell's square corners to the row's
+ * radius — the same construction the packages page's banded cards use. Without it the cell's
+ * top-left and bottom-left corners stick out past the frame.
  */
-.qc-stat-head {
+.qc-pstrip {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
-  background: linear-gradient(180deg, var(--pro-fill), var(--pro-fill-deep));
-  border-bottom: 1px solid var(--pro-edge);
-  padding: 9px 16px;
-}
-.qc-stat-glyph { align-self: center; display: flex; flex: none; }
-.qc-stat-glyph svg {
-  width: 15px; height: 15px;
-  stroke: var(--pro-ink); stroke-width: 1.5; fill: none;
-  stroke-linecap: round; stroke-linejoin: round;
+  align-items: stretch;
+  max-width: 560px;
+  border: 1px solid var(--pro-edge);
+  border-radius: 9px;
+  overflow: hidden;
+  background: #ffffff;
 }
 
+/* The blue cell: the parcel leads, the Playfair name follows. */
+.qc-ps-nm {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: linear-gradient(180deg, var(--pro-a), var(--pro-b));
+  border-right: 1px solid var(--pro-edge);
+  padding: 7px 14px;
+  color: var(--pro-ink);
+  flex: 0 0 auto;
+}
+.qc-ps-nm img { display: block; }
 /**
- * ⚠️ `line-height: 1.3` — THE STANDING FLOOR, AND THE REF GIVES NONE. A package name is
- * writer-supplied, so it can hold a `g`, a `y` or a `p`; inheriting whatever the pane sets is how
- * this file's own history records two crops. Measured at 17px rather than assumed.
+ * ⚠️ `line-height: 1.3` — THE STANDING FLOOR FOR MIXED-CASE PLAYFAIR. A package name is
+ * writer-supplied, so it can hold a `g`, a `y` or a `p`, and this row has a fixed-ish height.
  */
-.qc-stat-head h4 {
+.qc-ps-nm b {
   font-family: var(--f12-serif);
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.3;
-  color: var(--pro-ink);
-  margin: 0;
-  /* ⚠️ THE NAME WRAPS BEFORE IT COLLIDES (D6). `min-width: 0` lets a long name shrink inside the
-     flex row and break, rather than pushing the label off the end. */
+}
+.qc-ps-open {
+  background: none; border: none; padding: 0; cursor: pointer; font: inherit; color: inherit;
+  text-align: left; min-width: 0;
+}
+.qc-ps-open:hover b, .qc-ps-open:focus-visible b { text-decoration: underline; text-underline-offset: 2px; }
+
+/* The white cell: the slots as `LABEL Value` pairs. */
+.qc-ps-sl {
+  padding: 7px 14px;
+  display: flex;
+  gap: 17px;
+  flex-wrap: wrap;
+  align-items: center;
   min-width: 0;
 }
-.qc-stat-open { background: none; border: none; padding: 0; text-align: left; cursor: pointer; font: inherit; min-width: 0; }
-.qc-stat-open:hover h4, .qc-stat-open:focus-visible h4 { text-decoration: underline; text-underline-offset: 2px; }
 
-/* ⚠️ `margin-left: auto` IS WHAT KEEPS THE LABEL RIGHT AND THE NAME GROWING LEFTWARD. `flex: none`
-   stops it shrinking to nothing when the name is long — it would rather the name wrapped. */
-.qc-stat-l {
-  margin-left: auto;
-  flex: none;
-  font-family: var(--f12-mono);
-  font-size: 7px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--pro-ink);
-  opacity: 0.65;
+/**
+ * ⚠️ THE SLOTS ARE THE HOST'S OWN PILLS, STRIPPED OF THEIR PILL TREATMENT — not rebuilt.
+ *
+ * The Query Centre builds them from `linkedChips`, and they already carry the eyebrow-and-name
+ * shape Option A draws, plus the sample's version chip. Restyling them here keeps that chip working
+ * without this file knowing anything about versions; rebuilding them would have meant a second
+ * place that decides what a package contains.
+ */
+.qc-ps-sl .qc-mchip-slot {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11.5px;
 }
-
-/* ⚠️ THE PILLS TAKE NOTHING FROM THE CARD (D3) — no colour, no size change, no override. They are
-   the loose row's pill, and the two states must read as one component in two moods. */
-.qc-stat-body { padding: 11px 16px 13px; display: flex; gap: 7px; flex-wrap: wrap; }
+.qc-ps-sl .qc-mchipeye {
+  font-family: var(--f12-mono);
+  font-size: 6.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: rgba(58, 28, 20, 0.4);
+}
+.qc-ps-sl .qc-mchiptx { font-weight: 600; }
 
 /* Drift reports; it does not warn. No blush, no icon — a package moving on is ordinary. */
 .qc-stat-note {
-  margin: 0;
-  padding: 0 16px 12px;
+  margin: 6px 0 0;
   font-size: 11.5px;
   line-height: 1.45;
   color: var(--pro-ink);
 }
 
 /**
- * ⚠️ REVEALED ON HOVER **AND** `:focus-within` (D4). Hover alone strands the keyboard and touch —
+ * ⚠️ REVEALED ON HOVER **AND** `:focus-within` (D6). Hover alone strands the keyboard and touch —
  * a control that exists only under a pointer is unreachable to anyone not using one, and these are
  * the only way to correct a mis-attached package.
  *
  * ⚠️ AND IT IS `opacity`, NOT `display` OR `visibility`. Both of those take the buttons out of the
- * tab order, so `:focus-within` could never fire: the element would have to be focusable before it
- * could be focused into. Opacity keeps them in the order and reachable by Tab, which is what makes
- * the focus reveal work at all rather than merely look like it should.
- *
- * ⚠️ ON A COARSE POINTER THEY ARE ALWAYS VISIBLE. There is no hover to give, and the mobile pass
- * will refine the arrangement — but unreachable is not a state to ship in the meantime.
+ * tab order, so `:focus-within` could never fire.
  */
 .qc-stat-acts { opacity: 0; transition: opacity 0.15s; }
 .qc-attach:hover .qc-stat-acts,
@@ -153,6 +167,7 @@
   justify-content: flex-end;
   gap: 14px;
   margin-top: 7px;
+  max-width: 560px;
   font-family: var(--f12-mono);
   font-size: 8px;
   letter-spacing: 0.1em;

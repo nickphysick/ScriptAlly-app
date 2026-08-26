@@ -36,6 +36,7 @@
  */
 import React from "react";
 import { packageDrift, driftNote, asSentLabel, type MaterialGroup } from "../../lib/packageAttach";
+import PARCEL_MARK from "../../assets/packages/package-mark.png";
 import type { QueryMaterial, SubmissionPackage } from "../../types";
 import "./packageGroup.css";
 
@@ -44,8 +45,15 @@ import "./packageGroup.css";
 /* ⚠️ `SHEETS_SLOT` IS GONE (D8). It named the loose row's dashed plate, which rendered empty and
    is retired — loose materials are not an object needing an emblem. `PARCEL_SLOT` stays: the
    packaged strip IS one. */
-/** The band's glyph size — icon territory, per D5. */
-export const STRIP_MARK_PX = 15;
+/**
+ * ⚠️ THE FIRST COMMISSIONED ASSET IN THE APP, and how it is added sets the pattern.
+ *
+ * It is IMPORTED from `src/assets/<area>/` rather than referenced from `public/` — the convention
+ * every recent asset follows (shell, marketing, todo, journeys), which gives a hashed filename, a
+ * build-time error if the file goes missing, and one folder per feature area. `public/` is the older
+ * pile: brand one-offs referenced by URL, with spaces in their filenames. See F-BF in the report.
+ */
+export const PARCEL_PX = 24;
 
 export interface PackageGroupProps {
   group: MaterialGroup;
@@ -89,67 +97,59 @@ export const PackageGroup: React.FC<PackageGroupProps> = ({
    * ⚠️ EACH STATE APPEARS ONLY WHEN TRUE, AND THERE IS NO "MATCHES" STATE. A group that still
    * matches its package says nothing at all — a marker confirming that nothing has happened is
    * noise on every send that is behaving normally, and it would train the eye to skip the line
-   * that matters. `unknown` renders nothing for the same reason from the other direction: a send
-   * with no version ids cannot be compared, and a guess would be a false alarm.
+   * that matters. `unknown` renders nothing for the same reason from the other direction.
    */
   const { state, differing } = packageDrift(group, live, sent);
 
-  /* ⚠️ THE NAME IS THE ONE STORED ON THE ITEMS, not looked up live — it is a record of what was
-     sent and must outlive the package's deletion. Rendered inline in the head now; the shared
-     `name` const went with the old two-cell strip. */
-
   return (
-    /* ⚠️ THE WRAPPER IS THE HOVER/FOCUS TARGET (D4) — the actions live OUTSIDE the card and are
+    /* ⚠️ THE WRAPPER IS THE HOVER/FOCUS TARGET (D6) — the actions live OUTSIDE the row and are
        revealed by this element, so they sit below it without being part of the object. */
     <div className="qc-attach">
-      <div className="qc-stat">
-        {/**
-          * ⚠️ THE LETTERHEAD. Glyph, name and label on one baseline row; the label is pushed right
-          * by `margin-left: auto`, so a long name grows into the space before it and wraps rather
-          * than colliding with it (D6).
-          */}
-        <div className="qc-stat-head">
+      {/**
+        * ⚠️ ONE ROW, TWO CELLS (Option A, D1). The blue cell leads with the parcel and the name;
+        * the white cell holds the slots as `LABEL Value` pairs. `overflow: hidden` is what clips
+        * the blue cell's square corners to the row's radius — the same construction the packages
+        * page's banded cards use.
+        */}
+      <div className="qc-pstrip">
+        <div className="qc-ps-nm">
           {/**
-            * ⚠️ A SOLID GLYPH, PERMANENTLY — NOT A DASHED PLACEHOLDER (D5). At 15px this is icon
-            * territory, not illustration territory: a commission slot at this size would be a 15px
-            * dashed box saying an artist owes us something. Both query-strip slots leave the
-            * artist's inventory with this change; the rest of the commission stands.
+            * ⚠️ 24px, AND THAT IS A FLOOR RATHER THAN A STARTING POINT (D2). The drawing has string,
+            * tape seams and a label: measured downscales put 16px at a brown blob with the string
+            * and label gone, 20px at the floor, 24px reading as a parcel and 28px overpowering the
+            * row. If a future row cannot accommodate 24, the row is the thing to change.
+            *
+            * ⚠️ AND THERE IS NO 2× FILE (D7). The source is 100×100 — better than 4× at this size,
+            * so a second asset would be bytes for nothing.
             */}
-          <span className="qc-stat-glyph" aria-hidden="true">
-            <svg viewBox="0 0 32 32">
-              <path d="M16 4 28 10v12L16 28 4 22V10z" />
-              <path d="M16 15 28 10M16 15v13M16 15 4 10" />
-            </svg>
-          </span>
+          <img src={PARCEL_MARK} alt="" width={PARCEL_PX} height={PARCEL_PX} />
           {live ? (
-            <button type="button" className="qc-stat-open" onClick={onView}
+            <button type="button" className="qc-ps-open" onClick={onView}
                     title={`Open ${group.packageName}`}>
-              <h4>{group.packageName}</h4>
+              <b>{group.packageName}</b>
             </button>
-          ) : <h4>{group.packageName}</h4>}
-          <span className="qc-stat-l">Submission package</span>
+          ) : <b>{group.packageName}</b>}
         </div>
-
-        {/* ⚠️ THE PILLS ARE THE LOOSE ROW'S PILL, unchanged (D3). Same component, same markup — one
-            boxed and blue, one free and blush, and that is the whole of the difference. */}
-        <div className="qc-stat-body">{children}</div>
-
-        {/**
-          * ⚠️ DRIFT STAYS, AND STAYS INSIDE THE CARD. It is a fact about THIS package, so it belongs
-          * with the object rather than beside it. Each state appears only when true; a group that
-          * still matches says nothing, because a marker confirming nothing happened is noise on
-          * every send that is behaving normally.
-          */}
-        {state === "deleted" && <p className="qc-stat-note">Package no longer exists</p>}
-        {state === "changed" && (
-          <p className="qc-stat-note">
-            {asSentLabel(sentDate)}
-            {differing.length > 0 ? ` — ${driftNote(differing)}` : ""}
-          </p>
-        )}
+        {/* ⚠️ THE SLOTS ARE THE HOST'S OWN CHILDREN, unchanged (D6) — including the sample's version
+            chip. The strip owns their LAYOUT and strips the pill treatment; it does not rebuild
+            them, which is what keeps the chip working without this file knowing about versions. */}
+        <div className="qc-ps-sl">{children}</div>
       </div>
 
-      {/* ⚠️ OUTSIDE THE CARD (D4). Which package this query points at is the QUERY's field, not the
+      {/**
+        * ⚠️ DRIFT STAYS, AND MOVES BELOW THE ROW. It is a fact about this package rather than part
+        * of the object, and Option A's row has no space that is not a cell. Each state appears only
+        * when true.
+        */}
+      {state === "deleted" && <p className="qc-stat-note">Package no longer exists</p>}
+      {state === "changed" && (
+        <p className="qc-stat-note">
+          {asSentLabel(sentDate)}
+          {differing.length > 0 ? ` — ${driftNote(differing)}` : ""}
+        </p>
+      )}
+
+      {/* ⚠️ OUTSIDE THE ROW (D6). Which package this query points at is the QUERY's field, not the
           package's — so the controls that change it sit beside the object rather than on it. */}
       {(onChangePackage || onRemovePackage) && (
         <div className="qc-stat-acts">
@@ -167,21 +167,6 @@ export const PackageGroup: React.FC<PackageGroupProps> = ({
   );
 };
 
-/**
- * ══ LOOSE MATERIALS — the pills, and nothing else (ref §2, stripped D7/D8) ═══════════════════
- *
- * ⚠️ NO ILLUSTRATION SLOT (D8). The row carried a dashed `sheets` plate that rendered EMPTY on the
- * live page, and loose materials are not an object needing an emblem. The packaged strip has a
- * parcel and a seal because it IS one — a named, contained thing — and the contrast between the two
- * rows is the design. Giving both an emblem erases the distinction the slot exists to draw.
- *
- * ⚠️ NO `Save as package ›` (D7). Building a package is packages-page work; offering it inside a
- * record of what was sent is a conversion nudge in a place reserved for facts. The Attach menu
- * already reaches the packages page for anyone who wants one.
- *
- * ⚠️ AND STILL NO BORDER, FILL OR RADIUS. Anything that boxes this row turns "different" into
- * "lesser", which is the one reading the design forbids: a package is a convenience, not a status.
- */
 export const LooseMaterials: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="qc-loose">{children}</div>
 );
