@@ -133,6 +133,95 @@ await attempt("activity create", "long-standing",
   () => setDoc(aref, { type: "Queried", resultingStatus: "Queried", createdAt: new Date().toISOString(), note: "probe", queryId: "seed-query-1" }),
   () => deleteDoc(aref));
 
+/* ── the ten-field allowlist (audit fix, 26 Aug) ────────────────────────────────────────────────
+ *
+ * ⚠️ THE CASE ABOVE PROVES FIVE FIELDS AND THE ALLOWLIST HAS TEN, which is precisely the gap that
+ * made the dev deploy look like a verification and not be one. `isValidActivityNested` gained
+ * `keys().hasOnly([...])`, so a field missing from that list denies the WHOLE document — and the
+ * five it does not exercise are the five that are conditional, and therefore the five a smoke test
+ * never reaches: `agentName`/`manuscriptTitle` on every db.tsx writer, `dateProvisional` on an
+ * import, `reminderDate` on a nudge, `replyWeeks` on a holding reply.
+ *
+ * ⚠️ AND THE `hasOnly` IS OVER `incoming()`, NOT `affectedKeys()` — so unlike every query-document
+ * probe above, the "the value must change or this proves nothing" rule does NOT apply here. On an
+ * UPDATE, Firestore evaluates the MERGED document, so every key on the resulting row is checked
+ * whether this write touched it or not. That is what makes the legacy-row update below the single
+ * most load-bearing case in this file: an allowlist narrower than real data denies an ordinary edit
+ * of an OLD row, silently, on an account where nothing looks wrong.
+ */
+console.log("\nnested activity — the ten-field allowlist, one field at a time (26 Aug):");
+const nat = (id) => doc(db, "users", uid, "queries", "seed-query-1", "activity", id);
+/** The five-field shape the case above proves, as the base every increment adds one field to. */
+const nbase = (extra = {}) => ({
+  type: "Queried", resultingStatus: "Queried", createdAt: new Date().toISOString(),
+  note: "probe", queryId: "seed-query-1", ...extra,
+});
+const oneField = async (label, commit, extra) => {
+  const r = nat("probe-nested-inc");
+  await attempt(label, commit, () => setDoc(r, nbase(extra)), () => deleteDoc(r));
+};
+await oneField("+ agentName", "db.tsx logDoc :2152", { agentName: "Eleanor Hart" });
+await oneField("+ manuscriptTitle", "db.tsx logDoc :2152", { manuscriptTitle: "My Novel" });
+await oneField("+ dateProvisional (bool)", "smartImportCommit :222", { dateProvisional: true });
+await oneField("+ reminderDate", "logNudge :133", { reminderDate: new Date().toISOString() });
+await oneField("+ replyWeeks (number)", "holdingReply :126", { replyWeeks: 8 });
+{
+  const r = nat("probe-nested-full");
+  await attempt("ALL TEN together", "audit fix", () => setDoc(r, nbase({
+    agentName: "Eleanor Hart", manuscriptTitle: "My Novel", dateProvisional: false,
+    reminderDate: new Date().toISOString(), replyWeeks: 8,
+  })), () => deleteDoc(r));
+}
+
+/* ⚠️ `type` IS NOT A QueryStatus, AND THESE FOUR VALUES ARE WHY THE ENUM IS ON `resultingStatus`
+   ALONE. QueryTimeline.tsx:280,304 FILTERS on them to draw the nudge and holding-reply rows, so
+   constraining `type` would deny every one of these writes AND blank the rows. Three of the four
+   carry NO `resultingStatus` at all — they are not status-bearing, which is the whole point of
+   them: recomputeQuery ignores a rung whose status it does not recognise. */
+console.log("\nnested activity — the four non-enum `type` values (must all be ALLOWED):");
+const nonEnum = async (label, commit, body) => {
+  const r = nat("probe-nested-type");
+  await attempt(label, commit, () => setDoc(r, body), () => deleteDoc(r));
+};
+const noteBase = { createdAt: new Date().toISOString(), note: "probe", queryId: "seed-query-1", agentName: "Eleanor Hart" };
+await nonEnum(`type "Nudge sent"`, "logNudge :86", { type: "Nudge sent", ...noteBase, reminderDate: new Date().toISOString() });
+await nonEnum(`type "Holding reply"`, "holdingReply :43", { type: "Holding reply", ...noteBase, replyWeeks: 8 });
+await nonEnum(`type "Offer accepted"`, "offerDecision :28", { type: "Offer accepted", ...noteBase });
+await nonEnum(`type "Offer declined"`, "offerDecision :29", { type: "Offer declined", ...noteBase, resultingStatus: "Withdrawn" });
+
+/* ⚠️ THE UPDATE PATH, AND THE LEGACY ROW IS THE POINT. `saveQueryEdits.ts:167` patches a rung with
+   `batch.update`, and db.tsx's move (:3084) and correction-restore (:2985) write back whatever they
+   READ. The migration-heal shape (migrateDerivedStatus.ts:117) is four fields — no queryId, no
+   agentName, no manuscriptTitle — and is one of exactly two shapes ever written across all 117
+   revisions of the four writer files. If the allowlist is short, THIS is what breaks: an ordinary
+   edit of an old entry, denied silently. */
+console.log("\nnested activity — the UPDATE path over a legacy four-field row:");
+{
+  const r = nat("probe-nested-legacy");
+  await attempt("create the legacy heal shape (4 fields)", "migrateDerivedStatus :117",
+    () => setDoc(r, { type: "Queried", resultingStatus: "Queried", createdAt: new Date().toISOString(), note: "probe" }));
+  await attempt("edit it — the saveQueryEdits patch", "saveQueryEdits :167",
+    () => updateDoc(r, { type: "Partial Requested", resultingStatus: "Partial Requested", dateProvisional: false }));
+  await attempt("update adding an unknown key (must be DENIED)", "audit fix",
+    () => updateDoc(r, { bogus: 1 }));
+  try { await deleteDoc(r); } catch {}
+  const gone = await getDoc(r);
+  console.log(`  legacy probe row removed: ${gone.exists() ? "NO — CLEAN IT UP" : "yes"}`);
+}
+
+/* The refusals. Each one is a claim the allowlist makes; a green here means the rule is doing
+   nothing, which is the failure mode a "does the app still work" check cannot see. */
+console.log("\nnested activity — the refusals (each must be DENIED):");
+const mustDeny = async (label, body) => {
+  const r = nat("probe-nested-deny");
+  await attempt(label, "audit fix", () => setDoc(r, body), () => deleteDoc(r));
+};
+await mustDeny("unknown field on create (must be DENIED)", nbase({ bogus: 1 }));
+await mustDeny("resultingStatus off-enum (must be DENIED)", nbase({ resultingStatus: "Offer Pending" }));
+await mustDeny("replyWeeks as a string (must be DENIED)", nbase({ replyWeeks: "eight" }));
+await mustDeny("dateProvisional as a string (must be DENIED)", nbase({ dateProvisional: "yes" }));
+await mustDeny("type as a number (must be DENIED)", { ...nbase(), type: 7 });
+
 console.log("\nthe backfill's own two steps, on the query it fails for (seed-query-11):");
 const q11 = doc(db, "users", uid, "queries", "seed-query-11");
 const s11 = await getDoc(q11);
