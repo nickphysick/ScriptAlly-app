@@ -144,8 +144,8 @@
 .qc-ps-sl {
   padding: 7px 14px;
   display: flex;
-  gap: 17px;
-  flex-wrap: wrap;
+  gap: 12px;
+  flex-wrap: nowrap;
   align-items: center;
   min-width: 0;
 }
@@ -164,8 +164,10 @@
   border-radius: 0;
   padding: 0;
   display: flex;
-  align-items: baseline;
-  gap: 6px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-width: 0;
   font-size: 11.5px;
 }
 .qc-ps-sl .qc-mchipeye {
@@ -175,7 +177,7 @@
   text-transform: uppercase;
   color: rgba(58, 28, 20, 0.4);
 }
-.qc-ps-sl .qc-mchiptx { font-weight: 600; }
+.qc-ps-sl .qc-mchiptx { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 
 /**
  * ⚠️ THE ROW STACKS WHEN ITS COLUMN CANNOT HOLD IT — and the number came from measuring, not taste.
@@ -198,6 +200,29 @@
 @container qc-strip (max-width: 574px) {
   .qc-pstrip { flex-direction: column; align-items: stretch; }
   .qc-ps-nm { border-right: none; border-bottom: 1px solid var(--pro-edge); }
+  /**
+   * ⚠️ STACKING THE ROW WAS NOT ENOUGH, AND THE COMMENT ABOVE ASSERTED THAT IT WAS.
+   *
+   * "The slots get the full width and fit on one line" was written from the arithmetic of the
+   * three VALUES and never measured. With their eyebrows beside them the three pills are
+   * 111.7 + 68 + 212.7 = 392.4px, plus 34px of gaps, against 321.2px of usable cell — so they
+   * wrapped to a second line and the strip measured **124px**, not the 72 predicted. That is the
+   * same number as the accidental stack this replaced, which is what made it read as leftover
+   * chrome rather than as content that does not fit.
+   *
+   * What gives is the PAIR, not the mark and not the text: each slot turns its `EYEBROW value`
+   * row upright, so its width is the wider of the two rather than their sum — 235px against 321,
+   * one line, nothing dropped and nothing truncated.
+   *
+   * ⚠️ AND IT IS A BASE RULE, NOT A NARROW-FORM ONE, BECAUSE THE WIDE FORM HAD THE SAME FAULT.
+   * Scoping it here was the first repair, and a census at 1920 measured heights of **42 AND 85**
+   * across the same eleven strips: the side-by-side pairs also wrapped in the 620px container,
+   * for the queries whose slots carry longer values. 575 was measured on a short-slot query and
+   * described that query rather than the component. Upright everywhere, both forms are one line
+   * of slots — 42px wide, 81px stacked — and the container query is left saying only the thing it
+   * is for: that the two CELLS do not fit beside each other.
+   */
+
 }
 
 /* Drift reports; it does not warn. No blush, no icon — a package moving on is ordinary. */

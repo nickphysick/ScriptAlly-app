@@ -121,3 +121,46 @@ test("Option A — one row, two cells, and the parcel", async ({ page }) => {
 
   console.log(JSON.stringify(out, null, 2));
 });
+
+/**
+ * ⚠️ THE SLOTS NEVER WRAP — AT EITHER WIDTH, ON EVERY STRIP.
+ *
+ * The first Option A shipped believing the stack fixed this, because the comment in the stylesheet
+ * asserted "the slots get the full width and fit on one line" from the arithmetic of the three
+ * values rather than from a render. Measured, they wrapped: 392.4px of pairs into 321.2px of cell,
+ * a second line, and a 124px strip — the same number as the accidental stack it replaced, which is
+ * why it read as leftover chrome rather than as content that does not fit.
+ *
+ * This asserts the composed result rather than the declaration: the number of distinct top edges
+ * among the slot cell's children, per strip, at both widths. A rule can be perfectly written and
+ * still wrap, and nothing about `flex-wrap` read out of a file would have caught it.
+ *
+ * The census is swept and COUNTED — an empty sweep would satisfy every per-strip assertion below.
+ */
+for (const [w, want] of [[1440, 81], [1920, 42]] as const) {
+  test(`Option A — the slots hold one line at ${w}`, async ({ page }) => {
+    await openRoute(page, "/queries", { width: w, height: 1200 });
+    const opts = page.getByRole("option");
+    await expect(opts.first()).toBeVisible({ timeout: 25000 });
+    const n = await opts.count();
+    expect(n, "the query list must have rows to sweep").toBeGreaterThan(3);
+    const seen: { lines: number; slots: number; h: number }[] = [];
+    for (let i = 0; i < n; i++) {
+      await opts.nth(i).click();
+      await page.waitForTimeout(400);
+      seen.push(...await page.evaluate(() =>
+        [...document.querySelectorAll(".qc-pstrip")].map((s) => {
+          const el = s as HTMLElement;
+          const sl = el.querySelector(".qc-ps-sl") as HTMLElement;
+          const tops = [...sl.children].map((k) => Math.round((k as HTMLElement).getBoundingClientRect().top));
+          return { lines: new Set(tops).size, slots: tops.length, h: Math.round(el.getBoundingClientRect().height) };
+        })));
+    }
+    expect(seen.length, `swept ${n} queries and found no packaged strip to measure`).toBeGreaterThan(3);
+    for (const s of seen) {
+      expect(s.slots, "a strip with no slots proves nothing about wrapping").toBeGreaterThan(0);
+      expect(s.lines, `slots wrapped onto ${s.lines} lines (strip ${s.h}px)`).toBe(1);
+      expect(s.h, "the strip is its two rows and nothing more").toBe(want);
+    }
+  });
+}
