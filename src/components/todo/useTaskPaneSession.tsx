@@ -831,6 +831,16 @@ export function useTaskPaneSession(
         body: paneBody,
         /* the fork's own answer — a withdrawal is not a silence, and the origin is what knows */
         closeReason,
+        /* ⚠️ THE NUDGE'S OWN CLOCK, FROM THE WRITER (Phase 5). Without this the committer used
+           `DEFAULT_CHECKBACK_DAYS` and every nudge set a follow-up nobody chose. */
+        ...(() => {
+          const c = paneBody.checkin;
+          if (!c) return {};
+          if (c.kind === "never") return { noCheckIn: true };
+          if (c.kind === "days") return { checkBackDays: c.days };
+          const d = daysUntil(c.ymd);
+          return d == null ? {} : { checkBackDays: d };
+        })(),
         ...(q?.sendMethod ? { queryMethod: q.sendMethod } : {}),
         now: new Date(),
       }), bulkRows);

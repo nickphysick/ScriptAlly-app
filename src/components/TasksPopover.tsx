@@ -69,7 +69,8 @@ export const TasksPopover: React.FC<{
 
   const completeStored = (id: string) => {
     void updateUserTask(id, { done: true, completedAt: new Date().toISOString() });
-    showToast({ message: "Task done", undo: () => updateUserTask(id, { done: false }) });
+    /* the stamp goes with the completion — see `useTaskCommit`'s inverse for why */
+    showToast({ message: "Task done", undo: () => updateUserTask(id, { done: false, completedAt: null }) });
   };
 
   return createPortal(

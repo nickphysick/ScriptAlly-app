@@ -110,7 +110,7 @@ test("Pack C Phase 1 — a completion through the pane still writes, and the toa
       .filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0)[0] as HTMLElement | undefined;
     if (!pane) return null;
     return { deed: (pane.querySelector(".deed")?.textContent ?? "").replace(/\s+/g," ").trim().slice(0,60),
-             primary: (pane.querySelector("button.ab.go")?.textContent ?? "").trim(),
+             primary: (pane.querySelector("button.ab.go, button.fk")?.textContent ?? "").trim(),
              isOurs: (pane.textContent ?? "").includes(t) };
   }, NOTE);
   console.log("pane docked on:", JSON.stringify(paneOn));
@@ -120,7 +120,7 @@ test("Pack C Phase 1 — a completion through the pane still writes, and the toa
   await page.evaluate(() => {
     const pane = Array.from(document.querySelectorAll(".tpn"))
       .filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0)[0] as HTMLElement;
-    (pane.querySelector("button.ab.go") as HTMLButtonElement).click();
+    (pane.querySelector("button.ab.go, button.fk") as HTMLButtonElement).click();
   });
   await page.waitForTimeout(2500);
 

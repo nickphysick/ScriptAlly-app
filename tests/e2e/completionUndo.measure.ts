@@ -29,6 +29,11 @@ test("a completion's Undo reverts the stored record", async ({ page }) => {
   await openRoute(page, "/todo", { width: 1440, height: 900 });
   const TASK = `Undo probe ${Date.now()}`;
 
+  /* ⚠️ WAIT FOR THE CONTROL, DO NOT ASSUME IT. `openRoute` resolves before the board finishes
+     rendering, and a `find(...)` that comes back undefined throws "Cannot read properties of null"
+     from inside the evaluate — which reads like a broken page rather than an early click. */
+  await page.waitForFunction(() => Array.from(document.querySelectorAll("button"))
+    .some((e) => (e.textContent || "").trim() === "Add a task"), null, { timeout: 15000 });
   await page.evaluate(() => (Array.from(document.querySelectorAll("button"))
     .find((e) => (e.textContent || "").trim() === "Add a task") as HTMLElement).click());
   await page.waitForTimeout(700);
@@ -64,8 +69,39 @@ test("a completion's Undo reverts the stored record", async ({ page }) => {
 
   /* ⚠️ ONE TOAST, COUNTED. The split makes the edit a silent write and leaves `quickDone` the only
      receipt, so more than one toast here would be the fault the pack asked to be reported. */
-  await page.evaluate(() => (document.querySelector(".tpn button.ab.go") as HTMLButtonElement).click());
-  await page.waitForTimeout(2200);
+  /* ⚠️ THE PANE MUST BE ON OUR CARD BEFORE THE PRESS — the standing probe rule. An unguarded
+     `querySelector(...).click()` here throws "Cannot read properties of null" from inside the
+     evaluate, which reads like a broken page rather than a pane that never docked. */
+  const paneOn = await page.evaluate(() => ({
+    deed: (document.querySelector(".tpn .deed")?.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 60),
+    hasPrimary: !!document.querySelector(".tpn button.ab.go, .tpn button.fk"),
+    panes: document.querySelectorAll(".tpn").length,
+  }));
+  console.log("pane before the press:", JSON.stringify(paneOn));
+  expect(paneOn.hasPrimary, `no primary in the pane — it shows ${JSON.stringify(paneOn.deed)}`).toBe(true);
+  expect(paneOn.deed, "the pane docked another card — refusing to press").toContain(TASK.slice(0, 14));
+
+  /**
+   * ⚠️ THE PANE COMMITS IN TWO STEPS NOW. Its action bar offers FORKS (`.fk`) — "Tick it off",
+   * "Give it a date" — and choosing one reveals the commit (`.ab.go`). A probe that pressed the
+   * first control and looked for a toast found none and read it as a broken write; it had only
+   * answered the question, not pressed the button. Press the fork if one is offered, then commit.
+   */
+  const fork = await page.evaluate(() => {
+    const b = Array.from(document.querySelectorAll(".tpn button.fk"))
+      .find((e) => /tick it off/i.test(e.textContent ?? "")) as HTMLButtonElement | undefined;
+    if (!b) return "no fork — the bar commits directly";
+    b.click(); return "fork chosen";
+  });
+  console.log("fork:", fork);
+  await page.waitForTimeout(1000);
+  const committed = await page.evaluate(() => {
+    const b = document.querySelector(".tpn button.ab.go") as HTMLButtonElement | null;
+    if (!b) return false;
+    b.click(); return true;
+  });
+  expect(committed, "no commit control after choosing the fork").toBe(true);
+  await page.waitForTimeout(2400);
   const done = await page.evaluate(() => ({
     /* ⚠️ RECEIPTS, NOT NODES CARRYING THE WORD. `[class*=toast]` matched three things on the first
        run — the toast, its own action button, and `.sa-toasts`, which is the app-level HOST

@@ -54,7 +54,7 @@ const paneState = (page: P) => page.evaluate(() => {
     width: win ? Math.round(win.getBoundingClientRect().width) : 0,
     ids: Array.from(document.querySelectorAll(".cal-panewin [id^='cal-s-']")).map((e) => e.id),
     deed: (win?.querySelector(".deed")?.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 60),
-    primary: (win?.querySelector("button.ab.go")?.textContent ?? "").replace(/\s+/g, " ").trim(),
+    primary: (win?.querySelector("button.ab.go, button.fk")?.textContent ?? "").replace(/\s+/g, " ").trim(),
     verbs: Array.from(win?.querySelectorAll("button") ?? []).map((b) => (b.textContent ?? "").trim())
       .filter((t) => /snooze|dismiss/i.test(t)),
     ffSheet: document.querySelectorAll(".tdb-ffsheet").length,
@@ -182,7 +182,7 @@ test("Pack C Phase 3 — parity with /todo, the jump, the hand-off, and the toas
     if (!pane) return null;
     return {
       deed: (pane.querySelector(".deed")?.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 60),
-      primary: (pane.querySelector("button.ab.go")?.textContent ?? "").replace(/\s+/g, " ").trim(),
+      primary: (pane.querySelector("button.ab.go, button.fk")?.textContent ?? "").replace(/\s+/g, " ").trim(),
       sections: Array.from(pane.querySelectorAll("[id^='s-']")).map((e) => e.id).sort(),
     };
   });
@@ -197,7 +197,7 @@ test("Pack C Phase 3 — parity with /todo, the jump, the hand-off, and the toas
     if (!win) return null;
     return {
       deed: (win.querySelector(".deed")?.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 60),
-      primary: (win.querySelector("button.ab.go")?.textContent ?? "").replace(/\s+/g, " ").trim(),
+      primary: (win.querySelector("button.ab.go, button.fk")?.textContent ?? "").replace(/\s+/g, " ").trim(),
       sections: Array.from(win.querySelectorAll("[id^='cal-s-']")).map((e) => e.id.replace(/^cal-/, "")).sort(),
     };
   });
@@ -243,7 +243,7 @@ test("Pack C Phase 3 — parity with /todo, the jump, the hand-off, and the toas
     const r = await openPaneOn(page, m);
     if (!r) continue;
     const label = await page.evaluate(() =>
-      (document.querySelector(".cal-panewin button.ab.go")?.textContent ?? "").replace(/\s+/g, " ").trim());
+      (document.querySelector(".cal-panewin button.ab.go, .cal-panewin button.fk")?.textContent ?? "").replace(/\s+/g, " ").trim());
     if (/to answer/i.test(label)) { gated = { label }; break; }
     console.log(`  skipped "${r.text}" — its primary reads "${label}", which would COMMIT`);
     await page.keyboard.press("Escape");
@@ -254,7 +254,7 @@ test("Pack C Phase 3 — parity with /todo, the jump, the hand-off, and the toas
     console.log("⚠️ GAP: no card on this account has an unanswered gate, so the jump was not driven.");
   } else {
     console.log(`jump: pressing a gated primary — "${gated.label}"`);
-    await page.evaluate(() => (document.querySelector(".cal-panewin button.ab.go") as HTMLButtonElement).click());
+    await page.evaluate(() => (document.querySelector(".cal-panewin button.ab.go, .cal-panewin button.fk") as HTMLButtonElement).click());
     await page.waitForTimeout(900);
     const jump = await page.evaluate(() => {
       const win = document.querySelector(".cal-panewin") as HTMLElement | null;
@@ -266,7 +266,7 @@ test("Pack C Phase 3 — parity with /todo, the jump, the hand-off, and the toas
       return {
         targetInThisWindow: !!(target && win.contains(target)),
         stillOpen: true,
-        primary: (win.querySelector("button.ab.go")?.textContent ?? "").replace(/\s+/g, " ").trim(),
+        primary: (win.querySelector("button.ab.go, button.fk")?.textContent ?? "").replace(/\s+/g, " ").trim(),
       };
     });
     console.log("jump result:", JSON.stringify(jump));
@@ -283,7 +283,7 @@ test("Pack C Phase 3 — parity with /todo, the jump, the hand-off, and the toas
   if (!offerRow) {
     console.log("⚠️ GAP: no offer card on this account — the fall-through was not driven.");
   } else {
-    await page.evaluate(() => (document.querySelector(".cal-panewin button.ab.go") as HTMLButtonElement)?.click());
+    await page.evaluate(() => (document.querySelector(".cal-panewin button.ab.go, .cal-panewin button.fk") as HTMLButtonElement)?.click());
     await page.waitForTimeout(1100);
     const ff = await page.evaluate(() => ({
       sheet: document.querySelectorAll(".tdb-ffsheet").length,
@@ -348,11 +348,11 @@ test("Pack C Phase 3 — a completion on the calendar toasts, offers Undo, and a
 
   /* ══ 10 · INTERACTIVE — the completion's receipt ═══════════════════════════════════════════ */
   const primary = await page.evaluate(() =>
-    (document.querySelector(".cal-panewin button.ab.go")?.textContent ?? "").replace(/\s+/g, " ").trim());
+    (document.querySelector(".cal-panewin button.ab.go, .cal-panewin button.fk")?.textContent ?? "").replace(/\s+/g, " ").trim());
   console.log("primary on my own task:", primary);
   expect(primary, "this task's primary states an unanswered gate — pressing it would not complete").not.toMatch(/to answer/i);
 
-  await page.evaluate(() => (document.querySelector(".cal-panewin button.ab.go") as HTMLButtonElement).click());
+  await page.evaluate(() => (document.querySelector(".cal-panewin button.ab.go, .cal-panewin button.fk") as HTMLButtonElement).click());
   await page.waitForTimeout(2500);
 
   const receipt = await page.evaluate(() => ({

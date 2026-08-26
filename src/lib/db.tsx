@@ -111,7 +111,7 @@ import { replyTask } from "./taskPrecedence";
    same predicate the tracker's ghost rung uses, and `elapsedPhrase` is the app's one scaled figure. */
 import { scheduledReminder } from "./nudgeState";
 import { elapsedPhrase, daysBetween } from "./elapsed";
-import { TaskFlagKey, taskFlagId, flagKeyForTask, flagMatchesTask, isFlagSuppressing, buildTaskFlagFromDismissed } from "./taskFlags";
+import { TaskFlagKey, taskFlagId, flagKeyForTask, flagMatchesTask, isFlagSuppressing, buildTaskFlagFromDismissed, MUTED_UNTIL } from "./taskFlags";
 import { homeCountrySeed } from "./territory";
 import { agentDataQualityNeeds } from "./agentDataQuality";
 import { queriesMissingMaterials, isBulkMaterialsGap, MATERIALS_BULK_RECORD_ID } from "./queryMaterialsGap";
@@ -367,7 +367,7 @@ interface DbContextType {
   // per-record "View tasks" popovers). Badge counts stay derived.
   userTasks: UserTask[];
   addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[]; createdAt?: string }) => Promise<string | undefined>;
-  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">> & { detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null }) => Promise<void>;
+  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done">> & { completedAt?: string | null; detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null }) => Promise<void>;
   deleteUserTask: (id: string) => Promise<void>;
   /** ⚠️ THE UNDO'S WRITE — the captured document, VERBATIM. A restore through addUserTask loses
    *  whatever that builder does not know about (it stamped createdAt once, then committedDate and
@@ -418,7 +418,9 @@ interface DbContextType {
    * and hides-and-resurfaces the nudge_overdue task on the chosen check-back date. Never touches
    * status or responseDeadline and never counts as a response. (Distinct from dismissTask.)
    */
-  logNudge: (queryId: string, args: { checkBackDate: string; note?: string; eventDate?: string }) => Promise<{ success: boolean; error?: string }>;
+  /* ⚠️ `checkBackDate` IS OPTIONAL — absent is "Don't ask again" (journey round, Phase 5): the nudge
+     is recorded, no `nudgeDate` is written, and the dismissal is PERMANENT rather than dated. */
+  logNudge: (queryId: string, args: { checkBackDate?: string; note?: string; eventDate?: string }) => Promise<{ success: boolean; error?: string }>;
   recordOfferDecision: (queryId: string, decision: OfferDecision) => Promise<{ success: boolean; error?: string }>;
 
   // ⚠️ NO cleanDuplicates / wipeAndResetDatabase / seedUserDatabase. They backed two panels on the
@@ -2717,13 +2719,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const updateUserTask = async (
     id: string,
-    fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">> & {
+    fields: Partial<Pick<UserTask, "text" | "done">> & {
+      completedAt?: string | null;
       detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null;
       committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null;
     },
   ) => {
     if (!currentUser) return;
-    const { committedDate, detail, dueDate, surfaceOffset, tags, estimateMin, ...rest } = fields;
+    const { committedDate, completedAt, detail, dueDate, surfaceOffset, tags, estimateMin, ...rest } = fields;
     const patch: Record<string, unknown> = { ...rest, updatedAt: new Date().toISOString() };
     // `null` clears the Today's-list commitment (uncommit); a string sets it.
     if (committedDate !== undefined) patch.committedDate = committedDate === null ? deleteField() : committedDate;
@@ -2737,6 +2740,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (tags !== undefined) patch.tags = tags === null || tags.length === 0 ? deleteField() : tags;
     // board-optimise P7: null is the ladder's "none" rung — the field leaves the doc
     if (estimateMin !== undefined) patch.estimateMin = estimateMin === null ? deleteField() : estimateMin;
+    /* ⚠️ `null` CLEARS THE COMPLETION STAMP, and un-ticking must use it. A task that is not done
+       has no time at which it was done: leaving `completedAt` behind is an INCOHERENT RECORD, and
+       the trap is that it reads perfectly — `briefingCleared` counts the weekly review's cleared
+       tasks by this field, correctly, because it is the field that records when a thing was
+       completed. Guarding that consumer on `done` would paper over the incoherence and leave it
+       for the next reader who reasonably trusts the stamp. Found by the harness's first
+       stored-field Undo assertion (completion-paths). */
+    if (completedAt !== undefined) patch.completedAt = completedAt === null ? deleteField() : completedAt;
     try {
       await updateDoc(doc(db, "users", currentUser.id, "tasks", id), patch);
     } catch (e) {
@@ -3209,7 +3220,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // dismissTask, does NOT touch status/responseDeadline, and is not a response.
   const logNudge = async (
     queryId: string,
-    args: { checkBackDate: string; note?: string }
+    args: { checkBackDate?: string; note?: string; eventDate?: string }
   ): Promise<{ success: boolean; error?: string }> => {
     if (!currentUser) return { success: false, error: "Session required." };
     const q = queries.find(item => item.id === queryId);
@@ -3239,7 +3250,15 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       // 3) Hide-and-resurface the nudge_overdue task on the check-back date — a taskFlag snooze.
       //    The deterministic key means a repeat nudge updates the same flag (no stacked duplicates).
-      await upsertTaskFlag(flagKeyForTask("nudge_overdue", queryId), { snoozedUntil: writes.dismissal.resurfaceDate });
+      //    ⚠️ A DISMISSAL WITH NO RESURFACE DATE IS THE MUTE (journey round, Phase 5): the writer
+      //    answered "don't ask again", so the suggestion stops for THIS query rather than returning.
+      //    `MUTED_UNTIL` is the same indefinite value `dismissTask(…, "permanent")` writes, so the
+      //    two doors reach one state rather than two that have to be kept in step.
+      await upsertTaskFlag(flagKeyForTask("nudge_overdue", queryId), {
+        snoozedUntil: writes.dismissal.dismissType === "custom date"
+          ? writes.dismissal.resurfaceDate
+          : MUTED_UNTIL,
+      });
       return { success: true };
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId} [logNudge]`);

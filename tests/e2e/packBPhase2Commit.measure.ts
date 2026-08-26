@@ -79,7 +79,7 @@ test("Pack B Phase 2 — a primary commits, and the dock lands on the pre-write 
     await page.waitForTimeout(320);
     const left = await page.evaluate(() => (Array.from(document.querySelectorAll(".tpn"))
       .filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0)[0] as HTMLElement)
-      .querySelector("button.ab.go")?.textContent?.replace(/\s+/g, " ").trim());
+      .querySelector("button.ab.go, button.fk")?.textContent?.replace(/\s+/g, " ").trim());
     console.log(`   ${label}: ${hit ? "clicked" : "NOT FOUND"} → primary reads "${left}"`);
     return hit;
   };
@@ -94,7 +94,7 @@ test("Pack B Phase 2 — a primary commits, and the dock lands on the pre-write 
       .filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0)[0] as HTMLElement;
     return {
       deed: (pane.querySelector(".deed")?.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 56),
-      primary: (pane.querySelector("button.ab.go")?.textContent ?? "").replace(/\s+/g, " ").trim(),
+      primary: (pane.querySelector("button.ab.go, button.fk")?.textContent ?? "").replace(/\s+/g, " ").trim(),
       will: (pane.querySelector(".will")?.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 140),
     };
   });
@@ -104,7 +104,7 @@ test("Pack B Phase 2 — a primary commits, and the dock lands on the pre-write 
   await page.evaluate(() => {
     const pane = Array.from(document.querySelectorAll(".tpn"))
       .filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0)[0] as HTMLElement;
-    (pane.querySelector("button.ab.go") as HTMLButtonElement).click();
+    (pane.querySelector("button.ab.go, button.fk") as HTMLButtonElement).click();
   });
   await page.waitForTimeout(3500);
 

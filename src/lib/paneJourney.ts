@@ -196,6 +196,12 @@ export interface JourneySendValues {
   note: string;
   /** chase only — days until the reminder returns. */
   checkBackDays: number;
+  /**
+   * ⚠️ THE WRITER DECLINED A CHECK-IN — "Don't ask again" (journey round, Phase 5). Its own flag
+   * rather than a sentinel value in `checkBackDays`, because a far-future number would reach
+   * `logNudge` as a fabricated date on the query. Absent on every other journey.
+   */
+  noCheckIn?: boolean;
   /** close only — which of the three ways it ended. `null` until the writer says. */
   reason: CloseReason | null;
   /* ── fix: one field per gap `agentDataQualityNeeds` can report, all empty until answered ── */

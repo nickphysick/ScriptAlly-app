@@ -73,7 +73,12 @@ describe("buildNudgeWrites — the Log-nudge payloads", () => {
     const { dismissal } = buildNudgeWrites(query, agent, { checkBackDate: CHECK_BACK }, NOW);
     expect(dismissal.taskType).toBe("nudge_overdue");
     expect(dismissal.relatedRecordId).toBe("q1");
+    /* ⚠️ THE DISMISSAL IS A UNION NOW (journey round, Phase 5) — a check-back returns and a mute
+       does not, so the narrowing IS the claim rather than a cast around it. A permanent dismissal
+       carrying a resurface date would be two instructions, and whichever the reader believed the
+       other would be a lie. */
     expect(dismissal.dismissType).toBe("custom date");
+    if (dismissal.dismissType !== "custom date") throw new Error("a check-back produced a mute");
     expect(dismissal.resurfaceDate).toBe(new Date(CHECK_BACK).toISOString());
   });
 
@@ -173,7 +178,7 @@ describe("eventDate — the P1 back-dating extension (journey-logic pass)", () =
     expect(w.activity.date).toBe(EV);
     expect(w.queryUpdates.lastNudgeSentDate).toBe(EV); // snapshot ≡ reconcileNudge's re-derivation from nested.createdAt
     expect(w.dismissal.dismissedDate).toBe(NOW.toISOString());
-    expect(w.dismissal.resurfaceDate).toBe("2026-07-30T00:00:00.000Z");
+    expect(w.dismissal.dismissType === "custom date" ? w.dismissal.resurfaceDate : null).toBe("2026-07-30T00:00:00.000Z");
     expect(w.queryUpdates.nudgeDate).toBe("2026-07-30T00:00:00.000Z"); // check-back untouched
   });
 });

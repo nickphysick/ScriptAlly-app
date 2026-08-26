@@ -200,7 +200,12 @@ describe("⚠️ completion goes through the PRIMITIVE, from either path (the un
     const writer = readFileSync(join(here, "useTaskCommit.tsx"), "utf8");
     const at = writer.indexOf("async function quickDone");
     expect(at, "the completion primitive is gone from the committer").toBeGreaterThan(-1);
-    const qd = writer.slice(at, at + 1200);
+    /* ⚠️ SLICED TO THE NEXT FUNCTION, not to a character count. A fixed +1200 window is a bet on
+       how much prose sits above the code, and it lost the moment the inverse gained a comment
+       explaining why it clears the completion stamp. An anchor cannot drift like that. */
+    const end = writer.indexOf("async function writeQueryMaterials", at);
+    expect(end, "the anchor after quickDone is gone").toBeGreaterThan(at);
+    const qd = writer.slice(at, end);
     expect(qd).toContain("const undo =");
     expect(qd).toContain("flash(");
   });

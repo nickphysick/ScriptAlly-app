@@ -21,6 +21,11 @@ const WIDTHS = [1000, 1440, 1920];
 /** create a dated task on /todo and return its title — the composer needs a date to enable save */
 async function makeTask(page: P, label: string) {
   const TASK = `${label} ${Date.now()}`;
+  /* ⚠️ WAIT FOR THE CONTROL, DO NOT ASSUME IT. `openRoute` resolves before the board finishes
+     rendering, and a `find(...)` that comes back undefined throws "Cannot read properties of null"
+     from inside the evaluate — which reads like a broken page rather than an early click. */
+  await page.waitForFunction(() => Array.from(document.querySelectorAll("button"))
+    .some((e) => (e.textContent || "").trim() === "Add a task"), null, { timeout: 15000 });
   await page.evaluate(() => (Array.from(document.querySelectorAll("button"))
     .find((e) => (e.textContent || "").trim() === "Add a task") as HTMLElement).click());
   await page.waitForTimeout(700);
@@ -78,9 +83,9 @@ test("Phase 5 — /todo completes with a toast and Undo, at three widths", async
     await page.mouse.click(pt!.x, pt!.y);
     await page.waitForTimeout(800);
 
-    const primary = await page.evaluate(() => (document.querySelector(".tpn button.ab.go")?.textContent ?? "").trim());
+    const primary = await page.evaluate(() => (document.querySelector(".tpn button.ab.go, .tpn button.fk")?.textContent ?? "").trim());
     expect(primary, `[${width}] this task's primary states a gate — pressing would not complete`).not.toMatch(/to answer/i);
-    await page.evaluate(() => (document.querySelector(".tpn button.ab.go") as HTMLButtonElement).click());
+    await page.evaluate(() => (document.querySelector(".tpn button.ab.go, .tpn button.fk") as HTMLButtonElement).click());
     await page.waitForTimeout(2200);
 
     const r = await receipts(page);
@@ -134,7 +139,7 @@ test("Phase 5 — the calendar completes with a toast and Undo, and the month is
     const on = await page.evaluate(() => (document.querySelector(".cal-panewin .deed")?.textContent ?? "").replace(/\s+/g, " ").trim());
     expect(on, `[${width}] the pane docked "${on}" rather than our own task — refusing to press`).toContain(TASK!.slice(0, 12));
 
-    await page.evaluate(() => (document.querySelector(".cal-panewin button.ab.go") as HTMLButtonElement).click());
+    await page.evaluate(() => (document.querySelector(".cal-panewin button.ab.go, .cal-panewin button.fk") as HTMLButtonElement).click());
     await page.waitForTimeout(2300);
     const r = await receipts(page);
     console.log(`[${width}] calendar → ${JSON.stringify(r)}`);

@@ -27,7 +27,8 @@ const DETAILS_MAX = 4096; // firestore.rules isValidActivity: details size limit
 
 export interface NudgeInput {
   /** The chosen check-back date (ISO or date string). Normalised to ISO here. */
-  checkBackDate: string;
+  /** ⚠️ ABSENT MEANS "DON'T ASK AGAIN" — an answer, not a missing input. See `NudgeWrites`. */
+  checkBackDate?: string;
   /** Optional note the writer kept on record. */
   note?: string;
   /** When the nudge was actually SENT (full ISO — already noon-normalised by the journey layer's
@@ -36,25 +37,47 @@ export interface NudgeInput {
   eventDate?: string;
 }
 
-export interface NudgeDismissalWrite {
-  taskType: "nudge_overdue";
-  relatedRecordId: string;
-  dismissedDate: string;
-  resurfaceDate: string;
-  dismissType: "custom date";
-}
+/**
+ * ⚠️ TWO SHAPES, BECAUSE "COME BACK ON THE 25th" AND "DON'T ASK AGAIN" ARE DIFFERENT ANSWERS
+ * (journey round, Phase 5). A union rather than an optional field, so a caller cannot produce a
+ * permanent dismissal that still carries a resurface date — a mute with a return date is two
+ * instructions, and whichever the reader believes, the other one is a lie.
+ *
+ * Every existing caller supplies a check-back and gets the `custom date` member byte-identically.
+ */
+export type NudgeDismissalWrite =
+  | {
+      taskType: "nudge_overdue";
+      relatedRecordId: string;
+      dismissedDate: string;
+      resurfaceDate: string;
+      dismissType: "custom date";
+    }
+  | {
+      taskType: "nudge_overdue";
+      relatedRecordId: string;
+      dismissedDate: string;
+      dismissType: "permanent";
+    };
 
 export interface NudgeWrites {
   /** AUTHORITATIVE row for the per-query subcollection (users/{uid}/queries/{qid}/activity) — what
    *  the Tracking timeline reads. `type` is deliberately NOT a QueryStatus enum member, so
    *  recomputeQuery's normalisation ignores it (non-status by construction). */
-  nested: { type: typeof NUDGE_NESTED_TYPE; createdAt: string; note: string; queryId: string; agentName: string; reminderDate: string };
+  nested: { type: typeof NUDGE_NESTED_TYPE; createdAt: string; note: string; queryId: string; agentName: string; reminderDate?: string };
   /** The global-feed PROJECTION twin (users/{uid}/activities) — what the dashboard timeline reads.
    *  Derived from the same build as `nested`; the caller writes both under ONE shared id (the
    *  saveQueryEdits same-id-twin convention), never as an independent parallel write. */
   activity: Omit<Activity, "id" | "userId">;
-  /** The ONLY query fields touched — never status or responseDeadline. */
-  queryUpdates: { nudgeDate: string; lastNudgeSentDate: string };
+  /**
+   * The ONLY query fields touched — never status or responseDeadline.
+   *
+   * ⚠️ `nudgeDate` IS ABSENT WHERE THE WRITER DECLINED A CHECK-IN, and absent rather than a
+   * far-future stand-in. "Don't ask again" is an answer about the ASKING, not a date the writer
+   * chose — writing one would put a fabricated day on the query, which is the fault this whole
+   * round keeps closing. `lastNudgeSentDate` is always written: the nudge did happen.
+   */
+  queryUpdates: { nudgeDate?: string; lastNudgeSentDate: string };
   /** The hide-and-resurface dismissal (id/userId added by the caller). */
   dismissal: NudgeDismissalWrite;
 }
@@ -78,7 +101,9 @@ export const buildNudgeWrites = (
 ): NudgeWrites => {
   const agentName = agent?.name || "agent";
   const agency = agent?.agency || "agency";
-  const checkBackISO = new Date(input.checkBackDate).toISOString();
+  /* ⚠️ `null` IS "DON'T ASK AGAIN", AND IT IS AN ANSWER. A nudge resets the clock, so the flow asks
+     for the new clock — and one of its honest answers is that there should not be one. */
+  const checkBackISO = input.checkBackDate ? new Date(input.checkBackDate).toISOString() : null;
   const nowISO = now.toISOString();
   const eventISO = input.eventDate ? new Date(input.eventDate).toISOString() : nowISO;
   const note = input.note?.trim();
@@ -88,7 +113,9 @@ export const buildNudgeWrites = (
   let description = `Nudge sent to ${agentName} at ${agency}`;
   if (description.length > DESC_MAX) description = description.slice(0, DESC_MAX);
 
-  let details = `Follow-up reminder set for ${formatCheckBack(checkBackISO)}`;
+  let details = checkBackISO
+    ? `Follow-up reminder set for ${formatCheckBack(checkBackISO)}`
+    : "No follow-up reminder — you asked not to be reminded about this one";
   if (note) details += ` · "${note}"`;
   if (details.length > DETAILS_MAX) details = details.slice(0, DETAILS_MAX);
 
@@ -102,7 +129,7 @@ export const buildNudgeWrites = (
       agentName,
       // Structured reminder date ON the authoritative activity → the query's nudgeDate snapshot can be
       // faithfully re-derived from the remaining nudges when one is deleted (the delete-desync fix).
-      reminderDate: checkBackISO,
+      ...(checkBackISO ? { reminderDate: checkBackISO } : {}),
     },
     activity: {
       queryId: query.id,
@@ -113,14 +140,24 @@ export const buildNudgeWrites = (
       details,
       // deliberately NO resultingStatus — non-status event
     },
-    queryUpdates: { nudgeDate: checkBackISO, lastNudgeSentDate: eventISO },
-    dismissal: {
-      taskType: "nudge_overdue",
-      relatedRecordId: query.id,
-      dismissedDate: nowISO,
-      resurfaceDate: checkBackISO,
-      dismissType: "custom date",
-    },
+    queryUpdates: { ...(checkBackISO ? { nudgeDate: checkBackISO } : {}), lastNudgeSentDate: eventISO },
+    dismissal: checkBackISO
+      ? {
+          taskType: "nudge_overdue",
+          relatedRecordId: query.id,
+          dismissedDate: nowISO,
+          resurfaceDate: checkBackISO,
+          dismissType: "custom date",
+        }
+      : {
+          /* ⚠️ THE MUTE, THROUGH THE SAME DISMISSAL THE CHECK-IN USES. "Don't ask again" stops the
+             recurring nudge suggestion for THIS query and nothing else — it deletes no history, and
+             every other task on the query still appears. */
+          taskType: "nudge_overdue",
+          relatedRecordId: query.id,
+          dismissedDate: nowISO,
+          dismissType: "permanent",
+        },
   };
 };
 

@@ -2090,7 +2090,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   /** Un-tick — quickDone's own reverse, which is exactly what its undo toast already calls. */
   async function unDone(c: BoardCard) {
     if (!c.userTaskId) return;
-    try { await updateUserTask(c.userTaskId, { done: false }); }
+    try { await updateUserTask(c.userTaskId, { done: false, completedAt: null }); }
     catch { flash("Couldn’t undo that — try again?"); }
   }
 
@@ -2204,7 +2204,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         break;
       case "undo-done":
         if (card.userTaskId) {
-          void updateUserTask(card.userTaskId, { done: false })
+          void updateUserTask(card.userTaskId, { done: false, completedAt: null })
             .then(() => flash("Put back on the board"))
             .catch(() => flash("Couldn’t undo that — try again?"));
         }

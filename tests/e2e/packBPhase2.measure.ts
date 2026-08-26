@@ -50,8 +50,8 @@ const paneState = (page: import("@playwright/test").Page) => page.evaluate(() =>
     whenOn: seg ? Array.from(seg.querySelectorAll("button")).filter((b) => b.className === "on").map((b) => b.textContent) : [],
     whenCount: seg ? seg.querySelectorAll("button").length : 0,
     also: (pane.querySelector("textarea.note-in") as HTMLTextAreaElement | null)?.value ?? null,
-    primary: (pane.querySelector("button.ab.go")?.textContent ?? "").replace(/\s+/g, " ").trim(),
-    primDisabled: (pane.querySelector("button.ab.go") as HTMLButtonElement | null)?.disabled ?? null,
+    primary: (pane.querySelector("button.ab.go, button.fk")?.textContent ?? "").replace(/\s+/g, " ").trim(),
+    primDisabled: (pane.querySelector("button.ab.go, button.fk") as HTMLButtonElement | null)?.disabled ?? null,
     navIndex: (pane.querySelector(".tpn-nav")?.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 30),
   };
 });

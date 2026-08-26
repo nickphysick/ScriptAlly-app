@@ -37,8 +37,19 @@ console.log(`  text        : ${JSON.stringify(t.text ?? t.title)}`);
 console.log(`  done        : ${JSON.stringify(t.done)}`);
 console.log(`  completedAt : ${JSON.stringify(t.completedAt ?? null)}`);
 console.log("");
+/**
+ * ⚠️ BOTH HALVES, BECAUSE THE SECOND IS WHAT THE FIRST RUN FOUND. Undo reverting `done` while
+ * leaving `completedAt` is an INCOHERENT RECORD — a completion timestamp on a task that is not
+ * complete — and it reads perfectly, which is why nothing had caught it. `briefingCleared` counts
+ * the weekly review's cleared tasks by that field, correctly, because it is the field that records
+ * when a thing was completed. The inverse clears both now; this asserts it stays that way.
+ */
 const reverted = t.done === false || t.done === undefined;
+const stampCleared = t.completedAt === undefined || t.completedAt === null;
 console.log(reverted
-  ? "✅ UNDO REVERTED THE RECORD — done is not true after pressing Undo."
+  ? "✅ done is not true after pressing Undo."
   : "❌ UNDO DID NOT REVERT — the record still reads done: true.");
-process.exit(reverted ? 0 : 2);
+console.log(stampCleared
+  ? "✅ completedAt is gone — no completion time on an uncompleted task."
+  : `❌ THE STAMP SURVIVED — completedAt is still ${JSON.stringify(t.completedAt)} on a task that is not done.`);
+process.exit(reverted && stampCleared ? 0 : 2);

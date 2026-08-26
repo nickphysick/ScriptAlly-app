@@ -102,7 +102,13 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
         flash("Couldn’t mark that done — try again?", { label: "Try again", fn: () => { void quickDone(c); } });
         return false;
       }
-      const undo = () => updateUserTask(c.userTaskId!, { done: false });
+      /* ⚠️ THE INVERSE CLEARS THE STAMP TOO. Undoing a completion used to write `{ done: false }`
+         alone, leaving `completedAt` on a task that is not complete — an incoherent record, and one
+         that reads perfectly: `briefingCleared` counts the weekly review's cleared tasks by that
+         field, correctly, because it is the field that says when a thing was completed. Fixed in
+         the primitive rather than in the consumer, because four entrances reach this inverse and
+         the next reader to trust the stamp would meet the same trap. */
+      const undo = () => updateUserTask(c.userTaskId!, { done: false, completedAt: null });
       doneToast(c, async () => { await undo(); flash("Restored"); });
       return true;
     }
@@ -219,10 +225,16 @@ export function useTaskCommit(host: TaskCommitHost): TaskCommit {
     if (!q) return false;
     const nowIso = new Date().toISOString();
     const base = quickNudgePayload({ cardKey: card.key, label: card.title, queryId: q.id, method: q.sendMethod, nowIso });
+    /* ⚠️ "DON'T ASK AGAIN" REACHES `logNudge` AS AN ABSENT CHECK-BACK (journey round, Phase 5), not
+       as a far-future one. The builder then writes no `nudgeDate` and a PERMANENT dismissal — the
+       nudge is recorded, nothing is scheduled, and the suggestion stops for this query only. A
+       sentinel date would have put a day on the query that the writer explicitly declined. */
     const p = {
       ...base,
       nudgeDate: v.sentDate,
-      checkBackDate: new Date(new Date(`${v.sentDate}T12:00:00`).getTime() + v.checkBackDays * 86400000).toISOString(),
+      ...(v.noCheckIn ? {} : {
+        checkBackDate: new Date(new Date(`${v.sentDate}T12:00:00`).getTime() + v.checkBackDays * 86400000).toISOString(),
+      }),
       ...(v.note.trim() ? { note: v.note.trim() } : {}),
     };
     const r = await logNudge(...nudgeWriteArgs(p, nowIso));

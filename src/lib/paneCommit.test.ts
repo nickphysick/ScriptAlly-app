@@ -576,3 +576,76 @@ describe("⚠️ the send journey writes what the contract says, and nothing els
     expect(arm, "the delay arm falls through to the committer").toContain("return;");
   });
 });
+
+/**
+ * ⚠️ THE NUDGE JOURNEY (journey round, Phase 5) — against `todo-two-journeys-full.html`'s green
+ * blocks: "activity Nudge sent · nudgeDate 25 Sept → status unchanged (a nudge is not a new
+ * submission)" and "no query fields, no activity — the task's own return date only".
+ */
+describe("⚠️ the nudge journey writes a clock the writer chose, and never a status", () => {
+  /* ⚠️ THE ROUND'S NAMED BUG. `requiredFor("chase")` was `[]` while this supplied
+     `DEFAULT_CHECKBACK_DAYS` — so every nudge from the pane set a follow-up date nobody chose. */
+  it("the check-in is the writer's answer, not the shared default", () => {
+    const v = paneCommitValues({ kind: "chase", now: NOW, checkBackDays: 30, body: body({ when: { kind: "today" } }) });
+    expect(v.checkBackDays, "the writer's clock was replaced by the default").toBe(30);
+    expect(v.checkBackDays).not.toBe(DEFAULT_CHECKBACK_DAYS);
+  });
+
+  /* the default survives for a caller that supplies none — the quick rail states its own on a
+     receipt — and the pane is simply no longer one of them */
+  it("a caller that answers nothing still gets the shared default", () => {
+    expect(paneCommitValues({ kind: "chase", now: NOW, body: body({ when: { kind: "today" } }) }).checkBackDays)
+      .toBe(DEFAULT_CHECKBACK_DAYS);
+  });
+
+  /* ⚠️ "Don't ask again" IS AN ANSWER, AND IT TRAVELS AS ITS OWN FLAG. A far-future number would
+     reach `logNudge` as a fabricated date on the query — the fault this round keeps closing. */
+  it("declining a check-in travels as a flag, never as a sentinel date", () => {
+    const v = paneCommitValues({ kind: "chase", now: NOW, noCheckIn: true, body: body({ when: { kind: "today" } }) });
+    expect(v.noCheckIn).toBe(true);
+    /* and the committer turns that into an ABSENT check-back rather than a distant one */
+    expect(writer, "the committer still computes a date when the writer declined one")
+      .toContain("...(v.noCheckIn ? {} : {");
+  });
+
+  /* ⚠️ A NUDGE IS NOT A NEW SUBMISSION. The activity is non-status by construction, so
+     `recomputeQuery` ignores it and the query's own status cannot move. */
+  it("a nudge writes a non-status activity, and touches neither status nor responseDeadline", async () => {
+    const fs = await import("node:fs");
+    const src = fs.readFileSync(new URL("./logNudge.ts", import.meta.url), "utf8");
+    const decls = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(decls, "the nudge gained a resulting status").not.toContain("resultingStatus");
+    /* the ONLY query fields it touches, stated as a closed pair */
+    const upd = decls.slice(decls.indexOf("queryUpdates:"), decls.indexOf("dismissal:"));
+    expect(upd).toContain("lastNudgeSentDate");
+    expect(upd, "the nudge started writing a status").not.toContain("status");
+    expect(upd, "the nudge started moving the reply deadline").not.toContain("responseDeadline");
+  });
+});
+
+/**
+ * ⚠️ THE JOURNEY REPORTS, IT DOES NOT JUDGE — the register the contract states for the nudge:
+ * matter-of-fact, no anxiety, no red. "Overdue" and "late" are verdicts about the AGENT, and this
+ * app does not have the standing to make one.
+ */
+describe("⚠️ no journey calls an agent overdue or late", () => {
+  it("the pane's own copy carries neither word", async () => {
+    const fs = await import("node:fs");
+    const files = [
+      "../components/todo/TaskPane.tsx",
+      "../components/todo/TaskPaneBody.tsx",
+      "./journeys.ts",
+    ];
+    for (const f of files) {
+      const src = fs.readFileSync(new URL(f, import.meta.url), "utf8");
+      /* ⚠️ COMMENTS STRIPPED FIRST. This repo's prose names what it retires, and a lock forbidding a
+         word will find it in the sentence explaining why it is forbidden. Seven false reds in one
+         session came from exactly that. */
+      const decls = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+      /* ⚠️ AND `nudge_overdue` IS AN IDENTIFIER, NOT A WORD A READER SEES. Bounded so the task
+         type cannot satisfy a claim about COPY — the prefix hazard, pointing the other way. */
+      const hits = [...decls.matchAll(/[^_a-z](overdue|late)[^_a-z]/gi)].map((m) => m[1]);
+      expect(hits, `${f} calls someone ${hits[0] ?? ""}`).toHaveLength(0);
+    }
+  });
+});

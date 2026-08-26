@@ -119,6 +119,10 @@ export interface PaneCommitInput {
    * never asked of the writer. See the note at `reason` below.
    */
   closeReason?: "no_reply" | "off_record" | "withdrawn";
+  /** the nudge's own clock, in days — the writer's answer to "if nothing comes back…" */
+  checkBackDays?: number;
+  /** the writer answered "Don't ask again": log the nudge, schedule nothing, mute the suggestion */
+  noCheckIn?: boolean;
   /**
    * ⚠️ `"bulk"` IS NOT A `JourneyKind`, AND SAYING SO IS THE POINT. `paneJourneyKind` predates the
    * cohort table and has no member for it; the cohort is decided by the CARD, and its committer
@@ -179,7 +183,22 @@ export function paneCommitValues(inp: PaneCommitInput): JourneySendValues {
     sentDate: sent ?? (kind === "chase" ? ymd(now) : ""),
     /* "Anything else? OPTIONAL" is the remembered note, not part of the parcel */
     note: body.also,
-    checkBackDays: DEFAULT_CHECKBACK_DAYS,
+    /**
+     * ⚠️ THE CHECK-IN IS AN ANSWER NOW, NOT A DEFAULT (journey round, Phase 5) — and it is the
+     * round's own named bug. `requiredFor("chase")` was `[]`, so the nudge asked nothing, while
+     * this line supplied `DEFAULT_CHECKBACK_DAYS`: every nudge logged from the pane set a follow-up
+     * date the writer had never chosen. The fork asks "if nothing comes back…" and requires it.
+     *
+     * The default survives for a caller that supplies no answer — the quick rail, which states its
+     * own defaults on a receipt — but the pane is no longer one of them.
+     */
+    checkBackDays: inp.checkBackDays ?? DEFAULT_CHECKBACK_DAYS,
+    /**
+     * ⚠️ AND "DON'T ASK AGAIN" IS AN ANSWER TOO, carried as its own flag rather than as a sentinel
+     * number. A far-future `checkBackDays` would reach `logNudge` as a fabricated date on the query;
+     * this reaches it as an ABSENT check-back, which is what the writer said.
+     */
+    ...(inp.noCheckIn ? { noCheckIn: true as const } : {}),
     /**
      * ⚠️ THE CLOSE'S REASON IS THE JOURNEY'S NOW, NOT A CONSTANT (journey round, Phase 4).
      *

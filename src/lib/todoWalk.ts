@@ -194,7 +194,9 @@ export type StagedPayload =
      which accepts and writes the field — was never given it. The form compelled an answer, the strip
      stated it had been recorded, and nothing was written. */
   | { kind: "mark-sent"; cardKey: string; label?: string; queryId: string; targetStatus: QueryStatus; sentDate: string; isResubmit: boolean; method?: string; materials?: string[]; writerExpectedDate?: string; note?: string; nudgeDate?: string }
-  | { kind: "nudge"; cardKey: string; label?: string; queryId: string; checkBackDate: string; note?: string; nudgeDate?: string; method?: string }
+  /* ⚠️ `checkBackDate` IS OPTIONAL — its absence is "Don't ask again", an answer rather than a
+     missing field (journey round, Phase 5). Every quick-rail payload still supplies one. */
+  | { kind: "nudge"; cardKey: string; label?: string; queryId: string; checkBackDate?: string; note?: string; nudgeDate?: string; method?: string }
   | { kind: "snooze"; cardKey: string; label?: string; taskType: string; relatedRecordId: string; days: number }
   | { kind: "mute-item"; cardKey: string; label?: string; taskType: string; relatedRecordId: string }
   | { kind: "mute-rule"; cardKey: string; label?: string; rule: string }
@@ -229,8 +231,17 @@ export function markSentWriteArgs(p: Extract<StagedPayload, { kind: "mark-sent" 
  *  REACHES the write as `eventDate` (via the shared noon rule) — it was display-only before, so a
  *  back-dated nudge logged at write time. `method` stays display-only (the write path has no home
  *  for it). */
-export function nudgeWriteArgs(p: Extract<StagedPayload, { kind: "nudge" }>, nowIso: string): [string, { checkBackDate: string; note?: string; eventDate: string }] {
-  return [p.queryId, { checkBackDate: p.checkBackDate, ...(p.note ? { note: p.note } : {}), eventDate: journeyEventISO(p.nudgeDate, nowIso) }];
+/**
+ * ⚠️ AN ABSENT `checkBackDate` TRAVELS AS ABSENT (journey round, Phase 5) — "Don't ask again" is an
+ * answer, and `logNudge` writes no `nudgeDate` and a permanent dismissal for it. Spreading the key
+ * conditionally rather than passing `undefined` keeps the payload the shape Firestore accepts.
+ */
+export function nudgeWriteArgs(p: Extract<StagedPayload, { kind: "nudge" }>, nowIso: string): [string, { checkBackDate?: string; note?: string; eventDate: string }] {
+  return [p.queryId, {
+    ...(p.checkBackDate ? { checkBackDate: p.checkBackDate } : {}),
+    ...(p.note ? { note: p.note } : {}),
+    eventDate: journeyEventISO(p.nudgeDate, nowIso),
+  }];
 }
 
 /**
