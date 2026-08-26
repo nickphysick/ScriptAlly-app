@@ -74,6 +74,14 @@ jobs:
       - name: Typecheck
         run: npx tsc --noEmit
 
+      # ⚠️ THE ROOT TYPECHECK DOES NOT COVER `functions/` — tsconfig.json excludes it, so the step
+      # above is blind to every type error in a Cloud Function. Until this step existed the ONLY
+      # thing that typechecked them was `firebase.json`'s predeploy hook, which means a type error
+      # surfaced to whoever was mid-deploy rather than to CI. Measured: a deliberate TS2322 in
+      # functions/src went completely unmentioned by the root run and was caught by this one.
+      - name: Typecheck (functions)
+        run: npx tsc --noEmit -p functions/tsconfig.json
+
       - name: Test
         run: npm test
 
