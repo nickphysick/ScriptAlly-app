@@ -992,7 +992,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
           ) : (
           <>
           <div className="tl-board">
-            <TplZone className="tl-zone" hem={false} label="The week">
+            {/* ⚠️ THE ZONE NAMES WHAT IS IN IT, AND IT SAID "The week" AT EVERY RANGE (Phase 5).
+                It was true while a window could only be seven days. It is the same fault as a
+                comment outliving what it described, arriving through a prop: a label nobody
+                re-reads, stating something the code stopped doing. */}
+            <TplZone className="tl-zone" hem={false} label={range.label}>
               <div
                 className={`tl dense${range.dense}`}
                 style={{ "--tl-days": range.days, "--tl-cols": columns.length } as React.CSSProperties}
