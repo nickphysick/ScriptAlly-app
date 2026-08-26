@@ -269,3 +269,27 @@ describe("D4 — the field reaches exactly two activity types, enumerated", () =
     expect(block).toContain("fact worth recording, not a mistake");
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("⚠️ the held line states an absence ONCE", () => {
+  const tsx = readFileSync(join(root, "src/components/reading-pane/VersionLines.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  /**
+   * It rendered `MANUSCRIPT HELD · NOT RECORDED · VERSION NOT RECORDED` — the same fact twice,
+   * reading as a stutter. Every assertion passed, because each half was individually correct: the
+   * value slot honestly said the version was not recorded, and the note honestly said the match
+   * state was unknown. **The fault only exists in the composed line**, which is why it took reading
+   * it aloud rather than checking it.
+   */
+  it("the note renders only when there is a version to compare", () => {
+    expect(tsx).toContain("{held.version && (");
+  });
+
+  it("⚠️ and the unknown note SURVIVES for the case it was written for", () => {
+    /* Silence beside a KNOWN version would read as agreement; that case still gets its note. The
+       thing dropped is the second telling of an absence already stated in the value position. */
+    expect(MATCH_NOTE.unknown).toBe("Version not recorded");
+    expect(tsx).toContain("MATCH_NOTE[state]");
+  });
+});

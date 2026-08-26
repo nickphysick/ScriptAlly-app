@@ -22,7 +22,14 @@ async function scopeAll(page: import("@playwright/test").Page) {
   await expect(filters, "no Filters control — the census cannot be widened").toBeVisible({ timeout: 20_000 });
   await filters.click();
   await page.waitForTimeout(400);
-  const all = page.getByRole("button", { name: /^all manuscripts$/i }).first();
+  /**
+   * ⚠️ `role="radio"`, NOT "button". `PRow` renders a `<button>` that ANNOUNCES itself as a radio,
+   * so a role-button locator matches nothing — and the earlier censuses in this project guarded
+   * that miss with `if (await x.count())`, which made a failed widening indistinguishable from a
+   * successful one. Same family as reading an uppercased `innerText` off a source string: the
+   * locator was written from what the element IS rather than what it says it is.
+   */
+  const all = page.getByRole("radio", { name: /^all manuscripts$/i }).first();
   await expect(all, "no 'All manuscripts' option — scope was never widened").toBeVisible({ timeout: 10_000 });
   await all.click();
   await page.waitForTimeout(500);

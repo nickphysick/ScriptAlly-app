@@ -72,11 +72,26 @@ export const VersionLines: React.FC<VersionLinesProps> = ({
           {held.version
             ? <Chip name={held.version.name} />
             : <span className="qv-none">Not recorded</span>}
-          <span className={`qv-note qv-note--${state}`}>
-            {state === "match" && <span aria-hidden="true">✓ </span>}
-            {state === "differs" && <span aria-hidden="true">△ </span>}
-            {MATCH_NOTE[state]}
-          </span>
+          {/**
+            * ⚠️ THE NOTE IS SUPPRESSED WHEN THE VALUE SLOT ALREADY SAYS IT — found by reading the
+            * rendered line aloud, not by a check.
+            *
+            * It rendered `MANUSCRIPT HELD · NOT RECORDED · VERSION NOT RECORDED`: the same fact
+            * twice, reading as a stutter. Every assertion passed, because each half was
+            * individually correct.
+            *
+            * ⚠️ AND THE ANTI-SILENCE RULE STILL HOLDS WHERE IT APPLIES. `MATCH_NOTE.unknown` exists
+            * because silence beside a KNOWN version would read as agreement — that case is a chip
+            * with no note, and it still gets one. What is dropped is the second telling of an
+            * absence the line has already stated in the value position.
+            */}
+          {held.version && (
+            <span className={`qv-note qv-note--${state}`}>
+              {state === "match" && <span aria-hidden="true">✓ </span>}
+              {state === "differs" && <span aria-hidden="true">△ </span>}
+              {MATCH_NOTE[state]}
+            </span>
+          )}
         </div>
       )}
     </div>
