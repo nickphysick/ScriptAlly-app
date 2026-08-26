@@ -487,27 +487,42 @@ test("finishing Phase 7b — reduced motion, overlay, cushion, foot margin", asy
   expect(before.point, "no enabled panel row to open — the overlay check would be vacuous").not.toBeNull();
   await page.mouse.click(before.point!.x, before.point!.y);
   await page.waitForTimeout(700);
+  /**
+   * ⚠️ THE ROW OPENS THE TASK PANE NOW, NOT `FocusFlow` (tasks-workflow Pack C Phase 2). This case
+   * asserted `.cal-flow .tdb-ffsheet` — the takeover a panel row used to raise — and the calendar
+   * deliberately stopped raising it: clicking a row mounts the SAME `TaskPane` `/todo` draws, in a
+   * window over the month. `FocusFlow` is still mounted here and still reached, but through the
+   * pane's own primary for the `offer` and `fix` journeys, exactly as on `/todo`.
+   *
+   * The law this case protects is unchanged and is asserted against the new surface: a row opens
+   * ONE modal layer over the month, centred, on screen, scrolling in its own region, at the
+   * calendar's own narrow measure rather than the full-page width.
+   */
   const ov = await page.evaluate(() => {
-    const ff = document.querySelector(".cal-flow .tdb-ff") as HTMLElement | null;
-    const sheet = document.querySelector(".cal-flow .tdb-ffsheet") as HTMLElement | null;
-    const body = document.querySelector(".cal-flow .tdb-ffbody") as HTMLElement | null;
-    if (!ff || !sheet) return null;
-    const s = sheet.getBoundingClientRect();
+    const win = document.querySelector(".cal-panewin") as HTMLElement | null;
+    const scrim = document.querySelector(".cal-panescrim") as HTMLElement | null;
+    const body = document.querySelector(".cal-panescroll") as HTMLElement | null;
+    if (!win || !scrim) return null;
+    const s = win.getBoundingClientRect();
     return {
-      role: ff.getAttribute("role"), modal: ff.getAttribute("aria-modal"),
+      role: win.getAttribute("role"), modal: win.getAttribute("aria-modal"),
       width: Math.round(s.width),
       centred: Math.abs((s.left + s.width / 2) - window.innerWidth / 2) < 3,
       onScreen: s.top >= 0 && s.bottom <= window.innerHeight + 1,
       scrolls: body ? getComputedStyle(body).overflowY : null,
-      scrimAlpha: getComputedStyle(ff).backgroundColor,
+      scrimAlpha: getComputedStyle(scrim).backgroundColor,
+      /* the takeover must NOT also be up — one layer over the month, which was this case's point */
+      sheets: document.querySelectorAll(".cal-flow .tdb-ffsheet").length,
     };
   });
-  expect(ov, "the overlay did not open").not.toBeNull();
-  log.push(`  overlay: ${ov!.width}px · centred ${ov!.centred} · on-screen ${ov!.onScreen} · ${ov!.role}/${ov!.modal} · body ${ov!.scrolls}`);
+  expect(ov, "the pane did not open from the panel row").not.toBeNull();
+  log.push(`  pane: ${ov!.width}px · centred ${ov!.centred} · on-screen ${ov!.onScreen} · ${ov!.role}/${ov!.modal} · body ${ov!.scrolls}`);
   expect(ov!.role).toBe("dialog");
   expect(ov!.modal).toBe("true");
-  /* ⚠️ 430 IS THE SCOPED WIDTH — if this reads ~860 the page rule lost the cascade to todo.css */
-  expect(ov!.width, "the sheet is not the calendar's scoped 430 — the cascade was lost").toBe(430);
+  expect(ov!.sheets, "a FocusFlow sheet opened as well — two layers over the month").toBe(0);
+  /* ⚠️ THE PANE'S OWN MEASURE — 440, a few pixels from `.cal-flow`'s 430, so the two read as one
+     family. If this comes back near the viewport width the window's rule lost the cascade. */
+  expect(ov!.width, "the window is not the pane's scoped measure — the cascade was lost").toBeLessThanOrEqual(440);
   expect(ov!.centred, "the sheet is not centred").toBe(true);
   expect(ov!.onScreen, "the sheet hangs off the viewport").toBe(true);
   expect(ov!.scrolls, "the sheet body is not its own scroll region").toBe("auto");
@@ -519,14 +534,15 @@ test("finishing Phase 7b — reduced motion, overlay, cushion, foot margin", asy
       .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
     const sel = grid.querySelector(".cal-cell.sel, .cal-cell[aria-selected='true']") as HTMLElement | null;
     return {
-      open: document.querySelectorAll(".cal-flow .tdb-ff").length,
+      /* the pane is what a row opens now — see the note above */
+      open: document.querySelectorAll(".cal-panewin").length,
       selDay: (sel?.querySelector(".cal-dn")?.textContent ?? "").trim(),
     };
   });
-  expect(after.open, "Escape did not close the overlay").toBe(0);
+  expect(after.open, "Escape did not close the pane").toBe(0);
   /* ⚠️ THE DAY IS STILL SELECTED — closing nulls the card and nothing else */
   expect(after.selDay, "closing lost the selected day").toBe(before.selDay);
-  log.push(`  overlay closed on Escape · day still selected: ${after.selDay || "(none)"}`);
+  log.push(`  pane closed on Escape · day still selected: ${after.selDay || "(none)"}`);
 
   /* ── what could NOT be verified, stated rather than skipped ───────────────────────── */
   /* ⚠️ POINTER INTERACTION *INSIDE* `FocusFlow` IS UNVERIFIABLE IN THIS HARNESS, and that is the
@@ -1225,6 +1241,21 @@ test("proposals Phase 6a — weekends, record row, expected pills, month jump", 
 test("proposals Phase 6b — the drag, on a task seeded for it", async ({ page }) => {
   const log: string[] = [];
   const TITLE = `Harness drag ${Date.now().toString(36)}`;
+  /**
+   * ⚠️ THE TWO DAYS ARE COMPUTED, NOT LITERAL — and this test taught the lesson the hard way. It
+   * was written on 22 Aug with `25` and `27` typed in, which were "a few days ahead" that week and
+   * yesterday-and-tomorrow four days later. A past-dated task does not sit on its own day here (the
+   * calendar rolls it forward), so the seed appeared to vanish and the failure read like the drag
+   * being broken. Nothing about the feature had changed. Same fault as `seed.mjs`'s today-relative
+   * `dateAdded`: a date pinned to a literal is correct for a week.
+   *
+   * ⚠️ AND BOTH DAYS MUST SHARE THE PICKER'S CURRENT MONTH, because the probe never navigates it.
+   * Near the end of a month they clamp to the last two days rather than crossing over.
+   */
+  const NOW = new Date();
+  const LAST_DAY = new Date(NOW.getFullYear(), NOW.getMonth() + 1, 0).getDate();
+  const SRC_DAY = String(Math.min(NOW.getDate() + 1, LAST_DAY - 1));
+  const TGT_DAY = String(Math.min(NOW.getDate() + 2, LAST_DAY));
 
   await openRoute(page, "/todo", { width: 1440, height: 900 });
   await page.evaluate(() => window.dispatchEvent(new CustomEvent("sa:open-todo-composer")));
@@ -1244,19 +1275,19 @@ test("proposals Phase 6b — the drag, on a task seeded for it", async ({ page }
   expect(trig, "no date trigger in the composer").not.toBeNull();
   await page.mouse.click(trig!.x, trig!.y);
   await page.waitForTimeout(450);
-  const day25 = await page.evaluate(() => {
+  const day25 = await page.evaluate((d) => {
     const cells = Array.from(document.querySelectorAll(".sa-dp-day:not(.muted)")) as HTMLElement[];
-    const b = cells.find((x) => (x.textContent ?? "").trim() === "25" && x.getBoundingClientRect().height > 0);
+    const b = cells.find((x) => (x.textContent ?? "").trim() === d && x.getBoundingClientRect().height > 0);
     if (!b) return null;
     const r = b.getBoundingClientRect();
     return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
-  });
-  expect(day25, "day 25 not clickable in the picker").not.toBeNull();
+  }, SRC_DAY);
+  expect(day25, `day ${SRC_DAY} not clickable in the picker`).not.toBeNull();
   await page.mouse.click(day25!.x, day25!.y);
   await page.waitForTimeout(400);
   await page.locator(".tdb-nc-save").click();
   await page.waitForTimeout(1400);
-  log.push(`  seeded "${TITLE}" due 25 Aug`);
+  log.push(`  seeded "${TITLE}" due day ${SRC_DAY}`);
 
   /* ── exactly ONE pill, draggable; a record pill is not ──────────────────── */
   await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
@@ -1276,7 +1307,7 @@ test("proposals Phase 6b — the drag, on a task seeded for it", async ({ page }
   }, TITLE);
   expect(pills.n, "the seeded task is not on the calendar exactly once").toBe(1);
   expect(pills.draggable, "the task pill is not draggable").toBe("true");
-  expect(pills.day).toBe("25");
+  expect(pills.day, `the pill is not on day ${SRC_DAY}`).toBe(SRC_DAY);
   /* ⚠️ THE NEGATIVE HALF: a record pill — a fact — carries NO draggable attribute */
   expect(pills.recDraggable, "a record pill is draggable — you cannot drag a fact").toBe("absent");
 
@@ -1293,26 +1324,26 @@ test("proposals Phase 6b — the drag, on a task seeded for it", async ({ page }
     pill.dispatchEvent(new DragEvent("dragstart", { bubbles: true, cancelable: true, dataTransfer: new DataTransfer() }));
   }, TITLE);
   await page.waitForTimeout(300);
-  const over = await page.evaluate(() => {
+  const over = await page.evaluate((d) => {
     const grid = Array.from(document.querySelectorAll(".cal-grid"))
       .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
     const target = Array.from(grid.querySelectorAll(".cal-cell:not(.off)"))
-      .find((c) => (c.querySelector(".cal-dn")?.textContent ?? "").trim() === "27") as HTMLElement;
+      .find((c) => (c.querySelector(".cal-dn")?.textContent ?? "").trim() === d) as HTMLElement;
     const ev = new DragEvent("dragover", { bubbles: true, cancelable: true, dataTransfer: new DataTransfer() });
     target.dispatchEvent(ev);
     return { prevented: ev.defaultPrevented };
-  });
+  }, TGT_DAY);
   expect(over.prevented, "the dragover handler never ran — the drop would be refused").toBe(true);
   await page.waitForTimeout(250);
-  const ringed = await page.evaluate(() => {
+  const ringed = await page.evaluate((d) => {
     const grid = Array.from(document.querySelectorAll(".cal-grid"))
       .find((g) => (g as HTMLElement).getBoundingClientRect().height > 0) as HTMLElement;
     const target = Array.from(grid.querySelectorAll(".cal-cell:not(.off)"))
-      .find((c) => (c.querySelector(".cal-dn")?.textContent ?? "").trim() === "27") as HTMLElement;
+      .find((c) => (c.querySelector(".cal-dn")?.textContent ?? "").trim() === d) as HTMLElement;
     const ok = target.classList.contains("dropok");
     target.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: new DataTransfer() }));
     return ok;
-  });
+  }, TGT_DAY);
   expect(ringed, "the target cell never ringed on dragover").toBe(true);
   await page.waitForTimeout(1600);
   const after = await page.evaluate((title) => {
@@ -1330,12 +1361,12 @@ test("proposals Phase 6b — the drag, on a task seeded for it", async ({ page }
     };
   }, TITLE);
   expect(after.n, "the task duplicated or vanished").toBe(1);
-  expect(after.day, "the pill did not move — the write or the re-derivation failed").toBe("27");
+  expect(after.day, "the pill did not move — the write or the re-derivation failed").toBe(TGT_DAY);
   expect(after.rings, "a drop ring survived the drop").toBe(0);
   /* ⚠️ NO CELL OVERFLOWS AFTER A DROP INTO A FULL DAY — the pack's own check */
   expect(after.overflow, "a cell overflows after the drop").toBe(0);
   expect(after.foldShort, "the fold reports a shortfall after the drop").toBeNull();
-  log.push("  dragged 25 → 27: ring shown, write landed, feed re-derived, no overflow");
+  log.push(`  dragged ${SRC_DAY} → ${TGT_DAY}: ring shown, write landed, feed re-derived, no overflow`);
 
   /* ── /todo follows in the same derivation ───────────────────────────────── */
   await openRoute(page, "/todo", { width: 1440, height: 900 });
