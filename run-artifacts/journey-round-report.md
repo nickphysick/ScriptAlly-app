@@ -305,27 +305,93 @@ and a clean production build, over a pane that crashed the moment anyone opened 
 
 ---
 
-## Where the next night starts
+## Phases 6, 7 and 8 — the second night
 
-Phase 6, with five journeys' worth of spine in place.
+**All eight phases are on `main`, 51/51 measured green at 1440.** Per-phase: Phase 6 `523ee45e`,
+Phase 7 `8861a7c6`, Phase 8 `e7ffaceb`. Gates green at each: tsc clean, production build clean,
+unit suite 7,036 → 7,057 → 7,079.
 
-1. **Fill-in's date question** is the only real gap. The contract offers
-   *"I know the date… / Around then — keep the import date / Not sure"*, where **"Not sure" leaves
-   the date blank rather than guessing**. Today that row still uses the send's `When` options. It
-   needs the same per-flow override the delays already have.
-2. **"I can't remember" already works** — the `forget` flow declares `writes: { kind: "mute" }` and
-   the primary routes on it, so it records nothing and stops the asking. It needs its assertions,
-   not its code.
-3. **Note's two intents already work** and it renders no `When`, because the tick carries its date.
+### Phase 6 — close, fill-in and note
 
-Phase 7 (the filling primary) is a self-contained UI change against
-`todo-filling-primary.html` — count outside the button, the fill advancing with answers, and the
-one that matters: **it looks disabled and must not be disabled.**
+The seam was `JourneyFlow.strip`: **seven grammars declared, read by nothing.** Every flow but the
+close and the send fell through to the CONSEQUENCES sentence, which resolves the expected reply and
+the nudge reminder — two answers a delay never asks for — so *"Not yet — hold me to it"*, a flow
+whose whole purpose is to say when a task comes back, rendered **"This records —"**. So did *"I
+can't remember"*, whose entire point is a sentence about what it does not record. The previous
+assertion required only that each flow DECLARE a grammar, which is a test that a field is filled in.
 
-Phase 8 needs the receipt-with-undo on every terminus, and the close reason carried by the journey
-— which Phase 4 has already done, so Phase 8's hardest sentence is already true.
+The fill-in's date question now offers the import's own three answers instead of the send's three,
+and `DayChoice` gained two members rather than mapping either onto a neighbour — the alternative was
+a writer naming a day they never knew in order to get past a required question.
+
+### Phase 7 — the filling primary
+
+The point of the phase is a **deleted attribute**. `primDisabled` was set for exactly one journey,
+and the gate's own handler already opens the first unanswered question — `s-rows` is a real anchor
+on the cohort's table — so `disabled` was preventing the one route that would have helped. Measured:
+fill 25% against a count saying 3 of 4 outstanding, 50.1% after one answer, back to 25% when that
+answer is removed; pressing a faded primary opens `s-when` and puts focus in the row.
+
+### Phase 8 — registers and receipts
+
+`register` was the second declared-and-unread field in the same file. It stays unrendered and is now
+enforced by a vocabulary per journey. Receipts are reconciled as two derivations against each other,
+and a real close was committed and undone on the page, asserted against the derived STATUS.
 
 ---
+
+## The three findings worth more than the features
+
+**1 · A single-escaped `\s` inside a `page.evaluate` template is eaten by the template, and it had
+been corrupting data silently.** `/\s+/g` becomes `/s+/g` — a regex matching the LETTER s — so
+`"Rosalind Vale"` was read as `"Ro alind Vale"` and matched no row, which reads exactly like a
+failing feature. Worse, `/\blate\b/` becomes `/(backspace)late(backspace)/` and matches nothing at
+all: **the "late" half of P5.5 — my own Phase 5 assertion — had never tested anything.** Five
+templates repaired here, one in `paneRound.measure.ts`; the sweep now covers `\s \d \w \b` as
+well as stray backticks.
+
+**2 · The measurement left queries closed before it was right.** An early Phase 8 version read the
+board with `page.goto` between the commit and the Undo. The toast IS the receipt; navigating
+destroys it. Three runs committed a close — receipts named **Elinor Hale (3 months), Priya Nair (13
+weeks), Elinor Hale (12 weeks)** — and the account reads **No response (4)**. The spec no longer
+navigates in that window and `expect(pressUndo)` now fails loudly. **Those three need checking by
+hand.**
+
+**3 · Two standing measurement rounds have been red since 25 August, and nobody noticed.**
+`steerRound` and `finishRound` have baselines from 20–21 Aug, fully green; the pane gained its intent
+fork on 25–26 Aug, so every case that opens a card and reads a ledger has been describing a page the
+app no longer serves. Their `primDisabled` assertions were retargeted (Phase 7 genuinely reverses
+that behaviour) and their count probes repointed — **two would otherwise have gone vacuously
+green.** The rest is flagged in a header on each file and queued.
+
+## What is NOT measured, and why
+
+Phase 6's three named assertions are **unit-locked, not measured**, and the report says so rather
+than implying otherwise. The single-query fill-in card is raised only BELOW `BULK_MATERIALS_THRESHOLD`
+(3) gaps; this account has 32, so it shows the cohort instead and `materials_unrecorded` cannot
+appear at all. There is no user Note card either. To measure them: an account with one or two
+unrecorded sends, and one note.
+
+**The fill-in's `When` answer is required, drawn, answered and then discarded.** Writing it was tried
+and reverted: `dateSent` is DERIVED, `recomputeQuery` is its single writer, and a direct
+`updateQuery` would be overwritten while leaving `responseDeadline` describing a send date the record
+no longer claims. `materialsAcceptance.test.ts` caught it. The gap is locked open with its reason in
+both the committer and `journeyFillin.test.ts` — closing it means writing an ACTIVITY, or making the
+question optional. Both are decisions, not repairs.
+
+## Where the next night starts
+
+The round is finished. What it leaves behind, in order of cost if ignored:
+
+1. **Check the three queries by hand** — Elinor Hale (3 months), Priya Nair (13 weeks), Elinor Hale
+   (12 weeks). The account reads "No response (4)"; at most one of those four should be genuine.
+2. **The queued repair of `steerRound` and `finishRound`** — both pre-date the fork.
+3. **The fill-in's discarded date** — a decision about whether that journey writes an activity, or
+   whether the question stops being required.
+4. **The calendar's drag-snooze** — still declared and still queued: the calendar should route into
+   the pane for anything beyond a date change.
+5. **Two journeys are unmeasurable on this account** — the single fill-in and the note. A seeded
+   account with one or two unrecorded sends and one note would close that gap permanently.
 
 ## The pattern worth taking from tonight
 
