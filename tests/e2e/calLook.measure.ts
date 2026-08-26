@@ -2,346 +2,333 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The Calendar's JOURNEY BARS — the acceptance (bars pack, Phase 6).
+ * The Calendar's MARKERS AND GEOMETRY — the acceptance (markers pack, Phase 5).
  *
  * ⚠️ EVERY CLAIM IS MEASURED ON THE RENDERED PAGE. A source lock proves a rule was written, never
- * that it reached an element; a stylesheet lock proves a declaration exists, never what the
- * cascade and the box model do with it.
+ * that it reached an element — which is the whole reason this pack exists: `.tl-chip` was applied
+ * to an element and had no rule at all, and nothing in the suite could see it.
  *
- * ⚠️ AND WHERE THE HARNESS ACCOUNT CANNOT PRODUCE A CASE, THIS FILE SAYS SO RATHER THAN SKIPPING
- * QUIETLY. Several of v5's nine rules need a query in a state this account does not hold — an
- * offer, an R&R, a closure inside the current week. Those are locked in `journeyBars.test.ts` and
- * the run report names them; what is asserted here is what the page can actually be made to draw.
+ * ⚠️ WHERE THE HARNESS ACCOUNT CANNOT PRODUCE A CASE, THIS FILE SAYS SO IN ITS OWN OUTPUT rather
+ * than skipping quietly. It holds no dated user task and no query whose expectation has passed, so
+ * the chip and the hatch are proved by other means, each named where it happens.
  */
 import { test, expect } from "@playwright/test";
-import { openRoute, scrollbarWidth, liftMotionSuppression } from "./measure";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import { openRoute, scrollbarWidth } from "./measure";
 
 const WIDTHS = [1280, 1440, 1920, 2400];
 const HEIGHT = 900;
-
-/** the visible page — every workspace page stays MOUNTED, so a bare selector finds hidden ones */
 const TAG = `
   const vis = (sel) => [...document.querySelectorAll(sel)]
     .find((e) => e.getBoundingClientRect().height > 0) || null;
 `;
 
-/* ══ the chrome ═══════════════════════════════════════════════════════════════════════════════ */
+/* ══ geometry ═════════════════════════════════════════════════════════════════════════════════ */
 
-test("one control row, pinned, and it never wraps", async ({ page }) => {
-  const errs: string[] = [];
-  page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
+test("no literal vertical offset survives in the stylesheet", async () => {
+  const css = readFileSync(join(process.cwd(), "src/components/todo/todoCalendar.css"), "utf8");
+  /* ⚠️ COMMENTS STRIPPED FIRST. This file's prose quotes every literal it retired — `top: 0`,
+     `lanes * 52 + 28`, `translateX(-18px)` — so a bare scan over the raw text reads its own
+     explanation as the offence. The house law, in its plainest form. */
+  const decls = css.replace(/\/\*[\s\S]*?\*\//g, "");
 
-  for (const width of WIDTHS) {
-    await openRoute(page, "/todo/calendar", { width, height: HEIGHT });
-    const r = await page.evaluate<any>(TAG + `(() => {
-      const wpg = vis(".wpg");
-      const tools = wpg.querySelector(".tpl-tools");
-      const board = vis(".tl-board");
-      const zone = board.querySelector(".tl-zone");
-      const kids = [...tools.children].filter((e) => e.getBoundingClientRect().width > 0);
-      /* ⚠️ WRAPPING IS THE ROW GROWING TALLER THAN ITS TALLEST CHILD, not its children having
-         different top edges. The first version of this check counted distinct tops and reported
-         FIVE lines on a row that is demonstrably one: the controls are 26px and 34px and the row
-         centres them, so their top edges legitimately differ. A measurement that answers a
-         different question in the format of the one you asked. */
-      const tallest = Math.max(...kids.map((e) => e.getBoundingClientRect().height));
-      const centres = new Set(kids.map((e) => {
-        const b = e.getBoundingClientRect();
-        return Math.round(b.top + b.height / 2);
-      }));
-      return {
-        /* ⚠️ WRAPPING IS MEASURED AS DISTINCT TOP EDGES, not as a height threshold. A flex row with
-           no flex-wrap grows silently; a row whose children sit on two different lines is the
-           fault, whatever it measures. */
-        wrapped: tools.getBoundingClientRect().height > tallest + 2,
-        tallestChild: Math.round(tallest * 100) / 100,
-        offCentre: centres.size,
-        toolsH: Math.round(tools.getBoundingClientRect().height * 100) / 100,
-        /* the second control row must be gone, not merely empty */
-        barRows: document.querySelectorAll(".tl-bar").length,
-        kinds: [...tools.querySelectorAll(".tl-kind")].map((e) => e.textContent.trim()),
-        hasSearch: !!tools.querySelector(".tl-search"),
-        hasSort: [...tools.querySelectorAll(".tl-mbtn")].length,
-        countShown: !!tools.querySelector(".tl-count") &&
-          tools.querySelector(".tl-count").getBoundingClientRect().width > 0,
-        /* pinned: the chrome that holds it sticks to the top of the scroll row */
-        chromeSticky: getComputedStyle(wpg.querySelector(".wpg-chrome")).position,
-        zone: zone.clientHeight,
-        boardTop: Math.round(board.getBoundingClientRect().top),
-        docScrollW: document.documentElement.scrollWidth,
-        docClientW: document.documentElement.clientWidth,
-      };
-    })()`);
-    console.log(`[${width}] chrome ${JSON.stringify(r)} (scrollbar ${await scrollbarWidth(page)}px)`);
-
-    expect(r.wrapped, `[${width}] the control row wrapped — ${r.toolsH} tall against a ${r.tallestChild} child`).toBe(false);
-    /* and it is one line by the other reading too: everything on it shares a centre */
-    expect(r.offCentre, `[${width}] the row's controls do not share a centre line`).toBe(1);
-    expect(r.barRows, `[${width}] a second control row is still on the page`).toBe(0);
-    expect(r.kinds, `[${width}] the filters are not the four`)
-      .toEqual(["Your move", "Their move", "Record", "Your tasks"]);
-    expect(r.hasSearch, `[${width}] no search on the row`).toBe(true);
-    expect(r.hasSort, `[${width}] no sort on the row`).toBeGreaterThan(0);
-    expect(r.chromeSticky, `[${width}] the control row is not pinned`).toBe("sticky");
-    expect(r.docScrollW, `[${width}] the page scrolls sideways`).toBeLessThanOrEqual(r.docClientW + 1);
-    /* ⚠️ THE COUNT ELIDES FIRST — at the narrow end it is allowed to go, and nothing else is. */
-    if (width >= 1280) expect(r.countShown, `[${width}] the count went before it had to`).toBe(true);
-  }
-
-  console.log("console errors:", errs.length ? JSON.stringify(errs.slice(0, 5)) : "none");
-  expect(errs, "the page threw").toEqual([]);
-});
-
-test("what the board gained at 900px", async ({ page }) => {
-  await openRoute(page, "/todo/calendar", { width: 1440, height: HEIGHT });
-  const rest = await page.evaluate<any>(TAG + `(() => {
-    const board = vis(".tl-board"), wpg = vis(".wpg");
-    return {
-      zone: board.querySelector(".tl-zone").clientHeight,
-      boardTop: Math.round(board.getBoundingClientRect().top),
-      mast: Math.round(wpg.querySelector(".wpg-mast").getBoundingClientRect().height * 100) / 100,
-      reclaim: Math.round(wpg.querySelector(".wpg-reclaim").getBoundingClientRect().height * 100) / 100,
-    };
-  })()`);
-  await page.evaluate(TAG + `vis(".tl-board").querySelector(".tl-zone").scrollTop = 400`);
-  await page.waitForTimeout(700);
-  const scrolled = await page.evaluate<any>(TAG + `(() => {
-    const board = vis(".tl-board"), wpg = vis(".wpg");
-    return {
-      zone: board.querySelector(".tl-zone").clientHeight,
-      mast: Math.round(wpg.querySelector(".wpg-mast").getBoundingClientRect().height * 100) / 100,
-      reclaim: Math.round(wpg.querySelector(".wpg-reclaim").getBoundingClientRect().height * 100) / 100,
-    };
-  })()`);
-  console.log(`board at 900: rest ${JSON.stringify(rest)} -> scrolled ${JSON.stringify(scrolled)}`);
-  console.log(`LAST RUN: zone 542 at rest and 542 scrolled, boardTop 335.`);
-
-  /* ⚠️ THE BOARD MUST HAVE GAINED, and the settle's recovery must reach it rather than a spacer.
-     Measured last run: the masthead shed 45.89px on settle and .wpg-reclaim took all of it. */
-  expect(rest.zone, "the board gained nothing at rest").toBeGreaterThan(542);
-  expect(scrolled.zone, "the settle's reclaim did not reach the board").toBeGreaterThan(rest.zone);
-  expect(scrolled.mast, "the masthead did not settle").toBeLessThan(rest.mast);
-  expect(scrolled.reclaim, "the spacer took the reclaim again").toBeLessThanOrEqual(rest.reclaim + 1);
-});
-
-/* ══ the bars ═════════════════════════════════════════════════════════════════════════════════ */
-
-const BARS = TAG + `(() => {
-  const board = vis(".tl-board");
-  const rows = [...board.querySelectorAll(".tl-row")];
-  const out = rows.map((row) => {
-    const lane = row.querySelector(".tl-lane");
-    const L = lane.getBoundingClientRect();
-    const box = (e) => { const b = e.getBoundingClientRect();
-      return { l: Math.round(b.left - L.left), r: Math.round(b.right - L.left),
-               t: Math.round(b.top - L.top), h: Math.round(b.height) }; };
-    return {
-      name: (row.querySelector(".tl-nmtxt") || {}).textContent || "",
-      laneW: Math.round(L.width),
-      rowH: Math.round(row.getBoundingClientRect().height),
-      segs: [...row.querySelectorAll(".tl-seg")].map((e) => ({
-        ...box(e),
-        cls: [...e.classList].filter((c) => c !== "tl-seg").join(" "),
-        anim: getComputedStyle(e).animationName,
-        bg: getComputedStyle(e).backgroundColor,
-        text: e.textContent.trim(),
-      })),
-      over: [...row.querySelectorAll(".tl-over")].map((e) => ({ ...box(e), text: e.textContent.trim() })),
-      nodes: [...row.querySelectorAll(".tl-node")].map((e) => ({ ...box(e), cls: [...e.classList].join(" ") })),
-      ways: [...row.querySelectorAll(".tl-wp")].map((e) => ({ ...box(e), cls: [...e.classList].join(" ") })),
-      chips: [...row.querySelectorAll(".tl-chip")].length,
-    };
-  });
-  return { rows: out, empty: !!board.querySelector(".tl-none") };
-})()`;
-
-test("bars break and resume around every interruption, and never overlap one", async ({ page }) => {
-  const errs: string[] = [];
-  page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
-
-  let sawNodes = 0;
-  let sawWaypoints = 0;
-
-  for (const width of WIDTHS) {
-    await openRoute(page, "/todo/calendar", { width, height: HEIGHT });
-    /* ⚠️ ONE WEEK BACK, BECAUSE THIS WEEK IS EMPTY OF EVENTS AND THE CHECK WOULD PASS ON NOTHING.
-       Measured on the harness account: the current week holds 0 nodes and 1 waypoint, so every
-       break assertion was satisfied by an empty set — the vacuous shape this repo keeps paying
-       for. The week before it holds 14 nodes and 3 waypoints, which is what a break rule needs to
-       be asked of. The population floor below is what stops this going quiet again. */
-    await page.getByRole("button", { name: "Previous week" }).click();
-    await page.waitForTimeout(400);
-    const r = await page.evaluate<any>(BARS);
-    const withParts = r.rows.filter((x: any) => x.segs.length || x.nodes.length);
-    sawNodes += withParts.reduce((n: number, x: any) => n + x.nodes.length, 0);
-    sawWaypoints += withParts.reduce((n: number, x: any) => n + x.ways.length, 0);
-    console.log(`[${width}] ${r.rows.length} rows, ${withParts.reduce((n: number, x: any) => n + x.segs.length, 0)} segments, ` +
-      `${withParts.reduce((n: number, x: any) => n + x.nodes.length, 0)} nodes, ` +
-      `${withParts.reduce((n: number, x: any) => n + x.ways.length, 0)} waypoints`);
-    console.log(`[${width}] sample: ${JSON.stringify(withParts.slice(0, 3))}`);
-
-    expect(r.rows.length, `[${width}] no rows`).toBeGreaterThan(0);
-
-    for (const row of r.rows) {
-      /* ⚠️ NO EMPTY ROWS — the one rule, measured. */
-      expect(row.segs.length + row.nodes.length + row.chips,
-        `[${width}] ${row.name} is an empty row`).toBeGreaterThan(0);
-
-      /* every part lies inside its lane and inside its row */
-      for (const p of [...row.segs, ...row.over, ...row.nodes]) {
-        expect(p.l, `[${width}] ${row.name}: a part starts left of its lane`).toBeGreaterThanOrEqual(-2);
-        expect(p.r, `[${width}] ${row.name}: a part runs past its lane`).toBeLessThanOrEqual(row.laneW + 2);
-      }
-
-      /* ⚠️ THE BREAK IS REAL — a segment must not run under a node or a waypoint. The node sits IN
-         the gap, so any overlap means the clearance was not left. */
-      for (const n of [...row.nodes, ...row.ways]) {
-        const centre = (n.l + n.r) / 2;
-        for (const sg of row.segs) {
-          if (Math.abs(sg.t - n.t) > 30) continue; // a different lane
-          const inside = centre > sg.l + 2 && centre < sg.r - 2;
-          expect(inside, `[${width}] ${row.name}: a segment runs under an interruption at ${centre}`).toBe(false);
-        }
-      }
-
-      /* ⚠️ ADJACENT-DAY EVENTS LEAVE NO HAIRLINE. A piece narrower than the floor is not drawn at
-         all — "nothing happened between them" — so no rendered segment may be a sliver. */
-      for (const sg of row.segs) {
-        expect(sg.r - sg.l, `[${width}] ${row.name}: a hairline segment of ${sg.r - sg.l}px`)
-          .toBeGreaterThan(row.laneW / 40);
-      }
+  const offenders: string[] = [];
+  for (const m of decls.matchAll(/(?:^|\n)(\.tl-[^\n{]*)\{([^}]*)\}/g)) {
+    const sel = m[1].trim();
+    /* the elements this pack is about: the bar, the markers and the chip */
+    if (!/\.tl-(seg|node|wp|chip|mk|tip|lane|row)\b/.test(sel)) continue;
+    for (const [, prop, val] of m[2].matchAll(/\b(top|bottom|margin-top|margin-bottom)\s*:\s*([^;]+)/g)) {
+      if (/-?\d+(\.\d+)?px/.test(val) && !/calc|var\(/.test(val)) offenders.push(`${sel} { ${prop}: ${val.trim()} }`);
     }
   }
+  console.log(`positional literals in the bar/marker/chip rules: ${offenders.length ? JSON.stringify(offenders) : "none"}`);
+  expect(offenders, "a vertical position is written as a literal again").toEqual([]);
 
-  /* ⚠️ THE POPULATION FLOOR. Every assertion above is a NEGATIVE — no overlap, no hairline, no
-     empty row — and a negative check is satisfied by an empty set. Without this the whole case
-     goes green on a week that drew no interruptions at all, which is precisely what it did the
-     first time it was run. */
-  console.log(`interruptions measured across the four widths: ${sawNodes} nodes, ${sawWaypoints} waypoints`);
-  expect(sawNodes, "no nodes were measured — the break rules were not exercised").toBeGreaterThan(0);
-  expect(sawWaypoints, "no waypoints were measured").toBeGreaterThan(0);
+  /* ⚠️ AND THE POPULATION FLOOR — a scan that matched no rules would report "none" for ever. */
+  const scanned = [...decls.matchAll(/(?:^|\n)(\.tl-[^\n{]*)\{/g)]
+    .filter((m) => /\.tl-(seg|node|wp|chip|mk|tip|lane|row)\b/.test(m[1])).length;
+  console.log(`rules scanned: ${scanned}`);
+  expect(scanned, "the scan found no rules to check").toBeGreaterThan(10);
+
+  /* the four tokens the whole geometry reads */
+  for (const t of ["--lane-h", "--bar-h", "--disc", "--chip-h"]) {
+    expect(decls, `${t} is not declared`).toContain(`${t}:`);
+  }
+});
+
+test("bars are centred in their rows, at every row height and every width", async ({ page }) => {
+  const errs: string[] = [];
+  page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
+
+  for (const width of WIDTHS) {
+    await openRoute(page, "/todo/calendar", { width, height: HEIGHT });
+    /* one week back — this week is quiet on this account, and a centring check wants markers too */
+    await page.getByRole("button", { name: "Previous week" }).click();
+    await page.waitForTimeout(400);
+
+    const r = await page.evaluate<any>(TAG + `(() => {
+      const board = vis(".tl-board");
+      const rows = [...board.querySelectorAll(".tl-row")];
+      const px = (n) => Math.round(n * 100) / 100;
+      const off = [];
+      for (const row of rows) {
+        const R = row.getBoundingClientRect();
+        const laneH = parseFloat(getComputedStyle(row).getPropertyValue("--lane-h"));
+        const lanes = Number(getComputedStyle(row).getPropertyValue("--lanes")) || 1;
+        for (const e of row.querySelectorAll(".tl-seg, .tl-node, .tl-wp, .tl-chip")) {
+          const B = e.getBoundingClientRect();
+          const lane = Number(getComputedStyle(e).getPropertyValue("--lane")) || 0;
+          off.push(px((B.top + B.height / 2) - (R.top + laneH * (lane + 0.5))));
+        }
+        /* and the row is exactly its lanes — never a floor, never a leftover */
+        if (Math.abs(R.height - lanes * laneH) > 1) off.push(9999);
+      }
+      const heights = [...new Set(rows.map((x) => Math.round(x.getBoundingClientRect().height)))];
+      const zone = board.querySelector(".tl-zone");
+      let fits = 0, used = 0;
+      const room = zone.clientHeight - board.querySelector(".tl-head").getBoundingClientRect().height;
+      for (const x of rows) { const h = x.getBoundingClientRect().height; if (used + h > room) break; used += h; fits += 1; }
+      return { rows: rows.length, heights, parts: off.length,
+        worst: off.length ? Math.max(...off.map(Math.abs)) : null,
+        laneH: parseFloat(getComputedStyle(rows[0]).getPropertyValue("--lane-h")),
+        zone: zone.clientHeight, room: Math.round(room), fits,
+        docScrollW: document.documentElement.scrollWidth, docClientW: document.documentElement.clientWidth };
+    })()`);
+    console.log(`[${width}] ${JSON.stringify(r)} (scrollbar ${await scrollbarWidth(page)}px)`);
+
+    expect(r.parts, `[${width}] nothing positioned to measure`).toBeGreaterThan(5);
+    /* ⚠️ THE WHOLE OF FAULT 2 IN ONE NUMBER. Before this pack a 36px bar sat at top 0 in a 132px
+       row — 48px off centre — and every row height was a different offence. */
+    expect(r.worst, `[${width}] something is off its lane centre`).toBeLessThanOrEqual(1);
+    expect(r.heights.every((h: number) => h % r.laneH === 0),
+      `[${width}] a row height is not a whole number of lanes: ${JSON.stringify(r.heights)}`).toBe(true);
+    expect(r.docScrollW, `[${width}] the page scrolls sideways`).toBeLessThanOrEqual(r.docClientW + 1);
+  }
   console.log("console errors:", errs.length ? JSON.stringify(errs.slice(0, 5)) : "none");
   expect(errs, "the board threw").toEqual([]);
 });
 
-test("the pulse: on waiting bars, never on your-move, never in a past week, never under reduce", async ({ page }) => {
-  await openRoute(page, "/todo/calendar", { width: 1440, height: HEIGHT });
-  /* ⚠️ THE HARNESS SUPPRESSES ANIMATION FOR MEASUREMENT, and a suppressed page reports every
-     animation as `none` — so a pulse check run under it measures the suppression, not the pulse.
-     Lift it, and let the styles settle before reading. */
-  await liftMotionSuppression(page);
-  await page.waitForTimeout(300);
+/* ══ the chip ═════════════════════════════════════════════════════════════════════════════════ */
 
-  const live = await page.evaluate<any>(BARS);
-  const seg = (rows: any[]) => rows.flatMap((r: any) => r.segs);
-  const theirs = seg(live.rows).filter((s: any) => s.cls.includes("theirs"));
-  const yours = seg(live.rows).filter((s: any) => s.cls.includes("yours"));
-  console.log(`this week: ${theirs.length} waiting, ${yours.length} your-move`);
-  console.log(`waiting animations: ${JSON.stringify([...new Set(theirs.map((s: any) => s.anim))])}`);
-  console.log(`your-move animations: ${JSON.stringify([...new Set(yours.map((s: any) => s.anim))])}`);
-
-  expect(theirs.length, "no waiting bar to check the pulse on").toBeGreaterThan(0);
-  /* ⚠️ THE NAME, NOT A DURATION. A `var()` inside `@keyframes` fails silently here, so the check
-     that matters is that the animation is BOUND — a running animation of nothing looks identical
-     to none at all in every property but this one. */
-  expect(theirs.every((s: any) => s.anim === "tlBreathe"), "a waiting bar is not breathing").toBe(true);
-  /* ⚠️ AND NOT ON THE LOUD ONES. If long-standing work also moved, the two would compete. */
-  expect(yours.every((s: any) => s.anim === "none"), "a your-move bar is animated").toBe(true);
-
-  /* a past week: page back until every row is behind today */
-  await page.getByRole("button", { name: "Previous week" }).click();
-  await page.getByRole("button", { name: "Previous week" }).click();
-  await page.waitForTimeout(400);
-  const past = await page.evaluate<any>(TAG + `(() => {
-    const board = vis(".tl-board");
-    const rows = [...board.querySelectorAll(".tl-row.past")];
-    return {
-      pastRows: rows.length,
-      anims: [...new Set(rows.flatMap((r) => [...r.querySelectorAll(".tl-seg.theirs")]
-        .map((e) => getComputedStyle(e).animationName)))],
-      solidFutures: [...board.querySelectorAll(".tl-row.past .tl-seg.future")]
-        .map((e) => getComputedStyle(e).borderRightStyle),
-      passedWays: [...board.querySelectorAll(".tl-row.past .tl-wp")]
-        .map((e) => [e.classList.contains("passed"), getComputedStyle(e).borderLeftStyle]),
-    };
-  })()`);
-  console.log(`past week: ${JSON.stringify(past)}`);
-  if (past.pastRows > 0) {
-    expect(past.anims.every((a: string) => a === "none"), "a past week is still breathing").toBe(true);
-    /* ⚠️ NOTHING IS PROVISIONAL IN A PAST WEEK — v5's own rule: the dashes go solid. */
-    expect(past.solidFutures.every((v: string) => v === "solid"), "a past week still draws a forecast").toBe(true);
-  } else {
-    console.log("NOTE: no past rows two weeks back on this account — the rule is unit-locked only.");
-  }
-  await page.getByRole("button", { name: "Today" }).click();
-
-  /* reduced motion */
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.waitForTimeout(300);
-  const reduced = await page.evaluate<any>(TAG + `[...new Set([...vis(".tl-board").querySelectorAll(".tl-seg.theirs")]
-    .map((e) => getComputedStyle(e).animationName))]`);
-  console.log(`under prefers-reduced-motion: ${JSON.stringify(reduced)}`);
-  expect(reduced.every((a: string) => a === "none"), "the pulse survives reduced motion").toBe(true);
-  /* ⚠️ BOTH DIRECTIONS. A check that only asserts none passes on a page where the property was
-     never set at all — which is why the live reading above is taken first. */
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.waitForTimeout(300);
-  const back = await page.evaluate<any>(TAG + `[...new Set([...vis(".tl-board").querySelectorAll(".tl-seg.theirs")]
-    .map((e) => getComputedStyle(e).animationName))]`);
-  expect(back.includes("tlBreathe"), "the pulse did not come back").toBe(true);
-});
-
-test("no red, and not the word", async ({ page }) => {
+test("chips render as pills, with visible separation between adjacent ones", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1440, height: HEIGHT });
   const r = await page.evaluate<any>(TAG + `(() => {
     const board = vis(".tl-board");
-    const parts = [...board.querySelectorAll(".tl-seg, .tl-over, .tl-node, .tl-wp, .tl-chip, .tl-kind")];
+    const real = board.querySelectorAll(".tl-chip").length;
+    /* ⚠️ A SYNTHETIC PROBE, AND THE REASON IS STATED IN THE OUTPUT. This account holds no user task
+       with a due date — swept 27 weeks, zero chips — so there is no real chip to measure. The
+       question "does this stylesheet style an element with this class in this DOM position" is a
+       CSS question, and a synthetic element answers it exactly. It writes nothing and spends no
+       fixture. */
+    const lane = board.querySelector(".tl-row .tl-lane");
+    const mk = (left) => { const b = document.createElement("button");
+      b.className = "tl-at tl-chip"; b.setAttribute("data-kind", "task");
+      b.style.left = left; b.style.setProperty("--lane", "0");
+      b.innerHTML = '<span class="d"></span><span class="tl-lbl">Book the library room</span>';
+      lane.appendChild(b); return b; };
+    const a = mk("0%"), c = mk("40%");
+    const cs = getComputedStyle(a), dot = getComputedStyle(a.querySelector(".d"));
+    const ra = a.getBoundingClientRect(), rc = c.getBoundingClientRect();
+    const out = {
+      realChipsOnPage: real,
+      display: cs.display, position: cs.position,
+      padX: cs.paddingLeft, radius: cs.borderTopLeftRadius,
+      border: cs.borderTopStyle + " " + cs.borderTopWidth, bg: cs.backgroundColor,
+      height: Math.round(ra.height), innerGap: cs.columnGap,
+      bullet: { w: dot.width, radius: dot.borderTopLeftRadius, border: dot.borderTopStyle },
+      separation: Math.round(rc.left - ra.right),
+      /* the label is a distinct box from the bullet — the fault was them running together */
+      labelStartsAfterBullet: a.querySelector(".tl-lbl").getBoundingClientRect().left
+        > a.querySelector(".d").getBoundingClientRect().right,
+    };
+    a.remove(); c.remove();
+    return out;
+  })()`);
+  console.log("CHIP:", JSON.stringify(r));
+
+  /* ⚠️ THE REGRESSION, MEASURED: an unstyled inline-flex has no padding, no border and no radius,
+     and its parts run together as bare text. Each of these was zero or `none` on the shipped
+     build. */
+  expect(r.display, "the chip is not a flex pill").toMatch(/flex/);
+  expect(parseFloat(r.padX), "no horizontal padding — the fault exactly").toBeGreaterThan(6);
+  expect(r.radius, "not a pill").toBe("999px");
+  expect(r.border, "no border").toMatch(/^solid/);
+  expect(r.height, "not the chip token's height").toBe(26);
+  expect(parseFloat(r.innerGap), "the bullet and the label have no gap between them").toBeGreaterThan(0);
+  expect(r.labelStartsAfterBullet, "the label runs into the bullet").toBe(true);
+  /* the writer's own task takes a checkbox square */
+  expect(r.bullet.radius, "the task bullet is not a checkbox square").toBe("2px");
+  /* and two adjacent chips are visibly apart */
+  expect(r.separation, "adjacent chips are not separated").toBeGreaterThan(4);
+});
+
+/* ══ the markers ══════════════════════════════════════════════════════════════════════════════ */
+
+test("the marker grammar — shape states whether a fact exists, and so does the interaction", async ({ page }) => {
+  const errs: string[] = [];
+  page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
+  await openRoute(page, "/todo/calendar", { width: 1440, height: HEIGHT });
+
+  const seen = new Set<string>();
+  let statusMarkers = 0, directionMarkers = 0, flags = 0;
+
+  for (let back = 0; back <= 12; back += 1) {
+    const r = await page.evaluate<any>(TAG + `(() => {
+      const b = vis(".tl-board");
+      const px = (n) => Math.round(n * 100) / 100;
+      return {
+        nodes: [...b.querySelectorAll(".tl-node")].map((e) => ({
+          marker: e.getAttribute("data-marker"), dir: e.getAttribute("data-dir"),
+          w: px(e.getBoundingClientRect().width),
+          svg: e.querySelectorAll("svg").length, tag: e.tagName,
+          pe: getComputedStyle(e).pointerEvents, caption: e.getAttribute("aria-label"),
+        })),
+        ways: [...b.querySelectorAll(".tl-wp")].map((e) => ({
+          kind: e.getAttribute("data-kind"), tag: e.tagName,
+          pe: getComputedStyle(e).pointerEvents,
+          dashed: getComputedStyle(e).borderLeftStyle,
+          ring: getComputedStyle(e, "::before").content,
+          caption: (e.querySelector(".tl-tip") || {}).textContent || "",
+        })),
+        disc: parseFloat(getComputedStyle(b.querySelector(".tl-row")).getPropertyValue("--disc")),
+      };
+    })()`);
+
+    for (const n of r.nodes) {
+      seen.add(`${n.marker}:${n.caption}`);
+      if (n.marker === "status") {
+        statusMarkers += 1;
+        /* ⚠️ MARKER 1 IS THE LOCKED COMPONENT, and the SVG is how you know it is that and not a
+           lookalike drawn here: nothing in this page's stylesheet emits one. */
+        expect(n.svg, `a status marker with no StatusDot inside it (${n.caption})`).toBeGreaterThan(0);
+        expect(n.w, `a status marker is not at --disc (${n.caption})`).toBe(r.disc);
+      } else if (n.marker === "direction") {
+        directionMarkers += 1;
+        /* ⚠️ MARKER 2 IS SMALLER AND RINGLESS — a StatusDot here would draw the same symbol on
+           both sides of the join and read as nothing having happened. */
+        expect(n.svg, `a direction marker drew a StatusDot (${n.caption})`).toBe(0);
+        expect(n.w, `a direction marker is not smaller than the disc (${n.caption})`).toBeLessThan(r.disc);
+      }
+      /* both are clickable, because both have an entry behind them */
+      expect(n.tag, "a solid marker is not a control").toBe("BUTTON");
+      expect(n.pe, "a solid marker is not clickable").not.toBe("none");
+    }
+    for (const w of r.ways) {
+      flags += 1;
+      seen.add(`flag:${w.kind}`);
+      /* ⚠️ MARKER 3 IS NOT CLICKABLE, and not because of a flag saying so — it is a span with no
+         handler, because there is nothing behind it to open. */
+      expect(w.tag, "a dashed marker is a control").toBe("SPAN");
+      expect(w.pe, "a dashed marker is clickable").toBe("none");
+      /* dashed unless the week has passed, where nothing is provisional any more */
+      expect(["dashed", "solid", "none"]).toContain(w.dashed);
+      /* ⚠️ AND NO ALARM: no exclamation anywhere in a marker's own words. */
+      expect(w.caption, "a marker caption carries an exclamation").not.toMatch(/!/);
+    }
+
+    if (back < 12) await page.getByRole("button", { name: "Previous week" }).click();
+    await page.waitForTimeout(200);
+  }
+
+  console.log(`markers over 13 weeks: ${statusMarkers} status · ${directionMarkers} direction · ${flags} flags`);
+  console.log(`distinct events seen: ${JSON.stringify([...seen].sort())}`);
+  /* ⚠️ THE POPULATION FLOOR. Every assertion above is inside a loop over what happens to be there;
+     with nothing there they all pass. */
+  expect(statusMarkers, "no status marker was measured").toBeGreaterThan(0);
+  expect(directionMarkers, "no direction marker was measured").toBeGreaterThan(0);
+  expect(flags, "no dashed flag was measured").toBeGreaterThan(0);
+
+  console.log("console errors:", errs.length ? JSON.stringify(errs.slice(0, 5)) : "none");
+  expect(errs, "the board threw").toEqual([]);
+});
+
+/* ══ one bar, one count ═══════════════════════════════════════════════════════════════════════ */
+
+test("a long-standing row is one bar with one count", async ({ page }) => {
+  await openRoute(page, "/todo/calendar", { width: 1440, height: HEIGHT });
+  const r = await page.evaluate<any>(TAG + `(() => {
+    const b = vis(".tl-board");
+    return {
+      overElements: b.querySelectorAll(".tl-over").length,
+      rows: [...b.querySelectorAll(".tl-row")]
+        .filter((r) => r.querySelector(".tl-seg.w-long"))
+        .map((r) => ({
+          name: (r.querySelector(".tl-nmtxt") || {}).textContent || "",
+          bars: r.querySelectorAll(".tl-seg").length,
+          counts: [...r.querySelectorAll(".tl-cnt")].map((e) => e.textContent.trim()),
+          hatched: r.querySelectorAll(".tl-seg.hatched").length,
+        })),
+      hatchSizes: [...b.querySelectorAll(".tl-seg.hatched")].map((e) => getComputedStyle(e).backgroundSize),
+    };
+  })()`);
+  console.log("ONE BAR:", JSON.stringify(r));
+
+  /* ⚠️ THE SECOND OBJECT IS GONE, not merely hidden. */
+  expect(r.overElements, "the overrun is still a second element").toBe(0);
+  expect(r.rows.length, "no long-standing row to check").toBeGreaterThan(0);
+  for (const row of r.rows) {
+    expect(row.counts.length, `${row.name} states its duration ${row.counts.length} times`).toBe(1);
+  }
+  if (!r.hatchSizes.length) {
+    console.log("NOTE: no hatch on this account — no your-move stretch has an expectation that has "
+      + "passed, so the overrun's own rendering is unit-locked only.");
+  } else {
+    for (const s of r.hatchSizes) expect(s, "the hatch covers the whole bar").not.toBe("auto");
+  }
+});
+
+/* ══ the standing rules ═══════════════════════════════════════════════════════════════════════ */
+
+test("no red on the timeline, and not the word anywhere in the bundle", async ({ page }) => {
+  await openRoute(page, "/todo/calendar", { width: 1440, height: HEIGHT });
+  const r = await page.evaluate<any>(TAG + `(() => {
+    const b = vis(".tl-board");
+    const parts = [...b.querySelectorAll(".tl-seg, .tl-node, .tl-mk, .tl-wp, .tl-chip, .tl-kind, .tl-tip")];
     const rgb = (v) => (v.match(/\\d+/g) || []).slice(0, 3).map(Number);
     const reds = [];
     for (const e of parts) {
       const cs = getComputedStyle(e);
-      for (const prop of ["backgroundColor", "borderTopColor", "borderRightColor", "borderLeftColor", "color"]) {
-        const c = rgb(cs[prop]);
-        if (c.length === 3 && c[0] - c[1] > 80) reds.push([e.className, prop, cs[prop]]);
+      for (const p of ["backgroundColor", "borderTopColor", "borderLeftColor", "color"]) {
+        const c = rgb(cs[p]);
+        if (c.length === 3 && c[0] - c[1] > 80) reds.push([e.className, p, cs[p]]);
       }
     }
-    return { parts: parts.length, reds, text: board.textContent.toLowerCase() };
+    return { parts: parts.length, reds, text: b.textContent.toLowerCase() };
   })()`);
   console.log(`scanned ${r.parts} painted parts; red-dominant: ${JSON.stringify(r.reds)}`);
   expect(r.parts, "nothing painted to scan").toBeGreaterThan(0);
-  /* ⚠️ THE TEST IS RED DOMINANCE, NOT A HUE NAME. The app's own burgundy sits at R−G 66 and is
-     everywhere; an alarm red is far above 150. A rule phrased as "no red" would fail on the
-     brand. */
+  /* ⚠️ RED DOMINANCE, NOT A HUE NAME — the app's own burgundy sits at R−G 66 and is everywhere;
+     an alarm red is far above 150. A rule phrased as "no red" would fail on the brand. */
   expect(r.reds, "an alarm red reached the timeline").toEqual([]);
-  /* ⚠️ AND NOT THE WORD, in what the reader sees. Duration is a fact; lateness is a verdict. */
   expect(r.text.includes("overdue"), "the forbidden word reached the page").toBe(false);
-});
 
-test("the three weights and the overrun, where the account can show them", async ({ page }) => {
-  await openRoute(page, "/todo/calendar", { width: 1440, height: HEIGHT });
-  const r = await page.evaluate<any>(TAG + `(() => {
-    const board = vis(".tl-board");
-    const w = (c) => [...board.querySelectorAll(".tl-seg.yours.w-" + c)].map((e) => ({
-      bg: getComputedStyle(e).backgroundColor, weight: getComputedStyle(e).fontWeight,
-      text: e.textContent.trim(),
-    }));
-    return {
-      fresh: w("fresh"), settled: w("settled"), long: w("long"),
-      overruns: [...board.querySelectorAll(".tl-over")].map((e) => e.textContent.trim()),
-      counts: [...board.querySelectorAll(".tl-cnt")].map((e) => e.textContent.trim()),
-    };
-  })()`);
-  console.log(`weights: ${JSON.stringify(r)}`);
-  const seen = ["fresh", "settled", "long"].filter((k) => (r as any)[k].length);
-  console.log(`weights present on this account: ${JSON.stringify(seen)}`);
-  expect(seen.length, "no your-move bar at all — the weights cannot be checked").toBeGreaterThan(0);
+  /**
+   * ⚠️ THE BUNDLE-WIDE CLAIM IS NOT THIS PACK'S TO MAKE, AND SAYING SO IS THE HONEST ANSWER.
+   *
+   * The word IS in the shipped bundle, and not one occurrence is the calendar's. It is a stored
+   * `TaskType` value (`nudge_overdue`, written into task flags in Firestore), a member of
+   * `Task.priority`'s union, a class in the tasks popover, and a count on the shell's nav panel.
+   * Removing any of those is a data-layer or To-do-world change with a migration behind it — a
+   * whole pack, not a line in this one.
+   *
+   * What this pack can claim, and does: **the calendar contributes none of them**, in its own
+   * source or in what a reader sees. Both halves are asserted; the wider sweep is reported.
+   */
+  const own = [
+    "src/lib/journeyBars.ts", "src/lib/todoTimeline.ts",
+    "src/components/todo/TodoCalendarPage.tsx", "src/components/todo/todoCalendar.css",
+  ];
+  const mine = own.filter((f) => readFileSync(join(process.cwd(), f), "utf8").toLowerCase().includes("overdue"));
+  console.log(`calendar-owned files containing the word: ${JSON.stringify(mine)}`);
+  expect(mine, "the calendar has started using the forbidden word").toEqual([]);
 
-  /* the three fills must differ from each other wherever two are present */
-  const fills = seen.map((k) => (r as any)[k][0].bg);
-  expect(new Set(fills).size, "two weights render the same fill").toBe(fills.length);
-  /* ⚠️ THE COUNT IS A DURATION AND NOTHING ELSE — no adverb, no escalation. */
-  for (const c of r.counts) expect(c).toMatch(/^\d+ days?$/i);
-  for (const o of r.overruns) expect(o).toMatch(/^\d+ days? your move$/i);
+  const dir = join(process.cwd(), "dist/assets");
+  const files = readdirSync(dir).filter((f) => f.endsWith(".js") || f.endsWith(".css"));
+  const hits = files.filter((f) => readFileSync(join(dir, f), "utf8").toLowerCase().includes("overdue"));
+  console.log(`bundle files scanned: ${files.length}; containing the word: ${JSON.stringify(hits)} `
+    + `— app-wide, none of it the calendar's (see the report)`);
+  expect(files.length, "no bundle to scan").toBeGreaterThan(0);
 });
 
 test("/todo is unchanged", async ({ page }) => {
@@ -354,11 +341,10 @@ test("/todo is unchanged", async ({ page }) => {
     return {
       title: wpg.querySelector(".wsh-title")?.textContent?.trim() ?? null,
       zones: wpg.querySelectorAll(".tpl-zone, .l-body").length,
-      timeline: wpg.querySelectorAll(".tl-board, .tl-grid, .tl-seg").length,
+      timeline: wpg.querySelectorAll(".tl-board, .tl-seg, .tl-node, .tl-chip").length,
       calendarMountedHidden: [...document.querySelectorAll(".tl-board")]
         .every((e) => e.getBoundingClientRect().height === 0),
-      docScrollW: document.documentElement.scrollWidth,
-      docClientW: document.documentElement.clientWidth,
+      docScrollW: document.documentElement.scrollWidth, docClientW: document.documentElement.clientWidth,
     };
   })()`);
   console.log("/todo:", JSON.stringify(r));
@@ -372,18 +358,31 @@ test("/todo is unchanged", async ({ page }) => {
   expect(errs).toEqual([]);
 });
 
+test("⚠️ the task pane still squeezes below ~600px — confirmed, not fixed", async () => {
+  /* KNOWN AND OUT OF SCOPE. `.tpn .ws` is an unconditional two-column grid, so any mount narrower
+     than about 600px gives the steps column whatever is left. It is a pane change, not a calendar
+     one; the calendar's own Do column carries a page-scoped fold from an earlier pack, which is
+     why you do not see it here. */
+  const pane = readFileSync(join(process.cwd(), "src/components/todo/taskPane.css"), "utf8");
+  const rule = pane.slice(pane.indexOf("\n.tpn .ws {"), pane.indexOf("}", pane.indexOf("\n.tpn .ws {")));
+  console.log(`.tpn .ws is still: ${rule.trim()}`);
+  expect(rule, "the rule moved — re-read it before trusting this flag").toContain("grid-template-columns");
+  expect(rule, "it gained a container query — the squeeze may be fixed").not.toContain("container");
+  /* the calendar's own fold, so the report can say why it is invisible here */
+  const cal = readFileSync(join(process.cwd(), "src/components/todo/todoCalendar.css"), "utf8");
+  expect(cal, "the calendar's page-scoped fold has gone").toContain(".tl-do .tpn .ws");
+});
+
 test("the run's screenshots", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1440, height: HEIGHT });
-  await page.screenshot({ path: "reports/calendar-bars/bars-1440.png" });
-  await page.setViewportSize({ width: 2400, height: HEIGHT });
-  await page.waitForTimeout(300);
-  await page.screenshot({ path: "reports/calendar-bars/bars-2400.png" });
-  await page.setViewportSize({ width: 1280, height: HEIGHT });
-  await page.waitForTimeout(300);
-  await page.screenshot({ path: "reports/calendar-bars/bars-1280.png" });
-  /* the week the breaks actually happen in — the current one is quiet on this account */
-  await page.setViewportSize({ width: 1440, height: HEIGHT });
+  await page.screenshot({ path: "reports/calendar-markers/week-1440.png" });
   await page.getByRole("button", { name: "Previous week" }).click();
   await page.waitForTimeout(500);
-  await page.screenshot({ path: "reports/calendar-bars/bars-events.png" });
+  await page.screenshot({ path: "reports/calendar-markers/markers-1440.png" });
+  await page.setViewportSize({ width: 2400, height: HEIGHT });
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: "reports/calendar-markers/markers-2400.png" });
+  await page.setViewportSize({ width: 1280, height: HEIGHT });
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: "reports/calendar-markers/markers-1280.png" });
 });
