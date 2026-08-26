@@ -401,7 +401,10 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({
             const unitChanged = (was?.kind === "qty" ? was.unit : null) !== (now?.kind === "qty" ? now.unit : null);
             onChange({ ...value, rows, ...(unitChanged ? { unitCommitted: false } : {}) });
           }}
-          onCommit={() => { onChange({ ...value, unitCommitted: true }); onAnswered?.(); }}
+          /* ⚠️ ONE WRITE CARRYING BOTH FACTS. The rows arrive from the picker rather than being
+             read back off this render's `value`, which still holds the PRE-commit amount — two
+             writes in one batch and the second wins, so the writer's number reverted to the seed. */
+          onCommit={(rows) => { onChange({ ...value, rows, unitCommitted: true }); onAnswered?.(); }}
           /* ⚠️ "and", NOT "or". A requirement offers a choice; a record describes one parcel. */
           join="and"
           mode="sent"

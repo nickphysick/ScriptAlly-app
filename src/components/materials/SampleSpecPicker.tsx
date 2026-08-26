@@ -69,7 +69,7 @@ export interface SampleSpecPickerProps {
    * clicking "Chapters" silently accepted 3. This is the signal that separates them, and it is
    * OPTIONAL so `mode="wanted"` and every other caller are byte-identical.
    */
-  onCommit?: () => void;
+  onCommit?: (rows: MaterialRow[]) => void;
   /** Distinguishes this instance's inputs when several sit on one page (the bulk table). */
   idPrefix?: string;
   /** The bulk table renders many of these — it states its own summary instead. */
@@ -112,8 +112,19 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
     onChange(blank ? rows.map((r) => (r === blank ? seeded : r)) : [...rows, seeded]);
   };
 
-  const patch = (row: QtyRow, amount: string) =>
-    onChange(rows.map((r) => (r === row ? { ...r, amount } : r)));
+  /**
+   * ⚠️ IT RETURNS THE ROWS IT WROTE, and `onCommit` is handed them (journey round, Phase 4 — found
+   * by measurement). The commit path used to call `patch` and then `onCommit()` as two separate
+   * callbacks, and the caller's `onCommit` spread ITS OWN render's `value` — which still held the
+   * pre-patch rows. React batched the two writes, the second won, and the amount reverted to the
+   * seed: the writer typed 7, pressed Enter, and the record said 3. A silent wrong number, which is
+   * the exact class this round exists to close.
+   */
+  const patch = (row: QtyRow, amount: string): MaterialRow[] => {
+    const next = rows.map((r) => (r === row ? { ...r, amount } : r));
+    onChange(next);
+    return next;
+  };
 
   /**
    * ⚠️ THE EXPANDING PILL, AND THE ONE THING IT MUST NOT DO IS RE-RENDER ITS INPUT WHILE FOCUSED
@@ -135,10 +146,11 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
     const n = parseInt(raw.replace(/[^0-9]/g, ""), 10);
     /* ⚠️ CLAMPED TO THE UNIT'S OWN MIN, never to a house number. 500 words is a floor for words and
        nonsense for chapters, which is why the floor lives in `UNIT_CFG` beside the step. */
-    patch(row, String(Number.isFinite(n) ? Math.max(cfg.min, n) : cfg.min));
+    const next = patch(row, String(Number.isFinite(n) ? Math.max(cfg.min, n) : cfg.min));
     setDraft(null);
-    /* the writer has said what the amount is — blur or Enter both reach here */
-    onCommit?.();
+    /* the writer has said what the amount is — blur or Enter both reach here, and the ROWS travel
+       with the signal so the caller writes one value rather than two that race */
+    onCommit?.(next);
   };
 
   return (
@@ -192,7 +204,7 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
                 onPointerDown={(e) => e.stopPropagation()}
               >
                 <button type="button" aria-label={`Fewer ${u.toLowerCase()}`} disabled={disabled}
-                  onClick={() => { patch(row, stepAmount(row.amount, u, -1)); onCommit?.(); }}>−</button>
+                  onClick={() => onCommit?.(patch(row, stepAmount(row.amount, u, -1)))}>−</button>
                 <input
                   id={`${idPrefix}-${u.toLowerCase()}`}
                   type="text" inputMode="numeric"
@@ -206,13 +218,12 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
                     if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
                     e.preventDefault();
                     setDraft(null);
-                    patch(row, stepAmount(row.amount, u, e.key === "ArrowUp" ? 1 : -1));
-                    onCommit?.();
+                    onCommit?.(patch(row, stepAmount(row.amount, u, e.key === "ArrowUp" ? 1 : -1)));
                   }}
                 />
                 <span className="u">{u.toLowerCase()}</span>
                 <button type="button" aria-label={`More ${u.toLowerCase()}`} disabled={disabled}
-                  onClick={() => { patch(row, stepAmount(row.amount, u, 1)); onCommit?.(); }}>+</button>
+                  onClick={() => onCommit?.(patch(row, stepAmount(row.amount, u, 1)))}>+</button>
               </span>
             )}
           </button>

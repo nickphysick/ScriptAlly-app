@@ -154,8 +154,15 @@ describe("⚠️ the parcel's amount must be committed, not merely seeded", () =
     const fs = await import("node:fs");
     const picker = fs.readFileSync(new URL("../components/materials/SampleSpecPicker.tsx", import.meta.url), "utf8");
     const decls = picker.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect((decls.match(/onCommit\?\.\(\)/g) || []).length,
+    expect((decls.match(/onCommit\?\.\(/g) || []).length,
       "not every way of finishing the number commits").toBeGreaterThanOrEqual(4);
+    /* ⚠️ AND THE COMMIT CARRIES THE ROWS IT WROTE — found by measurement. It used to call `patch`
+       and then a bare `onCommit()`, and the caller's handler spread ITS OWN render's value, which
+       still held the pre-patch rows. React batched the two writes, the second won, and the amount
+       reverted to the seed: the writer typed 7, pressed Enter, and the record said 3. */
+    expect(decls, "the commit signal stopped carrying the rows it wrote")
+      .not.toMatch(/onCommit\?\.\(\)/);
+    expect(decls, "patch stopped returning what it wrote").toContain("): MaterialRow[] => {");
     /* the unit button focuses AND SELECTS, so the first keystroke replaces the seed */
     expect(decls, "the seed is focused but not selected — typing would append to it")
       .toContain("el?.select()");
