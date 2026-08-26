@@ -38,10 +38,14 @@ describe("a send that works", () => {
   });
 
   it("sends both parts, and a reply-to separate from the sender", async () => {
-    const stub = vi.fn(async () => res(200, { id: "x" }));
+    /* ⚠️ THE SIGNATURE IS WHAT MAKES `mock.calls[0][1]` EXIST. A `vi.fn` declaring no
+       parameters has an EMPTY call tuple, so reading index 1 off it is a type error
+       (TS2493) however the value is cast — and the cast was the second error. Model
+       `fetch`'s two arguments and both go away, without a cast. */
+    const stub = vi.fn(async (_url: string, _init?: RequestInit) => res(200, { id: "x" }));
     vi.stubGlobal("fetch", stub);
     await sendEmail("someone@example.com", "welcome", RENDERED, ENV);
-    const body = JSON.parse(String((stub.mock.calls[0][1] as RequestInit).body));
+    const body = JSON.parse(String(stub.mock.calls[0][1]?.body));
     /* ⚠️ BOTH PARTS, ALWAYS. A message with no plain-text alternative scores worse with filters,
        is unreadable in a text-only client, and is what a screen reader gets when the HTML is
        hostile. */
