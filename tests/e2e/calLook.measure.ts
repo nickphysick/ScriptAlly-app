@@ -433,3 +433,70 @@ test("the run's screenshots", async ({ page }) => {
     await page.screenshot({ path: "reports/calendar-timeline/workspace-2400.png" });
   }
 });
+
+/**
+ * ⚠️ A CENSUS, NOT A THRESHOLD. It reports how many rows the board holds before it starts
+ * scrolling, at each supported width, and asserts only that the figure is sane — because the
+ * honest answer depends on how many lanes each row packed into, which depends on the writer's
+ * data. A hard number here would be a rule invented about somebody else's querying.
+ */
+test("rows at volume — how many fit before the board scrolls", async ({ page }) => {
+  for (const width of WIDTHS) {
+    await openRoute(page, "/todo/calendar", { width, height: HEIGHT });
+    const r = await page.evaluate<any>(TAG + `(() => {
+      const board = vis(".tl-board");
+      const zone = board.querySelector(".tl-zone");
+      const head = board.querySelector(".tl-head");
+      const rows = [...board.querySelectorAll(".tl-row")];
+      const hs = rows.map((e) => Math.round(e.getBoundingClientRect().height));
+      const room = zone.clientHeight - head.getBoundingClientRect().height;
+      let fit = 0, used = 0;
+      for (const h of hs) { if (used + h > room) break; used += h; fit += 1; }
+      return {
+        rows: hs.length,
+        heights: hs,
+        lanes: rows.map((e) => e.querySelectorAll(".tl-chip, .tl-band").length),
+        zoneH: Math.round(zone.clientHeight),
+        roomBelowHead: Math.round(room),
+        fitsWithoutScrolling: fit,
+        scrolls: zone.scrollHeight > zone.clientHeight + 1,
+        overflowBy: Math.max(0, zone.scrollHeight - zone.clientHeight),
+      };
+    })()`);
+    console.log(`[${width}] volume ${JSON.stringify(r)}`);
+    expect(r.rows, `[${width}] no rows`).toBeGreaterThan(0);
+    /* the pinned row is always there, so at least one row must fit or the board shows nothing */
+    expect(r.fitsWithoutScrolling, `[${width}] not one row fits`).toBeGreaterThan(0);
+
+    /* ⚠️ THE MASTHEAD SETTLES WHEN THE BOARD SCROLLS — the claim the Phase 3 commit made about a
+       SHARED mechanism, which is exactly the kind that is true in source and false on the page.
+       The board is a `.tpl-zone`, which `TasksPageLayout` already names in its `settleOn`, and
+       `primaryScroller()` requires EXACTLY ONE live scroller among those selectors — so this is
+       also the check that the page has not grown a second one.
+
+       ⚠️ WHAT IS ASSERTED IS THE CHROME SHRINKING, NOT THE BOARD GROWING. A first version required
+       the scrollport to gain the reclaimed height and went red: the settle deliberately hands that
+       height to a SPACER so the column's total never changes, which is the whole reason the
+       reader's place does not jump. Asking for the opposite is asking the mechanism to fail. */
+    if (r.scrolls) {
+      const mast = () => page.evaluate<any>(TAG + `(() => {
+        const wpg = vis(".wpg");
+        const m = wpg && wpg.querySelector(".wpg-mast");
+        const zone = vis(".tl-board").querySelector(".tl-zone");
+        return {
+          mastH: m ? Math.round(m.getBoundingClientRect().height) : -1,
+          zoneH: Math.round(zone.clientHeight),
+          top: Math.round(zone.scrollTop),
+        };
+      })()`);
+      const rest = await mast();
+      await page.evaluate(TAG + `vis(".tl-board").querySelector(".tl-zone").scrollTop = 400`);
+      await page.waitForTimeout(700);
+      const after = await mast();
+      console.log(`[${width}] settle: rest ${JSON.stringify(rest)} -> ${JSON.stringify(after)}`);
+      expect(after.top, `[${width}] the board did not scroll`).toBeGreaterThan(2);
+      expect(after.mastH, `[${width}] the masthead did not settle when the board scrolled`)
+        .toBeLessThan(rest.mastH);
+    }
+  }
+});
