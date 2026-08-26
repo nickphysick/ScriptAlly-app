@@ -151,3 +151,12 @@
   border-radius: 8px; padding: 7px 15px; cursor: pointer;
 }
 .bv-save:disabled { opacity: 0.45; cursor: default; }
+
+/**
+ * ⚠️ THE HOSTED VARIANT — the book profile's Versions pane puts this inside a capped card, which
+ * already carries the frame and the name. The panel's own frame comes off here rather than being
+ * conditionally absent in the base rule, so `.bv-panel` keeps ONE declaration and this states the
+ * exception.
+ */
+.bv-panel--hosted { border: 0; border-radius: 0; background: none; box-shadow: none; }
+.bv-panel--hosted .bv-body { padding: 0; }

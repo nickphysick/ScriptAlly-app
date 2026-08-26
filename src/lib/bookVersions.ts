@@ -463,3 +463,66 @@ export const earlierLine = (
   if (unknown === 0) return `${earlier} of ${hs.length} hold a version earlier than your latest.`;
   return `${earlier} hold a version earlier than your latest; ${unknown} ${unknown === 1 ? "is" : "are"} unrecorded.`;
 };
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   UNRECORDED — the samples and holders that name no version
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * How many agents hold a sample whose opening was never recorded.
+ *
+ * ⚠️ ITS OWN FIGURE, NEVER ADDED TO A NAMED VERSION'S. `holdingEarlier` already refuses to count an
+ * unrecorded holder as holding an EARLIER version — "I do not know what they have" is not "they
+ * have an older one" — and this is the other half of that rule: the page has to be able to SAY how
+ * many it does not know about, or the silent alternative is a versions list that names two holders
+ * and says nothing about the third.
+ *
+ * The failure this exists to prevent is always flattering and always silent: folding makes a
+ * version look busier than it is, dropping makes the page state fewer samples than exist, and both
+ * leave every total looking sane.
+ */
+export const unrecordedHolders = (
+  queries: readonly Query[],
+  activities: readonly Activity[],
+): number => holdings(queries, activities).filter((h) => h.versionId === null).length;
+
+export interface UnattributedOpening {
+  /** Sample materials carrying no book version at all. */
+  samples: number;
+  /** Packages built from any of them. */
+  packages: number;
+  /** Queries sent with any of those packages. */
+  sent: number;
+}
+
+/**
+ * The samples that belong to no opening — the row "Requests by opening" needs so that its rows and
+ * the shelf's samples reconcile.
+ *
+ * ⚠️ IT REPORTS NO REQUEST COUNT, AND THAT IS THE POINT RATHER THAN AN OMISSION. A request that
+ * arrived on a sample whose opening was never recorded cannot be attributed to an opening; stating
+ * a figure would attribute it to "unknown", which is not an opening anyone can act on. The row says
+ * `Not attributed`, which is the true answer.
+ *
+ * ⚠️ SAMPLE PAGES ONLY, THROUGH `bookVersionOf` — never `m.bookVersionId` directly. A stored id on
+ * a letter or a synopsis is meaningless and is ignored there; reading the raw field here would let
+ * one quietly remove a sample from BOTH sides of the reconciliation.
+ */
+export const unattributedOpening = (
+  materials: readonly ManuscriptVersion[],
+  packages: readonly { id: string; samplePagesVersionId?: string }[],
+  queries: readonly Query[],
+): UnattributedOpening => {
+  const loose = materials.filter(
+    (m) => m.componentType === ComponentType.SAMPLE_PAGES && bookVersionOf(m) === null,
+  );
+  const sampleIds = new Set(loose.map((m) => m.id));
+  const pkgIds = new Set(
+    packages.filter((p) => !!p.samplePagesVersionId && sampleIds.has(p.samplePagesVersionId)).map((p) => p.id),
+  );
+  return {
+    samples: sampleIds.size,
+    packages: pkgIds.size,
+    sent: queries.filter((q) => !!q.packageId && pkgIds.has(q.packageId)).length,
+  };
+};

@@ -57,6 +57,14 @@ export interface BookVersionsPanelProps {
   /** Today, date-only, so a new version is stamped in the writer's own calendar. */
   today: string;
   onSave: (next: BookVersion[]) => void;
+  /**
+   * ⚠️ DROPS THE PANEL'S OWN BAND, for a host that already names it. The book profile's Versions
+   * pane puts this inside a capped card whose cap reads `Versions · Pro · 3`; leaving the band on
+   * would say "Versions" twice, three inches apart, with two counts to keep in step. Nothing else
+   * changes — the list, the rename affordance and the create door are the same, because this is
+   * still the only place a version name is typed.
+   */
+  hideBand?: boolean;
 }
 
 interface DraftState {
@@ -68,7 +76,7 @@ interface DraftState {
 }
 
 export const BookVersionsPanel: React.FC<BookVersionsPanelProps> = ({
-  versions, materials, queries, activities, today, onSave,
+  versions, materials, queries, activities, today, onSave, hideBand = false,
 }) => {
   const [draft, setDraft] = useState<DraftState | null>(null);
   const showList = versionsActive({ bookVersions: versions as BookVersion[] });
@@ -144,11 +152,13 @@ export const BookVersionsPanel: React.FC<BookVersionsPanelProps> = ({
   }
 
   return (
-    <section className="bv-panel">
-      <div className="bv-band">
-        <span className="bv-eyebrow">Versions</span>
-        <span className="bv-count">{versions.length}</span>
-      </div>
+    <section className={`bv-panel${hideBand ? " bv-panel--hosted" : ""}`}>
+      {!hideBand && (
+        <div className="bv-band">
+          <span className="bv-eyebrow">Versions</span>
+          <span className="bv-count">{versions.length}</span>
+        </div>
+      )}
       <div className="bv-body">
         {versions.map((v) => {
           const rr = rrLink(v, activities);

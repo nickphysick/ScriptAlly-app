@@ -23,7 +23,8 @@ import React, { useState } from "react";
 import { MoreHorizontal, Archive, Trash2, Pencil } from "lucide-react";
 import { Manuscript, ManuscriptVersion, SubmissionPackage, Query, CompTitle } from "../../types";
 import type { Activity, BookVersion } from "../../types";
-import { bookVersionsOf, holdingRows } from "../../lib/bookVersions";
+import { bookVersionsOf, holdingRows, openingRows, unattributedOpening, unrecordedHolders } from "../../lib/bookVersions";
+import { isRequest } from "../../lib/packageMetrics";
 import { isShelvedPresentation, CLOSED_STATUSES } from "../../lib/manuscriptPage";
 import { plateStats } from "../../lib/manuscriptPlate";
 import { heroFacts, queryingSinceMs, atAGlance, glanceMeta, pitchMeta, profileDate } from "../../lib/manuscriptProfile";
@@ -32,8 +33,9 @@ import { ManuscriptTabKey } from "./ManuscriptTabs";
 import { ManuscriptHero } from "./ManuscriptHero";
 import { OverviewPane } from "./OverviewPane";
 import { JourneyPane } from "./JourneyPane";
+import { CompsPane } from "./CompsPane";
+import { VersionsPane } from "./VersionsPane";
 import { BookVersionsPanel } from "./BookVersionsPanel";
-import { ManuscriptCompsPane } from "./ManuscriptCompsPane";
 import { PitchAsset, PitchAssetKey } from "../../lib/manuscriptPitch";
 import { ManuscriptPlateEdit } from "./ManuscriptPlate";
 import { PitchLine } from "../../lib/comps";
@@ -272,28 +274,23 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
           )}
 
           {tab === "comps" && (
-            <ManuscriptCompsPane
-              comps={comps}
-              /* The ONE Pro predicate, gating the Scout strip and nothing else on this page. */
-              isPro={isPro}
-              scoutAvailable={scoutAvailable}
-              currentYear={currentYear}
-              onRemoveComp={onRemoveComp}
-              onAddComp={onAddComp}
-              onCopyPitch={onCopyPitch}
-              onSeeHowItWorks={onOpenPlans}
-              onUpgrade={onOpenPlans}
-            />
+            <CompsPane comps={comps} onManage={onAddComp} />
           )}
 
           {tab === "versions" && (
-            <BookVersionsPanel
+            <VersionsPane
+              isPro={isPro}
               versions={bookVersionsOf(manuscript)}
               materials={versions}
               queries={queries}
               activities={activities}
               today={today}
-              onSave={onSaveBookVersions}
+              onSaveBookVersions={onSaveBookVersions}
+              openings={openingRows(bookVersionsOf(manuscript), versions, packages, queries, isRequest)}
+              unattributed={unattributedOpening(versions, packages, queries)}
+              unrecordedHolders={unrecordedHolders(queries, activities)}
+              holders={holders}
+              onUpgrade={onOpenPlans}
             />
           )}
         </div>

@@ -192,8 +192,13 @@ export function withCompMoved(comps: CompTitle[], from: number, to: number): Com
  *
  * The page used to write `{ ...draft, source, inQuery }`, so any stored field the draft did not
  * carry was destroyed on every save. `note` was exactly that field: nothing on the comps page
- * writes it or renders it, and its ONLY renderer is `ManuscriptCompsPane` on the Manuscripts card
- * — so the loss happened on one page and showed on another, which is why it survived unnoticed.
+ * writes it or renders it, and its only renderer is on the Manuscripts card — so the loss happened
+ * on one page and showed on another, which is why it survived unnoticed.
+ *
+ * ⚠️ THAT RENDERER IS `CompsPane` NOW, NOT `ManuscriptCompsPane` (book profile, Phase 5). The name
+ * is corrected rather than left standing: a comment that outlives the thing it describes is worse
+ * than no comment, because it is read as fact. The ASYMMETRY it documents is unchanged — one page
+ * writes the field, another shows it — and that is what makes the merge load-bearing.
  *
  * Spreading the stored comp FIRST means a field the form does not carry survives by default. That
  * is the property that was missing; `note` was the instance of it, not the whole of it. Do not
