@@ -276,7 +276,8 @@
 /**
  * ⚠️ THE ONE EXPRESSION EVERY OFFSET READS — AND IT IS A CLASS, NOT A GROUPED SELECTOR.
  *
- * The first version of this rule was `.tl-seg, .tl-over, .tl-node, .tl-wp, .tl-chip { … }`, which
+ * The first version of this rule was `.tl-seg, .tl-node, .tl-wp, .tl-chip { … }` — a grouped
+ * selector over five members — which
  * is precisely how the chip lost its treatment in the first place: retire any one member and the
  * rest go with it, because a grouped selector is ONE RULE. The sweep in
  * `calendarStyleReach.test.ts` went red on it within a minute of being written, which is the
@@ -292,7 +293,7 @@
 
 /* ══ THE JOURNEY BAR (bars pack Phase 4; treatment C, v7 weights) ═══════════════════════════ */
 
-.tl-seg, .tl-over {
+.tl-seg {
   height: var(--bar-h);
   transform: translateY(-50%);
   box-sizing: border-box;
@@ -348,8 +349,12 @@
    printed the duration twice. It is the left PORTION of a single continuous bar now: the same
    element, the same statement, hatched where it ran over. */
 .tl-seg.hatched {
+  /* ⚠️ `background-size` IS THE WHOLE MECHANISM. The hatch covers `--hatch` of THIS bar's width and
+     the bar's own fill shows through beyond it — hatched behind, solid ahead, on one element. A
+     second element was what printed the duration twice. */
   background-image: repeating-linear-gradient(-45deg, #e6bda9 0 6px, #efd0c1 6px 12px);
   background-repeat: no-repeat;
+  background-size: var(--hatch, 0%) 100%;
 }
 
 /* ── the edges: what each one claims ───────────────────────────────────────────────────────── */
@@ -480,8 +485,9 @@
  * parts as bare concatenated text, which is exactly what shipped.
  *
  * ⚠️ SO THE CHIP IS DECLARED ALONE NOW, sharing no selector with anything. The bar above shares
- * one with `.tl-over` and that is deliberate and safe — they are two states of the same object —
- * but nothing that can be retired independently shares a rule with the chip again.
+ * nothing that can be retired independently shares a rule with the chip again. (`.tl-over`, which
+ * this note used to cite as the safe case, is itself retired: the overrun is a background on the
+ * bar rather than a second element beside it.)
  */
 .tl-chip {
   height: var(--chip-h);

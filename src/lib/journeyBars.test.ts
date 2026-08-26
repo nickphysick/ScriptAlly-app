@@ -246,7 +246,7 @@ describe("⚠️ v5 · a past week — nothing is provisional any more", () => {
       records: [rec({ key: "r1", ymd: PAST.days[1], label: "Full requested", dir: "in", activityId: "f1" })],
       statusOf: () => QueryStatus.FULL_REQUESTED,
     }), PAST);
-    expect(bars.segments.some((s) => s.overrun)).toBe(false);
+    expect(bars.segments.some((s) => s.hatchPct)).toBe(false);
   });
 });
 
@@ -314,11 +314,16 @@ describe("⚠️ weight is the whole urgency grammar — three steps, no red, no
       agent: agent({ responseTimeWeeks: 2 } as Partial<Agent>),
       moveLabel: "Send full",
     }), WIN);
-    const over = bars.segments.find((s) => s.overrun);
-    expect(over, "no overrun on a long-standing your-move bar").toBeTruthy();
-    expect(over!.from).toBe(0);
-    expect(over!.to).toBeCloseTo(OVERRUN_SPAN - GAP, 6);
-    expect(over!.count).toMatch(/^\d+ days your move$/);
+    /* ⚠️ ONE BAR, ONE COUNT (Phase 4). The overrun used to be a second segment with its own count
+       beside the live one, so a long-standing row drew two capsules and printed the duration
+       twice. It is a background treatment on the SAME bar now — `hatchPct` is how much of that
+       bar lies before the expectation — and the count is stated once, by whichever piece speaks. */
+    const hatched = bars.segments.filter((s) => s.hatchPct);
+    expect(hatched.length, "no hatch on a long-standing your-move bar").toBeGreaterThan(0);
+    expect(hatched[0].hatchPct).toBeGreaterThan(0);
+    const counted = bars.segments.filter((s) => s.count);
+    expect(counted, "the duration is stated more than once").toHaveLength(1);
+    expect(counted[0].count).toMatch(/^\d+ days your move$/);
     /* the waypoint names the real date, which is the half that has to be true */
     expect(bars.waypoints.some((w) => /^Expected /.test(w.caption))).toBe(true);
   });
@@ -331,7 +336,7 @@ describe("⚠️ weight is the whole urgency grammar — three steps, no red, no
       statusOf: () => QueryStatus.FULL_REQUESTED,
       moveLabel: "Send full",
     }), WIN);
-    expect(bars.segments.some((s) => s.overrun)).toBe(false);
+    expect(bars.segments.some((s) => s.hatchPct)).toBe(false);
     expect(bars.segments.filter((s) => s.side === "yours").every((s) => s.weight === "fresh")).toBe(true);
   });
 });

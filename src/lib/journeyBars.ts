@@ -122,8 +122,16 @@ export interface Segment {
   norail?: true;
   /** open-ended by nature (an R&R, an offer with no stated deadline) — it fades, it does not end */
   openEnd?: true;
-  /** the hatched stretch back to the expected date; carries the count */
-  overrun?: true;
+  /**
+   * How much of THIS piece lies before the expected date, as a percentage of its own width.
+   *
+   * ⚠️ THE OVERRUN IS A BACKGROUND TREATMENT ON ONE BAR, NOT A SECOND OBJECT BESIDE IT. It used to
+   * be its own segment with its own count, so a long-standing row drew two capsules and printed
+   * the duration twice — v11's "hatched behind, solid ahead" is ONE bar and one story. Every piece
+   * computes its own share, so the hatch composes with whatever real events also broke the bar:
+   * a piece wholly before the date is 100, wholly after is absent, straddling is the fraction.
+   */
+  hatchPct?: number;
   /** your-move only */
   weight?: Weight;
   queryId: string;
@@ -469,7 +477,9 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
     ...waypoints.map((w) => ({ at: w.at, kind: "waypoint" as const })),
   ];
   if (wantsOverrun) {
-    breaks.push({ at: OVERRUN_SPAN, kind: "waypoint" });
+    /* ⚠️ IT IS NOT PUSHED INTO `breaks`. The expectation passing is a change of TREATMENT, not an
+       interruption — nothing happened on that date, which is the whole of what it says. Breaking
+       the bar there is what made it two objects. */
     waypoints.push({
       key: `wp-${rowKey}-${lane}-overrun`, rowKey, lane, at: OVERRUN_SPAN, side: "yours",
       kind: "overrun",
@@ -524,28 +534,35 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
     /* which stretch is this? the one after however many nodes precede it */
     const before = live.filter((n) => n.at <= p.from).length;
     const side = sides[Math.min(before, sides.length - 1)];
-    const first = i === 0;
     const last = i === pieces.length - 1;
-    const isOverrun = wantsOverrun && first;
+    const first = i === 0;
+    /* the share of this piece that lies before the expectation — 0 when it is wholly after */
+    const hatch = wantsOverrun
+      ? Math.max(0, Math.min(1, (OVERRUN_SPAN - p.from) / Math.max(0.0001, p.to - p.from)))
+      : 0;
     const startsAtEdge = p.from <= 0.001;
     const endsAtEdge = Math.abs(p.to - span) < 0.001;
 
     segments.push({
       key: `sg-${rowKey}-${lane}-${i}`,
       rowKey, lane, from: p.from, to: p.to,
-      side: isOverrun ? "yours" : side,
+      side,
       /* the journey began before the window unless its own send is the first thing in it */
       openLeft: startsAtEdge && !(live[0] && live[0].dir === "out" && live[0].at < 1),
       openRight: endsAtEdge && !terminal && closeIdx < 0 && !openEnd && !norail,
       capLeft: !startsAtEdge,
       capRight: !endsAtEdge,
-      label: isOverrun || !speaks ? "" : labelFor(side, {
+      label: !speaks ? "" : labelFor(side, {
         norail, openEnd, query, expectedYmd, expectedPassed, nudgeYmd, moveLabel, terminal,
       }),
-      ...(isOverrun ? { overrun: true as const, count: `${durationCount(yoursDays)} your move` } : {}),
-      ...(!isOverrun && speaks && side === "yours" && !terminal && yoursDays > 0
-        ? { count: durationCount(yoursDays) } : {}),
-      ...(!isOverrun && side === "yours" && !terminal ? { weight } : {}),
+      ...(hatch > 0 ? { hatchPct: Math.round(hatch * 1000) / 10 } : {}),
+      /* ⚠️ THE DURATION IS STATED ONCE, on the one piece of the run that speaks. It used to ride
+         the overrun AND the piece after it, so a long-standing row printed it twice; the phrasing
+         gains "your move" where there is an overrun, because that is what the hatch is measuring. */
+      ...(speaks && side === "yours" && !terminal && yoursDays > 0
+        ? { count: wantsOverrun ? `${durationCount(yoursDays)} your move` : durationCount(yoursDays) }
+        : {}),
+      ...(side === "yours" && !terminal ? { weight } : {}),
       ...(norail && first ? { norail: true as const } : {}),
       ...(openEnd && last ? { openEnd: true as const } : {}),
       queryId: query.id,

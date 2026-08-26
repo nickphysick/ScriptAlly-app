@@ -143,8 +143,11 @@ const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({
     type="button"
     className={[
       "tl-at tl-seg",
-      sg.overrun ? "tl-over" : sg.side === "yours" ? "yours" : "theirs",
-      sg.weight && !sg.overrun ? `w-${sg.weight}` : "",
+      sg.side === "yours" ? "yours" : "theirs",
+      sg.weight ? `w-${sg.weight}` : "",
+      /* ⚠️ THE HATCH IS A CLASS ON THIS BAR, not a second bar beside it. One element, one
+         statement, and the treatment stops where the expectation was. */
+      sg.hatchPct ? "hatched" : "",
       sg.openLeft ? "openleft" : "", sg.openRight ? "future" : "",
       sg.capLeft ? "capl" : "", sg.capRight ? "capr" : "",
       sg.norail ? "norail" : "", sg.openEnd ? "openend" : "",
@@ -153,6 +156,7 @@ const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({
     style={{
       left: `calc(${pct(sg.from)} + 4px)`,
       width: `calc(${pct(sg.to - sg.from)} - 8px)`,
+      ...(sg.hatchPct ? { ["--hatch" as string]: `${sg.hatchPct}%` } : {}),
       ...laneVar(sg.lane),
     }}
     onClick={onPick}
@@ -160,9 +164,9 @@ const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({
     {/* ⚠️ THE DOT IS THE STATEMENT'S BULLET, so a piece that says nothing does not draw one. A bar
         states itself once per run; the pieces that stay silent are the same bar continuing, and a
         lone dot in an empty capsule reads as a pill that failed to load. */}
-    {!sg.overrun && !!sg.label && <span className="d" aria-hidden />}
-    <span className="tl-lbl">{sg.overrun ? sg.count : sg.label}</span>
-    {!sg.overrun && sg.count && <span className="tl-cnt">{sg.count}</span>}
+    {!!sg.label && <span className="d" aria-hidden />}
+    <span className="tl-lbl">{sg.label}</span>
+    {sg.count && <span className="tl-cnt">{sg.count}</span>}
   </button>
 );
 
@@ -683,7 +687,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     const sg = selSeg;
     const who = workRowNameFor(sg.rowKey);
     head = <>{sg.side === "yours" ? "Your move" : "Waiting"}{who && <> — <em>{who}</em></>}</>;
-    ctx = sg.overrun ? "It has been your move since the date it was expected." : sg.label;
+    ctx = sg.hatchPct ? "It has been your move since the date it was expected." : sg.label;
     if (sg.count) facts.push({ k: "Duration", v: sg.count });
     facts.push({ k: "Side", v: sg.side === "yours" ? "Your move" : "Their move" });
     acts = <button type="button" className="tl-btn" onClick={() => onNavigatePath(`/queries?q=${encodeURIComponent(sg.queryId)}`)}>Open query ›</button>;
@@ -767,7 +771,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                   <span className="tl-cempty">nothing today</span>
                 ) : (
                   <span className="tl-cits">
-                    {bs.map((sg) => <span key={sg.key} className="tl-mini" data-kind={sg.side === "yours" ? "turn" : "wait"}>{sg.overrun ? sg.count : sg.label}</span>)}
+                    {bs.map((sg) => <span key={sg.key} className="tl-mini" data-kind={sg.side === "yours" ? "turn" : "wait"}>{sg.label || sg.count}</span>)}
                     {its.map((i) => <span key={i.key} className="tl-mini" data-kind={i.kind}>{i.label}</span>)}
                   </span>
                 )}
