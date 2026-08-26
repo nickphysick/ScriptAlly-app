@@ -13,8 +13,8 @@ for (const width of [1440, 1920]) {
 
     const m = await page.evaluate(() => {
       const r = document.querySelector(".pkgw") as HTMLElement;
-      const head = r.querySelector(".pkgb-bandhead") as HTMLElement;
-      const acts = r.querySelector(".pkgb-bandacts") as HTMLElement;
+      const head = r.querySelector(".sa-sechead") as HTMLElement;
+      const acts = r.querySelector(".sa-secacts") as HTMLElement;
       const card = r.querySelector(".pkgb-pkgcard") as HTMLElement;
       const ch = card?.querySelector(".pkgb-cardhead") as HTMLElement;
       const tickBefore = getComputedStyle(head, "::before");

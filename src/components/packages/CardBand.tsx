@@ -21,7 +21,21 @@ import { TypeGlyph } from "./TypeGlyph";
 import { TYPE_META } from "./typeMeta";
 import "./packagesBroadsheet.css";
 
-export type BandKind = ComponentType | "package";
+/**
+ * ⚠️ THE FOUR TINTS ARE A SECOND, GENERAL VOCABULARY FOR THE SAME FOUR COLOURS — added so a card
+ * that is NOT a material can still draw its band head through this component rather than through a
+ * reproduction of it, which is the one thing this file's head forbids. A caller passing a tint
+ * supplies its own `glyph` and `label`; the material kinds keep resolving both from `TYPE_META`.
+ *
+ * ⚠️ AND A TINT IS NOT A `ComponentType`. `slate` does not mean "package" and `pink` does not mean
+ * "query letter" — they are colours, and what a card IS stays the caller's business. Widening
+ * `ComponentType` to carry them would have put a display category into the data model.
+ */
+export type CapTint = "pink" | "sage" | "slate" | "tan";
+
+export const CAP_TINTS: readonly CapTint[] = ["pink", "sage", "slate", "tan"];
+
+export type BandKind = ComponentType | "package" | CapTint;
 
 /** The band's tint modifier, by kind. The card takes the same class. */
 export const BAND_CLASS: Record<string, string> = {
@@ -57,17 +71,25 @@ const PARCEL = (
   </svg>
 );
 
+const IS_TINT = (k: BandKind): k is CapTint => (CAP_TINTS as readonly string[]).includes(k);
+
 export interface CardBandProps {
   kind: BandKind;
-  /** Overrides the standing label — the legend uses it to name the colour's meaning. */
+  /** Overrides the standing label — the legend uses it to name the colour's meaning. REQUIRED when
+   *  `kind` is a tint, which names a colour and therefore cannot name a thing. */
   label?: string;
   /** A mono note pushed to the right of the band, e.g. `Locked`. */
   right?: React.ReactNode;
+  /** The mark, for a TINTED band. The material kinds resolve their own and ignore this. */
+  glyph?: React.ReactNode;
+  /** Additive — the tint class for a general band. Packages passes nothing, so every band on that
+   *  page renders byte-identically to before this widening. */
+  className?: string;
 }
 
-export const CardBand: React.FC<CardBandProps> = ({ kind, label, right }) => (
-  <div className="pkgb-cardhead">
-    {kind === "package" ? PARCEL : <TypeGlyph type={kind} size={16} />}
+export const CardBand: React.FC<CardBandProps> = ({ kind, label, right, glyph, className }) => (
+  <div className={className ? `pkgb-cardhead ${className}` : "pkgb-cardhead"}>
+    {IS_TINT(kind) ? glyph : kind === "package" ? PARCEL : <TypeGlyph type={kind} size={16} />}
     <span className="pkgb-chlbl">{label ?? BAND_LABEL[kind]}</span>
     {right && <span className="pkgb-chrt">{right}</span>}
   </div>

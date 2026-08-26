@@ -32,6 +32,7 @@ import { isRequest } from "../../lib/packageMetrics";
 import { shortDate } from "../../lib/createSummary";
 import { AGENT_NOT_RECORDED } from "../../lib/agentDisplay";
 import "./packagesBroadsheet.css";
+import { SectionHeader } from "../containers/SectionHeader";
 
 /** The mark per stat cell, from the ref (D4). Briefs are in the report's inventory table. */
 /**
@@ -98,10 +99,7 @@ export const TrackingBand: React.FC<TrackingBandProps> = ({
         </div>
       ) : totals.sent > 0 ? (
         <>
-          <div className="pkgb-bandhead">
-            <h2 id="pkgb-track-h">What&rsquo;s landing</h2>
-            <span className="pkgb-tag">Reported, not guessed</span>
-          </div>
+          <SectionHeader tick headingId="pkgb-track-h" title={<>What&rsquo;s landing</>} meta="Reported, not guessed" />
           <div className="pkgb-land">
             <div className="pkgb-landhead">
               <h3>Requests by material</h3>

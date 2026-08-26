@@ -22,6 +22,7 @@ import { isPackageLocked } from "../../lib/packageMetrics";
 import { packageStamp } from "../../lib/packageTracking";
 import { IllustrationSlot } from "./IllustrationSlot";
 import { CardBand } from "./CardBand";
+import { SectionHeader } from "../containers/SectionHeader";
 import "./packagesBroadsheet.css";
 
 export interface PackagesBandProps {
@@ -74,12 +75,12 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
 
   return (
     <section className="pkgb-band" aria-labelledby="pkgb-pkg-h">
-      <div className="pkgb-bandhead">
-        <h2 id="pkgb-pkg-h">Your packages</h2>
-        <span className="pkgb-tag">
-          {packages.length} built{typeof sent === "number" ? ` · ${sent} sent` : ""}
-        </span>
-        {/**
+      <SectionHeader
+        tick
+        headingId="pkgb-pkg-h"
+        title="Your packages"
+        meta={`${packages.length} built${typeof sent === "number" ? ` · ${sent} sent` : ""}`}
+        actions={<>{/**
           * ⚠️ THE ACTIONS ARE A GROUP, IN A RULED ORDER (D3): How it works · Show archived ·
           * ＋ New package.
           *
@@ -91,7 +92,6 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
           * ⚠️ AND THE GROUP TAKES THE `margin-left: auto`, not its members. Three controls each
           * claiming auto would push only the first of them right and leave the rest trailing it.
           */}
-        <span className="pkgb-bandacts">
           {onHowItWorks && (
             <button type="button" className="pkgb-how" onClick={onHowItWorks}>
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
@@ -105,8 +105,8 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
           {/* ⚠️ THE BAND'S PRIMARY ACTION, AND IT GENUINELY ACTS ON THIS BAND (D0d) — which is why
               it stayed when the manuscript selector beside it did not. */}
           <button type="button" className="pkgb-newpkg" onClick={onNewPackage}>＋ New package</button>
-        </span>
-      </div>
+        </>}
+      />
 
       <div className="pkgb-pkggrid">
         {tiles.map((t) => {

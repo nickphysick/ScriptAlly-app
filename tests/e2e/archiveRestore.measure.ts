@@ -9,7 +9,7 @@ const SHOT = (n: string) => resolve(process.cwd(), `reports/fh/${n}.png`);
 const state = (page: import("@playwright/test").Page) => page.evaluate(() => {
   const root = document.querySelector(".pkgw") as HTMLElement | null;
   const tag = (h: string) => {
-    const head = [...document.querySelectorAll(".pkgb-bandhead")]
+    const head = [...document.querySelectorAll(".sa-sechead")]
       .find((b) => new RegExp(h, "i").test((b as HTMLElement).innerText));
     return head ? ((head.querySelector(".pkgb-tag") as HTMLElement)?.innerText ?? null) : null;
   };

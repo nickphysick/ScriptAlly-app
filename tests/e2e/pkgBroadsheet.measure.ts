@@ -149,8 +149,8 @@ export const BAND = `(() => {
   const rect = (el) => { const b = el.getBoundingClientRect();
     return { x: Math.round(b.x), w: Math.round(b.width), h: Math.round(b.height) }; };
   return {
-    bandHead: (root.querySelector(".pkgb-bandhead h2")?.textContent || "").trim(),
-    bandTag: (root.querySelector(".pkgb-bandhead .pkgb-tag")?.textContent || "").trim(),
+    bandHead: (root.querySelector(".sa-sechead h2")?.textContent || "").trim(),
+    bandTag: (root.querySelector(".sa-sechead .sa-secmeta")?.textContent || "").trim(),
     bandBox: band ? rect(band) : null,
     gridTemplate: grid ? getComputedStyle(grid).gridTemplateColumns : null,
     railPanels: Array.from(root.querySelectorAll(".pkgo-rail .pkgo-lbl")).map((l) => (l.textContent||"").trim()),
@@ -566,8 +566,8 @@ export const BANDS = `(() => {
        a file, never that no file renders it. */
     railPresent: !!root.querySelector(".pkgo-rail"),
     railRows: root.querySelectorAll(".pkgo-row").length,
-    bandHeads: bands.map((b) => txt(b, ".pkgb-bandhead h2")),
-    bandTags: bands.map((b) => txt(b, ".pkgb-bandhead .pkgb-tag")),
+    bandHeads: bands.map((b) => txt(b, ".sa-sechead h2")),
+    bandTags: bands.map((b) => txt(b, ".sa-sechead .sa-secmeta")),
     bandWidths: bands.map((b) => rect(b).w),
     cards: cards.map((c) => ({
       name: txt(c, ".pkgb-pkgname"),

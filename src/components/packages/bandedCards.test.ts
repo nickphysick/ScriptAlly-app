@@ -18,6 +18,9 @@ const root = join(__dirname, "..", "..", "..");
 const css = readFileSync(join(root, "src/components/packages/packagesBroadsheet.css"), "utf8");
 /** ⚠️ Comments first — this sheet's prose quotes every value and class it retired. */
 const decls = css.replace(/\/\*[\s\S]*?\*\//g, "");
+/** The shared cap grammar the four material tints now read. */
+const shared = readFileSync(join(root, "src/components/containers/containers.css"), "utf8")
+  .replace(/\/\*[\s\S]*?\*\//g, "");
 
 /** Every BASE rule for a selector (no pseudo, no descendant), in file order. */
 const baseRules = (sel: string): string[] => {
@@ -83,10 +86,27 @@ describe("D3 — the package band outweighs the material tints", () => {
    * ⚠️ COMPARED AS LIGHTNESS, NOT BY EYE. The package is the parent object; a band paler than the
    * materials it holds inverts the hierarchy, which is what "reads as disabled" meant.
    */
+  /**
+   * ⚠️ IT RESOLVES THE CHAIN, because the hexes MOVED (book profile, Phase 1). `--pkgt-*` keeps the
+   * material names on this page and now READS the general cap grammar in
+   * `containers/containers.css`, where a second page needed the same four tints under names that
+   * do not claim a pink cap is a query letter. The law below is untouched — the package band is
+   * still darker than every material band — but the value that paints is one hop away, and a
+   * helper that only accepted a literal would have gone red about a colour nobody had moved.
+   *
+   * ⚠️ AND FOLLOWING THE HOP IS STRICTLY STRONGER THAN THE LITERAL IT REPLACES. A literal here
+   * could be a stale copy of a value the browser never uses; this reads what the cascade will.
+   */
   const hex = (name: string): number => {
-    const m = new RegExp(`--pkgt-${name}:\\s*(#[0-9a-f]{6})`, "i").exec(decls);
-    expect(m, `--pkgt-${name} is not declared`).toBeTruthy();
-    const [r, g, b] = [1, 3, 5].map((i) => parseInt(m![1].slice(i, i + 2), 16));
+    let v = new RegExp(`--pkgt-${name}:\\s*([^;]+);`).exec(decls)?.[1]?.trim();
+    expect(v, `--pkgt-${name} is not declared`).toBeTruthy();
+    for (let hop = 0; hop < 4 && v && v.startsWith("var("); hop++) {
+      const ref = /var\(\s*(--[a-z0-9-]+)\s*\)/i.exec(v)![1];
+      v = new RegExp(`${ref}:\\s*([^;]+);`).exec(shared)?.[1]?.trim();
+      expect(v, `${ref} is not declared in containers.css`).toBeTruthy();
+    }
+    expect(v, `--pkgt-${name} does not resolve to a literal`).toMatch(/^#[0-9a-f]{6}$/i);
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(v!.slice(i, i + 2), 16));
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   };
 

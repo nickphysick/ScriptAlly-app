@@ -15,7 +15,7 @@ const count = (page: import("@playwright/test").Page) => page.evaluate(() => {
     ghostCards: q(".pkgb-ghostpkg, .pkgb-pkgghost"),
     ghostCopy: (txt.match(/Build another package/g) ?? []).length,
     realCards: q(".pkgb-pkgcard"),
-    bandHeads: q(".pkgb-bandhead"),
+    bandHeads: q(".sa-sechead"),
     /* Phase 0 — the page's own selector must be gone, and the sidebar's must still be there. */
     pageSelector: q(".pkgw-mschip"),
     newPkgCta: q(".pkgb-newpkg"),

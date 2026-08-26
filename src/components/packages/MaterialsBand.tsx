@@ -24,6 +24,7 @@
 import { MATERIAL_LABEL } from "../../lib/manuscriptPackages";
 import { ArchivedToggle, ArchivedRow, ArchivedSection } from "./ArchivedRow";
 import { CardBand, BandLegend, BAND_CLASS } from "./CardBand";
+import { SectionHeader } from "../containers/SectionHeader";
 import React from "react";
 import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../../types";
 import type { BookVersion } from "../../types";
@@ -88,13 +89,15 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
 
   return (
     <section className="pkgb-band" aria-labelledby="pkgb-mat-h">
-      <div className="pkgb-bandhead">
-        <h2 id="pkgb-mat-h">Your materials</h2>
-        {/* ⚠️ `0 held` IS TRUE AND STAYS. A count of things you have is a count; the sentence-not-a-
-            count rule applies to the usage line, where "In 0 packages" reads as a malfunction. */}
-        <span className="pkgb-tag">{sheets.length} held</span>
+      {/* ⚠️ `0 held` IS TRUE AND STAYS. A count of things you have is a count; the sentence-not-a-
+          count rule applies to the usage line, where "In 0 packages" reads as a malfunction.
+
+          ⚠️ AND THE TOGGLE IS A BARE CHILD, NOT AN `actions` MEMBER. `.pkgb-arcToggle` carries no
+          auto margin, so here it sits inline beside the count rather than travelling right — which
+          is what this head rendered before the extraction and therefore what it renders now. */}
+      <SectionHeader tick headingId="pkgb-mat-h" title="Your materials" meta={`${sheets.length} held`}>
         <ArchivedToggle n={archived.length} on={showArchived} onClick={onToggleArchived} />
-      </div>
+      </SectionHeader>
 
       <div className="pkgb-shelf">
         {sheets.map((sh) => (

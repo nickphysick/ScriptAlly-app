@@ -23,10 +23,15 @@
    *
    * Input to F-AK (the app's four near-identical blues); Nick's ruling still pending.
    */
-  --pkgt-pro-ink: #2d4a6b; --pkgt-pro-a: #cfdcea; --pkgt-pro-b: #bccfe2; --pkgt-pro-edge: #9db6cf;
-  --pkgt-let-ink: #8a4433; --pkgt-let-a: #f7e3da; --pkgt-let-b: #f0d5c9; --pkgt-let-edge: #e5c3b4;
-  --pkgt-syn-ink: #4f6647; --pkgt-syn-a: #dfe6dc; --pkgt-syn-b: #d2dccf; --pkgt-syn-edge: #bccab8;
-  --pkgt-sam-ink: #7a6326; --pkgt-sam-a: #f6eed5; --pkgt-sam-b: #efe4c2; --pkgt-sam-edge: #e0d3aa;
+  /* ⚠️ THE HEXES MOVED TO `containers/containers.css` AND THESE NOW READ THEM (book profile,
+     Phase 1). The values are unchanged; what changed is that a second page needed the same four
+     tints and must not name them after MATERIALS. There, they are `--cap-slate/pink/sage/tan`;
+     here they keep the material names, because on THIS page a pink cap really does mean a query
+     letter. One source of hexes, two vocabularies — never two sets of values to keep in step. */
+  --pkgt-pro-ink: var(--cap-slate-ink); --pkgt-pro-a: var(--cap-slate-a); --pkgt-pro-b: var(--cap-slate-b); --pkgt-pro-edge: var(--cap-slate-edge);
+  --pkgt-let-ink: var(--cap-pink-ink);  --pkgt-let-a: var(--cap-pink-a);  --pkgt-let-b: var(--cap-pink-b);  --pkgt-let-edge: var(--cap-pink-edge);
+  --pkgt-syn-ink: var(--cap-sage-ink);  --pkgt-syn-a: var(--cap-sage-a);  --pkgt-syn-b: var(--cap-sage-b);  --pkgt-syn-edge: var(--cap-sage-edge);
+  --pkgt-sam-ink: var(--cap-tan-ink);   --pkgt-sam-a: var(--cap-tan-a);   --pkgt-sam-b: var(--cap-tan-b);   --pkgt-sam-edge: var(--cap-tan-edge);
 }
 
 /**
@@ -34,28 +39,20 @@
  * burgundy tick at its start — the containers move DOWN to the objects, which is the whole idea:
  * a band is a rule on the page, a card is a thing on it.
  */
-.pkgb-bandhead {
-  position: relative;
-  border-bottom: 1px solid var(--pkgo-hairline);
-  padding-bottom: 10px;
-  margin-bottom: 18px;
-}
-/* ⚠️ THE TICK IS `bottom: -1px`, so it sits ON the rule rather than above it. */
-.pkgb-bandhead::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  width: 56px;
-  height: 2px;
-  background: var(--pkg-burg);
-  opacity: 0.75;
-}
-/* ⚠️ THE ACTIONS GROUP RIGHT, in the ruled order: How it works · Show archived · ＋ New package.
+/* ⚠️ THE BAND HEAD LEFT THIS SHEET (book profile, Phase 1) — it is `SectionHeader` /
+   `.sa-sechead` in `containers/containers.css`, and the burgundy tick is its `--tick` variant,
+   which this page asks for and the book profile does not.
+
+   ⚠️ AND IT WAS DECLARED TWICE HERE, which is why the move is worth a note. `.pkgb-bandhead` had a
+   base rule at this point AND another ~250 lines below; the cascade took `position: relative` from
+   the first and `padding-bottom: 9px` from the second, so NEITHER block on its own described the
+   header on screen. `bandedCards.test.ts` locks one-base-rule for seven selectors in this file and
+   this was not one of them; `containers.test.tsx` now locks `.sa-sechead`.
+
+   ⚠️ THE ACTIONS GROUP RIGHT, in the ruled order: How it works · Show archived · ＋ New package.
    `Show archived` sits WITH them and is the quietest — it modifies what the band DISPLAYS rather
    than acting on the page, so it belongs in the group without competing with the two that do
-   something. */
-.pkgb-bandacts { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+   something. It is `.sa-secacts` now, in the shared sheet. */
 
 /* ⚠️ THE CARD'S BAND HEAD (D4). 16px glyph · mono type label · optional right-aligned state word. */
 .pkgb-cardhead {
@@ -282,15 +279,6 @@
 
 .pkgb-band { margin-bottom: 38px; }
 .pkgb-band:last-child { margin-bottom: 0; }
-.pkgb-bandhead {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 14px;
-  border-bottom: 1px solid var(--pkgo-hairline);
-  padding-bottom: 9px;
-  margin-bottom: 18px;
-}
 /**
  * ⚠️ THE EXPLAINER'S CONTROL, AND IT IS THE QUIETEST THING IN THE ROW. `margin-left: auto` puts it
  * at the far end, past the count, so the head still reads "Your packages · N built" and this sits
@@ -310,13 +298,6 @@
 }
 .pkgb-how:hover { color: var(--pkg-ink); text-decoration: underline; text-underline-offset: 3px; }
 
-.pkgb-bandhead h2 {
-  font-family: var(--font-serif);
-  font-size: 23px;
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--pkg-ink);
-}
 .pkgb-tag {
   font-family: var(--font-mono);
   font-size: 9px;

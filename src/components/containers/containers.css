@@ -1,0 +1,139 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * ══ THE SHARED CONTAINER LANGUAGE — one section header, one capped card ═══════════════════════
+ *
+ * Two pages now speak this grammar: Submission packages (which invented it) and Manuscripts. The
+ * components live in `containers/` rather than in either page, because a container owned by one
+ * page is a container the other page copies.
+ *
+ * ⚠️ THIS SHEET READS `:root` TOKENS ONLY — NEVER `--pkg-*` OR `--pkgo-*`. Those are declared on
+ * `.pkgw` (packageWorkshop.css:20), so they resolve on the packages page and NOWHERE else: a
+ * shared rule reading one would paint correctly on packages and fall back to `unset` on
+ * Manuscripts, which is the house's own "not is it a token, but WHERE is it evaluated" trap. The
+ * values below are the resolved values of the ones this sheet replaces, so packages renders
+ * byte-identically:
+ *     --pkg-ink        = var(--shell-ink)         → read directly here
+ *     --pkg-muted      = var(--shell-muted)       → read directly here
+ *     --pkgo-hairline  = rgba(124, 58, 42, .16)   → --sa-sec-rule below
+ *
+ * ⚠️ AND `.pkgb-bandhead` WAS DECLARED TWICE (packagesBroadsheet.css:37 and :285) — the duplicate
+ * base rule this repo keeps rediscovering. The cascade took `padding-bottom: 9px` from the later
+ * block and `position: relative` from the earlier one, so neither block on its own described the
+ * header anyone was looking at. `.sa-sechead` below is the FOLD of the two: one rule, every live
+ * declaration, and `position: relative` kept because the tick's `::before` is absolute against it.
+ * `bandedCards.test.ts` locks one-base-rule for seven packages selectors and did not cover this
+ * one; `containers.test.tsx` now covers `.sa-sechead`.
+ */
+
+:root {
+  /**
+   * ══ THE CAP GRAMMAR ══════════════════════════════════════════════════════════════════════════
+   *
+   * Four tints, and they are named for the COLOUR rather than for what packages happens to put in
+   * them. `--pkgt-pro-*` / `-let-*` / `-syn-*` / `-sam-*` are the same four values wearing
+   * MATERIAL-TYPE names (package · query letter · synopsis · opening sample), which is right on a
+   * page whose cards are materials and a false claim anywhere else: a pink cap on an elevator
+   * pitch does not make the pitch a query letter. So packages keeps its material names and points
+   * them at these, and every other surface reads the general names.
+   *
+   * ⚠️ ONE SOURCE, TWO VOCABULARIES — never two sets of hexes. The values are the app's existing
+   * ones (packagesBroadsheet.css:26–29 before this move), NOT the mockup's near-neighbours.
+   */
+  --cap-slate-a: #cfdcea; --cap-slate-b: #bccfe2; --cap-slate-edge: #9db6cf; --cap-slate-ink: #2d4a6b;
+  --cap-pink-a:  #f7e3da; --cap-pink-b:  #f0d5c9; --cap-pink-edge:  #e5c3b4; --cap-pink-ink:  #8a4433;
+  --cap-sage-a:  #dfe6dc; --cap-sage-b:  #d2dccf; --cap-sage-edge:  #bccab8; --cap-sage-ink:  #4f6647;
+  --cap-tan-a:   #f6eed5; --cap-tan-b:   #efe4c2; --cap-tan-edge:   #e0d3aa; --cap-tan-ink:   #7a6326;
+
+  /** The rule under a section header. Was `--pkgo-hairline`, which is `.pkgw`-scoped. */
+  --sa-sec-rule: rgba(124, 58, 42, 0.16);
+}
+
+/* ══ SECTION HEADER ═══════════════════════════════════════════════════════════════════════════ */
+
+.sa-sechead {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  border-bottom: 1px solid var(--sa-sec-rule);
+  padding-bottom: 9px;
+  margin-bottom: 18px;
+}
+
+/**
+ * ⚠️ THE TICK IS A VARIANT, NOT A DEFAULT — and that is the whole reason this is a modifier class.
+ * Packages carries it (`bottom: -1px`, so it sits ON the rule rather than above it); the
+ * Manuscripts book profile does not, by ruling. Expressed as an option on the shared component,
+ * both pages state what they want; expressed as a page override, one of them would be fighting the
+ * other's default at equal specificity and the winner would be decided by stylesheet order.
+ */
+.sa-sechead--tick::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 56px;
+  height: 2px;
+  background: var(--burg);
+  opacity: 0.75;
+}
+
+.sa-sechead h2 {
+  font-family: var(--font-serif);
+  font-size: 23px;
+  font-weight: 600;
+  /* ⚠️ 1.3 IS THE FLOOR, not a taste. Mixed-case Playfair below it crops its own descenders. */
+  line-height: 1.3;
+  color: var(--shell-ink);
+}
+
+/** The mono meta beside the title. Identical to packages' `.pkgb-tag`, which survives for the
+ *  four uses of it that are NOT section headers (TrackingBand's inner panel heads). */
+.sa-secmeta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--shell-muted);
+  text-transform: uppercase;
+}
+
+/**
+ * ⚠️ THE GROUP TAKES THE `margin-left: auto`, NOT ITS MEMBERS. Three controls each claiming auto
+ * pushes only the first of them right and leaves the rest trailing it.
+ */
+.sa-secacts { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+
+/* ══ CAPPED CARD ══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ THE CAP ITSELF IS `CardBand`, IMPORTED — never redrawn. That component's own head states the
+ * law ("the legend must render this component, never a reproduction") and it is the reason the tint
+ * rules below colour `.pkgb-cardhead` rather than a second box of our own: there is one band-head
+ * DOM in this app, and `CappedCard` renders it. Its box rules read `:root` tokens and
+ * `currentColor` only, so they resolve on any page; only the three colour declarations are ours.
+ *
+ * ⚠️ AND PACKAGES' OWN CARD WRAPPER IS DELIBERATELY NOT FOLDED IN HERE. `.pkgb-pkgcard` and
+ * `.pkgb-msheet` are a package tile and a material shelf-sheet — objects with hover states, ghost
+ * padding and `data-` identity that this card does not have and should not grow. What could drift
+ * between two pages is the BAND, and the band is shared; a three-line wrapper is not worth putting
+ * risk on a page this pass does not own.
+ */
+.sa-card {
+  background: var(--shell-card);
+  border: 1px solid var(--hair);
+  border-radius: 10px;
+  /* The clip is what rounds the cap's top corners — the cap reaches all three edges. */
+  overflow: hidden;
+}
+
+/** ⚠️ THE BODY CARRIES THE INSET, NOT THE FRAME. A padded frame would hold the cap off its own
+ *  edges, which is the fault packages' own D2 note records. */
+.sa-cardbody { padding: 13px 15px 15px; }
+
+.sa-cap--pink  { background: linear-gradient(180deg, var(--cap-pink-a),  var(--cap-pink-b));  border-bottom-color: var(--cap-pink-edge);  color: var(--cap-pink-ink); }
+.sa-cap--sage  { background: linear-gradient(180deg, var(--cap-sage-a),  var(--cap-sage-b));  border-bottom-color: var(--cap-sage-edge);  color: var(--cap-sage-ink); }
+.sa-cap--slate { background: linear-gradient(180deg, var(--cap-slate-a), var(--cap-slate-b)); border-bottom-color: var(--cap-slate-edge); color: var(--cap-slate-ink); }
+.sa-cap--tan   { background: linear-gradient(180deg, var(--cap-tan-a),   var(--cap-tan-b));   border-bottom-color: var(--cap-tan-edge);   color: var(--cap-tan-ink); }
