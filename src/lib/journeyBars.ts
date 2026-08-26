@@ -1,0 +1,468 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * journeyBars — one continuous bar per agent × manuscript (bars pack, Phase 3; refs
+ * design-refs/timeline-journey-bars.html for the grammar, timeline-edge-cases.html for the nine
+ * rules, timeline-urgency.html for the duration weights).
+ *
+ * ⚠️ THIS IS ARITHMETIC OVER DATA THE PAGE ALREADY HOLDS. Nothing here reads, writes or derives a
+ * fact: the events come from `recordDays`, the window from `resolveExpectedDate`, the forecast from
+ * `Query.nudgeDate`, the return from `TaskFlag.snoozedUntil`, and whose move it is from
+ * `getPrimaryAction(status).ballHolder` — the CTA engine the row-head dot and the filters already
+ * read. What this module does is cut one bar into the pieces the interruptions leave.
+ *
+ * ⚠️ POSITIONS ARE FRACTIONAL DAYS, AND THE HALF IS NOT A GUESS. An activity is stamped with a DAY
+ * and nothing finer — the day panel's own note says so — so its honest position is the MIDDLE of
+ * its column, `dayIndex + EVENT_AT`. Drawing it at the column's left edge would claim a time of day
+ * the record does not carry, and drawing it at a real time would invent one.
+ *
+ * ⚠️ AND WHOSE MOVE IT IS AT EACH POINT IN THE WEEK IS DERIVED, NOT REPLAYED FROM A SECOND TABLE.
+ * Two rules do the whole job, and both come from facts the record already carries:
+ *   · AFTER an event that changed the status, the side is `getPrimaryAction(resultingStatus)`;
+ *   · an event that changed NO status changes no hands either — a nudge is something you do WHILE
+ *     waiting, not a hand-over, and it carries no `resultingStatus` by construction.
+ *   · BEFORE a hand-changing event, the side is the opposite of who authored it: you author when it
+ *     is your move, they author when it is theirs. `dir` is already the record layer's word for
+ *     authorship, so this needs no new vocabulary.
+ * Verified against every case v5 draws, the nudge included — which is the one the naive inversion
+ * gets wrong, and the reason the no-status clause is stated first.
+ */
+import { Activity, Agent, Query, QueryStatus, TaskFlag } from "../types";
+import { RecordItem, shortCalDate } from "./todoCalendar";
+import { getPrimaryAction } from "./queryPrimaryAction";
+import { resolveExpectedDate } from "./expectedDate";
+import { isTerminalStatus } from "./agentList";
+
+/* ══ THE TOKENS ═══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * The clearance either side of a node or waypoint, in days — v5's own constant.
+ *
+ * ⚠️ ONE TOKEN, BOTH SIDES. The bar stops `GAP` short of every interruption and resumes `GAP` past
+ * it, so a break is symmetrical by construction. Two numbers would let one side drift.
+ */
+export const GAP = 0.34;
+
+/**
+ * A piece narrower than this is not drawn at all.
+ *
+ * ⚠️ THE RULE IS "NOTHING HAPPENED BETWEEN THEM", NOT "THE PIECE IS SMALL". Two events on adjacent
+ * days leave `1 - 2 × GAP = 0.32` of a day between them; a sliver of bar there would say a state
+ * persisted for a few hours, which is a claim the record cannot support. v5 draws the two events
+ * adjacent and nothing between, and this is that rule as a number.
+ */
+export const MIN_SEG = 0.33;
+
+/** An event sits at the middle of its day, because a day is all the record knows. */
+export const EVENT_AT = 0.5;
+
+/* ── the duration weights (v7) ─────────────────────────────────────────────────────────────── */
+/**
+ * ⚠️ NAMED TOKENS, NOT LITERALS, AND FLAGGED FOR NICK. These are a judgement about how long is
+ * long, and the honest answer probably differs by task type — a fortnight sitting on a full
+ * request is not a fortnight sitting on a nudge. They are one place so that ruling is one edit.
+ */
+export const FRESH_MAX_DAYS = 7;
+export const SETTLED_MAX_DAYS = 21;
+
+/**
+ * How much of the window the overrun's hatch occupies.
+ *
+ * ⚠️ IT IS NOT TO SCALE, AND THAT IS FORCED RATHER THAN CHOSEN. A 41-day overrun cannot be drawn to
+ * scale in a seven-day window, and on a window that starts today the whole of it is in the past, so
+ * a to-scale stretch would have zero width. v7 draws it as a lead-in and captions the waypoint with
+ * a date two months before the week it sits in, which is the same admission. So the hatch is a
+ * MARKER and the count on it is the fact — `41 days your move` is true, and the number is the half
+ * that has to be.
+ */
+export const OVERRUN_SPAN = 2;
+
+export type Side = "theirs" | "yours";
+export type Weight = "fresh" | "settled" | "long";
+export type NodeDir = "out" | "in" | "close";
+
+export interface Segment {
+  key: string;
+  rowKey: string;
+  lane: number;
+  /** fractional day, 0 = the window's left edge */
+  from: number;
+  to: number;
+  side: Side;
+  /** began before the window — dotted left edge, squared off */
+  openLeft: boolean;
+  /** continues past the window — dashed right edge, squared off */
+  openRight: boolean;
+  /** resumed after a break — a round cap on the left */
+  capLeft: boolean;
+  /** stopped at a break — a round cap on the right */
+  capRight: boolean;
+  label: string;
+  /** the duration, stated as a fact and never as a verdict */
+  count?: string;
+  /** no reply time recorded — a dashed rail, no cap and no forecast */
+  norail?: true;
+  /** open-ended by nature (an R&R, an offer with no stated deadline) — it fades, it does not end */
+  openEnd?: true;
+  /** the hatched stretch back to the expected date; carries the count */
+  overrun?: true;
+  /** your-move only */
+  weight?: Weight;
+  queryId: string;
+}
+
+export interface BarNode {
+  key: string;
+  rowKey: string;
+  lane: number;
+  at: number;
+  dir: NodeDir;
+  glyph: string;
+  caption: string;
+  queryId: string;
+  activityId: string;
+}
+
+export interface Waypoint {
+  key: string;
+  rowKey: string;
+  lane: number;
+  at: number;
+  side: Side;
+  caption: string;
+  /** the week is behind us: the dashes go solid and this renders as already passed */
+  passed?: true;
+  queryId: string;
+}
+
+export interface Bars {
+  segments: Segment[];
+  nodes: BarNode[];
+  waypoints: Waypoint[];
+}
+
+/** One lane's inputs — a single agent × manuscript pairing. */
+export interface LaneInput {
+  rowKey: string;
+  lane: number;
+  query: Query;
+  agent: Agent | null;
+  /** the lane's own record entries, inside the window, in date order */
+  records: RecordItem[];
+  /** `activityId` → the `resultingStatus` it wrote, where it wrote one */
+  statusOf: (activityId: string) => QueryStatus | null;
+  /** the flag whose return date belongs to this lane, if any */
+  flag?: TaskFlag | null;
+  /** the label the card would carry — `pillLabel`'s output, never re-summarised here */
+  moveLabel?: string;
+}
+
+export interface BarWindow {
+  /** the window's day strings, in order */
+  days: readonly string[];
+  today: string;
+  /** the whole window is behind today */
+  past: boolean;
+}
+
+/* ══ helpers ══════════════════════════════════════════════════════════════════════════════════ */
+
+const ms = (ymd: string) => new Date(`${ymd}T12:00:00`).getTime();
+const DAY_MS = 86_400_000;
+/** whole days between two ymds, midday-anchored so a DST shift cannot round one off */
+const daysBetween = (a: string, b: string) => Math.round((ms(b) - ms(a)) / DAY_MS);
+const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
+
+const isoToYmd = (iso: string | undefined | null): string | null => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+/**
+ * The side the CTA engine puts a status on — `null` where the journey has ended.
+ *
+ * ⚠️ THE ENGINE RETURNS `null` FOR AN OFFER AS WELL AS FOR THE THREE TERMINAL STATUSES, and
+ * defaulting that to "theirs" was wrong in the one case a reader would notice: an offer is
+ * emphatically the writer's move. The engine is not wrong either — it declines to draw a
+ * BALL-HOLDER CHIP for an offer, which is a decision about that chip.
+ *
+ * ⚠️ SO THE SECOND SOURCE IS NOT A NEW LIST, IT IS `isTerminalStatus`. A status the engine gives no
+ * holder for is either finished or it is the offer, and the board has already ruled on the offer by
+ * raising `offer_received` into the writer's-turn family. Two existing derivations, composed.
+ *
+ * ⚠️ AND `null` IS RETURNED RATHER THAN A HARMLESS-LOOKING DEFAULT, because every live branch in
+ * this module tests for `"yours"` or `"theirs"` — so a closed journey switches all of them off by
+ * arriving as neither, instead of by each branch remembering to ask.
+ */
+export const sideOf = (status: QueryStatus): Side | null => {
+  const holder = getPrimaryAction(status).ballHolder;
+  if (holder) return holder === "writer" ? "yours" : "theirs";
+  return isTerminalStatus(status) ? null : "yours";
+};
+
+/**
+ * How long a your-move stretch has run, as a weight.
+ *
+ * ⚠️ THREE NAMES AND NO FOURTH. Weight is the whole of the urgency grammar here — no red, no
+ * motion, and no word that judges — so the scale has to be readable at a glance rather than
+ * precise. Adding a fourth step would make two of them indistinguishable.
+ */
+export const weightFor = (days: number): Weight =>
+  days <= FRESH_MAX_DAYS ? "fresh" : days <= SETTLED_MAX_DAYS ? "settled" : "long";
+
+/** The count, stated as a duration and never as a verdict. */
+export const durationCount = (days: number): string => plural(days, "day");
+
+const GLYPH: Record<NodeDir, string> = { out: "↑", in: "↤", close: "×" };
+
+/* ══ the pass ═════════════════════════════════════════════════════════════════════════════════ */
+
+interface Break { at: number; kind: "node" | "waypoint" }
+
+/**
+ * Cut `[0, span]` at every break, leaving `GAP` either side, and drop what is left too narrow.
+ *
+ * ⚠️ EXPORTED SO THE CUT CAN BE TESTED WITHOUT A QUERY. The rule that a sliver is not drawn is the
+ * one most easily lost to a refactor, and it is the one v5 spends a whole case on.
+ */
+export function cutPieces(span: number, breaks: readonly number[]): { from: number; to: number }[] {
+  const out: { from: number; to: number }[] = [];
+  let cursor = 0;
+  for (const b of [...breaks].sort((x, y) => x - y)) {
+    const to = b - GAP;
+    if (to - cursor >= MIN_SEG) out.push({ from: cursor, to });
+    cursor = Math.max(cursor, b + GAP);
+  }
+  if (span - cursor >= MIN_SEG) out.push({ from: cursor, to: span });
+  return out;
+}
+
+/**
+ * One lane's bar: its segments, its nodes and its waypoints.
+ */
+export function laneBars(input: LaneInput, win: BarWindow): Bars {
+  const { rowKey, lane, query, agent, records, statusOf, flag, moveLabel } = input;
+  const span = win.days.length;
+  const idxOf = new Map(win.days.map((d, i) => [d, i]));
+  const at = (ymd: string): number | null => {
+    const i = idxOf.get(ymd);
+    return i === undefined ? null : i + EVENT_AT;
+  };
+
+  /* ── nodes: the events, in the order they happened ─────────────────────────────────────── */
+  const nodes: BarNode[] = [];
+  for (const r of records) {
+    const a = at(r.ymd);
+    if (a == null) continue;
+    const closes = /^closed$/i.test(r.label);
+    nodes.push({
+      key: `nd-${r.key}`, rowKey, lane, at: a,
+      dir: closes ? "close" : r.dir,
+      glyph: GLYPH[closes ? "close" : r.dir],
+      caption: r.label,
+      queryId: r.queryId,
+      activityId: r.activityId,
+    });
+  }
+  nodes.sort((a, b) => a.at - b.at);
+
+  /* ⚠️ A CLOSURE STOPS THE BAR DEAD AND NOTHING FOLLOWS IT, EVER. Everything after the first
+     closure is dropped here rather than filtered later, so no forecast, waypoint or segment can
+     be emitted past it by some other branch. */
+  const closeIdx = nodes.findIndex((n) => n.dir === "close");
+  const live = closeIdx >= 0 ? nodes.slice(0, closeIdx + 1) : nodes;
+  const stopAt = closeIdx >= 0 ? live[live.length - 1].at : span;
+
+  /* ⚠️ A JOURNEY THAT ENDED BEFORE THIS WEEK DRAWS NOTHING AT ALL. v5's closure rule is that the
+     bar stops dead AT the closure — which says nothing about a week the closure is not in. A
+     terminal query whose closure fell in some earlier month has no stretch left to draw here, and
+     drawing one labelled "Closed" across a week in which nothing happened would state an event on
+     days that held none. The row it belongs to survives only if something else puts it there. */
+  if (isTerminalStatus(query.status) && closeIdx < 0) {
+    return { segments: [], nodes: [], waypoints: [] };
+  }
+
+  /* ── the sides, walked backwards from today ────────────────────────────────────────────── */
+  const now = sideOf(query.status);
+  const terminal = isTerminalStatus(query.status);
+  /* sides[i] is the side of the stretch BEFORE node i; sides[live.length] is after the last one.
+     ⚠️ On a closed journey the last node IS the closure, so the tail is never drawn — the fallback
+     exists to keep the array total, not to state anything. */
+  const sides: Side[] = new Array(live.length + 1);
+  sides[live.length] = now ?? "theirs";
+  for (let i = live.length - 1; i >= 0; i -= 1) {
+    const st = statusOf(live[i].activityId);
+    /* an event that changed no status changed no hands — a nudge is something you do WHILE
+       waiting, and it carries no `resultingStatus` by construction */
+    if (!st) { sides[i] = sides[i + 1]; continue; }
+    /* before a hand-changing event the side is the opposite of who authored it */
+    sides[i] = live[i].dir === "out" ? "yours" : "theirs";
+  }
+
+  /* ── waypoints: what is forecast, and what comes back ──────────────────────────────────── */
+  const waypoints: Waypoint[] = [];
+  const sends = [query.dateSent, query.partialSentDate, query.fullSentDate]
+    .map((iso) => (iso ? new Date(iso as string).getTime() : NaN))
+    .filter((t) => !Number.isNaN(t));
+  const sentMs = sends.length ? Math.max(...sends) : null;
+  /* ⚠️ `null` FOR THE REPLY-STATED WINDOW, inherited and deliberate: an agency's window stated
+     inside a holding reply lives in the query's NESTED events, which only the reading pane loads.
+     Composing one from what this page holds would be inventing data. */
+  const resolved = terminal ? { ms: null, source: null }
+    : resolveExpectedDate(query, sentMs, agent?.responseTimeWeeks ?? null, null);
+  const expectedYmd = resolved.ms == null ? null : isoToYmd(new Date(resolved.ms).toISOString());
+  const expectedPassed = !!expectedYmd && expectedYmd < win.today;
+
+  const addWp = (ymd: string | null, side: Side, caption: string) => {
+    if (!ymd || !caption) return;
+    const a = at(ymd);
+    if (a == null || a > stopAt) return;
+    waypoints.push({
+      key: `wp-${rowKey}-${lane}-${ymd}-${caption}`, rowKey, lane, at: a, side, caption,
+      ...(ymd < win.today ? { passed: true as const } : {}),
+      queryId: query.id,
+    });
+  };
+
+  /* ⚠️ A WAYPOINT IS DRAWN WHEREVER IT LANDS IN THE WINDOW, and `passed` says whether it has been
+     overtaken. Gating on "not yet passed" was right for the current week and wrong for a past one,
+     where v5's whole rule is that overtaken waypoints still render — as passed. In a window that
+     starts today, in-window and not-yet-passed are the same thing, so one test does both jobs. */
+  if (expectedYmd) {
+    addWp(expectedYmd, now === "yours" ? "yours" : "theirs",
+      now === "yours" ? `They asked by ${shortCalDate(expectedYmd)}` : `Expected ${shortCalDate(expectedYmd)}`);
+  }
+  /* the next reminder the writer set — a forecast, never a fact */
+  const nudgeYmd = terminal ? null : isoToYmd(query.nudgeDate as string | undefined);
+  addWp(nudgeYmd, "theirs", nudgeYmd ? `Reminder due ${shortCalDate(nudgeYmd)}` : "");
+  /* ⚠️ A SNOOZE PAUSES YOUR ATTENTION, NOT THE AGENT'S CLOCK — so it is a waypoint and the bar is
+     untouched by it. Drawing a break in the journey would say something stopped; nothing did. */
+  const backYmd = flag?.snoozedUntil ? isoToYmd(flag.snoozedUntil) : null;
+  if (backYmd) addWp(backYmd, "yours", `Back on ${shortCalDate(backYmd)}`);
+
+  /* ── the overrun: a long-standing your-move stretch, hatched back to the expectation ────── */
+  const sinceYmd = (() => {
+    /* when it became the writer's move: the last hand-changing event, else the expectation
+       passing, else the latest send — in that order, because each is more specific than the next */
+    for (let i = live.length - 1; i >= 0; i -= 1) {
+      if (statusOf(live[i].activityId) && sides[i + 1] === "yours") return win.days[Math.floor(live[i].at)];
+    }
+    if (expectedPassed && expectedYmd) return expectedYmd;
+    return sentMs != null ? isoToYmd(new Date(sentMs).toISOString()) : null;
+  })();
+  const yoursDays = sinceYmd ? Math.max(0, daysBetween(sinceYmd, win.today)) : 0;
+  const weight = weightFor(yoursDays);
+  const wantsOverrun = now === "yours" && !terminal && weight === "long" && expectedPassed && !win.past;
+
+  const breaks: Break[] = [
+    ...live.map((n) => ({ at: n.at, kind: "node" as const })),
+    ...waypoints.map((w) => ({ at: w.at, kind: "waypoint" as const })),
+  ];
+  if (wantsOverrun) {
+    breaks.push({ at: OVERRUN_SPAN, kind: "waypoint" });
+    waypoints.push({
+      key: `wp-${rowKey}-${lane}-overrun`, rowKey, lane, at: OVERRUN_SPAN, side: "yours",
+      caption: expectedYmd ? `Expected ${shortCalDate(expectedYmd)}` : "Expected",
+      queryId: query.id,
+    });
+  }
+
+  /* ── the pieces ────────────────────────────────────────────────────────────────────────── */
+  const marks = [...new Set(breaks.map((b) => b.at))].sort((a, b) => a - b).filter((m) => m <= stopAt);
+  const pieces = cutPieces(stopAt, marks);
+
+  /* ⚠️ NO REPLY TIME RECORDED → A DASHED RAIL AND NOTHING ELSE. No cap, no forecast, no end: the
+     app does not know when to expect an answer, and drawing one would be inventing the date the
+     writer has not given. One piece, whatever the events did. */
+  const norail = now === "theirs" && !terminal && resolved.ms == null;
+
+  /* ⚠️ OPEN-ENDED BY NATURE. An R&R and an offer with no stated deadline have no end to draw, so
+     the bar fades rather than stopping. `resolveExpectedDate` is the only date the model holds for
+     either; where it resolves, the cap is real and gets a waypoint (above). */
+  const openEndKind = query.status === QueryStatus.REVISE_RESUBMIT || query.status === QueryStatus.OFFER;
+  const openEnd = now === "yours" && openEndKind && resolved.ms == null;
+
+  const segments: Segment[] = [];
+  pieces.forEach((p, i) => {
+    /* which stretch is this? the one after however many nodes precede it */
+    const before = live.filter((n) => n.at <= p.from).length;
+    const side = sides[Math.min(before, sides.length - 1)];
+    const first = i === 0;
+    const last = i === pieces.length - 1;
+    const isOverrun = wantsOverrun && first;
+    const startsAtEdge = p.from <= 0.001;
+    const endsAtEdge = Math.abs(p.to - span) < 0.001;
+
+    segments.push({
+      key: `sg-${rowKey}-${lane}-${i}`,
+      rowKey, lane, from: p.from, to: p.to,
+      side: isOverrun ? "yours" : side,
+      /* the journey began before the window unless its own send is the first thing in it */
+      openLeft: startsAtEdge && !(live[0] && live[0].dir === "out" && live[0].at < 1),
+      openRight: endsAtEdge && !terminal && closeIdx < 0 && !openEnd && !norail,
+      capLeft: !startsAtEdge,
+      capRight: !endsAtEdge,
+      label: isOverrun ? "" : labelFor(side, {
+        norail, openEnd, query, expectedYmd, expectedPassed, nudgeYmd, moveLabel, terminal,
+      }),
+      ...(isOverrun ? { overrun: true as const, count: `${durationCount(yoursDays)} your move` } : {}),
+      ...(!isOverrun && side === "yours" && !terminal && yoursDays > 0
+        ? { count: durationCount(yoursDays) } : {}),
+      ...(!isOverrun && side === "yours" && !terminal ? { weight } : {}),
+      ...(norail && first ? { norail: true as const } : {}),
+      ...(openEnd && last ? { openEnd: true as const } : {}),
+      queryId: query.id,
+    });
+  });
+
+  return { segments, nodes: live, waypoints };
+}
+
+interface LabelInput {
+  norail: boolean;
+  openEnd: boolean;
+  query: Query;
+  expectedYmd: string | null;
+  expectedPassed: boolean;
+  nudgeYmd: string | null;
+  moveLabel?: string;
+  terminal: boolean;
+}
+
+/**
+ * What a stretch says.
+ *
+ * ⚠️ IT REPORTS AND DOES NOT JUDGE. No adverb, no escalation, and never the word this pack forbids
+ * outright — a duration is a fact, lateness is a verdict, and an agent has not broken a promise by
+ * being slow. `Next reminder due {date}` is the one forward-looking clause and it names something
+ * the WRITER set.
+ */
+export function labelFor(side: Side, i: LabelInput): string {
+  if (i.terminal) return "Closed";
+  if (side === "theirs") {
+    if (i.norail) return "No reply time recorded · give it a date";
+    /* ⚠️ THE BAR ALWAYS RUNS TO THE NEXT THING DUE. After a nudge the clock restarts, so the
+       stretch is not "still waiting" — it is waiting until the reminder the writer set. */
+    if (i.nudgeYmd) return `Next reminder due ${shortCalDate(i.nudgeYmd)}`;
+    if (i.expectedYmd && !i.expectedPassed) return `Reply window · to ${shortCalDate(i.expectedYmd)}`;
+    return "Reply window";
+  }
+  if (i.openEnd) {
+    return i.query.status === QueryStatus.OFFER
+      ? "Decide on the offer · no date set"
+      : "Your move · revise & resubmit · no date set";
+  }
+  return i.moveLabel ? `Your move · ${i.moveLabel.toLowerCase()}` : "Your move";
+}
+
+/** Which activities wrote a status — the join the side derivation needs, built once per render. */
+export function statusIndex(activities: readonly Activity[]): Map<string, QueryStatus> {
+  const m = new Map<string, QueryStatus>();
+  for (const a of activities) {
+    if (a.id && a.resultingStatus) m.set(a.id, a.resultingStatus as QueryStatus);
+  }
+  return m;
+}

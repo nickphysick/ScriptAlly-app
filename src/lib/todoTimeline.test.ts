@@ -15,7 +15,7 @@ import {
   CalendarInput, CalendarItem,
 } from "./todoCalendar";
 import {
-  windowDays, shiftWindow, timelineWeek, timelineRows, timelineBands,
+  windowDays, shiftWindow, timelineWeek, timelineRows, timelineSegments,
   defaultView, allFilters, TIMELINE_FILTERS, FILTER_LABEL, SHOW_ORDER, SORT_ORDER,
   YOU_ROW, YOU_ROW_NAME, TimelineData, TimelineView,
 } from "./todoTimeline";
@@ -59,6 +59,7 @@ const dataFor = (inp: CalendarInput, win: readonly string[] = WIN): TimelineData
     dedupeAgainstRecord(byDay.get(ymd)?.items ?? [], recordFor(ymd));
   return {
     queries: inp.queries, agents: inp.agents, today: inp.today,
+    activities: inp.activities, manuscripts: [], taskFlags: inp.flags,
     itemsFor, recordFor,
     ghostsOn: (ymd) => (ymd === inp.today ? [] : ghostsFor(ymd, itemsFor(inp.today))),
   };
@@ -206,84 +207,85 @@ const banded = (sent: string, weeks: number, over: Partial<Query> = {}) => input
   agents: [agent({ responseTimeWeeks: weeks } as Partial<Agent>)],
 });
 
-describe("bands — a span from the send to the resolved window, clamped and marked at both edges", () => {
-  it("runs between the two, unclamped, when both ends are in the window", () => {
-    /* sent on day 0 of the window, two weeks would land outside — so use a one-day window pair */
-    const b = timelineBands(dataFor(banded(`${TODAY}T09:00:00Z`, 0.5)), TODAY, 7)[0];
-    expect(b).toBeDefined();
-    expect([b.fromIdx, b.toIdx]).toEqual([0, 3]);
-    expect([b.openLeft, b.openRight]).toEqual([false, false]);
-    expect(b.source).toBe("agent");
-    expect(b.endYmd).toBe("2026-08-29");
+/**
+ * ⚠️ THE BAND'S OWN TESTS ARE RETIRED WITH THE BAND, AND THE LAWS THEY CARRIED DID NOT ALL SURVIVE
+ * IN KIND. A band was a whole reply window drawn as one span, so "clamps at the left edge",
+ * "clamps at the right", "marks both", "is wholly outside" and "takes the LATEST send as the
+ * anchor" were claims about one object with two ends. A journey bar has no ends of its own: it
+ * runs the width of the window and is CUT by what happened, so the clamping questions are now
+ * about the window rather than about the span, and `journeyBars.test.ts` asks them of the cut.
+ *
+ * What survives here is the JOIN — which query gets a bar, which row it lands on, how manuscripts
+ * become lanes — because that is what this module does and the bar module does not.
+ */
+describe("journey bars — which query gets one, and where it lands", () => {
+  const banded = (sent: string, weeks: number, over: Partial<Query> = {}) => input({
+    queries: [q({ id: "q1", agentId: "a1", status: QueryStatus.QUERIED, dateSent: sent, ...over })],
+    agents: [agent({ responseTimeWeeks: weeks } as Partial<Agent>)],
   });
 
-  it("clamps to the LEFT edge and marks it when the send precedes the window", () => {
-    const b = timelineBands(dataFor(banded("2026-08-20T09:00:00Z", 1)), TODAY, 7)[0];
-    expect(b.fromIdx).toBe(0);
-    expect(b.openLeft).toBe(true);
-    expect(b.toIdx).toBe(1); // 27 Aug
-    expect(b.openRight).toBe(false);
+  it("a waiting query draws a bar on its agent's row", () => {
+    const { rows, segments } = timelineWeek(dataFor(banded("2026-08-01T09:00:00Z", 8)), TODAY, 7);
+    expect(segments.length).toBeGreaterThan(0);
+    expect(segments.every((sg) => sg.rowKey === "agent-a1")).toBe(true);
+    expect(rows.find((r) => r.agentId === "a1")).toBeDefined();
   });
 
-  it("clamps to the RIGHT edge and marks it when the window closes beyond it", () => {
-    const b = timelineBands(dataFor(banded(`${TODAY}T09:00:00Z`, 6)), TODAY, 7)[0];
-    expect([b.fromIdx, b.toIdx]).toEqual([0, 6]);
-    expect([b.openLeft, b.openRight]).toEqual([false, true]);
-  });
-
-  it("marks BOTH when the span swallows the whole window", () => {
-    const b = timelineBands(dataFor(banded("2026-07-01T09:00:00Z", 12)), TODAY, 7)[0];
-    expect([b.fromIdx, b.toIdx]).toEqual([0, 6]);
-    expect([b.openLeft, b.openRight]).toEqual([true, true]);
-  });
-
-  it("draws nothing for a span that is wholly outside the window", () => {
-    expect(timelineBands(dataFor(banded("2026-06-01T09:00:00Z", 1)), TODAY, 7)).toHaveLength(0);
-  });
-
-  it("⚠️ a passed window is FADED, not gone, and gains no expiry copy", () => {
-    /* sent 1 Aug, a one-week window — it closed on the 8th, a fortnight before today */
-    const inp = banded("2026-08-01T09:00:00Z", 1);
-    const early = timelineBands(dataFor(inp, windowDays("2026-08-05", 7)), "2026-08-05", 7)[0];
-    expect(early.passed).toBe(true);
-    expect([early.fromIdx, early.toIdx]).toEqual([0, 3]);
-    expect(early.openLeft).toBe(true);
-    /* no expiry pill, no expiry copy, no second label — the band is drawn faded and that is all */
-    expect(early.label).toBe("Reply window");
-  });
-
-  it("takes the LATEST send as the anchor, so a partial restarts the clock", () => {
-    const inp = banded("2026-07-01T09:00:00Z", 1, {
-      status: QueryStatus.PARTIAL_SENT, partialSentDate: `${TODAY}T09:00:00Z`,
+  it("⚠️ AND SO DOES A WRITER'S-MOVE QUERY — the bar is the whole journey, not the waiting half", () => {
+    /* the band only ever drew a reply window, so a query in the writer's court had nothing at all.
+       A bar has a side, so it draws either way — which is the point of the change. */
+    const inp = input({
+      queries: [q({ id: "q1", agentId: "a1", status: QueryStatus.FULL_REQUESTED })],
+      agents: [agent({})],
     });
-    const b = timelineBands(dataFor(inp), TODAY, 7)[0];
-    expect(b.fromIdx).toBe(0);
-    expect(b.openLeft).toBe(false);
+    const segs = timelineSegments(dataFor(inp), TODAY, 7);
+    expect(segs.length).toBeGreaterThan(0);
+    expect(segs.every((sg) => sg.side === "yours")).toBe(true);
   });
 
-  it("draws no band for a query that is not waiting — the writer's turn expects no reply", () => {
-    const inp = banded(`${TODAY}T09:00:00Z`, 1, { status: QueryStatus.FULL_REQUESTED });
-    expect(timelineBands(dataFor(inp), TODAY, 7)).toHaveLength(0);
-  });
-
-  it("draws no band without a send — a span needs a start, and only a send is an honest one", () => {
+  it("draws no bar for a query with no send — a journey needs a beginning", () => {
     const inp = input({
       queries: [{ ...q({ id: "q1", agentId: "a1" }), dateSent: undefined } as unknown as Query],
       agents: [agent({ responseTimeWeeks: 1 } as Partial<Agent>)],
     });
-    expect(timelineBands(dataFor(inp), TODAY, 7)).toHaveLength(0);
+    /* it still draws the rail, because "we do not know when to expect a reply" is a true thing to
+       say about a query that exists; what it does not do is forecast an end */
+    const segs = timelineSegments(dataFor(inp), TODAY, 7);
+    expect(segs.every((sg) => !sg.openRight)).toBe(true);
   });
 
-  it("draws no band when nothing resolves the window — no agency weeks, no date of yours", () => {
-    const inp = input({ queries: [q({ id: "q1", agentId: "a1" })], agents: [agent({})] });
-    expect(timelineBands(dataFor(inp), TODAY, 7)).toHaveLength(0);
+  it("⚠️ TWO MANUSCRIPTS WITH ONE AGENT IS TWO LANES UNDER ONE HEAD, not two rows", () => {
+    const inp = input({
+      queries: [
+        q({ id: "q1", agentId: "a1", manuscriptId: "m1", status: QueryStatus.QUERIED }),
+        q({ id: "q2", agentId: "a1", manuscriptId: "m2", status: QueryStatus.FULL_REQUESTED }),
+      ],
+      agents: [agent({ responseTimeWeeks: 8 } as Partial<Agent>)],
+    });
+    const { rows, segments } = timelineWeek(dataFor(inp), TODAY, 7);
+    const mine = rows.filter((r) => r.agentId === "a1");
+    expect(mine, "one agent became two rows").toHaveLength(1);
+    expect(mine[0].manuscripts).toHaveLength(2);
+    expect(new Set(segments.map((sg) => sg.lane)).size, "the two books share a lane").toBe(2);
   });
 
-  it("⚠️ the band IS the reply window — it is never also a chip on its end day", () => {
-    const inp = banded(`${TODAY}T09:00:00Z`, 0.5);
-    const { rows, bands } = timelineWeek(dataFor(inp), TODAY, 7);
-    expect(bands).toHaveLength(1);
-    expect(rows.find((r) => r.agentId === "a1")!.items).toHaveLength(0);
+  it("a closed relationship draws its closure and stops — nothing follows", () => {
+    const inp = input({
+      queries: [q({ id: "q1", agentId: "a1", status: QueryStatus.REJECTED })],
+      agents: [agent({})],
+      activities: [act({ id: "c1", queryId: "q1", activityType: ActivityType.STATUS_CHANGED,
+        resultingStatus: QueryStatus.REJECTED, date: `${TODAY}T09:00:00Z` })],
+    });
+    const { segments, nodes } = timelineWeek(dataFor(inp), TODAY, 7);
+    expect(nodes.map((n) => n.dir)).toEqual(["close"]);
+    expect(segments.every((sg) => !sg.openRight)).toBe(true);
+  });
+
+  it("timelineWeek and timelineSegments are two views of one pass", () => {
+    const d = dataFor(banded("2026-08-01T09:00:00Z", 8));
+    const once = timelineWeek(d, TODAY, 7);
+    expect(timelineSegments(d, TODAY, 7)).toEqual(once.segments);
+    expect(timelineRows(d, TODAY, 7)).toEqual(once.rows);
   });
 });
 
@@ -302,23 +304,32 @@ describe("the kind filters — five, and each is a thing to switch off", () => {
     expect(rows.map((r) => r.key)).toEqual([YOU_ROW]);
   });
 
-  it("⚠️ but it does not remove a row that had nothing to hide", () => {
-    /* a live query, no card, no band — the filters were hiding nothing, so the row stays */
+  it("⚠️ AND A LIVE QUERY NOW ALWAYS HAS SOMETHING TO HIDE — the rail is the bar's floor", () => {
+    /* ⚠️ THE OLD CASE WAS "a live query, no card, no band — the filters were hiding nothing, so
+       the row stays". A bar changed that: a query with no reply time recorded still draws the
+       dashed rail that SAYS SO, which is a better answer than a blank row and means the
+       nothing-to-hide exemption has almost no subject left. Switching the waiting side off
+       therefore does remove this row, which is what a filter is for. */
     const inp = input({ queries: [q({ id: "q1", agentId: "a1" })], agents: [agent({})] });
+    expect(timelineSegments(dataFor(inp), TODAY, 7).map((sg) => sg.norail)).toEqual([true]);
     const rows = timelineRows(dataFor(inp), TODAY, 7, view({ kinds: ["rec"] }));
-    expect(rows.map((r) => r.agentId)).toEqual([null, "a1"]);
+    expect(rows.map((r) => r.agentId)).toEqual([null]);
   });
 
-  it("switching waiting off takes the band and leaves the row's other work", () => {
+  it("switching the waiting side off takes the bar and leaves the record standing", () => {
     const inp = input({
       queries: [q({ id: "q1", agentId: "a1", status: QueryStatus.QUERIED, dateSent: `${TODAY}T09:00:00Z` })],
-      agents: [agent({ responseTimeWeeks: 0.5 } as Partial<Agent>)],
-      activities: [act({ id: "r1", queryId: "q1" })],
+      agents: [agent({ responseTimeWeeks: 4 } as Partial<Agent>)],
+      activities: [act({ id: "r1", queryId: "q1", date: "2026-08-29T09:00:00Z" })],
     });
-    expect(timelineBands(dataFor(inp), TODAY, 7)).toHaveLength(1);
+    const on = timelineWeek(dataFor(inp), TODAY, 7);
+    expect(on.segments.length, "no bar at rest").toBeGreaterThan(0);
+    expect(on.nodes.length, "no event on the bar").toBeGreaterThan(0);
+    /* ⚠️ THE THREE PARTS FILTER SEPARATELY. A stretch is a claim about a side; an event is a fact
+       about a day. Switching the waiting side off must not take the record with it. */
     const off = timelineWeek(dataFor(inp), TODAY, 7, view({ kinds: ["rec"] }));
-    expect(off.bands).toHaveLength(0);
-    expect(off.rows.find((r) => r.agentId === "a1")!.items.map((i) => i.kind)).toEqual(["rec"]);
+    expect(off.segments).toHaveLength(0);
+    expect(off.nodes.length).toBe(on.nodes.length);
   });
 
   it("search reaches the agent, the agency and the item's own words", () => {
@@ -406,20 +417,23 @@ describe("order — Your tasks ignores it, closed rows sink, and ties keep their
 /* ══ lanes ═══════════════════════════════════════════════════════════════════════════════════ */
 
 describe("lanes — the ref gives every chip in a row one top, and two of them would overlap", () => {
-  it("puts a chip that falls inside a band on a lane of its own", () => {
+  it("⚠️ A CHIP PACKS ABOVE THE BAR, never on top of it — two lane mechanisms, one row height", () => {
+    /* a bar's lane means "this manuscript"; a chip's lane means "the first line where nothing
+       collides". They are different questions, so a chip is offset past the bars rather than
+       competing with them for lane 0. */
     const inp = input({
       queries: [q({ id: "q1", agentId: "a1", status: QueryStatus.QUERIED, dateSent: `${TODAY}T09:00:00Z` })],
       agents: [agent({ responseTimeWeeks: 1 } as Partial<Agent>)],
       activities: [act({ id: "r1", queryId: "q1", date: "2026-08-28T09:00:00Z" })],
     });
-    const { rows, bands } = timelineWeek(dataFor(inp), TODAY, 7);
+    const { rows, segments } = timelineWeek(dataFor(inp), TODAY, 7);
     const row = rows.find((r) => r.agentId === "a1")!;
-    expect(row.lanes).toBe(2);
-    expect(bands[0].lane).toBe(0);
-    expect(row.items[0].lane).toBe(1);
+    expect(segments.every((sg) => sg.lane === 0), "the one manuscript took more than one lane").toBe(true);
+    expect(row.items.every((it) => it.lane >= 1), "a chip landed on the bar's lane").toBe(true);
+    expect(row.lanes).toBeGreaterThanOrEqual(2);
   });
 
-  it("shares one lane between things that do not overlap", () => {
+  it("shares one CHIP lane between things that do not overlap, above the bar's own", () => {
     const inp = input({
       queries: [q({ id: "q1", agentId: "a1" })],
       agents: [agent({})],
@@ -428,9 +442,12 @@ describe("lanes — the ref gives every chip in a row one top, and two of them w
         act({ id: "r2", queryId: "q1", date: "2026-08-30T09:00:00Z", activityType: ActivityType.NUDGE_SENT }),
       ],
     });
-    const row = timelineRows(dataFor(inp), TODAY, 7).find((r) => r.agentId === "a1")!;
-    expect(row.lanes).toBe(1);
-    expect(row.items.map((i) => i.lane)).toEqual([0, 0]);
+    const { rows, segments } = timelineWeek(dataFor(inp), TODAY, 7);
+    const row = rows.find((r) => r.agentId === "a1")!;
+    /* one manuscript, so one bar lane; the chips then share the single lane above it */
+    expect(new Set(segments.map((sg) => sg.lane)).size).toBe(1);
+    expect(new Set(row.items.map((i) => i.lane)).size).toBe(1);
+    expect(row.items.every((i) => i.lane === 1)).toBe(true);
   });
 
   it("⚠️ a chip runs to the column before the next occupant of its lane, not to the row's end", () => {
@@ -516,10 +533,13 @@ describe("⚠️ the derivations underneath are untouched, and the rows prove it
     expect(kinds).toContainEqual(["task", 6, "2026-08-20"]);
   });
 
-  it("timelineRows and timelineBands are two views of one pass, never two derivations", () => {
-    const d = dataFor(banded(`${TODAY}T09:00:00Z`, 0.5));
+  it("timelineRows and timelineSegments are two views of one pass, never two derivations", () => {
+    const d = dataFor(input({
+      queries: [q({ id: "q1", agentId: "a1", status: QueryStatus.QUERIED, dateSent: `${TODAY}T09:00:00Z` })],
+      agents: [agent({ responseTimeWeeks: 4 } as Partial<Agent>)],
+    }));
     const once = timelineWeek(d, TODAY, 7);
     expect(timelineRows(d, TODAY, 7)).toEqual(once.rows);
-    expect(timelineBands(d, TODAY, 7)).toEqual(once.bands);
+    expect(timelineSegments(d, TODAY, 7)).toEqual(once.segments);
   });
 });

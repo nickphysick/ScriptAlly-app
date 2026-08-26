@@ -45,9 +45,13 @@ import {
   windowDays, shiftWindow, timelineWeek, defaultView,
   TIMELINE_FILTERS, FILTER_LABEL, SORT_LABEL, SORT_ORDER,
   allFilters, YOU_ROW,
-  type TimelineItem, type TimelineBand, type TimelineRow, type TimelineView,
+  type TimelineItem, type TimelineRow, type TimelineView,
   type RowSort, type TimelineFilter,
 } from "../../lib/todoTimeline";
+import {
+  OVERRUN_SPAN, durationCount,
+  type Segment, type BarNode, type Waypoint,
+} from "../../lib/journeyBars";
 import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
 import { useDockActivity } from "./useDockActivity";
 /* ⚠️ THE QUERY CENTRE'S OWN ROWS, NOT A SECOND READING PANE. `FocusFlow` already mounts these two
@@ -116,20 +120,60 @@ const Chip: React.FC<{
   </button>
 );
 
-const Band: React.FC<{ b: TimelineBand; selected: boolean; onPick: () => void }> = ({ b, selected, onPick }) => (
+/**
+ * One piece of a journey bar.
+ *
+ * ⚠️ IT IS POSITIONED IN FRACTIONAL DAYS, as a percentage of the seven columns — so a break lands
+ * on the same boundary the cells do at every width, and a resize recomputes nothing.
+ */
+const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({ sg, selected, onPick }) => (
   <button
     type="button"
-    className={`tl-band${selected ? " sel" : ""}${b.openLeft ? " openl" : ""}${b.openRight ? " openr" : ""}${b.passed ? " passed" : ""}`}
+    className={[
+      "tl-seg",
+      sg.overrun ? "tl-over" : sg.side === "yours" ? "yours" : "theirs",
+      sg.weight && !sg.overrun ? `w-${sg.weight}` : "",
+      sg.openLeft ? "openleft" : "", sg.openRight ? "future" : "",
+      sg.capLeft ? "capl" : "", sg.capRight ? "capr" : "",
+      sg.norail ? "norail" : "", sg.openEnd ? "openend" : "",
+      selected ? "sel" : "",
+    ].filter(Boolean).join(" ")}
     style={{
-      left: `calc(${pct(b.fromIdx)} + 4px)`,
-      width: `calc(${pct(b.toIdx - b.fromIdx + 1)} - 8px)`,
-      top: laneTop(b.lane),
+      left: `calc(${pct(sg.from)} + 4px)`,
+      width: `calc(${pct(sg.to - sg.from)} - 8px)`,
+      top: laneTop(sg.lane),
     }}
     onClick={onPick}
   >
-    <span className="d" aria-hidden />
-    <span className="tl-lbl">{b.label}</span>
+    {!sg.overrun && <span className="d" aria-hidden />}
+    <span className="tl-lbl">{sg.overrun ? sg.count : sg.label}</span>
+    {!sg.overrun && sg.count && <span className="tl-cnt">{sg.count}</span>}
   </button>
+);
+
+/** An event on the bar — it sits IN the break, and its caption hangs beneath. */
+const Node: React.FC<{ n: BarNode; selected: boolean; onPick: () => void }> = ({ n, selected, onPick }) => (
+  <button
+    type="button"
+    className={`tl-node ${n.dir}${selected ? " sel" : ""}`}
+    style={{ left: pct(n.at), top: laneTop(n.lane) }}
+    onClick={onPick}
+    aria-label={n.caption}
+  >
+    <span aria-hidden>{n.glyph}</span>
+    <span className="tl-tip">{n.caption}</span>
+  </button>
+);
+
+/** A forecast: a dashed upright with its caption below. Nothing about it claims an event. */
+const Way: React.FC<{ w: Waypoint }> = ({ w }) => (
+  <span
+    className={`tl-wp${w.side === "yours" ? " yours" : ""}${w.passed ? " passed" : ""}`}
+    style={{ left: pct(w.at), top: laneTop(w.lane) }}
+    aria-hidden
+  >
+    <span className="tl-tip">{w.caption}</span>
+  </span>
 );
 
 /** A dropdown that names its current value — the same shape for Show and for Sort. */
@@ -279,28 +323,40 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     [itemsFor, today],
   );
 
-  const { rows, bands } = useMemo(
-    () => timelineWeek({ queries, agents, today, itemsFor, recordFor, ghostsOn }, winStart, TL_DAYS, view),
-    [queries, agents, today, itemsFor, recordFor, ghostsOn, winStart, view],
+  const { rows, segments, nodes, waypoints } = useMemo(
+    () => timelineWeek(
+      { queries, agents, activities, manuscripts, taskFlags, today, itemsFor, recordFor, ghostsOn },
+      winStart, TL_DAYS, view,
+    ),
+    [queries, agents, activities, manuscripts, taskFlags, today, itemsFor, recordFor, ghostsOn, winStart, view],
   );
-  const bandsByRow = useMemo(() => {
-    const m = new Map<string, TimelineBand[]>();
-    for (const b of bands) m.set(b.rowKey, [...(m.get(b.rowKey) ?? []), b]);
+  /** the bar's three parts, grouped by the row they belong to — one pass, read three times */
+  const barsByRow = useMemo(() => {
+    const m = new Map<string, { segs: Segment[]; nodes: BarNode[]; ways: Waypoint[] }>();
+    const get = (k: string) => {
+      let v = m.get(k);
+      if (!v) { v = { segs: [], nodes: [], ways: [] }; m.set(k, v); }
+      return v;
+    };
+    for (const sg of segments) get(sg.rowKey).segs.push(sg);
+    for (const n of nodes) get(n.rowKey).nodes.push(n);
+    for (const w of waypoints) get(w.rowKey).ways.push(w);
     return m;
-  }, [bands]);
+  }, [segments, nodes, waypoints]);
 
   /* ⚠️ THE COUNT STATES WHAT IS ON SCREEN, never a total the filters have stopped describing. */
-  const shown = rows.reduce((n, r) => n + r.items.length, 0) + bands.length;
+  const shown = rows.reduce((n, r) => n + r.items.length, 0) + segments.length;
   const agentRows = rows.filter((r) => r.key !== YOU_ROW).length;
 
   /* ══ WHAT IS SELECTED, AND WHAT IS BEING WORKED ══════════════════════════════════════════ */
   const allItems = useMemo(() => rows.flatMap((r) => r.items.map((it) => ({ it, row: r }))), [rows]);
   const selItem = allItems.find((x) => x.it.key === sel) ?? null;
-  const selBand = bands.find((b) => b.key === sel) ?? null;
+  const selSeg = segments.find((sg) => sg.key === sel) ?? null;
+  const selNode = nodes.find((n) => n.key === sel) ?? null;
   /* a selection the filters have taken off the board is no longer a selection */
   React.useEffect(() => {
-    if (sel && !selItem && !selBand) setSel(null);
-  }, [sel, selItem, selBand]);
+    if (sel && !selItem && !selSeg) setSel(null);
+  }, [sel, selItem, selSeg]);
 
   const workRow = work ? rows.find((r) => r.key === work.rowKey) ?? null : null;
   /* the workspace lost its row — a filter, a page, or the card completing and evaporating */
@@ -317,12 +373,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     if (!workRow) return undefined;
     const picked = work?.itemKey ? workRow.items.find((i) => i.key === work.itemKey) : undefined;
     return picked?.queryId
-      ?? bandsByRow.get(workRow.key)?.[0]?.queryId
+      ?? barsByRow.get(workRow.key)?.segs[0]?.queryId
       ?? workRow.items.find((i) => i.queryId)?.queryId;
-  }, [workRow, work, bandsByRow]);
+  }, [workRow, work, barsByRow]);
   const workQuery = workQueryId ? queries.find((q) => q.id === workQueryId) ?? null : null;
   const workAgent = workRow?.agentId ? agents.find((a) => a.id === workRow.agentId) ?? null : null;
-  const workBand = workRow ? bandsByRow.get(workRow.key)?.[0] ?? null : null;
+  const workSeg = workRow ? (barsByRow.get(workRow.key)?.segs ?? []).find((sg) => sg.side === "theirs") ?? null : null;
 
   /**
    * ⚠️ THE AUTHORITATIVE ROWS, from the query's own subcollection — the store the Query Centre
@@ -473,7 +529,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     }));
 
   const row = (r: TimelineRow) => {
-    const rowBands = bandsByRow.get(r.key) ?? [];
+    const bar = barsByRow.get(r.key) ?? { segs: [], nodes: [], ways: [] };
     const lanes = Math.max(1, r.lanes);
     return (
       <div
@@ -506,12 +562,15 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
           />
         ))}
         <div className="tl-lane">
-          {r.items.length + rowBands.length === 0 && (
-            <span className="tl-quiet">Nothing this week</span>
-          )}
-          {rowBands.map((b) => (
-            <Band key={b.key} b={b} selected={sel === b.key}
-              onPick={() => setSel((c) => (c === b.key ? null : b.key))} />
+          {/* the bar first, then its events on top of it, then the writer's own chips above both */}
+          {bar.segs.map((sg) => (
+            <Seg key={sg.key} sg={sg} selected={sel === sg.key}
+              onPick={() => setSel((c) => (c === sg.key ? null : sg.key))} />
+          ))}
+          {bar.ways.map((w) => <Way key={w.key} w={w} />)}
+          {bar.nodes.map((n) => (
+            <Node key={n.key} n={n} selected={sel === n.key}
+              onPick={() => setSel((c) => (c === n.key ? null : n.key))} />
           ))}
           {r.items.map((it) => (
             <Chip
@@ -536,19 +595,28 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     );
   };
 
+  const workRowNameFor = (rowKey: string) => rows.find((r) => r.key === rowKey)?.name ?? "";
+
   /* ── the focus band: what a selection says, full width and nothing truncated ─────────────── */
   const facts: { k: string; v: string }[] = [];
   let head: React.ReactNode = null;
   let ctx = "";
   let acts: React.ReactNode = null;
-  if (selBand) {
-    const b = selBand;
-    head = <>Waiting — <em>{b.expected.agent || "this agency"}</em></>;
-    ctx = `${expectedLine(b.expected)}. The window ${b.passed ? "closed" : "runs to"} ${shortCalDate(b.endYmd)}.`;
-    facts.push({ k: "Window", v: shortCalDate(b.endYmd) });
-    if (b.expected.fromYmd) facts.push({ k: "Sent", v: shortCalDate(b.expected.fromYmd) });
-    acts = <button type="button" className="tl-btn" onClick={() => onNavigatePath(`/queries?q=${encodeURIComponent(b.queryId)}`)}>Open query ›</button>;
-  } else if (selItem) {
+  if (selSeg) {
+    const sg = selSeg;
+    const who = workRowNameFor(sg.rowKey);
+    head = <>{sg.side === "yours" ? "Your move" : "Waiting"}{who && <> — <em>{who}</em></>}</>;
+    ctx = sg.overrun ? "It has been your move since the date it was expected." : sg.label;
+    if (sg.count) facts.push({ k: "Duration", v: sg.count });
+    facts.push({ k: "Side", v: sg.side === "yours" ? "Your move" : "Their move" });
+    acts = <button type="button" className="tl-btn" onClick={() => onNavigatePath(`/queries?q=${encodeURIComponent(sg.queryId)}`)}>Open query ›</button>;
+  } else if (selNode) {
+    const n = selNode;
+    const who = workRowNameFor(n.rowKey);
+    head = <>{n.caption}{who && <> — <em>{who}</em></>}</>;
+    ctx = "";
+    acts = <button type="button" className="tl-btn" onClick={() => onNavigatePath(`/queries?q=${encodeURIComponent(n.queryId)}`)}>Open query ›</button>;
+  } else if (selItem) {  } else if (selItem) {
     const { it, row } = selItem;
     head = <>{it.label}{row.key !== YOU_ROW && <> — <em>{row.name}</em></>}</>;
     ctx = it.kind === "ghost"
@@ -573,7 +641,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     );
   }
 
-  const focusBand = (selBand || selItem) && (
+  const focusBand = (selSeg || selNode || selItem) && (
     <div className="tl-below">
       <div className="tl-fx">
         <div className="tl-fxmain">
@@ -605,10 +673,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       <div className="tl-colbd">
         {rows.map((r) => {
           const its = r.items.filter((i) => i.ymd === work.ymd);
-          const bs = (bandsByRow.get(r.key) ?? []).filter((b) => {
-            const i = visible.indexOf(work.ymd);
-            return i >= b.fromIdx && i <= b.toIdx;
-          });
+          const i = visible.indexOf(work.ymd);
+          const bs = (barsByRow.get(r.key)?.segs ?? []).filter((sg) => i + 0.5 >= sg.from && i + 0.5 <= sg.to);
           const on = r.key === work.rowKey;
           return (
             <button key={r.key} type="button" className={`tl-crow${on ? " on" : " off"}`}
@@ -624,7 +690,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                   <span className="tl-cempty">nothing today</span>
                 ) : (
                   <span className="tl-cits">
-                    {bs.map((b) => <span key={b.key} className="tl-mini" data-kind="wait">{b.label}</span>)}
+                    {bs.map((sg) => <span key={sg.key} className="tl-mini" data-kind={sg.side === "yours" ? "turn" : "wait"}>{sg.overrun ? sg.count : sg.label}</span>)}
                     {its.map((i) => <span key={i.key} className="tl-mini" data-kind={i.kind}>{i.label}</span>)}
                   </span>
                 )}
@@ -640,7 +706,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const know: { k: string; v: string }[] = [];
   if (workQuery) {
     know.push({ k: "Status", v: workQuery.status });
-    know.push({ k: "Reply window", v: workBand ? `To ${shortCalDate(workBand.endYmd)} · ${expectedLine(workBand.expected)}` : "None resolvable" });
+    know.push({ k: "Reply window", v: workSeg ? workSeg.label : "None resolvable" });
     const mats = (workQuery.materialsWanted ?? []).map(formatQueryMaterial).filter(Boolean);
     if (mats.length) know.push({ k: "Materials", v: mats.join(", ") });
     if (workQuery.personalisationNotes) know.push({ k: "Your note", v: workQuery.personalisationNotes });
@@ -784,10 +850,9 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               </div>
               {/* ⚠️ AN EMPTY BOARD IS NOT A FAILURE STATE. No apology, no prompt to do more — a
                   writer with a quiet week is entitled to read that as good news, or as nothing. */}
-              {rows.length === 1 && rows[0].items.length === 0 && bands.length === 0 && (
+              {rows.length === 1 && rows[0].items.length === 0 && segments.length === 0 && (
                 <div className="tl-none">
-                  <p className="tl-none-t">A quiet week.</p>
-                  <p className="tl-none-s">Nothing scheduled · nothing waiting</p>
+                  <p className="tl-none-t">Nothing this week.</p>
                 </div>
               )}
             </TplZone>

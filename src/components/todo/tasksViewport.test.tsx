@@ -342,7 +342,11 @@ describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local 
        narrowing now happens inside `timelineWeek`, which is the ONLY producer of rows and bands,
        so a surface cannot read an unfiltered set: there is no unfiltered set to read. */
     expect(cal).toContain("timelineWeek(");
-    expect(cal).toContain("TL_DAYS, view)");
+    /* ⚠️ THE VIEW REACHES THE ONE DERIVATION — asserted as the argument rather than as a line of
+       source. The literal `TL_DAYS, view)` was the whole call on one line; the call grew a second
+       argument and wrapped, and the lock went red over a reformat. What it is FOR is that nothing
+       filters anywhere else, which the two clauses below say. */
+    expect(cal).toMatch(/timelineWeek\(\s*\{[\s\S]{0,400}?\},\s*winStart,\s*TL_DAYS,\s*view,?\s*\)/);
     expect(decomment(cal)).not.toContain("itemInKinds");
     expect(decomment(cal)).not.toContain("recordInKinds");
   });

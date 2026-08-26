@@ -30,9 +30,14 @@ import { queryBucket } from "./queryAmbient";
 import { resolveExpectedDate } from "./expectedDate";
 import { STATUS_ORDER } from "./statusOrder";
 import {
-  CalendarItem, RecordItem, GhostItem, RecordDir, ExpectedItem,
-  EXPECTED_PILL, pillLabel, draggableTask, toYmd,
+  CalendarItem, RecordItem, GhostItem, RecordDir,
+  pillLabel, draggableTask, toYmd,
 } from "./todoCalendar";
+import {
+  laneBars, statusIndex, sideOf,
+  type Segment, type BarNode, type Waypoint, type BarWindow,
+} from "./journeyBars";
+import type { Activity, Manuscript, TaskFlag } from "../types";
 
 /* ── the window ────────────────────────────────────────────────────────────────────────────── */
 
@@ -134,47 +139,25 @@ export interface TimelineRow {
   items: TimelineItem[];
   /** How many lanes the row's occupants packed into; at least 1, so an empty row still has height. */
   lanes: number;
+  /**
+   * The manuscripts this relationship spans, one per lane, in lane order.
+   *
+   * ⚠️ THE KEY IS AGENT × MANUSCRIPT AND THE HEAD IS PER AGENT. Two books with one agency is two
+   * LANES under one name, not two rows — a row is a relationship, and you have one relationship
+   * with an agency however many books you have sent them. The head names the books only when there
+   * is more than one, because naming the single obvious one is a line that says nothing.
+   */
+  manuscripts: { id: string; title: string }[];
   /** No live query — the row is history. Sinks below live rows in every sort. */
   closed: boolean;
 }
 
-export type BandSource = "agent" | "writer";
-
-export interface TimelineBand {
-  key: string;
-  rowKey: string;
-  fromIdx: number;
-  toIdx: number;
-  /** Began before the window — clamped to the left edge and marked, never drawn off-screen. */
-  openLeft: boolean;
-  /** Ends after the window — the same, at the other edge. */
-  openRight: boolean;
-  /**
-   * The end is behind today.
-   *
-   * ⚠️ A PASSED WINDOW SHOWS NOTHING NEW — no "expired" pill, no copy, no colour. The fact is
-   * "open, no reply", which the query and any nudge card already carry; an expiry state would be
-   * the app editorialising about an agent being late. This flag exists so the band can be drawn
-   * faded as a closed span, and for nothing else.
-   */
-  passed: boolean;
-  source: BandSource;
-  /** The resolved end, as a ymd — the fact the band was drawn from, carried rather than re-derived. */
-  endYmd: string;
-  /**
-   * The window as an `ExpectedItem`, so `expectedLine` stays the ONE producer of this copy.
-   *
-   * ⚠️ BUILT HERE BECAUSE `expectedDays` IS RETIRED, NOT ALONGSIDE IT. That function placed a pill
-   * on the window's own day, which a band supersedes; keeping it would have left a second
-   * construction of one shape, and two constructions of a shape are how two readings of it come to
-   * disagree. This is its construction, moved to its one remaining caller — the copy, its
-   * no-gendered-pronouns rule and its absent-clause handling are all still `expectedLine`'s.
-   */
-  expected: ExpectedItem;
-  queryId: string;
-  label: string;
-  lane: number;
-}
+/* ⚠️ `TimelineBand`, `BandSource` AND THE `ExpectedItem` IT CARRIED ARE RETIRED (bars pack,
+   Phase 3). A band was a whole reply window drawn as one span, which is what a grid of cells
+   forces; a `Segment` is a piece of one continuous journey between two interruptions, and it
+   carries which side holds the move. The window is still resolved by `resolveExpectedDate` and it
+   is still the thing the bar runs to — it is drawn as the bar's own end rather than as an object
+   of its own. `expectedLine` keeps its caller: the workspace's Know column. */
 
 /* ── the view's own options ────────────────────────────────────────────────────────────────── */
 
@@ -220,6 +203,12 @@ export const defaultView = (): TimelineView => ({
 export interface TimelineData {
   queries: readonly Query[];
   agents: readonly Agent[];
+  /** for the status join the side derivation needs — the page's own feed, unwindowed */
+  activities: readonly Activity[];
+  /** lane titles; the head names them only when a relationship spans more than one */
+  manuscripts: readonly Manuscript[];
+  /** a snooze is a waypoint on the bar and nothing else */
+  taskFlags: readonly TaskFlag[];
   itemsFor: (ymd: string) => CalendarItem[];
   recordFor: (ymd: string) => RecordItem[];
   /**
@@ -294,7 +283,7 @@ interface Draft {
   dot: RowDot;
   closed: boolean;
   items: TimelineItem[];
-  bands: TimelineBand[];
+  manuscripts: { id: string; title: string }[];
   /** everything the row held BEFORE the filters — see the emptying rule below */
   held: number;
   hasLive: boolean;
@@ -305,10 +294,16 @@ interface Draft {
   order: number;
 }
 
-export interface TimelineWeek { rows: TimelineRow[]; bands: TimelineBand[] }
+export interface TimelineWeek {
+  rows: TimelineRow[];
+  /** the journey bars' pieces — one bar per agent × manuscript, cut by its own interruptions */
+  segments: Segment[];
+  nodes: BarNode[];
+  waypoints: Waypoint[];
+}
 
 /**
- * The whole week in one pass — rows, their items, and the bands beneath them.
+ * The whole week in one pass — rows, their items, and the journey bars beneath them.
  */
 export function timelineWeek(
   data: TimelineData,
@@ -331,7 +326,7 @@ export function timelineWeek(
        with exactly one book; the row holds tasks from every manuscript and from none. A row that
        has nothing to say on its second line says nothing (the rows-omit-themselves law). */
     agency: "",
-    dot: "self", closed: false, items: [], bands: [], held: 0, hasLive: true,
+    dot: "self", closed: false, items: [], manuscripts: [], held: 0, hasLive: true,
     soonest: Infinity, waitingFrom: Infinity, stage: -1, order: -1,
   };
   drafts.set(YOU_ROW, you);
@@ -352,7 +347,7 @@ export function timelineWeek(
       agency: agentSecondary(agent),
       dot: turn === "you" ? "you" : turn === "them" ? "them" : "quiet",
       closed: !hasLive,
-      items: [], bands: [], held: 0, hasLive,
+      items: [], manuscripts: [], held: 0, hasLive,
       soonest: Infinity,
       waitingFrom: Infinity,
       /* journey stage — the most advanced LIVE query's place in the canonical order. Derived from
@@ -439,75 +434,110 @@ export function timelineWeek(
     }
   });
 
-  /* ── bands ──────────────────────────────────────────────────────────────────────────────── */
-  /* ⚠️ THE EXPECTED DATE IS THE BAND'S END, NOT ALSO A CHIP. On the month grid it was a pill on
-     its own day because a grid cannot draw a span; here the span is the whole point, and drawing
-     both would state one fact twice — the same law the record dedupe exists for. `expectedFor`
-     is consequently NOT read for chips; it is read for nothing, and the page stops calling it. */
+  /* ── the journey bars, one per agent × manuscript ───────────────────────────────────────── */
+  /**
+   * ⚠️ THE BAND IS RETIRED AND A SEGMENT IS NOT THE SAME THING. A band was a whole reply window
+   * drawn as one span; a segment is a PIECE of one continuous journey, between two interruptions,
+   * carrying which side holds the move. The bar is the sequence; the segments are what the breaks
+   * leave of it. Everything a band knew — the send, the resolved window, the source — the bar
+   * still reads, from the same functions, and draws as one object instead of one pill per fact.
+   *
+   * ⚠️ LANES ARE MANUSCRIPTS NOW, NOT PACKING. The greedy interval packing that kept two chips off
+   * each other still runs for the ITEMS; a lane index on a bar means "this book", which is why two
+   * manuscripts with one agency is two lanes under one head.
+   */
+  const statusOf = statusIndex(data.activities);
+  const msTitle = new Map(data.manuscripts.map((m) => [m.id, m.title]));
+  const barWin: BarWindow = { days: win, today: data.today, past: last < data.today };
+
+  /* which (agent, manuscript) pairs have a journey worth drawing, and which query speaks for each */
+  const laneOf = new Map<string, Map<string, Query>>();
   for (const q of data.queries) {
-    if (queryBucket(q.status) !== "waiting") continue;
-    const agent = q.agentId ? byAgent.get(q.agentId) : undefined;
-    /* the send anchor — the latest of the three stage sends. These are `recomputeQuery`'s own
-       output from the activity feed, so this IS the send activity, read once and shared, rather
-       than a second scan of `activities`. */
-    const sends = [q.dateSent, q.partialSentDate, q.fullSentDate]
-      .map((iso) => (iso ? new Date(iso as string).getTime() : NaN))
-      .filter((t) => !Number.isNaN(t));
-    if (!sends.length) continue; // a band needs a start, and a send is the only honest one
-    const sentMs = Math.max(...sends);
-    /* ⚠️ `null` FOR THE REPLY-STATED WINDOW, INHERITED AND DELIBERATE. An agent's window stated
-       inside a holding reply lives in the query's NESTED events, which only the reading pane
-       loads; the global feed this page holds carries no `replyWeeks`. Composing one from what is
-       here would be inventing data — so a query whose latest statement is a reply resolves from
-       the agency's standing weeks or the writer's own date, the same answer the To-do board gives
-       for the same query. */
-    const resolved = resolveExpectedDate(q, sentMs, agent?.responseTimeWeeks ?? null, null);
-    if (resolved.ms == null || (resolved.source !== "agent" && resolved.source !== "writer")) continue;
-    const fromYmd = toYmd(new Date(sentMs));
-    const toYmdEnd = toYmd(new Date(resolved.ms));
-    if (toYmdEnd < win[0] || fromYmd > last) continue; // wholly outside the window
-    const row = rowFor(q.agentId || null);
-    row.held += 1;
-    if (row.waitingFrom === Infinity || sentMs < row.waitingFrom) row.waitingFrom = sentMs;
-    if (!on.has("wait")) continue;
-    if (search && !rowMatches(row) && !EXPECTED_PILL.toLowerCase().includes(search)) continue;
-    const fromIdx = idxOf.get(fromYmd) ?? 0;
-    const toIdx = idxOf.get(toYmdEnd) ?? win.length - 1;
-    row.bands.push({
-      key: `band-${q.id}`,
-      rowKey: row.key,
-      fromIdx: Math.max(0, fromIdx),
-      toIdx: Math.min(win.length - 1, toIdx),
-      openLeft: fromYmd < win[0],
-      openRight: toYmdEnd > last,
-      passed: toYmdEnd < data.today,
-      source: resolved.source,
-      endYmd: toYmdEnd,
-      expected: {
-        key: `exp-${q.id}`,
-        ymd: toYmdEnd,
-        queryId: q.id,
-        agent: agentPrimary(agent),
-        source: resolved.source,
-        ...(resolved.source === "agent"
-          ? {
-              ...(typeof agent?.responseTimeWeeks === "number" ? { weeks: agent.responseTimeWeeks } : {}),
-              fromYmd,
-            }
-          : (() => {
-              /* ⚠️ AN UNSTAMPED WRITER'S DATE OMITS THE CLAUSE rather than inventing a moment —
-                 the rows-omit-themselves law, and `expectedLine` is written to expect the gap. */
-              const setAt = (q as { writerExpectedSetAt?: string }).writerExpectedSetAt;
-              const setYmd = setAt ? toYmd(new Date(setAt)) : null;
-              return setYmd ? { setYmd } : {};
-            })()),
-      },
-      queryId: q.id,
-      label: EXPECTED_PILL,
-      lane: 0,
+    if (!q.agentId) continue;
+    const key = agentRowKey(q.agentId);
+    const per = laneOf.get(key) ?? new Map<string, Query>();
+    const msId = q.manuscriptId || "";
+    const held = per.get(msId);
+    /* ⚠️ ONE QUERY SPEAKS FOR A LANE, and a live one always outranks a finished one. A writer who
+       queried the same agency about the same book twice has one relationship about that book; the
+       bar draws the journey that is still running, or the most recent one if none is. */
+    if (!held) per.set(msId, q);
+    else {
+      const heldLive = !isTerminalStatus(held.status);
+      const qLive = !isTerminalStatus(q.status);
+      const newer = String(q.dateSent ?? "") > String(held.dateSent ?? "");
+      if ((qLive && !heldLive) || (qLive === heldLive && newer)) per.set(msId, q);
+    }
+    laneOf.set(key, per);
+  }
+
+  const segments: Segment[] = [];
+  const nodes: BarNode[] = [];
+  const waypoints: Waypoint[] = [];
+
+  for (const [rowKey, per] of laneOf) {
+    const agentId = rowKey.slice("agent-".length);
+    const row = rowFor(agentId);
+    /* stable lane order: the manuscript titles, so the head reads the same way twice running */
+    const pairs = [...per.entries()].sort((a, b) =>
+      (msTitle.get(a[0]) ?? "").localeCompare(msTitle.get(b[0]) ?? "", "en-GB", { sensitivity: "base" }));
+    pairs.forEach(([msId, q], laneIdx) => {
+      const agent = q.agentId ? byAgent.get(q.agentId) : undefined;
+      const recs = win.flatMap((ymd, i) =>
+        data.recordFor(ymd).filter((r) => r.queryId === q.id).map((r) => ({ r, i })))
+        .sort((a, b) => a.i - b.i)
+        .map((x) => x.r);
+      /* the card's own words for a your-move stretch — `pillLabel`'s output, never re-summarised */
+      const card = win.flatMap((ymd) => data.itemsFor(ymd))
+        .find((it) => it.card?.relatedRecordId === q.id);
+      const flag = data.taskFlags.find((f) => f.queryId === q.id && !!f.snoozedUntil) ?? null;
+
+      const bars = laneBars({
+        rowKey, lane: laneIdx, query: q, agent: agent ?? null, records: recs,
+        statusOf: (id) => statusOf.get(id) ?? null,
+        flag,
+        ...(card ? { moveLabel: pillLabel(card) } : {}),
+      }, barWin);
+
+      const drawn = bars.segments.length + bars.nodes.length + bars.waypoints.length;
+      if (drawn > 0) {
+        row.held += 1;
+        if (row.manuscripts.every((m) => m.id !== msId)) {
+          row.manuscripts.push({ id: msId, title: msTitle.get(msId) ?? "" });
+        }
+        const sends = [q.dateSent, q.partialSentDate, q.fullSentDate]
+          .map((iso) => (iso ? new Date(iso as string).getTime() : NaN))
+          .filter((t) => !Number.isNaN(t));
+        if (sends.length) {
+          const sentMs = Math.min(...sends);
+          if (row.waitingFrom === Infinity || sentMs < row.waitingFrom) row.waitingFrom = sentMs;
+        }
+      }
+
+      /* ⚠️ THE FILTERS NARROW WHICH SIDES ARE DRAWN, not which rows exist — a bar is the row's
+         whole story, so hiding "their move" hides those stretches and leaves the rest of the
+         journey standing. The nodes and waypoints belong to the bar and travel with it. */
+      const wantTheirs = on.has("wait");
+      const wantYours = on.has("turn");
+      const searchOk = (text: string) => !search || rowMatches(row) || text.toLowerCase().includes(search);
+      const keep = bars.segments.filter((sg) =>
+        (sg.side === "theirs" ? wantTheirs : wantYours) && searchOk(sg.label));
+      /* ⚠️ THE THREE PARTS ARE FILTERED SEPARATELY, and gating the nodes on the segments surviving
+         was a real fault: a closure on the window's first day leaves NO drawable stretch — the
+         piece before it is narrower than the floor — so the whole event vanished with it. An event
+         is a fact about a day; whether a stretch fits beside it is a question about pixels. */
+      const keepNodes = on.has("rec") ? bars.nodes.filter((n) => searchOk(n.caption)) : [];
+      const keepWays = keep.length || keepNodes.length ? bars.waypoints : [];
+      if (!keep.length && !keepNodes.length) return;
+      segments.push(...keep);
+      nodes.push(...keepNodes);
+      waypoints.push(...keepWays);
+      const first = Math.min(...[...keep.map((sg) => sg.from), ...keepNodes.map((n) => n.at)]);
+      if (first < row.soonest) row.soonest = first;
+      /* the row's dot follows the lane that is the writer's move, if any */
+      if (keep.some((sg) => sg.side === "yours")) row.dot = "you";
+      else if (row.dot !== "you" && sideOf(q.status) === "theirs") row.dot = "them";
     });
-    const start = Math.max(0, fromIdx);
-    if (start < row.soonest) row.soonest = start;
   }
 
   /* ── which rows survive ─────────────────────────────────────────────────────────────────── */
@@ -524,7 +554,7 @@ export function timelineWeek(
   const kept: Draft[] = [];
   for (const row of drafts.values()) {
     if (row.key === YOU_ROW) { kept.push(row); continue; } // pinned: always, even empty
-    const alive = row.items.length + row.bands.length;
+    const alive = row.items.length + (segments.filter((sg) => sg.rowKey === row.key).length);
     /* ⚠️ "Needs me" IS A QUESTION ABOUT WORK, so it takes none of the exemptions below: an empty
        row is not work, and keeping quiet relationships in it would answer a different question
        from the one asked. */
@@ -569,26 +599,46 @@ export function timelineWeek(
 
   const ordered = [you, ...rest];
 
-  /* ── lanes, packed across items AND bands together ──────────────────────────────────────── */
+  /* ── lanes ──────────────────────────────────────────────────────────────────────────────── */
+  /**
+   * ⚠️ TWO KINDS OF LANE, AND THEY ARE NOT THE SAME MECHANISM. A BAR's lane is a MANUSCRIPT — it
+   * means "this book", and it is assigned where the bars are built. An ITEM's lane is PACKING —
+   * it means "the first line where this chip does not collide", and it is assigned here by the
+   * same greedy pass as before. A row's height takes whichever needs more room.
+   *
+   * ⚠️ SO ITEMS PACK ROUND THE BARS RATHER THAN BESIDE THEM: a chip is given a lane at or below
+   * the bars', which is what stops a task chip landing on top of a journey it has nothing to do
+   * with. Bars occupy their own lanes wholly, so they enter the pass as full-width occupants.
+   */
   const rows: TimelineRow[] = [];
-  const bands: TimelineBand[] = [];
   for (const row of ordered) {
-    const occ: (Occupant & { it?: TimelineItem; bd?: TimelineBand })[] = [
-      ...row.items.map((it) => ({ start: it.idx, end: it.idx, lane: 0, spanTo: it.idx, it })),
-      ...row.bands.map((bd) => ({ start: bd.fromIdx, end: bd.toIdx, lane: 0, spanTo: bd.toIdx, bd })),
-    ].sort((a, b) => (a.start - b.start) || (a.end - b.end));
-    const lanes = packLanes(occ, Math.max(1, win.length));
+    const mine = segments.filter((sg) => sg.rowKey === row.key);
+    const barLanes = mine.length ? Math.max(...mine.map((sg) => sg.lane)) + 1 : 0;
+    const occ: (Occupant & { it?: TimelineItem })[] = row.items
+      .map((it) => ({ start: it.idx, end: it.idx, lane: 0, spanTo: it.idx, it }))
+      .sort((a, b) => (a.start - b.start) || (a.end - b.end));
+    const packed = packLanes(occ, Math.max(1, win.length));
     for (const o of occ) {
-      if (o.it) { o.it.lane = o.lane; o.it.spanTo = Math.max(o.it.idx, o.spanTo); }
-      if (o.bd) o.bd.lane = o.lane;
+      o.it!.lane = o.lane + barLanes;
+      o.it!.spanTo = Math.max(o.it!.idx, o.spanTo);
     }
     rows.push({
       key: row.key, agentId: row.agentId, name: row.name, agency: row.agency,
-      dot: row.dot, items: row.items, lanes, closed: row.closed,
+      dot: row.dot, items: row.items,
+      lanes: Math.max(1, barLanes + (row.items.length ? packed : 0)),
+      manuscripts: row.manuscripts, closed: row.closed,
     });
-    bands.push(...row.bands);
   }
-  return { rows, bands };
+  const keys = new Set(rows.map((r) => r.key));
+  /* ⚠️ A BAR WHOSE ROW DID NOT SURVIVE IS DROPPED HERE, not left to render against nothing. The
+     row rules and the bar derivation are one pass, so this cannot go stale — but a segment
+     pointing at a row that was filtered out is exactly the shape that draws in the wrong place. */
+  return {
+    rows,
+    segments: segments.filter((sg) => keys.has(sg.rowKey)),
+    nodes: nodes.filter((n) => keys.has(n.rowKey)),
+    waypoints: waypoints.filter((w) => keys.has(w.rowKey)),
+  };
 }
 
 /** The rows — a projection of `timelineWeek`, which is the one derivation. */
@@ -598,9 +648,9 @@ export function timelineRows(
   return timelineWeek(data, windowStart, days, view).rows;
 }
 
-/** The bands — the same pass, so a band and a chip can never be given the same lane. */
-export function timelineBands(
+/** The bars' pieces — the same pass, so a bar and a chip can never be given the same lane. */
+export function timelineSegments(
   data: TimelineData, windowStart: string, days: number, view?: TimelineView,
-): TimelineBand[] {
-  return timelineWeek(data, windowStart, days, view).bands;
+): Segment[] {
+  return timelineWeek(data, windowStart, days, view).segments;
 }
