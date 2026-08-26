@@ -4307,7 +4307,15 @@ export const Queries: React.FC<{
                   setIsMarkSentOpen(false);
                   setIsRecordResponseFocusFormOpen(true);
                 }}
-                onSave={async ({ sentDate, writerExpectedDate, nudgeDate }) => {
+                /**
+                 * ⚠️ THE VERSIONS AND THE PRE-FILL COME FROM THE SAME DERIVATIONS THE PANE READS
+                 * (Part E, D5). `openingRead` reaches the version THROUGH the package's sample, so
+                 * the field's default and the "Opening read" line beneath the strip cannot disagree
+                 * — they are one derivation with two readers.
+                 */
+                bookVersions={activeBookVersions}
+                readVersion={openingRead(activeQuery, packages, versions, activeBookVersions)}
+                onSave={async ({ sentDate, writerExpectedDate, nudgeDate, bookVersionId }) => {
                   await recordMaterialsSent({
                     queryId: activeQuery.id,
                     targetStatus: a2.target as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT,
@@ -4315,6 +4323,8 @@ export const Queries: React.FC<{
                     isResubmit: a2.markKind === "resubmit",
                     writerExpectedDate,
                     nudgeDate,
+                    /* undefined where nothing was chosen — the write path omits the key (D7) */
+                    bookVersionId,
                   });
                 }}
               />

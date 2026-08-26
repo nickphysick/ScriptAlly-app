@@ -326,6 +326,18 @@ interface DbContextType {
     isResubmit?: boolean;
     writerExpectedDate?: string; // ISO — optional; §2: the writer stating when they expect a reply
     nudgeDate?: string; // ISO — optional, set when a nudge reminder is chosen
+    /**
+     * Which BOOK version this send carried (Part E, D6). Optional, and absent means NOT RECORDED.
+     *
+     * ⚠️ THE TWO-ACTIVITY-TYPE RULE IS ENFORCED BY `targetStatus`'S TYPE, not by a check. That
+     * parameter is already `PARTIAL_SENT | FULL_SENT` and nothing else, so this seam cannot put a
+     * version on any other kind of event — the strongest form the restriction can take, and it was
+     * here before the feature was.
+     *
+     * ⚠️ AND IT IS PAYLOAD. `recomputeQuery` does not read it, so a version can never move a
+     * status, a count or a date.
+     */
+    bookVersionId?: string;
   }) => Promise<void>;
   /** Phase 3 — a reply that decides nothing. Non-status by construction; see lib/holdingReply.ts. */
   recordHoldingReply: (
@@ -2360,9 +2372,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
      * the timeline reads, and "on file" is what the label promised.
      */
     note?: string;
+      /** Part E, D6 — see the interface above. Absent means not recorded. */
+    bookVersionId?: string;
   }) => {
     if (!currentUser) return;
-    const { queryId, targetStatus, sentDate, isResubmit, writerExpectedDate, nudgeDate, note } = args;
+    const { queryId, targetStatus, sentDate, isResubmit, writerExpectedDate, nudgeDate, note, bookVersionId } = args;
     const targetQ = queries.find(q => q.id === queryId);
     if (!targetQ) return;
 
@@ -2410,6 +2424,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       date: sentISO,
       details,
       resultingStatus: targetStatus,
+      /**
+       * ⚠️ THE KEY IS OMITTED WHEN NOTHING WAS CHOSEN (D7). `NOT RECORDED` is the ordinary case —
+       * no send predating this feature carries a version, and the sample may carry none either — so
+       * an unrecorded default must never become a recorded value on save. A stored `""` would be
+       * exactly that: a value the writer never chose, indistinguishable from one they did.
+       */
+      ...(bookVersionId ? { bookVersionId } : {}),
     };
 
     try {

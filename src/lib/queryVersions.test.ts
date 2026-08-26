@@ -15,7 +15,7 @@ import {
   openingRead, manuscriptHeld, versionMatch, MATCH_NOTE, listVersion, sendVersionDefault,
   VERSIONED_SENDS, versionsActive,
 } from "./queryVersions";
-import { ComponentType, QueryStatus } from "../types";
+import { ActivityType, ComponentType, QueryStatus } from "../types";
 import type { Activity, BookVersion, ManuscriptVersion, Query, SubmissionPackage } from "../types";
 
 const root = join(__dirname, "..", "..");
@@ -199,5 +199,73 @@ describe("D1 — editActivity accepts the version, and clears by DELETING", () =
     const i = rules.indexOf("'activityType', 'description', 'date', 'details'");
     expect(i, "the activity update allowlist has moved").toBeGreaterThan(-1);
     expect(rules.slice(i, rules.indexOf("])", i))).toContain("'bookVersionId'");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("D4 — the field reaches exactly two activity types, enumerated", () => {
+  const db = readFileSync(join(root, "src/lib/db.tsx"), "utf8");
+  const pop = readFileSync(join(root, "src/components/MarkSentPopover.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  /**
+   * ⚠️ ENUMERATED AGAINST THE REAL ENUM, not a hand-written pair. A literal list on both sides
+   * would go green the day a status was added — the standing rule that a test must be handed what
+   * the app can actually produce.
+   */
+  it("every ActivityType other than a materials send has no version path", () => {
+    const types = Object.values(ActivityType);
+    expect(types.length, "ActivityType is empty — has it moved?").toBeGreaterThan(8);
+    /* the ONE writer that attaches a version is `recordMaterialsSent`, whose `targetStatus` is
+       typed `PARTIAL_SENT | FULL_SENT` — so the restriction is the type system's, not a check. */
+    expect(db).toContain("targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT");
+    const writers = [...db.matchAll(/\.\.\.\(bookVersionId \? \{ bookVersionId \} : \{\}\)/g)];
+    expect(writers.length, "more than one place attaches a version to an activity").toBe(1);
+  });
+
+  it("⚠️ and no OTHER status can reach that seam", () => {
+    /* Named individually so the failure says which one leaked. */
+    for (const s of [QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED,
+                     QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.REJECTED,
+                     QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]) {
+      expect(VERSIONED_SENDS, `${s} can carry a version`).not.toContain(s);
+    }
+    expect(VERSIONED_SENDS).toHaveLength(2);
+  });
+
+  it("D8 — the field is gated on two versions, once, in the form", () => {
+    expect(pop).toContain("const showVersionField = bookVersions.length >= 2");
+    expect(pop).toContain("{showVersionField && (");
+  });
+
+  it("⚠️ D7 — an unrecorded default sends `undefined`, never `\"\"`", () => {
+    /* The fault this forecloses: an empty select silently becoming a recorded value on save. */
+    expect(pop).toContain("bookVersionId: bookVersionId || undefined");
+    expect(db).toContain("...(bookVersionId ? { bookVersionId } : {})");
+  });
+
+  it("D5 — the pre-fill is the shared derivation, not a local fallback", () => {
+    expect(pop).toContain("useState(sendVersionDefault(readVersion))");
+    expect(pop).not.toMatch(/useState\(readVersion\?\.id/);
+  });
+
+  it("⚠️ D6 — no warning, no confirmation, no verdict on changing it", () => {
+    const i = pop.indexOf("showVersionField && (");
+    expect(i, "the version block has moved").toBeGreaterThan(-1);
+    const block = pop.slice(i, pop.indexOf("{requestedMaterial", i));
+    expect(block.length, "the slice found no block").toBeGreaterThan(200);
+    for (const w of ["confirm", "are you sure", "warning", "careful", "check that", "double-check"]) {
+      expect(block.toLowerCase(), `the field warns: "${w}"`).not.toContain(w);
+    }
+    /**
+     * ⚠️ "MISTAKE" IS NOT IN THAT LIST, AND THE FIRST DRAFT PUT IT THERE — where it caught the ref's
+     * own sentence, "that's a fact worth recording, not a mistake". That clause is the OPPOSITE of a
+     * warning: it is the app saying the unusual answer is legitimate. Banning the token rather than
+     * the act is the same shape as a rule naming one hue.
+     *
+     * So the copy is asserted POSITIVELY instead. It is normative from the ref, and locking it here
+     * is stronger than guessing at what its absence would look like.
+     */
+    expect(block).toContain("fact worth recording, not a mistake");
   });
 });

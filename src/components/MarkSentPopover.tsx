@@ -24,6 +24,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Send, Bell, X } from "lucide-react";
 import { Agent, Query } from "../types";
+import type { BookVersion } from "../types";
+import { sendVersionDefault } from "../lib/queryVersions";
 import { agentPrimary } from "../lib/agentDisplay";
 import { BrandDatePicker } from "./forms";
 import { formatQueryMaterial } from "../lib/materials";
@@ -45,7 +47,16 @@ export interface MarkSentPopoverProps {
   onRecordResponseInstead: () => void;
   /* ⚠️ §2 · `writerExpectedDate` — the writer is stating when they expect to hear back, so the
      prop is named for the column that holds writer-stated dates. */
-  onSave: (args: { sentDate: string; writerExpectedDate?: string; nudgeDate?: string }) => Promise<void>;
+  onSave: (args: { sentDate: string; writerExpectedDate?: string; nudgeDate?: string; bookVersionId?: string }) => Promise<void>;
+  /**
+   * The manuscript's BOOK versions, and the one the agent READ (Part E, D5–D8).
+   *
+   * ⚠️ FEWER THAN TWO AND THE FIELD NEVER APPEARS (D8) — there is nothing to choose between. The
+   * host passes the list; the gate is applied here, once.
+   */
+  bookVersions?: readonly BookVersion[];
+  /** The version on the sample in the package that went out — the pre-fill, and the note's subject. */
+  readVersion?: BookVersion | null;
 }
 
 const todayISO = () => new Date().toISOString().split("T")[0];
@@ -75,7 +86,7 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
   triggerRef,
   onClose,
   onRecordResponseInstead,
-  onSave,
+  onSave, bookVersions = [], readVersion = null,
 }) => {
   const popRef = useRef<HTMLDivElement>(null);
 
@@ -92,6 +103,16 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
   const [materialConfirmed, setMaterialConfirmed] = useState(true);
 
   // Reminder — de-emphasised behind a "Set a reminder" link. Auto-fills sentDate + responseTime.
+  /**
+   * ⚠️ SEEDED FROM WHAT THEY READ, AND `""` WHEN NOTHING IS KNOWN (D5/D7). `sendVersionDefault` is
+   * the shared derivation rather than a local `?? ""` — a pre-filled answer the writer did not give
+   * is this app's recorded fault class, and the empty string is what makes "not recorded" a real
+   * option rather than a hole the form fills in.
+   */
+  const [bookVersionId, setBookVersionId] = useState(sendVersionDefault(readVersion));
+  /* ⚠️ THE GATE, ONCE (D8). Below two versions there is nothing to choose between. */
+  const showVersionField = bookVersions.length >= 2;
+
   const [wantReminder, setWantReminder] = useState(false);
   const [expectedDate, setExpectedDate] = useState("");
   const expectedEdited = useRef(false);
@@ -129,7 +150,10 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
     setSaving(true);
     try {
       const reminder = wantReminder && expectedDate ? expectedDate : undefined;
-      await onSave({ sentDate, writerExpectedDate: reminder, nudgeDate: reminder });
+      /* ⚠️ AN EMPTY SELECT SENDS NOTHING (D7) — `undefined`, not `""`, so the write path omits the
+         key rather than storing a version the writer never chose. */
+      await onSave({ sentDate, writerExpectedDate: reminder, nudgeDate: reminder,
+        bookVersionId: bookVersionId || undefined });
       onClose();
     } catch {
       setSaving(false);
@@ -172,6 +196,53 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
       </div>
 
       {/* What you sent — optional confirmation chip */}
+      {/**
+        * ⚠️ ONE PRE-FILLED SELECT, ON THE TWO SEND FLOWS ONLY (D4–D7).
+        *
+        * The common case is one click and no thought: the right answer is already selected, and the
+        * field costs something only when the truth is unusual — exactly when recording it is worth
+        * anything.
+        *
+        * ⚠️ CHANGING IT RECORDS A DELIBERATE DIFFERENCE, NOT A MISTAKE (D6). No warning, no
+        * confirmation, no verdict — sending a revision on purpose is ordinary, and the app's job is
+        * to keep the record true rather than to ask whether the writer meant it.
+        *
+        * ⚠️ AND WHERE NOTHING IS KNOWN IT SAYS SO AND STORES NOTHING (D7). `Not recorded` is the
+        * ordinary case — no send predating this feature carries a version, and the package's sample
+        * may carry none either — so the default is the empty option and saving it writes no key.
+        */}
+      {showVersionField && (
+        <div className="mb-2.5">
+          <label htmlFor="ms-bookversion" className="block text-[10px] uppercase font-bold text-[var(--n6)] tracking-wider mb-1">
+            Version sent
+          </label>
+          {readVersion ? (
+            <p className="text-[11px] leading-snug text-[var(--n6)] mb-1.5">
+              {agent.name} read <strong className="font-semibold text-[#7c3a2a]">{readVersion.name}</strong> in
+              the sample you queried with. That&rsquo;s pre-selected below.
+            </p>
+          ) : (
+            /* ⚠️ SAID, NOT GUESSED. Silence here would let the empty option read as a choice. */
+            <p className="text-[11px] leading-snug text-[var(--n6)] mb-1.5">
+              No version is recorded for the sample you queried with.
+            </p>
+          )}
+          <select
+            id="ms-bookversion"
+            value={bookVersionId}
+            onChange={(e) => setBookVersionId(e.target.value)}
+            className="w-full text-[12px] rounded-[8px] border border-[var(--n4)] bg-white px-2.5 py-1.5 text-[var(--n8)]"
+          >
+            <option value="">— not recorded —</option>
+            {bookVersions.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
+          </select>
+          <p className="text-[10px] leading-snug text-[var(--n6)] mt-1">
+            Which version you actually sent. Change it if you sent something else &mdash; that&rsquo;s a
+            fact worth recording, not a mistake.
+          </p>
+        </div>
+      )}
+
       {requestedMaterial && (
         <>
           <label className="block text-[10px] uppercase font-bold text-[var(--n6)] tracking-wider mb-1">What you sent</label>
