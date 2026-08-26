@@ -2444,7 +2444,23 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       //    from it, and the reading-pane timeline renders it.
       //  - the global `activities` feed is its projection for the Dashboard.
       const manuscriptTitle = manuscripts.find(m => m.id === targetQ.manuscriptId)?.title || "";
-      const subRef = doc(collection(db, "users", currentUser.id, "queries", queryId, "activity"));
+      /**
+       * ⚠️ ONE ID FOR BOTH STORES, AND THIS WRITER IS WHY EVERY DELETE PRIMITIVE HAD A HOLE (26 Aug).
+       *
+       * It used to mint an AUTO-GENERATED id here and a separate `act-<random>` for the feed, so the
+       * same event lived under two different ids and nothing could pair them by id. That is the root
+       * of all three faults found last night: `undoQueryStatus` matching the projection heuristically
+       * against React state, `deleteActivity` swallowing a same-id miss on the AUTHORITATIVE store,
+       * and `editActivity` patching one store and calling the divergence cosmetic. Every other
+       * writer in this file already paired them; this one did not, and no test could see it because
+       * both writes succeed.
+       *
+       * ⚠️ HISTORICAL ROWS STAY DIVERGENT, which is why `removeActivityEverywhere` still carries its
+       * (query, status, nearest time) fallback. This stops the divergence being CREATED; it does not
+       * retro-pair what is already on the account.
+       */
+      const actId = "act-" + Math.random().toString(36).substr(2, 9);
+      const subRef = doc(db, "users", currentUser.id, "queries", queryId, "activity", actId);
       await setDoc(subRef, {
         type: targetStatus,
         resultingStatus: targetStatus,
@@ -2454,7 +2470,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         agentName: agent?.name || "The agent",
         manuscriptTitle,
       });
-      const actId = "act-" + Math.random().toString(36).substr(2, 9);
       await setDoc(doc(db, "users", currentUser.id, "activities", actId), { ...activity, id: actId });
       await recompute(queryId);
     } catch (e) {
@@ -2502,6 +2517,98 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * which recompute supersedes. `previousStatus` is unused (derivation produces it);
    * `newStatus` is used only to prefer deleting the exact entry the undone change created.
    */
+  /**
+   * ⚠️ THE ONE WAY AN ACTIVITY LEAVES — BOTH STORES, OR NEITHER (26 Aug).
+   *
+   * An event lives twice: as a document in the query's own `activity` subcollection, which is
+   * AUTHORITATIVE (`recomputeQuery` derives from it and the reading pane renders it), and as a row
+   * in the global `activities` feed, which is its PROJECTION. Three primitives removed or patched
+   * them one at a time and each swallowed the failure of the second — `undoQueryStatus` matched the
+   * projection heuristically against React state and called it "best-effort", while `deleteActivity`
+   * and `editActivity` tried the same id and caught the miss with a comment saying an independent
+   * id was cosmetic.
+   *
+   * ⚠️ IT IS NOT COSMETIC IN EITHER DIRECTION, AND ONE IS MUCH WORSE. A surviving PROJECTION shows a
+   * close on a query that re-derived to Queried — the timeline and the status disagreeing, which is
+   * what was found on the harness account. A surviving SUBCOLLECTION doc is worse: the writer deletes
+   * a rejection from the timeline and `recomputeQuery` goes on deriving Rejected from the copy
+   * nobody can see.
+   *
+   * ⚠️ AND THE IDS DIVERGE, WHICH IS THE ROOT OF ALL THREE. `recordMaterialsSent` minted an
+   * auto-generated id for the subcollection and a separate `act-<random>` for the feed, so no
+   * delete-by-id could ever pair them — which is precisely why each caller had grown a heuristic.
+   * That writer is fixed in this commit; this function still pairs historical rows by
+   * (queryId, resultingStatus, nearest time) so the data written before it can be cleaned up.
+   *
+   * ⚠️ ATOMIC BY BATCH. A `writeBatch` commits all of its deletes or none, so a failure cannot leave
+   * the pair half-removed — the state every caller used to be able to produce.
+   *
+   * Returns the ids it removed, so a caller can say what it did.
+   */
+  const removeActivityEverywhere = async (
+    queryId: string,
+    /** may name EITHER store — the two are paired by every writer but one, and resolved below */
+    id: string,
+  ): Promise<{ sub: string | null; feed: string | null }> => {
+    if (!currentUser) return { sub: null, feed: null };
+    const uid = currentUser.id;
+
+    /**
+     * ⚠️ IT ACCEPTS EITHER ID, AND THE FIRST VERSION OF THIS DID NOT — which would have been a
+     * REGRESSION rather than a fix. `deleteActivity`'s caller holds a FEED id; `undoQueryStatus`
+     * holds a SUBCOLLECTION one. A primitive taking only the latter would have found nothing for
+     * the former on exactly the divergent-id rows it exists to clean up, and deleted neither.
+     */
+    const subRef = doc(db, "users", uid, "queries", queryId, "activity", id);
+    const feedRefById = doc(db, "users", uid, "activities", id);
+    const [subSnap, feedSnap] = await Promise.all([getDoc(subRef), getDoc(feedRefById)]);
+
+    let subId: string | null = subSnap.exists() ? id : null;
+    let feedId: string | null = feedSnap.exists() ? id : null;
+
+    /**
+     * ⚠️ THE HISTORICAL FALLBACK, AND IT IS DELIBERATELY NARROW. Same query, same resulting status,
+     * closest timestamp. Anything looser deletes a DIFFERENT event that happens to share a status,
+     * which on a query with two rejections is a real possibility. A row carrying no status at all
+     * is left alone rather than guessed at.
+     */
+    const near = <T,>(xs: { id: string; t: number }[], at: number): string | null =>
+      xs.length ? xs.map((x) => ({ id: x.id, d: Math.abs(x.t - at) })).sort((a, b) => a.d - b.d)[0].id : null;
+
+    if (subId && !feedId) {
+      const d = subSnap.data() as Record<string, unknown>;
+      const want = d.resultingStatus ?? d.type ?? null;
+      const raw = (d.createdAt as { toDate?: () => Date })?.toDate?.().toISOString() ?? (d.createdAt as unknown as string);
+      if (want !== null) {
+        feedId = near(activities.filter((a) => a.queryId === queryId && a.resultingStatus === want)
+          .map((a) => ({ id: a.id, t: getActivityTime(a.date) })), getActivityTime(raw));
+      }
+    } else if (feedId && !subId) {
+      const f = activities.find((a) => a.id === id);
+      const want = f?.resultingStatus ?? null;
+      if (want !== null) {
+        const all = await getDocs(collection(db, "users", uid, "queries", queryId, "activity"));
+        const cands = all.docs
+          .filter((x) => { const v = x.data() as Record<string, unknown>; return (v.resultingStatus ?? v.type) === want; })
+          .map((x) => {
+            const v = x.data() as Record<string, unknown>;
+            const raw = (v.createdAt as { toDate?: () => Date })?.toDate?.().toISOString() ?? (v.createdAt as unknown as string);
+            return { id: x.id, t: getActivityTime(raw) };
+          });
+        subId = near(cands, getActivityTime(f?.date));
+      }
+    }
+
+    if (!subId && !feedId) return { sub: null, feed: null };
+    /* ⚠️ ATOMIC. A batch commits all of its deletes or none, so a failure cannot leave the pair
+       half-removed — the state every caller used to be able to produce. */
+    const batch = writeBatch(db);
+    if (subId) batch.delete(doc(db, "users", uid, "queries", queryId, "activity", subId));
+    if (feedId) batch.delete(doc(db, "users", uid, "activities", feedId));
+    await batch.commit();
+    return { sub: subId, feed: feedId };
+  };
+
   const undoQueryStatus = async (queryId: string, _previousStatus: QueryStatus, newStatus: QueryStatus) => {
     if (!currentUser) return;
 
@@ -2517,22 +2624,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         docs[docs.length - 1];
 
       if (target) {
-        await deleteDoc(target.ref);
-
-        // Best-effort: remove the matching global-feed projection row (same query, same
-        // resultingStatus, latest). Legacy rows without resultingStatus can't be matched — the
-        // feed is a projection, so an orphan row there can no longer corrupt status.
-        const projection = activities
-          .filter(act => act.queryId === queryId && act.resultingStatus === target.derivable.resultingStatus)
-          .sort((a, b) => getActivityTime(a.date) - getActivityTime(b.date))
-          .pop();
-        if (projection) {
-          try {
-            await deleteDoc(doc(db, "users", currentUser.id, "activities", projection.id));
-          } catch (e) {
-            console.error("Undo: global-feed projection delete failed (non-fatal):", e);
-          }
-        }
+        /* ⚠️ ONE PRIMITIVE, BOTH STORES, ATOMICALLY (26 Aug). This deleted the authoritative doc and
+           then made a BEST-EFFORT attempt at the projection, matched heuristically against React
+           state and logged on failure. Measured on the harness account: the subcollection doc went,
+           the feed row stayed, and the query read Queried while its timeline still showed a close.
+           `removeActivityEverywhere` pairs them — by id, or by (query, status, nearest time) for the
+           rows one writer minted with divergent ids — and commits both in one batch. */
+        await removeActivityEverywhere(queryId, target.ref.id);
       }
 
       await recompute(queryId);
@@ -2939,8 +3037,30 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const uid = currentUser.id;
 
     const logRef = doc(db, "users", uid, "queries", fromQueryId, "activity", activityId);
-    const feedRef = doc(db, "users", uid, "activities", activityId);
-    const [logSnap, feedSnap] = await Promise.all([getDoc(logRef), getDoc(feedRef)]);
+    /**
+     * ⚠️ THE FEED TWIN IS RESOLVED, NOT ASSUMED (26 Aug). This took the same id in both stores; where
+     * `recordMaterialsSent` minted divergent ones the lookup missed, `feedAfter` fell to null, and
+     * the move left the projection still naming the OLD query — the same hole as the three delete
+     * primitives, in the one operation whose entire purpose is to change which query an event
+     * belongs to. Same narrow fallback: same query, same status, nearest time.
+     */
+    let feedRef = doc(db, "users", uid, "activities", activityId);
+    let [logSnap, feedSnap] = await Promise.all([getDoc(logRef), getDoc(feedRef)]);
+    if (logSnap.exists() && !feedSnap.exists()) {
+      const d = logSnap.data() as Record<string, unknown>;
+      const want = d.resultingStatus ?? d.type ?? null;
+      if (want !== null) {
+        const raw = (d.createdAt as { toDate?: () => Date })?.toDate?.().toISOString() ?? (d.createdAt as unknown as string);
+        const at = getActivityTime(raw);
+        const cands = activities.filter((a) => a.queryId === fromQueryId && a.resultingStatus === want);
+        if (cands.length) {
+          const best = cands.map((a) => ({ id: a.id, d: Math.abs(getActivityTime(a.date) - at) }))
+            .sort((x, y) => x.d - y.d)[0].id;
+          feedRef = doc(db, "users", uid, "activities", best);
+          feedSnap = await getDoc(feedRef);
+        }
+      }
+    }
     if (!logSnap.exists()) return { success: false, error: "That entry is no longer on this query.", undo: noop };
 
     const logBefore = logSnap.data() as Record<string, unknown>;
@@ -3001,13 +3121,22 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const target = activities.find(act => act.id === id);
 
     try {
-      await deleteDoc(doc(db, "users", currentUser.id, "activities", id));
-      if (target?.queryId) {
-        try {
-          await deleteDoc(doc(db, "users", currentUser.id, "queries", target.queryId, "activity", id));
-        } catch {
-          // No same-id twin in the authoritative log — nothing status-bearing to remove.
-        }
+      /* ⚠️ AN ACTIVITY WITH NO QUERY IS FEED-ONLY, and dropping it here would have been a second
+         regression of my own making: the old code deleted the feed row OUTSIDE this branch, so a
+         "Added new title" row would have stopped being deletable at all. */
+      if (!target?.queryId) {
+        await deleteDoc(doc(db, "users", currentUser.id, "activities", id));
+      } else {
+        /**
+         * ⚠️ THE AUTHORITATIVE DOC FIRST, AND BOTH IN ONE BATCH (26 Aug). This deleted the FEED row
+         * and then tried the subcollection twin by the same id inside a swallowing catch — whose
+         * comment read "No same-id twin in the authoritative log — nothing status-bearing to
+         * remove". That is exactly backwards where the ids diverge: the twin exists, the delete
+         * misses it, and the writer removes a rejection from the timeline while `recomputeQuery`
+         * goes on deriving Rejected from the copy nobody can see. Of the three primitives that
+         * carried this hole it was the dangerous one, because it left the AUTHORITATIVE store dirty.
+         */
+        await removeActivityEverywhere(target.queryId, id);
         await recompute(target.queryId);
         // A deleted NUDGE must FULLY undo (the delete-desync fix): recompute derives status/dates but
         // never touches nudgeDate/lastNudgeSentDate, which grace + tasks read. Re-derive that snapshot
@@ -3093,14 +3222,43 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           ? deleteField()
           : patch.bookVersionId;
       }
-      if (Object.keys(subPatch).length > 0) {
-        await updateDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", activityId), subPatch);
+      /**
+       * ⚠️ BOTH STORES OR NEITHER (26 Aug). The projection patch was a swallowed best-effort whose
+       * comment read "Projection row has an independent id — cosmetic only, recompute doesn't read
+       * it". It is not cosmetic: an edit that reaches the authoritative log and misses the feed
+       * leaves the DASHBOARD stating the old wording, the old date or the old status of an event the
+       * writer has corrected — and the correction UI is built on this primitive, so every correction
+       * would have carried the divergence forward.
+       *
+       * ⚠️ A BATCH, SO A FAILURE PATCHES NEITHER. Half an edit is worse than none: the writer is
+       * told it saved, and two surfaces then disagree with no way to tell which is current.
+       */
+      const subRef = doc(db, "users", currentUser.id, "queries", queryId, "activity", activityId);
+      const feedById = await getDoc(doc(db, "users", currentUser.id, "activities", activityId));
+      let feedId: string | null = feedById.exists() ? activityId : null;
+      if (!feedId) {
+        /* the divergent-id fallback, same rule as `removeActivityEverywhere`: same query, same
+           status, nearest time — narrow on purpose, and silent where the status is unknown */
+        const subNow = (await getDoc(subRef)).data() as Record<string, unknown> | undefined;
+        const want = subNow ? (subNow.resultingStatus ?? subNow.type ?? null) : null;
+        if (want !== null) {
+          const raw = (subNow?.createdAt as { toDate?: () => Date })?.toDate?.().toISOString()
+            ?? (subNow?.createdAt as unknown as string);
+          const at = getActivityTime(raw);
+          const cands = activities.filter((a) => a.queryId === queryId && a.resultingStatus === want);
+          feedId = cands.length
+            ? cands.map((a) => ({ id: a.id, d: Math.abs(getActivityTime(a.date) - at) }))
+                .sort((x, y) => x.d - y.d)[0].id
+            : null;
+        }
       }
-      // Best-effort same-id projection patch in the global feed.
-      try {
-        await updateDoc(doc(db, "users", currentUser.id, "activities", activityId), patch as Record<string, any>);
-      } catch {
-        // Projection row has an independent id — cosmetic only, recompute doesn't read it.
+      if (Object.keys(subPatch).length > 0 || feedId) {
+        const batch = writeBatch(db);
+        if (Object.keys(subPatch).length > 0) {
+          batch.update(subRef, subPatch);
+        }
+        if (feedId) batch.update(doc(db, "users", currentUser.id, "activities", feedId), patch as Record<string, any>);
+        await batch.commit();
       }
       await recompute(queryId);
     } catch (e) {
