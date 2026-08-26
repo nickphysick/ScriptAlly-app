@@ -32,7 +32,9 @@ import { consumeRateLimit, joinWaitlist, readCounterState, verifyWaitlist } from
 import { RESEND_API_KEY, sendEmail } from "./email";
 import { resolveMailConfig } from "./emailConfig";
 import { prepareConfirm, prepareWelcome } from "./emailTemplates";
-import { unsubscribeToken } from "./waitlistModel";
+import { parseUnsubscribeToken, unsubscribeToken } from "./waitlistModel";
+import { unsubscribeById } from "./waitlistStore";
+import { unsubscribePage } from "./unsubscribePage";
 
 /**
  * ⚠️ THE IP SALT IS A SECRET AND NEVER HAS A DEFAULT IN CODE. A hard-coded fallback would look
@@ -120,6 +122,30 @@ export const waitlist = onRequest(
 
       const path = (req.path || "").replace(/\/+$/, "");
       const isVerify = path.endsWith("/verify");
+      const isUnsubscribe = path.endsWith("/unsubscribe");
+
+      /* ── Unsubscribing ──
+         ⚠️ A PLAIN PAGE, SERVED HERE, NOT A REDIRECT. The verify link redirects to `/founders`
+         and nothing on that page reads the parameter yet, so a redirect would land someone who
+         just unsubscribed on a page still selling them the offer. A self-contained answer needs
+         no client change and cannot say the wrong thing.
+         ⚠️ NO CONFIRMATION STEP AND NO REACTIVATION NAG. They clicked the link in an email they
+         received; asking "are you sure" is a dark pattern, and offering to undo it is the same
+         pattern wearing a friendlier face. */
+      if (isUnsubscribe) {
+        if (req.method !== "GET") { res.status(405).json({ ok: false, error: "Method not allowed." }); return; }
+        const docId = parseUnsubscribeToken(req.query.token, IP_HASH_SALT.value());
+        const outcome = docId ? await unsubscribeById(db, docId, Date.now()) : null;
+        console.info(JSON.stringify({
+          event: "waitlist.unsubscribe",
+          result: !docId ? "bad-token" : !outcome!.found ? "not-found"
+                  : outcome!.released ? "released" : "already",
+        }));
+        res.set("Content-Type", "text/html; charset=utf-8");
+        res.set("Cache-Control", "no-store");
+        res.status(200).send(unsubscribePage(outcome));
+        return;
+      }
 
       /* ── The verify link ── */
       if (isVerify) {

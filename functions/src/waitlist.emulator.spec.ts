@@ -23,7 +23,7 @@ import {
   countPayload, emailHash, newVerifyToken, tokenHash,
 } from "./waitlistModel";
 import {
-  consumeRateLimit, joinWaitlist, readCounterState, unsubscribe, verifyWaitlist,
+  consumeRateLimit, joinWaitlist, readCounterState, unsubscribeById, verifyWaitlist,
 } from "./waitlistStore";
 
 /* `firebase emulators:exec` exports FIRESTORE_EMULATOR_HOST; the Admin SDK reads it itself. */
@@ -356,26 +356,78 @@ describe("the count is the count, from the very first sign-up", () => {
 
 /* ══════════════ Unsubscribe ══════════════ */
 
-describe("unsubscribing gives the place back", () => {
-  it("a verified unsubscribe decrements in the same transaction", async () => {
+describe("unsubscribing releases a place, exactly once", () => {
+  /**
+   * ⚠️ THE DECREMENT IS THE ONE PLACE IN THIS FEATURE WHERE A MISTAKE IS BOTH INVISIBLE AND
+   * PERMANENT. Too many decrements and the cap admits more than a hundred founding writers; too
+   * few and the counter claims places that were released and the list reads "full" while real
+   * places sit empty. Nothing reports either. These four cases are the whole of the invariant.
+   */
+  it("a verified member releases their place", async () => {
     await setCounter(9);
     await join("bye@example.com");
     expect((await counterOf()).verifiedCount).toBe(10);
-    const r = await unsubscribe(db, "bye@example.com", Date.now());
-    expect(r).toEqual({ found: true, wasVerified: true });
-    expect((await counterOf()).verifiedCount).toBe(9);
+
+    const r = await unsubscribeById(db, emailHash("bye@example.com"), Date.now());
+    expect(r).toEqual({ found: true, released: true, was: "verified" });
+    expect((await counterOf()).verifiedCount, "exactly one place back").toBe(9);
+
+    const doc = await db.doc(`waitlist/${emailHash("bye@example.com")}`).get();
+    expect(doc.get("status")).toBe("unsubscribed");
+    expect(doc.get("position"), "the place is not theirs to hold any more").toBeNull();
   });
 
-  it("a pending unsubscribe changes no number", async () => {
+  /**
+   * ⚠️ IDEMPOTENT, BECAUSE AN EMAILED LINK IS CLICKED TWICE. Prefetched by a scanner, retried on a
+   * flaky connection, or simply clicked again — the second call must change nothing. A second
+   * decrement here is a place invented from nothing.
+   */
+  it("…and clicking the link again changes no number", async () => {
+    await setCounter(9);
+    await join("twice@example.com");
+    const first = await unsubscribeById(db, emailHash("twice@example.com"), Date.now());
+    const second = await unsubscribeById(db, emailHash("twice@example.com"), Date.now());
+    expect(first.released).toBe(true);
+    expect(second).toEqual({ found: true, released: false, was: "unsubscribed" });
+    expect((await counterOf()).verifiedCount, "one release, not two").toBe(9);
+  });
+
+  /** ⚠️ A PENDING MEMBER NEVER HELD A PLACE, so there is nothing to give back. */
+  it("a pending member moves no number", async () => {
     await setCounter(9);
     await seedPending("quiet@example.com");
-    const r = await unsubscribe(db, "quiet@example.com", Date.now());
-    expect(r).toEqual({ found: true, wasVerified: false });
+    const r = await unsubscribeById(db, emailHash("quiet@example.com"), Date.now());
+    expect(r).toEqual({ found: true, released: false, was: "pending" });
     expect((await counterOf()).verifiedCount).toBe(9);
   });
 
-  it("an unknown address is not an error", async () => {
-    expect(await unsubscribe(db, "nobody@example.com", Date.now()))
-      .toEqual({ found: false, wasVerified: false });
+  /** Nor did someone on the plain waiting list. */
+  it("a waiting member moves no number either", async () => {
+    await setCounter(DEFAULT_CAP);
+    await join("late@example.com");
+    expect((await counterOf()).verifiedCount).toBe(DEFAULT_CAP);
+    const r = await unsubscribeById(db, emailHash("late@example.com"), Date.now());
+    expect(r).toEqual({ found: true, released: false, was: "waiting" });
+    expect((await counterOf()).verifiedCount).toBe(DEFAULT_CAP);
+  });
+
+  it("an unknown document is not an error", async () => {
+    await setCounter(5);
+    expect(await unsubscribeById(db, emailHash("nobody@example.com"), Date.now()))
+      .toEqual({ found: false, released: false, was: null });
+    expect((await counterOf()).verifiedCount).toBe(5);
+  });
+
+  /** ⚠️ THE COUNTER NEVER GOES NEGATIVE, however inconsistent the data it started from. */
+  it("…and a release against a zero counter cannot drive it below zero", async () => {
+    await setCounter(0);
+    await db.doc(`waitlist/${emailHash("odd@example.com")}`).set({
+      email: "odd@example.com", emailNormalised: "odd@example.com",
+      createdAt: new Date(), lastInteractionAt: new Date(),
+      verified: true, status: "verified", position: 1, source: "landing-panel",
+    });
+    await unsubscribeById(db, emailHash("odd@example.com"), Date.now());
+    expect((await counterOf()).verifiedCount).toBe(0);
   });
 });
+

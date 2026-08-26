@@ -322,31 +322,76 @@ export const verifyWaitlist = async (
 
 /* ══════════════ Unsubscribing ══════════════ */
 
+export interface UnsubscribeOutcome {
+  /** False when the token authenticated a document that no longer exists. */
+  found: boolean;
+  /** True only on the transition that actually released a founding place. */
+  released: boolean;
+  /** Their status before this call — so the page can say "you were already off the list". */
+  was: WaitlistStatus | null;
+}
+
 /**
- * ⚠️ A VERIFIED UNSUBSCRIBE GIVES THE PLACE BACK, IN THE SAME TRANSACTION. Decrementing separately
- * would leave a window where the place is neither theirs nor available, and a crash inside it
- * loses a founding place permanently.
+ * ⚠️ ONLY A `verified` DOCUMENT DECREMENTS, AND ONLY ONCE. This is the one place in the feature
+ * where getting it wrong is both invisible and permanent:
+ *   · decrementing a `pending` or `waiting` document subtracts a place that was never taken, so
+ *     the counter drifts DOWN and the cap admits more than a hundred founding writers;
+ *   · not decrementing a `verified` one leaves the counter claiming a place that was released, so
+ *     it drifts UP and eventually the list is "full" while real places sit empty;
+ *   · decrementing twice on a repeated click does both at once.
+ * Nothing ever reports any of these. The counter simply stops being the number of founding
+ * writers, and the only symptom is a page quietly lying.
+ *
+ * ⚠️ IDEMPOTENT BY READING THE STATUS, NOT BY GUARDING THE CALLER. An unsubscribe link is in an
+ * email; it will be clicked twice, prefetched by a scanner, and retried by a flaky connection. The
+ * second call finds `unsubscribed`, changes nothing and reports `released: false` — so the
+ * transition is what decrements, never the request.
+ *
+ * ⚠️ AND THE WHOLE OF IT IS ONE TRANSACTION. Releasing the place and lowering the count are the
+ * same fact; a crash between two writes would leave one of them true.
  */
-export const unsubscribe = async (
-  db: Db, emailNormalised: string, nowMs: number,
-): Promise<{ found: boolean; wasVerified: boolean }> => {
-  const sRef = db.doc(`waitlist/${emailHash(emailNormalised)}`);
+export const unsubscribeById = async (
+  db: Db, docId: string, nowMs: number,
+): Promise<UnsubscribeOutcome> => {
+  const sRef = db.doc(`waitlist/${docId}`);
   const cRef = db.doc(COUNTER_PATH);
   const now = new Date(nowMs);
 
   return db.runTransaction(async (tx: Tx) => {
     const [sSnap, cSnap] = await Promise.all([tx.get(sRef), tx.get(cRef)]);
-    if (!sSnap.exists) return { found: false, wasVerified: false };
-    const wasVerified = (sSnap.get("status") as WaitlistStatus) === "verified";
+    if (!sSnap.exists) return { found: false, released: false, was: null };
+
+    const was = (sSnap.get("status") as WaitlistStatus) ?? "verified";
+    if (was === "unsubscribed") {
+      /* Already off the list. Nothing to write and nothing to release — but it is not an error,
+         and the page says so warmly rather than as a failure. */
+      return { found: true, released: false, was };
+    }
+
     const counter = readCounter(cSnap.exists ? (cSnap.data() as Record<string, unknown>) : undefined);
+    const releases = was === "verified";
 
     tx.set(sRef, {
       status: "unsubscribed" as WaitlistStatus, verified: false, position: null,
-      lastInteractionAt: now, verifyTokenHash: null, verifyTokenExpiresAt: null,
+      lastInteractionAt: now, unsubscribedAt: now,
+      /* Both tokens die with the subscription. The signed unsubscribe token keeps working —
+         it is derived, not stored — which is what makes a second click idempotent rather than
+         `unknown`. */
+      verifyTokenHash: null, verifyTokenExpiresAt: null,
     }, { merge: true });
-    if (wasVerified && counter.verifiedCount > 0) {
+
+    if (releases && counter.verifiedCount > 0) {
       writeCounter(tx, cRef, counter, counter.verifiedCount - 1, now);
     }
-    return { found: true, wasVerified };
+    return { found: true, released: releases, was };
   });
 };
+
+/**
+ * ⚠️ KEPT FOR THE ADDRESS-KEYED PATH (the retention job and any future admin action). It is the
+ * same transaction, entered by hashing an address instead of trusting a signed token.
+ */
+export const unsubscribe = async (
+  db: Db, emailNormalised: string, nowMs: number,
+): Promise<UnsubscribeOutcome> =>
+  unsubscribeById(db, emailHash(emailNormalised), nowMs);

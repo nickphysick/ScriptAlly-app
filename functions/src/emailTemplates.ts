@@ -16,7 +16,7 @@
  */
 
 import { RenderedEmail } from "./email";
-import { MailConfig, SUPPORT_EMAIL, unsubscribeLink, verifyLink } from "./emailConfig";
+import { MailConfig, unsubscribeLink, verifyLink } from "./emailConfig";
 import {
   CONFIRM_CTA, CONFIRM_EXPIRY, CONFIRM_HEADING, CONFIRM_LEAD, CONFIRM_NEXT, CONFIRM_NOT_HELD,
   CONFIRM_NOT_YOU, CONFIRM_SUBJECT, SIGN_OFF, UNSUBSCRIBE_LABEL, UNSUBSCRIBE_NOTE,
@@ -58,10 +58,10 @@ const rawLink = (href: string) =>
   `<p style="margin:0 0 24px;font-size:13px;line-height:1.5;color:${MUTED};word-break:break-all">` +
   `${esc(href)}</p>`;
 
-const foot = (unsubUrl: string) =>
+const foot = (unsubUrl: string, contact: string) =>
   `<hr style="border:none;border-top:1px solid #e7ddd2;margin:28px 0 18px">` +
   `<p style="margin:0 0 8px;font-size:13px;line-height:1.6;color:${MUTED}">` +
-  `${esc(contactLine(SUPPORT_EMAIL))}</p>` +
+  `${esc(contactLine(contact))}</p>` +
   `<p style="margin:0;font-size:13px;line-height:1.6;color:${MUTED}">` +
   `<a href="${esc(unsubUrl)}" style="color:${MUTED}">${esc(UNSUBSCRIBE_LABEL)}</a>` +
   ` — ${esc(UNSUBSCRIBE_NOTE)}</p>`;
@@ -74,8 +74,8 @@ const shell = (heading: string, inner: string) =>
   `<h1 style="margin:0 0 18px;font-size:22px;line-height:1.3;color:${INK};font-weight:600">` +
   `${esc(heading)}</h1>${inner}</div></div>`;
 
-const textFoot = (unsubUrl: string) =>
-  `\n---\n${contactLine(SUPPORT_EMAIL)}\n\n${UNSUBSCRIBE_LABEL}: ${unsubUrl}\n${UNSUBSCRIBE_NOTE}\n`;
+const textFoot = (unsubUrl: string, contact: string) =>
+  `\n---\n${contactLine(contact)}\n\n${UNSUBSCRIBE_LABEL}: ${unsubUrl}\n${UNSUBSCRIBE_NOTE}\n`;
 
 /* ══════════════ A · Confirm your place ══════════════ */
 
@@ -106,12 +106,12 @@ export const prepareConfirm = (
         p(CONFIRM_NEXT) +
         p(CONFIRM_NOT_YOU, MUTED) +
         p(SIGN_OFF, MUTED) +
-        foot(unsubUrl!)),
+        foot(unsubUrl!, cfg.contactEmail)),
       text: [
         CONFIRM_HEADING, "", CONFIRM_LEAD, "",
         `${CONFIRM_CTA}: ${verifyUrl}`, "",
         CONFIRM_EXPIRY, "", CONFIRM_NOT_HELD, "", CONFIRM_NEXT, "", CONFIRM_NOT_YOU, "", SIGN_OFF,
-      ].join("\n") + textFoot(unsubUrl!),
+      ].join("\n") + textFoot(unsubUrl!, cfg.contactEmail),
     },
   };
 };
@@ -137,11 +137,11 @@ export const prepareWelcome = (
         `<ul style="margin:0 0 16px;padding-left:20px;font-size:16px;line-height:1.7;color:${INK}">` +
         perks.map((k) => `<li>${esc(k)}</li>`).join("") + `</ul>` +
         p(SIGN_OFF, MUTED) +
-        foot(unsubUrl)),
+        foot(unsubUrl, cfg.contactEmail)),
       text: [
         WELCOME_HEADING, "", lead, "", WELCOME_NEXT, "", WELCOME_NO_DATE, "",
         ...perks.map((k) => `- ${k}`), "", SIGN_OFF,
-      ].join("\n") + textFoot(unsubUrl),
+      ].join("\n") + textFoot(unsubUrl, cfg.contactEmail),
     },
   };
 };

@@ -15,6 +15,7 @@
 export const PUBLIC_URL_ENV = "WAITLIST_PUBLIC_URL";
 export const REPLY_TO_ENV = "WAITLIST_REPLY_TO";
 export const FROM_ENV = "WAITLIST_FROM";
+export const CONTACT_ENV = "WAITLIST_CONTACT_EMAIL";
 
 /**
  * ⚠️ "at", NOT "@" — some mail clients render a second `@` in a display name as a second address,
@@ -33,6 +34,11 @@ export const DEFAULT_FROM = "Nick at ScriptAlly <nick@scriptally.ink>";
  * dependency trees — the enum duplication that forced that split is recorded in CLAUDE.md), so the
  * value is stated twice on purpose. The Help Centre, the landing copy and the legal copy all read
  * the other one; if either moves, both move.
+ *
+ * ⚠️ AND IT IS THE INTENDED PUBLIC ADDRESS, NOT NECESSARILY A DELIVERING ONE. Namecheap forwarding
+ * has one alias configured and it is not delivering; nothing routes this one either. So the value
+ * an email PRINTS is `WAITLIST_CONTACT_EMAIL`, which falls back to this. `SUPPORT_EMAIL` itself is
+ * unchanged and stays the long-term answer — it is the delivery that is broken, not the address.
  */
 export const SUPPORT_EMAIL = "hello@scriptally.ink";
 
@@ -61,6 +67,15 @@ export interface MailConfig {
    * founding writer tried to click it.
    */
   publicUrl: string | null;
+  /**
+   * The address an email PRINTS in its body. Falls back to `SUPPORT_EMAIL`.
+   *
+   * ⚠️ A PRINTED ADDRESS THAT BOUNCES IS WORSE THAN A DEAD `Reply-To`. A reply-to that fails is
+   * invisible; an address in the body is a promise made in the text of the email, and the founding
+   * offer is built on "a direct line to the founder". Until forwarding delivers, this points
+   * somewhere that answers.
+   */
+  contactEmail: string;
 }
 
 type Env = Record<string, string | undefined>;
@@ -78,6 +93,7 @@ export const resolveMailConfig = (env: Env): MailConfig => {
        writer's reply lands somewhere that currently bounces, and nothing else would say so. */
     replyTo: replyTo || from,
     publicUrl: publicUrl || null,
+    contactEmail: clean(env[CONTACT_ENV]) || SUPPORT_EMAIL,
   };
 };
 
