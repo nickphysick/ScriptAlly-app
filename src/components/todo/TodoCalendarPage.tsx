@@ -321,6 +321,14 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   );
 
   const visible = useMemo(() => windowDays(winStart, TL_DAYS), [winStart]);
+  /**
+   * ⚠️ WHERE ONE PERIOD ENDS AND THE NEXT BEGINS — the rhythm a weekend tint would have given, and
+   * the reason it is not one. Shading Saturday and Sunday states that a reply window pauses at the
+   * weekend; the month grid made that ruling already and dropped its own tint for it. At day grain
+   * the boundary is a Monday. (Week and month grain arrive with the range control in Phase 3, and
+   * this is the one function that will answer for all three.)
+   */
+  const startsPeriod = (ymd: string) => new Date(`${ymd}T12:00:00`).getDay() === 1;
   /* ⚠️ A PAST WEEK IS A PROPERTY OF THE WINDOW, not of a row — nothing in it is provisional any
      more, so the dashes go solid, the waypoints render as passed, and the pulse stops. */
   const pastWeek = visible[visible.length - 1] < today;
@@ -635,7 +643,9 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         {visible.map((ymd, i) => (
           <div
             key={ymd}
-            className={`tl-cell${ymd === today ? " today" : ""}${ymd < today ? " past" : ""}${dropYmd === ymd ? " dropok" : ""}`}
+            /* ⚠️ THE BOUNDARY IS ON THE CELL THAT STARTS THE WEEK, and `i > 0` keeps it off the
+               first column, whose left edge is the head column's own border. */
+            className={`tl-cell${ymd === today ? " today" : ""}${ymd < today ? " past" : ""}${dropYmd === ymd ? " dropok" : ""}${i > 0 && startsPeriod(ymd) ? " bound" : ""}`}
             style={{ gridColumn: i + 2, gridRow: 1 }}
             onDragOver={dragTask && ymd !== dragTask.from ? (e) => { e.preventDefault(); setDropYmd(ymd); } : undefined}
             onDragLeave={dropYmd === ymd ? () => setDropYmd(null) : undefined}
@@ -917,6 +927,24 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
           <div className="tl-board">
             <TplZone className="tl-zone" hem={false} label="The week">
               <div className="tl">
+                {/**
+                  * ⚠️ THE TODAY SPINE, POSITIONED BY THE HEAD COLUMN'S OWN TOKEN. The page supplies
+                  * only the FRACTION of the window today sits at — data, not another element's
+                  * dimension — and `.tl-spine` does the geometry against `--tl-head-w`, which steps
+                  * down twice at breakpoints. A spine placed by any constant would be right at one
+                  * width and wrong at the other two, which is the fault this pack exists to end.
+                  *
+                  * ⚠️ ABSENT WHEN TODAY IS OUTSIDE THE WINDOW, rather than clamped to an edge. A
+                  * line pinned to the first column would say "today is here" about a day that is
+                  * not on the board.
+                  */}
+                {(() => {
+                  const at = visible.indexOf(today);
+                  return at < 0 ? null : (
+                    <div className="tl-spine" aria-hidden
+                      style={{ "--spine-at": (at + 0.5) / visible.length } as React.CSSProperties} />
+                  );
+                })()}
                 <div className="tl-grid tl-head">
                   <div className="tl-corner" style={{ gridColumn: 1, gridRow: 1 }}>Agents &amp; you</div>
                   {visible.map((ymd, i) => (

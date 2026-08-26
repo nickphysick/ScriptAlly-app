@@ -119,13 +119,44 @@
 
 .tl-board {
   flex: 1; min-height: 0; display: flex; flex-direction: column;
-  background: #fdfaf5; border: 1px solid #ece0d2; border-radius: 14px; overflow: hidden;
+  /* ⚠️ THE GROUND IS THE APP'S OWN, NOT A NEW HEX. Bars are `#fff` and the board was `#fdfaf5` —
+     two points apart, so a white bar read as washed out rather than deliberate. `--ws-ground`
+     (#f7f4ee) is the content-area colour the rest of the workspace already stands on; sampled from
+     `index.css` rather than taken from the mockup, which is only indicative for colour. */
+  background: var(--ws-ground, #f7f4ee);
+  border: 1px solid #ece0d2; border-radius: 14px; overflow: hidden;
 }
 /* ⚠️ `overflow-x: hidden`, ADDED TO THE PRIMITIVE'S `overflow: auto`. Seven columns FILL the
    container — they never earn a horizontal scrollbar — so any horizontal overflow is a fault to
    see rather than a thing to scroll. */
 .tl-zone { overflow-x: hidden; }
-.tl { display: flex; flex-direction: column; }
+/* ⚠️ THE BOARD OWNS THE HEAD COLUMN'S WIDTH, and it had to move here to stay one number. It was
+   declared on `.tl-grid` — every row — which is where it is READ, so the spine (a sibling of the
+   rows, not a descendant) could not inherit it and would have needed a constant of its own. One
+   owner on the board, and the rows and the spine are both readers. It steps down twice so seven
+   day columns still fit a narrow laptop; the breakpoints move with it. */
+.tl { display: flex; flex-direction: column; position: relative; --tl-head-w: 210px; }
+/**
+ * ⚠️ THE TODAY SPINE READS THE HEAD COLUMN'S OWN TOKEN (range pack, Phase 2), which is this pack's
+ * standing rule applied to its own new element. `--tl-head-w` steps 210 → 168 → 132 at two
+ * breakpoints, so a spine positioned by any constant would be right at one width and wrong at the
+ * other two. The page supplies only `--spine-at` — the fraction of the WINDOW that today sits at,
+ * which is data rather than another element's dimension — and the geometry is done here.
+ *
+ * ⚠️ AND `translateX(-50%)` CENTRES IT ON ITSELF, so the rule never has to know its own width.
+ */
+.tl-spine {
+  position: absolute; top: 0; bottom: 0; width: 1px; z-index: 2;
+  left: calc(var(--tl-head-w) + (100% - var(--tl-head-w)) * var(--spine-at, 0));
+  transform: translateX(-50%);
+  background: #7c3a2a; opacity: 0.5; pointer-events: none;
+}
+.tl-spine::after {
+  content: "TODAY"; position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 6.5px;
+  letter-spacing: 0.16em; color: #7c3a2a;
+  background: var(--ws-ground, #f7f4ee); padding: 1px 4px; border-radius: 4px; white-space: nowrap;
+}
 
 /* ⚠️ ONE CLASS OWNS THE COLUMNS, AND IT IS NOT `.tl-head, .tl-row`. Both the header strip and
    every row need the identical eight-track template, and the obvious spelling is a grouped
@@ -137,8 +168,6 @@
    is the content's min-content width, so one long chip would push the seven columns wider than
    the board and earn the horizontal scrollbar the design forbids. */
 .tl-grid {
-  /* the row-head width steps down twice so seven day columns still fit a narrow laptop */
-  --tl-head-w: 210px;
   display: grid;
   grid-template-columns: var(--tl-head-w) repeat(7, minmax(0, 1fr));
 }
@@ -189,11 +218,20 @@
      how the cascade and a reader come to disagree — the reader takes the first, the browser takes
      the last — and it is the same family as the grouped rule that took the chip's whole treatment
      out with the band's. One selector, one rule, whatever it has to carry. */
-  /* one line of a row: what a lane is worth. A row is `--lanes` of these and nothing else. */
-  --lane-h: 70px;
-  --bar-h: 34px;
+  /* ⚠️ THE LANE IS DERIVED FROM WHAT IT HOLDS (range pack, Phase 2; ref timeline-range v18). It
+     was `70px` beside a `34px` bar, and the 36px of slack was the caption strip — a number one
+     element owned describing room a DIFFERENT element needed. Captions leave the board entirely in
+     Phase 4, so the lane is the bar plus its own padding and nothing else. It still computes to
+     70; what changed is that it can no longer be right by coincidence. */
+  --row-pad: 13px;
+  --bar-h: 44px;
+  --lane-h: calc(var(--bar-h) + var(--row-pad) * 2);
   /* the StatusDot's own app-wide size — stated so the markers position against it, never restated */
-  --disc: 30px;
+  --disc: 34px;
+  /* ⚠️ THE DIRECTION DOT OWNS ITS SIZE. It was `calc(var(--disc) - 8px)`, written at three sites —
+     a delta belonging to this dot, expressed as an adjustment to something else's. The tiers move
+     the two independently, so a shared derivation would have been wrong at the first tier. */
+  --ddot: 24px;
   --chip-h: 26px;
   /* how far a waypoint's upright stands proud of the bar, top and bottom */
   --wp-over: 6px;
@@ -206,10 +244,11 @@
    same template against the same width. */
 .tl-row--pin {
   position: sticky; top: var(--tl-head-h); z-index: 3; background: #fdfaf5;
-  /* ⚠️ THE PINNED ROW'S LINE IS SHORTER, AND IT IS THE SAME FORMULA. Its occupants are 26px chips,
-     not 34px bars with captions hanging beneath them; a bar's line would spend 70px on a row that
-     needs 40. One token per row type, one derivation for both. */
-  --lane-h: 40px;
+  /* ⚠️ THE PINNED ROW'S LINE IS SHORTER, AND IT IS NOW ACTUALLY THE SAME FORMULA. Its occupants
+     are chips, not bars, so it is the chip plus its own padding — the claim this comment made
+     while the value beside it was the literal `40px`. It still computes to 40. */
+  --chip-pad: 7px;
+  --lane-h: calc(var(--chip-h) + var(--chip-pad) * 2);
 }
 .tl-rowhead {
   grid-row: 1;
@@ -245,6 +284,13 @@
 .tl-row.closed .tl-rowhead { opacity: 0.55; }
 
 .tl-cell { grid-row: 1; border-bottom: 1px solid #f0e9dd; border-right: 1px solid #f4efe6; }
+/* ⚠️ BOUNDARY RULES, NOT A WEEKEND TINT (range pack, Phase 2). Shading Saturday and Sunday would
+   state that a reply window pauses at the weekend, which is the ruling the month grid already
+   made and the reason its own tint was removed. The rhythm a reader needs is where one WEEK ends
+   and the next begins, so the boundary carries a stronger line and the days carry none.
+   ⚠️ THE LINE IS ON THE CELL THAT STARTS THE PERIOD, never the one that ends it — a trailing
+   border would double with `.tl-cell:last-child`'s removal at the board's own edge. */
+.tl-cell.bound { border-left: 1px solid #e2d7c6; }
 .tl-cell:last-child { border-right: 0; }
 .tl-cell.today { background: #fdf5f2; }
 .tl-cell.past { background: #faf7f2; }
@@ -318,7 +364,9 @@
    attention, and the whole point of a waiting bar is that nothing is being asked of you. */
 .tl-seg.theirs {
   background: #fff; border-color: #dfe6dc; color: #5a6e58;
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04);
+  /* lifted a shade with the ground (range pack, Phase 2) — a white bar on a warm ground is an
+     object resting on it, which is what the shadow has to say now that the two differ */
+  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.07);
   animation: tlBreathe 4.2s ease-in-out infinite;
 }
 .tl-seg.theirs .d { background: #8a9e88; }
@@ -425,7 +473,7 @@
 /* ── MARKER 2 · recorded, but the status held ─────────────────────────────────────────────────
    ⚠️ SMALLER AND RINGLESS. A StatusDot here would draw the same symbol on both sides of the join,
    which reads as nothing having happened — the whole reason this marker exists. */
-.tl-node[data-marker="direction"] { width: calc(var(--disc) - 8px); height: calc(var(--disc) - 8px); }
+.tl-node[data-marker="direction"] { width: var(--ddot); height: var(--ddot); }
 .tl-node[data-marker="direction"] .tl-mk { font-size: 11px; line-height: 1; }
 .tl-node[data-marker="direction"][data-dir="out"] .tl-mk {
   background: #f8e7dc; border: 1.5px solid #7c3a2a; color: #7c3a2a;
@@ -471,7 +519,7 @@
 .tl-wp[data-kind="reminder"]::before {
   content: ""; position: absolute;
   top: 50%; left: 0; transform: translate(-50%, -50%);
-  width: calc(var(--disc) - 8px); height: calc(var(--disc) - 8px);
+  width: var(--ddot); height: var(--ddot);
   border-radius: 50%; border: 2px dashed #c9a89e;
   background: #fdfaf5; box-shadow: 0 0 0 3px #fdfaf5;
 }
@@ -530,10 +578,10 @@
    sitting below a narrow one silently overrides it — the fault this repo has already paid for on
    every phone once. */
 @media (max-width: 1200px) {
-  .tl-grid { --tl-head-w: 168px; }
+  .tl { --tl-head-w: 168px; }
 }
 @media (max-width: 1000px) {
-  .tl-grid { --tl-head-w: 132px; }
+  .tl { --tl-head-w: 132px; }
   .tl-nm { font-size: 13px; }
 }
 
