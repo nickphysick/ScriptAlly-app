@@ -342,6 +342,64 @@ export function useTaskPaneSession(
     return out;
   }, [card, queries, agents, userTasks]);
 
+  /**
+   * ⚠️ THE FORK'S DERIVATIONS SIT ABOVE `paneWill`, AND THAT IS LOAD-BEARING (journey round, found
+   * by MEASUREMENT after `tsc` and 6,995 unit tests were all green).
+   *
+   * `paneWill` is a `const` whose IIFE runs AT ITS DECLARATION, and Phase 4 made it read
+   * `activeFlow` and `closeReason` so the strip could say "Closed as withdrawn" rather than
+   * asserting a silence. Those two were declared two hundred lines BELOW it — a temporal dead zone
+   * the compiler cannot see through an immediately-invoked arrow, so it compiled clean and threw at
+   * runtime: `ReferenceError: Cannot access 'Rr' before initialization`, inside `useTaskPaneSession`,
+   * on every render with a docked card. The whole To-do page fell into its error boundary the
+   * moment a task was opened.
+   *
+   * ⚠️ AND THE COMPILER-VISIBLE HALF OF THIS TRAP HAD ALREADY FIRED ONCE THIS ROUND — `closeReason`
+   * reading `activeFlow` from the same scope was refused with TS2448, and I moved one declaration
+   * and thought the shape was closed. It was not: the same read from inside an IIFE is invisible to
+   * `tsc`, which is exactly what CLAUDE.md says about this bug and exactly how it shipped again.
+   * The rule that actually holds is the ORDER, not the compiler: anything a render-time expression
+   * reads is declared above it.
+   */
+  /* ══ THE FORK, DERIVED (journey round, Phase 2) ═════════════════════════════════════════════
+     Everything below reads the declaration and the two pieces of state above; nothing branches on
+     a task type, and nothing is stored. */
+
+  /** which journey the pane is showing — the card's, unless a crossover swapped it */
+  const activeId: JourneyId | null = !card ? null : (crossed?.to ?? journeyIdFor(card));
+
+  /** the intent in force: the writer's choice, or the only one there is */
+  const effectiveIntent: string | null = (() => {
+    if (!activeId) return null;
+    if (intentId) return intentId;
+    const opts = JOURNEYS[activeId].fork.options;
+    return opts.length === 1 ? opts[0].id : null;
+  })();
+
+  /** the verb a crossover arrives under, where the contract gives it one */
+  const crossedPrimary: string | undefined =
+    crossed ? CROSSOVERS[`${crossed.from}:${crossed.fromIntent}`]?.primary : undefined;
+
+  /** the flow that intent opens — `null` while the fork is showing */
+  const activeFlow: JourneyFlow | null =
+    activeId && effectiveIntent ? flowFor(activeId, effectiveIntent) ?? null : null;
+
+  /**
+   * ⚠️ THE REASON THE CLOSE RECORDS, AND THE ORIGIN IS WHAT KNOWS IT. Arriving from the send fork's
+   * "I'm not going to send it" is a WITHDRAWAL; arriving from the nudge fork's "time to close" is a
+   * silence; arriving at the close task itself is a silence too. The writer is never asked to
+   * categorise their own disappointment — the journey they came from already said.
+   *
+   * ⚠️ DECLARED BELOW `activeFlow`, WHICH IT READS. Written above it, `tsc` refused with TS2448 —
+   * "used before its declaration" — because the reference shares the declaration's scope. That is
+   * the one shape of this trap the compiler CAN see; the shape it cannot is the same read from a
+   * hoisted helper, which is why this repo's rule is that initialisation goes at the end.
+   */
+  const closeReason: "no_reply" | "off_record" | "withdrawn" =
+    (crossed ? crossoverReason(crossed.from, crossed.fromIntent) : undefined)
+    ?? (activeFlow?.writes.kind === "close-query" ? activeFlow.writes.reason : "no_reply");
+
+
   /* what the primary will write, in the mockup's own `Will record:` grammar */
   /**
    * ⚠️ THE STRIP IS PROSE NOW (deed round, Phase 2). It was a mono field-string —
@@ -852,44 +910,6 @@ export function useTaskPaneSession(
       host.advance(card);
     })();
   }
-
-  /* ══ THE FORK, DERIVED (journey round, Phase 2) ═════════════════════════════════════════════
-     Everything below reads the declaration and the two pieces of state above; nothing branches on
-     a task type, and nothing is stored. */
-
-  /** which journey the pane is showing — the card's, unless a crossover swapped it */
-  const activeId: JourneyId | null = !card ? null : (crossed?.to ?? journeyIdFor(card));
-
-  /** the intent in force: the writer's choice, or the only one there is */
-  const effectiveIntent: string | null = (() => {
-    if (!activeId) return null;
-    if (intentId) return intentId;
-    const opts = JOURNEYS[activeId].fork.options;
-    return opts.length === 1 ? opts[0].id : null;
-  })();
-
-  /** the verb a crossover arrives under, where the contract gives it one */
-  const crossedPrimary: string | undefined =
-    crossed ? CROSSOVERS[`${crossed.from}:${crossed.fromIntent}`]?.primary : undefined;
-
-  /** the flow that intent opens — `null` while the fork is showing */
-  const activeFlow: JourneyFlow | null =
-    activeId && effectiveIntent ? flowFor(activeId, effectiveIntent) ?? null : null;
-
-  /**
-   * ⚠️ THE REASON THE CLOSE RECORDS, AND THE ORIGIN IS WHAT KNOWS IT. Arriving from the send fork's
-   * "I'm not going to send it" is a WITHDRAWAL; arriving from the nudge fork's "time to close" is a
-   * silence; arriving at the close task itself is a silence too. The writer is never asked to
-   * categorise their own disappointment — the journey they came from already said.
-   *
-   * ⚠️ DECLARED BELOW `activeFlow`, WHICH IT READS. Written above it, `tsc` refused with TS2448 —
-   * "used before its declaration" — because the reference shares the declaration's scope. That is
-   * the one shape of this trap the compiler CAN see; the shape it cannot is the same read from a
-   * hoisted helper, which is why this repo's rule is that initialisation goes at the end.
-   */
-  const closeReason: "no_reply" | "off_record" | "withdrawn" =
-    (crossed ? crossoverReason(crossed.from, crossed.fromIntent) : undefined)
-    ?? (activeFlow?.writes.kind === "close-query" ? activeFlow.writes.reason : "no_reply");
 
   /**
    * ⚠️ CHOOSING AN INTENT IS THE WHOLE OF THIS FUNCTION, INCLUDING THE CROSSOVER. A crossover swaps

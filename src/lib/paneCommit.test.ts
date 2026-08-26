@@ -649,3 +649,46 @@ describe("⚠️ no journey calls an agent overdue or late", () => {
     }
   });
 });
+
+/**
+ * ⚠️ EVERYTHING A RENDER-TIME EXPRESSION READS IS DECLARED ABOVE IT (journey round, found by
+ * measurement after `tsc` and 6,995 unit tests were green).
+ *
+ * `paneWill` is a `const` whose IIFE runs AT ITS DECLARATION. Phase 4 made it read `activeFlow` and
+ * `closeReason` — declared two hundred lines below — and the compiler cannot see a temporal dead
+ * zone through an immediately-invoked arrow. It threw at runtime:
+ * `ReferenceError: Cannot access 'Rr' before initialization`, inside `useTaskPaneSession`, on every
+ * render with a docked card. The whole To-do page fell into its error boundary the moment a task
+ * was opened.
+ *
+ * ⚠️ THE COMPILER-VISIBLE HALF HAD ALREADY FIRED ONCE THIS ROUND — `closeReason` reading
+ * `activeFlow` from the same scope was refused with TS2448, and moving one declaration looked like
+ * the end of it. The same read from inside an IIFE is invisible to `tsc`, which is what CLAUDE.md
+ * says about this bug and how it shipped anyway.
+ *
+ * ORDER is a source fact, so this is a source lock — the one thing a source lock does better than
+ * anything else. A rendered check cannot catch it either: the page simply goes blank.
+ */
+describe("⚠️ nothing the strip reads is declared below the strip", () => {
+  it("the fork's derivations precede `paneWill`, which runs at its declaration", () => {
+    const at = (needle: string) => {
+      const i = hook.indexOf(needle);
+      expect(i, `${needle} is gone — this lock is reading a file that has moved on`).toBeGreaterThan(-1);
+      return i;
+    };
+    const will = at("const paneWill");
+    for (const dep of ["const activeId", "const effectiveIntent", "const activeFlow", "const closeReason"]) {
+      expect(at(dep), `${dep} is declared BELOW paneWill, which reads it during render`)
+        .toBeLessThan(will);
+    }
+  });
+
+  /* ⚠️ AND THE STRIP REALLY DOES READ THEM, or the ordering claim above is about nothing. Both
+     halves, because a lock that only asserts the order passes forever on a strip that stopped
+     reading the flow — and that strip would be back to asserting a silence over a withdrawal. */
+  it("and the strip does read them — so the order is load-bearing rather than incidental", () => {
+    const will = hook.slice(hook.indexOf("const paneWill"), hook.indexOf("const paneWill") + 3000);
+    expect(will, "the strip stopped reading the flow").toContain("activeFlow?.writes.kind");
+    expect(will, "the strip stopped reading the close's reason").toContain("closeReason");
+  });
+});
