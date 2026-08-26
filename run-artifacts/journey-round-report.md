@@ -1,278 +1,350 @@
 # To-do pane — the journey logic
 
-**Stopped at the end of Phase 3, on a phase boundary, as the brief asks.** Phases 1–3 are the
-spine and all three are on `main`. Phases 4–8 are not started.
+**Stopped at the end of Phase 5, on a phase boundary.** Phases 1–5 are on `main`, plus the
+response-rate correction. Phases 6–8 are not started.
 
-**Why there:** Phase 3 is the last phase that can stand alone. Phases 4 and 5 are journeys, and the
-brief's own instruction is not to start a journey I cannot finish — Phase 4 alone needs the unit
-picker's seed-selection fix, the withdrawn close reason on the write path, and a terminus-by-terminus
-check against `todo-two-journeys-full.html`'s green blocks. Phase 3 also turned out to be
-**mandatory rather than optional**: Phase 2 made the delay intents reachable while the primary still
-routed on the card's journey, so pressing "Set the reminder" would have recorded a send. That is
-described below.
-
----
-
-## Phase 0 recon — the table
-
-Full working in `run-artifacts/journey-recon.md`. The five answers:
-
-| # | question | answer |
-|---|---|---|
-| 1 | **Snooze** — name the primitive, its field, its readers; can the pane call it? | **Yes, and it already did.** `snoozeCard(card, days, when)` (`ToDoPage.tsx:619`) → `snoozeVia` picks `upsertTaskFlag` (writer's own item) or `dismissTask(…, "fixed snooze")` (engine-raised). Field `TaskFlag.snoozedUntil`. Read by `snoozedCards`, `snoozedCount`, `taskFlags`, the board derivation, the snoozed filter, the ⋯ menu. Ceilings clamp in `lib/todoActions`. **It already takes a caller-supplied label**, so Phase 3 needed no signature change. |
-| 2 | **Close reasons** — is "closed" one state, or can withdrawn and no-response be told apart? | **Three, each with its own status.** `CLOSE_REASONS` (`todoJourneys.ts`): `no_reply → NO_RESPONSE`, `off_record → REJECTED`, `withdrawn → WITHDRAWN`. `commitCloseFromPane` already routes through it with an undo arm. **What is broken is the pane's SUPPLY**: `paneCommit.ts:178` hard-codes `reason: kind === "close" ? "no_reply" : null`, so every close from the pane is a no-response whatever the writer meant. Nothing had to be invented and nothing is mapped onto its neighbour. |
-| 3 | **Nudge check-in** — is `nudgeDate` writable from a nudge journey, and does a task come back? | **Yes to both, by a mechanism the question does not imply.** `logNudge` writes a non-status `NUDGE_SENT` activity, `nudgeDate` + `lastNudgeSentDate`, and a **custom-date `DismissedTask`** whose `resurfaceDate` is the check-back. The returning task is the derived `nudge_overdue` **un-hiding**, not a fresh derivation from `nudgeDate`. It never touches `status` or `responseDeadline`. |
-| 4 | **Task resolution by cause** | **Derived tasks resolve themselves.** Every task is re-derived per render from the query's own status, so recording a reply elsewhere simply stops it being generated. `TaskFlag.resolvedAt` has two live writers only — the agent-gap commit, and the nudge reconciliation. |
-| 5 | **The union, and what has no template / list / commit path** | **There were TWO unions and they disagreed** — see below. `offer`/`decide` and the agent-record gap have no deed template, no required list and no commit path (declared hand-offs). **`chase` has an EMPTY required list while `paneCommitValues` supplies a default check-back** — the round's real bug. |
-
----
-
-## False premises and findings — read these first
-
-### 1 · There were two journey unions, and `fix` named two different journeys
-
-The brief assumes one union. There were two:
-
-| | `paneJourney.JourneyKind` | `paneGate.JourneyKind` |
-|---|---|---|
-| members | `send · chase · close · offer · note · fix · materials` | `send · decide · chase · close · fix · bulk · note` |
-| the fill-in | `materials` | **`fix`** |
-| the agent-record gap | **`fix`** | *(also `fix`)* |
-| the cohort | *(absent)* | `bulk` |
-
-**One word covered two acts depending on which file you were reading** — the agent-record gap and
-the materials fill-in — and each has its own writer. Phase 1's declaration is the reconciliation:
-one `JourneyId`, with `chase → nudge`, `materials → fillin`, `fix → agentgap`, `decide → offer`.
-
-### 2 · The nudge writes a check-in date the writer never chose
-
-`requiredFor("chase")` is `[]` — the chase asks nothing — while `paneCommitValues` supplies
-`checkBackDays: DEFAULT_CHECKBACK_DAYS`. So a nudge logged from the pane today sets a follow-up date
-nobody picked. Phase 1's declaration makes `checkin` **required** on the nudge flow, which is
-Phase 5's headline turned into a compile-checked fact ahead of Phase 5. Locked both ways: the
-shipped list is asserted empty, and the declaration's is asserted `["when", "checkin"]`.
-
-### 3 · Withdrawn does not count as a response — but it *is* in the denominator
-
-The brief asks that a withdrawn close "never affects the response-rate calculation". Half of that is
-already true and half is not:
-
-- `WITHDRAWN` is absent from both `AGENT_RESPONSE_STATUSES` and `LEGACY_RESPONSE_STATUSES`, so it
-  never counts as a response. **The brief's narrower assertion — rejection counts untouched — holds
-  exactly**, because `REJECTED` is a different status.
-- But `responseRatePercent = responsesReceived / queries.length` counts **every** query, so
-  withdrawing one *lowers* your response rate — a number made worse by a decision you made, about a
-  query the agent never had a fair chance to answer.
-
-**Flagged, not changed.** `responseRatePercent` is read by the dashboard and analytics, and whether
-the denominator should exclude withdrawn queries is a product question, not a pane fix.
-
-### 4 · Phase 3 was not optional — Phase 2 alone would have recorded a send
-
-Phase 2 makes "Not yet — hold me to it" reachable. The primary still routed on the **card's**
-journey, so `paneCommits("send")` was true and pressing "Set the reminder" would have run the send
-committer and **recorded a send on a query nobody had sent**.
-
-Caught by reading the path straight after committing Phase 2, not by a test. The primary now reads
-the **flow's** declared write before it reaches any committer, which makes that shape impossible
-rather than remembered. It is why Phase 3 shipped the same night rather than being deferred.
-
-### 5 · A crossover changed the band but not the deed — found by measurement
-
-The brief requires a crossover to swap "band register, deed sentence, flow, primary". The band and
-the flow followed, because both read the active journey. The deed did **not**: `deedSentence`
-switches on `cardBucket(c)`, a fact about the **card**.
-
-Measured at 1440: crossing a send to a close changed the band `u-now → u-house` and left the deed
-reading *"Send your full manuscript for The Smoke Test to Marcus Reed"* above a close fork — a
-sentence describing the act the writer had just decided against, in the largest type on the pane.
-
-`DeedParts.as` is the override, absent everywhere else so no existing caller can quietly acquire it,
-and `JOURNEY_DEED_BUCKET` is the translation, declared beside the journeys.
-
-### 6 · A single-option fork resolves without being drawn
-
-`offer`, `agentgap` and `bulk` each declare one intent, because the declaration must be **total** —
-every journey has a fork, and that is what the compile guard rests on. But a fork with one option is
-not a choice, and drawing it would put a click in front of a hand-off and a cohort table purely to
-honour a shape. **The declaration stays whole; the renderer skips it.** Locked both ways: exactly
-those three carry one option, and the contract's five each offer a real choice.
-
-### 7 · The calendar cannot complete a delay intent, and that is declared
-
-`TodoCalendarPage` supplies neither `snooze` nor `mute`. Its snooze is **drag** — on the surface
-where days are the subject — and it shows no dismissed cards at all, which is why it already passes
-no `onSnooze` and no `onDismiss`. A delay intent there therefore writes nothing rather than writing
-through a surface with no place for it. **Flagged as the one journey that host cannot finish.**
-
-### 8 · The measurement's first run looked for the wrong toast, and left a card snoozed
-
-`/todo` renders its **own** toast — `.tdb-toast` with `.tdb-toast-act`, label "Undo" in sentence
-case — not `ToastProvider`'s `.sa-toast-undo`, which is uppercased. The probe reported *"no undo was
-offered"* about a button that was on screen, so the restore step never ran and one card stayed
-snoozed. Same shape as the correction round's case-sensitive probe.
-
-Both fixes are in: the selector accepts either host, the toast's undo is now **asserted** rather
-than merely read, and the spec **pre-cleans** — it walks the snoozed band and unsnoozes through the
-app's own ⋯ control before measuring anything, so a run that dies mid-write cannot poison the next.
-
-**Two toast implementations on one page is itself a finding**, and it is pre-existing and out of
-scope.
-
-### 9 · The full suite timed out once under another session's CPU load
-
-`pageStructure.test.ts` — another stream's `QueryAnalytics.tsx` case — hit vitest's 120s ceiling in
-one full run and **passed in 9.4s when run alone**. Load averages were 6.79 / 12.23 / 15.45 at the
-time, with three other sessions building and testing in the same checkout. Re-run before believing,
-as this repo's own CI note asks. Not a red build.
-
----
-
-## What landed, phase by phase
+**Why there:** Phase 5 finished a journey; Phase 6 starts three more. Phase 4 and 5 also needed
+measuring — the last measured state was Phase 3, and two phases of write-path change should not sit
+unverified while a third journey is opened.
 
 | phase | SHA | |
 |---|---|---|
-| contracts | `866b12e7` | the three journey files, installed from `~/Downloads` at their stated hashes |
-| **1 · journeys are data** | `7632ca1d` | one declaration; two unions reconciled; per-flow required lists; the compile guard proved three ways |
-| **2 · the fork is the first question** | `51a5a08a` | fork, receipt, crossover, cleared-answers, no primary until an intent is chosen |
+| contracts | `866b12e7` | three journey files, installed from `~/Downloads` at their stated hashes |
+| **1 · journeys are data** | `7632ca1d` | one declaration; two unions reconciled; per-flow lists; compile guard proved three ways |
+| **2 · the fork is the first question** | `51a5a08a` | fork, receipt, crossover, cleared answers, no primary until an intent |
 | **3 · delay is snooze** | `1a623f16` | the existing primitive from the fork; Snooze leaves the bar; the mute finds its home |
-| — | `4c7a444b` | a crossover swaps the sentence too *(found by measurement)* |
-| — | `55c9b12b` | the flow says which optional fields it offers *(found in a screenshot)* |
-| 4–8 | — | **not started** |
-
-### Phase 1 — the compile guard, proved rather than asserted
-
-The brief asks for it explicitly. Three deliberate breaks, three real errors:
-
-| break | error |
-|---|---|
-| a journey added to the union with no declaration | `Property 'brandnew' is missing in type … but required in type 'Record<JourneyId, Journey>'` |
-| a flow with no primary | `Property 'primary' is missing in type … but required in type 'JourneyFlow'` |
-| a journey with no fork | `'forkTYPO' does not exist in type 'Journey'` |
-
-**And the `never` guard caught me on the first compile.** Calling `cardBucket(card)` again in the
-default gives TypeScript a fresh `Bucket` it cannot know is exhausted, so the guard stops guarding —
-the exact trap `cardFootHint` already carries a note about. Hoisted.
+| — | `4c7a444b` | a crossover swaps the sentence too *(measured)* |
+| — | `55c9b12b` | the flow says which optional fields it offers *(screenshot)* |
+| — | `9eff807a` | the Phase 0 recon, the measurement suite and the first report |
+| — | `106a1c53` | **the response rate counts replies, not endings** *(your correction)* |
+| **4 · the send journey** | `e415c065` | the seeded number stops answering; the close's reason is the journey's |
+| **5 · the nudge journey** | ⚠️ **`bfd533fd`** | **swept into another session's commit — see Concurrency** |
+| — | `99841015` | the measure waits for the board, and asserts it arrived |
+| — | `7edd4b8b` | **the strip's dependencies are declared above the strip** *(the crash)* |
+| — | `46e3e71d` | CLAUDE.md — the TDZ's third shape |
+| — | `05f87103` | **the commit carries the rows it wrote** *(typed 7, recorded 3)* |
+| 6–8 | — | **not started** |
 
 ---
 
-## Red → green at the seam
+## Findings — read these first
 
-Every retarget states the law it asserts and what moved.
+Phases 1–3's findings stand unchanged in the previous edition (two disagreeing journey unions with
+`fix` naming two journeys; the nudge writing a check-in nobody chose; the crossover that changed the
+band and not the deed; the single-option fork; the calendar's drag-snooze; the wrong-toast probe).
+What follows is new, and the first item is the most serious thing this round found.
 
-- **Phase 1** broke eight call sites the moment `GateAnswers` gained three members — which is the
-  exhaustiveness guard working, not a cost. Each had to say what it means about the new questions.
-- **Phase 2** broke `paneCommit`'s ledger lock, which asserted the per-JOURNEY reading. The law is
-  unchanged — the form draws what the gate requires — and what moved is the level.
-- **Phase 3** broke two ORDERING claims inside `dockPrimary`, honestly: there are two hand-off
-  routes now and several advances, and a first-match `indexOf` found the delay's rather than the
-  commit's. Both assert over **all** matches now, and the advance case additionally proves every
-  advance before the write gate belongs to a writer that cannot fail silently.
-- **My own `slice("paneHost")` failed loudly** — it is a `const` and the helper anchors on
-  `function <name>`, so it named the missing anchor instead of widening to the rest of the file.
-  That is `sliceBetween`'s own rule working.
+### ⚠️ The pane was crashing on every docked card, and every gate was green over it
 
-## Coverage assertions scan every place the pattern can appear
+The most serious thing this round found, and only the measurement could have found it.
 
-- every claim in `journeys.test.ts` sweeps `Object.values(JOURNEYS[id].flows)` rather than the flows
-  an intent happens to point at — a flow added without a primary fails even if nothing targets it
-- the delay-options claim sweeps every flow and every field, with the population asserted first
-  (`> 3` delay questions found) so an empty sweep cannot pass
-- the crossover-reason claim sweeps every intent in every journey, not the two that cross today
-- `never` is asserted present on exactly two option sets and absent from all others, by enumeration
-  rather than by checking the two
+```
+ReferenceError: Cannot access 'Rr' before initialization
+  at useTaskPaneSession → ToDoPage
+UI error boundary caught: Cannot access 'Rr' before initialization
+```
 
-## Out of scope, untouched
+`paneWill` is a `const` whose IIFE runs **at its declaration**. Phase 4 made it read `activeFlow`
+and `closeReason` so the strip could say *"Closed as withdrawn"* rather than asserting a silence —
+and both were declared **two hundred lines below it**. TypeScript cannot see a temporal dead zone
+through an immediately-invoked arrow, so it compiled clean, 6,995 unit tests passed, the production
+build was clean, and the To-do page fell into its error boundary the moment any task was opened.
+The board rendered; the list rendered; clicking a row emptied the workspace.
 
-Mobile · the storage question · Pro · the bulk table's inert ticks · any restyling outside the pane.
+⚠️ **And the compiler-visible half of this trap had already fired once, hours earlier.**
+`closeReason` reading `activeFlow` from the same scope was refused with **TS2448**, I moved one
+declaration, and treated the shape as closed. It was not. The same read from inside an IIFE is
+invisible to `tsc` — which is exactly what CLAUDE.md says about this bug, and exactly how it shipped
+again in the same session that had just been caught by its milder form.
+
+**The rule that holds is the ORDER, not the compiler.** Anything a render-time expression reads is
+declared above it. There is now a source lock asserting both halves — that the five derivations
+precede the strip, and that the strip really does read them, so it cannot pass forever over a strip
+that has quietly gone back to asserting a silence over a withdrawal. It has to be a source lock: a
+rendered check cannot catch it either, because the page simply goes blank.
+
+**How close this came to shipping.** It was inside `bfd533fd` — the other session's commit — so it
+reached `main` under a message about something else, with every gate green. The chain that caught it
+was: measure → 32 red → suspect the harness → fix the harness → still red → probe the click →
+console error. Four steps, and the first three all looked like the tool being wrong.
+
+### ⚠️ A run that measured nothing reported it as 32 failures
+
+The Phase 4–5 measurement came back **32 of 32 RED** — including assertions that had been green an
+hour earlier. It was not a regression. Every reading was `-` or `undefined`: the spec's fixed
+`waitForTimeout(7000)` was not enough under a load average of **14**, with three other sessions
+building in the same checkout, so it opened a page whose list had not rendered and measured nothing.
+Probed moments later the same page held **27 rows and logged no console error**.
+
+**A fixed wait is a guess about a machine.** The spec waits on the condition now — the board's own
+rows appearing — and asserts that precondition **first**, so "the board never came" is one honest
+failure that says so rather than a wall of red about a page nobody looked at. It exits early in that
+case rather than reporting 32 vacuous readings.
+
+This is the vacuous-measurement family running in the loud direction for once: 32 red is at least
+alarming enough to investigate. The same fault reading *green* is the one this repo keeps paying
+for, and the fix is the same either way — assert the precondition before the claim.
+
+---
+
+## Phases 4 and 5 — what changed
+
+### Phase 4 · the send journey (`e415c065`)
+
+**The seeded number is not an answer** — the bug that was live on dev, and the *third* instance in
+this codebase of a value nobody chose (after the pre-filled send answers and `RemindChoice`'s
+invented fortnight). `SampleSpecPicker` in `mode="sent"` seeds a default the moment a unit is
+chosen, so the picker opens on something rather than nothing. The gate read the amount's
+**presence**, so clicking "Chapters" silently accepted 3.
+
+Two halves, and the first was invisible until I looked for it:
+
+- the picker focused the amount but did **not select** it, so typing `5` after choosing Chapters
+  gave `35` — the writer's answer glued onto the app's guess, with the guess winning the leading
+  digit. It focuses **and selects** now.
+- `onCommit` fires on the four ways of finishing a number — blur, Enter, a stepper, an arrow — and
+  **not** on choosing a unit, so the gate can tell a seed from an answer. A unit change clears the
+  commit, because `mode="sent"` replaces the row and a new unit is a new question.
+
+**The close's reason is the journey's.** `paneCommitValues` read
+`kind === "close" ? "no_reply" : null` — a hard-coded constant — so every close from the pane
+recorded a no-response whatever the writer meant, while `CLOSE_REASONS` was fully able to express
+all three and `commitCloseFromPane` already routed through it. The plumbing was complete and
+unused. It arrives from the fork: `send:wont` is a **withdrawal**, `nudge:toclose` is a silence.
+
+The strip followed: it said "Closed as no response" on every close, so crossing from "I'm not going
+to send it" read a sentence about a silence over a withdrawal — the strip stating something the
+write would not do, on the one surface whose whole job is to say what the write **will** do.
+
+**A crossover carries a verb as well as a reason**, from the contract's own drawing.
+`todo-two-journeys-full.html` shows both crossed closes under **"Close the query"** while the close
+journey's own flow keeps **"Log the close"**. Arriving at a close *task* you record a state the query
+has reached; arriving from a send or a nudge you end it now. Same write, two acts.
+
+### Phase 5 · the nudge journey — **landed inside another session's commit**
+
+⚠️ **Phase 5 has no SHA of its own.** All nine of its files were swept into `bfd533fd`
+("completion-paths: the inverse clears the completion stamp") by another session's broad staging,
+between my last gate and my commit. See the concurrency section — the code is on `main`, the tree is
+green, and what was lost is the commit message.
+
+What it does:
+
+- **The check-in is the writer's answer.** `requiredFor("chase")` was `[]` while `paneCommitValues`
+  supplied `DEFAULT_CHECKBACK_DAYS` — so every nudge logged from the pane set a follow-up date
+  nobody chose. The fork asks *"if nothing comes back…"* and requires it. The shared default
+  survives for the quick rail, which states its own defaults on a receipt; the pane is no longer one
+  of them.
+- **"Don't ask again" writes the mute, not a date.** It travels as its own flag rather than a
+  sentinel number, because a far-future `checkBackDays` would reach `logNudge` as a **fabricated
+  date on the query**. `logNudge`'s `checkBackDate` is optional now: absent means the nudge is
+  recorded, **no `nudgeDate` is written**, and the dismissal is `permanent` rather than dated.
+- `NudgeDismissalWrite` became a **union** rather than gaining an optional field, so a caller cannot
+  produce a permanent dismissal that still carries a resurface date. A mute with a return date is
+  two instructions, and whichever the reader believes, the other one is a lie. Every existing caller
+  gets the `custom date` member byte-identically.
+- **A nudge is not a new submission** — the activity is non-status by construction, so
+  `recomputeQuery` ignores it and the status cannot move. Locked as a closed pair: the only query
+  fields touched are `nudgeDate` and `lastNudgeSentDate`, never `status`, never `responseDeadline`.
+- **No verdicts.** "Overdue" and "late" are judgements about the *agent*, and this app does not have
+  the standing to make one. Locked against the rendered pane rather than the source, because
+  `nudge_overdue` is an identifier and would satisfy a source sweep — the prefix hazard pointing the
+  other way.
+
+### The response rate, on your correction (`106a1c53`)
+
+You were right that excluding withdrawn was the wrong fix. `hasAgentResponded` was already honest —
+`deriveResponseFlags` asks whether an agent-response **rung exists** in the log. The offender was
+`responsesReceivedCount`'s **fallback** for unmigrated docs, which read
+`LEGACY_RESPONSE_STATUSES.has(q.status)` — how the query **ended**.
+
+Checking rejected and no-response as you asked: **rejected read correctly by luck.** A rejection *is*
+a reply, so the status happened to imply what the log would have said. No-response and withdrawn
+both read wrong wherever a request preceded them. One of three right for the wrong reason is a
+coincidence, and it is what made the fault hard to see.
+
+The numerator now reads the four stamps that are each written *from* the log —
+`responseReceivedAt`, `partialRequestedDate`, `fullRequestedDate`, `rejectedDate` — with
+position-in-the-journey kept only as the last resort. `packageMetrics.reachedRequest` already read
+the pair this way, so this brings the response rate into line with a shape the codebase had settled
+on. The denominator is unchanged: a query withdrawn before any reply has none, and is counted as
+one that got none.
 
 ---
 
 ## Every assertion — measured on the running page
 
-**22 assertions, 0 red**, at 1440 against a local dev bundle. Suite:
+**33 assertions at 1440, 0 red**, against a local dev bundle. Suite:
 `tests/e2e/journeyRound.measure.ts`. Raw readings: `run-artifacts/journey-round.txt`.
+
+The Phase 2 and 3 assertions are unchanged from the previous edition and green throughout. What
+follows is the new half.
 
 | | claim | reading |
 |---|---|---|
-| P2.1 | the pane opens on the fork, with its label and its options | `"Where are you with it?"` · 3 |
-| P2.2 | **NO primary until an intent is chosen** | `primary=null` |
-| P2.3 | Snooze and Dismiss remain | `["Snooze","Dismiss"]` |
-| P2.4 | the steer square marks the fork itself | `visible` |
-| P2.5 | every option states both lines; the crossover says so first | 1 of 3 wears `crosses to close →` |
-| P2.6 | no ledger row while the fork is showing | `rows=0` |
-| P2.7 | choosing collapses the fork and opens question 1 | `"You chose I’ve sent it Change"` · 4 rows · open `s-when` |
-| P2.8 | the primary is the FLOW's, and it is there now | `"Log as sent · 3 to answer"` |
-| P2.9 | **Snooze has LEFT the bar** | `["Dismiss"]` |
-| P2.10 | Change returns to the fork | 3 options · `primary=null` |
-| P2.11 | and the old intent's answers are cleared, and the pane says so | cleared `["s-unit","s-when"]` · line shown |
-| P2.12 | a crossover changes band, deed and fork **together** | `u-now → u-house` · `"Send your full manuscript…"` → `"Consider closing your quer…"` |
-| P2.13 | its receipt names where it came from | `"Crossed from send Go back"` |
-| P2.14 | Go back restores the origin | `u-now` · 3 options |
-| P3.1 | the delay intent opens one question with its flow's options | `"Hold me to when?"` · `["Tomorrow","In 3 days","Next week","A date…"]` |
-| P3.2 | and says nothing is recorded on the query | verbatim |
-| P3.3 | its primary is the flow's, not the send's | `"Set the reminder"` |
-| P3.4 | the close fork names the honourable alternatives first | `["Close it now","Nudge them once more first","Leave it open for now"]` |
-| P3.5 | leave-it-open offers the mute as one of its answers | `…"A date…","Stop asking about this one"` |
-| P3.6 | and the hint states what the mute does NOT touch | this query only · deletes nothing · every other task |
-| P3.7 | **a delay writes through the app's own snooze** | toast `"Snoozed until Thursday"` · undo offered · rows 20 → 19 |
-| P3.8 | and the undo restores it | rows 19 → 20 (was 20) |
+| P0 | **the board rendered before anything was measured** | the precondition, asserted first |
+| P4.1 | **choosing a unit does NOT mark the parcel answered** | `row.done after pressing a unit = false` |
+| P4.2 | the seed is focused **and selected**, so typing replaces it | `value="3" focused=true selected=true` |
+| P4.3 | typing replaces the seed without a keystroke being lost | `answer="7 chapters"` — not 3, not 37 |
+| P4.4 | the crossed close arrives under the contract's own verb | primary absent until its intent |
+| P4.5 | its strip says **withdrawn**, not no-response | `"Closed as withdrawn, today."` |
+| P5.1 | the nudge fork offers record, wait, and the crossover | the contract's three, verbatim |
+| P5.2 | logging a nudge **requires its own clock** | `["When","If nothing comes back…"]` |
+| P5.3 | and *Don't ask again* is one of its answers | `[…,"A date…","Don't ask again"]` |
+| P5.4 | the primary is absent until the clock is answered | `"Log the nudge · 2 to answer"` |
+| P5.5 | the pane calls nobody **overdue** or **late** | `overdue=false late=false` |
 
-### The spec writes, and puts it back
+**P4.1 is the round's headline.** It is the bug that was live on dev — clicking "Chapters" silently
+accepting 3 — and it now reads `false`.
 
-One snooze is performed through the fork and undone through the app's own control, so the harness
-account is left as it was found — asserted, not assumed. It also **pre-cleans**: it walks the
-snoozed band and unsnoozes before measuring, so a run that dies between the write and the undo
-cannot poison the next one.
+---
 
-**The first run did die that way** (the wrong toast selector), leaving one card snoozed for a day.
-Audited afterwards on the running page: no snoozed band and no snoozed chips — the one-day snooze
-had self-expired. Stated rather than assumed.
+## Concurrency — and the incident that cost Phase 5 its commit
 
-## Screenshots
+⚠️ **Another session's commit swept in nine of my uncommitted Phase 5 files.** `bfd533fd`
+("completion-paths: the inverse clears the completion stamp") contains `logNudge.ts`,
+`logNudge.test.ts`, `db.tsx`, `todoWalk.ts`, `paneJourney.ts`, `paneCommit.ts`,
+`paneCommit.test.ts`, `useTaskCommit.tsx` and `useTaskPaneSession.tsx` — my code, my comments, under
+a message about something else.
 
-`run-artifacts/journey-round/` — every fork and the states reachable from them, at 1440:
+**Nothing in my process could have prevented it.** `git commit --only -- <paths>` — which this repo
+mandates and which I used for every commit tonight — governs what *I* commit. It does not govern
+what another session commits, and my files were sitting in the shared working tree between my last
+gate and my commit.
 
-`fork-send` · `fork-send-sent` · `fork-send-later` · `fork-send-crossed` · `fork-close` ·
-`fork-close-leave` · `fork-nudge` · `fork-note`.
+**The tells, in the order they appeared:** files I had edited showed as **staged `M`** when I had
+never staged them; `git diff HEAD -- src/lib/db.tsx` came back **empty** while `git status` still
+called it modified (working tree == HEAD, because their commit had taken it); and
+`git show HEAD:src/lib/logNudge.ts | grep "Don't ask again"` found my own sentence in their commit.
 
-*(The brief asks for every terminal state of all five journeys. Phases 4–8 are what build those
-termini, so what is shot here is what exists: every fork, and the flows the spine opens.)*
+**What I did not do:** rewrite history, revert their commit, or touch their work. The code is on
+`main`, the tree is green, and the only thing lost is the commit message's reasoning — which is why
+Phase 5 is written out in full above. The in-file comments survived, which is the half that matters.
 
-## Concurrency
+**The lesson, and it is now in memory as the hazard's third shape:** the defence is the size of the
+window. Commit each coherent unit the moment its gates are green rather than accumulating a phase's
+worth of files. An hour of uncommitted work is an hour of exposure.
 
-This session owned the pane, its stylesheet and the journey definitions throughout. Gated against
-its own scope, which is what the shared checkout allows.
+### The rest of the picture
 
-Three other sessions were live in this checkout for most of the round — marketing (`Hero.tsx`,
-`marketing.css`, `landingCopy.ts`), packages (`packageAttach.ts`, `PackagesBand.tsx`) and versions.
-Their commits landed between mine throughout (`aa1b53ce`, `62d5dabd`, `f2226008`, `319dfe33`), and
-at two points `tsc` reported errors in files none of this round touches — `landingCopy.test.ts`
-(`HERO_TURN_B`) and `packageAttach.ts` (`BookVersion`), both transient WIP. Final gates were taken
-on this round's scope: **5182 passed / 3 skipped / 0 failed**, `tsc` clean outside those two files,
-production build clean.
+Three other sessions were live in this checkout throughout — versions/packages
+(`packageAttach.ts`, `PackagesBand.tsx`, `Queries.tsx`), marketing, and the completion-paths stream.
+`tsc` reported transient errors in files this round never touches at three separate points
+(`landingCopy.test.ts`'s `HERO_TURN_B`, `packageAttach.ts`'s `BookVersion`, `Queries.tsx`'s
+`useMemo`), each another stream mid-edit. Gates were taken on this round's scope throughout.
 
-Measurement ran in an isolated worktree (`../ScriptAlly-journey`, detached, `node_modules`
-symlinked, `.env.local` and `tests/e2e/.auth/` copied — both gitignored, the dev-only harness
-account). Commits came from the primary tree; the worktree was rebuilt from `FETCH_HEAD` for each
-pass. **Delete the second copy of `.env.local` and `tests/e2e/.auth/` when the worktree goes.**
+One full-suite run also **timed out** in `pageStructure.test.ts` (another stream's
+`QueryAnalytics.tsx` case) at vitest's 120s ceiling, with load averages at 6.79 / 12.23 / 15.45. It
+passes in **9.4s** run alone. Re-run before believing, as this repo's own CI note asks.
 
-⚠️ **`vite preview` bound IPv6-only this time** (`[::1]:4194`), the opposite of the case CLAUDE.md
-records. `curl 127.0.0.1` refused while `localhost` and `[::1]` answered. Worth knowing that it goes
-both ways: probe the address rather than assuming which.
+Measurement ran in an isolated worktree (`../ScriptAlly-jr2`, detached, `node_modules` symlinked,
+`.env.local` and `tests/e2e/.auth/` copied — both gitignored, the dev-only harness account). Commits
+came from the primary tree. **The second copy of `.env.local` and `tests/e2e/.auth/` is deleted with
+the worktree.**
+
+⚠️ **`vite preview` bound IPv6-only** (`[::1]`), the opposite of the case CLAUDE.md records —
+`curl 127.0.0.1` refused while `localhost` and `[::1]` answered. It goes both ways: probe the
+address rather than assuming which.
+
+### ⚠️ The writer typed 7 and the record said 3
+
+The probe fixes turned three reds into one, and the one that survived was **real**.
+
+Phase 4's commit path called `patch(row, amount)` and then a bare `onCommit()` as two separate
+callbacks. The body's handler spread **its own render's `value`** — which still held the *pre-patch*
+rows — so React batched the two writes and the second won. The amount reverted to the seed the
+moment the writer committed their own number. Measured: `answer="3 chapters"` after typing `7` and
+pressing Enter.
+
+A silent wrong number in the record, which is the exact class this round exists to close — and it
+arrived *inside the fix for the previous one*.
+
+⚠️ **Everything else was blind to it.** `tsc` clean, 6,636 unit tests passing, and the source lock
+asserting *"every way of finishing the number commits"* passed too: it **counted the calls** and
+could not see that one of them undid the other. The lock now asserts the **shape** — `onCommit` is
+never called bare, `patch` returns the rows it wrote — rather than the count.
+
+`patch` returns what it wrote; `onCommit` is handed those rows; the caller performs one write
+carrying both facts instead of two that race.
+
+### Three probes that were wrong about a correct app
+
+The post-crash run came back 30 of 33. All three reds were the harness:
+
+- **two measured a card with no unit to pick.** The harness's Send card is a FULL manuscript, where
+  the parcel requirement is satisfied by the material itself and the row is answered before anything
+  is pressed — so *"choosing a unit does not answer it"* was being asked of a card that has no unit.
+  The same fault as handing a function an input its callers cannot produce, wearing a fixture's
+  clothes. They target a **partial** now, assert the precondition that the row starts unanswered,
+  and report themselves **UNMEASURED** rather than red where the account holds no such card.
+- **one read a control that had correctly stopped existing.** Committing the amount closes the row,
+  so the picker unmounts; the probe read `value=null` and called it a lost keystroke. It reads the
+  row's stated ANSWER now, which is the durable evidence.
+- **one read a closed row's options** and reported `[]` about a question that renders its answers
+  correctly the moment it is opened.
+
+What they did confirm, first time: the seed is **focused and selected** (`value="3" focused=true
+selected=true`), the crossed close's strip reads **"Closed as withdrawn, today."**, the nudge's
+ledger carries **"If nothing comes back…"**, its primary counts **2 to answer**, and the pane calls
+nobody overdue or late.
+
+---
+
+## What is measured, and what is not — stated plainly
+
+| | verification |
+|---|---|
+| Phases 1–3 | **measured on the page**, 22/22 green, at `9eff807a` |
+| the response-rate correction | unit — six locks, verified red-before |
+| Phases 4 · 5 | **measured on the page**, 33/33 green |
+| the crash fix | **the reason the measurement exists** — it is what found it |
+
+The distinction matters more than usual tonight, because tonight is the clearest case this repo has
+produced of why: Phase 4 and 5 were *"landed (code + unit)"* with `tsc` clean, 6,995 tests passing
+and a clean production build, over a pane that crashed the moment anyone opened a task.
+
+---
 
 ## Where the next night starts
 
-Phase 4, with the spine in place. What it needs, in order:
+Phase 6, with five journeys' worth of spine in place.
 
-1. **The unit pill's seeded number is not an answer** — the bug on dev today. Choosing a unit must
-   open the picker focused and text-selected, and the question must count as answered only once the
-   value is committed. `SampleSpecPicker` already focuses the amount on selection, so the change is
-   the SELECTION and the gate's predicate, not the focus.
-2. **The withdrawn close reason on the write path.** `CROSSOVER_REASON` already declares it and
-   `CLOSE_REASONS` already maps it to `QueryStatus.WITHDRAWN`; what is missing is
-   `paneCommitValues` reading the flow's declared write instead of its hard-coded `"no_reply"`.
-3. **Terminus-by-terminus against `todo-two-journeys-full.html`'s green blocks** — each write
-   asserted to be exactly what the contract states and nothing else.
+1. **Fill-in's date question** is the only real gap. The contract offers
+   *"I know the date… / Around then — keep the import date / Not sure"*, where **"Not sure" leaves
+   the date blank rather than guessing**. Today that row still uses the send's `When` options. It
+   needs the same per-flow override the delays already have.
+2. **"I can't remember" already works** — the `forget` flow declares `writes: { kind: "mute" }` and
+   the primary routes on it, so it records nothing and stops the asking. It needs its assertions,
+   not its code.
+3. **Note's two intents already work** and it renders no `When`, because the tick carries its date.
 
-Phase 5 then has its hardest part already done: `checkin` is required and declared.
+Phase 7 (the filling primary) is a self-contained UI change against
+`todo-filling-primary.html` — count outside the button, the fill advancing with answers, and the
+one that matters: **it looks disabled and must not be disabled.**
+
+Phase 8 needs the receipt-with-undo on every terminus, and the close reason carried by the journey
+— which Phase 4 has already done, so Phase 8's hardest sentence is already true.
+
+---
+
+## The pattern worth taking from tonight
+
+Three real bugs shipped through a completely green gate, and each was found one step further out
+than the last:
+
+| bug | what was green over it | what found it |
+|---|---|---|
+| the crossover kept the origin's deed | tsc · unit · build | **measurement** |
+| the optional link leaked into the fork | tsc · unit · build · measurement | **a screenshot** |
+| the pane crashed on every docked card | tsc · **6,995 unit tests** · build | **measurement, after two false leads** |
+| the writer typed 7 and it recorded 3 | tsc · 6,636 unit tests · build · **a source lock about the very function** | **measurement** |
+
+The last one is the sharpest. There *was* a lock on that code path — "every way of finishing the
+number commits" — and it passed, because it **counted the calls** and could not see that one of them
+undid the other. A lock that counts is not a lock that checks.
+
+And the chain that found the crash is worth remembering, because the first three steps all looked
+like the tool being wrong: measure → 32 red → suspect the harness → fix the harness → still red →
+probe the click → console error. **Twice I had good reason to conclude "the measurement is broken"
+and stop.** The reason not to is that a run reading `-` for everything is not a result at all — it
+is the absence of one, and the absence of a result never proves the code is fine.

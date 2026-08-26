@@ -368,8 +368,27 @@ test("journey round", async ({ page }) => {
   await page.goto("/todo");
   await boardReady();
   await liftMotionSuppression(page);
-  await openCard("Send");
-  await choose("I\u2019ve sent it");
+  /**
+   * ⚠️ THE UNIT CLAIM NEEDS A CARD WITH A UNIT TO PICK. The first run of these two measured the
+   * harness's FULL-manuscript send, where the parcel requirement is satisfied by the material
+   * itself (`wholeThing`) and the row is answered before anything is pressed — so "choosing a unit
+   * does not answer it" was being asked of a card that has no unit. The same fault as handing a
+   * function an input its callers cannot produce, wearing a fixture's clothes.
+   *
+   * A PARTIAL is the card that can exercise it. Where the account holds none, this reports itself
+   * as unmeasured rather than red: a fixture that cannot pose the question has not answered it.
+   */
+  const openedPartial = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const row = [...document.querySelectorAll(".tlc .row")].filter(vis)
+      .find((r) => ((r.querySelector(".pill") || {}).textContent || "").trim() === "Send"
+                && /partial/i.test(r.textContent || ""));
+    if (!row) return false;
+    row.click();
+    return true;
+  })()`) as boolean;
+  await page.waitForTimeout(1200);
+  if (openedPartial) await choose("I\u2019ve sent it");
 
   /* ⚠️ THE SEEDED NUMBER IS NOT AN ANSWER — the bug that was live on dev. Open the parcel row,
      press a unit, and read the gate WITHOUT touching the amount. */
@@ -405,11 +424,14 @@ test("journey round", async ({ page }) => {
     } : null;
   })()`) as any;
   const unitRowAfter = (afterUnit?.rows ?? []).find((r: any) => r.id.indexOf("s-unit") >= 0);
+  const unitRowBefore = (beforeUnit?.rows ?? []).find((r: any) => r.id.indexOf("s-unit") >= 0);
+  /* ⚠️ THE PRECONDITION FIRST: the row must start UNANSWERED, or the claim is unaskable here. */
+  const canAskUnit = !!openedPartial && !!unitRowBefore && !unitRowBefore.done;
   add("P4.1 · choosing a unit does NOT mark the parcel answered",
-      !!pressedUnit && !!unitRowAfter && !unitRowAfter.done,
-      unitProbe?.skipped ? unitProbe.skipped
-        : "pressed=" + !!pressedUnit + " row.done=" + unitRowAfter?.done
-          + " (was " + ((beforeUnit?.rows ?? []).find((r: any) => r.id.indexOf("s-unit") >= 0)?.done) + ")");
+      !canAskUnit || (!!pressedUnit && !!unitRowAfter && !unitRowAfter.done),
+      !openedPartial ? "UNMEASURED — no partial send card on this account, so no unit to pick"
+        : !canAskUnit ? "UNMEASURED — this card's parcel is a whole manuscript, which has no unit"
+        : "pressed=" + !!pressedUnit + " row.done after pressing a unit = " + unitRowAfter?.done);
   add("P4.2 · and the seed is focused AND selected, so typing replaces it",
       !!seedState && seedState.focused && seedState.selected,
       seedState ? "value=" + JSON.stringify(seedState.value) + " focused=" + seedState.focused
@@ -425,9 +447,21 @@ test("journey round", async ({ page }) => {
     const row = [...document.querySelectorAll(".tpn .q")].filter(vis).find((q) => q.id.indexOf("s-unit") >= 0);
     return { value: inp ? inp.value : null, done: row ? row.classList.contains("done") : null };
   })()`) as any;
+  /* ⚠️ READ THE ANSWER, NOT THE INPUT. Committing closes the row, so the picker unmounts and the
+     input is gone by the time this reads — the first run reported `value=null` about a control that
+     had correctly stopped existing. The ROW's stated answer is the durable evidence. */
+  const typedAnswer = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const row = [...document.querySelectorAll(".tpn .q")].filter(vis).find((q) => q.id.indexOf("s-unit") >= 0);
+    const ans = row ? row.querySelector(".ans") : null;
+    return { ans: ans ? (ans.textContent || "").replace(/\u2713|Edit/g, "").trim() : null,
+             done: row ? row.classList.contains("done") : null };
+  })()`) as any;
   add("P4.3 · typing replaces the seed without a keystroke being lost, and THEN it is answered",
-      typed.value === "7" && typed.done === true,
-      "value=" + JSON.stringify(typed.value) + " (7 expected, not 37) · answered=" + typed.done);
+      !canAskUnit || (/\b7\b/.test(typedAnswer.ans ?? "") && typedAnswer.done === true),
+      !canAskUnit ? "UNMEASURED — see P4.1"
+        : "answer=" + JSON.stringify(typedAnswer.ans) + " (7 expected, not 37) · answered=" + typedAnswer.done
+          + " · input at commit=" + JSON.stringify(typed.value));
 
   /* the crossover to close — its verb and its strip */
   await page.goto("/todo");
@@ -468,10 +502,21 @@ test("journey round", async ({ page }) => {
     add("P5.2 · logging a nudge REQUIRES its own clock — the question is on the ledger",
         !!nudged && nudged.rows.some((r: any) => /if nothing comes back/i.test(r.label)),
         nudged ? JSON.stringify(nudged.rows.map((r: any) => r.label)) : "-");
-    const checkinRow = (nudged?.rows ?? []).find((r: any) => /if nothing comes back/i.test(r.label));
+    /* ⚠️ ONLY THE OPEN ROW RENDERS ITS CONTROL, so the options have to be asked for. The first run
+       read a CLOSED row and reported `[]` — an empty reading about a question that renders its
+       answers correctly the moment it is opened. */
+    await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const row = [...document.querySelectorAll(".tpn .q")].filter(vis)
+        .find((q) => /if nothing comes back/i.test((q.querySelector(".ql") || {}).textContent || ""));
+      if (row && !row.classList.contains("open")) (row.querySelector(".head")).click();
+    })()`);
+    await page.waitForTimeout(700);
+    const opened5 = await read();
+    const checkinRow = (opened5?.rows ?? []).find((r: any) => /if nothing comes back/i.test(r.label));
     add("P5.3 · and Don\u2019t ask again is one of its answers",
         !!checkinRow && (checkinRow.opts ?? []).some((o: string) => /don.t ask again/i.test(o)),
-        checkinRow ? JSON.stringify(checkinRow.opts) : "(row not open)");
+        checkinRow ? JSON.stringify(checkinRow.opts) : "(no check-in row on screen)");
     add("P5.4 · the primary is absent until the clock is answered",
         !!nudged && /to answer/.test(nudged.primary ?? ""),
         "primary=" + JSON.stringify(nudged?.primary));
