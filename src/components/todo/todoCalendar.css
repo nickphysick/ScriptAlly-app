@@ -113,14 +113,21 @@
   display: grid;
   grid-template-columns: var(--tl-head-w) repeat(7, minmax(0, 1fr));
 }
-/* ⚠️ THE HEADER'S HEIGHT IS A TOKEN BECAUSE TWO RULES READ IT: the header's own floor, and the
-   pinned row's sticky `top`, which is the header's height by definition. Restated as a number in
-   two places, they drift the day either moves and the pinned row hides under the day names. */
-.tl-head, .tl-row--pin { --tl-head-h: 36px; }
+/* ⚠️ THE TOKEN IS THE HEADER'S HEIGHT, NOT A DESCRIPTION OF IT — and it had to become one. It was
+   `min-height: 36px` against a header whose content rendered at 46, so the pinned row stuck ten
+   pixels too high and slid under the day names: the exact fault a token is supposed to prevent,
+   committed by the token itself. A number that ENCODES another element's height is right until
+   that height moves, and here it was wrong on the first render.
+   ⚠️ SO THE HEADER TAKES ITS HEIGHT FROM THE TOKEN rather than the token describing the header.
+   One owner, two readers, and they cannot disagree — the acceptance measures the rendered header
+   against the pinned row's offset, and separately checks the header's contents do not overflow it,
+   because a fixed height on a text container is only safe while it is measured. Uppercase mono
+   with no descenders is the one case where that holds. */
+.tl-head, .tl-row--pin { --tl-head-h: 46px; }
 
 .tl-head {
   position: sticky; top: 0; z-index: 4;
-  min-height: var(--tl-head-h);
+  height: var(--tl-head-h);
   background: linear-gradient(135deg, #d7ddd5, #d5dbd3);
   border-bottom: 1px solid #ece0d2;
 }
@@ -446,6 +453,25 @@
   gap: 26px; align-items: start;
 }
 .tl-do { min-width: 0; border: 1px solid #ece0d2; border-radius: 10px; overflow: hidden; background: #fff; }
+/**
+ * ⚠️ THE PANE'S OWN TWO-COLUMN SPLIT IS FOLDED HERE, AND THE FAULT IT FIXES IS OLDER THAN THIS
+ * PACK. `.tpn .ws` is `minmax(0, 1fr) 288px` unconditionally — no container query, no media query
+ * — so in any mount narrower than about 600px the steps column is whatever is left. At the 440px
+ * modal window the month grid used, that was ~140px: the fork's answers rendered one word per
+ * line. It shipped that way and no assertion could see it, because every property was correct and
+ * the fault was in the arrangement.
+ *
+ * ⚠️ IT WAS FOUND BY LOOKING, NOT BY MEASURING. The acceptance passed at all four widths — the
+ * pane was 430 wide, exactly as specified — and the screenshot showed an unreadable column. That
+ * is the standing reason a phase renders an image.
+ *
+ * ⚠️ 0-3-0, DELIBERATELY, and it is `.cal-flow`'s precedent applied to the same component. A
+ * `.tl-do .ws` rule would be 0-2-0 and TIE with the component's own, leaving the winner to
+ * whichever stylesheet the bundler happened to put last. Three classes wins outright and needs no
+ * `!important`. The record card goes BELOW the steps, which is the choice the journey sheet's own
+ * 640px fold already makes for the same reason: reference belongs under the thing it references.
+ */
+.tl-do .tpn .ws { grid-template-columns: minmax(0, 1fr); }
 .tl-read { min-width: 0; border: 1px solid #ece0d2; border-radius: 11px; background: #fdfaf5; overflow: hidden; }
 .tl-readhd {
   padding: 11px 14px; border-bottom: 1px solid #ece0d2;
