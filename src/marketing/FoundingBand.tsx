@@ -36,7 +36,7 @@
 import React from "react";
 import { Runs } from "./CopyRuns";
 import {
-  FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_BLURB, FOUNDING_NOTE,
+  FOUNDING_EYEBROW, FOUNDING_HEADING, FOUNDING_BLURB,
 } from "./landingCopy";
 import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
 import sealMark from "../assets/marketing/founding-seal-mark-placeholder.png";
@@ -70,7 +70,6 @@ export const FoundingBand: React.FC<{
       />
       <FoundingCounter variant="bar" />
 
-      <p className="mk-betanote"><Runs runs={FOUNDING_NOTE} onNavigate={onNavigate} /></p>
     </div>
   </section>
 );

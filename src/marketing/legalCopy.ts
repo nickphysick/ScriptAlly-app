@@ -184,8 +184,28 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
           p(
             "Your records are kept for as long as your account exists. If you delete your account, " +
             "your data is deleted from our systems within ", { b: String(DELETION_WINDOW_DAYS) },
-            " days, allowing for backup cycles. Waitlist emails are deleted once launch " +
-            "invitations have gone out or on request, whichever is sooner.",
+            " days, allowing for backup cycles.",
+          ),
+          /* ⚠️ THE WAITLIST SENTENCE WAS CORRECTED TO MATCH THE JOB, NOT THE OTHER WAY ROUND. It
+             promised deletion "once launch invitations have gone out or on request, whichever is
+             sooner" — vague, unenforced, and not what any code did. `waitlistRetention` now deletes
+             on a stated schedule, so the page states that schedule.
+             ⚠️ AND THE TWO PERIODS HERE ARE DIFFERENT PROMISES ABOUT DIFFERENT THINGS. The 30 days
+             above is the window after ACCOUNT deletion; the 24 months below is how long a waitlist
+             entry survives without contact. Collapsing them into one number makes one of them
+             false. */
+          p(
+            "If you join the founding writers' list we keep your email address, the page you signed " +
+            "up from, and a one-way hash of your IP address — we never store the address itself. We " +
+            "use it only to send you founding-access email: a confirmation, and your invite. It is " +
+            "never sold, never shared, and never used for anything else.",
+          ),
+          p(
+            "You can leave at any time using the unsubscribe link in any of those emails. It takes " +
+            "effect immediately and frees your founding place. We also delete a waitlist entry " +
+            "automatically ", { b: "24 months" }, " after we last heard from you, and within ",
+            { b: "30 days" }, " of you unsubscribing. If you would rather we removed you sooner, ",
+            { link: "write to us", to: "contact" }, " and we will.",
           ),
         ],
       },

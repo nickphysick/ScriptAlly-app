@@ -31,6 +31,7 @@ import {
 } from "./landingCopy";
 import { useFounding, ensureCount, submitFounding, FoundingState } from "./foundingStore";
 import { WAITLIST_HONEYPOT_FIELD, WaitlistSource } from "./waitlist";
+import { FOUNDING_NOTE } from "./landingCopy";
 
 /** Which outcomes replace the form, and which leave it there to try again. */
 const HIDES_FORM: ReadonlySet<FoundingState> = new Set<FoundingState>(["sent", "dupe", "full", "down"]);
@@ -105,6 +106,7 @@ export const FoundingSignup: React.FC<{
   return (
     <>
       {!HIDES_FORM.has(state) && (
+        <>
         <form className={formClass} onSubmit={(e) => { void submit(e); }} noValidate>
           {/* ⚠️ A LABEL, NOT A PLACEHOLDER STANDING IN FOR ONE. The placeholder is an example
               address and it disappears the moment anyone types; the label has to survive that.
@@ -145,6 +147,13 @@ export const FoundingSignup: React.FC<{
             {ctaLabel}
           </button>
         </form>
+        {/* ⚠️ RENDERED HERE, SO ALL THREE CAPTURE POINTS CARRY IT BY CONSTRUCTION. It used to live
+            in `FoundingBand` alone — so the landing hero's panel and the `/founders` hero each took
+            an address with no privacy link at all, which is a consent problem on two of the three
+            surfaces that ask for one. A note that has to be remembered per mount is a note that
+            will be missing from the next mount; inside the component it cannot be. */}
+        <p className="mk-betanote"><Runs runs={FOUNDING_NOTE} onNavigate={onNavigate} /></p>
+        </>
       )}
 
       {invalid && <p className="mk-betainvalid" id={invalidId}>{FOUNDING_INVALID}</p>}
