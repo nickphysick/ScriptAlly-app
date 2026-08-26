@@ -519,18 +519,41 @@
   background: #fff; border: 1.5px solid #b9a48f; color: #b9a48f;
 }
 
-/* the caption hangs beneath the marker, measured from the marker's OWN box */
+/* ══ THE CAPTION ═══════════════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ ON HOVER AND ON FOCUS, NEVER AT REST (range pack, Phase 4). Every caption used to hang
+ * beneath its marker permanently. At one week that is a readable strip; at six months a day is
+ * about six pixels wide, so eighty pixels of mono text per marker overprint their neighbours
+ * three and four deep and the board reads as noise laid over shapes.
+ *
+ * ⚠️ AND THE COLLISION IT REPLACES WAS NEVER SOLVED — IT WAS ANNOTATED. `title={caption}` was
+ * added on the marker with a comment saying two captions on one day overprint and that a policy
+ * was a design decision. Hover IS the policy: one caption at a time, chosen by the reader,
+ * cannot collide with anything by construction. The `title` is retired with it.
+ *
+ * ⚠️ THE MARKER RISES WITH ITS CAPTION. A revealed caption is wider than the marker it belongs
+ * to, so without this it is painted over by the next marker along — the collision moved rather
+ * than removed. `z-index` on the hovered ancestor lifts the pair together.
+ */
 .tl-tip {
   position: absolute; top: calc(100% + 5px); left: 50%; transform: translateX(-50%);
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
   letter-spacing: 0.09em; text-transform: uppercase; color: #a2937f;
   white-space: nowrap; background: #fdfaf5; padding: 1px 5px; border-radius: 5px;
   pointer-events: none;
+  opacity: 0; transition: opacity 0.12s ease;
 }
+.tl-at:hover > .tl-tip,
+.tl-at:focus-visible > .tl-tip { opacity: 1; }
+.tl-at:hover, .tl-at:focus-visible { z-index: 6; }
+@media (prefers-reduced-motion: reduce) { .tl-tip { transition: none; } }
 
 /* ── MARKER 3 · a date arrived, and nothing is behind it ──────────────────────────────────────
    ⚠️ `pointer-events: none` IS THE INTERACTION HALF OF THE SAME RULE. There is nothing to open, so
-   there is nothing to click — stated once, in the place that also makes it dashed. */
+   there is nothing to click — stated once, in the place that also makes it dashed.
+   ⚠️ AND IT IS NARROWED, NOT CONTRADICTED, BY THE `::after` BELOW (Phase 4). The pseudo-element
+   takes pointer events so the caption can be reached; the element still has no handler, is still
+   not a button and is still `aria-hidden`. Nothing became openable. Read the two together. */
 .tl-wp {
   width: 0; height: calc(var(--bar-h) + var(--wp-over) * 2);
   transform: translate(-1px, -50%);
@@ -538,8 +561,19 @@
   pointer-events: none;
 }
 .tl-wp.yours { border-left-color: #c9a89e; }
-.tl-wp .tl-tip { color: #5a6e58; background: transparent; }
+.tl-wp .tl-tip { color: #5a6e58; background: #fdfaf5; }
 .tl-wp.yours .tl-tip { color: #a06a55; }
+/* ⚠️ A WAYPOINT IS TWO PIXELS WIDE AND TAKES NO POINTER EVENTS, SO IT CANNOT BE HOVERED — which
+   would have made hover-only captions silently delete every forecast's label rather than defer it.
+   The reach is a transparent pseudo-element that takes events while the element does not, so the
+   upright stays exactly as unclickable as its own rule says: no handler, no button, `aria-hidden`.
+   Hovering a label is not opening a record, and this is the one place the two had to be separated. */
+.tl-wp::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -10px; width: 20px;
+  pointer-events: auto;
+}
+/* the reminder's reach is its ring's, because its ring is what a reader aims at */
+.tl-wp[data-kind="reminder"]::after { left: calc(var(--ddot) / -2); width: var(--ddot); }
 /* ⚠️ AN OVERTAKEN WAYPOINT STILL RENDERS — as passed. A past week states what happened, and a
    forecast that was met or missed is part of what happened. */
 .tl-wp.passed { border-left-style: solid; opacity: 0.55; }
@@ -557,7 +591,10 @@
   border-radius: 50%; border: 2px dashed #c9a89e;
   background: #fdfaf5; box-shadow: 0 0 0 3px #fdfaf5;
 }
-.tl-wp[data-kind="reminder"] .tl-tip { top: calc(50% + var(--disc) / 2); }
+/* ⚠️ THE OFFSET IS THE RING'S OWN SIZE. It read `--disc` — the StatusDot's — while the ring it
+   hangs from is `--ddot`, so the caption was placed by a number a different element owns and the
+   two only agreed while the dots were within 10px of each other. The tiers move them apart. */
+.tl-wp[data-kind="reminder"] .tl-tip { top: calc(50% + var(--ddot) / 2 + 5px); }
 
 /* ══ THE WRITER'S OWN CHIPS ═════════════════════════════════════════════════════════════════
  *

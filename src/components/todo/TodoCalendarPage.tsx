@@ -183,7 +183,14 @@ const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({
 );
 
 /**
- * An event on the bar — it sits IN the break the derivation left, and its caption hangs beneath.
+ * An event on the bar — it sits IN the break the derivation left, and names itself on hover.
+ *
+ * ⚠️ THE CAPTION IS NOT A `title` ANY MORE (range pack, Phase 4). It was, and the comment at it
+ * said why: two markers on one day overprint each other's captions, the markers stay legible and
+ * the captions do not, and a policy for that was a design decision left unmade. The policy is
+ * hover — one caption at a time, chosen by the reader — so the workaround has no subject left.
+ * `aria-label` still carries the same words, and on a `<button>` it replaces the contents for
+ * assistive technology, so the caption is not read twice.
  *
  * ⚠️ TWO MARKERS, AND THE SHAPE IS THE CLAIM (v11). Where the status CHANGED the marker is the
  * locked `StatusDot` — the same symbol the writer reads on every other surface, at its own
@@ -203,12 +210,6 @@ const Node: React.FC<{ n: BarNode; selected: boolean; onPick: () => void }> = ({
     style={{ left: pct(n.at), ...laneVar(n.lane) }}
     onClick={onPick}
     aria-label={n.caption}
-    /* ⚠️ THE CAPTION IS ALSO A `title`, because two markers on one day put their captions on top of
-       each other — measured at 1440: two 30px dots clear each other by 10px while their captions
-       need about eighty each, so the later one overprints the earlier. The markers are legible and
-       the captions are not; a policy for that is a design decision and is flagged rather than
-       invented here. This costs nothing and makes the overprinted one readable meanwhile. */
-    title={n.caption}
   >
     {/* ⚠️ THE HALO IS THE WRAPPER'S, NOT THE DOT'S. `StatusDot` is locked and takes no ring of its
         own; punching the marker out of the board's parchment is this page's business, so it is

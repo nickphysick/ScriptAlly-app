@@ -64,17 +64,35 @@ test("bars are centred in their rows, at every row height and every width", asyn
   for (const width of WIDTHS) {
     await openRoute(page, "/todo/calendar", { width, height: HEIGHT });
     /* one week back — this week is quiet on this account, and a centring check wants markers too */
-    await page.getByRole("button", { name: "Previous week" }).click();
+    await page.getByRole("button", { name: "Previous window" }).click();
     await page.waitForTimeout(400);
 
     const r = await page.evaluate<any>(TAG + `(() => {
       const board = vis(".tl-board");
       const rows = [...board.querySelectorAll(".tl-row")];
       const px = (n) => Math.round(n * 100) / 100;
+      /* ⚠️ A CUSTOM PROPERTY HOLDING A \`calc()\` READS BACK AS ITS TEXT, NOT ITS VALUE. This was
+         \`parseFloat(getPropertyValue("--lane-h"))\`, which was a number while the token was the
+         literal \`70px\` and became \`NaN\` the moment the lane started deriving from what it holds
+         (range pack, Phase 2) — so every offset was NaN and this check went RED rather than
+         vacuous, which is the only good half of it. Resolving it by re-stating the arithmetic here
+         would be worse: there are two formulas, a bar row's and a pinned row's, and a lock that
+         restates a formula agrees with the sheet only until someone edits one of them. So the
+         browser resolves it, in the row's OWN scope, on a probe that is out of flow and gone
+         again before anything is measured. */
+      const laneOf = (row) => {
+        const probe = document.createElement("div");
+        probe.style.cssText =
+          "position:absolute;visibility:hidden;pointer-events:none;width:0;height:var(--lane-h)";
+        row.appendChild(probe);
+        const h = probe.getBoundingClientRect().height;
+        probe.remove();
+        return h;
+      };
       const off = [];
       for (const row of rows) {
         const R = row.getBoundingClientRect();
-        const laneH = parseFloat(getComputedStyle(row).getPropertyValue("--lane-h"));
+        const laneH = laneOf(row);
         const lanes = Number(getComputedStyle(row).getPropertyValue("--lanes")) || 1;
         for (const e of row.querySelectorAll(".tl-seg, .tl-node, .tl-wp, .tl-chip")) {
           const B = e.getBoundingClientRect();
@@ -91,7 +109,7 @@ test("bars are centred in their rows, at every row height and every width", asyn
       for (const x of rows) { const h = x.getBoundingClientRect().height; if (used + h > room) break; used += h; fits += 1; }
       return { rows: rows.length, heights, parts: off.length,
         worst: off.length ? Math.max(...off.map(Math.abs)) : null,
-        laneH: parseFloat(getComputedStyle(rows[0]).getPropertyValue("--lane-h")),
+        laneH: laneOf(rows[0]),
         zone: zone.clientHeight, room: Math.round(room), fits,
         docScrollW: document.documentElement.scrollWidth, docClientW: document.documentElement.clientWidth };
     })()`);
@@ -173,6 +191,7 @@ test("the marker grammar — shape states whether a fact exists, and so does the
   const seen = new Set<string>();
   let statusMarkers = 0, directionMarkers = 0, flags = 0;
 
+  let tipsSeen = 0;
   for (let back = 0; back <= 12; back += 1) {
     const r = await page.evaluate<any>(TAG + `(() => {
       const b = vis(".tl-board");
@@ -190,7 +209,14 @@ test("the marker grammar — shape states whether a fact exists, and so does the
           dashed: getComputedStyle(e).borderLeftStyle,
           ring: getComputedStyle(e, "::before").content,
           caption: (e.querySelector(".tl-tip") || {}).textContent || "",
+          /* the reach that lets a two-pixel upright be hovered without becoming clickable */
+          reachPe: getComputedStyle(e, "::after").pointerEvents,
+          reachW: getComputedStyle(e, "::after").width,
         })),
+        /* every caption on the board, at rest — none of them may be painted */
+        tipsShowing: [...b.querySelectorAll(".tl-tip")]
+          .filter((e) => getComputedStyle(e).opacity !== "0").length,
+        tipsTotal: b.querySelectorAll(".tl-tip").length,
         disc: parseFloat(getComputedStyle(b.querySelector(".tl-row")).getPropertyValue("--disc")),
       };
     })()`);
@@ -221,13 +247,30 @@ test("the marker grammar — shape states whether a fact exists, and so does the
          handler, because there is nothing behind it to open. */
       expect(w.tag, "a dashed marker is a control").toBe("SPAN");
       expect(w.pe, "a dashed marker is clickable").toBe("none");
+      /* ⚠️ THE `none` AND THE REACH ARE ONE MECHANISM AND ARE ASSERTED TOGETHER (Phase 4).
+         Captions show on hover now, and a 2px upright taking no pointer events can never BE
+         hovered — so its caption would have been silently deleted rather than deferred. A
+         transparent `::after` takes the events the element does not. Either half alone is
+         meaningless: without the `none` the upright becomes clickable, and without the reach the
+         forecast loses its label. Removing the reach as an unused declaration is exactly how
+         this breaks, which is why it is asserted here rather than left to read as decoration. */
+      expect(w.reachPe, "the waypoint's caption cannot be reached — its reach takes no events").toBe("auto");
+      expect(parseFloat(w.reachW), "the waypoint's reach is not wider than its upright").toBeGreaterThan(10);
       /* dashed unless the week has passed, where nothing is provisional any more */
       expect(["dashed", "solid", "none"]).toContain(w.dashed);
       /* ⚠️ AND NO ALARM: no exclamation anywhere in a marker's own words. */
       expect(w.caption, "a marker caption carries an exclamation").not.toMatch(/!/);
     }
 
-    if (back < 12) await page.getByRole("button", { name: "Previous week" }).click();
+    /* ⚠️ NO CAPTION IS PAINTED AT REST (Phase 4), and the population is asserted over the WHOLE
+       sweep rather than per window. A single window can legitimately hold no markers — the board
+       opens at today and runs forward, and markers are records — so a per-window population check
+       fails on a correct page. Accumulating keeps the guard against the vacuous case (`0 showing`
+       is meaningless if nothing was ever there) without inventing a fault. */
+    tipsSeen += r.tipsTotal;
+    expect(r.tipsShowing, `${r.tipsShowing} of ${r.tipsTotal} captions are painted at rest`).toBe(0);
+
+    if (back < 12) await page.getByRole("button", { name: "Previous window" }).click();
     await page.waitForTimeout(200);
   }
 
@@ -238,6 +281,8 @@ test("the marker grammar — shape states whether a fact exists, and so does the
   expect(statusMarkers, "no status marker was measured").toBeGreaterThan(0);
   expect(directionMarkers, "no direction marker was measured").toBeGreaterThan(0);
   expect(flags, "no dashed flag was measured").toBeGreaterThan(0);
+  console.log(`captions seen over the sweep: ${tipsSeen}, none of them painted`);
+  expect(tipsSeen, "no caption exists anywhere over thirteen windows — the rest-state check measured nothing").toBeGreaterThan(0);
 
   console.log("console errors:", errs.length ? JSON.stringify(errs.slice(0, 5)) : "none");
   expect(errs, "the board threw").toEqual([]);
@@ -376,7 +421,7 @@ test("⚠️ the task pane still squeezes below ~600px — confirmed, not fixed"
 test("the run's screenshots", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1440, height: HEIGHT });
   await page.screenshot({ path: "reports/calendar-markers/week-1440.png" });
-  await page.getByRole("button", { name: "Previous week" }).click();
+  await page.getByRole("button", { name: "Previous window" }).click();
   await page.waitForTimeout(500);
   await page.screenshot({ path: "reports/calendar-markers/markers-1440.png" });
   await page.setViewportSize({ width: 2400, height: HEIGHT });
