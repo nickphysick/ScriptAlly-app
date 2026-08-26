@@ -21,9 +21,13 @@ import { ManuscriptVersion, Query, SubmissionPackage } from "../../types";
  * ⚠️ `STAT_CELLS`, `repliesByPackage` and `ledgerRows` ARE NO LONGER IMPORTED HERE, and that is the
  * point of D-B3 rather than an oversight: the stat strip is now the header's one derived line, the
  * per-package figures are the cards' scorecard footers, and the activity ledger is gone from this
- * page. They remain exported and unit-locked in `packageTracking.ts` — `repliesByPackage` still has
- * its own tests and the DEV `#/pkg-lab` route — so this is a mount being removed, not a derivation
- * being deleted. Anyone reviving them should ask what they would say that a card does not.
+ * page.
+ *
+ * ⚠️ AND THEY ARE NOW GONE ENTIRELY. This note used to end "they remain exported and unit-locked in
+ * `packageTracking.ts`", which stopped being true when F-U deleted all three with their tests — and
+ * the dev review route it also cited as a caller was itself removed, and had never imported them
+ * anyway. Both halves of the reassurance had expired. Kept, corrected, because this comment is
+ * exactly the prose that once made a plain grep read as though a caller survived.
  */
 import { trackingTotals, requestsByMaterial, trackingNudge } from "../../lib/packageTracking";
 import type { Activity, BookVersion } from "../../types";

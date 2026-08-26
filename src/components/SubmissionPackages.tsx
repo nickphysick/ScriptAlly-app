@@ -17,8 +17,9 @@
  * Pro-gated inside `addPackage` (db.tsx) — the builder surfaces that refusal instead of swallowing
  * it, which the old composer did. See F-E in the flow report.
  *
- * ⚠️ THE WORKSHOP AND ANALYTICS SURFACES ARE UNREACHABLE FROM HERE (flow pack D9) and stay on disk
- * for the DEV `#/pkg-lab` route. Do not re-open a route into them to give the guided tour a door —
+ * ⚠️ THE WORKSHOP AND ANALYTICS SURFACES ARE GONE — not unreachable, deleted (flow pack D9 made
+ * them unreachable; the 25 Aug tidy-up deleted all six, together with the dev review route that had
+ * been the stated reason for keeping them). Do not rebuild one to give the guided tour a door —
  * that tour's missing entry point is F-F, and it wants a decision, not a shortcut.
  */
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
@@ -72,15 +73,16 @@ export const SubmissionPackages: React.FC = () => {
 
      ⚠️ THE TAB STRIP IS GONE AND THIS IS WHAT REPLACED IT (restructure D1). `PackageTab` was two
      values and this is three, because the overview is a real destination rather than a third tab:
-     the rail IS the navigation now, and Workshop and Analytics are what it opens. The strip's
-     component survives untouched for the DEV `#/pkg-lab` route, which still mounts it. */
+     the rail IS the navigation now, and Workshop and Analytics are what it opens. `PackageTabs`
+     itself is deleted — it outlived this page by one route, and that route went too. */
   /* ⚠️ THE `view` STATE IS GONE, AND SO ARE BOTH BRANCHES IT SWITCHED (D9, R5's whole list).
      Materials open the modal, packages open the builder, and Tracking is a dashboard on the stage —
      so nothing on this page could set `view` to anything but "overview" any more, which made the
      WorkshopTab and AnalyticsTab branches unreachable code. Traced to a rendered root before
      removing, in both directions: the two components, `BackToOverview`, the four signal states and
-     the analytics scope were reachable ONLY from those branches. The COMPONENTS stay on disk and
-     stay mounted by `#/pkg-lab`; what is deleted is this page's dead switch. */
+     the analytics scope were reachable ONLY from those branches. This pass deleted only the dead
+     switch and left the components on disk, because a dev review route still mounted them; that
+     route and all six components have since gone too. */
   /* The material modal (flow pack Phase 2). `matModal` is the open flag; `matEditing` is the record
      being edited, or null when adding. Both local — a modal is not a destination. */
   const [matModal, setMatModal] = useState(false);
@@ -346,8 +348,10 @@ export const SubmissionPackages: React.FC = () => {
       {/* ⚠️ `.pkgw-strip` IS RETIRED FROM THIS PAGE (restructure). It carried the scorecard sentence
           as a thin band above the tab row; the overview's problem-statement card is that same
           sentence promoted to the stage, in the ref's own words. Keeping both would state the
-          page's one argument twice, a few pixels apart. Removed from the render rather than hidden;
-          its CSS stays in packageWorkshop.css because the DEV `#/pkg-lab` route still draws it. */}
+          page's one argument twice, a few pixels apart. Removed from the render rather than hidden.
+          ⚠️ ITS CSS IS STILL IN packageWorkshop.css AND NOW HAS NO RENDERER AT ALL — it was kept
+          because a dev review route drew it, and that route is gone. Orphaned, flagged, not swept
+          here. */}
       {!activeMs ? (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 40, textAlign: "center" }}>
           <div>

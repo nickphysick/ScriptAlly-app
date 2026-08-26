@@ -1,6 +1,6 @@
 /**
- * ⚠️ UNMOUNTED, AND KEPT ON PURPOSE (F-AM). Its only consumer was `AnalyticsTab`, deleted with the
- * `#/pkg-lab` cascade — so nothing renders these derivations today. They survive because they are
+ * ⚠️ UNMOUNTED, AND KEPT ON PURPOSE (F-AM). Its only consumer was `AnalyticsTab`, deleted along
+ * with the dev review route that had kept it alive — so nothing renders these derivations today. They survive because they are
  * PURE, TESTED, and answer a question the live page does not: the reply-rate framing, the material
  * ranking, the composition read and the recommendations. `TrackingBand` derives from
  * `packageTracking.ts` and reproduces none of it, so deleting this would lose the work rather than

@@ -181,9 +181,9 @@ export function packageStamp(packageId: string): string {
  * their tests in the same commit. A tested export with no caller reads as live code to the next
  * session, which is how a deleted surface gets "restored".
  *
- * ⚠️ AND `#/pkg-lab` WAS NOT THEIR CALLER, though the brief said it was. It imported `PackageTabs`,
- * `WorkshopTab` and `AnalyticsTab` and none of these — they had already been orphaned by an earlier
- * change. `TrackingBand.tsx` carries a comment RECORDING that it stopped importing them, and that
+ * ⚠️ AND THE DEV REVIEW ROUTE WAS NOT THEIR CALLER, though the brief said it was. It imported
+ * `PackageTabs`, `WorkshopTab` and `AnalyticsTab` and none of these — they had already been orphaned
+ * by an earlier change. (That route has since been deleted too, with all three components.) `TrackingBand.tsx` carries a comment RECORDING that it stopped importing them, and that
  * comment is what makes a plain grep read as though a caller survived. Strip comments before
  * believing a reachability answer.
  */

@@ -507,8 +507,6 @@ function AppContent() {
   if (hash === "#/shell-lab" && import.meta.env.DEV) {
     return <ShellLab />;
   }
-  // Dev-only Package Workshop review surface (landing + empty/full workshop over stubs, no auth). TEMP.
-
   // Boot: while Firebase Auth is still resolving the session, show a neutral splash — never a
   // landing/auth view. Stops the old "calmer place to query" landing flashing on a hard refresh.
   if (!authReady) {
