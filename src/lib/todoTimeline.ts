@@ -406,6 +406,18 @@ export function timelineWeek(
          and everything else derived from a query is the writer's turn */
       const isTask = !!it.card?.userTaskId || it.family === "task";
       const kind: TimelineKind = it.family === "done" ? "rec" : isTask ? "task" : "turn";
+      /**
+       * ⚠️ A QUERY'S WORK IS THE BAR NOW, NOT A CHIP BESIDE IT — and leaving both drew every fact
+       * twice. A your-turn card IS the bar's your-move stretch; a completed or recorded item IS a
+       * node on it. Rendering the chip as well put one event on the row in two places, inflated
+       * every count, and cost each row a whole lane of height for pills nobody needed.
+       *
+       * ⚠️ THE ITEM IS NOT DISCARDED, ONLY THE CHIP. The card it carries is what the workspace
+       * opens, and the page still finds it by `queryId` — this decides what is DRAWN, which is the
+       * view's business, and touches nothing the pane reads.
+       */
+      /* ghosts arrive in their own loop below, so this branch only ever sees the three above */
+      if (kind !== "task") continue;
       const owner = it.card?.agentId ?? ownerOf(it.card?.relatedRecordId, byQuery);
       push(rowFor(isTask ? null : owner), {
         key: it.key, idx, ymd, kind, label: pillLabel(it), lane: 0, spanTo: idx,
@@ -416,12 +428,10 @@ export function timelineWeek(
         draggable: draggableTask(it),
       });
     }
-    for (const r of data.recordFor(ymd)) {
-      push(rowFor(ownerOf(r.queryId, byQuery)), {
-        key: r.key, idx, ymd, kind: "rec", label: pillLabel(r), lane: 0, spanTo: idx,
-        dir: r.dir, queryId: r.queryId, draggable: false,
-      });
-    }
+    /* ⚠️ THE RECORD IS A NODE ON THE BAR, NOT A CHIP BESIDE IT. `recordFor` is still read — by
+       the bar derivation, which places each entry as an event IN the journey rather than as a pill
+       floating above it. That is the whole change: one object that tells the story left to right,
+       instead of one pill per fact. */
     for (const g of data.ghostsOn(ymd)) {
       const isTask = !!g.of.card?.userTaskId || g.of.family === "task";
       const owner = g.of.card?.agentId ?? ownerOf(g.of.card?.relatedRecordId, byQuery);
@@ -554,12 +564,20 @@ export function timelineWeek(
   const kept: Draft[] = [];
   for (const row of drafts.values()) {
     if (row.key === YOU_ROW) { kept.push(row); continue; } // pinned: always, even empty
-    const alive = row.items.length + (segments.filter((sg) => sg.rowKey === row.key).length);
+    /* ⚠️ A NODE COUNTS AS SOMETHING ON THE ROW. A closure on the window's first day leaves no
+       drawable stretch — the piece before it is narrower than the floor — so a row whose only
+       content is that event would otherwise be dropped and take the event with it. */
+    const alive = row.items.length
+      + segments.filter((sg) => sg.rowKey === row.key).length
+      + nodes.filter((n) => n.rowKey === row.key).length;
     /* ⚠️ "Needs me" IS A QUESTION ABOUT WORK, so it takes none of the exemptions below: an empty
        row is not work, and keeping quiet relationships in it would answer a different question
        from the one asked. */
     if (view.show === "needs") {
-      if (row.items.some((i) => i.kind === "turn" || i.kind === "task")) kept.push(row);
+      /* ⚠️ IT READS THE BAR NOW. "Work" used to be a your-turn CHIP; a your-turn card is a stretch
+         of the bar since Phase 3, so asking the items alone found nothing at all. */
+      const mine = segments.some((sg) => sg.rowKey === row.key && sg.side === "yours");
+      if (mine || row.items.some((i) => i.kind === "task")) kept.push(row);
       continue;
     }
     if (alive > 0) { kept.push(row); continue; }

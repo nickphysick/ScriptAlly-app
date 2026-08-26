@@ -122,7 +122,10 @@ describe("rows are relationships — one per agent, and Your tasks pinned above 
     expect(a).toBeDefined();
     expect(a.name).toBe("P. Kaur");
     expect(a.agency).toBe("Kaur & Finch");
-    expect(a.items.map((i) => i.kind)).toEqual(["turn"]);
+    /* ⚠️ A YOUR-TURN CARD IS A STRETCH OF THE BAR NOW, NOT A CHIP BESIDE IT. Drawing both put one
+       fact on the row twice and cost every row a lane of height. */
+    expect(a.items).toHaveLength(0);
+    expect(timelineSegments(dataFor(TURN), TODAY, 7).some((sg) => sg.side === "yours")).toBe(true);
   });
 
   it("sends a writer's own task to the pinned row and never to an agent's", () => {
@@ -147,9 +150,12 @@ describe("rows are relationships — one per agent, and Your tasks pinned above 
     const rec = dataFor(inp).recordFor(TODAY)[0];
     expect(rec).toBeDefined();
     expect((rec as unknown as { agentId?: string }).agentId).toBeUndefined();
-    const rows = timelineRows(dataFor(inp), TODAY, 7);
+    const { rows, nodes } = timelineWeek(dataFor(inp), TODAY, 7);
     const a = rows.find((r) => r.agentId === "a1")!;
-    expect(a.items.map((i) => [i.kind, i.label])).toEqual([["rec", "Query sent"]]);
+    /* ⚠️ THE RECORD IS A NODE ON THE BAR, and it still routes by `queryId` — which is the join this
+       case exists for, and the only thing about it the bar changed is where it is drawn. */
+    expect(a.items).toHaveLength(0);
+    expect(nodes.map((n) => [n.rowKey, n.caption])).toEqual([["agent-a1", "Query sent"]]);
   });
 
   it("⚠️ keeps a live query with nothing scheduled — a query you sent is never invisible", () => {
@@ -336,8 +342,10 @@ describe("the kind filters — five, and each is a thing to switch off", () => {
     const d = dataFor(TURN);
     expect(timelineRows(d, TODAY, 7, view({ search: "kaur" })).map((r) => r.agentId)).toEqual([null, "a1"]);
     expect(timelineRows(d, TODAY, 7, view({ search: "finch" })).map((r) => r.agentId)).toEqual([null, "a1"]);
-    /* the card's own title, which `pillLabel` had abbreviated to "Send full" on the grid */
-    expect(timelineRows(d, TODAY, 7, view({ search: "send the full" })).map((r) => r.agentId)).toEqual([null, "a1"]);
+    /* ⚠️ THE BAR'S OWN WORDS, and the reach they replaced. A your-turn card used to be a chip, so
+       the search read its title; the card is a STRETCH now and the stretch carries `pillLabel`'s
+       output. "Send full" still finds it; the card's fuller title no longer does, which costs
+       nothing a reader would notice — the agent's name in that title is searchable on its own. */
     expect(timelineRows(d, TODAY, 7, view({ search: "send full" })).map((r) => r.agentId)).toEqual([null, "a1"]);
     expect(timelineRows(d, TODAY, 7, view({ search: "zzz" })).map((r) => r.agentId)).toEqual([null]);
   });
@@ -416,59 +424,59 @@ describe("order — Your tasks ignores it, closed rows sink, and ties keep their
 
 /* ══ lanes ═══════════════════════════════════════════════════════════════════════════════════ */
 
-describe("lanes — the ref gives every chip in a row one top, and two of them would overlap", () => {
-  it("⚠️ A CHIP PACKS ABOVE THE BAR, never on top of it — two lane mechanisms, one row height", () => {
-    /* a bar's lane means "this manuscript"; a chip's lane means "the first line where nothing
-       collides". They are different questions, so a chip is offset past the bars rather than
-       competing with them for lane 0. */
-    const inp = input({
-      queries: [q({ id: "q1", agentId: "a1", status: QueryStatus.QUERIED, dateSent: `${TODAY}T09:00:00Z` })],
-      agents: [agent({ responseTimeWeeks: 1 } as Partial<Agent>)],
-      activities: [act({ id: "r1", queryId: "q1", date: "2026-08-28T09:00:00Z" })],
+/**
+ * ⚠️ THE TWO LANE MECHANISMS, AND THEY NO LONGER MEET. A BAR's lane is a MANUSCRIPT; a CHIP's lane
+ * is packing. Since the record and the your-turn card became parts of the bar, the only chips left
+ * are the writer's own tasks — which belong to the pinned row, where there are no bars. So the
+ * offset that keeps a chip off a bar's lane is a guard rather than a daily occurrence, and these
+ * cases assert each mechanism where it actually runs.
+ */
+describe("lanes — a manuscript on the bar, packing on the chips", () => {
+  const tasks = (...ymds: string[]) => input({
+    cols: {
+      todo: [], snoozed: [], dismissed: [], done: [],
+      today: ymds.map((y, i) => card({
+        key: `u${i}`, userTaskId: `t${i}`, nature: "task", dueYmd: y, title: `Task ${i}`,
+      })),
+    },
+  } as Partial<CalendarInput>);
+
+  it("one manuscript is one bar lane; two are two", () => {
+    const one = input({
+      queries: [q({ id: "q1", agentId: "a1", manuscriptId: "m1", status: QueryStatus.QUERIED })],
+      agents: [agent({ responseTimeWeeks: 8 } as Partial<Agent>)],
     });
-    const { rows, segments } = timelineWeek(dataFor(inp), TODAY, 7);
-    const row = rows.find((r) => r.agentId === "a1")!;
-    expect(segments.every((sg) => sg.lane === 0), "the one manuscript took more than one lane").toBe(true);
-    expect(row.items.every((it) => it.lane >= 1), "a chip landed on the bar's lane").toBe(true);
+    expect(new Set(timelineSegments(dataFor(one), TODAY, 7).map((sg) => sg.lane)).size).toBe(1);
+    const two = input({
+      queries: [
+        q({ id: "q1", agentId: "a1", manuscriptId: "m1", status: QueryStatus.QUERIED }),
+        q({ id: "q2", agentId: "a1", manuscriptId: "m2", status: QueryStatus.QUERIED }),
+      ],
+      agents: [agent({ responseTimeWeeks: 8 } as Partial<Agent>)],
+    });
+    expect(new Set(timelineSegments(dataFor(two), TODAY, 7).map((sg) => sg.lane)).size).toBe(2);
+  });
+
+  it("chips that do not overlap share one lane", () => {
+    const row = timelineRows(dataFor(tasks(TODAY, "2026-08-30")), TODAY, 7)[0];
+    expect(row.key).toBe(YOU_ROW);
+    expect(row.items).toHaveLength(2);
+    expect(new Set(row.items.map((i) => i.lane)).size).toBe(1);
+  });
+
+  it("two chips on the same day take a lane each — they cannot share a line", () => {
+    const row = timelineRows(dataFor(tasks(TODAY, TODAY)), TODAY, 7)[0];
+    expect(new Set(row.items.map((i) => i.lane)).size).toBe(2);
     expect(row.lanes).toBeGreaterThanOrEqual(2);
   });
 
-  it("shares one CHIP lane between things that do not overlap, above the bar's own", () => {
-    const inp = input({
-      queries: [q({ id: "q1", agentId: "a1" })],
-      agents: [agent({})],
-      activities: [
-        act({ id: "r1", queryId: "q1", date: `${TODAY}T09:00:00Z` }),
-        act({ id: "r2", queryId: "q1", date: "2026-08-30T09:00:00Z", activityType: ActivityType.NUDGE_SENT }),
-      ],
-    });
-    const { rows, segments } = timelineWeek(dataFor(inp), TODAY, 7);
-    const row = rows.find((r) => r.agentId === "a1")!;
-    /* one manuscript, so one bar lane; the chips then share the single lane above it */
-    expect(new Set(segments.map((sg) => sg.lane)).size).toBe(1);
-    expect(new Set(row.items.map((i) => i.lane)).size).toBe(1);
-    expect(row.items.every((i) => i.lane === 1)).toBe(true);
-  });
-
   it("⚠️ a chip runs to the column before the next occupant of its lane, not to the row's end", () => {
-    const inp = input({
-      queries: [q({ id: "q1", agentId: "a1" })],
-      agents: [agent({})],
-      activities: [
-        act({ id: "r1", queryId: "q1", date: `${TODAY}T09:00:00Z` }),
-        act({ id: "r2", queryId: "q1", date: "2026-08-30T09:00:00Z", activityType: ActivityType.NUDGE_SENT }),
-      ],
-    });
-    const row = timelineRows(dataFor(inp), TODAY, 7).find((r) => r.agentId === "a1")!;
+    const row = timelineRows(dataFor(tasks(TODAY, "2026-08-30")), TODAY, 7)[0];
     expect(row.items.map((i) => [i.idx, i.spanTo])).toEqual([[0, 3], [4, 6]]);
   });
 
   it("gives a lone chip the rest of the window to spread into", () => {
-    const inp = input({
-      queries: [q({ id: "q1", agentId: "a1" })], agents: [agent({})],
-      activities: [act({ id: "r1", queryId: "q1", date: "2026-08-27T09:00:00Z" })],
-    });
-    const row = timelineRows(dataFor(inp), TODAY, 7).find((r) => r.agentId === "a1")!;
+    const row = timelineRows(dataFor(tasks("2026-08-27")), TODAY, 7)[0];
     expect([row.items[0].idx, row.items[0].spanTo]).toEqual([1, 6]);
   });
 });
@@ -490,16 +498,23 @@ describe("⚠️ the derivations underneath are untouched, and the rows prove it
     const raw = calendarDays(inp, [...WIN]).get(TODAY)!.items;
     expect(raw.filter((i) => i.family === "done")).toHaveLength(1);
     expect(recordDays(inp.activities, inp.queries, inp.agents, WIN).get(TODAY)).toHaveLength(1);
-    const row = timelineRows(dataFor(inp), TODAY, 7, view({ show: "all" })).find((r) => r.agentId === "a1")!;
-    expect(row.items).toHaveLength(1);
-    expect(row.items[0].kind).toBe("rec");
+    /* ⚠️ THE DEDUPE STILL HOLDS, AND IT HOLDS ONE STEP EARLIER NOW. The done card is superseded
+       before the page reads the day, so the bar's node derivation never sees it: one activity is
+       one NODE, where it used to be one chip. */
+    const { rows, nodes } = timelineWeek(dataFor(inp), TODAY, 7, view({ show: "all" }));
+    const row = rows.find((r) => r.agentId === "a1")!;
+    expect(row.items).toHaveLength(0);
+    expect(nodes.filter((n) => n.rowKey === row.key)).toHaveLength(1);
   });
 
   it("labels come from `pillLabel` and are not re-summarised here", () => {
-    const row = timelineRows(dataFor(TURN), TODAY, 7).find((r) => r.agentId === "a1")!;
+    /* the bar's your-move stretch takes the card's own two words, lower-cased into a sentence —
+       the summarising still happens in exactly one place and it is not this module */
     const raw = dataFor(TURN).itemsFor(TODAY)[0];
-    expect(row.items[0].label).toBe(pillLabel(raw));
-    expect(row.items[0].label).toBe("Send full");
+    expect(pillLabel(raw)).toBe("Send full");
+    const yours = timelineSegments(dataFor(TURN), TODAY, 7).filter((sg) => sg.side === "yours");
+    expect(yours.length).toBeGreaterThan(0);
+    expect(yours[0].label).toBe(`Your move · ${pillLabel(raw).toLowerCase()}`);
   });
 
   it("a writer's own task is draggable and a fact is not — `draggableTask`, unchanged", () => {
@@ -514,8 +529,11 @@ describe("⚠️ the derivations underneath are untouched, and the rows prove it
       },
     } as Partial<CalendarInput>);
     const rows = timelineRows(dataFor(inp), TODAY, 7);
+    /* ⚠️ THE FACT YOU CANNOT DRAG IS NOT A CHIP ANY MORE — it is the bar, which has no drag at all.
+       What survives is the half that matters: the writer's own task is the one thing here whose
+       date is INPUT, and it is the only thing that moves. */
     expect(rows[0].items.map((i) => i.draggable)).toEqual([true]);
-    expect(rows.find((r) => r.agentId === "a1")!.items.map((i) => i.draggable)).toEqual([false]);
+    expect(rows.find((r) => r.agentId === "a1")!.items).toHaveLength(0);
   });
 
   it("carries a rolled-forward item onto today and leaves a ghost on its origin", () => {

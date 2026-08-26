@@ -81,8 +81,15 @@ const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
  * scroll" survive a resize with nothing to recompute.
  */
 const pct = (n: number) => `${(n / TL_DAYS) * 100}%`;
-/** the lane's vertical step — a chip's box plus the gap between two of them */
-const LANE_STEP = 27;
+/**
+ * The lane's vertical step.
+ *
+ * ⚠️ IT IS THE BAR'S BOX PLUS ITS CAPTION, not the chip's. A node's caption hangs 40px below the
+ * bar's top edge, so a lane that only cleared the 36px bar would put one lane's captions on the
+ * next lane's ink. 52 is 36 + the caption's line + its breathing room, measured against the
+ * rendered page rather than added up here.
+ */
+const LANE_STEP = 52;
 
 const laneTop = (lane: number) => lane * LANE_STEP;
 
@@ -264,6 +271,9 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   );
 
   const visible = useMemo(() => windowDays(winStart, TL_DAYS), [winStart]);
+  /* ⚠️ A PAST WEEK IS A PROPERTY OF THE WINDOW, not of a row — nothing in it is provisional any
+     more, so the dashes go solid, the waypoints render as passed, and the pulse stops. */
+  const pastWeek = visible[visible.length - 1] < today;
 
   /* ⚠️ THE PAGER MOVES BY WHOLE WINDOWS, and the arrow keys move it too. They were moving a day
      SELECTION when a day was the unit; the unit is now the week, so the same keys move the week.
@@ -506,6 +516,18 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     setWork({ rowKey, ymd, itemKey });
     setPaneCard(card ?? null);
   };
+  /**
+   * ⚠️ A YOUR-MOVE STRETCH IS WORK, SO IT OPENS THE WORKSPACE — the same gesture a your-turn chip
+   * had before the chip became part of the bar. The card is found by the query the stretch belongs
+   * to, which is the join the page already makes for everything else.
+   */
+  const cardForQuery = (queryId: string): BoardCard | undefined =>
+    visible.flatMap((ymd) => itemsFor(ymd)).find((it) => it.card?.relatedRecordId === queryId)?.card;
+  const pickSeg = (rowKey: string, sg: Segment) => {
+    const card = sg.side === "yours" ? cardForQuery(sg.queryId) : undefined;
+    if (card) { openWork(rowKey, visible[Math.floor(sg.from)] ?? today, sg.key, card); return; }
+    setSel((c) => (c === sg.key ? null : sg.key));
+  };
   const pick = (rowKey: string, it: TimelineItem) => {
     if (it.card) { openWork(rowKey, it.ymd, it.key, it.card); return; }
     setSel((c) => (c === it.key ? null : it.key));
@@ -534,8 +556,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     return (
       <div
         key={r.key}
-        className={`tl-grid tl-row${r.key === YOU_ROW ? " tl-row--pin" : ""}${r.closed ? " closed" : ""}`}
-        style={{ minHeight: lanes * LANE_STEP + 18 }}
+        className={`tl-grid tl-row${r.key === YOU_ROW ? " tl-row--pin" : ""}${r.closed ? " closed" : ""}${pastWeek ? " past" : ""}`}
+        /* ⚠️ THE ROW GROWS TO HOLD ITS LANES — it never clips one. A clipped lane hides a journey
+           with nothing to say so, which is the one failure a bar must not have. */
+        style={{ minHeight: lanes * LANE_STEP + 28 }}
       >
         {/* ⚠️ THE ROW HEAD IS A CONTROL — it opens the relationship's workspace with nothing
             selected, which is how you reach a query that has no card raised against it. */}
@@ -546,6 +570,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
             <span className="tl-nmtxt">{r.name}</span>
           </span>
           {r.agency && <span className="tl-ag">{r.agency}</span>}
+          {/* ⚠️ THE BOOKS ARE NAMED ONLY WHERE THERE IS MORE THAN ONE. Naming the single obvious
+              one is a line that says nothing, and this row has little enough height as it is. */}
+          {r.manuscripts.length > 1 && (
+            <span className="tl-ms">{r.manuscripts.map((m) => m.title).filter(Boolean).join(" · ")}</span>
+          )}
         </button>
         {/* ⚠️ EVERY PARTICIPANT NAMES ITS OWN COLUMN. Auto-placement never overlaps: an auto-placed
             cell beside the explicitly placed lane would be pushed into an implicit new column and
@@ -565,7 +594,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
           {/* the bar first, then its events on top of it, then the writer's own chips above both */}
           {bar.segs.map((sg) => (
             <Seg key={sg.key} sg={sg} selected={sel === sg.key}
-              onPick={() => setSel((c) => (c === sg.key ? null : sg.key))} />
+              onPick={() => pickSeg(r.key, sg)} />
           ))}
           {bar.ways.map((w) => <Way key={w.key} w={w} />)}
           {bar.nodes.map((n) => (

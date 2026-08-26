@@ -237,60 +237,151 @@
 .tl-lane {
   grid-row: 1; grid-column: 2 / -1;
   position: relative; pointer-events: none;
-  padding: 5px 0;
+  padding: 12px 0;
 }
-.tl-chip, .tl-band {
-  position: absolute; height: 24px; box-sizing: border-box;
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 0 9px; border-radius: 999px;
-  font-size: 10.5px; font-weight: 600; font-family: inherit;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+
+/* ══ THE JOURNEY BAR (bars pack, Phase 4; refs v4 grammar, v6 treatment C, v7 weights) ═══════
+ *
+ * ⚠️ ONE BAR PER AGENT × MANUSCRIPT, CUT BY WHAT HAPPENED. Every piece is positioned in fractional
+ * days as a percentage of the seven columns, so a break lands on the same boundary the cells do at
+ * every width and a resize recomputes nothing.
+ */
+.tl-seg, .tl-over {
+  position: absolute; height: 36px; box-sizing: border-box;
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 0 14px;
+  font-size: 11.5px; font-weight: 500; font-family: inherit;
+  white-space: nowrap; overflow: hidden;
   pointer-events: auto; cursor: pointer; text-align: left;
-  border: 1px solid transparent;
+  border: 1px solid transparent; border-radius: 999px;
 }
-.tl-chip .d, .tl-band .d { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+.tl-seg .d { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
 .tl-lbl { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-
-/* pink = your turn */
-.tl-chip[data-kind="turn"] { background: #f8e2d9; border-color: #eecfc2; color: #7a3a28; }
-.tl-chip[data-kind="turn"] .d { background: #f8e2d9; border: 1.5px solid #7c3a2a; }
-/* white + a dot = the record; warm out, sage in */
-.tl-chip[data-kind="rec"] { background: #fff; border-color: #ece0d2; color: #6b5a4d; font-weight: 500; }
-/* ⚠️ THE SIZE IS HERE, THE COLOUR IS NOT — `REC_TONE` is the one declaration of the layer's two
-   tones and the chip reads it inline, because direction is the only thing on a chip that varies
-   with the data. A hex restated here would be a second reading of that map. */
-.tl-chip[data-kind="rec"] .d { width: 7px; height: 7px; }
-/* a checkbox square = your own task */
-.tl-chip[data-kind="task"] { background: #fff; border-color: #d9d0c4; color: #3f5a3d; }
-.tl-chip[data-kind="task"] .d { border-radius: 2px; border: 1.5px solid #7c3a2a; background: transparent; }
-/* dashed = carried; the arrow points at the live item, which lives on today */
-.tl-chip[data-kind="ghost"] {
-  background: transparent; border: 1px dashed #d3c4b3; color: #a08f80; font-weight: 500;
+/* the duration, riding inside the piece — mono, quiet, and a fact rather than a warning */
+.tl-cnt {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 9px;
+  letter-spacing: 0.09em; text-transform: uppercase; opacity: 0.8; flex: none;
 }
-.tl-chip[data-kind="ghost"] .d { border: 1.5px dashed #d3c4b3; background: transparent; }
-.tl-fwd { font-size: 9px; color: #c0ae9c; flex: none; }
-.tl-chip.struck .tl-lbl { text-decoration: line-through; opacity: 0.62; }
-.tl-chip:hover { border-color: #c9b8a6; }
 
-/* ⚠️ A SAGE BAND WITH A DASHED RIGHT EDGE: the send is a fact, the close is a forecast. */
-.tl-band {
-  background: #e9ede6; border-color: #c9d6c5; color: #3f5a3d; font-weight: 500;
-  border-right: 2px dashed #8a9e88;
+/* ── their move: white, still, and breathing (v6, treatment C) ─────────────────────────────── */
+/* ⚠️ WHITE RATHER THAN FILLED, AND THE PULSE IS WHY. A reply window is real time passing, so
+   motion is not a lie — but a filled sage bar that also moves reads as something wanting
+   attention, and the whole point of a waiting bar is that nothing is being asked of you. White
+   plus a slow breath says live without saying urgent. */
+.tl-seg.theirs {
+  background: #fff; border-color: #dfe6dc; color: #5a6e58;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04);
+  animation: tlBreathe 4.2s ease-in-out infinite;
 }
-.tl-band .d { width: 7px; height: 7px; background: #7c3a2a; }
-/* began before the window, or ends after it: the edge is squared off and the clamp is visible */
-.tl-band.openl { border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-left: 2px dotted #8a9e88; }
-.tl-band.openr { border-top-right-radius: 3px; border-bottom-right-radius: 3px; }
-/* ⚠️ A PASSED WINDOW IS A CLOSED SPAN, FADED — and gains no pill, no copy and no colour of its
-   own. "Open, no reply" is what the query and any nudge card already say; an expiry state here
-   would be the app editorialising about an agent being late. */
-.tl-band.passed { opacity: 0.5; border-right-style: solid; }
+.tl-seg.theirs .d { background: #8a9e88; }
+/* ⚠️ LITERAL COLOURS IN THE KEYFRAMES. A `var()` inside `@keyframes` fails SILENTLY in this setup —
+   no error, no animation, no warning — and this project has shipped that bug. The two stops are
+   the only place these values may be written; the resting pair above is the same white and the
+   same hairline, so the animation starts where the rule leaves off. */
+@keyframes tlBreathe {
+  0%, 100% { background: #ffffff; border-color: #dfe6dc; }
+  50% { background: #f4f8f2; border-color: #cdd8c9; }
+}
+/* ⚠️ THE OVERRIDE SITS IMMEDIATELY AFTER THE RULE IT OVERRIDES. A media query confers NO
+   specificity, so at equal specificity the later declaration wins — this repo has already shipped
+   an `animation: none` that lost to a rule four hundred lines below it. */
+@media (prefers-reduced-motion: reduce) {
+  .tl-seg.theirs { animation: none; }
+}
+/* ⚠️ AND NO MOTION IN A PAST WEEK, where nothing is live. v6 states this as a condition of the
+   pulse shipping at all, alongside reduced motion and the your-move bars. */
+.tl-row.past .tl-seg.theirs { animation: none; }
 
-/* selection: a ring, and nothing is written by taking it */
-.tl-chip.sel, .tl-band.sel { box-shadow: 0 0 0 1.5px #7c3a2a; }
-.tl-chip:focus-visible, .tl-band:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
-.tl-chip.grab { cursor: grab; }
-.tl-chip.grab:active { cursor: grabbing; }
+/* ── your move: blush, three weights by duration (v7) ──────────────────────────────────────── */
+/* ⚠️ WEIGHT, NOT MOTION, AND NEVER RED. The waiting bars already breathe; if long-standing work
+   also moved, the two would compete and the page would read as agitated. Weight is loud in a still
+   frame and silent in a moving one, which is exactly the right way round. */
+.tl-seg.yours .d { background: #f8e2d9; border: 1.5px solid #7c3a2a; }
+.tl-seg.yours.w-fresh { background: #fdf3ef; border-color: #eed8ce; color: #8a5442; }
+.tl-seg.yours.w-settled { background: #f3e0d6; border-color: #e8c8bc; color: #7a4636; }
+.tl-seg.yours.w-long { background: #eec9ba; border-color: #dba892; color: #5f2a1c; font-weight: 600; }
+/* a your-move stretch with no weight yet (a closed journey's last stretch) takes the middle one */
+.tl-seg.yours { background: #f3e0d6; border-color: #e8c8bc; color: #7a4636; }
+
+/* ⚠️ THE OVERRUN IS A MARKER AND THE COUNT ON IT IS THE FACT. It cannot be to scale — a 41-day
+   overrun does not fit in a seven-day window, and on a window starting today the whole of it is in
+   the past — so the hatch says "this ran over" and the number says by how much. Same hue as the
+   long-standing weight, because it is the same condition seen from its other end. */
+.tl-over {
+  background: repeating-linear-gradient(-45deg, #e6bda9 0 6px, #efd0c1 6px 12px);
+  border-color: #dba892; border-right: none;
+  border-radius: 999px 0 0 999px;
+  font-weight: 600; color: #5f2a1c; font-size: 11px;
+}
+
+/* ── the edges: what each one claims ───────────────────────────────────────────────────────── */
+/* a round cap where the bar stopped at an interruption, and where it resumed past one */
+.tl-seg.capl { border-top-left-radius: 999px; border-bottom-left-radius: 999px; }
+.tl-seg.capr { border-top-right-radius: 999px; border-bottom-right-radius: 999px; }
+/* it began before the window: dotted, squared off, and it does not pretend to start here */
+.tl-seg.openleft { border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: 2px dotted #8a9e88; }
+.tl-seg.yours.openleft { border-left-color: #c9a89e; }
+/* it continues past the window: dashed, squared off — the close is a forecast, the send is a fact */
+.tl-seg.future { border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: 2px dashed #8a9e88; }
+.tl-seg.yours.future { border-right-color: #c9a89e; }
+.tl-seg.yours.w-long.future { border-right-color: #c08a72; }
+/* ⚠️ IN A PAST WEEK NOTHING IS PROVISIONAL ANY MORE — the dashes go solid and the edge rounds off,
+   because a week that has happened holds no forecast. v5's own rule, drawn. */
+.tl-row.past .tl-seg.future {
+  border-right-style: solid; border-right-width: 1px;
+  border-top-right-radius: 999px; border-bottom-right-radius: 999px;
+}
+.tl-row.past .tl-seg.openleft { border-left-style: solid; border-left-width: 1px; }
+/* ⚠️ NO REPLY TIME RECORDED — a dashed rail, no cap, no forecast. The app does not know when to
+   expect an answer, and a solid bar with an end would be inventing the date nobody has given. */
+.tl-seg.norail {
+  background: transparent; border: 1px dashed #e0d0c4; color: #c9a89e;
+  border-right: none; border-radius: 999px; box-shadow: none; animation: none;
+}
+.tl-seg.norail .d { background: transparent; border: 1.5px dashed #e0d0c4; }
+/* ⚠️ OPEN-ENDED BY NATURE — an R&R or an offer with no stated deadline has no end to draw, so the
+   bar FADES rather than stopping. A hard edge would state a boundary the model does not hold. */
+.tl-seg.openend {
+  border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 78%, transparent);
+  mask-image: linear-gradient(90deg, #000 78%, transparent);
+}
+
+.tl-seg.sel, .tl-node.sel { box-shadow: 0 0 0 1.5px #7c3a2a; }
+.tl-seg:focus-visible, .tl-node:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+
+/* ── nodes: the events, sitting IN the break ───────────────────────────────────────────────── */
+.tl-node {
+  position: absolute; width: 36px; height: 36px; border-radius: 50%; z-index: 2;
+  transform: translateX(-18px);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; cursor: pointer; pointer-events: auto; padding: 0;
+  background: #fff; border: 2px solid #ece0d2; color: #6b5a4d;
+}
+.tl-node.out { background: #f8e2d9; border-color: #7c3a2a; color: #7c3a2a; }
+.tl-node.in { background: #e9efe6; border-color: #8a9e88; color: #5a6e58; }
+.tl-node.close { background: #fff; border-color: #b9a48f; color: #b9a48f; }
+/* the caption hangs beneath the bar, on the page's ground, so it never sits on the bar's ink */
+.tl-tip {
+  position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
+  letter-spacing: 0.09em; text-transform: uppercase; color: #a2937f;
+  white-space: nowrap; background: #fdfaf5; padding: 1px 5px; border-radius: 5px;
+  pointer-events: none;
+}
+
+/* ── waypoints: a forecast, and nothing about it claims an event ───────────────────────────── */
+.tl-wp {
+  position: absolute; width: 0; height: 32px; z-index: 3;
+  border-left: 2px dashed #8a9e88; transform: translateX(-1px);
+  margin-top: 2px;
+}
+.tl-wp.yours { border-left-color: #c9a89e; }
+.tl-wp .tl-tip { color: #5a6e58; background: transparent; }
+.tl-wp.yours .tl-tip { color: #a06a55; }
+/* ⚠️ AN OVERTAKEN WAYPOINT STILL RENDERS — as passed. A past week states what happened, and a
+   forecast that was met or missed is part of what happened. */
+.tl-wp.passed { border-left-style: solid; opacity: 0.55; }
 
 /* ⚠️ A ROW WITH NOTHING IN IT SAYS SO, QUIETLY. A live query with no window resolvable and nothing
    scheduled is a real state — the row exists because the query does — and a blank strip reads as a
@@ -534,4 +625,11 @@
   .tl-split { grid-template-columns: minmax(0, 1fr); }
   .tl-two { grid-template-columns: minmax(0, 1fr); }
   .tl-know { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* the row head's third line: the books this relationship spans, where it spans more than one */
+.tl-ms {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7px;
+  letter-spacing: 0.1em; text-transform: uppercase; color: #c9a89e;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 1px;
 }
