@@ -42,3 +42,13 @@
  * label and a remove control.
  */
 .qc-mchipver { margin-left: 6px; vertical-align: middle; }
+
+/**
+ * ⚠️ THE LIST ROW'S VERSION CHIP (D10). Same `.pkgb-mver` mark as everywhere else this feature
+ * names a version; only the row's own spacing is added here.
+ *
+ * ⚠️ AND IT SITS UNDER THE AGENCY, NOT IN THE STATUS COLUMN. The right-hand column is where the
+ * query STANDS — its dot and its date. What the agent is holding is a fact about the send, and
+ * putting it there would make a version look like a stage.
+ */
+.f12-ver { display: inline-flex; margin-top: 3px; align-self: flex-start; }

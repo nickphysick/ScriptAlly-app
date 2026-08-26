@@ -126,3 +126,13 @@ export const sendVersionDefault = (read: BookVersion | null): string => read?.id
 
 /** The two send statuses this feature touches, and no others (D6). */
 export const VERSIONED_SENDS: readonly QueryStatus[] = [QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT];
+
+/**
+ * The filter's sentinel for "no version recorded" (D11).
+ *
+ * ⚠️ IT IS A NAMED CONSTANT, NOT `null` OR `""`. The filter's resting state is `null` — not
+ * filtering at all — and a writer asking for the queries whose version is unknown is asking a real
+ * question that deserves its own value. Collapsing the two would make the resting list mean "show me
+ * the ones I know nothing about", which is the same fault class as folding an unknown into a known.
+ */
+export const UNRECORDED_VERSION = "__unrecorded__";

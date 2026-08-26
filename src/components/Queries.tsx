@@ -99,7 +99,7 @@ import {
 import { PackageGroup, LooseMaterials } from "./reading-pane/PackageGroup";
 import { VersionLines } from "./reading-pane/VersionLines";
 import { bookVersionsOf } from "../lib/bookVersions";
-import { openingRead, versionsActive } from "../lib/queryVersions";
+import { openingRead, versionsActive, listVersion, UNRECORDED_VERSION } from "../lib/queryVersions";
 import { isPackageLocked, materialsLinkWrites } from "../lib/packageMetrics";
 import { useConfirmAsk } from "./todo/ConfirmAsk";
 import { useOpenEditQuery } from "./EditQueryHost";
@@ -1606,6 +1606,14 @@ export const Queries: React.FC<{
   
   // Left Filters state (configured to always align with Agents-style)
   const [selectedStatusFilters, setSelectedStatusFilters] = useState<string[]>(["All"]);
+  /**
+   * Part E, D11 — filter by version, alongside the existing filters.
+   *
+   * ⚠️ `null` IS "NOT FILTERING", NOT "NO VERSION". A writer wanting the queries whose version is
+   * unrecorded picks `UNRECORDED_VERSION`; `null` is the resting state. Collapsing the two would
+   * make the resting list mean "show me the ones I know nothing about".
+   */
+  const [versionFilter, setVersionFilter] = useState<string | null>(null);
   /* ── F12 filter model (ref queries-hub-v14.html filter popover) ──
      turn — WHOSE TURN radio, derived from the CTA engine's queryBucket (the ONE source of
      truth): "move" = writer's turn, "wait" = agent's court; never a second derivation.
@@ -2379,6 +2387,18 @@ export const Queries: React.FC<{
   /* v5 P2 — THE filter predicate, extracted so there is exactly one. The list renders through it,
      and the create flow asks it "would the query I just saved be visible?" — asking a copy would
      be the classic drift bug (the row silently vanishes because the copy disagreed). */
+  /**
+   * The versions the version filter can offer (D11).
+   *
+   * ⚠️ SCOPED TO THE FILTERED MANUSCRIPT, and empty at "All manuscripts" — see the section's own
+   * note. Two books can each have an opening called "Draft two", and a list mixing them would let
+   * the writer choose one and get the other.
+   */
+  const versionFilterOptions = (() => {
+    if (selectedManuscriptFilter === "All" || selectedManuscriptFilter === UNASSIGNED_MS) return [];
+    return bookVersionsOf(manuscripts.find((m) => m.id === selectedManuscriptFilter) ?? null);
+  })();
+
   const matchesFilters = (q: Query): boolean => {
     const agent = agents.find(a => a.id === q.agentId);
     const ms = manuscripts.find(m => m.id === q.manuscriptId);
@@ -2413,6 +2433,18 @@ export const Queries: React.FC<{
     }
 
     // Needs attention — both derived (reply overdue; open tasks via the derived Task[]).
+    /**
+     * Part E, D11 — the version filter.
+     *
+     * ⚠️ IT READS THE SAME `listVersion` THE COLUMN DRAWS, so a row can never be filtered out by a
+     * version it is not showing. One derivation, two readers — the rule this whole feature is built
+     * on, applied to its own two surfaces.
+     */
+    if (versionFilter !== null) {
+      const v = listVersion(q as never, packages, versions, activities, bookVersionsOf(ms ?? null));
+      if (versionFilter === UNRECORDED_VERSION) { if (v) return false; }
+      else if (v?.id !== versionFilter) return false;
+    }
     if (needsOverdue && !isOverdueForReply(q)) return false;
     if (needsTasks && queryTaskBadge(tasks, q.id).count === 0) return false;
 
@@ -2573,6 +2605,30 @@ export const Queries: React.FC<{
         <PRow kind="rad" on={turnFilter === "move"} label="Your move" sub="The agent has replied — your turn" onClick={() => setTurnFilter("move")} />
         <PRow kind="rad" on={turnFilter === "wait"} label="Waiting" sub="Ball is in the agent's court" onClick={() => setTurnFilter("wait")} />
       </PopSection>
+      {/**
+        * Part E, D11 — filter by version, alongside the existing filters.
+        *
+        * ⚠️ THE SECTION RENDERS ONLY WHEN THE FILTERED MANUSCRIPT HAS TWO OR MORE (D12/D8). With
+        * "All manuscripts" selected it would have to offer every book's versions in one list, where
+        * two manuscripts could each have an opening called "Draft two" and the writer could not
+        * tell which they were choosing. A filter that cannot name what it filters is worse than no
+        * filter.
+        *
+        * ⚠️ AND "NOT RECORDED" IS ITS OWN OPTION, not the resting state. `versionFilter === null`
+        * means not filtering; a writer asking which queries have no version recorded is asking a
+        * real question — the ordinary one, in fact, since no send predating this feature has one.
+        */}
+      {versionFilterOptions.length >= 2 && (
+        <PopSection label="Version">
+          <PRow kind="rad" on={versionFilter === null} label="Any version" onClick={() => setVersionFilter(null)} />
+          {versionFilterOptions.map((v) => (
+            <PRow key={v.id} kind="rad" on={versionFilter === v.id} label={v.name}
+                  onClick={() => setVersionFilter(v.id)} />
+          ))}
+          <PRow kind="rad" on={versionFilter === UNRECORDED_VERSION} label="Not recorded"
+                sub="Sent before you named your versions" onClick={() => setVersionFilter(UNRECORDED_VERSION)} />
+        </PopSection>
+      )}
       <PopSection label="Manuscript">
         <PRow kind="rad" on={selectedManuscriptFilter === "All"} label="All manuscripts" onClick={() => setSelectedManuscriptFilter("All")} />
         {manuscriptsWithQueries.map(m => (
@@ -4971,6 +5027,23 @@ export const Queries: React.FC<{
                     <span className="f12-mid">
                       <span className="f12-nm">{agentPrimary(agent)}</span>
                       <span className="f12-ag">{agentAgencyLine(agent)}</span>
+                      {/**
+                        * ⚠️ THE VERSION COLUMN (Part E, D10) — the version HELD where a full or
+                        * partial has gone, otherwise the version READ. `listVersion` decides, and
+                        * it is the same function the filter runs, so a row can never be filtered
+                        * out by a version it is not showing.
+                        *
+                        * ⚠️ WHERE NEITHER IS KNOWN IT RENDERS NOTHING — not a dash. A dash in a
+                        * column is a value; it says "we looked and the answer is empty", when the
+                        * truth is that nobody recorded one. Absence is the honest mark, and it is
+                        * the ordinary case for every query sent before this feature.
+                        */}
+                      {(() => {
+                        const bvs = bookVersionsOf(ms ?? null);
+                        if (bvs.length < 2) return null;
+                        const v = listVersion(q as never, packages, versions, activities, bvs);
+                        return v ? <span className="f12-ver pkgb-mver"><span aria-hidden="true">§</span>{v.name}</span> : null;
+                      })()}
                     </span>
                     <span className="f12-end">
                       {undoingQueryIds.has(q.id) ? (
