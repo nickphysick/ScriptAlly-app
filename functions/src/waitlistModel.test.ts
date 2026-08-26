@@ -14,6 +14,7 @@ import {
   normaliseEmail, checkEmail, isDisposable, domainOf, emailHash, tokenHash, ipHash,
   newVerifyToken, tokensMatch, readCounter, countPayload, rateLimitKey, overRateLimit,
   judgeJoin, readSource, COUNTER_PATH,
+  RETENTION_MS, UNSUBSCRIBED_GRACE_MS, RETENTION_LIVE_ENV, deletionReason, retentionIsLive,
 } from "./waitlistModel";
 
 describe("normalisation is trim-and-lowercase and nothing else", () => {
@@ -279,5 +280,67 @@ describe("the settled decisions are pinned where a future edit will trip over th
     expect(readSource("landing-panel")).toBe("landing-panel");
     expect(readSource("something-else")).toBe("unknown");
     expect(readSource(undefined)).toBe("unknown");
+  });
+});
+
+describe("retention decides by age, and never guesses", () => {
+  const now = 1_800_000_000_000;
+
+  it("a dormant document past twenty-four months is due", () => {
+    expect(deletionReason({ status: "verified", lastInteractionAt: now - RETENTION_MS - 1 }, now))
+      .toBe("dormant");
+  });
+
+  it("…and one a day short of it is not", () => {
+    expect(deletionReason({ status: "verified", lastInteractionAt: now - RETENTION_MS + 86_400_000 }, now))
+      .toBeNull();
+  });
+
+  /**
+   * ⚠️ MEASURED FROM LAST INTERACTION, NOT FROM SIGN-UP. Someone who answered an email last week
+   * is not dormant however long ago they joined — `lastInteractionAt` is touched on every join,
+   * verify and unsubscribe for exactly this reason.
+   */
+  it("a recent interaction keeps an old signup alive", () => {
+    expect(deletionReason({ status: "verified", lastInteractionAt: now - 86_400_000 }, now)).toBeNull();
+  });
+
+  it("an unsubscribed document goes after the grace period, not before", () => {
+    expect(deletionReason({ status: "unsubscribed", unsubscribedAt: now - UNSUBSCRIBED_GRACE_MS - 1 }, now))
+      .toBe("unsubscribed");
+    expect(deletionReason({ status: "unsubscribed", unsubscribedAt: now - 1000 }, now)).toBeNull();
+  });
+
+  /**
+   * ⚠️ THE GRACE IS SUPPRESSION, NOT SENTIMENT. The record of "this address asked not to be
+   * contacted" is the only thing stopping a re-import writing to them again; deleting it the same
+   * day removes the suppression along with the subscription.
+   */
+  it("an unsubscribed document without its stamp still ages out, from what we do know", () => {
+    expect(deletionReason(
+      { status: "unsubscribed", unsubscribedAt: null, lastInteractionAt: now - UNSUBSCRIBED_GRACE_MS - 1 },
+      now,
+    )).toBe("unsubscribed");
+  });
+
+  /**
+   * ⚠️ "I CANNOT TELL HOW OLD THIS IS" MUST NEVER RESOLVE TO "DELETE IT". A document with no
+   * timestamp is one this code does not understand — an older shape, or a partial write — and the
+   * safe default for an irreversible action is to do nothing.
+   */
+  it("a document with no timestamps is never due", () => {
+    expect(deletionReason({ status: "verified" }, now)).toBeNull();
+    expect(deletionReason({ status: "unsubscribed" }, now)).toBeNull();
+    expect(deletionReason({}, now)).toBeNull();
+  });
+
+  it("the job is a dry run unless the environment says otherwise, exactly", () => {
+    expect(retentionIsLive({})).toBe(false);
+    expect(retentionIsLive({ [RETENTION_LIVE_ENV]: "false" })).toBe(false);
+    /* ⚠️ Not "1", not "yes", not "TRUE " by accident — but a deliberate `true` in any case works. */
+    expect(retentionIsLive({ [RETENTION_LIVE_ENV]: "1" })).toBe(false);
+    expect(retentionIsLive({ [RETENTION_LIVE_ENV]: "yes" })).toBe(false);
+    expect(retentionIsLive({ [RETENTION_LIVE_ENV]: "true" })).toBe(true);
+    expect(retentionIsLive({ [RETENTION_LIVE_ENV]: " TRUE " })).toBe(true);
   });
 });

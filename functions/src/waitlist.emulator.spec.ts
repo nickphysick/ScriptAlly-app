@@ -25,6 +25,8 @@ import {
 import {
   consumeRateLimit, joinWaitlist, readCounterState, unsubscribeById, verifyWaitlist,
 } from "./waitlistStore";
+import { runRetention } from "./waitlistRetention";
+import { RETENTION_MS, UNSUBSCRIBED_GRACE_MS } from "./waitlistModel";
 
 /* `firebase emulators:exec` exports FIRESTORE_EMULATOR_HOST; the Admin SDK reads it itself. */
 const PROJECT = process.env.GCLOUD_PROJECT || "demo-scriptally-test";
@@ -431,3 +433,82 @@ describe("unsubscribing releases a place, exactly once", () => {
   });
 });
 
+/* ══════════════ Retention ══════════════ */
+
+describe("the retention job deletes nothing until it is armed", () => {
+  /** A verified document whose last interaction is however long ago. */
+  const seedAged = async (email: string, agoMs: number, status = "verified") => {
+    const when = new Date(Date.now() - agoMs);
+    await db.doc(`waitlist/${emailHash(email)}`).set({
+      email, emailNormalised: email,
+      createdAt: when, lastInteractionAt: when,
+      verified: status === "verified", status, position: status === "verified" ? 1 : null,
+      source: "landing-panel",
+      ...(status === "unsubscribed" ? { unsubscribedAt: when } : {}),
+    });
+  };
+
+  /**
+   * ⚠️ THE DRY RUN IS THE WHOLE SAFETY MECHANISM, so it is asserted as an ABSENCE of writes rather
+   * than as a return value. A job that reported "would delete 3" while deleting them would pass a
+   * tally check and fail the only thing that matters.
+   */
+  it("a dry run reports what it would delete and deletes nothing", async () => {
+    await setCounter(3);
+    await seedAged("old@example.com", RETENTION_MS + 86_400_000);
+    await seedAged("gone@example.com", UNSUBSCRIBED_GRACE_MS + 86_400_000, "unsubscribed");
+    await seedAged("fresh@example.com", 86_400_000);
+
+    const tally = await runRetention(db, Date.now(), false);
+    expect(tally.dormant).toBe(1);
+    expect(tally.unsubscribed).toBe(1);
+    expect(tally.scanned).toBe(3);
+
+    expect((await db.collection("waitlist").get()).size, "nothing was deleted").toBe(3);
+    expect((await counterOf()).verifiedCount, "and nothing was released").toBe(3);
+  });
+
+  /**
+   * ⚠️ DELETING A VERIFIED DOCUMENT RELEASES ITS PLACE — the unsubscribe decrement arriving more
+   * slowly, and with the same three ways of being wrong. A counter that keeps a deleted member's
+   * place claims something that no longer exists, and nothing ever reports it.
+   */
+  it("a live run deletes, and a deleted verified member releases exactly one place", async () => {
+    await setCounter(3);
+    await seedAged("old@example.com", RETENTION_MS + 86_400_000);
+    await seedAged("fresh@example.com", 86_400_000);
+
+    const tally = await runRetention(db, Date.now(), true);
+    expect(tally.dormant).toBe(1);
+    expect(tally.released).toBe(1);
+
+    expect((await db.collection("waitlist").get()).size, "the dormant one is gone").toBe(1);
+    expect((await counterOf()).verifiedCount, "one place back").toBe(2);
+  });
+
+  /** ⚠️ AN UNSUBSCRIBED MEMBER ALREADY RELEASED THEIR PLACE — deleting them must not do it twice. */
+  it("deleting an unsubscribed document releases nothing further", async () => {
+    await setCounter(5);
+    await seedAged("gone@example.com", UNSUBSCRIBED_GRACE_MS + 86_400_000, "unsubscribed");
+    const tally = await runRetention(db, Date.now(), true);
+    expect(tally.unsubscribed).toBe(1);
+    expect(tally.released, "they gave the place back when they unsubscribed").toBe(0);
+    expect((await counterOf()).verifiedCount).toBe(5);
+  });
+
+  /** A pending document that has simply gone quiet is deleted, and held no place to release. */
+  it("a dormant pending document goes without touching the counter", async () => {
+    await setCounter(4);
+    await seedAged("never@example.com", RETENTION_MS + 86_400_000, "pending");
+    const tally = await runRetention(db, Date.now(), true);
+    expect(tally.dormant).toBe(1);
+    expect(tally.released).toBe(0);
+    expect((await counterOf()).verifiedCount).toBe(4);
+  });
+
+  it("an empty collection is a quiet no-op, not an error", async () => {
+    await setCounter(0);
+    expect(await runRetention(db, Date.now(), true))
+      .toEqual({ dormant: 0, unsubscribed: 0, released: 0, scanned: 0 });
+  });
+});

@@ -6,3 +6,4 @@ export { waitlist } from "./waitlist";
 export { sendContactMessage } from "./contactMessage";
 export { sendBetaFeedback } from "./betaFeedback";
 export { redeemInviteCode } from "./inviteCode";
+export { waitlistRetention } from "./waitlistRetention";

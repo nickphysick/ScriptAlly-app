@@ -237,6 +237,61 @@ export const checkEmail = (normalisedEmail: string): EmailVerdict => {
   return "ok";
 };
 
+/* ══════════════ Retention ══════════════ */
+
+/**
+ * ⚠️ TWENTY-FOUR MONTHS FROM LAST INTERACTION, NOT FROM SIGN-UP. "Since we last heard from you" is
+ * what a retention period is meant to measure; from sign-up it would delete an active subscriber
+ * on their second anniversary regardless of whether they answered an email last week.
+ * `lastInteractionAt` is touched on every join, verify and unsubscribe for exactly this.
+ */
+export const RETENTION_MS = 24 * 30.44 * 24 * 60 * 60 * 1000;
+
+/**
+ * ⚠️ A SHORT GRACE AFTER UNSUBSCRIBING, NOT AN IMMEDIATE DELETE. The record of "this address asked
+ * not to be contacted" is the only thing that stops a re-import or a stray script writing to them
+ * again — deleting it the same day removes the suppression along with the subscription. Thirty
+ * days is long enough to catch that and short enough to be an honest "we remove you promptly".
+ */
+export const UNSUBSCRIBED_GRACE_MS = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * ⚠️ THE JOB IS A DRY RUN UNTIL SOMEBODY HAS WATCHED IT. `RETENTION_LIVE=true` in the environment
+ * is what arms it; anything else logs what it WOULD delete and deletes nothing. A deletion job
+ * nobody has observed is not a job to leave running unattended over real data — and the failure
+ * mode of getting it wrong is silent, permanent and unrecoverable.
+ */
+export const RETENTION_LIVE_ENV = "RETENTION_LIVE";
+
+export const retentionIsLive = (env: Record<string, string | undefined>): boolean =>
+  String(env[RETENTION_LIVE_ENV] ?? "").trim().toLowerCase() === "true";
+
+export type DeletionReason = "dormant" | "unsubscribed";
+
+/**
+ * Whether a document is due deletion, and why. Pure, so the boundary conditions are testable
+ * without a database.
+ *
+ * ⚠️ AN ABSENT `lastInteractionAt` IS NEVER DUE. A document with no timestamp is one this code
+ * does not understand — an older shape, or a partial write — and "I cannot tell how old this is"
+ * must never resolve to "delete it". The safe default for an irreversible action is to do nothing.
+ */
+export const deletionReason = (
+  doc: { status?: unknown; lastInteractionAt?: number | null; unsubscribedAt?: number | null },
+  nowMs: number,
+): DeletionReason | null => {
+  const last = typeof doc.lastInteractionAt === "number" ? doc.lastInteractionAt : null;
+  const unsub = typeof doc.unsubscribedAt === "number" ? doc.unsubscribedAt : null;
+  if (doc.status === "unsubscribed") {
+    /* Fall back to `lastInteractionAt` when the stamp is missing — an older unsubscribe still
+       ages out, it just measures from the last thing we know about. */
+    const from = unsub ?? last;
+    return from !== null && nowMs - from >= UNSUBSCRIBED_GRACE_MS ? "unsubscribed" : null;
+  }
+  if (last === null) return null;
+  return nowMs - last >= RETENTION_MS ? "dormant" : null;
+};
+
 /* ══════════════ The counter ══════════════ */
 
 /**

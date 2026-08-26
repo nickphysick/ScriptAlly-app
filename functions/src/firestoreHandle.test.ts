@@ -108,6 +108,11 @@ describe("the Firestore handle has exactly one home", () => {
     const consumers = [
       "smartImport.ts", "suggestComps.ts", "assistAgentData.ts", "waitlist.ts",
       "betaFeedback.ts", "contactMessage.ts", "inviteCode.ts", "emailImport.ts",
+      /* ⚠️ THE NINTH, AND THE COMMENT BELOW PREDICTED IT. Exporting `waitlistRetention` from
+         index.ts turned this red immediately — the reconciliation working, not a nuisance. That
+         function deletes documents and moves the counter, so "does it use the shared handle" is
+         precisely the question worth being forced to answer. It does. */
+      "waitlistRetention.ts",
     ];
     /* ⚠️ RECONCILED AGAINST index.ts RATHER THAN TRUSTED AS A HAND-WRITTEN LIST — a literal here
      * goes stale the day a ninth function is exported, and goes stale silently. */
