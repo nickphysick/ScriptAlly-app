@@ -12,7 +12,7 @@
  */
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
-import * as admin from "firebase-admin";
+import { db } from "./firestore";
 import Anthropic from "@anthropic-ai/sdk";
 import { SYSTEM_PROMPT } from "./smartImportPrompt";
 import { assembleResult } from "./assembleImport";
@@ -24,10 +24,9 @@ import { MODEL } from "./emailImportCore";
 const ANTHROPIC_API_KEY = defineSecret("ANTHROPIC_API_KEY");
 
 // Admin SDK — bypasses Firestore rules, so usage is written here and NEVER by the client (the gate
-// is tamper-proof: a user editing client state can't grant themselves another import). The init
-// guard is shared-safe across function files (extractFromEmail also inits).
-if (admin.apps.length === 0) admin.initializeApp();
-const db = admin.firestore();
+// is tamper-proof: a user editing client state can't grant themselves another import). The handle
+// and the one initializeApp() now live in ./firestore, which also names the database explicitly —
+// this function calls admin.firestore() nowhere, and neither may any other (locked).
 
 // Pro source of truth — the SAME field extractFromEmail reads: User.plan === "Pro" (UserPlan.PRO).
 const PRO_PLAN = "Pro";

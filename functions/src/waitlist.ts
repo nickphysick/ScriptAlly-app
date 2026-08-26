@@ -23,15 +23,12 @@
 
 import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
-import * as admin from "firebase-admin";
+import { db } from "./firestore";
 import {
   ALLOWED_ORIGINS, GET_CACHE_SECONDS, MAX_BODY_BYTES, MIN_SUBMIT_MS, REQUIRE_VERIFICATION,
   countPayload, ipHash, judgeJoin, normaliseEmail, readSource,
 } from "./waitlistModel";
 import { consumeRateLimit, joinWaitlist, readCounterState, verifyWaitlist } from "./waitlistStore";
-
-if (admin.apps.length === 0) admin.initializeApp();
-const db = admin.firestore();
 
 /**
  * ⚠️ THE IP SALT IS A SECRET AND NEVER HAS A DEFAULT IN CODE. A hard-coded fallback would look

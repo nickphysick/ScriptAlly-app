@@ -16,6 +16,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
+import { db } from "./firestore";
 import Anthropic from "@anthropic-ai/sdk";
 import {
   extractProposal,
@@ -27,9 +28,6 @@ import {
 } from "./emailImportCore";
 
 const ANTHROPIC_API_KEY = defineSecret("ANTHROPIC_API_KEY");
-
-if (admin.apps.length === 0) admin.initializeApp();
-const db = admin.firestore();
 
 /* ── Plan gate ─────────────────────────────────────────────────────────────
  *  The real entitlement field EXISTS on the user doc: User.plan === "Pro" (UserPlan.PRO in

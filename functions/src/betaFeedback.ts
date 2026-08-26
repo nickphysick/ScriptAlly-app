@@ -17,9 +17,8 @@
  */
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
+import { db } from "./firestore";
 
-if (admin.apps.length === 0) admin.initializeApp();
-const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
 
 const MAX = { message: 4000, route: 200, viewport: 32, browser: 400, kind: 64, version: 64 };

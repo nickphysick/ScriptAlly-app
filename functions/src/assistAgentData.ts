@@ -18,14 +18,11 @@
  */
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
-import * as admin from "firebase-admin";
+import { db } from "./firestore";
 import Anthropic from "@anthropic-ai/sdk";
 import { assistFromModel, MalformedAssistError, isAssistRule, AssistInput, AssistAgentInput, MAX_AGENTS } from "./assistAgentDataCore";
 
 const ANTHROPIC_API_KEY = defineSecret("ANTHROPIC_API_KEY");
-
-if (admin.apps.length === 0) admin.initializeApp();
-const db = admin.firestore();
 
 /* Master switch, mirroring suggestComps — must never ship ungated. */
 const ASSIST_REQUIRES_PRO = true;

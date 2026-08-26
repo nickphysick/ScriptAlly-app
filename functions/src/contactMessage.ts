@@ -26,10 +26,9 @@
  */
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
+import { db } from "./firestore";
 import { createHash } from "crypto";
 
-if (admin.apps.length === 0) admin.initializeApp();
-const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
 
 const MAX = { name: 120, email: 254, message: 4000, topic: 64 };
