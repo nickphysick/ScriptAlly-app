@@ -86,14 +86,24 @@ export type RowDot = "you" | "them" | "quiet" | "self";
 
 /** An item is a point on the timeline; a band is a span. The five together are the filter set. */
 export type TimelineKind = "turn" | "task" | "rec" | "ghost";
-export type TimelineFilter = TimelineKind | "wait";
-export const TIMELINE_FILTERS: readonly TimelineFilter[] = ["turn", "wait", "rec", "task", "ghost"];
+export type TimelineFilter = "turn" | "wait" | "rec" | "task";
+/**
+ * ⚠️ FOUR, AND `Carried` IS THE ONE THAT WENT. It filtered the origin marks a carried item left
+ * behind — a signpost saying "this fell due here and is still outstanding". The bar says that
+ * better and says it where the work is: a your-move stretch carries its own duration, and a
+ * long-standing one draws the hatched overrun back to the date it was expected. A ghost was the
+ * month grid's way of expressing a span it had no way to draw.
+ *
+ * ⚠️ AND THE FIRST TWO ARE RENAMED FROM THE CONTROL'S POINT OF VIEW. "Your turn" and "Waiting"
+ * named the writer's state and the agent's in two different grammars; a bar has two SIDES, and
+ * `Your move` / `Their move` is one grammar naming both.
+ */
+export const TIMELINE_FILTERS: readonly TimelineFilter[] = ["turn", "wait", "rec", "task"];
 export const FILTER_LABEL: Record<TimelineFilter, string> = {
-  turn: "Your turn",
-  wait: "Waiting",
-  rec: "On the record",
+  turn: "Your move",
+  wait: "Their move",
+  rec: "Record",
   task: "Your tasks",
-  ghost: "Carried",
 };
 export const allFilters = (): TimelineFilter[] => [...TIMELINE_FILTERS];
 
@@ -161,13 +171,13 @@ export interface TimelineRow {
 
 /* ── the view's own options ────────────────────────────────────────────────────────────────── */
 
-export type ShowMode = "active" | "all" | "needs";
-export const SHOW_LABEL: Record<ShowMode, string> = {
-  active: "Active only",
-  all: "Everything",
-  needs: "Needs me",
-};
-export const SHOW_ORDER: readonly ShowMode[] = ["active", "all", "needs"];
+/* ⚠️ THE SHOW MODES ARE RETIRED — `ShowMode`, `SHOW_LABEL`, `SHOW_ORDER` and `TimelineView.show`.
+   They answered "which relationships do I want to see" with three modes, and the row rule answers
+   it now with one sentence: a row appears when it has something in the visible week. `Active only`
+   was that rule minus the closed rows, and a closed row only ever appears because its CLOSURE is
+   in view — which is news, and news the writer should see. `Everything` showed relationships with
+   nothing in the week at all, which is the empty row this pack exists to remove. `Needs me` is the
+   `Your move` filter with a different name. Three controls, one rule, and the rule is shorter. */
 
 export type RowSort = "soonest" | "waiting" | "name" | "stage";
 export const SORT_LABEL: Record<RowSort, string> = {
@@ -179,14 +189,12 @@ export const SORT_LABEL: Record<RowSort, string> = {
 export const SORT_ORDER: readonly RowSort[] = ["soonest", "waiting", "name", "stage"];
 
 export interface TimelineView {
-  show: ShowMode;
   sort: RowSort;
   kinds: TimelineFilter[];
   search: string;
 }
 
 export const defaultView = (): TimelineView => ({
-  show: "active",
   sort: "soonest",
   kinds: allFilters(),
   search: "",
@@ -385,7 +393,8 @@ export function timelineWeek(
 
   const push = (row: Draft, it: TimelineItem) => {
     row.held += 1;
-    if (!on.has(it.kind)) return;
+    /* a ghost is a fact about a task, so it rides the task filter rather than growing a fifth */
+    if (!on.has(it.kind === "ghost" ? "task" : it.kind)) return;
     /* ⚠️ THE CARD'S OWN TITLE AS WELL AS THE PILL. `pillLabel` summarises a derived card to two
        words — "Send full" — so a search over labels alone cannot find "the full for P. Kaur",
        which is what the writer actually saw on the To-do list. Both, or the search is a search of
@@ -432,10 +441,21 @@ export function timelineWeek(
        the bar derivation, which places each entry as an event IN the journey rather than as a pill
        floating above it. That is the whole change: one object that tells the story left to right,
        instead of one pill per fact. */
+    /**
+     * ⚠️ A GHOST SURVIVES ONLY FOR THE WRITER'S OWN TASKS, and it files under `Your tasks`.
+     *
+     * An origin mark says "this fell due here and is still outstanding". For a QUERY that is now
+     * the bar's job and the bar does it better: a your-move stretch carries its own duration, and
+     * a long-standing one draws the overrun back to the date it was expected. Keeping the mark as
+     * well would put one fact on the row twice — the same doubling the record chips had.
+     *
+     * For a writer's own task there is no bar, so the mark is the only thing that can say it, and
+     * it lands on the pinned row where a task belongs.
+     */
     for (const g of data.ghostsOn(ymd)) {
       const isTask = !!g.of.card?.userTaskId || g.of.family === "task";
-      const owner = g.of.card?.agentId ?? ownerOf(g.of.card?.relatedRecordId, byQuery);
-      push(rowFor(isTask ? null : owner), {
+      if (!isTask) continue;
+      push(rowFor(null), {
         key: g.key, idx, ymd, kind: "ghost", label: pillLabel(g.of), lane: 0, spanTo: idx,
         ...(g.of.card ? { card: g.of.card } : {}),
         ...(g.of.rolledFrom ? { rolledFrom: g.of.rolledFrom } : {}),
@@ -561,32 +581,26 @@ export function timelineWeek(
    * ⚠️ "Needs me" DOES NOT GET THAT EXEMPTION. It is a question about work, and an empty row is not
    * work; keeping quiet rows in it would answer a different question from the one asked.
    */
+  /**
+   * ⚠️ ONE RULE: A ROW APPEARS WHEN IT HAS SOMETHING IN THE VISIBLE WEEK.
+   *
+   * Three things went to get here. The three SHOW MODES, which asked the same question with
+   * different scopes. The nothing-to-hide EXEMPTION, which kept a live relationship on screen with
+   * nothing on it — written when a quiet query really did draw nothing, and made pointless by the
+   * bar, whose dashed rail says "no reply time recorded" in the row rather than leaving it blank.
+   * And the PINNED row's standing exemption, which drew "Your tasks" every week whether or not the
+   * writer had any.
+   *
+   * ⚠️ AN EMPTY ROW IS THE APP SAYING NOTHING, LOUDLY — it costs 80px, it draws a name, and what
+   * it communicates is that the reader should keep looking. The empty WEEK still says one line;
+   * that is a different thing, said once.
+   */
   const kept: Draft[] = [];
   for (const row of drafts.values()) {
-    if (row.key === YOU_ROW) { kept.push(row); continue; } // pinned: always, even empty
-    /* ⚠️ A NODE COUNTS AS SOMETHING ON THE ROW. A closure on the window's first day leaves no
-       drawable stretch — the piece before it is narrower than the floor — so a row whose only
-       content is that event would otherwise be dropped and take the event with it. */
     const alive = row.items.length
       + segments.filter((sg) => sg.rowKey === row.key).length
       + nodes.filter((n) => n.rowKey === row.key).length;
-    /* ⚠️ "Needs me" IS A QUESTION ABOUT WORK, so it takes none of the exemptions below: an empty
-       row is not work, and keeping quiet relationships in it would answer a different question
-       from the one asked. */
-    if (view.show === "needs") {
-      /* ⚠️ IT READS THE BAR NOW. "Work" used to be a your-turn CHIP; a your-turn card is a stretch
-         of the bar since Phase 3, so asking the items alone found nothing at all. */
-      const mine = segments.some((sg) => sg.rowKey === row.key && sg.side === "yours");
-      if (mine || row.items.some((i) => i.kind === "task")) kept.push(row);
-      continue;
-    }
-    if (alive > 0) { kept.push(row); continue; }
-    /* nothing survived. Whether the row does depends on whether a FILTER is why. */
-    if (row.held > 0) continue;                       // a filter took it — the row goes with it
-    if (search && !rowMatches(row)) continue;         // so does a search it does not answer
-    /* ⚠️ "Everything" MEANS EVERY RELATIONSHIP, including one that ended and left nothing in this
-       week — that is the mode's whole job, and it is the only place a closed agent appears. */
-    if (view.show === "all" || row.hasLive) kept.push(row);
+    if (alive > 0) kept.push(row);
   }
 
   /* ── order ──────────────────────────────────────────────────────────────────────────────── */
@@ -615,7 +629,9 @@ export function timelineWeek(
     return a.order - b.order;
   });
 
-  const ordered = [you, ...rest];
+  /* ⚠️ THE PINNED ROW IS PINNED, NOT EXEMPT. It is prepended only if it survived the one rule —
+     prepending it unconditionally was how it kept drawing itself empty after the exemption went. */
+  const ordered = kept.includes(you) ? [you, ...rest] : rest;
 
   /* ── lanes ──────────────────────────────────────────────────────────────────────────────── */
   /**

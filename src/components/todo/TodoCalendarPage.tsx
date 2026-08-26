@@ -879,10 +879,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               </div>
               {/* ⚠️ AN EMPTY BOARD IS NOT A FAILURE STATE. No apology, no prompt to do more — a
                   writer with a quiet week is entitled to read that as good news, or as nothing. */}
-              {rows.length === 1 && rows[0].items.length === 0 && segments.length === 0 && (
-                <div className="tl-none">
-                  <p className="tl-none-t">Nothing this week.</p>
-                </div>
+              {/* ⚠️ ONE LINE, NO ILLUSTRATION, NO ENCOURAGEMENT. A week with nothing in it is a
+                  fact, and a writer with a quiet week is entitled to read it as good news or as
+                  nothing at all. The EMPTY ROW is what this pack removed; the empty WEEK still
+                  says its one line, once. */}
+              {rows.length === 0 && (
+                <div className="tl-none"><p className="tl-none-t">Nothing this week.</p></div>
               )}
             </TplZone>
           </div>

@@ -16,7 +16,7 @@ import {
 } from "./todoCalendar";
 import {
   windowDays, shiftWindow, timelineWeek, timelineRows, timelineSegments,
-  defaultView, allFilters, TIMELINE_FILTERS, FILTER_LABEL, SHOW_ORDER, SORT_ORDER,
+  defaultView, allFilters, TIMELINE_FILTERS, FILTER_LABEL, SORT_ORDER,
   YOU_ROW, YOU_ROW_NAME, TimelineData, TimelineView,
 } from "./todoTimeline";
 
@@ -101,19 +101,27 @@ const TURN = input({
 } as Partial<CalendarInput>);
 
 describe("rows are relationships — one per agent, and Your tasks pinned above them all", () => {
-  it("puts Your tasks first, always, and it belongs to no agent", () => {
-    const rows = timelineRows(dataFor(input({})), TODAY, 7);
+  /** the pinned row appears when the writer has a dated task — it is pinned, not exempt */
+  const MINE = input({
+    cols: {
+      todo: [], snoozed: [], dismissed: [], done: [],
+      today: [card({ key: "u1", userTaskId: "t1", nature: "task", dueYmd: TODAY, title: "Book the room" })],
+    },
+  } as Partial<CalendarInput>);
+
+  it("puts Your tasks first when it has any, and it belongs to no agent", () => {
+    const rows = timelineRows(dataFor(MINE), TODAY, 7);
     expect(rows[0].key).toBe(YOU_ROW);
     expect(rows[0].name).toBe(YOU_ROW_NAME);
     expect(rows[0].agentId).toBeNull();
   });
 
-  it("keeps Your tasks even when it holds nothing — it never disappears", () => {
-    const rows = timelineRows(dataFor(input({})), TODAY, 7);
-    expect(rows).toHaveLength(1);
-    expect(rows[0].items).toHaveLength(0);
-    /* an empty row still has a lane, or it would have no height to draw in */
-    expect(rows[0].lanes).toBe(1);
+  it("⚠️ AND IT GOES WHEN IT HOLDS NOTHING — no row is exempt from the one rule", () => {
+    /* ⚠️ THIS REVERSES A STANDING RULING, deliberately. The event catalogue said the pinned row
+       appears "always — even empty"; the bars pack says an empty row is the app saying nothing,
+       loudly, and it is right. An empty Your-tasks row costs 80px, draws a name, and tells the
+       reader only to keep looking. The empty WEEK still says its one line. */
+    expect(timelineRows(dataFor(input({})), TODAY, 7)).toHaveLength(0);
   });
 
   it("raises one row per agent with something in the window, named by the display helpers", () => {
@@ -168,26 +176,35 @@ describe("rows are relationships — one per agent, and Your tasks pinned above 
     expect(a.closed).toBe(false);
   });
 
-  it("drops a closed relationship from Active, and Everything brings it back", () => {
-    const inp = input({
+  it("a relationship that ended before this week draws nothing at all", () => {
+    /* ⚠️ AND ITS CLOSURE IN VIEW BRINGS IT BACK — which is the honest replacement for the three
+       show modes. A closed row appears because its CLOSURE is in the week, and a closure is news. */
+    const gone = input({
       queries: [q({ id: "q1", agentId: "a1", status: QueryStatus.REJECTED })],
       agents: [agent({})],
     });
-    expect(timelineRows(dataFor(inp), TODAY, 7).map((r) => r.key)).toEqual([YOU_ROW]);
-    const all = timelineRows(dataFor(inp), TODAY, 7, view({ show: "all" }));
-    expect(all.map((r) => r.agentId)).toEqual([null, "a1"]);
-    expect(all[1].closed).toBe(true);
+    expect(timelineRows(dataFor(gone), TODAY, 7)).toHaveLength(0);
+
+    const closedHere = input({
+      queries: [q({ id: "q1", agentId: "a1", status: QueryStatus.REJECTED })],
+      agents: [agent({})],
+      activities: [act({ id: "c1", queryId: "q1", activityType: ActivityType.STATUS_CHANGED,
+        resultingStatus: QueryStatus.REJECTED, date: `${TODAY}T09:00:00Z` })],
+    });
+    const rows = timelineRows(dataFor(closedHere), TODAY, 7);
+    expect(rows.map((r) => r.agentId)).toEqual(["a1"]);
+    expect(rows[0].closed).toBe(true);
   });
 
-  it("Needs me keeps only rows holding work, and takes no pity on a quiet live row", () => {
+  it("⚠️ `Needs me` IS THE `Your move` FILTER WITH ANOTHER NAME — one control, not two", () => {
     const quiet = input({ queries: [q({ id: "q9", agentId: "a9" })], agents: [agent({ id: "a9", name: "T. Ellery" })] });
     const merged = input({
       queries: [...TURN.queries, ...quiet.queries],
       agents: [...TURN.agents, ...quiet.agents],
       cols: TURN.cols,
     } as Partial<CalendarInput>);
-    const needs = timelineRows(dataFor(merged), TODAY, 7, view({ show: "needs" }));
-    expect(needs.map((r) => r.agentId)).toEqual([null, "a1"]);
+    const mine = timelineRows(dataFor(merged), TODAY, 7, view({ kinds: ["turn"] }));
+    expect(mine.map((r) => r.agentId)).toEqual(["a1"]);
   });
 
   it("marks whose move it is from the CTA engine, never from a second list of statuses", () => {
@@ -197,11 +214,11 @@ describe("rows are relationships — one per agent, and Your tasks pinned above 
       queries: [q({ id: "q1", agentId: "a1", status: QueryStatus.QUERIED })], agents: [agent({})],
     });
     expect(timelineRows(dataFor(waiting), TODAY, 7).find((r) => r.agentId === "a1")!.dot).toBe("them");
-    expect(timelineRows(dataFor(input({})), TODAY, 7)[0].dot).toBe("self");
+    expect(timelineRows(dataFor(MINE), TODAY, 7)[0].dot).toBe("self");
   });
 
   it("the pinned row states no second line — it holds tasks from every manuscript and from none", () => {
-    expect(timelineRows(dataFor(input({})), TODAY, 7)[0].agency).toBe("");
+    expect(timelineRows(dataFor(MINE), TODAY, 7)[0].agency).toBe("");
   });
 });
 
@@ -299,7 +316,9 @@ describe("journey bars — which query gets one, and where it lands", () => {
 
 describe("the kind filters — five, and each is a thing to switch off", () => {
   it("names all five, and the reset restores them from the list rather than a literal", () => {
-    expect(TIMELINE_FILTERS).toEqual(["turn", "wait", "rec", "task", "ghost"]);
+    expect(TIMELINE_FILTERS).toEqual(["turn", "wait", "rec", "task"]);
+    expect(TIMELINE_FILTERS.map((k) => FILTER_LABEL[k]))
+      .toEqual(["Your move", "Their move", "Record", "Your tasks"]);
     expect(allFilters()).toEqual([...TIMELINE_FILTERS]);
     expect(TIMELINE_FILTERS.every((k) => !!FILTER_LABEL[k])).toBe(true);
     expect(Object.keys(FILTER_LABEL).sort()).toEqual([...TIMELINE_FILTERS].sort());
@@ -307,7 +326,7 @@ describe("the kind filters — five, and each is a thing to switch off", () => {
 
   it("⚠️ a filter that empties a row removes the row", () => {
     const rows = timelineRows(dataFor(TURN), TODAY, 7, view({ kinds: ["rec"] }));
-    expect(rows.map((r) => r.key)).toEqual([YOU_ROW]);
+    expect(rows).toHaveLength(0);
   });
 
   it("⚠️ AND A LIVE QUERY NOW ALWAYS HAS SOMETHING TO HIDE — the rail is the bar's floor", () => {
@@ -318,8 +337,7 @@ describe("the kind filters — five, and each is a thing to switch off", () => {
        therefore does remove this row, which is what a filter is for. */
     const inp = input({ queries: [q({ id: "q1", agentId: "a1" })], agents: [agent({})] });
     expect(timelineSegments(dataFor(inp), TODAY, 7).map((sg) => sg.norail)).toEqual([true]);
-    const rows = timelineRows(dataFor(inp), TODAY, 7, view({ kinds: ["rec"] }));
-    expect(rows.map((r) => r.agentId)).toEqual([null]);
+    expect(timelineRows(dataFor(inp), TODAY, 7, view({ kinds: ["rec"] }))).toHaveLength(0);
   });
 
   it("switching the waiting side off takes the bar and leaves the record standing", () => {
@@ -340,14 +358,14 @@ describe("the kind filters — five, and each is a thing to switch off", () => {
 
   it("search reaches the agent, the agency and the item's own words", () => {
     const d = dataFor(TURN);
-    expect(timelineRows(d, TODAY, 7, view({ search: "kaur" })).map((r) => r.agentId)).toEqual([null, "a1"]);
-    expect(timelineRows(d, TODAY, 7, view({ search: "finch" })).map((r) => r.agentId)).toEqual([null, "a1"]);
+    expect(timelineRows(d, TODAY, 7, view({ search: "kaur" })).map((r) => r.agentId)).toEqual(["a1"]);
+    expect(timelineRows(d, TODAY, 7, view({ search: "finch" })).map((r) => r.agentId)).toEqual(["a1"]);
     /* ⚠️ THE BAR'S OWN WORDS, and the reach they replaced. A your-turn card used to be a chip, so
        the search read its title; the card is a STRETCH now and the stretch carries `pillLabel`'s
        output. "Send full" still finds it; the card's fuller title no longer does, which costs
        nothing a reader would notice — the agent's name in that title is searchable on its own. */
-    expect(timelineRows(d, TODAY, 7, view({ search: "send full" })).map((r) => r.agentId)).toEqual([null, "a1"]);
-    expect(timelineRows(d, TODAY, 7, view({ search: "zzz" })).map((r) => r.agentId)).toEqual([null]);
+    expect(timelineRows(d, TODAY, 7, view({ search: "send full" })).map((r) => r.agentId)).toEqual(["a1"]);
+    expect(timelineRows(d, TODAY, 7, view({ search: "zzz" }))).toHaveLength(0);
   });
 });
 
@@ -364,20 +382,27 @@ describe("order — Your tasks ignores it, closed rows sink, and ties keep their
     ["2026-08-01T09:00:00Z", "2026-07-01T09:00:00Z", "2026-08-10T09:00:00Z"],
   );
 
-  it("pins Your tasks above every sort", () => {
+  it("pins Your tasks above every sort, when it is there at all", () => {
+    const withMine = input({
+      queries: inp.queries, agents: inp.agents,
+      cols: {
+        todo: [], snoozed: [], dismissed: [], done: [],
+        today: [card({ key: "u1", userTaskId: "t1", nature: "task", dueYmd: TODAY, title: "Book the room" })],
+      },
+    } as Partial<CalendarInput>);
     for (const sort of SORT_ORDER) {
-      expect(timelineRows(dataFor(inp), TODAY, 7, view({ sort }))[0].key).toBe(YOU_ROW);
+      expect(timelineRows(dataFor(withMine), TODAY, 7, view({ sort }))[0].key).toBe(YOU_ROW);
     }
   });
 
   it("longest waiting puts the oldest send first", () => {
     const rows = timelineRows(dataFor(inp), TODAY, 7, view({ sort: "waiting" }));
-    expect(rows.slice(1).map((r) => r.agentId)).toEqual(["a1", "a0", "a2"]);
+    expect(rows.map((r) => r.agentId)).toEqual(["a1", "a0", "a2"]);
   });
 
   it("by name, A to Z, by the display name and not the id", () => {
     const rows = timelineRows(dataFor(inp), TODAY, 7, view({ sort: "name" }));
-    expect(rows.slice(1).map((r) => r.name)).toEqual(["Agent A", "Agent B", "Agent C"]);
+    expect(rows.map((r) => r.name)).toEqual(["Agent A", "Agent B", "Agent C"]);
   });
 
   it("by journey stage, furthest along first, from the canonical order", () => {
@@ -386,7 +411,7 @@ describe("order — Your tasks ignores it, closed rows sink, and ties keep their
       ["2026-08-20T09:00:00Z", "2026-08-20T09:00:00Z", "2026-08-20T09:00:00Z"],
     );
     const rows = timelineRows(dataFor(staged), TODAY, 7, view({ sort: "stage" }));
-    expect(rows.slice(1).map((r) => r.agentId)).toEqual(["a1", "a2", "a0"]);
+    expect(rows.map((r) => r.agentId)).toEqual(["a1", "a2", "a0"]);
   });
 
   it("⚠️ ties keep the order they arrived in — stated, never left to the engine", () => {
@@ -396,7 +421,7 @@ describe("order — Your tasks ignores it, closed rows sink, and ties keep their
     );
     for (const sort of ["soonest", "waiting", "stage"] as const) {
       const rows = timelineRows(dataFor(tied), TODAY, 7, view({ sort }));
-      expect(rows.slice(1).map((r) => r.agentId)).toEqual(["a0", "a1", "a2"]);
+      expect(rows.map((r) => r.agentId)).toEqual(["a0", "a1", "a2"]);
     }
   });
 
@@ -408,16 +433,21 @@ describe("order — Your tasks ignores it, closed rows sink, and ties keep their
       ],
       agents: [agent({ id: "a0", name: "A. Aardvark", responseTimeWeeks: 8 } as Partial<Agent>),
                agent({ id: "a1", name: "Z. Zebra", responseTimeWeeks: 8 } as Partial<Agent>)],
-      activities: [act({ id: "r0", queryId: "q0" })],
+      /* ⚠️ A REAL CLOSURE, because a closed row only appears at all when its closure is in view —
+         the first version of this fixture used a bare STATUS_CHANGED with no `resultingStatus`,
+         which the record layer excludes, so the row had nothing and was dropped before the sort
+         could be asked about it. */
+      activities: [act({ id: "c0", queryId: "q0", activityType: ActivityType.STATUS_CHANGED,
+        resultingStatus: QueryStatus.REJECTED, date: `${TODAY}T09:00:00Z` })],
     });
     for (const sort of SORT_ORDER) {
-      const rows = timelineRows(dataFor(mixed), TODAY, 7, view({ show: "all", sort }));
-      expect(rows.slice(1).map((r) => r.agentId)).toEqual(["a1", "a0"]);
+      const rows = timelineRows(dataFor(mixed), TODAY, 7, view({ sort }));
+      /* the pinned row is gone when it holds nothing, so these are the two agent rows */
+      expect(rows.map((r) => r.agentId)).toEqual(["a1", "a0"]);
     }
   });
 
-  it("names all three show modes and all four sorts", () => {
-    expect(SHOW_ORDER).toEqual(["active", "all", "needs"]);
+  it("names all four sorts", () => {
     expect(SORT_ORDER).toEqual(["soonest", "waiting", "name", "stage"]);
   });
 });
@@ -501,7 +531,7 @@ describe("⚠️ the derivations underneath are untouched, and the rows prove it
     /* ⚠️ THE DEDUPE STILL HOLDS, AND IT HOLDS ONE STEP EARLIER NOW. The done card is superseded
        before the page reads the day, so the bar's node derivation never sees it: one activity is
        one NODE, where it used to be one chip. */
-    const { rows, nodes } = timelineWeek(dataFor(inp), TODAY, 7, view({ show: "all" }));
+    const { rows, nodes } = timelineWeek(dataFor(inp), TODAY, 7);
     const row = rows.find((r) => r.agentId === "a1")!;
     expect(row.items).toHaveLength(0);
     expect(nodes.filter((n) => n.rowKey === row.key)).toHaveLength(1);
