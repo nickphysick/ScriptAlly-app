@@ -216,6 +216,14 @@ export const verifyWaitlist = async (
     if (!tokensMatch(storedHash, hash)) return { kind: "unknown" as const };
 
     const status = (doc.get("status") as WaitlistStatus) ?? "pending";
+    /**
+     * ⚠️ THIS BRANCH WAS UNREACHABLE UNTIL 26 Aug AND NOBODY KNEW. Every path that set `verified`
+     * or `waiting` also nulled `verifyTokenHash`, which is the field this lookup queries on — so
+     * a second click matched nothing and returned `unknown` two lines above. The test asserting
+     * `already` had never run (its whole file failed to import in CI), so both halves were wrong
+     * and neither could tell you. It returns before the counter is read: clicking twice cannot
+     * take two places.
+     */
     if (status === "verified" || status === "waiting") {
       return { kind: "already" as const, position: (doc.get("position") as number | undefined) ?? null };
     }
@@ -241,7 +249,9 @@ export const verifyWaitlist = async (
     if (counter.verifiedCount >= counter.cap) {
       tx.set(doc.ref, {
         status: "waiting" as WaitlistStatus, verified: false,
-        lastInteractionAt: now, verifyTokenHash: null, verifyTokenExpiresAt: null,
+        /* Spent, not erased — see the note on the verified path below. Someone who lands in the
+           waiting list and clicks again is told `already`, not `unknown`. */
+        lastInteractionAt: now, verifyTokenSpentAt: now, verifyTokenExpiresAt: null,
       }, { merge: true });
       return { kind: "waiting" as const, counter };
     }
@@ -250,8 +260,32 @@ export const verifyWaitlist = async (
     tx.set(doc.ref, {
       verified: true, verifiedAt: now, status: "verified" as WaitlistStatus, position,
       lastInteractionAt: now,
-      /* ⚠️ THE TOKEN IS SPENT. Leaving it usable makes a verify link a permanent credential. */
-      verifyTokenHash: null, verifyTokenExpiresAt: null,
+      /**
+       * ⚠️ THE HASH SURVIVES AS A LOOKUP KEY. IT IS SPENT, NOT ERASED — and the reason is mail
+       * security scanners. Outlook Safe Links, corporate gateways and some antivirus tools issue
+       * a GET on every URL in an inbound email BEFORE the recipient sees it. Null the hash here
+       * and the scanner's fetch IS the verification: it takes the founding place, and the
+       * writer's own click finds nothing and is told `unknown`. That is not an edge case, it is
+       * a routine failure mode of GET-based verification, and it would have hit a meaningful
+       * share of founding writers.
+       *
+       * Keeping it makes verification IDEMPOTENT: the `already` branch above finds the record,
+       * returns the position, and never touches the counter. The cap transaction still fires
+       * exactly once, on the first transition.
+       *
+       * ⚠️ AND IT IS NOT A CREDENTIAL ANY MORE. `verifyTokenSpentAt` marks it used and the
+       * `already` branch is reached before any expiry or cap logic, so a replay can only ever
+       * learn "you are in" — and whoever holds the link got it from that mailbox, so there is
+       * nothing there they did not already know.
+       *
+       * ⚠️ THE EXPIRED AND UNSUBSCRIBE PATHS STILL NULL IT, deliberately. Neither reached a
+       * terminal "you are in" state, so for those a live hash really would be a replayable
+       * credential.
+       *
+       * A retention job may null spent hashes after 90 days. None exists yet — do not read this
+       * as a description of one that does.
+       */
+      verifyTokenSpentAt: now, verifyTokenExpiresAt: null,
     }, { merge: true });
     writeCounter(tx, cRef, counter, position, now);
     return { kind: "verified" as const, position, counter: { ...counter, verifiedCount: position } };

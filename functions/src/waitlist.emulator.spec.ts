@@ -207,7 +207,49 @@ describe("verify tokens", () => {
     expect(doc.get("verifyTokenHash")).toBeNull();
     /* The person is still on the list — they asked to join; only the link died. */
     expect(doc.exists).toBe(true);
-    expect((await counterOf()).verifiedCount).toBe(0);
+    /**
+     * ⚠️ ABSENT, NOT ZERO — and `counterOf` is the wrong helper here. This case never seeds a
+     * counter, and `readCounterState` returns `null` for a missing document ON PURPOSE: a
+     * document that is not there is not evidence that nobody signed up, it is evidence that we
+     * do not know. `counterOf` asserts non-null first, so it failed the moment this file first
+     * ran. The honest assertion is that an expired click creates no counter at all.
+     */
+    expect(await readCounterState(db)).toBeNull();
+  });
+
+  /**
+   * ⚠️ THE MECHANISM, ASSERTED SEPARATELY FROM THE BEHAVIOUR. `already` works only because the
+   * hash SURVIVES a successful verify to serve as the lookup key. A future tidy-up that nulls it
+   * — which reads as obviously correct, and was the original code — silently returns the app to
+   * telling verified writers `unknown`. That is why this asserts the field and not just the
+   * outcome: the outcome test above would still pass for one wrong reason if the record could be
+   * found some other way.
+   */
+  it("a spent token is marked spent, not erased — mail scanners fetch links before people do", async () => {
+    await setCounter(0);
+    const token = await seedPending("scanned@example.com");
+    /* the scanner gets there first */
+    expect((await verifyWaitlist(db, token, Date.now())).kind).toBe("verified");
+
+    const doc = await db.doc(`waitlist/${emailHash("scanned@example.com")}`).get();
+    expect(doc.get("verifyTokenHash")).toBe(tokenHash(token));
+    expect(doc.get("verifyTokenSpentAt")).toBeTruthy();
+
+    /* then the writer clicks their own link and must be told they are in, not "unknown" */
+    const theirClick = await verifyWaitlist(db, token, Date.now());
+    expect(theirClick.kind).toBe("already");
+    if (theirClick.kind === "already") expect(theirClick.position).toBe(1);
+    /* and the place is taken once, not twice */
+    expect((await counterOf()).verifiedCount).toBe(1);
+  });
+
+  it("a token spent into the waiting list is `already` on the second click too", async () => {
+    await setCounter(DEFAULT_CAP);
+    const token = await seedPending("late@example.com");
+    expect((await verifyWaitlist(db, token, Date.now())).kind).toBe("waiting");
+    expect((await verifyWaitlist(db, token, Date.now())).kind).toBe("already");
+    /* the cap is not moved by either click */
+    expect((await counterOf()).verifiedCount).toBe(DEFAULT_CAP);
   });
 
   it("an unknown token is refused without saying why", async () => {
