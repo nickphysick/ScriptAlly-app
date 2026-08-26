@@ -184,6 +184,72 @@ const validNestedActivity = () => ({
   note: 'Status changed',
 });
 
+/**
+ * The nested store's CURRENT full shape — every field any live writer sets, derived by reading the
+ * write paths rather than assumed from the audit:
+ *   type/resultingStatus/createdAt/note/queryId/agentName/manuscriptTitle
+ *       db.tsx logDoc (:2152), updateQueryStatus (:2340), recordMaterialsSent (:2463),
+ *       saveQueryEdits.ts (:126), smartImportCommit.ts (:216)
+ *   dateProvisional  smartImportCommit.ts:222 (true) - saveQueryEdits.ts:161 (false on a date edit)
+ *   reminderDate     logNudge.ts:133
+ *   replyWeeks       holdingReply.ts:126
+ */
+const currentNestedActivity = () => ({
+  type: 'Partial Requested',
+  resultingStatus: 'Partial Requested',
+  createdAt: '2026-01-01T00:00:00.000Z',
+  note: 'Agent asked for the first fifty pages',
+  queryId: 'q-1',
+  agentName: 'Eleanor Hart',
+  manuscriptTitle: 'My Novel',
+  dateProvisional: false,
+  reminderDate: '2026-02-01T00:00:00.000Z',
+  replyWeeks: 8,
+});
+
+/**
+ * The MIGRATION-HEAL shape — four fields, no queryId/agentName/manuscriptTitle
+ * (migrateDerivedStatus.ts:117). One of exactly two shapes ever written across all 117 revisions
+ * of the four writer files, so this is what older rows on a real account look like.
+ *
+ * IT MUST STAY *EDITABLE*, not merely creatable. saveQueryEdits.ts:167 patches rungs with
+ * batch.update, and db.tsx's move (:3084) and correction-restore (:2985) write back whatever they
+ * read — so an allowlist narrower than real data denies those paths on legacy rows, silently.
+ */
+const legacyNestedActivity = () => ({
+  type: 'Queried',
+  resultingStatus: 'Queried',
+  createdAt: '2026-01-01T00:00:00.000Z',
+  note: 'Status reconciled during derived-status migration',
+});
+
+/**
+ * `type` IS NOT A QueryStatus AND MUST NEVER TAKE THE ENUM CHECK. Four non-enum values are
+ * load-bearing — 'Nudge sent' (logNudge.ts:86), 'Holding reply' (holdingReply.ts:43),
+ * 'Offer accepted'/'Offer declined' (offerDecision.ts:28-29) — and QueryTimeline.tsx:280,304
+ * FILTERS on them to render the nudge and holding-reply rows. Enum-constraining `type` would deny
+ * every nudge, holding reply and offer decision AND blank those rows. The enum belongs on
+ * `resultingStatus`, which these two shapes correctly omit (neither is status-bearing).
+ */
+const nudgeNestedActivity = () => ({
+  type: 'Nudge sent',
+  createdAt: '2026-01-01T00:00:00.000Z',
+  note: 'Follow-up reminder set for 1 Feb',
+  queryId: 'q-1',
+  agentName: 'Eleanor Hart',
+  reminderDate: '2026-02-01T00:00:00.000Z',
+});
+
+const holdingReplyNestedActivity = () => ({
+  type: 'Holding reply',
+  createdAt: '2026-01-01T00:00:00.000Z',
+  note: 'They expect to reply within 8 weeks',
+  queryId: 'q-1',
+  agentName: 'Eleanor Hart',
+  replyWeeks: 8,
+});
+
+
 const validJournalEntry = (uid = ALICE) => ({
   id: 'je-1',
   userId: uid,
@@ -830,6 +896,121 @@ describe('/users/{userId}/queries', () => {
         getDoc(doc(bobCtx().firestore(), 'users', ALICE, 'queries', 'q-1', 'activity', 'act-nested-1'))
       );
     });
+
+    /*
+     * ─── The authoritative store's shape (audit, 26 Aug 2026) ────────────────────────────
+     * This subcollection is what recomputeQuery derives status and every pipeline date from
+     * (subcollectionDocToDerivable, recomputeQuery.ts:31). Its validator checked three fields,
+     * restricted no keys, and never looked at resultingStatus — while the DISPLAY projection
+     * beside it (/users/{uid}/activities) enforced the full ten-value enum. The store that
+     * DECIDES status was the loose one; the store that merely SHOWS it was strict.
+     */
+
+    it('rejects an unknown field on create', async () => {
+      const db = aliceCtx().firestore();
+      await assertFails(
+        setDoc(
+          doc(db, 'users', ALICE, 'queries', 'q-1', 'activity', 'act-nested-1'),
+          { ...validNestedActivity(), bogus: 1 }
+        )
+      );
+    });
+
+    it('rejects an unknown field on update', async () => {
+      await asAdmin(async (ctx) => {
+        await setDoc(
+          doc(ctx.firestore(), 'users', ALICE, 'queries', 'q-1', 'activity', 'act-nested-1'),
+          validNestedActivity()
+        );
+      });
+      await assertFails(
+        updateDoc(
+          doc(aliceCtx().firestore(), 'users', ALICE, 'queries', 'q-1', 'activity', 'act-nested-1'),
+          { bogus: 1 }
+        )
+      );
+    });
+
+    it('rejects a resultingStatus outside the QueryStatus enum', async () => {
+      const db = aliceCtx().firestore();
+      await assertFails(
+        setDoc(
+          doc(db, 'users', ALICE, 'queries', 'q-1', 'activity', 'act-nested-1'),
+          { ...validNestedActivity(), resultingStatus: 'Offer Pending' }
+        )
+      );
+    });
+
+    it('rejects a non-string type', async () => {
+      const db = aliceCtx().firestore();
+      await assertFails(
+        setDoc(
+          doc(db, 'users', ALICE, 'queries', 'q-1', 'activity', 'act-nested-1'),
+          { ...validNestedActivity(), type: 7 }
+        )
+      );
+    });
+
+    it('rejects a non-string resultingStatus', async () => {
+      const db = aliceCtx().firestore();
+      await assertFails(
+        setDoc(
+          doc(db, 'users', ALICE, 'queries', 'q-1', 'activity', 'act-nested-1'),
+          { ...validNestedActivity(), resultingStatus: 7 }
+        )
+      );
+    });
+
+    it('allows the current full shape — every field a live writer sets', async () => {
+      const db = aliceCtx().firestore();
+      await assertSucceeds(
+        setDoc(
+          doc(db, 'users', ALICE, 'queries', 'q-1', 'activity', 'act-nested-1'),
+          currentNestedActivity()
+        )
+      );
+    });
+
+    it('allows a legacy migration-heal row to be created AND edited', async () => {
+      await asAdmin(async (ctx) => {
+        await setDoc(
+          doc(ctx.firestore(), 'users', ALICE, 'queries', 'q-1', 'activity', 'act-legacy-1'),
+          legacyNestedActivity()
+        );
+      });
+      const db = aliceCtx().firestore();
+      await assertSucceeds(
+        setDoc(
+          doc(db, 'users', ALICE, 'queries', 'q-1', 'activity', 'act-legacy-2'),
+          legacyNestedActivity()
+        )
+      );
+      // The saveQueryEdits patch shape (:155-167) applied over a legacy row — the exact path an
+      // over-narrow allowlist would deny silently.
+      await assertSucceeds(
+        updateDoc(
+          doc(db, 'users', ALICE, 'queries', 'q-1', 'activity', 'act-legacy-1'),
+          { type: 'Partial Requested', resultingStatus: 'Partial Requested', dateProvisional: false }
+        )
+      );
+    });
+
+    it('allows the nudge and holding-reply shapes — their non-enum type is load-bearing', async () => {
+      const db = aliceCtx().firestore();
+      await assertSucceeds(
+        setDoc(
+          doc(db, 'users', ALICE, 'queries', 'q-1', 'activity', 'act-nudge-1'),
+          nudgeNestedActivity()
+        )
+      );
+      await assertSucceeds(
+        setDoc(
+          doc(db, 'users', ALICE, 'queries', 'q-1', 'activity', 'act-holding-1'),
+          holdingReplyNestedActivity()
+        )
+      );
+    });
+
   });
 });
 
