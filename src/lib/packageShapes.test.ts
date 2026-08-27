@@ -196,7 +196,7 @@ describe("the builder states which slots are optional, and unsets rather than st
     expect(body).not.toContain("one of each");
   });
 
-  it("synopsis and sample both offer Not included; the letter does not", () => {
+  it("the synopsis offers Not included and the version Not recorded; the letter offers neither", () => {
     const between = (from: string, to: string) => {
       const a = body.indexOf(from);
       const b = body.indexOf(to, a + 1);
@@ -205,9 +205,18 @@ describe("the builder states which slots are optional, and unsets rather than st
       expect(b, `anchor missing: ${to}`).toBeGreaterThan(a);
       return body.slice(a, b);
     };
+    /**
+     * ⚠️ RETARGETED: the third slot is the VERSION, and its empty option is a different word for a
+     * different fact. `Not included` says the writer left a material out; `Not recorded` says they
+     * have not said which shape of the book this package tests — and D3 makes that permanent,
+     * since a sent package can never gain one. Rendering the version's empty state as "Not
+     * included" would claim the package was built without a manuscript.
+     */
     expect(between("pkgf-pkg-letter", "pkgf-pkg-synopsis")).not.toContain("NOT_INCLUDED");
-    expect(between("pkgf-pkg-synopsis", "pkgf-pkg-sample")).toContain("NOT_INCLUDED");
-    expect(between("pkgf-pkg-sample", "pkgf-pkg-other")).toContain("NOT_INCLUDED");
+    expect(between("pkgf-pkg-synopsis", "pkgf-pkg-version")).toContain("NOT_INCLUDED");
+    const ver = between("pkgf-pkg-version", "pkgf-pkg-other");
+    expect(ver).toContain("NOT_RECORDED");
+    expect(ver, "the version slot must not borrow the material wording").not.toContain("NOT_INCLUDED");
   });
 
   it("every slot label carries Required or Optional", () => {

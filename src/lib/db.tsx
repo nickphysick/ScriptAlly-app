@@ -1701,7 +1701,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const updatePackage = async (
     id: string,
-    fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials">>,
+    fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials" | "bookVersionId">>,
   ): Promise<string | null> => {
     if (!currentUser) return "Authentication required.";
     const live = packages.find((p) => p.id === id);

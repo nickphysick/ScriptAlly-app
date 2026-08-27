@@ -56,10 +56,27 @@ describe("isPackageLocked — absence is the whole test", () => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 describe("what the lock freezes, and what it deliberately does not", () => {
-  it("exactly the three version slots", () => {
+  it("exactly the three slots and the version", () => {
+    /**
+     * ⚠️ THE VERSION JOINED THE FROZEN SET, on the same argument as the other three: a sent package
+     * is the record of what the agent received, and the shape of the book it carried is part of
+     * that record. Left mutable, a writer could retro-fit a version onto a sent package and every
+     * scorecard reading it would silently re-attribute requests that arrived on something else.
+     *
+     * ⚠️ AND THE CLIENT LIST MUST MATCH THE RULE, or the writer gets a bare permission error where
+     * they should get the refusal message. Asserted against `firestore.rules` rather than against a
+     * second literal, so the two cannot drift.
+     */
     expect([...LOCKED_PACKAGE_FIELDS]).toEqual([
-      "queryLetterVersionId", "synopsisVersionId", "samplePagesVersionId",
+      "queryLetterVersionId", "synopsisVersionId", "samplePagesVersionId", "bookVersionId",
     ]);
+    const rules = readFileSync(join(root, "firestore.rules"), "utf8");
+    const j = rules.indexOf("match /packages/");
+    expect(j).toBeGreaterThan(-1);
+    const route = rules.slice(j, rules.indexOf("\n      }", j));
+    for (const f of LOCKED_PACKAGE_FIELDS) {
+      expect(route, `${f} is frozen on the client but not in the rules`).toContain(`'${f}'`);
+    }
   });
 
   it("NOT the name, the status, or the free-text line", () => {
@@ -159,11 +176,13 @@ describe("the rule — proven against the deployed database by rulesProbe, asser
     expect(rules).toContain("data.firstSentAt is string");
   });
 
-  it("a sent package's three slots cannot change", () => {
+  it("a sent package's slots — and its version — cannot change", () => {
+    /* ⚠️ THE VERSION IS IN THE SAME SET NOW. See LOCKED_PACKAGE_FIELDS above for why: a version a
+       sent package could gain would re-attribute every request that arrived on something else. */
     expect(rules).toContain(
       "!existing().keys().hasAny(['firstSentAt'])");
     expect(rules).toMatch(
-      /affectedKeys\(\)\.hasAny\(\['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt'\]\)/);
+      /affectedKeys\(\)\.hasAny\(\['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId'\]\)/);
   });
 
   it("the stamp is write-once — it is in the SAME forbidden set", () => {

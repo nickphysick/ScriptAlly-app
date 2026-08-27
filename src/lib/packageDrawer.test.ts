@@ -99,18 +99,19 @@ describe("D11 — the version chip is INHERITED, never stored", () => {
     expect(drawerSlots(pkg(), MATS, BV.slice(0, 1))[2].versionName).toBeNull();
   });
 
-  it("⚠️ AND NO VERSION FIELD EXISTS ON THE PACKAGE — model, builder, card or rules", () => {
+  it("⚠️ AND THE PACKAGE STATES ITS VERSION ONCE — the field, not a second route", () => {
+    /**
+     * ⚠️ RETARGETED, AND THE LAW IT NOW ASSERTS: this case forbade a version field on a package
+     * because the drawer's chip was INHERITED from the sample, and a stored field would have been a
+     * second answer. The settled model retires the sample slot, so the inheritance has no source
+     * left and the field IS the answer. What survives is the singularity — one member, one place.
+     */
     const types = decls(read("src/types.ts"));
     const i = types.indexOf("export interface SubmissionPackage {");
-    expect(types.slice(i, types.indexOf("\n}", i))).not.toMatch(/bookVersion/i);
-    for (const f of ["src/components/packages/PackageModal.tsx", "src/components/packages/PackagesBand.tsx"]) {
-      expect(read(f), `${f} names a book version`).not.toMatch(/bookVersion/i);
-    }
-    const rules = read("firestore.rules");
-    const j = rules.indexOf("function isValidPackage");
-    expect(rules.slice(j, rules.indexOf("\n    }", j))).not.toMatch(/bookVersion/i);
-  });
-});
+    const body = types.slice(i, types.indexOf("\n}", i));
+    expect(body).toMatch(/\bbookVersionId\?: string;/);
+    expect(body.match(/bookVersion/gi) ?? []).toHaveLength(1);
+  });});
 
 // ─────────────────────────────────────────────────────────────────────────────
 describe("D12 / D17 — who has it, and what it will not guess", () => {

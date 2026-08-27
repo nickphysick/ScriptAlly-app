@@ -27,7 +27,7 @@ import React, { useState } from "react";
 import type { Activity, BookVersion, BookVersionKind, ManuscriptVersion, Query } from "../../types";
 import {
   KIND_LABEL, BOOK_VERSION_KINDS, versionsActive, latestVersion, rrLink,
-  appendBookVersion, renameBookVersion, samplesOfVersion, holdings, versionMeta,
+  appendBookVersion, newBookVersionId as newId, renameBookVersion, samplesOfVersion, holdings, versionMeta,
 } from "../../lib/bookVersions";
 import "./bookVersions.css";
 
@@ -46,7 +46,7 @@ export const monthYear = (iso: string): string => {
 };
 
 /** A new id, on the app's existing shape for client-generated ids. */
-const newId = (): string => `bv-${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36)}`;
+
 
 export interface BookVersionsPanelProps {
   versions: readonly BookVersion[];

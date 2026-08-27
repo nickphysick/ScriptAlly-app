@@ -373,3 +373,18 @@
 @media (max-width: 1080px) {
   .pkgf-dashgrid, .pkgf-dashghosts, .pkgf-statstrip { grid-template-columns: minmax(0, 1fr); }
 }
+
+/**
+ * ⚠️ THE INLINE VERSION CREATE — name, kind, Add, Cancel on one row.
+ *
+ * It sits INSIDE the version slot rather than replacing the select, so the writer can see what they
+ * already have while naming a new one; the select shows `＋ New version…` as its value meanwhile,
+ * which is what says the row below belongs to it.
+ */
+.pkgf-newver { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+.pkgf-newver input { flex: 1 1 auto; min-width: 0; }
+.pkgf-newver select { flex: 0 0 auto; }
+.pkgf-newver .pkgf-btn { flex: 0 0 auto; }
+
+/** The slot's own explanation — the ref's `.sub`. */
+.pkgf-sub { margin-top: 6px; font-size: 11.5px; line-height: 1.45; color: var(--pkg-muted); }

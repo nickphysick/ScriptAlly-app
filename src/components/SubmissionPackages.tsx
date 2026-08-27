@@ -25,13 +25,13 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { PackageTracking } from "./packages/PackageTracking";
 import { useScriptAllyDb } from "../lib/db";
-import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../types";
+import { BookVersionKind, ComponentType, ManuscriptVersion, SubmissionPackage } from "../types";
 import { useNavigate } from "react-router-dom";
 import { PackagesTeachFirst } from "./packages/PackagesTeachFirst";
 import { PackagesBand } from "./packages/PackagesBand";
 import { TrackingBand } from "./packages/TrackingBand";
 import { PackageDetailDrawer } from "./packages/PackageDetailDrawer";
-import { bookVersionsOf } from "../lib/bookVersions";
+import { appendBookVersion, bookVersionsOf, newBookVersionId } from "../lib/bookVersions";
 import { agentLabel, AGENT_NOT_RECORDED } from "../lib/agentDisplay";
 import { FootnoteBand } from "./packages/FootnoteBand";
 import { RemovePopover } from "./packages/RemovePopover";
@@ -54,7 +54,7 @@ import "./packages/packageWorkshop.css";
 import "./shell/illustratedMasthead.css";
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries, activities, agents, addVersion, updateVersion, deleteVersion, archiveVersion, addPackage, updatePackage, deletePackage, retirePackage, restoreVersion, restorePackage, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, activities, agents, updateManuscript, addVersion, updateVersion, deleteVersion, archiveVersion, addPackage, updatePackage, deletePackage, retirePackage, restoreVersion, restorePackage, updateUserProfile } = useScriptAllyDb();
   /**
    * ⚠️ NEVER AUTO-OPENS (D7). Plain component state, seeded `false`: no localStorage, no first-run
    * trigger, nothing watching the teach→workspace transition. A drawer that opened itself would
@@ -197,6 +197,31 @@ export const SubmissionPackages: React.FC = () => {
    * keys to be PRESENT, so omitting one fails the rule outright — this is the single place on this
    * page where `deleteField()` would be the wrong instinct, and the modal sends `UNFILLED_SLOT`.
    */
+  /**
+   * `＋ New version…` — the version is created on the MANUSCRIPT, which is where versions live, and
+   * the new id comes back so the builder's select can land on it.
+   *
+   * ⚠️ IT RETURNS NULL ON FAILURE RATHER THAN THROWING, because the caller's only sane response is
+   * to leave the select where it was. An id handed back for a write that did not land would point
+   * the package at a version the manuscript does not have.
+   *
+   * ⚠️ AND IT GOES THROUGH `appendBookVersion`, which owns the cap. A raw spread here would be a
+   * second writer of the same list and the 50-version ceiling would apply on one path only.
+   */
+  const createBookVersion = async (name: string, kind: BookVersionKind): Promise<string | null> => {
+    if (!msId) return null;
+    const id = newBookVersionId();
+    const next = appendBookVersion(msBookVersions, {
+      id, name, kind, createdDate: new Date().toISOString().slice(0, 10),
+    });
+    try {
+      await updateManuscript(msId, { bookVersions: next });
+      return id;
+    } catch {
+      return null;
+    }
+  };
+
   const savePackageDraft = async (d: PackageDraftResult): Promise<string | null> => {
     if (!msId) return "No manuscript is selected.";
     const fields = {
@@ -204,6 +229,14 @@ export const SubmissionPackages: React.FC = () => {
       queryLetterVersionId: d.letterId,
       synopsisVersionId: d.synopsisId,
       samplePagesVersionId: d.sampleId,
+      /**
+       * ⚠️ ABSENT WHEN NOT RECORDED, never `""` — the opposite convention to the three slots above,
+       * and deliberately. Those are required-present by `isValidPackage` and cannot change without
+       * invalidating every stored package; this field is new, so it can be modelled honestly: no
+       * key means the writer has not said. `updatePackage` turns the blank into `deleteField()`,
+       * so clearing it back to `Not recorded` is expressible.
+       */
+      bookVersionId: d.bookVersionId,
       /* ⚠️ ALWAYS SENT, EVEN WHEN BLANK — `updatePackage` turns blank into `deleteField()`, which is
          how the writer CLEARS the line. Omitting the key here instead would make a cleared field
          indistinguishable from an untouched one, and the old text would survive the edit. */
@@ -549,7 +582,9 @@ export const SubmissionPackages: React.FC = () => {
         duplicating={pkgDuplicating}
         existingNames={msPackages.map((p) => p.packageName)}
         versions={msVersions}
+        bookVersions={msBookVersions}
         packageCount={msPackages.length}
+        onCreateVersion={createBookVersion}
         onClose={() => { setPkgModal(false); setPkgEditing(null); setPkgDuplicating(null); }}
         onSave={savePackageDraft}
       />}

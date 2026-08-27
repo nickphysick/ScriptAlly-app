@@ -223,6 +223,14 @@ service cloud.firestore {
         && data.queryLetterVersionId is string && data.queryLetterVersionId.size() <= 128
         && data.synopsisVersionId is string && data.synopsisVersionId.size() <= 128
         && data.samplePagesVersionId is string && data.samplePagesVersionId.size() <= 128
+        // ⚠️ THE VERSION SLOT IS OPTIONAL AND STAYS OPTIONAL (D3). Unlike the three above it is
+        // absent rather than `""` when unset: those three are required-present by this validator
+        // and cannot change that without invalidating every stored package, whereas this one is
+        // new and can be modelled honestly from the start. A sent package can never gain one — the
+        // freeze below covers it — so `Not recorded` is permanent for every package already out.
+        && (!data.keys().hasAny(['bookVersionId'])
+            || (data.bookVersionId is string && data.bookVersionId.size() >= 1
+                && data.bookVersionId.size() <= 128))
         // ⚠️ THE LOCK STAMP (attachment model, D-D1). Optional; present means the package has gone out
         // and its slots are frozen — enforced on the update rule below, because a validator cannot
         // see what CHANGED. Stored rather than derived because rules can get() a document by path
@@ -755,10 +763,15 @@ service cloud.firestore {
         // edit the slots, and the guarantee is a formality. `hasAny` on the CHANGED keys is what
         // says "you may add it, you may never touch it again".
         allow update: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId)
-          && incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status', 'firstSentAt'])
+          && incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status', 'firstSentAt', 'bookVersionId'])
           && (
             !existing().keys().hasAny(['firstSentAt'])
-            || !incoming().diff(existing()).affectedKeys().hasAny(['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt'])
+            // ⚠️ THE VERSION JOINS THE FROZEN SET, and it is the same argument as the other three:
+            // a package that has gone out is a record of what the agent received, and the shape of
+            // the book it carried is part of that record. Left mutable, a writer could retro-fit a
+            // version onto a sent package and every scorecard reading it would silently re-attribute
+            // requests that arrived on something else.
+            || !incoming().diff(existing()).affectedKeys().hasAny(['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId'])
           );
       }
 

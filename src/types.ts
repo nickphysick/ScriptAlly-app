@@ -452,6 +452,21 @@ export interface SubmissionPackage {
   synopsisVersionId: string;
   samplePagesVersionId: string;
   /**
+   * Which ordering of the book this package is testing — a `BookVersion.id` on the manuscript.
+   *
+   * ⚠️ OPTIONAL, PERMANENTLY (D3). Every package written before this field has none, and a package
+   * that has already gone out cannot gain one: `firestore.rules` freezes a sent package's slots, so
+   * the writer cannot go back and say which shape it carried. `Not recorded` is therefore a
+   * standing bucket rather than a transitional one, and every derivation downstream — the ledger,
+   * `Requests by opening`, `Who holds what` — has to render it as its own row rather than folding
+   * it into a known version or into a zero.
+   *
+   * ⚠️ THIS IS THE EDGE. Versions Part C wired sample material to version and left packages
+   * version-blind; that edge moves here. A package's scorecard is now its own version's scorecard,
+   * read directly rather than aggregated through whatever sample happened to be in the sample slot.
+   */
+  bookVersionId?: string;
+  /**
    * ⚠️ THE LOCK, AND THE ONE PLACE THIS FEATURE STORES WHAT IT WOULD RATHER DERIVE.
    *
    * ISO stamp of the first time a query went out carrying this package. Absent = never sent = the

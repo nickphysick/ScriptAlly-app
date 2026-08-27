@@ -141,42 +141,55 @@ describe("the write — absent means unwritten", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe("⚠️ D13 — packages take NO version field, anywhere", () => {
+describe("⚠️ D13 IS SUPERSEDED — a package now carries its own version, and the sample slot does not", () => {
   /**
-   * ⚠️ THE ONE EDGE IS THE MODEL. A package that carried its own version could disagree with the
-   * sample it holds, and there would be no answer to which was right. "Versions inside packages"
-   * was the original suggestion and it is deliberately not built — so this reads as a convenience
-   * somebody might add, which is exactly why it is locked rather than left to memory.
+   * ⚠️ THIS LOCK IS RETARGETED, AND HERE IS THE LAW IT NOW ASSERTS, so a later reader can tell a
+   * legitimate retarget from a convenient one.
+   *
+   * D13 forbade a version on a package because a package that carried one could disagree with the
+   * SAMPLE it held, and nothing would say which was right. The settled model removes the other
+   * half of that pair: a package is a covering letter, a synopsis and a version, and the sample is
+   * not one of its slots at all. With no sample there is nothing left to disagree with, so the
+   * reason the field was forbidden is the reason it is now required.
+   *
+   * What is still locked is the SINGULARITY — one place a package's version is stated, and no
+   * second route through a material. That is the part of D13 that survives, and it is the part
+   * that would actually reintroduce two answers.
    */
-  it("the SubmissionPackage type has no version member", () => {
+  it("the SubmissionPackage type carries exactly one version member", () => {
     const types = decls(read("src/types.ts"));
     const i = types.indexOf("export interface SubmissionPackage {");
     expect(i).toBeGreaterThan(-1);
     const body = types.slice(i, types.indexOf("\n}", i));
-    expect(body).not.toMatch(/bookVersion/i);
+    expect(body).toMatch(/\bbookVersionId\?: string;/);
+    expect(body.match(/bookVersion/gi) ?? [], "one version member, not two").toHaveLength(1);
   });
 
-  it("the package builder and the package card never mention one", () => {
-    for (const f of ["src/components/packages/PackageModal.tsx",
-                     "src/components/packages/PackagesBand.tsx"]) {
-      expect(read(f), `${f} names a book version`).not.toMatch(/bookVersion/i);
-    }
+  it("the package no longer claims a sample slot in the builder", () => {
+    const modal = decls(read("src/components/packages/PackageModal.tsx"));
+    expect(modal).toMatch(/bookVersionId/);
+    /* ⚠️ THE SAMPLE IS CARRIED, NOT CHOSEN — the builder may still PASS an existing package's
+       sample through so an edit does not silently drop it, but it may not offer a control for
+       one. So the assertion is about the control, not about the identifier. */
+    expect(modal).not.toMatch(/id="pkgf-pkg-sample"/);
+    expect(modal).not.toMatch(/setSampleId\(/);
   });
 
-  it("the rules do not allow one on a package", () => {
+  it("the rules allow a version on a package, optional and frozen once sent", () => {
     const rules = readFileSync(join(root, "firestore.rules"), "utf8");
     const i = rules.indexOf("function isValidPackage");
     expect(i).toBeGreaterThan(-1);
-    expect(rules.slice(i, rules.indexOf("\n    }", i))).not.toMatch(/bookVersion/i);
-    /* ⚠️ AND THE ALLOWLIST IS BOUNDED AT ITS OWN CLOSING BRACKET, not by a character count. A
-       fixed-length slice is the "slice(-1) reads the rest of the file" family one step along: it
-       passes today because the list happens to be short, and silently stops covering the tail the
-       day somebody adds a key. */
-    const from = rules.indexOf("'packageName', 'queryLetterVersionId'");
-    expect(from).toBeGreaterThan(-1);
-    const end = rules.indexOf("])", from);
-    expect(end).toBeGreaterThan(from);
-    expect(rules.slice(from, end)).not.toMatch(/bookVersion/i);
+    const fn = rules.slice(i, rules.indexOf("\n    }", i));
+    /* optional — absent is legal, and that is D3's permanent `Not recorded` */
+    expect(fn).toMatch(/!data\.keys\(\)\.hasAny\(\['bookVersionId'\]\)/);
+    expect(fn).toMatch(/data\.bookVersionId is string/);
+    /* ⚠️ AND FROZEN WITH THE OTHER THREE. A version a sent package could gain would silently
+       re-attribute every request that arrived on something else. */
+    const j = rules.indexOf("match /packages/");
+    expect(j).toBeGreaterThan(-1);
+    const route = rules.slice(j, rules.indexOf("\n      }", j));
+    expect(route).toMatch(/hasOnly\(\[[^\]]*'bookVersionId'/);
+    expect(route).toMatch(/hasAny\(\['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId'\]\)/);
   });
 
   it("⚠️ the aggregation reaches a package THROUGH its sample slot, never through a field of its own", () => {

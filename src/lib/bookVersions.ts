@@ -118,6 +118,16 @@ export const rrLink = (
  * references a version must keep resolving, and "this ordering was never real" and "I stopped using
  * it in May" are different histories. A revision is a NEW version, never an edit of an old one.
  */
+/**
+ * The id for a new ordering.
+ *
+ * ⚠️ ONE GENERATOR. This lived privately in `BookVersionsPanel` and the packages builder needed the
+ * same thing; a second copy is a second answer to what a version id looks like, and the `bv-` prefix
+ * is what makes one recognisable in a document by eye.
+ */
+export const newBookVersionId = (): string =>
+  `bv-${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36)}`;
+
 export const appendBookVersion = (
   existing: readonly BookVersion[],
   entry: BookVersion,

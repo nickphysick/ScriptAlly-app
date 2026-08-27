@@ -31,7 +31,8 @@
  * it.
  */
 import React, { useMemo, useState } from "react";
-import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../../types";
+import { BookVersion, BookVersionKind, ComponentType, ManuscriptVersion, SubmissionPackage } from "../../types";
+import { BOOK_VERSION_KINDS, KIND_LABEL } from "../../lib/bookVersions";
 import { ofType } from "../../lib/materialDraft";
 import { UNFILLED_SLOT, isSlotFilled, OTHER_MAX, duplicateName } from "../../lib/packageMetrics";
 import { TYPE_META } from "./typeMeta";
@@ -40,13 +41,26 @@ import "./packagesFlow.css";
 /** The ref's own wording for a slot the writer has deliberately left out. */
 export const NOT_INCLUDED = "Not included";
 
+/** The version slot's own wording for "the writer has not said". Permanent, not transitional (D3). */
+export const NOT_RECORDED = "Not recorded";
+/** The foot of the version list. Full-width so it cannot be mistaken for a version called "New". */
+export const NEW_VERSION = "＋ New version…";
+
 export interface PackageDraftResult {
   name: string;
   letterId: string;
   /** `""` when no synopsis — the sentinel `isValidPackage` requires. */
   synopsisId: string;
-  /** `""` when no sample — the sentinel `isValidPackage` requires. */
+  /**
+   * ⚠️ CARRIED, NOT CHOSEN (D9). The builder no longer offers a sample slot; this is whatever the
+   * package already held, passed straight back so an edit does not silently drop it. A sent
+   * package's slots are frozen by the rules anyway, but an UNLOCKED one would otherwise lose its
+   * sample the first time somebody renamed it — a data change nobody asked for, from a form that
+   * no longer shows the field.
+   */
   sampleId: string;
+  /** A `BookVersion.id`, or `""` for `Not recorded` — which is permanent, not transitional (D3). */
+  bookVersionId: string;
   /** Free text, or `""` to leave it unset. Never stored as `""` — `updatePackage` unsets it. */
   otherMaterials: string;
 }
@@ -66,6 +80,16 @@ export interface PackageModalProps {
   /** Existing names, so the duplicate can pick one that is free. */
   existingNames?: readonly string[];
   versions: ManuscriptVersion[];
+  /** The manuscript's orderings — the third slot's options. */
+  bookVersions: readonly BookVersion[];
+  /**
+   * ⚠️ `＋ New version…` CREATES ON THE MANUSCRIPT, not on the package — that is what the copy
+   * promises ("Versions live on your manuscript — create one here and it's added there too") and it
+   * is the only honest place for it, since two packages testing the same ordering must name the
+   * same record. Resolves to the new id so the select can land on it; null means the write failed
+   * and the select falls back, rather than pointing at an id that does not exist.
+   */
+  onCreateVersion: (name: string, kind: BookVersionKind) => Promise<string | null>;
   /** How many packages already exist — drives the suggested name. */
   packageCount: number;
   onClose: () => void;
@@ -81,7 +105,8 @@ export interface PackageModalProps {
 }
 
 export const PackageModal: React.FC<PackageModalProps> = ({
-  editing, duplicating, existingNames = [], versions, packageCount, onClose, onSave,
+  editing, duplicating, existingNames = [], versions, bookVersions, packageCount,
+  onClose, onSave, onCreateVersion,
 }) => {
   /* The record the form OPENS on — the one being edited, or the one being copied. */
   const seed = editing ?? duplicating ?? null;
@@ -95,6 +120,21 @@ export const PackageModal: React.FC<PackageModalProps> = ({
         : packageCount === 0 ? "Standard UK" : `Variant ${packageCount + 1}`,
   );
   const [letterId, setLetterId] = useState(seed?.queryLetterVersionId || letters[0]?.id || "");
+  /**
+   * ⚠️ NOT SEEDED FROM `bookVersions[0]` — absent means the writer has not said, and picking the
+   * first one for them would state a shape the record does not carry. Same fabricated-value rule
+   * the synopsis slot already follows one line down.
+   */
+  const [bookVersionId, setBookVersionId] = useState(seed?.bookVersionId ?? "");
+  const [newVersionName, setNewVersionName] = useState("");
+  /**
+   * ⚠️ THE KIND IS ASKED FOR, NOT ASSUMED. `BookVersionKind` has no neutral member, so defaulting
+   * it would write "this is a revision" about an ordering the writer never described that way —
+   * the same fabricated-value fault the synopsis and version slots avoid by staying empty. The
+   * panel's own ghost row asks; so does this.
+   */
+  const [newVersionKind, setNewVersionKind] = useState<BookVersionKind>(BOOK_VERSION_KINDS[0]);
+  const [creatingVersion, setCreatingVersion] = useState(false);
   /**
    * ⚠️ AN EXISTING PACKAGE'S EMPTY SLOT STAYS EMPTY. Seeding from `synopses[0]` on edit would
    * silently re-fill a slot the writer had chosen to leave out — the same fabricated-value fault as
@@ -192,17 +232,63 @@ export const PackageModal: React.FC<PackageModalProps> = ({
               </select>
             </div>
 
+            {/* ⚠️ THE THIRD SLOT IS THE VERSION, AND IT REPLACED THE SAMPLE RATHER THAN JOINING IT.
+                A package is a covering letter, a synopsis and the shape of the book they are
+                testing; the portion that went is the QUERY's fact and lives there (Part B). */}
             <div className="pkgf-fld">
-              <label htmlFor="pkgf-pkg-sample">
-                {TYPE_META[ComponentType.SAMPLE_PAGES].label}
+              <label htmlFor="pkgf-pkg-version">
+                Version
                 <span className="pkgf-opt">Optional</span>
               </label>
-              <select id="pkgf-pkg-sample" value={sampleId} onChange={(e) => setSampleId(e.target.value)}>
-                {/* the ref's own ordering for this slot — omission heads it, because a sample is the
-                    material most often left out */}
-                <option value="">{NOT_INCLUDED}</option>
-                {samples.map((v) => <option key={v.id} value={v.id}>{v.versionName}</option>)}
+              <select
+                id="pkgf-pkg-version" value={creatingVersion ? NEW_VERSION : bookVersionId}
+                onChange={(e) => {
+                  if (e.target.value === NEW_VERSION) { setCreatingVersion(true); return; }
+                  setCreatingVersion(false);
+                  setBookVersionId(e.target.value);
+                }}
+              >
+                {bookVersions.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
+                {/* ⚠️ `Not recorded` IS A STANDING OPTION, NOT A PLACEHOLDER. Every package written
+                    before this field has none and a sent one can never gain one, so this is where
+                    a great many packages stay for good. */}
+                <option value="">{NOT_RECORDED}</option>
+                <option value={NEW_VERSION}>{NEW_VERSION}</option>
               </select>
+              {creatingVersion && (
+                <div className="pkgf-newver">
+                  <input
+                    type="text" autoFocus autoComplete="off" maxLength={80}
+                    placeholder="Prologue-first"
+                    value={newVersionName}
+                    onChange={(e) => setNewVersionName(e.target.value)}
+                  />
+                  <select
+                    aria-label="Kind of version" value={newVersionKind}
+                    onChange={(e) => setNewVersionKind(e.target.value as BookVersionKind)}
+                  >
+                    {BOOK_VERSION_KINDS.map((k) => <option key={k} value={k}>{KIND_LABEL[k]}</option>)}
+                  </select>
+                  <button
+                    type="button" className="pkgf-btn" disabled={!newVersionName.trim()}
+                    onClick={async () => {
+                      const id = await onCreateVersion(newVersionName.trim(), newVersionKind);
+                      /* ⚠️ ONLY SELECT IT IF IT WAS ACTUALLY WRITTEN. A failed create that still
+                         moved the select would point the package at an id the manuscript does not
+                         have, and the ledger would render a version nobody could open. */
+                      if (id) { setBookVersionId(id); setNewVersionName(""); setCreatingVersion(false); }
+                    }}
+                  >Add</button>
+                  <button
+                    type="button" className="pkgf-btn"
+                    onClick={() => { setCreatingVersion(false); setNewVersionName(""); }}
+                  >Cancel</button>
+                </div>
+              )}
+              <div className="pkgf-sub">
+                Which shape of the manuscript this package is testing. Versions live on your
+                manuscript — create one here and it's added there too.
+              </div>
             </div>
 
             <div className="pkgf-fld">
@@ -241,7 +327,9 @@ export const PackageModal: React.FC<PackageModalProps> = ({
                     name, letterId,
                     /* `""` rather than an absent key — isValidPackage requires all three */
                     synopsisId: synopsisId || UNFILLED_SLOT,
-                    sampleId: sampleId || UNFILLED_SLOT,
+                    /* carried, not chosen — see `sampleId` on PackageDraftResult */
+                    sampleId: seed?.samplePagesVersionId || UNFILLED_SLOT,
+                    bookVersionId,
                     otherMaterials: other.trim(),
                   });
                   setSaving(false);

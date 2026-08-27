@@ -212,6 +212,11 @@ export const isPackageLocked = (pkg: Pick<SubmissionPackage, "firstSentAt">): bo
  */
 export const LOCKED_PACKAGE_FIELDS = [
   "queryLetterVersionId", "synopsisVersionId", "samplePagesVersionId",
+  /* ⚠️ THE VERSION IS FROZEN TOO, and the client list must match the rule or the writer gets a
+     denial with no explanation instead of the refusal message. `firestore.rules` adds it to the
+     same `hasAny` guard: a sent package is a record of what the agent received, and the shape of
+     the book it carried is part of that record. */
+  "bookVersionId",
 ] as const;
 
 /** What the writer is told, where the editing happens. States the fact; offers the way on. */
