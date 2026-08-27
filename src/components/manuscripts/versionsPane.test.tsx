@@ -16,7 +16,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { CompsPane } from "./CompsPane";
 import { VersionsPane, VERSION_LIMITATION } from "./VersionsPane";
-import { HoldingRow, OpeningRow, UnattributedOpening } from "../../lib/bookVersions";
+import { HoldingRow, OpeningRow,  } from "../../lib/bookVersions";
 import { CompTitle } from "../../types";
 
 const COMPS: CompTitle[] = [
@@ -34,7 +34,9 @@ const opening = (id: string, name: string, samples: number, meta: string): Openi
 const holder = (over: Partial<HoldingRow> = {}): HoldingRow =>
   ({ queryId: "q1", agent: "T. Marsh", what: "FULL", holds: "Full manuscript", sentDay: "2 Jun 2026",
      askedFor: "Full requested", askedOn: "28 May 2026", versionName: "Post-R&R", ...over });
-const UNATTR: UnattributedOpening = { samples: 3, packages: 1, sent: 1 };
+/* ⚠️ THREE PACKAGES WITH NO VERSION — the bucket is packages now (D15), and D3 makes it
+   permanent: a sent package is frozen and can never gain one. */
+const UNATTR: { packages: number; sent: number; requests: number } = { packages: 3, sent: 3, requests: 0 };
 
 const versions = (over: Partial<React.ComponentProps<typeof VersionsPane>> = {}) =>
   renderToStaticMarkup(
@@ -139,12 +141,12 @@ describe("unrecorded is never folded, on any of the three surfaces", () => {
     expect(html).toContain("Counted here, not against any version above.");
   });
 
-  it("gives the unattributed samples their own row, unattributed", () => {
+  it("gives the versionless PACKAGES their own row, unattributed", () => {
     const html = versions();
-    expect(html).toContain(">No recorded version<");
+    expect(html).toContain(">Not recorded<");
     expect(html).toContain(">Not attributed<");
     // …and no request figure against it, because a request cannot be attributed to an unknown.
-    const row = /<td class="soft">No recorded version<\/td>([\s\S]*?)<\/tr>/.exec(html)?.[1] ?? "";
+    const row = /<td class="soft">Not recorded<\/td>([\s\S]*?)<\/tr>/.exec(html)?.[1] ?? "";
     expect(row).toContain(">3<");
     expect(row).not.toMatch(/request/i);
   });
@@ -155,10 +157,13 @@ describe("unrecorded is never folded, on any of the three surfaces", () => {
     expect(html).toContain("Post-R&amp;R");
   });
 
-  it("states the unrecorded samples in the header's meta, and omits the clause when there are none", () => {
-    expect(versions()).toContain("2 recorded · 3 unrecorded samples");
-    expect(versions({ unattributed: { samples: 0, packages: 0, sent: 0 } })).toContain(">2 recorded<");
-    expect(versions({ unattributed: { samples: 0, packages: 0, sent: 0 } })).not.toContain("unrecorded");
+  it("states the unrecorded PACKAGES in the header's meta, and omits the clause when there are none", () => {
+    /* ⚠️ PACKAGES, NOT SAMPLES (D15). A sample no longer carries an ordering — it is not a
+       material type at all — so what can fail to name a version is a package, and D3 makes that
+       permanent rather than a backlog. */
+    expect(versions()).toContain("2 recorded · 3 packages with no version");
+    expect(versions({ unattributed: { packages: 0, sent: 0, requests: 0 } })).toContain(">2 recorded<");
+    expect(versions({ unattributed: { packages: 0, sent: 0, requests: 0 } })).not.toContain("unrecorded");
   });
 
   it("says nothing about unrecorded holders when there are none", () => {
@@ -167,7 +172,7 @@ describe("unrecorded is never folded, on any of the three surfaces", () => {
 
   it("agrees with itself about singulars", () => {
     expect(versions({ unrecordedHolders: 2 })).toContain("<b>2 agents</b> hold a sample");
-    expect(versions({ unattributed: { samples: 1, packages: 1, sent: 1 } })).toContain("1 unrecorded sample<");
+    expect(versions({ unattributed: { packages: 1, sent: 1, requests: 0 } })).toContain("1 package with no version");
   });
 });
 

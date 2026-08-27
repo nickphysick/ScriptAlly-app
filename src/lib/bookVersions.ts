@@ -234,9 +234,7 @@ export const holdingEarlier = (hs: readonly Holding[], latestId: string | null):
 
 export interface VersionRequests {
   versionId: string;
-  /** Sample materials carrying this version. */
-  samples: number;
-  /** Packages that include any of those samples — the inherited edge, never a stored one. */
+  /** Packages stating this version — read from the package, never inherited through a sample. */
   packages: number;
   /** Queries sent with any of those packages. */
   sent: number;
@@ -247,30 +245,49 @@ export interface VersionRequests {
 /**
  * "Requests by opening" (D15) — the question that started all this, answered as counts.
  *
- * ⚠️ THE AGGREGATION IS SAMPLE → PACKAGE → QUERY, and the package hop is a LOOKUP rather than a
- * field. `materialUsage` next door does the same walk one level down (material → package → query);
- * this is that shape with one hop added at the front, deliberately mirroring it rather than
- * inventing a second way to count the same sends.
+ * ⚠️ THE AGGREGATION IS PACKAGE → QUERY NOW. It used to be sample → package → query, because a
+ * package carried no version and the only thing that knew was whichever sample happened to be in
+ * its sample slot. A package states its own version (D1), so the front hop is gone: a package's
+ * scorecard IS its version's scorecard for that letter and synopsis.
+ *
+ * ⚠️ AND THE `samples` FIGURE WENT WITH IT, rather than being kept at zero. Sample pages is not a
+ * material type any more, so "2 samples" would be a count of archived documents nothing sends —
+ * a true number about a thing that no longer participates, which is worse than an absent one
+ * because it looks like a live figure.
  */
 export const requestsByVersion = (
   version: BookVersion,
-  materials: readonly ManuscriptVersion[],
-  packages: readonly { id: string; samplePagesVersionId?: string }[],
+  packages: readonly { id: string; bookVersionId?: string }[],
   queries: readonly Query[],
   isRequestFn: (q: Query) => boolean,
 ): VersionRequests => {
-  const sampleIds = new Set(samplesOfVersion(version.id, materials).map((m) => m.id));
-  const pkgIds = new Set(
-    packages.filter((p) => !!p.samplePagesVersionId && sampleIds.has(p.samplePagesVersionId)).map((p) => p.id),
-  );
+  const pkgIds = new Set(packages.filter((p) => p.bookVersionId === version.id).map((p) => p.id));
   const mine = queries.filter((q) => !!q.packageId && pkgIds.has(q.packageId));
   return {
     versionId: version.id,
-    samples: sampleIds.size,
     packages: pkgIds.size,
     sent: mine.length,
     requests: mine.filter(isRequestFn).length,
   };
+};
+
+/**
+ * The packages that state NO version — D3's permanent bucket, as a row of its own.
+ *
+ * ⚠️ IT IS NOT FOLDED INTO A KNOWN VERSION AND IT IS NOT A ZERO. Every package written before the
+ * version slot has none, and a sent package can never gain one, so this row is permanent rather
+ * than transitional — and the sends it holds are real sends whose opening nobody can name. Adding
+ * them to a version would attribute requests that arrived on something else; dropping them would
+ * make the panel's totals disagree with the writer's own list of packages.
+ */
+export const unrecordedVersion = (
+  packages: readonly { id: string; bookVersionId?: string }[],
+  queries: readonly Query[],
+  isRequestFn: (q: Query) => boolean,
+): Omit<VersionRequests, "versionId"> => {
+  const pkgIds = new Set(packages.filter((p) => !p.bookVersionId).map((p) => p.id));
+  const mine = queries.filter((q) => !!q.packageId && pkgIds.has(q.packageId));
+  return { packages: pkgIds.size, sent: mine.length, requests: mine.filter(isRequestFn).length };
 };
 
 /**
@@ -325,22 +342,40 @@ const pct = (n: number, d: number): number => (d <= 0 ? 0 : Math.round((n / d) *
  */
 export const openingRows = (
   versions: readonly BookVersion[],
-  materials: readonly ManuscriptVersion[],
-  packages: readonly { id: string; samplePagesVersionId?: string }[],
+  packages: readonly { id: string; bookVersionId?: string }[],
   queries: readonly Query[],
   isRequestFn: (q: Query) => boolean,
 ): OpeningRow[] => {
-  const raw = versions.map((v) => ({ v, r: requestsByVersion(v, materials, packages, queries, isRequestFn) }));
-  const max = Math.max(...raw.map((x) => x.r.sent), 1);
-  return raw.map(({ v, r }) => ({
+  const raw = versions.map((v) => ({ v, r: requestsByVersion(v, packages, queries, isRequestFn) }));
+  /**
+   * ⚠️ THE UNRECORDED ROW IS PART OF THE SET, NOT AN APPENDIX (D3/D15) — so it scales against the
+   * same maximum as every named version. Computing it afterwards, against its own max, would draw a
+   * full-width bar beside a named version's half-width one on a smaller number.
+   *
+   * ⚠️ AND IT RENDERS ONLY WHEN IT HOLDS SOMETHING. A `Not recorded` row on a manuscript where
+   * every package states its version is a row about nothing; the bucket is permanent, its ROW is
+   * conditional on there being packages in it.
+   */
+  const un = unrecordedVersion(packages, queries, isRequestFn);
+  const all = un.packages > 0
+    ? [...raw, { v: { id: UNRECORDED_VERSION_ID, name: UNRECORDED_VERSION }, r: { ...un, versionId: UNRECORDED_VERSION_ID } }]
+    : raw;
+  const max = Math.max(...all.map((x) => x.r.sent), 1);
+  return all.map(({ v, r }) => ({
     id: v.id,
     name: v.name,
-    where: `${r.samples} sample${r.samples === 1 ? "" : "s"} · ${r.packages} package${r.packages === 1 ? "" : "s"}`,
+    /* ⚠️ NO SAMPLE COUNT. It used to read `2 samples · 1 package`; sample pages is not a material
+       any more, so the samples half would be counting archived documents nothing sends. */
+    where: `${r.packages} package${r.packages === 1 ? "" : "s"}`,
     meta: `${r.requests} request${r.requests === 1 ? "" : "s"} from ${r.sent} sent`,
     sentPct: pct(r.sent, max),
     inPct: pct(r.requests, r.sent),
   }));
 };
+
+/** The row a versionless package lands in. A name the writer reads, and an id nothing else uses. */
+export const UNRECORDED_VERSION = "Not recorded";
+export const UNRECORDED_VERSION_ID = "__unrecorded__";
 
 export interface HoldingRow {
   queryId: string;
@@ -506,33 +541,14 @@ export interface UnattributedOpening {
 }
 
 /**
- * The samples that belong to no opening — the row "Requests by opening" needs so that its rows and
- * the shelf's samples reconcile.
+ * ⚠️ `unattributedOpening` IS RETIRED (D15), AND ITS SUBJECT IS WHAT WENT — not its usefulness.
  *
- * ⚠️ IT REPORTS NO REQUEST COUNT, AND THAT IS THE POINT RATHER THAN AN OMISSION. A request that
- * arrived on a sample whose opening was never recorded cannot be attributed to an opening; stating
- * a figure would attribute it to "unknown", which is not an opening anyone can act on. The row says
- * `Not attributed`, which is the true answer.
+ * It reconciled the SAMPLES whose ordering was never recorded against the ones that named a
+ * version, so the panel could say `2 recorded · 1 unrecorded sample` without implying every sample
+ * belonged to an opening. Sample pages is no longer a material type, so there are no samples to
+ * reconcile; and the aggregation no longer walks materials at all.
  *
- * ⚠️ SAMPLE PAGES ONLY, THROUGH `bookVersionOf` — never `m.bookVersionId` directly. A stored id on
- * a letter or a synopsis is meaningless and is ignored there; reading the raw field here would let
- * one quietly remove a sample from BOTH sides of the reconciliation.
+ * The question it answered has moved up a level and is answered by `unrecordedVersion` above: the
+ * PACKAGES that state no version. Same honesty, one hop shorter — and it is a permanent bucket now
+ * rather than a backlog, because a sent package can never gain a version (D3).
  */
-export const unattributedOpening = (
-  materials: readonly ManuscriptVersion[],
-  packages: readonly { id: string; samplePagesVersionId?: string }[],
-  queries: readonly Query[],
-): UnattributedOpening => {
-  const loose = materials.filter(
-    (m) => m.componentType === ComponentType.SAMPLE_PAGES && bookVersionOf(m) === null,
-  );
-  const sampleIds = new Set(loose.map((m) => m.id));
-  const pkgIds = new Set(
-    packages.filter((p) => !!p.samplePagesVersionId && sampleIds.has(p.samplePagesVersionId)).map((p) => p.id),
-  );
-  return {
-    samples: sampleIds.size,
-    packages: pkgIds.size,
-    sent: queries.filter((q) => !!q.packageId && pkgIds.has(q.packageId)).length,
-  };
-};

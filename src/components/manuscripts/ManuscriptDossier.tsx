@@ -22,7 +22,7 @@
 import React, { useState } from "react";
 import { Manuscript, ManuscriptVersion, SubmissionPackage, Query, CompTitle, UserTask } from "../../types";
 import type { Activity, BookVersion } from "../../types";
-import { bookVersionsOf, holdingRows, openingRows, unattributedOpening, unrecordedHolders } from "../../lib/bookVersions";
+import { bookVersionsOf, holdingRows, openingRows, unrecordedVersion, unrecordedHolders } from "../../lib/bookVersions";
 import { isRequest } from "../../lib/packageMetrics";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import { plateStats } from "../../lib/manuscriptPlate";
@@ -248,8 +248,8 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
               activities={activities}
               today={today}
               onSaveBookVersions={onSaveBookVersions}
-              openings={openingRows(bookVersionsOf(manuscript), versions, packages, queries, isRequest)}
-              unattributed={unattributedOpening(versions, packages, queries)}
+              openings={openingRows(bookVersionsOf(manuscript), packages, queries, isRequest)}
+              unattributed={unrecordedVersion(packages, queries, isRequest)}
               unrecordedHolders={unrecordedHolders(queries, activities)}
               holders={holders}
               onUpgrade={onOpenPlans}

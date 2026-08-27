@@ -221,41 +221,54 @@ describe("D17 — earlier is a count, and an unknown is not an earlier", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe("D15 — requests by opening, aggregated sample → package → query", () => {
+describe("D15 — requests by opening, read from the package", () => {
   const materials = [sample("s1", "va"), sample("s2", "va"), sample("s3", "vb"),
                      sample("s4", "va", ComponentType.QUERY_LETTER)];
   const packages = [{ id: "p1", samplePagesVersionId: "s1" }, { id: "p2", samplePagesVersionId: "s2" },
-                    { id: "p3", samplePagesVersionId: "s3" }, { id: "p4" }];
+                    { id: "p3", samplePagesVersionId: "s3" }, { id: "p4" }]
+    .map((p) => ({ ...p, bookVersionId: p.id === "p3" ? "vb" : p.id === "p4" ? undefined : "va" }));
   const queries = [q("q1", QueryStatus.FULL_REQUESTED, "p1"), q("q2", QueryStatus.QUERIED, "p1"),
                    q("q3", QueryStatus.QUERIED, "p2"), q("q4", QueryStatus.QUERIED, "p3"),
                    q("q5", QueryStatus.QUERIED)];
 
   it("counts every sample and package carrying the version, and the sends they rode", () => {
-    const out = requestsByVersion(v("va"), materials, packages, queries, isRequest);
-    /* s4 is a LETTER carrying the id and must not be counted — the sample-pages-only rule, here */
-    expect(out).toEqual({ versionId: "va", samples: 2, packages: 2, sent: 3, requests: 1 });
+    /* ⚠️ READ FROM THE PACKAGE (D15), not aggregated through a sample. The sample-pages-only rule
+       this case used to guard has no subject left: a stray id on a letter cannot be reached,
+       because nothing walks materials to find a version any more. */
+    const out = requestsByVersion(v("va"), packages, queries, isRequest);
+    expect(out).toEqual({ versionId: "va", packages: 2, sent: 3, requests: 1 });
   });
 
   it("counts a version nothing has gone out with as zeros, not as absent", () => {
-    expect(requestsByVersion(v("vz"), materials, packages, queries, isRequest))
-      .toEqual({ versionId: "vz", samples: 0, packages: 0, sent: 0, requests: 0 });
+    expect(requestsByVersion(v("vz"), packages, queries, isRequest))
+      .toEqual({ versionId: "vz", packages: 0, sent: 0, requests: 0 });
   });
 
   it("⚠️ RETURNS NO RATE (D15). 2-from-18 against 0-from-6 is not a result", () => {
-    const out = requestsByVersion(v("va"), materials, packages, queries, isRequest);
-    expect(Object.keys(out).sort()).toEqual(["packages", "requests", "samples", "sent", "versionId"]);
+    const out = requestsByVersion(v("va"), packages, queries, isRequest);
+    expect(Object.keys(out).sort()).toEqual(["packages", "requests", "sent", "versionId"]);
     const src = readFileSync(join(__dirname, "bookVersions.ts"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
     expect(src).not.toContain("%");
     expect(src).not.toMatch(/\brate\b/i);
   });
 
-  it("⚠️ a package's OWN sample slot is the only edge — no package field is read", () => {
+  it("⚠️ THE PACKAGE'S OWN FIELD IS THE ONLY EDGE — no walk through a material", () => {
+    /**
+     * ⚠️ RETARGETED, AND THE LAW IT NOW ASSERTS IS THE SAME ONE INVERTED. It used to forbid a
+     * package field, because the version was inherited from whichever sample sat in the sample slot
+     * and a second source would have been a second answer. The package states its version now (D1)
+     * and sample pages is not a material type (D9), so the inheritance has no source or
+     * destination. What is locked is unchanged: ONE edge, and the two can never disagree.
+     */
     const src = readFileSync(join(__dirname, "bookVersions.ts"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    /* D13: packages never reference a version. If this ever reads `p.bookVersionId`, the model has
-       grown a second edge and the two can disagree — which the one-edge rule exists to prevent. */
-    expect(src).not.toMatch(/\bp\.bookVersionId\b/);
+    const i = src.indexOf("export const requestsByVersion");
+    expect(i, "requestsByVersion is gone").toBeGreaterThan(-1);
+    const body = src.slice(i, src.indexOf("\n};", i));
+    expect(body).toContain("p.bookVersionId");
+    expect(body).not.toContain("samplePagesVersionId");
+    expect(body).not.toMatch(/samplesOfVersion|bookVersionOf/);
   });
 });
 

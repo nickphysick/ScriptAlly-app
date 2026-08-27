@@ -92,14 +92,14 @@ describe("the aggregation's route from a package to a version", () => {
    * collected and asserted nothing. Restored inside one, which is the only reason it is here in
    * this commit rather than in Part D's.
    *
-   * ⚠️ AND IT IS ABOUT TO INVERT. Today `requestsByVersion` still walks sample material -> package
-   * -> query, which is the three-hop route Part C leaves standing and D15 replaces with a direct
-   * read of `pkg.bookVersionId`. The assertion is stated as it is TODAY so the flip is visible in
-   * D15's diff rather than absorbed into it.
+   * ⚠️ AND IT HAS NOW INVERTED. It was stated as the three-hop route in Part C's commit precisely
+   * so this flip would be visible in D15's diff rather than absorbed into it. `requestsByVersion`
+   * reads `pkg.bookVersionId`; nothing walks a material to reach a version.
    */
-  it("still reaches a package through its sample slot — until D15 repoints it", () => {
+  it("reads the package's own version — D15 has repointed it", () => {
     const src2 = decls(read("src/lib/bookVersions.ts"));
-    expect(src2).toContain("p.samplePagesVersionId");
-    expect(src2).not.toMatch(/\bp\.bookVersionId\b/);
+    expect(src2).toMatch(/p\.bookVersionId/);
+    /* the three-hop route is gone: nothing here walks a material to reach a version */
+    expect(src2).not.toContain("p.samplePagesVersionId");
   });
 });

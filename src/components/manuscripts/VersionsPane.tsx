@@ -46,7 +46,8 @@ export interface VersionsPaneProps {
   today: string;
   onSaveBookVersions: (next: BookVersion[]) => void;
   openings: OpeningRow[];
-  unattributed: UnattributedOpening;
+  /** The packages stating no version — D3's permanent bucket, never folded into a known one. */
+  unattributed: { packages: number; sent: number; requests: number };
   unrecordedHolders: number;
   holders: HoldingRow[];
   onUpgrade: () => void;
@@ -90,8 +91,11 @@ export const VersionsPane: React.FC<VersionsPaneProps> = ({
   /* ⚠️ THE META STATES THE UNRECORDED SAMPLES ALONGSIDE THE RECORDED VERSIONS — the one number is
      not a qualification of the other, and stating only the first is how the page comes to imply
      that every sample belongs to an opening. Omitted entirely when there are none. */
-  const meta = unattributed.samples > 0
-    ? `${versions.length} recorded · ${unattributed.samples} unrecorded sample${unattributed.samples === 1 ? "" : "s"}`
+  /* ⚠️ THE BUCKET IS PACKAGES NOW, NOT SAMPLES (D15). A sample no longer carries an ordering —
+     it is not a material type at all — so what can fail to name a version is a PACKAGE. And it is
+     permanent rather than a backlog: a sent package is frozen and can never gain one (D3). */
+  const meta = unattributed.packages > 0
+    ? `${versions.length} recorded · ${unattributed.packages} package${unattributed.packages === 1 ? "" : "s"} with no version`
     : `${versions.length} recorded`;
 
   return (
@@ -135,10 +139,10 @@ export const VersionsPane: React.FC<VersionsPaneProps> = ({
                     on a sample whose opening was never recorded cannot be attributed to an opening;
                     stating a number would attribute it to "unknown", which is not an opening
                     anybody can act on. */}
-                {unattributed.samples > 0 && (
+                {unattributed.packages > 0 && (
                   <tr>
-                    <td className="soft">No recorded version</td>
-                    <td className="msp-num soft">{unattributed.samples}</td>
+                    <td className="soft">Not recorded</td>
+                    <td className="msp-num soft">{unattributed.packages}</td>
                     <td className="soft">Not attributed</td>
                   </tr>
                 )}

@@ -43,7 +43,8 @@ describe("planSampleRetirement", () => {
 
   it("⚠️ is safe to run twice — a second pass plans no writes", () => {
     const after = MATS.map((m) =>
-      m.componentType === ComponentType.SAMPLE_PAGES ? { ...m, status: "Retired" } : m);
+      m.componentType === ComponentType.SAMPLE_PAGES
+        ? ({ ...m, status: "Retired" } as ManuscriptVersion) : m);
     expect(planSampleRetirement(after, PKGS).archive).toEqual([]);
     expect(planSampleRetirement(after, PKGS).alreadyArchived).toBe(3);
   });

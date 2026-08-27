@@ -22,7 +22,7 @@
  */
 import { describe, it, expect } from "vitest";
 import {
-  unattributedOpening, unrecordedHolders, openingRows, samplesOfVersion, holdingRows,
+  unrecordedVersion, unrecordedHolders, openingRows, samplesOfVersion, holdingRows,
 } from "./bookVersions";
 import { isRequest } from "./packageMetrics";
 import {
@@ -100,49 +100,61 @@ describe("the versions list's per-version counts", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe("requests by opening", () => {
-  it("gives every named version its own row, and none of them the unrecorded sample", () => {
-    const rows = openingRows(VERSIONS, MATERIALS, PACKAGES, QUERIES, isRequest);
+describe("requests by opening — the unrecorded bucket is PACKAGES now (D15)", () => {
+  /**
+   * ⚠️ RETARGETED, AND THE LAW IT NOW ASSERTS. These cases reconciled the SAMPLES whose ordering was
+   * never recorded against the ones that named a version, so the panel could not imply every sample
+   * belonged to an opening. Sample pages is no longer a material type, so there are no samples to
+   * reconcile — and the aggregation reads the package's own version rather than walking materials.
+   *
+   * The law survives entirely and moves up one level: **an unknown is never folded into a known, in
+   * numerator or denominator, and never rendered as a zero.** What can now fail to name a version
+   * is a PACKAGE, and D3 makes that permanent rather than a backlog — a sent package is frozen and
+   * can never gain one.
+   */
+  const PKGS = [
+    { id: "p1", bookVersionId: "bv1" },
+    { id: "p2", bookVersionId: "bv2" },
+    { id: "p3" },
+  ];
+  const QS = [q("q1", QueryStatus.FULL_REQUESTED, "p1"), q("q2", QueryStatus.QUERIED, "p2"),
+              q("q3", QueryStatus.QUERIED, "p3")];
+
+  it("gives every named version its own row, and none of them the versionless package", () => {
+    const rows = openingRows(VERSIONS, PKGS, QS, isRequest);
+    expect(rows.map((r) => r.name)).toEqual(["Initial", "Prologue-first", "Not recorded"]);
+    for (const r of rows.slice(0, 2)) expect(r.where).toBe("1 package");
+  });
+
+  it("states the versionless packages on a row of their own", () => {
+    const un = unrecordedVersion(PKGS, QS, isRequest);
+    expect(un).toEqual({ packages: 1, sent: 1, requests: 0 });
+  });
+
+  it("⚠️ the rows account for every package, with none counted twice", () => {
+    /* Two derivations against each other, never a literal on both sides. */
+    const rows = openingRows(VERSIONS, PKGS, QS, isRequest);
+    const counted = rows.reduce((n, r) => n + Number(/^(\d+) package/.exec(r.where)![1]), 0);
+    expect(counted).toBe(PKGS.length);
+  });
+
+  it("⚠️ the row is absent when every package names a version — the bucket is permanent, its ROW is not", () => {
+    const tidy = [{ id: "p1", bookVersionId: "bv1" }, { id: "p2", bookVersionId: "bv2" }];
+    const rows = openingRows(VERSIONS, tidy, QS, isRequest);
     expect(rows.map((r) => r.name)).toEqual(["Initial", "Prologue-first"]);
-    for (const r of rows) expect(r.where).toContain("1 sample");
   });
 
-  /**
-   * ⚠️ ITS OWN ROW, AND `Not attributed` RATHER THAN A REQUEST COUNT. A request that arrived on a
-   * sample whose opening was never recorded cannot be attributed to an opening — stating a figure
-   * would be attributing it to "unknown", which is not an opening a writer can act on.
-   */
-  it("states the unattributed samples on a row of their own", () => {
-    const un = unattributedOpening(MATERIALS, PACKAGES, QUERIES);
-    expect(un.samples).toBe(1);
-    expect(un.packages).toBe(1);
-    expect(un.sent).toBe(1);
-  });
-
-  it("the two together account for every sample, with none counted twice", () => {
-    const rows = openingRows(VERSIONS, MATERIALS, PACKAGES, QUERIES, isRequest);
-    const named = rows.reduce((n, r) => n + Number(/^(\d+) sample/.exec(r.where)![1]), 0);
-    const un = unattributedOpening(MATERIALS, PACKAGES, QUERIES);
-    const allSamples = MATERIALS.filter((m) => m.componentType === ComponentType.SAMPLE_PAGES).length;
-    expect(named + un.samples).toBe(allSamples);
-  });
-
-  it("says nothing at all when every sample names a version", () => {
-    const tidy = [sample("s-init", "bv1"), sample("s-pro", "bv2")];
-    expect(unattributedOpening(tidy, PACKAGES, QUERIES).samples).toBe(0);
-  });
-
-  /**
-   * ⚠️ A `bookVersionId` ON A LETTER OR A SYNOPSIS IS MEANINGLESS AND MUST NOT MAKE IT ATTRIBUTED.
-   * `bookVersionOf` already ignores one; the unattributed count must agree, or a stored id on the
-   * wrong component type would quietly remove a sample from both sides of the reconciliation.
-   */
-  it("counts only sample pages, whatever a letter happens to carry", () => {
-    const letter = ({ id: "l9", userId: "u", manuscriptId: "m1",
-                      componentType: ComponentType.QUERY_LETTER, versionName: "l9",
-                      createdDate: "2026-01-01", status: "Final", wordCount: 400,
-                      bookVersionId: "bv1" } as unknown as ManuscriptVersion);
-    const un = unattributedOpening([...MATERIALS, letter], PACKAGES, QUERIES);
-    expect(un.samples).toBe(1);
+  it("⚠️ the unrecorded row scales against the SAME maximum as the named ones", () => {
+    /**
+     * Computed afterwards against its own max, a bucket holding fewer sends than a named version
+     * would still draw a full-width bar — the panel would read as though the unknown were the most
+     * used opening. It is part of the set, so it competes on the same scale.
+     */
+    const many = [...PKGS, { id: "p4" }, { id: "p5" }];
+    const qs = [...QS, q("q4", QueryStatus.QUERIED, "p4"), q("q5", QueryStatus.QUERIED, "p5")];
+    const rows = openingRows(VERSIONS, many, qs, isRequest);
+    const un = rows.find((r) => r.name === "Not recorded")!;
+    expect(un.sentPct).toBe(100);
+    expect(rows.find((r) => r.name === "Initial")!.sentPct).toBeLessThan(100);
   });
 });

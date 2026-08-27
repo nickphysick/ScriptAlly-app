@@ -75,7 +75,7 @@ export const TrackingBand: React.FC<TrackingBandProps> = ({
    * invent a question they have not asked.
    */
   const showVersions = versionsActive({ bookVersions: bookVersions as BookVersion[] });
-  const openings = showVersions ? openingRows(bookVersions, versions, packages, queries, isRequest) : [];
+  const openings = showVersions ? openingRows(bookVersions, packages, queries, isRequest) : [];
   const holders = showVersions ? holdingRows(queries, activities, bookVersions, agentName, (iso) => shortDate(iso)) : [];
   const earlier = showVersions ? earlierLine(queries, activities, bookVersions) : null;
 

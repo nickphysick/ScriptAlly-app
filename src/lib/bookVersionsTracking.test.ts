@@ -43,16 +43,20 @@ describe("D15 — requests by opening", () => {
   const versions = [bv("va", "Prologue-first"), bv("vb", "Worldbuilding-first")];
   const materials = [sample("s1", "va"), sample("s2", "va"), sample("s3", "vb"),
                      sample("s4", "va", ComponentType.QUERY_LETTER)];
-  const packages = [{ id: "p1", samplePagesVersionId: "s1" }, { id: "p2", samplePagesVersionId: "s2" },
-                    { id: "p3", samplePagesVersionId: "s3" }];
+  /* ⚠️ PACKAGES STATE THEIR OWN VERSION NOW (D1/D15). The sample slots stay in the fixture because
+     no package document is rewritten by the retirement — they are simply not read. */
+  const packages = [{ id: "p1", samplePagesVersionId: "s1", bookVersionId: "va" },
+                    { id: "p2", samplePagesVersionId: "s2", bookVersionId: "va" },
+                    { id: "p3", samplePagesVersionId: "s3", bookVersionId: "vb" }];
   const queries = [q("q1", QueryStatus.FULL_REQUESTED, "p1"), q("q2", QueryStatus.QUERIED, "p1"),
                    q("q3", QueryStatus.QUERIED, "p2"), q("q4", QueryStatus.QUERIED, "p3")];
 
-  it("counts samples, packages and sends per opening", () => {
-    const [a, b] = openingRows(versions, materials, packages, queries, isRequest);
-    expect(a.where).toBe("2 samples · 2 packages");
+  it("counts packages and sends per opening — no sample half (D15)", () => {
+    /* `2 samples · 2 packages` counted archived documents nothing sends once the type went. */
+    const [a, b] = openingRows(versions, packages, queries, isRequest);
+    expect(a.where).toBe("2 packages");
     expect(a.meta).toBe("1 request from 3 sent");
-    expect(b.where).toBe("1 sample · 1 package");
+    expect(b.where).toBe("1 package");
     expect(b.meta).toBe("0 requests from 1 sent");
   });
 
@@ -60,29 +64,29 @@ describe("D15 — requests by opening", () => {
     /* `requestsByMaterial` one level down DROPS its empty rows. This must not: "nothing has been
        sent with this opening yet" is the most useful thing the panel can tell somebody who has
        just made one. */
-    const rows = openingRows([...versions, bv("vz", "Untested")], materials, packages, queries, isRequest);
+    const rows = openingRows([...versions, bv("vz", "Untested")], packages, queries, isRequest);
     expect(rows.map((r) => r.name)).toContain("Untested");
     expect(rows.find((r) => r.name === "Untested")?.meta).toBe("0 requests from 0 sent");
   });
 
   it("⚠️ STATES NO RATE ANYWHERE (D15) — 2-from-18 against 0-from-6 is not a result", () => {
-    for (const r of openingRows(versions, materials, packages, queries, isRequest)) {
+    for (const r of openingRows(versions, packages, queries, isRequest)) {
       expect(r.meta).not.toContain("%");
       expect(r.where).not.toContain("%");
     }
   });
 
   it("bars a share of the busiest row, so the eye can rank without a rate", () => {
-    const [a, b] = openingRows(versions, materials, packages, queries, isRequest);
+    const [a, b] = openingRows(versions, packages, queries, isRequest);
     expect(a.sentPct).toBe(100);          // 3 of the busiest 3
     expect(b.sentPct).toBe(33);           // 1 of 3
     expect(a.inPct).toBe(33);             // 1 request in 3 sends
   });
 
   it("agrees its verbs at one", () => {
-    const rows = openingRows([bv("va", "A")], [sample("s1", "va")], [{ id: "p1", samplePagesVersionId: "s1" }],
+    const rows = openingRows([bv("va", "A")], [{ id: "p1", bookVersionId: "va" }],
                              [q("q1", QueryStatus.FULL_REQUESTED, "p1")], isRequest);
-    expect(rows[0].where).toBe("1 sample · 1 package");
+    expect(rows[0].where).toBe("1 package");
     expect(rows[0].meta).toBe("1 request from 1 sent");
   });
 });
