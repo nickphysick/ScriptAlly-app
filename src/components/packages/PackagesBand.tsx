@@ -17,9 +17,10 @@
 import { ArchivedToggle, ArchivedRow, ArchivedSection } from "./ArchivedRow";
 import type { BookVersion } from "../../types";
 import PARCEL_MARK from "../../assets/packages/package-mark.png";
-import React from "react";
+import React, { useState } from "react";
+import { nextSort, sortRows, sortArrow, barPct, type SortState, type SortKey } from "../../lib/ledgerSort";
 import { ManuscriptVersion, Query, SubmissionPackage } from "../../types";
-import { packageTiles, tileFooter, composition } from "../../lib/packagesOverview";
+import { packageTiles, tileFooter, composition, type PackageTile } from "../../lib/packagesOverview";
 import { isPackageLocked } from "../../lib/packageMetrics";
 import { packageStamp } from "../../lib/packageTracking";
 import { IllustrationSlot } from "./IllustrationSlot";
@@ -60,6 +61,19 @@ export interface PackagesBandProps {
    * is a dead end — the writer wanted a different combination and the app just refuses.
    */
   onDuplicatePackage?: (id: string) => void;
+  /**
+   * Cross-highlighting (D19). The chip currently hovered in the rail, as `{kind, id}`, or null.
+   *
+   * ⚠️ POINTER-ONLY IS ACCEPTABLE HERE, AND THAT IS A DECISION RATHER THAN AN OVERSIGHT (D20).
+   * The app rejected hover-to-REVEAL elsewhere, because a fact only reachable by hovering is a fact
+   * some readers never get. This reveals NOTHING that is not already on screen: every row and every
+   * chip is fully readable without it, and the highlight only makes an existing relationship
+   * quicker to see. Adding a click would make "where is this used" a MODE the reader has to enter
+   * and leave — worse than the thing it fixed. Do not "fix" this by adding one.
+   */
+  hoverChip?: { kind: string; id: string } | null;
+  /** A ledger cell being hovered drives the rail the other way. */
+  onHoverCell?: (v: { kind: string; id: string } | null) => void;
   /** Rendered per card when given — the archive/delete control. */
   renderRemove?: (pkg: SubmissionPackage) => React.ReactNode;
   /**
@@ -74,10 +88,34 @@ export interface PackagesBandProps {
 export const LEDGER_MARK_PX = 26;
 
 export const PackagesBand: React.FC<PackagesBandProps> = ({
-  packages, versions, queries, bookVersions = [], onOpenPackage, onNewPackage, onHowItWorks, sent, onDuplicatePackage, renderRemove, renderTracking,
+  packages, versions, queries, bookVersions = [], hoverChip = null, onHoverCell, onOpenPackage, onNewPackage, onHowItWorks, sent, onDuplicatePackage, renderRemove, renderTracking,
   archived, showArchived, onToggleArchived, onRestore,
 }) => {
   const tiles = packageTiles(packages, versions, queries, bookVersions);
+
+  const [sort, setSort] = useState<SortState | null>(null);
+  /**
+   * ⚠️ THE ROWS AND THE PACKAGES ARE SORTED TOGETHER, because the row's own controls resolve
+   * against `byId` rather than an index — but the SCALE MAXIMA are taken before sorting, from the
+   * whole set. A maximum computed after a sort is the same number; computed per render over a
+   * filtered set it would not be, and this is the place that would go wrong first.
+   */
+  const maxima = {
+    sent: Math.max(...tiles.map((t) => t.sent), 0),
+    replies: Math.max(...tiles.map((t) => t.replies), 0),
+    requests: Math.max(...tiles.map((t) => t.requests), 0),
+  };
+  const rows = sortRows(tiles, sort);
+
+  /** Which slot of a row matches the hovered chip — the row lights when any does (D19). */
+  const rowUses = (t: PackageTile): boolean => {
+    if (!hoverChip) return false;
+    const p = byId.get(t.id);
+    if (!p) return false;
+    return hoverChip.kind === "let" ? p.queryLetterVersionId === hoverChip.id
+      : hoverChip.kind === "syn" ? p.synopsisVersionId === hoverChip.id
+        : p.bookVersionId === hoverChip.id;
+  };
   const byId = new Map(packages.map((p) => [p.id, p]));
 
   return (
@@ -140,19 +178,30 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
               <th>Covering letter</th>
               <th>Synopsis</th>
               <th>Version</th>
-              <th className="pkgb-lnum">Sent</th>
-              <th className="pkgb-lnum">Replied</th>
-              <th className="pkgb-lnum">Requests</th>
+              {/* ⚠️ THE COUNT HEADS SORT (D21), and they are BUTTONS inside the `th` rather than a
+                  click handler on the cell — a sortable column that only a mouse can reach is the
+                  same fault as a mouse-only build path, one surface along. */}
+              {(["sent", "replies", "requests"] as const).map((k) => (
+                <th key={k} className={`pkgb-lnum${sort?.key === k ? " pkgb-lsorted" : ""}`}
+                    aria-sort={sort?.key === k ? (sort.desc ? "descending" : "ascending") : "none"}>
+                  <button type="button" className="pkgb-lsort" data-sort={k}
+                          onClick={() => setSort((c) => nextSort(c, k))}>
+                    {k === "sent" ? "Sent" : k === "replies" ? "Replied" : "Requests"}
+                    <span className="pkgb-lar" aria-hidden="true">{sortArrow(sort, k)}</span>
+                  </button>
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {tiles.map((t) => {
+            {rows.map((t) => {
               const foot = tileFooter(t);
               const pkg = byId.get(t.id);
               const locked = !!pkg && isPackageLocked(pkg);
               const parts = composition(t);
               return (
-                <tr key={t.id} data-package={t.id} onClick={() => onOpenPackage(t.id)}>
+                <tr key={t.id} data-package={t.id} onClick={() => onOpenPackage(t.id)}
+                    className={hoverChip ? (rowUses(t) ? "pkgb-lit" : "pkgb-dim") : undefined}>
                   <td className="pkgb-lfirst">
                     <span className="pkgb-pname">
                       {/* ⚠️ 26px, AND THE SAME ASSET THE STRIP USES. A second drawing of a parcel is
@@ -174,17 +223,43 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
                             Duplicate already lives in the drawer's footer. */}
                         {locked && <span className="pkgb-pst">Locked · sent with {t.sent}</span>}
                       </span>
+                      {/**
+                        * ⚠️ `DUPLICATE & EDIT` ON ROW HOVER (D22) — the way forward from a locked
+                        * package, which the drawer also offers. It is a real BUTTON that stops the
+                        * row's own click, not a styled span: the row opens the reader, and a
+                        * control inside it that fell through to that would answer a different
+                        * question from the one it asks.
+                        *
+                        * ⚠️ AND IT IS NOT HOVER-TO-REVEAL IN THE SENSE THIS APP REJECTS. It is an
+                        * ACTION, available from the drawer on every package; hovering only brings
+                        * it closer. Nothing here is the only route to a fact.
+                        */}
+                      {onDuplicatePackage && (
+                        <button type="button" className="pkgb-rowdup"
+                                onClick={(e) => { e.stopPropagation(); onDuplicatePackage(t.id); }}>
+                          Duplicate &amp; edit
+                        </button>
+                      )}
                     </span>
                   </td>
-                  {parts.map((part, i) => (
-                    <td key={i}>
+                  {parts.map((part, i) => {
+                    const kind = (["let", "syn", "ver"] as const)[i];
+                    const p = byId.get(t.id);
+                    /* the id this cell names, so hovering it can light the matching chip (D19) */
+                    const cellId = !p ? "" : kind === "let" ? p.queryLetterVersionId
+                      : kind === "syn" ? p.synopsisVersionId : (p.bookVersionId ?? "");
+                    return (
+                    <td key={i}
+                        onMouseEnter={() => cellId && onHoverCell?.({ kind, id: cellId })}
+                        onMouseLeave={() => onHoverCell?.(null)}>
                       {/* ⚠️ THE VERSION IS TINTED, THE MATERIALS ARE NOT — it is the one cell naming
                           a thing that lives on the manuscript rather than in this package. */}
                       <span className={`pkgb-slotv${i === 2 ? " pkgb-slotv--ver" : ""}${part.held ? "" : " pkgb-slotv--none"}`}>
                         {part.text}
                       </span>
                     </td>
-                  ))}
+                    );
+                  })}
                   {"idle" in foot ? (
                     /* ⚠️ ONE CELL ACROSS THE THREE COUNT COLUMNS. Three zeros would be three true
                        figures that together state something false — that this package has been
@@ -192,9 +267,21 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
                     <td className="pkgb-lnum pkgb-lidle" colSpan={3}>{foot.idle}</td>
                   ) : (
                     <>
-                      <td className={`pkgb-lnum${t.sent === 0 ? " pkgb-lzero" : ""}`}>{t.sent}</td>
-                      <td className={`pkgb-lnum${t.replies === 0 ? " pkgb-lzero" : ""}`}>{t.replies}</td>
-                      <td className={`pkgb-lnum${t.requests === 0 ? " pkgb-lzero" : ""}`}>{t.requests}</td>
+                      {/* ⚠️ THE BAR IS A PROPORTION OF ITS OWN COLUMN'S MAXIMUM (D21), never the
+                          table's. `Sent` and `Requests` are different quantities; one scale would
+                          draw them as comparable and invite a comparison that means nothing.
+                          ⚠️ AND THE NUMBER IS THE CLAIM. The bar exists so the eye can rank three
+                          rows at a glance; it carries no figure of its own and is `aria-hidden`. */}
+                      {(["sent", "replies", "requests"] as const).map((k) => (
+                        <td key={k} className={`pkgb-lnum${t[k] === 0 ? " pkgb-lzero" : ""}${k === "requests" ? " pkgb-linb" : ""}`}>
+                          <span className="pkgb-lv">{t[k]}</span>
+                          {maxima[k] > 0 && (
+                            <span className="pkgb-lbar" aria-hidden="true">
+                              <i style={{ width: `${barPct(t[k], maxima[k])}%` }} />
+                            </span>
+                          )}
+                        </td>
+                      ))}
                     </>
                   )}
                 </tr>

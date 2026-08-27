@@ -1133,3 +1133,50 @@
   display: block; margin-top: 3px;
   font-size: 11px; line-height: 1.4; color: var(--pkg-muted);
 }
+
+/* ── Part E: cross-highlighting, scale bars, sortable heads, the row action ───────────────── */
+
+/**
+ * ⚠️ THE DIM IS OPACITY ON THE ROW, not a colour swap on its cells. Every cell keeps its own
+ * treatment — the version's tint, a `Not recorded` italic — and the whole row recedes together.
+ */
+.pkgb-ledger tbody tr.pkgb-dim { opacity: 0.3; }
+.pkgb-ledger tbody tr.pkgb-lit { background: var(--pkgt-let-a); }
+
+.pkgb-lsort {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit;
+}
+.pkgb-lsort:hover, .pkgb-lsorted .pkgb-lsort { color: var(--pkg-burg); }
+.pkgb-lsort:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+.pkgb-lar { margin-left: 3px; opacity: 0.7; }
+
+/* the count cell becomes the bar's positioning context */
+.pkgb-ledger td.pkgb-lnum { position: relative; }
+.pkgb-lv { position: relative; z-index: 1; }
+.pkgb-lbar {
+  position: absolute; left: 8px; right: 8px; bottom: 4px;
+  height: 2px; background: var(--pkgo-hairline-soft); border-radius: 2px; overflow: hidden;
+  display: block;
+}
+.pkgb-lbar i { display: block; height: 100%; background: var(--pkgt-let-edge); border-radius: 2px; }
+/* ⚠️ REQUESTS ARE THE INBOUND COLUMN and take the sage that means "came back" everywhere else. */
+.pkgb-linb .pkgb-lbar i { background: var(--pkgt-syn-edge); }
+
+/**
+ * `DUPLICATE & EDIT` on row hover (D22). Hidden by opacity rather than `display`, so the row's
+ * height does not change when the pointer crosses it — a row that grows on hover makes the rows
+ * below it move under the pointer.
+ */
+.pkgb-rowdup {
+  margin-left: auto;
+  background: none; border: none; cursor: pointer; padding: 0;
+  font-family: var(--font-mono);
+  font-size: 6.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--pkg-burg);
+  opacity: 0; transition: opacity 0.12s;
+  flex: 0 0 auto;
+}
+.pkgb-ledger tbody tr:hover .pkgb-rowdup { opacity: 1; }
+/* ⚠️ AND IT IS REACHABLE BY KEYBOARD, which hover alone would not be. */
+.pkgb-rowdup:focus-visible { opacity: 1; outline: 2px solid var(--pkg-burg); outline-offset: 2px; }

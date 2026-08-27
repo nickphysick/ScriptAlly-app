@@ -658,6 +658,11 @@ export const SubmissionPackages: React.FC = () => {
                 versions={msVersions}
                 queries={msQueries}
                 bookVersions={msBookVersions}
+                /* ⚠️ CROSS-HIGHLIGHTING RUNS BOTH WAYS THROUGH THE PAGE (D19), which is the only
+                   place that holds both the rail and the ledger. Neither component knows about the
+                   other; each reports a hover and renders a state. */
+                hoverChip={hoverChip ? { kind: hoverChip.kind, id: hoverChip.id } : null}
+                onHoverCell={(v) => setLedgerHover(v as { kind: RailKind; id: string } | null)}
                 /**
                  * ⚠️ THE CARD OPENS A READER, NOT AN EDITOR (D8/D16). It used to open the composer
                  * straight away — which is an edit the lock would refuse on any sent package, and
