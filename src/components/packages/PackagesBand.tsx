@@ -16,6 +16,7 @@
  */
 import { ArchivedToggle, ArchivedRow, ArchivedSection } from "./ArchivedRow";
 import type { BookVersion } from "../../types";
+import PARCEL_MARK from "../../assets/packages/package-mark.png";
 import React from "react";
 import { ManuscriptVersion, Query, SubmissionPackage } from "../../types";
 import { packageTiles, tileFooter, composition } from "../../lib/packagesOverview";
@@ -69,6 +70,9 @@ export interface PackagesBandProps {
   renderTracking?: (pkg: SubmissionPackage) => React.ReactNode;
 }
 
+/** The parcel in the name column. 26px per the ref — above the 20px stroke floor (F-BE). */
+export const LEDGER_MARK_PX = 26;
+
 export const PackagesBand: React.FC<PackagesBandProps> = ({
   packages, versions, queries, bookVersions = [], onOpenPackage, onNewPackage, onHowItWorks, sent, onDuplicatePackage, renderRemove, renderTracking,
   archived, showArchived, onToggleArchived, onRestore,
@@ -111,92 +115,93 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
         </>}
       />
 
-      <div className="pkgb-pkggrid">
-        {tiles.map((t) => {
-          const foot = tileFooter(t);
-          const pkg = byId.get(t.id);
-          return (
-            <div key={t.id} className="pkgb-pkgcard pkgb-t-pkg" data-package={t.id}>
-              {/**
-                * ⚠️ THE ART PANEL IS DELETED, AND ITS GLYPH MOVES INTO A BAND HEAD (D4/D7). The panel
-                * was a blush block with a dashed 56px slot, and it is the element that made the card
-                * mostly decoration: half the card's height carrying no information. The band head
-                * says the same thing — this is a package — in 16px, and colours the card by type
-                * while it does so.
-                *
-                * ⚠️ AND THE GLYPH IS SOLID (D12). A dashed plate on a user-facing card is a
-                * commission slot; at 16px this is an icon. The mockups and the artist's inventory
-                * keep dashed, the served page does not.
-                */}
-              {/* ⚠️ THE SAME COMPONENT THE MATERIAL CARDS AND THE LEGEND RENDER. This head used to
-                  hand-write its own parcel `<svg>` while the material cards went through
-                  `TypeGlyph` — two ways of drawing one band head, before a legend asked for a
-                  third. */}
-              <CardBand kind="package" right={pkg && isPackageLocked(pkg) ? "Locked" : undefined} />
-              <div className="pkgb-pkgbody">
-                <h3 className="pkgb-pkgname">
-                  <button type="button" className="pkgb-sopen" onClick={() => onOpenPackage(t.id)}>
-                    {t.name}
-                  </button>
-                </h3>
-                {/* ⚠️ ONE LINE, AND AN OMITTED SLOT IS A QUIET CLAUSE IN IT — `no sample`, not
-                    `Not included`. This is a sentence about what the package sends; `Not included`
-                    is a stated choice and belongs in the builder's list, where it reads as a row. */}
-                {/**
-                  * ⚠️ ROWS, NOT A COMMA SENTENCE (D6). The line used to read
-                  * `Hook-first · One-page · no sample`, which is a sentence about what the package
-                  * sends — fine in prose and unscannable in a grid, because the eye cannot tell
-                  * which slot a value belongs to without reading the order.
-                  *
-                  * ⚠️ AND AN OMITTED SLOT IS MUTED ITALIC, not a quiet word in the sentence. The row
-                  * already names the slot, so the value states the choice: `Not included`.
-                  */}
-                {composition(t).map((part, i) => (
-                  <div className="pkgb-slotline" key={i}>
-                    <span className="pkgb-sl">{part.label}</span>
-                    <span className={`pkgb-sv${part.held ? "" : " pkgb-sv--none"}`}>{part.text}</span>
-                  </div>
-                ))}
-                {t.other && <div className="pkgb-pkgother">{t.other}</div>}
-                {/**
-                  * ⚠️ ONE FOOTNOTE LINE (D8). The grey box carried `LOCKED_NOTE` over `LOCKED_WHY`
-                  * — two sentences explaining a rule beside a card the writer is not editing. The
-                  * line states the fact and offers the way forward; the DRAWER is where the lock
-                  * explains itself, which is the one place the reason is being asked for.
-                  */}
-                {pkg && isPackageLocked(pkg) && (
-                  <div className="pkgb-lockline">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" />
-                    </svg>
-                    <span>Contents fixed — sent with {t.sent}</span>
-                    {onDuplicatePackage && (
-                      <button type="button" className="pkgb-dup" onClick={() => onDuplicatePackage(t.id)}>
-                        Duplicate ›
-                      </button>
-                    )}
-                  </div>
-                )}
-                {/* ⚠️ THE SCORECARD IS THE CARD'S FOOTER (D-B3) — these three numbers used to live in
-                    a separate "Replies by package" panel, which stated per-package figures three
-                    inches from the packages they described. On the card there is only one place to
-                    read them, so the two cannot come to disagree. */}
-                {"idle" in foot ? (
-                  <div className="pkgb-score pkgb-score--idle">{foot.idle}</div>
-                ) : (
-                  <div className="pkgb-score">
-                    <span className="pkgb-sc"><span className="pkgb-n">{t.sent}</span><span className="pkgb-l">Sent</span></span>
-                    <span className="pkgb-sc"><span className="pkgb-n">{t.replies}</span><span className="pkgb-l">Replied</span></span>
-                    <span className="pkgb-sc"><span className="pkgb-n">{t.requests}</span><span className="pkgb-l">Requests</span></span>
-                  </div>
-                )}
-                {pkg && renderRemove?.(pkg)}
-              </div>
-            </div>
-          );
-        })}
-
-        {/**
+      {/**
+        * ⚠️ THE LEDGER (D12) — a table, because the question it answers is a comparison.
+        *
+        * The cards were a grid of objects: to ask "which combination is drawing requests" you had
+        * to hold three numbers from one card in your head while you read the next. Ruled rows put
+        * every package's letter, synopsis, version and three counts on one line, in fixed columns,
+        * so the comparison is a glance down a column rather than an act of memory.
+        *
+        * ⚠️ RULES, NOT CELLS OR STRIPES. One hairline under each row and one under the heads; no
+        * vertical borders, no alternating fill. A ruled table reads as a ledger; a bordered one
+        * reads as a spreadsheet, and a striped one puts a second, meaningless grouping over the
+        * real one.
+        *
+        * ⚠️ AND IT IS A REAL `<table>`. These are seven columns of one record — the semantics are
+        * the accessibility, and a grid of divs would need row and column roles reinvented to say
+        * what `<th>` already says.
+        */}
+      <div className="pkgb-ledgerwrap">
+        <table className="pkgb-ledger">
+          <thead>
+            <tr>
+              <th className="pkgb-lfirst">Package</th>
+              <th>Covering letter</th>
+              <th>Synopsis</th>
+              <th>Version</th>
+              <th className="pkgb-lnum">Sent</th>
+              <th className="pkgb-lnum">Replied</th>
+              <th className="pkgb-lnum">Requests</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tiles.map((t) => {
+              const foot = tileFooter(t);
+              const pkg = byId.get(t.id);
+              const locked = !!pkg && isPackageLocked(pkg);
+              const parts = composition(t);
+              return (
+                <tr key={t.id} data-package={t.id} onClick={() => onOpenPackage(t.id)}>
+                  <td className="pkgb-lfirst">
+                    <span className="pkgb-pname">
+                      {/* ⚠️ 26px, AND THE SAME ASSET THE STRIP USES. A second drawing of a parcel is
+                          a second answer to what a package looks like. */}
+                      <img src={PARCEL_MARK} alt="" width={LEDGER_MARK_PX} height={LEDGER_MARK_PX} />
+                      <span className="pkgb-ptx">
+                        <b>{t.name}</b>
+                        {/**
+                          * ⚠️ THE FREE-TEXT LINE KEEPS A HOME, AND THIS IS THE ONLY ONE LEFT. The
+                          * ledger has no column for it — it is not a slot — and the drawer does not
+                          * render it either, so dropping it with the card would have made something
+                          * the writer typed invisible everywhere in the app. It sits under the name
+                          * because that is where a note about THIS package belongs.
+                          */}
+                        {t.other && <span className="pkgb-pother">{t.other}</span>}
+                        {/* ⚠️ THE LOCK IS A SUB-LINE, AND THE WAY ON IS THE DRAWER'S. The card's
+                            lock line carried a sentence and a Duplicate button; in a ruled row a
+                            sentence is a second row's worth of height on every sent package, and
+                            Duplicate already lives in the drawer's footer. */}
+                        {locked && <span className="pkgb-pst">Locked · sent with {t.sent}</span>}
+                      </span>
+                    </span>
+                  </td>
+                  {parts.map((part, i) => (
+                    <td key={i}>
+                      {/* ⚠️ THE VERSION IS TINTED, THE MATERIALS ARE NOT — it is the one cell naming
+                          a thing that lives on the manuscript rather than in this package. */}
+                      <span className={`pkgb-slotv${i === 2 ? " pkgb-slotv--ver" : ""}${part.held ? "" : " pkgb-slotv--none"}`}>
+                        {part.text}
+                      </span>
+                    </td>
+                  ))}
+                  {"idle" in foot ? (
+                    /* ⚠️ ONE CELL ACROSS THE THREE COUNT COLUMNS. Three zeros would be three true
+                       figures that together state something false — that this package has been
+                       tried and drew nothing. It has not been sent. */
+                    <td className="pkgb-lnum pkgb-lidle" colSpan={3}>{foot.idle}</td>
+                  ) : (
+                    <>
+                      <td className={`pkgb-lnum${t.sent === 0 ? " pkgb-lzero" : ""}`}>{t.sent}</td>
+                      <td className={`pkgb-lnum${t.replies === 0 ? " pkgb-lzero" : ""}`}>{t.replies}</td>
+                      <td className={`pkgb-lnum${t.requests === 0 ? " pkgb-lzero" : ""}`}>{t.requests}</td>
+                    </>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+          {/**
           * ⚠️ ONE GHOST, LAST (D2). TWO rendered here — `.pkgb-ghost.pkgb-pkgghost` at 54px and
           * `.pkgb-ghostpkg` at 44px — both calling `onNewPackage`, with copy differing by one word
           * ("a different length of synopsis" against "a different synopsis").
@@ -213,14 +218,25 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
           * The smaller one survives: a ghost must read as quieter and shorter than a real card
           * (D10), or a populated page stops reading as populated.
           */}
-        <button type="button" className="pkgb-ghostpkg" onClick={onNewPackage}>
-          {/* ⚠️ `bare` — NO DASHED RIM (D7). The plate's dashed border says "artwork pending", which is
-                 true of the inventory and not of a page a writer is reading. The mark stays; the
-                 commission chrome does not. */}
-            <IllustrationSlot id="pkg-ghost" icon="parcelOpen" px={44} shape="bare" />
-          <span className="pkgb-gt">Build another package</span>
-          <span className="pkgb-gs">A different letter, a different synopsis.</span>
-        </button>
+          {/* ⚠️ A FULL-WIDTH LAST ROW (D12), in its own `tbody` so it carries no rule. In the grid
+              the ghost was a card among cards; in a ledger a card-shaped thing beside ruled rows
+              reads as a row that has gone wrong. Spanning every column says "this is not a
+              package, it is how you make one". */}
+          <tbody className="pkgb-ghostrow">
+            <tr>
+              <td colSpan={7}>
+                <button type="button" className="pkgb-ghostpkg" onClick={onNewPackage}>
+                  {/* ⚠️ `bare` — NO DASHED RIM (D7). The plate's dashed border says "artwork
+                      pending", which is true of the inventory and not of a page a writer is
+                      reading. The mark stays; the commission chrome does not. */}
+                  <IllustrationSlot id="pkg-ghost" icon="parcelOpen" px={44} shape="bare" />
+                  <span className="pkgb-gt">Build another package</span>
+                  <span className="pkgb-gs">A different letter, a different synopsis.</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <ArchivedSection show={showArchived} n={archived.length}>
         {archived.map((p) => (

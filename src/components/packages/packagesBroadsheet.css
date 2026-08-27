@@ -1054,3 +1054,82 @@
   overflow: hidden;
   min-width: 152px;
 }
+
+/**
+ * ⚠️ THE LEDGER (D12) — ruled rows, no cell borders, no striping.
+ *
+ * A ruled table reads as a ledger; a bordered one reads as a spreadsheet, and a striped one puts a
+ * second, meaningless grouping over the real one. One hairline under the heads and one under each
+ * row is the whole of the structure.
+ *
+ * ⚠️ AND IT SCROLLS INSIDE ITS OWN WRAPPER. Seven columns on a narrow window must not make the page
+ * scroll sideways — the house rule for any wide content.
+ */
+.pkgb-ledgerwrap { overflow-x: auto; }
+.pkgb-ledger { width: 100%; border-collapse: collapse; }
+
+.pkgb-ledger thead th {
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--pkg-muted);
+  font-weight: 400;
+  text-align: left;
+  padding: 0 14px 8px 0;
+  border-bottom: 1px solid var(--pkgo-hairline-soft);
+  white-space: nowrap;
+}
+.pkgb-ledger thead th.pkgb-lnum { text-align: center; padding-right: 0; width: 62px; }
+.pkgb-ledger thead th.pkgb-lfirst { padding-left: 2px; }
+
+.pkgb-ledger tbody tr { border-bottom: 1px solid var(--pkgo-hairline-soft); cursor: pointer; }
+.pkgb-ledger tbody tr:hover { background: var(--pkg-fill); }
+.pkgb-ledger tbody td { padding: 12px 14px 12px 0; vertical-align: middle; }
+.pkgb-ledger tbody td.pkgb-lfirst { padding-left: 2px; }
+
+.pkgb-pname { display: flex; align-items: center; gap: 10px; }
+.pkgb-pname img { display: block; flex: 0 0 auto; }
+/**
+ * ⚠️ `line-height: 1.25`, NOT THE REF'S TIGHTER FIGURE. Mixed-case Playfair below 1.3 crops its
+ * descenders, and a package name is whatever the writer typed — the standing house floor, applied
+ * to the largest text in the row.
+ */
+.pkgb-ptx b {
+  font-family: var(--font-serif);
+  font-size: 16.5px; font-weight: 600; line-height: 1.35; display: block;
+}
+.pkgb-pst {
+  font-family: var(--font-mono);
+  font-size: 6.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--pkg-muted); margin-top: 2px; display: block;
+}
+
+.pkgb-slotv { font-size: 12.5px; font-weight: 600; }
+/* the one cell naming a thing that lives on the manuscript rather than in this package */
+.pkgb-slotv--ver { color: var(--pkg-pro-ink); }
+.pkgb-slotv--none { font-weight: 400; font-style: italic; color: var(--pkg-muted); }
+
+.pkgb-ledger td.pkgb-lnum {
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: 16.5px; font-weight: 600;
+}
+/* ⚠️ A ZERO IS STATED, NOT OMITTED — it is a true count. It is quietened, not hidden. */
+.pkgb-ledger td.pkgb-lzero { color: var(--pkg-muted); font-weight: 400; }
+.pkgb-ledger td.pkgb-lidle {
+  font-family: var(--font-mono);
+  font-size: 8px; font-weight: 400; letter-spacing: 0.06em;
+  color: var(--pkg-muted); text-align: center;
+}
+
+/* the ghost's row carries no rule — it is not a package */
+.pkgb-ghostrow tr { border-bottom: none; cursor: default; }
+.pkgb-ghostrow tr:hover { background: transparent; }
+.pkgb-ghostrow td { padding-top: 14px; }
+.pkgb-ghostrow .pkgb-ghostpkg { width: 100%; }
+/* the writer's free-text line — the ledger's only home for it, since it is not a slot */
+.pkgb-pother {
+  display: block; margin-top: 3px;
+  font-size: 11px; line-height: 1.4; color: var(--pkg-muted);
+}

@@ -189,12 +189,21 @@ describe("D6 — the legend renders the real band", () => {
     expect(strip(legend)).not.toMatch(/LEGEND[\s\S]{0,200}SAMPLE_PAGES/);
   });
 
-  it("⚠️ and BOTH card surfaces render the same component — there is one band head now", () => {
-    /* The package card used to hand-write its own parcel <svg> while the material cards went
-       through TypeGlyph: two implementations of one head, before a legend asked for a third. */
+  it("⚠️ the shelf keeps the banded card; the packages band is a LEDGER and has no head (D12/D13)", () => {
+    /**
+     * ⚠️ RETARGETED, AND THE LAW IT NOW ASSERTS. Both surfaces used to be banded cards, and the
+     * claim was that they rendered ONE head component rather than two hand-drawn parcels. D13 keeps
+     * the shelf's banded cards; D12 replaces the packages grid with a ledger, where a band head has
+     * nothing to sit on — a row is not a card.
+     *
+     * The one-implementation law survives where it still applies (the shelf, and the legend below),
+     * and the packages side is asserted the other way: no head, and still no hand-drawn parcel —
+     * the ledger's mark is the shared asset at 26px, not a second drawing.
+     */
     expect(strip(mats)).toContain("<CardBand kind={sh.type}");
-    expect(strip(pkgs)).toContain('<CardBand kind="package"');
-    expect(strip(pkgs), "the package head still hand-draws a parcel").not.toContain("M16 4 28 10v12L16 28 4 22V10z");
+    expect(strip(pkgs), "a ledger row has nothing for a band head to sit on").not.toContain("<CardBand");
+    expect(strip(pkgs), "the package mark is still not hand-drawn").not.toContain("M16 4 28 10v12L16 28 4 22V10z");
+    expect(strip(pkgs), "and it is the shared asset").toContain("PARCEL_MARK");
   });
 
   it("the tint map lives in one place", () => {

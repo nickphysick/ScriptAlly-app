@@ -218,22 +218,32 @@ describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers 
    * place. Only the shape moved — and the REASON moved with it, to the drawer, which is the one
    * place a writer asks why.
    */
-  it("a sent package's card says so, and states what it was sent with", () => {
+  it("a sent package's ROW says so, and states what it was sent with", () => {
+    /**
+     * ⚠️ RETARGETED, AND THE LAW IT NOW ASSERTS. The card carried a lock LINE — a sentence plus a
+     * Duplicate button. The ledger (D12) is ruled rows, where a sentence is a second row's worth of
+     * height on every sent package, so the fact moves to a sub-line under the name and the way on
+     * is the drawer's footer, which already offers Duplicate.
+     *
+     * What is locked is unchanged and is the part that matters: a sent package SAYS it is sent, on
+     * the surface where the writer is looking at it, and states what it went with. A lock the
+     * writer only discovers by trying to edit is the dead end this rule exists to prevent.
+     */
     const band = read("src/components/packages/PackagesBand.tsx");
     expect(band).toContain("isPackageLocked(pkg)");
-    expect(band).toContain("pkgb-lockline");
-    expect(band).toContain("Contents fixed — sent with");
-    /* the two-sentence box is gone from this surface */
+    expect(band).toMatch(/Locked · sent with \{t\.sent\}/);
+    /* the two-sentence box, and then the lock line, are both gone from this surface */
     expect(band).not.toContain("{LOCKED_WHY}");
+    expect(band).not.toContain("pkgb-lockline");
   });
 
-  it("the way on sits in the same line as the note", () => {
-    const band = read("src/components/packages/PackagesBand.tsx");
-    const i = band.indexOf("pkgb-lockline");
-    expect(i, "the lock line is gone").toBeGreaterThan(-1);
-    const block = band.slice(i, i + 900);
-    expect(block).toContain("onDuplicatePackage");
-    expect(block).toContain("Duplicate ›");
+  it("⚠️ and the way on is the drawer's, which is where the reason is asked for", () => {
+    /* The row states the fact; the drawer explains it and offers Duplicate. Asserted on the drawer
+       so "the way on exists" cannot pass on a build where the row merely stopped offering it. */
+    const drawer = read("src/components/packages/PackageDetailDrawer.tsx");
+    expect(drawer).toContain("isPackageLocked");
+    expect(drawer).toMatch(/onDuplicate/);
+    expect(read("src/components/packages/PackagesBand.tsx")).not.toContain("pkgb-dup");
   });
 
   it("the note reports rather than warns — no caution palette", () => {

@@ -261,9 +261,12 @@ describe("the card renders Other as a note, not as a fourth material", () => {
   const css = decls(read("src/components/packages/packagesBroadsheet.css"));
 
   it("the row is conditional on the value", () => {
-    /* the row moved from the slot list into the card body with the object-card rebuild (D-B1);
-       the CLAIM — it renders only when filled — is unchanged */
-    expect(band).toContain("{t.other && <div className=\"pkgb-pkgother\">");
+    /* ⚠️ IT HAS MOVED TWICE AND THE CLAIM IS UNCHANGED: it renders only when filled. From the slot
+       list into the card body (D-B1), and now into the ledger's name cell (D12) — which is the only
+       home left, since it is not a slot and so has no column, and the drawer does not render it
+       either. Dropping it with the card would have made something the writer typed invisible
+       everywhere in the app. */
+    expect(band).toContain("{t.other && <span className=\"pkgb-pother\">");
   });
 
   it("it is set in Caveat, in burgundy, and not italicised on top", () => {
