@@ -125,3 +125,118 @@ None of the five implicates derivation beneath the view layer. `recomputeQuery`,
 `useTaskPaneSession`, `quickDone` and the toast are all untouched by what is described here: the
 fill fault is in the paint, and the row-subject fault is in which already-derived query a view
 function is handed. Proceeding.
+
+---
+
+## Phase 1 — the fill edge is today
+
+**Worst deviation 243px → 0.0px, over 68 partial fills** (3 ranges × 3 widths).
+
+| range | partial fills | worst before | worst after |
+|---|---|---|---|
+| 1 month  | 9 | **+243px** | 0.0px |
+| 3 months | 8 | +166px | 0.0px |
+| 6 months | 8 | +92px | 0.0px |
+
+**The fix is the UNIT, not the arithmetic.** `pct()` was a percentage, so it meant "of the lane"
+only for a *direct* child of the lane — the ticks, the chips and the bars. The fill is a
+grandchild, so the identical expression written inside a bar silently measured the bar. `.tl-c-tl`
+is now a size container and `pct()` is `cqw`, so the rail's ticks, the bars and the fills resolve
+one expression against one width. `fillEndAt(sg)` says where the edge belongs in window
+coordinates; `fillFor` survives as the reported number and no longer draws anything.
+
+Lane widths measured before and after at 1280/1440/1920: unchanged, so the containment did not
+disturb the flex row.
+
+**Two locks were vacuous. Both replaced, neither patched.**
+
+- *Range invariance* claimed in its own comment to read the painted ratio. It read
+  `fl.style.width` and compared it to `data-fill` — one `fillFor` call written into two attributes
+  by one JSX expression, so it could only fail if somebody wired two different numbers into one
+  element. Retargeted onto what the number still governs: the **near step**, which is a painted
+  colour and can therefore disagree. Both branches asserted with populations; proved red at
+  `NEAR_AT`.
+- *The past wash* asserted "the wash is not on the data" by comparing
+  `getComputedStyle(fl).backgroundColor` on two elements — the **declared** colour, identical
+  whatever paints on top. It now decodes a screenshot in a canvas: the ground either side of today
+  must satisfy the wash composite exactly, and bars lying wholly under the wash must paint what
+  their own rule declares. Proved red by raising the wash above the bars.
+
+**Its history is the better warning.** That lock's first draft looked for a fill crossing today,
+found none, and reasoned *"a fill ends at today by definition, because that is what a fill IS"* —
+then discarded the reasoning because the board disagreed. The reasoning was right and the drawing
+was wrong.
+
+## Phase 2 — the row's subject *(and Phase 3, which needed no separate fix)*
+
+`laneOf` is hoisted above `rowFor`, `drawnFor(agentId)` is the row's subject, and **`mine` is no
+longer defined inside the row derivation at all**. All ten reads switched. That is what makes a
+fourth variant unwriteable rather than unlikely: the identifier is absent, and the only route to
+the whole set is `allQueriesFor`, which nothing reads today, deliberately.
+
+Measuring it needed the row to say what it is about, because none of the three variants is visible
+from appearance: `SEND THE PARTIAL` beside *"reply expected 29 Sept"* is only wrong if you know
+they concern different queries, and each sentence is true alone. `TimelineRow.subjects` carries the
+query id behind the deed, the caption and the sort key; bars carry `data-qid`.
+
+**144 drawing rows, 351 claims** (deed 63, caption 144, sort 144). Proved red by pointing
+`drawnFor` back at the whole set, which named the recon's own defect:
+
+> Rachel Lin: the deed is about `seed-query-7`, which this row does not draw (it draws
+> `seed-pkgq-7`) — it reads "SEND THE PARTIAL"
+
+A second, narrower assertion covers what identity nearly implies: `DEED` and `familyOf` are
+separate mappings, so a wrong entry could still put SEND against a bar the board draws as the
+agent's move. **48 deeds checked against their own live bar**; proved red by pointing the
+writer's-move family at the agent's.
+
+## Phase 4 — the shelf, and the ghosts
+
+**Shelf** gated at three calendar months, counted from the window (`months.length`) rather than the
+range, so there is no second derivation. Measured 0 labels / 0 dividers at one month, 4 / 3 at
+three, 7 / 6 at six, across three widths, with the day labels asserted present at every range so
+"absent" cannot be satisfied by a rail that renders nothing. Proved red by removing the gate.
+
+**Ghosts: unfounded, nothing changed.** Ghost paints `dashed`, `rgb(160, 143, 128)`, transparent;
+live paints `solid`, `rgb(58, 28, 20)`, white. The lock this phase asks for already exists and
+already asserts precisely it, with a population guard. A second one would be two locks answering
+one question.
+
+## Phase 5 — verification
+
+25/25: calLook (23), the new `/todo` lock, `completionUndo`.
+
+| claim | result |
+|---|---|
+| fill edge on today, every partial fill | 68 fills, worst **0.0px** |
+| no fill right of today | 0 |
+| passed-end bars whole, left of today | asserted per bar |
+| ratios re-measured, unchanged | 41/41/41, 36/36/36, 59/59/59, 93/93/93 … |
+| row-subject consistency | 144 rows, 351 claims |
+| ghost vs live distinct | dashed/muted vs solid/ink |
+| shelf absent at 1m, present at 3m and 6m | 0 / 4 / 7 labels |
+| marker clearance ≥1px, **all ranges** | worst 2.9px, 0 offenders, 19–49 pairs |
+| rail/lane alignment ≤1px | green |
+| wash on ground, absent from data | 27 bars, 3 families, 11 ground rows |
+| today rule coincident with today's x | `lineX 903 = washEndsAt 903` |
+| `/todo` unchanged | masthead "To-do list", no calendar rows, clean console |
+| completion → one toast with Undo | `{"toasts":1,"undo":true}` |
+
+### Not this pass's, reported not touched
+
+- **`tlAccept.measure.ts`** measures `.tl`, `.tl-seg`, a density tier and five ranges — the
+  grid-era timeline the Porcelain rebuild retired. `.tl-dense` and `.tl-cell` have **zero**
+  occurrences in `src/`.
+- **`todoShot.measure.ts`** clicks `.tdg-row`, which `/todo` no longer renders (it renders
+  `tdw-*` / `tdb-*`).
+- **`completionUndo`** leaves an `Undo probe <timestamp>` task on the harness account every run —
+  four tonight. The undo restores the query, not the task.
+
+### The fixture expired mid-run, and the guards caught it
+
+Three cases went red at midnight with *"no bar reached the near step"*, *"that branch was never
+exercised"* and *"nothing was measured"* — population guards doing their job rather than passing
+over an empty set. Two real causes: `iso()` computed **UTC** while the board derives today
+**locally**, so under BST between 23:00 and midnight every fixture was seeded a day older than it
+claimed; and 13/14 is dead centre of the 85–100% band on the day it is written and outside it the
+next morning. Now local, and 50/56 — in band for six days either side.
