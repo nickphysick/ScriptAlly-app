@@ -11,7 +11,7 @@ import { describe, it, expect } from "vitest";
 import { Agent, Query, QueryStatus, TaskFlag, Activity, ActivityType } from "../types";
 import { RecordItem, shortCalDate } from "./todoCalendar";
 import {
-  GAP, MIN_SEG, EVENT_AT, OVERRUN_SPAN, FRESH_MAX_DAYS, SETTLED_MAX_DAYS,
+  GAP, MIN_SEG, EVENT_AT, FRESH_MAX_DAYS, SETTLED_MAX_DAYS, fillFor,
   cutPieces, laneBars, sideOf, weightFor, durationCount, labelFor, statusIndex,
   type BarWindow, type LaneInput,
 } from "./journeyBars";
@@ -39,6 +39,20 @@ const lane = (over: Partial<LaneInput> = {}): LaneInput => ({
 });
 
 const day = (n: number) => WIN.days[n];
+
+/**
+ * A window that OPENS BEHIND TODAY, which is what every real range does now (the three stops open
+ * 8, 22 and 45 days back).
+ *
+ * ⚠️ IT EXISTS BECAUSE `WIN` STARTS ON TODAY, SO EVERY `day(n)` ABOVE ZERO IS IN THE FUTURE — and
+ * a RECORD dated in the future is data this app does not produce. That was harmless while a bar
+ * ran to the window's edge regardless; now that a bar ends on today or on its named date, a
+ * fixture built from future-dated records tests a shape the board can never be in. The house law
+ * is that a test must hand a function an input its callers can actually produce, so the cases
+ * about the side walk and about piece labelling take a window where their events are in the past.
+ */
+const BACK: BarWindow = { days: windowDays("2026-08-20", 12), today: TODAY, past: false };
+const back = (n: number) => BACK.days[n];
 
 /* ══ the cut ══════════════════════════════════════════════════════════════════════════════════ */
 
@@ -117,10 +131,10 @@ describe("⚠️ the side comes from the CTA engine, and nothing here re-lists a
     /* a full request arrives mid-week: theirs before it, yours after */
     const bars = laneBars(lane({
       query: q({ status: QueryStatus.FULL_REQUESTED }),
-      records: [rec({ key: "r1", ymd: day(2), label: "Full requested", dir: "in", activityId: "f1" })],
+      records: [rec({ key: "r1", ymd: back(2), label: "Full requested", dir: "in", activityId: "f1" })],
       statusOf: (id) => (id === "f1" ? QueryStatus.FULL_REQUESTED : null),
       moveLabel: "Send full",
-    }), WIN);
+    }), BACK);
     expect(bars.segments.map((s) => s.side)).toEqual(["theirs", "yours"]);
     /* ⚠️ THE CARD'S OWN WORDS, BARE (grouped pack, Phase 5). It was `Your move · send full`;
        "Your move" is how this codebase talks to itself and never how a writer talks about their
@@ -129,11 +143,16 @@ describe("⚠️ the side comes from the CTA engine, and nothing here re-lists a
        full"; the bar states what the STRETCH IS — a full was requested — and the note beside it
        states what to do about it. Both forms are asserted, because a short form nobody checks is
        a second string free to drift. */
-    /* ⚠️ THIS FIXTURE IS LONG-STANDING, so it takes y3's form — the duration is the point of
-       that state and the label carries it. Asserted against the state rather than assumed. */
-    expect(bars.segments[1].state).toBe("y3");
-    expect(bars.segments[1].label).toBe("Full requested 56 days ago");
-    expect(bars.segments[1].short).toBe("Full req · 56 days ago");
+    /* ⚠️ THE WEIGHT CHANGED WHEN THE FIXTURE BECAME POSSIBLE, and the new answer is the right
+       one. With the request two days in the FUTURE the side walk could not use it — an event
+       after today cannot be when something started — so the duration fell back to the send date
+       and read 56 days: long-standing, from a full that had not been requested yet. Dated two
+       days in the PAST it is four days old, which is what a fresh your-move stretch is. The old
+       `y3` was an artefact of the impossible fixture, not a property of the derivation. */
+    expect(bars.segments[1].state).toBe("y1");
+    /* y1's form is the fact alone — a four-day-old request does not need its age stating; that
+       is what separates the three weights from one another. */
+    expect(bars.segments[1].label).toBe("Full requested");
   });
 
   it("and the other way round — you send, and it becomes theirs", () => {
@@ -185,8 +204,12 @@ describe("⚠️ v5 · no reply time recorded — nothing is forecast, so nothin
     expect(bars.segments[0].short).toBe("No reply date given");
   });
 
-  it("⚠️ AND FORECASTS NOTHING — no waypoint, and no open right edge to imply one", () => {
-    expect(bars.waypoints).toHaveLength(0);
+  it("⚠️ AND FORECASTS NOTHING — no named end, no fill, and no open right edge to imply one", () => {
+    /* ⚠️ THE EMPTY TRACK IS THE STATEMENT. `fillFor` returns null rather than 0: zero would say a
+       span exists and none of it has elapsed, which is a confident wrong answer. Null says nobody
+       named a date, which is the true one and the one the emptiness is there to make. */
+    expect(bars.segments[0].goal).toBeUndefined();
+    expect(fillFor(bars.segments[0])).toBeNull();
     expect(bars.segments[0].openRight).toBe(false);
   });
 });
@@ -206,16 +229,20 @@ describe("⚠️ v5 · R&R and offers are open-ended by nature", () => {
     expect(bars.segments[bars.segments.length - 1].label).toContain("Offer");
   });
 
-  it("⚠️ AN AGENT-STATED DEADLINE IS A REAL CAP AND A REAL WAYPOINT", () => {
+  it("⚠️ AN AGENT-STATED DEADLINE IS A REAL CAP, AND IT IS WHERE THE BAR ENDS", () => {
     const bars = laneBars(lane({
       query: q({ status: QueryStatus.OFFER, writerExpectedDate: `${day(4)}T12:00:00Z` } as Partial<Query>),
     }), WIN);
-    expect(bars.waypoints.map((w) => w.caption)).toEqual([`They asked by ${"30 Aug"}`]);
+    /* ⚠️ THE NOTCH IS RETIRED AND THE BAR NO LONGER BREAKS AROUND THE DATE. It TERMINATES on it,
+       which is a stronger statement than a mark beside a bar that ran on regardless — and the
+       fill says the same thing a second way, by having somewhere to fill to. */
     expect(bars.segments.some((s) => s.openEnd)).toBe(false);
-    /* the bar breaks around it, with a round cap on both sides */
-    expect(bars.segments).toHaveLength(2);
-    expect(bars.segments[0].capRight).toBe(true);
-    expect(bars.segments[1].capLeft).toBe(true);
+    const last = bars.segments[bars.segments.length - 1];
+    expect(last.goal).toBeCloseTo(4 + EVENT_AT, 6);
+    expect(fillFor(last)).not.toBeNull();
+    /* the caption the notch used to carry now rides the bar's tooltip, where it survives the long
+       ranges at which the label drops out entirely */
+    expect(bars.segments.some((sg) => sg.tip.includes("30 Aug"))).toBe(true);
   });
 });
 
@@ -246,29 +273,26 @@ describe("⚠️ v5 · a closure stops the bar dead, and nothing follows it, eve
     expect(bars.segments[0].capRight).toBe(true);
   });
 
-  it("forecasts nothing on a closed query — no window, no reminder", () => {
-    expect(bars.waypoints).toHaveLength(0);
+  it("forecasts nothing on a closed query — no window, no reminder, no fill to run to", () => {
+    expect(bars.segments.every((sg) => sg.goal === undefined)).toBe(true);
+    /* ⚠️ AND A CLOSED STRETCH IS STILL FULL, because it is FINISHED — `historical` outranks the
+       absent goal. A part-filled closed bar would suggest a wait still running. */
+    expect(bars.segments.every((sg) => fillFor(sg) === 1)).toBe(true);
   });
 });
 
 describe("⚠️ v5 · a past week — nothing is provisional any more", () => {
-  it("marks its waypoints passed, so the dashes can go solid", () => {
+  it("a window wholly behind today draws finished stretches, and a finished stretch is full", () => {
     const bars = laneBars(lane({
       query: q({ status: QueryStatus.QUERIED, nudgeDate: `${PAST.days[5]}T09:00:00Z` }),
       agent: agent({ responseTimeWeeks: 8 } as Partial<Agent>),
     }), PAST);
-    expect(bars.waypoints.length).toBeGreaterThan(0);
-    expect(bars.waypoints.every((w) => w.passed === true)).toBe(true);
-  });
-
-  it("⚠️ AND DRAWS NO OVERRUN THERE — a past week states what happened, not what is outstanding", () => {
-    const bars = laneBars(lane({
-      query: q({ status: QueryStatus.FULL_REQUESTED, dateSent: "2026-06-01T09:00:00Z" }),
-      agent: agent({ responseTimeWeeks: 2 } as Partial<Agent>),
-      records: [rec({ key: "r1", ymd: PAST.days[1], label: "Full requested", dir: "in", activityId: "f1" })],
-      statusOf: () => QueryStatus.FULL_REQUESTED,
-    }), PAST);
-    expect(bars.segments.some((s) => s.hatchPct)).toBe(false);
+    expect(bars.segments.length).toBeGreaterThan(0);
+    /* ⚠️ TODAY IS BEYOND THE RIGHT-HAND EDGE HERE, AND `todayAt` IS DELIBERATELY NOT CLAMPED TO
+       IT. Clamping would put today ON the edge and every bar in a past window would fill to 100%
+       — stating that every wait had completed. It is out of range, and `fillFor`'s own clamp is
+       what keeps the fraction sane. */
+    expect(bars.segments[0].todayAt).toBeGreaterThan(PAST.days.length);
   });
 });
 
@@ -279,8 +303,11 @@ describe("⚠️ v5 · a snooze pauses your attention, not the agent's clock", (
     query: q({ status: QueryStatus.FULL_REQUESTED }), flag, moveLabel: "Send full",
   }), WIN);
 
-  it("adds a waypoint and nothing else", () => {
-    expect(bars.waypoints.map((w) => [w.side, w.caption])).toEqual([["yours", "Back on 29 Aug"]]);
+  it("⚠️ CHANGES NOTHING ABOUT THE BAR — the snooze notch is retired with every other one", () => {
+    /* A snooze pauses YOUR attention, not the agent's clock. It used to add a waypoint; nothing
+       is drawn at a forecast date now, and the snoozed GROUP is where a reader learns this row is
+       quiet. The bar is untouched either way, which was always the point. */
+    expect(bars.segments.length).toBeGreaterThan(0);
   });
 
   it("the bar keeps running — both stretches are still the writer's move", () => {
@@ -292,7 +319,6 @@ describe("⚠️ v5 · an empty week says one line", () => {
   it("a lane with no query state to draw emits nothing to draw", () => {
     const bars = laneBars(lane({ query: q({ status: QueryStatus.REJECTED }) }), WIN);
     /* a closed query with no closure event in view has no live stretch and no forecast */
-    expect(bars.waypoints).toHaveLength(0);
     expect(bars.segments.every((s) => s.label === "Closed")).toBe(true);
   });
 });
@@ -351,28 +377,29 @@ describe("⚠️ weight is the whole urgency grammar — three steps, no red, no
     expect(all).not.toMatch(/\bReed\b|\bMarsh\b|\bEllery\b/);
   });
 
-  it("a long-standing your-move stretch draws the hatched overrun, with the count as fact", () => {
+  it("a long-standing your-move stretch runs past its named date, and the run-on is hollow", () => {
     const bars = laneBars(lane({
       /* the window passed weeks ago and it is the writer's move */
       query: q({ status: QueryStatus.FULL_REQUESTED, dateSent: "2026-06-01T09:00:00Z" }),
       agent: agent({ responseTimeWeeks: 2 } as Partial<Agent>),
       moveLabel: "Send full",
     }), WIN);
-    /* ⚠️ ONE BAR, ONE COUNT (Phase 4). The overrun used to be a second segment with its own count
-       beside the live one, so a long-standing row drew two capsules and printed the duration
-       twice. It is a background treatment on the SAME bar now — `hatchPct` is how much of that
-       bar lies before the expectation — and the count is stated once, by whichever piece speaks. */
-    const hatched = bars.segments.filter((s) => s.hatchPct);
-    expect(hatched.length, "no hatch on a long-standing your-move bar").toBeGreaterThan(0);
-    expect(hatched[0].hatchPct).toBeGreaterThan(0);
+    /* ⚠️ ONE BAR, ONE COUNT, AND THE HATCH IS RETIRED IN FAVOUR OF THE HOLLOW (Porcelain,
+       Phase 4). `hatchPct` shaded the part of the stretch lying before the expectation; the
+       hollow continuation says the same thing in the same single element and says it for every
+       family rather than for one. Lateness is DRAWN — the fill caps at 1, the run-on is an
+       outline, and no word is added anywhere. */
+    const hollow = bars.segments.filter((sg) => sg.hollow);
+    expect(hollow.length, "no hollow run-on past a passed date").toBeGreaterThan(0);
+    expect(fillFor(bars.segments[0]), "the stretch up to the date is full").toBe(1);
     const counted = bars.segments.filter((s) => s.count);
     expect(counted, "the duration is stated more than once").toHaveLength(1);
-    expect(counted[0].count).toMatch(/^\d+ days your move$/);
-    /* the waypoint names the real date, which is the half that has to be true */
-    expect(bars.waypoints.some((w) => /^Expected /.test(w.caption))).toBe(true);
+    expect(counted[0].count).toMatch(/^\d+ days$/);
+    /* the real date rides the tooltip, which is where the notch's caption went */
+    expect(bars.segments.some((sg) => sg.tip.length > 0)).toBe(true);
   });
 
-  it("⚠️ AND A FRESH ONE DRAWS NO OVERRUN — the hatch is the long-standing case's alone", () => {
+  it("⚠️ AND A FRESH ONE RUNS ON NOWHERE — its named date is still ahead of it", () => {
     const bars = laneBars(lane({
       query: q({ status: QueryStatus.FULL_REQUESTED, dateSent: `${day(0)}T09:00:00Z` }),
       agent: agent({ responseTimeWeeks: 8 } as Partial<Agent>),
@@ -380,7 +407,7 @@ describe("⚠️ weight is the whole urgency grammar — three steps, no red, no
       statusOf: () => QueryStatus.FULL_REQUESTED,
       moveLabel: "Send full",
     }), WIN);
-    expect(bars.segments.some((s) => s.hatchPct)).toBe(false);
+    expect(bars.segments.some((sg) => sg.hollow)).toBe(false);
     expect(bars.segments.filter((s) => s.side === "yours").every((s) => s.weight === "fresh")).toBe(true);
   });
 });
@@ -421,12 +448,12 @@ describe("⚠️ the side walk runs FORWARDS — a send hands the move over, and
     const bars = laneBars(lane({
       query: q({ status: QueryStatus.PARTIAL_REQUESTED }),
       records: [
-        rec({ key: "r1", ymd: day(1), label: "Partial sent", dir: "out", activityId: "s1" }),
-        rec({ key: "r2", ymd: day(4), label: "Partial sent", dir: "out", activityId: "s2" }),
+        rec({ key: "r1", ymd: back(1), label: "Partial sent", dir: "out", activityId: "s1" }),
+        rec({ key: "r2", ymd: back(4), label: "Partial sent", dir: "out", activityId: "s2" }),
       ],
       statusOf: () => QueryStatus.PARTIAL_SENT,
       moveLabel: "Send partial",
-    }), WIN);
+    }), BACK);
     expect(bars.segments.map((s) => s.side)).toEqual(["yours", "theirs", "yours"]);
   });
 
@@ -457,15 +484,20 @@ describe("⚠️ a bar says what it is ONCE, where there is room to read it", ()
   const twice = () => laneBars(lane({
     /* ⚠️ A REAL SEND DATE, because the duration is counted from when it became the writer's move
        and the first version of this fixture put its events two days in the FUTURE — where nothing
-       has elapsed, so the count was correctly omitted and the case was measuring that instead. */
+       has elapsed, so the count was correctly omitted and the case was measuring that instead.
+       ⚠️ AND THE EVENTS THEMSELVES ARE IN THE PAST NOW, on `BACK`, for the second half of the
+       same lesson: a bar ends on today or on its named date, so a run of future-dated records has
+       nothing to be broken into pieces AT. The fixture was measuring a shape the board cannot be
+       in — twice, by two different routes, which is why the window exists rather than a nudge to
+       the dates. */
     query: q({ status: QueryStatus.FULL_REQUESTED, dateSent: "2026-07-01T09:00:00Z" }),
     records: [
-      rec({ key: "r1", ymd: day(2), label: "Full requested", dir: "in", activityId: "f1" }),
-      rec({ key: "r2", ymd: day(4), label: "Holding reply", dir: "in", activityId: "h1" }),
+      rec({ key: "r1", ymd: back(2), label: "Full requested", dir: "in", activityId: "f1" }),
+      rec({ key: "r2", ymd: back(4), label: "Holding reply", dir: "in", activityId: "h1" }),
     ],
     statusOf: (id) => (id === "f1" ? QueryStatus.FULL_REQUESTED : null),
     moveLabel: "Send full",
-  }), WIN);
+  }), BACK);
 
   it("labels one piece of each contiguous same-side run and leaves the rest silent", () => {
     const bars = twice();
@@ -633,68 +665,52 @@ describe("⚠️ marker 2 — the direction dot, where an activity held the stat
   });
 });
 
-describe("⚠️ marker 3 — the dashed flag, where only a date arrived", () => {
-  it("names each of v11's five, so the view can draw the reminder differently", () => {
-    /* the reply window, still theirs */
-    const win1 = laneBars(lane({
+describe("⚠️ THE NAMED END — three sources, one precedence, and no notch to draw it", () => {
+  /* ⚠️ THE FIVE WAYPOINT KINDS ARE RETIRED WITH THE NOTCH THAT DREW THEM (Porcelain, Phase 5).
+     What survives is the QUESTION they answered — did anybody name a date for this stretch, and
+     which date — and the bar answers it now by ending there and filling toward it. These cases
+     assert the answer rather than the retired vehicle. */
+
+  it("an agency's stated reply window is a named end", () => {
+    const bars = laneBars(lane({
       query: q({ status: QueryStatus.QUERIED, dateSent: `${day(0)}T09:00:00Z` }),
       agent: agent({ responseTimeWeeks: 0.5 } as Partial<Agent>),
     }), WIN);
-    expect(win1.waypoints.map((w) => w.kind)).toContain("expected");
+    expect(bars.segments[0].goal).not.toBeUndefined();
+    expect(fillFor(bars.segments[0])).not.toBeNull();
+  });
 
-    /* the agency's own deadline, once the move is the writer's */
-    const deal = laneBars(lane({
+  it("so is a date the agency asked the writer to send by", () => {
+    const bars = laneBars(lane({
       query: q({ status: QueryStatus.OFFER, writerExpectedDate: `${day(4)}T12:00:00Z` } as Partial<Query>),
     }), WIN);
-    expect(deal.waypoints.map((w) => w.kind)).toEqual(["deadline"]);
+    expect(bars.segments.some((sg) => sg.goal !== undefined)).toBe(true);
+  });
 
-    /* the reminder the writer set */
-    const rem = laneBars(lane({
+  it("and so is the writer's own reminder, where nothing else named one", () => {
+    const bars = laneBars(lane({
       query: q({ status: QueryStatus.QUERIED, nudgeDate: `${day(3)}T09:00:00Z` }),
-      agent: agent({ responseTimeWeeks: 12 } as Partial<Agent>),
+      agent: agent({} as Partial<Agent>),
     }), WIN);
-    expect(rem.waypoints.map((w) => w.kind)).toEqual(["reminder"]);
-
-    /* attention coming back */
-    const flag = { id: "f1", userId: "u", taskType: "nudge_overdue", queryId: "q1",
-      snoozeCount: 1, snoozedUntil: `${day(3)}T09:00:00Z` } as TaskFlag;
-    const snz = laneBars(lane({ query: q({ status: QueryStatus.FULL_REQUESTED }), flag }), WIN);
-    expect(snz.waypoints.map((w) => w.kind)).toEqual(["snooze"]);
-
-    /* and the expectation that has already passed, which the overrun runs back to */
-    const over = laneBars(lane({
-      query: q({ status: QueryStatus.FULL_REQUESTED, dateSent: "2026-06-01T09:00:00Z" }),
-      agent: agent({ responseTimeWeeks: 2 } as Partial<Agent>),
-      moveLabel: "Send full",
-    }), WIN);
-    expect(over.waypoints.map((w) => w.kind)).toContain("overrun");
+    expect(bars.segments[0].goal).toBeCloseTo(3 + EVENT_AT, 6);
   });
 
-  it("⚠️ ONE RESOLVED DATE, TWO OF THE FIVE — named for whose move it is, not derived twice", () => {
-    const theirs = laneBars(lane({
-      query: q({ status: QueryStatus.QUERIED, dateSent: `${day(0)}T09:00:00Z` }),
+  /* ⚠️ THE PRECEDENCE MATTERS AND IS NOT A TIE-BREAK OF CONVENIENCE. A date the AGENCY stated
+     outranks one the writer set for themselves: the first is a commitment the relationship is
+     measured against, the second is a note-to-self. Where both exist the bar fills toward the
+     agency's. */
+  it("an agency's date outranks the writer's own reminder when both exist", () => {
+    const bars = laneBars(lane({
+      query: q({ status: QueryStatus.QUERIED, dateSent: `${day(0)}T09:00:00Z`, nudgeDate: `${day(5)}T09:00:00Z` }),
       agent: agent({ responseTimeWeeks: 0.5 } as Partial<Agent>),
-    }), WIN).waypoints[0];
-    const yours = laneBars(lane({
-      query: q({ status: QueryStatus.OFFER, writerExpectedDate: `${day(4)}T12:00:00Z` } as Partial<Query>),
-    }), WIN).waypoints[0];
-    expect(theirs.kind).toBe("expected");
-    expect(yours.kind).toBe("deadline");
-    expect(theirs.caption).toMatch(/^Expected /);
-    expect(yours.caption).toMatch(/^They asked by /);
+    }), WIN);
+    /* half a week from day 0 is day 3-4, not the day-5 reminder */
+    expect(bars.segments[0].goal).toBeLessThan(5 + EVENT_AT);
   });
 
-  it("⚠️ NO CAPTION THIS MODULE PRODUCES CARRIES AN ALARM — no exclamation, and not the word", () => {
-    const all = [
-      ...laneBars(lane({
-        query: q({ status: QueryStatus.QUERIED, nudgeDate: `${day(3)}T09:00:00Z` }),
-        agent: agent({ responseTimeWeeks: 12 } as Partial<Agent>),
-      }), WIN).waypoints,
-      ...laneBars(lane({
-        query: q({ status: QueryStatus.FULL_REQUESTED, dateSent: "2026-06-01T09:00:00Z" }),
-        agent: agent({ responseTimeWeeks: 2 } as Partial<Agent>), moveLabel: "Send full",
-      }), WIN).waypoints,
-    ].map((w) => w.caption).join(" | ");
-    expect(all).not.toMatch(/!|overdue|late|urgent|action required/i);
+  it("⚠️ AND A STRETCH NOBODY NAMED A DATE FOR HAS NO GOAL AND NO FILL", () => {
+    const bars = laneBars(lane({ query: q({ status: QueryStatus.QUERIED }), agent: agent({}) }), WIN);
+    expect(bars.segments[0].goal).toBeUndefined();
+    expect(fillFor(bars.segments[0])).toBeNull();
   });
 });

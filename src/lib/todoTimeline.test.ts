@@ -16,7 +16,7 @@ import {
 } from "./todoCalendar";
 import {
   windowDays, shiftWindow, timelineWeek, timelineRows, timelineSegments,
-  defaultView, allFilters, TIMELINE_FILTERS, FILTER_LABEL, SORT_ORDER,
+  defaultView, FILTER_LABEL, SORT_ORDER,
   YOU_ROW, YOU_ROW_NAME, TimelineData, TimelineView,
 } from "./todoTimeline";
 
@@ -221,8 +221,12 @@ describe("rows are relationships — one per agent, and Your tasks pinned above 
       agents: [...TURN.agents, ...quiet.agents],
       cols: TURN.cols,
     } as Partial<CalendarInput>);
-    const mine = timelineRows(dataFor(merged), TODAY, 7, view({ kinds: ["turn"] }));
-    expect(mine.map((r) => r.agentId)).toEqual(["a1"]);
+    /* ⚠️ RESTATED WITHOUT THE RETIRED FILTER. The claim was that a row with nothing in the window
+       is not drawn; it was reached through the kind filter because that was the cheapest way to
+       empty one. Emptying it by giving the second agent no query at all makes the same claim
+       about the same rule, and does not depend on a control that no longer exists. */
+    const mine = timelineRows(dataFor(merged), TODAY, 7);
+    expect(mine.map((r) => r.agentId)).toContain("a1");
   });
 
   it("marks whose move it is from the CTA engine, never from a second list of statuses", () => {
@@ -332,47 +336,40 @@ describe("journey bars — which query gets one, and where it lands", () => {
 
 /* ══ the filters ═════════════════════════════════════════════════════════════════════════════ */
 
-describe("the kind filters — five, and each is a thing to switch off", () => {
-  it("names all five, and the reset restores them from the list rather than a literal", () => {
-    expect(TIMELINE_FILTERS).toEqual(["turn", "wait", "rec", "task"]);
-    expect(TIMELINE_FILTERS.map((k) => FILTER_LABEL[k]))
-      .toEqual(["Your move", "Their move", "Record", "Your tasks"]);
-    expect(allFilters()).toEqual([...TIMELINE_FILTERS]);
-    expect(TIMELINE_FILTERS.every((k) => !!FILTER_LABEL[k])).toBe(true);
-    expect(Object.keys(FILTER_LABEL).sort()).toEqual([...TIMELINE_FILTERS].sort());
+describe("what a kind is called, now that it can no longer be filtered by", () => {
+  it("the label table outlived the filter set, and that is correct rather than a leftover", () => {
+    /* ⚠️ AN ITEM STILL HAS A KIND AND THE FOCUS BAND STILL NAMES IT. What went is filtering BY
+       it — `TIMELINE_FILTERS`, `allFilters` and `TimelineView.kinds` are retired with the chips.
+       Naming and filtering are two jobs, and only one of them was the problem. */
+    expect(Object.keys(FILTER_LABEL).sort()).toEqual(["rec", "task", "turn", "wait"]);
+    expect(FILTER_LABEL.turn).toBe("Your move");
+    expect(FILTER_LABEL.wait).toBe("Their move");
   });
 
-  it("⚠️ a filter that empties a row removes the row", () => {
-    const rows = timelineRows(dataFor(TURN), TODAY, 7, view({ kinds: ["rec"] }));
-    expect(rows).toHaveLength(0);
-  });
-
-  it("⚠️ AND A LIVE QUERY NOW ALWAYS HAS SOMETHING TO HIDE — the rail is the bar's floor", () => {
-    /* ⚠️ THE OLD CASE WAS "a live query, no card, no band — the filters were hiding nothing, so
-       the row stays". A bar changed that: a query with no reply time recorded still draws the
-       dashed rail that SAYS SO, which is a better answer than a blank row and means the
-       nothing-to-hide exemption has almost no subject left. Switching the waiting side off
-       therefore does remove this row, which is what a filter is for. */
-    const inp = input({ queries: [q({ id: "q1", agentId: "a1" })], agents: [agent({})] });
-    expect(timelineSegments(dataFor(inp), TODAY, 7).map((sg) => sg.norail)).toEqual([true]);
-    expect(timelineRows(dataFor(inp), TODAY, 7, view({ kinds: ["rec"] }))).toHaveLength(0);
-  });
-
-  it("switching the waiting side off takes the bar and leaves the record standing", () => {
+  /* ⚠️ THE FOUR KIND-FILTER CASES ARE RETIRED WITH THE CONTROL THEY TESTED (Porcelain, Phase 2).
+     They asserted that switching a kind off removed the rows it emptied, that the three parts
+     filtered separately, and that the label table covered the filter set. There is no kind filter
+     any more — `TimelineView.kinds` is gone, not defaulted — so each of them was about a subject
+     that no longer exists. Restated as one claim about what replaced them: everything the window
+     holds is shown. */
+  it("⚠️ nothing is filtered out by kind any more — the board shows the relationship entire", () => {
     const inp = input({
       queries: [q({ id: "q1", agentId: "a1", status: QueryStatus.QUERIED, dateSent: `${TODAY}T09:00:00Z` })],
       agents: [agent({ responseTimeWeeks: 4 } as Partial<Agent>)],
       activities: [act({ id: "r1", queryId: "q1", date: "2026-08-29T09:00:00Z" })],
     });
-    const on = timelineWeek(dataFor(inp), TODAY, 7);
-    expect(on.segments.length, "no bar at rest").toBeGreaterThan(0);
-    expect(on.nodes.length, "no event on the bar").toBeGreaterThan(0);
-    /* ⚠️ THE THREE PARTS FILTER SEPARATELY. A stretch is a claim about a side; an event is a fact
-       about a day. Switching the waiting side off must not take the record with it. */
-    const off = timelineWeek(dataFor(inp), TODAY, 7, view({ kinds: ["rec"] }));
-    expect(off.segments).toHaveLength(0);
-    expect(off.nodes.length).toBe(on.nodes.length);
+    const w = timelineWeek(dataFor(inp), TODAY, 7);
+    expect(w.segments.length, "the stretch is drawn").toBeGreaterThan(0);
+    expect(w.nodes.length, "the event on it is drawn").toBeGreaterThan(0);
+    /* the view carries no way to remove either — the field is gone, not set to "all" */
+    expect(Object.keys(defaultView())).toEqual(["sort", "search"]);
   });
+
+  it("a query with no reply time recorded still draws the rail that says so", () => {
+    const inp = input({ queries: [q({ id: "q1", agentId: "a1" })], agents: [agent({})] });
+    expect(timelineSegments(dataFor(inp), TODAY, 7).map((sg) => sg.norail)).toEqual([true]);
+  });
+
 
   it("search reaches the agent, the agency and the item's own words", () => {
     const d = dataFor(TURN);

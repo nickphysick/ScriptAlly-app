@@ -270,15 +270,27 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
     /* ⚠️ ONE CLASS, so this lookup cannot slice a stub — a grouped selector containing
        another selector's text is the first-match trap in CSS clothing, and it caught this very
        assertion once before the stylesheet was restructured to make it impossible. */
-    const tracks = rule(calCss, ".tl-grid {");
-    /* ⚠️ THE COUNT IS THE BOARD'S TOKEN NOW (range pack, Phase 3). It was the literal `7`, which
-       is why a row could only ever be a week; the board declares `--tl-cols` and every row reads
-       it, so six month-columns and thirty-one day-columns are the same template. The law this
-       asserts is unchanged and is the one that matters: the head column takes its own width token
-       and every OTHER track is `minmax(0, 1fr)` — a bare `1fr` would floor at min-content and let
-       one long chip push the board wider than its container. */
-    expect(tracks).toContain("grid-template-columns: var(--tl-head-w) repeat(var(--tl-cols, 7), minmax(0, 1fr))");
-    expect(tracks).not.toMatch(/repeat\(7,\s*1fr\)/);
+    const tracks = null as unknown as string;
+    /* ⚠️ THE GRID IS GONE AND THE CLAIM WENT WITH IT (Porcelain, Phase 2). The board was a CSS
+       grid of day columns, and this asserted that every day track was `minmax(0, 1fr)` so one
+       long chip could not push the board wider than its container. There are no day columns: a
+       row is three flex columns and the timeline one is a positioning context whose pieces are
+       PERCENTAGES of it, so nothing inside it can widen it and the horizontal-overflow hazard
+       ceases to exist rather than being guarded. The surviving half of the claim — that any
+       horizontal overflow is a fault to see rather than a thing to scroll — is asserted below.
+
+       ⚠️ AND THE THREE FIXED WIDTHS THAT REPLACED THE TRACKS ARE TOKENS, so the name column and
+       the action column cannot be set in two places. */
+    void tracks;
+    const boardBlock = calCss.slice(calCss.indexOf(".tl-board {"), calCss.indexOf(".tl-grp"));
+    expect(boardBlock).toContain("--tl-nm-w:");
+    expect(boardBlock).toContain("--tl-ac-w:");
+    expect(rule(calCss, ".tl-c-nm {")).toContain("flex: 0 0 var(--tl-nm-w)");
+    expect(rule(calCss, ".tl-c-ac {")).toContain("flex: 0 0 var(--tl-ac-w)");
+    /* ⚠️ AND THE TIMELINE COLUMN CLIPS, which is load-bearing rather than tidy: it is why the
+       tooltip is portalled to the board wrap. A clipping ancestor beats any z-index a descendant
+       can declare, so a tip drawn inside this box would be cut in half by it. */
+    expect(rule(calCss, ".tl-c-tl {")).toContain("overflow: hidden");
 
     /* seven columns FILL — they never earn a horizontal scrollbar, so any horizontal overflow is
        a fault to see rather than a thing to scroll */
@@ -300,18 +312,21 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
        empty ground beneath it. The page supplies `--lanes`, which is data — how many lines does
        this row need — and the sheet multiplies it by `--lane-h`, which is geometry and belongs
        where the tokens are. A FLOOR is still forbidden; a derivation is what replaced it. */
-    expect(rule(calCss, ".tl-cell {")).not.toMatch(/min-height:\s*\d+px/);
+    /* ⚠️ THE CELL IS GONE WITH THE GRID; THE ROW IS WHERE THE LAW LIVES NOW. Same claim, same
+       reason: a timeline row must GROW to hold however many lanes its occupants packed into, and
+       it must never clip — clipping a lane hides a journey with nothing to say so. */
+    expect(rule(calCss, ".tl-rrow {")).not.toMatch(/(?:^|;|\s)height:\s*\d+px/);
     /* ⚠️ COMMENTS STRIPPED FIRST, AND THIS FILE'S `rule()` DOES NOT DO IT. Its `indexOf` found
        `.tl-row {` inside a COMMENT explaining a grouped selector and sliced prose — the house law
        ("a source-string lock strips comments before it asserts") in its plainest form. The shared
        helper is left alone: changing it would repoint every other caller in this file at a
        different block, which is not a change to make on the way past. */
     const calDecls = calCss.replace(/\/\*[\s\S]*?\*\//g, "");
-    const rowRule = calDecls.slice(calDecls.indexOf("\n.tl-row {"), calDecls.indexOf("}", calDecls.indexOf("\n.tl-row {")));
-    expect(rowRule, "no .tl-row rule found once comments are stripped").toContain("--lane-h");
-    /* still no literal floor — the height is a calc over the lane token */
+    const rowRule = calDecls.slice(calDecls.indexOf("\n.tl-rrow {"), calDecls.indexOf("}", calDecls.indexOf("\n.tl-rrow {")));
+    expect(rowRule, "no .tl-rrow rule found once comments are stripped").toContain("--row-h");
+    /* still no literal floor — the height is a calc over the row token and the lane COUNT */
     expect(rowRule).not.toMatch(/min-height:\s*\d+px/);
-    expect(rowRule).toContain("min-height: calc(var(--lanes, 1) * var(--lane-h))");
+    expect(rowRule).toContain("min-height: calc(var(--row-h) * var(--lanes, 1))");
     /* and the page hands down the COUNT, never a position */
     expect(cal).toContain('["--lanes" as string]: String(lanes)');
     /* ⚠️ AND THE PAGE IS STRIPPED TOO, for the reason this repo has paid for seven times: every
@@ -347,9 +362,19 @@ describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local 
        for a month of history; a timeline's rows are relationships, so the useful question is which
        LAYER you are looking at — your turn, waiting, on the record, your tasks, carried. Five, not
        six, and each names a thing on the board rather than a category of event. */
-    expect(cal).toContain("tl-kind");
-    expect(cal).toContain("TIMELINE_FILTERS.map");
-    expect(cal).toContain("FILTER_LABEL[k]");
+    /* ⚠️ RETARGETED A FOURTH TIME, AND THIS TIME THE SUBJECT IS GONE RATHER THAN MOVED
+       (Porcelain, Phase 2). The kind chips are DELETED, not hidden, and `TimelineView.kinds` went
+       with them — four toggles that each subtracted a class of thing from a board whose whole
+       claim is that it shows the relationship entire. The honest replacement states the
+       retirement and asserts what stands in its place: the two segmented controls, which change
+       what is SHOWN OF the one derivation rather than filtering pieces out of it. */
+    const calSrcNow = cal.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(calSrcNow, "the kind chips came back").not.toMatch(/["\s`]tl-kind["\s`]/);
+    expect(calSrcNow).not.toContain("TIMELINE_FILTERS");
+    expect(calSrcNow).not.toContain("toggleKind");
+    expect(cal).toContain("tl-seg2");
+    expect(cal).toContain("FULL BOARD");
+    expect(cal).toContain("RIGHT NOW");
     expect(cal).not.toContain("KIND_LABEL"); // no per-page vocabulary
     /* and the superseded control is gone from the page, not merely unrendered */
     /* ⚠️ STRIPPED, NOT RAW — and this caught me twice in one pack. The page now carries COMMENTS

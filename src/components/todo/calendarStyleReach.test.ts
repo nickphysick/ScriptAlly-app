@@ -67,8 +67,11 @@ describe("⚠️ every class the Calendar renders has a base rule in its own sty
        empty set: an extraction that silently matched nothing would go green for ever. */
     expect(drawn.length, "no classes extracted — the extraction is broken, not the page")
       .toBeGreaterThan(15);
-    expect(drawn, "the sweep is not seeing the chip").toContain("tl-chip");
-    expect(drawn, "the sweep is not seeing the bar").toContain("tl-seg");
+    /* ⚠️ THE TWO NAMED HERE ARE THE FLOOR ON THE SWEEP ITSELF — a sweep that found nothing would
+       report no offenders for ever. They are the chip and the bar under their Porcelain names
+       (`tl-seg`/`tl-chip` were the grid era's). */
+    expect(drawn, "the sweep is not seeing the chip").toContain("tl-tchip");
+    expect(drawn, "the sweep is not seeing the bar").toContain("tl-p");
   });
 
   it("⚠️ none of them is styled ONLY inside a media block, which is how the chip shipped", () => {
@@ -84,16 +87,16 @@ describe("⚠️ every class the Calendar renders has a base rule in its own sty
 });
 
 describe("⚠️ the chip is declared ALONE, so it cannot be retired as somebody else's member", () => {
-  it("no rule groups `.tl-chip` with another top-level class", () => {
+  it("no rule groups `.tl-tchip` with another top-level class", () => {
     /* ⚠️ THE RULE THIS ENFORCES IS NOT "never group selectors" — `.tl-seg, .tl-over` share one and
        that is right, because they are two states of one object and neither can outlive the other.
        It is that the chip may not share a rule with something that CAN be retired independently,
        which is exactly what `.tl-band` was. */
-    for (const m of base.matchAll(/(?:^|\n)([^{}\n]*\.tl-chip[^{}\n]*)\{/g)) {
+    for (const m of base.matchAll(/(?:^|\n)([^{}\n]*\.tl-tchip[^{}\n]*)\{/g)) {
       const sel = m[1].trim();
       const others = [...sel.matchAll(/\.(tl-[a-z0-9-]+)/g)]
         .map((x) => x[1])
-        .filter((c) => c !== "tl-chip" && c !== "tl-lbl" && c !== "tl-fwd");
+        .filter((c) => c !== "tl-tchip" && c !== "tl-at2" && c !== "sq");
       expect(others, `\`${sel}\` groups the chip with something that can be retired without it`)
         .toEqual([]);
     }

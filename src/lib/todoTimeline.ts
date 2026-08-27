@@ -37,7 +37,7 @@ import { rowGroupOf, type RowGroup, type QueryFacts } from "./timelineGroups";
 import { rowSentence, rowNote, agentSurname, type RowCopy, type RowNote } from "./timelineCopy";
 import {
   laneBars, statusIndex, sideOf,
-  type Segment, type BarNode, type Waypoint, type BarWindow,
+  type Segment, type BarNode, type BarWindow,
 } from "./journeyBars";
 import type { Activity, Manuscript, TaskFlag } from "../types";
 
@@ -122,14 +122,12 @@ export type TimelineFilter = "turn" | "wait" | "rec" | "task";
  * named the writer's state and the agent's in two different grammars; a bar has two SIDES, and
  * `Your move` / `Their move` is one grammar naming both.
  */
-export const TIMELINE_FILTERS: readonly TimelineFilter[] = ["turn", "wait", "rec", "task"];
 export const FILTER_LABEL: Record<TimelineFilter, string> = {
   turn: "Your move",
   wait: "Their move",
   rec: "Record",
   task: "Your tasks",
 };
-export const allFilters = (): TimelineFilter[] => [...TIMELINE_FILTERS];
 
 export interface TimelineItem {
   key: string;
@@ -241,15 +239,24 @@ export const SORT_LABEL: Record<RowSort, string> = {
 };
 export const SORT_ORDER: readonly RowSort[] = ["soonest", "waiting", "name", "stage"];
 
+/**
+ * ⚠️ `kinds` IS RETIRED (Porcelain, Phase 2), AND THE FIELD WENT WITH THE CONTROL RATHER THAN
+ * OUTLIVING IT. Four chips each subtracted a class of thing from a board whose whole claim is
+ * that it shows the relationship entire — and a board you have silently switched a quarter of off
+ * is one that lies by omission. Leaving the field behind, permanently set to "all", would have
+ * left a filter nothing could reach and nothing could clear: exactly how a retired control comes
+ * back as a bug six months later.
+ *
+ * `TimelineKind` and `FILTER_LABEL` SURVIVE and are not the same thing — an item still HAS a kind
+ * and the focus band still names it. What went is the ability to filter BY it.
+ */
 export interface TimelineView {
   sort: RowSort;
-  kinds: TimelineFilter[];
   search: string;
 }
 
 export const defaultView = (): TimelineView => ({
   sort: "soonest",
-  kinds: allFilters(),
   search: "",
 });
 
@@ -376,7 +383,6 @@ export interface TimelineWeek {
   /** the journey bars' pieces — one bar per agent × manuscript, cut by its own interruptions */
   segments: Segment[];
   nodes: BarNode[];
-  waypoints: Waypoint[];
 }
 
 /**
@@ -393,7 +399,6 @@ export function timelineWeek(
   const last = win.length ? win[win.length - 1] : windowStart;
   const byQuery = new Map(data.queries.map((q) => [q.id, q]));
   const byAgent = new Map(data.agents.map((a) => [a.id, a]));
-  const on = new Set(view.kinds);
   const search = view.search.trim().toLowerCase();
 
   const drafts = new Map<string, Draft>();
@@ -560,7 +565,6 @@ export function timelineWeek(
   const push = (row: Draft, it: TimelineItem) => {
     row.held += 1;
     /* a ghost is a fact about a task, so it rides the task filter rather than growing a fifth */
-    if (!on.has(it.kind === "ghost" ? "task" : it.kind)) return;
     /* ⚠️ THE CARD'S OWN TITLE AS WELL AS THE PILL. `pillLabel` summarises a derived card to two
        words — "Send full" — so a search over labels alone cannot find "the full for P. Kaur",
        which is what the writer actually saw on the To-do list. Both, or the search is a search of
@@ -669,7 +673,6 @@ export function timelineWeek(
 
   const segments: Segment[] = [];
   const nodes: BarNode[] = [];
-  const waypoints: Waypoint[] = [];
 
   for (const [rowKey, per] of laneOf) {
     const agentId = rowKey.slice("agent-".length);
@@ -695,7 +698,7 @@ export function timelineWeek(
         ...(card ? { moveLabel: pillLabel(card) } : {}),
       }, barWin);
 
-      const drawn = bars.segments.length + bars.nodes.length + bars.waypoints.length;
+      const drawn = bars.segments.length + bars.nodes.length;
       if (drawn > 0) {
         row.held += 1;
         if (row.manuscripts.every((m) => m.id !== msId)) {
@@ -712,9 +715,9 @@ export function timelineWeek(
 
       /* ⚠️ THE FILTERS NARROW WHICH SIDES ARE DRAWN, not which rows exist — a bar is the row's
          whole story, so hiding "their move" hides those stretches and leaves the rest of the
-         journey standing. The nodes and waypoints belong to the bar and travel with it. */
-      const wantTheirs = on.has("wait");
-      const wantYours = on.has("turn");
+         journey standing. The nodes belong to the bar and travel with it. */
+      const wantTheirs = true;
+      const wantYours = true;
       const searchOk = (text: string) => !search || rowMatches(row) || text.toLowerCase().includes(search);
       const keep = bars.segments.filter((sg) =>
         (sg.side === "theirs" ? wantTheirs : wantYours) && searchOk(sg.label));
@@ -722,12 +725,10 @@ export function timelineWeek(
          was a real fault: a closure on the window's first day leaves NO drawable stretch — the
          piece before it is narrower than the floor — so the whole event vanished with it. An event
          is a fact about a day; whether a stretch fits beside it is a question about pixels. */
-      const keepNodes = on.has("rec") ? bars.nodes.filter((n) => searchOk(n.caption)) : [];
-      const keepWays = keep.length || keepNodes.length ? bars.waypoints : [];
+      const keepNodes = bars.nodes.filter((n) => searchOk(n.caption));
       if (!keep.length && !keepNodes.length) return;
       segments.push(...keep);
       nodes.push(...keepNodes);
-      waypoints.push(...keepWays);
       const first = Math.min(...[...keep.map((sg) => sg.from), ...keepNodes.map((n) => n.at)]);
       if (first < row.soonest) row.soonest = first;
       /* the row's dot follows the lane that is the writer's move, if any */
@@ -862,7 +863,6 @@ export function timelineWeek(
     rows,
     segments: segments.filter((sg) => keys.has(sg.rowKey)),
     nodes: nodes.filter((n) => keys.has(n.rowKey)),
-    waypoints: waypoints.filter((w) => keys.has(w.rowKey)),
   };
 }
 

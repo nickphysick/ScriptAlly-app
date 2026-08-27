@@ -115,801 +115,353 @@
  */
 .cal-timeline .wpg-reclaim { --wpg-reclaim-pad: 0px; }
 
-/* ══ THE BOARD ═════════════════════════════════════════════════════════════════════════════ */
+/* ══ THE BOARD — PORCELAIN (Porcelain pack; ref design-refs/timeline-v35.html) ══════════════
+ *
+ * ⚠️ THE GRID IS GONE, AND IT TOOK FOUR FAULTS WITH IT. The board was a CSS grid of day columns:
+ * one column per day, every participant naming its own `grid-column`, cells carrying the
+ * gridlines and the past/weekend washes. That shape is what forced the 1-week range to exist, and
+ * it is what made auto-placement able to grow the board sideways by hundreds of pixels the moment
+ * anything was placed implicitly. A row is a flex row of three columns now, and the timeline
+ * column is a positioning context: pieces are placed as PERCENTAGES of it. Gridlines, the weekend
+ * question and the phantom-column hazard all cease to exist rather than being suppressed.
+ *
+ * ⚠️ EVERY VERTICAL POSITION DERIVES FROM A TOKEN. `--row-h`, `--bar-h` and `--mk` are the three
+ * facts; nothing in this block writes a vertical offset as a literal. `calLook.measure.ts` greps
+ * for exactly that, and the rule exists because a bar offset and a row height were once two
+ * numbers that both read 52 and neither was the other's.
+ */
+.tl-zone { overflow-x: hidden; }
 
 .tl-board {
   flex: 1; min-height: 0; display: flex; flex-direction: column;
-  /* ⚠️ THE GROUND IS A TOKEN NOW (settled pack, Phase 2). It was `var(--ws-ground)` — the app's
-     content-area colour — chosen when bars were white and the board needed to differ from them.
-     The bars are filled at every state now, so the board is the ref's own `--board-ground` and
-     stops depending on a shell token that means something else. */
-  background: var(--board-ground);
-  border: 1px solid #ece0d2; border-radius: 14px; overflow: hidden;
+  /* ⚠️ THE GROUND IS THE REF'S `--ground` AND THE ROWS ARE WHITE. It was a tinted `#eae2d6`,
+     chosen when every bar was filled and the board needed to differ from them. Porcelain inverts
+     that: the bar is a WHITE TRACK, so a tinted board would make the tracks the lightest thing on
+     the page and the fills invisible against them. */
+  background: var(--tl-ground);
+  border: 1px solid var(--tl-hair); border-radius: 14px; overflow: hidden;
 
-  /* ══ BAR COLOUR, AS TOKENS (ref timeline-settled v44 — values verbatim) ════════════════════
+  /* ══ THE PINNED VALUES ══════════════════════════════════════════════════════════════════
    *
-   * ⚠️ TEN STATES, TEN TRIPLES, AND NO LITERAL ANYWHERE A BAR IS PAINTED. The sheet used to
-   * compose a bar's colour from `side` + `weight` + four modifiers, so a value lived at the
-   * intersection of several rules and nothing said what a bar WAS.
+   * ⚠️ THESE ARE THE REF'S, VERBATIM, AND THE STANDING "COLOURS FROM THE CODE" RULE IS SUSPENDED
+   * HERE ON PURPOSE. That rule is what produced the yellow reminder band and the blue decide bar
+   * it replaces: those elements never had code tokens, so "read the code" meant "invent one".
+   * Every value below is pinned by the brief and by the ref together.
    *
-   * ⚠️ DECLARED ON THE BOARD RATHER THAN AT `:root`. `--board-ground` is a broad name for a
-   * page-agnostic scope, and every element that reads any of these is inside `.tl-board` — so the
-   * scope is exactly the set of readers, which is what stops a shell refactor inheriting them.
+   * ⚠️ DECLARED ON THE BOARD, NOT AT `:root`. Every element that reads any of them is inside
+   * `.tl-board`, so the scope is exactly the set of readers — which is what stops a shell
+   * refactor inheriting a calendar colour it has no use for.
    */
-  --board-ground: #eae2d6;
+  --tl-ground: #faf7f2;
+  --tl-row: #fffefb;
+  --tl-ink: #3a1c14;
+  --tl-muted: #8a7a6c;
+  --tl-label: #9c8878;
+  --tl-burgundy: #7c3a2a;
+  --tl-pink: #f5e2da;
+  --tl-pinkb: #e8c8bc;
+  --tl-hair: #efe6da;
+  --tl-rowline: #f4ede3;
+  --tl-rowhov: #faf5ec;
+  --tl-scrawl: #8a4a36;
+  --tl-todayl: rgba(58, 28, 20, .4);
 
-  /* waiting on the agent — a reply date is known */
-  --bar-theirs-fill: #e4ecdf;  --bar-theirs-line: #e6e6e6;  --bar-theirs-text: #787878;
-  /* waiting, with no reply date ever given */
-  --bar-theirsq-fill: #e4ecdf; --bar-theirsq-line: #e6e6e6; --bar-theirsq-text: #858585;
-  /* nudged — a reminder is scheduled ahead */
-  --bar-nudged-fill: #fff8e5;  --bar-nudged-line: #e6e6e6;  --bar-nudged-text: #787878;
-  /* the writer's move: fresh, settled, long-standing */
-  --bar-y1-fill: #f3dbd0;      --bar-y1-line: #e6e6e6;      --bar-y1-text: #8e5252;
-  --bar-y2-fill: #f3dbd0;      --bar-y2-line: #e6e6e6;      --bar-y2-text: #8e5252;
-  --bar-y3-fill: #f3dbd0;      --bar-y3-line: #e5c2b4;      --bar-y3-text: #8e5252;
-  /* ⚠️ THE DEEPER END OF LONG-STANDING'S OWN BREATH — not a separate colour. It is the pulse's
-     50% stop, and it is what a reader who has asked for no motion is given instead. */
-  --bar-urgent-fill: #e9c3b2;
-  /* gone quiet — the date passed and nothing is scheduled */
-  --bar-quiet-fill: #e0e0e0;   --bar-quiet-line: #a3a3a3;   --bar-quiet-text: #8e5252;
-  --bar-quiet-hatch: #d6d6d6;
-  /* an offer */
-  --bar-offer-fill: #cbd9e8;   --bar-offer-line: #9db6cf;   --bar-offer-text: #8e5252;
-  /* closed — no fill, so there is no `-fill` token to declare */
-  --bar-closed-line: #ded3c4;  --bar-closed-text: #a3927f;
-  /* ⚠️ THE NOTCH'S OWN COLOUR, the ref's `--dash`. It was a literal `#c9a89e` repeated on the
-     waypoint's side variants; a mark that means "a date, and nothing behind it" is one thing and
-     takes one value. */
-  --dash: #c9a89e;
+  /* the five live bar families: border · fill · the deeper fill at ≥85% · text */
+  --bar-out-line: #d9e1d6;    --bar-out-fill: #e6ece3;    --bar-out-near: #d7e0d2;    --bar-out-text: #55684f;
+  --bar-req-line: #ecd3c6;    --bar-req-fill: #f3e0d5;    --bar-req-near: #ecc9b8;    --bar-req-text: #6b3a2a;
+  --bar-decide-line: #e2b8a5; --bar-decide-fill: #eccbba; --bar-decide-near: #e2b09a; --bar-decide-text: #58281a;
+  --bar-remind-line: #dde3da; --bar-remind-fill: #eef1ec; --bar-remind-near: #dfe6dc; --bar-remind-text: #5c6b59;
+  /* gone quiet — a hatch rather than a fill, because there is no span to be a fraction of */
+  --bar-quiet-line: #e0dbd3;  --bar-quiet-text: #6b675f;
+  --bar-quiet-hatch: repeating-linear-gradient(-55deg, #e7e3dc 0 5px, #f4f1ec 5px 10px);
+  /* closed — dashed, and there is no fill token because a closed bar has no fill element at all */
+  --bar-closed-line: #ddd0c0; --bar-closed-text: #a3927f;
+
+  /* the four markers: ring · glyph ink */
+  --mk-in-line: #9fb29a;      --mk-in-ink: #55684f;
+  --mk-out-line: #cfa08e;     --mk-out-ink: #7c3a2a;
+  --mk-bang-line: #7c3a2a;    --mk-bang-ink: #7c3a2a;
+  --mk-clock-line: #bdb8b0;   --mk-clock-ink: #6b675f;
+
   /* the writer's own chips */
-  --bar-task-fill: #ffffff;    --bar-task-line: #e0d0c4;    --bar-task-text: #3a1c14;
-}
-/* ⚠️ `overflow-x: hidden`, ADDED TO THE PRIMITIVE'S `overflow: auto`. Seven columns FILL the
-   container — they never earn a horizontal scrollbar — so any horizontal overflow is a fault to
-   see rather than a thing to scroll. */
-.tl-zone { overflow-x: hidden; }
-/* ⚠️ THE BOARD OWNS THE HEAD COLUMN'S WIDTH, and it stays here now that the spine has gone. It
-   moved off `.tl-grid` because the spine was a SIBLING of the rows and could not inherit it; the
-   spine is deleted and the token does not go back, because `.tl-grid` is repeated per row and a
-   width declared per row is one edit away from rows disagreeing. One owner, many readers. It steps
-   down twice so seven day columns still fit a narrow laptop; the breakpoints move with it. */
-.tl {
-  display: flex; flex-direction: column; position: relative;
-  /* ⚠️ 260 IS MEASURED, NOT CHOSEN (density pack, Phase 2). The head carries a SENTENCE now, and
-     the longest everyday form — "They want a revise and resubmit — asked 61 days ago" — needs
-     233px of ink; 233 plus the head's own 26px of padding is 259. At 210 it cut two sentences in
-     fourteen mid-word, and at the mono-caps treatment it cut six.
-     ⚠️ THE ELLIPSIS STAYS AND STILL HAS A SUBJECT: the sentence carries the agent's surname, so a
-     long one can still run past this. What it no longer does is cut an ordinary sentence. */
-  --tl-head-w: 260px;
-}
-/**
- * ⚠️ THE MARKER CLEARANCE IS NOT MIGRATED YET, AND THE TOKEN IS DELIBERATELY ABSENT RATHER THAN
- * DECLARED-AND-UNREAD (range pack, Phase 3).
- *
- * It is `GAP = 0.34` in `journeyBars.ts` — a third of a DAY, which is 4.9% of the board at one week
- * and 0.19% at six months: right where it was designed and invisible everywhere else. A clearance
- * is a fact about how close two INK MARKS may sit, so it belongs in ink, and the ref's shape is
- * `--clear` at 20 / 14 / 11 applied as padding at a bar's end where a marker abuts it.
- *
- * That is a change to the bar DERIVATION, not to this stylesheet: `laneBars` cuts its pieces in
- * days and knows nothing about pixels. Declaring the token here first would leave three values
- * nothing reads — a rule that looks parameterised and is not, which this repo has been caught by
- * twice. Stated as outstanding instead.
- */
-/**
- * ⚠️ THE MARKERS SHRINK BY TIER, AND THEY KEEP A HALO AGAINST THE GROUND. At week and month grain
- * two markers can fall within a few pixels of one another, so each carries a ring of the board's
- * own colour — which is what keeps a crowd legible as several marks rather than one blob.
- */
-.tl.dense3 .tl-node, .tl.dense4 .tl-node { --disc: 22px; --ddot: 15px; }
-.tl.dense3 .tl-node[data-marker], .tl.dense4 .tl-node[data-marker] {
-  box-shadow: 0 0 0 2px var(--ws-ground, #f7f4ee);
-}
-/* ⚠️ THE TIER NO LONGER DECIDES WHETHER A BAR SPEAKS (density pack, Phase 1). This hid the bar
-   label and the end label at three months and beyond, on the reasoning that "a half-legible word
-   inside a 9px bar is worse than no word" — which is true, and is a claim about a bar's WIDTH that
-   was being answered from its RANGE. `barFit` answers it by measuring: long form, then short form,
-   then bare. Two mechanisms were solving one problem and the guess was winning.
+  --tl-chip-line: #e5d8c9;
 
-   ⚠️ AND IT DID NOT MERELY WIN — IT CORRUPTED THE OTHER ONE FIRST. `scrollWidth` on a
-   `display: none` element is 0, so `fitLabel(clientWidth, 0, 0)` judged every bar wider than 26px
-   to hold its long form comfortably, `.narrow` was never applied, and the tier hid the label
-   anyway. A probe reading `.narrow` would have reported a board where every label fits.
+  /* controls — square-cornered, so a control can never be mistaken for a bar */
+  --tl-btn-line: #dcccbb;     --tl-btn-ink: #54402f;
 
-   ⚠️ THE GEOMETRY TIERS ABOVE STAY, because they answer questions `barFit` does not ask: how big a
-   marker is, and whether a shrunken one still has an edge against the bar it sits on. A range is
-   the right input for both. */
-/* ⚠️ ONE CLASS OWNS THE COLUMNS, AND IT IS NOT `.tl-head, .tl-row`. Both the header strip and
-   every row need the identical eight-track template, and the obvious spelling is a grouped
-   selector — but a grouped selector whose text CONTAINS another selector's is this repo's
-   first-match slicing trap wearing CSS. A lock doing `indexOf(".tl-head, .tl-row {")` matched a
-   `.tl, .tl-head, .tl-row {` token rule declared above it and read a two-property stub, reporting
-   that the board declared no columns. One class, one rule, no substring to collide with.
-   ⚠️ AND `minmax(0, 1fr)`, NEVER A BARE `1fr` — a bare track is `minmax(auto, 1fr)`, whose floor
-   is the content's min-content width, so one long chip would push the seven columns wider than
-   the board and earn the horizontal scrollbar the design forbids. */
-.tl-grid {
-  display: grid;
-  /* ⚠️ THE COLUMN COUNT IS THE BOARD'S FACT, read here. It was a literal `7` in every row's
-     template, so a row could only ever be a week; the board declares `--tl-cols` and the rows read
-     it, which is the same ownership the head width now has. */
-  grid-template-columns: var(--tl-head-w) repeat(var(--tl-cols, 7), minmax(0, 1fr));
+  /* ══ GEOMETRY, AS THE THREE FACTS THE REST DERIVES FROM ═════════════════════════════════ */
+  --row-h: 47px;
+  --bar-h: 22px;
+  --mk: 20px;
+  --tl-headrow-h: 26px;
+  --tl-nm-w: 308px;
+  --tl-ac-w: 168px;
+  /* how far a piece stands off a marker it abuts, and off a plain neighbour */
+  --tl-gap-mk: 12px;
+  --tl-gap: 2px;
 }
-/* ⚠️ THE TOKEN IS THE HEADER'S HEIGHT, NOT A DESCRIPTION OF IT — and it had to become one. It was
-   `min-height: 36px` against a header whose content rendered at 46, so the pinned row stuck ten
-   pixels too high and slid under the day names: the exact fault a token is supposed to prevent,
-   committed by the token itself. A number that ENCODES another element's height is right until
-   that height moves, and here it was wrong on the first render.
-   ⚠️ SO THE HEADER TAKES ITS HEIGHT FROM THE TOKEN rather than the token describing the header.
-   One owner, two readers, and they cannot disagree — the acceptance measures the rendered header
-   against the pinned row's offset, and separately checks the header's contents do not overflow it,
-   because a fixed height on a text container is only safe while it is measured. Uppercase mono
-   with no descenders is the one case where that holds. */
-.tl-head, .tl-row--pin { --tl-head-h: 46px; }
 
-.tl-head {
-  position: sticky; top: 0; z-index: 4;
-  height: var(--tl-head-h);
-  background: linear-gradient(135deg, #d7ddd5, #d5dbd3);
-  border-bottom: 1px solid #ece0d2;
+/* ══ A GROUP ═══════════════════════════════════════════════════════════════════════════════ */
+.tl-grp { margin-bottom: 4px; }
+.tl-gt { display: flex; align-items: baseline; gap: 9px; padding: 14px 2px 7px; }
+.tl-gt .t { font-family: 'Playfair Display', Georgia, serif; font-size: 19px; font-weight: 500; color: var(--tl-ink); }
+.tl-gt .n { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 9px; color: var(--tl-label); }
+/* ⚠️ THE SENTENCE IS WHAT THE HEADING IS FOR. "Needs you soon" is a label a reader has to decode;
+   the sentence beneath it is the thing itself. */
+.tl-gt .s { font-size: 11.5px; color: var(--tl-muted); }
+.tl-gtbtn {
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8.5px; letter-spacing: .1em;
+  color: var(--tl-label); cursor: pointer; background: none; border: 0; padding: 0; margin-left: 2px;
 }
-.tl-corner {
-  display: flex; align-items: center; padding: 0 13px;
-  border-right: 1px solid #ece0d2;
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 6.5px;
-  letter-spacing: 0.17em; text-transform: uppercase; color: #5a6e58;
-}
-.tl-dh { text-align: center; padding: 6px 0 5px; }
-.tl-dw {
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 6.5px;
-  letter-spacing: 0.17em; color: #5a6e58; display: block;
-}
-/* ⚠️ THE MARK FITS ITS OWN LABEL (density pack, Phase 4). It was a fixed 19×19 CIRCLE, which is
-   the right shape for the thing it was designed around: a one- or two-digit day number at day
-   grain. The range control then made the label "25 Aug" at week grain and "Aug" at month grain,
-   and nothing changed the marker wrapping it — so today's header rendered a burgundy blob with
-   its text spilling out of both sides of a 19px disc.
-   ⚠️ THE FAULT IS THE FIXED SIZE, NOT THE ROUNDNESS. A pill holds one character or six; the height
-   stays 19 in both states, which is what the original comment was protecting — today's mark must
-   not change the header's height. */
-.tl-dd {
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10.5px; font-weight: 500;
-  color: #3f4d3d; margin-top: 2px;
-  min-width: 19px; height: 19px; padding: 0 6px; border-radius: 999px;
-  display: inline-flex; align-items: center; justify-content: center;
-  white-space: nowrap;
-}
-.tl-dh.today .tl-dd { background: #7c3a2a; color: #fdfaf5; }
+.tl-gtbtn:hover { color: var(--tl-burgundy); }
+.tl-gtbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
+
+.tl-tbl { background: var(--tl-row); border-top: 1px solid var(--tl-hair); border-bottom: 1px solid var(--tl-hair); }
 
 /* ══ A ROW ═════════════════════════════════════════════════════════════════════════════════ */
+.tl-hrow, .tl-rrow { display: flex; align-items: stretch; }
+.tl-rrow {
+  border-top: 1px solid var(--tl-rowline);
+  /* ⚠️ THE ROW GROWS TO HOLD ITS LANES AND NEVER CLIPS ONE. `--lanes` is how many lines this
+     relationship needs, which is data; `--row-h` is what a line is worth, which is geometry. */
+  min-height: calc(var(--row-h) * var(--lanes, 1));
+  transition: background .12s;
+}
+.tl-rrow:hover { background: var(--tl-rowhov); }
+.tl-hrow { height: var(--tl-headrow-h); border-bottom: 1px solid var(--tl-hair); }
 
-.tl-row {
-  position: relative;
-  /* ── the geometry, in tokens (markers pack, Phase 2) ────────────────────────────────────────
-     ⚠️ DECLARED IN THIS RULE RATHER THAN A SECOND `.tl-row`. Two declarations of one selector is
-     how the cascade and a reader come to disagree — the reader takes the first, the browser takes
-     the last — and it is the same family as the grouped rule that took the chip's whole treatment
-     out with the band's. One selector, one rule, whatever it has to carry. */
-  /* ⚠️ THE LANE IS DERIVED FROM WHAT IT HOLDS (range pack, Phase 2; ref timeline-range v18). It
-     was `70px` beside a `34px` bar, and the 36px of slack was the caption strip — a number one
-     element owned describing room a DIFFERENT element needed. Captions leave the board entirely in
-     Phase 4, so the lane is the bar plus its own padding and nothing else. It still computes to
-     70; what changed is that it can no longer be right by coincidence. */
-  --row-pad: 13px;
-  --bar-h: 44px;
-  --lane-h: calc(var(--bar-h) + var(--row-pad) * 2);
-  /* the StatusDot's own app-wide size — stated so the markers position against it, never restated */
-  --disc: 34px;
-  /* ⚠️ THE DIRECTION DOT OWNS ITS SIZE. It was `calc(var(--disc) - 8px)`, written at three sites —
-     a delta belonging to this dot, expressed as an adjustment to something else's. The tiers move
-     the two independently, so a shared derivation would have been wrong at the first tier. */
-  --ddot: 24px;
-  --chip-h: 26px;
-  /* how far a waypoint's upright stands proud of the bar, top and bottom */
-  --wp-over: 6px;
-  min-height: calc(var(--lanes, 1) * var(--lane-h));
+.tl-c-nm { flex: 0 0 var(--tl-nm-w); display: flex; align-items: center; gap: 10px; padding: 0 12px; min-width: 0; }
+.tl-c-ac { flex: 0 0 var(--tl-ac-w); display: flex; align-items: center; padding: 0 8px; }
+/* ⚠️ `overflow: hidden` IS LOAD-BEARING AND IS WHY THE TOOLTIP IS PORTALLED. A clipping ancestor
+   beats any z-index a descendant can declare, so no tooltip inside this box can ever escape it. */
+.tl-c-tl { flex: 1 1 auto; position: relative; overflow: hidden; }
+.tl-hrow .tl-c-tl { overflow: visible; }
+.tl-hrow .tl-lbl3 { font-size: 7.5px; }
+
+.tl-lbl3 {
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 9px; letter-spacing: .16em;
+  text-transform: uppercase; font-weight: 500; color: var(--tl-label);
 }
-/* ⚠️ THE PINNED ROW IS ONE STICKY ELEMENT, WHICH IS WHY EACH ROW IS ITS OWN GRID. A grid ROW
-   cannot be made sticky — only its items can — so a single 8-column grid would have needed all
-   eight cells stuck at the same offset and moving in step by coincidence. A flex column of
-   per-row grids sticks the row itself, and the columns still align because every row resolves the
-   same template against the same width. */
-.tl-row--pin {
-  position: sticky; top: var(--tl-head-h); z-index: 3; background: #fdfaf5;
-  /* ⚠️ THE PINNED ROW'S LINE IS SHORTER, AND IT IS NOW ACTUALLY THE SAME FORMULA. Its occupants
-     are chips, not bars, so it is the chip plus its own padding — the claim this comment made
-     while the value beside it was the literal `40px`. It still computes to 40. */
-  --chip-pad: 7px;
-  --lane-h: calc(var(--chip-h) + var(--chip-pad) * 2);
+/* ⚠️ ONE COLUMN HEADER FOR THE WHOLE BOARD, above the first group only. Repeating it per group
+   restated the same nine dates five times down the page. */
+.tl-dt {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .1em;
+  color: var(--tl-label); white-space: nowrap;
 }
-.tl-rowhead {
-  grid-row: 1;
-  /* it is a button now — strip the UA chrome rather than inventing a look for it */
-  background: none; text-align: left; cursor: pointer; font: inherit; color: inherit;
-  border-right: 1px solid #ece0d2; border-bottom: 1px solid #f0e9dd;
-  padding: 9px 13px; display: flex; flex-direction: column; justify-content: center; gap: 2px;
-  min-width: 0;
+
+.tl-nmwrap { min-width: 0; }
+.tl-nm2 {
+  font-family: 'Playfair Display', Georgia, serif; font-size: 14px; font-weight: 500; line-height: 1.3;
+  color: var(--tl-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.tl-nm {
-  font-family: "Playfair Display", Georgia, serif; font-size: 14px; font-weight: 500;
-  /* ⚠️ 1.3 — mixed-case Playfair, so the house descender floor applies. Below it the `y` in a
-     name like "Ashworth & Vale" is cropped, which is how this bug reached dev three times. */
-  line-height: 1.3; color: #2e2118;
-  display: flex; align-items: center; gap: 7px; min-width: 0;
-}
-.tl-nmtxt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.tl-ag {
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
-  letter-spacing: 0.12em; text-transform: uppercase; color: #a2937f;
+.tl-ag2 {
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--tl-label); margin-top: 2px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-/* ⚠️ THE MARK IS WHOSE MOVE IT IS, from `agentTurn` — the CTA engine, not a colour off a drawing.
-   Filled burgundy = yours; hollow = theirs; faint = no live query; a SQUARE = your own tasks,
-   because the pinned row is a checkbox row and not a relationship. */
-/* ⚠️ THE REAL `StatusDot` LEADS EVERY ROW HEAD THAT HAS A QUERY (grouped pack, Phase 4), AND THIS
-   SHEET STYLES IT NOWHERE. A `flex: 0 0 auto` was written here first, to stop the name squashing
-   it — and the component already sets `flexShrink: 0` inline, so the rule matched nothing and
-   looked like a knob that did something. It takes no `className` here either. A locked component
-   that needs no help from the page is the point of it being locked.
-   ⚠️ `.tl-sd` SURVIVES FOR THE PINNED ROW ALONE — it holds no query, so it has no status and a
-   dot invented for it would state a journey that does not exist. The four `data-dot` variants stay
-   because the fallback still reads `r.dot`; only `self` is reachable today. */
-.tl-sd { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; border: 1.5px solid #7c3a2a; }
-.tl-sd[data-dot="you"] { background: #7c3a2a; }
+.tl-sd { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; border: 1.5px solid var(--tl-burgundy); }
+.tl-sd[data-dot="you"] { background: var(--tl-burgundy); }
 .tl-sd[data-dot="them"] { background: #f8e2d9; }
 .tl-sd[data-dot="quiet"] { background: transparent; border-color: #d3c4b3; }
 .tl-sd[data-dot="self"] { border-radius: 3px; background: transparent; }
-.tl-rowhead:hover { background: #faf5ee; }
-.tl-rowhead:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
-.tl-row.closed .tl-rowhead { opacity: 0.55; }
-/* ⚠️ THE ROW-LEVEL CLOSED OVERRIDE IS GONE (settled pack, Phase 2), AND SO ARE ITS FOUR
-   `!important`s. It existed because the fill was set by four separate rules further down and
-   matching each of them would have put the closed treatment in four places; `barState` returns
-   "closed" for a terminal stretch now, so one rule paints it and there is nothing to out-shout.
-   ⚠️ The `animation: none` went with it and is NOT lost — the pulse is scoped to `.s-y3`, and a
-   closed stretch is never y3. */
-.tl-row.closed .tl-seg { animation: none; }
-.tl-row.closed .tl-node, .tl-row.closed .tl-wp { opacity: 0.6; }
+.tl-rrow.closed .tl-c-nm { opacity: .62; }
 
-/* ══ A GROUP HEADER ═════════════════════════════════════════════════════════════════════════
+/* ⚠️ THE ROW'S NAME IS A BUTTON, AND IT MUST NOT LOOK LIKE ONE. It opens the relationship's
+   workspace — the only route to a query with no card raised against it — so it has to be a real
+   control for the keyboard; it takes the row's own ground so the row still reads as one object. */
+.tl-nmbtn {
+  border: 0; background: none; padding: 0 12px; margin: 0; font: inherit; color: inherit;
+  text-align: left; cursor: pointer;
+}
+.tl-nmbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+
+/* the collapsed day column's own name and agency — a different surface, and it keeps its own
+   treatment because it is a list of everyone rather than a row of the board */
+.tl-nmtxt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.tl-ag {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--tl-label, #9c8878); margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ══ THE SEGMENTED CONTROLS IN THE TOOL ROW ════════════════════════════════════════════════
+   ⚠️ SQUARE-CORNERED LIKE EVERY OTHER CONTROL, for the reason the action button is: the board's
+   own pills are DATA, and a control that borrows their shape borrows their meaning. */
+.tl-seg2 { display: inline-flex; background: #fff; border: 1px solid #e5d8c9; border-radius: 9px; overflow: hidden; flex: none; }
+.tl-seg2 button {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 9px; letter-spacing: 0.08em;
+  font-weight: 500; border: none; background: transparent; color: #6a5a50; padding: 8px 12px;
+  cursor: pointer; line-height: 1;
+}
+.tl-seg2 button + button { border-left: 1px solid #efe6da; }
+.tl-seg2 button[data-on="true"] { background: #f5e2da; color: #7c3a2a; }
+.tl-seg2 button:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+
+/* ══ THE ACTION COLUMN — CONTROLS ARE NEVER PILLS ══════════════════════════════════════════
  *
- * ⚠️ IT SPANS THE BOARD RATHER THAN SITTING IN THE HEAD COLUMN. A heading indented to the rows'
- * own left edge would read as another row; running the full width says it is a division of the
- * board. It is a flex child of `.tl`, not a `.tl-grid`, so it takes the whole width by default and
- * has no column template to keep in step with the rows.
+ * ⚠️ BARS ARE 999px, CONTROLS ARE 3px, AND THAT IS THE WHOLE RULE. A pill-shaped button beside
+ * pill-shaped bars reads as another piece of data; a square-cornered one cannot. The stylesheet
+ * is swept for the inverse in `calLook.measure.ts`: no control may carry a 999px radius, and no
+ * bar may carry less.
  */
-.tl-ghead { position: sticky; top: var(--tl-head-h); z-index: 2; background: var(--ws-ground, #f7f4ee); }
-.tl-ghbtn {
-  width: 100%; display: flex; align-items: center; gap: 8px;
-  background: none; border: 0; cursor: pointer; font: inherit; color: inherit;
-  padding: 13px var(--gh-pad, 13px) 6px;
-  border-bottom: 1px solid #e2d7c6;
+.tl-abtn {
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .1em;
+  font-weight: 500; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center;
+  gap: 6px; line-height: 1; border-radius: 3px; padding: 7px 9px 7px 10px;
+  background: #fff; border: 1px solid var(--tl-btn-line); color: var(--tl-btn-ink);
+  box-shadow: 0 1px 0 rgba(58, 28, 20, .05);
 }
-.tl-ghname {
-  font-family: "Playfair Display", Georgia, serif; font-size: 15px; font-weight: 600;
-  color: #3d2f22; letter-spacing: -0.1px;
-}
-.tl-ghn {
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 9px;
-  letter-spacing: 0.1em; color: #9c8b78;
-  border: 1px solid #ded2c1; border-radius: 999px; padding: 1px 6px;
-}
-/* ⚠️ THE CARET IS THE ONLY THING THAT TURNS, and it turns by transform rather than by swapping a
-   glyph — a second character would be a second thing to translate and to get the direction of. */
-.tl-ghcar {
-  font-size: 9px; color: #9c8b78; line-height: 1;
-  transition: transform 0.16s ease;
-}
-.tl-ghcar[data-open="1"] { transform: rotate(90deg); }
-@media (prefers-reduced-motion: reduce) { .tl-ghcar { transition: none; } }
+.tl-abtn:hover { border-color: var(--tl-burgundy); color: var(--tl-burgundy); }
+.tl-rrow:hover .tl-abtn { border-color: var(--tl-pinkb); }
+.tl-abtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+.tl-abtn .cv { opacity: .5; }
+/* ⚠️ AN EM-DASH, NOT AN EMPTY CELL. "Nothing is asked of you here" is a fact worth stating; a
+   blank reads as a control that failed to render. */
+.tl-adash { color: #cec2b3; font-size: 12px; padding-left: 6px; }
 
-.tl-cell { grid-row: 1; border-bottom: 1px solid #f0e9dd; border-right: 1px solid #f4efe6; }
-/* ⚠️ BOUNDARY RULES, NOT A WEEKEND TINT (range pack, Phase 2). Shading Saturday and Sunday would
-   state that a reply window pauses at the weekend, which is the ruling the month grid already
-   made and the reason its own tint was removed. The rhythm a reader needs is where one WEEK ends
-   and the next begins, so the boundary carries a stronger line and the days carry none.
-   ⚠️ THE LINE IS ON THE CELL THAT STARTS THE PERIOD, never the one that ends it — a trailing
-   border would double with `.tl-cell:last-child`'s removal at the board's own edge. */
-.tl-cell.bound { border-left: 1px solid #e2d7c6; }
-/* ══ THE PAST SLICE ════════════════════════════════════════════════════════════════════════
+/* ══ THE LANE, AND WHAT SITS IN IT ═════════════════════════════════════════════════════════
  *
- * ⚠️ A DEEPER GROUND, NOT A DIFFERENT COLOUR. The past is the same board seen from behind, so it
- * takes a shade more of the ground it already has — anything with a hue of its own would read as a
- * state (a warning, a selection) rather than as time that has passed. This is also what the today
- * spine used to say, and says it by BEING the thing rather than by labelling it.
- *
- * ⚠️ AND THE STEP IS SMALL ON PURPOSE. Half the board is past at three and six months; a strong
- * step there would divide the board in two and make the boundary the loudest thing on it, when
- * what the boundary is worth is a glance. */
-/* ⚠️ `.tl-cell.past` IS NOT DECLARED HERE — it already exists below, and a second rule for one
-   selector is how the cascade and a reader come to disagree (the reader takes the first, the
-   browser takes the last). It was written for the PAGER's past windows and is exactly the deeper
-   ground this phase wanted, so the phase changed nothing about it. */
-/* the header above a past column is muted the same way its own text already is elsewhere */
-.tl-dh.past { opacity: 0.55; }
-/* ⚠️ TODAY WINS OVER PAST WHERE THEY MEET — they cannot both be true, but the rules are separate
-   and the cascade decides. Declared after, so the rule that follows is the one that applies. */
-.tl-dh.today { opacity: 1; }
-.tl-cell:last-child { border-right: 0; }
-.tl-cell.today { background: #fdf5f2; }
-.tl-cell.past { background: #faf7f2; }
-/* the drop affordance is INSET — a shadow spends no layout, so a full row cannot be shoved into
-   overflow by its own highlight. Sage: the receptive tone in this grammar. */
-.tl-cell.dropok { box-shadow: inset 0 0 0 1.5px #8a9e88; background: #f4f7f2; }
-
-/* ══ THE GEOMETRY, IN TOKENS (markers pack, Phase 2; ref timeline-rails.html) ═══════════════
- *
- * ⚠️ NOT ONE VERTICAL POSITION IN THIS BLOCK IS A LITERAL. Every offset is a `calc()` over the
- * four tokens below, and the ACCEPTANCE GREPS THIS FILE for a bare `top:` in pixels — because the
- * fault this replaces was not a wrong number, it was the right number owned by the wrong element.
- * A 36px bar sat at `top: 0` in a 132px row with 96px of empty ground beneath it: the row's height
- * was `lanes * 52 + 28` and the bar's offset was `lane * 52`, both reading 52, neither being the
- * other's. Exactly the shape `--tl-head-h` had.
- *
- * ⚠️ AND THE ELEMENT'S OWN HEIGHT NEVER ENTERS ITS OFFSET. Everything is centred on its lane with
- * `top: <lane centre>; transform: translateY(-50%)`, so there is no `/ 2` anywhere to go stale
- * when a height moves. `translateY(-50%)` knows the height; the stylesheet does not have to.
+ * ⚠️ EVERY PIECE IS PLACED FROM `--lane` AND `--lanes`, never from a pixel. One lane centres on
+ * the row; two split it; the arithmetic is the same expression in both cases, so nothing has to
+ * remember which case it is in.
  */
-.tl-lane {
-  grid-row: 1; grid-column: 2 / -1;
-  position: relative; pointer-events: none;
-  /* ⚠️ NO PADDING. It offset every `top` in here by 12px, so a lane index no longer meant a lane
-     centre — the reason the derivation has to own the whole box rather than share it. */
-}
-
-
-/**
- * ⚠️ THE ONE EXPRESSION EVERY OFFSET READS — AND IT IS A CLASS, NOT A GROUPED SELECTOR.
- *
- * The first version of this rule was `.tl-seg, .tl-node, .tl-wp, .tl-chip { … }` — a grouped
- * selector over five members — which
- * is precisely how the chip lost its treatment in the first place: retire any one member and the
- * rest go with it, because a grouped selector is ONE RULE. The sweep in
- * `calendarStyleReach.test.ts` went red on it within a minute of being written, which is the
- * cheapest possible evidence that the sweep was worth writing.
- *
- * "Positioned on a lane" is a real shared property, so it gets a class of its own that the page
- * applies. Nothing here can now be retired by an edit aimed at something else.
- */
-.tl-at {
+.tl-at2 {
   position: absolute;
-  top: calc(var(--lane-h) * (var(--lane, 0) + 0.5));
-}
-
-/* ══ THE JOURNEY BAR (bars pack Phase 4; treatment C, v7 weights) ═══════════════════════════ */
-
-.tl-seg {
-  height: var(--bar-h);
+  top: calc((var(--lane, 0) + .5) / var(--lanes, 1) * 100%);
   transform: translateY(-50%);
-  box-sizing: border-box;
-  display: inline-flex; align-items: center; gap: 9px;
-  padding: 0 14px;
-  font-size: 11.5px; font-weight: 500; font-family: inherit;
-  white-space: nowrap; overflow: hidden;
-  pointer-events: auto; cursor: pointer; text-align: left;
-  border: 1px solid transparent; border-radius: 999px;
-}
-.tl-seg .d { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
-/* ⚠️ THE LABEL GROWS SO THE DATE IS PUSHED RIGHT — never an auto margin, which this repo's
-   Tasks work already rules out, and never `space-between`, which would spread the bullet and the
-   count as well. One growing child does the whole job. */
-.tl-lbl { overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1 1 auto; }
-/* ⚠️ `.tl-when` IS RETIRED (settled pack, Phase 5). It drew the date at the bar's right end so a
-   run of bars lined their dates up; the ref's wording carries the date INSIDE the label ("reply
-   expected 18 Aug"), so keeping it would have stated the same date twice on one bar.
-   ⚠️ AND `.narrow` IS THE FIT PASS'S LAST STEP — the bar goes bare rather than truncating, because
-   an ellipsis is a promise that the rest is somewhere and on a bar it is not. */
-.tl-seg.narrow .tl-lbl { display: none; }
-/* the duration, riding inside the piece — mono, quiet, and a fact rather than a warning */
-.tl-cnt {
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 9px;
-  letter-spacing: 0.09em; text-transform: uppercase; opacity: 0.8; flex: none;
 }
 
-/* ── their move: white, still, and breathing (v6, treatment C) ─────────────────────────────── */
-/* ══ THE NOTE AFTER THE BAR (settled pack, Phase 4; ref timeline-settled v44) ══════════════
+/* ── the bar ──────────────────────────────────────────────────────────────────────────────── */
+.tl-p {
+  height: var(--bar-h); border-radius: 999px; overflow: hidden; z-index: 2; background: #fff;
+  border: 1px solid transparent; box-sizing: border-box;
+}
+/* ⚠️ THE FILL IS A CHILD, NOT A BACKGROUND, because its WIDTH is the statement. A gradient stop
+   would put the number inside a colour value where nothing can read it back. */
+.tl-fl {
+  position: absolute; left: 0; top: 0; bottom: 0; border-radius: inherit;
+  border-top-right-radius: 3px; border-bottom-right-radius: 3px;
+}
+/* a fill that has reached the end is the bar, so it takes the bar's own corner back */
+.tl-fl[data-full="1"] { border-top-right-radius: inherit; border-bottom-right-radius: inherit; }
+.tl-plbl {
+  position: relative; font-size: 9.5px; font-weight: 500; white-space: nowrap; padding: 0 10px;
+  line-height: var(--bar-h); z-index: 2;
+}
+/* ⚠️ HOLLOW IS THE CONTINUATION PAST A NAMED DATE. Lateness is DRAWN — no fill, no word, no
+   colour it does not already have. The label dims because the stretch is no longer the story. */
+.tl-p.hollow { background: transparent; }
+.tl-p.hollow .tl-plbl { opacity: .75; }
+
+.tl-p.out { border-color: var(--bar-out-line); }
+.tl-p.out .tl-fl { background-color: var(--bar-out-fill); }
+.tl-p.out .tl-plbl { color: var(--bar-out-text); }
+.tl-p.out.near .tl-fl { background-color: var(--bar-out-near); }
+.tl-p.req { border-color: var(--bar-req-line); }
+.tl-p.req .tl-fl { background-color: var(--bar-req-fill); }
+.tl-p.req .tl-plbl { color: var(--bar-req-text); }
+.tl-p.req.near .tl-fl { background-color: var(--bar-req-near); }
+.tl-p.decide { border-color: var(--bar-decide-line); }
+.tl-p.decide .tl-fl { background-color: var(--bar-decide-fill); }
+.tl-p.decide .tl-plbl { color: var(--bar-decide-text); }
+.tl-p.decide.near .tl-fl { background-color: var(--bar-decide-near); }
+.tl-p.remind { border-color: var(--bar-remind-line); }
+.tl-p.remind .tl-fl { background-color: var(--bar-remind-fill); }
+.tl-p.remind .tl-plbl { color: var(--bar-remind-text); }
+.tl-p.remind.near .tl-fl { background-color: var(--bar-remind-near); }
+/* ⚠️ QUIET IS A HATCH AND NOT A FILL, because there is no named span for a fraction to be OF.
+   That is the same fact the empty track states, said in the one state where the emptiness would
+   otherwise read as a bar nobody had finished drawing. */
+.tl-p.quiet { border-color: var(--bar-quiet-line); }
+.tl-p.quiet .tl-fl { background-image: var(--bar-quiet-hatch); }
+.tl-p.quiet .tl-plbl { color: var(--bar-quiet-text); }
+.tl-p.closedp { border: 1.5px dashed var(--bar-closed-line); }
+.tl-p.closedp .tl-plbl { color: var(--bar-closed-text); }
+.tl-p.hollow { border-style: solid; border-width: 1px; }
+
+/* ── the markers ──────────────────────────────────────────────────────────────────────────── */
+/* ⚠️ THE HALO IS THE CLEARANCE. A marker sits ON the bar, so without a ring of the row's own
+   colour behind it the two inks touch and neither is legible. It is `box-shadow`, which paints
+   outside the box and takes no layout — so a marker's clearance costs the bar nothing. */
+.tl-mk2 {
+  width: var(--mk); height: var(--mk); border-radius: 999px; background: #fff;
+  display: flex; align-items: center; justify-content: center; z-index: 4;
+  box-shadow: 0 0 0 3px var(--tl-row);
+  transform: translate(-50%, -50%); box-sizing: border-box; padding: 0; border: 1.5px solid transparent;
+}
+.tl-mk2.in    { border-color: var(--mk-in-line);    color: var(--mk-in-ink); }
+.tl-mk2.outk  { border-color: var(--mk-out-line);   color: var(--mk-out-ink); }
+.tl-mk2.bang  { border-color: var(--mk-bang-line);  color: var(--mk-bang-ink); font-weight: 600; font-size: 12px; font-family: 'Playfair Display', Georgia, serif; }
+.tl-mk2.clock { border-color: var(--mk-clock-line); color: var(--mk-clock-ink); }
+.tl-mk2 svg { display: block; }
+button.tl-mk2 { cursor: pointer; }
+.tl-mk2:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
+.tl-rrow.closed .tl-mk2 { opacity: .6; }
+
+/* ── the scrawl ───────────────────────────────────────────────────────────────────────────── */
+/* ⚠️ IT EARNS ITS PLACE OR IT DOES NOT RENDER. A hand-written remark that repeats the button
+   beside it and the bar beneath it is charm doing no work; one carrying a date the row does not
+   otherwise state is the best thing on the board. `scrawlEarns` is the predicate. */
+.tl-scr {
+  font-family: 'Caveat', cursive; font-size: 16.5px; font-weight: 500; color: var(--tl-scrawl);
+  white-space: nowrap; z-index: 3;
+  transform: translateY(-50%) rotate(-1.4deg);
+}
+
+/* ── the writer's own chips ───────────────────────────────────────────────────────────────── */
+.tl-tchip {
+  display: flex; align-items: center; gap: 6px; height: 23px; background: #fff;
+  border: 1px solid var(--tl-chip-line); border-radius: 999px; padding: 0 10px;
+  font-size: 10px; font-weight: 500; color: var(--tl-ink); white-space: nowrap; z-index: 2;
+}
+.tl-tchip .sq { width: 8px; height: 8px; border-radius: 2px; border: 1.5px solid var(--tl-burgundy); flex: 0 0 auto; }
+.tl-tchip.struck { text-decoration: line-through; opacity: .62; }
+.tl-tchip.grab { cursor: grab; }
+.tl-tchip.grab:active { cursor: grabbing; }
+button.tl-tchip { cursor: pointer; }
+.tl-tchip:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+
+/* ══ TODAY, THE CROSSHAIR AND THE ONE TOOLTIP ══════════════════════════════════════════════
  *
- * ⚠️ A HAND, AND THE HAND BELONGS TO ACTIONS ONLY. Caveat implies a person wrote this, and the
- * person it implies is the writer — so nothing waiting, quiet or closed is ever scrawled on. That
- * is enforced in the derivation (`rowNote` returns null outside two groups) rather than here,
- * because a rule keyed on state would be a second answer to the same question.
- *
- * ⚠️ `pointer-events: none` — IT IS NOT PRESSABLE, AND THAT IS A STANDING DEFAULT RATHER THAN AN
- * OVERSIGHT. Making it pressable would duplicate the Action column and is Nick's call; until then
- * a note that looked pressable and was not would be worse than one that plainly is not.
+ * ⚠️ ALL THREE ARE CHILDREN OF THE BOARD WRAP, NOT OF A LANE — because a lane clips. The wrap is
+ * the only ancestor that spans every row and clips nothing.
  */
-.tl-tail {
-  position: absolute;
-  /* ⚠️ THE LANE'S OWN CENTRE, NOT `top: 50%`. A percentage would centre the note on the whole ROW,
-     so a two-book row would write both notes on one line through the middle. Same expression the
-     bars and markers use — `.tl-at`'s — because it is the same fact. */
-  top: calc(var(--lane-h) * (var(--lane, 0) + 0.5));
-  transform: translateY(-50%) rotate(-1.1deg);
-  transform-origin: left center;
-  font-family: "Caveat", cursive;
-  font-size: 19px; font-weight: 600; line-height: 1;
-  color: #7c3a2a;
-  padding-left: 13px; white-space: nowrap;
-  pointer-events: none; z-index: 4;
+.tl-wrap { position: relative; }
+.tl-todayline { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px solid var(--tl-todayl); z-index: 5; pointer-events: none; }
+.tl-todayflag {
+  position: absolute; transform: translateX(-50%); font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 8px; letter-spacing: .12em; color: var(--tl-ink); pointer-events: none; z-index: 5;
 }
-/* ⚠️ THE UNDERLINE IS DRAWN, NOT `text-decoration`. A rule under a hand is a printed rule, which
-   is the one thing in this note that would not have been written by the same person. */
-.tl-tail u { text-decoration: none; position: relative; }
-.tl-tail u::after {
-  content: ""; position: absolute; left: -1px; right: -3px; bottom: 1px; height: 5px;
-  border-bottom: 1.6px solid #c9a89e; border-radius: 0 0 60% 40%;
-  transform: rotate(0.6deg);
+.tl-xh { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px dashed rgba(58, 28, 20, .28); z-index: 6; pointer-events: none; }
+.tl-xhlab {
+  position: absolute; transform: translateX(-50%); background: var(--tl-ink); color: #f8f5f0;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .1em;
+  padding: 3px 7px; border-radius: 4px; z-index: 7; pointer-events: none; white-space: nowrap;
 }
+.tl-tipp {
+  position: absolute; background: #fff; border: 1px solid var(--tl-hair);
+  box-shadow: 0 4px 14px rgba(58, 28, 20, .14); border-radius: 8px; padding: 6px 10px;
+  font-size: 10.5px; color: var(--tl-ink); white-space: nowrap; z-index: 20; pointer-events: none;
+  opacity: 0; transition: opacity .09s;
+}
+.tl-tipp.on { opacity: 1; }
 
-/* ══ THE TEN STATES ═════════════════════════════════════════════════════════════════════════
- *
- * ⚠️ ONE RULE PER STATE, READING ONE TRIPLE. A bar's colour is no longer assembled from `side`
- * plus `weight` plus a modifier; `barState` decides what a stretch IS and the class says so.
- *
- * ⚠️ BORDERS MATCH FILL, AND `transparent` IS HOW — not a second copy of the fill token. A
- * background paints UNDER its border by default (`background-clip: border-box`), so a transparent
- * border shows the bar's own fill and the two cannot be told apart. The ref does it this way and
- * the reason only becomes visible once the bar MOVES: `border-color: var(--bar-y3-fill)` looks
- * identical at rest and diverges the moment a pulse deepens the background, because the border is
- * a frozen copy of a value that is changing. Measured — the acceptance sweep caught it at 1280.
- *
- * ⚠️ THAT ALSO LEAVES THE CLAMPS ALONE. `.openleft` / `.future` paint their edge in `currentColor`
- * to SAY something, and an animation on `border-color` would outrank that longhand and make the
- * claim breathe with the bar. Nothing animates a border now, so nothing can.
- *
- * ⚠️ CLOSED IS THE SOLE EXCEPTION, for a reason that cannot be designed around: a transparent fill
- * with a transparent border is an INVISIBLE BAR. It keeps its dashed edge.
+/* ══ THE EMPTY BOARD ═══════════════════════════════════════════════════════════════════════
+ * ⚠️ NOT A FAILURE STATE. No apology and no prompt to do more — a writer with a quiet window is
+ * entitled to read that as good news, or as nothing at all.
  */
-.tl-seg.s-theirs  { background-color: var(--bar-theirs-fill);  border-color: transparent;  color: var(--bar-theirs-text); }
-.tl-seg.s-theirsq { background-color: var(--bar-theirsq-fill); border-color: transparent; color: var(--bar-theirsq-text); }
-.tl-seg.s-nudged  { background-color: var(--bar-nudged-fill);  border-color: transparent;  color: var(--bar-nudged-text); }
-.tl-seg.s-y1      { background-color: var(--bar-y1-fill);      border-color: transparent;      color: var(--bar-y1-text); }
-.tl-seg.s-y2      { background-color: var(--bar-y2-fill);      border-color: transparent;      color: var(--bar-y2-text); }
-/* ══ URGENCY IS BREATH, NOT COLOUR (settled pack, Phase 3) ═════════════════════════════════
- *
- * ⚠️ LONG-STANDING IS THE SETTLED FILL, PULSING — not a redder bar. A third pink would have been
- * a third thing to learn and a verdict painted on; the same bar, breathing, says a stretch is
- * still running without saying the writer has failed at it.
- *
- * ⚠️ LITERAL VALUES INSIDE `@keyframes`. A `var()` there fails SILENTLY in this setup — no error,
- * no animation, no warning — and this project has shipped that bug. The two stops are
- * `--bar-y3-fill` and `--bar-urgent-fill`, written out; a lock asserts the four agree.
- *
- * ⚠️ AND THE BREATH MOVED. It used to be on `.tl-seg.theirs` — WAITING ON THE AGENT — where the
- * old sheet reasoned that a reply window is real time passing. The ref pulses the writer's own
- * long-standing bar instead, which is the opposite claim: motion belongs to the thing that wants
- * something from you, not to the thing you are waiting on.
- */
-.tl-seg.s-y3 {
-  background-color: var(--bar-y3-fill);
-  border-color: transparent;
-  color: var(--bar-y3-text);
-  animation: tlUrge 2.6s ease-in-out infinite;
+.tl-sparse {
+  background: #fff; border: 1px dashed #e0d3c2; border-radius: 10px; padding: 26px 22px; text-align: center;
 }
-/* ⚠️ THE BACKGROUND ALONE, WHICH IS THE FLAT VARIANT AND THE ONLY ONE NEEDED. Borders are
-   `transparent` here, so the fill breathes THROUGH them and an animated `border-color` would do
-   nothing but outrank the clamps — the ref's own reason for the flat form, arrived at the long way
-   round: a keyframe that also set `border-color` was written first, and the acceptance sweep
-   caught a clamped bar whose border held still while its background moved. */
-/* ⚠️ `background-color`, NEVER THE SHORTHAND. `background:` resets EVERY background longhand,
-   including `background-image` — and an animation outranks normal declarations, so a keyframe
-   written with the shorthand erases `.tl-seg.hatched`'s gradient on every frame it runs. A
-   long-standing bar with an overrun is exactly the bar that has both, so the hatch was being
-   wiped by the breath forty times a second. */
-@keyframes tlUrge {
-  0%, 100% { background-color: #f3dbd0; }
-  50%      { background-color: #e9c3b2; }
-}
-
-/* ⚠️ REDUCED MOTION CARRIES THE SAME INFORMATION WITHOUT MOVING. The old rule was
-   `animation: none` and nothing else — whatever the motion was saying then went unsaid, which is
-   motion as the ONLY signal. The bar settles at the deeper end of its own breath instead, so a
-   reader who has asked for stillness still sees which stretch has run longest.
-   ⚠️ The override sits immediately after the rule it overrides: a media query confers NO
-   specificity, so at equal specificity the later declaration wins. */
-@media (prefers-reduced-motion: reduce) {
-  .tl-seg.s-y3 {
-    animation: none;
-    background-color: var(--bar-urgent-fill);
-    /* the border stays transparent, so it deepens with the fill for free */
-  }
-}
-/* ⚠️ AND NO BREATH IN A PAST WINDOW, where nothing is still running. */
-.tl-row.past .tl-seg.s-y3 { animation: none; }
-.tl-seg.s-offer   { background-color: var(--bar-offer-fill);   border-color: transparent;   color: var(--bar-offer-text); }
-/* ⚠️ GONE QUIET IS HATCHED — the one state whose fill is not a flat colour. Silence has no single
-   tone, and the hatch is what stops a grey bar reading as a disabled one. */
-.tl-seg.s-quiet {
-  background: repeating-linear-gradient(-45deg,
-    var(--bar-quiet-fill) 0 6px, var(--bar-quiet-hatch) 6px 12px);
-  border-color: transparent;
-  color: var(--bar-quiet-text);
-}
-.tl-seg.s-closed {
-  background-color: transparent;
-  border-style: dashed;
-  border-color: var(--bar-closed-line);
-  color: var(--bar-closed-text);
-}
-/* the bullet takes its own bar's ink, so a dot can never disagree with the bar it sits in */
-.tl-seg .d { background-color: currentColor; border: 0; }
-.tl-seg.s-closed .d, .tl-seg.s-theirsq .d {
-  background-color: transparent; border: 1.5px dashed currentColor;
-}
-
-/* ══ ONE TEXT FORMATTING FOR EVERY "YOUR MOVE" STATE ═══════════════════════════════════════
- *
- * ⚠️ FIVE STATES, ONE TREATMENT, AND THE COLOUR IS PART OF IT. Fresh, settled, long-standing, gone
- * quiet and an offer are all things the writer has to act on, so they read as one class of thing:
- * 10px, 500, no tracking, sentence case, `#8e5252`. They used to carry six different text colours
- * between them, none of which meant anything.
- *
- * ⚠️ THE REF DISAGREES WITH ITSELF HERE and the pack settles it. Its token block says
- * `--bar-quiet-text: #8e5252`; a later rule sets `.b.cold .blab { color: #7a4636 }`. The pack names
- * #8e5252 for all five AND gives its reason, so it wins — a reasoned value in prose beats an
- * unreasoned one in an artefact.
- */
-.tl-seg.s-y1 .tl-lbl, .tl-seg.s-y2 .tl-lbl, .tl-seg.s-y3 .tl-lbl,
-.tl-seg.s-quiet .tl-lbl, .tl-seg.s-offer .tl-lbl {
-  font-size: 10px; font-weight: 500; letter-spacing: 0; text-transform: none; color: inherit;
-}
-
-/* ⚠️ THE OVERRUN IS A BACKGROUND TREATMENT ON ONE BAR, NOT A SECOND OBJECT BESIDE IT (Phase 4).
-   It used to be its own element with its own count, so a long-standing row drew two capsules and
-   printed the duration twice. It is the left PORTION of a single continuous bar now: the same
-   element, the same statement, hatched where it ran over. */
-.tl-seg.hatched {
-  /* ⚠️ `background-size` IS THE WHOLE MECHANISM. The hatch covers `--hatch` of THIS bar's width and
-     the bar's own fill shows through beyond it — hatched behind, solid ahead, on one element. A
-     second element was what printed the duration twice. */
-  /* ⚠️ THE STOPS ARE THE LONG-STANDING PAIR, not two pinks of their own. The hatch is the part of
-     a your-move stretch that ran past its expectation, so it is that state's own two ends — the
-     bar's fill and the deeper end of its breath — and it cannot drift from them. */
-  background-image: repeating-linear-gradient(-45deg,
-    var(--bar-urgent-fill) 0 6px, var(--bar-y3-fill) 6px 12px);
-  background-repeat: no-repeat;
-  background-size: var(--hatch, 0%) 100%;
-}
-
-/* ── the edges: what each one claims ───────────────────────────────────────────────────────── */
-.tl-seg.capl { border-top-left-radius: 999px; border-bottom-left-radius: 999px; }
-.tl-seg.capr { border-top-right-radius: 999px; border-bottom-right-radius: 999px; }
-/* ⚠️ A CLAMP TAKES THE STATE'S OWN INK, NOT ITS FILL — the one place "borders match fill" cannot
-   apply. A clamped edge exists to SAY something ("this began before the board" / "this runs past
-   it"), and an edge the same colour as the bar it ends says nothing at all. `currentColor` is the
-   state's `-text` token, which is legible on that state's fill by construction: it is the colour
-   the bar's own words are set in. Three literals went with this — a sage, a dusty pink and a
-   darker pink, one per side and weight, none of them token-derived. */
-.tl-seg.openleft {
-  border-top-left-radius: 0; border-bottom-left-radius: 0;
-  border-left: 2px dotted currentColor;
-}
-.tl-seg.future {
-  border-top-right-radius: 0; border-bottom-right-radius: 0;
-  border-right: 2px dashed currentColor;
-}
-/* ⚠️ IN A PAST WEEK NOTHING IS PROVISIONAL ANY MORE — the dashes go solid and the edge rounds. */
-.tl-row.past .tl-seg.future {
-  border-right-style: solid; border-right-width: 1px;
-  border-top-right-radius: 999px; border-bottom-right-radius: 999px;
-}
-.tl-row.past .tl-seg.openleft { border-left-style: solid; border-left-width: 1px; }
-/* ⚠️ NO REPLY TIME RECORDED — a dashed rail, no cap, no forecast. */
-/* ⚠️ `.norail` IS GEOMETRY ONLY NOW. Its colours moved to `.s-theirsq`, which is the same
-   condition named as a state — "waiting, with no reply date ever given" — so the two cannot
-   disagree. What is left here is the shape that condition takes: no right edge, because there is
-   no date to end at, and no shadow, because there is nothing to lift off the board. */
-.tl-seg.norail {
-  border-right: none; border-radius: 999px; box-shadow: none; animation: none;
-}
-/* ⚠️ OPEN-ENDED BY NATURE — an R&R or an offer with no stated deadline FADES rather than stopping. */
-.tl-seg.openend {
-  border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0;
-  -webkit-mask-image: linear-gradient(90deg, #000 78%, transparent);
-  mask-image: linear-gradient(90deg, #000 78%, transparent);
-}
-
-.tl-seg.sel, .tl-node.sel { box-shadow: 0 0 0 1.5px #7c3a2a; }
-/* ⚠️ THE FOCUS RING RIDES `.tl-at` FOR THE SAME REASON THE POSITION DOES. Grouped as
-   `.tl-seg:focus-visible, .tl-node:focus-visible, .tl-chip:focus-visible` it was three members of
-   one rule again, and retiring any of them would have taken the other two's focus ring with it.
-   A waypoint is `pointer-events: none` and takes no focus, so it costs nothing to be included. */
-.tl-at:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
-
-/* ══ THE MARKERS (markers pack, Phase 3; ref timeline-marker-grammar.html) ══════════════════
- *
- * ⚠️ THREE MARKERS, AND THE SHAPE STATES WHETHER A FACT EXISTS. A StatusDot where the status
- * changed, a smaller ringless dot where an activity was recorded and the status held, a dashed
- * flag where only a date arrived. The interaction rule is the same rule — solid is clickable
- * because something is behind it, dashed is not because nothing is — so the two cannot drift.
- *
- * ⚠️ THE MARKER OCCUPIES THE GAP; IT DOES NOT SIT ON A BAR. The `GAP` clearance either side is the
- * derivation's and is correct as shipped, so the halo below separates the marker from the ground
- * rather than covering a bar that runs under it.
- */
-.tl-node {
-  transform: translate(-50%, -50%);
-  z-index: 3; padding: 0; border: 0; background: none;
-  display: inline-flex; align-items: center; justify-content: center;
-  pointer-events: auto; cursor: pointer;
-}
-/* ⚠️ THE HALO IS PARCHMENT, NOT WHITE — it punches the marker out of the board's own ground, and
-   the board is parchment. White here would draw a ring nobody asked for. */
-.tl-mk {
-  border-radius: 50%; box-shadow: 0 0 0 3px #fdfaf5;
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 100%; height: 100%;
-}
-
-/* ── MARKER 1 · the status changed ────────────────────────────────────────────────────────────
-   ⚠️ THIS RULE SETS NO COLOUR, NO RING AND NO GLYPH, because every one of those is `StatusDot`'s
-   and the component is locked app-wide. It sets a box the size of the dot's own `DOT_SIZE`, which
-   is what `--disc` is, and gets out of the way. */
-.tl-node[data-marker="status"] { width: var(--disc); height: var(--disc); }
-
-/* ── MARKER 2 · recorded, but the status held ─────────────────────────────────────────────────
-   ⚠️ SMALLER AND RINGLESS. A StatusDot here would draw the same symbol on both sides of the join,
-   which reads as nothing having happened — the whole reason this marker exists. */
-.tl-node[data-marker="direction"] { width: var(--ddot); height: var(--ddot); }
-.tl-node[data-marker="direction"] .tl-mk { font-size: 11px; line-height: 1; }
-.tl-node[data-marker="direction"][data-dir="out"] .tl-mk {
-  background: #f8e7dc; border: 1.5px solid #7c3a2a; color: #7c3a2a;
-}
-.tl-node[data-marker="direction"][data-dir="in"] .tl-mk {
-  background: #e9efe6; border: 1.5px solid #8a9e88; color: #5a6e58;
-}
-.tl-node[data-marker="direction"][data-dir="close"] .tl-mk {
-  background: #fff; border: 1.5px solid #b9a48f; color: #b9a48f;
-}
-
-/* ══ THE CAPTION ═══════════════════════════════════════════════════════════════════════════
- *
- * ⚠️ ON HOVER AND ON FOCUS, NEVER AT REST (range pack, Phase 4). Every caption used to hang
- * beneath its marker permanently. At one week that is a readable strip; at six months a day is
- * about six pixels wide, so eighty pixels of mono text per marker overprint their neighbours
- * three and four deep and the board reads as noise laid over shapes.
- *
- * ⚠️ AND THE COLLISION IT REPLACES WAS NEVER SOLVED — IT WAS ANNOTATED. `title={caption}` was
- * added on the marker with a comment saying two captions on one day overprint and that a policy
- * was a design decision. Hover IS the policy: one caption at a time, chosen by the reader,
- * cannot collide with anything by construction. The `title` is retired with it.
- *
- * ⚠️ THE MARKER RISES WITH ITS CAPTION. A revealed caption is wider than the marker it belongs
- * to, so without this it is painted over by the next marker along — the collision moved rather
- * than removed. `z-index` on the hovered ancestor lifts the pair together.
- */
-.tl-tip {
-  position: absolute; top: calc(100% + 5px); left: 50%; transform: translateX(-50%);
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
-  letter-spacing: 0.09em; text-transform: uppercase; color: #a2937f;
-  white-space: nowrap; background: #fdfaf5; padding: 1px 5px; border-radius: 5px;
-  pointer-events: none;
-  opacity: 0; transition: opacity 0.12s ease;
-}
-.tl-at:hover > .tl-tip,
-.tl-at:focus-visible > .tl-tip { opacity: 1; }
-.tl-at:hover, .tl-at:focus-visible { z-index: 6; }
-@media (prefers-reduced-motion: reduce) { .tl-tip { transition: none; } }
-
-/* ── MARKER 3 · A NOTCH — a date arrived, and nothing is behind it ────────────────────────────
- *
- * ⚠️ THE DASHED RING IS SUPERSEDED (density pack, Phase 3; v11 amended). It read as an unfinished
- * StatusDot — and now that a status marker and a direction marker are BOTH circles, anything round
- * on this timeline implies a recorded fact. A date that arrived with nothing against it is the one
- * thing here that is not a fact, so it cannot be a circle at all.
- *
- * ⚠️ A NOTCH IS STRAIGHT-SIDED AND SOLID, which is the whole distinction: it is a mark ON the
- * timeline rather than an object IN it. It was dashed, on the older grammar where dashed meant
- * provisional; that grammar is carried by the SHAPE now, and a dashed 2px line at these sizes read
- * as a rendering artefact rather than as a decision.
- *
- * ⚠️ `pointer-events: none` IS THE INTERACTION HALF OF THE SAME RULE. There is nothing to open, so
- * there is nothing to click — and the ref's own `.notch` carries `cursor: pointer`, which this
- * build deliberately does not: a pointer cursor on an inert mark is a promise the app cannot keep.
- * The `::after` below narrows that without contradicting it — see the note at it.
- */
-.tl-wp {
-  --wp-line: 2px;
-  width: var(--wp-line);
-  /* ⚠️ THE REF SAYS `--bar-h + 12px` AND THIS SAYS THE SAME THING IN THE ROW'S OWN TOKENS.
-     `--wp-over` is how far a waypoint stands proud of the bar — six, at each end — so the literal
-     12 would be that number written twice, once here and once as a token nothing read. */
-  height: calc(var(--bar-h) + var(--wp-over) * 2);
-  transform: translate(calc(var(--wp-line) / -2), -50%);
-  z-index: 3;
-  background: var(--dash);
-  pointer-events: none;
-}
-/* ⚠️ ONE COLOUR FOR EVERY KIND, AND IT IS THE DATE'S, NOT THE SIDE'S. The upright used to be sage
-   for the agent's dates and dusty pink for the writer's, which said whose date it was — a fact the
-   BAR beneath it already carries in its fill, and the only one a notch has room to be wrong about.
-   A notch says "a date lands here"; what kind of date it is, its caption says. */
-.tl-wp .tl-tip { color: #8a7a6c; background: #fdfaf5; }
-/* ⚠️ AN OVERTAKEN WAYPOINT STILL RENDERS — as passed. A past window states what happened, and a
-   forecast that was met or missed is part of what happened. It fades; it does not change shape,
-   because the shape is what it IS rather than when it is. */
-.tl-wp.passed { opacity: 0.55; }
-/* ⚠️ THE REMINDER IS A NOTCH LIKE EVERY OTHER. It drew a dashed RING — the one shape this pack
-   retires — on the reasoning that a reminder is the writer's own date rather than a fact. That is
-   true and it is what the CAPTION says; drawing it as a circle put it in the vocabulary of
-   recorded events, which is precisely where it does not belong. */
-
-/* ⚠️ THE REACH: A TWO-PIXEL MARK CANNOT BE HOVERED, so a transparent pseudo-element takes the
-   pointer events the notch itself does not. The notch stays exactly as unclickable as its own rule
-   says — no handler, no button, `aria-hidden` — and hovering a label is not opening a record. Read
-   the two together. */
-.tl-wp::after {
-  content: ""; position: absolute; top: 0; bottom: 0; left: -10px; width: 20px;
-  pointer-events: auto;
-}
-
-/* ══ THE WRITER'S OWN CHIPS ═════════════════════════════════════════════════════════════════
- *
- * ⚠️ RESTORED. `.tl-chip` and `.tl-band` were ONE GROUPED RULE, and retiring the band took the
- * chip's whole treatment with it — base box, bullet, four kinds, struck and hover — while the chip
- * was still being rendered. An unstyled inline-flex with no padding, border or radius renders its
- * parts as bare concatenated text, which is exactly what shipped.
- *
- * ⚠️ SO THE CHIP IS DECLARED ALONE NOW, sharing no selector with anything. The bar above shares
- * nothing that can be retired independently shares a rule with the chip again. (`.tl-over`, which
- * this note used to cite as the safe case, is itself retired: the overrun is a background on the
- * bar rather than a second element beside it.)
- */
-.tl-chip {
-  height: var(--chip-h);
-  transform: translateY(-50%);
-  box-sizing: border-box;
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 0 11px; border-radius: 999px;
-  font-size: 11px; font-weight: 500; font-family: inherit;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  background: #fff; border: 1px solid #e0d0c4; color: #3a2c22;
-  pointer-events: auto; cursor: pointer; text-align: left;
-}
-.tl-chip .d { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
-/* ⚠️ THE WRITER'S OWN TASK TAKES A CHECKBOX SQUARE — the one thing on this page you tick. */
-.tl-chip[data-kind="task"] .d {
-  border-radius: 2px; border: 1.5px solid #7c3a2a; background: transparent;
-}
-.tl-chip[data-kind="task"] { color: #3f5a3d; }
-.tl-chip[data-kind="ghost"] {
-  background: transparent; border-style: dashed; border-color: #d3c4b3; color: #a08f80;
-}
-.tl-chip[data-kind="ghost"] .d { border: 1.5px dashed #d3c4b3; background: transparent; }
-.tl-chip[data-kind="rec"] { color: #6b5a4d; }
-.tl-chip.struck .tl-lbl { text-decoration: line-through; opacity: 0.62; }
-.tl-chip:hover { border-color: #c9b8a6; }
-.tl-chip.sel { box-shadow: 0 0 0 1.5px #7c3a2a; }
-.tl-chip.grab { cursor: grab; }
-.tl-chip.grab:active { cursor: grabbing; }
-/* the carried mark's arrow — it points at the live item, which sits on today */
-.tl-fwd { font-size: 9px; color: #c0ae9c; flex: none; margin-left: 2px; }
-
-
-.tl-none { padding: 40px 16px; text-align: center; }
-.tl-none-t {
-  font-family: "Playfair Display", Georgia, serif; font-size: 19px; color: #4a3a30;
-  margin: 0; line-height: 1.3;
-}
-
-/* ⚠️ NARROW GOES LAST. Two blocks at equal specificity are decided by order, and a wide query
-   sitting below a narrow one silently overrides it — the fault this repo has already paid for on
-   every phone once. */
-@media (max-width: 1200px) {
-  .tl { --tl-head-w: 200px; }
-}
-@media (max-width: 1000px) {
-  .tl { --tl-head-w: 150px; }
-  .tl-nm { font-size: 13px; }
-}
+.tl-sparse h4 { font-family: 'Playfair Display', Georgia, serif; font-size: 19px; font-weight: 500; margin-bottom: 6px; color: var(--tl-ink); }
+.tl-sparse p { font-size: 12.5px; color: var(--tl-muted); max-width: 420px; margin: 0 auto; line-height: 1.55; }
 
 @media (prefers-reduced-motion: reduce) {
-  /* ⚠️ `.tl-band` IS GONE FROM THIS LIST TOO. It was retired with the bars pack and left behind
-     here, which is harmless in itself — but a retired class still named in a live rule is how the
-     next reader concludes it exists. */
-  .tl-chip, .tl-kind, .tl-mbtn { transition: none; }
+  /* ⚠️ NOTHING ANIMATES ON THIS BOARD ANY MORE — the pulse retired when the fill arrived, because
+     position states what motion was straining to. This block keeps only the row's hover fade,
+     which is a state change rather than an attractor. */
+  .tl-rrow, .tl-tipp { transition: none; }
 }
 
 /* ══ THE ACTION OVERLAY (finishing pack, Phase 6; ref calendar-month-focus-v5.html) ════════════
@@ -1125,7 +677,7 @@
 /* the row head's third line: the books this relationship spans, where it spans more than one */
 .tl-ms {
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7px;
-  letter-spacing: 0.1em; text-transform: uppercase; color: #c9a89e;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--tl-label);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 1px;
 }
 

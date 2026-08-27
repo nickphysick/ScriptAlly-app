@@ -29,7 +29,10 @@ import { TaskPane } from "./TaskPane";
 import { useTaskPaneSession, type TaskPaneHost } from "./useTaskPaneSession";
 import { useTaskCommit } from "./useTaskCommit";
 import { TimelineRangeSlider, TIMELINE_RANGES, DEFAULT_RANGE_INDEX, pastDaysOf } from "./TimelineRangeSlider";
-import { GROUP_ORDER, GROUP_LABEL, COLLAPSED_BY_DEFAULT, type RowGroup } from "../../lib/timelineGroups";
+import {
+  GROUP_ORDER, GROUP_LABEL, COLLAPSED_BY_DEFAULT, groupSentence, TASKS_HEADING, TASKS_SENTENCE,
+  type RowGroup,
+} from "../../lib/timelineGroups";
 import { fitLabel } from "../../lib/barFit";
 import { useConfirmAsk } from "./ConfirmAsk";
 /** this mount's pane section-id prefix — every workspace page stays mounted, so ids must not collide */
@@ -46,15 +49,16 @@ import {
 } from "../../lib/todoCalendar";
 import {
   windowDays, shiftWindow, timelineWeek, defaultView,
-  TIMELINE_FILTERS, FILTER_LABEL, SORT_LABEL, SORT_ORDER,
-  allFilters, YOU_ROW,
+  FILTER_LABEL, SORT_LABEL, SORT_ORDER,
+  YOU_ROW,
   type TimelineItem, type TimelineRow, type TimelineView,
   type RowSort, type TimelineFilter,
 } from "../../lib/todoTimeline";
 import {
-  OVERRUN_SPAN, durationCount,
-  type Segment, type BarNode, type Waypoint,
+  durationCount, fillFor, NEAR_AT,
+  type Segment, type BarNode, type BarState,
 } from "../../lib/journeyBars";
+import { scrawlEarns } from "../../lib/timelineCopy";
 import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
 import { useDockActivity } from "./useDockActivity";
 /* ⚠️ THE QUERY CENTRE'S OWN ROWS, NOT A SECOND READING PANE. `FocusFlow` already mounts these two
@@ -96,6 +100,20 @@ const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
  * The columns change what a reader SEES. They are not what anything is positioned by.
  */
 const pct = (n: number) => `calc(${n} / var(--tl-days) * 100%)`;
+
+/**
+ * How wide a piece is drawn — its span, less the clearance at each end.
+ *
+ * ⚠️ THE CLEARANCE IS TWO TOKENS AND NEITHER IS WRITTEN HERE. A piece that abuts a marker stands
+ * off by `--tl-gap-mk`; one that abuts nothing by `--tl-gap`. The segment says WHETHER it abuts
+ * (data); the stylesheet says by how much (geometry). Writing 12 and 2 into this file would put
+ * the marker's size in the bar's arithmetic, which is the fault the row-height token was built to
+ * end.
+ */
+const gapVar = (abuts: boolean | undefined) => (abuts ? "var(--tl-gap-mk)" : "var(--tl-gap)");
+const barLeft = (sg: Segment) => `calc(${pct(sg.from)} + ${gapVar(sg.abutL)})`;
+const barWidth = (sg: Segment) =>
+  `calc(${pct(sg.to - sg.from)} - ${gapVar(sg.abutL)} - ${gapVar(sg.abutR)})`;
 /**
  * ⚠️ THE PAGE DECLARES WHICH LANE; THE STYLESHEET DECIDES WHERE THAT IS.
  *
@@ -112,163 +130,104 @@ const pct = (n: number) => `calc(${n} / var(--tl-days) * 100%)`;
 const laneVar = (lane: number): React.CSSProperties =>
   ({ ["--lane" as string]: String(lane) } as React.CSSProperties);
 
-const Chip: React.FC<{
-  it: TimelineItem;
-  selected: boolean;
-  onPick: () => void;
-  drag?: { onStart: (e: React.DragEvent) => void; onEnd: () => void };
-}> = ({ it, selected, onPick, drag }) => (
-  <button
-    type="button"
-    className={`tl-at tl-chip${selected ? " sel" : ""}${it.struck ? " struck" : ""}${drag ? " grab" : ""}`}
-    data-kind={it.kind}
-    {...(it.dir ? { "data-dir": it.dir } : {})}
-    style={{
-      left: `calc(${pct(it.idx)} + 4px)`,
-      /* the chip runs to the column before the next occupant of its own lane — the room that is
-         actually free, rather than all the width there is (which is what the ref gives it) */
-      maxWidth: `calc(${pct(it.spanTo - it.idx + 1)} - 8px)`,
-      ...laneVar(it.lane),
-    }}
-    draggable={!!drag}
-    onDragStart={drag?.onStart}
-    onDragEnd={drag?.onEnd}
-    onClick={onPick}
-  >
-    {/* ⚠️ THE RECORD'S DOT COMES FROM `REC_TONE`, THE MAP, because it is the one thing on a chip
-        that VARIES with the data — direction is authorship, and the layer's two tones are declared
-        once. Everything else here is a fixed grammar with no per-item variation, so it lives in
-        the stylesheet with the page's other fixed colours. */}
-    <span className="d" aria-hidden
-      style={it.kind === "rec" ? { background: REC_TONE[it.dir ?? "out"].dot } : undefined} />
-    <span className="tl-lbl">{it.label}</span>
-    {it.kind === "ghost" && <span className="tl-fwd" aria-hidden>↦</span>}
-  </button>
-);
+/**
+ * Which of the ref's five bar families a derived `BarState` is.
+ *
+ * ⚠️ IT IS A MAPPING, NOT A RENAME, AND THE TWO WAITING STATES DIVERGE HERE. `theirs` and
+ * `theirsq` are both "out with the agent" and both draw the sage `out` family — but `theirsq` is
+ * the case where no reply time was EVER given, so it has no named end and therefore no fill. The
+ * empty track is the statement: nobody named a date. `quiet` is the different fact — a date was
+ * named and has passed with nothing scheduled — and it takes the hatch, because there is no span
+ * left for a fraction to be of.
+ */
+const FAMILY: Record<BarState, string> = {
+  closed: "closedp",
+  theirs: "out",
+  theirsq: "out",
+  nudged: "remind",
+  quiet: "quiet",
+  y1: "req",
+  y2: "req",
+  y3: "req",
+  offer: "decide",
+};
 
 /**
- * One piece of a journey bar.
+ * One piece of a bar — a white track, a tinted fill, and the label riding on top.
  *
- * ⚠️ IT IS POSITIONED IN FRACTIONAL DAYS, as a percentage of the seven columns — so a break lands
- * on the same boundary the cells do at every width, and a resize recomputes nothing.
+ * ⚠️ THE FILL IS AN ELEMENT WITH A WIDTH, NOT A GRADIENT STOP. A percentage written into a
+ * background is a number no probe can read back and no reader can be sure of; a child with
+ * `width: N%` is measurable, and `fillFor` is the only thing that decides N.
+ *
+ * ⚠️ AND A BAR WITH NO NAMED END RENDERS NO FILL ELEMENT AT ALL — not a fill of zero. Zero is a
+ * claim that no time has passed; absence is the claim that nobody named a date, which is the true
+ * one and the one the emptiness is there to make.
  */
-const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({ sg, selected, onPick }) => (
-  /**
-   * ⚠️ `s-<state>` IS WHAT THE SHEET PAINTS FROM (settled pack, Phase 2). One class, one rule, one
-   * token triple — where a bar's colour used to be assembled from `side` + `weight` + a modifier
-   * at once, so no single place said what a bar was.
-   *
-   * ⚠️ `yours`/`theirs` AND `w-*` SURVIVE FOR THEIR OTHER READERS, not for colour. `side` drives
-   * the drawer's wording and the row dot; `weight` drives the duration phrasing; both are read by
-   * locks that assert the derivation rather than the paint. Nothing in the stylesheet gives any of
-   * them a colour any more.
-   *
-   * ⚠️ AND THE PROSE SITS HERE RATHER THAN INSIDE THE CLASS LIST, which is not a style
-   * preference. `calendarStyleReach.test.ts` extracts rendered classes with a match bounded at 600
-   * characters; comments inside the expression pushed it past that and the match silently stopped
-   * finding `tl-seg` at all. A bounded slice that stops matching reports an absence, not an error.
-   */
-  <button
-    type="button"
-    className={[
-      "tl-at tl-seg",
-      `s-${sg.state}`,
-      sg.side === "yours" ? "yours" : "theirs",
-      sg.weight ? `w-${sg.weight}` : "",
-      /* ⚠️ THE HATCH IS A CLASS ON THIS BAR, not a second bar beside it. One element, one
-         statement, and the treatment stops where the expectation was. */
-      sg.hatchPct ? "hatched" : "",
-      sg.openLeft ? "openleft" : "", sg.openRight ? "future" : "",
-      sg.capLeft ? "capl" : "", sg.capRight ? "capr" : "",
-      sg.norail ? "norail" : "", sg.openEnd ? "openend" : "",
-      selected ? "sel" : "",
-    ].filter(Boolean).join(" ")}
-    style={{
-      left: `calc(${pct(sg.from)} + 4px)`,
-      width: `calc(${pct(sg.to - sg.from)} - 8px)`,
-      ...(sg.hatchPct ? { ["--hatch" as string]: `${sg.hatchPct}%` } : {}),
-      ...laneVar(sg.lane),
-    }}
-    onClick={onPick}
-  >
-    {/* ⚠️ THE DOT IS THE STATEMENT'S BULLET, so a piece that says nothing does not draw one. A bar
-        states itself once per run; the pieces that stay silent are the same bar continuing, and a
-        lone dot in an empty capsule reads as a pill that failed to load. */}
-    {!!sg.label && <span className="d" aria-hidden />}
-    {/* ⚠️ BOTH FORMS TRAVEL WITH THE ELEMENT and the fit pass swaps its text between them. The
-        alternative — rendering both and hiding one — puts two strings in the accessibility tree
-        for one bar, and the hidden one is the one a screen reader would reach first. */}
-    <span className="tl-lbl" data-long={sg.label} data-short={sg.short}>{sg.label}</span>
-    {sg.count && <span className="tl-cnt">{sg.count}</span>}
-  </button>
-);
+const Piece: React.FC<{
+  sg: Segment; fill: number | null; selected: boolean; onPick: () => void;
+}> = ({ sg, fill, selected, onPick }) => {
+  const near = fill != null && fill >= NEAR_AT && fill < 1 && !sg.historical;
+  return (
+    <div
+      /* ⚠️ THE CLASS LIST IS WRITTEN IN THE JSX, not built into a `const` above it. The style-reach
+         sweep reads `className=` expressions out of this file, so a list assembled into a variable
+         is invisible to it — and its report would be "this class has no rule", about a class it
+         never saw. An absence that reads as a finding. */
+      className={`tl-at2 tl-p ${FAMILY[sg.state]}${sg.hollow ? " hollow" : ""}${near ? " near" : ""}${selected ? " sel" : ""}`}
+      style={{ left: barLeft(sg), width: barWidth(sg), ...laneVar(sg.lane) }}
+      data-state={sg.state}
+      data-fill={fill == null ? "none" : String(Math.round(fill * 100))}
+      data-tip={sg.tip || undefined}
+      onClick={onPick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(); } }}
+    >
+      {fill != null && !sg.hollow && (
+        <span className="tl-fl" data-full={fill >= 1 ? "1" : "0"} style={{ width: `${fill * 100}%` }} />
+      )}
+      {sg.label && (
+        <span className="tl-plbl" data-long={sg.label} data-short={sg.short}>{sg.label}</span>
+      )}
+    </div>
+  );
+};
 
 /**
- * An event on the bar — it sits IN the break the derivation left, and names itself on hover.
- *
- * ⚠️ THE CAPTION IS NOT A `title` ANY MORE (range pack, Phase 4). It was, and the comment at it
- * said why: two markers on one day overprint each other's captions, the markers stay legible and
- * the captions do not, and a policy for that was a design decision left unmade. The policy is
- * hover — one caption at a time, chosen by the reader — so the workaround has no subject left.
- * `aria-label` still carries the same words, and on a `<button>` it replaces the contents for
- * assistive technology, so the caption is not read twice.
- *
- * ⚠️ TWO MARKERS, AND THE SHAPE IS THE CLAIM (v11). Where the status CHANGED the marker is the
- * locked `StatusDot` — the same symbol the writer reads on every other surface, at its own
- * app-wide size, with nothing about it restated here. Where an activity was recorded and the
- * status HELD, a StatusDot would draw the same symbol on both sides of the join and read as
- * nothing having happened, so the marker is a smaller ringless dot carrying the direction alone.
- *
- * ⚠️ BOTH ARE CLICKABLE, because both have an entry behind them. That is not a second rule: it is
- * the same rule the shape states, which is what stops the two drifting apart.
+ * ⚠️ FOUR MARKERS AND NO NOTCH. The notch marked "somebody named this date"; the fill now carries
+ * that distinction on its own — a filling bar means a date exists, an empty one means nobody set
+ * it — and the bar terminates on the date either way. Three statements of one fact, so the
+ * drawing goes and its caption moves onto the bar's tooltip, where it survives the long ranges at
+ * which labels drop out.
  */
-const Node: React.FC<{ n: BarNode; selected: boolean; onPick: () => void }> = ({ n, selected, onPick }) => (
+const GLYPH_IN = (
+  <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden>
+    <path d="M8 5 H2.6 M4.6 2.8 L2.4 5 L4.6 7.2" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+  </svg>
+);
+const GLYPH_OUT = (
+  <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden>
+    <path d="M2 5 H7.4 M5.4 2.8 L7.6 5 L5.4 7.2" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+  </svg>
+);
+const GLYPH_CLOCK = (
+  <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden>
+    <circle cx="6" cy="6" r="4.6" fill="none" stroke="currentColor" strokeWidth="1.2" />
+    <path d="M6 3.6 V6 L7.8 7.2" stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+  </svg>
+);
+
+const Marker: React.FC<{ n: BarNode; selected: boolean; onPick: () => void }> = ({ n, selected, onPick }) => (
   <button
     type="button"
-    className={`tl-at tl-node${selected ? " sel" : ""}`}
-    data-marker={n.marker}
-    data-dir={n.dir}
+    className={`tl-at2 tl-mk2 ${n.mark}${selected ? " sel" : ""}`}
     style={{ left: pct(n.at), ...laneVar(n.lane) }}
-    onClick={onPick}
+    data-tip={n.caption}
     aria-label={n.caption}
+    onClick={onPick}
   >
-    {/* ⚠️ THE HALO IS THE WRAPPER'S, NOT THE DOT'S. `StatusDot` is locked and takes no ring of its
-        own; punching the marker out of the board's parchment is this page's business, so it is
-        this page's element that does it. */}
-    <span className="tl-mk">
-      {n.marker === "status" && n.status
-        ? <StatusDot status={n.status} decorative />
-        : <span aria-hidden>{n.glyph}</span>}
-    </span>
-    <span className="tl-tip">{n.caption}</span>
+    {n.mark === "in" ? GLYPH_IN : n.mark === "outk" ? GLYPH_OUT : n.mark === "clock" ? GLYPH_CLOCK : "!"}
   </button>
-);
-
-/**
- * A date that arrived with nothing recorded against it.
- *
- * ⚠️ NOT CLICKABLE, AND NOT BECAUSE OF A FLAG. It is a `<span>` with no handler, because there is
- * nothing behind it to open — v11's rule is that the interaction and the shape are the SAME rule,
- * so neither can drift from the other. Dashed throughout, because dashed already means provisional
- * everywhere else in this app.
- *
- * ⚠️ THE REMINDER TAKES A DASHED RING RATHER THAN AN UPRIGHT, and no exclamation mark. A reminder
- * falling due is the date you chose, arriving; an exclamation adds alarm the app has no business
- * feeling, which is the ground the forbidden word was ruled out on.
- */
-const Way: React.FC<{ w: Waypoint }> = ({ w }) => (
-  <span
-    /* ⚠️ NO `yours` CLASS (density pack, Phase 3). It coloured the upright sage for the agent's
-        dates and dusty pink for the writer's; a notch is one colour, so the class had no rule left
-        to reach and emitting it would leave a hook the next reader assumes is live. The side is
-        still on `w` for anything that needs it — nothing on this element does. */
-    className={`tl-at tl-wp${w.passed ? " passed" : ""}`}
-    data-kind={w.kind}
-    style={{ left: pct(w.at), ...laneVar(w.lane) }}
-    aria-hidden
-  >
-    <span className="tl-tip">{w.caption}</span>
-  </span>
 );
 
 /** A dropdown that names its current value — the same shape for Show and for Sort. */
@@ -407,12 +366,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     const fit = () => {
       const root = pageRef.current;
       if (!root) return;
-      for (const seg of Array.from(root.querySelectorAll<HTMLElement>(".tl-seg"))) {
-        const lbl = seg.querySelector<HTMLElement>(".tl-lbl");
+      for (const seg of Array.from(root.querySelectorAll<HTMLElement>(".tl-p"))) {
+        const lbl = seg.querySelector<HTMLElement>(".tl-plbl");
         if (!lbl) continue;
         const long = lbl.dataset.long ?? "";
         const short = lbl.dataset.short ?? "";
-        seg.classList.remove("narrow");
+        lbl.style.display = "";
         if (!long) continue;
         /* ⚠️ MEASURE BOTH, THEN DECIDE ONCE. The decision itself is `fitLabel` — pure, and unit-
            locked, because the branch that matters is the one this account never produces: its bars
@@ -426,7 +385,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         switch (fitLabel(seg.clientWidth, longW, shortW)) {
           case "long": lbl.textContent = long; break;
           case "short": lbl.textContent = short; break;
-          default: seg.classList.add("narrow");
+          /* ⚠️ BARE MEANS THE LABEL GOES, NOT THAT IT IS TRUNCATED. An ellipsis is a promise that
+             the rest is somewhere, and on a bar it is not — the tooltip is where a reader finds
+             out, which is why the tip carries the long form and the named date whatever fits. */
+          default: lbl.textContent = ""; lbl.style.display = "none";
         }
       }
     };
@@ -557,7 +519,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     [itemsFor, today],
   );
 
-  const { rows, segments, nodes, waypoints } = useMemo(
+  const { rows, segments, nodes } = useMemo(
     () => timelineWeek(
       { queries, agents, activities, manuscripts, taskFlags, today, itemsFor, recordFor, ghostsOn },
       winFrom, range.days, view,
@@ -566,17 +528,16 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   );
   /** the bar's three parts, grouped by the row they belong to — one pass, read three times */
   const barsByRow = useMemo(() => {
-    const m = new Map<string, { segs: Segment[]; nodes: BarNode[]; ways: Waypoint[] }>();
+    const m = new Map<string, { segs: Segment[]; nodes: BarNode[] }>();
     const get = (k: string) => {
       let v = m.get(k);
-      if (!v) { v = { segs: [], nodes: [], ways: [] }; m.set(k, v); }
+      if (!v) { v = { segs: [], nodes: [] }; m.set(k, v); }
       return v;
     };
     for (const sg of segments) get(sg.rowKey).segs.push(sg);
     for (const n of nodes) get(n.rowKey).nodes.push(n);
-    for (const w of waypoints) get(w.rowKey).ways.push(w);
     return m;
-  }, [segments, nodes, waypoints]);
+  }, [segments, nodes]);
 
   /* ⚠️ THE COUNT STATES WHAT IS ON SCREEN, never a total the filters have stopped describing. */
   const shown = rows.reduce((n, r) => n + r.items.length, 0) + segments.length;
@@ -768,136 +729,358 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
 
   const setView1 = <K extends keyof TimelineView>(k: K, v: TimelineView[K]) =>
     setView((cur) => ({ ...cur, [k]: v }));
-  const toggleKind = (k: TimelineFilter) =>
-    setView((cur) => ({
-      ...cur,
-      kinds: cur.kinds.includes(k) ? cur.kinds.filter((x) => x !== k) : [...cur.kinds, k],
-    }));
 
+  /**
+   * ⚠️ CUT BY MANUSCRIPT IS GATED ON THERE BEING MORE THAN ONE, and the gate reads the
+   * MANUSCRIPTS THE BOARD ACTUALLY DRAWS rather than the writer's shelf. A writer with three
+   * books, two of them shelved with no live queries, has one manuscript on this board — offering
+   * to cut it by book would offer two cuts that produce the same page and one that produces an
+   * empty one.
+   */
+  const boardManuscripts = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const r of rows) for (const m of r.manuscripts) if (m.id) seen.set(m.id, m.title);
+    return [...seen].map(([id, title]) => ({ id, title }));
+  }, [rows]);
+  const cutByAvailable = boardManuscripts.length > 1;
+  const [cutBy, setCutBy] = useState<"needs" | "ms">("needs");
+  /* ⚠️ A CUT THE BOARD CAN NO LONGER OFFER MUST NOT SURVIVE AS STATE. Deleting the last book that
+     made the control available while it is selected would otherwise leave the board grouped by a
+     control that is no longer on screen — a filter nothing can reach and nothing can clear. */
+  const cutNow: "needs" | "ms" = cutByAvailable ? cutBy : "needs";
+
+  /* ══ THE CROSSHAIR, THE ONE TOOLTIP, AND `RIGHT NOW` ═══════════════════════════════════ */
+
+  /**
+   * ⚠️ `RIGHT NOW` IS A VIEW STATE AND NOTHING ELSE — no route, no persistence, no second
+   * derivation. It survives nothing, deliberately: a reader who has filtered the board down to
+   * what is being asked of them should find the whole board again when they come back to it,
+   * because the full board is what the page is for.
+   */
+  const [onlyAsks, setOnlyAsks] = useState(false);
+
+  const wrapRef = React.useRef<HTMLDivElement | null>(null);
+  const tipRef = React.useRef<HTMLDivElement | null>(null);
+  const [cross, setCross] = useState<{ x: number; label: string } | null>(null);
+
+  /**
+   * The crosshair — pure geometry, and it reads the DAY rather than remembering one.
+   *
+   * ⚠️ IT IS COMPUTED FROM THE POINTER'S FRACTION OF THE LANE, never from a column the reader is
+   * over: there are no columns any more. The lane is the ruler, `--tl-days` is its scale, and the
+   * date falls out of the arithmetic — so it cannot drift out of step with where the bars are
+   * drawn, which are placed by the identical expression.
+   */
+  const onLaneMove = (e: React.MouseEvent) => {
+    const wrap = wrapRef.current;
+    const lane = (e.target as HTMLElement | null)?.closest?.(".tl-c-tl") as HTMLElement | null;
+    if (!wrap || !lane || !lane.closest(".tl-rrow")) { setCross(null); return; }
+    const wr = wrap.getBoundingClientRect();
+    const lr = lane.getBoundingClientRect();
+    const f = (e.clientX - lr.left) / lr.width;
+    if (f < 0 || f > 1) { setCross(null); return; }
+    const idx = Math.min(visible.length - 1, Math.max(0, Math.round(f * range.days)));
+    const ymd = visible[idx];
+    if (!ymd) { setCross(null); return; }
+    setCross({ x: (lr.left - wr.left) + f * lr.width, label: shortCalDate(ymd) });
+  };
+  const clearCross = () => setCross(null);
+
+  /**
+   * ONE tooltip, portalled to the board wrap.
+   *
+   * ⚠️ `.tl-c-tl` CLIPS (`overflow: hidden`), SO NO DESCENDANT TOOLTIP CAN ESCAPE IT — a clipping
+   * ancestor beats any `z-index` a child can declare. That is why this is a single element at
+   * board level rather than one per bar, and why it is positioned against the wrap and clamped
+   * inside it: a tip on the last row or at the right-hand edge would otherwise be cut in half by
+   * the very box it belongs to.
+   *
+   * ⚠️ AND IT NEVER INTERCEPTS CLICKS. `pointer-events: none` in the sheet, so a marker under it
+   * stays clickable — a tooltip that swallowed the click on the thing it describes would be a
+   * control that looks live and is not.
+   */
+  React.useEffect(() => {
+    const wrap = wrapRef.current;
+    const tip = tipRef.current;
+    if (!wrap || !tip) return;
+    const show = (ev: MouseEvent) => {
+      const t = (ev.target as HTMLElement | null)?.closest?.("[data-tip]") as HTMLElement | null;
+      if (!t) { tip.classList.remove("on"); return; }
+      const text = t.getAttribute("data-tip") ?? "";
+      if (!text) { tip.classList.remove("on"); return; }
+      tip.textContent = text;
+      tip.classList.add("on");
+      const wr = wrap.getBoundingClientRect();
+      const tr = t.getBoundingClientRect();
+      tip.style.top = `${(tr.top - wr.top) - tip.offsetHeight - 7}px`;
+      const half = tip.offsetWidth / 2;
+      const want = (tr.left - wr.left) + Math.min(tr.width / 2, 90);
+      const x = Math.max(half + 2, Math.min(wr.width - half - 2, want));
+      tip.style.left = `${x - half}px`;
+    };
+    const hide = (ev: MouseEvent) => {
+      const to = ev.relatedTarget as HTMLElement | null;
+      if (!to || !to.closest?.("[data-tip]")) tip.classList.remove("on");
+    };
+    wrap.addEventListener("mouseover", show);
+    wrap.addEventListener("mouseout", hide);
+    return () => {
+      wrap.removeEventListener("mouseover", show);
+      wrap.removeEventListener("mouseout", hide);
+    };
+  }, []);
+
+  /* ⚠️ THESE TWO ARE DECLARED ABOVE THE BOARD DERIVATION, AND THE ORDER IS LOAD-BEARING.
+     `board` is a `useMemo` that RUNS DURING RENDER and calls `asksOfYou` → `actionFor`; a `const`
+     arrow declared below it is in its temporal dead zone at that moment, so the page threw
+     "Cannot access 'actionFor' before initialization" and fell into its error boundary — with a
+     clean `tsc`, because TypeScript cannot see through a helper the render happens to call. The
+     render smoke is what caught it, which is the reason that smoke exists. */
+  /* ══ WHAT A ROW ASKS OF YOU, AND WHAT IT SCRAWLS ═══════════════════════════════════════ */
+
+  /**
+   * The one deed this row offers, or `null`.
+   *
+   * ⚠️ THE LABEL AND THE SCRAWL COME FROM ONE SOURCE, which is why they cannot disagree. `rowNote`
+   * already derives the deed from the query's status (and, for a reminder fallen due, from a
+   * date); the button uppercases it and the scrawl sets it in a hand. Two renderings of one fact,
+   * never two derivations of it.
+   *
+   * ⚠️ AND A DEED WITHOUT A CARD IS NOT AN ACTION. The button's only job is to open the task pane,
+   * so a row whose work has no `BoardCard` behind it has no door to offer — it shows the em-dash.
+   * A button that opened nothing would be the dead-control fault this repo already records
+   * against an Undo that restored nothing.
+   */
+  const actionFor = (r: TimelineRow): { label: string; card: BoardCard; itemKey: string | null } | null => {
+    if (!r.note) return null;
+    const withCard = r.items.find((i) => i.card);
+    if (!withCard?.card) return null;
+    return { label: r.note.deed.toUpperCase(), card: withCard.card, itemKey: withCard.key };
+  };
+
+  /**
+   * The scrawl, where it earns its place — with where to anchor it.
+   *
+   * ⚠️ ANCHORED PAST THIS ROW'S OWN LAST PIECE, never at a fixed offset, so it reads as a remark
+   * added to that stretch rather than as a column of its own. `--lane` puts it on the line the
+   * piece is on; without it a two-book row would write both notes on the first lane.
+   */
+  const scrawlFor = (
+    r: TimelineRow,
+    segs: readonly Segment[],
+    act: { label: string } | null,
+  ): { text: string; at: number; lane: number } | null => {
+    if (!r.note) return null;
+    if (!scrawlEarns(r.note, segs.map((sg) => sg.label).filter(Boolean))) return null;
+    const pieces: { to: number; lane: number }[] = segs.map((sg) => ({ to: sg.to, lane: sg.lane }));
+    if (!pieces.length) return null;
+    const last = pieces.reduce((a, b) => (b.to > a.to ? b : a));
+    void act;
+    return { text: `${r.note.deed} · ${r.note.timing}`, at: last.to, lane: last.lane };
+  };
+
+  /* ══ THE BOARD'S OWN DERIVATIONS ═══════════════════════════════════════════════════════ */
+
+  /**
+   * The date labels along the one column header.
+   *
+   * ⚠️ ROUGHLY NINE ACROSS THE WINDOW, AT EVERY RANGE — the ref's own `nDays / 9`. It is not a
+   * day grain, a week grain or a month grain: those were properties of a grid that had to put a
+   * cell somewhere, and there is no grid. Nine labels is what a reader can scan without counting.
+   */
+  const dateLabels = useMemo(() => {
+    const step = Math.max(1, Math.round(range.days / 9));
+    const out: { ymd: string; at: number; text: string }[] = [];
+    for (let d = step; d < range.days; d += step) {
+      const ymd = visible[d];
+      if (ymd) out.push({ ymd, at: d, text: shortCalDate(ymd) });
+    }
+    return out;
+  }, [range.days, visible]);
+
+  /** where today sits in the window, or `null` when the window does not contain it */
+  const todayAt = useMemo(() => {
+    const i = visible.indexOf(today);
+    return i < 0 ? null : i + 0.5;
+  }, [visible, today]);
+  const todayLeft = todayAt == null ? undefined : pct(todayAt);
+
+  /**
+   * ⚠️ `RIGHT NOW` IS A FILTER OF THE ONE DERIVATION, NEVER A SECOND ONE. It shows every row that
+   * asks something of you and nothing else — the same rows, the same bars, the same deeds, in the
+   * same groups. Deriving the short board separately is how two surfaces come to disagree about
+   * what is being asked; the round-trip identity check in `calLook.measure.ts` asserts that
+   * toggling out and back returns the identical set, by row key.
+   */
+  const asksOfYou = (r: TimelineRow) => actionFor(r) != null;
+
+  /**
+   * The board, as groups.
+   *
+   * ⚠️ "Your tasks" IS A HEADING, NOT A SEVENTH `RowGroup`. A task belongs to no query, so
+   * `rowGroupOf` returns `null` for it and that null is DATA. Widening the classification so the
+   * view could have its heading would put a view decision inside a function every other reader
+   * shares.
+   */
+  const board = useMemo(() => {
+    const live = onlyAsks ? rows.filter(asksOfYou) : rows;
+    const out: {
+      key: string; title: string; sentence: string; count: number;
+      rows: TimelineRow[]; group: RowGroup | null; collapsible: boolean; open: boolean;
+    }[] = [];
+    const pinned = live.filter((r) => r.group === null);
+    if (pinned.length) {
+      out.push({
+        key: "tasks", title: TASKS_HEADING, sentence: TASKS_SENTENCE, count: pinned.length,
+        rows: pinned, group: null, collapsible: false, open: true,
+      });
+    }
+    /* ⚠️ CUT BY MANUSCRIPT REPLACES THE GROUPS, IT DOES NOT NEST INSIDE THEM. A board grouped by
+       book and then by urgency is a board with fourteen headings; the cut is a different question
+       ("what is happening with this book"), and answering both at once answers neither. Tasks keep
+       their own heading either way — they belong to no book by construction. */
+    if (cutNow === "ms") {
+      for (const m of boardManuscripts) {
+        const mine = live.filter((r) => r.group !== null && r.manuscripts.some((x) => x.id === m.id));
+        if (!mine.length) continue;
+        out.push({
+          key: `ms-${m.id}`, title: m.title, sentence: "", count: mine.length,
+          rows: mine, group: null, collapsible: false, open: true,
+        });
+      }
+      return out;
+    }
+    for (const g of GROUP_ORDER) {
+      /* ⚠️ IN `RIGHT NOW` ONLY THE THREE ASKING GROUPS CAN SURVIVE, and that falls out of the
+         filter rather than being listed: a watching, snoozed or closed row asks nothing, so it
+         has no action and is already gone. A hard-coded list of three would be a second statement
+         of the same rule, free to drift. */
+      const mine = live.filter((r) => r.group === g);
+      /* ⚠️ AN EMPTY GROUP IS OMITTED ENTIRELY, HEADER AND ALL. A header reading "0" is a heading
+         for nothing — it teaches the shape of a board the writer does not have. */
+      if (!mine.length) continue;
+      out.push({
+        key: g, title: GROUP_LABEL[g], sentence: groupSentence(g, mine.length), count: mine.length,
+        rows: mine, group: g, collapsible: g === "snoozed", open: !shut.includes(g),
+      });
+    }
+    return out;
+  }, [rows, shut, onlyAsks, cutNow, boardManuscripts]);
+
+  const firstOpen = board.findIndex((g) => g.open && g.rows.length > 0);
+  const asking = rows.filter(asksOfYou).length;
+
+  /**
+   * ⚠️ THE EMPTY STATES ARE TWO DIFFERENT FACTS AND MUST NOT SHARE COPY. "Nothing is asking for
+   * you" is good news about a board full of live queries; "nothing here yet" is a board with no
+   * queries at all. One sentence for both would tell a writer with twelve live submissions that
+   * they have none.
+   */
+  const sparse = onlyAsks ? (
+    <div className="tl-sparse">
+      <h4>Nothing is asking for you</h4>
+      <p>Every query is with an agent and no reminder has fallen due. The full board shows what is
+        out and how far through each wait you are.</p>
+    </div>
+  ) : (
+    <div className="tl-sparse">
+      <h4>Nothing in this window</h4>
+      <p>Queries you send, replies you log and dates you set will line up here.</p>
+    </div>
+  );
+
+  /**
+   * A row: name · action · timeline.
+   *
+   * ⚠️ THREE FLEX COLUMNS, NOT A GRID OF DAYS. The grid is what forced a 1-week range to exist,
+   * and it is what could silently grow the board sideways when anything was auto-placed. Here the
+   * timeline column is simply a positioning context and every piece is a percentage of it — so
+   * gridlines, the weekend question and the phantom-column hazard all cease to exist rather than
+   * being suppressed one rule at a time.
+   */
   const row = (r: TimelineRow) => {
-    const bar = barsByRow.get(r.key) ?? { segs: [], nodes: [], ways: [] };
+    const bar = barsByRow.get(r.key) ?? { segs: [], nodes: [] };
     const lanes = Math.max(1, r.lanes);
+    const act = actionFor(r);
+    const scrawl = scrawlFor(r, bar.segs, act);
     return (
       <div
         key={r.key}
-        className={`tl-grid tl-row${r.key === YOU_ROW ? " tl-row--pin" : ""}${r.closed ? " closed" : ""}${pastWeek ? " past" : ""}`}
-        /* ⚠️ THE ROW GROWS TO HOLD ITS LANES — it never clips one. A clipped lane hides a journey
-           with nothing to say so, which is the one failure a bar must not have. The HEIGHT is the
-           sheet's: `--lanes` is how many lines this row needs, which is data, and what a line is
-           worth is `--lane-h`, which is geometry. */
+        className={`tl-rrow${r.closed ? " closed" : ""}`}
         style={{ ["--lanes" as string]: String(lanes) } as React.CSSProperties}
       >
-        {/* ⚠️ THE ROW HEAD IS A CONTROL — it opens the relationship's workspace with nothing
-            selected, which is how you reach a query that has no card raised against it. */}
-        <button type="button" className="tl-rowhead" style={{ gridColumn: 1 }}
+        {/* ⚠️ THE NAME IS A CONTROL — it opens the relationship's workspace with nothing selected,
+            which is how you reach a query that has no card raised against it. */}
+        <button type="button" className="tl-c-nm tl-nmbtn"
           onClick={() => openWork(r.key, today, null)}>
-          <span className="tl-nm">
-            {/**
-              * ⚠️ THE LOCKED COMPONENT, AT ITS OWN SMALLEST SUPPORTED SIZE — never a drawing of
-              * one. `StatusDot` owns the ring, the glyph, the pulse and the palette, and its
-              * amended lock says direction and stage are carried by SHAPE while the six pipeline
-              * statuses take one hue per theme. So reproducing "colour for direction" here would
-              * be a fork of a locked component wearing a helpful face. Nothing is restated.
-              *
-              * ⚠️ `overrideSize` EXISTS FOR EXACTLY THIS — "the dense timelines, where a full-size
-              * dot would be clipped" — and clamps at 12. 18 is inside the supported range and
-              * already has siblings at 19 on the Agents page and 22 in the query list.
-              *
-              * ⚠️ THE PINNED ROW KEEPS ITS SQUARE. It holds no query, so it has no status, and a
-              * dot invented for it would state a journey that does not exist. The fallback is the
-              * mark it already had rather than a blank space.
-              */}
-            {r.status
-              ? <StatusDot status={r.status} overrideSize={18} decorative />
-              : <i className="tl-sd" data-dot={r.dot} aria-hidden />}
-            <span className="tl-nmtxt">{r.name}</span>
+          {/* ⚠️ THE LOCKED COMPONENT, NEVER A DRAWING OF ONE. `StatusDot` owns the ring, the
+              glyph and the palette; the pinned row keeps its square because it holds no query and
+              a dot invented for it would state a journey that does not exist. */}
+          {r.status
+            ? <StatusDot status={r.status} overrideSize={13} decorative />
+            : <i className="tl-sd" data-dot={r.dot} aria-hidden />}
+          <span className="tl-nmwrap">
+            <span className="tl-nm2">{r.name}</span>
+            {r.agency && <span className="tl-ag2">{r.agency}</span>}
+            {/* the books, only where the relationship spans more than one — naming the single
+                obvious one is a line that says nothing */}
+            {r.manuscripts.length > 1 && (
+              <span className="tl-ms">{r.manuscripts.map((m) => m.title).filter(Boolean).join(" · ")}</span>
+            )}
           </span>
-          {r.agency && <span className="tl-ag">{r.agency}</span>}
-          {/* ⚠️ THE BOOKS ARE NAMED ONLY WHERE THERE IS MORE THAN ONE. Naming the single obvious
-              one is a line that says nothing, and this row has little enough height as it is. */}
-          {r.manuscripts.length > 1 && (
-            <span className="tl-ms">{r.manuscripts.map((m) => m.title).filter(Boolean).join(" · ")}</span>
-          )}
-          {/**
-            * ⚠️ THE SENTENCE IS ALWAYS HERE NOW (grouped pack, Phase 5), at every range — it is
-            * what the row SAYS, not a fallback for a range where the bar cannot carry a label.
-            * The relocation this replaces was the bar's own words moved for legibility at three
-            * months and above; a head that only speaks when the board is zoomed out is a head that
-            * has nothing to say when the writer is closest to the work.
-            *
-            * ⚠️ AND IT IS THE ROW'S SENTENCE, NOT THE BAR'S LABEL. The two are deliberately
-            * different registers now: the bar names its own stretch in as few words as fit inside
-            * it, and the head says what is happening in this relationship in the writer's voice.
-            * They come from one lead query, so they cannot describe different journeys.
-            */}
-          {r.sentence && <span className="tl-rowsay">{r.sentence}</span>}
         </button>
-        {/* ⚠️ EVERY PARTICIPANT NAMES ITS OWN COLUMN. Auto-placement never overlaps: an auto-placed
-            cell beside the explicitly placed lane would be pushed into an implicit new column and
-            the grid would silently grow sideways — measured at 688px of phantom right margin the
-            last time this page mixed the two. */}
-        {columns.map(({ ymd }, i) => (
-          <div
-            key={ymd}
-            /* ⚠️ THE BOUNDARY IS ON THE CELL THAT STARTS THE WEEK, and `i > 0` keeps it off the
-               first column, whose left edge is the head column's own border. */
-            className={`tl-cell${ymd === today ? " today" : ""}${ymd < today ? " past" : ""}${dropYmd === ymd ? " dropok" : ""}${i > 0 && startsPeriod(ymd) ? " bound" : ""}`}
-            style={{ gridColumn: i + 2, gridRow: 1 }}
-            onDragOver={dragTask && ymd !== dragTask.from ? (e) => { e.preventDefault(); setDropYmd(ymd); } : undefined}
-            onDragLeave={dropYmd === ymd ? () => setDropYmd(null) : undefined}
-            onDrop={(e) => { e.preventDefault(); dropOn(ymd); }}
-          />
-        ))}
-        <div className="tl-lane">
-          {/**
-            * ⚠️ THE NOTE SITS AFTER THE BAR, AND ONLY WHERE THERE IS SOMETHING TO DO. It is set in
-            * a hand, and a hand implies a PERSON wrote it — the person it implies is the writer.
-            * So a row where nothing is being asked of them carries none: `note` is `null` for
-            * every waiting, quiet and closed row, which is the common case and is the point.
-            *
-            * ⚠️ IT IS PLACED AT THE BAR'S END rather than at a fixed offset, so it reads as a
-            * remark added to that stretch rather than as a column of its own. `--lane` puts it on
-            * the same line as the bar it belongs to; without it a two-book row would write both
-            * notes on the first lane.
-            */}
-          {r.note && bar.segs.length > 0 && (() => {
-            const last = bar.segs.reduce((a, b) => (b.to > a.to ? b : a));
-            return (
-              <span className="tl-tail" style={{ left: pct(last.to), ...laneVar(last.lane) }}>
-                {/* the deed is underlined by hand; the timing follows plain, because a date is
-                    not an instruction */}
-                <u>{r.note.deed}</u>{r.note.timing && <> · {r.note.timing}</>}
-              </span>
-            );
-          })()}
-          {/* the bar first, then its events on top of it, then the writer's own chips above both */}
+
+        {/* ⚠️ THE ACTION COLUMN IS A DOOR, NOT A FORM. The button opens the same `TaskPane` the
+            To-do page opens, through the same `useTaskPaneSession`; it commits nothing itself. */}
+        <div className="tl-c-ac">
+          {act
+            ? (
+              <button type="button" className="tl-abtn" onClick={() => openWork(r.key, today, act.itemKey, act.card)}>
+                {act.label}<span className="cv" aria-hidden>›</span>
+              </button>
+            )
+            : <span className="tl-adash" aria-hidden>–</span>}
+        </div>
+
+        <div className="tl-c-tl">
           {bar.segs.map((sg) => (
-            <Seg key={sg.key} sg={sg} selected={sel === sg.key}
+            <Piece key={sg.key} sg={sg} fill={fillFor(sg)} selected={sel === sg.key}
               onPick={() => pickSeg(r.key, sg)} />
           ))}
-          {bar.ways.map((w) => <Way key={w.key} w={w} />)}
           {bar.nodes.map((n) => (
-            <Node key={n.key} n={n} selected={sel === n.key}
+            <Marker key={n.key} n={n} selected={sel === n.key}
               onPick={() => setSel((c) => (c === n.key ? null : n.key))} />
           ))}
           {r.items.map((it) => (
-            <Chip
+            <button
               key={it.key}
-              it={it}
-              selected={sel === it.key}
-              onPick={() => pick(r.key, it)}
-              drag={it.draggable && it.card?.userTaskId ? {
-                onStart: (e) => {
-                  /* the payload rides the event for protocol correctness — the STATE is what the
-                     drop reads; dataTransfer is write-only in dragover */
-                  e.dataTransfer.setData("text/plain", it.card!.userTaskId!);
-                  e.dataTransfer.effectAllowed = "move";
-                  setDragTask({ id: it.card!.userTaskId!, from: it.ymd });
-                },
-                onEnd: endDrag,
+              type="button"
+              className={`tl-at2 tl-tchip${it.struck ? " struck" : ""}${it.draggable && it.card?.userTaskId ? " grab" : ""}${sel === it.key ? " sel" : ""}`}
+              style={{ left: `calc(${pct(it.idx)} + var(--tl-gap))`, ...laneVar(it.lane) }}
+              data-tip={it.label}
+              draggable={!!(it.draggable && it.card?.userTaskId)}
+              onDragStart={it.draggable && it.card?.userTaskId ? (e) => {
+                /* the payload rides the event for protocol correctness — the STATE is what the
+                   drop reads; dataTransfer is write-only in dragover */
+                e.dataTransfer.setData("text/plain", it.card!.userTaskId!);
+                e.dataTransfer.effectAllowed = "move";
+                setDragTask({ id: it.card!.userTaskId!, from: it.ymd });
               } : undefined}
-            />
+              onDragEnd={endDrag}
+              onClick={() => pick(r.key, it)}
+            >
+              <span className="sq" aria-hidden />{it.label}
+            </button>
           ))}
+          {/* ⚠️ THE SCRAWL EARNS ITS PLACE OR IT DOES NOT RENDER — `scrawlEarns` is the predicate,
+              and `scrawlFor` has already applied it. It is anchored 16px past the end of this
+              row's own last piece, so it reads as a remark added to that stretch. */}
+          {scrawl && (
+            <span className="tl-at2 tl-scr"
+              style={{ left: `calc(${pct(scrawl.at)} + 16px)`, ...laneVar(scrawl.lane) }}>
+              {scrawl.text}
+            </span>
+          )}
         </div>
       </div>
     );
@@ -923,7 +1106,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
        is why this note describes the phrase instead of quoting it. (Its own needle is split in
        two "so this lock never matches itself" — the author knew.) */
     head = <>{sg.side === "yours" ? "With you" : "Waiting to hear"}{who && <> — <em>{who}</em></>}</>;
-    ctx = sg.hatchPct ? "This has been with you since the date a reply was expected." : sg.label;
+    /* ⚠️ THE HOLLOW STRETCH IS WHAT THE HATCH USED TO SAY. A piece past its named end is time the
+       writer has held past the date somebody stated — drawn as an outline, and named here only
+       because a focus band is prose rather than drawing. */
+    ctx = sg.hollow ? "This has run past the date that was named for it." : sg.label;
     if (sg.count) facts.push({ k: "Duration", v: sg.count });
     facts.push({ k: "With", v: sg.side === "yours" ? "You" : "The agent" });
     acts = <button type="button" className="tl-btn" onClick={() => onNavigatePath(`/queries?q=${encodeURIComponent(sg.queryId)}`)}>Open query ›</button>;
@@ -933,7 +1119,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     head = <>{n.caption}{who && <> — <em>{who}</em></>}</>;
     ctx = "";
     acts = <button type="button" className="tl-btn" onClick={() => onNavigatePath(`/queries?q=${encodeURIComponent(n.queryId)}`)}>Open query ›</button>;
-  } else if (selItem) {  } else if (selItem) {
+  } else if (selItem) {
     const { it, row } = selItem;
     head = <>{it.label}{row.key !== YOU_ROW && <> — <em>{row.name}</em></>}</>;
     ctx = it.kind === "ghost"
@@ -1094,6 +1280,26 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
             <>
               {/* ⚠️ THE RANGE SITS WITH THE PAGER, because they answer one question between them —
                   the pager moves the window and this sets how much of it there is. */}
+              {/* ══ ONE CONTROL ROW ═══════════════════════════════════════════════════════
+                  ⚠️ THE KIND CHIPS ARE REMOVED, NOT HIDDEN, AND `TimelineView.kinds` WENT WITH
+                  THEM. Four toggles that each subtracted a class of thing from a board whose whole
+                  claim is that it shows you the relationship entire — and a board you have
+                  silently switched a quarter of off is a board that lies by omission. Leaving the
+                  field behind set to "all" would have left a filter nothing could reach and
+                  nothing could clear, which is how a retired control comes back as a bug. */}
+
+              {/* ⚠️ CUT BY MANUSCRIPT ONLY EXISTS FROM THE SECOND MANUSCRIPT ON. The ref's own
+                  audit: "genuinely useful from the second manuscript onward; noise before that."
+                  A control offering one choice implies others the writer cannot reach. */}
+              {cutByAvailable && (
+                <span className="tl-seg2" role="group" aria-label="Cut by">
+                  <button type="button" data-on={cutBy === "needs"} aria-pressed={cutBy === "needs"}
+                    onClick={() => setCutBy("needs")}>WHAT NEEDS YOU</button>
+                  <button type="button" data-on={cutBy === "ms"} aria-pressed={cutBy === "ms"}
+                    onClick={() => setCutBy("ms")}>MANUSCRIPT</button>
+                </span>
+              )}
+
               <TimelineRangeSlider index={rangeIdx} onChange={setRangeIdx} />
               <button type="button" className="cal-nav calm-nav" aria-label="Previous window"
                 onClick={() => setWinStart((s) => shiftWindow(s, range.days, -1))}>
@@ -1106,21 +1312,16 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                 <ChevronRight size={14} aria-hidden />
               </button>
 
-              {/* ⚠️ ONE CONTROL ROW, AND THE SECOND ONE IS GONE. The filters used to sit in a row of
-                  their own directly beneath this one — two strips of controls stacked, 42px of a
-                  900px viewport spent on the fact that they had been built at different times.
-                  They are one line now: which week, which kinds, which order, what you are looking
-                  for, and how much of it there is. */}
               <span className="tl-sep" aria-hidden />
-              <span className="tl-kinds" role="group" aria-label="Kinds">
-                {TIMELINE_FILTERS.map((k) => (
-                  <button key={k} type="button" className="tl-kind"
-                    data-on={view.kinds.includes(k)} aria-pressed={view.kinds.includes(k)}
-                    onClick={() => toggleKind(k)}>
-                    {FILTER_LABEL[k]}
-                  </button>
-                ))}
+              {/* ⚠️ A FILTER OF THE ONE BOARD, NEVER A SECOND BOARD. Same rows, same bars, same
+                  deeds, same groups — only the rows that ask nothing of you are withheld. */}
+              <span className="tl-seg2" role="group" aria-label="How much of the board">
+                <button type="button" data-on={!onlyAsks} aria-pressed={!onlyAsks}
+                  onClick={() => setOnlyAsks(false)}>FULL BOARD</button>
+                <button type="button" data-on={onlyAsks} aria-pressed={onlyAsks}
+                  onClick={() => setOnlyAsks(true)}>RIGHT NOW</button>
               </span>
+
               <Menu<RowSort> label="Sort" value={view.sort} options={SORT_ORDER}
                 labels={SORT_LABEL} onPick={(v) => setView1("sort", v)} />
               <input
@@ -1130,12 +1331,13 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                 onChange={(e) => setView1("search", e.target.value)}
               />
               <TplGrow />
-              {/* ⚠️ THE COUNT ELIDES FIRST when the row runs short of room, then the search
-                  narrows — a tally is the one thing here that answers a question nobody has asked
-                  yet, so it is the one that can go. Neither the week, the kinds, the order nor the
-                  search may ever be the thing that wraps. */}
+              {/* ⚠️ THE COUNT NAMES WHAT IS ON SCREEN, and it changes its noun with the view — a
+                  tally of "relationships" beside a board showing only what is being asked of you
+                  would be counting one thing and describing another. */}
               <span className="tl-count">
-                {agentRows} {agentRows === 1 ? "row" : "rows"} · {shown} {shown === 1 ? "item" : "items"}
+                {onlyAsks
+                  ? `${asking} ASKING FOR YOU`
+                  : `${agentRows} ${agentRows === 1 ? "RELATIONSHIP" : "RELATIONSHIPS"}`}
               </span>
               {/* the pink creation action: the ONE composer lives on the To-do list page — go
                   there and announce, never a second create surface */}
@@ -1159,77 +1361,68 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
           ) : (
           <>
           <div className="tl-board">
-            {/* ⚠️ THE ZONE NAMES WHAT IS IN IT, AND IT SAID "The week" AT EVERY RANGE (Phase 5).
-                It was true while a window could only be seven days. It is the same fault as a
-                comment outliving what it described, arriving through a prop: a label nobody
-                re-reads, stating something the code stopped doing. */}
             <TplZone className="tl-zone" hem={false} label={range.label}>
               <div
-                className={`tl dense${range.dense}`}
-                style={{ "--tl-days": range.days, "--tl-cols": columns.length } as React.CSSProperties}
+                className="tl tl-wrap"
+                ref={wrapRef}
+                style={{ "--tl-days": range.days } as React.CSSProperties}
+                onMouseMove={onLaneMove}
+                onMouseLeave={clearCross}
               >
-                {/* ⚠️ THE TODAY SPINE IS GONE (grouped pack, Phase 2), and the ref draws none
-                    either. Today is where the board STARTS — every range opens a small slice
-                    before it and the rest ahead — so a line marking today restated what the
-                    layout already guarantees, in the one place a reader was least likely to
-                    need telling. The past columns' deeper ground says the same thing by being
-                    the thing itself rather than a label on it. */}
-                <div className="tl-grid tl-head">
-                  <div className="tl-corner" style={{ gridColumn: 1, gridRow: 1 }}>Agents &amp; you</div>
-                  {columns.map((c, i) => (
-                    <div key={c.ymd} className={`tl-dh${c.now ? " today" : ""}${!c.now && c.ymd < today ? " past" : ""}${i > 0 && startsPeriod(c.ymd) ? " bound" : ""}`}
-                      style={{ gridColumn: i + 2, gridRow: 1 }}>
-                      {/* ⚠️ THE WEEKDAY INITIAL DROPS AT A MONTH AND BEYOND (ref v18): seven letters
-                          repeating thirty-one times is noise, and at week or month grain a column is
-                          not a weekday at all. The date below it carries the column either way. */}
-                      {range.grain === "day" && range.days <= 14 && (
-                        <span className="tl-dw">{DOW[new Date(`${c.ymd}T12:00:00`).getDay()]}</span>
-                      )}
-                      <span className="tl-dd">{colLabel(c.ymd, range.grain)}</span>
-                    </div>
-                  ))}
-                </div>
-                {/**
-                  * ⚠️ THE PINNED ROW IS ABOVE THE GROUPS, NOT IN ONE. It holds tasks from every
-                  * manuscript and from none, so no group is true of it; its `group` is `null` and
-                  * that is what filters it out of the buckets below rather than a special case.
-                  */}
-                {rows.filter((r) => r.group === null).map(row)}
-                {GROUP_ORDER.map((g) => {
-                  const mine = rows.filter((r) => r.group === g);
-                  /* ⚠️ AN EMPTY GROUP IS OMITTED ENTIRELY, HEADER AND ALL. A header reading "0"
-                     is a heading for nothing — it teaches the shape of a board the writer does
-                     not have, and at six groups it would be most of the page. */
-                  if (!mine.length) return null;
-                  const open = !shut.includes(g);
-                  return (
-                    <React.Fragment key={g}>
-                      <div className="tl-ghead">
-                        <button type="button" className="tl-ghbtn"
-                          aria-expanded={open}
+                {board.length === 0 ? sparse : board.map((g, gi) => (
+                  <div className="tl-grp" key={g.key}>
+                    <div className="tl-gt">
+                      <span className="t">{g.title}</span>
+                      <span className="n">{g.count}</span>
+                      {g.sentence && <span className="s">{g.sentence}</span>}
+                      {g.collapsible && (
+                        <button type="button" className="tl-gtbtn"
+                          aria-expanded={g.open}
                           onClick={() => setShut((cur) =>
-                            cur.includes(g) ? cur.filter((x) => x !== g) : [...cur, g])}>
-                          <span className="tl-ghcar" data-open={open ? "1" : "0"} aria-hidden>▸</span>
-                          <span className="tl-ghname">{GROUP_LABEL[g]}</span>
-                          {/* ⚠️ THE COUNT IS THE RENDERED ROWS, so it cannot disagree with what is
-                              on screen. Filters run before grouping, so this is the filtered
-                              figure by construction rather than by a second count. */}
-                          <span className="tl-ghn">{mine.length}</span>
+                            cur.includes(g.group!) ? cur.filter((x) => x !== g.group) : [...cur, g.group!])}>
+                          {g.open ? "hide ‹" : "show ›"}
                         </button>
+                      )}
+                    </div>
+                    {g.open && (
+                      <div className="tl-tbl">
+                        {/* ⚠️ ONE COLUMN HEADER FOR THE WHOLE BOARD, above the first group only.
+                            Repeating it per group restated the same nine dates five times down a
+                            page whose whole difficulty is vertical room. */}
+                        {gi === firstOpen && (
+                          <div className="tl-hrow">
+                            <div className="tl-c-nm"><span className="tl-lbl3">Agent</span></div>
+                            <div className="tl-c-ac"><span className="tl-lbl3">Action?</span></div>
+                            <div className="tl-c-tl">
+                              {dateLabels.map((d) => (
+                                <span key={d.ymd} className="tl-dt" style={{ left: pct(d.at) }}>{d.text}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {g.rows.map(row)}
                       </div>
-                      {open && mine.map(row)}
-                    </React.Fragment>
-                  );
-                })}
+                    )}
+                  </div>
+                ))}
+                {/* ⚠️ TODAY, THE CROSSHAIR AND THE ONE TOOLTIP ARE ALL CHILDREN OF THE WRAP, never
+                    of a lane — a lane clips, and a clipping ancestor beats any z-index. */}
+                {todayAt != null && (
+                  <>
+                    <div className="tl-todayline" style={{ left: todayLeft }} aria-hidden />
+                    <div className="tl-todayflag" style={{ left: todayLeft, top: 0 }} aria-hidden>
+                      {shortCalDate(today)}
+                    </div>
+                  </>
+                )}
+                {cross && (
+                  <>
+                    <div className="tl-xh" style={{ left: `${cross.x}px` }} aria-hidden />
+                    <div className="tl-xhlab" style={{ left: `${cross.x}px`, top: 0 }} aria-hidden>{cross.label}</div>
+                  </>
+                )}
+                <div ref={tipRef} className="tl-tipp" role="tooltip" aria-hidden />
               </div>
-              {/* ⚠️ AN EMPTY BOARD IS NOT A FAILURE STATE. No apology, no prompt to do more — a
-                  writer with a quiet window is entitled to read that as good news, or as nothing. */}
-              {/* ⚠️ NOT "this week" — the window is seven days at one range out of five and it said
-                  week at all of them. The board does not name its own span here: the range control
-                  above states it and the column headers show it. */}
-              {rows.length === 0 && (
-                <div className="tl-none"><p className="tl-none-t">Nothing in this window.</p></div>
-              )}
             </TplZone>
           </div>
           {focusBand}

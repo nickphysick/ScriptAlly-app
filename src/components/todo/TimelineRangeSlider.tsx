@@ -39,34 +39,37 @@ export interface TimelineRange {
 }
 
 /**
- * ⚠️ THE FIVE STOPS, AND THE GRAIN IS PART OF THE STOP RATHER THAN DERIVED FROM THE DAYS. A
+ * ⚠️ THREE STOPS, AND THE GRAIN IS PART OF THE STOP RATHER THAN DERIVED FROM THE DAYS. A
  * threshold on the day count ("over 60 days use weeks") would be a second place the tiers are
  * decided, and the two would drift the first time a stop moved. One table, read by the column
  * builder, the density class and the readout alike.
  */
 /**
- * ⚠️ `past` IS A FRACTION OF THE RANGE, NOT A NUMBER OF DAYS, AND IT LIVES HERE (grouped pack,
- * Phase 6). The ref hard-codes `PAST = 3` against `DAYS = 14`; three days is a fifth of a
- * fortnight and a sixtieth of six months, so carrying the literal across would have given the
- * long ranges no history at all — which is exactly the emptiness the past slice exists to fix.
+ * ⚠️ THE 1-WEEK AND 2-WEEK STOPS ARE DELETED (Porcelain, Phase 2; ref timeline-v35.html). The
+ * ref's own audit gives the reason and it is about what the surface is FOR: "on a board of
+ * relationships measured in weeks, seven days shows fragments of bars and answers nothing the
+ * To-do list doesn't answer better". A range that can only show fragments of the one object the
+ * board draws is not a smaller view of this board, it is a worse view of a different one.
  *
- * ⚠️ AND IT IS A PROPERTY OF THE RANGE, so there is one place to change it and no call site holds
- * a number. The two long ranges take a quarter; the three short ones take the ref's own proportion
- * (3/14), which lands the fortnight on the ref's exact 3 days.
+ * ⚠️ AND THE DEFAULT MOVED WITH THEM, to 3 months. Every earlier pack measured against index 0
+ * when index 0 was a week; the stop that opens now is the one the ref opens on.
+ *
+ * ⚠️ `past` IS STILL A FRACTION OF THE RANGE, NOT A NUMBER OF DAYS, so no call site holds the
+ * number — but the fractions are now written as the ref's own day counts over the ref's own
+ * spans (8/30, 22/90, 45/180) rather than as a tidied decimal. `pastDaysOf` therefore lands on
+ * exactly the ref's −8 / −22 / −45, which a rounded 0.25 would not have done at 30 days.
  */
 export const TIMELINE_RANGES: readonly TimelineRange[] = [
-  { label: "1 week",   days: 7,   grain: "day",   dense: 1, past: 3 / 14 },
-  { label: "2 weeks",  days: 14,  grain: "day",   dense: 2, past: 3 / 14 },
-  { label: "1 month",  days: 31,  grain: "day",   dense: 2, past: 3 / 14 },
-  { label: "3 months", days: 91,  grain: "week",  dense: 3, past: 0.25 },
-  { label: "6 months", days: 182, grain: "month", dense: 4, past: 0.25 },
+  { label: "1 month",  days: 30,  grain: "day",   dense: 2, past: 8 / 30 },
+  { label: "3 months", days: 90,  grain: "week",  dense: 3, past: 22 / 90 },
+  { label: "6 months", days: 180, grain: "month", dense: 4, past: 45 / 180 },
 ];
 
 /** How many days of the range sit BEFORE today — the fraction resolved, in one place. */
 export const pastDaysOf = (r: TimelineRange): number => Math.round(r.days * r.past);
 
 /** The default, and the one every earlier pack measured against. */
-export const DEFAULT_RANGE_INDEX = 0;
+export const DEFAULT_RANGE_INDEX = 1;
 
 export interface TimelineRangeSliderProps {
   index: number;

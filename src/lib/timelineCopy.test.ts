@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
-import { rowSentence, agentSurname, addressed, whenSaid, type RowCopy } from "./timelineCopy";
+import { rowSentence, agentSurname, addressed, whenSaid, type RowCopy, scrawlEarns, type RowNote } from "./timelineCopy";
 
 const TODAY = "2026-08-26";
 const ago = (d: number) => {
@@ -137,5 +137,46 @@ describe("a recent date is a weekday, an older one is a date", () => {
     /* ⚠️ AND FORWARD TOO — "an answer by Sunday" is how a deadline four days out is spoken about. */
     expect(whenSaid(ahead(6), TODAY)).not.toMatch(/\d/);
     expect(whenSaid(ahead(7), TODAY)).toMatch(/\d/);
+  });
+});
+
+/* ══ WHETHER A SCRAWL EARNS ITS PLACE (Porcelain, Phase 6) ═══════════════════════════════════ */
+
+describe("a scrawl must carry a fact its own row does not already state", () => {
+  const note = (deed: string, timing: string): RowNote => ({ deed, timing });
+
+  it("⚠️ KEEPS the one the ref's audit calls the best thing on the board", () => {
+    /* "Send it · due 15 days ago" beside a SEND THE PARTIAL button and a bar reading "Partial
+       req": the interval is nowhere else on the row. */
+    expect(scrawlEarns(note("Send it", "due 15 days ago"), ["Partial req"])).toBe(true);
+  });
+
+  it("⚠️ CUTS the one it calls charm doing no work", () => {
+    /* "Nudge them · due today" beside a NUDGE button and a bar reading "Nudge due" — and TODAY is
+       the most visible fact on the page, with a ruled line through every row and a dated flag
+       above it. A fourth statement of it is not a fact, it is decoration. */
+    expect(scrawlEarns(note("Nudge them", "due today"), ["Nudge due"])).toBe(false);
+  });
+
+  it("the deed alone never earns it, because the button IS the deed", () => {
+    /* both are built from the same `DEED` table, so a scrawl with no timing is by construction a
+       second copy of the button six inches to its right */
+    expect(scrawlEarns(note("Nudge or close it", ""), [])).toBe(false);
+    expect(scrawlEarns(null, ["anything"])).toBe(false);
+  });
+
+  it("a date the bar already names does not earn it either", () => {
+    expect(scrawlEarns(note("Send the full", "by 14 Sept"), ["Full req · by 14 Sept"])).toBe(false);
+    /* …and the same date on a bar that has gone bare DOES, which is the point of comparing
+       against the LONG label rather than the fitted one */
+    expect(scrawlEarns(note("Send the full", "by 14 Sept"), ["Full requested"])).toBe(true);
+  });
+
+  it("⚠️ THE COMPARISON IS ON THE FACT, NOT THE PREPOSITION", () => {
+    /* "by 2 Sept" against a bar reading "answer by 2 Sept" is the same date twice however the two
+       are worded, so the preposition is stripped before the two are compared */
+    expect(scrawlEarns(note("Answer them", "by 2 Sept"), ["Offer received · answer by 2 Sept"])).toBe(false);
+    /* and separators must not defeat it */
+    expect(scrawlEarns(note("Answer them", "by 2 Sept"), ["Offer · answer by 2 Sept."])).toBe(false);
   });
 });

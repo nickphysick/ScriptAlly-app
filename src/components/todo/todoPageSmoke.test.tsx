@@ -155,13 +155,21 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
      families' colours; the timeline's grammar is five kinds, and the filter chips name all five in
      words. A colour swatch on a chip would also fight the chip's own pink selected state — two
      colour meanings on one control. Reported for Nick, not decided here. */
-  it("…and carries its board, its day header and its tools", () => {
+  it("…and carries its board, its one column header and its groups", () => {
     const html = render(<TodoCalendarPage onNavigate={() => {}} />);
     expect(html).toContain("Calendar");
     expect(html).toContain("tl-board");
-    expect(html).toContain("tl-head");
-    expect(html).toContain("Your tasks");   // the pinned row, which always renders
-    expect(html).toContain("WED");          // a weekday name, whichever day it is run
+    /* ⚠️ ONE COLUMN HEADER, not a grid of weekday cells (Porcelain, Phase 2). `tl-head` and the
+       weekday initials went with the day grid: a board of relationships measured in months has no
+       use for "WED", and repeating the header per group restated nine dates five times down the
+       page. `tl-hrow` is the single header; `tl-dt` are the ~nine dates along it. */
+    expect(html).toContain("FULL BOARD");   // the view toggle, so the control row is really there
+    /* ⚠️ AN EMPTY BOARD IS THE SPARSE PANEL, NOT AN EMPTY TABLE WITH A HEADER OVER IT. A column
+       header above nothing teaches the shape of a board the writer does not have — the same rule
+       that omits a group heading reading "0". The populated smoke below is where the header,
+       the groups and the rows are proved. */
+    expect(html).toContain("tl-sparse");
+    expect(html).toContain("Nothing in this window");
   });
 
   it("…and a dated task REACHES its day (the populated smoke)", () => {
@@ -170,7 +178,16 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     seed.userTasks = [{ id: "t1", userId: "u1", text: "Redraft the opening", done: false, dueDate: ymd, createdAt: "", updatedAt: "" }];
     const html = render(<TodoCalendarPage onNavigate={() => {}} />);
     expect(html).toContain("Redraft the opening");
-    expect(html).toContain("tl-chip");
+    /* the writer's own chip — `tl-tchip` since the rebuild; `tl-chip` was the grid-era class */
+    expect(html).toContain("tl-tchip");
+    /* ⚠️ AND THE POPULATED BOARD IS WHERE THE CHROME IS PROVED: one column header for the whole
+       board, its ~nine dates, and the pinned group above the query groups. */
+    expect(html).toContain("tl-hrow");
+    expect(html).toContain("tl-dt");
+    expect(html).toContain("Your tasks");
+    expect(html).toContain("Dated tasks of your own.");
+    /* exactly ONE column header in the document, however many groups there are */
+    expect(html.split("tl-hrow").length - 1, "the column header is drawn per group again").toBe(1);
   });
 
   /* tasks-pages P4 — the Noteboard is real too. Empty AND populated. */

@@ -76,7 +76,41 @@ export const SETTLED_MAX_DAYS = 21;
  * MARKER and the count on it is the fact — `41 days your move` is true, and the number is the half
  * that has to be.
  */
-export const OVERRUN_SPAN = 2;
+
+/**
+ * The fraction at which a bar deepens one step — and the whole of what replaced the pulse.
+ *
+ * ⚠️ POSITION, NOT MOTION. Urgency used to be an animation on the writer's own long-standing
+ * bars; it had to be suppressed under `prefers-reduced-motion`, which left the reader who asked
+ * for no motion with no signal at all. A bar at 85% of its stated span is at 85% whether or not
+ * anything moves, and it is legible in a screenshot.
+ */
+export const NEAR_AT = 0.85;
+
+/**
+ * How far through its stated span a stretch is — `null` where nobody stated one.
+ *
+ * ⚠️ `null` IS THE POINT OF THIS FUNCTION, NOT ITS FAILURE CASE. A bar with no named end renders
+ * NO FILL ELEMENT, and that emptiness is information: it says nobody named a date. A fill of zero
+ * would say the opposite — that a span exists and none of it has elapsed — which is a confident
+ * wrong answer of exactly the kind this repo has shipped before, where a value was invented to
+ * fill a hole in the model and then rendered as though a person had supplied it.
+ *
+ * ⚠️ A HISTORICAL STRETCH IS FULL. It ended at a real event; there is nothing left of it to be
+ * part-way through, and drawing it part-filled would suggest a wait still running.
+ *
+ * ⚠️ AND IT CAPS AT 1 RATHER THAN RUNNING PAST IT. Past the named end the bar is full and the
+ * CONTINUATION is drawn hollow — lateness is drawn, never named. A fill of 130% would be a
+ * verdict with a number on it.
+ */
+export function fillFor(sg: Segment): number | null {
+  if (sg.historical) return 1;
+  if (sg.goal == null) return null;
+  /* the named end is at or before the start: nothing to be part-way through */
+  if (sg.goal <= sg.from) return 1;
+  const p = (sg.todayAt - sg.from) / (sg.goal - sg.from);
+  return Math.max(0, Math.min(1, p));
+}
 
 export type Side = "theirs" | "yours";
 export type Weight = "fresh" | "settled" | "long";
@@ -95,9 +129,10 @@ export type NodeDir = "out" | "in" | "close";
  * against it is a `Waypoint`, and the absence of a node IS the claim.
  */
 export type MarkerKind = "status" | "direction";
+/** The four circled marker faces the board draws. */
+export type MarkerFace = "in" | "outk" | "bang" | "clock";
 
 /** Which of the five dated things a waypoint is — the view draws the reminder differently. */
-export type WaypointKind = "expected" | "reminder" | "deadline" | "snooze" | "overrun";
 
 export interface Segment {
   key: string;
@@ -131,16 +166,6 @@ export interface Segment {
   norail?: true;
   /** open-ended by nature (an R&R, an offer with no stated deadline) — it fades, it does not end */
   openEnd?: true;
-  /**
-   * How much of THIS piece lies before the expected date, as a percentage of its own width.
-   *
-   * ⚠️ THE OVERRUN IS A BACKGROUND TREATMENT ON ONE BAR, NOT A SECOND OBJECT BESIDE IT. It used to
-   * be its own segment with its own count, so a long-standing row drew two capsules and printed
-   * the duration twice — v11's "hatched behind, solid ahead" is ONE bar and one story. Every piece
-   * computes its own share, so the hatch composes with whatever real events also broke the bar:
-   * a piece wholly before the date is 100, wholly after is absent, straddling is the fraction.
-   */
-  hatchPct?: number;
   /** your-move only */
   weight?: Weight;
   /**
@@ -151,6 +176,35 @@ export interface Segment {
    * several classes at once, where no single place said what a bar was.
    */
   state: BarState;
+  /**
+   * Where the NAMED end of this stretch is, in the same fractional-day coordinates as `from` and
+   * `to` — absent where nobody named one.
+   *
+   * ⚠️ THREE SOURCES, ONE PRECEDENCE, AND NO NEW STORED FIELD. The agency's stated response
+   * window and a promised send-by are the SAME resolved date wearing whichever name the current
+   * side gives it (`resolveExpectedDate`); the writer's own reminder is the fallback where
+   * neither exists. All three were already read to place a waypoint — this records where the
+   * winner landed rather than deriving anything new.
+   */
+  goal?: number;
+  /** where today is, in this segment's own coordinates — a window fact, carried so `fillFor` is pure */
+  todayAt: number;
+  /** this stretch ended at a real event: it is finished, and a finished stretch is full */
+  historical?: true;
+  /** this piece lies PAST the named end — transparent, outlined, label dimmed */
+  hollow?: true;
+  /** what the one portalled tooltip says for this bar: the label and the named date */
+  tip: string;
+  /**
+   * Whether a MARKER sits at this piece's left / right end.
+   *
+   * ⚠️ A BOOLEAN, NOT A PIXEL COUNT. How far a bar stands off a marker is geometry and belongs
+   * with the tokens; whether it abuts one at all is data, and only the pass that cut the pieces
+   * knows it. The render turns each flag into `--tl-gap-mk` or `--tl-gap`, so the clearance can be
+   * retuned in the stylesheet without touching this module.
+   */
+  abutL?: true;
+  abutR?: true;
   queryId: string;
 }
 
@@ -170,28 +224,35 @@ export interface BarNode {
   status?: QueryStatus;
   /** the direction marker's own symbol; a status marker draws `StatusDot` and ignores this */
   glyph: string;
+  /**
+   * Which of the ref's FOUR circled markers this is.
+   *
+   * ⚠️ FOUR KINDS AND NO NOTCH (Porcelain, Phase 5). `in` is something arriving, `outk` something
+   * leaving, `bang` a nudge or reminder fallen due, `clock` a query gone quiet. They are drawn as
+   * 20px circles on white with a halo of the row's own colour — which is what keeps a marker
+   * legible where it sits ON a bar rather than beside one.
+   */
+  mark: MarkerFace;
   caption: string;
   queryId: string;
   activityId: string;
 }
 
-export interface Waypoint {
-  key: string;
-  rowKey: string;
-  lane: number;
-  at: number;
-  side: Side;
-  kind: WaypointKind;
-  caption: string;
-  /** the week is behind us: the dashes go solid and this renders as already passed */
-  passed?: true;
-  queryId: string;
-}
+/* ⚠️ `Waypoint`, `WaypointKind` AND `OVERRUN_SPAN` ARE RETIRED (Porcelain, Phase 5). A waypoint
+   was a forecast DRAWN as a notch — "somebody named this date" — and the fill states that on its
+   own now: a filling bar means a date exists, an empty one means nobody set it, and the bar ends
+   on the date either way. Three statements of one fact. The captions were not lost with the
+   drawing: they ride the bar's own tooltip, where they survive the long ranges at which labels
+   drop out entirely.
+
+   ⚠️ AND `hatchPct` WENT WITH THEM. It shaded the part of a your-move stretch that ran past its
+   expectation; the HOLLOW continuation says the same thing in the same single element, and says
+   it for every family rather than for one. The hatch survives on `quiet` alone, where there is no
+   named span for a fraction to be OF. */
 
 export interface Bars {
   segments: Segment[];
   nodes: BarNode[];
-  waypoints: Waypoint[];
 }
 
 /** One lane's inputs — a single agent × manuscript pairing. */
@@ -322,6 +383,16 @@ export const durationCount = (days: number): string => plural(days, "day");
  */
 const GLYPH: Record<NodeDir, string> = { out: "↑", in: "←", close: "●" };
 
+/**
+ * Which circled face a node draws.
+ *
+ * ⚠️ DIRECTION IS THE DEFAULT AND `bang`/`clock` ARE THE TWO EXCEPTIONS, both of which are about
+ * a DATE rather than about an event: `bang` is a nudge or reminder that has fallen due, `clock` a
+ * query that has gone quiet. Neither is something that happened — they are the absence of
+ * something happening, which is why they cannot be derived from `dir`.
+ */
+const faceOf = (dir: NodeDir): MarkerFace => (dir === "in" ? "in" : "outk");
+
 /* ══ the pass ═════════════════════════════════════════════════════════════════════════════════ */
 
 interface Break { at: number; kind: "node" | "waypoint" }
@@ -373,6 +444,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
       marker: st ? "status" : "direction",
       ...(st ? { status: st } : {}),
       glyph: GLYPH[dir],
+      mark: faceOf(dir),
       caption: r.label,
       queryId: r.queryId,
       activityId: r.activityId,
@@ -419,7 +491,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
      drawing one labelled "Closed" across a week in which nothing happened would state an event on
      days that held none. The row it belongs to survives only if something else puts it there. */
   if (isTerminalStatus(query.status) && closeIdx < 0) {
-    return { segments: [], nodes: [], waypoints: [] };
+    return { segments: [], nodes: [] };
   }
 
   /* ── the sides, walked backwards from today ────────────────────────────────────────────── */
@@ -459,8 +531,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
   }
   if (live.length) sides[live.length] = now ?? sides[live.length];
 
-  /* ── waypoints: what is forecast, and what comes back ──────────────────────────────────── */
-  const waypoints: Waypoint[] = [];
+  /* ── what is forecast: read to place the bar's end, never drawn ────────────────────────── */
   const sends = [query.dateSent, query.partialSentDate, query.fullSentDate]
     .map((iso) => (iso ? new Date(iso as string).getTime() : NaN))
     .filter((t) => !Number.isNaN(t));
@@ -473,36 +544,37 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
   const expectedYmd = resolved.ms == null ? null : isoToYmd(new Date(resolved.ms).toISOString());
   const expectedPassed = !!expectedYmd && expectedYmd < win.today;
 
-  const addWp = (ymd: string | null, side: Side, kind: WaypointKind, caption: string) => {
-    if (!ymd || !caption) return;
-    const a = at(ymd);
-    if (a == null || a > stopAt) return;
-    waypoints.push({
-      key: `wp-${rowKey}-${lane}-${ymd}-${caption}`, rowKey, lane, at: a, side, kind, caption,
-      ...(ymd < win.today ? { passed: true as const } : {}),
-      queryId: query.id,
-    });
-  };
 
-  /* ⚠️ A WAYPOINT IS DRAWN WHEREVER IT LANDS IN THE WINDOW, and `passed` says whether it has been
-     overtaken. Gating on "not yet passed" was right for the current week and wrong for a past one,
-     where v5's whole rule is that overtaken waypoints still render — as passed. In a window that
-     starts today, in-window and not-yet-passed are the same thing, so one test does both jobs. */
-  if (expectedYmd) {
-    /* ⚠️ ONE DATE, TWO OF v11's FIVE. While it is theirs it is the reply window's close; once the
-       move is the writer's it is the deadline the agency stated for THEM. The same resolved date,
-       named for whose it is — not two derivations. */
-    addWp(expectedYmd, now === "yours" ? "yours" : "theirs",
-      now === "yours" ? "deadline" : "expected",
-      now === "yours" ? `They asked by ${shortCalDate(expectedYmd)}` : `Expected ${shortCalDate(expectedYmd)}`);
-  }
   /* the next reminder the writer set — a forecast, never a fact */
   const nudgeYmd = terminal ? null : isoToYmd(query.nudgeDate as string | undefined);
-  addWp(nudgeYmd, "theirs", "reminder", nudgeYmd ? `Reminder due ${shortCalDate(nudgeYmd)}` : "");
-  /* ⚠️ A SNOOZE PAUSES YOUR ATTENTION, NOT THE AGENT'S CLOCK — so it is a waypoint and the bar is
-     untouched by it. Drawing a break in the journey would say something stopped; nothing did. */
-  const backYmd = flag?.snoozedUntil ? isoToYmd(flag.snoozedUntil) : null;
-  if (backYmd) addWp(backYmd, "yours", "snooze", `Back on ${shortCalDate(backYmd)}`);
+
+  /* ══ THE TWO MARKERS THAT ARE NOT EVENTS ═══════════════════════════════════════════════
+   *
+   * ⚠️ THEY MARK THE ABSENCE OF SOMETHING HAPPENING, which is why neither can come from the
+   * record walk above. `bang` is a reminder the writer set that has arrived; `clock` is a stated
+   * reply window that came and went with nothing scheduled behind it. Both are drawn where the
+   * DATE is, and both are the same fact the bar's own state already carries — said at a point,
+   * because the bar says it over a span and a reader scanning dates is looking at points.
+   */
+  const dateMarks: BarNode[] = [];
+  const pushMark = (ymd: string | null, mark: MarkerFace, caption: string) => {
+    if (!ymd) return;
+    const a = at(ymd);
+    if (a == null || a > stopAt) return;
+    dateMarks.push({
+      key: `dm-${rowKey}-${lane}-${mark}-${ymd}`, rowKey, lane, at: a, dir: "in",
+      marker: "direction", glyph: "", mark, caption,
+      queryId: query.id, activityId: "",
+    });
+  };
+  if (!terminal && nudgeYmd && nudgeYmd <= win.today) {
+    pushMark(nudgeYmd, "bang", `Reminder fell due · ${shortCalDate(nudgeYmd)}`);
+  }
+  /* ⚠️ GONE QUIET IS THE STATE WITH NO SCHEDULED FOLLOW-UP. Where a reminder IS set the bar is
+     `nudged`, not `quiet`, so drawing a clock as well would contradict it. */
+  if (!terminal && expectedPassed && expectedYmd && !(nudgeYmd && nudgeYmd > win.today)) {
+    pushMark(expectedYmd, "clock", `Gone quiet · no reply logged since ${shortCalDate(expectedYmd)}`);
+  }
 
   /* ── the overrun: a long-standing your-move stretch, hatched back to the expectation ────── */
   const sinceYmd = (() => {
@@ -534,27 +606,71 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
   })();
   const yoursDays = sinceYmd ? Math.max(0, daysBetween(sinceYmd, win.today)) : 0;
   const weight = weightFor(yoursDays);
-  const wantsOverrun = now === "yours" && !terminal && weight === "long" && expectedPassed && !win.past;
 
-  const breaks: Break[] = [
-    ...live.map((n) => ({ at: n.at, kind: "node" as const })),
-    ...waypoints.map((w) => ({ at: w.at, kind: "waypoint" as const })),
-  ];
-  if (wantsOverrun) {
-    /* ⚠️ IT IS NOT PUSHED INTO `breaks`. The expectation passing is a change of TREATMENT, not an
-       interruption — nothing happened on that date, which is the whole of what it says. Breaking
-       the bar there is what made it two objects. */
-    waypoints.push({
-      key: `wp-${rowKey}-${lane}-overrun`, rowKey, lane, at: OVERRUN_SPAN, side: "yours",
-      kind: "overrun",
-      caption: expectedYmd ? `Expected ${shortCalDate(expectedYmd)}` : "Expected",
-      queryId: query.id,
-    });
-  }
+  /* ══ WHERE TODAY IS, AND WHERE THE NAMED END IS ══════════════════════════════════════════
+   *
+   * ⚠️ `todayAt` MAY SIT OUTSIDE THE WINDOW, and it is deliberately not clamped. A window paged
+   * into the past has today beyond its right edge; clamping would put today ON the edge and every
+   * bar in that window would fill to 100%, silently, stating that every wait had completed.
+   * Out-of-range is the honest value and `fillFor`'s own clamp is what keeps the fraction sane.
+   */
+  const todayAt = daysBetween(win.days[0], win.today) + EVENT_AT;
+
+  /**
+   * ⚠️ THE PRECEDENCE IS EXPECTED-THEN-REMINDER, AND THE FIRST COVERS TWO OF THE THREE SOURCES.
+   * The agency's stated window and a send-by the agency asked for are ONE resolved date named for
+   * whichever side currently holds the move — that is already how the waypoint above is built, so
+   * treating them as two candidates here would be a second derivation of one fact. The writer's
+   * own reminder is the genuine third, and it is the fallback rather than a peer: a date the
+   * agency stated outranks one the writer set for themselves.
+   */
+  const goalYmd = expectedYmd ?? nudgeYmd;
+  const goalAt = goalYmd ? daysBetween(win.days[0], goalYmd) + EVENT_AT : null;
+
+  /**
+   * ⚠️ ONLY EVENTS BREAK A BAR NOW. A break exists so that something DRAWN has room beside it —
+   * and with the notch retired nothing is drawn at a forecast date at all. Leaving the forecasts
+   * in here was not merely redundant, it deleted bars: a bar that now ENDS on its named date had
+   * a break at that same date, so `cutPieces` reserved clearance either side of the bar's own
+   * terminus and the whole stretch came back too narrow to draw. Measured on the unit fixtures —
+   * an eight-week window resolving to exactly today produced zero pieces and the row vanished.
+   */
+  const breaks: Break[] = live.map((n) => ({ at: n.at, kind: "node" as const }));
 
   /* ── the pieces ────────────────────────────────────────────────────────────────────────── */
-  const marks = [...new Set(breaks.map((b) => b.at))].sort((a, b) => a - b).filter((m) => m <= stopAt);
-  const pieces = cutPieces(stopAt, marks);
+  /* ══ WHERE THE LIVE BAR STOPS ═══════════════════════════════════════════════════════════
+   *
+   * ⚠️ IT USED TO RUN TO THE WINDOW'S EDGE, WHICH SAID SOMETHING FALSE AT EVERY RANGE. A bar
+   * drawn to the right-hand edge states that the wait continues to the end of the visible period
+   * — a claim that changes meaning when the reader changes the range, and one nobody made. The
+   * bar ends where the story ends: on the named date if one is ahead, otherwise on today.
+   *
+   * ⚠️ AND WHERE THE NAMED DATE HAS PASSED, THE BAR RUNS ON TO TODAY AND THAT STRETCH IS HOLLOW.
+   * That is the whole drawing of lateness: full to the date, outlined past it, no word and no
+   * second colour.
+   */
+  /* ⚠️ AND IT MUST REACH EVERY EVENT DRAWN ON IT. A marker is placed at its own date whatever
+     the bar does; a bar that stopped short of one would leave the event floating over bare
+     ground, attached to nothing. So the stop is the LAST of: today, the named end, and the final
+     event — never today alone. */
+  const lastEventAt = live.length ? live[live.length - 1].at : -Infinity;
+  const liveStop = closeIdx >= 0
+    ? stopAt
+    : Math.max(0, Math.min(span, Math.max(todayAt, goalAt ?? -Infinity, lastEventAt)));
+  const barStop = closeIdx >= 0 ? stopAt : liveStop;
+
+  /* ⚠️ THE NAMED END SPLITS THE BAR SEAMLESSLY — it is not in `breaks`. A break leaves `GAP`
+     either side because something is DRAWN there; nothing is drawn at the named end any more (the
+     notch is retired), so a gap would open a hole in a continuous stretch for no reason a reader
+     could see. */
+  const marks = [...new Set(breaks.map((b) => b.at))].sort((a, b) => a - b).filter((m) => m <= barStop);
+  const cut = cutPieces(barStop, marks);
+  const pieces: { from: number; to: number }[] = [];
+  for (const pc of cut) {
+    if (goalAt != null && goalAt > pc.from + 0.001 && goalAt < pc.to - 0.001) {
+      pieces.push({ from: pc.from, to: goalAt }, { from: goalAt, to: pc.to });
+    } else pieces.push(pc);
+  }
 
   /* ⚠️ NO REPLY TIME RECORDED → A DASHED RAIL AND NOTHING ELSE. No cap, no forecast, no end: the
      app does not know when to expect an answer, and drawing one would be inventing the date the
@@ -600,10 +716,6 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
     const side = sides[Math.min(before, sides.length - 1)];
     const last = i === pieces.length - 1;
     const first = i === 0;
-    /* the share of this piece that lies before the expectation — 0 when it is wholly after */
-    const hatch = wantsOverrun
-      ? Math.max(0, Math.min(1, (OVERRUN_SPAN - p.from) / Math.max(0.0001, p.to - p.from)))
-      : 0;
     /* ⚠️ THE STATE IS COMPUTED BEFORE THE LABEL, because the label reads it. Leaving it in the
        object literal below would have had `labelFor` reading a `const` from the same literal it
        is being written into — the temporal-dead-zone shape this repo has shipped once. */
@@ -640,22 +752,69 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
             });
             return { label: l.long, short: l.short };
           })()),
-      ...(hatch > 0 ? { hatchPct: Math.round(hatch * 1000) / 10 } : {}),
       /* ⚠️ THE DURATION IS STATED ONCE, on the one piece of the run that speaks. It used to ride
          the overrun AND the piece after it, so a long-standing row printed it twice; the phrasing
          gains "your move" where there is an overrun, because that is what the hatch is measuring. */
       ...(speaks && side === "yours" && !terminal && yoursDays > 0
-        ? { count: wantsOverrun ? `${durationCount(yoursDays)} your move` : durationCount(yoursDays) }
+        /* ⚠️ THE "your move" SUFFIX WENT WITH THE HATCH IT DESCRIBED. It existed because the
+           hatch was measuring how long the stretch had been the writer's; the hollow run-on says
+           that by being an outline, so the count is a plain duration again. */
+        ? { count: durationCount(yoursDays) }
         : {}),
       ...(side === "yours" && !terminal ? { weight } : {}),
       state,
       ...(norail && first ? { norail: true as const } : {}),
       ...(openEnd && last ? { openEnd: true as const } : {}),
+      todayAt,
+      /* ⚠️ A FINISHED STRETCH IS FULL, AND THERE ARE THREE WAYS TO BE FINISHED: it lies wholly
+         behind today, it ENDS AT AN EVENT (something happened and the stretch stopped), or the
+         journey is closed. A live relationship is made of completed stretches and one running
+         one, and only the running one has a fraction to be part-way through. */
+      ...(p.to < todayAt - 0.001
+        || marks.some((m) => Math.abs(m - p.to) < GAP + 0.001)
+        || terminal
+        ? { historical: true as const } : {}),
+      /* the stretch past the named end — drawn, never named */
+      ...(goalAt != null && p.from >= goalAt - 0.001 && goalAt < todayAt
+        ? { hollow: true as const }
+        : {}),
+      ...(goalAt != null ? { goal: goalAt } : {}),
+      ...(marks.some((m) => Math.abs(m - p.from) < GAP + 0.001) ? { abutL: true as const } : {}),
+      ...(marks.some((m) => Math.abs(m - p.to) < GAP + 0.001) ? { abutR: true as const } : {}),
+      /**
+       * ⚠️ THE TOOLTIP IS WHERE THE NAMED DATE SURVIVES. `barFit` drops a bar's label entirely at
+       * six months, and the notch that used to carry the date is retired — so without this the
+       * date would be unreachable on exactly the range where a reader most needs it. It is built
+       * from the LONG label, never the fitted one: what a bar says when it has no room is a
+       * layout fact, and a tooltip has all the room it needs.
+       */
+      tip: "",
       queryId: query.id,
     });
   });
 
-  return { segments, nodes: live, waypoints };
+  /**
+   * ⚠️ THE TIP IS COMPOSED AFTER THE FACT, because it needs the label the spread above produced.
+   * Writing it inside the literal would mean reading a property of the object being constructed —
+   * the shape this repo has shipped a temporal-dead-zone crash through once already.
+   *
+   * ⚠️ AND A PIECE THAT DOES NOT SPEAK STILL GETS A TIP. Only the widest piece of a run carries
+   * the visible label, but every piece of that run is the same stretch and a reader hovering the
+   * narrow end is asking the same question.
+   */
+  const runLabel = new Map<number, string>();
+  segments.forEach((sg, i) => { if (sg.label) runLabel.set(runOf[i], sg.label); });
+  const namedOn = goalYmd ? shortCalDate(goalYmd) : null;
+  segments.forEach((sg, i) => {
+    const words = sg.label || runLabel.get(runOf[i]) || "";
+    const dateBit = namedOn && !words.includes(namedOn) ? namedOn : null;
+    sg.tip = [words, dateBit].filter(Boolean).join(" · ");
+  });
+
+  /* ⚠️ THE DATE MARKS RIDE ALONGSIDE THE RECORD NODES BUT ARE NOT `live`. `live` is what the side
+     walk and the piece cuts are computed from, and a mark that is not an event must not break a
+     bar or flip a side — it is drawn on top of a stretch that is already correct without it. */
+  return { segments, nodes: [...live, ...dateMarks] };
 }
 
 interface LabelInput {

@@ -246,3 +246,38 @@ export function rowNote(c: RowCopy, group: RowGroup | null, today: string): RowN
 
   return null;
 }
+
+/* ══ WHETHER A SCRAWL EARNS ITS PLACE (Porcelain, Phase 6) ═══════════════════════════════════ */
+
+/**
+ * Does this hand-written remark carry a fact its own row does not already state?
+ *
+ * ⚠️ THE REF'S OWN AUDIT ASKED FOR THIS AND GAVE BOTH WORKED CASES. "Send it · due 15 days ago"
+ * beside a SEND THE PARTIAL button carries the interval, which is nowhere else on the row — it is
+ * the best thing on the board. "Nudge them · due today" beside a NUDGE button and a bar reading
+ * "Nudge due" is the same sentence three times in three typefaces, which is charm doing no work.
+ *
+ * ⚠️ THE DEED ALONE NEVER EARNS IT, because the action button IS the deed — they are built from
+ * the same `DEED` table, so a scrawl with no timing is by construction a second copy of the
+ * button six inches to its right.
+ *
+ * ⚠️ AND "due today" IS A DATE THE BOARD ALREADY DRAWS. Today has a ruled line through every row
+ * and a dated flag above it; a scrawl naming it adds a fourth statement of the most visible fact
+ * on the page. A date, or an elapsed interval, is a different matter — neither is legible from
+ * the drawing.
+ *
+ * ⚠️ IT TAKES THE BARS' **LONG** LABELS, NOT THE FITTED ONES. What a bar says when it has no room
+ * is a layout fact settled in the browser; whether a remark is redundant is a fact about the
+ * copy. Deciding it from the fitted label would make the same row scrawl at six months and not at
+ * one, which is the opposite of what the rule is for.
+ */
+export function scrawlEarns(note: RowNote | null, barLabels: readonly string[]): boolean {
+  if (!note) return false;
+  const timing = note.timing.trim();
+  if (!timing) return false;
+  if (/^due today$/i.test(timing)) return false;
+  const norm = (s: string) => s.toLowerCase().replace(/[·.,]/g, " ").replace(/\s+/g, " ").trim();
+  /* the fact itself, with the preposition stripped: "by 2 Sept" → "2 sept", "due 15 days ago" → "15 days ago" */
+  const fact = norm(timing).replace(/^(by|due)\s+/, "");
+  return !barLabels.some((l) => norm(l).includes(fact));
+}

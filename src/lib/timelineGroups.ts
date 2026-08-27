@@ -32,7 +32,7 @@ export const GROUP_ORDER: readonly RowGroup[] = [
  * a single offer into "Needs you now" would file the best news a writer gets among the chores.
  */
 export const GROUP_LABEL: Record<RowGroup, string> = {
-  offers: "Offers",
+  offers: "Offer on the table",
   now: "Needs you now",
   soon: "Needs you soon",
   watching: "Watching brief",
@@ -121,3 +121,75 @@ export function rowGroupOf(
   if (!lastClosedYmd) return "closed";
   return daysBetween(lastClosedYmd, today) <= CLOSED_LINGER_DAYS ? "closed" : null;
 }
+
+/* ══ WHAT A GROUP SAYS (Porcelain, Phase 2; ref timeline-v35.html) ═══════════════════════════
+ *
+ * ⚠️ A HEADING NAMES A BUCKET; A SENTENCE SAYS WHY YOU ARE LOOKING AT IT. "Needs you soon" is a
+ * label the writer has to decode; "Nothing to do yet; a reminder is coming" is the thing itself.
+ * The ref carries one for every group and they are normative copy.
+ *
+ * ⚠️ TWO OF THEM STATE A COUNT AND STATE IT IN WORDS, which is why this is a function and not a
+ * table. The ref writes "One offer, awaiting your answer" and "Four agents are waiting on you" —
+ * prose, in a sentence, where a numeral would read as a tally beside the tally already there.
+ */
+const ONES = [
+  "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
+  "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen",
+  "Nineteen", "Twenty",
+];
+
+/**
+ * A count as a word, falling back to the numeral past twenty.
+ *
+ * ⚠️ THE FALLBACK IS NOT A FAILURE. "Twenty-seven agents are waiting on you" is a sentence nobody
+ * reads as a sentence; past twenty the numeral IS the more readable form, and a writer with that
+ * many rows is scanning rather than reading.
+ */
+export const inWords = (n: number): string => (n >= 0 && n <= 20 ? ONES[n] : String(n));
+
+/**
+ * What the group says beneath its title, or `""` where it says nothing.
+ *
+ * ⚠️ `closed` DERIVES ITS SENTENCE FROM `CLOSED_LINGER_DAYS` RATHER THAN RESTATING IT. The ref's
+ * own wording is "Kept for a month, then it leaves." — and the constant is SEVEN DAYS, so the
+ * ref's sentence would be a false claim about what the app does the moment it was typed. This is
+ * the house law that copy asserts only what the code does today, and it bites here in the one
+ * direction that is easy to miss: the copy came from a normative artefact, so it arrived looking
+ * already-approved. Derived, the two cannot disagree whatever the constant becomes.
+ *
+ * ⚠️ THE REF/CODE DIVERGENCE IS FLAGGED, NOT SILENTLY RESOLVED. Whether a closure should linger a
+ * week or a month is Nick's call, not a copy edit; changing the constant to make a sentence true
+ * is deciding a retention policy by typography.
+ */
+export function groupSentence(g: RowGroup, n: number): string {
+  switch (g) {
+    case "offers":
+      return `${inWords(n)} ${n === 1 ? "offer" : "offers"}, awaiting your answer.`;
+    case "now":
+      return `${inWords(n)} ${n === 1 ? "agent is" : "agents are"} waiting on you.`;
+    case "soon":
+      return "Nothing to do yet; a reminder is coming.";
+    case "watching":
+      return "Out with agents. Nothing is asked of you.";
+    case "snoozed":
+      return "Quiet until their return dates.";
+    case "closed":
+      return `Kept for ${CLOSED_LINGER_DAYS === 7 ? "a week" : `${CLOSED_LINGER_DAYS} days`}, then it leaves.`;
+    default: {
+      const unhandled: never = g;
+      return unhandled;
+    }
+  }
+}
+
+/**
+ * The pinned row's own heading and sentence.
+ *
+ * ⚠️ IT IS A HEADING, NOT A SEVENTH `RowGroup`, and the difference is the whole reason it is here
+ * rather than in `GROUP_ORDER`. A task belongs to no query, so it has no group — `rowGroupOf`
+ * returns `null` for it and that null is DATA. The ref draws a heading above those rows, which is
+ * a fact about the view; widening the data type so the view could have its heading would put a
+ * view decision inside the classification every other reader shares.
+ */
+export const TASKS_HEADING = "Your tasks";
+export const TASKS_SENTENCE = "Dated tasks of your own.";

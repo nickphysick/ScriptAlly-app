@@ -38,9 +38,19 @@ describe("the now/soon split is by KIND, not by a threshold", () => {
     const fs = await import("node:fs/promises");
     const src = await fs.readFile(new URL("./timelineGroups.ts", import.meta.url), "utf8");
     const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    const numbers = [...code.matchAll(/\b\d+\b/g)].map((m) => m[0]);
+    /* ⚠️ SCOPED TO THE CLASSIFICATION, and the scoping is the point rather than a convenience.
+       The file also holds `groupSentence` and `inWords`, which are COPY — the words for nought
+       through twenty, and the boundary past which a numeral reads better than a word. Those
+       numbers decide how a sentence is spelled, not which group a row is in, so a sweep over the
+       whole file would have forbidden them for a reason that is not true of them. The claim was
+       always about the derivation; it now reads only the derivation. */
+    const derivation = code.slice(0, code.indexOf("const ONES"));
+    const numbers = [...derivation.matchAll(/\b\d+\b/g)].map((m) => m[0]);
     expect(numbers, `numbers in the derivation: ${numbers.join(", ")}`).toEqual(["7"]);
     expect(code).toContain("CLOSED_LINGER_DAYS = 7");
+    /* the population floor: a slice that found nothing would report "no numbers" for ever */
+    expect(derivation.length, "the derivation slice is empty").toBeGreaterThan(1000);
+    expect(derivation).toContain("export function queryGroup");
   });
 });
 
