@@ -166,6 +166,51 @@ describe("the dossier renders one manuscript", () => {
  * Written down because a case that simply disappears from a spec is indistinguishable from a rule
  * that was dropped.
  */
+/**
+ * ⚠️ THE NAME APPEARS ONCE IN THE PAGE BODY, AND THIS ASSERTION WAS GREEN ON ARRIVAL — which is
+ * worth saying rather than implying it caught something. The brief asks for the title to be removed
+ * from a sticky tab rail that carries a mini cover, a name and a status dot. That rail is in the
+ * MOCKUP; it was never built. When Nick chose Type A in amendment 1, the page-local sticky rail was
+ * dropped in favour of the shared grid's pinning slab, so `.msp-tabs` is plain content with no
+ * `position: sticky` and no title in it. There was nothing to remove.
+ *
+ * ⚠️ IT IS STILL WORTH LOCKING, because the duplication it forbids is the kind that arrives by
+ * accretion — a collapsed-state title, a breadcrumb echo, a card header — and each addition looks
+ * reasonable on its own.
+ *
+ * ⚠️ COUNTED IN TEXT, NOT IN THE MARKUP. The title legitimately appears in an `aria-label` on the
+ * edit affordance ("Edit title — …"), which is one name for a screen reader and not a second
+ * printing of it. Counting raw HTML would forbid the accessible label.
+ */
+describe("the manuscript's name is printed once", () => {
+  /** Visible text only: attributes stripped, then tags. */
+  const textOf = (html: string) =>
+    html.replace(/<[^>]*>/g, "\u0000").split("\u0000").join(" ");
+
+  it("appears exactly once in the rendered page body", () => {
+    const title = "Murphy&#x27;s Day Out";
+    const body = doss();
+    const plain = textOf(body);
+    const hits = plain.split(title).length - 1;
+    expect(hits, `the name is printed ${hits} times`).toBe(1);
+  });
+
+  it("is not in the tab rail", () => {
+    const rail = /<div class="msp-tabs"[\s\S]*?<\/div>/.exec(doss())?.[0] ?? "";
+    expect(rail, "the tab rail is not on the page").not.toBe("");
+    expect(rail).not.toContain("Murphy");
+    /* …nor the rest of the mockup's rail furniture, which was never built. */
+    for (const c of ["msp-mini", "msp-railtitle", "msp-dotstat"]) {
+      expect(rail, `${c} arrived in the rail`).not.toContain(c);
+    }
+  });
+
+  /** The accessible label is a name for a screen reader, not a second printing — it stays. */
+  it("keeps the edit affordance's accessible label", () => {
+    expect(doss({ plateEdit: BASE.plateEdit })).toBeTruthy();
+  });
+});
+
 describe("the tab row", () => {
   it("renders the five tabs, opening on Overview", () => {
     const html = doss();

@@ -190,3 +190,11 @@ export const synopsisMeta = (text: string | null): string | null => {
   const words = text.trim().split(/\s+/).filter(Boolean).length;
   return `${words.toLocaleString("en-GB")} word${words === 1 ? "" : "s"}`;
 };
+
+/**
+ * ⚠️ IT SAYS WHAT THESE FILES ARE NOT FOR. An attachment panel on a page about querying invites the
+ * reading that its contents go to an agent; they do not — nothing here is sent, and the materials
+ * that ARE sent are built in Submission packages. Stating the negative is the point of the sentence.
+ */
+export const ATTACHMENTS_NOTE =
+  "Files kept with the manuscript for your own reference. Nothing here is sent to an agent.";

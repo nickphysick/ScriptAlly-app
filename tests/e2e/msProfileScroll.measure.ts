@@ -45,6 +45,18 @@ test("the manuscripts page scrolls as a page, and its header rests before it sti
       chromeTop: Math.round(chrome.getBoundingClientRect().top),
       rowTop: Math.round(row.getBoundingClientRect().top),
       // A nested scroller inside the row would mean the page still is not the thing that scrolls.
+      /* The chrome above the tab rail — masthead slab plus anything between it and the tabs. This
+         is the figure three amendments have been reducing; it is reported rather than asserted,
+         because a target number would be a value tuned to today's content. */
+      chromeAboveTabs: (() => {
+        const tabs = document.querySelector(".msv-wpg .msp-tabs") as HTMLElement | null;
+        if (!tabs) return null;
+        return Math.round(tabs.getBoundingClientRect().top - row.getBoundingClientRect().top + row.scrollTop);
+      })(),
+      /* Every element inside the row that is `position: sticky` — both must idle at rest. */
+      stickies: [...row.querySelectorAll("*")]
+        .filter((e) => getComputedStyle(e as HTMLElement).position === "sticky")
+        .map((e) => (e as HTMLElement).className.toString().slice(0, 40)),
       nested: [...row.querySelectorAll("*")].filter((e) => {
         const o = getComputedStyle(e as HTMLElement).overflowY;
         return (o === "auto" || o === "scroll") && (e as HTMLElement).scrollHeight > (e as HTMLElement).clientHeight + 4;
@@ -57,8 +69,20 @@ test("the manuscripts page scrolls as a page, and its header rests before it sti
 
   /* ── PRECONDITION: there is something to scroll, and the row is the thing that does it ── */
   expect(rest!.rowOverflowY, "the row is not a scroller").toMatch(/auto|scroll/);
-  expect(rest!.overflow, "nothing overflows — 'unstuck at rest' would pass for the wrong reason")
-    .toBeGreaterThan(60);
+  /**
+   * ⚠️ THE FLOOR IS "SOMETHING SCROLLS", NOT A COMFORTABLE MARGIN, and the number is REPORTED rather
+   * than asserted against a target. Three amendments have taken chrome off this page — the card and
+   * its clip, the banner, the shelf bar, the control row — and the overflow has fallen 307 → 100 →
+   * 33px. A threshold tuned to any one of those figures would have failed the next reduction as if
+   * it were a regression, when a shorter page is the goal.
+   *
+   * ⚠️ WHAT MATTERS AT 33px IS NOT THE FIGURE BUT THE SWEEP BELOW. Settling RECLAIMS height, and on
+   * a page overflowing by less than the settle reclaims, the reclaim destroys the scroll the settled
+   * state derives from and the header cycles — Noteboard did it 37 times at 47px of overflow. This
+   * page is now UNDER that figure, so the flip count is the only thing that answers it.
+   */
+  expect(rest!.overflow, "nothing overflows at all — every reading below would be vacuous")
+    .toBeGreaterThan(4);
   expect(rest!.nested, "something inside the row opens a second scrollport").toBe(0);
 
   /* ── AT REST: sticky, but idle — not clamped ── */

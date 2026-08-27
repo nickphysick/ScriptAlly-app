@@ -113,10 +113,16 @@ describe("the pitch has no container", () => {
     const html = pane();
     expect(html.match(/msp-qmark/g)).toHaveLength(2);
     expect(html).toContain("msp-qmark close");
-    /* ⚠️ NO CAPPED CARD. The cap grammar is for panels of derived figures; this is the one thing on
-       the page the writer composed. */
-    expect(html).not.toContain("sa-card");
-    expect(html).not.toContain("sa-cap--");
+    /**
+     * ⚠️ NO CAPPED CARD ON THE PITCH — scoped to the pitch's own block, which is the actual claim.
+     * It used to sweep the whole pane, which was true until the attachments panel arrived and is
+     * the "measure the part you name" fault: a pane-wide sweep answers a question about the pane.
+     * The panel IS a capped card, correctly; the pitch is not.
+     */
+    const block = /<div class="msp-blk">[\s\S]*?<\/div><\/div>/.exec(html)?.[0] ?? "";
+    expect(block, "the pitch block is not on the page").toContain("msp-qmark");
+    expect(block).not.toContain("sa-card");
+    expect(block).not.toContain("sa-cap--");
   });
 
   it("hides the marks from the accessibility tree — they are punctuation, not content", () => {
@@ -170,6 +176,21 @@ describe("what left this pane", () => {
     const html = pane();
     expect(html).not.toContain("Who holds what");
     expect(html).not.toContain("<table");
+  });
+
+  /**
+   * ⚠️ THE ATTACHMENTS PANEL RENDERS EMPTY AND INVENTS NOTHING. Storage is not wired — no
+   * `storage.rules`, no `storage` block in either firebase config, no `firebase/storage` import
+   * anywhere in `src`. A stubbed row would be the page stating that a writer has a file they do not
+   * have, which is the same class of claim as a fabricated date.
+   */
+  it("shows the attachments panel empty, with no invented rows", () => {
+    const html = pane();
+    expect(html).toContain("Attachments");
+    expect(html).toContain("Nothing kept with this manuscript yet.");
+    expect(html).toContain("Nothing here is sent to an agent.");
+    /* Disabled rather than hidden: the panel says what will live here, and cannot pretend to act. */
+    expect(html).toMatch(/class="msp-attadd"[^>]*disabled/);
   });
 
   it("no longer states the five-figure stat row", () => {

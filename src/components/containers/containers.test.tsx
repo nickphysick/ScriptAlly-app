@@ -291,6 +291,7 @@ describe("the book profile's cap assignment — one table, checked against the r
     ["VersionsPane.tsx", "Who holds which version", "pro"],
     ["CompsPane.tsx", "Comparable titles", "reference"],
     ["NotesPane.tsx", "Note", "reference"],
+    ["OverviewPane.tsx", "Attachments", "reference"],
   ];
 
   const pane = (f: string) =>
@@ -319,10 +320,19 @@ describe("the book profile's cap assignment — one table, checked against the r
     expect([...all].sort()).toEqual(["incoming", "outgoing", "pro", "reference"]);
   });
 
-  /** ⚠️ AND OVERVIEW CAPS NOTHING — asserted, so the pitch cannot quietly acquire a container. */
-  it("Overview has no capped card at all", () => {
-    const src = readFileSync(join(root, "src/components/manuscripts/OverviewPane.tsx"), "utf8");
-    expect(src).not.toContain("<CappedCard");
-    expect(src).not.toContain("CappedCard");
+  /**
+   * ⚠️ OVERVIEW'S ONE CAPPED CARD IS THE ATTACHMENTS PANEL (amendment 3). This used to assert the
+   * pane had none at all, which held while its only candidates were the pitch and the synopsis —
+   * both deliberately uncapped, the pitch because it is the one thing the writer composed rather
+   * than the app derived. The panel is a different object and takes the `reference` role: files you
+   * consult rather than act on.
+   */
+  it("Overview caps the attachments panel and nothing else", () => {
+    const src = readFileSync(join(root, "src/components/manuscripts/OverviewPane.tsx"), "utf8")
+      .replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+    const cards = [...src.matchAll(/<CappedCard[\s\S]*?>/g)].map((m) => m[0]);
+    expect(cards).toHaveLength(1);
+    expect(cards[0]).toContain('label="Attachments"');
+    expect(cards[0]).toContain('tint="reference"');
   });
 });

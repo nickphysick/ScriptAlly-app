@@ -27,7 +27,8 @@
 import React, { useState } from "react";
 import { SectionHeader } from "../containers/SectionHeader";
 import { InlineText } from "../containers/InlineText";
-import { PITCH_PLACEHOLDER, SYNOPSIS_PLACEHOLDER, SYNOPSIS_NOTE } from "../../lib/manuscriptProfile";
+import { CappedCard } from "../containers/CappedCard";
+import { PITCH_PLACEHOLDER, SYNOPSIS_PLACEHOLDER, SYNOPSIS_NOTE, ATTACHMENTS_NOTE } from "../../lib/manuscriptProfile";
 import "./bookProfile.css";
 
 export interface OverviewPaneProps {
@@ -48,7 +49,8 @@ export const OverviewPane: React.FC<OverviewPaneProps> = ({
   /* Component state, deliberately: a clamp is a reading convenience, not a preference to persist. */
   const [synOpen, setSynOpen] = useState(false);
   return (
-  <>
+  <div className="msp-ovgrid">
+    <div className="msp-ovmain">
     <div className="msp-blk">
       <SectionHeader title="The pitch" meta={pitchMeta ?? "Not written yet"} />
       {/* ⚠️ THE CLOSING MARK IS BOTTOM-ALIGNED, which is what makes the pair read as quotation rather
@@ -91,6 +93,31 @@ export const OverviewPane: React.FC<OverviewPaneProps> = ({
       </div>
       <p className="msp-footnote">{SYNOPSIS_NOTE}</p>
     </div>
-  </>
+    </div>
+
+    {/**
+      * ⚠️ THE ATTACHMENTS PANEL RENDERS EMPTY, AND EMPTY IS THE HONEST STATE. Storage is not wired:
+      * a bucket exists on dev, but there is no `storage.rules` in the repo, no `storage` block in
+      * either firebase config, and no `firebase/storage` import anywhere in `src`. So the panel has
+      * its cap, its footnote and a disabled add — and NO invented rows. A stubbed file list would be
+      * a page stating that a writer has attachments they do not have.
+      *
+      * ⚠️ AND IT IS NOT `position: sticky` THIS PASS. A sticky offset here has to clear the pinned
+      * masthead slab, and the grid no longer publishes its height — `--wpg-stuck-h` was measured,
+      * found to have exactly one reader, and deleted with it. Restoring a shared-grid mechanism so
+      * that an EMPTY panel can hold its place beside nothing is the wrong way round; it lands with
+      * the rows, when there is something to stay alongside. `top: 0` was the alternative and is the
+      * fault the brief names: the panel would slide under the slab.
+      */}
+    <aside className="msp-ovside">
+      <CappedCard tint="reference" label="Attachments" right="0">
+        <p className="msp-empty">Nothing kept with this manuscript yet.</p>
+        <button type="button" className="msp-attadd" disabled>
+          Add a file
+        </button>
+        <p className="msp-footnote">{ATTACHMENTS_NOTE}</p>
+      </CappedCard>
+    </aside>
+  </div>
   );
 };

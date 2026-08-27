@@ -664,3 +664,45 @@
 @media (max-width: 900px) {
   .msp-stages { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ══ OVERVIEW · THE TWO COLUMNS ═══════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ `minmax(0, …)` ON BOTH TRACKS, AND THE ZERO MINIMUM IS THE POINT. A grid track's default
+ * minimum is `auto`, which is the content's MIN-CONTENT width — so a long unbroken filename or a
+ * wide table would push its column past its share and the other column would never get its 7fr.
+ * With `minmax(0, 7fr)` the ratio is the ratio whatever the content does.
+ */
+.msp-ovgrid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+  gap: 34px;
+  align-items: start;
+}
+.msp-ovmain { min-width: 0; }
+.msp-ovside { min-width: 0; }
+
+/** Disabled, because Storage is not wired. Not hidden: the panel says what will live here. */
+.msp-attadd {
+  margin-top: 14px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px dashed var(--pink-b);
+  border-radius: 9px;
+  background: none;
+  color: var(--burg);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.msp-attadd:disabled { color: var(--shell-muted); border-color: var(--hair); cursor: default; }
+
+/**
+ * ⚠️ ONE COLUMN BELOW 1100px, WHERE 3fr STOPS BEING A PANEL. At 1100 the right track is roughly
+ * 300px; below it the filename, the size and the date stop fitting on one row and the panel becomes
+ * a narrow strip of wrapped text beside a column that has itself gone tight.
+ */
+@media (max-width: 1100px) {
+  .msp-ovgrid { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+}
