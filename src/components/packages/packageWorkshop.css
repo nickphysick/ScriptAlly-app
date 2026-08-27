@@ -916,19 +916,29 @@
    * sampling the painted colour at the last glyph of each, in both postures, rather than trusted.
    */
   /**
-   * ⚠️ 54%/76%, NOT THE REF'S 34%/64% — AND THIS IS THE CONTAINER-TRANSFER RULE AGAIN, not a taste
-   * change. The bench draws one width, where 34% clears its text. Here the masthead's measure is
-   * CAPPED and CENTRED, so where the description ends as a FRACTION of the band moves with the
-   * viewport: measured, its last glyph sits at 51.5% of the band at 1280, 44% at 1440 and 33% at
-   * 2300. A stop at 34% therefore put the description on painted artwork at the two narrower
-   * widths — 251,246,241 against a white ground at 1440, faint but really there.
+   * ⚠️ THE START TRACKS THE TEXT, IT IS NOT A PERCENTAGE OF THE BAND — and the two flat values this
+   * replaces were both wrong for the same reason. The ref's 34% put the description ON the artwork
+   * at the narrow widths; a flat 54%, set to clear the worst case, then held the illustration far
+   * too far right everywhere else — 396px of empty band at 2300, which is what Nick saw.
    *
-   * 54% clears the worst case (51.5%) by about 25px, and the fade keeps the ref's 30-point span.
-   * The cost is paid at 1280, where the artwork now begins later in a band that is already the
-   * narrowest; that is the trade the screenshots are for.
+   * MEASURED, and it is the cleanest possible input: the text ends **485px from the masthead's left
+   * edge at every width** — it is one fixed string at a fixed size. What moves is the MEASURE's left
+   * edge, which is 35 at 1280 and 1440 and 185 at 2300, because the measure is capped and centred.
+   * So the start is that edge plus the text plus 30px of air, expressed exactly as the measure is:
+   *
+   *     (100% - min(--work-max, 100% - 2 × --mast-gutter)) / 2   is the measure's left edge
+   *     + 515px                                                  is 485 of text and 30 of air
+   *
+   * Computed: 550 · 550 · 700 against text ending at 520 · 520 · 670. Thirty pixels clear at every
+   * width, and the artwork now begins as soon as the words stop rather than at a fraction that only
+   * suits one viewport.
+   *
+   * ⚠️ IT READS THE SAME TWO TOKENS THE MEASURE ITSELF READS, so a change to the gutter or the cap
+   * moves the mask with the text instead of leaving the two to drift apart.
    */
-  -webkit-mask-image: linear-gradient(to right, transparent 54%, #000 76%);
-          mask-image: linear-gradient(to right, transparent 54%, #000 76%);
+  --pkgw-illo-start: calc((100% - min(var(--work-max), 100% - 2 * var(--mast-gutter))) / 2 + 515px);
+  -webkit-mask-image: linear-gradient(to right, transparent var(--pkgw-illo-start), #000 calc(var(--pkgw-illo-start) + 170px));
+          mask-image: linear-gradient(to right, transparent var(--pkgw-illo-start), #000 calc(var(--pkgw-illo-start) + 170px));
 }
 /* ⚠️ THE TEXT SITS ABOVE THE PAINT. The pseudo-element is positioned and the masthead's measure is
    not, so without this the artwork would paint over the title — the bench lifts `.mastin` to
