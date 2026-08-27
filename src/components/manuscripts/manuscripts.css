@@ -504,3 +504,11 @@
 .msv-qm {
   font-family: 'Playfair Display', serif; font-style: italic; font-size: 15px; color: var(--msv-ink);
 }
+
+/**
+ * ⚠️ THE PAGE'S CONTROL ROW (amendment 2). `＋ Add a manuscript` and the manuscript's ⋯ live here
+ * because `PageHeader variant="workspace"` THROWS when handed either — its message names the rule:
+ * the masthead holds no actions, they belong in the control row, which is the element that anchors
+ * once the masthead has gone. It pins with the slab, so both stay reachable while reading.
+ */
+.msv-toolrow { display: flex; align-items: center; gap: 10px; }

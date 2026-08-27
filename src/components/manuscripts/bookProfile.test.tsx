@@ -15,7 +15,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { ManuscriptHero } from "./ManuscriptHero";
-import { heroFacts, queryingSinceMs, shelfMeta, profileDate } from "../../lib/manuscriptProfile";
+import { queryingSinceMs, shelfMeta, profileDate } from "../../lib/manuscriptProfile";
 import { Query, QueryStatus } from "../../types";
 
 const css = readFileSync(join(__dirname, "bookProfile.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
@@ -55,7 +55,13 @@ const hero = (over: Partial<React.ComponentProps<typeof ManuscriptHero>> = {}) =
       genres={["Young Adult", "Thriller"]}
       wordCount={50000}
       stats={{ queriesSent: 26, responses: 12, lastActivity: "2 Jun" }}
-      facts={heroFacts(26, 12, Date.parse("2026-01-14"))}
+      figures={[
+        { key: "sent", value: "26", label: "Queries sent" },
+        { key: "responses", value: "12", label: "Responses" },
+        { key: "since", value: "14 Jan 2026", label: "Querying since", date: true },
+      ]}
+      onPrev={null}
+      onNext={null}
       tab="overview"
       onTabChange={() => {}}
       {...over}
@@ -88,32 +94,12 @@ describe("queryingSinceMs — the EARLIEST send, and never a stand-in for it", (
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe("heroFacts — a nought is stated, a missing date is not", () => {
-  it("states both counts at nought and omits the date entirely", () => {
-    expect(heroFacts(0, 0, null)).toEqual([
-      { key: "sent", label: "queries sent", value: "0" },
-      { key: "responses", label: "responses", value: "0" },
-    ]);
-  });
-
-  it("never emits a dash, an em dash or an empty value for the missing date", () => {
-    for (const f of heroFacts(0, 0, null)) {
-      expect(f.value).not.toMatch(/^[—–-]?$/);
-    }
-    expect(heroFacts(0, 0, null).map((f) => f.key)).not.toContain("since");
-  });
-
-  it("agrees with its own verbs", () => {
-    expect(heroFacts(1, 1, null).map((f) => f.label)).toEqual(["query sent", "response"]);
-    expect(heroFacts(2, 0, null).map((f) => f.label)).toEqual(["queries sent", "responses"]);
-  });
-
-  it("states the date once there is one", () => {
-    const facts = heroFacts(26, 12, Date.parse("2026-01-14"));
-    expect(facts[2]).toEqual({ key: "since", label: "Querying since", value: "14 Jan 2026" });
-  });
-});
-
+/**
+ * ⚠️ `heroFacts` IS RETIRED AND ITS ONE RULE MOVED RATHER THAN LAPSED. It built the three derived
+ * clauses in the facts line; those are the hero's stat CELLS now. The rule it existed to hold —
+ * a count of nought is stated, a date nobody has is NOT — is asserted at the component, where the
+ * cell either renders or does not.
+ */
 describe("shelfMeta", () => {
   it("agrees with its own verbs, at one and at many", () => {
     expect(shelfMeta(1, 1)).toBe("1 manuscript · 1 query");
@@ -195,21 +181,82 @@ describe("the hero", () => {
     expect(html).not.toContain("msv-statstrip");
   });
 
-  it("states the derived facts as one line, figures in the stronger ink", () => {
+  it("states the three figures as cells, Playfair over mono", () => {
     const html = hero();
-    expect(html).toContain("<b>26</b> queries sent");
-    expect(html).toContain("<b>12</b> responses");
-    expect(html).toContain("Querying since <b>14 Jan 2026</b>");
+    expect(html).toContain('<div class="msp-hsn">26</div><div class="msp-hsl">Queries sent</div>');
+    expect(html).toContain('<div class="msp-hsn">12</div><div class="msp-hsl">Responses</div>');
+    expect(html).toContain('<div class="msp-hsn date">14 Jan 2026</div><div class="msp-hsl">Querying since</div>');
   });
 
   /**
-   * ⚠️ THE SEPARATOR IS A `::before`, NOT AN ELEMENT — which is the whole reason an omitted clause
-   * cannot leave a stray interpunct behind it. The ref draws `<span class="ip">·</span>` between
-   * its clauses; taken literally, dropping `Querying since` would have left the dot before it.
+   * ⚠️ NOT TWICE ON ONE ROW. The three figures used to be clauses in the facts line under the title;
+   * they are the hero's right-hand cells now, and the facts line keeps genre and word count only.
    */
-  it("carries no punctuation-only markup between the clauses", () => {
-    const html = hero({ facts: heroFacts(0, 0, null) });
-    expect(html).not.toContain("·");
+  it("states none of the three figures in the facts line as well", () => {
+    const line = /class="msv-platemeta"([\s\S]*?)<\/div>/.exec(hero())?.[1] ?? "";
+    expect(line).toContain("Young Adult");
+    expect(line).toContain("50,000 words");
+    for (const word of ["queries sent", "responses", "Querying since"]) {
+      expect(line.toLowerCase(), `${word} is stated twice on one row`).not.toContain(word.toLowerCase());
+    }
+  });
+
+  /**
+   * ⚠️ A DATE OR NOTHING — and the divider goes with it. `Querying since —` asserts a start the app
+   * does not know, which is the shape this page shipped once as an "Added" date derived from an
+   * imported query's send. The divider is a `border-left` on the cell, so an omitted cell cannot
+   * leave a rule with nothing beyond it.
+   */
+  it("omits the since cell entirely rather than dashing a date it does not have", () => {
+    const html = hero({ figures: [
+      { key: "sent", value: "0", label: "Queries sent" },
+      { key: "responses", value: "0", label: "Responses" },
+    ] });
+    expect(html).not.toContain("Querying since");
+    expect(html).not.toContain("—");
+    // …and the two counts are still stated at nought, which is a fact rather than an absence.
+    expect(html).toContain('<div class="msp-hsn">0</div><div class="msp-hsl">Queries sent</div>');
+    expect(html.match(/msp-hs"/g)).toHaveLength(2);
+  });
+
+  /**
+   * ⚠️ THE CHEVRONS RENDER WHEN THEY CANNOT BE USED. Dimmed and disabled at one manuscript, so the
+   * affordance is visible before a second book exists — and NO WRAP-AROUND, so a writer can tell
+   * from the control that they have reached the end of their own shelf.
+   */
+  it("renders both chevrons disabled when there is nowhere to page", () => {
+    const html = hero();
+    const chevs = html.match(/<button[^>]*msp-chev[^>]*>/g) ?? [];
+    expect(chevs).toHaveLength(2);
+    for (const c of chevs) expect(c).toContain("disabled");
+    expect(html).toContain('aria-label="Previous manuscript"');
+    expect(html).toContain('aria-label="Next manuscript"');
+  });
+
+  it("enables only the direction that has a neighbour", () => {
+    const first = hero({ onPrev: null, onNext: () => {} });
+    const prev = /<button[^>]*aria-label="Previous manuscript"[^>]*>/.exec(first)![0];
+    const next = /<button[^>]*aria-label="Next manuscript"[^>]*>/.exec(first)![0];
+    expect(prev, "first manuscript offers a previous").toContain("disabled");
+    expect(next, "a next exists and is disabled anyway").not.toContain("disabled");
+  });
+
+  /** ⚠️ THE ACTION CLUSTER IS RETIRED — the rail's collapsed primary is the page's one CTA. */
+  it("carries no actions at all", () => {
+    const html = hero();
+    for (const word of ["Send a query", "Query Centre", "More actions"]) {
+      expect(html, `${word} is still in the hero`).not.toContain(word);
+    }
+    expect(html).not.toContain("msp-heroacts");
+  });
+
+  /**
+   * ⚠️ THE SEPARATOR IS STILL A `::before` AND STILL MATTERS, for a smaller line than before. The
+   * facts row is genre chips and word count now; the ref draws `<span class="ip">·</span>` between
+   * them, and taken literally a manuscript with no word count would leave the dot behind.
+   */
+  it("carries no punctuation-only markup between the facts", () => {
+    expect(hero()).not.toContain(">·<");
     expect(theRule(".msv-plateband--hero .msv-platemeta > * + *::before")).toContain('content: "·"');
   });
 
@@ -219,9 +266,7 @@ describe("the hero", () => {
     expect(html.indexOf("msp-tabs")).toBeLessThan(html.lastIndexOf("</div>"));
   });
 
-  it("offers no Send on a shelved manuscript when the caller withholds it", () => {
-    expect(hero({ actions: undefined })).not.toContain("msp-heroacts");
-  });
+
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

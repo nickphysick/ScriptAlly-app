@@ -46,11 +46,10 @@ import { pitchAssets, pitchMeter, PitchAssetKey, synopsisVersions } from "../lib
 import { genreDisplay } from "../lib/genres";
 import { agentPrimary, AGENT_NOT_RECORDED } from "../lib/agentDisplay";
 import { manuscriptNotes } from "../lib/manuscriptProfile";
+import { ManuscriptActions } from "./manuscripts/ManuscriptActions";
 import { londonDay } from "../lib/queryingGoals";
 import type { BookVersion } from "../types";
 import { genreList, splitGenres } from "./manuscripts/plateEdit";
-import { SectionHeader } from "./containers/SectionHeader";
-import { shelfMeta } from "../lib/manuscriptProfile";
 import "./manuscripts/manuscripts.css";
 
 /** Shared with the comps + packages sub-pages — the section's single active-manuscript pointer. */
@@ -142,6 +141,17 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
    * under us) resolves to null and returns to the shelf rather than to some other writer's book.
    */
   const selected = openId ? ordered.find((m) => m.id === openId) ?? null : null;
+  /**
+   * ⚠️ THE PAGER READS `ordered`, WHICH IS THE SHELF'S OWN ORDER — never a second sort. A pager
+   * that walked a different sequence from the grid it came out of would put the writer somewhere
+   * they could not have predicted from what they clicked.
+   *
+   * ⚠️ AND THERE IS NO WRAP-AROUND. Null at each end, which the chevron renders as disabled rather
+   * than hidden: wrapping would make the two ends indistinguishable from the middle, so a writer
+   * could not tell from the control whether they had reached the end of their own shelf.
+   */
+  const atIndex = selected ? ordered.findIndex((m) => m.id === selected.id) : -1;
+  const goTo = (i: number) => () => { const m = ordered[i]; if (m) setOpenId(m.id); };
 
   /** Writes the pointer the comps and packages sub-pages read. Not view state — a section-wide seat. */
   const selectMs = (id: string) => {
@@ -275,6 +285,40 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
         className="msv-wpg"
         scrollLabel="Manuscripts"
         /**
+         * ⚠️ THE CONTROL ROW, BECAUSE THE MASTHEAD REFUSES ACTIONS AND SAYS WHY. The brief put
+         * `＋ Add a manuscript` "in the page masthead, to the left of Hide"; neither half of that is
+         * available. `PageHeader variant="workspace"` THROWS when handed an action, a slot, a
+         * toolbar or an overflow menu — its own message states the reason: the masthead holds no
+         * actions, they belong in the page's control row, which is the element that anchors once
+         * the masthead has gone. And there is no Hide: that control is Type B only, and this page
+         * became Type A in amendment 1.
+         *
+         * ⚠️ THE "YOUR SHELF" BAR IS GONE AND ITS TALLY IS NOT REHOMED. `1 manuscript · 26 queries`
+         * simply goes — the third time that figure has been moved rather than dropped, and it read
+         * as a stray caption at every stop.
+         */
+        toolbar={
+          <div className="msv-toolrow">
+            <button
+              type="button"
+              className="msv-btn sm"
+              onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
+            >
+              <Plus />
+              Add a manuscript
+            </button>
+            {/* The lifecycle acts on the OPEN manuscript, so it renders only when there is one. */}
+            {selected && (
+              <ManuscriptActions
+                shelved={isShelvedPresentation(selected)}
+                onEditDetails={() => startEditMs(selected)}
+                onShelveToggle={() => void toggleShelved(selected)}
+                onDelete={() => setDeleteModalMs(selected)}
+              />
+            )}
+          </div>
+        }
+        /**
          * ⚠️ NO `fill`, AND THAT IS WHAT MAKES THIS A SCROLLING PAGE. It used to opt in, which turned
          * the scroll row into a flex column sized to the window — so the row barely scrolled (the
          * grid's own sheet records it overflowing 72px at 1280) and everything inside had to build
@@ -343,34 +387,6 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
           <ManuscriptsEmpty onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")} />
         ) : (
           <>
-            {/**
-              * ⚠️ ONE SECTION HEADER, AND IT IS TRUE IN BOTH STATES. "Your shelf" introduces the
-              * library whether you are browsing it or reading one book off it, so it renders above
-              * the grid and above an open profile alike — the alternative was two headers saying
-              * the same thing in two places, which is how they come to disagree.
-              *
-              * ⚠️ NO ACCENT UNDERLINE. Packages puts a burgundy tick on its band heads; this page
-              * does not, by ruling — which is why `SectionHeader` takes the tick as a prop instead
-              * of defaulting to one.
-              *
-              * ⚠️ AND `How it works` IS NOT RENDERED. The ref draws one beside the CTA; this page
-              * has no explainer surface for it to open, and the house rule is that the shell
-              * renders what EXISTS. A control that goes nowhere teaches the wrong shape of the app.
-              */}
-            <SectionHeader
-              title="Your shelf"
-              meta={shelfMeta(ordered.length, queries.length)}
-              actions={
-                <button
-                  type="button"
-                  className="msv-btn sm"
-                  onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
-                >
-                  <Plus />
-                  Add a manuscript
-                </button>
-              }
-            />
             {/*
               ⚠️ THE GRID IS THE SWITCHER NOW. The shelf switcher that used to sit here is DELETED,
               not hidden: it existed to pick the one card's subject, and the library does that by
@@ -459,10 +475,6 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
               tab={tab}
               onTabChange={setTab}
               onBack={closeDossier}
-              onSendQuery={() => onNavigate?.("queries", "Send a query", { manuscriptId: selected.id })}
-              onEditDetails={() => startEditMs(selected)}
-              onShelveToggle={() => void toggleShelved(selected)}
-              onDelete={() => setDeleteModalMs(selected)}
               /* Removal is the shared pure helper + the single writer; adding needs the form the
                  sub-page owns, so it goes there until the comps retirement moves it across. */
               onRemoveComp={(i) => { void updateManuscript(selected.id, { comps: withCompRemoved(msComps, i) }); }}
@@ -491,6 +503,8 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
               onWriteNote={(text, detail) =>
                 void addUserTask({ text, ...(detail ? { detail } : {}), manuscriptId: selected.id })}
               onOpenNoteboard={() => navigate("/todo/noteboard")}
+              onPrev={atIndex > 0 ? goTo(atIndex - 1) : null}
+              onNext={atIndex >= 0 && atIndex < ordered.length - 1 ? goTo(atIndex + 1) : null}
               onOpenPackageBuilder={() => {
                 selectMs(selected.id);
                 onNavigate?.("manuscripts", "Submission packages");

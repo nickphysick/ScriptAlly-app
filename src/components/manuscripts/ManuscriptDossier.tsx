@@ -20,14 +20,13 @@
  * component that called `Date.now()` itself could not be asserted against a fixed date.
  */
 import React, { useState } from "react";
-import { MoreHorizontal, Archive, Trash2, Pencil } from "lucide-react";
 import { Manuscript, ManuscriptVersion, SubmissionPackage, Query, CompTitle, UserTask } from "../../types";
 import type { Activity, BookVersion } from "../../types";
 import { bookVersionsOf, holdingRows, openingRows, unattributedOpening, unrecordedHolders } from "../../lib/bookVersions";
 import { isRequest } from "../../lib/packageMetrics";
 import { isShelvedPresentation, CLOSED_STATUSES } from "../../lib/manuscriptPage";
 import { plateStats } from "../../lib/manuscriptPlate";
-import { heroFacts, queryingSinceMs, atAGlance, glanceMeta, pitchMeta, profileDate } from "../../lib/manuscriptProfile";
+import { queryingSinceMs, atAGlance, glanceMeta, pitchMeta, profileDate } from "../../lib/manuscriptProfile";
 import { standingTrack, furthestTrack, furthestReached, journeyMeta } from "../../lib/manuscriptJourney";
 import { ManuscriptTabKey } from "./ManuscriptTabs";
 import { ManuscriptHero } from "./ManuscriptHero";
@@ -73,6 +72,9 @@ export interface ManuscriptDossierProps {
   /** Writes one against this manuscript. Absent → the pane reads without offering to write. */
   onWriteNote?: (text: string, detail: string) => void;
   onOpenNoteboard: () => void;
+  /** Page through the shelf, in the sidebar's order. Null at the ends — there is no wrap-around. */
+  onPrev: (() => void) | null;
+  onNext: (() => void) | null;
   synopsisVersionCount: number;
   synopsisDate: string | null;
   onSavePitch: (key: PitchAssetKey, text: string) => void;
@@ -89,10 +91,13 @@ export interface ManuscriptDossierProps {
   tab: ManuscriptTabKey;
   onTabChange: (t: ManuscriptTabKey) => void;
   onBack: () => void;
-  onSendQuery: () => void;
-  onEditDetails: () => void;
-  onShelveToggle: () => void;
-  onDelete: () => void;
+  /**
+   * ⚠️ THE LIFECYCLE PROPS LEFT WITH THE ⋯ (amendment 2). Send a query, Query Centre, Edit details,
+   * shelve and delete were the hero's action cluster; the cluster is retired and the ⋯ is
+   * `ManuscriptActions` in the page's control row, which is where the handlers live. Left declared
+   * here they would be four props nothing reads — the shape this repo keeps finding as dead weight
+   * that looks like wiring.
+   */
   onRemoveComp: (index: number) => void;
   onAddComp: () => void;
   onCopyPitch: (text: string) => void;
@@ -118,6 +123,8 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   notes,
   onWriteNote,
   onOpenNoteboard,
+  onPrev,
+  onNext,
   synopsisVersionCount,
   synopsisDate,
   onSavePitch,
@@ -127,10 +134,6 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   tab,
   onTabChange,
   onBack,
-  onSendQuery,
-  onEditDetails,
-  onShelveToggle,
-  onDelete,
   onRemoveComp,
   onAddComp,
   onCopyPitch,
@@ -141,6 +144,7 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const shelved = isShelvedPresentation(manuscript);
   const stats = plateStats(queries);
+  const since = queryingSinceMs(queries);
   /**
    * ⚠️ THE HOLDERS ARE DERIVED ONCE AND READ TWICE — the Overview's table and the count in its
    * section header. Deriving them separately for the two is how a card comes to state a number its
@@ -179,79 +183,25 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
           genres={genres}
           wordCount={manuscript.wordCount}
           stats={stats}
-          facts={heroFacts(stats.queriesSent, stats.responses, queryingSinceMs(queries))}
           edit={plateEdit}
           tab={tab}
           onTabChange={onTabChange}
           counts={{ comps: comps.length, versions: bookVersionsOf(manuscript).length, notes: notes.length }}
-          actions={
-            <>
-              {/* A shelved manuscript offers no Send — the same rule the library grid applies. */}
-              {!shelved && (
-                <button type="button" className="msv-btn sm msv-primary" onClick={onSendQuery}>
-                  Send a query
-                </button>
-              )}
-              <button type="button" className="msv-btn sm" onClick={onOpenQueriesHub}>
-                Query Centre ›
-              </button>
-              {/* Shelve / reactivate / guarded delete, and the three fields with no inline editor
-                  (status, shelved reason, notes) reach their form through here. The design draws
-                  two actions; dropping this would be a functional regression in a mockup's clothes. */}
-            <div style={{ position: "relative" }}>
-              <button
-                type="button"
-                className="msv-btn sm"
-                title="More actions"
-                aria-label="More actions"
-                aria-expanded={menuOpen}
-                onClick={() => setMenuOpen((o) => !o)}
-                style={{ padding: "6.5px 9px" }}
-              >
-                <MoreHorizontal />
-              </button>
-              {menuOpen && (
-                <>
-                  <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
-                  <div className="absolute right-0 top-[34px] z-40 bg-white border border-[#e8e0d8] rounded-[11px] shadow-[0_12px_30px_rgba(58,28,20,0.16)] p-1.5 min-w-[186px]">
-                    {/*
-                      ⚠️ "EDIT DETAILS" LIVES HERE NOW, and this is a deliberate deviation from
-                      "the button disappears". It disappears FROM THE PLATE, which is what the
-                      reframe was about — but three fields have no inline editor and no other
-                      surface on this page: STATUS, SHELVED REASON and NOTES. Deleting the form
-                      outright would strand them, which is a functional regression wearing a design
-                      decision's clothes. Status leaves this form when Phase 6's decision sheet
-                      lands; the other two need a home before the form can go.
-                    */}
-                    <button
-                      onClick={() => { setMenuOpen(false); onEditDetails(); }}
-                      className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#3a1c14] hover:bg-[rgba(138,158,136,0.14)] cursor-pointer"
-                    >
-                      <Pencil className="w-3.5 h-3.5 text-stone-500 shrink-0" />
-                      Edit details…
-                    </button>
-                    <div className="h-px bg-[#f0eae2] my-1 mx-1" />
-                    <button
-                      onClick={() => { setMenuOpen(false); onShelveToggle(); }}
-                      className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#3a1c14] hover:bg-[rgba(138,158,136,0.14)] cursor-pointer"
-                    >
-                      <Archive className="w-3.5 h-3.5 text-stone-500 shrink-0" />
-                      {manuscript.shelved ? "Reactivate" : "Shelve"}
-                    </button>
-                    <div className="h-px bg-[#f0eae2] my-1 mx-1" />
-                    <button
-                      onClick={() => { setMenuOpen(false); onDelete(); }}
-                      className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#a8442f] hover:bg-[rgba(168,68,47,0.08)] cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                      Delete…
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-            </>
-          }
+          /* ⚠️ THE HERO CARRIES NO ACTIONS NOW. Send a query and Query Centre are retired
+             from it — the rail's collapsed primary is the page's one call to action — and the ⋯
+             moved to the control row as `ManuscriptActions`, because shelve, reactivate, the
+             guarded delete and the three fields with no inline editor have no other surface. */
+          figures={[
+            { key: "sent", value: String(stats.queriesSent), label: "Queries sent" },
+            { key: "responses", value: String(stats.responses), label: "Responses" },
+            /* ⚠️ A DATE OR NOTHING — never a dash. `Querying since —` asserts a start the app does
+               not know; the cell omits itself and the divider goes with it. */
+            ...(since !== null
+              ? [{ key: "since", value: profileDate(since), label: "Querying since", date: true }]
+              : []),
+          ]}
+          onPrev={onPrev}
+          onNext={onNext}
         />
 
 

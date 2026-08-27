@@ -23,7 +23,7 @@
 import React from "react";
 import { ManuscriptPlate, ManuscriptPlateEdit } from "./ManuscriptPlate";
 import { ManuscriptTabs, ManuscriptTabKey } from "./ManuscriptTabs";
-import { HeroFact } from "../../lib/manuscriptProfile";
+import { HeroFigure } from "../../lib/manuscriptProfile";
 import { PlateStats } from "../../lib/manuscriptPlate";
 import manuscriptIcon from "../../assets/shell/manuscript-icon.png";
 import "./bookProfile.css";
@@ -35,22 +35,49 @@ export interface ManuscriptHeroProps {
   genres: string[];
   wordCount?: number;
   stats: PlateStats;
-  /** The derived clauses after genre and word count. */
-  facts: HeroFact[];
+  /**
+   * The three derived figures, right-aligned with hairline dividers. Absent entries simply do not
+   * render — `Querying since` omits itself rather than dashing a date the app does not have.
+   */
+  figures: HeroFigure[];
   edit?: ManuscriptPlateEdit;
   tab: ManuscriptTabKey;
   onTabChange: (t: ManuscriptTabKey) => void;
   counts?: Partial<Record<ManuscriptTabKey, number>>;
-  /** The hero's own actions — the primary, the quiet one, and the lifecycle ⋯. */
-  actions?: React.ReactNode;
+  /**
+   * Page through the shelf. Null means there is no neighbour that way — the chevron still RENDERS,
+   * disabled and dimmed, so the affordance is visible before a second book exists. No wrap-around:
+   * the first has no previous and the last has no next.
+   */
+  onPrev: (() => void) | null;
+  onNext: (() => void) | null;
 }
 
 export const ManuscriptHero: React.FC<ManuscriptHeroProps> = ({
-  title, status, shelved, genres, wordCount, stats, facts, edit, tab, onTabChange, counts, actions,
+  title, status, shelved, genres, wordCount, stats, figures, edit, tab, onTabChange, counts,
+  onPrev, onNext,
 }) => (
   <div className="msp-hero">
     <div className="msp-heroin">
-      {/* ⚠️ ONE ROW, VERTICALLY CENTRED. Cover · identity · actions — `align-items: center` rather
+      {/**
+        * ⚠️ THE CHEVRONS ARE RENDERED WHEN THEY CANNOT BE USED, NOT HIDDEN. A control that appears
+        * the day a second manuscript exists teaches nothing to the writer who has one; a dimmed,
+        * disabled one says "this pages through your shelf" before the shelf has a second book on it.
+        *
+        * ⚠️ AND THERE IS NO WRAP-AROUND. First has no previous, last has no next. Wrapping would
+        * make the two ends indistinguishable from the middle, so a writer could not tell from the
+        * control whether they had reached the end of their own shelf.
+        */}
+      <div className="msp-heroband">
+        <button
+          type="button"
+          className="msp-chev"
+          onClick={() => onPrev?.()}
+          disabled={!onPrev}
+          aria-label="Previous manuscript"
+        >‹</button>
+
+      {/* ⚠️ ONE ROW, VERTICALLY CENTRED. Cover · identity · figures — `align-items: center` rather
           than `flex-start`, so a one-line title and a two-line one both sit against the cover's
           middle instead of riding its top edge. */}
       <div className="msp-herorow">
@@ -69,22 +96,27 @@ export const ManuscriptHero: React.FC<ManuscriptHeroProps> = ({
           wordCount={wordCount}
           stats={stats}
           edit={edit}
-          facts={
-            <>
-              {facts.map((f) => (
-                <span key={f.key} className="msp-fact">
-                  {/* `26 queries sent` — figure first; `Querying since 14 Jan 2026` — label first.
-                      The clause decides, so the shape is data rather than two hard-coded rows. */}
-                  {f.key === "since"
-                    ? <>{f.label} <b>{f.value}</b></>
-                    : <><b>{f.value}</b> {f.label}</>}
-                </span>
-              ))}
-            </>
-          }
         />
 
-        {actions && <div className="msp-heroacts">{actions}</div>}
+        {/* ⚠️ RIGHT-ALIGNED, PLAYFAIR OVER MONO, AND DERIVED AT READ TIME. These are the same three
+            figures the facts line used to carry; they are not stated twice on one row of the page. */}
+        <div className="msp-herostats">
+          {figures.map((f) => (
+            <div key={f.key} className="msp-hs">
+              <div className={`msp-hsn${f.date ? " date" : ""}`}>{f.value}</div>
+              <div className="msp-hsl">{f.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+        <button
+          type="button"
+          className="msp-chev"
+          onClick={() => onNext?.()}
+          disabled={!onNext}
+          aria-label="Next manuscript"
+        >›</button>
       </div>
 
       <ManuscriptTabs active={tab} onChange={onTabChange} counts={counts} />

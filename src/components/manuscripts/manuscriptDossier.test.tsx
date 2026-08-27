@@ -51,6 +51,8 @@ const BASE: ManuscriptDossierProps = {
   agentName: (id) => (id === "a1" ? "T. Marsh" : "Agent not recorded"),
   notes: [],
   onOpenNoteboard: noop,
+  onPrev: null,
+  onNext: null,
   comps: [],
   isPro: false,
   scoutAvailable: true,
@@ -65,10 +67,6 @@ const BASE: ManuscriptDossierProps = {
   tab: DEFAULT_MANUSCRIPT_TAB,
   onTabChange: noop,
   onBack: noop,
-  onSendQuery: noop,
-  onEditDetails: noop,
-  onShelveToggle: noop,
-  onDelete: noop,
   onRemoveComp: noop,
   onAddComp: noop,
   onCopyPitch: noop,
@@ -104,8 +102,8 @@ describe("the dossier renders one manuscript", () => {
     expect(html).toContain("Young Adult");
     expect(html).toContain("Thriller");
     expect(html).toContain("50,000 words");
-    expect(html).toContain("<b>1</b> query sent");
-    expect(html).toContain("<b>0</b> responses");
+    expect(html).toContain('<div class="msp-hsn">1</div><div class="msp-hsl">Queries sent</div>');
+    expect(html).toContain('<div class="msp-hsn">0</div><div class="msp-hsl">Responses</div>');
     // The stat strip is gone from this variant, not merely restyled.
     expect(html).not.toContain("msv-statn");
   });
@@ -118,7 +116,7 @@ describe("the dossier renders one manuscript", () => {
    */
   it("omits Querying since where nothing has been sent, and states it where something has", () => {
     expect(doss({ queries: [] })).not.toContain("Querying since");
-    expect(doss({ queries: [] })).toContain("<b>0</b> queries sent");
+    expect(doss({ queries: [] })).toContain('<div class="msp-hsn">0</div><div class="msp-hsl">Queries sent</div>');
     expect(doss()).toContain("Querying since");
   });
 
@@ -134,25 +132,7 @@ describe("the dossier renders one manuscript", () => {
     expect(doss()).toContain("mlib-back");
   });
 
-  /** ⚠️ The lifecycle menu has no other home on this page — losing it is a silent regression. */
-  it("keeps the shelve/delete affordance", () => {
-    expect(doss()).toContain('aria-label="More actions"');
-  });
 
-  /**
-   * ⚠️ "EDIT DETAILS" LEFT THE PLATE AND LANDED HERE, deliberately. The reframe deletes the button
-   * from the plate — the plate is the form — but STATUS, SHELVED REASON and NOTES have no inline
-   * editor and no other surface on this page, so deleting the form outright would strand them.
-   * Status leaves it when Phase 6's decision sheet lands; the other two need a home first.
-   */
-  it("rehomes Edit details into the lifecycle menu rather than deleting the form", () => {
-    const src = readFileSync(resolve(__dirname, "./ManuscriptDossier.tsx"), "utf8");
-    expect(src).toContain("Edit details…");
-    expect(src).toContain("onEditDetails()");
-    /* And it is NOT on the plate — that component no longer takes the prop at all. */
-    const plateSrc = readFileSync(resolve(__dirname, "./ManuscriptPlate.tsx"), "utf8");
-    expect(plateSrc).not.toContain("onEditDetails");
-  });
 
   /* Editing is opt-in on the plate, and the dossier is the caller that opts in. */
   it("hands the plate its editors when the page supplies them", () => {
@@ -175,6 +155,14 @@ describe("the dossier renders one manuscript", () => {
   });
 });
 
+/**
+ * ⚠️ THE LIFECYCLE CASES MOVED WITH THE MENU, THEY DID NOT LAPSE (amendment 2). Shelve, reactivate,
+ * the guarded delete and "Edit details" — the only route to status, shelved reason and notes — used
+ * to be asserted here because the ⋯ was in the hero. The hero carries no actions now and the ⋯ is
+ * `ManuscriptActions` in the page's control row, so the assertions live in `manuscriptActions.test.tsx`.
+ * Written down because a case that simply disappears from a spec is indistinguishable from a rule
+ * that was dropped.
+ */
 describe("the tab row", () => {
   it("renders the five tabs, opening on Overview", () => {
     const html = doss();

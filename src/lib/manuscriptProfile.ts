@@ -52,35 +52,29 @@ export const queryingSinceMs = (queries: readonly Query[]): number | null => {
 export const profileDate = (ms: number): string =>
   new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
-export interface HeroFact {
+export interface HeroFigure {
   key: string;
-  /** The plain part of the clause. */
+  /** The figure itself — a count, or a date already formatted. */
+  value: string;
   label: string;
-  /** The figure, set in the facts line's stronger ink. Absent where the clause is all label. */
-  value?: string;
+  /** A date sets smaller than a numeral, so the three cells stay optically level. */
+  date?: boolean;
 }
 
 /**
- * The hero's derived clauses — the ones after genre and word count, which the identity block
- * already owns and which stay editable in place.
+ * ⚠️ `heroFacts` AND `HeroFact` ARE RETIRED (amendment 2), NOT RENAMED. They built the three
+ * derived CLAUSES that sat in the facts line under the title — `26 queries sent · 12 responses ·
+ * Querying since …`. Those three are the hero's right-hand stat CELLS now, and the facts line keeps
+ * only genre chips and word count, so nothing on that row of the page states them twice.
  *
- * ⚠️ THE COUNTS ARE STATED AT NOUGHT AND THE DATE IS NOT. A writer with no queries out reads
- * `0 queries sent · 0 responses` and nothing else: those are true, and `Querying since` has no
- * date behind it, so the clause is omitted rather than dashed. A dash there would be the app
- * asserting a start it does not know.
+ * ⚠️ THE ONE RULE THE BUILDER EXISTED TO HOLD SURVIVES, AND IT MOVED RATHER THAN LAPSED: a count of
+ * nought is stated, a date nobody has is not. `0 queries sent` is a fact the writer needs;
+ * `Querying since —` is the app asserting a start it does not know, and this page has shipped that
+ * exact shape before as an "Added" date derived from an imported query's send. The cell is now
+ * OMITTED when `queryingSinceMs` returns null — which takes its hairline divider with it, because
+ * the divider is a `border-left` on the cell rather than an element between cells.
  */
-export const heroFacts = (
-  queriesSent: number,
-  responses: number,
-  sinceMs: number | null,
-): HeroFact[] => {
-  const out: HeroFact[] = [
-    { key: "sent", label: queriesSent === 1 ? "query sent" : "queries sent", value: String(queriesSent) },
-    { key: "responses", label: responses === 1 ? "response" : "responses", value: String(responses) },
-  ];
-  if (sinceMs !== null) out.push({ key: "since", label: "Querying since", value: profileDate(sinceMs) });
-  return out;
-};
+
 
 /**
  * The shelf header's meta — `2 manuscripts · 26 queries`.
