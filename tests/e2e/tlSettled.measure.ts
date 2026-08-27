@@ -74,6 +74,17 @@ test("Phase 6 — colour, breath, words and the hand, at every width and range",
 
         const notes = [...tl.querySelectorAll(".tl-tail")].map((t) => (t.textContent || "").trim());
         const y3 = tl.querySelector<HTMLElement>(".tl-seg.s-y3");
+        /* ⚠️ THE REGRESSION THIS WHOLE PACK EXISTS FOR — labels at three and six months, where a
+           density tier used to set `display: none` on every one of them. */
+        const labels = [...tl.querySelectorAll<HTMLElement>(".tl-seg .tl-lbl")]
+          .filter((e) => getComputedStyle(e).display !== "none" && (e.textContent || "").trim());
+        /* ⚠️ AND THE BAR'S HEIGHT, which must not move with the range. It never did — no tier ever
+           touched `--bar-h` — but this is the shape a future tier would reach for first. */
+        const barH = segs.length ? Math.round(segs[0].getBoundingClientRect().height) : null;
+        const says = [...tl.querySelectorAll<HTMLElement>(".tl-rowsay")];
+        const notch = tl.querySelector<HTMLElement>(".tl-wp");
+        const disc = tl.querySelector<HTMLElement>(".tl-node");
+        const todayDd = tl.querySelector<HTMLElement>(".tl-dh.today .tl-dd");
 
         return {
           segs: segs.length, mismatched, spill: spill.slice(0, 3),
@@ -83,11 +94,21 @@ test("Phase 6 — colour, breath, words and the hand, at every width and range",
           ground: getComputedStyle(board).backgroundColor,
           bars, notes, names,
           breath: y3 ? getComputedStyle(y3).animationName : null,
+          labels: labels.length,
+          barH,
+          saysClipped: says.filter((x) => x.scrollWidth > x.clientWidth + 1).length,
+          saysN: says.length,
+          notch: notch ? { tag: notch.tagName, pe: getComputedStyle(notch).pointerEvents } : null,
+          disc: disc ? { tag: disc.tagName, pe: getComputedStyle(disc).pointerEvents } : null,
+          today: todayDd
+            ? { text: (todayDd.textContent || "").trim(), over: todayDd.scrollWidth > todayDd.clientWidth + 1 }
+            : null,
           ink: tl.textContent || "",
         };
       }, FLAT);
 
-      const say = `[${width}] ${STOPS[i].padEnd(9)} ${m.segs} bars · ${m.notes.length} notes · breath ${m.breath}`;
+      const say = `[${width}] ${STOPS[i].padEnd(9)} ${m.segs} bars · ${m.labels} labels · ${m.notes.length} notes` +
+        ` · bar ${m.barH}px · says ${m.saysN}/${m.saysClipped} clipped · breath ${m.breath}`;
       console.log(`  ${say}`);
 
       expect(m.segs, `${say} — no bars`).toBeGreaterThan(0);
@@ -108,6 +129,32 @@ test("Phase 6 — colour, breath, words and the hand, at every width and range",
         }
       }
       expect(m.ink.toLowerCase(), `${say} — the board says "overdue"`).not.toContain("overdue");
+
+      /* ── the density pack's own acceptances ──────────────────────────────────────────────── */
+      /* ⚠️ THE REGRESSION, ASSERTED AT EVERY RANGE. A tier set `display: none` on every bar label
+         at three months and beyond — the range the board opens at — so the whole of the settled
+         pack's copy was rendered and then suppressed. */
+      expect(m.labels, `${say} — no bar carries a label`).toBeGreaterThan(0);
+      /* the bar's height is the row's token and nothing else; it cannot move with the range */
+      expect(m.barH, `${say} — the bar is not 44px`).toBe(44);
+      /* the row head finishes its sentence */
+      expect(m.saysN, `${say} — no row-head sentences`).toBeGreaterThan(0);
+      expect(m.saysClipped, `${say} — ${m.saysClipped} row-head sentences are cut`).toBe(0);
+      /* ⚠️ A NOTCH IS A MARK AND A DISC IS AN OBJECT — asserted together, because each alone is
+         satisfied by a board where everything is one or the other. */
+      if (m.notch) {
+        expect(m.notch.tag, `${say} — a notch is a control`).toBe("SPAN");
+        expect(m.notch.pe, `${say} — a notch takes pointer events`).toBe("none");
+      }
+      if (m.disc) {
+        expect(m.disc.tag, `${say} — a disc is not a control`).toBe("BUTTON");
+        expect(m.disc.pe, `${say} — a disc takes no pointer events`).not.toBe("none");
+      }
+      /* today's header shows a date rather than a blob */
+      if (m.today) {
+        expect(m.today.text.length, `${say} — today's mark is empty`).toBeGreaterThan(0);
+        expect(m.today.over, `${say} — "${m.today.text}" spills out of today's mark`).toBe(false);
+      }
       /* ⚠️ THE BREATH, WHERE THERE IS A LONG-STANDING BAR TO BREATHE. `null` means the board holds
          none at this range, which is a fact about the data rather than a failure — reported so a
          range that quietly stops producing one is visible rather than absorbed. */
