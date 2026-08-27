@@ -22,6 +22,9 @@
 import { test, expect, Page } from "@playwright/test";
 import { openRoute, liftMotionSuppression } from "./measure";
 
+/* the pages the illustrated-masthead trial carves out of the shared chrome — counted in `headerFix` */
+const CARVED = ["Submission packages"];
+
 const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Query Centre",        route: "/queries",              cls: "qc-wpg"   },
   { name: "Analytics",           route: "/queries/analytics",    cls: "qa-wpg"   },
@@ -203,6 +206,14 @@ test("⚠️ CHROME IS IDENTICAL WITHIN EACH TYPE", async ({ page }) => {
     const s = (await survey(page, cls))!;
     /* the masthead's own shape — height varies legitimately with a missing description, so the
        comparison is of the declared type's chrome, not of every pixel */
+    /**
+     * ⚠️ THE CARVED-OUT PAGE IS EXCLUDED, AND THIS IS THE THIRD LOCK THE 47px TITLE DIED IN.
+     * Submission packages runs the illustrated-masthead trial, whose carve-out covers ground,
+     * artwork AND type scale; holding it to the shared chrome as well is holding it to the thing it
+     * is carved out of. Its own values are asserted in `headerFix`, and the count of carved pages is
+     * asserted there too, so this exclusion cannot quietly widen.
+     */
+    if (CARVED.includes(name)) continue;
     seen[s.type!].push({ name, k: `pos ${s.slabPosition} · hairline ${s.hairline} · pad ${s.padTop} · title ${s.titleSize} · mark ${s.markW}` });
   }
   for (const [type, rows] of Object.entries(seen)) {

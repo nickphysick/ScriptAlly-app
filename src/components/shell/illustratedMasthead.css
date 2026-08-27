@@ -62,8 +62,19 @@
  * What stays here is the gradient's terminal colour, flat, so the band still reaches both window
  * edges and nothing bands or steps where the measure begins.
  */
-.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome {
-  background-color: var(--pkg-ground-b);
+/**
+ * ⚠️ THE SLAB'S FLAT FILL, AND SETTLED IT GOES — which is the whole of the suppression. The measure
+ * carries the tint and the artwork; this is the terminal colour behind it, so the band still reaches
+ * both window edges and nothing steps where the measure ends on the right.
+ *
+ * ⚠️ SCOPED TO THE REST STATE, so a settled Packages takes the SHARED WASH back like every other
+ * Type A page. Settled the band is ~55px, the artwork would render about a third of its size and
+ * Rule 3 would fail outright — there would be no picture where the fade uncovers it. A working bar
+ * is not a title, and it is asserted: settled, this masthead's painted colour is the wash at every
+ * sampled point.
+ */
+.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome:not(.wpg-chrome--stuck) {
+  background-color: var(--pkg-pale);
   background-image: none;
 }
 /* ⚠️ THE TEXT SITS ABOVE THE PAINT. The pseudo-element is positioned and the masthead's measure is
@@ -75,31 +86,44 @@
  * `background-position: 100% center` anchors the illustration to the measure's right edge — where
  * the text can see it — rather than to a window edge the text drifts away from.
  */
-.wpg.pkgw-wpg .wpg-mast {
+.wpg.pkgw-wpg .wpg-chrome:not(.wpg-chrome--stuck) .wpg-mast {
   position: relative;
   z-index: 2;
-  background-color: var(--pkg-ground-b);
-  background-image: linear-gradient(to right, var(--pkg-ground-a) 0%, var(--pkg-ground-b) var(--pkg-ground-mid));
+  background-color: var(--pkg-tint);
+  /**
+   * ⚠️ THE TINT'S TWO STOPS ARE TRANSPOSED IN THE BRIEF, AND AS WRITTEN THEY PRODUCE A HARD EDGE
+   * RATHER THAN A FADE. It gives `#f2e4dd var(--pkg-gnd-b), #fdf9f6 var(--pkg-gnd-a)` — but
+   * `gnd-b` is 458 and `gnd-a` is 138, so the second stop sits LEFT of the first and CSS clamps a
+   * non-monotonic stop up to its predecessor. Both then land on 458.
+   *
+   * MEASURED as written, across the measure: solid 242,228,221 from 0 all the way to 450, then
+   * 253,249,246 at 458 — a vertical line at the text's right edge with no transition at all.
+   *
+   * The prose says the colour "resolves just before the picture arrives", which is a fade, so the
+   * stops are ordered left to right: solid until `gnd-a`, pale by `gnd-b`, 60px before the reveal
+   * begins. The token NAMES are kept as the brief has them.
+   */
+  background-image: linear-gradient(to right, var(--pkg-tint) var(--pkg-gnd-a), var(--pkg-pale) var(--pkg-gnd-b));
 }
-.wpg.pkgw-wpg .wpg-mast::after {
+.wpg.pkgw-wpg .wpg-chrome:not(.wpg-chrome--stuck) .wpg-mast::after {
   content: '';
   position: absolute;
   inset: 0;
   /* ⚠️ IT MUST NOT SWALLOW A CLICK — the page's controls sit over this band. */
   pointer-events: none;
   background-image: url(../../assets/packages/packages.webp);
-  background-repeat: no-repeat;
+  /* Rule 2 · anchored to the measure's right edge, sized by band height, dense end outward */
   background-position: 100% center;
-  background-size: auto 130%;
+  background-size: auto 140%;
   opacity: 0.86;
   /**
-   * ⚠️ THE MASK IS THE POINT: the artwork is fully transparent where the title and description sit
-   * and fades in across the middle, so no text is set over painted illustration. Asserted by
-   * photographing the band with the artwork off and on and requiring the two identical at each
-   * glyph — never against a single "ground" colour, which a gradient has never had.
+   * Rule 1 · the reveal is anchored to the TEXT, in pixels, from the left. Rule 3 is what makes it
+   * safe: the artwork is always wider than the gap between the reveal and the measure's right edge,
+   * so the picture always exists where the fade uncovers it — asserted arithmetically at four
+   * widths, because that is the check that would have caught every failure in this saga.
    */
-  -webkit-mask-image: linear-gradient(to right, transparent var(--pkg-art-start), var(--illo-solid) var(--pkg-art-full));
-          mask-image: linear-gradient(to right, transparent var(--pkg-art-start), var(--illo-solid) var(--pkg-art-full));
+  -webkit-mask-image: linear-gradient(to right, transparent var(--pkg-reveal-a), var(--illo-solid) var(--pkg-reveal-b));
+          mask-image: linear-gradient(to right, transparent var(--pkg-reveal-a), var(--illo-solid) var(--pkg-reveal-b));
 }
 /* ⚠️ THE TEXT ABOVE THE PAINT. The pseudo-element is positioned and `.wsh` is not, so without this
    the artwork would paint over the title — the bench lifts its inner box for the same reason. */
@@ -193,16 +217,40 @@
  * Five tokens because this is a trial and the numbers will move.
  */
 .wpg.pkgw-wpg {
-  /* ⚠️ IT READS THE WASH'S TOP STOP RATHER THAN RESTATING ITS HEX. The brief's `#f2e4dd` IS
-     `--mast-wash-top`, so writing it again put the same colour in two declarations — caught by the
-     single-source lock, which cannot tell a deliberate match from a stale copy and should not have
-     to. Stated as the relationship it is: this ground BEGINS at the masthead wash and resolves to
-     something lighter, so retuning the wash carries the trial with it. If the two are meant to be
-     independent colours that happen to coincide today, this becomes a literal again — and the lock
-     will ask about it. */
-  --pkg-ground-a: var(--mast-wash-top);   /* the ground's left stop */
-  --pkg-ground-b: #fdf9f6;   /* its right stop, and the flat colour beneath the gradient */
-  --pkg-ground-mid: 60%;     /* where the ground finishes resolving */
-  --pkg-art-start: 43%;      /* where the artwork begins fading in */
-  --pkg-art-full: 73%;       /* where it reaches full strength */
+  /**
+   * ⚠️ EVERY STOP IS A PIXEL OFFSET FROM THE MEASURE'S LEFT EDGE, ANCHORED TO THE TEXT — and that
+   * is the whole design rather than a tuning. The title and description are a fixed-size object at a
+   * fixed gutter, so `textRight` is the SAME 458px at 1280, 1440, 1920 and 2560; anchoring the fade
+   * to it clears the words by construction at any width. Every earlier version anchored the reveal
+   * to the band or to the artwork, both of which move relative to the text, which is why it kept
+   * breaking in a different place each time.
+   */
+  --pkg-text-right: 458px;
+  --pkg-reveal-a: calc(var(--pkg-text-right) + 60px);    /* artwork begins to appear */
+  --pkg-reveal-b: calc(var(--pkg-reveal-a) + 430px);     /* artwork fully painted */
+  /* the tint resolves just before the picture arrives, on the same anchor and the same direction */
+  --pkg-gnd-a: calc(var(--pkg-reveal-a) - 380px);
+  --pkg-gnd-b: calc(var(--pkg-reveal-a) - 60px);
+  /* ⚠️ THE TINT IS THE WASH'S TOP STOP, READ RATHER THAN RESTATED — the brief's `#f2e4dd` IS
+     `--mast-wash-top`, so writing it again is a second copy of one colour and the single-source
+     lock says so. It resolves here because these tokens are declared on the PAGE'S GRID ROOT, where
+     `--mast-wash-top` is in scope; the same line at `:root` silently killed the whole gradient once
+     already, which is why the scope is stated in the note above rather than left to be rediscovered. */
+  --pkg-tint: var(--mast-wash-top);
+  --pkg-pale: #fdf9f6;
 }
+
+/**
+ * ══ THE TYPE SCALE — PART OF THE CARVE-OUT ════════════════════════════════════════════════════
+ *
+ * ⚠️ THE 47px TITLE KEPT REVERTING BECAUSE THE CARVE-OUT DID NOT COVER TYPOGRAPHY. The chrome
+ * matrix asserts every Type A masthead is identical, which is a good law and forces 30px; each time
+ * the trial raised the title, that lock pulled it back. So the carve-out now names three things —
+ * ground, artwork AND type scale — and is still counted, so it cannot quietly widen.
+ *
+ * ⚠️ AND IT IS SCOPED TO THE REST STATE. Settled, this page is a working bar like any other and
+ * takes the shared scale back; the suppression below says so for the paint, and the title follows
+ * the same rule for the same reason.
+ */
+.wpg.pkgw-wpg .wpg-chrome:not(.wpg-chrome--stuck) .wsh { --wsh-title-size: 47px; }
+.wpg.pkgw-wpg .wpg-chrome:not(.wpg-chrome--stuck) .wsh-sub { font-size: 14px; }

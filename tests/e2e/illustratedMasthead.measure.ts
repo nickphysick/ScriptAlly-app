@@ -91,7 +91,7 @@ const TRIAL_ROUTES: { name: string; route: string; cls: string }[] = [
   { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
 ];
 
-for (const width of [1280, 1440, 2300]) {
+for (const width of [1280, 1440, 1920, 2560]) {
  for (const trial of TRIAL_ROUTES) {
   test(`⚠️ NO TEXT SITS ON PAINTED ARTWORK — ${trial.name} — ${width}`, async ({ page }) => {
     await openRoute(page, trial.route, { width, height: 900 });

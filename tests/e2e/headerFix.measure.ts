@@ -52,6 +52,8 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
     type: g.getAttribute("data-wpg-type"),
     chromeImg: cs.backgroundImage,
     chromeBg: cs.backgroundColor,
+    /* the title's rendered size, so the carve-out can state that it covers type as well as paint */
+    titleSize: (() => { const t = g.querySelector(".wsh-title") as HTMLElement | null; return t ? getComputedStyle(t).fontSize : ""; })(),
     washTop: cs.getPropertyValue("--mast-wash-top").trim(),
     washBottom: cs.getPropertyValue("--mast-wash-bottom").trim(),
     /* ⚠️ THE TRIPLE, NOT `--ws-window`. A custom property read back gives its TOKEN TEXT, and
@@ -93,6 +95,14 @@ test("⚠️ EVERY MASTHEAD CARRIES THE WASH — a partition, with one named car
       carved += 1;
       const alpha = (c: string) => { const m = /rgba?\(([^)]*)\)/.exec(c); const parts = m ? m[1].split(",").map((v) => parseFloat(v.trim())) : []; return parts.length > 3 ? parts[3] : 1; };
       expect(alpha(r!.chromeBg), `${name} is carved out of the wash and its ground is not opaque (${r!.chromeBg})`).toBe(1);
+      /**
+       * ⚠️ THE CARVE-OUT COVERS TYPOGRAPHY TOO, AND NOT SAYING SO IS WHY THE 47px TITLE KEPT
+       * REVERTING. The chrome matrix asserts every Type A masthead is identical — a good law, and it
+       * forces 30px — so each time the trial raised the title that lock pulled it back and nothing
+       * said why. A carve-out naming the ground and the artwork but not the type scale has a hole in
+       * it exactly the size of the thing that kept disappearing.
+       */
+      expect(r!.titleSize, `${name} is carved out and its title is back at the shared 30px — the carve-out does not cover typography`).not.toBe("30px");
       lines.push(`${name.padEnd(21)} ${String(r!.type).padEnd(7)} · CARVE-OUT · ground ${r!.chromeBg}`);
       continue;
     }
