@@ -2,6 +2,7 @@
   "_note": "Hashes of the design refs that are ACTIVE design authorities. Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. Re-record deliberately with --update after taking a new ref; never from a build.",
   "refs": {
     "design-refs/manuscripts-scroll-page.html": "86e9eb3ce18714a43e3f3538ca8312eac7e16199ca9fc37eaf4420c1a2814aee",
-    "design-refs/manuscript-identity-band.html": "45b9a7a2af4aefda90ea77332f9e60cd7770da36f2394259d4a73a3e7c8892cf"
+    "design-refs/manuscript-identity-band.html": "45b9a7a2af4aefda90ea77332f9e60cd7770da36f2394259d4a73a3e7c8892cf",
+    "design-refs/timeline-v35.html": "764197fea6bd50dd49a2fb6329e15e6b2480d7277c6395084cb640b9c2e37033"
   }
 }

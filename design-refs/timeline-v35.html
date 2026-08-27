@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Calendar v31: white, tints, and filling bars</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ground:#faf7f2;--row:#fffefb;--ink:#3a1c14;--muted:#8a7a6c;--label:#9c8878;
+--burgundy:#7c3a2a;--pink:#f5e2da;--pinkb:#e8c8bc;--hair:#efe6da;
+--scrawl:#8a4a36;--todayl:rgba(58,28,20,.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ground);font-family:Inter,sans-serif;color:var(--ink);padding:22px 26px 46px;-webkit-font-smoothing:antialiased}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;color:var(--label)}
+h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:500;margin:5px 0 8px}
+.sub{font-size:13px;color:var(--muted);max-width:980px;line-height:1.55;margin-bottom:14px}
+.sub b{color:var(--ink)}
+.ctrl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.seg{display:inline-flex;background:#fff;border:1px solid #e5d8c9;border-radius:9px;overflow:hidden}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;font-weight:500;border:none;background:transparent;color:#6a5a50;padding:8px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--hair)}
+.seg button[data-on="true"]{background:var(--pink);color:var(--burgundy)}
+.btn{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;font-weight:500;border-radius:9px;padding:7px 12px;cursor:pointer;background:#fff;border:1px solid #e5d8c9;color:#6a5a50;line-height:1}
+input[type=range]{accent-color:var(--burgundy);width:120px}
+.rlab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#6a5a50}
+.count{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--label);margin-left:auto}
+/* board */
+.wrap{position:relative}
+.todayline{position:absolute;top:0;bottom:0;width:0;border-left:1px solid var(--todayl);z-index:5;pointer-events:none}
+.todayflag{position:absolute;top:-16px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--ink)}
+.grp{margin-bottom:4px}
+.gt{display:flex;align-items:baseline;gap:9px;padding:14px 2px 7px}
+.gt .t{font-family:'Playfair Display',serif;font-size:19px;font-weight:500}
+.gt .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--label)}
+.gt .s{font-size:11.5px;color:var(--muted)}
+.gt .show{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:var(--label);cursor:pointer}
+.tbl{background:var(--row);border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.hrow,.rrow{display:flex;align-items:stretch}
+.rrow{border-top:1px solid #f4ede3;min-height:47px;transition:background .12s}
+.rrow:hover{background:#faf5ec}
+.rrow:hover .abtn{background:var(--pinkb)}
+.hrow{height:26px;border-bottom:1px solid var(--hair)}
+.c-nm{flex:0 0 308px;display:flex;align-items:center;gap:10px;padding:0 12px}
+.c-ac{flex:0 0 168px;display:flex;align-items:center;padding:0 8px}
+.c-tl{flex:1 1 auto;position:relative;overflow:hidden}
+.hrow .lbl{font-size:7.5px}
+.hrow .c-tl{overflow:visible}
+.dt{position:absolute;top:50%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;color:var(--label)}
+.nm{font-family:'Playfair Display',serif;font-size:14px;font-weight:500;line-height:1.15}
+.ag{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);margin-top:2px}
+.sd{flex:0 0 auto}
+/* CONTROLS ARE NEVER PILLS — bars are 999px, controls are square-cornered */
+.abtn{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;font-weight:500;cursor:pointer;
+  white-space:nowrap;display:inline-flex;align-items:center;gap:6px;line-height:1}
+/* C1 · Cut corner — white ground, ink text, 3px radius, chevron */
+.c1 .abtn{border-radius:3px;padding:7px 9px 7px 10px;background:#fff;border:1px solid #dcccbb;color:#54402f;
+  box-shadow:0 1px 0 rgba(58,28,20,.05)}
+.c1 .abtn:hover{border-color:var(--burgundy);color:var(--burgundy)}
+.c1 .abtn .cv{opacity:.5}
+.adash{color:#cec2b3;font-size:12px;padding-left:6px}
+/* pieces: white track + tinted fill */
+.p{position:absolute;height:22px;top:50%;transform:translateY(-50%);border-radius:999px;overflow:hidden;z-index:2;background:#fff}
+.p .fl{position:absolute;left:0;top:0;bottom:0;border-radius:inherit;border-top-right-radius:3px;border-bottom-right-radius:3px}
+.p .fl[style*="width:100"]{border-top-right-radius:inherit;border-bottom-right-radius:inherit}
+.p .t{position:relative;font-size:9.5px;font-weight:500;white-space:nowrap;padding:0 10px;line-height:22px;z-index:2}
+.p.hollow{background:transparent}
+.p.hollow .t{opacity:.75}
+/* S1 · Porcelain — white tracks, family-tinted hairlines, tinted fills */
+.s1 .p.out{border:1px solid #d9e1d6}.s1 .p.out .fl{background:#e6ece3}.s1 .p.out .t{color:#55684f}
+.s1 .p.out.near .fl{background:#d7e0d2}
+.s1 .p.req{border:1px solid #ecd3c6}.s1 .p.req .fl{background:#f3e0d5}.s1 .p.req .t{color:#6b3a2a}
+.s1 .p.req.near .fl{background:#ecc9b8}
+.s1 .p.decide{border:1px solid #e2b8a5}.s1 .p.decide .fl{background:#eccbba}.s1 .p.decide .t{color:#58281a}
+.s1 .p.decide.near .fl{background:#e2b09a}
+.s1 .p.remind{border:1px solid #dde3da}.s1 .p.remind .fl{background:#eef1ec}.s1 .p.remind .t{color:#5c6b59}
+.s1 .p.remind.near .fl{background:#dfe6dc}
+.s1 .p.quiet{border:1px solid #e0dbd3}.s1 .p.quiet .fl{background:repeating-linear-gradient(-55deg,#e7e3dc 0 5px,#f4f1ec 5px 10px)}.s1 .p.quiet .t{color:#6b675f}
+.s1 .p.closedp{border:1.5px dashed #ddd0c0}.s1 .p.closedp .t{color:#a3927f}
+.s1 .p.hollow{border-style:solid;border-width:1px}
+/* S2 · Ink & paper — one grey fill, colour only where something acts */
+.s2 .p{border:1px solid #e6ddd0}
+.s2 .p .fl{background:#efe9e0}
+.s2 .p.near .fl{background:#e5dccf}
+.s2 .p .t{color:#5c4c40}
+.s2 .p.decide .t,.s2 .p.req .t{color:#6b3a2a}
+.s2 .p.out .t,.s2 .p.remind .t{color:#66735f}
+.s2 .p.quiet .fl{background:repeating-linear-gradient(-55deg,#e9e4dc 0 5px,#f6f3ee 5px 10px)}
+.s2 .p.quiet .t{color:#6b675f}
+.s2 .p.closedp{border-style:dashed;background:transparent}.s2 .p.closedp .fl{display:none}.s2 .p.closedp .t{color:#a3927f}
+/* S3 · Whisper — v29's fills at half strength, no progress mechanic */
+.s3 .p.out{background:#eef2ec;border:none}.s3 .p.out .t{color:#55684f}
+.s3 .p.req{background:#f4e1d7;border:none}.s3 .p.req .t{color:#6b3a2a}
+.s3 .p.decide{background:#e2e8ee;border:none}.s3 .p.decide .t{color:#4b5a6b}
+.s3 .p.remind{background:#faf4e6;border:none}.s3 .p.remind .t{color:#7a6a3f}
+.s3 .p.quiet{background:repeating-linear-gradient(-55deg,#e5e1da 0 5px,#f1eee9 5px 10px);border:none}.s3 .p.quiet .t{color:#6b675f}
+.s3 .p.closedp{background:transparent;border:1.5px dashed #ddd0c0}.s3 .p.closedp .t{color:#a3927f}
+.s3 .p .fl{display:none}
+.s3 .p.hollow{border:1.5px solid #dde3da;background:transparent}
+/* markers */
+.mk{position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:999px;background:#fff;
+  display:flex;align-items:center;justify-content:center;z-index:4;cursor:default;box-shadow:0 0 0 3px var(--row)}
+.mk.in{border:1.5px solid #9fb29a;color:#55684f}
+.mk.outk{border:1.5px solid #cfa08e;color:var(--burgundy)}
+.mk.bang{border:1.5px solid var(--burgundy);color:var(--burgundy);font-weight:600;font-size:12px;font-family:'Playfair Display',serif}
+.mk.clock{border:1.5px solid #bdb8b0;color:#6b675f}
+.mk svg{display:block}
+.scr{position:absolute;top:50%;transform:translateY(-50%) rotate(-1.4deg);font-family:'Caveat',cursive;font-size:16.5px;
+  font-weight:500;color:var(--scrawl);white-space:nowrap;z-index:3}
+.tchip{position:absolute;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:6px;height:23px;background:#fff;
+  border:1px solid #e5d8c9;border-radius:999px;padding:0 10px;font-size:10px;font-weight:500;color:var(--ink);white-space:nowrap;z-index:2}
+.tchip .sq{width:8px;height:8px;border-radius:2px;border:1.5px solid var(--burgundy);flex:0 0 auto}
+/* one portalled tooltip — .c-tl clips, so no descendant can escape it */
+.tipp{position:absolute;background:#fff;border:1px solid var(--hair);box-shadow:0 4px 14px rgba(58,28,20,.14);
+  border-radius:8px;padding:6px 10px;font-size:10.5px;color:var(--ink);white-space:nowrap;z-index:20;pointer-events:none;
+  opacity:0;transition:opacity .09s}
+.tipp.on{opacity:1}
+/* F1 crosshair */
+.xh{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed rgba(58,28,20,.28);z-index:6;pointer-events:none}
+.xhlab{position:absolute;transform:translateX(-50%);background:var(--ink);color:#f8f5f0;font-family:'JetBrains Mono',monospace;
+  font-size:8px;letter-spacing:.1em;padding:3px 7px;border-radius:4px;z-index:7;pointer-events:none;white-space:nowrap}
+/* F5 sparse */
+.sparse{background:#fff;border:1px dashed #e0d3c2;border-radius:10px;padding:26px 22px;text-align:center}
+.sparse h4{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;margin-bottom:6px}
+.sparse p{font-size:12.5px;color:var(--muted);max-width:420px;margin:0 auto 12px;line-height:1.55}
+/* audit */
+.aud{margin-top:26px;max-width:1080px}
+.aud h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;margin-bottom:10px}
+.aud .a{background:#fff;border:1px solid var(--hair);border-radius:10px;padding:11px 15px;font-size:12px;color:#5c4c40;line-height:1.6;margin-bottom:8px}
+.aud b{color:var(--ink)}
+.aud .v{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;padding:2px 8px;border-radius:999px;margin-right:8px}
+.aud .keep{background:#e6ece3;color:#4d5f4b}
+.aud .cond{background:#f5e2da;color:#7c3a2a}
+.aud .cut{background:#eee9e2;color:#8a8177}
+</style>
+</head>
+<body>
+
+<span class="lbl">ScriptAlly · design ref v35 · NORMATIVE · supersedes every earlier timeline ref · demo dated 27 Aug 2026</span>
+<h1>The calendar — Porcelain, settled</h1>
+<div class="sub">Scrawls trail their own row’s last piece. Controls are cut-corner buttons — <b>bars are 999px pills, controls are square-cornered</b>, so a control can never again be mistaken for data. <b>The named-date notches are gone</b>: the fill already states that a date was named, and the bar ends on it. Their captions moved onto the bars, which now carry a hover tooltip — so the date survives at long ranges where labels drop out. <br><br><b>The fill rule keeps the data honest:</b> a bar fills only when it has a named end — a stated response time, a promised send date, your own reminder. The fill is simply elapsed time over the stated span, derived at read, nothing stored. <b>A bar with no named date stays unfilled</b> — an open-ended wait, and the emptiness says so. A finished stretch is full. A bar at ≥85% deepens one step, which retires the pulse animation entirely. Past a named date the bar caps at full and continues hollow — lateness is drawn, never named. Switch the three schemes; everything else is v29 + the one column header you accepted.</div>
+
+<div class="ctrl">
+  <span class="lbl">Cut by</span>
+  <div class="seg" id="cut"><button data-c="needs" data-on="true">WHAT NEEDS YOU</button><button data-c="ms" data-on="false">MANUSCRIPT</button></div>
+  <span class="lbl">Range</span>
+  <input type="range" id="rng" min="0" max="2" value="1"><span class="rlab" id="rlab">3 MONTHS</span>
+  <button class="btn" id="prev">‹</button><button class="btn" id="tdy">TODAY</button><button class="btn" id="next">›</button>
+  <div class="seg" id="pop"><button data-p="full" data-on="true">FULL BOARD</button><button data-p="few" data-on="false">RIGHT NOW</button></div>
+  <span class="count" id="cnt2">13 RELATIONSHIPS</span>
+</div>
+
+<div class="wrap" id="wrap"><div id="board" class="s1"></div></div>
+
+<div class="aud">
+<h2>Does it earn its place? The audit</h2>
+<div class="a"><span class="v keep">KEEP</span><b>The fill.</b> It answers the question a writer actually opens the calendar with — <i>how far through the wait am I?</i> — without arithmetic. Day-counts state the past; the fill shows position within the stated span. And it carries a second fact for free: a filling bar means someone named a date, an unfilled bar means nobody did. It also replaces the pulse (motion) with position (state), which is calmer and reduced-motion-proof.</div>
+<div class="a"><span class="v keep">KEEP</span><b>Action column, hover captions, ! and clock markers, notches, hollow continuation, group sentences.</b> Each states a fact or offers exactly one deed; none decorates.</div>
+<div class="a"><span class="v cond">EARN IT</span><b>Scrawls.</b> Where a scrawl adds a fact the row doesn't already show — <i>Send it · due 15 days ago</i> carries the date — it's the best thing on the board. Where it triples what the button and bar already say — <i>Nudge them · due today</i> beside a NUDGE button and a bar reading "Nudge due" — it's charm doing no work. Proposed rule: <b>a scrawl must contain a fact absent from its own row, or it doesn't render.</b> On this demo board that keeps three of five.</div>
+<div class="a"><span class="v cond">EARN IT</span><b>Cut by manuscript.</b> Genuinely useful from the second manuscript onward; noise before that. Proposed: the control only renders when more than one manuscript exists.</div>
+<div class="a"><span class="v cut">CUT</span><b>The named-date notch.</b> It once distinguished <i>someone named this date</i> from <i>this is merely where the bar stops</i>. The fill now carries that distinction on its own — a filling bar means a date exists, an empty one means nobody set it — and the bar terminates on the date regardless. Three statements of one fact. Removed, with its caption moved to the bar’s hover so nothing is lost at long ranges.</div>
+<div class="a"><span class="v cut">CUT</span><b>The 1-week range.</b> On a board of relationships measured in weeks, seven days shows fragments of bars and answers nothing the To-do list doesn't answer better. Range becomes 1 · 3 · 6 months. </div>
+<div class="a"><span class="v cut">CUT</span><b>The elapsed wash (R6).</b> Honest reversal of my own proposal: once bars fill, the fill already encodes elapsed time — a second elapsed treatment on the canvas would say the same thing twice. R6 belonged to the flat-bar world.</div>
+</div>
+
+<script>
+var TODAY=new Date(2026,7,27);
+var M=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+function addD(n){var x=new Date(TODAY);x.setDate(x.getDate()+n);return x}
+function dlab(n){var d=addD(n);return d.getDate()+' '+M[d.getMonth()]}
+var RANGES=[{n:30,s:-8,l:'1 MONTH'},{n:90,s:-22,l:'3 MONTHS'},{n:180,s:-45,l:'6 MONTHS'}];
+var ri=1,nDays=90,start=-22,cut='needs',scheme='s1',ctl='c1',pop='full';
+
+var GROUPS=[
+ {k:'tasks',t:'Your tasks',s:'Dated tasks of your own.'},
+ {k:'offer',t:'Offer on the table',s:'One offer, awaiting your answer.'},
+ {k:'now',t:'Needs you now',s:'Four agents are waiting on you.'},
+ {k:'soon',t:'Needs you soon',s:'Nothing to do yet; a reminder is coming.'},
+ {k:'watch',t:'Watching brief',s:'Out with agents. Nothing is asked of you.'},
+ {k:'snz',t:'Snoozed',s:'Quiet until their return dates.',collapsed:2},
+ {k:'closed',t:'Recently closed',s:'Kept for a month, then it leaves.'}
+];
+function dot(kind){
+  var s='<svg class="sd" width="13" height="13" viewBox="0 0 14 14">';
+  if(kind==='offer')s+='<circle cx="7" cy="7" r="6" fill="#7c3a2a"/><path d="M4.4 7.2 L6.3 9 L9.8 5.2" stroke="#f8f5f0" stroke-width="1.5" fill="none" stroke-linecap="round"/>';
+  else if(kind==='half')s+='<circle cx="7" cy="7" r="5.4" fill="#f8e7dc" stroke="#7c3a2a" stroke-width="1.6"/><path d="M7 4.1 A2.9 2.9 0 0 1 7 9.9 Z" fill="#7c3a2a"/>';
+  else if(kind==='closedd')s+='<circle cx="7" cy="7" r="5.4" fill="#f4efe8" stroke="#b9b0a5" stroke-width="1.4"/><path d="M4.9 4.9 L9.1 9.1 M9.1 4.9 L4.9 9.1" stroke="#8a8177" stroke-width="1.2" stroke-linecap="round"/>';
+  else s+='<circle cx="7" cy="7" r="5.4" fill="#f8e7dc" stroke="#7c3a2a" stroke-width="1.6"/>';
+  return s+'</svg>';
+}
+function mkGlyph(k){
+  if(k==='in')return '<svg width="10" height="10" viewBox="0 0 10 10"><path d="M8 5 H2.6 M4.6 2.8 L2.4 5 L4.6 7.2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>';
+  if(k==='outk')return '<svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5 H7.4 M5.4 2.8 L7.6 5 L5.4 7.2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>';
+  if(k==='clock')return '<svg width="11" height="11" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.6" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M6 3.6 V6 L7.8 7.2" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>';
+  return '!';
+}
+/* b:[from,to,fill,label, goal|null] — goal null = open-ended, no fill. 'past' = finished stretch, full. */
+var ROWS=[
+ {g:'tasks',task:true,nm:'Nudge Marcus Reed',ag:'Your task',action:'TICK IT OFF',chips:[{d:7,l:'Nudge due'}]},
+ {g:'tasks',task:true,nm:'Chase Inkwell about the partial',ag:'Your task',action:'TICK IT OFF',chips:[{d:-1,l:'Due yesterday'}]},
+ {g:'tasks',task:true,nm:'Draft the Ellery reply',ag:'Your task',action:'TICK IT OFF',chips:[{d:6,l:'Due 2 Sept'}]},
+
+ {g:'offer',nm:'Tom Ellery',ag:'Curtis Vane',dk:'offer',ms:'m1',action:'DECIDE',
+  pieces:[{b:[-160,-8,'out','Out since 2 Apr','past']},{m:[-8,'in','Offer received \u00b7 19 Aug']},
+          {b:[-8,6,'decide','Your answer \u00b7 by 2 Sept',6]},{x:[6,'Your date \u00b7 2 Sept']}],
+  scr:'Answer them \u00b7 by 2 Sept'},
+
+ {g:'now',nm:'Jonathan Marsh',ag:'The Marsh Agency',dk:'q',ms:'m1',action:'SEND THE FULL',
+  pieces:[{b:[-15,-6,'out','Out since 12 Aug','past']},{m:[-6,'in','Full requested \u00b7 21 Aug']},
+          {b:[-6,18,'req','Full req \u00b7 by 14 Sept',18]},{x:[18,'Named date \u00b7 14 Sept']}],
+  scr:null},
+ {g:'now',nm:'Greg Panetta',ag:'Panetta Literary',dk:'half',ms:'m2',action:'SEND THE PARTIAL',
+  pieces:[{m:[-22,'in','Partial requested \u00b7 5 Aug']},{b:[-22,-15,'req','Partial req',-15]},
+          {x:[-15,'Promised \u00b7 12 Aug']},{b:[-15,0,'req','',null,1]}],
+  scr:'Send it \u00b7 due 15 days ago'},
+ {g:'now',nm:'William Tan',ag:'Foxglove Literary',dk:'q',ms:'m1',action:'NUDGE',
+  pieces:[{b:[-100,-19,'out','','past',1]},{m:[-19,'clock','Gone quiet \u00b7 no reply logged']},
+          {b:[-19,0,'quiet','78 days quiet',null]}],
+  scr:null},
+ {g:'now',nm:'Marcus Reed',ag:'Bloomsbury Quill',dk:'q',ms:'m1',action:'NUDGE',
+  pieces:[{b:[-52,0,'out','Nudge due',0]},{m:[0,'bang','Nudge due today']}],
+  scr:null},
+
+ {g:'soon',nm:'Daniel O\u2019Rourke',ag:'Inkwell & Stone',dk:'q',ms:'m1',action:null,
+  pieces:[{b:[-25,-9,'out','Out since 2 Aug','past']},{m:[-9,'outk','Nudge sent \u00b7 18 Aug']},
+          {b:[-9,29,'remind','Nudged \u00b7 remind 25 Sept',29]},{m:[29,'bang','Reminder falls due \u00b7 25 Sept']}],
+  scr:null},
+
+ {g:'watch',nm:'Eleanor Whitfield',ag:'Greenfield Literary',dk:'q',ms:'m1',action:null,
+  pieces:[{b:[-26,-10,'out','Out since 1 Aug','past']},{m:[-10,'in','Reply \u00b7 17 Aug']},{m:[-8.4,'outk','Partial sent \u00b7 18 Aug']},
+          {b:[-8.4,14,'out','Partial sent \u00b7 reply exp. 10 Sept',14]},{x:[14,'Stated window \u00b7 10 Sept']}],
+  scr:null},
+ {g:'watch',nm:'Harriet Vane-Coe',ag:'Vane-Coe Associates',dk:'q',ms:'m1',action:null,
+  pieces:[{b:[-49,6,'out','Out since 9 Jul \u00b7 reply exp. 2 Sept',6]},{x:[6,'Stated window \u00b7 2 Sept']}],scr:null},
+ {g:'watch',nm:'Priya Nair',ag:'Nair & Cole',dk:'q',ms:'m2',action:null,
+  pieces:[{m:[-4,'outk','Queried \u00b7 23 Aug']},{b:[-4,24,'out','Out since 23 Aug',24]},{x:[24,'Stated window \u00b7 20 Sept']}],scr:null},
+ {g:'watch',nm:'K. Osei',ag:'Osei Literary',dk:'q',ms:'m1',action:null,
+  pieces:[{b:[-12,2,'out','Out since 15 Aug',2]},{x:[2,'Stated window \u00b7 29 Aug']}],scr:null},
+ {g:'watch',nm:'M. Byrne',ag:'Byrne & Frost',dk:'q',ms:'m2',action:null,
+  pieces:[{b:[-38,9,'out','Out since 20 Jul',9]},{x:[9,'Stated window \u00b7 5 Sept']}],scr:null},
+
+ {g:'closed',nm:'D. Okafor',ag:'Castle Lane Literary',dk:'closedd',ms:'m1',action:null,
+  pieces:[{b:[-9,-1,'closedp','Closed 26 Aug \u00b7 form pass',null]}],scr:null}
+];
+var MS={m1:"Murphy\u2019s Day Out",m2:'The Salt Path Home'};
+
+function pct(d){return (d-start)/nDays*100}
+function fillPct(b){
+  var goal=b[4];
+  if(goal===null||goal===undefined)return null;
+  if(goal==='past')return 100;
+  var f=b[0],g=goal;
+  if(g<=f)return 100;
+  var p=(0-f)/(g-f)*100;
+  return Math.max(0,Math.min(100,p));
+}
+function hrowHTML(){
+  var h='<div class="hrow"><div class="c-nm"><span class="lbl">Agent</span></div><div class="c-ac"><span class="lbl">Action?</span></div><div class="c-tl">';
+  var step=Math.max(1,Math.round(nDays/9));
+  for(var d=start+step;d<start+nDays;d+=step)h+='<div class="dt" style="left:'+pct(d)+'%">'+dlab(d)+'</div>';
+  return h+'</div></div>';
+}
+function piecesHTML(r){
+  var h='';var marks=[];var lastEnd=null;
+  var named=null;(r.pieces||[]).forEach(function(p){if(p.x)named=p.x[1];});
+  (r.pieces||[]).forEach(function(p){if(p.m)marks.push(p.m[0]);});
+  (r.pieces||[]).forEach(function(p){
+    if(p.b){
+      var f=p.b[0],t=p.b[1],state=p.b[2],lab=p.b[3],hollow=p.b[5];
+      if(t<=start||f>=start+nDays)return;
+      var cf=f,ct=t;
+      if(cf<start){cf=start;hollow=hollow}
+      if(ct>start+nDays)ct=start+nDays;
+      var gl=marks.indexOf(f)>=0?12:2, gr=marks.indexOf(t)>=0?12:2;
+      var fp=fillPct(p.b);
+      var near=(fp!==null&&fp>=85&&fp<100&&p.b[4]!=='past');
+      var cls='p '+state+(hollow?' hollow':'')+(near?' near':'');
+      var tip=lab?(lab+(named?' \u00b7 '+named:'')):(named||'');
+      var fill=(fp===null||hollow)?'':'<span class="fl" style="width:'+fp+'%"></span>';
+      h+='<div class="'+cls+'"'+(tip?' data-tip="'+tip+'"':'')+' style="left:calc('+pct(cf)+'% + '+gl+'px);width:calc('+((ct-cf)/nDays*100)+'% - '+(gl+gr)+'px)">'
+        +fill+(lab?'<span class="t" data-l="'+lab+'">'+lab+'</span>':'')+'</div>';
+      lastEnd=(lastEnd===null)?ct:Math.max(lastEnd,ct);
+    }
+    if(p.m){var at=p.m[0];if(at<start||at>start+nDays)return;
+      h+='<div class="mk '+p.m[1]+'" data-tip="'+p.m[2]+'" style="left:'+pct(at)+'%">'+(p.m[1]==='bang'?'!':mkGlyph(p.m[1]))+'</div>';
+      lastEnd=(lastEnd===null)?at:Math.max(lastEnd,at);}
+    if(p.x){var at=p.x[0];if(at<start||at>start+nDays)return;
+      /* the named date is no longer drawn: the fill states that a date exists and the bar ends on it.
+         its caption rides the bar instead, so it survives when labels drop at long ranges. */
+      lastEnd=(lastEnd===null)?at:Math.max(lastEnd,at);}
+  });
+  (r.chips||[]).forEach(function(c){
+    if(c.d<start||c.d>=start+nDays)return;
+    h+='<div class="tchip" style="left:calc('+pct(c.d)+'% + 2px)"><span class="sq"></span>'+c.l+'</div>';
+  });
+  if(r.scr&&lastEnd!==null){
+    var anchor=Math.min(lastEnd,start+nDays);
+    if(anchor>start)h+='<div class="scr" style="left:calc('+pct(anchor)+'% + 16px)">'+r.scr+'</div>';
+  }
+  return h;
+}
+function rowsHTML(rows){
+  var h='';
+  rows.forEach(function(r){
+    h+='<div class="rrow"><div class="c-nm">'
+      +(r.task?'<svg class="sd" width="13" height="13" viewBox="0 0 14 14"><rect x="2.5" y="2.5" width="9" height="9" rx="2.5" fill="none" stroke="#7c3a2a" stroke-width="1.6"/></svg>':dot(r.dk))
+      +'<div><div class="nm">'+r.nm+'</div><div class="ag">'+r.ag+'</div></div></div>'
+      +'<div class="c-ac">'+(r.action?'<button class="abtn">'+r.action+'<span class="cv">\u203a</span></button>':'<span class="adash">\u2013</span>')+'</div>'
+      +'<div class="c-tl">'+piecesHTML(r)+'</div></div>';
+  });
+  return h;
+}
+function render(){
+  var b=document.getElementById('board');
+  b.className=scheme+' '+ctl;
+  if(pop==='few'){
+    /* Right now = every row that asks something of you, and nothing else. */
+    var live=ROWS.filter(function(r){return !!r.action});
+    var byG={};live.forEach(function(r){(byG[r.g]=byG[r.g]||[]).push(r)});
+    var h2='';
+    ['tasks','offer','now'].forEach(function(k){
+      if(!byG[k])return;
+      var g=GROUPS.filter(function(x){return x.k===k})[0];
+      h2+='<div class="grp"><div class="gt"><span class="t">'+g.t+'</span><span class="n">'+byG[k].length+'</span>'
+        +'<span class="s">'+g.s+'</span></div><div class="tbl">'+(h2?'':hrowHTML())+rowsHTML(byG[k])+'</div></div>';
+    });
+    if(!live.length)h2='<div class="sparse"><h4>Nothing is asking for you</h4>'
+      +'<p>Every query is with an agent and no reminder has fallen due. The full board shows what is out and how far through each wait you are.</p></div>';
+    b.innerHTML=h2;
+    document.getElementById('cnt2').textContent=live.length+' ASKING FOR YOU';
+    positionToday();requestAnimationFrame(fitPass);return;
+  }
+  var groups=[];
+  if(cut==='needs'){groups=GROUPS.map(function(g){return {t:g.t,s:g.s,k:g.k,collapsed:g.collapsed,rows:ROWS.filter(function(r){return r.g===g.k})}});}
+  else{groups=[{t:'Your tasks',s:'Dated tasks of your own.',k:'tasks',rows:ROWS.filter(function(r){return r.task})}];
+    Object.keys(MS).forEach(function(m){groups.push({t:MS[m],s:'',k:m,rows:ROWS.filter(function(r){return r.ms===m})})});}
+  var h='';var first=true;
+  groups.forEach(function(g){
+    if(!g.rows.length&&!g.collapsed)return;
+    h+='<div class="grp"><div class="gt"><span class="t">'+g.t+'</span><span class="n">'+(g.collapsed||g.rows.length)+'</span>'
+      +(g.s?'<span class="s">'+g.s+'</span>':'')+(g.collapsed?'<span class="show">show \u203a</span>':'')+'</div>';
+    if(g.collapsed){h+='</div>';return}
+    h+='<div class="tbl">';
+    if(first){h+=hrowHTML();first=false}
+    g.rows.forEach(function(r){
+      h+='<div class="rrow"><div class="c-nm">'
+        +(r.task?'<svg class="sd" width="13" height="13" viewBox="0 0 14 14"><rect x="2.5" y="2.5" width="9" height="9" rx="2.5" fill="none" stroke="#7c3a2a" stroke-width="1.6"/></svg>':dot(r.dk))
+        +'<div><div class="nm">'+r.nm+'</div><div class="ag">'+r.ag+'</div></div></div>'
+        +'<div class="c-ac">'+(r.action?'<button class="abtn">'+r.action+'<span class="cv">\u203a</span></button>':'<span class="adash">\u2013</span>')+'</div>'
+        +'<div class="c-tl">'+piecesHTML(r)+'</div></div>';
+    });
+    h+='</div></div>';
+  });
+  b.innerHTML=h;
+  positionToday();
+  requestAnimationFrame(fitPass);
+}
+function positionToday(){
+  document.querySelectorAll('.todayline,.todayflag').forEach(function(e){e.remove()});
+  var anyTl=document.querySelector('.rrow .c-tl');if(!anyTl)return;
+  if(0<start||0>=start+nDays)return;
+  var wrap=document.getElementById('wrap');
+  var wr=wrap.getBoundingClientRect(),tr=anyTl.getBoundingClientRect();
+  var x=(tr.left-wr.left)+tr.width*((0-start)/nDays);
+  var l=document.createElement('div');l.className='todayline';l.style.left=x+'px';wrap.appendChild(l);
+  var f=document.createElement('div');f.className='todayflag';f.style.left=x+'px';f.textContent=dlab(0);wrap.appendChild(f);
+}
+function fitPass(){
+  document.querySelectorAll('.p .t').forEach(function(el){
+    el.textContent=el.dataset.l;
+    if(el.scrollWidth>el.parentElement.clientWidth-6)el.textContent='';
+  });
+}
+document.getElementById('cut').addEventListener('click',function(ev){
+  var btn=ev.target.closest('button');if(!btn)return;
+  this.querySelectorAll('button').forEach(function(x){x.dataset.on='false'});
+  btn.dataset.on='true';cut=btn.dataset.c;render();
+});
+document.getElementById('rng').addEventListener('input',function(){
+  ri=parseInt(this.value,10);nDays=RANGES[ri].n;start=RANGES[ri].s;
+  document.getElementById('rlab').textContent=RANGES[ri].l;render();
+});
+document.getElementById('prev').addEventListener('click',function(){start-=nDays;render()});
+document.getElementById('next').addEventListener('click',function(){start+=nDays;render()});
+document.getElementById('tdy').addEventListener('click',function(){start=RANGES[ri].s;render()});
+/* F1 · crosshair */
+(function(){
+  var wrap=document.getElementById('wrap');
+  var xh=null,lab=null;
+  wrap.addEventListener('mousemove',function(ev){
+    var lane=ev.target.closest('.c-tl');
+    if(!lane||!lane.closest('.rrow')){clear();return}
+    var wr=wrap.getBoundingClientRect(),lr=lane.getBoundingClientRect();
+    var f=(ev.clientX-lr.left)/lr.width;if(f<0||f>1){clear();return}
+    var day=Math.round(start+f*nDays), x=(lr.left-wr.left)+f*lr.width;
+    if(!xh){xh=document.createElement('div');xh.className='xh';wrap.appendChild(xh);
+            lab=document.createElement('div');lab.className='xhlab';wrap.appendChild(lab)}
+    xh.style.left=x+'px';lab.style.left=x+'px';lab.style.top='-16px';lab.textContent=dlab(day);
+  });
+  wrap.addEventListener('mouseleave',clear);
+  function clear(){if(xh){xh.remove();lab.remove();xh=null;lab=null}}
+})();
+document.getElementById('pop').addEventListener('click',function(ev){
+  var btn=ev.target.closest('button');if(!btn)return;
+  this.querySelectorAll('button').forEach(function(x){x.dataset.on='false'});
+  btn.dataset.on='true';pop=btn.dataset.p;render();
+  if(pop==='full')document.getElementById('cnt2').textContent='13 RELATIONSHIPS';
+});
+/* portalled tooltip: positioned against the wrap, clamped inside it */
+(function(){
+  var wrap=document.getElementById('wrap');
+  var tip=document.createElement('div');tip.className='tipp';wrap.appendChild(tip);
+  wrap.addEventListener('mouseover',function(ev){
+    var t=ev.target.closest('[data-tip]');if(!t){hide();return}
+    tip.textContent=t.getAttribute('data-tip');tip.classList.add('on');
+    var wr=wrap.getBoundingClientRect(),tr=t.getBoundingClientRect();
+    var x=(tr.left-wr.left)+Math.min(tr.width/2,90);
+    tip.style.top=((tr.top-wr.top)-tip.offsetHeight-7)+'px';
+    var half=tip.offsetWidth/2;
+    x=Math.max(half+2,Math.min(wr.width-half-2,x));
+    tip.style.left=(x-half)+'px';
+  });
+  wrap.addEventListener('mouseout',function(ev){
+    if(!ev.relatedTarget||!ev.relatedTarget.closest('[data-tip]'))hide();
+  });
+  function hide(){tip.classList.remove('on')}
+})();
+window.addEventListener('resize',positionToday);
+render();
+</script>
+</body>
+</html>
