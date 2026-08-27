@@ -32,7 +32,7 @@ import {
   CalendarItem, RecordItem, GhostItem, RecordDir,
   pillLabel, draggableTask, toYmd,
 } from "./todoCalendar";
-import { rowGroupOf, type RowGroup, type QueryFacts } from "./timelineGroups";
+import { rowGroupOf, queryGroup, type RowGroup, type QueryFacts } from "./timelineGroups";
 import { rowSentence, rowNote, agentSurname, type RowCopy, type RowNote } from "./timelineCopy";
 import {
   laneBars, statusIndex, sideOf, namedEndFor,
@@ -377,6 +377,8 @@ interface Draft {
   lastClosed: string | null;
   /** the lead query's facts — the sentence and the note both read these, so they cannot disagree */
   copy: RowCopy | null;
+  /** every query on this row, with its own copy — the deed asks the one that earned the group */
+  copies: { q: Query; copy: RowCopy }[];
   /** what the row's own StatusDot draws — null only on the pinned row, which holds no query */
   status: QueryStatus | null;
   /** the row head's sentence, in the writer's words — "" only on the pinned row */
@@ -424,7 +426,7 @@ export function timelineWeek(
        rather than filed inside one. Handing it empty facts would file it under a closure that has
        outstayed its week and delete it, which is why the group is assigned per row below and the
        pinned row is exempted there in one place. */
-    facts: [], lastClosed: null, copy: null, status: null, sentence: "",
+    facts: [], lastClosed: null, copy: null, copies: [], status: null, sentence: "",
     soonest: Infinity, waitingFrom: Infinity, stage: -1, order: -1,
   };
   drafts.set(YOU_ROW, you);
@@ -437,7 +439,7 @@ export function timelineWeek(
     const d: Draft = {
       key, agentId: null, name: title, agency: TASK_ROW_AGENCY,
       dot: "self", closed: false, items: [], manuscripts: [], held: 0, hasLive: true,
-      facts: [], lastClosed: null, copy: null, status: null, sentence: "",
+      facts: [], lastClosed: null, copy: null, copies: [], status: null, sentence: "",
       soonest: Infinity, waitingFrom: Infinity, stage: -1, order: drafts.size,
     };
     drafts.set(key, d);
@@ -494,6 +496,17 @@ export function timelineWeek(
       }
       return best;
     })();
+    /**
+     * ⚠️ THE QUERIES THIS ROW HOLDS, SO THE DEED CAN BE ASKED OF THE ONE THAT EARNED THE GROUP.
+     *
+     * A row's GROUP is the earliest group any of its queries earns; its COPY was the LEAD query's
+     * — the most advanced status. Those are different queries whenever a relationship holds more
+     * than one, so a row could be filed under "Needs you now" because query B is writer-held while
+     * the deed was asked of query A, which is agent-held and has nothing to say. The answer was a
+     * generic "Open the query": a dash wearing a costume. The copies travel with the row so the
+     * deed can be asked of the query the group is actually about.
+     */
+    const copies: { q: Query; copy: RowCopy }[] = mine.map((q) => ({ q: q as Query, copy: copyOf(q as Query, agent) }));
     const d: Draft = {
       key,
       agentId,
@@ -537,6 +550,7 @@ export function timelineWeek(
        * drawn beside it.
        */
       copy: lead ? copyOf(lead, agent) : null,
+      copies,
       /* the head's sentence and the note read the SAME facts — see `copyOf` above */
       sentence: lead ? rowSentence(copyOf(lead, agent), data.today) : "",
       order: drafts.size,
@@ -870,8 +884,24 @@ export function timelineWeek(
      on is the question "is something being asked of the writer", and `timelineGroups` answers that
      once; deriving it again from statuses would be a second answer to a settled question, able to
      disagree with the group heading three inches above it. */
+  /**
+   * ⚠️ THE DEED IS ASKED OF THE QUERY THAT EARNED THE GROUP, not of the row's lead.
+   *
+   * Where a row holds several queries the two are different: the group is the earliest any of them
+   * earns, the lead is the most advanced. Asking the lead put a row in an asking group with a deed
+   * its own copy could not name — and the fallback was a generic that says nothing a dash does not.
+   * The first query whose own group matches the row's is the one the heading is about.
+   */
   const noteOf = new Map(
-    grouped.map((x) => [x.r.key, x.r.copy ? rowNote(x.r.copy, x.group, data.today) : null]),
+    grouped.map((x) => {
+      const earner = x.r.copies.find((c) => queryGroup({
+        status: c.q.status as QueryStatus,
+        nudgeYmd: ymdOf(c.q.nudgeDate),
+        backYmd: ymdOf(data.taskFlags.find((f) => f.queryId === c.q.id && !!f.snoozedUntil)?.snoozedUntil),
+      }, data.today) === x.group);
+      const copy = earner ? earner.copy : x.r.copy;
+      return [x.r.key, copy ? rowNote(copy, x.group, data.today) : null];
+    }),
   );
 
   /* ── lanes ──────────────────────────────────────────────────────────────────────────────── */

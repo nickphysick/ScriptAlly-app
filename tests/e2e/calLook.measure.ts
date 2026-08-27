@@ -646,3 +646,66 @@ test("⚠️ a fill ratio is the same number at every range — the board is not
       .toBeLessThanOrEqual(1);
   }
 });
+
+/* ══ DEEDS, GROUPS AND THE COUNT (v36, Phase 7) ══════════════════════════════════════════════ */
+
+test("every asking row names what is owed, and the count says what it counts", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+  await openRoute(page, "/todo/calendar", { width: 1440, height: 950 });
+  await page.waitForTimeout(1300);
+
+  const r = await page.evaluate(`(() => {
+    const ASKING = ["Your tasks", "Offer on the table", "Needs you now"];
+    const out = { asking: [], soon: [], count: null, groups: [] };
+    for (const g of document.querySelectorAll(".tl-grp")) {
+      const title = (g.querySelector(".tl-gt .t") || {}).textContent || "";
+      out.groups.push(title);
+      for (const row of g.querySelectorAll(".tl-rrow")) {
+        const rec = {
+          group: title,
+          name: (row.querySelector(".tl-nm2") || {}).textContent || "?",
+          buttons: [...row.querySelectorAll(".tl-abtn")].map((b) => b.textContent),
+          dash: !!row.querySelector(".tl-adash"),
+        };
+        if (ASKING.includes(title)) out.asking.push(rec);
+        if (title === "Needs you soon") out.soon.push(rec);
+      }
+    }
+    const c = document.querySelector(".tl-count");
+    out.count = c ? c.textContent.trim() : null;
+    return out;
+  })()`) as any;
+
+  console.log("groups: " + JSON.stringify(r.groups));
+  console.log("count:  " + r.count);
+  console.log("asking rows: " + r.asking.length + ", soon rows: " + r.soon.length);
+
+  expect(r.asking.length, "no asking rows — the sweep proves nothing").toBeGreaterThan(2);
+  for (const x of r.asking) {
+    /* ⚠️ EXACTLY ONE BUTTON, and never the generic. "Open the query" occupied the one place on the
+       row meant to say what is owed and said nothing — a dash wearing a costume. */
+    expect(x.buttons.length, `${x.group} / ${x.name} has ${x.buttons.length} buttons`).toBe(1);
+    expect(x.dash, `${x.group} / ${x.name} shows a dash as well`).toBe(false);
+    expect(x.buttons[0].toLowerCase(), `${x.group} / ${x.name} renders the generic`)
+      .not.toContain("open the query");
+  }
+
+  /* ⚠️ A REMINDER THAT HAS NOT FALLEN DUE IS NOT AN ASK. `Needs you soon` is its home, with a
+     dash — nothing is being asked of the writer yet, and a button there would invent one.
+     ⚠️ AND THE POPULATION IS ASSERTED, because the board carried NO such row until one was seeded
+     and the loop below reported nothing while passing. A check that reports on nothing must fail
+     loudly. */
+  expect(r.soon.length, "no row in Needs you soon — the future-reminder claim is unexercised")
+    .toBeGreaterThan(0);
+  for (const x of r.soon) {
+    expect(x.buttons.length, `${x.name} is asked for a deed in Needs you soon`).toBe(0);
+    expect(x.dash, `${x.name} shows no dash in Needs you soon`).toBe(true);
+  }
+
+  /* ⚠️ TWO NOUNS OVER TWO SETS. A task row is not a relationship, and one noun counting both is a
+     tally describing something other than what it counted. */
+  expect(r.count, "no count rendered").not.toBeNull();
+  expect(r.count).toMatch(/^\d+ RELATIONSHIPS?( · \d+ TASKS?)?$/);
+  expect(errors, `console errors: ${errors.join(" | ")}`).toEqual([]);
+});

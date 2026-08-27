@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
-import { rowSentence, agentSurname, addressed, whenSaid, type RowCopy, scrawlEarns, type RowNote } from "./timelineCopy";
+import { rowSentence, agentSurname, addressed, whenSaid, type RowCopy, scrawlEarns, rowNote, type RowNote } from "./timelineCopy";
 
 const TODAY = "2026-08-26";
 const ago = (d: number) => {
@@ -178,5 +178,43 @@ describe("a scrawl must carry a fact its own row does not already state", () => 
     expect(scrawlEarns(note("Answer them", "by 2 Sept"), ["Offer received · answer by 2 Sept"])).toBe(false);
     /* and separators must not defeat it */
     expect(scrawlEarns(note("Answer them", "by 2 Sept"), ["Offer · answer by 2 Sept."])).toBe(false);
+  });
+});
+
+/* ══ NO GENERIC DEED (v36, Phase 7) ══════════════════════════════════════════════════════════ */
+
+describe("an asking row names what is owed, or it says nothing at all", () => {
+  const copy = (over: Partial<RowCopy>): RowCopy => ({
+    surname: "Bligh", status: QueryStatus.QUERIED,
+    expectedYmd: null, nudgeYmd: null, nudgedOnYmd: null,
+    lastWordYmd: "2026-08-01", closedYmd: null, ...over,
+  } as RowCopy);
+
+  it("⚠️ THE GENERIC IS GONE — it was a dash wearing a costume", () => {
+    /* "Open the query" occupied the one place on the row meant to say what is owed, and said
+       nothing. Every deed the table can produce names an act. */
+    for (const g of ["offers", "now"] as const) {
+      for (const st of Object.values(QueryStatus)) {
+        const n = rowNote(copy({ status: st as QueryStatus }), g, "2026-08-27");
+        if (n) expect(n.deed.toLowerCase(), `${st} in ${g} produced a generic`).not.toContain("open the query");
+      }
+    }
+  });
+
+  it("the four named deeds still answer, and a nudge that has fallen due still does", () => {
+    expect(rowNote(copy({ status: QueryStatus.FULL_REQUESTED }), "now", "2026-08-27")!.deed)
+      .toBe("Send the full");
+    expect(rowNote(copy({ status: QueryStatus.OFFER }), "offers", "2026-08-27")!.deed)
+      .toBe("Answer them");
+    expect(rowNote(copy({ nudgeYmd: "2026-08-20" }), "now", "2026-08-27")!.deed)
+      .toBe("Nudge them");
+    expect(rowNote(copy({ expectedYmd: "2026-08-01" }), "now", "2026-08-27")!.deed)
+      .toBe("Nudge or close it");
+  });
+
+  it("⚠️ AND A ROW IT CANNOT SPEAK FOR GETS `null`, WHICH IS A BUG REPORT RATHER THAN A COSTUME", () => {
+    /* nothing named, nothing due, nothing passed — the app has nothing true to say, and a dash is
+       what that looks like. The rendered lock asserts no asking row is ever in this state. */
+    expect(rowNote(copy({}), "now", "2026-08-27")).toBeNull();
   });
 });

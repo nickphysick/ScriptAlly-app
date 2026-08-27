@@ -248,15 +248,20 @@ export function rowNote(c: RowCopy, group: RowGroup | null, today: string): RowN
   if (c.expectedYmd && c.expectedYmd < today) return { deed: "Nudge or close it", timing: "" };
 
   /**
-   * ⚠️ AN ASKING ROW ALWAYS HAS A DEED, and this is the branch that makes it true.
+   * ⚠️ THE GENERIC IS GONE, AND ITS ABSENCE IS THE POINT (v36, Phase 7).
    *
-   * The group has already decided that this row needs the writer — it is in `offers` or `now` or
-   * `asksOfYou` would have returned false three lines up. Falling through to `null` here left the
-   * row in an asking group with a dash in its action column: the heading said one thing and the
-   * control said another, on one line, about one row. Where the app cannot NAME what is owed it
-   * says so by offering the thing itself rather than by offering nothing.
+   * "Open the query" is a dash wearing a costume: it occupies the one place on the row that is
+   * meant to say what is owed, and says nothing. It existed because the deed was asked of the
+   * row's LEAD query while the GROUP came from whichever query earned it — so on a row holding
+   * several, the copy could be looking at a query the heading was not about. That mismatch is
+   * fixed where it belongs (`todoTimeline` picks the earner), so every asking row now reaches one
+   * of the named branches above.
+   *
+   * ⚠️ AND `null` IS THE HONEST FALLBACK IF ONE EVER DOES NOT. A row that reaches here is a row
+   * the app cannot say anything true about — a dash is what that looks like, and it is a bug
+   * report rather than a costume. The lock asserts no asking row renders one.
    */
-  return { deed: "Open the query", timing: "" };
+  return null;
 }
 
 /* ══ WHETHER A SCRAWL EARNS ITS PLACE (Porcelain, Phase 6) ═══════════════════════════════════ */

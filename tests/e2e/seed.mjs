@@ -195,6 +195,12 @@ const STATUSES = [
        fixture measured nothing. */
     { id: "seed-cal-passed865", name: "Ottoline Frayn", agency: "Frayn Agency",
       weeks: 4, sentDaysAgo: 893, status: "Full Requested" },
+    /* ⚠️ A REMINDER THAT HAS NOT FALLEN DUE — the only shape that reaches `Needs you soon`, and
+       the board had nothing in that group at all, so the claim "a future reminder is not an ask"
+       was unexercised and the sweep reported zero rows rather than failing. Twelve weeks out with
+       a reminder in a fortnight: nothing is owed yet, and the row must carry a dash. */
+    { id: "seed-cal-soon", name: "Hester Blaine", agency: "Blaine & Vole",
+      weeks: 12, sentDaysAgo: 20, status: "Queried", nudgeInDays: 14 },
   ];
   const kept = new Map();
   for (const c of CAL) {
@@ -225,10 +231,11 @@ const STATUSES = [
       dateSent: iso(c.sentDaysAgo),
       status: c.status, sendMethod: "Email",
       personalisationNotes: "", packageId: "",
+      ...(c.nudgeInDays ? { nudgeDate: iso(-c.nudgeInDays) } : {}),
     });
   }
   await batch.commit();
-  console.log(`wrote ${CAL.length} calendar fixtures (near step, passed end ×2)`);
+  console.log(`wrote ${CAL.length} calendar fixtures (near step, passed end ×2, future reminder)`);
 }
 
 /* ⚠️ ONE DATED TASK, so the Calendar's per-task row has a subject. The board renders one row per

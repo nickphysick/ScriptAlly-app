@@ -525,7 +525,9 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
 
   /* ⚠️ THE COUNT STATES WHAT IS ON SCREEN, never a total the filters have stopped describing. */
   const shown = rows.reduce((n, r) => n + r.items.length, 0) + segments.length;
-  const agentRows = rows.filter((r) => r.key !== YOU_ROW).length;
+  /* ⚠️ RELATIONSHIPS ONLY. This counted everything that was not the pinned row, which since tasks
+     became rows meant it counted those too — a noun describing something other than its own set. */
+  const agentRows = rows.filter((r) => r.key !== YOU_ROW && r.group !== null).length;
 
   /* ══ WHAT IS SELECTED, AND WHAT IS BEING WORKED ══════════════════════════════════════════ */
   const allItems = useMemo(() => rows.flatMap((r) => r.items.map((it) => ({ it, row: r }))), [rows]);
@@ -998,6 +1000,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
 
   const firstOpen = board.findIndex((g) => g.open && g.rows.length > 0);
   const asking = rows.filter(rowAsks).length;
+  /* the two nouns the count uses — a task row belongs to no agent and is not a relationship */
+  const taskRows = rows.filter((r) => r.group === null && r.key !== YOU_ROW).length;
 
   /**
    * ⚠️ THE EMPTY STATES ARE TWO DIFFERENT FACTS AND MUST NOT SHARE COPY. "Nothing is asking for
@@ -1372,9 +1376,14 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                   tally of "relationships" beside a board showing only what is being asked of you
                   would be counting one thing and describing another. */}
               <span className="tl-count">
+                {/* ⚠️ TASK ROWS ARE NOT RELATIONSHIPS, and one noun counting both was a tally
+                    describing something other than what it counted. Two nouns, each over its own
+                    set, and the tasks clause is omitted entirely when there are none — a "0 TASKS"
+                    states an absence nobody asked about. */}
                 {onlyAsks
                   ? `${asking} ASKING FOR YOU`
-                  : `${agentRows} ${agentRows === 1 ? "RELATIONSHIP" : "RELATIONSHIPS"}`}
+                  : `${agentRows} ${agentRows === 1 ? "RELATIONSHIP" : "RELATIONSHIPS"}`
+                    + (taskRows ? ` · ${taskRows} ${taskRows === 1 ? "TASK" : "TASKS"}` : "")}
               </span>
               {/* the pink creation action: the ONE composer lives on the To-do list page — go
                   there and announce, never a second create surface */}
