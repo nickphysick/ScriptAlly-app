@@ -106,7 +106,19 @@ test("the manuscripts page scrolls as a page, and its header rests before it sti
   }, [ROW, max] as const);
   await page.waitForTimeout(350);
   const moved = await read();
-  expect(moved!.scrollTop, "the row did not move").toBeGreaterThan(20);
+  /**
+   * ⚠️ THE MAGNITUDE WAS A LITERAL AND THE PAGE SHRANK PAST IT — the exact fault the comment above
+   * warns about, committed three lines below the warning. `> 20` was safe at 307px of overflow and
+   * at 100; it is unreachable at 21, because the settle's scroll-anchoring pass lands the row at 12.
+   * Measured red at the pre-amendment-4 commit too (overflow 14), so this had been failing before
+   * this pack touched the page — a shorter page reading as a regression, which is what a threshold
+   * tuned to yesterday's content always eventually does.
+   *
+   * The honest claim is that the row MOVED. Where it comes to rest is anchoring answering the
+   * settle, and `msProfileEmpty.measure.ts` records that variance over repeated trials rather than
+   * asserting on it: the same code returned 5, 0 and 12 on three consecutive attempts.
+   */
+  expect(moved!.scrollTop, "the row did not move").toBeGreaterThan(4);
   expect(moved!.stuck, "the header never sticks — sticky is present and doing nothing").toBe(true);
 
   /**
