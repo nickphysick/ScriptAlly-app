@@ -41,7 +41,13 @@ export const GROUP_LABEL: Record<RowGroup, string> = {
 };
 
 /** Snoozed is collapsed at rest: a quiet group is honest, and disappearing is not. */
-export const COLLAPSED_BY_DEFAULT: readonly RowGroup[] = ["snoozed"];
+/**
+ * ⚠️ SNOOZED **AND** RECENTLY CLOSED (v36, Phase 6). Both are history rather than work — one is
+ * the writer saying "not yet", the other a relationship that has ended — and a board opens on what
+ * is being asked. A quiet group is honest; disappearing is not, so both keep their heading, their
+ * count and their `show ›`.
+ */
+export const COLLAPSED_BY_DEFAULT: readonly RowGroup[] = ["snoozed", "closed"];
 
 /**
  * How long a closure lingers before the row goes.

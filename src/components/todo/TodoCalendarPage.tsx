@@ -996,7 +996,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       if (!mine.length) continue;
       out.push({
         key: g, title: GROUP_LABEL[g], sentence: groupSentence(g, mine.length), count: mine.length,
-        rows: mine, group: g, collapsible: g === "snoozed", open: !shut.includes(g),
+        /* ⚠️ COLLAPSIBLE IS WHATEVER OPENS COLLAPSED, read from the one list rather than named
+           again here — two lists of the same groups is one edit from disagreeing about which of
+           them a reader can reopen. */
+        rows: mine, group: g,
+        collapsible: COLLAPSED_BY_DEFAULT.includes(g), open: !shut.includes(g),
       });
     }
     return out;

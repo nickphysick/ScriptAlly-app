@@ -125,7 +125,13 @@ describe("the vocabulary", () => {
   it("the order is the rank and there is only one of them", () => {
     expect(GROUP_ORDER).toEqual(["offers", "now", "soon", "watching", "snoozed", "closed"]);
     expect(Object.keys(GROUP_LABEL).sort()).toEqual([...GROUP_ORDER].sort());
-    expect(COLLAPSED_BY_DEFAULT).toEqual(["snoozed"]);
+    /* ⚠️ TWO NOW (v36, Phase 6). Both are history rather than work — one the writer saying "not
+       yet", the other a relationship that has ended — and a board opens on what is being asked.
+       Both keep their heading, their count and their `show ›`: a quiet group is honest,
+       disappearing is not. */
+    expect([...COLLAPSED_BY_DEFAULT]).toEqual(["snoozed", "closed"]);
+    /* and every one of them is a real group, so the page cannot collapse something that is not there */
+    for (const g of COLLAPSED_BY_DEFAULT) expect(GROUP_ORDER).toContain(g);
   });
 
   /** ⚠️ NOT A GROUP NAME AND NOT A WORD — a verdict, and one that implies a deadline that mostly
