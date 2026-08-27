@@ -101,6 +101,15 @@ const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
  * The columns change what a reader SEES. They are not what anything is positioned by.
  */
 /**
+ * How many calendar months a window must touch before the rail draws its month shelf.
+ *
+ * ⚠️ A NUMBER WITH A NAME, because the alternative is a bare `>= 3` in the JSX that reads as an
+ * accident. Two months is not a shelf: it is one divider, and one divider on a long rule is a mark
+ * rather than a boundary.
+ */
+const MONTH_SHELF_FROM = 3;
+
+/**
  * ⚠️ `cqw`, NOT `%` — AND THE UNIT IS THE WHOLE POINT.
  *
  * A percentage means "of my parent", so this expression meant "of the lane" only for a DIRECT
@@ -1581,8 +1590,16 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                     <div className="tl-c-nm"><span className="tl-lbl3">Agent</span></div>
                     <div className="tl-c-ac"><span className="tl-lbl3">Action?</span></div>
                     <div className="tl-c-tl tl-railtl">
-                      {/* the month shelf */}
-                      {months.map((m) => (
+                      {/* ══ THE MONTH SHELF, WHICH ONLY APPEARS WHERE IT SAYS SOMETHING ══════
+                          ⚠️ THREE MONTHS IS THE THRESHOLD, AND IT IS COUNTED FROM THE WINDOW
+                          RATHER THAN THE RANGE. At one month the window straddles two calendar
+                          months, so the shelf drew two labels and a single divider over a span
+                          that is almost entirely one month — and that lone divider reads as a
+                          stray mark on the rule rather than as a boundary between two things. The
+                          nine date labels already carry that range. `months` IS the list of
+                          calendar months the window touches, so its own length is the span: no
+                          second derivation, and it stays right if the ranges are ever retuned. */}
+                      {months.length >= MONTH_SHELF_FROM && months.map((m) => (
                         <React.Fragment key={m.key}>
                           {m.at > 0 && <span className="tl-mdiv" style={{ left: pct(m.at) }} aria-hidden />}
                           <span

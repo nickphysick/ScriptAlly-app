@@ -1626,3 +1626,48 @@ test("every part of a row is about a query that row actually draws", async ({ pa
   }
   expect(errors, `console errors: ${errors.join(" | ")}`).toEqual([]);
 });
+
+/**
+ * ⚠️ THE MONTH SHELF EARNS ITS PLACE OR IT IS ABSENT (v36 part three, Phase 4).
+ *
+ * At one month the window straddles two calendar months, so the shelf drew two labels and a
+ * SINGLE divider — and one divider on a long rule reads as a stray mark rather than as a boundary
+ * between two things. The nine date labels already carry that range.
+ *
+ * The assertion is on the DOM, not on opacity or width: a label nobody can see is still a label a
+ * screen reader reads out, and "absent" is the claim being made.
+ */
+test("the month shelf appears only where there are months to tell apart", async ({ page }) => {
+  const seen: string[] = [];
+  for (const width of WIDTHS) {
+    await openRoute(page, "/todo/calendar", { width, height: HEIGHT });
+    await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+
+    for (const r of [0, 1, 2]) {
+      await setRangeTo(page, r);
+      const read = await page.evaluate(TAG + `(() => {
+        const rail = vis(".tl-railtl");
+        if (!rail) return { fatal: "no rail" };
+        return {
+          labels: [...rail.querySelectorAll(".tl-mlab")].map((e) => e.textContent),
+          dividers: rail.querySelectorAll(".tl-mdiv").length,
+          days: [...rail.querySelectorAll(".tl-dt")].length,
+        };
+      })()`) as any;
+      expect(read.fatal, `${width}px range ${r}: ${read.fatal}`).toBeUndefined();
+      seen.push(`${width} r${r}: ${read.labels.length} labels ${JSON.stringify(read.labels)}, ${read.dividers} dividers, ${read.days} days`);
+
+      if (r === 0) {
+        expect(read.labels, `${width}px at one month: the shelf drew ${JSON.stringify(read.labels)}`).toEqual([]);
+        expect(read.dividers, `${width}px at one month: ${read.dividers} month dividers`).toBe(0);
+      } else {
+        expect(read.labels.length, `${width}px range ${r}: the shelf is missing`).toBeGreaterThanOrEqual(3);
+        expect(read.dividers, `${width}px range ${r}: the shelf has no dividers`).toBeGreaterThan(1);
+      }
+      /* ⚠️ AND THE DAY LABELS CARRY EVERY RANGE, INCLUDING THE ONE THE SHELF LEAVES. Without this
+         the case above is satisfied by a rail that renders nothing at all at one month. */
+      expect(read.days, `${width}px range ${r}: the rail has no date labels`).toBeGreaterThan(4);
+    }
+  }
+  for (const s of seen) console.log(`  ${s}`);
+});
