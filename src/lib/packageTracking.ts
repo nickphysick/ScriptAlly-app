@@ -27,7 +27,7 @@
  */
 import { ManuscriptVersion, SubmissionPackage, Query } from "../types";
 import { packageMetrics, isRequest, isSlotFilled, packagesUsingVersion } from "./packageMetrics";
-import { TYPE_META } from "../components/packages/typeMeta";
+import { TYPE_META, BUILDER_TYPES } from "../components/packages/typeMeta";
 /* ⚠️ THE APP'S ONE EVENT LABELLER, NOT A SECOND ONE. Its own docstring says why: "a second labeller
    for the dock is how two surfaces come to call one event different things". The ledger has no hero
    row above it, so it passes `includeSend` — the option that exists for exactly this case. */
@@ -107,7 +107,27 @@ export function requestsByMaterial(
   versions: ManuscriptVersion[],
   queries: Query[],
 ): BarRow[] {
-  const rows = versions.map((v) => {
+  /**
+   * ⚠️ LIVE MATERIAL TYPES ONLY — a missed R3 consumer, and it is NOT derived from history.
+   *
+   * The panel went on rendering `SAMPLE PAGES · Chapters 1–3` after the type was retired, and the
+   * reason is worth stating because the innocent explanation is plausible: it looks like a figure
+   * derived from what was actually sent, which would be true and would earn its place. It is not.
+   * It iterates the LIVE material list and reaches packages through `packagesUsingVersion`, which
+   * still reads `samplePagesVersionId` — so it is a present-tense claim, under a heading that says
+   * "Across every package that carries it", about a type the writer can no longer make.
+   *
+   * ⚠️ AND `packagesUsingVersion` IS DELIBERATELY LEFT ALONE. It answers a different question for
+   * the delete guard and the shelf's `usedIn` — "is this material referenced by any package" —
+   * where the sample slot MUST still count, because a sent package genuinely still references that
+   * id and the reference is frozen. Removing the slot there would let a writer delete a material a
+   * sent package points at. One function, two questions; the filter belongs here.
+   *
+   * ⚠️ ARCHIVED IS NOT FILTERED, ONLY THE TYPE. An archived letter that drew three requests is a
+   * true row — archiving is filing, not deleting — and dropping it would quietly change the
+   * comparison the panel exists to draw.
+   */
+  const rows = versions.filter((v) => BUILDER_TYPES.includes(v.componentType)).map((v) => {
     const inPkgs = packagesContaining(v.id, packages);
     const ids = new Set(inPkgs.map((p) => p.id));
     const mine = queries.filter((q) => !!q.packageId && ids.has(q.packageId));

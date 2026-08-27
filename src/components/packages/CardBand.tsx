@@ -57,10 +57,21 @@ export const BAND_LABEL: Record<string, string> = {
 
 /** The four kinds the page bands, in the order the legend reads them: the parent, then its parts. */
 export const BAND_KINDS: readonly BandKind[] = [
-  /* ⚠️ THREE, NOT FOUR — sample pages is retired as a material type (D9/D13), so the legend has
-     nothing to key. The BAND TINT map below keeps its entry: archived samples still render in the
-     shelf's archive drawer, and a legend is about what the shelf teaches, not about what exists. */
-  "package", ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS,
+  /**
+   * ⚠️ TWO, AND BOTH ARE MATERIALS — the legend keys the shelf it sits under, and nothing else.
+   *
+   * It lost the SAMPLE swatch when the type was retired (D9/D13), and it has now lost SUBMISSION
+   * PACKAGE for a different reason: that swatch keyed the packages band's card HEAD, and D12
+   * replaced those cards with a ledger, which has no band head. So it was teaching a treatment that
+   * appears nowhere on the page — and doing it beneath a heading that reads "Your materials", where
+   * a package is not one of the things being listed.
+   *
+   * ⚠️ THE BAND TINT MAP BELOW KEEPS BOTH RETIRED ENTRIES. `CardBand kind="package"` is still
+   * rendered by nothing on this page, but the tint table is what any future banded surface would
+   * read, and archived samples still render in the shelf's drawer. A legend is about what a
+   * surface TEACHES; the map is about what can be drawn.
+   */
+  ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS,
 ];
 
 /**

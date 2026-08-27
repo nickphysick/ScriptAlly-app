@@ -181,11 +181,17 @@ describe("D6 — the legend renders the real band", () => {
     expect(strip(legend)).not.toMatch(/pkgb-legcell[\s\S]{0,200}background/);
   });
 
-  it("names all four kinds, parent first", () => {
-    /* ⚠️ THREE, NOT FOUR (D13) — the legend teaches what the shelf offers, and the shelf offers
-       two material types. A key that still showed a sample swatch would teach a type nothing can
-       create. */
-    expect(strip(legend)).toContain('"package", ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS,');
+  it("names the two material kinds, and nothing that is not one", () => {
+    /**
+     * ⚠️ TWO, NOT FOUR, AND THEY WENT FOR DIFFERENT REASONS. The SAMPLE swatch went with its
+     * type (D9/D13) — a key that showed it would teach a type nothing can create. SUBMISSION
+     * PACKAGE went because it keyed the packages band's card HEAD, and D12 replaced those cards
+     * with a ledger, which has no head: it was teaching a treatment that appears nowhere on the
+     * page, beneath a heading reading "Your materials", where a package is not one of the things
+     * being listed.
+     */
+    expect(strip(legend)).toContain("ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS,");
+    expect(strip(legend), "the legend must not key a package").not.toContain('"package",');
     expect(strip(legend)).not.toMatch(/LEGEND[\s\S]{0,200}SAMPLE_PAGES/);
   });
 

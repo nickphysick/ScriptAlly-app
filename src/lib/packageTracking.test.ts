@@ -10,6 +10,7 @@
  * typically keeps one synopsis and varies the letter, so that is most of them.
  */
 import { describe, it, expect } from "vitest";
+import { packagesUsingVersion } from "./packageMetrics";
 import { readFileSync } from "fs";
 import { sliceBetween } from "../test/sliceBetween";
 import {
@@ -281,5 +282,45 @@ describe("D8 — the adapter is the only thing reading query data, and it reache
   it("takes no rate from the engine", () => {
     expect(decls).not.toContain("requestRate");
     expect(decls).not.toContain("responseRate");
+  });
+});
+
+/**
+ * ⚠️ A RETIRED TYPE MUST NOT APPEAR IN A LIVE PANEL — and the reason this needed a lock is that the
+ * innocent explanation was plausible enough to accept without checking.
+ *
+ * `Requests by material` went on rendering `SAMPLE PAGES · Chapters 1–3` after D9. That could have
+ * been a figure derived from what was actually SENT, which would be true and would earn its place.
+ * It was not: the panel iterates the live material list and reaches packages through the live
+ * `samplePagesVersionId`, so it was a present-tense claim about a type nobody can make, under a
+ * heading reading "Across every package that carries it".
+ */
+describe("Requests by material lists only live material types", () => {
+  const M = (id: string, type: ComponentType, name: string): ManuscriptVersion =>
+    ({ id, manuscriptId: "m1", userId: "u", componentType: type, versionName: name,
+       fileAttached: false, createdDate: "" } as ManuscriptVersion);
+  const P: SubmissionPackage[] = [{ id: "p1", userId: "u", manuscriptId: "m1", packageName: "P",
+    queryLetterVersionId: "ql1", synopsisVersionId: "syn1", samplePagesVersionId: "pag1",
+    createdDate: "" } as SubmissionPackage];
+  const MATS = [M("ql1", ComponentType.QUERY_LETTER, "Hook-first"),
+                M("syn1", ComponentType.SYNOPSIS, "One-page"),
+                M("pag1", ComponentType.SAMPLE_PAGES, "Chapters 1-3")];
+  const QS = [{ id: "q1", packageId: "p1", status: QueryStatus.FULL_REQUESTED } as Query];
+
+  it("⚠️ omits a retired sample even though a package still references it", () => {
+    const rows = requestsByMaterial(P, MATS, QS);
+    expect(rows.map((r) => r.name)).toEqual(["Hook-first", "One-page"]);
+    expect(rows.map((r) => r.name)).not.toContain("Chapters 1-3");
+  });
+
+  it("⚠️ and the reference itself is UNTOUCHED — the delete guard still sees it", () => {
+    /**
+     * `packagesUsingVersion` answers a different question: is this material referenced by any
+     * package. There the sample slot must still count, because a sent package genuinely still
+     * references that id and the reference is frozen — removing it would let a writer delete a
+     * material a sent package points at. Asserted here so the panel's filter cannot be "fixed"
+     * one level down, where it would take the guard with it.
+     */
+    expect(packagesUsingVersion("pag1", P).map((p) => p.id)).toEqual(["p1"]);
   });
 });
