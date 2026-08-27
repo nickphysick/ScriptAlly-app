@@ -659,7 +659,6 @@ export const SubmissionPackages: React.FC = () => {
                  * The drawer's footer is where Edit and Duplicate live now.
                  */
                 onOpenPackage={(id) => setPkgOpen(msPackages.find((p) => p.id === id) ?? null)}
-                onNewPackage={() => { setPkgEditing(null); setPkgDuplicating(null); setPkgModal(true); }}
                 onHowItWorks={() => setHowOpen(true)}
                 sent={trackingTotals(msPackages, msQueries).sent}
                 archived={archivedPackages}

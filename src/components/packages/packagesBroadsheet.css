@@ -822,19 +822,6 @@
   color: var(--pkg-muted); padding-top: 12px; padding-bottom: 2px;
 }
 
-.pkgb-ghostpkg {
-  /* ⚠️ `align-self: start` — WITHOUT IT THE GRID STRETCHES THE GHOST TO THE ROW'S HEIGHT, and D10
-     stops being true at exactly the width where the row is tallest. Measured: 230px against a 290px
-     card at 1440, and 290 against 290 at 1920 — the same markup reading correctly at one width and
-     dominating at the other. A ghost must be quieter AND shorter, or a populated page stops reading
-     as populated. */
-  align-self: start;
-  border: 1.5px dashed rgba(124, 58, 42, 0.32); border-radius: 16px; background: transparent;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-  min-height: 230px; cursor: pointer; font-family: inherit;
-  transition: background 0.15s, border-color 0.15s;
-}
-.pkgb-ghostpkg:hover { background: rgba(245, 226, 218, 0.35); border-color: var(--pkg-pinkline); }
 .pkgb-gt { font-family: var(--font-serif); font-style: italic; font-size: 15px; color: var(--pkg-burg); line-height: 1.35; }
 .pkgb-gs { font-size: 10.5px; color: var(--pkg-muted); }
 
@@ -936,20 +923,6 @@
 .pkgb-bin { height: 100%; background: var(--pkgo-sage-deep); border-radius: 99px; }
 
 /* ⚠️ THE BAND'S PRIMARY ACTION (D1/D3). Soft pink, never burgundy-filled — the house rule. */
-.pkgb-newpkg {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--pkg-burg);
-  background: var(--pink-cta, #f5e2da);
-  border: 1px solid var(--pink-cta-edge, #e8c8bc);
-  border-radius: 9px;
-  padding: 8px 14px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.pkgb-newpkg:hover { background: #f8e9e2; }
 
 /**
  * ⚠️ THE VERSION CHIP ON A SAMPLE SHEET (manuscript-versions D12) — it joins the usage line rather
@@ -1124,10 +1097,6 @@
 }
 
 /* the ghost's row carries no rule — it is not a package */
-.pkgb-ghostrow tr { border-bottom: none; cursor: default; }
-.pkgb-ghostrow tr:hover { background: transparent; }
-.pkgb-ghostrow td { padding-top: 14px; }
-.pkgb-ghostrow .pkgb-ghostpkg { width: 100%; }
 /* the writer's free-text line — the ledger's only home for it, since it is not a slot */
 .pkgb-pother {
   display: block; margin-top: 3px;

@@ -286,8 +286,20 @@ describe("D-D2 / D-D3 — the lock is visible where editing happens, and offers 
       expect(win, `a mode is set without clearing the other near offset ${i}`)
         .toMatch(/setPkgEditing\([\s\S]*setPkgDuplicating\(|setPkgDuplicating\([\s\S]*setPkgEditing\(/);
     }
-    /* and `New` clears both — the one entry point that seeds from neither */
-    expect(page).toContain("setPkgEditing(null); setPkgDuplicating(null); setPkgModal(true);");
+    /**
+     * ⚠️ THE `New` ENTRY POINT IS GONE, AND THE LAW SURVIVES WITHOUT IT.
+     *
+     * This asserted that the one handler seeding from NEITHER mode cleared both — `＋ New package`
+     * in the ledger head. That control is retired: `builder-refined.html` contains "New package"
+     * zero times, and the build row is the only way to make one now. So there is no longer an
+     * entry point that seeds from neither, and requiring one would pin a control the ref does not
+     * have.
+     *
+     * What is locked is unchanged and is the part that matters — asserted above, over EVERY
+     * remaining setter: a mode is never set without the other being cleared, so Edit and Duplicate
+     * cannot both be live. That claim got stronger when the third entry point went, not weaker.
+     */
+    expect(page, "the retired head control must not come back").not.toContain("pkgb-newpkg");
   });
 
   it("the builder seeds from whichever it was given, and names the duplicate", () => {

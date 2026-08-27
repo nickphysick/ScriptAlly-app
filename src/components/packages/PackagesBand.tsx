@@ -23,7 +23,6 @@ import { ManuscriptVersion, Query, SubmissionPackage } from "../../types";
 import { packageTiles, tileFooter, composition, type PackageTile } from "../../lib/packagesOverview";
 import { isPackageLocked } from "../../lib/packageMetrics";
 import { packageStamp } from "../../lib/packageTracking";
-import { IllustrationSlot } from "./IllustrationSlot";
 import { CardBand } from "./CardBand";
 import { SectionHeader } from "../containers/SectionHeader";
 import "./packagesBroadsheet.css";
@@ -35,7 +34,6 @@ export interface PackagesBandProps {
   versions: ManuscriptVersion[];
   queries: Query[];
   onOpenPackage: (id: string) => void;
-  onNewPackage: () => void;
   /**
    * ⚠️ THE EXPLAINER LIVES HERE AND NOT IN THE MASTHEAD (D4, amended). The brief asked for a
    * control "in the packages page header"; `PageHeader` variant="workspace" THROWS when handed one,
@@ -88,7 +86,7 @@ export interface PackagesBandProps {
 export const LEDGER_MARK_PX = 26;
 
 export const PackagesBand: React.FC<PackagesBandProps> = ({
-  packages, versions, queries, bookVersions = [], hoverChip = null, onHoverCell, onOpenPackage, onNewPackage, onHowItWorks, sent, onDuplicatePackage, renderRemove, renderTracking,
+  packages, versions, queries, bookVersions = [], hoverChip = null, onHoverCell, onOpenPackage, onHowItWorks, sent, onDuplicatePackage, renderRemove, renderTracking,
   archived, showArchived, onToggleArchived, onRestore,
 }) => {
   const tiles = packageTiles(packages, versions, queries, bookVersions);
@@ -149,7 +147,7 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
           <ArchivedToggle n={archived.length} on={showArchived} onClick={onToggleArchived} />
           {/* ⚠️ THE BAND'S PRIMARY ACTION, AND IT GENUINELY ACTS ON THIS BAND (D0d) — which is why
               it stayed when the manuscript selector beside it did not. */}
-          <button type="button" className="pkgb-newpkg" onClick={onNewPackage}>＋ New package</button>
+
         </>}
       />
 
@@ -302,40 +300,23 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
             })}
           </tbody>
           {/**
-          * ⚠️ ONE GHOST, LAST (D2). TWO rendered here — `.pkgb-ghost.pkgb-pkgghost` at 54px and
-          * `.pkgb-ghostpkg` at 44px — both calling `onNewPackage`, with copy differing by one word
-          * ("a different length of synopsis" against "a different synopsis").
-          *
-          * ⚠️ THE CAUSE IS NOT A DOUBLE-RENDER OR A DOUBLE-JOIN (F-AU). They are two hand-written
-          * elements, one a superseded version of the other, left side by side when a later pass
-          * added its replacement without deleting what it replaced. The near-identical copy is what
-          * hid it: a reader skims the pair as one block. Third time in this build that a superseded
-          * thing has survived beside its replacement.
-          *
-          * ⚠️ AND THEY SHARED `id="pkg-ghost"`, so the document carried a duplicate id — the hazard
-          * this repo already records for components that gain a second mount.
-          *
-          * The smaller one survives: a ghost must read as quieter and shorter than a real card
-          * (D10), or a populated page stops reading as populated.
-          */}
-          {/* ⚠️ A FULL-WIDTH LAST ROW (D12), in its own `tbody` so it carries no rule. In the grid
-              the ghost was a card among cards; in a ledger a card-shaped thing beside ruled rows
-              reads as a row that has gone wrong. Spanning every column says "this is not a
-              package, it is how you make one". */}
-          <tbody className="pkgb-ghostrow">
-            <tr>
-              <td colSpan={7}>
-                <button type="button" className="pkgb-ghostpkg" onClick={onNewPackage}>
-                  {/* ⚠️ `bare` — NO DASHED RIM (D7). The plate's dashed border says "artwork
-                      pending", which is true of the inventory and not of a page a writer is
-                      reading. The mark stays; the commission chrome does not. */}
-                  <IllustrationSlot id="pkg-ghost" icon="parcelOpen" px={44} shape="bare" />
-                  <span className="pkgb-gt">Build another package</span>
-                  <span className="pkgb-gs">A different letter, a different synopsis.</span>
-                </button>
-              </td>
-            </tr>
-          </tbody>
+            * ⚠️ THE GHOST ROW IS GONE, AND IT WAS THE THIRD GENERATION OF ONE CONTROL.
+            *
+            * Gen 1: two hand-written ghost CARDS side by side, one a superseded copy of the other.
+            * Gen 2: this row — the ledger pack replaced the pair with a single full-width `tbody`.
+            * Gen 3: `＋ Build a package`, which the Builder pack added BELOW the ledger and which
+            * opens the build row rather than the modal.
+            *
+            * Gen 3 arrived without gen 2 being deleted, so the tab carried two build affordances
+            * three inches apart, both saying the same thing and doing different things — a
+            * replacement ADDED rather than swapped, which is the fault this row's own retired
+            * comment described happening to its predecessors. Third time in this feature.
+            *
+            * ⚠️ `＋ New package` IN THE HEAD WENT WITH IT, and that was the one nobody had counted:
+            * there were THREE, not two. `builder-refined.html` contains "New package" zero times
+            * and "Build a package" twice — the ledger head holds the count and `How it works`,
+            * and nothing else.
+            */}
         </table>
       </div>
       <ArchivedSection show={showArchived} n={archived.length}>

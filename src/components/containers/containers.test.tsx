@@ -100,7 +100,12 @@ describe("the fold — one base rule, and it is the union of the two it replaces
     // ⚠️ A REMOVAL IS VERIFIED AGAINST THE POST-EDIT FILE, BOTH DIRECTIONS. `.pkgb-tag` in
     // particular is still used four times by TrackingBand's inner panel heads, which are not
     // section headers and were not touched.
-    for (const sel of [".pkgb-tag", ".pkgb-how", ".pkgb-newpkg", ".pkgb-band", ".pkgb-cardhead",
+    /* ⚠️ `.pkgb-newpkg` HAS SINCE BEEN RETIRED ON PURPOSE, so it leaves this survivor list rather
+       than being restored to satisfy it. It was `＋ New package` in the ledger head — one of three
+       build affordances on one tab, where the ref has one. A survivor assertion that outlives the
+       thing it protects turns every deliberate removal into a red, which trains the next reader to
+       delete the line without reading it. */
+    for (const sel of [".pkgb-tag", ".pkgb-how", ".pkgb-band", ".pkgb-cardhead",
                        ".pkgb-pkgcard", ".pkgb-msheet"]) {
       expect(baseRules(broadsheet, sel).length, `${sel} was destroyed by the removal`).toBe(1);
     }
