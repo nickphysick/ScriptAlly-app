@@ -338,3 +338,65 @@ out (they use `""` as their sentinel, so unsetting one would be denied).
 ⚠️ **And my first retarget was itself too broad** — `not.toContain("queryLetterVersionId")` over the
 function body failed on a correct build, because the slot names appear in its TYPE SIGNATURE. The
 claim is about the unsettable SET, so that is what gets sliced.
+
+---
+
+## Phase 7 — read it aloud
+
+Against a fixture holding a package **with** a note beside two **without**, a versionless package,
+and three versions in no package — all in one run, which is the monoculture rule applied to a
+visual state.
+
+```
+TABS      Builder 3 · 10  |  Tracking 11 sent
+RAIL      Covering letters  2  ＋ Add
+            Hook-first             Text · in 2
+            Comps-forward          Text · in 1
+          Synopses          1  ＋ Add
+            One-page               Text · in 2
+          Versions          3  ＋ Add
+            Prologue-first         not yet in a package             Not used
+            Worldbuilding-first    not yet in a package             Not used
+            Post-R&R (T. Marsh)    Latest · not yet in a package     Not used
+            Versions belong to the manuscript. Adding one here writes it there too.
+HEADS     Package · Covering letter · Synopsis · Version · Sent · Replied · Requests
+ROW       Standard UK        Locked · sent with 8   Hook-first · One-page · Not recorded
+            8 5 5    note: For the agencies that want comps up front — Hook-first opens…
+ROW       Comps-led variant  Locked · sent with 2   Comps-forward · One-page · Not recorded
+            2 1 0    [hover] ＋ Note
+ROW       Unattributed set                          Hook-first · Not included · Not recorded
+            1 0 0    [hover] ＋ Note
+BUILD     ＋ Build a package · or drag a chip here
+GHOST     Build another package · A different letter, a different synopsis.
+```
+
+No sentence states an absence as a zero. `Not included` (a stated choice) and `Not recorded` (an
+absence of one) sit in the same row and stay distinct.
+
+### The lock line on an unsent package — it does not render, and that is right
+
+```
+DRAWER UNSENT  sections ["Note","What's in it","Who has it","What came back"]
+               lock: ""      note: the placeholder, italic      foot: ""
+DRAWER SENT    lock: "Contents are fixed because this package has been sent. Your note
+                      isn't — it's yours, and you can change it whenever."
+               note: "For the agencies that want comps up front…"   foot: "Edited 14 Aug"
+```
+
+The line is gated on `locked`, so an unsent package carries none — a sentence explaining a freeze
+that is not in force would teach a rule the writer is not subject to. The note section is first in
+both, and its footer is empty rather than `Not edited yet` when there is no note: a stamp for a note
+that does not exist is the same fault as one outliving a cleared note.
+
+### ⚠️ AND THE READ-ALOUD CAUGHT SOMETHING THE GATES COULD NOT
+
+The masthead read **`Query Centre / Bundle your materials once…`** — neither the packages title nor
+the scope line committed in Phase 2.
+
+Two separate things, and only one was a bug:
+
+1. **My probe took the title from the first `.wpg` in the document**, which is a hidden page. The
+   workspace keeps every page MOUNTED. I scoped the SUB and not the TITLE — the same hazard that
+   caught me in Phase 2, in the same file, one line along.
+2. **The scope line had been reverted, and deliberately, by another session** — with a reasoned
+   comment naming my commit. See below. That is not a bug and I have left it alone.
