@@ -1,5 +1,38 @@
 # Calendar — v36
 
+**DEPLOYED to dev, hosting only, at `93cf648a`** — verified by bundle hash:
+`https://scriptally-dev.web.app` serves `/assets/index-lcej-TgG.js`, the file that build produced.
+No throwaway worktree was needed at deploy time: no other session held uncommitted `src/`.
+
+⚠️ **FIVE OF NINE PHASES LANDED. Phases 3, 4 and 5 — the surface, the sticky rail and the past
+wash — are NOT BUILT, and neither is the rest of Phase 8.** That is a scope call, not an
+oversight: the correctness phases came first because the brief said so, and Phase 2 alone took
+four wrong anchors and three broken probes to get right. Shipping an unverified 42px rail whose
+tick alignment I could not measure would be worth less than saying it is not there. What did land
+is verified at three widths and three ranges with a clean console.
+
+| phase | state |
+|---|---|
+| 0 recon | ✅ committed alone |
+| 1 the ref | ✅ v36 in, v35 deleted |
+| 2 the honest fill | ✅ landed, locks proved red |
+| 3 surface and layout | ❌ not built |
+| 4 the rail | ❌ not built |
+| 5 the past, set back | ❌ not built |
+| 6 ordering | ✅ landed |
+| 7 deeds, groups, count | ✅ landed |
+| 8 residuals | ◐ the vacuous clearance lock is repaired to a census; Ellery and the marker fix are not |
+| 9 verify | ✅ for what landed — 13/13 at 1280 / 1440 / 1920 |
+
+Gates: **tsc 0 in owned files · production build 0 · vitest 425 files, 7303 passed, 3 skipped, 0
+failed** — better than baseline, which carried a tsc error and a vitest red from another session's
+untracked work (proved by reading; since resolved by them).
+
+Commits: `69672d61` recon · `bfb7ea0f` ref · `fe78c1bd` fill · `fc7b39e8` deeds ·
+`16ba3fe5` ordering · `93cf648a` load state.
+
+---
+
 ## Phase 0 · recon (read-only)
 
 Baseline recorded first: **tsc RED** (1 error, `tests/e2e/msProfileEmpty.measure.ts:189`) and
@@ -80,3 +113,75 @@ because the fit pass drops it. `in`/`bang` remain unseeded.
 fix, no mention beyond this line.
 
 **Red gate: not triggered.** Nothing implicates derivation below the view layer.
+
+
+---
+
+## The answers, in order
+
+### 3 · The clipped-fill ratio, before and after
+
+| row | before (1m / 3m / 6m) | after |
+|---|---|---|
+| Rachel Lin | **20 / 41 / 41 %** | 41 / 41 / 41 |
+| Tom Ellery | 25 / 47 / 55 | 100 / 100 / 100 |
+| Devendra Rao | 31 / 54 / 59 | 73 / 73 / 73 |
+| Wren Ashcombe *(the near fixture)* | 89 / 96 / 98 | 93 / 93 / 93 |
+
+All nine rows carrying a live fill are now identical at every range. **Four anchors were tried and
+three were wrong**, each hiding the next: the piece's start taken only where clipped (a bar is
+*always* drawn from the edge); the piece's start rather than the run's (pieces break at every drawn
+node, most of which change no hands); `lastStatusChange` (the stamp for when the *status* began, not
+the *wait*). The answer is the date the goal is already measured from — the latest send — so
+numerator and denominator come from one date and the window can reach neither.
+
+### 4 · Locks proved vacuous, and what they became
+
+- **The marker-clearance lock.** It measured a gap *only where the two boxes did not intersect*, so
+  an overlapping pair was skipped **before** it was measured. Not under-ranged, as the brief
+  supposed — vacuous, excluding exactly the case that fails. **Now a reported census** (48
+  neighbouring pairs at 1280/1440, 50 at 1920) rather than a lock, because *"a marker is crowded"*
+  has no pinned definition: a marker sits ON its bar by design and the 3px halo is what separates
+  the inks. **This is the one ruling I need from you** — see §5.
+- **The fill lock, twice.** Both the unit and rendered forms were proved red by deleting the fix
+  (35 / 58 / 74 and 20/41/41 respectively), then green with it.
+- **"Groups never reorder under any sort"** failed on LONGEST WAITING — **correctly**.
+  `timelineRows` returns one flat list in the view's order and the *page* buckets it by
+  `GROUP_ORDER`; the flat list's ranks were never meant to be monotonic. The claim that *is* the
+  contract now sits on the rendered board.
+- **A red for the wrong reason is not a proof.** The generic-deed lock's first red was
+  `rowNote is not defined` — a missing import. The import was added and the red re-taken.
+
+### 5 · Values needed but not pinned
+
+**One, and it blocks a lock rather than a build: the definition of marker clearance.** The halo is
+pinned at 3px in the card colour; what is not pinned is what a marker must be clear *of*. It sits on
+its own bar by design, so the only meaningful claim concerns *neighbouring* bars — and the repaired
+sweep reports large negative gaps against bars the marker's midpoint is outside, which is either a
+real crowding fault or a wrong reading of what a neighbour is. I declined to pin a threshold,
+because choosing one would be inventing the definition rather than measuring against it.
+
+### 6 · Unverifiable remainder; cross-session
+
+**Unexercised, each named rather than left as a silent null**
+- **`Recently closed` never renders** — no closure falls inside the window on the harness account —
+  so its new collapsed-by-default state is unit-locked and not rendered-locked.
+- **`remind` text colour** is still unsampled at some widths (the fit pass drops that family's
+  label). Reported by the sweep every run.
+- **`in` / `bang` markers** remain unseeded; the fixture set has `outk` and `clock` only.
+- **Ellery's passed end** is held pending the recon's inversion (see premise 2): the row already
+  renders full-and-labelled on both lanes, and the hollow row that does exist carries its label.
+
+**Known, still reproducing, untouched as instructed:** uppercase agent names in dev data, the
+pane's `.tpn ws` squeeze, `nudge_overdue` as a stored task type.
+
+**Cross-session:** `main` moved during the run; six commits, `--only` throughout, verified after
+each that only my paths landed. A probe fault is worth carrying forward: the range control is an
+`<input type="range">` and every workspace page stays mounted, so `querySelector` returns a hidden
+page's copy — the first recon reported three identical readings for three different ranges without
+erroring. Every range-dependent probe now requires exactly one **visible** control and throws
+otherwise.
+
+**One cosmetic thing I noticed and did not fix:** the control row now wraps `RANGE` and its
+readout onto two lines at 1440, because the FULL BOARD / RIGHT NOW toggle took the width. It is in
+Phase 3's territory, which is not built.
