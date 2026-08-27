@@ -165,3 +165,46 @@ page shows; a full-estate figure needs the same count per manuscript and is take
 
 So Phase 4 expects **4 materials archived** and **3 packages affected** on this manuscript. More
 than that at the same scope is the red gate.
+
+---
+
+## Phase 2 — Part A, measured
+
+Dev rules deployed and verified by release `updateTime` (`10:42:32` → `11:30:46`, ruleset
+`830c8db7`), never by the success line, which does not name the database. Probed after a 45s wait,
+because rules take seconds to propagate and an impatient probe reports a false denial.
+
+`rulesProbe.mjs`, against the deployed dev database — both directions:
+
+```
+✅ package create with NO version (must be ALLOWED)      absent is legal — D3's permanent bucket
+✅ bookVersionId on UPDATE                               the good write lands
+✅ bookVersionId cleared (deleteField)                   clearing back to Not recorded is expressible
+❌ bookVersionId = 7 (must be DENIED)                    the type is real
+❌ bookVersionId = "" (must be DENIED)                   `""` is NOT this field's sentinel
+❌ bookVersionId 129 chars (must be DENIED)              the ceiling is real
+✅ create a SENT package (firstSentAt present)
+❌ bookVersionId on a SENT package (must be DENIED)      the freeze covers it
+✅ packageName on a SENT package (must be ALLOWED)       a sent package stays filable
+```
+
+The builder, measured on a served build at 1440:
+
+```
+options  ["Prologue-first","Worldbuilding-first","Post-R&R (T. Marsh)","Not recorded","＋ New version…"]
+value    ""                     not seeded — absent means the writer has not said
+sub      "Which shape of the manuscript this package is testing. Versions live on your
+          manuscript — create one here and it's added there too."      the ref, verbatim
+colour   rgb(156, 136, 120)     `--pkg-muted` RESOLVES (rule 5) — an unresolved var()
+                                 would have invalidated the declaration and inherited black
+sample   absent                 the slot is gone, not hidden
+console  no errors
+```
+
+`＋ New version…` — list grew by exactly one, one entry not two, the select landed on a real
+`bv-jmytsi76mtbg336z` rather than the sentinel, the inline row closed, and **it survived a reload**,
+which is what proves it reached the manuscript rather than the form.
+
+**The fixture was restored in the same run.** Book versions are append-only by design — rename is
+the only permitted edit — so the version the gate had to create was removed by writing
+`seed-ms-1`'s list back without it (4 → 3). The probe's own package documents delete themselves.

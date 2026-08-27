@@ -344,6 +344,43 @@ await attempt("package create, NO letter (must be DENIED)", "Part B",
   () => setDoc(PKG, basePkg({ queryLetterVersionId: "" })), dropPkg);
 await dropPkg().catch(() => {});
 
+/* ── the version slot (settled model, Part A) ──────────────────────────────────────────────── */
+console.log("\npackages — the version slot: optional, typed, and frozen once sent:");
+/**
+ * ⚠️ ABSENT IS LEGAL AND `""` IS NOT, WHICH IS THE OPPOSITE OF THE THREE SLOTS ABOVE. Those are
+ * required-present with `""` as the unfilled sentinel; the version is new, so it could be modelled
+ * honestly — no key means the writer has not said, and D3 makes that permanent for every package
+ * already sent. A probe that only tried the happy path could not tell those two conventions apart.
+ */
+await attempt("package create with NO version (must be ALLOWED)", "Part A",
+  () => setDoc(PKG, basePkg()), null);
+await attempt("bookVersionId on UPDATE", "Part A",
+  () => updateDoc(PKG, { bookVersionId: "bv-probe" }), null);
+await attempt("bookVersionId cleared (deleteField)", "Part A",
+  () => updateDoc(PKG, { bookVersionId: deleteField() }), null);
+/* malformed — the type and the ceiling are both real */
+await attempt("bookVersionId = 7 (must be DENIED)", "Part A",
+  () => updateDoc(PKG, { bookVersionId: 7 }), null);
+await attempt('bookVersionId = "" (must be DENIED)', "Part A",
+  () => updateDoc(PKG, { bookVersionId: "" }), null);
+await attempt("bookVersionId 129 chars (must be DENIED)", "Part A",
+  () => updateDoc(PKG, { bookVersionId: "b".repeat(129) }), null);
+await dropPkg().catch(() => {});
+/**
+ * ⚠️ AND THE FREEZE, WHICH IS THE HALF A HAPPY-PATH PROBE CANNOT SEE. Once `firstSentAt` exists the
+ * version joins the three slots as immutable — otherwise a writer could retro-fit a version onto a
+ * package that has already gone out, and every scorecard reading it would silently re-attribute
+ * requests that arrived on something else.
+ */
+await attempt("create a SENT package (firstSentAt present)", "Part A",
+  () => setDoc(PKG, basePkg({ firstSentAt: new Date(0).toISOString() })), null);
+await attempt("bookVersionId on a SENT package (must be DENIED)", "Part A",
+  () => updateDoc(PKG, { bookVersionId: "bv-probe" }), null);
+/* …while the name still moves, so a sent package stays filable */
+await attempt("packageName on a SENT package (must be ALLOWED)", "Part A",
+  () => updateDoc(PKG, { packageName: "Rules probe renamed" }), null);
+await dropPkg().catch(() => {});
+
 /* ── the lock: a sent package's contents are immutable (attachment model, D-D1) ─────────────── */
 console.log("\npackages — the lock, both halves:");
 /**
