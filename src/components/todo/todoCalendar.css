@@ -119,12 +119,47 @@
 
 .tl-board {
   flex: 1; min-height: 0; display: flex; flex-direction: column;
-  /* ⚠️ THE GROUND IS THE APP'S OWN, NOT A NEW HEX. Bars are `#fff` and the board was `#fdfaf5` —
-     two points apart, so a white bar read as washed out rather than deliberate. `--ws-ground`
-     (#f7f4ee) is the content-area colour the rest of the workspace already stands on; sampled from
-     `index.css` rather than taken from the mockup, which is only indicative for colour. */
-  background: var(--ws-ground, #f7f4ee);
+  /* ⚠️ THE GROUND IS A TOKEN NOW (settled pack, Phase 2). It was `var(--ws-ground)` — the app's
+     content-area colour — chosen when bars were white and the board needed to differ from them.
+     The bars are filled at every state now, so the board is the ref's own `--board-ground` and
+     stops depending on a shell token that means something else. */
+  background: var(--board-ground);
   border: 1px solid #ece0d2; border-radius: 14px; overflow: hidden;
+
+  /* ══ BAR COLOUR, AS TOKENS (ref timeline-settled v44 — values verbatim) ════════════════════
+   *
+   * ⚠️ TEN STATES, TEN TRIPLES, AND NO LITERAL ANYWHERE A BAR IS PAINTED. The sheet used to
+   * compose a bar's colour from `side` + `weight` + four modifiers, so a value lived at the
+   * intersection of several rules and nothing said what a bar WAS.
+   *
+   * ⚠️ DECLARED ON THE BOARD RATHER THAN AT `:root`. `--board-ground` is a broad name for a
+   * page-agnostic scope, and every element that reads any of these is inside `.tl-board` — so the
+   * scope is exactly the set of readers, which is what stops a shell refactor inheriting them.
+   */
+  --board-ground: #eae2d6;
+
+  /* waiting on the agent — a reply date is known */
+  --bar-theirs-fill: #e4ecdf;  --bar-theirs-line: #e6e6e6;  --bar-theirs-text: #787878;
+  /* waiting, with no reply date ever given */
+  --bar-theirsq-fill: #e4ecdf; --bar-theirsq-line: #e6e6e6; --bar-theirsq-text: #858585;
+  /* nudged — a reminder is scheduled ahead */
+  --bar-nudged-fill: #fff8e5;  --bar-nudged-line: #e6e6e6;  --bar-nudged-text: #787878;
+  /* the writer's move: fresh, settled, long-standing */
+  --bar-y1-fill: #f3dbd0;      --bar-y1-line: #e6e6e6;      --bar-y1-text: #8e5252;
+  --bar-y2-fill: #f3dbd0;      --bar-y2-line: #e6e6e6;      --bar-y2-text: #8e5252;
+  --bar-y3-fill: #f3dbd0;      --bar-y3-line: #e5c2b4;      --bar-y3-text: #8e5252;
+  /* ⚠️ THE DEEPER END OF LONG-STANDING'S OWN BREATH — not a separate colour. It is the pulse's
+     50% stop, and it is what a reader who has asked for no motion is given instead. */
+  --bar-urgent-fill: #e9c3b2;
+  /* gone quiet — the date passed and nothing is scheduled */
+  --bar-quiet-fill: #e0e0e0;   --bar-quiet-line: #a3a3a3;   --bar-quiet-text: #8e5252;
+  --bar-quiet-hatch: #d6d6d6;
+  /* an offer */
+  --bar-offer-fill: #cbd9e8;   --bar-offer-line: #9db6cf;   --bar-offer-text: #8e5252;
+  /* closed — no fill, so there is no `-fill` token to declare */
+  --bar-closed-line: #ded3c4;  --bar-closed-text: #a3927f;
+  /* the writer's own chips */
+  --bar-task-fill: #ffffff;    --bar-task-line: #e0d0c4;    --bar-task-text: #3a1c14;
 }
 /* ⚠️ `overflow-x: hidden`, ADDED TO THE PRIMITIVE'S `overflow: auto`. Seven columns FILL the
    container — they never earn a horizontal scrollbar — so any horizontal overflow is a fault to
@@ -302,17 +337,13 @@
 .tl-rowhead:hover { background: #faf5ee; }
 .tl-rowhead:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
 .tl-row.closed .tl-rowhead { opacity: 0.55; }
-/* ⚠️ A CLOSED JOURNEY IS AN OUTLINE — no fill, and nothing that moves. It is history sitting among
-   work, and a filled bar in the writer's own colours would read as something still running. The
-   `!important` is not laziness: the fill is set per direction by four separate rules further down,
-   and matching each of them would put the closed treatment in four places to be kept in step. */
-.tl-row.closed .tl-seg {
-  background: transparent !important;
-  border-color: #cbbba9 !important;
-  border-style: dashed !important;
-  color: #9c8b78 !important;
-  animation: none !important;
-}
+/* ⚠️ THE ROW-LEVEL CLOSED OVERRIDE IS GONE (settled pack, Phase 2), AND SO ARE ITS FOUR
+   `!important`s. It existed because the fill was set by four separate rules further down and
+   matching each of them would have put the closed treatment in four places; `barState` returns
+   "closed" for a terminal stretch now, so one rule paints it and there is nothing to out-shout.
+   ⚠️ The `animation: none` went with it and is NOT lost — the pulse is scoped to `.s-y3`, and a
+   closed stretch is never y3. */
+.tl-row.closed .tl-seg { animation: none; }
 .tl-row.closed .tl-node, .tl-row.closed .tl-wp { opacity: 0.6; }
 
 /* ══ A GROUP HEADER ═════════════════════════════════════════════════════════════════════════
@@ -452,38 +483,62 @@
 }
 
 /* ── their move: white, still, and breathing (v6, treatment C) ─────────────────────────────── */
-/* ⚠️ WHITE RATHER THAN FILLED, AND THE PULSE IS WHY. A reply window is real time passing, so
-   motion is not a lie — but a filled sage bar that also moves reads as something wanting
-   attention, and the whole point of a waiting bar is that nothing is being asked of you. */
-.tl-seg.theirs {
-  background: #fff; border-color: #dfe6dc; color: #5a6e58;
-  /* lifted a shade with the ground (range pack, Phase 2) — a white bar on a warm ground is an
-     object resting on it, which is what the shadow has to say now that the two differ */
-  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.07);
-  animation: tlBreathe 4.2s ease-in-out infinite;
+/* ══ THE TEN STATES ═════════════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ ONE RULE PER STATE, READING ONE TRIPLE. A bar's colour is no longer assembled from `side`
+ * plus `weight` plus a modifier; `barState` decides what a stretch IS and the class says so.
+ *
+ * ⚠️ BORDERS MATCH FILL — the bar reads as ONE SOLID SHAPE rather than a fill inside an outline.
+ * The ref carries both modes and this is its `body.flat`; taking the `-line` values as the shipped
+ * borders would have built the other one. The `-line` tokens are still declared because CLOSED
+ * paints with one, and because the other mode is a change of mind rather than a rewrite.
+ *
+ * ⚠️ CLOSED IS THE SOLE EXCEPTION, for a reason that cannot be designed around: a transparent fill
+ * with a matching border is an INVISIBLE BAR. It keeps its dashed edge.
+ */
+.tl-seg.s-theirs  { background: var(--bar-theirs-fill);  border-color: var(--bar-theirs-fill);  color: var(--bar-theirs-text); }
+.tl-seg.s-theirsq { background: var(--bar-theirsq-fill); border-color: var(--bar-theirsq-fill); color: var(--bar-theirsq-text); }
+.tl-seg.s-nudged  { background: var(--bar-nudged-fill);  border-color: var(--bar-nudged-fill);  color: var(--bar-nudged-text); }
+.tl-seg.s-y1      { background: var(--bar-y1-fill);      border-color: var(--bar-y1-fill);      color: var(--bar-y1-text); }
+.tl-seg.s-y2      { background: var(--bar-y2-fill);      border-color: var(--bar-y2-fill);      color: var(--bar-y2-text); }
+.tl-seg.s-y3      { background: var(--bar-y3-fill);      border-color: var(--bar-y3-fill);      color: var(--bar-y3-text); }
+.tl-seg.s-offer   { background: var(--bar-offer-fill);   border-color: var(--bar-offer-fill);   color: var(--bar-offer-text); }
+/* ⚠️ GONE QUIET IS HATCHED — the one state whose fill is not a flat colour. Silence has no single
+   tone, and the hatch is what stops a grey bar reading as a disabled one. */
+.tl-seg.s-quiet {
+  background: repeating-linear-gradient(-45deg,
+    var(--bar-quiet-fill) 0 6px, var(--bar-quiet-hatch) 6px 12px);
+  border-color: var(--bar-quiet-fill);
+  color: var(--bar-quiet-text);
 }
-.tl-seg.theirs .d { background: #8a9e88; }
-/* ⚠️ LITERAL COLOURS IN THE KEYFRAMES. A `var()` inside `@keyframes` fails SILENTLY in this setup —
-   no error, no animation, no warning — and this project has shipped that bug. */
-@keyframes tlBreathe {
-  0%, 100% { background: #ffffff; border-color: #dfe6dc; }
-  50% { background: #f4f8f2; border-color: #cdd8c9; }
+.tl-seg.s-closed {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--bar-closed-line);
+  color: var(--bar-closed-text);
 }
-/* ⚠️ THE OVERRIDE SITS IMMEDIATELY AFTER THE RULE IT OVERRIDES. A media query confers NO
-   specificity, so at equal specificity the later declaration wins. */
-@media (prefers-reduced-motion: reduce) {
-  .tl-seg.theirs { animation: none; }
+/* the bullet takes its own bar's ink, so a dot can never disagree with the bar it sits in */
+.tl-seg .d { background: currentColor; border: 0; }
+.tl-seg.s-closed .d, .tl-seg.s-theirsq .d {
+  background: transparent; border: 1.5px dashed currentColor;
 }
-/* ⚠️ AND NO MOTION IN A PAST WEEK, where nothing is live. */
-.tl-row.past .tl-seg.theirs { animation: none; }
 
-/* ── your move: blush, three weights by duration (v7) ──────────────────────────────────────── */
-.tl-seg.yours .d { background: #f8e2d9; border: 1.5px solid #7c3a2a; }
-.tl-seg.yours.w-fresh { background: #fdf3ef; border-color: #eed8ce; color: #8a5442; }
-.tl-seg.yours.w-settled { background: #f3e0d6; border-color: #e8c8bc; color: #7a4636; }
-.tl-seg.yours.w-long { background: #eec9ba; border-color: #dba892; color: #5f2a1c; font-weight: 600; }
-/* a your-move stretch with no weight yet (a closed journey's last stretch) takes the middle one */
-.tl-seg.yours { background: #f3e0d6; border-color: #e8c8bc; color: #7a4636; }
+/* ══ ONE TEXT FORMATTING FOR EVERY "YOUR MOVE" STATE ═══════════════════════════════════════
+ *
+ * ⚠️ FIVE STATES, ONE TREATMENT, AND THE COLOUR IS PART OF IT. Fresh, settled, long-standing, gone
+ * quiet and an offer are all things the writer has to act on, so they read as one class of thing:
+ * 10px, 500, no tracking, sentence case, `#8e5252`. They used to carry six different text colours
+ * between them, none of which meant anything.
+ *
+ * ⚠️ THE REF DISAGREES WITH ITSELF HERE and the pack settles it. Its token block says
+ * `--bar-quiet-text: #8e5252`; a later rule sets `.b.cold .blab { color: #7a4636 }`. The pack names
+ * #8e5252 for all five AND gives its reason, so it wins — a reasoned value in prose beats an
+ * unreasoned one in an artefact.
+ */
+.tl-seg.s-y1 .tl-lbl, .tl-seg.s-y2 .tl-lbl, .tl-seg.s-y3 .tl-lbl,
+.tl-seg.s-quiet .tl-lbl, .tl-seg.s-offer .tl-lbl {
+  font-size: 10px; font-weight: 500; letter-spacing: 0; text-transform: none; color: inherit;
+}
 
 /* ⚠️ THE OVERRUN IS A BACKGROUND TREATMENT ON ONE BAR, NOT A SECOND OBJECT BESIDE IT (Phase 4).
    It used to be its own element with its own count, so a long-standing row drew two capsules and
@@ -493,7 +548,11 @@
   /* ⚠️ `background-size` IS THE WHOLE MECHANISM. The hatch covers `--hatch` of THIS bar's width and
      the bar's own fill shows through beyond it — hatched behind, solid ahead, on one element. A
      second element was what printed the duration twice. */
-  background-image: repeating-linear-gradient(-45deg, #e6bda9 0 6px, #efd0c1 6px 12px);
+  /* ⚠️ THE STOPS ARE THE LONG-STANDING PAIR, not two pinks of their own. The hatch is the part of
+     a your-move stretch that ran past its expectation, so it is that state's own two ends — the
+     bar's fill and the deeper end of its breath — and it cannot drift from them. */
+  background-image: repeating-linear-gradient(-45deg,
+    var(--bar-urgent-fill) 0 6px, var(--bar-y3-fill) 6px 12px);
   background-repeat: no-repeat;
   background-size: var(--hatch, 0%) 100%;
 }
@@ -501,11 +560,20 @@
 /* ── the edges: what each one claims ───────────────────────────────────────────────────────── */
 .tl-seg.capl { border-top-left-radius: 999px; border-bottom-left-radius: 999px; }
 .tl-seg.capr { border-top-right-radius: 999px; border-bottom-right-radius: 999px; }
-.tl-seg.openleft { border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: 2px dotted #8a9e88; }
-.tl-seg.yours.openleft { border-left-color: #c9a89e; }
-.tl-seg.future { border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: 2px dashed #8a9e88; }
-.tl-seg.yours.future { border-right-color: #c9a89e; }
-.tl-seg.yours.w-long.future { border-right-color: #c08a72; }
+/* ⚠️ A CLAMP TAKES THE STATE'S OWN INK, NOT ITS FILL — the one place "borders match fill" cannot
+   apply. A clamped edge exists to SAY something ("this began before the board" / "this runs past
+   it"), and an edge the same colour as the bar it ends says nothing at all. `currentColor` is the
+   state's `-text` token, which is legible on that state's fill by construction: it is the colour
+   the bar's own words are set in. Three literals went with this — a sage, a dusty pink and a
+   darker pink, one per side and weight, none of them token-derived. */
+.tl-seg.openleft {
+  border-top-left-radius: 0; border-bottom-left-radius: 0;
+  border-left: 2px dotted currentColor;
+}
+.tl-seg.future {
+  border-top-right-radius: 0; border-bottom-right-radius: 0;
+  border-right: 2px dashed currentColor;
+}
 /* ⚠️ IN A PAST WEEK NOTHING IS PROVISIONAL ANY MORE — the dashes go solid and the edge rounds. */
 .tl-row.past .tl-seg.future {
   border-right-style: solid; border-right-width: 1px;
@@ -513,11 +581,13 @@
 }
 .tl-row.past .tl-seg.openleft { border-left-style: solid; border-left-width: 1px; }
 /* ⚠️ NO REPLY TIME RECORDED — a dashed rail, no cap, no forecast. */
+/* ⚠️ `.norail` IS GEOMETRY ONLY NOW. Its colours moved to `.s-theirsq`, which is the same
+   condition named as a state — "waiting, with no reply date ever given" — so the two cannot
+   disagree. What is left here is the shape that condition takes: no right edge, because there is
+   no date to end at, and no shadow, because there is nothing to lift off the board. */
 .tl-seg.norail {
-  background: transparent; border: 1px dashed #e0d0c4; color: #c9a89e;
   border-right: none; border-radius: 999px; box-shadow: none; animation: none;
 }
-.tl-seg.norail .d { background: transparent; border: 1.5px dashed #e0d0c4; }
 /* ⚠️ OPEN-ENDED BY NATURE — an R&R or an offer with no stated deadline FADES rather than stopping. */
 .tl-seg.openend {
   border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0;

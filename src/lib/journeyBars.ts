@@ -136,6 +136,14 @@ export interface Segment {
   hatchPct?: number;
   /** your-move only */
   weight?: Weight;
+  /**
+   * What this stretch IS — the one thing the stylesheet reads.
+   *
+   * ⚠️ IT DOES NOT REPLACE `side` OR `weight`, which the drawer, the row dot and the sort keys
+   * still read for their own reasons. It replaces the SHEET's habit of composing a colour from
+   * several classes at once, where no single place said what a bar was.
+   */
+  state: BarState;
   queryId: string;
 }
 
@@ -247,6 +255,53 @@ export const sideOf = (status: QueryStatus): Side | null => {
  * motion, and no word that judges — so the scale has to be readable at a glance rather than
  * precise. Adding a fourth step would make two of them indistinguishable.
  */
+/**
+ * What a stretch of time IS — one value per segment, and the only thing the stylesheet reads.
+ *
+ * ⚠️ TEN STATES, ONE FIELD. The sheet used to compose a bar's look from `side` + `weight` + four
+ * modifier classes, which meant a colour lived at the intersection of several rules and no single
+ * place said what a bar was. One state means one rule per state and a token triple per rule.
+ *
+ * ⚠️ AND THE FOUR AGENT-SIDE STATES SEPARATE BY KIND, NOT BY DURATION. A reply date exists or it
+ * does not; a reminder is scheduled or it is not; that date has passed or it has not. No constant
+ * is involved, so none has to be tuned or explained. Only the writer's three — fresh, settled,
+ * long-standing — are a duration distinction, because nothing else separates a three-day stretch
+ * from a thirty-day one, and those go through `weightFor`'s two already-named boundaries.
+ */
+export type BarState =
+  | "closed" | "theirs" | "theirsq" | "nudged" | "quiet" | "y1" | "y2" | "y3" | "offer";
+
+export interface StateInput {
+  side: Side;
+  terminal: boolean;
+  status: QueryStatus;
+  norail: boolean;
+  /** the reminder the WRITER set, ymd, or null */
+  nudgeYmd: string | null;
+  /** the reply date has been overtaken */
+  expectedPassed: boolean;
+  weight: Weight;
+  today: string;
+}
+
+export function barState(i: StateInput): BarState {
+  if (i.terminal) return "closed";
+  if (i.side === "theirs") {
+    /* no reply time was ever recorded — there is nothing to have passed */
+    if (i.norail) return "theirsq";
+    /* the writer has a reminder in front of them, so this is not silence */
+    if (i.nudgeYmd && i.nudgeYmd > i.today) return "nudged";
+    /* the date came and went and nothing is scheduled — this is what gone quiet MEANS */
+    if (i.expectedPassed) return "quiet";
+    return "theirs";
+  }
+  /* ⚠️ AN OFFER IS ITS OWN STATE BEFORE IT IS A WEIGHT. It is categorically different from every
+     other thing on the writer's side, and filing it under a duration band would colour the best
+     news a writer gets the same as a chore that has run three weeks. */
+  if (i.status === QueryStatus.OFFER) return "offer";
+  return i.weight === "fresh" ? "y1" : i.weight === "settled" ? "y2" : "y3";
+}
+
 export const weightFor = (days: number): Weight =>
   days <= FRESH_MAX_DAYS ? "fresh" : days <= SETTLED_MAX_DAYS ? "settled" : "long";
 
@@ -570,6 +625,10 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
         ? { count: wantsOverrun ? `${durationCount(yoursDays)} your move` : durationCount(yoursDays) }
         : {}),
       ...(side === "yours" && !terminal ? { weight } : {}),
+      state: barState({
+        side, terminal, status: query.status as QueryStatus,
+        norail, nudgeYmd, expectedPassed, weight, today: win.today,
+      }),
       ...(norail && first ? { norail: true as const } : {}),
       ...(openEnd && last ? { openEnd: true as const } : {}),
       queryId: query.id,

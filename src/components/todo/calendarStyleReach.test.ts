@@ -46,7 +46,12 @@ const classesIn = (src: string): Set<string> => {
 /** what the page draws: only the class tokens that appear inside a className expression */
 const rendered = (): Set<string> => {
   const out = new Set<string>();
-  for (const m of page.matchAll(/className=(?:"([^"]*)"|\{([\s\S]{0,600}?)\}(?=\s|\n|>))/g)) {
+  /* ⚠️ THE 600-CHARACTER BOUND IS LOAD-BEARING AND FAILS BY ABSENCE. A `className={…}` longer
+     than this simply stops matching, so its classes go missing and every assertion below reports
+     them as unrendered rather than as unextracted — an absence, not an error. It happened: two
+     comments added inside the bar's class list pushed it past the bound and the sweep stopped
+     seeing `tl-seg`. The floor cases below are what caught it, which is why they exist. */
+  for (const m of page.matchAll(/className=(?:"([^"]*)"|\{([\s\S]{0,900}?)\}(?=\s|\n|>))/g)) {
     for (const c of classesIn(m[1] ?? m[2] ?? "")) out.add(c);
   }
   return out;

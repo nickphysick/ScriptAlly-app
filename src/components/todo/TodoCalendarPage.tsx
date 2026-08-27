@@ -152,10 +152,26 @@ const Chip: React.FC<{
  * on the same boundary the cells do at every width, and a resize recomputes nothing.
  */
 const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({ sg, selected, onPick }) => (
+  /**
+   * ⚠️ `s-<state>` IS WHAT THE SHEET PAINTS FROM (settled pack, Phase 2). One class, one rule, one
+   * token triple — where a bar's colour used to be assembled from `side` + `weight` + a modifier
+   * at once, so no single place said what a bar was.
+   *
+   * ⚠️ `yours`/`theirs` AND `w-*` SURVIVE FOR THEIR OTHER READERS, not for colour. `side` drives
+   * the drawer's wording and the row dot; `weight` drives the duration phrasing; both are read by
+   * locks that assert the derivation rather than the paint. Nothing in the stylesheet gives any of
+   * them a colour any more.
+   *
+   * ⚠️ AND THE PROSE SITS HERE RATHER THAN INSIDE THE CLASS LIST, which is not a style
+   * preference. `calendarStyleReach.test.ts` extracts rendered classes with a match bounded at 600
+   * characters; comments inside the expression pushed it past that and the match silently stopped
+   * finding `tl-seg` at all. A bounded slice that stops matching reports an absence, not an error.
+   */
   <button
     type="button"
     className={[
       "tl-at tl-seg",
+      `s-${sg.state}`,
       sg.side === "yours" ? "yours" : "theirs",
       sg.weight ? `w-${sg.weight}` : "",
       /* ⚠️ THE HATCH IS A CLASS ON THIS BAR, not a second bar beside it. One element, one
