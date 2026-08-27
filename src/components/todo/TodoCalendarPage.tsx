@@ -947,6 +947,40 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     return out;
   }, [range.days, visible]);
 
+  /**
+   * The months the window spans, for the rail's shelf.
+   *
+   * ⚠️ THE CURRENT MONTH'S LABEL IS PLACED IN ITS POST-TODAY HALF so it can never be split by the
+   * today stem — the one position on the shelf where a label and a rule compete for the same
+   * pixels. Every other month centres in its own span.
+   */
+  const months = useMemo(() => {
+    const out: { key: string; label: string; at: number; labelAt: number; current: boolean; past: boolean }[] = [];
+    const SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+    let i = 0;
+    while (i < visible.length) {
+      const d = new Date(`${visible[i]}T12:00:00`);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      let j = i;
+      while (j + 1 < visible.length) {
+        const n = new Date(`${visible[j + 1]}T12:00:00`);
+        if (`${n.getFullYear()}-${n.getMonth()}` !== key) break;
+        j += 1;
+      }
+      const nowM = new Date(`${today}T12:00:00`);
+      const current = `${nowM.getFullYear()}-${nowM.getMonth()}` === key;
+      const tAt = visible.indexOf(today);
+      /* the current month labels in the half AFTER today; every other centres in its own span */
+      const labelAt = current && tAt >= i && tAt <= j ? (tAt + j + 1) / 2 : (i + j + 1) / 2;
+      out.push({
+        key, label: SHORT[d.getMonth()], at: i, labelAt, current,
+        past: !current && visible[j] < today,
+      });
+      i = j + 1;
+    }
+    return out;
+  }, [visible, today]);
+
   /** where today sits in the window, or `null` when the window does not contain it */
   const todayAt = useMemo(() => {
     const i = visible.indexOf(today);
@@ -1501,6 +1535,44 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                 onMouseMove={onLaneMove}
                 onMouseLeave={clearCross}
               >
+                {/* ══ THE RAIL ═══════════════════════════════════════════════════════════════
+                    ⚠️ IT USES THE SAME THREE COLUMNS AS EVERY ROW, and that is the whole of the
+                    alignment guarantee. `.tl-c-nm` and `.tl-c-ac` take the same two width tokens
+                    a row does, so the rail's timeline column BEGINS where every lane begins — and
+                    a tick placed at `pct(d)` of it lands on the same pixel as a bar placed at
+                    `pct(d)` of a lane. One column source, one expression, no second arithmetic to
+                    drift. The today line's own 346px error came from having a second one. */}
+                {board.length > 0 && (
+                  <div className="tl-rail">
+                    <div className="tl-c-nm"><span className="tl-lbl3">Agent</span></div>
+                    <div className="tl-c-ac"><span className="tl-lbl3">Action?</span></div>
+                    <div className="tl-c-tl tl-railtl">
+                      {/* the month shelf */}
+                      {months.map((m) => (
+                        <React.Fragment key={m.key}>
+                          {m.at > 0 && <span className="tl-mdiv" style={{ left: pct(m.at) }} aria-hidden />}
+                          <span
+                            className={`tl-mlab${m.current ? " now" : ""}${m.past ? " gone" : ""}`}
+                            style={{ left: pct(m.labelAt) }}
+                          >{m.label}</span>
+                        </React.Fragment>
+                      ))}
+                      {/* the ticks and their days */}
+                      {dateLabels.map((d) => (
+                        <React.Fragment key={d.ymd}>
+                          <span className="tl-tick" style={{ left: pct(d.at) }} data-at={d.at} aria-hidden />
+                          <span className="tl-dt" style={{ left: pct(d.at) }}>{d.text}</span>
+                        </React.Fragment>
+                      ))}
+                      {todayAt != null && (
+                        <>
+                          <span className="tl-todaystem" style={{ left: pct(todayAt) }} aria-hidden />
+                          <span className="tl-todaychip" style={{ left: pct(todayAt) }}>{shortCalDate(today)}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
                 {board.length === 0 ? sparse : board.map((g, gi) => (
                   <div className="tl-grp" key={g.key}>
                     <div className="tl-gt">
@@ -1518,20 +1590,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                     </div>
                     {g.open && (
                       <div className="tl-tbl">
-                        {/* ⚠️ ONE COLUMN HEADER FOR THE WHOLE BOARD, above the first group only.
-                            Repeating it per group restated the same nine dates five times down a
-                            page whose whole difficulty is vertical room. */}
-                        {gi === firstOpen && (
-                          <div className="tl-hrow">
-                            <div className="tl-c-nm"><span className="tl-lbl3">Agent</span></div>
-                            <div className="tl-c-ac"><span className="tl-lbl3">Action?</span></div>
-                            <div className="tl-c-tl">
-                              {dateLabels.map((d) => (
-                                <span key={d.ymd} className="tl-dt" style={{ left: pct(d.at) }}>{d.text}</span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                        {/* ⚠️ THE DATE ROW HAS LEFT THE CARD (v36, Phase 4). It was drawn once,
+                            inside the FIRST group's card — so it scrolled away with that card and
+                            a reader four groups down had no dates at all. It is the page's own
+                            sticky rail now, above every group. */}
                         {g.rows.map(row)}
                       </div>
                     )}

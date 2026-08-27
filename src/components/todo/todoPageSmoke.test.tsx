@@ -182,12 +182,24 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     expect(html).toContain("tl-tchip");
     /* ⚠️ AND THE POPULATED BOARD IS WHERE THE CHROME IS PROVED: one column header for the whole
        board, its ~nine dates, and the pinned group above the query groups. */
-    expect(html).toContain("tl-hrow");
+    /* ⚠️ THE DATE ROW IS THE RAIL NOW (v36, Phase 4). `tl-hrow` was the in-card header, drawn once
+       inside the FIRST group's card — so it scrolled away with that card and a reader four groups
+       down had no dates. It is the page's own sticky rail, above every group, and its ticks are
+       proved to land on the same pixels as the lanes in `calLook.measure.ts`. */
+    expect(html).toContain("tl-rail");
     expect(html).toContain("tl-dt");
+    expect(html).toContain("tl-tick");
+    expect(html).not.toContain("tl-hrow");
     expect(html).toContain("Your tasks");
     expect(html).toContain("Dated tasks of your own.");
     /* exactly ONE column header in the document, however many groups there are */
-    expect(html.split("tl-hrow").length - 1, "the column header is drawn per group again").toBe(1);
+    /* ⚠️ ONE RAIL FOR THE WHOLE BOARD, however many groups there are — the claim that used to be
+       "exactly one in-card header" and is stronger as a rail: it is the page's own and cannot
+       scroll away with a card. */
+    /* ⚠️ THE EXACT ATTRIBUTE, NEVER THE SUBSTRING. `tl-rail` is a prefix of `tl-railtl` — the
+       rail's own timeline column — so a bare split counted two and reported the rail as drawn per
+       group. The house rule, met on its own ground: a class-name lock bounds its token. */
+    expect(html.split('class="tl-rail"').length - 1, "the rail is drawn per group").toBe(1);
   });
 
   /* tasks-pages P4 — the Noteboard is real too. Empty AND populated. */

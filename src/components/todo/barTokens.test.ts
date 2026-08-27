@@ -263,3 +263,25 @@ describe("⚠️ the retired values are gone from the DECLARATIONS, not merely f
     expect(found, `${found.length} retired values are still painted`).toEqual([]);
   });
 });
+
+describe("⚠️ the rail's pinned values, where a source lock is the right instrument", () => {
+  /**
+   * ⚠️ THE STEM IS DECLARED AT 1.5px AND CHROMIUM REPORTS 1px. A sub-pixel border's USED value
+   * rounds at DPR 1, so the rendered check can only say it is painted and painted burgundy — the
+   * declared width is a fact about the sheet and belongs here. This is the one place in this pack
+   * where a source lock is stronger than a painted one, and it is stated so nobody "fixes" the
+   * rendered assertion by pinning 1px.
+   */
+  it("the today stem is 1.5px in the sheet, whatever the used value rounds to", () => {
+    expect(rulesFor(".tl-todaystem")).toMatch(/border-left:\s*1\.5px solid var\(--tl-burgundy\)/);
+  });
+
+  it("the rail's height is a token, and the columns it shares with a row are the same two", () => {
+    const board = css.slice(css.indexOf(".tl-board {"), css.indexOf(".tl-grp"));
+    expect(board).toContain("--tl-rail-h:");
+    expect(rulesFor(".tl-rail")).toMatch(/height\s*:\s*var\(--tl-rail-h\)/);
+    /* ⚠️ ONE RULE GIVES THE RAIL AND EVERY ROW THEIR FLEX, so the two cannot be given different
+       column models by an edit to one of them. */
+    expect(decls).toMatch(/\.tl-hrow,\s*\.tl-rrow,\s*\.tl-rail\s*\{[^}]*display:\s*flex/);
+  });
+});

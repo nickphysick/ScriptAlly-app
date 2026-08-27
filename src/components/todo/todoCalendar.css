@@ -211,6 +211,7 @@
   --bar-h: 22px;
   --mk: 20px;
   --tl-headrow-h: 26px;
+  --tl-rail-h: 42px;
   --tl-nm-w: 288px;
   --tl-ac-w: 172px;
   /* how far a piece stands off a marker it abuts, and off a plain neighbour */
@@ -242,7 +243,72 @@
 }
 
 /* ══ A ROW ═════════════════════════════════════════════════════════════════════════════════ */
-.tl-hrow, .tl-rrow { display: flex; align-items: stretch; }
+.tl-hrow, .tl-rrow, .tl-rail { display: flex; align-items: stretch; }
+
+/* ══ THE RAIL (v36, Phase 4) ════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ IT IS THE PAGE'S OWN, ABOVE EVERY GROUP — not the first card's header. The date row used to
+ * be drawn once inside the FIRST group's card, so it scrolled away with that card and a reader
+ * four groups down had no dates at all. Sticky at the top of the board's own scroller.
+ *
+ * ⚠️ AND IT TAKES THE SAME TWO WIDTH TOKENS AS A ROW, which is the whole alignment guarantee: its
+ * timeline column BEGINS where every lane begins, so a tick at `pct(d)` of it lands on the pixel a
+ * bar at `pct(d)` of a lane lands on. One column source, one expression. The today line's own
+ * 346px error came from having a second one.
+ */
+.tl-rail {
+  position: sticky; top: 0; z-index: 8;
+  height: var(--tl-rail-h); align-items: stretch;
+  background: var(--tl-ground);
+  border-bottom: 1px solid #e0d3bf;
+  /* ⚠️ THE CARD'S OWN BORDER INSETS ITS LANES BY 1px A SIDE, and the rail is not inside a card —
+     so without matching it the rail's timeline column is 2px wider than every lane and starts a
+     pixel earlier. Measured: rail 742/640 against lane 743/638. The per-tick drift was only 0.8px
+     because the two errors partly cancel, which is precisely why the lock asserts the COLUMNS
+     coincide as well as the ticks: an offset shared by every tick hides inside a tolerance. */
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+  box-sizing: border-box;
+}
+.tl-railtl { overflow: visible; }
+/* the baseline the ticks stand on */
+.tl-railtl::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+  border-bottom: 1px solid #e3d7c4;
+}
+.tl-tick {
+  position: absolute; bottom: 0; width: 0; height: 5px;
+  border-left: 1px solid #cdbfa8;
+}
+.tl-rail .tl-dt {
+  top: auto; bottom: 7px; transform: translateX(-50%);
+  font-size: 7.5px; color: #9c8878;
+}
+/* ── the month shelf ─────────────────────────────────────────────────────────────────────── */
+.tl-mlab {
+  position: absolute; top: 5px; transform: translateX(-50%);
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .22em;
+  text-transform: uppercase; color: #a8927a; white-space: nowrap;
+}
+/* ⚠️ THE MONTH YOU ARE IN IS INK, and the ones behind you are set back — a shelf where every
+   label weighs the same makes the reader find today twice. */
+.tl-mlab.now { color: #3a1c14; font-weight: 500; }
+.tl-mlab.gone { color: #c3b39c; }
+.tl-mdiv {
+  position: absolute; top: 2px; height: 13px; width: 0;
+  border-left: 1px solid #e5d9c6;
+}
+/* ── today, in the rail ──────────────────────────────────────────────────────────────────── */
+.tl-todaystem {
+  position: absolute; bottom: 0; height: 11px; width: 0;
+  border-left: 1.5px solid var(--tl-burgundy);
+}
+.tl-todaychip {
+  position: absolute; top: 3px; transform: translateX(-50%);
+  background: var(--tl-burgundy); color: #f8f5f0;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .1em;
+  padding: 2px 6px; border-radius: 4px; white-space: nowrap;
+}
 .tl-rrow {
   border-top: 1px solid var(--tl-rowline);
   /* ⚠️ THE ROW GROWS TO HOLD ITS LANES AND NEVER CLIPS ONE. `--lanes` is how many lines this

@@ -202,6 +202,7 @@ test.describe("the Calendar — Porcelain", () => {
         /* ── structure ──────────────────────────────────────────────────────────────────── */
         out.columnHeaders = document.querySelectorAll(".tl-hrow").length;
         out.dateLabels = document.querySelectorAll(".tl-hrow .tl-dt").length;
+        out.railDates = document.querySelectorAll(".tl-rail .tl-dt").length;
         out.groupTitles = [...document.querySelectorAll(".tl-gt")].map((g) => ({
           title: (g.querySelector(".t")||{}).textContent || "",
           count: (g.querySelector(".n")||{}).textContent || "",
@@ -310,9 +311,15 @@ test.describe("the Calendar — Porcelain", () => {
         + JSON.stringify(read.markerOffenders)).toBeGreaterThanOrEqual(1);
 
       /* ── structure ──────────────────────────────────────────────────────────────────── */
-      expect(read.columnHeaders, "the column header is drawn per group again").toBe(1);
-      expect(read.dateLabels, "the header's dates").toBeGreaterThan(5);
-      expect(read.dateLabels, "too many dates to scan").toBeLessThan(14);
+      /* ⚠️ THE DATE ROW IS THE RAIL NOW, AND THE CLAIM IS STRONGER FOR IT (v36, Phase 4). This
+         asserted "exactly one `.tl-hrow` in the document", which was the best available guarantee
+         while the row lived inside the first group's card — one card had it and the rest did not,
+         and it scrolled away with that card. There are ZERO in-card headers now: the rail is the
+         page's own, sticky above every group, and the alignment lock proves its ticks land on the
+         same pixels as the lanes. */
+      expect(read.columnHeaders, "an in-card date row came back").toBe(0);
+      expect(read.railDates, "the rail's dates").toBeGreaterThan(5);
+      expect(read.railDates, "too many dates to scan").toBeLessThan(14);
       expect(read.gridlines, "the day grid came back").toBe(0);
       const withSentence = read.groupTitles.filter((g: any) => g.sentence.trim().length > 0);
       expect(withSentence.length, "groups without a sentence").toBeGreaterThan(2);
@@ -1042,4 +1049,133 @@ test("⚠️ the past is set back on the ground and never on the data", async ({
     const all = new Set(Object.values(v).flat());
     expect([...all], `${fam} paints ${all.size} different fills either side of today`).toHaveLength(1);
   }
+});
+
+/* ══ THE RAIL, AND THE ONE CLAIM THAT DECIDES WHETHER IT IS BUILT (v36 part two, Phase 4) ════ */
+
+test("⚠️ a rail tick lands on the same pixel as that date inside a card lane", async ({ page }) => {
+  for (const [label, idx] of [["1 month", 0], ["3 months", 1], ["6 months", 2]] as const) {
+    await openRoute(page, "/todo/calendar", { width: 1440, height: 980 });
+    await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+    await page.evaluate(`(() => {
+      const all = [...document.querySelectorAll('input[type=range]')]
+        .filter((e) => e.getBoundingClientRect().width > 0);
+      if (all.length !== 1) throw new Error("expected 1 visible range control, found " + all.length);
+      const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+      set.call(all[0], String(${idx}));
+      all[0].dispatchEvent(new Event("input", { bubbles: true }));
+    })()`);
+    await page.waitForTimeout(700);
+
+    const r = await page.evaluate(`(() => {
+      const rail = document.querySelector(".tl-rail .tl-railtl");
+      if (!rail) throw new Error("no rail on the board");
+      const lane = [...document.querySelectorAll(".tl-rrow .tl-c-tl")]
+        .find((e) => e.getBoundingClientRect().width > 0);
+      if (!lane) throw new Error("no visible lane to compare against");
+      const rr = rail.getBoundingClientRect();
+      const lr = lane.getBoundingClientRect();
+      /**
+       * THE SAME DATE, BY BOTH ROUTES. A tick carries the day index it was placed at; the lane's
+       * own x for that index is computed from the lane's rect and the window length. If the rail
+       * and the rows shared no column source these would differ by the width of the two head
+       * columns, which is what the today line was wrong by.
+       * (No backticks in here: this comment lives inside a template literal.)
+       */
+      const days = Number(getComputedStyle(document.querySelector(".tl")).getPropertyValue("--tl-days"));
+      const ticks = [...rail.querySelectorAll(".tl-tick")].map((t) => {
+        const at = Number(t.dataset.at);
+        return {
+          at,
+          railX: t.getBoundingClientRect().left,
+          laneX: lr.left + lr.width * (at / days),
+        };
+      });
+      return {
+        days,
+        railLeft: Math.round(rr.left), laneLeft: Math.round(lr.left),
+        railW: Math.round(rr.width), laneW: Math.round(lr.width),
+        drifts: ticks.map((t) => +(t.railX - t.laneX).toFixed(2)),
+        n: ticks.length,
+      };
+    })()`) as any;
+
+    console.log(`${label}: rail ${r.railLeft}/${r.railW} · lane ${r.laneLeft}/${r.laneW} · `
+      + `${r.n} ticks, worst drift ${Math.max(...r.drifts.map(Math.abs)).toFixed(2)}`);
+
+    /* ⚠️ THE COLUMNS THEMSELVES MUST COINCIDE — if they do not, every tick is wrong by the same
+       amount and a per-tick tolerance would hide it behind an average. */
+    expect(Math.abs(r.railLeft - r.laneLeft), `${label}: the rail's timeline column starts `
+      + `${r.railLeft} and a lane starts ${r.laneLeft}`).toBeLessThanOrEqual(1);
+    expect(Math.abs(r.railW - r.laneW), `${label}: rail ${r.railW}px wide, lane ${r.laneW}px`)
+      .toBeLessThanOrEqual(1);
+    expect(r.n, `${label}: no ticks — the sweep proves nothing`).toBeGreaterThan(4);
+    for (const d of r.drifts) {
+      expect(Math.abs(d), `${label}: a tick sits ${d}px from its own date in a lane`)
+        .toBeLessThanOrEqual(1);
+    }
+  }
+});
+
+test("the rail is the page's own, and the cards carry no date row", async ({ page }) => {
+  await openRoute(page, "/todo/calendar", { width: 1440, height: 980 });
+  await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+  await page.waitForTimeout(600);
+  const r = await page.evaluate(`(() => {
+    const rail = document.querySelector(".tl-rail");
+    const cs = getComputedStyle(rail);
+    const months = [...document.querySelectorAll(".tl-mlab")].map((m) => ({
+      text: m.textContent, ink: getComputedStyle(m).color,
+      weight: getComputedStyle(m).fontWeight, spacing: getComputedStyle(m).letterSpacing,
+      now: m.classList.contains("now"), gone: m.classList.contains("gone"),
+    }));
+    const chip = document.querySelector(".tl-todaychip");
+    const stem = document.querySelector(".tl-todaystem");
+    return {
+      h: cs.height, position: cs.position, border: cs.borderBottomColor,
+      /* ⚠️ THE DATE ROW MUST HAVE LEFT THE CARDS ENTIRELY — it used to be drawn inside the first
+         group's card, so it scrolled away with that card. */
+      hrowsInCards: document.querySelectorAll(".tl-tbl .tl-hrow").length,
+      railsInCards: document.querySelectorAll(".tl-tbl .tl-rail").length,
+      labelsInRail: [...document.querySelectorAll(".tl-rail .tl-lbl3")].map((e) => e.textContent),
+      labelsInCards: document.querySelectorAll(".tl-tbl .tl-lbl3").length,
+      months,
+      tick: (() => { const t = document.querySelector(".tl-tick"); const c = getComputedStyle(t);
+        return { colour: c.borderLeftColor, h: c.height }; })(),
+      baseline: getComputedStyle(document.querySelector(".tl-railtl"), "::after").borderBottomColor,
+      chip: chip ? { bg: getComputedStyle(chip).backgroundColor, ink: getComputedStyle(chip).color } : null,
+      stem: stem ? { colour: getComputedStyle(stem).borderLeftColor, w: getComputedStyle(stem).borderLeftWidth } : null,
+    };
+  })()`) as any;
+  console.log("rail " + JSON.stringify({ h: r.h, position: r.position, months: r.months.map((m: any) => m.text) }));
+
+  expect(r.h, "the rail's height").toBe("42px");
+  expect(r.position, "the rail does not stick").toBe("sticky");
+  expect(r.border, "the rail's bottom border").toBe("rgb(224, 211, 191)");
+  expect(r.baseline, "the rail's baseline").toBe("rgb(227, 215, 196)");
+  expect(r.tick.colour, "tick colour").toBe("rgb(205, 191, 168)");
+  expect(r.tick.h, "tick height").toBe("5px");
+  expect(r.hrowsInCards, "a card still carries a date row").toBe(0);
+  expect(r.railsInCards, "the rail is inside a card").toBe(0);
+  expect(r.labelsInCards, "AGENT / ACTION? still live in the cards").toBe(0);
+  expect(r.labelsInRail, "the rail's own column labels").toEqual(["Agent", "Action?"]);
+
+  /* ⚠️ THE MONTH SHELF: the one you are in is ink, the ones behind you are set back. A shelf
+     where every label weighs the same makes the reader find today twice. */
+  expect(r.months.length, "no months on the shelf").toBeGreaterThan(1);
+  expect(r.months[0].spacing).toBe("1.76px");   /* .22em at 8px */
+  const now = r.months.filter((m: any) => m.now);
+  expect(now.length, "no current month on the shelf").toBe(1);
+  expect(now[0].ink).toBe("rgb(58, 28, 20)");
+  expect(now[0].weight).toBe("500");
+  for (const m of r.months.filter((m: any) => m.gone)) expect(m.ink).toBe("rgb(195, 179, 156)");
+  for (const m of r.months.filter((m: any) => !m.gone && !m.now)) expect(m.ink).toBe("rgb(168, 146, 122)");
+
+  expect(r.chip.bg, "the today chip").toBe("rgb(124, 58, 42)");
+  expect(r.stem.colour, "the today stem").toBe("rgb(124, 58, 42)");
+  /* ⚠️ THE USED WIDTH ROUNDS. The stylesheet declares 1.5px and Chromium reports 1px at DPR 1 —
+     a browser rounding a sub-pixel border, not a value that drifted. The DECLARED 1.5px is
+     asserted in `barTokens.test.ts`, where a source lock is the right instrument; here the honest
+     rendered claim is that the stem is painted, and painted burgundy. */
+  expect(parseFloat(r.stem.w), "the today stem has no width").toBeGreaterThan(0);
 });
