@@ -174,3 +174,38 @@ saying something, not an invitation to `force`. The switcher is chrome this page
 what is under test is how this PAGE responds to a change of scope — so the measurement writes
 `scriptally_active_manuscript_id` and reloads, which is the same read path the page uses on every
 visit.
+
+---
+
+## The flag register — authoritative, swept from the repo
+
+Swept from `reports/*.md`, `CLAUDE.md` and `src/`, not from memory. **Next unused letter: `F-BN`.**
+
+Allocated: `F-A`…`F-Z`, `F-AA`…`F-AQ`, `F-AT`…`F-AZ` (no `F-AR`/`F-AS`), `F-BA`…`F-BM` (no `F-BG`).
+
+**The two that collided in this pack's prompt, and what they actually are:**
+
+| | subject | ruling |
+|---|---|---|
+| `F-BJ` | the portion derived from `materialsWanted` rather than a second field | **ruled: derive** |
+| `F-BK` | D7's dotted divider, which no ref draws | **ruled: build as a decision** |
+| `F-BL` | *(this pack)* no tab primitive existed; one built, not promoted | open |
+| `F-BM` | *(this pack)* `Switch book` in the ref, deliberately unbuilt | **ruled: stays unbuilt** |
+
+⚠️ **Regenerate this by sweeping, never by remembering.** The command is one line and it is what
+found the collision:
+
+```
+grep -rhoE "\bF-[A-Z]{1,2}\b" reports/*.md CLAUDE.md src/ | sort -u | tail
+```
+
+## D6's premise was wrong, and it is the third of its kind
+
+The prompt says `Switch book` defers to *"the sidebar's existing switcher"*. The switcher is
+`ShellScope` in the **top bar** — moved there deliberately, its own note saying *"it lives in the bar
+because every figure on screen is filtered by it, and in the sidebar it vanished the moment the
+panel collapsed."* That change of premise is what makes the link redundant rather than merely hard
+to wire: a control that is always on screen does not need a second door.
+
+Recorded beside the two from the last pack — `SUBMISSION PACKAGE` from a retired band, and the
+dotted divider from a mockup — because three instances is a shape, not a slip.
