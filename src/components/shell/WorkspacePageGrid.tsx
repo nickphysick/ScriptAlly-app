@@ -617,13 +617,30 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
                 two mechanisms for one job, and the caught-between state that produced. A Type A page
                 reclaims its strip by scrolling, so a Hide there is a second way to do what the page
                 already does. */}
-            {!pinned && !hidden && (
-              <button type="button" className="wpg-mast-hide" onClick={() => setHidden(true)}>
-                <ChevronUp aria-hidden="true" />
-                Hide
-              </button>
-            )}
           </div>
+          {/**
+            * ⚠️ THE FOLD CONTROL IS A SIBLING OF THE MEASURE, NOT A CHILD OF IT — and it was a child
+            * until the chevron treatment proved it could not be. `.wpg-mast` collapses by animating
+            * `max-height` to 0 with `overflow: hidden`, which IS the fold; anything inside it is
+            * therefore clipped to the thing it is collapsing. That was invisible while the control
+            * was a text button sitting well inside the measure, and immediately fatal to a badge
+            * meant to straddle the band's bottom border: measured, the pill's box was in exactly the
+            * right place, computed visible at `z-index: 30`, and painted nothing —
+            * `elementsFromPoint` at its centre returned the CHROME.
+            *
+            * ⚠️ IT IS ALSO THE RIGHT WAY ROUND ON ITS OWN TERMS. A control that collapses a box
+            * should not be inside that box, or it animates away with what it is operating on. The
+            * folded state's badge already lives outside for the same reason — the window clips, so
+            * it is portalled to the window's wrapper.
+            *
+            * Type B only, unchanged: a Type A page reclaims its strip by scrolling.
+            */}
+          {!pinned && !hidden && (
+            <button type="button" className="wpg-mast-hide" onClick={() => setHidden(true)}>
+              <ChevronUp aria-hidden="true" />
+              Hide
+            </button>
+          )}
           {/* ⚠️ THE CONTROL ROW FOLLOWS THE MASTHEAD, INSIDE THE SCROLLER, and it has to be here
               rather than a grid row above it for one reason: the masthead must come FIRST. Left as
               row 2 of the grid it would have been pinned ABOVE a masthead that had moved into the

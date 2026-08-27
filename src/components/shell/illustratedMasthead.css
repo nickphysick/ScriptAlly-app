@@ -6,6 +6,8 @@
      hue is irrelevant and the name says what it is for rather than what it looks like. */
   --illo-ground: #ffffff;
   --illo-solid: #000000;
+  /* how far the fold badge hangs below the border it sits on — half its own height, so it straddles */
+  --illo-fold-drop: 0px;
 }
 
 /**
@@ -126,7 +128,13 @@
    * treatment, opposite declaration, because what is underneath is not the same.
    */
   position: relative;
-  overflow: hidden;
+  /**
+   * ⚠️ NO `overflow: hidden` HERE, AND IT WAS NEVER DOING ANYTHING. The bench puts it on `.mast`,
+   * and Packages keeps it, but the artwork is a BACKGROUND on a pseudo-element with `inset: 0` — a
+   * background is clipped to its own border box by default, so there is nothing for `overflow` to
+   * contain. What it WOULD do here is clip the fold control below, which straddles this element's
+   * bottom border by half its height. Removing it is what lets the badge sit on the line.
+   */
 }
 .wpg.qc-wpg > .wpg-scroll > .wpg-chrome::after {
   content: '';
@@ -148,6 +156,78 @@
   -webkit-mask-image: linear-gradient(to right, transparent var(--qc-illo-start), var(--illo-solid) calc(var(--qc-illo-start) + 170px));
           mask-image: linear-gradient(to right, transparent var(--qc-illo-start), var(--illo-solid) calc(var(--qc-illo-start) + 170px));
 }
-/* the text sits above the paint — `.wpg-mast` is already `position: relative` on a static page, so
-   this adds only the order */
-.wpg.qc-wpg .wpg-mast { z-index: 2; }
+/**
+ * The text sits above the paint — `.wpg-mast` is already `position: relative` on a static page, so
+ * `z-index` adds only the order.
+ *
+ * ⚠️ AND `overflow: visible`, WITHOUT WHICH THE FOLD BADGE DOES NOT EXIST. The measure carries
+ * `overflow: hidden`, so a control straddling the band's bottom border is cut in half by its own
+ * parent — measured, the pill's box was in exactly the right place, computed `visible` at
+ * `z-index: 30`, and painted nothing at all: `elementsFromPoint` at its centre returned the CHROME.
+ * The same clip is why the folded badge has to be portalled out to the window's wrapper.
+ *
+ * ⚠️ IT IS SAFE HERE AND WOULD NOT BE EVERYWHERE. The clip exists to stop a long title spilling its
+ * measure; Query Centre's title and description are short fixed strings, so there is nothing to
+ * spill. A rollout to a page with longer or user-supplied text has to answer this again rather than
+ * copy the line.
+ */
+.wpg.qc-wpg .wpg-mast { z-index: 2; overflow: visible; }
+
+/**
+ * ══ THE FOLD CONTROL — A CHEVRON ON THE BOTTOM BORDER ═════════════════════════════════════════
+ *
+ * ⚠️ THIS IS THE EXISTING `Hide` BUTTON RESTYLED, NOT A NEW CONTROL. The grid already renders a
+ * fold button on a Type B page and already knows what to do when it is pressed; giving the trial its
+ * own would be a second control doing one job, and would need a change to the shared component for a
+ * treatment that may be reverted next week. Everything here is paint.
+ *
+ * ⚠️ AND IT DELIBERATELY MIRRORS `.wpg-chevfold`, the badge that sits on the WINDOW's top border in
+ * the folded state and unfolds. Same 38×20 pill, same hairline, same ground, same 12px chevron, same
+ * half-off-the-edge placement — so the two read as one control in two positions rather than as two
+ * controls that happen to look alike. Up on the masthead's own border to fold; down on the window's
+ * border to unfold.
+ *
+ * ⚠️ WHY IT HAD TO MOVE AT ALL: on Query Centre the artwork now runs the width of the band, and the
+ * text `Hide` sat in the densest part of it — pale grey ink over an hourglass, measured and barely
+ * readable. A control cannot live on top of an illustration. The bottom border is the one edge of
+ * this band the artwork does not occupy.
+ */
+.wpg.qc-wpg .wpg-mast-hide {
+  position: absolute;
+  left: 50%;
+  right: auto;
+  top: auto;
+  /* the chrome's bottom border, straddled — half above the line, half below, as the folded badge
+     straddles the window's */
+  bottom: calc(var(--illo-fold-drop) * -1);
+  transform: translate(-50%, 50%);
+  z-index: 30;
+  width: 38px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  gap: 0;
+  border: 1px solid var(--ws-edge);
+  border-radius: 999px;
+  background: var(--ws-window);
+  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.10);
+  color: var(--shell-muted);
+  /* ⚠️ THE LABEL GOES WITHOUT LEAVING THE ACCESSIBLE NAME BEHIND. `font-size: 0` collapses the text
+     node to nothing while the button still reads as "Hide" to a screen reader — a `display: none`
+     on the text, or replacing the button, would take the name with it. The icon states its own
+     size below, so it is unaffected. */
+  font-size: 0;
+  line-height: 0;
+}
+.wpg.qc-wpg .wpg-mast-hide svg {
+  width: 12px;
+  height: 12px;
+  /* the button's icon already points up; this is stated so a change to the shared icon cannot
+     silently flip the control's meaning */
+  transform: none;
+}
+.wpg.qc-wpg .wpg-mast-hide:hover {
+  color: var(--shell-ink);
+  border-color: var(--ws-edge-strong, var(--ws-edge));
+}

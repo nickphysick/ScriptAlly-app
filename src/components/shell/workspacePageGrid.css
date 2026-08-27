@@ -637,7 +637,11 @@
  * page, never settles, and leaves only when the reader folds it with Hide.
  */
 .wpg--static > .wpg-scroll > .wpg-chrome {
-  position: static;
+  /* ⚠️ `relative`, NOT `static` — the fold control is a child of this element now rather than of the
+     measure it collapses (see the note in the component), so this is what it positions against. It
+     is `relative` rather than `sticky`, so the Type B contract — a masthead that sits in flow and
+     never pins — is untouched, and the lock that asserts it stays green. */
+  position: relative;
   box-shadow: none;
 }
 /**

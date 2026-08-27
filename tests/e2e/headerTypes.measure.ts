@@ -164,7 +164,15 @@ test("⚠️ TYPE B · STATIC — in flow, one Hide, no settle", async ({ page }
     const s = (await survey(page, cls))!;
     if (s.type !== "static") continue;
     n += 1;
-    expect(s.slabPosition, `${name}: a static page's slab is sticky — nothing it could pin to ever moves`).toBe("static");
+    /**
+     * ⚠️ THE CLAIM IS "NOT STICKY", NOT "EXACTLY `static`" — and pinning the exact keyword was
+     * asserting an implementation detail rather than the Type B contract. That contract is that the
+     * masthead sits IN FLOW and never pins; `relative` satisfies it as completely as `static` does,
+     * and the slab now needs to be `relative` because the fold control is a child of it rather than
+     * of the measure it collapses (see the note in `WorkspacePageGrid`).
+     */
+    expect(s.slabPosition, `${name}: a static page's slab is sticky — nothing it could pin to ever moves`).not.toBe("sticky");
+    expect(["static", "relative"], `${name}: a static page's slab is positioned out of flow (${s.slabPosition})`).toContain(s.slabPosition);
     expect(s.hides, `${name}: a static page renders ${s.hides} Hide controls; it needs exactly one`).toBe(1);
     expect(s.badges, `${name}: a chevron is showing while the masthead is not folded`).toBe(0);
     /* ⚠️ NO SETTLE BOUND — scrolling anything on this page must leave the chrome alone. Its panes

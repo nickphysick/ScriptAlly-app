@@ -68,6 +68,9 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
       const inMast = [...g.querySelectorAll(".wpg-mast button, .wpg-mast a, .wpg-mast [role='button']")];
       return inMast.filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0).length;
     })(),
+    /* the fold control moved OUT of the measure and is a child of the slab — see below */
+    foldInChrome: [...g.querySelectorAll(".wpg-chrome > .wpg-mast-hide")]
+      .filter((e) => (e as HTMLElement).getBoundingClientRect().height > 0).length,
     badgeCount: document.querySelectorAll(".wpg-chevfold").length,
   };
 }, cls);
@@ -119,18 +122,42 @@ const sampleTopEdge = (page: Page) => page.evaluate(() => {
 
 test("Hide folds the masthead to a chevron on the window's border, on every fill page", async ({ page }) => {
   const lines: string[] = [];
+  let exercised = 0;
   for (const { name, route, cls } of FILL) {
     await openRoute(page, route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
 
     const rest = await read(page, cls);
     expect(rest, `${name}: no grid`).not.toBeNull();
-    /* the precondition: this route is genuinely Type B, read from the page rather than from the list */
-    expect(rest!.type, `${name} is not a static page — the fold is Type B's alone`).toBe("static");
+    /**
+     * ⚠️ A PAGE THAT HAS CHANGED TYPE IS SKIPPED AND REPORTED, NOT FAILED — the list this iterates
+     * is a census, and a census goes stale. Manuscripts was Type B when it was written and is Type A
+     * now, by another stream's change, so this asserted that a page which no longer folds ought to
+     * fold. That is the list being out of date, not the page being wrong.
+     *
+     * ⚠️ AND THE POPULATION IS ASSERTED BELOW so the skip cannot hollow the case out. If every
+     * listed page changed type this would otherwise pass having tested nothing — the empty-set
+     * failure this repo keeps meeting.
+     */
+    if (rest!.type !== "static") {
+      lines.push(`${name.padEnd(21)} — now Type ${rest!.type === "pinned" ? "A" : "?"}; the fold is Type B's alone, so it is not exercised here`);
+      continue;
+    }
     expect(rest!.hidden, `${name}: the masthead is folded on arrival`).toBe(false);
     expect(rest!.mastH, `${name}: no masthead on arrival`).toBeGreaterThan(40);
     expect(rest!.badgeCount, `${name}: a chevron is drawn while the masthead is showing`).toBe(0);
-    expect(rest!.actionable, `${name}: the chrome carries ${rest!.actionable} control(s) before Hide; it should carry Hide alone`).toBe(1);
+    /**
+     * ⚠️ THE LAW GOT CLEANER WHEN THE CONTROL MOVED, and this now states it in two halves. It used
+     * to read "the measure holds exactly one control, which is Hide" — true while Hide lived inside
+     * `.wpg-mast`. Hide is a child of the SLAB now, because `.wpg-mast` collapses by animating
+     * `max-height` to 0 under `overflow: hidden` and anything inside it is clipped to the thing it
+     * is collapsing. So the measure holds NO actions at all, and the slab holds exactly one.
+     *
+     * Both halves are asserted: without the second, the case would pass on a build that had stopped
+     * rendering the fold control altogether.
+     */
+    expect(rest!.actionable, `${name}: the masthead's measure carries ${rest!.actionable} control(s) — it should carry none`).toBe(0);
+    expect(rest!.foldInChrome, `${name}: the slab does not carry exactly one fold control`).toBe(1);
 
     await page.evaluate((c) => {
       const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
@@ -151,7 +178,8 @@ test("Hide folds the masthead to a chevron on the window's border, on every fill
     expect(folded!.slabLine, `${name}: the slab kept its hairline with the masthead folded away`).toContain("rgba(0, 0, 0, 0)");
     /* exactly one chevron, and it is the chrome's only control once the masthead is gone */
     expect(folded!.badgeCount, `${name}: ${folded!.badgeCount} chevrons rendered`).toBe(1);
-    expect(folded!.actionable, `${name}: Hide is still rendered on a folded masthead`).toBe(0);
+    expect(folded!.actionable, `${name}: an action is rendered inside a folded masthead`).toBe(0);
+    expect(folded!.foldInChrome, `${name}: the fold control is still rendered on a folded masthead`).toBe(0);
     /* ⚠️ A SIBLING OF THE WINDOW, NEVER A CHILD — the window clips at its radius. */
     expect(folded!.inWindow, `${name}: the chevron is INSIDE the window — it will be clipped by the radius`).toBe(false);
     expect(folded!.inWrap, `${name}: the chevron is not in the window's wrapper`).toBe(true);
@@ -181,9 +209,14 @@ test("Hide folds the masthead to a chevron on the window's border, on every fill
     expect(back!.hidden, `${name}: the chevron did not restore the masthead`).toBe(false);
     expect(back!.mastH, `${name}: the restored masthead is not its resting height`).toBeCloseTo(rest!.mastH, 0);
     expect(back!.badgeCount, `${name}: the chevron survived the restore`).toBe(0);
-    expect(back!.actionable, `${name}: Hide did not come back with the masthead`).toBe(1);
+    /* the same two halves as on arrival: nothing inside the measure, one fold control on the slab */
+    expect(back!.actionable, `${name}: an action came back inside the measure`).toBe(0);
+    expect(back!.foldInChrome, `${name}: the fold control did not come back with the masthead`).toBe(1);
+    exercised += 1;
   }
   console.log(lines.join("\n"));
+  /* ⚠️ THE FLOOR, so a census that has entirely gone stale fails loudly instead of passing empty */
+  expect(exercised, "no Type B page exercised the fold — every listed page has changed type and this census needs rewriting").toBeGreaterThan(0);
 });
 
 test("⚠️ A SCROLLING PAGE HAS NO FOLD AND NO CHEVRON — not hidden, not rendered", async ({ page }) => {
