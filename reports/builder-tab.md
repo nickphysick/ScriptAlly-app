@@ -522,3 +522,99 @@ This is a verification pass, so neither was touched.
 2. **The panel's tag reads "Across every sample and package that carries it."** Samples are retired
    as a material type; the aggregation no longer touches one. The heading beneath it was corrected
    at D15 and this line was not.
+
+---
+
+# Fix batch — the three left standing, and the fixture
+
+Baseline at `7856bec9`: tsc 0 · build 0 · vitest **425 files, 7293 passed, 0 failed**.
+
+## 1 · The bare zero, and the module sweep
+
+`Requests by opening` read `0 packages · 0 requests from 0 sent` — three true figures which together
+say a version has been tried and drew nothing, about one that has never been in a package. It states
+the absence in words now, **in the same words the rail's chip uses**: `NOT_IN_A_PACKAGE` is declared
+once and the chip reads the constant rather than restating it.
+
+⚠️ **The two clauses fail separately, which the single fault hid.** A version can be in a package
+that has not gone out — `1 package · not yet sent` is a real and different state from `not yet in a
+package`. And `0 requests from 1 sent` keeps the **count** form: it went out and drew nothing, which
+is a result. Measured on the app, both branches present in one sweep:
+
+```
+METAS ["not yet sent", "2 requests from 7 sent"]
+```
+
+**The module sweep, rather than the instance.** Two other emitters carry the shape:
+
+* `earlierLine` already branches on `unknown === 0` — correct as written.
+* ⚠️ **`versionMeta` emits `${samples} sample${…}` and its own comment defends the zero — but it
+  counts a RETIRED type** through `samplesOfVersion`, so on the **book profile** it now reads
+  "0 samples" for every version, permanently. Live, on another page, outside tonight's surface.
+  **Reported, not changed.**
+
+## 2 · Four sentences teaching a retired type — and a fifth on the public site
+
+The tag read "Across every sample and package that carries it". The grep found three more, all
+teaching sample pages as a thing a writer keeps: the teach-first screen, the "How it works" drawer,
+and the guided tour. All four corrected.
+
+⚠️ **A FIFTH WAS FOUND BY GREPPING THE SERVED BUNDLE, NOT THE SOURCE**, because it is a structured
+`{ text: … }` run rather than a quoted string and my source pattern could not match it:
+
+```
+src/marketing/landingCopy.ts:377
+  " from your letters, synopses and sample pages — version them, reuse them, …"
+```
+
+**It is on the public landing page, it is verbatim-locked, and it is not mine to edit.** Marketing
+copy in this repo is normative from `design-refs/` and never paraphrased. But the product it
+describes has changed underneath it: the page advertises versioning and reusing *sample pages*, and
+that material type no longer exists. **A ref decision, and Nick's** — flagged as **F-BO**.
+
+The many other `Opening sample` strings are the AGENT'S stated requirement and the query's own
+materials, where the enum member survives and the unit-agnostic label is correct. Left deliberately.
+
+## 3 · The fourth affordance, and the census
+
+⚠️ **The premise had moved: `＋ New package` left the ledger head last pack.** The fourth is in
+`PackagesHeroBand`, which has **no importer** — a dead component carrying a live-looking build
+control that nothing renders. Which is the argument for a census over another singular fix: three of
+the four were found one at a time by looking, and the fourth could not be found by looking at all.
+
+Deleted with its styles — 14 rules for eight classes the hero alone rendered, verified both
+directions against the post-edit file. **The census, at both widths:**
+
+```
+CENSUS n=1  [{ cls: "bldr-closed", text: "＋ Build a package · or drag a chip here", visible: true }]
+```
+
+⚠️ **The component's deletion is not in my commit.** I staged it with `git rm`; another session's
+`69672d61` — *"Phase 0, read-only, committed alone"* — swept the staged deletion into itself. That is
+the shared-index hazard `--only` cannot prevent, running towards me rather than away. The outcome is
+right and nothing is lost; the attribution is wrong in two commit messages and cannot be fixed in
+either. **It is the third cross-session contamination in three packs, and the argument for F-BN.**
+
+## 4 · The fixture, reseeded and reproducible
+
+```
+node tests/e2e/seedBookVersions.mjs           bv-prologue · bv-world · bv-rr
+node tests/e2e/seedBookVersions.mjs --clear
+```
+
+⚠️ **The loss could not be attributed**, and the script says so at the top, because the **symptom
+points nowhere near the cause**: below two versions `versionsActive` is false, so every version
+surface hides itself — the rail's Versions section renders empty and two of Tracking's three panels
+do not render at all. Both read as regressions and neither is one. Verified after the reseed: all
+three panels return.
+
+## Flags
+
+* **F-BO** — the landing page advertises versioning "sample pages", a material type the product no
+  longer has. Verbatim-locked marketing copy; a ref decision.
+* **F-BN** — still outstanding and deliberately not squeezed in here. Three packs, three
+  cross-session incidents: my commit sweeping up another session's masthead reversal, another
+  session's commit sweeping up my staged deletion, and a fixture change nobody can attribute. The
+  write-up wants a session with room.
+* Carry forward: `CorrectionDraft` widening · F-AK (four blues) · broadsheet Phase 5 (held) ·
+  F-AV (superseded by the rail chips — recommend closing) · F-R, F-S, F-AB, F-AE, F-X.
