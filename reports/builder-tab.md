@@ -126,3 +126,51 @@ flagging it** — it is the same question as F-AK, which is still awaiting a rul
   reader-for-a-material is still wanted.
 * Carry forward: Correction UI's `CorrectionDraft` widening · F-AK (four blues — now with a fourth
   instance, above) · broadsheet Phase 5 (held) · F-R, F-S, F-AB, F-AE, F-X.
+
+---
+
+## Phase 2 — Parts A + B, measured
+
+Identical at 1440 and 1920, on a served build:
+
+```
+tabs        2            Builder 3 · 10  ·  Tracking 11 sent
+type        Playfair Display          active rgb(46,39,35)   inactive rgb(156,136,120)
+underline   2px  rgb(124,58,42)       burgundy, on the active tab only
+gutter      tabLeft 327 == ledgerLeft 327            left-aligned at the body's gutter
+scope       "for The Smoke Test"      below the title
+duplicates  []                        no second manuscript control on the page
+console     no errors
+```
+
+### D3 proven in BOTH states, because the fixture only has one of them
+
+A census of all three manuscripts found **none** in D3's state — `seed-ms-1` has 11 sends, and the
+other two have nothing at all and sit on teach-first. A sweep of the default scope would have
+reported "two tabs" and proved nothing about the rule.
+
+One covering letter was created on `seed-ms-2` to put it in the populated branch with zero sends,
+and **deleted in the same run** — the census afterwards shows all three manuscripts exactly as
+found.
+
+```
+with sends   tabs 2   Builder 3 · 10 · Tracking 11 sent   panel in DOM: yes
+no sends     tabs 1   Builder 0 · 2                       panel in DOM: NO      teach-first: no
+```
+
+The last two columns are the ones that matter: the Tracking panel is **not in the document**, not
+hidden; and `teachFirst: false` proves the case is genuinely the populated branch rather than the
+first-run screen, which would have shown one tab for an unrelated reason.
+
+### ⚠️ Two probe faults found on the way, both mine
+
+**`document.querySelector(".wsh-sub")` returned another page's masthead.** The workspace keeps every
+page MOUNTED, so the first match in the document was the To-do page's description — and the probe
+reported the packages masthead as stating *"Every query, every response…"*. Scoped to the visible
+`.wpg`, it reads `for The Smoke Test`. The hazard is recorded in CLAUDE.md and it still caught me.
+
+**The scope switch timed out rather than clicking.** Per the standing rule that is the element
+saying something, not an invitation to `force`. The switcher is chrome this page does not own, and
+what is under test is how this PAGE responds to a change of scope — so the measurement writes
+`scriptally_active_manuscript_id` and reloads, which is the same read path the page uses on every
+visit.
