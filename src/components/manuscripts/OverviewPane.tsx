@@ -73,7 +73,10 @@ export const OverviewPane: React.FC<OverviewPaneProps> = ({
       </div>
 
       <CappedCard
-        tint="incoming"
+        /* ⚠️ OUTGOING. What an agent is holding is material you SENT and that is still out with
+           them — the same reading that makes correspondence pink. It is not something that came
+           back; when it comes back the query moves off this table. */
+        tint="outgoing"
         label="Who holds what"
         right={`${holders.length} agent${holders.length === 1 ? "" : "s"}`}
         className="msp-holders"

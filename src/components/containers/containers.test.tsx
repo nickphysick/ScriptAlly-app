@@ -258,3 +258,58 @@ describe("CappedCard — the cap is CardBand, not a copy of it", () => {
     }
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("the book profile's cap assignment — one table, checked against the render", () => {
+  /**
+   * ⚠️ THE ASSIGNMENT IS A CLAIM ABOUT MEANING AND IT DRIFTED ONCE ALREADY. While the tints were
+   * named after colours, the same KIND of data was tinted two different ways on one page: "Who
+   * holds what" and "Out with agents now" list the same thing — material that is out with an agent
+   * — and one was sage while the other was pink. Naming the roles is what made that visible; this
+   * table is what stops it happening again.
+   *
+   * ⚠️ WHERE PRO AND OUTGOING BOTH APPLY, PRO WINS. "Who holds which version" is material out with
+   * an agent AND a gated feature; the gate is the more useful thing for a reader to see first, and
+   * a card that changed tint when a writer upgraded would be worse than either answer.
+   *
+   * Read from the SOURCE rather than from a rendered page, because the claim is about which card
+   * declares which role — every one of these components is separately smoke-tested for its render.
+   */
+  const CARDS: [string, string, string][] = [
+    ["OverviewPane.tsx", "Elevator pitch", "outgoing"],
+    ["OverviewPane.tsx", "Who holds what", "outgoing"],
+    ["JourneyPane.tsx", "Current standing", "incoming"],
+    ["JourneyPane.tsx", "Out with agents now", "outgoing"],
+    ["JourneyPane.tsx", "How far queries reached", "incoming"],
+    ["VersionsPane.tsx", "Requests by opening", "pro"],
+    ["VersionsPane.tsx", "Who holds which version", "pro"],
+    ["CompsPane.tsx", "Comparable titles", "reference"],
+    ["NotesPane.tsx", "Note", "reference"],
+  ];
+
+  const pane = (f: string) =>
+    readFileSync(join(root, "src/components/manuscripts", f), "utf8").replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+
+  it.each(CARDS)("%s · %s is capped %s", (file, label, role) => {
+    const src = pane(file);
+    /* The `tint` and the `label` must belong to the SAME card — anchored on one `<CappedCard`,
+       never on the two strings appearing somewhere in the file. */
+    const cards = [...src.matchAll(/<CappedCard[\s\S]*?>/g)].map((m) => m[0]);
+    const mine = cards.filter((c) => c.includes(`label="${label}"`) || c.includes(`label={\`${label}`));
+    expect(mine.length, `${label} is declared ${mine.length} times in ${file}`).toBeGreaterThan(0);
+    for (const c of mine) expect(c, `${label} in ${file}`).toContain(`tint="${role}"`);
+  });
+
+  it("Versions is the one card whose label repeats, and both are Pro", () => {
+    const cards = [...pane("VersionsPane.tsx").matchAll(/<CappedCard[\s\S]*?>/g)]
+      .map((m) => m[0]).filter((c) => c.includes('label="Versions"'));
+    expect(cards).toHaveLength(2); // the free offer, and the Pro panel
+    for (const c of cards) expect(c).toContain('tint="pro"');
+  });
+
+  /** Every role in the grammar is used, so none is a token nobody reads. */
+  it("uses all four roles", () => {
+    const all = new Set(CARDS.map(([, , role]) => role));
+    expect([...all].sort()).toEqual(["incoming", "outgoing", "pro", "reference"]);
+  });
+});

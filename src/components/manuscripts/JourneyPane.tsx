@@ -132,7 +132,11 @@ export const JourneyPane: React.FC<JourneyPaneProps> = ({
             )}
           </CappedCard>
 
-          <CappedCard tint="reference" label="How far queries reached" right={`All ${queriesSent}`}>
+          {/* ⚠️ INCOMING, LIKE THE TRACK BESIDE IT. Every rung above "Queried" is an agent having
+              acted — a request, an R&R, an offer — so this table is a record of what came back,
+              not material to consult. It read as reference until the roles were named, which is
+              the inconsistency naming them by colour was hiding. */}
+          <CappedCard tint="incoming" label="How far queries reached" right={`All ${queriesSent}`}>
             <table className="msp-table">
               <thead><tr><th>Furthest point</th><th>Queries</th></tr></thead>
               <tbody>
