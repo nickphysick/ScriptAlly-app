@@ -22,7 +22,7 @@
 import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { SectionHeader } from "./SectionHeader";
 import { CappedCard } from "./CappedCard";
@@ -291,7 +291,6 @@ describe("the book profile's cap assignment — one table, checked against the r
     ["VersionsPane.tsx", "Who holds which version", "pro"],
     ["CompsPane.tsx", "Comparable titles", "reference"],
     ["NotesPane.tsx", "Note", "reference"],
-    ["OverviewPane.tsx", "Attachments", "reference"],
   ];
 
   const pane = (f: string) =>
@@ -321,18 +320,59 @@ describe("the book profile's cap assignment — one table, checked against the r
   });
 
   /**
-   * ⚠️ OVERVIEW'S ONE CAPPED CARD IS THE ATTACHMENTS PANEL (amendment 3). This used to assert the
-   * pane had none at all, which held while its only candidates were the pitch and the synopsis —
-   * both deliberately uncapped, the pitch because it is the one thing the writer composed rather
-   * than the app derived. The panel is a different object and takes the `reference` role: files you
-   * consult rather than act on.
+   * ⚠️ OVERVIEW CAPS NOTHING AT ALL AGAIN (amendment 4), AND THIS ASSERTS THE REMOVAL REACHED NOTHING.
+   *
+   * The attachments panel was the pane's one capped card. It was the only filled, capped, coloured
+   * element on a page of unboxed editorial content, so it read as pasted in from elsewhere — and the
+   * fix was to stop it being a card, NOT to restyle the card. That distinction is the whole safety
+   * argument: `CappedCard` renders `CardBand`, which the packages page consumes in three places, so
+   * restyling either would have reached a page this pass does not own.
+   *
+   * Both halves are asserted: Overview no longer calls `CappedCard`, and `CardBand`'s packages
+   * consumers are all still there. A removal is verified against the post-edit file in BOTH
+   * directions — reading the diff tells you what you took out, only re-reading tells you what went
+   * with it.
    */
-  it("Overview caps the attachments panel and nothing else", () => {
-    const src = readFileSync(join(root, "src/components/manuscripts/OverviewPane.tsx"), "utf8")
-      .replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
-    const cards = [...src.matchAll(/<CappedCard[\s\S]*?>/g)].map((m) => m[0]);
-    expect(cards).toHaveLength(1);
-    expect(cards[0]).toContain('label="Attachments"');
-    expect(cards[0]).toContain('tint="reference"');
+  it("Overview caps nothing, and packages' band consumers are untouched", () => {
+    /**
+     * ⚠️ COMMENTS STRIPPED FIRST, and this lock proved the rule on its own first run. The prose
+     * explaining WHY the panel stopped being a card necessarily names `CappedCard` — as every
+     * retirement in this codebase is documented by quoting what it retired — so a bare read went red
+     * over a correct file. The fault is never carelessness; it is that the lock read the wrong artefact.
+     */
+    const overview = decls(readFileSync(join(root, "src/components/manuscripts/OverviewPane.tsx"), "utf8"));
+    expect(overview, "the attachments panel is a card again").not.toContain("CappedCard");
+
+    /**
+     * ⚠️ THE CENSUS IS SCANNED, NOT TYPED — and typing it is what went wrong first. I wrote the
+     * consumer list from memory as PackagesBand · MaterialsBand · PackageDetailDrawer; the first of
+     * those imports `CardBand` and never renders it, so the loop failed on its own bad list rather
+     * than on anything real, and it failed identically under two mutations that changed nothing it
+     * was looking at. Both "proofs" were the loop dying at element one.
+     *
+     * ⚠️ AND THE TOKEN IS BOUNDED. `toContain("CardBand")` is satisfied by `CardBandX` — the
+     * prefix-match fault — which is how the first form survived a rename aimed straight at it.
+     *
+     * The set is the claim: a consumer that stopped rendering the band shrinks it, and a new one
+     * grows it. Either is a thing to look at.
+     */
+    const rendersBand = readdirSync(join(root, "src"), { recursive: true })
+      .map(String)
+      .filter((f) => f.endsWith(".tsx") && !f.includes(".test."))
+      .filter((f) => /<CardBand[\s/>]/.test(readFileSync(join(root, "src", f), "utf8")))
+      .map((f) => f.split("/").pop()!)
+      .sort();
+
+    expect(rendersBand).toEqual(["CappedCard.tsx", "CardBand.tsx", "MaterialsBand.tsx", "PackageDetailDrawer.tsx"]);
+  });
+
+  /** ⚠️ AND THE PANEL SPEAKS THE FIELDS' GRAMMAR — the same `SectionHeader` the pitch and synopsis use. */
+  it("the attachments panel uses the shared section header, one size down", () => {
+    const overview = decls(readFileSync(join(root, "src/components/manuscripts/OverviewPane.tsx"), "utf8"));
+    expect(overview).toContain('<SectionHeader title="Attachments"');
+    const css = readFileSync(join(root, "src/components/manuscripts/bookProfile.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    /* 0-2-1, so it beats `.sa-sechead h2` on specificity rather than on stylesheet order. */
+    expect(css).toContain(".sa-sechead.msp-attsec h2 { font-size: 19px; }");
   });
 });

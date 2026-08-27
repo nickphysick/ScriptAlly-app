@@ -687,7 +687,39 @@
 .msp-ovmain { min-width: 0; }
 .msp-ovside { min-width: 0; }
 
-/** Disabled, because Storage is not wired. Not hidden: the panel says what will live here. */
+/**
+ * ⚠️ ONE STEP SMALLER THAN THE FIELD HEADINGS — 19px against the pitch's and synopsis's 23. It reads
+ * as subordinate to them rather than as a different kind of thing, which is the whole complaint the
+ * restyle answers.
+ *
+ * ⚠️ SCOPED AT 0-2-1, NOT 0-1-1. `.sa-sechead h2` is a class plus an element; a bare `.msp-attsec h2`
+ * ties it, and a tie between two single-class rules on one element is decided by which stylesheet
+ * loaded last. That is how a value gets lost with both rules reading correctly.
+ */
+.sa-sechead.msp-attsec h2 { font-size: 19px; }
+
+/** Rows, when there are any: a bordered type tile, the name, size and date, and a ⋯. */
+.msp-attrow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hair-soft);
+}
+.msp-attrow:last-of-type { border-bottom: 0; }
+/**
+ * ⚠️ THE FILENAME TRUNCATES AND THE ROW DOES NOT GROW. `min-width: 0` is what lets it — a flex item's
+ * default minimum is its min-content width, so without it one long unbroken name pushes the size and
+ * the date out of the column rather than ellipsing.
+ */
+.msp-attname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; }
+.msp-attmeta { flex: none; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--shell-muted); }
+
+/**
+ * ⚠️ DASHED MEANS PROVISIONAL — the app's grammar for a thing that is not there yet. Disabled
+ * because Storage is unwired; rendered rather than hidden, so the panel says what will live here
+ * and cannot pretend to act.
+ */
 .msp-attadd {
   margin-top: 14px;
   width: 100%;

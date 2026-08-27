@@ -27,8 +27,7 @@
 import React, { useState } from "react";
 import { SectionHeader } from "../containers/SectionHeader";
 import { InlineText } from "../containers/InlineText";
-import { CappedCard } from "../containers/CappedCard";
-import { PITCH_PLACEHOLDER, SYNOPSIS_PLACEHOLDER, SYNOPSIS_NOTE, ATTACHMENTS_NOTE } from "../../lib/manuscriptProfile";
+import { PITCH_PLACEHOLDER, SYNOPSIS_PLACEHOLDER, SYNOPSIS_NOTE, ATTACHMENTS_NOTE, ATTACHMENTS_EMPTY_META } from "../../lib/manuscriptProfile";
 import "./bookProfile.css";
 
 export interface OverviewPaneProps {
@@ -48,6 +47,9 @@ export const OverviewPane: React.FC<OverviewPaneProps> = ({
 }) => {
   /* Component state, deliberately: a clamp is a reading convenience, not a preference to persist. */
   const [synOpen, setSynOpen] = useState(false);
+  /* ⚠️ NOT `0 files`. There is nothing to count yet — a count of nought here would state that the
+     feature has run and found none, when it has not run at all. */
+  const attachmentsMeta = ATTACHMENTS_EMPTY_META;
   return (
   <div className="msp-ovgrid">
     <div className="msp-ovmain">
@@ -109,14 +111,37 @@ export const OverviewPane: React.FC<OverviewPaneProps> = ({
       * the rows, when there is something to stay alongside. `top: 0` was the alternative and is the
       * fault the brief names: the panel would slide under the slab.
       */}
+    {/**
+      * ⚠️ THE SAME GRAMMAR AS THE PITCH AND THE SYNOPSIS, WHICH IS A REMOVAL RATHER THAN A RESTYLE.
+      * This was the only filled, capped, coloured element on a page of unboxed editorial content, so
+      * it read as pasted in from somewhere else. It now uses `SectionHeader` — Playfair heading,
+      * mono meta, full-width hairline — exactly as the two fields beside it do.
+      *
+      * ⚠️ AND IT STOPPED CALLING `CappedCard` RATHER THAN `CappedCard` BEING RESTYLED. That
+      * component renders `CardBand`, which the packages page consumes in three places
+      * (`PackagesBand`, `MaterialsBand`, `PackageDetailDrawer`); restyling either would have reached
+      * a page this pass does not own. Removal reaches nothing, and the lock asserts both halves.
+      *
+      * ⚠️ ONE STEP SMALLER THAN THE FIELD HEADINGS, so it reads as subordinate rather than foreign.
+      * The pitch and the synopsis are 23px; this is 19. Scoped `.sa-sechead.msp-attsec h2` at 0-2-1
+      * so it wins on specificity rather than on stylesheet order — two single-class rules on one
+      * element are decided by which sheet loaded last, which is how a value gets lost silently.
+      */}
     <aside className="msp-ovside">
-      <CappedCard tint="reference" label="Attachments" right="0">
-        <p className="msp-empty">Nothing kept with this manuscript yet.</p>
-        <button type="button" className="msp-attadd" disabled>
-          Add a file
-        </button>
-        <p className="msp-footnote">{ATTACHMENTS_NOTE}</p>
-      </CappedCard>
+      <SectionHeader title="Attachments" meta={attachmentsMeta} className="msp-attsec" />
+
+      {/* ⚠️ NO FABRICATED ROWS. Storage is unwired — no `storage.rules`, no `storage` block in
+          either firebase config, no `firebase/storage` import in `src` — so a file row here would be
+          the page stating that a writer has something they do not have. */}
+      <p className="msp-empty">Nothing kept with this manuscript yet.</p>
+
+      {/* Dashed means provisional, and disabled because there is nothing behind it yet. Rendered
+          rather than hidden: the panel says what will live here and cannot pretend to act. */}
+      <button type="button" className="msp-attadd" disabled>
+        Add a file
+      </button>
+
+      <p className="msp-footnote">{ATTACHMENTS_NOTE}</p>
     </aside>
   </div>
   );
