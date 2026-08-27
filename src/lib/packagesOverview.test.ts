@@ -19,6 +19,7 @@ import {
   sentLine, howItWorks, packagedQueries, packageTiles, tileFooter,
   materialColumns, packagesUsing, usageLine,
   isRetired, removalChoice, materialHolders, packageHolders, resolveSlot, MISSING_SLOT,
+  composition,
 } from "./packagesOverview";
 import { packageMetrics, UNFILLED_SLOT, isRequest as isRequestExport, packagesUsingVersion } from "./packageMetrics";
 import { TYPE_META, BUILDER_TYPES } from "../components/packages/typeMeta";
@@ -379,5 +380,39 @@ describe("archiving a material does not damage the packages holding it", () => {
     /* ⚠️ RE-POINTED AT `packageTiles` when `packageRows` went with the rail. The claim is the same
        and it is the important half: the package that held the archived material still names it. */
     expect(packageTiles(held, archived, [])[0].slots[0].name).toBe("Hook-first");
+  });
+});
+
+/**
+ * ⚠️ THE VERSION'S EMPTY WORD IS NOT THE MATERIALS' EMPTY WORD, AND THIS WAS FOUND BY MEASURING.
+ *
+ * The ledger's structural gate passed at both widths — columns aligned, no cell borders, no
+ * striping, the parcel at 26px — while every version cell read `Not included`. A check that asks
+ * about arrangement cannot see a wrong sentence, which is the whole reason the gate also prints
+ * what the cells SAY.
+ */
+describe("Not included and Not recorded are different facts", () => {
+  const P = (over: Partial<SubmissionPackage> = {}): SubmissionPackage =>
+    ({ id: "p1", userId: "u", manuscriptId: "m1", packageName: "P", queryLetterVersionId: "ql1",
+       synopsisVersionId: "", samplePagesVersionId: "", createdDate: "", ...over } as SubmissionPackage);
+  const MATS = [{ id: "ql1", manuscriptId: "m1", userId: "u", componentType: ComponentType.QUERY_LETTER,
+                  versionName: "Hook-first", fileAttached: false, createdDate: "" }] as ManuscriptVersion[];
+
+  it("an omitted MATERIAL is a stated choice", () => {
+    const t = packageTiles([P()], MATS, [], [])[0];
+    expect(composition(t)[1].text).toBe("Not included");
+  });
+
+  it("⚠️ an absent VERSION is not a choice — it reads Not recorded", () => {
+    const t = packageTiles([P()], MATS, [], [])[0];
+    expect(composition(t)[2].text).toBe("Not recorded");
+    expect(composition(t)[2].text).not.toBe("Not included");
+  });
+
+  it("a stated version reads its name", () => {
+    const t = packageTiles([P({ bookVersionId: "bv1" })], MATS, [],
+      [{ id: "bv1", name: "Prologue-first", kind: "reordering", createdDate: "" }])[0];
+    expect(composition(t)[2].text).toBe("Prologue-first");
+    expect(composition(t)[2].held).toBe(true);
   });
 });

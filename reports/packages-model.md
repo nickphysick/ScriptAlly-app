@@ -301,3 +301,53 @@ The cost of leaving it is one optional key on documents nobody edits, and one ga
 of removing it is a write over the writer's own archived material. `MaterialModal`'s branch is kept
 as a named `showVersionField = false` constant rather than deleted markup, so whoever revisits this
 can see what used to write it.
+
+---
+
+## Phase 5 — Part D, measured at both widths
+
+The ledger, on a served build, 1440 and 1920 — identical at both:
+
+```
+heads      Package · Covering letter · Synopsis · Version · Sent · Replied · Requests
+aligned    true          every row's cells within 1px of their column head
+borders    0px/0px       on every cell — rules, not a spreadsheet
+fills      one value     no striping
+rules      1px           one under every row
+mark       26px × 3      the strip's own asset, above the 20px stroke floor
+counts     centred       Playfair; heads are JetBrains Mono
+ghost      colSpan 7     full width, in its own tbody, carrying no rule
+overflow   none          the page does not scroll sideways
+```
+
+### ⚠️ THE STRUCTURAL GATE PASSED WHILE EVERY VERSION CELL SAID THE WRONG THING
+
+`slotTexts` came back `["Hook-first", "One-page", "Not included"]` on all three rows. The version's
+empty state must read **`Not recorded`** (D3), and `Not included` claims the writer built a package
+without a manuscript. Columns aligned, borders absent, striping absent, mark 26px — **every
+assertion about arrangement passed, because arrangement is not what was wrong.** The gate caught it
+only because it also prints what the cells SAY.
+
+Fixed, and locked as three cases: an omitted material is a stated choice, an absent version is not,
+and a stated version reads its name.
+
+### And the tint was unprovable until the fixture had one
+
+`verTint` read `rgb(156, 136, 120)` — the muted ink — because the probe took the FIRST
+`.pkgb-slotv--ver` and every version cell on the fixture was empty, so it also carried
+`--none`. **A pass there would have proved nothing.** One package was seeded with a version, and
+the filled cell measures:
+
+```
+Prologue-first   rgb(65, 98, 127)   weight 600   upright     --pkg-pro-ink
+Not recorded     rgb(156, 136, 120) weight 400   italic      --pkg-muted
+```
+
+**The fixture was restored in the same run** — `seed-pkg-noversion` is the versionless case and its
+name says so, so the seeded version was cleared with `deleteField()`.
+
+### D15's panels
+
+`Requests by opening` reads the package's own version; `Who holds what` already reached it through
+the send activity and did not move. Versionless packages form a `Not recorded` row that scales
+against the same maximum as the named versions, and renders only when it holds something.

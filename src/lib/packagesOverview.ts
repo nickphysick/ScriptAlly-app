@@ -386,6 +386,9 @@ export const NO_SLOT_WORD: Record<string, string> = {
  * comma sentence, where an omitted slot read as a quiet clause (`no sample`); as ROWS each line
  * needs its slot named, because a row with only a value cannot say which slot is empty.
  */
+/** The version slot's empty word. NOT `Not included` — see `composition` for why they differ. */
+export const UNRECORDED_SLOT = "Not recorded";
+
 export interface CompositionPart { text: string; held: boolean; label: string }
 
 export function composition(t: PackageTile): CompositionPart[] {
@@ -395,14 +398,23 @@ export function composition(t: PackageTile): CompositionPart[] {
        have labelled the version with whatever the builder's third type happened to be. */
     const reg = PACKAGE_SLOTS[i];
     const label = reg?.kind === "material" ? (SLOT_EYEBROW[reg.type] ?? "") : "Version";
-    /* ⚠️ AS A ROW, AN OMITTED SLOT READS `Not included` — the ref's word, and the right one here.
-       The old `no sample` was correct in a SENTENCE about what the package sends; in a labelled row
-       the slot is already named, so the value states the choice rather than repeating the noun. */
+    /**
+     * ⚠️ AS A ROW, AN OMITTED SLOT READS `Not included` — the ref's word, and the right one here.
+     * The old `no sample` was correct in a SENTENCE about what the package sends; in a labelled row
+     * the slot is already named, so the value states the choice rather than repeating the noun.
+     *
+     * ⚠️ EXCEPT ON THE VERSION, WHERE IT READS `Not recorded` (D3) — and the two are different
+     * facts, not two wordings of one. `Not included` is a stated CHOICE: the writer left the
+     * synopsis out. An empty version slot is the ABSENCE of a statement, and it is permanent for
+     * every package already sent, because the rules freeze a sent package's slots. `Not included`
+     * there would claim the writer built a package without a manuscript.
+     */
+    const emptyWord = reg?.kind === "version" ? UNRECORDED_SLOT : "Not included";
     return sl.state === "held" && sl.name
       ? { text: sl.name, held: true, label }
       : sl.state === "missing"
         ? { text: MISSING_SLOT, held: false, label }
-        : { text: "Not included", held: false, label };
+        : { text: emptyWord, held: false, label };
   });
 }
 
