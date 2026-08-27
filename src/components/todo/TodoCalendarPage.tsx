@@ -56,7 +56,7 @@ import {
   type RowSort, type TimelineFilter,
 } from "../../lib/todoTimeline";
 import {
-  durationCount, fillFor, NEAR_AT, familyOf,
+  durationCount, fillFor, fillEndAt, NEAR_AT, familyOf,
   type Segment, type BarNode,
 } from "../../lib/journeyBars";
 import { scrawlEarns } from "../../lib/timelineCopy";
@@ -100,7 +100,18 @@ const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
  *
  * The columns change what a reader SEES. They are not what anything is positioned by.
  */
-const pct = (n: number) => `calc(${n} / var(--tl-days) * 100%)`;
+/**
+ * ⚠️ `cqw`, NOT `%` — AND THE UNIT IS THE WHOLE POINT.
+ *
+ * A percentage means "of my parent", so this expression meant "of the lane" only for a DIRECT
+ * child of the lane. The ticks, the chips and the bars are direct children and were right; the
+ * FILL is a grandchild, so the identical arithmetic inside a bar silently measured the bar. That
+ * is how the board came to have two date→x mappings while every rule read correctly.
+ *
+ * `.tl-c-tl` is a size container (see the stylesheet), so `100cqw` is the lane's width at any
+ * depth. One expression, one width, for the rail's ticks and the bars and the fills alike.
+ */
+const pct = (n: number) => `calc(${n} / var(--tl-days) * 100cqw)`;
 
 /**
  * How wide a piece is drawn — its span, less the clearance at each end.
@@ -115,6 +126,17 @@ const gapVar = (abuts: boolean | undefined) => (abuts ? "var(--tl-gap-mk)" : "va
 const barLeft = (sg: Segment) => `calc(${pct(sg.from)} + ${gapVar(sg.abutL)})`;
 const barWidth = (sg: Segment) =>
   `calc(${pct(sg.to - sg.from)} - ${gapVar(sg.abutL)} - ${gapVar(sg.abutR)})`;
+/**
+ * How wide the FILL is drawn — from the piece's own left edge to where the fill's edge belongs.
+ *
+ * ⚠️ IT IS A DISTANCE BETWEEN TWO DATES, NOT A FRACTION OF A BAR. `fillEndAt` says where the edge
+ * belongs in window coordinates and `barLeft` says where the piece starts in the same ones, so the
+ * width is the difference — expressed in the one mapping, exactly as the bar's own width is. The
+ * two subtracted terms are the real offsets between the lane's origin and this element's: the
+ * piece's clearance, and the border that `left: 0` on an absolutely positioned child sits inside.
+ */
+const fillWidth = (sg: Segment, end: number) =>
+  `calc(${pct(end - sg.from)} - ${gapVar(sg.abutL)} - var(--tl-bar-bd))`;
 /**
  * ⚠️ THE PAGE DECLARES WHICH LANE; THE STYLESHEET DECIDES WHERE THAT IS.
  *
@@ -147,8 +169,8 @@ const laneVar = (lane: number): React.CSSProperties =>
  * one and the one the emptiness is there to make.
  */
 const Piece: React.FC<{
-  sg: Segment; fill: number | null; selected: boolean; onPick: () => void;
-}> = ({ sg, fill, selected, onPick }) => {
+  sg: Segment; fill: number | null; fillEnd: number | null; selected: boolean; onPick: () => void;
+}> = ({ sg, fill, fillEnd, selected, onPick }) => {
   const near = fill != null && fill >= NEAR_AT && fill < 1 && !sg.historical;
   return (
     <div
@@ -167,8 +189,12 @@ const Piece: React.FC<{
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(); } }}
     >
-      {fill != null && !sg.hollow && (
-        <span className="tl-fl" data-full={fill >= 1 ? "1" : "0"} style={{ width: `${fill * 100}%` }} />
+      {fillEnd != null && (
+        <span
+          className="tl-fl"
+          data-full={fill != null && fill >= 1 ? "1" : "0"}
+          style={{ width: fillWidth(sg, fillEnd) }}
+        />
       )}
       {sg.label && (
         <span className="tl-plbl" data-long={sg.label} data-short={sg.short}>{sg.label}</span>
@@ -1194,7 +1220,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
 
         <div className="tl-c-tl">
           {bar.segs.map((sg) => (
-            <Piece key={sg.key} sg={sg} fill={fillFor(sg)} selected={sel === sg.key}
+            <Piece key={sg.key} sg={sg} fill={fillFor(sg)} fillEnd={fillEndAt(sg)} selected={sel === sg.key}
               onPick={() => pickSeg(r.key, sg)} />
           ))}
           {bar.nodes.map((n) => (

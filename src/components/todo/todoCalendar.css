@@ -217,6 +217,12 @@
   /* how far a piece stands off a marker it abuts, and off a plain neighbour */
   --tl-gap-mk: 12px;
   --tl-gap: 2px;
+  /* ⚠️ THE BAR'S BORDER IS A TOKEN BECAUSE THE FILL HAS TO SUBTRACT IT. `.tl-fl` is absolutely
+     positioned, so its `left: 0` is the piece's PADDING box — one border inside the painted edge.
+     The fill's width is a distance measured from the lane's origin, so that inset comes off it,
+     and a literal `1px` in the fill's rule would be a number the bar owns written into another
+     element's geometry. Move the border and the fill follows. */
+  --tl-bar-bd: 1px;
 }
 
 /* ══ A GROUP ═══════════════════════════════════════════════════════════════════════════════ */
@@ -323,7 +329,16 @@
 .tl-c-ac { flex: 0 0 var(--tl-ac-w); display: flex; align-items: center; padding: 0 8px; }
 /* ⚠️ `overflow: hidden` IS LOAD-BEARING AND IS WHY THE TOOLTIP IS PORTALLED. A clipping ancestor
    beats any z-index a descendant can declare, so no tooltip inside this box can ever escape it. */
-.tl-c-tl { flex: 1 1 auto; position: relative; overflow: hidden; }
+/* ⚠️ THE LANE IS A SIZE CONTAINER, AND THAT IS WHAT MAKES ONE DATE→X MAPPING POSSIBLE.
+   `pct()` was a percentage, so it only meant "of the lane" for a DIRECT child of it — the ticks,
+   the chips and the bars. The fill is a grandchild, so the same expression written inside a bar
+   meant "of the bar", and the fill was drawn on a second, silent mapping. `100cqw` is the lane's
+   width at any depth, so ticks, bars and fills now resolve the identical expression against the
+   identical width. That is what kills the class rather than the instance.
+   `flex: 1 1 auto` is unaffected: the two flanking columns are fixed and this is the only item
+   that grows, so a flex-basis resolving to 0 under containment lands on the same width — measured
+   before and after at 1280/1440/1920 and unchanged to the pixel. */
+.tl-c-tl { flex: 1 1 auto; position: relative; overflow: hidden; container-type: inline-size; }
 /* ══ THE PAST, SET BACK ═════════════════════════════════════════════════════════════════════
  * ⚠️ ON THE LANE'S GROUND AND ON NOTHING ELSE. The wash says "this is behind you" about the
  * SURFACE; laid over a bar it would dim the data, and a reader cannot tell a washed fill from a
@@ -450,7 +465,7 @@
    `line-height` under a bar selector. */
 .tl-p {
   height: var(--bar-h); border-radius: 999px; overflow: hidden; z-index: 2; background: #fff;
-  border: 1px solid transparent; box-sizing: border-box;
+  border: var(--tl-bar-bd) solid transparent; box-sizing: border-box;
   display: flex; align-items: center;
 }
 /* ⚠️ THE FILL IS A CHILD, NOT A BACKGROUND, because its WIDTH is the statement. A gradient stop

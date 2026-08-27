@@ -45,6 +45,30 @@ const MARKER = {
 /* ⚠️ THE BOARD IS FOUND BY MEASUREMENT, NEVER BY `.first()`. Every workspace page stays MOUNTED
    and three of them carry `.wpg` — a locator's first match is routinely a hidden page's zero-sized
    copy, which Playwright then waits the full timeout for. */
+/**
+ * Move the board to one of the three ranges.
+ *
+ * ⚠️ IT THROWS RATHER THAN GUARDS, and the reason is the shell. Every workspace page stays
+ * MOUNTED, so a bare `querySelector` returns a hidden page's copy — the dispatch then changes
+ * nothing and the probe reports three identical readings for three different ranges without
+ * erroring. That happened.
+ *
+ * ⚠️ AND IT IS AT MODULE SCOPE BECAUSE A SECOND COPY IS THE FAULT THIS PACK IS ABOUT. It lived
+ * inside one test; the fill-edge case needs it too, and writing it out again would be two
+ * functions answering one question — which is the disease, not the workaround for it.
+ */
+const setRangeTo = async (page: import("@playwright/test").Page, i: number) => {
+  await page.evaluate(`(() => {
+    const all = [...document.querySelectorAll('input[type=range]')]
+      .filter((e) => e.getBoundingClientRect().width > 0);
+    if (all.length !== 1) throw new Error("expected 1 visible range control, found " + all.length);
+    const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+    set.call(all[0], String(${i}));
+    all[0].dispatchEvent(new Event("input", { bubbles: true }));
+  })()`);
+  await page.waitForTimeout(700);
+};
+
 const TAG = `
   const vis = (sel) => [...document.querySelectorAll(sel)]
     .find((e) => e.getBoundingClientRect().height > 0) || null;
@@ -621,31 +645,27 @@ test("⚠️ a fill ratio is the same number at every range — the board is not
      returns a hidden page's copy — the dispatch then changes nothing and the probe reports three
      identical readings for three different ranges without erroring. That happened; it is why this
      throws rather than guards. */
-  const setRange = async (i: number) => {
-    await page.evaluate(`(() => {
-      const all = [...document.querySelectorAll('input[type=range]')]
-        .filter((e) => e.getBoundingClientRect().width > 0);
-      if (all.length !== 1) throw new Error("expected 1 visible range control, found " + all.length);
-      const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-      set.call(all[0], String(${i}));
-      all[0].dispatchEvent(new Event("input", { bubbles: true }));
-    })()`);
-    await page.waitForTimeout(700);
-  };
+  const setRange = (i: number) => setRangeTo(page, i);
 
   /* ⚠️ READ THE PAINTED WIDTH RATIO, not the data attribute. `data-fill` is what the code THINKS;
      the child's width against its parent's is what the reader sees, and the two are only the same
      thing if the element was drawn from the number. */
   /**
-   * ⚠️ THE REPORTED NUMBER, AND THE PROOF THE ELEMENT IS DRAWN FROM IT.
+   * ⚠️ THE REPORTED NUMBER, AND WHAT IT STILL GOVERNS — REWRITTEN, BECAUSE ITS SECOND HALF WAS A
+   * TAUTOLOGY AND ITS SUBJECT HAS SINCE CHANGED.
    *
-   * The painted width RATIO is not a usable invariance metric and three drafts proved it: the bar
-   * is `box-sizing: border-box` with a 1px border, so a fill at `width: 100%` paints two pixels
-   * narrower than the rect — 0.3% of a 600px bar and 36% of a 30px one. Comparing rects reported
-   * 99 / 98 / 64 for a bar that was full at all three ranges. So this asserts the two halves that
-   * actually matter and can each be measured honestly: the NUMBER the board reports is the same at
-   * every range, and the fill element's own width is set FROM that number rather than from
-   * anything else. Together they are the composed claim; either alone is not.
+   * It used to assert that the fill element was "drawn FROM the number" by comparing
+   * `fl.style.width` against `data-fill`. Both were one `fillFor` call written into two attributes
+   * by one JSX expression, so the check could only fail if someone wired two different numbers
+   * into the same element — never for any real defect. Its own docstring reasoned its way there
+   * honestly (comparing rects IS defeated by `box-sizing: border-box` and a 1px border) and landed
+   * on something unfalsifiable.
+   *
+   * The fill no longer draws from the number at all — its edge is a date, mapped like every other
+   * date on the board — so that half is not merely weak now, it is describing something that has
+   * deliberately stopped being true. What the number still governs is the NEAR step: at or past
+   * 85% a bar deepens. That is a painted colour, so the reported number and the paint can
+   * genuinely disagree, and both branches are asserted with their populations.
    */
   const ratios = async () => page.evaluate(`(() => {
     const out = {};
@@ -662,22 +682,27 @@ test("⚠️ a fill ratio is the same number at every range — the board is not
       if (!b || !fl) continue;
       const said = Number(b.dataset.fill);
       if (!Number.isFinite(said)) continue;
-      const drawn = parseFloat(fl.style.width);
-      out[nm] = { said, drawn: Number.isFinite(drawn) ? drawn : null };
+      /* what the number GOVERNS, now that it no longer draws: the near step, which is a painted
+         colour and can therefore disagree with it */
+      out[nm] = { said, near: b.classList.contains("near"), fillPaint: getComputedStyle(fl).backgroundColor };
     }
     return out;
-  })()`) as Promise<Record<string, { said: number; drawn: number | null }>>;
+  })()`) as Promise<Record<string, { said: number; near: boolean; fillPaint: string }>>;
 
   const seen: Record<string, number[]> = {};
-  const drawnGap: string[] = [];
+  const stepGap: string[] = [];
+  let nearSeen = 0;
+  let farSeen = 0;
   for (const i of [0, 1, 2]) {
     await setRange(i);
     const r = await ratios();
     for (const [k, v] of Object.entries(r)) {
       (seen[k] = seen[k] || []).push(v.said);
-      /* the element is drawn FROM the number: same value, allowing the render's own rounding */
-      if (v.drawn == null || Math.abs(v.drawn - v.said) > 1.5) {
-        drawnGap.push(`${k} says ${v.said}% and draws ${v.drawn}%`);
+      /* the number governs the near step, in both directions */
+      const shouldBeNear = v.said >= 85 && v.said < 100;
+      if (shouldBeNear) nearSeen++; else farSeen++;
+      if (shouldBeNear !== v.near) {
+        stepGap.push(`${k} says ${v.said}% and ${v.near ? "wears" : "does not wear"} the near step`);
       }
     }
   }
@@ -686,7 +711,11 @@ test("⚠️ a fill ratio is the same number at every range — the board is not
   for (const [k, v] of across) console.log(`  ${k.padEnd(24)} ${v.join(" / ")}%`);
 
   expect(across.length, "no row carried a live fill at all three ranges").toBeGreaterThan(2);
-  expect(drawnGap, `the fill element is not drawn from the number: ${drawnGap.join(" | ")}`).toEqual([]);
+  /* ⚠️ BOTH BRANCHES, OR THE CLAIM IS ABOUT WHICHEVER ONE THE FIXTURE HAPPENS TO HOLD. A sweep in
+     which every bar is under 85% proves nothing about the step and passes. */
+  expect(nearSeen, "no bar is at or past the near step — that branch was never exercised").toBeGreaterThan(0);
+  expect(farSeen, "every bar is at the near step — the other branch was never exercised").toBeGreaterThan(0);
+  expect(stepGap, `the reported number and the near step disagree: ${stepGap.join(" | ")}`).toEqual([]);
   for (const [k, v] of across) {
     expect(Math.max(...v) - Math.min(...v), `${k} reported ${v.join(" / ")}% at three ranges`)
       .toBeLessThanOrEqual(1);
@@ -964,6 +993,118 @@ test("the surface is the pinned one, and the heading is not inside the card", as
   expect(errors, `console errors: ${errors.join(" | ")}`).toEqual([]);
 });
 
+/**
+ * Read the composited paint either side of the today line, from a screenshot the BROWSER decodes.
+ *
+ * ⚠️ A COMPUTED STYLE CANNOT SEE AN OVERLAY, WHICH IS THE WHOLE REASON THIS EXISTS.
+ * `getComputedStyle(el).backgroundColor` returns what the stylesheet DECLARES, identically whether
+ * or not a wash is painted on top of it — so the one assertion that used to stand for "the wash is
+ * not on the data" could never have failed. Canvas gives the real pixel, and comparing a real
+ * pixel against a declared value is a composed claim that can.
+ */
+const sample = async (page: import("@playwright/test").Page, shot: string) =>
+  (await page.evaluate(
+    `(async (b64) => {
+      const img = new Image();
+      await new Promise((ok, no) => { img.onload = ok; img.onerror = no; img.src = "data:image/png;base64," + b64; });
+      const cv = document.createElement("canvas");
+      cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+      cv.getContext("2d").drawImage(img, 0, 0);
+      const ctx = cv.getContext("2d");
+      /* the shot is in DEVICE pixels and every rect is in CSS pixels */
+      const k = img.naturalWidth / window.innerWidth;
+      const at = (x, y) => {
+        const d = ctx.getImageData(Math.round(x * k), Math.round(y * k), 1, 1).data;
+        return "rgb(" + d[0] + ", " + d[1] + ", " + d[2] + ")";
+      };
+      const vis = (sel) => [...document.querySelectorAll(sel)].find((e) => e.getBoundingClientRect().height > 0) || null;
+      const line = vis(".tl-todayline");
+      const tx = line.getBoundingClientRect().left;
+      /**
+       * ⚠️ "IN THE VIEWPORT" IS NOT "VISIBLE", AND THE DIFFERENCE COST A FALSE FAILURE.
+       *
+       * The pinned masthead covers the top of the scroll row. A row scrolled up behind it is still
+       * inside the viewport, so a rect check passed it — and the pixel read there belonged to the
+       * chrome. It reported one flat colour either side of today and read exactly like a wash that
+       * was not being painted. elementsFromPoint names what actually owns the pixel, which is the
+       * only thing that can answer the question a colour sample is asking.
+       * (No backticks in here: this is inside an evaluate template and one would close it.)
+       */
+      const ownsPixel = (x, y, host) => {
+        const st = document.elementsFromPoint(x, y);
+        return st.length > 0 && host.contains(st[0]);
+      };
+      const topAt = (x, y) => { const st = document.elementsFromPoint(x, y); return st.length ? st[0] : null; };
+      const inView = (r) => r.top > 4 && r.bottom < window.innerHeight - 4;
+
+      const bars = []; const drop = { width:0, notInView:0, aheadOfToday:0, noFill:0, thin:0, notTop:0, noFam:0 };
+      for (const b of document.querySelectorAll(".tl-p")) {
+        const r = b.getBoundingClientRect();
+        if (r.width <= 0) { drop.width++; continue; }
+        if (!inView(r)) { drop.notInView++; continue; }
+        /**
+         * ⚠️ A BAR WHOLLY INSIDE THE WASHED REGION, WHICH IS THE STRONGER SUBJECT AND THE COMMONER
+         * ONE. The first draft wanted a bar STRADDLING the line so both sides could be read off
+         * one element; after the guards (the fill must reach the line, and nothing may own the
+         * pixel instead) that left one candidate at one scroll position and none at another — a
+         * claim resting on whichever bar happened to survive. A bar lying entirely behind today is
+         * lying entirely under the wash, so if the wash reached the data its fill would be tinted;
+         * and there are dozens of them.
+         */
+        if (r.right > tx - 4) { drop.aheadOfToday++; continue; }
+        const fl = b.querySelector(".tl-fl");
+        if (!fl) { drop.noFill++; continue; }
+        const fr = fl.getBoundingClientRect();
+        /* wide enough that the midpoint clears a marker at either end — they are ~12px and
+           sit exactly where a bar is interrupted, which is what defeated a right-edge sample */
+        if (fr.width < 44) { drop.thin++; continue; }
+        const base = ["out","req","decide","remind","quiet"].find((c) => b.classList.contains(c));
+        if (!base) { drop.noFam++; continue; }
+        /**
+         * ⚠️ NOT THE MIDDLE OF THE BAR — THE LABEL RIDES THERE.
+         *
+         * Sampled at mid-height, the past side returned rgb(184, 194, 180) against a declared fill
+         * of rgb(230, 236, 227): an antialiased glyph of the label's own ink, which reads exactly
+         * like a wash darkening the data. The band just under the top border is the only part of a
+         * bar guaranteed to be nothing but fill or track.
+         */
+        const y = r.top + Math.min(4, r.height / 4);
+        /* sample at the fill's MIDPOINT — furthest from both ends — and only where the fill itself
+           owns that pixel. A containment test is not enough: the label is inside the bar too, and a
+           marker sits exactly where the bar is interrupted, which is what a right-edge sample hit. */
+        const fx = fr.left + fr.width / 2;
+        if (topAt(fx, y) !== fl) { drop.notTop++; continue; }
+        bars.push({
+          key: b.className + '@' + Math.round(r.top) + ':' + Math.round(r.left),
+          fam: base + (b.classList.contains("near") ? ":near" : ""),
+          paintedFill: at(fx, y),
+          declaredFill: getComputedStyle(fl).backgroundColor,
+        });
+      }
+
+      /* the ground: a row where nothing is drawn across the line, sampled either side of it */
+      const ground = [];
+      for (const row of document.querySelectorAll(".tl-rrow")) {
+        const lane = row.querySelector(".tl-c-tl");
+        if (!lane) continue;
+        const lr = lane.getBoundingClientRect();
+        if (lr.height <= 0 || !inView(lr)) continue;
+        const busy = [...row.querySelectorAll(".tl-p,.tl-tchip,.tl-mk2")].some((e) => {
+          const r = e.getBoundingClientRect();
+          return r.height > 0 && r.left < tx + 10 && r.right > tx - 10;
+        });
+        if (busy) continue;
+        const y = lr.top + lr.height / 2;
+        /* both sample points must belong to this lane, or the reading is about whatever covers it */
+        if (!ownsPixel(tx - 6, y, lane) || !ownsPixel(tx + 6, y, lane)) continue;
+        ground.push({ key: Math.round(lr.top) + ':' + Math.round(y),
+                      nm: (row.querySelector(".tl-nm2") || {}).textContent,
+                      past: at(tx - 6, y), ahead: at(tx + 6, y) });
+      }
+      return { bars, ground, drop };
+    })(${JSON.stringify(shot)})`,
+  )) as { bars: any[]; ground: any[] };
+
 test("⚠️ the past is set back on the ground and never on the data", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1440, height: 980 });
   await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
@@ -1040,15 +1181,107 @@ test("⚠️ the past is set back on the ground and never on the data", async ({
      mistake a washed fill for a paler one. */
   expect(Number(r.barZ)).toBeGreaterThan(0);
   expect(Number(r.markerZ)).toBeGreaterThan(0);
-  /* ⚠️ AND MEASURED, NOT ONLY REASONED: a family's fill must paint ONE colour whichever side of
-     the line it falls. A wash laid over the data would tint the past ones and leave the rest. */
-  const spanning = Object.entries(r.fills).filter(([, v]: any) => Object.keys(v).length > 1);
-  expect(spanning.length, `no family appears on both sides of today: ${JSON.stringify(r.fills)}`)
-    .toBeGreaterThan(0);
-  for (const [fam, v] of spanning as any[]) {
-    const all = new Set(Object.values(v).flat());
-    expect([...all], `${fam} paints ${all.size} different fills either side of today`).toHaveLength(1);
+  /**
+   * ⚠️ THE `fills` SWEEP IS RETIRED, AND BOTH REASONS ARE WORTH KEEPING.
+   *
+   * It required a family to appear on both sides of today and then required one colour. Since the
+   * fill edge became today by construction (Phase 1), NO fill is ever ahead of the line — so the
+   * precondition is unsatisfiable and the case failed loudly rather than passing on an empty set,
+   * which is the only reason it was looked at. Its own comment records the first draft hitting
+   * this and concluding the check was wrong: *"a fill ends at today by definition, because that is
+   * what a fill IS"*. That reasoning was right and the board disagreed with it, so the reasoning
+   * was discarded. It is true again now.
+   *
+   * ⚠️ AND IT COULD NEVER HAVE CAUGHT WHAT IT WAS FOR. It compared `getComputedStyle(fl)
+   * .backgroundColor` on two elements — the DECLARED colour, which is identical whatever paints
+   * on top of it. An overlay is exactly what a computed style cannot see, so the one assertion
+   * aimed at "the wash is not on the data" was vacuous for its whole life.
+   *
+   * What replaces it is a real pixel: the browser decodes a screenshot into a canvas, and the
+   * paint either side of the line is compared against the value the stylesheet DECLARES. That is
+   * a composed claim — painted against declared — and it is the only shape that can fail if a
+   * wash reaches the data.
+   */
+  /**
+   * ⚠️ THE POPULATION IS GATHERED DOWN THE BOARD, NOT AT ONE SCROLL POSITION.
+   *
+   * A viewport shot can only sample what is on screen, and the guards below throw most candidates
+   * away — a bar is only usable where its fill actually reaches the line and where nothing (the
+   * label, the pinned masthead, a chip) owns the pixel instead. At one position that left a single
+   * bar, and a claim resting on one sample is a claim about one bar. Stepping the scroller and
+   * accumulating gives a real population, and the floor below is what makes a thin sweep fail
+   * rather than quietly prove less than it says.
+   */
+  const scroller = page.locator(".wpg-scroll").first();
+  const bars: any[] = [];
+  const ground: any[] = [];
+  const seen = new Set<string>();
+  let lastDrop: any = null;
+
+  /**
+   * ⚠️ THE LABELS ARE HIDDEN FOR THE SHOT, AND `visibility` IS THE REASON IT IS SAFE.
+   *
+   * A label is a flex child spanning most of its bar, so it owns the pixel wherever you sample —
+   * the guard rejected every candidate, and sampling anyway returned an antialiased glyph that
+   * read exactly like a darkened fill. `visibility: hidden` takes an element out of painting AND
+   * out of hit testing while leaving its box in flow, so every bar, fill and lane keeps the
+   * geometry this case measures. The claim is about what the wash does to a fill; the words riding
+   * on top of it are not part of it.
+   */
+  await page.addStyleTag({ content: ".tl-plbl { visibility: hidden !important; }" });
+  await page.waitForTimeout(200);
+
+  for (const frac of [0, 0.25, 0.5, 0.75]) {
+    await page.evaluate(`(() => {
+      const sc = [...document.querySelectorAll(".wpg-scroll")].find((e) => e.scrollHeight > e.clientHeight + 4);
+      if (sc) sc.scrollTop = (sc.scrollHeight - sc.clientHeight) * ${frac};
+    })()`);
+    await page.waitForTimeout(400);
+    const shot = (await page.screenshot()).toString("base64");
+    const got = await sample(page, shot);
+    for (const b of got.bars) if (!seen.has("b" + b.key)) { seen.add("b" + b.key); bars.push(b); }
+    for (const g of got.ground) if (!seen.has("g" + g.key)) { seen.add("g" + g.key); ground.push(g); }
+    lastDrop = (got as any).drop;
   }
+  void scroller;
+  const paint = { bars, ground, drop: lastDrop };
+
+  console.log(`wash paint — ${paint.bars.length} bars behind today, ${paint.ground.length} clear ground rows; drops ${JSON.stringify(paint.drop)}`);
+
+  /* ⚠️ POPULATION FIRST, BOTH HALVES. Either list being empty satisfies every claim below by
+     having nothing in it, which is the shape this file exists to refuse. */
+  expect(paint.bars.length, "no bar lies wholly behind today with a readable fill — nothing was measured")
+    .toBeGreaterThan(3);
+  expect(paint.ground.length, "no row has clear ground either side of today — nothing was measured")
+    .toBeGreaterThan(0);
+
+  /**
+   * ⚠️ THE WASH IS ON THE GROUND, AND THE CLAIM IS THE COMPOSITE RATHER THAN "THEY DIFFER".
+   *
+   * "The two sides differ" passes on any accident that happens to change the colour — a hover, a
+   * band, a neighbouring element. Compositing the declared wash over the measured AHEAD sample and
+   * requiring the measured PAST sample to equal it is exact, holds whatever the row's base colour
+   * is, and fails if the wash is the wrong alpha, the wrong tint, or absent.
+   */
+  const WASH = [58, 28, 20];
+  const WASH_A = 0.035;
+  for (const g of paint.ground) {
+    const base = (g.ahead.match(/\d+/g) || []).map(Number);
+    const want = base.map((c: number, i: number) => Math.round(c * (1 - WASH_A) + WASH[i] * WASH_A));
+    const got = (g.past.match(/\d+/g) || []).map(Number);
+    const off = got.map((c: number, i: number) => Math.abs(c - want[i]));
+    expect(
+      Math.max(...off),
+      `${g.nm}: ground ahead of today paints ${g.ahead}, so behind it should paint rgb(${want.join(", ")}) — it paints ${g.past}`,
+    ).toBeLessThanOrEqual(1);
+  }
+  /* and it is NOT on the data: these bars sit entirely under the wash, and each paints exactly the
+     colour its own stylesheet rule declares — the composed claim a computed style cannot make */
+  const tinted = paint.bars
+    .filter((b: any) => b.paintedFill !== b.declaredFill)
+    .map((b: any) => `${b.fam} declares ${b.declaredFill} and paints ${b.paintedFill} behind today`);
+  expect(tinted, "the wash has reached the data").toEqual([]);
+  console.log(`  families read behind today: ${JSON.stringify([...new Set(paint.bars.map((b: any) => b.fam))])}`);
 });
 
 /* ══ THE RAIL, AND THE ONE CLAIM THAT DECIDES WHETHER IT IS BUILT (v36 part two, Phase 4) ════ */
@@ -1178,4 +1411,103 @@ test("the rail is the page's own, and the cards carry no date row", async ({ pag
      asserted in `barTokens.test.ts`, where a source lock is the right instrument; here the honest
      rendered claim is that the stem is painted, and painted burgundy. */
   expect(parseFloat(r.stem.w), "the today stem has no width").toBeGreaterThan(0);
+});
+
+/* ══ THE FILL EDGE IS TODAY (v36 part three, Phase 1) ═══════════════════════════════════════ */
+
+/**
+ * ⚠️ THIS REPLACES THE RANGE-INVARIANCE CHECK AS THE LOAD-BEARING ONE, and that check is kept
+ * below because it is still true — not because it was ever going to catch this.
+ *
+ * The fill is elapsed time on an axis linear in time, so its right edge is today by construction.
+ * The old drawing computed an honest ratio over the stretch's TRUE span and then multiplied it by
+ * the PIECE's span — clipped at the window edge and cut at every break — so the painted edge
+ * landed wherever that arithmetic put it: measured on the deployed board at 1440, nine of nine
+ * partial fills right of today at one month, worst +243px, and −38px on a reminder bar at six.
+ *
+ * ⚠️ AND THE OLD CHECK COULD NOT HAVE SEEN ANY OF IT — TWICE OVER. A drawing wrong by the same
+ * rule at every range satisfies "same ratio at every range" perfectly; and its second half, which
+ * claimed to prove the element was drawn FROM the number, compared `fl.style.width` against
+ * `data-fill` — one `fillFor` call written into two attributes by one JSX expression, so it could
+ * only fail if someone wired two different numbers into one element. Necessary, never sufficient.
+ */
+test("the painted fill edge lands on today, at every range and every width", async ({ page }) => {
+  const rows: string[] = [];
+  let covered = 0;
+  let worst = 0;
+
+  for (const width of WIDTHS) {
+    await openRoute(page, "/todo/calendar", { width, height: HEIGHT });
+    await page.waitForTimeout(1200);
+
+    for (const r of [0, 1, 2]) {
+      await setRangeTo(page, r);
+      const read = await page.evaluate(TAG + `(() => {
+        const line = vis(".tl-todayline");
+        const lane = vis(".tl-c-tl");
+        if (!line || !lane) return { fatal: "no today line or no lane on the page" };
+        const lr = line.getBoundingClientRect();
+        /* the rule is a 1px left border on a zero-width box: its ink is its left edge */
+        const todayX = lr.left;
+        const partial = [], right = [], passed = [];
+        for (const b of document.querySelectorAll(".tl-p")) {
+          const br = b.getBoundingClientRect();
+          if (br.width <= 0) continue;
+          const fl = b.querySelector(".tl-fl");
+          if (!fl) continue;
+          const fr = fl.getBoundingClientRect();
+          if (fr.width <= 0) continue;
+          const row = b.closest(".tl-rrow");
+          const nm = row ? (row.querySelector(".tl-nm2") || {}).textContent : "?";
+          const said = Number(b.dataset.fill);
+          const rec = { nm, said, dev: fr.right - todayX, edgeGap: br.right - fr.right };
+          /* ⚠️ THE POPULATION IS SPLIT BY WHAT THE BOARD SAYS, NOT BY WHERE IT DREW. The
+             reported number decides which claim applies before any geometry is looked at, so a
+             fill drawn in the wrong place cannot select itself into a branch that forgives it.
+             (No backticks in here: this is inside an evaluate template, and one would close it.) */
+          if (Number.isFinite(said) && said > 0 && said < 100) partial.push(rec);
+          else if (said >= 100) passed.push(rec);
+          if (fr.right - todayX > 1) right.push(rec);
+        }
+        return { todayX, partial, right, passed };
+      })()`) as any;
+
+      expect(read.fatal, `${width}px range ${r}: ${read.fatal}`).toBeUndefined();
+
+      /* ⚠️ THE POPULATION FIRST. A board with no partial fill satisfies every claim below by
+         having nothing to check, which is the shape that goes green while measuring nothing. */
+      expect(
+        read.partial.length,
+        `${width}px range ${r}: no bar carries a partial fill, so this case measured nothing`,
+      ).toBeGreaterThan(2);
+      covered += read.partial.length;
+
+      for (const f of read.partial) {
+        worst = Math.max(worst, Math.abs(f.dev));
+        rows.push(`${width} r${r} ${String(f.nm).padEnd(20)} ${String(f.said).padStart(3)}% dev ${f.dev.toFixed(1)}px`);
+      }
+      const off = read.partial.filter((f: any) => Math.abs(f.dev) > 1);
+      expect(
+        off.map((f: any) => `${f.nm} ${f.said}% is ${f.dev.toFixed(1)}px from today`),
+        `${width}px range ${r}: a fill in progress does not end on today`,
+      ).toEqual([]);
+
+      /* nothing paints fill to the right of today, whatever it says about itself */
+      expect(
+        read.right.map((f: any) => `${f.nm} ${f.dev.toFixed(1)}px right of today`),
+        `${width}px range ${r}: fill painted to the right of today`,
+      ).toEqual([]);
+
+      /* a bar whose named end has passed is full to its own right edge, and that edge is left of
+         today — the two halves together, because either alone is satisfiable by a bar drawn wrong */
+      for (const f of read.passed) {
+        expect(f.edgeGap, `${width}px range ${r}: ${f.nm} says 100% but stops ${f.edgeGap.toFixed(1)}px short of its own end`)
+          .toBeLessThanOrEqual(2.5);
+        expect(f.dev, `${width}px range ${r}: ${f.nm} has a passed end but paints ${f.dev.toFixed(1)}px right of today`)
+          .toBeLessThanOrEqual(1);
+      }
+    }
+  }
+  console.log(`fill edge — ${covered} partial fills covered, worst deviation ${worst.toFixed(1)}px`);
+  for (const r of rows) console.log(`  ${r}`);
 });

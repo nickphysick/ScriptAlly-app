@@ -103,6 +103,46 @@ export const NEAR_AT = 0.85;
  * CONTINUATION is drawn hollow — lateness is drawn, never named. A fill of 130% would be a
  * verdict with a number on it.
  */
+/**
+ * Where the fill's right edge belongs, in the same fractional-day coordinates as `from` and `to`
+ * — `null` where no fill is drawn at all.
+ *
+ * ⚠️ THIS IS THE THING THAT DRAWS, AND `fillFor` NO LONGER IS. The ratio was honest — computed
+ * from the true start and the named end, so it did not move with the range — and it was then
+ * multiplied by the width of the PIECE, whose span is `from → to`: clipped at the window's edge,
+ * and cut short at every break. The two spans coincide only when the piece happens to be the
+ * whole stretch, so the painted edge landed wherever that arithmetic put it. Measured at 1440 on
+ * the deployed board: nine of nine partial fills right of today at one month, worst +243px; and
+ * −38px — LEFT of today — on a reminder bar at six months. Not an overshoot to subtract: no fixed
+ * relation to today in either direction.
+ *
+ * ⚠️ AND THE RANGE-INVARIANCE LOCK COULD NEVER HAVE SEEN IT. A drawing wrong by the same rule at
+ * every range satisfies "the same ratio at every range" perfectly — necessary, never sufficient.
+ *
+ * The fill is elapsed time on an axis linear in time, so its right edge is today by construction
+ * and can never be right of it. A stretch whose named end has passed reaches its own end and stops
+ * there; a finished stretch is full. Both fall out of the clamp rather than needing a branch.
+ */
+export function fillEndAt(sg: Segment): number | null {
+  /* an overrun paints no fill — the emptiness past the named end is the point of it */
+  if (sg.hollow) return null;
+  /* a stretch that ended at a real event is finished, and a finished stretch is full */
+  if (sg.historical) return sg.to;
+  /* nobody named an end: no fill element at all, which is not the same claim as a fill of zero */
+  if (sg.goal == null) return null;
+  /* ⚠️ CLAMPED TO THIS PIECE, not to the stretch. A piece lying wholly before today is full and a
+     piece wholly after it is empty, and both are the same expression once the ends are clamped. */
+  return Math.max(sg.from, Math.min(sg.to, Math.min(sg.todayAt, sg.goal)));
+}
+
+/**
+ * How far through this stretch we are, 0–1 — THE REPORTED NUMBER, and no longer the drawn one.
+ *
+ * ⚠️ IT SURVIVES BECAUSE IT ANSWERS A DIFFERENT QUESTION FROM `fillEndAt`. This is a fact about
+ * the whole stretch ("73% of the way to the reply you were promised") and is deliberately
+ * range-invariant; that is what captions and the `near` treatment want. Where the fill's edge
+ * BELONGS on screen is a fact about the window, and mixing the two is what this pass repaired.
+ */
 export function fillFor(sg: Segment): number | null {
   if (sg.historical) return 1;
   if (sg.goal == null) return null;

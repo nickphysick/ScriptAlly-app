@@ -35,7 +35,13 @@ describe("the calendar's measurement file cannot terminate its own evaluate stri
       /* a well-formed body is substantial; a body cut short by a stray backtick is not, and the
          giveaway is that what follows the "close" is not a call terminator */
       const after = src.slice(end + 1, end + 40).replace(/\s/g, "");
-      if (!/^\)|^\}\)\(\)|^asPromise|^as/.test(after) && body.length < 40_000) {
+      /* ⚠️ `,)` IS A TERMINATOR TOO, and adding it is a precise extension rather than a loosening.
+         A multi-line call — evaluate(\n  `…`,\n) as any — puts a comma before the paren, and the
+         checker flagged its own file for it. The house warning about this class of lock is that
+         the temptation is to widen the pattern until the false positive stops, which widens it for
+         every real offender as well; a body cut short by a stray backtick is followed by arbitrary
+         JavaScript, and arbitrary JavaScript does not begin with a comma and a closing paren. */
+      if (!/^,?\)|^\}\)\(\)|^asPromise|^as/.test(after) && body.length < 40_000) {
         offenders.push(`a template closes early at index ${end}; it is followed by ${JSON.stringify(after.slice(0, 30))}`);
       }
     }
