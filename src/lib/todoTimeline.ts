@@ -219,6 +219,19 @@ export interface TimelineRow {
    * key the painted rows actually carry.
    */
   pressingAt: number | null;
+  /**
+   * WHICH QUERY EACH PART OF THIS ROW IS ABOUT — the row's subject, made visible.
+   *
+   * ⚠️ THEY ARE ON THE ROW SO A LOCK CAN READ THEM OFF THE PAGE, and that is the only way this
+   * class of bug is catchable. All three shipped variants looked correct in isolation: a true deed,
+   * a true caption, a true sort key, each about a query the reader could not see. Nothing about the
+   * rendered words says which query they came from, so a probe reading appearance can only ever
+   * ask whether they LOOK consistent. These say it outright, and the assertion is that each is one
+   * of the queries this row actually draws.
+   *
+   * `null` where that part of the row says nothing — the pinned task rows have no query at all.
+   */
+  subjects: { deed: string | null; caption: string | null; sort: string | null };
 }
 
 /* ⚠️ `TimelineBand`, `BandSource` AND THE `ExpectedItem` IT CARRIED ARE RETIRED (bars pack,
@@ -416,7 +429,11 @@ interface Draft {
   lastClosed: string | null;
   /** the lead query's facts — the sentence and the note both read these, so they cannot disagree */
   copy: RowCopy | null;
-  /** every query on this row, with its own copy — the deed asks the one that earned the group */
+  /** the query `copy` and `sentence` were built from — the caption's subject */
+  captionQueryId: string | null;
+  /** the query `pressingAt` was taken from — the sort key's subject, filled by the bar pass */
+  sortQueryId?: string | null;
+  /** every query this row DRAWS, with its own copy — the deed asks the one that earned the group */
   copies: { q: Query; copy: RowCopy }[];
   /** what the row's own StatusDot draws — null only on the pinned row, which holds no query */
   status: QueryStatus | null;
@@ -456,6 +473,56 @@ export function timelineWeek(
   const byAgent = new Map(data.agents.map((a) => [a.id, a]));
   const search = view.search.trim().toLowerCase();
 
+  /* which (agent, manuscript) pairs have a journey worth drawing, and which query speaks for each */
+  const laneOf = new Map<string, Map<string, Query>>();
+  for (const q of data.queries) {
+    if (!q.agentId) continue;
+    const key = agentRowKey(q.agentId);
+    const per = laneOf.get(key) ?? new Map<string, Query>();
+    const msId = q.manuscriptId || "";
+    const held = per.get(msId);
+    /* ⚠️ ONE QUERY SPEAKS FOR A LANE, and a live one always outranks a finished one. A writer who
+       queried the same agency about the same book twice has one relationship about that book; the
+       bar draws the journey that is still running, or the most recent one if none is. */
+    if (!held) per.set(msId, q);
+    else {
+      const heldLive = !isTerminalStatus(held.status);
+      const qLive = !isTerminalStatus(q.status);
+      const newer = String(q.dateSent ?? "") > String(held.dateSent ?? "");
+      if ((qLive && !heldLive) || (qLive === heldLive && newer)) per.set(msId, q);
+    }
+    laneOf.set(key, per);
+  }
+
+  /**
+   * THE ROW'S SUBJECT — the queries a row actually DRAWS, and the only set a row-level derivation
+   * may read.
+   *
+   * ⚠️ THREE VARIANTS OF ONE DISEASE SHIPPED BEFORE THIS EXISTED, each fixed at its own seam and
+   * each leaving the next one writable: the deed asked of the row's LEAD while the GROUP came from
+   * whichever query earned it; the sort key minimised over EVERY query the agent holds while the
+   * row drew one per manuscript; and the deed's repair then searched the same everything-set again.
+   * The missing idea was not a fix, it was a NOUN. A row draws one query per manuscript, so that
+   * set is what the row's words are about, and a derivation handed it cannot quietly pick another.
+   *
+   * ⚠️ IT IS BUILT BEFORE `rowFor` SO THAT `mine` NEED NOT EXIST. Naming the whole set inside the
+   * draft is what made all three variants a single keystroke each; with only `drawn` in scope, the
+   * fourth is not a slip you can make without writing `allQueriesFor` and reading why it is there.
+   */
+  const drawnFor = (agentId: string): Query[] =>
+    [...(laneOf.get(agentRowKey(agentId)) ?? new Map<string, Query>()).values()];
+
+  /**
+   * Every query this agent holds, drawn or not.
+   *
+   * ⚠️ IT EXISTS SO THAT NEEDING IT IS A DECISION WITH A NAME ON IT. A derivation that genuinely
+   * wants the whole relationship — how long you have known an agency, how many times you have
+   * written to them — says so at the call site, and a reader can see that it did. Nothing in the
+   * row derivation reads it today; that is the point, not an oversight.
+   */
+  const allQueriesFor = (agentId: string): Query[] =>
+    data.queries.filter((q) => q.agentId === agentId) as Query[];
+
   const drafts = new Map<string, Draft>();
   const you: Draft = {
     key: YOU_ROW, agentId: null, name: YOU_ROW_NAME,
@@ -469,7 +536,7 @@ export function timelineWeek(
        rather than filed inside one. Handing it empty facts would file it under a closure that has
        outstayed its week and delete it, which is why the group is assigned per row below and the
        pinned row is exempted there in one place. */
-    facts: [], lastClosed: null, copy: null, copies: [], status: null, sentence: "",
+    facts: [], lastClosed: null, copy: null, captionQueryId: null, copies: [], status: null, sentence: "",
     soonest: Infinity, waitingFrom: Infinity, stage: -1, lastActive: -Infinity, order: -1,
   };
   drafts.set(YOU_ROW, you);
@@ -482,7 +549,7 @@ export function timelineWeek(
     const d: Draft = {
       key, agentId: null, name: title, agency: TASK_ROW_AGENCY,
       dot: "self", closed: false, items: [], manuscripts: [], held: 0, hasLive: true,
-      facts: [], lastClosed: null, copy: null, copies: [], status: null, sentence: "",
+      facts: [], lastClosed: null, copy: null, captionQueryId: null, copies: [], status: null, sentence: "",
       soonest: Infinity, waitingFrom: Infinity, stage: -1, lastActive: -Infinity, order: drafts.size,
     };
     drafts.set(key, d);
@@ -495,9 +562,13 @@ export function timelineWeek(
     const cur = drafts.get(key);
     if (cur) return cur;
     const agent = byAgent.get(agentId);
-    const mine = data.queries.filter((q) => q.agentId === agentId);
-    const hasLive = mine.some((q) => !isTerminalStatus(q.status));
-    const turn = agent ? agentTurn(agent, mine as Query[]) : null;
+    /* ⚠️ THE DRAWN SET, AND `drawn` IS DELIBERATELY NOT DEFINED HERE. See `drawnFor`: every
+       shipped variant of this bug was one identifier away, and the identifier is the one that is
+       now absent. Anything that genuinely wants the whole relationship calls `allQueriesFor` and
+       says so. */
+    const drawn = drawnFor(agentId);
+    const hasLive = drawn.some((q) => !isTerminalStatus(q.status));
+    const turn = agent ? agentTurn(agent, drawn as Query[]) : null;
     /**
      * ⚠️ ONE QUERY SPEAKS FOR THE ROW HEAD, and it is the most advanced LIVE one — falling back to
      * the most advanced terminal one when nothing is live, which is what lets a closed row say HOW
@@ -529,8 +600,8 @@ export function timelineWeek(
         : null,
     });
     const lead = (() => {
-      const live = mine.filter((q) => !isTerminalStatus(q.status));
-      const pool = live.length ? live : mine;
+      const live = drawn.filter((q) => !isTerminalStatus(q.status));
+      const pool = live.length ? live : drawn;
       let best: Query | null = null;
       let at = -Infinity;
       for (const q of pool) {
@@ -549,7 +620,7 @@ export function timelineWeek(
      * generic "Open the query": a dash wearing a costume. The copies travel with the row so the
      * deed can be asked of the query the group is actually about.
      */
-    const copies: { q: Query; copy: RowCopy }[] = mine.map((q) => ({ q: q as Query, copy: copyOf(q as Query, agent) }));
+    const copies: { q: Query; copy: RowCopy }[] = drawn.map((q) => ({ q: q as Query, copy: copyOf(q as Query, agent) }));
     const d: Draft = {
       key,
       agentId,
@@ -566,7 +637,7 @@ export function timelineWeek(
       lastActive: -Infinity,
       /* journey stage — the most advanced LIVE query's place in the canonical order. Derived from
          `STATUS_ORDER`, never a second list of statuses written out here. */
-      stage: mine.reduce((best, q) => {
+      stage: drawn.reduce((best, q) => {
         if (isTerminalStatus(q.status)) return best;
         return Math.max(best, STATUS_ORDER.indexOf(q.status as QueryStatus));
       }, -1),
@@ -597,11 +668,13 @@ export function timelineWeek(
        * drawn beside it.
        */
       copy: lead ? copyOf(lead, agent) : null,
+      /* the caption's subject: the same query `copy` and `sentence` are built from */
+      captionQueryId: lead ? lead.id : null,
       copies,
       /**
        * ⚠️ `pressingAt` IS **NOT** COMPUTED HERE, and the absence is the fix (v36 part two).
        *
-       * It used to take `Math.min` over ALL of `mine` — every live query this agent holds. But a
+       * It used to take `Math.min` over ALL of `drawn` — every live query this agent holds. But a
        * row DRAWS one query per manuscript (see `per` in the bar pass), so an agent with three
        * queries on one book showed one lane and sorted by whichever of the three was most
        * pressing, including the two the reader cannot see. Measured on the deployed board: Rachel
@@ -614,7 +687,7 @@ export function timelineWeek(
       /* the head's sentence and the note read the SAME facts — see `copyOf` above */
       sentence: lead ? rowSentence(copyOf(lead, agent), data.today) : "",
       order: drafts.size,
-      facts: mine
+      facts: drawn
         .filter((q) => !isTerminalStatus(q.status))
         .map((q) => ({
           status: q.status as QueryStatus,
@@ -627,7 +700,7 @@ export function timelineWeek(
       /* ⚠️ THE CLOSURE DATE COMES FROM `recomputeQuery`'s OUTPUT, never from a scan of the feed.
          `rejectedDate` is the specific answer where there is one and `lastStatusChange` the general
          one; both have a single writer, so this cannot disagree with what the record says. */
-      lastClosed: mine
+      lastClosed: drawn
         .filter((q) => isTerminalStatus(q.status))
         .map((q) => ymdOf(q.rejectedDate) ?? ymdOf(q.lastStatusChange))
         .filter((x): x is string => !!x)
@@ -758,27 +831,6 @@ export function timelineWeek(
   const msTitle = new Map(data.manuscripts.map((m) => [m.id, m.title]));
   const barWin: BarWindow = { days: win, today: data.today, past: last < data.today };
 
-  /* which (agent, manuscript) pairs have a journey worth drawing, and which query speaks for each */
-  const laneOf = new Map<string, Map<string, Query>>();
-  for (const q of data.queries) {
-    if (!q.agentId) continue;
-    const key = agentRowKey(q.agentId);
-    const per = laneOf.get(key) ?? new Map<string, Query>();
-    const msId = q.manuscriptId || "";
-    const held = per.get(msId);
-    /* ⚠️ ONE QUERY SPEAKS FOR A LANE, and a live one always outranks a finished one. A writer who
-       queried the same agency about the same book twice has one relationship about that book; the
-       bar draws the journey that is still running, or the most recent one if none is. */
-    if (!held) per.set(msId, q);
-    else {
-      const heldLive = !isTerminalStatus(held.status);
-      const qLive = !isTerminalStatus(q.status);
-      const newer = String(q.dateSent ?? "") > String(held.dateSent ?? "");
-      if ((qLive && !heldLive) || (qLive === heldLive && newer)) per.set(msId, q);
-    }
-    laneOf.set(key, per);
-  }
-
   const segments: Segment[] = [];
   const nodes: BarNode[] = [];
 
@@ -828,7 +880,12 @@ export function timelineWeek(
           const sent = ymdOf(q.dateSent);
           return PRESSING_BASE + (sent ? new Date(`${sent}T12:00:00`).getTime() : 0);
         })();
-        if (row.pressingAt === undefined || key < row.pressingAt) row.pressingAt = key;
+        if (row.pressingAt === undefined || key < row.pressingAt) {
+          row.pressingAt = key;
+          /* ⚠️ THE KEY AND THE QUERY IT CAME FROM ARE WRITTEN TOGETHER, so they cannot come apart.
+             Recording the winner separately is how a sort key and its evidence drift. */
+          row.sortQueryId = q.id;
+        }
       }
       /* the card's own words for a your-move stretch — `pillLabel`'s output, never re-summarised */
       const card = win.flatMap((ymd) => data.itemsFor(ymd))
@@ -1010,7 +1067,12 @@ export function timelineWeek(
    * its own copy could not name — and the fallback was a generic that says nothing a dash does not.
    * The first query whose own group matches the row's is the one the heading is about.
    */
-  const noteOf = new Map(
+  /* ⚠️ THE NOTE AND THE QUERY IT IS ABOUT ARE BUILT TOGETHER. The deed's subject was the thing
+     nothing recorded, so nothing could check it — the repair that made the deed ask the group's
+     EARNER left the answer to "which query is this sentence about" implicit, and an implicit
+     answer is one no lock can read. `copies` is now the DRAWN set, so the earner is drawn by
+     construction; this records which one it was so that claim is measurable rather than argued. */
+  const noteOf = new Map<string, { note: RowNote | null; deedQueryId: string | null }>(
     grouped.map((x) => {
       const earner = x.r.copies.find((c) => queryGroup({
         status: c.q.status as QueryStatus,
@@ -1018,7 +1080,12 @@ export function timelineWeek(
         backYmd: ymdOf(data.taskFlags.find((f) => f.queryId === c.q.id && !!f.snoozedUntil)?.snoozedUntil),
       }, data.today) === x.group);
       const copy = earner ? earner.copy : x.r.copy;
-      return [x.r.key, copy ? rowNote(copy, x.group, data.today) : null];
+      const note = copy ? rowNote(copy, x.group, data.today) : null;
+      return [x.r.key, {
+        note,
+        /* the subject is only claimed where a deed was actually written */
+        deedQueryId: note ? (earner ? earner.q.id : x.r.captionQueryId) : null,
+      }] as [string, { note: RowNote | null; deedQueryId: string | null }];
     }),
   );
 
@@ -1048,8 +1115,13 @@ export function timelineWeek(
     rows.push({
       key: row.key, agentId: row.agentId, name: row.name, agency: row.agency,
       group: groupOf.get(row.key) ?? null, status: row.status, sentence: row.sentence,
-      note: noteOf.get(row.key) ?? null,
+      note: noteOf.get(row.key)?.note ?? null,
       pressingAt: row.pressingAt ?? null,
+      subjects: {
+        deed: noteOf.get(row.key)?.deedQueryId ?? null,
+        caption: row.sentence ? row.captionQueryId : null,
+        sort: row.pressingAt == null ? null : (row.sortQueryId ?? null),
+      },
       dot: row.dot, items: row.items,
       lanes: Math.max(1, barLanes + (row.items.length ? packed : 0)),
       manuscripts: row.manuscripts, closed: row.closed,

@@ -181,6 +181,10 @@ const Piece: React.FC<{
       className={`tl-at2 tl-p ${familyOf(sg.state)}${sg.hollow ? " hollow" : ""}${near ? " near" : ""}${selected ? " sel" : ""}`}
       style={{ left: barLeft(sg), width: barWidth(sg), ...laneVar(sg.lane) }}
       data-state={sg.state}
+      /* ⚠️ WHICH QUERY THIS BAR IS, so a lock can ask whether the row's WORDS are about a query the
+         row actually draws. Three variants of that bug shipped, each one a true sentence about a
+         query the reader could not see, and none of them was catchable from appearance alone. */
+      data-qid={sg.queryId}
       data-live={sg.live ? "1" : undefined}
       data-fill={fill == null ? "none" : String(Math.round(fill * 100))}
       data-tip={sg.tip || undefined}
@@ -1164,6 +1168,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       <div
         key={r.key}
         className={`tl-rrow${r.closed ? " closed" : ""}`}
+        /* the row's subject, per derivation — see `TimelineRow.subjects` */
+        data-subj-deed={r.subjects.deed ?? undefined}
+        data-subj-caption={r.subjects.caption ?? undefined}
+        data-subj-sort={r.subjects.sort ?? undefined}
         /* ⚠️ THE SORT KEY, ON THE ROW. The lock asserts the PAINTED order against it — a seeded
            ordering case can pass while the live board is visibly out of order, and only comparing
            the two on one page can tell those apart. */

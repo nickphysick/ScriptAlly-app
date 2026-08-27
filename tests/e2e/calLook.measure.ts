@@ -1511,3 +1511,118 @@ test("the painted fill edge lands on today, at every range and every width", asy
   console.log(`fill edge — ${covered} partial fills covered, worst deviation ${worst.toFixed(1)}px`);
   for (const r of rows) console.log(`  ${r}`);
 });
+
+/* ══ THE ROW'S SUBJECT (v36 part three, Phase 2) ════════════════════════════════════════════ */
+
+/**
+ * ⚠️ ONE PROPERTY THAT WOULD HAVE CAUGHT ALL THREE SHIPPED VARIANTS.
+ *
+ * A row draws one query per manuscript. Three times a row-level derivation reached for the
+ * AGENT's whole set instead and produced a true sentence about a query the reader cannot see:
+ * the deed asked of the row's lead while the group came from whichever query earned it; the sort
+ * key minimised over every query the agent holds; and the deed's own repair searched the
+ * everything-set again. Each was fixed at its own seam, and each left the next one writable.
+ *
+ * None of them is visible from appearance. A deed reading SEND THE PARTIAL beside a bar reading
+ * "reply expected 29 Sept" is only WRONG if you know they are about different queries — the words
+ * themselves are each true. So the row states which query each of its parts came from, and this
+ * asks the only question that distinguishes the three: is it one of the ones drawn here?
+ */
+test("every part of a row is about a query that row actually draws", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+
+  let rowsChecked = 0;
+  let claimsChecked = 0;
+  const tally: Record<string, number> = {};
+  const deedsSeen: string[] = [];
+
+  for (const width of WIDTHS) {
+    await openRoute(page, "/todo/calendar", { width, height: HEIGHT });
+    await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+
+    for (const r of [0, 1, 2]) {
+      await setRangeTo(page, r);
+      const read = await page.evaluate(TAG + `(() => {
+        const rows = [];
+        for (const row of document.querySelectorAll(".tl-rrow")) {
+          const drawn = [...row.querySelectorAll(".tl-p")]
+            .map((b) => b.dataset.qid).filter(Boolean);
+          /* the family of the LIVE piece for each query — a bar is cut into several pieces across
+             time and only the running one carries the state the deed is answering */
+          const live = {};
+          for (const b of row.querySelectorAll('.tl-p[data-live="1"]')) {
+            const fam = ["out","req","decide","remind","quiet","closedp"].find((c) => b.classList.contains(c));
+            if (b.dataset.qid && fam) live[b.dataset.qid] = fam;
+          }
+          rows.push({
+            nm: (row.querySelector(".tl-nm2") || {}).textContent,
+            drawn,
+            deed: row.dataset.subjDeed || null,
+            caption: row.dataset.subjCaption || null,
+            sort: row.dataset.subjSort || null,
+            deedText: (row.querySelector(".tl-c-ac") || {}).textContent,
+            live,
+          });
+        }
+        return { rows, board: !!vis(".tl-board") };
+      })()`) as any;
+
+      expect(read.board, `${width}px range ${r}: no visible board`).toBe(true);
+
+      const offences: string[] = [];
+      for (const row of read.rows) {
+        /* a row with no bar draws nothing, so it has no subject to be wrong about — the pinned
+           task rows are the whole of that population and they carry no query at all */
+        if (!row.drawn.length) continue;
+        rowsChecked++;
+        for (const part of ["deed", "caption", "sort"] as const) {
+          const id = row[part];
+          if (!id) continue;
+          claimsChecked++;
+          tally[part] = (tally[part] || 0) + 1;
+          if (!row.drawn.includes(id)) {
+            offences.push(
+              `${row.nm}: the ${part} is about ${id}, which this row does not draw ` +
+              `(it draws ${row.drawn.join(", ")})${part === "deed" ? ` — it reads "${String(row.deedText).trim()}"` : ""}`,
+            );
+          }
+        }
+      }
+      expect(offences, `${width}px range ${r}: a row's words are about a query it does not draw`).toEqual([]);
+
+      /**
+       * ⚠️ AND THE DEED AGREES WITH THE BAR BESIDE IT — the reader-visible half.
+       *
+       * Identity nearly implies this: if the deed is about a query the row draws, both are derived
+       * from that query's status and cannot disagree. Nearly, because the DEED table is a separate
+       * mapping from `familyOf`, so a wrong entry there would put "SEND THE PARTIAL" against a bar
+       * the board itself is drawing as the agent's move. That is the shape a reader would report,
+       * and identity alone would not catch it.
+       */
+      const clash: string[] = [];
+      for (const row of read.rows) {
+        const want = /^\s*SEND\b/i.test(String(row.deedText)) ? "req"
+          : /^\s*ANSWER\b/i.test(String(row.deedText)) ? "decide" : null;
+        if (!want || !row.deed) continue;
+        const fam = row.live[row.deed];
+        if (fam && fam !== want) {
+          clash.push(`${row.nm} reads "${String(row.deedText).trim()}" beside a ${fam} bar`);
+          deedsSeen.push(`${row.nm}:${fam}`);
+        } else if (fam) deedsSeen.push(`${row.nm}:${fam}`);
+      }
+      expect(clash, `${width}px range ${r}: a deed contradicts the bar beside it`).toEqual([]);
+    }
+  }
+
+  /* ⚠️ THE POPULATION, AND PER PART. A sweep in which no row carried a deed would satisfy the
+     claim by having nothing to check — and so would one that happened to check only captions. */
+  console.log(`row subject — ${rowsChecked} drawing rows, ${claimsChecked} claims: ${JSON.stringify(tally)}`);
+  expect(rowsChecked, "no row draws a bar — nothing was checked").toBeGreaterThan(20);
+  console.log(`  deeds checked against their own bar: ${deedsSeen.length}`);
+  expect(deedsSeen.length, "no asking deed had a live bar to be checked against").toBeGreaterThan(3);
+  for (const part of ["deed", "caption", "sort"]) {
+    expect(tally[part] || 0, `no row carried a ${part} subject — that part was never checked`).toBeGreaterThan(0);
+  }
+  expect(errors, `console errors: ${errors.join(" | ")}`).toEqual([]);
+});
