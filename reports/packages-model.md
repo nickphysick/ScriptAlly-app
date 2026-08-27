@@ -208,3 +208,52 @@ which is what proves it reached the manuscript rather than the form.
 **The fixture was restored in the same run.** Book versions are append-only by design — rename is
 the only permitted edit — so the version the gate had to create was removed by writing
 `seed-ms-1`'s list back without it (4 → 3). The probe's own package documents delete themselves.
+
+---
+
+## Phase 3 — Part B rests on two premises that do not hold. Stopping here.
+
+### 1 · D7's dotted divider is not in any ref
+
+`packages-page-settled.html` contains **no strip and no divider**. The word *portion* appears twice
+in it, both in the lede — *"What portion actually went is recorded on the query, because the agency
+decides that"* — and nothing draws it. Sweeping every committed ref for `dotted`: the only instance
+in either strip ref (`package-strip-parcel.html`, `packaged-strip-cuts.html`) is
+`border-bottom: 1px dotted` on `.e-via`, the underline beneath the *via Email* label. There is no
+drawn separation between package contents and a portion anywhere.
+
+This is the same shape as last round's `SUBMISSION PACKAGE`, which was cited as *per the ref* and
+turned out to come from a band retired three commits earlier. D7's own words are clear enough to
+build from — *package contents left of it, this query's own fact right of it* — but it should be
+built as a **decision**, not as a restoration, or the next reader will go looking for the drawing.
+
+### 2 · The portion is already modelled, and a second field is the fault this surface has paid for
+
+This is F-BJ from Phase 1, restated because it is now the blocking one. `Query.materialsWanted`
+already pre-fills from the agent's stated requirement, already stores nothing until edited, already
+carries free text through `QueryMaterial{ type: "other" }`, already has one writer, an allowlist
+entry and an undo. `classifyQueryMaterial` already partitions it into letter / synopsis / sample /
+other, so *the portion* is the sample-and-other members of that list.
+
+A second stored field means a rules allowlist change and two answers to what a query holds. The
+retired `attachPackage` path is the precedent, and its own note records the cost: two models of
+what a query holds, one of which *"contributed to no scorecard at all"*.
+
+**Both readings are defensible and the difference is a design decision rather than a bug**, which
+is why this is a question rather than an assumption:
+
+* **(a) Derive** — the strip's right-hand side reads `materialsWanted`'s sample/other members; the
+  editor writes back through the existing single writer. No new field, no rules change, D6 satisfied
+  by construction. Costs: the letter and synopsis members of that list are then stated by the
+  package too, so something must decide which surface owns them.
+* **(b) A dedicated field** — as D5 literally specifies. Cleaner semantics (one portion, one
+  string), costs a rules allowlist entry and leaves `materialsWanted` recording an overlapping fact.
+
+Parts C and D do not depend on this and could proceed first.
+
+## Flags
+
+* **F-BJ** — as above. The blocking question.
+* **F-BK** — D7 cites a divider no ref draws. Build it as a decision, not a restoration.
+* **F-BH** — the vestigial material `bookVersionId` (D11), open until Part C.
+* **F-BI** — CSV import and the portion field, open until Part B lands.
