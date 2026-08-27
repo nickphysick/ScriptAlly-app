@@ -69,11 +69,52 @@ test("the manuscripts page scrolls as a page, and its header rests before it sti
     .toBeLessThan(6);
 
   /* ── AFTER SCROLLING: it sticks ── */
-  await page.evaluate((sel) => { (document.querySelector(sel) as HTMLElement).scrollTop = 260; }, ROW);
+  /**
+   * ⚠️ SCROLL TO THE ROW'S OWN MAXIMUM, NOT TO A LITERAL. Amendment 2 took ~190px out of the hero
+   * (the banner) and removed the shelf bar, so the overflow fell from 307px to 89: a hard 260 in
+   * this test clamped to 89 and read as "the row did not move". A number that was reachable when it
+   * was written is a number that silently stops being reachable — the fault this repo records as an
+   * offset encoding another element's height.
+   */
+  const max = rest!.overflow;
+  await page.evaluate(([sel, y]) => {
+    (document.querySelector(sel as string) as HTMLElement).scrollTop = y as number;
+  }, [ROW, max] as const);
   await page.waitForTimeout(350);
   const moved = await read();
-  expect(moved!.scrollTop, "the row did not move").toBeGreaterThan(100);
+  expect(moved!.scrollTop, "the row did not move").toBeGreaterThan(20);
   expect(moved!.stuck, "the header never sticks — sticky is present and doing nothing").toBe(true);
+
+  /**
+   * ⚠️ AND IT MUST NOT OSCILLATE. Settling RECLAIMS height; on a page that overflows by less than
+   * the settle reclaims, the reclaim destroys the scroll the settled state is derived from, the
+   * header releases, the height comes back, and it cycles. This repo has measured exactly that on
+   * Noteboard — 37 flips on one downward pass at 47px of overflow against a 166px chrome — and this
+   * page's overflow has just fallen from 307px to a figure in the same neighbourhood.
+   *
+   * Walked in small steps rather than jumped, because the oscillation only appears while the scroll
+   * position sits near the threshold.
+   */
+  const flips = await page.evaluate(async (sel) => {
+    const row = document.querySelector(sel) as HTMLElement;
+    const chrome = document.querySelector(".msv-wpg .wpg-chrome") as HTMLElement;
+    const stuckNow = () => chrome.className.includes("wpg-chrome--stuck");
+    row.scrollTop = 0;
+    await new Promise((r) => setTimeout(r, 400));
+    let last = stuckNow();
+    let n = 0;
+    const seen: number[] = [];
+    for (let y = 0; y <= row.scrollHeight - row.clientHeight; y += 6) {
+      row.scrollTop = y;
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
+      const now = stuckNow();
+      if (now !== last) { n++; seen.push(y); last = now; }
+    }
+    return { flips: n, at: seen, maxScroll: row.scrollHeight - row.clientHeight };
+  }, ROW);
+  /* One flip on a downward pass is the whole of correct behaviour: unstuck, then stuck, then held. */
+  expect(flips.flips, `the header oscillated (${flips.flips} flips at ${flips.at.join(", ")})`)
+    .toBeLessThanOrEqual(1);
 
   /* ── AND BACK: it releases, so the state follows the scroll rather than latching ── */
   await page.evaluate((sel) => { (document.querySelector(sel) as HTMLElement).scrollTop = 0; }, ROW);
@@ -81,5 +122,5 @@ test("the manuscripts page scrolls as a page, and its header rests before it sti
   const back = await read();
   expect(back!.stuck, "the header latched — it stuck once and never released").toBe(false);
 
-  console.log(JSON.stringify({ rest, moved, back }, null, 1));
+  console.log(JSON.stringify({ rest, moved, back, flips }, null, 1));
 });
