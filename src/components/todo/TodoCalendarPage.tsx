@@ -790,6 +790,27 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
           />
         ))}
         <div className="tl-lane">
+          {/**
+            * ⚠️ THE NOTE SITS AFTER THE BAR, AND ONLY WHERE THERE IS SOMETHING TO DO. It is set in
+            * a hand, and a hand implies a PERSON wrote it — the person it implies is the writer.
+            * So a row where nothing is being asked of them carries none: `note` is `null` for
+            * every waiting, quiet and closed row, which is the common case and is the point.
+            *
+            * ⚠️ IT IS PLACED AT THE BAR'S END rather than at a fixed offset, so it reads as a
+            * remark added to that stretch rather than as a column of its own. `--lane` puts it on
+            * the same line as the bar it belongs to; without it a two-book row would write both
+            * notes on the first lane.
+            */}
+          {r.note && bar.segs.length > 0 && (() => {
+            const last = bar.segs.reduce((a, b) => (b.to > a.to ? b : a));
+            return (
+              <span className="tl-tail" style={{ left: pct(last.to), ...laneVar(last.lane) }}>
+                {/* the deed is underlined by hand; the timing follows plain, because a date is
+                    not an instruction */}
+                <u>{r.note.deed}</u>{r.note.timing && <> · {r.note.timing}</>}
+              </span>
+            );
+          })()}
           {/* the bar first, then its events on top of it, then the writer's own chips above both */}
           {bar.segs.map((sg) => (
             <Seg key={sg.key} sg={sg} selected={sel === sg.key}

@@ -483,6 +483,40 @@
 }
 
 /* ── their move: white, still, and breathing (v6, treatment C) ─────────────────────────────── */
+/* ══ THE NOTE AFTER THE BAR (settled pack, Phase 4; ref timeline-settled v44) ══════════════
+ *
+ * ⚠️ A HAND, AND THE HAND BELONGS TO ACTIONS ONLY. Caveat implies a person wrote this, and the
+ * person it implies is the writer — so nothing waiting, quiet or closed is ever scrawled on. That
+ * is enforced in the derivation (`rowNote` returns null outside two groups) rather than here,
+ * because a rule keyed on state would be a second answer to the same question.
+ *
+ * ⚠️ `pointer-events: none` — IT IS NOT PRESSABLE, AND THAT IS A STANDING DEFAULT RATHER THAN AN
+ * OVERSIGHT. Making it pressable would duplicate the Action column and is Nick's call; until then
+ * a note that looked pressable and was not would be worse than one that plainly is not.
+ */
+.tl-tail {
+  position: absolute;
+  /* ⚠️ THE LANE'S OWN CENTRE, NOT `top: 50%`. A percentage would centre the note on the whole ROW,
+     so a two-book row would write both notes on one line through the middle. Same expression the
+     bars and markers use — `.tl-at`'s — because it is the same fact. */
+  top: calc(var(--lane-h) * (var(--lane, 0) + 0.5));
+  transform: translateY(-50%) rotate(-1.1deg);
+  transform-origin: left center;
+  font-family: "Caveat", cursive;
+  font-size: 19px; font-weight: 600; line-height: 1;
+  color: #7c3a2a;
+  padding-left: 13px; white-space: nowrap;
+  pointer-events: none; z-index: 4;
+}
+/* ⚠️ THE UNDERLINE IS DRAWN, NOT `text-decoration`. A rule under a hand is a printed rule, which
+   is the one thing in this note that would not have been written by the same person. */
+.tl-tail u { text-decoration: none; position: relative; }
+.tl-tail u::after {
+  content: ""; position: absolute; left: -1px; right: -3px; bottom: 1px; height: 5px;
+  border-bottom: 1.6px solid #c9a89e; border-radius: 0 0 60% 40%;
+  transform: rotate(0.6deg);
+}
+
 /* ══ THE TEN STATES ═════════════════════════════════════════════════════════════════════════
  *
  * ⚠️ ONE RULE PER STATE, READING ONE TRIPLE. A bar's colour is no longer assembled from `side`

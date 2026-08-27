@@ -1,5 +1,6 @@
 import { QueryStatus } from "../types";
 import { shortCalDate } from "./todoCalendar";
+import type { RowGroup } from "./timelineGroups";
 
 /**
  * What a timeline row says about itself, in the writer's own words.
@@ -171,4 +172,77 @@ export function rowSentence(c: RowCopy, today: string): string {
 
   if (c.expectedYmd) return `Out with ${who} — reply expected by ${whenSaid(c.expectedYmd, today)}`;
   return `Out with ${who} — no reply time given`;
+}
+
+
+/* ══ THE NOTE AFTER THE BAR ═══════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ THE NOTE IS RESERVED FOR ACTIONS, AND A ROW WITH NOTHING TO DO SHOWS NOTHING. It is set in a
+ * hand — Caveat, burgundy, tilted — and a hand implies that a PERSON wrote it. The person it
+ * implies is the writer. So scrawling on a row where nothing is being asked of them puts words in
+ * their mouth about work they have not got, which is why nothing waiting, quiet or closed is ever
+ * written on: the hand belongs to actions only.
+ *
+ * ⚠️ AND THE NOTE NEVER SAYS WHAT THE BAR SAYS. The bar states what a stretch of time IS; the note
+ * states what to do about it. The ref itself breaks this once — its `cold` bar reads "Quiet for 78
+ * days · nudge or close it" above a note reading "Nudge or close it" — and the rule wins over the
+ * artefact: the instruction lives in the note and the bar keeps the fact.
+ */
+export interface RowNote {
+  /** the deed — underlined by hand, because it is the thing to do */
+  deed: string;
+  /** when it is for — plain, because a date is not an instruction. "" where none applies. */
+  timing: string;
+}
+
+/**
+ * ⚠️ ONLY TWO GROUPS ARE EVER WRITTEN ON, and it is the GROUP that decides rather than the status.
+ * A row is in "Needs you now" or "Offers" precisely when something is being asked of the writer —
+ * that judgement is already made, once, in `timelineGroups`, and re-deriving it here from statuses
+ * would be a second answer to a settled question that could disagree with the group heading three
+ * inches above it.
+ */
+const WRITTEN_ON: readonly RowGroup[] = ["offers", "now"];
+
+/** What to do, in the writer's own imperative. */
+const DEED: Partial<Record<QueryStatus, string>> = {
+  [QueryStatus.PARTIAL_REQUESTED]: "Send the partial",
+  [QueryStatus.FULL_REQUESTED]: "Send the full",
+  [QueryStatus.REVISE_RESUBMIT]: "Send the revision",
+  [QueryStatus.OFFER]: "Answer them",
+};
+
+/**
+ * When a deed is for, stated as a fact.
+ *
+ * ⚠️ NEVER "OVERDUE" — not in the copy, not in a class name, not in a token. It is a verdict twice
+ * over: it says the writer failed, and it implies a deadline that mostly does not exist. "due 15
+ * days ago" states the identical fact and accuses nobody.
+ */
+function timingFor(ymd: string | null, today: string): string {
+  if (!ymd) return "";
+  const d = gap(today, ymd);
+  if (d === 0) return "due today";
+  if (d > 0) return `by ${whenSaid(ymd, today)}`;
+  return `due ${plural(-d, "day")} ago`;
+}
+
+export function rowNote(c: RowCopy, group: RowGroup | null, today: string): RowNote | null {
+  if (!group || !WRITTEN_ON.includes(group)) return null;
+
+  const deed = DEED[c.status];
+  if (deed) return { deed, timing: timingFor(c.expectedYmd, today) };
+
+  /* ⚠️ A NUDGE THAT HAS FALLEN DUE IS AN ACTION, and it is the one deed that comes from a DATE
+     rather than from a status — the query is still simply out with the agent. */
+  if (c.nudgeYmd && c.nudgeYmd <= today) {
+    return { deed: "Nudge them", timing: timingFor(c.nudgeYmd, today) };
+  }
+
+  /* ⚠️ GONE QUIET OFFERS A CHOICE, not an instruction, because there is no right answer: a
+     relationship that has stopped answering can be chased or let go, and the app does not know
+     which. It carries no timing — there is no date to be for. */
+  if (c.expectedYmd && c.expectedYmd < today) return { deed: "Nudge or close it", timing: "" };
+
+  return null;
 }

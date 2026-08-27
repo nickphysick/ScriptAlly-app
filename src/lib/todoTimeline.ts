@@ -34,7 +34,7 @@ import {
   pillLabel, draggableTask, toYmd,
 } from "./todoCalendar";
 import { rowGroupOf, type RowGroup, type QueryFacts } from "./timelineGroups";
-import { rowSentence, agentSurname } from "./timelineCopy";
+import { rowSentence, rowNote, agentSurname, type RowCopy, type RowNote } from "./timelineCopy";
 import {
   laneBars, statusIndex, sideOf,
   type Segment, type BarNode, type Waypoint, type BarWindow,
@@ -205,6 +205,14 @@ export interface TimelineRow {
    * say anything would be a row with no query, which is the pinned one by definition.
    */
   sentence: string;
+  /**
+   * What to do about this relationship, in a hand — or `null` where nothing is being asked.
+   *
+   * ⚠️ `null` IS THE COMMON CASE AND IS THE POINT. The note is set in Caveat, which implies a
+   * person wrote it, and the person it implies is the writer; scrawling on a row where nothing is
+   * being asked of them puts words in their mouth about work they have not got.
+   */
+  note: RowNote | null;
 }
 
 /* ⚠️ `TimelineBand`, `BandSource` AND THE `ExpectedItem` IT CARRIED ARE RETIRED (bars pack,
@@ -350,6 +358,8 @@ interface Draft {
    */
   facts: QueryFacts[];
   lastClosed: string | null;
+  /** the lead query's facts — the sentence and the note both read these, so they cannot disagree */
+  copy: RowCopy | null;
   /** what the row's own StatusDot draws — null only on the pinned row, which holds no query */
   status: QueryStatus | null;
   /** the row head's sentence, in the writer's words — "" only on the pinned row */
@@ -399,7 +409,7 @@ export function timelineWeek(
        rather than filed inside one. Handing it empty facts would file it under a closure that has
        outstayed its week and delete it, which is why the group is assigned per row below and the
        pinned row is exempted there in one place. */
-    facts: [], lastClosed: null, status: null, sentence: "",
+    facts: [], lastClosed: null, copy: null, status: null, sentence: "",
     soonest: Infinity, waitingFrom: Infinity, stage: -1, order: -1,
   };
   drafts.set(YOU_ROW, you);
@@ -419,6 +429,32 @@ export function timelineWeek(
      * it ended rather than only that it did. Chosen once here so the dot, the status and the
      * sentence cannot describe three different journeys under one name.
      */
+    /**
+     * ⚠️ ONE SET OF FACTS FOR THE SENTENCE AND THE NOTE. The head says what is happening and the
+     * note says what to do about it, and if the two derived their dates separately they could
+     * disagree about the same query on the same row — a head reading "reply expected by 15 Sept"
+     * above a note reading "due 3 days ago".
+     */
+    const copyOf = (q: Query, a: Agent | undefined): RowCopy => ({
+      surname: agentSurname(agentPrimary(a)),
+      status: q.status as QueryStatus,
+      expectedYmd: isTerminalStatus(q.status) ? null : ymdOf(
+        (() => {
+          const sends = [q.dateSent, q.partialSentDate, q.fullSentDate]
+            .map((iso) => (iso ? new Date(iso as string).getTime() : NaN))
+            .filter((t) => !Number.isNaN(t));
+          const r = resolveExpectedDate(
+            q, sends.length ? Math.min(...sends) : null, a?.responseTimeWeeks ?? null, null);
+          return r.ms == null ? null : new Date(r.ms).toISOString();
+        })(),
+      ),
+      nudgeYmd: isTerminalStatus(q.status) ? null : ymdOf(q.nudgeDate),
+      nudgedOnYmd: ymdOf(q.lastNudgeSentDate),
+      lastWordYmd: ymdOf(q.lastStatusChange) ?? ymdOf(q.dateSent),
+      closedYmd: isTerminalStatus(q.status)
+        ? (ymdOf(q.rejectedDate) ?? ymdOf(q.lastStatusChange))
+        : null,
+    });
     const lead = (() => {
       const live = mine.filter((q) => !isTerminalStatus(q.status));
       const pool = live.length ? live : mine;
@@ -472,28 +508,9 @@ export function timelineWeek(
        * agency window as a floor — and a second copy here would eventually disagree with the bar
        * drawn beside it.
        */
-      sentence: lead
-        ? rowSentence({
-            surname: agentSurname(agentPrimary(agent)),
-            status: lead.status as QueryStatus,
-            expectedYmd: isTerminalStatus(lead.status) ? null : ymdOf(
-              (() => {
-                const sends = [lead.dateSent, lead.partialSentDate, lead.fullSentDate]
-                  .map((iso) => (iso ? new Date(iso as string).getTime() : NaN))
-                  .filter((t) => !Number.isNaN(t));
-                const r = resolveExpectedDate(
-                  lead, sends.length ? Math.min(...sends) : null, agent?.responseTimeWeeks ?? null, null);
-                return r.ms == null ? null : new Date(r.ms).toISOString();
-              })(),
-            ),
-            nudgeYmd: isTerminalStatus(lead.status) ? null : ymdOf(lead.nudgeDate),
-            nudgedOnYmd: ymdOf(lead.lastNudgeSentDate),
-            lastWordYmd: ymdOf(lead.lastStatusChange) ?? ymdOf(lead.dateSent),
-            closedYmd: isTerminalStatus(lead.status)
-              ? (ymdOf(lead.rejectedDate) ?? ymdOf(lead.lastStatusChange))
-              : null,
-          }, data.today)
-        : "",
+      copy: lead ? copyOf(lead, agent) : null,
+      /* the head's sentence and the note read the SAME facts — see `copyOf` above */
+      sentence: lead ? rowSentence(copyOf(lead, agent), data.today) : "",
       order: drafts.size,
       facts: mine
         .filter((q) => !isTerminalStatus(q.status))
@@ -797,6 +814,13 @@ export function timelineWeek(
 
   const ordered = kept.includes(you) ? [you, ...grouped.map((x) => x.r)] : grouped.map((x) => x.r);
   const groupOf = new Map(grouped.map((x) => [x.r.key, x.group]));
+  /* ⚠️ THE NOTE IS DECIDED WHERE THE GROUP IS, not where the facts are. Whether a row is written
+     on is the question "is something being asked of the writer", and `timelineGroups` answers that
+     once; deriving it again from statuses would be a second answer to a settled question, able to
+     disagree with the group heading three inches above it. */
+  const noteOf = new Map(
+    grouped.map((x) => [x.r.key, x.r.copy ? rowNote(x.r.copy, x.group, data.today) : null]),
+  );
 
   /* ── lanes ──────────────────────────────────────────────────────────────────────────────── */
   /**
@@ -824,6 +848,7 @@ export function timelineWeek(
     rows.push({
       key: row.key, agentId: row.agentId, name: row.name, agency: row.agency,
       group: groupOf.get(row.key) ?? null, status: row.status, sentence: row.sentence,
+      note: noteOf.get(row.key) ?? null,
       dot: row.dot, items: row.items,
       lanes: Math.max(1, barLanes + (row.items.length ? packed : 0)),
       manuscripts: row.manuscripts, closed: row.closed,
