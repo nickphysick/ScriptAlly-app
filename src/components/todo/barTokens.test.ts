@@ -10,6 +10,45 @@ const decls = css.replace(/\/\*[\s\S]*?\*\//g, "");
 
 const STATES = ["theirs", "theirsq", "nudged", "y1", "y2", "y3", "quiet", "offer", "closed", "task"];
 
+describe("⚠️ urgency is breath, and reduced motion carries the same fact (Phase 3)", () => {
+  it("the pulse is on long-standing, and no longer on the waiting bar", () => {
+    expect(decls, "long-standing does not breathe").toMatch(/\.tl-seg\.s-y3\s*\{[^}]*animation:\s*tlUrge\s/);
+    /* ⚠️ THE OLD BREATH IS GONE, ASSERTED. It was on `.tl-seg.theirs` — waiting on the AGENT — and
+       a pack that only adds the new one leaves two bars pulsing for opposite reasons. */
+    expect(decls, "the waiting bar still breathes").not.toMatch(/tlBreathe/);
+  });
+
+  it("⚠️ the keyframes carry LITERALS, and they are the state's own two stops", () => {
+    /* A `var()` inside `@keyframes` fails silently in this setup — no error, no animation, no
+       warning — so the values must be written out, and the risk is that written-out values drift
+       from the tokens they duplicate. This asserts the four against the two. */
+    const board = decls.slice(decls.indexOf("\n.tl-board {"));
+    const tok = (n: string) => board.match(new RegExp(`--bar-${n}:\\s*([^;]+);`))![1].trim();
+    const rest = tok("y3-fill"), deep = tok("urgent-fill");
+    for (const name of ["tlUrge", "tlUrgeFlat"]) {
+      const kf = decls.match(new RegExp(`@keyframes ${name}\\s*\\{([\\s\\S]*?)\\n\\}`))![1];
+      expect(kf, `${name} does not rest at --bar-y3-fill (${rest})`).toContain(rest);
+      expect(kf, `${name} does not deepen to --bar-urgent-fill (${deep})`).toContain(deep);
+      expect(kf, `${name} reads a var(), which fails silently inside keyframes`).not.toContain("var(");
+    }
+    /* the flat variant exists for the clamped case and animates the background alone */
+    const flat = decls.match(/@keyframes tlUrgeFlat\s*\{([\s\S]*?)\n\}/)![1];
+    expect(flat, "the flat variant animates a border it was written to leave alone").not.toContain("border-color");
+    expect(decls, "the flat variant has no consumer").toMatch(/\.tl-seg\.s-y3\.(openleft|future)[^{]*\{[^}]*tlUrgeFlat/);
+  });
+
+  it("⚠️ reduced motion stops the pulse AND states the fact another way", () => {
+    const m = decls.match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/g) ?? [];
+    const block = m.find((b) => b.includes("s-y3"));
+    expect(block, "long-standing has no reduced-motion rule at all").toBeTruthy();
+    expect(block!, "the pulse does not stop").toContain("animation: none");
+    /* ⚠️ THE HALF THAT MATTERS. Stopping is easy; carrying the information without motion is the
+       claim, and a check that only asserts `animation: none` passes on the old broken rule. */
+    expect(block!, "reduced motion says nothing — motion was the only signal")
+      .toContain("background: var(--bar-urgent-fill)");
+  });
+});
+
 describe("⚠️ bar colour is a token, never a literal (settled pack, Phase 2)", () => {
   it("no rule that paints a bar carries a hex or an rgb", () => {
     const bad: string[] = [];
