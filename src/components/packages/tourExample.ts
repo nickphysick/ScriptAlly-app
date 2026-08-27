@@ -48,7 +48,7 @@ export const EXAMPLE_QUERIES: Query[] = EXAMPLE_AGENTS.map((a, i) => ({
 
 /** The workshop walkthrough — 4 steps, verbatim from the ref, mapped to the workshop's target ids. */
 export const WORKSHOP_TOUR_STEPS: TourStep[] = [
-  { targetId: "tgt-palette", title: "Your materials", body: "The pieces of your submission live here — <b>letters, synopses and sample pages</b>. We’ve filled it with an example library so you can see how yours will look: every piece is a draggable card." },
+  { targetId: "tgt-palette", title: "Your materials", body: "The pieces of your submission live here — <b>letters and synopses</b>. We’ve filled it with an example library so you can see how yours will look: every piece is a draggable card." },
   { targetId: "tgt-bench", title: "The active package", body: "A package is one version of your submission. This example — <b>Character-led · v2</b> — was built by dragging three materials into these slots. The letter’s the only must-have. Name it, hit Save." },
   { targetId: "tgt-analytics", title: "See what wins", body: "This example went to <b>four agents — and one asked for the full manuscript</b>. Attach your packages to queries in the Queries Hub and this panel tracks exactly that: which version wins requests." },
   { targetId: "tgt-editmat", title: "Start here", body: "That’s the loop: write → build → send → see what wins. The example data clears now — <b>Add materials</b> is where your real story starts." },

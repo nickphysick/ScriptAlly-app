@@ -328,6 +328,14 @@ export interface OpeningRow {
 const pct = (n: number, d: number): number => (d <= 0 ? 0 : Math.round((n / d) * 100));
 
 /**
+ * ⚠️ ONE VOCABULARY FOR ONE STATE. The rail's chip and the `Requests by opening` row both describe
+ * a version nothing has sent, and they said it in two different ways — the chip in words, the row
+ * as `0 packages`. Stated once here so a third surface cannot invent a third.
+ */
+export const NOT_IN_A_PACKAGE = "not yet in a package";
+export const NOT_YET_SENT = "not yet sent";
+
+/**
  * "Requests by opening" (D15).
  *
  * ⚠️ THE BAR IS A PROPORTION OF THE BUSIEST ROW, NOT A RATE, and the number beside it is the claim.
@@ -366,8 +374,22 @@ export const openingRows = (
     name: v.name,
     /* ⚠️ NO SAMPLE COUNT. It used to read `2 samples · 1 package`; sample pages is not a material
        any more, so the samples half would be counting archived documents nothing sends. */
-    where: `${r.packages} package${r.packages === 1 ? "" : "s"}`,
-    meta: `${r.requests} request${r.requests === 1 ? "" : "s"} from ${r.sent} sent`,
+    /**
+     * ⚠️ AN ABSENCE IS STATED IN WORDS, NEVER AS A ZERO — and in the SAME words the rail's chip
+     * uses, so the two surfaces cannot come to describe one state differently. The row read
+     * `0 packages · 0 requests from 0 sent`: three true figures which together say a version has
+     * been tried and drew nothing, about one that has never been in a package.
+     *
+     * ⚠️ AND THE TWO CLAUSES FAIL SEPARATELY. A version can be in a package that has not gone out
+     * — `1 package · not yet sent` is a real and different state from `not yet in a package`, and
+     * collapsing them would hide the fact that something is ready and waiting.
+     */
+    where: r.packages > 0
+      ? `${r.packages} package${r.packages === 1 ? "" : "s"}`
+      : NOT_IN_A_PACKAGE,
+    meta: r.sent > 0
+      ? `${r.requests} request${r.requests === 1 ? "" : "s"} from ${r.sent} sent`
+      : NOT_YET_SENT,
     sentPct: pct(r.sent, max),
     inPct: pct(r.requests, r.sent),
   }));

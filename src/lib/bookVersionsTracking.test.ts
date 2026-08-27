@@ -57,6 +57,8 @@ describe("D15 — requests by opening", () => {
     expect(a.where).toBe("2 packages");
     expect(a.meta).toBe("1 request from 3 sent");
     expect(b.where).toBe("1 package");
+    /* ⚠️ THE BOUNDARY. `0 requests from 1 sent` is a real RESULT — it went out and drew nothing —
+       so it keeps the count form. Only `sent === 0` becomes words. */
     expect(b.meta).toBe("0 requests from 1 sent");
   });
 
@@ -66,7 +68,14 @@ describe("D15 — requests by opening", () => {
        just made one. */
     const rows = openingRows([...versions, bv("vz", "Untested")], packages, queries, isRequest);
     expect(rows.map((r) => r.name)).toContain("Untested");
-    expect(rows.find((r) => r.name === "Untested")?.meta).toBe("0 requests from 0 sent");
+    /**
+     * ⚠️ AND IT SAYS SO IN WORDS, NOT AS TWO ZEROS. This asserted `0 requests from 0 sent`, which
+     * is two true figures that together state something false — that the opening was tried and
+     * drew nothing. The row's LAW is unchanged (it is still listed, which is what the case is
+     * for); the wording it pinned was itself the fault.
+     */
+    expect(rows.find((r) => r.name === "Untested")?.meta).toBe("not yet sent");
+    expect(rows.find((r) => r.name === "Untested")?.where).toBe("not yet in a package");
   });
 
   it("⚠️ STATES NO RATE ANYWHERE (D15) — 2-from-18 against 0-from-6 is not a result", () => {

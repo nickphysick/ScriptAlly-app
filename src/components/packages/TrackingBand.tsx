@@ -142,7 +142,7 @@ export const TrackingBand: React.FC<TrackingBandProps> = ({
             <div className="pkgb-land">
               <div className="pkgb-landhead">
                 <h3>Requests by opening</h3>
-                <span className="pkgb-tag">Across every sample and package that carries it</span>
+                <span className="pkgb-tag">Across every package that tests it</span>
               </div>
               {openings.map((o) => (
                 <div key={o.id} className="pkgb-drow">

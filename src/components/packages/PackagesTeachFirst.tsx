@@ -78,7 +78,7 @@ export interface TeachStage {
 export const TEACH_STAGES: TeachStage[] = [
   {
     slot: "PKG-STAGE-ADD", n: "Stage one", title: "Add your materials",
-    body: "Versions of your covering letter, synopsis and sample pages — written here or pasted in. Most writers keep two or three of each.",
+    body: "Versions of your covering letter and synopsis — written here or pasted in. Most writers keep two or three of each.",
     art: <><path d="M7 4h13l5 5v19H7z" /><path d="M20 4v5h5" /><path d="M16 14v8M12 18h8" /></>,
   },
   {

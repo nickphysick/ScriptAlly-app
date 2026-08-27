@@ -15,7 +15,7 @@
  */
 import { Activity, BookVersion, ComponentType, ManuscriptVersion, Query, SubmissionPackage } from "../types";
 import { materialShelf } from "./packagesOverview";
-import { holdings, latestVersion } from "./bookVersions";
+import { holdings, latestVersion, NOT_IN_A_PACKAGE } from "./bookVersions";
 
 export type RailKind = "let" | "syn" | "ver";
 
@@ -91,7 +91,9 @@ export const versionMetaLine = (
 ): string =>
   packages > 0
     ? `${plural(packages, "package")} · held by ${plural(agents, "agent")}`
-    : `${isLatest ? "Latest · " : ""}not yet in a package`;
+    /* ⚠️ THE SAME CONSTANT THE PANEL READS. Two surfaces describing one state in two spellings is
+       how they come to disagree; `bookVersions.ts` states it once. */
+    : `${isLatest ? "Latest · " : ""}${NOT_IN_A_PACKAGE}`;
 
 export const builderRail = (
   materials: readonly ManuscriptVersion[],

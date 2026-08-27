@@ -94,7 +94,9 @@ test("the book profile rests and settles at both ends of its content range", asy
   const seen: {
     name: string; overflow: number; chromeAboveTabs: number | null; flips: number;
     at: number[]; title: string | null; reached: number; stuckWhenScrolled: boolean | null;
-    releases: boolean | null;
+    releases: boolean | null; restMax: number; settledMax: number | null;
+    /* Repeated because one reading of the landing point was not reproducible — see below. */
+    trials: { set: number; landed: number; stuck: boolean; max: number }[];
   }[] = [];
 
   for (const c of [

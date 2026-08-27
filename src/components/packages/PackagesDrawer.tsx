@@ -41,7 +41,7 @@ interface Stage { eyebrow: string; icon: string; slot: string; title: string; bo
 const STAGES: Stage[] = [
   {
     eyebrow: "Stage one", icon: "pages", slot: "PKG-STAGE-ADD", title: "Add your materials",
-    body: "Versions of your covering letter, synopsis and sample pages — written here or pasted in. Most writers keep two or three of each, so they can test which one lands.",
+    body: "Versions of your covering letter and synopsis — written here or pasted in. Most writers keep two or three of each, so they can test which one lands.",
   },
   {
     eyebrow: "Stage two", icon: "parcel", slot: "PKG-STAGE-BUNDLE", title: "Bundle them into a package",
