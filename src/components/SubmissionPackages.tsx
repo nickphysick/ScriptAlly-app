@@ -50,6 +50,8 @@ import { WorkspacePageGrid, PageTally } from "./shell/WorkspacePageGrid";
 import { PackagesDrawer } from "./packages/PackagesDrawer";
 import { ChevronDown, ShieldCheck, Plus } from "lucide-react";
 import "./packages/packageWorkshop.css";
+/* the illustrated-masthead trial — one file for both pages, delete it to revert */
+import "./shell/illustratedMasthead.css";
 
 export const SubmissionPackages: React.FC = () => {
   const { currentUser, manuscripts, versions, packages, queries, activities, agents, addVersion, updateVersion, deleteVersion, archiveVersion, addPackage, updatePackage, deletePackage, retirePackage, restoreVersion, restorePackage, updateUserProfile } = useScriptAllyDb();

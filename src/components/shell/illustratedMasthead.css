@@ -1,0 +1,153 @@
+:root {
+  /* ⚠️ THE TWO COLOURS THE TRIAL NEEDS, AS TOKENS — a bare `#ffffff` ground and two `#000` mask
+     stops are what turned another stream's no-literals lock red when this lived in `f12.css`. They
+     are named here so the blocks below carry no colour of their own, and so a rollout retunes the
+     ground in one place. `--illo-solid` is the mask's opaque end: a mask reads only alpha, so the
+     hue is irrelevant and the name says what it is for rather than what it looks like. */
+  --illo-ground: #ffffff;
+  --illo-solid: #000000;
+}
+
+/**
+ * ══ TRIAL · ILLUSTRATED MASTHEADS ═════════════════════════════════════════════════════════════
+ * (ref design-refs/182-qc-illustrated-masthead.html — the bench draws it on Query Centre's layout;
+ * the MECHANISM is normative there, not the page.)
+ *
+ * ⚠️ ONE FILE FOR THE WHOLE TRIAL, AND THAT IS THE POINT: deleting it reverts both pages completely.
+ * The blocks started life in each page's own stylesheet, which was wrong twice over — it scattered a
+ * temporary treatment through two files somebody else owns, and Query Centre's half landed inside a
+ * section of `f12.css` that another stream locks against colour literals, so a `#ffffff` ground and
+ * two `#000` mask stops turned that lock red. A trial belongs in its own file.
+ *
+ * ⚠️ EVERY RULE IS SCOPED BY ITS PAGE'S GRID CLASS at four classes' specificity, because the shared
+ * wash is declared at three (`.wpg > .wpg-scroll > .wpg-chrome`) and a two-class page rule loses to
+ * it silently — measured, the band went on painting terracotta with the rule applying cleanly.
+ */
+
+/**
+ * ══ TRIAL · AN ILLUSTRATED MASTHEAD, THIS PAGE ONLY ═══════════════════════════════════════════
+ * (ref design-refs/182-qc-illustrated-masthead.html — the bench draws it on Query Centre's layout;
+ * the MECHANISM is what is normative there, not the page.)
+ *
+ * ⚠️ THE BAND, NOT `.wsh` — and the brief's snippet names the inner element. In the bench the
+ * artwork sits on `.mast`, a full-bleed band (`position: relative; overflow: hidden`), with the text
+ * in `.mastin`, an inset measure lifted to `z-index: 2`. Those map here to `.wpg-chrome` and
+ * `.wpg-mast`, not to `.wsh`: `.wsh` lives INSIDE the measure, which is capped and inset 35px each
+ * side, so painting it there would put a white box in the middle of a terracotta band with the wash
+ * still showing in both gutters — and the artwork would stop 35px short of the edges the wash
+ * reaches. The band is the element that already spans the window, so it is the element that carries
+ * this.
+ *
+ * ⚠️ SCOPED TO THIS PAGE BY ITS GRID CLASS, so the trial is one block to delete. Nothing in the
+ * shared grid is touched, and the other nine mastheads cannot acquire artwork by inheritance.
+ */
+/* ⚠️ FOUR CLASSES, BECAUSE THE SHARED RULE HAS THREE. The wash is declared on
+   `.wpg > .wpg-scroll > .wpg-chrome` (0-3-0); a page-scoped `.pkgw-wpg .wpg-chrome` is 0-2-0 and
+   loses, silently — measured, the band still painted the terracotta `rgb(251,243,238)` with this
+   rule applying cleanly and every sample downstream taken against the wrong ground. */
+.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome {
+  /* ⚠️ WHITE, NOT THE WASH — the carve-out this trial buys, and the ground lock names it as the one
+     page allowed it. Both longhands, never the `background` shorthand: the shorthand is what resets
+     `background-color` to transparent, which is the fault four earlier rounds were about. */
+  background-color: var(--illo-ground);
+  background-image: none;
+  /**
+   * ⚠️ NO `position: relative` — THE BENCH HAS IT AND COPYING IT HERE BROKE THE PAGE. This band is
+   * `position: sticky`, and `relative` overrode it: the slab stopped pinning, which the behaviour
+   * lock caught immediately. A sticky element already establishes a containing block for
+   * absolutely-positioned descendants, so the pseudo-element needs nothing added.
+   *
+   * ⚠️ `overflow: hidden` IS SAFE HERE and is the half of the bench's rule that must survive — it
+   * is on the sticky element itself, not on an ancestor, so it clips the artwork to the band without
+   * touching the pinning. (An `overflow` other than `visible` on an ANCESTOR is what kills sticky.)
+   */
+  overflow: hidden;
+}
+.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* ⚠️ IT MUST NOT SWALLOW A CLICK — Hide and the page's own controls sit over this band. */
+  pointer-events: none;
+  background-image: url(../../assets/packages/packages.webp);
+  background-repeat: no-repeat;
+  background-position: 100% center;
+  background-size: auto 150%;
+  /* knocked back so it reads as a watermark rather than competing with what sits on it */
+  opacity: 0.65;
+  /**
+   * ⚠️ THE MASK IS THE POINT. The artwork is fully transparent where the title and description sit
+   * and fades in across the middle, so no text is ever set over painted illustration — asserted by
+   * sampling the painted colour at the last glyph of each, in both postures, rather than trusted.
+   */
+  /**
+   * ⚠️ THE START TRACKS THE TEXT, IT IS NOT A PERCENTAGE OF THE BAND — and the two flat values this
+   * replaces were both wrong for the same reason. The ref's 34% put the description ON the artwork
+   * at the narrow widths; a flat 54%, set to clear the worst case, then held the illustration far
+   * too far right everywhere else — 396px of empty band at 2300, which is what Nick saw.
+   *
+   * MEASURED, and it is the cleanest possible input: the text ends **485px from the masthead's left
+   * edge at every width** — it is one fixed string at a fixed size. What moves is the MEASURE's left
+   * edge, which is 35 at 1280 and 1440 and 185 at 2300, because the measure is capped and centred.
+   * So the start is that edge plus the text plus 30px of air, expressed exactly as the measure is:
+   *
+   *     (100% - min(--work-max, 100% - 2 × --mast-gutter)) / 2   is the measure's left edge
+   *     + 515px                                                  is 485 of text and 30 of air
+   *
+   * Computed: 550 · 550 · 700 against text ending at 520 · 520 · 670. Thirty pixels clear at every
+   * width, and the artwork now begins as soon as the words stop rather than at a fraction that only
+   * suits one viewport.
+   *
+   * ⚠️ IT READS THE SAME TWO TOKENS THE MEASURE ITSELF READS, so a change to the gutter or the cap
+   * moves the mask with the text instead of leaving the two to drift apart.
+   */
+  --pkgw-illo-start: calc((100% - min(var(--work-max), 100% - 2 * var(--mast-gutter))) / 2 + 515px);
+  -webkit-mask-image: linear-gradient(to right, transparent var(--pkgw-illo-start), var(--illo-solid) calc(var(--pkgw-illo-start) + 170px));
+          mask-image: linear-gradient(to right, transparent var(--pkgw-illo-start), var(--illo-solid) calc(var(--pkgw-illo-start) + 170px));
+}
+/* ⚠️ THE TEXT SITS ABOVE THE PAINT. The pseudo-element is positioned and the masthead's measure is
+   not, so without this the artwork would paint over the title — the bench lifts `.mastin` to
+   `z-index: 2` for the same reason. */
+.wpg.pkgw-wpg .wpg-mast { position: relative; z-index: 2; }
+
+/**
+ * ══ QUERY CENTRE ══════════════════════════════════════════════════════════════════════════════
+ * The second page of the trial. Structurally identical; three things differ and each is measured.
+ */
+.wpg.qc-wpg > .wpg-scroll > .wpg-chrome {
+  background-color: var(--illo-ground);
+  background-image: none;
+  /**
+   * ⚠️ `position: relative` IS REQUIRED HERE AND WAS FORBIDDEN ON PACKAGES — the pages are different
+   * header types and that is the whole difference. Packages is Type A, so its band is `sticky` and
+   * is already a containing block; adding `relative` there OVERRODE the sticky and stopped it
+   * pinning. Query Centre is Type B, so its band is `static` and an absolutely-positioned
+   * pseudo-element would otherwise resolve against `.wpg-scroll` and spill past the masthead. Same
+   * treatment, opposite declaration, because what is underneath is not the same.
+   */
+  position: relative;
+  overflow: hidden;
+}
+.wpg.qc-wpg > .wpg-scroll > .wpg-chrome::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url(../../assets/queries/queries.jpg);
+  background-repeat: no-repeat;
+  background-position: 100% center;
+  background-size: auto 150%;
+  opacity: 0.65;
+  /**
+   * ⚠️ 482, WHERE PACKAGES USES 515 — measured, not copied. Query Centre's description is a
+   * different string, so its text ends **452px from the masthead's left edge** at every width
+   * against Packages' 485; the 30px of air is the same. The expression is otherwise identical and
+   * reads the same two tokens the measure reads, so the mask cannot drift from the words it clears.
+   */
+  --qc-illo-start: calc((100% - min(var(--work-max), 100% - 2 * var(--mast-gutter))) / 2 + 482px);
+  -webkit-mask-image: linear-gradient(to right, transparent var(--qc-illo-start), var(--illo-solid) calc(var(--qc-illo-start) + 170px));
+          mask-image: linear-gradient(to right, transparent var(--qc-illo-start), var(--illo-solid) calc(var(--qc-illo-start) + 170px));
+}
+/* the text sits above the paint — `.wpg-mast` is already `position: relative` on a static page, so
+   this adds only the order */
+.wpg.qc-wpg .wpg-mast { z-index: 2; }

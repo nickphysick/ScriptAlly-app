@@ -24,7 +24,17 @@ const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Calendar",            route: "/todo/calendar",        cls: "tpl-wpg"  },
   { name: "Noteboard",           route: "/todo/noteboard",       cls: "tpl-wpg"  },
 ];
-const TRIAL = "Submission packages";
+/**
+ * ⚠️ TWO PAGES NOW, AND THE NUMBER IS THE GATE. The trial began on Submission packages and Query
+ * Centre joined it deliberately. The SET is asserted rather than a count, so neither moving the
+ * artwork to a different page nor a third page joining can pass — someone has to edit this list and
+ * read this paragraph.
+ *
+ * ⚠️ AND THE TWO ARE DIFFERENT HEADER TYPES, which is why the behaviour case below compares each
+ * against its OWN peers rather than against one another: Packages is Type A and its band is sticky,
+ * Query Centre is Type B and its band is static.
+ */
+const TRIAL = ["Submission packages", "Query Centre"];
 
 const readBand = (page: Page, cls: string) => page.evaluate((c) => {
   const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
@@ -65,29 +75,35 @@ test("⚠️ EXACTLY ONE PAGE CARRIES MASTHEAD ARTWORK — asserted in both dire
   console.log("\n══ MASTHEAD ARTWORK (1440)\n" + lines.join("\n"));
   /* ⚠️ THE EXACT SET, NOT A COUNT. `toHaveLength(1)` would pass the day the artwork moved to a
      different page, which is a decision nobody took and nobody would see. */
-  expect(withArt, "masthead artwork is not on exactly the trial page").toEqual([TRIAL]);
+  expect(withArt.slice().sort(), "masthead artwork is not on exactly the trial pages").toEqual(TRIAL.slice().sort());
 });
 
+const TRIAL_ROUTES: { name: string; route: string; cls: string }[] = [
+  { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
+  { name: "Query Centre",        route: "/queries",              cls: "qc-wpg"   },
+];
+
 for (const width of [1280, 1440, 2300]) {
-  test(`⚠️ NO TEXT SITS ON PAINTED ARTWORK — both postures — ${width}`, async ({ page }) => {
-    await openRoute(page, "/manuscripts/packages", { width, height: 900 });
+ for (const trial of TRIAL_ROUTES) {
+  test(`⚠️ NO TEXT SITS ON PAINTED ARTWORK — ${trial.name} — ${width}`, async ({ page }) => {
+    await openRoute(page, trial.route, { width, height: 900 });
     await liftMotionSuppression(page);
     await page.waitForTimeout(900);
     const lines: string[] = [];
     for (const posture of ["rest", "settled"] as const) {
       if (posture === "settled") {
-        const moved = await page.evaluate(async () => {
-          const g = [...document.querySelectorAll(".wpg.pkgw-wpg")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+        const moved = await page.evaluate(async (c) => {
+          const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
           const sc = g.querySelector(".wpg-scroll") as HTMLElement;
           if (sc.scrollHeight - sc.clientHeight < 120) return false;
           for (let t = 0; t <= 400; t += 20) { sc.scrollTop = t; await new Promise((r) => requestAnimationFrame(r)); }
           return true;
-        });
+        }, trial.cls);
         if (!moved) { lines.push(`  ${posture}: the page cannot scroll here — posture not exercised`); continue; }
         await page.waitForTimeout(800);
       }
-      const geo = await page.evaluate(() => {
-        const g = [...document.querySelectorAll(".wpg.pkgw-wpg")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+      const geo = await page.evaluate((c) => {
+        const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
         const ch = g.querySelector(".wpg-chrome") as HTMLElement;
         const b = ch.getBoundingClientRect();
         const ink = (sel: string) => {
@@ -99,7 +115,7 @@ for (const width of [1280, 1440, 2300]) {
           return { right: Math.round(Math.max(...rects.map((x) => x.right))), y: Math.round(rects[0].top + rects[0].height / 2) };
         };
         return { band: { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) }, title: ink(".wsh-title"), sub: ink(".wsh-sub") };
-      });
+      }, trial.cls);
       const png = readPng(await page.screenshot({ clip: { x: geo.band.x, y: geo.band.y, width: geo.band.w, height: geo.band.h } }));
       const at = (ax: number, ay: number) => png.at(Math.min(Math.max(ax - geo.band.x, 0), png.width - 1), Math.min(Math.max(ay - geo.band.y, 0), png.height - 1)).join(",");
       /* the ground, taken at the far left where the mask is fully transparent by construction */
@@ -123,9 +139,10 @@ for (const width of [1280, 1440, 2300]) {
         expect(painted, `${posture}: painted artwork reaches the ${what}'s last glyph — the mask does not clear the text`).toBe(ground);
       }
     }
-    console.log(`\n══ TEXT CLEARS THE ARTWORK — ${width}\n` + lines.join("\n"));
+    console.log(`\n══ TEXT CLEARS THE ARTWORK — ${trial.name} — ${width}\n` + lines.join("\n"));
     expect(lines.filter((l) => l.includes("last glyph")).length, "no glyph was sampled").toBeGreaterThan(1);
   });
+ }
 }
 
 test("⚠️ THE TRIAL CHANGES NO BEHAVIOUR — Packages answers like every other Type A page", async ({ page }) => {
@@ -136,12 +153,38 @@ test("⚠️ THE TRIAL CHANGES NO BEHAVIOUR — Packages answers like every othe
     const r = (await readBand(page, cls))!;
     rows.push({ name, sticky: r.sticky, type: r.type, settleOn: r.settleOn, toolband: r.toolbandBg });
   }
-  const trial = rows.find((r) => r.name === TRIAL)!;
-  const peers = rows.filter((r) => r.type === "pinned" && r.name !== TRIAL);
+  const trials = rows.filter((r) => TRIAL.includes(r.name));
   console.log("\n══ BEHAVIOUR (1440)\n" + rows.map((r) => `${r.name.padEnd(21)} ${String(r.type).padEnd(7)} · ${r.sticky} · settles on ${r.settleOn}`).join("\n"));
-  expect(peers.length, "no peer pinned pages to compare against").toBeGreaterThan(4);
-  /* the treatment is paint: the type, the stickiness and the settle binding all read as a peer's */
-  expect(trial.type, "the trial page changed header type").toBe("pinned");
-  expect(trial.sticky, "the trial page's slab stopped being sticky").toBe(peers[0].sticky);
-  expect(trial.settleOn, "the trial page's settle is bound differently from its peers").toBe(peers[0].settleOn);
+  /**
+   * ⚠️ EACH TRIAL PAGE AGAINST ITS OWN TYPE'S PEERS, never against the other trial page. The two
+   * are deliberately different header types — Packages pins and settles, Query Centre is static —
+   * so a comparison between them would assert that a Type B page behaves like a Type A one, which
+   * is a claim nobody wants and which the header contract forbids.
+   */
+  expect(trials.length, "a trial page did not render").toBe(TRIAL.length);
+  for (const t of trials) {
+    /**
+     * ⚠️ THE TYPE'S CONTRACT, NOT A PEER — and the peer form broke the day Manuscripts changed type.
+     * It compared each treated page against an untreated page of the same type, which is fine until
+     * a type has only one page: Query Centre is now the ONLY Type B page (Manuscripts reads `pinned`
+     * where it used to read `static`, by another stream's change), so treating it left nothing to
+     * compare against and the case failed for want of a sample rather than for a fault.
+     *
+     * The contract needs no sample. Type A pins; Type B sits in flow and does not. That is the
+     * canonical rule, and asserting it directly is both stronger and immune to the census shifting.
+     */
+    if (t.type === "pinned") {
+      expect(t.sticky, `${t.name} is Type A and its band is not sticky — the trial changed its behaviour`).toBe("sticky");
+      expect(t.settleOn, `${t.name} is Type A and names no primary scroller`).toBeTruthy();
+    } else {
+      expect(t.sticky, `${t.name} is Type B and its band went sticky — the trial changed its behaviour`).not.toBe("sticky");
+      expect(t.settleOn, `${t.name} is Type B and has acquired a settle binding`).toBeFalsy();
+    }
+    /* and where untreated peers of the same type DO exist, the treated page still matches them */
+    const peers = rows.filter((r) => r.type === t.type && !TRIAL.includes(r.name));
+    if (peers.length) {
+      expect(t.sticky, `${t.name}: its band's positioning differs from untreated pages of the same type`).toBe(peers[0].sticky);
+      expect(t.settleOn, `${t.name}: its settle is bound differently from untreated pages of the same type`).toBe(peers[0].settleOn);
+    }
+  }
 });

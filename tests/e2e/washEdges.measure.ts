@@ -42,7 +42,7 @@ const near = (a: string, b: string) => {
  * becomes two pages is no longer a trial; the size of this list is asserted, so a second page cannot
  * join without someone editing the number and reading this paragraph.
  */
-const ILLUSTRATED = ["Submission packages"];
+const ILLUSTRATED = ["Submission packages", "Query Centre"];
 
 const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Query Centre",        route: "/queries",              cls: "qc-wpg"   },
@@ -195,7 +195,7 @@ for (const width of [1280, 1440, 2300]) {
       }
     }
     console.log(`\n══ WASH TO THE WINDOW'S EDGES — ${width}\n` + lines.join("\n"));
-    expect(ILLUSTRATED, "more than one page departs from the plain wash — the trial has spread").toHaveLength(1);
+    expect(ILLUSTRATED, "the number of pages departing from the plain wash has changed — the trial has spread or been reverted").toHaveLength(2);
     expect(measured, "no band was sampled at all").toBeGreaterThan(9);
     /* ⚠️ REPORTED, NOT REQUIRED. How many pages take real width depends on the platform's scrollbar
        style — nil here, where they are overlays. A floor would assert the harness's settings. */
