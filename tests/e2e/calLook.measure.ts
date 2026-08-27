@@ -66,10 +66,18 @@ test.describe("the Calendar — Porcelain", () => {
         const bars = [...document.querySelectorAll(".tl-p")].filter((e) => e.getBoundingClientRect().width > 0);
         out.barCount = bars.length;
         const fam = {};
+        const fam2Solid = {};
         const fills = {};
         for (const b of bars) {
           const f = ["out","req","decide","remind","quiet","closedp"].find((c) => b.classList.contains(c));
           if (!f) continue;
+          /* THE TRACK CLAIM NEEDS A SOLID BAR. A hollow overrun is transparent BY DESIGN, so
+             sampling the first bar of a family reports "the track is not white" about a bar that
+             is correct - the probe's own monoculture problem, arriving through a STATE rather
+             than through a fixture. */
+          if (fam2Solid[f] === undefined && !b.classList.contains("hollow")) {
+            fam2Solid[f] = getComputedStyle(b).backgroundColor;
+          }
           const cs = getComputedStyle(b);
           const lbl = b.querySelector(".tl-plbl");
           const fl = b.querySelector(".tl-fl");
@@ -91,6 +99,7 @@ test.describe("the Calendar — Porcelain", () => {
           const k = b.dataset.fill;
           fills[k] = (fills[k] || 0) + 1;
         }
+        for (const k of Object.keys(fam)) if (fam2Solid[k] !== undefined) fam[k].track = fam2Solid[k];
         out.families = fam;
         out.fillTally = fills;
         /* a bar with no named end paints NO fill element at all */
@@ -213,6 +222,7 @@ test.describe("the Calendar — Porcelain", () => {
 
       console.log(`\n══ ${width} ══\n` + JSON.stringify(read, null, 1));
 
+      const unlabelled: string[] = [];
       expect(read.board, "no board").toBe(true);
       expect(read.barCount, "no bars to measure — the sweep proves nothing").toBeGreaterThan(3);
 
@@ -221,12 +231,20 @@ test.describe("the Calendar — Porcelain", () => {
         const got = read.families[name];
         if (!got) continue;   /* a family the fixture does not produce is reported, not asserted */
         expect(got.line, `${name} border`).toBe(hex(want.line));
-        expect(got.text, `${name} text`).toBe(hex(want.text));
+        /* ⚠️ A FAMILY WHOSE LABEL THE FIT PASS DROPPED EVERYWHERE HAS NO TEXT TO SAMPLE, and that
+           is a fact about the board's widths rather than about the colour. It is REPORTED rather
+           than asserted-on-null, and the census below is what stops the whole set going unchecked
+           quietly. */
+        if (got.text == null) unlabelled.push(name);
+        else expect(got.text, `${name} text`).toBe(hex(want.text));
         expect(got.track, `${name} track is not white`).toBe("rgb(255, 255, 255)");
         if (got.fill) expect([hex(want.fill), hex(want.near)], `${name} fill`).toContain(got.fill);
         expect(got.radius, `${name} is not a pill`).toBe("999px");
         expect(got.height, `${name} height`).toBe("22px");
       }
+      console.log(`families whose text could not be sampled at ${width}: ${unlabelled.length ? unlabelled.join(", ") : "none"}`);
+      expect(unlabelled.length, `no family carried a label at all: ${unlabelled.join(", ")}`)
+        .toBeLessThan(Object.keys(FAMILY).length);
       const seenFamilies = Object.keys(read.families);
       expect(seenFamilies.length, `only one family on the board: ${seenFamilies}`).toBeGreaterThan(1);
 
@@ -309,5 +327,240 @@ test.describe("the Calendar — Porcelain", () => {
     expect(after, "the round trip did not restore the same rows").toEqual(before);
     expect(narrowed.length, "RIGHT NOW showed the whole board").toBeLessThanOrEqual(before.length);
     for (const n of narrowed) expect(before, `${n} appeared only in RIGHT NOW`).toContain(n);
+  });
+});
+
+/* ══ THE FIX PACK'S OWN CLAIMS (Phase 7) ═════════════════════════════════════════════════════ */
+
+test.describe("the fix pack — one fact, one function", () => {
+  const HEIGHT2 = 900;
+  for (const width of [1280, 1440, 1920]) {
+    test(`composed rows at ${width}`, async ({ page }) => {
+      const errors: string[] = [];
+      page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+      await openRoute(page, "/todo/calendar", { width, height: HEIGHT2 });
+      await page.waitForTimeout(1400);
+
+      const r = await page.evaluate(`(() => {
+        const out = {};
+        const rows = [...document.querySelectorAll(".tl-rrow")];
+        out.rows = rows.map((row) => {
+          const grp = row.closest(".tl-grp");
+          const nm = row.querySelector(".tl-nm2");
+          const ag = row.querySelector(".tl-ag2");
+          const nmR = nm ? nm.getBoundingClientRect() : null;
+          const agR = ag ? ag.getBoundingClientRect() : null;
+          return {
+            group: grp ? (grp.querySelector(".tl-gt .t") || {}).textContent : null,
+            name: nm ? nm.textContent : null,
+            agency: ag ? ag.textContent : null,
+            nameBottom: nmR ? nmR.bottom : null,
+            agencyTop: agR ? agR.top : null,
+            bars: [...row.querySelectorAll(".tl-p")].map((b) => {
+              const fl = b.querySelector(".tl-fl");
+              const lbl = b.querySelector(".tl-plbl");
+              return {
+                fam: ["out","req","decide","remind","quiet","closedp"].find((c) => b.classList.contains(c)) || "?",
+                near: b.classList.contains("near"),
+                hollow: b.classList.contains("hollow"),
+                fill: b.dataset.fill,
+                fillPaint: fl ? getComputedStyle(fl).backgroundColor : null,
+                label: lbl ? lbl.textContent : "",
+                labelOpacity: lbl ? getComputedStyle(lbl).opacity : null,
+              };
+            }),
+            btn: row.querySelector(".tl-abtn") ? row.querySelector(".tl-abtn").textContent : null,
+            dash: !!row.querySelector(".tl-adash"),
+            scrawl: row.querySelector(".tl-scr") ? row.querySelector(".tl-scr").textContent : null,
+            chips: [...row.querySelectorAll(".tl-tchip")].map((c) => c.textContent),
+          };
+        });
+        const flag = document.querySelector(".tl-todayflag");
+        const line = document.querySelector(".tl-todayline");
+        const gt = document.querySelector(".tl-gt .t");
+        const fr = flag ? flag.getBoundingClientRect() : null;
+        out.flagBottom = fr ? fr.bottom : null;
+        out.flagCentre = fr ? (fr.left + fr.right) / 2 : null;
+        out.flagText = flag ? flag.textContent : null;
+        out.lineX = line ? line.getBoundingClientRect().left : null;
+        out.firstTitleTop = gt ? gt.getBoundingClientRect().top : null;
+        return out;
+      })()`) as any;
+
+      const rows: any[] = r.rows;
+      console.log(`\n── fix pack ${width} ──`);
+      for (const x of rows) {
+        const fams = x.bars.map((b: any) => `${b.fam}${b.hollow ? "*" : ""}${b.near ? "~" : ""}`).join("|");
+        console.log(` ${String(x.group).slice(0, 18).padEnd(18)} ${String(x.name).slice(0, 24).padEnd(24)} btn=${String(x.btn).slice(0, 18).padEnd(18)} [${fams}]`);
+      }
+
+      /* ── P1 · a same-holder run never alternates families, ON THE PAGE ────────────────── */
+      const AGENT_FAMS = ["out", "quiet", "remind"];
+      for (const x of rows) {
+        for (let i = 1; i < x.bars.length; i += 1) {
+          const a = x.bars[i - 1].fam; const b = x.bars[i].fam;
+          const sameHolder = AGENT_FAMS.includes(a) === AGENT_FAMS.includes(b);
+          if (sameHolder && a !== b) {
+            /* only the LIVE stretch may differ within a holder — it is the last piece */
+            expect(i, `${x.name} alternates families: ${x.bars.map((z: any) => z.fam).join("|")}`)
+              .toBe(x.bars.length - 1);
+          }
+        }
+      }
+
+      /* ── P4 · every row in an asking group has exactly one button ─────────────────────── */
+      const ASKING = ["Your tasks", "Offer on the table", "Needs you now"];
+      const asking = rows.filter((x) => ASKING.includes(x.group));
+      expect(asking.length, "no asking rows to check").toBeGreaterThan(2);
+      for (const x of asking) {
+        expect(x.btn, `${x.group} / ${x.name} has no deed`).not.toBeNull();
+        expect(x.dash, `${x.group} / ${x.name} shows a dash as well`).toBe(false);
+      }
+      /* the offer's own deed, and a watching row's dash */
+      const offer = rows.find((x) => x.group === "Offer on the table");
+      if (offer) expect(offer.btn!.toUpperCase()).toContain("ANSWER");
+      const watching = rows.filter((x) => x.group === "Watching brief");
+      expect(watching.length, "nothing in the watching brief").toBeGreaterThan(0);
+      for (const x of watching) expect(x.btn, `${x.name} was asked for a deed`).toBeNull();
+
+      /* ── P5 · tasks are rows ──────────────────────────────────────────────────────────── */
+      const tasks = rows.filter((x) => x.group === "Your tasks");
+      expect(tasks.length, "no task rows").toBeGreaterThan(0);
+      for (const x of tasks) {
+        expect(x.agency).toBe("Your task");
+        expect(x.btn, "a task row has no TICK IT OFF").toContain("TICK IT OFF");
+        /* ⚠️ NAMED FOR ITS HISTORY: the chip must carry the title or a barFit form of it, never
+           an interior truncation. `o'r` was a fragment of a title, whatever produced it. */
+        for (const c of x.chips) {
+          expect(c.length, `chip "${c}" is a fragment`).toBeGreaterThan(3);
+          expect(c, `chip "${c}" is an interior truncation`).not.toMatch(/^[a-z]?['’][a-z]$/);
+        }
+      }
+
+      /* ── P6 · the row head STACKS ─────────────────────────────────────────────────────── */
+      const stacked = rows.filter((x) => x.agencyTop != null && x.nameBottom != null);
+      expect(stacked.length, "no row with both lines").toBeGreaterThan(3);
+      for (const x of stacked) {
+        expect(x.agencyTop, `${x.name}: the agency sits inside the name's line box`)
+          .toBeGreaterThanOrEqual(x.nameBottom - 1);
+      }
+
+      /* ── P6 · the flag is clear of the first group title ──────────────────────────────── */
+      expect(r.flagText, "no today flag").not.toBeNull();
+      expect(r.firstTitleTop - r.flagBottom, "the today flag crowds the first group title")
+        .toBeGreaterThan(6);
+      /* ⚠️ CENTRED ON ITS OWN RULE BY `translateX(-50%)`, never by an offset anyone has to keep in
+         step with the flag's width — which changes with the date it prints. */
+      expect(Math.abs(r.flagCentre - r.lineX), "the flag is not centred on the today rule")
+        .toBeLessThan(2);
+
+      expect(errors, `console errors: ${errors.join(" | ")}`).toEqual([]);
+    });
+  }
+
+  test("the seeded fixtures are on the board, and the sweep can see them", async ({ page }) => {
+    await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
+    await page.waitForTimeout(1400);
+    const r = await page.evaluate(`(() => {
+      const out = { near: null, hollowLabelled: null, passed: 0, tally: {} };
+      for (const b of document.querySelectorAll(".tl-p")) {
+        const fl = b.querySelector(".tl-fl");
+        const lbl = b.querySelector(".tl-plbl");
+        const fam = ["out","req","decide","remind","quiet","closedp"].find((c) => b.classList.contains(c)) || "?";
+        out.tally[fam] = (out.tally[fam] || 0) + 1;
+        if (b.classList.contains("near") && !out.near) {
+          out.near = { fam, paint: fl ? getComputedStyle(fl).backgroundColor : null, fill: b.dataset.fill };
+        }
+        if (b.classList.contains("hollow")) {
+          out.passed += 1;
+          if (lbl && lbl.textContent && !out.hollowLabelled) {
+            out.hollowLabelled = {
+              text: lbl.textContent, opacity: getComputedStyle(lbl).opacity,
+              bg: getComputedStyle(b).backgroundColor,
+              borderStyle: getComputedStyle(b).borderTopStyle,
+            };
+          }
+        }
+      }
+      return out;
+    })()`) as any;
+    console.log("FIXTURES " + JSON.stringify(r, null, 1));
+
+    /* ⚠️ THE NEAR STEP, PAINTED. The last run had to report this "not exercised" — nothing on the
+       account sat between 85% and 100%. A seeded 13-day wait against a 14-day window does. */
+    expect(r.near, "no bar reached the near step — the fixture is not on the board").not.toBeNull();
+    expect(Number(r.near.fill)).toBeGreaterThanOrEqual(85);
+    expect(Number(r.near.fill)).toBeLessThan(100);
+    const DEEP: Record<string, string> = {
+      out: "rgb(215, 224, 210)", req: "rgb(236, 201, 184)",
+      decide: "rgb(226, 176, 154)", remind: "rgb(223, 230, 220)",
+    };
+    expect(r.near.paint, `the near step painted ${r.near.paint} for ${r.near.fam}`)
+      .toBe(DEEP[r.near.fam]);
+
+    /* ⚠️ AND THE HOLLOW OVERRUN'S LABEL, computed. Also "not exercised" last time. */
+    expect(r.passed, "no hollow overrun on the board").toBeGreaterThan(0);
+    expect(r.hollowLabelled, "no hollow stretch carries a label").not.toBeNull();
+    expect(r.hollowLabelled.opacity).toBe("0.75");
+    expect(r.hollowLabelled.bg, "a hollow stretch is filled").toBe("rgba(0, 0, 0, 0)");
+    expect(r.hollowLabelled.borderStyle).toBe("solid");
+
+    /* the distinct families seen — a monoculture would satisfy every check above */
+    expect(Object.keys(r.tally).length, `only one family: ${JSON.stringify(r.tally)}`).toBeGreaterThan(2);
+  });
+
+  test("⚠️ the scrawl and the fill name the SAME date, on every row that names one", async ({ page }) => {
+    await openRoute(page, "/todo/calendar", { width: 1920, height: 900 });
+    await page.waitForTimeout(1400);
+    const r = await page.evaluate(`(() => {
+      const DATE = /\\b(\\d{1,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\\b/g;
+      const out = [];
+      for (const row of document.querySelectorAll(".tl-rrow")) {
+        const scr = row.querySelector(".tl-scr");
+        const bars = [...row.querySelectorAll(".tl-p")];
+        const goals = [...new Set(bars.map((b) => b.dataset.fill).filter((f) => f && f !== "none"))];
+        /* ⚠️ PER LANE, NOT PER ROW. A row is a RELATIONSHIP and can hold several queries — Tom
+           Ellery holds two, on two lanes, with two legitimately different named ends. Comparing
+           across the row would demand that two separate journeys agree about a date neither of
+           them shares, which is not a contradiction but a row doing its job. */
+        const byLane = {};
+        for (const b of bars) {
+          const lane = getComputedStyle(b).getPropertyValue("--lane").trim() || "0";
+          const tip = b.getAttribute("data-tip") || "";
+          if (!tip) continue;
+          (byLane[lane] = byLane[lane] || []).push(tip);
+        }
+        for (const lane of Object.keys(byLane)) {
+          const tips = [...new Set(byLane[lane])];
+          out.push({
+            name: ((row.querySelector(".tl-nm2") || {}).textContent || "?") + " lane " + lane,
+            scrawl: scr ? scr.textContent : null,
+            tips,
+            hasFillTarget: goals.length > 0,
+            tipDates: tips.map((t) => (t.match(DATE) || [])),
+          });
+        }
+      }
+      return out;
+    })()`) as any[];
+    let checked = 0;
+    for (const row of r) {
+      /* ⚠️ A CAPTION MAY NAME TWO DATES — a span has a start and an end, and "Out since 25 Jun ·
+         reply expected 20 Aug" is one sentence saying both. What it may NOT do is name a
+         different END from every other caption on its own row: that is the contradiction this
+         pack found live, where one bar's label said "next reminder 8 Sept" and its own tooltip
+         appended "16 Sept". So the LAST date in each caption — the end — must agree across the
+         row. */
+      const ends = [...new Set((row.tipDates as string[][]).map((ds) => ds[ds.length - 1]).filter(Boolean))];
+      expect(ends.length, `${row.name}: the row's captions end on ${ends.length} different dates — ${JSON.stringify(row.tips)}`)
+        .toBeLessThanOrEqual(1);
+      if (ends.length) checked += 1;
+      /* a row whose scrawl names a date must have something to fill toward */
+      if (row.scrawl && /\d/.test(row.scrawl)) {
+        expect(row.hasFillTarget, `${row.name} scrawls "${row.scrawl}" with no fill target`).toBe(true);
+      }
+    }
+    console.log(`captions carrying a date: ${checked}`);
+    expect(checked, "no caption named a date — the sweep proves nothing").toBeGreaterThan(2);
   });
 });

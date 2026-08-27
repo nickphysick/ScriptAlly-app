@@ -153,6 +153,110 @@ const STATUSES = [
   console.log(`wrote ${STATUSES.length} queries`);
 }
 
+/* ══ THREE CALENDAR FIXTURES THE ACCOUNT COULD NOT PRODUCE (Porcelain fix pack, Phase 2) ══════
+ *
+ * ⚠️ THEY EXIST BECAUSE THE LAST RUN'S ACCEPTANCE HAD TO SAY "not exercised" ABOUT THREE OF ITS
+ * OWN CLAIMS. The near step, the hollow overrun and a passed named end were all covered by unit
+ * tests over `fillFor` and by nothing on a rendered page — and a unit test cannot see a painted
+ * tone. An honest gap in a report is better than a green that means nothing, but it is not as
+ * good as closing it.
+ *
+ * ⚠️ EVERY DATE IS RELATIVE TO TODAY, so the fixtures stay in the state they were built for on
+ * every day the seeder is run. A fixed date would drift out of its own case within a fortnight
+ * and the acceptance would quietly stop measuring what it names.
+ *
+ * ⚠️ AND THE SENDS ARE INSIDE THE WINDOW ON PURPOSE for the near case. A stretch that begins
+ * before the window's left edge is drawn from that edge, so its fill is a fraction of the VISIBLE
+ * span rather than of the stated one — a real property of the drawing, and one a fixture must not
+ * sit on top of if it means to measure the threshold.
+ */
+{
+  const CAL = [
+    /* ⚠️ THE NEAR STEP: 13 days elapsed against a 14-day window ≈ 93%, inside [85, 100).
+       `responseTimeWeeks` IS AN INT in the rules (`firestore.rules:349`), so the window can only
+       be a whole number of weeks — a fractional 1.6 was denied, and denied ATOMICALLY, taking all
+       three fixtures with it. Two weeks is the shortest window that leaves room for a fraction
+       above 85% that is not also 100%.
+       ⚠️ AND BOTH ENDS SIT INSIDE THE 3-MONTH WINDOW (which opens 22 days back) on purpose: a
+       stretch beginning before the left edge is drawn FROM that edge, so its fill is a fraction of
+       what shows rather than of the stated span, and a fixture for a threshold must not sit on
+       top of that. */
+    { id: "seed-cal-near", name: "Wren Ashcombe", agency: "Ashcombe Literary",
+      weeks: 2, sentDaysAgo: 13, status: "Queried" },
+    /* a passed named end at a plausible distance: 48 days out on a 4-week window, so the date
+       passed 20 days ago and the bar runs full to it and hollow past it */
+    { id: "seed-cal-passed20", name: "Cormac Bligh", agency: "Bligh & Sons",
+      weeks: 4, sentDaysAgo: 48, status: "Queried" },
+    /* ⚠️ THE EXTREME, AND THE ONLY SHAPE THAT PUTS A LABEL ON A HOLLOW PIECE. The named end is far
+       outside the window, so the whole run is past it and the run's words have nowhere solid to
+       sit. It must be WRITER-held: an agent-held stretch whose date has passed is `quiet`, which
+       has its own hatch and is exempted from the hollow treatment — so a `Queried` fixture here
+       produced one quiet bar and no hollow label at all, which is how the first attempt at this
+       fixture measured nothing. */
+    { id: "seed-cal-passed865", name: "Ottoline Frayn", agency: "Frayn Agency",
+      weeks: 4, sentDaysAgo: 893, status: "Full Requested" },
+  ];
+  const kept = new Map();
+  for (const c of CAL) {
+    const snap = await getDoc(doc(db, "users", uid, "agents", c.id));
+    if (snap.exists() && typeof snap.data().dateAdded === "string") kept.set(c.id, snap.data().dateAdded);
+  }
+  const batch = writeBatch(db);
+  for (const c of CAL) {
+    batch.set(doc(db, "users", uid, "agents", c.id), {
+      id: c.id, userId: uid, name: c.name, agency: c.agency,
+      email: `${c.name.split(" ")[0].toLowerCase()}@example.com`,
+      website: "", genres: ["Literary Fiction"], notes: "", agentNotes: "",
+      mswlNotes: "", twitter: "", bluesky: "", instagram: "", socials: [],
+      city: "London", country: "GB",
+      submissionStatus: "Open", submissionMethod: "Email",
+      responseTimeWeeks: c.weeks,
+      starRating: 4, noResponseMeansNo: false,
+      setAside: false, importedNeedsReview: false,
+      materialsWanted: ["Query letter", "Synopsis"],
+      /* ⚠️ `dateAdded` IS IMMUTABLE — the stored value wins where there is one, for the reason
+         spelled out at the agents batch above: a value recomputed from today enters the update
+         diff on every later run and the whole batch is refused, atomically and silently. */
+      dateAdded: kept.get(c.id) ?? iso(200), lastCheckedDate: iso(5),
+    });
+    batch.set(doc(db, "users", uid, "queries", `${c.id}-q`), {
+      id: `${c.id}-q`, userId: uid,
+      agentId: c.id, manuscriptId: MS_ID,
+      dateSent: iso(c.sentDaysAgo),
+      status: c.status, sendMethod: "Email",
+      personalisationNotes: "", packageId: "",
+    });
+  }
+  await batch.commit();
+  console.log(`wrote ${CAL.length} calendar fixtures (near step, passed end ×2)`);
+}
+
+/* ⚠️ ONE DATED TASK, so the Calendar's per-task row has a subject. The board renders one row per
+   dated task now — title as the name, `Your task` beneath it, TICK IT OFF wired to `quickDone` —
+   and none of that can be measured on an account with no task due. The title is deliberately long
+   enough to make `barFit` choose between its three forms on a real chip. */
+{
+  const TASK_ID = "seed-cal-task";
+  /* the collection is `tasks` — `users/{uid}/tasks`, the canonical stored to-do object */
+  /* ⚠️ `createdAt` IS NOT IN THE UPDATE ALLOWLIST, and recomputing it from today is the SAME
+     trap this file already records at `dateAdded` above — arriving a second time, in a different
+     collection, through a different field. `affectedKeys()` is a VALUE diff: on the day this is
+     first written the recomputed value matches, and every day after it differs by the elapsed
+     time, `createdAt` enters the diff, and the write is refused. The stored value wins where
+     there is one, which makes the seeder idempotent on any day. */
+  const had = await getDoc(doc(db, "users", uid, "tasks", TASK_ID));
+  await setDoc(doc(db, "users", uid, "tasks", TASK_ID), {
+    id: TASK_ID, userId: uid,
+    text: "Reread the O'Rourke pages before Thursday",
+    done: false,
+    dueDate: iso(-2),
+    createdAt: (had.exists() && had.data().createdAt)
+      || new Date(Date.now() - 5 * 86_400_000).toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+  console.log("wrote 1 dated task");
+}
+
 for (const c of ["manuscripts", "agents", "queries"]) {
   console.log(`  ${c}: ${(await getDocs(path(c))).size} docs on the account`);
 }
