@@ -400,3 +400,71 @@ Two separate things, and only one was a bug:
    caught me in Phase 2, in the same file, one line along.
 2. **The scope line had been reverted, and deliberately, by another session** — with a reasoned
    comment naming my commit. See below. That is not a bug and I have left it alone.
+
+---
+
+# Fix pack — three faults and a verification pass
+
+Baseline at `d784599d`: tsc 0 · build 0 · vitest **424 files, 7281 passed, 0 failed** — clean.
+
+## Part 1 — the ghost card was the third generation, and there were three of them
+
+The card is the ledger's own `pkgb-ghostrow`, and it is the middle of three generations of one
+control:
+
+| | | opens |
+|---|---|---|
+| gen 1 | two hand-written ghost CARDS side by side, one superseding the other | modal |
+| gen 2 | `pkgb-ghostrow` — the ledger pack replaced that pair with one full-width `tbody` | modal |
+| gen 3 | `＋ Build a package` — the Builder pack added it BELOW the ledger | the build row |
+
+**Gen 3 arrived without gen 2 being deleted.** A replacement added rather than swapped — which is
+the fault gen 2's own comment described happening to *its* predecessors. Third time in this
+feature, and mine, one pack ago.
+
+⚠️ **And there were THREE, not two.** `＋ New package` in the ledger head is the one nobody counted,
+including me when I wrote the brief's premise into this report. `builder-refined.html` contains
+**"New package" zero times and "Build a package" twice**; the ledger head holds the count and
+`How it works`, and nothing else.
+
+`.pkgb-gt` / `.pkgb-gs` were **left**: they are still rendered by `MaterialsBand`, which the rail
+replaced but which is not deleted. **Reported, not swept** — that is a different removal from this
+one, and it is the same class of loose end (see below).
+
+## Part 2 — the empty section, and a premise that did not hold
+
+D4 asked for Versions to match "how the other two sections behave when empty". **They behave the
+same way it does** — a heading, a zero and a blank. There was no treatment to match, so fixing the
+instance that was seen would have left two-thirds of the fault. All three now invite their first.
+
+`.radd` is styled in the ref and **rendered zero times**, because every section in its fixture has
+chips. The shape is the ref's; the sentence is mine (**F-BO**).
+
+## Part 3 — `Text · 1 word` is the FIXTURE, and no change was made
+
+Read directly from the dev database:
+
+```
+seed-mat-ql1  Query Letter  "Hook-first"     wordCount=undefined  bodyChars=0  bodyWords=0
+seed-mat-ql2  Query Letter  "Comps-forward"  wordCount=undefined  bodyChars=0  bodyWords=0
+seed-mat-syn  Synopsis      "One-page"       wordCount=undefined  bodyChars=0  bodyWords=0
+```
+
+All three hold **no text at all**. `wordsPhrase` returns `null` at zero words, so `sourceLabel`
+emits `Text` with no count — which is what the rail measured (`Text · in 2`) in the previous pack.
+**`1 word` is not reproducible on this data**, and the label is correct: the seed is what is thin.
+
+**D8's sweep ran anyway**, over every word-and-count derivation rather than the one that was seen:
+
+```
+materialDraft.wordsPhrase     words === 1 ? "word" : "words"     ✔ and null at zero
+manuscriptPitch:160           n === 1 ? "word" : "words"         ✔
+manuscriptProfile:112         word${words === 1 ? "" : "s"}      ✔
+compsPage:115                 elapsed === 1 ? "year" : "years"   ✔
+builderRail.versionMetaLine   package/packages, agent/agents     ✔ locked
+```
+
+One inconsistency found and **not** changed, since it is outside this pack: `agentMaterials.ts:116`
+formats with `toLocaleString("en-US")` in an `en-GB` app, and always says "words". It describes the
+AGENT's stated requirement rather than a material's length, so the plural is not wrong there —
+the locale is. Flagged, not fixed.
