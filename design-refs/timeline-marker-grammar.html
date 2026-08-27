@@ -46,8 +46,19 @@ z-index:3;box-shadow:0 0 0 3px var(--parchment);display:flex;align-items:center;
 z-index:3;box-shadow:0 0 0 3px var(--parchment);display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1}
 .ddot.out{background:#f8e7dc;border:1.5px solid var(--burgundy);color:var(--burgundy)}
 .ddot.in{background:var(--sagecent);border:1.5px solid var(--sage);color:var(--sagedark)}
-/* ---------- MARKER 3 · dashed flag — a date arrived, nothing happened ---------- */
-.flag{position:absolute;top:-6px;height:calc(var(--bar-h) + 12px);width:0;border-left:2px dashed var(--dash);
+/* ---------- MARKER 3 · NOTCH — a date arrived, nothing happened ----------
+   ⚠️ AMENDED 27 Aug by the `calendar` session (density pack, Phase 3). This was a DASHED FLAG,
+   and its reminder variant a DASHED RING. Both are superseded.
+   The ring read as an unfinished StatusDot — and now that a status marker and a direction marker
+   are BOTH circles, anything round on the timeline implies a recorded fact. A date that arrived
+   with nothing against it is the one thing here that is not a fact, so it cannot be a circle.
+   The dash went with it: dashed meant provisional under the older grammar, which the SHAPE now
+   carries, and a dashed 2px line at these sizes read as a rendering artefact rather than a
+   decision. The mark is a 2px SOLID straight-sided tick in `--dash`, `--bar-h + 12px` tall.
+   ⚠️ AND IT IS NOT CLICKABLE. `timeline-settled.html` (v44) gives its `.notch` `cursor: pointer`;
+   the build deliberately does not, because nothing is behind it and a pointer cursor on an inert
+   mark is a promise the app cannot keep. Discs and direction dots remain clickable. */
+.flag{position:absolute;top:-6px;height:calc(var(--bar-h) + 12px);width:2px;background:var(--dash);/* was: width:0;border-left:2px dashed var(--dash) — superseded, see above */
 transform:translateX(-1px);z-index:3}
 .flag .lab{position:absolute;top:-5px;left:6px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;
 text-transform:uppercase;white-space:nowrap;padding:2px 7px;border-radius:5px;background:var(--parchment);
@@ -145,7 +156,7 @@ border:2px dashed var(--dash);background:var(--parchment);box-shadow:0 0 0 3px v
   <div class="b their fadeR" style="left:56%;right:0">Reply window &middot; to 6 Sept</div></div></td></tr>
 </table>
 
-<h2><span class="k">Marker 3</span>Dashed flag — a date arrived</h2>
+<h2><span class="k">Marker 3</span>Notch — a date arrived <em>(amended 27 Aug: was a dashed flag; the ring variant is retired)</em></h2>
 <div class="secnote">No activity, nothing on the record, nothing to click. Dashed throughout, because dashed already means <i>provisional</i> everywhere else in this app.</div>
 <table>
 <tr><th>Event</th><th>On the bar</th></tr>

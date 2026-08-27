@@ -258,7 +258,11 @@ const Node: React.FC<{ n: BarNode; selected: boolean; onPick: () => void }> = ({
  */
 const Way: React.FC<{ w: Waypoint }> = ({ w }) => (
   <span
-    className={`tl-at tl-wp${w.side === "yours" ? " yours" : ""}${w.passed ? " passed" : ""}`}
+    /* ⚠️ NO `yours` CLASS (density pack, Phase 3). It coloured the upright sage for the agent's
+        dates and dusty pink for the writer's; a notch is one colour, so the class had no rule left
+        to reach and emitting it would leave a hook the next reader assumes is live. The side is
+        still on `w` for anything that needs it — nothing on this element does. */
+    className={`tl-at tl-wp${w.passed ? " passed" : ""}`}
     data-kind={w.kind}
     style={{ left: pct(w.at), ...laneVar(w.lane) }}
     aria-hidden

@@ -158,6 +158,10 @@
   --bar-offer-fill: #cbd9e8;   --bar-offer-line: #9db6cf;   --bar-offer-text: #8e5252;
   /* closed — no fill, so there is no `-fill` token to declare */
   --bar-closed-line: #ded3c4;  --bar-closed-text: #a3927f;
+  /* ⚠️ THE NOTCH'S OWN COLOUR, the ref's `--dash`. It was a literal `#c9a89e` repeated on the
+     waypoint's side variants; a mark that means "a date, and nothing behind it" is one thing and
+     takes one value. */
+  --dash: #c9a89e;
   /* the writer's own chips */
   --bar-task-fill: #ffffff;    --bar-task-line: #e0d0c4;    --bar-task-text: #3a1c14;
 }
@@ -776,60 +780,57 @@
 .tl-at:hover, .tl-at:focus-visible { z-index: 6; }
 @media (prefers-reduced-motion: reduce) { .tl-tip { transition: none; } }
 
-/* ── MARKER 3 · a date arrived, and nothing is behind it ──────────────────────────────────────
-   ⚠️ `pointer-events: none` IS THE INTERACTION HALF OF THE SAME RULE. There is nothing to open, so
-   there is nothing to click — stated once, in the place that also makes it dashed.
-   ⚠️ AND IT IS NARROWED, NOT CONTRADICTED, BY THE `::after` BELOW (Phase 4). The pseudo-element
-   takes pointer events so the caption can be reached; the element still has no handler, is still
-   not a button and is still `aria-hidden`. Nothing became openable. Read the two together. */
+/* ── MARKER 3 · A NOTCH — a date arrived, and nothing is behind it ────────────────────────────
+ *
+ * ⚠️ THE DASHED RING IS SUPERSEDED (density pack, Phase 3; v11 amended). It read as an unfinished
+ * StatusDot — and now that a status marker and a direction marker are BOTH circles, anything round
+ * on this timeline implies a recorded fact. A date that arrived with nothing against it is the one
+ * thing here that is not a fact, so it cannot be a circle at all.
+ *
+ * ⚠️ A NOTCH IS STRAIGHT-SIDED AND SOLID, which is the whole distinction: it is a mark ON the
+ * timeline rather than an object IN it. It was dashed, on the older grammar where dashed meant
+ * provisional; that grammar is carried by the SHAPE now, and a dashed 2px line at these sizes read
+ * as a rendering artefact rather than as a decision.
+ *
+ * ⚠️ `pointer-events: none` IS THE INTERACTION HALF OF THE SAME RULE. There is nothing to open, so
+ * there is nothing to click — and the ref's own `.notch` carries `cursor: pointer`, which this
+ * build deliberately does not: a pointer cursor on an inert mark is a promise the app cannot keep.
+ * The `::after` below narrows that without contradicting it — see the note at it.
+ */
 .tl-wp {
-  /* ⚠️ THE NUDGE IS HALF THE UPRIGHT'S OWN LINE, and it was the literal `-1px` — the last of the
-     four instances this pack's standing rule names. A zero-width element draws its whole border on
-     one side of its position, so it has to be pulled back by half of it to sit ON the day rather
-     than beside it. Written as `-1px` that is a number in one declaration silently depending on a
-     number in another; the day someone thickens the line to 3px, the upright is off by half a
-     pixel and nothing says why. */
   --wp-line: 2px;
-  width: 0; height: calc(var(--bar-h) + var(--wp-over) * 2);
+  width: var(--wp-line);
+  /* ⚠️ THE REF SAYS `--bar-h + 12px` AND THIS SAYS THE SAME THING IN THE ROW'S OWN TOKENS.
+     `--wp-over` is how far a waypoint stands proud of the bar — six, at each end — so the literal
+     12 would be that number written twice, once here and once as a token nothing read. */
+  height: calc(var(--bar-h) + var(--wp-over) * 2);
   transform: translate(calc(var(--wp-line) / -2), -50%);
-  z-index: 3; border-left: var(--wp-line) dashed #8a9e88;
+  z-index: 3;
+  background: var(--dash);
   pointer-events: none;
 }
-.tl-wp.yours { border-left-color: #c9a89e; }
-.tl-wp .tl-tip { color: #5a6e58; background: #fdfaf5; }
-.tl-wp.yours .tl-tip { color: #a06a55; }
-/* ⚠️ A WAYPOINT IS TWO PIXELS WIDE AND TAKES NO POINTER EVENTS, SO IT CANNOT BE HOVERED — which
-   would have made hover-only captions silently delete every forecast's label rather than defer it.
-   The reach is a transparent pseudo-element that takes events while the element does not, so the
-   upright stays exactly as unclickable as its own rule says: no handler, no button, `aria-hidden`.
-   Hovering a label is not opening a record, and this is the one place the two had to be separated. */
+/* ⚠️ ONE COLOUR FOR EVERY KIND, AND IT IS THE DATE'S, NOT THE SIDE'S. The upright used to be sage
+   for the agent's dates and dusty pink for the writer's, which said whose date it was — a fact the
+   BAR beneath it already carries in its fill, and the only one a notch has room to be wrong about.
+   A notch says "a date lands here"; what kind of date it is, its caption says. */
+.tl-wp .tl-tip { color: #8a7a6c; background: #fdfaf5; }
+/* ⚠️ AN OVERTAKEN WAYPOINT STILL RENDERS — as passed. A past window states what happened, and a
+   forecast that was met or missed is part of what happened. It fades; it does not change shape,
+   because the shape is what it IS rather than when it is. */
+.tl-wp.passed { opacity: 0.55; }
+/* ⚠️ THE REMINDER IS A NOTCH LIKE EVERY OTHER. It drew a dashed RING — the one shape this pack
+   retires — on the reasoning that a reminder is the writer's own date rather than a fact. That is
+   true and it is what the CAPTION says; drawing it as a circle put it in the vocabulary of
+   recorded events, which is precisely where it does not belong. */
+
+/* ⚠️ THE REACH: A TWO-PIXEL MARK CANNOT BE HOVERED, so a transparent pseudo-element takes the
+   pointer events the notch itself does not. The notch stays exactly as unclickable as its own rule
+   says — no handler, no button, `aria-hidden` — and hovering a label is not opening a record. Read
+   the two together. */
 .tl-wp::after {
   content: ""; position: absolute; top: 0; bottom: 0; left: -10px; width: 20px;
   pointer-events: auto;
 }
-/* the reminder's reach is its ring's, because its ring is what a reader aims at */
-.tl-wp[data-kind="reminder"]::after { left: calc(var(--ddot) / -2); width: var(--ddot); }
-/* ⚠️ AN OVERTAKEN WAYPOINT STILL RENDERS — as passed. A past week states what happened, and a
-   forecast that was met or missed is part of what happened. */
-.tl-wp.passed { border-left-style: solid; opacity: 0.55; }
-
-/* ⚠️ THE REMINDER TAKES A DASHED RING, NOT AN EXCLAMATION MARK. A reminder falling due is the date
-   you chose, arriving; an exclamation adds alarm the app has no business feeling — the same ground
-   the forbidden word was ruled out on. The ring reads as a sibling of the StatusDot rather than a
-   warning, which is exactly what it is: the same size as the direction marker, dashed instead of
-   solid, because the thing behind it is a date rather than a fact. */
-.tl-wp[data-kind="reminder"] { border-left: none; }
-.tl-wp[data-kind="reminder"]::before {
-  content: ""; position: absolute;
-  top: 50%; left: 0; transform: translate(-50%, -50%);
-  width: var(--ddot); height: var(--ddot);
-  border-radius: 50%; border: 2px dashed #c9a89e;
-  background: #fdfaf5; box-shadow: 0 0 0 3px #fdfaf5;
-}
-/* ⚠️ THE OFFSET IS THE RING'S OWN SIZE. It read `--disc` — the StatusDot's — while the ring it
-   hangs from is `--ddot`, so the caption was placed by a number a different element owns and the
-   two only agreed while the dots were within 10px of each other. The tiers move them apart. */
-.tl-wp[data-kind="reminder"] .tl-tip { top: calc(50% + var(--ddot) / 2 + 5px); }
 
 /* ══ THE WRITER'S OWN CHIPS ═════════════════════════════════════════════════════════════════
  *
