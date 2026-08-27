@@ -851,11 +851,44 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * A button that opened nothing would be the dead-control fault this repo already records
    * against an Undo that restored nothing.
    */
+  /**
+   * ⚠️ THE CARD IS FOUND BY QUERY, ACROSS THE WHOLE BOARD — never by looking for a chip inside the
+   * visible window. That was the first shape and it left the action column EMPTY ON EVERY ROW: a
+   * card sits on the day it landed on the desk, which for a full requested three weeks ago is
+   * outside a one-month window that opens eight days back. The row was asking for something, the
+   * scrawl said so, and the button beside it was an em-dash — measured, 14 dashes and 0 buttons.
+   *
+   * ⚠️ AND IT READS `assembled`, WHICH IS `assembleBoardColumns` — the same derivation the To-do
+   * board and the badge count through. A second scan for "the card for this query" is how two
+   * surfaces come to disagree about whether there is one.
+   */
+  const cardsByQuery = useMemo(() => {
+    const m = new Map<string, BoardCard>();
+    const cols = assembled.cols;
+    for (const c of [...cols.todo, ...cols.today, ...cols.snoozed, ...cols.done]) {
+      const id = c.relatedRecordId;
+      if (id && !m.has(id)) m.set(id, c);
+    }
+    return m;
+  }, [assembled]);
+
   const actionFor = (r: TimelineRow): { label: string; card: BoardCard; itemKey: string | null } | null => {
     if (!r.note) return null;
+    /* the row's own item is the most specific answer where the window happens to hold one */
     const withCard = r.items.find((i) => i.card);
-    if (!withCard?.card) return null;
-    return { label: r.note.deed.toUpperCase(), card: withCard.card, itemKey: withCard.key };
+    if (withCard?.card) return { label: r.note.deed.toUpperCase(), card: withCard.card, itemKey: withCard.key };
+    /* otherwise the query this row is about — a row can hold several, so the one the note is
+       about is whichever query the bars name first */
+    const qid = barsByRow.get(r.key)?.segs.find((sg) => sg.side === "yours")?.queryId
+      ?? barsByRow.get(r.key)?.segs[0]?.queryId
+      ?? r.items.find((i) => i.queryId)?.queryId;
+    const card = qid ? cardsByQuery.get(qid) : undefined;
+    /* ⚠️ A DEED WITHOUT A CARD IS NOT AN ACTION. The button's only job is to open the task pane,
+       so a row whose work has no card behind it has no door to offer and shows the em-dash. A
+       button that opened nothing would be the dead-control fault this repo already records
+       against an Undo that restored nothing. */
+    if (!card) return null;
+    return { label: r.note.deed.toUpperCase(), card, itemKey: null };
   };
 
   /**

@@ -11,9 +11,10 @@ import { describe, it, expect } from "vitest";
 import { Agent, Query, QueryStatus, TaskFlag, Activity, ActivityType } from "../types";
 import { RecordItem, shortCalDate } from "./todoCalendar";
 import {
-  GAP, MIN_SEG, EVENT_AT, FRESH_MAX_DAYS, SETTLED_MAX_DAYS, fillFor,
+  GAP, MIN_SEG, EVENT_AT, FRESH_MAX_DAYS, SETTLED_MAX_DAYS, fillFor, NEAR_AT,
   cutPieces, laneBars, sideOf, weightFor, durationCount, labelFor, statusIndex,
   type BarWindow, type LaneInput,
+  type Segment,
 } from "./journeyBars";
 import { windowDays } from "./todoTimeline";
 
@@ -712,5 +713,56 @@ describe("⚠️ THE NAMED END — three sources, one precedence, and no notch t
     const bars = laneBars(lane({ query: q({ status: QueryStatus.QUERIED }), agent: agent({}) }), WIN);
     expect(bars.segments[0].goal).toBeUndefined();
     expect(fillFor(bars.segments[0])).toBeNull();
+  });
+});
+
+/* ══ THE FILL (Porcelain, Phase 3) ═══════════════════════════════════════════════════════════ */
+
+describe("fillFor — elapsed over a stated span, derived at read and stored nowhere", () => {
+  const seg = (over: Partial<Segment>): Segment => ({
+    key: "s", rowKey: "r", lane: 0, from: 0, to: 10, side: "theirs",
+    openLeft: false, openRight: false, capLeft: false, capRight: false,
+    label: "", short: "", state: "theirs", tip: "", todayAt: 5, queryId: "q", ...over,
+  } as Segment);
+
+  it("⚠️ null WHERE NOBODY NAMED A DATE — and null is the point, not the failure case", () => {
+    /* a fill of zero would say a span exists and none of it had elapsed. Absence says nobody
+       named a date, which is the true statement and the one the empty track is there to make. */
+    expect(fillFor(seg({ goal: undefined }))).toBeNull();
+  });
+
+  it("clamps at both ends", () => {
+    /* today before the stretch even began */
+    expect(fillFor(seg({ from: 4, goal: 8, todayAt: 0 }))).toBe(0);
+    /* today past the named end — it caps, and the run-on is drawn hollow instead */
+    expect(fillFor(seg({ from: 0, goal: 4, todayAt: 99 }))).toBe(1);
+  });
+
+  it("is the honest fraction in between", () => {
+    expect(fillFor(seg({ from: 0, goal: 10, todayAt: 2.5 }))).toBeCloseTo(0.25, 6);
+    expect(fillFor(seg({ from: 2, goal: 6, todayAt: 5 }))).toBeCloseTo(0.75, 6);
+  });
+
+  it("a finished stretch is full, whatever its dates say", () => {
+    expect(fillFor(seg({ historical: true, goal: undefined }))).toBe(1);
+    expect(fillFor(seg({ historical: true, from: 0, goal: 100, todayAt: 1 }))).toBe(1);
+  });
+
+  it("a named end at or before the start is full rather than negative or infinite", () => {
+    /* the degenerate case: a span of zero. Dividing by it would give Infinity or NaN, and a NaN
+       width is a declaration the browser drops — a bar that silently loses its fill. */
+    expect(fillFor(seg({ from: 4, goal: 4, todayAt: 9 }))).toBe(1);
+    expect(fillFor(seg({ from: 4, goal: 2, todayAt: 9 }))).toBe(1);
+  });
+
+  it("⚠️ THE NEAR STEP IS A THRESHOLD ON THE FRACTION, and it is what replaced the pulse", () => {
+    /* 85% of a stated span is 85% whether or not anything moves, and it survives a screenshot and
+       a reader who has asked for no motion — neither of which the animation did. */
+    expect(NEAR_AT).toBe(0.85);
+    const at = (todayAt: number) => fillFor(seg({ from: 0, goal: 100, todayAt }))!;
+    expect(at(84) >= NEAR_AT, "84% should not be near").toBe(false);
+    expect(at(85) >= NEAR_AT, "85% should be near").toBe(true);
+    /* and 100% is NOT near — a finished wait is finished, not nearly finished */
+    expect(at(100)).toBe(1);
   });
 });

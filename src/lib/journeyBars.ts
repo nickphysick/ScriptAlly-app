@@ -774,8 +774,15 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
         || marks.some((m) => Math.abs(m - p.to) < GAP + 0.001)
         || terminal
         ? { historical: true as const } : {}),
-      /* the stretch past the named end — drawn, never named */
-      ...(goalAt != null && p.from >= goalAt - 0.001 && goalAt < todayAt
+      /* ⚠️ THE STRETCH PAST THE NAMED END IS DRAWN, NEVER NAMED — except on `quiet`, which has
+         its own treatment and must not take this one.
+         A quiet bar IS the stretch past a date that came and went with nothing scheduled behind
+         it; that is what the state means. Drawing it hollow would leave it with no fill element
+         at all, so the hatch — the one thing that distinguishes gone-quiet from a bar somebody
+         forgot to finish — would never paint. Measured: a transparent track, no `.tl-fl` child,
+         and a rule that read perfectly correctly. Two treatments for one fact, and the wrong one
+         was winning. */
+      ...(goalAt != null && p.from >= goalAt - 0.001 && goalAt < todayAt && state !== "quiet"
         ? { hollow: true as const }
         : {}),
       ...(goalAt != null ? { goal: goalAt } : {}),
