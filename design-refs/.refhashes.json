@@ -1,0 +1,6 @@
+{
+  "_note": "Hashes of the design refs that are ACTIVE design authorities. Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. Re-record deliberately with --update after taking a new ref; never from a build.",
+  "refs": {
+    "design-refs/manuscripts-scroll-page.html": "86e9eb3ce18714a43e3f3538ca8312eac7e16199ca9fc37eaf4420c1a2814aee"
+  }
+}
