@@ -16,15 +16,20 @@
  */
 import { ComponentType } from "../types";
 import type { Agent, BookVersion, ManuscriptVersion, Query, SubmissionPackage } from "../types";
-import { SLOT_FIELD, TYPE_META, BUILDER_TYPES } from "../components/packages/typeMeta";
+import { TYPE_META } from "../components/packages/typeMeta";
+import { PACKAGE_SLOTS } from "./packageAttach";
 import { isSlotFilled, isRequest, isResponse } from "./packageMetrics";
-import { bookVersionOf } from "./bookVersions";
 import { wordsPhrase } from "./materialDraft";
 import { agentPrimary, agentSecondary, AGENT_NOT_RECORDED } from "./agentDisplay";
 
 export interface DrawerSlot {
-  type: ComponentType;
-  /** `Covering letter` / `Synopsis` / `Sample pages`. */
+  /**
+   * The material type, or **null on the version row** — a version is not a material and has no
+   * `ComponentType`. Consumers that key off the type must handle the null rather than assume three
+   * material rows; that assumption is what made the third row a sample for as long as it was one.
+   */
+  type: ComponentType | null;
+  /** `Covering letter` / `Synopsis` / `Version`. */
   label: string;
   /** The material's id, for `Open material ›`. Null when the slot is empty. */
   materialId: string | null;
@@ -58,31 +63,52 @@ export interface DrawerSlot {
  * ⚠️ AND AN EMPTY SLOT IS STILL A ROW. A slot that vanished would state nothing; a row reading
  * "Not included" states that the package does not carry one, which is the fact.
  */
+/**
+ * `What's in it` — **three rows: letter, synopsis, version** (D14).
+ *
+ * ⚠️ THE THIRD ROW HAS NO CONTENTS PREVIEW, AND THAT IS NOT AN OMISSION. The first two resolve to a
+ * material the writer wrote, so they can show its word count and its opening line. A version is an
+ * ordering of the book — a name and a kind, with no text of its own — so `words` and `opening` are
+ * null on it by construction rather than by a missing lookup. A row that showed the manuscript's
+ * word count here would be answering a different question.
+ *
+ * ⚠️ AND THE VERSION IS THE PACKAGE'S OWN. It used to be inherited from the sample material through
+ * `bookVersionOf`, and shown only above two versions; both halves have gone (D1, D9). It shows
+ * whenever the package states one, because a package that names its version is stating a fact
+ * regardless of how many other orderings exist.
+ */
 export const drawerSlots = (
   pkg: SubmissionPackage,
   materials: readonly ManuscriptVersion[],
   bookVersions: readonly BookVersion[],
-): DrawerSlot[] =>
-  BUILDER_TYPES.map((type) => {
-    const id = pkg[SLOT_FIELD[type]];
-    const m = isSlotFilled(id) ? materials.find((v) => v.id === id) ?? null : null;
-    const bvId = m ? bookVersionOf(m) : null;
+): DrawerSlot[] => PACKAGE_SLOTS.map((sl) => {
+  if (sl.kind === "version") {
+    const bv = pkg.bookVersionId ? bookVersions.find((b) => b.id === pkg.bookVersionId) ?? null : null;
     return {
-      type,
-      label: TYPE_META[type].label,
-      materialId: m?.id ?? null,
-      name: m?.versionName ?? null,
-      words: m ? wordsPhrase(m) : null,
-      /* ⚠️ THE WHOLE BODY, NOT A SUBSTRING. Clamping in JS bakes a line count into the data, which
-         is wrong at every width but the one it was cut for; `-webkit-line-clamp` clamps what is
-         rendered. A material with no pasted body (a `ref`) has no opening to show. */
-      opening: m?.contentDraft?.trim() || null,
-      versionName:
-        bvId && bookVersions.length >= 2
-          ? bookVersions.find((b) => b.id === bvId)?.name ?? null
-          : null,
+      type: null,
+      label: "Version",
+      materialId: null,
+      name: bv?.name ?? null,
+      words: null,
+      opening: null,
+      versionName: null,
     };
-  });
+  }
+  const id = pkg[sl.key];
+  const m = isSlotFilled(id) ? materials.find((v) => v.id === id) ?? null : null;
+  return {
+    type: sl.type,
+    label: TYPE_META[sl.type].label,
+    materialId: m?.id ?? null,
+    name: m?.versionName ?? null,
+    words: m ? wordsPhrase(m) : null,
+    /* ⚠️ THE WHOLE BODY, NOT A SUBSTRING. Clamping in JS bakes a line count into the data, which
+       is wrong at every width but the one it was cut for; `-webkit-line-clamp` clamps what is
+       rendered. A material with no pasted body (a `ref`) has no opening to show. */
+    opening: m?.contentDraft?.trim() || null,
+    versionName: null,
+  };
+});
 
 export interface DrawerHolder {
   queryId: string;

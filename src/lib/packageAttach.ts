@@ -65,12 +65,33 @@ export interface AttachedMaterial extends QueryMaterial {
   fromVersionId?: string;
 }
 
-/** The canonical order a package's slots are read in — the order the picker and the pills use. */
-export const PACKAGE_SLOTS: { key: keyof SubmissionPackage; type: ComponentType }[] = [
-  { key: "queryLetterVersionId", type: ComponentType.QUERY_LETTER },
-  { key: "synopsisVersionId", type: ComponentType.SYNOPSIS },
-  { key: "samplePagesVersionId", type: ComponentType.SAMPLE_PAGES },
+/**
+ * The canonical order a package's slots are read in — **letter, synopsis, version** (D4).
+ *
+ * ⚠️ IT IS A UNION, BECAUSE A VERSION IS NOT A MATERIAL. The first two resolve to a
+ * `ManuscriptVersion` document the writer wrote; the third names a `BookVersion` on the manuscript
+ * — an ordering of the book, with no document, no `componentType` and no text to paste. Typing all
+ * three as `{ type: ComponentType }` was only possible while the third slot WAS a material, and
+ * writing one now would mean inventing a `ComponentType` for a thing that is not one.
+ *
+ * ⚠️ AND THE SAMPLE IS GONE FROM HERE WITHOUT ANY PACKAGE BEING REWRITTEN. `samplePagesVersionId`
+ * is still stored on every package that had one and `isValidPackage` still requires the key; it is
+ * simply no longer read. See `lib/retireSamples.ts` for why that is the correct shape rather than a
+ * half-measure — a sent package's slots are frozen precisely so it keeps reporting what the agent
+ * actually received.
+ */
+export type PackageSlot =
+  | { kind: "material"; key: "queryLetterVersionId" | "synopsisVersionId"; type: ComponentType }
+  | { kind: "version"; key: "bookVersionId" };
+
+export const PACKAGE_SLOTS: PackageSlot[] = [
+  { kind: "material", key: "queryLetterVersionId", type: ComponentType.QUERY_LETTER },
+  { kind: "material", key: "synopsisVersionId", type: ComponentType.SYNOPSIS },
+  { kind: "version", key: "bookVersionId" },
 ];
+
+/** The material slots alone — what anything resolving a slot to a written document iterates. */
+export const PACKAGE_MATERIAL_SLOTS = PACKAGE_SLOTS.flatMap((s) => (s.kind === "material" ? [s] : []));
 
 export interface PackageItem {
   type: ComponentType;
@@ -94,7 +115,9 @@ export interface PackageItem {
  * writer sent nothing. It lands with its type name and no version name.
  */
 export function packageItems(pkg: SubmissionPackage, versions: readonly ManuscriptVersion[]): PackageItem[] {
-  return PACKAGE_SLOTS.flatMap(({ key, type }) => {
+  /* ⚠️ MATERIAL SLOTS ONLY. A chip resolves a slot id to a version DOCUMENT and prints its name;
+     the version slot names an ordering of the book, which has no document to resolve. */
+  return PACKAGE_MATERIAL_SLOTS.flatMap(({ key, type }) => {
     const id = pkg[key] as string;
     if (!isSlotFilled(id)) return [];
     const v = versions.find((x) => x.id === id);
@@ -123,7 +146,6 @@ export function packageItems(pkg: SubmissionPackage, versions: readonly Manuscri
 export const SLOT_EYEBROW: Record<string, string> = {
   [ComponentType.QUERY_LETTER]: "Letter",
   [ComponentType.SYNOPSIS]: "Syn",
-  [ComponentType.SAMPLE_PAGES]: "Sample",
 };
 
 /**
@@ -139,36 +161,49 @@ export const SLOT_EYEBROW: Record<string, string> = {
  */
 export interface LinkedChip {
   key: string; eyebrow: string; name: string; missing: boolean;
-  /**
-   * The BOOK version this slot's material excerpts (Part E, D5) — sample pages only, and null
-   * everywhere else.
-   *
-   * ⚠️ IT IS REACHED THROUGH THE MATERIAL, NEVER THROUGH THE PACKAGE. A package carries no version
-   * field anywhere in this app; `bookVersionOf` enforces sample-pages-only, so a stray id on a
-   * letter draws nothing. One edge, and the two can never disagree.
-   */
-  bookVersionName: string | null;
 }
 
+/**
+ * What a LINKED package's chips read — **its three slots**: letter, synopsis, version (D4/D14).
+ *
+ * ⚠️ THE VERSION IS THE PACKAGE'S OWN NOW, NOT INHERITED THROUGH A SAMPLE. It used to be reached
+ * through the sample material — `bookVersionOf(mat)` — because a package carried no version field
+ * and the sample was the only thing that knew. Both halves of that have gone: the package states it
+ * directly, and sample pages is no longer a material type, so the inheritance has no source left.
+ * One edge, and it now runs the short way round.
+ *
+ * ⚠️ AND IT IS ONE CHIP, NOT A MARK ON EVERY OTHER CHIP. The version is a fact about the package,
+ * so hanging it off each material would state it twice or three times and invite the reader to
+ * wonder which material it belonged to.
+ *
+ * ⚠️ A VERSIONLESS PACKAGE YIELDS NO VERSION CHIP AT ALL — not a chip reading `Not recorded`. On
+ * the strip these pills say what went; a pill stating an absence is noise beside two that state
+ * facts. The LEDGER is where `Not recorded` belongs, because a column has to say something.
+ */
 export function linkedChips(
   pkg: SubmissionPackage,
   versions: readonly ManuscriptVersion[],
-  /** The manuscript's book versions. Absent, or fewer than two, and no chip is offered (D12). */
+  /** The manuscript's book versions — the version slot resolves against these. */
   bookVersions: readonly BookVersion[] = [],
 ): LinkedChip[] {
-  const show = bookVersions.length >= 2;
-  return packageItems(pkg, versions).map((i) => {
-    const mat = show ? versions.find((v) => v.id === i.versionId) : undefined;
-    const bvId = mat ? bookVersionOf(mat) : null;
-    return {
-      key: i.versionId,
-      eyebrow: SLOT_EYEBROW[i.type] ?? i.label,
-      name: i.versionName?.trim() || MISSING_SLOT_CHIP,
-      missing: !i.versionName?.trim(),
-      bookVersionName: bvId ? bookVersions.find((b) => b.id === bvId)?.name ?? null : null,
-    };
-  });
+  const items = packageItems(pkg, versions).map((i) => ({
+    key: i.versionId,
+    eyebrow: SLOT_EYEBROW[i.type] ?? i.label,
+    name: i.versionName?.trim() || MISSING_SLOT_CHIP,
+    missing: !i.versionName?.trim(),
+  }));
+  if (!pkg.bookVersionId) return items;
+  const bv = bookVersions.find((b) => b.id === pkg.bookVersionId);
+  return [...items, {
+    key: `bv-${pkg.bookVersionId}`,
+    eyebrow: VERSION_EYEBROW,
+    name: bv?.name ?? MISSING_SLOT_CHIP,
+    missing: !bv,
+  }];
 }
+
+/** The version slot's eyebrow, beside `Letter` and `Syn`. */
+export const VERSION_EYEBROW = "Version";
 
 /** Same words as the packages page's own missing-slot state — one sentence, two surfaces. */
 export const MISSING_SLOT_CHIP = "No longer available";
@@ -423,7 +458,9 @@ export function packageDrift(
   if (anyMissing || snapshot.size === 0) return { state: "unknown", differing: [] };
 
   const current = new Map<string, string>();
-  for (const { key, type } of PACKAGE_SLOTS) {
+  /* ⚠️ MATERIAL SLOTS ONLY — drift compares what a SEND took against what the package holds now,
+     and a send takes materials. The version is not in the snapshot, so it cannot differ. */
+  for (const { key, type } of PACKAGE_MATERIAL_SLOTS) {
     const id = live[key] as string;
     if (isSlotFilled(id)) current.set(type as string, id);
   }

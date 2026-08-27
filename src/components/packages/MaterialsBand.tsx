@@ -154,12 +154,12 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
             </div>
           </div>
         ))}
-        {/* ⚠️ ONE ADD CARD, AND IT NAMES THE THREE TYPES RATHER THAN ASKING FOR ONE. The modal owns
-            the type step; a preselect here would be the page answering a question it is about to
-            ask. */}
+        {/* ⚠️ ONE ADD CARD, AND IT NAMES THE TYPES RATHER THAN ASKING FOR ONE. The modal owns the
+            type step; a preselect here would be the page answering a question it is about to ask.
+            Two types now — sample pages is retired as a material (D9/D13). */}
         <button type="button" className="pkgb-msheetadd" onClick={() => onAddMaterial(BUILDER_TYPES[0])}>
           <span className="pkgb-gt">Add a material</span>
-          <span className="pkgb-gs">Letter, synopsis or sample</span>
+          <span className="pkgb-gs">Letter or synopsis</span>
         </button>
       </div>
       {/**

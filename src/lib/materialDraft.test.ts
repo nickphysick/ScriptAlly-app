@@ -200,9 +200,11 @@ describe("typeTiles", () => {
   it("offers exactly the three builder types with their held counts", () => {
     const tiles = typeTiles([v(), v({ id: "v2" }), v({ id: "v3", componentType: ComponentType.SYNOPSIS })]);
     expect(tiles.map((t) => t.type)).toEqual([
-      ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS, ComponentType.SAMPLE_PAGES,
+      /* ⚠️ TWO (D9) — the shelf offers letters and synopses; the version is a package slot, not
+         a material, and the portion that went is recorded on the query. */
+      ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS,
     ]);
-    expect(tiles.map((t) => t.held)).toEqual([2, 1, 0]);
+    expect(tiles.map((t) => t.held)).toEqual([2, 1]);
   });
 
   /* the standing law — a full manuscript is not a package material */

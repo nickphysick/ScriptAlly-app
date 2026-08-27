@@ -21,7 +21,10 @@ const decls = (x: string) => x.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\
 
 const pkg = (over: Partial<SubmissionPackage> = {}): SubmissionPackage =>
   ({ id: "p1", userId: "u", manuscriptId: "m1", packageName: "Standard UK",
-     queryLetterVersionId: "ql1", synopsisVersionId: "syn1", samplePagesVersionId: "pag1",
+     queryLetterVersionId: "ql1", synopsisVersionId: "syn1",
+     /* ⚠️ THE SAMPLE SLOT STAYS STORED — no package is rewritten by the retirement (D10) — and
+        nothing reads it. The version is the package's own field now (D1). */
+     samplePagesVersionId: "pag1", bookVersionId: "bv-a",
      createdDate: "2026-01-01", ...over } as SubmissionPackage);
 
 const mat = (id: string, type: ComponentType, over: Partial<ManuscriptVersion> = {}): ManuscriptVersion =>
@@ -46,12 +49,23 @@ const AGENTS = [{ id: "a1", name: "T. Marsh", agency: "The Marsh Agency" }] as u
 
 // ─────────────────────────────────────────────────────────────────────────────
 describe("D10 — what's in it", () => {
-  it("resolves all three slots with name, words and opening", () => {
+  it("resolves three rows: two materials and the version (D14)", () => {
     const s = drawerSlots(pkg(), MATS, BV);
-    expect(s.map((x) => x.name)).toEqual(["Hook-first", "One-page", "Chapters 1–3"]);
+    expect(s.map((x) => x.label)).toEqual(["Covering letter", "Synopsis", "Version"]);
+    expect(s.map((x) => x.name)).toEqual(["Hook-first", "One-page", "Prologue-first"]);
     expect(s[0].words).toBe("412 words");
-    expect(s[2].words).toBe("7,412 words");
     expect(s[0].opening).toBe("When the tide went out…");
+  });
+
+  it("⚠️ THE VERSION ROW HAS NO CONTENTS PREVIEW, and that is not a missing lookup (D14)", () => {
+    /* A version is an ordering of the book — a name and a kind, with no text of its own. A word
+       count here would be the manuscript's, which answers a different question; an opening line
+       would have to come from some material, and the version does not name one. */
+    const v = drawerSlots(pkg(), MATS, BV)[2];
+    expect(v.words).toBeNull();
+    expect(v.opening).toBeNull();
+    expect(v.materialId, "there is no material to open").toBeNull();
+    expect(v.type, "a version has no ComponentType").toBeNull();
   });
 
   it("⚠️ RETURNS THE WHOLE OPENING — the two-line clamp is the stylesheet's job", () => {
@@ -82,21 +96,35 @@ describe("D10 — what's in it", () => {
   });
 });
 
-describe("D11 — the version chip is INHERITED, never stored", () => {
-  it("names the sample's version", () => {
-    expect(drawerSlots(pkg(), MATS, BV)[2].versionName).toBe("Prologue-first");
+describe("⚠️ D11 IS SUPERSEDED — the version is the package's own, not inherited", () => {
+  /**
+   * ⚠️ RETARGETED. The chip was reached through the SAMPLE material, because a package carried no
+   * version field and the sample was the only thing that knew. Both halves have gone (D1, D9), so
+   * the inheritance has no source and no destination. What survives is that a version is stated
+   * once, from one place.
+   */
+  it("comes from the package's field, and a stray id on a material reaches nothing", () => {
+    /* `pag1` still carries `bookVersionId: "bv-a"` in MATS and is no longer read at all. */
+    expect(drawerSlots(pkg(), MATS, BV)[2].name).toBe("Prologue-first");
+    expect(drawerSlots(pkg({ bookVersionId: undefined }), MATS, BV)[2].name).toBeNull();
   });
 
-  it("is absent on the letter and the synopsis", () => {
-    const s = drawerSlots(pkg(), MATS, BV);
-    expect(s[0].versionName).toBeNull();
-    expect(s[1].versionName).toBeNull();
+  it("⚠️ `versionName` IS NULL ON EVERY ROW NOW — the inheritance is gone, not relocated", () => {
+    /**
+     * The field carried the ordering a SAMPLE excerpted, hung off the sample's row. The version is
+     * a row of its own with its name in `name`, so nothing needs a second place to put one — and
+     * leaving `versionName` populated anywhere would be the two-answers shape all over again.
+     *
+     * ⚠️ IT IS ASSERTED ACROSS ALL THREE ROWS rather than on the one that used to carry it: an
+     * assertion about row 2 alone would pass on a build that had merely moved the inheritance.
+     */
+    expect(drawerSlots(pkg(), MATS, BV).map((r) => r.versionName)).toEqual([null, null, null]);
   });
 
-  it("is absent on a sample carrying none, and below two versions", () => {
-    const noBv = [...MATS.slice(0, 2), mat("pag1", ComponentType.SAMPLE_PAGES)];
-    expect(drawerSlots(pkg(), noBv, BV)[2].versionName).toBeNull();
-    expect(drawerSlots(pkg(), MATS, BV.slice(0, 1))[2].versionName).toBeNull();
+  it("⚠️ shows the version however many orderings exist", () => {
+    /* It used to appear only above two versions, because below that a chip naming "the version"
+       distinguished nothing. A package that STATES its version is stating a fact regardless. */
+    expect(drawerSlots(pkg(), MATS, BV.slice(0, 1))[2].name).toBe("Prologue-first");
   });
 
   it("⚠️ AND THE PACKAGE STATES ITS VERSION ONCE — the field, not a second route", () => {

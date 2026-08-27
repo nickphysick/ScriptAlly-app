@@ -21,7 +21,7 @@
 import { ManuscriptVersion, SubmissionPackage, Query, ComponentType, RecordStatus } from "../types";
 import { packageMetrics, isRequest, isSlotFilled, otherMaterialsText, packagesUsingVersion } from "./packageMetrics";
 import { TYPE_META, BUILDER_TYPES, SLOT_FIELD } from "../components/packages/typeMeta";
-import { SLOT_EYEBROW } from "./packageAttach";
+import { SLOT_EYEBROW, PACKAGE_SLOTS } from "./packageAttach";
 import { versionMeta } from "./packageMetrics";
 import { agoLabel, daysBetween } from "./elapsed";
 import { sourceLabel } from "./materialDraft";
@@ -129,6 +129,27 @@ export function resolveSlot(
   return { name: v.versionName, state: "held" };
 }
 
+/**
+ * Resolve the version slot against the manuscript's orderings.
+ *
+ * ⚠️ IT IS A SEPARATE RESOLVER, NOT `resolveSlot` WITH A DIFFERENT MAP, because its empty state
+ * means something else. A material slot's `empty` is "left out"; this one's is "not recorded", and
+ * D3 makes that permanent rather than transitional — a sent package is frozen and can never gain a
+ * version, so a great many packages stay here for good.
+ *
+ * ⚠️ AND A VERSION THAT NO LONGER EXISTS IS `missing`, NOT `empty` — same reasoning as the material
+ * slots. The package says it was testing an ordering; that the ordering has since been renamed out
+ * of existence is a gap in the register, not evidence the writer never said.
+ */
+export function resolveVersionSlot(
+  id: string | undefined,
+  bookVersions: readonly BookVersion[],
+): { name: string | null; state: SlotState } {
+  if (!id) return { name: null, state: "empty" };
+  const v = bookVersions.find((x) => x.id === id);
+  return v ? { name: v.name, state: "held" } : { name: MISSING_SLOT, state: "missing" };
+}
+
 export interface PackageTile {
   id: string;
   name: string;
@@ -167,6 +188,7 @@ export function packageTiles(
   packages: SubmissionPackage[],
   versions: ManuscriptVersion[],
   queries: Query[],
+  bookVersions: readonly BookVersion[] = [],
 ): PackageTile[] {
   const byId = new Map(versions.map((v) => [v.id, v]));
   return packages.map((p) => {
@@ -175,10 +197,20 @@ export function packageTiles(
     return {
       id: p.id,
       name: p.packageName,
-      slots: BUILDER_TYPES.map((t) => ({
-        label: TYPE_META[t].label,
-        ...resolveSlot(p[SLOT_FIELD[t]], byId),
-      })),
+      /**
+       * ⚠️ THE THREE SLOTS A PACKAGE ACTUALLY HAS — letter, synopsis, VERSION (D4/D12), taken from
+       * `PACKAGE_SLOTS` rather than from `BUILDER_TYPES`. Those two agreed only while the third
+       * slot was a material; the version has no `ComponentType` and no document, so mapping the
+       * builder's type list would have silently produced a two-column ledger.
+       *
+       * ⚠️ AND `Not recorded` IS NOT `Not included`. An empty material slot is a stated choice —
+       * the writer left the synopsis out. An empty version slot is an ABSENCE of a statement, and
+       * it is permanent for every package already sent (D3), so it must not read as a decision.
+       */
+      slots: PACKAGE_SLOTS.map((sl) =>
+        sl.kind === "material"
+          ? { label: TYPE_META[sl.type].label, ...resolveSlot(p[sl.key], byId) }
+          : { label: "Version", ...resolveVersionSlot(p.bookVersionId, bookVersions) }),
       /* ⚠️ NOT IN `slots`. See the field's note — prose is not a material. */
       other: otherMaterialsText(p),
       sent: m.sent,
@@ -237,8 +269,7 @@ export interface MaterialColumn {
 const GHOST_LABEL: Record<string, string> = {
   [ComponentType.QUERY_LETTER]: "Add a letter",
   [ComponentType.SYNOPSIS]: "Add a synopsis",
-  [ComponentType.SAMPLE_PAGES]: "Add sample pages",
-};
+  };
 
 /**
  * The three type columns.
@@ -348,7 +379,6 @@ export function materialShelf(
 export const NO_SLOT_WORD: Record<string, string> = {
   [ComponentType.QUERY_LETTER]: "no letter",
   [ComponentType.SYNOPSIS]: "no synopsis",
-  [ComponentType.SAMPLE_PAGES]: "no sample",
 };
 
 /**
@@ -360,7 +390,11 @@ export interface CompositionPart { text: string; held: boolean; label: string }
 
 export function composition(t: PackageTile): CompositionPart[] {
   return t.slots.map((sl, i) => {
-    const label = SLOT_EYEBROW[BUILDER_TYPES[i]] ?? "";
+    /* ⚠️ THE SAME REGISTER THE SLOTS CAME FROM. This read `BUILDER_TYPES[i]`, which agreed with
+       the slot order only while the third slot was a material; against a three-slot tile it would
+       have labelled the version with whatever the builder's third type happened to be. */
+    const reg = PACKAGE_SLOTS[i];
+    const label = reg?.kind === "material" ? (SLOT_EYEBROW[reg.type] ?? "") : "Version";
     /* ⚠️ AS A ROW, AN OMITTED SLOT READS `Not included` — the ref's word, and the right one here.
        The old `no sample` was correct in a SENTENCE about what the package sends; in a labelled row
        the slot is already named, so the value states the choice rather than repeating the noun. */

@@ -442,6 +442,7 @@ export const SubmissionPackages: React.FC = () => {
                 packages={msPackages}
                 versions={msVersions}
                 queries={msQueries}
+                bookVersions={msBookVersions}
                 /**
                  * ⚠️ THE CARD OPENS A READER, NOT AN EDITOR (D8/D16). It used to open the composer
                  * straight away — which is an edit the lock would refuse on any sent package, and

@@ -18,6 +18,20 @@ const V = (id: string, componentType: ComponentType, versionName: string) =>
   ({ id, manuscriptId: "m1", userId: "u", componentType, versionName, fileAttached: false, createdDate: "" }) as ManuscriptVersion;
 const VERSIONS = [V("v-ql", ComponentType.QUERY_LETTER, "QL v3"), V("v-syn", ComponentType.SYNOPSIS, "Syn v1"), V("v-smp", ComponentType.SAMPLE_PAGES, "First 50")];
 
+/**
+ * ⚠️ A PACKAGE HOLDS TWO MATERIALS NOW, NOT THREE — and every expectation below that fell from 3 to
+ * 2 fell for that one reason, so it is stated here rather than twenty-eight times.
+ *
+ * Sample pages is retired as a material type (D9). A package is a covering letter, a synopsis and a
+ * VERSION; the portion that actually went is the agency's decision and is recorded on the query.
+ * `PACKAGE_SLOTS` is a union now, and the two consumers here iterate `PACKAGE_MATERIAL_SLOTS`,
+ * because a chip resolves a slot id to a version DOCUMENT and the version slot has none.
+ *
+ * ⚠️ THE FIXTURES DELIBERATELY KEEP A FILLED `samplePagesVersionId`. No package document is
+ * rewritten by this change — a sent package's slots are frozen so it keeps reporting what the agent
+ * received — so the realistic state is a stored sample slot that nothing reads. A fixture with the
+ * key emptied would be testing a migration that does not happen.
+ */
 describe("a package's items", () => {
   it("resolves the filled slots in canonical order", () => {
     /* ⚠️ DERIVED FROM THE APP'S OWN MAP, not hand-written. The query letter reads "Covering
@@ -26,20 +40,19 @@ describe("a package's items", () => {
     expect(packageItems(PKG, VERSIONS).map((i) => i.label)).toEqual([
       MATERIAL_LABEL[ComponentType.QUERY_LETTER],
       MATERIAL_LABEL[ComponentType.SYNOPSIS],
-      MATERIAL_LABEL[ComponentType.SAMPLE_PAGES],
     ]);
   });
 
   it("⚠️ skips an UNFILLED slot — the sentinel is empty string, not absence", () => {
     const half = { ...PKG, synopsisVersionId: "" } as SubmissionPackage;
     expect(packageItems(half, VERSIONS).map((i) => i.label)).toEqual([
-      MATERIAL_LABEL[ComponentType.QUERY_LETTER], MATERIAL_LABEL[ComponentType.SAMPLE_PAGES],
+      MATERIAL_LABEL[ComponentType.QUERY_LETTER],
     ]);
   });
 
   it("⚠️ keeps a slot whose VERSION is missing — a gap in the register is not evidence nothing was sent", () => {
     const items = packageItems(PKG, [VERSIONS[0]]);
-    expect(items).toHaveLength(3);
+    expect(items).toHaveLength(2);
     expect(items[1].versionName).toBeUndefined();
     expect(items[1].label).toBe("Synopsis");
   });
@@ -56,9 +69,22 @@ describe("a package's items", () => {
     }
   });
 
-  it("⚠️ uses the app's own name for a sample — never 'Sample pages', which asserts a unit", () => {
-    expect(packageItems(PKG, VERSIONS)[2].label).toBe(MATERIAL_LABEL[ComponentType.SAMPLE_PAGES]);
-    expect(packageItems(PKG, VERSIONS)[2].label).not.toMatch(/sample pages/i);
+  it("⚠️ NO LONGER RESOLVES A SAMPLE AT ALL — the slot is not read (D9)", () => {
+    /**
+     * ⚠️ RETARGETED, AND THE LAW IT NOW ASSERTS. This case guarded the sample's LABEL: three unit
+     * choices map to one `ComponentType`, so "Sample pages" would assert a unit the record does not
+     * carry, and it had to read "Opening sample". That law is unchanged and still lives on
+     * `MATERIAL_LABEL` — where archived samples still read through it.
+     *
+     * What changed is that a package no longer HAS a sample slot to label. The fixture still stores
+     * one, deliberately (no document is rewritten), so this asserts the stronger thing: a stored
+     * sample slot produces no item, whatever it is called.
+     */
+    expect(packageItems(PKG, VERSIONS)).toHaveLength(2);
+    expect(packageItems(PKG, VERSIONS).map((i) => i.label))
+      .not.toContain(MATERIAL_LABEL[ComponentType.SAMPLE_PAGES]);
+    /* the naming law itself, still true where it still applies */
+    expect(MATERIAL_LABEL[ComponentType.SAMPLE_PAGES]).not.toMatch(/sample pages/i);
   });
 });
 
@@ -70,7 +96,7 @@ describe("the snapshot, and its receipt", () => {
   });
 
   it("the tag derives from the items, so a hand-removed pill makes it count 2", () => {
-    expect(originTagText(originTags(attached)[0])).toBe("3 items from UK standard");
+    expect(originTagText(originTags(attached)[0])).toBe("2 items from UK standard");
     expect(originTagText(originTags(attached.slice(0, 2))[0])).toBe("2 items from UK standard");
     expect(originTagText(originTags(attached.slice(0, 1))[0])).toBe("1 item from UK standard");
   });
@@ -83,7 +109,7 @@ describe("the snapshot, and its receipt", () => {
   it("counts two packages separately", () => {
     const other = attachedMaterials({ ...PKG, id: "p2", packageName: "US wide" } as SubmissionPackage, packageItems(PKG, VERSIONS));
     expect(originTags([...attached, ...other]).map(originTagText))
-      .toEqual(["3 items from UK standard", "3 items from US wide"]);
+      .toEqual(["2 items from UK standard", "2 items from US wide"]);
   });
 
   /**
@@ -159,7 +185,7 @@ describe("§1 · the group is presentation over stored origin", () => {
     const { groups, loose } = groupByOrigin([...attached, "Author bio", { material: "Synopsis" } as QueryMaterial]);
     expect(groups).toHaveLength(1);
     expect(groups[0].packageName).toBe("UK standard");
-    expect(groups[0].materials).toEqual(["Query Letter", "Synopsis", "Sample Pages"]);
+    expect(groups[0].materials).toEqual(["Query Letter", "Synopsis"]);
     /* ⚠️ ANYTHING ATTACHED OUTSIDE THE PACKAGE SITS BELOW IT, including a second synopsis added by
        hand — the group is a statement about provenance, not about the material's name. */
     expect(loose).toEqual(["Author bio", "Synopsis"]);
@@ -178,7 +204,7 @@ describe("§1 · the group is presentation over stored origin", () => {
   it("survives one of its items being removed", () => {
     const { groups } = groupByOrigin(attached.slice(1));
     expect(groups).toHaveLength(1);
-    expect(groups[0].materials).toEqual(["Synopsis", "Sample Pages"]);
+    expect(groups[0].materials).toEqual(["Synopsis"]);
   });
 
   it("disappears once the last of its items is gone", () => {
@@ -210,10 +236,18 @@ describe("§2 · the three states, each only when true", () => {
     expect(driftNote(d.differing)).toContain("keeps what actually went");
   });
 
-  it("sees a slot the package has since emptied", () => {
-    const d = packageDrift(group, { ...PKG, samplePagesVersionId: "" } as SubmissionPackage, sent);
+  it("sees a MATERIAL slot the package has since emptied", () => {
+    /* ⚠️ THE SAMPLE IS NO LONGER COMPARED (D9) — drift asks what a send took against what the
+       package holds now, and a send takes materials. Emptying the sample slot is invisible here
+       because nothing reads it; emptying the SYNOPSIS is still drift. */
+    const d = packageDrift(group, { ...PKG, synopsisVersionId: "" } as SubmissionPackage, sent);
     expect(d.state).toBe("changed");
-    expect(d.differing).toEqual(["Sample Pages"]);
+    expect(d.differing).toEqual(["Synopsis"]);
+  });
+
+  it("⚠️ and emptying the retired sample slot is NOT drift", () => {
+    const d = packageDrift(group, { ...PKG, samplePagesVersionId: "" } as SubmissionPackage, sent);
+    expect(d.state).toBe("none");
   });
 
   /**

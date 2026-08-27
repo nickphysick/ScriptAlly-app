@@ -114,7 +114,20 @@ export const MaterialModal: React.FC<MaterialModalProps> = ({
    * ⚠️ SAMPLE PAGES ONLY (D11), AND GATED ON TWO VERSIONS. A letter or a synopsis does not excerpt
    * an ordering of the book, and a writer with one version sees none of this feature at all.
    */
-  const showVersionField = type === ComponentType.SAMPLE_PAGES && bookVersions.length >= 2;
+  /**
+   * ⚠️ PERMANENTLY FALSE, AND KEPT AS A NAMED CONSTANT RATHER THAN DELETED INLINE (D9/D11).
+   *
+   * A material's `bookVersionId` said which ordering a pasted SAMPLE excerpted. Sample pages is no
+   * longer a material type, so nothing can reach this branch: the shelf offers two types and the
+   * editor is only ever opened on one of them. The version now lives on the PACKAGE, which is what
+   * the ledger and both panels read.
+   *
+   * Left as a constant so the field's markup below stays visible to whoever removes the vestigial
+   * `bookVersionId` from `ManuscriptVersion` — see F-BH in reports/packages-model.md. Archived
+   * samples still carry the stored id and are harmless; a migration that rewrites archived data is
+   * not, which is why nothing is being cleaned up here.
+   */
+  const showVersionField = false;
 
   /* Select the suggested name on open so it can be typed straight over (the ref's behaviour). */
   useEffect(() => {

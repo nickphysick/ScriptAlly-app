@@ -6262,9 +6262,13 @@ export const Queries: React.FC<{
                                           * the case D5 is about. It rendered nothing, and a
                                           * measurement asserting "at most one chip" passed on zero.
                                           */}
-                                        {c.bookVersionName && (
-                                          <span className="pkgb-mver qc-mchipver"><span aria-hidden="true">§</span>{c.bookVersionName}</span>
-                                        )}
+                                        {/* ⚠️ THE VERSION IS ITS OWN PILL NOW, not a mark hung off
+                                            another one. It used to be inherited through the sample
+                                            material — the only thing that knew — and both halves of
+                                            that have gone: the package states its version directly
+                                            (D1) and sample pages is no longer a material (D9). So
+                                            `linkedChips` returns it as the third slot and it
+                                            renders like the other two, with no special case here. */}
                                       </span>
                                     ))}
                                   </PackageGroup>

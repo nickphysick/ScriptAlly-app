@@ -30,8 +30,21 @@ export const TYPE_META: Record<ComponentType, TypeMeta> = {
   [ComponentType.FULL_MANUSCRIPT]: { label: "Full manuscript", plural: "Full manuscripts", tint: "var(--band)", ink: "var(--ink)" },
 };
 
-/** The three types the builder surfaces, in canonical order. */
-export const BUILDER_TYPES: ComponentType[] = [ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS, ComponentType.SAMPLE_PAGES];
+/**
+ * The material types the shelf and the material editor surface, in canonical order — **two** now.
+ *
+ * ⚠️ SAMPLE PAGES IS GONE FROM HERE AND THE ENUM MEMBER STAYS (D9). `ComponentType.SAMPLE_PAGES`
+ * serves two unrelated systems: the writer's own pasted sample material, retired here, and the
+ * AGENT'S stated requirement, where `agentMaterials.ts` maps "Sample pages", "Sample chapters" and
+ * "Sample words" all onto it because the unit is the only thing separating them. Deleting the
+ * member would take the agent's side with it — and that side is what the query's portion pre-fills
+ * from, so retiring the type wholesale would have broken the portion while retiring the material.
+ *
+ * ⚠️ AND THIS IS NOT THE PACKAGE'S SLOT LIST. A package's slots are letter, synopsis and VERSION
+ * (`PACKAGE_SLOTS`); the version is not a material and has no member here. The two agreed while the
+ * third slot was a material and must not be assumed to again.
+ */
+export const BUILDER_TYPES: ComponentType[] = [ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS];
 
 /** The slot field on SubmissionPackage that holds each type's version-id reference. */
 export const SLOT_FIELD: Record<ComponentType, "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId"> = {

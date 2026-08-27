@@ -159,6 +159,8 @@ describe("F-BA — the letter mark is an envelope, not a question mark", () => {
   it("⚠️ and the map still resolves every type it did before — the fault was the ARTWORK", () => {
     /* A missing entry renders NOTHING here (`if (!g) return null`), which is why "every other type
        resolved" was the tell that this was a drawn `?` rather than a lookup failure. */
+    /* ⚠️ THE TINT MAP KEEPS ALL THREE — archived samples still render in the archive drawer.
+       It is the LEGEND that lost its swatch (D13), asserted just below. */
     for (const t of ["QUERY_LETTER", "SYNOPSIS", "SAMPLE_PAGES"]) {
       expect(glyph).toContain(`[ComponentType.${t}]:`);
     }
@@ -180,7 +182,11 @@ describe("D6 — the legend renders the real band", () => {
   });
 
   it("names all four kinds, parent first", () => {
-    expect(strip(legend)).toContain('"package", ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS, ComponentType.SAMPLE_PAGES');
+    /* ⚠️ THREE, NOT FOUR (D13) — the legend teaches what the shelf offers, and the shelf offers
+       two material types. A key that still showed a sample swatch would teach a type nothing can
+       create. */
+    expect(strip(legend)).toContain('"package", ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS,');
+    expect(strip(legend)).not.toMatch(/LEGEND[\s\S]{0,200}SAMPLE_PAGES/);
   });
 
   it("⚠️ and BOTH card surfaces render the same component — there is one band head now", () => {

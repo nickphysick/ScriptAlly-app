@@ -115,14 +115,18 @@ describe("packageTiles — the working stage's grid (flow pack D7)", () => {
 
   it("always renders three slot rows, in canonical order", () => {
     const t = packageTiles([noSample], versions, [])[0];
-    expect(t.slots.map((s) => s.label)).toEqual(["Covering letter", "Synopsis", "Sample pages"]);
+    /* ⚠️ THE THIRD SLOT IS THE VERSION (D4/D12), not a material. A package is a covering letter,
+       a synopsis and the shape of the book they are testing. */
+    expect(t.slots.map((s) => s.label)).toEqual(["Covering letter", "Synopsis", "Version"]);
   });
 
   /* ⚠️ THE ROW SURVIVES AN EMPTY SLOT. A row that vanishes states nothing; a null name lets the
      component say "Not included", which states that the slot was considered and left out. */
   it("keeps the sample row with a null name when the slot is empty", () => {
     const t = packageTiles([noSample], versions, [])[0];
-    expect(t.slots[2]).toEqual({ label: "Sample pages", name: null, state: "empty" });
+    /* ⚠️ AND ITS EMPTY STATE IS `Not recorded`, NOT `Not included` — an absence of a statement
+       rather than a stated choice, and permanent for every package already sent (D3). */
+    expect(t.slots[2]).toEqual({ label: "Version", name: null, state: "empty" });
   });
 
   /**
@@ -133,14 +137,19 @@ describe("packageTiles — the working stage's grid (flow pack D7)", () => {
   it("tells an empty slot apart from one whose material is gone", () => {
     const orphaned = pkg("pk5", "Orphan", "gone", UNFILLED_SLOT, "p1");
     const t = packageTiles([orphaned], versions, [])[0];
-    expect(t.slots.map((sl) => sl.state)).toEqual(["missing", "empty", "held"]);
+    /* ⚠️ THE THIRD IS THE VERSION AND THIS PACKAGE HAS NONE, so it is `empty` — which reads
+       `Not recorded`, not `Not included`. The sample slot it still stores is not read (D9). */
+    expect(t.slots.map((sl) => sl.state)).toEqual(["missing", "empty", "empty"]);
     expect(t.slots[0].name).toBe(MISSING_SLOT);
     expect(t.slots[1].name).toBeNull();
   });
 
   it("resolves filled slots to their material names", () => {
+    /* ⚠️ TWO MATERIALS AND A VERSION. `withSample` still stores a sample slot — no package is
+       rewritten by the retirement — and it resolves to nothing, because nothing reads it. The
+       version resolves from the manuscript's own orderings, which this caller does not pass. */
     const t = packageTiles([withSample], versions, [])[0];
-    expect(t.slots.map((s) => s.name)).toEqual(["Hook-first", "One-page", "Chapters 1-3"]);
+    expect(t.slots.map((s) => s.name)).toEqual(["Hook-first", "One-page", null]);
   });
 
   /* two derivations against each other, never a literal on both sides */
@@ -188,7 +197,9 @@ describe("materialColumns — the broadsheet's three type columns (D3)", () => {
 
   it("gives exactly three columns, in canonical order, with PLURAL headings", () => {
     const cols = materialColumns(versions, packages);
-    expect(cols.map((c) => c.heading)).toEqual(["Covering letters", "Synopses", "Sample pages"]);
+        /* ⚠️ TWO MATERIAL TYPES NOW. Sample pages is retired as a material (D9): a package is a
+       covering letter, a synopsis and a VERSION, and the portion that went is the query's fact. */
+    expect(cols.map((c) => c.heading)).toEqual(["Covering letters", "Synopses"]);
   });
 
   it("never offers a Full Manuscript column", () => {
@@ -197,12 +208,12 @@ describe("materialColumns — the broadsheet's three type columns (D3)", () => {
   });
 
   it("counts what each column holds", () => {
-    expect(materialColumns(versions, packages).map((c) => c.held)).toEqual([2, 1, 1]);
+    expect(materialColumns(versions, packages).map((c) => c.held)).toEqual([2, 1]);
   });
 
   it("carries the ref's own per-type ghost wording", () => {
     expect(materialColumns(versions, packages).map((c) => c.ghostLabel))
-      .toEqual(["Add a letter", "Add a synopsis", "Add sample pages"]);
+      .toEqual(["Add a letter", "Add a synopsis"]);
   });
 
   /* ⚠️ ONE DERIVATION FOR THE LINE AND THE GUARD. If these could differ, a sheet could say a

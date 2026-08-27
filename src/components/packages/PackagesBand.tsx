@@ -15,6 +15,7 @@
  * and a query still points at it. One component, one decision function, two record types.
  */
 import { ArchivedToggle, ArchivedRow, ArchivedSection } from "./ArchivedRow";
+import type { BookVersion } from "../../types";
 import React from "react";
 import { ManuscriptVersion, Query, SubmissionPackage } from "../../types";
 import { packageTiles, tileFooter, composition } from "../../lib/packagesOverview";
@@ -26,6 +27,8 @@ import { SectionHeader } from "../containers/SectionHeader";
 import "./packagesBroadsheet.css";
 
 export interface PackagesBandProps {
+  /** The manuscript's orderings — the ledger's version column resolves against these. */
+  bookVersions?: readonly BookVersion[];
   packages: SubmissionPackage[];
   versions: ManuscriptVersion[];
   queries: Query[];
@@ -67,10 +70,10 @@ export interface PackagesBandProps {
 }
 
 export const PackagesBand: React.FC<PackagesBandProps> = ({
-  packages, versions, queries, onOpenPackage, onNewPackage, onHowItWorks, sent, onDuplicatePackage, renderRemove, renderTracking,
+  packages, versions, queries, bookVersions = [], onOpenPackage, onNewPackage, onHowItWorks, sent, onDuplicatePackage, renderRemove, renderTracking,
   archived, showArchived, onToggleArchived, onRestore,
 }) => {
-  const tiles = packageTiles(packages, versions, queries);
+  const tiles = packageTiles(packages, versions, queries, bookVersions);
   const byId = new Map(packages.map((p) => [p.id, p]));
 
   return (

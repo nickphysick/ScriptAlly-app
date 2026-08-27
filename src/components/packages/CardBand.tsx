@@ -57,7 +57,10 @@ export const BAND_LABEL: Record<string, string> = {
 
 /** The four kinds the page bands, in the order the legend reads them: the parent, then its parts. */
 export const BAND_KINDS: readonly BandKind[] = [
-  "package", ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS, ComponentType.SAMPLE_PAGES,
+  /* ⚠️ THREE, NOT FOUR — sample pages is retired as a material type (D9/D13), so the legend has
+     nothing to key. The BAND TINT map below keeps its entry: archived samples still render in the
+     shelf's archive drawer, and a legend is about what the shelf teaches, not about what exists. */
+  "package", ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS,
 ];
 
 /**

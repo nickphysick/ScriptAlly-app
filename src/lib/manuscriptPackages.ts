@@ -31,8 +31,14 @@ import { materialLabel } from "./materials";
 export const PACKAGE_MATERIALS: ComponentType[] = [
   ComponentType.QUERY_LETTER,
   ComponentType.SYNOPSIS,
-  ComponentType.SAMPLE_PAGES,
 ];
+
+/* ⚠️ TWO, NOT THREE. Sample pages is retired as a material type (D9): a package is a covering
+   letter, a synopsis and a VERSION, and the portion that actually went is the agency's decision,
+   recorded on the query. The enum member survives for the AGENT'S stated requirement, which is a
+   different system — see BUILDER_TYPES for why deleting it would break the portion's pre-fill.
+   `MATERIAL_LABEL` below keeps its entry: archived samples still need a name in the archive
+   drawer. */
 
 /**
  * Sentence case for reading; the enum's Title Case is a stored value, not a sentence.

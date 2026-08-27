@@ -106,6 +106,7 @@ import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIEL
 import { buildHoldingReplyWrites, HOLDING_REPLY_TYPE } from "./holdingReply";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
 import { planExpectedDateMigration, type MigrationQuery } from "./expectedDate";
+import { planSampleRetirement, retirementReport } from "./retireSamples";
 import { replyTask } from "./taskPrecedence";
 /* §3 — the suggestion's wording and its suppression both need these: `scheduledReminder` is the
    same predicate the tracker's ghost rung uses, and `elapsedPhrase` is the app's one scaled figure. */
@@ -1135,6 +1136,46 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       console.log("[ScriptAlly] expected-date migration — writes attempted");
     })();
   }, [currentUser, queries, agents]);
+
+  /**
+   * ⚠️ SAMPLE PAGES IS RETIRED AS A MATERIAL TYPE (D9) — the materials are ARCHIVED, never deleted.
+   *
+   * The writer wrote that text. Archiving puts it in the shelf's archive drawer where they can
+   * still read it and restore it; deleting it would take a piece of their own writing away to tidy
+   * a model. Nothing else about it moves — the stored `bookVersionId` on an archived sample stays
+   * exactly where it is (F-BH), because a migration that rewrites archived data is a worse thing
+   * than a field nobody reads.
+   *
+   * ⚠️ AND NO PACKAGE DOCUMENT IS TOUCHED. `planSampleRetirement` reports which packages hold a
+   * sample slot so the count can be checked against the recon, and writes none of them: the rules
+   * freeze a sent package's slots so it keeps reporting what the agent actually received, and
+   * dropping a slot from one would change that record. The slot simply stops being read.
+   *
+   * ⚠️ SAFE TO RUN TWICE — it only ever selects samples that are not already `Retired`.
+   *
+   * ⚠️ AND IT NEEDS THE STORES LOADED. Running with `versions` empty would plan nothing and report
+   * zero, which reads exactly like "there were none" — so it waits, the same guard the
+   * expected-date migration needs for the same reason.
+   */
+  const retiredSamples = useRef(false);
+  useEffect(() => {
+    if (!currentUser || retiredSamples.current) return;
+    if (versions.length === 0) return;
+    retiredSamples.current = true;
+
+    const plan = planSampleRetirement(versions, packages);
+    console.log(retirementReport(plan));
+    if (plan.archive.length === 0) return;
+
+    void (async () => {
+      for (const id of plan.archive) {
+        try {
+          await updateDoc(doc(db, "users", currentUser.id, "versions", id), { status: "Retired" });
+        } catch (e) { handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/versions/${id}`); }
+      }
+      console.log(`[ScriptAlly] sample-pages retirement — ${plan.archive.length} archive write${plan.archive.length === 1 ? "" : "s"} attempted`);
+    })();
+  }, [currentUser, versions, packages]);
 
   // Self-healing backfill routine to auto-create missing creation activities for existing agents and manuscripts.
   // This gracefully heals objects that were successfully added but whose activities were rejected by past Firestore rules.
