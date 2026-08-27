@@ -381,6 +381,41 @@ await attempt("packageName on a SENT package (must be ALLOWED)", "Part A",
   () => updateDoc(PKG, { packageName: "Rules probe renamed" }), null);
 await dropPkg().catch(() => {});
 
+/* ── the note, and the asymmetry that is the whole of D24 ─────────────────────────────────── */
+console.log("\npackages — the note is editable on a SENT package while its slots are not:");
+/**
+ * ⚠️ BOTH WRITES GO AGAINST ONE LOCKED RECORD, IN ONE RUN, AND THAT IS THE POINT.
+ *
+ * Two passes could each be true of a different fixture state — a note accepted on some package and
+ * a slot refused on some other — and together they would prove nothing about the asymmetry. The
+ * claim is that on THIS document, right now, one write lands and the other does not. So the package
+ * is created sent, and the four attempts below run against it back to back without it being
+ * touched in between.
+ *
+ * ⚠️ AND THE REFUSALS ARE HALF THE PROOF. A probe that only wrote the note would pass identically
+ * on a build that had accidentally unfrozen the slots.
+ */
+const SENT = doc(db, "users", uid, "packages", "probe-pkg-note");
+const sentBase = {
+  id: "probe-pkg-note", manuscriptId: "seed-ms-1", userId: uid,
+  packageName: "Note probe", queryLetterVersionId: "v-probe-letter",
+  synopsisVersionId: "", samplePagesVersionId: "",
+  status: "Active", createdDate: new Date(0).toISOString(),
+  firstSentAt: new Date(0).toISOString(),
+};
+const dropSent = () => deleteDoc(SENT);
+await attempt("create a SENT package for the pair", "Part F",
+  () => setDoc(SENT, sentBase), null);
+await attempt("note on a SENT package (must be ALLOWED)", "Part F",
+  () => updateDoc(SENT, { note: "For the agencies that want comps up front.", noteEditedAt: new Date(0).toISOString() }), null);
+await attempt("slot on THAT SAME sent package (must be DENIED)", "Part F",
+  () => updateDoc(SENT, { synopsisVersionId: "v-probe-syn" }), null);
+await attempt("note CLEARED on a sent package (must be ALLOWED)", "Part F",
+  () => updateDoc(SENT, { note: deleteField(), noteEditedAt: deleteField() }), null);
+await attempt("note 2001 chars (must be DENIED)", "Part F",
+  () => updateDoc(SENT, { note: "x".repeat(2001) }), null);
+await dropSent().catch(() => {});
+
 /* ── the lock: a sent package's contents are immutable (attachment model, D-D1) ─────────────── */
 console.log("\npackages — the lock, both halves:");
 /**

@@ -281,3 +281,60 @@ Post-R&R (T. Marsh)   Latest · not yet in a package   unused, and newest
 **The letters read `Text · in 2`, not the ref's `Text · 412 words · in 2`** — and that is the DATA,
 not the code. `sourceLabel` drops the count when a material has no pasted body, which these have
 not; the ref's fixture had word counts. Checked rather than assumed.
+
+---
+
+## Phase 5 — Part E, measured
+
+```
+CHIP → LEDGER   Standard UK lit · Comps-led variant DIMMED · Unattributed set lit
+LEDGER → CHIP   exactly 1 chip lit (Hook-first), 5 dimmed
+SORT            natural [8,2,1] → desc [8,2,1] → asc [1,2,8]
+                aria-sort "descending" then "ascending"
+BARS            Sent max 8 → 100%, 2 → 25%, 1 → 13%
+                Replied max 5 → 100%, 1 → 20%      each column scaled independently
+                every bar aria-hidden="true"
+```
+
+Both highlight directions have **both branches entered** — some rows lit and some dimmed, one chip
+lit and the rest dimmed. A ledger where everything lit would have proved one.
+
+## Phase 6 — Part F, the model and D24's proof
+
+Rules deployed to dev and verified by release `updateTime` (`11:30:46` → `16:27:06`), never the
+success line, and probed after a wait.
+
+### ⚠️ BOTH WRITES AGAINST ONE LOCKED RECORD, IN ONE RUN
+
+Two passes could each be true of a different fixture state — a note accepted on some package, a slot
+refused on another — and together they would prove nothing about the asymmetry. The package is
+created **sent**, and the four attempts run against it back to back without it being touched:
+
+```
+✅ create a SENT package for the pair
+✅ note on a SENT package (must be ALLOWED)
+❌ slot on THAT SAME sent package (must be DENIED)
+✅ note CLEARED on a sent package (must be ALLOWED)
+❌ note 2001 chars (must be DENIED)
+```
+
+**The refusals are half the proof.** A probe that only wrote the note would pass identically on a
+build that had accidentally unfrozen the slots.
+
+The allowlist gained `note` and `noteEditedAt`; the **freeze list is unchanged** — that asymmetry is
+the whole of D24. A package's slots are frozen because they are a claim about what an agent
+received; a note is the writer's own margin and says nothing about the envelope. Freezing it would
+mean a writer could never record what they learned from the very send that froze the package.
+
+### A lock retargeted from a line to a claim
+
+`packageShapes` pinned the literal `payload.otherMaterials = t ? t : deleteField()`. Part F
+generalised that into a loop when the note became the second unsettable field, so the lock went red
+on a refactor that changed nothing it was about — **a source lock that pins an implementation cannot
+tell a refactor from a regression**, which is the only thing it exists to do. It now asserts the
+property: the unsettable set is a named array, both members are in it, and the version slots stay
+out (they use `""` as their sentinel, so unsetting one would be denied).
+
+⚠️ **And my first retarget was itself too broad** — `not.toContain("queryLetterVersionId")` over the
+function body failed on a correct build, because the slot names appear in its TYPE SIGNATURE. The
+claim is about the unsettable SET, so that is what gets sliced.

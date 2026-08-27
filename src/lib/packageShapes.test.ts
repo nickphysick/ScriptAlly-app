@@ -241,9 +241,37 @@ describe("the builder states which slots are optional, and unsets rather than st
     expect(body).toContain("[letterId, synopsisId, sampleId].filter(isSlotFilled)");
   });
 
-  it("a blank Other is UNSET by updatePackage, never stored as an empty string", () => {
+  it("a blank free-text field is UNSET by updatePackage, never stored as an empty string", () => {
+    /**
+     * ⚠️ RETARGETED FROM A LINE TO THE CLAIM, and the law is unchanged. This pinned the literal
+     * `payload.otherMaterials = t ? t : deleteField()`; Part F generalised that into a loop when
+     * the NOTE became the second unsettable field, so the lock went red on a refactor that changed
+     * nothing it was about. A source lock that pins an implementation cannot tell a refactor from a
+     * regression — which is the only thing it exists to do.
+     *
+     * What is asserted now is the property: the unsettable set is NAMED, both members are in it,
+     * and a blank becomes `deleteField()` rather than `""`. The version slots must stay OUT of it —
+     * they use `""` as their sentinel and `isValidPackage` requires the key present, so unsetting
+     * one would be denied.
+     */
     const db = decls(read("src/lib/db.tsx"));
-    expect(db).toContain("payload.otherMaterials = t ? t : deleteField()");
+    const i = db.indexOf("const updatePackage");
+    expect(i, "updatePackage is gone").toBeGreaterThan(-1);
+    const body2 = db.slice(i, db.indexOf("\n  };", i));
+    /* ⚠️ THE ARRAY ITSELF, NOT THE FUNCTION BODY. The slot names appear in this function's TYPE
+       SIGNATURE, so a `not.toContain` over the whole body fails on a correct build — the claim is
+       about the unsettable SET, so that is what gets sliced. */
+    const set = /of (\[[^\]]*\]) as const/.exec(body2);
+    expect(set, "the unsettable set is no longer a named array").not.toBeNull();
+    expect(set![1]).toBe('["otherMaterials", "note"]');
+    expect(body2).toMatch(/deleteField\(\)/);
+  });
+
+  it("⚠️ clearing a note takes its timestamp with it", () => {
+    /* A stamp surviving a cleared note has the drawer's footer state when a note that no longer
+       exists last changed. */
+    const db = decls(read("src/lib/db.tsx"));
+    expect(db).toMatch(/if \(k === "note" && !t\) payload\.noteEditedAt = deleteField\(\);/);
   });
 
   it("save is refused, with a stated reason, when there is no covering letter", () => {

@@ -228,6 +228,14 @@ service cloud.firestore {
         // and cannot change that without invalidating every stored package, whereas this one is
         // new and can be modelled honestly from the start. A sent package can never gain one — the
         // freeze below covers it — so `Not recorded` is permanent for every package already out.
+        // ⚠️ THE NOTE IS OPTIONAL AND IS NOT PART OF THE FREEZE BELOW (D24). A package's slots are
+        // frozen once sent because they are a claim about what the agent received; a note is the
+        // writer's own margin and says nothing about the envelope. Freezing it would mean a writer
+        // could never record what they learned from the very send that froze the package.
+        && (!data.keys().hasAny(['note'])
+            || (data.note is string && data.note.size() <= 2000))
+        && (!data.keys().hasAny(['noteEditedAt'])
+            || (data.noteEditedAt is string && data.noteEditedAt.size() <= 40))
         && (!data.keys().hasAny(['bookVersionId'])
             || (data.bookVersionId is string && data.bookVersionId.size() >= 1
                 && data.bookVersionId.size() <= 128))
@@ -763,7 +771,7 @@ service cloud.firestore {
         // edit the slots, and the guarantee is a formality. `hasAny` on the CHANGED keys is what
         // says "you may add it, you may never touch it again".
         allow update: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId)
-          && incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status', 'firstSentAt', 'bookVersionId'])
+          && incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status', 'firstSentAt', 'bookVersionId', 'note', 'noteEditedAt'])
           && (
             !existing().keys().hasAny(['firstSentAt'])
             // ⚠️ THE VERSION JOINS THE FROZEN SET, and it is the same argument as the other three:

@@ -467,6 +467,25 @@ export interface SubmissionPackage {
    */
   bookVersionId?: string;
   /**
+   * The writer's own margin note about this package (Part F, D23).
+   *
+   * ⚠️ ONE NOTE, NOT A THREAD, and not timestamped entries. A log of notes would be a second
+   * activity feed — the app already has one of those, and the Noteboard is where thinking out loud
+   * belongs. This is a single field a writer overwrites.
+   *
+   * ⚠️ AND IT IS EDITABLE FOREVER, INCLUDING ON A SENT PACKAGE (D24) — which is why it is
+   * deliberately OUTSIDE the freeze in `firestore.rules`. The three slots are frozen because a
+   * package's CONTENTS are a claim about what an agent received; a note is not a claim about
+   * anything the agent saw. It is the writer's own margin, and freezing it would mean a writer
+   * could never record what they learned from the send that froze it.
+   *
+   * Absent means unwritten. Cleared by omitting the key, never by storing `""` — the convention
+   * `otherMaterials` and `elevatorPitch` already follow.
+   */
+  note?: string;
+  /** ISO stamp of the last note edit — the drawer's footer states it. Absent while there is no note. */
+  noteEditedAt?: string;
+  /**
    * ⚠️ THE LOCK, AND THE ONE PLACE THIS FEATURE STORES WHAT IT WOULD RATHER DERIVE.
    *
    * ISO stamp of the first time a query went out carrying this package. Absent = never sent = the

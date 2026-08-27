@@ -272,7 +272,7 @@ interface DbContextType {
    * stored empty string would be a claim that the question was answered. Keeping that conversion
    * here means the two callers cannot disagree about what empty means.
    */
-  updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials">>) => Promise<string | null>;
+  updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials" | "bookVersionId" | "note" | "noteEditedAt">>) => Promise<string | null>;
   /* ⚠️ `markPackageSent` IS RETIRED — it never had a caller. It was written in anticipation of a
      stamping surface that turned out not to need it: both real paths stamp INSIDE their own atomic
      batch (`commitQueryEdits` for the drawer, `setQueryPackage` for the pane), because a stamp that
@@ -1742,21 +1742,26 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const updatePackage = async (
     id: string,
-    fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials" | "bookVersionId">>,
+    fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials" | "bookVersionId" | "note" | "noteEditedAt">>,
   ): Promise<string | null> => {
     if (!currentUser) return "Authentication required.";
     const live = packages.find((p) => p.id === id);
     if (live && isPackageLocked(live) && LOCKED_PACKAGE_FIELDS.some((k) => k in fields)) {
       return `${LOCKED_NOTE}. ${LOCKED_WHY}`;
     }
-    /* ⚠️ CLEARING THE FREE-TEXT LINE IS AN UNSET, NOT AN EMPTY STRING. The caller sends what the
-       input holds; the conversion lives here so both callers cannot drift. `otherMaterials` is the
-       only unsettable field on a package — the three version slots use `""` as their sentinel and
-       `deleteField()` on one of THOSE would fail `isValidPackage`, which requires the key present. */
+    /* ⚠️ CLEARING A FREE-TEXT FIELD IS AN UNSET, NOT AN EMPTY STRING. The caller sends what the
+       input holds; the conversion lives here so no caller can drift. The three version slots use
+       `""` as their sentinel and `deleteField()` on one of THOSE would fail `isValidPackage`,
+       which requires the key present — so the unsettable set is named rather than assumed.
+
+       ⚠️ AND `note` TAKES `noteEditedAt` WITH IT. A stamp surviving a cleared note would have the
+       drawer's footer state when a note that no longer exists last changed. */
     const payload: Record<string, unknown> = { ...fields };
-    if ("otherMaterials" in fields) {
-      const t = fields.otherMaterials?.trim();
-      payload.otherMaterials = t ? t : deleteField();
+    for (const k of ["otherMaterials", "note"] as const) {
+      if (!(k in fields)) continue;
+      const t = (fields[k] as string | undefined)?.trim();
+      payload[k] = t ? t : deleteField();
+      if (k === "note" && !t) payload.noteEditedAt = deleteField();
     }
     try {
       await updateDoc(doc(db, "users", currentUser.id, "packages", id), payload);
