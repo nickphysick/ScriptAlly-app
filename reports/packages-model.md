@@ -257,3 +257,47 @@ Parts C and D do not depend on this and could proceed first.
 * **F-BK** — D7 cites a divider no ref draws. Build it as a decision, not a restoration.
 * **F-BH** — the vestigial material `bookVersionId` (D11), open until Part C.
 * **F-BI** — CSV import and the portion field, open until Part B lands.
+
+---
+
+## Phase 4 — Part C, measured on the running app
+
+```
+[ScriptAlly] sample-pages retirement — 0 materials archived (4 already), 3 packages hold
+a sample slot that is no longer read (no package document is written)
+```
+
+**Against the recon's prediction: 4 materials archived, 3 packages affected — exactly as forecast.
+D10's red gate is not triggered.** The Phase 1 census found those same 4 samples in the ACTIVE
+shelf; this run reports them as already archived, so the migration ran, did its work, and a second
+pass planned nothing — **idempotence proved on live data rather than only in the unit test.**
+
+The shelf, rendered:
+
+```
+materials     3   two covering letters and one synopsis; the 4 samples are in the archive drawer
+ghost         "Add a material · Letter or synopsis"      (D13, and it names no sample)
+slot labels   ["Letter","Syn","Version"] × 3 cards       (D4/D12 — the three slots a package has)
+```
+
+**No package document was written.** The three packages still store their `samplePagesVersionId`;
+nothing reads it. That is the whole of D10 as it can honestly be executed — see the Phase 1 finding
+for why rewriting a locked package would violate the guarantee the lock exists to give.
+
+### F-BH — the vestigial `bookVersionId` on sample materials (D11), proposed not decided
+
+**Leave it.** Removing it is more expensive than leaving it, and the expense is of the worse kind:
+
+* It has exactly **one reader**, `bookVersionOf()`, which gates on `componentType === SAMPLE_PAGES`.
+  Nothing else in `src/` dereferences `m.bookVersionId`. After D15 that reader has no caller either,
+  so the field is inert rather than merely unused.
+* Every sample carrying one is now **archived**. A migration to strip the field would be a write
+  across archived documents — rewriting a record of what the writer wrote, to tidy a model. That is
+  the same objection as D10's, one collection along.
+* Restoring an archived sample is a supported action. A stripped field would silently change what
+  came back.
+
+The cost of leaving it is one optional key on documents nobody edits, and one gated helper. The cost
+of removing it is a write over the writer's own archived material. `MaterialModal`'s branch is kept
+as a named `showVersionField = false` constant rather than deleted markup, so whoever revisits this
+can see what used to write it.
