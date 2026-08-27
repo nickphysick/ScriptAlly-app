@@ -115,10 +115,27 @@ for (const width of [1280, 1440, 2300]) {
         };
         return { band: { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) }, title: ink(".wsh-title"), sub: ink(".wsh-sub") };
       }, trial.cls);
-      const png = readPng(await page.screenshot({ clip: { x: geo.band.x, y: geo.band.y, width: geo.band.w, height: geo.band.h } }));
+      /**
+       * ⚠️ THE BAND PHOTOGRAPHED WITH THE ARTWORK OFF AND ON, NOT AGAINST ONE "GROUND" COLOUR — and
+       * the single-colour form broke the moment a page's ground became a GRADIENT. It sampled the
+       * far left as "the ground" and compared the text's surroundings to it; with a two-colour
+       * ground those are different colours by design, so it reported artwork over the title on a
+       * band where the mask was working perfectly.
+       *
+       * Switching the pseudo-element's opacity to 0 and back gives the ground exactly as painted at
+       * every x, with no modelling of the gradient and nothing assumed about what the band is filled
+       * with. The claim becomes what it always meant: at the text, the band looks the same whether
+       * the artwork is there or not.
+       */
+      const clip = { x: geo.band.x, y: geo.band.y, width: geo.band.w, height: geo.band.h };
+      await page.addStyleTag({ content: `.wpg .wpg-chrome::after { opacity: 0 !important; }` });
+      await page.waitForTimeout(120);
+      const bare = readPng(await page.screenshot({ clip }));
+      await page.locator("style").last().evaluate((e) => e.remove());
+      await page.waitForTimeout(160);
+      const png = readPng(await page.screenshot({ clip }));
       const at = (ax: number, ay: number) => png.at(Math.min(Math.max(ax - geo.band.x, 0), png.width - 1), Math.min(Math.max(ay - geo.band.y, 0), png.height - 1)).join(",");
-      /* the ground, taken at the far left where the mask is fully transparent by construction */
-      const ground = at(geo.band.x + 6, geo.band.y + Math.round(geo.band.h / 2));
+      const bareAt = (ax: number, ay: number) => bare.at(Math.min(Math.max(ax - geo.band.x, 0), png.width - 1), Math.min(Math.max(ay - geo.band.y, 0), png.height - 1)).join(",");
       for (const [what, k] of [["title", geo.title], ["description", geo.sub]] as const) {
         if (!k) { lines.push(`  ${posture}: no ${what} rendered`); continue; }
         /**
@@ -129,13 +146,14 @@ for (const width of [1280, 1440, 2300]) {
          * where the text ends, on the same line — the strictest point that is still background.
          */
         const painted = at(k.right + 3, k.y);
-        lines.push(`  ${posture.padEnd(7)} ${what.padEnd(11)} last glyph x${k.right} → ${painted} (ground ${ground})`);
+        const ground = bareAt(k.right + 3, k.y);
+        lines.push(`  ${posture.padEnd(7)} ${what.padEnd(11)} last glyph x${k.right} → ${painted} (ground there ${ground})`);
         /**
          * ⚠️ THE GROUND EXACTLY, NOT "CLOSE TO IT". The mask's job is that the artwork is FULLY
          * transparent where text sits — a pixel a few units off the ground is artwork showing
          * through faintly, which is precisely the state this is written to forbid.
          */
-        expect(painted, `${posture}: painted artwork reaches the ${what}'s last glyph — the mask does not clear the text`).toBe(ground);
+        expect(painted, `${posture}: painted artwork reaches the ${what}'s last glyph — the band differs there with the artwork on`).toBe(ground);
       }
     }
     console.log(`\n══ TEXT CLEARS THE ARTWORK — ${trial.name} — ${width}\n` + lines.join("\n"));
