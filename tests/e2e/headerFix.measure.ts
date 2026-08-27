@@ -67,15 +67,35 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
   };
 }, cls);
 
-test("⚠️ EVERY MASTHEAD CARRIES THE WASH — a partition, with no page named", async ({ page }) => {
+/* the pages permitted a ground other than the wash — see the note at the carve-out */
+const WASH_CARVE_OUTS = ["Submission packages"];
+
+test("⚠️ EVERY MASTHEAD CARRIES THE WASH — a partition, with one named carve-out", async ({ page }) => {
   const lines: string[] = [];
-  let measured = 0, washed = 0;
+  let measured = 0, washed = 0, carved = 0;
   for (const { name, route, cls } of PAGES) {
     await openRoute(page, route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     const r = await read(page, cls);
     expect(r, `${name}: no grid — the census names a page this build does not render`).not.toBeNull();
     measured += 1;
+    /**
+     * ⚠️ ONE CARVE-OUT, STATED HERE RATHER THAN HIDDEN IN A SKIP. Submission packages is running a
+     * trial: an illustration bleeding across its masthead, on a WHITE ground rather than the wash.
+     * It is the single page allowed to depart, and the size of that list is asserted below — so a
+     * second page cannot join it without someone editing the number and reading this.
+     *
+     * ⚠️ THE CARVED-OUT PAGE IS STILL HELD TO SOMETHING, never merely skipped. It must have an
+     * OPAQUE ground of its own; what it may not do is quietly have no ground at all, which is the
+     * fault this whole family of locks exists for.
+     */
+    if (WASH_CARVE_OUTS.includes(name)) {
+      carved += 1;
+      const alpha = (c: string) => { const m = /rgba?\(([^)]*)\)/.exec(c); const parts = m ? m[1].split(",").map((v) => parseFloat(v.trim())) : []; return parts.length > 3 ? parts[3] : 1; };
+      expect(alpha(r!.chromeBg), `${name} is carved out of the wash and its ground is not opaque (${r!.chromeBg})`).toBe(1);
+      lines.push(`${name.padEnd(21)} ${String(r!.type).padEnd(7)} · CARVE-OUT · ground ${r!.chromeBg}`);
+      continue;
+    }
     const stops = r!.chromeImg.match(/rgb\([^)]*\)/g) ?? [];
     /* the claim, over whichever pages exist: a gradient between the two tokens */
     expect(stops.length, `${name}: its masthead draws no wash (${r!.chromeImg.slice(0, 50)})`).toBe(2);
@@ -87,7 +107,10 @@ test("⚠️ EVERY MASTHEAD CARRIES THE WASH — a partition, with no page named
   console.log("\n══ THE WASH, EVERY MASTHEAD (1440)\n" + lines.join("\n"));
   /* ⚠️ THE POPULATION FIRST — an empty census satisfies every claim above it. */
   expect(measured, "no page was measured at all").toBe(PAGES.length);
-  expect(washed, "a masthead was measured that carries no wash").toBe(measured);
+  expect(washed, "a masthead was measured that carries no wash").toBe(measured - carved);
+  /* ⚠️ EXACTLY ONE, so the trial cannot spread without a deliberate edit here */
+  expect(carved, "the number of pages departing from the wash is not one — the trial has spread or been reverted").toBe(1);
+  expect(WASH_CARVE_OUTS, "the carve-out list itself has grown").toHaveLength(1);
 });
 
 test("⚠️ NO TOOLBAR CARRIES THE WASH — asserted in both directions", async ({ page }) => {

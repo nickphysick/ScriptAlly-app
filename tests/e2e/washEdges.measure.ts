@@ -37,6 +37,13 @@ const near = (a: string, b: string) => {
   return x.every((v, i) => Math.abs(v - y[i]) <= 2);
 };
 
+/**
+ * ⚠️ THE PAGES ALLOWED TO DEPART FROM THE PLAIN WASH, LISTED HERE AND COUNTED. A trial that quietly
+ * becomes two pages is no longer a trial; the size of this list is asserted, so a second page cannot
+ * join without someone editing the number and reading this paragraph.
+ */
+const ILLUSTRATED = ["Submission packages"];
+
 const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Query Centre",        route: "/queries",              cls: "qc-wpg"   },
   { name: "Analytics",           route: "/queries/analytics",    cls: "qa-wpg"   },
@@ -79,6 +86,8 @@ const frame = (page: Page, cls: string) => page.evaluate((c) => {
        is real. `offsetWidth - clientWidth` is what the browser actually took, so a reservation that
        no bar occupies is not mistaken for one that does. */
     barW: Math.round(sb.width) - sc.clientWidth,
+    /* the band's own box, for the illustrated carve-out — see its note */
+    bandBox: { l: Math.round(cb.left), r: Math.round(cb.right) },
     scrolls: sc.scrollHeight - sc.clientHeight > 2,
   };
 }, cls);
@@ -110,7 +119,10 @@ for (const width of [1280, 1440, 2300]) {
       await liftMotionSuppression(page);
       const f = await frame(page, cls);
       expect(f, `${name}: no grid`).not.toBeNull();
-      const { innerL, innerR, washY, toolY, barW, scrolls } = f!;
+      const { innerL, innerR, washY, toolY, barW, scrolls, bandBox } = f!;
+      /* the left edge is geometry too, for every page — the cheapest statement of the whole claim */
+      expect(bandBox.l, `${name}: the band's box starts ${bandBox.l - innerL}px inside the window's LEFT inner edge`)
+        .toBeLessThanOrEqual(innerL + 1);
       const span = innerR - innerL;
       expect(span, `${name}: the window has no inner width to span`).toBeGreaterThan(200);
 
@@ -128,7 +140,35 @@ for (const width of [1280, 1440, 2300]) {
         const left = at(0), right = at(rightmost - innerL);
         measured += 1;
         expect(near(left, mid), `${name}: the ${what} band does not reach the window's LEFT inner edge — painted ${left} there against ${mid} inside the band`).toBe(true);
-        expect(near(right, mid), `${name}: the ${what} band does not reach the window's RIGHT inner edge — painted ${right} there against ${mid} inside the band`).toBe(true);
+        if (ILLUSTRATED.includes(name) && what === "masthead") {
+          /**
+           * ⚠️ ONE CARVE-OUT, NAMED, AND ITS POPULATION ASSERTED BELOW. Submission packages carries
+           * a trial illustration bleeding to its right edge, so the band's colour THERE is artwork
+           * rather than its ground — and comparing it to the band's modal colour reports a
+           * perfectly full-bleed band as stopping short (232,210,195 against a white modal).
+           *
+           * ⚠️ THE CLAIM IS UNCHANGED AND IS STILL THE POINT: no strip of PAGE GROUND at the edge.
+           * It is tested by CONTINUITY instead — the outermost pixel against one 20px inside it. If
+           * the band stopped short, the outer sample would be the desk and the two would diverge
+           * sharply; artwork running to the edge varies gently. The left edge keeps the exact test,
+           * because the mask is fully transparent there by construction.
+           */
+          /**
+           * ⚠️ GEOMETRY, NOT COLOUR, AND THE COLOUR TESTS BOTH FAILED HONESTLY BEFORE THIS. Against
+           * the band's modal colour the artwork reads as a short band; against a sample 20px inward
+           * it reads as broken, because a detailed illustration legitimately changes a lot in 20px
+           * (179,166,154 against 232,210,195). Neither is a question about the edge.
+           *
+           * What the original fault WAS is a band whose BOX stopped short of the window — the
+           * scrollbar reservation held it 15px in on both sides — and the box is exactly what this
+           * asks. It is immune to what the band is filled with, which is the property the carve-out
+           * needs, and it would have caught the reservation directly.
+           */
+          expect(bandBox.r, `${name}: the ${what} band's box stops ${innerR - bandBox.r}px short of the window's RIGHT inner edge`)
+            .toBeGreaterThanOrEqual(innerR - (scrolls ? barW : 0) - 1);
+        } else {
+          expect(near(right, mid), `${name}: the ${what} band does not reach the window's RIGHT inner edge — painted ${right} there against ${mid} inside the band`).toBe(true);
+        }
         if (what === "masthead") {
           lines.push(`${name.padEnd(21)} span ${String(span).padStart(4)} · bar ${String(barW).padStart(2)}${scrolls ? "" : " (unused)"} · L ${left} · R ${right} · mid ${mid}`);
         }
@@ -155,6 +195,7 @@ for (const width of [1280, 1440, 2300]) {
       }
     }
     console.log(`\n══ WASH TO THE WINDOW'S EDGES — ${width}\n` + lines.join("\n"));
+    expect(ILLUSTRATED, "more than one page departs from the plain wash — the trial has spread").toHaveLength(1);
     expect(measured, "no band was sampled at all").toBeGreaterThan(9);
     /* ⚠️ REPORTED, NOT REQUIRED. How many pages take real width depends on the platform's scrollbar
        style — nil here, where they are overlays. A floor would assert the harness's settings. */

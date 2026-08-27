@@ -858,3 +858,79 @@
    border, no radius, no shadow — which is the whole of what step 1 did; a sage edge on one page is
    card treatment, and the acceptance matrix compares every masthead against every other. Its
    `:not(.wsh--scrolled)` guard is dead too: nothing emits that class any more. */
+
+/**
+ * ══ TRIAL · AN ILLUSTRATED MASTHEAD, THIS PAGE ONLY ═══════════════════════════════════════════
+ * (ref design-refs/182-qc-illustrated-masthead.html — the bench draws it on Query Centre's layout;
+ * the MECHANISM is what is normative there, not the page.)
+ *
+ * ⚠️ THE BAND, NOT `.wsh` — and the brief's snippet names the inner element. In the bench the
+ * artwork sits on `.mast`, a full-bleed band (`position: relative; overflow: hidden`), with the text
+ * in `.mastin`, an inset measure lifted to `z-index: 2`. Those map here to `.wpg-chrome` and
+ * `.wpg-mast`, not to `.wsh`: `.wsh` lives INSIDE the measure, which is capped and inset 35px each
+ * side, so painting it there would put a white box in the middle of a terracotta band with the wash
+ * still showing in both gutters — and the artwork would stop 35px short of the edges the wash
+ * reaches. The band is the element that already spans the window, so it is the element that carries
+ * this.
+ *
+ * ⚠️ SCOPED TO THIS PAGE BY ITS GRID CLASS, so the trial is one block to delete. Nothing in the
+ * shared grid is touched, and the other nine mastheads cannot acquire artwork by inheritance.
+ */
+/* ⚠️ FOUR CLASSES, BECAUSE THE SHARED RULE HAS THREE. The wash is declared on
+   `.wpg > .wpg-scroll > .wpg-chrome` (0-3-0); a page-scoped `.pkgw-wpg .wpg-chrome` is 0-2-0 and
+   loses, silently — measured, the band still painted the terracotta `rgb(251,243,238)` with this
+   rule applying cleanly and every sample downstream taken against the wrong ground. */
+.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome {
+  /* ⚠️ WHITE, NOT THE WASH — the carve-out this trial buys, and the ground lock names it as the one
+     page allowed it. Both longhands, never the `background` shorthand: the shorthand is what resets
+     `background-color` to transparent, which is the fault four earlier rounds were about. */
+  background-color: #ffffff;
+  background-image: none;
+  /**
+   * ⚠️ NO `position: relative` — THE BENCH HAS IT AND COPYING IT HERE BROKE THE PAGE. This band is
+   * `position: sticky`, and `relative` overrode it: the slab stopped pinning, which the behaviour
+   * lock caught immediately. A sticky element already establishes a containing block for
+   * absolutely-positioned descendants, so the pseudo-element needs nothing added.
+   *
+   * ⚠️ `overflow: hidden` IS SAFE HERE and is the half of the bench's rule that must survive — it
+   * is on the sticky element itself, not on an ancestor, so it clips the artwork to the band without
+   * touching the pinning. (An `overflow` other than `visible` on an ANCESTOR is what kills sticky.)
+   */
+  overflow: hidden;
+}
+.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* ⚠️ IT MUST NOT SWALLOW A CLICK — Hide and the page's own controls sit over this band. */
+  pointer-events: none;
+  background-image: url(../../assets/packages/packages.webp);
+  background-repeat: no-repeat;
+  background-position: 100% center;
+  background-size: auto 150%;
+  /* knocked back so it reads as a watermark rather than competing with what sits on it */
+  opacity: 0.65;
+  /**
+   * ⚠️ THE MASK IS THE POINT. The artwork is fully transparent where the title and description sit
+   * and fades in across the middle, so no text is ever set over painted illustration — asserted by
+   * sampling the painted colour at the last glyph of each, in both postures, rather than trusted.
+   */
+  /**
+   * ⚠️ 54%/76%, NOT THE REF'S 34%/64% — AND THIS IS THE CONTAINER-TRANSFER RULE AGAIN, not a taste
+   * change. The bench draws one width, where 34% clears its text. Here the masthead's measure is
+   * CAPPED and CENTRED, so where the description ends as a FRACTION of the band moves with the
+   * viewport: measured, its last glyph sits at 51.5% of the band at 1280, 44% at 1440 and 33% at
+   * 2300. A stop at 34% therefore put the description on painted artwork at the two narrower
+   * widths — 251,246,241 against a white ground at 1440, faint but really there.
+   *
+   * 54% clears the worst case (51.5%) by about 25px, and the fade keeps the ref's 30-point span.
+   * The cost is paid at 1280, where the artwork now begins later in a band that is already the
+   * narrowest; that is the trade the screenshots are for.
+   */
+  -webkit-mask-image: linear-gradient(to right, transparent 54%, #000 76%);
+          mask-image: linear-gradient(to right, transparent 54%, #000 76%);
+}
+/* ⚠️ THE TEXT SITS ABOVE THE PAINT. The pseudo-element is positioned and the masthead's measure is
+   not, so without this the artwork would paint over the title — the bench lifts `.mastin` to
+   `z-index: 2` for the same reason. */
+.wpg.pkgw-wpg .wpg-mast { position: relative; z-index: 2; }
