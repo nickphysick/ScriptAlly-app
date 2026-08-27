@@ -312,3 +312,57 @@
 /* ⚠️ THE OLD STRIP'S FOOT, LOCK AND POINTER RULES ARE GONE (Option B). The footer held the lock
    notice — retired from this surface last run — and the pointer controls, which have left the card
    entirely and are `.qc-stat-acts` now. Nothing renders these classes. */
+
+/**
+ * ⚠️ THE PORTION — after a dotted divider, right of the package's own contents (D7).
+ *
+ * The divider is a DECISION, not a restoration: no committed ref draws one. Left of it is what the
+ * PACKAGE holds, identical on every send carrying it; right of it is what this one agency asked
+ * for. Run together they read as one list and nothing tells the reader which half moves when the
+ * package is edited.
+ *
+ * ⚠️ DOTTED RATHER THAN SOLID, AND THAT IS THE POINT OF IT. A solid rule in this row would read as
+ * another cell boundary — the strip already has one, between the blue name cell and the slots. A
+ * dotted line reads as a change of subject inside one region, which is what this is.
+ */
+.qc-ps-por {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 7px 14px 7px 13px;
+  border-left: 1px dotted var(--pro-edge);
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.qc-ps-poreye {
+  font-family: var(--f12-mono, ui-monospace, monospace);
+  font-size: 6.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: rgba(58, 28, 20, 0.4);
+  flex: 0 0 auto;
+}
+.qc-ps-porv {
+  font-size: 11.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+/**
+ * ⚠️ THE STAND-IN IS A DIFFERENT TREATMENT, NOT THE SAME ONE GREYED. `--soft` is what the strip
+ * wears when the text is the AGENT'S stated requirement rather than a record of what went, or when
+ * nobody has stated one at all. It must not read as a fact the writer entered — that is D6's whole
+ * point, and an italic muted value is how every other absent-or-expected value on this page reads.
+ */
+.qc-ps-por--soft .qc-ps-porv { font-weight: 400; font-style: italic; color: rgba(58, 28, 20, 0.55); }
+
+/* stacked, the divider becomes a rule above rather than a rule beside */
+@container qc-strip (max-width: 574px) {
+  .qc-ps-por {
+    border-left: none;
+    border-top: 1px dotted var(--pro-edge);
+    padding: 7px 14px;
+  }
+}

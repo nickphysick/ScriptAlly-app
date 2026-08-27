@@ -38,6 +38,7 @@ import React from "react";
 import { packageDrift, driftNote, asSentLabel, type MaterialGroup } from "../../lib/packageAttach";
 import PARCEL_MARK from "../../assets/packages/package-mark.png";
 import type { QueryMaterial, SubmissionPackage } from "../../types";
+import { PORTION_UNRECORDED, type QueryPortion } from "../../lib/queryPortion";
 import "./packageGroup.css";
 
 /* ⚠️ `PARCEL_SLOT` IS GONE (D5) — it named a DASHED commission slot, and the band draws a solid
@@ -63,6 +64,12 @@ export interface PackageGroupProps {
   sent: readonly (string | QueryMaterial)[];
   /** The send's own date, for `As sent, 12 Aug`. */
   sentDate?: string;
+  /**
+   * What portion of the manuscript this query carried — DERIVED, never a stored field of its own
+   * (`lib/queryPortion.ts`). Absent means the caller does not state one at all; `{ text: null }`
+   * means nobody has, which renders `Not recorded`.
+   */
+  portion?: QueryPortion;
   onView: () => void;
   /**
    * ⚠️ POINTER CONTROLS, NOT CONTENT CONTROLS (Ruling 1). Which package this query points at is
@@ -91,7 +98,7 @@ export interface PackageGroupProps {
 }
 
 export const PackageGroup: React.FC<PackageGroupProps> = ({
-  group, live, sent, sentDate, onView, onChangePackage, onRemovePackage, children,
+  group, live, sent, sentDate, portion, onView, onChangePackage, onRemovePackage, children,
 }) => {
   /**
    * ⚠️ EACH STATE APPEARS ONLY WHEN TRUE, AND THERE IS NO "MATCHES" STATE. A group that still
@@ -134,6 +141,30 @@ export const PackageGroup: React.FC<PackageGroupProps> = ({
             chip. The strip owns their LAYOUT and strips the pill treatment; it does not rebuild
             them, which is what keeps the chip working without this file knowing about versions. */}
         <div className="qc-ps-sl">{children}</div>
+        {/**
+          * ⚠️ THE PORTION SITS AFTER A DOTTED DIVIDER — package contents left of it, this query's
+          * own fact right (D7).
+          *
+          * The divider is a DECISION rather than a restoration: no committed ref draws one. The
+          * settled ref has no strip at all, and the only `dotted` in either strip ref is the
+          * underline beneath the "via Email" label. Said plainly here so the next reader does not
+          * go looking for the drawing.
+          *
+          * ⚠️ WHY A DIVIDER AT ALL. Left of it is what the PACKAGE holds — the same three slots on
+          * every send that carries it. Right of it is what this one agency asked for, which no
+          * other send need share. Run together they read as one list, and the reader has no way to
+          * tell which half moves when the package is edited.
+          *
+          * ⚠️ AND AN UNRECORDED PORTION IS SHOWN, NOT OMITTED. `Not recorded` is the fact for every
+          * query written before this existed; a blank right-hand side would read as though the
+          * package were the whole of what went.
+          */}
+        {portion && (
+          <div className={`qc-ps-por${portion.recorded ? "" : " qc-ps-por--soft"}`}>
+            <span className="qc-ps-poreye">Portion</span>
+            <span className="qc-ps-porv">{portion.text ?? PORTION_UNRECORDED}</span>
+          </div>
+        )}
       </div>
 
       {/**

@@ -96,6 +96,7 @@ import {
   attachablePackages, canAttachPackages, groupByOrigin, materialName,
   packageMenuRow, detachMenuRows, detachToast, withoutPackage, linkedChips,
 } from "../lib/packageAttach";
+import { queryPortion } from "../lib/queryPortion";
 import { PackageGroup, LooseMaterials } from "./reading-pane/PackageGroup";
 import { VersionLines } from "./reading-pane/VersionLines";
 import { bookVersionsOf } from "../lib/bookVersions";
@@ -6126,6 +6127,12 @@ export const Queries: React.FC<{
                                         live={packages.find((p) => p.id === g.packageId) ?? null}
                                         sent={materialsOf(activeQuery)}
                                         sentDate={activeQuery.dateSent}
+                                        /* ⚠️ DERIVED, NOT STORED (Part B). The portion is the
+                                           sample-and-other members of this query's own
+                                           `materialsWanted` — the field this file already describes
+                                           as "the record of what was sent". A second field beside
+                                           it would have been two answers to one question. */
+                                        portion={queryPortion(activeQuery, activeAgent)}
                                         onView={openPackages}
                                       >
                                         {take(g.materials)}
@@ -6241,6 +6248,7 @@ export const Queries: React.FC<{
                                     live={linkedPackage}
                                     sent={[]}
                                     sentDate={activeQuery.dateSent}
+                                    portion={queryPortion(activeQuery, activeAgent)}
                                     onView={openPackages}
                                     onChangePackage={() => {
                                       (pkgPickTrigRef as React.MutableRefObject<HTMLElement | null>).current = addMatTrigRef.current;
