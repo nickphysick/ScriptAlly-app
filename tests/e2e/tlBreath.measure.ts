@@ -9,12 +9,14 @@ import { openRoute, liftMotionSuppression } from "./measure";
  * pulse and said nothing in its place. The claim is that the INFORMATION survives.
  */
 /**
- * ⚠️ THE TWO KINDS OF LONG-STANDING BAR ARE MEASURED SEPARATELY, because they take DIFFERENT
- * keyframes on purpose. A clamped bar's edge is `currentColor` dotted or dashed and says "this
- * began before the board" / "this runs past it"; the pulse must not recolour that claim, so a
- * clamped bar animates its background alone. Asking for "the first `.tl-seg.s-y3`" answered about
- * whichever happened to be first — which was a clamped one, and the check read as the pulse being
- * the wrong animation rather than as the probe picking the wrong bar.
+ * ⚠️ THE TWO KINDS ARE STILL MEASURED SEPARATELY, THOUGH THEY NOW TAKE THE SAME KEYFRAME. They
+ * briefly took different ones — a clamped bar animating its background alone, so the pulse could
+ * not recolour a `currentColor` edge that says "this began before the board". That split is gone
+ * because BORDERS ARE TRANSPARENT: the fill breathes through them, so nothing animates a border
+ * and nothing can outrank a clamp. The split survives in the PROBE because a clamped bar is a
+ * different object to look at, and because "the first `.tl-seg.s-y3`" once answered about
+ * whichever happened to be first — which was a clamped one, and read as the pulse being the wrong
+ * animation rather than as the probe picking the wrong bar.
  */
 const find = `(() => {
   const all = [...document.querySelectorAll(".tl")];
@@ -51,10 +53,10 @@ test("Phase 3 — the pulse, and its equal under reduced motion", async ({ page 
   /* ⚠️ THE POPULATION FIRST — every clause below is satisfied by a board with no y3 on it. */
   expect(live.n, "no long-standing bar on this account — nothing was measured").toBeGreaterThan(0);
   expect(live.any.dur, "the breath is not 2.6s").toBe("2.6s");
-  if (live.whole) expect(live.whole.name, "an unclamped long-standing bar takes the flat variant").toBe("tlUrge");
-  else console.log("  NOTE: no unclamped long-standing bar — `tlUrge` is source-locked only");
-  if (live.clamped) expect(live.clamped.name, "a clamped bar's edge would breathe with it").toBe("tlUrgeFlat");
-  else console.log("  NOTE: no clamped long-standing bar — `tlUrgeFlat` is source-locked only");
+  if (live.whole) expect(live.whole.name, "an unclamped long-standing bar does not breathe").toBe("tlUrge");
+  else console.log("  NOTE: no unclamped long-standing bar on this account");
+  if (live.clamped) expect(live.clamped.name, "a clamped long-standing bar does not breathe").toBe("tlUrge");
+  else console.log("  NOTE: no clamped long-standing bar on this account");
   expect(live.whole || live.clamped, "neither kind rendered").toBeTruthy();
 
   /* ⚠️ IT ACTUALLY MOVES, asserted by SEEKING rather than by waiting. A computed value read at an
@@ -105,7 +107,8 @@ test("Phase 3 — under reduce, the pulse stops and the bar deepens", async ({ b
     /* ⚠️ AND IT STILL SAYS SOMETHING. The bar settles at the deeper end of its own breath, so the
        stretch that has run longest is distinguishable without anything moving. */
     expect(v.bg, `${kind}: reduce stopped the pulse and said nothing in its place`).toBe("rgb(233, 195, 178)");
-    expect(v.bd, `${kind}: the border did not follow the fill under reduce`).toBe(v.bg);
+    /* the border is transparent, so it deepens WITH the fill rather than needing its own rule */
+    expect(v.bd, `${kind}: the border is painted rather than transparent`).toBe("rgba(0, 0, 0, 0)");
   }
 
   console.log(`console errors: ${errs.length ? errs.join(" | ") : "none"}`);

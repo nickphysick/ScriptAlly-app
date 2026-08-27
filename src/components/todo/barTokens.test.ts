@@ -25,16 +25,22 @@ describe("⚠️ urgency is breath, and reduced motion carries the same fact (Ph
     const board = decls.slice(decls.indexOf("\n.tl-board {"));
     const tok = (n: string) => board.match(new RegExp(`--bar-${n}:\\s*([^;]+);`))![1].trim();
     const rest = tok("y3-fill"), deep = tok("urgent-fill");
-    for (const name of ["tlUrge", "tlUrgeFlat"]) {
+    for (const name of ["tlUrge"]) {
       const kf = decls.match(new RegExp(`@keyframes ${name}\\s*\\{([\\s\\S]*?)\\n\\}`))![1];
       expect(kf, `${name} does not rest at --bar-y3-fill (${rest})`).toContain(rest);
       expect(kf, `${name} does not deepen to --bar-urgent-fill (${deep})`).toContain(deep);
       expect(kf, `${name} reads a var(), which fails silently inside keyframes`).not.toContain("var(");
     }
-    /* the flat variant exists for the clamped case and animates the background alone */
-    const flat = decls.match(/@keyframes tlUrgeFlat\s*\{([\s\S]*?)\n\}/)![1];
-    expect(flat, "the flat variant animates a border it was written to leave alone").not.toContain("border-color");
-    expect(decls, "the flat variant has no consumer").toMatch(/\.tl-seg\.s-y3\.(openleft|future)[^{]*\{[^}]*tlUrgeFlat/);
+    /**
+     * ⚠️ THE BACKGROUND ALONE, AND NO BORDER. Borders are transparent, so the fill breathes THROUGH
+     * them; a keyframe that also set `border-color` would do nothing but outrank the clamps, whose
+     * `currentColor` edge says "this began before the board" / "this runs past it". That version
+     * was written first and the acceptance sweep caught it — a clamped bar whose border held still
+     * while its background moved, which is "borders match fill" failing for 1.3 seconds at a time.
+     */
+    const kf = decls.match(/@keyframes tlUrge\s*\{([\s\S]*?)\n\}/)![1];
+    expect(kf, "the pulse animates a border, which outranks the clamps").not.toContain("border-color");
+    expect(decls, "nothing consumes the pulse").toMatch(/\.tl-seg\.s-y3\s*\{[^}]*animation:\s*tlUrge\s/);
   });
 
   it("⚠️ reduced motion stops the pulse AND states the fact another way", () => {
@@ -46,6 +52,9 @@ describe("⚠️ urgency is breath, and reduced motion carries the same fact (Ph
        claim, and a check that only asserts `animation: none` passes on the old broken rule. */
     expect(block!, "reduced motion says nothing — motion was the only signal")
       .toContain("background: var(--bar-urgent-fill)");
+    /* ⚠️ AND IT SETS NO BORDER, for the same reason the keyframes set none: transparent shows the
+       fill, so the border deepens with it and a second declaration would only outrank the clamps. */
+    expect(block!, "reduced motion recolours a border the clamps own").not.toContain("border-color:");
   });
 });
 
@@ -81,16 +90,22 @@ describe("⚠️ bar colour is a token, never a literal (settled pack, Phase 2)"
     expect(block, "the board has no ground token").toContain("--board-ground:");
   });
 
-  it("⚠️ borders match fill, and closed is the only exception", () => {
+  it("⚠️ borders match fill via `transparent`, and closed is the only exception", () => {
     for (const s of STATES) {
       if (s === "closed" || s === "quiet" || s === "task") continue;
       const rule = decls.match(new RegExp(`\\n\\.tl-seg\\.s-${s}\\s*\\{([^}]*)\\}`));
       expect(rule, `.tl-seg.s-${s} has no rule`).not.toBeNull();
       const body = rule![1];
       expect(body, `s-${s} does not paint from its fill token`).toContain(`background: var(--bar-${s}-fill)`);
-      /* the claim, stated as the two reading the SAME token rather than as two equal literals */
-      expect(body, `s-${s}: the border does not read the fill token`)
-        .toContain(`border-color: var(--bar-${s}-fill)`);
+      /**
+       * ⚠️ `transparent`, NOT A SECOND COPY OF THE FILL TOKEN. A background paints UNDER its
+       * border, so a transparent border shows the bar's own fill and the two cannot be told apart.
+       * The version that read `border-color: var(--bar-X-fill)` looked identical at rest and
+       * diverged the moment the pulse deepened the background, because the border was a frozen
+       * copy of a value that was changing — caught by the acceptance sweep, not by reading.
+       */
+      expect(body, `s-${s}: the border is a frozen copy of the fill rather than transparent`)
+        .toContain("border-color: transparent");
     }
     const closed = decls.match(/\n\.tl-seg\.s-closed\s*\{([^}]*)\}/)![1];
     expect(closed, "closed grew a fill").toContain("background: transparent");

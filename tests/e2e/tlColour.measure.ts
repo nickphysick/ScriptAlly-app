@@ -32,7 +32,7 @@ test("Phase 2 — tokens, matching borders, one your-move wording", async ({ pag
       const lbl = el.querySelector(".tl-lbl") as HTMLElement | null;
       seen[st] = {
         fill: cs.backgroundColor, image: cs.backgroundImage.slice(0, 40),
-        border: cs.borderTopColor, style: cs.borderTopStyle,
+        border: cs.borderTopColor, style: cs.borderTopStyle, clip: cs.backgroundClip,
         text: cs.color,
         lbl: lbl ? [getComputedStyle(lbl).fontSize, getComputedStyle(lbl).fontWeight,
                     getComputedStyle(lbl).letterSpacing, getComputedStyle(lbl).textTransform,
@@ -77,7 +77,13 @@ test("Phase 2 — tokens, matching borders, one your-move wording", async ({ pag
       /* the one state whose fill is a hatch rather than a flat colour */
       expect(v.image, "gone quiet is not hatched").toContain("repeating-linear-gradient");
     } else {
-      expect(v.border, `${st}: the border does not match the fill`).toBe(v.fill);
+      /* ⚠️ TRANSPARENT IS HOW THE BORDER MATCHES THE FILL. A background paints UNDER its border,
+         so a transparent border shows the bar's own fill and nothing can tell them apart — while a
+         border carrying a COPY of the fill token diverges the moment the pulse deepens one of
+         them. `background-clip` is asserted beside it, because that default is the whole reason
+         this works and a single declaration elsewhere would silently end it. */
+      expect(v.border, `${st}: the border is painted rather than transparent`).toBe("rgba(0, 0, 0, 0)");
+      expect(v.clip, `${st}: the fill no longer paints under its border`).toBe("border-box");
       expect(v.style, `${st}: the border is not solid`).toBe("solid");
     }
   }

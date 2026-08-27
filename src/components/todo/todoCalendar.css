@@ -521,19 +521,25 @@
  * ⚠️ ONE RULE PER STATE, READING ONE TRIPLE. A bar's colour is no longer assembled from `side`
  * plus `weight` plus a modifier; `barState` decides what a stretch IS and the class says so.
  *
- * ⚠️ BORDERS MATCH FILL — the bar reads as ONE SOLID SHAPE rather than a fill inside an outline.
- * The ref carries both modes and this is its `body.flat`; taking the `-line` values as the shipped
- * borders would have built the other one. The `-line` tokens are still declared because CLOSED
- * paints with one, and because the other mode is a change of mind rather than a rewrite.
+ * ⚠️ BORDERS MATCH FILL, AND `transparent` IS HOW — not a second copy of the fill token. A
+ * background paints UNDER its border by default (`background-clip: border-box`), so a transparent
+ * border shows the bar's own fill and the two cannot be told apart. The ref does it this way and
+ * the reason only becomes visible once the bar MOVES: `border-color: var(--bar-y3-fill)` looks
+ * identical at rest and diverges the moment a pulse deepens the background, because the border is
+ * a frozen copy of a value that is changing. Measured — the acceptance sweep caught it at 1280.
+ *
+ * ⚠️ THAT ALSO LEAVES THE CLAMPS ALONE. `.openleft` / `.future` paint their edge in `currentColor`
+ * to SAY something, and an animation on `border-color` would outrank that longhand and make the
+ * claim breathe with the bar. Nothing animates a border now, so nothing can.
  *
  * ⚠️ CLOSED IS THE SOLE EXCEPTION, for a reason that cannot be designed around: a transparent fill
- * with a matching border is an INVISIBLE BAR. It keeps its dashed edge.
+ * with a transparent border is an INVISIBLE BAR. It keeps its dashed edge.
  */
-.tl-seg.s-theirs  { background: var(--bar-theirs-fill);  border-color: var(--bar-theirs-fill);  color: var(--bar-theirs-text); }
-.tl-seg.s-theirsq { background: var(--bar-theirsq-fill); border-color: var(--bar-theirsq-fill); color: var(--bar-theirsq-text); }
-.tl-seg.s-nudged  { background: var(--bar-nudged-fill);  border-color: var(--bar-nudged-fill);  color: var(--bar-nudged-text); }
-.tl-seg.s-y1      { background: var(--bar-y1-fill);      border-color: var(--bar-y1-fill);      color: var(--bar-y1-text); }
-.tl-seg.s-y2      { background: var(--bar-y2-fill);      border-color: var(--bar-y2-fill);      color: var(--bar-y2-text); }
+.tl-seg.s-theirs  { background: var(--bar-theirs-fill);  border-color: transparent;  color: var(--bar-theirs-text); }
+.tl-seg.s-theirsq { background: var(--bar-theirsq-fill); border-color: transparent; color: var(--bar-theirsq-text); }
+.tl-seg.s-nudged  { background: var(--bar-nudged-fill);  border-color: transparent;  color: var(--bar-nudged-text); }
+.tl-seg.s-y1      { background: var(--bar-y1-fill);      border-color: transparent;      color: var(--bar-y1-text); }
+.tl-seg.s-y2      { background: var(--bar-y2-fill);      border-color: transparent;      color: var(--bar-y2-text); }
 /* ══ URGENCY IS BREATH, NOT COLOUR (settled pack, Phase 3) ═════════════════════════════════
  *
  * ⚠️ LONG-STANDING IS THE SETTLED FILL, PULSING — not a redder bar. A third pink would have been
@@ -551,26 +557,19 @@
  */
 .tl-seg.s-y3 {
   background: var(--bar-y3-fill);
-  border-color: var(--bar-y3-fill);
+  border-color: transparent;
   color: var(--bar-y3-text);
   animation: tlUrge 2.6s ease-in-out infinite;
 }
+/* ⚠️ THE BACKGROUND ALONE, WHICH IS THE FLAT VARIANT AND THE ONLY ONE NEEDED. Borders are
+   `transparent` here, so the fill breathes THROUGH them and an animated `border-color` would do
+   nothing but outrank the clamps — the ref's own reason for the flat form, arrived at the long way
+   round: a keyframe that also set `border-color` was written first, and the acceptance sweep
+   caught a clamped bar whose border held still while its background moved. */
 @keyframes tlUrge {
-  0%, 100% { background: #f3dbd0; border-color: #f3dbd0; }
-  50%      { background: #e9c3b2; border-color: #e9c3b2; }
-}
-/* ⚠️ THE FLAT VARIANT IS FOR A BAR WHOSE EDGE MEANS SOMETHING. A clamped edge is `currentColor`
-   dotted or dashed and says "this began before the board" / "this runs past it"; letting the pulse
-   recolour it would make that claim breathe too, which is a second thing moving for no reason. So
-   a clamped long-standing bar animates its BACKGROUND only and its edge holds still.
-   (The ref needs this variant for a different reason — its flat mode makes the border transparent,
-   and animating a transparent border does nothing at all. Ours carries the fill colour rather than
-   transparent, so it does not depend on `background-clip` and both keyframes have real work.) */
-@keyframes tlUrgeFlat {
   0%, 100% { background: #f3dbd0; }
   50%      { background: #e9c3b2; }
 }
-.tl-seg.s-y3.openleft, .tl-seg.s-y3.future { animation-name: tlUrgeFlat; }
 
 /* ⚠️ REDUCED MOTION CARRIES THE SAME INFORMATION WITHOUT MOVING. The old rule was
    `animation: none` and nothing else — whatever the motion was saying then went unsaid, which is
@@ -579,21 +578,21 @@
    ⚠️ The override sits immediately after the rule it overrides: a media query confers NO
    specificity, so at equal specificity the later declaration wins. */
 @media (prefers-reduced-motion: reduce) {
-  .tl-seg.s-y3, .tl-seg.s-y3.openleft, .tl-seg.s-y3.future {
+  .tl-seg.s-y3 {
     animation: none;
     background: var(--bar-urgent-fill);
-    border-color: var(--bar-urgent-fill);
+    /* the border stays transparent, so it deepens with the fill for free */
   }
 }
 /* ⚠️ AND NO BREATH IN A PAST WINDOW, where nothing is still running. */
 .tl-row.past .tl-seg.s-y3 { animation: none; }
-.tl-seg.s-offer   { background: var(--bar-offer-fill);   border-color: var(--bar-offer-fill);   color: var(--bar-offer-text); }
+.tl-seg.s-offer   { background: var(--bar-offer-fill);   border-color: transparent;   color: var(--bar-offer-text); }
 /* ⚠️ GONE QUIET IS HATCHED — the one state whose fill is not a flat colour. Silence has no single
    tone, and the hatch is what stops a grey bar reading as a disabled one. */
 .tl-seg.s-quiet {
   background: repeating-linear-gradient(-45deg,
     var(--bar-quiet-fill) 0 6px, var(--bar-quiet-hatch) 6px 12px);
-  border-color: var(--bar-quiet-fill);
+  border-color: transparent;
   color: var(--bar-quiet-text);
 }
 .tl-seg.s-closed {
