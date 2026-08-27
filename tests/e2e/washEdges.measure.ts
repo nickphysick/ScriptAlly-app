@@ -42,7 +42,7 @@ const near = (a: string, b: string) => {
  * becomes two pages is no longer a trial; the size of this list is asserted, so a second page cannot
  * join without someone editing the number and reading this paragraph.
  */
-const ILLUSTRATED = ["Submission packages"];
+const ILLUSTRATED = ["Submission packages", "Query Centre"];
 
 const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Query Centre",        route: "/queries",              cls: "qc-wpg"   },
@@ -88,6 +88,22 @@ const frame = (page: Page, cls: string) => page.evaluate((c) => {
     barW: Math.round(sb.width) - sc.clientWidth,
     /* the band's own box, for the illustrated carve-out — see its note */
     bandBox: { l: Math.round(cb.left), r: Math.round(cb.right) },
+    /* ⚠️ THE MEASURE'S BOX, WHICH IS WHERE THE PAINT WRONGLY LIVED — and it is measured rather than
+       assumed, because the gutter is 35px only while the measure's cap is slack. At 2560 it is
+       ~315px, so a check written against 35 would have looked inside the tint on both sides and
+       found agreement. */
+    mastBox: (() => { const m = g.querySelector(".wpg-mast") as HTMLElement | null;
+      const b = m?.getBoundingClientRect(); return b ? { l: Math.round(b.left), r: Math.round(b.right) } : null; })(),
+    /* ⚠️ WHERE THE ARTWORK BEGINS, RESOLVED THROUGH A PROBE — `getPropertyValue` on a `calc()` hands
+       back its TEXT, which parses to NaN. Just left of it the ground is fully pale AND the mask is
+       fully transparent, so it is the one x that says what the band looks like with no picture on
+       it — the reference the "does the artwork reach the edge" claim needs. */
+    revealA: (() => {
+      const pr = document.createElement("div");
+      pr.style.cssText = "position:absolute;visibility:hidden;height:0;width:var(--illo-reveal-a)";
+      chrome.appendChild(pr); const w = pr.getBoundingClientRect().width; pr.remove();
+      return Math.round(w);
+    })(),
     scrolls: sc.scrollHeight - sc.clientHeight > 2,
   };
 }, cls);
@@ -119,7 +135,7 @@ for (const width of [1280, 1440, 2300]) {
       await liftMotionSuppression(page);
       const f = await frame(page, cls);
       expect(f, `${name}: no grid`).not.toBeNull();
-      const { innerL, innerR, washY, toolY, barW, scrolls, bandBox } = f!;
+      const { innerL, innerR, washY, toolY, barW, scrolls, bandBox, mastBox, revealA } = f!;
       /* the left edge is geometry too, for every page — the cheapest statement of the whole claim */
       expect(bandBox.l, `${name}: the band's box starts ${bandBox.l - innerL}px inside the window's LEFT inner edge`)
         .toBeLessThanOrEqual(innerL + 1);
@@ -139,34 +155,50 @@ for (const width of [1280, 1440, 2300]) {
         const { at, ground: mid } = await rowAt(page, innerL, y, span);
         const left = at(0), right = at(rightmost - innerL);
         measured += 1;
-        expect(near(left, mid), `${name}: the ${what} band does not reach the window's LEFT inner edge — painted ${left} there against ${mid} inside the band`).toBe(true);
         if (ILLUSTRATED.includes(name) && what === "masthead") {
           /**
-           * ⚠️ ONE CARVE-OUT, NAMED, AND ITS POPULATION ASSERTED BELOW. Submission packages carries
-           * a trial illustration bleeding to its right edge, so the band's colour THERE is artwork
-           * rather than its ground — and comparing it to the band's modal colour reports a
-           * perfectly full-bleed band as stopping short (232,210,195 against a white modal).
+           * ══ THE ILLUSTRATED CARVE-OUT — AND IT IS THE ASSERTION, NOT AN EXEMPTION ═══════════
            *
-           * ⚠️ THE CLAIM IS UNCHANGED AND IS STILL THE POINT: no strip of PAGE GROUND at the edge.
-           * It is tested by CONTINUITY instead — the outermost pixel against one 20px inside it. If
-           * the band stopped short, the outer sample would be the desk and the two would diverge
-           * sharply; artwork running to the edge varies gently. The left edge keeps the exact test,
-           * because the mask is fully transparent there by construction.
-           */
-          /**
-           * ⚠️ GEOMETRY, NOT COLOUR, AND THE COLOUR TESTS BOTH FAILED HONESTLY BEFORE THIS. Against
-           * the band's modal colour the artwork reads as a short band; against a sample 20px inward
-           * it reads as broken, because a detailed illustration legitimately changes a lot in 20px
-           * (179,166,154 against 232,210,195). Neither is a question about the edge.
+           * ⚠️ THE PREVIOUS CARVE-OUT WENT GREEN THROUGH THE EXACT FAULT IT NAMES, FOR TWO
+           * INDEPENDENT REASONS — ONE PER EDGE — AND BOTH ARE WORTH KNOWING.
            *
-           * What the original fault WAS is a band whose BOX stopped short of the window — the
-           * scrollbar reservation held it 15px in on both sides — and the box is exactly what this
-           * asks. It is immune to what the band is filled with, which is the property the carve-out
-           * needs, and it would have caught the reservation directly.
+           * On the RIGHT it swapped the painted colour for the BAND'S BOX, reasoning that a picture
+           * legitimately varies at the edge. True, and the box is the wrong subject: the slab never
+           * moved. The paint moved INSIDE it, onto the capped measure, and a box test cannot see
+           * that by construction.
+           *
+           * On the LEFT the exact colour test was still running, unconditionally, and it passed —
+           * because it compares the edge against the ROW'S MODAL COLOUR, and the slab underneath
+           * had deliberately been given the gradient's TERMINAL colour so nothing would step where
+           * the measure began. That is camouflage: the gutter was painted the same colour as the
+           * band's commonest pixel, so an identity test could not distinguish 35px of gutter from
+           * 35px of band. The fix for one problem is what blinded the lock to the next.
+           *
+           * ⚠️ SO THE CLAIM IS CONTINUITY ACROSS THE MEASURE'S OWN BOUNDARY, which is where the
+           * seam appears and is immune to what the band is filled with. Three pixels outside the
+           * measure and three inside must paint the same thing: with the treatment on the slab they
+           * are both band, and with it on the measure they are gutter and band. It also catches the
+           * original reservation fault, because a reserved strip is not the band either.
            */
+          const g0 = at(Math.max(mastBox!.l - innerL - 3, 0));
+          const g1 = at(mastBox!.l - innerL + 3);
+          expect(near(g0, g1), `${name}: the ${what} band steps at the measure's left boundary — painted ${g0} outside it against ${g1} inside, so the treatment is inset rather than full-bleed`).toBe(true);
+          /* the box still has to reach both window edges — a different fault, still worth holding */
           expect(bandBox.r, `${name}: the ${what} band's box stops ${innerR - bandBox.r}px short of the window's RIGHT inner edge`)
             .toBeGreaterThanOrEqual(innerR - (scrolls ? barW : 0) - 1);
+          expect(bandBox.l, `${name}: the ${what} band's box starts inside the window's LEFT inner edge`).toBeLessThanOrEqual(innerL + 1);
+          /* ⚠️ AND THE ARTWORK REACHES THE RIGHT EDGE, which is the half the box cannot answer: the
+             outermost pixel must not be the band's pale ground, or the picture stops short of the
+             window however wide its host is. */
+          const outer = at(rightmost - innerL);
+          /* ⚠️ THE REFERENCE IS THE BAND'S OWN PALE TERMINAL, SAMPLED WHERE THE MASK IS STILL FULLY
+             TRANSPARENT — not the tint at the left edge, which was my first form and is far too
+             loose: an artwork stopping short leaves PALE at the edge, and pale differs from the
+             tint too, so that version would have passed on exactly the fault. */
+          const bare = at(Math.max(revealA - 8, 0));
+          expect(near(outer, bare), `${name}: the outermost pixel of the ${what} band is ${outer}, the same as its unpainted ground ${bare} — the artwork does not reach the window's right edge`).toBe(false);
         } else {
+          expect(near(left, mid), `${name}: the ${what} band does not reach the window's LEFT inner edge — painted ${left} there against ${mid} inside the band`).toBe(true);
           expect(near(right, mid), `${name}: the ${what} band does not reach the window's RIGHT inner edge — painted ${right} there against ${mid} inside the band`).toBe(true);
         }
         if (what === "masthead") {
@@ -195,7 +227,7 @@ for (const width of [1280, 1440, 2300]) {
       }
     }
     console.log(`\n══ WASH TO THE WINDOW'S EDGES — ${width}\n` + lines.join("\n"));
-    expect(ILLUSTRATED, "the number of pages departing from the plain wash has changed — the trial has spread or been reverted").toHaveLength(1);
+    expect(ILLUSTRATED, "the number of pages departing from the plain wash has changed — the trial has spread or been reverted").toHaveLength(2);
     expect(measured, "no band was sampled at all").toBeGreaterThan(9);
     /* ⚠️ REPORTED, NOT REQUIRED. How many pages take real width depends on the platform's scrollbar
        style — nil here, where they are overlays. A floor would assert the harness's settings. */

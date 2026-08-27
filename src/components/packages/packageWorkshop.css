@@ -866,4 +866,3 @@
  * to one manuscript, and the page never said which. The ref draws a `Switch book` affordance beside
  * it; that is deliberately not built — see the note at the call site.
  */
-.pkgw-scopebk { font-weight: 600; color: var(--pkg-ink); }

@@ -70,7 +70,7 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
 }, cls);
 
 /* the pages permitted a ground other than the wash — see the note at the carve-out */
-const WASH_CARVE_OUTS = ["Submission packages"];
+const WASH_CARVE_OUTS = ["Submission packages", "Query Centre"];
 
 test("⚠️ EVERY MASTHEAD CARRIES THE WASH — a partition, with one named carve-out", async ({ page }) => {
   const lines: string[] = [];
@@ -82,10 +82,10 @@ test("⚠️ EVERY MASTHEAD CARRIES THE WASH — a partition, with one named car
     expect(r, `${name}: no grid — the census names a page this build does not render`).not.toBeNull();
     measured += 1;
     /**
-     * ⚠️ ONE CARVE-OUT, STATED HERE RATHER THAN HIDDEN IN A SKIP. Submission packages is running a
-     * trial: an illustration bleeding across its masthead, on a WHITE ground rather than the wash.
-     * It is the single page allowed to depart, and the size of that list is asserted below — so a
-     * second page cannot join it without someone editing the number and reading this.
+     * ⚠️ TWO CARVE-OUTS, STATED HERE RATHER THAN HIDDEN IN A SKIP. Submission packages and Query
+     * Centre run a trial: an illustration bleeding across the masthead, on a tint-to-pale ground
+     * rather than the wash. They are the only pages allowed to depart, and the size of that list is
+     * asserted below — so a third cannot join without someone editing the number and reading this.
      *
      * ⚠️ THE CARVED-OUT PAGE IS STILL HELD TO SOMETHING, never merely skipped. It must have an
      * OPAQUE ground of its own; what it may not do is quietly have no ground at all, which is the
@@ -119,8 +119,11 @@ test("⚠️ EVERY MASTHEAD CARRIES THE WASH — a partition, with one named car
   expect(measured, "no page was measured at all").toBe(PAGES.length);
   expect(washed, "a masthead was measured that carries no wash").toBe(measured - carved);
   /* ⚠️ EXACTLY ONE, so the trial cannot spread without a deliberate edit here */
-  expect(carved, "the number of pages departing from the wash has changed — the trial has spread or been reverted").toBe(1);
-  expect(WASH_CARVE_OUTS, "the carve-out list itself has changed size").toHaveLength(1);
+  /* ⚠️ DERIVED FROM THE LIST, NOT RESTATED BESIDE IT — this was `toBe(1)` and went red when the
+     list legitimately became two, which is a lock reporting its own bookkeeping as a fault. The
+     claim is that every carved page WAS actually reached and carved; the number belongs to the list. */
+  expect(carved, "a page on the carve-out list was not measured, or a page carved itself off the list").toBe(WASH_CARVE_OUTS.length);
+  expect(WASH_CARVE_OUTS, "the carve-out list itself has changed size").toHaveLength(2);
 });
 
 test("⚠️ NO TOOLBAR CARRIES THE WASH — asserted in both directions", async ({ page }) => {

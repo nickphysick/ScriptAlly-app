@@ -4184,7 +4184,11 @@ export const Queries: React.FC<{
           masthead={
           <PageHeader
             variant="workspace"
-            mark="queries"
+            /* ⚠️ NO MARK — the illustration bleeding across this band IS the page's picture, and a
+               glyph beside a 47px title in front of it is a second picture competing with the
+               first. Removed with the trial's carve-out, which names mark absence as one of the
+               four things it changes; `mastheadMatrix` counts the markless pages, so a third
+               cannot drop its mark unnoticed and this one cannot silently get it back. */
             /* The workspace masthead: this page is a fixed-height master–detail surface, so
                header height is working area taken from the panes. The description is KEPT as a
                prop though compact doesn't render it — the copy stays where it lives, so bringing

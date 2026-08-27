@@ -1,14 +1,12 @@
 :root {
-  /* ⚠️ THE TWO COLOURS THE TRIAL NEEDS, AS TOKENS — a bare `#ffffff` ground and two `#000` mask
-     stops are what turned another stream's no-literals lock red when this lived in `f12.css`. They
-     are named here so the blocks below carry no colour of their own, and so a rollout retunes the
+  /* ⚠️ THE COLOURS THE TRIAL NEEDS, AS TOKENS — a bare `#ffffff` ground and two `#000` mask stops
+     are what turned another stream's no-literals lock red when this lived in `f12.css`. They are
+     named here so the blocks below carry no colour of their own, and so a rollout retunes the
      ground in one place. `--illo-solid` is the mask's opaque end: a mask reads only alpha, so the
      hue is irrelevant and the name says what it is for rather than what it looks like. */
-  --illo-ground: #ffffff;
   --illo-solid: #000000;
   /* how far the fold badge hangs below the border it sits on — half its own height, so it straddles */
   --illo-fold-drop: 0px;
-
 }
 
 /**
@@ -22,112 +20,199 @@
  * section of `f12.css` that another stream locks against colour literals, so a `#ffffff` ground and
  * two `#000` mask stops turned that lock red. A trial belongs in its own file.
  *
- * ⚠️ EVERY RULE IS SCOPED BY ITS PAGE'S GRID CLASS at four classes' specificity, because the shared
+ * ⚠️ EVERY RULE IS SCOPED BY ITS PAGE'S GRID CLASS AT FOUR CLASSES' SPECIFICITY, because the shared
  * wash is declared at three (`.wpg > .wpg-scroll > .wpg-chrome`) and a two-class page rule loses to
  * it silently — measured, the band went on painting terracotta with the rule applying cleanly.
+ *
+ * ⚠️ THE TWO PAGES SHARE EVERY RULE AND DIFFER BY TWO TOKENS — the artwork and the text's width.
+ * A second copy of the mechanism is how the two would come to disagree about what the three rules
+ * mean; the whole point of Rule 1 is that the ONLY page-specific number is where the words end.
+ *
+ * ══ THE THREE RULES ═══════════════════════════════════════════════════════════════════════════
+ *  1 · The reveal is anchored to the TEXT, in pixels from where the words end.
+ *  2 · The artwork is anchored to the band's right edge and sized by the band's height.
+ *  3 · The artwork must always reach back to the reveal — asserted arithmetically, four widths.
  */
 
-/**
- * ══ TRIAL · AN ILLUSTRATED MASTHEAD, THIS PAGE ONLY ═══════════════════════════════════════════
- * (ref design-refs/182-qc-illustrated-masthead.html — the bench draws it on Query Centre's layout;
- * the MECHANISM is what is normative there, not the page.)
- *
- * ⚠️ THE BAND, NOT `.wsh` — and the brief's snippet names the inner element. In the bench the
- * artwork sits on `.mast`, a full-bleed band (`position: relative; overflow: hidden`), with the text
- * in `.mastin`, an inset measure lifted to `z-index: 2`. Those map here to `.wpg-chrome` and
- * `.wpg-mast`, not to `.wsh`: `.wsh` lives INSIDE the measure, which is capped and inset 35px each
- * side, so painting it there would put a white box in the middle of a terracotta band with the wash
- * still showing in both gutters — and the artwork would stop 35px short of the edges the wash
- * reaches. The band is the element that already spans the window, so it is the element that carries
- * this.
- *
- * ⚠️ SCOPED TO THIS PAGE BY ITS GRID CLASS, so the trial is one block to delete. Nothing in the
- * shared grid is touched, and the other nine mastheads cannot acquire artwork by inheritance.
- */
-/* ⚠️ FOUR CLASSES, BECAUSE THE SHARED RULE HAS THREE. The wash is declared on
-   `.wpg > .wpg-scroll > .wpg-chrome` (0-3-0); a page-scoped `.pkgw-wpg .wpg-chrome` is 0-2-0 and
-   loses, silently — measured, the band still painted the terracotta `rgb(251,243,238)` with this
-   rule applying cleanly and every sample downstream taken against the wrong ground. */
-/**
- * ⚠️ THE SLAB CARRIES ONLY A FLAT FILL NOW — the gradient and the artwork moved into the MEASURE,
- * and the reason is that they were painted in a different coordinate space from the text.
- *
- * The gradient ran from the window's inner edge, so `#f2e4dd 0%` was never the colour under the
- * title: measured at four widths, the title's first glyph sat on 253,249,246 — the gradient's
- * TERMINAL colour — at every one of them. And the artwork was welded to the window's right edge
- * while the measure caps and centres, so at 2560 the illustration ended 315px past the measure's
- * right edge and the composition came apart. Gap ratios ran -0.445 · -0.089 · 0.479 · 0.525 across
- * 1280 / 1440 / 2300 / 2560: no relationship at all.
- *
- * What stays here is the gradient's terminal colour, flat, so the band still reaches both window
- * edges and nothing bands or steps where the measure begins.
- */
-/**
- * ⚠️ THE SLAB'S FLAT FILL, AND SETTLED IT GOES — which is the whole of the suppression. The measure
- * carries the tint and the artwork; this is the terminal colour behind it, so the band still reaches
- * both window edges and nothing steps where the measure ends on the right.
- *
- * ⚠️ SCOPED TO THE REST STATE, so a settled Packages takes the SHARED WASH back like every other
- * Type A page. Settled the band is ~55px, the artwork would render about a third of its size and
- * Rule 3 would fail outright — there would be no picture where the fade uncovers it. A working bar
- * is not a title, and it is asserted: settled, this masthead's painted colour is the wash at every
- * sampled point.
- */
-.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome:not(.wpg-chrome--stuck) {
-  background-color: var(--pkg-pale);
-  background-image: none;
+/* ══ THE TWO PER-PAGE FACTS ══════════════════════════════════════════════════════════════════ */
+.wpg.pkgw-wpg {
+  --illo-art: url(../../assets/packages/packages.webp);
+  /* measured: the title and description are a fixed-size object, so this is the same at every width */
+  --illo-text-right: 458px;
 }
-/* ⚠️ THE TEXT SITS ABOVE THE PAINT. The pseudo-element is positioned and the masthead's measure is
-   not, so without this the artwork would paint over the title — the bench lifts `.mastin` to
-   `z-index: 2` for the same reason. */
-/**
- * ⚠️ THE GROUND AND THE ARTWORK LIVE IN THE TEXT'S OWN BOX. Percent stops mean what they were always
- * meant to mean once they are percentages of the box the text lives in, and
- * `background-position: 100% center` anchors the illustration to the measure's right edge — where
- * the text can see it — rather than to a window edge the text drifts away from.
- */
-.wpg.pkgw-wpg .wpg-chrome:not(.wpg-chrome--stuck) .wpg-mast {
-  position: relative;
-  z-index: 2;
-  background-color: var(--pkg-tint);
+.wpg.qc-wpg {
+  --illo-art: url(../../assets/queries/queries.jpg);
   /**
-   * ⚠️ THE TINT'S TWO STOPS ARE TRANSPOSED IN THE BRIEF, AND AS WRITTEN THEY PRODUCE A HARD EDGE
-   * RATHER THAN A FADE. It gives `#f2e4dd var(--pkg-gnd-b), #fdf9f6 var(--pkg-gnd-a)` — but
-   * `gnd-b` is 458 and `gnd-a` is 138, so the second stop sits LEFT of the first and CSS clamps a
-   * non-monotonic stop up to its predecessor. Both then land on 458.
-   *
-   * MEASURED as written, across the measure: solid 242,228,221 from 0 all the way to 450, then
-   * 253,249,246 at 458 — a vertical line at the text's right edge with no transition at all.
-   *
-   * The prose says the colour "resolves just before the picture arrives", which is a fade, so the
-   * stops are ordered left to right: solid until `gnd-a`, pale by `gnd-b`, 60px before the reveal
-   * begins. The token NAMES are kept as the brief has them.
+   * ⚠️ MEASURED TWICE, AND THE SECOND READING IS THE LESSON. The widest ink in this header is the
+   * DESCRIPTION, not the title, so the first measurement came back at 467 — WIDER than Packages'
+   * 458, the opposite of what a shorter title suggests. Then the mark came off, the text shifted
+   * left, and the true value fell to 399. Neither number is derivable from the copy by reading it;
+   * both had to be measured, and the second was caught by `illoRules`' Rule 1 case reconciling this
+   * token against the rendered ink rather than against a literal on both sides.
    */
-  background-image: linear-gradient(to right, var(--pkg-tint) var(--pkg-gnd-a), var(--pkg-pale) var(--pkg-gnd-b));
+  --illo-text-right: 399px;
 }
-.wpg.pkgw-wpg .wpg-chrome:not(.wpg-chrome--stuck) .wpg-mast::after {
+
+/**
+ * ══ THE GEOMETRY, DERIVED — EVERY STOP IS AN OFFSET FROM THE SLAB'S LEFT EDGE ═════════════════
+ *
+ * ⚠️ THE GUTTER IS NOT A CONSTANT, AND ASSUMING IT WAS IS THE FAULT THIS BLOCK EXISTS TO AVOID.
+ * The brief says the measure sits at a fixed offset from the slab, so `--illo-text-right` can simply
+ * be moved across. That is true at 1280, 1440 and 1920 and FALSE at 2560: the measure is
+ * `min(--work-max, 100% - 2 * --mast-gutter)` and centred, so the gutter is 35px only while the cap
+ * is slack. `--work-max` is 1660 and the gutter overtakes 35px once the slab passes 1730 — at 2560
+ * the slab is ~2288 wide and the gutter is ~314. A fixed 35 would have opened the reveal 279px
+ * inside the title at the one width the brief added to the standard list.
+ *
+ * ⚠️ SO IT IS DERIVED FROM THE MEASURE'S OWN TWO TOKENS RATHER THAN MATCHED TO A READING. This is
+ * the house rule about a literal another element owns, in its exact form: the measure's inset and
+ * the reveal's anchor are now ONE expression, so nothing has to be kept in step by hand.
+ *
+ * `100%` resolves at the point of USE — the slab's background positioning area — which is what
+ * makes one declaration correct on both the gradient and the mask.
+ */
+.wpg.pkgw-wpg,
+.wpg.qc-wpg {
+  --illo-gutter: max(var(--mast-gutter), (100% - var(--work-max)) / 2);
+  /* Rule 1 · the reveal opens 60px past the last glyph and is fully open 430px later */
+  --illo-reveal-a: calc(var(--illo-gutter) + var(--illo-text-right) + 60px);
+  --illo-reveal-b: calc(var(--illo-reveal-a) + 430px);
+  /**
+   * The tint resolves BEFORE the picture opens, on the same anchor and in the same direction.
+   * ⚠️ BOTH STOPS ARE SMALLER THAN `--illo-reveal-a` AND `gnd-b` IS SMALLER THAN `gnd-a` — the
+   * names are the brief's and the ORDER is what makes it a fade. A non-monotonic pair is clamped up
+   * to its predecessor by CSS, which turns the whole gradient into a hard vertical line at the
+   * later stop: measured once as solid 242,228,221 to offset 450 and 253,249,246 at 458, with no
+   * transition at all and every rule applying cleanly.
+   */
+  --illo-gnd-b: calc(var(--illo-reveal-a) - 380px);   /* solid until here  — the SMALLER value */
+  --illo-gnd-a: calc(var(--illo-reveal-a) - 60px);    /* fully pale by here — the LARGER value */
+  /* ⚠️ THE TINT IS THE WASH'S TOP STOP, READ RATHER THAN RESTATED — the brief's `#f2e4dd` IS
+     `--mast-wash-top`, so writing it again is a second copy of one colour and the single-source
+     lock says so. It resolves here because these tokens are declared on the PAGE'S GRID ROOT, where
+     `--mast-wash-top` is in scope; the same line at `:root` silently killed the whole gradient once
+     already — a custom property resolves where it is DECLARED, and `--mast-wash-top` is not in
+     scope at `:root`, so the read became the guaranteed-invalid value and every `background-image`
+     that named it was dropped ENTIRELY. */
+  --illo-tint: var(--mast-wash-top);
+  --illo-pale: #fdf9f6;
+}
+
+/**
+ * ══ THE GROUND AND THE ARTWORK, ON THE FULL-BLEED SLAB ════════════════════════════════════════
+ *
+ * ⚠️ THEY LIVED ON THE MEASURE FOR TWO PACKS AND THAT LEFT A ~35px UNPAINTED STRIP DOWN EACH SIDE.
+ * The measure is capped and centred; the slab spans the window. Painting the treatment on the
+ * measure meant the band's own colour stopped short of both window edges — the exact fault the wash
+ * pack was built to end, reintroduced by a fix for a different problem.
+ *
+ * ⚠️ AND IT IS SAFE TO MOVE BACK ONLY BECAUSE OF RULE 1. The reason the paint went onto the measure
+ * was that percentage stops meant nothing useful against the window: the title's first glyph sat on
+ * the gradient's TERMINAL colour at all four widths. Anchoring every stop to the text's pixel
+ * position removes that dependency completely, so the coordinate space no longer matters — the
+ * stops describe the same places on the slab that they described on the measure.
+ *
+ * ⚠️ SCOPED TO THE REST STATE ON PACKAGES, so a settled Packages takes the SHARED WASH back like
+ * every other Type A page. Settled the band is ~55px, the artwork would render about a third of its
+ * size and Rule 3 would fail outright — there would be no picture where the fade uncovers it. A
+ * working bar is not a title. Query Centre is Type B: it never settles, so it carries no suppression
+ * and must not be given one.
+ */
+.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome:not(.wpg-chrome--stuck),
+.wpg.qc-wpg > .wpg-scroll > .wpg-chrome {
+  /* ⚠️ A COLOUR *AND* AN IMAGE, NEVER THE SHORTHAND — `background: linear-gradient(…)` resets
+     `background-color` to transparent, so a gradient declined for any reason leaves the slab
+     see-through. The colour is the gradient's terminal stop, so the fallback matches the band where
+     it meets the hairline. */
+  background-color: var(--illo-pale);
+  background-image: linear-gradient(
+    to right,
+    var(--illo-tint) var(--illo-gnd-b),
+    var(--illo-pale) var(--illo-gnd-a)
+  );
+}
+.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome:not(.wpg-chrome--stuck)::after,
+.wpg.qc-wpg > .wpg-scroll > .wpg-chrome::after {
   content: '';
   position: absolute;
   inset: 0;
   /* ⚠️ IT MUST NOT SWALLOW A CLICK — the page's controls sit over this band. */
   pointer-events: none;
-  background-image: url(../../assets/packages/packages.webp);
-  /* Rule 2 · anchored to the measure's right edge, sized by band height, dense end outward */
+  background-image: var(--illo-art);
+  /* Rule 2 · anchored to the band's right edge, sized by band height, dense end outward */
   background-position: 100% center;
-  background-size: auto 140%;
+  /**
+   * ⚠️ 150%, NOT THE BRIEF'S 140%, BECAUSE AT 140% RULE 3 FAILS ON QUERY CENTRE AT 2560 — and the
+   * two constraints genuinely conflict there rather than one being a mistake.
+   *
+   * THE ARITHMETIC. Above a 1730px slab the measure's cap binds, so the gutter grows as half the
+   * surplus and the gap the artwork must cover grows with it: `bandW/2 + 830 - textRight - 60`. At
+   * 2560 the slab is 2290, so Query Centre's gap is 1516 against Packages' 1457 — the SHORTER title
+   * is the harder case, because its reveal opens earlier and leaves more to cover. The artwork is
+   * `bandH × scale × 1600/192`; at 127px and 140% that is 1482, which clears Packages by 25px and
+   * falls 34px short of Query Centre. Rule 3 needs at least 143.2%.
+   *
+   * 150% is the smallest round value that clears both with real margin (Packages 130, Query Centre
+   * 71), and it is also nearer the artwork's native 1600px — 1587 rather than 1482 — so it is very
+   * slightly sharper rather than softer. It crops 33% of the picture's height against 29%.
+   *
+   * ⚠️ THE TRIAL STILL HAS A CEILING, AND IT IS ~2700px OF VIEWPORT. Past that the gap outgrows the
+   * artwork again and the fade uncovers bare ground. Making Rule 3 hold by CONSTRUCTION would mean
+   * sizing the artwork by the gap rather than by the band's height — which is Rule 2's job, and a
+   * design decision rather than a fix.
+   */
+  background-size: auto 150%;
+  background-repeat: no-repeat;
   opacity: 0.86;
   /**
-   * Rule 1 · the reveal is anchored to the TEXT, in pixels, from the left. Rule 3 is what makes it
-   * safe: the artwork is always wider than the gap between the reveal and the measure's right edge,
-   * so the picture always exists where the fade uncovers it — asserted arithmetically at four
-   * widths, because that is the check that would have caught every failure in this saga.
+   * Rule 1 · the reveal is anchored to the TEXT. Rule 3 is what makes it safe: the artwork is always
+   * wider than the gap between the reveal and the band's right edge, so the picture always exists
+   * where the fade uncovers it — asserted arithmetically at four widths, because that is the check
+   * that would have caught every failure in this saga.
    */
-  -webkit-mask-image: linear-gradient(to right, transparent var(--pkg-reveal-a), var(--illo-solid) var(--pkg-reveal-b));
-          mask-image: linear-gradient(to right, transparent var(--pkg-reveal-a), var(--illo-solid) var(--pkg-reveal-b));
+  -webkit-mask-image: linear-gradient(to right, transparent var(--illo-reveal-a), var(--illo-solid) var(--illo-reveal-b));
+          mask-image: linear-gradient(to right, transparent var(--illo-reveal-a), var(--illo-solid) var(--illo-reveal-b));
 }
-/* ⚠️ THE TEXT ABOVE THE PAINT. The pseudo-element is positioned and `.wsh` is not, so without this
-   the artwork would paint over the title — the bench lifts its inner box for the same reason. */
-.wpg.pkgw-wpg .wsh { position: relative; z-index: 1; }
+
+/**
+ * ⚠️ THE TEXT ABOVE THE PAINT. The pseudo-element is positioned and `.wsh` is not, so without this
+ * the artwork paints over the title — the bench lifts its inner box for the same reason.
+ */
+.wpg.pkgw-wpg .wsh,
+.wpg.qc-wpg .wsh { position: relative; z-index: 1; }
+
+/**
+ * ⚠️ AND A TOOLBAR WOULD BE UNDER THE ARTWORK TOO — NEITHER PAGE HAS ONE TODAY, WHICH IS WHY THIS
+ * IS HERE. The `::after` is `inset: 0` on the SLAB, and the slab holds the toolbar band as well as
+ * the masthead; a positioned pseudo-element paints above non-positioned element children, so the
+ * day either page gains `tools` the picture would run straight over its controls. One declaration
+ * now, in the trial's own file, rather than a silent regression in whichever pass adds the toolbar.
+ */
+.wpg.pkgw-wpg .wpg-toolband,
+.wpg.qc-wpg .wpg-toolband { position: relative; z-index: 1; }
+
+/**
+ * ══ THE TYPE SCALE — PART OF THE CARVE-OUT ════════════════════════════════════════════════════
+ *
+ * ⚠️ THE 47px TITLE KEPT REVERTING BECAUSE THE CARVE-OUT DID NOT COVER TYPOGRAPHY. The chrome
+ * matrix asserts every Type A masthead is identical, which is a good law and forces 30px; each time
+ * the trial raised the title, that lock pulled it back. The carve-out names its properties one by
+ * one — ground, artwork, title size, mark absence — and nothing else, so every other assertion in
+ * every one of those files continues to apply to these two pages.
+ *
+ * ⚠️ AND IT IS SCOPED TO THE REST STATE ON PACKAGES. Settled, that page is a working bar like any
+ * other and takes the shared scale back; the suppression above says so for the paint, and the title
+ * follows the same rule for the same reason.
+ *
+ * ⚠️ 47px IS MIXED-CASE PLAYFAIR, SO ITS LINE BOX IS CHECKED RATHER THAN ASSUMED. The house floor
+ * is 1.3 and this system has cropped descenders three times; the title's own rule carries the
+ * leading, and `illustratedMasthead.measure.ts` asserts `scrollHeight === clientHeight` on the
+ * title element in both postures on both pages.
+ */
+.wpg.pkgw-wpg .wpg-chrome:not(.wpg-chrome--stuck) .wsh { --wsh-title-size: 47px; }
+.wpg.pkgw-wpg .wpg-chrome:not(.wpg-chrome--stuck) .wsh-sub { font-size: 14px; }
+.wpg.qc-wpg .wsh { --wsh-title-size: 47px; }
+.wpg.qc-wpg .wsh-sub { font-size: 14px; }
 
 /**
  * ══ THE FOLD CONTROL — A CHEVRON ON THE BOTTOM BORDER ═════════════════════════════════════════
@@ -143,10 +228,10 @@
  * controls that happen to look alike. Up on the masthead's own border to fold; down on the window's
  * border to unfold.
  *
- * ⚠️ WHY IT HAD TO MOVE AT ALL: on Query Centre the artwork now runs the width of the band, and the
- * text `Hide` sat in the densest part of it — pale grey ink over an hourglass, measured and barely
- * readable. A control cannot live on top of an illustration. The bottom border is the one edge of
- * this band the artwork does not occupy.
+ * ⚠️ WHY IT HAD TO MOVE AT ALL: the artwork now runs the width of the band, and the text `Hide` sat
+ * in the densest part of it — pale grey ink over an hourglass, measured and barely readable. A
+ * control cannot live on top of an illustration. The bottom border is the one edge of this band the
+ * artwork does not occupy.
  */
 /**
  * ⚠️ THE MEASURE MUST NOT CLIP, OR THE FOLD BADGE DOES NOT EXIST. `.wpg-mast` carries
@@ -200,57 +285,3 @@
   color: var(--shell-ink);
   border-color: var(--ws-edge-strong, var(--ws-edge));
 }
-
-
-/**
- * ⚠️ ON THE PAGE'S GRID ROOT, NOT `:root` — AND THAT MOVE IS A BUG FIX, NOT TIDINESS.
- * `--pkg-ground-a` reads `--mast-wash-top`, which is declared on `.wpg`. A custom property's value
- * is resolved where it is DECLARED, so at `:root` that read found nothing, `--pkg-ground-a` became
- * the guaranteed-invalid value, and every `background-image` using it was DROPPED ENTIRELY.
- *
- * ⚠️ IT FAILED IN COMPLETE SILENCE AND I SHIPPED IT. The band still had a flat fill underneath, so
- * it looked like a plain masthead rather than a broken one — measured after the fact, the title's
- * first glyph sat on 253,249,246 (the gradient's TERMINAL colour) at all four widths, which is
- * exactly what a missing gradient looks like. The ground had been dead since the token was pointed
- * at the wash to satisfy the single-source lock, and no measurement re-read it afterwards.
- *
- * Five tokens because this is a trial and the numbers will move.
- */
-.wpg.pkgw-wpg {
-  /**
-   * ⚠️ EVERY STOP IS A PIXEL OFFSET FROM THE MEASURE'S LEFT EDGE, ANCHORED TO THE TEXT — and that
-   * is the whole design rather than a tuning. The title and description are a fixed-size object at a
-   * fixed gutter, so `textRight` is the SAME 458px at 1280, 1440, 1920 and 2560; anchoring the fade
-   * to it clears the words by construction at any width. Every earlier version anchored the reveal
-   * to the band or to the artwork, both of which move relative to the text, which is why it kept
-   * breaking in a different place each time.
-   */
-  --pkg-text-right: 458px;
-  --pkg-reveal-a: calc(var(--pkg-text-right) + 60px);    /* artwork begins to appear */
-  --pkg-reveal-b: calc(var(--pkg-reveal-a) + 430px);     /* artwork fully painted */
-  /* the tint resolves just before the picture arrives, on the same anchor and the same direction */
-  --pkg-gnd-a: calc(var(--pkg-reveal-a) - 380px);
-  --pkg-gnd-b: calc(var(--pkg-reveal-a) - 60px);
-  /* ⚠️ THE TINT IS THE WASH'S TOP STOP, READ RATHER THAN RESTATED — the brief's `#f2e4dd` IS
-     `--mast-wash-top`, so writing it again is a second copy of one colour and the single-source
-     lock says so. It resolves here because these tokens are declared on the PAGE'S GRID ROOT, where
-     `--mast-wash-top` is in scope; the same line at `:root` silently killed the whole gradient once
-     already, which is why the scope is stated in the note above rather than left to be rediscovered. */
-  --pkg-tint: var(--mast-wash-top);
-  --pkg-pale: #fdf9f6;
-}
-
-/**
- * ══ THE TYPE SCALE — PART OF THE CARVE-OUT ════════════════════════════════════════════════════
- *
- * ⚠️ THE 47px TITLE KEPT REVERTING BECAUSE THE CARVE-OUT DID NOT COVER TYPOGRAPHY. The chrome
- * matrix asserts every Type A masthead is identical, which is a good law and forces 30px; each time
- * the trial raised the title, that lock pulled it back. So the carve-out now names three things —
- * ground, artwork AND type scale — and is still counted, so it cannot quietly widen.
- *
- * ⚠️ AND IT IS SCOPED TO THE REST STATE. Settled, this page is a working bar like any other and
- * takes the shared scale back; the suppression below says so for the paint, and the title follows
- * the same rule for the same reason.
- */
-.wpg.pkgw-wpg .wpg-chrome:not(.wpg-chrome--stuck) .wsh { --wsh-title-size: 47px; }
-.wpg.pkgw-wpg .wpg-chrome:not(.wpg-chrome--stuck) .wsh-sub { font-size: 14px; }

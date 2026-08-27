@@ -22,8 +22,17 @@
 import { test, expect, Page } from "@playwright/test";
 import { openRoute, liftMotionSuppression } from "./measure";
 
-/* the pages the illustrated-masthead trial carves out of the shared chrome — counted in `headerFix` */
-const CARVED = ["Submission packages"];
+/**
+ * ⚠️ THE TRIAL CARVES OUT TYPE SCALE AND GROUND — NOT THE STRUCTURE, AND THE DIFFERENCE IS THE
+ * WHOLE POINT. This used to `continue` on the carved page, which skipped its slab position, its
+ * hairline and its padding as well: a page exempted for its title size stopped being held to the
+ * type law it belongs to. Structure is compared across EVERY page; the two carved readings are
+ * compared across the rest, and both populations are asserted.
+ *
+ * ⚠️ AND QUERY CENTRE IS THE ONLY TYPE B PAGE, so a blanket skip would empty that bucket entirely —
+ * the "no Type B page was measured" floor is what forces the split rather than a wider exemption.
+ */
+const CARVED = ["Submission packages", "Query Centre"];
 
 const PAGES: { name: string; route: string; cls: string }[] = [
   { name: "Query Centre",        route: "/queries",              cls: "qc-wpg"   },
@@ -199,27 +208,36 @@ test("⚠️ CHROME IS IDENTICAL WITHIN EACH TYPE", async ({ page }) => {
   /* ⚠️ WITHIN, NOT ACROSS. The two types differ by design — one is sticky and settles, the other is
      in flow and folds — so a single cross-page comparison would be asserting that difference away.
      What must hold is that no page inside a type is arranged specially. */
-  const seen: Record<string, { name: string; k: string }[]> = { pinned: [], static: [] };
+  const seen: Record<string, { name: string; k: string; scale: string; carved: boolean }[]> = { pinned: [], static: [] };
   for (const { name, route, cls } of PAGES) {
     await openRoute(page, route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     const s = (await survey(page, cls))!;
     /* the masthead's own shape — height varies legitimately with a missing description, so the
        comparison is of the declared type's chrome, not of every pixel */
-    /**
-     * ⚠️ THE CARVED-OUT PAGE IS EXCLUDED, AND THIS IS THE THIRD LOCK THE 47px TITLE DIED IN.
-     * Submission packages runs the illustrated-masthead trial, whose carve-out covers ground,
-     * artwork AND type scale; holding it to the shared chrome as well is holding it to the thing it
-     * is carved out of. Its own values are asserted in `headerFix`, and the count of carved pages is
-     * asserted there too, so this exclusion cannot quietly widen.
-     */
-    if (CARVED.includes(name)) continue;
-    seen[s.type!].push({ name, k: `pos ${s.slabPosition} · hairline ${s.hairline} · pad ${s.padTop} · title ${s.titleSize} · mark ${s.markW}` });
+    seen[s.type!].push({
+      name,
+      /* the structural half — asserted for every page of the type, carved or not */
+      k: `pos ${s.slabPosition} · hairline ${s.hairline} · pad ${s.padTop}`,
+      /* the two readings the trial's carve-out names — asserted across the rest */
+      scale: `title ${s.titleSize} · mark ${s.markW}`,
+      carved: CARVED.includes(name),
+    });
   }
   for (const [type, rows] of Object.entries(seen)) {
     const vals = [...new Set(rows.map((r) => r.k))];
     expect(vals, `${type} pages have different chrome: ${rows.map((r) => `${r.name} → ${r.k}`).join(" | ")}`).toHaveLength(1);
     expect(rows.length, `no ${type} page was measured`).toBeGreaterThan(0);
+    /* ⚠️ AND THE CARVED READINGS, ACROSS THE PAGES THE CARVE DOES NOT COVER. Where every page of a
+       type is carved — Type B is Query Centre alone — there is nothing to compare and the case says
+       so rather than passing on an empty set. */
+    const plain = rows.filter((r) => !r.carved);
+    if (plain.length > 1) {
+      expect([...new Set(plain.map((r) => r.scale))],
+        `${type} pages disagree on type scale: ${plain.map((r) => `${r.name} → ${r.scale}`).join(" | ")}`).toHaveLength(1);
+    } else {
+      console.log(`   ${type}: ${plain.length} uncarved page — type scale not compared here`);
+    }
   }
   console.log("\n══ CHROME BY TYPE\n" + Object.entries(seen).map(([t, r]) => `${t.padEnd(7)} ${r.length} pages · ${r[0]?.k}`).join("\n"));
 });

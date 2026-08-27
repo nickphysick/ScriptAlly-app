@@ -2,11 +2,12 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE ILLUSTRATED MASTHEAD — A TRIAL ON ONE PAGE, LOCKED AS ONE PAGE.
+ * THE ILLUSTRATED MASTHEAD — A TRIAL ON TWO PAGES, LOCKED AS TWO PAGES.
  *
  * ⚠️ THE POINT OF EVERY CASE HERE IS THE POPULATION. A trial that quietly becomes two pages is no
  * longer a trial, and a treatment that quietly stops applying is a revert nobody decided. Both
- * directions are asserted: Packages has artwork, the other nine do not, and the count is exact.
+ * directions are asserted: the two named pages have artwork, the other eight do not, and the SET
+ * is exact — not the count, so moving the trial to a different page fails as loudly as spreading it.
  */
 import { test, expect, Page } from "@playwright/test";
 import { openRoute, liftMotionSuppression } from "./measure";
@@ -34,7 +35,7 @@ const PAGES: { name: string; route: string; cls: string }[] = [
  * against its OWN peers rather than against one another: Packages is Type A and its band is sticky,
  * Query Centre is Type B and its band is static.
  */
-const TRIAL = ["Submission packages"];
+const TRIAL = ["Submission packages", "Query Centre"];
 
 const readBand = (page: Page, cls: string) => page.evaluate((c) => {
   const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
@@ -89,6 +90,7 @@ test("⚠️ EXACTLY ONE PAGE CARRIES MASTHEAD ARTWORK — asserted in both dire
 
 const TRIAL_ROUTES: { name: string; route: string; cls: string }[] = [
   { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
+  { name: "Query Centre",        route: "/queries",              cls: "qc-wpg"   },
 ];
 
 for (const width of [1280, 1440, 1920, 2560]) {
@@ -214,3 +216,144 @@ test("⚠️ THE TRIAL CHANGES NO BEHAVIOUR — Packages answers like every othe
     }
   }
 });
+
+
+/**
+ * ══ THE TINT FADES, IT DOES NOT STEP ══════════════════════════════════════════════════════════
+ *
+ * ⚠️ A NON-MONOTONIC PAIR OF GRADIENT STOPS IS NOT AN ERROR — CSS CLAMPS THE LATER ONE UP TO ITS
+ * PREDECESSOR, and the result is a hard vertical line where a fade was written. It happened here:
+ * the two stops arrived transposed, both resolved to 458, and the band painted solid 242,228,221 to
+ * offset 450 and 253,249,246 at 458. Every declaration was valid, the build was green, and the only
+ * way to see it was to look.
+ *
+ * ⚠️ SO THE CLAIM IS THE SHAPE OF THE TRANSITION, NOT THE STOP VALUES. Sampling the row across the
+ * tint's own range, the biggest single step between adjacent samples must be a small fraction of
+ * the whole change — a fade spreads its difference over its length, a clamped pair delivers all of
+ * it between two neighbouring pixels. Asserting the token values instead would pass on exactly the
+ * fault, because the values were right and their ORDER was not.
+ */
+for (const width of [1280, 2560]) {
+ for (const trial of TRIAL_ROUTES) {
+  test(`⚠️ THE TINT FADES RATHER THAN STEPPING — ${trial.name} — ${width}`, async ({ page }) => {
+    await openRoute(page, trial.route, { width, height: 900 });
+    await liftMotionSuppression(page);
+    await page.waitForTimeout(700);
+    const geo = await page.evaluate((c) => {
+      const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+      const ch = g.querySelector(".wpg-chrome") as HTMLElement;
+      const b = ch.getBoundingClientRect();
+      /* the tint's own two stops, resolved through a probe — `getPropertyValue` on a `calc()`
+         hands back its TEXT, which parses to NaN */
+      const probe = document.createElement("div");
+      probe.style.cssText = "position:absolute;visibility:hidden;height:0";
+      ch.appendChild(probe);
+      const px = (v: string) => { probe.style.width = v; return probe.getBoundingClientRect().width; };
+      const gndB = px("var(--illo-gnd-b)"), gndA = px("var(--illo-gnd-a)");
+      probe.remove();
+      return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height), gndB, gndA };
+    }, trial.cls);
+
+    /* ⚠️ MONOTONIC FIRST — the precondition, asserted before the shape, because a transposed pair
+       makes the whole range zero-length and every sample identical, which a "gradual" test passes. */
+    expect(geo.gndA, `${trial.name}: the tint's stops are not in ascending order (gnd-b ${geo.gndB} → gnd-a ${geo.gndA}) — CSS will clamp them into one hard edge`).toBeGreaterThan(geo.gndB + 20);
+
+    /* the artwork off, so this is a question about the GROUND alone */
+    await page.addStyleTag({ content: `.wpg .wpg-chrome::after { opacity: 0 !important; }` });
+    await page.waitForTimeout(140);
+    const png = readPng(await page.screenshot({ clip: { x: geo.x, y: geo.y, width: geo.w, height: geo.h } }));
+    await page.locator("style").last().evaluate((e) => e.remove());
+
+    /* a row clear of the window's corner arc and clear of the text's own line */
+    const row = Math.min(png.height - 3, 6);
+    const red = (px: number) => png.at(Math.min(Math.max(px, 0), png.width - 1), row)[0];
+    const from = Math.round(geo.gndB), to = Math.round(geo.gndA);
+    const samples: number[] = [];
+    const step = Math.max(2, Math.round((to - from) / 40));
+    for (let x = from; x <= to; x += step) samples.push(red(x));
+    const total = Math.abs(samples[0] - samples[samples.length - 1]);
+    let biggest = 0, atX = 0;
+    for (let i = 1; i < samples.length; i += 1) {
+      const d = Math.abs(samples[i] - samples[i - 1]);
+      if (d > biggest) { biggest = d; atX = from + i * step; }
+    }
+    console.log(`\n══ TINT FADE — ${trial.name} — ${width}\n   stops ${from} → ${to} · ${samples.length} samples · total change ${total} · biggest single step ${biggest} at x${atX}`);
+    expect(total, `${trial.name}: the tint does not change across its own range — there is no fade to check`).toBeGreaterThan(6);
+    expect(biggest, `${trial.name}: the tint changes by ${biggest} of its total ${total} between two adjacent samples at x${atX} — that is a step, not a fade`).toBeLessThan(Math.max(3, total / 3));
+  });
+ }
+}
+
+/**
+ * ══ THE 47px TITLE'S LINE BOX ═════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ NOT `scrollHeight === clientHeight`, AND THAT IS A CORRECTION RATHER THAN A SHORTCUT. On an
+ * `overflow: visible` box `scrollHeight` reports the union of the content box and anything spilling
+ * out of it, and Playfair's ascent plus descent exceed the line box at any leading below ~1.15 —
+ * measured here, the title reads 62 against 61 at a leading of 1.30 with nothing clipped anywhere.
+ * That reading is a false red on a correct page, and taking it at face value would have "fixed" a
+ * fault that does not exist.
+ *
+ * ⚠️ THE INSTRUMENT THAT IS ALWAYS RIGHT IS INK AGAINST A CLIPPING ANCESTOR: the union of the
+ * element's own text rects, against the box of the first ancestor whose overflow is not visible.
+ * `.wpg-mast` really does clip on a Type B page — it is the fold's own animation — so the question
+ * is a real one, and this is the only form that answers it.
+ */
+for (const posture of ["rest", "settled"] as const) {
+ for (const trial of TRIAL_ROUTES) {
+  test(`⚠️ THE TITLE'S INK IS NOT CLIPPED — ${trial.name} — ${posture}`, async ({ page }) => {
+    await openRoute(page, trial.route, { width: 1440, height: 900 });
+    await liftMotionSuppression(page);
+    await page.waitForTimeout(700);
+    if (posture === "settled") {
+      const moved = await page.evaluate(async (c) => {
+        const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+        const sc = g.querySelector(".wpg-scroll") as HTMLElement;
+        if (sc.scrollHeight - sc.clientHeight < 120) return false;
+        for (let t = 0; t <= 400; t += 20) { sc.scrollTop = t; await new Promise((r) => requestAnimationFrame(r)); }
+        return true;
+      }, trial.cls);
+      if (!moved) { console.log(`   ${trial.name}: cannot settle — Type B, posture not exercised`); return; }
+      await page.waitForTimeout(700);
+    }
+    const out = await page.evaluate((c) => {
+      const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+      const wsh = g.querySelector(".wsh") as HTMLElement;
+      return [".wsh-title", ".wsh-sub"].map((sel) => {
+        const el = wsh.querySelector(sel) as HTMLElement | null;
+        if (!el || !el.getBoundingClientRect().height) return { sel, absent: true } as any;
+        let top = Infinity, bot = -Infinity;
+        const walk = (n: Node) => {
+          if (n.nodeType === 3 && (n.textContent || "").trim()) {
+            const rg = document.createRange(); rg.selectNodeContents(n);
+            for (const r of rg.getClientRects()) if (r.height > 0) { top = Math.min(top, r.top); bot = Math.max(bot, r.bottom); }
+          }
+          n.childNodes.forEach(walk);
+        };
+        walk(el);
+        let anc: HTMLElement | null = el.parentElement, clip: any = null;
+        while (anc) {
+          const cs = getComputedStyle(anc);
+          if (!/^visible/.test(cs.overflowY) || !/^visible/.test(cs.overflowX)) {
+            const b = anc.getBoundingClientRect();
+            clip = { cls: String(anc.className).slice(0, 30), top: b.top, bot: b.bottom };
+            break;
+          }
+          anc = anc.parentElement;
+        }
+        const own = getComputedStyle(el);
+        return { sel, fs: own.fontSize, lh: own.lineHeight, ink: { top, bot }, clip,
+                 over: clip ? Math.max(0, +(clip.top - top).toFixed(1), +(bot - clip.bot).toFixed(1)) : 0 };
+      });
+    }, trial.cls);
+    console.log(`\n══ TITLE INK vs CLIPPER — ${trial.name} — ${posture}\n` +
+      out.map((o: any) => o.absent ? `   ${o.sel}: absent` :
+        `   ${o.sel.padEnd(11)} ${o.fs}/${o.lh} · ink ${o.ink.top.toFixed(1)}→${o.ink.bot.toFixed(1)} · clipper ${o.clip ? `${o.clip.cls} ${o.clip.top.toFixed(1)}→${o.clip.bot.toFixed(1)}` : "none"} · over ${o.over}`).join("\n"));
+    const present = out.filter((o: any) => !o.absent);
+    expect(present.length, "neither the title nor the description rendered — nothing was checked").toBeGreaterThan(0);
+    for (const o of present as any[]) {
+      expect(o.over, `${trial.name} ${posture}: ${o.sel}'s ink overflows its clipping ancestor (${o.clip?.cls}) by ${o.over}px at ${o.fs}/${o.lh}`).toBeLessThanOrEqual(0.5);
+    }
+  });
+ }
+}

@@ -20,11 +20,39 @@ import { test, expect, Page } from "@playwright/test";
 import { openRoute, liftMotionSuppression, scrollbarWidth } from "./measure";
 
 /** the page-specific class on each grid root — `.tpl-wpg` is shared by the three Tasks pages */
-/* ⚠️ THE PAGES ALLOWED NO MARK, COUNTED — so a second cannot drop its mark unnoticed. */
-const MARKLESS = ["Submission packages"];
-/* ⚠️ THE PAGES EXCLUDED FROM THE IDENTITY CLAIM, COUNTED — the illustrated-masthead trial's own
-   scale is asserted in `headerFix`; a second page cannot join without changing this number. */
-const CARVED = ["Submission packages"];
+
+/**
+ * ══ THE CARVE-OUT, ENUMERATED — FOUR PROPERTIES, NOT A LIST OF PAGES ══════════════════════════
+ *
+ * ⚠️ A CARVE-OUT THAT NAMES PAGES EXEMPTS THEM FROM EVERYTHING, AND THAT IS AN OPT-OUT WEARING A
+ * CARVE-OUT'S CLOTHES. This list used to be `CARVED = ["Submission packages"]`, consulted by one
+ * helper that every identity key ran through — so a page carved out for its TITLE SIZE stopped
+ * being held to its padding, its hairline, its radius and its shadow as well. The one page the
+ * trial changed became the one page nothing checked, which is how the paint spent two packs inset
+ * 35px from both window edges with a full-bleed lock green beside it.
+ *
+ * So the exemption is per PROPERTY. Each list names the pages whose value legitimately differs for
+ * that one reading, every other assertion in this file continues to apply to them, and each list's
+ * length is asserted so a page cannot join a carve quietly.
+ *
+ * `ground` and `artwork` are not keys here — they are asserted in `headerFix` and `washEdges`, and
+ * are named so the four differences are enumerable in one place.
+ */
+const ILLUSTRATED = ["Submission packages", "Query Centre"];
+const CARVES = {
+  /** the band is a tint plus an illustration rather than the shared wash */
+  ground: ILLUSTRATED,
+  /** a picture bleeds to the band's right edge, so its painted colour there is artwork */
+  artwork: ILLUSTRATED,
+  /** 47px at rest against the shared 30px — the reason the trial's title reverted four times */
+  titleSize: ILLUSTRATED,
+  /** renders no mark at all: the illustration is the page's picture */
+  mark: ILLUSTRATED as string[],
+} as const;
+/* ⚠️ HEIGHT IS NOT A CARVE OF ITS OWN — it is what the two above ADD UP TO, and stating it as one
+   would let a real height change hide behind a type-scale exemption. Named as a derivation. */
+const CARVED_HEIGHT = [...new Set([...CARVES.titleSize, ...CARVES.mark])];
+const MARKLESS = CARVES.mark;
 
 const PAGES: { name: string; route: string; cls: string; fill: boolean }[] = [
   { name: "Query Centre",        route: "/queries",             cls: "qc-wpg",  fill: true  },
@@ -190,14 +218,14 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
    * cannot also be held to the shared scale. Its own values are asserted in `headerFix`; what stays
    * here is that the OTHER pages remain identical to each other, which is what the law protects.
    */
-  const same = (key: keyof (typeof rows)[0]["r"], why: string) => {
+  const same = (key: keyof (typeof rows)[0]["r"], why: string, exempt: readonly string[] = []) => {
     const seen = new Map<string, string[]>();
-    for (const { name, r } of rows.filter((x) => !CARVED.includes(x.name))) {
+    for (const { name, r } of rows.filter((x) => !exempt.includes(x.name))) {
       const v = String(r[key]);
       seen.set(v, [...(seen.get(v) ?? []), name]);
     }
     expect(seen.size, `${why}: nothing was compared — every page is carved out`).toBeGreaterThan(0);
-    expect(rows.length - CARVED.length, "fewer than four pages remain to compare").toBeGreaterThan(3);
+    expect(rows.length - exempt.length, "fewer than four pages remain to compare").toBeGreaterThan(3);
     expect([...seen.entries()].map(([v, ns]) => `${v}: ${ns.join(", ")}`).join(" | "),
       `${why} — the pages disagree`).not.toContain(" | ");
   };
@@ -227,9 +255,9 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
   for (const { name, r } of rows) {
     expect(parseFloat(String(r.slabLine)), `${name}: the chrome slab has no base hairline`).toBeGreaterThan(0);
   }
-  same("titleSize", "the title size");
+  same("titleSize", "the title size", CARVES.titleSize);
   same("titleWeight", "the title weight");
-  same("background", "the masthead's ground");
+  same("background", "the masthead's ground", CARVES.ground);
   same("radius", "the masthead's corner radius");
   same("shadow", "the masthead's shadow");
 
@@ -270,8 +298,8 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
   /* ⚠️ THE CARVED-OUT PAGE IS OUT OF THE HEIGHT COMPARISON TOO — its masthead is 125.7 against
      102.9 because the trial gives it a 47px title and no mark. Same carve-out, third visible
      effect; its own values are asserted in `headerFix`. */
-  const withSub = rows.filter((x) => x.r.hasSub && !CARVED.includes(x.name));
-  const soloRows = rows.filter((x) => !x.r.hasSub && !CARVED.includes(x.name));
+  const withSub = rows.filter((x) => x.r.hasSub && !CARVED_HEIGHT.includes(x.name));
+  const soloRows = rows.filter((x) => !x.r.hasSub && !CARVED_HEIGHT.includes(x.name));
   expect(withSub.length, "no page has a description — the height derivation is untested").toBeGreaterThan(1);
   expect([...new Set(withSub.map((x) => x.r.height))],
     `pages with a description disagree on height: ${withSub.map((x) => `${x.name} ${x.r.height}`).join(", ")}`)
@@ -544,7 +572,7 @@ test("⚠️ THE SETTLED POSTURE IS THE SAME OBJECT, HALF THE HEIGHT", async ({ 
   /* ⚠️ AND A PAGE THAT NEVER SETTLED IS OUT OF THE COMPARISON, NOT JUST OUT OF THE LOOP ABOVE. The
      skip there only stopped asserting about it; it stayed in `rows`, so its RESTING height came back
      as a settled one (102.9 against 57) and read as a page arranged specially. */
-  const settledRows = rows.filter((x) => !CARVED.includes(x.name) && parseFloat(x.r!.titleSize) === 22);
+  const settledRows = rows.filter((x) => !CARVED_HEIGHT.includes(x.name) && parseFloat(x.r!.titleSize) === 22);
   expect(settledRows.length, "every settled page is carved out — nothing was compared").toBeGreaterThan(2);
   for (const k of ["height", "padTop", "padBottom", "titleSize", "markW", "subH"] as const) {
     const vals = [...new Set(settledRows.map((x) => String(x.r![k])))];
