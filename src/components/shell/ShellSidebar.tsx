@@ -17,7 +17,7 @@
  * All derivations live in lib/shellSidebar.ts (pure, unit-locked).
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutGrid, Send, Users, Book, ChevronRight, ChevronsUpDown, Plus, Reply, UserPlus, BookPlus,
   Settings, ListChecks,
@@ -25,6 +25,7 @@ import {
 import { useScriptAllyDb } from "../../lib/db";
 import { UserPlan } from "../../types";
 import { invokeCapture } from "./railNav";
+import { manuscriptViewPath } from "./manuscriptScope";
 import { SHELL_DASHBOARD, SHELL_SECTIONS, ShellV2Section, shellPageForPath } from "./shellV2Nav";
 import {
   localYMD, manuscriptInitials, manuscriptSubtitle, planLine, resolveActiveManuscript,
@@ -96,10 +97,19 @@ export const ShellScope: React.FC<{ onNavigate: (tab: string, subPageName?: stri
   const activeMs = resolveActiveManuscript(manuscripts, storedMsId);
   const [msOpen, setMsOpen] = useState(false);
   const deckRef = useRef<HTMLDivElement>(null);
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  /**
+   * ⚠️ THE SAME RULE THE DESKTOP PICKER OBEYS, FROM THE SAME HELPER. This control did not navigate
+   * at all before; the desktop one did. Writing the condition twice is how a breakpoint-dependent
+   * disagreement gets built, so the decision lives in `manuscriptScope` and both call it.
+   */
   const pickManuscript = (id: string) => {
     try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* private mode */ }
     setStoredMsId(id);
     setMsOpen(false);
+    const view = manuscriptViewPath(pathname, id);
+    if (view) navigate(view);
   };
   useEffect(() => {
     if (!msOpen) return;

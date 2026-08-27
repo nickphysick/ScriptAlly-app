@@ -630,6 +630,16 @@ function AppContent() {
   // Queries subpage-equivalent, read from the URL: ?q=<id> is deep-selection (Queries treats an
   // unrecognised subpage value as a query id, exactly as it did with the old activeSubPage).
   const queriesSub = params.get("q") ?? "Query database";
+  /**
+   * ⚠️ THE MANUSCRIPTS PAGE'S VIEW, READ HERE BECAUSE `?q=` IS READ HERE. Absent renders the library
+   * grid; an id renders that book's dossier. It is a URL param rather than page state so that the
+   * shell's switcher and the sidebar's `Manuscripts` item can reach it — the grid had no route back
+   * once a book was opened, because nothing outside the page could clear the state that decided it.
+   *
+   * ⚠️ THIS IS VIEW, NOT SCOPE. `scriptally_active_manuscript_id` remains the section-wide pointer
+   * packages, comps and analytics read; the two are different facts and stay on different channels.
+   */
+  const manuscriptView = params.get("m");
   /* The shell's four Queries children are ONE hub under four filters (shell-rebuild pack,
      Phase 3). Parsed here beside `?q=` because this is already where the hub's params are read;
      an unknown value falls back to "all" rather than filtering to an empty list, which would
@@ -761,6 +771,7 @@ function AppContent() {
             <AllManuscripts
               searchQuery={searchQuery}
               onNavigate={handleNavigate}
+              openId={manuscriptView}
               /* ⚠️ LOAD-BEARING: the page stays MOUNTED, so this is the only signal that it has
                  become visible — which is what the one-shot manuscript reveal keys on. */
               active={routeKey === "manuscripts" && !manuscriptsPackages && !manuscriptsComps}

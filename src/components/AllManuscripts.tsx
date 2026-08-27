@@ -53,6 +53,8 @@ import { genreList, splitGenres } from "./manuscripts/plateEdit";
 import "./manuscripts/manuscripts.css";
 
 /** Shared with the comps + packages sub-pages — the section's single active-manuscript pointer. */
+import { manuscriptViewHref } from "./shell/manuscriptScope";
+
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
 interface AllManuscriptsProps {
@@ -67,9 +69,16 @@ interface AllManuscriptsProps {
    * for the same reason its own reveal has been silently dead; see the run report.
    */
   active?: boolean;
+  /**
+   * ⚠️ THE VIEW, FROM `/manuscripts?m=<id>`. Null renders the library grid; an id renders that
+   * book's dossier. It was local state until amendment 4, which is exactly why the grid became
+   * unreachable: nothing outside this component could clear a `useState`, so the sidebar switcher
+   * and the nav item had no way to say "back to the shelf".
+   */
+  openId?: string | null;
 }
 
-export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, active = true }) => {
+export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, active = true, openId = null }) => {
   const { currentUser, manuscripts, queries, packages, versions, activities, agents, userTasks, addUserTask, taskFlags, updateManuscript, updateManuscriptQuiet, deleteManuscript, setManuscriptShelved, addPersonalGenre } =
     useScriptAllyDb();
 
@@ -87,7 +96,6 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
    * no route, no URL param, no persistence.
    */
   const navigate = useNavigate();
-  const [openId, setOpenId] = useState<string | null>(null);
   const [tab, setTab] = useState<ManuscriptTabKey>(DEFAULT_MANUSCRIPT_TAB);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [deleteModalMs, setDeleteModalMs] = useState<Manuscript | null>(null);
@@ -130,7 +138,9 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
     try { sessionStorage.removeItem("sa.manuscriptReveal"); } catch { /* private mode */ }
     if (!manuscripts.some((m) => m.id === id)) return;   // stale id — consumed, nothing to show
     try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* private mode */ }
-    setOpenId(id);
+    /* Built inline rather than through `openDossier`, which is declared below: an effect closing
+       over a later `const` is legal but is the exact shape this repo has been bitten by. */
+    navigate(manuscriptViewHref(id));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, manuscripts.length]);
 
@@ -151,26 +161,32 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
    * could not tell from the control whether they had reached the end of their own shelf.
    */
   const atIndex = selected ? ordered.findIndex((m) => m.id === selected.id) : -1;
-  const goTo = (i: number) => () => { const m = ordered[i]; if (m) setOpenId(m.id); };
+  /* ⚠️ THE PAGER GOES THROUGH `openDossier`, so paging re-scopes as well as re-views. It used to
+     set the view alone, which left the bar's switcher naming a different book from the one on
+     screen — two surfaces disagreeing about which manuscript you are looking at. */
+  const goTo = (i: number) => () => { const m = ordered[i]; if (m) openDossier(m.id); };
 
   /** Writes the pointer the comps and packages sub-pages read. Not view state — a section-wide seat. */
   const selectMs = (id: string) => {
     try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* private mode — selection is session-only */ }
   };
-  const openDossier = (id: string) => { selectMs(id); setOpenId(id); };
   /**
-   * ⚠️ `closeDossier` IS GONE, AND WITH IT THE ONLY ROUTE BACK TO THE LIBRARY GRID. The back link was
-   * its one caller; amendment 3 removes the link because the sidebar switcher and the hero's
-   * chevrons are better routes BETWEEN BOOKS — which they are. Neither is a route back to the GRID,
-   * and nothing else sets `openId` to null.
-   *
-   * ⚠️ SO THE GRID IS UNREACHABLE ONCE A BOOK IS OPENED IN A SESSION. It still renders at first
-   * visit and on an empty shelf, and it still owns `ManuscriptAddTile`. This is a consequence of
-   * the instruction rather than a decision I made, and it is flagged rather than worked around: the
-   * fix is one line either way — the sidebar's switcher clearing `openId`, or the grid retiring
-   * outright — and which of those is right is a product question.
+   * ⚠️ SCOPE THEN VIEW, AND THE VIEW IS THE URL. `selectMs` writes the section-wide pointer the
+   * sub-pages read; the navigation carries the view. Making the view a route is what gives the
+   * grid a way back — the sidebar's `Manuscripts` item navigates to `/manuscripts` with no param.
    */
-
+  const openDossier = (id: string) => { selectMs(id); navigate(manuscriptViewHref(id)); };
+  /**
+   * ⚠️ THE GRID IS REACHABLE AGAIN, AND THE ROUTE BACK IS THE SIDEBAR'S `Manuscripts` ITEM — which
+   * navigates to `/manuscripts` with no `?m=`, so the view resolves to null and the shelf renders.
+   * No `closeDossier`, no back link: the collection is a destination in the nav, which is where a
+   * reader already looks for "all of them".
+   *
+   * ⚠️ THIS IS WHAT THE PARAM BOUGHT. While the view was a `useState`, nothing outside this
+   * component could clear it — so amendment 3's removal of the back link stranded the grid for a
+   * whole session, with the fix stated in this comment and unreachable from anywhere in the app.
+   * A view that only its own component can change has no route back by construction.
+   */
   /**
    * ⚠️ RESOLVED THROUGH `genreDisplay`, ONCE, FOR BOTH SURFACES. `GenrePicker` stores canonical IDS
    * (`literary-fiction`), so a surface that renders the stored value shows the writer the id — which

@@ -40,6 +40,7 @@ import { formatSidebarName, getInitials } from "../../lib/displayName";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
 import { invokeCapture } from "./railNav";
+import { manuscriptViewPath } from "./manuscriptScope";
 import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
 import "./primitives.css";
 import manuscriptMark from "../../assets/shell/manuscript-icon.png";
@@ -280,10 +281,19 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const chooseMs = useCallback((id: string) => {
     try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* not worth an error */ }
   }, []);
+  /**
+   * ⚠️ ONE NAVIGATION EITHER WAY — this picker ALREADY re-navigated to the same path, so the naive
+   * addition ("navigate to ?m=" plus the existing same-path call) would have navigated twice on the
+   * one page the param matters. The helper returns null off `/manuscripts`, and null falls through
+   * to the re-navigation this call site was already doing for its own reasons.
+   *
+   * ⚠️ AND THE CONDITION IS NOT WRITTEN HERE. `ShellScope` is the same control at a narrower
+   * breakpoint, in another file; the rule lives in `manuscriptScope` so the two cannot drift.
+   */
   const pickMs = useCallback((id: string) => {
     chooseMs(id);
     setMsOpen(false);
-    onNavigatePath(`${pathname}${search}`);
+    onNavigatePath(manuscriptViewPath(pathname, id) ?? `${pathname}${search}`);
   }, [chooseMs, onNavigatePath, pathname, search]);
   /* ⚠️ STEPPING DOES NOT RE-ROUTE — the picker navigates for its own reasons; an arrow is a
      change of scope, not of page. */
