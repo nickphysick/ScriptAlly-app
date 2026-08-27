@@ -10,6 +10,43 @@ const decls = css.replace(/\/\*[\s\S]*?\*\//g, "");
 
 const STATES = ["theirs", "theirsq", "nudged", "y1", "y2", "y3", "quiet", "offer", "closed", "task"];
 
+describe("⚠️ two geometry faults, and the mechanism behind the second (Phase 4)", () => {
+  it("⚠️ nothing that paints a bar uses the `background` SHORTHAND", () => {
+    /**
+     * `background:` resets EVERY background longhand, including `background-image` — and
+     * `.tl-seg.hatched` paints the overrun as an image on the bar's own element. An animation
+     * outranks normal declarations, so `@keyframes tlUrge` written with the shorthand erased that
+     * gradient on every frame it ran, and a long-standing bar with an overrun is exactly the bar
+     * that has both. It was being wiped by its own breath.
+     *
+     * ⚠️ ASSERTED OVER THE WHOLE FAMILY, not just the keyframe that was wrong. The next rule to
+     * paint a bar will be written the obvious way, and the obvious way is the one that breaks it.
+     */
+    const bad: string[] = [];
+    for (const m of decls.matchAll(/([^{}]*)\{([^}]*)\}/g)) {
+      const sel = m[1].replace(/\s+/g, " ").trim();
+      if (!sel.includes(".tl-seg") && !sel.includes("tlUrge")) continue;
+      const hit = m[2].match(/(?:^|;|\s)background\s*:[^;]*/);
+      /* a gradient IS an image, so the shorthand is the right spelling there */
+      if (hit && !hit[0].includes("gradient")) bad.push(`${sel} → ${hit[0].trim()}`);
+    }
+    expect(bad, `${bad.length} bar rules reset the hatch`).toEqual([]);
+    /* and the hatch is still an image on the bar itself, not a second element */
+    expect(decls, "the overrun stopped being the bar's own background")
+      .toMatch(/\.tl-seg\.hatched\s*\{[^}]*background-image:\s*repeating-linear-gradient/);
+  });
+
+  it("⚠️ today's mark fits its own label", () => {
+    const dd = decls.match(/\n\.tl-dd\s*\{([^}]*)\}/)![1];
+    /* it was `width: 19px; border-radius: 50%` — a circle sized for a two-digit day, wrapping a
+       label the range control turns into "25 Aug" and "Aug" */
+    expect(dd, "today's mark has a fixed width again").not.toMatch(/(?:^|;|\s)width\s*:/);
+    expect(dd, "today's mark cannot hold a wider label").toContain("min-width");
+    /* the height stays fixed in BOTH states — today's mark must not change the header's height */
+    expect(dd, "the mark's height is no longer fixed").toContain("height: 19px");
+  });
+});
+
 describe("⚠️ the tiers answer geometry, never whether a bar speaks (density pack, Phase 1)", () => {
   it("no tier hides or shrinks a label, an end label or a note", () => {
     /* ⚠️ SELECTORS SPAN LINES, so this reads whole rules rather than lines. The rule this pack
@@ -92,7 +129,7 @@ describe("⚠️ urgency is breath, and reduced motion carries the same fact (Ph
     /* ⚠️ THE HALF THAT MATTERS. Stopping is easy; carrying the information without motion is the
        claim, and a check that only asserts `animation: none` passes on the old broken rule. */
     expect(block!, "reduced motion says nothing — motion was the only signal")
-      .toContain("background: var(--bar-urgent-fill)");
+      .toContain("background-color: var(--bar-urgent-fill)");
     /* ⚠️ AND IT SETS NO BORDER, for the same reason the keyframes set none: transparent shows the
        fill, so the border deepens with it and a second declaration would only outrank the clamps. */
     expect(block!, "reduced motion recolours a border the clamps own").not.toContain("border-color:");
@@ -137,7 +174,10 @@ describe("⚠️ bar colour is a token, never a literal (settled pack, Phase 2)"
       const rule = decls.match(new RegExp(`\\n\\.tl-seg\\.s-${s}\\s*\\{([^}]*)\\}`));
       expect(rule, `.tl-seg.s-${s} has no rule`).not.toBeNull();
       const body = rule![1];
-      expect(body, `s-${s} does not paint from its fill token`).toContain(`background: var(--bar-${s}-fill)`);
+      /* ⚠️ `background-color`, NOT THE SHORTHAND (density pack, Phase 4). The claim is unchanged
+         — the state paints from its own fill token — but the spelling is load-bearing now: the
+         shorthand resets `background-image`, which is how `.tl-seg.hatched` paints the overrun. */
+      expect(body, `s-${s} does not paint from its fill token`).toContain(`background-color: var(--bar-${s}-fill)`);
       /**
        * ⚠️ `transparent`, NOT A SECOND COPY OF THE FILL TOKEN. A background paints UNDER its
        * border, so a transparent border shows the bar's own fill and the two cannot be told apart.
@@ -149,7 +189,7 @@ describe("⚠️ bar colour is a token, never a literal (settled pack, Phase 2)"
         .toContain("border-color: transparent");
     }
     const closed = decls.match(/\n\.tl-seg\.s-closed\s*\{([^}]*)\}/)![1];
-    expect(closed, "closed grew a fill").toContain("background: transparent");
+    expect(closed, "closed grew a fill").toContain("background-color: transparent");
     expect(closed, "closed lost its dash — a transparent bar with a matching border is invisible")
       .toContain("border-style: dashed");
   });

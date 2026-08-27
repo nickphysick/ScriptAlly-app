@@ -266,12 +266,20 @@
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 6.5px;
   letter-spacing: 0.17em; color: #5a6e58; display: block;
 }
+/* ⚠️ THE MARK FITS ITS OWN LABEL (density pack, Phase 4). It was a fixed 19×19 CIRCLE, which is
+   the right shape for the thing it was designed around: a one- or two-digit day number at day
+   grain. The range control then made the label "25 Aug" at week grain and "Aug" at month grain,
+   and nothing changed the marker wrapping it — so today's header rendered a burgundy blob with
+   its text spilling out of both sides of a 19px disc.
+   ⚠️ THE FAULT IS THE FIXED SIZE, NOT THE ROUNDNESS. A pill holds one character or six; the height
+   stays 19 in both states, which is what the original comment was protecting — today's mark must
+   not change the header's height. */
 .tl-dd {
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10.5px; font-weight: 500;
   color: #3f4d3d; margin-top: 2px;
-  /* the disc is a fixed box in BOTH states, so today's mark does not change the header's height */
-  width: 19px; height: 19px; border-radius: 50%;
+  min-width: 19px; height: 19px; padding: 0 6px; border-radius: 999px;
   display: inline-flex; align-items: center; justify-content: center;
+  white-space: nowrap;
 }
 .tl-dh.today .tl-dd { background: #7c3a2a; color: #fdfaf5; }
 
@@ -554,11 +562,11 @@
  * ⚠️ CLOSED IS THE SOLE EXCEPTION, for a reason that cannot be designed around: a transparent fill
  * with a transparent border is an INVISIBLE BAR. It keeps its dashed edge.
  */
-.tl-seg.s-theirs  { background: var(--bar-theirs-fill);  border-color: transparent;  color: var(--bar-theirs-text); }
-.tl-seg.s-theirsq { background: var(--bar-theirsq-fill); border-color: transparent; color: var(--bar-theirsq-text); }
-.tl-seg.s-nudged  { background: var(--bar-nudged-fill);  border-color: transparent;  color: var(--bar-nudged-text); }
-.tl-seg.s-y1      { background: var(--bar-y1-fill);      border-color: transparent;      color: var(--bar-y1-text); }
-.tl-seg.s-y2      { background: var(--bar-y2-fill);      border-color: transparent;      color: var(--bar-y2-text); }
+.tl-seg.s-theirs  { background-color: var(--bar-theirs-fill);  border-color: transparent;  color: var(--bar-theirs-text); }
+.tl-seg.s-theirsq { background-color: var(--bar-theirsq-fill); border-color: transparent; color: var(--bar-theirsq-text); }
+.tl-seg.s-nudged  { background-color: var(--bar-nudged-fill);  border-color: transparent;  color: var(--bar-nudged-text); }
+.tl-seg.s-y1      { background-color: var(--bar-y1-fill);      border-color: transparent;      color: var(--bar-y1-text); }
+.tl-seg.s-y2      { background-color: var(--bar-y2-fill);      border-color: transparent;      color: var(--bar-y2-text); }
 /* ══ URGENCY IS BREATH, NOT COLOUR (settled pack, Phase 3) ═════════════════════════════════
  *
  * ⚠️ LONG-STANDING IS THE SETTLED FILL, PULSING — not a redder bar. A third pink would have been
@@ -575,7 +583,7 @@
  * something from you, not to the thing you are waiting on.
  */
 .tl-seg.s-y3 {
-  background: var(--bar-y3-fill);
+  background-color: var(--bar-y3-fill);
   border-color: transparent;
   color: var(--bar-y3-text);
   animation: tlUrge 2.6s ease-in-out infinite;
@@ -585,9 +593,14 @@
    nothing but outrank the clamps — the ref's own reason for the flat form, arrived at the long way
    round: a keyframe that also set `border-color` was written first, and the acceptance sweep
    caught a clamped bar whose border held still while its background moved. */
+/* ⚠️ `background-color`, NEVER THE SHORTHAND. `background:` resets EVERY background longhand,
+   including `background-image` — and an animation outranks normal declarations, so a keyframe
+   written with the shorthand erases `.tl-seg.hatched`'s gradient on every frame it runs. A
+   long-standing bar with an overrun is exactly the bar that has both, so the hatch was being
+   wiped by the breath forty times a second. */
 @keyframes tlUrge {
-  0%, 100% { background: #f3dbd0; }
-  50%      { background: #e9c3b2; }
+  0%, 100% { background-color: #f3dbd0; }
+  50%      { background-color: #e9c3b2; }
 }
 
 /* ⚠️ REDUCED MOTION CARRIES THE SAME INFORMATION WITHOUT MOVING. The old rule was
@@ -599,13 +612,13 @@
 @media (prefers-reduced-motion: reduce) {
   .tl-seg.s-y3 {
     animation: none;
-    background: var(--bar-urgent-fill);
+    background-color: var(--bar-urgent-fill);
     /* the border stays transparent, so it deepens with the fill for free */
   }
 }
 /* ⚠️ AND NO BREATH IN A PAST WINDOW, where nothing is still running. */
 .tl-row.past .tl-seg.s-y3 { animation: none; }
-.tl-seg.s-offer   { background: var(--bar-offer-fill);   border-color: transparent;   color: var(--bar-offer-text); }
+.tl-seg.s-offer   { background-color: var(--bar-offer-fill);   border-color: transparent;   color: var(--bar-offer-text); }
 /* ⚠️ GONE QUIET IS HATCHED — the one state whose fill is not a flat colour. Silence has no single
    tone, and the hatch is what stops a grey bar reading as a disabled one. */
 .tl-seg.s-quiet {
@@ -615,15 +628,15 @@
   color: var(--bar-quiet-text);
 }
 .tl-seg.s-closed {
-  background: transparent;
+  background-color: transparent;
   border-style: dashed;
   border-color: var(--bar-closed-line);
   color: var(--bar-closed-text);
 }
 /* the bullet takes its own bar's ink, so a dot can never disagree with the bar it sits in */
-.tl-seg .d { background: currentColor; border: 0; }
+.tl-seg .d { background-color: currentColor; border: 0; }
 .tl-seg.s-closed .d, .tl-seg.s-theirsq .d {
-  background: transparent; border: 1.5px dashed currentColor;
+  background-color: transparent; border: 1.5px dashed currentColor;
 }
 
 /* ══ ONE TEXT FORMATTING FOR EVERY "YOUR MOVE" STATE ═══════════════════════════════════════
