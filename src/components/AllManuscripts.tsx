@@ -274,12 +274,19 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
       <WorkspacePageGrid
         className="msv-wpg"
         scrollLabel="Manuscripts"
-        /* ⚠️ OPT-IN, AND IT IS WHAT MAKES THE DOSSIER'S HEIGHT CHAIN REAL. `.wpg-scroll` is a BLOCK
-           by default, so `flex: 1; min-height: 0` inside it applies to nothing — and `flex: 1 1 0%`
-           under a content-sized parent computes to EXACTLY 0, with every child mounted and correct.
-           Measured twice in this repo. `fill` makes the scroll row a flex column; the library grid
-           opts back out with `flex: 0 0 auto` so a growing shelf still scrolls the page. */
-        fill
+        /**
+         * ⚠️ NO `fill`, AND THAT IS WHAT MAKES THIS A SCROLLING PAGE. It used to opt in, which turned
+         * the scroll row into a flex column sized to the window — so the row barely scrolled (the
+         * grid's own sheet records it overflowing 72px at 1280) and everything inside had to build
+         * its own height chain, ending in `.msv-dpane`'s nested scroller. One page, two scrollports.
+         *
+         * ⚠️ AND DROPPING IT CHANGES THE PAGE'S HEADER TYPE, DELIBERATELY. `pinned = !fill ||
+         * !!settleOn`, so this is Type A now: the shared grid pins the masthead slab at `top: 0` and
+         * settles it as the row scrolls. That is the app's ONE collapsing-header mechanism — the same
+         * one Comparable titles, Discover, Analytics and packages already use. A page-local sticky
+         * rail instead would have been a second implementation of it, and a third header behaviour
+         * inside a law that says a page is Type A or Type B and may not opt out.
+         */
         /**
          * ⚠️ `condensed={!!selected}` IS DELETED (masthead rethink, step 4). Opening a dossier used
          * to fold the masthead: the page becomes a workspace whose panes scroll internally, so the
@@ -328,7 +335,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
       {/* ⚠️ THE WRAPPER JOINS THE HEIGHT CHAIN ONLY FOR THE DOSSIER. It sits between the grid's
           scroll row and the card, so without the modifier `.msv-doss`'s `flex: 1` has no flex
           parent and the row scrolls instead of the pane. The library keeps flowing. */}
-      <div className={`msv-wrap${selected ? " msv-wrap--doss" : ""}`}>
+      <div className="msv-wrap">
         {ordered.length === 0 ? (
           /* ⚠️ THE EMPTY SHELF CARRIES ITS OWN `Your shelf` HEADER, so this branch is not wrapped
              in the populated one's. Two headers for one page state is how a count comes to be

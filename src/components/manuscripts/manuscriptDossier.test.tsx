@@ -191,7 +191,7 @@ describe("the tab row", () => {
   it("advertises no tab without a pane behind it", () => {
     for (const t of MANUSCRIPT_TABS) {
       const html = doss({ tab: t.key, comps: [{ title: "The Salt Path", year: 2018 }] });
-      const pane = html.split('class="msv-dpane msp-pane"')[1] ?? "";
+      const pane = html.split('class="msp-pane"')[1] ?? "";
       expect(pane, `${t.label}: no pane element at all`).not.toBe("");
       expect(pane.trim().startsWith("></div>"), `${t.label} has nothing behind it`).toBe(false);
     }

@@ -164,37 +164,43 @@ describe("Editorial stays monochrome", () => {
 });
 
 /**
- * ⚠️ THE DOSSIER'S HEIGHT CHAIN, LOCKED LINK BY LINK — because it was measured BROKEN before it was
- * measured working, and the break was silent. `fill` makes `.wpg-scroll` a flex column, but the
- * page's own `.msv-wrap` sits between it and the card as a plain block; without the modifier,
- * `.msv-doss`'s `flex: 1` had no flex parent, the card sized to its content, and the SCROLL ROW
- * scrolled 1810px while the pane — 1456px tall — scrolled not at all. Every element mounted, styled
- * and correct. The tell is a page that scrolls where its spec says the panes do.
+ * ⚠️ THE HEIGHT CHAIN IS RETIRED, AND THIS ASSERTS ITS ABSENCE RATHER THAN ITS SHAPE.
  *
- * A missing link cannot be seen in a screenshot and cannot be seen by tsc. It can be seen here.
+ * It used to be four elements — `.msv-wrap--doss`, `.msv-doss`, `.msv-dcard`, `.msv-dpane` — each
+ * claiming `flex: 1; min-height: 0`, and the block here checked every link, because a missing one
+ * is invisible: the page measured working, the SCROLL ROW scrolled 1810px while the pane, 1456px
+ * tall, scrolled not at all, and every element was mounted, styled and correct.
+ *
+ * The chain existed for one reason. The dossier sat in a card that CLIPPED (`overflow: hidden`), so
+ * its pane had to scroll inside that card, so every ancestor had to hand it a definite height, so
+ * the page had to be `fill`. Removing the card's frame is a look; removing its clip is what let the
+ * page scroll as a page — and the chain then had nothing left to do.
+ *
+ * ⚠️ SO THE FAULT TO GUARD IS NOW THE OPPOSITE ONE: a `flex: 1` left behind on a page with no flex
+ * parent applies to nothing, silently, and this repo has twice measured that shape compute to
+ * EXACTLY 0 with every child mounted and correct. What is checked is that no link survives, that
+ * nothing here opens a second scrollport, and that the page still computes no height of its own.
  */
-describe("the dossier fills, and only its pane body scrolls", () => {
-  const CHAIN = [".msv-wrap--doss", ".msv-doss", ".msv-dcard"] as const;
+describe("the dossier flows — no card, no chain, no second scrollport", () => {
+  for (const sel of [".msv-wrap--doss", ".msv-dcard", ".msv-dpane"]) {
+    it(`${sel} is gone, not merely unused`, () => {
+      expect(LIB, `${sel} still has a rule`).not.toMatch(
+        new RegExp(`(?:^|\\n)\\s*\\${sel}\\s*[,{]`),
+      );
+    });
+  }
 
-  it.each(CHAIN)("%s is a flex column that may be shorter than its content", (sel) => {
-    const r = rule(LIB, sel);
-    expect(r).toContain("flex-direction: column");
-    expect(r).toContain("min-height: 0");
-    expect(r).toContain("flex: 1");
+  /* ⚠️ ONE SCROLLPORT ON THE PAGE, AND IT IS THE GRID'S ROW. A nested `overflow` here is what the
+     card's clip used to force; anything reintroducing one puts the chrome inside a scrollport it is
+     meant to sit above. */
+  it("opens no scroller of its own", () => {
+    const decls = LIB.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(decls).not.toMatch(/overflow(-y)?\s*:\s*(auto|scroll)/);
   });
 
-  it("the pane body is the scroller, and the chrome above it is not", () => {
-    const pane = rule(LIB, ".msv-dpane");
-    expect(pane).toContain("overflow-y: auto");
-    expect(pane).toContain("min-height: 0");
-    expect(pane).toContain("scrollbar-gutter: stable both-edges");
-    expect(rule(LIB, ".msv-dcard > .msv-plateband")).toContain("flex: 0 0 auto");
-  });
-
-  /* ⚠️ THE LIBRARY OPTS OUT, and must. `.wpg--fill` would otherwise stretch the grid to the row's
-     height and strand the cards at the top of a tall box; a growing shelf is meant to scroll. */
-  it("the library grid stays out of the chain", () => {
-    expect(rule(LIB, ".mlib-grid")).toContain("flex: 0 0 auto");
+  /* A gutter reserved for a scrollbar that cannot appear insets the content for nothing. */
+  it("reserves no scrollbar gutter", () => {
+    expect(LIB.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("scrollbar-gutter");
   });
 
   /* No `dvh`, and no arithmetic against a bar height — the height arrives from the grid row. */
@@ -204,13 +210,6 @@ describe("the dossier fills, and only its pane body scrolls", () => {
   });
 });
 
-/**
- * ⚠️ THE DOSSIER CONDENSES THE PAGE HEADER, AND IT DOES SO BY MODE, NOT BY SCROLL. This page's
- * scroll row never moves once a manuscript is open — the pane body scrolls instead — so a
- * sentinel-driven strip would never fire. `WorkspacePageGrid` already unions `stuck ||
- * condensedByMode` for Query Centre's journeys; the dossier is a SECOND CONSUMER of that prop, not
- * a second mechanism, and the header receives one boolean so it never learns which half fired.
- */
 describe("the dossier condenses the header by mode", () => {
   const RAW = readFileSync(resolve(__dirname, "../AllManuscripts.tsx"), "utf8");
   /* ⚠️ COMMENTS STRIPPED FIRST — this rule is about CODE. The page's own comment EXPLAINS the union

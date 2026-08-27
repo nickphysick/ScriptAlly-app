@@ -179,17 +179,21 @@
  * ⚠️ AND IT IS A MODIFIER, NOT THE BASE RULE. The library view shares this wrapper and must keep
  * flowing — a filling `.msv-wrap` would stretch the grid to the row's height and strand the cards
  * at the top of a tall box. Only the dossier asks for the height. */
-.msv-wrap--doss { display: flex; flex-direction: column; min-height: 0; flex: 1; }
-
-.msv-doss { display: flex; flex-direction: column; min-height: 0; flex: 1; }
-.msv-dcard { display: flex; flex-direction: column; min-height: 0; flex: 1; }
-.msv-dcard > .msv-plateband,
-.msv-dcard > .msv-tabs { flex: 0 0 auto; }
-.msv-dpane {
-  flex: 1; min-height: 0; overflow-y: auto;
-  /* Both edges, so the pane's content stays centred whether or not the bar is showing. */
-  scrollbar-gutter: stable both-edges;
-}
+/**
+ * ⚠️ THE HEIGHT CHAIN IS GONE, ALL OF IT — `.msv-wrap--doss`, `.msv-doss`, `.msv-dcard` and
+ * `.msv-dpane`'s own scroller. Four elements each claiming `flex: 1; min-height: 0` existed for one
+ * reason: the card clipped, so the pane had to scroll inside it, so every ancestor had to hand it a
+ * definite height. The page scrolls now, so the whole chain has nothing left to do — and a `flex: 1`
+ * left behind on a page with no flex parent applies to nothing, silently, which is the fault this
+ * repo has measured twice as a box computing to EXACTLY 0 with every child mounted and correct.
+ *
+ * ⚠️ AND `scrollbar-gutter` WENT WITH IT. It reserved room on both edges so the pane's content
+ * stayed centred whether or not its scrollbar was showing. There is no pane scrollbar now; the
+ * grid's row owns that, and reserving a gutter for one that cannot appear would inset the content
+ * for nothing.
+ */
+.msv-doss { display: flex; flex-direction: column; }
+.msv-doss-body { display: flex; flex-direction: column; }
 
 /* ⚠️ THE DOSSIER'S BOTTOM GUTTER — and the dead space under the card was the SCROLL ROW's own
  * padding, not a lost height anywhere in the chain. `fill` is doing its job: the card measures the

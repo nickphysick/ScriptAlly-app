@@ -161,11 +161,17 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
         ← All manuscripts
       </button>
 
-      {/*
-        ⚠️ ONE CARD. The library grid picks the subject; this renders it. The card is the same shape
-        at one manuscript and at five.
-      */}
-      <div className="msv-card msv-dcard">
+      {/**
+        * ⚠️ NO CARD. This used to be `.msv-card .msv-dcard` — 16px radius, border, shadow,
+        * `overflow: hidden` — sitting inside `.ws-window`, which is the SAME treatment one level up.
+        * A card inside a card, with the inner one clipping its own scroller.
+        *
+        * ⚠️ AND THE CLIP WAS THE EXPENSIVE HALF. `overflow: hidden` on the card is what forced
+        * `.msv-dpane` to scroll internally, which is what forced the whole `flex: 1; min-height: 0`
+        * chain above it, which is what forced the page to be `fill`. Removing the frame is a look;
+        * removing the clip is what lets the page scroll as a page.
+        */}
+      <div className="msv-doss-body">
         <ManuscriptHero
           title={manuscript.title}
           status={shelved ? "Shelved" : manuscript.status}
@@ -254,7 +260,7 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
           `flex: 0 0 auto` above it; this takes the remainder with `min-height: 0` so it can be
           shorter than its content instead of pushing the card past the viewport.
         */}
-        <div className="msv-dpane msp-pane">
+        <div className="msp-pane">
           {tab === "overview" && (
             <OverviewPane
               pitch={elevatorPitch}
