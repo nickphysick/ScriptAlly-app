@@ -279,6 +279,17 @@ export const SubmissionPackages: React.FC = () => {
     setSlots((prev) => ({ ...prev, [c.kind]: c }));
   };
 
+  /**
+   * ⚠️ THE PAGE RESOLVES A DROPPED ID AGAINST THE RAIL IT ALREADY HAS. A drop carries an id and a
+   * kind and nothing else; resolving it here means one chip object, from one source, whichever
+   * route filled the slot. Building one at the drop site produced a slot with a blank name.
+   */
+  const dropChip = (kind: RailKind, id: string) => {
+    const c = railSections.find((s) => s.kind === kind)?.chips.find((x) => x.id === id);
+    /* an id that resolves to nothing fills nothing — silently, because no gesture completed */
+    if (c) pickChip(c);
+  };
+
   const onChipDragStart = (_c: RailChip) => { setBuilding(true); setArmed(true); };
 
   /* ⚠️ CLOSING CLEARS (D18). A row that reopened holding yesterday's half-built package would be
@@ -708,7 +719,7 @@ export const SubmissionPackages: React.FC = () => {
                   existing={msPackages}
                   onOpen={() => setBuilding(true)}
                   onClear={(k) => setSlots((prev) => ({ ...prev, [k]: null }))}
-                  onDrop={pickChip}
+                  onDrop={dropChip}
                   onClose={closeBuild}
                   onCreate={createFromSlots}
                 />

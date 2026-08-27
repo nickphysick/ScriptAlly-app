@@ -209,3 +209,75 @@ to wire: a control that is always on screen does not need a second door.
 
 Recorded beside the two from the last pack — `SUBMISSION PACKAGE` from a retired band, and the
 dotted divider from a mockup — because three instances is a shape, not a slip.
+
+---
+
+## Phases 3+4 — Parts C and D, measured
+
+The rail, identical at 1440 and 1920:
+
+```
+sections   let / syn / ver   Covering letters · Synopses · Versions
+head ink   rgb(138,68,51) · rgb(79,102,71) · rgb(45,74,107)     three distinct inks
+＋ Add      on all three      note on Versions only
+layout     rail 296px at x=327, ledger at x=647, same row
+chips      6, all draggable, all tabIndex 0, 6 grip dots each
+build row  closed by default
+console    no errors
+```
+
+### ⚠️ The drag filled the slot with a BLANK NAME, and `filled: true` hid it
+
+The first measurement passed. Printing the composed value did not:
+
+```
+DRAG [{"kind":"let","filled":true,"name":""}, …]
+```
+
+`onDrop` built a `RailChip` at the drop site with `name: ""` — because a `dataTransfer` carries only
+what was put on it, and I had put an id and a kind. The drag worked and the slot said nothing. The
+page owns the rail, so the page resolves the id now; the handler takes `(kind, id)` and cannot
+fabricate a chip. **An assertion on `filled` alone passes on that bug** — the case now asserts the
+name.
+
+### The three build routes, and the two gates
+
+```
+CLICK  syn filled "One-page", let untouched      — only its own type
+KEY    Enter on a letter chip filled "Hook-first"
+DRAG   native HTML5, filled "Hook-first"          — no library, no `force`
+GATE   disabled: true · why: "Add a covering letter to continue" · title: ""
+NAME   suggested "Hook-first · One-page"          — from the filled slots
+NAME2  typed "My own name", then filled a slot → still "My own name"
+ESC    closed, and reopened empty
+```
+
+`title: ""` is the assertion that matters for D17: the reason is **on the page**, not reachable only
+by hovering the control that is not working.
+
+### D16 against a real package
+
+```
+TARGET {"name":"Standard UK","cells":["Hook-first","One-page","Not recorded"]}
+DUPE   why: Same combination as “Standard UK”   styled as a warning   createDisabled: FALSE
+```
+
+Taken off the ledger rather than hand-written, so the duplicate is a real record. And the version
+slot left empty against that row's `Not recorded` proves on the running app what the unit test
+proves in isolation: **an empty slot is part of the combination, not a wildcard.**
+
+### Two things the fixture could not show, and one it showed honestly
+
+**Every version chip read `not yet in a package`** — the used branch was unexercised, so
+`N packages · held by N agents` was unproven on the app. One package was pointed at a version,
+both branches measured, and the fixture **restored in the same run**:
+
+```
+Prologue-first        1 package · held by 1 agent     used
+Worldbuilding-first   not yet in a package            unused
+Post-R&R (T. Marsh)   Latest · not yet in a package   unused, and newest
+```
+
+**The letters read `Text · in 2`, not the ref's `Text · 412 words · in 2`** — and that is the DATA,
+not the code. `sourceLabel` drops the count when a material has no pasted body, which these have
+not; the ref's fixture had word counts. Checked rather than assumed.

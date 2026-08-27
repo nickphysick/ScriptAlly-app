@@ -27,7 +27,15 @@ export interface BuildRowProps {
   existing: readonly SubmissionPackage[];
   onOpen: () => void;
   onClear: (kind: RailKind) => void;
-  onDrop: (chip: RailChip) => void;
+  /**
+   * ⚠️ IT TAKES AN ID AND A KIND, NOT A CHIP — because a drop cannot know the chip.
+   *
+   * The only things readable from a `dataTransfer` are what was put on it, and putting the whole
+   * chip on would be serialising a view model through the clipboard. The first version of this
+   * built a `RailChip` here with `name: ""`, which filled the slot with a BLANK NAME — the drag
+   * worked and the slot said nothing. The page owns the rail, so the page resolves the id.
+   */
+  onDrop: (kind: RailKind, id: string) => void;
   onClose: () => void;
   onCreate: (name: string) => void;
 }
@@ -112,7 +120,7 @@ export const BuildRow: React.FC<BuildRowProps> = ({
                   /* ⚠️ A SLOT REFUSES A TYPE THAT IS NOT ITS OWN, silently — the drag simply does
                      not land. An error message for a gesture nobody completed is noise. */
                   if (kind !== k || !id) return;
-                  onDrop({ id, kind, name: "", meta: "", unused: false });
+                  onDrop(k, id);
                 }}
               >
                 {held ? (
