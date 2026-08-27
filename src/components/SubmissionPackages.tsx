@@ -466,7 +466,7 @@ export const SubmissionPackages: React.FC = () => {
       {/* ⚠️ THIS PAGE CONFORMS (F-E, ruled). The masthead is the SHARED `PageHeader` with
           `variant="workspace"`, so the census in `workspacePageGrid.test.tsx` stays green by
           conforming rather than by gaining an entry, and no shared header file is touched. The
-          hero lives on as `PackagesHeroBand`, immediately beneath — everything the ref drew except
+          hero lived on as `PackagesHeroBand`, immediately beneath — everything the ref drew except
           the page title, which belongs to the header alone.
 
           ⚠️ AND THERE IS NO PRO MARKER ON THIS PAGE AT ALL (D1). The wax seal that rode
@@ -549,7 +549,8 @@ export const SubmissionPackages: React.FC = () => {
               builderCount={builderCount} trackingCount={trackingCount}
             />
             {/**
-              * ⚠️ NO HERO IN WORKSPACE STATE (D1). `PackagesHeroBand` rendered here — INSIDE the
+              * ⚠️ NO HERO IN WORKSPACE STATE (D1), AND THE COMPONENT IS NOW DELETED — it had no
+              * importer and carried a fourth `＋ New package`. `PackagesHeroBand` rendered here — INSIDE the
               * populated branch, not leaking from the teach one — so a writer with four materials
               * and two packages was still being asked "Fed up of guessing which materials are
               * landing with agents?". A page that has the thing should stop selling it. Measured
