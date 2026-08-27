@@ -66,10 +66,9 @@ export const ManuscriptsEmpty: React.FC<ManuscriptsEmptyProps> = ({ onAdd }) => 
   <>
     <SectionHeader title="Your shelf" meta="No manuscripts yet" />
 
+    {/* ⚠️ NO BANNER HERE EITHER. It was the same stripe, and a `data-slot` naming artwork nobody is
+        drawing is a dangling instruction. The three stage slots below are the page's commissions. */}
     <div className="msp-hero msp-emptyhero">
-      <div className="msp-banner" data-slot="ms-hero-banner" aria-hidden="true">
-        <span className="msp-artkey">ms-hero-banner</span>
-      </div>
       <div className="msp-heroin msp-emptyin">
         <h2 className="msp-emptyh">Nothing on the shelf yet.</h2>
         <p className="msp-emptylede">

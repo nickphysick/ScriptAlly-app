@@ -6,19 +6,19 @@
  *
  * Reference: `design-refs/manuscripts-book-profile.html`, `.hero`.
  *
- * ⚠️ THE COVER OVERLAPS THE BANNER BY DESIGN, and it does it with a negative margin against a
- * white keyline rather than by absolute positioning. Positioned, it would sit outside the flow and
- * a longer title would run underneath it; in flow it pushes the identity block along beside it and
- * the layout holds at any title length.
+ * ⚠️ NO BANNER, AND NO OVERHANG. The coloured stripe and the cover's negative-margin overlap cost
+ * about 190px of height for decoration, on a page whose whole point is the record beneath it. The
+ * cover now sits in the row, on the page ground, at 74×92 with a hairline — an object on a desk
+ * rather than a book cover pasted over a header.
  *
  * ⚠️ THE IDENTITY BLOCK IS `ManuscriptPlate` IN ITS `hero` VARIANT — not a second implementation.
  * The three inline editors (title, genre, word count) are that component's, with their popovers,
  * their validation and their spec; drawing the identity fresh here would have meant either
  * rebuilding all of it or dropping it.
  *
- * ⚠️ THE BANNER IS A COMMISSION SLOT AND SAYS SO. It carries a `data-slot` key and a mono corner
- * label, which is this repo's grammar for artwork that has not arrived — the same reason the
- * packages page's plates are dashed. When the drawing lands, the key and the gradient go together.
+ * ⚠️ AND THE COMMISSION SLOT WENT WITH IT, KEY AND ALL. A `data-slot` naming artwork nobody is
+ * drawing any more is a dangling instruction; the cover is the only illustration surface left here,
+ * and it keeps the plain tinted placeholder it already had. A real asset is a separate commission.
  */
 import React from "react";
 import { ManuscriptPlate, ManuscriptPlateEdit } from "./ManuscriptPlate";
@@ -27,9 +27,6 @@ import { HeroFact } from "../../lib/manuscriptProfile";
 import { PlateStats } from "../../lib/manuscriptPlate";
 import manuscriptIcon from "../../assets/shell/manuscript-icon.png";
 import "./bookProfile.css";
-
-/** The banner's commission key. Named, so the inventory and the page cannot drift apart. */
-export const HERO_BANNER_SLOT = "ms-hero-banner";
 
 export interface ManuscriptHeroProps {
   title: string;
@@ -52,11 +49,10 @@ export const ManuscriptHero: React.FC<ManuscriptHeroProps> = ({
   title, status, shelved, genres, wordCount, stats, facts, edit, tab, onTabChange, counts, actions,
 }) => (
   <div className="msp-hero">
-    <div className="msp-banner" data-slot={HERO_BANNER_SLOT} aria-hidden="true">
-      <span className="msp-artkey">{HERO_BANNER_SLOT}</span>
-    </div>
-
     <div className="msp-heroin">
+      {/* ⚠️ ONE ROW, VERTICALLY CENTRED. Cover · identity · actions — `align-items: center` rather
+          than `flex-start`, so a one-line title and a two-line one both sit against the cover's
+          middle instead of riding its top edge. */}
       <div className="msp-herorow">
         {/* ⚠️ THE SAME ASSET THE DASHBOARD AND THE PLATE RENDER, contained, no blend mode. Tracing
             it to SVG would fork one illustration in two. */}

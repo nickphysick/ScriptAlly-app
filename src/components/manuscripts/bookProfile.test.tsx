@@ -14,7 +14,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { ManuscriptHero, HERO_BANNER_SLOT } from "./ManuscriptHero";
+import { ManuscriptHero } from "./ManuscriptHero";
 import { heroFacts, queryingSinceMs, shelfMeta, profileDate } from "../../lib/manuscriptProfile";
 import { Query, QueryStatus } from "../../types";
 
@@ -124,11 +124,16 @@ describe("shelfMeta", () => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 describe("the hero", () => {
-  it("declares the banner as a commission slot rather than pretending it is artwork", () => {
+  /**
+   * ⚠️ THE BANNER IS GONE AND SO IS ITS KEY. It cost ~190px of height for decoration, and a
+   * `data-slot` naming artwork nobody is drawing any more is a dangling instruction — the failure
+   * mode is a future reader commissioning a piece for a surface that no longer exists.
+   */
+  it("draws no banner and leaves no commission key behind it", () => {
     const html = hero();
-    expect(html).toContain(`data-slot="${HERO_BANNER_SLOT}"`);
-    // The mono key is the only thing on the page that says the drawing has not arrived.
-    expect(html).toContain(`<span class="msp-artkey">${HERO_BANNER_SLOT}</span>`);
+    expect(html).not.toContain("msp-banner");
+    expect(html).not.toContain("ms-hero-banner");
+    expect(html).not.toContain("msp-artkey");
   });
 
   /**
@@ -148,11 +153,34 @@ describe("the hero", () => {
    * ⚠️ THE COVER OVERLAPS IN FLOW. A negative margin against a white keyline, never
    * `position: absolute` — positioned, it leaves the flow and a wrapped title runs underneath it.
    */
-  it("overlaps the banner with a margin, not by leaving the flow", () => {
+  /**
+   * ⚠️ NO OVERHANG. The negative margin existed to sit the cover on a banner; with the banner gone
+   * it would be a book hanging off the top of nothing. It sits in the row, on the page ground.
+   */
+  it("sits in the flow with no overhang and no keyline", () => {
     const rule = theRule(".msp-cover");
-    expect(rule).toMatch(/margin-top:\s*-\d+px/);
+    expect(rule).not.toMatch(/margin-top:\s*-/);
     expect(rule).not.toMatch(/position:\s*absolute/);
     expect(rule).toContain("flex: none");
+    expect(rule).toContain("width: 74px");
+    expect(rule).toContain("height: 92px");
+    // A hairline, not a 4px white keyline cut out of a banner.
+    expect(rule).toContain("border: 1px solid var(--hair)");
+  });
+
+  /** ⚠️ ONE ROW, CENTRED — a one-line title and a wrapped one both sit against the cover's middle. */
+  it("is one vertically centred row", () => {
+    expect(theRule(".msp-herorow")).toContain("align-items: center");
+  });
+
+  /**
+   * ⚠️ 1.3 IS THE PLAYFAIR FLOOR AND THE REF DRAWS 1.05. That value is tuned to a title somebody
+   * typed into a mockup; a real title is whatever a writer names their book, and "Murphy's Day Out"
+   * alone carries two descenders.
+   */
+  it("keeps the title above the descender floor", () => {
+    expect(parseFloat(theRule(".msv-plateband--hero .msv-platetitle").match(/line-height:\s*([\d.]+)/)![1]))
+      .toBeGreaterThanOrEqual(1.3);
   });
 
   it("draws exactly one book image — the hero's cover, not the plate's mark too", () => {
@@ -198,7 +226,7 @@ describe("the hero", () => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 describe("the stylesheet", () => {
-  for (const sel of [".msp-hero", ".msp-banner", ".msp-cover", ".msp-heroin", ".msp-herorow",
+  for (const sel of [".msp-hero", ".msp-cover", ".msp-heroin", ".msp-herorow",
                      ".msp-tabs", ".msp-tab", ".msv-plateband--hero"]) {
     it(`${sel} has exactly one base rule`, () => { theRule(sel); });
   }
@@ -219,7 +247,13 @@ describe("the stylesheet", () => {
     /* ⚠️ `@theme` COUNTS. Tailwind v4 emits that block's custom properties into `:root`, so
        `--font-sans` / `--font-mono` are as global as anything in it — verified by the check going
        red on exactly those two before this line existed. */
-    for (const blk of root.matchAll(/(?:^|\n)\s*(?::root|@theme)\s*\{([\s\S]*?)\n\}/g)) {
+    /* ⚠️ THE SHARED CONTAINER GRAMMAR COUNTS TOO. `--cap-outgoing/incoming/pro/reference` are
+       declared at `:root` in `containers/containers.css`, which this page imports through
+       `CappedCard`; excluding it reported four live tokens as undefined. A THEME class is still
+       excluded on purpose — it is not an ancestor of every page, which is the whole check. */
+    const shared = readFileSync(join(__dirname, "..", "containers", "containers.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const blk of (root + shared).matchAll(/(?:^|\n)\s*(?::root|@theme)\s*\{([\s\S]*?)\n\}/g)) {
       for (const m = blk[1].matchAll(/(--[a-z0-9-]+)\s*:/gi), it = m; ;) {
         const n = it.next();
         if (n.done) break;
@@ -234,7 +268,13 @@ describe("the stylesheet", () => {
 
   it("declares its one stand-in colour rather than borrowing a theme's", () => {
     expect(css).not.toContain("--sage-band");
-    expect(theRule(".msp-hero")).toContain("--msp-banner-a:");
+    /* The banner went; the cover keeps the stand-in, and the token was renamed with it rather than
+       left naming a surface that no longer exists. */
+    expect(css).not.toContain("--msp-banner-a");
+    /* ⚠️ AND IT IS DECLARED ON THE ELEMENT THAT READS IT. Losing this declaration is exactly how
+       the rename could have gone wrong: `var()` on an undefined token paints NOTHING, silently, and
+       the cover would have come out transparent through a green build. The sweep above caught it. */
+    expect(theRule(".msp-cover")).toContain("--msp-cover-a:");
   });
 });
 
