@@ -16,11 +16,11 @@ interface Want {
   initials: boolean; barText: boolean; rowSay: boolean; disc: number;
 }
 const WANT: Want[] = [
-  { name: "1 week",   days: 7,   cols: 7,  dense: 1, initials: true,  barText: true,  rowSay: true , disc: 34 },
-  { name: "2 weeks",  days: 14,  cols: 14, dense: 2, initials: true,  barText: true,  rowSay: true , disc: 34 },
-  { name: "1 month",  days: 31,  cols: 31, dense: 2, initials: false, barText: true,  rowSay: true , disc: 34 },
-  { name: "3 months", days: 91,  cols: 13, dense: 3, initials: false, barText: false, rowSay: true,  disc: 22 },
-  { name: "6 months", days: 182, cols: 7,  dense: 4, initials: false, barText: false, rowSay: true,  disc: 22 },
+  { name: "1 week",   days: 7,   cols: 7,  dense: 1, initials: true,  barText: true ,  rowSay: true , disc: 34 },
+  { name: "2 weeks",  days: 14,  cols: 14, dense: 2, initials: true,  barText: true ,  rowSay: true , disc: 34 },
+  { name: "1 month",  days: 31,  cols: 31, dense: 2, initials: false, barText: true ,  rowSay: true , disc: 34 },
+  { name: "3 months", days: 91,  cols: 13, dense: 3, initials: false, barText: true , rowSay: true,  disc: 22 },
+  { name: "6 months", days: 182, cols: 7,  dense: 4, initials: false, barText: true , rowSay: true,  disc: 22 },
 ];
 
 test("Phase 5 — four widths, five ranges, one table", async ({ page }) => {
@@ -54,7 +54,11 @@ test("Phase 5 — four widths, five ranges, one table", async ({ page }) => {
           cols: Number(cs.getPropertyValue("--tl-cols").trim()),
           headers: tl.querySelectorAll(".tl-dh").length,
           initials: tl.querySelectorAll(".tl-dw").length,
-          barText: lbl ? getComputedStyle(lbl).display !== "none" : null,
+          /* ⚠️ A COUNT ACROSS THE BOARD, NOT THE FIRST LABEL. `barFit` decides per BAR now, so
+             the first one may legitimately be too narrow to speak — reading it would make this
+             column a fact about whichever bar happened to be first. */
+          barText: [...tl.querySelectorAll(".tl-seg .tl-lbl")]
+            .filter((e) => getComputedStyle(e).display !== "none").length,
           rowSays: tl.querySelectorAll(".tl-rowsay").length,
           disc: node ? Math.round(node.getBoundingClientRect().width) : null,
           spines,
@@ -75,7 +79,17 @@ test("Phase 5 — four widths, five ranges, one table", async ({ page }) => {
       expect(m.cols, `${say} — drawn divisions`).toBe(w.cols);
       expect(m.headers, `${say} — a header per division`).toBe(w.cols);
       expect(m.initials > 0, `${say} — weekday initials`).toBe(w.initials);
-      if (m.barText !== null) expect(m.barText, `${say} — bar text`).toBe(w.barText);
+      /* ⚠️ EVERY RANGE MAY SPEAK NOW (density pack, Phase 1). This column read `false` at three
+         and six months, which was the TIER's guess written down as a property of the range;
+         `barFit` measures each bar instead. The column stays `true` throughout rather than being
+         deleted, because a bar that stops being ABLE to carry a label is still a regression and
+         this is where it would show. */
+      /* ⚠️ GREATER THAN ZERO AT EVERY RANGE — the regression this pack exists for. The column
+         read `false` at three and six months, which was the TIER's guess written down as a
+         property of the range; `barFit` measures each bar instead. Kept as a column rather than
+         deleted, because a range that stops being ABLE to speak is still a regression and this is
+         where it would show. */
+      expect(m.barText > 0, `${say} — ${m.barText} bars carry a label`).toBe(w.barText);
       /* ⚠️ THE HEAD SPEAKS AT EVERY RANGE NOW (grouped pack, Phase 5), so this column is `true`
          throughout and the table keeps it rather than dropping it. It read false at the three day
          grains because the head's text used to be the BAR's label, lifted up only where a bar was

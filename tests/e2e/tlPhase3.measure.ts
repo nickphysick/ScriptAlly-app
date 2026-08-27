@@ -32,7 +32,12 @@ test("Phase 3 — five ranges, four density tiers", async ({ page }) => {
         headers: document.querySelectorAll(".tl-dh").length,
         weekdayInitials: document.querySelectorAll(".tl-dw").length,
         bounds: document.querySelectorAll(".tl-cell.bound").length,
-        barText: lbl ? getComputedStyle(lbl).display : (seg ? "no-label" : "no-bar"),
+        /* ⚠️ WHO hid it, not whether it is hidden. `barFit` hides a label by adding `.narrow` to
+           the BAR; a tier hid it by setting `display: none` on the label itself. Only the second
+           is the fault this pack retired, and only this distinction can tell them apart. */
+        barText: !lbl ? (seg ? "no-label" : "no-bar")
+          : getComputedStyle(lbl).display === "none" && !seg!.classList.contains("narrow")
+            ? "tier-hidden" : getComputedStyle(lbl).display,
         rowSays: document.querySelectorAll(".tl-rowsay").length,
         /* retired in the grouped pack — counted so its return is a failure, not a surprise */
         spine: document.querySelectorAll(".tl-spine").length,
@@ -58,10 +63,18 @@ test("Phase 3 — five ranges, four density tiers", async ({ page }) => {
     expect(m.rowSays, `${STOPS[i]}: no row head says anything`).toBeGreaterThan(0);
     /* weekday initials drop at a month and beyond */
     if (i >= 2) expect(m.weekdayInitials, `${STOPS[i]}: weekday initials should have dropped`).toBe(0);
-    /* bar text leaves at 3 months, and the row head takes the sentence */
-    if (i >= 3 && m.barText !== "no-bar" && m.barText !== "no-label") {
-      expect(m.barText, `${STOPS[i]}: bar text did not leave`).toBe("none");
-    }
+    /**
+     * ⚠️ THE RANGE NO LONGER DECIDES WHETHER A BAR SPEAKS (density pack, Phase 1), so this stops
+     * asserting that it does. It required `display: none` at three months and beyond, which was
+     * the tier's guess; `barFit` measures instead — long form, then short, then bare — and a wide
+     * bar at six months may legitimately carry words.
+     *
+     * ⚠️ THE LAW THAT SURVIVES IS THE ONE WORTH KEEPING: whatever is shown is one of the bar's
+     * OWN two forms, never a truncation. That is asserted in `tlBarCopy.measure.ts` across every
+     * range, so this file states the retirement rather than restating the claim.
+     */
+    expect(m.barText, `${STOPS[i]}: a range is deciding whether a bar speaks again`)
+      .not.toBe("tier-hidden");
   }
   console.log("console errors:", errs.length ? JSON.stringify(errs.slice(0, 3)) : "none");
   expect(errs).toEqual([]);

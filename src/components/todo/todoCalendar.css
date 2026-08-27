@@ -197,11 +197,20 @@
 .tl.dense3 .tl-node[data-marker], .tl.dense4 .tl-node[data-marker] {
   box-shadow: 0 0 0 2px var(--ws-ground, #f7f4ee);
 }
-/* ⚠️ AT THREE MONTHS AND BEYOND A BAR IS SHAPE, NOT A LABEL. The text does not shrink and it is
-   not truncated — it LEAVES, and the row head says the sentence instead (see `.tl-rowsay`). A
-   half-legible word inside a 9px bar is worse than no word. */
-.tl.dense3 .tl-seg .tl-lbl, .tl.dense4 .tl-seg .tl-lbl,
-.tl.dense3 .tl-seg .tl-cnt, .tl.dense4 .tl-seg .tl-cnt { display: none; }
+/* ⚠️ THE TIER NO LONGER DECIDES WHETHER A BAR SPEAKS (density pack, Phase 1). This hid the bar
+   label and the end label at three months and beyond, on the reasoning that "a half-legible word
+   inside a 9px bar is worse than no word" — which is true, and is a claim about a bar's WIDTH that
+   was being answered from its RANGE. `barFit` answers it by measuring: long form, then short form,
+   then bare. Two mechanisms were solving one problem and the guess was winning.
+
+   ⚠️ AND IT DID NOT MERELY WIN — IT CORRUPTED THE OTHER ONE FIRST. `scrollWidth` on a
+   `display: none` element is 0, so `fitLabel(clientWidth, 0, 0)` judged every bar wider than 26px
+   to hold its long form comfortably, `.narrow` was never applied, and the tier hid the label
+   anyway. A probe reading `.narrow` would have reported a board where every label fits.
+
+   ⚠️ THE GEOMETRY TIERS ABOVE STAY, because they answer questions `barFit` does not ask: how big a
+   marker is, and whether a shrunken one still has an edge against the bar it sits on. A range is
+   the right input for both. */
 /* ⚠️ ONE CLASS OWNS THE COLUMNS, AND IT IS NOT `.tl-head, .tl-row`. Both the header strip and
    every row need the identical eight-track template, and the obvious spelling is a grouped
    selector — but a grouped selector whose text CONTAINS another selector's is this repo's

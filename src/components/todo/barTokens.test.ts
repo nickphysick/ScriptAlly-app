@@ -10,6 +10,47 @@ const decls = css.replace(/\/\*[\s\S]*?\*\//g, "");
 
 const STATES = ["theirs", "theirsq", "nudged", "y1", "y2", "y3", "quiet", "offer", "closed", "task"];
 
+describe("⚠️ the tiers answer geometry, never whether a bar speaks (density pack, Phase 1)", () => {
+  it("no tier hides or shrinks a label, an end label or a note", () => {
+    /* ⚠️ SELECTORS SPAN LINES, so this reads whole rules rather than lines. The rule this pack
+       deleted was found only on a second attempt because the first sweep could not cross a
+       newline — it did not error, it under-reported, which is the answer that would have made
+       the whole pack look unnecessary. */
+    const rules = [...decls.matchAll(/([^{}]*)\{([^}]*)\}/g)]
+      .map((m) => [m[1].replace(/\s+/g, " ").trim(), m[2]] as const)
+      .filter(([sel]) => /dense[1-4]/.test(sel));
+    expect(rules.length, "no tier rules at all — the extraction is broken, not the sheet").toBeGreaterThan(0);
+    for (const [sel, body] of rules) {
+      for (const target of ["tl-lbl", "tl-cnt", "tl-tail"]) {
+        if (!sel.includes(target)) continue;
+        expect(body, `a tier suppresses ${target}: ${sel}`).not.toMatch(/display:\s*none|font-size:\s*0/);
+      }
+    }
+  });
+
+  it("⚠️ the tiers that remain are geometry, and each is named", () => {
+    const sels = [...decls.matchAll(/([^{}]*)\{[^}]*\}/g)]
+      .map((m) => m[1].replace(/\s+/g, " ").trim())
+      .filter((sel) => /dense[1-4]/.test(sel));
+    /* marker size, and the halo that gives a shrunken marker an edge against its own bar */
+    expect(sels.every((s) => s.includes(".tl-node")),
+      `a tier reaches something that is not a marker: ${sels.join(" | ")}`).toBe(true);
+  });
+
+  it("⚠️ bar height comes from `--bar-h` and nothing else", () => {
+    const rules = [...decls.matchAll(/([^{}]*)\{([^}]*)\}/g)]
+      .map((m) => [m[1].replace(/\s+/g, " ").trim(), m[2]] as const);
+    const sets = rules.filter(([, b]) => /--bar-h\s*:/.test(b)).map(([s]) => s);
+    expect(sets, "more than one rule declares the bar height").toEqual([".tl-row"]);
+    /* and nothing gives a segment a height of its own */
+    for (const [sel, body] of rules) {
+      if (!sel.includes(".tl-seg") || sel.includes(".d")) continue;
+      const h = body.match(/(?:^|;|\s)height\s*:\s*([^;]+)/);
+      if (h) expect(h[1].trim(), `${sel} sets its own height`).toBe("var(--bar-h)");
+    }
+  });
+});
+
 describe("⚠️ urgency is breath, and reduced motion carries the same fact (Phase 3)", () => {
   it("the pulse is on long-standing, and no longer on the waiting bar", () => {
     expect(decls, "long-standing does not breathe").toMatch(/\.tl-seg\.s-y3\s*\{[^}]*animation:\s*tlUrge\s/);
