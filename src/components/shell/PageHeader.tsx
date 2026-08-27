@@ -82,7 +82,19 @@ export interface PageHeaderProps {
    */
   variant?: "full" | "workspace";
   title: string;
-  description?: string;
+  /**
+   * ⚠️ A NODE, NOT A STRING, SINCE THE PACKAGES PAGE STATES ITS SCOPE HERE.
+   *
+   * `builder-refined.html` puts `for **Murphy's Day Out** · Switch book` in this slot — a sentence
+   * with a name in it and a deferral to the sidebar's switcher — which a `string` cannot carry.
+   * The house law is that a type which cannot represent an offered choice is extended rather than
+   * worked around; the alternative was a second slot in the same position, which is how one line
+   * comes to have two owners.
+   *
+   * ⚠️ ADDITIVE, AND PROVED SO: a `string` IS a `ReactNode`, so every existing call site compiles
+   * and renders byte-identically. The two render sites below already wrap it in an element.
+   */
+  description?: React.ReactNode;
   /* ⚠️ THERE IS NO `count` PROP — the slot is DELETED from the variant (amendment 7), not merely
      unused. The plate is mark + title + description + actions. The two pages that had one had
      their figure REHOMED rather than dropped; see the notes at those call sites. Deleting the prop

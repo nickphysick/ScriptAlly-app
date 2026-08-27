@@ -858,3 +858,12 @@
    border, no radius, no shadow — which is the whole of what step 1 did; a sage edge on one page is
    card treatment, and the acceptance matrix compares every masthead against every other. Its
    `:not(.wsh--scrolled)` guard is dead too: nothing emits that class any more. */
+
+/**
+ * The masthead's scope line (D6) — `for **Murphy's Day Out**`, per `builder-refined.html` `.scope`.
+ *
+ * ⚠️ IT IS CONTEXT, NOT A CONTROL. Every letter, synopsis, version and package on this page belongs
+ * to one manuscript, and the page never said which. The ref draws a `Switch book` affordance beside
+ * it; that is deliberately not built — see the note at the call site.
+ */
+.pkgw-scopebk { font-weight: 600; color: var(--pkg-ink); }

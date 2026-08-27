@@ -39,6 +39,7 @@ import { MaterialsBand } from "./packages/MaterialsBand";
 import { packageHolders, packagedQueries } from "../lib/packagesOverview";
 import { MaterialModal, MaterialDraftResult } from "./packages/MaterialModal";
 import { PackageModal, PackageDraftResult } from "./packages/PackageModal";
+import { PackageTabs, type PackageTabKey } from "./packages/PackageTabs";
 import { canBuildPackage, createPayload, updatePayload } from "../lib/materialDraft";
 import { trackingTotals } from "../lib/packageTracking";
 import { deleteField } from "firebase/firestore";
@@ -73,10 +74,17 @@ export const SubmissionPackages: React.FC = () => {
   /* Which surface is showing. Component-local UI state by design — deliberately NOT persisted and
      deliberately not a route, so you always land on the overview.
 
-     ⚠️ THE TAB STRIP IS GONE AND THIS IS WHAT REPLACED IT (restructure D1). `PackageTab` was two
-     values and this is three, because the overview is a real destination rather than a third tab:
-     the rail IS the navigation now, and Workshop and Analytics are what it opens. `PackageTabs`
-     itself is deleted — it outlived this page by one route, and that route went too. */
+     ⚠️ THE OLD TAB STRIP IS GONE AND THIS IS WHAT REPLACED IT (restructure D1). `PackageTab` was
+     two values and this is three, because the overview is a real destination rather than a third
+     tab: the rail was the navigation, and Workshop and Analytics were what it opened.
+
+     ⚠️ AND A `PackageTabs` EXISTS AGAIN, UNDER THE SAME NAME AND MEANING SOMETHING ELSE. This note
+     used to end "`PackageTabs` itself is deleted", which is no longer true and would have sent the
+     next reader looking for a contradiction. What was deleted was a strip of VIEWS of one
+     workspace — Workshop, Analytics, overview — retired because the rail had become the way
+     between them. What exists now is a split of the PAGE into Builder and Tracking: two different
+     jobs, not two views of one. The name is reused because it is the honest name for both; the
+     thing is not. */
   /* ⚠️ THE `view` STATE IS GONE, AND SO ARE BOTH BRANCHES IT SWITCHED (D9, R5's whole list).
      Materials open the modal, packages open the builder, and Tracking is a dashboard on the stage —
      so nothing on this page could set `view` to anything but "overview" any more, which made the
@@ -222,6 +230,38 @@ export const SubmissionPackages: React.FC = () => {
     }
   };
 
+  /**
+   * ⚠️ TAB STATE IS LOCAL — no route, no URL param, no persistence. The same law the book profile's
+   * tabs state; a tab that wrote to the URL would turn a within-page toggle into navigation the
+   * shell has to model.
+   */
+  const [tab, setTab] = useState<PackageTabKey>("builder");
+
+  /**
+   * `Builder 3 · 8` — packages built, then everything the rail holds (D2). Both refs agree: 3
+   * packages against 3 letters + 2 synopses + 3 versions in `builder-refined`, 4 against 5 in
+   * `packages-tabs`.
+   */
+  const builderCount = `${msPackages.length} · ${msVersions.length + msBookVersions.length}`;
+
+  /**
+   * `18 SENT`, or **null when nothing has been sent** — which is what makes the Tracking tab absent
+   * rather than empty (D3), and what sends a writer who is mid-setup back to Builder if the last
+   * send is ever undone.
+   *
+   * ⚠️ IT COUNTS SENDS, NOT QUERIES CARRYING A PACKAGE. Tracking's three panels all answer
+   * questions about packages that have gone out, so the figure that decides whether the tab exists
+   * has to be the one those panels are about.
+   */
+  const sentCount = useMemo(
+    () => msQueries.filter((q) => !!q.packageId && msPackages.some((p) => p.id === q.packageId)).length,
+    [msQueries, msPackages],
+  );
+  const trackingCount = sentCount > 0 ? `${sentCount} sent` : null;
+
+  /* ⚠️ AND A TAB THAT VANISHES MUST NOT STRAND THE READER ON IT. */
+  useEffect(() => { if (trackingCount === null && tab === "tracking") setTab("builder"); }, [trackingCount, tab]);
+
   const savePackageDraft = async (d: PackageDraftResult): Promise<string | null> => {
     if (!msId) return "No manuscript is selected.";
     const fields = {
@@ -352,9 +392,33 @@ export const SubmissionPackages: React.FC = () => {
       <WorkspacePageGrid className="pkgw-wpg" scrollLabel="Package Workshop" masthead={
         <PageHeader
           variant="workspace"
-          mark="packages"
+          /* ⚠️ NO MARK ON THIS PAGE — the illustration IS the page's picture, and a 52px monoline
+             parcel opposite a drawing of parcels is the same subject twice in two hands. It is also
+             the degrade path rather than commissioned art: `packages` has no `src` in the mark
+             registry, so what rendered here was the fallback. Part of the trial's carve-out. */
           title="Submission packages"
-          description="Bundle your materials once, then send them without rebuilding each time."
+          /**
+           * ⚠️ THE SCOPE, AND IT IS CONTEXT RATHER THAN A CONTROL (D6). Every letter, synopsis,
+           * version and package on this page belongs to one manuscript, and until now the page
+           * never said which — the reader had to remember. `Switch book` DEFERS to the sidebar's
+           * switcher rather than offering a second one: the selector that used to sit here was
+           * deleted as a duplicate of it, and reinstating it under a different name is the same
+           * mistake wearing a sentence.
+           *
+           * ⚠️ `Switch book` IS IN THE REF AND IS DELIBERATELY NOT BUILT (F-BM), for two reasons.
+           * The prompt places the switcher in the sidebar; it is in the top BAR (`ShellScope`,
+           * `.sv2-scope`), where it is always on screen on every page — so a reader who wants
+           * another book is already looking at the control. And the only way to trigger it from
+           * here is a cross-component DOM click on that class, whose failure mode is a control
+           * that looks live and does nothing. This repo's standing rule is that a dead affordance
+           * is worse than an absent one: it leaves the reader believing the app is broken rather
+           * than knowing where to go. The scope stays what D6 actually asks it to be — context.
+           *
+           * ⚠️ AND IT REPLACES THE DESCRIPTION RATHER THAN JOINING IT. `builder-refined.html` puts
+           * the scope in that slot; `packages-tabs.html` keeps the old sentence there. The former
+           * is the normative ref, and two lines under one title is how a masthead starts growing.
+           */
+          description={activeMs ? <>for <b className="pkgw-scopebk">{activeMs.title}</b></> : undefined}
           /* ⚠️ NO ACTIONS SLOT — AND THE SHARED MASTHEAD ENFORCES THAT WITH A THROW, not a comment.
              `PageHeader` refuses `actions` on `variant="workspace"`: a masthead with nothing
              actionable never needs restoring mid-visit, so it can scroll away on a scrolling page
@@ -406,6 +470,10 @@ export const SubmissionPackages: React.FC = () => {
               so it scrolls with the content exactly as the masthead above it now does. */}
           {msVersions.length + msPackages.length > 0 ? (
             <>
+            <PackageTabs
+              active={tab} onChange={setTab}
+              builderCount={builderCount} trackingCount={trackingCount}
+            />
             {/**
               * ⚠️ NO HERO IN WORKSPACE STATE (D1). `PackagesHeroBand` rendered here — INSIDE the
               * populated branch, not leaking from the teach one — so a writer with four materials
@@ -438,6 +506,12 @@ export const SubmissionPackages: React.FC = () => {
               * correct — they are a first-time user of a feature they now have no record in. A
               * `hasSeenPackages` flag would strand them on a workspace with nothing to show.
               */}
+              {/* ⚠️ BUILDER AND TRACKING ARE TWO JOBS, NOT TWO VIEWS. The ledger and the shelf are
+                  what a writer ASSEMBLES with; the three panels are what they READ afterwards. The
+                  split is here rather than in a route because it is a within-page toggle — see the
+                  note on `tab` above. */}
+              <div role="tabpanel" id="pkgt-panel-builder" aria-labelledby="pkgt-tab-builder"
+                   hidden={tab !== "builder"}>
               <PackagesBand
                 packages={msPackages}
                 versions={msVersions}
@@ -511,6 +585,14 @@ export const SubmissionPackages: React.FC = () => {
               onToggleArchived={() => setShowArchived((v) => !v)}
               onRestore={restoreVersion}
             />
+              </div>
+              {/* ⚠️ MOVED WHOLESALE, NOT REDESIGNED (D4). The three panels are byte-identical to
+                  what stood on the single-page version; this pack relocates them and nothing else.
+                  ⚠️ AND IT IS NOT RENDERED AT ALL BELOW ONE SEND (D3) — `trackingCount` is null
+                  there, so the tab does not exist and neither does its panel. */}
+              {trackingCount !== null && (
+              <div role="tabpanel" id="pkgt-panel-tracking" aria-labelledby="pkgt-tab-tracking"
+                   hidden={tab !== "tracking"}>
               <TrackingBand
                 packages={msPackages}
                 versions={msVersions}
@@ -523,6 +605,8 @@ export const SubmissionPackages: React.FC = () => {
                 agentName={(id) => agentLabel(agents.find((a) => a.id === id) ?? null, AGENT_NOT_RECORDED)}
                 onLogQuery={() => navigate("/queries")}
               />
+              </div>
+              )}
               <FootnoteBand />
             </>
           ) : (

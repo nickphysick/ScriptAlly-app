@@ -1,0 +1,47 @@
+/**
+ * The tab rail — `design-refs/builder-refined.html`, `.tabsrow` / `.tab`.
+ *
+ * ⚠️ THE UNDERLINE IS AN `::after` INSET BY 16px, not a border on the button. A border would run
+ * the full width of the padding box and read as a box edge; the ref's rule underlines the WORD.
+ */
+.pkgt-row {
+  display: flex;
+  border-bottom: 1px solid var(--pkgo-hairline);
+  /* left-aligned at the body's gutter (D1) — the page's own padding, not a second inset */
+  padding: 0;
+  margin-bottom: 18px;
+}
+.pkgt-tab {
+  position: relative;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-serif);
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--pkg-muted);
+  padding: 10px 20px 11px;
+}
+.pkgt-tab:first-child { padding-left: 0; }
+.pkgt-tab .pkgt-c {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-left: 7px;
+  opacity: 0.75;
+}
+.pkgt-tab--on { color: var(--pkg-ink); }
+.pkgt-tab--on::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 16px; bottom: -1px;
+  height: 2px;
+  background: var(--pkg-burg);
+  border-radius: 2px;
+}
+/* ⚠️ THE FIRST TAB'S UNDERLINE STARTS AT THE GUTTER, because its padding-left is zero — the ref
+   insets by 16 on both sides of a padded tab, and the same inset on an unpadded one would leave
+   the underline floating away from the word it belongs to. */
+.pkgt-tab:not(:first-child).pkgt-tab--on::after { left: 16px; }
+.pkgt-tab:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
