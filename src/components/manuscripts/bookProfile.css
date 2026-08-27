@@ -47,7 +47,8 @@
   cursor: pointer;
   color: var(--burg);
   font-size: 15px;
-  /* ⚠️ SAFE AT 1 — a chevron glyph has no descender. */
+  /* ⚠️ SAFE AT 1 — a chevron glyph has no descender. The sheet's other sanctioned exception to the
+     Playfair floor; the register is at `.msv-plateband--hero .msv-platetitle`. */
   line-height: 1;
   display: flex;
   align-items: center;
@@ -121,8 +122,13 @@
 /**
  * ⚠️ 1.3 IS THE FLOOR AND THE REF DRAWS 1.25. Mixed-case Playfair below 1.3 crops its descenders,
  * and a real title is whatever a writer names their book — the ref's value is tuned to the one
- * string somebody typed into it. Third time this has come up on this page; the size follows the ref
- * at 24px, the leading does not.
+ * string somebody typed into it. The size follows the ref at 24px; the leading does not.
+ *
+ * ⚠️ REFUSED THREE TIMES NOW, WHICH IS WHY IT IS WRITTEN DOWN RATHER THAN RE-ARGUED. This sheet has
+ * exactly TWO sanctioned exceptions to the floor and both are glyphs with no descender at all:
+ * `.msp-qmark` at 0.8 and `.msp-chev` at 1. The test is the GLYPHS, never the family — if the text
+ * can contain a lowercase descender, the floor applies. Anything proposing a third exception is
+ * proposing to crop a writer's title.
  */
 .msv-plateband--hero .msv-platetitle { font-size: 24px; line-height: 1.3; margin: 0; }
 
@@ -262,7 +268,8 @@
   font-family: var(--font-serif);
   font-size: 86px;
   /* ⚠️ SAFE BELOW 1.3 — a quotation mark has no descender, and this is the exception the Playfair
-     floor exists to allow: the rule is about mixed-case text, not about every serif glyph. */
+     floor exists to allow: the rule is about mixed-case text, not about every serif glyph. One of
+     the sheet's two sanctioned exceptions; the register is at `.msv-plateband--hero .msv-platetitle`. */
   line-height: 0.8;
   color: var(--burg);
   opacity: 0.28;
