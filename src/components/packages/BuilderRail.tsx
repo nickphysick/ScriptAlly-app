@@ -15,6 +15,7 @@
  * handler; a picker that only accepts a drag is the trap this repo has recorded once already.
  */
 import React from "react";
+import { RAIL_EMPTY } from "../../lib/builderRail";
 import type { RailChip, RailKind, RailSection } from "../../lib/builderRail";
 import "./builderRail.css";
 
@@ -47,6 +48,19 @@ export const BuilderRail: React.FC<BuilderRailProps> = ({
           <button type="button" className="bldr-add" onClick={() => onAdd(sec.kind)}>＋ Add</button>
         </div>
         <div className="bldr-items">
+          {/**
+            * ⚠️ AN EMPTY SECTION INVITES ITS FIRST, RATHER THAN SHOWING A HEAD OVER NOTHING (D4).
+            *
+            * ⚠️ AND ALL THREE GET IT, because all three had the gap. The brief asked for the
+            * Versions section to "match how the other two behave when empty" — they behaved the
+            * same way, which is to say they rendered a heading, a zero and a blank. Fixing the
+            * instance that was seen would have left two-thirds of the fault in place.
+            */}
+          {sec.chips.length === 0 && (
+            <button type="button" className="bldr-radd" onClick={() => onAdd(sec.kind)}>
+              {RAIL_EMPTY[sec.kind]}
+            </button>
+          )}
           {sec.chips.map((c) => (
             <div
               key={c.id}

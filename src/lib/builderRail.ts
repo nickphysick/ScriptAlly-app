@@ -51,6 +51,23 @@ export const RAIL_HEADING: Record<RailKind, string> = {
  * two do not: it writes to the MANUSCRIPT. A writer who adds one here and later finds it on the
  * book profile should have been told, not surprised.
  */
+/**
+ * What an empty section invites (D4).
+ *
+ * ⚠️ THE REF GIVES THE TREATMENT AND NOT THE WORDS. `.radd` is styled in `builder-refined.html`
+ * — dashed, centred, italic Playfair in burgundy — and rendered ZERO times, because every section
+ * in its fixture has chips. So the shape is the ref's and the sentence is a decision (F-BO).
+ *
+ * ⚠️ AND EACH SECTION NAMES ITS OWN NOUN. One shared "Add your first" would make the reader look up
+ * to the heading to find out what they are being offered, in the one state where the section has
+ * nothing else in it to say.
+ */
+export const RAIL_EMPTY: Record<RailKind, string> = {
+  let: "Add your first covering letter",
+  syn: "Add your first synopsis",
+  ver: "Add your first version",
+};
+
 export const VERSIONS_NOTE =
   "Versions belong to the manuscript. Adding one here writes it there too.";
 

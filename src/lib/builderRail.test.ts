@@ -4,7 +4,7 @@
  * count, and an unused one must state its absence in words rather than as two zeros.
  */
 import { describe, it, expect } from "vitest";
-import { builderRail, versionMetaLine, RAIL_KINDS, RAIL_HEADING, VERSIONS_NOTE } from "./builderRail";
+import { builderRail, versionMetaLine, RAIL_KINDS, RAIL_HEADING, VERSIONS_NOTE, RAIL_EMPTY } from "./builderRail";
 import { ComponentType, QueryStatus } from "../types";
 import type { Activity, BookVersion, ManuscriptVersion, Query, SubmissionPackage } from "../types";
 
@@ -100,5 +100,33 @@ describe("versionMetaLine", () => {
 
   it("⚠️ a version IN packages is never labelled Latest — the clause belongs to the absence", () => {
     expect(versionMetaLine(2, 1, true)).toBe("2 packages · held by 1 agent");
+  });
+});
+
+describe("an empty section invites its first (D4)", () => {
+  it("⚠️ ALL THREE sections have an empty state, because all three had the gap", () => {
+    /* The brief asked for Versions to match the other two; they rendered a heading, a zero and a
+       blank. Fixing the instance that was seen would have left two-thirds of the fault. */
+    expect(Object.keys(RAIL_EMPTY).sort()).toEqual(["let", "syn", "ver"]);
+  });
+
+  it("⚠️ each names its own noun", () => {
+    /* One shared "Add your first" makes the reader look up to the heading to find out what they
+       are being offered, in the one state where the section has nothing else to say. */
+    expect(RAIL_EMPTY.let).toContain("covering letter");
+    expect(RAIL_EMPTY.syn).toContain("synopsis");
+    expect(RAIL_EMPTY.ver).toContain("version");
+    expect(new Set(Object.values(RAIL_EMPTY)).size, "three distinct sentences").toBe(3);
+  });
+
+  it("⚠️ the invitation is not a count — an empty section never states a zero in prose", () => {
+    for (const v of Object.values(RAIL_EMPTY)) expect(v).not.toMatch(/\b0\b|\bno\b/i);
+  });
+
+  it("the versions note survives the empty state (D5)", () => {
+    /* It is what tells a writer what the section is FOR, which matters most when it is empty. */
+    const empty = builderRail([], [], [], [], []);
+    expect(empty[2].note).toBe(VERSIONS_NOTE);
+    expect(empty.map((s) => s.chips.length)).toEqual([0, 0, 0]);
   });
 });

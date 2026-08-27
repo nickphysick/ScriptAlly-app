@@ -117,3 +117,25 @@
   border: 1px solid var(--pkgo-hairline-soft); border-radius: 7px; outline: none; }
 .bldr-vadd select { flex: 0 0 auto; font-size: 11px; }
 .bldr-vadd .bldr-btn { flex: 0 0 auto; padding: 6px 10px; font-size: 11px; }
+
+/**
+ * An empty section's invitation (D4) — the ref's `.radd`, which it styles and never renders.
+ *
+ * ⚠️ DASHED, WHICH ON THIS PAGE MEANS "NOT YET". The same grammar the build row's closed line uses:
+ * a solid bordered box would read as a chip that failed to load.
+ */
+.bldr-radd {
+  border: 1px dashed var(--pkgt-let-edge);
+  border-radius: 9px;
+  background: transparent;
+  padding: 8px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 12.5px;
+  color: var(--pkg-burg);
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+}
+.bldr-radd:hover { background: var(--pkg-fill); }
+.bldr-radd:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
