@@ -545,4 +545,95 @@ if ((await getDoc(MSREF)).exists()) {
   console.log("  ⚠️  seed-ms-1 missing — run the seed first");
 }
 
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   STORAGE RULES — the same probe treatment, for the caps that are real controls.
+
+   ⚠️ "DENIED BY A RULE" AND "THERE IS NO BUCKET" ARE DIFFERENT FACTS AND MUST NOT COLLAPSE. Until
+   somebody clicks Get Started in the Firebase console, every call here fails — and a probe that
+   printed DENIED for all of them would report a perfectly working allowlist on a project with no
+   Storage at all. The unprovisioned case is detected once, up front, and says so.
+
+   ⚠️ AND THE FILE COUNT IS NOT PROBED, BECAUSE IT IS NOT ENFORCED. 25 MB and the content type are
+   in storage.rules; 20 files per manuscript is a UI limit. A probe case for it would imply a
+   control that does not exist.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+const { getStorage, ref: sref, uploadBytes, deleteObject, getDownloadURL } =
+  await import("firebase/storage");
+
+console.log("\nstorage rules — the caps that are real controls:");
+const storage = getStorage(app);
+const apath = (u, name) => `users/${u}/manuscripts/seed-ms-1/attachments/${name}`;
+const small = new Uint8Array(1024);
+
+/* One probe first, to tell an absent bucket from a working allowlist. */
+let storageLive = true;
+try {
+  await uploadBytes(sref(storage, apath(uid, "probe-warmup.pdf")), small, { contentType: "application/pdf" });
+  await deleteObject(sref(storage, apath(uid, "probe-warmup.pdf"))).catch(() => {});
+} catch (e) {
+  const code = e?.code ?? "";
+  if (code === "storage/unauthorized" || code === "storage/unauthenticated") {
+    console.log("  ⚠️  bucket reachable but the warm-up was DENIED — rules may predate this commit");
+  } else {
+    storageLive = false;
+    console.log(`  ⚠️  STORAGE NOT REACHABLE (${code || e?.message?.slice(0, 60)}) — is it set up in the console?`);
+    console.log("      Every case below would print DENIED for the wrong reason, so they are skipped.");
+  }
+}
+
+if (storageLive) {
+  const sattempt = async (label, expect, fn, undo) => {
+    try {
+      await fn();
+      if (undo) await undo().catch(() => {});
+      console.log(`  ${expect === "ACCEPT" ? "✅" : "⚠️ "} ${label.padEnd(38)} ACCEPTED${expect === "DENY" ? "  ← EXPECTED DENIAL" : ""}`);
+    } catch (e) {
+      const denied = e?.code === "storage/unauthorized";
+      console.log(`  ${denied && expect === "DENY" ? "❌" : "⚠️ "} ${label.padEnd(38)} ${denied ? "DENIED" : "ERROR: " + (e?.code ?? e?.message?.slice(0, 60))}`);
+    }
+  };
+
+  await sattempt("valid pdf, own path", "ACCEPT",
+    () => uploadBytes(sref(storage, apath(uid, "probe.pdf")), small, { contentType: "application/pdf" }),
+    () => deleteObject(sref(storage, apath(uid, "probe.pdf"))));
+
+  /* One byte over, so the BOUNDARY is probed rather than "huge is refused". */
+  await sattempt("26 MB (DENIED)", "DENY",
+    () => uploadBytes(sref(storage, apath(uid, "probe-big.pdf")),
+      new Uint8Array(25 * 1024 * 1024 + 1), { contentType: "application/pdf" }),
+    () => deleteObject(sref(storage, apath(uid, "probe-big.pdf"))));
+
+  await sattempt("content type off the allowlist (DENIED)", "DENY",
+    () => uploadBytes(sref(storage, apath(uid, "probe.zip")), small, { contentType: "application/zip" }),
+    () => deleteObject(sref(storage, apath(uid, "probe.zip"))));
+
+  await sattempt("another user's path (DENIED)", "DENY",
+    () => uploadBytes(sref(storage, apath("someone-elses-uid", "probe.pdf")), small, { contentType: "application/pdf" }),
+    () => deleteObject(sref(storage, apath("someone-elses-uid", "probe.pdf"))));
+
+  await sattempt("outside the attachments tree (DENIED)", "DENY",
+    () => uploadBytes(sref(storage, `users/${uid}/loose.pdf`), small, { contentType: "application/pdf" }),
+    () => deleteObject(sref(storage, `users/${uid}/loose.pdf`)));
+
+  /* ⚠️ THE DELETE CASE IS THE `request.resource`-IS-NULL TRAP. Folding the size and type checks
+     into one `allow write` denies every delete while every upload keeps working. */
+  await sattempt("owner deletes their own file", "ACCEPT", async () => {
+    await uploadBytes(sref(storage, apath(uid, "probe-del.pdf")), small, { contentType: "application/pdf" });
+    await deleteObject(sref(storage, apath(uid, "probe-del.pdf")));
+  });
+
+  /* ⚠️ A SECOND, SIGNED-OUT APP — the one case a signed-in probe cannot make, and the one whose
+     failure would mean an open bucket. */
+  const { initializeApp: initApp2 } = await import("firebase/app");
+  const anonApp = initApp2({
+    apiKey: dev.VITE_FIREBASE_API_KEY,
+    authDomain: dev.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: PROJECT,
+    storageBucket: dev.VITE_FIREBASE_STORAGE_BUCKET,
+    appId: dev.VITE_FIREBASE_APP_ID,
+  }, "probe-anon");
+  await sattempt("unauthenticated (DENIED)", "DENY",
+    () => uploadBytes(sref(getStorage(anonApp), apath(uid, "probe-anon.pdf")), small, { contentType: "application/pdf" }));
+}
+
 process.exit(0);

@@ -13,7 +13,7 @@
     "lint": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:rules": "firebase emulators:exec --only firestore --project demo-scriptally-test 'npx vitest run --config vitest.config.rules.ts'",
+    "test:rules": "firebase emulators:exec --only firestore,storage --project demo-scriptally-test 'npx vitest run --config vitest.config.rules.ts'",
     "test:functions": "firebase emulators:exec --only firestore --project demo-scriptally-test 'npx vitest run --config vitest.config.emulator.ts'",
     "check:derivation": "esbuild scripts/derivationCheck.ts --bundle --platform=node --outfile=/tmp/derivationCheck.cjs && node /tmp/derivationCheck.cjs",
     "deploy:rules:dryrun": "firebase deploy --only firestore:rules --dry-run --project prod",
