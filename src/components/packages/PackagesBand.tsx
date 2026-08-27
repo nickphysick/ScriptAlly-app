@@ -222,6 +222,19 @@ export const PackagesBand: React.FC<PackagesBandProps> = ({
                             sentence is a second row's worth of height on every sent package, and
                             Duplicate already lives in the drawer's footer. */}
                         {locked && <span className="pkgb-pst">Locked · sent with {t.sent}</span>}
+                        {/**
+                          * ⚠️ ONE TRUNCATED LINE, IN THE WRITER'S OWN HAND (D25). Caveat, burgundy,
+                          * clamped to one line by CSS rather than by cutting the string — a
+                          * substring bakes a width into the data, which is wrong at every width but
+                          * the one it was cut for. The drawer holds the whole of it.
+                          *
+                          * ⚠️ AND AN ABSENT NOTE IS NEVER A BLANK LINE. It is `＋ NOTE`, which
+                          * appears on row hover — a control rather than a gap, so a row without a
+                          * note does not read as a row whose note failed to load.
+                          */}
+                        {pkg?.note
+                          ? <span className="pkgb-pnote" title={pkg.note}>{pkg.note}</span>
+                          : <span className="pkgb-paddnote">＋ Note</span>}
                       </span>
                       {/**
                         * ⚠️ `DUPLICATE & EDIT` ON ROW HOVER (D22) — the way forward from a locked

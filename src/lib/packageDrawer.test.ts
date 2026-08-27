@@ -223,9 +223,23 @@ describe("D13 — returns are one line", () => {
 describe("D14 / D15 / D16 — the lock, the two variants, and no editing", () => {
   const tsx = decls(read("src/components/packages/PackageDetailDrawer.tsx"));
 
-  it("the lock footnote gives its reason, not just its rule", () => {
-    expect(LOCK_FOOTNOTE).toContain("that's what keeps every figure above true");
-    expect(tsx).toContain("{locked && <p className=\"pkgdd-lock\">{LOCK_FOOTNOTE}</p>}");
+  it("⚠️ the lock footnote names what is NOT frozen, not just what is (D27)", () => {
+    /**
+     * ⚠️ RETARGETED, AND THE CLAIM IS STRONGER THAN THE ONE IT REPLACES. This required the sentence
+     * to give its REASON — "that's what keeps every figure above true" — which explains the freeze
+     * and stops there. A writer reading it on a package they have just sent has no way to know the
+     * NOTE is still theirs, and the natural reading of "contents are fixed" is that the whole
+     * record is. Part F puts the exception in the same sentence as the rule, because otherwise the
+     * rule is the only thing anybody takes away.
+     */
+    expect(LOCK_FOOTNOTE).toContain("has been sent");
+    expect(LOCK_FOOTNOTE).toContain("Your note isn't");
+    expect(LOCK_FOOTNOTE).toContain("you can change it whenever");
+    /* ⚠️ THE CLAIM IS "ON A LOCKED PACKAGE ONLY", NOT A SPELLING. The sentence is split so the
+       emphasis can sit on the half that is the news, so pinning the one-line JSX would fail on a
+       change that altered nothing about when it renders. */
+    expect(tsx).toMatch(/\{locked && \(/);
+    expect(tsx).toContain("LOCK_FOOTNOTE_EM");
   });
 
   it("⚠️ D15 — an unsent package loses the sections, it does not grey them", () => {

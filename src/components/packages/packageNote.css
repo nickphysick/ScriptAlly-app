@@ -1,0 +1,47 @@
+/** The note box — `design-refs/package-notes.html`, `.notebox` / `.np` / `.notefoot`. */
+.pkgn-box {
+  background: var(--pkg-fill);
+  border: 1px solid var(--pkgt-let-edge);
+  border-radius: 10px;
+  padding: 13px 15px 12px;
+  position: relative;
+  margin-bottom: 16px;
+}
+/* ⚠️ `pre-wrap`, so the writer's own line breaks survive reading. */
+.pkgn-read {
+  font-family: 'Caveat', cursive;
+  font-size: 16.5px;
+  color: var(--pkg-burg);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  min-height: 26px;
+  cursor: text;
+}
+.pkgn-read--empty { color: var(--pkg-muted); font-style: italic; }
+.pkgn-read:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 3px; }
+.pkgn-ta {
+  width: 100%;
+  font-family: 'Caveat', cursive;
+  font-size: 16.5px;
+  color: var(--pkg-burg);
+  line-height: 1.5;
+  background: var(--pkg-paper);
+  border: 1px solid var(--pkgt-let-edge);
+  border-radius: 7px;
+  padding: 8px 10px;
+  outline: none;
+  resize: vertical;
+}
+.pkgn-foot { display: flex; align-items: center; gap: 10px; margin-top: 9px; min-height: 18px; }
+.pkgn-m {
+  font-family: var(--font-mono);
+  font-size: 7px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--pkg-muted);
+}
+.pkgn-m--err { color: var(--pkg-burg); }
+.pkgn-sp { margin-left: auto; display: flex; gap: 8px; }
+.pkgn-btn {
+  padding: 5px 11px; font-size: 11px; font-weight: 600; border-radius: 7px; cursor: pointer;
+  border: 1px solid var(--pkgo-hairline); background: var(--pkg-paper); color: var(--pkg-ink);
+}
+.pkgn-btn--primary { background: var(--pkg-pink); border-color: var(--pkgt-let-edge); color: var(--pkg-burg); }
+.pkgn-btn:disabled { opacity: 0.45; cursor: not-allowed; }

@@ -483,27 +483,16 @@ export const SubmissionPackages: React.FC = () => {
              registry, so what rendered here was the fallback. Part of the trial's carve-out. */
           title="Submission packages"
           /**
-           * ⚠️ THE SCOPE, AND IT IS CONTEXT RATHER THAN A CONTROL (D6). Every letter, synopsis,
-           * version and package on this page belongs to one manuscript, and until now the page
-           * never said which — the reader had to remember. `Switch book` DEFERS to the sidebar's
-           * switcher rather than offering a second one: the selector that used to sit here was
-           * deleted as a duplicate of it, and reinstating it under a different name is the same
-           * mistake wearing a sentence.
-           *
-           * ⚠️ `Switch book` IS IN THE REF AND IS DELIBERATELY NOT BUILT (F-BM), for two reasons.
-           * The prompt places the switcher in the sidebar; it is in the top BAR (`ShellScope`,
-           * `.sv2-scope`), where it is always on screen on every page — so a reader who wants
-           * another book is already looking at the control. And the only way to trigger it from
-           * here is a cross-component DOM click on that class, whose failure mode is a control
-           * that looks live and does nothing. This repo's standing rule is that a dead affordance
-           * is worse than an absent one: it leaves the reader believing the app is broken rather
-           * than knowing where to go. The scope stays what D6 actually asks it to be — context.
-           *
-           * ⚠️ AND IT REPLACES THE DESCRIPTION RATHER THAN JOINING IT. `builder-refined.html` puts
-           * the scope in that slot; `packages-tabs.html` keeps the old sentence there. The former
-           * is the normative ref, and two lines under one title is how a masthead starts growing.
+           * ⚠️ THE MASTHEAD HOLDS NO SELECTOR AND NO SCOPE INDICATOR — it holds the page's sentence.
+           * `cec65b21` put `for {manuscript}` in this slot, reading `builder-refined.html` as
+           * normative over `packages-tabs.html`, and it cost the page the one line that says what
+           * the feature IS. Two things decide it against that ref: this masthead is declared to hold
+           * no actions and no controls (`PageHeader` variant="workspace" THROWS on an actions slot),
+           * so a scope indicator is the first control in a box built to have none; and the shell
+           * already states the scope permanently in the sidebar chip, three inches away and visible
+           * in every posture including the settled bar, which this line is not.
            */
-          description={activeMs ? <>for <b className="pkgw-scopebk">{activeMs.title}</b></> : undefined}
+          description="Bundle your materials once, then send them without rebuilding each time."
           /* ⚠️ NO ACTIONS SLOT — AND THE SHARED MASTHEAD ENFORCES THAT WITH A THROW, not a comment.
              `PageHeader` refuses `actions` on `variant="workspace"`: a masthead with nothing
              actionable never needs restoring mid-visit, so it can scroll away on a scrolling page
@@ -795,7 +784,14 @@ export const SubmissionPackages: React.FC = () => {
           setPkgModal(true);
         }}
         onArchive={(id) => { setPkgOpen(null); void retirePackage(id); }}
-      />
+        /* ⚠️ THROUGH `updatePackage`, THE PAGE'S ONE PACKAGE WRITER — which turns a blank into an
+             unset and clears the stamp with it. A local write here would be a second answer to what
+             "cleared" means. */
+          onSaveNote={(id, text) => updatePackage(id, {
+            note: text,
+            ...(text.trim() ? { noteEditedAt: new Date().toISOString() } : {}),
+          })}
+        />
       {matModal && <MaterialModal
         bookVersions={msBookVersions}
         key={matEditing?.id ?? `new-${matPreselect ?? "material"}`}

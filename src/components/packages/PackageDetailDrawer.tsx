@@ -27,9 +27,11 @@ import { Form11Drawer, type Form11DrawerHandle } from "../Form11Drawer";
 import { StatusDot } from "../StatusDot";
 import { CardBand, BAND_CLASS } from "./CardBand";
 import {
-  drawerSlots, drawerHolders, drawerReturns, returnsLine, LOCK_FOOTNOTE,
+  drawerSlots, drawerHolders, drawerReturns, returnsLine,
+  LOCK_FOOTNOTE_HEAD, LOCK_FOOTNOTE_EM, LOCK_FOOTNOTE_TAIL,
 } from "../../lib/packageDrawer";
 import { isPackageLocked } from "../../lib/packageMetrics";
+import { PackageNote } from "./PackageNote";
 import { shortDate } from "../../lib/createSummary";
 import type { Agent, BookVersion, ManuscriptVersion, Query, SubmissionPackage } from "../../types";
 import "./packageDetailDrawer.css";
@@ -44,12 +46,14 @@ export interface PackageDetailDrawerProps {
   onOpenMaterial: (id: string) => void;
   /** Sent packages duplicate; unsent ones edit (D15). */
   onDuplicate: (id: string) => void;
+  /** Save or clear this package's note. Blank clears — `updatePackage` turns it into an unset. */
+  onSaveNote: (id: string, text: string) => Promise<string | null>;
   onEdit: (id: string) => void;
   onArchive: (id: string) => void;
 }
 
 export const PackageDetailDrawer: React.FC<PackageDetailDrawerProps> = ({
-  pkg, materials, bookVersions, queries, agents, onClose, onOpenMaterial, onDuplicate, onEdit, onArchive,
+  pkg, materials, bookVersions, queries, agents, onClose, onOpenMaterial, onDuplicate, onEdit, onArchive, onSaveNote,
 }) => {
   const ref = useRef<Form11DrawerHandle>(null);
   if (!pkg) return null;
@@ -121,6 +125,18 @@ export const PackageDetailDrawer: React.FC<PackageDetailDrawerProps> = ({
           * ⚠️ THE DRAWER'S REASON TO EXIST (D10). Each slot in its own type colour, with the
           * material's opening lines — recognising a letter without opening it.
           */}
+        {/**
+          * ⚠️ THE NOTE IS THE FIRST SECTION, ABOVE THE CONTENTS (D26) — because it is the only
+          * thing on this surface the writer WROTE. Everything below is a record of what the app
+          * observed; this is what they made of it, and it is the thing they came back for.
+          */}
+        <h3 className="pkgdd-sec">Note</h3>
+        <PackageNote
+          note={pkg.note ?? null}
+          editedAt={pkg.noteEditedAt ?? null}
+          onSave={(text) => onSaveNote(pkg.id, text)}
+        />
+
         <h3 className="pkgdd-sec">What&rsquo;s in it</h3>
         {slots.map((s) => (
           <div key={s.type} className={`pkgdd-slot ${BAND_CLASS[s.type]}`}>
@@ -195,7 +211,13 @@ export const PackageDetailDrawer: React.FC<PackageDetailDrawerProps> = ({
         )}
 
         {/* ⚠️ D14 — THE LOCK IS A FOOTNOTE WITH ITS REASON, under the figures it protects. */}
-        {locked && <p className="pkgdd-lock">{LOCK_FOOTNOTE}</p>}
+        {/* ⚠️ THE EXCEPTION IS IN THE SAME SENTENCE AS THE RULE (D27). "Contents are fixed" reads
+            as the whole record being fixed unless the note's exemption sits beside it. */}
+        {locked && (
+          <p className="pkgdd-lock">
+            {LOCK_FOOTNOTE_HEAD} <b>{LOCK_FOOTNOTE_EM}</b>{LOCK_FOOTNOTE_TAIL}
+          </p>
+        )}
       </div>
     </Form11Drawer>
   );

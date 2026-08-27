@@ -173,5 +173,31 @@ export const returnsLine = (r: { sent: number; replied: number; requests: number
  * the second clause says what it is for, which is the only thing that makes it acceptable to a
  * writer who wanted to change something and cannot.
  */
-export const LOCK_FOOTNOTE =
-  "Contents are fixed because this package has been sent — that's what keeps every figure above true.";
+/**
+ * ⚠️ THE LOCK LINE NAMES WHAT IS *NOT* FROZEN (D27), and that clause is the point of the rewrite.
+ *
+ * It used to end "— that's what keeps every figure above true", which explains the freeze and stops.
+ * A writer reading it on a package they have just sent has no way to know the NOTE is still theirs;
+ * the natural reading of "contents are fixed" is that the whole record is. The exception has to be
+ * in the same sentence as the rule, or the rule is the only thing anybody takes away.
+ *
+ * Split so the emphasis can sit on the half that is the news.
+ */
+export const LOCK_FOOTNOTE_HEAD = "Contents are fixed because this package has been sent.";
+export const LOCK_FOOTNOTE_EM = "Your note isn't";
+export const LOCK_FOOTNOTE_TAIL = " — it's yours, and you can change it whenever.";
+
+/** The whole sentence, for anywhere that cannot carry the emphasis. */
+export const LOCK_FOOTNOTE = `${LOCK_FOOTNOTE_HEAD} ${LOCK_FOOTNOTE_EM}${LOCK_FOOTNOTE_TAIL}`;
+
+/**
+ * ⚠️ THE EDITOR'S PLACEHOLDER IS THE REF'S, AND "Add a note" WOULD NOT DO (D28). A prompt that
+ * names the ACTION gets an empty box and a writer wondering what belongs in it; one that names the
+ * QUESTIONS gets an answer. Three of them, because a note about a package is usually about who it
+ * is for, what is being tested, and what came back.
+ */
+export const NOTE_PLACEHOLDER =
+  "What is this package for? Which agencies, what you're testing, what you learned.";
+
+/** What the drawer's note footer says when there is no stamp yet. */
+export const NOTE_NEVER = "Not edited yet";
