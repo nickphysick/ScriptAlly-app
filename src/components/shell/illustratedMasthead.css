@@ -9,21 +9,6 @@
   /* how far the fold badge hangs below the border it sits on — half its own height, so it straddles */
   --illo-fold-drop: 0px;
 
-  /* ⚠️ SUBMISSION PACKAGES' FIVE, ALL TOKENS BECAUSE THIS IS A TRIAL AND THE NUMBERS WILL MOVE.
-     The ground is a horizontal two-colour gradient rather than the shared wash — the carve-out the
-     ground lock names — and the artwork's fade is stated as percentages of the band's width. */
-  /* ⚠️ IT READS THE WASH'S TOP STOP RATHER THAN RESTATING ITS HEX. The brief's `#f2e4dd` IS
-     `--mast-wash-top`, so writing it again put the same colour in two declarations — caught by the
-     single-source lock, which cannot tell a deliberate match from a stale copy and should not have
-     to. Stated as the relationship it is: this ground BEGINS at the masthead wash and resolves to
-     something lighter, so retuning the wash carries the trial with it. If the two are meant to be
-     independent colours that happen to coincide today, this becomes a literal again — and the lock
-     will ask about it. */
-  --pkg-ground-a: var(--mast-wash-top);   /* the ground's left stop */
-  --pkg-ground-b: #fdf9f6;   /* its right stop, and the flat colour beneath the gradient */
-  --pkg-ground-mid: 60%;     /* where the ground finishes resolving */
-  --pkg-art-start: 43%;      /* where the artwork begins fading in */
-  --pkg-art-full: 73%;       /* where it reaches full strength */
 }
 
 /**
@@ -63,31 +48,40 @@
    `.wpg > .wpg-scroll > .wpg-chrome` (0-3-0); a page-scoped `.pkgw-wpg .wpg-chrome` is 0-2-0 and
    loses, silently — measured, the band still painted the terracotta `rgb(251,243,238)` with this
    rule applying cleanly and every sample downstream taken against the wrong ground. */
+/**
+ * ⚠️ THE SLAB CARRIES ONLY A FLAT FILL NOW — the gradient and the artwork moved into the MEASURE,
+ * and the reason is that they were painted in a different coordinate space from the text.
+ *
+ * The gradient ran from the window's inner edge, so `#f2e4dd 0%` was never the colour under the
+ * title: measured at four widths, the title's first glyph sat on 253,249,246 — the gradient's
+ * TERMINAL colour — at every one of them. And the artwork was welded to the window's right edge
+ * while the measure caps and centres, so at 2560 the illustration ended 315px past the measure's
+ * right edge and the composition came apart. Gap ratios ran -0.445 · -0.089 · 0.479 · 0.525 across
+ * 1280 / 1440 / 2300 / 2560: no relationship at all.
+ *
+ * What stays here is the gradient's terminal colour, flat, so the band still reaches both window
+ * edges and nothing bands or steps where the measure begins.
+ */
 .wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome {
-  /* ⚠️ WHITE, NOT THE WASH — the carve-out this trial buys, and the ground lock names it as the one
-     page allowed it. Both longhands, never the `background` shorthand: the shorthand is what resets
-     `background-color` to transparent, which is the fault four earlier rounds were about. */
-  /**
-   * ⚠️ A TWO-COLOUR GROUND, NOT A FLAT ONE — the carve-out this page buys. Both longhands, never
-   * the `background` shorthand: the shorthand resets `background-color` to transparent, which is
-   * the see-through-header fault four earlier rounds were about. The colour is the gradient's RIGHT
-   * stop, so a dropped image leaves the ground the artwork sits on rather than the one it starts at.
-   */
+  background-color: var(--pkg-ground-b);
+  background-image: none;
+}
+/* ⚠️ THE TEXT SITS ABOVE THE PAINT. The pseudo-element is positioned and the masthead's measure is
+   not, so without this the artwork would paint over the title — the bench lifts `.mastin` to
+   `z-index: 2` for the same reason. */
+/**
+ * ⚠️ THE GROUND AND THE ARTWORK LIVE IN THE TEXT'S OWN BOX. Percent stops mean what they were always
+ * meant to mean once they are percentages of the box the text lives in, and
+ * `background-position: 100% center` anchors the illustration to the measure's right edge — where
+ * the text can see it — rather than to a window edge the text drifts away from.
+ */
+.wpg.pkgw-wpg .wpg-mast {
+  position: relative;
+  z-index: 2;
   background-color: var(--pkg-ground-b);
   background-image: linear-gradient(to right, var(--pkg-ground-a) 0%, var(--pkg-ground-b) var(--pkg-ground-mid));
-  /**
-   * ⚠️ NO `position: relative` — THE BENCH HAS IT AND COPYING IT HERE BROKE THE PAGE. This band is
-   * `position: sticky`, and `relative` overrode it: the slab stopped pinning, which the behaviour
-   * lock caught immediately. A sticky element already establishes a containing block for
-   * absolutely-positioned descendants, so the pseudo-element needs nothing added.
-   *
-   * ⚠️ `overflow: hidden` IS SAFE HERE and is the half of the bench's rule that must survive — it
-   * is on the sticky element itself, not on an ancestor, so it clips the artwork to the band without
-   * touching the pinning. (An `overflow` other than `visible` on an ANCESTOR is what kills sticky.)
-   */
-  overflow: hidden;
 }
-.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome::after {
+.wpg.pkgw-wpg .wpg-mast::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -96,27 +90,20 @@
   background-image: url(../../assets/packages/packages.webp);
   background-repeat: no-repeat;
   background-position: 100% center;
-  /**
-   * ⚠️ THE ARTWORK'S WIDTH IS A FUNCTION OF THE BAND'S HEIGHT AND THE MASK'S IS A FUNCTION OF ITS
-   * WIDTH — so the two drift as the window changes, and that is the coupling §2(b) exists to look
-   * at. `auto 130%` on a ~150px band renders the illustration about 1620px wide whatever the window
-   * is doing; the mask's 43% is 434px at 1280 and 873px at 2300. Measured and reported rather than
-   * pre-emptively unified.
-   */
   background-size: auto 130%;
   opacity: 0.86;
   /**
    * ⚠️ THE MASK IS THE POINT: the artwork is fully transparent where the title and description sit
    * and fades in across the middle, so no text is set over painted illustration. Asserted by
-   * sampling the painted colour just past the last glyph of each, in both postures.
+   * photographing the band with the artwork off and on and requiring the two identical at each
+   * glyph — never against a single "ground" colour, which a gradient has never had.
    */
   -webkit-mask-image: linear-gradient(to right, transparent var(--pkg-art-start), var(--illo-solid) var(--pkg-art-full));
           mask-image: linear-gradient(to right, transparent var(--pkg-art-start), var(--illo-solid) var(--pkg-art-full));
 }
-/* ⚠️ THE TEXT SITS ABOVE THE PAINT. The pseudo-element is positioned and the masthead's measure is
-   not, so without this the artwork would paint over the title — the bench lifts `.mastin` to
-   `z-index: 2` for the same reason. */
-.wpg.pkgw-wpg .wpg-mast { position: relative; z-index: 2; }
+/* ⚠️ THE TEXT ABOVE THE PAINT. The pseudo-element is positioned and `.wsh` is not, so without this
+   the artwork would paint over the title — the bench lifts its inner box for the same reason. */
+.wpg.pkgw-wpg .wsh { position: relative; z-index: 1; }
 
 /**
  * ══ THE FOLD CONTROL — A CHEVRON ON THE BOTTOM BORDER ═════════════════════════════════════════
@@ -188,4 +175,34 @@
 .wpg.qc-wpg .wpg-mast-hide:hover {
   color: var(--shell-ink);
   border-color: var(--ws-edge-strong, var(--ws-edge));
+}
+
+
+/**
+ * ⚠️ ON THE PAGE'S GRID ROOT, NOT `:root` — AND THAT MOVE IS A BUG FIX, NOT TIDINESS.
+ * `--pkg-ground-a` reads `--mast-wash-top`, which is declared on `.wpg`. A custom property's value
+ * is resolved where it is DECLARED, so at `:root` that read found nothing, `--pkg-ground-a` became
+ * the guaranteed-invalid value, and every `background-image` using it was DROPPED ENTIRELY.
+ *
+ * ⚠️ IT FAILED IN COMPLETE SILENCE AND I SHIPPED IT. The band still had a flat fill underneath, so
+ * it looked like a plain masthead rather than a broken one — measured after the fact, the title's
+ * first glyph sat on 253,249,246 (the gradient's TERMINAL colour) at all four widths, which is
+ * exactly what a missing gradient looks like. The ground had been dead since the token was pointed
+ * at the wash to satisfy the single-source lock, and no measurement re-read it afterwards.
+ *
+ * Five tokens because this is a trial and the numbers will move.
+ */
+.wpg.pkgw-wpg {
+  /* ⚠️ IT READS THE WASH'S TOP STOP RATHER THAN RESTATING ITS HEX. The brief's `#f2e4dd` IS
+     `--mast-wash-top`, so writing it again put the same colour in two declarations — caught by the
+     single-source lock, which cannot tell a deliberate match from a stale copy and should not have
+     to. Stated as the relationship it is: this ground BEGINS at the masthead wash and resolves to
+     something lighter, so retuning the wash carries the trial with it. If the two are meant to be
+     independent colours that happen to coincide today, this becomes a literal again — and the lock
+     will ask about it. */
+  --pkg-ground-a: var(--mast-wash-top);   /* the ground's left stop */
+  --pkg-ground-b: #fdf9f6;   /* its right stop, and the flat colour beneath the gradient */
+  --pkg-ground-mid: 60%;     /* where the ground finishes resolving */
+  --pkg-art-start: 43%;      /* where the artwork begins fading in */
+  --pkg-art-full: 73%;       /* where it reaches full strength */
 }

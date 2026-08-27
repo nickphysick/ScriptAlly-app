@@ -41,7 +41,16 @@ const readBand = (page: Page, cls: string) => page.evaluate((c) => {
   if (!g) return null;
   const ch = g.querySelector(".wpg-chrome") as HTMLElement;
   const cs = getComputedStyle(ch);
-  const af = getComputedStyle(ch, "::after");
+  /**
+   * ⚠️ THE ARTWORK IS LOOKED FOR ON EITHER HOST, because it has now lived on both. It began on the
+   * slab and moved into the MEASURE — the box the text lives in — so that the ground and the
+   * illustration share a coordinate space with the title. A lock that named one element would have
+   * reported "no page carries artwork" after a move that changed nothing about the claim.
+   */
+  const mastEl = g.querySelector(".wpg-mast") as HTMLElement;
+  const slabAfter = getComputedStyle(ch, "::after");
+  const mastAfter = getComputedStyle(mastEl, "::after");
+  const af = /url\(/.test(mastAfter.backgroundImage) ? mastAfter : slabAfter;
   return {
     /* the artwork lives on the pseudo-element; the band's own image is the wash's gradient */
     artwork: af.backgroundImage,
