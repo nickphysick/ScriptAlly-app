@@ -1601,6 +1601,26 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     // intact — children can be stranded but never orphaned.
     const plan = cascadePlan("manuscript", id, { queries, activities, taskFlags, versions, packages, attachments });
     const qIds = plan.queryIds;
+    /**
+     * ⚠️ THE BLOBS GO BEFORE THE BATCH THAT REMOVES THEIR RECORDS, which is the ruled order stated
+     * concretely: object first, then its Firestore record, the manuscript last. A failure here
+     * strands a RECORD — visible in the list, retryable, cheap. The reverse strands a BLOB:
+     * invisible and billed. Always fail toward the thing you can see.
+     *
+     * ⚠️ AND A FAILED BLOB DOES NOT STOP THE DELETE. Refusing to remove a manuscript because one
+     * object is stuck is worse than the orphan — the writer is left unable to finish an action they
+     * confirmed, with no way to correct it.
+     */
+    const orphanedBlobs: string[] = [];
+    for (const a of attachments.filter((x) => x.manuscriptId === id)) {
+      try {
+        await deleteObject(storageRef(getStorage(app), a.storagePath));
+      } catch (e) {
+        orphanedBlobs.push(a.storagePath);
+        console.error(`[attachments] blob delete failed during cascade: ${a.storagePath}`, e);
+      }
+    }
+
     try {
       const refs: DocumentReference[] = [];
       // The manuscripts/{id}/notes subcollection is RETIRED (rules default-deny it — Tier 2 ·
@@ -1620,14 +1640,34 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // Best-effort — a failed log must never surface as a failed delete (the delete already committed).
       const qn = qIds.length;
       const detail = qn > 0 ? ` (and ${qn} quer${qn > 1 ? "ies" : "y"} removed)` : "";
+      /**
+       * ⚠️ THE ORPHANS RIDE THE DURABLE RECORD, so "log and continue" is retrievable in the app
+       * rather than only in a console nobody has open. `details` is already allowlisted, so this
+       * needs no rules change — the alternative was a diagnostics collection, which is a new
+       * collection, a new match block and a deploy, for a case that should be rare.
+       */
+      const orphanNote = orphanedBlobs.length
+        ? `${orphanedBlobs.length} file${orphanedBlobs.length > 1 ? "s" : ""} could not be removed from storage: ${orphanedBlobs.join(", ")}`
+        : "";
       await addActivity({
         activityType: ActivityType.MANUSCRIPT_DELETED,
         description: `You deleted “${msTitle}”${detail}`,
         manuscriptId: "",
         queryId: "",
         date: new Date().toISOString(),
-        details: "",
-      }).catch(() => { /* best-effort: the delete itself succeeded */ });
+        details: orphanNote,
+        /* ⚠️ LOGGED, NOT SWALLOWED. This was `.catch(() => {})`, which is right for a record nobody
+           depends on and wrong the moment it became the only durable trace of an orphaned blob: a
+           dropped failure is indistinguishable from no failure. The delete itself still stands. */
+      }).catch((e) => {
+        console.error(
+          `[attachments] the delete record could not be written; ` +
+          (orphanedBlobs.length
+            ? `THE ONLY REMAINING TRACE OF ${orphanedBlobs.length} ORPHANED BLOB(S) IS THIS LINE: ${orphanedBlobs.join(", ")}`
+            : "no orphans to report"),
+          e,
+        );
+      });
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${uid}/manuscripts/${id}`);
     }

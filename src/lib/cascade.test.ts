@@ -219,3 +219,50 @@ describe('attachments join the cascade and the dialogue', () => {
     );
   });
 });
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   THE CASCADE'S BLOB HALF — order, and a failure that stays findable.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+describe('deleteManuscript removes blobs before records, and does not swallow the failure', () => {
+  const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  /** ⚠️ Two anchors that cannot nest — a function opening and the next function's opening. */
+  const body = (() => {
+    const src = strip(readFileSync(join(__dirname, './db.tsx'), 'utf8'));
+    const from = src.indexOf('const deleteManuscript = async');
+    const to = src.indexOf('const setManuscriptShelved = async');
+    expect(from, 'deleteManuscript moved').toBeGreaterThan(-1);
+    expect(to, 'the anchor after deleteManuscript moved').toBeGreaterThan(from);
+    return src.slice(from, to);
+  })();
+
+  /**
+   * ⚠️ THE ORDER IS THE RULING. Object first, then its record, the manuscript last. A failure then
+   * strands a RECORD — visible, retryable, cheap. The reverse strands a BLOB: invisible and billed.
+   */
+  it('deletes the objects before committing the record batch', () => {
+    const blob = body.indexOf('deleteObject(');
+    const batch = body.indexOf('commitDeletesInBatches(');
+    expect(blob, 'the cascade stopped deleting blobs').toBeGreaterThan(-1);
+    expect(batch, 'the batch commit moved').toBeGreaterThan(-1);
+    expect(blob, 'records are removed before their blobs — that strands a billed orphan').toBeLessThan(batch);
+  });
+
+  /** A stuck object must not block a delete the writer already confirmed. */
+  it('a failed blob does not abort the cascade', () => {
+    const loop = body.slice(body.indexOf('deleteObject('), body.indexOf('commitDeletesInBatches('));
+    expect(loop, 'a blob failure now throws out of the cascade').toContain('orphanedBlobs.push');
+    expect(loop, 'a blob failure rethrows').not.toMatch(/catch\s*\([^)]*\)\s*\{\s*throw/);
+  });
+
+  /**
+   * ⚠️ "LOG AND CONTINUE" MUST NOT MEAN "DROP". A `.catch(() => {})` is indistinguishable from no
+   * failure at all, which is the same problem as the silent orphan one level up. Both the blob
+   * failure and the durable record's own failure carry the paths.
+   */
+  it('the orphan list reaches a durable record, and the record’s own failure is logged', () => {
+    expect(body, 'the orphans never reach the delete record').toMatch(/details:\s*orphanNote/);
+    const tail = body.slice(body.indexOf('addActivity({'));
+    expect(tail, 'the delete record failure is swallowed').not.toMatch(/\.catch\(\(\)\s*=>\s*\{\s*\}\)/);
+    expect(tail, 'the delete record failure is not logged').toContain('console.error');
+  });
+});
