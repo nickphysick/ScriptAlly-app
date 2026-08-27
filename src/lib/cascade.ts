@@ -51,6 +51,8 @@ export interface DestroyData {
   taskFlags: { id: string; queryId?: string; agentId?: string }[];
   versions?: { id: string; manuscriptId: string }[];
   packages?: { id: string; manuscriptId: string }[];
+  /** Attachment RECORDS. The blobs they point at are removed by db.tsx, not planned here. */
+  attachments?: { id: string; manuscriptId: string }[];
 }
 
 /** The "Goes with it" panel — live counts computed at dialog-open. One source with the cascade
@@ -62,6 +64,12 @@ export interface DestroyManifest {
   packages: number;
   versions: number;
   taskFlags: number;
+  /**
+   * ⚠️ THE ONLY LINE ON THIS DIALOGUE THAT NAMES SOMETHING THE WRITER MAY HOLD NOWHERE ELSE. A
+   * query is a record of something that happened and could be reconstructed; an attachment is the
+   * file itself. It is counted here so the dialogue cannot promise less than the delete removes.
+   */
+  attachments: number;
 }
 
 export function destroyManifest(kind: "manuscript" | "agent", id: string, data: DestroyData): DestroyManifest {
@@ -75,12 +83,13 @@ export function destroyManifest(kind: "manuscript" | "agent", id: string, data: 
     packages: kind === "manuscript" ? (data.packages ?? []).filter((p) => p.manuscriptId === id).length : 0,
     versions: kind === "manuscript" ? (data.versions ?? []).filter((v) => v.manuscriptId === id).length : 0,
     taskFlags: flagIdsForCascade(data.taskFlags, { queryIds: qIds, ...(kind === "agent" ? { agentId: id } : {}) }).length,
+    attachments: kind === "manuscript" ? (data.attachments ?? []).filter((a) => a.manuscriptId === id).length : 0,
   };
 }
 
 /** One doc the cascade deletes, by top-level collection. */
 export interface CascadeDoc {
-  col: "versions" | "packages" | "queries" | "activities" | "taskFlags" | "manuscripts" | "agents";
+  col: "versions" | "packages" | "queries" | "activities" | "taskFlags" | "attachments" | "manuscripts" | "agents";
   id: string;
 }
 
@@ -102,6 +111,13 @@ export function cascadePlan(kind: "manuscript" | "agent", id: string, data: Dest
   if (kind === "manuscript") {
     for (const v of (data.versions ?? []).filter((x) => x.manuscriptId === id)) docs.push({ col: "versions", id: v.id });
     for (const p of (data.packages ?? []).filter((x) => x.manuscriptId === id)) docs.push({ col: "packages", id: p.id });
+    /**
+     * ⚠️ ATTACHMENTS ARE THE FIRST CHILD WHOSE STRANDING COSTS MONEY RATHER THAN LEAVING A STALE
+     * ROW. They are planned here like any other record; the BLOB each one points at is removed by
+     * db.tsx immediately before the record — see the cascade note there. Planning them early keeps
+     * the parent last, so a mid-way failure still strands rather than orphans.
+     */
+    for (const a of (data.attachments ?? []).filter((x) => x.manuscriptId === id)) docs.push({ col: "attachments", id: a.id });
   }
   for (const qid of queryIds) docs.push({ col: "queries", id: qid });
   for (const aid of activityIdsForQueries(data.activities, queryIds)) docs.push({ col: "activities", id: aid });

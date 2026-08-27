@@ -48,6 +48,13 @@ export const ConfirmDestroy: React.FC<ConfirmDestroyProps> = ({ kind, name, mani
   if (manifest.packages > 0) rows.push(plural(manifest.packages, "submission package", "submission packages"));
   if (manifest.versions > 0) rows.push(plural(manifest.versions, "material version", "material versions"));
   if (manifest.taskFlags > 0) rows.push(plural(manifest.taskFlags, "to-do stance", "to-do stances"));
+  /**
+   * ⚠️ LAST IN THE LIST AND NAMED AS FILES, because it is the only line here the writer may hold
+   * nowhere else. Everything above it is a record of something that happened; this is the thing
+   * itself. No adjective and no warning — the dialogue reports what will happen, and "3 attached
+   * files" is already the whole of the point.
+   */
+  if (manifest.attachments > 0) rows.push(plural(manifest.attachments, "attached file", "attached files"));
 
   const consequence = light
     ? `This permanently removes the ${kind}. Nothing else depends on it.`

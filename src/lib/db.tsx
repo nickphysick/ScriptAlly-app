@@ -1599,7 +1599,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     // live-fetched activity subcollection) → global-feed projections → taskFlag stances (6A: stances
     // die with their records) → THE MANUSCRIPT LAST, so a mid-way failure leaves it (and a retry)
     // intact — children can be stranded but never orphaned.
-    const plan = cascadePlan("manuscript", id, { queries, activities, taskFlags, versions, packages });
+    const plan = cascadePlan("manuscript", id, { queries, activities, taskFlags, versions, packages, attachments });
     const qIds = plan.queryIds;
     try {
       const refs: DocumentReference[] = [];

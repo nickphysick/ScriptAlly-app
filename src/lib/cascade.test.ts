@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   queriesForManuscript, queriesForAgent, activityIdsForQueries,
   flagIdsForCascade, destroyManifest, cascadePlan, canDestroy, chunkArray, DestroyData,
@@ -94,12 +96,12 @@ describe('flagIdsForCascade — stances die with their records', () => {
 describe('destroyManifest — the "Goes with it" panel counts', () => {
   it('manuscript: queries + materials-out + activity + packages + versions + flags', () => {
     expect(destroyManifest('manuscript', 'm1', DATA)).toEqual({
-      queries: 2, materialsOut: 1, activityRecords: 2, packages: 1, versions: 1, taskFlags: 1,
+      queries: 2, materialsOut: 1, activityRecords: 2, packages: 1, versions: 1, taskFlags: 1, attachments: 0,
     });
   });
   it('agent: queries + activity + its own stance flags; packages/versions never counted', () => {
     expect(destroyManifest('agent', 'a1', DATA)).toEqual({
-      queries: 2, materialsOut: 2, activityRecords: 2, packages: 0, versions: 0, taskFlags: 3,
+      queries: 2, materialsOut: 2, activityRecords: 2, packages: 0, versions: 0, taskFlags: 3, attachments: 0,
     });
   });
   it('a zero-query agent is empty-handed (the light path trigger)', () => {
@@ -158,5 +160,62 @@ describe('chunkArray — Firestore batch chunking', () => {
   });
   it('empty input → no batches', () => {
     expect(chunkArray([], 450)).toEqual([]);
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   ATTACHMENTS IN THE CASCADE — the first child whose stranding costs money.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+describe('attachments join the cascade and the dialogue', () => {
+  const data = {
+    queries: [], activities: [], taskFlags: [],
+    versions: [{ id: 'v1', manuscriptId: 'ms-1' }],
+    packages: [{ id: 'p1', manuscriptId: 'ms-1' }],
+    attachments: [
+      { id: 'a1', manuscriptId: 'ms-1' },
+      { id: 'a2', manuscriptId: 'ms-1' },
+      { id: 'a3', manuscriptId: 'ms-OTHER' },
+    ],
+  };
+
+  it('counts only this manuscript’s attachments', () => {
+    expect(destroyManifest('manuscript', 'ms-1', data).attachments).toBe(2);
+  });
+
+  /** An agent delete never reaches a manuscript's files. */
+  it('counts none for an agent', () => {
+    expect(destroyManifest('agent', 'ag-1', data).attachments).toBe(0);
+  });
+
+  /**
+   * ⚠️ THE PARENT STAYS LAST. Every child before it means a mid-way failure strands rather than
+   * orphans — and with attachments in the plan, "strands" now includes a record whose blob db.tsx
+   * removed a moment earlier, which is the visible half of the ruled order.
+   */
+  it('plans the attachments before the manuscript', () => {
+    const plan = cascadePlan('manuscript', 'ms-1', data);
+    const cols = plan.docs.map((d) => d.col);
+    expect(cols).toContain('attachments');
+    expect(cols[cols.length - 1]).toBe('manuscripts');
+    expect(cols.indexOf('attachments')).toBeLessThan(cols.length - 1);
+    expect(plan.docs.filter((d) => d.col === 'attachments').map((d) => d.id)).toEqual(['a1', 'a2']);
+  });
+
+  /**
+   * ⚠️ `attachments` IS OPTIONAL ON `DestroyData`, WHICH MEANS A CALL SITE THAT FORGETS IT STILL
+   * TYPECHECKS AND SILENTLY REPORTS ZERO. That is the exact shape the manifest exists to prevent —
+   * "the dialog can never promise less than the delete removes" — so the two manuscript call sites
+   * are asserted by source rather than trusted to the compiler.
+   */
+  it('both manuscript call sites actually pass attachments', () => {
+    const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+    const page = strip(readFileSync(join(__dirname, '../components/AllManuscripts.tsx'), 'utf8'));
+    const db = strip(readFileSync(join(__dirname, './db.tsx'), 'utf8'));
+    expect(page, 'the dialogue would report 0 attached files').toMatch(
+      /destroyManifest\("manuscript",[^)]*attachments[^)]*\)/,
+    );
+    expect(db, 'the cascade would leave every attachment record behind').toMatch(
+      /cascadePlan\("manuscript",[^)]*attachments[^)]*\)/,
+    );
   });
 });

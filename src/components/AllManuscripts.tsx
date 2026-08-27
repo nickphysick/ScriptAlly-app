@@ -79,7 +79,7 @@ interface AllManuscriptsProps {
 }
 
 export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, active = true, openId = null }) => {
-  const { currentUser, manuscripts, queries, packages, versions, activities, agents, userTasks, addUserTask, taskFlags, updateManuscript, updateManuscriptQuiet, deleteManuscript, setManuscriptShelved, addPersonalGenre } =
+  const { currentUser, manuscripts, queries, packages, versions, activities, agents, userTasks, addUserTask, taskFlags, updateManuscript, updateManuscriptQuiet, deleteManuscript, setManuscriptShelved, addPersonalGenre, attachments } =
     useScriptAllyDb();
 
   /**
@@ -726,7 +726,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
           source with the delete plan). Light mode when nothing depends on the manuscript. */}
       {deleteModalMs && (() => {
         const m = deleteModalMs;
-        const manifest = destroyManifest("manuscript", m.id, { queries, activities, taskFlags, versions, packages });
+        const manifest = destroyManifest("manuscript", m.id, { queries, activities, taskFlags, versions, packages, attachments });
         const light = manifest.queries === 0 && manifest.packages === 0 && manifest.versions === 0 && manifest.activityRecords === 0;
         return (
           <ConfirmDestroy
