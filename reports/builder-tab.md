@@ -468,3 +468,57 @@ One inconsistency found and **not** changed, since it is outside this pack: `age
 formats with `toLocaleString("en-US")` in an `en-GB` app, and always says "words". It describes the
 AGENT's stated requirement rather than a material's length, so the plural is not wrong there —
 the locale is. Flagged, not fixed.
+
+## Part 4 — verification. E and F both landed; two faults found in a third place
+
+Measured at 1440 and 1920, identical:
+
+```
+D3   AFFORD    exactly one — "＋ Build a package · or drag a chip here"
+D9   HL        chip → 2 rows lit, 1 dimmed  ·  cell → 1 chip lit, 2 dimmed
+D10  SORT      desc [5,2,0] · asc [0,2,5] · aria-sort descending then ascending
+D11  NOTES     Standard UK: the Caveat line, and NO ＋ Note
+                the other two: ＋ Note, opacity 0 → 1 on hover
+D12  TRACKING  one panel … see below
+```
+
+**D11's answer is "both, and neither is a fault".** Part F's UI shipped — `pkgb-pnote`,
+`pkgb-paddnote`, `PackageNote` and `pkgn-box` are all present — and no package had a note, because
+I seeded one for last pack's read-aloud and restored it afterwards. Seeded again, both states proven
+in one run, restored again.
+
+### ⚠️ THE FIXTURE HAS LOST `seed-ms-1`'s BOOK VERSIONS, AND THAT IS WHY THREE THINGS LOOKED BROKEN
+
+```
+seed-ms-1   "The Smoke Test"     bookVersions = undefined      (three, last pack)
+seed-ms-2   "The Quiet Second"   bookVersions = 1
+thin-ms     "The Quiet Fixture"  bookVersions = undefined
+```
+
+The tell was the chip count: **3 chips where there were 6.** With no versions, `versionsActive` is
+false and every version surface hides itself — which is its stated law, *"a writer with fewer than
+two versions sees NONE of this"*. So:
+
+* **D12's "only one panel" is correct behaviour, not a regression.** Seeded three versions back:
+  all three panels render (`Requests by material`, `Requests by opening`, `Manuscripts out with
+  agents`). Restored to as-found afterwards.
+* **Part 2's empty Versions section is the same cause** — the section was empty because the
+  manuscript has no versions, not because the section mishandles the state. The fix stands on its
+  own merits; the screenshot's trigger was the data.
+
+I cannot attribute the loss. **It is worth a decision: dev currently shows none of the versions
+feature on the main fixture.**
+
+### Two faults found by reading the seeded panel aloud — REPORTED, NOT FIXED
+
+This is a verification pass, so neither was touched.
+
+1. **`Requests by opening` renders `0 packages`.** `bookVersions.ts:369` emits
+   `${r.packages} package${…}` with no absence branch, so a version in no package reads
+   `§Prologue-first · 0 packages · 0 requests from 0 sent`. The version CHIP was given the
+   words-not-a-zero treatment last pack (`not yet in a package`); this panel was not. Same fault
+   class, different surface — which is what D8's "sweep the class, not the instance" is for, applied
+   to the wrong pack.
+2. **The panel's tag reads "Across every sample and package that carries it."** Samples are retired
+   as a material type; the aggregation no longer touches one. The heading beneath it was corrected
+   at D15 and this line was not.
