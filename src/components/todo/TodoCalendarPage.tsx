@@ -937,7 +937,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      the rows that were asking, and a row under "Needs you now" whose card the board had not
      raised vanished from the very view built to find it. */
   const rowAsks = (r: TimelineRow) =>
-    asksOfYou(r.group, r.key === YOU_ROW && r.items.some((i) => i.card));
+    /* ⚠️ A TASK ROW ASKS BY EXISTING, and it is keyed by its own task rather than by `YOU_ROW` —
+       which the first version of this tested for, so every per-task row answered false and the
+       whole `Your tasks` group came out with dashes. `group === null` is what identifies one. */
+    asksOfYou(r.group, r.group === null && r.items.some((i) => i.card));
 
   /**
    * The board, as groups.
