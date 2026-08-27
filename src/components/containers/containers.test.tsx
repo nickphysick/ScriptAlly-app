@@ -372,8 +372,14 @@ describe("the book profile's cap assignment — one table, checked against the r
   });
 
   /** ⚠️ AND THE PANEL SPEAKS THE FIELDS' GRAMMAR — the same `SectionHeader` the pitch and synopsis use. */
+  /**
+   * ⚠️ RETARGETED TO THE PANEL'S OWN FILE. The law is unchanged — the attachments panel speaks the
+   * fields' grammar, one size down — and only the file that renders it moved, because the built
+   * panel needs the db context and the pane must stay pure. A lock bound to a PATH cannot tell a
+   * relocation from a regression, which is the only thing a lock is for.
+   */
   it("the attachments panel uses the shared section header, one size down", () => {
-    const overview = decls(readFileSync(join(root, "src/components/manuscripts/OverviewPane.tsx"), "utf8"));
+    const overview = decls(readFileSync(join(root, "src/components/manuscripts/AttachmentsPanel.tsx"), "utf8"));
     expect(overview).toContain('<SectionHeader title="Attachments"');
     const css = readFileSync(join(root, "src/components/manuscripts/bookProfile.css"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "");

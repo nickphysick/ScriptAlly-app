@@ -184,13 +184,32 @@ describe("what left this pane", () => {
    * anywhere in `src`. A stubbed row would be the page stating that a writer has a file they do not
    * have, which is the same class of claim as a fabricated date.
    */
-  it("shows the attachments panel empty, with no invented rows", () => {
-    const html = pane();
-    expect(html).toContain("Attachments");
-    expect(html).toContain("Nothing kept with this manuscript yet.");
-    expect(html).toContain("Nothing here is sent to an agent.");
-    /* Disabled rather than hidden: the panel says what will live here, and cannot pretend to act. */
-    expect(html).toMatch(/class="msp-attadd"[^>]*disabled/);
+  /**
+   * ⚠️ RETARGETED, AND THE LAW CHANGED WITH THE CODE. This used to assert that the pane rendered an
+   * empty attachments panel with no invented rows — true while Storage was unwired and the panel
+   * was a stub. The panel is real now and needs the Firestore listener, so it is rendered by the
+   * composition root and reaches this pane as a SLOT: pulling `useScriptAllyDb` in here stopped two
+   * suites LOADING with auth/invalid-api-key.
+   *
+   * The law asserted here is now the pane's half — it renders whatever slot it is given, in the
+   * side column, and owns no attachment behaviour of its own. The panel's own claims moved to
+   * attachmentsPanel.test.tsx and attachmentRows.test.ts rather than lapsing.
+   */
+  it("renders the attachments slot it is given, and owns nothing of its own", () => {
+    const html = renderToStaticMarkup(
+      <OverviewPane
+        pitch={null} pitchMeta={null} onSavePitch={() => {}}
+        synopsis={null} synopsisMeta={null} onSaveSynopsis={() => {}}
+        attachments={<aside className="msp-ovside">SLOT MARKER</aside>}
+      />,
+    );
+    expect(html).toContain("SLOT MARKER");
+    /* ⚠️ Comments stripped — the prose explaining WHY the pane must not import the db context
+       necessarily names it, and a bare read goes red over a correct file. */
+    const src = readFileSync(join(__dirname, "OverviewPane.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(src, "the pane reached for the db context again").not.toContain("useScriptAllyDb");
+    expect(src, "the pane started rendering attachments itself").not.toContain("AttachmentsPanel");
   });
 
   it("no longer states the five-figure stat row", () => {

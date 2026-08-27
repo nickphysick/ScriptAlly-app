@@ -27,7 +27,7 @@
 import React, { useState } from "react";
 import { SectionHeader } from "../containers/SectionHeader";
 import { InlineText } from "../containers/InlineText";
-import { PITCH_PLACEHOLDER, SYNOPSIS_PLACEHOLDER, SYNOPSIS_NOTE, ATTACHMENTS_NOTE, ATTACHMENTS_EMPTY_META } from "../../lib/manuscriptProfile";
+import { PITCH_PLACEHOLDER, SYNOPSIS_PLACEHOLDER, SYNOPSIS_NOTE } from "../../lib/manuscriptProfile";
 import "./bookProfile.css";
 
 export interface OverviewPaneProps {
@@ -40,16 +40,22 @@ export interface OverviewPaneProps {
   synopsis: string | null;
   synopsisMeta: string | null;
   onSaveSynopsis: (next: string) => void;
+  /**
+   * ⚠️ A SLOT, NOT A COMPONENT IMPORT, AND THE REASON IS LOAD-BEARING. The attachments panel needs
+   * the Firestore listener, and `useScriptAllyDb` transitively imports Firebase — which initialises
+   * auth at module scope. Importing it here made TWO suites stop LOADING with
+   * `auth/invalid-api-key`: not a failing assertion, a file that never ran. This pane and the
+   * dossier above it are pure props components and stay that way; the db dependency lives at the
+   * composition root, where it already was.
+   */
+  attachments?: React.ReactNode;
 }
 
 export const OverviewPane: React.FC<OverviewPaneProps> = ({
-  pitch, pitchMeta, onSavePitch, synopsis, synopsisMeta, onSaveSynopsis,
+  pitch, pitchMeta, onSavePitch, synopsis, synopsisMeta, onSaveSynopsis, attachments,
 }) => {
   /* Component state, deliberately: a clamp is a reading convenience, not a preference to persist. */
   const [synOpen, setSynOpen] = useState(false);
-  /* ⚠️ NOT `0 files`. There is nothing to count yet — a count of nought here would state that the
-     feature has run and found none, when it has not run at all. */
-  const attachmentsMeta = ATTACHMENTS_EMPTY_META;
   return (
   <div className="msp-ovgrid">
     <div className="msp-ovmain">
@@ -98,11 +104,10 @@ export const OverviewPane: React.FC<OverviewPaneProps> = ({
     </div>
 
     {/**
-      * ⚠️ THE ATTACHMENTS PANEL RENDERS EMPTY, AND EMPTY IS THE HONEST STATE. Storage is not wired:
-      * a bucket exists on dev, but there is no `storage.rules` in the repo, no `storage` block in
-      * either firebase config, and no `firebase/storage` import anywhere in `src`. So the panel has
-      * its cap, its footnote and a disabled add — and NO invented rows. A stubbed file list would be
-      * a page stating that a writer has attachments they do not have.
+      * ⚠️ THE PANEL IS BUILT NOW, AND THE SENTENCE THAT USED TO SIT HERE IS GONE RATHER THAN LEFT
+      * STANDING. It said Storage was unwired — no rules, no config block, no `firebase/storage`
+      * import — and every word of that is now false. A comment that outlives what it described is
+      * read as fact, which is worse than no comment.
       *
       * ⚠️ AND IT IS NOT `position: sticky` THIS PASS. A sticky offset here has to clear the pinned
       * masthead slab, and the grid no longer publishes its height — `--wpg-stuck-h` was measured,
@@ -127,22 +132,7 @@ export const OverviewPane: React.FC<OverviewPaneProps> = ({
       * so it wins on specificity rather than on stylesheet order — two single-class rules on one
       * element are decided by which sheet loaded last, which is how a value gets lost silently.
       */}
-    <aside className="msp-ovside">
-      <SectionHeader title="Attachments" meta={attachmentsMeta} className="msp-attsec" />
-
-      {/* ⚠️ NO FABRICATED ROWS. Storage is unwired — no `storage.rules`, no `storage` block in
-          either firebase config, no `firebase/storage` import in `src` — so a file row here would be
-          the page stating that a writer has something they do not have. */}
-      <p className="msp-empty">Nothing kept with this manuscript yet.</p>
-
-      {/* Dashed means provisional, and disabled because there is nothing behind it yet. Rendered
-          rather than hidden: the panel says what will live here and cannot pretend to act. */}
-      <button type="button" className="msp-attadd" disabled>
-        Add a file
-      </button>
-
-      <p className="msp-footnote">{ATTACHMENTS_NOTE}</p>
-    </aside>
+    {attachments}
   </div>
   );
 };

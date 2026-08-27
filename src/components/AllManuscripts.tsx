@@ -40,6 +40,7 @@ import { isProUser, scoutLive } from "../lib/suggestComps";
 import { plateStats, formatPlateDate } from "../lib/manuscriptPlate";
 import { DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./manuscripts/ManuscriptTabs";
 import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
+import { AttachmentsPanel } from "./manuscripts/AttachmentsPanel";
 import { ManuscriptLibraryCard, ManuscriptAddTile } from "./manuscripts/ManuscriptLibraryCard";
 import { ManuscriptsEmpty } from "./manuscripts/ManuscriptsEmpty";
 import { pitchAssets, pitchMeter, PitchAssetKey, synopsisVersions } from "../lib/manuscriptPitch";
@@ -440,6 +441,11 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
           {selected ? (
             <ManuscriptDossier
               manuscript={selected}
+              /* ⚠️ RENDERED HERE, NOT IMPORTED BY THE PANE. The panel needs the Firestore listener,
+                 and pulling `useScriptAllyDb` into a leaf stopped two suites LOADING with
+                 auth/invalid-api-key — a file that never ran, not a failing assertion. The db
+                 dependency stays at the composition root, which already had it. */
+              attachmentsSlot={<AttachmentsPanel manuscriptId={selected.id} />}
               genres={msGenres(selected)}
               queries={msQueries}
               versions={msVersions}

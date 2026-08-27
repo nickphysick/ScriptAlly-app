@@ -68,6 +68,8 @@ export interface ManuscriptDossierProps {
   /** The writer's working synopsis. NOT the packages synopsis materials — see types.ts. */
   synopsis: string | null;
   onSaveSynopsis: (next: string) => void;
+  /** Rendered by the composition root, which owns the db context. See OverviewPane's note. */
+  attachmentsSlot?: React.ReactNode;
   /** Resolves an agent id to a display name — the canonical helper, never a local format. */
   agentName: (agentId: string) => string;
   /** This manuscript's own notes — `UserTask` documents, the collection the Noteboard reads. */
@@ -124,7 +126,7 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   pitchText,
   elevatorPitch,
   synopsis,
-  onSaveSynopsis,
+  onSaveSynopsis, attachmentsSlot,
   agentName,
   notes,
   onWriteNote,
@@ -227,6 +229,7 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
               synopsis={synopsis}
               synopsisMeta={synopsisMeta(synopsis)}
               onSaveSynopsis={onSaveSynopsis}
+              attachments={attachmentsSlot}
             />
           )}
 

@@ -750,3 +750,35 @@
 @media (max-width: 1100px) {
   .msp-ovgrid { grid-template-columns: minmax(0, 1fr); gap: 26px; }
 }
+
+/**
+ * ⚠️ NEW ELEMENTS FOR THE BUILT PANEL, NOT A RESTYLE OF THE APPROVED ONE. The heading, meta,
+ * hairline, rows, dashed add and footnote are untouched; these two are the row's actions and its
+ * failure line, which had nothing to be styled by before there was anything to do.
+ */
+.msp-attlink {
+  flex: none;
+  border: 0;
+  background: none;
+  padding: 0 0 0 10px;
+  color: var(--burg);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.msp-attlink:hover { text-decoration: underline; }
+/**
+ * ⚠️ NOT RED, AND NOT A BANNER. The page reports; it does not alarm. A refused upload is stated in
+ * the muted ink the rest of the panel's meta uses, in the row where the file would have been.
+ */
+.msp-attfail {
+  flex: 1;
+  min-width: 0;
+  color: var(--shell-muted);
+  font-size: 12px;
+  font-style: italic;
+}
+.msp-attrow[data-status="failed"] .msp-attname,
+.msp-attrow[data-status="uploading"] .msp-attname { color: var(--shell-muted); }

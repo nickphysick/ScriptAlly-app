@@ -95,7 +95,7 @@ import { db, auth, app, handleFirestoreError, OperationType } from "./firebase";
  * the attachments panel rendered empty. Those comments are now wrong wherever they still say it;
  * the fence is `storage.rules`, which is a real control rather than a missing dependency.
  */
-import { getStorage, ref as storageRef, uploadBytes, deleteObject, getDownloadURL } from "firebase/storage";
+import { getStorage, ref as storageRef, uploadBytesResumable, deleteObject, getDownloadURL } from "firebase/storage";
 import { Attachment } from "../types";
 import { attachmentStoragePath, newAttachmentId } from "./attachments";
 import { TodoWriteError, classifyWriteError } from "./todoWrite";
@@ -250,7 +250,7 @@ interface DbContextType {
    * a file that landed from one that did not, and a swallowed rejection is indistinguishable from
    * success. That is the exact silent-discard the pitch field had for months.
    */
-  addAttachment: (manuscriptId: string, file: File) => Promise<Attachment>;
+  addAttachment: (manuscriptId: string, file: File, onProgress?: (pct: number) => void) => Promise<Attachment>;
   deleteAttachment: (id: string) => Promise<void>;
   attachmentUrl: (a: Attachment) => Promise<string>;
   /** Shelve/reactivate — a reversible lifecycle overlay (hides from picker/suggestions; keeps everything). */
@@ -1650,14 +1650,23 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * describe. If THAT fails too the orphan is real, and it is logged with its full path rather than
    * swallowed — an orphan you can find is a different problem from one you cannot.
    */
-  const addAttachment = async (manuscriptId: string, file: File): Promise<Attachment> => {
+  const addAttachment = async (manuscriptId: string, file: File, onProgress?: (pct: number) => void): Promise<Attachment> => {
     if (!currentUser) throw new Error("Not signed in.");
     const uid = currentUser.id;
     const id = newAttachmentId();
     const path = attachmentStoragePath(uid, manuscriptId, id);
     const objectRef = storageRef(getStorage(app), path);
 
-    await uploadBytes(objectRef, file, { contentType: file.type });
+    /* ⚠️ RESUMABLE FOR THE PROGRESS EVENTS ONLY — `uploadBytes` resolves with no intermediate
+       state, and a 25 MB file over a slow line with no feedback reads as a hang. The task is still
+       awaited to completion; nothing here resumes anything across a reload. */
+    const task = uploadBytesResumable(objectRef, file, { contentType: file.type });
+    if (onProgress) {
+      task.on("state_changed", (snap) => {
+        onProgress(snap.totalBytes ? Math.round((snap.bytesTransferred / snap.totalBytes) * 100) : 0);
+      });
+    }
+    await task;
 
     const record: Attachment = {
       id, userId: uid, manuscriptId,

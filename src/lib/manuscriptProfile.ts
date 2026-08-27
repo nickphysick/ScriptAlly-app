@@ -198,11 +198,3 @@ export const synopsisMeta = (text: string | null): string | null => {
  */
 export const ATTACHMENTS_NOTE =
   "Files kept with the manuscript for your own reference. Nothing here is sent to an agent.";
-
-/**
- * ⚠️ NOT `0 files`. Attachments are unbuilt pending Storage, so there is nothing to count — and a
- * count of nought states that the feature ran and found none, which is a different claim from "this
- * does not work yet". The same distinction the counter on the public pages makes: live or absent,
- * never a fabricated zero.
- */
-export const ATTACHMENTS_EMPTY_META = "Not yet available";
