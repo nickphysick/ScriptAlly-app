@@ -442,4 +442,35 @@ await attempt("activity bookVersionId as a list (DENIED)", "Part A",
 await deleteDoc(ACT).catch(() => {});
 console.log(`  probe activity removed: ${(await getDoc(ACT)).exists() ? "NO — still present" : "yes"}`);
 
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   THE MANUSCRIPT'S OWN PROSE — the pitch and the working synopsis (book profile amendment 2)
+
+   ⚠️ `elevatorPitch` HAD EXISTED ON THE TYPE SINCE THE PITCH SHELF AND WAS NEVER ALLOWLISTED, so
+   every write of it was denied in SILENCE for the life of the field — the affectedKeys gotcha, and
+   the reason the Overview's pitch card was held read-only with a lock reading firestore.rules. Both
+   fields are what this deploy is FOR, so both are probed: an accepted write here is the difference
+   between an editor that saves and one that discards what the writer typed.
+
+   ⚠️ AND THE UNDO IS `deleteField()`, NOT `""`. Both clear by omitting the key, so writing an empty
+   string to undo would leave the document in a state the model says is impossible.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+console.log("\nmanuscript prose — the two fields amendment 2 allowlists:");
+if ((await getDoc(MSREF)).exists()) {
+  await attempt("manuscript elevatorPitch", "amendment 2",
+    () => updateDoc(MSREF, { elevatorPitch: "Rules probe — a fly that shouldn't exist." }),
+    () => updateDoc(MSREF, { elevatorPitch: deleteField() }));
+  await attempt("manuscript synopsis", "amendment 2",
+    () => updateDoc(MSREF, { synopsis: "Rules probe — the whole story, ending included." }),
+    () => updateDoc(MSREF, { synopsis: deleteField() }));
+  /* Bounded, or the field is free text: 4096 for the pitch, 32768 for the synopsis. */
+  await attempt("elevatorPitch over its cap (DENIED)", "amendment 2",
+    () => updateDoc(MSREF, { elevatorPitch: "x".repeat(4097) }),
+    () => updateDoc(MSREF, { elevatorPitch: deleteField() }));
+  await attempt("elevatorPitch as a number (DENIED)", "amendment 2",
+    () => updateDoc(MSREF, { elevatorPitch: 7 }),
+    () => updateDoc(MSREF, { elevatorPitch: deleteField() }));
+} else {
+  console.log("  ⚠️  seed-ms-1 missing — run the seed first");
+}
+
 process.exit(0);
