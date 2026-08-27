@@ -546,6 +546,56 @@ if ((await getDoc(MSREF)).exists()) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════
+   ATTACHMENT METADATA — the Firestore record beside the blob.
+
+   ⚠️ A WRONG-TYPED KNOWN FIELD IS AS BAD AS AN UNKNOWN ONE, and only one of the two is obvious. A
+   validator that checks `data.keys()` and forgets `is int` accepts a size of "big", which then
+   formats as NaN on the page and sorts unpredictably. So the probe sends each known field wrong as
+   well as sending an unknown one.
+
+   ⚠️ AND THE PATH CLAUSE IS PROBED, because it is the one integrity check that is not cosmetic: a
+   record may only point INTO its own owner's tree, under its own manuscript.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+console.log("\nattachment metadata — the record beside the blob:");
+const AID = "probe-att-1";
+const aref2 = doc(db, "users", uid, "attachments", AID);
+const apathFor = (ms, id) => `users/${uid}/manuscripts/${ms}/attachments/${id}`;
+const abase = (extra = {}) => ({
+  id: AID, userId: uid, manuscriptId: "seed-ms-1",
+  fileName: "probe.pdf", size: 1024, contentType: "application/pdf",
+  storagePath: apathFor("seed-ms-1", AID),
+  uploadedAt: new Date().toISOString(),
+  ...extra,
+});
+const adel = () => deleteDoc(aref2);
+
+await attempt("attachment, valid record", "storage pack",
+  () => setDoc(aref2, abase()), adel);
+await attempt("size as a string (DENIED)", "storage pack",
+  () => setDoc(aref2, abase({ size: "1024" })), adel);
+await attempt("size over 25 MB (DENIED)", "storage pack",
+  () => setDoc(aref2, abase({ size: 25 * 1024 * 1024 + 1 })), adel);
+await attempt("fileName empty (DENIED)", "storage pack",
+  () => setDoc(aref2, abase({ fileName: "" })), adel);
+await attempt("contentType as a number (DENIED)", "storage pack",
+  () => setDoc(aref2, abase({ contentType: 7 })), adel);
+await attempt("uploadedAt missing (DENIED)", "storage pack",
+  () => { const b = abase(); delete b.uploadedAt; return setDoc(aref2, b); }, adel);
+await attempt("an unknown field (DENIED)", "storage pack",
+  () => setDoc(aref2, abase({ colour: "blue" })), adel);
+await attempt("storagePath into another user (DENIED)", "storage pack",
+  () => setDoc(aref2, abase({ storagePath: `users/someone-else/manuscripts/seed-ms-1/attachments/${AID}` })), adel);
+await attempt("storagePath under another manuscript (DENIED)", "storage pack",
+  () => setDoc(aref2, abase({ storagePath: apathFor("some-other-ms", AID) })), adel);
+await attempt("doc id not matching data.id (DENIED)", "storage pack",
+  () => setDoc(doc(db, "users", uid, "attachments", "probe-att-2"), abase()),
+  () => deleteDoc(doc(db, "users", uid, "attachments", "probe-att-2")));
+/* ⚠️ HOW TO READ THIS BLOCK. Only the FIRST case should be ACCEPTED. If it is DENIED with all the
+   others, the ruleset predates this commit — the collection has no match block yet and default-deny
+   is answering, which looks identical to a working allowlist and is not one. */
+console.log("     ↑ only the first should be ACCEPTED; all denied = the deployed ruleset predates this commit");
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
    STORAGE RULES — the same probe treatment, for the caps that are real controls.
 
    ⚠️ "DENIED BY A RULE" AND "THERE IS NO BUCKET" ARE DIFFERENT FACTS AND MUST NOT COLLAPSE. Until

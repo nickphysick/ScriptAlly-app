@@ -167,6 +167,38 @@ service cloud.firestore {
         && (!data.keys().hasAll(['activePackageId']) || (data.activePackageId is string && data.activePackageId.size() <= 128));
     }
 
+    /**
+     * An attachment RECORD. The file itself lives in Cloud Storage and is guarded by storage.rules;
+     * this document is the index entry the page lists, and it is a separate write that can succeed
+     * or fail on its own.
+     *
+     * ⚠️ THE SIZE CAP IS ARTEFACT-LOCKED TO storage.rules AND TO `MAX_ATTACHMENT_BYTES`. Three
+     * copies of one number is two too many, so a lock asserts them equal — if they drift, the client
+     * permits an upload this rule then denies SILENTLY, which is the affectedKeys shape one
+     * collection along.
+     *
+     * ⚠️ THE CONTENT TYPE IS *NOT* RE-ALLOWLISTED HERE, DELIBERATELY. storage.rules owns what may
+     * actually be stored; a second copy of that list in a second file is a drift waiting to happen,
+     * and the failure it would prevent is cosmetic — a record mislabelling its own blob shows the
+     * wrong icon, it does not store anything the Storage rules refused.
+     *
+     * ⚠️ BUT THE PATH IS CONSTRAINED, and that one is not cosmetic: a record may only point INTO its
+     * own owner's tree, under its own manuscript. Without it a document could name someone else's
+     * blob path — unreadable, but a lie sitting in the database, and the kind that is discovered
+     * long after whoever wrote it has gone.
+     */
+    function isValidAttachment(data, userId) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId == userId
+        && data.manuscriptId is string && data.manuscriptId.size() <= 128
+        && data.fileName is string && data.fileName.size() >= 1 && data.fileName.size() <= 512
+        && data.size is int && data.size >= 0 && data.size <= 25 * 1024 * 1024
+        && data.contentType is string && data.contentType.size() >= 1 && data.contentType.size() <= 128
+        && data.storagePath is string && data.storagePath.size() <= 1024
+        && data.storagePath == 'users/' + userId + '/manuscripts/' + data.manuscriptId + '/attachments/' + data.id
+        && data.uploadedAt is string && data.uploadedAt.size() <= 64;
+    }
+
     function isValidVersion(data, userId) {
       return data.id is string && data.id.size() <= 128
         && data.manuscriptId is string && data.manuscriptId.size() <= 128
@@ -753,6 +785,7 @@ service cloud.firestore {
       }
 
       // ROUTE: SubmissionPackages
+
       match /packages/{packageId} {
         allow get, delete: if isOwner(userId) && isValidId(packageId);
         allow list: if isOwner(userId);
@@ -781,6 +814,30 @@ service cloud.firestore {
             // requests that arrived on something else.
             || !incoming().diff(existing()).affectedKeys().hasAny(['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId'])
           );
+      }
+
+      // ROUTE: manuscript attachments (index records; the files are in Cloud Storage)
+      //
+      // ⚠️ TOP-LEVEL, MIRRORING versions AND packages, NOT A SUBCOLLECTION UNDER THE MANUSCRIPT.
+      // Two reasons: cascade.ts's CascadeDoc.col is a union of TOP-LEVEL collections and db.tsx maps
+      // doc(db,"users",uid,col,id), so a subcollection needs the same special-case the per-query
+      // `activity` collection gets; and the manuscripts/{id}/notes SUBCOLLECTION was retired and is
+      // default-denied, so opening a new one there argues with a decision already taken.
+      match /attachments/{attachmentId} {
+        allow get, delete: if isOwner(userId) && isValidId(attachmentId);
+        allow list: if isOwner(userId);
+        // ⚠️ THE DOC ID IS THE STORAGE FILENAME, which is what `isValidAttachment`'s path clause
+        // ties together. isValidId bounds it to [A-Za-z0-9_-], so it can never contain a slash and
+        // cannot escape its own directory.
+        allow create: if isOwner(userId) && isValidId(attachmentId)
+          && isValidAttachment(incoming(), userId)
+          && incoming().id == attachmentId;
+        // ⚠️ ONLY THE DISPLAY NAME IS MUTABLE. Size, type, path and manuscript are facts about a
+        // blob that already exists; letting any of them move would let a record stop describing the
+        // file it points at, which is worse than having no record.
+        allow update: if isOwner(userId) && isValidId(attachmentId)
+          && isValidAttachment(incoming(), userId)
+          && incoming().diff(existing()).affectedKeys().hasOnly(['fileName']);
       }
 
       // ROUTE: Agents

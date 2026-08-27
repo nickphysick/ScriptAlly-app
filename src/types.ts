@@ -355,6 +355,27 @@ export enum ComponentType {
   FULL_MANUSCRIPT = "Full Manuscript",
 }
 
+/**
+ * A file kept with a manuscript. The BLOB lives in Cloud Storage at `storagePath`; this record is
+ * the index entry the page lists, and it is a separate write that can succeed or fail on its own.
+ *
+ * ⚠️ TOP-LEVEL AT `users/{uid}/attachments/{id}`, mirroring versions and packages — NOT a
+ * subcollection under the manuscript. `cascade.ts`'s `CascadeDoc.col` is a union of top-level
+ * collections, and the manuscripts/{id}/notes subcollection was retired and default-denied.
+ */
+export interface Attachment {
+  id: string;
+  userId: string;
+  manuscriptId: string;
+  /** As the writer named it. NOT the document id — see `newAttachmentId`. */
+  fileName: string;
+  size: number;
+  contentType: string;
+  /** Composed only by `attachmentStoragePath`; the rules check it character for character. */
+  storagePath: string;
+  uploadedAt: string;
+}
+
 export interface ManuscriptVersion {
   id: string;
   manuscriptId: string;

@@ -88,7 +88,16 @@ const writeBatch: typeof _writeBatch = ((...args: Parameters<typeof _writeBatch>
   return batch;
 }) as typeof _writeBatch;
 
-import { db, auth, handleFirestoreError, OperationType } from "./firebase";
+import { db, auth, app, handleFirestoreError, OperationType } from "./firebase";
+/**
+ * ⚠️ THE FIRST `firebase/storage` IMPORT IN `src/`. Until this commit the upload fence was ABSENCE
+ * — no import, no bucket block, no rules — and several comments cited that absence as the reason
+ * the attachments panel rendered empty. Those comments are now wrong wherever they still say it;
+ * the fence is `storage.rules`, which is a real control rather than a missing dependency.
+ */
+import { getStorage, ref as storageRef, uploadBytes, deleteObject, getDownloadURL } from "firebase/storage";
+import { Attachment } from "../types";
+import { attachmentStoragePath, newAttachmentId } from "./attachments";
 import { TodoWriteError, classifyWriteError } from "./todoWrite";
 import { deriveQueryFields, getActivityTime, normalizeResultingStatus } from "./queryDerivation";
 import { queriesForManuscript, queriesForAgent, activityIdsForQueries, flagIdsForCascade, cascadePlan, chunkArray } from "./cascade";
@@ -231,6 +240,19 @@ interface DbContextType {
    */
   updateManuscriptQuiet: (id: string, fields: Partial<Manuscript>) => Promise<void>;
   deleteManuscript: (id: string) => Promise<void>;
+
+  // Attachment Actions — the blob lives in Storage, the record in Firestore.
+  /** The records, straight from the snapshot listener. A pending upload is NEVER in here. */
+  attachments: Attachment[];
+  /**
+   * ⚠️ THESE TWO THROW. Every other write in this file swallows into `handleFirestoreError`, which
+   * is right for a fire-and-forget field edit and WRONG here: the upload UI has to be able to tell
+   * a file that landed from one that did not, and a swallowed rejection is indistinguishable from
+   * success. That is the exact silent-discard the pitch field had for months.
+   */
+  addAttachment: (manuscriptId: string, file: File) => Promise<Attachment>;
+  deleteAttachment: (id: string) => Promise<void>;
+  attachmentUrl: (a: Attachment) => Promise<string>;
   /** Shelve/reactivate — a reversible lifecycle overlay (hides from picker/suggestions; keeps everything). */
   setManuscriptShelved: (id: string, shelved: boolean) => Promise<void>;
   
@@ -450,6 +472,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [smartImportUsage, setSmartImportUsage] = useState<SmartImportUsage | null>(null);
   const [manuscripts, setManuscripts] = useState<Manuscript[]>([]);
   const [versions, setVersions] = useState<ManuscriptVersion[]>([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [packages, setPackages] = useState<SubmissionPackage[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [communityAgents, setCommunityAgents] = useState<CommunityAgent[]>([]);
@@ -480,6 +503,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     let unsubEntitlement: () => void = () => {};
     let unsubManuscripts: () => void = () => {};
     let unsubVersions: () => void = () => {};
+    let unsubAttachments: () => void = () => {};
     let unsubPackages: () => void = () => {};
     let unsubAgents: () => void = () => {};
     let unsubQueries: () => void = () => {};
@@ -505,6 +529,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         unsubEntitlement();
         unsubManuscripts();
         unsubVersions();
+      unsubAttachments();
+        unsubAttachments();
         unsubPackages();
         unsubAgents();
         unsubQueries();
@@ -623,6 +649,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           setVersions(arr);
         }, (error) => {
           handleFirestoreError(error, OperationType.GET, `users/${uid}/versions`);
+        });
+
+        // Attachments snapshot reader
+        //
+        // ⚠️ THIS LISTENER IS THE ONLY SOURCE THE LIST RENDERS FROM, WHICH IS THE STRUCTURAL HALF OF
+        // "a denied upload cannot render as success". A pending row is held in component state and
+        // is never merged into this array, so a file appears in the list only once Firestore has
+        // acknowledged its record. Optimism cannot leak in, because there is nowhere to put it.
+        unsubAttachments = onSnapshot(collection(db, "users", uid, "attachments"), (snap) => {
+          const arr: Attachment[] = [];
+          snap.forEach(d => arr.push(d.data() as Attachment));
+          setAttachments(arr);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/attachments`);
         });
 
         // Packages snapshot reader
@@ -749,6 +789,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       unsubEntitlement();
       unsubManuscripts();
       unsubVersions();
+      unsubAttachments();
       unsubPackages();
       unsubAgents();
       unsubQueries();
@@ -1591,6 +1632,81 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       handleFirestoreError(e, OperationType.DELETE, `users/${uid}/manuscripts/${id}`);
     }
   };
+
+  /* ── Attachments ─────────────────────────────────────────────────────────────────────────────
+   *
+   * ⚠️ THESE THROW RATHER THAN SWALLOW, DELIBERATELY, AND IT IS THE ONE PLACE IN THIS FILE THAT
+   * DOES. `handleFirestoreError` is right for a field edit nobody is watching; here the caller has
+   * to be able to tell a file that landed from one that did not. A swallowed rejection returns
+   * successfully, and the UI then shows a file the writer does not have.
+   */
+
+  /**
+   * Blob first, then the record — the same order the deletion cascade uses, for the same reason.
+   *
+   * ⚠️ AND THE RECORD'S FAILURE UNDOES THE BLOB, BEST-EFFORT. A record write can be denied while the
+   * upload succeeded (a rules drift, a malformed field), which would leave a file nothing points at:
+   * invisible, billed, and undiscoverable. So a failed record deletes the object it was going to
+   * describe. If THAT fails too the orphan is real, and it is logged with its full path rather than
+   * swallowed — an orphan you can find is a different problem from one you cannot.
+   */
+  const addAttachment = async (manuscriptId: string, file: File): Promise<Attachment> => {
+    if (!currentUser) throw new Error("Not signed in.");
+    const uid = currentUser.id;
+    const id = newAttachmentId();
+    const path = attachmentStoragePath(uid, manuscriptId, id);
+    const objectRef = storageRef(getStorage(app), path);
+
+    await uploadBytes(objectRef, file, { contentType: file.type });
+
+    const record: Attachment = {
+      id, userId: uid, manuscriptId,
+      fileName: file.name,
+      size: file.size,
+      contentType: file.type,
+      storagePath: path,
+      uploadedAt: new Date().toISOString(),
+    };
+    try {
+      await setDoc(doc(db, "users", uid, "attachments", id), record);
+    } catch (e) {
+      await deleteObject(objectRef).catch((cleanupError) => {
+        console.error(
+          `[attachments] ORPHANED BLOB — the record write failed and the object could not be removed. ` +
+          `Path: ${path}`, cleanupError,
+        );
+      });
+      throw e;
+    }
+    return record;
+  };
+
+  /**
+   * ⚠️ BLOB FIRST, THEN THE RECORD, AND A FAILED BLOB DOES NOT STOP THE RECORD GOING. Deleting the
+   * object first means a failure strands a RECORD — visible in the list, retryable, cheap. The
+   * reverse strands a BLOB: invisible and billed. Always fail toward the thing you can see.
+   *
+   * ⚠️ AND THE FAILURE IS LOGGED WITH ITS PATH, NEVER JUST `.catch(() => {})`. A dropped failure is
+   * indistinguishable from no failure, which is the same problem as a silent orphan one level up.
+   */
+  const deleteAttachment = async (id: string): Promise<void> => {
+    if (!currentUser) throw new Error("Not signed in.");
+    const uid = currentUser.id;
+    const record = attachments.find((a) => a.id === id);
+    if (record) {
+      await deleteObject(storageRef(getStorage(app), record.storagePath)).catch((e) => {
+        console.error(
+          `[attachments] blob delete failed; removing the record anyway and leaving an orphan. ` +
+          `Path: ${record.storagePath}`, e,
+        );
+      });
+    }
+    await deleteDoc(doc(db, "users", uid, "attachments", id));
+  };
+
+  /** A short-lived download URL. Throws, so a broken link surfaces rather than rendering as href="". */
+  const attachmentUrl = async (a: Attachment): Promise<string> =>
+    getDownloadURL(storageRef(getStorage(app), a.storagePath));
 
   // Shelve / reactivate — writes the single `shelved` overlay flag (reversible). No cascade, no
   // activity-log noise: queries, stats, and history are all kept; only the picker/suggestions hide it.
@@ -3580,6 +3696,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         updateManuscript,
         updateManuscriptQuiet,
         deleteManuscript,
+        attachments,
+        addAttachment,
+        deleteAttachment,
+        attachmentUrl,
         setManuscriptShelved,
         addVersion,
         updateVersion,
