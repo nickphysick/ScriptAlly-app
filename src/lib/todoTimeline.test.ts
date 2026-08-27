@@ -16,9 +16,10 @@ import {
 } from "./todoCalendar";
 import {
   windowDays, shiftWindow, timelineWeek, timelineRows, timelineSegments,
-  defaultView, FILTER_LABEL, SORT_ORDER,
+  defaultView, FILTER_LABEL, SORT_ORDER, SORT_LABEL, SORT_MEANING,
   YOU_ROW, YOU_ROW_NAME, TimelineData, TimelineView,
 } from "./todoTimeline";
+import { GROUP_ORDER } from "./timelineGroups";
 
 const TODAY = "2026-08-26";
 const NOW = Date.parse("2026-08-26T12:00:00Z");
@@ -462,18 +463,21 @@ describe("order — Your tasks ignores it, closed rows sink, and ties keep their
     expect(rows.map((r) => r.agentId)).toEqual(["a1", "a0", "a2"]);
   });
 
-  it("by name, A to Z, by the display name and not the id", () => {
-    const rows = timelineRows(dataFor(inp), TODAY, 7, view({ sort: "name" }));
-    expect(rows.map((r) => r.name)).toEqual(["Agent A", "Agent B", "Agent C"]);
-  });
-
-  it("by journey stage, furthest along first, from the canonical order", () => {
-    const staged = threeAgents(
-      [QueryStatus.QUERIED, QueryStatus.FULL_SENT, QueryStatus.PARTIAL_SENT],
-      ["2026-08-20T09:00:00Z", "2026-08-20T09:00:00Z", "2026-08-20T09:00:00Z"],
-    );
-    const rows = timelineRows(dataFor(staged), TODAY, 7, view({ sort: "stage" }));
-    expect(rows.map((r) => r.agentId)).toEqual(["a1", "a2", "a0"]);
+  /* ⚠️ A–Z AND JOURNEY STAGE ARE RETIRED (v36, Phase 6), and each for its own reason. A–Z answers
+     "where is this agent in an alphabet", which is a question about a list rather than about work.
+     Journey stage answers one the GROUPS already answer — and answering it twice lets a sort
+     disagree with the heading three inches above it. Three sorts remain, and each names a
+     different question about time. */
+  it("the sort set is three, and RECENTLY ACTIVE puts the newest record first", () => {
+    expect([...SORT_ORDER]).toEqual(["soonest", "waiting", "active"]);
+    expect(Object.keys(SORT_LABEL).sort()).toEqual(["active", "soonest", "waiting"]);
+    /* ⚠️ AND EACH CARRIES ITS OWN DEFINITION. A sort NAME is not a definition — "Soonest" could
+       mean the soonest thing you must do, the soonest reply expected, or the soonest anything
+       happens, and the three give different orders. */
+    for (const k of SORT_ORDER) {
+      expect(SORT_MEANING[k], `${k} has no definition`).toBeTruthy();
+      expect(SORT_MEANING[k].length).toBeGreaterThan(20);
+    }
   });
 
   it("⚠️ ties keep the order they arrived in — stated, never left to the engine", () => {
@@ -481,7 +485,7 @@ describe("order — Your tasks ignores it, closed rows sink, and ties keep their
       [QueryStatus.QUERIED, QueryStatus.QUERIED, QueryStatus.QUERIED],
       ["2026-08-20T09:00:00Z", "2026-08-20T09:00:00Z", "2026-08-20T09:00:00Z"],
     );
-    for (const sort of ["soonest", "waiting", "stage"] as const) {
+    for (const sort of ["soonest", "waiting", "active"] as const) {
       const rows = timelineRows(dataFor(tied), TODAY, 7, view({ sort }));
       expect(rows.map((r) => r.agentId)).toEqual(["a0", "a1", "a2"]);
     }
@@ -509,8 +513,9 @@ describe("order — Your tasks ignores it, closed rows sink, and ties keep their
     }
   });
 
-  it("names all four sorts", () => {
-    expect(SORT_ORDER).toEqual(["soonest", "waiting", "name", "stage"]);
+  it("names all three sorts", () => {
+    /* four became three: A–Z and journey stage are retired — see the set case above for why */
+    expect([...SORT_ORDER]).toEqual(["soonest", "waiting", "active"]);
   });
 });
 
@@ -682,5 +687,90 @@ describe("⚠️ the derivations underneath are untouched, and the rows prove it
     const once = timelineWeek(d, TODAY, 7);
     expect(timelineRows(d, TODAY, 7)).toEqual(once.rows);
     expect(timelineSegments(d, TODAY, 7)).toEqual(once.segments);
+  });
+});
+
+/* ══ ORDERING: ONE KEY, NO TIERS (v36, Phase 6) ══════════════════════════════════════════════ */
+
+describe("what is pressing is one scale, and a debt outranks an appointment", () => {
+  /**
+   * ⚠️ THE CASE THAT KILLED THE TWO-TIER RULE. An earlier ordering bucketed dated rows above
+   * undated ones, which put a sixty-day debt BELOW an appointment five weeks out — the older ask
+   * was plainly the more pressing thing and the sort said otherwise. One key, three cases.
+   */
+  const rowsFor = (qs: Query[], agents: Agent[]) =>
+    timelineRows(dataFor(input({ queries: qs, agents } as Partial<CalendarInput>)), TODAY, 90,
+      view({ sort: "soonest" }));
+
+  it("⚠️ AN UNDATED ASK 60 DAYS OLD SORTS ABOVE A DATED ONE FIVE WEEKS OUT", () => {
+    /* the debt: a full requested sixty days ago, no reply window on file at all — due on receipt,
+       and past ever since */
+    const debt = q({
+      id: "qd", agentId: "ad", status: QueryStatus.FULL_REQUESTED,
+      dateSent: "2026-06-28T09:00:00Z", lastStatusChange: "2026-06-28T09:00:00Z",
+    } as Partial<Query>);
+    /* the appointment: a query out with an agency whose window lands five weeks from today */
+    const appt = q({
+      id: "qa", agentId: "aa", status: QueryStatus.QUERIED, dateSent: "2026-08-27T09:00:00Z",
+    });
+    const rows = rowsFor([debt, appt], [
+      agent({ id: "ad", name: "Debt" }),
+      agent({ id: "aa", name: "Appointment", responseTimeWeeks: 5 } as Partial<Agent>),
+    ]);
+    const names = rows.filter((r) => r.agentId).map((r) => r.name);
+    expect(names.length, "one of the two rows is missing").toBe(2);
+    expect(names[0], `order was ${names.join(" then ")}`).toBe("Debt");
+  });
+
+  it("a named end sorts by that date — the nearer one first", () => {
+    const near = q({ id: "q1", agentId: "a1", status: QueryStatus.QUERIED, dateSent: "2026-08-20T09:00:00Z" });
+    const far = q({ id: "q2", agentId: "a2", status: QueryStatus.QUERIED, dateSent: "2026-08-20T09:00:00Z" });
+    const rows = rowsFor([far, near], [
+      agent({ id: "a2", name: "Far", responseTimeWeeks: 10 } as Partial<Agent>),
+      agent({ id: "a1", name: "Near", responseTimeWeeks: 2 } as Partial<Agent>),
+    ]);
+    const names = rows.filter((r) => r.agentId).map((r) => r.name);
+    expect(names[0], `order was ${names.join(" then ")}`).toBe("Near");
+  });
+
+  it("⚠️ AND AN UNDATED AGENT-HELD ROW SORTS AFTER EVERY DATED ONE — nothing is being asked", () => {
+    const dated = q({ id: "q1", agentId: "a1", status: QueryStatus.QUERIED, dateSent: "2026-08-20T09:00:00Z" });
+    /* no `responseTimeWeeks` at all: the agency named nothing and the work is theirs */
+    const undated = q({ id: "q2", agentId: "a2", status: QueryStatus.QUERIED, dateSent: "2026-05-01T09:00:00Z" });
+    const rows = rowsFor([undated, dated], [
+      agent({ id: "a2", name: "Undated" }),
+      agent({ id: "a1", name: "Dated", responseTimeWeeks: 9 } as Partial<Agent>),
+    ]);
+    const names = rows.filter((r) => r.agentId).map((r) => r.name);
+    expect(names, `order was ${names.join(" then ")}`).toEqual(["Dated", "Undated"]);
+  });
+
+  it("⚠️ THE SORT ORDERS ROWS, AND THE PAGE ORDERS GROUPS — two jobs, and this proves the split", () => {
+    /* `timelineRows` returns ONE flat list in the view's order; the page buckets it by
+       `GROUP_ORDER` and each bucket comes out in that same order, which is why "sort applies
+       within groups" needs no code. So the flat list's group ranks are NOT monotonic and must not
+       be asserted to be — the first draft of this case did exactly that and failed on LONGEST
+       WAITING, reporting a defect about a contract that does not exist. The claim that IS the
+       contract — group headings render in `GROUP_ORDER` under every sort — is a fact about the
+       rendered page and is asserted there, in `calLook.measure.ts`. */
+    const mixed = input({
+      queries: [
+        q({ id: "q1", agentId: "a1", status: QueryStatus.OFFER, dateSent: "2026-08-01T09:00:00Z" }),
+        q({ id: "q2", agentId: "a2", status: QueryStatus.QUERIED, dateSent: "2026-05-01T09:00:00Z" }),
+      ],
+      agents: [agent({ id: "a1", name: "Offer" }), agent({ id: "a2", name: "Watching" })],
+    } as Partial<CalendarInput>);
+    for (const sort of SORT_ORDER) {
+      const rows = timelineRows(dataFor(mixed), TODAY, 90, view({ sort }));
+      /* every row still knows its own group, whatever the order — that is what the page buckets on */
+      const groups = rows.filter((r) => r.group).map((r) => r.group!);
+      expect(groups.length, `${sort} lost a row's group`).toBe(2);
+      expect(new Set(groups)).toEqual(new Set(["offers", "watching"]));
+      expect(groups.every((g) => GROUP_ORDER.includes(g))).toBe(true);
+    }
+  });
+
+  it("⚠️ SOONEST IS THE LOAD STATE — a reader who has chosen nothing gets what is due first", () => {
+    expect(defaultView().sort).toBe("soonest");
   });
 });

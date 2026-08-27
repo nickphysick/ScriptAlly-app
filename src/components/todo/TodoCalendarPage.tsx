@@ -50,7 +50,7 @@ import {
 } from "../../lib/todoCalendar";
 import {
   windowDays, shiftWindow, timelineWeek, defaultView,
-  FILTER_LABEL, SORT_LABEL, SORT_ORDER,
+  FILTER_LABEL, SORT_LABEL, SORT_ORDER, SORT_MEANING,
   YOU_ROW,
   type TimelineItem, type TimelineRow, type TimelineView,
   type RowSort, type TimelineFilter,
@@ -216,9 +216,12 @@ const Marker: React.FC<{ n: BarNode; selected: boolean; onPick: () => void }> = 
 
 /** A dropdown that names its current value — the same shape for Show and for Sort. */
 function Menu<T extends string>({
-  label, value, options, labels, onPick,
+  label, value, options, labels, meanings, onPick,
 }: {
-  label: string; value: T; options: readonly T[]; labels: Record<T, string>; onPick: (v: T) => void;
+  label: string; value: T; options: readonly T[]; labels: Record<T, string>;
+  /** what each option MEANS — a sort name is not a definition; see `SORT_MEANING` */
+  meanings?: Record<T, string>;
+  onPick: (v: T) => void;
 }) {
   const [open, setOpen] = useState(false);
   const wrap = React.useRef<HTMLSpanElement>(null);
@@ -252,7 +255,8 @@ function Menu<T extends string>({
           {options.map((o) => (
             <button key={o} type="button" aria-current={o === value}
               onClick={() => { onPick(o); setOpen(false); }}>
-              {labels[o]}
+              <span className="tl-menuname">{labels[o]}</span>
+              {meanings && <span className="tl-menuwhat">{meanings[o]}</span>}
             </button>
           ))}
         </div>
@@ -1363,8 +1367,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                   onClick={() => setOnlyAsks(true)}>RIGHT NOW</button>
               </span>
 
+              {/* ⚠️ EACH OPTION CARRIES ITS OWN DEFINITION. "Soonest" could mean the soonest thing
+                  you must do, the soonest reply expected, or the soonest anything happens — three
+                  different orders, and a reader has no way to tell which they got from the name. */}
               <Menu<RowSort> label="Sort" value={view.sort} options={SORT_ORDER}
-                labels={SORT_LABEL} onPick={(v) => setView1("sort", v)} />
+                labels={SORT_LABEL} meanings={SORT_MEANING}
+                onPick={(v) => setView1("sort", v)} />
               <input
                 className="tl-search" type="search" value={view.search}
                 aria-label="Search agents, agencies and tasks"

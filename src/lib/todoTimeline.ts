@@ -229,14 +229,32 @@ export interface TimelineRow {
    nothing in the week at all, which is the empty row this pack exists to remove. `Needs me` is the
    `Your move` filter with a different name. Three controls, one rule, and the rule is shorter. */
 
-export type RowSort = "soonest" | "waiting" | "name" | "stage";
+/**
+ * ⚠️ THREE SORTS, AND `name` AND `stage` ARE RETIRED (v36, Phase 6). A–Z answers "where is this
+ * agent in an alphabet", which is a question about a list rather than about work; journey stage
+ * answers one the GROUPS already answer, and answering it twice lets a sort disagree with the
+ * heading three inches above it.
+ */
+export type RowSort = "soonest" | "waiting" | "active";
 export const SORT_LABEL: Record<RowSort, string> = {
   soonest: "Soonest",
   waiting: "Longest waiting",
-  name: "Agent name",
-  stage: "Journey stage",
+  active: "Recently active",
 };
-export const SORT_ORDER: readonly RowSort[] = ["soonest", "waiting", "name", "stage"];
+export const SORT_ORDER: readonly RowSort[] = ["soonest", "waiting", "active"];
+
+/**
+ * What each sort MEANS, in the writer's own terms — rendered beside its name in the control.
+ *
+ * ⚠️ A SORT NAME IS NOT A DEFINITION. "Soonest" could mean the soonest thing you must do, the
+ * soonest reply expected, or the soonest anything happens; the three give different orders and a
+ * reader has no way to tell which they got. The definition ships with the control.
+ */
+export const SORT_MEANING: Record<RowSort, string> = {
+  soonest: "What is due first — a named date, or an ask already past.",
+  waiting: "Longest since you sent anything, whatever has happened since.",
+  active: "Most recently recorded first.",
+};
 
 /**
  * ⚠️ `kinds` IS RETIRED (Porcelain, Phase 2), AND THE FIELD WENT WITH THE CONTROL RATHER THAN
@@ -289,6 +307,18 @@ export interface TimelineData {
 }
 
 /* ── identity ──────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * The base for a row with nothing dated about it.
+ *
+ * ⚠️ ONE SCALE, NOT TWO TIERS. An undated agent-held row sorts after every dated one, and among
+ * themselves by longest waiting — and both facts are ONE number rather than a second comparator
+ * that could disagree with the first. The base is beyond any real date, and the row's own
+ * `waitingFrom` is added to it, so the longest wait (the smallest `waitingFrom`) gets the smallest
+ * key inside the block.
+ */
+const PRESSING_BASE = 8.64e15;
+const PRESSING_NONE = Number.POSITIVE_INFINITY;
 
 export const YOU_ROW = "you";
 export const YOU_ROW_NAME = "Your tasks";
@@ -387,6 +417,10 @@ interface Draft {
   soonest: number;
   waitingFrom: number;
   stage: number;
+  /** the newest recorded event on this row, ms — `-Infinity` where nothing is on the record */
+  lastActive: number;
+  /** what is pressing, as one comparable key in ms — see `pressingFrom` */
+  pressingAt?: number;
   order: number;
 }
 
@@ -427,7 +461,7 @@ export function timelineWeek(
        outstayed its week and delete it, which is why the group is assigned per row below and the
        pinned row is exempted there in one place. */
     facts: [], lastClosed: null, copy: null, copies: [], status: null, sentence: "",
-    soonest: Infinity, waitingFrom: Infinity, stage: -1, order: -1,
+    soonest: Infinity, waitingFrom: Infinity, stage: -1, lastActive: -Infinity, order: -1,
   };
   drafts.set(YOU_ROW, you);
 
@@ -440,7 +474,7 @@ export function timelineWeek(
       key, agentId: null, name: title, agency: TASK_ROW_AGENCY,
       dot: "self", closed: false, items: [], manuscripts: [], held: 0, hasLive: true,
       facts: [], lastClosed: null, copy: null, copies: [], status: null, sentence: "",
-      soonest: Infinity, waitingFrom: Infinity, stage: -1, order: drafts.size,
+      soonest: Infinity, waitingFrom: Infinity, stage: -1, lastActive: -Infinity, order: drafts.size,
     };
     drafts.set(key, d);
     return d;
@@ -517,6 +551,10 @@ export function timelineWeek(
       items: [], manuscripts: [], held: 0, hasLive,
       soonest: Infinity,
       waitingFrom: Infinity,
+      /* ⚠️ THE NEWEST RECORDED EVENT ON THIS ROW, filled by the record pass below. `-Infinity` is
+         "nothing on the record", which SINKS in RECENTLY ACTIVE rather than tying with every other
+         empty row — the same asymmetry `soonest` and `waitingFrom` already use. */
+      lastActive: -Infinity,
       /* journey stage — the most advanced LIVE query's place in the canonical order. Derived from
          `STATUS_ORDER`, never a second list of statuses written out here. */
       stage: mine.reduce((best, q) => {
@@ -551,6 +589,31 @@ export function timelineWeek(
        */
       copy: lead ? copyOf(lead, agent) : null,
       copies,
+      /**
+       * ⚠️ WHAT IS PRESSING, AS ONE KEY (v36, Phase 6). The most pressing of the row's live
+       * queries wins — a relationship is as urgent as its most urgent thread. See `pressingFrom`
+       * for the three cases and why they share one scale rather than bucketing.
+       */
+      pressingAt: (() => {
+        const live = mine.filter((qq) => !isTerminalStatus(qq.status));
+        if (!live.length) return undefined;
+        const keys = live.map((qq) => {
+          const named = namedEndFor(qq as Query, agent ?? null, { today: data.today }).end;
+          if (named) return new Date(`${named.ymd}T12:00:00`).getTime();
+          if (sideOf(qq.status as QueryStatus) === "yours") {
+            /* ⚠️ DUE ON RECEIPT. Nobody named a date, but the agency asked — so it was due the day
+               it arrived, and it has been past ever since. The longer it has been past the more
+               pressing it is, which falls out of the scale rather than needing a tier. */
+            const asked = ymdOf(qq.lastStatusChange) ?? ymdOf(qq.dateSent);
+            return asked ? new Date(`${asked}T12:00:00`).getTime() : PRESSING_BASE;
+          }
+          /* ⚠️ UNDATED AND WITH THE AGENT: nothing is being asked, so it sorts after everything
+             dated — and among its own kind by longest waiting, in the same number. */
+          const sent = ymdOf(qq.dateSent);
+          return PRESSING_BASE + (sent ? new Date(`${sent}T12:00:00`).getTime() : 0);
+        });
+        return Math.min(...keys);
+      })(),
       /* the head's sentence and the note read the SAME facts — see `copyOf` above */
       sentence: lead ? rowSentence(copyOf(lead, agent), data.today) : "",
       order: drafts.size,
@@ -734,6 +797,13 @@ export function timelineWeek(
         data.recordFor(ymd).filter((r) => r.queryId === q.id).map((r) => ({ r, i })))
         .sort((a, b) => a.i - b.i)
         .map((x) => x.r);
+      /* ⚠️ THE NEWEST RECORDED EVENT FEEDS `RECENTLY ACTIVE`, and it reads the same `recordFor` the
+         bar's own nodes come from — never a second scan of the feed, which is how two surfaces come
+         to disagree about when something last happened. */
+      for (const r of recs) {
+        const t = new Date(`${r.ymd}T12:00:00`).getTime();
+        if (Number.isFinite(t) && t > row.lastActive) row.lastActive = t;
+      }
       /* the card's own words for a your-move stretch — `pillLabel`'s output, never re-summarised */
       const card = win.flatMap((ymd) => data.itemsFor(ymd))
         .find((it) => it.card?.relatedRecordId === q.id);
@@ -820,17 +890,39 @@ export function timelineWeek(
 
   /* ── order ──────────────────────────────────────────────────────────────────────────────── */
   const rest = kept.filter((r) => !r.key.startsWith("task-") && r.key !== YOU_ROW);
+  /**
+   * ONE COMPARABLE KEY FOR "what is pressing", in ms.
+   *
+   * ⚠️ ONE KEY, NOT TWO TIERS. An earlier rule bucketed dated rows above undated ones, which put a
+   * sixty-day debt BELOW an appointment five weeks out — the older ask was the more pressing thing
+   * and the sort said otherwise. Three cases, one scale:
+   *
+   *   · a named end            → that date. It is when this becomes due.
+   *   · no named end, YOURS    → the day the ask arrived. It was due on receipt, so it is already
+   *                              past, and the longer it has been past the more pressing it is —
+   *                              which falls out of the scale rather than needing a tier.
+   *   · no named end, THEIRS   → undated. Nothing is being asked, so it sorts after everything
+   *                              dated, and among themselves by longest waiting.
+   *
+   * ⚠️ THE UNDATED AGENT-HELD ROWS TAKE `Infinity` MINUS THEIR WAIT, so "after the dated" and
+   * "longest waiting first among themselves" are one number rather than a second comparator that
+   * could disagree with the first.
+   */
+  const pressingFrom = (d: Draft): number => d.pressingAt ?? PRESSING_NONE;
+
   const cmp: Record<RowSort, (a: Draft, b: Draft) => number> = {
     /* ⚠️ COMPARED, NOT SUBTRACTED. Both keys are `Infinity` on a row that holds nothing, and
        `Infinity - Infinity` is NaN while `Infinity - 3` is Infinity — neither of which is a
        comparator's answer. Subtraction would have let an empty row tie with every other one
        instead of sinking, silently, in the two sorts that are the page's defaults. */
-    soonest: (a, b) => (a.soonest === b.soonest ? 0 : a.soonest < b.soonest ? -1 : 1),
-    /* longest waiting first: the OLDEST send wins, and a row with no band sinks */
+    soonest: (a, b) => {
+      const x = pressingFrom(a); const y = pressingFrom(b);
+      return x === y ? 0 : x < y ? -1 : 1;
+    },
+    /* longest waiting first: the OLDEST send wins, and a row with no send sinks */
     waiting: (a, b) => (a.waitingFrom === b.waitingFrom ? 0 : a.waitingFrom < b.waitingFrom ? -1 : 1),
-    name: (a, b) => a.name.localeCompare(b.name, "en-GB", { sensitivity: "base" }),
-    /* furthest along the journey first; a row with no live query is -1 and sinks */
-    stage: (a, b) => b.stage - a.stage,
+    /* most recently recorded first; a row with nothing on the record sinks */
+    active: (a, b) => (a.lastActive === b.lastActive ? 0 : a.lastActive > b.lastActive ? -1 : 1),
   };
   rest.sort((a, b) => {
     /* ⚠️ A CLOSED ROW SINKS BELOW EVERY LIVE ONE, IN EVERY SORT — it is history sitting among

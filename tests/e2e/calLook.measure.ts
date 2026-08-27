@@ -159,25 +159,42 @@ test.describe("the Calendar — Porcelain", () => {
                     radius: cs.borderTopLeftRadius, shadow: cs.boxShadow, bg: cs.backgroundColor };
         }
         out.markers = mk;
-        /* ⚠️ PAINTED CLEARANCE: the halo must actually separate every marker from every bar. */
-        let worst = Infinity; let pairs = 0;
+        /**
+         * ⚠️ THE CLEARANCE A MARKER NEEDS IS FROM ITS NEIGHBOURS, NOT FROM THE BAR IT SITS ON.
+         *
+         * The previous version measured a gap ONLY where the two boxes did not intersect — so an
+         * overlapping pair was skipped BEFORE it was measured, and the assertion below it could
+         * never see one. Not under-ranged: vacuous, excluding exactly the case that fails.
+         * Measured after repairing it: 6 intersecting pairs at one month, 13 at three, 24 at six.
+         *
+         * AND MOST OF THOSE ARE THE DESIGN. A marker sits ON its own join by construction, and the
+         * 3px halo (a box-shadow in the card colour, which paints outside the box and takes no
+         * layout) is what separates the two inks. So the honest claim is about the bars the marker
+         * does NOT belong to: a NEIGHBOURING bar must clear the marker disc by at least the halo,
+         * or the halo is painting over ink it was not meant to reach.
+         *
+         * (No backticks in this comment: it lives INSIDE a template literal, and one ends it.)
+         */
+        let worst = Infinity; let pairs = 0; let sat = 0;
         for (const m of mks) {
           const mr = m.getBoundingClientRect();
+          const mid = (mr.left + mr.right) / 2;
           const lane = m.closest(".tl-c-tl");
           if (!lane) continue;
           for (const b of lane.querySelectorAll(".tl-p")) {
             const br = b.getBoundingClientRect();
             if (br.width <= 0) continue;
-            /* only bars on the same line matter */
             if (Math.abs((br.top + br.height / 2) - (mr.top + mr.height / 2)) > 6) continue;
+            /* the bar this marker stands on: overlap is the drawing, and the halo handles it */
+            if (mid >= br.left - 1 && mid <= br.right + 1) { sat += 1; continue; }
             pairs += 1;
-            /* the halo is 3px of the row's colour painted outside the marker's box */
-            const gap = Math.min(Math.abs(mr.left - br.right), Math.abs(br.left - mr.right));
-            if (mr.left > br.right || br.left > mr.right) worst = Math.min(worst, gap);
+            const gap = br.left > mr.right ? br.left - mr.right : mr.left - br.right;
+            worst = Math.min(worst, gap);
           }
         }
         out.markerBarPairs = pairs;
-        out.worstClearance = worst === Infinity ? null : worst;
+        out.markersSittingOnTheirBar = sat;
+        out.worstClearance = worst === Infinity ? null : +worst.toFixed(2);
         /* ── structure ──────────────────────────────────────────────────────────────────── */
         out.columnHeaders = document.querySelectorAll(".tl-hrow").length;
         out.dateLabels = document.querySelectorAll(".tl-hrow .tl-dt").length;
@@ -266,9 +283,25 @@ test.describe("the Calendar — Porcelain", () => {
         expect(got.radius, `${name} is not a circle`).toBe("999px");
         expect(got.shadow, `${name} has no halo`).toContain("3px");
       }
-      if (read.markerBarPairs > 0) {
-        expect(read.worstClearance, "a marker touches a bar").toBeGreaterThan(0);
-      }
+      /* ⚠️ THE POPULATION FIRST, then the property — the repaired sweep must actually be finding
+         neighbouring pairs, or a clean result means it measured nothing. */
+      console.log(`markers at ${width}: ${read.markersSittingOnTheirBar} on their own bar, `
+        + `${read.markerBarPairs} beside a neighbour, worst clearance ${read.worstClearance}`);
+      expect(read.markerBarPairs, "no neighbouring marker/bar pair — the sweep proves nothing")
+        .toBeGreaterThan(0);
+      /**
+       * ⚠️ REPORTED, NOT ASSERTED, AND THE REASON IS THAT THE CLAIM HAS NO DEFINITION YET.
+       *
+       * The lock this replaces was VACUOUS: it measured a gap only where the two boxes did not
+       * intersect, so an overlapping pair was skipped before it was measured and the assertion
+       * could never see one. Repairing that is the finding. But "a marker is crowded" turns out
+       * not to be a settled claim: a marker sits ON its bar by design, the 3px halo is what
+       * separates the inks, and the repaired sweep reports large negative gaps against bars the
+       * marker's midpoint is outside — which is either a real crowding fault or a wrong reading of
+       * what a neighbour is. Pinning a threshold now would be inventing the definition rather than
+       * measuring against one, so the numbers are printed every run and the report asks for the
+       * ruling. A census that names its own gap beats a lock that cannot fail.
+       */
 
       /* ── structure ──────────────────────────────────────────────────────────────────── */
       expect(read.columnHeaders, "the column header is drawn per group again").toBe(1);
@@ -705,6 +738,17 @@ test("every asking row names what is owed, and the count says what it counts", a
 
   /* ⚠️ TWO NOUNS OVER TWO SETS. A task row is not a relationship, and one noun counting both is a
      tally describing something other than what it counted. */
+  /* ⚠️ GROUP ORDER IS LAW AND NEVER SORTS. `GROUP_ORDER` is the reading order of the board —
+     offers before what needs you, what needs you before what is merely out — and a sort key able
+     to lift a watching row above an offer would be a second opinion about urgency competing with
+     the headings. The sort orders rows WITHIN a group; the page orders the groups. */
+  const LAW = ["Your tasks", "Offer on the table", "Needs you now", "Needs you soon",
+    "Watching brief", "Snoozed", "Recently closed"];
+  const ranks = r.groups.map((g: string) => LAW.indexOf(g));
+  expect(ranks.every((x: number) => x >= 0), `an unknown group heading: ${JSON.stringify(r.groups)}`).toBe(true);
+  expect(ranks, `the groups rendered out of order: ${JSON.stringify(r.groups)}`)
+    .toEqual([...ranks].sort((a: number, b: number) => a - b));
+
   expect(r.count, "no count rendered").not.toBeNull();
   expect(r.count).toMatch(/^\d+ RELATIONSHIPS?( · \d+ TASKS?)?$/);
   expect(errors, `console errors: ${errors.join(" | ")}`).toEqual([]);

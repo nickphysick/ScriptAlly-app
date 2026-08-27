@@ -74,6 +74,16 @@
   padding: 7px 9px; font-size: 11.5px; color: #4a3a30;
 }
 .tl-menu button:hover { background: #faf6ef; }
+/* ⚠️ THE OPTION'S NAME AND ITS DEFINITION STACK, and they are BLOCKS. Two inline spans would sit
+   on one baseline and read as one run — the same inline-vs-block fault this board has now had
+   three times (the fit pass, the bar label, the row head). Told, not assumed. */
+.tl-menu button { display: block; text-align: left; }
+.tl-menuname { display: block; }
+.tl-menuwhat {
+  display: block; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8px;
+  letter-spacing: 0.04em; color: #9c8878; margin-top: 2px; max-width: 34ch; white-space: normal;
+  line-height: 1.4;
+}
 .tl-menu button[aria-current="true"] { background: #f2ede7; font-weight: 600; color: #2b2118; }
 .tl-search {
   flex: 0 1 190px; min-width: 90px; height: 26px; padding: 0 10px; font-size: 11.5px;
