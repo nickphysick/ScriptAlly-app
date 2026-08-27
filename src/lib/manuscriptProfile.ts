@@ -87,52 +87,16 @@ export interface HeroFigure {
 export const shelfMeta = (manuscripts: number, queries: number): string =>
   `${manuscripts} manuscript${manuscripts === 1 ? "" : "s"} · ${queries} quer${queries === 1 ? "y" : "ies"}`;
 
-/* ══════════════════════════════════════════════════════════════════════════════════════════════
-   OVERVIEW — the at-a-glance row
-   ══════════════════════════════════════════════════════════════════════════════════════════════ */
-
-export interface GlanceCell {
-  key: string;
-  label: string;
-  value: number;
-  /** Drawn in the quieter ink. Closed is a fact about the past, not a figure to lead with. */
-  soft?: boolean;
-}
-
 /**
- * The five figures over the manuscript's own queries.
+ * ⚠️ `atAGlance`, `glanceMeta` AND `GlanceCell` ARE RETIRED (amendment 2). They built the five-cell
+ * stat row — queries sent, responses, still open, closed, agents holding — which the Overview no
+ * longer has: three of those figures are the HERO's cells now and the other two went with the row.
  *
- * ⚠️ `stillOpen` AND `closed` PARTITION THE SET, so the two always sum to `queriesSent`. They are
- * derived from the ONE closed set (`CLOSED_STATUSES` in manuscriptPage) rather than from two
- * hand-written status lists, which is how two figures on one card come to disagree.
- *
- * ⚠️ `responses` COUNTS THROUGH `plateStats`, WHICH COUNTS THROUGH `isResponse` — the canonical
- * predicate the package maths uses. It is deliberately NOT recomputed here: a local "has the agent
- * replied" test would eventually disagree with the rest of the app about what a response is.
- *
- * ⚠️ AND `agentsHolding` COUNTS AGENTS, NOT QUERIES. Two live sends to one agent is one agent
- * holding something; counting rows would state a number of people that does not exist. Holding
- * comes from `HOLDING_STATUSES` — the two send statuses — never a hand-kept "active" list.
- *
- * ⚠️ NO VERDICT ANYWHERE. Five counts, five nouns, no ordering by outcome, no colour that means
- * good or bad. `closed` is quieter than the rest and that is a reading weight, not a judgement.
+ * ⚠️ THE PARTITION PROPERTY THEY CARRIED IS NOT LOST, IT IS NO LONGER CLAIMED. `still open + closed
+ * = queries sent` was worth a property test because the page ASSERTED all three at once; it states
+ * neither of the two now, so there is nothing left to reconcile. The two sum invariants that remain
+ * — the journey's tracks — are untouched and still locked as properties.
  */
-export const atAGlance = (
-  queriesSent: number,
-  responses: number,
-  closed: number,
-  agentsHolding: number,
-): GlanceCell[] => [
-  { key: "sent", label: "Queries sent", value: queriesSent },
-  { key: "responses", label: "Responses", value: responses },
-  { key: "open", label: "Still open", value: queriesSent - closed },
-  { key: "closed", label: "Closed", value: closed, soft: true },
-  { key: "holding", label: "Agents holding", value: agentsHolding },
-];
-
-/** The Overview header's meta — `26 queries · 4 agents holding`. */
-export const glanceMeta = (queriesSent: number, agentsHolding: number): string =>
-  `${queriesSent} quer${queriesSent === 1 ? "y" : "ies"} · ${agentsHolding} agent${agentsHolding === 1 ? "" : "s"} holding`;
 
 /**
  * The pitch header's meta — `38 words`.
@@ -188,4 +152,41 @@ export const noteDay = (createdAt: string | undefined): string | null => {
   if (!createdAt) return null;
   const t = Date.parse(createdAt);
   return Number.isNaN(t) ? null : profileDate(t);
+};
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   THE PITCH AND THE SYNOPSIS — the two things on this page the writer composed
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ THE PLACEHOLDER IS A PROMPT, NOT A VALUE, and it reaches the field through the browser's own
+ * `placeholder` attribute — so there is no code path by which it can be committed. The trap it
+ * avoids is a `contenteditable` whose placeholder is rendered as text content and saved by the first
+ * writer who clicks in and out again.
+ *
+ * The `Elevator pitch:` prefix from the brief is dropped: the section heading already says "The
+ * pitch", and a placeholder that repeats its own label spends the writer's attention twice.
+ */
+export const PITCH_PLACEHOLDER =
+  "If you were to describe your book to an agent in the space of a few seconds, what would you say?";
+
+export const SYNOPSIS_PLACEHOLDER =
+  "The whole story, ending included — what happens, to whom, and what it costs them.";
+
+/**
+ * ⚠️ IT SAYS "WORKING COPY" AND ASSERTS NO RELATIONSHIP, WHICH IS THE POINT. Submission packages
+ * already holds synopsis MATERIALS — the "One-page" and "Two-page" items, which are
+ * `ManuscriptVersion` documents a package reaches through `synopsisVersionId`. Whether this field is
+ * the master those derive from or a genuinely separate scratch copy is an OPEN QUESTION and not one
+ * this sentence settles. Saying nothing keeps both answers available; implying either would need
+ * unpicking the day the other turns out to be right.
+ */
+export const SYNOPSIS_NOTE =
+  "Your working copy, kept with the manuscript. The synopses you send are built in Submission packages.";
+
+/** `1,240 words`, or null where there is nothing written to measure. */
+export const synopsisMeta = (text: string | null): string | null => {
+  if (!text) return null;
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return `${words.toLocaleString("en-GB")} word${words === 1 ? "" : "s"}`;
 };

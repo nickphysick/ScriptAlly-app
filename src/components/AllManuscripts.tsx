@@ -193,6 +193,17 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
     void updateManuscriptQuiet(selected.id, { [field]: value ? value : deleteField() } as any);
   };
 
+  /**
+   * ⚠️ EMPTY CLEARS THE KEY RATHER THAN STORING `""`. Absence and "written and then emptied" are the
+   * same fact to a reader and must be the same state in the document, or `has()` starts answering
+   * differently for two manuscripts in identical condition.
+   */
+  const saveSynopsis = (text: string) => {
+    if (!selected) return;
+    const value = text.trim();
+    void updateManuscriptQuiet(selected.id, { synopsis: value ? value : deleteField() } as never);
+  };
+
   // ── lifecycle (carried over: reversible shelve flag-flip with Undo; deferred delete) ──
   const toggleShelved = async (ms: Manuscript) => {
     const next = !ms.shelved;
@@ -450,6 +461,8 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
               synopsisVersionCount={msSynVersions.length}
               synopsisDate={msSynDate ? formatPlateDate(Date.parse(msSynDate)) : null}
               onSavePitch={savePitch}
+              synopsis={selected.synopsis ?? null}
+              onSaveSynopsis={saveSynopsis}
               /*
                * ⚠️ EVERY INLINE PLATE EDIT IS QUIET, INCLUDING THE TITLE. The activity feed records
                * the query journey, not field maintenance — a writer correcting a typo in their own

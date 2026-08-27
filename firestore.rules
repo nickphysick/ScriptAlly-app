@@ -117,6 +117,20 @@ service cloud.firestore {
         && data.ageCategory is string && data.ageCategory.size() <= 128
         && data.wordCount is int && data.wordCount >= 0
         && data.logline is string && data.logline.size() <= 2048
+        // ⚠️ OPTIONAL-WHEN-PRESENT, because both are cleared by OMITTING the key (`deleteField()`),
+        // never by storing "". A required clause here would refuse every manuscript that has never
+        // had one written — which is all of them until the writer types.
+        //
+        // ⚠️ `elevatorPitch` HAS EXISTED ON THE TYPE SINCE THE PITCH SHELF AND WAS NEVER ALLOWLISTED,
+        // so every write of it has been denied in SILENCE (the affectedKeys gotcha) for as long as
+        // the field has existed. The Overview's pitch card was held read-only for exactly that
+        // reason, with a lock reading this file. It is editable now because this line exists.
+        && (!data.keys().hasAny(['elevatorPitch']) || (data.elevatorPitch is string && data.elevatorPitch.size() <= 4096))
+        // The writer's own working synopsis. NOT the packages synopsis MATERIALS — those are
+        // `ManuscriptVersion` documents with componentType SYNOPSIS, reached through a package's
+        // `synopsisVersionId`. No relationship between the two is asserted anywhere; whether this is
+        // their master or a separate scratch copy is an open product question.
+        && (!data.keys().hasAny(['synopsis']) || (data.synopsis is string && data.synopsis.size() <= 32768))
         // Structured comps — a list of maps {title, author?, publisher?, year?, note?, media?,
         // matchAxis?, inQuery?, source?}. Per-item shape is client-enforced (rules can't iterate a
         // list); optional-when-present so docs written before any field was added stay updatable.
@@ -693,7 +707,9 @@ service cloud.firestore {
         allow create: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly([
-            'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comps', 'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved', 'activePackageId', 'bookVersions'
+            'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comps', 'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved', 'activePackageId', 'bookVersions',
+            // book profile amendment 2 — see the two clauses in isValidManuscript above.
+            'elevatorPitch', 'synopsis'
           ])
         );
 

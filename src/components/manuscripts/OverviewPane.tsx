@@ -10,23 +10,24 @@
  * ⚠️ EVERY FIGURE IS DERIVED AT READ TIME. Nothing here is stored, cached or written back, and
  * nothing on this page goes near `recomputeQuery`.
  *
- * ⚠️ THE PITCH CARD IS READ-ONLY, AND ITS `Edit pitch` CONTROL IS DELIBERATELY NOT BUILT.
- * `Manuscript.elevatorPitch` is NOT in the manuscript-update allowlist in `firestore.rules`
- * (`title, genre, subGenres, ageCategory, wordCount, logline, comps, status, shelvedReason,
- * statusChangedDate, notes, shelved, activePackageId, bookVersions`), so a write carrying it is
- * SILENTLY DENIED — the affectedKeys gotcha. A button that appears to save and does not is worse
- * than no button, and this repo already records that under a dead Undo. The ref draws the control;
- * it returns with the rules line, which is Nick's to deploy.
+ * ⚠️ THE PITCH IS EDITABLE NOW, AND IT TOOK A RULES LINE TO GET THERE. `Manuscript.elevatorPitch`
+ * has existed on the type since the pitch shelf and was never in the manuscript-update allowlist, so
+ * every write of it was denied in SILENCE (the affectedKeys gotcha). This pane held the card
+ * read-only for exactly that reason, with a lock that read `firestore.rules`. The allowlist carries
+ * it now — the lock is inverted rather than deleted, so it fails if the line is ever removed.
  *
- * ⚠️ AND `Who holds what` HAS NO VERSION COLUMN HERE. Which version an agent holds is Pro, and the
- * footnote says where it lives rather than teasing it — a greyed column would advertise a feature
- * in the place a fact should be.
+ * ⚠️ NO CONTAINER ON THE PITCH. Two large Playfair quotation marks and the words between them; the
+ * capped card is gone. It is the one thing on this page the writer composed rather than the app
+ * derived, and a frame made it look like another panel of figures.
+ *
+ * ⚠️ AND `Who holds what` HAS LEFT THIS PANE ENTIRELY. It is "Out with agents now" on Journey, which
+ * is the same table; keeping both would be one fact with two homes that disagree the moment either
+ * moves. Overview is pitch → synopsis now.
  */
-import React from "react";
+import React, { useState } from "react";
 import { SectionHeader } from "../containers/SectionHeader";
-import { CappedCard } from "../containers/CappedCard";
-import { GlanceCell } from "../../lib/manuscriptProfile";
-import { HoldingRow } from "../../lib/bookVersions";
+import { InlineText } from "../containers/InlineText";
+import { PITCH_PLACEHOLDER, SYNOPSIS_PLACEHOLDER, SYNOPSIS_NOTE } from "../../lib/manuscriptProfile";
 import "./bookProfile.css";
 
 export interface OverviewPaneProps {
@@ -34,78 +35,62 @@ export interface OverviewPaneProps {
   pitch: string | null;
   /** `38 words`, or null where there is no pitch to measure. */
   pitchMeta: string | null;
-  glance: GlanceCell[];
-  glanceMeta: string;
-  holders: HoldingRow[];
-  /** Switches the reader to the Versions tab, where the version column lives. */
-  onOpenVersions: () => void;
+  onSavePitch: (next: string) => void;
+  /** The writer's working synopsis, or null. NOT the packages synopsis materials. */
+  synopsis: string | null;
+  synopsisMeta: string | null;
+  onSaveSynopsis: (next: string) => void;
 }
 
 export const OverviewPane: React.FC<OverviewPaneProps> = ({
-  pitch, pitchMeta, glance, glanceMeta, holders, onOpenVersions,
-}) => (
+  pitch, pitchMeta, onSavePitch, synopsis, synopsisMeta, onSaveSynopsis,
+}) => {
+  /* Component state, deliberately: a clamp is a reading convenience, not a preference to persist. */
+  const [synOpen, setSynOpen] = useState(false);
+  return (
   <>
     <div className="msp-blk">
-      <SectionHeader title="The pitch" meta={pitchMeta ?? undefined} />
-      <CappedCard tint="outgoing" label="Elevator pitch">
-        {/* ⚠️ AN UNWRITTEN PITCH SAYS SO. It does not render an empty card, and it does not offer
-            to write one — the editor is unreachable until the rules allowlist carries the field. */}
-        {pitch
-          ? <p className="msp-pitchtext">{pitch}</p>
-          : <p className="msp-empty">No elevator pitch written yet.</p>}
-      </CappedCard>
+      <SectionHeader title="The pitch" meta={pitchMeta ?? "Not written yet"} />
+      {/* ⚠️ THE CLOSING MARK IS BOTTOM-ALIGNED, which is what makes the pair read as quotation rather
+          than as two decorations — `align-self: flex-end` on it, `flex-start` on the row. */}
+      <div className="msp-pitchwrap">
+        <span className="msp-qmark" aria-hidden="true">&ldquo;</span>
+        <InlineText
+          className="msp-pitchtext"
+          value={pitch}
+          placeholder={PITCH_PLACEHOLDER}
+          onCommit={onSavePitch}
+          ariaLabel="Elevator pitch"
+          rows={2}
+        />
+        <span className="msp-qmark close" aria-hidden="true">&rdquo;</span>
+      </div>
     </div>
 
     <div className="msp-blk">
-      <SectionHeader title="At a glance" meta={glanceMeta} />
-
-      <div className="sa-card msp-glancecard">
-        <div className="msp-stats">
-          {glance.map((c) => (
-            <div key={c.key} className="msp-stat">
-              {/* ⚠️ A NOUGHT IS STATED. Every cell here is a count, and a count of nought is the
-                  fact — an omitted cell would read as a figure nobody knows. */}
-              <div className={`msp-statn${c.soft ? " soft" : ""}`}>{c.value}</div>
-              <div className="msp-statl">{c.label}</div>
-            </div>
-          ))}
+      <SectionHeader title="The synopsis" meta={synopsisMeta ?? "Not written yet"} />
+      <div className="msp-synbox">
+        {/* ⚠️ CLAMPED WITH A MASK, NOT A CROP — the fade says there is more rather than ending the
+            text at an arbitrary line. Expanding is the writer's, and it is remembered nowhere:
+            a clamp is a reading convenience, not a preference. */}
+        <div className={`msp-synclamp${synOpen ? " open" : ""}`}>
+          <InlineText
+            className="msp-syntext"
+            value={synopsis}
+            placeholder={SYNOPSIS_PLACEHOLDER}
+            onCommit={onSaveSynopsis}
+            ariaLabel="Synopsis"
+            rows={4}
+          />
         </div>
-      </div>
-
-      <CappedCard
-        /* ⚠️ OUTGOING. What an agent is holding is material you SENT and that is still out with
-           them — the same reading that makes correspondence pink. It is not something that came
-           back; when it comes back the query moves off this table. */
-        tint="outgoing"
-        label="Who holds what"
-        right={`${holders.length} agent${holders.length === 1 ? "" : "s"}`}
-        className="msp-holders"
-      >
-        {holders.length === 0 ? (
-          <p className="msp-empty">Nothing is with an agent right now.</p>
-        ) : (
-          <>
-            <table className="msp-table">
-              <thead><tr><th>Agent</th><th>Holds</th><th>Since</th></tr></thead>
-              <tbody>
-                {holders.map((h) => (
-                  <tr key={h.queryId}>
-                    <td>{h.agent}</td>
-                    <td>{h.holds}</td>
-                    {/* ⚠️ AN UNDATED SEND STATES NO DATE. The em dash says "not recorded"; a
-                        fabricated one would be indistinguishable from a real one. */}
-                    <td className={`msp-num${h.sentDay ? "" : " soft"}`}>{h.sentDay ?? "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <p className="msp-footnote">
-              Which version each agent holds is shown under{" "}
-              <button type="button" className="msp-inlinelink" onClick={onOpenVersions}>Versions</button>.
-            </p>
-          </>
+        {synopsis && (
+          <button type="button" className="msp-synmore" onClick={() => setSynOpen((o) => !o)}>
+            {synOpen ? "Collapse" : "Expand"}
+          </button>
         )}
-      </CappedCard>
+      </div>
+      <p className="msp-footnote">{SYNOPSIS_NOTE}</p>
     </div>
   </>
-);
+  );
+};

@@ -24,9 +24,9 @@ import { Manuscript, ManuscriptVersion, SubmissionPackage, Query, CompTitle, Use
 import type { Activity, BookVersion } from "../../types";
 import { bookVersionsOf, holdingRows, openingRows, unattributedOpening, unrecordedHolders } from "../../lib/bookVersions";
 import { isRequest } from "../../lib/packageMetrics";
-import { isShelvedPresentation, CLOSED_STATUSES } from "../../lib/manuscriptPage";
+import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import { plateStats } from "../../lib/manuscriptPlate";
-import { queryingSinceMs, atAGlance, glanceMeta, pitchMeta, profileDate } from "../../lib/manuscriptProfile";
+import { queryingSinceMs, pitchMeta, synopsisMeta, profileDate } from "../../lib/manuscriptProfile";
 import { standingTrack, furthestTrack, furthestReached, journeyMeta } from "../../lib/manuscriptJourney";
 import { ManuscriptTabKey } from "./ManuscriptTabs";
 import { ManuscriptHero } from "./ManuscriptHero";
@@ -65,6 +65,9 @@ export interface ManuscriptDossierProps {
   pitchText: string | null;
   /** The elevator pitch as stored, or null when it has not been written. */
   elevatorPitch: string | null;
+  /** The writer's working synopsis. NOT the packages synopsis materials — see types.ts. */
+  synopsis: string | null;
+  onSaveSynopsis: (next: string) => void;
   /** Resolves an agent id to a display name — the canonical helper, never a local format. */
   agentName: (agentId: string) => string;
   /** This manuscript's own notes — `UserTask` documents, the collection the Noteboard reads. */
@@ -119,6 +122,8 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   pitch,
   pitchText,
   elevatorPitch,
+  synopsis,
+  onSaveSynopsis,
   agentName,
   notes,
   onWriteNote,
@@ -146,18 +151,15 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   const stats = plateStats(queries);
   const since = queryingSinceMs(queries);
   /**
-   * ⚠️ THE HOLDERS ARE DERIVED ONCE AND READ TWICE — the Overview's table and the count in its
-   * section header. Deriving them separately for the two is how a card comes to state a number its
-   * own rows do not add up to.
+   * ⚠️ ONE DERIVATION, AND IT HAS ONE CONSUMER NOW. Overview's copy of this table is gone —
+   * "Out with agents now" on Journey is the same table, and one fact with two homes disagrees the
+   * moment either moves. Versions reads it too, for the version column Overview never had.
    */
   const holders = holdingRows(queries, activities, bookVersionsOf(manuscript), agentName, (iso) => profileDate(Date.parse(iso)));
-  const closed = queries.filter((q) => CLOSED_STATUSES.includes(q.status)).length;
   /* ⚠️ DERIVED ONCE AND READ THREE TIMES — the table, the track's footer and the section header's
      meta. Deriving it per consumer is how a card comes to state a furthest rung its own rows do
      not show. */
   const furthest = furthestTrack(queries, activities);
-  /* Distinct AGENTS, not rows: two live sends to one agent is one agent holding something. */
-  const agentsHolding = new Set(holders.map((h) => h.agent)).size;
 
   return (
     <div className="msv-doss">
@@ -215,10 +217,10 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
             <OverviewPane
               pitch={elevatorPitch}
               pitchMeta={pitchMeta(elevatorPitch)}
-              glance={atAGlance(stats.queriesSent, stats.responses, closed, agentsHolding)}
-              glanceMeta={glanceMeta(stats.queriesSent, agentsHolding)}
-              holders={holders}
-              onOpenVersions={() => onTabChange("versions")}
+              onSavePitch={(next) => onSavePitch("elevator", next)}
+              synopsis={synopsis}
+              synopsisMeta={synopsisMeta(synopsis)}
+              onSaveSynopsis={onSaveSynopsis}
             />
           )}
 

@@ -275,9 +275,15 @@ describe("the book profile's cap assignment — one table, checked against the r
    * Read from the SOURCE rather than from a rendered page, because the claim is about which card
    * declares which role — every one of these components is separately smoke-tested for its render.
    */
+  /**
+   * ⚠️ OVERVIEW HAS NO CAPPED CARDS AT ALL SINCE AMENDMENT 2, and both of its entries left for
+   * different reasons. The PITCH lost its container entirely — it is two quotation marks and the
+   * words between them, because it is the one thing on the page the writer composed rather than the
+   * app derived, and a cap made it look like another panel of figures. `Who holds what` left the
+   * PANE: it is "Out with agents now" on Journey, the same table, and one fact with two homes
+   * disagrees the moment either moves. Neither change touches the other eight assignments.
+   */
   const CARDS: [string, string, string][] = [
-    ["OverviewPane.tsx", "Elevator pitch", "outgoing"],
-    ["OverviewPane.tsx", "Who holds what", "outgoing"],
     ["JourneyPane.tsx", "Current standing", "incoming"],
     ["JourneyPane.tsx", "Out with agents now", "outgoing"],
     ["JourneyPane.tsx", "How far queries reached", "incoming"],
@@ -311,5 +317,12 @@ describe("the book profile's cap assignment — one table, checked against the r
   it("uses all four roles", () => {
     const all = new Set(CARDS.map(([, , role]) => role));
     expect([...all].sort()).toEqual(["incoming", "outgoing", "pro", "reference"]);
+  });
+
+  /** ⚠️ AND OVERVIEW CAPS NOTHING — asserted, so the pitch cannot quietly acquire a container. */
+  it("Overview has no capped card at all", () => {
+    const src = readFileSync(join(root, "src/components/manuscripts/OverviewPane.tsx"), "utf8");
+    expect(src).not.toContain("<CappedCard");
+    expect(src).not.toContain("CappedCard");
   });
 });

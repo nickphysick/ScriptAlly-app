@@ -145,3 +145,36 @@
 .sa-cap--incoming  { background: linear-gradient(180deg, var(--cap-incoming-a),  var(--cap-incoming-b));  border-bottom-color: var(--cap-incoming-edge);  color: var(--cap-incoming-ink); }
 .sa-cap--pro { background: linear-gradient(180deg, var(--cap-pro-a), var(--cap-pro-b)); border-bottom-color: var(--cap-pro-edge); color: var(--cap-pro-ink); }
 .sa-cap--reference   { background: linear-gradient(180deg, var(--cap-reference-a),   var(--cap-reference-b));   border-bottom-color: var(--cap-reference-edge);   color: var(--cap-reference-ink); }
+
+/* ══ INLINE TEXT ══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ IT INHERITS ITS TYPE, so the caller styles the surrounding block and this reads as whatever
+ * that block reads as. A primitive that carried its own font would make every consumer override it.
+ *
+ * ⚠️ AND IT LOOKS LIKE PROSE AT REST. No border, no fill, no resize handle — a field that announced
+ * itself would make a page of reading matter look like a form. Hover tints; focus gives it the box.
+ */
+.sa-inline {
+  display: block;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 8px;
+  margin: -6px -8px;
+  resize: none;
+  overflow: hidden;
+  outline: none;
+  cursor: text;
+  transition: background 0.14s ease, box-shadow 0.14s ease;
+}
+.sa-inline:hover { background: rgba(124, 58, 42, 0.035); }
+.sa-inline:focus {
+  background: var(--ws-window);
+  box-shadow: 0 0 0 1px var(--hair), 0 0 0 3px rgba(124, 58, 42, 0.08);
+}
+/** ⚠️ THE PLACEHOLDER IS MUTED STYLING, NOT STORED CONTENT — it is the browser's, and unsaveable. */
+.sa-inline::placeholder { color: var(--shell-muted); opacity: 1; }

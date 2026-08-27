@@ -2,225 +2,192 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ══ THE BOOK PROFILE — Overview ═══════════════════════════════════════════════════════════════
+ * ══ THE BOOK PROFILE — Overview: the pitch and the synopsis ═══════════════════════════════════
  *
- * ⚠️ THE STAT ROW'S FIVE FIGURES ARE NOT FIVE INDEPENDENT COUNTS. `stillOpen` and `closed`
- * PARTITION the queries, so the two must sum to `queriesSent` for any input — which is the kind of
- * claim a fixture can satisfy by coincidence and a property cannot. It is asserted over a spread of
- * status mixtures rather than over one hand-built board.
+ * ⚠️ THE STAT ROW AND `Who holds what` ARE GONE FROM THIS PANE (amendment 2), and their locks with
+ * them — deliberately, not by omission. Three of the five figures are the HERO's cells now and are
+ * asserted in `bookProfile.test.tsx`; the holdings table is "Out with agents now" on Journey, where
+ * `journeyPane.test.tsx` already covers it. The `still open + closed = queries sent` property is not
+ * lost so much as no longer claimed: the page states neither figure, so there is nothing to
+ * reconcile. The two journey sums are untouched and still locked as properties.
  *
- * ⚠️ AND `agentsHolding` COUNTS PEOPLE. Two live sends to one agent is one agent holding something;
- * counting rows would state a number of human beings that does not exist.
+ * ⚠️ WHAT THIS FILE IS FOR NOW IS THE PLACEHOLDER. A click-to-edit block whose placeholder is
+ * rendered as TEXT CONTENT gets saved by the first writer who clicks in and out again — the trap
+ * this pane was built to be structurally immune to.
  */
 import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { atAGlance, glanceMeta, pitchMeta } from "../../lib/manuscriptProfile";
-import { holdingRows, HoldingRow } from "../../lib/bookVersions";
-import { CLOSED_STATUSES } from "../../lib/manuscriptPage";
-import { OverviewPane } from "./OverviewPane";
-import { Query, QueryStatus, Activity } from "../../types";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { OverviewPane } from "./OverviewPane";
+import {
+  PITCH_PLACEHOLDER, SYNOPSIS_PLACEHOLDER, SYNOPSIS_NOTE, pitchMeta, synopsisMeta,
+} from "../../lib/manuscriptProfile";
 
-const q = (id: string, status: QueryStatus, agentId = "a1"): Query =>
-  ({ id, userId: "u", manuscriptId: "m1", agentId, packageId: "", status,
-     dateSent: "2026-02-01", materialsWanted: [] } as unknown as Query);
-const send = (queryId: string, date: string, status: QueryStatus): Activity =>
-  ({ id: `ac-${queryId}`, userId: "u", queryId, manuscriptId: "m1", date,
-     description: "sent", resultingStatus: status } as unknown as Activity);
-
-const NAMES: Record<string, string> = { a1: "T. Marsh", a2: "R. Halloway", a3: "J. Okafor" };
-const nameOf = (id: string) => NAMES[id] ?? "Agent not recorded";
-const day = (iso: string) => iso.slice(0, 10);
-
-/** `atAGlance` from raw queries, the way the dossier composes it — never hand-fed figures. */
-const glanceOf = (queries: Query[], activities: Activity[]) => {
-  const holders = holdingRows(queries, activities, [], nameOf, day);
-  const closed = queries.filter((x) => CLOSED_STATUSES.includes(x.status)).length;
-  const responses = queries.filter((x) =>
-    x.status !== QueryStatus.QUERIED && !CLOSED_STATUSES.includes(x.status)).length;
-  return {
-    cells: atAGlance(queries.length, responses, closed, new Set(holders.map((h) => h.agent)).size),
-    holders,
-  };
-};
+const pane = (over: Partial<React.ComponentProps<typeof OverviewPane>> = {}) =>
+  renderToStaticMarkup(
+    <OverviewPane
+      pitch="A fly that shouldn't exist."
+      pitchMeta={pitchMeta("A fly that shouldn't exist.")}
+      onSavePitch={() => {}}
+      synopsis="Murphy finds the fly."
+      synopsisMeta={synopsisMeta("Murphy finds the fly.")}
+      onSaveSynopsis={() => {}}
+      {...over}
+    />,
+  );
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe("the stat row is a partition, not five separate counts", () => {
-  const MIXTURES: QueryStatus[][] = [
-    [],
-    [QueryStatus.QUERIED],
-    [QueryStatus.QUERIED, QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE],
-    [QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.OFFER, QueryStatus.REVISE_RESUBMIT],
-    Object.values(QueryStatus),
-    [...Object.values(QueryStatus), ...Object.values(QueryStatus)],
-  ];
-
-  it("still open + closed = queries sent, for every mixture of statuses", () => {
-    for (const mix of MIXTURES) {
-      const cells = glanceOf(mix.map((s, i) => q(`q${i}`, s)), []).cells;
-      const at = (k: string) => cells.find((c) => c.key === k)!.value;
-      expect(at("open") + at("closed"), `mixture ${mix.join("|") || "(empty)"}`).toBe(at("sent"));
-    }
-  });
-
-  /** Nothing may go negative, at any mixture — a negative count is a derivation admitting defeat. */
-  it("states no negative figure", () => {
-    for (const mix of MIXTURES) {
-      for (const c of glanceOf(mix.map((s, i) => q(`q${i}`, s)), []).cells) {
-        expect(c.value, `${c.label} on ${mix.join("|") || "(empty)"}`).toBeGreaterThanOrEqual(0);
-      }
-    }
-  });
-
-  it("states all five at nought on an unqueried manuscript rather than omitting them", () => {
-    const cells = glanceOf([], []).cells;
-    expect(cells).toHaveLength(5);
-    expect(cells.every((c) => c.value === 0)).toBe(true);
-  });
-
-  /** ⚠️ THE APP REPORTS, NEVER APPRAISES. No cell may carry a verdict word or an ordering claim. */
-  it("uses no verdict language in any label", () => {
-    const words = /\b(best|worst|strong|weak|good|bad|poor|great|top|leading|winning|success|fail)/i;
-    for (const c of atAGlance(9, 4, 5, 2)) expect(c.label).not.toMatch(words);
-    expect(glanceMeta(9, 2)).not.toMatch(words);
-  });
-
-  /** Closed is quieter, and quieter is the ONLY distinction — never a colour that means bad. */
-  it("marks closed as soft and nothing else", () => {
-    expect(atAGlance(9, 4, 5, 2).filter((c) => c.soft).map((c) => c.key)).toEqual(["closed"]);
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-describe("who holds what — agents, not rows", () => {
+describe("⚠️ THE PLACEHOLDER IS NEVER PERSISTED, AND IT IS STRUCTURAL", () => {
   /**
-   * ⚠️ THE FIXTURE IS THE POINT: two live sends to ONE agent. Counting `holders.length` would say
-   * two agents are holding something when one person is.
+   * The guarantee is not a check somebody remembered to write — it is that the placeholder reaches
+   * the field through the browser's own `placeholder` ATTRIBUTE. It is never in `value`, never in
+   * the element's text content, and there is no code path from it to `onCommit`.
    */
-  it("counts one agent when one agent holds two things", () => {
-    const queries = [q("q1", QueryStatus.FULL_SENT, "a1"), q("q2", QueryStatus.PARTIAL_SENT, "a1")];
-    const acts = [send("q1", "2026-05-01", QueryStatus.FULL_SENT), send("q2", "2026-03-01", QueryStatus.PARTIAL_SENT)];
-    const { cells, holders } = glanceOf(queries, acts);
-    expect(holders).toHaveLength(2);
-    expect(cells.find((c) => c.key === "holding")!.value).toBe(1);
-  });
-
-  it("counts only live sends — a full that was later rejected is not being held", () => {
-    const queries = [q("q1", QueryStatus.FULL_SENT, "a1"), q("q2", QueryStatus.REJECTED, "a2")];
-    const acts = [send("q1", "2026-05-01", QueryStatus.FULL_SENT), send("q2", "2026-01-01", QueryStatus.FULL_SENT)];
-    expect(glanceOf(queries, acts).cells.find((c) => c.key === "holding")!.value).toBe(1);
-  });
-
-  it("names what is held without inventing a quantity", () => {
-    const rows = holdingRows([q("q1", QueryStatus.PARTIAL_SENT)], [send("q1", "2026-03-03", QueryStatus.PARTIAL_SENT)], [], nameOf, day);
-    // The ref writes `Partial · 50 pp`; the record carries the status and not the page count.
-    expect(rows[0].holds).toBe("Partial");
-    expect(rows[0].holds).not.toMatch(/\d/);
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-describe("pitchMeta — what the record can support, and no more", () => {
-  it("counts the words it was given", () => {
-    expect(pitchMeta("One two three")).toBe("3 words");
-    expect(pitchMeta("  spaced   out  words ")).toBe("3 words");
-    expect(pitchMeta("Alone")).toBe("1 word");
-  });
-
-  it("states nothing at all where there is no pitch", () => {
-    expect(pitchMeta(null)).toBeNull();
-    expect(pitchMeta("")).toBeNull();
-  });
-
-  /**
-   * ⚠️ `last edited` IS IN THE REF AND IS NOT BUILT. No field records when the elevator pitch was
-   * written; `statusChangedDate` is about the STATUS and under an "edited" label would be a
-   * plausible number measuring something else — the exact shape of the "Added {date}" fault this
-   * page has shipped once already.
-   */
-  it("never claims when the pitch was edited", () => {
-    expect(pitchMeta("some words here")).not.toMatch(/edit|last|ago|\d{4}/i);
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-describe("the pane", () => {
-  const row = (over: Partial<HoldingRow> = {}): HoldingRow =>
-    ({ queryId: "q1", agent: "T. Marsh", what: "FULL · sent 2 Jun 2026",
-       holds: "Full manuscript", sentDay: "2 Jun 2026",
-       askedFor: "Full requested", askedOn: "28 May 2026", versionName: null, ...over });
-
-  const pane = (over: Partial<React.ComponentProps<typeof OverviewPane>> = {}) =>
-    renderToStaticMarkup(
-      <OverviewPane
-        pitch="A fly that shouldn't exist."
-        pitchMeta="5 words"
-        glance={atAGlance(26, 12, 13, 4)}
-        glanceMeta={glanceMeta(26, 4)}
-        holders={[row()]}
-        onOpenVersions={() => {}}
-        {...over}
-      />,
-    );
-
-  /**
-   * ⚠️ THE EDIT CONTROL IS DELIBERATELY ABSENT AND THIS IS WHAT HOLDS IT ABSENT.
-   * `Manuscript.elevatorPitch` is not in the manuscript-update allowlist in `firestore.rules`, so
-   * a write carrying it is SILENTLY DENIED. A button that appears to save and does not is worse
-   * than no button — the same law as the Undo that restored nothing. It returns with the rules line.
-   */
-  it("offers no way to edit the pitch while the write would be silently denied", () => {
-    const html = pane();
-    expect(html.toLowerCase()).not.toContain("edit pitch");
-    const rules = readFileSync(join(__dirname, "..", "..", "..", "firestore.rules"), "utf8");
-    const allow = /allow update:[\s\S]*?affectedKeys\(\)\.hasOnly\(\[([\s\S]*?)\]/g;
-    const blocks = [...rules.matchAll(allow)].map((m) => m[1]);
-    const manuscriptBlock = blocks.find((b) => b.includes("'bookVersions'"));
-    expect(manuscriptBlock, "the manuscript update allowlist moved — re-find it").toBeTruthy();
-    expect(manuscriptBlock).not.toContain("elevatorPitch");
-  });
-
-  it("says the pitch is unwritten rather than rendering an empty card", () => {
+  it("renders as an attribute, never as content", () => {
     const html = pane({ pitch: null, pitchMeta: null });
-    expect(html).toContain("No elevator pitch written yet.");
-    expect(html).toContain("Elevator pitch");
+    expect(html).toContain(`placeholder="${PITCH_PLACEHOLDER.replace(/'/g, "&#x27;")}"`);
+    // …and NOT between the tags, which is the form that gets saved.
+    expect(html).not.toContain(`>${PITCH_PLACEHOLDER}<`);
   });
 
-  it("draws the five figures, closed among them and quieter", () => {
+  /**
+   * ⚠️ ASSERTED TWO WAYS, BECAUSE THIS REPO HAS NO DOM. `vitest.config.ts` is `environment: "node"`,
+   * so the hook cannot run and a blur cannot be fired; what CAN be proved is that the placeholder is
+   * not in the field's value on a real render, and that no code path carries it to `onCommit`.
+   */
+  it("leaves the field's value empty — the prompt is not in it", () => {
+    const html = pane({ pitch: null, pitchMeta: null });
+    const field = /<textarea[^>]*aria-label="Elevator pitch"[^>]*>([\s\S]*?)<\/textarea>/.exec(html);
+    expect(field, "the pitch field is not on the page").toBeTruthy();
+    /* A textarea's value is its CHILD TEXT in static markup. Empty is the whole claim. */
+    expect(field![1]).toBe("");
+    expect(field![0]).toContain("placeholder=");
+  });
+
+  it("carries the placeholder nowhere near the commit", () => {
+    const src = readFileSync(join(__dirname, "..", "containers", "InlineText.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    /* The draft starts from the STORED value and from nothing else… */
+    expect(src).toContain('useState(value ?? "")');
+    expect(src).toContain('setDraft(value ?? "")');
+    /* …and the commit sends the draft. `placeholder` is read once, as an attribute, and never
+       assigned to state or passed to a handler. */
+    expect(src).toContain("onCommit(draft.trim())");
+    const uses = [...src.matchAll(/placeholder/g)].length;
+    expect(uses, "placeholder is referenced more than as a prop and an attribute").toBeLessThanOrEqual(4);
+    expect(src).not.toMatch(/setDraft\([^)]*placeholder/);
+    expect(src).not.toMatch(/onCommit\([^)]*placeholder/);
+  });
+
+  /** ⚠️ NOT A `contenteditable`, ANYWHERE IN THE PRIMITIVE — the whole trap lives in that element. */
+  it("uses no contenteditable", () => {
+    const src = readFileSync(join(__dirname, "..", "containers", "InlineText.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(src.toLowerCase()).not.toContain("contenteditable");
+    expect(src).toContain("<textarea");
+  });
+
+  /** ⚠️ AND IT IS NOT COUNTED. The meta measures the stored text; an unwritten pitch has no count. */
+  it("counts no placeholder words", () => {
+    expect(pitchMeta(null)).toBeNull();
+    expect(synopsisMeta(null)).toBeNull();
+    expect(pitchMeta("")).toBeNull();
+    /* The prompt is a sentence of its own; nothing must ever report its length as the pitch's. */
+    expect(pitchMeta(null) ?? "").not.toContain("word");
+    expect(synopsisMeta(PITCH_PLACEHOLDER), "the prompt was measured as if it were content")
+      .not.toBe(pitchMeta(null));
+  });
+
+  it("says so in the meta rather than stating a count of nought", () => {
+    const html = pane({ pitch: null, pitchMeta: null, synopsis: null, synopsisMeta: null });
+    expect(html.match(/Not written yet/g)).toHaveLength(2);
+    expect(html).not.toContain("0 words");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("the pitch has no container", () => {
+  it("is two quotation marks and the words between them", () => {
     const html = pane();
-    for (const n of ["26", "12", "13", "4"]) expect(html).toContain(`>${n}</div>`);
-    expect(html).toContain('class="msp-statn soft">13<');
+    expect(html.match(/msp-qmark/g)).toHaveLength(2);
+    expect(html).toContain("msp-qmark close");
+    /* ⚠️ NO CAPPED CARD. The cap grammar is for panels of derived figures; this is the one thing on
+       the page the writer composed. */
+    expect(html).not.toContain("sa-card");
+    expect(html).not.toContain("sa-cap--");
   });
 
-  it("states a nought rather than dropping the cell", () => {
-    const html = pane({ glance: atAGlance(0, 0, 0, 0), glanceMeta: glanceMeta(0, 0) });
-    expect(html.match(/class="msp-statn(?: soft)?">0</g)).toHaveLength(5);
+  it("hides the marks from the accessibility tree — they are punctuation, not content", () => {
+    const marks = [...pane().matchAll(/<span class="msp-qmark[^"]*"[^>]*>/g)].map((m) => m[0]);
+    expect(marks).toHaveLength(2);
+    for (const m of marks) expect(m).toContain('aria-hidden="true"');
   });
 
-  it("tables the holders without a version column, and says where that lives", () => {
+  it("names the field for a screen reader, since the marks cannot", () => {
+    expect(pane()).toContain('aria-label="Elevator pitch"');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("the synopsis", () => {
+  it("is a bordered box, clamped, with a way to open it", () => {
     const html = pane();
-    expect(html).toContain("<th>Agent</th><th>Holds</th><th>Since</th>");
-    expect(html).not.toContain("<th>Version</th>");
-    expect(html).toContain("Which version each agent holds is shown under");
+    expect(html).toContain("msp-synbox");
+    expect(html).toContain("msp-synclamp");
+    expect(html).toContain(">Expand<");
   });
 
-  it("dashes an undated send rather than fabricating a date", () => {
-    expect(pane({ holders: [row({ sentDay: null })] })).toContain('class="msp-num soft">—<');
+  /** Nothing written → nothing to expand. A toggle over an empty box would do nothing visible. */
+  it("offers no expand control when there is nothing to clamp", () => {
+    expect(pane({ synopsis: null, synopsisMeta: null })).not.toContain("msp-synmore");
   });
 
-  it("says nothing is out rather than drawing an empty table", () => {
-    const html = pane({ holders: [] });
-    expect(html).toContain("Nothing is with an agent right now.");
+  /**
+   * ⚠️ IT ASSERTS NO RELATIONSHIP TO THE PACKAGES SYNOPSIS MATERIALS, AND THAT IS THE POINT. Whether
+   * this is the master the "One-page" and "Two-page" materials derive from, or a separate scratch
+   * copy, is an OPEN QUESTION. The footnote says "working copy" and names where the sent ones are
+   * built; it claims neither answer, so neither has to be unpicked later.
+   */
+  it("claims no master/derived relationship in its own words", () => {
+    expect(pane()).toContain(SYNOPSIS_NOTE);
+    for (const word of ["master", "derived", "source of", "generated from", "synced"]) {
+      expect(SYNOPSIS_NOTE.toLowerCase(), word).not.toContain(word);
+    }
+  });
+
+  it("has its own placeholder, distinct from the pitch's", () => {
+    expect(SYNOPSIS_PLACEHOLDER).not.toBe(PITCH_PLACEHOLDER);
+    expect(pane({ synopsis: null, synopsisMeta: null })).toContain('aria-label="Synopsis"');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe("what left this pane", () => {
+  /** ⚠️ ONE FACT, ONE HOME. `Out with agents now` on Journey is the same table. */
+  it("no longer tables who holds what", () => {
+    const html = pane();
+    expect(html).not.toContain("Who holds what");
     expect(html).not.toContain("<table");
-    // …and with no table there is no footnote pointing at a column that is not there.
-    expect(html).not.toContain("Which version each agent holds");
   });
 
-  /** ⚠️ NO RED. Closed and rejection are grey on this page; a red anywhere would encode a verdict. */
-  it("paints no red", () => {
-    expect(pane()).not.toMatch(/#(?:f|e|d|c)[0-9a-f]{1,2}[0-3][0-9a-f]{1,2}[0-3]/i);
-    expect(pane().toLowerCase()).not.toContain("red");
+  it("no longer states the five-figure stat row", () => {
+    const html = pane();
+    for (const label of ["Queries sent", "Responses", "Still open", "Closed", "Agents holding"]) {
+      expect(html, `${label} is still on Overview`).not.toContain(label);
+    }
+  });
+
+  /** ⚠️ THE PITCH IS EDITABLE NOW, AND ONLY BECAUSE THE RULES CARRY THE FIELD. */
+  it("is editable because firestore.rules allowlists elevatorPitch", () => {
+    const rules = readFileSync(join(__dirname, "..", "..", "..", "firestore.rules"), "utf8");
+    const block = [...rules.matchAll(/hasOnly\(\[([\s\S]*?)\]/g)]
+      .map((m) => m[1]).find((b) => b.includes("'bookVersions'"));
+    expect(block, "the manuscript update allowlist moved — re-find it").toBeTruthy();
+    expect(block, "elevatorPitch left the allowlist — the pitch editor now fails in silence")
+      .toContain("'elevatorPitch'");
+    expect(block, "synopsis left the allowlist — the synopsis editor now fails in silence")
+      .toContain("'synopsis'");
   });
 });

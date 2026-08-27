@@ -297,6 +297,21 @@ export interface Manuscript {
    */
   elevatorPitch?: string;
   backCoverBlurb?: string;
+  /**
+   * The writer's own working synopsis, edited in place on the book profile's Overview.
+   *
+   * ⚠️ THIS IS NOT THE PACKAGES SYNOPSIS MATERIALS, AND NO RELATIONSHIP BETWEEN THEM IS ASSERTED.
+   * Those are `ManuscriptVersion` documents with `componentType: SYNOPSIS` — the "One-page" and
+   * "Two-page" items — reached through a package's `synopsisVersionId`. Nothing on the manuscript
+   * has ever referenced one, and this field does not either. Whether this is the master those
+   * derive from or a genuinely separate scratch copy is an OPEN PRODUCT QUESTION; the surface says
+   * "working copy" and builds no edge, so either answer is still available.
+   *
+   * ⚠️ CLEARED BY OMITTING THE KEY (`deleteField()`), never by storing `""` — the convention
+   * `elevatorPitch` and `backCoverBlurb` already follow, so "never written" and "written and then
+   * emptied" do not become the same stored state.
+   */
+  synopsis?: string;
   // The manuscript's cover image (the panel selector's 30x40 slot renders it framed; absent shows
   // the illustrated mark, unframed). ⚠️ NOTHING WRITES THIS YET — the slot was built to accept an
   // image ahead of upload landing, so the field is a forward declaration only. TODO(cover-upload):
