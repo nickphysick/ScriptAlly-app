@@ -148,15 +148,23 @@ describe("the hero", () => {
     expect(rule).not.toMatch(/margin-top:\s*-/);
     expect(rule).not.toMatch(/position:\s*absolute/);
     expect(rule).toContain("flex: none");
-    expect(rule).toContain("width: 74px");
-    expect(rule).toContain("height: 92px");
+    /* ⚠️ 52×65 SINCE THE RECORD CARD (amendment 4). It was 74×92 when the band was bare on the
+       page ground; inside a framed card the cover is one item in a row rather than the band's
+       anchor, and at the old size it set the card's whole height. */
+    expect(rule).toContain("width: 52px");
+    expect(rule).toContain("height: 65px");
     // A hairline, not a 4px white keyline cut out of a banner.
     expect(rule).toContain("border: 1px solid var(--hair)");
   });
 
-  /** ⚠️ ONE ROW, CENTRED — a one-line title and a wrapped one both sit against the cover's middle. */
+  /**
+   * ⚠️ ONE ROW, CENTRED — and it is `.msp-heroband` now, not `.msp-herorow`. The wrapper went with
+   * the record card: the band IS the row, holding a chevron either side of the card, so a second
+   * flex row inside it was a box with one child.
+   */
   it("is one vertically centred row", () => {
-    expect(theRule(".msp-herorow")).toContain("align-items: center");
+    expect(theRule(".msp-heroband")).toContain("align-items: center");
+    expect(theRule(".msp-card")).toContain("align-items: center");
   });
 
   /**
@@ -167,6 +175,54 @@ describe("the hero", () => {
   it("keeps the title above the descender floor", () => {
     expect(parseFloat(theRule(".msv-plateband--hero .msv-platetitle").match(/line-height:\s*([\d.]+)/)![1]))
       .toBeGreaterThanOrEqual(1.3);
+  });
+
+  /**
+   * ⚠️ AN OBJECT ON THE GROUND, NOT A SECOND PAGE HEADER. The band used to sit bare beneath a
+   * masthead of the same shape — mark, Playfair title, supporting line, twice over — and the eye
+   * took the manuscript's name for the page's. A frame is what separates them.
+   */
+  it("is a bordered card, not a bare band", () => {
+    const rule = theRule(".msp-card");
+    expect(rule).toContain("background: var(--ws-window)");
+    expect(rule).toContain("border: 1px solid var(--hair)");
+    expect(rule).toMatch(/border-radius:\s*12px/);
+  });
+
+  /**
+   * ⚠️ NO `overflow: hidden` ON THE CARD — a card inside a scroll container is exactly where that
+   * clips a focus ring, and a keyboard user would lose the outline on the ⋯ with nothing to point
+   * at. The cover is a separate box and clips its own image; the card must not.
+   */
+  it("clips nothing, so a focus ring inside it survives", () => {
+    expect(theRule(".msp-card")).not.toMatch(/overflow\s*:\s*(hidden|clip)/);
+  });
+
+  /** ⚠️ THE CHEVRONS ACT ON THE CARD, so they sit outside it — inside they would read as controls
+   *  of the book they are about to replace. */
+  it("puts the chevrons outside the card, one each side", () => {
+    const html = hero();
+    const first = html.indexOf("msp-chev");
+    const card = html.indexOf("msp-card");
+    const last = html.lastIndexOf("msp-chev");
+    expect(first).toBeLessThan(card);
+    expect(last).toBeGreaterThan(card);
+    expect(html.match(/msp-chev/g)).toHaveLength(2);
+  });
+
+  /** The ⋯ belongs with the figures — both are about the record — and sits at their far right. */
+  it("groups the figures and the book's ⋯ together", () => {
+    const html = hero({ bookActions: <button type="button">dots</button> });
+    /* ⚠️ BOUNDED ON THE NEXT CHEVRON, NOT ON `</div></div>`. The group contains nested divs, so a
+       non-greedy close matches the FIRST inner one and cuts the ⋯ off the end — the slice then
+       reports the very absence the assertion is testing for. Slicing between two anchors that
+       cannot nest is the reliable form. */
+    const start = html.indexOf('<div class="msp-recstats">');
+    expect(start, "the figures group is not on the page").toBeGreaterThan(-1);
+    const group = html.slice(start, html.indexOf("msp-chev", start));
+    expect(group).toContain("msp-hsrow");
+    expect(group.indexOf("msp-hsrow")).toBeLessThan(group.indexOf("dots"));
+    expect(theRule(".msp-recstats")).toContain("margin-left: auto");
   });
 
   it("draws exactly one book image — the hero's cover, not the plate's mark too", () => {
@@ -271,7 +327,7 @@ describe("the hero", () => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 describe("the stylesheet", () => {
-  for (const sel of [".msp-hero", ".msp-cover", ".msp-heroin", ".msp-herorow",
+  for (const sel of [".msp-hero", ".msp-cover", ".msp-heroin", ".msp-heroband", ".msp-card",
                      ".msp-tabs", ".msp-tab", ".msv-plateband--hero"]) {
     it(`${sel} has exactly one base rule`, () => { theRule(sel); });
   }

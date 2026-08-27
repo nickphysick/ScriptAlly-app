@@ -74,6 +74,10 @@ export const ManuscriptHero: React.FC<ManuscriptHeroProps> = ({
         * ⚠️ AND THERE IS NO WRAP-AROUND. First has no previous, last has no next. Wrapping would
         * make the two ends indistinguishable from the middle, so a writer could not tell from the
         * control whether they had reached the end of their own shelf.
+        *
+        * ⚠️ THEY SIT OUTSIDE THE CARD. They page through the shelf, so they act ON the card rather
+        * than belonging to it — inside, they would read as controls of the book they are about to
+        * replace.
         */}
       <div className="msp-heroband">
         <button
@@ -84,40 +88,46 @@ export const ManuscriptHero: React.FC<ManuscriptHeroProps> = ({
           aria-label="Previous manuscript"
         >‹</button>
 
-      {/* ⚠️ ONE ROW, VERTICALLY CENTRED. Cover · identity · figures — `align-items: center` rather
-          than `flex-start`, so a one-line title and a two-line one both sit against the cover's
-          middle instead of riding its top edge. */}
-      <div className="msp-herorow">
-        {/* ⚠️ THE SAME ASSET THE DASHBOARD AND THE PLATE RENDER, contained, no blend mode. Tracing
-            it to SVG would fork one illustration in two. */}
-        <div className="msp-cover">
-          <img src={manuscriptIcon} alt="" />
-        </div>
+        {/**
+          * ⚠️ A CARD, BECAUSE TWO HEADERS WERE COMPETING. Bare on the page ground beneath a masthead
+          * of the same shape, this band read as a second page header — mark, Playfair title,
+          * supporting line, twice over. A white bordered card is an OBJECT sitting on the ground,
+          * and that distinction is what stops the eye taking the manuscript's name for the page's.
+          */}
+        <div className="msp-card">
+          {/* The same asset the dashboard and the plate render — contained, no blend mode. */}
+          <div className="msp-cover">
+            <img src={manuscriptIcon} alt="" />
+          </div>
 
-        <ManuscriptPlate
-          variant="hero"
-          title={title}
-          status={status}
-          shelved={shelved}
-          genres={genres}
-          wordCount={wordCount}
-          stats={stats}
-          edit={edit}
-        />
+          <ManuscriptPlate
+            variant="hero"
+            title={title}
+            status={status}
+            shelved={shelved}
+            genres={genres}
+            wordCount={wordCount}
+            stats={stats}
+            edit={edit}
+          />
 
-        {/* ⚠️ RIGHT-ALIGNED, PLAYFAIR OVER MONO, AND DERIVED AT READ TIME. These are the same three
-            figures the facts line used to carry; they are not stated twice on one row of the page. */}
-        {bookActions && <div className="msp-heroacts">{bookActions}</div>}
-
-        <div className="msp-herostats">
-          {figures.map((f) => (
-            <div key={f.key} className="msp-hs">
-              <div className={`msp-hsn${f.date ? " date" : ""}`}>{f.value}</div>
-              <div className="msp-hsl">{f.label}</div>
+          {/**
+            * ⚠️ THE FIGURES AND THE ⋯ ARE ONE GROUP, and the ⋯ sits at its far right. Both are about
+            * this RECORD rather than about the page, so they travel together — and the group takes
+            * the auto margin, because members each claiming it push only the first of them right.
+            */}
+          <div className="msp-recstats">
+            <div className="msp-hsrow">
+              {figures.map((f) => (
+                <div key={f.key} className="msp-hs">
+                  <div className={`msp-hsn${f.date ? " date" : ""}`}>{f.value}</div>
+                  <div className="msp-hsl">{f.label}</div>
+                </div>
+              ))}
             </div>
-          ))}
+            {bookActions}
+          </div>
         </div>
-      </div>
 
         <button
           type="button"

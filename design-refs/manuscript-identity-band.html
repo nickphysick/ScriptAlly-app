@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manuscript identity band — options (mockup)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f2ede7; --parchment:#fdfaf5; --white:#fffdfa;
+    --sage-chip:#dde3da; --sage-ink:#4e5c4b;
+    --pink-chip:#f6e3da;
+    --pink-cta:#f5e2da; --pink-cta-2:#e8c8bc;
+    --burgundy:#7c3a2a; --slate:#6A89A7;
+    --ink:#3a1c14; --muted:rgba(58,28,20,.55); --muted-2:rgba(58,28,20,.38);
+    --hair:rgba(58,28,20,.11); --hair-2:rgba(58,28,20,.07);
+    --gutter:38px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;}
+  body{margin:0; background:#e9e4dd; color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif; font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased; display:flex; flex-direction:column;}
+
+  .appbar{flex:none; background:var(--cream); border-bottom:1px solid var(--hair);
+    padding:0 24px; height:52px; display:flex; align-items:center; gap:14px;}
+  .appbar .crumb{font-family:'Playfair Display',serif; font-size:15.5px; color:var(--muted);}
+  .appbar .crumb b{color:var(--ink); font-weight:600;}
+  .appbar .sp{flex:1;}
+  .appbar .newbtn{background:#1c130f; color:#fff; border-radius:20px; padding:6px 15px; font-size:12.5px;}
+  .shellrow{flex:1; display:flex; min-height:0;}
+  .side{flex:none; width:180px; background:var(--cream); border-right:1px solid var(--hair);
+    padding:14px 11px; font-size:12.5px; color:var(--muted);}
+  .side .msw{background:var(--white); border:1px solid var(--hair); border-radius:9px;
+    padding:8px 9px; display:flex; align-items:center; gap:8px; margin-bottom:14px;}
+  .side .msw .th{width:22px;height:28px;border-radius:3px;background:linear-gradient(#dde3da,#d7ded4);flex:none;}
+  .side .msw .nm{font-size:11.5px; font-weight:600; color:var(--ink);}
+  .side .msw .sub{font-size:9.5px; color:var(--muted-2);}
+  .side .navi{padding:6px 9px; border-radius:7px;}
+  .side .navi.cur{background:var(--white); color:var(--ink); font-weight:600;}
+  .side .grp{font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--muted-2); margin:12px 0 4px 9px;}
+
+  .page{flex:1; min-width:0; background:var(--cream); display:flex; flex-direction:column; min-height:0;}
+  .switch{flex:none; padding:8px var(--gutter); display:flex; align-items:center; gap:11px;
+    background:#efe9e2; border-bottom:1px solid var(--hair); flex-wrap:wrap;
+    font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--muted-2);}
+  .seg{display:inline-flex; border:1px solid var(--hair); border-radius:7px; overflow:hidden; background:var(--white);}
+  .seg button{font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.05em;
+    text-transform:uppercase; padding:6px 11px; border:0; background:transparent; color:var(--muted); cursor:pointer;}
+  .seg button+button{border-left:1px solid var(--hair);}
+  .seg button[aria-pressed="true"]{background:var(--pink-cta); color:var(--ink);}
+  .switch .note{margin-left:auto; text-transform:none; letter-spacing:0;
+    font-family:'Inter',sans-serif; font-size:12px; color:var(--muted); max-width:520px; text-align:right;}
+  .scrollport{flex:1; min-height:0; overflow-y:auto;}
+  .inner{max-width:1140px; margin:0 auto; padding:0 var(--gutter) 90px;}
+
+  /* ============ PAGE MASTHEAD — as built. Not being changed. ============ */
+  .wshead{background:linear-gradient(100deg,#f8ece5 0%,#f6ece7 55%,var(--cream) 100%);
+    border-bottom:1px solid var(--hair);}
+  .wshead .in{max-width:1140px; margin:0 auto; padding:26px var(--gutter);
+    display:flex; align-items:center; gap:20px;}
+  .wshead .ill{width:56px; height:56px; flex:none; display:flex; align-items:center;
+    justify-content:center; font-size:38px; color:var(--burgundy); opacity:.85;}
+  .wshead h1{font-family:'Playfair Display',serif; font-weight:600; font-size:38px; margin:0; line-height:1.15;}
+  .wshead .subt{color:var(--muted); font-size:15px; margin-top:4px;}
+  .wshead .sp{flex:1;}
+  .btn-out{background:var(--pink-cta); border:1px solid var(--pink-cta-2); color:var(--burgundy);
+    font-size:14px; padding:11px 18px; border-radius:9px; text-decoration:none;}
+
+  /* ============ shared bits ============ */
+  .chev{flex:none; width:30px; height:30px; border:1px solid var(--hair); background:var(--white);
+    border-radius:50%; cursor:pointer; color:var(--burgundy); font-size:15px;
+    display:flex; align-items:center; justify-content:center;}
+  .chev:disabled{color:var(--muted-2); opacity:.28; background:none; border-color:var(--hair-2);}
+  .dots{flex:none; width:30px; height:30px; border:1px solid var(--hair); background:none;
+    border-radius:8px; cursor:pointer; color:var(--muted); font-size:13px;}
+  .dots:hover{color:var(--ink);}
+  .status{font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:.13em;
+    text-transform:uppercase; background:var(--pink-chip); color:var(--burgundy);
+    padding:4px 10px; border-radius:20px; display:inline-flex; align-items:center; gap:5px;}
+  .status::before{content:""; width:4px; height:4px; border-radius:50%; background:var(--burgundy);}
+  .chip{background:var(--sage-chip); color:var(--sage-ink); border-radius:20px;
+    padding:3px 10px; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.11em;
+    text-transform:uppercase;}
+  .cover{background:linear-gradient(#dde3da,#d7ded4); display:flex; align-items:center;
+    justify-content:center; border:1px solid rgba(58,28,20,.09); flex:none;}
+
+  .tabs{display:flex; gap:2px; border-bottom:1px solid var(--hair); margin-left:-10px; margin-top:0;}
+  .tab{font-size:13.5px; color:var(--muted); background:none; border:0; cursor:pointer;
+    padding:12px 10px 11px; position:relative; display:flex; align-items:center; gap:7px;}
+  .tab[aria-selected="true"]{color:var(--ink); font-weight:600;}
+  .tab[aria-selected="true"]::after{content:""; position:absolute; left:7px; right:7px;
+    bottom:-1px; height:2.5px; background:var(--burgundy); border-radius:2px 2px 0 0;}
+  .tab .cnt{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted-2);}
+  .tab .protag{font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:.11em;
+    text-transform:uppercase; color:#fff; background:var(--slate); padding:2px 6px; border-radius:20px;}
+
+  /* ============ A — toolbar strip ============ */
+  .A .strip{display:flex; align-items:center; gap:13px; padding:16px 0 14px;}
+  .A .cover{width:30px; height:38px; border-radius:4px; font-size:15px;}
+  .A .nm{font-family:'Playfair Display',serif; font-weight:600; font-size:19px; line-height:1.3;}
+  .A .divx{width:1px; height:22px; background:var(--hair);}
+  .A .facts{font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--muted); display:flex; gap:8px; align-items:center;}
+  .A .facts b{color:var(--ink); font-weight:500;}
+  .A .facts .ip{color:var(--muted-2);}
+  .A .right{margin-left:auto; display:flex; align-items:center; gap:10px;}
+
+  /* ============ B — record card ============ */
+  .B .wrapc{padding:22px 0 20px;}
+  .B .card{background:var(--white); border:1px solid var(--hair); border-radius:12px;
+    box-shadow:0 1px 2px rgba(28,19,15,.03); display:flex; align-items:center;
+    gap:16px; padding:16px 18px;}
+  .B .cover{width:52px; height:65px; border-radius:6px; font-size:22px;}
+  .B .nm{font-family:'Playfair Display',serif; font-weight:600; font-size:24px; line-height:1.25;}
+  .B .row1{display:flex; align-items:center; gap:11px; flex-wrap:wrap;}
+  .B .row2{margin-top:7px; display:flex; gap:8px; align-items:center;
+    font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--muted);}
+  .B .stats{margin-left:auto; display:flex; align-items:center; gap:14px;}
+  .B .bs{padding:0 16px; text-align:center; border-left:1px solid var(--hair-2);}
+  .B .bs:first-child{border-left:0;}
+  .B .bs .n{font-family:'Playfair Display',serif; font-size:21px; line-height:1.2;}
+  .B .bs .n.date{font-size:14.5px; padding-top:3px;}
+  .B .bs .l{font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:.11em;
+    text-transform:uppercase; color:var(--muted-2); margin-top:5px;}
+
+  /* ============ C — stats-led ============ */
+  .C .band{display:flex; align-items:flex-end; gap:26px; padding:22px 0 16px;
+    border-bottom:1px solid var(--hair);}
+  .C .idcol{min-width:0;}
+  .C .kicker{font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--muted-2); margin-bottom:6px;}
+  .C .nmrow{display:flex; align-items:center; gap:11px; flex-wrap:wrap;}
+  .C .nm{font-family:'Playfair Display',serif; font-weight:600; font-size:23px; line-height:1.3;}
+  .C .facts{margin-top:7px; display:flex; gap:8px; align-items:center;
+    font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--muted);}
+  .C .figs{margin-left:auto; display:flex; align-items:flex-end; gap:0;}
+  .C .fg{padding:0 22px; text-align:center; border-left:1px solid var(--hair-2);}
+  .C .fg:first-child{border-left:0;}
+  .C .fg .n{font-family:'Playfair Display',serif; font-size:32px; line-height:1.1;}
+  .C .fg .n.date{font-size:19px;}
+  .C .fg .l{font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--muted-2); margin-top:6px;}
+  .C .acts{display:flex; gap:9px; align-items:center; padding-bottom:4px; margin-left:20px;}
+
+  /* ============ D — merged into the tab bar ============ */
+  .D .merged{display:flex; align-items:center; gap:14px; border-bottom:1px solid var(--hair);
+    margin-top:18px;}
+  .D .bookbit{display:flex; align-items:center; gap:11px; padding:9px 16px 9px 0;
+    border-right:1px solid var(--hair-2); align-self:stretch;}
+  .D .cover{width:28px; height:35px; border-radius:4px; font-size:14px;}
+  .D .nm{font-family:'Playfair Display',serif; font-weight:600; font-size:17px; line-height:1.3;}
+  .D .dotstat{width:6px; height:6px; border-radius:50%; background:var(--burgundy); flex:none;}
+  .D .tabs{border-bottom:0; margin-left:0; flex:1;}
+  .D .right{display:flex; align-items:center; gap:9px;}
+  .D .facts{display:flex; gap:16px; padding:14px 0 12px;}
+  .D .fq{font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--muted);}
+  .D .fq b{color:var(--ink); font-weight:500; font-size:12px;}
+
+  /* content stub */
+  .fhead{display:flex; align-items:baseline; gap:12px; padding:0 0 10px;
+    border-bottom:1px solid var(--hair); margin:30px 0 18px;}
+  .fhead h3{font-family:'Playfair Display',serif; font-weight:600; font-size:25px; margin:0; line-height:1.25;}
+  .fhead .meta{font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.11em;
+    text-transform:uppercase; color:var(--muted-2);}
+  .pq{display:flex; align-items:flex-start; gap:14px;}
+  .pq .qm{font-family:'Playfair Display',serif; font-size:54px; line-height:.7;
+    color:var(--burgundy); opacity:.24; flex:none;}
+  .pq .qm.c{align-self:flex-end;}
+  .pq .txt{flex:1; font-family:'Playfair Display',serif; font-style:italic; font-size:19px;
+    line-height:1.6; color:var(--muted-2); padding:4px 0;}
+
+  .variant{display:none;}
+  body.a .A, body.b .B, body.c .C, body.d .D{display:block;}
+</style>
+</head>
+<body class="a">
+
+<div class="appbar">
+  <span class="crumb">ScriptAlly / Materials / <b>Manuscripts</b></span>
+  <span class="sp"></span><span class="newbtn">＋ New</span>
+</div>
+
+<div class="shellrow">
+  <div class="side">
+    <div class="msw"><span class="th"></span><span><span class="nm">Murphy's Day …</span><br><span class="sub">1 of 1</span></span></div>
+    <div class="navi">Dashboard</div>
+    <div class="grp">Queries</div>
+    <div class="navi">Query Centre</div>
+    <div class="navi">Analytics</div>
+    <div class="grp">Materials</div>
+    <div class="navi cur">Manuscripts</div>
+    <div class="navi">Comparable titles</div>
+    <div class="navi">Submission packages</div>
+  </div>
+
+  <div class="page">
+    <div class="switch">
+      <span>Identity band</span>
+      <div class="seg" id="vSeg">
+        <button data-v="a" aria-pressed="true">A — Strip</button>
+        <button data-v="b">B — Record card</button>
+        <button data-v="c">C — Stats-led</button>
+        <button data-v="d">D — In the tab bar</button>
+      </div>
+      <span class="note" id="note"></span>
+    </div>
+
+    <div class="scrollport">
+
+      <!-- masthead: as built, untouched -->
+      <div class="wshead">
+        <div class="in">
+          <div class="ill">📕</div>
+          <div><h1>Manuscripts</h1><div class="subt">Every manuscript on your shelf, and what each one is out doing.</div></div>
+          <span class="sp"></span>
+          <a class="btn-out" href="#">＋ Add a manuscript</a>
+        </div>
+      </div>
+
+      <div class="inner">
+
+        <!-- ===== A — toolbar strip ===== -->
+        <div class="variant A">
+          <div class="strip">
+            <button class="chev" disabled>‹</button>
+            <div class="cover">📕</div>
+            <span class="nm">Murphy's Day Out</span>
+            <span class="status">Querying</span>
+            <span class="divx"></span>
+            <span class="facts">
+              <span class="chip">Young Adult</span><span class="chip">Thriller</span>
+              <span class="ip">·</span><span>50,000 words</span>
+              <span class="ip">·</span><span><b>26</b> sent</span>
+              <span class="ip">·</span><span><b>12</b> responses</span>
+              <span class="ip">·</span><span>since <b>5 Dec 2023</b></span>
+            </span>
+            <span class="right"><button class="dots">⋯</button><button class="chev" disabled>›</button></span>
+          </div>
+          <div class="tabs">
+            <button class="tab" aria-selected="true">Overview</button>
+            <button class="tab">Journey</button>
+            <button class="tab">Comparable titles <span class="cnt">6</span></button>
+            <button class="tab">Versions <span class="cnt">3</span> <span class="protag">Pro</span></button>
+            <button class="tab">Notes <span class="cnt">4</span></button>
+          </div>
+        </div>
+
+        <!-- ===== B — record card ===== -->
+        <div class="variant B">
+          <div class="wrapc">
+            <div style="display:flex; align-items:center; gap:11px;">
+              <button class="chev" disabled>‹</button>
+              <div class="card" style="flex:1">
+                <div class="cover">📕</div>
+                <div style="min-width:0">
+                  <div class="row1"><span class="nm">Murphy's Day Out</span><span class="status">Querying</span></div>
+                  <div class="row2"><span class="chip">Young Adult</span><span class="chip">Thriller</span>
+                    <span>· 50,000 words</span></div>
+                </div>
+                <div class="stats">
+                  <div style="display:flex">
+                    <div class="bs"><div class="n">26</div><div class="l">Queries sent</div></div>
+                    <div class="bs"><div class="n">12</div><div class="l">Responses</div></div>
+                    <div class="bs"><div class="n date">5 Dec 2023</div><div class="l">Querying since</div></div>
+                  </div>
+                  <button class="dots">⋯</button>
+                </div>
+              </div>
+              <button class="chev" disabled>›</button>
+            </div>
+          </div>
+          <div class="tabs">
+            <button class="tab" aria-selected="true">Overview</button>
+            <button class="tab">Journey</button>
+            <button class="tab">Comparable titles <span class="cnt">6</span></button>
+            <button class="tab">Versions <span class="cnt">3</span> <span class="protag">Pro</span></button>
+            <button class="tab">Notes <span class="cnt">4</span></button>
+          </div>
+        </div>
+
+        <!-- ===== C — stats-led ===== -->
+        <div class="variant C">
+          <div class="band">
+            <button class="chev" disabled style="align-self:center">‹</button>
+            <div class="idcol">
+              <div class="kicker">Manuscript · 1 of 1</div>
+              <div class="nmrow"><span class="nm">Murphy's Day Out</span><span class="status">Querying</span></div>
+              <div class="facts"><span class="chip">Young Adult</span><span class="chip">Thriller</span>
+                <span>· 50,000 words</span></div>
+            </div>
+            <div class="figs">
+              <div class="fg"><div class="n">26</div><div class="l">Queries sent</div></div>
+              <div class="fg"><div class="n">12</div><div class="l">Responses</div></div>
+              <div class="fg"><div class="n date">5 Dec 2023</div><div class="l">Querying since</div></div>
+            </div>
+            <span class="acts"><button class="dots">⋯</button><button class="chev" disabled>›</button></span>
+          </div>
+          <div class="tabs" style="margin-top:0">
+            <button class="tab" aria-selected="true">Overview</button>
+            <button class="tab">Journey</button>
+            <button class="tab">Comparable titles <span class="cnt">6</span></button>
+            <button class="tab">Versions <span class="cnt">3</span> <span class="protag">Pro</span></button>
+            <button class="tab">Notes <span class="cnt">4</span></button>
+          </div>
+        </div>
+
+        <!-- ===== D — merged into the tab bar ===== -->
+        <div class="variant D">
+          <div class="merged">
+            <span class="bookbit">
+              <button class="chev" disabled>‹</button>
+              <div class="cover">📕</div>
+              <span class="nm">Murphy's Day Out</span>
+              <span class="dotstat" title="Querying"></span>
+              <button class="chev" disabled>›</button>
+            </span>
+            <div class="tabs">
+              <button class="tab" aria-selected="true">Overview</button>
+              <button class="tab">Journey</button>
+              <button class="tab">Comparable titles <span class="cnt">6</span></button>
+              <button class="tab">Versions <span class="cnt">3</span> <span class="protag">Pro</span></button>
+              <button class="tab">Notes <span class="cnt">4</span></button>
+            </div>
+            <span class="right"><button class="dots">⋯</button></span>
+          </div>
+          <div class="facts">
+            <span class="fq"><b>Young Adult</b> · Thriller</span>
+            <span class="fq"><b>50,000</b> words</span>
+            <span class="fq"><b>26</b> queries sent</span>
+            <span class="fq"><b>12</b> responses</span>
+            <span class="fq">querying since <b>5 Dec 2023</b></span>
+          </div>
+        </div>
+
+        <!-- content stub, same in all four -->
+        <div class="fhead"><h3>The pitch</h3><span class="meta">Not written yet</span></div>
+        <div class="pq"><span class="qm">“</span>
+          <div class="txt">If you were to describe your book to an agent in the space of a few seconds, what would you say?</div>
+          <span class="qm c">”</span></div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const notes = {
+  a:'One compact line — the book as a toolbar, not a second headline.',
+  b:'The book as a white record card, clearly an object sitting on the page.',
+  c:'Name goes quiet, the three figures get the weight. A kicker labels the row.',
+  d:'Book and tabs share one bar; the facts sit beneath as a plain line.'
+};
+function apply(){
+  const v = document.querySelector('#vSeg [aria-pressed="true"]').dataset.v;
+  document.body.className = v;
+  document.getElementById('note').textContent = notes[v];
+}
+document.querySelectorAll('#vSeg button').forEach(b=> b.onclick = ()=>{
+  document.querySelectorAll('#vSeg button').forEach(x=> x.setAttribute('aria-pressed','false'));
+  b.setAttribute('aria-pressed','true'); apply();
+});
+apply();
+</script>
+</body>
+</html>
