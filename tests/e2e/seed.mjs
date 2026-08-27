@@ -51,7 +51,22 @@ const { user } = await signInWithEmailAndPassword(getAuth(app), EMAIL, PASSWORD)
 const uid = user.uid;
 console.log(`signed in as ${EMAIL} on ${PROJECT}`);
 
-const iso = (daysAgo) => new Date(Date.now() - daysAgo * 86_400_000).toISOString().slice(0, 10);
+/**
+ * A date N days before today, as the APP would name it.
+ *
+ * ⚠️ LOCAL, NOT UTC, AND THE DIFFERENCE IS A WHOLE DAY FOR AN HOUR EVERY NIGHT. `toISOString()`
+ * is UTC: under BST, between 23:00 and midnight local, it names YESTERDAY. Every fixture written
+ * in that hour was therefore one day older than it says, while the board derives "today" locally —
+ * so a 13-day wait against a 14-day window, seeded to sit at 93%, was written at 14 days and
+ * rendered at exactly 100%. Measured 28 Aug at 00:40 local: the near-step fixture had no near step,
+ * and three locks failed for a reason that was nothing to do with the page.
+ */
+const iso = (daysAgo) => {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  const p2 = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
+};
 const path = (coll) => collection(db, "users", uid, coll);
 
 /* ── one manuscript ─────────────────────────────────────────────────────────────────────── */
@@ -181,8 +196,13 @@ const STATUSES = [
        stretch beginning before the left edge is drawn FROM that edge, so its fill is a fraction of
        what shows rather than of the stated span, and a fixture for a threshold must not sit on
        top of that. */
+    /* ⚠️ THE NEAR STEP NEEDS HEADROOM, NOT PRECISION. This was 13 days against a 14-day window —
+       92.9%, dead centre of the 85–100% band on the day it was written and 100% the next morning,
+       so the fixture emptied its own branch within a day and three locks went red over a board
+       that was fine. 50 against 56 is 89.3% and stays inside the band for six days either side. A
+       fixture that only holds on the day you seed it is a fixture that fails whoever runs next. */
     { id: "seed-cal-near", name: "Wren Ashcombe", agency: "Ashcombe Literary",
-      weeks: 2, sentDaysAgo: 13, status: "Queried" },
+      weeks: 8, sentDaysAgo: 50, status: "Queried" },
     /* a passed named end at a plausible distance: 48 days out on a 4-week window, so the date
        passed 20 days ago and the bar runs full to it and hollow past it */
     { id: "seed-cal-passed20", name: "Cormac Bligh", agency: "Bligh & Sons",

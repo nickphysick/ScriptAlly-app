@@ -74,6 +74,47 @@ const TAG = `
     .find((e) => e.getBoundingClientRect().height > 0) || null;
 `;
 
+/**
+ * Marker clearance, box-to-box, against every bar on the marker's own line.
+ *
+ * ⚠️ ONE IMPLEMENTATION, CALLED TWICE. The structural case checks it per width and the sweep below
+ * checks it per range; writing the rule out twice is the fault this whole pack is about, and a
+ * second copy would be free to drift into the two wrong versions this one already survived.
+ *
+ * Two earlier versions were wrong in opposite directions. The first measured a gap only where the
+ * boxes did NOT intersect, so an overlapping pair was skipped before it was measured — vacuous,
+ * excluding exactly the case that fails. The second excused every bar whose span contained the
+ * marker's midpoint, on the belief that a marker sits ON its own bar by design. It does not:
+ * markers INTERRUPT bars, which is what the 12px gap exists for, so an overlap is a fault wherever
+ * it occurs and the midpoint test was the old skip wearing a reason.
+ *
+ * The 3px halo is contrast against the card surface and never counts as clearance.
+ */
+const clearanceNow = async (page: import("@playwright/test").Page) =>
+  (await page.evaluate(`(() => {
+    const mks = [...document.querySelectorAll(".tl-mk2")].filter((m) => m.getBoundingClientRect().width > 0);
+    let worst = Infinity; let pairs = 0; const offenders = [];
+    for (const m of mks) {
+      const mr = m.getBoundingClientRect();
+      const lane = m.closest(".tl-c-tl");
+      if (!lane) continue;
+      for (const b of lane.querySelectorAll(".tl-p")) {
+        const br = b.getBoundingClientRect();
+        if (br.width <= 0) continue;
+        /* the same LINE only — a two-lane row draws two independent journeys */
+        if (Math.abs((br.top + br.height / 2) - (mr.top + mr.height / 2)) > 6) continue;
+        pairs += 1;
+        /* positive where they are apart, negative where they overlap — never skipped */
+        const gap = br.left >= mr.right ? br.left - mr.right
+          : mr.left >= br.right ? mr.left - br.right
+          : -Math.min(mr.right, br.right) + Math.max(mr.left, br.left);
+        if (gap < worst) worst = gap;
+        if (gap < 1) offenders.push(Math.round(gap * 10) / 10 + "px");
+      }
+    }
+    return { pairs, worst: Number.isFinite(worst) ? Math.round(worst * 10) / 10 : null, offenders };
+  })()`)) as { pairs: number; worst: number | null; offenders: string[] };
+
 test.describe("the Calendar — Porcelain", () => {
   for (const width of WIDTHS) {
     test(`painted values, structure and clearance at ${width}`, async ({ page }) => {
@@ -1231,10 +1272,16 @@ test("⚠️ the past is set back on the ground and never on the data", async ({
   await page.addStyleTag({ content: ".tl-plbl { visibility: hidden !important; }" });
   await page.waitForTimeout(200);
 
-  for (const frac of [0, 0.25, 0.5, 0.75]) {
+  for (const frac of [0, 0.14, 0.28, 0.42, 0.56, 0.7, 0.85, 1]) {
+    /* ⚠️ `.tl-zone`, NOT `.wpg-scroll`. The calendar is a FILL page, so the grid's scroll row does
+       not scroll — the board scrolls inside its own zone. Stepping the wrong element moved nothing
+       and the sweep gathered the same two bars eight times over, which reads exactly like a board
+       that only has two. Choosing the scroller by measurement rather than by name is the guard. */
     await page.evaluate(`(() => {
-      const sc = [...document.querySelectorAll(".wpg-scroll")].find((e) => e.scrollHeight > e.clientHeight + 4);
-      if (sc) sc.scrollTop = (sc.scrollHeight - sc.clientHeight) * ${frac};
+      const sc = [...document.querySelectorAll(".tl-zone, .wpg-scroll")]
+        .find((e) => e.scrollHeight > e.clientHeight + 8 && e.getBoundingClientRect().height > 0);
+      if (!sc) throw new Error("no scrolling zone on the calendar");
+      sc.scrollTop = (sc.scrollHeight - sc.clientHeight) * ${frac};
     })()`);
     await page.waitForTimeout(400);
     const shot = (await page.screenshot()).toString("base64");
@@ -1670,4 +1717,29 @@ test("the month shelf appears only where there are months to tell apart", async 
     }
   }
   for (const s of seen) console.log(`  ${s}`);
+});
+
+/**
+ * ⚠️ CLEARANCE AT EVERY RANGE, NOT ONLY THE ONE THE PAGE OPENS ON.
+ *
+ * The structural case measures it at three widths and one range. Bars change span with the range
+ * — that is what a range IS — so the pair that is tightest at six months is not the pair that is
+ * tightest at one, and a rule verified at a single range is verified for a single set of pairs.
+ */
+test("markers stay clear of every bar on their line, at every range", async ({ page }) => {
+  const seen: string[] = [];
+  for (const width of WIDTHS) {
+    await openRoute(page, "/todo/calendar", { width, height: HEIGHT });
+    await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+    for (const r of [0, 1, 2]) {
+      await setRangeTo(page, r);
+      const c = await clearanceNow(page);
+      seen.push(`${width} r${r}: ${c.pairs} pairs, worst ${c.worst}px, ${c.offenders.length} under 1px`);
+      expect(c.pairs, `${width}px range ${r}: no marker/bar pair — the sweep proves nothing`)
+        .toBeGreaterThan(0);
+      expect(c.worst, `${width}px range ${r}: ${c.offenders.length} pairs under 1px: ${JSON.stringify(c.offenders)}`)
+        .toBeGreaterThanOrEqual(1);
+    }
+  }
+  for (const s2 of seen) console.log(`  ${s2}`);
 });
