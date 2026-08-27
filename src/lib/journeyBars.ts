@@ -866,7 +866,19 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
    * terminus and the whole stretch came back too narrow to draw. Measured on the unit fixtures —
    * an eight-week window resolving to exactly today produced zero pieces and the row vanished.
    */
-  const breaks: Break[] = live.map((n) => ({ at: n.at, kind: "node" as const }));
+  /**
+   * ⚠️ EVERY DRAWN MARKER BREAKS THE BAR, INCLUDING THE TWO THAT ARE NOT EVENTS.
+   *
+   * `bang` (a reminder fallen due) and `clock` (a query gone quiet) are drawn at their dates but
+   * were never in `breaks`, so the bar ran straight under them and the marker's 20px disc sat ON
+   * the ink. Measured box-to-box at 1440: eight pixels of overlap, on thirteen marker/bar pairs.
+   * A marker INTERRUPTS a bar — that is what the 12px gap is for — so anything drawn is a break,
+   * and the two exceptions were the whole of the fault.
+   */
+  const breaks: Break[] = [
+    ...live.map((n) => ({ at: n.at, kind: "node" as const })),
+    ...dateMarks.map((n) => ({ at: n.at, kind: "node" as const })),
+  ];
 
   /* ── the pieces ────────────────────────────────────────────────────────────────────────── */
   /* ══ WHERE THE LIVE BAR STOPS ═══════════════════════════════════════════════════════════

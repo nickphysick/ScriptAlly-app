@@ -160,40 +160,44 @@ test.describe("the Calendar — Porcelain", () => {
         }
         out.markers = mk;
         /**
-         * ⚠️ THE CLEARANCE A MARKER NEEDS IS FROM ITS NEIGHBOURS, NOT FROM THE BAR IT SITS ON.
+         * MARKER CLEARANCE, TO THE RULING: box-to-box, against EVERY bar in the row, >= 1px.
          *
-         * The previous version measured a gap ONLY where the two boxes did not intersect — so an
-         * overlapping pair was skipped BEFORE it was measured, and the assertion below it could
-         * never see one. Not under-ranged: vacuous, excluding exactly the case that fails.
-         * Measured after repairing it: 6 intersecting pairs at one month, 13 at three, 24 at six.
+         * Two earlier versions were wrong in opposite directions. The first measured a gap only
+         * where the boxes did NOT intersect, so an overlapping pair was skipped before it was
+         * measured — vacuous, excluding exactly the case that fails. The second excused every bar
+         * whose span contained the marker's midpoint, on the belief that a marker sits ON its own
+         * bar by design. It does not: markers INTERRUPT bars, which is what the 12px GAP exists
+         * for, so an overlap is a fault wherever it occurs and the midpoint test was simply the
+         * old skip wearing a reason.
          *
-         * AND MOST OF THOSE ARE THE DESIGN. A marker sits ON its own join by construction, and the
-         * 3px halo (a box-shadow in the card colour, which paints outside the box and takes no
-         * layout) is what separates the two inks. So the honest claim is about the bars the marker
-         * does NOT belong to: a NEIGHBOURING bar must clear the marker disc by at least the halo,
-         * or the halo is painting over ink it was not meant to reach.
-         *
-         * (No backticks in this comment: it lives INSIDE a template literal, and one ends it.)
+         * The 3px halo is contrast against the card surface and never counts as clearance.
+         * (No backticks in here: this comment lives inside a template literal.)
          */
-        let worst = Infinity; let pairs = 0; let sat = 0;
+        let worst = Infinity; let pairs = 0; const offenders = [];
         for (const m of mks) {
           const mr = m.getBoundingClientRect();
-          const mid = (mr.left + mr.right) / 2;
           const lane = m.closest(".tl-c-tl");
           if (!lane) continue;
           for (const b of lane.querySelectorAll(".tl-p")) {
             const br = b.getBoundingClientRect();
             if (br.width <= 0) continue;
+            /* the same LINE only — a two-lane row draws two independent journeys */
             if (Math.abs((br.top + br.height / 2) - (mr.top + mr.height / 2)) > 6) continue;
-            /* the bar this marker stands on: overlap is the drawing, and the halo handles it */
-            if (mid >= br.left - 1 && mid <= br.right + 1) { sat += 1; continue; }
             pairs += 1;
-            const gap = br.left > mr.right ? br.left - mr.right : mr.left - br.right;
-            worst = Math.min(worst, gap);
+            /* positive where they are apart, negative where they overlap — never skipped */
+            const gap = br.left >= mr.right ? br.left - mr.right
+              : mr.left >= br.right ? mr.left - br.right
+              : -Math.min(mr.right, br.right) + Math.max(mr.left, br.left);
+            if (gap < worst) worst = gap;
+            if (gap < 1) {
+              offenders.push(((m.closest(".tl-rrow").querySelector(".tl-nm2") || {}).textContent || "?")
+                .slice(0, 18) + " " + gap.toFixed(1));
+            }
           }
         }
         out.markerBarPairs = pairs;
-        out.markersSittingOnTheirBar = sat;
+        out.markerOffenders = offenders.slice(0, 12);
+        out.markerOffenderCount = offenders.length;
         out.worstClearance = worst === Infinity ? null : +worst.toFixed(2);
         /* ── structure ──────────────────────────────────────────────────────────────────── */
         out.columnHeaders = document.querySelectorAll(".tl-hrow").length;
@@ -285,23 +289,17 @@ test.describe("the Calendar — Porcelain", () => {
       }
       /* ⚠️ THE POPULATION FIRST, then the property — the repaired sweep must actually be finding
          neighbouring pairs, or a clean result means it measured nothing. */
-      console.log(`markers at ${width}: ${read.markersSittingOnTheirBar} on their own bar, `
-        + `${read.markerBarPairs} beside a neighbour, worst clearance ${read.worstClearance}`);
+      console.log(`markers at ${width}: ${read.markerBarPairs} marker/bar pairs in row, `
+        + `worst gap ${read.worstClearance}, ${read.markerOffenderCount} under 1px`
+        + (read.markerOffenderCount ? ` — ${read.markerOffenders.join(", ")}` : ""));
       expect(read.markerBarPairs, "no neighbouring marker/bar pair — the sweep proves nothing")
         .toBeGreaterThan(0);
-      /**
-       * ⚠️ REPORTED, NOT ASSERTED, AND THE REASON IS THAT THE CLAIM HAS NO DEFINITION YET.
-       *
-       * The lock this replaces was VACUOUS: it measured a gap only where the two boxes did not
-       * intersect, so an overlapping pair was skipped before it was measured and the assertion
-       * could never see one. Repairing that is the finding. But "a marker is crowded" turns out
-       * not to be a settled claim: a marker sits ON its bar by design, the 3px halo is what
-       * separates the inks, and the repaired sweep reports large negative gaps against bars the
-       * marker's midpoint is outside — which is either a real crowding fault or a wrong reading of
-       * what a neighbour is. Pinning a threshold now would be inventing the definition rather than
-       * measuring against one, so the numbers are printed every run and the report asks for the
-       * ruling. A census that names its own gap beats a lock that cannot fail.
-       */
+      /* ⚠️ AN ASSERTION NOW, NOT ONLY A CENSUS — the ruling settled the definition the earlier
+         version said it lacked. A marker must be clear of EVERY bar in its own row, including the
+         segments it joins, by at least 1px box-to-box. The census stays beside it, printing its
+         distinct values, because a clean number over an empty set proves nothing. */
+      expect(read.worstClearance, `${read.markerOffenderCount} marker/bar pairs under 1px: `
+        + JSON.stringify(read.markerOffenders)).toBeGreaterThanOrEqual(1);
 
       /* ── structure ──────────────────────────────────────────────────────────────────── */
       expect(read.columnHeaders, "the column header is drawn per group again").toBe(1);

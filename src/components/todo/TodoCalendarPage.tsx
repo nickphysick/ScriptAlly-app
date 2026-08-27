@@ -355,6 +355,28 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       const root = pageRef.current;
       if (!root) return;
       for (const seg of Array.from(root.querySelectorAll<HTMLElement>(".tl-p"))) {
+        /**
+         * ⚠️ A PIECE WITH NO ROOM TO DRAW IS NOT DRAWN, and `border-box` is why this is needed.
+         *
+         * A bar stands 12px off each marker it abuts. Where the stretch between two markers is
+         * only a day or so, those two standoffs consume the whole span — and a width calc that
+         * resolves NEGATIVE is not clamped to nothing: with `box-sizing: border-box` the used
+         * width is clamped UP to the borders, so the piece paints a 2px sliver. Measured
+         * box-to-box, that sliver overlapped its own marker by exactly 2px on four rows, which is
+         * the whole of the residual clearance fault after the drawn markers became breaks.
+         *
+         * A sliver says nothing that its run's neighbouring pieces do not, and it cannot be drawn
+         * without overlapping the marker it abuts — so it is hidden rather than shrunk. The same
+         * judgement as a label going bare: where there is no room, the honest thing is absence.
+         */
+        /* ⚠️ RESET BEFORE MEASURING, or the hide LATCHES: a `display: none` element reports
+           `clientWidth` 0 for ever, so a piece hidden once at six months would stay hidden when
+           the reader came back to one month. The same shape as the label's own reset above.
+           ⚠️ AND IT IS `display`, NOT `visibility` — a hidden element still HAS a box, so the
+           sliver would go on overlapping its marker where it counts, in the geometry. */
+        seg.style.display = "";
+        const room = seg.clientWidth;
+        if (room <= 0) { seg.style.display = "none"; continue; }
         const lbl = seg.querySelector<HTMLElement>(".tl-plbl");
         if (!lbl) continue;
         const long = lbl.dataset.long ?? "";
