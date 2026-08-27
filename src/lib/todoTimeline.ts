@@ -27,7 +27,6 @@ import { BoardCard } from "./todoBoard";
 import { agentPrimary, agentSecondary } from "./agentDisplay";
 import { agentTurn, isTerminalStatus, matchesAgentSearch } from "./agentList";
 import { queryBucket } from "./queryAmbient";
-import { resolveExpectedDate } from "./expectedDate";
 import { STATUS_ORDER } from "./statusOrder";
 import {
   CalendarItem, RecordItem, GhostItem, RecordDir,
@@ -36,7 +35,7 @@ import {
 import { rowGroupOf, type RowGroup, type QueryFacts } from "./timelineGroups";
 import { rowSentence, rowNote, agentSurname, type RowCopy, type RowNote } from "./timelineCopy";
 import {
-  laneBars, statusIndex, sideOf,
+  laneBars, statusIndex, sideOf, namedEndFor,
   type Segment, type BarNode, type BarWindow,
 } from "./journeyBars";
 import type { Activity, Manuscript, TaskFlag } from "../types";
@@ -294,6 +293,17 @@ export interface TimelineData {
 export const YOU_ROW = "you";
 export const YOU_ROW_NAME = "Your tasks";
 const agentRowKey = (agentId: string): string => `agent-${agentId}`;
+/**
+ * ⚠️ ONE ROW PER DATED TASK, and the key is the task's own id.
+ *
+ * They used to share one aggregate row called "Your tasks", which could hold no deed (whose task
+ * would it tick off?), no name (which task is it?) and no useful count — the group heading read
+ * "1" beside four chips. A relationship earns a row because it is one thing with one state; a
+ * dated task is one thing with one state in exactly the same way, and it is the only kind of row
+ * on this board the writer can finish outright.
+ */
+const taskRowKey = (id: string): string => `task-${id}`;
+export const TASK_ROW_AGENCY = "Your task";
 
 /**
  * Which row an item belongs to.
@@ -419,6 +429,21 @@ export function timelineWeek(
   };
   drafts.set(YOU_ROW, you);
 
+  /** the task's own row, made on demand and named by the task */
+  const taskRowFor = (id: string, title: string): Draft => {
+    const key = taskRowKey(id);
+    const cur = drafts.get(key);
+    if (cur) return cur;
+    const d: Draft = {
+      key, agentId: null, name: title, agency: TASK_ROW_AGENCY,
+      dot: "self", closed: false, items: [], manuscripts: [], held: 0, hasLive: true,
+      facts: [], lastClosed: null, copy: null, status: null, sentence: "",
+      soonest: Infinity, waitingFrom: Infinity, stage: -1, order: drafts.size,
+    };
+    drafts.set(key, d);
+    return d;
+  };
+
   const rowFor = (agentId: string | null): Draft => {
     if (!agentId) return you;
     const key = agentRowKey(agentId);
@@ -443,16 +468,14 @@ export function timelineWeek(
     const copyOf = (q: Query, a: Agent | undefined): RowCopy => ({
       surname: agentSurname(agentPrimary(a)),
       status: q.status as QueryStatus,
-      expectedYmd: isTerminalStatus(q.status) ? null : ymdOf(
-        (() => {
-          const sends = [q.dateSent, q.partialSentDate, q.fullSentDate]
-            .map((iso) => (iso ? new Date(iso as string).getTime() : NaN))
-            .filter((t) => !Number.isNaN(t));
-          const r = resolveExpectedDate(
-            q, sends.length ? Math.min(...sends) : null, a?.responseTimeWeeks ?? null, null);
-          return r.ms == null ? null : new Date(r.ms).toISOString();
-        })(),
-      ),
+      /* ⚠️ ONE FUNCTION, AND THIS SITE IS THE ONE THAT WAS WRONG. It resolved the reply window
+         from `Math.min(...sends)` — the EARLIEST thing you sent — while the bar three inches to
+         its right resolved the same window from `Math.max`. So a relationship that ran a query in
+         January and a full in August had its scrawl measuring from January and its bar from
+         August, and the scrawl printed day-counts nobody could reconcile. `namedEndFor` is the
+         single source and it takes the latest send, because the reply you are waiting for is to
+         the last thing you sent. */
+      expectedYmd: namedEndFor(q as Query, a ?? null, { today: data.today }).window,
       nudgeYmd: isTerminalStatus(q.status) ? null : ymdOf(q.nudgeDate),
       nudgedOnYmd: ymdOf(q.lastNudgeSentDate),
       lastWordYmd: ymdOf(q.lastStatusChange) ?? ymdOf(q.dateSent),
@@ -598,8 +621,17 @@ export function timelineWeek(
       /* ghosts arrive in their own loop below, so this branch only ever sees the three above */
       if (kind !== "task") continue;
       const owner = it.card?.agentId ?? ownerOf(it.card?.relatedRecordId, byQuery);
-      push(rowFor(isTask ? null : owner), {
-        key: it.key, idx, ymd, kind, label: pillLabel(it), lane: 0, spanTo: idx,
+      /* ⚠️ THE TASK'S OWN WORDS NAME ITS ROW — `it.label`, never `pillLabel`'s summary. A writer's
+         own task already has a title they wrote; summarising it on their behalf is the one thing
+         this board must not do to the one row that is entirely theirs. */
+      const taskId = it.card?.userTaskId ?? it.key;
+      const target = isTask ? taskRowFor(taskId, it.label) : rowFor(owner);
+      push(target, {
+        /* ⚠️ A TASK'S CHIP CARRIES THE WRITER'S OWN WORDS. `pillLabel` summarises a DERIVED card
+           to two words, which is right for a card the app raised and wrong for a line the writer
+           typed — and on a per-task row the chip is the only place those words appear beside a
+           date. Everything else still goes through the shared summariser. */
+        key: it.key, idx, ymd, kind, label: isTask ? it.label : pillLabel(it), lane: 0, spanTo: idx,
         ...(it.card ? { card: it.card } : {}),
         ...(it.card?.relatedRecordId ? { queryId: it.card.relatedRecordId } : {}),
         ...(it.rolledFrom ? { rolledFrom: it.rolledFrom } : {}),
@@ -620,12 +652,14 @@ export function timelineWeek(
      * well would put one fact on the row twice — the same doubling the record chips had.
      *
      * For a writer's own task there is no bar, so the mark is the only thing that can say it, and
-     * it lands on the pinned row where a task belongs.
+     * it lands on THAT TASK'S OWN ROW — the same row its live chip is on, which is the whole point
+     * of the mark: it says "this fell due here and is still outstanding", and a reader can only
+     * read that if the origin and the live item are on one line.
      */
     for (const g of data.ghostsOn(ymd)) {
       const isTask = !!g.of.card?.userTaskId || g.of.family === "task";
       if (!isTask) continue;
-      push(rowFor(null), {
+      push(taskRowFor(g.of.card?.userTaskId ?? g.of.key, g.of.label), {
         key: g.key, idx, ymd, kind: "ghost", label: pillLabel(g.of), lane: 0, spanTo: idx,
         ...(g.of.card ? { card: g.of.card } : {}),
         ...(g.of.rolledFrom ? { rolledFrom: g.of.rolledFrom } : {}),
@@ -771,7 +805,7 @@ export function timelineWeek(
   }
 
   /* ── order ──────────────────────────────────────────────────────────────────────────────── */
-  const rest = kept.filter((r) => r.key !== YOU_ROW);
+  const rest = kept.filter((r) => !r.key.startsWith("task-") && r.key !== YOU_ROW);
   const cmp: Record<RowSort, (a: Draft, b: Draft) => number> = {
     /* ⚠️ COMPARED, NOT SUBTRACTED. Both keys are `Infinity` on a row that holds nothing, and
        `Infinity - Infinity` is NaN while `Infinity - 3` is Infinity — neither of which is a
@@ -813,7 +847,24 @@ export function timelineWeek(
     .map((r) => ({ r, group: rowGroupOf(r.facts, r.lastClosed, data.today, ymdGap) }))
     .filter((x): x is { r: Draft; group: RowGroup } => x.group !== null);
 
-  const ordered = kept.includes(you) ? [you, ...grouped.map((x) => x.r)] : grouped.map((x) => x.r);
+  /**
+   * ⚠️ THE TASK ROWS PIN ABOVE THE GROUPS, EACH ON ITS OWN LINE. There used to be exactly one —
+   * an aggregate called "Your tasks" that could hold no deed (whose task would it tick off?), no
+   * name (which task is it?) and no useful count, so its heading read "1" beside four chips.
+   *
+   * ⚠️ AND THEY KEEP THE VIEW'S OWN ORDER AMONG THEMSELVES, by `soonest`, so the nearest date is
+   * first. `you` survives only as the home for anything a task cannot be keyed by, and is
+   * prepended only if it kept an item — prepending it unconditionally was how it drew itself empty
+   * after its exemption went.
+   */
+  const taskRows = kept
+    .filter((r) => r.key.startsWith("task-"))
+    .sort((a, b) => (a.soonest === b.soonest ? a.order - b.order : a.soonest - b.soonest));
+  const ordered = [
+    ...(kept.includes(you) ? [you] : []),
+    ...taskRows,
+    ...grouped.map((x) => x.r),
+  ];
   const groupOf = new Map(grouped.map((x) => [x.r.key, x.group]));
   /* ⚠️ THE NOTE IS DECIDED WHERE THE GROUP IS, not where the facts are. Whether a row is written
      on is the question "is something being asked of the writer", and `timelineGroups` answers that

@@ -109,10 +109,16 @@ describe("rows are relationships — one per agent, and Your tasks pinned above 
     },
   } as Partial<CalendarInput>);
 
-  it("puts Your tasks first when it has any, and it belongs to no agent", () => {
+  it("puts the writer's own tasks first, each on its own row, belonging to no agent", () => {
+    /* ⚠️ ONE ROW PER DATED TASK (fix pack, Phase 5). This asserted a single AGGREGATE row called
+       "Your tasks" — which could hold no deed (whose task would it tick off?), no name (which task
+       is it?) and no useful count: its heading read "1" beside four chips. The claim that
+       survives is the one that mattered — a task pins above the agent rows and belongs to no
+       agent — and it is now true of each task separately. */
     const rows = timelineRows(dataFor(MINE), TODAY, 7);
-    expect(rows[0].key).toBe(YOU_ROW);
-    expect(rows[0].name).toBe(YOU_ROW_NAME);
+    expect(rows[0].key.startsWith("task-"), `first row is ${rows[0].key}`).toBe(true);
+    expect(rows[0].agentId).toBeNull();
+    expect(rows[0].agency).toBe("Your task");
     /**
      * ⚠️ THE PINNED ROW HAS NO STATUS AND NO GROUP, AND BOTH ABSENCES ARE THE POINT.
      *
@@ -154,7 +160,7 @@ describe("rows are relationships — one per agent, and Your tasks pinned above 
     expect(timelineSegments(dataFor(TURN), TODAY, 7).some((sg) => sg.side === "yours")).toBe(true);
   });
 
-  it("sends a writer's own task to the pinned row and never to an agent's", () => {
+  it("sends a writer's own task to ITS OWN row and never to an agent's", () => {
     const inp = input({
       cols: {
         todo: [], snoozed: [], dismissed: [], done: [],
@@ -163,7 +169,11 @@ describe("rows are relationships — one per agent, and Your tasks pinned above 
     } as Partial<CalendarInput>);
     const rows = timelineRows(dataFor(inp), TODAY, 7);
     expect(rows).toHaveLength(1);
-    expect(rows[0].key).toBe(YOU_ROW);
+    expect(rows[0].key).toBe("task-t1");
+    /* ⚠️ THE ROW IS NAMED BY THE TASK, which is the whole reason it is a row: an aggregate could
+       not say which task it was about, so it could not carry a deed either. */
+    expect(rows[0].name).toBe("Book the library room");
+    expect(rows[0].agency).toBe("Your task");
     expect(rows[0].items.map((i) => [i.kind, i.label, i.idx])).toEqual([["task", "Book the library room", 2]]);
   });
 
@@ -239,8 +249,17 @@ describe("rows are relationships — one per agent, and Your tasks pinned above 
     expect(timelineRows(dataFor(MINE), TODAY, 7)[0].dot).toBe("self");
   });
 
-  it("the pinned row states no second line — it holds tasks from every manuscript and from none", () => {
-    expect(timelineRows(dataFor(MINE), TODAY, 7)[0].agency).toBe("");
+  it("⚠️ A TASK ROW'S SECOND LINE SAYS WHOSE IT IS, and it is the same on every one of them", () => {
+    /* The aggregate row deliberately said NOTHING on its second line: it held tasks from every
+       manuscript and from none, so no title was true of it. A row that IS one task has something
+       true to say there — whose task it is — and the ref's own wording is what it says. */
+    const rows = timelineRows(dataFor(MINE), TODAY, 7).filter((r) => r.key.startsWith("task-"));
+    expect(rows.length, "no task rows in the fixture").toBeGreaterThan(0);
+    for (const r of rows) {
+      expect(r.agency).toBe("Your task");
+      expect(r.group, "a task row was filed inside a query group").toBeNull();
+      expect(r.status, "a task row grew a status it has no query for").toBeNull();
+    }
   });
 });
 
@@ -424,7 +443,7 @@ describe("order — Your tasks ignores it, closed rows sink, and ties keep their
     ["2026-08-01T09:00:00Z", "2026-07-01T09:00:00Z", "2026-08-10T09:00:00Z"],
   );
 
-  it("pins Your tasks above every sort, when it is there at all", () => {
+  it("pins the task rows above every sort, when there are any at all", () => {
     const withMine = input({
       queries: inp.queries, agents: inp.agents,
       cols: {
@@ -433,7 +452,8 @@ describe("order — Your tasks ignores it, closed rows sink, and ties keep their
       },
     } as Partial<CalendarInput>);
     for (const sort of SORT_ORDER) {
-      expect(timelineRows(dataFor(withMine), TODAY, 7, view({ sort }))[0].key).toBe(YOU_ROW);
+      const first = timelineRows(dataFor(withMine), TODAY, 7, view({ sort }))[0];
+      expect(first.key.startsWith("task-"), `${sort} put ${first.key} above the tasks`).toBe(true);
     }
   });
 
@@ -529,22 +549,40 @@ describe("lanes — a manuscript on the bar, packing on the chips", () => {
     expect(new Set(timelineSegments(dataFor(two), TODAY, 7).map((sg) => sg.lane)).size).toBe(2);
   });
 
-  it("chips that do not overlap share one lane", () => {
-    const row = timelineRows(dataFor(tasks(TODAY, "2026-08-30")), TODAY, 7)[0];
-    expect(row.key).toBe(YOU_ROW);
-    expect(row.items).toHaveLength(2);
+  /* ⚠️ THE SUBJECT OF LANE PACKING CHANGED, AND THE RULE DID NOT (fix pack, Phase 5). Two dated
+     tasks used to share one aggregate row and had to be packed into lanes; they are two ROWS now,
+     so that particular collision cannot happen. What still puts two chips on one row is a task
+     and its own GHOST — the origin mark saying "this fell due here and is still outstanding",
+     which is only readable if the two are on one line. That is the packing rule's remaining
+     subject and these cases follow it there. */
+  it("two dated tasks are two rows now — one chip each, one lane each", () => {
+    const rows = timelineRows(dataFor(tasks(TODAY, "2026-08-30")), TODAY, 7);
+    expect(rows.map((r) => r.key.startsWith("task-"))).toEqual([true, true]);
+    for (const r of rows) {
+      expect(r.items).toHaveLength(1);
+      expect(r.lanes).toBe(1);
+    }
+    /* and each is named by its own task, which an aggregate could never be */
+    expect(new Set(rows.map((r) => r.name)).size, "two rows share one name").toBe(2);
+  });
+
+  it("a task and its own ghost share one row, and pack into lanes without overlapping", () => {
+    const inp = input({
+      cols: {
+        todo: [], snoozed: [], dismissed: [], done: [],
+        today: [card({ key: "u1", userTaskId: "t1", nature: "task", dueYmd: "2026-08-20", title: "Follow up" })],
+      },
+    } as Partial<CalendarInput>);
+    const win = windowDays("2026-08-20", 10);
+    const rows = timelineRows(dataFor(inp, win), "2026-08-20", 10);
+    expect(rows, "the ghost and its task landed on different rows").toHaveLength(1);
+    const row = rows[0];
+    expect(row.items.length, "no pair to pack").toBe(2);
+    /* they do not overlap, so one lane holds both */
     expect(new Set(row.items.map((i) => i.lane)).size).toBe(1);
-  });
-
-  it("two chips on the same day take a lane each — they cannot share a line", () => {
-    const row = timelineRows(dataFor(tasks(TODAY, TODAY)), TODAY, 7)[0];
-    expect(new Set(row.items.map((i) => i.lane)).size).toBe(2);
-    expect(row.lanes).toBeGreaterThanOrEqual(2);
-  });
-
-  it("⚠️ a chip runs to the column before the next occupant of its lane, not to the row's end", () => {
-    const row = timelineRows(dataFor(tasks(TODAY, "2026-08-30")), TODAY, 7)[0];
-    expect(row.items.map((i) => [i.idx, i.spanTo])).toEqual([[0, 3], [4, 6]]);
+    /* ⚠️ AND THE FIRST STOPS BEFORE THE SECOND BEGINS — the claim the packing rule exists for. */
+    const [a, b] = [...row.items].sort((x, y) => x.idx - y.idx);
+    expect(a.spanTo, `chip at ${a.idx} runs into the chip at ${b.idx}`).toBeLessThan(b.idx);
   });
 
   it("gives a lone chip the rest of the window to spread into", () => {

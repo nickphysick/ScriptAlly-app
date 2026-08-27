@@ -294,6 +294,93 @@ const isoToYmd = (iso: string | undefined | null): string | null => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
+/* ══ ONE FACT: THE NAMED END ═════════════════════════════════════════════════════════════════ */
+
+/** Which of the three sources named the date — the bar does not care, the copy does. */
+export type NamedEndSource = "window" | "sendBy" | "reminder";
+export interface NamedEnd { ymd: string; source: NamedEndSource }
+/**
+ * What one call answers.
+ *
+ * ⚠️ TWO FACTS, ONE DERIVATION, AND THAT IS WHY THEY ARE RETURNED TOGETHER. `end` is the date the
+ * bar RUNS TO; `window` is the date the AGENCY stated, whether or not it won. They are different
+ * questions — a reminder ahead of the window takes the end while the window is still the thing
+ * that decides whether a reply time was ever given — and returning them from one call is what
+ * stops a consumer deriving the second for itself, which is the whole disease this pack treats.
+ */
+export interface NamedEnds { end: NamedEnd | null; window: string | null }
+
+/**
+ * The date somebody named for this stretch, or `null` where nobody did.
+ *
+ * ⚠️ THIS IS THE PACK'S ONE FUNCTION AND IT REPLACES THREE. The bar computed its own from
+ * `Math.max(...sends)`; the row's copy computed its own from `Math.min(...sends)` — **the opposite
+ * send**, fed to the same `resolveExpectedDate` — and a third read the earliest send again. So the
+ * bar measured the wait from the last thing you sent and the scrawl measured it from the first,
+ * which on a relationship that ran a query in January and a full in August is a difference of
+ * months. That is where the impossible day-counts came from.
+ *
+ * ⚠️ AND `Math.max` IS THE RIGHT ONE, which is worth saying because the two were not merely
+ * inconsistent — one was wrong. The reply you are waiting for is to the LAST thing you sent. A
+ * window measured from the original query would still be running long after the agency answered
+ * it and asked for something else.
+ *
+ * ⚠️ THE PRECEDENCE IS THE PORCELAIN ONE, and its first two members are ONE resolved date wearing
+ * whichever name the current holder gives it: an agency's stated reply window while the work is
+ * theirs, a send-by the agency asked for once it is yours. The writer's own reminder is the
+ * genuine third and is a FALLBACK rather than a peer — a date the agency stated outranks one the
+ * writer set for themselves.
+ */
+export function namedEndFor(
+  query: Query,
+  agent: Agent | null,
+  opts: { terminal?: boolean; today?: string } = {},
+): NamedEnds {
+  const terminal = opts.terminal ?? isTerminalStatus(query.status as QueryStatus);
+  if (terminal) return { end: null, window: null };
+  const sends = [query.dateSent, query.partialSentDate, query.fullSentDate]
+    .map((iso) => (iso ? new Date(iso as string).getTime() : NaN))
+    .filter((t) => !Number.isNaN(t));
+  /* ⚠️ `null` FOR THE REPLY-STATED WINDOW, inherited and deliberate: an agency's window stated
+     inside a holding reply lives in the query's NESTED events, which only the reading pane loads.
+     Composing one from what this page holds would be inventing data. */
+  const r = resolveExpectedDate(
+    query, sends.length ? Math.max(...sends) : null, agent?.responseTimeWeeks ?? null, null);
+  const cands: NamedEnd[] = [];
+  const wYmd = r.ms == null ? null : isoToYmd(new Date(r.ms).toISOString());
+  if (wYmd) {
+    cands.push({ ymd: wYmd, source: sideOf(query.status as QueryStatus) === "yours" ? "sendBy" : "window" });
+  }
+  const nudge = isoToYmd(query.nudgeDate as string | undefined);
+  if (nudge) cands.push({ ymd: nudge, source: "reminder" });
+  if (!cands.length) return { end: null, window: null };
+
+  /**
+   * ⚠️ THE NEXT DATE STILL AHEAD — which is the precedence, read the way the ref draws it.
+   *
+   * Stated as a list ("window, then send-by, then the writer's own reminder") the three look like
+   * a strict order, and the first two ARE one resolved date wearing whichever name the holder
+   * gives it, so the only real contest is window against reminder. The ref settles that contest
+   * in the reminder's favour: its nudged row runs `-9 → 29` with the goal ON the reminder, not on
+   * the window beyond it. And that is the right answer for the reason a reminder exists — you set
+   * one so that something happens BEFORE the window elapses, so the reminder is by construction
+   * the next named date, and a bar filling past it toward a later one would be filling toward a
+   * date nothing is going to happen on.
+   *
+   * ⚠️ WHERE EVERY CANDIDATE HAS PASSED, THE MOST RECENT WINS. The overrun should be measured from
+   * the last commitment anybody made, not from the oldest one — measuring from the oldest is how a
+   * day-count nobody could reconcile gets printed.
+   */
+  const today = opts.today;
+  const pick = (): NamedEnd => {
+    if (!today) return cands[0];
+    const ahead = cands.filter((c) => c.ymd >= today).sort((a, b) => a.ymd.localeCompare(b.ymd));
+    if (ahead.length) return ahead[0];
+    return [...cands].sort((a, b) => b.ymd.localeCompare(a.ymd))[0];
+  };
+  return { end: pick(), window: wYmd };
+}
+
 /**
  * The side the CTA engine puts a status on — `null` where the journey has ended.
  *
@@ -339,6 +426,44 @@ export const sideOf = (status: QueryStatus): Side | null => {
 export type BarState =
   | "closed" | "theirs" | "theirsq" | "nudged" | "quiet" | "y1" | "y2" | "y3" | "offer";
 
+/** Who holds a stretch — the one question a bar's colour answers. */
+export type Holder = "agent" | "writer";
+
+/**
+ * Who holds this stretch.
+ *
+ * ⚠️ ONE FACT, ONE FUNCTION, AND IT IS THE WHOLE OF WHAT DECIDES A FAMILY. `side` is the walk's
+ * own word and it is already correct per piece; what went wrong was that the family ALSO consulted
+ * three query-level facts about TODAY (`expectedPassed`, `nudgeYmd`, `weight`) and applied them to
+ * every piece regardless of when that piece ran. So one journey alternated families —
+ * `req | req | quiet | req` measured on a single row — because a stretch that finished weeks ago
+ * was being coloured grey by an expectation that passed long after it ended.
+ */
+export const holderOf = (sg: { side: Side }): Holder => (sg.side === "yours" ? "writer" : "agent");
+
+/**
+ * The painted family, from the holder and the kind of thing — never from age.
+ *
+ * ⚠️ `quiet`, `nudged` AND `theirsq` ARE PROPERTIES OF THE **LIVE** STRETCH AND OF NOTHING ELSE.
+ * Each of them characterises an ABSENCE — no reply logged, no date ever given, a reminder standing
+ * between you and silence — and a stretch that has ENDED cannot be characterised by the absence of
+ * an ending: something happened, which is why it stopped. That single sentence is the fix.
+ */
+export const familyOf = (state: BarState): string => {
+  switch (state) {
+    case "closed": return "closedp";
+    case "quiet": return "quiet";
+    case "nudged": return "remind";
+    case "offer": return "decide";
+    case "theirs": case "theirsq": return "out";
+    case "y1": case "y2": case "y3": return "req";
+    default: {
+      const unhandled: never = state;
+      return unhandled;
+    }
+  }
+};
+
 export interface StateInput {
   side: Side;
   terminal: boolean;
@@ -350,11 +475,22 @@ export interface StateInput {
   expectedPassed: boolean;
   weight: Weight;
   today: string;
+  /**
+   * Is this the stretch that runs to today?
+   *
+   * ⚠️ WITHOUT IT, EVERY FACT ABOUT NOW WAS APPLIED TO EVERY PIECE. `expectedPassed` and
+   * `nudgeYmd` describe where the relationship stands TODAY; a piece that ended in July cannot
+   * be gone-quiet, because something happened in July to end it.
+   */
+  live: boolean;
 }
 
 export function barState(i: StateInput): BarState {
   if (i.terminal) return "closed";
   if (i.side === "theirs") {
+    /* ⚠️ A FINISHED AGENT-HELD STRETCH IS SIMPLY `theirs`. The three branches below all describe
+       the state of play NOW; none of them can be true of a stretch that already ended. */
+    if (!i.live) return "theirs";
     /* no reply time was ever recorded — there is nothing to have passed */
     if (i.norail) return "theirsq";
     /* the writer has a reminder in front of them, so this is not silence */
@@ -392,6 +528,23 @@ const GLYPH: Record<NodeDir, string> = { out: "↑", in: "←", close: "●" };
  * something happening, which is why they cannot be derived from `dir`.
  */
 const faceOf = (dir: NodeDir): MarkerFace => (dir === "in" ? "in" : "outk");
+
+/**
+ * The face a join draws, from the HOLDER TRANSITION either side of it.
+ *
+ * ⚠️ THE RECORD'S OWN `dir` IS AUTHORSHIP, WHICH IS A DIFFERENT QUESTION. It says who wrote the
+ * entry; the marker says which way the work moved. They agree most of the time and disagree
+ * exactly where it matters — a holding reply the AGENT sent that hands nothing over, or a
+ * status the writer logged on the agent's behalf. Reading the transition means the glyph and the
+ * two stretches it sits between can never tell different stories, because they are the same story
+ * read at a point instead of over a span.
+ */
+const faceAt = (before: Side | undefined, after: Side | undefined, dir: NodeDir): MarkerFace => {
+  if (dir === "close") return "outk";
+  if (before && after && before !== after) return after === "yours" ? "in" : "outk";
+  /* no hands changed — fall back to who authored it, which is all there is to go on */
+  return faceOf(dir);
+};
 
 /* ══ the pass ═════════════════════════════════════════════════════════════════════════════════ */
 
@@ -531,6 +684,18 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
   }
   if (live.length) sides[live.length] = now ?? sides[live.length];
 
+  /**
+   * ⚠️ THE MARKER'S FACE IS REWRITTEN FROM THE TRANSITION, once the holders are known.
+   *
+   * It cannot be decided where the node is BUILT, because the side walk has not run yet — and
+   * that is precisely why it used to read the record's own `dir`, which answers a different
+   * question (who wrote this) from the one the glyph asks (which way did the work move). One pass
+   * over `live`, and the arrow and the two stretches it sits between can no longer disagree.
+   */
+  for (let i = 0; i < live.length; i += 1) {
+    live[i].mark = faceAt(sides[i], sides[i + 1], live[i].dir);
+  }
+
   /* ── what is forecast: read to place the bar's end, never drawn ────────────────────────── */
   const sends = [query.dateSent, query.partialSentDate, query.fullSentDate]
     .map((iso) => (iso ? new Date(iso as string).getTime() : NaN))
@@ -539,9 +704,14 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
   /* ⚠️ `null` FOR THE REPLY-STATED WINDOW, inherited and deliberate: an agency's window stated
      inside a holding reply lives in the query's NESTED events, which only the reading pane loads.
      Composing one from what this page holds would be inventing data. */
-  const resolved = terminal ? { ms: null, source: null }
-    : resolveExpectedDate(query, sentMs, agent?.responseTimeWeeks ?? null, null);
-  const expectedYmd = resolved.ms == null ? null : isoToYmd(new Date(resolved.ms).toISOString());
+  /* ⚠️ ONE CALL, AND THE TWO LOCAL DERIVATIONS IT REPLACES ARE GONE. `expectedYmd` is now
+     whatever `namedEndFor` says, and so is the goal below — the bar cannot fill toward one date
+     while its own label names another. */
+  const named = namedEndFor(query, agent, { terminal, today: win.today });
+  /* ⚠️ THE AGENCY'S OWN DATE, whether or not it won the bar's end — `norail` and `expectedPassed`
+     are about whether a reply time was ever GIVEN, which a reminder the writer set does not
+     answer either way. */
+  const expectedYmd = named.window;
   const expectedPassed = !!expectedYmd && expectedYmd < win.today;
 
 
@@ -624,7 +794,10 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
    * own reminder is the genuine third, and it is the fallback rather than a peer: a date the
    * agency stated outranks one the writer set for themselves.
    */
-  const goalYmd = expectedYmd ?? nudgeYmd;
+  /* ⚠️ THE GOAL IS THE NAMED END, FULL STOP — not a second `??` chain that happens to agree with
+     one. `namedEndFor` already applied the precedence; restating it here is how the two came to
+     pick different dates on the same bar. */
+  const goalYmd = named.end ? named.end.ymd : null;
   const goalAt = goalYmd ? daysBetween(win.days[0], goalYmd) + EVENT_AT : null;
 
   /**
@@ -675,13 +848,17 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
   /* ⚠️ NO REPLY TIME RECORDED → A DASHED RAIL AND NOTHING ELSE. No cap, no forecast, no end: the
      app does not know when to expect an answer, and drawing one would be inventing the date the
      writer has not given. One piece, whatever the events did. */
-  const norail = now === "theirs" && !terminal && resolved.ms == null;
+  /* ⚠️ "NO REPLY TIME" IS "THE AGENCY NAMED NOTHING", not "nothing is named at all". A reminder
+     the WRITER set is still a date this bar can run to, but it is not the agency stating a window
+     — so the dashed rail is decided by the absence of a `window`/`sendBy` end, never by the
+     absence of `namedEndFor` outright. */
+  const norail = now === "theirs" && !terminal && expectedYmd == null;
 
   /* ⚠️ OPEN-ENDED BY NATURE. An R&R and an offer with no stated deadline have no end to draw, so
      the bar fades rather than stopping. `resolveExpectedDate` is the only date the model holds for
      either; where it resolves, the cap is real and gets a waypoint (above). */
   const openEndKind = query.status === QueryStatus.REVISE_RESUBMIT || query.status === QueryStatus.OFFER;
-  const openEnd = now === "yours" && openEndKind && resolved.ms == null;
+  const openEnd = now === "yours" && openEndKind && expectedYmd == null;
 
   /**
    * ⚠️ A BAR SAYS WHAT IT IS ONCE, WHERE THERE IS ROOM TO READ IT.
@@ -702,10 +879,27 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
     if (i > 0 && sideAt(i) !== sideAt(i - 1)) run += 1;
     runOf[i] = run;
   });
+  /**
+   * ⚠️ THE RUN SPEAKS FROM ITS WIDEST **SOLID** PIECE, and the preference is the fix.
+   *
+   * A stretch past its named date is drawn hollow, and the hollow piece is very often the widest
+   * one in the run — so the label kept landing on the OVERRUN, where it is dimmed to .75 and
+   * describes the part of the stretch nobody named. The words belong to the part that was named:
+   * a bar reading "Full requested · send by 20 Aug" is about the span that ran up to 20 Aug.
+   * Widest-solid first; widest-of-anything only where the whole run is hollow, because a run with
+   * nothing to say is worse than one saying it quietly.
+   */
+  const isHollow = (i: number) => goalAt != null && pieces[i].from >= goalAt - 0.001 && goalAt < todayAt;
   const widestOfRun = new Map<number, number>();
-  pieces.forEach((p, i) => {
-    const cur = widestOfRun.get(runOf[i]);
-    if (cur === undefined || p.to - p.from > pieces[cur].to - pieces[cur].from) widestOfRun.set(runOf[i], i);
+  const better = (i: number, cur: number | undefined) => {
+    if (cur === undefined) return true;
+    const solidNow = !isHollow(i);
+    const solidCur = !isHollow(cur);
+    if (solidNow !== solidCur) return solidNow;
+    return pieces[i].to - pieces[i].from > pieces[cur].to - pieces[cur].from;
+  };
+  pieces.forEach((_, i) => {
+    if (better(i, widestOfRun.get(runOf[i]))) widestOfRun.set(runOf[i], i);
   });
 
   const segments: Segment[] = [];
@@ -719,9 +913,13 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
     /* ⚠️ THE STATE IS COMPUTED BEFORE THE LABEL, because the label reads it. Leaving it in the
        object literal below would have had `labelFor` reading a `const` from the same literal it
        is being written into — the temporal-dead-zone shape this repo has shipped once. */
+    /* ⚠️ THE LIVE PIECE IS THE ONE THAT REACHES TODAY — the last of the run, and only when the
+       window actually contains today. A window paged into the past has no live stretch at all,
+       which is right: nothing in it is still running. */
+    const live_ = p.to >= todayAt - 0.001 && todayAt <= span + 0.001 && todayAt >= -0.001;
     const state = barState({
       side, terminal, status: query.status as QueryStatus,
-      norail, nudgeYmd, expectedPassed, weight, today: win.today,
+      norail, nudgeYmd, expectedPassed, weight, today: win.today, live: live_,
     });
     const startsAtEdge = p.from <= 0.001;
     const endsAtEdge = Math.abs(p.to - span) < 0.001;
@@ -740,6 +938,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
         : (() => {
             const l = labelFor(state, {
               norail, openEnd, query, expectedYmd, expectedPassed, nudgeYmd, moveLabel, terminal,
+              goalYmd,
               nudgedOnYmd: isoToYmd(query.lastNudgeSentDate as string | undefined),
               sentYmd: sentMs == null ? null : isoToYmd(new Date(sentMs).toISOString()),
               yoursDays,
@@ -782,9 +981,11 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
          forgot to finish — would never paint. Measured: a transparent track, no `.tl-fl` child,
          and a rule that read perfectly correctly. Two treatments for one fact, and the wrong one
          was winning. */
-      ...(goalAt != null && p.from >= goalAt - 0.001 && goalAt < todayAt && state !== "quiet"
-        ? { hollow: true as const }
-        : {}),
+      /* ⚠️ ONE EXPRESSION FOR "IS THIS PIECE PAST THE NAMED END", shared with the label pass above.
+         Two copies of the same test is how the label came to sit on a piece the sheet was about to
+         dim. `quiet` is exempted because it has its own treatment — a hatch rather than an
+         outline — and a hollow quiet piece would have no fill element at all to hatch. */
+      ...(isHollow(i) && state !== "quiet" ? { hollow: true as const } : {}),
       ...(goalAt != null ? { goal: goalAt } : {}),
       ...(marks.some((m) => Math.abs(m - p.from) < GAP + 0.001) ? { abutL: true as const } : {}),
       ...(marks.some((m) => Math.abs(m - p.to) < GAP + 0.001) ? { abutR: true as const } : {}),
@@ -831,6 +1032,16 @@ interface LabelInput {
   expectedYmd: string | null;
   expectedPassed: boolean;
   nudgeYmd: string | null;
+  /**
+   * The date this bar actually RUNS TO — `namedEndFor`'s answer.
+   *
+   * ⚠️ A LABEL NAMES ITS OWN BAR'S END, AND NOTHING ELSE. The nudged form used to name the
+   * reminder while the bar filled toward the agency's window, so the label said one date and the
+   * bar's own tooltip appended another two words later. Whichever date wins the end is the date
+   * the words are about; the loser is stated by the marker standing on it, where a point in time
+   * belongs.
+   */
+  goalYmd: string | null;
   nudgedOnYmd: string | null;
   /** the day this journey went out, ymd — "Out since …" */
   sentYmd: string | null;
@@ -882,8 +1093,13 @@ export function labelFor(state: BarState, i: LabelInput): BarLabel {
     case "nudged":
       return {
         long: i.nudgedOnYmd
-          ? `Nudged ${on(i.nudgedOnYmd)} · next reminder ${on(i.nudgeYmd)}`
-          : `Next reminder ${on(i.nudgeYmd)}`,
+          /* ⚠️ THE BAR NAMES THE DATE IT RUNS TO, AND THE MARKER NAMES THE REMINDER. This form used
+             to name the reminder and nothing else, while the bar filled toward the agency's own
+             window — so the label said "next reminder 8 Sept" and the bar's tooltip appended
+             "16 Sept" two words later. A span's label states the span's end; a point in time
+             belongs on the marker standing at it. */
+          ? `Nudged ${on(i.nudgedOnYmd)}${i.goalYmd ? ` · next ${on(i.goalYmd)}` : ""}`
+          : (i.goalYmd ? `Next reminder ${on(i.goalYmd)}` : "Reminder ahead"),
         short: i.nudgedOnYmd ? `Nudged · remind ${on(i.nudgeYmd)}` : `Remind ${on(i.nudgeYmd)}`,
       };
 

@@ -12,6 +12,7 @@ import { Agent, Query, QueryStatus, TaskFlag, Activity, ActivityType } from "../
 import { RecordItem, shortCalDate } from "./todoCalendar";
 import {
   GAP, MIN_SEG, EVENT_AT, FRESH_MAX_DAYS, SETTLED_MAX_DAYS, fillFor, NEAR_AT,
+  holderOf, familyOf, namedEndFor,
   cutPieces, laneBars, sideOf, weightFor, durationCount, labelFor, statusIndex,
   type BarWindow, type LaneInput,
   type Segment,
@@ -351,7 +352,7 @@ describe("⚠️ weight is the whole urgency grammar — three steps, no red, no
      */
     const base = {
       norail: false, openEnd: false, query: q({}), expectedYmd: TODAY, expectedPassed: false,
-      nudgeYmd: null, nudgedOnYmd: TODAY, sentYmd: TODAY, yoursDays: 41, quietDays: 78,
+      nudgeYmd: null, goalYmd: TODAY, nudgedOnYmd: TODAY, sentYmd: TODAY, yoursDays: 41, quietDays: 78,
       closedYmd: TODAY, terminal: false,
     };
     const STATES = ["closed", "theirs", "theirsq", "nudged", "quiet", "y1", "y2", "y3", "offer"] as const;
@@ -764,5 +765,181 @@ describe("fillFor — elapsed over a stated span, derived at read and stored now
     expect(at(85) >= NEAR_AT, "85% should be near").toBe(true);
     /* and 100% is NOT near — a finished wait is finished, not nearly finished */
     expect(at(100)).toBe(1);
+  });
+});
+
+/* ══ ONE HOLDER, ONE FAMILY, ONE DIRECTION (fix pack, Phase 1) ═══════════════════════════════ */
+
+describe("a stretch's family comes from who holds it, never from how old it is", () => {
+  /**
+   * ⚠️ THE FIXTURE IS A REAL SHAPE: a query sent, a full requested, the writer still holding it,
+   * and an agency window that has since passed. Before this pack that painted
+   * `req | req | quiet | req` — one journey alternating between families, because `expectedPassed`
+   * is a fact about TODAY and was applied to every piece regardless of when the piece ran.
+   */
+  const mixed = () => laneBars(lane({
+    query: q({
+      status: QueryStatus.FULL_REQUESTED,
+      dateSent: "2026-07-01T09:00:00Z",
+    }),
+    agent: agent({ responseTimeWeeks: 2 } as Partial<Agent>),
+    records: [
+      rec({ key: "r1", ymd: back(1), label: "Full requested", dir: "in", activityId: "f1" }),
+      rec({ key: "r2", ymd: back(4), label: "Partial sent", dir: "out", activityId: "s1" }),
+    ],
+    statusOf: (id) => (id === "f1" ? QueryStatus.FULL_REQUESTED : QueryStatus.PARTIAL_SENT),
+    moveLabel: "Send full",
+  }), BACK);
+
+  it("⚠️ THE WHOLE SEQUENCE, not each stretch alone — a run never alternates families", () => {
+    const fams = mixed().segments.map((sg) => familyOf(sg.state));
+    /* the composed claim: every contiguous same-holder run paints ONE family */
+    const holders = mixed().segments.map((sg) => holderOf(sg));
+    for (let i = 1; i < fams.length; i += 1) {
+      if (holders[i] === holders[i - 1]) {
+        expect(fams[i], `a run alternated: ${fams.join(" | ")}`).toBe(fams[i - 1]);
+      }
+    }
+    /* and the population floor — a one-piece bar would satisfy the loop vacuously */
+    expect(fams.length, `only ${fams.length} piece(s): ${fams.join(" | ")}`).toBeGreaterThan(1);
+  });
+
+  it("a FINISHED agent-held stretch is sage, never the grey hatch", () => {
+    const segs = mixed().segments;
+    const finished = segs.filter((sg) => holderOf(sg) === "agent" && sg.historical);
+    expect(finished.length, "no finished agent-held stretch in the fixture").toBeGreaterThan(0);
+    for (const sg of finished) {
+      expect(familyOf(sg.state), `a finished stretch painted ${familyOf(sg.state)}`).toBe("out");
+      /* ⚠️ AND `historical` STILL DOES ITS ONE JOB: it fills the stretch. It affects the fill and
+         nothing else, which is the whole of the rule. */
+      expect(fillFor(sg)).toBe(1);
+    }
+  });
+
+  it("holderOf and the family are the SAME answer — agent is sage, writer is blush", () => {
+    for (const sg of mixed().segments) {
+      const fam = familyOf(sg.state);
+      if (holderOf(sg) === "agent") expect(["out", "quiet", "remind"], fam).toContain(fam);
+      else expect(["req", "decide"], fam).toContain(fam);
+    }
+  });
+
+  it("⚠️ AND THE THREE NOW-FACTS REACH ONLY THE LIVE STRETCH", () => {
+    /* each of `theirsq`, `nudged` and `quiet` characterises an ABSENCE, and a stretch that ended
+       cannot be characterised by the absence of an ending */
+    const nowOnly = ["theirsq", "nudged", "quiet"];
+    for (const sg of mixed().segments) {
+      if (nowOnly.includes(sg.state)) {
+        expect(sg.historical, `${sg.state} on a finished stretch`).toBeUndefined();
+      }
+    }
+  });
+});
+
+describe("the direction glyph reads the holder transition, not the record's authorship", () => {
+  it("agent → writer paints the arrival face; writer → agent paints the departure", () => {
+    const bars = laneBars(lane({
+      query: q({ status: QueryStatus.FULL_REQUESTED }),
+      records: [
+        /* a full REQUEST authored by the agent — work arrives with the writer */
+        rec({ key: "r1", ymd: back(2), label: "Full requested", dir: "in", activityId: "f1" }),
+        /* the writer sends it — work departs */
+        rec({ key: "r2", ymd: back(5), label: "Full sent", dir: "out", activityId: "s1" }),
+      ],
+      statusOf: (id) => (id === "f1" ? QueryStatus.FULL_REQUESTED : QueryStatus.FULL_SENT),
+      moveLabel: "Send full",
+    }), BACK);
+    const faces = bars.nodes.filter((n) => n.activityId).map((n) => n.mark);
+    expect(faces.length, "no joins to read").toBeGreaterThan(1);
+    expect(faces[0], "a request should arrive").toBe("in");
+    expect(faces[1], "a send should depart").toBe("outk");
+  });
+
+  it("⚠️ AND A JOIN THAT CHANGES NO HANDS FALLS BACK TO AUTHORSHIP, which is all there is", () => {
+    const bars = laneBars(lane({
+      query: q({ status: QueryStatus.QUERIED, dateSent: "2026-07-01T09:00:00Z" }),
+      agent: agent({ responseTimeWeeks: 8 } as Partial<Agent>),
+      /* a holding reply: the agent wrote it and nothing moved */
+      records: [rec({ key: "r1", ymd: back(3), label: "Holding reply", dir: "in", activityId: "h1" })],
+      statusOf: () => null,
+    }), BACK);
+    expect(bars.nodes.filter((n) => n.activityId).map((n) => n.mark)).toEqual(["in"]);
+  });
+});
+
+/* ══ ONE FACT: `namedEndFor` (fix pack, Phase 3) ═════════════════════════════════════════════ */
+
+describe("namedEndFor — one date, and the three derivations it replaces", () => {
+  it("⚠️ MEASURES FROM THE LATEST SEND, which is the half that was WRONG rather than merely split", () => {
+    /* a query in January, a full in August. The reply you are waiting for is to the FULL — a
+       window measured from the original query would still be running long after the agency
+       answered it and asked for something else, and printing the difference as a day-count is
+       where the impossible numbers came from. */
+    const query = q({
+      status: QueryStatus.QUERIED,
+      dateSent: "2026-01-05T09:00:00Z",
+      fullSentDate: "2026-08-20T09:00:00Z",
+    } as Partial<Query>);
+    const got = namedEndFor(query, agent({ responseTimeWeeks: 4 } as Partial<Agent>), { today: TODAY });
+    /* 20 Aug + 4 weeks = 17 Sept; from January it would have been early February */
+    expect(got.window!.startsWith("2026-09")).toBe(true);
+    expect(got.end!.ymd).toBe(got.window);
+  });
+
+  it("returns the NEXT named date still ahead — the ref's own nudged row draws it that way", () => {
+    const query = q({
+      status: QueryStatus.QUERIED,
+      dateSent: `${TODAY}T09:00:00Z`,
+      nudgeDate: "2026-09-09T09:00:00Z",
+    });
+    const got = namedEndFor(query, agent({ responseTimeWeeks: 12 } as Partial<Agent>), { today: TODAY });
+    /* the window is twelve weeks out; the reminder is a fortnight out and is what happens next */
+    expect(got.end!.source).toBe("reminder");
+    expect(got.end!.ymd).toBe("2026-09-09");
+    /* ⚠️ AND THE AGENCY'S OWN DATE SURVIVES THE CONTEST IT LOST. `window` is what decides whether
+       a reply time was ever GIVEN — a reminder the writer set does not answer that either way. */
+    expect(got.window, "the window was lost with the contest").not.toBeNull();
+    expect(got.window).not.toBe(got.end!.ymd);
+  });
+
+  it("where every candidate has passed, the MOST RECENT commitment wins", () => {
+    const query = q({
+      status: QueryStatus.QUERIED,
+      dateSent: "2026-01-01T09:00:00Z",
+      nudgeDate: "2026-08-01T09:00:00Z",
+    });
+    const got = namedEndFor(query, agent({ responseTimeWeeks: 4 } as Partial<Agent>), { today: TODAY });
+    /* Jan + 4 weeks is long past; the August reminder is the last thing anybody committed to, and
+       measuring an overrun from the older date is how a day-count nobody can reconcile is printed */
+    expect(got.end!.ymd).toBe("2026-08-01");
+  });
+
+  it("a terminal query names nothing, and neither half pretends otherwise", () => {
+    const got = namedEndFor(q({ status: QueryStatus.REJECTED }), agent({ responseTimeWeeks: 4 } as Partial<Agent>), { today: TODAY });
+    expect(got.end).toBeNull();
+    expect(got.window).toBeNull();
+  });
+
+  it("⚠️ THE BAR'S LABEL NAMES THE BAR'S OWN END — never a date it is not running to", () => {
+    const bars = laneBars(lane({
+      query: q({ status: QueryStatus.QUERIED, dateSent: `${TODAY}T09:00:00Z`, nudgeDate: "2026-09-09T09:00:00Z" }),
+      agent: agent({ responseTimeWeeks: 12 } as Partial<Agent>),
+      records: [rec({ key: "r1", ymd: back(1), label: "Nudge sent", dir: "out", activityId: "n1" })],
+    }), BACK);
+    const spoken = bars.segments.filter((sg) => sg.label);
+    expect(spoken.length, "no bar spoke").toBeGreaterThan(0);
+    /* the label and the goal are the same date, on every piece that speaks */
+    for (const sg of spoken) {
+      if (sg.goal == null) continue;
+      const goalYmd = BACK.days[Math.floor(sg.goal)];
+      const other = BACK.days.filter((d) => d !== goalYmd);
+      /* it must not name a DIFFERENT date from the one it runs to */
+      for (const d of other) {
+        const pretty = shortCalDate(d);
+        if (sg.label.includes(pretty) && pretty !== shortCalDate(goalYmd)) {
+          throw new Error(`label "${sg.label}" names ${pretty} but the bar runs to ${shortCalDate(goalYmd)}`);
+        }
+      }
+    }
   });
 });

@@ -31,6 +31,7 @@ import { useTaskCommit } from "./useTaskCommit";
 import { TimelineRangeSlider, TIMELINE_RANGES, DEFAULT_RANGE_INDEX, pastDaysOf } from "./TimelineRangeSlider";
 import {
   GROUP_ORDER, GROUP_LABEL, COLLAPSED_BY_DEFAULT, groupSentence, TASKS_HEADING, TASKS_SENTENCE,
+  asksOfYou,
   type RowGroup,
 } from "../../lib/timelineGroups";
 import { fitLabel } from "../../lib/barFit";
@@ -55,8 +56,8 @@ import {
   type RowSort, type TimelineFilter,
 } from "../../lib/todoTimeline";
 import {
-  durationCount, fillFor, NEAR_AT,
-  type Segment, type BarNode, type BarState,
+  durationCount, fillFor, NEAR_AT, familyOf,
+  type Segment, type BarNode,
 } from "../../lib/journeyBars";
 import { scrawlEarns } from "../../lib/timelineCopy";
 import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
@@ -130,27 +131,9 @@ const barWidth = (sg: Segment) =>
 const laneVar = (lane: number): React.CSSProperties =>
   ({ ["--lane" as string]: String(lane) } as React.CSSProperties);
 
-/**
- * Which of the ref's five bar families a derived `BarState` is.
- *
- * ⚠️ IT IS A MAPPING, NOT A RENAME, AND THE TWO WAITING STATES DIVERGE HERE. `theirs` and
- * `theirsq` are both "out with the agent" and both draw the sage `out` family — but `theirsq` is
- * the case where no reply time was EVER given, so it has no named end and therefore no fill. The
- * empty track is the statement: nobody named a date. `quiet` is the different fact — a date was
- * named and has passed with nothing scheduled — and it takes the hatch, because there is no span
- * left for a fraction to be of.
- */
-const FAMILY: Record<BarState, string> = {
-  closed: "closedp",
-  theirs: "out",
-  theirsq: "out",
-  nudged: "remind",
-  quiet: "quiet",
-  y1: "req",
-  y2: "req",
-  y3: "req",
-  offer: "decide",
-};
+/* ⚠️ THE PAGE NO LONGER OWNS A FAMILY MAP. `familyOf` in `journeyBars` is the one source — the
+   page had a second table keyed on the same `BarState`, which is two answers to one question
+   waiting to disagree. Deleted rather than left as a pass-through. */
 
 /**
  * One piece of a bar — a white track, a tinted fill, and the label riding on top.
@@ -173,7 +156,7 @@ const Piece: React.FC<{
          sweep reads `className=` expressions out of this file, so a list assembled into a variable
          is invisible to it — and its report would be "this class has no rule", about a class it
          never saw. An absence that reads as a finding. */
-      className={`tl-at2 tl-p ${FAMILY[sg.state]}${sg.hollow ? " hollow" : ""}${near ? " near" : ""}${selected ? " sel" : ""}`}
+      className={`tl-at2 tl-p ${familyOf(sg.state)}${sg.hollow ? " hollow" : ""}${near ? " near" : ""}${selected ? " sel" : ""}`}
       style={{ left: barLeft(sg), width: barWidth(sg), ...laneVar(sg.lane) }}
       data-state={sg.state}
       data-fill={fill == null ? "none" : String(Math.round(fill * 100))}
@@ -872,22 +855,26 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     return m;
   }, [assembled]);
 
-  const actionFor = (r: TimelineRow): { label: string; card: BoardCard; itemKey: string | null } | null => {
+  const actionFor = (r: TimelineRow): { label: string; card: BoardCard | null; itemKey: string | null } | null => {
+    /* ⚠️ THE GROUP DECIDES, AND THE CARD ONLY DECIDES WHAT THE DOOR OPENS ONTO. Requiring a
+       `BoardCard` was the third of three predicates answering one question, and it was the one
+       that put a dash beside a scrawl reading "Send the partial · due 21 days ago". A row the
+       board is asking about always gets its control; where no card has been raised the control
+       opens the relationship's workspace, which is a real door rather than a dead one. */
+    if (!rowAsks(r)) return null;
+    /* ⚠️ A TASK ROW'S DEED IS TO FINISH IT, and it is the only row on this board the writer can
+       finish outright. It has no query, so no `note` — the deed comes from what the row IS. */
+    if (r.group === null) {
+      const own = r.items.find((i) => i.card?.userTaskId);
+      return own?.card ? { label: "TICK IT OFF", card: own.card, itemKey: own.key } : null;
+    }
     if (!r.note) return null;
-    /* the row's own item is the most specific answer where the window happens to hold one */
     const withCard = r.items.find((i) => i.card);
     if (withCard?.card) return { label: r.note.deed.toUpperCase(), card: withCard.card, itemKey: withCard.key };
-    /* otherwise the query this row is about — a row can hold several, so the one the note is
-       about is whichever query the bars name first */
     const qid = barsByRow.get(r.key)?.segs.find((sg) => sg.side === "yours")?.queryId
       ?? barsByRow.get(r.key)?.segs[0]?.queryId
       ?? r.items.find((i) => i.queryId)?.queryId;
-    const card = qid ? cardsByQuery.get(qid) : undefined;
-    /* ⚠️ A DEED WITHOUT A CARD IS NOT AN ACTION. The button's only job is to open the task pane,
-       so a row whose work has no card behind it has no door to offer and shows the em-dash. A
-       button that opened nothing would be the dead-control fault this repo already records
-       against an Undo that restored nothing. */
-    if (!card) return null;
+    const card = qid ? cardsByQuery.get(qid) ?? null : null;
     return { label: r.note.deed.toUpperCase(), card, itemKey: null };
   };
 
@@ -945,7 +932,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * what is being asked; the round-trip identity check in `calLook.measure.ts` asserts that
    * toggling out and back returns the identical set, by row key.
    */
-  const asksOfYou = (r: TimelineRow) => actionFor(r) != null;
+  /* ⚠️ THE ROW ASKS BECAUSE ITS GROUP SAYS SO — never because a button happened to be buildable.
+     This read `actionFor(r) != null`, so `RIGHT NOW` showed the rows that had a CARD rather than
+     the rows that were asking, and a row under "Needs you now" whose card the board had not
+     raised vanished from the very view built to find it. */
+  const rowAsks = (r: TimelineRow) =>
+    asksOfYou(r.group, r.key === YOU_ROW && r.items.some((i) => i.card));
 
   /**
    * The board, as groups.
@@ -956,7 +948,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * shares.
    */
   const board = useMemo(() => {
-    const live = onlyAsks ? rows.filter(asksOfYou) : rows;
+    const live = onlyAsks ? rows.filter(rowAsks) : rows;
     const out: {
       key: string; title: string; sentence: string; count: number;
       rows: TimelineRow[]; group: RowGroup | null; collapsible: boolean; open: boolean;
@@ -1001,7 +993,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   }, [rows, shut, onlyAsks, cutNow, boardManuscripts]);
 
   const firstOpen = board.findIndex((g) => g.open && g.rows.length > 0);
-  const asking = rows.filter(asksOfYou).length;
+  const asking = rows.filter(rowAsks).length;
 
   /**
    * ⚠️ THE EMPTY STATES ARE TWO DIFFERENT FACTS AND MUST NOT SHARE COPY. "Nothing is asking for
@@ -1068,7 +1060,15 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         <div className="tl-c-ac">
           {act
             ? (
-              <button type="button" className="tl-abtn" onClick={() => openWork(r.key, today, act.itemKey, act.card)}>
+              <button type="button" className="tl-abtn"
+                /* ⚠️ A TASK IS FINISHED WHERE IT IS, THROUGH `quickDone` — the same committer the
+                   To-do list ticks through, so the receipt and its Undo are the shared ones. Every
+                   other deed OPENS the work rather than doing it, because every other deed needs
+                   answers this row cannot hold. */
+                onClick={() => {
+                  if (r.group === null && act.card) { void quickDone(act.card); return; }
+                  openWork(r.key, today, act.itemKey, act.card ?? undefined);
+                }}>
                 {act.label}<span className="cv" aria-hidden>›</span>
               </button>
             )
@@ -1443,7 +1443,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                 {todayAt != null && (
                   <>
                     <div className="tl-todayline" style={{ left: todayLeft }} aria-hidden />
-                    <div className="tl-todayflag" style={{ left: todayLeft, top: 0 }} aria-hidden>
+                    <div className="tl-todayflag" style={{ left: todayLeft }} aria-hidden>
                       {shortCalDate(today)}
                     </div>
                   </>

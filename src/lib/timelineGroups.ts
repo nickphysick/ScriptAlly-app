@@ -50,7 +50,7 @@ export const COLLAPSED_BY_DEFAULT: readonly RowGroup[] = ["snoozed"];
  * only day count in this file, and it is a retention policy rather than a classification: nothing
  * about which group a row is in depends on it.
  */
-export const CLOSED_LINGER_DAYS = 7;
+export const CLOSED_LINGER_DAYS = 30;
 
 /** What one live query contributes. Every field is already in the record; none is computed here. */
 export interface QueryFacts {
@@ -71,6 +71,36 @@ const rank = (g: RowGroup): number => GROUP_ORDER.indexOf(g);
  * already read. Listing the statuses here instead would be a second copy of a mapping that exists,
  * and the day one moved the board and the bars would disagree about whose move it is.
  */
+/* ══ ONE PREDICATE: DOES THIS ASK SOMETHING OF YOU? (fix pack, Phase 4) ═════════════════════ */
+
+/**
+ * The three groups that are asking something of the writer.
+ *
+ * ⚠️ THE GROUPS ARE THE DEFINITION, AND EVERYTHING ELSE READS THEM. Membership of one of these,
+ * the presence of a deed button, and the `RIGHT NOW` filter were three separate answers to one
+ * question — so a row could sit under "Needs you now" with a dash in its action column and a
+ * scrawl telling the writer to send a partial. Measured: one of five.
+ */
+export const ASKING_GROUPS: readonly RowGroup[] = ["offers", "now"];
+
+/**
+ * Does this row ask something of the writer?
+ *
+ * ⚠️ IT TAKES THE GROUP, WHICH IS THE POINT. The group is already derived from the whole row —
+ * every query on it, the snooze, the reminder — by `rowGroupOf`, and a second predicate reading a
+ * single lead query is how the two came to disagree: the group was the EARLIEST group across all
+ * of a row's queries while the deed read the MOST ADVANCED one. One derivation, consulted twice,
+ * cannot disagree with itself.
+ *
+ * ⚠️ AND THE PINNED TASK ROWS ANSWER `true` BY THEIR OWN RULE, not by a group: a dated task of the
+ * writer's own is asking something by existing. `group === null` is how a task row says it belongs
+ * to no query group, so the caller passes `hasDatedTask` for it.
+ */
+export function asksOfYou(group: RowGroup | null, hasDatedTask = false): boolean {
+  if (group === null) return hasDatedTask;
+  return ASKING_GROUPS.includes(group);
+}
+
 export function queryGroup(f: QueryFacts, today: string): RowGroup {
   if (f.status === QueryStatus.OFFER) return "offers";
   /* a live snooze is the writer saying "not yet" — it outranks everything except an offer */
@@ -174,7 +204,13 @@ export function groupSentence(g: RowGroup, n: number): string {
     case "snoozed":
       return "Quiet until their return dates.";
     case "closed":
-      return `Kept for ${CLOSED_LINGER_DAYS === 7 ? "a week" : `${CLOSED_LINGER_DAYS} days`}, then it leaves.`;
+      /* ⚠️ STILL DERIVED, AND THE CONSTANT MOVED RATHER THAN THE SENTENCE (fix pack, Phase 6).
+         The ref said "Kept for a month" and the code said seven days, so shipping the ref's words
+         would have been a false claim. Nick ruled for the ref: at a weekly visiting cadence a
+         seven-day linger can hide a closure entirely — you look on Monday, it closed on Tuesday,
+         and by your next visit it has gone. The sentence goes on deriving so the two can never
+         disagree again, whichever way the constant moves next. */
+      return `Kept for ${CLOSED_LINGER_DAYS === 30 ? "a month" : CLOSED_LINGER_DAYS === 7 ? "a week" : `${CLOSED_LINGER_DAYS} days`}, then it leaves.`;
     default: {
       const unhandled: never = g;
       return unhandled;

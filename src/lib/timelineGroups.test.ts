@@ -46,8 +46,8 @@ describe("the now/soon split is by KIND, not by a threshold", () => {
        always about the derivation; it now reads only the derivation. */
     const derivation = code.slice(0, code.indexOf("const ONES"));
     const numbers = [...derivation.matchAll(/\b\d+\b/g)].map((m) => m[0]);
-    expect(numbers, `numbers in the derivation: ${numbers.join(", ")}`).toEqual(["7"]);
-    expect(code).toContain("CLOSED_LINGER_DAYS = 7");
+    expect(numbers, `numbers in the derivation: ${numbers.join(", ")}`).toEqual(["30"]);
+    expect(code).toContain("CLOSED_LINGER_DAYS = 30");
     /* the population floor: a slice that found nothing would report "no numbers" for ever */
     expect(derivation.length, "the derivation slice is empty").toBeGreaterThan(1000);
     expect(derivation).toContain("export function queryGroup");

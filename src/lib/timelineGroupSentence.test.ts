@@ -40,9 +40,16 @@ describe("group sentences", () => {
   it("the closed sentence cannot disagree with the constant it is about", () => {
     const said = groupSentence("closed", 2);
     const n: number = CLOSED_LINGER_DAYS;
-    expect(said).toBe(n === 7 ? "Kept for a week, then it leaves." : `Kept for ${n} days, then it leaves.`);
-    /* the ref's own wording is "a month"; if that is ever made true it must be made true in the
-       CONSTANT, and this catches the reverse — copy edited to match a ref the code contradicts */
+    /* ⚠️ THE RULING LANDED IN THE CONSTANT, NOT IN THE COPY (fix pack, Phase 6). The ref said
+       "a month" and the code said a week; Nick ruled for the ref, so 30 is what the code now does
+       and "a month" is now TRUE rather than merely written. The derivation is what this asserts —
+       it is what stops the two disagreeing again in whichever direction the constant moves. */
+    expect(said).toBe(
+      n === 30 ? "Kept for a month, then it leaves."
+      : n === 7 ? "Kept for a week, then it leaves."
+      : `Kept for ${n} days, then it leaves.`,
+    );
+    /* the sentence may only say "a month" while the constant IS a month */
     if (n !== 30) expect(said).not.toContain("a month");
   });
 

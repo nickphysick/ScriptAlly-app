@@ -1,6 +1,6 @@
 import { QueryStatus } from "../types";
 import { shortCalDate } from "./todoCalendar";
-import type { RowGroup } from "./timelineGroups";
+import { asksOfYou, type RowGroup } from "./timelineGroups";
 
 /**
  * What a timeline row says about itself, in the writer's own words.
@@ -202,7 +202,10 @@ export interface RowNote {
  * would be a second answer to a settled question that could disagree with the group heading three
  * inches above it.
  */
-const WRITTEN_ON: readonly RowGroup[] = ["offers", "now"];
+/* ⚠️ THE SECOND PREDICATE IS DELETED. `WRITTEN_ON` was a hand-written copy of `ASKING_GROUPS`,
+   and two lists naming the same three groups is one edit away from disagreeing. `rowNote` now
+   asks `asksOfYou`, which is the same function the group heading, the deed button and the
+   `RIGHT NOW` filter ask. */
 
 /** What to do, in the writer's own imperative. */
 const DEED: Partial<Record<QueryStatus, string>> = {
@@ -228,7 +231,7 @@ function timingFor(ymd: string | null, today: string): string {
 }
 
 export function rowNote(c: RowCopy, group: RowGroup | null, today: string): RowNote | null {
-  if (!group || !WRITTEN_ON.includes(group)) return null;
+  if (!asksOfYou(group)) return null;
 
   const deed = DEED[c.status];
   if (deed) return { deed, timing: timingFor(c.expectedYmd, today) };
@@ -244,7 +247,16 @@ export function rowNote(c: RowCopy, group: RowGroup | null, today: string): RowN
      which. It carries no timing — there is no date to be for. */
   if (c.expectedYmd && c.expectedYmd < today) return { deed: "Nudge or close it", timing: "" };
 
-  return null;
+  /**
+   * ⚠️ AN ASKING ROW ALWAYS HAS A DEED, and this is the branch that makes it true.
+   *
+   * The group has already decided that this row needs the writer — it is in `offers` or `now` or
+   * `asksOfYou` would have returned false three lines up. Falling through to `null` here left the
+   * row in an asking group with a dash in its action column: the heading said one thing and the
+   * control said another, on one line, about one row. Where the app cannot NAME what is owed it
+   * says so by offering the thing itself rather than by offering nothing.
+   */
+  return { deed: "Open the query", timing: "" };
 }
 
 /* ══ WHETHER A SCRAWL EARNS ITS PLACE (Porcelain, Phase 6) ═══════════════════════════════════ */
