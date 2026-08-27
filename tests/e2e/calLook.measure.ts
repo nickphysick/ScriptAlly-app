@@ -753,3 +753,114 @@ test("every asking row names what is owed, and the count says what it counts", a
   expect(r.count).toMatch(/^\d+ RELATIONSHIPS?( · \d+ TASKS?)?$/);
   expect(errors, `console errors: ${errors.join(" | ")}`).toEqual([]);
 });
+
+/* ══ ORDERING AND THE GHOST, ON THE PAINTED BOARD (v36 part two, Phase 1) ════════════════════ */
+
+test("⚠️ the painted order matches the painted key, and the key matches the row's own words", async ({ page }) => {
+  await openRoute(page, "/todo/calendar", { width: 1440, height: 980 });
+  await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+  await page.waitForTimeout(600);
+
+  const groups = await page.evaluate(`(() => {
+    const out = [];
+    for (const g of document.querySelectorAll(".tl-grp")) {
+      const title = (g.querySelector(".tl-gt .t") || {}).textContent || "";
+      const rows = [...g.querySelectorAll(".tl-rrow")].map((r) => ({
+        name: ((r.querySelector(".tl-nm2") || {}).textContent || "?").slice(0, 30),
+        key: r.dataset.pressing,
+        top: Math.round(r.getBoundingClientRect().top),
+        tips: [...new Set([...r.querySelectorAll(".tl-p")].map((b) => b.getAttribute("data-tip") || "").filter(Boolean))],
+      }));
+      if (rows.length) out.push({ title, rows });
+    }
+    return out;
+  })()`) as any[];
+
+  let checked = 0;
+  for (const g of groups) {
+    /* ⚠️ THE PAINTED ORDER, read from the rows' own tops — not the array order, which is what a
+       seeded case would have compared and is not what a reader sees. */
+    const byTop = [...g.rows].sort((a: any, b: any) => a.top - b.top);
+    const keys = byTop.filter((r: any) => r.key && r.key !== "none").map((r: any) => Number(r.key));
+    if (keys.length < 2) continue;
+    checked += 1;
+    const sorted = [...keys].sort((a, b) => a - b);
+    expect(keys, `${g.title} is painted out of key order: `
+      + JSON.stringify(byTop.map((r: any) => [r.name, r.key]))).toEqual(sorted);
+  }
+  /* ⚠️ THE POPULATION, because a board of one-row groups would satisfy every loop above. */
+  expect(checked, "no group had two keyed rows — the sweep proves nothing").toBeGreaterThan(0);
+
+  /**
+   * ⚠️ AND THE KEY MUST AGREE WITH THE ROW'S OWN WORDS. This is the assertion the seeded lock
+   * could not make and the one the defect hid behind: `pressingAt` minimised over ALL an agent's
+   * live queries while the row DRAWS one per manuscript, so a row sorted on a date it did not
+   * show. Every key was ascending and the board was still wrong. Measured before the fix: Rachel
+   * Lin keyed 2026-08-07 beside her own bar reading "reply expected 29 Sept".
+   */
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"];
+  let agreed = 0;
+  for (const g of groups) {
+    for (const r of g.rows) {
+      if (!r.key || r.key === "none" || !r.tips.length) continue;
+      const d = new Date(Number(r.key));
+      const stamp = `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+      /* the key's date must appear in at least one of the row's own captions */
+      const said = r.tips.some((t: string) => t.includes(stamp));
+      if (said) agreed += 1;
+      else {
+        expect(said, `${r.name} sorts on ${stamp} but its own bars say ${JSON.stringify(r.tips)}`).toBe(true);
+      }
+    }
+  }
+  console.log(`rows whose key their own bars state: ${agreed}`);
+  expect(agreed, "no row's key could be checked against its words").toBeGreaterThan(4);
+});
+
+test("⚠️ a ghost chip is an origin, not a duplicate", async ({ page }) => {
+  await openRoute(page, "/todo/calendar", { width: 1440, height: 980 });
+  await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+  await page.waitForTimeout(600);
+  const rows = await page.evaluate(`(() => {
+    const out = [];
+    for (const row of document.querySelectorAll(".tl-rrow")) {
+      const cs = [...row.querySelectorAll(".tl-tchip")];
+      if (cs.length < 2) continue;
+      out.push({
+        name: ((row.querySelector(".tl-nm2") || {}).textContent || "?").slice(0, 30),
+        chips: cs.map((c) => {
+          const s = getComputedStyle(c);
+          return {
+            ghost: c.classList.contains("ghost"),
+            border: s.borderTopStyle, bg: s.backgroundColor, ink: s.color,
+            left: Math.round(c.getBoundingClientRect().left),
+          };
+        }),
+      });
+    }
+    return out;
+  })()`) as any[];
+
+  /* ⚠️ THE POPULATION FIRST. The board carried no carried task at all until one was seeded, so
+     this loop ran over an empty set and passed — a check that reports on nothing. */
+  expect(rows.length, "no row carries two chips — seed a carried task or this proves nothing")
+    .toBeGreaterThan(0);
+  for (const r of rows) {
+    const ghosts = r.chips.filter((c: any) => c.ghost);
+    const live = r.chips.filter((c: any) => !c.ghost);
+    expect(ghosts.length, `${r.name}: two chips and neither is a ghost`).toBeGreaterThan(0);
+    expect(live.length, `${r.name}: no live chip`).toBeGreaterThan(0);
+    /* the pair must be TOLD APART by paint, not by a class nobody can see */
+    for (const gh of ghosts) {
+      expect(gh.border, `${r.name}: the ghost is drawn solid like its live twin`).toBe("dashed");
+      expect(gh.bg, `${r.name}: the ghost is filled like its live twin`).toBe("rgba(0, 0, 0, 0)");
+      for (const lv of live) {
+        expect(gh.ink, `${r.name}: ghost and live share one ink`).not.toBe(lv.ink);
+        expect(gh.border, `${r.name}: ghost and live share one border`).not.toBe(lv.border);
+      }
+    }
+    /* and the ghost is BEHIND the live one — it is where the task fell due */
+    expect(Math.min(...ghosts.map((c: any) => c.left)))
+      .toBeLessThan(Math.min(...live.map((c: any) => c.left)));
+  }
+});

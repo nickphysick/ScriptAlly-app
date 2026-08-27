@@ -210,6 +210,15 @@ export interface TimelineRow {
    * being asked of them puts words in their mouth about work they have not got.
    */
   note: RowNote | null;
+  /**
+   * The sort key SOONEST orders by — see `pressingFrom`. `null` where the row has nothing live.
+   *
+   * ⚠️ IT IS ON THE ROW SO THE LOCK CAN READ IT OFF THE PAGE. The seeded ordering cases passed
+   * while the live board was visibly out of order, which is the "right number about the wrong
+   * subject" failure: the only way to tell them apart is to assert the PAINTED order against the
+   * key the painted rows actually carry.
+   */
+  pressingAt: number | null;
 }
 
 /* ⚠️ `TimelineBand`, `BandSource` AND THE `ExpectedItem` IT CARRIED ARE RETIRED (bars pack,
@@ -590,30 +599,18 @@ export function timelineWeek(
       copy: lead ? copyOf(lead, agent) : null,
       copies,
       /**
-       * ⚠️ WHAT IS PRESSING, AS ONE KEY (v36, Phase 6). The most pressing of the row's live
-       * queries wins — a relationship is as urgent as its most urgent thread. See `pressingFrom`
-       * for the three cases and why they share one scale rather than bucketing.
+       * ⚠️ `pressingAt` IS **NOT** COMPUTED HERE, and the absence is the fix (v36 part two).
+       *
+       * It used to take `Math.min` over ALL of `mine` — every live query this agent holds. But a
+       * row DRAWS one query per manuscript (see `per` in the bar pass), so an agent with three
+       * queries on one book showed one lane and sorted by whichever of the three was most
+       * pressing, including the two the reader cannot see. Measured on the deployed board: Rachel
+       * Lin sorted on 7 Aug beside her own bar reading "reply expected 29 Sept".
+       *
+       * It is filled in the bar pass instead, from the same `per` map the lanes come from — so
+       * the key and the evidence for it are the same queries. Third variant of one disease: the
+       * deed bug was lead-vs-earner, this is all-vs-drawn.
        */
-      pressingAt: (() => {
-        const live = mine.filter((qq) => !isTerminalStatus(qq.status));
-        if (!live.length) return undefined;
-        const keys = live.map((qq) => {
-          const named = namedEndFor(qq as Query, agent ?? null, { today: data.today }).end;
-          if (named) return new Date(`${named.ymd}T12:00:00`).getTime();
-          if (sideOf(qq.status as QueryStatus) === "yours") {
-            /* ⚠️ DUE ON RECEIPT. Nobody named a date, but the agency asked — so it was due the day
-               it arrived, and it has been past ever since. The longer it has been past the more
-               pressing it is, which falls out of the scale rather than needing a tier. */
-            const asked = ymdOf(qq.lastStatusChange) ?? ymdOf(qq.dateSent);
-            return asked ? new Date(`${asked}T12:00:00`).getTime() : PRESSING_BASE;
-          }
-          /* ⚠️ UNDATED AND WITH THE AGENT: nothing is being asked, so it sorts after everything
-             dated — and among its own kind by longest waiting, in the same number. */
-          const sent = ymdOf(qq.dateSent);
-          return PRESSING_BASE + (sent ? new Date(`${sent}T12:00:00`).getTime() : 0);
-        });
-        return Math.min(...keys);
-      })(),
       /* the head's sentence and the note read the SAME facts — see `copyOf` above */
       sentence: lead ? rowSentence(copyOf(lead, agent), data.today) : "",
       order: drafts.size,
@@ -803,6 +800,35 @@ export function timelineWeek(
       for (const r of recs) {
         const t = new Date(`${r.ymd}T12:00:00`).getTime();
         if (Number.isFinite(t) && t > row.lastActive) row.lastActive = t;
+      }
+
+      /**
+       * ⚠️ WHAT IS PRESSING, FROM THE QUERIES THE ROW ACTUALLY DRAWS.
+       *
+       * `q` is this LANE's query — the one `per` kept, and the one whose bar and tooltip the
+       * reader is looking at. Minimising here rather than over every query the agent holds is the
+       * whole fix: the key and the evidence for it are now the same queries, so a row can no
+       * longer sort by a date it does not show.
+       *
+       * See `pressingFrom` for the three cases and why they share one scale rather than bucketing.
+       */
+      if (!isTerminalStatus(q.status)) {
+        const named = namedEndFor(q as Query, agent ?? null, { today: data.today }).end;
+        const key = (() => {
+          if (named) return new Date(`${named.ymd}T12:00:00`).getTime();
+          if (sideOf(q.status as QueryStatus) === "yours") {
+            /* ⚠️ DUE ON RECEIPT. Nobody named a date, but the agency asked — so it was due the day
+               it arrived and has been past ever since. The longer past, the more pressing, which
+               falls out of the scale rather than needing a tier. */
+            const asked = ymdOf(q.lastStatusChange) ?? ymdOf(q.dateSent);
+            return asked ? new Date(`${asked}T12:00:00`).getTime() : PRESSING_BASE;
+          }
+          /* ⚠️ UNDATED AND WITH THE AGENT: nothing is being asked, so it sorts after everything
+             dated — and among its own kind by longest waiting, in the same number. */
+          const sent = ymdOf(q.dateSent);
+          return PRESSING_BASE + (sent ? new Date(`${sent}T12:00:00`).getTime() : 0);
+        })();
+        if (row.pressingAt === undefined || key < row.pressingAt) row.pressingAt = key;
       }
       /* the card's own words for a your-move stretch — `pillLabel`'s output, never re-summarised */
       const card = win.flatMap((ymd) => data.itemsFor(ymd))
@@ -1023,6 +1049,7 @@ export function timelineWeek(
       key: row.key, agentId: row.agentId, name: row.name, agency: row.agency,
       group: groupOf.get(row.key) ?? null, status: row.status, sentence: row.sentence,
       note: noteOf.get(row.key) ?? null,
+      pressingAt: row.pressingAt ?? null,
       dot: row.dot, items: row.items,
       lanes: Math.max(1, barLanes + (row.items.length ? packed : 0)),
       manuscripts: row.manuscripts, closed: row.closed,

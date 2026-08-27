@@ -445,6 +445,17 @@ button.tl-mk2 { cursor: pointer; }
   font-size: 10px; font-weight: 500; color: var(--tl-ink); white-space: nowrap; z-index: 2;
 }
 .tl-tchip .sq { width: 8px; height: 8px; border-radius: 2px; border: 1.5px solid var(--tl-burgundy); flex: 0 0 auto; }
+/* ⚠️ THE GHOST IS AN ORIGIN, NOT A DUPLICATE. It marks the day a task fell due while the live
+   chip sits on today — and rendered identically it read as the same task drawn twice, which is
+   what a reader reported. Dashed and unfilled, because it is a place rather than a thing: the
+   task is not there any more, that is only where it started. The muted ink and the ↦ say which
+   way to look. */
+.tl-tchip.ghost {
+  background: transparent; border-style: dashed; border-color: #d3c4b3;
+  color: #a08f80; font-weight: 500;
+}
+.tl-tchip.ghost .sq { border-color: #c3b39c; }
+.tl-tchip .fwd { font-size: 9px; color: #c0ae9c; margin-left: 2px; }
 .tl-tchip.struck { text-decoration: line-through; opacity: .62; }
 .tl-tchip.grab { cursor: grab; }
 .tl-tchip.grab:active { cursor: grabbing; }

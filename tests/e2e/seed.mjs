@@ -261,7 +261,21 @@ const STATUSES = [
       || new Date(Date.now() - 5 * 86_400_000).toISOString(),
     updatedAt: new Date().toISOString(),
   });
-  console.log("wrote 1 dated task");
+  /* ⚠️ A CARRIED TASK — one whose date has PASSED and which is still not done. It is the only
+     shape that puts two chips on one row: a ghost on the day it fell due, and the live item on
+     today. The board had none, so "does a task draw twice" could not be answered on it at all. */
+  const CARRIED_ID = "seed-cal-carried";
+  const hadC = await getDoc(doc(db, "users", uid, "tasks", CARRIED_ID));
+  await setDoc(doc(db, "users", uid, "tasks", CARRIED_ID), {
+    id: CARRIED_ID, userId: uid,
+    text: "Chase the Blaine partial",
+    done: false,
+    dueDate: iso(5),
+    createdAt: (hadC.exists() && hadC.data().createdAt)
+      || new Date(Date.now() - 20 * 86_400_000).toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+  console.log("wrote 2 dated tasks (one due ahead, one carried)");
 }
 
 for (const c of ["manuscripts", "agents", "queries"]) {

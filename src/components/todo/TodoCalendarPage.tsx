@@ -1048,6 +1048,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       <div
         key={r.key}
         className={`tl-rrow${r.closed ? " closed" : ""}`}
+        /* ⚠️ THE SORT KEY, ON THE ROW. The lock asserts the PAINTED order against it — a seeded
+           ordering case can pass while the live board is visibly out of order, and only comparing
+           the two on one page can tell those apart. */
+        data-pressing={r.pressingAt == null ? "none" : String(r.pressingAt)}
         style={{ ["--lanes" as string]: String(lanes) } as React.CSSProperties}
       >
         {/* ⚠️ THE NAME IS A CONTROL — it opens the relationship's workspace with nothing selected,
@@ -1104,7 +1108,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
             <button
               key={it.key}
               type="button"
-              className={`tl-at2 tl-tchip${it.struck ? " struck" : ""}${it.draggable && it.card?.userTaskId ? " grab" : ""}${sel === it.key ? " sel" : ""}`}
+              /* ⚠️ A GHOST SAYS ITS OWN NAME. It is the ORIGIN mark — "this fell due here and is
+                 still outstanding" — and it was rendering identically to the live chip beside it:
+                 same solid border, same white ground, same opacity, same text. A correct pair of
+                 marks read as one task drawn twice. The grid era distinguished them and the
+                 Porcelain rebuild dropped the treatment without replacing it. */
+              className={`tl-at2 tl-tchip${it.kind === "ghost" ? " ghost" : ""}${it.struck ? " struck" : ""}${it.draggable && it.card?.userTaskId ? " grab" : ""}${sel === it.key ? " sel" : ""}`}
               style={{ left: `calc(${pct(it.idx)} + var(--tl-gap))`, ...laneVar(it.lane) }}
               data-tip={it.label}
               draggable={!!(it.draggable && it.card?.userTaskId)}
@@ -1119,6 +1128,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               onClick={() => pick(r.key, it)}
             >
               <span className="sq" aria-hidden />{it.label}
+              {/* the forward mark: this is where it fell due, and the live one is over there */}
+              {it.kind === "ghost" && <span className="fwd" aria-hidden>↦</span>}
             </button>
           ))}
           {/* ⚠️ THE SCRAWL EARNS ITS PLACE OR IT DOES NOT RENDER — `scrawlEarns` is the predicate,
