@@ -111,6 +111,27 @@ needs to start from** — which is what turns a standing note nobody reads into 
   `ahead: 1`; all seven of the previous pack's are ancestors of HEAD with every file present.
   Checked rather than assumed.
 
+> ⚠️ **THREE ACCOUNT-SETTINGS LOCKS ARE RED ON DEV, AND MY DEPLOY IS WHAT PUT THEM THERE.**
+> Found after this report was first written, by a whole-directory e2e run left in the background.
+> `accountChassis.measure.ts` :59, :72 and :94 **crash** (`Cannot read properties of null`) rather
+> than fail, and they reproduce against deployed dev from a clean tree — so they are real, not an
+> artefact of the worktree I deleted underneath that run.
+>
+> **They are not mine.** Every file my eight commits touched is a calendar or timeline module or
+> its test; nothing reaches `.acct-col` or `.acct-rail`. Probed on the deployed page: **`.acct-col`
+> is absent (0), `.acct-rail` and `.acct-plane` are present** — the account column was restructured
+> by the session working there (`ff7a9d45 settings: notifications and preferences`), and its own
+> locks have not caught up.
+>
+> **What is mine is that a hosting deploy from a shared `main` carries every session's committed
+> work, not just the pack's.** That is how this reached dev. Left for its own session — a crashing
+> lock names a line number where an honest failure names a property, so those three say nothing
+> about the account pages until they are guarded.
+>
+> ⚠️ `accountPrefs.measure.ts:24` also failed, after **15 minutes**. It WRITES ("the write reaches
+> Firestore"), so it was deliberately not re-run — a writing measurement re-run to satisfy
+> curiosity is how a fixture gets spent.
+
 **Known, out of scope, confirmed:** `.tpn .ws` still squeezes the pane below ~600px —
 `calLook.measure.ts` asserts it as a standing non-fix and passes.
 
