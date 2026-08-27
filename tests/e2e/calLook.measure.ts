@@ -278,6 +278,14 @@ test.describe("the Calendar — Porcelain", () => {
       console.log(`label forms at ${width}: ${JSON.stringify(read.labelForms)}`);
 
       /* ── markers: values, size, and PAINTED clearance ───────────────────────────────── */
+      /* ⚠️ ALL FOUR FACES MUST BE ON THE BOARD, or the loop below skips the ones that are not and
+         reports nothing about them. `in` and `bang` were absent from every fixture for two packs
+         and the sweep said so in prose rather than in a failure; they are seeded now, and this is
+         what stops them going missing again. */
+      const facesSeen = Object.keys(read.markers).sort();
+      console.log(`marker faces at ${width}: ${facesSeen.join(", ")}`);
+      expect(facesSeen, "a marker face is not on the board — seed it or the sweep skips it")
+        .toEqual(["bang", "clock", "in", "outk"]);
       for (const [name, want] of Object.entries(MARKER)) {
         const got = read.markers[name];
         if (!got) continue;

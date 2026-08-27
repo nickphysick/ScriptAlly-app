@@ -201,6 +201,11 @@ const STATUSES = [
        a reminder in a fortnight: nothing is owed yet, and the row must carry a dash. */
     { id: "seed-cal-soon", name: "Hester Blaine", agency: "Blaine & Vole",
       weeks: 12, sentDaysAgo: 20, status: "Queried", nudgeInDays: 14 },
+    /* ⚠️ A REMINDER THAT HAS FALLEN DUE — the only shape that draws the `bang` marker, which the
+       sweep has reported absent since the markers were built. It also exercises `queryGroup`'s
+       OTHER route into `Needs you now`: not a writer-held status, but a date that has arrived. */
+    { id: "seed-cal-bang", name: "Alasdair Crewe", agency: "Crewe Literary",
+      weeks: 16, sentDaysAgo: 40, status: "Queried", nudgeInDays: -3 },
   ];
   const kept = new Map();
   for (const c of CAL) {
