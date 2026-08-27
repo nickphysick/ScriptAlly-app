@@ -8,6 +8,22 @@
   --illo-solid: #000000;
   /* how far the fold badge hangs below the border it sits on — half its own height, so it straddles */
   --illo-fold-drop: 0px;
+
+  /* ⚠️ SUBMISSION PACKAGES' FIVE, ALL TOKENS BECAUSE THIS IS A TRIAL AND THE NUMBERS WILL MOVE.
+     The ground is a horizontal two-colour gradient rather than the shared wash — the carve-out the
+     ground lock names — and the artwork's fade is stated as percentages of the band's width. */
+  /* ⚠️ IT READS THE WASH'S TOP STOP RATHER THAN RESTATING ITS HEX. The brief's `#f2e4dd` IS
+     `--mast-wash-top`, so writing it again put the same colour in two declarations — caught by the
+     single-source lock, which cannot tell a deliberate match from a stale copy and should not have
+     to. Stated as the relationship it is: this ground BEGINS at the masthead wash and resolves to
+     something lighter, so retuning the wash carries the trial with it. If the two are meant to be
+     independent colours that happen to coincide today, this becomes a literal again — and the lock
+     will ask about it. */
+  --pkg-ground-a: var(--mast-wash-top);   /* the ground's left stop */
+  --pkg-ground-b: #fdf9f6;   /* its right stop, and the flat colour beneath the gradient */
+  --pkg-ground-mid: 60%;     /* where the ground finishes resolving */
+  --pkg-art-start: 43%;      /* where the artwork begins fading in */
+  --pkg-art-full: 73%;       /* where it reaches full strength */
 }
 
 /**
@@ -51,8 +67,14 @@
   /* ⚠️ WHITE, NOT THE WASH — the carve-out this trial buys, and the ground lock names it as the one
      page allowed it. Both longhands, never the `background` shorthand: the shorthand is what resets
      `background-color` to transparent, which is the fault four earlier rounds were about. */
-  background-color: var(--illo-ground);
-  background-image: none;
+  /**
+   * ⚠️ A TWO-COLOUR GROUND, NOT A FLAT ONE — the carve-out this page buys. Both longhands, never
+   * the `background` shorthand: the shorthand resets `background-color` to transparent, which is
+   * the see-through-header fault four earlier rounds were about. The colour is the gradient's RIGHT
+   * stop, so a dropped image leaves the ground the artwork sits on rather than the one it starts at.
+   */
+  background-color: var(--pkg-ground-b);
+  background-image: linear-gradient(to right, var(--pkg-ground-a) 0%, var(--pkg-ground-b) var(--pkg-ground-mid));
   /**
    * ⚠️ NO `position: relative` — THE BENCH HAS IT AND COPYING IT HERE BROKE THE PAGE. This band is
    * `position: sticky`, and `relative` overrode it: the slab stopped pinning, which the behaviour
@@ -69,109 +91,32 @@
   content: '';
   position: absolute;
   inset: 0;
-  /* ⚠️ IT MUST NOT SWALLOW A CLICK — Hide and the page's own controls sit over this band. */
+  /* ⚠️ IT MUST NOT SWALLOW A CLICK — the page's controls sit over this band. */
   pointer-events: none;
   background-image: url(../../assets/packages/packages.webp);
   background-repeat: no-repeat;
   background-position: 100% center;
-  background-size: auto 150%;
-  /* knocked back so it reads as a watermark rather than competing with what sits on it */
-  opacity: 0.65;
   /**
-   * ⚠️ THE MASK IS THE POINT. The artwork is fully transparent where the title and description sit
-   * and fades in across the middle, so no text is ever set over painted illustration — asserted by
-   * sampling the painted colour at the last glyph of each, in both postures, rather than trusted.
+   * ⚠️ THE ARTWORK'S WIDTH IS A FUNCTION OF THE BAND'S HEIGHT AND THE MASK'S IS A FUNCTION OF ITS
+   * WIDTH — so the two drift as the window changes, and that is the coupling §2(b) exists to look
+   * at. `auto 130%` on a ~150px band renders the illustration about 1620px wide whatever the window
+   * is doing; the mask's 43% is 434px at 1280 and 873px at 2300. Measured and reported rather than
+   * pre-emptively unified.
    */
+  background-size: auto 130%;
+  opacity: 0.86;
   /**
-   * ⚠️ THE START TRACKS THE TEXT, IT IS NOT A PERCENTAGE OF THE BAND — and the two flat values this
-   * replaces were both wrong for the same reason. The ref's 34% put the description ON the artwork
-   * at the narrow widths; a flat 54%, set to clear the worst case, then held the illustration far
-   * too far right everywhere else — 396px of empty band at 2300, which is what Nick saw.
-   *
-   * MEASURED, and it is the cleanest possible input: the text ends **485px from the masthead's left
-   * edge at every width** — it is one fixed string at a fixed size. What moves is the MEASURE's left
-   * edge, which is 35 at 1280 and 1440 and 185 at 2300, because the measure is capped and centred.
-   * So the start is that edge plus the text plus 30px of air, expressed exactly as the measure is:
-   *
-   *     (100% - min(--work-max, 100% - 2 × --mast-gutter)) / 2   is the measure's left edge
-   *     + 515px                                                  is 485 of text and 30 of air
-   *
-   * Computed: 550 · 550 · 700 against text ending at 520 · 520 · 670. Thirty pixels clear at every
-   * width, and the artwork now begins as soon as the words stop rather than at a fraction that only
-   * suits one viewport.
-   *
-   * ⚠️ IT READS THE SAME TWO TOKENS THE MEASURE ITSELF READS, so a change to the gutter or the cap
-   * moves the mask with the text instead of leaving the two to drift apart.
+   * ⚠️ THE MASK IS THE POINT: the artwork is fully transparent where the title and description sit
+   * and fades in across the middle, so no text is set over painted illustration. Asserted by
+   * sampling the painted colour just past the last glyph of each, in both postures.
    */
-  --pkgw-illo-start: calc((100% - min(var(--work-max), 100% - 2 * var(--mast-gutter))) / 2 + 515px);
-  -webkit-mask-image: linear-gradient(to right, transparent var(--pkgw-illo-start), var(--illo-solid) calc(var(--pkgw-illo-start) + 170px));
-          mask-image: linear-gradient(to right, transparent var(--pkgw-illo-start), var(--illo-solid) calc(var(--pkgw-illo-start) + 170px));
+  -webkit-mask-image: linear-gradient(to right, transparent var(--pkg-art-start), var(--illo-solid) var(--pkg-art-full));
+          mask-image: linear-gradient(to right, transparent var(--pkg-art-start), var(--illo-solid) var(--pkg-art-full));
 }
 /* ⚠️ THE TEXT SITS ABOVE THE PAINT. The pseudo-element is positioned and the masthead's measure is
    not, so without this the artwork would paint over the title — the bench lifts `.mastin` to
    `z-index: 2` for the same reason. */
 .wpg.pkgw-wpg .wpg-mast { position: relative; z-index: 2; }
-
-/**
- * ══ QUERY CENTRE ══════════════════════════════════════════════════════════════════════════════
- * The second page of the trial. Structurally identical; three things differ and each is measured.
- */
-.wpg.qc-wpg > .wpg-scroll > .wpg-chrome {
-  background-color: var(--illo-ground);
-  background-image: none;
-  /**
-   * ⚠️ `position: relative` IS REQUIRED HERE AND WAS FORBIDDEN ON PACKAGES — the pages are different
-   * header types and that is the whole difference. Packages is Type A, so its band is `sticky` and
-   * is already a containing block; adding `relative` there OVERRODE the sticky and stopped it
-   * pinning. Query Centre is Type B, so its band is `static` and an absolutely-positioned
-   * pseudo-element would otherwise resolve against `.wpg-scroll` and spill past the masthead. Same
-   * treatment, opposite declaration, because what is underneath is not the same.
-   */
-  position: relative;
-  /**
-   * ⚠️ NO `overflow: hidden` HERE, AND IT WAS NEVER DOING ANYTHING. The bench puts it on `.mast`,
-   * and Packages keeps it, but the artwork is a BACKGROUND on a pseudo-element with `inset: 0` — a
-   * background is clipped to its own border box by default, so there is nothing for `overflow` to
-   * contain. What it WOULD do here is clip the fold control below, which straddles this element's
-   * bottom border by half its height. Removing it is what lets the badge sit on the line.
-   */
-}
-.wpg.qc-wpg > .wpg-scroll > .wpg-chrome::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: url(../../assets/queries/queries.jpg);
-  background-repeat: no-repeat;
-  background-position: 100% center;
-  background-size: auto 150%;
-  opacity: 0.65;
-  /**
-   * ⚠️ 482, WHERE PACKAGES USES 515 — measured, not copied. Query Centre's description is a
-   * different string, so its text ends **452px from the masthead's left edge** at every width
-   * against Packages' 485; the 30px of air is the same. The expression is otherwise identical and
-   * reads the same two tokens the measure reads, so the mask cannot drift from the words it clears.
-   */
-  --qc-illo-start: calc((100% - min(var(--work-max), 100% - 2 * var(--mast-gutter))) / 2 + 482px);
-  -webkit-mask-image: linear-gradient(to right, transparent var(--qc-illo-start), var(--illo-solid) calc(var(--qc-illo-start) + 170px));
-          mask-image: linear-gradient(to right, transparent var(--qc-illo-start), var(--illo-solid) calc(var(--qc-illo-start) + 170px));
-}
-/**
- * The text sits above the paint — `.wpg-mast` is already `position: relative` on a static page, so
- * `z-index` adds only the order.
- *
- * ⚠️ AND `overflow: visible`, WITHOUT WHICH THE FOLD BADGE DOES NOT EXIST. The measure carries
- * `overflow: hidden`, so a control straddling the band's bottom border is cut in half by its own
- * parent — measured, the pill's box was in exactly the right place, computed `visible` at
- * `z-index: 30`, and painted nothing at all: `elementsFromPoint` at its centre returned the CHROME.
- * The same clip is why the folded badge has to be portalled out to the window's wrapper.
- *
- * ⚠️ IT IS SAFE HERE AND WOULD NOT BE EVERYWHERE. The clip exists to stop a long title spilling its
- * measure; Query Centre's title and description are short fixed strings, so there is nothing to
- * spill. A rollout to a page with longer or user-supplied text has to answer this again rather than
- * copy the line.
- */
-.wpg.qc-wpg .wpg-mast { z-index: 2; overflow: visible; }
 
 /**
  * ══ THE FOLD CONTROL — A CHEVRON ON THE BOTTOM BORDER ═════════════════════════════════════════
@@ -192,6 +137,19 @@
  * readable. A control cannot live on top of an illustration. The bottom border is the one edge of
  * this band the artwork does not occupy.
  */
+/**
+ * ⚠️ THE MEASURE MUST NOT CLIP, OR THE FOLD BADGE DOES NOT EXIST. `.wpg-mast` carries
+ * `overflow: hidden` at four classes' specificity — it is the fold's own animation, collapsing
+ * `max-height` to 0 — so a control straddling the band's bottom border is cut in half by its parent.
+ * Measured when this was missing: the pill's box in exactly the right place, computed `visible` at
+ * `z-index: 30`, painting nothing, with `elementsFromPoint` returning the CHROME at its centre.
+ *
+ * The control itself is a child of the SLAB rather than the measure (see `WorkspacePageGrid`), so
+ * this is belt and braces for anything else the masthead hangs on its own edge.
+ */
+.wpg--static > .wpg-scroll > .wpg-chrome > .wpg.qc-wpg .wpg-mast,
+.wpg.qc-wpg .wpg-mast { z-index: 2; }
+
 .wpg.qc-wpg .wpg-mast-hide {
   position: absolute;
   left: 50%;

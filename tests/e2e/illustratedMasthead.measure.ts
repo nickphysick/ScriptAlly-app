@@ -34,7 +34,7 @@ const PAGES: { name: string; route: string; cls: string }[] = [
  * against its OWN peers rather than against one another: Packages is Type A and its band is sticky,
  * Query Centre is Type B and its band is static.
  */
-const TRIAL = ["Submission packages", "Query Centre"];
+const TRIAL = ["Submission packages"];
 
 const readBand = (page: Page, cls: string) => page.evaluate((c) => {
   const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
@@ -80,7 +80,6 @@ test("⚠️ EXACTLY ONE PAGE CARRIES MASTHEAD ARTWORK — asserted in both dire
 
 const TRIAL_ROUTES: { name: string; route: string; cls: string }[] = [
   { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
-  { name: "Query Centre",        route: "/queries",              cls: "qc-wpg"   },
 ];
 
 for (const width of [1280, 1440, 2300]) {

@@ -68,7 +68,7 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
 }, cls);
 
 /* the pages permitted a ground other than the wash — see the note at the carve-out */
-const WASH_CARVE_OUTS = ["Submission packages", "Query Centre"];
+const WASH_CARVE_OUTS = ["Submission packages"];
 
 test("⚠️ EVERY MASTHEAD CARRIES THE WASH — a partition, with one named carve-out", async ({ page }) => {
   const lines: string[] = [];
@@ -109,8 +109,8 @@ test("⚠️ EVERY MASTHEAD CARRIES THE WASH — a partition, with one named car
   expect(measured, "no page was measured at all").toBe(PAGES.length);
   expect(washed, "a masthead was measured that carries no wash").toBe(measured - carved);
   /* ⚠️ EXACTLY ONE, so the trial cannot spread without a deliberate edit here */
-  expect(carved, "the number of pages departing from the wash has changed — the trial has spread or been reverted").toBe(2);
-  expect(WASH_CARVE_OUTS, "the carve-out list itself has changed size").toHaveLength(2);
+  expect(carved, "the number of pages departing from the wash has changed — the trial has spread or been reverted").toBe(1);
+  expect(WASH_CARVE_OUTS, "the carve-out list itself has changed size").toHaveLength(1);
 });
 
 test("⚠️ NO TOOLBAR CARRIES THE WASH — asserted in both directions", async ({ page }) => {

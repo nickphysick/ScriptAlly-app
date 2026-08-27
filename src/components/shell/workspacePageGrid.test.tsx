@@ -211,7 +211,18 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
           if (e.isDirectory()) { walk(full); continue; }
           if (!/\.(css|tsx?)$/.test(e.name)) continue;
           if (e.name === "workspacePageGrid.css" || e.name === "workspacePageGrid.test.tsx") continue;
-          if (readFileSync(full, "utf8").toLowerCase().includes(bare)) offenders.push(e.name);
+          /**
+           * ⚠️ COMMENTS STRIPPED FIRST — the house rule, and this lock broke it on its second use.
+           * The prose in `illustratedMasthead.css` explains that the trial's ground stop IS
+           * `--mast-wash-top` and quotes the hex to say so; the sweep found that sentence and
+           * reported the file as a second copy of the value. A retirement is always documented by
+           * naming the thing retired, so a lock that reads raw source will keep finding its own
+           * explanation and calling it the code.
+           */
+          const decls = readFileSync(full, "utf8")
+            .replace(/\/\*[\s\S]*?\*\//g, "")
+            .replace(/\/\/[^\n]*/g, "");
+          if (decls.toLowerCase().includes(bare)) offenders.push(e.name);
         }
       };
       walk(resolve(__dirname, "../.."));
