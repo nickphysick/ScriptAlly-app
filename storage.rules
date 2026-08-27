@@ -1,0 +1,76 @@
+rules_version = '2';
+
+// ══ CLOUD STORAGE RULES — manuscript attachments ═══════════════════════════════════════════════
+//
+// ⚠️ WHAT IS ENFORCED HERE IS THE WHOLE OF WHAT IS ENFORCED. Two caps are real controls because
+// they live in this file: 25 MB per file, and the content-type allowlist. The THIRD cap — 20 files
+// per manuscript — is NOT here and cannot be: these rules see one request, never a directory, so
+// there is nothing to count. It is a UI limit and the code says so in those words. Do not write a
+// comment anywhere implying the file count is enforced; a guard that is believed and absent is
+// worse than one that is merely absent.
+//
+// ⚠️ THE CAPS ARE IDENTICAL ON FREE AND PRO, DELIBERATELY. A storage limit on the free plan would
+// need a usage meter to be fair, and this product's free plan never shows one.
+//
+// ⚠️ contentType IS DECLARED BY THE CLIENT, SO THIS IS A TYPE GATE AND NOT CONTENT SNIFFING. A
+// caller driving the SDK by hand can label a file whatever it likes. That is accepted: the size cap
+// is the one that bounds cost, and it is not forgeable — `request.resource.size` is measured by the
+// service, not asserted by the caller.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ⚠️ THE PATH CARRIES THE OWNER, WHICH IS WHAT MAKES CROSS-USER READS UNEXPRESSIBLE RATHER THAN
+    // MERELY FORBIDDEN. `userId` is a segment, so a rule comparing it to `request.auth.uid` cannot
+    // be satisfied by anyone else's token — there is no query shape that reaches another writer's
+    // files. `manuscriptId` scopes below it so a future per-manuscript share is one clause away.
+    match /users/{userId}/manuscripts/{manuscriptId}/attachments/{fileName} {
+
+      function isOwner() {
+        return request.auth != null && request.auth.uid == userId;
+      }
+
+      // 25 MB, in bytes. `request.resource.size` is the service's own measurement.
+      function withinSize() {
+        return request.resource.size <= 25 * 1024 * 1024;
+      }
+
+      // ⚠️ THE VARIANTS ARE NOT PADDING. Browsers disagree about several of these: .rtf arrives as
+      // either application/rtf or text/rtf, .md as text/markdown or text/x-markdown, .csv sometimes
+      // as application/csv, and .doc as application/msword. Listing one spelling each would reject
+      // files the allowlist is meant to accept, on some machines and not others — the worst kind of
+      // rejection, because it is unreproducible for whoever reports it.
+      function allowedType() {
+        return request.resource.contentType in [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.oasis.opendocument.text',
+          'application/rtf', 'text/rtf',
+          'text/plain',
+          'text/markdown', 'text/x-markdown',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'text/csv', 'application/csv',
+          'image/jpeg',
+          'image/png'
+        ];
+      }
+
+      allow read: if isOwner();
+
+      // ⚠️ CREATE AND UPDATE ARE SEPARATED FROM DELETE, AND THIS IS NOT TIDINESS. On a delete
+      // `request.resource` is NULL — so a single `allow write` carrying the size and type checks
+      // would evaluate them against nothing and DENY EVERY DELETE. The failure would look like a
+      // permissions bug in the client and would leave writers unable to remove their own files,
+      // while every upload worked perfectly.
+      allow create, update: if isOwner() && withinSize() && allowedType();
+      allow delete: if isOwner();
+    }
+  }
+
+  // ⚠️ DEFAULT DENY, STATED RATHER THAN INHERITED. Storage rules already deny an unmatched path,
+  // but an explicit terminal clause is what stops the next person adding a broad `match /{a=**}`
+  // above it and quietly opening the bucket. The same reason firestore.rules opens with one.
+  match /{allPaths=**} {
+    allow read, write: if false;
+  }
+}
