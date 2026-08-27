@@ -148,8 +148,10 @@
      chosen when every bar was filled and the board needed to differ from them. Porcelain inverts
      that: the bar is a WHITE TRACK, so a tinted board would make the tracks the lightest thing on
      the page and the fills invisible against them. */
+  /* ⚠️ THE BOARD IS THE GROUND AND CARRIES NO FRAME OF ITS OWN. Each group's card is the object;
+     a frame around all of them would be a card of cards, and the headings would sit inside it. */
   background: var(--tl-ground);
-  border: 1px solid var(--tl-hair); border-radius: 14px; overflow: hidden;
+  overflow: hidden;
 
   /* ══ THE PINNED VALUES ══════════════════════════════════════════════════════════════════
    *
@@ -163,7 +165,10 @@
    * refactor inheriting a calendar colour it has no use for.
    */
   --tl-ground: #faf7f2;
-  --tl-row: #fffefb;
+  /* ⚠️ THE CARD, NOT A ROW COLOUR (v36). A group's rows sit on their own card and the heading sits
+     on the GROUND above it — so this is the card's surface, and the marker halo reads it to get
+     contrast against exactly the thing a marker is drawn on. */
+  --tl-row: #f7f0e6;
   --tl-ink: #3a1c14;
   --tl-muted: #8a7a6c;
   --tl-label: #9c8878;
@@ -171,10 +176,12 @@
   --tl-pink: #f5e2da;
   --tl-pinkb: #e8c8bc;
   --tl-hair: #efe6da;
-  --tl-rowline: #f4ede3;
-  --tl-rowhov: #faf5ec;
+  --tl-rowline: #eee4d6;
+  --tl-rowhov: #f3ebdd;
   --tl-scrawl: #8a4a36;
-  --tl-todayl: rgba(58, 28, 20, .4);
+  /* ⚠️ .3, NOT .4 (v36). It carried the v35 value through part one — the rule marks a boundary
+     rather than competing with the bars either side of it. */
+  --tl-todayl: rgba(58, 28, 20, .3);
 
   /* the five live bar families: border · fill · the deeper fill at ≥85% · text */
   --bar-out-line: #d9e1d6;    --bar-out-fill: #e6ece3;    --bar-out-near: #d7e0d2;    --bar-out-text: #55684f;
@@ -204,8 +211,8 @@
   --bar-h: 22px;
   --mk: 20px;
   --tl-headrow-h: 26px;
-  --tl-nm-w: 308px;
-  --tl-ac-w: 168px;
+  --tl-nm-w: 288px;
+  --tl-ac-w: 172px;
   /* how far a piece stands off a marker it abuts, and off a plain neighbour */
   --tl-gap-mk: 12px;
   --tl-gap: 2px;
@@ -226,7 +233,13 @@
 .tl-gtbtn:hover { color: var(--tl-burgundy); }
 .tl-gtbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
 
-.tl-tbl { background: var(--tl-row); border-top: 1px solid var(--tl-hair); border-bottom: 1px solid var(--tl-hair); }
+/* ⚠️ EACH GROUP GETS ITS OWN CARD, and the heading is NOT in it. A heading inside the card reads
+   as a row of the table it names; on the ground above it, it reads as a label for the object
+   below — which is what it is. */
+.tl-tbl {
+  background: var(--tl-row); border: 1px solid var(--tl-hair); border-radius: 11px;
+  overflow: hidden;
+}
 
 /* ══ A ROW ═════════════════════════════════════════════════════════════════════════════════ */
 .tl-hrow, .tl-rrow { display: flex; align-items: stretch; }
@@ -245,6 +258,18 @@
 /* ⚠️ `overflow: hidden` IS LOAD-BEARING AND IS WHY THE TOOLTIP IS PORTALLED. A clipping ancestor
    beats any z-index a descendant can declare, so no tooltip inside this box can ever escape it. */
 .tl-c-tl { flex: 1 1 auto; position: relative; overflow: hidden; }
+/* ══ THE PAST, SET BACK ═════════════════════════════════════════════════════════════════════
+ * ⚠️ ON THE LANE'S GROUND AND ON NOTHING ELSE. The wash says "this is behind you" about the
+ * SURFACE; laid over a bar it would dim the data, and a reader cannot tell a washed fill from a
+ * paler one. It is drawn as a pseudo-element BEHIND everything in the lane (`z-index: 0` against
+ * the bar's 2 and the marker's 4), so no bar, marker, chip or scrawl is touched — and it stops at
+ * today, which is what `--tl-past-w` is set to per row. */
+.tl-c-tl::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+  width: var(--tl-past-w, 0);
+  background: rgba(58, 28, 20, .035);
+  pointer-events: none; z-index: 0;
+}
 .tl-hrow .tl-c-tl { overflow: visible; }
 .tl-hrow .tl-lbl3 { font-size: 7.5px; }
 
@@ -352,9 +377,15 @@
 }
 
 /* ── the bar ──────────────────────────────────────────────────────────────────────────────── */
+/* ⚠️ THE LABEL IS CENTRED BY FLEX, NEVER BY `line-height`. A line box the height of the bar
+   centres text only while the text is one line at the size it was tuned for — change the font,
+   the size or the box and it drifts, silently, with the rule still reading correctly. `flex` +
+   `align-items: center` centres whatever is actually there. A grep lock fails on any
+   `line-height` under a bar selector. */
 .tl-p {
   height: var(--bar-h); border-radius: 999px; overflow: hidden; z-index: 2; background: #fff;
   border: 1px solid transparent; box-sizing: border-box;
+  display: flex; align-items: center;
 }
 /* ⚠️ THE FILL IS A CHILD, NOT A BACKGROUND, because its WIDTH is the statement. A gradient stop
    would put the number inside a colour value where nothing can read it back. */
@@ -375,8 +406,7 @@
    pass is deciding presentation rather than repairing layout. */
 .tl-plbl {
   position: relative; display: inline-block; max-width: 100%;
-  font-size: 9.5px; font-weight: 500; white-space: nowrap; padding: 0 10px;
-  line-height: var(--bar-h); z-index: 2;
+  font-size: 9.5px; font-weight: 500; white-space: nowrap; padding: 0 10px; z-index: 2;
 }
 /* ⚠️ HOLLOW IS THE CONTINUATION PAST A NAMED DATE. Lateness is DRAWN — no fill, no word, no
    colour it does not already have. The label dims because the stretch is no longer the story. */

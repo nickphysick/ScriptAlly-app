@@ -952,7 +952,41 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     const i = visible.indexOf(today);
     return i < 0 ? null : i + 0.5;
   }, [visible, today]);
-  const todayLeft = todayAt == null ? undefined : pct(todayAt);
+  /**
+   * ⚠️ THE TODAY LINE IS POSITIONED IN PIXELS FROM A LANE'S OWN RECT, NEVER AS A PERCENTAGE.
+   *
+   * It was `pct(todayAt)` — a fraction of the WRAP — while every bar, chip and marker is a
+   * fraction of the LANE, and the lane begins 460px in behind the name and action columns.
+   * Measured at 1440: the line sat at x=557 while today, per the past wash, was at x=903. It has
+   * been pointing 346px away from today, inside the name column, since the board was rebuilt —
+   * and the acceptance could not see it, because it only asked whether the FLAG was centred on the
+   * LINE. Both were wrong together, so the lock passed.
+   *
+   * The wrap is the only ancestor that spans every row and clips nothing, so the line must live
+   * there; a percentage of the wrap is therefore meaningless and the position has to be measured.
+   */
+  const [todayX, setTodayX] = useState<number | null>(null);
+  React.useLayoutEffect(() => {
+    const place = () => {
+      const root = pageRef.current;
+      if (!root || todayAt == null) { setTodayX(null); return; }
+      const wrap = wrapRef.current;
+      const lane = Array.from(root.querySelectorAll<HTMLElement>(".tl-rrow .tl-c-tl"))
+        .find((e) => e.getBoundingClientRect().width > 0);
+      if (!wrap || !lane) { setTodayX(null); return; }
+      const wr = wrap.getBoundingClientRect();
+      const lr = lane.getBoundingClientRect();
+      setTodayX((lr.left - wr.left) + lr.width * (todayAt / range.days));
+    };
+    place();
+    /* ⚠️ AND IT IS RE-PLACED ON RESIZE, because the lane's width is what it is measured from. A
+       value taken once is correct until the first time anything moves. */
+    const ro = new ResizeObserver(place);
+    const board = pageRef.current?.querySelector(".tl-board");
+    if (board) ro.observe(board);
+    return () => ro.disconnect();
+  });
+  const todayLeft = todayX == null ? undefined : `${todayX}px`;
 
   /**
    * ⚠️ `RIGHT NOW` IS A FILTER OF THE ONE DERIVATION, NEVER A SECOND ONE. It shows every row that
@@ -1074,7 +1108,14 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
            ordering case can pass while the live board is visibly out of order, and only comparing
            the two on one page can tell those apart. */
         data-pressing={r.pressingAt == null ? "none" : String(r.pressingAt)}
-        style={{ ["--lanes" as string]: String(lanes) } as React.CSSProperties}
+        /* ⚠️ THE PAST'S WIDTH IS A ROW TOKEN, so the wash is one declaration in the sheet rather
+           than an element per row. `null` where the window does not contain today — a window
+           wholly ahead has no past to set back, and one wholly behind is all past, which
+           `todayAt` already expresses as 0 or the full span. */
+        style={{
+          ["--lanes" as string]: String(lanes),
+          ["--tl-past-w" as string]: todayAt == null ? "0%" : pct(todayAt),
+        } as React.CSSProperties}
       >
         {/* ⚠️ THE NAME IS A CONTROL — it opens the relationship's workspace with nothing selected,
             which is how you reach a query that has no card raised against it. */}

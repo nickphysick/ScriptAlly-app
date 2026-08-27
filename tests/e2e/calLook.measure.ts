@@ -870,3 +870,176 @@ test("⚠️ a ghost chip is an origin, not a duplicate", async ({ page }) => {
       .toBeLessThan(Math.min(...live.map((c: any) => c.left)));
   }
 });
+
+/* ══ SURFACE, BAR CENTRING AND THE PAST WASH (v36 part two, Phases 3 and 5) ══════════════════ */
+
+test("the surface is the pinned one, and the heading is not inside the card", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+  await openRoute(page, "/todo/calendar", { width: 1440, height: 980 });
+  await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+  await page.waitForTimeout(600);
+
+  const r = await page.evaluate(`(() => {
+    const board = [...document.querySelectorAll(".tl-board")].find((e) => e.getBoundingClientRect().height > 0);
+    const card = document.querySelector(".tl-tbl");
+    const head = document.querySelector(".tl-gt");
+    const row = document.querySelector(".tl-rrow");
+    const nm = document.querySelector(".tl-c-nm");
+    const ac = document.querySelector(".tl-c-ac");
+    const cs = (e) => (e ? getComputedStyle(e) : null);
+    return {
+      ground: cs(board).backgroundColor,
+      card: { bg: cs(card).backgroundColor, border: cs(card).borderTopColor,
+              w: cs(card).borderTopWidth, radius: cs(card).borderTopLeftRadius },
+      /* the heading must NOT be inside the card it names */
+      headInCard: !!(head && head.closest(".tl-tbl")),
+      sep: cs(row).borderTopColor,
+      nmW: Math.round(nm.getBoundingClientRect().width),
+      acW: Math.round(ac.getBoundingClientRect().width),
+      /* ── the bar's text is centred by flex, and its box centre matches the bar's ── */
+      hiddenBars: [...document.querySelectorAll(".tl-p")]
+        .filter((b) => getComputedStyle(b).display === "none").length,
+      bars: [...document.querySelectorAll(".tl-p")].map((b) => {
+        /* a piece with no room to draw is hidden outright (see the fit pass) — it has no box and
+           no centre, so it is COUNTED above rather than measured here */
+        if (getComputedStyle(b).display === "none") return null;
+        const lbl = b.querySelector(".tl-plbl");
+        if (!lbl || !lbl.textContent) return null;
+        const br = b.getBoundingClientRect();
+        const lr = lbl.getBoundingClientRect();
+        return {
+          drift: +(((lr.top + lr.bottom) / 2) - ((br.top + br.bottom) / 2)).toFixed(2),
+          display: getComputedStyle(b).display,
+          align: getComputedStyle(b).alignItems,
+        };
+      }).filter(Boolean),
+      /* ── row head stacked ── */
+      heads: [...document.querySelectorAll(".tl-rrow")].map((row2) => {
+        const n = row2.querySelector(".tl-nm2");
+        const a = row2.querySelector(".tl-ag2");
+        if (!n || !a) return null;
+        return { nameBottom: n.getBoundingClientRect().bottom, agencyTop: a.getBoundingClientRect().top };
+      }).filter(Boolean),
+    };
+  })()`) as any;
+
+  console.log(`ground ${r.ground} · card ${r.card.bg} ${r.card.w} ${r.card.border} r${r.card.radius}`);
+  console.log(`columns ${r.nmW} / ${r.acW} · bars measured ${r.bars.length}, hidden ${r.hiddenBars}`);
+
+  expect(r.ground, "the page ground").toBe("rgb(250, 247, 242)");
+  expect(r.card.bg, "the card").toBe("rgb(247, 240, 230)");
+  expect(r.card.border, "the card's border").toBe("rgb(239, 230, 218)");
+  expect(r.card.w).toBe("1px");
+  expect(r.card.radius).toBe("11px");
+  expect(r.sep, "the row separator").toBe("rgb(238, 228, 214)");
+  expect(r.headInCard, "a group heading is inside the card it names").toBe(false);
+  expect(r.nmW, "the name column").toBe(288);
+  expect(r.acW, "the action column").toBe(172);
+
+  /* ⚠️ THE TEXT IS CENTRED BY FLEX, and the painted centres are what proves it — a `line-height`
+     equal to the bar's height centres one line at one size and drifts at any other, with the rule
+     still reading correctly. */
+  expect(r.bars.length, "no labelled bar to measure — the sweep proves nothing").toBeGreaterThan(2);
+  for (const b of r.bars) {
+    expect(b.display).toBe("flex");
+    expect(b.align).toBe("center");
+    expect(Math.abs(b.drift), `a bar's text sits ${b.drift}px off its centre`).toBeLessThanOrEqual(1);
+  }
+
+  /* ⚠️ `agencyTop >= nameBottom`, never merely that the tops differ — two inline spans of
+     different sizes have different tops while sitting on ONE baseline, which is exactly the state
+     this assertion exists to reject. */
+  expect(r.heads.length, "no row with both lines").toBeGreaterThan(3);
+  for (const h of r.heads) {
+    expect(h.agencyTop, "the agency sits inside the name's line box").toBeGreaterThanOrEqual(h.nameBottom - 1);
+  }
+  expect(errors, `console errors: ${errors.join(" | ")}`).toEqual([]);
+});
+
+test("⚠️ the past is set back on the ground and never on the data", async ({ page }) => {
+  await openRoute(page, "/todo/calendar", { width: 1440, height: 980 });
+  await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+  await page.waitForTimeout(600);
+
+  const r = await page.evaluate(`(() => {
+    const line = document.querySelector(".tl-todayline");
+    if (!line) throw new Error("no today line to sample either side of");
+    const tx = line.getBoundingClientRect().left;
+    /* the wash is a pseudo-element, so it is read through the lane's own computed value */
+    const lane = document.querySelector(".tl-rrow .tl-c-tl");
+    const before = getComputedStyle(lane, "::before");
+    /**
+     * ⚠️ ONE FAMILY, ONE FILL COLOUR, WHEREVER IT SITS.
+     *
+     * The first draft looked for a bar whose FILL crossed the today line and found none — a fill
+     * ends at today by definition, because that is what a fill IS. It failed loudly rather than
+     * passing on an empty set, which is the only reason it was noticed. The claim it was reaching
+     * for is that the wash never tints data, and that is measured by asking whether a family's
+     * fill paints one colour on both sides of the line rather than by finding one bar that spans
+     * it.
+     */
+    const sides = {};
+    for (const b of document.querySelectorAll(".tl-p")) {
+      const fl = b.querySelector(".tl-fl");
+      if (!fl) continue;
+      const fr = fl.getBoundingClientRect();
+      if (fr.width <= 0) continue;
+      /* THE near STEP IS A DIFFERENT STATE, NOT A DIFFERENT RENDERING OF ONE. A bar at >=85%
+         deepens by design, so grouping it with its own family reported "out paints two fills
+         either side of today" about two states that are both correct. The key is family AND
+         step. */
+      const base = ["out","req","decide","remind","quiet"].find((c) => b.classList.contains(c));
+      if (!base) continue;
+      const fam = base + (b.classList.contains("near") ? ":near" : "");
+      const side = fr.right <= tx ? "past" : fr.left >= tx ? "ahead" : "both";
+      const paint = getComputedStyle(fl).backgroundColor;
+      sides[fam] = sides[fam] || {};
+      (sides[fam][side] = sides[fam][side] || new Set()).add(paint);
+    }
+    const fills = {};
+    for (const k of Object.keys(sides)) {
+      fills[k] = {};
+      for (const s2 of Object.keys(sides[k])) fills[k][s2] = [...sides[k][s2]];
+    }
+    /* ⚠️ THE LINE AND THE WASH MUST END ON THE SAME PIXEL. Both claim to mark today, and they are
+       computed by different routes — the wash as a percentage of the lane, the line in pixels
+       measured from the lane's own rect. Asserting one against the other is what caught the line
+       being a percentage of the WRAP: it sat at x=557 while today was at x=903, inside the name
+       column, 346px from the date it named. The flag was centred on the line, so the pair agreed
+       with each other and both were wrong. */
+    const laneR = lane.getBoundingClientRect();
+    return {
+      lineX: Math.round(line.getBoundingClientRect().left),
+      washEndsAt: Math.round(laneR.left + parseFloat(before.width)),
+      washBg: before.backgroundColor,
+      washW: before.width,
+      todayRule: getComputedStyle(line).borderLeftColor + " " + getComputedStyle(line).borderLeftWidth,
+      fills,
+      /* nothing in the lane may sit BEHIND the wash */
+      barZ: getComputedStyle(document.querySelector(".tl-p")).zIndex,
+      markerZ: document.querySelector(".tl-mk2") ? getComputedStyle(document.querySelector(".tl-mk2")).zIndex : null,
+    };
+  })()`) as any;
+  console.log("wash " + JSON.stringify(r));
+
+  expect(Math.abs(r.lineX - r.washEndsAt),
+    `the today rule is at ${r.lineX} and the past ends at ${r.washEndsAt}`).toBeLessThanOrEqual(1);
+  expect(r.washBg, "the past wash").toBe("rgba(58, 28, 20, 0.035)");
+  expect(parseFloat(r.washW), "the wash has no width — it reports on nothing").toBeGreaterThan(1);
+  expect(r.todayRule).toBe("rgba(58, 28, 20, 0.3) 1px");
+  /* ⚠️ THE WASH IS BEHIND THE DATA. A bar at z-index 2 and a marker at 4 sit above a wash at 0,
+     so neither is dimmed — the fill of a bar crossing the line is ONE colour, and a reader cannot
+     mistake a washed fill for a paler one. */
+  expect(Number(r.barZ)).toBeGreaterThan(0);
+  expect(Number(r.markerZ)).toBeGreaterThan(0);
+  /* ⚠️ AND MEASURED, NOT ONLY REASONED: a family's fill must paint ONE colour whichever side of
+     the line it falls. A wash laid over the data would tint the past ones and leave the rest. */
+  const spanning = Object.entries(r.fills).filter(([, v]: any) => Object.keys(v).length > 1);
+  expect(spanning.length, `no family appears on both sides of today: ${JSON.stringify(r.fills)}`)
+    .toBeGreaterThan(0);
+  for (const [fam, v] of spanning as any[]) {
+    const all = new Set(Object.values(v).flat());
+    expect([...all], `${fam} paints ${all.size} different fills either side of today`).toHaveLength(1);
+  }
+});

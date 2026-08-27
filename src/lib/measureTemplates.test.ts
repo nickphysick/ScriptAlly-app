@@ -1,0 +1,50 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * ⚠️ NO BACKTICK MAY APPEAR INSIDE A `page.evaluate` TEMPLATE LITERAL.
+ *
+ * One backtick ends the string, and the file then fails to COLLECT — which Playwright reports as
+ * "No tests found", i.e. as an absence rather than an error, while the previous run's report sits
+ * on disk looking current. It has cost this pack three separate sessions, every time through a
+ * COMMENT: a note written inside the evaluate body quoting a class name or an identifier in the
+ * house style.
+ *
+ * The house rule already says a constraint worth a warning comment is worth a test. This is that
+ * test — it reads the calendar's own measurement file and fails on the pattern rather than on its
+ * consequence.
+ */
+import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+describe("the calendar's measurement file cannot terminate its own evaluate strings", () => {
+  it("no backtick inside a page.evaluate template", () => {
+    const src = readFileSync(join(process.cwd(), "tests/e2e/calLook.measure.ts"), "utf8");
+    /* every `page.evaluate(` … `)` body: from the opening backtick to the closing one */
+    const offenders: string[] = [];
+    const re = /page\.evaluate\(\s*(?:TAG \+ )?`/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(src))) {
+      const start = m.index + m[0].length;
+      /* the body ends at the FIRST unescaped backtick — which is exactly the fault we are hunting:
+         if one appears early, this slice is short and the rest of the file is parsed as code */
+      const end = src.indexOf("`", start);
+      if (end < 0) { offenders.push("an evaluate template is never closed"); continue; }
+      const body = src.slice(start, end);
+      /* a well-formed body is substantial; a body cut short by a stray backtick is not, and the
+         giveaway is that what follows the "close" is not a call terminator */
+      const after = src.slice(end + 1, end + 40).replace(/\s/g, "");
+      if (!/^\)|^\}\)\(\)|^asPromise|^as/.test(after) && body.length < 40_000) {
+        offenders.push(`a template closes early at index ${end}; it is followed by ${JSON.stringify(after.slice(0, 30))}`);
+      }
+    }
+    expect(offenders, offenders.join(" | ")).toEqual([]);
+  });
+
+  it("finds the templates to check — a sweep over none proves nothing", () => {
+    const src = readFileSync(join(process.cwd(), "tests/e2e/calLook.measure.ts"), "utf8");
+    const n = [...src.matchAll(/page\.evaluate\(/g)].length;
+    expect(n, "no page.evaluate calls found — the extraction is broken, not the file").toBeGreaterThan(4);
+  });
+});

@@ -185,8 +185,33 @@ describe("⚠️ geometry comes from tokens, and no vertical offset is a literal
 
   it("⚠️ bar height comes from `--bar-h` and nothing else", () => {
     expect(rulesFor(".tl-p")).toMatch(/height\s*:\s*var\(--bar-h\)/);
-    /* and the label's line box is the bar's height, so text cannot decide how tall a bar is */
-    expect(rulesFor(".tl-plbl")).toMatch(/line-height\s*:\s*var\(--bar-h\)/);
+  });
+
+  /**
+   * ⚠️ NO `line-height` ANYWHERE IN THE BAR PATH — the text is centred by FLEX (v36, Phase 3).
+   *
+   * The label used to carry `line-height: var(--bar-h)`, and this lock REQUIRED it. A line box the
+   * height of the bar centres text only while the text is one line at the size it was tuned for:
+   * change the font, the size or the box and it drifts, silently, with the rule still reading
+   * correctly. `display: flex; align-items: center` centres whatever is actually there, and the
+   * rendered check in `calLook.measure.ts` asserts the painted text box sits within 1px of the
+   * bar's own centre — which is the claim this one could only approximate.
+   */
+  it("⚠️ AND NO `line-height` SURVIVES UNDER A BAR SELECTOR", () => {
+    const offenders: string[] = [];
+    for (const m of decls.matchAll(/(?:^|\n)\s*([^{}\n]*)\{([^}]*)\}/g)) {
+      const sel = m[1].replace(/\s+/g, " ").trim();
+      if (!/\.tl-p\b|\.tl-plbl\b|\.tl-fl\b/.test(sel)) continue;
+      if (/(?:^|;|\s)line-height\s*:/.test(m[2])) offenders.push(sel);
+    }
+    expect(offenders, `${offenders.length} bar rules still set a line box`).toEqual([]);
+    /* the flex centring that replaced it, on the element that holds the label */
+    expect(rulesFor(".tl-p")).toMatch(/display\s*:\s*flex/);
+    expect(rulesFor(".tl-p")).toMatch(/align-items\s*:\s*center/);
+    /* ⚠️ AND THE POPULATION — a sweep that matched no bar rules would report none for ever. */
+    const scanned = [...decls.matchAll(/(?:^|\n)\s*([^{}\n]*)\{/g)]
+      .filter((x) => /\.tl-p\b|\.tl-plbl\b|\.tl-fl\b/.test(x[1])).length;
+    expect(scanned, "no bar rules scanned").toBeGreaterThan(5);
   });
 
   it("⚠️ a lane's position is a calc over --lane and --lanes, never a pixel", () => {
