@@ -351,3 +351,44 @@ name says so, so the seeded version was cleared with `deleteField()`.
 `Requests by opening` reads the package's own version; `Who holds what` already reached it through
 the send activity and did not move. Versionless packages form a `Not recorded` row that scales
 against the same maximum as the named versions, and renders only when it holds something.
+
+---
+
+## Phase 3 (deferred) — Part B, derived per the ruling
+
+The split you asked me to confirm **holds**: `MaterialKind` is exactly
+`queryLetter | synopsis | sample | other`, so the portion is the sample-and-other members and the
+letter/synopsis members are cleanly separable. No new field, no rules change.
+
+Measured on a served build, 11 of 11 packaged strips at both 1440 and 1920:
+
+```
+first 3 chapters + 1-page pitch   soft=false  normal  600   RECORDED — the query's own
+Opening sample                    soft=true   italic  400   the AGENT'S ask, standing in
+Not recorded                      soft=true   italic  400   nobody has stated one
+```
+
+Divider dotted on every strip — `border-left` inline, `border-top` stacked. The portion sits right
+of the package's contents at every width, truncates rather than reflowing, and stays on one line.
+
+### ⚠️ AND EVERY STRIP READ `Not recorded` UNTIL THE FIXTURE HAD THE OTHER TWO
+
+The first run passed with 11/11 — and proved only the empty branch. **The recorded case and the
+pre-fill were both unexercised, so the treatment that distinguishes an expectation from a record
+was unproven.** Same family as the version tint an hour earlier, and as the doubled "not recorded"
+before that: a probe whose every subject is in one state reports a pass about one third of the
+behaviour.
+
+Seeded a recorded portion and a sample requirement on the agent, measured all three, and **restored
+both in the same run** — the queries back to no `materialsWanted`, `seed-agent-2` back to exactly
+`["Query letter","Synopsis"]`.
+
+### F-BI — CSV import and the portion (reported, not built)
+
+The importer has no column for a portion and should not gain one by inference. What it CAN do
+safely is nothing: a query imported without a portion reads `Not recorded`, which is true. The
+tempting move — deriving one from the agent's stated requirement at import time — would write the
+agency's ask into the writer's record as though it were what they sent, across every imported row
+at once, and D6 exists to forbid exactly that on a single query. If a column is ever added it
+writes one `QueryMaterial{ type: "other" }` through `withPortion`, and an empty cell must clear
+rather than store `""`.
