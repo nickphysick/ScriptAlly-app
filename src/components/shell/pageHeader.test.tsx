@@ -288,13 +288,32 @@ describe("the masthead is content, not chrome", () => {
     expect(decls(gridCss)).toContain("grid-template-rows: minmax(0, 1fr) auto");
   });
 
-  it("⚠️ THE MASTHEAD REFUSES ACTIONS IN THE COMPONENT, not merely in the markup", () => {
-    /* A guard that only omitted them would let a page pass an action that silently goes nowhere —
-       the same fault as the deleted `count` slot. It throws, and the throw is what the design rests
-       on: nothing actionable means nothing to strand when the masthead leaves. */
-    expect(hdrSrc).toContain("masthead holds NO actions");
+  it("⚠️ THE MASTHEAD REFUSES ACTIONS WHERE IT LEAVES, in the component and not merely in the markup", () => {
+    /**
+     * ⚠️ THE LAW MOVED FROM THE VARIANT TO THE BEHAVIOUR (amendment 3), and it did not weaken. A
+     * guard that only omitted an action would let a page pass one that silently goes nowhere — the
+     * same fault as the deleted `count` slot — so it still THROWS. What changed is when: a masthead
+     * that scrolls away strands anything in it, and one that pins and settles does not.
+     *
+     * ⚠️ AND THE BEHAVIOUR IS READ FROM THE GRID, NOT FROM A PROP. A boolean the caller passed would
+     * be the caller's opinion, and the one caller with a motive to get it wrong is the one wanting
+     * an action in a masthead that leaves. `WorkspacePageGrid` publishes the same `pinned`
+     * expression that decides whether its slab actually sticks, so the claim and the behaviour
+     * cannot come apart. Both directions are exercised in `pageHeaderDefault.test.tsx`.
+     */
+    expect(hdrSrc).toContain("LEAVES on scroll");
+    expect(hdrSrc, "the refusal reads a prop instead of the grid").toContain("useMastheadLeaves()");
+    expect(hdrSrc, "the slot renders on a masthead that leaves").toContain("!mastheadLeaves &&");
+    /* The tool ROW is still refused outright — a layout this masthead does not have, which is a
+       different claim from where an action may sit.
+       ⚠️ ANCHORED ON AN UNSPLIT FRAGMENT. The message reads "…has no tool row — it is one line of
+       identity", but it is CONCATENATED across two source lines, so `no tool row` is nowhere in the
+       file. Matching a joined string against source is the same fragility as reading a rendered
+       class out of a template; the behaviour itself is asserted on the thrown message in
+       `pageHeaderDefault.test.tsx`. */
+    expect(hdrSrc).toContain("one line of identity");
     const ws = sliceBetween(hdrSrc, 'if (variant === "workspace") {', "  return (\n    <header");
-    for (const gone of ["wsh-acts", "wsh-grow", "svh-btn"]) {
+    for (const gone of ["wsh-grow", "svh-btn"]) {
       expect(decls(ws), `the workspace branch still renders ${gone}`).not.toContain(gone);
     }
   });

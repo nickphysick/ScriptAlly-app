@@ -505,3 +505,47 @@
    Every one of them tweened the condense — height, title size, mark box, the button ladder — and
    the condense is deleted. Step 3's collapse brings its own guard for the one animation that
    returns; a block suppressing transitions that do not exist would read as coverage it is not. */
+
+/**
+ * ══ THE WORKSPACE MASTHEAD'S ACTION SLOT ══════════════════════════════════════════════════════
+ *
+ * ⚠️ IT RENDERS ONLY ON A PAGE WHOSE MASTHEAD PINS. The component throws for a masthead that leaves,
+ * because an action there would scroll out of reach — the law the old unconditional throw stated,
+ * now stated over the BEHAVIOUR rather than over the variant name. See `mastheadBehaviour.ts`.
+ *
+ * ⚠️ `margin-left: auto` ON THE GROUP, NOT ITS MEMBERS. Two controls each claiming auto pushes only
+ * the first right and leaves the second trailing it — the same fault the packages band records.
+ */
+.wsh-acts {
+  margin-left: auto;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.wsh-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 9px;
+  border: 1px solid var(--hair);
+  background: var(--ws-window);
+  color: var(--shell-ink);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.wsh-act:hover { background: var(--shell-card); }
+/* The Form 11 soft-pink primary — the app's one primary fill, not a second treatment. */
+.wsh-act--primary { background: var(--pink); border-color: var(--pink-b); color: var(--burg); }
+.wsh-act--primary:hover { background: var(--pink-h); }
+.wsh-act:disabled { opacity: 0.45; cursor: default; }
+
+/**
+ * ⚠️ THE COLLAPSED STATE SHRINKS THE ACTION WITH EVERYTHING ELSE. The settle already takes the mark
+ * from 52 to 34 and the title from 30 to 22; an action left at full size would grow relative to the
+ * header around it and end up the loudest thing in a band that just got quieter.
+ */
+.wpg-chrome--stuck .wsh-act { padding: 6px 11px; font-size: 12px; }

@@ -25,6 +25,7 @@
  * row does the anchoring.
  */
 import React from "react";
+import { useMastheadLeaves } from "./mastheadBehaviour";
 import { MoreHorizontal } from "lucide-react";
 import { OneScreenMark, MarkName } from "../dashboard/OneScreenMark";
 import "./pageHeader.css";
@@ -129,6 +130,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   overflow,
 }) => {
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
+  /* Whether THIS page's masthead scrolls away. Published by the grid; `true` outside one. */
+  const mastheadLeaves = useMastheadLeaves();
   const [moreOpen, setMoreOpen] = React.useState(false);
   const moreRef = React.useRef<HTMLDivElement>(null);
   /**
@@ -224,22 +227,40 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     /**
      * ⚠️ THE MASTHEAD HOLDS NO ACTIONS, AND THIS THROW IS THE GUARD RATHER THAN A COMMENT.
      *
-     * It is the condition the whole design rests on: a masthead with nothing actionable in it never
-     * needs restoring mid-visit, so it can scroll away on a scrolling page and vanish outright on a
-     * fill page without stranding a control. The moment one button lands here that stops being
-     * true, and the failure is silent — the page simply becomes unusable once the user scrolls.
+     * ⚠️ AMENDED: THE LAW IS ABOUT LEAVING, NOT ABOUT THE VARIANT NAME. The reasoning above is
+     * exactly right on a page whose masthead SCROLLS AWAY — an action placed there becomes
+     * unreachable, so it needs a row that persists. On a Type A page the masthead PINS and settles:
+     * it never leaves, the action never becomes unreachable, and a control row there is a band
+     * existing purely to work around a constraint that does not apply to it. So the refusal is now
+     * conditional on the behaviour.
      *
-     * ⚠️ IT THROWS RATHER THAN IGNORING. Accepting a prop and rendering nothing is how a page ends
-     * up passing an action that quietly goes nowhere, which is the same fault as the deleted
-     * `count` slot. Every button a masthead used to carry moved to its page's control row; see
-     * `169-inflow-masthead-qc.html` (fenced: the ref still draws Export here) and
-     * `170-sticky-control-row.html`, which draws the arrangement that replaces it.
+     * ⚠️ AND THE BEHAVIOUR IS READ FROM THE GRID, NOT FROM A PROP. `WorkspacePageGrid` publishes the
+     * same `pinned` expression that decides whether its slab actually sticks; a boolean the caller
+     * passed would be the caller's opinion, and the one caller with a motive to get it wrong is the
+     * one wanting an action in a masthead that leaves. Outside a grid it defaults to `leaves: true`
+     * — fail closed, because a header with no pinning slab has nothing anchoring it.
+     *
+     * ⚠️ IT STILL THROWS RATHER THAN IGNORING. Accepting a prop and rendering nothing is how a page
+     * ends up passing an action that quietly goes nowhere, which is the same fault as the deleted
+     * `count` slot.
+     *
+     * ⚠️ `toolbar` IS REFUSED IN BOTH CASES AND ALWAYS WILL BE. The tool ROW is a layout this
+     * masthead does not have — one line of identity — which is a different claim from where an
+     * action may sit.
      */
-    if (process.env.NODE_ENV !== "production" && (actions?.length || actionsSlot || toolbar || overflow?.length)) {
+    if (process.env.NODE_ENV !== "production" && toolbar) {
       throw new Error(
-        `PageHeader variant="workspace" ("${title}") was passed an action, a slot, a toolbar or an ` +
-        "overflow menu. The masthead holds NO actions — they belong in the page's control row, " +
-        "which is the element that anchors once the masthead has gone.",
+        `PageHeader variant="workspace" ("${title}") was passed a toolbar. This masthead has no tool ` +
+        "row — it is one line of identity. A page's controls belong in the grid's own row.",
+      );
+    }
+    if (process.env.NODE_ENV !== "production" && mastheadLeaves
+        && (actions?.length || actionsSlot || overflow?.length)) {
+      throw new Error(
+        `PageHeader variant="workspace" ("${title}") was passed an action, but this page's masthead ` +
+        "LEAVES on scroll, so an action placed in it would scroll out of reach. Use the grid's " +
+        "control row, which persists. A masthead that PINS accepts the slot instead — the rule is " +
+        "about whether the header anchors, not about the variant.",
       );
     }
     return (
@@ -264,6 +285,28 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
                 in flow there is no height to keep, so a title-only page is simply shorter. */}
             {description && <p className="wsh-sub">{description}</p>}
           </div>
+          {/**
+            * ⚠️ THE SLOT RENDERS ONLY WHERE THE MASTHEAD PINS, and the guard above is what makes that
+            * true rather than hopeful: a page whose masthead leaves throws before reaching here, so
+            * this branch cannot quietly draw an action that will scroll out of reach.
+            */}
+          {!mastheadLeaves && (acts.length > 0 || actionsSlot) && (
+            <div className="wsh-acts">
+              {acts.length > 0
+                ? acts.map((a) => (
+                    <button
+                      key={a.label}
+                      type="button"
+                      className={`wsh-act${a.primary ? " wsh-act--primary" : ""}`}
+                      onClick={a.onClick}
+                      disabled={a.disabled}
+                    >
+                      {a.label}
+                    </button>
+                  ))
+                : actionsSlot}
+            </div>
+          )}
         </div>
       </header>
     );

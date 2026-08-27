@@ -158,7 +158,18 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
     try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* private mode — selection is session-only */ }
   };
   const openDossier = (id: string) => { selectMs(id); setOpenId(id); };
-  const closeDossier = () => setOpenId(null);
+  /**
+   * ⚠️ `closeDossier` IS GONE, AND WITH IT THE ONLY ROUTE BACK TO THE LIBRARY GRID. The back link was
+   * its one caller; amendment 3 removes the link because the sidebar switcher and the hero's
+   * chevrons are better routes BETWEEN BOOKS — which they are. Neither is a route back to the GRID,
+   * and nothing else sets `openId` to null.
+   *
+   * ⚠️ SO THE GRID IS UNREACHABLE ONCE A BOOK IS OPENED IN A SESSION. It still renders at first
+   * visit and on an empty shelf, and it still owns `ManuscriptAddTile`. This is a consequence of
+   * the instruction rather than a decision I made, and it is flagged rather than worked around: the
+   * fix is one line either way — the sidebar's switcher clearing `openId`, or the grid retiring
+   * outright — and which of those is right is a product question.
+   */
 
   /**
    * ⚠️ RESOLVED THROUGH `genreDisplay`, ONCE, FOR BOTH SURFACES. `GenrePicker` stores canonical IDS
@@ -296,40 +307,6 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
         className="msv-wpg"
         scrollLabel="Manuscripts"
         /**
-         * ⚠️ THE CONTROL ROW, BECAUSE THE MASTHEAD REFUSES ACTIONS AND SAYS WHY. The brief put
-         * `＋ Add a manuscript` "in the page masthead, to the left of Hide"; neither half of that is
-         * available. `PageHeader variant="workspace"` THROWS when handed an action, a slot, a
-         * toolbar or an overflow menu — its own message states the reason: the masthead holds no
-         * actions, they belong in the page's control row, which is the element that anchors once
-         * the masthead has gone. And there is no Hide: that control is Type B only, and this page
-         * became Type A in amendment 1.
-         *
-         * ⚠️ THE "YOUR SHELF" BAR IS GONE AND ITS TALLY IS NOT REHOMED. `1 manuscript · 26 queries`
-         * simply goes — the third time that figure has been moved rather than dropped, and it read
-         * as a stray caption at every stop.
-         */
-        toolbar={
-          <div className="msv-toolrow">
-            <button
-              type="button"
-              className="msv-btn sm"
-              onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
-            >
-              <Plus />
-              Add a manuscript
-            </button>
-            {/* The lifecycle acts on the OPEN manuscript, so it renders only when there is one. */}
-            {selected && (
-              <ManuscriptActions
-                shelved={isShelvedPresentation(selected)}
-                onEditDetails={() => startEditMs(selected)}
-                onShelveToggle={() => void toggleShelved(selected)}
-                onDelete={() => setDeleteModalMs(selected)}
-              />
-            )}
-          </div>
-        }
-        /**
          * ⚠️ NO `fill`, AND THAT IS WHAT MAKES THIS A SCROLLING PAGE. It used to opt in, which turned
          * the scroll row into a flex column sized to the window — so the row barely scrolled (the
          * grid's own sheet records it overflowing 72px at 1280) and everything inside had to build
@@ -363,6 +340,20 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
              dropped once (with the grand slab) and would have gone a second time for want of a home;
              the home existed on a sibling page all along. */
           title="Manuscripts"
+          /**
+           * ⚠️ IN THE MASTHEAD, WHICH IT COULD NOT BE UNTIL THIS AMENDMENT. `variant="workspace"`
+           * refused every action outright, which is what forced this page — and four others — to
+           * build a control row for a single button. The refusal now depends on whether the
+           * masthead LEAVES: this page is Type A, its masthead pins and settles, so the action
+           * never scrolls out of reach and the band that existed to anchor it has no job left.
+           *
+           * ⚠️ AND IT IS THE THIRD ROUTE TO THIS ACTION, WHICH IS FLAGGED RATHER THAN RESOLVED. The
+           * sidebar already offers "Add a manuscript" twice — as the scope button when the shelf is
+           * empty (ShellSidebar.tsx:118) and inside the manuscript switcher (`:140`). Consolidating
+           * them is not this pass's to do.
+           */
+          actions={[{ label: "＋ Add a manuscript", primary: true,
+                      onClick: () => onNavigate?.("manuscripts", "Add a manuscript") }]}
           description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
           /**
            * ⚠️ `Add manuscript` IS DROPPED, NOT REHOMED — and this is the one masthead action that
@@ -487,7 +478,6 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
               currentYear={new Date().getFullYear()}
               tab={tab}
               onTabChange={setTab}
-              onBack={closeDossier}
               /* Removal is the shared pure helper + the single writer; adding needs the form the
                  sub-page owns, so it goes there until the comps retirement moves it across. */
               onRemoveComp={(i) => { void updateManuscript(selected.id, { comps: withCompRemoved(msComps, i) }); }}
@@ -516,6 +506,16 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
               onWriteNote={(text, detail) =>
                 void addUserTask({ text, ...(detail ? { detail } : {}), manuscriptId: selected.id })}
               onOpenNoteboard={() => navigate("/todo/noteboard")}
+              /* ⚠️ THE BOOK BAND'S OWN ACTIONS. They act on the manuscript, so they travel with the
+                 band that names it — not into the masthead, which acts on the shelf. */
+              bookActions={
+                <ManuscriptActions
+                  shelved={isShelvedPresentation(selected)}
+                  onEditDetails={() => startEditMs(selected)}
+                  onShelveToggle={() => void toggleShelved(selected)}
+                  onDelete={() => setDeleteModalMs(selected)}
+                />
+              }
               onPrev={atIndex > 0 ? goTo(atIndex - 1) : null}
               onNext={atIndex >= 0 && atIndex < ordered.length - 1 ? goTo(atIndex + 1) : null}
               onOpenPackageBuilder={() => {

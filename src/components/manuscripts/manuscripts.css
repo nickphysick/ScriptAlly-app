@@ -506,9 +506,9 @@
 }
 
 /**
- * ⚠️ THE PAGE'S CONTROL ROW (amendment 2). `＋ Add a manuscript` and the manuscript's ⋯ live here
- * because `PageHeader variant="workspace"` THROWS when handed either — its message names the rule:
- * the masthead holds no actions, they belong in the control row, which is the element that anchors
- * once the masthead has gone. It pins with the slab, so both stay reachable while reading.
+ * ⚠️ `.msv-toolrow` IS RETIRED (amendment 3). It was the page's control row, and it existed for one
+ * reason: `PageHeader variant="workspace"` refused every action, so a single button needed a band of
+ * its own. The refusal is conditional on whether the masthead LEAVES now — this page's pins — so the
+ * action sits in the masthead and the band has no job left. Removed rather than emptied: a row with
+ * nothing in it still costs its own height and its own hairline.
  */
-.msv-toolrow { display: flex; align-items: center; gap: 10px; }

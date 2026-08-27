@@ -78,6 +78,8 @@ export interface ManuscriptDossierProps {
   /** Page through the shelf, in the sidebar's order. Null at the ends — there is no wrap-around. */
   onPrev: (() => void) | null;
   onNext: (() => void) | null;
+  /** The book band's ⋯ — lifecycle and the three fields with no inline editor. */
+  bookActions?: React.ReactNode;
   synopsisVersionCount: number;
   synopsisDate: string | null;
   onSavePitch: (key: PitchAssetKey, text: string) => void;
@@ -93,7 +95,6 @@ export interface ManuscriptDossierProps {
   currentYear: number;
   tab: ManuscriptTabKey;
   onTabChange: (t: ManuscriptTabKey) => void;
-  onBack: () => void;
   /**
    * ⚠️ THE LIFECYCLE PROPS LEFT WITH THE ⋯ (amendment 2). Send a query, Query Centre, Edit details,
    * shelve and delete were the hero's action cluster; the cluster is retired and the ⋯ is
@@ -130,6 +131,7 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   onOpenNoteboard,
   onPrev,
   onNext,
+  bookActions,
   synopsisVersionCount,
   synopsisDate,
   onSavePitch,
@@ -138,7 +140,6 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   currentYear,
   tab,
   onTabChange,
-  onBack,
   onRemoveComp,
   onAddComp,
   onCopyPitch,
@@ -163,9 +164,13 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
 
   return (
     <div className="msv-doss">
-      <button type="button" className="mlib-back" onClick={onBack}>
-        ← All manuscripts
-      </button>
+      {/**
+        * ⚠️ THE BACK LINK IS GONE — it pointed at a destination that no longer exists. "All
+        * manuscripts" meant the library grid, and there are two better routes to another book now:
+        * the sidebar switcher, which names the current one on every page and never scrolls, and the
+        * hero's chevrons, which page through the shelf in its own order. A link back to a list
+        * nobody needs to visit is a step added to a journey that no longer has one.
+        */}
 
       {/**
         * ⚠️ NO CARD. This used to be `.msv-card .msv-dcard` — 16px radius, border, shadow,
@@ -204,6 +209,7 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
           ]}
           onPrev={onPrev}
           onNext={onNext}
+          bookActions={bookActions}
         />
 
 

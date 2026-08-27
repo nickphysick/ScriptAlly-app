@@ -68,7 +68,6 @@ const BASE: ManuscriptDossierProps = {
   currentYear: 2026,
   tab: DEFAULT_MANUSCRIPT_TAB,
   onTabChange: noop,
-  onBack: noop,
   onRemoveComp: noop,
   onAddComp: noop,
   onCopyPitch: noop,
@@ -130,8 +129,10 @@ describe("the dossier renders one manuscript", () => {
   });
 
   it("offers the way back to the shelf", () => {
-    expect(doss()).toContain("All manuscripts");
-    expect(doss()).toContain("mlib-back");
+    /* ⚠️ INVERTED (amendment 3). The link pointed at the library grid; the sidebar switcher and the
+       hero's chevrons are the two routes to another book now, and neither is a list to go back to. */
+    expect(doss()).not.toContain("All manuscripts");
+    expect(doss()).not.toContain("mlib-back");
   });
 
 

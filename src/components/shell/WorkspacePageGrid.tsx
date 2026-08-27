@@ -29,6 +29,7 @@
  * them is off it. Any stop between commits leaves a working app.
  */
 import React from "react";
+import { MastheadBehaviourContext } from "./mastheadBehaviour";
 import { createPortal } from "react-dom";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import "./workspacePageGrid.css";
@@ -597,7 +598,17 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             */}
           <div className={`wpg-chrome${stuck ? " wpg-chrome--stuck" : ""}`} ref={chromeRef}>
           <div className="wpg-mast" ref={mastRef}>
-            {masthead}
+            {/**
+              * ⚠️ THE MASTHEAD IS TOLD WHETHER IT LEAVES, and it is told rather than asked. `pinned`
+              * is the same expression that decides whether this slab actually sticks, so a
+              * `PageHeader` inside it cannot hold an opinion that differs from the behaviour. That
+              * is what lets the header refuse an action on a page whose masthead scrolls away and
+              * accept one on a page where it pins — a law about ANCHORING rather than about a
+              * variant name. See `mastheadBehaviour.ts`.
+              */}
+            <MastheadBehaviourContext.Provider value={{ leaves: !pinned }}>
+              {masthead}
+            </MastheadBehaviourContext.Provider>
             {/**
               * ⚠️ HIDE IS THE ONE EXCEPTION TO THE NO-ACTIONS RULE, AND IT IS THE GRID'S RATHER THAN
               * THE PAGE'S. `PageHeader` still throws if a PAGE hands it an action — that guard is

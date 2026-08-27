@@ -51,11 +51,18 @@ export interface ManuscriptHeroProps {
    */
   onPrev: (() => void) | null;
   onNext: (() => void) | null;
+  /**
+   * ⚠️ THE BOOK'S OWN ACTIONS, AND ONLY THOSE. The ⋯ — shelve, reactivate, edit details, the guarded
+   * delete — acts on the MANUSCRIPT, so it belongs to the band that names the manuscript. The page's
+   * create action went the other way, into the masthead, because it acts on the shelf. Send a query
+   * and Query Centre are not here and are not coming back: they left in amendment 2.
+   */
+  bookActions?: React.ReactNode;
 }
 
 export const ManuscriptHero: React.FC<ManuscriptHeroProps> = ({
   title, status, shelved, genres, wordCount, stats, figures, edit, tab, onTabChange, counts,
-  onPrev, onNext,
+  onPrev, onNext, bookActions,
 }) => (
   <div className="msp-hero">
     <div className="msp-heroin">
@@ -100,6 +107,8 @@ export const ManuscriptHero: React.FC<ManuscriptHeroProps> = ({
 
         {/* ⚠️ RIGHT-ALIGNED, PLAYFAIR OVER MONO, AND DERIVED AT READ TIME. These are the same three
             figures the facts line used to carry; they are not stated twice on one row of the page. */}
+        {bookActions && <div className="msp-heroacts">{bookActions}</div>}
+
         <div className="msp-herostats">
           {figures.map((f) => (
             <div key={f.key} className="msp-hs">

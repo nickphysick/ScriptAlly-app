@@ -34,6 +34,14 @@ const render = (el: React.ReactElement) => renderToStaticMarkup(el);
 /** the workspace variant only — it reads its state from the grid and throws without one */
 const renderInGrid = (el: React.ReactElement) =>
   renderToStaticMarkup(<WorkspacePageGrid masthead={el}>{null}</WorkspacePageGrid>);
+/**
+ * ⚠️ A GRID WHOSE MASTHEAD LEAVES — `fill` with no `settleOn`, which is what `pinned` is derived
+ * from. `renderInGrid` above is the other kind: not `fill`, therefore PINNED. The two exist because
+ * the masthead's refusal now depends on the behaviour rather than on the variant name, and a test
+ * that only ever rendered one of them would assert half the law.
+ */
+const renderInLeavingGrid = (el: React.ReactElement) =>
+  renderToStaticMarkup(<WorkspacePageGrid masthead={el} fill>{null}</WorkspacePageGrid>);
 
 describe("⚠️ the default variant is frozen", () => {
   it("title only — byte for byte", () => {
@@ -91,20 +99,51 @@ describe("the workspace variant", () => {
   });
 
   it("⚠️ THE MASTHEAD REFUSES AN ACTION RATHER THAN IGNORING IT", () => {
-    /* The whole design rests on the masthead having nothing actionable in it: that is what lets it
-       scroll away on a scrolling page and vanish outright on a fill one without stranding a
-       control. Accepting the prop and rendering nothing would be a page passing an action that
-       silently goes nowhere — so it throws, and this is that throw. */
+    /**
+     * ⚠️ THE LAW IS ABOUT LEAVING, NOT ABOUT THE VARIANT NAME (amendment 3). It used to refuse every
+     * action outright, and the reasoning was always anchoring: a masthead that scrolls away strands
+     * anything in it, so the control belongs in a row that persists. That is still exactly right —
+     * where the masthead LEAVES. Where it PINS and settles, it never goes, nothing is stranded, and
+     * the control row is a band working around a constraint that does not apply.
+     *
+     * ⚠️ SO BOTH DIRECTIONS ARE ASSERTED. A test that only rendered one grid would prove half of it,
+     * and the half it proved would be the one that no longer holds everywhere.
+     */
     for (const props of [
       { actions: [{ label: "Export", onClick: () => {} }] as const },
       { actionsSlot: <span>chip</span> },
-      { toolbar: <span>tools</span> },
       { overflow: [{ label: "Delete", onClick: () => {} }] },
     ]) {
+      expect(() => renderInLeavingGrid(
+        <PageHeader variant="workspace" title="T" mark="todo" {...(props as object)} />
+      ), "a masthead that leaves accepted an action").toThrow(/LEAVES on scroll/i);
       expect(() => renderInGrid(
         <PageHeader variant="workspace" title="T" mark="todo" {...(props as object)} />
-      )).toThrow(/masthead holds NO actions/i);
+      ), "a masthead that pins refused an action").not.toThrow();
     }
+  });
+
+  /**
+   * ⚠️ `toolbar` IS REFUSED IN BOTH CASES AND ALWAYS WILL BE. The tool ROW is a layout this masthead
+   * does not have — it is one line of identity — which is a different claim from where an action may
+   * sit. Separating the two is what stops the leaving rule quietly widening into "anything goes".
+   */
+  it("⚠️ A TOOLBAR IS REFUSED WHETHER THE MASTHEAD LEAVES OR NOT", () => {
+    for (const r of [renderInGrid, renderInLeavingGrid]) {
+      expect(() => r(<PageHeader variant="workspace" title="T" mark="todo" toolbar={<span>t</span>} />))
+        .toThrow(/no tool row/i);
+    }
+  });
+
+  /**
+   * ⚠️ ABSENCE MEANS "LEAVES", WHICH IS THE FAIL-CLOSED DIRECTION. A header rendered outside a grid
+   * has no pinning slab, so an action in it has nothing anchoring it; defaulting to "pins" would
+   * permit exactly the arrangement the law forbids, in the one case nobody is looking at.
+   */
+  it("⚠️ OUTSIDE A GRID IT REFUSES, because nothing is anchoring it", () => {
+    expect(() => render(
+      <PageHeader variant="workspace" title="T" mark="todo" actions={[{ label: "X", onClick: () => {} }]} />
+    )).toThrow(/LEAVES on scroll/i);
   });
 
   it("⚠️ THE COUNT SLOT IS GONE FROM THE MARKUP, not merely unused (amendment 7)", () => {
