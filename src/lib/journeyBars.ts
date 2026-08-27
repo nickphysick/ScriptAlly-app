@@ -116,8 +116,15 @@ export interface Segment {
   /** stopped at a break — a round cap on the right */
   capRight: boolean;
   label: string;
-  /** the date the stretch runs to, drawn at the bar's right end; "" where there is none */
-  when: string;
+  /**
+   * The shorter form, used when the bar cannot hold `label`.
+   *
+   * ⚠️ THIS REPLACES `when`, the date drawn at the bar's right end. The ref carries the date
+   * INSIDE the wording ("reply expected 18 Aug"), so a right-aligned copy of it would have stated
+   * the same date twice on one bar. `""` where there is no shorter true form — the fit pass goes
+   * bare rather than inventing one.
+   */
+  short: string;
   /** the duration, stated as a fact and never as a verdict */
   count?: string;
   /** no reply time recorded — a dashed rail, no cap and no forecast */
@@ -597,6 +604,13 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
     const hatch = wantsOverrun
       ? Math.max(0, Math.min(1, (OVERRUN_SPAN - p.from) / Math.max(0.0001, p.to - p.from)))
       : 0;
+    /* ⚠️ THE STATE IS COMPUTED BEFORE THE LABEL, because the label reads it. Leaving it in the
+       object literal below would have had `labelFor` reading a `const` from the same literal it
+       is being written into — the temporal-dead-zone shape this repo has shipped once. */
+    const state = barState({
+      side, terminal, status: query.status as QueryStatus,
+      norail, nudgeYmd, expectedPassed, weight, today: win.today,
+    });
     const startsAtEdge = p.from <= 0.001;
     const endsAtEdge = Math.abs(p.to - span) < 0.001;
 
@@ -610,12 +624,21 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
       capLeft: !startsAtEdge,
       capRight: !endsAtEdge,
       ...(!speaks
-        ? { label: "", when: "" }
+        ? { label: "", short: "" }
         : (() => {
-            const l = labelFor(side, {
+            const l = labelFor(state, {
               norail, openEnd, query, expectedYmd, expectedPassed, nudgeYmd, moveLabel, terminal,
+              nudgedOnYmd: isoToYmd(query.lastNudgeSentDate as string | undefined),
+              sentYmd: sentMs == null ? null : isoToYmd(new Date(sentMs).toISOString()),
+              yoursDays,
+              /* ⚠️ HOW LONG SINCE THE REPLY WAS EXPECTED — not how long since it was sent. A
+                 journey that has been out four months with a three-month window has been QUIET
+                 for one, and saying four would state the wrong fact in the right shape. */
+              quietDays: expectedYmd && expectedPassed ? daysBetween(expectedYmd, win.today) : 0,
+              closedYmd: isoToYmd(
+                (query.rejectedDate ?? query.lastStatusChange) as string | undefined),
             });
-            return { label: l.text, when: l.when };
+            return { label: l.long, short: l.short };
           })()),
       ...(hatch > 0 ? { hatchPct: Math.round(hatch * 1000) / 10 } : {}),
       /* ⚠️ THE DURATION IS STATED ONCE, on the one piece of the run that speaks. It used to ride
@@ -625,10 +648,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
         ? { count: wantsOverrun ? `${durationCount(yoursDays)} your move` : durationCount(yoursDays) }
         : {}),
       ...(side === "yours" && !terminal ? { weight } : {}),
-      state: barState({
-        side, terminal, status: query.status as QueryStatus,
-        norail, nudgeYmd, expectedPassed, weight, today: win.today,
-      }),
+      state,
       ...(norail && first ? { norail: true as const } : {}),
       ...(openEnd && last ? { openEnd: true as const } : {}),
       queryId: query.id,
@@ -645,51 +665,114 @@ interface LabelInput {
   expectedYmd: string | null;
   expectedPassed: boolean;
   nudgeYmd: string | null;
+  nudgedOnYmd: string | null;
+  /** the day this journey went out, ymd — "Out since …" */
+  sentYmd: string | null;
+  /** how long the writer has held it, for the long-standing forms */
+  yoursDays: number;
+  /** how long since the reply was expected, for the quiet forms */
+  quietDays: number;
+  closedYmd: string | null;
   moveLabel?: string;
   terminal: boolean;
 }
 
 /**
- * What a stretch says.
+ * What a stretch of time IS, in two lengths.
  *
- * ⚠️ IT REPORTS AND DOES NOT JUDGE. No adverb, no escalation, and never the word this pack forbids
- * outright — a duration is a fact, lateness is a verdict, and an agent has not broken a promise by
- * being slow. `Next reminder due {date}` is the one forward-looking clause and it names something
- * the WRITER set.
+ * ⚠️ TWO FORMS, BECAUSE A BAR'S WIDTH IS DATA. The same stretch is a third of the board at one
+ * week and four pixels at six months, so a single string is either too long for the short board or
+ * too terse for the long one. The fit pass tries `long`, falls back to `short`, and only then goes
+ * bare — an ellipsis is a promise that the rest is somewhere, and it is not.
+ *
+ * ⚠️ IT REPORTS AND DOES NOT JUDGE. No adverb, no escalation, and never the forbidden word — a
+ * duration is a fact, lateness is a verdict, and an agent has not broken a promise by being slow.
+ *
+ * ⚠️ AND THE BAR NEVER NAMES THE AGENT. The row head does, once. A bar repeating it would put the
+ * same name twice on one line, and would put it inside the one element whose width cannot hold it.
  */
 export interface BarLabel {
-  /** what the stretch is; "" where the bar has nothing true to add to the row's own sentence */
-  text: string;
-  /** the date, drawn at the bar's RIGHT end so a run of bars line their dates up */
-  when: string;
+  /** the full form, used when the bar can hold it */
+  long: string;
+  /** the fallback, used when it cannot; "" where there is no shorter true form */
+  short: string;
 }
 
-export function labelFor(side: Side, i: LabelInput): BarLabel {
-  if (i.terminal) return { text: "Closed", when: "" };
-  if (side === "theirs") {
-    if (i.norail) return { text: "No reply time given", when: "" };
-    /* ⚠️ THE BAR ALWAYS RUNS TO THE NEXT THING DUE. After a nudge the clock restarts, so the
-       stretch is not waiting on the agent in general — it is waiting until the reminder the
-       writer set. */
-    if (i.nudgeYmd) return { text: "Reminder", when: shortCalDate(i.nudgeYmd) };
-    if (i.expectedYmd && !i.expectedPassed) return { text: "Reply by", when: shortCalDate(i.expectedYmd) };
-    /**
-     * ⚠️ NOTHING, AND THAT IS THE HONEST ANSWER. This was "Reply window" — a phrase from the
-     * derivation rather than from the writer, naming a window that has closed with nothing in it.
-     * The row's head says what is true here ("No word in 40 days"); the bar repeating it in the
-     * code's own vocabulary added a second, worse description of one fact.
-     */
-    return { text: "", when: "" };
+export function labelFor(state: BarState, i: LabelInput): BarLabel {
+  const on = (ymd: string | null) => (ymd ? shortCalDate(ymd) : "");
+  const since = i.sentYmd ? `Out since ${on(i.sentYmd)}` : "Out";
+
+  switch (state) {
+    case "closed":
+      return i.closedYmd
+        ? { long: `Closed on ${on(i.closedYmd)}`, short: `Closed ${on(i.closedYmd)}` }
+        : { long: "Closed", short: "" };
+
+    case "theirsq":
+      /* ⚠️ "no reply date given" IS A FACT ABOUT THE RECORD, not a reproach to the agency. Plenty
+         of agencies state no window at all, and the app's job is to say so. */
+      return { long: `${since} · no reply date given`, short: "No reply date given" };
+
+    case "nudged":
+      return {
+        long: i.nudgedOnYmd
+          ? `Nudged ${on(i.nudgedOnYmd)} · next reminder ${on(i.nudgeYmd)}`
+          : `Next reminder ${on(i.nudgeYmd)}`,
+        short: i.nudgedOnYmd ? `Nudged · remind ${on(i.nudgeYmd)}` : `Remind ${on(i.nudgeYmd)}`,
+      };
+
+    case "quiet":
+      /* ⚠️ THE INSTRUCTION IS NOT HERE. The ref's own quiet bar reads "Quiet for 78 days · nudge
+         or close it" above a note reading "Nudge or close it" — the bar states what the stretch
+         IS and the note states what to do, and saying it twice makes the note redundant. */
+      return i.quietDays > 0
+        ? { long: `Quiet for ${plural(i.quietDays, "day")}`, short: `${i.quietDays} days quiet` }
+        : { long: "Quiet", short: "" };
+
+    case "theirs":
+      if (i.nudgeYmd && !i.expectedPassed) {
+        return { long: `${since} · nudge due`, short: "Nudge due" };
+      }
+      return i.expectedYmd
+        ? { long: `${since} · reply expected ${on(i.expectedYmd)}`, short: since }
+        : { long: since, short: "" };
+
+    case "offer":
+      return i.expectedYmd
+        ? { long: `Offer received · answer by ${on(i.expectedYmd)}`, short: `Offer · answer by ${on(i.expectedYmd)}` }
+        : { long: "Offer received", short: "Offer" };
+
+    /* ── the writer's move ─────────────────────────────────────────────────────────────────── */
+    default: {
+      const asked = ASKED_FOR[i.query.status as QueryStatus];
+      if (!asked) {
+        /* an open-ended stretch with nothing named — the card's own words, whole */
+        return { long: i.moveLabel ?? "", short: "" };
+      }
+      if (state === "y3" && i.yoursDays > 0) {
+        return {
+          long: `${asked.long} ${plural(i.yoursDays, "day")} ago`,
+          short: `${asked.short} · ${i.yoursDays} days ago`,
+        };
+      }
+      return i.expectedYmd
+        ? { long: `${asked.long} · send by ${on(i.expectedYmd)}`, short: `${asked.short} · by ${on(i.expectedYmd)}` }
+        : { long: asked.long, short: asked.short };
+    }
   }
-  if (i.openEnd) {
-    return i.query.status === QueryStatus.OFFER
-      ? { text: "Offer to answer — no date set", when: "" }
-      : { text: "Revise and resubmit — no date set", when: "" };
-  }
-  /* ⚠️ THE CARD'S OWN WORDS, BARE. They were prefixed "Your move · ", which is how this codebase
-     talks to itself and not how a writer talks about their own submission. */
-  return { text: i.moveLabel ?? "", when: "" };
 }
+
+/**
+ * What the agency asked for, long and short.
+ *
+ * ⚠️ THE SHORT FORM IS AN ABBREVIATION, NOT A DIFFERENT SENTENCE. "Partial req" is the same words
+ * cut; a second phrasing would be a second thing to keep true.
+ */
+const ASKED_FOR: Partial<Record<QueryStatus, { long: string; short: string }>> = {
+  [QueryStatus.PARTIAL_REQUESTED]: { long: "Partial requested", short: "Partial req" },
+  [QueryStatus.FULL_REQUESTED]: { long: "Full requested", short: "Full req" },
+  [QueryStatus.REVISE_RESUBMIT]: { long: "Revise and resubmit", short: "R&R" },
+};
 
 /** Which activities wrote a status — the join the side derivation needs, built once per render. */
 export function statusIndex(activities: readonly Activity[]): Map<string, QueryStatus> {

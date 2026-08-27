@@ -469,13 +469,12 @@
    Tasks work already rules out, and never `space-between`, which would spread the bullet and the
    count as well. One growing child does the whole job. */
 .tl-lbl { overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1 1 auto; }
-.tl-when {
-  flex: 0 0 auto;
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 9.5px;
-  letter-spacing: 0.05em; opacity: 0.78;
-}
-/* the date leaves with the label when a bar is too small to carry words */
-.tl.dense3 .tl-seg .tl-when, .tl.dense4 .tl-seg .tl-when { display: none; }
+/* ⚠️ `.tl-when` IS RETIRED (settled pack, Phase 5). It drew the date at the bar's right end so a
+   run of bars lined their dates up; the ref's wording carries the date INSIDE the label ("reply
+   expected 18 Aug"), so keeping it would have stated the same date twice on one bar.
+   ⚠️ AND `.narrow` IS THE FIT PASS'S LAST STEP — the bar goes bare rather than truncating, because
+   an ellipsis is a promise that the rest is somewhere and on a bar it is not. */
+.tl-seg.narrow .tl-lbl { display: none; }
 /* the duration, riding inside the piece — mono, quiet, and a fact rather than a warning */
 .tl-cnt {
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 9px;

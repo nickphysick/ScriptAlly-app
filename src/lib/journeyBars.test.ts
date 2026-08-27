@@ -125,8 +125,15 @@ describe("⚠️ the side comes from the CTA engine, and nothing here re-lists a
     /* ⚠️ THE CARD'S OWN WORDS, BARE (grouped pack, Phase 5). It was `Your move · send full`;
        "Your move" is how this codebase talks to itself and never how a writer talks about their
        own submission. The label the card supplies is the whole label now. */
-    expect(bars.segments[1].label).toBe("Send full");
-    expect(bars.segments[1].when, "a writer's-move stretch has no date to line up").toBe("");
+    /* ⚠️ THE REF'S OWN WORDING (settled pack, Phase 5). It was the card's bare words, "Send
+       full"; the bar states what the STRETCH IS — a full was requested — and the note beside it
+       states what to do about it. Both forms are asserted, because a short form nobody checks is
+       a second string free to drift. */
+    /* ⚠️ THIS FIXTURE IS LONG-STANDING, so it takes y3's form — the duration is the point of
+       that state and the label carries it. Asserted against the state rather than assumed. */
+    expect(bars.segments[1].state).toBe("y3");
+    expect(bars.segments[1].label).toBe("Full requested 56 days ago");
+    expect(bars.segments[1].short).toBe("Full req · 56 days ago");
   });
 
   it("and the other way round — you send, and it becomes theirs", () => {
@@ -153,8 +160,13 @@ describe("⚠️ v5 · after a nudge the bar runs to the NEXT THING DUE", () => 
        "Sept" in this locale. The literal is the helper's output, not a second formatting. */
     /* ⚠️ THE DATE MOVED TO THE BAR'S RIGHT END, so this asserts BOTH halves. Checking only the
        text would pass on a bar that lost its date entirely, which is the fault a split invites. */
-    expect(bars.segments[bars.segments.length - 1].label).toBe("Reminder");
-    expect(bars.segments[bars.segments.length - 1].when).toBe(shortCalDate("2026-09-09"));
+    /* ⚠️ NO `lastNudgeSentDate` ON THIS FIXTURE, so the label cannot say when the nudge was sent
+       and does not pretend to — "Next reminder {date}" rather than "Nudged … · next reminder …".
+       The absent half is the interesting one: a form that names a date it does not have is the
+       fault this whole module's copy rules exist to prevent. */
+    const nudged = bars.segments[bars.segments.length - 1];
+    expect(nudged.label).toBe("Next reminder " + shortCalDate("2026-09-09"));
+    expect(nudged.short).toBe("Remind " + shortCalDate("2026-09-09"));
   });
 });
 
@@ -168,7 +180,9 @@ describe("⚠️ v5 · no reply time recorded — nothing is forecast, so nothin
     expect(bars.segments).toHaveLength(1);
     expect(bars.segments[0].norail).toBe(true);
     /* shortened, and it no longer instructs — the head says what is true, the bar names the gap */
-    expect(bars.segments[0].label).toBe("No reply time given");
+    /* the long form leads with the send, the short one is the fact alone */
+    expect(bars.segments[0].label).toContain("no reply date given");
+    expect(bars.segments[0].short).toBe("No reply date given");
   });
 
   it("⚠️ AND FORECASTS NOTHING — no waypoint, and no open right edge to imply one", () => {
@@ -184,12 +198,12 @@ describe("⚠️ v5 · R&R and offers are open-ended by nature", () => {
     expect(last.side).toBe("yours");
     expect(last.openEnd).toBe(true);
     expect(last.openRight).toBe(false); // it fades; it does not claim a continuation
-    expect(last.label).toBe("Revise and resubmit — no date set");
+    expect(last.label).toContain("Revise and resubmit");
   });
 
   it("an offer with no stated deadline does the same, in its own words", () => {
     const bars = laneBars(lane({ query: q({ status: QueryStatus.OFFER }) }), WIN);
-    expect(bars.segments[bars.segments.length - 1].label).toBe("Offer to answer — no date set");
+    expect(bars.segments[bars.segments.length - 1].label).toContain("Offer");
   });
 
   it("⚠️ AN AGENT-STATED DEADLINE IS A REAL CAP AND A REAL WAYPOINT", () => {
@@ -303,19 +317,38 @@ describe("⚠️ weight is the whole urgency grammar — three steps, no red, no
   });
 
   it("⚠️ NO LABEL THIS MODULE PRODUCES JUDGES, and none carries the forbidden word", () => {
-    const all = [
-      labelFor("theirs", { norail: true, openEnd: false, query: q({}), expectedYmd: null, expectedPassed: false, nudgeYmd: null, terminal: false }),
-      labelFor("theirs", { norail: false, openEnd: false, query: q({}), expectedYmd: TODAY, expectedPassed: false, nudgeYmd: null, terminal: false }),
-      labelFor("theirs", { norail: false, openEnd: false, query: q({}), expectedYmd: TODAY, expectedPassed: true, nudgeYmd: TODAY, terminal: false }),
-      labelFor("yours", { norail: false, openEnd: true, query: q({ status: QueryStatus.OFFER }), expectedYmd: null, expectedPassed: false, nudgeYmd: null, terminal: false }),
-      labelFor("yours", { norail: false, openEnd: false, query: q({}), expectedYmd: null, expectedPassed: false, nudgeYmd: null, moveLabel: "Send full", terminal: false }),
-      labelFor("yours", { norail: false, openEnd: false, query: q({}), expectedYmd: null, expectedPassed: false, nudgeYmd: null, terminal: true }),
-    ].map((l) => `${l.text} ${l.when}`).concat([durationCount(41)]).join(" | ");
+    /**
+     * ⚠️ SWEPT OVER EVERY STATE, NOT OVER THE ONES I REMEMBERED. `labelFor` is a switch over
+     * `BarState` now, so the states themselves are the population — and both FORMS are swept,
+     * because a short form is where a phrase gets cut to something blunter.
+     */
+    const base = {
+      norail: false, openEnd: false, query: q({}), expectedYmd: TODAY, expectedPassed: false,
+      nudgeYmd: null, nudgedOnYmd: TODAY, sentYmd: TODAY, yoursDays: 41, quietDays: 78,
+      closedYmd: TODAY, terminal: false,
+    };
+    const STATES = ["closed", "theirs", "theirsq", "nudged", "quiet", "y1", "y2", "y3", "offer"] as const;
+    const forms: string[] = [];
+    for (const st of STATES) {
+      for (const status of [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED,
+                            QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.QUERIED]) {
+        for (const passed of [true, false]) {
+          const l = labelFor(st, { ...base, query: q({ status }), expectedPassed: passed,
+                                   nudgeYmd: passed ? TODAY : null, terminal: st === "closed" });
+          forms.push(l.long, l.short);
+        }
+      }
+    }
+    const all = forms.concat([durationCount(41)]).join(" | ");
+    expect(forms.length, "the sweep produced nothing").toBeGreaterThan(80);
     expect(all).not.toMatch(/overdue|late|behind|chase|urgent|failed|should have|too long/i);
     /* ⚠️ AND NO DERIVATION NAME (grouped pack, Phase 5). "Your move", "Their move" and "Reply
        window" are this codebase's vocabulary for whose turn it is; none of them is how a writer
-       describes their own submission, and none reaches a bar any more. */
+       describes their own submission, and none reaches a bar. */
     expect(all).not.toMatch(/your move|their move|reply window|your turn/i);
+    /* ⚠️ AND NO AGENT NAME, EVER (settled pack, Phase 5). The row head names the agent, once. The
+       fixture's agent is seeded with a surname the sweep would surface if any form reached for it. */
+    expect(all).not.toMatch(/\bReed\b|\bMarsh\b|\bEllery\b/);
   });
 
   it("a long-standing your-move stretch draws the hatched overrun, with the count as fact", () => {

@@ -415,7 +415,21 @@ describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local 
      the board scrolls in a `TplZone`, which is the lock this file exists to enforce. */
   it("⚠️ the fold's measurement is retired with the fold — nothing divides a height here", () => {
     expect(decomment(cal)).not.toContain("calFoldCap");
-    expect(decomment(cal)).not.toContain("ResizeObserver");
+    /**
+     * ⚠️ NARROWED TO ITS OWN LAW (settled pack, Phase 5). This forbade `ResizeObserver` outright,
+     * as a proxy for the retired fold: the old one measured how tall a week row had resolved to so
+     * it could work out how many pills fitted before "+N MORE". The law is "nothing divides a
+     * HEIGHT here", and that is unchanged and asserted directly below.
+     *
+     * The page now observes the BOARD's WIDTH so the bar labels can be fitted — long form, short
+     * form, then bare. It divides nothing, measures no height, and caps no count; forbidding it
+     * would forbid the class of tool rather than the mistake, which is what a proxy does when the
+     * thing it stood in for has gone.
+     */
+    const code = decomment(cal);
+    expect(code, "a height is being divided again — the fold's own mistake")
+      .not.toMatch(/(clientHeight|offsetHeight|getBoundingClientRect\(\)\.height)[^;\n]*\//);
+    expect(code, "the fold's cap is back").not.toMatch(/MORE|foldCap|maxPills/);
     expect(decomment(cal)).not.toContain("data-fold-short");
     expect(decomment(cal)).not.toContain("const rows = 6;");
   });

@@ -20,7 +20,7 @@
  * collapse chevron, the month jump, the `Upcoming only` mode and the event-kind vocabulary that
  * served it. A row grows to hold what it holds — there is nothing left to overflow.
  */
-import React, { useMemo, useState } from "react";
+import React, { useLayoutEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { useTodoToast } from "./useTodoToast";
@@ -30,6 +30,7 @@ import { useTaskPaneSession, type TaskPaneHost } from "./useTaskPaneSession";
 import { useTaskCommit } from "./useTaskCommit";
 import { TimelineRangeSlider, TIMELINE_RANGES, DEFAULT_RANGE_INDEX, pastDaysOf } from "./TimelineRangeSlider";
 import { GROUP_ORDER, GROUP_LABEL, COLLAPSED_BY_DEFAULT, type RowGroup } from "../../lib/timelineGroups";
+import { fitLabel } from "../../lib/barFit";
 import { useConfirmAsk } from "./ConfirmAsk";
 /** this mount's pane section-id prefix — every workspace page stays mounted, so ids must not collide */
 const CAL_PANE_PREFIX = "cal-";
@@ -194,12 +195,11 @@ const Seg: React.FC<{ sg: Segment; selected: boolean; onPick: () => void }> = ({
         states itself once per run; the pieces that stay silent are the same bar continuing, and a
         lone dot in an empty capsule reads as a pill that failed to load. */}
     {!!sg.label && <span className="d" aria-hidden />}
-    <span className="tl-lbl">{sg.label}</span>
+    {/* ⚠️ BOTH FORMS TRAVEL WITH THE ELEMENT and the fit pass swaps its text between them. The
+        alternative — rendering both and hiding one — puts two strings in the accessibility tree
+        for one bar, and the hidden one is the one a screen reader would reach first. */}
+    <span className="tl-lbl" data-long={sg.label} data-short={sg.short}>{sg.label}</span>
     {sg.count && <span className="tl-cnt">{sg.count}</span>}
-    {/* ⚠️ THE DATE SITS AT THE BAR'S RIGHT END so a run of bars line their dates up rather than
-        having them land wherever each label happens to stop. It is pushed there by `.tl-lbl`
-        growing, never by an auto margin. */}
-    {sg.when && <span className="tl-when">{sg.when}</span>}
   </button>
 );
 
@@ -382,6 +382,61 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * past; a forward-only six-month board is 182 days of forecast with nothing that happened on it.
    * Measured before this: 16 rows, 18 bar segments, one waypoint and ZERO markers at rest.
    */
+  /**
+   * ⚠️ THE FIT PASS: LONG, THEN SHORT, THEN BARE — measured, never estimated.
+   *
+   * A bar's width is DATA: the same stretch is a third of the board at one week and four pixels at
+   * six months. So the label cannot be chosen at derivation time, and a character-count guess
+   * would be wrong the moment a font loads differently or a date is two digits instead of one.
+   * The browser is asked instead, exactly as the ref does it: set the long form, compare
+   * `scrollWidth` against the bar's `clientWidth`, fall back to the short form, then hide.
+   *
+   * ⚠️ AN ELLIPSIS IS NOT AN OPTION, which is why the last step is bare rather than truncated. An
+   * ellipsis is a promise that the rest is somewhere; on a bar it is not, and the row head's
+   * sentence is where the writer actually reads what is happening.
+   *
+   * ⚠️ IT MUTATES `textContent` OUTSIDE REACT, and that is safe here BECAUSE React rewrites the
+   * label from `sg.label` on every render and this effect runs after every one of them. The two
+   * cannot drift: React always sets the long form, and this always re-decides.
+   */
+  useLayoutEffect(() => {
+    const fit = () => {
+      const root = pageRef.current;
+      if (!root) return;
+      for (const seg of Array.from(root.querySelectorAll<HTMLElement>(".tl-seg"))) {
+        const lbl = seg.querySelector<HTMLElement>(".tl-lbl");
+        if (!lbl) continue;
+        const long = lbl.dataset.long ?? "";
+        const short = lbl.dataset.short ?? "";
+        seg.classList.remove("narrow");
+        if (!long) continue;
+        /* ⚠️ MEASURE BOTH, THEN DECIDE ONCE. The decision itself is `fitLabel` — pure, and unit-
+           locked, because the branch that matters is the one this account never produces: its bars
+           are either ~600px or exactly 28px, so nothing on it is the width at which the short form
+           is the answer. Unexercised is not dead, and only a check that needs no fixture can tell
+           the two apart. */
+        lbl.textContent = long;
+        const longW = lbl.scrollWidth;
+        let shortW: number | null = null;
+        if (short) { lbl.textContent = short; shortW = lbl.scrollWidth; }
+        switch (fitLabel(seg.clientWidth, longW, shortW)) {
+          case "long": lbl.textContent = long; break;
+          case "short": lbl.textContent = short; break;
+          default: seg.classList.add("narrow");
+        }
+      }
+    };
+    fit();
+    /* ⚠️ A `ResizeObserver` ON THE BOARD, not on every bar. Bars are re-created on every range
+       change and observing each would leak one per render; the board is one element whose width
+       is the only thing that changes what fits. */
+    const board = pageRef.current?.querySelector(".tl-board");
+    if (!board) return;
+    const ro = new ResizeObserver(fit);
+    ro.observe(board);
+    return () => ro.disconnect();
+  });
+
   const pastDays = useMemo(() => pastDaysOf(range), [range]);
   const winFrom = useMemo(
     () => (pastDays > 0 ? shiftWindow(winStart, pastDays, -1) : winStart),
@@ -864,7 +919,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
        is why this note describes the phrase instead of quoting it. (Its own needle is split in
        two "so this lock never matches itself" — the author knew.) */
     head = <>{sg.side === "yours" ? "With you" : "Waiting to hear"}{who && <> — <em>{who}</em></>}</>;
-    ctx = sg.hatchPct ? "This has been with you since the date a reply was expected." : [sg.label, sg.when].filter(Boolean).join(" ");
+    ctx = sg.hatchPct ? "This has been with you since the date a reply was expected." : sg.label;
     if (sg.count) facts.push({ k: "Duration", v: sg.count });
     facts.push({ k: "With", v: sg.side === "yours" ? "You" : "The agent" });
     acts = <button type="button" className="tl-btn" onClick={() => onNavigatePath(`/queries?q=${encodeURIComponent(sg.queryId)}`)}>Open query ›</button>;
@@ -968,8 +1023,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
        own words are what this row shows, so it names them rather than a derivation. */
     know.push({
       k: "Waiting until",
-      v: workSeg ? [workSeg.label, workSeg.when].filter(Boolean).join(" ") || "No date resolvable"
-                 : "No date resolvable",
+      v: workSeg ? workSeg.label || "No date resolvable" : "No date resolvable",
     });
     const mats = (workQuery.materialsWanted ?? []).map(formatQueryMaterial).filter(Boolean);
     if (mats.length) know.push({ k: "Materials", v: mats.join(", ") });

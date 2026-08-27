@@ -378,11 +378,16 @@ describe("the kind filters — five, and each is a thing to switch off", () => {
     const d = dataFor(TURN);
     expect(timelineRows(d, TODAY, 7, view({ search: "kaur" })).map((r) => r.agentId)).toEqual(["a1"]);
     expect(timelineRows(d, TODAY, 7, view({ search: "finch" })).map((r) => r.agentId)).toEqual(["a1"]);
-    /* ⚠️ THE BAR'S OWN WORDS, and the reach they replaced. A your-turn card used to be a chip, so
-       the search read its title; the card is a STRETCH now and the stretch carries `pillLabel`'s
-       output. "Send full" still finds it; the card's fuller title no longer does, which costs
-       nothing a reader would notice — the agent's name in that title is searchable on its own. */
-    expect(timelineRows(d, TODAY, 7, view({ search: "send full" })).map((r) => r.agentId)).toEqual(["a1"]);
+    /* ⚠️ THE BAR'S OWN WORDS, AND THEY CHANGED (settled pack, Phase 5). The bar used to carry
+       `pillLabel`'s output — the card's instruction, "Send full" — and now states what the STRETCH
+       IS: a full was requested, and how long ago. So the searchable text moved with the copy.
+       The claim is unchanged and is what this case is for: the search reaches the bar's rendered
+       words, whatever they are. It is asserted against `labelFor`'s OWN output rather than a
+       string typed here, so it cannot go stale the next time the wording moves. */
+    const bar = timelineSegments(d, TODAY, 7).find((sg) => sg.side === "yours" && sg.label)!;
+    expect(bar, "no speaking writer's-move bar in the fixture").toBeTruthy();
+    const word = bar.label.split(" ")[0].toLowerCase();
+    expect(timelineRows(d, TODAY, 7, view({ search: word })).map((r) => r.agentId)).toEqual(["a1"]);
     expect(timelineRows(d, TODAY, 7, view({ search: "zzz" }))).toHaveLength(0);
   });
 });
@@ -589,7 +594,15 @@ describe("⚠️ the derivations underneath are untouched, and the rows prove it
        lower-casing that existed only to make the card's words read as a clause after it. The
        claim this case exists for is unchanged and is stronger without either: the label IS
        `pillLabel`'s output, never a re-summary of it. */
-    expect(yours[0].label).toBe(pillLabel(raw));
+    /* ⚠️ THE BAR NO LONGER ECHOES THE CARD (settled pack, Phase 5), and that is the law this case
+       now states. `pillLabel` is an INSTRUCTION — "Send full" — and the bar says what the stretch
+       of time IS while the note beside it says what to do. Both on one bar was the ref's own
+       mistake, made once, and the pack's prose settles it.
+       ⚠️ THE ORIGINAL CLAIM SURVIVES ELSEWHERE: `pillLabel` is still the one summariser and it is
+       still not re-summarised in this module — it reaches the bar as `moveLabel` for the
+       open-ended case, which is the only state with no wording of its own. */
+    expect(yours[0].label, "the bar is echoing the card's instruction again").not.toBe(pillLabel(raw));
+    expect(yours[0].label, "the bar says nothing about the stretch").toContain("requested");
   });
 
   it("a writer's own task is draggable and a fact is not — `draggableTask`, unchanged", () => {
