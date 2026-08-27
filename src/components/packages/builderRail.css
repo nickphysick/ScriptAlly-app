@@ -1,0 +1,119 @@
+/**
+ * The Builder's rail — `design-refs/builder-refined.html`, `.rail` / `.rsec` / `.chip`.
+ *
+ * ⚠️ THE TYPE TINTS ARE THE APP'S OWN LADDER, NOT THE REF'S PARALLEL SET. `--pkgt-let-*`,
+ * `--pkgt-syn-*` and `--pkgt-pro-*` already exist at `:root`, role-named one layer down as
+ * `--cap-*`, and eight of the ref's twelve values are identical to them. The four VERSION values
+ * differ because the app deepened them on purpose (`packaged-strip-cuts.html` — "the stationery
+ * band asks for more contrast"); `builder-refined.html` carries the older lighter set. Adding the
+ * ref's tokens beside the app's would be two answers to what a letter looks like.
+ */
+.bldr-rail { display: flex; flex-direction: column; gap: 17px; }
+
+.bldr-rsec .bldr-rh {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  padding-bottom: 6px;
+  margin-bottom: 9px;
+  border-bottom: 1px solid var(--pkgo-hairline-soft);
+}
+.bldr-rsec .bldr-rh h4 {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.bldr-t-let .bldr-rh h4 { color: var(--pkgt-let-ink); }
+.bldr-t-syn .bldr-rh h4 { color: var(--pkgt-syn-ink); }
+.bldr-t-ver .bldr-rh h4 { color: var(--pkgt-pro-ink); }
+
+.bldr-rsec .bldr-n { font-family: var(--font-mono); font-size: 7.5px; color: var(--pkg-muted); }
+.bldr-add {
+  margin-left: auto;
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--pkg-muted);
+  padding: 0;
+}
+.bldr-add:hover { color: var(--pkg-burg); }
+.bldr-add:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+
+.bldr-items { display: flex; flex-direction: column; gap: 7px; }
+
+.bldr-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid;
+  border-radius: 9px;
+  padding: 9px 11px;
+  cursor: grab;
+  transition: transform 0.12s, box-shadow 0.12s, opacity 0.12s;
+}
+.bldr-chip:hover { transform: translateY(-1px); box-shadow: 0 5px 13px rgba(58, 28, 20, 0.09); }
+.bldr-chip:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+.bldr-chip--dim { opacity: 0.34; }
+.bldr-chip--lit { box-shadow: 0 0 0 2px var(--pkg-burg); }
+.bldr-chip:active { cursor: grabbing; }
+
+.bldr-t-let.bldr-chip {
+  border-color: var(--pkgt-let-edge); color: var(--pkgt-let-ink);
+  background: linear-gradient(180deg, var(--pkgt-let-a), var(--pkgt-let-b));
+}
+.bldr-t-syn.bldr-chip {
+  border-color: var(--pkgt-syn-edge); color: var(--pkgt-syn-ink);
+  background: linear-gradient(180deg, var(--pkgt-syn-a), var(--pkgt-syn-b));
+}
+.bldr-t-ver.bldr-chip {
+  border-color: var(--pkgt-pro-edge); color: var(--pkgt-pro-ink);
+  background: linear-gradient(180deg, var(--pkgt-pro-a), var(--pkgt-pro-b));
+}
+
+.bldr-grip { display: grid; grid-template-columns: repeat(2, 3px); gap: 2px; flex: 0 0 auto; opacity: 0.4; }
+.bldr-grip i { width: 3px; height: 3px; border-radius: 50%; background: currentColor; display: block; }
+
+.bldr-tx { flex: 1; min-width: 0; }
+/**
+ * ⚠️ `line-height: 1.35`, NOT THE REF'S 1.25. Mixed-case Playfair below 1.3 crops its descenders,
+ * and a material's name is whatever the writer typed — the standing house floor beats a value
+ * tuned to the names somebody put in a mockup.
+ */
+.bldr-tx b {
+  font-family: var(--font-serif);
+  font-size: 14px; font-weight: 600; display: block; line-height: 1.35;
+  color: var(--pkg-ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bldr-m {
+  font-family: var(--font-mono);
+  font-size: 7px; color: var(--pkg-muted); margin-top: 2px; display: block;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* out of flow, so it never displaces the name */
+.bldr-unused {
+  position: absolute; top: -5px; right: 8px;
+  font-family: var(--font-mono);
+  font-size: 6px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--pkg-burg);
+  background: var(--pkg-paper);
+  border: 1px solid var(--pkgt-let-edge);
+  padding: 1px 5px; border-radius: 999px;
+}
+
+.bldr-rnote {
+  margin-top: 8px;
+  font-size: 10px; line-height: 1.6; font-style: italic;
+  color: var(--pkg-muted);
+}
+
+/* `＋ Add` on Versions — name, kind, Add, Cancel on one row under the rail. */
+.bldr-vadd { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+.bldr-vadd input { flex: 1 1 auto; min-width: 0; font-size: 12px; padding: 6px 8px;
+  border: 1px solid var(--pkgo-hairline-soft); border-radius: 7px; outline: none; }
+.bldr-vadd select { flex: 0 0 auto; font-size: 11px; }
+.bldr-vadd .bldr-btn { flex: 0 0 auto; padding: 6px 10px; font-size: 11px; }

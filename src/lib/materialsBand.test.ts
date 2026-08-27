@@ -65,8 +65,30 @@ describe("the materials band replaces the rail's register (D1)", () => {
     }
   });
 
-  it("mounts the band on the page, once", () => {
-    expect(decls(page).match(/<MaterialsBand\b/g) ?? []).toHaveLength(1);
+  it("⚠️ THE BAND IS SUPERSEDED BY THE RAIL — swapped, not added", () => {
+    /**
+     * ⚠️ RETARGETED, AND THE LAW IT NOW ASSERTS. This required `<MaterialsBand` to be mounted once.
+     * Part C replaces the shelf with the Builder's rail: the same materials, beside the ledger
+     * instead of below it, so a writer assembling a package can see what they are assembling from.
+     *
+     * What survives is the part that would actually cause harm if lost — the materials surface is
+     * mounted EXACTLY ONCE, and it is one surface rather than two. A page carrying both would be
+     * two answers to what materials this manuscript has.
+     */
+    const d = decls(page);
+    expect(d.match(/<BuilderRail\b/g) ?? [], "the rail is mounted exactly once").toHaveLength(1);
+    expect(d, "the shelf it replaces is gone from the page").not.toMatch(/<MaterialsBand\b/);
+  });
+
+  it("⚠️ AND THE ARCHIVE DRAWER CAME WITH IT — the only route back for a put-away material", () => {
+    /**
+     * `ArchivedSection` was the shelf's. Unmounting the shelf without rehoming it would have made
+     * the writer's own put-away work unreachable — and Part C's retirement of the sample type put
+     * four materials in there. Asserted on the PAGE, because that is where the rehoming happened.
+     */
+    const d = decls(page);
+    expect(d).toMatch(/<ArchivedSection\b/);
+    expect(d).toMatch(/archivedVersions/);
   });
 
   it("mounts the three working bands, once each", () => {

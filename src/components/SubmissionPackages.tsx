@@ -35,7 +35,13 @@ import { appendBookVersion, bookVersionsOf, newBookVersionId } from "../lib/book
 import { agentLabel, AGENT_NOT_RECORDED } from "../lib/agentDisplay";
 import { FootnoteBand } from "./packages/FootnoteBand";
 import { RemovePopover } from "./packages/RemovePopover";
-import { MaterialsBand } from "./packages/MaterialsBand";
+import { BuilderRail } from "./packages/BuilderRail";
+import { BuildRow } from "./packages/BuildRow";
+import { VersionQuickAdd } from "./packages/VersionQuickAdd";
+import { UNFILLED_SLOT } from "../lib/packageMetrics";
+import { ArchivedSection, ArchivedRow } from "./packages/ArchivedRow";
+import { MATERIAL_LABEL } from "../lib/manuscriptPackages";
+import { builderRail, type RailChip, type RailKind } from "../lib/builderRail";
 import { packageHolders, packagedQueries } from "../lib/packagesOverview";
 import { MaterialModal, MaterialDraftResult } from "./packages/MaterialModal";
 import { PackageModal, PackageDraftResult } from "./packages/PackageModal";
@@ -236,6 +242,74 @@ export const SubmissionPackages: React.FC = () => {
    * shell has to model.
    */
   const [tab, setTab] = useState<PackageTabKey>("builder");
+
+  /* ── the rail, and the build row it fills ──────────────────────────────────────────────── */
+
+  const railSections = useMemo(
+    () => builderRail(msVersions, msPackages, msBookVersions, msQueries, activities),
+    [msVersions, msPackages, msBookVersions, msQueries, activities],
+  );
+
+  /**
+   * ⚠️ THE BUILD ROW IS CLOSED BY DEFAULT AND ARMS ITSELF ON DRAGSTART (D12).
+   *
+   * A permanent empty three-slot form made the page look unfinished — the ref says so in as many
+   * words. It opens on click, and ALSO the moment a chip starts being dragged, so a drag never has
+   * to find a hidden target. Those are two routes to one state, not two states.
+   */
+  const [building, setBuilding] = useState(false);
+  const [armed, setArmed] = useState(false);
+  const [slots, setSlots] = useState<Record<RailKind, RailChip | null>>({ let: null, syn: null, ver: null });
+  /**
+   * ⚠️ `＋ Add` ON VERSIONS WRITES TO THE MANUSCRIPT (D11), through `createBookVersion` — the same
+   * function the package builder's `＋ New version…` already uses, so the 50-version cap and the
+   * id shape apply on one path rather than two. The rail's note says so above the control, because
+   * a writer who adds one here and later finds it on the book profile should have been told.
+   */
+  const [verAdding, setVerAdding] = useState(false);
+
+  /**
+   * ⚠️ CLICK, ENTER AND DRAG ALL REACH THIS ONE FUNCTION (D14) — a mouse-only build path is the
+   * picker trap this repo has recorded once already. It fills the slot of the chip's own type, and
+   * REPLACES what is there rather than refusing: a slot holds one thing, and a writer clicking a
+   * second letter plainly means that one.
+   */
+  const pickChip = (c: RailChip) => {
+    setBuilding(true);
+    setSlots((prev) => ({ ...prev, [c.kind]: c }));
+  };
+
+  const onChipDragStart = (_c: RailChip) => { setBuilding(true); setArmed(true); };
+
+  /* ⚠️ CLOSING CLEARS (D18). A row that reopened holding yesterday's half-built package would be
+     asking the writer to notice and undo a decision they did not make. */
+  const closeBuild = () => { setBuilding(false); setArmed(false); setSlots({ let: null, syn: null, ver: null }); };
+
+  /**
+   * ⚠️ IT GOES THROUGH `savePackageDraft`, THE PAGE'S ONE PACKAGE WRITER — the same path the modal
+   * uses, so the FREE-plan refusal and the `""`-sentinel discipline apply here without being
+   * restated. A second write path is a second answer to what a package is.
+   */
+  const createFromSlots = (name: string) => {
+    void (async () => {
+      const err = await savePackageDraft({
+        name,
+        letterId: slots.let?.id ?? "",
+        synopsisId: slots.syn?.id ?? UNFILLED_SLOT,
+        sampleId: UNFILLED_SLOT,
+        bookVersionId: slots.ver?.id ?? "",
+        otherMaterials: "",
+      });
+      if (!err) closeBuild();
+    })();
+  };
+  const onChipDragEnd = () => setArmed(false);
+
+  /* ── cross-highlighting, both directions (Part E) ──────────────────────────────────────── */
+  const [hoverChip, setHoverChip] = useState<RailChip | null>(null);
+  const [ledgerHover, setLedgerHover] = useState<{ kind: RailKind; id: string } | null>(null);
+  const litChipId = ledgerHover ? ledgerHover.id : null;
+
 
   /**
    * `Builder 3 · 8` — packages built, then everything the rail holds (D2). Both refs agree: 3
@@ -512,6 +586,62 @@ export const SubmissionPackages: React.FC = () => {
                   note on `tab` above. */}
               <div role="tabpanel" id="pkgt-panel-builder" aria-labelledby="pkgt-tab-builder"
                    hidden={tab !== "builder"}>
+              {/* ⚠️ RAIL LEFT, LEDGER RIGHT — the ref's `.split`, 296px against the rest. The
+                  shelf used to sit BELOW the ledger, which meant a writer assembling a package
+                  could not see what they were assembling from. */}
+              <div className="bldr-split">
+              {/**
+                * ⚠️ THE RAIL REPLACES THE MATERIALS SHELF — mounted here and unmounted there in the
+                * SAME commit, so the two never coexist (Part C). The shelf was a band of banded cards
+                * BELOW the ledger; the rail is the same information beside it, where a writer
+                * assembling a package can see both at once.
+                *
+                * ⚠️ THE ARCHIVE DRAWER CAME WITH IT, and that is not decoration. `ArchivedSection`
+                * was the shelf's, and it is the only route back for an archived material — Part C's
+                * retirement of the sample type put four of them in there. Unmounting the shelf
+                * without rehoming it would have made the writer's own put-away work unreachable, the
+                * same fault `otherMaterials` came one commit from last pack.
+                *
+                * ⚠️ THE LEGEND DID NOT COME WITH IT. It keyed the shelf's banded CARD heads, and a
+                * chip is not a card — it would be teaching a treatment that appears nowhere, which is
+                * exactly why the packages swatch was dropped from it a pack ago.
+                */}
+              <div className="bldr-railcol">
+                <BuilderRail
+                  sections={railSections}
+                  onPick={pickChip}
+                  onAdd={(kind) => {
+                    if (kind === "ver") { setVerAdding(true); return; }
+                    setMatEditing(null);
+                    setMatPreselect(kind === "let" ? ComponentType.QUERY_LETTER : ComponentType.SYNOPSIS);
+                    setMatModal(true);
+                  }}
+                  onDragStart={onChipDragStart}
+                  onDragEnd={onChipDragEnd}
+                  litId={litChipId}
+                  dimming={ledgerHover !== null}
+                  onHoverChip={setHoverChip}
+                />
+                {verAdding && (
+                <VersionQuickAdd
+                  onCancel={() => setVerAdding(false)}
+                  onCreate={async (name, kind) => {
+                    const id = await createBookVersion(name, kind);
+                    /* ⚠️ ONLY CLOSE IF IT LANDED. A form that closes on a write that failed tells
+                       the writer their version exists when it does not. */
+                    if (id) setVerAdding(false);
+                    return id;
+                  }}
+                />
+              )}
+              <ArchivedSection show={showArchived} n={archivedVersions.length}>
+                  {archivedVersions.map((v) => (
+                    <ArchivedRow key={v.id} name={v.versionName} meta={MATERIAL_LABEL[v.componentType]}
+                                   onRestore={() => void restoreVersion(v.id)} />
+                  ))}
+                </ArchivedSection>
+              </div>
+              <div className="bldr-main">
               <PackagesBand
                 packages={msPackages}
                 versions={msVersions}
@@ -568,23 +698,22 @@ export const SubmissionPackages: React.FC = () => {
                   />
                 )}
               />
-            <MaterialsBand
-              bookVersions={msBookVersions}
-              versions={msVersions}
-              packages={msPackages}
-              onAddMaterial={(type) => { setMatEditing(null); setMatPreselect(type); setMatModal(true); }}
-              onOpenMaterial={openMaterial}
-              /* ⚠️ THE PAGE PASSES BOTH WRITERS AND CHOOSES NEITHER (Ruling 2). Which one runs is
-                 decided inside the popover from `removalChoice`, off the same packages this page
-                 already hands the band — so the sheet's usage line, the popover's wording and the
-                 act performed are three readings of one number. */
-              onDeleteMaterial={deleteVersion}
-              onArchiveMaterial={archiveVersion}
-              archived={archivedVersions}
-              showArchived={showArchived}
-              onToggleArchived={() => setShowArchived((v) => !v)}
-              onRestore={restoreVersion}
-            />
+                {/* ⚠️ THE BUILD ROW SITS UNDER THE LEDGER, which is where a new package lands.
+                    Closed it is one quiet line; it opens on click and arms itself on dragstart, so
+                    a drag never has to find a hidden target (D12). */}
+                <BuildRow
+                  open={building}
+                  armed={armed}
+                  slots={slots}
+                  existing={msPackages}
+                  onOpen={() => setBuilding(true)}
+                  onClear={(k) => setSlots((prev) => ({ ...prev, [k]: null }))}
+                  onDrop={pickChip}
+                  onClose={closeBuild}
+                  onCreate={createFromSlots}
+                />
+              </div>
+              </div>
               </div>
               {/* ⚠️ MOVED WHOLESALE, NOT REDESIGNED (D4). The three panels are byte-identical to
                   what stood on the single-page version; this pack relocates them and nothing else.

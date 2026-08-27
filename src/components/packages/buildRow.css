@@ -1,0 +1,97 @@
+/**
+ * The build row — `design-refs/builder-refined.html`, `.buildclosed` / `.drop` / `.slots`.
+ */
+.bldr-buildwrap { margin-top: 14px; }
+
+.bldr-closed {
+  width: 100%;
+  display: flex; align-items: center;
+  border: 1.5px dashed var(--pkgo-hairline);
+  border-radius: 11px;
+  padding: 13px 16px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.bldr-closed:hover, .bldr-closed--armed { background: var(--pkg-fill); border-color: var(--pkgt-let-edge); }
+.bldr-closed:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+.bldr-closed .bldr-g { font-family: var(--font-serif); font-style: italic; font-size: 14.5px; color: var(--pkg-burg); }
+.bldr-closed .bldr-h {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 7px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--pkg-muted);
+}
+
+.bldr-drop {
+  border: 1.5px dashed var(--pkgt-let-edge);
+  border-radius: 11px;
+  padding: 14px 16px;
+  background: var(--pkg-paper);
+  transition: border-color 0.15s, background 0.15s;
+}
+.bldr-drop--armed { border-color: var(--pkgt-pro-edge); background: var(--pkgt-pro-a); }
+
+.bldr-slots { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 11px; }
+.bldr-slot {
+  border: 1px dashed var(--pkgo-hairline);
+  border-radius: 8px;
+  padding: 9px 11px;
+  min-height: 46px;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--pkg-paper);
+}
+.bldr-slot--over { border-color: var(--pkg-burg); background: var(--pkgt-let-a); border-style: solid; }
+.bldr-slot .bldr-ph {
+  font-family: var(--font-mono);
+  font-size: 7px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--pkg-muted);
+}
+/* ⚠️ `required` IS NOT ITALIC — it is a word in a mono label, and italic mono reads as a slip. */
+.bldr-slot .bldr-ph em { font-style: normal; color: var(--pkg-burg); opacity: 0.75; }
+.bldr-slot--on.bldr-t-let { border: 1px solid var(--pkgt-let-edge); background: linear-gradient(180deg, var(--pkgt-let-a), var(--pkgt-let-b)); }
+.bldr-slot--on.bldr-t-syn { border: 1px solid var(--pkgt-syn-edge); background: linear-gradient(180deg, var(--pkgt-syn-a), var(--pkgt-syn-b)); }
+.bldr-slot--on.bldr-t-ver { border: 1px solid var(--pkgt-pro-edge); background: linear-gradient(180deg, var(--pkgt-pro-a), var(--pkgt-pro-b)); }
+
+.bldr-filled { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; }
+.bldr-filled .bldr-tx { min-width: 0; }
+/* the house floor, not the ref's 1.2 — mixed-case Playfair crops its descenders below 1.3 */
+.bldr-filled .bldr-tx b {
+  font-family: var(--font-serif);
+  font-size: 13.5px; font-weight: 600; display: block; line-height: 1.35;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bldr-filled .bldr-k {
+  font-family: var(--font-mono);
+  font-size: 6.5px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--pkg-muted); display: block;
+}
+.bldr-x {
+  margin-left: auto; background: none; border: none; cursor: pointer;
+  font-size: 13px; color: var(--pkg-muted); line-height: 1; padding: 2px 4px;
+}
+.bldr-x:hover { color: var(--pkg-burg); }
+
+.bldr-buildfoot { display: flex; align-items: center; gap: 11px; margin-top: 12px; }
+.bldr-name {
+  font-size: 12.5px;
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 7px; padding: 8px 10px; outline: none;
+  flex: 1; max-width: 260px; min-width: 0;
+}
+.bldr-name:focus { border-color: var(--pkg-burg); }
+.bldr-why {
+  font-family: var(--font-mono);
+  font-size: 7.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--pkg-muted);
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bldr-why--dupe { color: var(--pkg-burg); }
+.bldr-sp { margin-left: auto; display: flex; gap: 9px; flex: 0 0 auto; }
+.bldr-btn {
+  font-size: 12px; font-weight: 600; padding: 8px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--pkgo-hairline); background: var(--pkg-paper); color: var(--pkg-ink);
+}
+.bldr-btn--primary { background: var(--pkg-pink); border-color: var(--pkgt-let-edge); color: var(--pkg-burg); }
+.bldr-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ⚠️ RAIL LEFT, LEDGER RIGHT — the ref's `.split`. */
+.bldr-split { display: grid; grid-template-columns: 296px minmax(0, 1fr); gap: 24px; align-items: start; }
+.bldr-railcol { min-width: 0; }
+.bldr-main { min-width: 0; }
