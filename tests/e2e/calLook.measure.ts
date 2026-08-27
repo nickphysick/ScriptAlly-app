@@ -108,6 +108,36 @@ test.describe("the Calendar — Porcelain", () => {
           labelOpacity: hollow.querySelector(".tl-plbl") ? getComputedStyle(hollow.querySelector(".tl-plbl")).opacity : null,
           hasFill: !!hollow.querySelector(".tl-fl"),
         } : null;
+        /* ⚠️ NO BAR MAY CLIP ITS OWN LABEL. The fit pass exists to choose long, short or BARE by
+           measurement — an ellipsis is a promise that the rest is somewhere, and on a bar it is
+           not. This is the composed result: it cannot be read off either element alone, because
+           the label was individually correct and the bar was individually correct and the pair
+           was clipped. It caught a real one - the label was an INLINE span, so scrollWidth and
+           clientWidth were meaningless, fitLabel was handed a bogus width and always answered
+           "long", and five bars at 1440 clipped mid-word through rules that all read correctly. */
+        out.clipped = bars.map((b) => {
+          const l = b.querySelector(".tl-plbl");
+          if (!l || !l.textContent) return null;
+          /* INK against the CLIPPING ANCESTOR, never scrollWidth. On an INLINE element
+             scrollWidth and clientWidth are both meaningless and happen to be EQUAL, so the
+             obvious check passes on exactly the page it was written to catch - proved by
+             removing the fix and watching it stay green. A Range gives the real painted ink, and
+             the bar is the box that clips it. */
+          const r = document.createRange();
+          r.selectNodeContents(l);
+          const rects = [...r.getClientRects()];
+          r.detach && r.detach();
+          if (!rects.length) return null;
+          const ink = { left: Math.min(...rects.map((x) => x.left)), right: Math.max(...rects.map((x) => x.right)) };
+          const box = b.getBoundingClientRect();
+          return (ink.right > box.right + 1 || ink.left < box.left - 1) ? l.textContent : null;
+        }).filter(Boolean);
+        out.labelForms = { long: 0, short: 0, bare: 0 };
+        for (const b of bars) {
+          const l = b.querySelector(".tl-plbl");
+          if (!l || !l.textContent) { out.labelForms.bare += 1; continue; }
+          out.labelForms[l.textContent === l.dataset.long ? "long" : "short"] += 1;
+        }
         /* ── markers ────────────────────────────────────────────────────────────────────── */
         const mks = [...document.querySelectorAll(".tl-mk2")].filter((e) => e.getBoundingClientRect().width > 0);
         out.markerCount = mks.length;
@@ -202,6 +232,11 @@ test.describe("the Calendar — Porcelain", () => {
 
       /* ── a bar with no named end paints no fill ─────────────────────────────────────── */
       expect(read.noGoalBarsWithoutFill, "a bar with no named date painted a fill anyway").toBe(true);
+
+      expect(read.clipped, `bars clipping their own labels: ${JSON.stringify(read.clipped)}`).toEqual([]);
+      /* ⚠️ AND THE FORMS ARE PRINTED, because a board where every bar went bare would satisfy the
+         clipping check for ever. A monoculture wearing a census's clothes. */
+      console.log(`label forms at ${width}: ${JSON.stringify(read.labelForms)}`);
 
       /* ── markers: values, size, and PAINTED clearance ───────────────────────────────── */
       for (const [name, want] of Object.entries(MARKER)) {

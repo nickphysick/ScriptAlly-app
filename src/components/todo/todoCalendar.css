@@ -345,8 +345,18 @@
 }
 /* a fill that has reached the end is the bar, so it takes the bar's own corner back */
 .tl-fl[data-full="1"] { border-top-right-radius: inherit; border-bottom-right-radius: inherit; }
+/* ⚠️ `inline-block` IS LOAD-BEARING, AND WITHOUT IT THE FIT PASS SILENTLY CHOOSES "long".
+   `scrollWidth` and `clientWidth` are meaningless on an INLINE element, so `fitLabel` was handed a
+   bogus width, always answered "long", and the bar clipped its own label mid-word — "Full
+   requested · send", "Revise and resubmit · se". The old `.tl-lbl` was a flex ITEM inside a flex
+   bar and therefore block-level by construction; the Porcelain bar is not a flex container, so
+   the label had to be told. Measured at 1440: five bars clipping, none after.
+   ⚠️ AND THE MAX-WIDTH IS THE OTHER HALF — a nowrap label wider than its bar would still lay out
+   at its full width and drag the bar's own overflow around; capping it at the bar means the fit
+   pass is deciding presentation rather than repairing layout. */
 .tl-plbl {
-  position: relative; font-size: 9.5px; font-weight: 500; white-space: nowrap; padding: 0 10px;
+  position: relative; display: inline-block; max-width: 100%;
+  font-size: 9.5px; font-weight: 500; white-space: nowrap; padding: 0 10px;
   line-height: var(--bar-h); z-index: 2;
 }
 /* ⚠️ HOLLOW IS THE CONTINUATION PAST A NAMED DATE. Lateness is DRAWN — no fill, no word, no
