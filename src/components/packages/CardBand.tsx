@@ -27,13 +27,15 @@ import "./packagesBroadsheet.css";
  * reproduction of it, which is the one thing this file's head forbids. A caller passing a tint
  * supplies its own `glyph` and `label`; the material kinds keep resolving both from `TYPE_META`.
  *
- * ⚠️ AND A TINT IS NOT A `ComponentType`. `slate` does not mean "package" and `pink` does not mean
- * "query letter" — they are colours, and what a card IS stays the caller's business. Widening
- * `ComponentType` to carry them would have put a display category into the data model.
+ * ⚠️ AND A TINT IS NOT A `ComponentType`, NOR A COLOUR. It is what the colour MEANS — `outgoing` is
+ * what you send and what is out with somebody, `incoming` is what came back. `slate` would name the
+ * hex and `pro` names the gate. Widening `ComponentType` to carry these would have put a display
+ * category into the data model; naming them after materials would make every non-material card that
+ * used one state something untrue.
  */
-export type CapTint = "pink" | "sage" | "slate" | "tan";
+export type CapTint = "outgoing" | "incoming" | "pro" | "reference";
 
-export const CAP_TINTS: readonly CapTint[] = ["pink", "sage", "slate", "tan"];
+export const CAP_TINTS: readonly CapTint[] = ["outgoing", "incoming", "pro", "reference"];
 
 export type BandKind = ComponentType | "package" | CapTint;
 

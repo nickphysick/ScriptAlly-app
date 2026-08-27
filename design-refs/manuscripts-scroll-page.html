@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Manuscripts — packages-aligned containers (mockup)</title>
+<title>Manuscripts — full-width scroll page (mockup)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
@@ -20,156 +20,132 @@
     --muted:rgba(58,28,20,.55); --muted-2:rgba(58,28,20,.38);
     --hair:rgba(58,28,20,.11); --hair-2:rgba(58,28,20,.07);
     --grey-ring:#a9a29c;
+    --gutter:44px;
   }
   *{box-sizing:border-box}
+  html{scroll-behavior:smooth;}
   body{
     margin:0; background:var(--cream); color:var(--ink);
     font-family:'Inter',system-ui,sans-serif; font-size:15px; line-height:1.5;
-    -webkit-font-smoothing:antialiased; padding:26px 22px 70px;
+    -webkit-font-smoothing:antialiased; padding-bottom:120px;
   }
+  .wrap{padding:0 var(--gutter);}
+  .inner{max-width:1180px; margin:0 auto;}
 
-  /* ---------- page shell (one large rounded container) ---------- */
-  .shell{
-    max-width:1180px; margin:0 auto; background:var(--parchment);
-    border-radius:18px; overflow:hidden;
-    box-shadow:0 1px 0 rgba(28,19,15,.03), 0 18px 50px -34px rgba(28,19,15,.5);
-  }
-  .pagehead{
-    background:linear-gradient(105deg, #f7ece5 0%, #f6ece7 42%, var(--parchment) 100%);
+  /* ---------- masthead (scrolls away) ---------- */
+  .mast{
+    background:linear-gradient(105deg,#f7ece5 0%,#f6ece7 45%,var(--cream) 100%);
     border-bottom:1px solid var(--hair);
-    padding:30px 40px 26px; display:flex; align-items:flex-start; gap:22px;
   }
-  .pagehead .ill{
-    width:56px; height:56px; flex:none; display:flex; align-items:center;
-    justify-content:center; font-size:34px; color:var(--burgundy); opacity:.85;
+  .mast .in{
+    max-width:1180px; margin:0 auto; padding:32px var(--gutter) 28px;
+    display:flex; align-items:flex-start; gap:22px;
   }
-  .pagehead h1{font-family:'Playfair Display',serif; font-weight:600; font-size:39px; margin:0; line-height:1.05;}
-  .pagehead .sub{color:var(--muted); font-size:16px; margin-top:7px;}
-  .pagehead .hide{
+  .mast .ill{width:54px; height:54px; flex:none; display:flex; align-items:center;
+    justify-content:center; font-size:34px; color:var(--burgundy); opacity:.85;}
+  .mast h1{font-family:'Playfair Display',serif; font-weight:600; font-size:40px; margin:0; line-height:1.05;}
+  .mast .sub{color:var(--muted); font-size:16px; margin-top:7px;}
+  .mast .hide{
     margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:11px;
     letter-spacing:.07em; text-transform:uppercase; color:var(--muted);
     background:none; border:0; cursor:pointer; padding:6px 2px;
   }
-  .shell-body{padding:30px 40px 40px;}
 
-  /* ---------- section header (Playfair + accent rule + meta + actions) ---------- */
-  .sec{display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; margin:0 0 22px;}
-  .sec .h{position:relative;}
-  .sec h2{font-family:'Playfair Display',serif; font-weight:600; font-size:31px; margin:0; line-height:1;}
-  .sec .meta{
+  /* ---------- shelf bar ---------- */
+  .shelfbar{
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+    padding:24px 0 20px; border-bottom:1px solid var(--hair-2); margin-bottom:20px;
+  }
+  .shelfbar h2{font-family:'Playfair Display',serif; font-weight:600; font-size:30px; margin:0; line-height:1;}
+  .shelfbar .meta{
     font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.1em;
-    text-transform:uppercase; color:var(--muted-2); padding-bottom:3px;
+    text-transform:uppercase; color:var(--muted-2);
   }
-  .sec .spacer{flex:1;}
-  .sec .acts{display:flex; align-items:center; gap:14px; padding-bottom:0;}
-  .linkact{
-    font-family:'Inter',sans-serif; font-size:13.5px; color:var(--muted);
-    background:none; border:0; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
-    text-decoration:none;
-  }
-  .linkact:hover{color:var(--ink);}
+  .shelfbar .spacer{flex:1;}
   .btn{
     background:var(--pink-cta); border:1px solid var(--pink-cta-2); color:var(--burgundy);
     font-family:'JetBrains Mono',monospace; font-weight:500; font-size:11.5px;
     letter-spacing:.1em; text-transform:uppercase;
     padding:11px 18px; border-radius:9px; cursor:pointer; text-decoration:none;
+    display:inline-flex; align-items:center; gap:7px;
   }
   .btn:hover{background:var(--pink-cta-2);}
-  .secrule{border:0; border-top:1px solid var(--hair); margin:0 0 22px;}
-
-  /* ---------- capped card (the packages card language) ---------- */
-  .card{
-    background:var(--white); border:1px solid var(--hair); border-radius:11px;
-    overflow:hidden; box-shadow:0 1px 2px rgba(28,19,15,.03);
+  .btn-quiet{
+    background:none; border:1px solid var(--hair); color:var(--muted);
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:.1em;
+    text-transform:uppercase; padding:11px 15px; border-radius:9px; cursor:pointer;
+    text-decoration:none; display:inline-flex; align-items:center; gap:7px;
   }
-  .cap{
-    display:flex; align-items:center; gap:9px; padding:9px 15px;
-    font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.13em;
-    text-transform:uppercase;
-  }
-  .cap .gl{font-size:12px; opacity:.75;}
-  .cap .right{margin-left:auto; font-size:9.5px; letter-spacing:.12em; opacity:.72;}
-  .cap-sage{background:var(--sage-cap); color:var(--sage-cap-ink);}
-  .cap-pink{background:var(--pink-cap); color:var(--pink-cap-ink);}
-  .cap-slate{background:var(--slate-cap); color:var(--slate-cap-ink);}
-  .cap-tan{background:var(--tan-cap); color:var(--tan-cap-ink);}
-  .card .in{padding:20px 22px 20px;}
-  .card h3{font-family:'Playfair Display',serif; font-weight:600; font-size:23px; margin:0 0 14px; line-height:1.15;}
-
-  /* stat row (packages foot pattern) */
-  .stats{display:flex; border-top:1px solid var(--hair-2);}
-  .stat{flex:1; text-align:center; padding:15px 6px 14px; border-left:1px solid var(--hair-2);}
-  .stat:first-child{border-left:0;}
-  .stat .n{font-family:'Playfair Display',serif; font-size:26px; line-height:1; color:var(--ink);}
-  .stat .n.soft{color:var(--muted);}
-  .stat .l{
-    font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.12em;
-    text-transform:uppercase; color:var(--muted-2); margin-top:7px;
+  .btn-quiet:hover{color:var(--ink); border-color:var(--muted-2);}
+  .btn-icon{
+    background:none; border:1px solid var(--hair); color:var(--muted);
+    width:40px; height:40px; border-radius:9px; cursor:pointer; font-size:16px;
   }
 
-  /* ghost card */
-  .ghostcard{
-    border:1px dashed rgba(124,58,42,.32); border-radius:11px; background:transparent;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    text-align:center; padding:34px 24px; cursor:pointer; min-height:150px;
-  }
-  .ghostcard:hover{background:rgba(245,226,218,.4);}
-  .ghostcard .gtitle{
-    font-family:'Playfair Display',serif; font-style:italic; font-weight:500;
-    font-size:22px; color:var(--burgundy);
-  }
-  .ghostcard .gsub{font-family:'Playfair Display',serif; font-style:italic; font-size:14.5px; color:var(--muted); margin-top:7px;}
-  .ghostcard .gicon{font-size:26px; color:var(--burgundy); opacity:.6; margin-bottom:12px;}
-
-  /* ---------- hero ---------- */
-  .hero{border:1px solid var(--hair); border-radius:13px; overflow:hidden; background:var(--white); margin-bottom:0;}
-  .banner{height:112px; position:relative;
-    background:linear-gradient(105deg,#dfe5dc 0%,#dbe2d9 52%,#e7e2d6 100%);}
-  .banner::after{content:""; position:absolute; inset:0;
-    background-image:radial-gradient(rgba(28,19,15,.03) 1px, transparent 1px); background-size:5px 5px;}
-  .banner .artkey{
-    position:absolute; right:14px; bottom:9px;
-    font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.09em;
-    color:rgba(28,19,15,.28); text-transform:uppercase;
-  }
-  .hero-in{padding:0 26px;}
-  .hero-row{display:flex; gap:24px; align-items:flex-start;}
+  /* ---------- hero: full width, no banner ---------- */
+  .heroid{padding:2px 0 6px;}
+  .heroid .row{display:flex; gap:22px; align-items:center;}
   .cover{
-    width:96px; height:118px; border-radius:9px; flex:none;
+    width:74px; height:92px; border-radius:8px; flex:none;
     background:linear-gradient(#dde3da,#d7ded4);
-    display:flex; align-items:center; justify-content:center; font-size:38px;
-    border:4px solid var(--white); margin-top:-46px; position:relative; z-index:2;
-    box-shadow:0 6px 16px -9px rgba(28,19,15,.45);
+    display:flex; align-items:center; justify-content:center; font-size:32px;
+    border:1px solid rgba(58,28,20,.09); position:relative;
+    box-shadow:0 4px 12px -8px rgba(28,19,15,.45);
   }
-  .hero-id{flex:1; min-width:0; padding-top:15px;}
-  .hero-id .toprow{display:flex; align-items:center; gap:13px; flex-wrap:wrap;}
-  .hero-id h2{font-family:'Playfair Display',serif; font-weight:600; font-size:30px; margin:0;}
+  .heroid .idmain{flex:1; min-width:0;}
+  .heroid .toprow{display:flex; align-items:center; gap:13px; flex-wrap:wrap;}
+  .heroid h2{font-family:'Playfair Display',serif; font-weight:600; font-size:33px; margin:0; line-height:1.05;}
   .status{
     font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.13em;
     text-transform:uppercase; background:var(--pink-cap); color:var(--burgundy);
-    padding:4px 11px; border-radius:20px; display:inline-flex; align-items:center; gap:6px;
+    padding:5px 12px; border-radius:20px; display:inline-flex; align-items:center; gap:6px;
   }
   .status::before{content:""; width:5px; height:5px; border-radius:50%; background:var(--burgundy);}
   .facts{
-    margin-top:9px; font-family:'JetBrains Mono',monospace; font-size:11px;
+    margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:11.5px;
     letter-spacing:.05em; color:var(--muted); text-transform:uppercase;
-    display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+    display:flex; gap:9px; align-items:center; flex-wrap:wrap;
   }
   .facts b{color:var(--ink); font-weight:500;}
   .facts .ip{color:var(--muted-2);}
-  .hero-actions{flex:none; display:flex; gap:10px; align-items:center; padding-top:18px;}
-  .btn-quiet{
-    background:none; border:1px solid var(--hair); color:var(--muted);
-    font-family:'Inter',sans-serif; font-size:13.5px; padding:9px 15px; border-radius:9px; cursor:pointer;
+  .facts .chip{
+    background:var(--sage-cap); color:var(--sage-cap-ink); border-radius:20px;
+    padding:4px 12px; letter-spacing:.11em; font-size:10px;
   }
-  .btn-quiet:hover{color:var(--ink);}
+  .heroid .acts{flex:none; display:flex; gap:10px; align-items:center;}
 
-  /* tabs */
-  .tabs{display:flex; gap:2px; margin-top:18px; border-top:1px solid var(--hair-2); overflow-x:auto;}
+  /* ---------- sticky rail ---------- */
+  .rail{
+    position:sticky; top:0; z-index:30;
+    background:var(--cream); border-bottom:1px solid var(--hair);
+    margin-top:20px; transition:box-shadow .18s ease, background .18s ease;
+  }
+  .rail.stuck{box-shadow:0 6px 18px -14px rgba(28,19,15,.55);}
+  .rail .in{
+    max-width:1180px; margin:0 auto; padding:0 var(--gutter);
+    display:flex; align-items:center; gap:18px;
+  }
+  /* collapsed title — appears only once stuck */
+  .railtitle{
+    display:flex; align-items:center; gap:11px; overflow:hidden;
+    max-width:0; opacity:0; transition:max-width .22s ease, opacity .16s ease;
+    white-space:nowrap;
+  }
+  .rail.stuck .railtitle{max-width:340px; opacity:1;}
+  .railtitle .mini{
+    width:26px; height:32px; border-radius:4px; flex:none;
+    background:linear-gradient(#dde3da,#d7ded4);
+    display:flex; align-items:center; justify-content:center; font-size:14px;
+  }
+  .railtitle .t{font-family:'Playfair Display',serif; font-weight:600; font-size:17px;}
+  .railtitle .dotstat{width:6px; height:6px; border-radius:50%; background:var(--burgundy); flex:none;}
+  .railtitle .sep{width:1px; height:24px; background:var(--hair); margin:0 4px;}
+
+  .tabs{display:flex; gap:2px; overflow-x:auto; flex:1;}
   .tab{
-    font-family:'Inter',sans-serif; font-size:14px; color:var(--muted);
+    font-family:'Inter',sans-serif; font-size:14.5px; color:var(--muted);
     background:none; border:0; cursor:pointer; white-space:nowrap;
-    padding:13px 15px 14px; position:relative; display:flex; align-items:center; gap:8px;
+    padding:17px 15px 16px; position:relative; display:flex; align-items:center; gap:8px;
   }
   .tab:hover{color:var(--ink);}
   .tab[aria-selected="true"]{color:var(--ink); font-weight:600;}
@@ -183,81 +159,116 @@
     text-transform:uppercase; color:#fff; background:var(--slate);
     padding:2px 7px; border-radius:20px;
   }
-
-  .tabpane{display:none; padding-top:34px;}
-  .tabpane.on{display:block;}
-  .duo{display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start;}
-  .duo3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:22px; align-items:start;}
-  .blk + .blk{margin-top:38px;}
-
-  /* pitch */
-  .pitchtext{
-    font-family:'Playfair Display',serif; font-style:italic; font-size:20px; line-height:1.55;
-    color:rgba(58,28,20,.84); margin:0;
+  .railacts{
+    display:flex; gap:9px; align-items:center; overflow:hidden;
+    max-width:0; opacity:0; transition:max-width .22s ease, opacity .16s ease;
   }
+  .rail.stuck .railacts{max-width:320px; opacity:1;}
+
+  /* ---------- content ---------- */
+  .pane{display:none; padding-top:38px;}
+  .pane.on{display:block;}
+  .sec{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; margin:0 0 20px;}
+  .sec h3{font-family:'Playfair Display',serif; font-weight:600; font-size:29px; margin:0; line-height:1;}
+  .sec .meta{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--muted-2);
+  }
+  .sec .spacer{flex:1;}
+  .sec .acts{display:flex; align-items:center; gap:14px;}
+  .linkact{
+    font-family:'Inter',sans-serif; font-size:13.5px; color:var(--muted);
+    background:none; border:0; cursor:pointer; text-decoration:none;
+  }
+  .linkact:hover{color:var(--ink);}
+  .blk + .blk{margin-top:46px;}
+
+  .card{
+    background:var(--white); border:1px solid var(--hair); border-radius:11px;
+    overflow:hidden; box-shadow:0 1px 2px rgba(28,19,15,.03);
+  }
+  .cap{
+    display:flex; align-items:center; gap:9px; padding:9px 16px;
+    font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.13em;
+    text-transform:uppercase;
+  }
+  .cap .gl{font-size:12px; opacity:.75;}
+  .cap .right{margin-left:auto; font-size:9.5px; letter-spacing:.12em; opacity:.72;}
+  .cap-sage{background:var(--sage-cap); color:var(--sage-cap-ink);}
+  .cap-pink{background:var(--pink-cap); color:var(--pink-cap-ink);}
+  .cap-slate{background:var(--slate-cap); color:var(--slate-cap-ink);}
+  .cap-tan{background:var(--tan-cap); color:var(--tan-cap-ink);}
+  .card .in2{padding:22px 24px;}
+
+  .stats{display:flex; border-top:1px solid var(--hair-2);}
+  .stat{flex:1; text-align:center; padding:18px 6px 16px; border-left:1px solid var(--hair-2);}
+  .stat:first-child{border-left:0;}
+  .stat .n{font-family:'Playfair Display',serif; font-size:29px; line-height:1;}
+  .stat .n.soft{color:var(--muted);}
+  .stat .l{font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--muted-2); margin-top:8px;}
+
+  .pitchtext{font-family:'Playfair Display',serif; font-style:italic; font-size:21px;
+    line-height:1.55; color:rgba(58,28,20,.84); margin:0;}
   .pitchmeta{
-    margin-top:14px; padding-top:13px; border-top:1px solid var(--hair-2);
+    margin-top:16px; padding-top:14px; border-top:1px solid var(--hair-2);
     display:flex; gap:16px; align-items:center;
     font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.1em;
     text-transform:uppercase; color:var(--muted-2);
   }
-  .pitchmeta button{background:none; border:0; padding:0; cursor:pointer; color:var(--burgundy); font:inherit; text-transform:uppercase; margin-left:auto;}
+  .pitchmeta button{background:none; border:0; padding:0; cursor:pointer; color:var(--burgundy);
+    font:inherit; text-transform:uppercase; margin-left:auto;}
 
-  /* journey track */
-  .track{display:flex; align-items:flex-start; padding:6px 4px 0;}
+  /* journey */
+  .track{display:flex; align-items:flex-start; padding:8px 6px 0;}
   .stations{flex:1; display:flex; position:relative; padding-top:6px;}
-  .rail{position:absolute; left:0; right:0; top:24px; height:2px; background:rgba(58,28,20,.11);}
-  .rail-fill{position:absolute; left:6%; top:24px; height:2px; background:var(--burgundy); opacity:.45;}
-  .stn{flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; position:relative; z-index:1;}
-  .stn .dot{background:var(--white); border-radius:50%; padding:3px; line-height:0;}
-  .stn .n{font-family:'Playfair Display',serif; font-size:24px; line-height:1;}
+  .railline{position:absolute; left:0; right:0; top:26px; height:2px; background:rgba(58,28,20,.11);}
+  .rail-fill{position:absolute; left:6%; top:26px; height:2px; background:var(--burgundy); opacity:.45;}
+  .stn{flex:1; display:flex; flex-direction:column; align-items:center; gap:9px; position:relative; z-index:1;}
+  .stn .dot{background:var(--white); border-radius:50%; padding:4px; line-height:0;}
+  .stn .n{font-family:'Playfair Display',serif; font-size:26px; line-height:1;}
   .stn.zero .n{color:var(--muted-2);}
-  .stn .lbl{
-    font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.09em;
-    text-transform:uppercase; color:var(--muted); text-align:center; line-height:1.4;
-  }
+  .stn .lbl{font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--muted); text-align:center; line-height:1.4;}
   .closed-block{
-    flex:none; margin-left:26px; padding-left:26px; border-left:1px solid var(--hair-2);
-    display:flex; flex-direction:column; align-items:center; gap:8px; padding-top:6px;
+    flex:none; margin-left:30px; padding-left:30px; border-left:1px solid var(--hair-2);
+    display:flex; flex-direction:column; align-items:center; gap:9px; padding-top:6px;
   }
-  .closed-block .n{font-family:'Playfair Display',serif; font-size:24px; color:var(--muted); line-height:1;}
-  .closed-block .lbl{font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted);}
+  .closed-block .n{font-family:'Playfair Display',serif; font-size:26px; color:var(--muted); line-height:1;}
+  .closed-block .lbl{font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--muted);}
   .journey-foot{
-    margin-top:20px; padding-top:14px; border-top:1px solid var(--hair-2);
+    margin-top:22px; padding-top:15px; border-top:1px solid var(--hair-2);
     display:flex; justify-content:space-between; gap:18px; flex-wrap:wrap;
     font-size:12.5px; color:var(--muted-2);
   }
   .journey-foot .reached{color:var(--muted);}
   .journey-foot .reached b{color:var(--ink);}
 
-  /* tables */
   table{width:100%; border-collapse:collapse; font-size:13.5px;}
-  th{
-    font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.11em;
+  th{font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.11em;
     text-transform:uppercase; color:var(--muted-2); text-align:left; font-weight:500;
-    padding:0 8px 9px 0; border-bottom:1px solid var(--hair);
-  }
-  td{padding:12px 8px 12px 0; border-bottom:1px solid var(--hair-2); vertical-align:top;}
+    padding:0 8px 10px 0; border-bottom:1px solid var(--hair);}
+  td{padding:13px 8px 13px 0; border-bottom:1px solid var(--hair-2); vertical-align:top;}
   tr:last-child td{border-bottom:0;}
-  td .sub{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted-2); display:block; margin-top:3px; letter-spacing:.03em;}
+  td .sub{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted-2);
+    display:block; margin-top:3px; letter-spacing:.03em;}
   td.num{font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--muted);}
   .vlabel{font-family:'Playfair Display',serif; font-size:15.5px;}
   .muted-cell{color:var(--muted);}
-  .foot-note{
-    margin-top:14px; padding-top:12px; border-top:1px solid var(--hair-2);
-    font-size:12.5px; color:var(--muted-2); line-height:1.45;
-  }
+  .foot-note{margin-top:15px; padding-top:13px; border-top:1px solid var(--hair-2);
+    font-size:12.5px; color:var(--muted-2); line-height:1.45;}
 
-  /* versions */
-  .vrow{padding:15px 0; border-bottom:1px solid var(--hair-2);}
+  .duo{display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start;}
+  .duo3{display:grid; grid-template-columns:repeat(3,1fr); gap:22px; align-items:start;}
+
+  .vrow{padding:16px 0; border-bottom:1px solid var(--hair-2);}
   .vrow:last-of-type{border-bottom:0;}
   .vhead{display:flex; align-items:baseline; gap:11px; flex-wrap:wrap;}
   .vname{font-family:'Playfair Display',serif; font-size:19px; font-weight:500;}
-  .kind{
-    font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.11em;
+  .kind{font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.11em;
     text-transform:uppercase; padding:3px 9px; border-radius:20px;
-    color:var(--slate-cap-ink); background:var(--slate-cap);
-  }
+    color:var(--slate-cap-ink); background:var(--slate-cap);}
   .vdate{margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--muted-2);}
   .rr{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--burgundy);
     text-decoration:none; border-bottom:1px dotted rgba(124,58,42,.4);}
@@ -267,51 +278,59 @@
   .edit{margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.08em;
     text-transform:uppercase; color:var(--muted-2); background:none; border:0; cursor:pointer;}
   .edit:hover{color:var(--burgundy);}
-  .unrec{
-    margin-top:8px; padding:12px 14px; border-radius:8px;
-    background:rgba(106,137,167,.08); font-size:13px; color:var(--muted);
-  }
+  .unrec{margin-top:8px; padding:13px 15px; border-radius:8px;
+    background:rgba(106,137,167,.08); font-size:13px; color:var(--muted);}
   .unrec b{color:var(--ink); font-weight:600;}
 
-  /* comps */
-  .comp{padding:15px 0; border-bottom:1px solid var(--hair-2);}
+  .comp{padding:16px 0; border-bottom:1px solid var(--hair-2);}
   .comp:last-child{border-bottom:0;}
   .comp .t{font-family:'Playfair Display',serif; font-size:18px; font-weight:500;}
-  .comp .by{font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.05em; color:var(--muted-2); margin-top:4px; text-transform:uppercase;}
+  .comp .by{font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.05em;
+    color:var(--muted-2); margin-top:4px; text-transform:uppercase;}
   .comp .shares{font-size:13px; color:var(--muted); margin-top:7px; line-height:1.45;}
 
-  /* notes */
-  .paper .ptitle{font-family:'Caveat',cursive; font-weight:600; font-size:22px; line-height:1.1; margin-bottom:8px;}
-  .paper .ptext{font-family:'Caveat',cursive; font-size:18.5px; color:rgba(58,28,20,.75); line-height:1.35;}
-  .paper .pdate{
-    margin-top:14px; padding-top:11px; border-top:1px solid var(--hair-2);
+  .ptitle{font-family:'Caveat',cursive; font-weight:600; font-size:22px; line-height:1.1; margin-bottom:8px;}
+  .ptext{font-family:'Caveat',cursive; font-size:18.5px; color:rgba(58,28,20,.75); line-height:1.35;}
+  .pdate{margin-top:15px; padding-top:12px; border-top:1px solid var(--hair-2);
     font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.1em;
-    text-transform:uppercase; color:var(--muted-2);
+    text-transform:uppercase; color:var(--muted-2);}
+  .ghostcard{
+    border:1px dashed rgba(124,58,42,.32); border-radius:11px; background:transparent;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:36px 24px; cursor:pointer; min-height:170px;
   }
+  .ghostcard:hover{background:rgba(245,226,218,.4);}
+  .ghostcard .gtitle{font-family:'Playfair Display',serif; font-style:italic; font-weight:500;
+    font-size:22px; color:var(--burgundy);}
+  .ghostcard .gsub{font-family:'Playfair Display',serif; font-style:italic; font-size:14.5px;
+    color:var(--muted); margin-top:7px;}
+  .ghostcard .gicon{font-size:26px; color:var(--burgundy); opacity:.6; margin-bottom:12px;}
 
-  .footlinks{
-    margin-top:38px; padding-top:20px; border-top:1px solid var(--hair);
-    font-size:13.5px; color:var(--muted); display:flex; gap:24px; flex-wrap:wrap;
-  }
+  .footlinks{margin-top:52px; padding-top:22px; border-top:1px solid var(--hair);
+    font-size:13.5px; color:var(--muted); display:flex; gap:26px; flex-wrap:wrap;}
   .footlinks a{color:var(--burgundy); text-decoration:none; border-bottom:1px dotted rgba(124,58,42,.4);}
 
   @media (max-width:940px){
+    :root{--gutter:20px;}
     .duo,.duo3{grid-template-columns:1fr;}
-    .shell-body{padding:24px 20px 32px;}
-    .pagehead{padding:24px 20px 20px;}
-    .hero-row{flex-wrap:wrap;}
-    .hero-actions{padding-top:0; padding-bottom:8px;}
-    .stations{flex-wrap:wrap; gap:18px 0;}
+    .heroid .row{flex-wrap:wrap;}
+    .heroid .acts{width:100%;}
+    .cover{width:58px; height:72px; font-size:26px;}
+    .stations{flex-wrap:wrap; gap:20px 0;}
     .stn{flex:0 0 33%;}
-    .rail,.rail-fill{display:none;}
-    .closed-block{margin-left:0; padding-left:0; border-left:0; width:100%; padding-top:18px; border-top:1px solid var(--hair-2);}
+    .railline,.rail-fill{display:none;}
+    .closed-block{margin-left:0; padding-left:0; border-left:0; width:100%;
+      padding-top:18px; border-top:1px solid var(--hair-2);}
+    .rail.stuck .railtitle{max-width:150px;}
+    .rail.stuck .railacts{max-width:0; opacity:0;}
   }
 </style>
 </head>
 <body>
-<div class="shell">
 
-  <div class="pagehead">
+<!-- masthead: scrolls away -->
+<div class="mast">
+  <div class="in">
     <div class="ill">📕</div>
     <div>
       <h1>Manuscripts</h1>
@@ -319,71 +338,82 @@
     </div>
     <button class="hide">^ Hide</button>
   </div>
+</div>
 
-  <div class="shell-body">
-
-    <div class="sec">
-      <div class="h"><h2>Your shelf</h2></div>
+<div class="wrap">
+  <div class="inner">
+    <div class="shelfbar">
+      <h2>Your shelf</h2>
       <span class="meta">1 manuscript · 26 queries</span>
       <span class="spacer"></span>
-      <span class="acts">
-        <a class="linkact" href="#">ⓘ How it works</a>
-        <a class="btn" href="#">＋ Add a manuscript</a>
-      </span>
+      <a class="btn" href="#">＋ Add a manuscript</a>
     </div>
 
-    <!-- hero -->
-    <div class="hero">
-      <div class="banner"><span class="artkey">banner-art</span></div>
-      <div class="hero-in">
-        <div class="hero-row">
-          <div class="cover">📕</div>
-          <div class="hero-id">
-            <div class="toprow">
-              <h2>Murphy's Day Out</h2>
-              <span class="status">Querying</span>
-            </div>
-            <div class="facts">
-              <span>Young Adult</span><span class="ip">·</span>
-              <span>Thriller</span><span class="ip">·</span>
-              <span>50,000 words</span><span class="ip">·</span>
-              <span><b>26</b> queries sent</span><span class="ip">·</span>
-              <span><b>12</b> responses</span><span class="ip">·</span>
-              <span>Querying since <b>14 Jan 2026</b></span>
-            </div>
+    <div class="heroid">
+      <div class="row">
+        <div class="cover">📕</div>
+        <div class="idmain">
+          <div class="toprow">
+            <h2>Murphy's Day Out</h2>
+            <span class="status">Querying</span>
           </div>
-          <div class="hero-actions">
-            <a class="btn" href="#">Query Centre ›</a>
-            <button class="btn-quiet">Edit details</button>
+          <div class="facts">
+            <span class="chip">Young Adult</span>
+            <span class="chip">Thriller</span>
+            <span class="ip">·</span>
+            <span>50,000 words</span><span class="ip">·</span>
+            <span><b>26</b> queries sent</span><span class="ip">·</span>
+            <span><b>12</b> responses</span><span class="ip">·</span>
+            <span>Querying since <b>5 Dec 2023</b></span>
           </div>
         </div>
-
-        <div class="tabs" role="tablist">
-          <button class="tab" role="tab" aria-selected="true" data-pane="overview">Overview</button>
-          <button class="tab" role="tab" aria-selected="false" data-pane="journey">Journey</button>
-          <button class="tab" role="tab" aria-selected="false" data-pane="comps">
-            Comparable titles <span class="cnt">6</span></button>
-          <button class="tab" role="tab" aria-selected="false" data-pane="versions">
-            Versions <span class="cnt">3</span> <span class="protag">Pro</span></button>
-          <button class="tab" role="tab" aria-selected="false" data-pane="notes">
-            Notes <span class="cnt">4</span></button>
+        <div class="acts">
+          <a class="btn" href="#">Send a query</a>
+          <a class="btn-quiet" href="#">Query Centre ›</a>
+          <button class="btn-icon">⋯</button>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- ================= Overview ================= -->
-    <div class="tabpane on" id="pane-overview">
+<!-- sticky rail -->
+<div class="rail" id="rail">
+  <div class="in">
+    <span class="railtitle">
+      <span class="mini">📕</span>
+      <span class="t">Murphy's Day Out</span>
+      <span class="dotstat" title="Querying"></span>
+      <span class="sep"></span>
+    </span>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-pane="overview">Overview</button>
+      <button class="tab" role="tab" aria-selected="false" data-pane="journey">Journey</button>
+      <button class="tab" role="tab" aria-selected="false" data-pane="comps">Comparable titles <span class="cnt">6</span></button>
+      <button class="tab" role="tab" aria-selected="false" data-pane="versions">Versions <span class="cnt">3</span> <span class="protag">Pro</span></button>
+      <button class="tab" role="tab" aria-selected="false" data-pane="notes">Notes <span class="cnt">4</span></button>
+    </div>
+    <span class="railacts">
+      <a class="btn" href="#">Send a query</a>
+    </span>
+  </div>
+</div>
 
+<div class="wrap">
+  <div class="inner">
+
+    <!-- ===== Overview ===== -->
+    <div class="pane on" id="pane-overview">
       <div class="blk">
         <div class="sec">
-          <div class="h"><h2>The pitch</h2></div>
+          <h3>The pitch</h3>
           <span class="meta">38 words · last edited 2 Jun</span>
           <span class="spacer"></span>
           <span class="acts"><button class="linkact">Edit pitch</button></span>
         </div>
         <div class="card">
           <div class="cap cap-pink"><span class="gl">✉</span>Elevator pitch</div>
-          <div class="in">
+          <div class="in2">
             <p class="pitchtext">When fourteen-year-old Murphy pockets a fly that shouldn't exist, the men
               who lost it come looking — and the only person who believes her is the school caretaker
               who's been waiting thirty years for someone to ask.</p>
@@ -393,10 +423,9 @@
 
       <div class="blk">
         <div class="sec">
-          <div class="h"><h2>At a glance</h2></div>
+          <h3>At a glance</h3>
           <span class="meta">26 queries · 4 agents holding</span>
         </div>
-
         <div class="card" style="margin-bottom:22px;">
           <div class="stats">
             <div class="stat"><div class="n">26</div><div class="l">Queries sent</div></div>
@@ -406,10 +435,9 @@
             <div class="stat"><div class="n">4</div><div class="l">Agents holding</div></div>
           </div>
         </div>
-
         <div class="card">
-          <div class="cap cap-sage"><span class="gl">✉</span>Who holds what<span class="right">4 agents</span></div>
-          <div class="in">
+          <div class="cap cap-pink"><span class="gl">✉</span>Who holds what<span class="right">4 agents</span></div>
+          <div class="in2">
             <table>
               <thead><tr><th>Agent</th><th>Holds</th><th>Since</th></tr></thead>
               <tbody>
@@ -425,19 +453,19 @@
       </div>
     </div>
 
-    <!-- ================= Journey ================= -->
-    <div class="tabpane" id="pane-journey">
+    <!-- ===== Journey ===== -->
+    <div class="pane" id="pane-journey">
       <div class="blk">
         <div class="sec">
-          <div class="h"><h2>Where the queries stand</h2></div>
+          <h3>Where the queries stand</h3>
           <span class="meta">26 queries · furthest reached, R&amp;R</span>
         </div>
         <div class="card">
           <div class="cap cap-sage"><span class="gl">◷</span>Current standing<span class="right">Today</span></div>
-          <div class="in">
+          <div class="in2">
             <div class="track">
               <div class="stations" id="stations">
-                <div class="rail"></div><div class="rail-fill" style="width:76%"></div>
+                <div class="railline"></div><div class="rail-fill" style="width:76%"></div>
               </div>
               <div class="closed-block"><span class="dot" id="closedDot"></span><span class="n">13</span><span class="lbl">Closed</span></div>
             </div>
@@ -453,7 +481,7 @@
         <div class="duo">
           <div class="card">
             <div class="cap cap-pink"><span class="gl">✈</span>Out with agents now<span class="right">4</span></div>
-            <div class="in">
+            <div class="in2">
               <table>
                 <thead><tr><th>Agent</th><th>Holds</th><th>Sent</th></tr></thead>
                 <tbody>
@@ -465,10 +493,9 @@
               </table>
             </div>
           </div>
-
           <div class="card">
-            <div class="cap cap-tan"><span class="gl">⤒</span>How far queries reached<span class="right">All 26</span></div>
-            <div class="in">
+            <div class="cap cap-sage"><span class="gl">⤒</span>How far queries reached<span class="right">All 26</span></div>
+            <div class="in2">
               <table>
                 <thead><tr><th>Furthest point</th><th>Queries</th></tr></thead>
                 <tbody>
@@ -487,11 +514,11 @@
       </div>
     </div>
 
-    <!-- ================= Comparable titles ================= -->
-    <div class="tabpane" id="pane-comps">
+    <!-- ===== Comps ===== -->
+    <div class="pane" id="pane-comps">
       <div class="blk">
         <div class="sec">
-          <div class="h"><h2>Comparable titles</h2></div>
+          <h3>Comparable titles</h3>
           <span class="meta">6 recorded</span>
           <span class="spacer"></span>
           <span class="acts"><a class="linkact" href="#">Manage in Comparable titles ›</a></span>
@@ -499,7 +526,7 @@
         <div class="duo">
           <div class="card">
             <div class="cap cap-tan"><span class="gl">▤</span>Comparable titles<span class="right">1–3</span></div>
-            <div class="in">
+            <div class="in2">
               <div class="comp"><div class="t">The Loneliest Girl in the Universe</div>
                 <div class="by">Lauren James · 2017 · Walker</div>
                 <div class="shares">Teenage narrator carrying a secret she can't test against anyone.</div></div>
@@ -513,7 +540,7 @@
           </div>
           <div class="card">
             <div class="cap cap-tan"><span class="gl">▤</span>Comparable titles<span class="right">4–6</span></div>
-            <div class="in">
+            <div class="in2">
               <div class="comp"><div class="t">Boy Parts</div>
                 <div class="by">Eliza Clark · 2020 · Influx</div>
                 <div class="shares">Voice-led, unsettling, funny in the wrong places.</div></div>
@@ -530,20 +557,19 @@
       </div>
     </div>
 
-    <!-- ================= Versions ================= -->
-    <div class="tabpane" id="pane-versions">
+    <!-- ===== Versions ===== -->
+    <div class="pane" id="pane-versions">
       <div class="blk">
         <div class="sec">
-          <div class="h"><h2>Versions</h2></div>
+          <h3>Versions</h3>
           <span class="meta">3 recorded · 1 unrecorded sample</span>
           <span class="spacer"></span>
           <span class="acts"><a class="btn" href="#">＋ New version</a></span>
         </div>
-
         <div class="duo">
           <div class="card">
             <div class="cap cap-slate"><span class="gl">❑</span>Versions<span class="right">Pro · 3</span></div>
-            <div class="in">
+            <div class="in2">
               <div class="vrow">
                 <div class="vhead"><span class="vname">Initial</span><span class="kind">Initial</span><span class="vdate">14 Jan 2026</span></div>
                 <div class="vderived"><span>12 samples</span><span class="dot-sep"></span><span>held by 0 agents</span>
@@ -565,10 +591,9 @@
               <div class="unrec"><b>1 agent</b> holds a sample with no recorded version. Counted here, not against any version above.</div>
             </div>
           </div>
-
           <div class="card">
             <div class="cap cap-slate"><span class="gl">◈</span>Requests by opening<span class="right">Pro</span></div>
-            <div class="in">
+            <div class="in2">
               <table>
                 <thead><tr><th>Opening</th><th>Samples out</th><th>Requests followed</th></tr></thead>
                 <tbody>
@@ -582,10 +607,9 @@
             </div>
           </div>
         </div>
-
         <div class="card" style="margin-top:22px;">
           <div class="cap cap-slate"><span class="gl">✉</span>Who holds which version<span class="right">Pro · 4 agents</span></div>
-          <div class="in">
+          <div class="in2">
             <table>
               <thead><tr><th>Agent</th><th>Holds</th><th>Version</th><th>Sent</th></tr></thead>
               <tbody>
@@ -601,47 +625,39 @@
       </div>
     </div>
 
-    <!-- ================= Notes ================= -->
-    <div class="tabpane" id="pane-notes">
+    <!-- ===== Notes ===== -->
+    <div class="pane" id="pane-notes">
       <div class="blk">
         <div class="sec">
-          <div class="h"><h2>Notes</h2></div>
+          <h3>Notes</h3>
           <span class="meta">4 on this manuscript</span>
           <span class="spacer"></span>
           <span class="acts"><a class="linkact" href="#">Open Noteboard ›</a></span>
         </div>
         <div class="duo3">
-          <div class="card paper">
+          <div class="card">
             <div class="cap cap-tan"><span class="gl">✎</span>Note</div>
-            <div class="in">
-              <div class="ptitle">Word count</div>
+            <div class="in2"><div class="ptitle">Word count</div>
               <div class="ptext">Three agents want under 45k for YA thriller. Check before the next batch.</div>
-              <div class="pdate">14 Jun 2026</div>
-            </div>
+              <div class="pdate">14 Jun 2026</div></div>
           </div>
-          <div class="card paper">
+          <div class="card">
             <div class="cap cap-tan"><span class="gl">✎</span>Note</div>
-            <div class="in">
-              <div class="ptitle">Marsh call</div>
+            <div class="in2"><div class="ptitle">Marsh call</div>
               <div class="ptext">Wants the aunt gone entirely, not just trimmed. Said the middle "sags after the rooftop".</div>
-              <div class="pdate">28 May 2026</div>
-            </div>
+              <div class="pdate">28 May 2026</div></div>
           </div>
-          <div class="card paper">
+          <div class="card">
             <div class="cap cap-tan"><span class="gl">✎</span>Note</div>
-            <div class="in">
-              <div class="ptitle">Comp idea</div>
+            <div class="in2"><div class="ptitle">Comp idea</div>
               <div class="ptext">Someone on AW suggested The Wall — added it. Look for something 2023+ too.</div>
-              <div class="pdate">2 May 2026</div>
-            </div>
+              <div class="pdate">2 May 2026</div></div>
           </div>
-          <div class="card paper">
+          <div class="card">
             <div class="cap cap-tan"><span class="gl">✎</span>Note</div>
-            <div class="in">
-              <div class="ptitle">Opening</div>
+            <div class="in2"><div class="ptitle">Opening</div>
               <div class="ptext">Rooftop version reads faster out loud. Keep for the next ten.</div>
-              <div class="pdate">3 Mar 2026</div>
-            </div>
+              <div class="pdate">3 Mar 2026</div></div>
           </div>
           <button class="ghostcard">
             <span class="gicon">✎</span>
@@ -662,7 +678,7 @@
 <script>
 const C = {burg:'#7c3a2a', pinkC:'#f8e7dc', sage:'#8a9e88', sageC:'#e9ede6',
            sageInk:'#5c6b58', grey:'#a9a29c', parch:'#fffdfa'};
-function dot({depth, dir, mark}, S=30){
+function dot({depth, dir, mark}, S=32){
   const r=S*0.367, c=S/2, sw=S*0.073, u=S/30;
   const ring=dir==='in'?C.sage:C.burg, centre=dir==='in'?C.sageC:C.pinkC, markC=dir==='in'?C.sageInk:C.burg;
   let arc='';
@@ -677,11 +693,11 @@ function dot({depth, dir, mark}, S=30){
     <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${ring}" stroke-width="${sw}" opacity=".22"/>
     ${arc}${glyph}</svg>`;
 }
-function offerDot(S=30){const c=S/2,r=S*0.387;
+function offerDot(S=32){const c=S/2,r=S*0.387;
   return `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}"><circle cx="${c}" cy="${c}" r="${r}" fill="${C.burg}"/>
   <path d="M ${c-S*0.167} ${c+S*0.013} L ${c-S*0.053} ${c+S*0.127} L ${c+S*0.173} ${c-S*0.113}"
   fill="none" stroke="${C.parch}" stroke-width="${S*0.07}" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
-function closedDot(S=30){const c=S/2,r=S*0.367,u=S/30;
+function closedDot(S=32){const c=S/2,r=S*0.367,u=S/30;
   return `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}"><circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${C.grey}" stroke-width="${2.2*u}"/>
   <path d="M ${c-3.8*u} ${c-3.8*u} L ${c+3.8*u} ${c+3.8*u} M ${c+3.8*u} ${c-3.8*u} L ${c-3.8*u} ${c+3.8*u}" stroke="${C.grey}" stroke-width="${1.9*u}" stroke-linecap="round"/></svg>`;}
 
@@ -702,9 +718,18 @@ document.getElementById('closedDot').innerHTML = closedDot();
 document.querySelectorAll('.tab').forEach(t=> t.onclick = ()=>{
   document.querySelectorAll('.tab').forEach(x=> x.setAttribute('aria-selected','false'));
   t.setAttribute('aria-selected','true');
-  document.querySelectorAll('.tabpane').forEach(p=> p.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(p=> p.classList.remove('on'));
   document.getElementById('pane-'+t.dataset.pane).classList.add('on');
 });
+
+/* stuck detection — sentinel above the rail */
+const rail = document.getElementById('rail');
+const sentinel = document.createElement('div');
+sentinel.style.cssText = 'position:absolute; height:1px; width:1px;';
+rail.parentNode.insertBefore(sentinel, rail);
+new IntersectionObserver(([e])=>{
+  rail.classList.toggle('stuck', e.intersectionRatio === 0);
+}, {threshold:[0]}).observe(sentinel);
 </script>
 </body>
 </html>

@@ -89,7 +89,7 @@ export const ManuscriptsEmpty: React.FC<ManuscriptsEmptyProps> = ({ onAdd }) => 
       {STAGES.map((s) => (
         <CappedCard
           key={s.slot}
-          tint={s.pro ? "slate" : "sage"}
+          tint={s.pro ? "pro" : "incoming"}
           label={s.title}
           right={s.pro ? "Pro" : undefined}
         >

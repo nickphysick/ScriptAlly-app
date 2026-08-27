@@ -29,22 +29,30 @@
 
 :root {
   /**
-   * ══ THE CAP GRAMMAR ══════════════════════════════════════════════════════════════════════════
+   * ══ THE CAP GRAMMAR — FOUR ROLES ═════════════════════════════════════════════════════════════
    *
-   * Four tints, and they are named for the COLOUR rather than for what packages happens to put in
-   * them. `--pkgt-pro-*` / `-let-*` / `-syn-*` / `-sam-*` are the same four values wearing
-   * MATERIAL-TYPE names (package · query letter · synopsis · opening sample), which is right on a
-   * page whose cards are materials and a false claim anywhere else: a pink cap on an elevator
-   * pitch does not make the pitch a query letter. So packages keeps its material names and points
-   * them at these, and every other surface reads the general names.
+   * ⚠️ NAMED FOR WHAT THE COLOUR MEANS — not for the colour, and not for the material. These began
+   * as `--pkgt-pro/let/syn/sam` (package · query letter · synopsis · opening sample), which is true
+   * on a page whose cards ARE materials and a local coincidence everywhere else. They then spent one
+   * commit as `--cap-slate/pink/sage/tan`, which is honest and says nothing: a maintainer reading
+   * `pink` learns the hex and not the reason.
    *
-   * ⚠️ ONE SOURCE, TWO VOCABULARIES — never two sets of hexes. The values are the app's existing
-   * ones (packagesBroadsheet.css:26–29 before this move), NOT the mockup's near-neighbours.
+   * The reason is already app-wide. A letter is pink because CORRESPONDENCE is pink — the same
+   * semantic `StatusDot`'s direction colouring draws on, burgundy and blush going out, sage coming
+   * back. So the names are what the tint MEANS:
+   *     outgoing   — what you send, and what is out with somebody now
+   *     incoming   — what came back, and where things stand as a result
+   *     pro        — gated by the plan
+   *     reference  — material you consult rather than act on
+   *
+   * ⚠️ ONE SOURCE OF HEXES, TWO VOCABULARIES, AND THE SECOND IS NOT PORTABLE. Packages keeps its
+   * MATERIAL names and points them here; nothing outside that page may use them. `--pkgt-syn` on a
+   * card that is not a synopsis is a false claim even when the colour is right.
    */
-  --cap-slate-a: #cfdcea; --cap-slate-b: #bccfe2; --cap-slate-edge: #9db6cf; --cap-slate-ink: #2d4a6b;
-  --cap-pink-a:  #f7e3da; --cap-pink-b:  #f0d5c9; --cap-pink-edge:  #e5c3b4; --cap-pink-ink:  #8a4433;
-  --cap-sage-a:  #dfe6dc; --cap-sage-b:  #d2dccf; --cap-sage-edge:  #bccab8; --cap-sage-ink:  #4f6647;
-  --cap-tan-a:   #f6eed5; --cap-tan-b:   #efe4c2; --cap-tan-edge:   #e0d3aa; --cap-tan-ink:   #7a6326;
+  --cap-pro-a: #cfdcea; --cap-pro-b: #bccfe2; --cap-pro-edge: #9db6cf; --cap-pro-ink: #2d4a6b;
+  --cap-outgoing-a:  #f7e3da; --cap-outgoing-b:  #f0d5c9; --cap-outgoing-edge:  #e5c3b4; --cap-outgoing-ink:  #8a4433;
+  --cap-incoming-a:  #dfe6dc; --cap-incoming-b:  #d2dccf; --cap-incoming-edge:  #bccab8; --cap-incoming-ink:  #4f6647;
+  --cap-reference-a:   #f6eed5; --cap-reference-b:   #efe4c2; --cap-reference-edge:   #e0d3aa; --cap-reference-ink:   #7a6326;
 
   /** The rule under a section header. Was `--pkgo-hairline`, which is `.pkgw`-scoped. */
   --sa-sec-rule: rgba(124, 58, 42, 0.16);
@@ -133,7 +141,7 @@
  *  edges, which is the fault packages' own D2 note records. */
 .sa-cardbody { padding: 13px 15px 15px; }
 
-.sa-cap--pink  { background: linear-gradient(180deg, var(--cap-pink-a),  var(--cap-pink-b));  border-bottom-color: var(--cap-pink-edge);  color: var(--cap-pink-ink); }
-.sa-cap--sage  { background: linear-gradient(180deg, var(--cap-sage-a),  var(--cap-sage-b));  border-bottom-color: var(--cap-sage-edge);  color: var(--cap-sage-ink); }
-.sa-cap--slate { background: linear-gradient(180deg, var(--cap-slate-a), var(--cap-slate-b)); border-bottom-color: var(--cap-slate-edge); color: var(--cap-slate-ink); }
-.sa-cap--tan   { background: linear-gradient(180deg, var(--cap-tan-a),   var(--cap-tan-b));   border-bottom-color: var(--cap-tan-edge);   color: var(--cap-tan-ink); }
+.sa-cap--outgoing  { background: linear-gradient(180deg, var(--cap-outgoing-a),  var(--cap-outgoing-b));  border-bottom-color: var(--cap-outgoing-edge);  color: var(--cap-outgoing-ink); }
+.sa-cap--incoming  { background: linear-gradient(180deg, var(--cap-incoming-a),  var(--cap-incoming-b));  border-bottom-color: var(--cap-incoming-edge);  color: var(--cap-incoming-ink); }
+.sa-cap--pro { background: linear-gradient(180deg, var(--cap-pro-a), var(--cap-pro-b)); border-bottom-color: var(--cap-pro-edge); color: var(--cap-pro-ink); }
+.sa-cap--reference   { background: linear-gradient(180deg, var(--cap-reference-a),   var(--cap-reference-b));   border-bottom-color: var(--cap-reference-edge);   color: var(--cap-reference-ink); }

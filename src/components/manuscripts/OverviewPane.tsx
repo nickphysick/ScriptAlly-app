@@ -47,7 +47,7 @@ export const OverviewPane: React.FC<OverviewPaneProps> = ({
   <>
     <div className="msp-blk">
       <SectionHeader title="The pitch" meta={pitchMeta ?? undefined} />
-      <CappedCard tint="pink" label="Elevator pitch">
+      <CappedCard tint="outgoing" label="Elevator pitch">
         {/* ⚠️ AN UNWRITTEN PITCH SAYS SO. It does not render an empty card, and it does not offer
             to write one — the editor is unreachable until the rules allowlist carries the field. */}
         {pitch
@@ -73,7 +73,7 @@ export const OverviewPane: React.FC<OverviewPaneProps> = ({
       </div>
 
       <CappedCard
-        tint="sage"
+        tint="incoming"
         label="Who holds what"
         right={`${holders.length} agent${holders.length === 1 ? "" : "s"}`}
         className="msp-holders"

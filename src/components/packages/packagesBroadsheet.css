@@ -25,13 +25,16 @@
    */
   /* ⚠️ THE HEXES MOVED TO `containers/containers.css` AND THESE NOW READ THEM (book profile,
      Phase 1). The values are unchanged; what changed is that a second page needed the same four
-     tints and must not name them after MATERIALS. There, they are `--cap-slate/pink/sage/tan`;
-     here they keep the material names, because on THIS page a pink cap really does mean a query
+     tints and must not name them after MATERIALS. There they are named by ROLE —
+     `--cap-outgoing/incoming/pro/reference` — because the reason a letter is pink is that
+     CORRESPONDENCE is pink, the same semantic `StatusDot`'s direction colouring draws on; the
+     material naming was a coincidence of a page where every card happens to be one.
+     Here they keep the material names, because on THIS page a pink cap really does mean a query
      letter. One source of hexes, two vocabularies — never two sets of values to keep in step. */
-  --pkgt-pro-ink: var(--cap-slate-ink); --pkgt-pro-a: var(--cap-slate-a); --pkgt-pro-b: var(--cap-slate-b); --pkgt-pro-edge: var(--cap-slate-edge);
-  --pkgt-let-ink: var(--cap-pink-ink);  --pkgt-let-a: var(--cap-pink-a);  --pkgt-let-b: var(--cap-pink-b);  --pkgt-let-edge: var(--cap-pink-edge);
-  --pkgt-syn-ink: var(--cap-sage-ink);  --pkgt-syn-a: var(--cap-sage-a);  --pkgt-syn-b: var(--cap-sage-b);  --pkgt-syn-edge: var(--cap-sage-edge);
-  --pkgt-sam-ink: var(--cap-tan-ink);   --pkgt-sam-a: var(--cap-tan-a);   --pkgt-sam-b: var(--cap-tan-b);   --pkgt-sam-edge: var(--cap-tan-edge);
+  --pkgt-pro-ink: var(--cap-pro-ink); --pkgt-pro-a: var(--cap-pro-a); --pkgt-pro-b: var(--cap-pro-b); --pkgt-pro-edge: var(--cap-pro-edge);
+  --pkgt-let-ink: var(--cap-outgoing-ink);  --pkgt-let-a: var(--cap-outgoing-a);  --pkgt-let-b: var(--cap-outgoing-b);  --pkgt-let-edge: var(--cap-outgoing-edge);
+  --pkgt-syn-ink: var(--cap-incoming-ink);  --pkgt-syn-a: var(--cap-incoming-a);  --pkgt-syn-b: var(--cap-incoming-b);  --pkgt-syn-edge: var(--cap-incoming-edge);
+  --pkgt-sam-ink: var(--cap-reference-ink);   --pkgt-sam-a: var(--cap-reference-a);   --pkgt-sam-b: var(--cap-reference-b);   --pkgt-sam-edge: var(--cap-reference-edge);
 }
 
 /**

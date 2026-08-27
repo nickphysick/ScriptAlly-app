@@ -59,7 +59,7 @@ export interface VersionsPaneProps {
  * offer: what the feature does, and the one way to it.
  */
 const Offer: React.FC<{ onUpgrade: () => void }> = ({ onUpgrade }) => (
-  <CappedCard tint="slate" label="Versions" right="Pro">
+  <CappedCard tint="pro" label="Versions" right="Pro">
     <p className="msp-pitchtext">
       Name the openings you send — an initial draft, a prologue-first reordering, a post-R&amp;R
       revision — and the app records which one went to whom.
@@ -99,7 +99,7 @@ export const VersionsPane: React.FC<VersionsPaneProps> = ({
       <div className="msp-blk">
         <SectionHeader title="Versions" meta={meta} />
         <div className="msp-duo">
-          <CappedCard tint="slate" label="Versions" right={`Pro · ${versions.length}`}>
+          <CappedCard tint="pro" label="Versions" right={`Pro · ${versions.length}`}>
             <BookVersionsPanel
               versions={versions}
               materials={materials}
@@ -120,7 +120,7 @@ export const VersionsPane: React.FC<VersionsPaneProps> = ({
             )}
           </CappedCard>
 
-          <CappedCard tint="slate" label="Requests by opening" right="Pro">
+          <CappedCard tint="pro" label="Requests by opening" right="Pro">
             <table className="msp-table">
               <thead><tr><th>Opening</th><th>Samples out</th><th>Requests followed</th></tr></thead>
               <tbody>
@@ -150,7 +150,7 @@ export const VersionsPane: React.FC<VersionsPaneProps> = ({
 
       <div className="msp-blk">
         <CappedCard
-          tint="slate"
+          tint="pro"
           label="Who holds which version"
           right={`Pro · ${holders.length} agent${holders.length === 1 ? "" : "s"}`}
         >

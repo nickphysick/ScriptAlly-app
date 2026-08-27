@@ -141,6 +141,18 @@ describe("the rename is value-preserving", () => {
 describe("the cap grammar — one source of hexes, two vocabularies", () => {
   const ROLES = ["a", "b", "edge", "ink"] as const;
 
+  /**
+   * ⚠️ NO COLOUR-NAMED CAP TOKEN MAY SURVIVE. The whole move is from naming the hex to naming the
+   * reason; a `--cap-pink-*` left behind would be a second, silent vocabulary for the same value,
+   * and the next person would reach for whichever they saw first.
+   */
+  it("names no cap token after its colour", () => {
+    for (const colour of ["slate", "pink", "sage", "tan"]) {
+      expect(shared, `--cap-${colour}-* survives`).not.toContain(`--cap-${colour}-`);
+      expect(broadsheet, `packages still reads --cap-${colour}-*`).not.toContain(`--cap-${colour}-`);
+    }
+  });
+
   it("the four tints are declared in the shared sheet, as literals", () => {
     for (const t of CAP_TINTS) {
       for (const r of ROLES) {
@@ -156,7 +168,10 @@ describe("the cap grammar — one source of hexes, two vocabularies", () => {
    * they were written and drift on the first retint.
    */
   it("packages' material-named tints read them rather than restating the values", () => {
-    for (const [mat, gen] of [["pro", "slate"], ["let", "pink"], ["syn", "sage"], ["sam", "tan"]]) {
+    /* material name → the ROLE its colour actually means. `let` is outgoing because correspondence
+       is what you send; `syn` and `sam` are the incoming and reference tints that page happens to
+       put a synopsis and a sample in. The mapping is the point: one set of hexes, two vocabularies. */
+    for (const [mat, gen] of [["pro", "pro"], ["let", "outgoing"], ["syn", "incoming"], ["sam", "reference"]]) {
       for (const r of ROLES) {
         const m = new RegExp(`--pkgt-${mat}-${r}:\\s*([^;]+);`).exec(broadsheet);
         expect(m, `--pkgt-${mat}-${r} is missing`).toBeTruthy();
@@ -224,17 +239,17 @@ describe("SectionHeader — the two slots differ by one auto margin", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 describe("CappedCard — the cap is CardBand, not a copy of it", () => {
   it("renders the one band-head DOM this app has, with the tint on it", () => {
-    const html = renderToStaticMarkup(<CappedCard tint="sage" label="Who holds what" right="4 agents">body</CappedCard>);
-    // `pkgb-cardhead` is CardBand's own box; `sa-cap--sage` is only the colour.
-    expect(html).toContain('class="pkgb-cardhead sa-cap--sage"');
+    const html = renderToStaticMarkup(<CappedCard tint="incoming" label="Who holds what" right="4 agents">body</CappedCard>);
+    // `pkgb-cardhead` is CardBand's own box; `sa-cap--incoming` is only the colour.
+    expect(html).toContain('class="pkgb-cardhead sa-cap--incoming"');
     expect(html).toContain('<span class="pkgb-chlbl">Who holds what</span>');
     expect(html).toContain('<span class="pkgb-chrt">4 agents</span>');
     expect(html).toContain('<div class="sa-cardbody">body</div>');
   });
 
   it("a tint resolves no glyph of its own — the caller supplies one or there is none", () => {
-    expect(renderToStaticMarkup(<CappedCard tint="pink" label="Elevator pitch">x</CappedCard>))
-      .toContain('<div class="pkgb-cardhead sa-cap--pink"><span class="pkgb-chlbl">Elevator pitch</span>');
+    expect(renderToStaticMarkup(<CappedCard tint="outgoing" label="Elevator pitch">x</CappedCard>))
+      .toContain('<div class="pkgb-cardhead sa-cap--outgoing"><span class="pkgb-chlbl">Elevator pitch</span>');
   });
 
   it("every tint is reachable", () => {

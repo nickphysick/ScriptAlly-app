@@ -90,7 +90,7 @@ describe("comparable titles are read-only here", () => {
 
   it("renders one card for one comp rather than an empty second", () => {
     const html = comps([COMPS[0]]);
-    expect(html.match(/sa-cap--tan/g)).toHaveLength(1);
+    expect(html.match(/sa-cap--reference/g)).toHaveLength(1);
     expect(html).toContain(">1<");
   });
 
@@ -104,7 +104,7 @@ describe("comparable titles are read-only here", () => {
   it("says the shelf is empty rather than drawing empty cards", () => {
     const html = comps([]);
     expect(html).toContain("No comparable titles recorded yet.");
-    expect(html.match(/sa-cap--tan/g)).toHaveLength(1);
+    expect(html.match(/sa-cap--reference/g)).toHaveLength(1);
   });
 });
 

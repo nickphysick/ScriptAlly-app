@@ -64,7 +64,7 @@ export const NotesPane: React.FC<NotesPaneProps> = ({ notes, onWrite, onOpenNote
 
       <div className="msp-notegrid">
         {notes.map((n) => (
-          <CappedCard key={n.id} tint="tan" label="Note" className="msp-paper">
+          <CappedCard key={n.id} tint="reference" label="Note" className="msp-paper">
             <div className="msp-ptitle">{n.text}</div>
             {/* An absent body renders nothing — never an empty line, never a placeholder. */}
             {n.detail && <div className="msp-ptext">{n.detail}</div>}

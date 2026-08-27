@@ -61,7 +61,7 @@ export const JourneyPane: React.FC<JourneyPaneProps> = ({
     <>
       <div className="msp-blk">
         <SectionHeader title="Where the queries stand" meta={journeyMeta} />
-        <CappedCard tint="sage" label="Current standing" right="Today">
+        <CappedCard tint="incoming" label="Current standing" right="Today">
           <div className="msp-track">
             <div className="msp-stations">
               <div className="msp-rail" aria-hidden="true" />
@@ -108,7 +108,7 @@ export const JourneyPane: React.FC<JourneyPaneProps> = ({
 
       <div className="msp-blk">
         <div className="msp-duo">
-          <CappedCard tint="pink" label="Out with agents now" right={String(holders.length)}>
+          <CappedCard tint="outgoing" label="Out with agents now" right={String(holders.length)}>
             {holders.length === 0 ? (
               <p className="msp-empty">Nothing is with an agent right now.</p>
             ) : (
@@ -132,7 +132,7 @@ export const JourneyPane: React.FC<JourneyPaneProps> = ({
             )}
           </CappedCard>
 
-          <CappedCard tint="tan" label="How far queries reached" right={`All ${queriesSent}`}>
+          <CappedCard tint="reference" label="How far queries reached" right={`All ${queriesSent}`}>
             <table className="msp-table">
               <thead><tr><th>Furthest point</th><th>Queries</th></tr></thead>
               <tbody>

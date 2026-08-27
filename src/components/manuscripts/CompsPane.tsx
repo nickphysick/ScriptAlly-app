@@ -52,7 +52,7 @@ export const CompsPane: React.FC<CompsPaneProps> = ({ comps, onManage }) => {
       />
 
       {columns.length === 0 ? (
-        <CappedCard tint="tan" label="Comparable titles">
+        <CappedCard tint="reference" label="Comparable titles">
           <p className="msp-empty">No comparable titles recorded yet.</p>
         </CappedCard>
       ) : (
@@ -60,7 +60,7 @@ export const CompsPane: React.FC<CompsPaneProps> = ({ comps, onManage }) => {
           {columns.map((col, i) => (
             <CappedCard
               key={i}
-              tint="tan"
+              tint="reference"
               label="Comparable titles"
               /* `1–3` / `4–6` — which slice of the writer's own order this card holds. */
               right={col.length === 1
