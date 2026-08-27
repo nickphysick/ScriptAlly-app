@@ -564,3 +564,85 @@ test.describe("the fix pack — one fact, one function", () => {
     expect(checked, "no caption named a date — the sweep proves nothing").toBeGreaterThan(2);
   });
 });
+
+/* ══ THE HONEST FILL, PAINTED (v36, Phase 2) ═════════════════════════════════════════════════ */
+
+test("⚠️ a fill ratio is the same number at every range — the board is not guessing", async ({ page }) => {
+  await openRoute(page, "/todo/calendar", { width: 1440, height: 950 });
+  await page.waitForTimeout(1200);
+
+  /* ⚠️ THE VISIBLE RANGE CONTROL. Every workspace page stays MOUNTED, so a bare querySelector
+     returns a hidden page's copy — the dispatch then changes nothing and the probe reports three
+     identical readings for three different ranges without erroring. That happened; it is why this
+     throws rather than guards. */
+  const setRange = async (i: number) => {
+    await page.evaluate(`(() => {
+      const all = [...document.querySelectorAll('input[type=range]')]
+        .filter((e) => e.getBoundingClientRect().width > 0);
+      if (all.length !== 1) throw new Error("expected 1 visible range control, found " + all.length);
+      const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+      set.call(all[0], String(${i}));
+      all[0].dispatchEvent(new Event("input", { bubbles: true }));
+    })()`);
+    await page.waitForTimeout(700);
+  };
+
+  /* ⚠️ READ THE PAINTED WIDTH RATIO, not the data attribute. `data-fill` is what the code THINKS;
+     the child's width against its parent's is what the reader sees, and the two are only the same
+     thing if the element was drawn from the number. */
+  /**
+   * ⚠️ THE REPORTED NUMBER, AND THE PROOF THE ELEMENT IS DRAWN FROM IT.
+   *
+   * The painted width RATIO is not a usable invariance metric and three drafts proved it: the bar
+   * is `box-sizing: border-box` with a 1px border, so a fill at `width: 100%` paints two pixels
+   * narrower than the rect — 0.3% of a 600px bar and 36% of a 30px one. Comparing rects reported
+   * 99 / 98 / 64 for a bar that was full at all three ranges. So this asserts the two halves that
+   * actually matter and can each be measured honestly: the NUMBER the board reports is the same at
+   * every range, and the fill element's own width is set FROM that number rather than from
+   * anything else. Together they are the composed claim; either alone is not.
+   */
+  const ratios = async () => page.evaluate(`(() => {
+    const out = {};
+    for (const row of document.querySelectorAll(".tl-rrow")) {
+      const nm = (row.querySelector(".tl-nm2") || {}).textContent;
+      /* ⚠️ THE STRETCH THAT SAYS IT IS LIVE. Geometry cannot name the same piece twice: a row is
+         cut into a different number of pieces at each range, so "the last one", "the one
+         containing today" and "the one whose edge is nearest today" each selected a DIFFERENT
+         segment at each reading — all three were tried, and all three reported swings of fifty
+         points on rows that had never been clipped. A range-invariance check that changes its
+         subject between readings measures its own selection. */
+      const b = row.querySelector('.tl-p[data-live="1"]');
+      const fl = b ? b.querySelector(".tl-fl") : null;
+      if (!b || !fl) continue;
+      const said = Number(b.dataset.fill);
+      if (!Number.isFinite(said)) continue;
+      const drawn = parseFloat(fl.style.width);
+      out[nm] = { said, drawn: Number.isFinite(drawn) ? drawn : null };
+    }
+    return out;
+  })()`) as Promise<Record<string, { said: number; drawn: number | null }>>;
+
+  const seen: Record<string, number[]> = {};
+  const drawnGap: string[] = [];
+  for (const i of [0, 1, 2]) {
+    await setRange(i);
+    const r = await ratios();
+    for (const [k, v] of Object.entries(r)) {
+      (seen[k] = seen[k] || []).push(v.said);
+      /* the element is drawn FROM the number: same value, allowing the render's own rounding */
+      if (v.drawn == null || Math.abs(v.drawn - v.said) > 1.5) {
+        drawnGap.push(`${k} says ${v.said}% and draws ${v.drawn}%`);
+      }
+    }
+  }
+  const across = Object.entries(seen).filter(([, v]) => v.length === 3);
+  console.log("reported fill at 1m / 3m / 6m:");
+  for (const [k, v] of across) console.log(`  ${k.padEnd(24)} ${v.join(" / ")}%`);
+
+  expect(across.length, "no row carried a live fill at all three ranges").toBeGreaterThan(2);
+  expect(drawnGap, `the fill element is not drawn from the number: ${drawnGap.join(" | ")}`).toEqual([]);
+  for (const [k, v] of across) {
+    expect(Math.max(...v) - Math.min(...v), `${k} reported ${v.join(" / ")}% at three ranges`)
+      .toBeLessThanOrEqual(1);
+  }
+});

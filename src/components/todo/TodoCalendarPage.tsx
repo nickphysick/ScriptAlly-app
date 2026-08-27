@@ -159,6 +159,7 @@ const Piece: React.FC<{
       className={`tl-at2 tl-p ${familyOf(sg.state)}${sg.hollow ? " hollow" : ""}${near ? " near" : ""}${selected ? " sel" : ""}`}
       style={{ left: barLeft(sg), width: barWidth(sg), ...laneVar(sg.lane) }}
       data-state={sg.state}
+      data-live={sg.live ? "1" : undefined}
       data-fill={fill == null ? "none" : String(Math.round(fill * 100))}
       data-tip={sg.tip || undefined}
       onClick={onPick}

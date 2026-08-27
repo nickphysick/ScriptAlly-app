@@ -723,7 +723,11 @@ describe("fillFor — elapsed over a stated span, derived at read and stored now
   const seg = (over: Partial<Segment>): Segment => ({
     key: "s", rowKey: "r", lane: 0, from: 0, to: 10, side: "theirs",
     openLeft: false, openRight: false, capLeft: false, capRight: false,
-    label: "", short: "", state: "theirs", tip: "", todayAt: 5, queryId: "q", ...over,
+    label: "", short: "", state: "theirs", tip: "", todayAt: 5, queryId: "q",
+    /* ⚠️ THE FILL READS `trueFrom`, so the helper must set it — and it DEFAULTS TO `from` here so
+       a case that does not care about clipping reads as it always did. A case that does care
+       overrides it, which is the only way to write the clipped span at all. */
+    trueFrom: (over as { from?: number }).from ?? 0, ...over,
   } as Segment);
 
   it("⚠️ null WHERE NOBODY NAMED A DATE — and null is the point, not the failure case", () => {
@@ -941,5 +945,72 @@ describe("namedEndFor — one date, and the three derivations it replaces", () =
         }
       }
     }
+  });
+});
+
+/* ══ THE HONEST FILL (v36, Phase 2) ══════════════════════════════════════════════════════════ */
+
+describe("a fill is a fraction of the STATED span, never of the visible one", () => {
+  /**
+   * ⚠️ THE BOARD REPORTED A DIFFERENT PERCENTAGE DEPENDING ON HOW YOU HAD SCROLLED. `fillFor` read
+   * the piece's DRAWN start, which `cutPieces` clamps to the window's left edge — so a wait that
+   * opened before the window showed a fraction of what happened to be on screen. Measured at 1440
+   * before this fix: Rachel Lin 20% at 1 month and 41% at 3 months; the near-step fixture crossed
+   * its own 85% threshold at 89 / 96 / 98. One query, one day, three answers.
+   *
+   * ⚠️ AND THE FIX IS IN THE FILL, NOT THE DRAW. Clipping is what a window IS: the element must
+   * still be cut at the edge. What must not be cut is the arithmetic.
+   */
+  const spanOf = (days: number, start: string) => ({
+    days, win: { days: windowDays(start, days), today: TODAY, past: false } as BarWindow,
+  });
+
+  it("⚠️ THE SAME STRETCH REPORTS THE SAME FRACTION AT EVERY RANGE", () => {
+    /* sent 40 days ago, an 8-week window: elapsed 40 of 56, whatever the board shows */
+    const q1 = q({ status: QueryStatus.QUERIED, dateSent: "2026-07-17T09:00:00Z" });
+    const a1 = agent({ responseTimeWeeks: 8 } as Partial<Agent>);
+    const fills: number[] = [];
+    for (const { win } of [spanOf(30, "2026-08-18"), spanOf(90, "2026-08-04"), spanOf(180, "2026-07-13")]) {
+      const bars = laneBars(lane({ query: q1, agent: a1 }), win);
+      const live = bars.segments[bars.segments.length - 1];
+      const f = fillFor(live);
+      expect(f, "no fill at all").not.toBeNull();
+      fills.push(Math.round(f! * 100));
+    }
+    /* ⚠️ ONE NUMBER, THREE WINDOWS. A board that answers "how far through the wait am I" with a
+       number that moves when you change the zoom is not reporting, it is guessing. */
+    expect(new Set(fills).size, `three ranges reported ${fills.join(" / ")}%`).toBe(1);
+    /* and it is the TRUE fraction: 40 elapsed of a 56-day window */
+    expect(fills[0]).toBeGreaterThanOrEqual(70);
+    expect(fills[0]).toBeLessThanOrEqual(74);
+  });
+
+  it("a stretch that opens INSIDE the window is unaffected — the fix changes nothing it should not", () => {
+    const q1 = q({ status: QueryStatus.QUERIED, dateSent: "2026-08-20T09:00:00Z" });
+    const a1 = agent({ responseTimeWeeks: 2 } as Partial<Agent>);
+    const { win } = spanOf(90, "2026-08-04");
+    const live = laneBars(lane({ query: q1, agent: a1 }), win).segments.slice(-1)[0];
+    /**
+     * ⚠️ THE EXPECTED VALUE IS DERIVED, NOT TYPED. The first draft of this case guessed a band
+     * (48–56%) from arithmetic done in my head, and the real answer was 43 — so a correct fill
+     * would have been reported as a defect. The span is whatever `namedEndFor` says it is, and
+     * `resolveExpectedDate` is the only thing entitled to say; reconciling two derivations against
+     * each other is the house pattern, and a literal on both sides is what it exists to replace.
+     */
+    const end = namedEndFor(q1, a1, { today: TODAY }).end!;
+    const day = (ymd: string) => Math.round(
+      (new Date(`${ymd}T12:00:00`).getTime() - new Date("2026-08-20T12:00:00").getTime()) / 86_400_000);
+    const expected = day(TODAY) / day(end.ymd);
+    expect(fillFor(live)!).toBeCloseTo(expected, 2);
+  });
+
+  it("⚠️ AND THE DRAWN PIECE IS STILL CLIPPED — the window still is a window", () => {
+    const q1 = q({ status: QueryStatus.QUERIED, dateSent: "2026-07-17T09:00:00Z" });
+    const a1 = agent({ responseTimeWeeks: 8 } as Partial<Agent>);
+    const { win } = spanOf(30, "2026-08-18");
+    const live = laneBars(lane({ query: q1, agent: a1 }), win).segments.slice(-1)[0];
+    /* the element begins at the edge — only the arithmetic reaches back past it */
+    expect(live.from).toBeGreaterThanOrEqual(0);
+    expect(live.trueFrom, "the true start was not carried").toBeLessThan(0);
   });
 });

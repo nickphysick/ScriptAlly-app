@@ -106,9 +106,13 @@ export const NEAR_AT = 0.85;
 export function fillFor(sg: Segment): number | null {
   if (sg.historical) return 1;
   if (sg.goal == null) return null;
+  /* ⚠️ `trueFrom`, NEVER `from`. `from` is where the ELEMENT starts — clamped to the window's left
+     edge — and reading it here made the reported fraction depend on the range the reader happened
+     to be on. See the field's own note. */
+  const start = sg.trueFrom;
   /* the named end is at or before the start: nothing to be part-way through */
-  if (sg.goal <= sg.from) return 1;
-  const p = (sg.todayAt - sg.from) / (sg.goal - sg.from);
+  if (sg.goal <= start) return 1;
+  const p = (sg.todayAt - start) / (sg.goal - start);
   return Math.max(0, Math.min(1, p));
 }
 
@@ -189,8 +193,33 @@ export interface Segment {
   goal?: number;
   /** where today is, in this segment's own coordinates — a window fact, carried so `fillFor` is pure */
   todayAt: number;
+  /**
+   * Where this stretch REALLY began, in window coordinates — negative when it opened before the
+   * window's left edge.
+   *
+   * ⚠️ THIS IS THE FILL'S ANCHOR, AND `from` IS THE DRAWING'S. `cutPieces` starts every run at 0
+   * because that is where the element starts; reading it as the stretch's beginning made the fill
+   * a fraction of what happened to be ON SCREEN. Measured at 1440 before this field existed, one
+   * unchanged wait reported 35% at one month, 58% at three and 74% at six. A board that answers
+   * "how far through am I" with a number that moves when you change the zoom is not reporting.
+   *
+   * ⚠️ CLIPPING IS WHAT A WINDOW IS, so the drawn piece is still cut at the edge. What must not be
+   * cut is the arithmetic.
+   */
+  trueFrom: number;
   /** this stretch ended at a real event: it is finished, and a finished stretch is full */
   historical?: true;
+  /**
+   * This is the stretch that reaches today — the one still running.
+   *
+   * ⚠️ IT IS RENDERED AS `data-live` SO A PROBE CAN NAME THE SAME STRETCH AT EVERY RANGE. A row is
+   * cut into a different NUMBER of pieces at different ranges as events fall in and out of the
+   * window, so any geometric rule for "the live one" (the last piece, the piece containing today,
+   * the piece whose edge is nearest today) selects a different segment at each reading — and a
+   * range-invariance check that changes its subject between readings is measuring its own
+   * selection. Identity, not geometry.
+   */
+  live?: true;
   /** this piece lies PAST the named end — transparent, outlined, label dimmed */
   hollow?: true;
   /** what the one portalled tooltip says for this bar: the label and the named date */
@@ -785,6 +814,35 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
    * Out-of-range is the honest value and `fillFor`'s own clamp is what keeps the fraction sane.
    */
   const todayAt = daysBetween(win.days[0], win.today) + EVENT_AT;
+  /**
+   * Where the journey opened, in window coordinates — negative when it began before the window.
+   *
+   * ⚠️ IT IS THE SAME ANCHOR THE LABEL ALREADY NAMES. A bar reading "Out since 27 Jul" is telling
+   * the reader when this stretch began; the fill must measure from the same day or the two are
+   * describing different spans on one element. `openedAt` is that day, and it is deliberately NOT
+   * clamped to the window — the whole fault was a clamp.
+   */
+  const sendYmds = [query.dateSent, query.partialSentDate, query.fullSentDate]
+    .map((iso) => isoToYmd(iso as string | undefined))
+    .filter((y): y is string => !!y)
+    .sort();
+  /**
+   * ⚠️ THE LATEST SEND, BECAUSE THAT IS THE DATE THE GOAL IS MEASURED FROM.
+   *
+   * `namedEndFor` resolves the reply window as `Math.max(...sends) + responseTimeWeeks`, so the
+   * stated span IS `[latest send, latest send + weeks]` — and a fill is the elapsed part of THAT.
+   * Anchoring anywhere else makes the numerator and the denominator measure from two different
+   * days, which is how a fraction comes to depend on things neither of them is about.
+   *
+   * ⚠️ `lastStatusChange` WAS TRIED HERE AND IS WRONG. It is the audit stamp for when the current
+   * STATUS began, which is not when the current WAIT began: a query sent in July whose full went
+   * out on the 31st has a status change in July and a wait that starts on the 31st. Measured, one
+   * row anchored on the status change read 73% at three months and 59% at six — the two ranges
+   * disagreeing because only the wider one could see the send that actually opened the stretch.
+   * Both halves of the fraction now come from one date and the window cannot reach either.
+   */
+  const openedYmd = sendYmds.length ? sendYmds[sendYmds.length - 1] : null;
+  const openedAt = openedYmd ? daysBetween(win.days[0], openedYmd) + EVENT_AT : 0;
 
   /**
    * ⚠️ THE PRECEDENCE IS EXPECTED-THEN-REMINDER, AND THE FIRST COVERS TWO OF THE THREE SOURCES.
@@ -902,6 +960,38 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
     if (better(i, widestOfRun.get(runOf[i]))) widestOfRun.set(runOf[i], i);
   });
 
+  /**
+   * Where each contiguous same-side run really began, in window coordinates.
+   *
+   * ⚠️ CLIPPED RUNS TAKE THE JOURNEY'S OWN OPENING. A run whose first piece starts at the window
+   * edge began before the window; `openedAt` is the outer bound we can state — `lastStatusChange`
+   * where there is one, the latest send otherwise. It is deliberately not clamped: the whole fault
+   * this replaces was a clamp.
+   */
+  const runFrom: Record<number, number> = {};
+  pieces.forEach((p, i) => {
+    if (runFrom[runOf[i]] === undefined) runFrom[runOf[i]] = p.from <= 0.001 ? openedAt : p.from;
+  });
+  /**
+   * ⚠️ THE LIVE RUN ALWAYS ANCHORS ON `openedAt`, WHETHER OR NOT ITS FIRST PIECE IS CLIPPED.
+   *
+   * Its goal is `latest send + weeks`, so its span is `[latest send, goal]` — both from the
+   * query's own fields, neither reachable by the window. Taking the first VISIBLE piece's position
+   * instead introduces a second anchor, and the two disagree wherever the record holds an event
+   * the query's send dates do not: measured, one row read 73% at three months and 59% at six,
+   * because at six months an event a fortnight after the last send became visible and the run
+   * started counting from there while its goal went on counting from the send. A fraction whose
+   * numerator and denominator measure from different days is not a fraction of anything.
+   *
+   * ⚠️ ONLY THE LIVE RUN NEEDS THIS. Every other run is `historical`, and `fillFor` returns 1 for
+   * those without reading the anchor at all.
+   */
+  pieces.forEach((p, i) => {
+    if (p.to >= todayAt - 0.001 && todayAt <= span + 0.001 && todayAt >= -0.001) {
+      runFrom[runOf[i]] = openedAt;
+    }
+  });
+
   const segments: Segment[] = [];
   pieces.forEach((p, i) => {
     const speaks = widestOfRun.get(runOf[i]) === i;
@@ -965,10 +1055,25 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
       ...(norail && first ? { norail: true as const } : {}),
       ...(openEnd && last ? { openEnd: true as const } : {}),
       todayAt,
+      /* ⚠️ THE FIRST PIECE OF A RUN TAKES THE JOURNEY'S OWN OPENING; every later one begins at a
+         real event and already knows where it began.
+         ⚠️ AND THE TEST IS "does this piece start at the window edge", NOT "did the journey open
+         before the window". A bar is ALWAYS drawn from the edge — `cutPieces` starts every run at
+         0 whether or not the send is visible — so a send that sits comfortably inside the window
+         is still not where the element begins, and requiring a negative opening left the six-month
+         reading disagreeing with the other two by three points. */
+      /* ⚠️ THE RUN'S OPENING, NOT THE PIECE'S. Pieces break at EVERY node — a nudge, a holding
+         reply, anything drawn — and most of those change no hands, so the stretch continues
+         through them. Anchoring on the piece made the fill depend on how many events happened to
+         be inside the window: one row read 73% at three months and 59% at six, because at six
+         months a nudge was visible and the piece began there. A run is one stretch and takes one
+         anchor. */
+      trueFrom: runFrom[runOf[i]],
       /* ⚠️ A FINISHED STRETCH IS FULL, AND THERE ARE THREE WAYS TO BE FINISHED: it lies wholly
          behind today, it ENDS AT AN EVENT (something happened and the stretch stopped), or the
          journey is closed. A live relationship is made of completed stretches and one running
          one, and only the running one has a fraction to be part-way through. */
+      ...(live_ ? { live: true as const } : {}),
       ...(p.to < todayAt - 0.001
         || marks.some((m) => Math.abs(m - p.to) < GAP + 0.001)
         || terminal
