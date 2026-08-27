@@ -172,7 +172,13 @@
    down twice so seven day columns still fit a narrow laptop; the breakpoints move with it. */
 .tl {
   display: flex; flex-direction: column; position: relative;
-  --tl-head-w: 210px;
+  /* ⚠️ 260 IS MEASURED, NOT CHOSEN (density pack, Phase 2). The head carries a SENTENCE now, and
+     the longest everyday form — "They want a revise and resubmit — asked 61 days ago" — needs
+     233px of ink; 233 plus the head's own 26px of padding is 259. At 210 it cut two sentences in
+     fourteen mid-word, and at the mono-caps treatment it cut six.
+     ⚠️ THE ELLIPSIS STAYS AND STILL HAS A SUBJECT: the sentence carries the agent's surname, so a
+     long one can still run past this. What it no longer does is cut an ordinary sentence. */
+  --tl-head-w: 260px;
 }
 /**
  * ⚠️ THE MARKER CLEARANCE IS NOT MIGRATED YET, AND THE TOKEN IS DELIBERATELY ABSENT RATHER THAN
@@ -878,10 +884,10 @@
    sitting below a narrow one silently overrides it — the fault this repo has already paid for on
    every phone once. */
 @media (max-width: 1200px) {
-  .tl { --tl-head-w: 168px; }
+  .tl { --tl-head-w: 200px; }
 }
 @media (max-width: 1000px) {
-  .tl { --tl-head-w: 132px; }
+  .tl { --tl-head-w: 150px; }
   .tl-nm { font-size: 13px; }
 }
 
@@ -1118,9 +1124,16 @@
 
 /* ⚠️ THE SENTENCE THE BARS CANNOT HOLD (range pack, Phase 3). Same words, different place — it is
    the live segment's own label, so the head and the bar can never state two different things. */
+/* ⚠️ A SENTENCE, SET AS ONE (density pack, Phase 2). This was mono 7.5px uppercase with 0.09em
+   tracking — a LABEL treatment, inherited from when the head's text was the bar's own label lifted
+   up. It is the grouped pack's copy now: "Offer on the table — an answer was due yesterday", in
+   the writer's voice. Mono caps make a sentence read as a system tag, and at 7.5px they made a
+   sentence read as a system tag nobody could finish.
+   ⚠️ AND IT WAS CLIPPING SIX ROWS IN FOURTEEN. Measured before the change: 183px of room against
+   248, 264, 202, 197 needed. The head's width is set from that measurement below, not from taste. */
 .tl-rowsay {
   display: block; margin-top: 3px;
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
-  letter-spacing: 0.09em; text-transform: uppercase; color: #7b6a58;
+  font-size: 10.5px; font-weight: 400; letter-spacing: 0; text-transform: none;
+  line-height: 1.25; color: #7b6a58;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }

@@ -30,6 +30,7 @@ const read = (page: any) => page.evaluate(() => {
     disc: cs.getPropertyValue("--disc").trim(), ddot: cs.getPropertyValue("--ddot").trim(),
     barRect: bar ? px(bar.getBoundingClientRect().height) : null,
     ground: getComputedStyle(board).backgroundColor,
+    groundToken: getComputedStyle(board).getPropertyValue("--board-ground").trim(),
     headW: getComputedStyle(tl).getPropertyValue("--tl-head-w").trim(),
     bounds: tl.querySelectorAll(".tl-cell.bound").length,
     spineX: spine ? px(spine.getBoundingClientRect().left + spine.getBoundingClientRect().width / 2) : null,
@@ -43,7 +44,7 @@ test("Phase 2 — weight, ground, boundaries, and no spine", async ({ page }) =>
   page.on("console", (m) => { if (m.type() === "error") errs.push(m.text().slice(0, 140)); });
   /**
    * ⚠️ 1100 AND 960 ARE HERE FOR THE HEAD-WIDTH CHANGE, and without them this file proves nothing
-   * about the pack's own rule. `--tl-head-w` steps 210 → 168 at 1200 and → 132 at 1000, so at the
+   * about the pack's own rule. `--tl-head-w` steps 260 → 200 at 1200 and → 150 at 1000, so at the
    * four acceptance widths it never moves — anything positioned by a constant 210 would pass all
    * four and be wrong on a narrow laptop. The two extra widths are where the token earns its keep,
    * and they stay after the spine's removal because `.tl-grid` still reads the same token.
@@ -58,7 +59,20 @@ test("Phase 2 — weight, ground, boundaries, and no spine", async ({ page }) =>
     expect(m.disc, `[${width}] disc is not 34`).toBe("34px");
     expect(m.ddot, `[${width}] the direction dot has no token of its own`).toBe("24px");
     expect(m.laneH, `[${width}] the lane is not bar + padding`).toBe(44 + 13 * 2);
-    expect(m.ground, `[${width}] the ground did not drop a shade`).toBe("rgb(247, 244, 238)");
+    /**
+     * ⚠️ THE GROUND IS `--board-ground` NOW, AND THIS LOCK WAS RED FOR TWO PACKS BEFORE ANYONE
+     * LOOKED. It pinned `rgb(247, 244, 238)` — `--ws-ground`, the app's content-area colour, which
+     * the board borrowed while its bars were white and needed to differ from it. The settled pack
+     * gave the board the ref's own `--board-ground` (#eae2d6) and did NOT run this file, which is
+     * the discipline the density pack restates at the top: run every owned lock in the phase that
+     * changes what it reads.
+     *
+     * ⚠️ THE LAW SURVIVES AND IS WHAT IS ASSERTED — the board has a ground of its OWN and does not
+     * borrow one from the shell. Pinning the value is what made it a maintenance cost; pinning the
+     * TOKEN is what makes it a claim.
+     */
+    expect(m.ground, `[${width}] the board does not paint its own ground token`).toBe("rgb(234, 226, 214)");
+    expect(m.groundToken, `[${width}] the board's ground is not a token of its own`).toBe("#eae2d6");
     expect(m.bounds, `[${width}] no week boundary rules`).toBeGreaterThan(0);
     /* ⚠️ THE SPINE IS RETIRED, AND THIS ASSERTS THE RETIREMENT (grouped pack, Phase 2). It used
        to sit on today's column centre and this file proved it did so at six widths, which was the
