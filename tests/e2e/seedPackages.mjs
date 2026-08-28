@@ -86,6 +86,14 @@ const ALL_MATERIALS = [
   { id: "seed-mat-syn", componentType: "Synopsis", versionName: "One-page", days: 6 },
   { id: "seed-mat-pag", componentType: "Sample Pages", versionName: "Chapters 1-3", days: 9,
     draft: "The clockmaker's guild kept its records in a language nobody living could read. ".repeat(40) },
+  /* ⚠️ THE LIBRARY CARD HAS THREE SOURCE STATES AND A FIXTURE THAT CARRIES ONE PROVES A THIRD OF IT.
+     Every material above is pasted text, so until these two arrived a sweep over the card grid was a
+     monoculture wearing a census's clothes: it could not see the attachment branch or the empty one,
+     and it passed. Both are real states the app must draw — a file with nothing typed beside it, and
+     a material with neither — so they belong in the fixture rather than in a scratch script. */
+  { id: "seed-mat-ql3", componentType: "Query Letter", versionName: "Voice-led", days: 2,
+    fileAttached: true, fileName: "voice-led-v2.docx", contentType: "ref" },
+  { id: "seed-mat-ql4", componentType: "Query Letter", versionName: "Untitled draft", days: 1 },
 ];
 
 /* ⚠️ SPARSE KEEPS A LETTER AND A SYNOPSIS AND NO SAMPLE — deliberately, because that is what makes
@@ -175,8 +183,9 @@ if (CLEAN) {
     batch.set(doc(db, "users", uid, "versions", m.id), {
       id: m.id, userId: uid, manuscriptId: MS_ID,
       componentType: m.componentType, versionName: m.versionName,
-      fileAttached: false, createdDate: iso(m.days),
-      contentType: "text", contentDraft: m.draft ?? "",
+      fileAttached: m.fileAttached ?? false, createdDate: iso(m.days),
+      contentType: m.contentType ?? "text", contentDraft: m.draft ?? "",
+      ...(m.fileName ? { fileName: m.fileName } : {}),
     });
   }
   await batch.commit();
