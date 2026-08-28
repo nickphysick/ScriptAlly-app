@@ -62,15 +62,33 @@
 .mcar-shelved { opacity: 0.62; }
 .mcar-focus.mcar-shelved:hover { opacity: 1; }
 
-/* ⚠️ ARTWORK BLED IN — no bottom border, no inner hairline. The card's own radius clips its top. */
+/**
+ * ⚠️ ARTWORK BLED IN — no bottom border, no inner hairline. The card's own radius clips its top.
+ *
+ * ⚠️ SAGE, NOT TAN, AND THE TAN WAS A LITERAL I INVENTED. The generated ref carried
+ * `linear-gradient(150deg, #e8ddd0, #d9c9b6)` — a warm pair with no token behind it, written into
+ * the mockup and then copied out of it. The manuscripts sage pair already exists as
+ * `--ct-band-a` / `--ct-band-b` (#dce0d9 / #d0d6cc, the comps band), which is the shelf's family.
+ * Declared locally rather than read across, because `--ct-*` is `comps.css`'s scope and a `var()`
+ * that does not resolve here would paint nothing — the fault this sheet's own token lock exists for.
+ */
 .mcar-art {
+  --mcar-art-a: #dce0d9;
+  --mcar-art-b: #d0d6cc;
   position: relative;
-  display: block;
+  display: grid;
+  place-items: center;
   height: 184px;
   flex: none;
   border-radius: 13px 13px 0 0;
-  background: linear-gradient(150deg, #e8ddd0, #d9c9b6);
+  background: linear-gradient(150deg, var(--mcar-art-a), var(--mcar-art-b));
 }
+/**
+ * ⚠️ THE GLYPH IS A STAND-IN AND LOOKS LIKE ONE. Muted and centred, so the block reads as a book
+ * awaiting a cover rather than as an image that failed to load. A real cover replaces the img and
+ * takes `object-fit: cover`; nothing else here changes.
+ */
+.mcar-glyph { width: 64px; height: 64px; object-fit: contain; opacity: 0.42; }
 /** ⚠️ OVERHANGS THE CARD on two sides — `top: -6px` and outside the art's rounded corner. */
 .mcar-ribbon {
   position: absolute;
@@ -119,6 +137,9 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+/** ⚠️ PLAINLY THE APP TALKING, not the book's own words — muted and italic against the pitch's ink. */
+.mcar-nopitch { color: var(--shell-muted); font-style: italic; }
+
 .mcar-figs { display: flex; gap: 26px; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--hair); }
 .mcar-fig { display: flex; flex-direction: column; }
 .mcar-figl { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--shell-muted); }
@@ -172,8 +193,15 @@
   cursor: pointer;
 }
 .mcar-chev:disabled { opacity: 0.35; cursor: default; }
-.mcar-chev-l { left: 24px; }
-.mcar-chev-r { right: 24px; }
+/**
+ * ⚠️ POSITIONED AGAINST THE TILE, NOT THE STAGE. They were `left: 24px` / `right: 24px` on a
+ * full-width stage, which at 1440 put them roughly 550px from a 392px tile — far enough that they
+ * read as page furniture rather than as this deck's controls. They now sit just outside the tile's
+ * own edges, derived from its width and the focus offset (-58%, so the tile's centre is 8% of the
+ * stage left of the middle) rather than from a literal.
+ */
+.mcar-chev-l { left: calc(50% - 8% - var(--mcar-tile-w) / 2 - 52px); }
+.mcar-chev-r { left: calc(50% - 8% + var(--mcar-tile-w) / 2 + 14px); }
 
 .mcar-dots { position: absolute; left: 0; right: 0; bottom: 22px; display: flex; justify-content: center; gap: 8px; z-index: 3; }
 .mcar-dot { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 999px; background: #cbbfae; cursor: pointer; }

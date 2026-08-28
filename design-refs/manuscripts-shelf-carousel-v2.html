@@ -42,6 +42,12 @@
     transition:transform .34s cubic-bezier(.22,.8,.3,1),opacity .34s;
   }
   /* ⚠️ ARTWORK BLED INTO THE CARD WITH NO BAND EDGE — no border, no hairline under it. */
+  /* ⚠️ STALE — THIS PAIR IS TAN AND THE SHELF IS SAGE. These two literals were invented for this
+     mockup and then copied out of it into the build, where they read as the wrong family on a
+     manuscripts surface. Shipped: #dce0d9 / #d0d6cc, the manuscripts sage pair. Fenced in place
+     rather than edited, per the house treatment of a partially-current ref.
+     ⚠️ AND THE BLOCK IS NOT EMPTY IN THE BUILD — it carries the manuscript glyph at 0.42, because
+     the largest element on the page being a flat fill reads as a failed image. */
   .art{height:184px;flex:none;background:linear-gradient(150deg,#e8ddd0,#d9c9b6);position:relative}
   /* ⚠️ THE RIBBON OVERHANGS THE TOP-LEFT CORNER. It is outside the card's own box on two sides,
      which is why the card must NOT clip it — see the note on overflow in the build. */
@@ -95,6 +101,9 @@
     width:38px;height:38px;border-radius:999px;background:var(--paper);
     border:1px solid var(--hair);color:var(--burg);font-size:16px;cursor:pointer;
   }
+  /* ⚠️ STALE — MEASURED AGAINST THE STAGE, NOT THE TILE. At 1440 these put the chevrons roughly
+     550px from a 392px tile, where they read as page furniture rather than this deck's controls.
+     Shipped: derived from the tile's width and the focus offset so they sit just outside its edges. */
   .chev.l{left:24px} .chev.r{right:24px}
   .dots{position:absolute;left:0;right:0;bottom:22px;display:flex;justify-content:center;gap:8px;z-index:3}
   .dot{width:7px;height:7px;border-radius:999px;background:#cbbfae;border:0;padding:0;cursor:pointer}
@@ -122,7 +131,9 @@
         <div class="figs">
           <div class="fig"><div class="l">Queries</div><div class="v">14</div></div>
           <div class="fig"><div class="l">Responses</div><div class="v">6</div></div>
-          <div class="fig"><div class="l">Since</div><div class="v">Mar</div></div>
+          <!-- ⚠️ STALE — a bare month is not a date. Shipped: the full `5 Dec 2023`, through the
+             page's existing `profileDate`. A shelf spanning years cannot say "Dec". -->
+        <div class="fig"><div class="l">Since</div><div class="v">Mar</div></div>
         </div>
         <span class="open">Open</span>
       </div>

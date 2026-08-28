@@ -23,6 +23,7 @@ import React, { useRef, useState } from "react";
 import { Manuscript, Query } from "../../types";
 import { deckSlots, stepDeck, deckHasPaging } from "../../lib/carouselDeck";
 import { plateStats } from "../../lib/manuscriptPlate";
+import manuscriptIcon from "../../assets/shell/manuscript-icon.png";
 import "./manuscriptCarousel.css";
 
 export interface ManuscriptCarouselProps {
@@ -112,8 +113,17 @@ export const ManuscriptCarousel: React.FC<ManuscriptCarouselProps> = ({
               onClick={() => (slot.role === "focus" ? onOpen(m.id) : setIndex(slot.index))}
               {...offstage}
             >
-              {/* ⚠️ ARTWORK BLED IN, NO BAND EDGE — no hairline under it, no inner border. */}
+              {/**
+                * ⚠️ ARTWORK BLED IN, NO BAND EDGE — no hairline under it, no inner border.
+                *
+                * ⚠️ AND IT CARRIES THE GLYPH RATHER THAN BEING AN EMPTY RECTANGLE. It was a flat
+                * fill with nothing in it — the largest element on the page, and empty, which reads
+                * as a failed image load rather than as a book waiting for a cover. This is the same
+                * asset the sidebar and the plate already render; a real cover replaces it and
+                * changes nothing else.
+                */}
               <span className="mcar-art" aria-hidden="true">
+                <img className="mcar-glyph" src={manuscriptIcon} alt="" />
                 {/* The ribbon OVERHANGS the top-left, which is why the tile must not clip. */}
                 <span className="mcar-ribbon">{slot.index + 1}</span>
                 <span className="mcar-pill">{st.label}</span>
@@ -127,7 +137,13 @@ export const ManuscriptCarousel: React.FC<ManuscriptCarouselProps> = ({
                   <span className="mcar-wc">{m.wordCount.toLocaleString("en-GB")} words</span>
                 ) : null}
                 {/* ⚠️ CLAMPED TO TWO LINES. A third changes the tile's height and the stage's. */}
-                {m.elevatorPitch ? <span className="mcar-pitch">{m.elevatorPitch}</span> : null}
+                {/* ⚠️ THE ABSENT PITCH IS STATED, NOT SKIPPED. Rendering nothing left a gap between
+                    the word count and the figures rule that reads as a rendering fault — and the
+                    writer cannot act on a line that is not there. It is muted and italic, so it is
+                    plainly the app talking rather than the book's own words. */}
+                {m.elevatorPitch
+                  ? <span className="mcar-pitch">{m.elevatorPitch}</span>
+                  : <span className="mcar-pitch mcar-nopitch">No elevator pitch written yet</span>}
                 <span className="mcar-figs">
                   {/* ⚠️ LABEL ABOVE VALUE — the opposite of the book page's figures strip, on
                       purpose: this is a card being scanned, that is a page being read. */}
@@ -157,14 +173,17 @@ export const ManuscriptCarousel: React.FC<ManuscriptCarouselProps> = ({
             aria-label="Next"
           >›</button>
           {/* ⚠️ REAL CONTROLS WITH ACCESSIBLE NAMES, not decoration. Each names its destination. */}
+          {/* ⚠️ THE DOTS COUNT BOOKS. The ghost is a deck member you can page to, but it is not a
+              manuscript, and a dot for it made the shelf read as holding one more book than it does
+              — a count that is wrong about the only thing the reader is counting. */}
           <div className="mcar-dots">
-            {slots.map((s) => (
+            {slots.filter((s) => !s.isGhost).map((s) => (
               <button
-                key={s.isGhost ? "ghost" : manuscripts[s.index].id}
+                key={manuscripts[s.index].id}
                 type="button"
                 className="mcar-dot"
                 aria-current={s.role === "focus" ? "true" : undefined}
-                aria-label={s.isGhost ? "Add a manuscript" : manuscripts[s.index].title}
+                aria-label={manuscripts[s.index].title}
                 onClick={() => setIndex(s.index)}
               />
             ))}

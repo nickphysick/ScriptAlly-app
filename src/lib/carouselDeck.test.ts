@@ -110,3 +110,71 @@ describe("the carousel reads the deck rather than re-deriving it", () => {
     expect(stage, "the keydown handler left the stage").toContain("onKeyDown={onKeyDown}");
   });
 });
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   THE SHELF DEFECTS SEEN ON DEV — each asserted so it cannot come back quietly.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+describe("the shelf tile's six defects", () => {
+  const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const tsx = strip(readFileSync(join(__dirname, "../components/manuscripts/ManuscriptCarousel.tsx"), "utf8"));
+  const css = strip(readFileSync(join(__dirname, "../components/manuscripts/manuscriptCarousel.css"), "utf8"));
+  const page = strip(readFileSync(join(__dirname, "../components/AllManuscripts.tsx"), "utf8"));
+
+  /**
+   * ⚠️ A BARE MONTH IS NOT A DATE. `SINCE / Dec` under a shelf spanning years is an ambiguity
+   * wearing a date's clothes. `profileDate` is the page's existing `5 Dec 2023` formatter — the
+   * defect was a SECOND, worse one written beside it.
+   */
+  it("states the full querying-since date, through the page's one formatter", () => {
+    expect(page).toContain("profileDate(ms)");
+    expect(page, "a second date format came back").not.toMatch(/toLocaleDateString\([^)]*month:\s*"short"[^)]*\)\s*;/);
+  });
+
+  /** ⚠️ The largest element on the page may not be an empty rectangle — it reads as a failed image. */
+  it("puts the manuscript glyph in the artwork block", () => {
+    expect(tsx).toContain("mcar-glyph");
+    expect(tsx).toContain("manuscriptIcon");
+    expect(css).toContain(".mcar-glyph");
+  });
+
+  /** ⚠️ Sage, and the tan literals were invented in the ref and copied out of it. */
+  it("fills the artwork with the manuscripts sage pair, not tan", () => {
+    expect(css).toContain("--mcar-art-a: #dce0d9");
+    expect(css).toContain("--mcar-art-b: #d0d6cc");
+    expect(css, "the tan pair came back").not.toContain("#e8ddd0");
+    expect(css, "the tan pair came back").not.toContain("#d9c9b6");
+  });
+
+  /**
+   * ⚠️ AN ABSENT PITCH IS STATED. Rendering nothing left a gap between the word count and the
+   * figures rule that reads as a rendering fault — and a writer cannot act on a line that is not
+   * there.
+   */
+  it("states the absent pitch rather than omitting the line", () => {
+    expect(tsx).toContain("No elevator pitch written yet");
+    expect(css).toContain(".mcar-nopitch");
+  });
+
+  /**
+   * ⚠️ THE CHEVRONS BELONG TO THE TILE, NOT THE STAGE. `left: 24px` on a full-width stage put them
+   * ~550px from a 392px tile, where they read as page furniture. Derived from the tile's own width
+   * now, so they cannot drift apart from it.
+   */
+  it("positions the chevrons from the tile's width, not a stage literal", () => {
+    expect(css).toMatch(/\.mcar-chev-l\s*\{[^}]*var\(--mcar-tile-w\)/);
+    expect(css).toMatch(/\.mcar-chev-r\s*\{[^}]*var\(--mcar-tile-w\)/);
+    expect(css, "a bare stage offset came back").not.toMatch(/\.mcar-chev-l\s*\{\s*left:\s*24px/);
+  });
+
+  /**
+   * ⚠️ THE DOTS COUNT BOOKS. The ghost is pageable but is not a manuscript, and a dot for it
+   * overstated the shelf by one — a count wrong about the only thing the reader is counting.
+   */
+  it("draws one dot per book and none for the ghost", () => {
+    expect(tsx).toContain("slots.filter((s) => !s.isGhost).map");
+    for (let n = 1; n <= 5; n++) {
+      const dots = deckSlots(n, 0).filter((s) => !s.isGhost).length;
+      expect(dots, `${n} books drew ${dots} dots`).toBe(n);
+    }
+  });
+});

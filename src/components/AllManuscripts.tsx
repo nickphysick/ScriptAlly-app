@@ -42,7 +42,7 @@ import { DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./manuscripts/Manuscri
 import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
 import { AttachmentsPanel } from "./manuscripts/AttachmentsPanel";
 import { ManuscriptCarousel } from "./manuscripts/ManuscriptCarousel";
-import { queryingSinceMs } from "../lib/manuscriptProfile";
+import { queryingSinceMs, profileDate } from "../lib/manuscriptProfile";
 import { ManuscriptsEmpty } from "./manuscripts/ManuscriptsEmpty";
 import { pitchAssets, pitchMeter, PitchAssetKey, synopsisVersions } from "../lib/manuscriptPitch";
 import { genreDisplay } from "../lib/genres";
@@ -439,10 +439,14 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
                   shelved: isShelvedPresentation(m),
                 })}
                 /* ⚠️ DERIVED, AND ABSENT WHEN IT IS ABSENT. A book with no sent query has no
-                   querying-since date, and `—` states that rather than inventing one. */
+                   querying-since date, and `—` states that rather than inventing one.
+                   ⚠️ AND IT IS THE FULL DATE. `{ month: "short" }` alone rendered `Dec` under a
+                   `SINCE` label — a month with no day and no year, which for a shelf spanning years
+                   is not a date at all but an ambiguity wearing one's clothes. `profileDate` is the
+                   page's existing `5 Dec 2023` formatter; this was a second, worse one. */
                 sinceOf={(m) => {
                   const ms = queryingSinceMs(queries.filter((q) => q.manuscriptId === m.id));
-                  return ms === null ? "—" : new Date(ms).toLocaleDateString("en-GB", { month: "short" });
+                  return ms === null ? "—" : profileDate(ms);
                 }}
                 onOpen={openDossier}
                 onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
