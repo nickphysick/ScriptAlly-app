@@ -36,7 +36,7 @@ import { agentLabel, AGENT_NOT_RECORDED } from "../lib/agentDisplay";
 import { FootnoteBand } from "./packages/FootnoteBand";
 import { RemovePopover } from "./packages/RemovePopover";
 import { BuilderRail } from "./packages/BuilderRail";
-import { BuildRow } from "./packages/BuildRow";
+import { BuildPanel } from "./packages/BuildPanel";
 import { VersionQuickAdd } from "./packages/VersionQuickAdd";
 import { UNFILLED_SLOT } from "../lib/packageMetrics";
 import { ArchivedSection, ArchivedRow } from "./packages/ArchivedRow";
@@ -270,8 +270,9 @@ export const SubmissionPackages: React.FC = () => {
    * words. It opens on click, and ALSO the moment a chip starts being dragged, so a drag never has
    * to find a hidden target. Those are two routes to one state, not two states.
    */
-  const [building, setBuilding] = useState(false);
-  const [armed, setArmed] = useState(false);
+  /* ⚠️ `building` AND `armed` ARE RETIRED WITH THE CLOSED STRIP (Part C). They existed because the
+     build row was hidden until clicked, so a drag needed something to arm; the New-package panel is
+     always its own target. `clearBuild` survives as what Escape and Clear both reach. */
   const [slots, setSlots] = useState<Record<RailKind, RailChip | null>>({ let: null, syn: null, ver: null });
   /**
    * ⚠️ `＋ Add` ON VERSIONS WRITES TO THE MANUSCRIPT (D11), through `createBookVersion` — the same
@@ -288,7 +289,6 @@ export const SubmissionPackages: React.FC = () => {
    * second letter plainly means that one.
    */
   const pickChip = (c: RailChip) => {
-    setBuilding(true);
     setSlots((prev) => ({ ...prev, [c.kind]: c }));
   };
 
@@ -303,11 +303,11 @@ export const SubmissionPackages: React.FC = () => {
     if (c) pickChip(c);
   };
 
-  const onChipDragStart = (_c: RailChip) => { setBuilding(true); setArmed(true); };
+  const onChipDragStart = (_c: RailChip) => {};
 
   /* ⚠️ CLOSING CLEARS (D18). A row that reopened holding yesterday's half-built package would be
      asking the writer to notice and undo a decision they did not make. */
-  const closeBuild = () => { setBuilding(false); setArmed(false); setSlots({ let: null, syn: null, ver: null }); };
+  const clearBuild = () => { setSlots({ let: null, syn: null, ver: null }); };
 
   /**
    * ⚠️ IT GOES THROUGH `savePackageDraft`, THE PAGE'S ONE PACKAGE WRITER — the same path the modal
@@ -324,10 +324,10 @@ export const SubmissionPackages: React.FC = () => {
         bookVersionId: slots.ver?.id ?? "",
         otherMaterials: "",
       });
-      if (!err) closeBuild();
+      if (!err) clearBuild();
     })();
   };
-  const onChipDragEnd = () => setArmed(false);
+  const onChipDragEnd = () => {};
 
   /* ── cross-highlighting, both directions (Part E) ──────────────────────────────────────── */
   const [hoverChip, setHoverChip] = useState<RailChip | null>(null);
@@ -778,18 +778,21 @@ export const SubmissionPackages: React.FC = () => {
                                    onRestore={() => void restoreVersion(v.id)} />
                   ))}
                 </ArchivedSection>
-                {/* ⚠️ THE BUILD ROW SITS UNDER THE LEDGER, which is where a new package lands.
-                    Closed it is one quiet line; it opens on click and arms itself on dragstart, so
-                    a drag never has to find a hidden target (D12). */}
-                <BuildRow
-                  open={building}
-                  armed={armed}
+              </div>
+              {/**
+                * ⚠️ THE PANEL IS THE SPLIT'S SECOND COLUMN, AND THE BUILD ROW NEVER WAS.
+                * The row sat INSIDE the rail column, under the library, so the second column
+                * of a two-column grid held nothing at all — which is the empty right half of
+                * a 2,000px page, and the reason widening the rail looked like it had fixed
+                * something. A composer beside the library is the whole point of the split.
+                */}
+              <div className="bldr-panelcol">
+                <BuildPanel
                   slots={slots}
                   existing={msPackages}
-                  onOpen={() => setBuilding(true)}
                   onClear={(k) => setSlots((prev) => ({ ...prev, [k]: null }))}
                   onDrop={dropChip}
-                  onClose={closeBuild}
+                  onClearAll={clearBuild}
                   onCreate={createFromSlots}
                 />
               </div>

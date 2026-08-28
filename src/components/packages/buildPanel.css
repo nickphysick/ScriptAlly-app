@@ -1,0 +1,125 @@
+/**
+ * The New package panel — pinned beside the library, scrolling inside itself.
+ * Reference: `design-refs/three-tabs.html`, `.bench`.
+ *
+ * ⚠️ IT REPLACES `buildRow.css`, WHICH IS DELETED IN THE SAME COMMIT. What survived the move is
+ * what other files render: `.bldr-split` and its two columns (the page), and `.bldr-btn`
+ * (VersionQuickAdd). Everything else described the collapsed strip and went with it.
+ */
+
+/**
+ * ⚠️ THE LIBRARY TAKES THE SPACE AND THE COMPOSER HAS A FLOOR — the rail's 296px was a literal that
+ * outlived the thing it was sized for. It fitted a column of CHIPS; when those became cards it
+ * starved them, and the card grid dutifully produced one column at every viewport, with the right
+ * half of a 2,000px page empty. A grid that answers the same at 1440 and 2560 is not answering.
+ *
+ * ⚠️ 480px IS THE COMPOSER'S FLOOR AND PART C RE-DERIVED IT RATHER THAN INHERITING IT. It was three
+ * side-by-side slots each needing a name beside a clear control. The slots stack now, so that
+ * argument is gone — but a slot holds a FULL CARD, whose own minimum is 236, and the foot carries a
+ * reason line beside two buttons which together want ~300. 236 + 2 × 18 of panel padding is 272;
+ * the foot is what holds the number up. Same figure, different constraint, and it is stated here
+ * rather than left looking like an inheritance.
+ */
+.bldr-split { display: grid; grid-template-columns: minmax(0, 2fr) minmax(480px, 1fr); gap: 24px; align-items: start; }
+.bldr-railcol { min-width: 0; }
+.bldr-main { min-width: 0; }
+/**
+ * ⚠️ THE PANEL'S COLUMN STRETCHES, AND WITHOUT THIS `position: sticky` DOES NOTHING AT ALL.
+ * A sticky element can only travel inside its containing block, and `.bldr-split` sets
+ * `align-items: start` so every track collapses to its own content — which makes the panel's track
+ * exactly as tall as the panel, leaving it zero range. Measured before the fix: the panel scrolled
+ * clean off the top of the viewport (top −6.1) while its computed `position` read `sticky` and its
+ * `top` read the correct 71.6. **The declaration applied and did nothing**, which is why this is a
+ * per-item `align-self` rather than a change to the container's default: `start` is right for the
+ * library column, which must not stretch its cards.
+ */
+.bldr-panelcol { min-width: 0; align-self: stretch; }
+
+/**
+ * ⚠️ THE STICKY OFFSET IS THE PINNED CHROME'S OWN HEIGHT, PUBLISHED BY THE GRID. The masthead slab
+ * pins at `top: 0` in this same scrollport, so a panel at `top: 0` clamps to the same line and
+ * slides under it. `--wpg-stuck-h` exists again for exactly this reader — it was deleted when its
+ * last consumer went, which was right, and a literal here would be a second element encoding a
+ * height it does not own.
+ *
+ * ⚠️ AND THE CAP IS THE SCROLLPORT'S HEIGHT, NEVER `100vh`. The scroller starts below the shell's
+ * own chrome, so `calc(100vh - …)` over-claims by exactly that offset — the same fault as the Tasks
+ * chassis's unreachable 21px, one element up. `--wpg-port-h` falls back to `100vh` only where this
+ * panel is rendered outside the grid, which is nowhere today.
+ */
+.bldp {
+  position: sticky;
+  top: calc(var(--wpg-stuck-h, 0px) + var(--wpg-chrome-gap, 16px));
+  max-height: calc(var(--wpg-port-h, 100vh) - var(--wpg-stuck-h, 0px) - 2 * var(--wpg-chrome-gap, 16px));
+  display: flex; flex-direction: column; min-height: 0;
+  box-sizing: border-box;
+  background: var(--pkg-paper);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 13px;
+  padding: 16px 18px 17px;
+  box-shadow: 0 2px 8px rgba(58, 28, 20, 0.05);
+}
+
+.bldp-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 13px; flex: 0 0 auto; }
+/* ⚠️ AN INPUT WEARING THE HEADING'S FACE — the package's name IS the panel's title, so it is set in
+   the heading's type and carries no box until it is touched. A bordered field here would read as
+   the last question on a form rather than as the name of the thing above the slots. */
+.bldp-title {
+  flex: 1; min-width: 0;
+  font-family: var(--font-serif); font-size: 16px; font-weight: 600; color: var(--pkg-ink);
+  background: none; border: none; border-bottom: 1px solid transparent;
+  padding: 1px 0; outline: none;
+}
+.bldp-title::placeholder { color: var(--pkg-muted); font-weight: 400; font-style: italic; }
+.bldp-title:hover { border-bottom-color: var(--pkgo-hairline-soft); }
+.bldp-title:focus { border-bottom-color: var(--pkg-burg); }
+.bldp-sub {
+  flex: 0 0 auto;
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--pkg-muted);
+}
+
+/* ⚠️ THE SCROLL IS HERE, NOT ON THE PANEL — the name above and the Create button below must stay on
+   screen while three full cards are being reviewed. `min-height: 0` is what lets a flex child
+   shrink below its content; without it the panel simply grows and the cap does nothing. */
+.bldp-slots {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 10px;
+  /* the scrollbar's gutter, so arriving at three cards does not shift the cards sideways */
+  scrollbar-gutter: stable;
+}
+
+.bldp-slot {
+  border: 1px dashed var(--pkgo-dash); border-radius: 11px;
+  min-height: 58px; display: flex; align-items: center; justify-content: center;
+  padding: 10px; box-sizing: border-box;
+}
+/* ⚠️ A FILLED SLOT HAS NO FRAME OF ITS OWN — the card carries its family's edge already, and a
+   second border round it would read as a card inside a box rather than as a part in a slot. */
+.bldp-slot--on { border: none; padding: 0; display: block; min-height: 0; }
+.bldp-slot--over { border-color: var(--pkg-burg); border-style: solid; background: var(--pkgt-let-a); }
+.bldp-ph {
+  font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--pkg-muted); text-align: center;
+}
+.bldp-ph em { font-style: normal; color: var(--pkg-burg); opacity: 0.75; }
+
+/* the card sitting in a slot: no lift, no grab cursor — it is not going anywhere */
+.bldp-slot .bldr-mc--slot { cursor: default; }
+.bldp-slot .bldr-mc--slot:hover { transform: none; box-shadow: 0 2px 8px rgba(58, 28, 20, 0.05); }
+
+.bldp-foot { display: flex; align-items: center; gap: 11px; margin-top: 13px; flex: 0 0 auto; }
+.bldp-sp { margin-left: auto; display: flex; gap: 9px; flex: 0 0 auto; }
+.bldr-why {
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--pkg-muted); min-width: 0;
+}
+.bldr-why--dupe { color: var(--pkg-burg); }
+
+.bldr-btn {
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--pkg-paper); border: 1px solid var(--pkgo-hairline-soft); border-radius: 8px;
+  padding: 7px 13px; color: var(--pkg-ink); cursor: pointer;
+}
+.bldr-btn--primary { background: var(--pkg-pink); border-color: var(--pkgt-let-edge); color: var(--pkg-burg); }
+.bldr-btn:disabled { opacity: 0.45; cursor: not-allowed; }

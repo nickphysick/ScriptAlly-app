@@ -78,6 +78,12 @@
 /* ⚠️ COLOUR IS THE 5px LEFT EDGE AND NOTHING ELSE (D6). */
 .bldr-mc::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--bldr-accbg); }
 .bldr-mc:hover { transform: translateY(-2px); box-shadow: 0 9px 20px rgba(58, 28, 20, 0.1); }
+/* the remove control a card takes when it is sitting in a slot rather than in the library */
+.bldr-mcx {
+  margin-left: auto; flex: 0 0 auto; background: none; border: none; padding: 0 0 0 6px;
+  font-size: 15px; line-height: 1; color: var(--pkg-muted); cursor: pointer;
+}
+.bldr-mcx:hover { color: var(--pkg-burg); }
 .bldr-mc:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
 .bldr-mc:active { cursor: grabbing; }
 .bldr-mc--dim { opacity: 0.34; }

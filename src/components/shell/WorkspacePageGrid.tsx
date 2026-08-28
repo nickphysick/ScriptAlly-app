@@ -173,6 +173,18 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = React.useState(false);
+  /** The pinned chrome's SETTLED height, for anything that must sit clear of it. See below. */
+  const [stuckH, setStuckH] = React.useState(0);
+  /**
+   * The SCROLLPORT's own height, for anything that must cap itself to what is on screen.
+   *
+   * ⚠️ `100vh` IS THE WRONG UNIT HERE AND THIS REPO HAS ALREADY PAID FOR IT ONCE. The viewport is
+   * not what a child of this scroller can occupy: the scroller starts below the shell's own chrome,
+   * so `calc(100vh - …)` over-claims by exactly that offset — which is the Tasks chassis's
+   * unreachable 21px, one element up. The figure a sticky child actually needs is this box's
+   * height, and this component is the only thing that knows it.
+   */
+  const [portH, setPortH] = React.useState(0);
   /**
    * ⚠️ THE HEMS ARE DRIVEN BY THE SAME EVALUATION AS THE HEADER, and that is the whole reason they
    * live here rather than in a page. A second scroll listener would be a second answer to "where
@@ -416,6 +428,20 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
        */
       const reclaim = settled ? Math.max(0, restHRef.current - h) : 0;
       setReclaim((prev) => (Math.abs(prev - reclaim) < 0.5 ? prev : reclaim));
+      /**
+       * ⚠️ `--wpg-stuck-h` IS BACK, AND IT IS BACK BECAUSE SOMETHING READS IT. It was deleted when
+       * the top hem went, correctly — a token nothing consumes is a knob people go looking for. The
+       * builder's New-package panel is `position: sticky` INSIDE this scroller, and the slab pins at
+       * `top: 0` in the same scrollport, so a panel without this figure clamps to the same line and
+       * slides under it. That is the exact fault the manuscripts attachments panel is still parked
+       * on, and it is a fact only this component knows.
+       *
+       * ⚠️ IT PUBLISHES THE SETTLED HEIGHT, NOT THE LIVE ONE. `h` falls by the whole settle the
+       * moment the page pins, and a sticky `top` bound to a value moving 62px mid-scroll would take
+       * the panel with it. The figure is only written while stuck — which is the only state in
+       * which anything is passing under the chrome and the only state the offset is for.
+       */
+      if (settled && h > 0) setStuckH((prev) => (Math.abs(prev - h) < 0.5 ? prev : h));
     };
     /* rAF-throttled: at most one evaluation per painted frame, however fast the wheel reports */
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(evaluate); };
@@ -499,6 +525,20 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * visit IS under a display-toggling shell. A shell that DOES unmount (a tier crossing) resets by
    * unmounting, so both arrangements are covered without either knowing about the other.
    */
+  /* ⚠️ OBSERVED, NOT READ ONCE. The scroller's height changes with the viewport, with the shell's
+     own chrome and with a tier crossing, and a figure captured at mount would be right until the
+     first of those. Written only when it moves, so it cannot loop against a layout it caused. */
+  React.useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => {
+      const h = el.clientHeight;
+      setPortH((prev) => (Math.abs(prev - h) < 0.5 ? prev : h));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const rootRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     const el = rootRef.current;
@@ -526,6 +566,8 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
            carry states. The stylesheet reads it; nothing else needs to know it exists. */
         style={{
           ["--wpg-reclaim-pad" as string]: `${reclaim}px`,
+          ["--wpg-stuck-h" as string]: `${stuckH}px`,
+          ["--wpg-port-h" as string]: portH > 0 ? `${portH}px` : "100vh",
         } as React.CSSProperties}
         /* ⚠️ `wpg--tools` IS GONE FROM THIS LIST. It existed for ONE rule — `.wpg--tools > .wpg-scroll`,
            which zeroed the scroller's top gap when a toolbar row had already paid it — and that

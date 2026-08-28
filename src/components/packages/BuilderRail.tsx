@@ -16,7 +16,8 @@
  */
 import React from "react";
 import { RAIL_EMPTY } from "../../lib/builderRail";
-import type { CardBody, CardIcon, RailChip, RailKind, RailSection } from "../../lib/builderRail";
+import type { RailChip, RailKind, RailSection } from "../../lib/builderRail";
+import { CardGlyph, MaterialCard } from "./MaterialCard";
 import "./builderRail.css";
 
 /** The Add button's wording, per the ref: the section names what it adds (D4). */
@@ -25,74 +26,6 @@ export const ADD_LABEL: Record<RailKind, string> = {
   syn: "Add a synopsis",
   ver: "Add a version",
 };
-
-/**
- * The card's three small marks — a page, a document, a plus.
- *
- * ⚠️ INLINE AND STROKE-ONLY, taking `currentColor`, so each sits in its family's ink without the
- * component knowing which family it is in. A shared icon set keyed by name would be a second
- * registry for three paths used in one file.
- */
-const CardGlyph: React.FC<{ kind: CardIcon | "plus" | "doc" }> = ({ kind }) => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    {kind === "page" && <><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /></>}
-    {/* the plate's mark — the page, with ruled lines, because it stands for a document rather than
-        for the act of writing one */}
-    {kind === "doc" && <><path d="M7 3h8l4 4v14H7z" /><path d="M15 3v4h4" /><path d="M10 13h7M10 17h5" /></>}
-    {kind === "plus" && <path d="M12 5v14M5 12h14" />}
-  </svg>
-);
-
-/**
- * ⚠️ THE DESCRIPTION BAND HOLDS SOMETHING TRUE IN EVERY STATE, AND THE SWITCH IS EXHAUSTIVE.
- * It was a string that could be blank, and the blank read as a line which had failed to load. The
- * `never` close is the house idiom: a fifth kind of body cannot be added without saying what the
- * band does with it, which is the guard a default branch would quietly remove.
- */
-const CardDescription: React.FC<{ body: CardBody }> = ({ body }) => {
-  switch (body.kind) {
-    case "text":
-      /* ⚠️ CLAMPED BY CSS, NEVER BY CUTTING THE STRING — a substring bakes a width into the data. */
-      return <div className="bldr-desc">{body.text}</div>;
-    case "file":
-      return (
-        <div className="bldr-plate">
-          <span className="bldr-plateico"><CardGlyph kind="doc" /></span>
-          <span className="bldr-platetx">
-            <span className="bldr-platefn">{body.fileName}</span>
-            {/* ⚠️ OMITTED WHERE THE NAME DOES NOT SAY WHAT KIND OF DOCUMENT IT IS — the filename
-                stands alone rather than the app naming a kind it cannot read. */}
-            {body.fileKind && <span className="bldr-platekind">{body.fileKind}</span>}
-          </span>
-        </div>
-      );
-    case "none":
-      return <div className="bldr-desc bldr-desc--none">Nothing written yet</div>;
-    case "version":
-      /* ⚠️ TWO ELEMENTS, NOT ONE STRING — the note is clamped to two lines and the holdings line is
-         not, so a long note can never push the holdings out of the card or swallow it into its own
-         clamp. The holdings line is omitted at zero; `Not in a package` in the foot says it once. */
-      return (
-        <div className="bldr-vband">
-          <div className={`bldr-desc${body.note ? "" : " bldr-desc--none"}`}>
-            {body.note ?? "No note on this version"}
-          </div>
-          {body.holdings && <div className="bldr-hold">{body.holdings}</div>}
-        </div>
-      );
-    default: {
-      const unhandled: never = body;
-      return unhandled;
-    }
-  }
-};
-
-/** What a screen reader hears in the band's place — the plate is two elements and one sentence. */
-const bandSpoken = (b: CardBody): string =>
-  b.kind === "text" ? b.text
-  : b.kind === "file" ? `Attached file ${b.fileName}${b.fileKind ? `, ${b.fileKind}` : ""}`
-  : b.kind === "none" ? "Nothing written yet"
-  : `${b.note ?? "No note on this version"}${b.holdings ? `. ${b.holdings}` : ""}`;
 
 export interface BuilderRailProps {
   sections: RailSection[];
@@ -139,48 +72,24 @@ export const BuilderRail: React.FC<BuilderRailProps> = ({
             </button>
           )}
           {sec.chips.map((c) => (
-            <div
+            <MaterialCard
               key={c.id}
-              className={`bldr-mc bldr-t-${c.kind}${inBench(c.id) ? " bldr-mc--used" : ""}${litId === c.id ? " bldr-mc--lit" : ""}${dimming && litId !== c.id ? " bldr-mc--dim" : ""}`}
-              role="button" tabIndex={0} draggable
-              data-chip={c.id} data-kind={c.kind}
-              aria-label={`${c.name}. ${bandSpoken(c.body)} ${[c.src, c.use].filter(Boolean).join(". ")}. Adds to the package you are building.`}
-              onClick={() => onPick(c)}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(c); } }}
-              onDragStart={(e) => {
-                e.dataTransfer.setData("text/plain", c.id);
-                e.dataTransfer.setData("application/x-sa-kind", c.kind);
-                e.dataTransfer.effectAllowed = "copy";
-                onDragStart(c);
+              chip={c}
+              pick={{
+                onPick: () => onPick(c),
+                onDragStart: (e) => {
+                  e.dataTransfer.setData("text/plain", c.id);
+                  e.dataTransfer.setData("application/x-sa-kind", c.kind);
+                  e.dataTransfer.effectAllowed = "copy";
+                  onDragStart(c);
+                },
+                onDragEnd,
+                onHover: (on) => onHoverChip(on ? c : null),
+                inBench: inBench(c.id),
+                lit: litId === c.id,
+                dimmed: dimming,
               }}
-              onDragEnd={onDragEnd}
-              onMouseEnter={() => onHoverChip(c)}
-              onMouseLeave={() => onHoverChip(null)}
-            >
-              <div className="bldr-mctop">
-                <h5>{c.name}</h5>
-                <span className="bldr-grip" aria-hidden="true"><i /><i /><i /><i /><i /><i /></span>
-              </div>
-              <CardDescription body={c.body} />
-              {/* ⚠️ TWO SLOTS, TWO REGISTERS — what it IS on the left, where it is USED on the right
-                  (D7/D8). The `Not used` tag that used to sit at the card's top right is RETIRED in
-                  this same commit: the right slot now states that fact as `Not in a package`, and a
-                  card carrying both would say one thing twice in two vocabularies, which is exactly
-                  the fault this pass exists to remove from the left slot. */}
-              <div className="bldr-mcfoot">
-                <span className="bldr-src">
-                  {c.srcIcon && <CardGlyph kind={c.srcIcon} />}
-                  {c.src}
-                </span>
-                <span className="bldr-use">{c.use}</span>
-              </div>
-              {/**
-                * ⚠️ A CARD IN THE BENCH DIMS IN PLACE — it is NOT removed from the grid (D9).
-                * Removing it reflows every card after it while the writer's hand is still moving,
-                * which is how someone clicks the thing that slid under the cursor.
-                */}
-              {inBench(c.id) && <div className="bldr-inuse">In this package</div>}
-            </div>
+            />
           ))}
         </div>
         {/* ⚠️ ONLY VERSIONS HAS ONE, because only its `＋ Add` writes somewhere else (D11). */}

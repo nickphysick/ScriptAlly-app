@@ -32,7 +32,10 @@ for (const w of [1440, 1920]) {
           headBg: getComputedStyle(s.querySelector("h4")!).backgroundColor,
           addBg: getComputedStyle(s.querySelector(".bldr-addbtn")!).backgroundColor,
         })),
-        cards: [...document.querySelectorAll(".bldr-mc")].map((c) => {
+        /* ⚠️ SCOPED TO THE LIBRARY. A slot in the New-package panel holds the SAME card component,
+           so a bare `.bldr-mc` sweep counts a card twice the moment anything is in the bench — which
+           is exactly what a "the library keeps every card" check must not do. */
+        cards: [...document.querySelectorAll(".bldr-railcol .bldr-mc")].map((c) => {
           const el = c as HTMLElement;
           const desc = c.querySelector(".bldr-desc") as HTMLElement | null;
           const plate = c.querySelector(".bldr-plate") as HTMLElement | null;
@@ -188,10 +191,10 @@ for (const w of [1440, 1920]) {
        The count is taken BEFORE, because removal and dimming are indistinguishable afterwards. */
     const before = out.cards.length;
     const target = out.cards.find((c) => c.kind === "let" && c.name === "Hook-first")!;
-    await page.locator(`.bldr-mc:has(h5:text-is("${target.name}"))`).click();
+    await page.locator(`.bldr-railcol .bldr-mc:has(h5:text-is("${target.name}"))`).click();
     await page.waitForTimeout(300);
     const after = await page.evaluate((name) => {
-      const all = [...document.querySelectorAll(".bldr-mc")];
+      const all = [...document.querySelectorAll(".bldr-railcol .bldr-mc")];
       const el = all.find((c) => (c.querySelector("h5")?.textContent ?? "").trim() === name) as HTMLElement | undefined;
       return { n: all.length, present: !!el, op: el ? getComputedStyle(el).opacity : null,
                mark: (el?.querySelector(".bldr-inuse")?.textContent ?? "").trim() };
