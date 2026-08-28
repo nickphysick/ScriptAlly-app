@@ -15,41 +15,73 @@
  */
 import { Activity, BookVersion, ComponentType, ManuscriptVersion, Query, SubmissionPackage } from "../types";
 import { materialShelf } from "./packagesOverview";
-import { wordsPhrase } from "./materialDraft";
-import { holdings, latestVersion, NOT_IN_A_PACKAGE } from "./bookVersions";
+import { fileKind, wordsPhrase } from "./materialDraft";
+import { holdings, latestVersion, NOT_IN_A_PACKAGE_USE } from "./bookVersions";
 
 export type RailKind = "let" | "syn" | "ver";
 
-/** The source line's glyph — a page for pasted text, a paperclip for an attachment, neither for a version. */
-export type CardIcon = "page" | "clip" | null;
+/**
+ * The source line's glyph — a page for pasted text, nothing otherwise.
+ *
+ * ⚠️ THE PAPERCLIP IS RETIRED WITH THE FILENAME IT SAT BESIDE (D3). The foot now reads `Attached
+ * file`; the filename and its document glyph moved into the description band, where the plate shows
+ * them once. A clip in the foot beside a plate above it would be the same fact drawn twice.
+ */
+export type CardIcon = "page" | null;
+
+/**
+ * ⚠️ `file` IS NOT AN EMPTY DESCRIPTION — IT IS A DIFFERENT ONE (D2). Where a material is an
+ * attached file with nothing pasted, the band holds a document plate: the filename and, when the
+ * name says what kind of document it is, that kind beneath it. The space stops looking empty
+ * because it stopped being asked the wrong question.
+ *
+ * ⚠️ `nonote` IS A VERSION'S ORDINARY STATE, NOT ITS EXCEPTION (D4) — five of the eight cards on
+ * the fixture. A version has no body and no file, so it has genuinely nothing to show, and the one
+ * honest thing it can do with the band is say so in words.
+ */
+export type CardBody =
+  | { kind: "text"; text: string }
+  | { kind: "file"; fileName: string; fileKind: string | null }
+  | { kind: "none" }
+  | { kind: "nonote" };
 
 export interface RailChip {
   id: string;
   kind: RailKind;
   name: string;
   /**
-   * The two clamped lines — the material ITSELF, not a summary of it (D5).
+   * What the description band holds. FOUR states, and the band is reserved in all of them (D6).
    *
-   * ⚠️ NULL LEAVES THE AREA EMPTY, and that is a ruling rather than an omission. A material can be
-   * an attached file with no pasted draft, and there is nothing to show for it: the source line
-   * already says `file.docx`, so a sentence here would be the app narrating an absence it has
-   * already stated. `descNone` distinguishes the one case that DOES speak — a material with neither
-   * text nor attachment, which reads `Nothing written yet` because a writer looking at an empty
-   * card needs to know it is empty rather than broken.
+   * ⚠️ IT IS A UNION BECAUSE THE BAND HAS FOUR ANSWERS AND A STRING CAN CARRY ONE. The earlier
+   * shape was `desc: string | null` plus a `descNone` flag, which could express "text", "nothing
+   * written" and "blank" — and the blank was the fault: an attachment rendered an empty band that
+   * read as a line which had failed to load. A file is not an absence, it is a different KIND of
+   * content, and a type that cannot say so is the type this repo's own rule says to widen.
    *
-   * ⚠️ AND THERE IS NO DESCRIPTION FIELD ON A MATERIAL (R4). `ManuscriptVersion` carries no such
-   * thing — this is `contentDraft`, the body itself, clamped by CSS. A version's is its `note`,
-   * which is a real description because a version has no body to show.
+   * ⚠️ AND THERE IS NO DESCRIPTION FIELD ON A MATERIAL (R4). `text` here is `contentDraft`, the
+   * body itself, clamped by CSS; a version's is its `note`, which is a real description because a
+   * version has no body to show.
    */
-  desc: string | null;
-  /** True only for the empty-and-unattached case: the area speaks instead of staying blank. */
-  descNone: boolean;
-  /** The foot's left: `412 words` after a page glyph, `voice-led.docx` after a clip, or `Empty`. */
-  src: string;
+  body: CardBody;
+  /**
+   * The foot's LEFT: what this material IS — `412 words` · `Attached file` · `Latest` (D7).
+   *
+   * ⚠️ NULL WHERE THERE IS NOTHING TRUE TO PUT THERE, never a filler. `Empty` used to sit here and
+   * was a STATE masquerading as a source; the card with neither text nor file now says so in the
+   * description band, where the state belongs, and leaves this slot alone.
+   */
+  src: string | null;
   srcIcon: CardIcon;
-  /** The foot's right: `In 2`, or null where the `Not used` tag is already saying it. */
-  use: string | null;
-  /** True when nothing holds it — draws the quiet `Not used` tag (D10, previous pack). */
+  /**
+   * The foot's RIGHT: where it is USED — `In 2` · `In 1` · `Not in a package` (D8).
+   *
+   * ⚠️ ONE REGISTER PER SLOT IS THE WHOLE POINT. A usage phrase in the source slot is what made
+   * `Latest · not yet in a package` one string, and that card was the only one on the page that
+   * wrapped. Always present: a version or a material in nothing states it here rather than leaving
+   * the reader to infer it from a gap.
+   */
+  use: string;
+  /** True when nothing holds it. Read by callers; the card no longer draws a tag for it. */
   unused: boolean;
 }
 
@@ -95,30 +127,14 @@ export const RAIL_EMPTY: Record<RailKind, string> = {
 export const VERSIONS_NOTE =
   "Versions belong to the manuscript. Adding one here writes it there too.";
 
-const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
-
 /**
- * A version's meta line.
- *
- * ⚠️ AN UNUSED VERSION STATES ITS ABSENCE IN WORDS, NEVER AS `0 packages · held by 0 agents`. Two
- * true zeros side by side read as a malfunction, and the standing law is that an unknown or an
- * absence is never rendered as a zero. The ref writes `Latest · not yet in a package`.
- *
- * ⚠️ `Latest` ONLY WHEN IT IS TRUE. The ref's one unused version happens to be the newest, so the
- * artefact cannot say what a non-latest unused version reads — this states the fact where it holds
- * and drops the clause where it does not, rather than inventing a label for every unused version.
+ * ⚠️ `versionMetaLine` IS RETIRED AND ITS HOLDINGS CLAUSE WITH IT (D7/D8). It built one string —
+ * `2 packages · held by 4 agents`, or `Latest · not yet in a package` — for a slot that now carries
+ * only what a version IS. Its usage half moved to the foot's right slot as `In 2` / `Not in a
+ * package`; its `held by N agents` half has no slot under the new grammar and is NOT restated here
+ * in a shorter form, because a second fact in either slot is what wrapped the card. That figure is
+ * a genuine reduction in what this card says and is reported rather than absorbed (F-BR).
  */
-export const versionMetaLine = (
-  packages: number,
-  agents: number,
-  isLatest: boolean,
-): string =>
-  packages > 0
-    ? `${plural(packages, "package")} · held by ${plural(agents, "agent")}`
-    /* ⚠️ THE SAME CONSTANT THE PANEL READS. Two surfaces describing one state in two spellings is
-       how they come to disagree; `bookVersions.ts` states it once. */
-    : `${isLatest ? "Latest · " : ""}${NOT_IN_A_PACKAGE}`;
-
 export const builderRail = (
   materials: readonly ManuscriptVersion[],
   packages: readonly SubmissionPackage[],
@@ -151,13 +167,18 @@ export const builderRail = (
         id: s.id,
         kind,
         name: s.name,
-        desc: hasBody ? body : null,
-        descNone: !hasBody && !file,
-        src: hasBody ? (words ?? "Text") : file || "Empty",
-        srcIcon: (hasBody ? "page" : file ? "clip" : null) as CardIcon,
-        /* ⚠️ OMITTED AT ZERO rather than reading `In 0` — the `Not used` tag states that fact once,
-           and stating it twice in two vocabularies is how the two come to disagree. */
-        use: s.usedIn > 0 ? `In ${s.usedIn}` : null,
+        body: hasBody
+          ? { kind: "text" as const, text: body }
+          : file
+            ? { kind: "file" as const, fileName: file, fileKind: fileKind(file) }
+            : { kind: "none" as const },
+        /* ⚠️ `Attached file`, NOT THE FILENAME (D3). The plate above already shows the name; the
+           foot states what kind of thing this is, in the same register as `412 words`. One fact,
+           one place — and it is what stops the longest filename on the fixture setting the width
+           of a slot that has a neighbour. */
+        src: hasBody ? (words ?? "Text") : file ? "Attached file" : null,
+        srcIcon: (hasBody ? "page" : null) as CardIcon,
+        use: s.usedIn > 0 ? `In ${s.usedIn}` : NOT_IN_A_PACKAGE_USE,
         unused: s.usedIn === 0,
       };
     });
@@ -169,19 +190,24 @@ export const builderRail = (
       held.filter((h) => h.versionId === v.id && !!h.query.agentId).map((h) => h.query.agentId),
     );
     /**
-     * ⚠️ A VERSION'S DESCRIPTION IS ITS `note`, AND ITS SOURCE LINE IS ITS HOLDINGS — never a word
-     * count (D8). A version is a shape of the book, not a document: it has no body to clamp and no
-     * length to state, so the two slots carry the only things it actually knows.
+     * ⚠️ A VERSION SAYS `No note on this version` RATHER THAN NOTHING (D4), and this is the case
+     * the whole pack turns on: a note-less version is the ORDINARY state — five of the eight cards
+     * on the fixture — so the band's blank was not an edge case a reader would meet rarely, it was
+     * what the Versions section mostly looked like.
+     *
+     * ⚠️ AND ITS SOURCE SLOT IS `Latest` OR NOTHING — never a word count (D8), because a version is
+     * a shape of the book rather than a document, and never a holdings sentence, because holdings
+     * are usage and usage is the other slot's business.
      */
+    const note = v.note?.trim() ?? "";
     return {
       id: v.id,
       kind: "ver" as const,
       name: v.name,
-      desc: v.note?.trim() || null,
-      descNone: false,
-      src: versionMetaLine(pkgIds.size, agents.size, newest?.id === v.id),
+      body: note ? { kind: "text" as const, text: note } : { kind: "nonote" as const },
+      src: newest?.id === v.id ? "Latest" : null,
       srcIcon: null as CardIcon,
-      use: null,
+      use: pkgIds.size > 0 ? `In ${pkgIds.size}` : NOT_IN_A_PACKAGE_USE,
       unused: pkgIds.size === 0,
     };
   });

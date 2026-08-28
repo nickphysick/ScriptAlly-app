@@ -334,6 +334,15 @@ const pct = (n: number, d: number): number => (d <= 0 ? 0 : Math.round((n / d) *
  */
 export const NOT_IN_A_PACKAGE = "not yet in a package";
 export const NOT_YET_SENT = "not yet sent";
+/**
+ * ⚠️ ONE FACT, TWO REGISTERS, AND THEY MOVE TOGETHER. The panel's cell is prose in a table — `not
+ * yet in a package` — while the builder card's foot is a two-slot grammar whose right-hand column
+ * reads `In 2` / `In 1` / `Not in a package`. A sentence fragment in that column is what put
+ * `Latest · not yet in a package` into one slot and made it the only card on the page that wrapped.
+ * They are declared adjacent so that changing what the app calls this state changes both.
+ */
+export const NOT_IN_A_PACKAGE_USE = "Not in a package";
+
 
 /**
  * "Requests by opening" (D15).

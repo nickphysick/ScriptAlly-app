@@ -110,6 +110,36 @@ export const wordsPhrase = (v: Pick<ManuscriptVersion, "wordCount" | "contentDra
   return words > 0 ? `${words.toLocaleString("en-GB")} ${words === 1 ? "word" : "words"}` : null;
 };
 
+/**
+ * ⚠️ WHAT KIND OF DOCUMENT A FILENAME NAMES — `Word document`, `PDF` — OR NULL.
+ *
+ * ⚠️ `contentType` CANNOT ANSWER THIS, AND THE BRIEF ASSUMED IT COULD. That field carries the
+ * material's MODE — `text | link | file | ref` — which says where the material lives and never what
+ * kind of document it is: every attachment is `ref` whatever it holds. Taken literally, deriving the
+ * kind from it would mean the brief's own fallback fired on every card and `Word document` never
+ * rendered at all, so the drawn state in `design-refs/empty-description.html` could not occur.
+ *
+ * The derivation is therefore the extension, which is not a guess about a file — there is no
+ * Storage in this app and it has never seen one — but a reading of the name the WRITER typed. An
+ * extension not in this table returns null and the plate shows the filename alone, which is the
+ * brief's fallback kept intact rather than a kind invented to fill the line.
+ */
+const FILE_KINDS: Record<string, string> = {
+  doc: "Word document", docx: "Word document",
+  pdf: "PDF",
+  rtf: "Rich text",
+  txt: "Plain text",
+  odt: "OpenDocument text",
+  pages: "Pages document",
+  md: "Markdown", markdown: "Markdown",
+};
+
+export const fileKind = (fileName: string | undefined | null): string | null => {
+  const dot = (fileName ?? "").trim().lastIndexOf(".");
+  if (dot < 1) return null;
+  return FILE_KINDS[(fileName ?? "").slice(dot + 1).trim().toLowerCase()] ?? null;
+};
+
 export function sourceLabel(v: ManuscriptVersion): string {
   const mode = modeOf(v);
   if (mode === "file") return `${v.fileName ?? "document"} · attached`;

@@ -81,7 +81,12 @@ const MS_ID = "seed-ms-1";
 /* The four materials the ref's register draws — two covering letters so the type groups with more
    than one member, and a sample with a real draft so the word count has something to count. */
 const ALL_MATERIALS = [
-  { id: "seed-mat-ql1", componentType: "Query Letter", versionName: "Hook-first", days: 4 },
+  /* ⚠️ ONE MATERIAL WITH A REAL BODY, or the description band's ordinary state is unrepresented:
+     the only material carrying a draft was the SAMPLE, which the builder's rail does not list. */
+  { id: "seed-mat-ql1", componentType: "Query Letter", versionName: "Hook-first", days: 4,
+    draft: "When the tide went out at Ravensmere it took the church with it, and every soul in the "
+      + "village agreed not to mention it again. Nell Aubrey was six that summer, and she has been "
+      + "mentioning it ever since." },
   { id: "seed-mat-ql2", componentType: "Query Letter", versionName: "Comps-forward", days: 14 },
   { id: "seed-mat-syn", componentType: "Synopsis", versionName: "One-page", days: 6 },
   { id: "seed-mat-pag", componentType: "Sample Pages", versionName: "Chapters 1-3", days: 9,

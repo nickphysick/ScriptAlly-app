@@ -4,7 +4,7 @@
  * count, and an unused one must state its absence in words rather than as two zeros.
  */
 import { describe, it, expect } from "vitest";
-import { builderRail, versionMetaLine, RAIL_KINDS, RAIL_HEADING, VERSIONS_NOTE, RAIL_EMPTY } from "./builderRail";
+import { builderRail, RAIL_KINDS, RAIL_HEADING, VERSIONS_NOTE, RAIL_EMPTY } from "./builderRail";
 import { ComponentType, QueryStatus } from "../types";
 import type { Activity, BookVersion, ManuscriptVersion, Query, SubmissionPackage } from "../types";
 
@@ -52,70 +52,84 @@ describe("builderRail", () => {
 
   it("a letter's card carries its own body, its word count and its use", () => {
     const c = rail()[0].chips.find((x) => x.name === "Hook-first")!;
-    expect(c.desc, "the two lines are the material ITSELF (R4)").toBe("a b c");
-    expect(c.descNone).toBe(false);
+    expect(c.body, "the two lines are the material ITSELF (R4)").toEqual({ kind: "text", text: "a b c" });
     expect(c.src).toBe("3 words");
     expect(c.srcIcon).toBe("page");
     expect(c.use).toBe("In 1");
     expect(c.unused).toBe(false);
   });
 
-  it("⚠️ AN ATTACHED FILE WITH NO DRAFT LEAVES THE DESCRIPTION EMPTY, not placeheld", () => {
-    /* The source line already says `v.docx`; a sentence above it would be the app narrating an
-       absence it has just stated. `descNone` is FALSE — this card is not empty, it is elsewhere. */
+  it("⚠️ AN ATTACHED FILE SHOWS THE FILE, and its foot says what kind of thing it is (D2/D3)", () => {
+    /* The band used to be left blank here, which read as a line that had failed to load. A file is
+       not an absence — it is a different kind of content — so the band shows it, and the foot stops
+       repeating the filename the plate is already showing. */
     const c = rail()[0].chips.find((x) => x.name === "Voice-led")!;
-    expect(c.desc).toBeNull();
-    expect(c.descNone).toBe(false);
-    expect(c.src).toBe("v.docx");
-    expect(c.srcIcon).toBe("clip");
+    expect(c.body).toEqual({ kind: "file", fileName: "v.docx", fileKind: "Word document" });
+    expect(c.src).toBe("Attached file");
+    expect(c.src, "the plate holds the name; the foot does not restate it").not.toContain("v.docx");
+    expect(c.srcIcon, "no clip beside a plate that already carries a document mark").toBeNull();
   });
 
-  it("⚠️ a VERSION states holdings and NEVER a word count (D8)", () => {
+  it("⚠️ AN UNREADABLE EXTENSION RENDERS THE NAME ALONE rather than a guessed kind", () => {
+    /* keyed off the NAME the assertion then looks up, so the fixture's ids cannot drift out from
+       under it — a hand-written id is an input the finder below may not be able to produce */
+    const odd = MATS.map((m) => (m.versionName === "Voice-led" ? { ...m, fileName: "voice-led.qqq" } : m));
+    const c = builderRail(odd, PKGS, BVS, QS, ACTS)[0].chips.find((x) => x.name === "Voice-led")!;
+    expect(c.body).toEqual({ kind: "file", fileName: "voice-led.qqq", fileKind: null });
+    expect(c.src, "the foot is unchanged — what it IS does not depend on reading the extension").toBe("Attached file");
+  });
+
+  it("⚠️ A VERSION WITH NO NOTE SAYS SO, because that is its ORDINARY state (D4)", () => {
+    /* Five of the eight cards on the dev fixture are note-less versions. Left blank, the Versions
+       section mostly looked broken; this is the case the treatment has to serve first. */
     const c = rail()[2].chips.find((x) => x.name === "Prologue-first")!;
-    expect(c.src).toBe("1 package · held by 2 agents");
-    expect(c.src).not.toMatch(/word/i);
-    expect(c.srcIcon, "no page or clip glyph — a version is not a document").toBeNull();
-    expect(c.use, "the holdings ARE its source line; there is no second count").toBeNull();
+    expect(c.body).toEqual({ kind: "nonote" });
   });
 
-  it("⚠️ agents are counted once each, however many sends they carry", () => {
-    /* Two queries, two agents, two send activities — `held by 2 agents`, not 2 sends dressed up. */
-    const twice = [...ACTS, act("q1", "bv1")];
-    expect(builderRail(MATS, PKGS, BVS, QS, twice)[2].chips[0].src).toBe("1 package · held by 2 agents");
+  it("⚠️ A MATERIAL WITH NEITHER TEXT NOR FILE KEEPS `Nothing written yet`, and its source is EMPTY (D5/D9)", () => {
+    const bare = [...MATS, { ...MATS[1], id: "ql3", versionName: "Untitled", fileName: undefined }];
+    const c = builderRail(bare, PKGS, BVS, QS, ACTS)[0].chips.find((x) => x.name === "Untitled")!;
+    expect(c.body).toEqual({ kind: "none" });
+    /* `Empty` was a STATE in the slot that states what a material IS. The band says it instead. */
+    expect(c.src).toBeNull();
   });
 
-  it("⚠️ NOT USED is set on both kinds, and only where nothing holds them (D10)", () => {
+  it("⚠️ a VERSION's source slot is `Latest` or nothing, and NEVER a word count (D7)", () => {
     const r = rail();
-    /* both branches entered — an all-used or all-unused fixture would prove one */
-    expect(r[0].chips.map((c) => [c.name, c.unused])).toEqual([["Hook-first", false], ["Voice-led", true]]);
-    expect(r[2].chips.map((c) => [c.name, c.unused]))
-      .toEqual([["Prologue-first", false], ["Worldbuilding-first", true], ["Post-R&R", true]]);
+    const srcs = r[2].chips.map((c) => [c.name, c.src]);
+    /* both branches entered — a fixture where every version were the newest would prove one */
+    expect(srcs).toEqual([["Prologue-first", null], ["Worldbuilding-first", null], ["Post-R&R", "Latest"]]);
+    for (const c of r[2].chips) {
+      expect(c.src ?? "").not.toMatch(/word/i);
+      expect(c.srcIcon, "no page glyph — a version is not a document").toBeNull();
+    }
   });
 
-  it("⚠️ an unused chip states its absence in WORDS, never as a zero (rule 9)", () => {
+  it("⚠️ THE TWO SLOTS HOLD TWO REGISTERS, and no usage phrase appears on the left (D7/D8)", () => {
+    const all = rail().flatMap((s) => s.chips);
+    expect(all.length).toBeGreaterThan(3);
+    for (const c of all) {
+      expect(c.src ?? "", `${c.name}'s source slot`).not.toMatch(/package|in \d/i);
+      expect(c.use, `${c.name}'s usage slot`).toMatch(/^(In \d+|Not in a package)$/);
+    }
+    /* and the composed foot, which is what actually wrapped: one short phrase per side */
+    const feet = all.map((c) => `${c.src ?? ""}|${c.use}`);
+    expect(new Set(feet).size, "a fixture where every foot were identical would prove one").toBeGreaterThan(2);
+  });
+
+  it("⚠️ usage is stated on EVERY card, and states absence in words rather than as `In 0` (rule 9)", () => {
     const r = rail();
-    expect(r[0].chips[1].src, "a letter drops the `in N` clause rather than reading `in 0`").not.toMatch(/in 0/);
-    /* the unused, non-newest one — the bare sentence */
-    expect(r[2].chips[1].src).toBe("not yet in a package");
-    /* and the unused NEWEST one — the same sentence with the clause that is true of it */
-    expect(r[2].chips[2].src).toBe("Latest · not yet in a package");
-    for (const c of r[2].chips) expect(c.src).not.toMatch(/\b0\b/);
-  });
-});
-
-describe("versionMetaLine", () => {
-  it("agrees its verbs at one", () => {
-    expect(versionMetaLine(1, 1, false)).toBe("1 package · held by 1 agent");
-    expect(versionMetaLine(2, 4, false)).toBe("2 packages · held by 4 agents");
+    expect(r[0].chips.map((c) => [c.name, c.use])).toEqual([["Hook-first", "In 1"], ["Voice-led", "Not in a package"]]);
+    expect(r[2].chips.map((c) => [c.name, c.use]))
+      .toEqual([["Prologue-first", "In 1"], ["Worldbuilding-first", "Not in a package"], ["Post-R&R", "Not in a package"]]);
+    for (const c of r.flatMap((s) => s.chips)) expect(c.use).not.toMatch(/\b0\b/);
   });
 
-  it("⚠️ `Latest` only where it is true", () => {
-    expect(versionMetaLine(0, 0, true)).toBe("Latest · not yet in a package");
-    expect(versionMetaLine(0, 0, false)).toBe("not yet in a package");
-  });
-
-  it("⚠️ a version IN packages is never labelled Latest — the clause belongs to the absence", () => {
-    expect(versionMetaLine(2, 1, true)).toBe("2 packages · held by 1 agent");
+  it("⚠️ `unused` survives the tag's retirement, because callers still read it (D8)", () => {
+    const r = rail();
+    /* both branches entered */
+    expect(r[0].chips.map((c) => c.unused)).toEqual([false, true]);
+    expect(r[2].chips.map((c) => c.unused)).toEqual([false, true, true]);
   });
 });
 

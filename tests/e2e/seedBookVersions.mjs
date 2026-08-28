@@ -53,8 +53,12 @@ const uid = user.uid;
 
 const { deleteField: df } = await import("firebase/firestore");
 const CLEAR = process.argv.includes("--clear");
+/* ⚠️ ONE VERSION CARRIES A NOTE AND TWO DO NOT, DELIBERATELY. A note-less version is the ordinary
+   state and the card says so in words; a version WITH a note shows it, in the same band. With all
+   three note-less, a sweep over the description band could only ever see one of those two. */
 const VERSIONS = [
-  { id: "bv-prologue", name: "Prologue-first",      kind: "reordering", createdDate: "2026-03-02" },
+  { id: "bv-prologue", name: "Prologue-first",      kind: "reordering", createdDate: "2026-03-02",
+    note: "Opens on the flood, and holds the guild back until chapter four." },
   { id: "bv-world",    name: "Worldbuilding-first", kind: "reordering", createdDate: "2026-05-11" },
   { id: "bv-rr",       name: "Post-R&R (T. Marsh)", kind: "revision",   createdDate: "2026-07-20" },
 ];

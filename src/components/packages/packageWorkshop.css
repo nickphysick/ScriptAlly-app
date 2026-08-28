@@ -83,6 +83,8 @@
   --pkgo-pink-band: #f3e0d6;           /* the problem card's corner wash */
   --pkgo-hairline: rgba(124, 58, 42, 0.16);
   --pkgo-hairline-soft: rgba(58, 28, 20, 0.10);
+  /* the faintest recess in the same ink family as the hairlines — the document plate's ground */
+  --pkgo-wash: rgba(58, 28, 20, 0.035);
   --pkgo-dash: rgba(124, 58, 42, 0.35); /* ghost panels — dashed means provisional (D6) */
   --pkgo-dash-soft: rgba(124, 58, 42, 0.30);
 

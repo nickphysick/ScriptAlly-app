@@ -22,7 +22,8 @@
 .bldr-t-syn { --bldr-acc: var(--pkgt-syn-ink); --bldr-accedge: var(--pkgt-syn-edge); --bldr-accbg: var(--pkgo-sage-a); }
 .bldr-t-ver { --bldr-acc: var(--pkgt-pro-ink); --bldr-accedge: var(--pkgt-pro-edge); --bldr-accbg: var(--pro-fill-deep); }
 
-.bldr-rsec { margin-bottom: 22px; }
+/* the query's container — the section, because the card grid is what has to fit the phrases */
+.bldr-rsec { margin-bottom: 22px; container-type: inline-size; }
 .bldr-sh { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
 /* the head is a filled pill in the family colour — which is why a card needs no type pill (D6) */
 .bldr-sh h4 {
@@ -44,7 +45,24 @@
 .bldr-addbtn:hover { filter: brightness(0.965); }
 .bldr-addbtn:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
 
-.bldr-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+/**
+ * ⚠️ THE COLUMN COUNT IS A CONTAINER QUERY, BECAUSE THE FOOT'S TWO SLOTS HAVE A MEASURED WIDTH.
+ *
+ * `Not in a package` is 77.3px and `Attached file` is 62 — 147.3 with the gap, against the 107px a
+ * card's inner box has at two columns in today's 296px rail. Both fitted only by ELLIPSING the left
+ * slot, which reads `Attac…` and `Late…`: worse than the wrap D10 removed, and invisible to a check
+ * that asks whether anything wrapped. Two columns therefore need a container wide enough to hold
+ * the phrases whole — 2 × 185 + the gap — and below that the cards go one up.
+ *
+ * ⚠️ AT TODAY'S FIXED 296px RAIL THIS RESOLVES TO ONE COLUMN, which halves the library's density.
+ * That is a real trade and it is stated rather than absorbed: the alternative is a shorter usage
+ * phrase, which is one constant. Written as a query rather than a flat `1fr` so that a wider rail —
+ * which the New-package panel may bring — takes two columns back without anyone remembering to.
+ */
+.bldr-cards { display: grid; grid-template-columns: 1fr; gap: 11px; }
+@container (min-width: 390px) {
+  .bldr-cards { grid-template-columns: 1fr 1fr; }
+}
 
 .bldr-mc {
   position: relative;
@@ -88,10 +106,53 @@
 }
 .bldr-desc--none { font-style: italic; color: var(--pkg-muted); }
 
+/**
+ * The document plate — what the description band holds when a material is an attached file (D2).
+ *
+ * ⚠️ ITS OUTER BOX IS THE DESCRIPTION BAND'S BOX, TO THE PIXEL (D6). `min-height` and `box-sizing`
+ * are declared together and the padding is chosen against the 26px icon so the total is 34: the
+ * band is a reservation, and a plate one pixel taller would raise every card in that section's grid
+ * row, which is a height change wearing a different card's clothes. The ref's roomier 8px padding
+ * is the one value not taken from it, for that reason.
+ */
+.bldr-plate {
+  box-sizing: border-box;
+  display: flex; align-items: center; gap: 10px;
+  min-height: 34px; margin-bottom: 9px;
+  padding: 2px 8px; border-radius: 8px;
+  background: var(--pkgo-wash); border: 1px solid var(--pkgo-hairline-soft);
+}
+.bldr-plateico {
+  width: 26px; height: 26px; border-radius: 6px; flex: 0 0 auto;
+  background: var(--pkg-paper); border: 1px solid var(--pkgo-hairline-soft);
+  display: flex; align-items: center; justify-content: center;
+}
+.bldr-plateico svg { width: 13px; height: 13px; stroke: var(--pkg-burg); stroke-width: 1.5; fill: none; }
+.bldr-platetx { min-width: 0; }
+/* the name can be long and the plate cannot grow — it ellipses rather than wrapping the card open */
+.bldr-platefn {
+  display: block; font-size: 11.5px; font-weight: 600; line-height: 1.35;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* ⚠️ ONE LINE, OR THE PLATE IS 10px TALLER THAN THE BAND IT SITS IN. `Word document` at 6.5px with
+   0.1em tracking wraps inside the plate's text column, and the second line pushed the whole card's
+   grid row down — measured 44 against 34, from a rule whose own `min-height` reads 34. The height
+   of a box is not what its `min-height` says; it is what its tallest child leaves it. */
+.bldr-platekind {
+  display: block; margin-top: 1px; line-height: 1.5;
+  font-family: var(--font-mono); font-size: 6.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--pkg-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
 .bldr-mcfoot { display: flex; align-items: center; gap: 8px; padding-top: 8px; border-top: 1px solid var(--pkgo-hairline-soft); }
-.bldr-src { display: flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.08em; color: var(--pkg-muted); min-width: 0; }
+/* ⚠️ THE LEFT SLOT GIVES WAY AND THE RIGHT ONE NEVER WRAPS (D10). `Latest · not yet in a package`
+   was one string in this slot, so the only card whose name and usage were both long was the only
+   card on the page that wrapped. Split, the left shrinks and ellipses; the right states a fixed
+   short phrase and holds its line. */
+.bldr-src { display: flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.08em; color: var(--pkg-muted); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bldr-src svg { width: 10px; height: 10px; stroke: currentColor; stroke-width: 1.6; fill: none; flex: 0 0 auto; }
-.bldr-use { margin-left: auto; font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.09em; color: var(--pkg-ink-soft); flex: 0 0 auto; }
+.bldr-use { margin-left: auto; font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.09em; color: var(--pkg-ink-soft); flex: 0 0 auto; white-space: nowrap; }
 
 .bldr-inuse {
   position: absolute; inset: 0;
@@ -102,15 +163,9 @@
   color: var(--pkg-burg);
 }
 
-/* out of flow, so it never displaces the name */
-.bldr-unused {
-  position: absolute; top: -1px; right: 8px; z-index: 1;
-  font-family: var(--font-mono);
-  font-size: 6px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--pkg-burg); background: var(--pkg-paper);
-  border: 1px solid var(--pkgt-let-edge);
-  padding: 1px 5px; border-radius: 999px;
-}
+/* ⚠️ `.bldr-unused` IS RETIRED WITH ITS ELEMENT (D8). The foot's right slot now states that fact
+   as `Not in a package`, in the same grammar as `In 2`; the tag said it a second time in a third
+   vocabulary, three inches away. Removed here rather than left as an orphan rule. */
 
 .bldr-rnote { margin-top: 9px; font-size: 10px; line-height: 1.6; font-style: italic; color: var(--pkg-muted); }
 

@@ -71,7 +71,24 @@ const path = (coll) => collection(db, "users", uid, coll);
 
 /* ── one manuscript ─────────────────────────────────────────────────────────────────────── */
 const MS_ID = "seed-ms-1";
+/**
+ * ⚠️ THIS IS WHY `seed-ms-1`'s BOOK VERSIONS KEPT VANISHING, TWICE, UNATTRIBUTABLY (F-BQ).
+ *
+ * `setDoc` without `merge` REPLACES the document, and this payload has no `bookVersions` — so every
+ * run of the canonical fixture restore silently deleted a field owned by `seedBookVersions.mjs`.
+ * It is not a race and not another lane misbehaving: any session restoring the fixture destroyed
+ * them, having no reason to think it had touched versions at all.
+ *
+ * The symptom lands nowhere near the cause. Below two versions `versionsActive` is false, so every
+ * version surface hides itself — the builder's Versions section renders empty and two of Tracking's
+ * three panels do not render — which reads as a regression in the app, three lanes from the script.
+ *
+ * So the write CARRIES the field across rather than merging: replace semantics are what this script
+ * wants for the fields it owns, and it must not silently drop one it does not.
+ */
+const msPrior = (await getDoc(doc(db, "users", uid, "manuscripts", MS_ID))).data() ?? {};
 await setDoc(doc(db, "users", uid, "manuscripts", MS_ID), {
+  ...(Array.isArray(msPrior.bookVersions) ? { bookVersions: msPrior.bookVersions } : {}),
   id: MS_ID, userId: uid,
   title: "The Smoke Test",
   genre: "Literary Fiction", ageCategory: "Adult",
