@@ -252,3 +252,101 @@ its renderers. Naming the new description component `CardBand` grew that set to 
 Enrolling the new ref rewrote `.refhashes.json`'s `_note` line from `—` to a literal em dash.
 That is the enrol script's own JSON serialisation, not an edit — the hashes are unchanged apart from
 the new entry.
+
+---
+
+## Three fixes on the screenshots, and F-BR — `cbf80967`
+
+### ⚠️ The single column was not a density trade. `.bldr-split` pinned the rail at 296px
+
+The container query was resolving honestly; it was being handed 296px at every viewport. That
+literal fitted a column of CHIPS and outlived them.
+
+```
+                      1440        1920        2560
+.bldr-split      296 + 690   296 + 1170   296 + 1810
+.bldr-cards            1 col       1 col       1 col
+```
+
+**A grid that answers the same at 1440 and 2560 is not answering.** After:
+
+```
+.bldr-split      506 + 480   977 + 489   1404 + 702
+.bldr-cards       2 × 247.5   4 × 236.1    5 × 272
+```
+
+The column count is `repeat(auto-fill, minmax(236px, 1fr))` — no threshold, no breakpoint, and
+correct at whatever width Part C's panel produces. 236 is the ref's drawn card and clears the
+measured floor of 182 (the foot's two phrases need 147.3px inside a card less 34px of padding).
+`auto-fill` rather than `auto-fit`, so the Synopses section's single card stays card-sized instead
+of stretching to the full rail; and never `minmax(0, 1fr)`, which is the hundred-phantom-tracks
+fault this repo already measured on the dashboard.
+
+The composer's floor is 480 — `.bldr-slots` is three equal tracks each needing a material's name
+beside a clear control. The 2:1 share is the reading that the library is what you browse and the
+composer is what you reach for once. Part C's pinned panel inherits both.
+
+### ⚠️ And the gate needed a second claim, because the obvious one passes on the bug
+
+`cols === floor((railW + gap) / (236 + gap))` is satisfied at 296: `floor(307 / 247)` is 1, and one
+column is what it rendered. **The derivation cannot catch a starved container** — so the gate also
+asserts the library is the larger half of the split, which is the structural claim the arithmetic
+can't make. That is the assertion the red proof tripped.
+
+### The explainer trio was outside all three panels
+
+`<FootnoteBand />` was a sibling after the panels, so it rendered on every tab — the same three
+cards explaining how Replies and Requests are counted, beside a ledger and a card library that state
+neither as a concept. Moved inside Tracking.
+
+```
+FOOT  packages: mounted 3 · showing 0
+      builder : mounted 3 · showing 0
+      tracking: mounted 3 · showing 3 · panel pkgt-panel-tracking
+```
+
+Mount count and visible count are asserted separately: every workspace page stays mounted and panels
+hide with `hidden`, so a second mount would satisfy "three showing" while doubling "three exist".
+
+### F-BR — the holdings line is back, and the fixture could not show it
+
+```
+Prologue-first        Opens on the flood, and holds the guild back until chapter four.
+                      1 package · held by 3 agents
+                                                              Latest        In 1
+```
+
+**No package on the fixture named a book version and no query was still out**, so `held by N agents`
+could only ever render as its absence — the unit lock proved both branches while the page could show
+one. It could not be added to either existing package: the version slot is frozen once a package has
+been sent, permanently and by design, and the rules refused the write. `seed-pkg-3` carries it from
+create, with a Full Sent and a Partial Sent still out on it.
+
+The line is omitted at zero rather than reading `held by 0 agents` — the foot's `Not in a package`
+states that absence once.
+
+### ⚠️ Card height, measured rather than eyeballed
+
+Nick's third point, for a decision rather than a change:
+
+```
+one-line band     14px of ink in a 34px reservation   →  20px of slack, on 5 of 8 cards
+material card     116.6px            version card     130.8px
+```
+
+At four-up it reads better than it did at one-up, but the slack is real and it is half the band. The
+band is reserved so that a card with a description and a card without are the same height in a row;
+dropping the reservation gives a ragged grid, which is what Option A in the ref was rejected for.
+**Left as it is, with the number recorded.**
+
+One thing that was fixed: a version with no holdings line had **3px** between its band and the foot
+where every other card has 9, because the note was the band's last child and carried the tighter
+margin meant for the line above the holdings.
+
+### Proved red three times
+
+| broken | what noticed |
+|---|---|
+| the rail pinned back to 296px | `the composer holds more width than the library` |
+| the holdings line removed | `no version in a package — F-BR unproven` |
+| the explainer moved back outside the panels | `footnoteBand.measure.ts` |
