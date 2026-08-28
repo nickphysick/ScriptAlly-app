@@ -129,3 +129,126 @@ it by id. A panel and its tab are one condition now.
 The gutter check first read `.wpg-scroll > *` — the masthead's full-bleed slab, which starts 80px
 left of the gutter — and reported a correct layout as 327 against 247. The showing panel's own
 content is the honest reference.
+
+---
+
+## The empty description, and the source line's two grammars — Option B
+
+`74002bc0`, one commit for both parts. `RailChip` carried `desc: string | null` plus a `descNone`
+flag; the two parts are the same interface, so splitting would have meant writing an intermediate
+state nobody built or measured. Both gates ran. Ref enrolled at
+`design-refs/empty-description.html`.
+
+### Part 1 — the band holds something true in every state
+
+The census, printed at both widths so a monoculture cannot hide in a pass:
+
+```
+BANDS  words:Nothing written yet
+       plate:voice-led-v2.docx / WORD DOCUMENT
+       text:When the tide went out at Ravensme…
+       text:Opens on the flood, and holds the …
+       words:No note on this version
+BANDH  [34, 34.5]        WRAPPED 0 · CLIPPED 0 of 8
+```
+
+All four bodies render. `34.5` is a two-line clamped body's own line box and always was — the
+assertion is the reserved 34 within a pixel, not an equality, because pinning one value fails on a
+correct card.
+
+### ⚠️ The plate measured 44 against a `min-height` that reads 34
+
+`Word document` at 6.5px with 0.1em tracking **wrapped inside the plate's text column**, making it
+36px tall against a 26px icon: 36 + 6 padding + 2 border = 44, which raised every card in that grid
+row. Nothing in the rule says 44. **The height of a box is not what its `min-height` says; it is
+what its tallest child leaves it** — a source read would have reported 34 and been wrong by ten
+pixels. Fixed by holding the kind to one line and taking the padding to 2px.
+
+### Part 2 — and the fix for the wrap was ellipsing words into nonsense
+
+D10 asked for zero wraps and got them. It also got `Attac…` and `Late…`, because a slot set to
+`nowrap` with `text-overflow: ellipsis` **cannot wrap by construction**, so a wrap check over it is
+satisfied by a truncated word. The proxy passed; the screenshot did not.
+
+Measured, at both 1440 and 1920 — the rail is a fixed 296px at either:
+
+```
+card 142.5  ·  inner 107
+Not in a package  77.3      Attached file  62      +8 gap  =  147.3   ✗
+Not in a package  77.3      Latest         29      +8 gap  =  114.3   ✗
+In 2              19.3      39 words       53      +8 gap  =   80.3   ✓
+```
+
+Two of eight cards over, both because the right slot is the long phrase. The column count is a
+**container query** now, against the width the phrases need (`min-width: 390px` on `.bldr-rsec`).
+
+### ⚠️ At today's rail that resolves to ONE column, and it halves the library's density
+
+Stated rather than absorbed. It is the only option that keeps every word the brief specified and
+every card readable; the alternative is a shorter usage phrase, which is one constant. Written as a
+query rather than a flat `1fr` so a wider rail — which Part C's New-package panel may bring — takes
+two columns back without anyone remembering to. **If you would rather keep two columns, say so and
+the phrase shortens.**
+
+The gate now asserts **clipping**, not wrapping. `scrollWidth > clientWidth` on both slots and on
+both lines of the plate.
+
+### The `Not used` tag is retired, and the brief did not ask for that
+
+D8 moves `Not in a package` into the foot's right slot. The tag at the card's top-right said the
+same fact, three inches away, in a third vocabulary — which is the fault this pass exists to remove
+from the left slot. Retired with its CSS rule in the same commit. `chip.unused` survives because
+callers read it. **One line to put back if you want it.**
+
+### ⚠️ And `held by N agents` is gone from the version card
+
+`versionMetaLine` built `2 packages · held by 4 agents` for a slot that now carries only what a
+version IS. The usage half moved to the right slot as `In 2`; the agents figure has no slot under a
+two-register grammar and is **not** restated in a shorter form, because a second fact in either slot
+is what wrapped the card in the first place. A genuine reduction in what the card says — reported,
+not absorbed (**F-BR**).
+
+### F-BQ — `seed.mjs` is what kept deleting the book versions
+
+Not a race, and not another lane misbehaving.
+
+```
+tests/e2e/seed.mjs:74   setDoc(doc(db,"users",uid,"manuscripts","seed-ms-1"), { …no bookVersions… })
+```
+
+`setDoc` without `merge` **replaces** the document. `seed.mjs` is documented in four measurement
+files as the canonical fixture restore, so every session that ran it deleted a field owned by
+`seedBookVersions.mjs` — having no reason to think it had touched versions at all. The symptom lands
+nowhere near the cause: below two versions `versionsActive` is false, so every version surface hides
+itself, which reads as a regression in the app three lanes away.
+
+The write carries the field across now. The two in-app writers (`AllManuscripts.tsx:303`,
+`SubmissionPackages.tsx:233`) both append or rename from the current list and cannot remove the key;
+neither was ever implicated. `seedThinCases.mjs:179` has the same `setDoc` shape on `thin-ms`, which
+has no versions to lose — same trap, nothing on the other side of it today.
+
+### The fixture gained the two states the sweep could not otherwise see
+
+`seed-mat-ql1` a real body, `bv-prologue` a note. Every material in the rail was previously
+draft-less and every version note-less, so the `text` branch of the band was unrepresented on both
+kinds — the same monoculture the last pack fixed for the source line, one level down.
+
+### Proved red three times
+
+| broken | what noticed |
+|---|---|
+| the plate returns a blank band | `no attachment card — D2 unproven` |
+| the grid returns to two columns | `a truncated word reads worse than the wrap it replaced` |
+| a usage phrase back in the source slot | both `D7` unit cases |
+
+### And the containers lock caught a name collision
+
+`CardBand` already exists — the cap band on a `CappedCard` — and `containers.test.tsx` sweeps for
+its renderers. Naming the new description component `CardBand` grew that set to five. Renamed to
+`CardDescription`; the lock was not rebaselined.
+
+### One byte-level note
+
+Enrolling the new ref rewrote `.refhashes.json`'s `_note` line from `—` to a literal em dash.
+That is the enrol script's own JSON serialisation, not an edit — the hashes are unchanged apart from
+the new entry.
