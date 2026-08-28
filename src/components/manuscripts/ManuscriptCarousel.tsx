@@ -66,9 +66,20 @@ export const ManuscriptCarousel: React.FC<ManuscriptCarouselProps> = ({
       <div className="mcar-track">
         {slots.map((slot) => {
           const hidden = slot.role === "hidden";
-          /* ⚠️ BOTH, NOT EITHER. `tabIndex={-1}` leaves it in the accessibility tree;
-             `aria-hidden` alone leaves it tabbable. A hidden tile needs to be neither. */
-          const offstage = { tabIndex: hidden ? -1 : 0, "aria-hidden": hidden || undefined };
+          /**
+           * ⚠️ `tabIndex` READS THE DECK'S `focusable`, NOT `hidden`. The first version derived it
+           * here from the role and made every PEEKING tile tabbable — so the module computed
+           * `focusable`, a lock asserted "exactly one slot is focusable, always", and the renderer
+           * ignored both. Green tests about a function the component was not listening to. The
+           * browser measurement read `tabbable: 2` and is the only thing that could have.
+           *
+           * ⚠️ ONE TAB STOP, THEN ARROW KEYS — the roving-tabindex model. You Tab to the carousel
+           * and move within it; you do not Tab through a shelf of books to get past it.
+           *
+           * ⚠️ AND `aria-hidden` IS SEPARATE, because the two do different jobs: `tabIndex={-1}`
+           * leaves an element in the accessibility tree, and `aria-hidden` alone leaves it tabbable.
+           */
+          const offstage = { tabIndex: slot.focusable ? 0 : -1, "aria-hidden": hidden || undefined };
 
           if (slot.isGhost) {
             return (

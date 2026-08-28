@@ -100,7 +100,12 @@ test("the book profile rests and settles at both ends of its content range", asy
   }[] = [];
 
   for (const c of [
-    { name: "populated", route: "/manuscripts" },
+    /* ⚠️ BY PARAM, NOT BY CLICKING A TILE. This case used to open the first card in the library
+       GRID — which the carousel retired, so the click found nothing, the sweep sat on the shelf and
+       reported a null title and zero overflow, and still passed: the non-scrolling branch asserts
+       only that an unscrolled header is not stuck, which is trivially true of a page with no
+       dossier on it at all. The guard below now requires a real book rather than a different one. */
+    { name: "populated", route: "/manuscripts?m=seed-ms-1" },
     { name: "empty", route: `/manuscripts?m=${EMPTY_ID}` },
   ]) {
     await openRoute(page, c.route, { width: 1440, height: 900 });
@@ -108,10 +113,6 @@ test("the book profile rests and settles at both ends of its content range", asy
 
     /* The populated case still arrives on the shelf, so a book has to be opened. The empty case
        navigates straight to its own dossier by param — which the view-as-a-route change bought. */
-    if (c.name === "populated") {
-      const card = page.locator(".mlib-card, .mlib-open, [data-manuscript]").first();
-      if (await card.count()) { await card.click(); await page.waitForTimeout(500); }
-    }
 
     const rest = await read(page);
     expect(rest, `${c.name}: the scroll row or the chrome is not on the page`).not.toBeNull();
@@ -200,9 +201,16 @@ test("the book profile rests and settles at both ends of its content range", asy
    * twice — which is exactly the drift this whole file was written to catch.
    */
   const [pop, empty] = seen;
+  /**
+   * ⚠️ BOTH FIXTURES ARE PINNED BY NAME NOW. Requiring only that the two DIFFER was satisfied by
+   * `null !== "Nothing In It Yet"` — the populated case rendered no book at all and the guard said
+   * the sweep had covered two. A guard against a monoculture has to assert what each subject IS,
+   * not merely that they are not each other.
+   */
+  expect(pop.title, "the populated fixture did not render — the sweep measured no book")
+    .toBe("The Smoke Test");
   expect(empty.title, "the empty fixture did not render — the sweep measured another book")
     .toBe("Nothing In It Yet");
-  expect(pop.title, "the two cases rendered the same manuscript").not.toBe(empty.title);
 
   /**
    * ⚠️ THE OVERFLOW IS CHROME-DOMINATED, NOT CONTENT-DOMINATED, AND THAT WAS A SURPRISE. I expected
