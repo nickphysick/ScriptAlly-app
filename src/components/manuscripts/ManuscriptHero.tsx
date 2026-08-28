@@ -23,7 +23,6 @@
 import React from "react";
 import { ManuscriptPlate, ManuscriptPlateEdit } from "./ManuscriptPlate";
 import { ManuscriptTabs, ManuscriptTabKey } from "./ManuscriptTabs";
-import { HeroFigure } from "../../lib/manuscriptProfile";
 import { PlateStats } from "../../lib/manuscriptPlate";
 import manuscriptIcon from "../../assets/shell/manuscript-icon.png";
 import "./bookProfile.css";
@@ -35,11 +34,8 @@ export interface ManuscriptHeroProps {
   genres: string[];
   wordCount?: number;
   stats: PlateStats;
-  /**
-   * The three derived figures, right-aligned with hairline dividers. Absent entries simply do not
-   * render — `Querying since` omits itself rather than dashing a date the app does not have.
-   */
-  figures: HeroFigure[];
+  /* ⚠️ `figures` IS GONE, NOT UNUSED. The three-figure row moved to the five-figure strip under
+     the tab rail; a prop left declared and unread is a knob the next reader goes looking for. */
   edit?: ManuscriptPlateEdit;
   tab: ManuscriptTabKey;
   onTabChange: (t: ManuscriptTabKey) => void;
@@ -61,7 +57,7 @@ export interface ManuscriptHeroProps {
 }
 
 export const ManuscriptHero: React.FC<ManuscriptHeroProps> = ({
-  title, status, shelved, genres, wordCount, stats, figures, edit, tab, onTabChange, counts,
+  title, status, shelved, genres, wordCount, stats, edit, tab, onTabChange, counts,
   onPrev, onNext, bookActions,
 }) => (
   <div className="msp-hero">
@@ -112,21 +108,15 @@ export const ManuscriptHero: React.FC<ManuscriptHeroProps> = ({
           />
 
           {/**
-            * ⚠️ THE FIGURES AND THE ⋯ ARE ONE GROUP, and the ⋯ sits at its far right. Both are about
-            * this RECORD rather than about the page, so they travel together — and the group takes
-            * the auto margin, because members each claiming it push only the first of them right.
+            * ⚠️ THE THREE-FIGURE ROW IS GONE, AND THE ⋯ STAYS. The five-figure strip under the tab
+            * rail states Queries sent · Responses · Still open · Agents holding · Last sent; keeping
+            * three of those here as well would put the same figures on one page twice, which is the
+            * two-numbers-both-called-the-same-thing fault this codebase has paid for repeatedly.
+            *
+            * ⚠️ THE ⋯ IS NOT A FIGURE AND DOES NOT GO WITH THEM. Shelve, reactivate, Edit details
+            * and the guarded delete act on the MANUSCRIPT and have no other surface on this page.
             */}
-          <div className="msp-recstats">
-            <div className="msp-hsrow">
-              {figures.map((f) => (
-                <div key={f.key} className="msp-hs">
-                  <div className={`msp-hsn${f.date ? " date" : ""}`}>{f.value}</div>
-                  <div className="msp-hsl">{f.label}</div>
-                </div>
-              ))}
-            </div>
-            {bookActions}
-          </div>
+          <div className="msp-recstats">{bookActions}</div>
         </div>
 
         <button

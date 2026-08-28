@@ -103,22 +103,32 @@ describe("the dossier renders one manuscript", () => {
     expect(html).toContain("Young Adult");
     expect(html).toContain("Thriller");
     expect(html).toContain("50,000 words");
-    expect(html).toContain('<div class="msp-hsn">1</div><div class="msp-hsl">Queries sent</div>');
-    expect(html).toContain('<div class="msp-hsn">0</div><div class="msp-hsl">Responses</div>');
+    /* ⚠️ RETARGETED TO THE STRIP. The figures left the record card in the same edit that added the
+       five-figure strip under the tab rail; the claim — that the page states the REAL derived
+       numbers rather than constants — is unchanged, and the markup that carries them moved. */
+    expect(html).toContain('<div class="msp-fign">1</div><div class="msp-figl">Queries sent</div>');
+    expect(html).toContain('<div class="msp-fign">0</div><div class="msp-figl">Responses</div>');
     // The stat strip is gone from this variant, not merely restyled.
     expect(html).not.toContain("msv-statn");
   });
 
   /**
-   * ⚠️ A COUNT OF NOUGHT IS STATED; A DATE NOBODY HAS IS NOT. `0 queries sent` is a fact the writer
-   * needs. `Querying since` has no date behind it until something has gone out, and a dash there
-   * would be the app asserting a start it does not know — so the clause omits itself, and its
-   * separator goes with it because the separator is a `::before` rather than an element.
+   * ⚠️ A COUNT OF NOUGHT IS STATED; A DATE NOBODY HAS IS NOT — and the strip inherits that split
+   * rather than dropping it. `0 queries sent` is a fact the writer needs. `Last sent` has no date
+   * behind it until something has gone out, and the strip writes `—` there, which is the form
+   * `plateStatCells` already uses for `Last activity`: it reads as "this has not happened" rather
+   * than asserting a date.
+   *
+   * ⚠️ `Querying since` IS RETIRED WITH THE HERO'S ROW. Its omit-the-whole-cell rule existed because
+   * an omitted cell had to take its own divider with it; the strip has five fixed cells and omits
+   * none, so there is nothing left to hang.
    */
-  it("omits Querying since where nothing has been sent, and states it where something has", () => {
-    expect(doss({ queries: [] })).not.toContain("Querying since");
-    expect(doss({ queries: [] })).toContain('<div class="msp-hsn">0</div><div class="msp-hsl">Queries sent</div>');
-    expect(doss()).toContain("Querying since");
+  it("states nought as a fact and dashes a date it does not have", () => {
+    const empty = doss({ queries: [] });
+    expect(empty).toContain('<div class="msp-fign">0</div><div class="msp-figl">Queries sent</div>');
+    expect(empty).toContain('<div class="msp-fign">—</div><div class="msp-figl">Last sent</div>');
+    expect(empty, "the retired since cell came back").not.toContain("Querying since");
+    expect(doss(), "a book with a sent query still dashes its last-sent").not.toContain('<div class="msp-fign">—</div><div class="msp-figl">Last sent</div>');
   });
 
   /* Genres arrive already resolved; the dossier must not be handed raw ids to print. */
@@ -183,6 +193,13 @@ describe("the dossier renders one manuscript", () => {
  * printing of it. Counting raw HTML would forbid the accessible label.
  */
 describe("the manuscript's name is printed once", () => {
+  /**
+   * ⚠️ STILL THE RECORD CARD'S PRINTING, AND THAT IS CURRENT RATHER THAN STALE. The plan was for the
+   * masthead to carry the book and become the one printing; that work is stopped by the
+   * coordination gate (`PageHeader`'s `mark` is a closed union of sixteen static page keys, and a
+   * book cover cannot be one), so the card still holds the name and this assertion still points at
+   * the right place. When the masthead does take it, this is what has to move — not be deleted.
+   */
   /** Visible text only: attributes stripped, then tags. */
   const textOf = (html: string) =>
     html.replace(/<[^>]*>/g, "\u0000").split("\u0000").join(" ");
@@ -265,5 +282,40 @@ describe("the four Details derivations execute, which is what the smoke could no
 
   it("and on an empty one, where every derivation takes its absent branch", () => {
     expect(() => doss({ manuscript: ms({ logline: "" }), queries: [], comps: [] })).not.toThrow();
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   THE FIVE-FIGURE STRIP — under the tab rail, and the only place these figures are stated.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+describe("the figures strip", () => {
+  it("states five cells under the tab rail, value over label", () => {
+    const html = doss();
+    const strip = html.slice(html.indexOf('class="msp-figstrip"'), html.indexOf('class="msp-pane"'));
+    expect(strip, "the strip is not on the page").not.toBe("");
+    expect((strip.match(/msp-figcell/g) ?? []).length).toBe(5);
+    for (const label of ["Queries sent", "Responses", "Still open", "Agents holding", "Last sent"]) {
+      expect(strip, `${label} is missing from the strip`).toContain(label);
+    }
+    /* Value above label: the numeral's div precedes the label's within each cell. */
+    expect(strip.indexOf("msp-fign")).toBeLessThan(strip.indexOf("msp-figl"));
+  });
+
+  /**
+   * ⚠️ IT SITS AFTER THE TAB RAIL AND BEFORE THE PANE, which is the whole of "under the tabs".
+   * Rendered above the rail it would read as part of the record card's identity block.
+   */
+  it("sits between the tab rail and the pane", () => {
+    const html = doss();
+    expect(html.indexOf("msp-tabs")).toBeLessThan(html.indexOf("msp-figstrip"));
+    expect(html.indexOf("msp-figstrip")).toBeLessThan(html.indexOf("msp-pane"));
+  });
+
+  /** ⚠️ AND THE FIGURES ARE STATED ONCE. Three of the five used to be on the record card too. */
+  it("is the only place these figures are stated", () => {
+    const html = doss();
+    for (const label of ["Queries sent", "Responses"]) {
+      expect(html.split(label).length - 1, `${label} is stated twice on the page`).toBe(1);
+    }
   });
 });

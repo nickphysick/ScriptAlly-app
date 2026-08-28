@@ -55,11 +55,6 @@ const hero = (over: Partial<React.ComponentProps<typeof ManuscriptHero>> = {}) =
       genres={["Young Adult", "Thriller"]}
       wordCount={50000}
       stats={{ queriesSent: 26, responses: 12, lastActivity: "2 Jun" }}
-      figures={[
-        { key: "sent", value: "26", label: "Queries sent" },
-        { key: "responses", value: "12", label: "Responses" },
-        { key: "since", value: "14 Jan 2026", label: "Querying since", date: true },
-      ]}
       onPrev={null}
       onNext={null}
       tab="overview"
@@ -210,18 +205,23 @@ describe("the hero", () => {
     expect(html.match(/msp-chev/g)).toHaveLength(2);
   });
 
-  /** The ⋯ belongs with the figures — both are about the record — and sits at their far right. */
-  it("groups the figures and the book's ⋯ together", () => {
+  /**
+   * ⚠️ RETARGETED: THE FIGURES LEFT AND THE ⋯ STAYED. The three-figure row moved into the
+   * five-figure strip under the tab rail; three of those five were stated in both places, which is
+   * the same numbers on one page twice. What remains in this group is the book's ⋯ alone — shelve,
+   * reactivate, Edit details and the guarded delete, which have no other surface on the page.
+   *
+   * ⚠️ STILL BOUNDED ON THE NEXT CHEVRON, NOT ON `</div></div>`. The group holds nested divs, so a
+   * non-greedy close matches the FIRST inner one and cuts the ⋯ off the end — the slice would then
+   * report the very absence the assertion is testing for.
+   */
+  it("keeps the book's ⋯ in the record group, and no figures with it", () => {
     const html = hero({ bookActions: <button type="button">dots</button> });
-    /* ⚠️ BOUNDED ON THE NEXT CHEVRON, NOT ON `</div></div>`. The group contains nested divs, so a
-       non-greedy close matches the FIRST inner one and cuts the ⋯ off the end — the slice then
-       reports the very absence the assertion is testing for. Slicing between two anchors that
-       cannot nest is the reliable form. */
     const start = html.indexOf('<div class="msp-recstats">');
-    expect(start, "the figures group is not on the page").toBeGreaterThan(-1);
+    expect(start, "the record group is not on the page").toBeGreaterThan(-1);
     const group = html.slice(start, html.indexOf("msp-chev", start));
-    expect(group).toContain("msp-hsrow");
-    expect(group.indexOf("msp-hsrow")).toBeLessThan(group.indexOf("dots"));
+    expect(group).toContain("dots");
+    expect(group, "the figure row came back to the hero").not.toContain("msp-hsrow");
     expect(theRule(".msp-recstats")).toContain("margin-left: auto");
   });
 
@@ -237,16 +237,26 @@ describe("the hero", () => {
     expect(html).not.toContain("msv-statstrip");
   });
 
-  it("states the three figures as cells, Playfair over mono", () => {
+  /**
+   * ⚠️ THE HERO STATES NO FIGURES AT ALL NOW. This replaces "states the three figures as cells" —
+   * the law did not weaken, it moved: the figures are `bookFigures`, locked in bookFigures.test.ts,
+   * and rendered by the dossier under the tab rail. Asserting their ABSENCE here is what stops them
+   * being quietly reinstated alongside.
+   */
+  it("states no figures of its own", () => {
     const html = hero();
-    expect(html).toContain('<div class="msp-hsn">26</div><div class="msp-hsl">Queries sent</div>');
-    expect(html).toContain('<div class="msp-hsn">12</div><div class="msp-hsl">Responses</div>');
-    expect(html).toContain('<div class="msp-hsn date">14 Jan 2026</div><div class="msp-hsl">Querying since</div>');
+    for (const cls of ["msp-hsrow", "msp-hsn", "msp-hsl"]) {
+      expect(html, `${cls} came back to the hero`).not.toContain(cls);
+    }
+    for (const label of ["Queries sent", "Responses", "Querying since"]) {
+      expect(html, `${label} is stated in the hero as well as the strip`).not.toContain(label);
+    }
   });
 
   /**
-   * ⚠️ NOT TWICE ON ONE ROW. The three figures used to be clauses in the facts line under the title;
-   * they are the hero's right-hand cells now, and the facts line keeps genre and word count only.
+   * ⚠️ NOT TWICE ON ONE ROW. The three figures were clauses in the facts line, then the hero's
+   * right-hand cells, and are now the strip's. The facts line has kept genre and word count
+   * throughout, and this is the assertion that has stopped them coming back at each move.
    */
   it("states none of the three figures in the facts line as well", () => {
     const line = /class="msv-platemeta"([\s\S]*?)<\/div>/.exec(hero())?.[1] ?? "";
@@ -258,21 +268,17 @@ describe("the hero", () => {
   });
 
   /**
-   * ⚠️ A DATE OR NOTHING — and the divider goes with it. `Querying since —` asserts a start the app
-   * does not know, which is the shape this page shipped once as an "Added" date derived from an
-   * imported query's send. The divider is a `border-left` on the cell, so an omitted cell cannot
-   * leave a rule with nothing beyond it.
+   * ⚠️ THE `Querying since` CELL AND ITS OMIT-RATHER-THAN-DASH RULE ARE BOTH RETIRED, and this
+   * records why rather than deleting the case. That rule existed because an omitted cell had to
+   * take its own `border-left` divider with it; the strip has a FIXED five cells, so nothing is
+   * omitted and nothing is left hanging. `Last sent` states `—` for a book never sent — which is
+   * the established form (`plateStatCells` does the same for `Last activity`) and reads as "this
+   * has not happened" rather than asserting a date.
+   *
+   * The live claim is in bookFigures.test.ts: nought where zero is true, `—` where nothing happened.
    */
-  it("omits the since cell entirely rather than dashing a date it does not have", () => {
-    const html = hero({ figures: [
-      { key: "sent", value: "0", label: "Queries sent" },
-      { key: "responses", value: "0", label: "Responses" },
-    ] });
-    expect(html).not.toContain("Querying since");
-    expect(html).not.toContain("—");
-    // …and the two counts are still stated at nought, which is a fact rather than an absence.
-    expect(html).toContain('<div class="msp-hsn">0</div><div class="msp-hsl">Queries sent</div>');
-    expect(html.match(/msp-hs"/g)).toHaveLength(2);
+  it("no longer renders a since cell for the hero to omit", () => {
+    expect(hero()).not.toContain("Querying since");
   });
 
   /**

@@ -782,3 +782,37 @@
 }
 .msp-attrow[data-status="failed"] .msp-attname,
 .msp-attrow[data-status="uploading"] .msp-attname { color: var(--shell-muted); }
+
+/**
+ * ══ THE FIVE-FIGURE STRIP ═════════════════════════════════════════════════════════════════════
+ * Directly under the tab rail. Playfair numerals over mono labels, hairline dividers between.
+ *
+ * ⚠️ NOT IN THE MASTHEAD. A masthead carrying live figures becomes a dashboard, which is a
+ * different contract for a component ten pages share.
+ */
+.msp-figstrip {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 14px 0 16px;
+  border-bottom: 1px solid var(--hair);
+}
+.msp-figcell {
+  flex: 1;
+  min-width: 0;
+  padding: 0 18px;
+  /* ⚠️ THE DIVIDER IS A `border-left` ON THE CELL, so a cell that is not rendered takes its own
+     divider with it — the same construction the retired hero row used for `Querying since`. */
+  border-left: 1px solid var(--hair);
+}
+.msp-figcell:first-child { border-left: 0; padding-left: 0; }
+/** ⚠️ 1.3 MINIMUM ON PLAYFAIR — numerals have no descender, but a `—` and a `2 Mar` share this cell. */
+.msp-fign { font-family: var(--font-serif); font-size: 26px; line-height: 1.3; color: var(--ink); }
+.msp-figl {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+}

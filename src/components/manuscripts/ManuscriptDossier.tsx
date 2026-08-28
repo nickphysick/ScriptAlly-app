@@ -31,6 +31,7 @@ import { standingTrack, furthestTrack, furthestReached, journeyMeta } from "../.
 import { ManuscriptTabKey } from "./ManuscriptTabs";
 import { ManuscriptHero } from "./ManuscriptHero";
 import { OverviewPane } from "./OverviewPane";
+import { bookFigures } from "../../lib/bookFigures";
 import { JourneyPane } from "./JourneyPane";
 import { CompsPane } from "./CompsPane";
 import { VersionsPane } from "./VersionsPane";
@@ -200,15 +201,6 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
              from it — the rail's collapsed primary is the page's one call to action — and the ⋯
              moved to the control row as `ManuscriptActions`, because shelve, reactivate, the
              guarded delete and the three fields with no inline editor have no other surface. */
-          figures={[
-            { key: "sent", value: String(stats.queriesSent), label: "Queries sent" },
-            { key: "responses", value: String(stats.responses), label: "Responses" },
-            /* ⚠️ A DATE OR NOTHING — never a dash. `Querying since —` asserts a start the app does
-               not know; the cell omits itself and the divider goes with it. */
-            ...(since !== null
-              ? [{ key: "since", value: profileDate(since), label: "Querying since", date: true }]
-              : []),
-          ]}
           onPrev={onPrev}
           onNext={onNext}
           bookActions={bookActions}
@@ -220,6 +212,26 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
           `flex: 0 0 auto` above it; this takes the remainder with `min-height: 0` so it can be
           shorter than its content instead of pushing the card past the viewport.
         */}
+        {/**
+          * ⚠️ THE FIGURES SIT UNDER THE TAB RAIL, NOT IN THE MASTHEAD. A masthead carrying live
+          * figures becomes a dashboard, and `PageHeader` is shared by ten pages — its `count` slot
+          * was deleted once already for exactly that reason.
+          *
+          * ⚠️ AND THE RECORD CARD'S THREE-FIGURE ROW WENT IN THE SAME EDIT. Three of these five
+          * were stated there too; leaving both would have put the same numbers on one page twice.
+          *
+          * ⚠️ VALUE OVER LABEL HERE, LABEL OVER VALUE ON THE SHELF TILE. Deliberate: this is a page
+          * being read, that is a card being scanned.
+          */}
+        <div className="msp-figstrip">
+          {bookFigures(queries).map((f) => (
+            <div key={f.key} className="msp-figcell">
+              <div className="msp-fign">{f.value}</div>
+              <div className="msp-figl">{f.label}</div>
+            </div>
+          ))}
+        </div>
+
         <div className="msp-pane">
           {tab === "overview" && (
             <OverviewPane
