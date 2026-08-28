@@ -74,6 +74,13 @@ for (const [w, h] of [[1440, 900], [1920, 700]] as const) {
         panel: rect(p), head: rect(p.querySelector(".bldp-head")), foot: rect(p.querySelector(".bldp-foot")),
         slabBottom: n((grid.querySelector(".wpg-chrome") as HTMLElement).getBoundingClientRect().bottom),
         title: (p.querySelector(".bldp-title") as HTMLInputElement).value,
+        /* ⚠️ THE FIELD MUST READ AS TYPEABLE (D12) — set in the heading's face with no box it read
+           as the panel's title. The mark is asserted on the WRAPPER, which is where the border is
+           and where the pencil cannot swallow a click. */
+        titleUnderline: (() => { const w = p.querySelector(".bldp-titlewrap") as HTMLElement;
+          const cs = getComputedStyle(w); return `${cs.borderBottomStyle} ${Math.round(parseFloat(cs.borderBottomWidth))}`; })(),
+        titlePencil: (() => { const g = p.querySelector(".bldp-pencil") as HTMLElement | null;
+          return g ? { present: true, events: getComputedStyle(g).pointerEvents } : { present: false, events: "" }; })(),
         titleTag: (p.querySelector(".bldp-title") as HTMLElement).tagName.toLowerCase(),
         titleFont: getComputedStyle(p.querySelector(".bldp-title")!).fontFamily.split(",")[0].replace(/["']/g, ""),
         why: (p.querySelector(".bldr-why")?.textContent ?? "").trim(),
@@ -114,6 +121,9 @@ for (const [w, h] of [[1440, 900], [1920, 700]] as const) {
 
     /* the title is the heading, and it took the suggestion */
     expect(out.titleTag).toBe("input");
+    expect(out.titleUnderline, "no dashed underline — the name reads as a heading").toBe("dashed 1");
+    expect(out.titlePencil.present, "no pencil — the name reads as a heading").toBe(true);
+    expect(out.titlePencil.events, "the mark must not swallow a click aimed at the field").toBe("none");
     expect(out.titleFont).toMatch(/Playfair/i);
     expect(out.title).toBe("Hook-first · One-page · Prologue-first");
     /* ⚠️ A DUPLICATE IS STATED, NOT BLOCKED (D16) — and the fixture reaches it, because

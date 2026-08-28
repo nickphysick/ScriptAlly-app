@@ -64,20 +64,22 @@
 /* ⚠️ AN INPUT WEARING THE HEADING'S FACE — the package's name IS the panel's title, so it is set in
    the heading's type and carries no box until it is touched. A bordered field here would read as
    the last question on a form rather than as the name of the thing above the slots. */
+.bldp-titlewrap {
+  flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 6px;
+  border-bottom: 1px dashed var(--pkgo-dash);
+}
+.bldp-titlewrap:hover, .bldp-titlewrap:focus-within { border-bottom-style: solid; border-bottom-color: var(--pkg-burg); }
+/* the mark advertises the field; it must never intercept a click aimed at it */
+.bldp-pencil { flex: 0 0 auto; color: var(--pkg-muted); pointer-events: none; align-self: center; }
+.bldp-titlewrap:hover .bldp-pencil, .bldp-titlewrap:focus-within .bldp-pencil { color: var(--pkg-burg); }
+
 .bldp-title {
   flex: 1; min-width: 0;
   font-family: var(--font-serif); font-size: 16px; font-weight: 600; color: var(--pkg-ink);
-  background: none; border: none; border-bottom: 1px solid transparent;
+  background: none; border: none;
   padding: 1px 0; outline: none;
 }
 .bldp-title::placeholder { color: var(--pkg-muted); font-weight: 400; font-style: italic; }
-.bldp-title:hover { border-bottom-color: var(--pkgo-hairline-soft); }
-.bldp-title:focus { border-bottom-color: var(--pkg-burg); }
-.bldp-sub {
-  flex: 0 0 auto;
-  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.13em;
-  text-transform: uppercase; color: var(--pkg-muted);
-}
 
 /* ⚠️ THE SCROLL IS HERE, NOT ON THE PANEL — the name above and the Create button below must stay on
    screen while three full cards are being reviewed. `min-height: 0` is what lets a flex child
@@ -98,11 +100,14 @@
    second border round it would read as a card inside a box rather than as a part in a slot. */
 .bldp-slot--on { border: none; padding: 0; display: block; min-height: 0; }
 .bldp-slot--over { border-color: var(--pkg-burg); border-style: solid; background: var(--pkgt-let-a); }
-.bldp-ph {
+.bldp-ph { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.bldp-phk {
   font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.13em;
-  text-transform: uppercase; color: var(--pkg-muted); text-align: center;
+  text-transform: uppercase; color: var(--pkg-muted);
 }
-.bldp-ph em { font-style: normal; color: var(--pkg-burg); opacity: 0.75; }
+.bldp-phk em { font-style: normal; color: var(--pkg-burg); opacity: 0.75; }
+/* quieter than the label above it — the fact first, the instruction second */
+.bldp-phc { font-size: 10.5px; font-style: italic; color: var(--pkg-dim, var(--pkg-muted)); opacity: 0.8; }
 
 /* the card sitting in a slot: no lift, no grab cursor — it is not going anywhere */
 .bldp-slot .bldr-mc--slot { cursor: default; }

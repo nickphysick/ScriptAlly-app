@@ -22,6 +22,7 @@
  * the suggestion stops the moment the writer types, including when they clear it back to empty.
  */
 import React, { useEffect, useRef, useState } from "react";
+import { Pencil } from "lucide-react";
 import type { RailChip, RailKind } from "../../lib/builderRail";
 import { blockedReason, duplicateOf, suggestedName } from "../../lib/buildRow";
 import type { SubmissionPackage } from "../../types";
@@ -99,14 +100,31 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
   return (
     <aside className="bldp" ref={panelRef} aria-label="New package">
       <div className="bldp-head">
-        {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
-        <input
-          type="text" className="bldp-title" placeholder="Name this package"
-          aria-label="Package name"
-          value={name}
-          onChange={(e) => setTyped(e.target.value)}
-        />
-        <span className="bldp-sub">Drag or click a part in</span>
+        {/**
+          * ⚠️ A DASHED UNDERLINE AND A PENCIL, BECAUSE OTHERWISE IT READS AS A HEADING (D12). Set in
+          * the heading's own face with no box, the name looked like the panel's title rather than
+          * something you could type into — which is exactly the trap `InlineText` exists to avoid on
+          * the book profile. The dashed underline is this app's established "editable in place" mark
+          * (`.qp-inplace`), and the pencil is `lucide-react`'s, the same one the agent card and the
+          * manuscript actions use rather than a fourth drawing of the same object.
+          *
+          * ⚠️ THE BORDER IS ON THE WRAPPER AND THE PENCIL IS `pointer-events: none`, so the mark
+          * cannot swallow a click aimed at the field it is advertising.
+          */}
+        <span className="bldp-titlewrap">
+          <input
+            type="text" className="bldp-title" placeholder="Name this package"
+            aria-label="Package name"
+            value={name}
+            onChange={(e) => setTyped(e.target.value)}
+          />
+          <Pencil className="bldp-pencil" width={12} height={12} aria-hidden="true" />
+        </span>
+        {/* ⚠️ THE HEAD'S `Drag or click a part in` IS RETIRED, and the ref carried it because its
+            slots said nothing. Now that each empty slot states how it is filled, the head line was
+            the same instruction a fourth time, three inches above three copies of itself — which is
+            the fault this build has spent two passes removing from the card foot. One line to put
+            back if the slots ever stop saying it. */}
       </div>
 
       {/* ⚠️ THE SCROLL IS ON THE SLOTS, NOT THE PANEL. The name at the top and the reason and the
@@ -147,7 +165,17 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({
             >
               {held
                 ? <MaterialCard chip={held} onRemove={() => onClear(k)} />
-                : <span className="bldp-ph">{SLOT_LABEL[k]}</span>}
+                : (
+                  /* ⚠️ THE SLOT SAYS WHAT GOES IN IT AND HOW IT GETS THERE. The label alone names
+                     the part and offers nothing — a dashed rectangle is not an affordance, and the
+                     click target was discoverable only by hovering it. The second line is quieter
+                     than the first on purpose: what this slot is for is the fact, how to fill it is
+                     the instruction, and a reader who already knows should be able to skip it. */
+                  <span className="bldp-ph">
+                    <span className="bldp-phk">{SLOT_LABEL[k]}</span>
+                    <span className="bldp-phc">Drag a card here, or click one</span>
+                  </span>
+                )}
             </div>
           );
         })}
