@@ -350,3 +350,114 @@ margin meant for the line above the holdings.
 | the rail pinned back to 296px | `the composer holds more width than the library` |
 | the holdings line removed | `no version in a package — F-BR unproven` |
 | the explainer moved back outside the panels | `footnoteBand.measure.ts` |
+
+---
+
+## Part C — the bench is a pinned panel — `01d735e6`
+
+### ⚠️ The split's second column has been empty since it was written
+
+`<BuildRow>` sat INSIDE `.bldr-railcol`, under the library. So a two-column grid held its composer
+in column one and **nothing at all in column two** — which is the empty right half of a 2,000px
+page, and it means last pass's widening moved the library into space the composer was never in.
+The panel is the second column now.
+
+### What went with the row
+
+`BuildRow` and `buildRow.css` are deleted in the same commit that mounts `BuildPanel`. `open` and
+`armed` go with them: they existed because the row was hidden until clicked, so a drag needed
+something to arm. A pinned panel is always its own target. `Cancel` becomes `Clear` — there is
+nothing left to close, only slots to empty — and Escape empties them, bound only while something is
+in the panel so an empty bench never swallows a key the page wants.
+
+What survived the move is what other files render: `.bldr-split` and its columns (the page), and
+`.bldr-btn` (VersionQuickAdd). Everything else described the strip.
+
+### `MaterialCard` is extracted, not copied
+
+A filled slot holds the library's own card. The alternative was a second card implementation inside
+the panel, which is how two surfaces come to disagree about what a material looks like — already
+paid for once here as two ghost cards differing by a single word. The modes are additive props
+rather than a `variant`: a library card drags, picks, reports its hover and dims; a slot card
+renders and offers a remove control. Passing neither gives the static card, which is what a slot
+needs and what a union would have had to spell out as a third member.
+
+### Two shell figures come back, because something reads them
+
+```
+--wpg-stuck-h   55.6px   the SETTLED slab height   →  panel top = 55.6 + 16 = 71.6
+--wpg-port-h     752px   the scrollport's own box  →  cap = 752 − 55.6 − 32 = 664.4
+                                                      100vh would give           812.4
+```
+
+`--wpg-stuck-h` was deleted when its last consumer went, which was right — a token nothing reads is
+a knob people go looking for. The panel is `position: sticky` inside the same scrollport the
+masthead slab pins in, so without it the panel clamps to the same line and slides under. It
+publishes the **settled** height, not the live one: `h` falls by the whole settle the instant the
+page pins, and a sticky `top` bound to a value moving 62px mid-scroll takes the panel with it.
+
+`--wpg-port-h` is new, and it exists because **`100vh` is the wrong unit here** — the scroller starts
+below the shell's own chrome, so a viewport cap over-claims by exactly that offset. Same fault as
+the Tasks chassis's unreachable 21px, one element up. The gate asserts the two figures **differ**,
+so a run where they happen to agree cannot pass by coincidence.
+
+### ⚠️ `position: sticky` applied, computed correctly, and did nothing
+
+`.bldr-split` sets `align-items: start`, so every track collapses to its own content — which made
+the panel's track exactly as tall as the panel, leaving it **zero range to travel in**.
+
+```
+before  position: sticky · top: 71.6px · panel top in the viewport: −6.1
+```
+
+The declaration was right, the computed value was right, and the panel scrolled clean off the top of
+the screen. The fix is a per-item `align-self: stretch` on the panel's column, not a change to the
+container's default — `start` is correct for the library column, which must not stretch its cards.
+Same family as the marketing hero's grid alignment, and as `mix-blend-mode` killed by an ancestor's
+transform: **the rule applies, the browser honours it, and the thing you wanted does not happen.**
+
+### The internal scroll, proven with three cards at a short viewport
+
+```
+1440×900   panel 499 · cap 664.4 · slots 383/383 · scrolls false
+1920×700   panel 464.4 · cap 464.4 · slots 348.4/361 · scrolls true
+1440×620   slots 310 against 268 · scrolled to 42 · title visible · Create visible
+```
+
+An empty bench is 310px tall and would never overflow anything, so a check taken on it proves the
+panel exists and nothing else. At 900 the cap is 664 and three cards fit — **the overflow branch is
+unreachable at a tall viewport**, so a gate that only ran tall would go green on a panel with no
+scroll at all. The scroll is on `.bldp-slots`, not `.bldp`: a panel that scrolled whole would take
+its own Create button off the screen at the moment it became usable.
+
+Card heights are printed rather than assumed — `[Hook-first 116.6, One-page 116.1, Prologue-first
+130.3]` — so a fixture drifting to three identical cards is visible rather than silent.
+
+### The 480px floor, re-derived rather than inherited
+
+It was three side-by-side slots each needing a name beside a clear control. The slots stack now, so
+that argument is gone. Under the pin: a slot holds a full card, whose own minimum is 236, and
+236 + 2 × 18 of panel padding is 272 — **the foot is what holds the number up**, carrying a reason
+line beside two buttons. Same figure, different constraint, and it is stated at the value rather
+than left looking like an inheritance. Measured 480 at 1440 and 488.7 at 1920.
+
+### And the library sweep needed re-scoping
+
+`document.querySelectorAll(".bldr-mc")` returned **9** the moment a card was picked, because the
+slot now holds the same component. The "library keeps every card" check counted a card twice. Not an
+app fault — a selector that stopped identifying the thing it was named for.
+
+### Proved red three times
+
+| broken | what noticed |
+|---|---|
+| the panel's column stops stretching | the panel's top no longer clears the slab |
+| the cap goes back to `100vh` | the cap disagrees with the scrollport, and the short viewport stops overflowing |
+| the scroll moves to the whole panel | `overflowY` on the slots, and `the slots did not move` |
+
+### One note on the commit form
+
+The deleted paths made `git commit --only -- <paths>` refuse the pathspec, so this one was committed
+from a verified index instead: `git diff --cached --name-status` was read in full first and lists
+exactly the eleven files, and `git status` afterwards shows only another session's untracked report
+images. Same guarantee, reached the other way round.
