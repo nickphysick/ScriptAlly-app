@@ -461,3 +461,60 @@ The deleted paths made `git commit --only -- <paths>` refuse the pathspec, so th
 from a verified index instead: `git diff --cached --name-status` was read in full first and lists
 exactly the eleven files, and `git status` afterwards shows only another session's untracked report
 images. Same guarantee, reached the other way round.
+
+---
+
+## The three on the Part C screenshots — `6b1a7912`
+
+### The slots had no affordance
+
+Each empty slot now carries a quieter second line — the label states what goes in it, the line
+states how it gets there, and the second is smaller so a reader who already knows can skip it.
+
+```
+SLOT  Covering letter · required   Drag a card here, or click one   10.5px
+      Synopsis · optional          Drag a card here, or click one   10.5px
+      Version · optional           Drag a card here, or click one   10.5px
+      head: ""
+```
+
+### ⚠️ And retiring the head's line was a consequence the brief did not ask for
+
+`Drag or click a part in` was the ref's, carried because the ref's slots said nothing. With three
+slots each stating it, the head was the same instruction **a fourth time, three inches above three
+copies of itself** — the fault the last two passes have spent their time removing from the card
+foot. Retired, with the lock asserting the head does not say it. One line to put back if the slots
+ever stop.
+
+### The name now reads as a field
+
+Dashed underline plus lucide's pencil — this app's established editable-in-place mark
+(`.qp-inplace`) and the same pencil the agent card and the manuscript actions already use, rather
+than a fourth drawing of the same object. The border is on the **wrapper** and the pencil is
+`pointer-events: none`, so the mark cannot swallow a click aimed at the field it is advertising.
+Asserted as `dashed 1` on the wrapper, plus the pencil's presence and its pointer-events.
+
+### The Packages tab at four packages — measured before deciding
+
+```
+PKG  panel 345.7 of a 852px scrollport (40%)  ·  4 rows  ·  tab reads "Packages 4"
+     4 BUILT · 9 SENT
+     Standard UK        Hook-first     One-page   Not recorded    5 · 2 · 2
+     Comps-led variant  Comps-forward  One-page   Not recorded    2 · 1 · 0
+     Prologue-led       Hook-first     One-page   Prologue-first  2 · 2 · 2
+     Unattributed set   Hook-first     —          Not recorded    Not yet sent
+```
+
+**It needs nothing.** At one package it read as a page with a row on it; at four it is a ledger, and
+40% of the scrollport is honest for four rows rather than a hole to fill. The version column also
+shows the frozen-slot design working as intended — `Prologue-led` names its ordering because it was
+created with one, and the two sent packages read `Not recorded` permanently, which is the rule
+refusing a retrofit rather than a gap.
+
+Worth re-reading if a writer ever has twenty; nothing to do at four.
+
+### On the deploy sequence
+
+Recorded against myself in CLAUDE.md: a failed check is a stop, and proving afterwards that it could
+not have reached the bundle is a good answer to the wrong question. The gate exists so nobody has to
+reason about it.
