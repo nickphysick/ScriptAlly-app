@@ -840,8 +840,21 @@
    without being clipped by the radius or interrupting the border's run. */
 .ws-winwrap { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .ws-window {
+  /**
+   * ⚠️ THE RADIUS AND THE BORDER ARE TOKENS BECAUSE ANYTHING SITTING AT THIS BOX'S TOP EDGE HAS TO
+   * DERIVE ITS OWN CURVE FROM THEM. A control or a rule drawn flush inside the window needs the
+   * INNER radius — `radius - border` — and computing that from two literals typed somewhere else is
+   * the "literal another element owns" fault this file already records twice. They are the same two
+   * values, read by their own rule.
+   *
+   * ⚠️ AND A `calc()` OVER AN UNDEFINED CUSTOM PROPERTY IS THE GUARANTEED-INVALID VALUE, so the
+   * whole declaration reading it is DROPPED — silently, with the rule looking correct. That is what
+   * would have happened to the Packages accent bar's `border-radius` had these stayed literals.
+   */
+  --ws-window-radius: 16px;
+  --ws-window-border: 1px;
   flex: 1; min-height: 0; background: var(--ws-window);
-  border: 1px solid var(--ws-edge); border-radius: 16px;
+  border: var(--ws-window-border) solid var(--ws-edge); border-radius: var(--ws-window-radius);
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 8px 26px rgba(58, 28, 20, 0.07);
   overflow: hidden; display: flex; flex-direction: column;
 }

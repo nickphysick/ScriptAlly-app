@@ -40,8 +40,14 @@ import { openRoute, liftMotionSuppression, scrollbarWidth } from "./measure";
  */
 const ILLUSTRATED = ["Submission packages", "Query Centre"];
 const CARVES = {
-  /** the band is a tint plus an illustration rather than the shared wash */
-  ground: ILLUSTRATED,
+  /**
+   * ⚠️ GROUND IS OFF THE LIST, AND NOT FOR THE REASON THE BRIEF GIVES. It says Packages rejoins
+   * because it is now on the shared `--ws-window` "like everywhere else" — but everywhere else the
+   * masthead carries the PARCHMENT WASH, and `headerFix` still carves both trial pages out of that.
+   * What lets them rejoin HERE is that this key reads the MEASURE's background, and the previous
+   * pack moved every painted layer off the measure and onto the slab. Both pages leave the measure
+   * transparent, like the other eight, so the exemption had already stopped doing anything.
+   */
   /** a picture bleeds to the band's right edge, so its painted colour there is artwork */
   artwork: ILLUSTRATED,
   /** 47px at rest against the shared 30px — the reason the trial's title reverted four times */
@@ -158,7 +164,28 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
     /* where the control row sits relative to the scroller — the gap between chrome and controls */
     rowTop: row ? r(row.getBoundingClientRect().top - scb.top) : -1,
     hasRow: !!row,
-    wrapTop: r(wrap.getBoundingClientRect().top - scb.top),
+    /**
+     * ⚠️ AGAINST THE SLAB'S INNER TOP EDGE, NOT THE SCROLLER'S — and the two are the same number on
+     * nine pages, which is why the weaker form survived. Packages now carries a 3px accent bar as a
+     * `border-top` on the slab, so the masthead legitimately begins 3px lower and this read 3
+     * against a 0.5 ceiling, reporting "something sits above the masthead" about a page where
+     * nothing does. The claim is that the masthead OPENS its container; a border on the container
+     * is the container, so the reference is the container's content box.
+     *
+     * Split in two rather than loosened, because the weaker form was carrying two claims at once
+     * and only one of them moved: the slab must still open the scroller, and nothing may sit
+     * between the slab's inner edge and the masthead.
+     */
+    slabTop: (() => {
+      const sl = g.querySelector(".wpg-chrome") as HTMLElement | null;
+      return sl ? r(sl.getBoundingClientRect().top - scb.top) : -1;
+    })(),
+    wrapTop: (() => {
+      const sl = g.querySelector(".wpg-chrome") as HTMLElement | null;
+      if (!sl) return r(wrap.getBoundingClientRect().top - scb.top);
+      const sb = sl.getBoundingClientRect();
+      return r(wrap.getBoundingClientRect().top - (sb.top + parseFloat(getComputedStyle(sl).borderTopWidth)));
+    })(),
     /**
      * ⚠️ THE THREE THINGS THAT MUST SHARE ONE WIDTH: the masthead, its closing hairline (drawn as
      * the SLAB's base) — one object, one width. A line at the content gutter beside a masthead 64px
@@ -257,7 +284,7 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
   }
   same("titleSize", "the title size", CARVES.titleSize);
   same("titleWeight", "the title weight");
-  same("background", "the masthead's ground", CARVES.ground);
+  same("background", "the masthead's ground");
   same("radius", "the masthead's corner radius");
   same("shadow", "the masthead's shadow");
 
@@ -374,7 +401,8 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
       expect(r.headerActionable, `${name} is Type B and has a control inside its header element`).toBe(0);
     }
     /* the masthead opens the scroll row — the control row anchors, so it must come second */
-    expect(r.wrapTop, `${name}: something sits above the masthead inside the scroller`).toBeLessThanOrEqual(0.5);
+    expect(r.slabTop, `${name}: the chrome slab does not open the scroll row — something sits above it`).toBeLessThanOrEqual(0.5);
+    expect(r.wrapTop, `${name}: something sits between the slab's inner top edge and the masthead`).toBeLessThanOrEqual(0.5);
   }  /* ⚠️ REPORTED AND FLOORED. Exactly one page is expected to use the masthead's action slot; if a
      second appears, that is a decision someone should see rather than a silent spread. */
   if (slotted.length) console.log(`\n══ MASTHEAD ACTION SLOT: ${slotted.join(", ")}`);

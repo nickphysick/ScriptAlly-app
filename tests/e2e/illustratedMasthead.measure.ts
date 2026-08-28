@@ -233,8 +233,14 @@ test("⚠️ THE TRIAL CHANGES NO BEHAVIOUR — Packages answers like every othe
  * it between two neighbouring pixels. Asserting the token values instead would pass on exactly the
  * fault, because the values were right and their ORDER was not.
  */
+/* ⚠️ THE PAGES THAT HAVE A TINT — Packages took a plain ground with its accent bar, so it has no
+   fade to check and asserting one there would fail on a correct page. Named rather than skipped,
+   and its length asserted below, so the day the trial's grounds converge again someone has to
+   edit this and read the sentence. */
+const TINTED = ["Query Centre"];
+
 for (const width of [1280, 2560]) {
- for (const trial of TRIAL_ROUTES) {
+ for (const trial of TRIAL_ROUTES.filter((t) => TINTED.includes(t.name))) {
   test(`⚠️ THE TINT FADES RATHER THAN STEPPING — ${trial.name} — ${width}`, async ({ page }) => {
     await openRoute(page, trial.route, { width, height: 900 });
     await liftMotionSuppression(page);
@@ -357,3 +363,20 @@ for (const posture of ["rest", "settled"] as const) {
   });
  }
 }
+
+
+test("⚠️ THE TINTED SET IS ONE PAGE — Packages carries an accent bar and a plain ground instead", async ({ page }) => {
+  await openRoute(page, "/manuscripts/packages", { width: 1440, height: 900 });
+  await liftMotionSuppression(page);
+  await page.waitForTimeout(600);
+  expect(TINTED, "the number of trial pages carrying a horizontal tint has changed").toHaveLength(1);
+  expect(TINTED.every((n) => TRIAL.includes(n)), "a tinted page is not on the trial list at all").toBe(true);
+  /* ⚠️ AND THE UNTINTED ONE IS ASSERTED TO BE UNTINTED, or the list above is a claim about nothing.
+     A horizontal gradient is what the accent bar replaced; the shared wash's vertical one is a
+     different thing and only ever appears when the band is settled. */
+  const img = await page.evaluate(() => {
+    const g = [...document.querySelectorAll(".wpg.pkgw-wpg")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+    return getComputedStyle(g.querySelector(".wpg-chrome") as HTMLElement).backgroundImage;
+  });
+  expect(img, `Submission packages' resting band still paints a gradient (${img}) — the tint was meant to go with the accent bar`).toBe("none");
+});

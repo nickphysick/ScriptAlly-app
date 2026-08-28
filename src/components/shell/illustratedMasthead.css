@@ -99,6 +99,19 @@
 }
 
 /**
+ * ⚠️ THE ACCENT, AND THE WINDOW'S INNER RADIUS IT HAS TO SIT IN. `--mast-r` is `radius - border`
+ * off the window's own two tokens — which had to be CREATED for this (`workspaceShell.css` stated
+ * both as literals), because a `calc()` over an undefined custom property is the guaranteed-invalid
+ * value and the whole `border-radius` declaration would have been DROPPED, silently, with the rule
+ * reading perfectly. The window is an ancestor of every one of these elements, so both resolve.
+ */
+.wpg.pkgw-wpg {
+  --pkg-accent: #000000;
+  --pkg-accent-h: 3px;
+  --mast-r: calc(var(--ws-window-radius) - var(--ws-window-border));
+}
+
+/**
  * ══ THE GROUND AND THE ARTWORK, ON THE FULL-BLEED SLAB ════════════════════════════════════════
  *
  * ⚠️ THEY LIVED ON THE MEASURE FOR TWO PACKS AND THAT LEFT A ~35px UNPAINTED STRIP DOWN EACH SIDE.
@@ -118,7 +131,11 @@
  * working bar is not a title. Query Centre is Type B: it never settles, so it carries no suppression
  * and must not be given one.
  */
-.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome:not(.wpg-chrome--stuck),
+/**
+ * ⚠️ QUERY CENTRE KEEPS THE TINT; PACKAGES IS ON A PLAIN GROUND. The two pages ran one rule until
+ * now and this is the first place they diverge — so the rule is split rather than overridden, and
+ * neither page's ground is expressed as an exception to the other's.
+ */
 .wpg.qc-wpg > .wpg-scroll > .wpg-chrome {
   /* ⚠️ A COLOUR *AND* AN IMAGE, NEVER THE SHORTHAND — `background: linear-gradient(…)` resets
      `background-color` to transparent, so a gradient declined for any reason leaves the slab
@@ -130,6 +147,37 @@
     var(--illo-tint) var(--illo-gnd-b),
     var(--illo-pale) var(--illo-gnd-a)
   );
+}
+
+/**
+ * ══ PACKAGES · THE ACCENT BAR AND A PLAIN GROUND ══════════════════════════════════════════════
+ *
+ * ⚠️ ON THE SLAB, NOT ON `.wsh`, AND THE BRIEF'S OWN ACCEPTANCE IS WHAT DECIDES IT. The block is
+ * written against the header's ink box; that box lives inside the CAPPED, CENTRED measure, so a
+ * border drawn on it would stop 35px short of the window at 1280 and 315px short at 2560 — and its
+ * ends could not "follow the window's curve", because they would be nowhere near the corner. The
+ * slab is the element that spans the window and sits flush against its top edge, so it is the
+ * element that can carry a rule the window's radius can cut.
+ *
+ * ⚠️ THE GROUND IS SCOPED TO THE REST STATE AND THE ACCENT IS NOT. Settled, the band takes the
+ * shared wash back like every other Type A page — that suppression already exists and is asserted —
+ * while the accent and the hairline stay, which is what the brief asks for and is also the only way
+ * the bar reads as belonging to the page rather than to one posture of it.
+ */
+.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome:not(.wpg-chrome--stuck) {
+  /* ⚠️ THE COLOUR ALONE, AND `background-image: none` STATED. The brief writes the `background`
+     shorthand, which would do both — but the shorthand is what this file already carries a warning
+     about, and here it would be silently load-bearing: it is the thing REMOVING the tint gradient.
+     A removal that happens as a side effect of a shorthand is a removal nobody can find later. */
+  background-color: var(--ws-window);
+  background-image: none;
+}
+.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome {
+  border-top: var(--pkg-accent-h) solid var(--pkg-accent);
+  /* ⚠️ THE WINDOW'S INNER RADIUS, DERIVED. The window clips its own children, so the accent's ends
+     would curve even without this; stating it means the bar's shape does not depend on an
+     ancestor's `overflow`, and it is the same two tokens either way. */
+  border-radius: var(--mast-r) var(--mast-r) 0 0;
 }
 .wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome:not(.wpg-chrome--stuck)::after,
 .wpg.qc-wpg > .wpg-scroll > .wpg-chrome::after {

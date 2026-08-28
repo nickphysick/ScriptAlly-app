@@ -114,8 +114,16 @@ describe("one ground, one window", () => {
     expect(w, "the window's ground is a literal again — the hems, the dock and the two internal fades all resolve into it and would each need the same literal")
       .toContain("background: var(--ws-window)");
     expect(w).not.toContain("#ffffff");
-    expect(w).toContain("border-radius: 16px");
-    expect(w).toContain("border: 1px solid var(--ws-edge)");
+    /* ⚠️ THE CLAIM IS THE VALUE AND THE INDIRECTION, NOT THE SPELLING. This read `border-radius:
+       16px` and `border: 1px solid var(--ws-edge)` and went red when the two literals became tokens
+       — a refactor that changed nothing about the window and everything about whether anything else
+       can derive from it. Both halves are asserted, so the values are still pinned AND a rule that
+       stops reading them fails: `--ws-window-radius` exists to be read by things drawn flush inside
+       this box, and a token nothing reads is worth less than the literal it replaced. */
+    expect(w).toContain("--ws-window-radius: 16px");
+    expect(w).toContain("--ws-window-border: 1px");
+    expect(w).toContain("border-radius: var(--ws-window-radius)");
+    expect(w).toContain("border: var(--ws-window-border) solid var(--ws-edge)");
     expect(w).toContain("box-shadow:");
   });
 
