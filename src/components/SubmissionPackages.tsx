@@ -756,6 +756,9 @@ export const SubmissionPackages: React.FC = () => {
                   litId={litChipId}
                   dimming={ledgerHover !== null}
                   onHoverChip={setHoverChip}
+                /* ⚠️ THE BENCH IS THE PAGE'S, so the card and the slot cannot disagree about what
+                   is in the package being built. The rail asks; it does not keep its own copy. */
+                inBench={(id) => Object.values(slots).some((f) => f?.id === id)}
                 />
                 {verAdding && (
                 <VersionQuickAdd

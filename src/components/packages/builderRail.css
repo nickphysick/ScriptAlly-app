@@ -10,106 +10,109 @@
  */
 .bldr-rail { display: flex; flex-direction: column; gap: 17px; }
 
-.bldr-rsec .bldr-rh {
-  display: flex;
-  align-items: baseline;
-  gap: 9px;
-  padding-bottom: 6px;
-  margin-bottom: 9px;
-  border-bottom: 1px solid var(--pkgo-hairline-soft);
-}
-.bldr-rsec .bldr-rh h4 {
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-weight: 700;
-}
-.bldr-t-let .bldr-rh h4 { color: var(--pkgt-let-ink); }
-.bldr-t-syn .bldr-rh h4 { color: var(--pkgt-syn-ink); }
-.bldr-t-ver .bldr-rh h4 { color: var(--pkgt-pro-ink); }
-
-.bldr-rsec .bldr-n { font-family: var(--font-mono); font-size: 7.5px; color: var(--pkg-muted); }
-.bldr-add {
-  margin-left: auto;
-  background: none; border: none; cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--pkg-muted);
-  padding: 0;
-}
-.bldr-add:hover { color: var(--pkg-burg); }
-.bldr-add:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
-
-.bldr-items { display: flex; flex-direction: column; gap: 7px; }
-
-.bldr-chip {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  border: 1px solid;
-  border-radius: 9px;
-  padding: 9px 11px;
-  cursor: grab;
-  transition: transform 0.12s, box-shadow 0.12s, opacity 0.12s;
-}
-.bldr-chip:hover { transform: translateY(-1px); box-shadow: 0 5px 13px rgba(58, 28, 20, 0.09); }
-.bldr-chip:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
-.bldr-chip--dim { opacity: 0.34; }
-.bldr-chip--lit { box-shadow: 0 0 0 2px var(--pkg-burg); }
-.bldr-chip:active { cursor: grabbing; }
-
-.bldr-t-let.bldr-chip {
-  border-color: var(--pkgt-let-edge); color: var(--pkgt-let-ink);
-  background: linear-gradient(180deg, var(--pkgt-let-a), var(--pkgt-let-b));
-}
-.bldr-t-syn.bldr-chip {
-  border-color: var(--pkgt-syn-edge); color: var(--pkgt-syn-ink);
-  background: linear-gradient(180deg, var(--pkgt-syn-a), var(--pkgt-syn-b));
-}
-.bldr-t-ver.bldr-chip {
-  border-color: var(--pkgt-pro-edge); color: var(--pkgt-pro-ink);
-  background: linear-gradient(180deg, var(--pkgt-pro-a), var(--pkgt-pro-b));
-}
-
-.bldr-grip { display: grid; grid-template-columns: repeat(2, 3px); gap: 2px; flex: 0 0 auto; opacity: 0.4; }
-.bldr-grip i { width: 3px; height: 3px; border-radius: 50%; background: currentColor; display: block; }
-
-.bldr-tx { flex: 1; min-width: 0; }
 /**
- * ⚠️ `line-height: 1.35`, NOT THE REF'S 1.25. Mixed-case Playfair below 1.3 crops its descenders,
- * and a material's name is whatever the writer typed — the standing house floor beats a value
- * tuned to the names somebody put in a mockup.
+ * ⚠️ THE FAMILY COLOURS ARE THE APP'S OWN TOKENS (R2), not the ref's parallel names. All three of
+ * the ref's fills already exist: `--pkgo-pink-band` (#f3e0d6) and `--pkgo-sage-a` (#d7ddd5) on
+ * `.pkgw`, `--pro-fill-deep` (#d5e1ec) at `:root`. No hex is introduced.
+ *
+ * ⚠️ THEY ARE A FOURTH LADDER against the `--pkgt-*` set the old chips used, whose tops are
+ * lighter. Recorded against F-AK; consolidation is a ruling for the audit's end, not for a build.
  */
-.bldr-tx b {
-  font-family: var(--font-serif);
-  font-size: 14px; font-weight: 600; display: block; line-height: 1.35;
-  color: var(--pkg-ink);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.bldr-m {
+.bldr-t-let { --bldr-acc: var(--pkg-burg); --bldr-accedge: var(--pkgt-let-edge); --bldr-accbg: var(--pkgo-pink-band); }
+.bldr-t-syn { --bldr-acc: var(--pkgt-syn-ink); --bldr-accedge: var(--pkgt-syn-edge); --bldr-accbg: var(--pkgo-sage-a); }
+.bldr-t-ver { --bldr-acc: var(--pkgt-pro-ink); --bldr-accedge: var(--pkgt-pro-edge); --bldr-accbg: var(--pro-fill-deep); }
+
+.bldr-rsec { margin-bottom: 22px; }
+.bldr-sh { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
+/* the head is a filled pill in the family colour — which is why a card needs no type pill (D6) */
+.bldr-sh h4 {
   font-family: var(--font-mono);
-  font-size: 7px; color: var(--pkg-muted); margin-top: 2px; display: block;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700;
+  color: var(--bldr-acc); background: var(--bldr-accbg);
+  padding: 4px 11px; border-radius: 999px;
+}
+.bldr-sh .bldr-n { font-family: var(--font-mono); font-size: 7.5px; color: var(--pkg-muted); }
+.bldr-addbtn {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11.5px; font-weight: 600;
+  color: var(--bldr-acc); background: var(--bldr-accbg);
+  border: 1px solid var(--bldr-accedge);
+  padding: 6px 12px; border-radius: 999px; cursor: pointer;
+}
+.bldr-addbtn svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; }
+.bldr-addbtn:hover { filter: brightness(0.965); }
+.bldr-addbtn:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+
+.bldr-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+
+.bldr-mc {
+  position: relative;
+  background: var(--pkg-paper);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 11px;
+  padding: 13px 15px 12px 19px;
+  cursor: grab; user-select: none; overflow: hidden;
+  box-shadow: 0 2px 8px rgba(58, 28, 20, 0.05);
+  transition: transform 0.14s, box-shadow 0.14s, opacity 0.14s;
+}
+/* ⚠️ COLOUR IS THE 5px LEFT EDGE AND NOTHING ELSE (D6). */
+.bldr-mc::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--bldr-accbg); }
+.bldr-mc:hover { transform: translateY(-2px); box-shadow: 0 9px 20px rgba(58, 28, 20, 0.1); }
+.bldr-mc:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+.bldr-mc:active { cursor: grabbing; }
+.bldr-mc--dim { opacity: 0.34; }
+.bldr-mc--lit { box-shadow: 0 0 0 2px var(--pkg-burg); }
+/* ⚠️ DIMMED IN PLACE, NEVER REMOVED (D9) — a card that vanishes reflows the grid under the hand. */
+.bldr-mc--used { opacity: 0.42; }
+
+.bldr-mctop { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 5px; }
+/* the house floor, not the ref's 1.22 — mixed-case Playfair crops its descenders below 1.3 */
+.bldr-mctop h5 {
+  font-family: var(--font-serif);
+  font-size: 16px; font-weight: 600; line-height: 1.35;
+  flex: 1; min-width: 0;
+}
+.bldr-grip { margin-left: auto; flex: 0 0 auto; display: grid; grid-template-columns: repeat(2, 3px); gap: 2px; opacity: 0.24; margin-top: 5px; }
+.bldr-grip i { width: 3px; height: 3px; border-radius: 50%; background: var(--pkg-ink); display: block; }
+
+/**
+ * ⚠️ `min-height` KEEPS THE FOOT ON ONE LINE ACROSS THE GRID even when a card has nothing to say —
+ * an empty description that collapsed would leave two cards in a row at different heights, and the
+ * ragged foot reads as a rendering fault rather than as an empty material.
+ */
+.bldr-desc {
+  font-size: 11.5px; color: var(--pkg-ink-soft); line-height: 1.5; margin-bottom: 9px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  min-height: 34px;
+}
+.bldr-desc--none { font-style: italic; color: var(--pkg-muted); }
+
+.bldr-mcfoot { display: flex; align-items: center; gap: 8px; padding-top: 8px; border-top: 1px solid var(--pkgo-hairline-soft); }
+.bldr-src { display: flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.08em; color: var(--pkg-muted); min-width: 0; }
+.bldr-src svg { width: 10px; height: 10px; stroke: currentColor; stroke-width: 1.6; fill: none; flex: 0 0 auto; }
+.bldr-use { margin-left: auto; font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.09em; color: var(--pkg-ink-soft); flex: 0 0 auto; }
+
+.bldr-inuse {
+  position: absolute; inset: 0;
+  background: rgba(253, 250, 245, 0.55);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--pkg-burg);
 }
 
 /* out of flow, so it never displaces the name */
 .bldr-unused {
-  position: absolute; top: -5px; right: 8px;
+  position: absolute; top: -1px; right: 8px; z-index: 1;
   font-family: var(--font-mono);
   font-size: 6px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--pkg-burg);
-  background: var(--pkg-paper);
+  color: var(--pkg-burg); background: var(--pkg-paper);
   border: 1px solid var(--pkgt-let-edge);
   padding: 1px 5px; border-radius: 999px;
 }
 
-.bldr-rnote {
-  margin-top: 8px;
-  font-size: 10px; line-height: 1.6; font-style: italic;
-  color: var(--pkg-muted);
-}
+.bldr-rnote { margin-top: 9px; font-size: 10px; line-height: 1.6; font-style: italic; color: var(--pkg-muted); }
 
 /* `＋ Add` on Versions — name, kind, Add, Cancel on one row under the rail. */
 .bldr-vadd { display: flex; align-items: center; gap: 6px; margin-top: 8px; }

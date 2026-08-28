@@ -16,8 +16,30 @@
  */
 import React from "react";
 import { RAIL_EMPTY } from "../../lib/builderRail";
-import type { RailChip, RailKind, RailSection } from "../../lib/builderRail";
+import type { CardIcon, RailChip, RailKind, RailSection } from "../../lib/builderRail";
 import "./builderRail.css";
+
+/** The Add button's wording, per the ref: the section names what it adds (D4). */
+export const ADD_LABEL: Record<RailKind, string> = {
+  let: "Add a letter",
+  syn: "Add a synopsis",
+  ver: "Add a version",
+};
+
+/**
+ * The card's three small marks — a page, a paperclip, a plus.
+ *
+ * ⚠️ INLINE AND STROKE-ONLY, taking `currentColor`, so each sits in its family's ink without the
+ * component knowing which family it is in. A shared icon set keyed by name would be a second
+ * registry for three paths used in one file.
+ */
+const CardGlyph: React.FC<{ kind: CardIcon | "plus" }> = ({ kind }) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    {kind === "page" && <><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /></>}
+    {kind === "clip" && <path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5" />}
+    {kind === "plus" && <path d="M12 5v14M5 12h14" />}
+  </svg>
+);
 
 export interface BuilderRailProps {
   sections: RailSection[];
@@ -30,6 +52,8 @@ export interface BuilderRailProps {
   onDragEnd: () => void;
   /** The chip currently lit by a ledger hover, or null (D19). */
   litId?: string | null;
+  /** Whether this material is already in the New package bench — it dims in place (D9). */
+  inBench: (id: string) => boolean;
   /** True while ANY ledger cell is hovered — the chips that are not lit dim. */
   dimming?: boolean;
   /** Hovering a chip drives the ledger the other way. */
@@ -37,24 +61,24 @@ export interface BuilderRailProps {
 }
 
 export const BuilderRail: React.FC<BuilderRailProps> = ({
-  sections, onPick, onAdd, onDragStart, onDragEnd, litId = null, dimming = false, onHoverChip,
+  sections, onPick, onAdd, onDragStart, onDragEnd, litId = null, dimming = false, onHoverChip, inBench,
 }) => (
   <div className="bldr-rail">
     {sections.map((sec) => (
       <div key={sec.kind} className={`bldr-rsec bldr-t-${sec.kind}`}>
-        <div className="bldr-rh">
+        <div className="bldr-sh">
+          {/* ⚠️ THE HEAD IS A FILLED PILL IN THE FAMILY COLOUR, and it is why a library CARD needs
+              no type pill of its own (D6): the section has already said what these are. */}
           <h4>{sec.heading}</h4>
           <span className="bldr-n">{sec.chips.length}</span>
-          <button type="button" className="bldr-add" onClick={() => onAdd(sec.kind)}>＋ Add</button>
+          <button type="button" className="bldr-addbtn" onClick={() => onAdd(sec.kind)}>
+            <CardGlyph kind="plus" /> {ADD_LABEL[sec.kind]}
+          </button>
         </div>
-        <div className="bldr-items">
+        <div className="bldr-cards">
           {/**
-            * ⚠️ AN EMPTY SECTION INVITES ITS FIRST, RATHER THAN SHOWING A HEAD OVER NOTHING (D4).
-            *
-            * ⚠️ AND ALL THREE GET IT, because all three had the gap. The brief asked for the
-            * Versions section to "match how the other two behave when empty" — they behaved the
-            * same way, which is to say they rendered a heading, a zero and a blank. Fixing the
-            * instance that was seen would have left two-thirds of the fault in place.
+            * ⚠️ AN EMPTY SECTION INVITES ITS FIRST, RATHER THAN SHOWING A HEAD OVER NOTHING (D4,
+            * previous pack). All three have it, because all three had the gap.
             */}
           {sec.chips.length === 0 && (
             <button type="button" className="bldr-radd" onClick={() => onAdd(sec.kind)}>
@@ -64,18 +88,13 @@ export const BuilderRail: React.FC<BuilderRailProps> = ({
           {sec.chips.map((c) => (
             <div
               key={c.id}
-              className={`bldr-chip bldr-t-${c.kind}${litId === c.id ? " bldr-chip--lit" : ""}${dimming && litId !== c.id ? " bldr-chip--dim" : ""}`}
+              className={`bldr-mc bldr-t-${c.kind}${inBench(c.id) ? " bldr-mc--used" : ""}${litId === c.id ? " bldr-mc--lit" : ""}${dimming && litId !== c.id ? " bldr-mc--dim" : ""}`}
               role="button" tabIndex={0} draggable
               data-chip={c.id} data-kind={c.kind}
-              aria-label={`${c.name} — ${c.meta}. Adds to the package you are building.`}
+              aria-label={`${c.name}. ${c.desc ?? ""} ${c.src}. Adds to the package you are building.`}
               onClick={() => onPick(c)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(c); }
-              }}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(c); } }}
               onDragStart={(e) => {
-                /* ⚠️ THE KIND TRAVELS ON THE EVENT, so a slot can refuse a type it does not take
-                   during dragover — where the only thing readable is the dataTransfer, not the
-                   element. `text/plain` carries the id for anything that wants it. */
                 e.dataTransfer.setData("text/plain", c.id);
                 e.dataTransfer.setData("application/x-sa-kind", c.kind);
                 e.dataTransfer.effectAllowed = "copy";
@@ -85,16 +104,31 @@ export const BuilderRail: React.FC<BuilderRailProps> = ({
               onMouseEnter={() => onHoverChip(c)}
               onMouseLeave={() => onHoverChip(null)}
             >
-              {/* ⚠️ THE TAG IS FIRST IN THE DOM AND POSITIONED OUT OF FLOW, so it never displaces
-                  the name — it sits on the chip's top edge (D10). A fact, not a nudge. */}
+              {/* ⚠️ THE TAG IS OUT OF FLOW so it never displaces the name (D10, previous pack). */}
               {c.unused && <span className="bldr-unused">Not used</span>}
-              <span className="bldr-grip" aria-hidden="true">
-                <i /><i /><i /><i /><i /><i />
-              </span>
-              <span className="bldr-tx">
-                <b>{c.name}</b>
-                <span className="bldr-m">{c.meta}</span>
-              </span>
+              <div className="bldr-mctop">
+                <h5>{c.name}</h5>
+                <span className="bldr-grip" aria-hidden="true"><i /><i /><i /><i /><i /><i /></span>
+              </div>
+              {/* ⚠️ CLAMPED BY CSS, NEVER BY CUTTING THE STRING — a substring bakes a width into the
+                  data. And an attached file with no draft leaves this EMPTY rather than narrating an
+                  absence the source line has already stated. */}
+              <div className={`bldr-desc${c.descNone ? " bldr-desc--none" : ""}`}>
+                {c.desc ?? (c.descNone ? "Nothing written yet" : "")}
+              </div>
+              <div className="bldr-mcfoot">
+                <span className="bldr-src">
+                  {c.srcIcon && <CardGlyph kind={c.srcIcon} />}
+                  {c.src}
+                </span>
+                {c.use && <span className="bldr-use">{c.use}</span>}
+              </div>
+              {/**
+                * ⚠️ A CARD IN THE BENCH DIMS IN PLACE — it is NOT removed from the grid (D9).
+                * Removing it reflows every card after it while the writer's hand is still moving,
+                * which is how someone clicks the thing that slid under the cursor.
+                */}
+              {inBench(c.id) && <div className="bldr-inuse">In this package</div>}
             </div>
           ))}
         </div>

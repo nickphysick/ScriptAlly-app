@@ -24,7 +24,8 @@ const act = (queryId: string, bookVersionId: string): Activity =>
 
 const MATS = [
   mat("ql1", ComponentType.QUERY_LETTER, { versionName: "Hook-first", contentDraft: "a b c" }),
-  mat("ql2", ComponentType.QUERY_LETTER, { versionName: "Voice-led", fileAttached: true, fileName: "v.docx" }),
+  /* ⚠️ AN ATTACHMENT WITH NO DRAFT — the case Nick asked to be driven rather than reasoned about. */
+  mat("ql2", ComponentType.QUERY_LETTER, { versionName: "Voice-led", fileAttached: true, fileName: "v.docx", contentType: "ref" }),
   mat("syn1", ComponentType.SYNOPSIS, { versionName: "One-page", contentDraft: "x y" }),
 ];
 /* ⚠️ THREE, SO BOTH UNUSED BRANCHES EXIST: bv2 is unused and NOT the newest, bv3 is unused and IS.
@@ -49,23 +50,38 @@ describe("builderRail", () => {
     expect(VERSIONS_NOTE).toContain("writes it there too");
   });
 
-  it("a letter's meta is its source and how many packages hold it", () => {
+  it("a letter's card carries its own body, its word count and its use", () => {
     const c = rail()[0].chips.find((x) => x.name === "Hook-first")!;
-    expect(c.meta).toMatch(/^Text · 3 words · in 1$/);
+    expect(c.desc, "the two lines are the material ITSELF (R4)").toBe("a b c");
+    expect(c.descNone).toBe(false);
+    expect(c.src).toBe("3 words");
+    expect(c.srcIcon).toBe("page");
+    expect(c.use).toBe("In 1");
     expect(c.unused).toBe(false);
   });
 
-  it("⚠️ a VERSION states holdings and NEVER a word count (D9)", () => {
+  it("⚠️ AN ATTACHED FILE WITH NO DRAFT LEAVES THE DESCRIPTION EMPTY, not placeheld", () => {
+    /* The source line already says `v.docx`; a sentence above it would be the app narrating an
+       absence it has just stated. `descNone` is FALSE — this card is not empty, it is elsewhere. */
+    const c = rail()[0].chips.find((x) => x.name === "Voice-led")!;
+    expect(c.desc).toBeNull();
+    expect(c.descNone).toBe(false);
+    expect(c.src).toBe("v.docx");
+    expect(c.srcIcon).toBe("clip");
+  });
+
+  it("⚠️ a VERSION states holdings and NEVER a word count (D8)", () => {
     const c = rail()[2].chips.find((x) => x.name === "Prologue-first")!;
-    expect(c.meta).toBe("1 package · held by 2 agents");
-    expect(c.meta).not.toMatch(/word/i);
-    expect(c.meta).not.toMatch(/Text|Ref/);
+    expect(c.src).toBe("1 package · held by 2 agents");
+    expect(c.src).not.toMatch(/word/i);
+    expect(c.srcIcon, "no page or clip glyph — a version is not a document").toBeNull();
+    expect(c.use, "the holdings ARE its source line; there is no second count").toBeNull();
   });
 
   it("⚠️ agents are counted once each, however many sends they carry", () => {
     /* Two queries, two agents, two send activities — `held by 2 agents`, not 2 sends dressed up. */
     const twice = [...ACTS, act("q1", "bv1")];
-    expect(builderRail(MATS, PKGS, BVS, QS, twice)[2].chips[0].meta).toBe("1 package · held by 2 agents");
+    expect(builderRail(MATS, PKGS, BVS, QS, twice)[2].chips[0].src).toBe("1 package · held by 2 agents");
   });
 
   it("⚠️ NOT USED is set on both kinds, and only where nothing holds them (D10)", () => {
@@ -78,12 +94,12 @@ describe("builderRail", () => {
 
   it("⚠️ an unused chip states its absence in WORDS, never as a zero (rule 9)", () => {
     const r = rail();
-    expect(r[0].chips[1].meta, "a letter drops the `in N` clause rather than reading `in 0`").not.toMatch(/in 0/);
+    expect(r[0].chips[1].src, "a letter drops the `in N` clause rather than reading `in 0`").not.toMatch(/in 0/);
     /* the unused, non-newest one — the bare sentence */
-    expect(r[2].chips[1].meta).toBe("not yet in a package");
+    expect(r[2].chips[1].src).toBe("not yet in a package");
     /* and the unused NEWEST one — the same sentence with the clause that is true of it */
-    expect(r[2].chips[2].meta).toBe("Latest · not yet in a package");
-    for (const c of r[2].chips) expect(c.meta).not.toMatch(/\b0\b/);
+    expect(r[2].chips[2].src).toBe("Latest · not yet in a package");
+    for (const c of r[2].chips) expect(c.src).not.toMatch(/\b0\b/);
   });
 });
 
