@@ -1,0 +1,143 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Manuscripts — shelf carousel v2</title>
+<!--
+  ⚠️ THIS REF WAS GENERATED FROM THE BRIEF'S PROSE, NOT SUPPLIED.
+  The file named in the prompt (`manuscripts-shelf-carousel-v2.html`) did not exist on disk. Section
+  A described the design in enough detail to build from, so this is that description rendered — and
+  it is committed so the staleness check has something real to hash, and so anyone reading a commit
+  that cites this path can see what was actually built to.
+  It is a RECORD OF THE BRIEF, not a signed-off drawing. Where the build and this file disagree, the
+  build was measured and this was not.
+-->
+<style>
+  :root{
+    --ink:#1c130f; --burg:#7c3a2a; --hair:#e7ddd2; --paper:#fffefb;
+    --ground:#f2ede7; --muted:#8a7a6c; --near-black:#1c130f;
+    --serif:'Playfair Display',Georgia,serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sans:'Source Sans Pro',system-ui,sans-serif;
+    --tile-w:392px; --tile-h:452px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans)}
+  .stage{
+    /* ⚠️ THE STAGE IS `tileH + 108`. Named because the brief flags it: on a short viewport this is
+       what pushes the page into scrolling, and the measurement pass reports the height at which. */
+    height:calc(var(--tile-h) + 108px);
+    display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+  }
+  .track{position:relative;width:100%;height:100%;display:flex;align-items:center}
+
+  /* ── the tile ───────────────────────────────────────────────────────────────────────────── */
+  .tile{
+    position:absolute;left:50%;top:50%;
+    width:var(--tile-w);height:var(--tile-h);
+    /* ⚠️ LEFT OF CENTRE, not centred: the focus tile sits at -58% so the right-hand neighbour
+       peeks further than the left. The shelf reads as continuing rightward. */
+    transform:translate(-58%,-50%);
+    background:var(--paper);border:1px solid var(--hair);border-radius:14px;
+    box-shadow:0 8px 28px rgba(40,28,20,.13);
+    display:flex;flex-direction:column;overflow:hidden;
+    text-align:left;font:inherit;color:inherit;cursor:pointer;padding:0;
+    transition:transform .34s cubic-bezier(.22,.8,.3,1),opacity .34s;
+  }
+  /* ⚠️ ARTWORK BLED INTO THE CARD WITH NO BAND EDGE — no border, no hairline under it. */
+  .art{height:184px;flex:none;background:linear-gradient(150deg,#e8ddd0,#d9c9b6);position:relative}
+  /* ⚠️ THE RIBBON OVERHANGS THE TOP-LEFT CORNER. It is outside the card's own box on two sides,
+     which is why the card must NOT clip it — see the note on overflow in the build. */
+  .ribbon{
+    position:absolute;left:22px;top:-6px;width:34px;padding:9px 0 7px;
+    background:var(--burg);color:#fff;text-align:center;
+    font-family:var(--mono);font-size:9px;letter-spacing:.1em;
+    clip-path:polygon(0 0,100% 0,100% 100%,50% 86%,0 100%);
+  }
+  .pill{
+    position:absolute;right:16px;top:16px;padding:5px 11px;border-radius:999px;
+    background:rgba(255,254,251,.72);backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.6);
+    font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);
+  }
+  .body{padding:18px 22px 20px;display:flex;flex-direction:column;flex:1;min-height:0}
+  /* ⚠️ 1.3 MINIMUM ON MIXED-CASE PLAYFAIR — annotated exception elsewhere, not relitigated here. */
+  .title{font-family:var(--serif);font-size:25px;font-weight:600;line-height:1.3;margin:0 0 9px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+  .chip{padding:3px 9px;border:1px solid var(--hair);border-radius:999px;font-size:11px;color:var(--muted)}
+  .wc{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  /* ⚠️ THE PITCH IS CLAMPED TO TWO LINES. A third line changes the card's height and the stage's. */
+  .pitch{
+    margin:11px 0 0;font-size:13.5px;line-height:1.5;color:#4a3d34;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .figs{display:flex;gap:26px;margin-top:auto;padding-top:16px;border-top:1px solid var(--hair)}
+  /* ⚠️ LABEL ABOVE VALUE, which is the opposite of the figures strip on the book page. */
+  .fig .l{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .fig .v{font-family:var(--serif);font-size:21px;line-height:1.3}
+  .open{
+    margin-top:15px;align-self:flex-start;padding:9px 20px;border-radius:999px;border:0;
+    background:var(--near-black);color:#fffefb;font-family:var(--mono);
+    font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;
+  }
+
+  /* ── neighbours and the ghost ───────────────────────────────────────────────────────────── */
+  .tile.peek{transform:translate(calc(-58% + 128px),-50%) scale(.94);opacity:.55;z-index:0}
+  .tile.peek-l{transform:translate(calc(-58% - 128px),-50%) scale(.94);opacity:.55;z-index:0}
+  .tile.focus{z-index:2}
+  /* ⚠️ THE GHOST IS THE EMPTY STATE AND THE ADD AFFORDANCE, ONE OBJECT. Dashed, offset ~128px,
+     slightly smaller, mostly hidden — and its LABEL is hidden while it peeks. */
+  .ghost{background:none;border:1.5px dashed #cbbfae;box-shadow:none;align-items:center;justify-content:center}
+  .ghost .glabel{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--burg)}
+  .ghost.peek .glabel{opacity:0}
+  .ghost.solo{transform:translate(-50%,-50%);opacity:1}
+
+  /* ── chevrons and dots — real controls, not decoration ──────────────────────────────────── */
+  .chev{
+    position:absolute;top:50%;transform:translateY(-50%);z-index:3;
+    width:38px;height:38px;border-radius:999px;background:var(--paper);
+    border:1px solid var(--hair);color:var(--burg);font-size:16px;cursor:pointer;
+  }
+  .chev.l{left:24px} .chev.r{right:24px}
+  .dots{position:absolute;left:0;right:0;bottom:22px;display:flex;justify-content:center;gap:8px;z-index:3}
+  .dot{width:7px;height:7px;border-radius:999px;background:#cbbfae;border:0;padding:0;cursor:pointer}
+  .dot[aria-current="true"]{background:var(--burg)}
+
+  /* ⚠️ REDUCED MOTION IS A SWAP, NOT A SLOWER SLIDE. */
+  @media (prefers-reduced-motion:reduce){ .tile{transition:none} }
+</style>
+
+<div class="stage">
+  <div class="track">
+    <button class="tile peek-l" tabindex="-1" aria-hidden="true"><div class="art"></div></button>
+
+    <button class="tile focus">
+      <div class="art">
+        <span class="ribbon">2</span>
+        <span class="pill">Querying</span>
+      </div>
+      <div class="body">
+        <h2 class="title">Murphy's Day Out</h2>
+        <div class="chips"><span class="chip">Adult</span><span class="chip">Literary Fiction</span></div>
+        <div class="wc">92,000 words</div>
+        <p class="pitch">A guild clockmaker rebuilds her dying sibling from salvaged parts, and has to
+          decide how many ticks her clockwork heart has left before the guild counts them for her.</p>
+        <div class="figs">
+          <div class="fig"><div class="l">Queries</div><div class="v">14</div></div>
+          <div class="fig"><div class="l">Responses</div><div class="v">6</div></div>
+          <div class="fig"><div class="l">Since</div><div class="v">Mar</div></div>
+        </div>
+        <span class="open">Open</span>
+      </div>
+    </button>
+
+    <button class="tile ghost peek" tabindex="-1" aria-hidden="true">
+      <span class="glabel">＋ Add a manuscript</span>
+    </button>
+
+    <button class="chev l" aria-label="Previous manuscript">‹</button>
+    <button class="chev r" aria-label="Next manuscript">›</button>
+    <div class="dots" role="tablist" aria-label="Manuscripts">
+      <button class="dot" role="tab" aria-label="The Smoke Test"></button>
+      <button class="dot" role="tab" aria-current="true" aria-label="Murphy's Day Out"></button>
+      <button class="dot" role="tab" aria-label="Add a manuscript"></button>
+    </div>
+  </div>
+</div>
