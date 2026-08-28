@@ -829,8 +829,17 @@ service cloud.firestore {
         // ⚠️ THE DOC ID IS THE STORAGE FILENAME, which is what `isValidAttachment`'s path clause
         // ties together. isValidId bounds it to [A-Za-z0-9_-], so it can never contain a slash and
         // cannot escape its own directory.
+        // ⚠️ THE KEY SET IS CLOSED ON CREATE, AND IT WAS NOT. `isValidAttachment` types every known
+        // field and says nothing about the ones it has never heard of, so `{…valid, colour: "blue"}`
+        // was ACCEPTED — caught by this pack's own probe case on the first deploy, which had
+        // expected a denial. A record whose shape is open stops being a record: nothing downstream
+        // can rely on what a document does or does not contain.
+        //
+        // ⚠️ `hasOnly` ON CREATE, `affectedKeys().hasOnly` ON UPDATE — they are different claims.
+        // The first bounds the whole document; the second bounds what may CHANGE.
         allow create: if isOwner(userId) && isValidId(attachmentId)
           && isValidAttachment(incoming(), userId)
+          && incoming().keys().hasOnly(['id', 'userId', 'manuscriptId', 'fileName', 'size', 'contentType', 'storagePath', 'uploadedAt'])
           && incoming().id == attachmentId;
         // ⚠️ ONLY THE DISPLAY NAME IS MUTABLE. Size, type, path and manuscript are facts about a
         // blob that already exists; letting any of them move would let a record stop describing the
