@@ -24,13 +24,14 @@
  *
  * USAGE
  *   node scripts/check-design-refs.mjs            verify — exits 1 on any mismatch
- *   node scripts/check-design-refs.mjs --update   re-record, AFTER deliberately taking a new ref
+ *   node scripts/check-design-refs.mjs --update   re-record the watchlist, naming what changed
+ *   node scripts/check-design-refs.mjs --update <path>   …and enrol that ref as well
  *
  * ⚠️ `--update` IS THE DELIBERATE ACT AND IS NEVER RUN BY A BUILD. Wiring it into one would make the
  * manifest agree with whatever is on disk at all times, which is the same as having no check.
  */
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -51,18 +52,64 @@ const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
 const entries = Object.entries(manifest.refs ?? {});
 const update = process.argv.includes("--update");
 
+/**
+ * ⚠️ THE MANIFEST IS A CURATED WATCHLIST OVER AN ARCHIVE — 4 guarded of 361 on disk. So `--update`
+ * does NOT sweep the directory: enrolling 357 historical refs would make every build fragile and
+ * the word "active" meaningless. Enrolment is an explicit act, which is what was missing.
+ *
+ * ⚠️ THE FAULT THIS FIXES IS THE SUCCESS LINE, NOT A MISSING SCAN. `--update` used to re-hash the
+ * listed refs and print "✓ recorded 3" whether or not it had done anything you wanted. A ref was
+ * committed, `--update` was run, the line was believed, and the file was never guarded. "Recorded
+ * 3" was TRUE and answered a question nobody asked — the same shape as an assertion satisfied by
+ * the wrong branch, or a slice bounded on the wrong anchor: a green result about the wrong subject.
+ *
+ * USAGE
+ *   --update                 re-record the watchlist, naming what actually changed
+ *   --update <path…>         enrol those refs as well, naming each
+ */
+const relOf = (arg) => (arg.startsWith("design-refs/") ? arg : `design-refs/${arg}`);
+
 if (update) {
+  const listed = new Set(entries.map(([rel]) => rel));
+  const asked = process.argv.slice(2).filter((a) => a !== "--update").map(relOf);
+
+  for (const rel of asked) {
+    if (!existsSync(join(ROOT, rel))) {
+      console.error(`✗ cannot enrol a ref that is not there: ${rel}`);
+      process.exit(1);
+    }
+  }
+
   const next = {};
   for (const [rel] of entries) {
     const abs = join(ROOT, rel);
     if (!existsSync(abs)) {
       console.error(`✗ cannot record a ref that is not there: ${rel}`);
+      console.error("  It is on the watchlist and gone from disk — retire it deliberately, or restore it.");
       process.exit(1);
     }
     next[rel] = sha(abs);
   }
+  const enrolled = asked.filter((rel) => !listed.has(rel));
+  for (const rel of asked) next[rel] = sha(join(ROOT, rel));
+
+  const rerecorded = entries.filter(([rel, was]) => next[rel] !== was).map(([rel]) => rel);
+
   writeFileSync(MANIFEST, `${JSON.stringify({ ...manifest, refs: next }, null, 2)}\n`);
-  console.log(`✓ recorded ${entries.length} design ref hash(es)`);
+
+  /**
+   * ⚠️ IT NAMES WHAT IT DID, AND SAYS SO WHEN IT DID NOTHING. A count is precisely what let the
+   * silent non-enrolment through: the number that moves when everything happened is the same number
+   * that moves when nothing did.
+   */
+  for (const rel of enrolled) console.log(`✓ enrolled  + ${rel}`);
+  for (const rel of rerecorded) console.log(`✓ re-recorded ~ ${rel}`);
+  if (!enrolled.length && !rerecorded.length) {
+    console.log(`· nothing to record — the ${entries.length} ref(s) on the watchlist are unchanged.`);
+    console.log("  To guard a NEW ref, name it:  node scripts/check-design-refs.mjs --update <path>");
+  } else {
+    console.log(`  ${Object.keys(next).length} ref(s) now guarded.`);
+  }
   process.exit(0);
 }
 
@@ -75,6 +122,12 @@ for (const [rel, recorded] of entries) {
 }
 
 if (bad.length === 0) {
+  /**
+   * ⚠️ VERIFY SAYS NOTHING ABOUT UNLISTED FILES, DELIBERATELY. `design-refs/` holds 361 `.html`
+   * files and the manifest guards 4: it is an ARCHIVE with a curated watchlist over it, so naming
+   * the other 357 on every build is noise that trains the reader to skip the output — which is the
+   * fault this script exists to fix, arriving by volume instead of by silence.
+   */
   console.log(`✓ design refs unchanged (${entries.length} checked)`);
   process.exit(0);
 }

@@ -1,5 +1,5 @@
 {
-  "_note": "Hashes of the design refs that are ACTIVE design authorities. Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. Re-record deliberately with --update after taking a new ref; never from a build.",
+  "_note": "Hashes of the design refs that are ACTIVE design authorities \u2014 a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act \u2014 `--update design-refs/<file>.html` \u2014 because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
   "refs": {
     "design-refs/manuscripts-scroll-page.html": "86e9eb3ce18714a43e3f3538ca8312eac7e16199ca9fc37eaf4420c1a2814aee",
     "design-refs/manuscript-identity-band.html": "45b9a7a2af4aefda90ea77332f9e60cd7770da36f2394259d4a73a3e7c8892cf",
