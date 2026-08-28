@@ -43,7 +43,17 @@ export type CardBody =
   | { kind: "text"; text: string }
   | { kind: "file"; fileName: string; fileKind: string | null }
   | { kind: "none" }
-  | { kind: "nonote" };
+  /**
+   * ⚠️ A VERSION'S BAND CARRIES ITS OWN METADATA, AND THAT IS WHY THE VERSIONS FEATURE EXISTS.
+   * `held by N agents` is the fact the whole thing is for — which ordering of the book is actually
+   * out there, in whose hands — and the two-register foot has no slot for it. The foot's grammar
+   * governs the FOOT; the description area is the version's own, and a third muted line there
+   * wraps nothing.
+   *
+   * ⚠️ `holdings` IS NULL AT ZERO, never `0 packages · held by 0 agents`. The foot already states
+   * that absence once, in words, as `Not in a package`.
+   */
+  | { kind: "version"; note: string | null; holdings: string | null };
 
 export interface RailChip {
   id: string;
@@ -127,14 +137,23 @@ export const RAIL_EMPTY: Record<RailKind, string> = {
 export const VERSIONS_NOTE =
   "Versions belong to the manuscript. Adding one here writes it there too.";
 
+const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
+
 /**
- * ⚠️ `versionMetaLine` IS RETIRED AND ITS HOLDINGS CLAUSE WITH IT (D7/D8). It built one string —
- * `2 packages · held by 4 agents`, or `Latest · not yet in a package` — for a slot that now carries
- * only what a version IS. Its usage half moved to the foot's right slot as `In 2` / `Not in a
- * package`; its `held by N agents` half has no slot under the new grammar and is NOT restated here
- * in a shorter form, because a second fact in either slot is what wrapped the card. That figure is
- * a genuine reduction in what this card says and is reported rather than absorbed (F-BR).
+ * A version's holdings — `2 packages · held by 4 agents` — or null when it is in nothing.
+ *
+ * ⚠️ IT LIVES IN THE DESCRIPTION BAND, NOT THE FOOT (F-BR). `versionMetaLine` used to build it for
+ * the foot's left slot, where it read `Latest · not yet in a package` as one string and made that
+ * card the only one on the page that wrapped. Splitting the foot into two registers left this
+ * figure with nowhere to go and it briefly went nowhere at all — which took the most valuable thing
+ * a version card says off the page. The band is where it belongs: a version's own metadata, under
+ * its own note.
+ *
+ * ⚠️ AND THE VERBS AGREE AT ONE. `1 package · held by 1 agent`.
  */
+export const holdingsLine = (packages: number, agents: number): string | null =>
+  packages > 0 ? `${plural(packages, "package")} · held by ${plural(agents, "agent")}` : null;
+
 export const builderRail = (
   materials: readonly ManuscriptVersion[],
   packages: readonly SubmissionPackage[],
@@ -204,7 +223,7 @@ export const builderRail = (
       id: v.id,
       kind: "ver" as const,
       name: v.name,
-      body: note ? { kind: "text" as const, text: note } : { kind: "nonote" as const },
+      body: { kind: "version" as const, note: note || null, holdings: holdingsLine(pkgIds.size, agents.size) },
       src: newest?.id === v.id ? "Latest" : null,
       srcIcon: null as CardIcon,
       use: pkgIds.size > 0 ? `In ${pkgIds.size}` : NOT_IN_A_PACKAGE_USE,

@@ -110,6 +110,13 @@ const MATERIALS = SPARSE ? ALL_MATERIALS.filter((m) => ["seed-mat-ql1", "seed-ma
 const ALL_PACKAGES = [
   { id: "seed-pkg-1", packageName: "Standard UK", ql: "seed-mat-ql1", syn: "seed-mat-syn", pag: "seed-mat-pag" },
   { id: "seed-pkg-2", packageName: "Comps-led variant", ql: "seed-mat-ql2", syn: "seed-mat-syn", pag: "seed-mat-pag" },
+  /* ⚠️ A THIRD PACKAGE EXISTS ONLY TO NAME A BOOK VERSION, AND IT HAD TO BE A NEW ONE. No version
+     on the fixture was in any package, so `held by N agents` could render only as its absence and
+     two of Tracking's panels had nothing to draw. It could not be added to either package above:
+     the version slot is frozen once a package has been sent, permanently and by design, so a sent
+     package can never gain one. Created with it instead, which is how the app creates them. */
+  { id: "seed-pkg-3", packageName: "Prologue-led", ql: "seed-mat-ql1", syn: "seed-mat-syn", pag: "seed-mat-pag",
+    bv: "bv-prologue" },
 ];
 /* One package, and its sample slot UNFILLED — the sparse package has no sample to point at. */
 const PACKAGES = SPARSE
@@ -130,6 +137,12 @@ const SENDS = SPARSE ? [] : [
   { pkg: "seed-pkg-1", status: "Rejected", days: 68 },
   { pkg: "seed-pkg-2", status: "Queried", days: 20 },
   { pkg: "seed-pkg-2", status: "Rejected", days: 45 },
+  /* ⚠️ TWO SENDS THAT ARE STILL OUT, EACH NAMING THE VERSION IT CARRIED. `holdings()` reads the
+     last SEND activity's `bookVersionId` on a query still in a holding status, so a fixture whose
+     every query has been answered has no holders at all — which is what left `held by N agents`
+     unmeasurable on a page and two of Tracking's panels empty. */
+  { pkg: "seed-pkg-3", status: "Full Sent", days: 40, bv: "bv-prologue" },
+  { pkg: "seed-pkg-3", status: "Partial Sent", days: 35, bv: "bv-prologue" },
 ];
 
 /**
@@ -159,6 +172,8 @@ const EVENTS = SENDS.flatMap((s, i) => {
       /* the outcome lands AFTER the send — a fortnight, so the ordering is unambiguous */
       days: Math.max(0, s.days - 14),
       description: `Status changed to ${s.status}`,
+      /* the version rides the SEND activity, which is where `holdings()` reads it from */
+      ...(s.bv ? { bookVersionId: s.bv } : {}),
     });
   }
   return rows;
@@ -204,6 +219,8 @@ if (CLEAN) {
       id: p.id, userId: uid, manuscriptId: MS_ID,
       packageName: p.packageName,
       queryLetterVersionId: p.ql, synopsisVersionId: p.syn, samplePagesVersionId: p.pag,
+      /* omitted, never "" — absent means the writer has not named an ordering */
+      ...(p.bv ? { bookVersionId: p.bv } : {}),
       status: "Active", createdDate: iso(25),
     });
   }
@@ -237,6 +254,7 @@ if (CLEAN) {
       id: e.id, userId: uid, queryId: e.queryId, manuscriptId: MS_ID,
       activityType: e.activityType, resultingStatus: e.resultingStatus,
       description: e.description, date: iso(e.days), details: "",
+      ...(e.bookVersionId ? { bookVersionId: e.bookVersionId } : {}),
     });
   }
   await batch.commit();

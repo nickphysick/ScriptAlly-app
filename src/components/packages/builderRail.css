@@ -22,8 +22,7 @@
 .bldr-t-syn { --bldr-acc: var(--pkgt-syn-ink); --bldr-accedge: var(--pkgt-syn-edge); --bldr-accbg: var(--pkgo-sage-a); }
 .bldr-t-ver { --bldr-acc: var(--pkgt-pro-ink); --bldr-accedge: var(--pkgt-pro-edge); --bldr-accbg: var(--pro-fill-deep); }
 
-/* the query's container — the section, because the card grid is what has to fit the phrases */
-.bldr-rsec { margin-bottom: 22px; container-type: inline-size; }
+.bldr-rsec { margin-bottom: 22px; }
 .bldr-sh { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
 /* the head is a filled pill in the family colour — which is why a card needs no type pill (D6) */
 .bldr-sh h4 {
@@ -46,23 +45,25 @@
 .bldr-addbtn:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
 
 /**
- * ⚠️ THE COLUMN COUNT IS A CONTAINER QUERY, BECAUSE THE FOOT'S TWO SLOTS HAVE A MEASURED WIDTH.
+ * ⚠️ THE COLUMN COUNT IS DERIVED FROM THE CARD'S OWN MINIMUM WIDTH AT ANY CONTAINER WIDTH.
  *
- * `Not in a package` is 77.3px and `Attached file` is 62 — 147.3 with the gap, against the 107px a
- * card's inner box has at two columns in today's 296px rail. Both fitted only by ELLIPSING the left
- * slot, which reads `Attac…` and `Late…`: worse than the wrap D10 removed, and invisible to a check
- * that asks whether anything wrapped. Two columns therefore need a container wide enough to hold
- * the phrases whole — 2 × 185 + the gap — and below that the cards go one up.
+ * It was a fixed `1fr 1fr`, then a container query at a threshold I chose. Both encode a width
+ * somebody picked; `auto-fill` over a real minimum encodes the only fact that matters — how narrow
+ * a card may be before its foot stops reading — and answers correctly at every width including the
+ * ones the New-package panel will produce.
  *
- * ⚠️ AT TODAY'S FIXED 296px RAIL THIS RESOLVES TO ONE COLUMN, which halves the library's density.
- * That is a real trade and it is stated rather than absorbed: the alternative is a shorter usage
- * phrase, which is one constant. Written as a query rather than a flat `1fr` so that a wider rail —
- * which the New-package panel may bring — takes two columns back without anyone remembering to.
+ * ⚠️ 236px IS THE REF'S DRAWN CARD, and it clears the measured floor by 54. The foot's two phrases
+ * need 147.3px of content (`Not in a package` 77.3 + `Attached file` 62 + the 8px gap) against a
+ * card's inner box, which is the card less 34px of padding — so 182 is where the words start being
+ * cut off. Anything at or above 236 reads.
+ *
+ * ⚠️ AND IT IS `auto-fill`, NOT `auto-fit`. `auto-fit` collapses the empty tracks, so the Synopses
+ * section's single card would stretch to the full width of the rail while the four letters above it
+ * sat at card size — one library, two card widths. It is also NOT `minmax(0, 1fr)`: a zero minimum
+ * gives `auto-fill` no reason to stop, which this repo has already measured as a hundred phantom
+ * tracks on the dashboard's stat block.
  */
-.bldr-cards { display: grid; grid-template-columns: 1fr; gap: 11px; }
-@container (min-width: 390px) {
-  .bldr-cards { grid-template-columns: 1fr 1fr; }
-}
+.bldr-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); gap: 11px; }
 
 .bldr-mc {
   position: relative;
@@ -105,6 +106,17 @@
   min-height: 34px;
 }
 .bldr-desc--none { font-style: italic; color: var(--pkg-muted); }
+
+/* a version's band is its note over its holdings — the note keeps the clamp, the holdings do not */
+.bldr-vband > .bldr-desc { margin-bottom: 3px; }
+/* ⚠️ WITH NO HOLDINGS LINE THE NOTE IS THE LAST THING IN THE BAND, so it owes the foot the same 9px
+   every other card's description does — measured 3 against 9, on the two note-less versions only. */
+.bldr-vband > .bldr-desc:last-child { margin-bottom: 9px; }
+.bldr-hold {
+  margin-bottom: 9px;
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.07em;
+  color: var(--pkg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 /**
  * The document plate — what the description band holds when a material is an attached file (D2).

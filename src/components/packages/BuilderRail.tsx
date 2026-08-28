@@ -68,8 +68,18 @@ const CardDescription: React.FC<{ body: CardBody }> = ({ body }) => {
       );
     case "none":
       return <div className="bldr-desc bldr-desc--none">Nothing written yet</div>;
-    case "nonote":
-      return <div className="bldr-desc bldr-desc--none">No note on this version</div>;
+    case "version":
+      /* ⚠️ TWO ELEMENTS, NOT ONE STRING — the note is clamped to two lines and the holdings line is
+         not, so a long note can never push the holdings out of the card or swallow it into its own
+         clamp. The holdings line is omitted at zero; `Not in a package` in the foot says it once. */
+      return (
+        <div className="bldr-vband">
+          <div className={`bldr-desc${body.note ? "" : " bldr-desc--none"}`}>
+            {body.note ?? "No note on this version"}
+          </div>
+          {body.holdings && <div className="bldr-hold">{body.holdings}</div>}
+        </div>
+      );
     default: {
       const unhandled: never = body;
       return unhandled;
@@ -82,7 +92,7 @@ const bandSpoken = (b: CardBody): string =>
   b.kind === "text" ? b.text
   : b.kind === "file" ? `Attached file ${b.fileName}${b.fileKind ? `, ${b.fileKind}` : ""}`
   : b.kind === "none" ? "Nothing written yet"
-  : "No note on this version";
+  : `${b.note ?? "No note on this version"}${b.holdings ? `. ${b.holdings}` : ""}`;
 
 export interface BuilderRailProps {
   sections: RailSection[];

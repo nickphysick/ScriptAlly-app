@@ -4,7 +4,7 @@
  * count, and an unused one must state its absence in words rather than as two zeros.
  */
 import { describe, it, expect } from "vitest";
-import { builderRail, RAIL_KINDS, RAIL_HEADING, VERSIONS_NOTE, RAIL_EMPTY } from "./builderRail";
+import { builderRail, holdingsLine, RAIL_KINDS, RAIL_HEADING, VERSIONS_NOTE, RAIL_EMPTY } from "./builderRail";
 import { ComponentType, QueryStatus } from "../types";
 import type { Activity, BookVersion, ManuscriptVersion, Query, SubmissionPackage } from "../types";
 
@@ -83,7 +83,33 @@ describe("builderRail", () => {
     /* Five of the eight cards on the dev fixture are note-less versions. Left blank, the Versions
        section mostly looked broken; this is the case the treatment has to serve first. */
     const c = rail()[2].chips.find((x) => x.name === "Prologue-first")!;
-    expect(c.body).toEqual({ kind: "nonote" });
+    expect(c.body).toEqual({ kind: "version", note: null, holdings: "1 package · held by 2 agents" });
+  });
+
+  it("⚠️ THE HOLDINGS LINE IS BACK, IN THE BAND, and it is what the versions feature is FOR (F-BR)", () => {
+    const noted = BVS.map((v) => (v.id === "bv1" ? { ...v, note: "Opens on the flood." } : v));
+    const r = builderRail(MATS, PKGS, noted, QS, ACTS)[2].chips;
+    /* both branches entered — a version in packages, and two in none */
+    expect(r.map((c) => [c.name, (c.body as { holdings: string | null }).holdings]))
+      .toEqual([["Prologue-first", "1 package · held by 2 agents"],
+                ["Worldbuilding-first", null], ["Post-R&R", null]]);
+    /* the note sits above it and neither swallows the other */
+    expect(r[0].body).toEqual({ kind: "version", note: "Opens on the flood.", holdings: "1 package · held by 2 agents" });
+    /* ⚠️ NEVER `0 packages · held by 0 agents` — the foot states that absence once, in words */
+    for (const c of r) expect((c.body as { holdings: string | null }).holdings ?? "").not.toMatch(/\b0\b/);
+  });
+
+  it("⚠️ agents are counted once each, however many sends they carry", () => {
+    /* Two queries, two agents, two send activities — `held by 2 agents`, not 2 sends dressed up. */
+    const twice = [...ACTS, act("q1", "bv1")];
+    const b = builderRail(MATS, PKGS, BVS, QS, twice)[2].chips[0].body as { holdings: string | null };
+    expect(b.holdings).toBe("1 package · held by 2 agents");
+  });
+
+  it("⚠️ the verbs agree at one", () => {
+    expect(holdingsLine(1, 1)).toBe("1 package · held by 1 agent");
+    expect(holdingsLine(2, 4)).toBe("2 packages · held by 4 agents");
+    expect(holdingsLine(0, 0)).toBeNull();
   });
 
   it("⚠️ A MATERIAL WITH NEITHER TEXT NOR FILE KEEPS `Nothing written yet`, and its source is EMPTY (D5/D9)", () => {

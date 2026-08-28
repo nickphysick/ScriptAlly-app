@@ -92,6 +92,17 @@
 .bldr-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* ⚠️ RAIL LEFT, LEDGER RIGHT — the ref's `.split`. */
-.bldr-split { display: grid; grid-template-columns: 296px minmax(0, 1fr); gap: 24px; align-items: start; }
+/**
+ * ⚠️ THE LIBRARY TAKES THE SPACE AND THE COMPOSER HAS A FLOOR — the rail's 296px was a literal that
+ * outlived the thing it was sized for. It fitted a column of CHIPS; when those became cards it
+ * starved them, and the card grid dutifully produced one column at every viewport, with the right
+ * half of a 2,000px page empty. A grid that answers the same at 1440 and 2560 is not answering.
+ *
+ * ⚠️ 480px IS THE COMPOSER'S FLOOR, DERIVED: `.bldr-slots` is three equal tracks and each needs a
+ * material's name beside a clear control, so squeezing that row is what a minimum exists to stop.
+ * The 2:1 share is the reading that the library is the browsing surface and the composer is the
+ * thing you reach for once — Part C's pinned New-package panel inherits the floor and the share.
+ */
+.bldr-split { display: grid; grid-template-columns: minmax(0, 2fr) minmax(480px, 1fr); gap: 24px; align-items: start; }
 .bldr-railcol { min-width: 0; }
 .bldr-main { min-width: 0; }

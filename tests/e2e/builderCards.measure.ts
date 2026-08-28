@@ -48,6 +48,9 @@ for (const w of [1440, 1920]) {
             fileName: t(c.querySelector(".bldr-platefn")),
             fileKind: t(c.querySelector(".bldr-platekind")),
             bandH: n(band.getBoundingClientRect().height),
+            hold: (c.querySelector(".bldr-hold")?.textContent ?? "").trim(),
+            holdClipped: (() => { const h = c.querySelector(".bldr-hold") as HTMLElement | null;
+              return !!h && h.scrollWidth > h.clientWidth + 1; })(),
             /* the foot: two slots, and whether either wrapped */
             src: t(src), srcGlyph: !!src.querySelector("svg"),
             use: t(use),
@@ -70,6 +73,10 @@ for (const w of [1440, 1920]) {
         }),
         cols: getComputedStyle(document.querySelector(".bldr-cards") as HTMLElement)
           .gridTemplateColumns.split(" ").length,
+        railW: n((document.querySelector(".bldr-cards") as HTMLElement).getBoundingClientRect().width),
+        splitCols: getComputedStyle(document.querySelector(".bldr-split") as HTMLElement)
+          .gridTemplateColumns.split(" ").map((v) => Math.round(parseFloat(v))),
+        cardW: n((document.querySelector(".bldr-mc") as HTMLElement).getBoundingClientRect().width),
       };
     });
 
@@ -94,6 +101,19 @@ for (const w of [1440, 1920]) {
       expect(p.src).not.toContain(p.fileName);
       expect(p.srcGlyph, "no clip beside a plate that carries its own mark").toBe(false);
     }
+    /* ⚠️ F-BR — THE HOLDINGS LINE IS BACK, IN THE BAND, and both branches are entered. It is the
+       fact the versions feature exists to surface; the two-register foot has no slot for it. */
+    const vers2 = out.cards.filter((c) => c.kind === "ver");
+    console.log(`B${w} HOLD ` + JSON.stringify(vers2.map((c) => [c.name, c.hold])));
+    expect(vers2.some((c) => /held by \d+ agents?/.test(c.hold)), "no version in a package — F-BR unproven").toBe(true);
+    expect(vers2.some((c) => c.hold === ""), "no version in nothing — the omission is unproven").toBe(true);
+    for (const c of vers2) {
+      expect(c.hold, "never `held by 0 agents` — the foot states that absence once").not.toMatch(/\b0\b/);
+      expect(c.holdClipped, `${c.name}'s holdings line is cut off`).toBe(false);
+    }
+    /* and no MATERIAL card carries one — it is a version's own metadata */
+    for (const c of out.cards.filter((x) => x.kind !== "ver")) expect(c.hold).toBe("");
+
     /* D4 + D5 — the two sentences, and each is entered */
     const words = byBand("words").map((c) => c.bandText);
     console.log(`B${w} WORDS ` + JSON.stringify(words));
@@ -149,7 +169,20 @@ for (const w of [1440, 1920]) {
        foot's phrases need, so a wider rail may legitimately return two — and a value pinned here
        would fail on that rather than on a regression. What must hold is that nothing is cut off,
        which the clipping assertion above states directly. */
-    expect(out.cols, "the card grid resolved to no columns at all").toBeGreaterThan(0);
+    /* ⚠️ THE COLUMN COUNT IS DERIVED, SO IT IS REPORTED AND ITS DERIVATION IS ASSERTED — never a
+       pinned number. What must hold is that the grid ANSWERS the width: a card at least the ref's
+       236 wide, and as many as fit. A fixed value here would pass on the fault this replaced, which
+       was one column at every viewport from 1440 to 2560. */
+    console.log(`B${w} GRID cols ${out.cols} · card ${out.cardW} · rail ${out.railW}`);
+    expect(out.cols).toBe(Math.floor((out.railW + 11) / (236 + 11)));
+    expect(out.cardW).toBeGreaterThanOrEqual(236);
+    /* ⚠️ AND THE LIBRARY IS THE LARGER HALF, which is what the derivation needs to be given space
+       to answer. The rail was a literal 296px, so the grid resolved to one column at 1440, 1920 and
+       2560 alike — a grid that answers the same at every width is not answering. This is the claim
+       the column derivation cannot make on its own: at 296 the derivation is satisfied by one. */
+    console.log(`B${w} SPLIT ${JSON.stringify(out.splitCols)}`);
+    expect(out.splitCols.length).toBe(2);
+    expect(out.splitCols[0], "the composer holds more width than the library").toBeGreaterThan(out.splitCols[1]);
 
     /* ⚠️ D9 (previous pack) — a card taken into the package DIMS; it does not leave the library.
        The count is taken BEFORE, because removal and dimming are indistinguishable afterwards. */

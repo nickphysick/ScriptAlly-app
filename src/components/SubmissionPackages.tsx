@@ -814,9 +814,15 @@ export const SubmissionPackages: React.FC = () => {
                 agentName={(id) => agentLabel(agents.find((a) => a.id === id) ?? null, AGENT_NOT_RECORDED)}
                 onLogQuery={() => navigate("/queries")}
               />
+              {/**
+                * ⚠️ THE EXPLAINER BELONGS WHERE THE FIGURES IT EXPLAINS LIVE. It sat OUTSIDE all
+                * three panels, so it rendered on every tab — the same three cards on Packages and
+                * on Builder, explaining how Replies and Requests are counted beside a ledger and a
+                * card library that state neither as a concept.
+                */}
+              <FootnoteBand />
               </div>
               )}
-              <FootnoteBand />
             </>
           ) : (
             <PackagesTeachFirst onAddMaterial={() => { setMatPreselect(null); setMatEditing(null); setMatModal(true); }} />
