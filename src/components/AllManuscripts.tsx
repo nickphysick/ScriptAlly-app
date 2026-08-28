@@ -42,6 +42,8 @@ import { DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./manuscripts/Manuscri
 import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
 import { AttachmentsPanel } from "./manuscripts/AttachmentsPanel";
 import { ManuscriptCarousel } from "./manuscripts/ManuscriptCarousel";
+import { ManuscriptBackLink, ManuscriptPager } from "./manuscripts/ManuscriptPager";
+import { MANUSCRIPTS_PATH } from "./shell/manuscriptScope";
 import { queryingSinceMs, profileDate } from "../lib/manuscriptProfile";
 import { ManuscriptsEmpty } from "./manuscripts/ManuscriptsEmpty";
 import { pitchAssets, pitchMeter, PitchAssetKey, synopsisVersions } from "../lib/manuscriptPitch";
@@ -374,6 +376,23 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
                       onClick: () => onNavigate?.("manuscripts", "Add a manuscript") }]}
           description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
           /**
+           * ⚠️ THE DEPARTURE, AND ONLY WITH A BOOK OPEN. On the shelf there is nothing to leave, so
+           * the lead is absent and the masthead is byte-identical to every other page's.
+           *
+           * ⚠️ IT NAVIGATES TO `MANUSCRIPTS_PATH` — the same constant `shellV2Nav` gives the
+           * sidebar's Manuscripts item. One destination, one constant, no second path back.
+           */
+          lead={selected ? <ManuscriptBackLink onLeave={() => navigate(MANUSCRIPTS_PATH)} /> : undefined}
+          /* ⚠️ THE PAGER SITS WITH THE BOOK'S ACTIONS, NOT WITH THE DEPARTURE. It moves you along
+             the shelf you are inside; the lead leaves it. */
+          actionsSlot={selected ? (
+            <ManuscriptPager
+              position={`${atIndex + 1} / ${ordered.length}`}
+              onPrev={atIndex > 0 ? goTo(atIndex - 1) : null}
+              onNext={atIndex >= 0 && atIndex < ordered.length - 1 ? goTo(atIndex + 1) : null}
+            />
+          ) : undefined}
+          /**
            * ⚠️ `Add manuscript` IS DROPPED, NOT REHOMED — and this is the one masthead action that
            * did not need a control row built for it, because the page already offers it TWICE. The
            * carousel's ADD GHOST is a member of the deck at every count (at zero it IS the deck),
@@ -552,8 +571,6 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
                   onDelete={() => setDeleteModalMs(selected)}
                 />
               }
-              onPrev={atIndex > 0 ? goTo(atIndex - 1) : null}
-              onNext={atIndex >= 0 && atIndex < ordered.length - 1 ? goTo(atIndex + 1) : null}
               onOpenPackageBuilder={() => {
                 selectMs(selected.id);
                 onNavigate?.("manuscripts", "Submission packages");

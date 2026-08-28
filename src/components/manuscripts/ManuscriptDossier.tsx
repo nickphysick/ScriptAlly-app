@@ -78,9 +78,8 @@ export interface ManuscriptDossierProps {
   /** Writes one against this manuscript. Absent → the pane reads without offering to write. */
   onWriteNote?: (text: string, detail: string) => void;
   onOpenNoteboard: () => void;
-  /** Page through the shelf, in the sidebar's order. Null at the ends — there is no wrap-around. */
-  onPrev: (() => void) | null;
-  onNext: (() => void) | null;
+  /* ⚠️ THE PAGER LEFT FOR THE MASTHEAD. It pages the SHELF, so it belongs beside the
+     departure and the book's actions rather than inside the book's own band. */
   /** The book band's ⋯ — lifecycle and the three fields with no inline editor. */
   bookActions?: React.ReactNode;
   synopsisVersionCount: number;
@@ -132,8 +131,6 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   notes,
   onWriteNote,
   onOpenNoteboard,
-  onPrev,
-  onNext,
   bookActions,
   synopsisVersionCount,
   synopsisDate,
@@ -201,8 +198,6 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
              from it — the rail's collapsed primary is the page's one call to action — and the ⋯
              moved to the control row as `ManuscriptActions`, because shelve, reactivate, the
              guarded delete and the three fields with no inline editor have no other surface. */
-          onPrev={onPrev}
-          onNext={onNext}
           bookActions={bookActions}
         />
 

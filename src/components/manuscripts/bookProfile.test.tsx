@@ -55,8 +55,6 @@ const hero = (over: Partial<React.ComponentProps<typeof ManuscriptHero>> = {}) =
       genres={["Young Adult", "Thriller"]}
       wordCount={50000}
       stats={{ queriesSent: 26, responses: 12, lastActivity: "2 Jun" }}
-      onPrev={null}
-      onNext={null}
       tab="overview"
       onTabChange={() => {}}
       {...over}
@@ -195,112 +193,19 @@ describe("the hero", () => {
 
   /** ⚠️ THE CHEVRONS ACT ON THE CARD, so they sit outside it — inside they would read as controls
    *  of the book they are about to replace. */
-  it("puts the chevrons outside the card, one each side", () => {
-    const html = hero();
-    const first = html.indexOf("msp-chev");
-    const card = html.indexOf("msp-card");
-    const last = html.lastIndexOf("msp-chev");
-    expect(first).toBeLessThan(card);
-    expect(last).toBeGreaterThan(card);
-    expect(html.match(/msp-chev/g)).toHaveLength(2);
-  });
-
   /**
-   * ⚠️ RETARGETED: THE FIGURES LEFT AND THE ⋯ STAYED. The three-figure row moved into the
-   * five-figure strip under the tab rail; three of those five were stated in both places, which is
-   * the same numbers on one page twice. What remains in this group is the book's ⋯ alone — shelve,
-   * reactivate, Edit details and the guarded delete, which have no other surface on the page.
+   * ⚠️ THE THREE CHEVRON CASES MOVED WITH THE PAGER, THEY DID NOT LAPSE. It pages the SHELF, so it
+   * now sits in the masthead beside the book's actions rather than inside the book's own band —
+   * and its claims (rendered-when-unusable, no wrap-around, a position readout) are asserted in
+   * manuscriptPager.test.tsx against the component that now owns them.
    *
-   * ⚠️ STILL BOUNDED ON THE NEXT CHEVRON, NOT ON `</div></div>`. The group holds nested divs, so a
-   * non-greedy close matches the FIRST inner one and cuts the ⋯ off the end — the slice would then
-   * report the very absence the assertion is testing for.
+   * What is asserted HERE is the hero's half: it draws no pager of its own, so the two cannot both
+   * render one.
    */
-  it("keeps the book's ⋯ in the record group, and no figures with it", () => {
-    const html = hero({ bookActions: <button type="button">dots</button> });
-    const start = html.indexOf('<div class="msp-recstats">');
-    expect(start, "the record group is not on the page").toBeGreaterThan(-1);
-    const group = html.slice(start, html.indexOf("msp-chev", start));
-    expect(group).toContain("dots");
-    expect(group, "the figure row came back to the hero").not.toContain("msp-hsrow");
-    expect(theRule(".msp-recstats")).toContain("margin-left: auto");
-  });
-
-  it("draws exactly one book image — the hero's cover, not the plate's mark too", () => {
-    expect(hero().match(/<img/g)).toHaveLength(1);
-    expect(hero()).not.toContain("msv-plateimg");
-  });
-
-  /** The counts and the actions moved to the hero; the plate's own side column must not render. */
-  it("drops the plate's stat strip and action column", () => {
+  it("draws no pager of its own", () => {
     const html = hero();
-    expect(html).not.toContain("msv-plateside");
-    expect(html).not.toContain("msv-statstrip");
-  });
-
-  /**
-   * ⚠️ THE HERO STATES NO FIGURES AT ALL NOW. This replaces "states the three figures as cells" —
-   * the law did not weaken, it moved: the figures are `bookFigures`, locked in bookFigures.test.ts,
-   * and rendered by the dossier under the tab rail. Asserting their ABSENCE here is what stops them
-   * being quietly reinstated alongside.
-   */
-  it("states no figures of its own", () => {
-    const html = hero();
-    for (const cls of ["msp-hsrow", "msp-hsn", "msp-hsl"]) {
-      expect(html, `${cls} came back to the hero`).not.toContain(cls);
-    }
-    for (const label of ["Queries sent", "Responses", "Querying since"]) {
-      expect(html, `${label} is stated in the hero as well as the strip`).not.toContain(label);
-    }
-  });
-
-  /**
-   * ⚠️ NOT TWICE ON ONE ROW. The three figures were clauses in the facts line, then the hero's
-   * right-hand cells, and are now the strip's. The facts line has kept genre and word count
-   * throughout, and this is the assertion that has stopped them coming back at each move.
-   */
-  it("states none of the three figures in the facts line as well", () => {
-    const line = /class="msv-platemeta"([\s\S]*?)<\/div>/.exec(hero())?.[1] ?? "";
-    expect(line).toContain("Young Adult");
-    expect(line).toContain("50,000 words");
-    for (const word of ["queries sent", "responses", "Querying since"]) {
-      expect(line.toLowerCase(), `${word} is stated twice on one row`).not.toContain(word.toLowerCase());
-    }
-  });
-
-  /**
-   * ⚠️ THE `Querying since` CELL AND ITS OMIT-RATHER-THAN-DASH RULE ARE BOTH RETIRED, and this
-   * records why rather than deleting the case. That rule existed because an omitted cell had to
-   * take its own `border-left` divider with it; the strip has a FIXED five cells, so nothing is
-   * omitted and nothing is left hanging. `Last sent` states `—` for a book never sent — which is
-   * the established form (`plateStatCells` does the same for `Last activity`) and reads as "this
-   * has not happened" rather than asserting a date.
-   *
-   * The live claim is in bookFigures.test.ts: nought where zero is true, `—` where nothing happened.
-   */
-  it("no longer renders a since cell for the hero to omit", () => {
-    expect(hero()).not.toContain("Querying since");
-  });
-
-  /**
-   * ⚠️ THE CHEVRONS RENDER WHEN THEY CANNOT BE USED. Dimmed and disabled at one manuscript, so the
-   * affordance is visible before a second book exists — and NO WRAP-AROUND, so a writer can tell
-   * from the control that they have reached the end of their own shelf.
-   */
-  it("renders both chevrons disabled when there is nowhere to page", () => {
-    const html = hero();
-    const chevs = html.match(/<button[^>]*msp-chev[^>]*>/g) ?? [];
-    expect(chevs).toHaveLength(2);
-    for (const c of chevs) expect(c).toContain("disabled");
-    expect(html).toContain('aria-label="Previous manuscript"');
-    expect(html).toContain('aria-label="Next manuscript"');
-  });
-
-  it("enables only the direction that has a neighbour", () => {
-    const first = hero({ onPrev: null, onNext: () => {} });
-    const prev = /<button[^>]*aria-label="Previous manuscript"[^>]*>/.exec(first)![0];
-    const next = /<button[^>]*aria-label="Next manuscript"[^>]*>/.exec(first)![0];
-    expect(prev, "first manuscript offers a previous").toContain("disabled");
-    expect(next, "a next exists and is disabled anyway").not.toContain("disabled");
+    expect(html, "the hero grew a second pager").not.toContain("msp-chev");
+    expect(html).not.toContain("Previous manuscript");
   });
 
   /** ⚠️ THE ACTION CLUSTER IS RETIRED — the rail's collapsed primary is the page's one CTA. */

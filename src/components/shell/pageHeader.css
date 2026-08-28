@@ -549,3 +549,12 @@
  * header around it and end up the loudest thing in a band that just got quieter.
  */
 .wpg-chrome--stuck .wsh-act { padding: 6px 11px; font-size: 12px; }
+
+/**
+ * ══ THE LEAD ROW — a departure, above the title ═══════════════════════════════════════════════
+ *
+ * ⚠️ IT EXISTS ONLY WHEN SOMETHING IS PASSED. There is no empty-state rule here on purpose: a
+ * reserved-but-empty row reads as nothing in review and moves every one of the nine pages that pass
+ * no lead down by its own height.
+ */
+.wsh-lead { display: flex; align-items: center; margin-bottom: 10px; }

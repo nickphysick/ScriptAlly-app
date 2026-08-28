@@ -124,6 +124,19 @@ export interface PageHeaderProps {
   /** A custom control occupying the same slot as `actions` — for pages whose right-hand control
    *  isn't a button (Discover's "Finding for" manuscript selector). Ignored when `actions` is set. */
   actionsSlot?: React.ReactNode;
+  /**
+   * A row ABOVE the title — today, the record page's `‹ All manuscripts`.
+   *
+   * ⚠️ IT IS A LEAD, NOT AN ACTION, AND THAT IS WHY IT IS NOT IN `actionsSlot`. Everything in the
+   * actions slot acts ON this page; this LEAVES it. Putting a departure among the operations is how
+   * a reader comes to press one meaning to get the other.
+   *
+   * ⚠️ ADDITIVE AND PROVED SO: absent, no element renders and no space is reserved, so the nine
+   * pages that pass nothing are byte-identical. That is asserted against rendered output rather
+   * than argued — a reserved-but-empty row is exactly the kind of change that reads as nothing and
+   * moves every page down eight pixels.
+   */
+  lead?: React.ReactNode;
   /** Page operations beyond the two primaries — rendered behind a ⋯ at the end of the tool row.
    *  If a page has six things it can do, five of them are not primary and the header should
    *  say so. Ignored on a compact header, whose actions stay inline. */
@@ -139,6 +152,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   toolbar,
   titleAdornment,
   actionsSlot,
+  lead,
   overflow,
 }) => {
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
@@ -280,6 +294,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
          height; the plate is content now, so there is nothing to reserve and nothing to stick. The
          element draws its own closing hairline and the gap beneath it — see pageHeader.css. */
       <header className="wsh">
+        {/* ⚠️ NOTHING WHEN ABSENT — not an empty div, not a reserved height. See the prop's note. */}
+        {lead && <div className="wsh-lead">{lead}</div>}
         <div className="wsh-row">
           {/* ⚠️ ONE MARK, LEFT OF THE TEXT (masthead left-constant, §B). The mirrored second mark
               of the centred layout is deleted; `OneScreenMark` carries its own `aria-hidden`. */}

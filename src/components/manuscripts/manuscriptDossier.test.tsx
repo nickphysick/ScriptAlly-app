@@ -53,8 +53,6 @@ const BASE: ManuscriptDossierProps = {
   onSaveSynopsis: noop,
   notes: [],
   onOpenNoteboard: noop,
-  onPrev: null,
-  onNext: null,
   comps: [],
   isPro: false,
   scoutAvailable: true,
