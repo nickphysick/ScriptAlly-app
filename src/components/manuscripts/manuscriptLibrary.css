@@ -1,4 +1,16 @@
 /**
+ * ⚠️ THIS SHEET IS MIS-NAMED AND IS NOT THE LIBRARY GRID'S. It carries 26 selectors the DOSSIER
+ * needs — `.msv-doss`, `.msv-wpg`, the whole `.msv-a*` assets cluster and the pitch strip — and
+ * `ManuscriptDossier.tsx` imports it for those. Its name describes the 19 `.mlib-*` rules, which
+ * are now the dead half.
+ *
+ * ⚠️ THE `.mlib-*` RULES ARE ORPHANED: the shelf is `ManuscriptCarousel` and nothing renders those
+ * classes any more. They are FLAGGED RATHER THAN SWEPT, deliberately — deleting this file as "the
+ * retired grid's stylesheet" is exactly the removal-scoped-to-one-surface fault, and it broke three
+ * test files and a page in this very pass before the import was found. A CSS sweep is its own pass,
+ * with its own reachability check, and it should rename the file while it is there.
+ */
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *

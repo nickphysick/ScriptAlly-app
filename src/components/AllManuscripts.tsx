@@ -41,7 +41,8 @@ import { plateStats, formatPlateDate } from "../lib/manuscriptPlate";
 import { DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./manuscripts/ManuscriptTabs";
 import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
 import { AttachmentsPanel } from "./manuscripts/AttachmentsPanel";
-import { ManuscriptLibraryCard, ManuscriptAddTile } from "./manuscripts/ManuscriptLibraryCard";
+import { ManuscriptCarousel } from "./manuscripts/ManuscriptCarousel";
+import { queryingSinceMs } from "../lib/manuscriptProfile";
 import { ManuscriptsEmpty } from "./manuscripts/ManuscriptsEmpty";
 import { pitchAssets, pitchMeter, PitchAssetKey, synopsisVersions } from "../lib/manuscriptPitch";
 import { genreDisplay } from "../lib/genres";
@@ -374,10 +375,13 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
           description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
           /**
            * ⚠️ `Add manuscript` IS DROPPED, NOT REHOMED — and this is the one masthead action that
-           * did not need a control row built for it, because the page already offers it TWICE.
-           * `ManuscriptAddTile` renders in the library grid at every count including one (its own
-           * note argues for exactly that), and the zero-manuscript panel carries its own button. A
-           * third copy in the masthead was the surplus.
+           * did not need a control row built for it, because the page already offers it TWICE. The
+           * carousel's ADD GHOST is a member of the deck at every count (at zero it IS the deck),
+           * and the zero-manuscript panel carries its own button. A third copy in the masthead was
+           * the surplus.
+           *
+           * ⚠️ This note used to cite `ManuscriptAddTile`, which the carousel retired. Updated
+           * rather than left standing: a comment that outlives what it described is read as fact.
            *
            * ⚠️ THE DOSSIER HAS NO ADD AFFORDANCE AND THAT IS CORRECT. The grid — and its tile —
            * render only while nothing is selected; with a manuscript open you are reading one, not
@@ -415,28 +419,34 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
               tile is the intended appearance — the old switcher's "absent below two manuscripts"
               rule was about a control that taught nothing at one, which is not true of a shelf.
             */}
+            {/**
+              * ⚠️ THE SHELF IS A CAROUSEL, AND THE GRID IS RETIRED RATHER THAN HIDDEN. The earlier
+              * ruling to keep the grid was about not losing the only exit from an opened book while
+              * a header was being tidied; the route settles that now — `?m=` absent IS the shelf,
+              * and the back button reaches it. So one shelf view, not two.
+              *
+              * ⚠️ THE ADD GHOST IS A MEMBER OF THE DECK, so the empty shelf and the add affordance
+              * are one object rather than two states that have to agree. `ManuscriptsEmpty` still
+              * owns the zero case above; the ghost is what the carousel shows at every count.
+              */}
             {!selected && (
-              <div className="mlib-grid">
-                {ordered.map((m) => {
-                  const mq = queries.filter((q) => q.manuscriptId === m.id);
-                  const mv = versions.filter((v) => v.manuscriptId === m.id);
-                  return (
-                    <ManuscriptLibraryCard
-                      key={m.id}
-                      title={m.title}
-                      status={isShelvedPresentation(m) ? "Shelved" : m.status}
-                      shelved={isShelvedPresentation(m)}
-                      genres={msGenres(m)}
-                      wordCount={m.wordCount}
-                      logline={m.logline}
-                      stats={plateStats(mq)}
-                      meter={pitchMeter(pitchAssets(m, mv))}
-                      onOpen={() => openDossier(m.id)}
-                    />
-                  );
+              <ManuscriptCarousel
+                manuscripts={ordered}
+                queries={queries}
+                genresOf={msGenres}
+                statusOf={(m) => ({
+                  label: isShelvedPresentation(m) ? "Shelved" : m.status,
+                  shelved: isShelvedPresentation(m),
                 })}
-                <ManuscriptAddTile onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")} />
-              </div>
+                /* ⚠️ DERIVED, AND ABSENT WHEN IT IS ABSENT. A book with no sent query has no
+                   querying-since date, and `—` states that rather than inventing one. */
+                sinceOf={(m) => {
+                  const ms = queryingSinceMs(queries.filter((q) => q.manuscriptId === m.id));
+                  return ms === null ? "—" : new Date(ms).toLocaleDateString("en-GB", { month: "short" });
+                }}
+                onOpen={openDossier}
+                onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
+              />
             )}
           {selected ? (
             <ManuscriptDossier

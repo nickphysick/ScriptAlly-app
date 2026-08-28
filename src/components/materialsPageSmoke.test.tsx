@@ -58,37 +58,48 @@ describe("/manuscripts renders", () => {
    * their own unit tests and `ManuscriptDetailTiles` its own render spec) but it is not nothing,
    * and it is recorded rather than quietly accepted.
    */
-  it("…and the manuscript reaches its card on the shelf", () => {
+  it("…and the manuscript reaches its tile on the shelf", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
     expect(html).toContain("The Smoke Test");
-    expect(html).toContain("mlib-grid");
-    expect(html).toContain("mlib-book");
+    /* The shelf is a carousel now; the grid is retired, not hidden. */
+    expect(html).toContain("mcar-track");
+    expect(html).toContain("mcar-tile");
+    expect(html, "the retired grid came back").not.toContain("mlib-grid");
   });
 
   /**
-   * ⚠️ ASSERT THE FIGURE, NOT THE LABEL. The foot renders whatever the numbers are, so a card fed
+   * ⚠️ ASSERT THE FIGURE, NOT THE LABEL. The tile renders whatever the numbers are, so one fed
    * constants — or fed the wrong manuscript's queries — passes a label-only check. The seed carries
-   * exactly one query and no response, so the card must SAY one query, and must agree in number.
+   * exactly one query and no response, so the tile must SAY one and nought, and agree in number.
+   *
+   * ⚠️ RETARGETED, NOT WEAKENED: the old card wrote `<b>1</b> query` in a prose foot, the tile
+   * writes the figure under a mono label. Same claim, different markup.
    */
   it("…with its derived counts, and the counts are the real ones", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
-    expect(html).toContain("<b>1</b> query");
-    expect(html).toContain("<b>0</b> responses");
+    const figs = html.slice(html.indexOf('class="mcar-figs"'), html.indexOf('class="mcar-open"'));
+    expect(figs, "the figures block moved").not.toBe("");
+    expect(figs).toContain(">Queries</span><span class=\"mcar-figv\">1<");
+    expect(figs).toContain(">Responses</span><span class=\"mcar-figv\">0<");
   });
 
   /**
-   * The pitch meter is the one derivation that reads BOTH the manuscript and its versions, so it is
-   * the card's deepest one. The seed has a logline and nothing else, which is 1 of 4.
+   * ⚠️ THE PITCH METER IS RETIRED AND THIS ASSERTS ITS ABSENCE RATHER THAN LAPSING. It counted
+   * materials on a shelf tile; materials belong to Submission packages, and a progress bar on a
+   * card is the shelf appraising the writer's readiness rather than reporting their shelf.
    */
-  it("…and the pitch meter, reporting the real state of the shelf", () => {
+  it("…and states no pitch-pieces meter, which belongs to Submission packages", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
-    expect(html).toContain("1 of 4 pitch pieces written");
-    expect(html).toContain("mlib-seg on");
+    expect(html).not.toContain("pitch pieces written");
+    expect(html).not.toContain("mlib-seg");
   });
 
-  /** The add tile renders at every count, including one — one card beside it is the intended shelf. */
-  it("…beside the add tile, which renders at every count", () => {
-    expect(renderPageSeeded(page(), "/manuscripts")).toContain("mlib-add");
+  /**
+   * ⚠️ THE ADD GHOST IS A MEMBER OF THE DECK, so it renders at every count — and at zero it IS the
+   * deck. That is what makes the empty shelf and the add affordance one object.
+   */
+  it("…beside the add ghost, which is a member of the deck at every count", () => {
+    expect(renderPageSeeded(page(), "/manuscripts")).toContain("mcar-ghost");
   });
 
   /**

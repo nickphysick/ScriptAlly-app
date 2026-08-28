@@ -1,0 +1,189 @@
+/**
+ * ══ THE SHELF CAROUSEL ════════════════════════════════════════════════════════════════════════
+ * Ref: design-refs/manuscripts-shelf-carousel-v2.html
+ */
+
+/**
+ * ⚠️ THE STAGE IS `tileH + 108`, AND IT IS A FIXED HEIGHT ON A PAGE THAT SCROLLS. On a short
+ * viewport this is what pushes the shelf into scrolling; the measurement pass reports the height at
+ * which it starts. It is NOT wrapped in a viewport-height media query — those interact badly with
+ * the masthead settle, which reclaims height and can destroy the scroll the settled state derives
+ * from.
+ */
+.mcar {
+  --mcar-tile-w: 392px;
+  --mcar-tile-h: 452px;
+  --mcar-peek: 128px;
+  position: relative;
+  height: calc(var(--mcar-tile-h) + 108px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* ⚠️ NOT `overflow: hidden`. The bookmark ribbon overhangs the tile's top-left corner, and the
+     tile's own box would clip it; the STAGE clips the peeking neighbours instead, which is what
+     `clip-path` below does without touching the ribbon's corner. */
+  overflow: visible;
+}
+.mcar-track { position: relative; width: 100%; height: 100%; }
+
+.mcar-tile {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--mcar-tile-w);
+  height: var(--mcar-tile-h);
+  /* ⚠️ LEFT OF CENTRE (-58%), not centred: the right-hand neighbour peeks further than the left,
+     so the shelf reads as continuing rightward rather than as a symmetrical pair. */
+  transform: translate(-58%, -50%);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: var(--ws-window, #fffefb);
+  border: 1px solid var(--hair);
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(40, 28, 20, 0.13);
+  transition: transform 0.34s cubic-bezier(0.22, 0.8, 0.3, 1), opacity 0.34s;
+}
+.mcar-focus { z-index: 2; }
+.mcar-peek-right { transform: translate(calc(-58% + var(--mcar-peek)), -50%) scale(0.94); opacity: 0.55; z-index: 1; }
+.mcar-peek-left  { transform: translate(calc(-58% - var(--mcar-peek)), -50%) scale(0.94); opacity: 0.55; z-index: 1; }
+/**
+ * ⚠️ `visibility: hidden` AS WELL AS `opacity: 0`. Opacity alone leaves the element in the tab
+ * order and in the accessibility tree — the renderer also sets `tabIndex={-1}` and `aria-hidden`,
+ * and this is the third belt: a future edit that drops one of the three still cannot leave a
+ * readable card off the side of the stage.
+ */
+.mcar-hidden { opacity: 0; visibility: hidden; pointer-events: none; transform: translate(-58%, -50%) scale(0.9); }
+
+.mcar-shelved { opacity: 0.62; }
+.mcar-focus.mcar-shelved:hover { opacity: 1; }
+
+/* ⚠️ ARTWORK BLED IN — no bottom border, no inner hairline. The card's own radius clips its top. */
+.mcar-art {
+  position: relative;
+  display: block;
+  height: 184px;
+  flex: none;
+  border-radius: 13px 13px 0 0;
+  background: linear-gradient(150deg, #e8ddd0, #d9c9b6);
+}
+/** ⚠️ OVERHANGS THE CARD on two sides — `top: -6px` and outside the art's rounded corner. */
+.mcar-ribbon {
+  position: absolute;
+  left: 22px;
+  top: -6px;
+  width: 34px;
+  padding: 9px 0 7px;
+  background: var(--burg);
+  color: #fff;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%);
+}
+.mcar-pill {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(255, 254, 251, 0.72);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.mcar-body { display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 18px 22px 20px; }
+/** ⚠️ 1.3 MINIMUM ON MIXED-CASE PLAYFAIR — the annotated exception, not relitigated. */
+.mcar-title { font-family: var(--font-serif); font-size: 25px; font-weight: 600; line-height: 1.3; margin-bottom: 9px; }
+.mcar-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 9px; }
+.mcar-chip { padding: 3px 9px; border: 1px solid var(--hair); border-radius: 999px; font-size: 11px; color: var(--shell-muted); }
+.mcar-wc { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--shell-muted); }
+/** ⚠️ TWO LINES. A third changes the tile's height, and the stage's height is derived from it. */
+.mcar-pitch {
+  margin-top: 11px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #4a3d34;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.mcar-figs { display: flex; gap: 26px; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--hair); }
+.mcar-fig { display: flex; flex-direction: column; }
+.mcar-figl { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--shell-muted); }
+.mcar-figv { font-family: var(--font-serif); font-size: 21px; line-height: 1.3; }
+/**
+ * ⚠️ THE APP'S NEAR-BLACK, NEVER A BURGUNDY FILL.
+ *
+ * ⚠️ AND IT IS `--ink`, NOT `--mk-nearblack`. The first version read the marketing token with a
+ * literal fallback — and marketing tokens are declared under `.mk-scope`, which the workspace never
+ * sits inside, so the token could never resolve and the FALLBACK was painting every time. The rule
+ * looked parameterised and was not. The token-resolution lock caught it on its first run, which is
+ * the whole reason that law followed the sheet rather than lapsing with the grid.
+ */
+.mcar-open {
+  margin-top: 15px;
+  align-self: flex-start;
+  padding: 9px 20px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fffefb;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/** ⚠️ THE EMPTY STATE AND THE ADD AFFORDANCE ARE ONE OBJECT — this is both. */
+.mcar-ghost {
+  background: none;
+  border: 1.5px dashed #cbbfae;
+  box-shadow: none;
+  align-items: center;
+  justify-content: center;
+}
+.mcar-glabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--burg); }
+/** At zero manuscripts the ghost centres properly rather than sitting at the focus offset. */
+.mcar-solo { transform: translate(-50%, -50%); }
+
+.mcar-chev {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: var(--ws-window, #fffefb);
+  border: 1px solid var(--hair);
+  color: var(--burg);
+  font-size: 16px;
+  cursor: pointer;
+}
+.mcar-chev:disabled { opacity: 0.35; cursor: default; }
+.mcar-chev-l { left: 24px; }
+.mcar-chev-r { right: 24px; }
+
+.mcar-dots { position: absolute; left: 0; right: 0; bottom: 22px; display: flex; justify-content: center; gap: 8px; z-index: 3; }
+.mcar-dot { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 999px; background: #cbbfae; cursor: pointer; }
+.mcar-dot[aria-current="true"] { background: var(--burg); }
+
+/**
+ * ⚠️ REDUCED MOTION IS A SWAP, NOT A SLOWER SLIDE. Declared AFTER the rules it overrides, because a
+ * media query confers no specificity and the later rule wins at equal weight — this repo has lost a
+ * reduced-motion override to exactly that ordering before.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .mcar-tile { transition: none; }
+}
