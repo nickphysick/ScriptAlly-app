@@ -644,6 +644,11 @@ export const SubmissionPackages: React.FC = () => {
                 * ⚠️ MOVED, NOT DUPLICATED. Two ledgers on one page would be two answers to one
                 * question, and a placeholder sentence here would be a tab that lands on a promise.
                 */}
+              {/* ⚠️ A PANEL AND ITS TAB APPEAR AND VANISH TOGETHER. Tracking's was already gated
+                  and this one was not, so a manuscript with no packages carried a panel no tab could
+                  reach — invisible, because `hidden` covered it, and therefore exactly the kind of
+                  thing that survives until something queries it by id. One condition, both halves. */}
+              {tabCounts.packages !== null && (
               <div role="tabpanel" id="pkgt-panel-packages" aria-labelledby="pkgt-tab-packages"
                    hidden={tab !== "packages"}>
               <div className="bldr-main">
@@ -709,6 +714,7 @@ export const SubmissionPackages: React.FC = () => {
               />
               </div>
               </div>
+              )}
               {/* ⚠️ BUILDER AND TRACKING ARE TWO JOBS, NOT TWO VIEWS. The ledger and the shelf are
                   what a writer ASSEMBLES with; the three panels are what they READ afterwards. The
                   split is here rather than in a route because it is a within-page toggle — see the

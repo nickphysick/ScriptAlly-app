@@ -70,3 +70,62 @@ agents` with the words-not-a-zero treatment. D8 is a re-skin of an existing deri
 **both** create and update — carries the optional clause. `addPackage` takes
 `Omit<SubmissionPackage, "id"|"userId"|"status"|"createdDate">`, so a note supplied at creation
 validates and lands. **D12 needs no rules change.**
+
+### Recon rulings, recorded
+
+* **R4** — the two lines come from `contentDraft`. Where a material is an attached file with no
+  draft, the description area is **left empty** rather than reaching for a placeholder sentence.
+  Reported if it looks wrong on the page rather than designed around now.
+* **R4b** — `ManuscriptVersion.notes?` is **dead or abandoned**: nothing in `src/` reads or writes
+  it. Flagged, not repurposed, and not removed.
+* **R2** — this pack uses the ref's fills, which are tokens and which the section heads must match.
+  The **fourth ladder is recorded in F-AK**; consolidation is a ruling for the audit's end, not for
+  inside a build pack.
+* **R3** — stated so the history reads coherently: the **top-bar switcher owns the key**; what was
+  deleted last pack was a **label** in the masthead; D14 adds a **switch** to the tab row.
+* **R5** — no rules change.
+
+---
+
+## Phase 2 — Part A, measured
+
+Identical at 1440 and 1920, on a served build:
+
+```
+labels     Packages 3  ·  Builder 7 parts  ·  Tracking 7 sent
+type       Playfair Display   active rgb(46,39,35)   inactive rgb(156,136,120)
+underline  2px  rgb(124,58,42)
+gutter     tabLeft 327 == bodyLeft 327
+panels     exactly one shown
+console    no errors
+```
+
+**D3, the new claim, driven rather than read:**
+
+```
+DEEP LINK   ?tab=builder  → active "Builder 7 parts"
+RELOAD      → still "Builder 7 parts"          the tab survives
+CLICK       Tracking → url "?tab=tracking", active "Tracking 7 sent"
+BOGUS       ?tab=nonsense → active "Packages", exactly one panel shown
+```
+
+**D2 needed seeding — no manuscript had materials, no packages and no sends.** One letter on
+`seed-ms-2` put it there, and it was deleted in the same run:
+
+```
+full   labels [Packages, Builder, Tracking]   panels [packages, builder, tracking]
+bare   labels [Builder 2 parts]               panels [builder]            teach-first: no
+```
+
+### ⚠️ And that seeded case found a real inconsistency
+
+The first run showed `bare.panels === ["packages", "builder"]`: **the Packages panel stayed in the
+DOM with no tab to reach it.** Tracking's was gated and this one was not — invisible, because
+`hidden` covered it, and therefore exactly the kind of thing that survives until something queries
+it by id. A panel and its tab are one condition now.
+
+### And the probe's own fault
+
+The gutter check first read `.wpg-scroll > *` — the masthead's full-bleed slab, which starts 80px
+left of the gutter — and reported a correct layout as 327 against 247. The showing panel's own
+content is the honest reference.
