@@ -44,4 +44,13 @@
    insets by 16 on both sides of a padded tab, and the same inset on an unpadded one would leave
    the underline floating away from the word it belongs to. */
 .pkgt-tab:not(:first-child).pkgt-tab--on::after { left: 16px; }
+
+/**
+ * The manuscript chip's slot at the end of the row (D14) — filled in Part D.
+ *
+ * ⚠️ `margin-left: auto` ON THE SLOT, not on the last tab. Pushing the last TAB would move it away
+ * from its siblings the moment a tab is hidden (D2 hides two of the three at different times), so
+ * the row's spacing would change with the data rather than with the layout.
+ */
+.pkgt-end { margin-left: auto; display: flex; align-items: center; }
 .pkgt-tab:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }

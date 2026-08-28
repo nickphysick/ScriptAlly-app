@@ -26,7 +26,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { PackageTracking } from "./packages/PackageTracking";
 import { useScriptAllyDb } from "../lib/db";
 import { BookVersionKind, ComponentType, ManuscriptVersion, SubmissionPackage } from "../types";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { PackagesTeachFirst } from "./packages/PackagesTeachFirst";
 import { PackagesBand } from "./packages/PackagesBand";
 import { TrackingBand } from "./packages/TrackingBand";
@@ -45,7 +45,7 @@ import { builderRail, type RailChip, type RailKind } from "../lib/builderRail";
 import { packageHolders, packagedQueries } from "../lib/packagesOverview";
 import { MaterialModal, MaterialDraftResult } from "./packages/MaterialModal";
 import { PackageModal, PackageDraftResult } from "./packages/PackageModal";
-import { PackageTabs, type PackageTabKey } from "./packages/PackageTabs";
+import { PackageTabs, PACKAGE_TABS, type PackageTabKey } from "./packages/PackageTabs";
 import { canBuildPackage, createPayload, updatePayload } from "../lib/materialDraft";
 import { trackingTotals } from "../lib/packageTracking";
 import { deleteField } from "firebase/firestore";
@@ -70,6 +70,7 @@ export const SubmissionPackages: React.FC = () => {
    */
   const [howOpen, setHowOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("scriptally_active_manuscript_id") : null,
@@ -241,7 +242,19 @@ export const SubmissionPackages: React.FC = () => {
    * tabs state; a tab that wrote to the URL would turn a within-page toggle into navigation the
    * shell has to model.
    */
-  const [tab, setTab] = useState<PackageTabKey>("builder");
+  /**
+   * ⚠️ THE TAB IS THE URL, NOT STATE (D3) — `?tab=builder` on this route.
+   *
+   * There is no `useState` beside it, deliberately: a state that mirrored the param could disagree
+   * with it, and the two would drift the first time something navigated without going through the
+   * setter. The URL is read on every render and written by `navigate`, so what the address bar says
+   * and what the page shows cannot come apart — which is also what makes it survive a reload.
+   *
+   * ⚠️ AND IT MATCHES THE APP'S OWN IDIOM rather than adding a second. `App.tsx` reads its params
+   * with `new URLSearchParams(location.search)`; `useSearchParams` would be a different way to do
+   * the same thing in the same router.
+   */
+  const tabParam = new URLSearchParams(location.search).get("tab");
 
   /* ── the rail, and the build row it fills ──────────────────────────────────────────────── */
 
@@ -327,7 +340,6 @@ export const SubmissionPackages: React.FC = () => {
    * packages against 3 letters + 2 synopses + 3 versions in `builder-refined`, 4 against 5 in
    * `packages-tabs`.
    */
-  const builderCount = `${msPackages.length} · ${msVersions.length + msBookVersions.length}`;
 
   /**
    * `18 SENT`, or **null when nothing has been sent** — which is what makes the Tracking tab absent
@@ -342,10 +354,50 @@ export const SubmissionPackages: React.FC = () => {
     () => msQueries.filter((q) => !!q.packageId && msPackages.some((p) => p.id === q.packageId)).length,
     [msQueries, msPackages],
   );
-  const trackingCount = sentCount > 0 ? `${sentCount} sent` : null;
+  /* ⚠️ SUPERSEDED BY `tabCounts.tracking` — one derivation, not two, so the tab's presence and its
+     count cannot disagree about whether anything has been sent. */
+
+  /**
+   * The tab counts, per the ref: `Packages 3` · `Builder 9 parts` · `Tracking 18 sent`.
+   *
+   * ⚠️ A NULL HIDES THE TAB (D2). Packages appears once one exists; Tracking once something has
+   * been sent. **Builder is never null** — it is where a writer with nothing at all begins, so it is
+   * the one tab that must always have somewhere to land.
+   */
+  const parts = msVersions.length + msBookVersions.length;
+  const tabCounts: Record<PackageTabKey, string | null> = {
+    packages: msPackages.length > 0 ? `${msPackages.length}` : null,
+    builder: `${parts} part${parts === 1 ? "" : "s"}`,
+    tracking: sentCount > 0 ? `${sentCount} sent` : null,
+  };
+
+  /**
+   * ⚠️ THE TAB IS DERIVED, SO AN UNREACHABLE ONE CANNOT BE LANDED ON. A `?tab=tracking` typed
+   * before anything is sent, or held in a bookmark from when something was, resolves to a tab that
+   * exists rather than rendering an empty panel or a blank page. The fallback order is D2's: a
+   * writer with no packages lands on Builder.
+   */
+  const wanted = (PACKAGE_TABS as readonly string[]).includes(tabParam ?? "")
+    ? (tabParam as PackageTabKey) : null;
+  const tab: PackageTabKey = wanted && tabCounts[wanted] !== null
+    ? wanted
+    : (tabCounts.packages !== null ? "packages" : "builder");
+
+  /**
+   * ⚠️ `replace`, NOT `push` — a tab is a view of one page, and pushing would make Back walk through
+   * every tab a writer glanced at before leaving the page.
+   */
+  const setTab = (k: PackageTabKey) => {
+    const p = new URLSearchParams(location.search);
+    p.set("tab", k);
+    navigate({ pathname: location.pathname, search: `?${p.toString()}` }, { replace: true });
+  };
 
   /* ⚠️ AND A TAB THAT VANISHES MUST NOT STRAND THE READER ON IT. */
-  useEffect(() => { if (trackingCount === null && tab === "tracking") setTab("builder"); }, [trackingCount, tab]);
+  /* ⚠️ THE STRAND-GUARD IS GONE, AND ITS JOB IS DONE BY CONSTRUCTION. It was an effect that pushed
+     the reader off Tracking when the last send was undone. `tab` is DERIVED from `tabCounts` now, so
+     a hidden tab cannot be resolved to at all — there is no state to correct after the fact, and no
+     frame in which the wrong panel is on screen. */
 
   const savePackageDraft = async (d: PackageDraftResult): Promise<string | null> => {
     if (!msId) return "No manuscript is selected.";
@@ -546,7 +598,7 @@ export const SubmissionPackages: React.FC = () => {
             <>
             <PackageTabs
               active={tab} onChange={setTab}
-              builderCount={builderCount} trackingCount={trackingCount}
+              counts={tabCounts}
             />
             {/**
               * ⚠️ NO HERO IN WORKSPACE STATE (D1), AND THE COMPONENT IS NOW DELETED — it had no
@@ -581,67 +633,19 @@ export const SubmissionPackages: React.FC = () => {
               * correct — they are a first-time user of a feature they now have no record in. A
               * `hasSeenPackages` flag would strand them on a workspace with nothing to show.
               */}
-              {/* ⚠️ BUILDER AND TRACKING ARE TWO JOBS, NOT TWO VIEWS. The ledger and the shelf are
-                  what a writer ASSEMBLES with; the three panels are what they READ afterwards. The
-                  split is here rather than in a route because it is a within-page toggle — see the
-                  note on `tab` above. */}
-              <div role="tabpanel" id="pkgt-panel-builder" aria-labelledby="pkgt-tab-builder"
-                   hidden={tab !== "builder"}>
-              {/* ⚠️ RAIL LEFT, LEDGER RIGHT — the ref's `.split`, 296px against the rest. The
-                  shelf used to sit BELOW the ledger, which meant a writer assembling a package
-                  could not see what they were assembling from. */}
-              <div className="bldr-split">
               {/**
-                * ⚠️ THE RAIL REPLACES THE MATERIALS SHELF — mounted here and unmounted there in the
-                * SAME commit, so the two never coexist (Part C). The shelf was a band of banded cards
-                * BELOW the ledger; the rail is the same information beside it, where a writer
-                * assembling a package can see both at once.
+                * ⚠️ THE PACKAGES PANEL EXISTS SO ITS TAB IS NOT A CLICK INTO NOTHING (Part A).
                 *
-                * ⚠️ THE ARCHIVE DRAWER CAME WITH IT, and that is not decoration. `ArchivedSection`
-                * was the shelf's, and it is the only route back for an archived material — Part C's
-                * retirement of the sample type put four of them in there. Unmounting the shelf
-                * without rehoming it would have made the writer's own put-away work unreachable, the
-                * same fault `otherMaterials` came one commit from last pack.
+                * It holds the LEDGER, moved here from Builder rather than copied — which is
+                * where it belongs in the finished design anyway: Builder becomes materials and the
+                * New package panel (Part B), and what a writer HAS is this tab's question. Part E
+                * swaps the ledger for the ref's carousel.
                 *
-                * ⚠️ THE LEGEND DID NOT COME WITH IT. It keyed the shelf's banded CARD heads, and a
-                * chip is not a card — it would be teaching a treatment that appears nowhere, which is
-                * exactly why the packages swatch was dropped from it a pack ago.
+                * ⚠️ MOVED, NOT DUPLICATED. Two ledgers on one page would be two answers to one
+                * question, and a placeholder sentence here would be a tab that lands on a promise.
                 */}
-              <div className="bldr-railcol">
-                <BuilderRail
-                  sections={railSections}
-                  onPick={pickChip}
-                  onAdd={(kind) => {
-                    if (kind === "ver") { setVerAdding(true); return; }
-                    setMatEditing(null);
-                    setMatPreselect(kind === "let" ? ComponentType.QUERY_LETTER : ComponentType.SYNOPSIS);
-                    setMatModal(true);
-                  }}
-                  onDragStart={onChipDragStart}
-                  onDragEnd={onChipDragEnd}
-                  litId={litChipId}
-                  dimming={ledgerHover !== null}
-                  onHoverChip={setHoverChip}
-                />
-                {verAdding && (
-                <VersionQuickAdd
-                  onCancel={() => setVerAdding(false)}
-                  onCreate={async (name, kind) => {
-                    const id = await createBookVersion(name, kind);
-                    /* ⚠️ ONLY CLOSE IF IT LANDED. A form that closes on a write that failed tells
-                       the writer their version exists when it does not. */
-                    if (id) setVerAdding(false);
-                    return id;
-                  }}
-                />
-              )}
-              <ArchivedSection show={showArchived} n={archivedVersions.length}>
-                  {archivedVersions.map((v) => (
-                    <ArchivedRow key={v.id} name={v.versionName} meta={MATERIAL_LABEL[v.componentType]}
-                                   onRestore={() => void restoreVersion(v.id)} />
-                  ))}
-                </ArchivedSection>
-              </div>
+              <div role="tabpanel" id="pkgt-panel-packages" aria-labelledby="pkgt-tab-packages"
+                   hidden={tab !== "packages"}>
               <div className="bldr-main">
               <PackagesBand
                 packages={msPackages}
@@ -703,6 +707,68 @@ export const SubmissionPackages: React.FC = () => {
                   />
                 )}
               />
+              </div>
+              </div>
+              {/* ⚠️ BUILDER AND TRACKING ARE TWO JOBS, NOT TWO VIEWS. The ledger and the shelf are
+                  what a writer ASSEMBLES with; the three panels are what they READ afterwards. The
+                  split is here rather than in a route because it is a within-page toggle — see the
+                  note on `tab` above. */}
+              <div role="tabpanel" id="pkgt-panel-builder" aria-labelledby="pkgt-tab-builder"
+                   hidden={tab !== "builder"}>
+              {/* ⚠️ RAIL LEFT, LEDGER RIGHT — the ref's `.split`, 296px against the rest. The
+                  shelf used to sit BELOW the ledger, which meant a writer assembling a package
+                  could not see what they were assembling from. */}
+              <div className="bldr-split">
+              {/**
+                * ⚠️ THE RAIL REPLACES THE MATERIALS SHELF — mounted here and unmounted there in the
+                * SAME commit, so the two never coexist (Part C). The shelf was a band of banded cards
+                * BELOW the ledger; the rail is the same information beside it, where a writer
+                * assembling a package can see both at once.
+                *
+                * ⚠️ THE ARCHIVE DRAWER CAME WITH IT, and that is not decoration. `ArchivedSection`
+                * was the shelf's, and it is the only route back for an archived material — Part C's
+                * retirement of the sample type put four of them in there. Unmounting the shelf
+                * without rehoming it would have made the writer's own put-away work unreachable, the
+                * same fault `otherMaterials` came one commit from last pack.
+                *
+                * ⚠️ THE LEGEND DID NOT COME WITH IT. It keyed the shelf's banded CARD heads, and a
+                * chip is not a card — it would be teaching a treatment that appears nowhere, which is
+                * exactly why the packages swatch was dropped from it a pack ago.
+                */}
+              <div className="bldr-railcol">
+                <BuilderRail
+                  sections={railSections}
+                  onPick={pickChip}
+                  onAdd={(kind) => {
+                    if (kind === "ver") { setVerAdding(true); return; }
+                    setMatEditing(null);
+                    setMatPreselect(kind === "let" ? ComponentType.QUERY_LETTER : ComponentType.SYNOPSIS);
+                    setMatModal(true);
+                  }}
+                  onDragStart={onChipDragStart}
+                  onDragEnd={onChipDragEnd}
+                  litId={litChipId}
+                  dimming={ledgerHover !== null}
+                  onHoverChip={setHoverChip}
+                />
+                {verAdding && (
+                <VersionQuickAdd
+                  onCancel={() => setVerAdding(false)}
+                  onCreate={async (name, kind) => {
+                    const id = await createBookVersion(name, kind);
+                    /* ⚠️ ONLY CLOSE IF IT LANDED. A form that closes on a write that failed tells
+                       the writer their version exists when it does not. */
+                    if (id) setVerAdding(false);
+                    return id;
+                  }}
+                />
+              )}
+              <ArchivedSection show={showArchived} n={archivedVersions.length}>
+                  {archivedVersions.map((v) => (
+                    <ArchivedRow key={v.id} name={v.versionName} meta={MATERIAL_LABEL[v.componentType]}
+                                   onRestore={() => void restoreVersion(v.id)} />
+                  ))}
+                </ArchivedSection>
                 {/* ⚠️ THE BUILD ROW SITS UNDER THE LEDGER, which is where a new package lands.
                     Closed it is one quiet line; it opens on click and arms itself on dragstart, so
                     a drag never has to find a hidden target (D12). */}
@@ -722,9 +788,9 @@ export const SubmissionPackages: React.FC = () => {
               </div>
               {/* ⚠️ MOVED WHOLESALE, NOT REDESIGNED (D4). The three panels are byte-identical to
                   what stood on the single-page version; this pack relocates them and nothing else.
-                  ⚠️ AND IT IS NOT RENDERED AT ALL BELOW ONE SEND (D3) — `trackingCount` is null
+                  ⚠️ AND IT IS NOT RENDERED AT ALL BELOW ONE SEND (D3) — `tabCounts.tracking` is null
                   there, so the tab does not exist and neither does its panel. */}
-              {trackingCount !== null && (
+              {tabCounts.tracking !== null && (
               <div role="tabpanel" id="pkgt-panel-tracking" aria-labelledby="pkgt-tab-tracking"
                    hidden={tab !== "tracking"}>
               <TrackingBand
