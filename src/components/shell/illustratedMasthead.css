@@ -77,39 +77,8 @@
   /* Rule 1 · the reveal opens 60px past the last glyph and is fully open 430px later */
   --illo-reveal-a: calc(var(--illo-gutter) + var(--illo-text-right) + 60px);
   --illo-reveal-b: calc(var(--illo-reveal-a) + 430px);
-  /**
-   * The tint resolves BEFORE the picture opens, on the same anchor and in the same direction.
-   * ⚠️ BOTH STOPS ARE SMALLER THAN `--illo-reveal-a` AND `gnd-b` IS SMALLER THAN `gnd-a` — the
-   * names are the brief's and the ORDER is what makes it a fade. A non-monotonic pair is clamped up
-   * to its predecessor by CSS, which turns the whole gradient into a hard vertical line at the
-   * later stop: measured once as solid 242,228,221 to offset 450 and 253,249,246 at 458, with no
-   * transition at all and every rule applying cleanly.
-   */
-  --illo-gnd-b: calc(var(--illo-reveal-a) - 380px);   /* solid until here  — the SMALLER value */
-  --illo-gnd-a: calc(var(--illo-reveal-a) - 60px);    /* fully pale by here — the LARGER value */
-  /* ⚠️ THE TINT IS THE WASH'S TOP STOP, READ RATHER THAN RESTATED — the brief's `#f2e4dd` IS
-     `--mast-wash-top`, so writing it again is a second copy of one colour and the single-source
-     lock says so. It resolves here because these tokens are declared on the PAGE'S GRID ROOT, where
-     `--mast-wash-top` is in scope; the same line at `:root` silently killed the whole gradient once
-     already — a custom property resolves where it is DECLARED, and `--mast-wash-top` is not in
-     scope at `:root`, so the read became the guaranteed-invalid value and every `background-image`
-     that named it was dropped ENTIRELY. */
-  --illo-tint: var(--mast-wash-top);
-  --illo-pale: #fdf9f6;
 }
 
-/**
- * ⚠️ THE ACCENT, AND THE WINDOW'S INNER RADIUS IT HAS TO SIT IN. `--mast-r` is `radius - border`
- * off the window's own two tokens — which had to be CREATED for this (`workspaceShell.css` stated
- * both as literals), because a `calc()` over an undefined custom property is the guaranteed-invalid
- * value and the whole `border-radius` declaration would have been DROPPED, silently, with the rule
- * reading perfectly. The window is an ancestor of every one of these elements, so both resolve.
- */
-.wpg.pkgw-wpg {
-  --pkg-accent: #000000;
-  --pkg-accent-h: 3px;
-  --mast-r: calc(var(--ws-window-radius) - var(--ws-window-border));
-}
 
 /**
  * ══ THE GROUND AND THE ARTWORK, ON THE FULL-BLEED SLAB ════════════════════════════════════════
@@ -132,53 +101,12 @@
  * and must not be given one.
  */
 /**
- * ⚠️ QUERY CENTRE KEEPS THE TINT; PACKAGES IS ON A PLAIN GROUND. The two pages ran one rule until
- * now and this is the first place they diverge — so the rule is split rather than overridden, and
- * neither page's ground is expressed as an exception to the other's.
+ * ⚠️ NEITHER PAGE PAINTS A GROUND ANY MORE. Query Centre's horizontal tint and Packages' plain fill
+ * plus accent bar are both retired with the header rebuild: one masthead format means one ground,
+ * and it is the window's own. What survives here is the ARTWORK and nothing else — the ground rules,
+ * the accent tokens and `--illo-gnd-*` are gone, deleted with the treatment they served rather than
+ * left inert for a sweep to find.
  */
-.wpg.qc-wpg > .wpg-scroll > .wpg-chrome {
-  /* ⚠️ A COLOUR *AND* AN IMAGE, NEVER THE SHORTHAND — `background: linear-gradient(…)` resets
-     `background-color` to transparent, so a gradient declined for any reason leaves the slab
-     see-through. The colour is the gradient's terminal stop, so the fallback matches the band where
-     it meets the hairline. */
-  background-color: var(--illo-pale);
-  background-image: linear-gradient(
-    to right,
-    var(--illo-tint) var(--illo-gnd-b),
-    var(--illo-pale) var(--illo-gnd-a)
-  );
-}
-
-/**
- * ══ PACKAGES · THE ACCENT BAR AND A PLAIN GROUND ══════════════════════════════════════════════
- *
- * ⚠️ ON THE SLAB, NOT ON `.wsh`, AND THE BRIEF'S OWN ACCEPTANCE IS WHAT DECIDES IT. The block is
- * written against the header's ink box; that box lives inside the CAPPED, CENTRED measure, so a
- * border drawn on it would stop 35px short of the window at 1280 and 315px short at 2560 — and its
- * ends could not "follow the window's curve", because they would be nowhere near the corner. The
- * slab is the element that spans the window and sits flush against its top edge, so it is the
- * element that can carry a rule the window's radius can cut.
- *
- * ⚠️ THE GROUND IS SCOPED TO THE REST STATE AND THE ACCENT IS NOT. Settled, the band takes the
- * shared wash back like every other Type A page — that suppression already exists and is asserted —
- * while the accent and the hairline stay, which is what the brief asks for and is also the only way
- * the bar reads as belonging to the page rather than to one posture of it.
- */
-.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome:not(.wpg-chrome--stuck) {
-  /* ⚠️ THE COLOUR ALONE, AND `background-image: none` STATED. The brief writes the `background`
-     shorthand, which would do both — but the shorthand is what this file already carries a warning
-     about, and here it would be silently load-bearing: it is the thing REMOVING the tint gradient.
-     A removal that happens as a side effect of a shorthand is a removal nobody can find later. */
-  background-color: var(--ws-window);
-  background-image: none;
-}
-.wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome {
-  border-top: var(--pkg-accent-h) solid var(--pkg-accent);
-  /* ⚠️ THE WINDOW'S INNER RADIUS, DERIVED. The window clips its own children, so the accent's ends
-     would curve even without this; stating it means the bar's shape does not depend on an
-     ancestor's `overflow`, and it is the same two tokens either way. */
-  border-radius: var(--mast-r) var(--mast-r) 0 0;
-}
 .wpg.pkgw-wpg > .wpg-scroll > .wpg-chrome:not(.wpg-chrome--stuck)::after,
 .wpg.qc-wpg > .wpg-scroll > .wpg-chrome::after {
   content: '';
@@ -240,27 +168,11 @@
 .wpg.qc-wpg .wpg-toolband { position: relative; z-index: 1; }
 
 /**
- * ══ THE TYPE SCALE — PART OF THE CARVE-OUT ════════════════════════════════════════════════════
- *
- * ⚠️ THE 47px TITLE KEPT REVERTING BECAUSE THE CARVE-OUT DID NOT COVER TYPOGRAPHY. The chrome
- * matrix asserts every Type A masthead is identical, which is a good law and forces 30px; each time
- * the trial raised the title, that lock pulled it back. The carve-out names its properties one by
- * one — ground, artwork, title size, mark absence — and nothing else, so every other assertion in
- * every one of those files continues to apply to these two pages.
- *
- * ⚠️ AND IT IS SCOPED TO THE REST STATE ON PACKAGES. Settled, that page is a working bar like any
- * other and takes the shared scale back; the suppression above says so for the paint, and the title
- * follows the same rule for the same reason.
- *
- * ⚠️ 47px IS MIXED-CASE PLAYFAIR, SO ITS LINE BOX IS CHECKED RATHER THAN ASSUMED. The house floor
- * is 1.3 and this system has cropped descenders three times; the title's own rule carries the
- * leading, and `illustratedMasthead.measure.ts` asserts `scrollHeight === clientHeight` on the
- * title element in both postures on both pages.
+ * ⚠️ THE PER-PAGE TYPE SCALE IS RETIRED WITH THE CARVE-OUT IT BELONGED TO. These two pages ran a
+ * 47px title and a 14px subtitle against the shared 30/13.5 while the trial was a trial; the format
+ * is 56/19 on all ten pages now, so an override here would be one page disagreeing with the law
+ * rather than a page carved out of it.
  */
-.wpg.pkgw-wpg .wpg-chrome:not(.wpg-chrome--stuck) .wsh { --wsh-title-size: 47px; }
-.wpg.pkgw-wpg .wpg-chrome:not(.wpg-chrome--stuck) .wsh-sub { font-size: 14px; }
-.wpg.qc-wpg .wsh { --wsh-title-size: 47px; }
-.wpg.qc-wpg .wsh-sub { font-size: 14px; }
 
 /**
  * ══ THE FOLD CONTROL — A CHEVRON ON THE BOTTOM BORDER ═════════════════════════════════════════
@@ -331,5 +243,8 @@
 }
 .wpg.qc-wpg .wpg-mast-hide:hover {
   color: var(--shell-ink);
-  border-color: var(--ws-edge-strong, var(--ws-edge));
+  /* ⚠️ THE FALLBACK WAS THE VALUE. `--ws-edge-strong` is defined nowhere in the tree, so this rule
+     looked parameterised and was not — the standing rule is that once a token is absent the fallback
+     IS the value: state it and delete the indirection, or the next reader goes looking for a knob. */
+  border-color: var(--ws-edge);
 }

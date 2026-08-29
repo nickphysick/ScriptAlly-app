@@ -670,18 +670,24 @@
    to the pages that pin; it is not that. The wash is what a masthead IS, and how one behaves on
    scroll is a separate question. Query Centre and Manuscripts were EXCLUDED by that reasoning
    rather than missed by it, and the lock is a partition now — every masthead, no page named. */
+/**
+ * ⚠️ THE GROUND IS THE WINDOW'S OWN, PLAIN — NO WASH, NO TINT, NO GRADIENT, NO ACCENT BAR.
+ * The parchment wash is retired with the two header types it belonged to: it existed so a PINNED
+ * masthead would read as a surface content passed beneath. Nothing pins now — the masthead is
+ * content and scrolls away, and a separate bar takes over — so a band of its own is a distinction
+ * with nothing left to distinguish.
+ *
+ * ⚠️ A COLOUR, NOT THE SHORTHAND, and the reason survives the gradient's removal: `background:` is
+ * the shorthand and resets every longhand, so a future edit adding an image here would silently
+ * take the colour with it. This repo has had four rounds of a see-through header from exactly that.
+ *
+ * ⚠️ `--mast-wash-top` / `--mast-wash-bottom` ARE STILL DECLARED and are now read by nothing. That
+ * is deliberate and belongs to Phase 6, which deletes the tokens and sweeps for reads; removing a
+ * definition here while five phases of locks still name it would trade one dangling reference for
+ * another.
+ */
 .wpg > .wpg-scroll > .wpg-chrome {
-  /**
-   * ⚠️ A COLOUR *AND* AN IMAGE, NEVER THE SHORTHAND ALONE — and after four rounds of a see-through
-   * header that is not caution, it is the lesson. `background: linear-gradient(…)` resets
-   * `background-color` to transparent, so a gradient the browser declines to paint for any reason
-   * leaves the slab with nothing at all. Declaring the colour separately means the worst case is a
-   * flat parchment rather than a header you can read the page through.
-   *
-   * The colour is the BOTTOM stop, so the fallback matches the wash where it meets the hairline.
-   */
-  background-color: var(--mast-wash-bottom);
-  background-image: linear-gradient(180deg, var(--mast-wash-top), var(--mast-wash-bottom));
+  background-color: var(--ws-window);
 }
 /* the pin shadow is back to the opaque value — there is no blur separating the layers now */
 .wpg-scroll > .wpg-chrome.wpg-chrome--stuck {

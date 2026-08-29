@@ -25,9 +25,14 @@
  * row does the anchoring.
  */
 import React from "react";
-import { useMastheadLeaves } from "./mastheadBehaviour";
 import { MoreHorizontal } from "lucide-react";
-import { OneScreenMark, MarkName } from "../dashboard/OneScreenMark";
+/* ⚠️ THE KICKER ARRIVES BY CONTEXT, NOT BY A ROUTER HOOK — see `mastheadSection.ts` for why. */
+import { useMastheadSection } from "./mastheadSection";
+/* ⚠️ THE TYPE ONLY — `OneScreenMark` IS NO LONGER RENDERED HERE. The masthead draws no mark at
+   rest; the mark exists in the collapsed bar, which is a separate element. The `mark` prop survives
+   because that bar needs to know which one to draw, so it stays a page's declaration rather than a
+   second table keyed by route. */
+import type { MarkName } from "../dashboard/OneScreenMark";
 import "./pageHeader.css";
 
 
@@ -157,7 +162,13 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
   /* Whether THIS page's masthead scrolls away. Published by the grid; `true` outside one. */
-  const mastheadLeaves = useMastheadLeaves();
+  /**
+   * ⚠️ THE KICKER IS THE SECTION, AND IT COMES FROM THE APP'S OWN CRUMB DERIVATION — carried here by
+   * context rather than read from the router, so this component still renders outside one. The shell
+   * computes it from `shellCrumbForPath`, the same pure function the breadcrumb reads, so the pill
+   * and the crumb cannot come to disagree about which section a page is in.
+   */
+  const kicker = useMastheadSection();
   const [moreOpen, setMoreOpen] = React.useState(false);
   const moreRef = React.useRef<HTMLDivElement>(null);
   /**
@@ -251,89 +262,85 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
    */
   if (variant === "workspace") {
     /**
-     * ⚠️ THE MASTHEAD HOLDS NO ACTIONS, AND THIS THROW IS THE GUARD RATHER THAN A COMMENT.
+     * ⚠️ THE MASTHEAD HOLDS EXACTLY ONE CONTROL, AND THE GUARD IS THE RULE RATHER THAN A COMMENT.
      *
-     * ⚠️ AMENDED: THE LAW IS ABOUT LEAVING, NOT ABOUT THE VARIANT NAME. The reasoning above is
-     * exactly right on a page whose masthead SCROLLS AWAY — an action placed there becomes
-     * unreachable, so it needs a row that persists. On a Type A page the masthead PINS and settles:
-     * it never leaves, the action never becomes unreachable, and a control row there is a band
-     * existing purely to work around a constraint that does not apply to it. So the refusal is now
-     * conditional on the behaviour.
-     *
-     * ⚠️ AND THE BEHAVIOUR IS READ FROM THE GRID, NOT FROM A PROP. `WorkspacePageGrid` publishes the
-     * same `pinned` expression that decides whether its slab actually sticks; a boolean the caller
-     * passed would be the caller's opinion, and the one caller with a motive to get it wrong is the
-     * one wanting an action in a masthead that leaves. Outside a grid it defaults to `leaves: true`
-     * — fail closed, because a header with no pinning slab has nothing anchoring it.
+     * ⚠️ WHAT THIS REPLACES: a throw on ANY action, later made conditional on whether the masthead
+     * pinned. Both were answers to a design where the header either scrolled out of reach or had to
+     * be restored. It does neither now — it scrolls away as content and a separate bar takes over —
+     * so an action here is no longer a control that becomes unreachable. It is a page's one call to
+     * action, and one is the whole allowance.
      *
      * ⚠️ IT STILL THROWS RATHER THAN IGNORING. Accepting a prop and rendering nothing is how a page
      * ends up passing an action that quietly goes nowhere, which is the same fault as the deleted
-     * `count` slot.
-     *
-     * ⚠️ `toolbar` IS REFUSED IN BOTH CASES AND ALWAYS WILL BE. The tool ROW is a layout this
-     * masthead does not have — one line of identity — which is a different claim from where an
-     * action may sit.
+     * `count` slot. Each refusal names what to do instead, because a throw that only says "no" gets
+     * worked around.
      */
-    if (process.env.NODE_ENV !== "production" && toolbar) {
-      throw new Error(
-        `PageHeader variant="workspace" ("${title}") was passed a toolbar. This masthead has no tool ` +
-        "row — it is one line of identity. A page's controls belong in the grid's own row.",
-      );
+    if (process.env.NODE_ENV !== "production") {
+      if (toolbar) {
+        throw new Error(
+          `PageHeader variant="workspace" ("${title}") was passed a toolbar. This masthead has no ` +
+          "tool row — it is a kicker, a title, a subtitle and one CTA. A page's controls belong in " +
+          "the grid's own row.",
+        );
+      }
+      if (actionsSlot) {
+        throw new Error(
+          `PageHeader variant="workspace" ("${title}") was passed an actionsSlot. The masthead holds ` +
+          "ONE control and it is the page's primary — pass it as a single `actions` entry with " +
+          "`primary: true`. Anything that is not the page's call to action belongs in the control row.",
+        );
+      }
+      if (overflow?.length) {
+        throw new Error(
+          `PageHeader variant="workspace" ("${title}") was passed an overflow menu. One control means ` +
+          "one — an overflow is a second control wearing a menu. Use the grid's control row.",
+        );
+      }
+      if (acts.length > 1) {
+        throw new Error(
+          `PageHeader variant="workspace" ("${title}") was passed ${acts.length} actions. The masthead ` +
+          "holds one: the page's primary. The rest belong in the grid's control row.",
+        );
+      }
+      if (acts.length === 1 && !acts[0].primary) {
+        throw new Error(
+          `PageHeader variant="workspace" ("${title}") was passed a non-primary action ` +
+          `("${acts[0].label}"). The one control a masthead may hold is the page's PRIMARY — mark it ` +
+          "`primary: true` or move it to the control row.",
+        );
+      }
     }
-    if (process.env.NODE_ENV !== "production" && mastheadLeaves
-        && (actions?.length || actionsSlot || overflow?.length)) {
-      throw new Error(
-        `PageHeader variant="workspace" ("${title}") was passed an action, but this page's masthead ` +
-        "LEAVES on scroll, so an action placed in it would scroll out of reach. Use the grid's " +
-        "control row, which persists. A masthead that PINS accepts the slot instead — the rule is " +
-        "about whether the header anchors, not about the variant.",
-      );
-    }
+    const cta = acts.length === 1 ? acts[0] : null;
     return (
-      /* ⚠️ NO WRAPPER, NO CARD, NO STATE CLASS. `.wsh-wrap` existed to reserve a sticky plate's rest
-         height; the plate is content now, so there is nothing to reserve and nothing to stick. The
-         element draws its own closing hairline and the gap beneath it — see pageHeader.css. */
+      /* ⚠️ NO WRAPPER, NO CARD, NO STATE CLASS. The masthead is content: it paints the window's own
+         ground and scrolls away with the page. */
       <header className="wsh">
+        {/* ⚠️ ARIA-HIDDEN, BECAUSE IT IS A RULE AND NOT A SEPARATOR IN THE DOCUMENT'S SENSE. An
+            `<hr>` here would put a thematic break between a page's title and the page. */}
+        <div className="wsh-toprule" aria-hidden="true" />
         {/* ⚠️ NOTHING WHEN ABSENT — not an empty div, not a reserved height. See the prop's note. */}
         {lead && <div className="wsh-lead">{lead}</div>}
-        <div className="wsh-row">
-          {/* ⚠️ ONE MARK, LEFT OF THE TEXT (masthead left-constant, §B). The mirrored second mark
-              of the centred layout is deleted; `OneScreenMark` carries its own `aria-hidden`. */}
-          {mark && (
-            <span className="wsh-mark">
-              <OneScreenMark name={mark} />
-            </span>
-          )}
-          <div className="wsh-txt">
-            <h1 className="wsh-title">
-              {title}{titleAdornment}
-            </h1>
-            {/* ⚠️ ABSENT DESCRIPTION RENDERS NOTHING AND RESERVES NOTHING (spec, step 1). It used to
-                keep the plate's full height either way because the plate was a fixed-height object;
-                in flow there is no height to keep, so a title-only page is simply shorter. */}
-            {description && <p className="wsh-sub">{description}</p>}
-          </div>
-          {/**
-            * ⚠️ THE SLOT RENDERS ONLY WHERE THE MASTHEAD PINS, and the guard above is what makes that
-            * true rather than hopeful: a page whose masthead leaves throws before reaching here, so
-            * this branch cannot quietly draw an action that will scroll out of reach.
-            */}
-          {!mastheadLeaves && (acts.length > 0 || actionsSlot) && (
-            <div className="wsh-acts">
-              {acts.length > 0
-                ? acts.map((a) => (
-                    <button
-                      key={a.label}
-                      type="button"
-                      className={`wsh-act${a.primary ? " wsh-act--primary" : ""}`}
-                      onClick={a.onClick}
-                      disabled={a.disabled}
-                    >
-                      {a.label}
-                    </button>
-                  ))
-                : actionsSlot}
-            </div>
+        <div className="wsh-body">
+          {/* ⚠️ THE SECTION, FROM THE ROUTER. Null on a route the crumb does not know, which renders
+              nothing rather than an empty pill — a bordered pill with no word in it is worse than no
+              pill at all, and it is what a fallback string would produce. */}
+          {kicker && <span className="wsh-kicker">{kicker}</span>}
+          <h1 className="wsh-title">
+            {title}{titleAdornment}
+          </h1>
+          {/* ⚠️ ABSENT DESCRIPTION RENDERS NOTHING AND RESERVES NOTHING. In flow there is no height
+              to keep, so a title-only page is simply shorter. */}
+          {description && <p className="wsh-sub">{description}</p>}
+          {cta && (
+            <button
+              type="button"
+              className="wsh-cta"
+              onClick={cta.onClick}
+              disabled={cta.disabled}
+            >
+              {cta.icon}
+              {cta.label}
+            </button>
           )}
         </div>
       </header>

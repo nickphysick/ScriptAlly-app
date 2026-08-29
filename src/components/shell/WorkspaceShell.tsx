@@ -24,6 +24,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { MastheadSectionContext } from "./mastheadSection";
 import {
   Book, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, PenLine, Plus,
 } from "lucide-react";
@@ -305,6 +306,24 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
   const save = useSaveState();
   const crumb = shellCrumb(sections, hit);
+  /**
+   * ⚠️ THE MASTHEAD'S KICKER IS THE CRUMB'S OWN SECTION, TAKEN FROM THE SAME CALL. Reading a second
+   * derivation put the two three inches apart and disagreeing: `shellV2Nav`'s `SHELL_SECTIONS` calls
+   * the manuscripts group "Shelf" while the LIVE nav model (`lib/workspaceNav.ts`, which this crumb
+   * reads) calls it "Materials" — so the bar said `Materials` and the pill said `SHELF` on the same
+   * page, measured on the built bundle. The brief's four names — Queries · Agents · Materials ·
+   * Tasks — are the live model's, which is the tell that it is the live one.
+   *
+   * ⚠️ `crumb.section` IS THE PAGE NAME ON A ONE-CHILD SECTION, by `shellCrumb`'s own rule: a group
+   * of one contributes no segment. That is right for a breadcrumb and wrong for a kicker, which must
+   * name a SECTION or nothing — so the section is looked up directly and the crumb's collapsing is
+   * deliberately not inherited.
+   */
+  const sectionLabel = React.useMemo(
+    () => (hit ? sections.find((sx) => sx.id === hit.section)?.label ?? null : null),
+    [sections, hit],
+  );
+  const mastheadSection = useMemo(() => ({ section: sectionLabel }), [sectionLabel]);
   /* The section segment navigates to the section's DEFAULT child — the same destination its rail
      icon and panel row reach, so all three agree about what "Queries" means. */
   const activeSection = sections.find((sx) => sx.id === hit?.section);
@@ -787,7 +806,17 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               ref={scrollRef}
               onScroll={onScroll}
             >
-              <div className={`ws-work${fit ? " ws-work--fit" : ""}`}>{children}</div>
+              <div className={`ws-work${fit ? " ws-work--fit" : ""}`}>
+                {/* ⚠️ THE MASTHEAD'S KICKER, SUPPLIED ONCE. Every page's masthead names its section;
+                    the shell is the one component that already knows the route AND wraps all ten, so
+                    it computes the label from `shellCrumbForPath` — the same pure function this
+                    shell's own breadcrumb reads — and hands it down. A page cannot pass its own,
+                    which is the point: a second table keyed by route is how the pill and the crumb
+                    would come to disagree. See `mastheadSection.ts`. */}
+                <MastheadSectionContext.Provider value={mastheadSection}>
+                  {children}
+                </MastheadSectionContext.Provider>
+              </div>
               {footFade}
             </div>
           </div>

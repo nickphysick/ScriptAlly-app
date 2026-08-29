@@ -219,7 +219,13 @@ describe("the masthead is content, not chrome", () => {
        full-width line at its base, and `workspacePageGrid.test.tsx` asserts it there. */
     expect(wsh, "the masthead drew its own hairline again — the slab's base is the only line in the chrome")
       .not.toContain("border-bottom");
-    expect(wsh).toContain("padding: 24px 0 18px");   /* 26/20 → 24/18 at §2, per ref 173 */
+    /* ⚠️ RETARGETED: THE AIR IS ON `.wsh-body` NOW, and `.wsh` states `padding: 0` for a structural
+       reason rather than a stylistic one — the top rule sits ABOVE the text's inset, so padding on
+       the masthead itself would push the rule down with the words and it would stop reading as the
+       page's top edge. The law is unchanged: ONE element states the vertical air. */
+    expect(wsh, "the masthead itself pays vertical air as well as its body").toContain("padding: 0");
+    expect(decls(all(hdrCss, ".wsh-body")), "the masthead's body stopped stating its own vertical air")
+      .toContain("padding: 26px 0 28px");
     /* the 16px gap moved to the slab's base with the hairline — asserted in workspacePageGrid.test */
     expect(wsh, "the masthead kept a bottom margin — that air belongs below the whole slab now")
       .not.toContain("margin-bottom");
@@ -288,7 +294,7 @@ describe("the masthead is content, not chrome", () => {
     expect(decls(gridCss)).toContain("grid-template-rows: minmax(0, 1fr) auto");
   });
 
-  it("⚠️ THE MASTHEAD REFUSES ACTIONS WHERE IT LEAVES, in the component and not merely in the markup", () => {
+  it("⚠️ THE MASTHEAD HOLDS ONE CONTROL AND REFUSES THE REST — in the component, not merely in the markup", () => {
     /**
      * ⚠️ THE LAW MOVED FROM THE VARIANT TO THE BEHAVIOUR (amendment 3), and it did not weaken. A
      * guard that only omitted an action would let a page pass one that silently goes nowhere — the
@@ -301,68 +307,46 @@ describe("the masthead is content, not chrome", () => {
      * expression that decides whether its slab actually sticks, so the claim and the behaviour
      * cannot come apart. Both directions are exercised in `pageHeaderDefault.test.tsx`.
      */
-    expect(hdrSrc).toContain("LEAVES on scroll");
-    expect(hdrSrc, "the refusal reads a prop instead of the grid").toContain("useMastheadLeaves()");
-    expect(hdrSrc, "the slot renders on a masthead that leaves").toContain("!mastheadLeaves &&");
-    /* The tool ROW is still refused outright — a layout this masthead does not have, which is a
-       different claim from where an action may sit.
-       ⚠️ ANCHORED ON AN UNSPLIT FRAGMENT. The message reads "…has no tool row — it is one line of
-       identity", but it is CONCATENATED across two source lines, so `no tool row` is nowhere in the
-       file. Matching a joined string against source is the same fragility as reading a rendered
-       class out of a template; the behaviour itself is asserted on the thrown message in
-       `pageHeaderDefault.test.tsx`. */
-    expect(hdrSrc).toContain("one line of identity");
+    /* ⚠️ THE `LEAVES` CONDITION IS RETIRED, AND WITH IT THE WHOLE TYPE PARTITION. Both the original
+       refusal (no actions, ever) and its amendment (no actions where the masthead scrolls away) were
+       answers to a header that either stranded a control or had to be restored. It does neither now:
+       it scrolls away as content and a separate bar takes over, so one control is simply what a
+       masthead holds. What must NOT weaken is that the refusal is a throw rather than a shrug — a
+       guard that omits an action lets a page pass one that silently goes nowhere. */
+    expect(hdrSrc, "the retired behaviour gate came back — there is one format and it holds one control")
+      .not.toContain("useMastheadLeaves");
+    for (const refusal of ["was passed a toolbar", "was passed an actionsSlot", "was passed an overflow menu", "PRIMARY"]) {
+      expect(hdrSrc, `the masthead stopped refusing: ${refusal}`).toContain(refusal);
+    }
+    expect(hdrSrc, "the toolbar refusal lost its reason").toContain("it is a kicker, a title, a subtitle and one CTA");
     const ws = sliceBetween(hdrSrc, 'if (variant === "workspace") {', "  return (\n    <header");
-    for (const gone of ["wsh-grow", "svh-btn"]) {
+    for (const gone of ["wsh-grow", "svh-btn", "wsh-acts", "wsh-mark"]) {
       expect(decls(ws), `the workspace branch still renders ${gone}`).not.toContain(gone);
     }
   });
 
-  it("⚠️ ONE MARK SIZE, BOTH FAMILIES, AND THE SECOND IS THE FIRST FLIPPED", () => {
-    /* ⚠️ THE TWO-SIZE RULE IS SUPERSEDED (masthead measure, §2). It was "illustrated → 52 bare,
-       monoline → 38 on a parchment plate", because scaling a PLATED glyph up "turns a small badge
-       into a large blank tile" — reasoning about the PLATE, which is gone. `markHasArt` no longer
-       decides anything here; it still governs the dashboard's marks and keeps its own lock. */
-    expect(all(hdrCss, ".wsh-mark"), "the mark box left 52px").toContain("flex: 0 0 52px");
-    expect(all(hdrCss, ".wsh-mark .os-mark"), "the drawing left 52px").toContain("width: 52px");
+  /**
+   * ⚠️ THE MARK IS GONE FROM THE MASTHEAD ENTIRELY, so "one mark size, both families" has no subject
+   * left and is replaced by its absence. The rule it retires was real and is worth keeping in view:
+   * 52px bare for both families, superseding an earlier "illustrated 52, monoline 38 on a parchment
+   * plate" whose reasoning was about a plate that no longer existed. The mark now belongs to the
+   * collapsed bar, which draws it at 20px and owns its own rules.
+   */
+  it("⚠️ NO MARK IN THE MASTHEAD — the sheet has no rules for one", () => {
     const live = decls(hdrCss);
-    expect(live, "`--xl` came back — one box, one size, and the modifier has nothing left to modify")
-      .not.toMatch(/["\s.]wsh-mark--xl[\s.{,]/);
-    for (const plate of ["border: 1px solid var(--shell-line)", "border-radius: 9px"]) {
-      expect(decls(all(hdrCss, ".wsh-mark .os-mark")), `the plate came back (\`${plate}\`)`).not.toContain(plate);
+    for (const gone of ["wsh-mark", "wsh-mark--xl"]) {
+      expect(live, `\`.${gone}\` still has rules in the masthead's sheet`).not.toMatch(new RegExp(`["\\s.]${gone}[\\s.{,:]`));
     }
-    /* ⚠️ THE MIRRORED SECOND MARK IS DELETED (masthead left-constant, §B) — one mark, left of the
-       text. Its FINDING is not deleted with it: the flip had to sit on the drawing rather than the
-       box, because a `transform` forms a stacking context and isolates `mix-blend-mode` beneath it.
-       That lives in CLAUDE.md and in the entrance-animation note, both of which stay. */
-    expect(live, "the mirrored mark came back — the row carries one mark now")
-      .not.toMatch(/["\s.]wsh-mark--mirror[\s.{,]/);
-  });
-
-  it("⚠️ THE ROW IS LEFT ALIGNED AND HIDE IS NOT IN IT", () => {
-    /**
-     * ⚠️ THE CENTRING ASSERTION IS DELETED, NOT ADAPTED — it described a layout that no longer
-     * exists (masthead left-constant, §B).
-     *
-     * ⚠️ HIDE'S ABSOLUTE POSITIONING IS STILL LOAD-BEARING, FOR A DIFFERENT REASON. It was "an
-     * in-flow control on one side shifts the centred block off true by half its width". Nothing is
-     * centred now — but a control at the row's end still STRETCHES the flex row, which moves the
-     * description's wrap point. The claim is about the control's position; it was never about a
-     * centre, and it does not go with one.
-     */
-    const rowDecls = decls(all(hdrCss, ".wsh-row"));
-    expect(rowDecls, "the masthead row went back to centring").not.toContain("justify-content: center");
-    expect(decls(all(hdrCss, ".wsh-txt")), "the text block went back to centring").not.toContain("text-align: center");
-    const grid = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8");
-    const hide = /\.wpg-mast-hide\s*\{([^}]*)\}/.exec(grid);
-    expect(hide, "Hide has no rule at all").toBeTruthy();
-    expect(hide![1], "Hide joined the flow — the centred block is now off true by half its width")
-      .toContain("position: absolute");
   });
 
   it("⚠️ ONE TITLE SIZE — the solo step is retired with the fixed height", () => {
     const decl = decls(hdrCss);
-    expect(decl).toContain("--wsh-title-size: 30px");
+    /* ⚠️ THE TOKEN'S NAME AND VALUE BOTH MOVED — `--wsh-title-size: 30px` became
+       `--mast-title-size: 56px` when the two header types became one format. The claim is unchanged:
+       ONE title size, stated once, with no per-page step. */
+    expect(decl).toContain("--mast-title-size: 56px");
+    expect(decl, "the old title token survived alongside the new one — two sizes, one masthead")
+      .not.toContain("--wsh-title-size");
     /* bounded, so `wsh--solo` cannot be matched by some longer live class that starts with it */
     expect(decl, "the solo step came back — it would add two points to every title-only page")
       .not.toMatch(/["\s`.]wsh--solo["\s`,{]/);

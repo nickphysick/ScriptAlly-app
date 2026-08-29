@@ -109,6 +109,19 @@ export const SHELL_SETUP_PATHS = new Set(["/account", "/plans", "/help", ...ACCO
  *  is already showing it. A crumb that renamed itself per section would put the same fact on
  *  screen twice, in two grammars, a few pixels apart. */
 const CRUMB_EXTRAS: Record<string, { section: string; page: string; rail: "dashboard" | ShellV2Section["key"] | null }> = {
+  /**
+   * ⚠️ ANALYTICS WAS IN NEITHER TABLE, so `shellCrumbForPath` returned null for it and the shell's
+   * breadcrumb has been BLANK on that page — a live routed workspace page the crumb did not know.
+   * It surfaced because the masthead's kicker reads the same derivation and came back empty on one
+   * page of ten; the breadcrumb had been silently short the whole time, because an absent crumb
+   * renders nothing and nothing renders as nothing.
+   *
+   * ⚠️ ADDED HERE RATHER THAN TO `SHELL_SECTIONS`, deliberately. That list is the RAIL's model — its
+   * pages are the accordion's rows — and Analytics is reached from Query Centre rather than from the
+   * rail. `rail: "querying"` keeps the rib lit while you are on it, which is what the section pointer
+   * is for; putting it in the section's `pages` would add a row to the rail nobody asked for.
+   */
+  "/queries/analytics": { section: "Querying", page: "Analytics", rail: "querying" },
   "/import": { section: "Shelf", page: "Import", rail: "shelf" },
   "/account": { section: "Setup", page: "Account", rail: null },
   "/plans": { section: "Setup", page: "Plans", rail: null },

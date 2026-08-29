@@ -434,15 +434,27 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        There is no chrome boundary now. The masthead is the first thing in the scroller and states
        its own air: 24 above, 18 below, then its hairline, then 16 to whatever follows. One element
        declares all of it, so nothing can pay it twice and there is nothing to arbitrate. */
+    /* ⚠️ RETARGETED TO `.wsh-body`, AND THE LAW IS UNCHANGED: ONE element states the masthead's
+       vertical air, so nothing can pay it twice. The rebuild moved that declaration one level in —
+       `.wsh` carries `padding: 0` because the top hairline has to sit ABOVE the text's inset, and
+       `.wsh-body` carries the 26/28 the format specifies. Both halves are asserted, because the
+       failure this guards against is the air being stated in two places at once. */
     const header = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8");
-    const wsh = /\.wsh\s*\{([^}]*)\}/.exec(header);
+    const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, "");
+    const wsh = /(?:^|\n)\.wsh\s*\{([^}]*)\}/.exec(header);
     expect(wsh, "the masthead has no rule at all").toBeTruthy();
-    const body = wsh![1].replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(body, "the masthead stopped stating its own vertical air").toContain("padding: 24px 0 18px");
+    expect(strip(wsh![1]), "the masthead itself pays vertical air as well as its body — that is the double-payment this rule forbids")
+      .toContain("padding: 0");
+    const bodyRule = /(?:^|\n)\.wsh-body\s*\{([^}]*)\}/.exec(header);
+    expect(bodyRule, "the masthead's body has no rule at all").toBeTruthy();
+    expect(strip(bodyRule![1]), "the masthead stopped stating its own vertical air")
+      .toContain("padding: 26px 0 28px");
     /* ⚠️ THE GAP MOVED TO THE SLAB'S BASE (pinned chrome, §1) — it used to sit between the masthead
        and the control row, clearing the masthead's own hairline. Those two are one object now and
        the hairline is at the object's foot, so the air belongs below the whole of it. */
-    expect(body, "the masthead kept a bottom margin — the gap belongs below the slab now").not.toContain("margin-bottom");
+    /* the same claim, over both rules now — a margin on either would put the gap back */
+    expect(strip(wsh![1]) + strip(bodyRule![1]), "the masthead kept a bottom margin — the gap belongs below the slab now")
+      .not.toContain("margin-bottom");
     /* ⚠️ THE GAP IS THE SPACER'S HEIGHT, NOT THE SLAB'S MARGIN (pinned chrome, §2). A margin here
        collapsed with the content's own and stopped collapsing once the spacer gained height, adding
        one whole gap to the column on every settle — measured, max scroll 1918 → 1934. */

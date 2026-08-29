@@ -252,10 +252,15 @@ describe("§5 · tighten, never scroll", () => {
        viewport, because a fixed-height plate cost the panes height they could not spare. The
        masthead is content and leaves on engagement, so a short viewport reclaims all of it — and
        the pack requires every page's title to measure the same as every other's. */
+    /* ⚠️ RETARGETED, AND THE LAW IS UNCHANGED: no page may scope its own masthead title size, and
+       the shared sheet must state one. What moved is the TOKEN's name and value — `--wsh-title-size:
+       30px` became `--mast-title-size: 56px` when the two header types collapsed into one format —
+       so this was pinning a spelling rather than the claim. Both halves are still asserted: nothing
+       page-scoped, and the shared sheet still names a size. */
     expect(css, "a page-scoped masthead step came back — the acceptance matrix compares titles across pages")
-      .not.toContain("--wsh-title-size");
+      .not.toMatch(/--(wsh|mast)-title-size/);
     const shell = read("../components/shell/pageHeader.css");
-    expect(shell, "the app-wide title size moved off 30px").toContain("--wsh-title-size: 30px");
+    expect(shell, "the shared sheet no longer states one masthead title size").toContain("--mast-title-size: 56px");
   });
 
   /**

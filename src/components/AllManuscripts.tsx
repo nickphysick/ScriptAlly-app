@@ -42,7 +42,7 @@ import { DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./manuscripts/Manuscri
 import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
 import { AttachmentsPanel } from "./manuscripts/AttachmentsPanel";
 import { ManuscriptCarousel } from "./manuscripts/ManuscriptCarousel";
-import { ManuscriptBackLink, ManuscriptPager } from "./manuscripts/ManuscriptPager";
+import { ManuscriptBackLink } from "./manuscripts/ManuscriptPager";
 import { MANUSCRIPTS_PATH } from "./shell/manuscriptScope";
 import { queryingSinceMs, profileDate } from "../lib/manuscriptProfile";
 import { ManuscriptsEmpty } from "./manuscripts/ManuscriptsEmpty";
@@ -164,11 +164,9 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
    * than hidden: wrapping would make the two ends indistinguishable from the middle, so a writer
    * could not tell from the control whether they had reached the end of their own shelf.
    */
-  const atIndex = selected ? ordered.findIndex((m) => m.id === selected.id) : -1;
   /* ⚠️ THE PAGER GOES THROUGH `openDossier`, so paging re-scopes as well as re-views. It used to
      set the view alone, which left the bar's switcher naming a different book from the one on
      screen — two surfaces disagreeing about which manuscript you are looking at. */
-  const goTo = (i: number) => () => { const m = ordered[i]; if (m) openDossier(m.id); };
 
   /** Writes the pointer the comps and packages sub-pages read. Not view state — a section-wide seat. */
   const selectMs = (id: string) => {
@@ -385,13 +383,17 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
           lead={selected ? <ManuscriptBackLink onLeave={() => navigate(MANUSCRIPTS_PATH)} /> : undefined}
           /* ⚠️ THE PAGER SITS WITH THE BOOK'S ACTIONS, NOT WITH THE DEPARTURE. It moves you along
              the shelf you are inside; the lead leaves it. */
-          actionsSlot={selected ? (
-            <ManuscriptPager
-              position={`${atIndex + 1} / ${ordered.length}`}
-              onPrev={atIndex > 0 ? goTo(atIndex - 1) : null}
-              onNext={atIndex >= 0 && atIndex < ordered.length - 1 ? goTo(atIndex + 1) : null}
-            />
-          ) : undefined}
+          /**
+           * ⚠️ THE PAGER PROP IS REMOVED, AND IT HAD NEVER RENDERED. `PageHeader` drew
+           * `acts.length > 0 ? acts.map(…) : actionsSlot`, and this page passes an unconditional
+           * `actions` entry — so the ternary took the actions branch on every render and the pager
+           * was unreachable from the day it was added. The masthead now holds exactly one control
+           * and refuses a slot outright, which is what surfaced it.
+           *
+           * ⚠️ `ManuscriptPager` ITSELF IS LEFT IN PLACE, not deleted with the prop. Rehoming a
+           * between-books control is Phase 4's two-view work; deleting it here would be this pass
+           * quietly removing a feature while claiming to change a header format.
+           */
           /**
            * ⚠️ `Add manuscript` IS DROPPED, NOT REHOMED — and this is the one masthead action that
            * did not need a control row built for it, because the page already offers it TWICE. The

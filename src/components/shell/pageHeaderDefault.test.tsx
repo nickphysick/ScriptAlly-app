@@ -17,7 +17,7 @@
 import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
-import { PageHeader } from "./PageHeader";
+import { PageHeader, type PageHeaderActions } from "./PageHeader";
 import { WorkspacePageGrid } from "./WorkspacePageGrid";
 /* ⚠️ THE BOUNDED SLICE FAILS LOUDLY ON A MISSING ANCHOR. `indexOf` returns -1 and `slice(-1)`
    reads as "one character from the end", so a renamed marker silently widens the slice to the rest
@@ -86,11 +86,13 @@ describe("⚠️ the default variant is frozen", () => {
 });
 
 describe("the workspace variant", () => {
-  it("renders title and mark — and NOTHING actionable", () => {
+  it("renders title and no mark — and nothing actionable unless a CTA is passed", () => {
     const out = renderInGrid(<PageHeader variant="workspace" title="Query Centre" mark="queries" />);
     expect(out).toContain('class="wsh"');
     expect(out).toContain("Query Centre");
-    expect(out).toContain('data-mark="queries"');
+    /* ⚠️ THE MARK IS DECLARED AND NOT DRAWN. It belongs to the collapsed bar now; the prop survives
+       so that bar knows which one, rather than a second table keyed by route. */
+    expect(out, "the masthead drew a declared mark").not.toContain('data-mark="queries"');
     /* ⚠️ ASSERTED STRUCTURALLY, NOT AGAINST A LIST OF LABELS. A name list passes the day someone
        adds a button this test has never heard of, which is precisely the day it should fail. */
     const masthead = sliceBetween(out, '<header class="wsh"', "</header>");
@@ -98,52 +100,30 @@ describe("the workspace variant", () => {
     expect(masthead).not.toContain("<a ");
   });
 
-  it("⚠️ THE MASTHEAD REFUSES AN ACTION RATHER THAN IGNORING IT", () => {
-    /**
-     * ⚠️ THE LAW IS ABOUT LEAVING, NOT ABOUT THE VARIANT NAME (amendment 3). It used to refuse every
-     * action outright, and the reasoning was always anchoring: a masthead that scrolls away strands
-     * anything in it, so the control belongs in a row that persists. That is still exactly right —
-     * where the masthead LEAVES. Where it PINS and settles, it never goes, nothing is stranded, and
-     * the control row is a band working around a constraint that does not apply.
-     *
-     * ⚠️ SO BOTH DIRECTIONS ARE ASSERTED. A test that only rendered one grid would prove half of it,
-     * and the half it proved would be the one that no longer holds everywhere.
-     */
-    for (const props of [
-      { actions: [{ label: "Export", onClick: () => {} }] as const },
-      { actionsSlot: <span>chip</span> },
-      { overflow: [{ label: "Delete", onClick: () => {} }] },
-    ]) {
-      expect(() => renderInLeavingGrid(
-        <PageHeader variant="workspace" title="T" mark="todo" {...(props as object)} />
-      ), "a masthead that leaves accepted an action").toThrow(/LEAVES on scroll/i);
-      expect(() => renderInGrid(
-        <PageHeader variant="workspace" title="T" mark="todo" {...(props as object)} />
-      ), "a masthead that pins refused an action").not.toThrow();
-    }
-  });
-
   /**
-   * ⚠️ `toolbar` IS REFUSED IN BOTH CASES AND ALWAYS WILL BE. The tool ROW is a layout this masthead
-   * does not have — it is one line of identity — which is a different claim from where an action may
-   * sit. Separating the two is what stops the leaving rule quietly widening into "anything goes".
+   * ⚠️ THE TWO REFUSAL CASES ARE REPLACED, NOT WEAKENED, AND THE LAW THEY ASSERTED IS RETIRED. They
+   * proved that a masthead which SCROLLS AWAY throws when handed an action while a pinning one
+   * accepts it — the Type A / Type B partition. There is one format now and it holds exactly one
+   * control, so "does this page's masthead leave" no longer decides anything. What must not weaken
+   * is that the guard THROWS rather than silently dropping a prop; the full set of refusals lives in
+   * `mastheadFormat.test.tsx`, and this keeps the one that is about the grid.
    */
-  it("⚠️ A TOOLBAR IS REFUSED WHETHER THE MASTHEAD LEAVES OR NOT", () => {
-    for (const r of [renderInGrid, renderInLeavingGrid]) {
-      expect(() => r(<PageHeader variant="workspace" title="T" mark="todo" toolbar={<span>t</span>} />))
-        .toThrow(/no tool row/i);
-    }
-  });
-
-  /**
-   * ⚠️ ABSENCE MEANS "LEAVES", WHICH IS THE FAIL-CLOSED DIRECTION. A header rendered outside a grid
-   * has no pinning slab, so an action in it has nothing anchoring it; defaulting to "pins" would
-   * permit exactly the arrangement the law forbids, in the one case nobody is looking at.
-   */
-  it("⚠️ OUTSIDE A GRID IT REFUSES, because nothing is anchoring it", () => {
-    expect(() => render(
-      <PageHeader variant="workspace" title="T" mark="todo" actions={[{ label: "X", onClick: () => {} }]} />
-    )).toThrow(/LEAVES on scroll/i);
+  it("⚠️ THE MASTHEAD REFUSES A SECOND CONTROL RATHER THAN IGNORING IT — inside a grid or outside one", () => {
+    const two = [
+      { label: "A", primary: true, onClick: () => {} },
+      { label: "B", primary: true, onClick: () => {} },
+    ] as const satisfies PageHeaderActions;
+    expect(() => renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" actions={two} />))
+      .toThrow(/was passed 2 actions/);
+    /* ⚠️ AND OUTSIDE A GRID TOO. The old guard read the grid's context and defaulted to "leaves" when
+       there was none; this one asks nothing of its surroundings, so the refusal cannot depend on
+       where the header happens to be mounted. */
+    expect(() => render(<PageHeader variant="workspace" title="T" mark="todo" actions={two} />))
+      .toThrow(/was passed 2 actions/);
+    /* the accepting direction, or "refuses" is indistinguishable from "refuses everything" */
+    expect(() => renderInGrid(
+      <PageHeader variant="workspace" title="T" mark="todo" actions={[two[0]]} />,
+    )).not.toThrow();
   });
 
   it("⚠️ THE COUNT SLOT IS GONE FROM THE MARKUP, not merely unused (amendment 7)", () => {
@@ -169,7 +149,7 @@ describe("the workspace variant", () => {
      * scroller, then the slab, then the masthead, then the controls — all inside the scrollport, none
      * of it in a chrome row above.
      */
-    const KEYS = ["wpg-scroll", "wpg-chrome", "wpg-mast", "wsh-row"];
+    const KEYS = ["wpg-scroll", "wpg-chrome", "wpg-mast", "wsh-toprule", "wsh-body"];
     const order = KEYS.map((k) => out.indexOf(k));
     for (const [i, k] of KEYS.entries()) {
       expect(order[i], `${k} is not in the rendered output`).toBeGreaterThan(-1);
@@ -213,10 +193,20 @@ describe("the workspace variant", () => {
     expect(solo).toContain('class="wsh"');
   });
 
-  it("every mark key renders", () => {
-    for (const m of ["queries", "todo", "calendar", "contacts", "packages", "analytics",
-      "noteboard", "discover", "settings"] as const) {
-      expect(renderInGrid(<PageHeader variant="workspace" title="T" mark={m} />), m).toContain(`data-mark="${m}"`);
+  /**
+   * ⚠️ INVERTED WITH THE FORMAT: every mark key is still a legal DECLARATION and none of them draws.
+   * The population matters as much as the claim — asserting it for one key would pass on a masthead
+   * that happened to reject that one, and the point is that the rule is about the masthead rather
+   * than about any particular drawing.
+   */
+  it("every mark key is accepted and none is drawn", () => {
+    const KEYS = ["queries", "todo", "calendar", "contacts", "packages", "analytics",
+      "noteboard", "discover", "settings"] as const;
+    expect(KEYS.length, "the mark census shrank").toBeGreaterThan(8);
+    for (const m of KEYS) {
+      const out = renderInGrid(<PageHeader variant="workspace" title="T" mark={m} />);
+      expect(out, `${m} threw or failed to render`).toContain('class="wsh"');
+      expect(out, `${m} is drawn in the masthead — marks belong to the collapsed bar`).not.toContain(`data-mark="${m}"`);
     }
   });
 });
