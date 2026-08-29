@@ -606,9 +606,24 @@
   width: 100%;
 }
 .wpg-scroll > .wpg-chrome {
-  position: sticky;
-  top: 0;
-  z-index: 3;
+  /**
+   * ⚠️ NOT STICKY ANY MORE, AND THIS IS WHAT MAKES THE HANDOFF POSSIBLE AT ALL. The slab pinned so
+   * the masthead could SETTLE — stay on screen in a tightened posture. The rebuild replaces that
+   * with a separate collapsed bar, and the masthead's whole job is now to LEAVE: "it scrolls away as
+   * content" is not a description, it is a requirement, and a pinned masthead cannot do it.
+   *
+   * ⚠️ MEASURED BEFORE IT WAS CHANGED, because the screenshot is what showed it: with the slab still
+   * sticky, driving the scroller past the threshold produced the bar floating ON TOP of a masthead
+   * that had not moved — two identities on screen at once, one in Playfair and one in mono. Every
+   * property-level assertion passed; only the picture said so.
+   *
+   * ⚠️ THE SETTLE'S OWN RULES ARE LEFT INERT RATHER THAN DELETED HERE. `--stuck` still matches while
+   * the scroller has moved, and its padding tighten now happens to an element nobody can see; the
+   * reclaim spacer compensates it exactly as before, so the arithmetic still nets to zero. Removing
+   * the machinery is Phase 6's, and doing it here would mean deleting a token another page reads
+   * inside a phase about a bar.
+   */
+  position: static;
   box-sizing: border-box;
   /* opaque, or the content passes through the page's own title */
   background: var(--ws-window);
@@ -887,3 +902,94 @@
 .wpg-mast-hide:hover { background: var(--ws-window); color: var(--shell-ink); }
 .wpg-mast-hide svg { width: 15px; height: 15px; flex: none; }
 @media (prefers-reduced-motion: reduce) { .wpg-mast-hide { transition: none; } }
+
+/**
+ * ══ THE COLLAPSED BAR ═════════════════════════════════════════════════════════════════════════
+ * (ref design-refs/collapse-transition.html — option B, "handoff with slide".)
+ *
+ * ⚠️ A SEPARATE ELEMENT, NEVER A TRANSFORMATION OF THE MASTHEAD, and the two reasons are mechanical.
+ * `font-family` is not interpolable — the masthead is Playfair, the bar is JetBrains Mono — so a
+ * morph between them cannot exist; and an animated height feeds back into scroll position, which is
+ * the loop this system has already paid for twice. The masthead is not animated at all: it scrolls
+ * away because it is content.
+ *
+ * ⚠️ IT RESERVES NO SPACE. `margin-bottom` is its own height, negated, so it takes 46px of flow and
+ * gives them straight back — nothing below it moves when it appears, and `scrollTop` never changes.
+ * That is asserted rather than assumed.
+ *
+ * ⚠️ `pointer-events: none`, because it is identity rather than a control. The ref draws it that way
+ * and it matters here: the bar sits over the top of a page whose content is live underneath.
+ */
+.wpg { --bar-h: 46px; }
+/**
+ * ⚠️ 0-2-0, BECAUSE `.wpg-scroll > *` CAPS EVERY CHILD TO THE CONTENT MEASURE. The slab already
+ * carries `max-width: none; width: 100%` for exactly this reason; a single-class rule on the bar
+ * loses to that on specificity and the bar came out 80px short on each side — measured 327..1337
+ * inside a 247..1417 window, so its ground stopped before the window's edge and its inner measure
+ * then centred inside the WRONG box: 940px against the masthead's 1100. The bar's identity would
+ * have slid sideways on every handoff.
+ */
+.wpg-scroll > .wpg-bar {
+  max-width: none;
+  width: 100%;
+}
+.wpg-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: var(--bar-h);
+  margin-bottom: calc(var(--bar-h) * -1);
+  background: var(--ws-window);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-8px);
+  /* the shadow is on the rule so it fades with the bar rather than appearing under a transparent box */
+  box-shadow: 0 10px 16px -12px rgba(25, 18, 16, 0);
+  transition:
+    opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s;
+}
+.wpg-bar--on {
+  opacity: 1;
+  transform: none;
+  box-shadow: 0 10px 16px -12px rgba(25, 18, 16, 0.32);
+}
+/**
+ * ⚠️ THE BAR'S CONTENT TAKES THE MASTHEAD'S MEASURE, NOT A GUTTER OF ITS OWN, AND THE BRIEF SAYS
+ * `padding: 0 var(--mast-gutter)`. Those agree at 1280, 1440 and 1920, where the measure's inset IS
+ * the gutter — and diverge at 2560, where the content cap binds and the measure's inset grows to
+ * ~315px. A padded bar would put its name 280px left of the title it replaces, so the handoff would
+ * slide sideways at exactly the width the brief added to the standard list. The measure is shared
+ * with `.wpg-mast` as one declaration rather than a matching pair.
+ */
+.wpg-barin {
+  width: 100%;
+  margin-inline: auto;
+  max-width: min(var(--work-max), calc(100% - 2 * var(--mast-gutter)));
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.wpg-barmk { flex: 0 0 20px; width: 20px; height: 20px; display: grid; place-items: center; }
+/* ⚠️ THE STROKE IS OVERRIDDEN IN CSS BECAUSE THE COMPONENT SETS IT AS AN ATTRIBUTE — presentational
+   attributes lose to any rule, so this wins without `!important` and without touching the shared
+   component's own colour, which is right at its own size. */
+.wpg-barmk .os-mark svg { width: 20px; height: 20px; stroke: var(--shell-ink); }
+.wpg-bar b {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--shell-ink);
+  /* a long page name truncates rather than wrapping a 46px bar into two lines */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wpg-bar { transition: none; }
+}

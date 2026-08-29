@@ -34,6 +34,7 @@ import { createPortal } from "react-dom";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import "./workspacePageGrid.css";
 import { WINWRAP_ID } from "./shellSlots";
+import { OneScreenMark, type MarkName } from "../dashboard/OneScreenMark";
 
 /**
  * ⚠️ `PlateCondensedContext` IS DELETED (in-flow masthead, step 4), AND ITS LAST READER WENT AT
@@ -168,11 +169,48 @@ export interface WorkspacePageGridProps {
    */
 }
 
+/**
+ * ⚠️ TWO THRESHOLDS, NOT ONE, AND THE GAP IS THE WHOLE MECHANISM. A single threshold flips on every
+ * frame that lands on it; 30px of separation is far more than any scroll step can straddle.
+ */
+const BAR_SHOW = 150;
+const BAR_HIDE = 120;
+
+/**
+ * ⚠️ THE BAR'S IDENTITY IS READ OFF THE MASTHEAD ELEMENT, WHICH IS THE PAGE'S OWN DECLARATION.
+ * The grid needs a title and a mark for the collapsed bar; the masthead already has both. Taking
+ * them from a second pair of props would be a table keyed by route sitting beside the one the page
+ * already fills in, and the two would diverge the first time a page was renamed — which this rebuild
+ * has already watched happen with the section names.
+ *
+ * ⚠️ ABSENCE MEANS NO BAR, not a bar with a blank name. A grid handed something that is not a
+ * `PageHeader` has no identity to show, and an empty 46px band that appears on scroll is worse than
+ * nothing at all.
+ */
+const barIdentity = (masthead: React.ReactNode): { title: string; mark?: MarkName } | null => {
+  if (!React.isValidElement(masthead)) return null;
+  const p = masthead.props as { title?: unknown; mark?: unknown };
+  return typeof p.title === "string" && p.title ? { title: p.title, mark: p.mark as MarkName | undefined } : null;
+};
+
 export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   masthead, toolbar, children, className, scrollLabel, dock, fill = false, settleOn,
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = React.useState(false);
+  /**
+   * ⚠️ THE COLLAPSED BAR IS A SEPARATE ELEMENT, NEVER A TRANSFORMATION OF THE MASTHEAD, and the
+   * reason is mechanical rather than aesthetic: `font-family` cannot be interpolated — the masthead
+   * is Playfair and the bar is JetBrains Mono — and an animated height feeds back into scroll
+   * position, which is the loop this system has already paid for twice.
+   *
+   * ⚠️ HYSTERESIS, HELD IN A REF, BECAUSE THE PREVIOUS STATE IS AN INPUT. It appears past 150 and
+   * leaves below 120; equal thresholds flicker at the boundary, and reading the current React state
+   * inside the scroll callback would read whatever value that closure captured.
+   */
+  const ident = React.useMemo(() => barIdentity(masthead), [masthead]);
+  const barOn = React.useRef(false);
+  const [bar, setBar] = React.useState(false);
   /** The pinned chrome's SETTLED height, for anything that must sit clear of it. See below. */
   const [stuckH, setStuckH] = React.useState(0);
   /**
@@ -368,6 +406,12 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
       const settleEl = primaryScroller();
       const settled = !!settleEl && settleEl.scrollTop > 2;
       setStuck(settled);
+      /* ⚠️ THE SAME SCROLLER THE SETTLE READS. A second listener asking "where is this page" is a
+         second answer, and the two would disagree on exactly the frames anyone would notice. */
+      const y = settleEl ? settleEl.scrollTop : 0;
+      if (!barOn.current && y > BAR_SHOW) barOn.current = true;
+      else if (barOn.current && y < BAR_HIDE) barOn.current = false;
+      setBar((prev) => (prev === barOn.current ? prev : barOn.current));
       /* ⚠️ COMPARED BEFORE IT IS WRITTEN. A fresh object every frame would re-render the whole
          page on every wheel tick even when nothing changed — the header's `setStuck` is free of
          that only because a boolean compares by value. */
@@ -441,7 +485,16 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
        * the panel with it. The figure is only written while stuck — which is the only state in
        * which anything is passing under the chrome and the only state the offset is for.
        */
-      if (settled && h > 0) setStuckH((prev) => (Math.abs(prev - h) < 0.5 ? prev : h));
+      /**
+       * ⚠️ IT IS THE BAR'S HEIGHT NOW, NOT THE SLAB'S, AND THE TOKEN'S MEANING IS UNCHANGED: it is
+       * how far down the scrollport the first unobstructed pixel is. The slab stopped pinning when
+       * the handoff arrived, so the only thing a sticky child has to clear is the collapsed bar —
+       * and `buildPanel.css` reads this for exactly that, as its `top` and inside its `max-height`.
+       * Publishing the slab's height here would have offset that panel by a masthead that is no
+       * longer on screen.
+       */
+      const pinnedH = barOn.current ? (root.querySelector(".wpg-bar") as HTMLElement | null)?.offsetHeight ?? 0 : 0;
+      setStuckH((prev) => (Math.abs(prev - pinnedH) < 0.5 ? prev : pinnedH));
     };
     /* rAF-throttled: at most one evaluation per painted frame, however fast the wheel reports */
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(evaluate); };
@@ -603,6 +656,25 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
           role={scrollLabel ? "region" : undefined}
           aria-label={scrollLabel}
         >
+          {/**
+            * ⚠️ THE BAR COMES FIRST IN THE MARKUP AND RESERVES NO SPACE. It is `sticky; top: 0` with
+            * a negative bottom margin equal to its own height, so it takes 46px of flow and gives
+            * them straight back: nothing below it moves when it appears, and `scrollTop` is
+            * untouched. The masthead is never animated — it scrolls away as content — so the only
+            * thing that changes on the handoff is this element's opacity and transform.
+            *
+            * ⚠️ AND IT IS RENDERED UNCONDITIONALLY, faded rather than mounted. Mounting on scroll
+            * would insert a box mid-scroll, which is the height feedback the design exists to
+            * avoid; and a transition needs both ends to exist to travel between them.
+            */}
+          {ident && (
+            <div className={`wpg-bar${bar ? " wpg-bar--on" : ""}`} aria-hidden="true">
+              <div className="wpg-barin">
+                {ident.mark && <span className="wpg-barmk"><OneScreenMark name={ident.mark} monoline /></span>}
+                <b>{ident.title}</b>
+              </div>
+            </div>
+          )}
           {/* ⚠️ THE MASTHEAD IS THE FIRST THING IN THE SCROLLER, and on a SCROLLING page that is the
               entire mechanism: it leaves with the content because it IS content. No sentinel feeds
               it, no class describes it, nothing reserves its height.

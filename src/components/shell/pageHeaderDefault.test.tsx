@@ -92,7 +92,12 @@ describe("the workspace variant", () => {
     expect(out).toContain("Query Centre");
     /* ⚠️ THE MARK IS DECLARED AND NOT DRAWN. It belongs to the collapsed bar now; the prop survives
        so that bar knows which one, rather than a second table keyed by route. */
-    expect(out, "the masthead drew a declared mark").not.toContain('data-mark="queries"');
+    /* ⚠️ SCOPED TO THE HEADER, BECAUSE THE GRID NOW DRAWS ONE TOO. The collapsed bar states the
+       page's mark at 20px — that is the whole reason the prop survives — so a document-wide search
+       for `data-mark` finds the BAR's and reports the masthead as drawing one. The claim is about
+       where the mark is, so the slice has to be as well. */
+    expect(sliceBetween(out, '<header class="wsh"', "</header>"), "the masthead drew a declared mark")
+      .not.toContain('data-mark="queries"');
     /* ⚠️ ASSERTED STRUCTURALLY, NOT AGAINST A LIST OF LABELS. A name list passes the day someone
        adds a button this test has never heard of, which is precisely the day it should fail. */
     const masthead = sliceBetween(out, '<header class="wsh"', "</header>");
@@ -206,7 +211,11 @@ describe("the workspace variant", () => {
     for (const m of KEYS) {
       const out = renderInGrid(<PageHeader variant="workspace" title="T" mark={m} />);
       expect(out, `${m} threw or failed to render`).toContain('class="wsh"');
-      expect(out, `${m} is drawn in the masthead — marks belong to the collapsed bar`).not.toContain(`data-mark="${m}"`);
+      expect(sliceBetween(out, '<header class="wsh"', "</header>"),
+        `${m} is drawn in the masthead — marks belong to the collapsed bar`).not.toContain(`data-mark="${m}"`);
+      /* ⚠️ AND IT IS DRAWN IN THE BAR, which is the other half: "not in the masthead" alone passes on
+         a mark that reaches nothing at all, and the prop would then be a declaration with no reader. */
+      expect(out, `${m} is declared and drawn nowhere — the bar should carry it`).toContain(`data-mark="${m}"`);
     }
   });
 });

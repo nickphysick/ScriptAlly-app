@@ -78,16 +78,28 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     for (const t of tops) {
       expect(t, `a sticky element clears ${t} — something above the scroller is being measured into a rule again`).toBe("0");
     }
-    /* ⚠️ AND EXACTLY ONE STICKY BOX IN THE SCROLLER — structural, counted, because "one slab" is the
-       claim and a second pinned element is precisely what §1 removed. */
+    /**
+     * ⚠️ TWO STICKY BOXES NOW, AND THE LAW IS UNCHANGED. The rebuild adds the collapsed bar, which
+     * has to pin to be a bar at all. What the rule forbids is a `top` that encodes ANOTHER element's
+     * height — and both are `top: 0`, asserted above, because the bar RESERVES NO SPACE: its
+     * negative bottom margin is its own height, so the slab beneath it is at the same place whether
+     * the bar is showing or not. Nothing clears anything.
+     *
+     * ⚠️ COUNTED AS A SET, so a third pinned element cannot arrive unnoticed — which is the half of
+     * this case that still does the work.
+     */
     /* ⚠️ THE SUBJECT OF THE SELECTOR, NOT ITS FIRST CLASS. My first version captured the first
        `.wpg-*` it saw and reported `.wpg-scroll` as sticky — the ANCESTOR in `.wpg-scroll >
        .wpg-chrome`, which is a scrollport and could not be. The assertion read as a real second
        sticky element and was an artefact of the regex. */
     const stickySubjects = [...cssRules.matchAll(/([^{}]+)\{[^}]*position:\s*sticky[^}]*\}/g)]
       .map((m) => m[1].trim().split(/[\s>]+/).filter(Boolean).pop()!);
-    expect([...new Set(stickySubjects)], `more than one element is sticky: ${stickySubjects.join(", ")}`)
-      .toEqual([".wpg-chrome"]);
+    /* ⚠️ ONE STICKY AGAIN, AND IT IS THE BAR RATHER THAN THE SLAB. The slab pinned so the masthead
+       could settle; the rebuild's masthead LEAVES, so the slab is static and the collapsed bar is the
+       only pinned thing in the scroller. Same claim as before the settle existed, different subject —
+       and a second pinned element still cannot arrive unnoticed. */
+    expect([...new Set(stickySubjects)].sort(), `the set of sticky elements has changed: ${stickySubjects.join(", ")}`)
+      .toEqual([".wpg-bar"]);
   });
 
   it("the scroll row is `minmax(0, 1fr)` — a plain `1fr` grows to its content and never scrolls", () => {
@@ -665,16 +677,18 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    * stylesheet's own file. It must equal the reclaim exactly and must not be transitioned: easing
    * it opens a frame in which max scroll is wrong, which is the clamp again, just harder to see.
    */
-  it("⚠️ THE FOLDED NAME BAR IS GONE ENTIRELY — component, classes and tokens", () => {
+  it("⚠️ THE OLD FOLDED NAME BAR STAYS GONE — the new one shares none of its parts", () => {
     /**
-     * ⚠️ THE DELETION IS THE CLAIM (pinned chrome, §4). The bar kept the page's identity on screen
-     * once the masthead had scrolled away; the slab keeps the MASTHEAD on screen, settled but still
-     * the title and the mark, so there is nothing left for a name bar to say. On a fill page the
-     * fold leaves a chevron on the window's border instead.
+     * ⚠️ THIS CASE IS INVERTED AND ITS SUBJECT IS NOT. It asserted that the folded name bar had been
+     * deleted outright — component, classes and tokens — because the settled slab kept the masthead
+     * on screen and there was nothing left for a bar to say. The rebuild removes the settle, so a
+     * bar is the only thing that can carry identity once the masthead has scrolled away, and one is
+     * back: `.wpg-bar`, a separate sticky element, 46px, reserving no space.
      *
-     * ⚠️ AND THE SWEEP IS FOR READS, NOT DEFINITIONS — the rule this repo learned from `--wsh-pill-*`,
-     * where two sheets went on READING tokens that had been deleted and fell back to a literal, so a
-     * grep for the definition found nothing and read as "already cleaned".
+     * ⚠️ WHAT MUST NOT COME BACK IS THE OLD ONE'S MACHINERY — a bar that grew from 0 to 51px on the
+     * same element the control row cleared with `top: var(--wpg-mini-h)`. That is the height-feedback
+     * shape the new design is built to avoid, so its tokens and classes are still forbidden and the
+     * sweep is still for READS rather than definitions.
      */
     const grid = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8");
     const liveSrc = grid.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
@@ -682,18 +696,19 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     for (const token of ["--wpg-mini-h", "--wpg-mini-pad", "--wpg-mini-fs", "--wpg-mini-lh"]) {
       expect(liveCss, `\`${token}\` is still READ or DEFINED — the bar it sized is gone`).not.toContain(token);
     }
-    /* ⚠️ THE CLASS NAME IS BOUNDED, not a substring: a bare `not.toContain("wpg-mini")` would also
-       forbid any future class that merely starts with it, and has produced false reds in this repo
-       twice. */
     for (const cls of ["wpg-mini", "wpg-mini-name", "wpg-mini-show", "wpg-mini--stuck", "wpg-mini--static"]) {
       expect(liveCss, `\`.${cls}\` still has a rule`).not.toMatch(new RegExp(`\\.${cls}[\\s.,{:]`));
       expect(liveSrc, `\`${cls}\` is still rendered`).not.toMatch(new RegExp(`["\\s\`]${cls}["\\s\`]`));
     }
-    /* ⚠️ AND THE IDENTITY PLUMBING GOES WITH ITS ONLY CONSUMER. The grid read `title` off the
-       masthead element's props so the bar could state it without being passed it twice. Nothing else
-       read it, which was checked rather than assumed. */
-    expect(liveSrc, "the grid still reads the masthead's props — the bar that needed them is gone")
-      .not.toContain("masthead.props");
+    /* ⚠️ AND THE NEW BAR'S HEIGHT IS ITS OWN, GIVEN BACK. The old bar's fault was that its height was
+       a number a second rule had to clear; this one's is a token it negates itself, so nothing else
+       ever reads it. Both halves asserted — the reservation and the negation — because a bar with
+       the margin and no height, or the height and no margin, are two different broken pages. */
+    expect(liveCss, "the bar stopped declaring its own height").toMatch(/--bar-h:\s*46px/);
+    expect(liveCss, "the bar reserves space — everything below it moves when it appears")
+      .toContain("margin-bottom: calc(var(--bar-h) * -1)");
+    expect(liveCss, "something other than the bar reads its height — that is the offset this design removes")
+      .not.toMatch(/top:\s*[^;]*--bar-h/);
   });
 
   it("⚠️ THE SETTLE'S RECLAIM IS A SPACER, NOT SCROLLER PADDING", () => {

@@ -163,13 +163,20 @@ const MARK: Record<MarkName, { label: string; icon: React.ReactNode; src?: strin
  */
 export const markHasArt = (name: MarkName): boolean => !!MARK[name].src;
 
-export const OneScreenMark: React.FC<{ name: MarkName }> = ({ name }) => {
+/**
+ * ⚠️ `monoline` SKIPS THE ARTWORK AND DRAWS THE LINE GLYPH, and the collapsed bar is why it exists.
+ * Four marks carry a `src` — a painted drawing sized for a 52px header slot that no longer exists.
+ * At the bar's 20px a watercolour is mush, and it cannot be inked: a raster is whatever colour it
+ * was exported, and the only way to force it black is a filter that flattens the drawing anyway.
+ * The line glyph is already the right object at that size, and it takes `stroke` from CSS.
+ */
+export const OneScreenMark: React.FC<{ name: MarkName; monoline?: boolean }> = ({ name, monoline }) => {
   const m = MARK[name];
   /* ⚠️ THE DEGRADE PATH, borrowed from ArtSlot: a 404 or a decode failure must not leave a broken-
      image glyph in a header. It falls back to the mono slot name — the ArtSlot convention — which
      is also what the box shows if a future mark ever arrives without an icon to stand in for it. */
   const [failed, setFailed] = useState(false);
-  const showArt = !!m.src && !failed;
+  const showArt = !!m.src && !failed && !monoline;
   return (
     <span className="os-mark" data-mark={name} aria-hidden="true">
       {showArt
