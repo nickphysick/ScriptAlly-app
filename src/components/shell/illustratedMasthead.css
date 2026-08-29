@@ -38,7 +38,7 @@
 .wpg.pkgw-wpg {
   --illo-art: url(../../assets/packages/packages.webp);
   /* measured: the title and description are a fixed-size object, so this is the same at every width */
-  --illo-text-right: 458px;
+  --illo-text-right: 565px;
 }
 .wpg.qc-wpg {
   --illo-art: url(../../assets/queries/queries.jpg);
@@ -50,7 +50,7 @@
    * both had to be measured, and the second was caught by `illoRules`' Rule 1 case reconciling this
    * token against the rendered ink rather than against a literal on both sides.
    */
-  --illo-text-right: 399px;
+  --illo-text-right: 524px;
 }
 
 /**
@@ -76,7 +76,7 @@
   --illo-gutter: max(var(--mast-gutter), (100% - var(--work-max)) / 2);
   /* Rule 1 · the reveal opens 60px past the last glyph and is fully open 430px later */
   --illo-reveal-a: calc(var(--illo-gutter) + var(--illo-text-right) + 60px);
-  --illo-reveal-b: calc(var(--illo-reveal-a) + 430px);
+  --illo-reveal-b: calc(var(--illo-reveal-a) + 490px);
 }
 
 
@@ -111,40 +111,46 @@
 .wpg.qc-wpg > .wpg-scroll > .wpg-chrome::after {
   content: '';
   position: absolute;
-  inset: 0;
+  /**
+   * ⚠️ THE BOX STARTS BELOW THE TOP RULE, so the rule always sits in clear space. It was `inset: 0`
+   * and painted over the rule on both illustrated pages — visible in the Phase 1 screenshots. The
+   * offset is the rule's own two tokens rather than a matching pair of numbers, so moving the rule
+   * moves the artwork with it. The BOTTOM needs nothing: `bottom: 0` resolves against the slab's
+   * PADDING box, which stops above its `border-bottom` — the masthead's closing hairline.
+   */
+  top: calc(var(--mast-toprule-y) + var(--mast-toprule-h));
+  right: 0;
+  bottom: 0;
+  left: 0;
   /* ⚠️ IT MUST NOT SWALLOW A CLICK — the page's controls sit over this band. */
   pointer-events: none;
   background-image: var(--illo-art);
-  /* Rule 2 · anchored to the band's right edge, sized by band height, dense end outward */
-  background-position: 100% center;
   /**
-   * ⚠️ 150%, NOT THE BRIEF'S 140%, BECAUSE AT 140% RULE 3 FAILS ON QUERY CENTRE AT 2560 — and the
-   * two constraints genuinely conflict there rather than one being a mistake.
+   * ⚠️ `auto 100%` FITS THE ILLUSTRATION EXACTLY BETWEEN THE TWO RULES, and that is what makes it
+   * self-correcting. It was `auto 150%`, sized against a band height it had to overshoot to fill —
+   * so when the header grew the artwork grew half again with it and bled past the edges. `100%` of
+   * this box IS the space between the floating rule above and the hairline below, so a change to the
+   * type refits the picture with no second number to keep in step.
    *
-   * THE ARITHMETIC. Above a 1730px slab the measure's cap binds, so the gutter grows as half the
-   * surplus and the gap the artwork must cover grows with it: `bandW/2 + 830 - textRight - 60`. At
-   * 2560 the slab is 2290, so Query Centre's gap is 1516 against Packages' 1457 — the SHORTER title
-   * is the harder case, because its reveal opens earlier and leaves more to cover. The artwork is
-   * `bandH × scale × 1600/192`; at 127px and 140% that is 1482, which clears Packages by 25px and
-   * falls 34px short of Query Centre. Rule 3 needs at least 143.2%.
-   *
-   * 150% is the smallest round value that clears both with real margin (Packages 130, Query Centre
-   * 71), and it is also nearer the artwork's native 1600px — 1587 rather than 1482 — so it is very
-   * slightly sharper rather than softer. It crops 33% of the picture's height against 29%.
-   *
-   * ⚠️ THE TRIAL STILL HAS A CEILING, AND IT IS ~2700px OF VIEWPORT. Past that the gap outgrows the
-   * artwork again and the fade uncovers bare ground. Making Rule 3 hold by CONSTRUCTION would mean
-   * sizing the artwork by the gap rather than by the band's height — which is Rule 2's job, and a
-   * design decision rather than a fix.
+   * ⚠️ AND `bottom` RATHER THAN `center`, because the box no longer starts at the band's top: a
+   * centred picture would drift by half the rule's offset. Anchored to the closing hairline it sits
+   * on the line the eye reads as the masthead's base.
    */
-  background-size: auto 150%;
+  background-position: 100% bottom;
+  background-size: auto 100%;
   background-repeat: no-repeat;
   opacity: 0.86;
   /**
-   * Rule 1 · the reveal is anchored to the TEXT. Rule 3 is what makes it safe: the artwork is always
-   * wider than the gap between the reveal and the band's right edge, so the picture always exists
-   * where the fade uncovers it — asserted arithmetically at four widths, because that is the check
-   * that would have caught every failure in this saga.
+   * Rule 1 · the reveal is anchored to the TEXT — measured per page as the WIDEST ink in the header,
+   * whichever element that turns out to be. On both illustrated pages it is the SUBTITLE rather than
+   * the title, which is why the token cannot be reasoned out of the type scale and has to be read
+   * off a render.
+   *
+   * ⚠️ THE RUN IS 490, THE BRIEF'S VALUE, AND THE BENCH SAYS 430. The bench composes
+   * `rb = ra + --reveal-run` with `--reveal-run: 430px`; the brief's own code block says `+ 490px`.
+   * Taking the brief's, because it is the later instruction and because the run only sets how LONG
+   * the fade is — Rule 3 depends on where it STARTS, so neither value can make the artwork fall
+   * short. 490 is the softer fade of the two.
    */
   -webkit-mask-image: linear-gradient(to right, transparent var(--illo-reveal-a), var(--illo-solid) var(--illo-reveal-b));
           mask-image: linear-gradient(to right, transparent var(--illo-reveal-a), var(--illo-solid) var(--illo-reveal-b));

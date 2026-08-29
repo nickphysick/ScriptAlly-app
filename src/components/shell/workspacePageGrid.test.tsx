@@ -448,7 +448,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     const bodyRule = /(?:^|\n)\.wsh-body\s*\{([^}]*)\}/.exec(header);
     expect(bodyRule, "the masthead's body has no rule at all").toBeTruthy();
     expect(strip(bodyRule![1]), "the masthead stopped stating its own vertical air")
-      .toContain("padding: 26px 0 28px");
+      .toContain("padding: var(--mast-pad-top) 0 var(--mast-pad-btm)");
     /* ⚠️ THE GAP MOVED TO THE SLAB'S BASE (pinned chrome, §1) — it used to sit between the masthead
        and the control row, clearing the masthead's own hairline. Those two are one object now and
        the hairline is at the object's foot, so the air belongs below the whole of it. */

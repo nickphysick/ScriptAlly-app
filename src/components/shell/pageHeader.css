@@ -260,6 +260,19 @@
      shrink under the default `flex-shrink: 1` as the panes below claim the row. */
   flex: 0 0 auto;
   box-sizing: border-box;
+  /**
+   * ⚠️ `flow-root`, AND IT IS LOAD-BEARING: WITHOUT IT THE TOP RULE'S OFFSET COLLAPSES OUT OF THE
+   * MASTHEAD. The rule is the first child and carries `margin-top`; on a block box with no padding or
+   * border of its own, a first child's top margin collapses THROUGH the parent and becomes the
+   * parent's. Measured, the same declaration put the rule 7px down on Query Centre and 0px down on
+   * Submission packages — one page's slab happened to interrupt the collapse and the other's did not,
+   * so a value stated once rendered as two.
+   *
+   * ⚠️ `flow-root` RATHER THAN PADDING, because the alternative moves the air onto `.wsh` and the
+   * standing rule is that ONE element states the masthead's vertical air. This establishes a block
+   * formatting context and nothing else — no box, no space, margins simply cannot escape.
+   */
+  display: flow-root;
   /* ⚠️ THE PADDING IS ON THE BODY, NOT HERE, because the top hairline has to sit ABOVE it — 7px
      below the container's top edge, with the text's 26px starting beneath the rule. Padding on this
      element would push the rule down with the text and it would stop reading as the page's top. */
@@ -276,8 +289,17 @@
   /* the top rule's ink — the ref's `--toprule`, a shade warmer than `--ws-edge` because it is a
      divider inside the ground rather than the window's own edge */
   --mast-toprule: #e6ded3;
-  --mast-title-size: 56px;
-  --mast-sub-size: 19px;
+  /**
+   * ⚠️ EVERY DIMENSION OF THE MASTHEAD IS A TOKEN HERE, and the reason is 2c rather than tidiness:
+   * the artwork is sized at `auto 100%` of this box, so the illustration refits itself when the type
+   * moves. A hard-coded padding or a literal title size would be a second number to keep in step
+   * with a picture, and this repo already records what that costs.
+   */
+  --mast-title-size: 44px;
+  --mast-sub-size: 17px;
+  --mast-pad-top: 22px;
+  --mast-pad-btm: 24px;
+  --mast-kick-gap: 11px;
 }
 
 /**
@@ -286,13 +308,21 @@
  * would read as a border on the container instead of a rule belonging to the text. It takes no
  * horizontal margin of its own — see the block note above.
  */
+/**
+ * ⚠️ ITS OFFSET AND ITS HEIGHT ARE TOKENS ON THE GRID ROOT, NOT LITERALS HERE, AND THE SCOPE IS THE
+ * WHOLE REASON. The artwork's box has to START below this rule so the rule always sits in clear
+ * space — and the artwork is painted on the SLAB, which is an ancestor of this element and cannot
+ * read a token declared on it. Both numbers therefore live on `.wpg`, where the slab and the rule
+ * can both see them, and neither element restates the other's geometry.
+ */
+.wpg { --mast-toprule-y: 7px; --mast-toprule-h: 1px; }
 .wsh-toprule {
-  height: 1px;
+  height: var(--mast-toprule-h);
   background: var(--mast-toprule);
-  margin: 7px 0 0;
+  margin: var(--mast-toprule-y) 0 0;
 }
 
-.wsh-body { padding: 26px 0 28px; }
+.wsh-body { padding: var(--mast-pad-top) 0 var(--mast-pad-btm); }
 
 /**
  * ⚠️ THE KICKER IS THE SECTION NAME AND IT COMES FROM THE ROUTER, NOT A TABLE HERE. Its source is
@@ -306,12 +336,12 @@
   border-radius: 999px;
   padding: 5px 15px 4px;
   font-family: var(--font-serif);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   letter-spacing: 0.15em;
   color: rgba(25, 18, 16, 0.72);
   text-transform: uppercase;
-  margin-bottom: 15px;
+  margin-bottom: var(--mast-kick-gap);
 }
 
 .wsh-title {
@@ -387,13 +417,17 @@
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  margin-top: 21px;
+  /* ⚠️ THE SIZING BENCH'S VALUES, NOT THE FULLPAGE REF'S, AND THE TWO DISAGREE. `scriptally-
+     masthead-fullpage.html` draws 21 / 11px 22px / 16px; `masthead-sizing-bench.html` — the later
+     artefact, and the one the brief says its numbers came from — draws 17 / 10px 20px / 15px. The
+     brief names five tokens and is silent on the CTA, so the ref wins on what it shows. */
+  margin-top: 17px;
   background: var(--pink);
   border: 1px solid var(--mast-cta-bd);
   border-radius: 999px;
-  padding: 11px 22px;
+  padding: 10px 20px;
   font-family: var(--font-serif);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.005em;
   color: #311e19;

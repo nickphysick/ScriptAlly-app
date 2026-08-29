@@ -225,7 +225,7 @@ describe("the masthead is content, not chrome", () => {
        page's top edge. The law is unchanged: ONE element states the vertical air. */
     expect(wsh, "the masthead itself pays vertical air as well as its body").toContain("padding: 0");
     expect(decls(all(hdrCss, ".wsh-body")), "the masthead's body stopped stating its own vertical air")
-      .toContain("padding: 26px 0 28px");
+      .toContain("padding: var(--mast-pad-top) 0 var(--mast-pad-btm)");
     /* the 16px gap moved to the slab's base with the hairline — asserted in workspacePageGrid.test */
     expect(wsh, "the masthead kept a bottom margin — that air belongs below the whole slab now")
       .not.toContain("margin-bottom");
@@ -344,7 +344,17 @@ describe("the masthead is content, not chrome", () => {
     /* ⚠️ THE TOKEN'S NAME AND VALUE BOTH MOVED — `--wsh-title-size: 30px` became
        `--mast-title-size: 56px` when the two header types became one format. The claim is unchanged:
        ONE title size, stated once, with no per-page step. */
-    expect(decl).toContain("--mast-title-size: 56px");
+    /* ⚠️ THE VALUE MOVED 56 → 44 (Phase 2a) AND THE CLAIM DID NOT. Pinning it is deliberate — it is a
+       BAKED design token, and the point of pinning one is that a retune is a decision somebody makes
+       rather than a number that drifts. What must stay is the pair: one size stated in the shared
+       sheet, and nothing page-scoped. */
+    expect(decl).toContain("--mast-title-size: 44px");
+    /* ⚠️ THE BODY'S AIR IS ASSERTED THROUGH ITS TOKENS RATHER THAN AS A LITERAL PAIR, so a retune
+       touches ONE place — the sizing block — instead of three locks. The values are pinned there. */
+    for (const [tok, val] of [["--mast-sub-size", "17px"], ["--mast-pad-top", "22px"],
+                              ["--mast-pad-btm", "24px"], ["--mast-kick-gap", "11px"]] as const) {
+      expect(decl, `the masthead's ${tok} moved off ${val}`).toContain(`${tok}: ${val}`);
+    }
     expect(decl, "the old title token survived alongside the new one — two sizes, one masthead")
       .not.toContain("--wsh-title-size");
     /* bounded, so `wsh--solo` cannot be matched by some longer live class that starts with it */

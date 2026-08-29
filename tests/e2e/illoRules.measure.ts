@@ -20,6 +20,21 @@
  */
 import { test, expect } from "@playwright/test";
 import { openRoute, liftMotionSuppression } from "./measure";
+import { readPng } from "./pngPixels";
+
+/** every workspace page — the container's edge is not an illustrated-page claim */
+const BORDER_PAGES: { name: string; route: string; cls: string }[] = [
+  { name: "Query Centre",        route: "/queries",              cls: "qc-wpg"   },
+  { name: "Analytics",           route: "/queries/analytics",    cls: "qa-wpg"   },
+  { name: "Contact list",        route: "/agents",               cls: "agl-wpg"  },
+  { name: "Discover",            route: "/agents/discover",      cls: "dv-wpg"   },
+  { name: "Manuscripts",         route: "/manuscripts",          cls: "msv-wpg"  },
+  { name: "Comparable titles",   route: "/manuscripts/comps",    cls: "ct-wpg"   },
+  { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
+  { name: "To-do list",          route: "/todo",                 cls: "tpl-wpg"  },
+  { name: "Calendar",            route: "/todo/calendar",        cls: "tpl-wpg"  },
+  { name: "Noteboard",           route: "/todo/noteboard",       cls: "tpl-wpg"  },
+];
 
 const TRIAL = [
   { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg", settles: true  },
@@ -162,118 +177,177 @@ test("⚠️ THE TREATMENT IS SUPPRESSED WHEN THE BAND SETTLES — and only wher
       return { stuck: ch.classList.contains("wpg-chrome--stuck"),
                art: getComputedStyle(ch, "::after").backgroundImage,
                img: cs.backgroundImage,
-               washTop: rgb(cs.getPropertyValue("--mast-wash-top").trim()),
-               washBottom: rgb(cs.getPropertyValue("--mast-wash-bottom").trim()),
+               bg: cs.backgroundColor,
+               winGround: rgb(cs.getPropertyValue("--ws-window").trim()),
                title: getComputedStyle(g.querySelector(".wsh-title") as HTMLElement).fontSize };
     }, t.cls);
     expect(after.stuck, `${t.name}: scrolled past the settle and the band is not stuck`).toBe(true);
     expect(/url\(/.test(after.art), `${t.name}: the artwork is still painted on the settled bar`).toBe(false);
-    expect(after.img, `${t.name}: the settled bar's ground is not a gradient — it has not taken the shared wash back`).toMatch(/linear-gradient/);
-    for (const [which, c] of [["top", after.washTop], ["bottom", after.washBottom]] as const) {
-      expect(after.img, `${t.name}: the settled bar's gradient does not carry the wash's ${which} stop (${c}) — it is painting something else`).toContain(c);
-    }
+    /* ⚠️ RETARGETED: THE SETTLED BAR TAKES THE WINDOW'S GROUND BACK, NOT A WASH. This asserted a
+       gradient carrying the parchment wash's two stops; the wash is retired with the two header
+       types, so the claim is now that the band paints the same plain ground every other masthead
+       does. What has not weakened is the point of the case — settled, the illustration is gone. */
+    expect(after.img, `${t.name}: the settled bar still paints an image — it should be the plain ground`).toBe("none");
+    expect(after.bg, `${t.name}: the settled bar's ground is not the window's own`).toBe(after.winGround);
     expect(after.title, `${t.name}: the settled bar keeps the trial's 47px title`).toBe("22px");
   }
 });
 
 
 /**
- * ══ THE ACCENT BAR — A POSITIVE CLAIM, NOT A CARVE-OUT ════════════════════════════════════════
+ * ══ ONE BORDER, ON THE CONTAINER, ON ALL FOUR SIDES ═══════════════════════════════════════════
  *
- * ⚠️ THE ENUMERATED CARVE-OUT GAINS NOTHING FOR THIS, AND THAT IS WORTH SAYING OUT LOUD. An
- * exemption is only needed where a shared assertion would otherwise fail; nothing in this system
- * ever read the slab's TOP border, and the slab's bottom hairline was already
- * `1px solid var(--ws-edge)` before this pack, so the brief's `border-bottom` line restates what
- * exists. A carve-out with nothing to exempt would be bookkeeping. The claim is asserted directly
- * instead, in both directions: this page has the bar, the other nine do not.
+ * ⚠️ THIS REPLACES THE ACCENT-BAR CASE, whose subject is deleted. It asserted a 3px black rule on
+ * one page's slab and the derivation of its corner radius; the trial is retired and the claim now is
+ * the opposite kind — that the WINDOW owns the only edge, and nothing inside it draws a competing
+ * one.
+ *
+ * ⚠️ THE BRIEF DESCRIBES A FAULT THIS APP DOES NOT HAVE, and the measurement is what says so. It
+ * reports the masthead having no side borders while the body does, so the edge appears to begin
+ * halfway down. Measured on ten pages: the ONLY near-full-width bordered elements inside the window
+ * are `.ws-window` itself (1px on all four sides in `--ws-edge`) and the slab's bottom hairline. The
+ * arrangement it asks for is the arrangement that exists — the loose-topped container is the SIZING
+ * BENCH's, whose `.win` carries no border at all while its cards do. The lock is written anyway,
+ * because "already true" and "guarded" are different things.
+ *
+ * ⚠️ AND THE CORNERS ARE SAMPLED SEPARATELY, because a border that stops short at a radius is the
+ * other failure and it is invisible to a mid-edge sample. The claim there is not "the border colour
+ * is at the corner" — an antialiased arc blends the border into both grounds, so a strict match
+ * fails on a correct curve. It is that the arc SEPARATES: the pixel outside is the page ground, the
+ * pixel inside is the window's fill, and between them the colour is neither.
  */
-const ACCENTED = ["Submission packages"];
-const ALL_PAGES: { name: string; route: string; cls: string }[] = [
-  { name: "Query Centre",        route: "/queries",              cls: "qc-wpg"   },
-  { name: "Analytics",           route: "/queries/analytics",    cls: "qa-wpg"   },
-  { name: "Contact list",        route: "/agents",               cls: "agl-wpg"  },
-  { name: "Discover",            route: "/agents/discover",      cls: "dv-wpg"   },
-  { name: "Manuscripts",         route: "/manuscripts",          cls: "msv-wpg"  },
-  { name: "Comparable titles",   route: "/manuscripts/comps",    cls: "ct-wpg"   },
-  { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg" },
-  { name: "To-do list",          route: "/todo",                 cls: "tpl-wpg"  },
-  { name: "Calendar",            route: "/todo/calendar",        cls: "tpl-wpg"  },
-  { name: "Noteboard",           route: "/todo/noteboard",       cls: "tpl-wpg"  },
-];
+const NEAR = (a: number[], b: number[], tol = 6) => a.every((v, i) => Math.abs(v - b[i]) <= tol);
 
-for (const posture of ["rest", "settled"] as const) {
-  test(`⚠️ EXACTLY ONE MASTHEAD CARRIES AN ACCENT BAR — ${posture}`, async ({ page }) => {
+for (const width of [1280, 1440, 1920, 2560]) {
+  test(`⚠️ THE CONTAINER OWNS THE ONLY EDGE, ALL FOUR SIDES — ${width}`, async ({ page }) => {
     const lines: string[] = [];
-    const withBar: string[] = [];
-    for (const { name, route, cls } of ALL_PAGES) {
-      /* short, so pages that CAN settle actually do — see the note on the suppression case */
-      await openRoute(page, route, { width: 1440, height: posture === "settled" ? 560 : 900 });
+    let sampled = 0;
+    for (const { name, route, cls } of BORDER_PAGES) {
+      await openRoute(page, route, { width, height: 900 });
       await liftMotionSuppression(page);
       await page.waitForTimeout(500);
-      if (posture === "settled") {
-        await page.evaluate(async (c) => {
-          const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-          const sc = g.querySelector(".wpg-scroll") as HTMLElement;
-          if (sc.scrollHeight - sc.clientHeight < 120) return;
-          for (let y = 0; y <= 400; y += 20) { sc.scrollTop = y; await new Promise((r) => requestAnimationFrame(r)); }
-        }, cls);
-        await page.waitForTimeout(700);
-      }
-      const r = await page.evaluate((c) => {
-        const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-        if (!g) return null;
-        const slab = g.querySelector(".wpg-chrome") as HTMLElement;
-        const cs = getComputedStyle(slab);
-        const win = g.closest(".ws-window") as HTMLElement;
-        const wcs = getComputedStyle(win), wb = win.getBoundingClientRect(), sb = slab.getBoundingClientRect();
-        /* ⚠️ THE INNER RADIUS, COMPUTED FROM THE WINDOW'S OWN TWO TOKENS AND NOT FROM A NUMBER TYPED
-           HERE — the whole point of the derivation is that the bar's ends follow whatever the window
-           does, so a lock restating 15px would pass on a window that had moved. */
-        const probe = document.createElement("div");
-        probe.style.cssText = "position:absolute;visibility:hidden;height:0;width:calc(var(--ws-window-radius) - var(--ws-window-border))";
-        slab.appendChild(probe);
-        const inner = probe.getBoundingClientRect().width;
-        probe.remove();
+      const g = await page.evaluate((c) => {
+        const el = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+        if (!el) return null;
+        const win = el.closest(".ws-window") as HTMLElement;
+        const wb = win.getBoundingClientRect(), cs = getComputedStyle(win);
+        const slab = el.querySelector(".wpg-chrome") as HTMLElement;
+        const sb = slab.getBoundingClientRect();
+        /* ⚠️ THE FILTER'S THRESHOLD IS THE WINDOW'S OWN WIDTH, NOT THE VIEWPORT'S. An earlier form
+           asked for elements wider than `viewport - 200`, which at 1440 is 1240 against a 1172px
+           window — so it could not match anything and reported "nothing draws a border" by
+           construction. A probe whose population cannot qualify is not a measurement. */
+        /* ⚠️ FLUSH WITH THE WINDOW'S INNER EDGE, NOT MERELY WIDE — and the first form was wrong in
+           the expensive direction, failing on correct pages. "Any near-full-width bordered element"
+           catches a page's own content: Analytics' bordered panels and the Calendar's timeline rail
+           and tables all have borders and are legitimately as wide as the column. The claim is about
+           an element drawing a SECOND container edge, which means one sitting ON the window's inner
+           edge — a card inset by the page's gutter is not competing with anything. */
+        const innerL = wb.left + parseFloat(cs.borderLeftWidth);
+        const innerR = wb.right - parseFloat(cs.borderRightWidth);
+        const rivals = [...win.querySelectorAll<HTMLElement>("*")].filter((e) => {
+          const b = e.getBoundingClientRect();
+          if (b.height < 8) return false;
+          const s2 = getComputedStyle(e);
+          const l = parseFloat(s2.borderLeftWidth) > 0 && Math.abs(b.left - innerL) <= 2;
+          const r2 = parseFloat(s2.borderRightWidth) > 0 && Math.abs(b.right - innerR) <= 2;
+          return l || r2;
+        }).map((e) => String(e.className).slice(0, 30));
         return {
-          top: cs.borderTopWidth, topColor: cs.borderTopColor,
-          bottom: cs.borderBottomWidth, bottomColor: cs.borderBottomColor,
-          radius: cs.borderTopLeftRadius, radiusR: cs.borderTopRightRadius,
-          bottomRadius: cs.borderBottomLeftRadius,
-          inner: Math.round(inner * 10) / 10,
-          /* the slab's top edge against the window's inner top edge — the bar has to BE at the
-             corner for following its curve to mean anything */
-          gapFromWindowTop: Math.round((sb.top - (wb.top + parseFloat(wcs.borderTopWidth))) * 10) / 10,
-          spans: Math.round(sb.width) >= Math.round(wb.width - 2 * parseFloat(wcs.borderLeftWidth)) - 1,
+          l: Math.round(wb.left), r: Math.round(wb.right), t: Math.round(wb.top),
+          bd: cs.borderTopWidth, bdc: cs.borderTopColor, radius: parseFloat(cs.borderTopLeftRadius),
+          rivals,
+          ys: [Math.round(sb.top + 40), Math.round(sb.bottom + 10), Math.round(sb.bottom + 140)],
         };
       }, cls);
-      expect(r, `${name}: no grid rendered`).not.toBeNull();
-      const has = parseFloat(r!.top) > 0;
-      if (has) withBar.push(name);
-      lines.push(`${name.padEnd(21)} top ${r!.top.padStart(5)} ${has ? r!.topColor : ""} · hairline ${r!.bottom} ${r!.bottomColor} · radius ${r!.radius}/${r!.radiusR} (inner ${r!.inner}) · atTop ${r!.gapFromWindowTop}`);
+      expect(g, `${name}: no grid`).not.toBeNull();
+      expect(parseFloat(g!.bd), `${name}: the container has no border`).toBeGreaterThan(0);
+      expect(g!.rivals, `${name}: something inside the window draws its own side border: ${g!.rivals.join(", ")}`).toEqual([]);
 
-      /* ⚠️ THE HAIRLINE IS ASSERTED ON EVERY PAGE, not just the accented one. It predates this pack
-         and the brief restates it; the way a restatement goes wrong is by quietly replacing a shared
-         token with a ref's literal, so what is checked is that all ten still agree. */
-      expect(parseFloat(r!.bottom), `${name}: the slab lost its base hairline`).toBeGreaterThan(0);
+      const bd = (g!.bdc.match(/\d+/g) ?? []).map(Number).slice(0, 3);
+      /* ⚠️ THREE HEIGHTS — inside the masthead, inside the toolbar's band, inside the body — because
+         the reported fault is an edge that starts partway down. One sample cannot see that. */
+      for (const [i, y] of g!.ys.entries()) {
+        if (y < 0 || y > 880) { lines.push(`${name} y${i}: offscreen`); continue; }
+        const png = readPng(await page.screenshot({ clip: { x: g!.l, y, width: g!.r - g!.l, height: 1 } }));
+        const left = png.at(0, 0).slice(0, 3), right = png.at(png.width - 1, 0).slice(0, 3);
+        sampled += 2;
+        expect(NEAR(left, bd), `${name}: the container's LEFT edge at height ${i} paints ${left.join(",")}, not the border's ${bd.join(",")}`).toBe(true);
+        expect(NEAR(right, bd), `${name}: the container's RIGHT edge at height ${i} paints ${right.join(",")}, not the border's ${bd.join(",")}`).toBe(true);
+      }
 
-      if (ACCENTED.includes(name)) {
-        expect(parseFloat(r!.top), `${name}: the accent bar is ${r!.top}, not the 3px the page declares`).toBe(3);
-        expect(r!.gapFromWindowTop, `${name}: the accent bar sits ${r!.gapFromWindowTop}px below the window's inner top edge, so its ends are nowhere near the corner it is meant to follow`).toBeLessThanOrEqual(0.5);
-        expect(r!.spans, `${name}: the accent bar's slab does not span the window's inner width`).toBe(true);
-        /* the derivation, both ends, and the bottom corners deliberately square */
-        expect(parseFloat(r!.radius), `${name}: the accent's left end does not follow the window's inner radius (${r!.radius} against ${r!.inner})`).toBeCloseTo(r!.inner, 1);
-        expect(parseFloat(r!.radiusR), `${name}: the accent's right end does not follow the window's inner radius (${r!.radiusR} against ${r!.inner})`).toBeCloseTo(r!.inner, 1);
-        expect(parseFloat(r!.bottomRadius), `${name}: the slab's BOTTOM corners are rounded — the band closes on a straight hairline`).toBe(0);
-      } else {
-        expect(parseFloat(r!.top), `${name}: a page that is not the accent trial has grown a ${r!.top} top border`).toBe(0);
+      /* ── the corners ── */
+      const R = Math.max(4, Math.round(g!.radius));
+      for (const [corner, x] of [["top-left", g!.l], ["top-right", g!.r - R - 2]] as const) {
+        const png = readPng(await page.screenshot({ clip: { x, y: g!.t, width: R + 2, height: R + 2 } }));
+        const mid = Math.round(R / 2);
+        const outer = png.at(corner === "top-left" ? 0 : png.width - 1, mid).slice(0, 3);
+        const inner = png.at(corner === "top-left" ? png.width - 1 : 0, mid).slice(0, 3);
+        lines.push(`${name.padEnd(20)} ${corner} outer ${outer.join(",")} inner ${inner.join(",")} bd ${bd.join(",")}`);
+        expect(NEAR(outer, inner, 4), `${name}: the ${corner} corner paints the same colour inside and out (${outer.join(",")}) — the border stops short at the radius`).toBe(false);
       }
     }
-    console.log(`\n══ ACCENT BAR — ${posture}\n` + lines.join("\n"));
-    expect(withBar, "the accent bar is not on exactly the trial page").toEqual(ACCENTED);
-    /* ⚠️ AND THE HAIRLINE COLOURS ARE COMPARED ACROSS PAGES rather than against a hex, so the
-       brief's `#e4ddd1` — the REF's edge token, a different hue from this app's `--ws-edge`, and
-       already refused once in `index.css` for exactly that reason — cannot arrive unnoticed. */
-    const hairlines = [...new Set(lines.map((l) => l.split("hairline ")[1].split(" · ")[0]))];
-    expect(hairlines, `the ten slabs disagree about their base hairline: ${hairlines.join(" | ")}`).toHaveLength(1);
+    console.log(`\n══ THE CONTAINER'S EDGE — ${width}\n` + lines.join("\n"));
+    expect(sampled, "no edge was sampled at all").toBeGreaterThan(40);
+  });
+}
+
+
+
+/**
+ * ══ THE TOP RULE SITS IN CLEAR SPACE ══════════════════════════════════════════════════════════
+ *
+ * ⚠️ THE ARTWORK PAINTED OVER IT FOR A WHOLE PHASE, and the screenshots showed it while every
+ * property-level assertion passed — the layer was `inset: 0` on the slab, so it began at the band's
+ * top and the rule was underneath it. The claim is not "the artwork has a top offset", which is a
+ * declaration; it is that the rule's row LOOKS THE SAME with the picture on and off.
+ *
+ * ⚠️ AND IT IS TAKEN AT THE RULE'S OWN y, MEASURED, rather than a few pixels down. A sample below
+ * the rule would pass on a band whose artwork started one pixel into it.
+ */
+for (const width of [1280, 2560]) {
+  test(`⚠️ THE ARTWORK STARTS BELOW THE TOP RULE — ${width}`, async ({ page }) => {
+    const gaps = new Map<string, string[]>();
+    for (const t of TRIAL) {
+      await openRoute(page, t.route, { width, height: 900 });
+      await liftMotionSuppression(page);
+      await page.waitForTimeout(600);
+      const g = await page.evaluate((c) => {
+        const el = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+        const rule = el.querySelector(".wsh-toprule") as HTMLElement | null;
+        const slab = el.querySelector(".wpg-chrome") as HTMLElement;
+        if (!rule) return null;
+        const rb = rule.getBoundingClientRect(), sb = slab.getBoundingClientRect();
+        return { y: Math.round(rb.top), x: Math.round(sb.left), w: Math.round(sb.width),
+                 gap: +(rb.top - sb.top).toFixed(1) };
+      }, t.cls);
+      expect(g, `${t.name}: no top rule`).not.toBeNull();
+      const clip = { x: g!.x, y: g!.y, width: g!.w, height: 1 };
+      const on = readPng(await page.screenshot({ clip }));
+      await page.addStyleTag({ content: `.wpg .wpg-chrome::after { opacity: 0 !important; }` });
+      await page.waitForTimeout(140);
+      const off = readPng(await page.screenshot({ clip }));
+      await page.locator("style").last().evaluate((e) => e.remove());
+      let diff = 0, worst = 0;
+      for (let x = 0; x < on.width; x += 3) {
+        const a = on.at(x, 0), b = off.at(x, 0);
+        const d = Math.max(...a.slice(0, 3).map((v, i) => Math.abs(v - b[i])));
+        if (d > 2) diff += 1;
+        worst = Math.max(worst, d);
+      }
+      console.log(`   ${t.name.padEnd(20)} ${width}: rule at +${g!.gap}px, ${diff} of ${Math.ceil(on.width / 3)} samples differ (worst ${worst})`);
+      expect(diff, `${t.name}: the artwork paints on the top rule's own row — ${diff} samples differ with it on (worst ${worst})`).toBe(0);
+      /**
+       * ⚠️ THE OFFSET ITSELF, BECAUSE IT COLLAPSED OUT OF THE MASTHEAD ONCE. The rule carries a
+       * `margin-top`; on a block box with no padding of its own a first child's top margin collapses
+       * THROUGH the parent, and measured, one declaration rendered as +7px on Query Centre and +0px
+       * on Submission packages. Asserted as a value AND as an agreement, because either alone
+       * misses one half: a positive gap on both pages can still be two different gaps, and equal
+       * gaps can both be zero.
+       */
+      expect(g!.gap, `${t.name}: the top rule sits at the band's very edge — its offset has collapsed out of the masthead`).toBeGreaterThan(2);
+      gaps.set(String(g!.gap), [...(gaps.get(String(g!.gap)) ?? []), t.name]);
+    }
+    expect([...gaps.keys()], `the two illustrated pages put the top rule at different offsets: ${[...gaps.entries()].map(([v, n]) => `${n.join(", ")} ${v}`).join(" | ")}`).toHaveLength(1);
   });
 }

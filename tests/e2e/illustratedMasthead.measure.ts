@@ -233,63 +233,6 @@ test("⚠️ THE TRIAL CHANGES NO BEHAVIOUR — Packages answers like every othe
  * it between two neighbouring pixels. Asserting the token values instead would pass on exactly the
  * fault, because the values were right and their ORDER was not.
  */
-/* ⚠️ THE PAGES THAT HAVE A TINT — Packages took a plain ground with its accent bar, so it has no
-   fade to check and asserting one there would fail on a correct page. Named rather than skipped,
-   and its length asserted below, so the day the trial's grounds converge again someone has to
-   edit this and read the sentence. */
-const TINTED = ["Query Centre"];
-
-for (const width of [1280, 2560]) {
- for (const trial of TRIAL_ROUTES.filter((t) => TINTED.includes(t.name))) {
-  test(`⚠️ THE TINT FADES RATHER THAN STEPPING — ${trial.name} — ${width}`, async ({ page }) => {
-    await openRoute(page, trial.route, { width, height: 900 });
-    await liftMotionSuppression(page);
-    await page.waitForTimeout(700);
-    const geo = await page.evaluate((c) => {
-      const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-      const ch = g.querySelector(".wpg-chrome") as HTMLElement;
-      const b = ch.getBoundingClientRect();
-      /* the tint's own two stops, resolved through a probe — `getPropertyValue` on a `calc()`
-         hands back its TEXT, which parses to NaN */
-      const probe = document.createElement("div");
-      probe.style.cssText = "position:absolute;visibility:hidden;height:0";
-      ch.appendChild(probe);
-      const px = (v: string) => { probe.style.width = v; return probe.getBoundingClientRect().width; };
-      const gndB = px("var(--illo-gnd-b)"), gndA = px("var(--illo-gnd-a)");
-      probe.remove();
-      return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height), gndB, gndA };
-    }, trial.cls);
-
-    /* ⚠️ MONOTONIC FIRST — the precondition, asserted before the shape, because a transposed pair
-       makes the whole range zero-length and every sample identical, which a "gradual" test passes. */
-    expect(geo.gndA, `${trial.name}: the tint's stops are not in ascending order (gnd-b ${geo.gndB} → gnd-a ${geo.gndA}) — CSS will clamp them into one hard edge`).toBeGreaterThan(geo.gndB + 20);
-
-    /* the artwork off, so this is a question about the GROUND alone */
-    await page.addStyleTag({ content: `.wpg .wpg-chrome::after { opacity: 0 !important; }` });
-    await page.waitForTimeout(140);
-    const png = readPng(await page.screenshot({ clip: { x: geo.x, y: geo.y, width: geo.w, height: geo.h } }));
-    await page.locator("style").last().evaluate((e) => e.remove());
-
-    /* a row clear of the window's corner arc and clear of the text's own line */
-    const row = Math.min(png.height - 3, 6);
-    const red = (px: number) => png.at(Math.min(Math.max(px, 0), png.width - 1), row)[0];
-    const from = Math.round(geo.gndB), to = Math.round(geo.gndA);
-    const samples: number[] = [];
-    const step = Math.max(2, Math.round((to - from) / 40));
-    for (let x = from; x <= to; x += step) samples.push(red(x));
-    const total = Math.abs(samples[0] - samples[samples.length - 1]);
-    let biggest = 0, atX = 0;
-    for (let i = 1; i < samples.length; i += 1) {
-      const d = Math.abs(samples[i] - samples[i - 1]);
-      if (d > biggest) { biggest = d; atX = from + i * step; }
-    }
-    console.log(`\n══ TINT FADE — ${trial.name} — ${width}\n   stops ${from} → ${to} · ${samples.length} samples · total change ${total} · biggest single step ${biggest} at x${atX}`);
-    expect(total, `${trial.name}: the tint does not change across its own range — there is no fade to check`).toBeGreaterThan(6);
-    expect(biggest, `${trial.name}: the tint changes by ${biggest} of its total ${total} between two adjacent samples at x${atX} — that is a step, not a fade`).toBeLessThan(Math.max(3, total / 3));
-  });
- }
-}
-
 /**
  * ══ THE 47px TITLE'S LINE BOX ═════════════════════════════════════════════════════════════════
  *
@@ -365,18 +308,32 @@ for (const posture of ["rest", "settled"] as const) {
 }
 
 
-test("⚠️ THE TINTED SET IS ONE PAGE — Packages carries an accent bar and a plain ground instead", async ({ page }) => {
-  await openRoute(page, "/manuscripts/packages", { width: 1440, height: 900 });
-  await liftMotionSuppression(page);
-  await page.waitForTimeout(600);
-  expect(TINTED, "the number of trial pages carrying a horizontal tint has changed").toHaveLength(1);
-  expect(TINTED.every((n) => TRIAL.includes(n)), "a tinted page is not on the trial list at all").toBe(true);
-  /* ⚠️ AND THE UNTINTED ONE IS ASSERTED TO BE UNTINTED, or the list above is a claim about nothing.
-     A horizontal gradient is what the accent bar replaced; the shared wash's vertical one is a
-     different thing and only ever appears when the band is settled. */
-  const img = await page.evaluate(() => {
-    const g = [...document.querySelectorAll(".wpg.pkgw-wpg")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-    return getComputedStyle(g.querySelector(".wpg-chrome") as HTMLElement).backgroundImage;
-  });
-  expect(img, `Submission packages' resting band still paints a gradient (${img}) — the tint was meant to go with the accent bar`).toBe("none");
+test("⚠️ NEITHER TRIAL PAGE PAINTS A GROUND — the masthead's ground is the window's, on all ten", async ({ page }) => {
+  /**
+   * ⚠️ THIS REPLACES THE TINT-FADE CASES, whose subject is deleted. They asserted the SHAPE of a
+   * horizontal tint — the biggest step between adjacent samples against the total change, with
+   * monotonic stops asserted first — on a page that had one. The rebuild put every masthead on the
+   * window's own plain ground, so there is no gradient left to check the shape of, and the honest
+   * successor is the absence.
+   *
+   * ⚠️ ASSERTED ON BOTH TRIAL PAGES, not one. The tint outlived the accent bar by a phase because a
+   * list said one page still had it; a claim about "neither" cannot go stale the same way.
+   */
+  for (const t of TRIAL_ROUTES) {
+    await openRoute(page, t.route, { width: 1440, height: 900 });
+    await liftMotionSuppression(page);
+    await page.waitForTimeout(500);
+    const r = await page.evaluate((c) => {
+      const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+      const ch = g.querySelector(".wpg-chrome") as HTMLElement;
+      const cs = getComputedStyle(ch);
+      const d = document.createElement("div");
+      d.style.color = cs.getPropertyValue("--ws-window").trim();
+      ch.appendChild(d); const ground = getComputedStyle(d).color; d.remove();
+      return { img: cs.backgroundImage, bg: cs.backgroundColor, ground };
+    }, t.cls);
+    expect(r.img, `${t.name}'s band still paints a gradient (${r.img}) — the ground is meant to be plain`).toBe("none");
+    expect(r.bg, `${t.name}'s band is not on the window's own ground`).toBe(r.ground);
+  }
 });
+
