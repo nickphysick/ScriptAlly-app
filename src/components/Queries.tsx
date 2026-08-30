@@ -4686,7 +4686,27 @@ export const Queries: React.FC<{
               plate's description is not drawn once the header condenses, which is the state the ref
               draws and the state this page spends its life in. Flagged, not silently reconciled. */}
           <div className="qc-lhead">
-            {/* ══ §2 · THE PAGE'S ONE CREATIVE ACTION, OVER THE COLUMN IT ADDS TO ═══════════
+            {/**
+              * ⚠️ THE LIST'S OWN CONTROLS SIT HERE NOW, OVER THE LIST. Search, filter and sort were
+              * inside the list panel's header; they govern the rows beneath them either way, but as a
+              * CELL OF THE BODY'S GRID they sit on the same line as the pane's verbs and read as one
+              * command row rather than two strips at different heights. The panel then starts
+              * straight into rows with no header of its own.
+              *
+              * ⚠️ AND `Log new query` WENT THE OTHER WAY, to the right cell. It was here on the
+              * reasoning that a creative verb belongs over the column it lengthens — true, and it put
+              * the page's one pink surface over a column whose other controls are all filters. The
+              * command row now reads left-to-right as "narrow the list · act on the record".
+              */}
+            {listHead}
+          </div>
+
+          {/* ⚠️ THE PANE'S VERBS CAME UP OUT OF THE HERO BAND (§1). They acted on the selected query
+              from inside the card that names it, which reads as the card's own chrome; a query's
+              verbs belong to the column, above the thing they change, on the same line as the list's.
+              §2 settles WHICH verbs — this row is their seat. */}
+          <div className="qc-phead">
+            {/* ══ THE PAGE'S ONE CREATIVE ACTION, FIRST IN THE ROW ═══════════════════════════
                 ⚠️ IT WAS IN THE MASTHEAD BAND, beside Export and above both columns — a creative
                 verb filed with the page's chrome. Here it sits over the list it lengthens, which is
                 where the thing it makes will appear.
@@ -4702,13 +4722,7 @@ export const Queries: React.FC<{
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
               <span>Log new query</span>
             </button>
-          </div>
 
-          {/* ⚠️ THE PANE'S VERBS CAME UP OUT OF THE HERO BAND (§1). They acted on the selected query
-              from inside the card that names it, which reads as the card's own chrome; a query's
-              verbs belong to the column, above the thing they change, on the same line as the list's.
-              §2 settles WHICH verbs — this row is their seat. */}
-          <div className="qc-phead">
             {/* ⚠️ `THIS QUERY` IS RETIRED (§3c), AND ITS OWN SENTENCE IS WHY. §3a says the label
                 "was being contradicted" by Filter and Sort sitting in this row; with them gone it
                 is true — and now redundant, because the column IS the query's and the pairing card
@@ -4974,7 +4988,9 @@ export const Queries: React.FC<{
                 vanished while the sheet was open would animate the desk behind the writer's back.
 
                 Wiring is untouched: same handlers, same popovers, same refs. */}
-{listHead}
+            {/* ⚠️ THE PANEL STARTS STRAIGHT INTO ROWS. `listHead` moved into the command row's left
+                cell — it is the same JSX, rendered one level up, so the wiring, the popovers and the
+                refs are untouched. What changes is that it now shares a line with the pane's verbs. */}
             {/**
               * ⚠️ DERIVED, UNDISMISSABLE, AND IT LEAVES ON ITS OWN (D6). It states a count and offers
               * the scope that holds them — no ✕, because there is nothing to remember having

@@ -73,8 +73,22 @@ describe("§1c · the list's controls sit at the head of the list column", () =>
     expect(list, "the list column is missing").toBeGreaterThan(-1);
     expect(head, "the list head is not mounted in the populated branch").toBeGreaterThan(-1);
     expect(rows, "the rows container is missing").toBeGreaterThan(-1);
-    expect(head).toBeGreaterThan(list);
-    expect(head, "the head fell below the rows — it must head the column, not scroll with it").toBeLessThan(rows);
+    /**
+     * ⚠️ RETARGETED, AND THE LAW SURVIVES ITS OWN INVERSION. This asserted the head sat INSIDE the
+     * list column, above the rows — the correction that retired a page-wide strip, because such a
+     * strip claimed a reach the controls do not have. The head has moved up one level into the body
+     * grid's LEFT CELL, which is not a page-wide row: it is a cell over the list column, on the same
+     * line as the pane's verbs, and the list panel now starts straight into rows.
+     *
+     * ⚠️ THE SOURCE-ORDER TEST WAS A PROXY FOR "OVER THE LIST" AND THE PROXY BROKE WHILE THE
+     * PROPERTY HELD. `cmd.measure.ts` asserts the real thing: the left cell's box IS the list
+     * column's box, to the pixel, at 1280 and 1920. What stays here is the half a source lock can
+     * honestly carry — the head is mounted, it is in the left cell, and no strip spans both columns.
+     */
+    expect(code.slice(body).indexOf("qc-lhead"), "the body lost its left command cell").toBeGreaterThan(-1);
+    expect(head, "the head is mounted somewhere other than the left command cell")
+      .toBeGreaterThan(code.indexOf('className="qc-lhead"', body));
+    expect(head, "the head fell past the list panel — it is meant to sit ABOVE it now").toBeLessThan(list);
     /* and what is mounted there IS the head */
     expect(headDefinition(), "the mounted head is not the list head").toContain('className="f12-lhead"');
   });

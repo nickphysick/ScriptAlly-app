@@ -162,7 +162,21 @@ describe("the query's verbs live in one kebab, not a bar", () => {
     expect(list, "the list column is missing").toBeGreaterThan(-1);
     expect(head, "the list head is not mounted in the populated branch").toBeGreaterThan(-1);
     expect(rows, "the rows container is missing").toBeGreaterThan(-1);
-    expect(head, "the head escaped the list column").toBeGreaterThan(list);
+    /**
+     * ⚠️ RETARGETED, AND THE LAW SURVIVES ITS OWN INVERSION. It asserted the head sat INSIDE the list
+     * column rather than in a page-wide row — the correction that retired a strip spanning both
+     * columns, because such a strip claimed a reach the controls do not have. The head has now moved
+     * up one level into the body grid's LEFT CELL, which is not a page-wide row: it is a cell over
+     * the list column, sitting on the same line as the pane's verbs.
+     *
+     * ⚠️ SO THE CLAIM IS GEOMETRY, NOT SOURCE ORDER. "Before the rows in the file" was a proxy for
+     * "over the list"; the proxy broke while the property held. `cmd.measure.ts` asserts the real
+     * thing — the left cell's box is the list column's box, to the pixel, at 1280 and 1920 — and what
+     * stays here is the half a source lock can honestly carry: the head is mounted in the populated
+     * branch, and no strip spans both columns.
+     */
+    expect(head, "the list head is not mounted at all").toBeGreaterThan(-1);
+    expect(code.slice(body).includes("qc-lhead"), "the body lost its left command cell").toBe(true);
     expect(head, "the head is below the rows — it must be the column's head, and it stays fixed while they scroll")
       .toBeLessThan(rows);
 
