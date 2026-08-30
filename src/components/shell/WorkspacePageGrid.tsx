@@ -29,11 +29,8 @@
  * them is off it. Any stop between commits leaves a working app.
  */
 import React from "react";
-import { MastheadBehaviourContext } from "./mastheadBehaviour";
-import { createPortal } from "react-dom";
-import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import "./workspacePageGrid.css";
-import { WINWRAP_ID } from "./shellSlots";
 import { OneScreenMark, type MarkName } from "../dashboard/OneScreenMark";
 
 /**
@@ -145,14 +142,20 @@ export interface WorkspacePageGridProps {
   fill?: boolean;
   /**
    * The page's PRIMARY SCROLLER, as a selector, for a `fill` page whose scrolling happens inside it.
+   * It is what the collapsed bar watches: no scroller, no handoff.
+   *
+   * ⚠️ IT WAS `settleOn`, AND THE RENAME IS THE POINT RATHER THAN TIDINESS. Nothing settles any
+   * more — the masthead leaves and a bar takes over — so a prop named for a mechanism that has been
+   * deleted is a comment outliving what it described, one level up where a reader cannot even grep
+   * for the explanation. What it names is unchanged: which element scrolls this page's body.
    *
    * ⚠️ ONLY WHERE A SINGLE ONE EXISTS. A scroll page has one by construction and passes nothing. The
    * Tasks family names its zone classes here because its frame never scrolls by contract. Query
-   * Centre and Manuscripts pass nothing DELIBERATELY: their panes scroll independently, and a
-   * masthead settling because a list moved inside one pane would report the page as being worked on
-   * when a corner of it was.
+   * Centre and Manuscripts pass nothing DELIBERATELY: their panes scroll independently, and a bar
+   * arriving because a list moved inside one pane would report the page as scrolled when a corner
+   * of it was.
    */
-  settleOn?: string;
+  scroller?: string;
   /**
    * ⚠️ THE DETAIL VIEW OPENS WITH THE BAR ALREADY IN PLACE AND NO MASTHEAD. A two-view page's second
    * view fills the viewport and its panes scroll internally, so there is nothing for a masthead to
@@ -233,10 +236,9 @@ const barIdentity = (masthead: React.ReactNode): { title: string; mark?: MarkNam
 };
 
 export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
-  masthead, toolbar, children, className, scrollLabel, dock, fill = false, settleOn, barOnly, record,
+  masthead, toolbar, children, className, scrollLabel, dock, fill = false, scroller, barOnly, record,
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
-  const [stuck, setStuck] = React.useState(false);
   /**
    * ⚠️ THE COLLAPSED BAR IS A SEPARATE ELEMENT, NEVER A TRANSFORMATION OF THE MASTHEAD, and the
    * reason is mechanical rather than aesthetic: `font-family` cannot be interpolated — the masthead
@@ -254,7 +256,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
      bar shows, so the two views cannot disagree about it — and the scroll hysteresis simply has
      nothing to do in a view that does not scroll. */
   const barShown = barOnly || !!record || bar;
-  /** The pinned chrome's SETTLED height, for anything that must sit clear of it. See below. */
+  /** The height of whatever is PINNED above a sticky child of this scroller. See below. */
   const [stuckH, setStuckH] = React.useState(0);
   /**
    * The SCROLLPORT's own height, for anything that must cap itself to what is on screen.
@@ -299,23 +301,9 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * inside the anchored controls, which is the exact fault this offset exists to remove. Sub-pixel
    * and invisible is still the wrong side of a boundary the lock asserts.
    */
-  /* what the settle takes out of `scrollHeight`, given back as padding so max scroll cannot move */
-  const [reclaim, setReclaim] = React.useState(0);
   const toolsRef = React.useRef<HTMLDivElement>(null);
-  /* the slab — one box whose rendered height IS the stuck chrome, so the hem has one thing to read */
+  /* the slab — one box, so the hem has one thing to read */
   const chromeRef = React.useRef<HTMLDivElement>(null);
-  /* the slab's RESTING height, remembered so the settle's reclaim can be derived rather than pinned */
-  const restHRef = React.useRef(0);
-  /**
-   * ⚠️ RESOLVED IN AN EFFECT, NOT DURING RENDER. The shell mounts around this component, so the
-   * host exists by the time effects run and does not during the first render — reading it inline
-   * would portal into `null` on mount and never retry. Held in state so finding it re-renders once.
-   */
-  const [badgeHost, setBadgeHost] = React.useState<HTMLElement | null>(null);
-  /* whether this grid is the page currently on screen — see the badge's note */
-  const [displayed, setDisplayed] = React.useState(false);
-  React.useEffect(() => { setBadgeHost(document.getElementById(WINWRAP_ID)); }, []);
-
   /**
    * ⚠️ THE MINI BAR'S IDENTITY IS READ OFF THE MASTHEAD ELEMENT, NOT PASSED A SECOND TIME.
    *
@@ -361,31 +349,25 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * replaces, so this is false for the whole of this commit and the fill mini bar does not render.
    */
   /**
-   * ══ THE HEADER TYPE — TWO, AND EVERY PAGE IS ONE OF THEM ═════════════════════════════════════
+   * ══ THE TWO HEADER TYPES ARE DELETED, AND SO IS EVERYTHING THAT DEPENDED ON THE PARTITION ════
    *
-   * A page has a SINGLE PRIMARY SCROLLER if exactly one element scrolls the page's own body: the
-   * scroll row, or one internal zone. Panes that scroll independently of each other are not one.
+   * A page used to be Type A (single primary scroller · sticky slab · settles · no fold) or Type B
+   * (none · in flow · never settles · Hide folds it to a chevron badge), asserted as a partition
+   * over ten pages: no page both, neither, or opting out. `pinned = !fill || !!scroller` was the
+   * derivation, `data-wpg-type` published it, `wpg--static` styled the other half, and
+   * `mastheadBehaviour.ts` handed it to `PageHeader` so a masthead that LEAVES could refuse an
+   * action a pinned one accepted.
    *
-   *   · TYPE A · PINNED — has one. Sticky slab, settles on that scroller. No Hide, no chevron.
-   *   · TYPE B · STATIC — has none. Masthead in flow, never settles. Hide folds it to a chevron.
+   * ⚠️ THERE IS ONE MASTHEAD NOW AND IT BEHAVES THE SAME EVERYWHERE: it is the first thing in the
+   * scroller, it scrolls away as content, and the collapsed bar takes over. A partition needs two
+   * behaviours to partition; there is one. Keeping the machinery would have left a classification
+   * with nothing to classify — which is how the next reader comes to give one half an offset.
    *
-   * No page may be both, neither, or opt out.
-   *
-   * ⚠️ IT IS ONE DERIVED BOOLEAN, NOT A SECOND PROP TO KEEP IN STEP. A scrolling page has a primary
-   * scroller by construction — its row. A `fill` page has one only if it NAMES it, because that is
-   * the fact no probe can discover: Query Centre's panes scroll independently and only one of them
-   * happens to hold enough to scroll, so "the single element that currently overflows" finds one and
-   * is wrong. `settleOn` is the declaration; its absence is the other type.
-   *
-   * ⚠️ AND `fill` IS NOT THE TYPE. It was, and that produced the caught-between state: `fill`
-   * describes the LAYOUT — the row does not scroll, the panes do — while the type describes the
-   * CHROME. The Tasks family is `fill` and Type A; Query Centre is `fill` and Type B.
+   * ⚠️ AND THE PARTITION'S OWN LOCK WAS ASSERTING CONTENT, NOT STRUCTURE — see the run report. It
+   * required every scrolling page's row to be currently overflowing, which contradicts the law
+   * stated beside it (*"type is a property of STRUCTURE, not of today's content"*). It was red on
+   * `main` before this rebuild began, on whichever page happened to fit that day.
    */
-  const pinned = !fill || !!settleOn;
-
-  const [hidden, setHidden] = React.useState(false);
-
-  /* the journey latch went with engagement — see the note above */
 
   /**
    * ⚠️ THE STATE IS A PURE FUNCTION OF `scrollTop`, AND THE CLAMP IT USED TO FEAR IS IMPOSSIBLE.
@@ -419,23 +401,22 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
      * three pages with least room to spare. The contract is untouched; the chrome now reacts to the
      * scroll that is actually occurring.
      *
-     * ⚠️ A PAGE BINDS THE SETTLE ONLY WHERE A SINGLE PRIMARY SCROLLER EXISTS, and that is the whole
+     * ⚠️ A PAGE BINDS THE BAR ONLY WHERE A SINGLE PRIMARY SCROLLER EXISTS, and that is the whole
      * rule. A scroll page has one by construction — the row. The Tasks family names its zone through
-     * `settleOn`. Query Centre and Manuscripts name nothing and therefore never settle: their panes
-     * scroll INDEPENDENTLY, and a masthead settling because a list moved inside one pane would be
-     * reporting the page as working when a corner of it was.
+     * `scroller`. Query Centre and Manuscripts name nothing: their panes scroll INDEPENDENTLY, and
+     * a bar arriving because a list moved inside one pane would report the page as scrolled when a
+     * corner of it was.
      *
      * ⚠️ AND THE CANDIDATE IS CHOSEN BY WHAT ACTUALLY SCROLLS, not by which selector matched first.
-     * `settleOn` is a list — the family owns three zone classes — and on a page carrying more than
+     * `scroller` is a list — the family owns three zone classes — and on a page carrying more than
      * one of them `querySelector` would return whichever came first in the document rather than the
-     * one with anything to scroll. Zero scrollable candidates means there is nothing to settle FOR,
-     * which is a real state: Calendar does not overflow at 1440×900, and Hide is what reclaims the
-     * strip there.
+     * one with anything to scroll. Zero scrollable candidates means there is nothing to hand off
+     * FROM, which is a real state: Calendar does not overflow at 1440×900.
      */
     const primaryScroller = (): HTMLElement | null => {
       if (!fill) return root;
-      if (!settleOn) return null;
-      const live = [...root.querySelectorAll(settleOn)]
+      if (!scroller) return null;
+      const live = [...root.querySelectorAll(scroller)]
         .map((e) => e as HTMLElement)
         .filter((e) => e.scrollHeight - e.clientHeight > 2);
       return live.length === 1 ? live[0] : null;
@@ -444,97 +425,44 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
     let frame = 0;
     const evaluate = () => {
       frame = 0;
-      /* the hems and the reclaim are the SCROLL ROW's — they describe that box and nothing else */
+      /* the hems are the SCROLL ROW's — they describe that box and nothing else */
       const top = root.scrollTop;
-      const settleEl = primaryScroller();
-      const settled = !!settleEl && settleEl.scrollTop > 2;
-      setStuck(settled);
-      /* ⚠️ THE SAME SCROLLER THE SETTLE READS. A second listener asking "where is this page" is a
-         second answer, and the two would disagree on exactly the frames anyone would notice. */
-      const y = settleEl ? settleEl.scrollTop : 0;
+      const scrollEl = primaryScroller();
+      /* ⚠️ ONE READING OF "WHERE IS THIS PAGE", SHARED. A second listener asking the same question
+         is a second answer, and the two would disagree on exactly the frames anyone would notice. */
+      const y = scrollEl ? scrollEl.scrollTop : 0;
       if (!barOn.current && y > BAR_SHOW) barOn.current = true;
       else if (barOn.current && y < BAR_HIDE) barOn.current = false;
       setBar((prev) => (prev === barOn.current ? prev : barOn.current));
       /* ⚠️ COMPARED BEFORE IT IS WRITTEN. A fresh object every frame would re-render the whole
-         page on every wheel tick even when nothing changed — the header's `setStuck` is free of
-         that only because a boolean compares by value. */
+         page on every wheel tick even when nothing changed — the bar's `setBar` is free of that
+         only because a boolean compares by value. */
       const next = { top: top > 2, bot: top < root.scrollHeight - root.clientHeight - 2 };
       setHem((prev) => (prev.top === next.top && prev.bot === next.bot ? prev : next));
-      /* ⚠️ ONE EVALUATION FOR ALL THREE — the same reason the hems live in this component at all.
-         A second listener measuring the chrome would be a second answer to "where is this scroller",
-         and the two would disagree on exactly the frames anyone would notice. */
       /**
-       * ⚠️ ONE BOX NOW, NOT A SUM (pinned chrome, §1). It was the mini bar's height PLUS the control
-       * row's, added here because they were two separate stickies; the slab is one element and its
-       * rendered height answers directly. A sum of parts is how a third sticky element gets
-       * forgotten — and the hem's lock still checks this figure against the rendered chrome from the
-       * other direction, so the two derivations keep each other honest.
+       * ⚠️ THE SETTLE IS DELETED, AND WITH IT EVERYTHING THAT COMPENSATED FOR IT.
        *
-       * ⚠️ AND IT MUST REPORT THE SETTLED HEIGHT, NOT THE RESTING ONE (§2). The slab tightens when it
-       * pins, so a reading taken from the pre-settle box would leave the hem clearing a slab that is
-       * no longer that tall — a gap of about half the chrome, in the one state where anything is
-       * actually passing beneath it.
-       */
-      const h = chromeRef.current?.getBoundingClientRect().height ?? 0;
-      /**
-       * ⚠️ THE RESTING HEIGHT IS ONLY READ WHEN NOTHING IS ANIMATING, and the version without that
-       * guard was wrong in a way that only a small scroll exposed.
+       * The slab used to tighten when the page pinned — mark 52→34, title 30→22, description folded
+       * — which took ~62px out of `scrollHeight` the instant it happened. Shrink is the dangerous
+       * direction: on a page overflowing by less than the reclaim the browser clamps `scrollTop` to
+       * 0, the slab un-settles and the page grows again, and it cycles. So the height was measured
+       * at rest (`restHRef`, guarded on `getAnimations({ subtree: true })` because the resting box
+       * is only honest while nothing is easing), the delta was published as `--wpg-reclaim-pad`, and
+       * the scroller gave it back as padding so max scroll could not move. Three mechanisms, all of
+       * them existing to undo one another.
        *
-       * `top <= 2` is true again the moment a settled page scrolls back towards the top — while the
-       * slab is still EASING open. Capturing then records a half-settled box as the resting height,
-       * so the next settle's reclaim is short by whatever the transition had left to run. Measured:
-       * a scroll that landed on 4px moved a content landmark 59px, which is the whole settle paid by
-       * the reader's eye, on a compensation that was working perfectly two ticks earlier.
-       *
-       * ⚠️ AND IT IS THE SUBTREE, NOT THE SLAB. The slab's own box is not what transitions — the
-       * masthead's padding, the mark's size and the title's face are, and the slab's height merely
-       * follows them. Asking only this element reports "nothing is animating" throughout.
-       */
-      const settling = chromeRef.current?.getAnimations?.({ subtree: true }).length ?? 0;
-      if (!settled && h > 0 && settling === 0) restHRef.current = h;
-      /* ⚠️ THE STUCK CHROME'S HEIGHT IS NO LONGER MEASURED OR PUBLISHED (pinned header ground, §2).
-         `--wpg-stuck-h` existed so the TOP HEM could clear the pinned chrome, and the top hem is
-         deleted — swept for reads before removing it, and the hem's `margin-top` was the only one.
-         The settle needs the slab's height for its RECLAIM, which is derived just below from the
-         same `h`; nothing else wanted the figure. */
-      /**
-       * ⚠️ THE SETTLE SHRINKS THE SLAB, AND SHRINK IS THE DANGEROUS DIRECTION (§2). The slab is
-       * inside the scroller, so its box is part of `scrollHeight`: settling takes ~62px out of the
-       * scrollable content the instant the page pins. On a page overflowing by less than that, the
-       * browser clamps `scrollTop` back to 0, `stuck` goes false, the slab un-settles and the page
-       * grows again — shrink, clamp, un-shrink, repeat. The mini bar was safe because it GREW.
-       *
-       * ⚠️ SO THE RECLAIM IS GIVEN BACK AS PADDING ON THE SCROLLER, and this is the shape the file
-       * deliberately kept when `--wpg-reclaim-pad` was deleted at the end of the in-flow pack: the
-       * padding is a `calc()` sum precisely so a page and this component can each contribute without
-       * one replacing the other.
-       *
-       * ⚠️ AND IT IS MEASURED, NOT CONSTANT. The settle's delta differs by page — a page with no
-       * control row reclaims less, a title that wraps reclaims more — so a literal would be right
-       * for one page on one day.
-       */
-      const reclaim = settled ? Math.max(0, restHRef.current - h) : 0;
-      setReclaim((prev) => (Math.abs(prev - reclaim) < 0.5 ? prev : reclaim));
-      /**
-       * ⚠️ `--wpg-stuck-h` IS BACK, AND IT IS BACK BECAUSE SOMETHING READS IT. It was deleted when
-       * the top hem went, correctly — a token nothing consumes is a knob people go looking for. The
-       * builder's New-package panel is `position: sticky` INSIDE this scroller, and the slab pins at
-       * `top: 0` in the same scrollport, so a panel without this figure clamps to the same line and
-       * slides under it. That is the exact fault the manuscripts attachments panel is still parked
-       * on, and it is a fact only this component knows.
-       *
-       * ⚠️ IT PUBLISHES THE SETTLED HEIGHT, NOT THE LIVE ONE. `h` falls by the whole settle the
-       * moment the page pins, and a sticky `top` bound to a value moving 62px mid-scroll would take
-       * the panel with it. The figure is only written while stuck — which is the only state in
-       * which anything is passing under the chrome and the only state the offset is for.
+       * ⚠️ THE MASTHEAD LEAVES NOW INSTEAD OF SETTLING, so there is no height change to compensate,
+       * no reclaim to publish, and no resting height to remember. This is what the rebuild bought:
+       * a mechanism deleted rather than a mechanism made safe.
        */
       /**
-       * ⚠️ IT IS THE BAR'S HEIGHT NOW, NOT THE SLAB'S, AND THE TOKEN'S MEANING IS UNCHANGED: it is
-       * how far down the scrollport the first unobstructed pixel is. The slab stopped pinning when
-       * the handoff arrived, so the only thing a sticky child has to clear is the collapsed bar —
-       * and `buildPanel.css` reads this for exactly that, as its `top` and inside its `max-height`.
-       * Publishing the slab's height here would have offset that panel by a masthead that is no
-       * longer on screen.
+       * ⚠️ `--wpg-stuck-h` IS THE BAR'S HEIGHT — how far down the scrollport the first unobstructed
+       * pixel is. The builder's New-package panel is `position: sticky` INSIDE this scroller and
+       * would otherwise clamp to the same line as the bar and slide under it; `buildPanel.css` reads
+       * this as its `top` and inside its `max-height`, and it is a fact only this component knows.
+       *
+       * ⚠️ WRITTEN ONLY WHILE THE BAR IS SHOWN, because that is the only state in which anything is
+       * pinned above a sticky child.
        */
       const pinnedH = barOn.current ? (root.querySelector(".wpg-bar") as HTMLElement | null)?.offsetHeight ?? 0 : 0;
       setStuckH((prev) => (Math.abs(prev - pinnedH) < 0.5 ? prev : pinnedH));
@@ -580,46 +508,27 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
       mo.disconnect();
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [fill, settleOn]);
+  }, [fill, scroller]);
 
   /**
-   * ⚠️ THE TRIGGER IS ON THE CONTENT ROWS, NEVER ON THE DOCUMENT. A document-level listener would
-   * collapse the header when you clicked the sidebar, the breadcrumb or the top bar — none of which
-   * is working on this page — and it would have to guess its way back out with a `closest()` test
-   * against markup it does not own. Handlers on the rows say the same thing structurally: these
-   * elements ARE the work area, so anything reaching them is engagement by definition.
+   * ⚠️ THE FOLD IS DELETED — `Hide`, the chevron badge on the window's border, the `hidden` state,
+   * the per-page visit reset that cleared it, and the portal that carried the badge out of a grid
+   * whose window clips it.
    *
-   * ⚠️ POINTERDOWN, NOT CLICK. A drag inside the content — reordering a To-do card, dragging a comp
-   * — never produces a `click`, and it is the least ambiguous act of working there is.
-   */
-  /* the masthead's own box — the fold's transition target */
-  const mastRef = React.useRef<HTMLDivElement>(null);
-
-  /**
-   * ⚠️ THERE IS NO RESTORE, AND THAT IS A DECISION RATHER THAN A DEFERRAL (in-flow masthead).
+   * It existed for Type B: a masthead that sits in flow and never leaves needs a way to be got out
+   * of the reader's way, and clicking a bare collapsed band was the way back. There is no Type B
+   * any more — every masthead scrolls away as content — so the fold's whole reason is served by
+   * scrolling, and a second way to do the same thing is one the reader has to choose between.
    *
-   * `restorable` and `restore` are deleted with the band they belonged to. The collapsed band WAS
-   * the way back — a bare surface you clicked to bring the header out again — and the masthead does
-   * not collapse to a band any more; on a fill page it vanishes outright (step 3) and returns on the
-   * next visit to the page.
+   * ⚠️ AND NOTHING IS STRANDED BY IT, which is the condition the design rests on: the masthead
+   * holds no actions, so a reader who scrolls past one has lost nothing they could have used.
+   * `PageHeader` throws if a page tries to put an action in one.
    *
-   * ⚠️ AND NOTHING IS STRANDED BY THAT, which is the condition the whole design rests on: the
-   * masthead holds no actions, so a writer who never sees it again within a visit has lost nothing
-   * they could have used. `PageHeader` throws if a page tries to put an action in one.
-   */
-
-  /**
-   * ⚠️ A PAGE VISIT RESETS IT — the card is the front door, and a fresh arrival gets it.
-   *
-   * ⚠️ AND UNMOUNTING IS NOT THE RESET, because these pages never unmount. The workspace keeps
-   * every page mounted and toggles `display`, so a component that reset its own state on unmount
-   * would reset it exactly never — you would leave Query Centre collapsed and come back to it
-   * collapsed a day later. Measured, not assumed: the matrix's own wheel helper exists because the
-   * first `.wpg-scroll` in the document belongs to a hidden slot whose box is empty.
-   *
-   * So the signal is the grid's box going from zero to non-zero: hidden → shown, which is what a
-   * visit IS under a display-toggling shell. A shell that DOES unmount (a tier crossing) resets by
-   * unmounting, so both arrangements are covered without either knowing about the other.
+   * ⚠️ THE PORTAL GOES TOO, AND IT IS THE PART WORTH REMEMBERING. The badge was portalled to the
+   * SHELL's window wrapper, which is shared, while the state that gated it was per-page — so a
+   * folded page went on drawing its badge over whatever page the reader opened next. Anything
+   * portalled to a shell-level host must also ask whether its page is the one on screen; that is
+   * what `displayed` was for, and it goes with the thing that needed it.
    */
   /* ⚠️ OBSERVED, NOT READ ONCE. The scroller's height changes with the viewport, with the shell's
      own chrome and with a tier crossing, and a figure captured at mount would be right until the
@@ -636,24 +545,6 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   }, []);
 
   const rootRef = React.useRef<HTMLDivElement>(null);
-  React.useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-    let shown = el.getBoundingClientRect().height > 0;
-    setDisplayed(shown);
-    const ro = new ResizeObserver(() => {
-      const now = el.getBoundingClientRect().height > 0;
-      /* ⚠️ ONLY THE HIDDEN → SHOWN EDGE. Resetting on every observation would clear engagement on
-         any reflow — a window resize, a pane opening — and the header would pop back mid-task. */
-      if (now && !shown) setHidden(false);
-      /* ⚠️ AND THE STATE ITSELF, EVERY OBSERVATION — the badge is portalled to a host shared with
-         every other page, so "am I the page on screen" has to be current rather than an edge. */
-      setDisplayed((prev) => (prev === now ? prev : now));
-      shown = now;
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
 
   return (
       <div
@@ -661,7 +552,6 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
         /* ⚠️ A CUSTOM PROPERTY RATHER THAN A CLASS, because the value is a MEASUREMENT and classes
            carry states. The stylesheet reads it; nothing else needs to know it exists. */
         style={{
-          ["--wpg-reclaim-pad" as string]: `${reclaim}px`,
           ["--wpg-stuck-h" as string]: `${stuckH}px`,
           ["--wpg-port-h" as string]: portH > 0 ? `${portH}px` : "100vh",
         } as React.CSSProperties}
@@ -670,7 +560,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
            arbitration died with the chrome rows. Grepped before removing: no stylesheet in `src/`
            reads it. A class the markup emits and nothing consumes is what a bundle sweep exists to
            find, and leaving it would imply a rule someone would go looking for. */
-        className={`wpg${hidden ? " wpg--hidden" : ""}${fill ? " wpg--fill" : ""}${pinned ? "" : " wpg--static"}${record ? " wpg--record" : ""}${className ? ` ${className}` : ""}`}
+        className={`wpg${fill ? " wpg--fill" : ""}${record ? " wpg--record" : ""}${className ? ` ${className}` : ""}`}
         /**
          * ⚠️ THE BINDING IS DECLARED IN THE DOM, so it can be asserted by IDENTITY rather than by a
          * list of page names — and page lists are what have been wrong twice about this app.
@@ -682,9 +572,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
          * — no single place this page scrolls — and is the assertable form of "this page never
          * settles".
          */
-        data-wpg-settle={fill ? settleOn : ".wpg-scroll"}
-        /* the type itself, so a lock can partition the ten pages without naming any of them */
-        data-wpg-type={pinned ? "pinned" : "static"}
+        data-wpg-scroller={fill ? scroller : ".wpg-scroll"}
       >
         {/* ⚠️ THE CHROME ROWS ARE GONE. Rows 1 and 2 were the plate and the toolbar, pinned as
             siblings of the scroller; both now sit INSIDE it, which is the whole of this pack. The
@@ -735,29 +623,16 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
               </div>
             </div>
           )}
-          {/* ⚠️ THE MASTHEAD IS THE FIRST THING IN THE SCROLLER, and on a SCROLLING page that is the
-              entire mechanism: it leaves with the content because it IS content. No sentinel feeds
-              it, no class describes it, nothing reserves its height.
-
-              ⚠️ ON A FILL PAGE NOTHING SCROLLS, so it leaves the other way — it collapses on the
-              first click in the content area (step 3). Same rule, two proxies for the same thing:
-              the user has started working. `.wpg-mast` is what animates; see the stylesheet. */}
-          {/* ⚠️ THE WRAPPER IS THE GRID'S, AND THE COLLAPSE IS ON IT RATHER THAN ON THE HEADER.
-              The grid owns when a page is working; it must not also know what class the header
-              wears. One element, one job: `.wpg-mast` animates, `PageHeader` renders. */}
           {/**
-            * ⚠️ THE MINI BAR IS THE ONLY CHROME THE MASTHEAD SYSTEM KEEPS ON SCREEN — mark and page
-            * name, 51px, one component on both page types.
+            * ⚠️ THE MASTHEAD IS THE FIRST THING IN THE SCROLLER, AND THAT IS THE ENTIRE MECHANISM:
+            * it leaves with the content because it IS content. No sentinel feeds it, no class
+            * describes it, nothing reserves its height.
             *
-            * ⚠️ IT COMES BEFORE THE MASTHEAD IN THE MARKUP AND THAT IS DELIBERATE. On a scrolling
-            * page it is `sticky; top: 0` and grows 0 → 51 when stuck, so the control row beneath it
-            * takes `top: 51` and the two stack — identity above, controls below. Ordering it after
-            * the masthead would put it below the row in the stack the moment both were pinned.
-            *
-            * ⚠️ ON A FILL PAGE IT IS STATIC AND APPEARS ONLY WHILE THE MASTHEAD IS HIDDEN. Nothing
-            * can hide one yet — the Hide button lands at step 4 — so on a fill page this renders
-            * nothing today. Stated rather than left to be discovered: the component is whole, its
-            * fill path is simply not reachable until its trigger exists.
+            * ⚠️ THE PROSE THAT USED TO SIT HERE IS DELETED RATHER THAN LEFT STANDING — it described
+            * a fill page collapsing its masthead on the first click in the content area, and a
+            * 51px mini bar ordered BEFORE the masthead so the control row could take `top: 51` and
+            * stack beneath it. Neither exists: there is no click trigger, no fold, no mini bar, and
+            * every `top` in this sheet is 0. A comment outliving what it described is read as fact.
             */}
           {/**
             * ⚠️ ONE SLAB — MASTHEAD AND CONTROL ROW IN ONE STICKY WRAPPER (pinned chrome, §1; ref 174
@@ -771,62 +646,19 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             * is the same fault as the fill-page border complaint in another costume.
             */}
           {!barOnly && !record && (
-          <div className={`wpg-chrome${stuck ? " wpg-chrome--stuck" : ""}`} ref={chromeRef}>
-          <div className="wpg-mast" ref={mastRef}>
+          <div className="wpg-chrome" ref={chromeRef}>
+          <div className="wpg-mast">
             {/**
-              * ⚠️ THE MASTHEAD IS TOLD WHETHER IT LEAVES, and it is told rather than asked. `pinned`
-              * is the same expression that decides whether this slab actually sticks, so a
-              * `PageHeader` inside it cannot hold an opinion that differs from the behaviour. That
-              * is what lets the header refuse an action on a page whose masthead scrolls away and
-              * accept one on a page where it pins — a law about ANCHORING rather than about a
-              * variant name. See `mastheadBehaviour.ts`.
+              * ⚠️ THE MASTHEAD IS NO LONGER TOLD ANYTHING ABOUT ITS OWN BEHAVIOUR, because there is
+              * only one. `MastheadBehaviourContext` handed it `leaves: !pinned` so that a header
+              * whose masthead scrolls away could REFUSE an action while a pinned one accepted it —
+              * a law about anchoring rather than about a variant name, and correct while there were
+              * two anchorings. There is one now, the masthead holds no controls at all, and
+              * `PageHeader`'s guard throws unconditionally; a context whose only value is constant
+              * is a knob the next reader will go looking for a use for.
               */}
-            <MastheadBehaviourContext.Provider value={{ leaves: !pinned }}>
-              {masthead}
-            </MastheadBehaviourContext.Provider>
-            {/**
-              * ⚠️ HIDE IS THE ONE EXCEPTION TO THE NO-ACTIONS RULE, AND IT IS THE GRID'S RATHER THAN
-              * THE PAGE'S. `PageHeader` still throws if a PAGE hands it an action — that guard is
-              * what keeps every other control off the masthead — and this is rendered BESIDE the
-              * header rather than through it, so no page-facing prop was opened up to allow it.
-              *
-              * ⚠️ ABSOLUTELY POSITIONED, FOR THE REASON THE PRO PILL ALREADY IS: the masthead's
-              * height is a function of the mark and the title, and nothing hung on it may change
-              * that. A flex sibling would be inside that arithmetic, and the matrix asserts it is
-              * not. The ref flexes it against a spacer, which lands in the same place on screen.
-              *
-              * ⚠️ FILL PAGES ONLY. A scrolling page's masthead leaves by scrolling, so a Hide there
-              * would be a second way to do what the page already does — and a control that becomes
-              * pointless the moment you scroll past it.
-              */}
-            {/* ⚠️ TYPE B ONLY. It was `fill`, which put Hide on the Tasks family beside a settle —
-                two mechanisms for one job, and the caught-between state that produced. A Type A page
-                reclaims its strip by scrolling, so a Hide there is a second way to do what the page
-                already does. */}
+            {masthead}
           </div>
-          {/**
-            * ⚠️ THE FOLD CONTROL IS A SIBLING OF THE MEASURE, NOT A CHILD OF IT — and it was a child
-            * until the chevron treatment proved it could not be. `.wpg-mast` collapses by animating
-            * `max-height` to 0 with `overflow: hidden`, which IS the fold; anything inside it is
-            * therefore clipped to the thing it is collapsing. That was invisible while the control
-            * was a text button sitting well inside the measure, and immediately fatal to a badge
-            * meant to straddle the band's bottom border: measured, the pill's box was in exactly the
-            * right place, computed visible at `z-index: 30`, and painted nothing —
-            * `elementsFromPoint` at its centre returned the CHROME.
-            *
-            * ⚠️ IT IS ALSO THE RIGHT WAY ROUND ON ITS OWN TERMS. A control that collapses a box
-            * should not be inside that box, or it animates away with what it is operating on. The
-            * folded state's badge already lives outside for the same reason — the window clips, so
-            * it is portalled to the window's wrapper.
-            *
-            * Type B only, unchanged: a Type A page reclaims its strip by scrolling.
-            */}
-          {!pinned && !hidden && (
-            <button type="button" className="wpg-mast-hide" onClick={() => setHidden(true)}>
-              <ChevronUp aria-hidden="true" />
-              Hide
-            </button>
-          )}
           {/* ⚠️ THE CONTROL ROW FOLLOWS THE MASTHEAD, INSIDE THE SCROLLER, and it has to be here
               rather than a grid row above it for one reason: the masthead must come FIRST. Left as
               row 2 of the grid it would have been pinned ABOVE a masthead that had moved into the
@@ -834,16 +666,6 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
               is also what lets it be `position: sticky` there (step 2), which is how it takes over
               the anchoring job the chrome row used to do. */}
           {toolbar && (
-            /* ⚠️ THE STUCK CLASS COMES FROM `stuck` ALONE, NEVER FROM `condensed` (step 2). The union
-               also carries `engaged` and the mode, both of which fire on FILL pages where nothing
-               scrolls — so reading it here would draw a "this row is anchored" hairline and shadow
-               on a row that has not moved and cannot. `stuck` is the only one of the three that
-               means what this treatment claims.
-
-               ⚠️ AND THE THRESHOLD IS THE EXISTING `scrollTop > 2`, not the pack's 4. They are
-               imperceptible apart, and the same evaluation also drives the top hem — changing the
-               number would move the hem's trigger with it, which is a second behaviour for one
-               edit. One derivation, one threshold. */
             /* ⚠️ THE BAND IS FULL-BLEED AND THE ROW KEEPS ITS MEASURE (header fix, §2). The slab
                paints the masthead's wash edge to edge; without a band of its own the toolbar would
                sit ON that wash, and painting the ROW instead would leave the wash showing in the
@@ -876,43 +698,6 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             */}
           <div className="wpg-reclaim" aria-hidden="true" />
           {children}
-          {/**
-            * ⚠️ THE FOLD'S ONE CONTROL, PORTALLED OUT TO THE WINDOW'S EDGE (pinned chrome, §3).
-            *
-            * It has to leave this subtree: the window clips at its radius, so a badge rendered here
-            * could never straddle its top border — and straddling is the drawing. The portal is the
-            * smallest way to say that; the alternative is lifting `hidden` into the shell, which
-            * would move a page-level state two components up to solve a positioning problem.
-            *
-            * ⚠️ FILL PAGES ONLY. A scrolling page's masthead comes back by scrolling, so a chevron
-            * there would be a second way to do what the page already does — and a control that
-            * becomes pointless the moment you scroll past it.
-            */}
-          {/**
-            * ⚠️ `displayed` IS NOT DEFENSIVE — IT IS THE FIX FOR A LEAK NICK SAW ON SCREEN. The badge
-            * is PORTALLED out to the window's wrapper, which is the SHELL's and shared by every
-            * page; the workspace keeps every page MOUNTED and toggles `display`. So a folded page
-            * kept rendering its badge into that shared host after the reader navigated away, and it
-            * floated over whatever page they went to — measured: fold Query Centre, open Comparable
-            * titles, and QC's chevron sits at y=100 over a page that has no fold at all.
-            *
-            * ⚠️ A PORTAL OUTLIVES ITS PAGE UNDER A DISPLAY-TOGGLING SHELL, and nothing about the
-            * portal says so. The state that gated it — `hidden` — is per-page and stays true; what
-            * had to be added is the page asking whether it is the one on screen.
-            */}
-          {!pinned && hidden && displayed && badgeHost
-            ? createPortal(
-                <button
-                  type="button"
-                  className="wpg-chevfold"
-                  onClick={() => setHidden(false)}
-                  aria-label="Show the page header"
-                >
-                  <ChevronDown aria-hidden="true" />
-                </button>,
-                badgeHost,
-              )
-            : null}
         </div>
         {/* ⚠️ THE HEMS ARE GRID CHILDREN OF ROW 3, NOT CHILDREN OF THE SCROLLER. Inside the
             scrollport they would scroll with the content, which is what makes the obvious version

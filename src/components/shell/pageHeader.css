@@ -273,6 +273,20 @@
    * formatting context and nothing else — no box, no space, margins simply cannot escape.
    */
   display: flow-root;
+  /**
+   * ⚠️ THE FORMAT CLOSES ITSELF AGAINST WHATEVER THE PAGE INHERITS — A FORMAT THAT INHERITS IS NOT
+   * ONE. Nothing in here RENDERS at this size: the kicker states 10px, the title 44 and the
+   * description 16. What it governs is the STRUT of the body's line boxes — and `.wsh-kicker` is
+   * `display: inline-block`, so the line it sits on is `max(strut, the pill)`, which makes the
+   * masthead's height a function of the page's own typography.
+   *
+   * ⚠️ MEASURED: Query Centre renders under `.t-f12`, which inherits 13px/18.85 where the other nine
+   * inherit 16px/24 — so its chrome came out 138.6 against everyone else's 141.1. Two and a half
+   * pixels, on the one element in the app whose whole claim is that it is identical everywhere, and
+   * invisible for four commits because a carve-out exempted that page from the comparison.
+   */
+  font-size: 16px;
+  line-height: 1.5;
   /* ⚠️ THE PADDING IS ON THE BODY, NOT HERE, because the top hairline has to sit ABOVE it — 7px
      below the container's top edge, with the text's 26px starting beneath the rule. Padding on this
      element would push the rule down with the text and it would stop reading as the page's top. */
@@ -430,4 +444,4 @@
  * reserved-but-empty row reads as nothing in review and moves every page that passes no lead down by
  * its own height.
  */
-.wsh-lead { display: flex; align-items: center; margin-bottom: 10px; }
+/* ⚠️ `.wsh-lead` IS DELETED with the prop — see `PageHeader`. The departure is the record bar's. */

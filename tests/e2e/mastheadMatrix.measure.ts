@@ -50,22 +50,32 @@ const CARVES = {
    */
   /** a picture bleeds to the band's right edge, so its painted colour there is artwork */
   artwork: ILLUSTRATED,
-  /** 47px at rest against the shared 30px — the reason the trial's title reverted four times */
-  titleSize: ILLUSTRATED,
-  /** renders no mark at all: the illustration is the page's picture */
-  mark: ILLUSTRATED as string[],
+  /**
+   * ⚠️ `titleSize` AND `mark` ARE DELETED FROM THIS TABLE, AND THE MEASUREMENT IS WHAT RETIRED THEM.
+   * The trial gave its two pages a 47px title against the shared 30px and drew no mark, so both were
+   * exempt from the type scale, from the mark size, and — as the sum of those — from the height
+   * comparison. The format rebuild gives every page a 44px title and NO page a mark: measured, all
+   * ten read `title 44px/700 · mark -1`, and both trial pages sit at the same 141.1px of chrome as
+   * the other eight.
+   *
+   * ⚠️ A CARVE-OUT NAMING PAGES THAT NO LONGER DIFFER CAN ONLY ROT, and it takes the comparison's
+   * population with it — three claims were being asserted over eight pages while reading as ten.
+   * `CARVED_HEIGHT` goes with them, so the height equality now covers the whole census.
+   */
 } as const;
-/* ⚠️ HEIGHT IS NOT A CARVE OF ITS OWN — it is what the two above ADD UP TO, and stating it as one
-   would let a real height change hide behind a type-scale exemption. Named as a derivation. */
-const CARVED_HEIGHT = [...new Set([...CARVES.titleSize, ...CARVES.mark])];
-const MARKLESS = CARVES.mark;
 
 const PAGES: { name: string; route: string; cls: string; fill: boolean }[] = [
-  { name: "Query Centre",        route: "/queries",             cls: "qc-wpg",  fill: true  },
+  /* ⚠️ `fill: false` SINCE QUERY CENTRE BECAME A LIST AND A RECORD. `Queries.tsx` passes
+     `fill={!!activeQuery}` — the RECORD view fills and its panes scroll, the browsing grid does not
+     — and this census arrives with no `?q=`, so it measures the grid. The drift check caught the
+     table before anyone read a number off it. */
+  { name: "Query Centre",        route: "/queries",             cls: "qc-wpg",  fill: false },
   { name: "Analytics",           route: "/queries/analytics",   cls: "qa-wpg",  fill: false },
   { name: "Contact list",        route: "/agents",              cls: "agl-wpg", fill: false },
   { name: "Discover",            route: "/agents/discover",     cls: "dv-wpg",  fill: false },
-  { name: "Manuscripts",         route: "/manuscripts",         cls: "msv-wpg", fill: true  },
+  /* ⚠️ `fill: false` SINCE THE BOOK PROFILE DE-CONTAINERED (27 Aug) — the shelf's row genuinely
+     scrolls, by 32px at 1440×900. Same drift, same catch. */
+  { name: "Manuscripts",         route: "/manuscripts",         cls: "msv-wpg", fill: false },
   { name: "Comparable titles",   route: "/manuscripts/comps",   cls: "ct-wpg",  fill: false },
   { name: "Submission packages", route: "/manuscripts/packages",cls: "pkgw-wpg",fill: false },
   { name: "To-do list",          route: "/todo",                cls: "tpl-wpg", fill: true  },
@@ -109,7 +119,7 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
     /* ⚠️ THE MASTHEAD DRAWS NO LINE (pinned chrome, §1) — the SLAB's base carries it, full width,
        once. Kept as a reading so "it drew one again" is a measurable claim rather than an absence. */
     borderBottom: cs.borderBottomWidth,
-    type: g.getAttribute("data-wpg-type"),
+
     slabLine: (() => {
       const slab = g.querySelector(".wpg-chrome") as HTMLElement | null;
       return slab ? getComputedStyle(slab).borderBottomWidth : "absent";
@@ -133,7 +143,41 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
     markW: mark ? r(mark.getBoundingClientRect().width) : -1,
     markH: mark ? r(mark.getBoundingClientRect().height) : 0,
     titleH: r(title.getBoundingClientRect().height),
-    padSum: r(parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderBottomWidth)),
+    /**
+     * ⚠️ THE PADDING IS `.wsh-body`'s, NOT `.wsh`'s — and reading the wrong element is what made this
+     * derivation stale from the day the format landed. `.wsh` carries `padding: 0` and
+     * `display: flow-root`; the air is stated on the body inside it, so `padSum` read 0 and the
+     * whole sum came out 88px short. It was masked for four commits by the header-type assertions
+     * that ran earlier in the same case.
+     */
+    padSum: (() => {
+      const b = mast.querySelector(".wsh-body") as HTMLElement | null;
+      if (!b) return 0;
+      const bs = getComputedStyle(b);
+      return r(parseFloat(bs.paddingTop) + parseFloat(bs.paddingBottom));
+    })(),
+    /* the rule above the body: its own height plus the margin that holds it off the container's edge */
+    ruleH: (() => {
+      const e = mast.querySelector(".wsh-toprule") as HTMLElement | null;
+      if (!e) return 0;
+      return r(e.getBoundingClientRect().height + parseFloat(getComputedStyle(e).marginTop));
+    })(),
+    /**
+     * ⚠️ THE KICKER'S FLOW CONTRIBUTION, NOT ITS BOX — and the difference is 1.9px, which is exactly
+     * the kind of number a derivation is supposed to name rather than absorb into a tolerance.
+     *
+     * `.wsh-kicker` is `display: inline-block`, so what it costs the column is the LINE BOX it sits
+     * on — governed by the body's own `line-height` and its strut — plus its margin, not the pill's
+     * border box. Measured as the distance from the body's content edge to the title's top, which
+     * is that contribution by definition and cannot drift from it.
+     */
+    kickH: (() => {
+      const b = mast.querySelector(".wsh-body") as HTMLElement | null;
+      const e = mast.querySelector(".wsh-kicker") as HTMLElement | null;
+      if (!b || !e) return 0;
+      const contentTop = b.getBoundingClientRect().top + parseFloat(getComputedStyle(b).paddingTop);
+      return r(title.getBoundingClientRect().top - contentTop);
+    })(),
     illustrated: !!mark?.querySelector("img"),
     markCount: mast.querySelectorAll(".wsh-mark").length,
     /**
@@ -297,39 +341,48 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
    * hangs on its title (two carry a `Pro` pill; both are absolutely positioned out of the title's
    * line box precisely so this reading cannot move), and not of any page-scoped rule.
    *
-   *     height = padding-top + max(mark, title + description) + padding-bottom + hairline
+   *     height = top rule (+ its margin) + body padding + kicker (+ its gap) + title + description
    *
-   * ⚠️ THE `max()` IS THE PART BOTH EARLIER VERSIONS MISSED. `.wsh-row` centres a mark against a
-   * text column, so whichever is TALLER sets the row. On a title-only page the 38px monoline mark
-   * is taller than the 31px title and therefore owns the height; adding a description only buys
-   * height once the text column passes the mark. That is why To-do measures 85 against everyone
-   * else's 102.5, and why the difference is 17.5 rather than the description's own 24.9 box —
-   * a number I asserted first, and which was simply not the rule.
+   * ⚠️ THE `max(mark, …)` TERM IS GONE WITH THE MARK. The old format put a mark beside a text
+   * column and whichever was TALLER owned the row, which is why a title-only page measured 85
+   * against everyone else's 102.5 — the difference being the mark's floor rather than the
+   * description's own box. There is no mark, so the parts simply stack.
+   *
+   * ⚠️ AND THE PADDING IS THE BODY'S. See the note at `padSum`: this derivation read `.wsh`'s and
+   * was 88px short from the day the format landed, masked by assertions that ran before it.
    *
    * ⚠️ ASSERTED PER PAGE RATHER THAN AS GROUP EQUALITY, which is strictly stronger: it names every
    * input that may contribute, so a page that grows by 6px from something the design has not named
    * fails even if some other page happens to grow by the same amount.
    */
   for (const { name, r } of rows) {
-    /* ⚠️ `padSum` NO LONGER INCLUDES A BORDER — the masthead has none since §1, and the slab's line
-       is outside the masthead's box entirely. The derivation is the same shape with one term gone. */
-    const derived = r.padSum + Math.max(r.markH, r.titleH + r.subH);
-    expect(r.height, `${name}: the masthead is ${r.height}px, but mark ${r.markH} / title ${r.titleH} / description ${r.subH} / padding ${r.padSum} derive ${derived} — it is spending height on something unnamed`)
+    const derived = r.ruleH + r.padSum + r.kickH + r.titleH + r.subH;
+    expect(r.height, `${name}: the masthead is ${r.height}px, but rule ${r.ruleH} / padding ${r.padSum} / kicker ${r.kickH} / title ${r.titleH} / description ${r.subH} derive ${derived} — it is spending height on something unnamed`)
       .toBeCloseTo(derived, 0);
   }
 
-  /* ⚠️ AND PAGES IN THE SAME CONDITION AGREE, which follows from the derivation but is asserted
-     because it is the thing a reader actually cares about: two pages side by side must read as
-     deliberate. Grouped by whether the page has a description — the one legitimate reason to
-     differ, and the step-1 rule ("no description element — no reserved space"). */
-  /* ⚠️ THE CARVED-OUT PAGE IS OUT OF THE HEIGHT COMPARISON TOO — its masthead is 125.7 against
-     102.9 because the trial gives it a 47px title and no mark. Same carve-out, third visible
-     effect; its own values are asserted in `headerFix`. */
-  const withSub = rows.filter((x) => x.r.hasSub && !CARVED_HEIGHT.includes(x.name));
-  const soloRows = rows.filter((x) => !x.r.hasSub && !CARVED_HEIGHT.includes(x.name));
+  /**
+   * ⚠️ AND PAGES IN THE SAME CONDITION AGREE — ONCE THE DESCRIPTION'S OWN BOX IS TAKEN OUT.
+   *
+   * ⚠️ THE EQUALITY USED TO BE OVER RAW HEIGHT, AND THAT WAS ASSERTING COPY. The description is
+   * capped at 58ch and wraps; a page whose sentence runs to two lines is 23.2px taller, which is
+   * one line of `--mast-sub-size` at 1.45. Measured: Analytics and Noteboard at 198.5, four others
+   * at 175.3 — six correct mastheads reported as disagreeing, because two of them had a longer
+   * sentence. That is the same fault as the partition demanding a page currently overflow: a fact
+   * about today's content standing in for a fact about the format.
+   *
+   * ⚠️ SO THE CLAIM IS ABOUT THE CHROME AROUND THE SENTENCE, which is what "identical" means here:
+   * every masthead spends the same on rule, padding, kicker and title, and differs only by how many
+   * lines its own copy takes. The line count is REPORTED, so a description that quietly grew to
+   * four lines is visible without being a failure.
+   */
+  const withSub = rows.filter((x) => x.r.hasSub);
+  const soloRows = rows.filter((x) => !x.r.hasSub);
   expect(withSub.length, "no page has a description — the height derivation is untested").toBeGreaterThan(1);
-  expect([...new Set(withSub.map((x) => x.r.height))],
-    `pages with a description disagree on height: ${withSub.map((x) => `${x.name} ${x.r.height}`).join(", ")}`)
+  console.log("\n══ MASTHEAD HEIGHT · chrome vs copy\n" + withSub
+    .map((x) => `${x.name.padEnd(21)} ${x.r.height} = chrome ${(x.r.height - x.r.subH).toFixed(1)} + description ${x.r.subH}`).join("\n"));
+  expect([...new Set(withSub.map((x) => Math.round(x.r.height - x.r.subH)))],
+    `pages with a description disagree on their chrome: ${withSub.map((x) => `${x.name} ${(x.r.height - x.r.subH).toFixed(1)}`).join(", ")}`)
     .toHaveLength(1);
   if (soloRows.length > 1) {
     expect([...new Set(soloRows.map((x) => x.r.height))],
@@ -360,53 +413,23 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
      * "one control on the masthead" and "no page may add one" are different claims.
      */
     /**
-     * ⚠️ THE COUNT FOLLOWS THE HEADER TYPE, NOT `fill` (header types — canonical). It was "one on a
-     * fill page, none on a scrolling one", which put Hide on the Tasks family beside a settle. A
-     * Type A page reclaims its strip by scrolling and carries NO fold control; Type B carries
-     * exactly one. The type is read from the page rather than from this file's table.
-     */
-    expect(r.type, `${name} declares no header type`).toMatch(/^(pinned|static)$/);
-    /**
-     * ⚠️ THE FOLD CONTROL LEFT THE MEASURE, so a Type B page's masthead carries NONE too — and the
-     * count is now about the SLAB. `.wpg-mast` collapses by animating `max-height` to 0 under
-     * `overflow: hidden`; anything inside it is clipped to the thing it collapses, which is why a
-     * badge straddling the band's border could not live there. The law is unchanged in substance —
-     * Type A has no fold control and Type B has exactly one — only where it is counted has moved.
-     */
-    /**
-     * ⚠️ AND "NONE, WHATEVER THE TYPE" WAS TOO STRONG — Manuscripts legitimately carries one. The
-     * masthead refuses actions where it LEAVES on scroll, which is Type B; a Type A masthead PINS
-     * and accepts an action slot, and exactly one page uses it. Asserting zero everywhere failed on
-     * a documented feature rather than on a fault.
+     * ⚠️ NO CONTROL IN ANY MASTHEAD, ON ANY PAGE, AND THE TYPE BRANCH IS DELETED WITH THE TYPES.
      *
-     * What the law actually protects is that the FOLD control is not inside the measure — it is a
-     * child of the slab, because `.wpg-mast` collapses by animating `max-height` to 0 under
-     * `overflow: hidden` and would clip anything straddling its edge. So: no fold control in the
-     * measure on any page, and the action slot is allowed on Type A and counted.
+     * This case has now stated three different laws about masthead controls, each correct for its
+     * moment: none anywhere; one on a `fill` page (Hide); then none on Type B and an action slot on
+     * Type A, because a masthead that LEAVES on scroll cannot anchor a control while a pinned one
+     * can. Every masthead leaves now, so the second half of that reasoning applies to all ten and
+     * the partition it was expressed through is gone. `PageHeader` throws on any control it is
+     * handed — the guard is unconditional again.
      */
-    expect(r.foldInMast ?? 0, `${name}: the fold control is inside the measure it collapses`).toBe(0);
-    if (r.type === "static") {
-      expect(r.actionable, `${name} is Type B and carries ${r.actionable} action(s) in its masthead — that masthead leaves on scroll`).toBe(0);
-    } else if (r.actionable > 0) {
-      slotted.push(name);
-    }
-    /**
-     * ⚠️ AND THE SLOT RENDERS INSIDE `.wsh`, so this was red for the same page and for the same
-     * reason — latent, hidden behind the assertion above it, and exposed the moment that one was
-     * corrected. `PageHeader` puts an action slot in the header element; that is where it goes.
-     * Type B still carries nothing there, because a masthead that leaves on scroll may not hold a
-     * control at all.
-     */
-    if (r.type === "static") {
-      expect(r.headerActionable, `${name} is Type B and has a control inside its header element`).toBe(0);
-    }
+    expect(r.foldInMast ?? 0, `${name}: a fold control came back — the fold is deleted`).toBe(0);
+    expect(r.actionable, `${name} carries ${r.actionable} control(s) in its masthead — every masthead leaves on scroll and holds none`).toBe(0);
+    expect(r.headerActionable, `${name} has a control inside its header element`).toBe(0);
     /* the masthead opens the scroll row — the control row anchors, so it must come second */
     expect(r.slabTop, `${name}: the chrome slab does not open the scroll row — something sits above it`).toBeLessThanOrEqual(0.5);
     expect(r.wrapTop, `${name}: something sits between the slab's inner top edge and the masthead`).toBeLessThanOrEqual(0.5);
-  }  /* ⚠️ REPORTED AND FLOORED. Exactly one page is expected to use the masthead's action slot; if a
-     second appears, that is a decision someone should see rather than a silent spread. */
-  if (slotted.length) console.log(`\n══ MASTHEAD ACTION SLOT: ${slotted.join(", ")}`);
-  expect(slotted.length, `${slotted.length} pages put an action in the masthead — the slot is one page's`).toBeLessThanOrEqual(1);
+  }  /* the slot is gone; the list is kept as a report so a reappearance is visible rather than silent */
+  expect(slotted, `${slotted.join(", ")} put a control in the masthead — there is no slot any more`).toEqual([]);
 
 
   /**
@@ -434,53 +457,36 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
   }
 
   /**
-   * ⚠️ THE MINI BAR IS RENDERED ON EVERY SCROLLING PAGE AND ON NO FILL PAGE AT REST — presence, not
-   * height. It is 0px tall until the page sticks, which is why this asserts that it EXISTS rather
-   * than what it measures; the height and the stacking are `miniBar.measure.ts`'s job.
+   * ⚠️ THE BAR IS RENDERED ON EVERY PAGE AND SHOWN ON NONE AT REST — presence, not height. It is
+   * `opacity: 0` and takes no flow height until the page scrolls past its threshold, which is why
+   * this asserts that it EXISTS rather than what it measures; the handoff itself is
+   * `handoff.measure.ts`'s job and its binding is `barBinding.measure.ts`'s.
    *
-   * ⚠️ AND ITS ONE CONTROL IS A FILL-PAGE AFFORDANCE. A scrolling page's masthead comes back by
-   * scrolling up, so a chevron there would be a second way to do what the page already does — and
-   * `-1` here means "no bar at all", which is the correct answer for a fill page at rest.
+   * ⚠️ THE FILL/SCROLL SPLIT IS GONE FROM THIS CLAIM. It used to say the bar's restore chevron was a
+   * fill-page affordance and a scrolling page came back by scrolling; there is no chevron, no fold,
+   * and one behaviour.
    */
-  for (const { name, r } of rows) {
-    const fill = PAGES.find((p) => p.name === name)!.fill;
-    void fill;
-  }
-
-  /* ⚠️ ONE MARK SIZE, BOTH FAMILIES (masthead measure, §2). The two-size rule — illustrated 52 bare,
-     monoline 38 on a parchment plate — was reasoning about the PLATE, and the plate is gone: what is
-     left at 52 is a drawing in open space, which is what the illustrated marks always were. */
-  /* ⚠️ THE MARKLESS PAGE IS OUT OF THIS ONE TOO — it renders no mark at all, so it has no size to
-     compare. Its absence is asserted by name in the settled case; what this protects is that every
-     page which DOES draw one draws it the same. */
-  const marked = rows.filter((x) => !MARKLESS.includes(x.name));
-  expect(marked.length, "every page is markless — nothing was compared").toBeGreaterThan(4);
-  const sizes = new Set(marked.map((x) => x.r.markW));
-  expect([...sizes], `the marks are not all one size: ${marked.map((x) => `${x.name} ${x.r.markW}`).join(", ")}`).toEqual([52]);
-  for (const name of MARKLESS) {
-    const row = rows.find((x) => x.name === name);
-    if (row) expect(row.r.markW, `${name} is the markless carve-out and has grown a mark`).toBe(-1);
-  }
 
   /**
-   * ⚠️ ONE MARK, LEFT OF THE TEXT (masthead left-constant, §B). The mirrored second mark is gone
-   * with the centred layout; the CENTRING assertion that stood here is DELETED rather than adapted,
-   * because it described a layout that no longer exists.
+   * ⚠️ NO PAGE CARRIES A MARK, AND THE CLAIM IS INVERTED RATHER THAN LAPSED.
    *
-   * ⚠️ HIDE IS STILL ASSERTED PRESENT ON EVERY FILL PAGE, and its absolute positioning is still
-   * load-bearing — for a different reason, which the unit lock now states: nothing is centred, but a
-   * control at the row's end still STRETCHES the flex row and moves the description's wrap point.
+   * The masthead used to draw one — 52px, one size for both the illustrated and monoline families,
+   * with a `MARKLESS` carve-out for the one page that drew none by decision. The format rebuild
+   * removed it from every masthead: the header is a kicker, a title and a subtitle.
+   *
+   * ⚠️ THE OLD SIZE ASSERTION HAD BEEN RED SINCE PHASE 1 AND NOBODY SAW IT, because the header-type
+   * assertions failed first in the same case. Every page reported `-1` — the sentinel for "no mark"
+   * — against an expected `[52]`.
+   *
+   * ⚠️ AND `MARKLESS` GOES WITH IT. A carve-out naming the pages that differ from a rule everybody
+   * now follows is a list that can only rot; the absence is asserted over the whole census instead.
    */
   for (const { name, r } of rows) {
-    /* ⚠️ EXCEPT THE MARKLESS CARVE-OUT, which draws none by decision — see the note at its list.
-       Stated both ways so neither a lost mark nor a grown one passes. */
-    expect(r.markCount, `${name} draws ${r.markCount} mark(s) — ${MARKLESS.includes(name) ? "it is the markless carve-out and should draw none" : "the masthead carries one"}`)
-      .toBe(MARKLESS.includes(name) ? 0 : 1);
-    const fill = PAGES.find((p) => p.name === name)!.fill;
-    /* ⚠️ HIDE IS TYPE B'S, NOT `fill`'s. The Tasks family is `fill` and Type A: it settles on its
-       own zone and carries no fold control at all. */
-    if (r.type === "static") expect(r.hidePresent, `${name} is a static page and drew no Hide`).toBe(true);
-    void fill;
+    expect(r.markCount, `${name} draws ${r.markCount} mark(s) — the masthead carries none`).toBe(0);
+    expect(r.markW, `${name} has grown a mark`).toBe(-1);
+    /* ⚠️ `Hide` IS DELETED, ON EVERY PAGE. The count stays as an ABSENCE rather than lapsing: a
+       fold control is exactly the kind of thing that gets half-restored on one page. */
+    expect(r.hidePresent, `${name} drew a Hide — the fold is deleted`).toBe(false);
   }
 
   /* ⚠️ AND THE CONTROL ROW SITS THE SAME DISTANCE BELOW ON EVERY PAGE THAT HAS ONE. This is where
@@ -489,22 +495,26 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
   const withRow = rows.filter((x) => x.r.hasRow);
   expect(withRow.length, "no page renders a control row — the matrix would be asserting nothing").toBeGreaterThan(1);
   /**
-   * ⚠️ ONE PAGE HAS DRIFTED AND IT IS NOT THIS PACK'S. Calendar's control row sits at 94 against
-   * 102.9 everywhere else — a 9px shorter masthead, from some change outside the illustrated-masthead
-   * trial. It was invisible while earlier assertions in this file failed first; correcting those
-   * exposed it, which is the third time that has happened in this file alone.
+   * ⚠️ THE CLAIM IS A RELATIONSHIP, NOT A COUNT OF DISTINCT VALUES — and counting was measuring copy
+   * for the third time in this file.
    *
-   * The spread is floored at two distinct values rather than one, and the set is PRINTED, so a real
-   * scatter still fails while one known outlier does not block a run that is about something else.
-   * It wants its own look: either Calendar's masthead is legitimately shorter or it is a regression,
-   * and this file cannot tell which.
+   * It allowed at most TWO row positions, because at the time there were two conditions: a page with
+   * a description and a page without. There are three now — 198.5, 175.3 and 141.2 — and the third
+   * is simply a description that wraps to a second line. Nothing has drifted; the tolerance was
+   * counting the wrong thing, and it had already been loosened once to accommodate a real outlier
+   * rather than diagnose it.
+   *
+   * ⚠️ WHAT THE CASE ACTUALLY MEANS is that the control row sits IMMEDIATELY BELOW the masthead with
+   * nothing between them — so its top IS the masthead's height, per page, to the pixel. That is
+   * strictly stronger than any spread: it cannot be satisfied by two pages being wrong in the same
+   * direction, and it goes on holding however many line counts the descriptions grow into.
    */
-  const rowTops = new Set(withRow.map((x) => x.r.rowTop));
-  if (rowTops.size > 1) {
-    console.log(`\n⚠️ CONTROL-ROW DRIFT: ${withRow.map((x) => `${x.name} ${x.r.rowTop}`).join(", ")}`);
+  console.log("\n══ CONTROL ROW vs MASTHEAD\n" + withRow
+    .map((x) => `${x.name.padEnd(21)} row top ${x.r.rowTop} · masthead ${x.r.height}`).join("\n"));
+  for (const { name, r } of withRow) {
+    expect(r.rowTop, `${name}: the control row sits at ${r.rowTop} under a ${r.height}px masthead — something is between them`)
+      .toBeCloseTo(r.height, 0);
   }
-  expect(rowTops.size, `the control row sits at more than two heights: ${withRow.map((x) => `${x.name} ${x.r.rowTop}`).join(", ")}`)
-    .toBeLessThanOrEqual(2);
 });
 
 test("⚠️ THE DASHBOARD IS UNTOUCHED — it renders none of this chrome", async ({ page }) => {
@@ -523,87 +533,13 @@ test("⚠️ THE DASHBOARD IS UNTOUCHED — it renders none of this chrome", asy
 });
 
 /**
- * ⚠️ THE SETTLED POSTURE, MEASURED AS A DERIVATION (pinned chrome, §2; ref 174 option C).
+ * ⚠️ THE SETTLED POSTURE IS DELETED, AND THE CASE THAT MEASURED IT GOES WITH IT.
  *
- * The chrome is one object with two postures, so the matrix has to see both — a masthead asserted
- * only at rest is asserted in the state the reader spends least time in. The height is derived per
- * posture rather than pinned, which is this repo's standing standard: `padding + max(mark, title
- * [+ description])`, with the description's box genuinely gone from the settled sum rather than
- * merely invisible.
+ * It asserted that the pinned chrome was THE SAME OBJECT at half the height — mark 52→34, title
+ * 30→22, description folded, paddings tightened — measured as a derivation rather than against
+ * literals, so a retune moved the design without moving the lock.
  *
- * ⚠️ AND THE TITLE KEEPS `line-height: 1.3` AT 22px. Playfair's descenders fall below the baseline
- * at every size; the settled title is the same mixed-case page name in a smaller box, so the rule
- * that made `line-height: 1` a bug at 30px makes it a bug here too.
+ * The masthead does not settle. It scrolls away as content and the collapsed bar takes over, which
+ * is measured in `handoff.measure.ts` — the same claim about identity surviving, over the mechanism
+ * that now carries it.
  */
-test("⚠️ THE SETTLED POSTURE IS THE SAME OBJECT, HALF THE HEIGHT", async ({ page }) => {
-  const rows: { name: string; r: Awaited<ReturnType<typeof readMasthead>> }[] = [];
-  const lines: string[] = [];
-  for (const { name, route, cls, fill } of PAGES) {
-    if (fill) continue;   /* a fill page cannot pin, so it has no settled posture to measure */
-    await openRoute(page, route, { width: 1440, height: 900 });
-    await liftMotionSuppression(page);
-    await page.mouse.move(700, 500);
-    await page.mouse.wheel(0, 600);
-    /* ⚠️ WAIT PAST THE .22s SETTLE. A transitioned property reports where it STARTED, and this file
-       exists to measure where it ENDED. */
-    await page.waitForTimeout(700);
-    const r = await readMasthead(page, cls);
-    expect(r, `${name}: no grid`).not.toBeNull();
-    rows.push({ name, r });
-    lines.push(`${name.padEnd(21)} h ${String(r!.height).padStart(6)} · pad ${r!.padTop}/${r!.padBottom} · title ${r!.titleSize}/${r!.titleWeight} lh ${r!.titleLine} · mark ${r!.markW} · sub ${r!.subH}`);
-  }
-  console.log("\n══ SETTLED\n" + lines.join("\n"));
-  expect(rows.length, "no scrolling page reached a settled posture — this case measured nothing").toBeGreaterThan(3);
-
-  const unsettled: string[] = [];
-  for (const { name, r } of rows) {
-    /* the precondition: it actually settled, or every claim below is about the resting posture */
-    /* ⚠️ A PAGE THAT DID NOT SETTLE IS SKIPPED AND REPORTED — the precondition is real and worth
-       keeping, but failing the whole case for one page that would not scroll on the day tells you
-       less than naming it. The population floor below is what stops the skip hollowing this out. */
-    if (parseFloat(r!.titleSize) !== 22) { unsettled.push(`${name} (title still ${r!.titleSize})`); continue; }
-    expect(r!.padTop, `${name}: the settled masthead's top padding`).toBe("13px");
-    expect(r!.padBottom, `${name}: the settled masthead's bottom padding`).toBe("10px");
-    /**
-     * ⚠️ ONE PAGE CARRIES NO MARK AT ALL, AND IT IS NAMED. Submission packages is running the
-     * illustrated-masthead trial: the illustration IS its picture, so a 52px monoline parcel beside
-     * a drawing of parcels would be the same subject twice in two hands — and that glyph was the
-     * degrade path rather than commissioned art. Its absence is a decision, so it is stated here
-     * rather than allowed through by a looser assertion; every other page still owes a 34px mark.
-     */
-    if (MARKLESS.includes(name)) {
-      expect(r!.markW, `${name} is the markless carve-out and has grown a mark`).toBe(-1);
-    } else {
-      expect(r!.markW, `${name}: the settled mark is ${r!.markW}px`).toBe(34);
-    }
-    /* ⚠️ THE DESCRIPTION IS GONE FROM THE SUM, not merely transparent — an invisible box that still
-       takes height reclaims nothing, which is the whole point of settling. */
-    expect(r!.subH, `${name}: the settled description still occupies ${r!.subH}px`).toBe(0);
-    /* ⚠️ 1.3 AT 22px TOO — the descender rule is about the typeface, not the size. */
-    expect(parseFloat(r!.titleLine) / 22, `${name}: the settled title's line box is ${r!.titleLine} against a 22px face`).toBeCloseTo(1.3, 2);
-    const derived = r!.padSum + Math.max(r!.markH, r!.titleH + r!.subH);
-    expect(r!.height, `${name}: the settled masthead is ${r!.height}px, but mark ${r!.markH} / title ${r!.titleH} / description ${r!.subH} / padding ${r!.padSum} derive ${derived}`)
-      .toBeCloseTo(derived, 0);
-  }  if (unsettled.length) console.log("\n⚠️ DID NOT SETTLE: " + unsettled.join(", "));
-  expect(unsettled.length, `${unsettled.length} pages never settled — this case measured almost nothing`).toBeLessThanOrEqual(1);
-
-  /**
-   * Page against page, never a constant — and the carved-out page is excluded here for the same
-   * reason it is excluded from the resting identity claim.
-   *
-   * ⚠️ ITS SETTLED HEIGHT DIFFERS AS A CONSEQUENCE OF HAVING NO MARK, not as a second decision:
-   * 51.6px against 57, because the settled masthead's height is driven by the 34px mark the trial
-   * page does not render. One carve-out, two visible effects — which is worth stating, because the
-   * next reader will meet the height difference first and look for a height rule that does not
-   * exist.
-   */
-  /* ⚠️ AND A PAGE THAT NEVER SETTLED IS OUT OF THE COMPARISON, NOT JUST OUT OF THE LOOP ABOVE. The
-     skip there only stopped asserting about it; it stayed in `rows`, so its RESTING height came back
-     as a settled one (102.9 against 57) and read as a page arranged specially. */
-  const settledRows = rows.filter((x) => !CARVED_HEIGHT.includes(x.name) && parseFloat(x.r!.titleSize) === 22);
-  expect(settledRows.length, "every settled page is carved out — nothing was compared").toBeGreaterThan(2);
-  for (const k of ["height", "padTop", "padBottom", "titleSize", "markW", "subH"] as const) {
-    const vals = [...new Set(settledRows.map((x) => String(x.r![k])))];
-    expect(vals, `the settled ${k} differs across pages: ${JSON.stringify(settledRows.map((x) => [x.name, x.r![k]]))}`).toHaveLength(1);
-  }
-});

@@ -95,14 +95,18 @@ describe("the meter's two roles are declared in every theme", () => {
   /**
    * A token defined in two files is a silent override — which one wins becomes load order.
    *
-   * ⚠️ TWO NAMED EXCEPTIONS, AND THEY ARE CONTRIBUTIONS RATHER THAN OVERRIDES. `workspacePageGrid.css`
-   * sums `--wpg-foot` and `--wpg-reclaim-pad` into one `padding-bottom` precisely so a page can
-   * contribute to it without replacing anything ("Pages contribute `--wpg-foot`; the working state
-   * contributes `--wpg-reclaim-pad`; both land here and ADD"). Query Centre already contributes the
-   * same reclaim zero from its own page class. Listed BY NAME, not as a `--wpg-*` wildcard, so a
-   * third grid token cannot slip in behind this allowance.
+   * ⚠️ ONE NAMED EXCEPTION, AND IT IS A CONTRIBUTION RATHER THAN AN OVERRIDE. `workspacePageGrid.css`
+   * states its `padding-bottom` as a `calc()` sum precisely so a page can contribute to it without
+   * replacing anything — a page and a component both writing one property must SUM through tokens,
+   * because raising specificity makes one replace the other.
+   *
+   * ⚠️ `--wpg-reclaim-pad` HAS LEFT THIS LIST WITH THE SETTLE. It was the second term: the working
+   * state's compensation for a masthead that shed height when it pinned. Nothing settles now, so
+   * the sum has one term — and the SHAPE is kept anyway, because the collision it solves is still
+   * live. Listed BY NAME, not as a `--wpg-*` wildcard, so a third grid token cannot slip in behind
+   * this allowance.
    */
-  const PAGE_CONTRIBUTIONS = new Set(["--wpg-foot", "--wpg-reclaim-pad"]);
+  const PAGE_CONTRIBUTIONS = new Set(["--wpg-foot"]);
 
   it("and the grid redefines nothing the plate or page sheets already own", () => {
     const mine = new Set(
@@ -117,10 +121,10 @@ describe("the meter's two roles are declared in every theme", () => {
 
   /**
    * ⚠️ THE DEAD BAND UNDER THE DOSSIER CARD WAS THE SCROLL ROW'S OWN `padding-bottom`, not a height
-   * lost anywhere in the chain. The working state sets `--wpg-reclaim-pad` to the header's
-   * height-and-gap delta so a SCROLLING page keeps its max scroll when the header condenses; the
-   * dossier does not scroll, so on this page it is dead space exactly the size of what the header
-   * gave back. Condensing the header is what introduced it.
+   * lost anywhere in the chain — the working state's `--wpg-reclaim-pad`, which compensated a
+   * SCROLLING page for the header shedding height when it pinned, landing on a page whose dossier
+   * did not scroll. Both the reclaim and the settle it answered are deleted; the value stated here
+   * is what the page actually wants.
    */
   it("states the dossier's foot inset as a value, because the token it mirrored is retired", () => {
     /* ⚠️ AMENDED (in-flow masthead, step 4). This asserted `--wpg-foot: var(--content-top-gap)` —

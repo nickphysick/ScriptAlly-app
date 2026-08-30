@@ -52,11 +52,11 @@
    */
   /* the masthead's own gutter — one value, every page, overridden by nothing */
   --mast-gutter: 35px;
-  /* the masthead's wash, top and bottom stops. Parchment (ref 179) until 25 Aug, terracotta since —
-     the same two tokens, which is the whole point of their being tokens: the palette has now moved
-     three times and every surface that reads them moved with it in one edit. */
-  --mast-wash-top: #f2e4dd;
-  --mast-wash-bottom: #fbf3ee;
+  /* ⚠️ `--mast-wash-top` / `--mast-wash-bottom` ARE DELETED. The masthead's parchment band went
+     when one format replaced the two; the tokens outlived it by five phases, declared and read by
+     nothing, which is a knob the next reader goes looking for a use for. Swept for READS, not
+     definitions — the direction that matters, since a `var()` on a token nobody defines paints the
+     fallback while looking parameterised. */
   /* the air between the chrome's closing hairline and the page's content */
   --wpg-chrome-gap: 16px;
   /* ⚠️ THE FOLDED BAR'S FOUR TOKENS ARE DELETED WITH IT (pinned chrome, §4) — `--wpg-mini-pad`,
@@ -387,8 +387,8 @@
  * ⚠️ AND ITS OSCILLATION GUARD GOES WITH IT, WHICH IS A DELETION RATHER THAN A REGRESSION. The
  * asymmetric `10px 0 14px` existed because tightening the row on stick removed 4px from
  * `scrollHeight`, and on a page overflowing by a few pixels that produced shrink → clamp →
- * un-shrink → repeat. §2 moves the tightening to the SLAB, where the same arithmetic applies and is
- * paid the same way — see `.wpg-chrome--stuck`. The hazard did not go away; its owner changed.
+ * un-shrink → repeat. The tightening moved to the SLAB, and then the slab's settle was deleted
+ * outright — so nothing changes height on scroll and the hazard has no owner rather than a new one.
  */
 @media (prefers-reduced-motion: reduce) {
   /* the STATE still changes — only the crossfade goes, exactly as the hems do */
@@ -556,50 +556,25 @@
  * page's scroller is a flex column and it must not be stretched into one.
  */
 /**
- * ══ THE FOLD'S CHEVRON — ON THE WINDOW'S BORDER, NEVER THROUGH IT (pinned chrome, §3; ref 175) ══
+ * ⚠️ THE FOLD'S CHEVRON BADGE IS DELETED (`.wpg-chevfold`), with `Hide` and the type partition it
+ * belonged to. It sat half in and half out of the window's top border — a SIBLING of `.ws-window`,
+ * portalled into `.ws-winwrap`, because a child would have been clipped by the window's `overflow:
+ * hidden` and its 16px radius, and an element spliced INTO the border's run would have broken the
+ * one continuous line the window is drawn with.
  *
- * A fill page cannot scroll, so its masthead cannot leave by scrolling; Hide folds it, and what
- * remains is this — one badge, centred, half in and half out of the window's top edge.
- *
- * ⚠️ IT SITS ON THE LINE AND MUST NOT CUT IT. The badge is a SIBLING of `.ws-window`, portalled into
- * `.ws-winwrap` and positioned over the edge. A child would be clipped by the window's `overflow:
- * hidden` and its 16px radius; an element spliced INTO the border's run would break the one
- * continuous line the window is drawn with. The lock asserts the border renders uninterrupted at
- * full width with the fold active — and its red is produced by parenting this inside the window.
- *
- * ⚠️ ITS GROUND IS THE WINDOW'S OWN, so the border appears to pass behind it rather than stopping at
- * it: the badge reads as resting on the line, which is the whole of the drawing.
+ * Recorded because the constraint outlives the control: anything that must sit ON the window's edge
+ * has to be a sibling positioned over it, never a child, and `shellSlots.ts` existed only to give
+ * that portal a host without a leaf component importing the whole shell.
  */
-.wpg-chevfold {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  transform: translate(-50%, -50%);
-  z-index: 30;
-  width: 38px;
-  height: 20px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--ws-edge);
-  border-radius: 999px;
-  background: var(--ws-window);
-  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.10);
-  color: var(--shell-muted);
-  cursor: pointer;
-  padding: 0;
-  transition: color .15s, border-color .15s;
-}
-.wpg-chevfold:hover { color: var(--shell-ink); border-color: var(--ws-edge-strong, var(--ws-edge)); }
-.wpg-chevfold svg { width: 12px; height: 12px; }
-@media (prefers-reduced-motion: reduce) { .wpg-chevfold { transition: none; } }
 
 .wpg-reclaim {
   flex: none;
-  /* ⚠️ THE GAP AND THE RECLAIM IN ONE BOX. The gap used to be the slab's `margin-bottom`; margins
-     COLLAPSE, and this box stops them collapsing the moment it has height — which added a whole gap
-     to the column on every settle. Summing them here means nothing can collapse and the column's
-     total is `slab + gap + reclaim`, constant by construction. */
-  height: calc(var(--wpg-chrome-gap) + var(--wpg-reclaim-pad, 0px));
+  /* ⚠️ A BOX RATHER THAN A MARGIN ON THE SLAB, AND THE REASON SURVIVES THE RECLAIM'S DELETION.
+     Adjacent siblings' margins COLLAPSE: as the slab's `margin-bottom` this gap collapsed with the
+     content's own `margin-top` and simply disappeared into it, which is why it is an element. It
+     used to carry `+ var(--wpg-reclaim-pad)` as well — the settle's compensation — and that term
+     is gone with the settle; the gap it always was remains. */
+  height: var(--wpg-chrome-gap);
   /* ⚠️ IT IS NOT PART OF ANY MEASURE — a full-width, zero-content box, so `.wpg-scroll > *`'s
      max-width would make it narrower than the column for no reason anyone could see. */
   max-width: none;
@@ -654,24 +629,6 @@
   transition: box-shadow .2s cubic-bezier(.4, 0, .2, 1);
 }
 /**
- * ⚠️ A TYPE B PAGE'S SLAB IS NOT STICKY, AND SAYING SO IS NOT TIDINESS. Type B has no single primary
- * scroller — its panes scroll independently — so nothing it could pin to ever moves. A `sticky` left
- * on it would be a claim about a behaviour that cannot occur, which is precisely how the next reader
- * is misled into giving it an offset (this file has paid for that once already: `top: 51px` on a
- * page that cannot scroll does not idle, it CLAMPS).
- *
- * ⚠️ AND ITS MASTHEAD IS IN FLOW, WHICH IS THE TYPE'S WHOLE DEFINITION — it sits at the top of the
- * page, never settles, and leaves only when the reader folds it with Hide.
- */
-.wpg--static > .wpg-scroll > .wpg-chrome {
-  /* ⚠️ `relative`, NOT `static` — the fold control is a child of this element now rather than of the
-     measure it collapses (see the note in the component), so this is what it positions against. It
-     is `relative` rather than `sticky`, so the Type B contract — a masthead that sits in flow and
-     never pins — is untouched, and the lock that asserts it stays green. */
-  position: relative;
-  box-shadow: none;
-}
-/**
  * ══ THE PINNED GROUND — AN OPAQUE PARCHMENT WASH (masthead presence; ref 179 PARCHMENT) ═══════
  *
  * ⚠️ THE TRANSLUCENT-PLUS-BLUR DIRECTION IS WITHDRAWN, AND THIS IS THE THIRD REPORT OF THE SAME
@@ -708,39 +665,29 @@
  * the shorthand and resets every longhand, so a future edit adding an image here would silently
  * take the colour with it. This repo has had four rounds of a see-through header from exactly that.
  *
- * ⚠️ `--mast-wash-top` / `--mast-wash-bottom` ARE STILL DECLARED and are now read by nothing. That
- * is deliberate and belongs to Phase 6, which deletes the tokens and sweeps for reads; removing a
- * definition here while five phases of locks still name it would trade one dangling reference for
- * another.
  */
 .wpg > .wpg-scroll > .wpg-chrome {
   background-color: var(--ws-window);
 }
-/* the pin shadow is back to the opaque value — there is no blur separating the layers now */
-.wpg-scroll > .wpg-chrome.wpg-chrome--stuck {
-  box-shadow: 0 12px 16px -13px rgba(58, 28, 20, 0.18);
-}
 /**
- * ══ SETTLE ON PIN — ONE OBJECT, TWO POSTURES (pinned chrome, §2; ref 174 option C) ════════════
+ * ══ THE SETTLE IS DELETED — ONE POSTURE, NOT TWO ══════════════════════════════════════════════
  *
- * At rest it is the full masthead; once anything passes beneath it the chrome settles to about half
- * its height and the page keeps its title without keeping its title page. The trigger is the
- * EXISTING stuck boolean — no second mechanism, no second threshold.
+ * `.wpg-chrome--stuck` tightened the masthead the moment anything passed beneath it: padding
+ * 24/18 → 13/10, mark 52 → 34, title 30 → 22, description folded by opacity AND `max-height`
+ * (hiding it with `display: none` would have jumped instead of easing). It was the one place this
+ * file styled `PageHeader`'s internals, and the pin shadow rode the same class.
  *
- * ⚠️ THE SETTLED POSTURE IS DECLARED ON THE SLAB AND REACHES INTO THE MASTHEAD, which is the one
- * place this file styles `PageHeader`'s internals. The alternative is a second class threaded
- * through the component, and the grid already owns when a page is working — it must not also have
- * to tell the header what to wear. One element, one job, stated at the boundary.
+ * ⚠️ IT WENT WITH THE TWO HEADER TYPES. A masthead that settles is one that STAYS — and this one
+ * leaves, as content, handing off to the collapsed bar. Both cannot be true of one element, and
+ * keeping the rules "inert" (they matched a slab nobody could see) meant a class still shrinking
+ * a box on every scroll while its reclaim spacer grew to compensate. Two mechanisms, both live,
+ * both undoing each other, over a masthead that had already gone.
+ *
+ * ⚠️ AND THE OSCILLATION HAZARD IS GONE RATHER THAN GUARDED. Shrink is the dangerous direction: on
+ * a page overflowing by less than the reclaim the browser clamps `scrollTop` to 0, the slab
+ * un-settles and the page grows again — Noteboard cycled 37 times on one pass at 47px of overflow.
+ * Nothing changes height on scroll now, so there is nothing to clamp.
  */
-.wpg-chrome--stuck .wsh { padding: 13px 0 10px; }
-.wpg-chrome--stuck .wsh-mark { flex-basis: 34px; }
-.wpg-chrome--stuck .wsh-mark .os-mark { width: 34px; height: 34px; flex-basis: 34px; }
-.wpg-chrome--stuck .wsh-mark .os-mark svg { width: 25px; height: 25px; }
-.wpg-chrome--stuck .wsh-title { font-size: 22px; }
-/* ⚠️ THE DESCRIPTION FOLDS RATHER THAN HIDING — opacity AND the box, or the space it occupied stays
-   and the settle reclaims nothing. `display: none` would jump instead of easing. */
-.wpg-chrome--stuck .wsh-sub { opacity: 0; max-height: 0; margin-top: 0; }
-.wpg-chrome--stuck .wpg-tools { padding: 0 0 12px; }
 @media (prefers-reduced-motion: reduce) {
   /* the STATE still changes — only the tween goes, as everywhere else in this file */
   .wpg-scroll > .wpg-chrome { transition: none; }
@@ -794,41 +741,27 @@
    * both the same way makes "the masthead aligns with Query Centre and Tasks" true at every width
    * rather than at the two where nothing caps.
    *
-   * ⚠️ AND IT PUTS HIDE WHERE THE REF PUTS IT. An absolutely-positioned child resolves `right: 0`
-   * against the PADDING box, so a padded measure would hang Hide 35px outside the masthead's own
-   * ink — outside the line its title and mark sit on.
+   * ⚠️ AND THE PADDING-VERSUS-MEASURE CHOICE DECIDES WHERE AN ABSOLUTE CHILD LANDS. `right: 0`
+   * resolves against the PADDING box, so a padded measure would hang any such child 35px outside
+   * the masthead's own ink — outside the line its title sits on. Nothing is positioned in here
+   * today; the constraint is recorded because it decides the next one.
    */
   max-width: min(var(--work-max), calc(100% - 2 * var(--mast-gutter)));
 }
 .wpg-mast {
   min-width: 0;
 }
-.wpg--static > .wpg-scroll > .wpg-chrome > .wpg-mast {
-  flex: none;
-  overflow: hidden;
-  max-height: 220px;
-  opacity: 1;
-  transition:
-    max-height .26s cubic-bezier(.4, 0, .2, 1),
-    opacity .18s ease;
-}
-/* ⚠️ THE HAIRLINE GOES WITH IT — it belongs to the masthead, and a rule left hanging over content
-   that has risen to the top would read as the page's own top edge, which is what the band was.
-   ⚠️ AND THE TRIGGER IS `wpg--hidden` NOW, NOT `wpg--working` (step 4): one explicit act by the
-   writer, rather than three inferences about whether they had started working. */
-/* ⚠️ THE HAIRLINE FOLDS WITH THE MASTHEAD (pinned chrome, §3). Hide removes the page's title; a
-   line left behind would be a boundary with nothing above it — chrome marking the edge of nothing.
-   The control row is NOT folded: it holds the page's controls, and Hide is about the title. */
-.wpg--static.wpg--hidden > .wpg-scroll > .wpg-chrome { border-bottom-color: transparent; }
-.wpg--static.wpg--hidden > .wpg-scroll > .wpg-chrome > .wpg-mast {
-  max-height: 0;
-  opacity: 0;
-}
-@media (prefers-reduced-motion: reduce) {
-  /* the STATE still changes — the masthead must still go, or the height it was collapsing to give
-     back is never given back. Only the tweening goes, exactly as everywhere else in this file. */
-  .wpg--static > .wpg-scroll > .wpg-chrome > .wpg-mast { transition: none; }
-}
+/**
+ * ⚠️ THE FOLD'S COLLAPSE IS DELETED. `.wpg--static … .wpg-mast` animated `max-height` 220 → 0 with
+ * `overflow: hidden` and an opacity tween, and the slab's own hairline went transparent with it —
+ * a line left behind would have been a boundary with nothing above it. The control row was
+ * deliberately NOT folded: it holds the page's controls, and Hide was about the title.
+ *
+ * ⚠️ RECORDED FOR THE ONE PART THAT IS STILL TRUE: `overflow: hidden` on the collapsing box CLIPS
+ * anything inside it, which is why the fold's own control had to be a sibling of `.wpg-mast` rather
+ * than a child. Measured at the time: the badge's box was in exactly the right place, computed
+ * visible at `z-index: 30`, and painted nothing.
+ */
 
 /**
  * ⚠️ A FILL PAGE'S CONTROL ROW IS STATIC — AND THIS IS A BUG THE MEASUREMENT FOUND, not a tidy-up.
@@ -865,55 +798,14 @@
  * transparent bar would show the list running through the page's own name.
  */
 /**
- * ⚠️ THE FOLDED NAME BAR IS DELETED ENTIRELY (pinned chrome, §4) — `.wpg-mini`, its `--stuck` and
- * `--static` variants, the name, the restore chevron and their reduced-motion rule.
+ * ⚠️ `Hide` IS DELETED (`.wpg-mast-hide`) — a ghost button, absolutely positioned at the masthead's
+ * right edge, vertically centred on the header's own box rather than on its text.
  *
- * It existed to keep the page's identity on screen once the masthead had scrolled away. The slab
- * keeps the masthead itself on screen — settled, but still the title and the mark — so there is
- * nothing left for a name bar to say; and on a fill page the fold leaves a chevron on the window's
- * border rather than a strip of chrome. Two systems for one job, and this is the one that went.
- *
- * ⚠️ EXPECT DELETIONS AND NO COMPENSATING ADDITION. Nothing was added to replace these rules — if
- * something had needed adding, it would have meant the old system still had a consumer.
+ * ⚠️ THE REASON IT WAS ABSOLUTE IS THE PART TO KEEP: a masthead's height must be a function of its
+ * mark and its title and nothing else — the same reason the two `Pro` pills are positioned out of
+ * the title's line box. A flex sibling would have been inside that sum, and the day someone gave
+ * the button a taller shape three pages would have grown.
  */
-
-
-/* ══ HIDE — the masthead's one action (masthead rethink, step 4; ref 171) ══════════════════════
- *
- * ⚠️ ABSOLUTE, SO IT IS OUTSIDE THE MASTHEAD'S HEIGHT ARITHMETIC. The rule the matrix holds is that
- * a masthead's height is a function of its mark and its title and nothing else — the same reason
- * the two `Pro` pills are positioned out of the title's line box. A flex sibling here would be in
- * that sum, and the day someone gave this button a taller shape three pages would grow.
- *
- * ⚠️ VERTICALLY CENTRED ON THE MASTHEAD'S OWN BOX, not on the text: the header's padding is 26/20,
- * so centring on the content would sit it visibly high.
- *
- * ⚠️ A GHOST, NOT A BUTTON WITH A FRAME. It is chrome for chrome — the only control the masthead
- * carries — and anything with a fill would read as the page's action rather than the header's.
- */
-.wpg--static > .wpg-scroll > .wpg-chrome > .wpg-mast { position: relative; }
-.wpg-mast-hide {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  height: 32px;
-  padding: 0 9px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: none;
-  font-family: inherit;
-  font-size: 12.5px;
-  color: var(--shell-muted);
-  cursor: pointer;
-  transition: background .15s, color .15s;
-}
-.wpg-mast-hide:hover { background: var(--ws-window); color: var(--shell-ink); }
-.wpg-mast-hide svg { width: 15px; height: 15px; flex: none; }
-@media (prefers-reduced-motion: reduce) { .wpg-mast-hide { transition: none; } }
 
 /**
  * ══ THE COLLAPSED BAR ═════════════════════════════════════════════════════════════════════════

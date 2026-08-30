@@ -154,15 +154,15 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(t, "the control row gained a radius — that is a card").not.toMatch(/(^|[;\s])border-radius\s*:/);
     expect(t, "the control row drew a hairline — the slab's base is the only line in the chrome")
       .not.toMatch(/(^|[;\s])border-bottom\s*:/);
-    /* ⚠️ AND THE SLAB CARRIES BOTH, ONCE. One line at the base, one shadow beneath it, and the
-       shadow only while pinned — the arrangement ref 174 draws as option C and calls the fix for
-       "the clash" of two lines and two shadows a few pixels apart. */
+    /* ⚠️ AND THE SLAB CARRIES THE ONE LINE. The SHADOW's half of this claim is withdrawn with the
+       settle: it appeared only while the slab was pinned, and the slab does not pin — it scrolls
+       away as content and the collapsed bar carries the shadow instead (see `.wpg-bar--on`). */
     const slab = block(".wpg-scroll > .wpg-chrome").replace(/\s+/g, " ");
     expect(slab, "the slab lost its base hairline").toMatch(/border-bottom:\s*1px solid var\(--ws-edge\)/);
     expect(slab, "the slab's ground is a literal — it will be wrong the next time the window is retoned")
       .toMatch(/background:\s*var\(--ws-window\)/);
-    expect(block(".wpg-scroll > .wpg-chrome.wpg-chrome--stuck"), "the slab casts no shadow when pinned")
-      .toMatch(/box-shadow:[^;]*rgba\(58, 28, 20, 0\.18\)/);   /* back to .18 — the blur that justified .14 is withdrawn */
+    expect(cssRules, "the settle's posture class came back — one masthead, one posture")
+      .not.toContain("wpg-chrome--stuck");
   });
 
   /**
@@ -215,47 +215,18 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(block(".wpg-scroll"), "the scroll row went back to padding every child by the same amount")
       .not.toContain("padding-inline:");
     /**
-     * ⚠️ THE TWO WASH STOPS ARE THE SINGLE SOURCE — no page, and no other rule, may state either as
-     * a literal. The tokens exist precisely because the palette keeps moving: parchment until 25
-     * Aug, terracotta since, and both moves were one edit only because nothing else spelled the hex
-     * out. A second copy is how a surface gets left behind on the old colour and nobody notices,
-     * since a stale wash still looks like a wash.
+     * ⚠️ THE WASH IS DELETED, AND THE SWEEP THAT GUARDED IT GOES WITH IT. `--mast-wash-top` and
+     * `--mast-wash-bottom` were the masthead's parchment band, swept over `src/` so no page could
+     * spell either hex out — a second copy is how one surface gets left behind on an old colour
+     * that still looks like a wash.
      *
-     * ⚠️ SWEPT OVER `src/`, NOT JUST THIS FILE, and the value is read from the token rather than
-     * repeated here — a lock that restates the hex it is forbidding is itself the second copy.
-     * `todo.css` legitimately holds `#f5efe6` as `--lat-1`, an unrelated latte token, which is why
-     * the sweep is for the CURRENT stops and scoped to whoever is not their declaration.
+     * ⚠️ TWO FINDINGS FROM THAT SWEEP ARE WORTH MORE THAN THE TOKENS AND ARE KEPT HERE. Strip
+     * comments before sweeping, or a retirement note that NAMES the thing retired is reported as a
+     * second copy of it — this lock broke that way on its second use. And the value must be read
+     * from the token rather than restated in the assertion, or the lock is itself the second copy.
      */
-    for (const which of ["--mast-wash-top", "--mast-wash-bottom"] as const) {
-      const decl = new RegExp(`${which}:\\s*(#[0-9a-f]{6})`, "i").exec(cssRules);
-      expect(decl, `${which} is not declared on the grid — the wash has no single source`).toBeTruthy();
-      const hex = decl![1];
-      const bare = hex.slice(1).toLowerCase();
-      const offenders: string[] = [];
-      const walk = (dir: string) => {
-        for (const e of readdirSync(dir, { withFileTypes: true })) {
-          const full = resolve(dir, e.name);
-          if (e.isDirectory()) { walk(full); continue; }
-          if (!/\.(css|tsx?)$/.test(e.name)) continue;
-          if (e.name === "workspacePageGrid.css" || e.name === "workspacePageGrid.test.tsx") continue;
-          /**
-           * ⚠️ COMMENTS STRIPPED FIRST — the house rule, and this lock broke it on its second use.
-           * The prose in `illustratedMasthead.css` explains that the trial's ground stop IS
-           * `--mast-wash-top` and quotes the hex to say so; the sweep found that sentence and
-           * reported the file as a second copy of the value. A retirement is always documented by
-           * naming the thing retired, so a lock that reads raw source will keep finding its own
-           * explanation and calling it the code.
-           */
-          const decls = readFileSync(full, "utf8")
-            .replace(/\/\*[\s\S]*?\*\//g, "")
-            .replace(/\/\/[^\n]*/g, "");
-          if (decls.toLowerCase().includes(bare)) offenders.push(e.name);
-        }
-      };
-      walk(resolve(__dirname, "../.."));
-      expect(offenders, `${which} (${hex}) is spelled out somewhere other than its own declaration — the token is no longer the single source`)
-        .toEqual([]);
-    }
+    expect(cssRules, "the wash came back — one masthead format means one ground, the window's own")
+      .not.toContain("--mast-wash");
     expect(block(".wpg-scroll"), "a scrollbar gutter is reserved again — that strip is outside the scroller's content box, so the masthead's wash cannot reach the window's edge through it")
       .not.toContain("scrollbar-gutter");
     /* comments stripped: this file's prose NAMES the retired token, so a bare search finds the
@@ -487,7 +458,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        one whole gap to the column on every settle — measured, max scroll 1918 → 1934. */
     expect(block(".wpg-scroll > .wpg-chrome"), "the slab took a margin again — it will collapse against the content's").not.toContain("margin-bottom");
     expect(block(".wpg-reclaim"), "the spacer stopped carrying the gap to whatever follows the chrome")
-      .toContain("height: calc(var(--wpg-chrome-gap) + var(--wpg-reclaim-pad, 0px))");
+      .toContain("height: var(--wpg-chrome-gap)");
 
     /* ⚠️ AND NEITHER GRID ROW MAY RE-ADD ONE. A `padding-top` on the scroller would sit ABOVE the
        masthead — pushing the page's title down while claiming to be the gap under it — and the
@@ -662,29 +633,34 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    * With the clamp gone the guard, the dead zone and the asymmetry all go together: the state is
    * `scrollTop > 2` and nothing else. A page that can scroll at all strips the moment it does.
    */
-  it("⚠️ the state is one symmetric expression of scrollTop, with nothing cached", () => {
-    expect(srcCode, "safeToStrip came back — with the padding in place there is nothing for it to guard, and it only ever bought a dead zone").not.toContain("safeToStrip");
-    expect(srcCode, "the reclaim is being computed in JS again — it belongs in the stylesheet, as a calc the padding and the height share").not.toContain("reclaimedPx");
-    /* ⚠️ IT PINNED THE EXPRESSION VERBATIM AND THAT WAS TOO TIGHT BY EXACTLY ONE REFACTOR. The
-       hems read the same scroll position, so `root.scrollTop` is now read once into a local and
-       both states derive from it — which is MORE of what this case wants, not less, and the
-       literal match failed on it. What matters is the shape: one read, a bare comparison against
-       the threshold, and nothing cached or conditional in between. */
-    /* ⚠️ AMENDED AGAIN, AND THE CLAIM IS UNCHANGED: derived every frame, written once, nothing
-       cached. The comparison moved one line up because the settle no longer reads the SCROLL ROW —
-       it reads the page's primary scroller, which on the Tasks family is an internal zone. The
-       shape asserted is therefore "one bare comparison against the threshold, assigned to a local,
-       and that local is what is written" rather than the comparison appearing inside `setStuck`. */
-    const derived = /const settled = [^;]*?\.scrollTop > 2;/.exec(srcCode);
-    expect(derived, "the settle is no longer one bare comparison of a scrollTop against the threshold").toBeTruthy();
-    const setter = /setStuck\(([^;]+)\);/.exec(srcCode);
-    expect(setter, "the state is not written in one place").toBeTruthy();
-    expect(setter![1].trim(), "the state stopped being the derived value written straight through")
-      .toBe("settled");
-    /* ⚠️ AND NOTHING IS REMEMBERED BETWEEN FRAMES. A cached "is it stuck" is what a missed event
-       makes permanently wrong; this recomputes from a live `scrollTop` on every evaluation. */
-    expect(srcCode, "the settle's state is being remembered rather than derived").not.toMatch(/stuckRef|wasStuck|lastStuck/);
-    expect(srcCode, "the updater takes the previous value again — that is a latch, and a latch is a cached decision").not.toMatch(/setStuck\(\(was\)/);
+  it("⚠️ THE BAR'S STATE IS DERIVED FROM `scrollTop` — the settle's is deleted outright", () => {
+    /**
+     * ⚠️ THIS CASE'S SUBJECT IS RETIRED AND ITS SHAPE IS NOT. It asserted that the settle was one
+     * bare comparison — `scrollTop > 2`, no `safeToStrip`, no dead zone, no latch, nothing cached
+     * between frames — because a cached "is it stuck" is what a missed event makes permanently
+     * wrong. There is no settle; there IS a bar, and the same law has to hold for it.
+     *
+     * ⚠️ THE BAR IS DELIBERATELY NOT ONE BARE COMPARISON, which is the interesting difference.
+     * It has HYSTERESIS — in past 150, out below 120 — because equal thresholds flicker at the
+     * boundary, and the previous state is therefore a genuine input. What must not happen is that
+     * input being read out of React state inside the scroll callback, where the closure captures
+     * whatever value it was created with. It lives in a ref, and the ref is what is compared.
+     */
+    expect(srcCode, "`safeToStrip` came back — it only ever bought a dead zone").not.toContain("safeToStrip");
+    /* ⚠️ BOUNDED, BECAUSE `setStuck` IS A PREFIX OF `setStuckH` — which survives and publishes the
+       BAR's height for the builder's sticky panel. The unbounded form went red on a correct file
+       the moment it was written, which is this repo's oldest lock fault in a new costume. */
+    expect(srcCode, "the settle's state is back").not.toMatch(/setStuck\s*\(|restHRef|reclaimedPx/);
+    /* the two edges, each asserting ONE direction — which is what makes it a hysteresis rather
+       than two competing triggers */
+    expect(srcCode, "the bar's entry edge is gone").toMatch(/!barOn\.current && y > BAR_SHOW/);
+    expect(srcCode, "the bar's exit edge is gone").toMatch(/barOn\.current && y < BAR_HIDE/);
+    expect(srcCode, "the thresholds collapsed to one value — that flickers at the boundary")
+      .not.toMatch(/BAR_SHOW\s*=\s*(\d+)[\s\S]{0,80}BAR_HIDE\s*=\s*\1\b/);
+    /* ⚠️ THE PREVIOUS STATE IS A REF, NOT THE RENDERED STATE. Reading `bar` inside the callback
+       would read the value that closure captured, which is the fault the ref exists to avoid. */
+    expect(srcCode, "the hysteresis reads React state rather than the ref").toMatch(/const barOn = React\.useRef/);
+    expect((srcCode.match(/setBar\(/g) ?? []).length, "the bar's state is written from more than one place").toBe(1);
   });
 
   /**
@@ -738,43 +714,22 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     }
   });
 
-  it("⚠️ THE SETTLE'S RECLAIM IS A SPACER, NOT SCROLLER PADDING", () => {
-    /* ⚠️ THIS INVERTS ITS OWN SUBJECT, AND THE INVERSION WAS MEASURED RATHER THAN REASONED. The
-       case used to REQUIRE `--wpg-reclaim-pad`: row 1 shrank when the header stripped, growing
-       `clientHeight`, so max scroll fell by the same amount unless `scrollHeight` was grown to
-       match — otherwise a page overflowing by less than the reclaim clamped to 0, the header came
-       back, and it cycled.
-
-       The masthead is content now. It scrolls; it changes no heights. But `.wpg--working` is set by
-       `stuck`, so the compensation started firing when the CONTROL ROW anchored — adding ~103px of
-       bottom padding to correct for a collapse that no longer happens. Measured on the built dev
-       bundle at 1440×900: Contact list's `scrollHeight` went 1904 → 2003 the instant the row stuck.
-       With it deleted, all five scrolling pages hold max scroll across the state change.
-
-       ⚠️ THE `calc()` SHAPE STAYS THOUGH ITS SECOND TERM IS GONE, and that is not tidiness: this
-       declaration is 0-1-0 and three pages declare `.aglist .wpg-scroll { padding-bottom: 48px }`
-       at 0-2-0, later in the bundle. A page and a component contributing to one property must SUM
-       through tokens; raising specificity makes one replace the other. */
-    const live = cssRules.replace(/\/\*[\s\S]*?\*\//g, "");
+  it("⚠️ THE RECLAIM IS DELETED, AND SO IS EVERY COMPENSATION FOR IT", () => {
     /**
-     * ⚠️ THE RECLAIM IS BACK AT §2, AND IT IS A DIFFERENT MECHANISM FOR A DIFFERENT COLLAPSE — which
-     * is why the assertion moved rather than being relaxed. The version deleted here was
-     * `padding-bottom` on the SCROLLER, compensating for a header that no longer changed height, and
-     * it fired on every anchor.
+     * ⚠️ THE HISTORY IS THE VALUE HERE, because the mechanism was rebuilt twice before being
+     * removed. The masthead used to SETTLE on pin, giving up ~62px inside the scroller — the
+     * SHRINK direction, so a page overflowing by less than the settle was clamped to 0, un-settled
+     * and cycled (Noteboard: 37 flips on one pass). The first compensation was `padding-bottom` on
+     * the scroller, which held max scroll and let the FLOW collapse: measured, a 10px wheel tick
+     * moved a content landmark 67px. The second was a SPACER between the slab and the content,
+     * which held both with one number.
      *
-     * What is compensated now genuinely happens: the SLAB settles when it pins and gives up ~62px
-     * inside the scroller. That is the SHRINK direction — a page overflowing by less than the settle
-     * would be clamped to 0, un-settle, and cycle.
-     *
-     * ⚠️ AND IT IS A SPACER, NOT SCROLLER PADDING. Padding fixed `scrollHeight` and left the flow to
-     * collapse: measured, a 10px wheel tick moved a content landmark 67px. A box between the slab
-     * and the content holds the flow still AND keeps the column's total constant, with one number
-     * doing both jobs.
+     * ⚠️ NOTHING CHANGES HEIGHT ON SCROLL NOW, so there is nothing to compensate. The spacer stays
+     * as the chrome GAP alone — it is still an element rather than a margin, because adjacent
+     * siblings' margins collapse and this one did, silently, into the content's own.
      */
-    expect(live, "the reclaim went back onto the scroller's padding — that fixes max scroll and lets the content collapse under the reader")
-      .not.toContain("padding-bottom: calc(var(--wpg-foot, 0px) + var(--wpg-reclaim-pad");
-    expect(block(".wpg-reclaim"), "the spacer stopped holding the settle's reclaim")
-      .toContain("var(--wpg-reclaim-pad, 0px)");
+    const live = cssRules.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(live, "the reclaim came back").not.toContain("--wpg-reclaim-pad");
     expect(live, "the working state started re-declaring the gap token — `manuscriptLibrary.css` reads it for its foot padding")
       .not.toContain("--content-top-gap-work");
     expect(block(".wpg-scroll"), "the foot padding stopped being a sum — a page's own contribution would replace the component's")
@@ -797,40 +752,34 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
      * (.wpg-scroll)`, two strings coupling two components across the DOM, which finds the wrong
      * element the day anything inside the row is itself a scroller.
      *
-     * ⚠️ IT DOES NOT FORBID RESOLVING A SCROLLER THE PAGE NAMED. `settleOn` is a selector the page
+     * ⚠️ IT DOES NOT FORBID RESOLVING A SCROLLER THE PAGE NAMED. `scroller` is a selector the page
      * hands in for its own internal zone, because on a `fill` page the frame never scrolls and the
-     * settle has to follow the scroll that does. The grid is not searching for something it owns; it
+     * bar has to follow the scroll that does. The grid is not searching for something it owns; it
      * is resolving something it was told about, and it picks by which candidate actually scrolls
      * rather than by document order. So the ban is scoped to the row's own class.
      */
     expect(srcCode, "the grid went hunting for its own scroll row — it holds a ref to it")
       .not.toMatch(/querySelector[^(]*\(\s*["'`][^"'`]*wpg-scroll/);
     const lookups = [...srcCode.matchAll(/querySelectorAll?\(([^)]*)\)/g)].map((m) => m[1].trim());
-    expect(lookups, `the grid resolves something other than the page's own \`settleOn\`: ${lookups.join(" · ")}`)
-      .toEqual(["settleOn"]);
+    expect(lookups, `the grid resolves something other than the page's own \`scroller\`: ${lookups.join(" · ")}`)
+      .toEqual(["scroller"]);
     expect(srcCode, "a `closest()` traversal appeared").not.toContain("closest(");
     expect(srcCode, "the grid stopped holding a ref to its own scroller").toContain("ref={scrollRef}");
   });
 
-  it("⚠️ THE FOLD HAS ONE TRIGGER, AND IT IS THE WRITER'S", () => {
+  it("⚠️ NOTHING INFERS THAT THE WRITER HAS STARTED WORKING", () => {
     /**
-     * ⚠️ THIS CASE'S SUBJECT IS RETIRED (masthead rethink, step 4). It asserted the MODE half of a
-     * three-input union — `stuck || condensedByMode || engaged` — reaching the header without any
-     * scrolling, because a workspace page could never strip otherwise.
-     *
-     * Every one of those inputs was an INFERENCE that the writer had started working, and the
-     * click-anywhere vanish is what that inference produced. The fold is an explicit Hide now: one
-     * trigger, on fill pages, pressed by the person it affects. What is asserted is that no
-     * inference survives — no prop, no engagement state, no latch.
+     * ⚠️ THE FOLD IS DELETED AND THE INFERENCES IT REPLACED STAY DELETED, which is the half of this
+     * case worth keeping. The masthead once folded on a three-input union — `stuck ||
+     * condensedByMode || engaged` — every term of which was a GUESS that the writer had started
+     * working, and the click-anywhere vanish is what that guess produced. `Hide` replaced the guess
+     * with one explicit act; the rebuild replaces the act with scrolling, which needs no state at
+     * all. What must never come back is the guessing.
      */
-    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8")
-      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    for (const gone of ["condensedByMode", "engaged", "setEngaged", "onPointerDown"]) {
-      expect(src, `\`${gone}\` came back — the masthead is inferring engagement again`).not.toContain(gone);
+    for (const gone of ["condensedByMode", "engaged", "setEngaged", "onPointerDown", "setHidden"]) {
+      expect(srcCode, `\`${gone}\` came back — the masthead is inferring engagement again`).not.toContain(gone);
     }
-    /* the one trigger, and it is a button the writer presses */
-    expect(src, "the fold has no explicit trigger").toContain("setHidden(true)");
-    expect(src, "the fold's state is persisted — Hide is per-visit by decision").not.toContain("localStorage");
+    expect(srcCode, "the fold's state is persisted — there is no fold").not.toContain("localStorage");
   });
 
   it("⚠️ NOTHING LISTENS FOR ENGAGEMENT ANY MORE", () => {
@@ -884,7 +833,11 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
          tabs are buttons that navigate. Counted, so a decorative element cannot join them quietly. */
       /* ⚠️ THE BROWSING GRID'S CARDS ARE BUTTONS. Counted with the rest, so the list stays a census
          of what is pressable rather than a list of exceptions. */
-      .toEqual([".qc-card", ".wpg-barback", ".wpg-chevfold", ".wpg-mast-hide"]);
+      /* ⚠️ THE TWO FOLD CONTROLS LEAVE THIS LIST WITH THE FOLD. What the case guards is unchanged
+         and is the reason it survives its own subject: a pointer cursor may appear only on
+         something that IS pressable, never on a bare surface promising something invisible —
+         which is what the retired click-to-restore band was. */
+      .toEqual([".qc-card", ".wpg-barback"]);
   });
 
   /**
@@ -893,17 +846,6 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    * be cleared exactly never, and you would return to a page days later still collapsed. The signal
    * is the grid's own box going from zero to non-zero, which is what a visit IS here.
    */
-  it("⚠️ A PAGE VISIT RESETS IT — keyed on hidden → shown, not on unmount", () => {
-    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(src, "the visit reset is gone — a folded masthead would stay folded on every future arrival").toMatch(/setHidden\(false\)/);
-    expect(src, "the reset is not observing the grid root — there is nothing else that reports hidden → shown")
-      .toMatch(/rootRef/);
-    /* ⚠️ THE EDGE, NOT EVERY OBSERVATION. Resetting on each callback would clear engagement on any
-       reflow — a window resize, a pane opening — and the card would pop back mid-task. */
-    expect(src, "the reset fires on every resize rather than on the hidden → shown edge — the header would pop back mid-task")
-      .toMatch(/if \(now && !shown\)/);
-  });
-
   /**
    * ⚠️ LEAVING A JOURNEY LEAVES THE HEADER COLLAPSED. You were working before it and you still are;
    * handing back the browsing chrome at the moment you have most to do is the wrong direction.
@@ -938,13 +880,13 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     const html = renderToStaticMarkup(
       <WorkspacePageGrid masthead={MAST} fill>{null}</WorkspacePageGrid>,
     );
-    expect(html, "a fill page arrives folded").not.toContain("wpg--hidden");
+    expect(html, "the fold's class came back").not.toContain("wpg--hidden");
     expect(html, "a plate row came back").not.toContain("wpg-plate");
     const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     /* ⚠️ ONE WRITER, WHICH IS WHAT THE UNION CASE WAS FOR. No page-level code may set it and
        nothing may synthesise a scroll position to reach it. */
-    expect((src.match(/setStuck\(/g) ?? []).length, "the stuck state is written from more than one place").toBe(1);
-    expect((src.match(/setHidden\(/g) ?? []).length, "the fold is written from more than the two controls that own it").toBe(3);
+    expect((src.match(/setBar\(/g) ?? []).length, "the bar's state is written from more than one place").toBe(1);
+    expect(src, "the fold came back").not.toContain("setHidden");
   });
 
   it("⚠️ THE CONTEXT IS DELETED, AND THE PROBLEM ITS `null` SOLVED CANNOT ARISE", () => {
@@ -1027,28 +969,23 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       .not.toContain("Contact list");
   });
 
-  it("⚠️ THE MASTHEAD COLLAPSES ON TYPE B ONLY — a pinned page's chrome settles instead", () => {
+  it("⚠️ THE TWO HEADER TYPES ARE DELETED — one masthead, one behaviour", () => {
     /**
-     * ⚠️ SCOPED TO THE TYPE, NOT TO `fill` (header types — canonical). It was `.wpg--fill`, and that
-     * put the fold on the Tasks family beside a settle — two mechanisms for one job. `fill` is the
-     * LAYOUT (the row does not scroll, the panes do); the type is the CHROME, and the Tasks family
-     * is `fill` and Type A.
+     * ⚠️ THE PARTITION IS GONE AND ITS ABSENCE IS ASSERTED, because a classification is exactly the
+     * kind of thing that gets half-restored. Type A pinned and settled; Type B sat in flow and
+     * folded to a chevron. Every masthead now scrolls away as content and hands off to the bar.
      *
-     * The scoping still matters in BOTH directions: a Type A page whose masthead also collapsed
-     * would lose it at `scrollTop 0`, where the settle says it must be resting.
+     * ⚠️ AND THE PARTITION'S OWN MEASUREMENT WAS ASSERTING CONTENT RATHER THAN STRUCTURE — it
+     * required each scrolling page's row to be currently overflowing, which contradicts the law
+     * stated beside it. It was red on `main` before this rebuild began, on whichever page happened
+     * to fit that day. Deleted with the thing it partitioned rather than repaired.
      */
-    const live = cssRules.replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(live, "the collapse is not scoped to the static type")
-      .toContain(".wpg--static.wpg--hidden > .wpg-scroll > .wpg-chrome > .wpg-mast");
-    expect(live, "the collapse is keyed on `fill` again — that is the layout, not the header type")
-      .not.toContain(".wpg--fill.wpg--hidden");
-    /* it goes to NOTHING — no band, no strip, no residue to click */
-    const gone = block(".wpg--static.wpg--hidden > .wpg-scroll > .wpg-chrome > .wpg-mast").replace(/\s+/g, " ");
-    expect(gone, "the masthead collapses to a band rather than to nothing").toContain("max-height: 0");
-    expect(gone, "the masthead is still painted when collapsed").toContain("opacity: 0");
-    /* ⚠️ AND `max-height` NEEDS A DEFINITE REST VALUE or there is nothing to transition from. */
-    expect(block(".wpg--static > .wpg-scroll > .wpg-chrome > .wpg-mast"), "no resting max-height — the collapse would snap")
-      .toMatch(/max-height:\s*\d+px/);
+    for (const gone of ["wpg--static", "wpg--hidden", "wpg-chevfold", "wpg-mast-hide", "wpg-chrome--stuck"]) {
+      expect(cssRules, `\`${gone}\` came back — there is one masthead behaviour`).not.toContain(gone);
+    }
+    for (const gone of ["data-wpg-type", "MastheadBehaviour", "pinned ?"]) {
+      expect(srcCode, `\`${gone}\` came back — the type partition is deleted`).not.toContain(gone);
+    }
   });
 
   it("⚠️ NO PAGE CAN MAKE A MASTHEAD ARRIVE FOLDED", () => {
@@ -1073,15 +1010,17 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(html, "the mini bar rendered beside a visible masthead").not.toContain("wpg-mini-name");
   });
 
-  it("⚠️ A CLICK ON THE MASTHEAD DOES NOTHING — because no click anywhere does", () => {
-    /* The containment test existed so a click on the header would not fold the header. With the
-       click trigger gone there is nothing to exclude it from: the only thing that folds the
-       masthead is its own Hide button. */
-    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8")
-      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect(src, "a containment test came back — it would only be needed if clicks folded again").not.toContain("contains(e.target");
-    const setters = src.match(/setHidden\(true\)/g) ?? [];
-    expect(setters.length, "the fold is set from more than the Hide button").toBe(1);
+  it("⚠️ A CLICK ANYWHERE DOES NOTHING TO THE CHROME", () => {
+    /**
+     * ⚠️ THE CONTAINMENT TEST IS THE THING TO KEEP OUT. It existed so a click on the header would
+     * not fold the header — which is only ever needed while clicks fold anything, and the fact that
+     * it had to exist is the clearest statement of what was wrong with inferring engagement.
+     * Nothing folds now; a click in the content area, on the masthead or on the dock changes no
+     * chrome state at all.
+     */
+    expect(srcCode, "a containment test came back — it would only be needed if clicks folded again")
+      .not.toContain("contains(e.target");
+    expect(srcCode, "a click handler on the chrome came back").not.toMatch(/onClick=\{[^}]*setBar/);
   });
 
   it("⚠️ THE CENSUS — every page that renders a masthead renders it through the grid", () => {
@@ -1244,7 +1183,7 @@ describe("no modifier is styled without being emitted", () => {
     for (const sheet of sheets) {
       for (const m of sheet.matchAll(/\.(wpg--[a-z-]+)/g)) styled.add(m[1]);
     }
-    expect(styled.size, "no modifiers found at all — the sweep read nothing").toBeGreaterThan(2);
+    expect(styled.size, "no modifiers found at all — the sweep read nothing").toBeGreaterThan(1);
     const orphans = [...styled].filter((c) => !srcCode.includes(`" ${c}"`));
     expect(orphans, `styled but never emitted: ${orphans.join(", ")}`).toEqual([]);
     console.log(`   modifiers styled and emitted: ${[...styled].sort().join(", ")}`);

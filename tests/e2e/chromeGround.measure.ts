@@ -2,7 +2,14 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE PINNED GROUND IS OPAQUE — proved by sampling what was PAINTED.
+ * THE PINNED BAND IS OPAQUE — proved by sampling what was PAINTED.
+ *
+ * ⚠️ THE SUBJECT MOVED FROM THE SLAB TO THE BAR, AND THE CLAIM DID NOT. The masthead used to PIN and
+ * settle, so content passed beneath it and it had to be opaque; it now scrolls away as content, and
+ * the thing content passes beneath is the collapsed bar. Everything below — the two-backdrop
+ * comparison, the sweep, the reasoning about why `elementsFromPoint` and `getComputedStyle` both
+ * answered the wrong question — transfers unchanged, because none of it was ever about which
+ * element it was pointed at.
  *
  * ⚠️ THIS SHIPPED BROKEN TWICE BEHIND A GREEN LOCK, AND THE LOCK IS WHY. Its predecessor said "the
  * pixel, not the rule" and then read `elementsFromPoint` — which reports the DOM stack at a
@@ -46,14 +53,11 @@ const PAGES: { name: string; route: string; cls: string }[] = [
 const read = (page: Page, cls: string) => page.evaluate((c) => {
   const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
   if (!g) return null;
-  const slab = g.querySelector(".wpg-chrome") as HTMLElement;
-  const cs = getComputedStyle(slab);
+  const bar = g.querySelector(".wpg-bar") as HTMLElement;
+  const cs = getComputedStyle(bar);
   return {
-    type: g.getAttribute("data-wpg-type"),
     bg: cs.backgroundColor,
     bgImage: cs.backgroundImage,
-    washTop: cs.getPropertyValue("--mast-wash-top").trim(),
-    washBottom: cs.getPropertyValue("--mast-wash-bottom").trim(),
     blur: cs.backdropFilter || (cs as unknown as { webkitBackdropFilter?: string }).webkitBackdropFilter || "none",
     shadow: cs.boxShadow,
     /* the ground the fill is supposed to be an alpha OF — read from the page, never restated */
@@ -79,58 +83,38 @@ const hexToRgb = (h: string) => {
 const normRgb = (c: string) => (/rgba?\(([^)]*)\)/.exec(c)?.[1].split(",").slice(0, 3).map((x) => Math.round(parseFloat(x.trim()))) ?? []).join(", ");
 const channelsOf = (c: string) => (/rgba?\(([^)]*)\)/.exec(c)?.[1].split(",").slice(0, 3).map((x) => Math.round(parseFloat(x.trim()))) ?? []).join(", ");
 
-test("⚠️ THE PINNED GROUND IS AN OPAQUE PARCHMENT WASH — no alpha in the colour or any stop", async ({ page }) => {
+test("⚠️ THE PINNED BAND IS OPAQUE — no alpha in the colour or any stop", async ({ page }) => {
+  /**
+   * ⚠️ NO ALPHA ANYWHERE, ON ANY PAGE. The translucent direction is withdrawn for good:
+   * `backdrop-filter` does not reliably apply inside a nested scroller beneath a rounded,
+   * `overflow: hidden` window, so any alpha here is a see-through band waiting to be reported for a
+   * fifth time.
+   *
+   * ⚠️ AND IT IS A PARTITION OVER ALL TEN PAGES, WITH NO CARVE-OUT. It used to split on header type
+   * and hold the two halves to different claims — which is exactly the shape that erodes one
+   * exemption at a time. One bar, one ground, no page named.
+   */
   const lines: string[] = [];
-  let pinned = 0, staticc = 0;
+  let checked = 0;
   for (const { name, route, cls } of PAGES) {
     await openRoute(page, route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     const r = (await read(page, cls))!;
     expect(r, `${name}: no grid`).not.toBeNull();
-    lines.push(`${name.padEnd(21)} ${String(r.type).padEnd(7)} · bg ${r.bg.padEnd(24)} · blur ${r.blur}`);
-    /* ⚠️ NO ALPHA ANYWHERE, EITHER TYPE — in the colour or in any gradient stop. The translucent
-       direction is withdrawn: `backdrop-filter` does not reliably apply in this scroller, so any
-       alpha is a see-through header waiting to be reported for a fifth time. */
-    expect(alphaOf(r.bg), `${name}: the ground colour is ${r.bg} — it must be fully opaque`).toBe(1);
+    checked += 1;
+    lines.push(`${name.padEnd(21)} bg ${r.bg.padEnd(24)} · blur ${r.blur}`);
+    expect(alphaOf(r.bg), `${name}: the band's colour is ${r.bg} — it must be fully opaque`).toBe(1);
     expect(r.blur, `${name}: a backdrop blur survives — it was only ever propping up a translucent fill`).toBe("none");
     for (const stop of (r.bgImage.match(/rgba?\([^)]*\)/g) ?? [])) {
-      expect(alphaOf(stop), `${name}: a gradient stop carries alpha (${stop}) — the wash must be opaque throughout`).toBe(1);
+      expect(alphaOf(stop), `${name}: a gradient stop carries alpha (${stop}) — the band must be opaque throughout`).toBe(1);
     }
-
-    if (r.type === "pinned") {
-      pinned += 1;
-      /**
-       * ⚠️ A WASH, NOT A FLAT FILL (ref 179, PARCHMENT). Asserted as a gradient BETWEEN THE TWO
-       * TOKENS rather than against two hexes, so the pair can move without this case moving with
-       * them — the palette has shifted twice this year.
-       */
-      expect(r.washTop, `${name}: \`--mast-wash-top\` resolves to nothing`).toMatch(/^#|^rgb/);
-      expect(r.washBottom, `${name}: \`--mast-wash-bottom\` resolves to nothing`).toMatch(/^#|^rgb/);
-      const stops = r.bgImage.match(/rgb\([^)]*\)/g) ?? [];
-      expect(stops.length, `${name}: the chrome draws no gradient (${r.bgImage.slice(0, 60)})`).toBe(2);
-      expect(hexToRgb(r.washTop), `${name}: the wash's first stop is not \`--mast-wash-top\``).toBe(normRgb(stops[0]));
-      expect(hexToRgb(r.washBottom), `${name}: the wash's second stop is not \`--mast-wash-bottom\``).toBe(normRgb(stops[1]));
-      /* ⚠️ AND A COLOUR BENEATH THE IMAGE, so a gradient the browser declines to paint cannot leave
-         the slab transparent — the failure mode this whole sequence has been chasing. */
-      expect(normRgb(r.bg), `${name}: the chrome has no opaque colour under its gradient — if the image is ever dropped it is see-through`)
-        .toBe(hexToRgb(r.washBottom));
-    } else {
-      staticc += 1;
-      /**
-       * ⚠️ TYPE B CARRIES THE WASH TOO, AND THIS ASSERTION USED TO SAY THE OPPOSITE (header fix,
-       * §1). The wash was scoped to pinned pages on the reasoning that it compensates for content
-       * passing beneath — which is a fact about BEHAVIOUR, not about what a masthead is. Query
-       * Centre and Manuscripts were excluded by that reasoning rather than overlooked. The claim is
-       * now a partition: every masthead, no page named, asserted in the pinned branch above and
-       * repeated here so a page changing type cannot slip between the two.
-       */
-      const stops = r.bgImage.match(/rgb\([^)]*\)/g) ?? [];
-      expect(stops.length, `${name} is static and carries no wash — the wash belongs to every masthead`).toBe(2);
-    }
+    /* ⚠️ THE GROUND IS THE WINDOW'S OWN, READ FROM THE PAGE RATHER THAN RESTATED. A literal on both
+       sides is a lock that agrees with itself and with nothing else. */
+    expect(channelsOf(r.bg), `${name}: the band's ground is not the window's own`)
+      .toBe(channelsOf(`rgb(${r.groundRgb})`));
   }
-  console.log("\n══ CHROME GROUND\n" + lines.join("\n"));
-  expect(pinned, "no pinned page was measured").toBeGreaterThan(4);
-  expect(staticc, "no static page was measured").toBeGreaterThan(0);
+  console.log("\n══ THE BAR'S GROUND\n" + lines.join("\n"));
+  expect(checked, "the census was not fully walked").toBe(PAGES.length);
 });
 
 for (const vp of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }]) {
@@ -140,33 +124,27 @@ for (const vp of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }]) {
     for (const { name, route, cls } of PAGES) {
       await openRoute(page, route, vp);
       await liftMotionSuppression(page);
-      const t = await page.evaluate((c) => {
-        const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-        return g?.getAttribute("data-wpg-type") ?? null;
-      }, cls);
-      if (t !== "pinned") continue;
-
       const box = async () => page.evaluate((c) => {
         const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-        const b = (g.querySelector(".wpg-chrome") as HTMLElement).getBoundingClientRect();
+        const b = (g.querySelector(".wpg-bar") as HTMLElement).getBoundingClientRect();
         return { x: Math.round(b.left), y: Math.round(b.top), width: Math.round(b.width), height: Math.round(b.height) };
       }, cls);
 
       /**
-       * ⚠️ BOTH READINGS ARE TAKEN WITH THE CHROME IN THE SAME POSTURE, and my first version was not.
-       * It photographed the chrome at rest and again after scrolling — but scrolling SETTLES it
-       * (mark 52→34, title 30→22, description folded), so the two images differed by design and the
-       * sweep reported ten changed points on a page with an opaque header. The instrument was
-       * measuring the settle.
+       * ⚠️ BOTH READINGS ARE TAKEN WITH THE BAR IN THE SAME POSTURE, and the original version of
+       * this case was not: it photographed the chrome at rest and again after scrolling, but
+       * scrolling SETTLED it, so the two images differed by design and the sweep reported ten
+       * changed points on a page with an opaque header. The instrument was measuring the settle.
        *
-       * ⚠️ SO THE COMPARISON IS BETWEEN TWO SCROLLED POSITIONS. The chrome is settled in both and
-       * identical to itself; only what passes BEHIND it differs. That isolates the one variable this
-       * case is about — change the backdrop, and the header must not change.
+       * ⚠️ THE SAME HAZARD SURVIVES THE SETTLE'S DELETION IN A NEW FORM: the bar FADES IN. At rest
+       * it is `opacity: 0` and there is nothing to photograph. So both positions are scrolled past
+       * the show threshold, the bar is shown and identical to itself in both, and only what passes
+       * BEHIND it differs — which isolates the one variable this case is about.
        */
       const strip = async () => { const b2 = await box(); return { x: b2.x, y: b2.y + b2.height + 2, width: b2.width, height: 40 }; };
       const scrollTo = (px: number) => page.evaluate(({ c, n }) => {
         const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-        const sel = g.getAttribute("data-wpg-settle");
+        const sel = g.getAttribute("data-wpg-scroller");
         const hit = sel ? [...g.querySelectorAll(sel)].map((e) => e as HTMLElement).find((e) => e.scrollHeight - e.clientHeight > 2) : null;
         if (!hit) return { max: 0, at: 0 };
         hit.scrollTop = n;
@@ -188,9 +166,26 @@ for (const vp of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }]) {
        * the separation assertion then failed it at 63 → 119 — a page with too little scroll being
        * reported as a broken measurement. The floor is now derived from what it has to produce.
        */
+      /**
+       * ⚠️ TWO CONSTRAINTS NOW, AND THE SECOND IS NEW WITH THE BAR. Both readings must be far enough
+       * apart that what is BEHIND the band genuinely differs (`MIN_SEP`), and BOTH must clear the
+       * bar's 150px show threshold — because the band is `opacity: 0` at rest, so a reading below it
+       * photographs nothing and two photographs of nothing are identical.
+       *
+       * ⚠️ THE POSITIONS ARE DERIVED AND THEN CHECKED, NEVER FLOORED AND HOPED FOR. Flooring them at
+       * 220 and 240 collided on Noteboard, whose zone scrolls 165–285px: the two landed 22px apart
+       * and the case failed for want of somewhere to scroll to, on a band that was behaving
+       * perfectly. A page that cannot satisfy both constraints is SKIPPED with its numbers, and the
+       * population floor after the loop is what stops the whole case going quiet.
+       */
       const MIN_SEP = 60;
-      const needed = Math.ceil((MIN_SEP + 42) / 0.7);
-      if (range.max < needed) { lines.push(`${name.padEnd(21)} — only ${range.max}px of scroll, under the ${needed} two positions ${MIN_SEP}px apart would need`); continue; }
+      const BAR_CLEAR = 220;
+      const firstWant = Math.max(BAR_CLEAR, Math.round(range.max * 0.15) + 42);
+      const secondWant = Math.round(range.max * 0.85);
+      if (secondWant - firstWant < MIN_SEP) {
+        lines.push(`${name.padEnd(21)} — ${range.max}px of scroll gives ${firstWant} → ${secondWant}, under the ${MIN_SEP}px two readings need past the bar's threshold`);
+        continue;
+      }
       /**
        * ⚠️ BOTH READINGS ARE TAKEN WITH THE TOOLBAR IN THE SAME STATE, and the retract is why this
        * had to be added. The claim is that the chrome renders identically over two different
@@ -222,19 +217,30 @@ for (const vp of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }]) {
         await page.waitForTimeout(420);
         return scrollTo(to);
       };
-      const first = await nudgeUp(Math.round(range.max * 0.15) + 42);
+      /* ⚠️ THE FIRST POSITION MUST CLEAR THE BAR'S SHOW THRESHOLD (150), or there is nothing to
+         photograph: the band is `opacity: 0` at rest, so a sweep taken below it would compare two
+         identical images of nothing and pass. That is the vacuous shape this whole file is a
+         monument to, arriving one mechanism later. */
+      const first = await nudgeUp(firstWant);
       if (!first.max) { lines.push(`${name.padEnd(21)} — nothing to scroll at this viewport`); continue; }
-      await page.waitForTimeout(800);          /* past the .22s settle, so the posture is stable */
+      await page.waitForTimeout(800);          /* past the bar's .2s fade, so the posture is stable */
+      /* ⚠️ AND THE PRECONDITION IS ASSERTED RATHER THAN ASSUMED. `--on` is what makes the band
+         visible; without it the two photographs are of a transparent box. */
+      const shown = await page.evaluate((c) => {
+        const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+        return !!(g.querySelector(".wpg-bar") as HTMLElement | null)?.className.includes("--on");
+      }, cls);
+      if (!shown) { lines.push(`${name.padEnd(21)} — the bar does not reach its threshold at this viewport`); continue; }
       const before = readPng(await page.screenshot({ clip: await box() }));
       const beforeBelow = readPng(await page.screenshot({ clip: await strip() }));
 
-      const second = await nudgeUp(Math.round(range.max * 0.85));
+      const second = await nudgeUp(secondWant);
       await page.waitForTimeout(800);
       const after = readPng(await page.screenshot({ clip: await box() }));
       const afterBelow = readPng(await page.screenshot({ clip: await strip() }));
       /* ⚠️ THE PRECONDITION FOR THE PRECONDITION: same chrome, or the pixel comparison is asking
          about two different elements and its answer means nothing either way. */
-      expect(after.height, `${name}: the chrome is ${before.height}px in one reading and ${after.height}px in the other — they are not the same object`).toBe(before.height);
+      expect(after.height, `${name}: the band is ${before.height}px in one reading and ${after.height}px in the other — they are not the same object`).toBe(before.height);
       const scrolled = second.at - first.at;
       expect(scrolled, `${name}: the second scroll position is not past the first (${first.at} → ${second.at})`).toBeGreaterThan(MIN_SEP - 1);
 

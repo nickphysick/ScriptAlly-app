@@ -2,11 +2,21 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE HEADER FIX PACK'S LOCKS — the wash's reach, the toolbar's ground, and the retract.
+ * THE HEADER FIX PACK'S LOCKS — the toolbar's ground, and the retract that stayed withdrawn.
  *
- * ⚠️ EVERY CASE HERE IS A PARTITION OVER THE CENSUS, NEVER A PAGE LIST. "Every masthead carries the
- * wash" and "no toolbar carries it" are claims about all ten pages at once; written as
- * `expect(pagesWithWash).toBe(10)` they would go green the day a page stopped rendering a masthead
+ * ⚠️ THE WASH AND ITS CARVE-OUT ARE DELETED. `--mast-wash-top` / `--mast-wash-bottom` painted a
+ * parchment band on the masthead; the rebuild gives every masthead the window's own ground, so
+ * there is one ground and nothing to partition. The CARVE-OUT went with it — two pages (Submission
+ * packages and Query Centre) were permitted a ground of their own for the illustrated trial, and a
+ * carve-out with nothing left to be carved out OF is a list nobody can reason about.
+ *
+ * ⚠️ THE PART THAT WAS ALWAYS THE POINT SURVIVES AND IS WHY THIS FILE IS NOT DELETED: the toolbar
+ * takes the PAGE's ground, not the masthead's, and the boundary between them is a colour change
+ * rather than a rule. That claim is independent of what the masthead is filled with.
+ *
+ * ⚠️ EVERY CASE HERE IS A PARTITION OVER THE CENSUS, NEVER A PAGE LIST. "Every masthead sits on one
+ * ground" and "no toolbar takes the masthead's" are claims about all ten pages at once; written as
+ * `expect(pagesWithGround).toBe(10)` they would go green the day a page stopped rendering a masthead
  * at all. Each case therefore asserts its POPULATION first and then the property over that
  * population — the discipline the off-screen-probe and empty-set failures in CLAUDE.md are about.
  */
@@ -31,6 +41,14 @@ const PAGES: { name: string; route: string; cls: string }[] = [
 const norm = (c: string) => (/rgba?\(([^)]*)\)/.exec(c)?.[1].split(",").slice(0, 3).map((x) => Math.round(parseFloat(x.trim()))) ?? []).join(", ");
 /* ⚠️ A TOKEN IS A HEX AND A COMPUTED STOP IS AN `rgb()` — comparing them raw is a lock that fails on
    a correct page, which is exactly what the first run of this file did. One canonical form for both. */
+/* ⚠️ AN OPAQUE FILL REPORTS `rgb(...)`, A TRANSPARENT ONE `rgba(..., a)` — and a missing background
+   reports `rgba(0, 0, 0, 0)`. All three have to be told apart, so the alpha is read rather than the
+   string being pattern-matched. */
+const alpha = (c: string) => {
+  const parts = /rgba?\(([^)]*)\)/.exec(c)?.[1].split(",") ?? [];
+  return parts.length > 3 ? parseFloat(parts[3]) : 1;
+};
+
 const asRgb = (v: string) => {
   const t = v.trim();
   const m = /^#?([0-9a-f]{6})$/i.exec(t);
@@ -49,13 +67,9 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
   const cs = getComputedStyle(chrome);
   const bs = band ? getComputedStyle(band) : null;
   return {
-    type: g.getAttribute("data-wpg-type"),
     chromeImg: cs.backgroundImage,
     chromeBg: cs.backgroundColor,
-    /* the title's rendered size, so the carve-out can state that it covers type as well as paint */
     titleSize: (() => { const t = g.querySelector(".wsh-title") as HTMLElement | null; return t ? getComputedStyle(t).fontSize : ""; })(),
-    washTop: cs.getPropertyValue("--mast-wash-top").trim(),
-    washBottom: cs.getPropertyValue("--mast-wash-bottom").trim(),
     /* ⚠️ THE TRIPLE, NOT `--ws-window`. A custom property read back gives its TOKEN TEXT, and
        `--ws-window` is itself `rgb(var(--ws-window-rgb))` — so reading it yields that string rather
        than a colour, and comparing it to a computed `rgb()` fails on a correct page. */
@@ -69,64 +83,34 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
   };
 }, cls);
 
-/* the pages permitted a ground other than the wash — see the note at the carve-out */
-const WASH_CARVE_OUTS = ["Submission packages", "Query Centre"];
-
-test("⚠️ EVERY MASTHEAD CARRIES THE WASH — a partition, with one named carve-out", async ({ page }) => {
+test("⚠️ EVERY MASTHEAD SITS ON THE WINDOW'S OWN GROUND — a partition, with no carve-out", async ({ page }) => {
+  /**
+   * ⚠️ THE CARVE-OUT IS GONE AND THE PARTITION IS STRONGER FOR IT. It named two pages by hand and
+   * held them to a weaker claim, which is exactly the shape that erodes one exemption at a time.
+   * One format, one ground, ten pages, no names.
+   *
+   * ⚠️ OPACITY IS ASSERTED, NOT JUST IDENTITY. A masthead scrolls beneath the collapsed bar, and a
+   * translucent one lets the page's own cards read through it — the fault this pack's ancestor
+   * shipped twice behind a green lock.
+   */
   const lines: string[] = [];
-  let measured = 0, washed = 0, carved = 0;
+  let measured = 0;
   for (const { name, route, cls } of PAGES) {
     await openRoute(page, route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     const r = await read(page, cls);
-    expect(r, `${name}: no grid — the census names a page this build does not render`).not.toBeNull();
+    expect(r, `${name}: no grid`).not.toBeNull();
     measured += 1;
-    /**
-     * ⚠️ TWO CARVE-OUTS, STATED HERE RATHER THAN HIDDEN IN A SKIP. Submission packages and Query
-     * Centre run a trial: an illustration bleeding across the masthead, on a tint-to-pale ground
-     * rather than the wash. They are the only pages allowed to depart, and the size of that list is
-     * asserted below — so a third cannot join without someone editing the number and reading this.
-     *
-     * ⚠️ THE CARVED-OUT PAGE IS STILL HELD TO SOMETHING, never merely skipped. It must have an
-     * OPAQUE ground of its own; what it may not do is quietly have no ground at all, which is the
-     * fault this whole family of locks exists for.
-     */
-    if (WASH_CARVE_OUTS.includes(name)) {
-      carved += 1;
-      const alpha = (c: string) => { const m = /rgba?\(([^)]*)\)/.exec(c); const parts = m ? m[1].split(",").map((v) => parseFloat(v.trim())) : []; return parts.length > 3 ? parts[3] : 1; };
-      expect(alpha(r!.chromeBg), `${name} is carved out of the wash and its ground is not opaque (${r!.chromeBg})`).toBe(1);
-      /**
-       * ⚠️ THE CARVE-OUT COVERS TYPOGRAPHY TOO, AND NOT SAYING SO IS WHY THE 47px TITLE KEPT
-       * REVERTING. The chrome matrix asserts every Type A masthead is identical — a good law, and it
-       * forces 30px — so each time the trial raised the title that lock pulled it back and nothing
-       * said why. A carve-out naming the ground and the artwork but not the type scale has a hole in
-       * it exactly the size of the thing that kept disappearing.
-       */
-      expect(r!.titleSize, `${name} is carved out and its title is back at the shared 30px — the carve-out does not cover typography`).not.toBe("30px");
-      lines.push(`${name.padEnd(21)} ${String(r!.type).padEnd(7)} · CARVE-OUT · ground ${r!.chromeBg}`);
-      continue;
-    }
-    const stops = r!.chromeImg.match(/rgb\([^)]*\)/g) ?? [];
-    /* the claim, over whichever pages exist: a gradient between the two tokens */
-    expect(stops.length, `${name}: its masthead draws no wash (${r!.chromeImg.slice(0, 50)})`).toBe(2);
-    expect(norm(stops[0]), `${name}: the wash's first stop is not --mast-wash-top`).toBe(asRgb(r!.washTop));
-    expect(norm(stops[1]), `${name}: the wash's second stop is not --mast-wash-bottom`).toBe(asRgb(r!.washBottom));
-    washed += 1;
-    lines.push(`${name.padEnd(21)} ${String(r!.type).padEnd(7)} · WASH · band ${r!.hasBand ? r!.bandBg : "no toolbar"}`);
+    expect(r!.chromeImg, `${name}: the masthead paints a background image — the wash has come back`).toBe("none");
+    expect(norm(r!.chromeBg), `${name}: the masthead's ground is not the window's own`).toBe(asRgb(`rgb(${r!.ground})`));
+    expect(alpha(r!.chromeBg), `${name}: the masthead's ground is not opaque (${r!.chromeBg})`).toBe(1);
+    lines.push(`${name.padEnd(21)} ground ${r!.chromeBg}`);
   }
-  console.log("\n══ THE WASH, EVERY MASTHEAD (1440)\n" + lines.join("\n"));
-  /* ⚠️ THE POPULATION FIRST — an empty census satisfies every claim above it. */
-  expect(measured, "no page was measured at all").toBe(PAGES.length);
-  expect(washed, "a masthead was measured that carries no wash").toBe(measured - carved);
-  /* ⚠️ EXACTLY ONE, so the trial cannot spread without a deliberate edit here */
-  /* ⚠️ DERIVED FROM THE LIST, NOT RESTATED BESIDE IT — this was `toBe(1)` and went red when the
-     list legitimately became two, which is a lock reporting its own bookkeeping as a fault. The
-     claim is that every carved page WAS actually reached and carved; the number belongs to the list. */
-  expect(carved, "a page on the carve-out list was not measured, or a page carved itself off the list").toBe(WASH_CARVE_OUTS.length);
-  expect(WASH_CARVE_OUTS, "the carve-out list itself has changed size").toHaveLength(2);
+  console.log("\n══ THE MASTHEAD'S GROUND (1440)\n" + lines.join("\n"));
+  expect(measured, "the census was not fully walked").toBe(PAGES.length);
 });
 
-test("⚠️ NO TOOLBAR CARRIES THE WASH — asserted in both directions", async ({ page }) => {
+test("⚠️ THE TOOLBAR TAKES THE PAGE'S GROUND, NOT THE MASTHEAD'S — asserted in both directions", async ({ page }) => {
   let withBand = 0, withoutBand = 0;
   const lines: string[] = [];
   for (const { name, route, cls } of PAGES) {
@@ -138,8 +122,8 @@ test("⚠️ NO TOOLBAR CARRIES THE WASH — asserted in both directions", async
     /* the toolbar's ground is the PAGE's, unchanged — stated as a value comparison against the
        ground token the page itself publishes, never against a literal on both sides */
     expect(norm(r.bandBg), `${name}: the toolbar's ground is not the page's --ws-window`).toBe(asRgb(`rgb(${r.ground})`));
-    expect(r.bandImg, `${name}: the toolbar's band carries a background image — the wash has reached it`).toBe("none");
-    expect(r.toolsImg, `${name}: the control row itself paints an image — the wash has reached it`).toBe("none");
+    expect(r.bandImg, `${name}: the toolbar's band carries a background image`).toBe("none");
+    expect(r.toolsImg, `${name}: the control row itself paints an image`).toBe("none");
     lines.push(`${name.padEnd(21)} band ${r.bandBg} · no image`);
   }
   console.log("\n══ THE TOOLBAR'S GROUND (1440)\n" + lines.join("\n"));
@@ -194,7 +178,7 @@ test("⚠️ NO PAGE RETRACTS ITS TOOLBAR — the mechanism is withdrawn, not ha
     const r = await page.evaluate(async (c) => {
       const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
       if (!g) return null;
-      const sel = g.getAttribute("data-wpg-settle");
+      const sel = g.getAttribute("data-wpg-scroller");
       const el = sel ? [...g.querySelectorAll(sel)].map((e) => e as HTMLElement).find((e) => e.scrollHeight - e.clientHeight > 2) : null;
       const band = g.querySelector(".wpg-toolband") as HTMLElement | null;
       const before = band ? Math.round(band.getBoundingClientRect().height) : null;

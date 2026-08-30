@@ -108,22 +108,16 @@
   .tl-search { flex-basis: 120px; }
 }
 
-/* ══ THE SETTLE'S RECLAIM GOES TO THE BOARD, NOT TO A SPACER ════════════════════════════════
+/**
+ * ⚠️ THE RECLAIM OPT-OUT IS DELETED WITH THE RECLAIM. This page zeroed `--wpg-reclaim-pad` on the
+ * spacer, because the compensation the grid published for every page did nothing here and cost the
+ * board 45.89px: the Calendar is `fill`, its scroll row never scrolls, and the only scrollport is
+ * the board's own zone, whose `scrollTop` is unaffected by its `clientHeight` growing.
  *
- * ⚠️ SCOPED TO THIS PAGE, AND THE SHARED MECHANISM IS UNTOUCHED. `.wpg-reclaim` is
- * `calc(var(--wpg-chrome-gap) + var(--wpg-reclaim-pad, 0px))`, and the pad exists so that a
- * SCROLLING scroll row keeps its `scrollTop` when the masthead shrinks — remove it there and the
- * reader's place jumps by the whole settle. That reasoning does not reach this page: the Calendar
- * is `fill`, its scroll row does not scroll at all, and the only scrollport is the board's own
- * zone, whose `scrollTop` is unaffected by its `clientHeight` growing. Measured before this rule,
- * the masthead shed 45.89px on settle and the spacer took 45.89px of it: the board gained nothing.
- *
- * ⚠️ IT IS DECLARED ON THE SPACER ITSELF, which is where the `calc()` reads it. The pad is set as
- * an INLINE custom property on the grid root and inherits down; a declaration on the element that
- * consumes it wins over an inherited one without needing `!important` and without touching the
- * root's inline style.
+ * The masthead does not settle any more, so there is no reclaim to opt out of. The finding that
+ * survives is the one that produced the rule: a compensation stated for every page is wrong on a
+ * page whose scrolling happens somewhere the compensation cannot reach.
  */
-.cal-timeline .wpg-reclaim { --wpg-reclaim-pad: 0px; }
 
 /* ══ THE BOARD — PORCELAIN (Porcelain pack; ref design-refs/timeline-v35.html) ══════════════
  *

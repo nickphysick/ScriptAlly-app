@@ -130,18 +130,11 @@ export interface PageHeaderProps {
    *  isn't a button (Discover's "Finding for" manuscript selector). Ignored when `actions` is set. */
   actionsSlot?: React.ReactNode;
   /**
-   * A row ABOVE the title — today, the record page's `‹ All manuscripts`.
-   *
-   * ⚠️ IT IS A LEAD, NOT AN ACTION, AND THAT IS WHY IT IS NOT IN `actionsSlot`. Everything in the
-   * actions slot acts ON this page; this LEAVES it. Putting a departure among the operations is how
-   * a reader comes to press one meaning to get the other.
-   *
-   * ⚠️ ADDITIVE AND PROVED SO: absent, no element renders and no space is reserved, so the nine
-   * pages that pass nothing are byte-identical. That is asserted against rendered output rather
-   * than argued — a reserved-but-empty row is exactly the kind of change that reads as nothing and
-   * moves every page down eight pixels.
+   * ⚠️ `lead` IS DELETED — an optional row above the title, and its only caller was Manuscripts'
+   * `← All manuscripts`. That departure lives in the record BAR now, shared with Query Centre, so
+   * the prop had no consumer and `.wsh-lead` had nothing to style. A prop nothing passes is a knob
+   * the next reader goes looking for a use for.
    */
-  lead?: React.ReactNode;
   /** Page operations beyond the two primaries — rendered behind a ⋯ at the end of the tool row.
    *  If a page has six things it can do, five of them are not primary and the header should
    *  say so. Ignored on a compact header, whose actions stay inline. */
@@ -157,7 +150,6 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   toolbar,
   titleAdornment,
   actionsSlot,
-  lead,
   overflow,
 }) => {
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
@@ -298,7 +290,6 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             `<hr>` here would put a thematic break between a page's title and the page. */}
         <div className="wsh-toprule" aria-hidden="true" />
         {/* ⚠️ NOTHING WHEN ABSENT — not an empty div, not a reserved height. See the prop's note. */}
-        {lead && <div className="wsh-lead">{lead}</div>}
         <div className="wsh-body">
           {/* ⚠️ THE SECTION, FROM THE ROUTER. Null on a route the crumb does not know, which renders
               nothing rather than an empty pill — a bordered pill with no word in it is worse than no

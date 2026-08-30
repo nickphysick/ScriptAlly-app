@@ -60,8 +60,8 @@ const readBand = (page: Page, cls: string) => page.evaluate((c) => {
     bandBg: cs.backgroundColor,
     bandImg: cs.backgroundImage,
     sticky: cs.position,
-    type: g.getAttribute("data-wpg-type"),
-    settleOn: g.getAttribute("data-wpg-settle"),
+
+    scroller: g.getAttribute("data-wpg-scroller"),
     toolbandBg: (() => { const b = g.querySelector(".wpg-toolband") as HTMLElement | null; return b ? getComputedStyle(b).backgroundColor : null; })(),
     toolbandArt: (() => { const b = g.querySelector(".wpg-toolband") as HTMLElement | null; return b ? getComputedStyle(b, "::after").backgroundImage : null; })(),
   };
@@ -100,18 +100,17 @@ for (const width of [1280, 1440, 1920, 2560]) {
     await liftMotionSuppression(page);
     await page.waitForTimeout(900);
     const lines: string[] = [];
-    for (const posture of ["rest", "settled"] as const) {
-      if (posture === "settled") {
-        const moved = await page.evaluate(async (c) => {
-          const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-          const sc = g.querySelector(".wpg-scroll") as HTMLElement;
-          if (sc.scrollHeight - sc.clientHeight < 120) return false;
-          for (let t = 0; t <= 400; t += 20) { sc.scrollTop = t; await new Promise((r) => requestAnimationFrame(r)); }
-          return true;
-        }, trial.cls);
-        if (!moved) { lines.push(`  ${posture}: the page cannot scroll here — posture not exercised`); continue; }
-        await page.waitForTimeout(800);
-      }
+    /**
+     * ⚠️ ONE POSTURE. This used to run at rest and again "settled" — the masthead scrolled 400px and
+     * held in its tightened form, where a band drawn for a 128px header had to be re-checked at
+     * about half of it. The settle is deleted: scrolling now takes the masthead AWAY, so the second
+     * posture's clip was a box above the viewport and every reading came back
+     * "Clipped area is either empty or outside the resulting image".
+     *
+     * ⚠️ AND THAT IS A SIMPLIFICATION RATHER THAN LOST COVERAGE. There is one shape to check because
+     * there is one shape; the artwork can no longer be cropped into a posture nobody drew it for.
+     */
+    for (const posture of ["rest"] as const) {
       const geo = await page.evaluate((c) => {
         const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
         const ch = g.querySelector(".wpg-chrome") as HTMLElement;
@@ -173,47 +172,37 @@ for (const width of [1280, 1440, 1920, 2560]) {
  }
 }
 
-test("⚠️ THE TRIAL CHANGES NO BEHAVIOUR — Packages answers like every other Type A page", async ({ page }) => {
-  const rows: { name: string; sticky: string; type: string | null; settleOn: string | null; toolband: string | null }[] = [];
+test("⚠️ THE TRIAL CHANGES NO BEHAVIOUR — the treated pages answer like every untreated one", async ({ page }) => {
+  /**
+   * ⚠️ THE TWO HEADER TYPES ARE DELETED, WHICH MAKES THIS CASE SIMPLER AND STRONGER. It used to
+   * split on `data-wpg-type` — Type A pins and settles, Type B sits in flow — and compare each
+   * treated page against untreated peers of its OWN type; that had already broken once when
+   * Manuscripts changed type and left Query Centre as the only Type B page, with nothing to compare
+   * against and a failure for want of a sample rather than for a fault.
+   *
+   * There is one behaviour now: the masthead is in flow, it scrolls away as content, and the page
+   * declares where it scrolls. So every page is a peer of every other, and the claim is that the
+   * artwork changes none of it.
+   */
+  const rows: { name: string; sticky: string; scroller: string | null; toolband: string | null }[] = [];
   for (const { name, route, cls } of PAGES) {
     await openRoute(page, route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     const r = (await readBand(page, cls))!;
-    rows.push({ name, sticky: r.sticky, type: r.type, settleOn: r.settleOn, toolband: r.toolbandBg });
+    rows.push({ name, sticky: r.sticky, scroller: r.scroller, toolband: r.toolbandBg });
   }
+  console.log("\n══ BEHAVIOUR (1440)\n" + rows.map((r) => `${r.name.padEnd(21)} ${r.sticky.padEnd(8)} · scrolls at ${r.scroller}`).join("\n"));
   const trials = rows.filter((r) => TRIAL.includes(r.name));
-  console.log("\n══ BEHAVIOUR (1440)\n" + rows.map((r) => `${r.name.padEnd(21)} ${String(r.type).padEnd(7)} · ${r.sticky} · settles on ${r.settleOn}`).join("\n"));
-  /**
-   * ⚠️ EACH TRIAL PAGE AGAINST ITS OWN TYPE'S PEERS, never against the other trial page. The two
-   * are deliberately different header types — Packages pins and settles, Query Centre is static —
-   * so a comparison between them would assert that a Type B page behaves like a Type A one, which
-   * is a claim nobody wants and which the header contract forbids.
-   */
+  const peers = rows.filter((r) => !TRIAL.includes(r.name));
   expect(trials.length, "a trial page did not render").toBe(TRIAL.length);
+  expect(peers.length, "no untreated page was measured — the comparison would be vacuous").toBeGreaterThan(2);
+  /* ⚠️ THE PEERS MUST AGREE WITH EACH OTHER FIRST, or "the trial matches the peers" is satisfied by
+     a census in which every page differs. */
+  expect([...new Set(peers.map((r) => r.sticky))], `untreated pages disagree about their band's positioning: ${peers.map((r) => `${r.name}→${r.sticky}`).join(" | ")}`)
+    .toHaveLength(1);
   for (const t of trials) {
-    /**
-     * ⚠️ THE TYPE'S CONTRACT, NOT A PEER — and the peer form broke the day Manuscripts changed type.
-     * It compared each treated page against an untreated page of the same type, which is fine until
-     * a type has only one page: Query Centre is now the ONLY Type B page (Manuscripts reads `pinned`
-     * where it used to read `static`, by another stream's change), so treating it left nothing to
-     * compare against and the case failed for want of a sample rather than for a fault.
-     *
-     * The contract needs no sample. Type A pins; Type B sits in flow and does not. That is the
-     * canonical rule, and asserting it directly is both stronger and immune to the census shifting.
-     */
-    if (t.type === "pinned") {
-      expect(t.sticky, `${t.name} is Type A and its band is not sticky — the trial changed its behaviour`).toBe("sticky");
-      expect(t.settleOn, `${t.name} is Type A and names no primary scroller`).toBeTruthy();
-    } else {
-      expect(t.sticky, `${t.name} is Type B and its band went sticky — the trial changed its behaviour`).not.toBe("sticky");
-      expect(t.settleOn, `${t.name} is Type B and has acquired a settle binding`).toBeFalsy();
-    }
-    /* and where untreated peers of the same type DO exist, the treated page still matches them */
-    const peers = rows.filter((r) => r.type === t.type && !TRIAL.includes(r.name));
-    if (peers.length) {
-      expect(t.sticky, `${t.name}: its band's positioning differs from untreated pages of the same type`).toBe(peers[0].sticky);
-      expect(t.settleOn, `${t.name}: its settle is bound differently from untreated pages of the same type`).toBe(peers[0].settleOn);
-    }
+    expect(t.sticky, `${t.name}: its band's positioning differs from untreated pages — the trial changed behaviour`).toBe(peers[0].sticky);
+    expect(t.scroller, `${t.name}: it stopped declaring where it scrolls`).toBeTruthy();
   }
 });
 
@@ -248,23 +237,18 @@ test("⚠️ THE TRIAL CHANGES NO BEHAVIOUR — Packages answers like every othe
  * `.wpg-mast` really does clip on a Type B page — it is the fold's own animation — so the question
  * is a real one, and this is the only form that answers it.
  */
-for (const posture of ["rest", "settled"] as const) {
+/**
+ * ⚠️ ONE POSTURE, FOR THE REASON STATED AT THE CASE ABOVE: the settle is deleted, so a "settled"
+ * reading is of a masthead that has left the viewport — and the ink of an element above the
+ * scrollport is outside its clipping ancestor by construction, which is a true statement about
+ * nothing. Measured red that way: "the title's ink overflows its clipping ancestor by 340.5px".
+ */
+{
  for (const trial of TRIAL_ROUTES) {
-  test(`⚠️ THE TITLE'S INK IS NOT CLIPPED — ${trial.name} — ${posture}`, async ({ page }) => {
+  test(`⚠️ THE TITLE'S INK IS NOT CLIPPED — ${trial.name}`, async ({ page }) => {
     await openRoute(page, trial.route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     await page.waitForTimeout(700);
-    if (posture === "settled") {
-      const moved = await page.evaluate(async (c) => {
-        const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-        const sc = g.querySelector(".wpg-scroll") as HTMLElement;
-        if (sc.scrollHeight - sc.clientHeight < 120) return false;
-        for (let t = 0; t <= 400; t += 20) { sc.scrollTop = t; await new Promise((r) => requestAnimationFrame(r)); }
-        return true;
-      }, trial.cls);
-      if (!moved) { console.log(`   ${trial.name}: cannot settle — Type B, posture not exercised`); return; }
-      await page.waitForTimeout(700);
-    }
     const out = await page.evaluate((c) => {
       const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
       const wsh = g.querySelector(".wsh") as HTMLElement;
@@ -295,13 +279,13 @@ for (const posture of ["rest", "settled"] as const) {
                  over: clip ? Math.max(0, +(clip.top - top).toFixed(1), +(bot - clip.bot).toFixed(1)) : 0 };
       });
     }, trial.cls);
-    console.log(`\n══ TITLE INK vs CLIPPER — ${trial.name} — ${posture}\n` +
+    console.log(`\n══ TITLE INK vs CLIPPER — ${trial.name}\n` +
       out.map((o: any) => o.absent ? `   ${o.sel}: absent` :
         `   ${o.sel.padEnd(11)} ${o.fs}/${o.lh} · ink ${o.ink.top.toFixed(1)}→${o.ink.bot.toFixed(1)} · clipper ${o.clip ? `${o.clip.cls} ${o.clip.top.toFixed(1)}→${o.clip.bot.toFixed(1)}` : "none"} · over ${o.over}`).join("\n"));
     const present = out.filter((o: any) => !o.absent);
     expect(present.length, "neither the title nor the description rendered — nothing was checked").toBeGreaterThan(0);
     for (const o of present as any[]) {
-      expect(o.over, `${trial.name} ${posture}: ${o.sel}'s ink overflows its clipping ancestor (${o.clip?.cls}) by ${o.over}px at ${o.fs}/${o.lh}`).toBeLessThanOrEqual(0.5);
+      expect(o.over, `${trial.name}: ${o.sel}'s ink overflows its clipping ancestor (${o.clip?.cls}) by ${o.over}px at ${o.fs}/${o.lh}`).toBeLessThanOrEqual(0.5);
     }
   });
  }

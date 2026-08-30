@@ -32,9 +32,9 @@ for (const width of [1280, 1440, 1920, 2560]) {
       const r = await page.evaluate(async (c) => {
         const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
         if (!g) return null;
-        const scroller = (g.getAttribute("data-wpg-settle") === ".wpg-scroll"
+        const scroller = (g.getAttribute("data-wpg-scroller") === ".wpg-scroll"
           ? g.querySelector(".wpg-scroll")
-          : [...g.querySelectorAll(g.getAttribute("data-wpg-settle") || ".wpg-scroll")]
+          : [...g.querySelectorAll(g.getAttribute("data-wpg-scroller") || ".wpg-scroll")]
               .find((e) => (e as HTMLElement).scrollHeight - (e as HTMLElement).clientHeight > 2)) as HTMLElement | null;
         if (!scroller) return { noScroll: true } as any;
         const max = scroller.scrollHeight - scroller.clientHeight;

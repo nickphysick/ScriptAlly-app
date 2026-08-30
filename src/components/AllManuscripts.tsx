@@ -332,12 +332,11 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
          * grid's own sheet records it overflowing 72px at 1280) and everything inside had to build
          * its own height chain, ending in `.msv-dpane`'s nested scroller. One page, two scrollports.
          *
-         * ⚠️ AND DROPPING IT CHANGES THE PAGE'S HEADER TYPE, DELIBERATELY. `pinned = !fill ||
-         * !!settleOn`, so this is Type A now: the shared grid pins the masthead slab at `top: 0` and
-         * settles it as the row scrolls. That is the app's ONE collapsing-header mechanism — the same
-         * one Comparable titles, Discover, Analytics and packages already use. A page-local sticky
-         * rail instead would have been a second implementation of it, and a third header behaviour
-         * inside a law that says a page is Type A or Type B and may not opt out.
+         * ⚠️ AND IT IS WHY THE SHELF SCROLLS AT THE ROW, which is what the shared grid's collapsed bar
+         * watches. The two header TYPES this note used to reason about are deleted: there is one
+         * masthead behaviour and no partition to fall on either side of. A page-local sticky rail
+         * would still be the wrong answer, and now for a simpler reason — it would be a second
+         * implementation of the one mechanism rather than a third behaviour inside a law of two.
          */
         /**
          * ⚠️ `condensed={!!selected}` IS DELETED (masthead rethink, step 4). Opening a dossier used

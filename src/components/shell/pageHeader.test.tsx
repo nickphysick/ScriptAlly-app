@@ -209,10 +209,22 @@ describe("the masthead is content, not chrome", () => {
        it. Anything reinstated here turns content back into chrome and re-earns the collapse
        mechanism the pack deleted. */
     const wsh = decls(all(hdrCss, ".wsh"));
-    for (const prop of ["background:", "border-radius:", "box-shadow:", "border: 1px", "height:"]) {
+    for (const prop of ["background:", "border-radius:", "box-shadow:", "border: 1px"]) {
       expect(wsh, `.wsh regained \`${prop}\` — the masthead is drawing itself as an object again`)
         .not.toContain(prop);
     }
+    /**
+     * ⚠️ `height` IS BOUNDED, BECAUSE `line-height` CONTAINS IT. The masthead closes its own
+     * typography — `font-size` and `line-height` on `.wsh`, so the format does not inherit the
+     * page's strut — and a bare `not.toContain("height:")` went red on that, over a declaration
+     * that has nothing to do with the masthead drawing itself as an object.
+     *
+     * ⚠️ AND THE LOOSENESS RAN BOTH WAYS, which is the half worth fearing: the same substring form
+     * would also have caught `min-height`/`max-height` by accident rather than by intent. The
+     * property is matched at a boundary and all three sizing forms are named.
+     */
+    expect(wsh, "`.wsh` states a height — the masthead is sized by its content, never by a number")
+      .not.toMatch(/(?:^|[;{\s])(?:min-|max-)?height\s*:/);
     /* ⚠️ THE CLOSING HAIRLINE IS NOT THE MASTHEAD'S ANY MORE (pinned chrome, §1). It drew one at its
        own MEASURE, so the line stopped short of the window while the shadow beneath it ran full
        width — one boundary rendered as two objects of different lengths. The SLAB carries one

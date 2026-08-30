@@ -4221,10 +4221,10 @@ export const Queries: React.FC<{
              page the composition is lying on. Its definition now sits with the journeys below.
 
              ⚠️ AND THE RHYTHM PACK'S SCROLLPORT WARNING RETIRES WITH IT. "A dock's height comes out
-             of the scrollport" was true of a grid row and is not true of a child of an overlay:
-             nothing about `--wpg-reclaim-pad` is coupled to it on this page any more. Do not
-             reinstate that coupling here — and note the warning still stands for any page that
-             puts a dock back in row 4. */
+             of the scrollport" was true of a grid row and is not true of a child of an overlay. The
+             token it used to be coupled to — `--wpg-reclaim-pad`, the settle's compensation — no
+             longer exists either; the warning still stands for any page that puts a dock back in
+             row 4, for the scrollport reason alone. */
           /* ⚠️ NO `toolbar` PROP (§1c). Search, Filter and Sort act on the LIST and nothing else,
              so they sit at the head of the list COLUMN rather than in a page-wide strip. The grid's
              row 2 is gone from this page entirely; `.wpg-scroll`'s own `padding-top` pays the
