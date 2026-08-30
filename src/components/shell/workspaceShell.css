@@ -802,7 +802,11 @@
    they stack — the pill rendered as a tall black circle. Caught by the screenshot, not the tests. */
 .ws-nbtn {
   display: flex; align-items: center; gap: 7px;
-  background: #1c130e; color: #ffffff; border: none; border-radius: 99px;
+  /* ⚠️ THE FILL IS THE SHARED TOKEN NOW. It was `#1c130e`, one unit off the masthead primary's
+     `#1c130f` — two literals for one button family, which is the shape a token exists to end. The
+     text is still `#ffffff` against the masthead's `#fdfaf5`; that difference is visible and is
+     flagged rather than changed here. */
+  background: var(--btn-ink); color: #ffffff; border: none; border-radius: 99px;
   padding: 9px 18px; font-size: 13.5px; font-weight: 500; cursor: pointer; white-space: nowrap;
 }
 .ws-nbtn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; }

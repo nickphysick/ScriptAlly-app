@@ -278,14 +278,9 @@
      element would push the rule down with the text and it would stop reading as the page's top. */
   padding: 0;
 
-  /* ⚠️ THE CTA'S BORDER CANNOT READ `--pink-b`, AND THAT IS NOT FUSSINESS — `--pink-b` IS DECLARED
-     TWICE. `:root` gives the soft-pink CTA border `#e8c8bc`; `.t-f12` — the theme class Query Centre
-     applies — redefines it as `#eecdc3` for its needs-you tag family. A masthead reading it would
-     therefore be a different colour on exactly one of the ten pages, which is precisely the claim
-     this format makes and the sort of divergence nobody sees in review. The value is stated here,
-     scoped to the masthead, and a lock asserts it against `:root`'s own token rather than a literal
-     on both sides. `--pink` and `--pink-h` are `:root`-only and are read normally. */
-  --mast-cta-bd: #e8c8bc;
+  /* ⚠️ `--mast-cta-bd` IS DELETED. It existed to shield the pink CTA's border from `.t-f12`, which
+     redefines `--pink-b` — a real trap, and moot now that the border is the fill. Its whole reason
+     went with the pink button. */
   /* the top rule's ink — the ref's `--toprule`, a shade warmer than `--ws-edge` because it is a
      divider inside the ground rather than the window's own edge */
   --mast-toprule: #e6ded3;
@@ -332,15 +327,26 @@
  */
 .wsh-kicker {
   display: inline-block;
-  border: 1px solid rgba(25, 18, 16, 0.28);
+  /**
+   * ⚠️ IT KEEPS THE PILL AND HALVES ITS PRESENCE, and the reason is a grammar rather than a taste:
+   * an OUTLINED CAPSULE IS A CONTROL SHAPE, so a label wearing one at Playfair 12.5/600 with a .28
+   * border reads as pressable. Mono not Playfair, 9px not 12.5, regular not semibold, and a border
+   * at half the weight — the shape survives because it still groups the words, and everything that
+   * made it look like a button goes.
+   *
+   * ⚠️ BOTH COLOURS ARE TOKENS. The border is an rgba the brief writes inline; inlined here it would
+   * be the only alpha literal in the sheet and the next surface needing the same hairline would
+   * write it again from memory.
+   */
+  border: 1px solid var(--mast-kick-bd);
   border-radius: 999px;
-  padding: 5px 15px 4px;
-  font-family: var(--font-serif);
-  font-size: 12.5px;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  color: rgba(25, 18, 16, 0.72);
+  padding: 4px 12px 3px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
+  color: var(--mast-kick-ink);
   margin-bottom: var(--mast-kick-gap);
 }
 
@@ -405,38 +411,40 @@
 }
 
 /**
- * ⚠️ ONE CONTROL, AND IT IS A PILL RATHER THAN A FILL. Soft pink on the window's white; the hover
- * DEEPENS to the border's own tone rather than introducing a third colour. No burgundy fill anywhere
- * — burgundy at this size is a block of colour, and the standing rule is that no button in this app
- * is burgundy-filled.
+ * ⚠️ ONE CONTROL, AND IT JOINS THE APP'S BUTTON FAMILY RATHER THAN STARTING ONE. It was a soft-pink
+ * Playfair pill — the only pink Playfair button in the app. Near-black Inter is what `+ New` in the
+ * top bar and `Log query` on the agent cards already are, so the masthead's primary now reads as the
+ * same object those are rather than as a masthead-specific invention.
  *
- * ⚠️ SENTENCE CASE. The kicker above it is the uppercase element; a second uppercase run in the same
- * 130px would make the CTA read as a label rather than a thing to press.
+ * ⚠️ THE FILL IS `--btn-ink`, WHICH HAD TO BE CREATED. There was no near-black button token: the top
+ * bar carried the literal `#1c130e` and this is specified as `#1c130f`. One unit apart, invisible,
+ * on two buttons whose entire rationale is that they match.
+ *
+ * ⚠️ STILL NO BURGUNDY FILL ANYWHERE, and sentence case — the kicker above it is the uppercase
+ * element, and a second uppercase run in the same 130px makes the CTA read as a label.
  */
 .wsh-cta {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  /* ⚠️ THE SIZING BENCH'S VALUES, NOT THE FULLPAGE REF'S, AND THE TWO DISAGREE. `scriptally-
-     masthead-fullpage.html` draws 21 / 11px 22px / 16px; `masthead-sizing-bench.html` — the later
-     artefact, and the one the brief says its numbers came from — draws 17 / 10px 20px / 15px. The
-     brief names five tokens and is silent on the CTA, so the ref wins on what it shows. */
   margin-top: 17px;
-  background: var(--pink);
-  border: 1px solid var(--mast-cta-bd);
+  background: var(--btn-ink);
+  border: 1px solid var(--btn-ink);
   border-radius: 999px;
   padding: 10px 20px;
-  font-family: var(--font-serif);
-  font-size: 15px;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
   font-weight: 600;
-  letter-spacing: 0.005em;
-  color: #311e19;
+  color: var(--btn-ink-on);
   cursor: pointer;
   transition: background 0.16s;
 }
-.wsh-cta:hover { background: var(--mast-cta-bd); }
+/* ⚠️ THE HOVER LIFTS RATHER THAN DEEPENING. A near-black fill has nowhere darker to go that reads as
+   a state; the top bar's `+ New` has no hover fill at all, so this stays in the same family. */
+.wsh-cta:hover { background: #2b201a; }
 .wsh-cta:disabled { opacity: 0.45; cursor: default; }
-.wsh-cta svg { width: 16px; height: 16px; flex: none; }
+/* the icon matches the top bar's exactly — 15px, 1.8 stroke, currentColor */
+.wsh-cta svg { width: 15px; height: 15px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; }
 
 /**
  * ⚠️ IT EXISTS ONLY WHEN SOMETHING IS PASSED. There is no empty-state rule here on purpose: a

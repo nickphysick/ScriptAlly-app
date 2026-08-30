@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8">
+<title>ScriptAlly — kicker and CTA options</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+ :root{
+  --page:#efe9e4;--band:#faf7f3;--ink:#191210;--ink2:#311e19;--sub:#4d413a;--mute:#8a7a70;
+  --burg:#7c3a2a;--pink:#f5e2da;--pinkb:#e8c8bc;--rim:#e9e1d4;--edge:#e0d8cd;
+  --gut:36px;
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{background:var(--page);font-family:'Inter',sans-serif;color:var(--ink);padding:20px 24px 40px}
+ h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:#8d7f75;margin:26px 0 10px;font-weight:400}
+ h4:first-child{margin-top:0}
+ .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+ .cell{background:var(--band);border:1px solid var(--edge);border-radius:14px;padding:20px 22px 22px;cursor:pointer;transition:box-shadow .15s}
+ .cell:hover{box-shadow:0 2px 10px rgba(25,18,16,.07)}
+ .cell.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+ .lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;color:#a2968c;margin-bottom:14px}
+ .cell.on .lbl{color:var(--burg)}
+ .ttl{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;line-height:1.14;letter-spacing:-.012em;margin:11px 0 7px}
+ .sub{font-family:'Playfair Display',serif;font-size:15px;color:var(--sub);line-height:1.45}
+ .spacer{height:15px}
+
+ /* ── KICKERS ── */
+ .k{display:inline-block}
+ .k1{border:1px solid rgba(25,18,16,.28);border-radius:999px;padding:5px 15px 4px;font-family:'Playfair Display',serif;
+     font-size:12.5px;font-weight:600;letter-spacing:.15em;color:rgba(25,18,16,.72);text-transform:uppercase}
+ .k2{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.2em;color:var(--mute);text-transform:uppercase}
+ .k3{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.2em;color:var(--mute);text-transform:uppercase;
+     display:inline-flex;align-items:center;gap:10px}
+ .k3::before{content:'';width:20px;height:1px;background:#c9bcb0}
+ .k4{border:1px solid rgba(25,18,16,.14);border-radius:999px;padding:4px 12px 3px;font-family:'JetBrains Mono',monospace;
+     font-size:9px;font-weight:400;letter-spacing:.18em;color:var(--mute);text-transform:uppercase}
+ .k5{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;font-weight:400;color:var(--mute);letter-spacing:.01em}
+ .k6{background:rgba(25,18,16,.05);border-radius:5px;padding:4px 10px 3px;font-family:'JetBrains Mono',monospace;
+     font-size:9px;font-weight:500;letter-spacing:.16em;color:#6b5f57;text-transform:uppercase}
+
+ /* ── CTAs ── */
+ .c{display:inline-flex;align-items:center;gap:9px;cursor:pointer}
+ .c1{background:var(--pink);border:1px solid var(--pinkb);border-radius:999px;padding:10px 20px;
+     font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--ink2)}
+ .c2{background:#1c130f;border:1px solid #1c130f;border-radius:999px;padding:10px 20px;
+     font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;color:#fdfaf5}
+ .c3{background:transparent;border:1px solid rgba(25,18,16,.45);border-radius:999px;padding:10px 20px;
+     font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;color:var(--ink)}
+ .c3:hover{background:var(--ink);color:#fdfaf5}
+ .c4{background:var(--pink);border:1px solid var(--pinkb);border-radius:9px;padding:10px 18px;
+     font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;color:var(--ink2)}
+ .c5{background:transparent;border:0;border-bottom:1.5px solid var(--burg);border-radius:0;padding:3px 1px 5px;
+     font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--burg)}
+ .c6{background:#fff;border:1px solid var(--rim);border-radius:999px;padding:10px 20px;
+     font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;color:var(--ink);box-shadow:0 1px 2px rgba(25,18,16,.05)}
+ .c7{background:var(--pink);border:1px solid var(--pinkb);border-radius:999px;padding:9px 18px;
+     font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+ .c8{background:#1c130f;border:0;border-radius:999px;padding:0;width:38px;height:38px;justify-content:center;color:#fdfaf5;font-size:17px}
+ .c .ic{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+</style></head><body>
+
+<h4>KICKER &mdash; PICK ONE</h4>
+<div class="grid" id="ks"></div>
+
+<h4>PRIMARY BUTTON &mdash; PICK ONE</h4>
+<div class="grid" id="cs"></div>
+
+<script>
+const PLUS='<svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+const K=[
+ ['1 · PILL, PLAYFAIR 12.5 (TODAY)','k1'],
+ ['2 · MONO, NO PILL','k2'],
+ ['3 · MONO WITH A RULE','k3'],
+ ['4 · SMALL PILL, MONO 9','k4'],
+ ['5 · PLAYFAIR ITALIC','k5'],
+ ['6 · MONO ON A TINT','k6']];
+document.getElementById('ks').innerHTML=K.map(([l,c])=>`<div class="cell"><div class="lbl">${l}</div>
+ <span class="k ${c}">Materials</span>
+ <div class="ttl">Submission packages</div>
+ <div class="sub">Bundle your materials once, then send them without rebuilding each time.</div></div>`).join('');
+
+const C=[
+ ['1 · PINK PILL, PLAYFAIR (TODAY)','c1','New package'],
+ ['2 · NEAR-BLACK PILL, INTER','c2','New package'],
+ ['3 · OUTLINED PILL, INTER','c3','New package'],
+ ['4 · PINK, 9px RADIUS, INTER','c4','New package'],
+ ['5 · TEXT WITH A BURGUNDY RULE','c5','New package'],
+ ['6 · WHITE PILL, HAIRLINE','c6','New package'],
+ ['7 · PINK PILL, MONO CAPS','c7','New package'],
+ ['8 · ICON ONLY','c8','']];
+document.getElementById('cs').innerHTML=C.map(([l,c,t])=>`<div class="cell"><div class="lbl">${l}</div>
+ <div class="ttl" style="font-size:30px;margin-top:4px">Submission packages</div>
+ <div class="sub" style="margin-bottom:17px">Bundle your materials once, then send them without rebuilding each time.</div>
+ <span class="c ${c}">${c==='c8'?'&#65291;':(c==='c5'?'':PLUS)+' '+t}</span></div>`).join('');
+
+document.querySelectorAll('.grid').forEach(g=>g.addEventListener('click',e=>{
+ const cell=e.target.closest('.cell'); if(!cell)return;
+ g.querySelectorAll('.cell').forEach(x=>x.classList.toggle('on',x===cell));}));
+</script></body></html>

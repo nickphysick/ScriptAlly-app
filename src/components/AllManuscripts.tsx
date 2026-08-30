@@ -370,7 +370,11 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
            * empty (ShellSidebar.tsx:118) and inside the manuscript switcher (`:140`). Consolidating
            * them is not this pass's to do.
            */
-          actions={[{ label: "＋ Add a manuscript", primary: true,
+          /* ⚠️ THE PLUS IS AN ICON NOW, NOT A CHARACTER. The masthead's primary joined the app's button
+             family, and that family draws its plus at 15px with a 1.8 stroke — a fullwidth `＋`
+             glyph is a different weight, a different size and a different vertical centring on every
+             platform, which is why the top bar's `+ New` has never used one. */
+          actions={[{ label: "Add a manuscript", icon: <Plus aria-hidden="true" />, primary: true,
                       onClick: () => onNavigate?.("manuscripts", "Add a manuscript") }]}
           description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
           /**

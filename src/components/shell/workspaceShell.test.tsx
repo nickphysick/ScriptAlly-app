@@ -302,11 +302,21 @@ describe("the breadcrumb is chrome", () => {
     expect(w).toContain("JetBrains Mono");
   });
 
-  /* ⚠️ RETARGETED — + New stays ink, and the pink treatment stays rejected. */
-  it("+ New is INK, never pink", () => {
+  /**
+   * ⚠️ RETARGETED — + New stays ink, and the pink treatment stays rejected. What moved is that the
+   * ink is a TOKEN: this button and the masthead's primary are the same object by design, and they
+   * were two literals one unit apart (`#1c130e` here, `#1c130f` there). The claim is unchanged and
+   * is now stronger, because it asserts the shared source rather than a value that could drift.
+   */
+  it("+ New is INK from the shared token, never pink", () => {
     const n = rule(".ws-nbtn");
-    expect(n).toContain("background: #1c130e");
+    expect(n).toContain("background: var(--btn-ink)");
+    expect(n, "the near-black is a literal again — the masthead's primary would drift from it")
+      .not.toMatch(/#1c130[ef]/i);
     expect(n).not.toContain("#f5e2da");
+    /* the token itself, where it is declared, so the value is still pinned somewhere */
+    const idx = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
+    expect(idx, "--btn-ink moved off the app's near-black").toContain("--btn-ink: #1c130f");
   });
 });
 

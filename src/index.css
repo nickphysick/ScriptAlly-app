@@ -36,7 +36,25 @@
   --hair: #e7ddd2;    /* a container's own edge */
   --hair-soft: #efe8de; /* a divider inside one */
   --pink-b: #e8c8bc;  /* soft-pink CTA border */
-  --pink-h: #efd5ca;  /* soft-pink CTA hover */
+  --pink-h: #efd5ca;
+
+  /**
+   * ⚠️ THE APP'S NEAR-BLACK BUTTON, AS ONE TOKEN, BECAUSE IT WAS TWO LITERALS ONE UNIT APART.
+   * The top bar's `+ New` was `#1c130e` and the masthead's new primary is specified as `#1c130f` —
+   * a difference nobody can see and nobody could have found, on two buttons whose whole rationale is
+   * that they are the SAME button. There was no token to reuse; `.agl-btn-dark` uses a third value
+   * (`--agl-ink: #311e19`, browner) which is that page's own ink rather than a button fill.
+   *
+   * ⚠️ THE FOREGROUND IS `#fdfaf5`, NOT WHITE, AND THE TOP BAR STILL SAYS `#ffffff`. Unifying the
+   * FILL is safe — the change is invisible and it makes "matches + New" true. Changing that button's
+   * TEXT is a visible edit to another surface and is Nick's call, so it is reported rather than done.
+   */
+  --btn-ink: #1c130f;
+  --btn-ink-on: #fdfaf5;
+
+  /* the masthead kicker's two colours — a label, not a control (see pageHeader.css) */
+  --mast-kick-ink: #8a7a70;
+  --mast-kick-bd: rgba(25, 18, 16, 0.14);  /* soft-pink CTA hover */
   --tl: #f6ddd3;      /* query-letter type tint */
   --ts: #e7ece4;      /* synopsis type tint */
   --tp: #f3e6cf;      /* sample-pages type tint */

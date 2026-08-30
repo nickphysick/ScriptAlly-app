@@ -18,6 +18,8 @@
 import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { PageHeader } from "./PageHeader";
 import { MastheadSectionContext } from "./mastheadSection";
 
@@ -152,5 +154,97 @@ describe("the masthead refuses everything but one primary", () => {
   });
   it("accepts exactly one primary", () => {
     expect(boom({ actions: [{ label: "+ Add a comp", primary: true, onClick: () => {} }] })).not.toThrow();
+  });
+});
+
+
+/**
+ * ══ THE KICKER IS A LABEL, THE CTA IS THE APP'S BUTTON ════════════════════════════════════════
+ * (ref design-refs/kicker-cta-options.html — kicker option 4, button option 2.)
+ */
+describe("the kicker's and the CTA's treatment", () => {
+  const css = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8");
+  const root = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
+  const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, "");
+  const rule = (sel: string) => {
+    const m = new RegExp(`(?:^|\\n)\\${sel}\\s*\\{([^}]*)\\}`).exec(css);
+    expect(m, `no rule for ${sel}`).toBeTruthy();
+    return strip(m![1]);
+  };
+
+  it("⚠️ BOTH OF THE KICKER'S COLOURS COME FROM TOKENS, never inline rgba", () => {
+    const k = rule(".wsh-kicker");
+    expect(k, "the kicker's ink is a literal").toContain("color: var(--mast-kick-ink)");
+    expect(k, "the kicker's border is a literal").toContain("border: 1px solid var(--mast-kick-bd)");
+    /* ⚠️ AND THE RULE CARRIES NO COLOUR OF ITS OWN. Asserting the two `var()`s alone passes on a rule
+       that ALSO states an rgba somewhere else — which is exactly how a second value gets in. */
+    expect(k, "the kicker states a colour literal alongside its tokens").not.toMatch(/#[0-9a-f]{3,8}|rgba?\(/i);
+    for (const [tok, val] of [["--mast-kick-ink", "#8a7a70"], ["--mast-kick-bd", "rgba(25, 18, 16, 0.14)"]] as const) {
+      expect(strip(root), `${tok} is not declared as ${val}`).toContain(`${tok}: ${val}`);
+    }
+  });
+
+  it("⚠️ IT IS A LABEL, NOT A CONTROL — mono, 9px, regular, half-weight border", () => {
+    const k = rule(".wsh-kicker");
+    /* the four things that made an outlined capsule read as pressable */
+    expect(k).toContain("font-family: var(--font-mono)");
+    expect(k).toContain("font-size: 9px");
+    expect(k).toContain("font-weight: 400");
+    expect(k).toContain("letter-spacing: 0.18em");
+    expect(k, "the kicker went back to Playfair").not.toContain("--font-serif");
+  });
+
+  it("⚠️ THE CTA READS THE SHARED NEAR-BLACK TOKEN, and the top bar reads the same one", () => {
+    const c = rule(".wsh-cta");
+    expect(c).toContain("background: var(--btn-ink)");
+    expect(c).toContain("border: 1px solid var(--btn-ink)");
+    expect(c).toContain("color: var(--btn-ink-on)");
+    expect(c, "the CTA is pink again").not.toContain("--pink");
+    /* ⚠️ THE OTHER READER IS ASSERTED, because "matches + New" is the entire reason for the change and
+       a token with one consumer would leave the top bar on its own literal — which is what it was:
+       `#1c130e`, one unit from this. */
+    const shell = strip(readFileSync(resolve(__dirname, "workspaceShell.css"), "utf8"));
+    const nbtn = /(?:^|\n)\.ws-nbtn\s*\{([^}]*)\}/.exec(shell);
+    expect(nbtn, "the top bar's `+ New` has no rule").toBeTruthy();
+    expect(nbtn![1], "the top bar's `+ New` is back on a literal — the two buttons can drift again")
+      .toContain("background: var(--btn-ink)");
+    /* ⚠️ SCOPED TO THAT RULE, NOT THE SHEET. A file-wide ban on the near-black also catches
+       `color: #1c130e` on a text element two hundred lines away, which is not a button fill and not
+       this claim — the first version failed on exactly that. */
+    expect(nbtn![1], "a near-black literal survives inside the button's own rule").not.toMatch(/#1c130[ef]/i);
+  });
+
+  it("⚠️ `--mast-cta-bd` IS GONE, and nothing reads it", () => {
+    for (const f of ["pageHeader.css", "workspacePageGrid.css", "illustratedMasthead.css"]) {
+      expect(strip(readFileSync(resolve(__dirname, f), "utf8")), `${f} still reads --mast-cta-bd`)
+        .not.toContain("var(--mast-cta-bd");
+    }
+    expect(strip(root), "--mast-cta-bd is still declared").not.toContain("--mast-cta-bd:");
+  });
+
+  /**
+   * ⚠️ THE CTA IS IDENTICAL ON ALL TEN, ASSERTED AS A PARTITION. Only one page carries one today —
+   * Phase 5 assigns the rest — so the population is SYNTHESISED: every page rendered with a CTA, its
+   * own words stripped, and one distinct skeleton required. A check over the single live CTA would
+   * be satisfied by one page and prove nothing about the format.
+   */
+  it("⚠️ THE CTA RENDERS IDENTICALLY ON ALL TEN — partition, not a page list", () => {
+    const shapes = new Map<string, string[]>();
+    for (const p of PAGES) {
+      /* ⚠️ ONE DESCRIPTION FOR EVERY PAGE. Noteboard is the only entry that carries one, so leaving
+         the census as it stands compares a masthead WITH a subtitle against nine without and reports
+         two shapes — a real structural difference, and not the one this case is about. */
+      const html = render({ ...p, description: "A line about this page." }, `+ Do the thing on ${p.title}`);
+      const k = skeleton(html);
+      shapes.set(k, [...(shapes.get(k) ?? []), p.title]);
+    }
+    expect(PAGES.length, "the census shrank").toBe(10);
+    expect([...shapes.keys()], `CTAs differ across pages: ${[...shapes.values()].map((v) => v.join(", ")).join(" | ")}`)
+      .toHaveLength(1);
+  });
+
+  it("⚠️ AND THE MASTHEAD STILL HOLDS EXACTLY ONE CONTROL", () => {
+    const html = render(PAGES[0], "+ Log new query");
+    expect((html.match(/<button/g) ?? []).length, "the masthead grew a second control").toBe(1);
   });
 });
