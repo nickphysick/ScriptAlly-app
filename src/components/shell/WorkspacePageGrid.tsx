@@ -154,6 +154,17 @@ export interface WorkspacePageGridProps {
    */
   settleOn?: string;
   /**
+   * ⚠️ THE DETAIL VIEW OPENS WITH THE BAR ALREADY IN PLACE AND NO MASTHEAD. A two-view page's second
+   * view fills the viewport and its panes scroll internally, so there is nothing for a masthead to
+   * scroll away from and nothing for the handoff to hand off — it would sit there permanently,
+   * taking a third of the working area to say a name the bar says in 46px.
+   *
+   * ⚠️ THE `masthead` PROP IS STILL PASSED IN THAT MODE, and that is deliberate rather than untidy:
+   * it is where the bar's identity comes from. A page that stopped passing it would lose its name in
+   * the one view that has nothing else to state it.
+   */
+  barOnly?: boolean;
+  /**
    * ⚠️ `condensed` IS DELETED (masthead rethink, step 4), AND WITH IT THE UNION IT WAS HALF OF.
    *
    * It was the MODE input to `stuck || condensedByMode || engaged` — the masthead folding when the
@@ -194,7 +205,7 @@ const barIdentity = (masthead: React.ReactNode): { title: string; mark?: MarkNam
 };
 
 export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
-  masthead, toolbar, children, className, scrollLabel, dock, fill = false, settleOn,
+  masthead, toolbar, children, className, scrollLabel, dock, fill = false, settleOn, barOnly,
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = React.useState(false);
@@ -211,6 +222,10 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   const ident = React.useMemo(() => barIdentity(masthead), [masthead]);
   const barOn = React.useRef(false);
   const [bar, setBar] = React.useState(false);
+  /* ⚠️ `barOnly` FORCES IT ON RATHER THAN BRANCHING THE RENDER. One expression decides whether the
+     bar shows, so the two views cannot disagree about it — and the scroll hysteresis simply has
+     nothing to do in a view that does not scroll. */
+  const barShown = barOnly || bar;
   /** The pinned chrome's SETTLED height, for anything that must sit clear of it. See below. */
   const [stuckH, setStuckH] = React.useState(0);
   /**
@@ -668,7 +683,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             * avoid; and a transition needs both ends to exist to travel between them.
             */}
           {ident && (
-            <div className={`wpg-bar${bar ? " wpg-bar--on" : ""}`} aria-hidden="true">
+            <div className={`wpg-bar${barShown ? " wpg-bar--on" : ""}`} aria-hidden="true">
               <div className="wpg-barin">
                 {ident.mark && <span className="wpg-barmk"><OneScreenMark name={ident.mark} monoline /></span>}
                 <b>{ident.title}</b>
@@ -710,6 +725,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             * belongs to the WINDOW, not to the masthead's measure — an edge that stops short mid-air
             * is the same fault as the fill-page border complaint in another costume.
             */}
+          {!barOnly && (
           <div className={`wpg-chrome${stuck ? " wpg-chrome--stuck" : ""}`} ref={chromeRef}>
           <div className="wpg-mast" ref={mastRef}>
             {/**
@@ -792,6 +808,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             </div>
           )}
           </div>
+          )}
           {/**
             * ⚠️ THE SETTLE'S RECLAIM, HELD OPEN IN THE FLOW (pinned chrome, §2).
             *

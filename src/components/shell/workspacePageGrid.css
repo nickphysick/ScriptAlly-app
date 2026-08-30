@@ -623,7 +623,19 @@
    * the machinery is Phase 6's, and doing it here would mean deleting a token another page reads
    * inside a phase about a bar.
    */
-  position: static;
+  /**
+   * ⚠️ `relative`, NOT `static`, AND THE DIFFERENCE IS ITS OWN `::after`. Unpinning the slab in
+   * Phase 3 was right — the masthead has to leave — but `static` also stopped it being a containing
+   * block, so the illustrated pages' artwork resolved `inset` against whatever was positioned
+   * further up and painted DOWN THE WHOLE PAGE, behind the cards. `relative` pins nothing and
+   * scrolls exactly as `static` does; it only restores the box the artwork was always measured in.
+   *
+   * ⚠️ AND IT WAS INVISIBLE FOR A PHASE BECAUSE I DID NOT RE-RUN THE ARTWORK LOCKS AFTER UNPINNING.
+   * The handoff cases and the screenshots I took were all of pages with no artwork; the two that
+   * have it were checked in Phase 2 and taken on trust afterwards. A green is worth what the last
+   * time somebody watched it go red.
+   */
+  position: relative;
   box-sizing: border-box;
   /* opaque, or the content passes through the page's own title */
   background: var(--ws-window);
@@ -992,4 +1004,123 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .wpg-bar { transition: none; }
+}
+
+/**
+ * ══ THE TWO-VIEW TAB RAIL ═════════════════════════════════════════════════════════════════════
+ * (ref design-refs/qc-two-views.html.)
+ *
+ * ⚠️ IT SITS AT THE BAR'S HEIGHT WHEN THE BAR IS SHOWING, AND THAT OFFSET IS THE BAR'S OWN TOKEN.
+ * The ref writes `body.stuck .rail { top: var(--bar-h) }`; here the state class is on the grid, so
+ * the same rule is scoped to it. This is the one place a `top` legitimately encodes another
+ * element's height — and it does it by READING that element's token rather than restating the
+ * number, which is exactly the distinction the standing rule draws.
+ */
+.vtabs {
+  position: sticky;
+  top: 0;
+  z-index: 18;
+  flex: 0 0 auto;
+  background: var(--ws-window);
+  border-bottom: 1px solid var(--ws-edge);
+}
+.wpg--barshown .vtabs { top: var(--bar-h); }
+/* ⚠️ IN THE DETAIL VIEW IT DOES NOT PIN. That view fills the viewport and its panes scroll
+   internally, so there is nothing for the rail to travel inside — a sticky element on a
+   non-scrolling ancestor does not idle, it CLAMPS, which is how a row ends up pushed down by its
+   own offset. Static is the honest statement. */
+.wpg--fill .vtabs { position: static; }
+/* the rail's content takes the masthead's measure — the same shared expression, so the tabs begin
+   where the title does at every width */
+.vtabs-in {
+  width: 100%;
+  margin-inline: auto;
+  max-width: min(var(--work-max), calc(100% - 2 * var(--mast-gutter)));
+  display: flex;
+  align-items: center;
+  gap: 26px;
+}
+.vtabs-tools { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.vtab {
+  padding: 14px 0 12px;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--mast-kick-ink);
+  background: none;
+  /* ⚠️ THE UNDERLINE IS A TRANSPARENT BORDER AT REST, not `none`. A border that appears on
+     selection changes the tab's height by 2px and shifts every other tab with it. */
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+.vtab i {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.13em;
+  color: var(--mast-kick-ink);
+}
+.vtab--on { color: var(--shell-ink); border-bottom-color: var(--shell-ink); }
+.vtab--on i { color: var(--shell-ink); }
+
+/**
+ * ══ QUERY CENTRE'S BROWSING GRID ══════════════════════════════════════════════════════════════
+ * (ref design-refs/qc-two-views.html — `.cards` and `.qc`.)
+ *
+ * ⚠️ IT LIVES HERE RATHER THAN IN THE PAGE'S OWN SHEET because it is the SECOND view of a two-view
+ * page, and Manuscripts' is the same object with different contents. A page-local copy would be two
+ * card grids to keep in step the first time the treatment moved.
+ */
+.qc-cards {
+  padding: 22px var(--mast-gutter) 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  /* the same measure the masthead takes, so the cards begin under the title at every width */
+  width: 100%;
+  margin-inline: auto;
+  max-width: min(var(--work-max), calc(100% - 2 * var(--mast-gutter)));
+  box-sizing: border-box;
+}
+.qc-card {
+  border: 1px solid var(--ws-edge);
+  border-radius: 14px;
+  background: var(--ws-window);
+  padding: 15px 16px;
+  box-shadow: 0 1px 2px rgba(25, 18, 16, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  transition: box-shadow 0.15s;
+}
+/* ⚠️ A SHADOW, NOT A LIFT. These cards sit flush in a grid whose scroller clips at its top edge —
+   a `translateY` reads as the card's top hairline vanishing rather than as movement, which is the
+   fault this repo already records against the manuscripts spine. */
+.qc-card:hover { box-shadow: 0 3px 10px rgba(25, 18, 16, 0.1); }
+.qc-card-top { display: flex; align-items: center; gap: 10px; }
+.qc-card-id { display: flex; flex-direction: column; min-width: 0; }
+.qc-card-id b { font-size: 13.5px; font-weight: 600; color: var(--shell-ink); }
+.qc-card-id span,
+.qc-card-ft {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mast-kick-ink);
+}
+.qc-card-ft {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 11px;
+  border-top: 1px solid var(--ws-edge);
 }

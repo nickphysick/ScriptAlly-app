@@ -75,9 +75,29 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        digit and every value passed. Read each declaration and compare it. */
     const tops = stickyBlocks.flatMap((b2) => [...b2.matchAll(/(?:^|[;{\s])top\s*:\s*([^;}]+)/gm)].map((m) => m[1].trim()));
     expect(tops.length, "no `top` is declared at all — the slab lost its anchor").toBeGreaterThan(0);
+    /**
+     * ⚠️ ONE `top` IS NOT 0, AND IT IS THE LEGITIMATE FORM OF THE RULE RATHER THAN AN EXCEPTION TO
+     * IT. The two-view tab rail sits BENEATH the collapsed bar when the bar is showing, so its offset
+     * genuinely is another element's height — and what this case forbids has always been encoding
+     * that height as a NUMBER (`calc(56px + gap)`, silently wrong by 32px on the Tasks family). The
+     * rail reads `var(--bar-h)`, the bar's own token, so the two cannot drift: change the bar's
+     * height and the rail follows without anyone remembering.
+     *
+     * ⚠️ AND THE ALLOWANCE IS A PATTERN, NOT A LIST. Anything else is still 0, and a `top` carrying a
+     * literal fails whatever declares it.
+     */
     for (const t of tops) {
-      expect(t, `a sticky element clears ${t} — something above the scroller is being measured into a rule again`).toBe("0");
+      const ok = t === "0" || /^var\(--bar-h\)$/.test(t);
+      expect(ok, `a sticky element clears \`${t}\` — an offset must be 0 or the pinned element's own token, never a number`).toBe(true);
     }
+    /* ⚠️ THE RAIL'S OFFSET IS IN ITS OWN RULE, NOT IN THE STICKY ONE, so the sweep above cannot see
+       it — every `top` inside a `position: sticky` block is 0, and the one exception is a state rule
+       that overrides it. Asserted directly, because a claim about "the only non-zero offset" that
+       reads a set which structurally cannot contain it is a claim about nothing. */
+    const railTop = /\.wpg--barshown\s+\.vtabs\s*\{([^}]*)\}/.exec(cssRules);
+    expect(railTop, "the tab rail no longer offsets itself when the bar is showing").toBeTruthy();
+    expect(railTop![1], "the tab rail restates the bar's height instead of reading its token")
+      .toContain("top: var(--bar-h)");
     /**
      * ⚠️ TWO STICKY BOXES NOW, AND THE LAW IS UNCHANGED. The rebuild adds the collapsed bar, which
      * has to pin to be a bar at all. What the rule forbids is a `top` that encodes ANOTHER element's
@@ -99,7 +119,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        only pinned thing in the scroller. Same claim as before the settle existed, different subject —
        and a second pinned element still cannot arrive unnoticed. */
     expect([...new Set(stickySubjects)].sort(), `the set of sticky elements has changed: ${stickySubjects.join(", ")}`)
-      .toEqual([".wpg-bar"]);
+      .toEqual([".vtabs", ".wpg-bar"]);
   });
 
   it("the scroll row is `minmax(0, 1fr)` — a plain `1fr` grows to its content and never scrolls", () => {
@@ -707,8 +727,20 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(liveCss, "the bar stopped declaring its own height").toMatch(/--bar-h:\s*46px/);
     expect(liveCss, "the bar reserves space — everything below it moves when it appears")
       .toContain("margin-bottom: calc(var(--bar-h) * -1)");
-    expect(liveCss, "something other than the bar reads its height — that is the offset this design removes")
-      .not.toMatch(/top:\s*[^;]*--bar-h/);
+    /* ⚠️ READING THE BAR'S TOKEN IS ALLOWED; RESTATING ITS NUMBER IS NOT. The old bar's fault was a
+       control row clearing `top: var(--wpg-mini-h)` while the bar GREW from 0 to that height — two
+       elements agreeing about a moving number. This bar's height is constant and its token is the
+       one source, so the tab rail reading it is the fix rather than the fault. What stays forbidden
+       is a literal. */
+    /* ⚠️ ANCHORED, BECAUSE `top:` IS A SUFFIX OF `padding-top:` AND `border-top:`. The unanchored
+       form matched `padding-top: 11px` on a card's footer and reported it as a sticky offset
+       restating a height — the substring fault this repo records against class-name locks, wearing a
+       property's clothes. */
+    const barTops = [...liveCss.matchAll(/(?:^|[;{\s])top:\s*([^;}]+)/g)].map((m) => m[1].trim());
+    for (const t of barTops) {
+      expect(t, `a \`top\` restates a height as a literal (\`${t}\`) — read the pinned element's token`)
+        .not.toMatch(/^\d+(\.\d+)?px$/);
+    }
   });
 
   it("⚠️ THE SETTLE'S RECLAIM IS A SPACER, NOT SCROLLER PADDING", () => {
@@ -852,7 +884,12 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        The folded name bar no longer renders anywhere, so its pointer cursor was an affordance on an
        element nothing mounts — the same class of residue as a transition with no state to tween. */
     expect(pointerRules.sort(), `a pointer cursor appeared on something that is not one of the fold controls: ${pointerRules.join(" · ")}`)
-      .toEqual([".wpg-chevfold", ".wpg-mast-hide"]);
+      /* ⚠️ THE TAB RAIL JOINS THE LIST, AND IT IS A REAL CONTROL RATHER THAN AN EXCEPTION. This case
+         guards against a pointer cursor appearing on something that is NOT pressable; the two-view
+         tabs are buttons that navigate. Counted, so a decorative element cannot join them quietly. */
+      /* ⚠️ THE BROWSING GRID'S CARDS ARE BUTTONS. Counted with the rest, so the list stays a census
+         of what is pressable rather than a list of exceptions. */
+      .toEqual([".qc-card", ".vtab", ".wpg-chevfold", ".wpg-mast-hide"]);
   });
 
   /**

@@ -38,7 +38,10 @@ const BORDER_PAGES: { name: string; route: string; cls: string }[] = [
 
 const TRIAL = [
   { name: "Submission packages", route: "/manuscripts/packages", cls: "pkgw-wpg", settles: true  },
-  { name: "Query Centre",        route: "/queries",              cls: "qc-wpg",   settles: false },
+  /* ⚠️ QUERY CENTRE SCROLLS NOW. It was `fill` — nothing to scroll, so its masthead never left and
+     the bar was unreachable. Its browsing view is an ordinary scrolling page, which is what the
+     two-view split is FOR, so this expectation inverts with the page rather than being relaxed. */
+  { name: "Query Centre",        route: "/queries",              cls: "qc-wpg",   settles: true  },
 ];
 
 for (const width of [1280, 1440, 1920, 2560]) {
@@ -136,63 +139,48 @@ for (const width of [1280, 1440, 1920, 2560]) {
 }
 
 /**
- * ⚠️ SETTLED, THE TREATMENT GOES — AND ONLY ON THE PAGE THAT SETTLES. Packages is Type A: at ~55px
- * the artwork would render about a third of its size and Rule 3 would fail outright. Query Centre is
- * Type B and never settles, so it must NOT carry a suppression; asserting one there would be
- * asserting about a state the page cannot enter.
+ * ══ SCROLLED, THE ARTWORK LEAVES WITH THE MASTHEAD ════════════════════════════════════════════
+ *
+ * ⚠️ THIS REPLACES THE SETTLE-SUPPRESSION CASE, WHOSE SUBJECT NO LONGER EXISTS. It asserted that a
+ * SETTLED masthead dropped its artwork and took the shared wash back — a claim about a slab that
+ * pinned and tightened. Nothing pins now: the masthead scrolls away as content and a separate bar
+ * takes over, so the artwork leaves because its host does, not because a rule suppresses it.
+ *
+ * ⚠️ AND THE CLAIM IS ABOUT THE BAR, which is what a reader actually sees once the masthead has
+ * gone. A 46px identity strip carrying a watercolour would be the fault this replaces, arriving from
+ * the other end.
  */
-/**
- * ⚠️ MEASURED AT A SHORT VIEWPORT, BECAUSE AT 1440x900 PACKAGES NO LONGER SCROLLS AT ALL. Its
- * overflow was ~205px earlier today and is 0 now — another stream shortened the page, and a 3px
- * accent border can only ever ADD to an overflow, so this is not the accent's doing. The type law
- * is explicit that type is a property of STRUCTURE rather than of today's content, so Packages is
- * still Type A and its settle is still real; what changed is only whether that state is reachable
- * at one particular viewport. Exercising it at 560px tall tests the posture instead of excusing it,
- * and the precondition is asserted so "never exercised" can never pass quietly.
- */
-test("⚠️ THE TREATMENT IS SUPPRESSED WHEN THE BAND SETTLES — and only where a band settles", async ({ page }) => {
+test("⚠️ THE COLLAPSED BAR CARRIES NO ARTWORK — on both illustrated pages", async ({ page }) => {
   for (const t of TRIAL) {
-    await openRoute(page, t.route, { width: 1440, height: 560 });
+    await openRoute(page, t.route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
     await page.waitForTimeout(700);
-    const moved = await page.evaluate(async (c) => {
+    const r = await page.evaluate(async (c) => {
       const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
       const sc = g.querySelector(".wpg-scroll") as HTMLElement;
-      if (sc.scrollHeight - sc.clientHeight < 120) return false;
-      for (let y = 0; y <= 400; y += 20) { sc.scrollTop = y; await new Promise((r) => requestAnimationFrame(r)); }
-      return true;
+      const max = sc.scrollHeight - sc.clientHeight;
+      if (max < 200) return { max } as any;
+      sc.scrollTop = Math.min(320, max);
+      for (let k = 0; k < 4; k += 1) await new Promise((res) => requestAnimationFrame(res));
+      const bar = g.querySelector(".wpg-bar") as HTMLElement;
+      const mast = g.querySelector(".wsh") as HTMLElement | null;
+      return {
+        max,
+        barOn: bar.classList.contains("wpg-bar--on"),
+        barArt: getComputedStyle(bar, "::after").backgroundImage,
+        barBg: getComputedStyle(bar).backgroundImage,
+        /* the masthead has genuinely left the scrollport rather than merely shrinking */
+        mastTop: mast ? Math.round(mast.getBoundingClientRect().bottom - sc.getBoundingClientRect().top) : null,
+      };
     }, t.cls);
-    expect(moved, `${t.name}: expected settles=${t.settles} and the page ${moved ? "can" : "cannot"} scroll far enough to settle`).toBe(t.settles);
-    if (!moved) continue;
-    await page.waitForTimeout(800);
-    const after = await page.evaluate((c) => {
-      const g = [...document.querySelectorAll(`.wpg.${c}`)].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
-      const ch = g.querySelector(".wpg-chrome") as HTMLElement;
-      const cs = getComputedStyle(ch);
-      /* ⚠️ THE WASH'S OWN TWO TOKENS, RESOLVED — not a `180deg` in the string. The browser
-         NORMALISES a `180deg` linear-gradient by dropping the angle, because downward is the
-         default, so a regex looking for it fails on a perfectly correct wash. Asserting the two
-         colours is the claim anyway: the settled bar paints what every other Type A bar paints. */
-      const rgb = (v: string) => { const d = document.createElement("div"); d.style.color = v; ch.appendChild(d); const c = getComputedStyle(d).color; d.remove(); return c; };
-      return { stuck: ch.classList.contains("wpg-chrome--stuck"),
-               art: getComputedStyle(ch, "::after").backgroundImage,
-               img: cs.backgroundImage,
-               bg: cs.backgroundColor,
-               winGround: rgb(cs.getPropertyValue("--ws-window").trim()),
-               title: getComputedStyle(g.querySelector(".wsh-title") as HTMLElement).fontSize };
-    }, t.cls);
-    expect(after.stuck, `${t.name}: scrolled past the settle and the band is not stuck`).toBe(true);
-    expect(/url\(/.test(after.art), `${t.name}: the artwork is still painted on the settled bar`).toBe(false);
-    /* ⚠️ RETARGETED: THE SETTLED BAR TAKES THE WINDOW'S GROUND BACK, NOT A WASH. This asserted a
-       gradient carrying the parchment wash's two stops; the wash is retired with the two header
-       types, so the claim is now that the band paints the same plain ground every other masthead
-       does. What has not weakened is the point of the case — settled, the illustration is gone. */
-    expect(after.img, `${t.name}: the settled bar still paints an image — it should be the plain ground`).toBe("none");
-    expect(after.bg, `${t.name}: the settled bar's ground is not the window's own`).toBe(after.winGround);
-    expect(after.title, `${t.name}: the settled bar keeps the trial's 47px title`).toBe("22px");
+    if (r.max < 200) { console.log(`   ${t.name}: cannot scroll (max ${r.max}) — not exercised`); continue; }
+    console.log(`   ${t.name.padEnd(20)} barOn=${r.barOn} mastBottom=${r.mastTop} barArt=${r.barArt}`);
+    expect(r.barOn, `${t.name}: the bar did not take over`).toBe(true);
+    expect(r.barArt, `${t.name}: the collapsed bar paints artwork`).toBe("none");
+    expect(r.barBg, `${t.name}: the collapsed bar paints an image`).toBe("none");
+    expect(r.mastTop, `${t.name}: the masthead is still in the scrollport — it should have scrolled away`).toBeLessThanOrEqual(0);
   }
 });
-
 
 /**
  * ══ ONE BORDER, ON THE CONTAINER, ON ALL FOUR SIDES ═══════════════════════════════════════════

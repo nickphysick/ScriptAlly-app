@@ -645,6 +645,21 @@ function AppContent() {
      an unknown value falls back to "all" rather than filtering to an empty list, which would
      read as "you have no queries" — the worst lie this page could tell. */
   const queriesStatus = parseStatusFilter(params.get(QUERIES_STATUS_PARAM));
+  /**
+   * ⚠️ THE VIEW IS A ROUTE, AND `?q=` ALREADY IMPLIES ONE. Query Centre is two views now — a card
+   * grid you browse and the two-pane surface you work in — and the brief's requirement is that a
+   * deep link from To-do, Calendar or Noteboard opens a record DIRECTLY in the second. Those links
+   * already carry `?q=<id>`, so deriving the view from it means every existing link lands correctly
+   * without being rewritten, and `?view=detail` exists only for reaching that surface with nothing
+   * selected — which is what the tab has to do.
+   *
+   * ⚠️ IT IS COMPUTED HERE RATHER THAN IN THE PAGE because Queries reads its params as PROPS: the
+   * page renders inside the router and its specs do not mount one, so a `useLocation` in there would
+   * make every existing Queries spec depend on a provider it has never needed. This rides the same
+   * seam `statusFilter` and `?q=` already use.
+   */
+  const queriesView: "cards" | "detail" =
+    params.get("view") === "detail" || params.has("q") ? "detail" : "cards";
   const queriesAnalytics = path === "/queries/analytics";
   const todoPage = todoPageForPath(path);
   const agentsDiscover = path === "/agents/discover";
@@ -688,7 +703,9 @@ function AppContent() {
             no contentVariant cap; the .t-f12 root paints the oat ground edge-to-edge. */}
         <StagePage active={routeKey === "queries" && !queriesAnalytics} layout="fill" clip>
           <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
-            statusFilter={queriesStatus}
+            statusFilter={queriesStatus} view={queriesView}
+            onSelectView={(v) => { const n = new URLSearchParams(params); if (v === "detail") n.set("view", "detail"); else { n.delete("view"); n.delete("q"); } navigate({ pathname: "/queries", search: n.toString() ? `?${n.toString()}` : "" }); }}
+            onOpenQuery={(id) => { const n = new URLSearchParams(params); n.set("q", id); n.delete("view"); navigate({ pathname: "/queries", search: `?${n.toString()}` }); }}
             createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)}
             routeActive={routeKey === "queries" && !queriesAnalytics} />
         </StagePage>

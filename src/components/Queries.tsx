@@ -64,6 +64,7 @@ import { recordQueryResponse } from "../lib/recordResponse";
 import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitle";
 import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
+import { ViewTabs } from "./shell/ViewTabs";
 /* §1 (provenance pack) — the writer's own expected date: its field name and its one accessor. */
 import { WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD, writerExpectedIso, writerExpectedWrite, resolveExpectedDate } from "../lib/expectedDate";
 /* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
@@ -309,7 +310,17 @@ export const Queries: React.FC<{
   routeActive?: boolean;
   /** The shell's Queries child, as `?status=`. Absent = the plain hub, filters untouched. */
   statusFilter?: QueriesStatusFilter;
-}> = ({ searchQuery, onNavigate, activeSubPage, inShell = false, createSeed, onCreateSeedConsumed, routeActive = false, statusFilter }) => {
+  /**
+   * ⚠️ THE VIEW IS A ROUTE AND ARRIVES AS A PROP, on the same seam as `statusFilter` and `?q=`.
+   * `cards` is the browsing grid; `detail` is the two-pane surface. App.tsx derives it — `?q=<id>`
+   * implies `detail`, so every existing deep link from To-do, Calendar and Noteboard opens a record
+   * directly in the working view without being rewritten.
+   */
+  view?: "cards" | "detail";
+  onSelectView?: (view: "cards" | "detail") => void;
+  /** opening a card is a NAVIGATION — it sets `?q=<id>`, which is what puts the page in detail view */
+  onOpenQuery?: (id: string) => void;
+}> = ({ searchQuery, onNavigate, activeSubPage, inShell = false, createSeed, onCreateSeedConsumed, routeActive = false, statusFilter, view = "cards", onSelectView, onOpenQuery }) => {
   const {
     currentUser,
     manuscripts,
@@ -4153,7 +4164,20 @@ export const Queries: React.FC<{
              list that was propping the row open — collapsed its whole body to 0px with every
              element inside it mounted and correct. Proven on the deployed build: this one
              declaration took `.qc-take-body` from 0 to 418px. */
-          fill
+          /**
+           * ⚠️ THE VIEW DECIDES BOTH, AND THAT IS THE WHOLE OF THE TWO-VIEW CHANGE. The browsing
+           * grid is an ordinary scrolling page — full masthead, handoff to the bar exactly as every
+           * other page — so it must NOT be `fill`; the detail surface is the two-pane layout this
+           * page has always been, which fills the viewport and scrolls its panes internally.
+           *
+           * ⚠️ AND `barOnly` IS WHY THIS PAGE COULD NOT HAND OFF BEFORE. A fill page has nothing to
+           * scroll, so its masthead never left and the bar's 150px threshold was unreachable — it
+           * measured a scroll range of 0. In the detail view there is still nothing to scroll, so the
+           * bar is simply present from the start: identity in 46px instead of a third of the working
+           * area saying a name nothing else states.
+           */
+          fill={view === "detail"}
+          barOnly={view === "detail"}
           scrollLabel="Query Centre"
           /* ⚠️ THE LIST STRIP (§1c) — the three controls that act on the LIST, and only those.
              `View tasks` and `Nudge` are NOT here despite sounding page-level: both are gated on
@@ -4592,6 +4616,59 @@ export const Queries: React.FC<{
             with a 200ms animation. The class states what this element IS; the attribute states
             what it is momentarily doing — and it is written BEFORE the class so `className="f12-body">`
             stays literally intact, which is what those slices anchor on. */}
+        {/**
+          * ⚠️ THE TAB RAIL IS THE PAGE'S TWO VIEWS, AND IT RENDERS IN BOTH OF THEM. It is what makes
+          * the detail surface reachable without a selection — the browsing grid can only get you
+          * there by choosing a record, and a view you can only enter through a record is not a view.
+          *
+          * ⚠️ "Detail view" READS ODDLY BESIDE "All queries" AND IS FLAGGED. The first names a SET,
+          * the second names a MODE, so the pair is not parallel — `All queries` / `One query` or
+          * `Browse` / `Work` would be. Left as the brief has it because the wording is Nick's to
+          * settle and a placeholder that reads slightly wrong is better than a guess that reads
+          * confidently wrong.
+          */}
+        <ViewTabs
+          label="Query Centre views"
+          active={view}
+          onSelect={(v) => onSelectView?.(v as "cards" | "detail")}
+          tabs={[
+            { key: "cards", label: "All queries", count: sortedList.length },
+            { key: "detail", label: "Detail view" },
+          ]}
+        />
+        {view === "cards" ? (
+          /**
+           * ⚠️ THE BROWSING GRID READS THE SAME DERIVED LIST THE ROWS DO. `sortedList` is already
+           * filtered by the page's own scope, search, status and sort, so the two views cannot show
+           * different sets of the same queries — which is the failure a second data path would make
+           * inevitable and invisible.
+           */
+          <div className="qc-cards">
+            {sortedList.map((q) => {
+              const agent = agents.find((a) => a.id === q.agentId);
+              return (
+                <button
+                  key={q.id}
+                  type="button"
+                  className="qc-card"
+                  onClick={() => onOpenQuery?.(q.id)}
+                >
+                  <span className="qc-card-top">
+                    <StatusDot status={q.status} overrideSize={17} />
+                    <span className="qc-card-id">
+                      <b>{agentPrimary(agent)}</b>
+                      <span>{agentAgencyLine(agent)}</span>
+                    </span>
+                  </span>
+                  <span className="qc-card-ft">
+                    <span>{q.status}</span>
+                    <span>{q.dateSent ? fmtShortISO(q.dateSent) : "NOT SENT"}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
         <div data-qc-fade={fadeIn ? "in" : undefined} className="f12-body">
           {/* ⚠️ §3 · ONE HAIRLINE UNDER THE WHOLE BAR. A grid child spanning both columns, so it
               crosses the channel and reads as one rule rather than two borders with a gap in it. */}
@@ -6744,7 +6821,8 @@ export const Queries: React.FC<{
           {/* (The foot control-row cards are retired — the F12 control bar at the top of the
               page carries every action; the list pane's own footer carries count + Export CSV.) */}
 
-        </div>{/* closes f12-body */}
+        </div>
+        )}{/* closes f12-body, and with it the cards-or-detail branch */}
 
         {/* ── THE MOBILE COMMAND BAR (Mobile Pass 1, concept frame 03) — the hub's settled
             espresso container, condensed to one floating bar on the pushed detail. It takes
