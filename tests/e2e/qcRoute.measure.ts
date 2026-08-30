@@ -27,6 +27,12 @@ const read = (page: import("@playwright/test").Page) => page.evaluate(() => {
     back: !!g.querySelector(".wpg-barback"),
     who: (g.querySelector(".wpg-barwho") as HTMLElement)?.innerText?.trim() ?? null,
     q: new URLSearchParams(location.search).get("q"),
+    occluded: (() => {
+      const bar = g.querySelector(".wpg-bar") as HTMLElement | null;
+      const body = g.querySelector(".f12-body") as HTMLElement | null;
+      if (!bar || !body) return null;
+      return +(bar.getBoundingClientRect().bottom - body.getBoundingClientRect().top).toFixed(1);
+    })(),
   };
 });
 
@@ -53,6 +59,17 @@ for (const width of [1280, 1440, 1920, 2560]) {
     expect(b.back, "the record's bar has no back-link").toBe(true);
     expect(b.who, "the record's bar states no name").toBeTruthy();
 
+    /**
+     * ⚠️ THE BAR MUST NOT EAT THE TOP OF THE RECORD. `.wpg-bar` carries `margin-bottom: -46px` so
+     * that on a GRID it overlays a masthead scrolling out beneath it. A record has no masthead and
+     * opens at `scrollTop: 0` with the bar already shown, so the same declaration simply steals the
+     * first 46px — measured at 30px of occluded content on both record pages before it was fixed.
+     *
+     * ⚠️ AND IT IS AN OVERLAP, WHICH IS WHY NEITHER PAGE'S EXISTING LOCKS SAW IT. The bar measured
+     * correctly and the body measured correctly; only the relationship between them was wrong.
+     */
+    expect(b.occluded, `the bar covers ${b.occluded}px of the record at rest`).toBeLessThanOrEqual(0);
+
     /* ── and the back link returns to the grid ── */
     await page.locator(".wpg-barback").click();
     await page.waitForTimeout(1100);
@@ -62,6 +79,6 @@ for (const width of [1280, 1440, 1920, 2560]) {
     expect(c.body, "the record's body survived the back link").toBe(false);
     expect(c.masthead, "the grid's masthead did not come back").toBe(true);
 
-    console.log(`   ${width}: grid ${a.cards} cards · record ${b.who} (?q=${b.q}) · back to ${c.cards} cards`);
+    console.log(`   ${width}: grid ${a.cards} cards · record ${b.who} (?q=${b.q}) · back to ${c.cards} cards · clearance ${-b.occluded!}px`);
   });
 }

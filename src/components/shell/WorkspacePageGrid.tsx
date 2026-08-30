@@ -173,7 +173,25 @@ export interface WorkspacePageGridProps {
    * ⚠️ IT IMPLIES `barOnly`. A record has no masthead: there is nothing for one to scroll away from,
    * and it would take a third of the working area to say a name the bar says in 46px.
    */
-  record?: { backLabel: string; onBack: () => void; title: string };
+  record?: {
+    backLabel: string;
+    onBack: () => void;
+    title: string;
+    /**
+     * ⚠️ NAVIGATION WITHIN THE SET, AND NOTHING ELSE — never an operation on the record. The bar
+     * then reads left to right as one sentence about position: leave the set, which one you are in,
+     * move along it. An action placed here would put a thing that CHANGES the record in the band
+     * whose whole business is which record you are looking at.
+     *
+     * ⚠️ AND IT SITS AT THE FAR END DELIBERATELY. `ManuscriptPager`'s own note warned against
+     * putting a departure among the operations — two chevrons in one band, one meaning "leave" and
+     * one meaning "previous". That warning was written for a masthead that no longer exists, and
+     * the risk it names is real here: the guard is the separation plus the labelling, the back
+     * control being an arrow WITH A WORD at the left and the pager a bare chevron pair around a
+     * numeric readout at the right.
+     */
+    within?: React.ReactNode;
+  };
   /**
    * ⚠️ `condensed` IS DELETED (masthead rethink, step 4), AND WITH IT THE UNION IT WAS HALF OF.
    *
@@ -652,7 +670,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
            arbitration died with the chrome rows. Grepped before removing: no stylesheet in `src/`
            reads it. A class the markup emits and nothing consumes is what a bundle sweep exists to
            find, and leaving it would imply a rule someone would go looking for. */
-        className={`wpg${hidden ? " wpg--hidden" : ""}${fill ? " wpg--fill" : ""}${pinned ? "" : " wpg--static"}${className ? ` ${className}` : ""}`}
+        className={`wpg${hidden ? " wpg--hidden" : ""}${fill ? " wpg--fill" : ""}${pinned ? "" : " wpg--static"}${record ? " wpg--record" : ""}${className ? ` ${className}` : ""}`}
         /**
          * ⚠️ THE BINDING IS DECLARED IN THE DOM, so it can be asserted by IDENTITY rather than by a
          * list of page names — and page lists are what have been wrong twice about this app.
@@ -706,6 +724,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
                       {record.backLabel}
                     </button>
                     <span className="wpg-barwho">{record.title}</span>
+                    {record.within && <div className="wpg-barwithin">{record.within}</div>}
                   </>
                 ) : (
                   <>

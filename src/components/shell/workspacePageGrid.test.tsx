@@ -1217,3 +1217,36 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       .toMatch(/overflow-y:\s*auto/);
   });
 });
+
+/**
+ * ══ EVERY MODIFIER THE STYLESHEET KEYS ON IS ACTUALLY EMITTED ═════════════════════════════════
+ *
+ * ⚠️ WRITTEN BECAUSE ONE WAS NOT, AND NOTHING NOTICED FOR A WHOLE PHASE. `.wpg--record` carried the
+ * record view's entrance — the fade-and-scale from `qc-view-transition.html`, built to the ref,
+ * reported as landed — and the component never put the class on the root. The rule was valid, the
+ * keyframe was correct, the animation had no subject, and the page simply appeared. It reached dev.
+ *
+ * ⚠️ IT IS THE FAMILY THIS REPO KEEPS PAYING FOR, one level along: not a replacement that leaves the
+ * original reachable, but a replacement with no CALLER. The cheap general guard is the one below —
+ * name every modifier the sheet selects on and require the component to emit it — because it holds
+ * for the next one as well as this one.
+ *
+ * ⚠️ COMMENT-STRIPPED, OR IT FINDS ITS OWN OBITUARIES. `.wpg--tools` and `.wpg--working` are both
+ * retired and both still discussed in prose across four stylesheets; a raw-text sweep reports them
+ * as live rules and demands the component resurrect them.
+ */
+describe("no modifier is styled without being emitted", () => {
+  it("every `.wpg--*` a stylesheet selects on is set by the component", () => {
+    const sheets = readdirSync(resolve(__dirname, ".."), { recursive: true, encoding: "utf8" })
+      .filter((f) => f.endsWith(".css"))
+      .map((f) => readFileSync(resolve(__dirname, "..", f), "utf8").replace(/\/\*[\s\S]*?\*\//g, ""));
+    const styled = new Set<string>();
+    for (const sheet of sheets) {
+      for (const m of sheet.matchAll(/\.(wpg--[a-z-]+)/g)) styled.add(m[1]);
+    }
+    expect(styled.size, "no modifiers found at all — the sweep read nothing").toBeGreaterThan(2);
+    const orphans = [...styled].filter((c) => !srcCode.includes(`" ${c}"`));
+    expect(orphans, `styled but never emitted: ${orphans.join(", ")}`).toEqual([]);
+    console.log(`   modifiers styled and emitted: ${[...styled].sort().join(", ")}`);
+  });
+});

@@ -42,7 +42,7 @@ import { DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./manuscripts/Manuscri
 import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
 import { AttachmentsPanel } from "./manuscripts/AttachmentsPanel";
 import { ManuscriptCarousel } from "./manuscripts/ManuscriptCarousel";
-import { ManuscriptBackLink } from "./manuscripts/ManuscriptPager";
+import { ManuscriptPager } from "./manuscripts/ManuscriptPager";
 import { MANUSCRIPTS_PATH } from "./shell/manuscriptScope";
 import { queryingSinceMs, profileDate } from "../lib/manuscriptProfile";
 import { ManuscriptsEmpty } from "./manuscripts/ManuscriptsEmpty";
@@ -163,10 +163,12 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
    * ⚠️ AND THERE IS NO WRAP-AROUND. Null at each end, which the chevron renders as disabled rather
    * than hidden: wrapping would make the two ends indistinguishable from the middle, so a writer
    * could not tell from the control whether they had reached the end of their own shelf.
+   *
+   * ⚠️ IT PAGES THROUGH `openDossier`, so paging re-scopes as well as re-views. Setting the view
+   * alone would leave the sidebar's switcher naming a different book from the one on screen — two
+   * surfaces disagreeing about which manuscript you are looking at.
    */
-  /* ⚠️ THE PAGER GOES THROUGH `openDossier`, so paging re-scopes as well as re-views. It used to
-     set the view alone, which left the bar's switcher naming a different book from the one on
-     screen — two surfaces disagreeing about which manuscript you are looking at. */
+  const msAt = selected ? ordered.findIndex((m) => m.id === selected.id) : -1;
 
   /** Writes the pointer the comps and packages sub-pages read. Not view state — a section-wide seat. */
   const selectMs = (id: string) => {
@@ -347,6 +349,31 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
          * an explicit Hide now, on this page as on every other fill page, and opening a dossier
          * leaves the masthead exactly as the writer left it.
          */
+        /**
+         * ⚠️ THE SHELF IS THE BROWSING VIEW AND A BOOK IS A RECORD, which is the same shape Query
+         * Centre took: with `record` set the grid drops the masthead entirely and the collapsed bar
+         * carries the departure and the book's name. A masthead over a record would spend a third of
+         * the working area restating a title the 46px band already says.
+         *
+         * ⚠️ `MANUSCRIPTS_PATH` IS THE ONE DESTINATION — the same constant `shellV2Nav` gives the
+         * sidebar's Manuscripts item, so the back link and the nav item cannot drift apart.
+         *
+         * ⚠️ AND THE PARAM IS STILL THE ONLY STATE. `onBack` navigates; it does not clear a local
+         * `openId`, because there is none to clear. That is what makes the grid reachable from
+         * outside this component, and it is the fault §0 fixed on the other two-view page.
+         */
+        record={selected ? {
+          backLabel: "All manuscripts",
+          onBack: () => navigate(MANUSCRIPTS_PATH),
+          title: selected.title,
+          within: (
+            <ManuscriptPager
+              position={`${msAt + 1} / ${ordered.length}`}
+              onPrev={msAt > 0 ? () => openDossier(ordered[msAt - 1].id) : null}
+              onNext={msAt >= 0 && msAt < ordered.length - 1 ? () => openDossier(ordered[msAt + 1].id) : null}
+            />
+          ),
+        } : undefined}
         masthead={
           <PageHeader
             variant="workspace"
@@ -378,25 +405,14 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
            */
           description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
           /**
-           * ⚠️ THE DEPARTURE, AND ONLY WITH A BOOK OPEN. On the shelf there is nothing to leave, so
-           * the lead is absent and the masthead is byte-identical to every other page's.
+           * ⚠️ THE DEPARTURE IS THE BAR'S NOW, NOT A LEAD ROW HERE — see the grid's `record` prop
+           * below. The masthead belongs to the SHELF, and with a book open there is no masthead at
+           * all, so a back link inside one had nowhere to be.
            *
-           * ⚠️ IT NAVIGATES TO `MANUSCRIPTS_PATH` — the same constant `shellV2Nav` gives the
-           * sidebar's Manuscripts item. One destination, one constant, no second path back.
-           */
-          lead={selected ? <ManuscriptBackLink onLeave={() => navigate(MANUSCRIPTS_PATH)} /> : undefined}
-          /* ⚠️ THE PAGER SITS WITH THE BOOK'S ACTIONS, NOT WITH THE DEPARTURE. It moves you along
-             the shelf you are inside; the lead leaves it. */
-          /**
-           * ⚠️ THE PAGER PROP IS REMOVED, AND IT HAD NEVER RENDERED. `PageHeader` drew
-           * `acts.length > 0 ? acts.map(…) : actionsSlot`, and this page passes an unconditional
-           * `actions` entry — so the ternary took the actions branch on every render and the pager
-           * was unreachable from the day it was added. The masthead now holds exactly one control
-           * and refuses a slot outright, which is what surfaced it.
-           *
-           * ⚠️ `ManuscriptPager` ITSELF IS LEFT IN PLACE, not deleted with the prop. Rehoming a
-           * between-books control is Phase 4's two-view work; deleting it here would be this pass
-           * quietly removing a feature while claiming to change a header format.
+           * ⚠️ AND `ManuscriptBackLink` IS DELETED WITH IT. `.wpg-barback` is the same control on
+           * the same band as Query Centre's, and a second implementation of "leave this record"
+           * living unrendered in this folder is the shape this repo keeps paying for: a replacement
+           * that is ADDED leaves the original reachable, and only one that is SWAPPED retires it.
            */
           /**
            * ⚠️ `Add manuscript` IS DROPPED, NOT REHOMED — and this is the one masthead action that

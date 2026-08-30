@@ -2,21 +2,22 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ══ THE SHELF PAGER AND THE DEPARTURE — masthead furniture ════════════════════════════════════
+ * ══ THE SHELF PAGER — bar furniture ══════════════════════════════════════════════════════════
  *
- * ⚠️ TWO CONTROLS, TWO PLACES, AND THE SPLIT IS THE POINT. `‹ All manuscripts` LEAVES the book and
- * sits in the masthead's lead row, above the title. The pager ACTS ON the shelf you are inside and
- * sits with the book's other actions. Putting a departure among the operations is how a reader
- * comes to press one meaning and get the other.
+ * ⚠️ IT LIVES IN THE RECORD BAR, at the far end, opposite the departure — see `record.within` on
+ * `WorkspacePageGrid`. The band then reads as one sentence about position: leave the set, which one
+ * you are in, move along it.
+ *
+ * ⚠️ AND `ManuscriptBackLink` IS DELETED FROM THIS FILE, along with the note that used to justify
+ * the split. It said the departure belonged in the masthead's lead row and the pager with the
+ * book's actions, because putting a departure among operations is how a reader presses one meaning
+ * and gets the other. That warning was written for a masthead a record no longer has — but the risk
+ * it names survives the move, so the guard moved with it: the two controls sit at opposite ends,
+ * and the one that LEAVES is an arrow carrying a word while the one that MOVES is a bare chevron
+ * pair around a readout. `.wpg-barback` is the departure now, shared with Query Centre, and a
+ * second unrendered implementation of it in this folder is the shape this repo keeps paying for.
  */
 import React from "react";
-
-/** ⚠️ ONE HANDLER, ONE CONSTANT. See `ManuscriptBackLink`'s note — this file states no path. */
-export const ManuscriptBackLink: React.FC<{ onLeave: () => void }> = ({ onLeave }) => (
-  <button type="button" className="msp-backlink" onClick={onLeave}>
-    <span aria-hidden="true">‹</span> All manuscripts
-  </button>
-);
 
 export interface ManuscriptPagerProps {
   /** `1 / 3`, already composed — the shelf's own order, never a second sequence. */

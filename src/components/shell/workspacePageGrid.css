@@ -970,6 +970,22 @@
   box-shadow: 0 10px 16px -12px rgba(25, 18, 16, 0.32);
 }
 /**
+ * ⚠️ IN THE RECORD VIEW THE BAR IS IN FLOW, AND THE NEGATIVE MARGIN IS WRONG THERE.
+ *
+ * The margin exists so the bar OVERLAYS a masthead that is scrolling out beneath it — on a grid the
+ * bar arrives at 150px, by which point there is content passing under it and the band is a lid.
+ * A record has no masthead and starts at `scrollTop: 0` with the bar already shown, so the same
+ * declaration simply steals the first 46px of the page from the top.
+ *
+ * ⚠️ MEASURED, ON BOTH RECORD PAGES, AT 30px OF OCCLUDED CONTENT — the manuscript card's top edge
+ * and the Query Centre body's, each cut off by a band that had nothing to overlay. It was invisible
+ * to every check because the record's own locks read the bar and the body separately and each was
+ * correct; only the OVERLAP is wrong, which is the same shape as a source line and a usage line
+ * rendering as one run. A screenshot is what showed it.
+ */
+.wpg--record .wpg-bar { margin-bottom: 0; }
+
+/**
  * ⚠️ THE BAR'S CONTENT TAKES THE MASTHEAD'S MEASURE, NOT A GUTTER OF ITS OWN, AND THE BRIEF SAYS
  * `padding: 0 var(--mast-gutter)`. Those agree at 1280, 1440 and 1920, where the measure's inset IS
  * the gutter — and diverge at 2560, where the content cap binds and the measure's inset grows to
@@ -1044,6 +1060,22 @@
 /* ⚠️ PLAYFAIR, NOT MONO, AND THAT IS THE WHOLE DISTINCTION THE BAR DRAWS. The page's name is a
    system label — mono, uppercase, tracked. A person's name is not: it is the record, set in the
    same face the masthead's title uses, at the size a 46px band can hold. */
+/**
+ * ⚠️ `margin-left: auto` ON THE SLOT, NOT A SPACER ELEMENT, so the title truncates into whatever is
+ * left rather than shoving the pager off the band. `min-width: 0` on `.wpg-barwho` is what makes
+ * that ellipsis possible; without it a flex item refuses to shrink below its content.
+ *
+ * ⚠️ AND IT TAKES ITS OWN POINTER EVENTS for the same reason `.wpg-barback` does — the band is
+ * `pointer-events: none` because in the grid's bar it is decoration, and a control inside it has to
+ * opt back in rather than the whole band losing a property it needs on nine other pages.
+ */
+.wpg-barwithin {
+  margin-left: auto;
+  flex: 0 0 auto;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+}
 .wpg-barwho {
   font-family: var(--font-serif);
   font-size: 17px;

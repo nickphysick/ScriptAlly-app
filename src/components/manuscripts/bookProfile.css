@@ -818,32 +818,15 @@
 }
 
 /**
- * ══ MASTHEAD FURNITURE — the departure and the pager ══════════════════════════════════════════
+ * ══ BAR FURNITURE — the shelf pager ═══════════════════════════════════════════════════════════
  *
  * ⚠️ WHITE PILL, HAIRLINE BORDER, BURGUNDY CHEVRON — and no burgundy FILL. The house rule is that
  * no button is burgundy-filled; the chevron is ink, the pill is the window's own white.
+ *
+ * ⚠️ `.msp-backlink` IS DELETED. The record bar's own `.wpg-barback` is the departure on both
+ * two-view pages; keeping a second one here would have left a manuscripts-only back link styled and
+ * rendered by nothing.
  */
-.msp-backlink {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 14px 6px 11px;
-  border: 1px solid var(--hair);
-  border-radius: 999px;
-  background: var(--ws-window);
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-.msp-backlink span { color: var(--burg); font-size: 13px; line-height: 1; }
-/* ⚠️ A LITERAL, BECAUSE `--ws-hover` DOES NOT EXIST. The first version read it with a fallback —
-   which paints the fallback forever while reading as parameterised, the same fault `--mk-nearblack`
-   was on the carousel. The page's own token lock caught it here too. */
-.msp-backlink:hover { background: #faf7f2; }
-
 .msp-pager { display: inline-flex; align-items: center; gap: 4px; }
 .msp-pagerbtn {
   width: 26px;
