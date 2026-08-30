@@ -42,23 +42,44 @@ describe("zero queries → ghost preview behind a welcome card", () => {
   });
 });
 
-describe("has queries → auto-select, remembering the last one viewed", () => {
-  it("the last-viewed id persists under the house `sa.` prefix", () => {
-    expect(queries).toContain('"sa.queries.lastViewed"');
-    expect(queries).toContain("writeLastViewedQueryId");
+/**
+ * ══ NOTHING SELECTS IMPLICITLY ════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ THIS DESCRIBE IS INVERTED, AND THE BEHAVIOUR IT GUARDED IS WHAT BROKE THE PAGE. It asserted
+ * that the page auto-selected on load, remembering the last query viewed under the house `sa.`
+ * prefix, honouring a remembered id only while the query still existed, and never throwing in
+ * private mode. Every one of those was a correct assertion about a coherent mechanism — while the
+ * two-pane layout WAS the page and there was nowhere else to land.
+ *
+ * ⚠️ `?q=` NOW MEANS "RECORD VIEW", so an auto-select on load made the browsing grid UNREACHABLE:
+ * the page opened straight into a record and `← All queries` could not get out, because the same
+ * effect re-selected the remembered id the moment the param went away. The store is deleted, writer
+ * and key, and what replaces these cases is the opposite claim.
+ */
+describe("nothing selects a query implicitly", () => {
+  it("⚠️ THE LAST-VIEWED STORE IS GONE — reader, writer and key", () => {
+    for (const token of ["readLastViewedQueryId", "writeLastViewedQueryId", "LAST_VIEWED_KEY", "sa.queries.lastViewed"]) {
+      expect(queries, `\`${token}\` survives — a store nothing consumes`).not.toContain(token);
+    }
   });
 
-  it("a remembered id is only honoured while the query still EXISTS", () => {
-    expect(queries).toContain("queries.some((q) => q.id === remembered)");
+  it("⚠️ AND THE SKELETON NO LONGER WAITS FOR A REMEMBERED ROW", () => {
+    /* it held the page behind a skeleton until the restored query had loaded — right while
+       something restored one, and a grid held behind a spinner for a row it will never open once
+       nothing does */
+    /* ⚠️ COMMENTS STRIPPED FIRST. The file explains the deletion by NAMING the thing deleted — this
+       repo's prose is unusually rich in exactly the tokens its locks forbid, because every retirement
+       here is documented by quoting what it retired. A bare `toContain` finds the explanation. */
+    const decls = queries.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(decls, "`awaitingRemembered` survives its own mechanism").not.toContain("awaitingRemembered");
   });
 
-  it("the fallback is the first row of the CURRENT SORT, not the raw array's first", () => {
-    expect(queries).toContain("setSelectedQueryId(sortedList[0].id)");
-    expect(queries, "the old raw-array fallback is back").not.toContain("setSelectedQueryId(queries[0].id)");
-  });
-
-  it("reading the preference never throws in private mode", () => {
-    expect(queries).toContain("try { return localStorage.getItem(LAST_VIEWED_KEY); } catch");
+  it("⚠️ THE PARAM IS READ IN BOTH DIRECTIONS — present selects, absent clears", () => {
+    /* ⚠️ THE CLEARING HALF IS THE ONE THAT WAS MISSING, and its absence is why the back link looked
+       inert: the effect only ever SET a selection, so removing `?q=` left the old one standing. */
+    expect(queries, "the selection effect no longer clears when the param goes").toContain("if (!wanted && selectedQueryId !== null) setSelectedQueryId(null)");
+    expect(queries, "an unresolvable id clears the selection — that races the data on a slow load")
+      .toContain("never merely unresolvable");
   });
 });
 

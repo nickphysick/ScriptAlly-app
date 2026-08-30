@@ -116,7 +116,8 @@ describe("Queries.tsx artefacts — one home for actions + regressions", () => {
   });
 
   it("the ?q= deep-link scroll-into-view is untouched (regression)", () => {
-    expect(src).toContain("query-row-${activeSubPage}");
+    /* the local now names the resolved id rather than the raw prop — same row, same behaviour */
+    expect(src).toContain("query-row-${wanted}");
     expect(src).toContain('scrollIntoView({ block: "center" })');
   });
 });

@@ -272,16 +272,16 @@ const RibbonMenuItem: React.FC<{
 );
 RibbonMenuItem.displayName = "RibbonMenuItem";
 
-/* v4 P3 — last-viewed query, remembered across visits so the hub reopens where you left it.
-   localStorage under the house `sa.` UI-prefs prefix; a lightweight preference, never a fact —
-   an id that no longer exists just falls through to the first row of the current sort. */
-const LAST_VIEWED_KEY = "sa.queries.lastViewed";
-const readLastViewedQueryId = (): string | null => {
-  try { return localStorage.getItem(LAST_VIEWED_KEY); } catch { return null; }
-};
-const writeLastViewedQueryId = (id: string | null) => {
-  try { if (id) localStorage.setItem(LAST_VIEWED_KEY, id); else localStorage.removeItem(LAST_VIEWED_KEY); } catch { /* private mode — the preference is optional */ }
-};
+/**
+ * ⚠️ THE LAST-VIEWED STORE IS DELETED, WRITER AND KEY, because its only reader was the auto-select
+ * that made the browsing grid unreachable. It remembered which query you had open so the page could
+ * restore it on the next visit — coherent when the two-pane layout WAS the page and there was
+ * nowhere else to land. `?q=` is the only thing that selects now, so a stored id had nobody to tell.
+ *
+ * ⚠️ AND THE WRITER WENT WITH THE READER RATHER THAN SURVIVING IT. A store nothing consumes is the
+ * shape this repo keeps finding late: it looks live, it costs a write on every selection, and the
+ * next person to open the file has to trace it to nothing before they can be sure.
+ */
 
 /**
  * Has the writer moved BEYOND the When step? (§4)
@@ -376,9 +376,16 @@ export const Queries: React.FC<{
   const { setMobileDetail } = useMobileChrome();
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
-  /** Select a row: on mobile this is also the push. */
+  /**
+   * Select a row: on mobile this is also the push.
+   *
+   * ⚠️ IT NAVIGATES AS WELL AS SETTING STATE, because `?q=` is the record view. Setting only local
+   * state left the URL naming one query while the pane showed another — and the breadcrumb, which
+   * resolves the param, would then say a different agent's name from the bar three pixels above it.
+   */
   const pickRow = (id: string) => {
     setSelectedQueryId(id);
+    onOpenQuery?.(id);
     setMobileView("detail");
   };
   /** The freshest closeCreate + creating flag for the shell bar's back handler (the registered
@@ -1918,27 +1925,42 @@ export const Queries: React.FC<{
   // Query editing now lives entirely in the Edit Query drawer (openEditQuery) — the inline
   // isEditMode editor and its edit-state are retired. The reading pane below is view-only.
 
-  // Select initial query on mount or use activeSubPage preselection
+  /**
+   * ══ THE PARAM IS THE SELECTION ════════════════════════════════════════════════════════════════
+   *
+   * ⚠️ THIS EFFECT USED TO AUTO-SELECT ON LOAD AND IT MADE THE GRID UNREACHABLE. Its fallback read
+   * the LAST-VIEWED query out of storage and selected it whenever nothing was selected — legacy
+   * behaviour from when the two-pane layout WAS the page, and harmless while there was nowhere else
+   * to be. With `?q=` meaning "record view", it fired on every arrival at `/queries`, so the browsing
+   * grid could not be reached at all: the page opened straight into a record.
+   *
+   * ⚠️ AND IT NEVER CLEARED, WHICH IS THE SECOND HEAD OF THE SAME FAULT. `← All queries` deletes the
+   * param and navigates; the effect saw `activeSubPage` fall back to its default, failed its `find`,
+   * and dropped through to the storage restore — so the back link re-selected the query it had just
+   * left. Either fault alone would have been enough; both together made the symptom look like the
+   * link was inert.
+   *
+   * ⚠️ NOTHING SELECTS IMPLICITLY NOW. The param is read in BOTH directions — present and resolvable
+   * selects, absent clears — so there is exactly one place a selection can come from, and it is one
+   * a reader can see in the address bar.
+   */
   useEffect(() => {
-    if (activeSubPage && activeSubPage !== "All queries" && activeSubPage !== "Queries database") {
-      const matched = queries.find(q => q.id === activeSubPage);
-      if (matched) {
-        setSelectedQueryId(activeSubPage);
-        // Deep-linked arrival (?q=<id>): bring the row into the middle of the list viewport so it
-        // lands clear of both edge fades. Only on the selection CHANGE — not on every data tick.
-        if (selectedQueryId !== activeSubPage) {
-          document.getElementById(`query-row-${activeSubPage}`)?.scrollIntoView({ block: "center" });
-        }
-        return;
+    const wanted = activeSubPage && activeSubPage !== "All queries"
+      && activeSubPage !== "Queries database" && activeSubPage !== "Query database"
+      ? activeSubPage : null;
+    if (wanted && queries.some((q) => q.id === wanted)) {
+      if (selectedQueryId !== wanted) {
+        setSelectedQueryId(wanted);
+        /* Deep-linked arrival: bring the row into the middle of the list viewport so it lands clear
+           of both edge fades. Only on the selection CHANGE — not on every data tick. */
+        document.getElementById(`query-row-${wanted}`)?.scrollIntoView({ block: "center" });
       }
+      return;
     }
-    // v4 P3 — auto-select on load: the LAST-VIEWED query when it's still present. The fallback is
-    // the first row of the CURRENT SORT, applied once the sort has resolved (the effect below) —
-    // this used to grab queries[0], which is the raw array's first, not the first visible row.
-    if (queries.length > 0 && !selectedQueryId) {
-      const remembered = readLastViewedQueryId();
-      if (remembered && queries.some((q) => q.id === remembered)) setSelectedQueryId(remembered);
-    }
+    /* ⚠️ CLEARED ONLY WHEN THE PARAM IS GENUINELY ABSENT, never merely unresolvable. A `?q=` naming a
+       query that has not loaded yet must not clear the selection on the way past — that would race
+       the data and drop the reader back to the grid on a slow connection. */
+    if (!wanted && selectedQueryId !== null) setSelectedQueryId(null);
   }, [queries, selectedQueryId, activeSubPage]);
 
   // The active query + its agent/manuscript, resolved live. The reading pane is view-only EXCEPT the
@@ -3429,13 +3451,14 @@ export const Queries: React.FC<{
    * ⚠️ IT WAITS ONLY FOR AN ID THE DATA ACTUALLY CONTAINS. A remembered query that has since been
    * deleted would otherwise hold the skeleton forever, waiting for a row that is never coming.
    */
-  const rememberedAtMount = useRef<string | null>(null);
-  if (rememberedAtMount.current === null) rememberedAtMount.current = readLastViewedQueryId() ?? "";
-  const awaitingRemembered =
-    !!rememberedAtMount.current && !selectedQueryId && dataReady &&
-    queries.some((q) => q.id === rememberedAtMount.current);
-
-  const showSkeleton = !!startedUnready.current && (!dataReady || !floorDone || awaitingRemembered);
+  /**
+   * ⚠️ `awaitingRemembered` IS DELETED WITH THE AUTO-SELECT IT SERVED. It held the skeleton until the
+   * LAST-VIEWED query had loaded, so the page would not flash a list before restoring the record —
+   * which was the right compensation while something restored one. Nothing does: `?q=` is the only
+   * thing that selects, and a deep link's id is in the URL from the first frame. Keeping it would
+   * have held the grid behind a skeleton waiting for a row it was never going to open.
+   */
+  const showSkeleton = !!startedUnready.current && (!dataReady || !floorDone);
 
   /**
    * ⚠️ THE FADE IS ARMED ONLY WHEN A SKELETON ACTUALLY PRECEDED THE CONTENT. A page that was ready
@@ -3619,15 +3642,12 @@ export const Queries: React.FC<{
    * the sort rather than by the writer, presented in a pane that looks exactly like one they asked
    * for. A pane showing a real agent's record is a claim that this is what you came for.
    *
-   * ⚠️ WHAT SELECTS ON LOAD IS UNCHANGED AND DELIBERATE: a deep link (`?q=<id>`) and the
-   * last-viewed id both still restore, above. This removed only the EMPTY default — the case where
-   * nothing has asked for anything.
+   * ⚠️ AMENDED: NOTHING SELECTS ON LOAD BUT A DEEP LINK. This note used to say the last-viewed id
+   * restored too — true then, and the reason the browsing grid could not be reached once `?q=` began
+   * to mean "record view". `?q=` is the only selector now.
    */
 
-  /* Remember the last-viewed query (a preference, written on change only). */
-  useEffect(() => {
-    if (selectedQueryId) writeLastViewedQueryId(selectedQueryId);
-  }, [selectedQueryId]);
+  /* ⚠️ THE LAST-VIEWED WRITE IS DELETED WITH ITS READER — see the note at the top of the file. */
 
   /* v4 P4 — the ROUTE-ENTRY load animation. The page stays mounted across navigation, so the entry
      is a class toggled on becoming visible, not a mount. The ANIMATION is entirely CSS (no JS
