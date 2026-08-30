@@ -262,7 +262,14 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
    */
   if (variant === "workspace") {
     /**
-     * ⚠️ THE MASTHEAD HOLDS EXACTLY ONE CONTROL, AND THE GUARD IS THE RULE RATHER THAN A COMMENT.
+     * ⚠️ THE MASTHEAD HOLDS NO CONTROL, AND THE GUARD IS THE RULE RATHER THAN A COMMENT.
+     *
+     * ⚠️ THIS IS THE THIRD FORM OF THIS REFUSAL AND IT RETURNS TO THE FIRST. It began as "no actions,
+     * ever"; became "none where the masthead LEAVES", when the two header types made anchoring the
+     * question; then "exactly one primary", when the format gained a CTA. The CTA is deleted — the
+     * toolbar beneath already carried the page's action, so the masthead stated it twice — and the
+     * original refusal is exactly right again. Recorded rather than rewritten, because a guard that
+     * has moved twice will be read as arbitrary unless the reasons are visible.
      *
      * ⚠️ WHAT THIS REPLACES: a throw on ANY action, later made conditional on whether the masthead
      * pinned. Both were answers to a design where the header either scrolled out of reach or had to
@@ -275,42 +282,14 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
      * `count` slot. Each refusal names what to do instead, because a throw that only says "no" gets
      * worked around.
      */
-    if (process.env.NODE_ENV !== "production") {
-      if (toolbar) {
-        throw new Error(
-          `PageHeader variant="workspace" ("${title}") was passed a toolbar. This masthead has no ` +
-          "tool row — it is a kicker, a title, a subtitle and one CTA. A page's controls belong in " +
-          "the grid's own row.",
-        );
-      }
-      if (actionsSlot) {
-        throw new Error(
-          `PageHeader variant="workspace" ("${title}") was passed an actionsSlot. The masthead holds ` +
-          "ONE control and it is the page's primary — pass it as a single `actions` entry with " +
-          "`primary: true`. Anything that is not the page's call to action belongs in the control row.",
-        );
-      }
-      if (overflow?.length) {
-        throw new Error(
-          `PageHeader variant="workspace" ("${title}") was passed an overflow menu. One control means ` +
-          "one — an overflow is a second control wearing a menu. Use the grid's control row.",
-        );
-      }
-      if (acts.length > 1) {
-        throw new Error(
-          `PageHeader variant="workspace" ("${title}") was passed ${acts.length} actions. The masthead ` +
-          "holds one: the page's primary. The rest belong in the grid's control row.",
-        );
-      }
-      if (acts.length === 1 && !acts[0].primary) {
-        throw new Error(
-          `PageHeader variant="workspace" ("${title}") was passed a non-primary action ` +
-          `("${acts[0].label}"). The one control a masthead may hold is the page's PRIMARY — mark it ` +
-          "`primary: true` or move it to the control row.",
-        );
-      }
+    if (process.env.NODE_ENV !== "production" && (toolbar || actionsSlot || overflow?.length || acts.length)) {
+      throw new Error(
+        `PageHeader variant="workspace" ("${title}") was passed a control. This masthead holds NONE. ` +
+        "It carried the page's primary for two passes and the toolbar beneath carried the same " +
+        "action, so every page stated it twice and paid about 30px for the duplicate. A page's " +
+        "controls belong in the grid's control row, which is where they already are.",
+      );
     }
-    const cta = acts.length === 1 ? acts[0] : null;
     return (
       /* ⚠️ NO WRAPPER, NO CARD, NO STATE CLASS. The masthead is content: it paints the window's own
          ground and scrolls away with the page. */
@@ -331,17 +310,6 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           {/* ⚠️ ABSENT DESCRIPTION RENDERS NOTHING AND RESERVES NOTHING. In flow there is no height
               to keep, so a title-only page is simply shorter. */}
           {description && <p className="wsh-sub">{description}</p>}
-          {cta && (
-            <button
-              type="button"
-              className="wsh-cta"
-              onClick={cta.onClick}
-              disabled={cta.disabled}
-            >
-              {cta.icon}
-              {cta.label}
-            </button>
-          )}
         </div>
       </header>
     );

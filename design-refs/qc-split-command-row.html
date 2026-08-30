@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8">
+<title>Query Centre — command row split over the columns</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+ :root{
+  --page:#efe9e4;--band:#faf7f3;--sidebar:#fdfcfa;
+  --ink:#191210;--ink2:#311e19;--sub:#4d413a;--mute:#8a7a70;
+  --burg:#7c3a2a;--burgd:#632e22;--pink:#f5e2da;--pinkb:#e8c8bc;
+  --rim:#e9e1d4;--edge:#e0d8cd;--hair:#e8e2d8;
+  --sage-a:#dfe4dc;--sage-b:#d9dfd6;
+  --win-r:18px;--gut:36px;--bar-h:46px;
+  --col:262px;--colgap:16px;
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{background:var(--page);font-family:'Inter',sans-serif;color:var(--ink);padding:14px 16px 24px}
+ .tabs{display:flex;gap:6px;align-items:center;margin-bottom:7px;flex-wrap:wrap}
+ .tab{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:7px 12px;border:1px solid #cabfb5;border-radius:7px;background:#efe8e2;cursor:pointer;color:var(--ink)}
+ .tab.on{background:var(--ink);color:#f6f0ea;border-color:var(--ink)}
+ .rd{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:#8d7f75;margin:0 2px 8px}
+ .rd b{color:var(--burg)}
+ .note{font-size:12.5px;color:#4d413a;margin:0 2px 11px;max-width:1150px;line-height:1.6}
+ .note b{color:var(--ink)}
+
+ .shell{display:flex;background:var(--page);height:620px;overflow:hidden;margin:0 auto}
+ .side{flex:0 0 180px;background:var(--sidebar);border-right:1px solid var(--hair);padding:14px 11px}
+ .brand{display:flex;align-items:center;gap:8px;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;padding:2px 4px 12px}
+ .brand svg{width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:1.4}
+ .navh{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.16em;color:#a2968c;margin:11px 6px 4px}
+ .nv{display:flex;align-items:center;gap:9px;font-size:12px;padding:7px 8px;border-radius:9px;color:#4d3b33}
+ .nv svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6}
+ .nv.on{background:#fff;font-weight:600;box-shadow:0 1px 2px rgba(58,28,20,.06)}
+ .main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+ .topbar{display:flex;align-items:center;gap:12px;padding:0 20px;height:50px}
+ .crumb{font-family:'Playfair Display',serif;font-size:15.5px;color:var(--mute)}
+ .crumb b{color:var(--ink);font-weight:700}
+ .sp{flex:1}
+ .np{background:#1c130f;color:#fdfaf5;border-radius:999px;font-size:12px;padding:8px 15px;font-weight:600}
+ .win{background:var(--band);border:1px solid var(--edge);border-radius:var(--win-r) var(--win-r) 0 0;margin:0 18px;flex:1;min-height:0;
+   display:flex;flex-direction:column;overflow:hidden}
+
+ .bar{height:var(--bar-h);background:var(--band);display:flex;align-items:center;gap:12px;padding:0 var(--gut);flex:0 0 auto;
+   box-shadow:0 10px 16px -12px rgba(25,18,16,.32);z-index:5}
+ .back{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;
+   color:var(--mute);cursor:pointer;padding:6px 9px;border-radius:7px;text-transform:uppercase;white-space:nowrap}
+ .back:hover{background:rgba(25,18,16,.05);color:var(--ink)}
+ .back svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+ .who{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;white-space:nowrap}
+
+ /* ══ the command row — same grid as the body ══ */
+ .cmd{display:grid;grid-template-columns:var(--col) minmax(0,1fr);gap:var(--colgap);
+   padding:13px var(--gut);flex:0 0 auto;border-bottom:1px solid var(--edge)}
+ .cl{display:flex;align-items:center;gap:8px;min-width:0}
+ .cr{display:flex;align-items:center;gap:9px;min-width:0}
+ .sp2{flex:1}
+ .srch{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--rim);
+   border-radius:999px;padding:0 13px;height:34px;font-size:12.5px;color:#a2968c}
+ .srch svg{width:13px;height:13px;stroke:#a2968c;fill:none;stroke-width:1.8}
+ .ib{flex:0 0 34px;width:34px;height:34px;border:1px solid var(--rim);background:#fff;border-radius:9px;display:grid;place-items:center;cursor:pointer}
+ .ib svg{width:14px;height:14px;stroke:#4d3b33;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+ .vb{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 12px;border-radius:9px;border:1px solid var(--rim);
+   background:#fff;color:#3f2e27;font-size:12.5px;font-weight:500;white-space:nowrap;cursor:pointer}
+ .vb svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+ .vb.pink{background:var(--pink);border-color:var(--pinkb);color:var(--ink2);font-weight:600}
+ .vb.dim{opacity:.42}
+ .vb.icon{padding:0;width:34px;justify-content:center}
+ body.narrow .vb .lbl{display:none}
+ body.narrow .vb{padding:0 11px}
+ body.narrow .vb.pink .lbl{display:inline}
+
+ .body{flex:1;min-height:0;padding:14px var(--gut) 18px;display:grid;grid-template-columns:var(--col) minmax(0,1fr);gap:var(--colgap)}
+ .pnl{border:1px solid var(--rim);border-radius:13px;background:#fff;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+ .rws{flex:1;min-height:0;overflow:auto}
+ .rw{display:flex;align-items:center;gap:9px;padding:10px 12px;border-bottom:1px solid #f8f3ec;font-size:12.5px}
+ .rw.sel{background:#fbe9e2}
+ .avr{width:28px;height:28px;border-radius:50%;background:#f1e6e0;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:#7d6a60}
+ .rw i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:#a2968c;display:block}
+ .lfoot{display:flex;justify-content:space-between;padding:10px 13px;border-top:1px solid #f2ece2;
+   font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;color:#a2968c}
+ .rec{padding:17px 19px;overflow:auto}
+ .rec h3{font-family:'Playfair Display',serif;font-size:26px;font-weight:700}
+ .rec .ag{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.13em;color:#a2968c;margin-top:4px}
+ .band2{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));padding:10px 15px;font-family:'Playfair Display',serif;
+   font-size:17px;font-weight:600;color:#2f3a2e;margin-top:15px;border-radius:11px 11px 0 0}
+ .stat{display:flex;gap:12px;padding:14px 15px;border:1px solid var(--rim);border-top:0;border-radius:0 0 11px 11px}
+ .st{flex:1;border:1px solid #f0e9df;border-radius:10px;padding:11px 13px}
+ .sn{font-family:'Playfair Display',serif;font-size:21px;font-weight:500}
+ .sk{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:#a2968c;margin-top:3px}
+</style></head><body>
+
+<div class="tabs">
+ <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#8d7f75;margin-right:4px">WIDTH</span>
+ <button class="tab" data-w="1280">1280</button>
+ <button class="tab on" data-w="1600">1600</button>
+ <button class="tab" data-w="1920">1920</button>
+</div>
+<div class="rd" id="rd"></div>
+<div class="note">The command row uses the body's own grid. Search, filter and sort sit over the query list; the record's verbs sit over the reading pane, arranged as they are today. Every control is above the thing it acts on.</div>
+
+<div class="shell" id="shell">
+ <aside class="side">
+  <div class="brand"><svg viewBox="0 0 24 24" fill="none"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>ScriptAlly</div>
+  <div class="navh">QUERIES</div>
+  <div class="nv on"><svg viewBox="0 0 24 24" fill="none"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>Query Centre</div>
+ </aside>
+ <div class="main">
+  <div class="topbar"><span class="crumb">ScriptAlly&nbsp; / &nbsp;Queries&nbsp; / &nbsp;<b>Greg Panetta</b></span><span class="sp"></span><span class="np">+ New</span></div>
+  <div class="win">
+    <div class="bar">
+      <span class="back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>All queries</span>
+      <span class="who">Greg Panetta</span>
+    </div>
+
+    <div class="cmd" id="cmd">
+      <div class="cl">
+        <span class="srch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</span>
+        <span class="ib"><svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8Z"/></svg></span>
+        <span class="ib"><svg viewBox="0 0 24 24"><path d="M7 4v16M4 17l3 3 3-3M17 20V4M14 7l3-3 3 3"/></svg></span>
+      </div>
+      <div class="cr">
+        <span class="vb pink"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">Log new query</span></span>
+        <span class="sp2"></span>
+        <span class="vb"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg><span class="lbl">Mark sent</span></span>
+        <span class="vb dim"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg><span class="lbl">Nudge</span></span>
+        <span class="vb"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7H3V5h13"/></svg><span class="lbl">View related tasks</span></span>
+        <span class="sp2"></span>
+        <span class="vb"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12a9 9 0 1 1-6.2-8.5"/></svg><span class="lbl">Mark closed</span></span>
+        <span class="vb icon"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg></span>
+        <span class="vb"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg><span class="lbl">Delete</span></span>
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="pnl"><div class="rws" id="rws"></div><div class="lfoot"><span>SHOWING 26 OF 26</span><span>EXPORT CSV</span></div></div>
+      <div class="pnl"><div class="rec"><h3>Greg Panetta</h3><div class="ag">NO AGENCY &middot; PARTIAL REQUESTED</div>
+        <div class="band2">Tracking</div>
+        <div class="stat"><div class="st"><div class="sn">2 weeks</div><div class="sk">WAITING SO FAR</div></div>
+          <div class="st"><div class="sn">10 Sept</div><div class="sk">REPLY EXPECTED BY</div></div></div>
+      </div></div>
+    </div>
+  </div>
+ </div>
+</div>
+
+<script>
+try{
+const $=i=>document.getElementById(i);
+const Q=[["HV","Harriet Vane-Coe","STILLWATER REPS"],["JM","Jonathan Marsh","THE MARSH AGENCY"],["DO","Daniel O'Rourke","INKWELL & STONE"],
+["DO","Daniel O'Rourke","INKWELL & STONE"],["EW","Eleanor Whitfield","GREENFIELD LITERARY"],["WT","William Tan","FOXGLOVE LITERARY"],
+["FS","Fenella Str","BRIGHTWATER BOOKS"],["SD","Sophie Dunn","CURTIS VANE"],["GP","Greg Panetta","NO AGENCY"],["TE","Tom Ellery","CURTIS VANE"]];
+$('rws').innerHTML=Q.map(([i,n,a],k)=>`<div class="rw${k===8?' sel':''}"><span class="avr">${i}</span>
+ <div><b style="font-weight:600">${n}</b><i>${a}</i></div></div>`).join('');
+function rd(){requestAnimationFrame(()=>{
+ const c=$('cmd').getBoundingClientRect();
+ const narrow=c.width<1050;
+ document.body.classList.toggle('narrow',narrow);
+ requestAnimationFrame(()=>{
+  $('rd').innerHTML='chrome before the panes: <b>'+Math.round(46+$('cmd').getBoundingClientRect().height)+'px</b>'+
+   (narrow?' &middot; secondary verbs shed labels':'');});});}
+document.querySelectorAll('.tab[data-w]').forEach(b=>b.onclick=()=>{
+ $('shell').style.maxWidth=b.dataset.w+'px';
+ document.querySelectorAll('.tab[data-w]').forEach(x=>x.classList.toggle('on',x===b));rd();});
+window.addEventListener('resize',rd);rd();
+}catch(e){console.error(e)}
+</script></body></html>

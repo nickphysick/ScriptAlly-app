@@ -33,7 +33,7 @@ import { Manuscript, ManuscriptStatus } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
-import { Plus, X, Check } from "lucide-react";
+import { X, Check } from "lucide-react";
 import { isShelvedPresentation } from "../lib/manuscriptPage";
 import { manuscriptComps, withCompRemoved, pitchLine, pitchLineText } from "../lib/comps";
 import { isProUser, scoutLive } from "../lib/suggestComps";
@@ -370,12 +370,12 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
            * empty (ShellSidebar.tsx:118) and inside the manuscript switcher (`:140`). Consolidating
            * them is not this pass's to do.
            */
-          /* ⚠️ THE PLUS IS AN ICON NOW, NOT A CHARACTER. The masthead's primary joined the app's button
-             family, and that family draws its plus at 15px with a 1.8 stroke — a fullwidth `＋`
-             glyph is a different weight, a different size and a different vertical centring on every
-             platform, which is why the top bar's `+ New` has never used one. */
-          actions={[{ label: "Add a manuscript", icon: <Plus aria-hidden="true" />, primary: true,
-                      onClick: () => onNavigate?.("manuscripts", "Add a manuscript") }]}
+          /**
+           * ⚠️ NO ACTION IN THE MASTHEAD. `Add a manuscript` lived here for two passes and the page's
+           * own control row carries the same action, so it was stated twice — and `PageHeader` now
+           * THROWS on any control rather than accepting one. The masthead is a kicker, a title and a
+           * subtitle; nothing else.
+           */
           description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
           /**
            * ⚠️ THE DEPARTURE, AND ONLY WITH A BOOK OPEN. On the shelf there is nothing to leave, so

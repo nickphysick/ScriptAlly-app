@@ -113,22 +113,16 @@ describe("the workspace variant", () => {
    * is that the guard THROWS rather than silently dropping a prop; the full set of refusals lives in
    * `mastheadFormat.test.tsx`, and this keeps the one that is about the grid.
    */
-  it("⚠️ THE MASTHEAD REFUSES A SECOND CONTROL RATHER THAN IGNORING IT — inside a grid or outside one", () => {
-    const two = [
-      { label: "A", primary: true, onClick: () => {} },
-      { label: "B", primary: true, onClick: () => {} },
-    ] as const satisfies PageHeaderActions;
-    expect(() => renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" actions={two} />))
-      .toThrow(/was passed 2 actions/);
-    /* ⚠️ AND OUTSIDE A GRID TOO. The old guard read the grid's context and defaulted to "leaves" when
-       there was none; this one asks nothing of its surroundings, so the refusal cannot depend on
-       where the header happens to be mounted. */
-    expect(() => render(<PageHeader variant="workspace" title="T" mark="todo" actions={two} />))
-      .toThrow(/was passed 2 actions/);
+  it("⚠️ THE MASTHEAD REFUSES EVERY CONTROL RATHER THAN IGNORING ONE — inside a grid or outside it", () => {
+    const one = [{ label: "A", primary: true, onClick: () => {} }] as const satisfies PageHeaderActions;
+    expect(() => renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" actions={one} />))
+      .toThrow(/holds NONE/);
+    /* ⚠️ AND OUTSIDE A GRID TOO. The guard asks nothing of its surroundings, so the refusal cannot
+       depend on where the header happens to be mounted — which the behaviour-gated form did. */
+    expect(() => render(<PageHeader variant="workspace" title="T" mark="todo" actions={one} />))
+      .toThrow(/holds NONE/);
     /* the accepting direction, or "refuses" is indistinguishable from "refuses everything" */
-    expect(() => renderInGrid(
-      <PageHeader variant="workspace" title="T" mark="todo" actions={[two[0]]} />,
-    )).not.toThrow();
+    expect(() => renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" />)).not.toThrow();
   });
 
   it("⚠️ THE COUNT SLOT IS GONE FROM THE MARKUP, not merely unused (amendment 7)", () => {

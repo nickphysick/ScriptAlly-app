@@ -291,7 +291,7 @@
    * with a picture, and this repo already records what that costs.
    */
   --mast-title-size: 44px;
-  --mast-sub-size: 17px;
+  --mast-sub-size: 16px;
   --mast-pad-top: 22px;
   --mast-pad-btm: 24px;
   --mast-kick-gap: 11px;
@@ -414,40 +414,16 @@
 }
 
 /**
- * ⚠️ ONE CONTROL, AND IT JOINS THE APP'S BUTTON FAMILY RATHER THAN STARTING ONE. It was a soft-pink
- * Playfair pill — the only pink Playfair button in the app. Near-black Inter is what `+ New` in the
- * top bar and `Log query` on the agent cards already are, so the masthead's primary now reads as the
- * same object those are rather than as a masthead-specific invention.
+ * ⚠️ THE MASTHEAD HOLDS NO CONTROL, AND `.wsh-cta` IS DELETED WITH THE BUTTON. It carried the page's
+ * primary for two passes; the toolbar beneath already carried the same action, so every page stated
+ * it twice and paid ~30px for the duplicate. The near-black treatment those two passes settled is
+ * not lost — `--btn-ink` survives because the top bar's `+ New` reads it, which is the whole reason
+ * it was made shared rather than masthead-private.
  *
- * ⚠️ THE FILL IS `--btn-ink`, WHICH HAD TO BE CREATED. There was no near-black button token: the top
- * bar carried the literal `#1c130e` and this is specified as `#1c130f`. One unit apart, invisible,
- * on two buttons whose entire rationale is that they match.
- *
- * ⚠️ STILL NO BURGUNDY FILL ANYWHERE, and sentence case — the kicker above it is the uppercase
- * element, and a second uppercase run in the same 130px makes the CTA read as a label.
+ * ⚠️ `--btn-ink-on` GOES, BECAUSE NOTHING ELSE READ IT. `+ New` keeps its own `#ffffff` — the
+ * deliberate divergence recorded in CLAUDE.md — so the foreground token had exactly one consumer and
+ * follows it out. Swept for reads rather than definitions.
  */
-.wsh-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  margin-top: 17px;
-  background: var(--btn-ink);
-  border: 1px solid var(--btn-ink);
-  border-radius: 999px;
-  padding: 10px 20px;
-  font-family: var(--font-sans);
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--btn-ink-on);
-  cursor: pointer;
-  transition: background 0.16s;
-}
-/* ⚠️ THE HOVER LIFTS RATHER THAN DEEPENING. A near-black fill has nowhere darker to go that reads as
-   a state; the top bar's `+ New` has no hover fill at all, so this stays in the same family. */
-.wsh-cta:hover { background: #2b201a; }
-.wsh-cta:disabled { opacity: 0.45; cursor: default; }
-/* the icon matches the top bar's exactly — 15px, 1.8 stroke, currentColor */
-.wsh-cta svg { width: 15px; height: 15px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; }
 
 /**
  * ⚠️ IT EXISTS ONLY WHEN SOMETHING IS PASSED. There is no empty-state rule here on purpose: a

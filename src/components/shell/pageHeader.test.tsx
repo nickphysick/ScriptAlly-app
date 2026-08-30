@@ -294,7 +294,7 @@ describe("the masthead is content, not chrome", () => {
     expect(decls(gridCss)).toContain("grid-template-rows: minmax(0, 1fr) auto");
   });
 
-  it("⚠️ THE MASTHEAD HOLDS ONE CONTROL AND REFUSES THE REST — in the component, not merely in the markup", () => {
+  it("⚠️ THE MASTHEAD HOLDS NO CONTROL AND REFUSES EVERY ONE — in the component, not merely in the markup", () => {
     /**
      * ⚠️ THE LAW MOVED FROM THE VARIANT TO THE BEHAVIOUR (amendment 3), and it did not weaken. A
      * guard that only omitted an action would let a page pass one that silently goes nowhere — the
@@ -315,12 +315,18 @@ describe("the masthead is content, not chrome", () => {
        guard that omits an action lets a page pass one that silently goes nowhere. */
     expect(hdrSrc, "the retired behaviour gate came back — there is one format and it holds one control")
       .not.toContain("useMastheadLeaves");
-    for (const refusal of ["was passed a toolbar", "was passed an actionsSlot", "was passed an overflow menu", "PRIMARY"]) {
-      expect(hdrSrc, `the masthead stopped refusing: ${refusal}`).toContain(refusal);
-    }
-    expect(hdrSrc, "the toolbar refusal lost its reason").toContain("it is a kicker, a title, a subtitle and one CTA");
+    /* ⚠️ ONE REFUSAL AGAIN, AND IT COVERS EVERY SHAPE. The guard has moved three times — "no actions
+       ever", then "none where the masthead LEAVES", then "exactly one primary" — and the CTA's
+       deletion returns it to the first. Four separate messages became one because there is one rule
+       again, and the message has to say WHY or it gets worked around. */
+    expect(hdrSrc, "the masthead stopped refusing controls outright").toContain("was passed a control");
+    expect(hdrSrc, "the refusal lost its reason").toContain("stated it twice");
+    expect(hdrSrc, "a per-shape refusal came back — there is one rule now")
+      .not.toMatch(/was passed \$\{acts\.length\} actions/);
+    /* the refusal names the masthead's whole contents, so a reader can see what it is refusing FROM */
+    expect(hdrSrc, "the refusal lost its account of what a masthead is").toContain("controls belong in the grid's control row");
     const ws = sliceBetween(hdrSrc, 'if (variant === "workspace") {', "  return (\n    <header");
-    for (const gone of ["wsh-grow", "svh-btn", "wsh-acts", "wsh-mark"]) {
+    for (const gone of ["wsh-grow", "svh-btn", "wsh-acts", "wsh-mark", "wsh-cta"]) {
       expect(decls(ws), `the workspace branch still renders ${gone}`).not.toContain(gone);
     }
   });
@@ -351,7 +357,7 @@ describe("the masthead is content, not chrome", () => {
     expect(decl).toContain("--mast-title-size: 44px");
     /* ⚠️ THE BODY'S AIR IS ASSERTED THROUGH ITS TOKENS RATHER THAN AS A LITERAL PAIR, so a retune
        touches ONE place — the sizing block — instead of three locks. The values are pinned there. */
-    for (const [tok, val] of [["--mast-sub-size", "17px"], ["--mast-pad-top", "22px"],
+    for (const [tok, val] of [["--mast-sub-size", "16px"], ["--mast-pad-top", "22px"],
                               ["--mast-pad-btm", "24px"], ["--mast-kick-gap", "11px"]] as const) {
       expect(decl, `the masthead's ${tok} moved off ${val}`).toContain(`${tok}: ${val}`);
     }

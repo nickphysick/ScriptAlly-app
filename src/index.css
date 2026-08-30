@@ -45,12 +45,12 @@
    * that they are the SAME button. There was no token to reuse; `.agl-btn-dark` uses a third value
    * (`--agl-ink: #311e19`, browner) which is that page's own ink rather than a button fill.
    *
-   * ⚠️ THE FOREGROUND IS `#fdfaf5`, NOT WHITE, AND THE TOP BAR STILL SAYS `#ffffff`. Unifying the
-   * FILL is safe — the change is invisible and it makes "matches + New" true. Changing that button's
-   * TEXT is a visible edit to another surface and is Nick's call, so it is reported rather than done.
+   * ⚠️ THE FOREGROUND TOKEN IS GONE WITH THE MASTHEAD'S CTA. `--btn-ink-on` had exactly one reader —
+   * that button — and the button is deleted: the toolbar beneath already carried the page's action,
+   * so the masthead was stating it twice. `+ New` keeps its own `#ffffff`, which is why the FILL
+   * token survives and the foreground one does not.
    */
   --btn-ink: #1c130f;
-  --btn-ink-on: #fdfaf5;
 
   /**
    * ⚠️ THE KICKER'S INK CLEARS WCAG AA AND `#8a7a70` DID NOT. At 9px uppercase it is unambiguously

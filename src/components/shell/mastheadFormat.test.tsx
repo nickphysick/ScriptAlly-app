@@ -42,16 +42,10 @@ const PAGES: { title: string; mark: string; section: string; description?: strin
   { title: "Noteboard", mark: "noteboard", section: "Tasks", description: "Notes to self, undated." },
 ];
 
-const render = (p: (typeof PAGES)[number], cta?: string) =>
+const render = (p: (typeof PAGES)[number]) =>
   renderToStaticMarkup(
     <MastheadSectionContext.Provider value={{ section: p.section }}>
-      <PageHeader
-        variant="workspace"
-        title={p.title}
-        mark={p.mark as never}
-        description={p.description}
-        actions={cta ? [{ label: cta, primary: true, onClick: () => {} }] : undefined}
-      />
+      <PageHeader variant="workspace" title={p.title} mark={p.mark as never} description={p.description} />
     </MastheadSectionContext.Provider>,
   );
 
@@ -60,8 +54,8 @@ const skeleton = (html: string) =>
   html
     .replace(/<span class="wsh-kicker">[^<]*<\/span>/, '<span class="wsh-kicker">§</span>')
     .replace(/<h1 class="wsh-title">[^<]*<\/h1>/, '<h1 class="wsh-title">§</h1>')
-    .replace(/<p class="wsh-sub">[^<]*<\/p>/, '<p class="wsh-sub">§</p>')
-    .replace(/(<button type="button" class="wsh-cta">)[^<]*/, "$1§");
+    .replace(/<p class="wsh-sub">[^<]*<\/p>/, '<p class="wsh-sub">§</p>');
+
 
 describe("one masthead format, ten pages", () => {
   it("⚠️ EVERY MASTHEAD IS THE SAME SHAPE — asserted as a partition, not per page", () => {
@@ -81,13 +75,21 @@ describe("one masthead format, ten pages", () => {
     }
   });
 
-  it("⚠️ THE CTA IS THE ONLY THING A PAGE MAY VARY, and its text does not change the shape", () => {
-    const a = skeleton(render(PAGES[0], "+ Log new query"));
-    const b = skeleton(render(PAGES[4], "+ Add manuscript"));
-    expect(a, "two pages with different CTA text render different mastheads").toBe(b);
-    /* and a page without one is the same format minus that element — never a reserved empty box */
-    const none = render(PAGES[0]);
-    expect(none, "an empty CTA was rendered for a page that passes none").not.toContain("wsh-cta");
+  /**
+   * ⚠️ THE MASTHEAD VARIES BY NOTHING BUT ITS WORDS, and the CTA case this replaces is why that
+   * sentence changed. A page could vary its primary for two passes; the button is deleted, because
+   * the toolbar beneath already carried the same action and every page stated it twice.
+   */
+  it("⚠️ NO PAGE RENDERS A CONTROL IN ITS MASTHEAD — all ten, both directions", () => {
+    for (const p of PAGES) {
+      const html = render(p);
+      expect(html, `${p.title} renders a button in its masthead`).not.toContain("<button");
+      expect(html, `${p.title} renders a link in its masthead`).not.toContain("<a ");
+      expect(html, `${p.title} kept the retired CTA element`).not.toContain("wsh-cta");
+    }
+    /* ⚠️ AND THE OTHER DIRECTION: the masthead still renders. "No button" is satisfied by a header
+       that failed to render at all, which is the shape a structural check has to exclude. */
+    expect(PAGES.every((p) => render(p).includes('<h1 class="wsh-title">')), "a masthead stopped rendering its title").toBe(true);
   });
 
   it("⚠️ NO MARK AT REST, EVEN WHERE A PAGE DECLARES ONE", () => {
@@ -110,8 +112,8 @@ describe("one masthead format, ten pages", () => {
    * checks pass on a header that renders the CTA above the title — this repo already records that a
    * measurement of the parts is not a measurement of the whole.
    */
-  it("⚠️ TOP RULE, THEN KICKER, TITLE, SUBTITLE, CTA — in that order", () => {
-    const html = render({ ...PAGES[9], description: "Notes to self, undated." }, "+ New note");
+  it("⚠️ TOP RULE, THEN KICKER, TITLE, SUBTITLE — in that order, and nothing after", () => {
+    const html = render({ ...PAGES[9], description: "Notes to self, undated." });
     expect(html).toBe(
       '<header class="wsh">'
       + '<div class="wsh-toprule" aria-hidden="true"></div>'
@@ -119,7 +121,6 @@ describe("one masthead format, ten pages", () => {
       + '<span class="wsh-kicker">Tasks</span>'
       + '<h1 class="wsh-title">Noteboard</h1>'
       + '<p class="wsh-sub">Notes to self, undated.</p>'
-      + '<button type="button" class="wsh-cta">+ New note</button>'
       + "</div></header>",
     );
   });
@@ -130,30 +131,44 @@ describe("one masthead format, ten pages", () => {
  * to do instead, because a throw that only says "no" gets worked around — and every one of these was
  * a real shape a page had passed at some point in this system's life.
  */
-describe("the masthead refuses everything but one primary", () => {
+/**
+ * ⚠️ THE REFUSAL IS BACK TO ITS ORIGINAL FORM, AND IT HAS NOW MOVED THREE TIMES. "No actions, ever"
+ * → "none where the masthead LEAVES" (when the two header types made anchoring the question) →
+ * "exactly one primary" (when the format gained a CTA) → no actions, ever. Each move had a reason and
+ * the reasons are in `PageHeader`; what matters here is that the guard still THROWS rather than
+ * dropping a prop, because a page that passes a control which silently goes nowhere is the fault all
+ * three forms were written against.
+ */
+describe("the masthead refuses every control", () => {
   const boom = (props: Record<string, unknown>) => () =>
     renderToStaticMarkup(<PageHeader variant="workspace" title="Anywhere" {...props} />);
 
   it("refuses a toolbar", () => {
-    expect(boom({ toolbar: <i>t</i> })).toThrow(/no tool row/);
+    expect(boom({ toolbar: <i>t</i> })).toThrow(/holds NONE/);
   });
   it("refuses an actionsSlot", () => {
-    expect(boom({ actionsSlot: <i>s</i> })).toThrow(/holds ONE control/);
+    expect(boom({ actionsSlot: <i>s</i> })).toThrow(/holds NONE/);
   });
   it("refuses an overflow menu", () => {
-    expect(boom({ overflow: [{ label: "x", onClick: () => {} }] })).toThrow(/second control wearing a menu/);
+    expect(boom({ overflow: [{ label: "x", onClick: () => {} }] })).toThrow(/holds NONE/);
   });
   it("refuses two actions", () => {
     expect(boom({ actions: [
       { label: "a", primary: true, onClick: () => {} },
       { label: "b", primary: true, onClick: () => {} },
-    ] })).toThrow(/was passed 2 actions/);
+    ] })).toThrow(/holds NONE/);
   });
   it("refuses a lone non-primary action", () => {
-    expect(boom({ actions: [{ label: "a", onClick: () => {} }] })).toThrow(/PRIMARY/);
+    expect(boom({ actions: [{ label: "a", onClick: () => {} }] })).toThrow(/holds NONE/);
   });
-  it("accepts exactly one primary", () => {
-    expect(boom({ actions: [{ label: "+ Add a comp", primary: true, onClick: () => {} }] })).not.toThrow();
+  /* ⚠️ THE SHAPE THAT USED TO BE THE ALLOWED ONE. A single primary was the whole of the previous
+     form's permission; asserting that it now throws is what makes the reversion a claim rather than
+     a deletion. */
+  it("refuses a single primary — the one shape the previous guard allowed", () => {
+    expect(boom({ actions: [{ label: "+ Add a comp", primary: true, onClick: () => {} }] })).toThrow(/holds NONE/);
+  });
+  it("renders without complaint when passed none", () => {
+    expect(boom({})).not.toThrow();
   });
 });
 
@@ -194,24 +209,25 @@ describe("the kicker's and the CTA's treatment", () => {
     expect(k, "the kicker went back to Playfair").not.toContain("--font-serif");
   });
 
-  it("⚠️ THE CTA READS THE SHARED NEAR-BLACK TOKEN, and the top bar reads the same one", () => {
-    const c = rule(".wsh-cta");
-    expect(c).toContain("background: var(--btn-ink)");
-    expect(c).toContain("border: 1px solid var(--btn-ink)");
-    expect(c).toContain("color: var(--btn-ink-on)");
-    expect(c, "the CTA is pink again").not.toContain("--pink");
-    /* ⚠️ THE OTHER READER IS ASSERTED, because "matches + New" is the entire reason for the change and
-       a token with one consumer would leave the top bar on its own literal — which is what it was:
-       `#1c130e`, one unit from this. */
+  /**
+   * ⚠️ THE CTA'S OWN CASE IS DELETED WITH THE BUTTON, AND WHAT SURVIVES IS THE TOKEN IT LEFT BEHIND.
+   * `--btn-ink` was created because the top bar's `+ New` and the masthead's primary were two
+   * literals one unit apart; the primary is gone and the token still has a consumer, which is the
+   * only reason it is not deleted too. `--btn-ink-on` had exactly one reader and follows the button
+   * out — swept for READS rather than definitions.
+   */
+  it("⚠️ `--btn-ink` SURVIVES BECAUSE `+ New` READS IT; `--btn-ink-on` DOES NOT", () => {
     const shell = strip(readFileSync(resolve(__dirname, "workspaceShell.css"), "utf8"));
     const nbtn = /(?:^|\n)\.ws-nbtn\s*\{([^}]*)\}/.exec(shell);
     expect(nbtn, "the top bar's `+ New` has no rule").toBeTruthy();
-    expect(nbtn![1], "the top bar's `+ New` is back on a literal — the two buttons can drift again")
+    expect(nbtn![1], "the token's last consumer went back to a literal — delete the token or keep the reader")
       .toContain("background: var(--btn-ink)");
-    /* ⚠️ SCOPED TO THAT RULE, NOT THE SHEET. A file-wide ban on the near-black also catches
-       `color: #1c130e` on a text element two hundred lines away, which is not a button fill and not
-       this claim — the first version failed on exactly that. */
-    expect(nbtn![1], "a near-black literal survives inside the button's own rule").not.toMatch(/#1c130[ef]/i);
+    expect(strip(root), "--btn-ink was deleted while something still reads it").toContain("--btn-ink: #1c130f");
+    expect(strip(root), "--btn-ink-on is still declared and nothing reads it").not.toContain("--btn-ink-on");
+    for (const f of ["pageHeader.css", "workspacePageGrid.css", "workspaceShell.css"]) {
+      expect(strip(readFileSync(resolve(__dirname, f), "utf8")), `${f} still reads --btn-ink-on`)
+        .not.toContain("var(--btn-ink-on");
+    }
   });
 
   it("⚠️ `--mast-cta-bd` IS GONE, and nothing reads it", () => {
@@ -223,28 +239,19 @@ describe("the kicker's and the CTA's treatment", () => {
   });
 
   /**
-   * ⚠️ THE CTA IS IDENTICAL ON ALL TEN, ASSERTED AS A PARTITION. Only one page carries one today —
-   * Phase 5 assigns the rest — so the population is SYNTHESISED: every page rendered with a CTA, its
-   * own words stripped, and one distinct skeleton required. A check over the single live CTA would
-   * be satisfied by one page and prove nothing about the format.
+   * ⚠️ THE PARTITION SURVIVES ITS SUBJECT. It asserted that a CTA rendered identically on all ten;
+   * with the button gone the same claim is that the masthead does, and it is the stronger form —
+   * there is no longer anything a page may vary but its own words.
    */
-  it("⚠️ THE CTA RENDERS IDENTICALLY ON ALL TEN — partition, not a page list", () => {
+  it("⚠️ EVERY MASTHEAD IS THE SAME SHAPE, AND NONE OF THEM HOLDS A CONTROL", () => {
     const shapes = new Map<string, string[]>();
     for (const p of PAGES) {
-      /* ⚠️ ONE DESCRIPTION FOR EVERY PAGE. Noteboard is the only entry that carries one, so leaving
-         the census as it stands compares a masthead WITH a subtitle against nine without and reports
-         two shapes — a real structural difference, and not the one this case is about. */
-      const html = render({ ...p, description: "A line about this page." }, `+ Do the thing on ${p.title}`);
-      const k = skeleton(html);
+      const k = skeleton(render({ ...p, description: "A line about this page." }));
       shapes.set(k, [...(shapes.get(k) ?? []), p.title]);
+      expect(k, `${p.title} renders a control`).not.toContain("<button");
     }
     expect(PAGES.length, "the census shrank").toBe(10);
-    expect([...shapes.keys()], `CTAs differ across pages: ${[...shapes.values()].map((v) => v.join(", ")).join(" | ")}`)
+    expect([...shapes.keys()], `mastheads differ: ${[...shapes.values()].map((v) => v.join(", ")).join(" | ")}`)
       .toHaveLength(1);
-  });
-
-  it("⚠️ AND THE MASTHEAD STILL HOLDS EXACTLY ONE CONTROL", () => {
-    const html = render(PAGES[0], "+ Log new query");
-    expect((html.match(/<button/g) ?? []).length, "the masthead grew a second control").toBe(1);
   });
 });
