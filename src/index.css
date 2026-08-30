@@ -52,8 +52,14 @@
   --btn-ink: #1c130f;
   --btn-ink-on: #fdfaf5;
 
-  /* the masthead kicker's two colours — a label, not a control (see pageHeader.css) */
-  --mast-kick-ink: #8a7a70;
+  /**
+   * ⚠️ THE KICKER'S INK CLEARS WCAG AA AND `#8a7a70` DID NOT. At 9px uppercase it is unambiguously
+   * NORMAL text, so the threshold is 4.5:1 and the muted grey measured 4.02 against the window's
+   * ground — it had been 7.29 before the label was quietened, so halving its presence halved its
+   * legibility with it. `#807168` is the same hue one step darker and the first value that clears,
+   * at 4.58:1.
+   */
+  --mast-kick-ink: #807168;
   --mast-kick-bd: rgba(25, 18, 16, 0.14);  /* soft-pink CTA hover */
   --tl: #f6ddd3;      /* query-letter type tint */
   --ts: #e7ece4;      /* synopsis type tint */

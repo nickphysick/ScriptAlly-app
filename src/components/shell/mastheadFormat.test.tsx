@@ -179,7 +179,7 @@ describe("the kicker's and the CTA's treatment", () => {
     /* ⚠️ AND THE RULE CARRIES NO COLOUR OF ITS OWN. Asserting the two `var()`s alone passes on a rule
        that ALSO states an rgba somewhere else — which is exactly how a second value gets in. */
     expect(k, "the kicker states a colour literal alongside its tokens").not.toMatch(/#[0-9a-f]{3,8}|rgba?\(/i);
-    for (const [tok, val] of [["--mast-kick-ink", "#8a7a70"], ["--mast-kick-bd", "rgba(25, 18, 16, 0.14)"]] as const) {
+    for (const [tok, val] of [["--mast-kick-ink", "#807168"], ["--mast-kick-bd", "rgba(25, 18, 16, 0.14)"]] as const) {
       expect(strip(root), `${tok} is not declared as ${val}`).toContain(`${tok}: ${val}`);
     }
   });
@@ -188,7 +188,7 @@ describe("the kicker's and the CTA's treatment", () => {
     const k = rule(".wsh-kicker");
     /* the four things that made an outlined capsule read as pressable */
     expect(k).toContain("font-family: var(--font-mono)");
-    expect(k).toContain("font-size: 9px");
+    expect(k).toContain("font-size: 10px");
     expect(k).toContain("font-weight: 400");
     expect(k).toContain("letter-spacing: 0.18em");
     expect(k, "the kicker went back to Playfair").not.toContain("--font-serif");

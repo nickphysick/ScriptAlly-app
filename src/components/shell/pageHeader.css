@@ -342,7 +342,10 @@
   border-radius: 999px;
   padding: 4px 12px 3px;
   font-family: var(--font-mono);
-  font-size: 9px;
+  /* ⚠️ 10px, NOT THE REF'S 9. Mono at `.18em` tracking is small even at passing contrast, and the
+     pixel back costs nothing: the kicker's box grows by one line-box pixel and the masthead's height
+     is unchanged to the tenth. */
+  font-size: 10px;
   font-weight: 400;
   letter-spacing: 0.18em;
   text-transform: uppercase;
