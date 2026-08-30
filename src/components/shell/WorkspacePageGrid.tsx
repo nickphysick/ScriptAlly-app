@@ -31,7 +31,7 @@
 import React from "react";
 import { MastheadBehaviourContext } from "./mastheadBehaviour";
 import { createPortal } from "react-dom";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import "./workspacePageGrid.css";
 import { WINWRAP_ID } from "./shellSlots";
 import { OneScreenMark, type MarkName } from "../dashboard/OneScreenMark";
@@ -165,6 +165,16 @@ export interface WorkspacePageGridProps {
    */
   barOnly?: boolean;
   /**
+   * ⚠️ THE RECORD VIEW REPLACES THE MASTHEAD WITH THE BAR, and the bar says something different in
+   * it: a back-link and the RECORD's name, not the page's. `← All queries` and `Greg Panetta` — the
+   * page name belongs to the grid you came from, and repeating it over a record states the one thing
+   * the reader can already see in the breadcrumb while omitting the one they cannot.
+   *
+   * ⚠️ IT IMPLIES `barOnly`. A record has no masthead: there is nothing for one to scroll away from,
+   * and it would take a third of the working area to say a name the bar says in 46px.
+   */
+  record?: { backLabel: string; onBack: () => void; title: string };
+  /**
    * ⚠️ `condensed` IS DELETED (masthead rethink, step 4), AND WITH IT THE UNION IT WAS HALF OF.
    *
    * It was the MODE input to `stuck || condensedByMode || engaged` — the masthead folding when the
@@ -205,7 +215,7 @@ const barIdentity = (masthead: React.ReactNode): { title: string; mark?: MarkNam
 };
 
 export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
-  masthead, toolbar, children, className, scrollLabel, dock, fill = false, settleOn, barOnly,
+  masthead, toolbar, children, className, scrollLabel, dock, fill = false, settleOn, barOnly, record,
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = React.useState(false);
@@ -225,7 +235,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   /* ⚠️ `barOnly` FORCES IT ON RATHER THAN BRANCHING THE RENDER. One expression decides whether the
      bar shows, so the two views cannot disagree about it — and the scroll hysteresis simply has
      nothing to do in a view that does not scroll. */
-  const barShown = barOnly || bar;
+  const barShown = barOnly || !!record || bar;
   /** The pinned chrome's SETTLED height, for anything that must sit clear of it. See below. */
   const [stuckH, setStuckH] = React.useState(0);
   /**
@@ -682,11 +692,27 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             * would insert a box mid-scroll, which is the height feedback the design exists to
             * avoid; and a transition needs both ends to exist to travel between them.
             */}
-          {ident && (
-            <div className={`wpg-bar${barShown ? " wpg-bar--on" : ""}`} aria-hidden="true">
+          {(ident || record) && (
+            <div className={`wpg-bar${barShown ? " wpg-bar--on" : ""}${record ? " wpg-bar--record" : ""}`} aria-hidden={record ? undefined : true}>
               <div className="wpg-barin">
-                {ident.mark && <span className="wpg-barmk"><OneScreenMark name={ident.mark} monoline /></span>}
-                <b>{ident.title}</b>
+                {record ? (
+                  <>
+                    {/* ⚠️ A REAL BUTTON, WHICH IS WHY THE BAR STOPS BEING `aria-hidden` HERE. In the
+                        grid it is decoration — the page's own name, already in the breadcrumb — and
+                        hiding it spares a screen reader a duplicate. In the record it carries the
+                        only way back, and a hidden control is no control. */}
+                    <button type="button" className="wpg-barback" onClick={record.onBack}>
+                      <ArrowLeft aria-hidden="true" />
+                      {record.backLabel}
+                    </button>
+                    <span className="wpg-barwho">{record.title}</span>
+                  </>
+                ) : (
+                  <>
+                    {ident.mark && <span className="wpg-barmk"><OneScreenMark name={ident.mark} monoline /></span>}
+                    <b>{ident.title}</b>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -725,7 +751,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             * belongs to the WINDOW, not to the masthead's measure — an edge that stops short mid-air
             * is the same fault as the fill-page border complaint in another costume.
             */}
-          {!barOnly && (
+          {!barOnly && !record && (
           <div className={`wpg-chrome${stuck ? " wpg-chrome--stuck" : ""}`} ref={chromeRef}>
           <div className="wpg-mast" ref={mastRef}>
             {/**

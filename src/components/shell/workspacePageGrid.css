@@ -1007,66 +1007,55 @@
 }
 
 /**
- * ══ THE TWO-VIEW TAB RAIL ═════════════════════════════════════════════════════════════════════
- * (ref design-refs/qc-two-views.html.)
- *
- * ⚠️ IT SITS AT THE BAR'S HEIGHT WHEN THE BAR IS SHOWING, AND THAT OFFSET IS THE BAR'S OWN TOKEN.
- * The ref writes `body.stuck .rail { top: var(--bar-h) }`; here the state class is on the grid, so
- * the same rule is scoped to it. This is the one place a `top` legitimately encodes another
- * element's height — and it does it by READING that element's token rather than restating the
- * number, which is exactly the distinction the standing rule draws.
+ * ⚠️ THE TAB RAIL IS DELETED. Query Centre is a list-and-record page, not a two-mode one: you browse
+ * a grid and you open a record. A `Detail view` tab was a MODE beside a SET — the pair never read as
+ * parallel, which the last report flagged — and with the record reached by opening a card there is
+ * nothing left for a second tab to select. Its sticky-offset allowance goes with it, so every `top`
+ * in this sheet is 0 again.
  */
-.vtabs {
-  position: sticky;
-  top: 0;
-  z-index: 18;
-  flex: 0 0 auto;
-  background: var(--ws-window);
-  border-bottom: 1px solid var(--ws-edge);
-}
-.wpg--barshown .vtabs { top: var(--bar-h); }
-/* ⚠️ IN THE DETAIL VIEW IT DOES NOT PIN. That view fills the viewport and its panes scroll
-   internally, so there is nothing for the rail to travel inside — a sticky element on a
-   non-scrolling ancestor does not idle, it CLAMPS, which is how a row ends up pushed down by its
-   own offset. Static is the honest statement. */
-.wpg--fill .vtabs { position: static; }
-/* the rail's content takes the masthead's measure — the same shared expression, so the tabs begin
-   where the title does at every width */
-.vtabs-in {
-  width: 100%;
-  margin-inline: auto;
-  max-width: min(var(--work-max), calc(100% - 2 * var(--mast-gutter)));
-  display: flex;
+
+/**
+ * ══ THE BAR IN THE RECORD VIEW ════════════════════════════════════════════════════════════════
+ * (ref design-refs/qc-view-transition.html — option C.)
+ */
+.wpg-barback {
+  display: inline-flex;
   align-items: center;
-  gap: 26px;
-}
-.vtabs-tools { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-.vtab {
-  padding: 14px 0 12px;
-  font-family: var(--font-serif);
-  font-size: 19px;
-  font-weight: 600;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--mast-kick-ink);
   background: none;
-  /* ⚠️ THE UNDERLINE IS A TRANSPARENT BORDER AT REST, not `none`. A border that appears on
-     selection changes the tab's height by 2px and shifts every other tab with it. */
   border: 0;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
+  border-radius: 7px;
+  padding: 6px 9px;
+  /* ⚠️ IT MUST BE CLICKABLE, AND THE BAR IS `pointer-events: none`. That is right for the grid's
+     bar, which is decoration; the record's bar carries the only way back, so the control takes its
+     own pointer events rather than the whole band losing the property it needs everywhere else. */
+  pointer-events: auto;
   cursor: pointer;
-  display: flex;
-  align-items: baseline;
-  gap: 9px;
+  white-space: nowrap;
+  margin-left: -9px;
 }
-.vtab i {
-  font-style: normal;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.13em;
-  color: var(--mast-kick-ink);
+.wpg-barback:hover { background: rgba(25, 18, 16, 0.05); color: var(--shell-ink); }
+.wpg-barback svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
+/* ⚠️ PLAYFAIR, NOT MONO, AND THAT IS THE WHOLE DISTINCTION THE BAR DRAWS. The page's name is a
+   system label — mono, uppercase, tracked. A person's name is not: it is the record, set in the
+   same face the masthead's title uses, at the size a 46px band can hold. */
+.wpg-barwho {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--shell-ink);
+  text-transform: none;
+  letter-spacing: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.vtab--on { color: var(--shell-ink); border-bottom-color: var(--shell-ink); }
-.vtab--on i { color: var(--shell-ink); }
 
 /**
  * ══ QUERY CENTRE'S BROWSING GRID ══════════════════════════════════════════════════════════════
@@ -1123,4 +1112,31 @@
   margin-top: auto;
   padding-top: 11px;
   border-top: 1px solid var(--ws-edge);
+}
+
+/**
+ * ══ THE VIEW TRANSITION ═══════════════════════════════════════════════════════════════════════
+ * (ref design-refs/qc-view-transition.html — option C.)
+ *
+ * ⚠️ THE PANE ARRIVES; NOTHING MORPHS. `qc-flip-transition.html` was built and rejected — a
+ * card-to-row FLIP reads once, breaks the moment the list is filtered or sorted (the card you came
+ * from may not be in it), and argues against the record view's own premise, which is that you have
+ * LEFT the grid. What is left is the honest version: the record fades up from .965, the masthead is
+ * simply not there any more, and the bar slides in on its own rules.
+ *
+ * ⚠️ IT IS AN ENTRANCE, NOT A TRANSITION BETWEEN TWO STATES. There is nothing to tween from — the
+ * grid has unmounted — so this is a keyframe on arrival. That is also why it cannot feed back into
+ * scroll position: a transform never affects layout.
+ */
+@keyframes wpg-record-in {
+  from { opacity: 0; transform: scale(0.965); }
+  to { opacity: 1; transform: none; }
+}
+.wpg--record .wpg-scroll > *:not(.wpg-bar) {
+  animation: wpg-record-in 0.24s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+/* ⚠️ A PLAIN CUT UNDER REDUCED MOTION, and the override sits immediately after the rule it
+   overrides — a media query confers no specificity, so declared earlier it would silently lose. */
+@media (prefers-reduced-motion: reduce) {
+  .wpg--record .wpg-scroll > *:not(.wpg-bar) { animation: none; }
 }

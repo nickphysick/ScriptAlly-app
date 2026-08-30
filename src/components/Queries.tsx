@@ -64,7 +64,6 @@ import { recordQueryResponse } from "../lib/recordResponse";
 import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitle";
 import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
-import { ViewTabs } from "./shell/ViewTabs";
 /* §1 (provenance pack) — the writer's own expected date: its field name and its one accessor. */
 import { WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD, writerExpectedIso, writerExpectedWrite, resolveExpectedDate } from "../lib/expectedDate";
 /* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
@@ -4176,8 +4175,18 @@ export const Queries: React.FC<{
            * bar is simply present from the start: identity in 46px instead of a third of the working
            * area saying a name nothing else states.
            */
-          fill={view === "detail"}
-          barOnly={view === "detail"}
+          /**
+           * ⚠️ THE RECORD IS THE VIEW, AND THE PROP IS ITS PRESENCE RATHER THAN A MODE FLAG. A page
+           * that carried a `view` string could be in `detail` with nothing selected, which is a state
+           * with no content and no way to describe itself; deriving both from the selected query
+           * means the record view cannot exist without a record in it.
+           */
+          fill={!!activeQuery}
+          record={activeQuery ? {
+            backLabel: "All queries",
+            onBack: () => onSelectView?.("cards"),
+            title: agentPrimary(activeAgent ?? undefined),
+          } : undefined}
           scrollLabel="Query Centre"
           /* ⚠️ THE LIST STRIP (§1c) — the three controls that act on the LIST, and only those.
              `View tasks` and `Nudge` are NOT here despite sounding page-level: both are gated on
@@ -4617,26 +4626,12 @@ export const Queries: React.FC<{
             what it is momentarily doing — and it is written BEFORE the class so `className="f12-body">`
             stays literally intact, which is what those slices anchor on. */}
         {/**
-          * ⚠️ THE TAB RAIL IS THE PAGE'S TWO VIEWS, AND IT RENDERS IN BOTH OF THEM. It is what makes
-          * the detail surface reachable without a selection — the browsing grid can only get you
-          * there by choosing a record, and a view you can only enter through a record is not a view.
-          *
-          * ⚠️ "Detail view" READS ODDLY BESIDE "All queries" AND IS FLAGGED. The first names a SET,
-          * the second names a MODE, so the pair is not parallel — `All queries` / `One query` or
-          * `Browse` / `Work` would be. Left as the brief has it because the wording is Nick's to
-          * settle and a placeholder that reads slightly wrong is better than a guess that reads
-          * confidently wrong.
+          * ⚠️ NO TAB RAIL. This page is a list and a record, not two modes: the grid IS the page, and
+          * opening a card opens that query. A `Detail view` tab named a MODE beside a SET — the pair
+          * never read as parallel — and once the record is reached by opening a card there is nothing
+          * left for a second tab to select.
           */}
-        <ViewTabs
-          label="Query Centre views"
-          active={view}
-          onSelect={(v) => onSelectView?.(v as "cards" | "detail")}
-          tabs={[
-            { key: "cards", label: "All queries", count: sortedList.length },
-            { key: "detail", label: "Detail view" },
-          ]}
-        />
-        {view === "cards" ? (
+        {!activeQuery ? (
           /**
            * ⚠️ THE BROWSING GRID READS THE SAME DERIVED LIST THE ROWS DO. `sortedList` is already
            * filtered by the page's own scope, search, status and sort, so the two views cannot show

@@ -38,6 +38,7 @@ import { FEEDBACK_FAB } from "../../lib/beta";
 import { useSaveState, saveWhisper } from "../../lib/useSaveState";
 import { useSidebarCollapsed } from "./useSidebarCollapsed";
 import { formatSidebarName, getInitials } from "../../lib/displayName";
+import { agentPrimary } from "../../lib/agentDisplay";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
 import { invokeCapture } from "./railNav";
@@ -129,7 +130,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   onNavigate, scrollId, scrollRef, onScroll, footFade, fit = false, accountMenu, children,
 }) => {
   const { pathname, search } = useLocation();
-  const { manuscripts, currentUser, updateUserProfile } = useScriptAllyDb();
+  const { manuscripts, queries, agents, currentUser, updateUserProfile } = useScriptAllyDb();
 
   const hit = useMemo(() => shellHitFor(sections, pathname, search), [sections, pathname, search]);
 
@@ -306,6 +307,26 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
   const save = useSaveState();
   const crumb = shellCrumb(sections, hit);
+  /**
+   * ⚠️ THE CRUMB FOLLOWS THE RECORD, AND IT IS RESOLVED HERE BECAUSE THE SHELL ALREADY HAS THE DATA.
+   * On `/queries?q=<id>` the page is showing one query, so the trail is `ScriptAlly / Queries / Greg
+   * Panetta` rather than `… / Query Centre` — the page name is what the grid is called, and over a
+   * record it states the one thing the reader can already see while omitting the one they cannot.
+   *
+   * ⚠️ IT RESOLVES OR IT IS ABSENT — never a placeholder. A `?q=` naming a query that has been
+   * deleted, or that belongs to another account, leaves the crumb saying the page's own name, which
+   * is true. An id in a breadcrumb, or the word "Query", would both be worse than the page name.
+   */
+  const recordCrumb = useMemo(() => {
+    if (!pathname.startsWith("/queries")) return null;
+    const id = new URLSearchParams(search).get("q");
+    if (!id) return null;
+    const q = queries.find((x) => x.id === id);
+    if (!q) return null;
+    const a = agents.find((x) => x.id === q.agentId);
+    const name = agentPrimary(a);
+    return name || null;
+  }, [pathname, search, queries, agents]);
   /**
    * ⚠️ THE MASTHEAD'S KICKER IS THE CRUMB'S OWN SECTION, TAKEN FROM THE SAME CALL. Reading a second
    * derivation put the two three inches apart and disagreeing: `shellV2Nav`'s `SHELL_SECTIONS` calls
@@ -672,10 +693,21 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                           {crumb.section}
                         </button>
                         <span className="ws-sep" aria-hidden="true">/</span>
-                        <span className="ws-cur" aria-current="page">{crumb.child}</span>
+                        {/**
+                          * ⚠️ THE RECORD TAKES THE LAST SEGMENT AND THE PAGE NAME BECOMES A LINK.
+                          * `ScriptAlly / Queries / Greg Panetta` — and `Query Centre` drops out
+                          * rather than becoming a fourth segment, because the trail is where you
+                          * ARE and the grid is not somewhere you are while reading a record. The
+                          * section above it already returns there, as does the bar's back-link.
+                          */}
+                        {recordCrumb ? (
+                          <span className="ws-cur" aria-current="page">{recordCrumb}</span>
+                        ) : (
+                          <span className="ws-cur" aria-current="page">{crumb.child}</span>
+                        )}
                       </>
                     ) : (
-                      <span className="ws-cur" aria-current="page">{crumb.section}</span>
+                      <span className="ws-cur" aria-current="page">{recordCrumb ?? crumb.section}</span>
                     )}
                   </>
                 )}

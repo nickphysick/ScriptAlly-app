@@ -87,17 +87,12 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
      * literal fails whatever declares it.
      */
     for (const t of tops) {
-      const ok = t === "0" || /^var\(--bar-h\)$/.test(t);
-      expect(ok, `a sticky element clears \`${t}\` — an offset must be 0 or the pinned element's own token, never a number`).toBe(true);
+      expect(t, `a sticky element clears \`${t}\` — nothing above the scroller may be measured into a rule`).toBe("0");
     }
-    /* ⚠️ THE RAIL'S OFFSET IS IN ITS OWN RULE, NOT IN THE STICKY ONE, so the sweep above cannot see
-       it — every `top` inside a `position: sticky` block is 0, and the one exception is a state rule
-       that overrides it. Asserted directly, because a claim about "the only non-zero offset" that
-       reads a set which structurally cannot contain it is a claim about nothing. */
-    const railTop = /\.wpg--barshown\s+\.vtabs\s*\{([^}]*)\}/.exec(cssRules);
-    expect(railTop, "the tab rail no longer offsets itself when the bar is showing").toBeTruthy();
-    expect(railTop![1], "the tab rail restates the bar's height instead of reading its token")
-      .toContain("top: var(--bar-h)");
+    /* ⚠️ THE TAB RAIL'S OFFSET ALLOWANCE IS DELETED WITH THE RAIL. It was the one legitimate
+       non-zero `top` in this sheet — a rail sitting beneath the bar, reading the bar's own token
+       rather than restating 46. The rail is gone, so every `top` is 0 again and the rule is back to
+       its strongest form: nothing clears anything, because nothing needs to. */
     /**
      * ⚠️ TWO STICKY BOXES NOW, AND THE LAW IS UNCHANGED. The rebuild adds the collapsed bar, which
      * has to pin to be a bar at all. What the rule forbids is a `top` that encodes ANOTHER element's
@@ -119,7 +114,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        only pinned thing in the scroller. Same claim as before the settle existed, different subject —
        and a second pinned element still cannot arrive unnoticed. */
     expect([...new Set(stickySubjects)].sort(), `the set of sticky elements has changed: ${stickySubjects.join(", ")}`)
-      .toEqual([".vtabs", ".wpg-bar"]);
+      .toEqual([".wpg-bar"]);
   });
 
   it("the scroll row is `minmax(0, 1fr)` — a plain `1fr` grows to its content and never scrolls", () => {
@@ -889,7 +884,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
          tabs are buttons that navigate. Counted, so a decorative element cannot join them quietly. */
       /* ⚠️ THE BROWSING GRID'S CARDS ARE BUTTONS. Counted with the rest, so the list stays a census
          of what is pressable rather than a list of exceptions. */
-      .toEqual([".qc-card", ".vtab", ".wpg-chevfold", ".wpg-mast-hide"]);
+      .toEqual([".qc-card", ".wpg-barback", ".wpg-chevfold", ".wpg-mast-hide"]);
   });
 
   /**
