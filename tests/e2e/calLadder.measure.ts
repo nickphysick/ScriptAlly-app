@@ -133,7 +133,14 @@ test("⚠️ the stub PAINTS a disc, and nothing on this fixture ever reaches it
     const c = [...document.querySelectorAll(".tl-p")].filter(vis)
       .find((e) => !e.classList.contains("fadeL") && !e.classList.contains("fadeR")) as HTMLElement;
     if (!c) return { w: 0, h: 0, r: "no unclipped card", line: true, dot: 0, dotR: "" };
+    /* ⚠️ AND THE OTHER ATTRIBUTES THE REAL PASS WOULD HAVE SET GO WITH IT. `data-noroom` is the
+       fit pass's answer for a `pill` card whose marks leave no space on either side; the stub
+       branch clears it before it returns, so the two can never coexist in the app. Forcing a tier
+       by hand does not run that branch, so a card that was `pill` + `noroom` kept the attribute
+       and its dot rendered `display: none` — 0px wide, reported as the stub's dot being wrong. A
+       driven state has to be the WHOLE state, or it measures a combination the app cannot be in. */
     c.dataset.tier = "stub";
+    c.removeAttribute("data-noroom");
     return new Promise<{ w: number; h: number; r: string; line: boolean; dot: number; dotR: string }>((res) => {
       requestAnimationFrame(() => requestAnimationFrame(() => {
         const b = c.getBoundingClientRect();

@@ -633,8 +633,13 @@
    leaves a line overflowing, so a permanent fade on the right of every card's words would be a
    promise about text that is not there. `overflow: hidden` stays as the belt: a rung is chosen by
    measurement, and a measurement is against a rendered box rather than a guarantee. */
+/* ⚠️ `flex: 1 1 auto` AND NOT `width: 100%`. A percentage width resolves against the card and is
+   then pushed right by the content offset, so the line's BOX ran past its own card by exactly that
+   offset — invisible, because the card clips, and enough to make an "is anything painted outside
+   this card" check report four false offenders per board. `flex` gives it the space that is
+   actually left, which is what it is. */
 .tl-line {
-  display: block; overflow: hidden; min-width: 0; width: 100%; flex: 0 0 auto; position: relative;
+  display: block; overflow: hidden; min-width: 0; flex: 1 1 auto; position: relative;
 }
 /* ⚠️ THE TRACK IS `max-content` AND ITS CHILDREN DO NOT SHRINK, and both halves are needed.
    Without them the track is bounded by the line and its items — which default to `flex-shrink: 1`
@@ -655,8 +660,13 @@
    to keep clear, and the offset would push the pill off the card's right edge instead — measured,
    five of them clipped to nothing. `fadeL` still takes its own inset: the card's first 38px are
    dissolving, and a pill fading out is no more readable than one under a disc. */
+/* ⚠️ ONE RULE, AND `--pill-left` IS ALREADY THE FINAL VALUE. The fade inset used to be applied
+   here with a `max()`, which meant the stylesheet and the fit pass each held part of the answer
+   and disagreed by 33px on a clipped card — the pass decided the pill cleared the first mark at
+   13px and the sheet painted it at 46, through the mark. The pass measures the card's real offset
+   now, so this states it and nothing else. The fallbacks are for a card the pass has not reached. */
 .tl-p[data-tier="pill"] > * { margin-left: var(--pill-left, var(--tl-text-inset)); }
-.tl-p[data-tier="pill"].fadeL > * { margin-left: max(var(--card-fade-inset), var(--pill-left, 0px)); }
+.tl-p[data-tier="pill"].fadeL > * { margin-left: var(--pill-left, var(--card-fade-inset)); }
 /* ⚠️ NEITHER SIDE HAD ROOM. The card keeps its span, its tone and its tooltip; a pill clipped to
    nothing says less than no pill does. */
 .tl-p[data-noroom] .tl-pill { display: none; }

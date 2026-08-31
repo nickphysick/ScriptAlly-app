@@ -19,15 +19,36 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
-/** The territory. A file that is not the calendar's is not this law's to police. */
+/**
+ * The territory. A file that is not the calendar's is not this law's to police.
+ *
+ * ⚠️ IT MUST GROW WITH THE TERRITORY, AND A HAND-WRITTEN LIST DOES NOT. Between v39 and v40 the
+ * calendar gained five modules — the pill, the fades, the tier ladder, the views and the ranges —
+ * and every one of them was outside the law while the law read as covering the board. That is the
+ * carve-out fault from the other end: not an exemption that stopped being needed, but a population
+ * that quietly stopped being the whole of it.
+ *
+ * ⚠️ SHARED MODULES ARE DELIBERATELY ABSENT. `db`, `materials`, `todoBoard`, `todoColumns`,
+ * `shellSidebar`, `agentDisplay`, `queryPrimaryAction`, `todoRoutes` and `todoWrite` are read by
+ * surfaces all over the app, and burgundy is the app's own accent everywhere else. A law about the
+ * calendar may not reach into them.
+ *
+ * ⚠️ `barFit.ts` IS DELETED (v40, Phase 8) — nothing imported it once the content ladder replaced
+ * it, and the two comments still naming it are history rather than callers.
+ */
 const TERRITORY = [
   "src/components/todo/todoCalendar.css",
   "src/components/todo/TodoCalendarPage.tsx",
   "src/lib/journeyBars.ts",
+  "src/lib/calendarFade.ts",
+  "src/lib/calendarPill.ts",
+  "src/lib/cardTier.ts",
   "src/lib/timelineCopy.ts",
   "src/lib/timelineGroups.ts",
+  "src/lib/timelineRanges.ts",
+  "src/lib/timelineViews.ts",
+  "src/lib/todoCalendar.ts",
   "src/lib/todoTimeline.ts",
-  "src/lib/barFit.ts",
 ];
 
 const FORBIDDEN: [string, RegExp][] = [
@@ -52,7 +73,20 @@ describe("the calendar's colour law", () => {
       expect(existsSync(join(process.cwd(), f)), `${f} is missing from the territory`).toBe(true);
       expect(readFileSync(join(process.cwd(), f), "utf8").length, `${f} is empty`).toBeGreaterThan(400);
     }
-    expect(TERRITORY.length, "the territory shrank").toBeGreaterThan(6);
+    /* ⚠️ THE SIZE, EXACTLY. A floor lets the territory shrink one file at a time while the law
+       goes on reading as if it covered the board — which is what happened between v39 and v40,
+       from the other direction: five new modules and a list that never grew. Changing this number
+       is the deliberate act of having decided what the calendar owns. */
+    expect(TERRITORY.length, "the territory changed — was that deliberate?").toBe(12);
+    /* ⚠️ AND EVERY CALENDAR-OWNED MODULE THE PAGE IMPORTS IS IN IT, derived rather than trusted.
+       A file added to `src/lib/` and imported by the board is inside this law whether or not
+       anybody remembered to list it. */
+    const page = readFileSync(join(process.cwd(), "src/components/todo/TodoCalendarPage.tsx"), "utf8");
+    const imported = [...page.matchAll(/"\.\.\/\.\.\/lib\/([a-zA-Z]+)"/g)].map((m) => m[1]);
+    const OWNED = /^(journeyBars|calendar[A-Z]|cardTier|timeline)/;
+    const missing = imported.filter((n) => OWNED.test(n))
+      .filter((n) => !TERRITORY.includes(`src/lib/${n}.ts`));
+    expect(missing, "calendar-owned modules outside the colour law").toEqual([]);
   });
 
   it("no burgundy and no black, in any file the calendar owns", () => {

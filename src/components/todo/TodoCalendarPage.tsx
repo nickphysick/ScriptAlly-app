@@ -147,6 +147,9 @@ const PILL_INSET = 13;
 /** the flex gap between the pill and the line it sits beside, matching `.tl-p`'s own */
 const PILL_GAP = 10;
 
+/** the mark's own width, matching `--mk` in the stylesheet */
+const MARK_W = 22;
+
 /** the right margin `.tl-p > *` pays, which the content needs as surely as it needs its own width */
 const CONTENT_MARGIN_R = 12;
 
@@ -602,6 +605,20 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
          * headline · detail) → headline (the detail goes) → pill (the words go, and whose move it
          * is survives, because that is the one thing a card is for) → stub.
          */
+        /**
+         * ⚠️ RESET EVERY OUTPUT OF THIS PASS BEFORE READING ANYTHING — the tier included.
+         *
+         * `data-tier` selects which rule places the content, so measuring with last pass's tier
+         * still on asks the browser where the pill sits under a decision that has not been made
+         * yet. Measured on the six-month board before this: pills clipped at the card's right
+         * edge, because the tier was chosen against the after-marks offset and the pill was then
+         * placed at the pinned one — two offsets, one comparison, and the comparison used the
+         * wrong one. Cleared, the card is in its `full` layout, which is the state every rung is
+         * a reduction OF.
+         */
+        seg.style.removeProperty("--pill-left");
+        seg.removeAttribute("data-noroom");
+        delete seg.dataset.tier;
         const pillW = pillEl ? pillEl.getBoundingClientRect().width : 0;
         const left = pillEl && line
           ? pillEl.getBoundingClientRect().left - seg.getBoundingClientRect().left
@@ -655,16 +672,41 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
          * card keeps its span, its tone and its tooltip, and a pill clipped to nothing says less
          * than no pill does.
          */
-        seg.style.removeProperty("--pill-left");
-        seg.removeAttribute("data-noroom");
         if (seg.dataset.tier === "pill" && pillEl) {
+          /**
+           * ⚠️ THE INSET IS MEASURED, NEVER ASSUMED — and assuming it was a real bug that the
+           * per-card locks could not see.
+           *
+           * `PILL_INSET` is the pinned 13px, and a `fadeL` card takes 46 instead: its first pixels
+           * are dissolving, so the stylesheet floors the offset there. The first version of this
+           * compared the first mark against 13 on every card, decided the pill fitted ahead of it,
+           * and the stylesheet then painted it at 46 — straight through a mark. Measured at
+           * 1440 / 1 month: a pill at 621–706 across marks at 681–703 and 703–725, on a card
+           * carrying `--pill-left: 13px`. Two expressions of one position, disagreeing by 33px.
+           *
+           * `left` is that offset, already measured above with the property cleared, so it is what
+           * the browser will actually apply. Nothing here needs to know which case it is in.
+           */
           const cardL = seg.getBoundingClientRect().left;
-          const marksOn = markLefts(seg);
-          const firstMark = marksOn.length ? Math.min(...marksOn) - cardL : Infinity;
-          const before = firstMark - PILL_INSET;
-          if (pillW <= before + 1) seg.style.setProperty("--pill-left", `${PILL_INSET}px`);
-          else if (pillW <= room + 1) seg.style.setProperty("--pill-left", `${left}px`);
-          else seg.setAttribute("data-noroom", "1");
+          const marksOn = markLefts(seg).map((x) => x - cardL);
+          /* ⚠️ THE INSET IS READ FROM THE TOKEN THAT DEFINES IT, never assumed. A `fadeL` card
+             floors its content at `--card-fade-inset` because its first pixels are dissolving;
+             every other card takes `--tl-text-inset`. Writing 13 and 46 here would be a second
+             source for two values the stylesheet owns, and the first version of this did exactly
+             that and placed a pill 33px inside a mark. */
+          const cs = getComputedStyle(seg);
+          const inset = parseFloat(cs.getPropertyValue(
+            seg.classList.contains("fadeL") ? "--card-fade-inset" : "--tl-text-inset")) || 0;
+          const first = marksOn.length ? Math.min(...marksOn) : Infinity;
+          /* ⚠️ AND EACH SIDE IS CHECKED AGAINST ITS OWN ROOM. Ahead of the marks that is the gap
+             between the inset and the first mark; past them it is what is left to the card's right
+             edge, less the margin the content pays there. */
+          const after = marksOn.length ? Math.max(...marksOn) + MARK_W + 14 : inset;
+          if (pillW <= first - inset + 1) {
+            seg.style.setProperty("--pill-left", `${inset}px`);
+          } else if (pillW <= seg.clientWidth - after - CONTENT_MARGIN_R + 1) {
+            seg.style.setProperty("--pill-left", `${after}px`);
+          } else seg.setAttribute("data-noroom", "1");
         }
         /**
          * ⚠️ MEASURED, THEN MARKED — the words are never removed.
