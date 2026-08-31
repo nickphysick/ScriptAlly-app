@@ -126,6 +126,29 @@ const clearanceNow = async (page: import("@playwright/test").Page) =>
     return { pairs, worst: Number.isFinite(worst) ? Math.round(worst * 10) / 10 : null, offenders };
   })()`)) as { pairs: number; worst: number | null; offenders: string[] };
 
+/**
+ * Put the board into GROUPED, for the cases whose subject is the groups.
+ *
+ * ⚠️ SINCE v37 THE DEFAULT IS ONE LIST, so a case that reads `.tl-gt` on the page as it opens is
+ * reading a board that has no group headings by design — and it fails saying "groups without a
+ * sentence", which reads like a copy bug rather than like a mode. The groups are still exactly what
+ * they were; they are one control away, and these cases press it.
+ *
+ * ⚠️ IT THROWS IF THE CONTROL IS NOT THERE. A guard would let a case go on to assert about the
+ * headings it never switched to, which is the shape that reports a real number about the wrong
+ * page.
+ */
+const showGrouped = async (page: import("@playwright/test").Page) => {
+  await page.evaluate(`(() => {
+    const b = [...document.querySelectorAll(".tl-seg2 button")]
+      .filter((e) => e.getBoundingClientRect().width > 0)
+      .find((e) => (e.textContent || "").trim() === "GROUPED");
+    if (!b) throw new Error("no GROUPED control on the page");
+    b.click();
+  })()`);
+  await page.waitForTimeout(450);
+};
+
 test.describe("the Calendar — Porcelain", () => {
   for (const width of WIDTHS) {
     test(`painted values, structure and clearance at ${width}`, async ({ page }) => {
@@ -133,6 +156,8 @@ test.describe("the Calendar — Porcelain", () => {
       page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
       await openRoute(page, "/todo/calendar", { width, height: HEIGHT });
       await page.waitForTimeout(1200);
+      /* this case's subject includes the group headings, which are a MODE since v37 */
+      await showGrouped(page);
 
       const read = await page.evaluate(TAG + `(() => {
         const out = {};
@@ -437,6 +462,7 @@ test.describe("the Calendar — Porcelain", () => {
   test("RIGHT NOW is a filter of the one board, not a second board", async ({ page }) => {
     await openRoute(page, "/todo/calendar", { width: 1440, height: HEIGHT });
     await page.waitForTimeout(1000);
+    await showGrouped(page);
     const keys = () => page.evaluate(`
       [...document.querySelectorAll(".tl-rrow")].map((r) => (r.querySelector(".tl-nm2")||{}).textContent || "?")
     `) as Promise<string[]>;
@@ -468,6 +494,7 @@ test.describe("the fix pack — one fact, one function", () => {
       page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
       await openRoute(page, "/todo/calendar", { width, height: HEIGHT2 });
       await page.waitForTimeout(1400);
+      await showGrouped(page);
 
       const r = await page.evaluate(`(() => {
         const out = {};
@@ -737,6 +764,7 @@ test("every asking row names what is owed, and the count says what it counts", a
   page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
   await openRoute(page, "/todo/calendar", { width: 1440, height: 950 });
   await page.waitForTimeout(1300);
+  await showGrouped(page);
 
   const r = await page.evaluate(`(() => {
     const ASKING = ["Your tasks", "Offer on the table", "Needs you now"];
@@ -809,6 +837,7 @@ test("every asking row names what is owed, and the count says what it counts", a
 test("⚠️ the painted order matches the painted key, and the key matches the row's own words", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1440, height: 980 });
   await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+  await showGrouped(page);
   await page.waitForTimeout(600);
 
   const groups = await page.evaluate(`(() => {
@@ -922,6 +951,7 @@ test("the surface is the pinned one, and the heading is not inside the card", as
   page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
   await openRoute(page, "/todo/calendar", { width: 1440, height: 980 });
   await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+  await showGrouped(page);
   await page.waitForTimeout(600);
 
   const r = await page.evaluate(`(() => {
@@ -1119,10 +1149,22 @@ const sample = async (page: import("@playwright/test").Page, shot: string) =>
            washed span, each carrying the fraction of the gradient it sits at, so the claim can be
            the composite AT THAT POINT rather than one flat colour that no longer exists. */
         const pastW = tx - lr.left;
+        /* ⚠️ EVERY PROBE IS OWNERSHIP-GUARDED, not just the pair either side of today. The first
+           draft guarded only those two, so a falloff sample was free to land on a bar, a chip or
+           the panel edge — and one did: it read pure white at 60% across the past and reported the
+           ground as unwashed. A sample that is not on the surface being asked about is a true
+           number about the wrong thing. */
+        /* ⚠️ THE LANE ITSELF MUST BE TOPMOST, not merely an ancestor of what is. A lane CONTAINS
+           its bars, so a containment test passes on a pixel belonging to a bar's white track —
+           which is exactly what happened: a probe read pure white at 60% across the past and
+           reported the ground as unwashed. Ownership by containment answers a different question
+           from ownership by paint. */
         const probes = [0.25, 0.6, 0.95].map((f) => {
           const x = lr.left + pastW * f;
-          return ownsPixel(x, y, lane) ? { f, paint: at(x, y) } : null;
+          return topAt(x, y) === lane ? { f, paint: at(x, y) } : null;
         }).filter(Boolean);
+        /* and a row that could not give three clean samples is skipped rather than half-measured */
+        if (probes.length < 3) continue;
         ground.push({ key: Math.round(lr.top) + ':' + Math.round(y),
                       nm: (row.querySelector(".tl-nm2") || {}).textContent,
                       probes, pastW: Math.round(pastW),

@@ -844,6 +844,18 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * because the full board is what the page is for.
    */
   const [onlyAsks, setOnlyAsks] = useState(false);
+  /**
+   * ⚠️ ONE LIST IS THE DEFAULT AND GROUPED IS THE MODE, which is the way round v37 turns it.
+   *
+   * The six groups answer "what kind of thing is this" — a question a reader asks once and then
+   * stops asking. What they want next is what is nearest, and headings put six walls between them
+   * and that. So the flat list orders every row, relationships and tasks together, by the one key
+   * both now carry.
+   *
+   * ⚠️ SESSION-HELD, NOT PERSISTED. A reader who went looking at the groups once should not meet
+   * them again next week having forgotten they asked; the page opens on the list every time.
+   */
+  const [grouped, setGrouped] = useState(false);
 
   const wrapRef = React.useRef<HTMLDivElement | null>(null);
   const tipRef = React.useRef<HTMLDivElement | null>(null);
@@ -1150,6 +1162,25 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     return out;
   }, [rows, shut, onlyAsks, cutNow, boardManuscripts]);
 
+  /**
+   * Every row on one list, nearest first.
+   *
+   * ⚠️ IT SORTS ON THE KEY THE ROWS CARRY, never on a second derivation of "nearest". `pressingAt`
+   * is what SOONEST already orders by and what the row publishes for the lock to read; deriving an
+   * order here would be a second answer to a settled question, free to disagree with the one the
+   * page says it is using.
+   *
+   * ⚠️ AND A ROW WITH NO KEY SINKS RATHER THAN LEADS. `null` means nothing is pressing — a closed
+   * relationship, or one with no dated work — and `null` sorted as zero would put the quietest
+   * rows at the top of a list whose whole claim is that the top is what needs you.
+   */
+  const oneList = useMemo(
+    () => board.flatMap((g) => g.rows)
+      .sort((a, b) => (a.pressingAt ?? Infinity) - (b.pressingAt ?? Infinity)),
+    [board],
+  );
+
+
   const firstOpen = board.findIndex((g) => g.open && g.rows.length > 0);
   const asking = rows.filter(rowAsks).length;
   /* the two nouns the count uses — a task row belongs to no agent and is not a relationship */
@@ -1191,7 +1222,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       <div
         key={r.key}
         className={`tl-rrow${r.closed ? " closed" : ""}`}
-        /* the row's subject, per derivation — see `TimelineRow.subjects` */
+        /* ⚠️ THE ROW PUBLISHES ITS OWN KEY AND ITS OWN IDENTITY, so a lock can assert the PAINTED
+    order against the key the board actually sorted by, and can follow the same row across a
+    mode change. Reading the order alone says the rows are in some order; reading the key
+    alone says a key exists. */
+data-rowkey={r.key}
+/* the row's subject, per derivation — see `TimelineRow.subjects` */
         data-subj-deed={r.subjects.deed ?? undefined}
         data-subj-caption={r.subjects.caption ?? undefined}
         data-subj-sort={r.subjects.sort ?? undefined}
@@ -1520,6 +1556,16 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               <span className="tl-sep" aria-hidden />
               {/* ⚠️ A FILTER OF THE ONE BOARD, NEVER A SECOND BOARD. Same rows, same bars, same
                   deeds, same groups — only the rows that ask nothing of you are withheld. */}
+              {/* ⚠️ THE SAME ROWS EITHER WAY. GROUPED does not fetch, filter or re-derive
+                  anything — it buckets the list the page already has, which is why the lock can
+                  assert the two views hold the identical row set by identity. */}
+              <span className="tl-seg2" role="group" aria-label="How the board is arranged">
+                <button type="button" data-on={!grouped} aria-pressed={!grouped}
+                  onClick={() => setGrouped(false)}>ONE LIST</button>
+                <button type="button" data-on={grouped} aria-pressed={grouped}
+                  onClick={() => setGrouped(true)}>GROUPED</button>
+              </span>
+              <span className="tl-sep" aria-hidden />
               <span className="tl-seg2" role="group" aria-label="How much of the board">
                 <button type="button" data-on={!onlyAsks} aria-pressed={!onlyAsks}
                   onClick={() => setOnlyAsks(false)}>FULL BOARD</button>
@@ -1629,7 +1675,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
                     </div>
                   </div>
                 )}
-                {board.length === 0 ? sparse : board.map((g, gi) => (
+                {board.length === 0 ? sparse : !grouped ? (
+                  /* ⚠️ NO CARD, NO HEADING, NO HAIRLINE — the rows are separated by height and by
+                     hover alone. A rule between every pair of rows on a list this long is thirteen
+                     lines competing with the bars, and the bars are the data. */
+                  <div className="tl-tbl tl-one">{oneList.map(row)}</div>
+                ) : board.map((g, gi) => (
                   <div className="tl-grp" key={g.key}>
                     <div className="tl-gt">
                       <span className="t">{g.title}</span>

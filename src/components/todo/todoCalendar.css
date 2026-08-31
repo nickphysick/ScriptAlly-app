@@ -171,7 +171,8 @@
   --tl-pinkb: #e8c8bc;
   --tl-hair: #efe6da;
   --tl-rowline: #eee4d6;
-  --tl-rowhov: #f3ebdd;
+  /* v37 pins the row hover at #f5f0e7 — it was #f3ebdd, a shade warmer and a shade darker */
+  --tl-rowhov: #f5f0e7;
   /* ⚠️ .3, NOT .4 (v36). It carried the v35 value through part one — the rule marks a boundary
      rather than competing with the bars either side of it. */
 
@@ -548,6 +549,14 @@
    in the .04 steps the brief sets, to the smallest value that clears 4.5:1 on BOTH grounds.
 
    decide   .66 → .78   (was 3.58:1 on fill, 4.41 on track; now 4.76:1 at worst)
+   req      .66 → .82   (was 3.31:1 on fill, 3.74 on track; now 4.75:1 at worst)
+
+   ⚠️ AND THE HOLLOW STACK IS A SECOND, WORSE FINDING. An overrun is dimmed to .75 on purpose —
+   the stretch is past the date somebody named, and the fading is the statement — so line two
+   paints at .75 × .66 = .49 and reads at 2.13:1, and on `out` even line ONE falls to 3.47:1.
+   Raising the text's opacity cannot fix that without undoing the dimming, which is the only thing
+   on the bar saying the date has passed. Whether an overrun should carry a second line at all is a
+   DESIGN question, and inventing an answer to it is what the rules here forbid. Reported.
 
    ⚠️ AND `out` IS FLAGGED RATHER THAN FIXED, WHICH IS THE FINDING. It needs α .98 to clear 4.5:1 —
    2.64:1 on its fill at .66 — and .98 is past the .85 ceiling. Its ink is #55684f on #e6ece3, a
@@ -555,6 +564,7 @@
    what says whose move it is. Left at .66, reported, and the lock below carries it as a KNOWN
    shortfall so a new one cannot hide behind it. */
 .tl-p.decide .tl-t2 { --tl-t2-op: .78; }
+.tl-p.req .tl-t2    { --tl-t2-op: .82; }
 /* ⚠️ HOLLOW IS THE CONTINUATION PAST A NAMED DATE. Lateness is DRAWN — no fill, no word, no
    colour it does not already have. The label dims because the stretch is no longer the story. */
 .tl-p.hollow { background: transparent; }
@@ -936,3 +946,12 @@ button.tl-tchip { cursor: pointer; }
   line-height: 1.25; color: #7b6a58;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
+/* ══ ONE LIST (v37, Phase 3) ═════════════════════════════════════════════════════════════════
+   ⚠️ SEPARATED BY HEIGHT AND HOVER, NOTHING ELSE. A rule between every pair of rows on a
+   thirteen-row list is thirteen lines competing with the bars, and the bars are the data. The row
+   height is what tells them apart at rest; the hover is what tells you which one you are on.
+   ⚠️ AND THE HAIRLINE IS REMOVED WITH A ZERO WIDTH RATHER THAN A COLOUR. `border-top: none` would
+   change the row's box by 1px and shift every lane's centre against the rail's ticks; a
+   transparent border of the same width keeps the geometry the alignment lock measures. */
+.tl-one .tl-rrow { border-top-color: transparent; }

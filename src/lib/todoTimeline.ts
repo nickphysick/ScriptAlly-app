@@ -746,6 +746,26 @@ export function timelineWeek(
        decide it; "longest waiting" is a fact about an agency's silence, and switching the bands
        off does not make an agent less waited-on. */
     if (it.idx < row.soonest) row.soonest = it.idx;
+    /**
+     * ⚠️ A TASK ROW'S PRESSING KEY IS ITS DUE DATE, IN THE SAME SCALE AS AN AGENT'S.
+     *
+     * ONE LIST interleaves tasks with relationships, so a task needs a key on the same axis or it
+     * cannot take its place among them — and a task with no key would sort as "nothing pressing",
+     * which is the opposite of what a dated task is. `pressingAt` is milliseconds everywhere else,
+     * so this is the item's own day at noon, matching how every other date on this board is
+     * turned into a comparable number.
+     *
+     * The EARLIEST item on the row wins, which is the same rule an agent row uses: what is
+     * pressing is the nearest thing, not the most recent.
+     */
+    if (row.key.startsWith("task-")) {
+      const ymd = win[it.idx];
+      const at = ymd ? new Date(`${ymd}T12:00:00`).getTime() : NaN;
+      if (Number.isFinite(at) && (row.pressingAt === undefined || row.pressingAt === null || at < row.pressingAt)) {
+        row.pressingAt = at;
+        row.sortQueryId = null;
+      }
+    }
   };
 
   /* ── items, day by day ──────────────────────────────────────────────────────────────────── */

@@ -210,3 +210,106 @@ test("hovering a bar lifts it without moving it", async ({ page }) => {
   expect(hovered.transform, `the hover transform lost its centring: ${hovered.transform}`)
     .toMatch(/matrix\(1\.004/);
 });
+
+/* ══ ONE LIST (v37, Phase 3) ═══════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ THE DEFAULT IS THE FLAT LIST, AND GROUPED IS ONE CONTROL AWAY.
+ *
+ * Three claims, and the third is the one that makes the other two safe: the default carries no
+ * heading and no card; the painted order is the key the rows themselves publish; and switching to
+ * GROUPED and back returns the IDENTICAL row set by identity — so the mode is an arrangement of
+ * one list rather than two derivations that will eventually disagree about what is on the board.
+ */
+test("the default is one flat list, ordered by what is pressing", async ({ page }) => {
+  await openRoute(page, "/todo/calendar", { width: 1440, height: HEIGHT });
+  await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+  await page.waitForTimeout(600);
+
+  const flat = await page.evaluate(TAG + `(() => {
+    if (!vis(".tl-board")) return { fatal: "no board" };
+    const rows = [...document.querySelectorAll(".tl-rrow")].filter((r) => r.getBoundingClientRect().height > 0);
+    return {
+      headings: document.querySelectorAll(".tl-gt").length,
+      cards: document.querySelectorAll(".tl-grp").length,
+      keys: rows.map((r) => ({
+        nm: (r.querySelector(".tl-nm2") || {}).textContent,
+        at: (!r.dataset.pressing || r.dataset.pressing === 'none') ? null : Number(r.dataset.pressing),
+        top: Math.round(r.getBoundingClientRect().top),
+        /* a hairline between rows is what the flat list must not draw */
+        border: getComputedStyle(r).borderTopColor,
+      })),
+      ids: rows.map((r) => r.getAttribute("data-rowkey")),
+    };
+  })()`) as any;
+  expect(flat.fatal, flat.fatal).toBeUndefined();
+
+  expect(flat.keys.length, "no rows — nothing was checked").toBeGreaterThan(6);
+  expect(flat.headings, `the flat list drew ${flat.headings} group headings`).toBe(0);
+  expect(flat.cards, `the flat list drew ${flat.cards} group cards`).toBe(0);
+
+  /* ⚠️ NO HAIRLINE BETWEEN ROWS. Asserted as PAINT, not as the absence of a declaration: the
+     border is still there at zero opacity so the row's box — and every lane's centre against the
+     rail's ticks — is unchanged. */
+  const ruled = flat.keys.filter((k: any) => !/rgba\(0, 0, 0, 0\)|transparent/.test(k.border));
+  expect(ruled.map((k: any) => `${k.nm}: ${k.border}`), "a row draws a hairline").toEqual([]);
+
+  /**
+   * ⚠️ THE PAINTED ORDER AGAINST THE PAINTED KEY. Reading the order alone says the rows are in
+   * SOME order; reading the key alone says the key exists. Only the two together say the board is
+   * ordered by the thing it claims to be ordered by — and rows with no key sink rather than lead,
+   * which is what `Infinity` encodes.
+   */
+  const withKey = flat.keys.filter((k: any) => k.at != null);
+  expect(withKey.length, "no row published a pressing key — the order cannot be checked")
+    .toBeGreaterThan(4);
+  const painted = flat.keys.map((k: any) => k.at ?? Infinity);
+  const sorted = [...painted].sort((a: number, b: number) => a - b);
+  expect(painted, `the painted order is not the key order: ${JSON.stringify(
+    flat.keys.map((k: any) => [k.nm, k.at]))}`).toEqual(sorted);
+
+  /* ⚠️ AND TASKS ARE AMONG THEM, NOT IN A BLOCK. If every task sorted to one end the list would be
+     two lists sharing a scrollbar, which is the thing this replaced. */
+  const taskAt = flat.ids.map((id: string, i: number) => (id || "").startsWith("task-") ? i : -1)
+    .filter((i: number) => i >= 0);
+  expect(taskAt.length, "no task rows on the board — the interleaving is unproved").toBeGreaterThan(0);
+  console.log(`  one list: ${flat.keys.length} rows, tasks at ${JSON.stringify(taskAt)} of ${flat.keys.length}`);
+
+  /* ══ THE ROUND TRIP ═══════════════════════════════════════════════════════════════════════ */
+  const before = flat.ids;
+  const press = async (label: string) => {
+    await page.evaluate(`(() => {
+      const b = [...document.querySelectorAll(".tl-seg2 button")]
+        .filter((e) => e.getBoundingClientRect().width > 0)
+        .find((e) => (e.textContent || "").trim() === ${JSON.stringify(label)});
+      if (!b) throw new Error("no control labelled " + ${JSON.stringify(label)});
+      b.click();
+    })()`);
+    await page.waitForTimeout(450);
+  };
+  const idsNow = async () => page.evaluate(`(() => [...document.querySelectorAll(".tl-rrow")]
+    .filter((r) => r.getBoundingClientRect().height > 0)
+    .map((r) => r.getAttribute("data-rowkey")))()`) as Promise<string[]>;
+
+  await press("GROUPED");
+  const inGroups = await idsNow();
+  const headingsNow = await page.evaluate(`document.querySelectorAll(".tl-gt").length`) as number;
+  expect(headingsNow, "GROUPED drew no headings — the control did nothing").toBeGreaterThan(1);
+
+  await press("ONE LIST");
+  const back = await idsNow();
+
+  /**
+   * ⚠️ GROUPED IS A SUBSET, NOT AN EQUAL SET, AND THE REASON IS A DECISION RATHER THAN A BUG.
+   *
+   * Two groups — snoozed and closed — are collapsed by default, so their rows are not rendered
+   * there. A set-equality claim was written first and went red naming `agent-seed-cal-passed20`;
+   * that row is real, on the list, and inside a group nobody has opened. So what GROUPED must be
+   * is a subset of the flat list with nothing invented, and the identity claim the brief asks for
+   * is the ROUND TRIP below, which is exact.
+   */
+  const strays = inGroups.filter((id) => !before.includes(id));
+  expect(strays, `GROUPED shows rows the flat list does not: ${strays.join(", ")}`).toEqual([]);
+  expect(inGroups.length, "GROUPED rendered no rows at all").toBeGreaterThan(3);
+  expect(back, "the round trip did not return the identical list, in order").toEqual(before);
+});
