@@ -541,6 +541,20 @@
   font-size: 8px; letter-spacing: .13em; text-transform: uppercase;
   opacity: var(--tl-t2-op, .66); margin-top: 2px; line-height: 1.2;
 }
+/* ══ WHAT THE CONTRAST AUDIT DECIDED (v37, Phase 8) ══════════════════════════════════════════
+   Measured as the COMPOSITED ink — the declared colour multiplied by the opacity at paint time —
+   against both grounds the same text crosses: the tinted fill, and the white track past the fill's
+   right edge. The size and the tracking are pinned and were not touched; only the opacity moved,
+   in the .04 steps the brief sets, to the smallest value that clears 4.5:1 on BOTH grounds.
+
+   decide   .66 → .78   (was 3.58:1 on fill, 4.41 on track; now 4.76:1 at worst)
+
+   ⚠️ AND `out` IS FLAGGED RATHER THAN FIXED, WHICH IS THE FINDING. It needs α .98 to clear 4.5:1 —
+   2.64:1 on its fill at .66 — and .98 is past the .85 ceiling. Its ink is #55684f on #e6ece3, a
+   muted sage on a paler sage, so the ratio can only be won by darkening the tone; and the tone is
+   what says whose move it is. Left at .66, reported, and the lock below carries it as a KNOWN
+   shortfall so a new one cannot hide behind it. */
+.tl-p.decide .tl-t2 { --tl-t2-op: .78; }
 /* ⚠️ HOLLOW IS THE CONTINUATION PAST A NAMED DATE. Lateness is DRAWN — no fill, no word, no
    colour it does not already have. The label dims because the stretch is no longer the story. */
 .tl-p.hollow { background: transparent; }
