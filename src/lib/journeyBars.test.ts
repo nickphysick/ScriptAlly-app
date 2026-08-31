@@ -125,7 +125,11 @@ describe("⚠️ the side comes from the CTA engine, and nothing here re-lists a
     expect(bars.segments[0].state).toBe("y1");
     /* y1's form is the fact alone — a four-day-old request does not need its age stating; that
        is what separates the three weights from one another. */
-    expect(bars.segments[0].label).toBe("Full requested");
+    /* ⚠️ RETARGETED (v54, Phase 5): a writer-owed stretch with no date promised now states the
+       span it has been owed for. The claim here is which ASK the card names, which is unchanged;
+       what follows the ask is the lateness line, and it is locked in its own cases. */
+    expect(bars.segments[0].label.startsWith("Full requested")).toBe(true);
+    expect(bars.segments[0].label).toContain("no date promised");
   });
 
   it("and the other way round — you send, and it becomes theirs", () => {

@@ -49,6 +49,55 @@ const isBarPath = (sel: string): boolean =>
 /** The properties that decide vertical geometry. A radius is not one; a glyph's width is not one. */
 const VERTICAL = /(^|;|\{)\s*(height|min-height|max-height|top|bottom|margin-top|margin-bottom|padding-top|padding-bottom|line-height)\s*:/;
 
+describe("⚠️ the stir: every keyframe repeats the base transform (v54)", () => {
+  /**
+   * ⚠️ `transform` IS NOT ADDITIVE, AND THIS IS THE FAULT IT CAUSES. A keyframe stating only a
+   * rotation REPLACES the whole transform, so the card loses `translateY(-50%)` and drops half its
+   * own height — silently, and only while the animation runs, which is the one moment nobody is
+   * measuring. A rendered check cannot catch it either: it would have to sample mid-animation at
+   * the right phase. The keyframes are read as written instead.
+   */
+  const src = () => readFileSync(CSS, "utf8");
+  const frames = () => {
+    const m = /@keyframes\s+tlStir\s*\{([\s\S]*?)\n\}/.exec(src());
+    expect(m, "the stir's keyframes are missing").not.toBeNull();
+    return [...m![1].matchAll(/transform\s*:\s*([^;]+);/g)].map((x) => x[1].trim());
+  };
+
+  it("every frame carries the base transform in full", () => {
+    const f = frames();
+    expect(f.length, "the stir has fewer than three frames").toBeGreaterThan(2);
+    for (const t of f) {
+      expect(t, `a keyframe drops translateY: ${t}`).toContain("translateY(-50%)");
+      expect(t, `a keyframe drops the owed scale: ${t}`).toContain("scale(1.006)");
+    }
+  });
+
+  it("⚠️ AND NO `var()` INSIDE THE KEYFRAMES — it fails silently in this setup", () => {
+    /* a custom property read from a keyframe block produces no error, no animation and nothing to
+       point at; this repo has already paid for that on the marketing pulse halo. The stagger is a
+       delay on the RULE, where a token resolves normally. */
+    const m = /@keyframes\s+tlStir\s*\{([\s\S]*?)\n\}/.exec(src());
+    expect(m![1], "a keyframe reads a custom property").not.toContain("var(");
+  });
+
+  it("the cycle, the stagger, the hover pause and reduced motion", () => {
+    const body = src();
+    expect(body).toMatch(/animation:\s*tlStir\s+11s/);
+    expect(body).toMatch(/animation-delay:\s*calc\(var\(--stir-i[^)]*\)\s*\*\s*2\.6s\)/);
+    expect(body).toMatch(/\.tl-p\.owed:hover\s*\{[^}]*animation-play-state:\s*paused/);
+    /* ⚠️ THE REDUCED-MOTION OVERRIDE MUST COME AFTER THE RULE IT OVERRIDES — a media query confers
+       no specificity, so an earlier block loses to a later equal-specificity rule. */
+    const rule = body.indexOf(".tl-p.owed {");
+    const reduce = body.lastIndexOf("prefers-reduced-motion");
+    const off = body.indexOf(".tl-p.owed { animation: none; }");
+    expect(off, "no reduced-motion override for the stir").toBeGreaterThan(-1);
+    expect(off, "the reduced-motion override is declared before the rule it overrides")
+      .toBeGreaterThan(rule);
+    expect(reduce).toBeGreaterThan(-1);
+  });
+});
+
 describe("⚠️ the today line is a drawn rule, and its width is a source claim (v54)", () => {
   /* ⚠️ THE RENDERED CHECK CANNOT CARRY THIS. A sub-pixel border's USED value rounds at DPR 1 —
      declared 1.5px, Chromium reports 1px — so `calGround54.measure.ts` asserts the line is painted

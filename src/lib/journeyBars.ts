@@ -232,6 +232,15 @@ export interface Segment {
    * the fade predicates are stated in.
    */
   trueTo: number;
+  /**
+   * Where lateness begins, in the window's day units — absent where nothing is overdue.
+   *
+   * ⚠️ THE WRITER'S OWN DATES ONLY. An agency's expected date that has passed is a silence rather
+   * than a debt; the board states it and never scores it, in colour or in words.
+   */
+  lateFrom?: number;
+  /** the due date's own position, unclamped — what `lateFrom` is derived FROM */
+  dueAt?: number;
   /** this stretch ended at a real event: it is finished, and a finished stretch is full */
   historical?: true;
   /**
@@ -1213,6 +1222,36 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
          anchor. */
       trueFrom: runFrom[runOf[i]],
       trueTo: runTo[runOf[i]],
+      /**
+       * ⚠️ WHERE LATENESS BEGINS, IN THE WINDOW'S OWN UNITS — the tint's left edge (v54, Phase 5).
+       *
+       * The tint's SPAN is the lateness, so it starts on the date the deed fell due and runs to
+       * today. Two sources and the second is not a fallback but a different fact: a named date
+       * that has passed, or — where no date was ever promised — the day the ask ARRIVED, because
+       * that is when it started being owed. In the second case the tint runs the whole card, which
+       * is correct: all of that wait is lateness.
+       *
+       * ⚠️ ONLY THE WRITER'S OWN. An agency's window that has passed is a silence, not a debt, and
+       * tinting it would say in colour what the copy is forbidden to say in words.
+       */
+      ...(now === "yours" && !terminal && live_
+        ? (() => {
+            const dueYmd = expectedPassed && expectedYmd ? expectedYmd : waitFromYmd;
+            const dueAt = dueYmd ? daysBetween(win.days[0], dueYmd) + EVENT_AT : null;
+            /* ⚠️ CLAMPED TO THE CARD'S OWN START. The due date can be older than the window —
+               `waitFrom` is clipped for drawing and this is not — and an unclamped value put the
+               tint's left edge outside the card it lives in, painting over the ground beside it.
+               Where lateness began before the window, all of the visible card is late, which is
+               what clamping says. */
+            /* ⚠️ `dueAt` IS PUBLISHED UNCLAMPED ALONGSIDE THE CLAMPED VALUE, and the pair is
+               what makes the tint lockable. A check that reads `lateFrom` and compares it with
+               where `lateFrom` put the tint is one number read twice — proved, by a mutation that
+               made every tint run its whole card and passed. `dueAt` comes from the DATE and no
+               clamp touches it, so a lock can compute where the edge ought to be and find out. */
+            return dueAt != null && dueAt < todayAt
+              ? { lateFrom: Math.max(dueAt, p.from), dueAt } : {};
+          })()
+        : {}),
       /* ⚠️ A FINISHED STRETCH IS FULL, AND THERE ARE THREE WAYS TO BE FINISHED: it lies wholly
          behind today, it ENDS AT AN EVENT (something happened and the stretch stopped), or the
          journey is closed. A live relationship is made of completed stretches and one running
@@ -1325,6 +1364,48 @@ export interface BarLabel {
   short: string;
 }
 
+/**
+ * How long, said at a scale a reader can hold.
+ *
+ * ⚠️ IT COARSENS BECAUSE PRECISION STOPS MEANING ANYTHING. "Overdue since 3 May · 118 days" asks
+ * the reader to do arithmetic to learn "about four months"; the number is exact and the fact is
+ * hidden in it. Days below 21, weeks below 84, months above — the boundaries are where the next
+ * unit starts being the one a person would use.
+ */
+export const overdueSpan = (days: number): string => {
+  const d = Math.max(0, Math.round(days));
+  if (d < 21) return plural(d, "day");
+  if (d < 84) return plural(Math.round(d / 7), "week");
+  return plural(Math.round(d / 30.44), "month");
+};
+
+/**
+ * ⚠️ "OVERDUE" ATTACHES ONLY TO A DATE THE WRITER OWES — an amendment to a standing law, and the
+ * one word on this board that carries a judgement.
+ *
+ * Nothing here named lateness until v54: the board reported and did not appraise. What changed is
+ * that a writer's own commitment is a promise they made, and a board that will not say a promise
+ * has passed is not being kind, it is being useless. An AGENCY's expected date is not a promise
+ * anybody made to anybody — an agency states a window, and a window that has passed is a silence,
+ * not a failure. So it is never called overdue, whatever the arithmetic says.
+ *
+ * The distinction is structural rather than remembered: this function is the only producer of the
+ * word, it takes `owed` and returns nothing without it, and a lock renders both kinds of row and
+ * requires that no agency-held one can produce the string at all.
+ */
+export function latenessLine(i: {
+  prefix: string; owed: boolean; dueYmd: string | null; days: number; expectedYmd: string | null;
+}): string {
+  const on = (ymd: string | null) => (ymd ? shortCalDate(ymd) : "");
+  if (i.owed) {
+    return i.dueYmd
+      ? `${i.prefix} · overdue since ${on(i.dueYmd)} · ${overdueSpan(i.days)}`
+      : `${i.prefix} · no date promised · owed ${overdueSpan(i.days)}`;
+  }
+  /* an agency's window that has passed: stated, never scored */
+  return `${i.prefix} · reply expected ${on(i.expectedYmd)} · none yet`;
+}
+
 export function labelFor(state: BarState, i: LabelInput): BarLabel {
   const on = (ymd: string | null) => (ymd ? shortCalDate(ymd) : "");
   const since = i.sentYmd ? `Out since ${on(i.sentYmd)}` : "Out";
@@ -1362,18 +1443,46 @@ export function labelFor(state: BarState, i: LabelInput): BarLabel {
        KIND of silence, and the app reports rather than appraises — "presumed rejected", "gone",
        "dead" are verdicts about a decision nobody made. What changes at the threshold is the
        TREATMENT: the card stops being drawn as live work. */
+    /* ⚠️ A GHOST KEEPS THE DURATION AND DOES NOT TAKE THE AGENCY LATENESS LINE. Both are agent-held
+       silences with a passed expectation, so they shared a case — and sharing it took the ghost's
+       one statement away: "reply expected 1 Jan · none yet" about a 242-day silence says when
+       something was due and not that half a year has gone. The ghost's whole claim is HOW LONG. */
     case "ghost":
-    case "quiet":
+      return i.quietDays > 0
+        ? { long: `Quiet for ${plural(i.quietDays, "day")}`, short: `${i.quietDays} days quiet` }
+        : { long: "Quiet", short: "" };
+
+    case "quiet": {
+      /**
+       * ⚠️ THE AGENCY'S PASSED WINDOW LIVES HERE, NOT IN `theirs` — and putting it there made it
+       * DEAD CODE. `barState` sends any agent-held stretch whose expectation has passed to `quiet`
+       * before `theirs` can see it, so the third lateness form could never render; a red proof
+       * that renamed it "overdue" changed nothing on the board, which is how it was found.
+       *
+       * It is stated and never scored: an agency's window is not a promise anybody made, so the
+       * date is named and the silence reported, with no verdict attached.
+       */
+      if (i.expectedYmd) {
+        return { long: latenessLine({ prefix: since, owed: false, dueYmd: null, days: 0,
+          expectedYmd: i.expectedYmd }), short: `${i.quietDays} days quiet` };
+      }
+      /* no date was ever given, so there is nothing to name — the duration alone */
       /* ⚠️ THE INSTRUCTION IS NOT HERE. The ref's own quiet bar reads "Quiet for 78 days · nudge
          or close it" above a note reading "Nudge or close it" — the bar states what the stretch
          IS and the note states what to do, and saying it twice makes the note redundant. */
       return i.quietDays > 0
         ? { long: `Quiet for ${plural(i.quietDays, "day")}`, short: `${i.quietDays} days quiet` }
         : { long: "Quiet", short: "" };
+    }
 
     case "theirs":
       if (i.nudgeYmd && !i.expectedPassed) {
         return { long: `${since} · nudge due`, short: "Nudge due" };
+      }
+      if (i.expectedYmd && i.expectedPassed) {
+        /* the window came and went and nothing arrived — reported, never scored */
+        return { long: latenessLine({ prefix: since, owed: false, dueYmd: null, days: 0,
+          expectedYmd: i.expectedYmd }), short: since };
       }
       return i.expectedYmd
         ? { long: `${since} · reply expected ${on(i.expectedYmd)}`, short: since }
@@ -1391,10 +1500,26 @@ export function labelFor(state: BarState, i: LabelInput): BarLabel {
         /* an open-ended stretch with nothing named — the card's own words, whole */
         return { long: i.moveLabel ?? "", short: "" };
       }
-      if (state === "y3" && i.yoursDays > 0) {
+      /**
+       * ⚠️ THE WRITER'S OWN DATE, ONCE IT HAS PASSED, IS THE ONE THING THIS BOARD CALLS OVERDUE.
+       *
+       * Two shapes: a date was named and has gone by, or none was ever given and the ask has been
+       * sitting since it arrived. The second still states a span — "owed 3 weeks" — because the
+       * absence of a promised date does not make the wait shorter, and the phrase says which it is
+       * so the reader is never told a date exists that does not.
+       */
+      if (i.expectedYmd && i.expectedPassed) {
         return {
-          long: `${asked.long} ${plural(i.yoursDays, "day")} ago`,
-          short: `${asked.short} · ${i.yoursDays} days ago`,
+          long: latenessLine({ prefix: asked.long, owed: true, dueYmd: i.expectedYmd,
+            days: i.yoursDays, expectedYmd: i.expectedYmd }),
+          short: `${asked.short} · overdue`,
+        };
+      }
+      if (!i.expectedYmd && i.yoursDays > 0) {
+        return {
+          long: latenessLine({ prefix: asked.long, owed: true, dueYmd: null,
+            days: i.yoursDays, expectedYmd: null }),
+          short: `${asked.short} · ${overdueSpan(i.yoursDays)}`,
         };
       }
       return i.expectedYmd

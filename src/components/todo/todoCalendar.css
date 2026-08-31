@@ -647,6 +647,17 @@
 }
 /* ⚠️ THE CONTENT IS ABOVE THE FRAME AND IS NEVER MASKED. `position: relative` is what lifts it out
    of the frame's paint order without a z-index war; the frame is `inset: 0` behind it. */
+/* ⚠️ THE OVERDUE TINT: FLAT, FULL HEIGHT, HARD EDGE AT THE DUE DATE (v54, Phase 5).
+   Its span is the lateness — it starts on the day the deed fell due and runs to the card's today
+   edge — so a gradient would make the start of lateness a region rather than a date, and the date
+   is the fact. It lives inside the frame so it rounds and dissolves with the card; as a sibling it
+   would need its own copy of the radius and the masks and would paint square corners over a
+   rounded card. */
+.tl-late {
+  position: absolute; top: 0; bottom: 0;
+  background: rgba(230, 195, 180, .60);
+  pointer-events: none;
+}
 .tl-content {
   position: relative; z-index: 1; display: flex; align-items: center;
   min-width: 0; width: 100%; height: 100%;
@@ -761,7 +772,37 @@
 
 /* ⚠️ OWED IS THE ONE STATE THAT LIFTS, and it lifts without animating. A passed date, or a
    writer-held request with none named: the card stands off the ground and its pill deepens. */
-.tl-p.owed { transform: translateY(-50%) scale(1.006); z-index: 4; }
+/**
+ * ⚠️ THE STIR: AN OWED CARD MOVES, AND EVERY KEYFRAME REPEATS THE BASE TRANSFORM (v54, Phase 5).
+ *
+ * `transform` is not additive. A keyframe stating only a rotation REPLACES the whole transform,
+ * so the card loses `translateY(-50%)` and drops half its own height — silently, and only while
+ * the animation runs, which is the one moment nobody is measuring. Every frame therefore repeats
+ * `translateY(-50%) scale(1.006)` in full.
+ *
+ * ⚠️ AND NO `var()` INSIDE THE KEYFRAMES. A custom property in a keyframe block fails silently in
+ * this setup — no error, no animation, nothing to point at — which this repo has already paid for
+ * on the marketing pulse halo. The values are literal.
+ *
+ * The stagger is what stops it reading as a wave: 2.6s apart on an 11s cycle, so no two cards
+ * move together. It pauses on hover, because a card the reader is trying to read must hold still.
+ */
+@keyframes tlStir {
+  0%   { transform: translateY(-50%) scale(1.006) rotate(0deg); }
+  25%  { transform: translateY(-50%) scale(1.006) rotate(0.45deg); }
+  50%  { transform: translateY(-50%) scale(1.006) rotate(0deg); }
+  75%  { transform: translateY(-50%) scale(1.006) rotate(-0.45deg); }
+  100% { transform: translateY(-50%) scale(1.006) rotate(0deg); }
+}
+.tl-p.owed {
+  transform: translateY(-50%) scale(1.006); z-index: 4;
+  animation: tlStir 11s ease-in-out infinite;
+  animation-delay: calc(var(--stir-i, 0) * 2.6s);
+}
+.tl-p.owed:hover { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .tl-p.owed { animation: none; }
+}
 .tl-p.owed .tl-frame { border-color: var(--owed-bd); box-shadow: var(--owed-sh); }
 .tl-p.owed .tl-pill { background: var(--owed-pill-bg); border-color: var(--owed-pill-bd); font-weight: 700; }
 

@@ -169,6 +169,8 @@ const pct = (n: number) => `calc(${n} / var(--tl-days) * 100cqw)`;
  * only a cut model can ask.
  */
 const barLeft = (sg: Segment) => pct(sg.from);
+/* the tint is positioned inside the frame, whose origin is the card's own left edge */
+const barLeftPad = (_sg: Segment) => "0px";
 const barWidth = (sg: Segment) => pct(sg.to - sg.from);
 /**
  * ⚠️ THE PAGE DECLARES WHICH LANE; THE STYLESHEET DECIDES WHERE THAT IS.
@@ -202,8 +204,9 @@ const laneVar = (lane: number): React.CSSProperties =>
  * one and the one the emptiness is there to make.
  */
 const Piece: React.FC<{
-  sg: Segment; days: number; lastMarkAt: number | null; selected: boolean; onPick: () => void;
-}> = ({ sg, days, lastMarkAt, selected, onPick }) => {
+  sg: Segment; days: number; lastMarkAt: number | null; selected: boolean;
+  stirIndex: number; onPick: () => void;
+}> = ({ sg, days, lastMarkAt, selected, stirIndex, onPick }) => {
   const lines = barLines(sg.label);
   /* ⚠️ THE PILL IS THE APP'S OWN VOCABULARY — see `calendarPill`. The status while the agency
      holds the move, the deed while the writer does, and nothing else is reachable. */
@@ -274,7 +277,11 @@ const Piece: React.FC<{
        * card becomes, written by the fit pass. The rule reads whichever pair applies, and the
        * transition is on `width` and `left`, which are now stylesheet properties.
        */
+      /* ⚠️ THE STAGGER INDEX IS DATA, NOT A `var()` INSIDE THE KEYFRAMES. A custom property read
+         from a keyframe block fails silently here; read from the RULE it resolves normally, which
+         is why the delay is a `calc()` on the animation and the frames carry only literals. */
       style={{ ...laneVar(sg.lane),
+        ["--stir-i" as string]: String(stirIndex),
         ["--l" as string]: barLeft(sg),
         ["--w" as string]: barWidth(sg),
         ["--content-left" as string]: contentLeft }}
@@ -293,6 +300,13 @@ const Piece: React.FC<{
          rather than asking a class about itself. The page published only the clipped coordinates
          before, so every leading piece reported a start of 0 — which is where a clipped card
          starts, not where its stretch began, and the audit could not be written at all. */
+      /* ⚠️ WHERE LATENESS BEGINS, IN DAY UNITS, so a lock can assert the tint's painted left edge
+         against the DATE rather than against the tint's own style. A probe that reads the tint's
+         `left` and compares it with the tint's `left` is one reading of one number: proved, by a
+         mutation that made every tint run its whole card and passed. */
+      data-latefrom={sg.lateFrom != null ? sg.lateFrom.toFixed(3) : undefined}
+      data-dueat={sg.dueAt != null ? sg.dueAt.toFixed(3) : undefined}
+      data-from={sg.from.toFixed(3)}
       data-truefrom={bounds.start.toFixed(3)}
       data-trueto={bounds.end.toFixed(3)}
       data-days={String(days)}
@@ -318,7 +332,22 @@ const Piece: React.FC<{
         * own wrapper when it will not fit. Nothing about the card's box moves: the frame is
         * `position: absolute; inset: 0`, so the date arithmetic still owns the geometry.
         */}
-      <div className="tl-frame" aria-hidden />
+      <div className="tl-frame" aria-hidden>
+        {/**
+          * ⚠️ THE TINT IS A LAYER INSIDE THE FRAME, so it rounds and dissolves with the card. As a
+          * sibling it would have to know the card's radius and its masks — two more places for one
+          * shape — and would paint square corners over a rounded card at both ends.
+          *
+          * Its LEFT edge is the due date and its right is the card's today edge, so its span IS
+          * the lateness. Flat, one value, hard edge: a gradient would make the start of lateness a
+          * region rather than a date, and the date is the fact.
+          */}
+        {sg.lateFrom != null && (
+          <span className="tl-late" aria-hidden
+            style={{ left: `calc(${pct(sg.lateFrom - sg.from)} - ${barLeftPad(sg)})`,
+              right: 0 }} />
+        )}
+      </div>
       {/* ⚠️ THE PILL IS NOT INSIDE THE LABEL'S CONDITIONAL, and it used to be. A segment with an
           empty label rendered a card with NO pill and NO text — a blank white box with a border and
           a shadow, eight of them on a 32-card board. The pill never depended on the label: a card
@@ -1528,6 +1557,9 @@ data-rowkey={r.key}
         <div className="tl-c-tl">
           {bar.segs.map((sg) => (
             <Piece key={sg.key} sg={sg} days={range.days} selected={sel === sg.key}
+              /* ⚠️ FOUR PHASES, so no two cards on screen move together and the row does not read
+                 as a wave. The index is the card's position in its row's own list. */
+              stirIndex={bar.segs.indexOf(sg) % 4}
               /* ⚠️ THE LAST MARK ON THIS CARD, never the row's last. A row can hold two
                  relationships — two books with one agency — and each card must clear its own
                  marks and no others. */
