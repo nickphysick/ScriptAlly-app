@@ -3,7 +3,6 @@
   "refs": {
     "design-refs/manuscripts-scroll-page.html": "86e9eb3ce18714a43e3f3538ca8312eac7e16199ca9fc37eaf4420c1a2814aee",
     "design-refs/manuscript-identity-band.html": "45b9a7a2af4aefda90ea77332f9e60cd7770da36f2394259d4a73a3e7c8892cf",
-    "design-refs/timeline-v36.html": "f1f1ab0d9d8a346f8d08888157587fc51dcb42100dae6fd20a9ff1da4f42b46a",
     "design-refs/manuscripts-shelf-carousel-v2.html": "f6b039cca3c8069fdb64ccfb3118e481c1d3813fcf38bf9baa7de44fbd1ecd84",
     "design-refs/empty-description.html": "7b80a6169c7887d46e65b60ab0871bfb385e34d62c22263e1700ea0b37505ba1",
     "design-refs/scriptally-masthead-fullpage.html": "c96241158ad3095ed301b6a0d62e67f5fc0d9a7dd7637c1ffaa52509161b74c0",
@@ -13,6 +12,7 @@
     "design-refs/kicker-cta-options.html": "b0ebc108d6c44473477991b1a9841d04697a766dee22384b8731b76a6047a5b0",
     "design-refs/qc-view-transition.html": "ccc06f2a2384628f86ad9e3c91fdc6f4a2a32abc4d18a6a518cc49bb941523b9",
     "design-refs/qc-split-command-row.html": "2badb224a56d24c625572b3e3a85bcff1a1cc66739b837cddb77fa517acca912",
-    "design-refs/qc-flip-transition.html": "27779ab4d8ffca126b96040b299bcfa8ddb801850ac9f968e5a9f0076b5c78ba"
+    "design-refs/qc-flip-transition.html": "27779ab4d8ffca126b96040b299bcfa8ddb801850ac9f968e5a9f0076b5c78ba",
+    "design-refs/timeline-v37.html": "5286940b84f882a0615254847cef6bbf59469a4cd0406a7b9ba897846be9d57c"
   }
 }

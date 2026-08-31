@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Calendar design ref v37 (normative)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--app:#f2ede7;--panel:#faf7f2;--ink:#3a1c14;--muted:#8a7a6c;--label:#9c8878;
+--burgundy:#7c3a2a;--pink:#f5e2da;--hair:#efe6da;
+--railbd:#e0d3bf;--railline:#e3d7c4;--tick:#cdbfa8;--mlab:#a8927a;--mdiv:#e5d9c6;
+--btnbd:#d4c3ae;--btntx:#54402f;--chipbd:#ddd0be;
+--bar-h:34px; --mk-size:30px; --row-h:52px;
+--t1-fs:11px; --t1-w:500; --t1-ls:.01em; --t2-fs:8px; --t2-ls:.13em}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--app);font-family:Inter,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:18px 20px 70px}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;color:var(--label)}
+.sw{display:flex;gap:9px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.seg{display:inline-flex;background:#fff;border:1px solid #e5d8c9;border-radius:9px;overflow:hidden}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;font-weight:500;border:none;background:transparent;color:#6a5a50;padding:8px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--hair)}
+.seg button[data-on="true"]{background:var(--pink);color:var(--burgundy)}
+.panel{background:var(--panel);border:1px solid #e9dfd0;border-radius:18px;box-shadow:0 2px 10px rgba(58,28,20,.05);overflow:hidden;margin-top:12px}
+.masthead{background:linear-gradient(180deg,#f7ece4,#f7f1e9);padding:18px 26px 14px;border-bottom:1px solid #eee1d2}
+.crumb{display:inline-flex;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;color:var(--label);border:1px solid #e5d8c9;border-radius:999px;padding:5px 11px;background:#fff;margin-bottom:9px}
+h1{font-family:'Playfair Display',serif;font-size:31px;font-weight:500;line-height:1.25}
+.ctrl{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:13px 26px 11px;border-bottom:1px solid #f0e6d8}
+.btn{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;font-weight:500;border-radius:9px;padding:7px 12px;cursor:pointer;background:#fff;border:1px solid #e5d8c9;color:#6a5a50}
+input[type=range]{accent-color:var(--burgundy);width:100px}
+.srch{font-size:11px;border:1px solid #e5d8c9;border-radius:9px;padding:8px 12px;background:#fff;width:130px}
+.count{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--label);margin-left:auto}
+.sortbtn{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.09em;font-weight:500;border-radius:3px;padding:8px 11px;background:#fff;border:1px solid var(--btnbd);color:var(--btntx);cursor:pointer}
+.inner{padding:0 26px 30px}
+.railwrap{position:sticky;top:0;z-index:20;background:var(--panel);padding:8px 0 0}
+.rail{display:flex;height:42px;border-bottom:1px solid var(--railbd)}
+.rail .c-nm,.rail .c-ac{display:flex;align-items:center}
+.rail .c-tl{overflow:visible;position:relative}
+.rl-line{position:absolute;left:0;right:0;bottom:0;border-bottom:1px solid var(--railline)}
+.mlab{position:absolute;top:3px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.22em;color:var(--mlab);z-index:2}
+.mlab.now{color:var(--ink);font-weight:500}
+.mdiv{position:absolute;top:3px;height:11px;width:0;border-left:1px solid var(--mdiv)}
+.tick{position:absolute;bottom:0;width:0;height:5px;border-left:1px solid var(--tick);z-index:2}
+.dlab{position:absolute;bottom:7px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;color:var(--label);z-index:2}
+.tdchip{position:absolute;bottom:4px;transform:translateX(-50%);background:var(--burgundy);color:#f8f5f0;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;padding:3px 7px;border-radius:999px;z-index:5}
+.tdstem{position:absolute;bottom:0;width:0;height:5px;border-left:1.5px solid var(--burgundy);z-index:4}
+.rrow{display:flex;align-items:stretch;min-height:var(--row-h)}
+.rrow:hover{background:#f5f0e7}
+.c-nm{flex:0 0 288px;display:flex;align-items:center;gap:10px;padding:0 13px}
+.c-nm .nm{font-family:'Playfair Display',serif;font-size:14px;font-weight:500;line-height:1.15}
+.c-nm .ag{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);margin-top:3px;display:block}
+.c-ac{flex:0 0 172px;display:flex;align-items:center;padding:0 8px}
+.c-tl{flex:1 1 auto;position:relative;overflow:hidden}
+.abtn{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;font-weight:500;border-radius:3px;padding:7px 10px;cursor:pointer;background:#fff;border:1px solid var(--btnbd);color:var(--btntx);white-space:nowrap}
+.adash{color:#c4b6a3;font-size:12px;padding-left:6px}
+.past{position:absolute;top:0;bottom:0;left:0;z-index:0;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(58,28,20,.055))}
+.td{position:absolute;top:0;bottom:0;z-index:6;pointer-events:none;box-shadow:-6px 0 8px -6px rgba(58,28,20,.28)}
+.p{position:absolute;height:var(--bar-h);top:50%;transform:translateY(-50%);border-radius:999px;overflow:hidden;z-index:2;background:#fff;transition:box-shadow .13s,transform .13s}
+.p:hover{box-shadow:0 3px 10px rgba(58,28,20,.16);transform:translateY(-50%) scale(1.004);z-index:5}
+.p .fl{position:absolute;left:0;top:0;bottom:0;border-radius:999px 3px 3px 999px}
+.p .fl.full{border-radius:999px}
+.p .txt{position:absolute;top:50%;left:14px;transform:translateY(-50%);z-index:2;display:flex;flex-direction:column;justify-content:center;white-space:nowrap}
+/* all mono, sizes from tokens */
+.t1{font-family:'JetBrains Mono',monospace;font-size:var(--t1-fs);font-weight:var(--t1-w);letter-spacing:var(--t1-ls);line-height:1.2}
+.t2{font-family:'JetBrains Mono',monospace;font-size:var(--t2-fs);letter-spacing:var(--t2-ls);text-transform:uppercase;opacity:.66;margin-top:2px;line-height:1.2}
+.p.out{border:1px solid #d9e1d6}.p.out .fl{background:#e6ece3}.p.out .txt{color:#55684f}
+.p.req{border:1px solid #ecd3c6}.p.req .fl{background:#f3e0d5}.p.req .txt{color:#6b3a2a}
+.p.decide{border:1px solid #e2b8a5}.p.decide .fl{background:#eccbba}.p.decide .txt{color:#58281a}
+.p.quiet{border:1px solid #e0dbd3}.p.quiet .fl{background:repeating-linear-gradient(-55deg,#e7e3dc 0 5px,#f4f1ec 5px 10px)}.p.quiet .txt{color:#6b675f}
+.p.closedp{border:1.5px dashed #ddd0c0;background:transparent}.p.closedp .txt{color:#a3927f}
+.p.hollow{background:transparent}.p.hollow .txt{opacity:.75}
+.mk{position:absolute;top:50%;transform:translate(-50%,-50%);width:var(--mk-size);height:var(--mk-size);border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;z-index:4;box-shadow:0 0 0 3px var(--panel)}
+.mk.in{border:1.5px solid #9fb29a;color:#55684f}
+.mk svg{width:calc(var(--mk-size) * .42);height:calc(var(--mk-size) * .42)}
+.tchip{position:absolute;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:7px;height:calc(var(--bar-h) - 2px);background:#fff;border:1px solid var(--chipbd);border-radius:999px;padding:0 14px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;white-space:nowrap;z-index:2}
+.tchip .sq{width:9px;height:9px;border-radius:2px;border:1.5px solid var(--burgundy)}
+
+.note{margin-top:20px;font-size:12px;color:#5c4c40;line-height:1.65;background:#fff;border:1px solid var(--hair);border-radius:10px;padding:13px 16px;max-width:1040px}
+.note b{color:var(--ink)}.note p{margin-bottom:7px}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="masthead"><span class="crumb">TASKS</span><h1>Calendar</h1></div>
+  <div class="ctrl">
+    <span class="lbl">Range</span><input type="range" min="0" max="2" value="1"><span class="lbl" style="color:#6a5a50">3 MONTHS</span>
+    <button class="btn">‹</button><button class="btn">TODAY</button><button class="btn">›</button>
+    <div class="seg"><button data-on="true">FULL BOARD</button><button data-on="false">RIGHT NOW</button></div>
+    <div class="seg"><button data-on="true">ONE LIST</button><button data-on="false">GROUPED</button></div>
+    <button class="sortbtn">SORT · SOONEST ▾</button>
+    <input class="srch" placeholder="Search…">
+    <span class="count">13 RELATIONSHIPS · 3 TASKS</span>
+  </div>
+  <div class="inner" id="inner">
+    <div class="railwrap"><div class="rail">
+      <div class="c-nm"><span class="lbl">Agent</span></div><div class="c-ac"><span class="lbl">Action?</span></div>
+      <div class="c-tl" id="railtl"></div>
+    </div></div>
+    <div id="board"></div>
+  </div>
+</div>
+
+<div class="note" id="note"></div>
+
+<script>
+var TP=30;
+var MONTHS=[{from:0,to:20,lab:'AUG'},{from:20,to:52,lab:'SEPT'},{from:52,to:84,lab:'OCT'},{from:84,to:100,lab:'NOV'}];
+var TICKS=[[8,'18'],[18,'28'],[38,'7'],[52,'17'],[66,'27'],[80,'7'],[92,'17']];
+function railHTML(){
+  var h='<div class="rl-line"></div>';
+  MONTHS.forEach(function(m){
+    if(m.from>0)h+='<div class="mdiv" style="left:'+m.from+'%"></div>';
+    var now=(m.from<TP&&m.to>TP);
+    h+='<div class="mlab '+(now?'now':'')+'" style="left:'+(now?(TP+m.to)/2:(m.from+m.to)/2)+'%">'+m.lab+'</div>';
+  });
+  TICKS.forEach(function(t){
+    if(Math.abs(t[0]-TP)<5)return;
+    h+='<div class="tick" style="left:'+t[0]+'%"></div><div class="dlab" style="left:'+t[0]+'%">'+t[1]+'</div>';
+  });
+  return h+'<div class="tdstem" style="left:'+TP+'%"></div><div class="tdchip" style="left:'+TP+'%">30 AUG</div>';
+}
+function dot(k){
+  var s='<svg width="13" height="13" viewBox="0 0 14 14">';
+  if(k==='offer')s+='<circle cx="7" cy="7" r="6" fill="#7c3a2a"/><path d="M4.4 7.2 L6.3 9 L9.8 5.2" stroke="#f8f5f0" stroke-width="1.5" fill="none" stroke-linecap="round"/>';
+  else if(k==='half')s+='<circle cx="7" cy="7" r="5.4" fill="#e9ede6" stroke="#8a9e88" stroke-width="1.6"/><path d="M7 4.1 A2.9 2.9 0 0 1 7 9.9 Z" fill="#8a9e88"/>';
+  else if(k==='closed')s+='<circle cx="7" cy="7" r="5.4" fill="#f4efe8" stroke="#b9b0a5" stroke-width="1.4"/><path d="M4.9 4.9 L9.1 9.1 M9.1 4.9 L4.9 9.1" stroke="#8a8177" stroke-width="1.2" stroke-linecap="round"/>';
+  else if(k==='task')s+='<rect x="2.5" y="2.5" width="9" height="9" rx="2.5" fill="none" stroke="#7c3a2a" stroke-width="1.6"/>';
+  else s+='<circle cx="7" cy="7" r="5.4" fill="#f8e7dc" stroke="#7c3a2a" stroke-width="1.6"/>';
+  return s+'</svg>';
+}
+var ARR='<svg viewBox="0 0 10 10"><path d="M8 5 H2.6 M4.6 2.8 L2.4 5 L4.6 7.2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>';
+function bar(o){
+  var f=(o.fill===undefined)?null:o.fill;
+  var h='<div class="p '+o.cls+'" style="left:'+o.l+'%;width:'+o.w+'%">';
+  if(f!==null)h+='<span class="fl'+(f>=100?' full':'')+'" style="width:'+f+'%"></span>';
+  h+='<span class="txt">';
+  if(o.t1)h+='<span class="t1">'+o.t1+'</span>';
+  if(o.t2)h+='<span class="t2">'+o.t2+'</span>';
+  return h+'</span></div>';
+}
+var ROWS=[
+ {dk:'offer',nm:'Tom Ellery',ag:'Curtis Vane',act:'ANSWER THEM',
+  tl:bar({cls:'decide',l:2,w:12,fill:100,t1:'Offer received',t2:'answer by 14 Apr'})},
+ {dk:'half',nm:'Greg Panetta',ag:'Panetta Literary',act:'SEND THE PARTIAL',
+  tl:bar({cls:'req',l:2,w:26,t1:'Partial requested',t2:'no date promised'})},
+ {dk:'q',nm:'William Tan',ag:'Foxglove Literary',act:'NUDGE THEM',
+  tl:bar({cls:'out',l:3,w:27,fill:100,t1:'Out since 29 Jul',t2:'nudge due'})},
+ {task:1,nm:'example',ag:'Your task',act:'TICK IT OFF',
+  tl:'<div class="tchip" style="left:26%"><span class="sq"></span>example</div>'},
+ {dk:'q',nm:'Sophie Dunn',ag:'Curtis Vane',act:null,
+  tl:bar({cls:'out',l:6,w:32,fill:75,t1:'Out since 8 Aug',t2:'reply expected 3 Sept'})},
+ {dk:'q',nm:'Eleanor Whitfield',ag:'Greenfield Literary',act:null,
+  tl:bar({cls:'out',l:8,w:36,fill:61,t1:'Out since 13 Aug',t2:'reply expected 10 Sept'})},
+ {dk:'q',nm:'Harriet Vane-Coe',ag:'Stillwater Reps',act:null,
+  tl:bar({cls:'out',l:10,w:44,fill:45,t1:'Nudged 18 Aug',t2:'next reminder 23 Sept'})},
+ {dk:'half',nm:'Jonathan Marsh',ag:'The Marsh Agency',act:'SEND THE PARTIAL',
+  tl:bar({cls:'out',l:4,w:9,fill:100})
+    +'<div class="mk in" style="left:14.6%">'+ARR+'</div>'
+    +bar({cls:'req',l:16.5,w:43.5,fill:31,t1:'Partial requested',t2:'send by 3 Oct'})},
+ {dk:'q',nm:'Penhallow Literary',ag:'Agent not specified',act:null,
+  tl:bar({cls:'quiet',l:2,w:28,fill:100,t1:'Quiet since Apr 2024',t2:'no reply logged'})},
+ {dk:'closed',nm:'D. Okafor',ag:'Castle Lane Literary',act:null,
+  tl:bar({cls:'closedp',l:12,w:18,t1:'Closed 26 Aug',t2:'a form pass'})}
+];
+function render(){
+  document.getElementById('railtl').innerHTML=railHTML();
+  document.getElementById('board').innerHTML=ROWS.map(function(r){
+    return '<div class="rrow"><div class="c-nm">'+dot(r.task?'task':r.dk)
+      +'<div><div class="nm">'+r.nm+'</div><span class="ag">'+r.ag+'</span></div></div>'
+      +'<div class="c-ac">'+(r.act?'<button class="abtn">'+r.act+' ›</button>':'<span class="adash">–</span>')+'</div>'
+      +'<div class="c-tl"><div class="past" style="width:'+TP+'%"></div>'+r.tl
+      +'<div class="td" style="left:'+TP+'%"></div></div></div>';
+  }).join('');
+}
+document.getElementById('note').innerHTML=
+ '<p><b>Normative ref v37.</b> One list, ordered by <code>pressingFrom</code>, tasks interleaved. No cards, no hairlines between rows, no group headings by default. Bar 34px in a fixed 52px row; marker 30px; text all mono 11/8, two lines, at the bar\u2019s start, in the family tone. Bars lift on hover. Scrawls are removed. The past is edge-only: a falloff to the left and a shadow at today, with no drawn rule.</p>'
++'<p><b>Accepted trade:</b> text sits at the bar\u2019s start, so a bar clipped by the window\u2019s left edge loses its label with it. This was chosen over clamping; it is not a defect.</p>'
++'<p><b>Two independent tokens:</b> <code>--row-h</code> is list density (52px); <code>--bar-h</code> is the bar (34px) and drives marker size, chip height, label size and inner padding through <code>calc()</code>. No literal offsets.</p>'
++'<p style="display:none"><b>x</b> 10px mono is small, but the reason the board reads flat is not size — it is that every word on a bar has the same weight and the same tone, so nothing is the headline. Bigger text alone gives you a flatter board at a larger size.</p>'
++'<p><b>E1 · Fact only.</b> As built. The elapsed count is buried in prose, so the eye has to read to find it.</p>'
++'<p><b>E2 · Number first.</b> The metric becomes the headline in bold mono, the fact drops to the small line beneath. Run your eye down the board: you can read the numbers alone and know where you stand — which is exactly the question the board exists to answer. My pick.</p>'
++'<p><b>E3 · Number inline.</b> Fact stays the headline, the count follows it in bold. Gentler; the number still has to be found rather than scanned.</p>'
++'<p><b>E4 · Both bold.</b> No number promoted, just more weight everywhere. Proof that weight alone is not hierarchy — it makes the bar louder without making it faster to read.</p>'
++'<p><b>Contrast.</b> C1 is as built. C2 deepens the first line within each family, so the tone still says whose move it is while the text carries. C3 puts every first line in ink — most legible, but a board where colour no longer reaches the words.</p>';
+render();
+</script>
+</body>
+</html>
