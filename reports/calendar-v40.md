@@ -1,7 +1,7 @@
 # Calendar v40 — one card per relationship
 
 **Branch** `main`, direct. **Commits** `b1317557` → `1095b1fe` (9).
-**Deployed to dev**: see the foot of this report.
+**Pushed** to `origin/main` and **deployed to dev** — `https://scriptally-dev.web.app`, bundle `index-B99EYLm1.js`, verified against the local build.
 
 ## The change in one sentence
 
