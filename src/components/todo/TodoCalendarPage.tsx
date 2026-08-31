@@ -36,7 +36,10 @@ import {
 } from "../../lib/timelineGroups";
 import { pillText } from "../../lib/calendarPill";
 import { fadesFor, cardBounds } from "../../lib/calendarFade";
-import { TAB_ORDER, TAB_LABEL, rowInTab, tabOf, type TimelineTab } from "../../lib/timelineViews";
+import {
+  TAB_ORDER, TAB_LABEL, rowInTab, tabOf, type TimelineTab,
+  GROUP_MODES, GROUP_MODE_LABEL, groupKeyOf, type GroupMode,
+} from "../../lib/timelineViews";
 import { useConfirmAsk } from "./ConfirmAsk";
 /** this mount's pane section-id prefix — every workspace page stays mounted, so ids must not collide */
 const CAL_PANE_PREFIX = "cal-";
@@ -1117,12 +1120,22 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     for (const r of rows) for (const m of r.manuscripts) if (m.id) seen.set(m.id, m.title);
     return [...seen].map(([id, title]) => ({ id, title }));
   }, [rows]);
+  /* ⚠️ FOUR MODES SINCE v54, AND `grouped` SURVIVES AS A DERIVED READING. The boolean was
+     `ONE LIST / GROUPED`; the mode says WHICH grouping, and every consumer that only wanted to
+     know "is this the flat list" reads the derivation rather than a second piece of state. */
+  const [groupMode, setGroupMode] = useState<GroupMode>("list");
+  const grouped = groupMode !== "list";
+
   const cutByAvailable = boardManuscripts.length > 1;
   const [cutBy, setCutBy] = useState<"needs" | "ms">("needs");
   /* ⚠️ A CUT THE BOARD CAN NO LONGER OFFER MUST NOT SURVIVE AS STATE. Deleting the last book that
      made the control available while it is selected would otherwise leave the board grouped by a
      control that is no longer on screen — a filter nothing can reach and nothing can clear. */
-  const cutNow: "needs" | "ms" = cutByAvailable ? cutBy : "needs";
+  /* ⚠️ THE MANUSCRIPT CUT IS A GROUP MODE NOW (v54, Phase 6), not a control of its own. It was a
+     two-state segment answering "how is this board arranged" beside another two-state segment
+     answering the same question; four modes in one row is the same set of choices stated once.
+     `cutNow` survives as the derived reading the board's own branch already reads. */
+  const cutNow: "needs" | "ms" = cutByAvailable && groupMode === "manuscript" ? "ms" : "needs";
 
   /* ══ THE CROSSHAIR, THE ONE TOOLTIP, AND `RIGHT NOW` ═══════════════════════════════════ */
 
@@ -1150,7 +1163,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * ⚠️ SESSION-HELD, NOT PERSISTED. A reader who went looking at the groups once should not meet
    * them again next week having forgotten they asked; the page opens on the list every time.
    */
-  const [grouped, setGrouped] = useState(false);
 
   const wrapRef = React.useRef<HTMLDivElement | null>(null);
   const tipRef = React.useRef<HTMLDivElement | null>(null);
@@ -1417,6 +1429,21 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       }
       return out;
     }
+    /* ⚠️ `Whose move` READS `tabOf`, THE TABS' OWN ANSWER. Two derivations of "whose move is
+       this" is how a heading and a tab come to disagree about one row — which is the fault
+       `ASKING_GROUPS` was written to end. One function, two readers. */
+    if (groupMode === "move") {
+      for (const t of TAB_ORDER.filter((x) => x !== "all")) {
+        const mine = live.filter((r) => r.group !== null
+          && tabOf(r.group, false) === t);
+        if (!mine.length) continue;
+        out.push({
+          key: `move-${t}`, title: TAB_LABEL[t], sentence: "", count: mine.length,
+          rows: mine, group: null, collapsible: false, open: true,
+        });
+      }
+      return out;
+    }
     for (const g of GROUP_ORDER) {
       /* ⚠️ IN `RIGHT NOW` ONLY THE THREE ASKING GROUPS CAN SURVIVE, and that falls out of the
          filter rather than being listed: a watching, snoozed or closed row asks nothing, so it
@@ -1436,7 +1463,17 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       });
     }
     return out;
-  }, [rows, shut, onlyAsks, cutNow, boardManuscripts]);
+  /**
+   * ⚠️ `tab` AND `groupMode` ARE IN THIS LIST, AND THEIR ABSENCE WAS INVISIBLE FOR TWO TABS.
+   *
+   * The filter reads `tab` and the arrangement reads `groupMode`; neither was a dependency, so the
+   * board never recomputed when either changed. It LOOKED right for `Needs me` and `With agents`
+   * because `onlyAsks` is derived as `tab === "needs"` and happens to change in step with those
+   * two — so switching between them busted the memo for an unrelated reason. `Tasks` and `Closed`
+   * change nothing else, and selecting `Tasks` left all 23 rows on the board with the tab lit.
+   * Two of five views working by coincidence is the shape a dependency list gets wrong in.
+   */
+  }, [rows, shut, onlyAsks, tab, groupMode, cutNow, boardManuscripts]);
 
   /**
    * Every row on one list, nearest first.
@@ -1462,14 +1499,19 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   /* ⚠️ THE TAB COUNTS ARE TAKEN OVER THE UNFILTERED ROWS, or every tab but the current one would
      report zero — a tab strip whose numbers depend on which tab you are in cannot be added up. */
   const tabCounts = React.useMemo(() => {
-    const t: Record<string, number> = { all: rows.length, needs: 0, agents: 0, closed: 0 };
+    /* ⚠️ SEEDED FROM `TAB_ORDER`, NEVER FROM A HAND-WRITTEN LITERAL. It was
+       `{ all, needs, agents, closed }` and v54's fifth tab was simply missing from it — so `Tasks`
+       rendered with no count at all and its rows were still counted, invisibly, under a key
+       nothing displayed. A tally that lists its own keys goes stale the first time the set grows. */
+    const t: Record<string, number> = Object.fromEntries(TAB_ORDER.map((k) => [k, 0]));
+    t.all = rows.length;
     for (const r of rows) t[tabOf(r.group, r.group === null && r.items.some((i) => i.card))] += 1;
     return t;
   }, [rows]);
   /* ⚠️ THE TRIGGER NAMES ONLY WHAT IS NOT THE DEFAULT. A summary restating every setting says the
      same thing on a board nobody has touched as on one somebody has, which is no signal at all. */
   const displaySummary = [
-    grouped ? "Grouped" : "",
+    groupMode === "list" ? "" : GROUP_MODE_LABEL[groupMode],
     view.sort === DEFAULT_SORT ? "" : SORT_LABEL[view.sort],
     cutNow === "ms" ? "By book" : "",
     rangeIdx === DEFAULT_RANGE_INDEX ? "" : TIMELINE_RANGES[rangeIdx].label,
@@ -1888,10 +1930,8 @@ data-rowkey={r.key}
                 {/* ⚠️ THE SAME ROWS EITHER WAY. GROUPED does not fetch, filter or re-derive
                     anything — it buckets the list the page already has, which is why the lock can
                     assert the two arrangements hold the identical row set by identity. */}
-                <PopRow name="Group" value={grouped ? "grouped" : "list"}
-                  options={["list", "grouped"] as const}
-                  labels={{ list: "One list", grouped: "Grouped" }}
-                  onPick={(v) => setGrouped(v === "grouped")} />
+                <PopRow name="Group" value={groupMode} options={GROUP_MODES}
+                  labels={GROUP_MODE_LABEL} onPick={setGroupMode} />
                 {/* ⚠️ EACH OPTION CARRIES ITS OWN DEFINITION IN THE MENU IT CAME FROM. "Soonest"
                     could mean the soonest thing you must do, the soonest reply expected, or the
                     soonest anything happens — three different orders, and a reader has no way to
@@ -1901,11 +1941,10 @@ data-rowkey={r.key}
                 {/* ⚠️ ONLY FROM THE SECOND MANUSCRIPT ON. The ref's own audit: "genuinely useful
                     from the second manuscript onward; noise before that." A control offering one
                     choice implies others the writer cannot reach. */}
-                {cutByAvailable && (
-                  <PopRow name="Manuscript" value={cutNow} options={["needs", "ms"] as const}
-                    labels={{ needs: "All books", ms: "By book" }}
-                    onPick={(v) => setCutBy(v)} />
-                )}
+                {/* ⚠️ THE MANUSCRIPT ROW IS GONE FROM HERE — it was "All books / By book", which is
+                    the same question `Group` now asks, and two controls for one choice is how they
+                    come to disagree. Grouping BY manuscript is a Group mode; SCOPING to one is a
+                    filter the board does not have, and is reported unbuilt rather than faked. */}
                 <PopRow name="Range" value={String(rangeIdx)}
                   options={TIMELINE_RANGES.map((_, i) => String(i))}
                   labels={Object.fromEntries(TIMELINE_RANGES.map((r, i) => [String(i), r.label]))}
@@ -1914,10 +1953,10 @@ data-rowkey={r.key}
                     set of choices with no empty state would have to mean something, and every
                     meaning it could take is one of the choices. */}
                 <button type="button" className="tl-popreset" onClick={() => {
-                  setTab("all"); setGrouped(false);
+                  setTab("all"); setGroupMode("list");
                   setView1("sort", DEFAULT_SORT); setRangeIdx(DEFAULT_RANGE_INDEX);
                   setCutBy("needs");
-                }}>Reset to All · One list · {SORT_LABEL[DEFAULT_SORT]} · {TIMELINE_RANGES[DEFAULT_RANGE_INDEX].label}</button>
+                }}>Reset to {TAB_LABEL.all} · {GROUP_MODE_LABEL.list} · {SORT_LABEL[DEFAULT_SORT]} · {TIMELINE_RANGES[DEFAULT_RANGE_INDEX].label}</button>
               </Popover>
               <input
                 className="tl-search" type="search" value={view.search}

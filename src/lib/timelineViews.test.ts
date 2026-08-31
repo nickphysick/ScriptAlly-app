@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { TAB_ORDER, TAB_LABEL, tabOf, rowInTab, type TimelineTab } from "./timelineViews";
+import {
+  TAB_ORDER, TAB_LABEL, tabOf, rowInTab, type TimelineTab,
+  GROUP_MODES, GROUP_MODE_LABEL, groupKeyOf,
+} from "./timelineViews";
 import { GROUP_ORDER, ASKING_GROUPS, type RowGroup } from "./timelineGroups";
 
 describe("the Calendar's four views", () => {
@@ -32,17 +35,56 @@ describe("the Calendar's four views", () => {
     expect(tabOf("closed")).toBe("closed");
   });
 
-  it("⚠️ A TASK ROW IS THE WRITER'S OWN, dated or not", () => {
-    /* it belongs to no query, so it has no group; it can never be with an agent or closed */
-    expect(tabOf(null, true)).toBe("needs");
-    expect(tabOf(null, false)).toBe("needs");
+  it("⚠️ A TASK ROW HAS ITS OWN VIEW, dated or not — which is what stops a double count", () => {
+    /* it belongs to no query, so it has no group. It went to `needs` until v54 gave it a tab of
+       its own; leaving it in both would put two of the board's rows in two views at once, and the
+       four counts would no longer sum to the fifth. */
+    expect(tabOf(null, true)).toBe("tasks");
+    expect(tabOf(null, false)).toBe("tasks");
+    expect(rowInTab("needs", null, true)).toBe(false);
     expect(rowInTab("agents", null, true)).toBe(false);
     expect(rowInTab("closed", null, false)).toBe(false);
+    expect(rowInTab("all", null, false)).toBe(true);
   });
 
   it("every view has a label, and `All` leads", () => {
     expect(TAB_ORDER[0]).toBe("all");
+    expect([...TAB_ORDER]).toEqual(["all", "needs", "agents", "tasks", "closed"]);
     for (const t of TAB_ORDER) expect(TAB_LABEL[t], `${t} has no label`).toBeTruthy();
     expect(Object.keys(TAB_LABEL)).toHaveLength(TAB_ORDER.length);
+  });
+});
+
+describe("how the board is arranged", () => {
+  it("⚠️ EVERY MODE BUCKETS THE SAME ROWS — grouping is never a filter", () => {
+    /* the claim the whole model rests on: a mode decides where a row is DRAWN, never whether it is
+       drawn. Asserted as an identity between the row sets each mode produces. */
+    const rows = [
+      { group: "now" as const, manuscript: "A" },
+      { group: "watching" as const, manuscript: "B" },
+      { group: "closed" as const, manuscript: "A" },
+      { group: null, hasDatedTask: true, manuscript: null },
+    ];
+    for (const m of GROUP_MODES) {
+      const bucketed = rows.map((r) => ({ r, k: groupKeyOf(m, r) }));
+      expect(bucketed.map((b) => b.r), `${m} lost or gained a row`).toEqual(rows);
+    }
+  });
+
+  it("`One list` names no bucket, because a flat list has no headings", () => {
+    for (const r of [{ group: "now" as const }, { group: null }]) {
+      expect(groupKeyOf("list", r)).toBeNull();
+    }
+  });
+
+  it("⚠️ `Whose move` READS THE TABS' OWN ANSWER, so a heading cannot disagree with a tab", () => {
+    for (const g of GROUP_ORDER) expect(groupKeyOf("move", { group: g })).toBe(tabOf(g));
+    expect(groupKeyOf("move", { group: null })).toBe(tabOf(null));
+  });
+
+  it("every mode has a label, and there are exactly four", () => {
+    expect(GROUP_MODES).toHaveLength(4);
+    for (const m of GROUP_MODES) expect(GROUP_MODE_LABEL[m]).toBeTruthy();
+    expect(Object.keys(GROUP_MODE_LABEL)).toHaveLength(4);
   });
 });
