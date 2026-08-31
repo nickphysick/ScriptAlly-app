@@ -174,8 +174,12 @@ agency `reply expected` row.
 
 ## FLAGS FOR NICK
 
-**1. Deploy outcome.** See the first line of the run's closing note — recorded at
-the foot of this file once the deploy ran.
+**1. Deploy outcome — DEPLOYED.** `https://scriptally-dev.web.app`, bundle
+`index-CzKIN5xX.js`, verified against the local build rather than trusted from
+the deploy's own success line. Pushed to `origin/main` at `2913545d`; twelve
+commits, `e2ffc32b` → `2913545d`. Every gate green: tsc clean, production build
+read in full, vitest 7351 passed / 3 skipped / 0 failed, 22 measured cases green
+at exit 0.
 
 **2. Which element carried the fade mask before this run, and how many rows it was
 blanking.** `.tl-p` — the CARD, which is the element containing the text. Three
