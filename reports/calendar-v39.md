@@ -206,3 +206,105 @@ by the pack and drawn by the ref — at α1.00, so unlike v37's shortfalls there
 raise. The ink is too light and darkening it changes a pinned value. It is **one pair, not four**:
 every family reports the same number because a card is monochrome now, which is the colour law
 working and the reason it matters. Headlines clear at 17.5–18.3; all three drawn pills at 4.66–14.59.
+
+---
+
+# Part two — the ground, the wash, the fades
+
+## The gate, first
+
+The new standing rule came out of v37's `tail -3`. The gate is now a script that **captures the
+full output to a file, searches the whole of it for the summary line, and treats the ABSENCE of
+that line as a failure** — then echoes the line it found together with the number of lines it read,
+so the figure that decided the verdict is the figure a reader sees. Baseline at `b89ecce7`:
+
+```
+  tsc   : mastheadMatrix.measure.ts(329,46) TS2339          [exit 2, 1 lines read]
+  vitest: Tests  7344 passed | 3 skipped (7347)             [exit 0, 72 lines read]
+  build : ✓ built in 6.49s                                  [exit 0, 188 lines read]
+```
+
+The one tsc error is the masthead session's, proved by reading. Measured on dev after checking its
+served bundle hash equals a local build of `b89ecce7`, so "the deployed board" is this commit.
+
+## Phase 0 — the four faults
+
+### 1. The ground differs — **FOUNDED**, and there are THREE surfaces, not two
+
+| point | painted |
+|---|---|
+| masthead, clear of its text | `rgb(254, 252, 250)` |
+| empty lane, right of today | `rgb(247, 240, 230)` |
+
+Walking the ancestry from the lane upward, three elements paint:
+
+| element | background |
+|---|---|
+| `.tl-tbl.tl-one` — the ONE LIST wrapper | **`rgb(247, 240, 230)`** |
+| `.tl-board` | **`rgb(250, 247, 242)`** = `#faf7f2` |
+| `.ws-work` / `.ws-window` — the shell's panel | `rgb(254, 252, 250)` |
+
+Exactly the suspected mechanism: the board paints a surface of its own, and so does the list
+wrapper — two survivors, stacked, so the lane's ground is neither the board's nor the panel's.
+
+**⚠️ AND THE PINNED VALUE BELONGS TO SOMEBODY ELSE.** The pack pins the ground as `#faf7f2`. The
+panel is `.ws-window`, shell chrome, and it paints `#fefcfa`. Deleting the calendar's two surfaces
+leaves one ground — **the panel's `#fefcfa`, not the ref's `#faf7f2`** — and repainting the panel
+would mean editing shell chrome this pack is fenced out of. Flagged: the *one ground* rule is
+buildable here; the *particular value* is not.
+
+### 2. The wash spans the whole lane — **UNFOUNDED. Nothing changed**
+
+| measured | |
+|---|---|
+| wash element width | 159.5px |
+| lane left | 743 |
+| wash right edge | **903** |
+| today's painted x | **903** |
+| delta | **0px** |
+
+`--tl-past-w` is `calc(22.5 / 90 * 100cqw)` and the gradient runs `transparent → rgba(58,28,20,.055)`
+in that order. The wash already stops at today, at every range, and its dark end is already at
+today rather than at the lane's edge.
+
+The screenshot impression was real and its cause is fault 1: the lane sits on a *different, darker
+ground* than the panel, so the whole lane reads as washed. The brief anticipated the two could be
+confused; it is the ground that is at fault, and the wash is correct.
+
+### 3. Fade classes on the wrong edges — **FOUNDED**
+
+32 cards: **fadeL on 23, fadeR on 20**, and many carry both. `seed-pkgq-2` is an `out` card in the
+middle of the window carrying `fadeL fadeR`; `seed-query-12` is **19px wide with a 38px fade**, so
+the mask is wider than the card and the whole thing is a gradient.
+
+**⚠️ THE AUDIT THE BRIEF ASKS FOR CANNOT BE BUILT FROM THE DOM AS IT STANDS.** The predicates are
+about the card's TRUE start and end; the only coordinates the DOM carries are the CLIPPED ones —
+every leading piece reports `from: 0`, which is where a clipped card starts, not where its stretch
+began. `openLeft`/`openRight` live on the Segment and reach the page only as class names, so
+asking "does the class match the predicate" currently means asking the class about itself.
+
+Phase 3 must publish the true start and end as data before the table can be honest. Recorded here
+as the reason the Phase 0 table is partial rather than as a table with a column I inferred.
+
+### 4. Empty cards — **FOUNDED. 8 of 32**
+
+| qid | width | classes |
+|---|---|---|
+| `thin-q-chase` | 50 | `quiet fadeR` |
+| `seed-query-5` | 50 | `quiet fadeR` |
+| `seed-query-6` | 50 | `quiet fadeR` |
+| `seed-query-11` | 29 | `req hollow fadeR` |
+| `seed-pkgq-4` | 22 | `req hollow fadeR` |
+| `seed-query-12` | 19 | `decide fadeL` |
+| `thin-q-remind` | 68 | `out fadeL` |
+| `seed-cal-bang-q` | 97 | `out fadeL` |
+
+Every one has **no pill and no text**, and the cause is mine from part one: the pill is rendered
+*inside* the `{sg.label && (…)}` conditional, so a segment with an empty label renders a card with
+nothing in it at all. The pill does not depend on the label and should never have been inside it.
+
+### Red gate
+
+None of the four lies beneath the view layer. Fault 1 is two stylesheet rules, fault 3 is a
+predicate and the data the page publishes about itself, fault 4 is one JSX conditional, and fault 2
+does not exist.
