@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Calendar design ref v40 (normative)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--app:#f2ede7;--ground:#faf7f2;--ink:#1c130f;--body:#3a1c14;--muted:#8a7a6c;--label:#9c8878;--detail:#6f6055;
+--pink:#f5e2da;--pinkb:#e8c8bc;--pinkd:#efd5ca;--pinkdd:#e6c3b4;--sage:#e9ede6;--sagetx:#5a6e58;--sagebd:#d6ddd2;--sageink:#8a9e88;
+--slate:#e3eaf0;--slatetx:#4b5f73;--slatebd:#cfdbe6;--grey:#efebe4;--greytx:#8a7a6c;
+--cardbd:#e0d5c8;--hair:#efe6da;--railbd:#e0d3bf;--railline:#e3d7c4;--tick:#cdbfa8;--mlab:#a8927a;--mdiv:#e5d9c6;
+--row-h:64px;--bar-h:54px;--mk:22px;--dot:18px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--app);font-family:Inter,sans-serif;color:var(--body);-webkit-font-smoothing:antialiased;padding:18px 20px 70px}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;color:var(--label)}
+.sw{display:flex;gap:9px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.seg{display:inline-flex;background:#fff;border:1px solid #e5d8c9;border-radius:9px;overflow:hidden}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;font-weight:500;border:none;background:transparent;color:#6a5a50;padding:8px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--hair)}
+.seg button[data-on="true"]{background:var(--pink);color:var(--ink)}
+.panel{background:var(--ground);border:1px solid #e9dfd0;border-radius:18px;box-shadow:0 2px 10px rgba(58,28,20,.05)}
+.masthead{padding:22px 26px 12px}
+.crumb{display:inline-flex;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;color:var(--label);border:1px solid #e5d8c9;border-radius:999px;padding:5px 11px;background:#fff;margin-bottom:9px}
+h1{font-family:'Playfair Display',serif;font-size:34px;font-weight:500;line-height:1.2;color:var(--ink)}
+.ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:0 26px 14px}
+.tabs{display:inline-flex;gap:2px;border-bottom:1px solid #e6dbc9}
+.tab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;font-weight:500;color:#8a7a6c;padding:8px 12px 9px;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.on{color:var(--ink);border-bottom-color:var(--ink)}
+.dd{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.09em;font-weight:500;border-radius:3px;padding:8px 11px;background:#fff;border:1px solid #d4c3ae;color:#54402f;cursor:pointer}
+.btn{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;font-weight:500;border-radius:9px;padding:8px 12px;cursor:pointer;background:#fff;border:1px solid #e5d8c9;color:#6a5a50}
+.srch{font-size:11px;border:1px solid #e5d8c9;border-radius:9px;padding:8px 12px;background:#fff;width:140px}
+.count{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--label);margin-left:auto}
+.inner{padding:0 26px 30px}
+.railwrap{position:sticky;top:0;z-index:20;background:var(--ground);padding:6px 0 0}
+.rail{display:flex;height:42px;border-bottom:1px solid var(--railbd)}
+.rail .c-nm{display:flex;align-items:center}
+.rail .c-tl{overflow:visible;position:relative}
+.rl-line{position:absolute;left:0;right:0;bottom:0;border-bottom:1px solid var(--railline)}
+.mlab{position:absolute;top:3px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.22em;color:var(--mlab);z-index:2}
+.mlab.now{color:var(--ink);font-weight:500}
+.mdiv{position:absolute;top:3px;height:11px;width:0;border-left:1px solid var(--mdiv)}
+.tick{position:absolute;bottom:0;width:0;height:5px;border-left:1px solid var(--tick);z-index:2}
+.dlab{position:absolute;bottom:7px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;color:var(--label);z-index:2}
+.tdchip{position:absolute;bottom:4px;transform:translateX(-50%);background:var(--ink);color:#f8f5f0;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;padding:3px 7px;border-radius:999px;z-index:5}
+.tdstem{position:absolute;bottom:0;width:0;height:5px;border-left:1.5px solid var(--ink);z-index:4}
+/* TWO columns — no action column */
+.rrow{display:flex;align-items:stretch;min-height:var(--row-h);position:relative}
+.rrow:hover{background:#f5f0e7}
+.rrow.asks::before{content:'';position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:2px;background:var(--pinkb);z-index:3}
+.c-nm{flex:0 0 292px;display:flex;align-items:center;gap:14px;padding:0 14px 0 16px}
+.c-nm .nm{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:500;line-height:1.15;color:var(--ink)}
+.c-nm .ag{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);margin-top:3px;display:block}
+.c-tl{flex:1 1 auto;position:relative;overflow:visible}
+.rrow.quietrow .nm,.rrow.quietrow .ag{opacity:.62}
+/* StatusDot — stands in for the locked component, at the size it needs */
+.sd{width:var(--dot);height:var(--dot);flex:0 0 auto}
+.past{position:absolute;top:0;bottom:0;left:0;z-index:0;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(58,28,20,.055))}
+.td{position:absolute;top:0;bottom:0;z-index:7;pointer-events:none;border-left:1.5px solid var(--ink);opacity:.55}
+/* ONE CARD PER RELATIONSHIP */
+.card{position:absolute;height:var(--bar-h);top:50%;transform:translateY(-50%);border-radius:9px;z-index:2;
+  background:#fff;border:1px solid var(--cardbd);box-shadow:0 1px 3px rgba(58,28,20,.06);cursor:pointer;transition:box-shadow .13s,transform .13s}
+.card:hover{box-shadow:0 5px 16px rgba(58,28,20,.17);transform:translateY(-50%) scale(1.004);z-index:6}
+.card .body{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;gap:5px;padding-right:12px;overflow:hidden;white-space:nowrap}
+.card .pill{align-self:flex-start;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:500;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.card .line{display:flex;align-items:baseline;gap:10px;white-space:nowrap}
+.card .hl{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.25}
+.card .sep{width:1px;align-self:stretch;background:#e2d7c9;flex:0 0 auto}
+.card .dt{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--detail);line-height:1.2}
+.pill.you{background:var(--pink);color:var(--ink);border:1px solid var(--pinkb)}
+.pill.them{background:var(--sage);color:var(--sagetx);border:1px solid var(--sagebd)}
+.pill.wait{background:var(--slate);color:var(--slatetx);border:1px solid var(--slatebd)}
+.pill.quiet{background:var(--grey);color:var(--greytx);border:1px solid #e5dfd4}
+.pill.closed{background:transparent;color:var(--label);border:1px solid #ddd0c0}
+.card.owed .pill{background:var(--pinkd);border-color:var(--pinkdd);font-weight:700}
+.card.owed{border-color:var(--pinkb);box-shadow:0 6px 16px rgba(58,28,20,.16);transform:translateY(-50%) scale(1.006);z-index:4}
+.card.quietc{background:#fcfaf6;box-shadow:none}.card.quietc .hl{color:var(--muted)}
+.card.closedc{border-style:dashed;box-shadow:none;background:transparent}.card.closedc .hl{color:var(--label)}
+.card.fadeR{border-top-right-radius:0;border-bottom-right-radius:0;border-right:none;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 38px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 38px),transparent)}
+.card.fadeL{border-top-left-radius:0;border-bottom-left-radius:0;border-left:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 38px);mask-image:linear-gradient(90deg,transparent,#000 38px)}
+.card.fadeL.fadeR{-webkit-mask-image:linear-gradient(90deg,transparent,#000 38px,#000 calc(100% - 38px),transparent);mask-image:linear-gradient(90deg,transparent,#000 38px,#000 calc(100% - 38px),transparent)}
+/* markers ride ON the card: the status changes, in the app's own dot grammar */
+.onmk{position:absolute;top:50%;transform:translate(-50%,-50%);width:var(--mk);height:var(--mk);border-radius:999px;background:#fff;
+  border:1.5px solid #cdbfa8;display:flex;align-items:center;justify-content:center;z-index:3;box-shadow:0 0 0 2px #fff}
+.onmk svg{width:12px;height:12px}
+/* the CONTENT LADDER — set by measured width, never by clipping */
+.card[data-tier="full"] .dt{display:inline}
+.card[data-tier="headline"] .sep,.card[data-tier="headline"] .dt{display:none}
+.card[data-tier="pill"] .line{display:none}
+.card[data-tier="stub"] .body{display:none}
+.card[data-tier="stub"]{width:var(--bar-h)!important;border-radius:999px;display:flex;align-items:center;justify-content:center}
+.card[data-tier="stub"] .stubdot{display:block}
+.stubdot{display:none;width:var(--dot);height:var(--dot)}
+.card .tip{display:none;position:absolute;bottom:calc(100% + 8px);left:0;background:#fff;border:1px solid var(--hair);border-radius:8px;box-shadow:0 6px 18px rgba(58,28,20,.14);padding:8px 11px;white-space:nowrap;z-index:30;font-size:11px;color:var(--body)}
+.card .tip b{font-family:'Playfair Display',serif;font-weight:500;color:var(--ink);font-size:13px;display:block;margin-bottom:2px}
+.card .tip i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--detail)}
+.card:not([data-tier="full"]):hover .tip{display:block}
+.ghost{position:absolute;top:50%;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:999px;border:1.5px dotted #cdbfa8;background:var(--ground);display:flex;align-items:center;justify-content:center;color:#9c8878;z-index:5}
+.ghost svg{width:13px;height:13px}
+.ghost.yours{border-color:var(--pinkdd);color:#a5735c}
+.ghost.due{border-style:solid;background:#fff;box-shadow:0 2px 6px rgba(58,28,20,.14)}
+.ghost .bdg{position:absolute;top:-5px;right:-5px;width:14px;height:14px;border-radius:999px;background:var(--pinkd);border:1px solid var(--pinkdd);color:#7a4a35;font-family:'Playfair Display',serif;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:center}
+.ghost.suggest{border-color:#d5cec3;color:#8a7a6c}
+.task{position:absolute;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:8px;z-index:3;white-space:nowrap}
+.task .ic{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--ink);background:#fff;display:flex;align-items:center;justify-content:center}
+.task .ic i{width:8px;height:8px;border-radius:2px;background:var(--pink)}
+.task .tl1{font-family:'Playfair Display',serif;font-size:13px;font-weight:500;color:var(--ink)}
+.task .tl2{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);display:block;margin-top:1px}
+.note{margin-top:20px;font-size:12px;color:#5c4c40;line-height:1.65;background:#fff;border:1px solid var(--hair);border-radius:10px;padding:13px 16px;max-width:1080px}
+.note b{color:var(--ink)}.note p{margin-bottom:7px}
+</style>
+</head>
+<body>
+
+<div class="sw">
+  <span class="lbl">Design ref v40 · normative · supersedes v39 · today sits at 50% of the window</span>
+  <div class="seg" id="rng"><button data-r="30" data-on="false">MONTHLY</button><button data-r="90" data-on="true">THREE-MONTHLY</button><button data-r="180" data-on="false">SIX-MONTHLY</button></div>
+</div>
+
+<div class="panel">
+  <div class="masthead"><span class="crumb">TASKS</span><h1>Calendar</h1></div>
+  <div class="ctrl">
+    <div class="tabs"><button class="tab on">ALL</button><button class="tab">NEEDS ME</button><button class="tab">WITH AGENTS</button><button class="tab">CLOSED</button></div>
+    <button class="dd" style="margin-left:8px">DISPLAY ▾</button>
+    <button class="btn">‹</button><button class="btn">TODAY</button><button class="btn">›</button>
+    <input class="srch" placeholder="Search…"><span class="count" id="cnt">13 RELATIONSHIPS · 2 TASKS</span>
+  </div>
+  <div class="inner">
+    <div class="railwrap"><div class="rail">
+      <div class="c-nm"><span class="lbl">Agent</span></div>
+      <div class="c-tl" id="railtl"></div>
+    </div></div>
+    <div id="board"></div>
+  </div>
+</div>
+
+<div class="note">
+<p><b>One card per relationship.</b> A relationship is one card from its first send to today (still running, faded) or to its named date. The status changes along the way — request came in, nudge went out, reply landed — are <b>marks riding on the card</b>, in the app's own dot grammar, not cuts through it. The text starts after the last mark. Fragments are impossible by construction: there is nothing to fragment.</p>
+<p><b>The content ladder.</b> Each card measures its own width after render and shows the most it can hold without clipping: <b>full</b> (pill · headline · detail) → <b>headline</b> (pill · headline) → <b>pill</b> only → <b>stub</b>, a status-dot-sized disc in the card's colour. Anything below full carries the rest on hover. Nothing is ever cut mid-word. Switch to six-monthly to watch cards step down the ladder; Whitfield and Osei reach the stub.</p>
+<p><b>The row head</b> carries the real StatusDot at 18px with 14px of air beside it — the locked component, imported, never redrawn. <b>Today sits at 50%</b> so the board shows as much past as future. <b>The action column is gone.</b></p>
+</div>
+
+<script>
+/* StatusDot placeholders in the locked grammar: ring fills with depth; direction by tone; offer solid; closed grey × */
+function dot(k,size){
+  size=size||18;
+  var s='<svg class="sd" width="'+size+'" height="'+size+'" viewBox="0 0 20 20">';
+  var ring='#8a9e88',fill='#e9ede6',ink='#5a6e58';
+  if(k==='queried')s+='<circle cx="10" cy="10" r="7.6" fill="#fff" stroke="'+ring+'" stroke-width="1.8"/>';
+  else if(k==='partial')s+='<circle cx="10" cy="10" r="7.6" fill="#fff" stroke="'+ring+'" stroke-width="1.8"/><path d="M10 4.4 A5.6 5.6 0 0 1 10 15.6 Z" fill="'+ring+'"/>';
+  else if(k==='full')s+='<circle cx="10" cy="10" r="7.6" fill="#fff" stroke="'+ring+'" stroke-width="1.8"/><circle cx="10" cy="10" r="5.2" fill="'+ring+'"/>';
+  else if(k==='offer')s+='<circle cx="10" cy="10" r="8.4" fill="#1c130f"/><path d="M6.4 10.4 L8.9 13 L13.8 7.4" stroke="#f8f5f0" stroke-width="1.9" fill="none" stroke-linecap="round"/>';
+  else if(k==='closed')s+='<circle cx="10" cy="10" r="7.6" fill="#f4efe8" stroke="#b9b0a5" stroke-width="1.6"/><path d="M7 7 L13 13 M13 7 L7 13" stroke="#8a8177" stroke-width="1.5" stroke-linecap="round"/>';
+  else if(k==='task')s+='<rect x="3.5" y="3.5" width="13" height="13" rx="3.5" fill="#fff" stroke="#1c130f" stroke-width="1.8"/>';
+  else s+='<circle cx="10" cy="10" r="7.6" fill="#fff" stroke="#bdb8b0" stroke-width="1.6"/><path d="M10 6 V10 L13 12" stroke="#8a8177" stroke-width="1.5" fill="none" stroke-linecap="round"/>';
+  return s+'</svg>';
+}
+var MK={in:'<svg viewBox="0 0 12 12"><path d="M9.5 6 H3 M5.4 3.4 L2.8 6 L5.4 8.6" stroke="#5a6e58" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
+        out:'<svg viewBox="0 0 12 12"><path d="M2.5 6 H9 M6.6 3.4 L9.2 6 L6.6 8.6" stroke="#8a5a45" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
+        clock:'<svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.4" fill="none" stroke="#8a8177" stroke-width="1.3"/><path d="M6 3.6 V6 L7.8 7.2" stroke="#8a8177" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>'};
+var GL={nudge:'<svg viewBox="0 0 14 14"><path d="M3 7 H10 M8 4.6 L10.6 7 L8 9.4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>',
+        half:'<svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M7 2.4 A4.6 4.6 0 0 1 7 11.6 Z" fill="currentColor"/></svg>',
+        answer:'<svg viewBox="0 0 14 14"><path d="M3.4 7.4 L6 10 L10.8 4.4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>',
+        close:'<svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="4.8" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5.2 5.2 L8.8 8.8 M8.8 5.2 L5.2 8.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'};
+/* relationships — days relative to today; one card each; marks ride on it */
+var ROWS=[
+ {id:'pan',asks:1,nm:'Greg Panetta',ag:'Panetta Literary',dk:'partial',start:-100,end:null,owed:1,pk:'you',pill:'Send the partial',hl:'Partial requested',dt:'28 Jun · no date promised',marks:[{d:-64,k:'in'}],ghost:{k:'half',mod:'due'}},
+ {id:'tan',asks:1,nm:'William Tan',ag:'Foxglove Literary',dk:'queried',start:-33,end:null,owed:1,pk:'you',pill:'Nudge due',hl:'Queried',dt:'sent 29 Jul · nudge due 30 Jul',marks:[],ghost:{k:'nudge',mod:'due'}},
+ {id:'ell',asks:1,nm:'Tom Ellery',ag:'Curtis Vane',dk:'offer',start:-151,end:6,pk:'you',pill:'Answer them',hl:'Offer',dt:'received 19 Aug · respond by 6 Sept',marks:[{d:-12,k:'in'}],ghost:{k:'answer'}},
+ {id:'t1',task:1,asks:1,nm:'Draft the Ellery reply',ag:'Your task',d:2},
+ {id:'mar',asks:1,nm:'Jonathan Marsh',ag:'The Marsh Agency',dk:'partial',start:-19,end:33,pk:'you',pill:'Send the partial',hl:'Partial requested',dt:'asked 21 Aug · send by 3 Oct',marks:[{d:-10,k:'in'}],ghost:{k:'half'}},
+ {id:'dun',nm:'Sophie Dunn',ag:'Curtis Vane',dk:'full',start:-39,end:3,pk:'them',pill:'Full sent',hl:'Full sent',dt:'sent 23 Jul · reply expected 3 Sept',marks:[],ghost:{k:'nudge'}},
+ {id:'whi',nm:'Eleanor Whitfield',ag:'Greenfield Literary',dk:'queried',start:-18,end:10,pk:'them',pill:'Queried',hl:'Queried',dt:'sent 13 Aug · reply expected 10 Sept',marks:[],ghost:{k:'nudge'}},
+ {id:'ose',nm:'K. Osei',ag:'Osei Literary',dk:'queried',start:-1,end:2,pk:'them',pill:'Queried',hl:'Queried',dt:'sent 30 Aug · reply expected 2 Sept',marks:[],ghost:{k:'nudge'}},
+ {id:'van',nm:'Harriet Vane-Coe',ag:'Stillwater Reps',dk:'queried',start:-13,end:23,pk:'wait',pill:'Queried',hl:'Queried',dt:'nudged 25 Aug · reminder 23 Sept',marks:[{d:-6,k:'out'}],ghost:{k:'nudge'}},
+ {id:'oro',nm:"Daniel O'Rourke",ag:'Inkwell & Stone',dk:'queried',start:-29,end:25,pk:'wait',pill:'Queried',hl:'Queried',dt:'nudged 18 Aug · reminder 25 Sept',marks:[{d:-13,k:'out'}],ghost:{k:'nudge'}},
+ {id:'t2',task:1,asks:1,nm:'Nudge Marcus Reed',ag:'Your task',d:25},
+ {id:'ram',nm:'Priya Raman',ag:'Raman &amp; Hale',dk:'partial',start:-46,end:null,pk:'them',pill:'Partial sent',hl:'Partial sent',dt:'sent 16 Jul · reply expected 27 Aug',marks:[{d:-4,k:'clock'}]},
+ {id:'pen',quiet:1,nm:'Penhallow Literary',ag:'Agent not specified',dk:'quiet',start:-858,end:null,cls:'quietc',pk:'quiet',pill:'No response',hl:'No response yet',dt:'858 days since sending',marks:[],ghost:{k:'close',mod:'suggest'}},
+ {id:'kap',quiet:1,nm:'Aisha Kapoor',ag:'The Lantern Agency',dk:'quiet',start:-838,end:null,cls:'quietc',pk:'quiet',pill:'No response',hl:'No response yet',dt:'838 days since sending',marks:[],ghost:{k:'close',mod:'suggest'}},
+ {id:'oka',quiet:1,nm:'D. Okafor',ag:'Castle Lane Literary',dk:'closed',start:-14,end:-5,cls:'closedc',pk:'closed',pill:'Rejected',hl:'Rejected',dt:'form rejection · 26 Aug',marks:[]}
+];
+var N=90;
+function pos(d){return 50+(d/N)*100}
+function railHTML(){
+  var h='<div class="rl-line"></div>';
+  var step=N===30?3:N===90?10:30;
+  for(var d=-Math.floor(N/2);d<=N/2;d+=step){
+    if(Math.abs(d)<step*.6)continue;
+    var dt=new Date(2026,7,31);dt.setDate(dt.getDate()+d);
+    var lab=N===180?(dt.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sept','Oct','Nov','Dec'][dt.getMonth()]):(dt.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sept','Oct','Nov','Dec'][dt.getMonth()]);
+    h+='<div class="tick" style="left:'+pos(d)+'%"></div><div class="dlab" style="left:'+pos(d)+'%">'+lab+'</div>';
+  }
+  return h+'<div class="tdstem" style="left:50%"></div><div class="tdchip" style="left:50%">31 AUG</div>';
+}
+function cardHTML(r){
+  var w0=-N/2,w1=N/2;
+  var s=Math.max(r.start,w0), e=(r.end===null)?0:Math.min(r.end,w1);
+  var fadeL=r.start<w0, ongoing=(r.end===null), fadeR=ongoing||(r.end>w1);
+  var l=pos(s), w=pos(e)-l;
+  var h='<div class="card '+(r.cls||'')+(r.owed?' owed':'')+(fadeL?' fadeL':'')+(fadeR?' fadeR':'')+'" data-id="'+r.id+'" style="left:'+l+'%;width:calc('+w+'% + '+(fadeR?38:0)+'px)">';
+  (r.marks||[]).forEach(function(m){if(m.d<w0||m.d>w1)return;
+    var mx=(pos(m.d)-l)/w*100; h+='<div class="onmk" data-mx="'+mx+'" style="left:'+mx+'%">'+MK[m.k]+'</div>';});
+  h+='<div class="body"><span class="pill '+r.pk+'">'+r.pill+'</span><span class="line"><span class="hl">'+r.hl+'</span><span class="sep"></span><span class="dt">'+r.dt+'</span></span></div>';
+  h+='<span class="stubdot">'+dot(r.dk,18)+'</span>';
+  h+='<div class="tip"><b>'+r.hl+'</b><i>'+r.pill+' · '+r.dt+'</i></div></div>';
+  if(r.ghost){var gx=(ongoing)?pos(0)+ (fadeR?4:0) : pos(Math.min(r.end,w1));
+    if(!(r.end!==null&&r.end>w1)){
+      h+='<div class="ghost '+(r.ghost.mod||'')+(r.pk==='you'?' yours':'')+'" style="left:calc('+gx+'% + 22px)">'+GL[r.ghost.k]+(r.ghost.mod==='due'?'<span class="bdg">!</span>':'')+'</div>';}}
+  return h;
+}
+function taskHTML(r){return '<div class="task" style="left:'+pos(r.d)+'%"><span class="ic"><i></i></span><span><span class="tl1">'+r.nm+'</span><span class="tl2">due '+(r.d===2?'2 Sept':'25 Sept')+'</span></span></div>';}
+function render(){
+  document.getElementById('railtl').innerHTML=railHTML();
+  document.getElementById('board').innerHTML=ROWS.map(function(r){
+    var head='<div>'+dot(r.task?'task':r.dk,18)+'</div><div><div class="nm">'+r.nm+'</div><span class="ag">'+r.ag+'</span></div>';
+    return '<div class="rrow'+(r.asks?' asks':'')+(r.quiet?' quietrow':'')+'"><div class="c-nm">'+head+'</div>'
+      +'<div class="c-tl"><div class="past" style="width:50%"></div>'+(r.task?taskHTML(r):cardHTML(r))+'<div class="td" style="left:50%"></div></div></div>';
+  }).join('');
+  requestAnimationFrame(ladder);
+}
+/* the content ladder — measured, deterministic, never clipping */
+function ladder(){
+  document.querySelectorAll('.card').forEach(function(c){
+    var body=c.querySelector('.body');if(!body)return;
+    var W=c.getBoundingClientRect().width-(c.classList.contains('fadeR')?38:0);
+    var lastMk=0;c.querySelectorAll('.onmk').forEach(function(m){lastMk=Math.max(lastMk,parseFloat(m.dataset.mx)/100*W+14)});
+    var left=Math.max(c.classList.contains('fadeL')?44:13,lastMk);
+    body.style.left=left+'px';
+    var avail=W-left-12;
+    c.dataset.tier='full';
+    var need=function(){var l=c.querySelector('.line');var p=c.querySelector('.pill');return Math.max(p.scrollWidth,l.style.display==='none'?0:l.scrollWidth)};
+    if(need()>avail)c.dataset.tier='headline';
+    if(c.dataset.tier==='headline'&&c.querySelector('.hl').scrollWidth>avail)c.dataset.tier='pill';
+    if(c.dataset.tier==='pill'&&c.querySelector('.pill').scrollWidth>avail)c.dataset.tier='stub';
+    if(W<60)c.dataset.tier='stub';
+  });
+}
+document.getElementById('rng').addEventListener('click',function(ev){
+  var b=ev.target.closest('button');if(!b)return;
+  this.querySelectorAll('button').forEach(function(x){x.dataset.on='false'});b.dataset.on='true';
+  N=parseInt(b.dataset.r,10);render();
+});
+window.addEventListener('resize',ladder);
+render();
+</script>
+</body>
+</html>
