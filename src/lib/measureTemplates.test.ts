@@ -15,7 +15,7 @@
  * consequence.
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -25,7 +25,17 @@ import { join } from "node:path";
  * scoped to the file where the fault was first found guards the one place it has already been
  * fixed.
  */
-const FILES = ["tests/e2e/calLook.measure.ts", "tests/e2e/calText.measure.ts"];
+/**
+ * ⚠️ EVERY CALENDAR MEASURE FILE, FOUND BY LISTING THE DIRECTORY — never a list typed out here.
+ *
+ * This named two files by hand. The next one written closed its own template on a backticked
+ * identifier in a comment, and the lock could not see it; naming three would have the same fault
+ * one file later. A guard that has to be extended by hand guards whatever somebody last remembered
+ * to add.
+ */
+const FILES = readdirSync(join(process.cwd(), "tests/e2e"))
+  .filter((f) => /^cal[A-Z]?\w*\.measure\.ts$/.test(f))
+  .map((f) => join("tests/e2e", f));
 
 describe("the calendar's measurement files cannot terminate their own evaluate strings", () => {
   it("no backtick inside a page.evaluate template", () => {
@@ -58,9 +68,11 @@ describe("the calendar's measurement files cannot terminate their own evaluate s
   });
 
   it("finds the templates to check — a sweep over none proves nothing", () => {
+    expect(FILES.length, "no calendar measure files found — the listing is broken, not the files")
+      .toBeGreaterThan(3);
     for (const f of FILES) {
       expect(readFileSync(join(process.cwd(), f), "utf8").length, `${f} is missing or empty`)
-        .toBeGreaterThan(500);
+        .toBeGreaterThan(400);
     }
     const src = FILES.map((f) => readFileSync(join(process.cwd(), f), "utf8")).join("\n");
     const n = [...src.matchAll(/page\.evaluate\(/g)].length;

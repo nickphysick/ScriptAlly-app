@@ -79,9 +79,14 @@ describe("⚠️ the marker's clearance is a halo, and it costs the bar nothing"
    * without a ring of the row's own colour behind it the two inks touch and neither is legible —
    * and a clearance made of margin or padding would move the bar instead.
    */
-  it("every marker carries a ring of the row's colour", () => {
+  it("every marker carries a ring of the ground it sits on", () => {
     const r = rulesFor(".tl-mk2");
-    expect(r).toMatch(/box-shadow\s*:\s*0 0 0 3px var\(--tl-row\)/);
+    /* ⚠️ THE PANEL'S TOKEN SINCE v39 PART TWO. The halo has to BE the ground, and the calendar no
+       longer has a ground of its own — `--tl-row` and `--tl-ground` were two surfaces it painted
+       under the panel, and both are deleted. `--ws-window` is the shell's, declared once; a copy of
+       its value here would be a second source for one colour, which is the fault that was removed
+       rather than relocated. */
+    expect(r).toMatch(/box-shadow\s*:\s*0 0 0 3px var\(--ws-window\)/);
     expect(r).toMatch(/width\s*:\s*var\(--mk\)/);
     expect(r).toMatch(/border-radius\s*:\s*999px/);
   });

@@ -144,7 +144,11 @@
      the page and the fills invisible against them. */
   /* ⚠️ THE BOARD IS THE GROUND AND CARRIES NO FRAME OF ITS OWN. Each group's card is the object;
      a frame around all of them would be a card of cards, and the headings would sit inside it. */
-  background: var(--tl-ground);
+  /* ⚠️ THE BOARD PAINTS NOTHING (v39 part two, Phase 1). It carried `--tl-ground` and the ONE LIST
+     wrapper carried `--tl-row`, stacked on the shell's panel — three surfaces, so the lane sat on a
+     tone that was neither the board's nor the panel's and the whole lane read as washed. The panel
+     is the one ground from the masthead to the foot of the board; anything the calendar paints
+     underneath it is a second tone by definition. */
   overflow: hidden;
 
   /* ══ THE PINNED VALUES ══════════════════════════════════════════════════════════════════
@@ -158,11 +162,9 @@
    * `.tl-board`, so the scope is exactly the set of readers — which is what stops a shell
    * refactor inheriting a calendar colour it has no use for.
    */
-  --tl-ground: #faf7f2;
   /* ⚠️ THE CARD, NOT A ROW COLOUR (v36). A group's rows sit on their own card and the heading sits
      on the GROUND above it — so this is the card's surface, and the marker halo reads it to get
      contrast against exactly the thing a marker is drawn on. */
-  --tl-row: #f7f0e6;
   --tl-ink: #3a1c14;
   --tl-muted: #8a7a6c;
   --tl-label: #9c8878;
@@ -294,8 +296,7 @@
 /* ⚠️ EACH GROUP GETS ITS OWN CARD, and the heading is NOT in it. A heading inside the card reads
    as a row of the table it names; on the ground above it, it reads as a label for the object
    below — which is what it is. */
-.tl-tbl {
-  background: var(--tl-row); border: 1px solid var(--tl-hair); border-radius: 11px;
+.tl-tbl { border: 1px solid var(--tl-hair); border-radius: 11px;
   overflow: hidden;
 }
 
@@ -316,7 +317,7 @@
 .tl-rail {
   position: sticky; top: 0; z-index: 8;
   height: var(--tl-rail-h); align-items: stretch;
-  background: var(--tl-ground);
+
   border-bottom: 1px solid #e0d3bf;
   /* ⚠️ THE CARD'S OWN BORDER INSETS ITS LANES BY 1px A SIDE, and the rail is not inside a card —
      so without matching it the rail's timeline column is 2px wider than every lane and starts a
@@ -686,7 +687,12 @@
 .tl-mk2 {
   width: var(--mk); height: var(--mk); border-radius: 999px; background: #fff;
   display: flex; align-items: center; justify-content: center; z-index: 4;
-  box-shadow: 0 0 0 3px var(--tl-row);
+  /* ⚠️ THE HALO IS THE PANEL'S OWN COLOUR, READ FROM THE PANEL'S OWN TOKEN. It separates the
+     marker from whatever it sits on, so it has to BE the ground — and the calendar no longer has a
+     ground of its own to name. `--ws-window` is the shell's, declared once in index.css; a copy of
+     its value here would be a second source for one colour, which is the fault Phase 1 exists to
+     remove rather than to relocate. */
+  box-shadow: 0 0 0 3px var(--ws-window);
   transform: translate(-50%, -50%); box-sizing: border-box; padding: 0; border: 1.5px solid transparent;
 }
 .tl-mk2.in    { border-color: var(--mk-in-line);    color: var(--mk-in-ink); }
