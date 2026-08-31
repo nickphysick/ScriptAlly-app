@@ -155,3 +155,147 @@ agency `reply expected` row.
   rows**, which `tabOf(null, …)` files under `Needs me`. Phase 6 adds a `Tasks`
   tab, so unless `tabOf` stops filing them there the counts become 9+14+0+2 = 25
   against 23 — that is what would be double-counted.
+
+
+---
+
+## PHASES 1–8 — WHAT LANDED
+
+| § | What landed |
+|---|---|
+| 1 | The board opens on **Month**; today is the lane's centre at every range and width (0.00–0.01px). ⚠️ **The ref half is HELD** — `timeline-v54.html` was not supplied. |
+| 2 | The past wash is **deleted**; today is a drawn 1.5px `#e6c3b4` rule at `z-index: 60`; the rail takes its own stacking context. |
+| 3 | A card is the **current wait**; earlier status changes are a **lead-in**; the mask moved to a `.tl-frame` sibling so it can never reach the words; the text sits at **one inset**. |
+| 4 | **Clip and open** replaces v40's ladder — the words are kept and the card opens to what they need. The detail drops only where there is nowhere to open to. |
+| 5 | The **overdue tint** (flat, hard-edged, spanning the lateness), the **copy** that names it, and the **stir**. |
+| 6 | A fifth view for **Tasks**, four **Group** modes, and a memo that had never listed `tab`. |
+| 7 | A task is a **point**, not a pill; **ghosts** are a named date past the card's end. |
+| 8 | Accepted at six widths × three ranges: 384 cards, worst 1, **zero** marks on cards, **two** insets. |
+
+## FLAGS FOR NICK
+
+**1. Deploy outcome.** See the first line of the run's closing note — recorded at
+the foot of this file once the deploy ran.
+
+**2. Which element carried the fade mask before this run, and how many rows it was
+blanking.** `.tl-p` — the CARD, which is the element containing the text. Three
+rules (`.fadeR`, `.fadeL`, `.fadeL.fadeR`). Measured at 1440 with
+`--card-fade: 38px`: **22 of 23 cards masked** (14 `fadeL`, 21 `fadeR`), and
+**14 of 23 rows had text inside a dissolving zone** — 26px of ink on thirteen of
+them, 4px on the fourteenth, the longest affected line 537px. Worse than the two
+rows the brief remembered. The mask is on `.tl-frame` now; the content is a
+sibling, unmasked, at opacity 1, asserted over the whole board.
+
+**3. Cards per relationship row, and text-inset variance, before and after.**
+Cards per relationship: **1 before and 1 after** — v40 had already settled that.
+Text insets: **12 distinct values before** (15, 46, 101, 118, 119, 145, 172, 190,
+216, 224, 376, and one card with none), **2 after** across 384 cards at six
+widths × three ranges: `flat:13` and `fadeL:42`, and nothing else.
+
+**4. How many cards enter `tight` per range, and the widest one that opens.**
+At 1440: Month 10 · 3 months 13 · 6 months 20. Across the whole sweep 266 of 384.
+The widest opened card measured **406px** (`agent-seed-agent-11::0`), opening from
+942 to 1348 in a lane ending at 1381 — start unmoved, 31–32px of slack between
+its last word and its right edge, which is the right margin plus the fade.
+
+**5. The tint — measured span per owed row, and the three samples.** 6 tinted
+cards at 1440, 16 untinted. Every tint's right edge is its card's today edge
+within 1.5px, and every left edge is the **due date's own x** — computed from a
+separately published `dueAt` that no clamp touches — or the card's own left where
+lateness began before the window. Three 1×1 screenshots across
+`agent-seed-cal-passed865::0` at x 612 / 777 / 941 (the 34px fade excluded at each
+end, sampled on a line below the words): **byte-identical**. The hard edge is
+confirmed on `agent-seed-agent-4::0` — the pixel at 820 differs from the pixel at
+826 either side of a tint starting at 823.
+
+**6. Every lateness string before and after, and the agency confirmation.**
+
+*Before* — eleven forms, and **none of them said "overdue"**: `Closed on {date}`,
+`{since} · no reply date given`, `Nudged · remind {date}`, `Quiet for {n} days`,
+`{since} · nudge due`, `{since} · reply expected {date}`, `Offer received ·
+answer by {date}`, `{asked} {n} days ago`, `{asked} · send by {date}`, plus
+`timelineCopy`'s row sentences `Out with {who} — reply expected by {date}` and
+`Offer on the table — an answer was due {when}`.
+
+*After* — three derived forms, `{span}` coarsening at 21 and 84 days:
+`{prefix} · overdue since {date} · {span}` · `{prefix} · no date promised · owed
+{span}` · `{prefix} · reply expected {date} · none yet`.
+
+**Confirmed: no agency-held row can produce "overdue".** Measured over 64 cards
+at three ranges — 13 writer-owed, 12 saying the word, **none** of them
+agent-held. Proved red by renaming the agency line to use it. ⚠️ And that proof
+found the third form was DEAD CODE where I first put it: `barState` sends any
+agent-held stretch whose expectation has passed to `quiet` before `theirs` can
+see it, so it could never render. It lives in `quiet` now, and `ghost` is split
+back out so a 242-day silence still states how long.
+
+**7. Tab counts before and after, and what was double-counted.**
+Before: `All —` · `Needs me 9` · `With agents 14` · `Closed 0` against 23 rows.
+After: `All —` · `Needs me 7` · `With agents 14` · `Tasks 2` · `Closed 0` = 23.
+**The two task rows were inside `Needs me`.** Adding the tab without moving them
+would have given 9 + 14 + 2 + 0 = 25 against 23.
+
+**8. Values needed but not pinned; locks proved vacuous.**
+
+*Not pinned, and taken from the prose:* nothing. The BAKED DECISIONS block
+covered every value the phases needed. Two existing tokens disagreed with it and
+were repinned (`--tl-text-inset` 14→13, `--card-fade-inset` 46→42), along with
+`--card-fade` 38→34, `--mk` 22→16 and `--row-h` 62→64.
+
+*Locks proved vacuous by their own red proofs — eight:*
+- the wash sweep checked only `background-image`, so a wash reinstated as a flat
+  COLOUR passed;
+- "no mark sits on a card" passed when the card was restored to the window's
+  edge, because then every mark is filtered out and the board renders none;
+- the inset set was asserted against itself (filtered by what was measured);
+- "it opens to what its content needs" compared the opened width against `--exp`,
+  the property that set it;
+- "its start does not move" permitted any leftward slide;
+- "the detail drops only where there is nowhere to open to" was satisfied by
+  nothing dropping;
+- the tint's left edge was compared against `lateFrom`, the number that placed it;
+- a four-way partition was satisfied by an EMPTY fifth view.
+
+**9. Unverifiable remainder; cross-session observations.**
+
+*Reported unbuilt, each with its reason:*
+- **The v54 design ref.** Not supplied. `timeline-v40.html` is held rather than
+  deleted — deleting it would leave the territory with no ref at all, and
+  authoring a `timeline-v54` myself would put a fabricated artefact under the name
+  decisions get signed off from.
+- **The Manuscript SCOPE row.** Grouping BY manuscript is a Group mode; scoping
+  TO one is a filter the board does not have. The old "All books / By book" row
+  was the grouping control mislabelled, and is deleted rather than left as a
+  second control for one choice.
+- **The ghost's `close` offer at 180 days of `No Response`.** It needs a control
+  on a surface this pass does not touch, and the brief frames it as availability
+  rather than advice — a copy and placement decision I would be inventing.
+- **"Clear of any OPENED card's extent."** An opened card's width is set on
+  hover, so the claim needs a hover held while a ring elsewhere in the row is
+  measured, and no row on this fixture has both a tight card and a ghost.
+
+*Unreachable on the harness fixture, driven and reported rather than claimed:*
+- **An uncut card.** A card is `fadeR` whenever its relationship is still running
+  and every relationship on the account is (`Closed` reads 0) — 64 of 64 cut at
+  every range. The state is driven and the paint read back.
+- **The detail drop.** Narrowest lane 434px, widest content ~406px. Driven by
+  narrowing the lane through an injected stylesheet: 13 of 21 cards drop, none
+  keeps a painted detail, none loses its pill or headline.
+- **A ghost at Month.** Its one named date falls outside a 31-day window, which
+  is the second of the three conditions working.
+
+*Cross-session:*
+- ⚠️ **`calLook.measure.ts` was 13/13 green before v40 and 7-failed after it, and
+  v40 was mine.** The file was not in v40's gate list. Measured at `7afeddff` in
+  a throwaway worktree before believing it. Three of the seven assert the cut
+  model v40 replaced; the other four are consequences nobody looked at. **They
+  are still red** — this run's territory named the file, and its seven cases
+  describe a board several rebuilds old. Retiring or rebuilding them is a pass of
+  its own, and doing it unattended alongside eight phases would have been the
+  worse call.
+- **The vitest runner exits 1 on a `[vitest-worker]: Timeout calling
+  "onTaskUpdate"`** that names no test and reproduces across runs. 438 files and
+  7351 tests pass. Recorded at the top of this report so a later exit 1 is not
+  read as a regression.
+- **`breaks` in `journeyBars.ts` is still dead** — nothing has read it since v40
+  deleted `cutPieces`. Left alone: it is outside this pack's phases.
