@@ -461,8 +461,23 @@ test("the surface is the pinned one, and the heading is not inside the card", as
   console.log(`ground ${r.ground} · card ${r.card.bg} ${r.card.w} ${r.card.border} r${r.card.radius}`);
   console.log(`columns ${r.nmW} / ${r.acW} · bars measured ${r.bars.length}, hidden ${r.hiddenBars}`);
 
-  expect(r.ground, "the page ground").toBe("rgb(250, 247, 242)");
-  expect(r.card.bg, "the card").toBe("rgb(247, 240, 230)");
+  /**
+   * ⚠️ THE BOARD PAINTS NOTHING NOW (v39 part two, Phase 1), so its computed background is
+   * transparent by design rather than by omission. It used to carry `--tl-ground` (#faf7f2) and
+   * the list wrapper carried another tone on top of it, stacked on the shell's panel — three
+   * surfaces, so the lane sat on a ground that was neither the board's nor the panel's.
+   *
+   * The claim moved rather than lapsing: that there is ONE ground from the masthead to the foot of
+   * the board is asserted in `calGround.measure.ts`, by sampling PAINTED pixels at four points
+   * across three widths and three ranges. A declared colour on one element could never have made
+   * that claim — it is exactly what was true here while the board looked wrong.
+   */
+  expect(r.ground, "the board paints a surface of its own again").toBe("rgba(0, 0, 0, 0)");
+  /* ⚠️ THE GROUP CARD DRAWS NO SURFACE SINCE v39 PART TWO. It carried `--tl-row`, which was one of
+     the two tones the calendar painted under the shell's panel. It keeps its border and its radius
+     — those separate one group from the next without adding a ground — and the claim that a
+     heading is not inside it, below, is untouched. */
+  expect(r.card.bg, "the group card paints a surface again").toBe("rgba(0, 0, 0, 0)");
   expect(r.card.border, "the card's border").toBe("rgb(239, 230, 218)");
   expect(r.card.w).toBe("1px");
   expect(r.card.radius).toBe("11px");
