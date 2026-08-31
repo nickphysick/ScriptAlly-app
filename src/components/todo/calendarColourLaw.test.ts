@@ -38,6 +38,10 @@ const FORBIDDEN: [string, RegExp][] = [
   /* ⚠️ BOUNDED, or it matches `blackout`, `blacklist` and the word inside any prose that survives
      the comment strip inside a template literal. */
   ["black", /(^|[^-\w])black([^-\w]|$)/i],
+  /* ⚠️ THE NAME, NOT ONLY THE VALUE. A token called `--tl-burgundy` holding near-black is a lie
+     that survives every check on colours, and it is the shape a restored accent comes back in:
+     somebody reads the name, believes it, and puts the hue back. Deleted, and forbidden. */
+  ["--tl-burgundy", /--tl-burgundy/i],
 ];
 
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");

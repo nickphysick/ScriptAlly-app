@@ -171,9 +171,10 @@
   /* ⚠️ THE BOARD HAS NO BURGUNDY (v39, the colour law). It was the accent for hovers, active
      segments, marker ink and an emphasis span — nine sites. Colour now appears ONLY in the pills;
      everything else is ink, cream, parchment, sage, pink or slate.
-     ⚠️ THE TOKEN IS RENAMED, NOT REPOINTED. `--tl-burgundy` holding #1c130f is a lie a reader
-     would have to open the file to catch, and a colour law enforced by a token called burgundy is
-     one keystroke from being undone by someone restoring what the name promises.
+     ⚠️ THE OLD ACCENT TOKEN IS DELETED, AND ITS NAME IS FORBIDDEN ALONGSIDE THE HEXES. A token
+     holding #1c130f under a name that promises a hue is a lie a reader has to open the file to
+     catch, and a colour law enforced through such a name is one keystroke from being undone by
+     somebody restoring what the name says.
      ⚠️ AND IT IS NOT `--tl-ink`, WHICH IS ALREADY TAKEN AND MEANS SOMETHING ELSE: this sheet's
      `--tl-ink` is #3a1c14, which v39 pins as the BODY colour. Two tokens, two values, and naming
      the darker one `ink` would have made every existing reader silently darker. */
@@ -189,7 +190,10 @@
   --card-closed-bd: #ddd0c0;
   --card-sh: 0 1px 3px rgba(58, 28, 20, .06);
   --card-hl: #1c130f;
-  --card-dt: #8a7a6c;
+  /* ⚠️ #6f6055, NOT THE PALETTE'S `muted`. #8a7a6c on white is 4.13:1 at full opacity — below AA
+     with no opacity left to raise, which part one flagged and could not fix from inside. The ruling
+     changes the pinned value; the ratio is re-measured by `calContrast`. */
+  --card-dt: #6f6055;
   /* the pills, one pair per tone */
   --pill-you-bg: #f5e2da;   --pill-you-bd: #e8c8bc;   --pill-you-tx: #1c130f;
   --pill-them-bg: #e9ede6;  --pill-them-bd: #d6ddd2;  --pill-them-tx: #5a6e58;
@@ -616,7 +620,11 @@
    being an object with weight. No colour, no opacity, no dimming of the words — the v37 hollow
    dimmed its text to .75 and that put the second line at 2.13:1, which was flagged then and is not
    being reintroduced now. FLAGGED for Nick: this is the one card state the ref does not pin. */
-.tl-p.hollow  { box-shadow: none; }
+/* ⚠️ PINNED BY THE RULING (v39 part two, Phase 5). Part one flagged this as the one card state the
+   ref did not draw and gave it only the thing quiet and closed share. It is a state of its own now:
+   a stretch past the date somebody named is transparent, dashed and quieter in its words. */
+.tl-p.hollow  { background: transparent; border: 1px dashed var(--card-closed-bd); box-shadow: none; }
+.tl-p.hollow .tl-hl, .tl-p.hollow .tl-cdt { color: #9c8878; }
 .tl-p.closedp { background: transparent; border-style: dashed; border-color: var(--card-closed-bd); box-shadow: none; }
 
 /* ⚠️ OWED IS THE ONE STATE THAT LIFTS, and it lifts without animating. A passed date, or a
@@ -667,7 +675,6 @@
    shortfall so a new one cannot hide behind it. */
 /* ⚠️ HOLLOW IS THE CONTINUATION PAST A NAMED DATE. Lateness is DRAWN — no fill, no word, no
    colour it does not already have. The label dims because the stretch is no longer the story. */
-.tl-p.hollow { background: transparent; }
 
 .tl-p.out { border-color: var(--bar-out-line); }
 .tl-p.req { border-color: var(--bar-req-line); }
@@ -678,7 +685,10 @@
    otherwise read as a bar nobody had finished drawing. */
 .tl-p.quiet { border-color: var(--bar-quiet-line); }
 .tl-p.closedp { border: 1.5px dashed var(--bar-closed-line); }
-.tl-p.hollow { border-style: solid; border-width: 1px; }
+/* ⚠️ RETIRED (v39 part two, Phase 5). This set `border-style: solid` on a hollow card and sat
+   LATER in the file than the rule that draws it, so the ruling's dashed border would have been
+   overridden by a line written for the bar it replaced — one selector, three declarations, and the
+   cascade taking the last. Found by counting the rules for the selector, not by reading them. */
 
 /* ── the markers ──────────────────────────────────────────────────────────────────────────── */
 /* ⚠️ THE HALO IS THE CLEARANCE. A marker sits ON the bar, so without a ring of the row's own

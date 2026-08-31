@@ -48,7 +48,12 @@ test("every word on a card clears 4.5:1 against the surface it sits on", async (
     const seen = new Set();
     for (const c of document.querySelectorAll(".tl-p")) {
       if (c.getBoundingClientRect().width <= 0) continue;
-      const fam = ["out","req","decide","quiet","closedp"].find((x) => c.classList.contains(x)) || "?";
+      const base = ["out","req","decide","quiet","closedp"].find((x) => c.classList.contains(x)) || "?";
+      /* ⚠️ HOLLOW IS ITS OWN CASE, because the ruling gives it its own ink — a stretch past its
+         named date is transparent, dashed, and quieter in its words. Keying by family alone
+         reported whichever of the two the board drew first, which is how a family that passes and
+         a family that does not came back as one number. */
+      const fam = base + (c.classList.contains("hollow") ? ".hollow" : "");
       const card = getComputedStyle(c).backgroundColor;
       for (const [what, sel] of [["headline", ".tl-hl"], ["detail", ".tl-cdt"]]) {
         const e = c.querySelector(sel);
@@ -113,10 +118,21 @@ test("every word on a card clears 4.5:1 against the surface it sits on", async (
    * Reported for Nick rather than resolved. Everything else on the card clears: headlines at
    * 17.5–18.3, and all three drawn pills between 4.66 and 14.59.
    */
-  const KNOWN = /\/detail$/;
+  /**
+   * ⚠️ THE CARVE-OUT MOVED WITH THE RULING, and both halves of that are worth stating.
+   *
+   * The DETAIL line was the shortfall part one flagged: `#8a7a6c` on white at 4.13:1 with no
+   * opacity left to raise. The ruling changed the pinned ink to `#6f6055`, and it now measures
+   * 6.03:1 — so that carve-out is GONE rather than kept as an exemption nobody re-measured.
+   *
+   * What is exempt now is the HOLLOW card, whose text the same ruling pins at `#9c8878`: on the
+   * ground it reads 3.38:1, headline and detail alike. It is a deliberate quietening of a stretch
+   * that has outlived its own date, and lifting it means changing a value the ruling set. Reported.
+   */
+  const KNOWN = /\.hollow\//;
   const unexpected = fails.filter((f) => !KNOWN.test(f.split(" ")[0]));
   expect(unexpected, `below 4.5:1 and not the known detail shortfall — ${unexpected.join(" | ")}`).toEqual([]);
   /* ⚠️ AND IT MUST STILL BE ONE. If the muted ink is ever darkened this goes red asking for the
      carve-out to be removed, rather than quietly keeping an exemption that has stopped applying. */
-  expect(fails.length, "the detail line now clears 4.5:1 — remove this carve-out").toBeGreaterThan(0);
+  expect(fails.length, "every known shortfall now clears 4.5:1 — remove this carve-out").toBeGreaterThan(0);
 });

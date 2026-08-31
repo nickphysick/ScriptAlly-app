@@ -38,15 +38,16 @@ export interface Pill {
  * not have. Flagged rather than resolved by silently reusing `Send the full`, which is a different
  * thing to send.
  *
- * ⚠️ AND IT IS `Answer the offer`, NOT THE APP'S EXISTING `Answer them`. The brief names the
- * former; `timelineCopy`'s row note still says the latter. Two surfaces, two wordings for one
- * deed — reported, because deciding which is right is a copy call rather than a code one.
+ * ⚠️ IT IS `Answer them`, WHICH IS THE APP'S OWN WORDING. Part one flagged the disagreement — the
+ * brief said "Answer the offer" and `timelineCopy`'s row note said "Answer them" — and the ruling
+ * is that the app wins: two surfaces stating one deed in two wordings is the fault, and the row
+ * note had it first.
  */
 export const DEEDS = {
   partial: "Send the partial",
   full: "Send the full",
   revision: "Send the revision",
-  offer: "Answer the offer",
+  offer: "Answer them",
   nudge: "Nudge due",
 } as const;
 
