@@ -134,6 +134,14 @@ const TEXT_INSET = 14;
  * depth. One expression, one width, for the rail's ticks and the bars and the fills alike.
  */
 /** the card's pinned left, matching `--tl-text-inset` in the stylesheet */
+/**
+ * ⚠️ THE ROW HEAD'S DOT, AND IT IS THE SAME BOX FOR BOTH KINDS. `StatusDot` draws a real journey;
+ * the pinned row holds no query, so it keeps a square rather than a dot invented for it. Both take
+ * this size, because if they did not the names beside them would start at two different x's and
+ * the column would read as two columns.
+ */
+const ROW_DOT = 18;
+
 const PILL_INSET = 13;
 
 /** the flex gap between the pill and the line it sits beside, matching `.tl-p`'s own */
@@ -1434,7 +1442,7 @@ data-rowkey={r.key}
               glyph and the palette; the pinned row keeps its square because it holds no query and
               a dot invented for it would state a journey that does not exist. */}
           {r.status
-            ? <StatusDot status={r.status} overrideSize={13} decorative />
+            ? <StatusDot status={r.status} overrideSize={ROW_DOT} decorative />
             : <i className="tl-sd" data-dot={r.dot} aria-hidden />}
           <span className="tl-nmwrap">
             <span className="tl-nm2">{r.name}</span>

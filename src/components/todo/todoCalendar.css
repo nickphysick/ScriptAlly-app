@@ -448,7 +448,10 @@
   text-transform: uppercase; color: var(--tl-label); margin-top: 2px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.tl-sd { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; border: 1.5px solid var(--tl-nearblack); }
+/* ⚠️ THE SAME BOX AS THE `StatusDot` BESIDE IT (`ROW_DOT`, 18px). The pinned row holds no query,
+   so it keeps a square rather than a dot invented for it — but a smaller box would start its name
+   at a different x and the head would read as two columns. */
+.tl-sd { width: 18px; height: 18px; border-radius: 50%; flex: 0 0 auto; border: 1.5px solid var(--tl-nearblack); }
 .tl-sd[data-dot="you"] { background: var(--tl-nearblack); }
 .tl-sd[data-dot="them"] { background: #f8e2d9; }
 .tl-sd[data-dot="quiet"] { background: transparent; border-color: #d3c4b3; }
