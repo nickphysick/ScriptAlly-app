@@ -1270,7 +1270,7 @@ data-rowkey={r.key}
         <div className="tl-c-ac">
           {act
             ? (
-              <button type="button" className="tl-abtn"
+              <button type="button" className="tl-abtn" aria-label={act.label}
                 /* ⚠️ A TASK IS FINISHED WHERE IT IS, THROUGH `quickDone` — the same committer the
                    To-do list ticks through, so the receipt and its Undo are the shared ones. Every
                    other deed OPENS the work rather than doing it, because every other deed needs
@@ -1279,7 +1279,12 @@ data-rowkey={r.key}
                   if (r.group === null && act.card) { void quickDone(act.card); return; }
                   openWork(r.key, today, act.itemKey, act.card ?? undefined);
                 }}>
-                {act.label}<span className="cv" aria-hidden>›</span>
+                {/* ⚠️ THE LABEL IS ITS OWN ELEMENT SO THE NARROW BOARD CAN COLLAPSE IT WITHOUT
+                    LOSING THE ACCESSIBLE NAME. `display: none` on the text would take the name with
+                    it and leave a button announced as "›". The wrapper is hidden and the button
+                    keeps an `aria-label` carrying the same words, so the control narrows on screen
+                    and says exactly what it did to a reader who cannot see it. */}
+                <span className="tl-ablbl">{act.label}</span><span className="cv" aria-hidden>›</span>
               </button>
             )
             : <span className="tl-adash" aria-hidden>–</span>}

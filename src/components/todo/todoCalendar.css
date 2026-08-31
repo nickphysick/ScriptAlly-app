@@ -955,3 +955,29 @@ button.tl-tchip { cursor: pointer; }
    change the row's box by 1px and shift every lane's centre against the rail's ticks; a
    transparent border of the same width keeps the geometry the alignment lock measures. */
 .tl-one .tl-rrow { border-top-color: transparent; }
+
+/* ══ THE NARROW BOARD (v37, Phase 9) ═════════════════════════════════════════════════════════
+   Measured before anything was changed: the lane is `viewport − 802`, so it holds 638px at 1440,
+   478 at 1280, 378 at 1180 and 266 at 1024. It crosses 320 at 1122px. Nothing overlapped at any
+   width and the page never scrolled sideways; what breaks first is the RAIL — seven of its eight
+   date labels collide from 1024 down — while bars go bare progressively (19 of 31 at 1440, 24 at
+   1280, 27 at 1024).
+
+   The two steps the brief authorises, in its order. Neither hides a row, adds a layout mode, or
+   introduces a horizontal scroll.
+
+   ⚠️ THE ACTION COLUMN KEEPS ITS BUTTON AND LOSES ITS WORDS, and the button keeps an aria-label
+   carrying them. Hiding the text with `display: none` would take the accessible name with it and
+   leave a control announced as "›". */
+@media (max-width: 1122px) {
+  .tl-board { --tl-ac-w: 44px; }
+  .tl-abtn { padding-inline: 0; justify-content: center; width: 100%; }
+  .tl-ablbl { display: none; }
+  .tl-hrow .tl-c-ac .tl-lbl3, .tl-rail .tl-c-ac .tl-lbl3 { display: none; }
+}
+/* ⚠️ AND ONLY THEN THE NAME, to a floor of 200px. A relationship's name is what a reader scans by,
+   so it is the last thing to give ground — and it stops at 200 rather than continuing, because
+   below that it is not a name, it is an abbreviation. */
+@media (max-width: 1000px) {
+  .tl-board { --tl-nm-w: 200px; }
+}
