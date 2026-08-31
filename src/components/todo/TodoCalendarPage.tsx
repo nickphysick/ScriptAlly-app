@@ -236,9 +236,19 @@ const Piece: React.FC<{
    * by taking the larger.
    */
   const inset = fade.left ? "var(--card-fade-inset)" : "var(--tl-text-inset)";
-  const contentLeft = lastMarkAt == null
-    ? inset
-    : `max(${inset}, calc(${pct(lastMarkAt - sg.from)} + calc(var(--mk) / 2) + 14px))`;
+  /**
+   * ⚠️ THE INSET IS FIXED, AND THE MARKS NO LONGER MOVE IT (v54, Phase 3).
+   *
+   * It was `max(inset, lastMark + mk/2 + 14px)` — text placed after whichever mark happened to
+   * ride on the card. Measured across the board that produced TWELVE distinct insets (15, 46, 101,
+   * 118, 119, 145, 172, 190, 216, 224, 376 and one card with none), so no two rows started their
+   * sentence in the same place and the eye had nothing to run down.
+   *
+   * v54 removes the cause rather than the symptom: status changes earlier than the card are a
+   * LEAD-IN drawn before its leading edge, so nothing rides on the card and nothing has to be got
+   * past. `fadeL` still takes a wider inset because that card's first pixels are dissolving.
+   */
+  const contentLeft = inset;
   return (
     <div
       /* ⚠️ THE CLASS LIST IS WRITTEN IN THE JSX, not built into a `const` above it. The style-reach
@@ -283,10 +293,27 @@ const Piece: React.FC<{
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(); } }}
     >
+      {/**
+        * ⚠️ THE FRAME AND THE CONTENT ARE SIBLINGS, AND THE MASK IS THE FRAME'S ALONE (v54).
+        *
+        * A mask erases everything inside the element it is set on. It was set on the CARD, which
+        * is the element containing the words — so a clipped card dissolved its own text along with
+        * its fill. Measured before this change: 22 of 23 cards masked, and 14 rows with text
+        * inside a dissolving zone, 26px of ink on thirteen of them. The rule's own comment reasons
+        * about dissolving the card, which is exactly right for a background and takes the sentence
+        * with it.
+        *
+        * The frame is the card's appearance — background, border, radius — and it is what
+        * dissolves. The content is a sibling of it, unmasked, at full opacity, and clipped by its
+        * own wrapper when it will not fit. Nothing about the card's box moves: the frame is
+        * `position: absolute; inset: 0`, so the date arithmetic still owns the geometry.
+        */}
+      <div className="tl-frame" aria-hidden />
       {/* ⚠️ THE PILL IS NOT INSIDE THE LABEL'S CONDITIONAL, and it used to be. A segment with an
           empty label rendered a card with NO pill and NO text — a blank white box with a border and
           a shadow, eight of them on a 32-card board. The pill never depended on the label: a card
           always knows whose move it is, which is the one thing it is for. */}
+      <div className="tl-content">
       <span className={`tl-pill ${pill.tone}`} data-pill={pill.text}>{pill.text}</span>
       {sg.label && (
         <>
@@ -305,6 +332,7 @@ const Piece: React.FC<{
           </span>
         </>
       )}
+      </div>
     </div>
   );
 };
@@ -1541,10 +1569,51 @@ data-rowkey={r.key}
               })()}
               onPick={() => pickSeg(r.key, sg)} />
           ))}
-          {bar.nodes.map((n) => (
-            <Marker key={n.key} n={n} selected={sel === n.key}
-              onPick={() => setSel((c) => (c === n.key ? null : n.key))} />
-          ))}
+          {/**
+            * ⚠️ THE LEAD-IN: MARKS BEFORE THE CARD, NEVER ON IT (v54, Phase 3).
+            *
+            * A card is the current wait, so every earlier status change is history — and history
+            * drawn ON the card is what forced the text to dodge it. Twelve distinct text insets
+            * across the board came from exactly that, and no two rows started their sentence in
+            * the same place.
+            *
+            * A mark whose date falls inside a card is dropped rather than moved. It is not lost:
+            * a clock inside the current wait IS "quiet for N days" and a bang IS the deed, both of
+            * which the card already states. Drawing it as well says one thing twice and puts it
+            * where the words are.
+            */}
+          {(() => {
+            const cardStart = new Map<string, number>();
+            for (const sg of bar.segs) {
+              const k = `${sg.rowKey}::${sg.lane}`;
+              cardStart.set(k, Math.min(cardStart.get(k) ?? Infinity, sg.from));
+            }
+            const lead = bar.nodes.filter((n) => {
+              const st = cardStart.get(`${n.rowKey}::${n.lane}`);
+              return st == null || n.at < st - 0.001;
+            });
+            const byLane = new Map<number, { first: number; to: number }>();
+            for (const n of lead) {
+              const st = cardStart.get(`${n.rowKey}::${n.lane}`);
+              if (st == null) continue;
+              const cur = byLane.get(n.lane);
+              byLane.set(n.lane, { first: Math.min(cur?.first ?? Infinity, n.at), to: st });
+            }
+            return (
+              <>
+                {/* the dotted run from the first mark to the card's leading edge */}
+                {[...byLane.entries()].map(([lane, r2]) => (
+                  <div key={`li-${lane}`} className="tl-leadin" aria-hidden
+                    style={{ left: pct(r2.first), width: pct(Math.max(0, r2.to - r2.first)),
+                      ...laneVar(lane) }} />
+                ))}
+                {lead.map((n) => (
+                  <Marker key={n.key} n={n} selected={sel === n.key}
+                    onPick={() => setSel((c) => (c === n.key ? null : n.key))} />
+                ))}
+              </>
+            );
+          })()}
           {r.items.map((it) => (
             <button
               key={it.key}

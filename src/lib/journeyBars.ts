@@ -881,6 +881,45 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
    * Both halves of the fraction now come from one date and the window cannot reach either.
    */
   const openedYmd = sendYmds.length ? sendYmds[sendYmds.length - 1] : null;
+
+  /**
+   * ⚠️ WHERE THE CURRENT WAIT BEGAN — v54's `waitFrom`, and the card's own start.
+   *
+   * A card was the whole relationship (v40) and is the CURRENT WAIT now: from the last status
+   * change to today, or to its named date. Everything earlier is a lead-in. Without this every
+   * card began at the window's left edge, so a board of long relationships drew a row of identical
+   * full-width slabs and the one fact a card is for — how long THIS has been going on — was the
+   * one thing its width did not say.
+   *
+   * Three sources, most specific first, and every one of them is already derived:
+   *   1. the last status-CHANGING event in view at or before today — the most specific answer
+   *      there is, and the only one that can see a change the query's own fields do not date;
+   *   2. `query.lastStatusChange`, the audit stamp for when the current status began — the same
+   *      field `cardActionYmd` reads to place an agent task on the day it landed;
+   *   3. the latest send, for a relationship whose status has never changed.
+   *
+   * ⚠️ IT IS NOT `waitingFrom`. That field exists, in `todoTimeline.ts`, and it is a row SORT KEY
+   * holding the EARLIEST send across the row's queries — when the relationship went out, which is
+   * the whole span this card is no longer drawing. Reading it here would restore the slab.
+   *
+   * ⚠️ AND IT IS NOT `sinceYmd`. That walk asks for the last change after which the move became
+   * the WRITER'S; it is the anchor for how long something has been owed. The card's start is the
+   * last change whoever it fell to.
+   */
+  const waitFromYmd = (() => {
+    for (let i = live.length - 1; i >= 0; i -= 1) {
+      const ymd = win.days[Math.floor(live[i].at)];
+      /* an event after today cannot be when something started — the same clamp `sinceYmd` needs */
+      if (ymd > win.today) continue;
+      if (statusOf(live[i].activityId)) return ymd;
+    }
+    const stamped = isoToYmd(query.lastStatusChange as string | undefined);
+    if (stamped) return stamped;
+    return openedYmd;
+  })();
+  /* ⚠️ NOT CLAMPED TO THE WINDOW. `fadesFor` asks whether the true start is before the window's
+     edge, so clamping here would erase the very fact the left fade states. */
+  const waitAt = waitFromYmd ? daysBetween(win.days[0], waitFromYmd) + EVENT_AT : 0;
   const openedAt = openedYmd ? daysBetween(win.days[0], openedYmd) + EVENT_AT : 0;
 
   /**
@@ -965,7 +1004,14 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
    * than the fragment.
    */
   const marks: number[] = [];
-  const pieces: { from: number; to: number }[] = [{ from: 0, to: barStop }];
+  /* ⚠️ THE CARD IS THE CURRENT WAIT (v54): `max(waitFrom, windowStart)` → today or the named end.
+     The clip to 0 is the DRAWING; `trueFrom` below keeps the unclipped value, which is what the
+     left fade is derived from. And it can never start after it ends — a wait stamped in the future
+     by a bad record would otherwise draw a negative-width card, which `border-box` clamps UP to
+     its borders and paints as a 3px sliver rather than as nothing. */
+  const pieces: { from: number; to: number }[] = [
+    { from: Math.max(0, Math.min(waitAt, barStop)), to: barStop },
+  ];
 
   /* ⚠️ NO REPLY TIME RECORDED → A DASHED RAIL AND NOTHING ELSE. No cap, no forecast, no end: the
      app does not know when to expect an answer, and drawing one would be inventing the date the
@@ -1044,7 +1090,9 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
   const runTo: Record<number, number> = {};
   const runFrom: Record<number, number> = {};
   pieces.forEach((p, i) => {
-    if (runFrom[runOf[i]] === undefined) runFrom[runOf[i]] = p.from <= 0.001 ? openedAt : p.from;
+    /* ⚠️ THE TRUE START IS THE WAIT'S OWN DAY, UNCLIPPED — that is what the left fade reads. It
+       was `openedAt`, the latest send, which was right while a card WAS the whole relationship. */
+    if (runFrom[runOf[i]] === undefined) runFrom[runOf[i]] = p.from <= 0.001 ? waitAt : p.from;
     /* the LAST piece of a run wins, because a run ends where its final piece does */
     runTo[runOf[i]] = p.to;
   });
@@ -1062,9 +1110,12 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
    * ⚠️ ONLY THE LIVE RUN NEEDS THIS. Every other run is `historical`, and `fillFor` returns 1 for
    * those without reading the anchor at all.
    */
+  /* ⚠️ THE LIVE RUN ANCHORS ON THE WAIT TOO (v54). It anchored on `openedAt` so that a fill's
+     numerator and denominator measured from one day; the fill is deleted, and what reads this now
+     is the left fade, which asks where the CARD begins. */
   pieces.forEach((p, i) => {
     if (p.to >= todayAt - 0.001 && todayAt <= span + 0.001 && todayAt >= -0.001) {
-      runFrom[runOf[i]] = openedAt;
+      runFrom[runOf[i]] = waitAt;
     }
   });
 
