@@ -35,6 +35,7 @@ import {
   type RowGroup,
 } from "../../lib/timelineGroups";
 import { pillText } from "../../lib/calendarPill";
+import { fadesFor, cardBounds } from "../../lib/calendarFade";
 import { cycleFor } from "../../lib/calendarMarquee";
 import { useConfirmAsk } from "./ConfirmAsk";
 /** this mount's pane section-id prefix — every workspace page stays mounted, so ids must not collide */
@@ -178,12 +179,15 @@ const laneVar = (lane: number): React.CSSProperties =>
  * one and the one the emptiness is there to make.
  */
 const Piece: React.FC<{
-  sg: Segment; selected: boolean; onPick: () => void;
-}> = ({ sg, selected, onPick }) => {
+  sg: Segment; days: number; selected: boolean; onPick: () => void;
+}> = ({ sg, days, selected, onPick }) => {
   const lines = barLines(sg.label);
   /* ⚠️ THE PILL IS THE APP'S OWN VOCABULARY — see `calendarPill`. The status while the agency
      holds the move, the deed while the writer does, and nothing else is reachable. */
   const pill = pillText(sg.status, holderOf(sg), sg.nudgeDue);
+  const facts = { trueFrom: sg.trueFrom, trueTo: sg.trueTo, from: sg.from, to: sg.to, days, live: sg.live };
+  const fade = fadesFor(facts);
+  const bounds = cardBounds(facts);
   return (
     <div
       /* ⚠️ THE CLASS LIST IS WRITTEN IN THE JSX, not built into a `const` above it. The style-reach
@@ -194,7 +198,12 @@ const Piece: React.FC<{
         /* ⚠️ THE FADES ARE THE SEGMENT'S OWN FACTS. `openLeft` means the stretch began before the
            window and `openRight` that it runs past it — both already derived, both already the
            reason the old renderer squared its ends. */
-        + `${sg.openLeft ? " fadeL" : ""}${sg.openRight || sg.live ? " fadeR" : ""}`
+        /* ⚠️ THE PREDICATES ARE THE ONLY SOURCE — see `calendarFade`. This read `openLeft` and
+           `openRight || live`, which is nearly the same and nearly is the problem: `openRight` is a
+           compound that also asks whether the journey is terminal, whether it closes, whether it is
+           open-ended and whether a reply window was given, so a card's edge dissolved because of a
+           decision about reply windows. */
+        + `${fade.left ? " fadeL" : ""}${fade.right ? " fadeR" : ""}`
         + `${selected ? " sel" : ""}`}
       style={{ left: barLeft(sg), width: barWidth(sg), ...laneVar(sg.lane) }}
       data-state={sg.state}
@@ -202,6 +211,13 @@ const Piece: React.FC<{
          row actually draws. Three variants of that bug shipped, each one a true sentence about a
          query the reader could not see, and none of them was catchable from appearance alone. */
       data-qid={sg.queryId}
+      /* ⚠️ THE STRETCH'S OWN DATES, so the fade audit can assert the classes against the NUMBERS
+         rather than asking a class about itself. The page published only the clipped coordinates
+         before, so every leading piece reported a start of 0 — which is where a clipped card
+         starts, not where its stretch began, and the audit could not be written at all. */
+      data-truefrom={bounds.start.toFixed(3)}
+      data-trueto={bounds.end.toFixed(3)}
+      data-days={String(days)}
       data-live={sg.live ? "1" : undefined}
       data-tip={sg.tip || undefined}
       onClick={onPick}
@@ -209,13 +225,17 @@ const Piece: React.FC<{
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(); } }}
     >
+      {/* ⚠️ THE PILL IS NOT INSIDE THE LABEL'S CONDITIONAL, and it used to be. A segment with an
+          empty label rendered a card with NO pill and NO text — a blank white box with a border and
+          a shadow, eight of them on a 32-card board. The pill never depended on the label: a card
+          always knows whose move it is, which is the one thing it is for. */}
+      <span className={`tl-pill ${pill.tone}`} data-pill={pill.text}>{pill.text}</span>
       {sg.label && (
         <>
           {/* ⚠️ THE PILL, THE HEADLINE AND THE DETAIL — three things on one line, in that order.
               The separator is an ELEMENT rather than a border on the detail, because the detail is
               the part that can be absent and a border would go with it, leaving the headline
               looking cut off. */}
-          <span className={`tl-pill ${pill.tone}`} data-pill={pill.text}>{pill.text}</span>
           <span className="tl-line">
             {/* ⚠️ ONE TRACK HOLDING BOTH, so the marquee moves them together. Scrolling the
                 headline while the detail stayed put would break the line in half mid-slide. */}
@@ -1331,7 +1351,7 @@ data-rowkey={r.key}
 
         <div className="tl-c-tl">
           {bar.segs.map((sg) => (
-            <Piece key={sg.key} sg={sg} selected={sel === sg.key}
+            <Piece key={sg.key} sg={sg} days={range.days} selected={sel === sg.key}
               onPick={() => pickSeg(r.key, sg)} />
           ))}
           {bar.nodes.map((n) => (

@@ -230,6 +230,12 @@ export interface Segment {
    * cut is the arithmetic.
    */
   trueFrom: number;
+  /**
+   * Where this stretch REALLY ends, in window coordinates — greater than the window's length when
+   * it continues past the right-hand edge. The mirror of `trueFrom`, and the other half of what
+   * the fade predicates are stated in.
+   */
+  trueTo: number;
   /** this stretch ended at a real event: it is finished, and a finished stretch is full */
   historical?: true;
   /**
@@ -1018,9 +1024,21 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
    * where there is one, the latest send otherwise. It is deliberately not clamped: the whole fault
    * this replaces was a clamp.
    */
+  /**
+   * ⚠️ THE RUN'S CLOSE, MIRRORING `runFrom`, and it exists so the fade predicates can be stated as
+   * arithmetic rather than inferred from appearance (v39 part two, Phase 3).
+   *
+   * `openRight` already means "continues past the window", but it is a COMPOUND — it also asks
+   * whether the journey is terminal, whether it closes, whether it is open-ended and whether a
+   * reply window was ever given. Reading a fade off it means reading four other decisions at the
+   * same time, and a lock over it can only ask the class about itself.
+   */
+  const runTo: Record<number, number> = {};
   const runFrom: Record<number, number> = {};
   pieces.forEach((p, i) => {
     if (runFrom[runOf[i]] === undefined) runFrom[runOf[i]] = p.from <= 0.001 ? openedAt : p.from;
+    /* the LAST piece of a run wins, because a run ends where its final piece does */
+    runTo[runOf[i]] = p.to;
   });
   /**
    * ⚠️ THE LIVE RUN ALWAYS ANCHORS ON `openedAt`, WHETHER OR NOT ITS FIRST PIECE IS CLIPPED.
@@ -1119,6 +1137,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
          months a nudge was visible and the piece began there. A run is one stretch and takes one
          anchor. */
       trueFrom: runFrom[runOf[i]],
+      trueTo: runTo[runOf[i]],
       /* ⚠️ A FINISHED STRETCH IS FULL, AND THERE ARE THREE WAYS TO BE FINISHED: it lies wholly
          behind today, it ENDS AT AN EVENT (something happened and the stretch stopped), or the
          journey is closed. A live relationship is made of completed stretches and one running

@@ -124,3 +124,86 @@ test("one ground from the masthead to the board, and the wash stops at today", a
   }
   for (const x of seen) console.log(`  ${x}`);
 });
+
+/* ══ FADES BY PREDICATE, AND NO EMPTY CARDS (v39 part two, Phases 3 and 4) ═══════════════════ */
+
+/**
+ * ⚠️ THE CLASSES ARE ASSERTED AGAINST THE STRETCH'S OWN DATES, never against its appearance.
+ *
+ * This audit could not be written at all until the page published its true start and end: the only
+ * coordinates in the DOM were the CLIPPED ones, so every leading piece reported a start of 0 —
+ * where a clipped card starts, not where its stretch began — and "does the class match the
+ * predicate" collapsed into asking the class about itself.
+ */
+test("every card fades exactly where it is cut, and no card is empty", async ({ page }) => {
+  const table: string[] = [];
+  let checked = 0;
+  const shapes = { L: 0, R: 0, LR: 0, none: 0 };
+
+  for (const width of WIDTHS) {
+    await openRoute(page, "/todo/calendar", { width, height: 900 });
+    await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+
+    for (const r of [0, 1, 2]) {
+      await setRangeTo(page, r);
+      const read = await page.evaluate(TAG + `(() => {
+        if (!vis(".tl-board")) return { fatal: "no board" };
+        const out = { cards: [], empties: [] };
+        for (const c of document.querySelectorAll(".tl-p")) {
+          const b = c.getBoundingClientRect();
+          if (b.width <= 0) continue;
+          out.cards.push({
+            qid: c.dataset.qid,
+            from: Number(c.dataset.truefrom), to: Number(c.dataset.trueto),
+            days: Number(c.dataset.days), live: c.dataset.live === "1",
+            L: c.classList.contains("fadeL"), R: c.classList.contains("fadeR"),
+            w: Math.round(b.width),
+          });
+          /* a card with no pill and no words is a blank box with a border and a shadow */
+          const pill = c.querySelector(".tl-pill");
+          const words = (c.textContent || "").trim();
+          if (!pill || !words) out.empties.push({ qid: c.dataset.qid, w: Math.round(b.width), pill: !!pill });
+        }
+        return out;
+      })()`) as any;
+      expect(read.fatal, `${width}px r${r}: ${read.fatal}`).toBeUndefined();
+      expect(read.cards.length, `${width}px r${r}: no cards`).toBeGreaterThan(5);
+
+      const EPS = 0.1;
+      const wrong: string[] = [];
+      for (const c of read.cards) {
+        expect(Number.isFinite(c.from) && Number.isFinite(c.to) && Number.isFinite(c.days),
+          `${c.qid}: the card did not publish its own dates`).toBe(true);
+        const wantL = c.from < -EPS;
+        const wantR = c.live || c.to > c.days + EPS;
+        checked += 1;
+        const key = (wantL ? "L" : "") + (wantR ? "R" : "");
+        shapes[(key || "none") as keyof typeof shapes] += 1;
+        if (c.L !== wantL || c.R !== wantR) {
+          wrong.push(`${c.qid} [${c.from.toFixed(1)}..${c.to.toFixed(1)} of ${c.days}${c.live ? ", live" : ""}]`
+            + ` carries ${(c.L ? "L" : "-") + (c.R ? "R" : "-")} and requires ${(wantL ? "L" : "-") + (wantR ? "R" : "-")}`);
+        }
+      }
+      if (width === 1440) {
+        for (const c of read.cards.slice(0, 10)) {
+          table.push(`  ${String(c.qid).padEnd(22)} ${c.from.toFixed(1).padStart(7)}..${c.to.toFixed(1).padStart(6)}`
+            + ` of ${String(c.days).padStart(3)} ${c.live ? "live" : "    "}  carries ${(c.L ? "L" : "-") + (c.R ? "R" : "-")}`);
+        }
+      }
+      expect(wrong, `${width}px r${r}: fade classes do not match the predicates:\n    ${wrong.join("\n    ")}`)
+        .toEqual([]);
+
+      /* ⚠️ NO EMPTY CARD. Eight of thirty-two were blank white boxes — the pill was rendered inside
+         the label's own conditional, so a segment with no label drew a card with nothing in it. */
+      expect(read.empties.map((e: any) => `${e.qid} w=${e.w} pill=${e.pill}`),
+        `${width}px r${r}: a card is empty`).toEqual([]);
+    }
+  }
+  console.log(`fade audit — ${checked} cards checked; shapes ${JSON.stringify(shapes)}`);
+  for (const t of table) console.log(t);
+  /* ⚠️ EVERY SHAPE MUST OCCUR. A board where nothing is cut satisfies "the classes match" by having
+     no fades at all, and a board where everything is cut proves nothing about the negative case. */
+  expect(shapes.none, "no card is uncut — the negative case is unexercised").toBeGreaterThan(0);
+  expect(shapes.L + shapes.LR, "no card starts before the window").toBeGreaterThan(0);
+  expect(shapes.R + shapes.LR, "no card runs past today or the window").toBeGreaterThan(0);
+});
