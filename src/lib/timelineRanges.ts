@@ -50,7 +50,7 @@ export interface TimelineRange {
  * one rule rather than three numbers, and it cannot drift apart between stops.
  */
 export const TIMELINE_RANGES: readonly TimelineRange[] = [
-  { label: "1 month",  days: 31,  grain: "day",   dense: 2 },
+  { label: "Month",    days: 31,  grain: "day",   dense: 2 },
   { label: "3 months", days: 91,  grain: "week",  dense: 3 },
   { label: "6 months", days: 181, grain: "month", dense: 4 },
 ];
@@ -66,4 +66,12 @@ export const TIMELINE_RANGES: readonly TimelineRange[] = [
 export const pastDaysOf = (r: TimelineRange): number => (r.days - 1) / 2;
 
 /** The default, and the one every earlier pack measured against. */
-export const DEFAULT_RANGE_INDEX = 1;
+/**
+ * ⚠️ THE BOARD OPENS ON THE MONTH (v54, Phase 1) — it opened on three months.
+ *
+ * The wider stops answer "how has this year gone"; a board a writer opens to see what is being
+ * asked of them wants the near field, where a card is wide enough to say something and a day is
+ * far enough from its neighbour to be a date rather than a smear. The other two stops are
+ * unchanged and one click away.
+ */
+export const DEFAULT_RANGE_INDEX = 0;

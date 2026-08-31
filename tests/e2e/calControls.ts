@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { TIMELINE_RANGES } from "../../src/lib/timelineRanges";
 
 /**
  * Driving the Calendar's board controls, from ONE place (v40, Phase 6).
@@ -50,7 +51,14 @@ async function pick(page: Page, row: string, label: string): Promise<void> {
 }
 
 /** the three ranges, by index, in `TIMELINE_RANGES` order */
-export const RANGE_LABELS = ["1 month", "3 months", "6 months"] as const;
+/**
+ * ⚠️ SPLICED FROM THE APP'S OWN TABLE, NEVER RETYPED. This list was three hand-written strings and
+ * it went stale twice: once when v35 deleted the 1-week and 2-week stops (four packs then drove
+ * indices 3 and 4 against a three-stop control, where they clamp, so two of five iterations
+ * silently measured the same board twice), and again when v54 renamed "1 month" to "Month". A
+ * label that comes from the control it drives cannot go stale.
+ */
+export const RANGE_LABELS: readonly string[] = TIMELINE_RANGES.map((r) => r.label);
 
 export async function setRangeTo(page: Page, i: number): Promise<void> {
   await pick(page, "Range", RANGE_LABELS[i]);

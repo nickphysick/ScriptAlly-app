@@ -1,0 +1,57 @@
+import { test, expect } from "@playwright/test";
+import { openRoute } from "./measure";
+import { setRangeTo, RANGE_LABELS } from "./calControls";
+
+/**
+ * ⚠️ TODAY IS THE MIDDLE OF THE LANE, AT EVERY RANGE AND EVERY WIDTH (v54, Phase 1).
+ *
+ * The window is `today − range/2 … today + range/2`, so today's painted x is the lane's own
+ * horizontal centre. That is a claim about arrangement, not about a number, and it is asserted as
+ * an equality between two measured things — the painted line against the measured lane — rather
+ * than against a coordinate written here, which would fail on every legitimate width change and
+ * say nothing about whether the board is centred.
+ *
+ * ⚠️ AND THE RANGE IS ASSERTED TO HAVE CHANGED. A sweep whose control did not take measures one
+ * board three times and reports a clean table; the trigger's own summary names the non-default
+ * range, so it is read back after every step.
+ */
+const WIDTHS = [1920, 1440, 1280, 1024, 900, 768] as const;
+
+test("today's painted x is the lane's centre, every range, every width", async ({ page }) => {
+  const rows: string[] = [];
+  const seen = new Set<string>();
+  for (const w of WIDTHS) {
+    await openRoute(page, "/todo/calendar", { width: w, height: 900 });
+    await page.waitForTimeout(700);
+    for (let i = 0; i < RANGE_LABELS.length; i++) {
+      await setRangeTo(page, i);
+      const at = await page.evaluate(() => {
+        const on = [...document.querySelectorAll(".tl-mbtn")]
+          .find((b) => (b.textContent || "").startsWith("Display"));
+        return (on?.textContent || "").trim();
+      });
+      /* the default range names nothing in the summary — that IS its reading */
+      const want = i === 0 ? "Display ▾" : `Display · ${RANGE_LABELS[i]} ▾`;
+      expect(at, `[${w}] range ${RANGE_LABELS[i]} was not reached`).toBe(want);
+      seen.add(`${w}:${i}`);
+
+      const m = await page.evaluate(() => {
+        const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().width > 0;
+        const lane = [...document.querySelectorAll(".tl-c-tl")].filter(vis)[0] as HTMLElement | undefined;
+        const line = document.querySelector(".tl-todayline") as HTMLElement | null;
+        if (!lane || !line) return null;
+        const lb = lane.getBoundingClientRect();
+        const tb = line.getBoundingClientRect();
+        return { laneCentre: lb.left + lb.width / 2, todayX: tb.left + tb.width / 2,
+          laneW: lb.width };
+      });
+      expect(m, `[${w}/${RANGE_LABELS[i]}] no lane or no today line to measure`).not.toBeNull();
+      const off = Math.abs(m!.todayX - m!.laneCentre);
+      rows.push(`${String(w).padEnd(5)} ${RANGE_LABELS[i].padEnd(9)} lane ${m!.laneW.toFixed(0)}px`
+        + ` · today ${m!.todayX.toFixed(1)} · centre ${m!.laneCentre.toFixed(1)} · off ${off.toFixed(2)}px`);
+      expect(off, `[${w}/${RANGE_LABELS[i]}] today is not the lane's centre`).toBeLessThan(1);
+    }
+  }
+  for (const r of rows) console.log(r);
+  expect(seen.size, "width × range combinations visited").toBe(WIDTHS.length * RANGE_LABELS.length);
+});

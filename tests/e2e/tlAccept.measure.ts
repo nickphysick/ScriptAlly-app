@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
-import { setRangeTo } from "./calControls";
+import { setRangeTo, RANGE_LABELS } from "./calControls";
 
 /**
  * Phase 5 — the range pack's acceptance, every width against every range.
@@ -24,9 +24,9 @@ interface Want {
    ⚠️ AND THE SPANS ARE ODD (v40, Phase 2), because today sits at the middle CELL of the lane —
    "today − range/2 … today + range/2" is range+1 days inclusive, so an even span has no middle. */
 const WANT: Want[] = [
-  { name: "1 month",  days: 31,  cols: 31, dense: 2, initials: false, barText: true , rowSay: true, disc: 22 },
-  { name: "3 months", days: 91,  cols: 13, dense: 3, initials: false, barText: true , rowSay: true, disc: 22 },
-  { name: "6 months", days: 181, cols: 7,  dense: 4, initials: false, barText: true , rowSay: true, disc: 22 },
+  { name: RANGE_LABELS[0], days: 31,  cols: 31, dense: 2, initials: false, barText: true , rowSay: true, disc: 22 },
+  { name: RANGE_LABELS[1], days: 91,  cols: 13, dense: 3, initials: false, barText: true , rowSay: true, disc: 22 },
+  { name: RANGE_LABELS[2], days: 181, cols: 7,  dense: 4, initials: false, barText: true , rowSay: true, disc: 22 },
 ];
 
 test("Phase 5 — four widths, five ranges, one table", async ({ page }) => {

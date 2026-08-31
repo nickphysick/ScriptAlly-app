@@ -18,7 +18,7 @@ import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { openRoute } from "./measure";
-import { setRangeTo, showGrouped } from "./calControls";
+import { setRangeTo, showGrouped, RANGE_LABELS } from "./calControls";
 
 /**
  * ⚠️ `.tl-plbl` IS `.tl-hl` SINCE v37. The bar's single label became two lines — what it is, and
@@ -624,7 +624,8 @@ const sample = async (page: import("@playwright/test").Page, shot: string) =>
 /* ══ THE RAIL, AND THE ONE CLAIM THAT DECIDES WHETHER IT IS BUILT (v36 part two, Phase 4) ════ */
 
 test("⚠️ a rail tick lands on the same pixel as that date inside a card lane", async ({ page }) => {
-  for (const [label, idx] of [["1 month", 0], ["3 months", 1], ["6 months", 2]] as const) {
+  /* ⚠️ SPLICED, NEVER RETYPED — the labels come from the control's own table (v54). */
+  for (const [idx, label] of RANGE_LABELS.map((l, i) => [i, l] as const)) {
     await openRoute(page, "/todo/calendar", { width: 1440, height: 980 });
     await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
     await setRangeTo(page, idx);
