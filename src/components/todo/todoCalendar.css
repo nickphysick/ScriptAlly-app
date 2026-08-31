@@ -595,10 +595,48 @@
    so setting one on the card dissolved the sentence with the fill; setting it on a sibling cannot
    reach the words at all. */
 .tl-p {
+  /* ⚠️ DECLARED HERE AND OVERRIDDEN INLINE BY THE PAGE, which is what the geometry actually is.
+     Without a declaration `var(--l)` resolves to nothing and the WHOLE declaration is dropped — so
+     a card that failed to receive its geometry would fall back to `position: absolute` with an
+     auto width at the lane's left edge: plausible-looking, and wrong. At zero it collapses to
+     nothing, which is visible as absent. The token-resolution lock is what found this. */
+  --l: 0px; --w: 0px;
   position: absolute; top: 50%; transform: translateY(-50%);
+  left: var(--l); width: var(--w);
   height: var(--bar-h); box-sizing: border-box;
   display: flex; align-items: center;
   z-index: 2; cursor: pointer;
+  transition: width .15s cubic-bezier(.22,.8,.3,1), left .15s cubic-bezier(.22,.8,.3,1);
+}
+/* ⚠️ A TIGHT CARD OPENS RIGHTWARDS FROM ITS START, so the date it begins on does not move — that
+   date is the one thing the card's position states. `--hx` is its resting `--l` except where
+   opening rightwards would run past the lane, in which case the fit pass slides it left by the
+   minimum needed and the card's RIGHT edge lands inside the lane instead. */
+/* ⚠️ `.tl-force-open` IS THE MEASUREMENT'S HOOK AND CARRIES NO STYLE OF ITS OWN. Playwright's
+   `hover` moves a real pointer, which a neighbouring card's own hover then steals; the class puts
+   the card in the SAME state the hover rule produces without a pointer being anywhere. */
+.tl-p[data-tight]:hover,
+.tl-p[data-tight]:focus-visible,
+.tl-p[data-tight].tl-force-open {
+  width: var(--exp, var(--w)); left: var(--hx, var(--l)); z-index: 20;
+}
+/* ⚠️ THE SOFT EDGE IS ON THE TEXT'S OWN WRAPPER AND ONLY WHILE IT IS CLIPPED. It is a different
+   mask from the frame's: the frame's says the CARD is cut by the window, this says the WORDS run
+   past the card. An opened card is not clipped, so it carries neither. */
+/* ⚠️ THE DETAIL DROPS ONLY WHERE THE OPENED CARD WOULD BE WIDER THAN THE LANE — there is nowhere
+   for it to open to. The headline and the pill never drop: whose move it is and what this is are
+   the two things a card exists to say, and v40's ladder removed both on sixteen of twenty-three
+   cards at six months. */
+.tl-p[data-nodetail] .tl-cdt, .tl-p[data-nodetail] .tl-csep { display: none; }
+.tl-p[data-tight] .tl-line {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 22px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 22px), transparent);
+}
+.tl-p[data-tight]:hover .tl-line,
+.tl-p[data-tight]:focus-visible .tl-line,
+.tl-p[data-tight].tl-force-open .tl-line { -webkit-mask-image: none; mask-image: none; }
+@media (prefers-reduced-motion: reduce) {
+  .tl-p { transition: none; }
 }
 .tl-frame {
   position: absolute; inset: 0; pointer-events: none;
@@ -663,9 +701,6 @@
    fit pass and published as `data-tier`; every rung below `full` is the one above it with a part
    removed, so nothing is restyled on the way down and a card cannot change its identity by getting
    narrower. */
-.tl-p[data-tier="headline"] .tl-cdt,
-.tl-p[data-tier="headline"] .tl-csep { display: none; }
-.tl-p[data-tier="pill"] .tl-line { display: none; }
 /* ⚠️ AND THE PILL RETURNS TO THE CARD'S OWN LEFT EDGE at this rung, ahead of every mark. The
    per-card offset exists to keep WORDS out from under a mark; with the words gone there is nothing
    to keep clear, and the offset would push the pill off the card's right edge instead — measured,
@@ -676,28 +711,14 @@
    and disagreed by 33px on a clipped card — the pass decided the pill cleared the first mark at
    13px and the sheet painted it at 46, through the mark. The pass measures the card's real offset
    now, so this states it and nothing else. The fallbacks are for a card the pass has not reached. */
-.tl-p[data-tier="pill"] .tl-content > * { margin-left: var(--pill-left, var(--tl-text-inset)); }
-.tl-p[data-tier="pill"].fadeL .tl-content > * { margin-left: var(--pill-left, var(--card-fade-inset)); }
 /* ⚠️ NEITHER SIDE HAD ROOM. The card keeps its span, its tone and its tooltip; a pill clipped to
    nothing says less than no pill does. */
-.tl-p[data-noroom] .tl-pill { display: none; }
 /* ⚠️ THE STUB IS A DISC, AND IT IS THE CARD ITSELF — not a marker drawn where a card would be. It
    keeps the card's own tone, so a stub still says whose move it is by colour where it has no room
    to say it in words. */
 /* ⚠️ THE DISC IS THE CARD'S WIDTH AND THE FRAME'S RADIUS. Sizing is the card's, appearance is the
    frame's — the same split as everywhere else, so a stub cannot become the one shape that draws
    its own border. */
-.tl-p[data-tier="stub"] {
-  width: var(--bar-h) !important; padding: 0;
-  display: flex; align-items: center; justify-content: center;
-}
-.tl-p[data-tier="stub"] .tl-frame { border-radius: 999px; }
-.tl-p[data-tier="stub"] .tl-content { justify-content: center; }
-.tl-p[data-tier="stub"] .tl-line { display: none; }
-.tl-p[data-tier="stub"] .tl-pill {
-  width: 18px; height: 18px; min-width: 18px; padding: 0; border-radius: 999px;
-  font-size: 0; margin: 0 !important; overflow: hidden;
-}
 .tl-track { display: inline-flex; width: max-content; align-items: baseline; gap: 10px; white-space: nowrap; will-change: transform, opacity; }
 .tl-track > * { flex: 0 0 auto; }
 .tl-hl { font-family: 'Playfair Display', Georgia, serif; font-size: 13.5px; font-weight: 500; color: var(--card-hl); line-height: 1.25; }

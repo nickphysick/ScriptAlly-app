@@ -36,7 +36,6 @@ import {
 } from "../../lib/timelineGroups";
 import { pillText } from "../../lib/calendarPill";
 import { fadesFor, cardBounds } from "../../lib/calendarFade";
-import { tierFor, STUB_MAX_W } from "../../lib/cardTier";
 import { TAB_ORDER, TAB_LABEL, rowInTab, tabOf, type TimelineTab } from "../../lib/timelineViews";
 import { useConfirmAsk } from "./ConfirmAsk";
 /** this mount's pane section-id prefix — every workspace page stays mounted, so ids must not collide */
@@ -266,7 +265,18 @@ const Piece: React.FC<{
            decision about reply windows. */
         + `${fade.left ? " fadeL" : ""}${fade.right ? " fadeR" : ""}`
         + `${selected ? " sel" : ""}`}
-      style={{ left: barLeft(sg), width: barWidth(sg), ...laneVar(sg.lane),
+      /**
+       * ⚠️ THE GEOMETRY IS CUSTOM PROPERTIES, NOT `left` AND `width` (v54, Phase 4).
+       *
+       * An inline `width` beats any stylesheet rule, so a hover rule could never open a card: the
+       * declaration it would have to override is on the element itself. `--l` and `--w` are the
+       * card's resting geometry from the date arithmetic; `--exp` and `--hx` are what an opened
+       * card becomes, written by the fit pass. The rule reads whichever pair applies, and the
+       * transition is on `width` and `left`, which are now stylesheet properties.
+       */
+      style={{ ...laneVar(sg.lane),
+        ["--l" as string]: barLeft(sg),
+        ["--w" as string]: barWidth(sg),
         ["--content-left" as string]: contentLeft }}
       /* ⚠️ THE RELATIONSHIP'S OWN IDENTITY, ON THE ELEMENT, so a lock can count cards PER
          RELATIONSHIP rather than per row. A row holds one card per drawn query, and a writer with
@@ -644,110 +654,69 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
          * wrong one. Cleared, the card is in its `full` layout, which is the state every rung is
          * a reduction OF.
          */
-        seg.style.removeProperty("--pill-left");
-        seg.removeAttribute("data-noroom");
+        /**
+         * ⚠️ CLIP AND OPEN, NOT DROP (v54, Phase 4) — and this replaces the four-rung ladder.
+         *
+         * v40 answered "the words do not fit" by removing some: the detail went, then the words,
+         * then the card became a disc. That is a decision made FOR the reader, and it is made on
+         * every card whose dates happen to be close together — on the six-month board sixteen of
+         * twenty-three cards had lost their sentence. v54 keeps the words and clips them with a
+         * soft edge; the card opens on hover to exactly what they need.
+         *
+         * The detail drops in ONE case only: where even the opened card would be wider than the
+         * lane, so there is nowhere for it to open TO. The headline and the pill never drop —
+         * whose move it is and what this is are the two things a card exists to say.
+         */
+        seg.style.removeProperty("--exp");
+        seg.style.removeProperty("--hx");
+        seg.removeAttribute("data-tight");
+        seg.removeAttribute("data-nodetail");
         delete seg.dataset.tier;
-        const pillW = pillEl ? pillEl.getBoundingClientRect().width : 0;
-        const left = pillEl && line
-          ? pillEl.getBoundingClientRect().left - seg.getBoundingClientRect().left
-          : 0;
-        const room = seg.clientWidth - left;
+        if (!line || !track || !pillEl) continue;
 
-        /* ⚠️ THE STUB IS A CARD WIDTH, NOT A ROOM — the ref pins 60px and means the CARD. A card
-           that narrow has nowhere to put a pill however its marks fall, and it is drawn as a disc
-           rather than as a squeezed version of something else. */
-        if (seg.clientWidth < STUB_MAX_W) {
-          seg.dataset.tier = "stub"; delete seg.dataset.over; continue;
+        const lane = seg.parentElement?.getBoundingClientRect();
+        const cb = seg.getBoundingClientRect();
+        const inset = parseFloat(getComputedStyle(seg).getPropertyValue(
+          seg.classList.contains("fadeL") ? "--card-fade-inset" : "--tl-text-inset")) || 0;
+        const detail = track.querySelector<HTMLElement>(".tl-cdt");
+
+        /* what the content needs: the inset, the pill, its gap, the whole track, and the air the
+           content pays on its right — plus the fade's own width where the card's right edge is
+           dissolving, or the last word opens straight into the dissolve */
+        const fadePad = seg.classList.contains("fadeR")
+          ? parseFloat(getComputedStyle(seg).getPropertyValue("--card-fade")) || 0 : 0;
+        const needed = () => inset + pillEl.getBoundingClientRect().width + PILL_GAP
+          + track.scrollWidth + CONTENT_MARGIN_R + fadePad;
+
+        const laneW = lane ? lane.width : Infinity;
+        let want = needed();
+
+        /* ⚠️ THE DETAIL DROPS ONLY WHERE THERE IS NOWHERE TO OPEN TO. Measured against the LANE,
+           not against the card: a narrow card with a wide lane beside it can open. */
+        if (want > laneW && detail) {
+          seg.setAttribute("data-nodetail", "1");
+          want = needed();
         }
-        if (!line || !track) continue;
-        /* ⚠️ MEASURE THE RUNGS IN ORDER, TOP DOWN, RESETTING FIRST — a tier left on from the last
-           pass changes what the next measurement sees, which is the latch this file already
-           records for `display`. The detail's own width comes from the track less the headline,
-           so a hidden detail cannot report zero and win the comparison. */
-        const hl = track.querySelector<HTMLElement>(".tl-hl");
 
-        /**
-         * ⚠️ AND THE BOTTOM RUNG PUTS THE PILL BACK IN FRONT OF THE MARKS.
-         *
-         * "The text starts after the last mark" is a rule about TEXT, and at this rung there is
-         * none: the words have already gone. What is left is the pill, which is the one thing a
-         * card is for — it says whose move it is — and where the room after the marks cannot hold
-         * even that, the honest place for it is the card's own left edge, ahead of every mark,
-         * where nothing is obscured in either direction. Measured before this: five pills painted
-         * OUTSIDE their own cards, clipped to nothing, on cards 314–403px wide. A card that wide
-         * cannot become a disc — its width is its span, which is data — so the stub is not the
-         * answer here; the stub is for a card too narrow to hold anything at all.
-         */
-        seg.dataset.tier = tierFor({
-          card: seg.clientWidth, room,
-          /* ⚠️ THE RIGHT MARGIN IS PART OF WHAT THE WORDS NEED. `.tl-p > *` pays 12px on its
-             right, so a rung chosen without it says "this fits" about content that is 12px too
-             wide — and the card then draws a clipped detail, which is the one thing the ladder
-             exists to stop. Measured: the marquee's own census found 0 overflowing cards either
-             way, so the fault was invisible from that side. */
-          full: pillW + PILL_GAP + track.scrollWidth + CONTENT_MARGIN_R,
-          headline: pillW + PILL_GAP + (hl ? hl.getBoundingClientRect().width : 0) + CONTENT_MARGIN_R,
-        });
+        /* ⚠️ THE PASS PUBLISHES ITS OWN NUMBERS, so a lock reads what the decision was made from
+           rather than recomputing it. A probe that re-derives `needed` is a second implementation
+           of this arithmetic, and the two disagreeing is indistinguishable from the feature being
+           broken — which cost a round here: the probe said a card needed 398px in a 250px lane
+           while the pass had decided otherwise, and only publishing both settled which was wrong. */
+        seg.dataset.need = String(Math.ceil(want));
+        seg.dataset.lane = String(Math.round(laneW));
+        seg.dataset.hasdetail = detail ? "1" : "0";
 
-        /**
-         * ⚠️ AT THE BOTTOM RUNG THE PILL'S SIDE IS MEASURED, NOT ASSUMED.
-         *
-         * Putting it back at the card's left edge is right whenever the first mark is far enough
-         * in to leave room, and wrong when a status change happened days after the send — measured,
-         * one card put a 64px pill at 590 with a mark painted across 592–614. Both sides are
-         * legitimate places for it; which one has room is a fact about this card, so it is asked
-         * rather than decided. Where neither side can hold it the pill is not drawn at all: the
-         * card keeps its span, its tone and its tooltip, and a pill clipped to nothing says less
-         * than no pill does.
-         */
-        if (seg.dataset.tier === "pill" && pillEl) {
-          /**
-           * ⚠️ THE INSET IS MEASURED, NEVER ASSUMED — and assuming it was a real bug that the
-           * per-card locks could not see.
-           *
-           * `PILL_INSET` is the pinned 13px, and a `fadeL` card takes 46 instead: its first pixels
-           * are dissolving, so the stylesheet floors the offset there. The first version of this
-           * compared the first mark against 13 on every card, decided the pill fitted ahead of it,
-           * and the stylesheet then painted it at 46 — straight through a mark. Measured at
-           * 1440 / 1 month: a pill at 621–706 across marks at 681–703 and 703–725, on a card
-           * carrying `--pill-left: 13px`. Two expressions of one position, disagreeing by 33px.
-           *
-           * `left` is that offset, already measured above with the property cleared, so it is what
-           * the browser will actually apply. Nothing here needs to know which case it is in.
-           */
-          const cardL = seg.getBoundingClientRect().left;
-          const marksOn = markLefts(seg).map((x) => x - cardL);
-          /* ⚠️ THE INSET IS READ FROM THE TOKEN THAT DEFINES IT, never assumed. A `fadeL` card
-             floors its content at `--card-fade-inset` because its first pixels are dissolving;
-             every other card takes `--tl-text-inset`. Writing 13 and 46 here would be a second
-             source for two values the stylesheet owns, and the first version of this did exactly
-             that and placed a pill 33px inside a mark. */
-          const cs = getComputedStyle(seg);
-          const inset = parseFloat(cs.getPropertyValue(
-            seg.classList.contains("fadeL") ? "--card-fade-inset" : "--tl-text-inset")) || 0;
-          const first = marksOn.length ? Math.min(...marksOn) : Infinity;
-          /* ⚠️ AND EACH SIDE IS CHECKED AGAINST ITS OWN ROOM. Ahead of the marks that is the gap
-             between the inset and the first mark; past them it is what is left to the card's right
-             edge, less the margin the content pays there. */
-          const after = marksOn.length ? Math.max(...marksOn) + MARK_W + 14 : inset;
-          if (pillW <= first - inset + 1) {
-            seg.style.setProperty("--pill-left", `${inset}px`);
-          } else if (pillW <= seg.clientWidth - after - CONTENT_MARGIN_R + 1) {
-            seg.style.setProperty("--pill-left", `${after}px`);
-          } else seg.setAttribute("data-noroom", "1");
-        }
-        /**
-         * ⚠️ MEASURED, THEN MARKED — the words are never removed.
-         *
-         * `barFit` used to drop the detail, then the whole line, wherever the text would not fit.
-         * A card with no words says nothing, and the reader had no way to find out what it would
-         * have said. The words stay; the ones past the edge arrive on hover.
-         *
-         * ⚠️ `scrollWidth` ON THE TRACK, `clientWidth` ON THE LINE. The track is what overflows and
-         * the line is the window onto it — measuring one element against itself reports zero
-         * forever. The track is `inline-flex` for the same reason the old lines were
-         * `inline-block`: scrollWidth on an inline box is meaningless.
-         */
+        if (want <= cb.width + 1) continue;   /* it fits — no clip, no open, no mask */
+
+        seg.setAttribute("data-tight", "1");
+        seg.style.setProperty("--exp", `${Math.ceil(want)}px`);
+        /* ⚠️ RIGHTWARDS FROM ITS START, and left only by the minimum needed. The start date is what
+           the card's position states, so it moves last and least. */
+        const restLeft = cb.left - (lane ? lane.left : 0);
+        const over = restLeft + want - laneW;
+        seg.style.setProperty("--hx", over > 0 ? `${Math.max(0, restLeft - over)}px` : `${restLeft}px`);
+
         /* ⚠️ THE OVERFLOW BOOKKEEPING WENT WITH THE MARQUEE. `fits` and `data-over` existed to
            tell the hover animation how far to slide; the ladder never leaves a line overflowing,
            so both were describing a state the board can no longer be in. */
