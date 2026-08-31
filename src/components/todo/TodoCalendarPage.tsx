@@ -1625,6 +1625,23 @@ data-rowkey={r.key}
             * which the card already states. Drawing it as well says one thing twice and puts it
             * where the words are.
             */}
+          {/**
+            * ⚠️ THE GHOST RINGS: a named date past the card's end, drawn as a place rather than a
+            * thing. Dotted while it is still ahead; solid with a badge once it has arrived, which
+            * is the one moment it stops being a forecast and starts being a deed.
+            *
+            * ⚠️ IT CLEARS THE CARD BY CONSTRUCTION, not by a tuned offset: it is only emitted for
+            * a date PAST the card's end, and it is centred on that date, so the gap is whatever
+            * the dates are. A ring nudged clear of a card it overlaps would be stating a day it is
+            * not drawn on.
+            */}
+          {bar.segs.filter((sg) => sg.ghostAt != null).map((sg) => (
+            <div key={`gh-${sg.key}`} aria-hidden
+              className={`tl-ghost${sg.ghostDue ? " due" : ""}`}
+              style={{ left: pct(sg.ghostAt!), ...laneVar(sg.lane) }}>
+              {sg.ghostDue && <span className="tl-ghostbang">!</span>}
+            </div>
+          ))}
           {(() => {
             const cardStart = new Map<string, number>();
             for (const sg of bar.segs) {

@@ -241,6 +241,15 @@ export interface Segment {
   lateFrom?: number;
   /** the due date's own position, unclamped — what `lateFrom` is derived FROM */
   dueAt?: number;
+  /**
+   * Where the next named date sits, past this card's end — the ghost's position.
+   *
+   * ⚠️ ABSENT WHERE NO DATE IS NAMED, where it falls outside the window, or where the card already
+   * covers it. Each of those would be a ring stating something nobody committed to.
+   */
+  ghostAt?: number;
+  /** whether that date has arrived — a due ghost is drawn solid with a badge */
+  ghostDue?: boolean;
   /** this stretch ended at a real event: it is finished, and a finished stretch is full */
   historical?: true;
   /**
@@ -1234,6 +1243,23 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
        * ⚠️ ONLY THE WRITER'S OWN. An agency's window that has passed is a silence, not a debt, and
        * tinting it would say in colour what the copy is forbidden to say in words.
        */
+      /**
+       * ⚠️ THE GHOST: A NAMED DATE PAST THE CARD'S END, AND THE WRITER'S OWN MOVE (v54, Phase 7).
+       *
+       * It is a ring drawn at a date that has been promised and has not arrived — the next thing
+       * this relationship is waiting on, sitting beyond where the card stops. Three conditions,
+       * and each removes a way of drawing a ghost that means nothing:
+       *   • a date must be NAMED — no date, no ghost, because a ring at a guessed day is a
+       *     commitment nobody made;
+       *   • it must fall INSIDE the window — a ring clamped to the edge states a date that is not
+       *     where it is drawn;
+       *   • it must be PAST the card's end — a date the card already covers is inside the wait,
+       *     and the card is already drawing it.
+       */
+      ...(goalAt != null && !terminal
+        && goalAt > p.to + 0.001 && goalAt <= span - 0.001 && goalAt >= 0.001
+        ? { ghostAt: goalAt, ghostDue: goalYmd != null && goalYmd <= win.today }
+        : {}),
       ...(now === "yours" && !terminal && live_
         ? (() => {
             const dueYmd = expectedPassed && expectedYmd ? expectedYmd : waitFromYmd;

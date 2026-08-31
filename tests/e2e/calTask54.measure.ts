@@ -87,3 +87,56 @@ test("⚠️ AND A TASK IS RENDERED ONCE PER ROW, at every range", async ({ page
   console.log(`task marks checked across three ranges: ${checked}`);
   expect(checked, "no task marks were checked at any range").toBeGreaterThan(0);
 });
+
+/**
+ * ⚠️ THE GHOSTS (v54, Phase 7) — a named date past the card's end.
+ *
+ * Three conditions, each removing a way of drawing a ring that means nothing: the date must be
+ * NAMED, it must fall INSIDE the window, and it must be PAST the card's end. The third is what
+ * makes the clearance structural — a ring is only ever emitted beyond where its card stops, so it
+ * cannot overlap one, and it is never nudged clear of a card it would otherwise sit on, which
+ * would state a day it is not drawn on.
+ */
+test("a ghost is a named date past its card, clear of it, and only inside the window", async ({ page }) => {
+  await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
+  await page.waitForTimeout(800);
+  const seen: { ghosts: number; ranges: string[]; clashes: string[]; outside: string[] } =
+    { ghosts: 0, ranges: [], clashes: [], outside: [] };
+  for (let i = 0; i < RANGE_LABELS.length; i++) {
+    await setRangeTo(page, i);
+    const got = await page.evaluate(() => {
+      const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().width > 0;
+      const rings = ([...document.querySelectorAll(".tl-ghost")] as HTMLElement[]).filter(vis);
+      const cards = ([...document.querySelectorAll(".tl-p")] as HTMLElement[]).filter(vis);
+      const clash: string[] = []; const outside: string[] = [];
+      for (const g of rings) {
+        const gb = g.getBoundingClientRect();
+        const lane = g.parentElement!.getBoundingClientRect();
+        if (gb.left < lane.left - 0.5 || gb.right > lane.right + 0.5) {
+          outside.push(`ring ${gb.left.toFixed(0)}..${gb.right.toFixed(0)} outside lane ${lane.left.toFixed(0)}..${lane.right.toFixed(0)}`);
+        }
+        for (const c of cards) {
+          const cb = c.getBoundingClientRect();
+          const sameLine = gb.top + gb.height / 2 > cb.top - 4 && gb.top + gb.height / 2 < cb.bottom + 4;
+          if (sameLine && gb.left < cb.right - 1 && gb.right > cb.left + 1) {
+            clash.push(`${c.dataset.rel}: ring ${gb.left.toFixed(0)}..${gb.right.toFixed(0)} over card ${cb.left.toFixed(0)}..${cb.right.toFixed(0)}`);
+          }
+        }
+      }
+      return { rings: rings.length, due: rings.filter((r) => r.classList.contains("due")).length,
+        clash, outside };
+    });
+    seen.ghosts += got.rings;
+    seen.ranges.push(`${RANGE_LABELS[i]}:${got.rings}(${got.due} due)`);
+    seen.clashes.push(...got.clash);
+    seen.outside.push(...got.outside);
+  }
+  console.log(`ghost rings by range: ${seen.ranges.join(" · ")}`);
+  /* ⚠️ THE COUNT IS REPORTED, and a board with none is a fact about the fixture rather than about
+     the feature — but the placement claims below are then untested, so that is said outright. */
+  expect(seen.clashes, "a ghost ring overlaps a card on its own line").toEqual([]);
+  expect(seen.outside, "a ghost ring is drawn outside its lane").toEqual([]);
+  if (seen.ghosts === 0) {
+    console.log("  no ghost on this fixture at any range — placement is unmeasured, not proven");
+  }
+});

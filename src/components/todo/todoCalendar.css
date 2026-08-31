@@ -583,6 +583,23 @@
 /* ⚠️ THE LEAD-IN IS A DOTTED RUN TO THE CARD'S LEADING EDGE (v54, Phase 3). It is the history the
    card is no longer drawing — thin, dotted and behind everything, because it is context rather
    than the thing being read. It carries no colour of its own: the marks on it are the colour. */
+/* ⚠️ A GHOST IS A PLACE, NOT A THING (v54, Phase 7): a 24px ring on a named date past the card's
+   end. Dotted while the date is ahead — nothing has happened there yet — and solid with a badge
+   once it has arrived, which is the moment it stops being a forecast. It is centred on its own
+   date, so it clears the card by construction rather than by a tuned offset. */
+.tl-ghost {
+  position: absolute; top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px;
+  border-radius: 999px; border: 1.5px dotted var(--card-closed-bd);
+  background: transparent; z-index: 3; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.tl-ghost.due {
+  border-style: solid; border-color: var(--owed-bd); background: #fff;
+}
+.tl-ghostbang {
+  font-family: 'Playfair Display', Georgia, serif; font-size: 13px; font-weight: 600;
+  color: var(--pill-you-tx); line-height: 1;
+}
 .tl-leadin {
   position: absolute; top: 50%; height: 0; z-index: 1; pointer-events: none;
   border-top: 1px dotted #d8cbba;
