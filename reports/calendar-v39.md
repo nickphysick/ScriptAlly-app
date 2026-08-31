@@ -308,3 +308,104 @@ nothing in it at all. The pill does not depend on the label and should never hav
 None of the four lies beneath the view layer. Fault 1 is two stylesheet rules, fault 3 is a
 predicate and the data the page publishes about itself, fault 4 is one JSX conditional, and fault 2
 does not exist.
+
+---
+
+## Part two — what shipped
+
+**Deployed to dev**, verified by bundle hash. **Vitest 7350 passed / 0 failed** and **24/24
+measured**, both through a gate that reports its exit code and the number of lines it read.
+
+| phase | outcome |
+|---|---|
+| 0 · measure the faults | 3 founded, 1 **unfounded**; one table reported unbuildable |
+| 1 · one ground | two surfaces deleted; four points identical at 3 widths × 3 ranges |
+| 2 · wash stops at today | was already correct; locked anyway |
+| 3 · fades by predicate | 307 cards audited against their own dates; all four shapes occur |
+| 4 · no empty cards | 8 of 32 fixed; the pill left the label's conditional |
+| 5 · the four rulings | all applied; detail now **6.03:1** |
+| 6 · views and display | **UNBUILT** |
+| 7 · ghosts | **UNBUILT** |
+| 8 · verify + deploy | done for what is built; two of three deferred measurements taken |
+
+### 7. How the gate proves it read its whole output
+
+It captures the full output to a file, searches **the whole of it** for the summary line, treats
+that line's **absence as a failure**, and echoes the line together with the exit code and the line
+count. It earned itself on the final run: the matched line read `23 passed` while the exit code was
+`1` — one case had failed and the summary still said passed. `tail -3` would have shown a
+clean-looking tail twice over.
+
+### 3. The fade audit
+
+Built only after the page was made to publish its own dates. **307 cards** at three widths × three
+ranges, every class asserted against the numbers: 75 fade left, 95 right, 93 both, **44 neither**.
+A sample at 1440, three months:
+
+| card | true start | true end | of | live | carries |
+|---|---|---|---|---|---|
+| `seed-cal-passed865-q` | −873.5 | 22.5 | 90 | yes | LR |
+| `thin-q-cohort-5` | −151.5 | 12.2 | 90 | no | L− |
+| `thin-q-chase` | −47.5 | 12.2 | 90 | no | L− |
+
+**⚠️ `trueFrom` is the RUN's opening, not the card's** — which took two attempts. Every piece of a
+run carries the run's bounds, so an interior piece inherited a left fade from a stretch that opened
+47 days before the board. The second attempt then required a live piece to reach the window's right
+edge and took the fade off every running card: the window is rolling, so **today sits inside it**.
+
+### 4. The empty segments
+
+**8 of 32**, all narrow (19–97px). Every one had no pill *and* no text, and the cause was mine: the
+pill was rendered **inside** `{sg.label && …}`, so a segment with an empty label drew a card with
+nothing in it. The pill never depended on the label.
+
+### 5. Detail contrast
+
+`#8a7a6c` → **`#6f6055` = 6.03:1**, from 4.13:1. No further darkening needed. Part one's carve-out
+is deleted rather than kept.
+
+**The one remaining shortfall is the hollow card at 3.38:1** — the ruling pins its text at
+`#9c8878`, a deliberate quietening of a stretch that has outlived its own date. Carved out and
+reported; the lock asserts it is *still* a shortfall so a retone goes red.
+
+### 6. `--tl-burgundy`
+
+**Nothing carried it** — part one had already renamed it to `--tl-nearblack`, which names its role
+(the near-black ink) and is read by the today stem, the today chip, the row dot, the group button
+and the chip square. The word survived only in a comment; that is gone, and **the colour law now
+fails on the NAME as well as the hexes**.
+
+### 8. The deferred measurements
+
+**Faded edge**, sampled as painted pixels against the ground *at each sample's own x*:
+
+| card | deep | mid | edge |
+|---|---|---|---|
+| white | 9 | 3 | **0** |
+| quiet | 25 | 15 | **4** |
+| hollow | 1 | 0 | **3** |
+
+Hollow is transparent — it *is* the ground at every point, so it has nowhere to travel and the
+numbers are sub-pixel noise. Every kind must END at the ground; only an opaque one has a journey.
+
+**Marquee census**: 3 of 22 cards overflow at one month, 13 of 24 at three, **21 of 23** at six.
+Distances 11px to 246px.
+
+**The 180-day threshold count was NOT taken** — it belongs to Phase 7, which is unbuilt, and
+counting rows for a ghost that does not exist would be a number about nothing.
+
+### Phases 6 and 7 — unbuilt again
+
+Neither was started. The run went into the ground, the fades and four probe faults of my own that
+had to be measured out. The action column, the range slider, `ONE LIST / GROUPED` and `RIGHT NOW`
+are all still live and coherent; **nothing is half-removed**.
+
+### 9. Remainder
+
+- **The pinned ground `#faf7f2` belongs to shell chrome.** The panel is `.ws-window` at `#fefcfa`.
+  The *one ground* rule is built; the *particular value* needs a change to chrome this pack is
+  fenced out of.
+- **A third `.tl-p.hollow` rule** set `border-style: solid`, sat later in the file than the rule
+  that draws the card, and would have overridden the ruling's dashed border silently. Found by
+  counting the rules for the selector rather than reading them.
+- tsc still carries the masthead session's one error.
