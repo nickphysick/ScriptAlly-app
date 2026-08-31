@@ -501,6 +501,11 @@
   background: #fff; border: 1px solid var(--tl-btn-line); color: var(--tl-btn-ink);
   box-shadow: 0 1px 0 rgba(58, 28, 20, .05);
 }
+/* ⚠️ AN UNCONDITIONAL RULE, because the only one it had was inside a max-width block. A class
+   styled ONLY in a media query is styled nowhere for most readers, and the style-reach lock says
+   so — it has been red since v37 shipped it. The label is inline text; that is its base state, and
+   the narrow board hides it. */
+.tl-ablbl { display: inline; }
 .tl-abtn:hover { border-color: var(--tl-nearblack); color: var(--tl-nearblack); }
 .tl-rrow:hover .tl-abtn { border-color: var(--tl-pinkb); }
 .tl-abtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }

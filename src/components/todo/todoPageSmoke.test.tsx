@@ -190,8 +190,18 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     expect(html).toContain("tl-dt");
     expect(html).toContain("tl-tick");
     expect(html).not.toContain("tl-hrow");
-    expect(html).toContain("Your tasks");
-    expect(html).toContain("Dated tasks of your own.");
+    /**
+     * ⚠️ THE GROUP HEADING IS A MODE SINCE v37, NOT THE DEFAULT. The board opens on ONE LIST, which
+     * has no headings at all — so "Your tasks" and its sentence are not on the page, and this
+     * assertion has been red since that shipped. The claim it was making is that a dated task
+     * REACHES the board, which is this case's whole title; the heading was how it used to be
+     * visible, never what it was about.
+     *
+     * The task's own row is what carries it now, so the assertion follows the task rather than the
+     * furniture it used to sit under.
+     */
+    expect(html).toContain("Redraft the opening");
+    expect(html).toContain("tl-rrow");
     /* exactly ONE column header in the document, however many groups there are */
     /* ⚠️ ONE RAIL FOR THE WHOLE BOARD, however many groups there are — the claim that used to be
        "exactly one in-card header" and is stronger as a rail: it is the page's own and cannot

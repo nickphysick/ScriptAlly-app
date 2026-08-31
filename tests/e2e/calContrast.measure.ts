@@ -34,141 +34,89 @@ const over = (ink: number[], ground: number[], a: number) =>
   ink.map((c, i) => c * a + ground[i] * (1 - a));
 const nums = (s: string) => (s.match(/[\d.]+/g) || []).map(Number).slice(0, 3);
 
-test("both bar lines clear 4.5:1 on both grounds, in every state", async ({ page }) => {
+test("every word on a card clears 4.5:1 against the surface it sits on", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1920, height: 900 });
   await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
   await page.waitForTimeout(700);
 
   const read = await page.evaluate(TAG + `(() => {
     if (!vis(".tl-board")) return { fatal: "no board" };
-    const FAMS = ["out", "req", "decide", "quiet", "closedp"];
-    const out = {};
-    for (const b of document.querySelectorAll(".tl-p")) {
-      if (b.getBoundingClientRect().width <= 0) continue;
-      const base = FAMS.find((c) => b.classList.contains(c));
-      if (!base) continue;
-      /* ⚠️ HOLLOW IS A SEPARATE CASE, NOT A VARIANT OF ITS FAMILY, because it multiplies a SECOND
-         dimming onto the text: an overrun stack carries .75, so line two paints at .75 × .66 =
-         .49. Keying on the family alone measured whichever of the two the board happened to draw
-         first — and the flat list changed which one that was, which is how a family that had
-         passed came back at 3.47:1 with nothing about its colours having moved. */
-      const fam = base + (b.classList.contains("hollow") ? ".hollow" : "");
-      if (out[fam]) continue;
-      const t1 = b.querySelector(".tl-t1");
-      const t2 = b.querySelector(".tl-t2");
-      const txt = b.querySelector(".tl-txt");
-      if (!t1) continue;
-      const st = (e) => e ? getComputedStyle(e) : null;
-      out[fam] = {
-        t1Ink: st(t1).color, t1Op: Number(st(t1).opacity),
-        t2Ink: t2 ? st(t2).color : null, t2Op: t2 ? Number(st(t2).opacity) : null,
-        stackOp: txt ? Number(st(txt).opacity) : 1,
-        /* ⚠️ ONE GROUND SINCE v39. The fill is deleted, so a card is one surface — white, or the
-           cream a quiet card takes — and text no longer crosses from a tint onto a track. The
-           second ground is kept in the shape below rather than removed, because the card's own
-           background is exactly what it now reads. */
-        fill: null,
-        track: st(b).backgroundColor,
-      };
+    /* ⚠️ A CARD IS ONE SURFACE SINCE v39 — white, or the cream a no-response takes — because the
+       fill is deleted. So every word's ground is the card it sits on, and a pill's ground is its
+       own fill. The pair is measured, never assumed from the token names. */
+    const out = { pairs: [] };
+    const seen = new Set();
+    for (const c of document.querySelectorAll(".tl-p")) {
+      if (c.getBoundingClientRect().width <= 0) continue;
+      const fam = ["out","req","decide","quiet","closedp"].find((x) => c.classList.contains(x)) || "?";
+      const card = getComputedStyle(c).backgroundColor;
+      for (const [what, sel] of [["headline", ".tl-hl"], ["detail", ".tl-cdt"]]) {
+        const e = c.querySelector(sel);
+        if (!e) continue;
+        const k = fam + "/" + what;
+        if (seen.has(k)) continue;
+        seen.add(k);
+        out.pairs.push({ k, ink: getComputedStyle(e).color, op: Number(getComputedStyle(e).opacity), ground: card });
+      }
+      const p = c.querySelector(".tl-pill");
+      if (p) {
+        const tone = [...p.classList].find((x) => x !== "tl-pill") || "?";
+        const k = "pill." + tone;
+        if (!seen.has(k)) {
+          seen.add(k);
+          out.pairs.push({ k, ink: getComputedStyle(p).color, op: Number(getComputedStyle(p).opacity),
+                           ground: getComputedStyle(p).backgroundColor, over: card });
+        }
+      }
     }
-    return { out };
+    return out;
   })()`) as any;
   expect(read.fatal, read.fatal).toBeUndefined();
 
   const WHITE = [255, 255, 255];
+  const solid = (c: string, under: number[]) => {
+    const n = nums(c);
+    const a = /rgba/.test(c) ? Number((c.match(/[\d.]+\)$/) || ["1)"])[0].replace(")", "")) : 1;
+    return over(n, under, a);
+  };
   const rows: string[] = [];
   const fails: string[] = [];
-  let pairs = 0;
-
-  for (const [fam, v] of Object.entries<any>(read.out)) {
-    const grounds: [string, number[]][] = [];
-    if (v.fill && !/rgba\(0, 0, 0, 0\)/.test(v.fill)) grounds.push(["fill", nums(v.fill)]);
-    const tr = /rgba\(0, 0, 0, 0\)/.test(v.track) ? WHITE : nums(v.track);
-    grounds.push(["track", tr]);
-
-    for (const [line, ink, op] of [
-      ["t1", v.t1Ink, v.t1Op * v.stackOp],
-      ["t2", v.t2Ink, v.t2Op == null ? null : v.t2Op * v.stackOp],
-    ] as [string, string | null, number | null][]) {
-      if (!ink || op == null) { rows.push(`  ${fam.padEnd(8)} ${line}  — not drawn on this board`); continue; }
-      for (const [gn, g] of grounds) {
-        const eff = over(nums(ink), g, op);
-        const r = ratio(eff, g);
-        pairs += 1;
-        rows.push(`  ${fam.padEnd(8)} ${line} on ${gn.padEnd(5)} α${op.toFixed(2)}  ${r.toFixed(2)}:1  ${r >= 4.5 ? "pass" : "FAIL"}`);
-        if (r < 4.5) fails.push(`${fam}/${line}/${gn} ${r.toFixed(2)}:1`);
-      }
-    }
+  for (const p of read.pairs) {
+    const under = p.over ? solid(p.over, WHITE) : WHITE;
+    const g = solid(p.ground, under);
+    const eff = over(nums(p.ink), g, p.op);
+    const r = ratio(eff, g);
+    rows.push(`  ${String(p.k).padEnd(16)} α${p.op.toFixed(2)}  ${r.toFixed(2)}:1  ${r >= 4.5 ? "pass" : "FAIL"}`);
+    if (r < 4.5) fails.push(`${p.k} ${r.toFixed(2)}:1`);
   }
-  console.log(`contrast — ${Object.keys(read.out).length} families, ${pairs} pairs`);
+  console.log(`contrast — ${read.pairs.length} pairs on the card`);
   for (const r of rows) console.log(r);
 
+  /* ⚠️ POPULATION, PER KIND. A board drawing no pill satisfies every claim about pills by never
+     drawing one, and a sweep that found only headlines would report a clean table about half the
+     type on the card. */
+  expect(read.pairs.filter((p: any) => /headline/.test(p.k)).length, "no headline measured").toBeGreaterThan(1);
+  expect(read.pairs.filter((p: any) => /detail/.test(p.k)).length, "no detail measured").toBeGreaterThan(1);
+  expect(read.pairs.filter((p: any) => /^pill\./.test(p.k)).length, "no pill measured").toBeGreaterThan(1);
   /**
-   * ⚠️ THE SMALLEST OPACITY THAT PASSES, IN THE STEPS THE BRIEF PINS.
+   * ⚠️ THE DETAIL LINE IS A KNOWN SHORTFALL, AND IT CANNOT BE FIXED FROM HERE.
    *
-   * Reported for every family whether or not it currently fails, because the interesting number is
-   * not "does .66 pass" but "what would". A state that needs more than .85 is flagged rather than
-   * fixed — the family tone is what says whose move it is, and darkening it to win a ratio would
-   * trade the thing the colour is for.
+   * `--card-dt` is `#8a7a6c` — the palette's `muted`, pinned by the pack and drawn by the ref —
+   * and on white it reads 4.13:1. v37's shortfalls could be answered by raising an opacity; this
+   * one is already at α1.00, so there is no headroom: the INK is too light, and darkening it means
+   * changing a pinned value.
+   *
+   * ⚠️ AND IT IS ONE PAIR, NOT FOUR. Every family reports the same 4.13 because a card is
+   * monochrome now — which is the colour law working, and the reason the number is worth acting on:
+   * it is not one state's problem, it is every detail line on the board.
+   *
+   * Reported for Nick rather than resolved. Everything else on the card clears: headlines at
+   * 17.5–18.3, and all three drawn pills between 4.66 and 14.59.
    */
-  const needed: string[] = [];
-  for (const [fam, v] of Object.entries<any>(read.out)) {
-    if (!v.t2Ink) continue;
-    const grounds: number[][] = [];
-    if (v.fill && !/rgba\(0, 0, 0, 0\)/.test(v.fill)) grounds.push(nums(v.fill));
-    grounds.push(/rgba\(0, 0, 0, 0\)/.test(v.track) ? WHITE : nums(v.track));
-    let a = 0.66;
-    let worst = 0;
-    while (a <= 1.0001) {
-      worst = Math.min(...grounds.map((g) => ratio(over(nums(v.t2Ink), g, a), g)));
-      if (worst >= 4.5) break;
-      a = +(a + 0.04).toFixed(2);
-    }
-    needed.push(`  ${fam.padEnd(8)} line two needs α${a.toFixed(2)} (worst ${worst.toFixed(2)}:1)`
-      + (a > 0.85 ? "  ⚠️ ABOVE .85 — FLAG, do not darken the family tone" : ""));
-  }
-  for (const n of needed) console.log(n);
-
-  /* ⚠️ POPULATION, PER KIND. A board drawing no `decide` bar satisfies every claim about it by
-     never producing one, and a sweep that found only line one would report a clean table about
-     half the type. */
-  expect(Object.keys(read.out).length, `families measured: ${Object.keys(read.out).join(", ")}`)
-    .toBeGreaterThan(3);
-  const measuredT2 = rows.filter((r) => / t2 on /.test(r)).length;
-  expect(measuredT2, "line two was never actually measured on any ground").toBeGreaterThan(2);
-
-  /**
-   * ⚠️ ONE KNOWN SHORTFALL, CARRIED EXPLICITLY SO A NEW ONE CANNOT HIDE BEHIND IT.
-   *
-   * `out` needs α .98 to clear 4.5:1 and the ceiling is .85, so it is reported rather than fixed:
-   * its ink is a muted sage on a paler sage, and the only way to win the ratio is to darken the
-   * tone — which is the thing that says whose move it is. Every OTHER pair must pass.
-   *
-   * ⚠️ AND THE SHORTFALL MUST STILL BE ONE. If somebody retones `out` so it passes, this goes red
-   * asking for the table to be updated, rather than quietly accepting a list that has stopped
-   * describing the page. A carve-out nobody re-measures is one that silently shrinks the claim.
-   */
-  /**
-   * ⚠️ THE KNOWN SHORTFALLS, AND WHY EACH IS REPORTED RATHER THAN FIXED.
-   *
-   * `out` — line two needs α .98 against a .85 ceiling. Its ink is a muted sage on a paler sage,
-   * so the ratio can only be won by darkening the tone, and the tone is what says whose move it is.
-   *
-   * `*.hollow` — an overrun stack is dimmed to .75 ON PURPOSE: the stretch is past the date
-   * somebody named, and the fading is the statement. Line two then paints at .49 and reads at
-   * 2.13:1. Raising the text's own opacity cannot fix it without undoing the dimming, which is the
-   * only thing on the bar saying the date has passed. This is a DESIGN question — whether an
-   * overrun should carry a second line at all — and inventing an answer is what the rules here
-   * forbid.
-   */
-  const KNOWN = ["out/t2/fill", "out/t2/track", "out.hollow/", "req.hollow/", "decide.hollow/",
-                 "quiet.hollow/", "closedp.hollow/"];
-  const unexpected = fails.filter((f) => !KNOWN.some((k) => f.startsWith(k)));
-  expect(unexpected, `below 4.5:1 and not a known shortfall — ${unexpected.join(" | ")}`).toEqual([]);
-  /* ⚠️ AT LEAST ONE KNOWN SHORTFALL MUST STILL BE ONE. Requiring ALL of them would go red on a
-     board that simply did not draw a hollow `req` today, which is a fact about the fixture rather
-     than about the page; requiring none is a carve-out nobody re-measures. */
-  const stillShort = KNOWN.filter((k) => fails.some((f) => f.startsWith(k)));
-  expect(stillShort.length, `every known shortfall now passes — re-measure and shrink the table`)
-    .toBeGreaterThan(0);
+  const KNOWN = /\/detail$/;
+  const unexpected = fails.filter((f) => !KNOWN.test(f.split(" ")[0]));
+  expect(unexpected, `below 4.5:1 and not the known detail shortfall — ${unexpected.join(" | ")}`).toEqual([]);
+  /* ⚠️ AND IT MUST STILL BE ONE. If the muted ink is ever darkened this goes red asking for the
+     carve-out to be removed, rather than quietly keeping an exemption that has stopped applying. */
+  expect(fails.length, "the detail line now clears 4.5:1 — remove this carve-out").toBeGreaterThan(0);
 });
