@@ -20,14 +20,31 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 import { readFileSync, writeFileSync } from "node:fs";
+import { removeProbeTasks } from "./probeTasks.mjs";
 
+/**
+ * ⚠️ IT PUTS THE TASK BACK, AND THE `finally` IS THE WHOLE POINT.
+ *
+ * This creates a REAL task on the shared harness account, completes it, and presses Undo — which
+ * restores the QUERY and leaves the TASK. Five had accumulated before anyone looked, and they were
+ * not inert: they render on the calendar as real rows, with real deeds, in the row order. A dev
+ * board filling with `Undo probe 1787873161410` is a board nobody can read, and every run made it
+ * worse.
+ *
+ * The cleanup runs whether or not the assertions pass, because a failing run is exactly the run
+ * that leaves residue — the assertion throws, the rest of the body never executes, and the task
+ * stays. That is how all five got there.
+ */
 test("a completion's Undo reverts the stored record", async ({ page }) => {
+  const created: string[] = [];
+  try {
   const errs: string[] = [];
   page.on("console", (m) => { if (m.type() === "error") errs.push(m.text().slice(0, 150)); });
   page.on("pageerror", (e) => errs.push("PAGEERROR " + String(e).slice(0, 150)));
 
   await openRoute(page, "/todo", { width: 1440, height: 900 });
   const TASK = `Undo probe ${Date.now()}`;
+  created.push(TASK);
 
   /* ⚠️ WAIT FOR THE CONTROL, DO NOT ASSUME IT. `openRoute` resolves before the board finishes
      rendering, and a `find(...)` that comes back undefined throws "Cannot read properties of null"
@@ -132,4 +149,12 @@ test("a completion's Undo reverts the stored record", async ({ page }) => {
   console.log("task title recorded for the stored-field read:", TASK);
   console.log("console errors:", errs.length ? JSON.stringify(errs.slice(0, 4)) : "none");
   expect(errs).toEqual([]);
+  } finally {
+    /* ⚠️ NAMED, NOT SWEPT. It removes the task THIS run created and nothing else, so a run racing
+       another cannot take away the other's fixture mid-assertion. */
+    for (const t of created) {
+      const gone = await removeProbeTasks({ title: t });
+      console.log(`cleanup: removed ${gone.length} task(s) named ${JSON.stringify(t)}`);
+    }
+  }
 });
