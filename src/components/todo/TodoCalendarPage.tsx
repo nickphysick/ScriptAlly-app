@@ -59,7 +59,6 @@ import {
   durationCount, fillFor, fillEndAt, NEAR_AT, familyOf,
   type Segment, type BarNode,
 } from "../../lib/journeyBars";
-import { scrawlEarns } from "../../lib/timelineCopy";
 import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
 import { useDockActivity } from "./useDockActivity";
 /* ⚠️ THE QUERY CENTRE'S OWN ROWS, NOT A SECOND READING PANE. `FocusFlow` already mounts these two
@@ -892,10 +891,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   /**
    * The one deed this row offers, or `null`.
    *
-   * ⚠️ THE LABEL AND THE SCRAWL COME FROM ONE SOURCE, which is why they cannot disagree. `rowNote`
-   * already derives the deed from the query's status (and, for a reminder fallen due, from a
-   * date); the button uppercases it and the scrawl sets it in a hand. Two renderings of one fact,
-   * never two derivations of it.
+   * ⚠️ THE DEED HAS ONE SOURCE. `rowNote` derives it from the query's status (and, for a reminder
+   * fallen due, from a date) and the button uppercases it — one rendering of one fact. It used to
+   * have two, the button and a handwritten copy beside the bar; v37 deleted the second, and the
+   * rule it was there to keep is now trivially true rather than maintained.
    *
    * ⚠️ AND A DEED WITHOUT A CARD IS NOT AN ACTION. The button's only job is to open the task pane,
    * so a row whose work has no `BoardCard` behind it has no door to offer — it shows the em-dash.
@@ -906,8 +905,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * ⚠️ THE CARD IS FOUND BY QUERY, ACROSS THE WHOLE BOARD — never by looking for a chip inside the
    * visible window. That was the first shape and it left the action column EMPTY ON EVERY ROW: a
    * card sits on the day it landed on the desk, which for a full requested three weeks ago is
-   * outside a one-month window that opens eight days back. The row was asking for something, the
-   * scrawl said so, and the button beside it was an em-dash — measured, 14 dashes and 0 buttons.
+   * outside a one-month window that opens eight days back. The row was asking for something and
+   * the button beside it was an em-dash — measured, 14 dashes and 0 buttons.
    *
    * ⚠️ AND IT READS `assembled`, WHICH IS `assembleBoardColumns` — the same derivation the To-do
    * board and the badge count through. A second scan for "the card for this query" is how two
@@ -926,7 +925,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const actionFor = (r: TimelineRow): { label: string; card: BoardCard | null; itemKey: string | null } | null => {
     /* ⚠️ THE GROUP DECIDES, AND THE CARD ONLY DECIDES WHAT THE DOOR OPENS ONTO. Requiring a
        `BoardCard` was the third of three predicates answering one question, and it was the one
-       that put a dash beside a scrawl reading "Send the partial · due 21 days ago". A row the
+       that put a dash beside a row whose own words read "Send the partial · due 21 days ago". A row the
        board is asking about always gets its control; where no card has been raised the control
        opens the relationship's workspace, which is a real door rather than a dead one. */
     if (!rowAsks(r)) return null;
@@ -946,26 +945,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     return { label: r.note.deed.toUpperCase(), card, itemKey: null };
   };
 
-  /**
-   * The scrawl, where it earns its place — with where to anchor it.
-   *
-   * ⚠️ ANCHORED PAST THIS ROW'S OWN LAST PIECE, never at a fixed offset, so it reads as a remark
-   * added to that stretch rather than as a column of its own. `--lane` puts it on the line the
-   * piece is on; without it a two-book row would write both notes on the first lane.
-   */
-  const scrawlFor = (
-    r: TimelineRow,
-    segs: readonly Segment[],
-    act: { label: string } | null,
-  ): { text: string; at: number; lane: number } | null => {
-    if (!r.note) return null;
-    if (!scrawlEarns(r.note, segs.map((sg) => sg.label).filter(Boolean))) return null;
-    const pieces: { to: number; lane: number }[] = segs.map((sg) => ({ to: sg.to, lane: sg.lane }));
-    if (!pieces.length) return null;
-    const last = pieces.reduce((a, b) => (b.to > a.to ? b : a));
-    void act;
-    return { text: `${r.note.deed} · ${r.note.timing}`, at: last.to, lane: last.lane };
-  };
 
   /* ══ THE BOARD'S OWN DERIVATIONS ═══════════════════════════════════════════════════════ */
 
@@ -1172,7 +1151,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     const bar = barsByRow.get(r.key) ?? { segs: [], nodes: [] };
     const lanes = Math.max(1, r.lanes);
     const act = actionFor(r);
-    const scrawl = scrawlFor(r, bar.segs, act);
     return (
       <div
         key={r.key}
@@ -1272,15 +1250,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               {it.kind === "ghost" && <span className="fwd" aria-hidden>↦</span>}
             </button>
           ))}
-          {/* ⚠️ THE SCRAWL EARNS ITS PLACE OR IT DOES NOT RENDER — `scrawlEarns` is the predicate,
-              and `scrawlFor` has already applied it. It is anchored 16px past the end of this
-              row's own last piece, so it reads as a remark added to that stretch. */}
-          {scrawl && (
-            <span className="tl-at2 tl-scr"
-              style={{ left: `calc(${pct(scrawl.at)} + 16px)`, ...laneVar(scrawl.lane) }}>
-              {scrawl.text}
-            </span>
-          )}
         </div>
       </div>
     );

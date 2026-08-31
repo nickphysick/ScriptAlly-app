@@ -172,7 +172,6 @@
   --tl-hair: #efe6da;
   --tl-rowline: #eee4d6;
   --tl-rowhov: #f3ebdd;
-  --tl-scrawl: #8a4a36;
   /* ⚠️ .3, NOT .4 (v36). It carried the v35 value through part one — the rule marks a boundary
      rather than competing with the bars either side of it. */
   --tl-todayl: rgba(58, 28, 20, .3);
@@ -219,8 +218,21 @@
   --tl-nm-w: 288px;
   --tl-ac-w: 172px;
   /* how far a piece stands off a marker it abuts, and off a plain neighbour */
-  --tl-gap-mk: 12px;
   --tl-gap: 2px;
+  /**
+   * ⚠️ THE CLEARANCE IS DERIVED FROM THE MARKER, NOT A LITERAL BESIDE IT.
+   *
+   * It was 12px, chosen when a marker was 20px across — so it carried 2px of real clearance and
+   * read as a considered number. The marker became 30px for v37 and the same 12 became an OVERLAP:
+   * measured, −1.2px on thirteen pairs at once, uniformly, which is the signature of arithmetic
+   * rather than of a layout that collapsed.
+   *
+   * A bar must stand off the marker's half-width and then clear it. Written that way the clearance
+   * is 2px at any marker size — the SAME 2px `--tl-gap` uses where there is no marker to clear, so
+   * the two now say one thing: stand off whatever is there by two pixels. No new value is
+   * introduced, and the next change to `--mk` cannot silently eat the gap.
+   */
+  --tl-gap-mk: calc(var(--mk) / 2 + var(--tl-gap));
   /* ⚠️ THE BAR'S BORDER IS A TOKEN BECAUSE THE FILL HAS TO SUBTRACT IT. `.tl-fl` is absolutely
      positioned, so its `left: 0` is the piece's PADDING box — one border inside the painted edge.
      The fill's width is a distance measured from the lane's origin, so that inset comes off it,
@@ -347,7 +359,7 @@
  * ⚠️ ON THE LANE'S GROUND AND ON NOTHING ELSE. The wash says "this is behind you" about the
  * SURFACE; laid over a bar it would dim the data, and a reader cannot tell a washed fill from a
  * paler one. It is drawn as a pseudo-element BEHIND everything in the lane (`z-index: 0` against
- * the bar's 2 and the marker's 4), so no bar, marker, chip or scrawl is touched — and it stops at
+ * the bar's 2 and the marker's 4), so no bar, marker or chip is touched — and it stops at
  * today, which is what `--tl-past-w` is set to per row. */
 .tl-c-tl::before {
   content: ""; position: absolute; left: 0; top: 0; bottom: 0;
@@ -551,15 +563,6 @@ button.tl-mk2 { cursor: pointer; }
 .tl-mk2:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
 .tl-rrow.closed .tl-mk2 { opacity: .6; }
 
-/* ── the scrawl ───────────────────────────────────────────────────────────────────────────── */
-/* ⚠️ IT EARNS ITS PLACE OR IT DOES NOT RENDER. A hand-written remark that repeats the button
-   beside it and the bar beneath it is charm doing no work; one carrying a date the row does not
-   otherwise state is the best thing on the board. `scrawlEarns` is the predicate. */
-.tl-scr {
-  font-family: 'Caveat', cursive; font-size: 16.5px; font-weight: 500; color: var(--tl-scrawl);
-  white-space: nowrap; z-index: 3;
-  transform: translateY(-50%) rotate(-1.4deg);
-}
 
 /* ── the writer's own chips ───────────────────────────────────────────────────────────────── */
 .tl-tchip {

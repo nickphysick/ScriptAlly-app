@@ -89,3 +89,62 @@ describe("the calendar's bar path states no vertical literal", () => {
     }
   });
 });
+
+/**
+ * ⚠️ THE SCRAWL IS DELETED, NOT HIDDEN (v37, Phase 5).
+ *
+ * It was a handwritten copy of the deed, set in Caveat beside the bar — a second rendering of a
+ * fact the action column already states. v37 removes it, and the whole value of removing it is
+ * that nothing is left to switch back on.
+ *
+ * ⚠️ SCOPED TO THE CALENDAR PATH, AND THAT IS NOT FUSSINESS. Caveat is live in ~46 files — the
+ * post-its, the note bodies, the task pane, packages, the marketing hero — and a sweep for the
+ * font across `src/` would forbid the app's own handwriting. `ImportOverview` also has a "scrawl"
+ * of its own, an onboarding corner note, unrelated to this one. The subject here is three files.
+ *
+ * ⚠️ AND COMMENTS ARE STRIPPED FIRST. This repo documents every retirement by quoting what it
+ * retired, so the prose still carries the word in six places — all past-tense lessons about real
+ * faults, deliberately kept. A raw-text sweep would report the obituary as the corpse.
+ */
+describe("the scrawl is gone from the calendar", () => {
+  const CAL = [
+    "src/components/todo/TodoCalendarPage.tsx",
+    "src/components/todo/todoCalendar.css",
+    "src/lib/timelineCopy.ts",
+  ];
+  const stripAll = (s: string) =>
+    s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  it("reads the calendar path — a sweep over nothing proves nothing", () => {
+    for (const f of CAL) {
+      expect(readFileSync(join(process.cwd(), f), "utf8").length, `${f} is empty`).toBeGreaterThan(400);
+    }
+  });
+
+  it("no scrawl class is emitted or styled", () => {
+    for (const f of CAL) {
+      const src = stripAll(readFileSync(join(process.cwd(), f), "utf8"));
+      /* ⚠️ BOUNDED, NOT A SUBSTRING. `tl-scr` is a prefix of nothing today and would be a prefix of
+         `tl-screen` tomorrow; a complete class name is delimited by a quote, a space, a backtick or
+         a brace on both sides. */
+      expect(src, `${f} still names the scrawl class`).not.toMatch(/["'`\s{.]tl-scr["'`\s{,:]/);
+    }
+  });
+
+  it("no Caveat in the calendar path — and the app's own handwriting is untouched", () => {
+    for (const f of CAL) {
+      const src = stripAll(readFileSync(join(process.cwd(), f), "utf8"));
+      expect(src, `${f} still sets Caveat`).not.toMatch(/Caveat/i);
+    }
+    /* the inverse, so this can never be "fixed" by deleting the app's hand */
+    const postit = readFileSync(join(process.cwd(), "src/components/todo/todo.css"), "utf8");
+    expect(postit, "the app's own Caveat has been swept away with the calendar's").toMatch(/Caveat/);
+  });
+
+  it("the earn-it predicate is orphaned nowhere — it does not exist", () => {
+    for (const f of [...CAL, "src/lib/timelineCopy.test.ts", "tests/e2e/calLook.measure.ts"]) {
+      const src = stripAll(readFileSync(join(process.cwd(), f), "utf8"));
+      expect(src, `${f} still references scrawlEarns`).not.toMatch(/scrawlEarns/);
+    }
+  });
+});

@@ -74,7 +74,7 @@ test("Phase 4 — notes appear where there is an action, and nowhere else", asyn
       const actionable = row.states.some((s) => ["s-y1", "s-y2", "s-y3", "s-offer", "s-quiet"].includes(s))
         || row.group === "Needs you now" || row.group === "Offers";
       if (row.note) {
-        expect(actionable, `${STOPS[i]}: "${row.note}" is scrawled on a ${row.group} row (${row.states.join(",")})`).toBe(true);
+        expect(actionable, `${STOPS[i]}: "${row.note}" is written on a ${row.group} row (${row.states.join(",")})`).toBe(true);
         expect(row.group, `${STOPS[i]}: a Watching brief row carries "${row.note}"`).not.toBe("Watching brief");
         expect(row.group, `${STOPS[i]}: a closed row carries "${row.note}"`).not.toBe("Recently closed");
         expect(row.group, `${STOPS[i]}: a quiet group row carries "${row.note}"`).not.toBe("Needs you soon");

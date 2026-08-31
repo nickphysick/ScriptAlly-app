@@ -287,14 +287,11 @@ test.describe("the Calendar — Porcelain", () => {
           text: ab.textContent,
         } : null;
         out.dashCount = document.querySelectorAll(".tl-adash").length;
-        /* ── scrawls ────────────────────────────────────────────────────────────────────── */
-        const scr = [...document.querySelectorAll(".tl-scr")];
-        out.scrawls = scr.map((s) => s.textContent);
-        out.scrawlStyle = scr[0] ? {
-          color: getComputedStyle(scr[0]).color,
-          family: getComputedStyle(scr[0]).fontFamily,
-          size: getComputedStyle(scr[0]).fontSize,
-        } : null;
+        /* the bar height the STYLESHEET declares, so the family sweep can assert against it
+           rather than against a copy of it */
+        const boardEl = vis(".tl-board");
+        out.barToken = boardEl ? getComputedStyle(boardEl).getPropertyValue("--bar-h").trim() : null;
+        out.mkToken = boardEl ? getComputedStyle(boardEl).getPropertyValue("--mk").trim() : null;
         /* ── today ──────────────────────────────────────────────────────────────────────── */
         const tl = vis(".tl-todayline");
         out.today = tl ? { border: getComputedStyle(tl).borderLeftColor, w: getComputedStyle(tl).borderLeftWidth } : null;
@@ -327,7 +324,14 @@ test.describe("the Calendar — Porcelain", () => {
         expect(got.track, `${name} track is not white`).toBe("rgb(255, 255, 255)");
         if (got.fill) expect([hex(want.fill), hex(want.near)], `${name} fill`).toContain(got.fill);
         expect(got.radius, `${name} is not a pill`).toBe("999px");
-        expect(got.height, `${name} height`).toBe("22px");
+        /* ⚠️ THE TOKEN, NOT A LITERAL. This read "22px", which was the bar height when it was
+           written and is a number this sheet no longer states anywhere — v37 moved it to
+           `--bar-h`. Retargeted rather than rebaselined: the claim it was making is that EVERY
+           family paints at the one bar height, and reading the token keeps that claim while the
+           value itself is asserted against 34 by the token lock. A lock that restates a number
+           another lock owns goes red on every legitimate retune and teaches the next reader to
+           edit it without looking. */
+        expect(got.height, `${name} height against --bar-h`).toBe(read.barToken);
       }
       console.log(`families whose text could not be sampled at ${width}: ${unlabelled.length ? unlabelled.join(", ") : "none"}`);
       expect(unlabelled.length, `no family carried a label at all: ${unlabelled.join(", ")}`)
@@ -357,7 +361,9 @@ test.describe("the Calendar — Porcelain", () => {
         if (!got) continue;
         expect(got.line, `${name} ring`).toBe(hex(want.line));
         expect(got.ink, `${name} ink`).toBe(hex(want.ink));
-        expect(got.w, `${name} size`).toBe("20px");
+        /* ⚠️ THE TOKEN, for the same reason as the bar's height above: `--mk` owns this number and
+           the token lock asserts its value. Restating it would put one figure in two files. */
+        expect(got.w, `${name} size against --mk`).toBe(read.mkToken);
         expect(got.radius, `${name} is not a circle`).toBe("999px");
         expect(got.shadow, `${name} has no halo`).toContain("3px");
       }
@@ -482,7 +488,6 @@ test.describe("the fix pack — one fact, one function", () => {
             }),
             btn: row.querySelector(".tl-abtn") ? row.querySelector(".tl-abtn").textContent : null,
             dash: !!row.querySelector(".tl-adash"),
-            scrawl: row.querySelector(".tl-scr") ? row.querySelector(".tl-scr").textContent : null,
             chips: [...row.querySelectorAll(".tl-tchip")].map((c) => c.textContent),
           };
         });
@@ -620,60 +625,6 @@ test.describe("the fix pack — one fact, one function", () => {
     expect(Object.keys(r.tally).length, `only one family: ${JSON.stringify(r.tally)}`).toBeGreaterThan(2);
   });
 
-  test("⚠️ the scrawl and the fill name the SAME date, on every row that names one", async ({ page }) => {
-    await openRoute(page, "/todo/calendar", { width: 1920, height: 900 });
-    await page.waitForTimeout(1400);
-    const r = await page.evaluate(`(() => {
-      const DATE = /\\b(\\d{1,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept|Oct|Nov|Dec)\\b/g;
-      const out = [];
-      for (const row of document.querySelectorAll(".tl-rrow")) {
-        const scr = row.querySelector(".tl-scr");
-        const bars = [...row.querySelectorAll(".tl-p")];
-        const goals = [...new Set(bars.map((b) => b.dataset.fill).filter((f) => f && f !== "none"))];
-        /* ⚠️ PER LANE, NOT PER ROW. A row is a RELATIONSHIP and can hold several queries — Tom
-           Ellery holds two, on two lanes, with two legitimately different named ends. Comparing
-           across the row would demand that two separate journeys agree about a date neither of
-           them shares, which is not a contradiction but a row doing its job. */
-        const byLane = {};
-        for (const b of bars) {
-          const lane = getComputedStyle(b).getPropertyValue("--lane").trim() || "0";
-          const tip = b.getAttribute("data-tip") || "";
-          if (!tip) continue;
-          (byLane[lane] = byLane[lane] || []).push(tip);
-        }
-        for (const lane of Object.keys(byLane)) {
-          const tips = [...new Set(byLane[lane])];
-          out.push({
-            name: ((row.querySelector(".tl-nm2") || {}).textContent || "?") + " lane " + lane,
-            scrawl: scr ? scr.textContent : null,
-            tips,
-            hasFillTarget: goals.length > 0,
-            tipDates: tips.map((t) => (t.match(DATE) || [])),
-          });
-        }
-      }
-      return out;
-    })()`) as any[];
-    let checked = 0;
-    for (const row of r) {
-      /* ⚠️ A CAPTION MAY NAME TWO DATES — a span has a start and an end, and "Out since 25 Jun ·
-         reply expected 20 Aug" is one sentence saying both. What it may NOT do is name a
-         different END from every other caption on its own row: that is the contradiction this
-         pack found live, where one bar's label said "next reminder 8 Sept" and its own tooltip
-         appended "16 Sept". So the LAST date in each caption — the end — must agree across the
-         row. */
-      const ends = [...new Set((row.tipDates as string[][]).map((ds) => ds[ds.length - 1]).filter(Boolean))];
-      expect(ends.length, `${row.name}: the row's captions end on ${ends.length} different dates — ${JSON.stringify(row.tips)}`)
-        .toBeLessThanOrEqual(1);
-      if (ends.length) checked += 1;
-      /* a row whose scrawl names a date must have something to fill toward */
-      if (row.scrawl && /\d/.test(row.scrawl)) {
-        expect(row.hasFillTarget, `${row.name} scrawls "${row.scrawl}" with no fill target`).toBe(true);
-      }
-    }
-    console.log(`captions carrying a date: ${checked}`);
-    expect(checked, "no caption named a date — the sweep proves nothing").toBeGreaterThan(2);
-  });
 });
 
 /* ══ THE HONEST FILL, PAINTED (v36, Phase 2) ═════════════════════════════════════════════════ */
