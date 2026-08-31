@@ -1089,8 +1089,17 @@ const sample = async (page: import("@playwright/test").Page, shot: string) =>
         const y = lr.top + lr.height / 2;
         /* both sample points must belong to this lane, or the reading is about whatever covers it */
         if (!ownsPixel(tx - 6, y, lane) || !ownsPixel(tx + 6, y, lane)) continue;
+        /* ⚠️ THE PAST IS A FALLOFF, SO ONE SAMPLE CANNOT DESCRIBE IT. Three positions across the
+           washed span, each carrying the fraction of the gradient it sits at, so the claim can be
+           the composite AT THAT POINT rather than one flat colour that no longer exists. */
+        const pastW = tx - lr.left;
+        const probes = [0.25, 0.6, 0.95].map((f) => {
+          const x = lr.left + pastW * f;
+          return ownsPixel(x, y, lane) ? { f, paint: at(x, y) } : null;
+        }).filter(Boolean);
         ground.push({ key: Math.round(lr.top) + ':' + Math.round(y),
                       nm: (row.querySelector(".tl-nm2") || {}).textContent,
+                      probes, pastW: Math.round(pastW),
                       past: at(tx - 6, y), ahead: at(tx + 6, y) });
       }
       return { bars, ground, drop };
@@ -1153,8 +1162,10 @@ test("⚠️ the past is set back on the ground and never on the data", async ({
       lineX: Math.round(line.getBoundingClientRect().left),
       washEndsAt: Math.round(laneR.left + parseFloat(before.width)),
       washBg: before.backgroundColor,
+      washImage: before.backgroundImage,
       washW: before.width,
-      todayRule: getComputedStyle(line).borderLeftColor + " " + getComputedStyle(line).borderLeftWidth,
+      todayRule: getComputedStyle(line).borderLeftWidth,
+      todayShadow: getComputedStyle(line).boxShadow,
       fills,
       /* nothing in the lane may sit BEHIND the wash */
       barZ: getComputedStyle(document.querySelector(".tl-p")).zIndex,
@@ -1165,9 +1176,18 @@ test("⚠️ the past is set back on the ground and never on the data", async ({
 
   expect(Math.abs(r.lineX - r.washEndsAt),
     `the today rule is at ${r.lineX} and the past ends at ${r.washEndsAt}`).toBeLessThanOrEqual(1);
-  expect(r.washBg, "the past wash").toBe("rgba(58, 28, 20, 0.035)");
+  /* ⚠️ A GRADIENT HAS NO ONE COLOUR, so the flat-value claim is replaced by the shape. The painted
+     sweep below is what actually proves the wash reaches the ground; this asserts the DECLARATION
+     is a left-to-right falloff to the pinned stop, which is the half a pixel read cannot state. */
+  expect(r.washBg, "a gradient paints no background-color").toBe("rgba(0, 0, 0, 0)");
+  expect(r.washImage, "the past is not a falloff").toMatch(/linear-gradient\(90deg,\s*rgba\(0, 0, 0, 0\),\s*rgba\(58, 28, 20, 0\.055\)\)/);
   expect(parseFloat(r.washW), "the wash has no width — it reports on nothing").toBeGreaterThan(1);
-  expect(r.todayRule).toBe("rgba(58, 28, 20, 0.3) 1px");
+  /* ⚠️ TODAY IS A SHADOW NOW, AND WHAT MATTERS IS THAT ITS BOX DID NOT MOVE. Two real bugs were
+     caught on this element's painted x — the 346px displacement, and the fill edge landing on
+     today — so losing the drawn border must not lose the position. The `lineX` assertion above is
+     that claim and is unchanged; this one only says the mark is a shadow and no longer a rule. */
+  expect(r.todayRule, "today still draws a border").toBe("0px");
+  expect(r.todayShadow, "today casts no shadow").toMatch(/rgba\(58, 28, 20, 0\.28\)/);
   /* ⚠️ THE WASH IS BEHIND THE DATA. A bar at z-index 2 and a marker at 4 sit above a wash at 0,
      so neither is dimmed — the fill of a bar crossing the line is ONE colour, and a reader cannot
      mistake a washed fill for a paler one. */
@@ -1262,16 +1282,33 @@ test("⚠️ the past is set back on the ground and never on the data", async ({
    * is, and fails if the wash is the wrong alpha, the wrong tint, or absent.
    */
   const WASH = [58, 28, 20];
-  const WASH_A = 0.035;
+  /* the gradient's far stop — its alpha at today, falling to nothing at the window's left edge */
+  const WASH_A = 0.055;
+  const lum = (c: string) => (c.match(/\d+/g) || []).map(Number).reduce((a, b) => a + b, 0);
   for (const g of paint.ground) {
-    const base = (g.ahead.match(/\d+/g) || []).map(Number);
-    const want = base.map((c: number, i: number) => Math.round(c * (1 - WASH_A) + WASH[i] * WASH_A));
-    const got = (g.past.match(/\d+/g) || []).map(Number);
-    const off = got.map((c: number, i: number) => Math.abs(c - want[i]));
-    expect(
-      Math.max(...off),
-      `${g.nm}: ground ahead of today paints ${g.ahead}, so behind it should paint rgb(${want.join(", ")}) — it paints ${g.past}`,
-    ).toBeLessThanOrEqual(1);
+    const base = ((g as any).ahead.match(/\d+/g) || []).map(Number);
+    /* ⚠️ THE COMPOSITE AT EACH POINT, which is the only form the claim can take once the wash is a
+       falloff: alpha is the gradient's stop times how far across the span the sample sits. */
+    for (const pr of (g as any).probes) {
+      const a = WASH_A * pr.f;
+      const want = base.map((c: number, i: number) => Math.round(c * (1 - a) + WASH[i] * a));
+      const got = (pr.paint.match(/\d+/g) || []).map(Number);
+      const off = got.map((c: number, i: number) => Math.abs(c - want[i]));
+      expect(
+        Math.max(...off),
+        `${g.nm}: at ${Math.round(pr.f * 100)}% across the past the ground should paint rgb(${want.join(", ")}) — it paints ${pr.paint}`,
+      ).toBeLessThanOrEqual(2);
+    }
+    /* ⚠️ AND IT DEEPENS TOWARD TODAY. The composite check above would be satisfied by a gradient
+       running the wrong way if its stops happened to land near these three values; a monotonic
+       darkening cannot be, and it is the thing a reader actually sees. */
+    const ls = (g as any).probes.map((pr: any) => lum(pr.paint));
+    for (let i = 1; i < ls.length; i++) {
+      expect(ls[i], `${g.nm}: the past lightens toward today — ${JSON.stringify((g as any).probes)}`)
+        .toBeLessThan(ls[i - 1] + 1);
+    }
+    expect(ls[ls.length - 1], `${g.nm}: the past does not darken at all across its span`)
+      .toBeLessThan(ls[0]);
   }
   /* and it is NOT on the data: these bars sit entirely under the wash, and each paints exactly the
      colour its own stylesheet rule declares — the composed claim a computed style cannot make */

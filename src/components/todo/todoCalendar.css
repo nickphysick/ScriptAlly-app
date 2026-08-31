@@ -174,7 +174,6 @@
   --tl-rowhov: #f3ebdd;
   /* ⚠️ .3, NOT .4 (v36). It carried the v35 value through part one — the rule marks a boundary
      rather than competing with the bars either side of it. */
-  --tl-todayl: rgba(58, 28, 20, .3);
 
   /* the five live bar families: border · fill · the deeper fill at ≥85% · text */
   --bar-out-line: #d9e1d6;    --bar-out-fill: #e6ece3;    --bar-out-near: #d7e0d2;    --bar-out-text: #55684f;
@@ -364,7 +363,14 @@
 .tl-c-tl::before {
   content: ""; position: absolute; left: 0; top: 0; bottom: 0;
   width: var(--tl-past-w, 0);
-  background: rgba(58, 28, 20, .035);
+  /* ⚠️ A FALLOFF, NOT A FLAT WASH (v37, Phase 4). A flat tint states one thing about the whole of
+     the past — that it is behind you — which is true and says nothing about WHEN. A gradient that
+     deepens toward today says the near past is nearer, which is the fact a reader is actually
+     looking for, and it removes the hard left edge the flat fill drew at the window's start.
+     ⚠️ AND IT IS `background-image`, NOT THE SHORTHAND. The shorthand resets every background
+     longhand, so a future edit adding a colour would silently take the gradient with it — this
+     repo has had four rounds of a see-through header from exactly that. */
+  background-image: linear-gradient(90deg, transparent, rgba(58, 28, 20, .055));
   pointer-events: none; z-index: 0;
 }
 .tl-hrow .tl-c-tl { overflow: visible; }
@@ -594,7 +600,18 @@ button.tl-tchip { cursor: pointer; }
  * the only ancestor that spans every row and clips nothing.
  */
 .tl-wrap { position: relative; }
-.tl-todayline { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px solid var(--tl-todayl); z-index: 5; pointer-events: none; }
+/* ⚠️ TODAY IS A SHADOW NOW, NOT A DRAWN RULE (v37, Phase 4). A 1px line is a border, and a border
+   is a thing on the page competing with every other line on it — the rail's ticks, the row edges,
+   the bar outlines. A shadow falling to the LEFT says the same thing without adding a mark: the
+   past is what is lit from today, and the edge is where the light stops.
+   ⚠️ THE ELEMENT KEEPS ITS ZERO WIDTH AND ITS POSITION. Both locks that caught real bugs read this
+   element's painted x — the 346px displacement, and the fill edge landing on today — and losing
+   the border must not lose them, so what is asserted is the box, never the border. */
+.tl-todayline {
+  position: absolute; top: 0; bottom: 0; width: 0;
+  box-shadow: -6px 0 8px -6px rgba(58, 28, 20, .28);
+  z-index: 6; pointer-events: none;
+}
 /* ⚠️ THE FLAG SITS ABOVE THE BOARD, CLEAR OF THE FIRST GROUP TITLE. It was 2px above it —
    not overlapping, and not clear either, which on a 19px Playfair title reads as a collision. It
    is lifted by its own height plus a gap, and it is CENTRED on its rule by `translateX(-50%)`
