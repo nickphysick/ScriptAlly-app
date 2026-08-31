@@ -52,7 +52,7 @@
 }
 .tl-kind:hover { border-color: #d3c4b3; color: #6a5a50; }
 /* one selection grammar page-wide — the pink the chosen segment already wore */
-.tl-kind[data-on="true"] { background: #f8e7e2; border-color: #eecfc2; color: #7c3a2a; }
+.tl-kind[data-on="true"] { background: #f5e2da; border-color: #e8c8bc; color: #1c130f; }
 .tl-kind:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
 .tl-menuwrap { position: relative; display: inline-flex; flex: none; }
 .tl-mbtn {
@@ -61,7 +61,7 @@
   padding: 0 10px; height: 26px; border-radius: 8px; cursor: pointer;
   border: 1px solid #e6dcce; background: #fff; color: #6a5a50;
 }
-.tl-mbtn:hover { border-color: #d3c4b3; color: #7c3a2a; }
+.tl-mbtn:hover { border-color: #d3c4b3; color: #1c130f; }
 .tl-menu {
   position: absolute; top: calc(100% + 6px); left: 0; z-index: 75;
   background: #fff; border: 1px solid #ece0d2; border-radius: 10px;
@@ -166,7 +166,16 @@
   --tl-ink: #3a1c14;
   --tl-muted: #8a7a6c;
   --tl-label: #9c8878;
-  --tl-burgundy: #7c3a2a;
+  /* ⚠️ THE BOARD HAS NO BURGUNDY (v39, the colour law). It was the accent for hovers, active
+     segments, marker ink and an emphasis span — nine sites. Colour now appears ONLY in the pills;
+     everything else is ink, cream, parchment, sage, pink or slate.
+     ⚠️ THE TOKEN IS RENAMED, NOT REPOINTED. `--tl-burgundy` holding #1c130f is a lie a reader
+     would have to open the file to catch, and a colour law enforced by a token called burgundy is
+     one keystroke from being undone by someone restoring what the name promises.
+     ⚠️ AND IT IS NOT `--tl-ink`, WHICH IS ALREADY TAKEN AND MEANS SOMETHING ELSE: this sheet's
+     `--tl-ink` is #3a1c14, which v39 pins as the BODY colour. Two tokens, two values, and naming
+     the darker one `ink` would have made every existing reader silently darker. */
+  --tl-nearblack: #1c130f;
   --tl-pink: #f5e2da;
   --tl-pinkb: #e8c8bc;
   --tl-hair: #efe6da;
@@ -189,8 +198,8 @@
 
   /* the four markers: ring · glyph ink */
   --mk-in-line: #9fb29a;      --mk-in-ink: #55684f;
-  --mk-out-line: #cfa08e;     --mk-out-ink: #7c3a2a;
-  --mk-bang-line: #7c3a2a;    --mk-bang-ink: #7c3a2a;
+  --mk-out-line: #e6c3b4;     --mk-out-ink: #a5735c;
+  --mk-bang-line: #e6c3b4;    --mk-bang-ink: #a5735c;
   --mk-clock-line: #bdb8b0;   --mk-clock-ink: #6b675f;
 
   /* the writer's own chips */
@@ -255,7 +264,7 @@
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8.5px; letter-spacing: .1em;
   color: var(--tl-label); cursor: pointer; background: none; border: 0; padding: 0; margin-left: 2px;
 }
-.tl-gtbtn:hover { color: var(--tl-burgundy); }
+.tl-gtbtn:hover { color: var(--tl-nearblack); }
 .tl-gtbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
 
 /* ⚠️ EACH GROUP GETS ITS OWN CARD, and the heading is NOT in it. A heading inside the card reads
@@ -325,11 +334,11 @@
 /* ── today, in the rail ──────────────────────────────────────────────────────────────────── */
 .tl-todaystem {
   position: absolute; bottom: 0; height: 11px; width: 0;
-  border-left: 1.5px solid var(--tl-burgundy);
+  border-left: 1.5px solid var(--tl-nearblack);
 }
 .tl-todaychip {
   position: absolute; top: 3px; transform: translateX(-50%);
-  background: var(--tl-burgundy); color: #f8f5f0;
+  background: var(--tl-nearblack); color: #f8f5f0;
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .1em;
   padding: 2px 6px; border-radius: 4px; white-space: nowrap;
 }
@@ -410,8 +419,8 @@
   text-transform: uppercase; color: var(--tl-label); margin-top: 2px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.tl-sd { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; border: 1.5px solid var(--tl-burgundy); }
-.tl-sd[data-dot="you"] { background: var(--tl-burgundy); }
+.tl-sd { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; border: 1.5px solid var(--tl-nearblack); }
+.tl-sd[data-dot="you"] { background: var(--tl-nearblack); }
 .tl-sd[data-dot="them"] { background: #f8e2d9; }
 .tl-sd[data-dot="quiet"] { background: transparent; border-color: #d3c4b3; }
 .tl-sd[data-dot="self"] { border-radius: 3px; background: transparent; }
@@ -445,7 +454,7 @@
   cursor: pointer; line-height: 1;
 }
 .tl-seg2 button + button { border-left: 1px solid #efe6da; }
-.tl-seg2 button[data-on="true"] { background: #f5e2da; color: #7c3a2a; }
+.tl-seg2 button[data-on="true"] { background: #f5e2da; color: #1c130f; }
 .tl-seg2 button:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
 
 /* ══ THE ACTION COLUMN — CONTROLS ARE NEVER PILLS ══════════════════════════════════════════
@@ -462,7 +471,7 @@
   background: #fff; border: 1px solid var(--tl-btn-line); color: var(--tl-btn-ink);
   box-shadow: 0 1px 0 rgba(58, 28, 20, .05);
 }
-.tl-abtn:hover { border-color: var(--tl-burgundy); color: var(--tl-burgundy); }
+.tl-abtn:hover { border-color: var(--tl-nearblack); color: var(--tl-nearblack); }
 .tl-rrow:hover .tl-abtn { border-color: var(--tl-pinkb); }
 .tl-abtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
 .tl-abtn .cv { opacity: .5; }
@@ -630,7 +639,7 @@ button.tl-mk2 { cursor: pointer; }
   border: 1px solid var(--tl-chip-line); border-radius: 999px; padding: 0 10px;
   font-size: 10px; font-weight: 500; color: var(--tl-ink); white-space: nowrap; z-index: 2;
 }
-.tl-tchip .sq { width: 8px; height: 8px; border-radius: 2px; border: 1.5px solid var(--tl-burgundy); flex: 0 0 auto; }
+.tl-tchip .sq { width: 8px; height: 8px; border-radius: 2px; border: 1.5px solid var(--tl-nearblack); flex: 0 0 auto; }
 /* ⚠️ THE GHOST IS AN ORIGIN, NOT A DUPLICATE. It marks the day a task fell due while the live
    chip sits on today — and rendered identically it read as the same task drawn twice, which is
    what a reader reported. Dashed and unfilled, because it is a place rather than a thing: the
@@ -775,7 +784,7 @@ button.tl-tchip { cursor: pointer; }
    emphasis but IDENTITY — the subject of the line — and the ref sets it burgundy for that reason.
    It is a `<em>` inside a Playfair headline, which is the one construction the standing rule
    permits a colour on, because the colour is naming a person rather than stressing a word. */
-.tl-fxh em { font-style: italic; color: #7c3a2a; }
+.tl-fxh em { font-style: italic; color: #1c130f; }
 .tl-fxctx { font-size: 12.5px; color: #6b5a4d; margin-top: 6px; line-height: 1.5; max-width: 62ch; }
 .tl-facts { display: flex; gap: 18px; margin-top: 11px; flex-wrap: wrap; }
 .tl-fact .k {
@@ -790,8 +799,8 @@ button.tl-tchip { cursor: pointer; }
   padding: 8px 12px; border-radius: 8px; cursor: pointer;
   border: 1px solid #e6dcce; background: #fff; color: #6a5a50;
 }
-.tl-btn:hover { border-color: #d3c4b3; color: #7c3a2a; }
-.tl-btn.primary { background: #f8e7e2; border-color: #eecfc2; color: #7c3a2a; }
+.tl-btn:hover { border-color: #d3c4b3; color: #1c130f; }
+.tl-btn.primary { background: #f5e2da; border-color: #e8c8bc; color: #1c130f; }
 .tl-btn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
 
 /* ══ THE WORKSPACE ═════════════════════════════════════════════════════════════════════════ */
@@ -821,7 +830,7 @@ button.tl-tchip { cursor: pointer; }
    so the reader keeps the context they were working in. Dimming is opacity on the ROW, never a
    filter that removes it: a row that vanished would say the relationship had. */
 .tl-crow.off { opacity: 0.3; }
-.tl-crow.on { background: #fdf5f2; box-shadow: inset 2px 0 0 #7c3a2a; }
+.tl-crow.on { background: #faf5f0; box-shadow: inset 2px 0 0 #1c130f; }
 .tl-cwho { flex: 1; min-width: 0; }
 .tl-cn {
   font-family: "Playfair Display", Georgia, serif; font-size: 13.5px; font-weight: 500;

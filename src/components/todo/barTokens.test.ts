@@ -273,7 +273,7 @@ describe("⚠️ the rail's pinned values, where a source lock is the right inst
    * rendered assertion by pinning 1px.
    */
   it("the today stem is 1.5px in the sheet, whatever the used value rounds to", () => {
-    expect(rulesFor(".tl-todaystem")).toMatch(/border-left:\s*1\.5px solid var\(--tl-burgundy\)/);
+    expect(rulesFor(".tl-todaystem")).toMatch(/border-left:\s*1\.5px solid var\(--tl-nearblack\)/);
   });
 
   it("the rail's height is a token, and the columns it shares with a row are the same two", () => {
