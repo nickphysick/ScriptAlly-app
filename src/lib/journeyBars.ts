@@ -37,22 +37,18 @@ import { isTerminalStatus } from "./agentList";
 /* ══ THE TOKENS ═══════════════════════════════════════════════════════════════════════════════ */
 
 /**
- * The clearance either side of a node or waypoint, in days — v5's own constant.
+ * ⚠️ `GAP` AND `MIN_SEG` ARE RETIRED WITH THE CUT (v40), AND THE PAIR ONLY EVER MADE SENSE
+ * TOGETHER.
  *
- * ⚠️ ONE TOKEN, BOTH SIDES. The bar stops `GAP` short of every interruption and resumes `GAP` past
- * it, so a break is symmetrical by construction. Two numbers would let one side drift.
- */
-export const GAP = 0.34;
-
-/**
- * A piece narrower than this is not drawn at all.
+ * `GAP` was the clearance a bar left either side of an interruption; `MIN_SEG` was the width below
+ * which the leftover was not worth drawing — v5's "nothing happened between them" rule, which
+ * exists only because two adjacent events left `1 - 2 × GAP` of a day between two pieces. Neither
+ * number means anything to one unbroken card: nothing interrupts it, so there is no clearance to
+ * reserve and no sliver to suppress. `cutPieces`, the only reader of both, goes with them.
  *
- * ⚠️ THE RULE IS "NOTHING HAPPENED BETWEEN THEM", NOT "THE PIECE IS SMALL". Two events on adjacent
- * days leave `1 - 2 × GAP = 0.32` of a day between them; a sliver of bar there would say a state
- * persisted for a few hours, which is a claim the record cannot support. v5 draws the two events
- * adjacent and nothing between, and this is that rule as a number.
+ * The last thing the clearance did before it went was paint every terminal mark 2px outside its
+ * own card — measured, mark centre 889.4 against a card ending 887.4.
  */
-export const MIN_SEG = 0.33;
 
 /** An event sits at the middle of its day, because a day is all the record knows. */
 export const EVENT_AT = 0.5;
@@ -253,16 +249,6 @@ export interface Segment {
   hollow?: true;
   /** what the one portalled tooltip says for this bar: the label and the named date */
   tip: string;
-  /**
-   * Whether a MARKER sits at this piece's left / right end.
-   *
-   * ⚠️ A BOOLEAN, NOT A PIXEL COUNT. How far a bar stands off a marker is geometry and belongs
-   * with the tokens; whether it abuts one at all is data, and only the pass that cut the pieces
-   * knows it. The render turns each flag into `--tl-gap-mk` or `--tl-gap`, so the clearance can be
-   * retuned in the stylesheet without touching this module.
-   */
-  abutL?: true;
-  abutR?: true;
   /**
    * The query's own status, and whether a reminder on it has fallen due.
    *
@@ -624,24 +610,6 @@ const faceAt = (before: Side | undefined, after: Side | undefined, dir: NodeDir)
 interface Break { at: number; kind: "node" | "waypoint" }
 
 /**
- * Cut `[0, span]` at every break, leaving `GAP` either side, and drop what is left too narrow.
- *
- * ⚠️ EXPORTED SO THE CUT CAN BE TESTED WITHOUT A QUERY. The rule that a sliver is not drawn is the
- * one most easily lost to a refactor, and it is the one v5 spends a whole case on.
- */
-export function cutPieces(span: number, breaks: readonly number[]): { from: number; to: number }[] {
-  const out: { from: number; to: number }[] = [];
-  let cursor = 0;
-  for (const b of [...breaks].sort((x, y) => x - y)) {
-    const to = b - GAP;
-    if (to - cursor >= MIN_SEG) out.push({ from: cursor, to });
-    cursor = Math.max(cursor, b + GAP);
-  }
-  if (span - cursor >= MIN_SEG) out.push({ from: cursor, to: span });
-  return out;
-}
-
-/**
  * One lane's bar: its segments, its nodes and its waypoints.
  */
 export function laneBars(input: LaneInput, win: BarWindow): Bars {
@@ -950,14 +918,27 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
      either side because something is DRAWN there; nothing is drawn at the named end any more (the
      notch is retired), so a gap would open a hole in a continuous stretch for no reason a reader
      could see. */
-  const marks = [...new Set(breaks.map((b) => b.at))].sort((a, b) => a - b).filter((m) => m <= barStop);
-  const cut = cutPieces(barStop, marks);
-  const pieces: { from: number; to: number }[] = [];
-  for (const pc of cut) {
-    if (goalAt != null && goalAt > pc.from + 0.001 && goalAt < pc.to - 0.001) {
-      pieces.push({ from: pc.from, to: goalAt }, { from: goalAt, to: pc.to });
-    } else pieces.push(pc);
-  }
+  /**
+   * ══ ONE CARD (v40) ══════════════════════════════════════════════════════════════════════
+   *
+   * ⚠️ NOTHING BREAKS THE BAR ANY MORE, AND THAT IS THE WHOLE OF v40. A relationship is ONE card
+   * running from its first send to today or to its named end; every status change along the way is
+   * a MARK riding on it. Fragments become impossible by construction — there is nothing left to
+   * fragment — which is a stronger guarantee than any rule about minimum widths could give.
+   *
+   * ⚠️ `cutPieces` IS DEAD AND SO ARE THE FIELDS THAT ONLY EXISTED BECAUSE A RUN WAS CUT. A marker
+   * used to INTERRUPT a bar, so every drawn marker was a break, each break reserved `GAP` either
+   * side, and anything left under `MIN_SEG` was dropped — which is how a bar that ended on its own
+   * named date could vanish entirely. The markers are still placed at their own dates in the lane;
+   * with the bar unbroken they simply sit ON it, which is what they were describing all along.
+   *
+   * ⚠️ AND THE NAMED END NO LONGER SPLITS IT EITHER. The split existed to draw the stretch past a
+   * passed date as hollow — full to the date, outlined beyond it. That is a property of the
+   * RELATIONSHIP, not of a piece, so it is a card state now and `isHollow` reads the run rather
+   * than the fragment.
+   */
+  const marks: number[] = [];
+  const pieces: { from: number; to: number }[] = [{ from: 0, to: barStop }];
 
   /* ⚠️ NO REPLY TIME RECORDED → A DASHED RAIL AND NOTHING ELSE. No cap, no forecast, no end: the
      app does not know when to expect an answer, and drawing one would be inventing the date the
@@ -1063,8 +1044,17 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
   const segments: Segment[] = [];
   pieces.forEach((p, i) => {
     const speaks = widestOfRun.get(runOf[i]) === i;
-    /* which stretch is this? the one after however many nodes precede it */
-    const before = live.filter((n) => n.at <= p.from).length;
+    /**
+     * ⚠️ THE CARD TAKES THE SIDE IT STANDS ON NOW — the stretch at its END, not its start.
+     *
+     * A cut piece lay wholly inside one stretch, so counting the marks before its START and the
+     * marks before its END gave the same answer. One unbroken card spans every stretch the
+     * relationship has been through, and those two counts are then the FIRST side and the CURRENT
+     * one. Reading the first is how a card that opened as a query and now holds a full request
+     * would paint itself as still waiting — the tone, the pill and the deed all taken from a
+     * stretch that ended months ago.
+     */
+    const before = live.filter((n) => n.at <= p.to + 0.001).length;
     const side = sides[Math.min(before, sides.length - 1)];
     const last = i === pieces.length - 1;
     const first = i === 0;
@@ -1126,7 +1116,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
       /* ⚠️ THE FIRST PIECE OF A RUN TAKES THE JOURNEY'S OWN OPENING; every later one begins at a
          real event and already knows where it began.
          ⚠️ AND THE TEST IS "does this piece start at the window edge", NOT "did the journey open
-         before the window". A bar is ALWAYS drawn from the edge — `cutPieces` starts every run at
+         before the window". A bar is ALWAYS drawn from the edge — one card starts every run at
          0 whether or not the send is visible — so a send that sits comfortably inside the window
          is still not where the element begins, and requiring a negative opening left the six-month
          reading disagreeing with the other two by three points. */
@@ -1143,10 +1133,11 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
          journey is closed. A live relationship is made of completed stretches and one running
          one, and only the running one has a fraction to be part-way through. */
       ...(live_ ? { live: true as const } : {}),
-      ...(p.to < todayAt - 0.001
-        || marks.some((m) => Math.abs(m - p.to) < GAP + 0.001)
-        || terminal
-        ? { historical: true as const } : {}),
+      /* ⚠️ "ENDS AT AN EVENT" WAS A THIRD WAY AND IS GONE WITH THE CUT. A piece used to stop at
+         every mark, so a stretch ending on one was finished by definition; one card ends on today
+         or on its named end and nothing else. Two ways now, and the removed term could only ever
+         have been false. */
+      ...(p.to < todayAt - 0.001 || terminal ? { historical: true as const } : {}),
       /* ⚠️ THE STRETCH PAST THE NAMED END IS DRAWN, NEVER NAMED — except on `quiet`, which has
          its own treatment and must not take this one.
          A quiet bar IS the stretch past a date that came and went with nothing scheduled behind
@@ -1161,8 +1152,6 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
          outline — and a hollow quiet piece would have no fill element at all to hatch. */
       ...(isHollow(i) && state !== "quiet" ? { hollow: true as const } : {}),
       ...(goalAt != null ? { goal: goalAt } : {}),
-      ...(marks.some((m) => Math.abs(m - p.from) < GAP + 0.001) ? { abutL: true as const } : {}),
-      ...(marks.some((m) => Math.abs(m - p.to) < GAP + 0.001) ? { abutR: true as const } : {}),
       /**
        * ⚠️ THE TOOLTIP IS WHERE THE NAMED DATE SURVIVES. `barFit` drops a bar's label entirely at
        * six months, and the notch that used to carry the date is retired — so without this the

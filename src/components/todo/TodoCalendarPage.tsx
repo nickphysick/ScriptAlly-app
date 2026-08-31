@@ -135,18 +135,21 @@ const TEXT_INSET = 14;
 const pct = (n: number) => `calc(${n} / var(--tl-days) * 100cqw)`;
 
 /**
- * How wide a piece is drawn — its span, less the clearance at each end.
+ * ⚠️ A CARD SPANS EXACTLY ITS OWN DATES — NO CLEARANCE AT EITHER END, AND THE REMOVAL IS THE
+ * POINT RATHER THAN A TIDY-UP.
  *
- * ⚠️ THE CLEARANCE IS TWO TOKENS AND NEITHER IS WRITTEN HERE. A piece that abuts a marker stands
- * off by `--tl-gap-mk`; one that abuts nothing by `--tl-gap`. The segment says WHETHER it abuts
- * (data); the stylesheet says by how much (geometry). Writing 12 and 2 into this file would put
- * the marker's size in the bar's arithmetic, which is the fault the row-height token was built to
- * end.
+ * The clearance existed because pieces NEIGHBOURED each other: a run cut at a status change put
+ * two pieces either side of one marker, and `--tl-gap` / `--tl-gap-mk` kept them off it. With one
+ * card per relationship there is no neighbour to stand off from, and the 2px it still subtracted
+ * was doing active harm: the closing mark sits at the end date, so a card inset 2px inside its own
+ * end painted its terminal mark OUTSIDE itself. Measured, twice, before the lock's tolerance was
+ * blamed — mark centre 889.4 against a card ending 887.4.
+ *
+ * `abutL`/`abutR` go with it. They answered "does this piece touch a marker", which is a question
+ * only a cut model can ask.
  */
-const gapVar = (abuts: boolean | undefined) => (abuts ? "var(--tl-gap-mk)" : "var(--tl-gap)");
-const barLeft = (sg: Segment) => `calc(${pct(sg.from)} + ${gapVar(sg.abutL)})`;
-const barWidth = (sg: Segment) =>
-  `calc(${pct(sg.to - sg.from)} - ${gapVar(sg.abutL)} - ${gapVar(sg.abutR)})`;
+const barLeft = (sg: Segment) => pct(sg.from);
+const barWidth = (sg: Segment) => pct(sg.to - sg.from);
 /**
  * ⚠️ THE PAGE DECLARES WHICH LANE; THE STYLESHEET DECIDES WHERE THAT IS.
  *
@@ -179,8 +182,8 @@ const laneVar = (lane: number): React.CSSProperties =>
  * one and the one the emptiness is there to make.
  */
 const Piece: React.FC<{
-  sg: Segment; days: number; selected: boolean; onPick: () => void;
-}> = ({ sg, days, selected, onPick }) => {
+  sg: Segment; days: number; lastMarkAt: number | null; selected: boolean; onPick: () => void;
+}> = ({ sg, days, lastMarkAt, selected, onPick }) => {
   const lines = barLines(sg.label);
   /* ⚠️ THE PILL IS THE APP'S OWN VOCABULARY — see `calendarPill`. The status while the agency
      holds the move, the deed while the writer does, and nothing else is reachable. */
@@ -188,6 +191,33 @@ const Piece: React.FC<{
   const facts = { trueFrom: sg.trueFrom, trueTo: sg.trueTo, from: sg.from, to: sg.to, days, live: sg.live };
   const fade = fadesFor(facts);
   const bounds = cardBounds(facts);
+  /**
+   * ⚠️ THE CONTENT BEGINS AFTER THE LAST MARK, and that is what makes one card possible.
+   *
+   * Marks used to BREAK the bar, so text never met one: the pieces were cut around them. With the
+   * bar unbroken they ride on it, and words under a 22px disc are words nobody can read — measured
+   * on the first render, a clock sitting across "FULL SENT" and "Quiet for 35 days".
+   *
+   * The offset is expressed in the lane's own mapping so it needs no measurement: the mark's
+   * distance from the card's start, plus its own radius, plus the pinned 14px of air. `max()`
+   * keeps the pinned left where a card has no mark, and a fadeL card takes its own inset — its
+   * first 38px are dissolving, so text there would fade out mid-word.
+   */
+  /**
+   * ⚠️ THE FADE INSET IS A FLOOR, NOT A CEILING — and the brief's two clauses meet here.
+   *
+   * "…or 44px on a fadeL card" is written for the ordinary left-clipped card, whose marks are off
+   * the left edge with nothing in view to clear. A relationship that began before the window and
+   * changed status INSIDE it has both: a dissolving left edge AND a mark to get past. Measured on
+   * the first build, with the inset taken as a fixed value: content pinned at 623 with marks
+   * painted at 682 and 903 — the clock sitting across "FULL SENT" and "Quiet for 35 days", which
+   * is the exact fault this rule exists to remove. Both clauses are floors, so both are honoured
+   * by taking the larger.
+   */
+  const inset = fade.left ? "var(--card-fade-inset)" : "var(--tl-text-inset)";
+  const contentLeft = lastMarkAt == null
+    ? inset
+    : `max(${inset}, calc(${pct(lastMarkAt - sg.from)} + calc(var(--mk) / 2) + 14px))`;
   return (
     <div
       /* ⚠️ THE CLASS LIST IS WRITTEN IN THE JSX, not built into a `const` above it. The style-reach
@@ -205,7 +235,14 @@ const Piece: React.FC<{
            decision about reply windows. */
         + `${fade.left ? " fadeL" : ""}${fade.right ? " fadeR" : ""}`
         + `${selected ? " sel" : ""}`}
-      style={{ left: barLeft(sg), width: barWidth(sg), ...laneVar(sg.lane) }}
+      style={{ left: barLeft(sg), width: barWidth(sg), ...laneVar(sg.lane),
+        ["--content-left" as string]: contentLeft }}
+      /* ⚠️ THE RELATIONSHIP'S OWN IDENTITY, ON THE ELEMENT, so a lock can count cards PER
+         RELATIONSHIP rather than per row. A row holds one card per drawn query, and a writer with
+         two books at one agency has two — counting per row would call that correct state a
+         failure, and counting per row on the OLD model would have called a fragmented bar a pass
+         wherever it happened to hold one relationship. */
+      data-rel={`${sg.rowKey}::${sg.lane}`}
       data-state={sg.state}
       /* ⚠️ WHICH QUERY THIS BAR IS, so a lock can ask whether the row's WORDS are about a query the
          row actually draws. Three variants of that bug shipped, each one a true sentence about a
@@ -1304,6 +1341,14 @@ data-rowkey={r.key}
         <div className="tl-c-tl">
           {bar.segs.map((sg) => (
             <Piece key={sg.key} sg={sg} days={range.days} selected={sel === sg.key}
+              /* ⚠️ THE LAST MARK ON THIS CARD, never the row's last. A row can hold two
+                 relationships — two books with one agency — and each card must clear its own
+                 marks and no others. */
+              lastMarkAt={(() => {
+                const on = bar.nodes.filter((n) => n.rowKey === sg.rowKey && n.lane === sg.lane
+                  && n.at >= sg.from - 0.001 && n.at <= sg.to + 0.001);
+                return on.length ? Math.max(...on.map((n) => n.at)) : null;
+              })()}
               onPick={() => pickSeg(r.key, sg)} />
           ))}
           {bar.nodes.map((n) => (

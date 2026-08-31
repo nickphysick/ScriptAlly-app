@@ -80,10 +80,14 @@ describe("the calendar's bar path states no vertical literal", () => {
     expect(offenders, `a vertical literal in the bar path: ${offenders.join(" | ")}`).toEqual([]);
   });
 
-  it("the three tokens are declared once each, at the values v39 pins", () => {
+  it("the three tokens are declared once each, at the values the refs pin", () => {
     const root = src.match(/(^|\n)\.tl-board\s*\{([\s\S]*?)\}/) ?? src.match(/(^|\n):root\s*\{([\s\S]*?)\}/);
     expect(root, "no token block found").not.toBeNull();
-    for (const [tok, want] of [["--row-h", "62px"], ["--bar-h", "54px"], ["--mk", "28px"]] as const) {
+    /* ⚠️ `--mk` IS 22px SINCE v40, and the reason is the mark's new job. At 28 it was an object in
+       the gap between two cut pieces, sized to be read on the panel's own ground; it now rides ON
+       a card whose own height is 54, and a 28px disc there covers half the card it is annotating.
+       The other two are unchanged — the row and the card did not move. */
+    for (const [tok, want] of [["--row-h", "62px"], ["--bar-h", "54px"], ["--mk", "22px"]] as const) {
       const hits = [...src.matchAll(new RegExp(`${tok}\\s*:\\s*([^;]+);`, "g"))].map((m) => m[1].trim());
       expect(hits, `${tok} is declared ${hits.length} times: ${JSON.stringify(hits)}`).toEqual([want]);
     }

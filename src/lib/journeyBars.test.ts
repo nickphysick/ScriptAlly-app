@@ -11,9 +11,9 @@ import { describe, it, expect } from "vitest";
 import { Agent, Query, QueryStatus, TaskFlag, Activity, ActivityType } from "../types";
 import { RecordItem, shortCalDate } from "./todoCalendar";
 import {
-  GAP, MIN_SEG, EVENT_AT, FRESH_MAX_DAYS, SETTLED_MAX_DAYS,
+  EVENT_AT, FRESH_MAX_DAYS, SETTLED_MAX_DAYS,
   holderOf, familyOf, namedEndFor,
-  cutPieces, laneBars, sideOf, weightFor, durationCount, labelFor, statusIndex,
+  laneBars, sideOf, weightFor, durationCount, labelFor, statusIndex,
   type BarWindow, type LaneInput,
   type Segment,
 } from "./journeyBars";
@@ -58,47 +58,13 @@ const back = (n: number) => BACK.days[n];
 
 /* ══ the cut ══════════════════════════════════════════════════════════════════════════════════ */
 
-describe("cutPieces — the bar stops short of every interruption and resumes past it", () => {
-  it("runs whole when nothing interrupts it", () => {
-    expect(cutPieces(7, [])).toEqual([{ from: 0, to: 7 }]);
-  });
-
-  it("leaves GAP either side of a break, symmetrically", () => {
-    const p = cutPieces(7, [3.5]);
-    expect(p).toHaveLength(2);
-    expect(p[0].to).toBeCloseTo(3.5 - GAP, 6);
-    expect(p[1].from).toBeCloseTo(3.5 + GAP, 6);
-  });
-
-  it("⚠️ DRAWS NOTHING BETWEEN EVENTS ON ADJACENT DAYS — nothing happened between them", () => {
-    /* two events a day apart leave 1 − 2×GAP = 0.32 of a day, under the floor */
-    const p = cutPieces(7, [2.5, 3.5]);
-    expect(p).toHaveLength(2);
-    expect(p[0].to).toBeCloseTo(2.5 - GAP, 6);
-    expect(p[1].from).toBeCloseTo(3.5 + GAP, 6);
-    expect(1 - 2 * GAP).toBeLessThan(MIN_SEG);
-  });
-
-  it("does draw between events two days apart — there the state really persisted", () => {
-    const p = cutPieces(7, [2.5, 4.5]);
-    expect(p).toHaveLength(3);
-    expect(p[1].to - p[1].from).toBeCloseTo(2 - 2 * GAP, 6);
-  });
-
-  it("drops a leading sliver rather than drawing a hairline at the edge", () => {
-    expect(cutPieces(7, [0.2])).toHaveLength(1);
-    expect(cutPieces(7, [0.2])[0].from).toBeCloseTo(0.54, 6);
-  });
-
-  it("drops a trailing sliver too", () => {
-    const p = cutPieces(7, [6.9]);
-    expect(p).toHaveLength(1);
-    expect(p[0].to).toBeCloseTo(6.9 - GAP, 6);
-  });
-});
-
-/* ══ whose move ═══════════════════════════════════════════════════════════════════════════════ */
-
+/* ⚠️ THE `cutPieces` CASES ARE RETIRED WITH THE FUNCTION (v40). Six of them locked the rule that
+ * a bar stops short of every interruption and resumes past it, including the sliver rule v5 spent
+ * a whole case on. All six passed against a pure function nothing called any more: v40 draws one
+ * card per relationship, so there is no cut, no clearance and no sliver. Keeping them would have
+ * been hardening a symbol with no path to a rendered root — which this repo has spent a session on
+ * once. What replaces them is `two hand-changing records still draw ONE card` below.
+ */
 describe("⚠️ the side comes from the CTA engine, and nothing here re-lists a status", () => {
   it("reads the same split the row dot and the filters read", () => {
     expect(sideOf(QueryStatus.QUERIED)).toBe("theirs");
@@ -126,18 +92,23 @@ describe("⚠️ the side comes from the CTA engine, and nothing here re-lists a
     }), WIN);
     expect(bars.nodes).toHaveLength(1);
     expect(bars.nodes[0].dir).toBe("out");
-    expect(bars.segments.map((s) => s.side)).toEqual(["theirs", "theirs"]);
+    /* one card, and the nudge did not move it off their side */
+    expect(bars.segments.map((s) => s.side)).toEqual(["theirs"]);
   });
 
-  it("⚠️ A HAND-CHANGING EVENT SPLITS THE BAR IN TWO SIDES", () => {
-    /* a full request arrives mid-week: theirs before it, yours after */
+  it("⚠️ A HAND-CHANGING EVENT MOVES THE CARD ONTO THE OTHER SIDE", () => {
+    /* ⚠️ THE TITLE SAID "SPLITS THE BAR IN TWO SIDES" AND THAT IS THE DEFECT'S OWN SENTENCE.
+       A full request arrives mid-week. It used to cut the relationship into a theirs piece and a
+       yours piece; it now leaves one card, standing on the writer's side, with the request drawn
+       as a mark on it. */
     const bars = laneBars(lane({
       query: q({ status: QueryStatus.FULL_REQUESTED }),
       records: [rec({ key: "r1", ymd: back(2), label: "Full requested", dir: "in", activityId: "f1" })],
       statusOf: (id) => (id === "f1" ? QueryStatus.FULL_REQUESTED : null),
       moveLabel: "Send full",
     }), BACK);
-    expect(bars.segments.map((s) => s.side)).toEqual(["theirs", "yours"]);
+    /* the request arrived, so the card now stands on the writer's side — one card, current side */
+    expect(bars.segments.map((s) => s.side)).toEqual(["yours"]);
     /* ⚠️ THE CARD'S OWN WORDS, BARE (grouped pack, Phase 5). It was `Your move · send full`;
        "Your move" is how this codebase talks to itself and never how a writer talks about their
        own submission. The label the card supplies is the whole label now. */
@@ -151,10 +122,10 @@ describe("⚠️ the side comes from the CTA engine, and nothing here re-lists a
        and read 56 days: long-standing, from a full that had not been requested yet. Dated two
        days in the PAST it is four days old, which is what a fresh your-move stretch is. The old
        `y3` was an artefact of the impossible fixture, not a property of the derivation. */
-    expect(bars.segments[1].state).toBe("y1");
+    expect(bars.segments[0].state).toBe("y1");
     /* y1's form is the fact alone — a four-day-old request does not need its age stating; that
        is what separates the three weights from one another. */
-    expect(bars.segments[1].label).toBe("Full requested");
+    expect(bars.segments[0].label).toBe("Full requested");
   });
 
   it("and the other way round — you send, and it becomes theirs", () => {
@@ -164,7 +135,7 @@ describe("⚠️ the side comes from the CTA engine, and nothing here re-lists a
       records: [rec({ key: "r1", ymd: day(2), label: "Full sent", dir: "out", activityId: "s1" })],
       statusOf: (id) => (id === "s1" ? QueryStatus.FULL_SENT : null),
     }), WIN);
-    expect(bars.segments.map((s) => s.side)).toEqual(["yours", "theirs"]);
+    expect(bars.segments.map((s) => s.side)).toEqual(["theirs"]);
   });
 });
 
@@ -267,7 +238,11 @@ describe("⚠️ the side walk runs FORWARDS — a send hands the move over, and
       statusOf: () => QueryStatus.PARTIAL_SENT,
       moveLabel: "Send partial",
     }), BACK);
-    expect(bars.segments.map((s) => s.side)).toEqual(["yours", "theirs", "yours"]);
+    /* ⚠️ TWO HAND CHANGES, ONE CARD — so the final side can only be right if BOTH steps of the
+       walk were. The old backwards walk answered "yours" for every stretch including this one, so
+       it would still fail here; the fixture keeps its teeth after the retarget, which is the whole
+       reason it was kept rather than rewritten. */
+    expect(bars.segments.map((s) => s.side)).toEqual(["yours"]);
   });
 
   it("a nudge between two stretches leaves both on the same side", () => {
@@ -277,7 +252,7 @@ describe("⚠️ the side walk runs FORWARDS — a send hands the move over, and
       records: [rec({ key: "r1", ymd: day(2), label: "Nudge sent", dir: "out", activityId: "n1" })],
       statusOf: () => null,
     }), WIN);
-    expect(bars.segments.map((s) => s.side)).toEqual(["theirs", "theirs"]);
+    expect(bars.segments.map((s) => s.side)).toEqual(["theirs"]);
   });
 
   it("⚠️ AND THE LAST STRETCH TAKES THE QUERY'S OWN STATUS, whatever the visible record says", () => {
@@ -293,16 +268,19 @@ describe("⚠️ the side walk runs FORWARDS — a send hands the move over, and
   });
 });
 
-describe("⚠️ a bar says what it is ONCE, where there is room to read it", () => {
+describe("⚠️ a relationship says what it is ONCE — because it is DRAWN once", () => {
+  /* ⚠️ THIS DESCRIBE USED TO POLICE A CONSEQUENCE OF THE DEFECT, AND NOW STATES THE FIX.
+   *
+   * A hand-changing event cut the bar, so a single run arrived as several pieces and only the
+   * widest was allowed to speak — `widestOfRun`, `speaks`, "leaves the rest silent". Every one of
+   * those existed to stop a fragmented run stating itself three times. v40 removes the fragment,
+   * so the rule has nothing left to govern: there is one card, it carries one label, and no
+   * arbitration is possible. The two cases that asserted the arbitration are retired WITH the
+   * mechanism rather than left passing over a list of length one.
+   *
+   * What replaces them is the composed claim the old model could not satisfy: this fixture holds
+   * two hand-changing records and used to yield three pieces. */
   const twice = () => laneBars(lane({
-    /* ⚠️ A REAL SEND DATE, because the duration is counted from when it became the writer's move
-       and the first version of this fixture put its events two days in the FUTURE — where nothing
-       has elapsed, so the count was correctly omitted and the case was measuring that instead.
-       ⚠️ AND THE EVENTS THEMSELVES ARE IN THE PAST NOW, on `BACK`, for the second half of the
-       same lesson: a bar ends on today or on its named date, so a run of future-dated records has
-       nothing to be broken into pieces AT. The fixture was measuring a shape the board cannot be
-       in — twice, by two different routes, which is why the window exists rather than a nudge to
-       the dates. */
     query: q({ status: QueryStatus.FULL_REQUESTED, dateSent: "2026-07-01T09:00:00Z" }),
     records: [
       rec({ key: "r1", ymd: back(2), label: "Full requested", dir: "in", activityId: "f1" }),
@@ -312,25 +290,22 @@ describe("⚠️ a bar says what it is ONCE, where there is room to read it", ()
     moveLabel: "Send full",
   }), BACK);
 
-  it("labels one piece of each contiguous same-side run and leaves the rest silent", () => {
+  it("two hand-changing records still draw ONE card", () => {
     const bars = twice();
-    const yours = bars.segments.filter((s) => s.side === "yours");
-    expect(yours.length, "the run was not broken into pieces").toBeGreaterThan(1);
-    expect(yours.filter((s) => s.label).length, "the run states itself more than once").toBe(1);
-    expect(yours.filter((s) => s.count).length, "the count is restated").toBe(1);
+    expect(bars.segments).toHaveLength(1);
+    /* and both records are still drawn — as marks riding on it, which is where they went */
+    expect(bars.nodes.length, "the records became marks").toBeGreaterThanOrEqual(2);
   });
 
-  it("⚠️ AND IT IS THE WIDEST PIECE, because the opening one is often a sliver", () => {
+  it("that one card speaks, and there is nothing else that could", () => {
     const bars = twice();
-    const yours = bars.segments.filter((s) => s.side === "yours");
-    const speaking = yours.find((s) => !!s.label)!;
-    const widest = yours.reduce((a, b) => (b.to - b.from > a.to - a.from ? b : a));
-    expect(speaking.key).toBe(widest.key);
+    expect(bars.segments.filter((sg) => !!sg.label)).toHaveLength(1);
+    expect(bars.segments.filter((sg) => sg.count != null).length).toBeLessThanOrEqual(1);
   });
 
-  it("a run of one piece still speaks", () => {
+  it("a journey with nothing in the record speaks too", () => {
     const bars = laneBars(lane({ query: q({ status: QueryStatus.QUERIED }) }), WIN);
-    expect(bars.segments.every((s) => !!s.label)).toBe(true);
+    expect(bars.segments.every((sg) => !!sg.label)).toBe(true);
   });
 });
 

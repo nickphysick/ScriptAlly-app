@@ -227,10 +227,13 @@
   --bar-closed-line: #ddd0c0;
 
   /* the four markers: ring · glyph ink */
-  --mk-in-line: #9fb29a;      --mk-in-ink: #55684f;
-  --mk-out-line: #e6c3b4;     --mk-out-ink: #a5735c;
-  --mk-bang-line: #e6c3b4;    --mk-bang-ink: #a5735c;
-  --mk-clock-line: #bdb8b0;   --mk-clock-ink: #6b675f;
+  /* ⚠️ ONE RING FOR EVERY MARK; THE GLYPH CARRIES THE MEANING. The ring used to be tinted per
+     kind, so a mark said the same thing twice — a sage ring around a sage arrow — and at 22px the
+     ring is a hairline nobody reads a hue off anyway. One line colour, three inks. */
+  --mk-line: #cdbfa8;
+  --mk-in-ink: #5a6e58;
+  --mk-out-ink: #8a5a45;
+  --mk-clock-ink: #8a8177;
 
   /* the writer's own chips */
   --tl-chip-line: #e5d8c9;
@@ -251,7 +254,7 @@
    */
   --row-h: 62px;
   --bar-h: 54px;
-  --mk: 28px;
+  --mk: 22px;
   --tl-headrow-h: 26px;
   --tl-rail-h: 42px;
   --tl-nm-w: 292px;
@@ -259,20 +262,10 @@
   /* the bar text's inset — mirrored by TEXT_INSET in the page, which the fit pass subtracts */
   --tl-text-inset: 14px;
   --tl-gap: 2px;
-  /**
-   * ⚠️ THE CLEARANCE IS DERIVED FROM THE MARKER, NOT A LITERAL BESIDE IT.
-   *
-   * It was 12px, chosen when a marker was 20px across — so it carried 2px of real clearance and
-   * read as a considered number. The marker became 30px for v37 and the same 12 became an OVERLAP:
-   * measured, −1.2px on thirteen pairs at once, uniformly, which is the signature of arithmetic
-   * rather than of a layout that collapsed.
-   *
-   * A bar must stand off the marker's half-width and then clear it. Written that way the clearance
-   * is 2px at any marker size — the SAME 2px `--tl-gap` uses where there is no marker to clear, so
-   * the two now say one thing: stand off whatever is there by two pixels. No new value is
-   * introduced, and the next change to `--mk` cannot silently eat the gap.
-   */
-  --tl-gap-mk: calc(var(--mk) / 2 + var(--tl-gap));
+  /* ⚠️ `--tl-gap-mk` IS GONE WITH THE CUT MODEL. It stood a piece off from the marker it abutted —
+     a clearance only two neighbouring pieces can need. `--tl-gap` survives because the task chip
+     still reads it, and it is 2px HERE against the shell's 22px in index.css: same name, two
+     scopes, and the calendar's own declaration is what makes the chip's offset 2px. */
   /* ⚠️ THE CARD'S BORDER IS A TOKEN. It was one because the FILL had to subtract it — a fill was
      absolutely positioned inside the card, so its `left: 0` sat one border inside the painted
      edge. The fill is deleted (v39, Phase 3): a card's extent already states its span, so the fill
@@ -550,7 +543,10 @@
      what the dates say it is; the words move in instead. */
   overflow: hidden;
 }
-.tl-p > * { margin-left: var(--tl-text-inset); margin-right: 12px; }
+/* ⚠️ THE CONTENT'S INSET IS A PER-CARD VALUE NOW, because a card has to clear its own marks. It
+   falls back to the pinned left where a card carries none, and the fallback is written at the use
+   site rather than as a second token: a token would be a knob nobody sets. */
+.tl-p > * { margin-left: var(--content-left, var(--tl-text-inset)); margin-right: 12px; }
 .tl-p:hover { box-shadow: 0 5px 16px rgba(58, 28, 20, .17); transform: translateY(-50%) scale(1.004); z-index: 6; }
 
 /* ⚠️ THE PILL IS THE ONLY COLOUR ON THE BOARD. Its five tones are whose-move, not status: pink is
@@ -685,22 +681,22 @@
 .tl-mk2 {
   width: var(--mk); height: var(--mk); border-radius: 999px; background: #fff;
   display: flex; align-items: center; justify-content: center; z-index: 4;
-  /* ⚠️ THE HALO IS THE PANEL'S OWN COLOUR, READ FROM THE PANEL'S OWN TOKEN. It separates the
-     marker from whatever it sits on, so it has to BE the ground — and the calendar no longer has a
-     ground of its own to name. `--ws-window` is the shell's, declared once in index.css; a copy of
-     its value here would be a second source for one colour, which is the fault Phase 1 exists to
-     remove rather than to relocate. */
-  box-shadow: 0 0 0 3px var(--ws-window);
-  transform: translate(-50%, -50%); box-sizing: border-box; padding: 0; border: 1.5px solid transparent;
+  /* ⚠️ THE HALO IS WHITE NOW BECAUSE THE MARK'S BACKDROP CHANGED, not because a value was
+     retuned. Marks used to sit in the gap between two cut pieces, on the lane's own ground, so the
+     halo read `--ws-window` to BE that ground. In v40 nothing cuts the bar: every mark rides ON a
+     card, and the thing it must separate itself from is the card. */
+  box-shadow: 0 0 0 2px #fff;
+  transform: translate(-50%, -50%); box-sizing: border-box; padding: 0;
+  border: 1.5px solid var(--mk-line);
 }
-.tl-mk2.in    { border-color: var(--mk-in-line);    color: var(--mk-in-ink); }
-.tl-mk2.outk  { border-color: var(--mk-out-line);   color: var(--mk-out-ink); }
+.tl-mk2.in    { color: var(--mk-in-ink); }
+.tl-mk2.outk  { color: var(--mk-out-ink); }
 /* ⚠️ THE BANG IS A GLYPH TOO, and it takes the SVGs' ratio rather than a number of its own. The ref
    pins .42 for the marker's artwork and says nothing about this one; .42 of 30 is 12.6px against
    the 12px it was drawn at, so applying the ratio keeps the painted size and ties it to the token
    instead of leaving a literal that stops agreeing the next time the marker moves. */
-.tl-mk2.bang  { border-color: var(--mk-bang-line);  color: var(--mk-bang-ink); font-weight: 600; font-size: calc(var(--mk) * .42); font-family: 'Playfair Display', Georgia, serif; }
-.tl-mk2.clock { border-color: var(--mk-clock-line); color: var(--mk-clock-ink); }
+.tl-mk2.bang  { color: var(--mk-out-ink); font-weight: 600; font-size: calc(var(--mk) * .42); font-family: 'Playfair Display', Georgia, serif; }
+.tl-mk2.clock { color: var(--mk-clock-ink); }
 /* ⚠️ THE GLYPH SCALES WITH THE MARKER, at the ref's own .42. The JSX still carries width/height
    attributes; CSS wins over a presentation attribute, so they survive as the no-CSS fallback and
    the painted size comes from the token. Without this a 30px marker holds a 10px glyph drawn for a
@@ -1092,7 +1088,7 @@ button.tl-tchip { cursor: pointer; }
 /* ⚠️ BOTH ENDS IS ONE MASK WITH TWO STOPS, not the two rules above stacked — a second
    `mask-image` REPLACES the first rather than adding to it, so a card cut at both ends would have
    faded at whichever edge won the cascade and been sheared at the other. */
-.tl-p.fadeL > * { margin-left: var(--card-fade-inset); }
+
 .tl-p.fadeL.fadeR {
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--card-fade), #000 calc(100% - var(--card-fade)), transparent);
   mask-image: linear-gradient(90deg, transparent, #000 var(--card-fade), #000 calc(100% - var(--card-fade)), transparent);

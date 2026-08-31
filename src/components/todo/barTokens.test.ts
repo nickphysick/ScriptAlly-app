@@ -47,27 +47,35 @@ const rulesFor = (sel: string): string => {
 
 describe("⚠️ the marker's clearance is a halo, and it costs the bar nothing", () => {
   /**
-   * ⚠️ `box-shadow` PAINTS OUTSIDE THE BOX AND TAKES NO LAYOUT. A marker sits ON a bar, so
-   * without a ring of the row's own colour behind it the two inks touch and neither is legible —
-   * and a clearance made of margin or padding would move the bar instead.
+   * ⚠️ `box-shadow` PAINTS OUTSIDE THE BOX AND TAKES NO LAYOUT. A marker sits ON a card, so
+   * without a ring behind it the two inks touch and neither is legible — and a clearance made of
+   * margin or padding would move the card instead.
    */
-  it("every marker carries a ring of the ground it sits on", () => {
+  it("every marker carries a ring of the surface it sits on", () => {
     const r = rulesFor(".tl-mk2");
-    /* ⚠️ THE PANEL'S TOKEN SINCE v39 PART TWO. The halo has to BE the ground, and the calendar no
-       longer has a ground of its own — `--tl-row` and `--tl-ground` were two surfaces it painted
-       under the panel, and both are deleted. `--ws-window` is the shell's, declared once; a copy of
-       its value here would be a second source for one colour, which is the fault that was removed
-       rather than relocated. */
-    expect(r).toMatch(/box-shadow\s*:\s*0 0 0 3px var\(--ws-window\)/);
+    /* ⚠️ WHITE SINCE v40, AND THE BACKDROP IS WHY — not a retuned value. Marks used to sit in the
+       gap between two cut pieces, on the panel's own ground, so the halo read `--ws-window` to BE
+       that ground. Nothing cuts the bar now: every mark rides ON a card, and what it has to
+       separate itself from is the card. A `--ws-window` ring on a white card would paint a band of
+       the panel colour across the thing the mark is riding on. */
+    expect(r).toMatch(/box-shadow\s*:\s*0 0 0 2px #fff/);
     expect(r).toMatch(/width\s*:\s*var\(--mk\)/);
     expect(r).toMatch(/border-radius\s*:\s*999px/);
   });
 
-  it("the four faces are four tokens, and none of them is a status colour", () => {
-    for (const face of ["in", "out", "bang", "clock"]) {
-      expect(decls, `--mk-${face}-line missing`).toContain(`--mk-${face}-line:`);
+  it("⚠️ ONE RING, THREE INKS — the ring stopped carrying meaning", () => {
+    /* Four per-kind line tokens are retired. A tinted ring said the same thing as the glyph inside
+       it, and at 22px a hairline is not something a hue is read off; keeping both meant two places
+       to change one fact. The ring is one token; only the glyph differs. */
+    expect(decls, "--mk-line missing").toContain("--mk-line:");
+    for (const face of ["in", "out", "clock"]) {
       expect(decls, `--mk-${face}-ink missing`).toContain(`--mk-${face}-ink:`);
     }
+    for (const face of ["in", "out", "bang", "clock"]) {
+      expect(decls, `--mk-${face}-line survives`).not.toContain(`--mk-${face}-line:`);
+    }
+    /* and the rule reads the one ring rather than restating a hex */
+    expect(rulesFor(".tl-mk2")).toMatch(/border\s*:\s*1\.5px solid var\(--mk-line\)/);
   });
 });
 
