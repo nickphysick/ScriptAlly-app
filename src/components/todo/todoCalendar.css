@@ -201,9 +201,19 @@
   --tl-btn-line: #dcccbb;     --tl-btn-ink: #54402f;
 
   /* ══ GEOMETRY, AS THE THREE FACTS THE REST DERIVES FROM ═════════════════════════════════ */
-  --row-h: 47px;
-  --bar-h: 22px;
-  --mk: 20px;
+  /**
+   * ⚠️ TWO TOKENS, AND THEY ARE INDEPENDENT BY CONSTRUCTION RATHER THAN BY AGREEMENT.
+   *
+   * `--row-h` is LIST DENSITY: how much vertical room one relationship is worth. `--bar-h` is the
+   * BAR, and it drives the marker, the chip, the label sizes and the inner padding through calc().
+   * Nothing reads one where it means the other, and the independence is structural: a bar is
+   * placed at a PERCENTAGE of its row (see `.tl-at2`), so changing `--bar-h` cannot move a row and
+   * changing `--row-h` cannot resize a bar. That is the property the lock proves by changing one
+   * and measuring the other, rather than by reading the two declarations and believing them.
+   */
+  --row-h: 52px;
+  --bar-h: 34px;
+  --mk: 30px;
   --tl-headrow-h: 26px;
   --tl-rail-h: 42px;
   --tl-nm-w: 288px;
@@ -526,9 +536,17 @@
 }
 .tl-mk2.in    { border-color: var(--mk-in-line);    color: var(--mk-in-ink); }
 .tl-mk2.outk  { border-color: var(--mk-out-line);   color: var(--mk-out-ink); }
-.tl-mk2.bang  { border-color: var(--mk-bang-line);  color: var(--mk-bang-ink); font-weight: 600; font-size: 12px; font-family: 'Playfair Display', Georgia, serif; }
+/* ⚠️ THE BANG IS A GLYPH TOO, and it takes the SVGs' ratio rather than a number of its own. The ref
+   pins .42 for the marker's artwork and says nothing about this one; .42 of 30 is 12.6px against
+   the 12px it was drawn at, so applying the ratio keeps the painted size and ties it to the token
+   instead of leaving a literal that stops agreeing the next time the marker moves. */
+.tl-mk2.bang  { border-color: var(--mk-bang-line);  color: var(--mk-bang-ink); font-weight: 600; font-size: calc(var(--mk) * .42); font-family: 'Playfair Display', Georgia, serif; }
 .tl-mk2.clock { border-color: var(--mk-clock-line); color: var(--mk-clock-ink); }
-.tl-mk2 svg { display: block; }
+/* ⚠️ THE GLYPH SCALES WITH THE MARKER, at the ref's own .42. The JSX still carries width/height
+   attributes; CSS wins over a presentation attribute, so they survive as the no-CSS fallback and
+   the painted size comes from the token. Without this a 30px marker holds a 10px glyph drawn for a
+   20px one — the marker grows and the thing inside it does not. */
+.tl-mk2 svg { display: block; width: calc(var(--mk) * .42); height: calc(var(--mk) * .42); }
 button.tl-mk2 { cursor: pointer; }
 .tl-mk2:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
 .tl-rrow.closed .tl-mk2 { opacity: .6; }
@@ -545,7 +563,7 @@ button.tl-mk2 { cursor: pointer; }
 
 /* ── the writer's own chips ───────────────────────────────────────────────────────────────── */
 .tl-tchip {
-  display: flex; align-items: center; gap: 6px; height: 23px; background: #fff;
+  display: flex; align-items: center; gap: 6px; height: calc(var(--bar-h) - 2px); background: #fff;
   border: 1px solid var(--tl-chip-line); border-radius: 999px; padding: 0 10px;
   font-size: 10px; font-weight: 500; color: var(--tl-ink); white-space: nowrap; z-index: 2;
 }

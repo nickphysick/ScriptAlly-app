@@ -1743,3 +1743,105 @@ test("markers stay clear of every bar on their line, at every range", async ({ p
   }
   for (const s2 of seen) console.log(`  ${s2}`);
 });
+
+/* ══ TWO TOKENS, NOT ONE (v37, Phase 2) ════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ LIST DENSITY AND BAR HEIGHT ARE INDEPENDENT, AND THAT IS PROVED BY MOVING ONE.
+ *
+ * Two declarations sitting in one `:root` block look independent and are not: the question is
+ * whether anything downstream reads one where it means the other. Reading the stylesheet cannot
+ * answer it — a bar sized from the row, or a row sized from the bar, is a `calc()` away and looks
+ * perfectly reasonable in either direction. So this measures the painted values, then overrides
+ * ONE token on the live page and measures again: the other must not move.
+ */
+test("row height and bar height are independent, and the marker sits clear in the row", async ({ page }) => {
+  const seen: string[] = [];
+  for (const width of WIDTHS) {
+    await openRoute(page, "/todo/calendar", { width, height: HEIGHT });
+    await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
+
+    for (const r of [0, 1, 2]) {
+      await setRangeTo(page, r);
+      const read = await page.evaluate(TAG + `(() => {
+        const board = vis(".tl-board");
+        if (!board) return { fatal: "no board" };
+        const bars = [...document.querySelectorAll(".tl-p")].filter((b) => b.getBoundingClientRect().width > 0);
+        const mks = [...document.querySelectorAll(".tl-mk2")].filter((m) => m.getBoundingClientRect().width > 0);
+        const rows = [...document.querySelectorAll(".tl-rrow")].filter((x) => x.getBoundingClientRect().height > 0);
+        /* ONE-LANE rows only: a two-lane row is two lines and its height is a multiple by design */
+        const oneLane = rows.filter((x) => (getComputedStyle(x).getPropertyValue("--lanes").trim() || "1") === "1");
+        const h = (els) => [...new Set(els.map((e) => Math.round(e.getBoundingClientRect().height)))];
+        /* the room above and below a marker inside its own row — the marker must not fill the line */
+        const room = [];
+        for (const m of mks) {
+          const row = m.closest(".tl-rrow");
+          if (!row) continue;
+          const mr = m.getBoundingClientRect();
+          const lanes = Number(getComputedStyle(row).getPropertyValue("--lanes").trim() || "1");
+          if (lanes !== 1) continue;
+          const rr = row.getBoundingClientRect();
+          room.push({ top: Math.round(mr.top - rr.top), bottom: Math.round(rr.bottom - mr.bottom) });
+        }
+        return {
+          barH: h(bars), mkH: h(mks), rowH: h(oneLane),
+          barCount: bars.length, mkCount: mks.length, rowCount: oneLane.length,
+          room,
+        };
+      })()`) as any;
+      expect(read.fatal, `${width}px range ${r}: ${read.fatal}`).toBeUndefined();
+
+      /* ⚠️ POPULATION FIRST, PER KIND. An empty set of bars satisfies "every bar is 34px". */
+      expect(read.barCount, `${width}px range ${r}: no bars`).toBeGreaterThan(3);
+      expect(read.mkCount, `${width}px range ${r}: no markers`).toBeGreaterThan(0);
+      expect(read.rowCount, `${width}px range ${r}: no single-lane rows`).toBeGreaterThan(3);
+
+      /* ⚠️ THE DISTINCT SET, NOT AN AVERAGE. One bar drawn at the wrong height disappears into a
+         mean and is the whole of what this is looking for. */
+      expect(read.barH, `${width}px range ${r}: bar heights ${JSON.stringify(read.barH)}`).toEqual([34]);
+      expect(read.mkH, `${width}px range ${r}: marker sizes ${JSON.stringify(read.mkH)}`).toEqual([30]);
+      expect(read.rowH, `${width}px range ${r}: single-lane row heights ${JSON.stringify(read.rowH)}`).toEqual([52]);
+
+      /* the marker does not fill its line: clear room above and below, inside the row */
+      const tight = read.room.filter((x: any) => x.top < 4 || x.bottom < 4);
+      expect(tight, `${width}px range ${r}: a marker crowds its row: ${JSON.stringify(tight)}`).toEqual([]);
+      seen.push(`${width} r${r}: bar ${read.barH} · row ${read.rowH} · marker ${read.mkH} · room ${read.room.length} markers`);
+    }
+  }
+  for (const s of seen) console.log(`  ${s}`);
+
+  /* ══ THE INDEPENDENCE, PROVED BY MOVING ONE ═══════════════════════════════════════════════ */
+  const moved = await page.evaluate(TAG + `(() => {
+    const board = vis(".tl-board");
+    const oneLaneRow = () => [...document.querySelectorAll(".tl-rrow")]
+      .filter((x) => x.getBoundingClientRect().height > 0)
+      .find((x) => (getComputedStyle(x).getPropertyValue("--lanes").trim() || "1") === "1");
+    const bar = () => [...document.querySelectorAll(".tl-p")].find((b) => b.getBoundingClientRect().width > 0);
+    const rd = () => ({
+      row: Math.round(oneLaneRow().getBoundingClientRect().height),
+      bar: Math.round(bar().getBoundingClientRect().height),
+    });
+    const before = rd();
+    /* move the BAR token alone */
+    board.style.setProperty("--bar-h", "20px");
+    const barMoved = rd();
+    board.style.removeProperty("--bar-h");
+    /* move the ROW token alone */
+    board.style.setProperty("--row-h", "80px");
+    const rowMoved = rd();
+    board.style.removeProperty("--row-h");
+    return { before, barMoved, rowMoved, after: rd() };
+  })()`) as any;
+  console.log(`  independence — rest ${JSON.stringify(moved.before)}`
+    + ` · bar→20 ${JSON.stringify(moved.barMoved)} · row→80 ${JSON.stringify(moved.rowMoved)}`);
+
+  /* the override must actually have taken, or every claim below is about a page that ignored it */
+  expect(moved.barMoved.bar, "setting --bar-h changed nothing — the override did not take")
+    .not.toBe(moved.before.bar);
+  expect(moved.rowMoved.row, "setting --row-h changed nothing — the override did not take")
+    .not.toBe(moved.before.row);
+  /* and neither reaches the other */
+  expect(moved.barMoved.row, "changing --bar-h moved the ROW height").toBe(moved.before.row);
+  expect(moved.rowMoved.bar, "changing --row-h moved the BAR height").toBe(moved.before.bar);
+  expect(moved.after, "the page did not return to rest").toEqual(moved.before);
+});
