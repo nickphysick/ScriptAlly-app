@@ -37,6 +37,7 @@ import {
 import { pillText } from "../../lib/calendarPill";
 import { fadesFor, cardBounds } from "../../lib/calendarFade";
 import { cycleFor } from "../../lib/calendarMarquee";
+import { tierFor, STUB_MAX_W } from "../../lib/cardTier";
 import { useConfirmAsk } from "./ConfirmAsk";
 /** this mount's pane section-id prefix — every workspace page stays mounted, so ids must not collide */
 const CAL_PANE_PREFIX = "cal-";
@@ -132,6 +133,12 @@ const TEXT_INSET = 14;
  * `.tl-c-tl` is a size container (see the stylesheet), so `100cqw` is the lane's width at any
  * depth. One expression, one width, for the rail's ticks and the bars and the fills alike.
  */
+/** the card's pinned left, matching `--tl-text-inset` in the stylesheet */
+const PILL_INSET = 13;
+
+/** the flex gap between the pill and the line it sits beside, matching `.tl-p`'s own */
+const PILL_GAP = 10;
+
 const pct = (n: number) => `calc(${n} / var(--tl-days) * 100cqw)`;
 
 /**
@@ -461,6 +468,21 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * label from `sg.label` on every render and this effect runs after every one of them. The two
    * cannot drift: React always sets the long form, and this always re-decides.
    */
+  /* ⚠️ THE MARKS BELONGING TO ONE CARD, READ OFF THE PAGE. The render knows which marks ride on
+     which card and hands the LAST one's date to `Piece`; the fit pass needs their PIXELS, which
+     only the browser has. Same set, two questions — the row is the lane, and a mark is on this
+     card when its centre lies within the card's box, which is exactly what the lock asserts. */
+  const markLefts = (seg: HTMLElement): number[] => {
+    const lane = seg.parentElement;
+    if (!lane) return [];
+    const cb = seg.getBoundingClientRect();
+    return Array.from(lane.querySelectorAll<HTMLElement>(".tl-mk2"))
+      .map((m) => m.getBoundingClientRect())
+      .filter((r) => r.top + r.height / 2 > cb.top - 4 && r.top + r.height / 2 < cb.bottom + 4
+        && r.left + r.width / 2 > cb.left - 1 && r.left + r.width / 2 < cb.right + 1)
+      .map((r) => r.left);
+  };
+
   useLayoutEffect(() => {
     const fit = () => {
       const root = pageRef.current;
@@ -489,7 +511,81 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         if (seg.clientWidth <= 0) { seg.style.display = "none"; continue; }
         const line = seg.querySelector<HTMLElement>(".tl-line");
         const track = seg.querySelector<HTMLElement>(".tl-track");
+        const pillEl = seg.querySelector<HTMLElement>(".tl-pill");
+
+        /**
+         * ⚠️ THE LADDER IS MEASURED AGAINST THE ROOM AFTER THE MARKS, NOT AGAINST THE CARD.
+         *
+         * v40's cards are wide — a relationship spans months, not the stretch between two status
+         * changes — so card width stopped predicting whether the words fit. What decides it is the
+         * room LEFT: a 400px card whose last mark sits at 380 has twenty pixels for its sentence.
+         * Measured on the first one-card render, before this existed: one card drew nothing at all
+         * and its neighbour's text ran off its own right edge, both of them comfortably over 300px
+         * wide. Reading `clientWidth` would have called both of them roomy.
+         *
+         * Four rungs, and each is the previous one less the part that can be spared: full (pill ·
+         * headline · detail) → headline (the detail goes) → pill (the words go, and whose move it
+         * is survives, because that is the one thing a card is for) → stub.
+         */
+        const pillW = pillEl ? pillEl.getBoundingClientRect().width : 0;
+        const left = pillEl && line
+          ? pillEl.getBoundingClientRect().left - seg.getBoundingClientRect().left
+          : 0;
+        const room = seg.clientWidth - left;
+
+        /* ⚠️ THE STUB IS A CARD WIDTH, NOT A ROOM — the ref pins 60px and means the CARD. A card
+           that narrow has nowhere to put a pill however its marks fall, and it is drawn as a disc
+           rather than as a squeezed version of something else. */
+        if (seg.clientWidth < STUB_MAX_W) {
+          seg.dataset.tier = "stub"; delete seg.dataset.over; continue;
+        }
         if (!line || !track) continue;
+        /* ⚠️ MEASURE THE RUNGS IN ORDER, TOP DOWN, RESETTING FIRST — a tier left on from the last
+           pass changes what the next measurement sees, which is the latch this file already
+           records for `display`. The detail's own width comes from the track less the headline,
+           so a hidden detail cannot report zero and win the comparison. */
+        const hl = track.querySelector<HTMLElement>(".tl-hl");
+
+        /**
+         * ⚠️ AND THE BOTTOM RUNG PUTS THE PILL BACK IN FRONT OF THE MARKS.
+         *
+         * "The text starts after the last mark" is a rule about TEXT, and at this rung there is
+         * none: the words have already gone. What is left is the pill, which is the one thing a
+         * card is for — it says whose move it is — and where the room after the marks cannot hold
+         * even that, the honest place for it is the card's own left edge, ahead of every mark,
+         * where nothing is obscured in either direction. Measured before this: five pills painted
+         * OUTSIDE their own cards, clipped to nothing, on cards 314–403px wide. A card that wide
+         * cannot become a disc — its width is its span, which is data — so the stub is not the
+         * answer here; the stub is for a card too narrow to hold anything at all.
+         */
+        seg.dataset.tier = tierFor({
+          card: seg.clientWidth, room,
+          full: pillW + PILL_GAP + track.scrollWidth,
+          headline: pillW + PILL_GAP + (hl ? hl.getBoundingClientRect().width : 0),
+        });
+
+        /**
+         * ⚠️ AT THE BOTTOM RUNG THE PILL'S SIDE IS MEASURED, NOT ASSUMED.
+         *
+         * Putting it back at the card's left edge is right whenever the first mark is far enough
+         * in to leave room, and wrong when a status change happened days after the send — measured,
+         * one card put a 64px pill at 590 with a mark painted across 592–614. Both sides are
+         * legitimate places for it; which one has room is a fact about this card, so it is asked
+         * rather than decided. Where neither side can hold it the pill is not drawn at all: the
+         * card keeps its span, its tone and its tooltip, and a pill clipped to nothing says less
+         * than no pill does.
+         */
+        seg.style.removeProperty("--pill-left");
+        seg.removeAttribute("data-noroom");
+        if (seg.dataset.tier === "pill" && pillEl) {
+          const cardL = seg.getBoundingClientRect().left;
+          const marksOn = markLefts(seg);
+          const firstMark = marksOn.length ? Math.min(...marksOn) - cardL : Infinity;
+          const before = firstMark - PILL_INSET;
+          if (pillW <= before + 1) seg.style.setProperty("--pill-left", `${PILL_INSET}px`);
+          else if (pillW <= room + 1) seg.style.setProperty("--pill-left", `${left}px`);
+          else seg.setAttribute("data-noroom", "1");
+        }
         /**
          * ⚠️ MEASURED, THEN MARKED — the words are never removed.
          *
@@ -502,7 +598,20 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
          * forever. The track is `inline-flex` for the same reason the old lines were
          * `inline-block`: scrollWidth on an inline box is meaningless.
          */
-        const over = track.scrollWidth - line.clientWidth;
+        /**
+         * ⚠️ THE MARQUEE IS THE FULL RUNG'S ALONE (v40). Below it the card is not overflowing —
+         * it has DROPPED something, and sliding what remains would move a complete phrase for no
+         * reason while the part the reader is missing stays missing. The tooltip states it.
+         *
+         * ⚠️ AND THE GUARD IS NOT REDUNDANT WITH THE STYLESHEET, THOUGH IT LOOKS IT. At the `pill`
+         * rung `.tl-line` is `display: none`, so BOTH `scrollWidth` and `clientWidth` report zero
+         * and no overflow is ever detected — which means deleting this line changes nothing today
+         * and the obvious red proof is INERT. It was: the mutation ran, the lock stayed green, and
+         * only reddening the stylesheet's hide as well showed the guard doing its job. The two
+         * hold the rule for different reasons, and the day the hide becomes a `visibility` or a
+         * clip — both of which keep a box — this is the only thing left.
+         */
+        const over = seg.dataset.tier === "full" ? track.scrollWidth - line.clientWidth : 0;
         if (over > 1) {
           line.classList.remove("fits");
           line.dataset.over = String(Math.round(over));

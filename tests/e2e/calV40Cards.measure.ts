@@ -24,10 +24,11 @@ const read = (page: import("@playwright/test").Page) => page.evaluate(() => {
     // a mark belongs to this card when its centre is on the card's own line
     const on = marks.filter((m) => { const mb = box(m);
       return mb.cy > cb.t - 34 && mb.cy < cb.b + 34 && mb.cx > cb.l - 60 && mb.cx < cb.r + 60; });
-    const kids = [...c.children].filter(vis).map((k) => box(k as HTMLElement).l);
-    return { rel: c.getAttribute("data-rel") || "", cb,
-      marks: on.map((m) => { const mb = box(m); return { cx: mb.cx, r: mb.r }; }),
-      contentLeft: kids.length ? Math.min(...kids) : null };
+    const kids = [...c.children].filter(vis).map((k) => box(k as HTMLElement));
+    return { rel: c.getAttribute("data-rel") || "", cb, tier: c.getAttribute("data-tier") || "none",
+      marks: on.map((m) => { const mb = box(m); return { cx: mb.cx, l: mb.l, r: mb.r }; }),
+      kids: kids.map((k) => ({ l: k.l, r: k.r })),
+      contentLeft: kids.length ? Math.min(...kids.map((k) => k.l)) : null };
   });
 });
 
@@ -57,9 +58,21 @@ test("marks ride on their card, and the words start clear of them", async ({ pag
     .filter((m) => m.cx < r.cb.l - 0.6 || m.cx > r.cb.r + 0.6)
     .map((m) => `${r.rel}: mark centre ${m.cx.toFixed(1)} outside card ${r.cb.l.toFixed(1)}–${r.cb.r.toFixed(1)}`));
   expect(stray, "marks painted off their own card").toEqual([]);
-  const under = rows.filter((r) => r.contentLeft != null)
-    .filter((r) => r.contentLeft! < Math.max(...r.marks.map((m) => m.r)) - 0.6)
-    .map((r) => `${r.rel}: content at ${r.contentLeft!.toFixed(1)} under a mark ending ${Math.max(...r.marks.map((m) => m.r)).toFixed(1)}`);
-  console.log(`checked ${rows.length} marked cards · clearances ${rows.map((r) => (r.contentLeft! - Math.max(...r.marks.map((m) => m.r))).toFixed(0)).join(" ")}`);
-  expect(under, "words painted under a mark").toEqual([]);
+  /**
+   * ⚠️ NON-OVERLAP, NOT ORDER — and the difference is a rung of the ladder.
+   *
+   * This was "the content's left edge is right of every mark's right edge", which was the right
+   * claim while every card carried words. At the `pill` rung there are none: the pill goes back to
+   * the card's own left edge, AHEAD of every mark, which is a correct arrangement that an ordering
+   * test calls a failure. What was ever meant is that nothing a reader has to read shares pixels
+   * with a disc, and that is true in both arrangements — so it is stated directly, and it is the
+   * stronger claim besides: ordering permits a 22px mark sitting on a pill that starts 4px later.
+   */
+  const clash = rows.flatMap((r) => r.kids.flatMap((k) => r.marks
+    .filter((m) => k.l < m.r - 0.6 && k.r > m.l + 0.6)
+    .map(() => `${r.rel} [${r.tier}]: content ${k.l.toFixed(0)}–${k.r.toFixed(0)} shares pixels with a mark`)));
+  const tally: Record<string, number> = {};
+  for (const r of rows) tally[r.tier] = (tally[r.tier] ?? 0) + 1;
+  console.log(`checked ${rows.length} marked cards · tiers ${JSON.stringify(tally)}`);
+  expect(clash, "content painted over a mark").toEqual([]);
 });

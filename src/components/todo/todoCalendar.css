@@ -581,6 +581,35 @@
    rows at once, which reads as a font bug and is a flex default.
    The track is allowed to be wider than the line because the line is the window: `overflow:
    hidden` there is what makes the overflow measurable, and the overflow is what the marquee is. */
+/* ⚠️ THE LADDER, AS FOUR STATES OF ONE CARD — never four components. The tier is measured in the
+   fit pass and published as `data-tier`; every rung below `full` is the one above it with a part
+   removed, so nothing is restyled on the way down and a card cannot change its identity by getting
+   narrower. */
+.tl-p[data-tier="headline"] .tl-cdt,
+.tl-p[data-tier="headline"] .tl-csep { display: none; }
+.tl-p[data-tier="pill"] .tl-line { display: none; }
+/* ⚠️ AND THE PILL RETURNS TO THE CARD'S OWN LEFT EDGE at this rung, ahead of every mark. The
+   per-card offset exists to keep WORDS out from under a mark; with the words gone there is nothing
+   to keep clear, and the offset would push the pill off the card's right edge instead — measured,
+   five of them clipped to nothing. `fadeL` still takes its own inset: the card's first 38px are
+   dissolving, and a pill fading out is no more readable than one under a disc. */
+.tl-p[data-tier="pill"] > * { margin-left: var(--pill-left, var(--tl-text-inset)); }
+.tl-p[data-tier="pill"].fadeL > * { margin-left: max(var(--card-fade-inset), var(--pill-left, 0px)); }
+/* ⚠️ NEITHER SIDE HAD ROOM. The card keeps its span, its tone and its tooltip; a pill clipped to
+   nothing says less than no pill does. */
+.tl-p[data-noroom] .tl-pill { display: none; }
+/* ⚠️ THE STUB IS A DISC, AND IT IS THE CARD ITSELF — not a marker drawn where a card would be. It
+   keeps the card's own tone, so a stub still says whose move it is by colour where it has no room
+   to say it in words. */
+.tl-p[data-tier="stub"] {
+  width: var(--bar-h) !important; border-radius: 999px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.tl-p[data-tier="stub"] .tl-line { display: none; }
+.tl-p[data-tier="stub"] .tl-pill {
+  width: 18px; height: 18px; min-width: 18px; padding: 0; border-radius: 999px;
+  font-size: 0; margin: 0 !important; overflow: hidden;
+}
 .tl-track { display: inline-flex; width: max-content; align-items: baseline; gap: 10px; white-space: nowrap; will-change: transform, opacity; }
 .tl-track > * { flex: 0 0 auto; }
 .tl-hl { font-family: 'Playfair Display', Georgia, serif; font-size: 13.5px; font-weight: 500; color: var(--card-hl); line-height: 1.25; }
