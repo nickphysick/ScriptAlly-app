@@ -282,7 +282,7 @@
   --tl-hair: #efe6da;
   --tl-rowline: #eee4d6;
   /* v37 pins the row hover at #f5f0e7 — it was #f3ebdd, a shade warmer and a shade darker */
-  --tl-rowhov: #f5f0e7;
+  --tl-rowhov: #f6f1e9;
   /* ⚠️ .3, NOT .4 (v36). It carried the v35 value through part one — the rule marks a boundary
      rather than competing with the bars either side of it. */
 
@@ -380,8 +380,12 @@
  * bar at `pct(d)` of a lane lands on. One column source, one expression. The today line's own
  * 346px error came from having a second one.
  */
+/* ⚠️ THE RAIL HAS ITS OWN STACKING CONTEXT AND SITS ABOVE THE TODAY LINE (v54, Phase 2).
+   `isolation: isolate` makes its children's z-indexes its own business, so no row and no card can
+   reach into it however high they climb — and the rail's own z must clear the line's 60, or a rule
+   drawn from the top of the board would paint across the date ruler it is measured against. */
 .tl-rail {
-  position: sticky; top: 0; z-index: 8;
+  position: sticky; top: 0; z-index: 70; isolation: isolate;
   height: var(--tl-rail-h); align-items: stretch;
 
   border-bottom: 1px solid #e0d3bf;
@@ -465,25 +469,13 @@
    it; `container-type: inline-size` applies layout, style and inline-size containment, none of
    which paints-contains, so the two are not in conflict. */
 .tl-c-tl { flex: 1 1 auto; position: relative; overflow: visible; container-type: inline-size; }
-/* ══ THE PAST, SET BACK ═════════════════════════════════════════════════════════════════════
- * ⚠️ ON THE LANE'S GROUND AND ON NOTHING ELSE. The wash says "this is behind you" about the
- * SURFACE; laid over a bar it would dim the data, and a reader cannot tell a washed fill from a
- * paler one. It is drawn as a pseudo-element BEHIND everything in the lane (`z-index: 0` against
- * the bar's 2 and the marker's 4), so no bar, marker or chip is touched — and it stops at
- * today, which is what `--tl-past-w` is set to per row. */
-.tl-c-tl::before {
-  content: ""; position: absolute; left: 0; top: 0; bottom: 0;
-  width: var(--tl-past-w, 0);
-  /* ⚠️ A FALLOFF, NOT A FLAT WASH (v37, Phase 4). A flat tint states one thing about the whole of
-     the past — that it is behind you — which is true and says nothing about WHEN. A gradient that
-     deepens toward today says the near past is nearer, which is the fact a reader is actually
-     looking for, and it removes the hard left edge the flat fill drew at the window's start.
-     ⚠️ AND IT IS `background-image`, NOT THE SHORTHAND. The shorthand resets every background
-     longhand, so a future edit adding a colour would silently take the gradient with it — this
-     repo has had four rounds of a see-through header from exactly that. */
-  background-image: linear-gradient(90deg, transparent, rgba(58, 28, 20, .055));
-  pointer-events: none; z-index: 0;
-}
+/* ⚠️ THE PAST WASH IS DELETED (v54, Phase 2), AND NOTHING REPLACES IT.
+   `.tl-c-tl::before` painted a gradient from the window's start to today, per row, off
+   `--tl-past-w`. It said "this is behind you" about the surface — true, and a thing every row had
+   to carry so that one fact could be stated once per row rather than once per board. The today
+   line says where today is; what is left of it is the past by construction, and a board that
+   tints half of itself is a board with two grounds. */
+
 .tl-hrow .tl-c-tl { overflow: visible; }
 .tl-hrow .tl-lbl3 { font-size: 7.5px; }
 
@@ -848,17 +840,23 @@ button.tl-tchip { cursor: pointer; }
  * the only ancestor that spans every row and clips nothing.
  */
 .tl-wrap { position: relative; }
-/* ⚠️ TODAY IS A SHADOW NOW, NOT A DRAWN RULE (v37, Phase 4). A 1px line is a border, and a border
-   is a thing on the page competing with every other line on it — the rail's ticks, the row edges,
-   the bar outlines. A shadow falling to the LEFT says the same thing without adding a mark: the
-   past is what is lit from today, and the edge is where the light stops.
-   ⚠️ THE ELEMENT KEEPS ITS ZERO WIDTH AND ITS POSITION. Both locks that caught real bugs read this
-   element's painted x — the 346px displacement, and the fill edge landing on today — and losing
-   the border must not lose them, so what is asserted is the box, never the border. */
+/* ⚠️ TODAY IS A DRAWN RULE AGAIN (v54, Phase 2), AND THE SHADOW THAT REPLACED IT IS GONE.
+   v37 made it a leftward shadow to avoid "a thing on the page competing with every other line on
+   it" — sound while the past was also washed, because the two said one thing between them. With
+   the wash deleted a shadow is the only remaining claim about the past, and a soft one: the board
+   now needs to say WHERE today is, not what is behind it.
+   ⚠️ THE BOX KEEPS ITS ZERO WIDTH AND THE INK IS A BORDER. Five locks read this element's painted
+   x — including the two that caught the 346px displacement and the fill edge — and the comment
+   they were written under says what is asserted is the box, never the border. A 1.5px width would
+   move every one of those readings by 0.75px; a border paints from the box's left edge, which IS
+   today's x.
+   ⚠️ AND `z-index: 60` IS IN FRONT OF EVERY CARD, not merely in front of most. Cards sit at 2,
+   an owed card at 4 and a hovered one at 6 — the line was 6 too, so it beat a hovered card only
+   on DOM order. A tie decided by source position is not a rule. */
 .tl-todayline {
   position: absolute; top: 0; bottom: 0; width: 0;
-  box-shadow: -6px 0 8px -6px rgba(58, 28, 20, .28);
-  z-index: 6; pointer-events: none;
+  border-left: 1.5px solid #e6c3b4;
+  z-index: 60; pointer-events: none;
 }
 /* ⚠️ THE FLAG SITS ABOVE THE BOARD, CLEAR OF THE FIRST GROUP TITLE. It was 2px above it —
    not overlapping, and not clear either, which on a 19px Playfair title reads as a collision. It

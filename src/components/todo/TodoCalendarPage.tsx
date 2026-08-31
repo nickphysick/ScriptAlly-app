@@ -1505,7 +1505,6 @@ data-rowkey={r.key}
            `todayAt` already expresses as 0 or the full span. */
         style={{
           ["--lanes" as string]: String(lanes),
-          ["--tl-past-w" as string]: todayAt == null ? "0%" : pct(todayAt),
         } as React.CSSProperties}
       >
         {/* ⚠️ THE NAME IS A CONTROL — it opens the relationship's workspace with nothing selected,

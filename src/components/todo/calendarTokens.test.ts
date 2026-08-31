@@ -49,6 +49,39 @@ const isBarPath = (sel: string): boolean =>
 /** The properties that decide vertical geometry. A radius is not one; a glyph's width is not one. */
 const VERTICAL = /(^|;|\{)\s*(height|min-height|max-height|top|bottom|margin-top|margin-bottom|padding-top|padding-bottom|line-height)\s*:/;
 
+describe("⚠️ the today line is a drawn rule, and its width is a source claim (v54)", () => {
+  /* ⚠️ THE RENDERED CHECK CANNOT CARRY THIS. A sub-pixel border's USED value rounds at DPR 1 —
+     declared 1.5px, Chromium reports 1px — so `calGround54.measure.ts` asserts the line is painted
+     and painted in the pinned tone, and the width is asserted where it can be read as written.
+     Two halves of one claim, each in the instrument that can answer it. */
+  /* ⚠️ ANCHORED AT A LINE START, or a bare `.tl-todayline {` also matches the tail of any
+     descendant selector ending in it — the first-match family this repo has hit four times. */
+  const ruleFor = (sel: string) => {
+    const src = decls(readFileSync(CSS, "utf8"));
+    const re = new RegExp(`(?:^|\\n)\\s*${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`, "g");
+    const hits = [...src.matchAll(re)];
+    expect(hits.length, `${sel} is declared ${hits.length} times — a lock cannot know which wins`).toBe(1);
+    return hits[0][1];
+  };
+
+  it("1.5px, in the pinned tone, and above every card", () => {
+    const r = ruleFor(".tl-todayline");
+    expect(r).toMatch(/border-left\s*:\s*1\.5px solid #e6c3b4/i);
+    /* cards sit at 2, an owed card at 4, a hovered one at 6 — a tie decided by DOM order is not a
+       rule, which is what `z-index: 6` on this element was */
+    expect(r).toMatch(/z-index\s*:\s*60/);
+  });
+
+  it("⚠️ AND THE PAST WASH IS GONE FROM THE SHEET, not merely unset by the page", () => {
+    /* `.tl-c-tl::before` painted a gradient from the window's start to today off `--tl-past-w`.
+       Deleting only the page's inline value would have left a rule with a `0` fallback — inert,
+       and one edit from painting again. */
+    const src = decls(readFileSync(CSS, "utf8"));
+    expect(src, "the past wash rule survives").not.toMatch(/\.tl-c-tl::before\s*\{/);
+    expect(src, "--tl-past-w survives").not.toContain("--tl-past-w");
+  });
+});
+
 describe("the calendar's bar path states no vertical literal", () => {
   const src = decls(readFileSync(CSS, "utf8"));
   const rules = [...src.matchAll(/(^|\n)([^\n{}]+)\{([^}]*)\}/g)]
