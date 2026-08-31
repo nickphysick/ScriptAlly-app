@@ -40,34 +40,6 @@ const rulesFor = (sel: string): string => {
   return [...decls.matchAll(re)].map((m) => m[1]).join(" ");
 };
 
-describe("⚠️ PILLS ARE DATA, CONTROLS ARE NOT PILLS", () => {
-  /**
-   * ⚠️ THE ONE RULE A READER CANNOT RECOVER FROM IF IT BREAKS. A pill-shaped button beside
-   * pill-shaped bars reads as another piece of data — the reader learns the shape means "a fact
-   * about this row" and then finds one of them is a control. Square corners make the two
-   * categories unmistakable, and it costs nothing.
-   */
-  it("no control carries a bar's radius, and no bar carries a control's", () => {
-    const CONTROLS = [".tl-abtn", ".tl-gtbtn"];
-    for (const c of CONTROLS) {
-      const r = rulesFor(c);
-      expect(r, `${c} has no rule at all`).not.toBe("");
-      expect(r, `${c} is drawn as a pill`).not.toMatch(/border-radius\s*:\s*999px/);
-    }
-    /* and the bar is a pill, which is the other half of the same claim */
-    /* ⚠️ 9px SINCE v39: a bar was a pill and a card is a card. The claim is unchanged — every
-       card has ONE radius and it is the pinned one — only the value moved, and it moved because
-       the object did. */
-    expect(rulesFor(".tl-p"), "the card stopped being a card").toMatch(/border-radius\s*:\s*9px/);
-  });
-
-  it("the action button states its ground, its line and its ink rather than inheriting them", () => {
-    const r = rulesFor(".tl-abtn");
-    expect(r).toMatch(/background\s*:\s*#fff/);
-    expect(r).toContain("--tl-btn-line");
-    expect(r).toContain("--tl-btn-ink");
-  });
-});
 
 
 

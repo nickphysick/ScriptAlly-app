@@ -224,8 +224,6 @@ test("every asking row names what is owed, and the count says what it counts", a
         const rec = {
           group: title,
           name: (row.querySelector(".tl-nm2") || {}).textContent || "?",
-          buttons: [...row.querySelectorAll(".tl-abtn")].map((b) => b.textContent),
-          dash: !!row.querySelector(".tl-adash"),
         };
         if (ASKING.includes(title)) out.asking.push(rec);
         if (title === "Needs you soon") out.soon.push(rec);

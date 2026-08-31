@@ -35,7 +35,6 @@ export interface TimelineRange {
    * ranges are not left with a slice too thin to see. It is what makes the long view worth having:
    * a board that only looks forward is emptiest exactly when it is zoomed out.
    */
-  past: number;
 }
 
 /**
@@ -54,19 +53,31 @@ export interface TimelineRange {
  * ⚠️ AND THE DEFAULT MOVED WITH THEM, to 3 months. Every earlier pack measured against index 0
  * when index 0 was a week; the stop that opens now is the one the ref opens on.
  *
- * ⚠️ `past` IS STILL A FRACTION OF THE RANGE, NOT A NUMBER OF DAYS, so no call site holds the
- * number — but the fractions are now written as the ref's own day counts over the ref's own
- * spans (8/30, 22/90, 45/180) rather than as a tidied decimal. `pastDaysOf` therefore lands on
- * exactly the ref's −8 / −22 / −45, which a rounded 0.25 would not have done at 30 days.
+ * ⚠️ THE SPANS ARE ODD (v40), AND THAT IS WHAT MAKES TODAY EXACTLY CENTRAL. "today − range/2 …
+ * today + range/2" is range+1 days INCLUSIVE, so a centred window needs an odd number of cells —
+ * with an even one there is no middle cell and today lands half a day off, which is 10.8px at one
+ * month. The labels are unchanged because a reader counts months, not cells.
+ *
+ * ⚠️ `past` IS DELETED (v40). It carried three fractions — 8/30, 22/90, 45/180 — which resolved
+ * to 26.7%, 24.4% and 25.0%, so today sat at roughly a quarter and the board showed three times as
+ * much future as past. v40 centres it: today is the middle of the lane at every range, which is
+ * one rule rather than three numbers, and it cannot drift apart between stops.
  */
 export const TIMELINE_RANGES: readonly TimelineRange[] = [
-  { label: "1 month",  days: 30,  grain: "day",   dense: 2, past: 8 / 30 },
-  { label: "3 months", days: 90,  grain: "week",  dense: 3, past: 22 / 90 },
-  { label: "6 months", days: 180, grain: "month", dense: 4, past: 45 / 180 },
+  { label: "1 month",  days: 31,  grain: "day",   dense: 2 },
+  { label: "3 months", days: 91,  grain: "week",  dense: 3 },
+  { label: "6 months", days: 181, grain: "month", dense: 4 },
 ];
 
-/** How many days of the range sit BEFORE today — the fraction resolved, in one place. */
-export const pastDaysOf = (r: TimelineRange): number => Math.round(r.days * r.past);
+/**
+ * How many days of the range sit BEFORE today — half of it, at every range.
+ *
+ * ⚠️ ONE RULE, NOT THREE NUMBERS. It read a per-range fraction and the three resolved to 26.7%,
+ * 24.4% and 25.0%: near enough to look deliberate, different enough that today moved when the
+ * reader changed range. Half is a statement about what the board is FOR — what has happened and
+ * what is coming, in equal measure — and it holds at any range anyone adds later.
+ */
+export const pastDaysOf = (r: TimelineRange): number => (r.days - 1) / 2;
 
 /** The default, and the one every earlier pack measured against. */
 export const DEFAULT_RANGE_INDEX = 1;

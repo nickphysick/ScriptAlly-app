@@ -284,9 +284,10 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
     void tracks;
     const boardBlock = calCss.slice(calCss.indexOf(".tl-board {"), calCss.indexOf(".tl-grp"));
     expect(boardBlock).toContain("--tl-nm-w:");
-    expect(boardBlock).toContain("--tl-ac-w:");
+    /* ⚠️ TWO COLUMNS SINCE v40. The action column is deleted — the deed lives on the card's pill
+       and nowhere else — so the row is agent · timeline and the timeline takes the freed width. */
     expect(rule(calCss, ".tl-c-nm {")).toContain("flex: 0 0 var(--tl-nm-w)");
-    expect(rule(calCss, ".tl-c-ac {")).toContain("flex: 0 0 var(--tl-ac-w)");
+    expect(calCss, "the action column came back").not.toMatch(/\.tl-c-ac\s*\{/);
     /* ⚠️ AND THE TIMELINE COLUMN CLIPS, which is load-bearing rather than tidy: it is why the
        tooltip is portalled to the board wrap. A clipping ancestor beats any z-index a descendant
        can declare, so a tip drawn inside this box would be cut in half by it. */

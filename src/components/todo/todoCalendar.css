@@ -254,8 +254,7 @@
   --mk: 28px;
   --tl-headrow-h: 26px;
   --tl-rail-h: 42px;
-  --tl-nm-w: 288px;
-  --tl-ac-w: 172px;
+  --tl-nm-w: 292px;
   /* how far a piece stands off a marker it abuts, and off a plain neighbour */
   /* the bar text's inset — mirrored by TEXT_INSET in the page, which the fit pass subtracts */
   --tl-text-inset: 14px;
@@ -381,8 +380,10 @@
 .tl-rrow:hover { background: var(--tl-rowhov); }
 .tl-hrow { height: var(--tl-headrow-h); border-bottom: 1px solid var(--tl-hair); }
 
-.tl-c-nm { flex: 0 0 var(--tl-nm-w); display: flex; align-items: center; gap: 10px; padding: 0 12px; min-width: 0; }
-.tl-c-ac { flex: 0 0 var(--tl-ac-w); display: flex; align-items: center; padding: 0 8px; }
+/* ⚠️ TWO COLUMNS SINCE v40 — agent · timeline — and the timeline takes what the action column had.
+   It is `flex: 1 1 auto` and was already, so deleting the third column needs no arithmetic here:
+   the freed 172px simply stops being reserved. */
+.tl-c-nm { flex: 0 0 var(--tl-nm-w); display: flex; align-items: center; gap: 14px; padding: 0 16px; min-width: 0; }
 /* ⚠️ `overflow: hidden` IS LOAD-BEARING AND IS WHY THE TOOLTIP IS PORTALLED. A clipping ancestor
    beats any z-index a descendant can declare, so no tooltip inside this box can ever escape it. */
 /* ⚠️ THE LANE IS A SIZE CONTAINER, AND THAT IS WHAT MAKES ONE DATE→X MAPPING POSSIBLE.
@@ -499,25 +500,12 @@
  * is swept for the inverse in `calLook.measure.ts`: no control may carry a 999px radius, and no
  * bar may carry less.
  */
-.tl-abtn {
-  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .1em;
-  font-weight: 500; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center;
-  gap: 6px; line-height: 1; border-radius: 3px; padding: 7px 9px 7px 10px;
-  background: #fff; border: 1px solid var(--tl-btn-line); color: var(--tl-btn-ink);
-  box-shadow: 0 1px 0 rgba(58, 28, 20, .05);
-}
 /* ⚠️ AN UNCONDITIONAL RULE, because the only one it had was inside a max-width block. A class
    styled ONLY in a media query is styled nowhere for most readers, and the style-reach lock says
    so — it has been red since v37 shipped it. The label is inline text; that is its base state, and
    the narrow board hides it. */
-.tl-ablbl { display: inline; }
-.tl-abtn:hover { border-color: var(--tl-nearblack); color: var(--tl-nearblack); }
-.tl-rrow:hover .tl-abtn { border-color: var(--tl-pinkb); }
-.tl-abtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
-.tl-abtn .cv { opacity: .5; }
 /* ⚠️ AN EM-DASH, NOT AN EMPTY CELL. "Nothing is asked of you here" is a fact worth stating; a
    blank reads as a control that failed to render. */
-.tl-adash { color: #cec2b3; font-size: 12px; padding-left: 6px; }
 
 /* ══ THE LANE, AND WHAT SITS IN IT ═════════════════════════════════════════════════════════
  *
@@ -1069,10 +1057,6 @@ button.tl-tchip { cursor: pointer; }
    carrying them. Hiding the text with `display: none` would take the accessible name with it and
    leave a control announced as "›". */
 @media (max-width: 1122px) {
-  .tl-board { --tl-ac-w: 44px; }
-  .tl-abtn { padding-inline: 0; justify-content: center; width: 100%; }
-  .tl-ablbl { display: none; }
-  .tl-hrow .tl-c-ac .tl-lbl3, .tl-rail .tl-c-ac .tl-lbl3 { display: none; }
 }
 /* ⚠️ AND ONLY THEN THE NAME, to a floor of 200px. A relationship's name is what a reader scans by,
    so it is the last thing to give ground — and it stops at 200 rather than continuing, because

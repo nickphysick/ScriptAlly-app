@@ -988,7 +988,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   }, []);
 
   /* ⚠️ THESE TWO ARE DECLARED ABOVE THE BOARD DERIVATION, AND THE ORDER IS LOAD-BEARING.
-     `board` is a `useMemo` that RUNS DURING RENDER and calls `asksOfYou` → `actionFor`; a `const`
+     `board` is a `useMemo` that RUNS DURING RENDER and called `asksOfYou` → `actionFor`; a `const`
      arrow declared below it is in its temporal dead zone at that moment, so the page threw
      "Cannot access 'actionFor' before initialization" and fell into its error boundary — with a
      clean `tsc`, because TypeScript cannot see through a helper the render happens to call. The
@@ -1029,28 +1029,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     return m;
   }, [assembled]);
 
-  const actionFor = (r: TimelineRow): { label: string; card: BoardCard | null; itemKey: string | null } | null => {
-    /* ⚠️ THE GROUP DECIDES, AND THE CARD ONLY DECIDES WHAT THE DOOR OPENS ONTO. Requiring a
-       `BoardCard` was the third of three predicates answering one question, and it was the one
-       that put a dash beside a row whose own words read "Send the partial · due 21 days ago". A row the
-       board is asking about always gets its control; where no card has been raised the control
-       opens the relationship's workspace, which is a real door rather than a dead one. */
-    if (!rowAsks(r)) return null;
-    /* ⚠️ A TASK ROW'S DEED IS TO FINISH IT, and it is the only row on this board the writer can
-       finish outright. It has no query, so no `note` — the deed comes from what the row IS. */
-    if (r.group === null) {
-      const own = r.items.find((i) => i.card?.userTaskId);
-      return own?.card ? { label: "TICK IT OFF", card: own.card, itemKey: own.key } : null;
-    }
-    if (!r.note) return null;
-    const withCard = r.items.find((i) => i.card);
-    if (withCard?.card) return { label: r.note.deed.toUpperCase(), card: withCard.card, itemKey: withCard.key };
-    const qid = barsByRow.get(r.key)?.segs.find((sg) => sg.side === "yours")?.queryId
-      ?? barsByRow.get(r.key)?.segs[0]?.queryId
-      ?? r.items.find((i) => i.queryId)?.queryId;
-    const card = qid ? cardsByQuery.get(qid) ?? null : null;
-    return { label: r.note.deed.toUpperCase(), card, itemKey: null };
-  };
 
 
   /* ══ THE BOARD'S OWN DERIVATIONS ═══════════════════════════════════════════════════════ */
@@ -1155,7 +1133,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * toggling out and back returns the identical set, by row key.
    */
   /* ⚠️ THE ROW ASKS BECAUSE ITS GROUP SAYS SO — never because a button happened to be buildable.
-     This read `actionFor(r) != null`, so `RIGHT NOW` showed the rows that had a CARD rather than
+     This read the action lookup, so `RIGHT NOW` showed the rows that had a CARD rather than
      the rows that were asking, and a row under "Needs you now" whose card the board had not
      raised vanished from the very view built to find it. */
   const rowAsks = (r: TimelineRow) =>
@@ -1276,7 +1254,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const row = (r: TimelineRow) => {
     const bar = barsByRow.get(r.key) ?? { segs: [], nodes: [] };
     const lanes = Math.max(1, r.lanes);
-    const act = actionFor(r);
     return (
       <div
         key={r.key}
@@ -1323,31 +1300,6 @@ data-rowkey={r.key}
             )}
           </span>
         </button>
-
-        {/* ⚠️ THE ACTION COLUMN IS A DOOR, NOT A FORM. The button opens the same `TaskPane` the
-            To-do page opens, through the same `useTaskPaneSession`; it commits nothing itself. */}
-        <div className="tl-c-ac">
-          {act
-            ? (
-              <button type="button" className="tl-abtn" aria-label={act.label}
-                /* ⚠️ A TASK IS FINISHED WHERE IT IS, THROUGH `quickDone` — the same committer the
-                   To-do list ticks through, so the receipt and its Undo are the shared ones. Every
-                   other deed OPENS the work rather than doing it, because every other deed needs
-                   answers this row cannot hold. */
-                onClick={() => {
-                  if (r.group === null && act.card) { void quickDone(act.card); return; }
-                  openWork(r.key, today, act.itemKey, act.card ?? undefined);
-                }}>
-                {/* ⚠️ THE LABEL IS ITS OWN ELEMENT SO THE NARROW BOARD CAN COLLAPSE IT WITHOUT
-                    LOSING THE ACCESSIBLE NAME. `display: none` on the text would take the name with
-                    it and leave a button announced as "›". The wrapper is hidden and the button
-                    keeps an `aria-label` carrying the same words, so the control narrows on screen
-                    and says exactly what it did to a reader who cannot see it. */}
-                <span className="tl-ablbl">{act.label}</span><span className="cv" aria-hidden>›</span>
-              </button>
-            )
-            : <span className="tl-adash" aria-hidden>–</span>}
-        </div>
 
         <div className="tl-c-tl">
           {bar.segs.map((sg) => (
@@ -1695,7 +1647,7 @@ data-rowkey={r.key}
               >
                 {/* ══ THE RAIL ═══════════════════════════════════════════════════════════════
                     ⚠️ IT USES THE SAME THREE COLUMNS AS EVERY ROW, and that is the whole of the
-                    alignment guarantee. `.tl-c-nm` and `.tl-c-ac` take the same two width tokens
+                    alignment guarantee. `.tl-c-nm` takes the same width token
                     a row does, so the rail's timeline column BEGINS where every lane begins — and
                     a tick placed at `pct(d)` of it lands on the same pixel as a bar placed at
                     `pct(d)` of a lane. One column source, one expression, no second arithmetic to
@@ -1703,8 +1655,7 @@ data-rowkey={r.key}
                 {board.length > 0 && (
                   <div className="tl-rail">
                     <div className="tl-c-nm"><span className="tl-lbl3">Agent</span></div>
-                    <div className="tl-c-ac"><span className="tl-lbl3">Action?</span></div>
-                    <div className="tl-c-tl tl-railtl">
+                                       <div className="tl-c-tl tl-railtl">
                       {/* ══ THE MONTH SHELF, WHICH ONLY APPEARS WHERE IT SAYS SOMETHING ══════
                           ⚠️ THREE MONTHS IS THE THRESHOLD, AND IT IS COUNTED FROM THE WINDOW
                           RATHER THAN THE RANGE. At one month the window straddles two calendar
