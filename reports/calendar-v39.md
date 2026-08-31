@@ -103,3 +103,106 @@ unit lock go with it.
 
 None of the six implicates derivation beneath the view layer. The closest is the pill vocabulary,
 which changes which *already-derived* status string the view prints — not what any of it means.
+
+---
+
+## What shipped, and what did not
+
+**Deployed to dev**, verified by bundle hash. **Vitest 437 files / 7344 passed / 0 failed** — the
+first fully green unit run on this territory since v37. **20 measured cases green.**
+
+| phase | outcome |
+|---|---|
+| colour law | 9 burgundy sites removed; grep lock fails the build on burgundy or black |
+| 1 · the ref | v39 in, v37 out, one commit; 13 guarded |
+| 2 · the card | 348 cards; 10 pill words, all the app's own |
+| 3 · delete the fill | 7 files; every site listed below |
+| 4 · one fade | mask on the card; lane unclipped |
+| 5 · marquee | cycle built in JS, locked against ping-pong |
+| 6 · views & display | **UNBUILT** |
+| 7 · ghosts | **UNBUILT** |
+| 8 · verify + deploy | done for what is built |
+
+### Phases 6 and 7 — reported unbuilt, not shipped unverified
+
+Neither was started. The run went into the card and into four faults of my own that had to be
+measured out of it (below), and stopping with two phases untouched is the honest end rather than
+half-building controls and ghosts at speed.
+
+**What is left standing that Phase 6 was to remove:** the action column (`.tl-c-ac`, `.tl-abtn`,
+`actionFor`) and the `RIGHT NOW` mode (`onlyAsks`) are still live, along with the range slider.
+`ONE LIST / GROUPED` already exists from v37 and is the shape the Display popover was to absorb.
+**Nothing was half-removed** — the board is coherent as it stands.
+
+### 2. Every invented state word, and its replacement
+
+| was | is |
+|---|---|
+| `With you` / `Waiting to hear` | the pill: a `QueryStatus`, or the deed |
+| `Quiet` / `Quiet for N days` | `No Response`, or the status that actually holds |
+| `Offer received` | `Offer` |
+| `Revise and resubmit` | `Revise & Resubmit` |
+| `Closed` / `Closed on {date}` | `Rejected` · `Withdrawn` · `No Response` — three endings, three words |
+| `Full req` · `Partial req` · `R&R` | `Full Requested` · `Partial Requested` · `Revise & Resubmit` |
+
+Ten distinct pill words measured on the board, every one a `QueryStatus` label or a named deed.
+
+**⚠️ Two wordings flagged, not decided.** The brief names *Answer the offer*; the app's own row note
+says *Answer them*. And Revise & Resubmit needs a fifth deed the brief does not name — it takes
+*Send the revision* rather than silently reusing *Send the full*, which is a different thing to send.
+
+### 3. Everything deleted with the fill
+
+`journeyBars.ts` (`fillFor`, `fillEndAt`, `NEAR_AT`) · `journeyBars.test.ts` (9 blocks) ·
+`TodoCalendarPage.tsx` (`fillWidth`, the `near` derivation, `data-fill`, the `.tl-fl` element, two
+props off `Piece`) · `todoCalendar.css` (`.tl-fl` ×2, 9 family fill/near rules, the quiet hatch, 9
+fill/near tokens, and later the whole orphaned `.tl-t1`/`.tl-t2`/`.tl-txt` family with its 6 text
+tokens) · `barTokens.test.ts` (4) · `calLook.measure.ts` (6) · `calContrast.measure.ts`.
+
+**`TaskPane.tsx` imports a different `fillWidth` from `lib/paneFill`** — same identifier, different
+feature, out of territory, untouched.
+
+### 4. The faded edges
+
+Not measured as pixels. The mask is asserted structurally (declared on the card, one two-stop mask
+where both ends are cut) and the lane is asserted unclipped, but the **pixel sweep across the three
+card colours was not built** — reported unbuilt rather than claimed.
+
+### 5. Marquee
+
+Cards overflowing, by range at 1440: not tabulated. The mechanism is measured (`fits` is set from
+`scrollWidth` vs `clientWidth`; the cycle is unit-locked) but the **per-range census was not built**.
+
+### 6. The long-silence threshold
+
+Not chosen — Phase 7 is unbuilt.
+
+### 7. Values needed but not pinned
+
+- **The hollow card.** The ref draws `quietc` and `closedc` and nothing between. It takes the one
+  thing they share — no shadow — and nothing else. Flagged.
+- **`--tl-burgundy` renamed to `--tl-nearblack`**, not repointed: a colour law enforced through a
+  token called burgundy is one keystroke from being undone by somebody restoring what the name
+  promises.
+
+### The four faults of my own, each found by measuring
+
+1. **The card was a ROW.** The ref's `align-self: flex-start` only means anything in a column.
+   Measured: a 156px card whose line resolved to **2px** against a 168px track.
+2. **`.tl-dt` and `.tl-sep` were already taken.** `.tl-dt` is the rail's *absolutely positioned*
+   date label; declared later, it took the card's detail out of flow and dropped it on the
+   headline — at x 728, in the rail's coordinate space, on a card starting at 791.
+3. **The track's children default to `flex-shrink: 1`**, so they compressed while their `nowrap`
+   text spilled and overprinted.
+4. **Padding on a `border-box` card is a floor, not an inset.** `padding-left: 46px` floored every
+   faded card at 60px; one the dates sized at 46 rendered at **59** and ran **8.6px** into its
+   marker. Settled by authorship — identical inline `style` strings rendering 46px at HEAD and 59
+   after. Clearance is back to HEAD's own figures (7.4 / 3.8 / 2.9px at 1280) over more pairs.
+
+### The contrast finding
+
+**Every detail line on the board reads 4.13:1.** `#8a7a6c` on white — the palette's `muted`, pinned
+by the pack and drawn by the ref — at α1.00, so unlike v37's shortfalls there is no opacity to
+raise. The ink is too light and darkening it changes a pinned value. It is **one pair, not four**:
+every family reports the same number because a card is monochrome now, which is the colour law
+working and the reason it matters. Headlines clear at 17.5–18.3; all three drawn pills at 4.66–14.59.
