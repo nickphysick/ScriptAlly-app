@@ -77,15 +77,6 @@ export const SETTLED_MAX_DAYS = 21;
  * that has to be.
  */
 
-/**
- * The fraction at which a bar deepens one step — and the whole of what replaced the pulse.
- *
- * ⚠️ POSITION, NOT MOTION. Urgency used to be an animation on the writer's own long-standing
- * bars; it had to be suppressed under `prefers-reduced-motion`, which left the reader who asked
- * for no motion with no signal at all. A bar at 85% of its stated span is at 85% whether or not
- * anything moves, and it is legible in a screenshot.
- */
-export const NEAR_AT = 0.85;
 
 /**
  * How far through its stated span a stretch is — `null` where nobody stated one.
@@ -146,38 +137,7 @@ export function barLines(label: string): { t1: string; t2: string } {
   return { t1: label.slice(0, i), t2: label.slice(i + 3) };
 }
 
-export function fillEndAt(sg: Segment): number | null {
-  /* an overrun paints no fill — the emptiness past the named end is the point of it */
-  if (sg.hollow) return null;
-  /* a stretch that ended at a real event is finished, and a finished stretch is full */
-  if (sg.historical) return sg.to;
-  /* nobody named an end: no fill element at all, which is not the same claim as a fill of zero */
-  if (sg.goal == null) return null;
-  /* ⚠️ CLAMPED TO THIS PIECE, not to the stretch. A piece lying wholly before today is full and a
-     piece wholly after it is empty, and both are the same expression once the ends are clamped. */
-  return Math.max(sg.from, Math.min(sg.to, Math.min(sg.todayAt, sg.goal)));
-}
 
-/**
- * How far through this stretch we are, 0–1 — THE REPORTED NUMBER, and no longer the drawn one.
- *
- * ⚠️ IT SURVIVES BECAUSE IT ANSWERS A DIFFERENT QUESTION FROM `fillEndAt`. This is a fact about
- * the whole stretch ("73% of the way to the reply you were promised") and is deliberately
- * range-invariant; that is what captions and the `near` treatment want. Where the fill's edge
- * BELONGS on screen is a fact about the window, and mixing the two is what this pass repaired.
- */
-export function fillFor(sg: Segment): number | null {
-  if (sg.historical) return 1;
-  if (sg.goal == null) return null;
-  /* ⚠️ `trueFrom`, NEVER `from`. `from` is where the ELEMENT starts — clamped to the window's left
-     edge — and reading it here made the reported fraction depend on the range the reader happened
-     to be on. See the field's own note. */
-  const start = sg.trueFrom;
-  /* the named end is at or before the start: nothing to be part-way through */
-  if (sg.goal <= start) return 1;
-  const p = (sg.todayAt - start) / (sg.goal - start);
-  return Math.max(0, Math.min(1, p));
-}
 
 export type Side = "theirs" | "yours";
 export type Weight = "fresh" | "settled" | "long";

@@ -186,13 +186,12 @@
      rather than competing with the bars either side of it. */
 
   /* the five live bar families: border · fill · the deeper fill at ≥85% · text */
-  --bar-out-line: #d9e1d6;    --bar-out-fill: #e6ece3;    --bar-out-near: #d7e0d2;    --bar-out-text: #55684f;
-  --bar-req-line: #ecd3c6;    --bar-req-fill: #f3e0d5;    --bar-req-near: #ecc9b8;    --bar-req-text: #6b3a2a;
-  --bar-decide-line: #e2b8a5; --bar-decide-fill: #eccbba; --bar-decide-near: #e2b09a; --bar-decide-text: #58281a;
-  --bar-remind-line: #dde3da; --bar-remind-fill: #eef1ec; --bar-remind-near: #dfe6dc; --bar-remind-text: #5c6b59;
+  --bar-out-line: #d9e1d6;    --bar-out-text: #55684f;
+  --bar-req-line: #ecd3c6;    --bar-req-text: #6b3a2a;
+  --bar-decide-line: #e2b8a5; --bar-decide-text: #58281a;
+  --bar-remind-line: #dde3da; --bar-remind-text: #5c6b59;
   /* gone quiet — a hatch rather than a fill, because there is no span to be a fraction of */
   --bar-quiet-line: #e0dbd3;  --bar-quiet-text: #6b675f;
-  --bar-quiet-hatch: repeating-linear-gradient(-55deg, #e7e3dc 0 5px, #f4f1ec 5px 10px);
   /* closed — dashed, and there is no fill token because a closed bar has no fill element at all */
   --bar-closed-line: #ddd0c0; --bar-closed-text: #a3927f;
 
@@ -244,11 +243,11 @@
    * introduced, and the next change to `--mk` cannot silently eat the gap.
    */
   --tl-gap-mk: calc(var(--mk) / 2 + var(--tl-gap));
-  /* ⚠️ THE BAR'S BORDER IS A TOKEN BECAUSE THE FILL HAS TO SUBTRACT IT. `.tl-fl` is absolutely
-     positioned, so its `left: 0` is the piece's PADDING box — one border inside the painted edge.
-     The fill's width is a distance measured from the lane's origin, so that inset comes off it,
-     and a literal `1px` in the fill's rule would be a number the bar owns written into another
-     element's geometry. Move the border and the fill follows. */
+  /* ⚠️ THE CARD'S BORDER IS A TOKEN. It was one because the FILL had to subtract it — a fill was
+     absolutely positioned inside the card, so its `left: 0` sat one border inside the painted
+     edge. The fill is deleted (v39, Phase 3): a card's extent already states its span, so the fill
+     was saying the same thing twice. The token stays because the border is still a number the card
+     owns and other rules measure against. */
   --tl-bar-bd: 1px;
 }
 
@@ -517,12 +516,7 @@
 }
 /* ⚠️ THE FILL IS A CHILD, NOT A BACKGROUND, because its WIDTH is the statement. A gradient stop
    would put the number inside a colour value where nothing can read it back. */
-.tl-fl {
-  position: absolute; left: 0; top: 0; bottom: 0; border-radius: inherit;
-  border-top-right-radius: 3px; border-bottom-right-radius: 3px;
-}
 /* a fill that has reached the end is the bar, so it takes the bar's own corner back */
-.tl-fl[data-full="1"] { border-top-right-radius: inherit; border-bottom-right-radius: inherit; }
 /* ══ THE BAR'S TWO LINES (v37, Phase 6) ══════════════════════════════════════════════════════
    ⚠️ AT THE BAR'S START, AND THE TRADE IS ACCEPTED RATHER THAN FIXED. Text at `left: 14px` means a
    bar clipped by the window's LEFT edge loses its words with the edge it starts at. That was
@@ -580,26 +574,17 @@
 .tl-p.hollow .tl-txt { opacity: .75; }
 
 .tl-p.out { border-color: var(--bar-out-line); }
-.tl-p.out .tl-fl { background-color: var(--bar-out-fill); }
 .tl-p.out .tl-t1, .tl-p.out .tl-t2 { color: var(--bar-out-text); }
-.tl-p.out.near .tl-fl { background-color: var(--bar-out-near); }
 .tl-p.req { border-color: var(--bar-req-line); }
-.tl-p.req .tl-fl { background-color: var(--bar-req-fill); }
 .tl-p.req .tl-t1, .tl-p.req .tl-t2 { color: var(--bar-req-text); }
-.tl-p.req.near .tl-fl { background-color: var(--bar-req-near); }
 .tl-p.decide { border-color: var(--bar-decide-line); }
-.tl-p.decide .tl-fl { background-color: var(--bar-decide-fill); }
 .tl-p.decide .tl-t1, .tl-p.decide .tl-t2 { color: var(--bar-decide-text); }
-.tl-p.decide.near .tl-fl { background-color: var(--bar-decide-near); }
 .tl-p.remind { border-color: var(--bar-remind-line); }
-.tl-p.remind .tl-fl { background-color: var(--bar-remind-fill); }
 .tl-p.remind .tl-t1, .tl-p.remind .tl-t2 { color: var(--bar-remind-text); }
-.tl-p.remind.near .tl-fl { background-color: var(--bar-remind-near); }
 /* ⚠️ QUIET IS A HATCH AND NOT A FILL, because there is no named span for a fraction to be OF.
    That is the same fact the empty track states, said in the one state where the emptiness would
    otherwise read as a bar nobody had finished drawing. */
 .tl-p.quiet { border-color: var(--bar-quiet-line); }
-.tl-p.quiet .tl-fl { background-image: var(--bar-quiet-hatch); }
 .tl-p.quiet .tl-t1, .tl-p.quiet .tl-t2 { color: var(--bar-quiet-text); }
 .tl-p.closedp { border: 1.5px dashed var(--bar-closed-line); }
 .tl-p.closedp .tl-t1, .tl-p.closedp .tl-t2 { color: var(--bar-closed-text); }

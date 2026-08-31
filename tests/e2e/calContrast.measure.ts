@@ -4,10 +4,9 @@
  *
  * THE CONTRAST OF THE BAR'S TWO LINES (v37, Phase 8).
  *
- * Line two is 8px uppercase mono at .66 over a tinted fill whose tone varies with state, which is
- * a combination that can sit below 4.5:1 without looking obviously wrong. Both lines are measured
- * against BOTH grounds each can sit on — the fill, and the white track past the fill's right edge —
- * for every family, because a bar is part-filled and the same text crosses both.
+ * Since v39 a card is ONE surface — white, or the cream a quiet card takes — because the fill is
+ * deleted. Text no longer crosses from a tint onto a track, so the two-ground sweep collapses to
+ * one; the shape is kept so a second ground can return if a card ever gains one.
  *
  * ⚠️ THE OPACITY IS COMPOSITED, NOT ASSUMED. `getComputedStyle(...).color` returns the DECLARED
  * ink; the .66 lives on the element as `opacity`, which multiplies at paint time. Reading the
@@ -57,7 +56,6 @@ test("both bar lines clear 4.5:1 on both grounds, in every state", async ({ page
       if (out[fam]) continue;
       const t1 = b.querySelector(".tl-t1");
       const t2 = b.querySelector(".tl-t2");
-      const fl = b.querySelector(".tl-fl");
       const txt = b.querySelector(".tl-txt");
       if (!t1) continue;
       const st = (e) => e ? getComputedStyle(e) : null;
@@ -65,8 +63,11 @@ test("both bar lines clear 4.5:1 on both grounds, in every state", async ({ page
         t1Ink: st(t1).color, t1Op: Number(st(t1).opacity),
         t2Ink: t2 ? st(t2).color : null, t2Op: t2 ? Number(st(t2).opacity) : null,
         stackOp: txt ? Number(st(txt).opacity) : 1,
-        /* the two grounds the same text crosses: the tinted fill, and the bar's own track */
-        fill: fl ? st(fl).backgroundColor : null,
+        /* ⚠️ ONE GROUND SINCE v39. The fill is deleted, so a card is one surface — white, or the
+           cream a quiet card takes — and text no longer crosses from a tint onto a track. The
+           second ground is kept in the shape below rather than removed, because the card's own
+           background is exactly what it now reads. */
+        fill: null,
         track: st(b).backgroundColor,
       };
     }

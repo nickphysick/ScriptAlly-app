@@ -56,7 +56,7 @@ import {
   type RowSort, type TimelineFilter,
 } from "../../lib/todoTimeline";
 import {
-  durationCount, fillFor, fillEndAt, barLines, NEAR_AT, familyOf,
+  durationCount, barLines, familyOf,
   type Segment, type BarNode,
 } from "../../lib/journeyBars";
 import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
@@ -146,17 +146,6 @@ const barLeft = (sg: Segment) => `calc(${pct(sg.from)} + ${gapVar(sg.abutL)})`;
 const barWidth = (sg: Segment) =>
   `calc(${pct(sg.to - sg.from)} - ${gapVar(sg.abutL)} - ${gapVar(sg.abutR)})`;
 /**
- * How wide the FILL is drawn — from the piece's own left edge to where the fill's edge belongs.
- *
- * ⚠️ IT IS A DISTANCE BETWEEN TWO DATES, NOT A FRACTION OF A BAR. `fillEndAt` says where the edge
- * belongs in window coordinates and `barLeft` says where the piece starts in the same ones, so the
- * width is the difference — expressed in the one mapping, exactly as the bar's own width is. The
- * two subtracted terms are the real offsets between the lane's origin and this element's: the
- * piece's clearance, and the border that `left: 0` on an absolutely positioned child sits inside.
- */
-const fillWidth = (sg: Segment, end: number) =>
-  `calc(${pct(end - sg.from)} - ${gapVar(sg.abutL)} - var(--tl-bar-bd))`;
-/**
  * ⚠️ THE PAGE DECLARES WHICH LANE; THE STYLESHEET DECIDES WHERE THAT IS.
  *
  * `LANE_STEP = 52` and `laneTop(lane) = lane * 52` are retired, and so is `minHeight: lanes * 52
@@ -188,9 +177,8 @@ const laneVar = (lane: number): React.CSSProperties =>
  * one and the one the emptiness is there to make.
  */
 const Piece: React.FC<{
-  sg: Segment; fill: number | null; fillEnd: number | null; selected: boolean; onPick: () => void;
-}> = ({ sg, fill, fillEnd, selected, onPick }) => {
-  const near = fill != null && fill >= NEAR_AT && fill < 1 && !sg.historical;
+  sg: Segment; selected: boolean; onPick: () => void;
+}> = ({ sg, selected, onPick }) => {
   const lines = barLines(sg.label);
   return (
     <div
@@ -198,7 +186,7 @@ const Piece: React.FC<{
          sweep reads `className=` expressions out of this file, so a list assembled into a variable
          is invisible to it — and its report would be "this class has no rule", about a class it
          never saw. An absence that reads as a finding. */
-      className={`tl-at2 tl-p ${familyOf(sg.state)}${sg.hollow ? " hollow" : ""}${near ? " near" : ""}${selected ? " sel" : ""}`}
+      className={`tl-at2 tl-p ${familyOf(sg.state)}${sg.hollow ? " hollow" : ""}${selected ? " sel" : ""}`}
       style={{ left: barLeft(sg), width: barWidth(sg), ...laneVar(sg.lane) }}
       data-state={sg.state}
       /* ⚠️ WHICH QUERY THIS BAR IS, so a lock can ask whether the row's WORDS are about a query the
@@ -206,20 +194,12 @@ const Piece: React.FC<{
          query the reader could not see, and none of them was catchable from appearance alone. */
       data-qid={sg.queryId}
       data-live={sg.live ? "1" : undefined}
-      data-fill={fill == null ? "none" : String(Math.round(fill * 100))}
       data-tip={sg.tip || undefined}
       onClick={onPick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(); } }}
     >
-      {fillEnd != null && (
-        <span
-          className="tl-fl"
-          data-full={fill != null && fill >= 1 ? "1" : "0"}
-          style={{ width: fillWidth(sg, fillEnd) }}
-        />
-      )}
       {sg.label && (
         <span className="tl-txt">
           {/* ⚠️ TWO ELEMENTS, NOT ONE WITH A BREAK. The fit pass drops line two on its own, so it
@@ -1292,7 +1272,7 @@ data-rowkey={r.key}
 
         <div className="tl-c-tl">
           {bar.segs.map((sg) => (
-            <Piece key={sg.key} sg={sg} fill={fillFor(sg)} fillEnd={fillEndAt(sg)} selected={sel === sg.key}
+            <Piece key={sg.key} sg={sg} selected={sel === sg.key}
               onPick={() => pickSeg(r.key, sg)} />
           ))}
           {bar.nodes.map((n) => (
