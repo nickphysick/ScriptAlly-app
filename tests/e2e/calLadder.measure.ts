@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { openRoute } from "./measure";
+import { setRangeTo, RANGE_LABELS } from "./calControls";
 
 /**
  * ⚠️ THE CONTENT LADDER — full · headline · pill · stub (v40, Phase 4).
@@ -41,12 +42,8 @@ test("every rung is reached, and each shows exactly what its name says", async (
   for (const w of WIDTHS) {
     await openRoute(page, "/todo/calendar", { width: w, height: 900 });
     await page.waitForTimeout(700);
-    const slider = page.locator('input[type="range"][id^="sa-tlrange"]').first();
     for (const i of [0, 1, 2]) {
-      await slider.focus();
-      await page.keyboard.press("Home");
-      for (let k = 0; k < i; k++) await page.keyboard.press("ArrowRight");
-      await page.waitForTimeout(500);
+      await setRangeTo(page, i);
       /**
        * ⚠️ THE RANGE IS ASSERTED, NOT ASSUMED — a walk that did not land measures one range three
        * times and reports a census. It happened between two runs of this very case: the headline
@@ -54,8 +51,16 @@ test("every rung is reached, and each shows exactly what its name says", async (
        * iteration re-read the same board. A sweep that cannot say which subjects it visited is a
        * sample wearing a census's clothes.
        */
-      const at = await slider.inputValue();
-      expect(at, `range ${i} was not reached at ${w}`).toBe(String(i));
+      const at = await page.evaluate(() => {
+        const on = [...document.querySelectorAll(".tl-mbtn")]
+          .find((b) => (b.textContent || "").startsWith("Display"));
+        return (on?.textContent || "").trim();
+      });
+      /* ⚠️ THE RANGE IS ASSERTED FROM THE TRIGGER'S OWN SUMMARY, which names the non-default
+         choices — so the assertion reads what a reader reads. The default range names nothing,
+         which is itself the reading for index 1. */
+      const want = i === 1 ? "Display ▾" : `Display · ${RANGE_LABELS[i]} ▾`;
+      expect(at, `range ${i} was not reached at ${w}`).toBe(want);
       visited.add(`${w}:${i}`);
       const got = await census(page);
       for (const r of got) seen[r.tier] = (seen[r.tier] ?? 0) + 1;

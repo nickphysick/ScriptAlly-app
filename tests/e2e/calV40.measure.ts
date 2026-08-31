@@ -6,18 +6,10 @@
  */
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
+import { setRangeTo } from "./calControls";
 
 const WIDTHS = [1280, 1440, 1920];
 const TAG = `const vis=(s)=>[...document.querySelectorAll(s)].find(e=>e.getBoundingClientRect().height>0)||null;`;
-const setRangeTo = async (page: import("@playwright/test").Page, i: number) => {
-  await page.evaluate(`(() => {
-    const all=[...document.querySelectorAll('input[type=range]')].filter(e=>e.getBoundingClientRect().width>0);
-    if (all.length !== 1) throw new Error("expected 1 visible range control, found " + all.length);
-    const set=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,"value").set;
-    set.call(all[0], String(${i})); all[0].dispatchEvent(new Event("input",{bubbles:true}));
-  })()`);
-  await page.waitForTimeout(650);
-};
 
 test("two columns, and the timeline takes the width the action column had", async ({ page }) => {
   const seen: string[] = [];

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
+import { setRangeTo, RANGE_LABELS } from "./calControls";
 
 /**
  * Phase 7 — the grouped board's acceptance, four widths × five ranges.
@@ -9,7 +10,12 @@ import { openRoute } from "./measure";
  * once — three things whose interaction nothing had measured together.
  */
 const WIDTHS = [1280, 1440, 1920, 2400];
-const STOPS = ["1 week", "2 weeks", "1 month", "3 months", "6 months"];
+/* ⚠️ THE STOPS ARE SPLICED FROM THE CONTROL, NEVER RETYPED — and this list was WRONG. The 1-week
+   and 2-week stops were deleted in v35 (Porcelain, Phase 2), so every run since has driven indices
+   3 and 4 against a three-stop control, where they clamp: two of five iterations silently measured
+   the six-month board twice and reported it as "2 weeks" and "1 month". Green the whole time, over
+   a census that was two-fifths a monoculture. */
+const STOPS = [...RANGE_LABELS];
 const ORDER = ["Offers", "Needs you now", "Needs you soon", "Watching brief", "Snoozed", "Recently closed"];
 
 test("Phase 7 — groups, dots, words and the past, at every width and range", async ({ page }) => {
@@ -20,12 +26,12 @@ test("Phase 7 — groups, dots, words and the past, at every width and range", a
   for (const width of WIDTHS) {
     await openRoute(page, "/todo/calendar", { width, height: 900 });
     await page.waitForTimeout(950);
-    const slider = page.getByRole("slider", { name: /range/i });
-    expect(await slider.count(), `[${width}] no range control found by role`).toBe(1);
+    /* ⚠️ THE RANGE SLIDER IS RETIRED (v40, Phase 6): the range is one row of the ONE `Display`
+       popover now. The helper is shared — every file that drove the old control held its own copy,
+       and all of them went red together the day it changed. */
 
     for (let i = 0; i < STOPS.length; i++) {
-      await slider.fill(String(i));
-      await page.waitForTimeout(600);
+      await setRangeTo(page, i);
 
       const m = await page.evaluate(() => {
         const all = [...document.querySelectorAll(".tl")] as HTMLElement[];

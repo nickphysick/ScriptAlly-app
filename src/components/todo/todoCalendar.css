@@ -1,4 +1,20 @@
 /**
+ * ⚠️ THE PAGE'S OWN INK, DECLARED AT THE PAGE ROOT AND NOT AT THE BOARD.
+ *
+ * It lived on `.tl-board` until v40's control row needed it: the tools row is drawn by
+ * `TasksPageLayout` in the page chrome, OUTSIDE the board, so `var(--tl-nearblack)` there resolved
+ * to nothing. A `background` on an undefined custom property is not an error — the declaration is
+ * simply dropped — so the selected tab painted NO fill and kept its near-white ink, on a near-white
+ * ground. Invisible, with every rule reading correctly and nothing to point at.
+ *
+ * ⚠️ AND THE FIX IS THE SCOPE, NEVER A SECOND COPY OF THE HEX. Writing #1c130f into the tab rule
+ * would have made one colour two sources, which is the fault the token exists to prevent.
+ */
+.cal-timeline {
+  --tl-nearblack: #1c130f;
+}
+
+/**
  * The Calendar page — the WEEK TIMELINE (calendar timeline pack, Phase 3; structure from
  * design-refs/timeline-week-ref.html, grammar from design-refs/timeline-event-catalogue.html).
  *
@@ -85,6 +101,59 @@
   line-height: 1.4;
 }
 .tl-menu button[aria-current="true"] { background: #f2ede7; font-weight: 600; color: #2b2118; }
+/* ══ the views, as tabs ═══════════════════════════════════════════════════════════════════════
+   ⚠️ THEY READ AS A STRIP, NOT AS FOUR BUTTONS. The selected one takes the near-black fill the
+   board uses for the writer's own side; the rest are bare, so the strip states which cut you are
+   in without a frame drawn round the whole thing. */
+/* ⚠️ `.tl-seg2` IS DELETED WITH THE FOUR SEGMENTED CONTROLS IT DRESSED (v40, Phase 6). Nothing in
+   `src/` rendered the class once the tabs and the `Display` popover replaced them — a stylesheet
+   rule with no subject is a rule that reads as live and governs nothing, which is how a retired
+   control comes back the next time somebody styles this row. */
+.tl-tabs { display: inline-flex; align-items: center; gap: 2px; flex: none; }
+.tl-tabs button {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8.5px;
+  letter-spacing: 0.11em; text-transform: uppercase; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0 10px; height: 26px; border-radius: 8px; cursor: pointer;
+  border: 1px solid transparent; background: none; color: #8a7a6e;
+}
+.tl-tabs button:hover { color: #1c130f; background: #f6f1ea; }
+.tl-tabs button[data-on="true"] { background: var(--tl-nearblack); color: #fdfaf5; }
+/* ⚠️ THE COUNT RIDES ITS OWN TAB and takes the tab's ink at reduced opacity rather than a second
+   colour — a tinted numeral beside a label is a second thing to read where there is one fact. */
+.tl-tabn { font-size: 8px; opacity: .62; font-variant-numeric: tabular-nums; }
+.tl-tabs button[data-on="true"] .tl-tabn { opacity: .75; }
+
+/* ══ the Display popover ══════════════════════════════════════════════════════════════════════ */
+.tl-mbtnsum { text-transform: none; letter-spacing: .02em; color: #9c8878; }
+.tl-mbtn[aria-expanded="true"] { border-color: #d3c4b3; color: #1c130f; }
+.tl-pop {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 75;
+  background: #fff; border: 1px solid #ece0d2; border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(58, 28, 20, 0.15);
+  padding: 10px; min-width: 250px;
+}
+.tl-poprow + .tl-poprow { margin-top: 10px; }
+.tl-popname {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8px;
+  letter-spacing: 0.12em; text-transform: uppercase; color: #9c8878; margin-bottom: 5px;
+}
+.tl-popopts { display: flex; flex-wrap: wrap; gap: 4px; }
+.tl-popopts button {
+  font-size: 11px; padding: 4px 9px; border-radius: 7px; cursor: pointer;
+  border: 1px solid #e6dcce; background: #fff; color: #4a3a30; white-space: nowrap;
+}
+.tl-popopts button:hover { border-color: #d3c4b3; }
+.tl-popopts button[data-on="true"] {
+  background: var(--tl-nearblack); border-color: var(--tl-nearblack); color: #fdfaf5;
+}
+.tl-popreset {
+  display: block; width: 100%; margin-top: 11px; padding-top: 9px; cursor: pointer;
+  border: 0; border-top: 1px solid #f0e7db; background: none; text-align: left;
+  font-size: 10.5px; color: #9c8878;
+}
+.tl-popreset:hover { color: #1c130f; }
+
 .tl-search {
   flex: 0 1 190px; min-width: 90px; height: 26px; padding: 0 10px; font-size: 11.5px;
   border: 1px solid #e6dcce; border-radius: 8px; background: #fff; color: #3a2c22;
@@ -178,7 +247,8 @@
      ⚠️ AND IT IS NOT `--tl-ink`, WHICH IS ALREADY TAKEN AND MEANS SOMETHING ELSE: this sheet's
      `--tl-ink` is #3a1c14, which v39 pins as the BODY colour. Two tokens, two values, and naming
      the darker one `ink` would have made every existing reader silently darker. */
-  --tl-nearblack: #1c130f;
+  /* ⚠️ MOVED TO `.cal-timeline` (v40, Phase 6) — see the declaration there. It sat on `.tl-board`
+     and the page's TOOLS ROW is not inside the board. */
   /* ══ THE CARD (v39, Phase 2) ══════════════════════════════════════════════════════════════
      ⚠️ COLOUR APPEARS ONLY IN THE PILLS. A card is white, or the cream a quiet one takes; its
      border, its shadow, its separator and both its texts are neutral. The pill is the one place a
@@ -479,15 +549,6 @@
 /* ══ THE SEGMENTED CONTROLS IN THE TOOL ROW ════════════════════════════════════════════════
    ⚠️ SQUARE-CORNERED LIKE EVERY OTHER CONTROL, for the reason the action button is: the board's
    own pills are DATA, and a control that borrows their shape borrows their meaning. */
-.tl-seg2 { display: inline-flex; background: #fff; border: 1px solid #e5d8c9; border-radius: 9px; overflow: hidden; flex: none; }
-.tl-seg2 button {
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 9px; letter-spacing: 0.08em;
-  font-weight: 500; border: none; background: transparent; color: #6a5a50; padding: 8px 12px;
-  cursor: pointer; line-height: 1;
-}
-.tl-seg2 button + button { border-left: 1px solid #efe6da; }
-.tl-seg2 button[data-on="true"] { background: #f5e2da; color: #1c130f; }
-.tl-seg2 button:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
 
 /* ══ THE ACTION COLUMN — CONTROLS ARE NEVER PILLS ══════════════════════════════════════════
  *
@@ -567,16 +628,14 @@
 .tl-pill.quiet  { background: var(--pill-quiet-bg); border: 1px solid var(--pill-quiet-bd); color: var(--pill-quiet-tx); }
 .tl-pill.closed { background: transparent;          border: 1px solid var(--pill-closed-bd); color: var(--tl-label, #9c8878); }
 
-/* ⚠️ THE LINE IS THE WINDOW AND THE TRACK IS WHAT MOVES. The mask lives on the LINE so it stays
-   put while the track slides under it; on the track it would slide too, and the fade would travel
-   with the words it is supposed to be revealing. */
+/* ⚠️ THE FADE MASK AND ITS `.fits` ESCAPE ARE RETIRED WITH THE MARQUEE (v40). The mask said "there
+   are more words past this edge" and the slide was how you read them; the content ladder never
+   leaves a line overflowing, so a permanent fade on the right of every card's words would be a
+   promise about text that is not there. `overflow: hidden` stays as the belt: a rung is chosen by
+   measurement, and a measurement is against a rendered box rather than a guarantee. */
 .tl-line {
   display: block; overflow: hidden; min-width: 0; width: 100%; flex: 0 0 auto; position: relative;
-  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 22px), transparent);
-  mask-image: linear-gradient(90deg, #000 calc(100% - 22px), transparent);
 }
-/* a line whose text fits carries no mask and no animation — both are stated by this one class */
-.tl-line.fits { -webkit-mask-image: none; mask-image: none; }
 /* ⚠️ THE TRACK IS `max-content` AND ITS CHILDREN DO NOT SHRINK, and both halves are needed.
    Without them the track is bounded by the line and its items — which default to `flex-shrink: 1`
    — compress; their text is `nowrap`, so it spills out of the boxes it was squeezed into and the

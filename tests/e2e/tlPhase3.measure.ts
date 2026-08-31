@@ -1,6 +1,12 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
-const STOPS = ["1 week", "2 weeks", "1 month", "3 months", "6 months"];
+import { setRangeTo, RANGE_LABELS } from "./calControls";
+/* ⚠️ THE STOPS ARE SPLICED FROM THE CONTROL, NEVER RETYPED — and this list was WRONG. The 1-week
+   and 2-week stops were deleted in v35 (Porcelain, Phase 2), so every run since has driven indices
+   3 and 4 against a three-stop control, where they clamp: two of five iterations silently measured
+   the six-month board twice and reported it as "2 weeks" and "1 month". Green the whole time, over
+   a census that was two-fifths a monoculture. */
+const STOPS = [...RANGE_LABELS];
 test("Phase 3 — five ranges, four density tiers", async ({ page }) => {
   const errs: string[] = [];
   page.on("console", (m) => { if (m.type() === "error") errs.push(m.text().slice(0, 140)); });
@@ -8,12 +14,12 @@ test("Phase 3 — five ranges, four density tiers", async ({ page }) => {
   await page.waitForTimeout(900);
 
   /* ⚠️ BY ROLE, NOT BY CLASS — the pack's own probe rule. */
-  const slider = page.getByRole("slider", { name: /range/i });
-  expect(await slider.count(), "no range control found by role").toBe(1);
+  /* ⚠️ THE RANGE SLIDER IS RETIRED (v40, Phase 6): the range is one row of the ONE `Display`
+     popover now. The helper is shared — every file that drove the old control held its own copy,
+     and all of them went red together the day it changed. */
 
   for (let i = 0; i < STOPS.length; i++) {
-    await slider.fill(String(i));
-    await page.waitForTimeout(700);
+    await setRangeTo(page, i);
     const m = await page.evaluate(() => {
       /* ⚠️ THE VISIBLE BOARD, NOT THE FIRST `.tl` IN THE DOCUMENT. Every workspace page stays
          mounted, so a bare querySelector can answer for a page the reader cannot see — the fault

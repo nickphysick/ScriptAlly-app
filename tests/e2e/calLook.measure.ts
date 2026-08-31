@@ -18,6 +18,7 @@ import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { openRoute } from "./measure";
+import { setRangeTo, showGrouped } from "./calControls";
 
 /**
  * ⚠️ `.tl-plbl` IS `.tl-hl` SINCE v37. The bar's single label became two lines — what it is, and
@@ -68,17 +69,6 @@ const MARKER = {
  * inside one test; the fill-edge case needs it too, and writing it out again would be two
  * functions answering one question — which is the disease, not the workaround for it.
  */
-const setRangeTo = async (page: import("@playwright/test").Page, i: number) => {
-  await page.evaluate(`(() => {
-    const all = [...document.querySelectorAll('input[type=range]')]
-      .filter((e) => e.getBoundingClientRect().width > 0);
-    if (all.length !== 1) throw new Error("expected 1 visible range control, found " + all.length);
-    const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-    set.call(all[0], String(${i}));
-    all[0].dispatchEvent(new Event("input", { bubbles: true }));
-  })()`);
-  await page.waitForTimeout(700);
-};
 
 const TAG = `
   const vis = (sel) => [...document.querySelectorAll(sel)]
@@ -138,16 +128,6 @@ const clearanceNow = async (page: import("@playwright/test").Page) =>
  * headings it never switched to, which is the shape that reports a real number about the wrong
  * page.
  */
-const showGrouped = async (page: import("@playwright/test").Page) => {
-  await page.evaluate(`(() => {
-    const b = [...document.querySelectorAll(".tl-seg2 button")]
-      .filter((e) => e.getBoundingClientRect().width > 0)
-      .find((e) => (e.textContent || "").trim() === "GROUPED");
-    if (!b) throw new Error("no GROUPED control on the page");
-    b.click();
-  })()`);
-  await page.waitForTimeout(450);
-};
 
 test.describe("the Calendar — Porcelain", () => {
   for (const width of WIDTHS) {
@@ -647,15 +627,7 @@ test("⚠️ a rail tick lands on the same pixel as that date inside a card lane
   for (const [label, idx] of [["1 month", 0], ["3 months", 1], ["6 months", 2]] as const) {
     await openRoute(page, "/todo/calendar", { width: 1440, height: 980 });
     await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
-    await page.evaluate(`(() => {
-      const all = [...document.querySelectorAll('input[type=range]')]
-        .filter((e) => e.getBoundingClientRect().width > 0);
-      if (all.length !== 1) throw new Error("expected 1 visible range control, found " + all.length);
-      const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-      set.call(all[0], String(${idx}));
-      all[0].dispatchEvent(new Event("input", { bubbles: true }));
-    })()`);
-    await page.waitForTimeout(700);
+    await setRangeTo(page, idx);
 
     const r = await page.evaluate(`(() => {
       const rail = document.querySelector(".tl-rail .tl-railtl");

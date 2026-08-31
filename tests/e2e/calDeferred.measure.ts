@@ -6,17 +6,9 @@
  */
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
+import { setRangeTo } from "./calControls";
 
 const TAG = `const vis=(s)=>[...document.querySelectorAll(s)].find(e=>e.getBoundingClientRect().height>0)||null;`;
-const setRangeTo = async (page: import("@playwright/test").Page, i: number) => {
-  await page.evaluate(`(() => {
-    const all=[...document.querySelectorAll('input[type=range]')].filter(e=>e.getBoundingClientRect().width>0);
-    if (all.length !== 1) throw new Error("expected 1 visible range control, found " + all.length);
-    const set=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,"value").set;
-    set.call(all[0], String(${i})); all[0].dispatchEvent(new Event("input",{bubbles:true}));
-  })()`);
-  await page.waitForTimeout(650);
-};
 
 /**
  * ⚠️ THE FADE IS PROVED BY PIXELS, ON EVERY COLOUR OF CARD.
@@ -128,33 +120,11 @@ test("a faded edge dissolves to the ground, on every colour of card", async ({ p
 });
 
 /** How much text does not fit, per range — the census part one deferred. */
-test("the marquee census — how many cards overflow, and by how much", async ({ page }) => {
-  const rows: string[] = [];
-  let total = 0;
-  await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
-  await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
-  for (const r of [0, 1, 2]) {
-    await setRangeTo(page, r);
-    const s = await page.evaluate(TAG + `(() => {
-      if (!vis(".tl-board")) return { fatal: "no board" };
-      const over=[]; let cards=0;
-      for (const c of document.querySelectorAll(".tl-p")) {
-        if (c.getBoundingClientRect().width<=0) continue;
-        const line=c.querySelector(".tl-line"); if(!line) continue;
-        cards+=1;
-        if (line.classList.contains("fits")) continue;
-        over.push(Number(line.dataset.over||"0"));
-      }
-      over.sort((a,b)=>a-b);
-      return { cards, n:over.length, min:over[0]??null, max:over[over.length-1]??null,
-               median: over.length?over[Math.floor(over.length/2)]:null };
-    })()`) as any;
-    expect(s.fatal, s.fatal).toBeUndefined();
-    expect(s.cards, `range ${r}: no cards`).toBeGreaterThan(3);
-    total += s.n;
-    rows.push(`  range ${r}: ${s.n} of ${s.cards} cards overflow · min ${s.min}px · median ${s.median}px · max ${s.max}px`);
-  }
-  for (const x of rows) console.log(x);
-  /* ⚠️ THE CENSUS MUST FIND SOMETHING, or it is a table of zeroes reported as a clean result. */
-  expect(total, "no card overflows at any range — the marquee is unexercised").toBeGreaterThan(0);
-});
+/* ⚠️ THE MARQUEE CENSUS IS RETIRED WITH THE MARQUEE (v40, Phase 6). It counted how many cards
+ * overflowed and by how much, and its own floor — "the census must find something, or it is a
+ * table of zeroes reported as a clean result" — is what proved the mechanism dead: 0 overflowing
+ * cards at every range. The content ladder answers "the words do not fit" by dropping the detail
+ * rather than by sliding the line, so `full` is chosen precisely when the content fits and nothing
+ * can overflow. `calLadder.measure.ts` is where that claim now lives, and it asserts the rungs are
+ * REACHED rather than that an animation has something to do.
+ */

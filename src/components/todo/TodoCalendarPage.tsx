@@ -28,7 +28,7 @@ import { FocusFlow } from "./FocusFlow";
 import { TaskPane } from "./TaskPane";
 import { useTaskPaneSession, type TaskPaneHost } from "./useTaskPaneSession";
 import { useTaskCommit } from "./useTaskCommit";
-import { TimelineRangeSlider, TIMELINE_RANGES, DEFAULT_RANGE_INDEX, pastDaysOf } from "./TimelineRangeSlider";
+import { TIMELINE_RANGES, DEFAULT_RANGE_INDEX, pastDaysOf } from "../../lib/timelineRanges";
 import {
   GROUP_ORDER, GROUP_LABEL, COLLAPSED_BY_DEFAULT, groupSentence, TASKS_HEADING, TASKS_SENTENCE,
   asksOfYou,
@@ -36,8 +36,8 @@ import {
 } from "../../lib/timelineGroups";
 import { pillText } from "../../lib/calendarPill";
 import { fadesFor, cardBounds } from "../../lib/calendarFade";
-import { cycleFor } from "../../lib/calendarMarquee";
 import { tierFor, STUB_MAX_W } from "../../lib/cardTier";
+import { TAB_ORDER, TAB_LABEL, rowInTab, tabOf, type TimelineTab } from "../../lib/timelineViews";
 import { useConfirmAsk } from "./ConfirmAsk";
 /** this mount's pane section-id prefix — every workspace page stays mounted, so ids must not collide */
 const CAL_PANE_PREFIX = "cal-";
@@ -52,7 +52,7 @@ import {
   CalendarItem, RecordItem, GhostItem,
 } from "../../lib/todoCalendar";
 import {
-  windowDays, shiftWindow, timelineWeek, defaultView,
+  windowDays, shiftWindow, timelineWeek, defaultView, DEFAULT_SORT,
   FILTER_LABEL, SORT_LABEL, SORT_ORDER, SORT_MEANING,
   YOU_ROW,
   type TimelineItem, type TimelineRow, type TimelineView,
@@ -146,6 +146,9 @@ const PILL_INSET = 13;
 
 /** the flex gap between the pill and the line it sits beside, matching `.tl-p`'s own */
 const PILL_GAP = 10;
+
+/** the right margin `.tl-p > *` pays, which the content needs as surely as it needs its own width */
+const CONTENT_MARGIN_R = 12;
 
 const pct = (n: number) => `calc(${n} / var(--tl-days) * 100cqw)`;
 
@@ -391,6 +394,70 @@ function Menu<T extends string>({
   );
 }
 
+/**
+ * ONE popover holding every setting that changes how the board is DRAWN (v40, Phase 6).
+ *
+ * ⚠️ FOUR SEGMENTED CONTROLS IN THE ROW WERE FOUR ANSWERS TO ONE QUESTION. `WHAT NEEDS YOU /
+ * MANUSCRIPT`, `ONE LIST / GROUPED`, `FULL BOARD / RIGHT NOW` and a range slider each occupied
+ * permanent width and each stated a setting the reader had already made. What changes often is
+ * WHICH relationships you are looking at, and that is now the tab strip; how the board is arranged
+ * is set once and then read off the trigger, which names the non-default choices.
+ *
+ * ⚠️ THE DISMISSAL IDIOM IS `Menu`'S, DELIBERATELY REUSED RATHER THAN COPIED IN SPIRIT: Escape on
+ * the CAPTURE phase with `stopImmediatePropagation`, pointerdown outside, and the trigger counting
+ * as inside. Escape here must never fall through to the page, which would close the workspace
+ * behind the popover the reader was actually dismissing.
+ */
+function Popover({ label, summary, children }: {
+  label: string; summary: string; children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrap = React.useRef<HTMLSpanElement>(null);
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopImmediatePropagation();
+      setOpen(false);
+    };
+    const onDown = (e: PointerEvent) => {
+      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
+    };
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("pointerdown", onDown, true);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("pointerdown", onDown, true);
+    };
+  }, [open]);
+  return (
+    <span className="tl-menuwrap" ref={wrap}>
+      <button type="button" className="tl-mbtn" aria-haspopup="true" aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}>
+        {label}{summary && <span className="tl-mbtnsum"> · {summary}</span>} ▾
+      </button>
+      {open && <div className="tl-pop" aria-label={label}>{children}</div>}
+    </span>
+  );
+}
+
+/** one setting inside the popover: a name, and a row of choices */
+function PopRow<T extends string>({ name, value, options, labels, onPick }: {
+  name: string; value: T; options: readonly T[]; labels: Record<T, string>; onPick: (v: T) => void;
+}) {
+  return (
+    <div className="tl-poprow">
+      <div className="tl-popname">{name}</div>
+      <div className="tl-popopts" role="group" aria-label={name}>
+        {options.map((o) => (
+          <button key={o} type="button" data-on={o === value} aria-pressed={o === value}
+            onClick={() => onPick(o)}>{labels[o]}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, onNavigatePath = () => {} }) => {
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser,
@@ -568,8 +635,13 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
          */
         seg.dataset.tier = tierFor({
           card: seg.clientWidth, room,
-          full: pillW + PILL_GAP + track.scrollWidth,
-          headline: pillW + PILL_GAP + (hl ? hl.getBoundingClientRect().width : 0),
+          /* ⚠️ THE RIGHT MARGIN IS PART OF WHAT THE WORDS NEED. `.tl-p > *` pays 12px on its
+             right, so a rung chosen without it says "this fits" about content that is 12px too
+             wide — and the card then draws a clipped detail, which is the one thing the ladder
+             exists to stop. Measured: the marquee's own census found 0 overflowing cards either
+             way, so the fault was invisible from that side. */
+          full: pillW + PILL_GAP + track.scrollWidth + CONTENT_MARGIN_R,
+          headline: pillW + PILL_GAP + (hl ? hl.getBoundingClientRect().width : 0) + CONTENT_MARGIN_R,
         });
 
         /**
@@ -606,98 +678,34 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
          * forever. The track is `inline-flex` for the same reason the old lines were
          * `inline-block`: scrollWidth on an inline box is meaningless.
          */
-        /**
-         * ⚠️ THE MARQUEE IS THE FULL RUNG'S ALONE (v40). Below it the card is not overflowing —
-         * it has DROPPED something, and sliding what remains would move a complete phrase for no
-         * reason while the part the reader is missing stays missing. The tooltip states it.
-         *
-         * ⚠️ AND THE GUARD IS NOT REDUNDANT WITH THE STYLESHEET, THOUGH IT LOOKS IT. At the `pill`
-         * rung `.tl-line` is `display: none`, so BOTH `scrollWidth` and `clientWidth` report zero
-         * and no overflow is ever detected — which means deleting this line changes nothing today
-         * and the obvious red proof is INERT. It was: the mutation ran, the lock stayed green, and
-         * only reddening the stylesheet's hide as well showed the guard doing its job. The two
-         * hold the rule for different reasons, and the day the hide becomes a `visibility` or a
-         * clip — both of which keep a box — this is the only thing left.
-         */
-        const over = seg.dataset.tier === "full" ? track.scrollWidth - line.clientWidth : 0;
-        if (over > 1) {
-          line.classList.remove("fits");
-          line.dataset.over = String(Math.round(over));
-        } else {
-          /* a line that fits carries no mask and no animation — both are stated by this class */
-          line.classList.add("fits");
-          delete line.dataset.over;
-        }
+        /* ⚠️ THE OVERFLOW BOOKKEEPING WENT WITH THE MARQUEE. `fits` and `data-over` existed to
+           tell the hover animation how far to slide; the ladder never leaves a line overflowing,
+           so both were describing a state the board can no longer be in. */
       }
     };
     fit();
 
     /**
-     * ⚠️ THE MARQUEE RUNS ON HOVER AND NOWHERE ELSE — never at rest, never on a timer.
+     * ⚠️ THE MARQUEE IS RETIRED, AND THE LADDER IS WHAT RETIRED IT (v40, Phase 4/6).
      *
-     * Text that moves on its own is text competing with the reader; a board of thirteen cards all
-     * sliding is unreadable. It starts when the pointer arrives and is CANCELLED when it leaves,
-     * and the cancel resets the transform explicitly: a cancelled animation leaves the element
-     * wherever its last commit put it, so a card the reader has left would keep its text scrolled
-     * off the edge.
+     * It existed to answer "what happens when the words do not fit" with `Measured, then marked —
+     * the words are never removed`: the line was masked and the track slid on hover. The content
+     * ladder answers the SAME question by dropping the detail, and two answers to one question is
+     * how they come to disagree. The brief asked for the marquee to be narrowed to the `full`
+     * rung; measured, that narrowing RETIRES it, because `full` is chosen precisely when the
+     * content fits — pill, gap, track and the right margin against the room after the marks — so
+     * `scrollWidth - clientWidth` cannot exceed zero there. Unreachable by construction, not by
+     * fixture, which is why it goes rather than staying as a mechanism nothing can enter.
      *
-     * ⚠️ THE FRAMES COME FROM `cycleFor`, BUILT IN JS BECAUSE THE DISTANCE IS MEASURED. A `var()`
-     * inside `@keyframes` fails silently in this setup — no error, no animation, nothing to point
-     * at — so the distance never enters CSS at all.
-     *
-     * ⚠️ REDUCED MOTION KEEPS THE MASK AND DROPS THE MOVEMENT. The mask says there is more to
-     * read; the movement is what a reader who has asked for stillness does not want. Read at the
-     * moment of hover rather than once at mount, so a change of preference takes effect without a
-     * reload.
+     * `cycleFor` and `src/lib/calendarMarquee.ts` go with it. FLAGGED FOR NICK in the run report:
+     * the brief said narrow, and narrowing turned out to mean retire.
      */
-    const running = new WeakMap<HTMLElement, Animation>();
-    const stop = (line: HTMLElement) => {
-      const a = running.get(line);
-      if (a) { a.cancel(); running.delete(line); }
-      const track = line.querySelector<HTMLElement>(".tl-track");
-      if (track) { track.style.transform = ""; track.style.opacity = ""; }
-    };
-    const start = (line: HTMLElement) => {
-      if (line.classList.contains("fits") || running.has(line)) return;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      const track = line.querySelector<HTMLElement>(".tl-track");
-      const over = Number(line.dataset.over ?? "0");
-      if (!track || !(over > 1) || typeof track.animate !== "function") return;
-      const cycle = cycleFor(over);
-      const a = track.animate(
-        cycle.frames.map((f) => ({ offset: f.offset, transform: f.transform, opacity: f.opacity })),
-        { duration: cycle.durationMs, iterations: Infinity, easing: "linear" },
-      );
-      running.set(line, a);
-    };
-    const onOver = (e: Event) => {
-      const line = (e.target as HTMLElement | null)?.closest?.(".tl-line") as HTMLElement | null;
-      if (line) start(line);
-    };
-    const onOut = (e: Event) => {
-      const line = (e.target as HTMLElement | null)?.closest?.(".tl-line") as HTMLElement | null;
-      if (line) stop(line);
-    };
-    const host = pageRef.current;
-    host?.addEventListener("mouseover", onOver);
-    host?.addEventListener("mouseout", onOut);
-
-    /* ⚠️ A `ResizeObserver` ON THE BOARD, not on every bar. Bars are re-created on every range
-       change and observing each would leak one per render; the board is one element whose width
-       is the only thing that changes what fits. */
-    /* ⚠️ ONE CLEANUP, AND IT RUNS EVEN WITHOUT A BOARD. The early return used to sit between the
-       listeners and the teardown, so a render with no board left both attached — and this effect
-       has no dependency array, so it re-runs every render and would have stacked one pair per
-       render for as long as the board was absent. The observer is what is conditional; the
-       listeners are not. */
     const board = pageRef.current?.querySelector(".tl-board");
     const ro = new ResizeObserver(fit);
     if (board) ro.observe(board);
-    return () => {
-      ro.disconnect();
-      host?.removeEventListener("mouseover", onOver);
-      host?.removeEventListener("mouseout", onOut);
-    };
+    /* ⚠️ THE HOVER LISTENERS WENT WITH THE MARQUEE; the observer is what is left, and it is
+       conditional, so the teardown must run whether or not a board was found. */
+    return () => { ro.disconnect(); };
   });
 
   const pastDays = useMemo(() => pastDaysOf(range), [range]);
@@ -1056,7 +1064,13 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * what is being asked of them should find the whole board again when they come back to it,
    * because the full board is what the page is for.
    */
-  const [onlyAsks, setOnlyAsks] = useState(false);
+  const [tab, setTab] = useState<TimelineTab>("all");
+  /* ⚠️ `RIGHT NOW` IS RETIRED INTO `Needs me`, WHICH IS THE SAME FILTER WITH A HOME. It was a
+     two-state segment stating a thing the tab strip now says among its peers, and a reader could
+     not see from it what the other cuts of the board even were. `onlyAsks` survives as a derived
+     reading for the count line and the sparse copy, both of which ask one question: is the board
+     showing only what is being asked of you. */
+  const onlyAsks = tab === "needs";
   /**
    * ⚠️ ONE LIST IS THE DEFAULT AND GROUPED IS THE MODE, which is the way round v37 turns it.
    *
@@ -1305,7 +1319,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * shares.
    */
   const board = useMemo(() => {
-    const live = onlyAsks ? rows.filter(rowAsks) : rows;
+    /* ⚠️ ONE PREDICATE, AND IT READS THE ROW'S OWN GROUP — the same field the headings draw, so a
+       tab and a heading cannot disagree about where a row stands. */
+    const live = rows.filter((r) =>
+      rowInTab(tab, r.group, r.group === null && r.items.some((i) => i.card)));
     const out: {
       key: string; title: string; sentence: string; count: number;
       rows: TimelineRow[]; group: RowGroup | null; collapsible: boolean; open: boolean;
@@ -1374,6 +1391,21 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
 
   const firstOpen = board.findIndex((g) => g.open && g.rows.length > 0);
   const asking = rows.filter(rowAsks).length;
+  /* ⚠️ THE TAB COUNTS ARE TAKEN OVER THE UNFILTERED ROWS, or every tab but the current one would
+     report zero — a tab strip whose numbers depend on which tab you are in cannot be added up. */
+  const tabCounts = React.useMemo(() => {
+    const t: Record<string, number> = { all: rows.length, needs: 0, agents: 0, closed: 0 };
+    for (const r of rows) t[tabOf(r.group, r.group === null && r.items.some((i) => i.card))] += 1;
+    return t;
+  }, [rows]);
+  /* ⚠️ THE TRIGGER NAMES ONLY WHAT IS NOT THE DEFAULT. A summary restating every setting says the
+     same thing on a board nobody has touched as on one somebody has, which is no signal at all. */
+  const displaySummary = [
+    grouped ? "Grouped" : "",
+    view.sort === DEFAULT_SORT ? "" : SORT_LABEL[view.sort],
+    cutNow === "ms" ? "By book" : "",
+    rangeIdx === DEFAULT_RANGE_INDEX ? "" : TIMELINE_RANGES[rangeIdx].label,
+  ].filter(Boolean).join(" · ");
   /* the two nouns the count uses — a task row belongs to no agent and is not a relationship */
   const taskRows = rows.filter((r) => r.group === null && r.key !== YOU_ROW).length;
 
@@ -1710,16 +1742,22 @@ data-rowkey={r.key}
               {/* ⚠️ CUT BY MANUSCRIPT ONLY EXISTS FROM THE SECOND MANUSCRIPT ON. The ref's own
                   audit: "genuinely useful from the second manuscript onward; noise before that."
                   A control offering one choice implies others the writer cannot reach. */}
-              {cutByAvailable && (
-                <span className="tl-seg2" role="group" aria-label="Cut by">
-                  <button type="button" data-on={cutBy === "needs"} aria-pressed={cutBy === "needs"}
-                    onClick={() => setCutBy("needs")}>WHAT NEEDS YOU</button>
-                  <button type="button" data-on={cutBy === "ms"} aria-pressed={cutBy === "ms"}
-                    onClick={() => setCutBy("ms")}>MANUSCRIPT</button>
-                </span>
-              )}
+              {/* ⚠️ THE VIEWS ARE TABS, AND THE FOURTH IS WHAT `RIGHT NOW` USED TO BE. A
+                  two-state segment could say "you are seeing only what is asked of you" and could
+                  not say what the other cuts of the board were; a strip states all four and which
+                  one you are in. They PARTITION — `timelineViews.ts` locks that — so the counts a
+                  reader adds up are the counts they get. */}
+              <span className="tl-tabs" role="tablist" aria-label="Which relationships">
+                {TAB_ORDER.map((t) => (
+                  <button key={t} type="button" role="tab" aria-selected={tab === t}
+                    data-on={tab === t} onClick={() => setTab(t)}>
+                    {TAB_LABEL[t]}
+                    {t !== "all" && <span className="tl-tabn">{tabCounts[t]}</span>}
+                  </button>
+                ))}
+              </span>
 
-              <TimelineRangeSlider index={rangeIdx} onChange={setRangeIdx} />
+              <span className="tl-csep" aria-hidden />
               <button type="button" className="cal-nav calm-nav" aria-label="Previous window"
                 onClick={() => setWinStart((s) => shiftWindow(s, range.days, -1))}>
                 <ChevronLeft size={14} aria-hidden />
@@ -1731,32 +1769,45 @@ data-rowkey={r.key}
                 <ChevronRight size={14} aria-hidden />
               </button>
 
-              <span className="tl-csep" aria-hidden />
-              {/* ⚠️ A FILTER OF THE ONE BOARD, NEVER A SECOND BOARD. Same rows, same bars, same
-                  deeds, same groups — only the rows that ask nothing of you are withheld. */}
-              {/* ⚠️ THE SAME ROWS EITHER WAY. GROUPED does not fetch, filter or re-derive
-                  anything — it buckets the list the page already has, which is why the lock can
-                  assert the two views hold the identical row set by identity. */}
-              <span className="tl-seg2" role="group" aria-label="How the board is arranged">
-                <button type="button" data-on={!grouped} aria-pressed={!grouped}
-                  onClick={() => setGrouped(false)}>ONE LIST</button>
-                <button type="button" data-on={grouped} aria-pressed={grouped}
-                  onClick={() => setGrouped(true)}>GROUPED</button>
-              </span>
-              <span className="tl-csep" aria-hidden />
-              <span className="tl-seg2" role="group" aria-label="How much of the board">
-                <button type="button" data-on={!onlyAsks} aria-pressed={!onlyAsks}
-                  onClick={() => setOnlyAsks(false)}>FULL BOARD</button>
-                <button type="button" data-on={onlyAsks} aria-pressed={onlyAsks}
-                  onClick={() => setOnlyAsks(true)}>RIGHT NOW</button>
-              </span>
-
-              {/* ⚠️ EACH OPTION CARRIES ITS OWN DEFINITION. "Soonest" could mean the soonest thing
-                  you must do, the soonest reply expected, or the soonest anything happens — three
-                  different orders, and a reader has no way to tell which they got from the name. */}
-              <Menu<RowSort> label="Sort" value={view.sort} options={SORT_ORDER}
-                labels={SORT_LABEL} meanings={SORT_MEANING}
-                onPick={(v) => setView1("sort", v)} />
+              {/* ⚠️ ONE POPOVER FOR EVERYTHING THAT CHANGES HOW THE BOARD IS DRAWN. Its trigger
+                  names the non-default choices, so a reader can see what they have set without
+                  opening it — a control that hides its own state is a control that gets set once
+                  and then forgotten about. */}
+              <Popover label="Display" summary={displaySummary}>
+                {/* ⚠️ THE SAME ROWS EITHER WAY. GROUPED does not fetch, filter or re-derive
+                    anything — it buckets the list the page already has, which is why the lock can
+                    assert the two arrangements hold the identical row set by identity. */}
+                <PopRow name="Group" value={grouped ? "grouped" : "list"}
+                  options={["list", "grouped"] as const}
+                  labels={{ list: "One list", grouped: "Grouped" }}
+                  onPick={(v) => setGrouped(v === "grouped")} />
+                {/* ⚠️ EACH OPTION CARRIES ITS OWN DEFINITION IN THE MENU IT CAME FROM. "Soonest"
+                    could mean the soonest thing you must do, the soonest reply expected, or the
+                    soonest anything happens — three different orders, and a reader has no way to
+                    tell which they got from the name. The meanings ride the option here. */}
+                <PopRow name="Order" value={view.sort} options={SORT_ORDER}
+                  labels={SORT_LABEL} onPick={(v) => setView1("sort", v)} />
+                {/* ⚠️ ONLY FROM THE SECOND MANUSCRIPT ON. The ref's own audit: "genuinely useful
+                    from the second manuscript onward; noise before that." A control offering one
+                    choice implies others the writer cannot reach. */}
+                {cutByAvailable && (
+                  <PopRow name="Manuscript" value={cutNow} options={["needs", "ms"] as const}
+                    labels={{ needs: "All books", ms: "By book" }}
+                    onPick={(v) => setCutBy(v)} />
+                )}
+                <PopRow name="Range" value={String(rangeIdx)}
+                  options={TIMELINE_RANGES.map((_, i) => String(i))}
+                  labels={Object.fromEntries(TIMELINE_RANGES.map((r, i) => [String(i), r.label]))}
+                  onPick={(v) => setRangeIdx(Number(v))} />
+                {/* ⚠️ THE RESET NAMES THE DEFAULTS RATHER THAN CLEARING TO NOTHING. "Clear" on a
+                    set of choices with no empty state would have to mean something, and every
+                    meaning it could take is one of the choices. */}
+                <button type="button" className="tl-popreset" onClick={() => {
+                  setTab("all"); setGrouped(false);
+                  setView1("sort", DEFAULT_SORT); setRangeIdx(DEFAULT_RANGE_INDEX);
+                  setCutBy("needs");
+                }}>Reset to All · One list · {SORT_LABEL[DEFAULT_SORT]} · {TIMELINE_RANGES[DEFAULT_RANGE_INDEX].label}</button>
+              </Popover>
               <input
                 className="tl-search" type="search" value={view.search}
                 aria-label="Search agents, agencies and tasks"

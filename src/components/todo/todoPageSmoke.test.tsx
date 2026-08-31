@@ -163,7 +163,13 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        weekday initials went with the day grid: a board of relationships measured in months has no
        use for "WED", and repeating the header per group restated nine dates five times down the
        page. `tl-hrow` is the single header; `tl-dt` are the ~nine dates along it. */
-    expect(html).toContain("FULL BOARD");   // the view toggle, so the control row is really there
+    /* ⚠️ `FULL BOARD / RIGHT NOW` IS RETIRED INTO THE VIEW STRIP (v40, Phase 6). It was a
+       two-state segment that could say "you are seeing only what is asked of you" and could not
+       say what the other cuts of the board even were; `Needs me` is the same filter with a home
+       among its peers. The smoke's claim is unchanged — the page renders its view control — so it
+       names the control that exists. */
+    expect(html).toContain("Needs me");
+    expect(html).toContain("With agents");
     /* ⚠️ AN EMPTY BOARD IS THE SPARSE PANEL, NOT AN EMPTY TABLE WITH A HEADER OVER IT. A column
        header above nothing teaches the shape of a board the writer does not have — the same rule
        that omits a group heading reading "0". The populated smoke below is where the header,

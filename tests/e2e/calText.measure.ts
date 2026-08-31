@@ -6,6 +6,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
+import { setRangeTo, showGrouped, showOneList } from "./calControls";
 
 const WIDTHS = [1280, 1440, 1920];
 const HEIGHT = 900;
@@ -14,17 +15,6 @@ const TAG = `
     .find((e) => e.getBoundingClientRect().height > 0) || null;
 `;
 
-const setRangeTo = async (page: import("@playwright/test").Page, i: number) => {
-  await page.evaluate(`(() => {
-    const all = [...document.querySelectorAll('input[type=range]')]
-      .filter((e) => e.getBoundingClientRect().width > 0);
-    if (all.length !== 1) throw new Error("expected 1 visible range control, found " + all.length);
-    const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-    set.call(all[0], String(${i}));
-    all[0].dispatchEvent(new Event("input", { bubbles: true }));
-  })()`);
-  await page.waitForTimeout(700);
-};
 
 /**
  * ⚠️ THE TWO-LINE STACK IS RETIRED, AND ITS CLAIMS ARE NOT LOST (v39).
@@ -38,7 +28,8 @@ const setRangeTo = async (page: import("@playwright/test").Page, i: number) => {
  * Where each claim went:
  *   the pinned type          → `calCard.measure.ts`, against the card's own values
  *   text stays inside its box → `calLook.measure.ts`, the containment claim
- *   the drop order            → `calendarMarquee.test.ts`, which asserts the cycle instead
+ *   the drop order            → `calLadder.measure.ts`, which asserts the rungs instead
+ *                                (`calendarMarquee.test.ts` is retired with the marquee, v40)
  *
  * The two cases below are v37's and are untouched: the hover lift, and ONE LIST.
  */
@@ -169,26 +160,20 @@ test("the default is one flat list, ordered by what is pressing", async ({ page 
 
   /* ══ THE ROUND TRIP ═══════════════════════════════════════════════════════════════════════ */
   const before = flat.ids;
-  const press = async (label: string) => {
-    await page.evaluate(`(() => {
-      const b = [...document.querySelectorAll(".tl-seg2 button")]
-        .filter((e) => e.getBoundingClientRect().width > 0)
-        .find((e) => (e.textContent || "").trim() === ${JSON.stringify(label)});
-      if (!b) throw new Error("no control labelled " + ${JSON.stringify(label)});
-      b.click();
-    })()`);
-    await page.waitForTimeout(450);
-  };
+  /* ⚠️ THE ARRANGEMENT MOVED INTO THE `Display` POPOVER (v40, Phase 6) and its labels are
+     sentence case there, not the segment's shouted mono. The helper is shared now — five files
+     each held their own copy of "find the control and click it", and all five went red together
+     the day the control changed. */
   const idsNow = async () => page.evaluate(`(() => [...document.querySelectorAll(".tl-rrow")]
     .filter((r) => r.getBoundingClientRect().height > 0)
     .map((r) => r.getAttribute("data-rowkey")))()`) as Promise<string[]>;
 
-  await press("GROUPED");
+  await showGrouped(page);
   const inGroups = await idsNow();
   const headingsNow = await page.evaluate(`document.querySelectorAll(".tl-gt").length`) as number;
   expect(headingsNow, "GROUPED drew no headings — the control did nothing").toBeGreaterThan(1);
 
-  await press("ONE LIST");
+  await showOneList(page);
   const back = await idsNow();
 
   /**

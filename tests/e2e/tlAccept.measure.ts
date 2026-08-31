@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
+import { setRangeTo } from "./calControls";
 
 /**
  * Phase 5 — the range pack's acceptance, every width against every range.
@@ -15,12 +16,17 @@ interface Want {
   name: string; days: number; cols: number; dense: number;
   initials: boolean; barText: boolean; rowSay: boolean; disc: number;
 }
+/* ⚠️ THE TWO SHORT STOPS ARE DELETED (v35, Porcelain Phase 2) AND THIS TABLE KEPT THEM. It has
+   been red on `main` ever since — measured at 1904828b before v40 touched it, failing on "1 week",
+   which is not a range the board offers. The ref's own audit is the reason they went: "on a board
+   of relationships measured in weeks, seven days shows fragments of bars and answers nothing the
+   To-do list doesn't answer better."
+   ⚠️ AND THE SPANS ARE ODD (v40, Phase 2), because today sits at the middle CELL of the lane —
+   "today − range/2 … today + range/2" is range+1 days inclusive, so an even span has no middle. */
 const WANT: Want[] = [
-  { name: "1 week",   days: 7,   cols: 7,  dense: 1, initials: true,  barText: true ,  rowSay: true , disc: 34 },
-  { name: "2 weeks",  days: 14,  cols: 14, dense: 2, initials: true,  barText: true ,  rowSay: true , disc: 34 },
-  { name: "1 month",  days: 31,  cols: 31, dense: 2, initials: false, barText: true ,  rowSay: true , disc: 34 },
-  { name: "3 months", days: 91,  cols: 13, dense: 3, initials: false, barText: true , rowSay: true,  disc: 22 },
-  { name: "6 months", days: 182, cols: 7,  dense: 4, initials: false, barText: true , rowSay: true,  disc: 22 },
+  { name: "1 month",  days: 31,  cols: 31, dense: 2, initials: false, barText: true , rowSay: true, disc: 22 },
+  { name: "3 months", days: 91,  cols: 13, dense: 3, initials: false, barText: true , rowSay: true, disc: 22 },
+  { name: "6 months", days: 181, cols: 7,  dense: 4, initials: false, barText: true , rowSay: true, disc: 22 },
 ];
 
 test("Phase 5 — four widths, five ranges, one table", async ({ page }) => {
@@ -30,13 +36,13 @@ test("Phase 5 — four widths, five ranges, one table", async ({ page }) => {
   for (const width of WIDTHS) {
     await openRoute(page, "/todo/calendar", { width, height: 900 });
     await page.waitForTimeout(900);
-    const slider = page.getByRole("slider", { name: /range/i });
-    expect(await slider.count(), `[${width}] no range control found by role`).toBe(1);
+    /* ⚠️ THE RANGE SLIDER IS RETIRED (v40, Phase 6): the range is one row of the ONE `Display`
+       popover now. The helper is shared — every file that drove the old control held its own copy,
+       and all of them went red together the day it changed. */
 
     for (let i = 0; i < WANT.length; i++) {
       const w = WANT[i];
-      await slider.fill(String(i));
-      await page.waitForTimeout(620);
+      await setRangeTo(page, i);
 
       const m = await page.evaluate(() => {
         const all = Array.from(document.querySelectorAll(".tl")) as HTMLElement[];

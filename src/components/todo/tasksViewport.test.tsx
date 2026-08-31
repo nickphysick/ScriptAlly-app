@@ -379,7 +379,21 @@ describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local 
     expect(calSrcNow, "the kind chips came back").not.toMatch(/["\s`]tl-kind["\s`]/);
     expect(calSrcNow).not.toContain("TIMELINE_FILTERS");
     expect(calSrcNow).not.toContain("toggleKind");
-    expect(cal).toContain("tl-seg2");
+    /* ⚠️ RETARGETED A FIFTH TIME (v40, Phase 6), AND BOTH LAWS STILL SURVIVE VERBATIM: ONE
+       definition rather than a per-page label list, and narrowing applied where every surface
+       reads it. Only the vocabulary moved again. The two segmented controls were four by the end —
+       `WHAT NEEDS YOU / MANUSCRIPT`, `ONE LIST / GROUPED`, `FULL BOARD / RIGHT NOW` and a range
+       slider — four answers to one question, each holding permanent width to state a setting made
+       once. What changes often is WHICH relationships you are looking at, and that is the tab
+       strip; how the board is arranged is set in one popover and read back off its trigger.
+       `.tl-seg2` is deleted from the stylesheet in the same commit rather than left as a rule with
+       no subject. */
+    expect(calSrcNow, "the segmented controls came back").not.toMatch(/["\s`]tl-seg2["\s`]/);
+    expect(cal).toContain("tl-tabs");
+    expect(cal).toContain("TAB_ORDER");
+    /* the narrowing still reads the ONE definition — `rowInTab` over the row's own group, the same
+       field the board's headings draw, so a tab and a heading cannot disagree about one row */
+    expect(cal).toContain("rowInTab");
     expect(cal).toContain("FULL BOARD");
     expect(cal).toContain("RIGHT NOW");
     expect(cal).not.toContain("KIND_LABEL"); // no per-page vocabulary

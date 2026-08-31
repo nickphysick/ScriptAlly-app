@@ -294,8 +294,15 @@ export interface TimelineView {
   search: string;
 }
 
+/**
+ * ⚠️ THE DEFAULT ORDER IS A NAMED CONSTANT so the reset and the initial state cannot disagree.
+ * A reset that restores a literal typed at the call site is a second copy of the default, and the
+ * two drift the first time one of them is retuned.
+ */
+export const DEFAULT_SORT: RowSort = "soonest";
+
 export const defaultView = (): TimelineView => ({
-  sort: "soonest",
+  sort: DEFAULT_SORT,
   search: "",
 });
 

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { openRoute, liftMotionSuppression } from "./measure";
+import { setRangeTo, RANGE_LABELS } from "./calControls";
 
 /**
  * Phase 6 — the settled timeline's acceptance, four widths × five ranges.
@@ -9,7 +10,12 @@ import { openRoute, liftMotionSuppression } from "./measure";
  * together, and a law that holds at exactly one width is a coincidence.
  */
 const WIDTHS = [1280, 1440, 1920, 2400];
-const STOPS = ["1 week", "2 weeks", "1 month", "3 months", "6 months"];
+/* ⚠️ THE STOPS ARE SPLICED FROM THE CONTROL, NEVER RETYPED — and this list was WRONG. The 1-week
+   and 2-week stops were deleted in v35 (Porcelain, Phase 2), so every run since has driven indices
+   3 and 4 against a three-stop control, where they clamp: two of five iterations silently measured
+   the six-month board twice and reported it as "2 weeks" and "1 month". Green the whole time, over
+   a census that was two-fifths a monoculture. */
+const STOPS = [...RANGE_LABELS];
 const FLAT = ["s-theirs", "s-theirsq", "s-nudged", "s-y1", "s-y2", "s-y3", "s-offer"];
 
 test("Phase 6 — colour, breath, words and the hand, at every width and range", async ({ page }) => {
@@ -23,12 +29,12 @@ test("Phase 6 — colour, breath, words and the hand, at every width and range",
        correct — and a check that accepted that would go green on a build with no pulse at all. */
     await liftMotionSuppression(page);
     await page.waitForTimeout(950);
-    const slider = page.getByRole("slider", { name: /range/i });
-    expect(await slider.count(), `[${width}] no range control by role`).toBe(1);
+    /* ⚠️ THE RANGE SLIDER IS RETIRED (v40, Phase 6): the range is one row of the ONE `Display`
+       popover now. The helper is shared — every file that drove the old control held its own copy,
+       and all of them went red together the day it changed. */
 
     for (let i = 0; i < STOPS.length; i++) {
-      await slider.fill(String(i));
-      await page.waitForTimeout(620);
+      await setRangeTo(page, i);
 
       const m = await page.evaluate((flat: string[]) => {
         const all = [...document.querySelectorAll(".tl")] as HTMLElement[];
