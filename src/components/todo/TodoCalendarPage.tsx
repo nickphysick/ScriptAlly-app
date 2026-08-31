@@ -725,6 +725,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
 
         /* ⚠️ THE DETAIL DROPS ONLY WHERE THERE IS NOWHERE TO OPEN TO. Measured against the LANE,
            not against the card: a narrow card with a wide lane beside it can open. */
+        /* ⚠️ THE PRE-DROP NEED IS PUBLISHED TOO, because that is the number the decision was
+           made on. After the detail goes the track is narrower, so a lock reading only the final
+           `data-need` sees a card that "needed 271 in a 434px lane" and reports a justified drop
+           as unjustified — 27 of them. The justification is the width WITH the detail. */
+        seg.dataset.needfull = String(Math.ceil(want));
         if (want > laneW && detail) {
           seg.setAttribute("data-nodetail", "1");
           want = needed();

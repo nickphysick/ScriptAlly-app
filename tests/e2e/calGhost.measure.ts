@@ -62,8 +62,12 @@ test("⚠️ a ghost is drawn as OVER without being drawn as CLOSED", async ({ p
       && !c.classList.contains("hollow") && !c.classList.contains("closedp")) as HTMLElement | undefined;
     const subject = cards.find((c) => c.classList.contains("quiet")) as HTMLElement | undefined;
     if (!live || !subject) return null;
+    /* ⚠️ THE FRAME, NOT THE CARD (v54). The card is geometry now and paints nothing; background,
+       border and shadow moved to its `.tl-frame` child, so reading the card's own computed style
+       returns the same transparent nothing for every state and "a ghost is drawn exactly like a
+       live card" became true of every pair on the board. */
     const read = (el: HTMLElement) => {
-      const cs = getComputedStyle(el);
+      const cs = getComputedStyle(el.querySelector(".tl-frame") as HTMLElement ?? el);
       return { bg: cs.backgroundColor, style: cs.borderTopStyle, colour: cs.borderTopColor,
         shadow: cs.boxShadow };
     };

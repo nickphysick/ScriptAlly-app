@@ -36,7 +36,11 @@ const census = (page: Page) => page.evaluate(() => {
       noDetail: c.hasAttribute("data-nodetail"),
       w: b.width, left: b.left, right: b.right,
       laneW: lane(c).width, laneL: lane(c).left, laneR: lane(c).right,
-      needed, exp: c.style.getPropertyValue("--exp"), hx: c.style.getPropertyValue("--hx"),
+      needed,
+      /* ⚠️ THE PASS'S OWN PRE-DROP NUMBER. Recomputing `needed` after a drop measures a track that
+         has already lost its detail, so a justified drop reads as unjustified. */
+      needFull: Number(c.dataset.needfull || "NaN"),
+      exp: c.style.getPropertyValue("--exp"), hx: c.style.getPropertyValue("--hx"),
       lineMask: maskOf(line) };
   });
 });
@@ -74,7 +78,8 @@ test("⚠️ AND THE DETAIL DROPS ONLY WHERE THERE IS NOWHERE TO OPEN TO", async
     + ` · lane ${all[0]?.laneW.toFixed(0)}px`);
   expect(all.length, "cards measured").toBeGreaterThan(8);
   /* every drop must be justified: what it needed WITH the detail exceeded the lane */
-  expect(dropped.filter((r) => r.needed <= r.laneW).map((r) => `${r.rel}: needed ${r.needed.toFixed(0)} in a ${r.laneW.toFixed(0)}px lane`),
+  expect(dropped.filter((r) => r.needFull <= r.laneW)
+    .map((r) => `${r.rel}: needed ${r.needFull} with its detail, in a ${r.laneW.toFixed(0)}px lane`),
     "a card dropped its detail while it still had somewhere to open to").toEqual([]);
 
   /**

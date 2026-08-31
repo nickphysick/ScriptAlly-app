@@ -154,7 +154,12 @@ test("nothing tints the past, and no row reaches into the rail", async ({ page }
            first version of this excluded `.tl-p` itself and caught its three pills instead,
            reporting a correct board as carrying three washes. Anything with a card above it is a
            card's business. */
-        if (painted && !el.closest(".tl-p") && !el.classList.contains("tl-mk2")) {
+        /* ⚠️ A WASH SPANS A REGION; A MARK IS A POINT. Card contents, lead-in marks and the
+           20px task marks are all painted things left of today and none of them is a wash — the
+           task mark arrived in Phase 7 and was reported as one. The exclusion is by what an
+           element IS, not by a width threshold, so a wider mark later cannot slip through. */
+        if (painted && !el.closest(".tl-p") && !el.closest(".tl-tchip")
+            && !el.classList.contains("tl-mk2") && !el.classList.contains("tl-ghost")) {
           washes.push(`${el.className || el.tagName} ${cs.backgroundColor} / ${cs.backgroundImage.slice(0, 30)}`);
         }
       }
