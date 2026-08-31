@@ -901,12 +901,27 @@ button.tl-mk2 { cursor: pointer; }
 
 
 /* ── the writer's own chips ───────────────────────────────────────────────────────────────── */
+/* ⚠️ A TASK IS A POINT (v54, Phase 7): a 20px outlined mark, its name in Playfair beside it, and
+   the day in mono beneath. It was a PILL — the shape this board uses for whose-move-it-is on a
+   card, a state holding over a span — so a task read as a fifth kind of card while carrying no
+   duration to justify one. No fill, no radius, no border on the chip itself: the mark is the
+   thing, and the words hang off it. */
 .tl-tchip {
-  display: flex; align-items: center; gap: 6px; height: calc(var(--bar-h) - 2px); background: #fff;
-  border: 1px solid var(--tl-chip-line); border-radius: 999px; padding: 0 10px;
-  font-size: 10px; font-weight: 500; color: var(--tl-ink); white-space: nowrap; z-index: 2;
+  display: flex; align-items: center; gap: 10px; height: calc(var(--bar-h) - 2px);
+  background: none; border: 0; padding: 0; z-index: 2; white-space: nowrap;
+  color: var(--tl-ink);
 }
-.tl-tchip .sq { width: 8px; height: 8px; border-radius: 2px; border: 1.5px solid var(--tl-nearblack); flex: 0 0 auto; }
+.tl-tmk {
+  width: 20px; height: 20px; flex: 0 0 auto; border-radius: 4px;
+  border: 1.5px solid var(--tl-nearblack); background: #fff;
+}
+.tl-twords { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.25; }
+.tl-tname { font-family: 'Playfair Display', Georgia, serif; font-size: 13px; color: var(--tl-ink); }
+/* ⚠️ THE DAY, NOT A DURATION. A task happens on a day; a span is what a card states. */
+.tl-tdue {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8px;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--tl-label, #9c8878);
+}
 /* ⚠️ THE GHOST IS AN ORIGIN, NOT A DUPLICATE. It marks the day a task fell due while the live
    chip sits on today — and rendered identically it read as the same task drawn twice, which is
    what a reader reported. Dashed and unfilled, because it is a place rather than a thing: the

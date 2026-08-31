@@ -49,6 +49,18 @@ const isBarPath = (sel: string): boolean =>
 /** The properties that decide vertical geometry. A radius is not one; a glyph's width is not one. */
 const VERTICAL = /(^|;|\{)\s*(height|min-height|max-height|top|bottom|margin-top|margin-bottom|padding-top|padding-bottom|line-height)\s*:/;
 
+describe("⚠️ a task is a point, and its mark is 1.5px (v54)", () => {
+  /* the rendered check can say the mark is outlined and cannot say by how much: a sub-pixel
+     border's used value rounds at DPR 1. Read as written here. */
+  it("20px, ink-outlined at 1.5px", () => {
+    const src = readFileSync(CSS, "utf8");
+    const m = /(?:^|\n)\s*\.tl-tmk\s*\{([^}]*)\}/.exec(src);
+    expect(m, "the task mark has no rule").not.toBeNull();
+    expect(m![1]).toMatch(/width\s*:\s*20px/);
+    expect(m![1]).toMatch(/border\s*:\s*1\.5px solid var\(--tl-nearblack\)/);
+  });
+});
+
 describe("⚠️ the stir: every keyframe repeats the base transform (v54)", () => {
   /**
    * ⚠️ `transform` IS NOT ADDITIVE, AND THIS IS THE FAULT IT CAUSES. A keyframe stating only a

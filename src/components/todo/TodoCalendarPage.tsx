@@ -1680,7 +1680,21 @@ data-rowkey={r.key}
               onDragEnd={endDrag}
               onClick={() => pick(r.key, it)}
             >
-              <span className="sq" aria-hidden />{it.label}
+              {/**
+                * ⚠️ A TASK IS A POINT, NOT A PILL (v54, Phase 7). A pill is the shape this board
+                * uses for whose-move-it-is on a CARD — a state that persists over a span. A task
+                * happens on a day: an outlined mark at that day, its name beside it, and the day
+                * itself in mono underneath. Wearing the pill's shape made a task look like a
+                * fifth kind of card, and it carried no duration to justify one.
+                */}
+              <span className="tl-tmk" aria-hidden />
+              <span className="tl-twords">
+                <span className="tl-tname">{it.label}</span>
+                {/* ⚠️ THE DAY IT FALLS ON, FROM THE ITEM'S OWN DATE — never a duration. A task
+                    happens on a day; "3 days" would be a span, which is what a card states and a
+                    task does not have. */}
+                <span className="tl-tdue">{shortCalDate(it.ymd)}</span>
+              </span>
               {/* the forward mark: this is where it fell due, and the live one is over there */}
               {it.kind === "ghost" && <span className="fwd" aria-hidden>↦</span>}
             </button>
