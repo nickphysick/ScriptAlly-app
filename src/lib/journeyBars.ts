@@ -123,6 +123,29 @@ export const NEAR_AT = 0.85;
  * and can never be right of it. A stretch whose named end has passed reaches its own end and stops
  * there; a finished stretch is full. Both fall out of the clamp rather than needing a branch.
  */
+/**
+ * The bar's two lines — what it is, and when.
+ *
+ * ⚠️ IT IS A SPLIT, NOT NEW COPY. Every label this module composes already joins a WHAT to a WHEN
+ * with a middot: "Out since 8 Aug · reply expected 3 Sept", "Offer received · answer by 14 Apr",
+ * "Partial requested · send by 3 Oct". v37 draws those two halves on two lines instead of one, so
+ * the split belongs here, where the join is, rather than in the view splitting on a character it
+ * did not put there.
+ *
+ * ⚠️ AND A LABEL WITH NO MIDDOT IS ONE LINE, not a line and an empty one. "Quiet for 31 days" has
+ * no when to state; rendering an empty second line would reserve space for a fact that does not
+ * exist and pull the first line off the bar's centre.
+ *
+ * ⚠️ THE FIRST SEPARATOR ONLY. A label can carry a middot inside its own words — an agency named
+ * "Vane · Coe" reaches a caption through a manuscript title — and splitting on the last one, or on
+ * all of them, would cut a name in half.
+ */
+export function barLines(label: string): { t1: string; t2: string } {
+  const i = label.indexOf(" · ");
+  if (i < 0) return { t1: label, t2: "" };
+  return { t1: label.slice(0, i), t2: label.slice(i + 3) };
+}
+
 export function fillEndAt(sg: Segment): number | null {
   /* an overrun paints no fill — the emptiness past the named end is the point of it */
   if (sg.hollow) return null;

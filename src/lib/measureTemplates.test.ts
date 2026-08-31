@@ -18,9 +18,18 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-describe("the calendar's measurement file cannot terminate its own evaluate strings", () => {
+/**
+ * ⚠️ EVERY CALENDAR MEASURE FILE, NOT ONE OF THEM. This watched `calLook` alone, and the very next
+ * calendar measure file written — `calText` — closed its own template on a backticked identifier
+ * inside a comment, exactly the fault this exists for, and the lock could not see it. A guard
+ * scoped to the file where the fault was first found guards the one place it has already been
+ * fixed.
+ */
+const FILES = ["tests/e2e/calLook.measure.ts", "tests/e2e/calText.measure.ts"];
+
+describe("the calendar's measurement files cannot terminate their own evaluate strings", () => {
   it("no backtick inside a page.evaluate template", () => {
-    const src = readFileSync(join(process.cwd(), "tests/e2e/calLook.measure.ts"), "utf8");
+    const src = FILES.map((f) => readFileSync(join(process.cwd(), f), "utf8")).join("\n/*FILE*/\n");
     /* every `page.evaluate(` … `)` body: from the opening backtick to the closing one */
     const offenders: string[] = [];
     const re = /page\.evaluate\(\s*(?:TAG \+ )?`/g;
@@ -49,7 +58,11 @@ describe("the calendar's measurement file cannot terminate its own evaluate stri
   });
 
   it("finds the templates to check — a sweep over none proves nothing", () => {
-    const src = readFileSync(join(process.cwd(), "tests/e2e/calLook.measure.ts"), "utf8");
+    for (const f of FILES) {
+      expect(readFileSync(join(process.cwd(), f), "utf8").length, `${f} is missing or empty`)
+        .toBeGreaterThan(500);
+    }
+    const src = FILES.map((f) => readFileSync(join(process.cwd(), f), "utf8")).join("\n");
     const n = [...src.matchAll(/page\.evaluate\(/g)].length;
     expect(n, "no page.evaluate calls found — the extraction is broken, not the file").toBeGreaterThan(4);
   });

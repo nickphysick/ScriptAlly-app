@@ -10,6 +10,34 @@
  */
 export type LabelFit = "long" | "short" | "bare";
 
+/** What a two-line bar shows: both lines, the first alone, or nothing. */
+export type LineFit = "both" | "one" | "bare";
+
+/**
+ * Which of a bar's two lines fit — the decision alone, with no DOM in it.
+ *
+ * ⚠️ THE PRECEDENCE IS STATED, NOT EMERGENT: line two drops before line one, and if line one will
+ * not fit the bar goes bare. Line one is WHAT the bar is; line two is WHEN. A bar that keeps the
+ * date and loses the thing it is about states a fact with no subject, so the order is not a
+ * preference — it is which half survives being narrowed.
+ *
+ * ⚠️ AND NEITHER LINE IS EVER TRUNCATED OR SHRUNK. An ellipsis is a promise that the rest is
+ * somewhere and on a bar it is not; a font shrunk to fit is a size nobody chose. The tooltip
+ * carries the whole of it whatever the bar can hold.
+ *
+ * ⚠️ BOTH LINES ARE MEASURED AGAINST THE SAME PAD as a single label, because the reason for the
+ * pad is unchanged: a line that exactly fills its bar touches both ends and reads as broken.
+ */
+export function fitLines(
+  barWidth: number,
+  line1Width: number,
+  line2Width: number | null,
+): LineFit {
+  if (barWidth < line1Width + FIT_PAD_LONG) return "bare";
+  if (line2Width == null || line2Width <= 0) return "one";
+  return barWidth >= line2Width + FIT_PAD_LONG ? "both" : "one";
+}
+
 /**
  * ⚠️ THE TWO PADS ARE THE REF'S AND THEY DIFFER ON PURPOSE. A label that exactly fills its bar is
  * touching both ends, which reads as broken rather than as tight — so each form must clear the box

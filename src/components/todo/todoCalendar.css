@@ -217,6 +217,8 @@
   --tl-nm-w: 288px;
   --tl-ac-w: 172px;
   /* how far a piece stands off a marker it abuts, and off a plain neighbour */
+  /* the bar text's inset — mirrored by TEXT_INSET in the page, which the fit pass subtracts */
+  --tl-text-inset: 14px;
   --tl-gap: 2px;
   /**
    * ⚠️ THE CLEARANCE IS DERIVED FROM THE MARKER, NOT A LITERAL BESIDE IT.
@@ -490,6 +492,19 @@
   border: var(--tl-bar-bd) solid transparent; box-sizing: border-box;
   display: flex; align-items: center;
 }
+
+/* ══ THE HOVER LIFT (v37, Phase 7) ═══════════════════════════════════════════════════════════
+   ⚠️ `translateY(-50%)` MUST BE REPEATED HERE, and it is the whole reason this rule is dangerous.
+   `transform` is not additive: a hover transform of `scale(1.004)` alone REPLACES the centring the
+   bar is placed by, and the bar drops half its own height — silently, only while the pointer is on
+   it, which is the one moment nobody is looking at a measurement. The lock asserts the painted
+   CENTRE is unchanged between rest and hover while the shadow differs, because either half alone
+   passes on a bar that moved. */
+.tl-p:hover {
+  box-shadow: 0 3px 10px rgba(58, 28, 20, .16);
+  transform: translateY(-50%) scale(1.004);
+  z-index: 5;
+}
 /* ⚠️ THE FILL IS A CHILD, NOT A BACKGROUND, because its WIDTH is the statement. A gradient stop
    would put the number inside a colour value where nothing can read it back. */
 .tl-fl {
@@ -498,48 +513,63 @@
 }
 /* a fill that has reached the end is the bar, so it takes the bar's own corner back */
 .tl-fl[data-full="1"] { border-top-right-radius: inherit; border-bottom-right-radius: inherit; }
-/* ⚠️ `inline-block` IS LOAD-BEARING, AND WITHOUT IT THE FIT PASS SILENTLY CHOOSES "long".
-   `scrollWidth` and `clientWidth` are meaningless on an INLINE element, so `fitLabel` was handed a
-   bogus width, always answered "long", and the bar clipped its own label mid-word — "Full
-   requested · send", "Revise and resubmit · se". The old `.tl-lbl` was a flex ITEM inside a flex
-   bar and therefore block-level by construction; the Porcelain bar is not a flex container, so
-   the label had to be told. Measured at 1440: five bars clipping, none after.
-   ⚠️ AND THE MAX-WIDTH IS THE OTHER HALF — a nowrap label wider than its bar would still lay out
-   at its full width and drag the bar's own overflow around; capping it at the bar means the fit
-   pass is deciding presentation rather than repairing layout. */
-.tl-plbl {
-  position: relative; display: inline-block; max-width: 100%;
-  font-size: 9.5px; font-weight: 500; white-space: nowrap; padding: 0 10px; z-index: 2;
+/* ══ THE BAR'S TWO LINES (v37, Phase 6) ══════════════════════════════════════════════════════
+   ⚠️ AT THE BAR'S START, AND THE TRADE IS ACCEPTED RATHER THAN FIXED. Text at `left: 14px` means a
+   bar clipped by the window's LEFT edge loses its words with the edge it starts at. That was
+   chosen over clamping the text inward, because a clamped label slides along its own bar as the
+   reader pans — the words move while the thing they name does not — and a label that has left with
+   its bar is at least honest about where the bar begins. The tooltip carries it either way.
+
+   ⚠️ THE TWO LINES ARE `inline-block`. `scrollWidth` on an INLINE box is meaningless, and the fit
+   pass measures both — the third instance of inline-vs-block on this board, after the fit pass
+   itself and the row head. */
+.tl-txt {
+  position: absolute; top: 50%; left: var(--tl-text-inset); transform: translateY(-50%);
+  z-index: 2; display: flex; flex-direction: column; justify-content: center; white-space: nowrap;
+  pointer-events: none;
+}
+.tl-t1, .tl-t2 { display: inline-block; }
+.tl-t1 {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: .01em; line-height: 1.2;
+}
+/* ⚠️ THE SECOND LINE IS THE FAMILY'S OWN INK AT .66, NOT A GREY. The tone is what says whose move
+   it is; a neutral second line would state the date in a voice belonging to no side. The opacity
+   is raised per state only where the contrast audit found it below 4.5:1 — see Phase 8. */
+.tl-t2 {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 8px; letter-spacing: .13em; text-transform: uppercase;
+  opacity: var(--tl-t2-op, .66); margin-top: 2px; line-height: 1.2;
 }
 /* ⚠️ HOLLOW IS THE CONTINUATION PAST A NAMED DATE. Lateness is DRAWN — no fill, no word, no
    colour it does not already have. The label dims because the stretch is no longer the story. */
 .tl-p.hollow { background: transparent; }
-.tl-p.hollow .tl-plbl { opacity: .75; }
+.tl-p.hollow .tl-txt { opacity: .75; }
 
 .tl-p.out { border-color: var(--bar-out-line); }
 .tl-p.out .tl-fl { background-color: var(--bar-out-fill); }
-.tl-p.out .tl-plbl { color: var(--bar-out-text); }
+.tl-p.out .tl-t1, .tl-p.out .tl-t2 { color: var(--bar-out-text); }
 .tl-p.out.near .tl-fl { background-color: var(--bar-out-near); }
 .tl-p.req { border-color: var(--bar-req-line); }
 .tl-p.req .tl-fl { background-color: var(--bar-req-fill); }
-.tl-p.req .tl-plbl { color: var(--bar-req-text); }
+.tl-p.req .tl-t1, .tl-p.req .tl-t2 { color: var(--bar-req-text); }
 .tl-p.req.near .tl-fl { background-color: var(--bar-req-near); }
 .tl-p.decide { border-color: var(--bar-decide-line); }
 .tl-p.decide .tl-fl { background-color: var(--bar-decide-fill); }
-.tl-p.decide .tl-plbl { color: var(--bar-decide-text); }
+.tl-p.decide .tl-t1, .tl-p.decide .tl-t2 { color: var(--bar-decide-text); }
 .tl-p.decide.near .tl-fl { background-color: var(--bar-decide-near); }
 .tl-p.remind { border-color: var(--bar-remind-line); }
 .tl-p.remind .tl-fl { background-color: var(--bar-remind-fill); }
-.tl-p.remind .tl-plbl { color: var(--bar-remind-text); }
+.tl-p.remind .tl-t1, .tl-p.remind .tl-t2 { color: var(--bar-remind-text); }
 .tl-p.remind.near .tl-fl { background-color: var(--bar-remind-near); }
 /* ⚠️ QUIET IS A HATCH AND NOT A FILL, because there is no named span for a fraction to be OF.
    That is the same fact the empty track states, said in the one state where the emptiness would
    otherwise read as a bar nobody had finished drawing. */
 .tl-p.quiet { border-color: var(--bar-quiet-line); }
 .tl-p.quiet .tl-fl { background-image: var(--bar-quiet-hatch); }
-.tl-p.quiet .tl-plbl { color: var(--bar-quiet-text); }
+.tl-p.quiet .tl-t1, .tl-p.quiet .tl-t2 { color: var(--bar-quiet-text); }
 .tl-p.closedp { border: 1.5px dashed var(--bar-closed-line); }
-.tl-p.closedp .tl-plbl { color: var(--bar-closed-text); }
+.tl-p.closedp .tl-t1, .tl-p.closedp .tl-t2 { color: var(--bar-closed-text); }
 .tl-p.hollow { border-style: solid; border-width: 1px; }
 
 /* ── the markers ──────────────────────────────────────────────────────────────────────────── */

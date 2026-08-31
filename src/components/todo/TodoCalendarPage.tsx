@@ -34,7 +34,7 @@ import {
   asksOfYou,
   type RowGroup,
 } from "../../lib/timelineGroups";
-import { fitLabel } from "../../lib/barFit";
+import { fitLines } from "../../lib/barFit";
 import { useConfirmAsk } from "./ConfirmAsk";
 /** this mount's pane section-id prefix — every workspace page stays mounted, so ids must not collide */
 const CAL_PANE_PREFIX = "cal-";
@@ -56,7 +56,7 @@ import {
   type RowSort, type TimelineFilter,
 } from "../../lib/todoTimeline";
 import {
-  durationCount, fillFor, fillEndAt, NEAR_AT, familyOf,
+  durationCount, fillFor, fillEndAt, barLines, NEAR_AT, familyOf,
   type Segment, type BarNode,
 } from "../../lib/journeyBars";
 import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
@@ -107,6 +107,17 @@ const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
  * rather than a boundary.
  */
 const MONTH_SHELF_FROM = 3;
+
+/**
+ * How far in from a bar's left edge its text begins — the ref's 14px.
+ *
+ * ⚠️ IT IS HERE AND IN THE SHEET, AND THE FIT PASS IS WHY. The stylesheet places the text; the fit
+ * pass has to subtract the same distance to know what room the text actually has, and a pass
+ * measuring against the whole bar would let a line run past the right-hand end by exactly this.
+ * The lock asserts the two agree, because two numbers that must match and live apart is the shape
+ * this pack keeps finding.
+ */
+const TEXT_INSET = 14;
 
 /**
  * ⚠️ `cqw`, NOT `%` — AND THE UNIT IS THE WHOLE POINT.
@@ -180,6 +191,7 @@ const Piece: React.FC<{
   sg: Segment; fill: number | null; fillEnd: number | null; selected: boolean; onPick: () => void;
 }> = ({ sg, fill, fillEnd, selected, onPick }) => {
   const near = fill != null && fill >= NEAR_AT && fill < 1 && !sg.historical;
+  const lines = barLines(sg.label);
   return (
     <div
       /* ⚠️ THE CLASS LIST IS WRITTEN IN THE JSX, not built into a `const` above it. The style-reach
@@ -209,7 +221,14 @@ const Piece: React.FC<{
         />
       )}
       {sg.label && (
-        <span className="tl-plbl" data-long={sg.label} data-short={sg.short}>{sg.label}</span>
+        <span className="tl-txt">
+          {/* ⚠️ TWO ELEMENTS, NOT ONE WITH A BREAK. The fit pass drops line two on its own, so it
+              has to be a box it can hide; and the two carry different type, so they could never
+              have been one node. `data-t1`/`data-t2` keep the full strings for the pass to measure
+              against after it has emptied them. */}
+          <span className="tl-t1" data-t1={lines.t1}>{lines.t1}</span>
+          {lines.t2 && <span className="tl-t2" data-t2={lines.t2}>{lines.t2}</span>}
+        </span>
       )}
     </div>
   );
@@ -415,28 +434,45 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         seg.style.display = "";
         const room = seg.clientWidth;
         if (room <= 0) { seg.style.display = "none"; continue; }
-        const lbl = seg.querySelector<HTMLElement>(".tl-plbl");
-        if (!lbl) continue;
-        const long = lbl.dataset.long ?? "";
-        const short = lbl.dataset.short ?? "";
-        lbl.style.display = "";
-        if (!long) continue;
+        const txt = seg.querySelector<HTMLElement>(".tl-txt");
+        const l1 = seg.querySelector<HTMLElement>(".tl-t1");
+        const l2 = seg.querySelector<HTMLElement>(".tl-t2");
+        if (!txt || !l1) continue;
+        const t1 = l1.dataset.t1 ?? "";
+        const t2 = l2?.dataset.t2 ?? "";
+        txt.style.display = "";
+        if (l2) l2.style.display = "";
+        if (!t1) continue;
         /* ⚠️ MEASURE BOTH, THEN DECIDE ONCE. The decision itself is `fitLabel` — pure, and unit-
            locked, because the branch that matters is the one this account never produces: its bars
            are either ~600px or exactly 28px, so nothing on it is the width at which the short form
            is the answer. Unexercised is not dead, and only a check that needs no fixture can tell
            the two apart. */
-        lbl.textContent = long;
-        const longW = lbl.scrollWidth;
-        let shortW: number | null = null;
-        if (short) { lbl.textContent = short; shortW = lbl.scrollWidth; }
-        switch (fitLabel(seg.clientWidth, longW, shortW)) {
-          case "long": lbl.textContent = long; break;
-          case "short": lbl.textContent = short; break;
-          /* ⚠️ BARE MEANS THE LABEL GOES, NOT THAT IT IS TRUNCATED. An ellipsis is a promise that
+        /* ⚠️ EACH LINE IS MEASURED AT ITS OWN TYPE. They are different sizes and different
+           tracking, so one width cannot stand for both — and `scrollWidth` on an inline box is
+           meaningless, which is why both are `inline-block` in the sheet. */
+        l1.textContent = t1;
+        const w1 = l1.scrollWidth;
+        let w2: number | null = null;
+        if (l2 && t2) { l2.textContent = t2; w2 = l2.scrollWidth; }
+        /* ⚠️ THE TEXT SITS AT THE BAR'S START, so the room it has is the bar's own width less the
+           14px inset it begins at. Measuring against the whole bar would let a line run past the
+           right-hand end by exactly that inset. */
+        const room2 = seg.clientWidth - TEXT_INSET;
+        switch (fitLines(room2, w1, w2)) {
+          case "both":
+            l1.textContent = t1;
+            if (l2) { l2.textContent = t2; l2.style.display = ""; }
+            break;
+          case "one":
+            l1.textContent = t1;
+            if (l2) l2.style.display = "none";
+            break;
+          /* ⚠️ BARE MEANS THE TEXT GOES, NOT THAT IT IS TRUNCATED. An ellipsis is a promise that
              the rest is somewhere, and on a bar it is not — the tooltip is where a reader finds
-             out, which is why the tip carries the long form and the named date whatever fits. */
-          default: lbl.textContent = ""; lbl.style.display = "none";
+             out, which is why the tip carries the whole label and the named date whatever fits. */
+          default:
+            txt.style.display = "none";
         }
       }
     };

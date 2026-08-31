@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { fitLabel, FIT_PAD_LONG, FIT_PAD_SHORT } from "./barFit";
+import { fitLabel, fitLines, FIT_PAD_LONG, FIT_PAD_SHORT } from "./barFit";
 
 describe("⚠️ the fit pass: long, then short, then bare", () => {
   it("takes the long form when it clears the bar by its pad", () => {
@@ -39,5 +39,35 @@ describe("⚠️ the fit pass: long, then short, then bare", () => {
     expect(fitLabel(125, 100, 60)).toBe("short");
     expect(fitLabel(82, 100, 60)).toBe("short");
     expect(fitLabel(81, 100, 60)).toBe("bare");
+  });
+});
+
+/* ══ TWO LINES (v37, Phase 6) ══════════════════════════════════════════════════════════════ */
+
+describe("two lines drop in a stated order", () => {
+  /* widths chosen so each branch is the ONLY one that could be returned — a case that would pass
+     under two different rules is not evidence about which rule is in force */
+  it("both lines where both clear the pad", () => {
+    expect(fitLines(200, 100, 80)).toBe("both");
+  });
+
+  it("line two drops first — line one survives a bar that cannot hold both", () => {
+    /* line one clears its pad (120 >= 90 + 26); line two does not (120 < 100 + 26) */
+    expect(fitLines(120, 90, 100)).toBe("one");
+  });
+
+  it("no second line at all is ONE, not bare", () => {
+    expect(fitLines(200, 100, null)).toBe("one");
+    expect(fitLines(200, 100, 0)).toBe("one");
+  });
+
+  it("a bar that cannot hold line one goes bare, whatever line two would have done", () => {
+    /* line two would fit comfortably on its own — it must not rescue the bar */
+    expect(fitLines(40, 90, 5)).toBe("bare");
+  });
+
+  it("the pad is what separates fitting from touching the ends", () => {
+    expect(fitLines(100 + FIT_PAD_LONG, 100, null)).toBe("one");
+    expect(fitLines(100 + FIT_PAD_LONG - 1, 100, null)).toBe("bare");
   });
 });

@@ -19,6 +19,17 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { openRoute } from "./measure";
 
+/**
+ * ⚠️ `.tl-plbl` IS `.tl-t1` SINCE v37. The bar's single label became two lines — what it is, and
+ * when — so the element every sweep here sampled for "the label" is now the FIRST of two. The claim
+ * each was making is unchanged: line one is the label, it carries the family's ink, and a bar the
+ * fit pass stripped has none. Retargeted rather than deleted, and their population guards are what
+ * caught the rename — three cases went red saying "no family carried a label at all" and "no
+ * labelled bar to measure", which is a guard working rather than a suite breaking.
+ *
+ * The hollow wash and the fit-pass hide now target `.tl-txt`, the stack, because both apply to the
+ * text as a whole rather than to one of its lines.
+ */
 const WIDTHS = [1280, 1440, 1920];
 const HEIGHT = 900;
 
@@ -144,7 +155,7 @@ test.describe("the Calendar — Porcelain", () => {
             fam2Solid[f] = getComputedStyle(b).backgroundColor;
           }
           const cs = getComputedStyle(b);
-          const lbl = b.querySelector(".tl-plbl");
+          const lbl = b.querySelector(".tl-t1");
           const fl = b.querySelector(".tl-fl");
           /* THE TEXT COLOUR IS SAMPLED FROM A BAR THAT HAS A LABEL: a bar whose label the fit
              pass dropped has no label element to read, so taking the FIRST bar of each family
@@ -179,7 +190,7 @@ test.describe("the Calendar — Porcelain", () => {
           bg: getComputedStyle(hollow).backgroundColor,
           borderStyle: getComputedStyle(hollow).borderTopStyle,
           borderWidth: getComputedStyle(hollow).borderTopWidth,
-          labelOpacity: hollow.querySelector(".tl-plbl") ? getComputedStyle(hollow.querySelector(".tl-plbl")).opacity : null,
+          labelOpacity: hollow.querySelector(".tl-txt") ? getComputedStyle(hollow.querySelector(".tl-txt")).opacity : null,
           hasFill: !!hollow.querySelector(".tl-fl"),
         } : null;
         /* ⚠️ NO BAR MAY CLIP ITS OWN LABEL. The fit pass exists to choose long, short or BARE by
@@ -190,7 +201,7 @@ test.describe("the Calendar — Porcelain", () => {
            clientWidth were meaningless, fitLabel was handed a bogus width and always answered
            "long", and five bars at 1440 clipped mid-word through rules that all read correctly. */
         out.clipped = bars.map((b) => {
-          const l = b.querySelector(".tl-plbl");
+          const l = b.querySelector(".tl-t1");
           if (!l || !l.textContent) return null;
           /* INK against the CLIPPING ANCESTOR, never scrollWidth. On an INLINE element
              scrollWidth and clientWidth are both meaningless and happen to be EQUAL, so the
@@ -208,7 +219,7 @@ test.describe("the Calendar — Porcelain", () => {
         }).filter(Boolean);
         out.labelForms = { long: 0, short: 0, bare: 0 };
         for (const b of bars) {
-          const l = b.querySelector(".tl-plbl");
+          const l = b.querySelector(".tl-t1");
           if (!l || !l.textContent) { out.labelForms.bare += 1; continue; }
           out.labelForms[l.textContent === l.dataset.long ? "long" : "short"] += 1;
         }
@@ -475,7 +486,7 @@ test.describe("the fix pack — one fact, one function", () => {
             agencyTop: agR ? agR.top : null,
             bars: [...row.querySelectorAll(".tl-p")].map((b) => {
               const fl = b.querySelector(".tl-fl");
-              const lbl = b.querySelector(".tl-plbl");
+              const lbl = b.querySelector(".tl-t1");
               return {
                 fam: ["out","req","decide","remind","quiet","closedp"].find((c) => b.classList.contains(c)) || "?",
                 near: b.classList.contains("near"),
@@ -581,7 +592,7 @@ test.describe("the fix pack — one fact, one function", () => {
       const out = { near: null, hollowLabelled: null, passed: 0, tally: {} };
       for (const b of document.querySelectorAll(".tl-p")) {
         const fl = b.querySelector(".tl-fl");
-        const lbl = b.querySelector(".tl-plbl");
+        const lbl = b.querySelector(".tl-t1");
         const fam = ["out","req","decide","remind","quiet","closedp"].find((c) => b.classList.contains(c)) || "?";
         out.tally[fam] = (out.tally[fam] || 0) + 1;
         if (b.classList.contains("near") && !out.near) {
@@ -589,9 +600,14 @@ test.describe("the fix pack — one fact, one function", () => {
         }
         if (b.classList.contains("hollow")) {
           out.passed += 1;
+          /* ⚠️ THE OPACITY IS ON THE STACK, NOT THE LINE. Since v37 the dimming that says a
+             stretch is past its named end sits on the text stack, and opacity is not inherited as
+             a computed value — a child reports its own 1 while being painted at .75. Reading the
+             line gave "1" about text that is visibly dimmed.
+             (No backticks in here: this is inside an evaluate template and one would close it.) */
           if (lbl && lbl.textContent && !out.hollowLabelled) {
             out.hollowLabelled = {
-              text: lbl.textContent, opacity: getComputedStyle(lbl).opacity,
+              text: lbl.textContent, opacity: getComputedStyle(lbl.closest('.tl-txt') || lbl).opacity,
               bg: getComputedStyle(b).backgroundColor,
               borderStyle: getComputedStyle(b).borderTopStyle,
             };
@@ -932,8 +948,18 @@ test("the surface is the pinned one, and the heading is not inside the card", as
         /* a piece with no room to draw is hidden outright (see the fit pass) — it has no box and
            no centre, so it is COUNTED above rather than measured here */
         if (getComputedStyle(b).display === "none") return null;
-        const lbl = b.querySelector(".tl-plbl");
-        if (!lbl || !lbl.textContent) return null;
+        /* ⚠️ THE STACK, NOT ONE OF ITS LINES. The claim is that the bar's text is centred in the
+           bar; since v37 the text is TWO lines in a column, so line one sits deliberately above the
+           midpoint and line two below it. Measuring line one reported it 8px off centre — true,
+           and about the wrong subject.
+           AND A HIDDEN STACK IS SKIPPED. The fit pass hides the text outright where there is no
+           room, and a display-none element reports a rect at the origin — which came out as the
+           text sitting 659px off its centre, a real number about an element that is not drawn.
+           (No backticks in here: this is inside an evaluate template and one would close it.) */
+        const lbl = b.querySelector(".tl-txt");
+        if (!lbl || getComputedStyle(lbl).display === "none") return null;
+        const l1 = lbl.querySelector(".tl-t1");
+        if (!l1 || !l1.textContent) return null;
         const br = b.getBoundingClientRect();
         const lr = lbl.getBoundingClientRect();
         return {
@@ -1240,7 +1266,7 @@ test("⚠️ the past is set back on the ground and never on the data", async ({
    * geometry this case measures. The claim is about what the wash does to a fill; the words riding
    * on top of it are not part of it.
    */
-  await page.addStyleTag({ content: ".tl-plbl { visibility: hidden !important; }" });
+  await page.addStyleTag({ content: ".tl-txt { visibility: hidden !important; }" });
   await page.waitForTimeout(200);
 
   for (const frac of [0, 0.14, 0.28, 0.42, 0.56, 0.7, 0.85, 1]) {
