@@ -689,6 +689,16 @@
 /* ⚠️ QUIET AND CLOSED ARE CARD TREATMENTS, not fills. A no-response card is cream with no shadow —
    it has stopped being an object you can pick up. A closed one is a dashed outline over nothing. */
 .tl-p.quiet   { background: var(--card-quiet); box-shadow: none; }
+/* ⚠️ A GHOST IS A QUIET CARD THAT HAS STOPPED BEING WORK (v40, Phase 7). Half a year of silence
+   with nothing scheduled is a relationship that has ended in every sense except that nobody wrote
+   it down — so it takes the closed card's OUTLINE, which is what "over" reads as on this board,
+   while keeping quiet's own line colour, which is what it still IS. It is deliberately NOT the
+   closed treatment outright: the app may say how long the silence has run and may not say what it
+   means, and a card indistinguishable from a recorded rejection would say what it means. */
+.tl-p.ghost {
+  background: transparent; border-style: dashed; box-shadow: none;
+}
+.tl-p.ghost .tl-hl, .tl-p.ghost .tl-cdt { color: var(--pill-quiet-tx); }
 /* ⚠️ HOLLOW IS A STRETCH PAST THE DATE SOMEBODY NAMED, and v39 pins no treatment for it — the ref
    draws `quietc` and `closedc` and nothing between. It takes the one thing quiet and closed have
    in common and nothing else: no shadow, because a run that has outlived its own date has stopped
@@ -758,7 +768,7 @@
 /* ⚠️ QUIET IS A HATCH AND NOT A FILL, because there is no named span for a fraction to be OF.
    That is the same fact the empty track states, said in the one state where the emptiness would
    otherwise read as a bar nobody had finished drawing. */
-.tl-p.quiet { border-color: var(--bar-quiet-line); }
+.tl-p.quiet, .tl-p.ghost { border-color: var(--bar-quiet-line); }
 .tl-p.closedp { border: 1.5px dashed var(--bar-closed-line); }
 /* ⚠️ RETIRED (v39 part two, Phase 5). This set `border-style: solid` on a hollow card and sat
    LATER in the file than the rule that draws it, so the ruling's dashed border would have been

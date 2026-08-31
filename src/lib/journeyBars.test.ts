@@ -11,7 +11,7 @@ import { describe, it, expect } from "vitest";
 import { Agent, Query, QueryStatus, TaskFlag, Activity, ActivityType } from "../types";
 import { RecordItem, shortCalDate } from "./todoCalendar";
 import {
-  EVENT_AT, FRESH_MAX_DAYS, SETTLED_MAX_DAYS,
+  EVENT_AT, GHOST_AFTER_DAYS, barState, FRESH_MAX_DAYS, SETTLED_MAX_DAYS,
   holderOf, familyOf, namedEndFor,
   laneBars, sideOf, weightFor, durationCount, labelFor, statusIndex,
   type BarWindow, type LaneInput,
@@ -140,6 +140,71 @@ describe("⚠️ the side comes from the CTA engine, and nothing here re-lists a
 });
 
 /* ══ v5's nine rules ══════════════════════════════════════════════════════════════════════════ */
+
+describe("⚠️ a long silence is a GHOST, and the board says how long rather than what it means", () => {
+  /* ⚠️ THE THRESHOLD IS ARITHMETIC AND IS LOCKED HERE, because no relationship on the harness
+     account is silent for anything like half a year — the longest measured is 42 days. A
+     measurement can say what a ghost LOOKS like once one exists; only a unit case can say when one
+     begins, and without this the whole branch would ship unexercised. */
+  const at = (quietDays: number) => barState({
+    side: "theirs", terminal: false, status: QueryStatus.QUERIED,
+    norail: false, nudgeYmd: null, expectedPassed: true, weight: "long",
+    today: "2026-08-31", live: true, quietDays,
+  });
+
+  it("becomes a ghost at the threshold and not a day before", () => {
+    expect(at(GHOST_AFTER_DAYS - 1)).toBe("quiet");
+    expect(at(GHOST_AFTER_DAYS)).toBe("ghost");
+    expect(at(GHOST_AFTER_DAYS + 400)).toBe("ghost");
+  });
+
+  it("⚠️ AND ONLY WHERE THE REPLY WAS ACTUALLY EXPECTED — silence needs a date to be late against", () => {
+    /* a journey with no reply time ever recorded has nothing to have passed, so it is `theirsq`
+       however long it has been; a ghost derived from a date nobody gave would be a verdict on a
+       relationship the app knows nothing about. */
+    const noRail = barState({
+      side: "theirs", terminal: false, status: QueryStatus.QUERIED,
+      norail: true, nudgeYmd: null, expectedPassed: false, weight: "long",
+      today: "2026-08-31", live: true, quietDays: 900,
+    });
+    expect(noRail).toBe("theirsq");
+  });
+
+  it("⚠️ AND A REMINDER STANDING IN FRONT OF THE SILENCE OUTRANKS IT", () => {
+    /* the writer has told themselves to look at this on a date — that is not silence, and it is
+       not a ghost however long the wait has already run */
+    expect(barState({
+      side: "theirs", terminal: false, status: QueryStatus.QUERIED,
+      norail: false, nudgeYmd: "2026-09-30", expectedPassed: true, weight: "long",
+      today: "2026-08-31", live: true, quietDays: 900,
+    })).toBe("nudged");
+  });
+
+  it("⚠️ A GHOST SAYS HOW LONG, NEVER WHAT IT MEANS — the app reports and does not appraise", () => {
+    /* Nothing has happened: an agency's silence is not a decision anyone recorded. The words are
+       the same duration `quiet` states; what changes at the threshold is the TREATMENT. */
+    const words = labelFor("ghost", {
+      norail: false, openEnd: false, query: q({ status: QueryStatus.QUERIED }),
+      expectedYmd: "2026-01-01", expectedPassed: true, nudgeYmd: null, moveLabel: "",
+      terminal: false, goalYmd: null, nudgedOnYmd: null, sentYmd: null, yoursDays: 0,
+      quietDays: 242, closedYmd: null,
+    });
+    expect(words.long).toBe("Quiet for 242 days");
+    for (const verdict of [/reject/i, /dead/i, /gone/i, /lost/i, /presum/i, /no response/i, /clos/i]) {
+      expect(words.long, `the ghost's words appraise: ${verdict}`).not.toMatch(verdict);
+      expect(words.short, `the ghost's short form appraises: ${verdict}`).not.toMatch(verdict);
+    }
+  });
+
+  it("⚠️ AND NOTHING WRITES A STATUS — the query is still exactly what the record says", () => {
+    /* the whole care in this phase: a ghost is a way of DRAWING a relationship, not a claim about
+       it. `barState` is pure and returns a string; the guard is that the ghost's own pill is the
+       query's real status rather than a closure the app invented. */
+    expect(familyOf("ghost")).toBe("ghost");
+    expect(familyOf("closed")).toBe("closedp");
+    expect(familyOf("ghost")).not.toBe(familyOf("closed"));
+  });
+});
 
 describe("⚠️ v5 · after a nudge the bar runs to the NEXT THING DUE", () => {
   it("names the reminder the writer set rather than saying 'still waiting'", () => {

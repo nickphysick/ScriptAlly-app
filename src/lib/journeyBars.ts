@@ -483,7 +483,7 @@ export const sideOf = (status: QueryStatus): Side | null => {
  * from a thirty-day one, and those go through `weightFor`'s two already-named boundaries.
  */
 export type BarState =
-  | "closed" | "theirs" | "theirsq" | "nudged" | "quiet" | "y1" | "y2" | "y3" | "offer";
+  | "closed" | "theirs" | "theirsq" | "nudged" | "quiet" | "ghost" | "y1" | "y2" | "y3" | "offer";
 
 /** Who holds a stretch — the one question a bar's colour answers. */
 export type Holder = "agent" | "writer";
@@ -512,6 +512,10 @@ export const familyOf = (state: BarState): string => {
   switch (state) {
     case "closed": return "closedp";
     case "quiet": return "quiet";
+    /* ⚠️ ITS OWN FAMILY, NOT `closedp`. A ghost has stopped being live work and it is NOT a
+       recorded closure — a card indistinguishable from a rejection the agency actually sent would
+       state a decision nobody made. */
+    case "ghost": return "ghost";
     case "nudged": return "remind";
     case "offer": return "decide";
     case "theirs": case "theirsq": return "out";
@@ -542,7 +546,19 @@ export interface StateInput {
    * be gone-quiet, because something happened in July to end it.
    */
   live: boolean;
+  /** how long since the reply was expected — 0 where no date was ever given */
+  quietDays: number;
 }
+
+/**
+ * How long a silence runs before the board stops drawing it as live work.
+ *
+ * ⚠️ A STATED THRESHOLD, NOT A DERIVED ONE, AND IT DECIDES A TREATMENT RATHER THAN A FACT. Half a
+ * year with no reply and nothing scheduled is a relationship that has ended in every sense except
+ * that nobody wrote it down. The board may say how long; it may not say what the silence means,
+ * because an agency's silence is not a decision anyone made. Nothing here writes `No Response`.
+ */
+export const GHOST_AFTER_DAYS = 180;
 
 export function barState(i: StateInput): BarState {
   if (i.terminal) return "closed";
@@ -554,8 +570,19 @@ export function barState(i: StateInput): BarState {
     if (i.norail) return "theirsq";
     /* the writer has a reminder in front of them, so this is not silence */
     if (i.nudgeYmd && i.nudgeYmd > i.today) return "nudged";
-    /* the date came and went and nothing is scheduled — this is what gone quiet MEANS */
-    if (i.expectedPassed) return "quiet";
+    /**
+     * ⚠️ THE DATE CAME AND WENT AND NOTHING IS SCHEDULED — this is what gone quiet MEANS. Past
+     * `GHOST_AFTER_DAYS` it is a GHOST: the same absence, long enough that the relationship has in
+     * practice ended, and the board says so with a treatment rather than with a verdict.
+     *
+     * ⚠️ IT NEVER WRITES `No Response`, AND THAT IS THE WHOLE CARE IN IT. Nothing has happened —
+     * an agency's silence is not a decision anyone recorded — so the app may state HOW LONG and
+     * may not state WHAT IT MEANS. The card's words stay a duration; what changes is that it stops
+     * being drawn as live work.
+     */
+    if (i.expectedPassed) {
+      return i.quietDays >= GHOST_AFTER_DAYS ? "ghost" : "quiet";
+    }
     return "theirs";
   }
   /* ⚠️ AN OFFER IS ITS OWN STATE BEFORE IT IS A WEIGHT. It is categorically different from every
@@ -1065,9 +1092,16 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
        window actually contains today. A window paged into the past has no live stretch at all,
        which is right: nothing in it is still running. */
     const live_ = p.to >= todayAt - 0.001 && todayAt <= span + 0.001 && todayAt >= -0.001;
+    /* ⚠️ HOW LONG SINCE THE REPLY WAS EXPECTED — not how long since it was sent. A journey out
+       four months with a three-month window has been QUIET for one, and the state that decides
+       whether it is a ghost must read the same number its words do. It was computed once, for the
+       label, two hundred lines below; the state needs it too, so it is computed ONCE here and both
+       read it. */
+    const quietDays_ = expectedYmd && expectedPassed ? daysBetween(expectedYmd, win.today) : 0;
     const state = barState({
       side, terminal, status: query.status as QueryStatus,
       norail, nudgeYmd, expectedPassed, weight, today: win.today, live: live_,
+      quietDays: quietDays_,
     });
     const startsAtEdge = p.from <= 0.001;
     const endsAtEdge = Math.abs(p.to - span) < 0.001;
@@ -1093,7 +1127,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
               /* ⚠️ HOW LONG SINCE THE REPLY WAS EXPECTED — not how long since it was sent. A
                  journey that has been out four months with a three-month window has been QUIET
                  for one, and saying four would state the wrong fact in the right shape. */
-              quietDays: expectedYmd && expectedPassed ? daysBetween(expectedYmd, win.today) : 0,
+              quietDays: quietDays_,
               closedYmd: isoToYmd(
                 (query.rejectedDate ?? query.lastStatusChange) as string | undefined),
             });
@@ -1150,7 +1184,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
          Two copies of the same test is how the label came to sit on a piece the sheet was about to
          dim. `quiet` is exempted because it has its own treatment — a hatch rather than an
          outline — and a hollow quiet piece would have no fill element at all to hatch. */
-      ...(isHollow(i) && state !== "quiet" ? { hollow: true as const } : {}),
+      ...(isHollow(i) && state !== "quiet" && state !== "ghost" ? { hollow: true as const } : {}),
       ...(goalAt != null ? { goal: goalAt } : {}),
       /**
        * ⚠️ THE TOOLTIP IS WHERE THE NAMED DATE SURVIVES. `barFit` drops a bar's label entirely at
@@ -1268,6 +1302,16 @@ export function labelFor(state: BarState, i: LabelInput): BarLabel {
         short: i.nudgedOnYmd ? `Nudged · remind ${on(i.nudgeYmd)}` : `Remind ${on(i.nudgeYmd)}`,
       };
 
+    case "ghost":
+      /* ⚠️ THE SAME SENTENCE AS `quiet`, AND DELIBERATELY SO. A ghost is a long silence, not a
+         different KIND of silence, and the app reports rather than appraises — "presumed
+         rejected", "gone", "dead" are all verdicts about a decision nobody made. What changes at
+         the threshold is the TREATMENT: the card stops being drawn as live work. */
+    /* ⚠️ A GHOST TAKES `quiet`'S OWN SENTENCE, DELIBERATELY. It is a long silence, not a different
+       KIND of silence, and the app reports rather than appraises — "presumed rejected", "gone",
+       "dead" are verdicts about a decision nobody made. What changes at the threshold is the
+       TREATMENT: the card stops being drawn as live work. */
+    case "ghost":
     case "quiet":
       /* ⚠️ THE INSTRUCTION IS NOT HERE. The ref's own quiet bar reads "Quiet for 78 days · nudge
          or close it" above a note reading "Nudge or close it" — the bar states what the stretch
