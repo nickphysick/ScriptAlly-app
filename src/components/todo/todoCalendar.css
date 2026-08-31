@@ -176,6 +176,31 @@
      `--tl-ink` is #3a1c14, which v39 pins as the BODY colour. Two tokens, two values, and naming
      the darker one `ink` would have made every existing reader silently darker. */
   --tl-nearblack: #1c130f;
+  /* ══ THE CARD (v39, Phase 2) ══════════════════════════════════════════════════════════════
+     ⚠️ COLOUR APPEARS ONLY IN THE PILLS. A card is white, or the cream a quiet one takes; its
+     border, its shadow, its separator and both its texts are neutral. The pill is the one place a
+     reader looks for whose move it is, so it is the one place with a hue. */
+  --card-bg: #ffffff;
+  --card-bd: #e0d5c8;
+  --card-sep: #e2d7c9;
+  --card-quiet: #fcfaf6;
+  --card-closed-bd: #ddd0c0;
+  --card-sh: 0 1px 3px rgba(58, 28, 20, .06);
+  --card-hl: #1c130f;
+  --card-dt: #8a7a6c;
+  /* the pills, one pair per tone */
+  --pill-you-bg: #f5e2da;   --pill-you-bd: #e8c8bc;   --pill-you-tx: #1c130f;
+  --pill-them-bg: #e9ede6;  --pill-them-bd: #d6ddd2;  --pill-them-tx: #5a6e58;
+  --pill-wait-bg: #e3eaf0;  --pill-wait-bd: #cfdbe6;  --pill-wait-tx: #4b5f73;
+  --pill-quiet-bg: #efebe4; --pill-quiet-bd: #e5dfd4; --pill-quiet-tx: #8a7a6c;
+  --pill-closed-bd: #ddd0c0;
+  /* owed — a passed date, or a writer-held request with none named */
+  --owed-bd: #e8c8bc;
+  --owed-sh: 0 6px 16px rgba(58, 28, 20, .16);
+  --owed-pill-bg: #efd5ca; --owed-pill-bd: #e6c3b4;
+  /* the fade at a cut edge, and the inset its text takes on the left */
+  --card-fade: 38px;
+  --card-fade-inset: 46px;
   --tl-pink: #f5e2da;
   --tl-pinkb: #e8c8bc;
   --tl-hair: #efe6da;
@@ -186,14 +211,14 @@
      rather than competing with the bars either side of it. */
 
   /* the five live bar families: border · fill · the deeper fill at ≥85% · text */
-  --bar-out-line: #d9e1d6;    --bar-out-text: #55684f;
-  --bar-req-line: #ecd3c6;    --bar-req-text: #6b3a2a;
-  --bar-decide-line: #e2b8a5; --bar-decide-text: #58281a;
-  --bar-remind-line: #dde3da; --bar-remind-text: #5c6b59;
+  --bar-out-line: #d9e1d6;
+  --bar-req-line: #ecd3c6;
+  --bar-decide-line: #e2b8a5;
+  --bar-remind-line: #dde3da;
   /* gone quiet — a hatch rather than a fill, because there is no span to be a fraction of */
-  --bar-quiet-line: #e0dbd3;  --bar-quiet-text: #6b675f;
+  --bar-quiet-line: #e0dbd3;
   /* closed — dashed, and there is no fill token because a closed bar has no fill element at all */
-  --bar-closed-line: #ddd0c0; --bar-closed-text: #a3927f;
+  --bar-closed-line: #ddd0c0;
 
   /* the four markers: ring · glyph ink */
   --mk-in-line: #9fb29a;      --mk-in-ink: #55684f;
@@ -218,9 +243,9 @@
    * changing `--row-h` cannot resize a bar. That is the property the lock proves by changing one
    * and measuring the other, rather than by reading the two declarations and believing them.
    */
-  --row-h: 52px;
-  --bar-h: 34px;
-  --mk: 30px;
+  --row-h: 62px;
+  --bar-h: 54px;
+  --mk: 28px;
   --tl-headrow-h: 26px;
   --tl-rail-h: 42px;
   --tl-nm-w: 288px;
@@ -364,7 +389,13 @@
    `flex: 1 1 auto` is unaffected: the two flanking columns are fixed and this is the only item
    that grows, so a flex-basis resolving to 0 under containment lands on the same width — measured
    before and after at 1280/1440/1920 and unchanged to the pixel. */
-.tl-c-tl { flex: 1 1 auto; position: relative; overflow: hidden; container-type: inline-size; }
+/* ⚠️ THE LANE NO LONGER CLIPS (v39, Phase 4). A card at a window edge is masked on ITSELF now, so
+   the lane has nothing left to cut — and it must not, because a hovered card's shadow reaches
+   past its own box and a clipping lane would shear it off at the left edge.
+   ⚠️ THE CONTAINER STAYS. `pct()` resolves in `cqw` and the ticks, the cards and the chips all read
+   it; `container-type: inline-size` applies layout, style and inline-size containment, none of
+   which paints-contains, so the two are not in conflict. */
+.tl-c-tl { flex: 1 1 auto; position: relative; overflow: visible; container-type: inline-size; }
 /* ══ THE PAST, SET BACK ═════════════════════════════════════════════════════════════════════
  * ⚠️ ON THE LANE'S GROUND AND ON NOTHING ELSE. The wash says "this is behind you" about the
  * SURFACE; laid over a bar it would dim the data, and a reader cannot tell a washed fill from a
@@ -496,11 +527,97 @@
    the size or the box and it drifts, silently, with the rule still reading correctly. `flex` +
    `align-items: center` centres whatever is actually there. A grep lock fails on any
    `line-height` under a bar selector. */
+/* ══ THE CARD ════════════════════════════════════════════════════════════════════════════════
+   ⚠️ IT IS AN OBJECT ON THE GROUND, NOT A LENGTH OF TINT. A bar said "this span" with its extent
+   and said it AGAIN with a fill; a card says it once, with its edges. The pill, the headline and
+   the detail sit on one line inside it. */
 .tl-p {
-  height: var(--bar-h); border-radius: 999px; overflow: hidden; z-index: 2; background: #fff;
-  border: var(--tl-bar-bd) solid transparent; box-sizing: border-box;
-  display: flex; align-items: center;
+  height: var(--bar-h);
+  border-radius: 9px;
+  z-index: 2;
+  background: var(--card-bg);
+  border: var(--tl-bar-bd) solid var(--card-bd);
+  box-shadow: var(--card-sh);
+  box-sizing: border-box;
+  /* ⚠️ A COLUMN, NOT A ROW — the pill sits ABOVE the line, not beside it.
+     Built as a row first, and the line collapsed: on a 156px card the pill and the two paddings
+     took all of it, so `flex: 1 1 auto` resolved to 2px against a 168px track. Measured, not
+     guessed — and the ref says so too, in one declaration: `align-self: flex-start` on the pill
+     only means anything inside a column. */
+  display: flex; flex-direction: column; justify-content: center; gap: 3px;
+  /* ⚠️ NO PADDING ON THE CARD — the inset lives on its contents, and `box-sizing: border-box` is
+     why. Border-box clamps a width UP to padding plus borders, so any padding here becomes a
+     FLOOR the date arithmetic cannot go under: `0 12px 0 14px` floored every card at 28px, and a
+     card the geometry sized at 20px grew into the marker beside it. The card's box must be exactly
+     what the dates say it is; the words move in instead. */
+  overflow: hidden;
 }
+.tl-p > * { margin-left: var(--tl-text-inset); margin-right: 12px; }
+.tl-p:hover { box-shadow: 0 5px 16px rgba(58, 28, 20, .17); transform: translateY(-50%) scale(1.004); z-index: 6; }
+
+/* ⚠️ THE PILL IS THE ONLY COLOUR ON THE BOARD. Its five tones are whose-move, not status: pink is
+   yours, sage is theirs, slate is a reminder, grey is a silence that ran out, and closed is an
+   outline with no fill at all — an ending is not a state you can act on. */
+.tl-pill {
+  flex: 0 0 auto; align-self: flex-start;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 7.5px; letter-spacing: .11em; text-transform: uppercase; font-weight: 500;
+  padding: 3px 7px; border-radius: 999px; white-space: nowrap;
+}
+.tl-pill.you    { background: var(--pill-you-bg);   border: 1px solid var(--pill-you-bd);   color: var(--pill-you-tx); }
+.tl-pill.them   { background: var(--pill-them-bg);  border: 1px solid var(--pill-them-bd);  color: var(--pill-them-tx); }
+.tl-pill.wait   { background: var(--pill-wait-bg);  border: 1px solid var(--pill-wait-bd);  color: var(--pill-wait-tx); }
+.tl-pill.quiet  { background: var(--pill-quiet-bg); border: 1px solid var(--pill-quiet-bd); color: var(--pill-quiet-tx); }
+.tl-pill.closed { background: transparent;          border: 1px solid var(--pill-closed-bd); color: var(--tl-label, #9c8878); }
+
+/* ⚠️ THE LINE IS THE WINDOW AND THE TRACK IS WHAT MOVES. The mask lives on the LINE so it stays
+   put while the track slides under it; on the track it would slide too, and the fade would travel
+   with the words it is supposed to be revealing. */
+.tl-line {
+  display: block; overflow: hidden; min-width: 0; width: 100%; flex: 0 0 auto; position: relative;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 22px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 22px), transparent);
+}
+/* a line whose text fits carries no mask and no animation — both are stated by this one class */
+.tl-line.fits { -webkit-mask-image: none; mask-image: none; }
+/* ⚠️ THE TRACK IS `max-content` AND ITS CHILDREN DO NOT SHRINK, and both halves are needed.
+   Without them the track is bounded by the line and its items — which default to `flex-shrink: 1`
+   — compress; their text is `nowrap`, so it spills out of the boxes it was squeezed into and the
+   headline paints over the detail. Measured: "Out since 27 Jul" ✕ "reply expected 21 Sept" on five
+   rows at once, which reads as a font bug and is a flex default.
+   The track is allowed to be wider than the line because the line is the window: `overflow:
+   hidden` there is what makes the overflow measurable, and the overflow is what the marquee is. */
+.tl-track { display: inline-flex; width: max-content; align-items: baseline; gap: 10px; white-space: nowrap; will-change: transform, opacity; }
+.tl-track > * { flex: 0 0 auto; }
+.tl-hl { font-family: 'Playfair Display', Georgia, serif; font-size: 13.5px; font-weight: 500; color: var(--card-hl); line-height: 1.25; }
+/* ⚠️ THE SEPARATOR IS AN ELEMENT, NOT A BORDER ON THE DETAIL. The detail is the part that can be
+   absent, and a border would go with it — leaving the headline looking cut off.
+   ⚠️ AND BOTH ARE `tl-c…` BECAUSE `tl-sep` AND `tl-dt` WERE ALREADY TAKEN. `.tl-dt` is the RAIL's
+   date label and is `position: absolute`; declared later in the sheet, it took the card's detail
+   out of flow and dropped it on top of the headline — measured at x 728 in the rail's coordinate
+   space, on a card starting at 791. Two rules, one name, and source order decides which. Renamed
+   rather than out-specified: a `.tl-p .tl-dt` would win today and leave the card's detail wearing
+   a class the rail owns. */
+.tl-csep { width: 1px; align-self: stretch; background: var(--card-sep); flex: 0 0 auto; }
+.tl-cdt { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8.5px; letter-spacing: .11em; text-transform: uppercase; color: var(--card-dt); }
+
+/* ⚠️ QUIET AND CLOSED ARE CARD TREATMENTS, not fills. A no-response card is cream with no shadow —
+   it has stopped being an object you can pick up. A closed one is a dashed outline over nothing. */
+.tl-p.quiet   { background: var(--card-quiet); box-shadow: none; }
+/* ⚠️ HOLLOW IS A STRETCH PAST THE DATE SOMEBODY NAMED, and v39 pins no treatment for it — the ref
+   draws `quietc` and `closedc` and nothing between. It takes the one thing quiet and closed have
+   in common and nothing else: no shadow, because a run that has outlived its own date has stopped
+   being an object with weight. No colour, no opacity, no dimming of the words — the v37 hollow
+   dimmed its text to .75 and that put the second line at 2.13:1, which was flagged then and is not
+   being reintroduced now. FLAGGED for Nick: this is the one card state the ref does not pin. */
+.tl-p.hollow  { box-shadow: none; }
+.tl-p.closedp { background: transparent; border-style: dashed; border-color: var(--card-closed-bd); box-shadow: none; }
+
+/* ⚠️ OWED IS THE ONE STATE THAT LIFTS, and it lifts without animating. A passed date, or a
+   writer-held request with none named: the card stands off the ground and its pill deepens. */
+.tl-p.owed { border-color: var(--owed-bd); box-shadow: var(--owed-sh); transform: translateY(-50%) scale(1.006); z-index: 4; }
+.tl-p.owed .tl-pill { background: var(--owed-pill-bg); border-color: var(--owed-pill-bd); font-weight: 700; }
+
 
 /* ══ THE HOVER LIFT (v37, Phase 7) ═══════════════════════════════════════════════════════════
    ⚠️ `translateY(-50%)` MUST BE REPEATED HERE, and it is the whole reason this rule is dangerous.
@@ -517,34 +634,10 @@
 /* ⚠️ THE FILL IS A CHILD, NOT A BACKGROUND, because its WIDTH is the statement. A gradient stop
    would put the number inside a colour value where nothing can read it back. */
 /* a fill that has reached the end is the bar, so it takes the bar's own corner back */
-/* ══ THE BAR'S TWO LINES (v37, Phase 6) ══════════════════════════════════════════════════════
-   ⚠️ AT THE BAR'S START, AND THE TRADE IS ACCEPTED RATHER THAN FIXED. Text at `left: 14px` means a
-   bar clipped by the window's LEFT edge loses its words with the edge it starts at. That was
-   chosen over clamping the text inward, because a clamped label slides along its own bar as the
-   reader pans — the words move while the thing they name does not — and a label that has left with
-   its bar is at least honest about where the bar begins. The tooltip carries it either way.
 
-   ⚠️ THE TWO LINES ARE `inline-block`. `scrollWidth` on an INLINE box is meaningless, and the fit
-   pass measures both — the third instance of inline-vs-block on this board, after the fit pass
-   itself and the row head. */
-.tl-txt {
-  position: absolute; top: 50%; left: var(--tl-text-inset); transform: translateY(-50%);
-  z-index: 2; display: flex; flex-direction: column; justify-content: center; white-space: nowrap;
-  pointer-events: none;
-}
-.tl-t1, .tl-t2 { display: inline-block; }
-.tl-t1 {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 11px; font-weight: 500; letter-spacing: .01em; line-height: 1.2;
-}
 /* ⚠️ THE SECOND LINE IS THE FAMILY'S OWN INK AT .66, NOT A GREY. The tone is what says whose move
    it is; a neutral second line would state the date in a voice belonging to no side. The opacity
    is raised per state only where the contrast audit found it below 4.5:1 — see Phase 8. */
-.tl-t2 {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 8px; letter-spacing: .13em; text-transform: uppercase;
-  opacity: var(--tl-t2-op, .66); margin-top: 2px; line-height: 1.2;
-}
 /* ══ WHAT THE CONTRAST AUDIT DECIDED (v37, Phase 8) ══════════════════════════════════════════
    Measured as the COMPOSITED ink — the declared colour multiplied by the opacity at paint time —
    against both grounds the same text crosses: the tinted fill, and the white track past the fill's
@@ -566,28 +659,19 @@
    muted sage on a paler sage, so the ratio can only be won by darkening the tone; and the tone is
    what says whose move it is. Left at .66, reported, and the lock below carries it as a KNOWN
    shortfall so a new one cannot hide behind it. */
-.tl-p.decide .tl-t2 { --tl-t2-op: .78; }
-.tl-p.req .tl-t2    { --tl-t2-op: .82; }
 /* ⚠️ HOLLOW IS THE CONTINUATION PAST A NAMED DATE. Lateness is DRAWN — no fill, no word, no
    colour it does not already have. The label dims because the stretch is no longer the story. */
 .tl-p.hollow { background: transparent; }
-.tl-p.hollow .tl-txt { opacity: .75; }
 
 .tl-p.out { border-color: var(--bar-out-line); }
-.tl-p.out .tl-t1, .tl-p.out .tl-t2 { color: var(--bar-out-text); }
 .tl-p.req { border-color: var(--bar-req-line); }
-.tl-p.req .tl-t1, .tl-p.req .tl-t2 { color: var(--bar-req-text); }
 .tl-p.decide { border-color: var(--bar-decide-line); }
-.tl-p.decide .tl-t1, .tl-p.decide .tl-t2 { color: var(--bar-decide-text); }
 .tl-p.remind { border-color: var(--bar-remind-line); }
-.tl-p.remind .tl-t1, .tl-p.remind .tl-t2 { color: var(--bar-remind-text); }
 /* ⚠️ QUIET IS A HATCH AND NOT A FILL, because there is no named span for a fraction to be OF.
    That is the same fact the empty track states, said in the one state where the emptiness would
    otherwise read as a bar nobody had finished drawing. */
 .tl-p.quiet { border-color: var(--bar-quiet-line); }
-.tl-p.quiet .tl-t1, .tl-p.quiet .tl-t2 { color: var(--bar-quiet-text); }
 .tl-p.closedp { border: 1.5px dashed var(--bar-closed-line); }
-.tl-p.closedp .tl-t1, .tl-p.closedp .tl-t2 { color: var(--bar-closed-text); }
 .tl-p.hollow { border-style: solid; border-width: 1px; }
 
 /* ── the markers ──────────────────────────────────────────────────────────────────────────── */
@@ -974,4 +1058,37 @@ button.tl-tchip { cursor: pointer; }
    below that it is not a name, it is an abbreviation. */
 @media (max-width: 1000px) {
   .tl-board { --tl-nm-w: 200px; }
+}
+
+/* ══ ONE FADE, BOTH ENDS (v39, Phase 4) ══════════════════════════════════════════════════════
+   ⚠️ THE MASK IS ON THE CARD, NEVER A SIBLING LAID OVER IT. Two mechanisms drew these before — an
+   overlay for one edge and a gradient for the other — and they could never match, because one
+   composited against the ground and the other against the card. A mask on the card itself
+   dissolves the card, whatever colour the card is: white, the cream of a no-response, or the
+   deepened border of an owed one. Nothing has to know what is behind it.
+   ⚠️ AND THE BORDERED SIDE IS DROPPED AND THE CORNER SQUARED, or the card fades out and leaves a
+   1px line and a rounded corner hanging in the air at the cut. */
+.tl-p.fadeR {
+  border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: none;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - var(--card-fade)), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - var(--card-fade)), transparent);
+}
+/* ⚠️ THE INSET IS ON THE CONTENTS, NOT ON THE CARD, and `box-sizing: border-box` is why.
+   Border-box clamps a width UP to padding plus borders, so `padding-left: 46px` on the card gave
+   every card a 60px floor — and a card the geometry had sized at 46px grew to 59 and ran into the
+   marker beside it. Measured: identical inline `style` strings rendering 46px before and 59px
+   after, with an 8.6px overlap where there had been none. The card's own box must stay exactly
+   what the date arithmetic says it is; only the words move in. */
+.tl-p.fadeL {
+  border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--card-fade));
+  mask-image: linear-gradient(90deg, transparent, #000 var(--card-fade));
+}
+/* ⚠️ BOTH ENDS IS ONE MASK WITH TWO STOPS, not the two rules above stacked — a second
+   `mask-image` REPLACES the first rather than adding to it, so a card cut at both ends would have
+   faded at whichever edge won the cascade and been sheared at the other. */
+.tl-p.fadeL > * { margin-left: var(--card-fade-inset); }
+.tl-p.fadeL.fadeR {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--card-fade), #000 calc(100% - var(--card-fade)), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 var(--card-fade), #000 calc(100% - var(--card-fade)), transparent);
 }

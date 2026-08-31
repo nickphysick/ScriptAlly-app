@@ -55,7 +55,10 @@ describe("⚠️ PILLS ARE DATA, CONTROLS ARE NOT PILLS", () => {
       expect(r, `${c} is drawn as a pill`).not.toMatch(/border-radius\s*:\s*999px/);
     }
     /* and the bar is a pill, which is the other half of the same claim */
-    expect(rulesFor(".tl-p"), "the bar stopped being a pill").toMatch(/border-radius\s*:\s*999px/);
+    /* ⚠️ 9px SINCE v39: a bar was a pill and a card is a card. The claim is unchanged — every
+       card has ONE radius and it is the pinned one — only the value moved, and it moved because
+       the object did. */
+    expect(rulesFor(".tl-p"), "the card stopped being a card").toMatch(/border-radius\s*:\s*9px/);
   });
 
   it("the action button states its ground, its line and its ink rather than inheriting them", () => {

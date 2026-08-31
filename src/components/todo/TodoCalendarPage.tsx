@@ -34,7 +34,8 @@ import {
   asksOfYou,
   type RowGroup,
 } from "../../lib/timelineGroups";
-import { fitLines } from "../../lib/barFit";
+import { pillText } from "../../lib/calendarPill";
+import { cycleFor } from "../../lib/calendarMarquee";
 import { useConfirmAsk } from "./ConfirmAsk";
 /** this mount's pane section-id prefix — every workspace page stays mounted, so ids must not collide */
 const CAL_PANE_PREFIX = "cal-";
@@ -56,7 +57,7 @@ import {
   type RowSort, type TimelineFilter,
 } from "../../lib/todoTimeline";
 import {
-  durationCount, barLines, familyOf,
+  durationCount, barLines, familyOf, holderOf,
   type Segment, type BarNode,
 } from "../../lib/journeyBars";
 import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
@@ -109,7 +110,7 @@ const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const MONTH_SHELF_FROM = 3;
 
 /**
- * How far in from a bar's left edge its text begins — the ref's 14px.
+ * How far in from a card's left edge its contents begin.
  *
  * ⚠️ IT IS HERE AND IN THE SHEET, AND THE FIT PASS IS WHY. The stylesheet places the text; the fit
  * pass has to subtract the same distance to know what room the text actually has, and a pass
@@ -180,13 +181,21 @@ const Piece: React.FC<{
   sg: Segment; selected: boolean; onPick: () => void;
 }> = ({ sg, selected, onPick }) => {
   const lines = barLines(sg.label);
+  /* ⚠️ THE PILL IS THE APP'S OWN VOCABULARY — see `calendarPill`. The status while the agency
+     holds the move, the deed while the writer does, and nothing else is reachable. */
+  const pill = pillText(sg.status, holderOf(sg), sg.nudgeDue);
   return (
     <div
       /* ⚠️ THE CLASS LIST IS WRITTEN IN THE JSX, not built into a `const` above it. The style-reach
          sweep reads `className=` expressions out of this file, so a list assembled into a variable
          is invisible to it — and its report would be "this class has no rule", about a class it
          never saw. An absence that reads as a finding. */
-      className={`tl-at2 tl-p ${familyOf(sg.state)}${sg.hollow ? " hollow" : ""}${selected ? " sel" : ""}`}
+      className={`tl-at2 tl-p ${familyOf(sg.state)}${sg.hollow ? " hollow" : ""}`
+        /* ⚠️ THE FADES ARE THE SEGMENT'S OWN FACTS. `openLeft` means the stretch began before the
+           window and `openRight` that it runs past it — both already derived, both already the
+           reason the old renderer squared its ends. */
+        + `${sg.openLeft ? " fadeL" : ""}${sg.openRight || sg.live ? " fadeR" : ""}`
+        + `${selected ? " sel" : ""}`}
       style={{ left: barLeft(sg), width: barWidth(sg), ...laneVar(sg.lane) }}
       data-state={sg.state}
       /* ⚠️ WHICH QUERY THIS BAR IS, so a lock can ask whether the row's WORDS are about a query the
@@ -201,14 +210,22 @@ const Piece: React.FC<{
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(); } }}
     >
       {sg.label && (
-        <span className="tl-txt">
-          {/* ⚠️ TWO ELEMENTS, NOT ONE WITH A BREAK. The fit pass drops line two on its own, so it
-              has to be a box it can hide; and the two carry different type, so they could never
-              have been one node. `data-t1`/`data-t2` keep the full strings for the pass to measure
-              against after it has emptied them. */}
-          <span className="tl-t1" data-t1={lines.t1}>{lines.t1}</span>
-          {lines.t2 && <span className="tl-t2" data-t2={lines.t2}>{lines.t2}</span>}
-        </span>
+        <>
+          {/* ⚠️ THE PILL, THE HEADLINE AND THE DETAIL — three things on one line, in that order.
+              The separator is an ELEMENT rather than a border on the detail, because the detail is
+              the part that can be absent and a border would go with it, leaving the headline
+              looking cut off. */}
+          <span className={`tl-pill ${pill.tone}`} data-pill={pill.text}>{pill.text}</span>
+          <span className="tl-line">
+            {/* ⚠️ ONE TRACK HOLDING BOTH, so the marquee moves them together. Scrolling the
+                headline while the detail stayed put would break the line in half mid-slide. */}
+            <span className="tl-track">
+              <span className="tl-hl">{lines.t1}</span>
+              {lines.t2 && <span className="tl-csep" aria-hidden />}
+              {lines.t2 && <span className="tl-cdt">{lines.t2}</span>}
+            </span>
+          </span>
+        </>
       )}
     </div>
   );
@@ -412,59 +429,101 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
            ⚠️ AND IT IS `display`, NOT `visibility` — a hidden element still HAS a box, so the
            sliver would go on overlapping its marker where it counts, in the geometry. */
         seg.style.display = "";
-        const room = seg.clientWidth;
-        if (room <= 0) { seg.style.display = "none"; continue; }
-        const txt = seg.querySelector<HTMLElement>(".tl-txt");
-        const l1 = seg.querySelector<HTMLElement>(".tl-t1");
-        const l2 = seg.querySelector<HTMLElement>(".tl-t2");
-        if (!txt || !l1) continue;
-        const t1 = l1.dataset.t1 ?? "";
-        const t2 = l2?.dataset.t2 ?? "";
-        txt.style.display = "";
-        if (l2) l2.style.display = "";
-        if (!t1) continue;
-        /* ⚠️ MEASURE BOTH, THEN DECIDE ONCE. The decision itself is `fitLabel` — pure, and unit-
-           locked, because the branch that matters is the one this account never produces: its bars
-           are either ~600px or exactly 28px, so nothing on it is the width at which the short form
-           is the answer. Unexercised is not dead, and only a check that needs no fixture can tell
-           the two apart. */
-        /* ⚠️ EACH LINE IS MEASURED AT ITS OWN TYPE. They are different sizes and different
-           tracking, so one width cannot stand for both — and `scrollWidth` on an inline box is
-           meaningless, which is why both are `inline-block` in the sheet. */
-        l1.textContent = t1;
-        const w1 = l1.scrollWidth;
-        let w2: number | null = null;
-        if (l2 && t2) { l2.textContent = t2; w2 = l2.scrollWidth; }
-        /* ⚠️ THE TEXT SITS AT THE BAR'S START, so the room it has is the bar's own width less the
-           14px inset it begins at. Measuring against the whole bar would let a line run past the
-           right-hand end by exactly that inset. */
-        const room2 = seg.clientWidth - TEXT_INSET;
-        switch (fitLines(room2, w1, w2)) {
-          case "both":
-            l1.textContent = t1;
-            if (l2) { l2.textContent = t2; l2.style.display = ""; }
-            break;
-          case "one":
-            l1.textContent = t1;
-            if (l2) l2.style.display = "none";
-            break;
-          /* ⚠️ BARE MEANS THE TEXT GOES, NOT THAT IT IS TRUNCATED. An ellipsis is a promise that
-             the rest is somewhere, and on a bar it is not — the tooltip is where a reader finds
-             out, which is why the tip carries the whole label and the named date whatever fits. */
-          default:
-            txt.style.display = "none";
+        if (seg.clientWidth <= 0) { seg.style.display = "none"; continue; }
+        const line = seg.querySelector<HTMLElement>(".tl-line");
+        const track = seg.querySelector<HTMLElement>(".tl-track");
+        if (!line || !track) continue;
+        /**
+         * ⚠️ MEASURED, THEN MARKED — the words are never removed.
+         *
+         * `barFit` used to drop the detail, then the whole line, wherever the text would not fit.
+         * A card with no words says nothing, and the reader had no way to find out what it would
+         * have said. The words stay; the ones past the edge arrive on hover.
+         *
+         * ⚠️ `scrollWidth` ON THE TRACK, `clientWidth` ON THE LINE. The track is what overflows and
+         * the line is the window onto it — measuring one element against itself reports zero
+         * forever. The track is `inline-flex` for the same reason the old lines were
+         * `inline-block`: scrollWidth on an inline box is meaningless.
+         */
+        const over = track.scrollWidth - line.clientWidth;
+        if (over > 1) {
+          line.classList.remove("fits");
+          line.dataset.over = String(Math.round(over));
+        } else {
+          /* a line that fits carries no mask and no animation — both are stated by this class */
+          line.classList.add("fits");
+          delete line.dataset.over;
         }
       }
     };
     fit();
+
+    /**
+     * ⚠️ THE MARQUEE RUNS ON HOVER AND NOWHERE ELSE — never at rest, never on a timer.
+     *
+     * Text that moves on its own is text competing with the reader; a board of thirteen cards all
+     * sliding is unreadable. It starts when the pointer arrives and is CANCELLED when it leaves,
+     * and the cancel resets the transform explicitly: a cancelled animation leaves the element
+     * wherever its last commit put it, so a card the reader has left would keep its text scrolled
+     * off the edge.
+     *
+     * ⚠️ THE FRAMES COME FROM `cycleFor`, BUILT IN JS BECAUSE THE DISTANCE IS MEASURED. A `var()`
+     * inside `@keyframes` fails silently in this setup — no error, no animation, nothing to point
+     * at — so the distance never enters CSS at all.
+     *
+     * ⚠️ REDUCED MOTION KEEPS THE MASK AND DROPS THE MOVEMENT. The mask says there is more to
+     * read; the movement is what a reader who has asked for stillness does not want. Read at the
+     * moment of hover rather than once at mount, so a change of preference takes effect without a
+     * reload.
+     */
+    const running = new WeakMap<HTMLElement, Animation>();
+    const stop = (line: HTMLElement) => {
+      const a = running.get(line);
+      if (a) { a.cancel(); running.delete(line); }
+      const track = line.querySelector<HTMLElement>(".tl-track");
+      if (track) { track.style.transform = ""; track.style.opacity = ""; }
+    };
+    const start = (line: HTMLElement) => {
+      if (line.classList.contains("fits") || running.has(line)) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const track = line.querySelector<HTMLElement>(".tl-track");
+      const over = Number(line.dataset.over ?? "0");
+      if (!track || !(over > 1) || typeof track.animate !== "function") return;
+      const cycle = cycleFor(over);
+      const a = track.animate(
+        cycle.frames.map((f) => ({ offset: f.offset, transform: f.transform, opacity: f.opacity })),
+        { duration: cycle.durationMs, iterations: Infinity, easing: "linear" },
+      );
+      running.set(line, a);
+    };
+    const onOver = (e: Event) => {
+      const line = (e.target as HTMLElement | null)?.closest?.(".tl-line") as HTMLElement | null;
+      if (line) start(line);
+    };
+    const onOut = (e: Event) => {
+      const line = (e.target as HTMLElement | null)?.closest?.(".tl-line") as HTMLElement | null;
+      if (line) stop(line);
+    };
+    const host = pageRef.current;
+    host?.addEventListener("mouseover", onOver);
+    host?.addEventListener("mouseout", onOut);
+
     /* ⚠️ A `ResizeObserver` ON THE BOARD, not on every bar. Bars are re-created on every range
        change and observing each would leak one per render; the board is one element whose width
        is the only thing that changes what fits. */
+    /* ⚠️ ONE CLEANUP, AND IT RUNS EVEN WITHOUT A BOARD. The early return used to sit between the
+       listeners and the teardown, so a render with no board left both attached — and this effect
+       has no dependency array, so it re-runs every render and would have stacked one pair per
+       render for as long as the board was absent. The observer is what is conditional; the
+       listeners are not. */
     const board = pageRef.current?.querySelector(".tl-board");
-    if (!board) return;
     const ro = new ResizeObserver(fit);
-    ro.observe(board);
-    return () => ro.disconnect();
+    if (board) ro.observe(board);
+    return () => {
+      ro.disconnect();
+      host?.removeEventListener("mouseover", onOver);
+      host?.removeEventListener("mouseout", onOut);
+    };
   });
 
   const pastDays = useMemo(() => pastDaysOf(range), [range]);
@@ -1538,7 +1597,7 @@ data-rowkey={r.key}
                 <ChevronRight size={14} aria-hidden />
               </button>
 
-              <span className="tl-sep" aria-hidden />
+              <span className="tl-csep" aria-hidden />
               {/* ⚠️ A FILTER OF THE ONE BOARD, NEVER A SECOND BOARD. Same rows, same bars, same
                   deeds, same groups — only the rows that ask nothing of you are withheld. */}
               {/* ⚠️ THE SAME ROWS EITHER WAY. GROUPED does not fetch, filter or re-derive
@@ -1550,7 +1609,7 @@ data-rowkey={r.key}
                 <button type="button" data-on={grouped} aria-pressed={grouped}
                   onClick={() => setGrouped(true)}>GROUPED</button>
               </span>
-              <span className="tl-sep" aria-hidden />
+              <span className="tl-csep" aria-hidden />
               <span className="tl-seg2" role="group" aria-label="How much of the board">
                 <button type="button" data-on={!onlyAsks} aria-pressed={!onlyAsks}
                   onClick={() => setOnlyAsks(false)}>FULL BOARD</button>

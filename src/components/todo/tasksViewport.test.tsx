@@ -290,7 +290,13 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
     /* ⚠️ AND THE TIMELINE COLUMN CLIPS, which is load-bearing rather than tidy: it is why the
        tooltip is portalled to the board wrap. A clipping ancestor beats any z-index a descendant
        can declare, so a tip drawn inside this box would be cut in half by it. */
-    expect(rule(calCss, ".tl-c-tl {")).toContain("overflow: hidden");
+    /* ⚠️ THE LANE STOPPED CLIPPING AT v39, AND THE CLAIM MOVED WITH IT. It clipped so that a bar
+       running past the window was cut at the edge; a card is masked on ITSELF now, so there is
+       nothing left for the lane to cut — and it must not cut, because a hovered card's shadow
+       reaches past its own box and a clipping lane shears it off. What this case is really about
+       is the ZONE taking the overflow, which is asserted above and is unchanged; the lane's own
+       overflow was never that claim, it was the mechanism of a different one. */
+    expect(rule(calCss, ".tl-c-tl {")).toContain("overflow: visible");
 
     /* seven columns FILL — they never earn a horizontal scrollbar, so any horizontal overflow is
        a fault to see rather than a thing to scroll */

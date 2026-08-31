@@ -20,7 +20,7 @@ import { join } from "node:path";
 import { openRoute } from "./measure";
 
 /**
- * ⚠️ `.tl-plbl` IS `.tl-t1` SINCE v37. The bar's single label became two lines — what it is, and
+ * ⚠️ `.tl-plbl` IS `.tl-hl` SINCE v37. The bar's single label became two lines — what it is, and
  * when — so the element every sweep here sampled for "the label" is now the FIRST of two. The claim
  * each was making is unchanged: line one is the label, it carries the family's ink, and a bar the
  * fit pass stripped has none. Retargeted rather than deleted, and their population guards are what
@@ -426,24 +426,26 @@ test("the surface is the pinned one, and the heading is not inside the card", as
         /* a piece with no room to draw is hidden outright (see the fit pass) — it has no box and
            no centre, so it is COUNTED above rather than measured here */
         if (getComputedStyle(b).display === "none") return null;
-        /* ⚠️ THE STACK, NOT ONE OF ITS LINES. The claim is that the bar's text is centred in the
-           bar; since v37 the text is TWO lines in a column, so line one sits deliberately above the
-           midpoint and line two below it. Measuring line one reported it 8px off centre — true,
-           and about the wrong subject.
-           AND A HIDDEN STACK IS SKIPPED. The fit pass hides the text outright where there is no
-           room, and a display-none element reports a rect at the origin — which came out as the
-           text sitting 659px off its centre, a real number about an element that is not drawn.
+        /* ⚠️ THE CLAIM CHANGED WITH THE OBJECT (v39). It used to be that the bar's text was
+           CENTRED in the bar, which was true of a bar holding one stack. A card is a COLUMN — the
+           pill above, the line beneath — so the line sits below the centre by design and measuring
+           its drift would report the layout as a fault. What must still hold is that the contents
+           stay INSIDE the card: a pill or a line escaping its own box is the thing a reader sees.
            (No backticks in here: this is inside an evaluate template and one would close it.) */
-        const lbl = b.querySelector(".tl-txt");
-        if (!lbl || getComputedStyle(lbl).display === "none") return null;
-        const l1 = lbl.querySelector(".tl-t1");
+        const lbl = b.querySelector(".tl-line");
+        const pil = b.querySelector(".tl-pill");
+        if (!lbl || !pil) return null;
+        const l1 = lbl.querySelector(".tl-hl");
         if (!l1 || !l1.textContent) return null;
         const br = b.getBoundingClientRect();
         const lr = lbl.getBoundingClientRect();
         return {
-          drift: +(((lr.top + lr.bottom) / 2) - ((br.top + br.bottom) / 2)).toFixed(2),
+          /* how far the contents escape the card, on either edge — 0 where they are contained */
+          drift: +Math.max(0, br.top - Math.min(lr.top, pil.getBoundingClientRect().top),
+                              Math.max(lr.bottom, pil.getBoundingClientRect().bottom) - br.bottom).toFixed(2),
           display: getComputedStyle(b).display,
-          align: getComputedStyle(b).alignItems,
+          dir: getComputedStyle(b).flexDirection,
+          justify: getComputedStyle(b).justifyContent,
         };
       }).filter(Boolean),
       /* ── row head stacked ── */
@@ -474,9 +476,14 @@ test("the surface is the pinned one, and the heading is not inside the card", as
      still reading correctly. */
   expect(r.bars.length, "no labelled bar to measure — the sweep proves nothing").toBeGreaterThan(2);
   for (const b of r.bars) {
+    /* ⚠️ A COLUMN SINCE v39, so the vertical centring moved axis. It was `align-items: center` on a
+       row holding one text stack; the card stacks the pill above the line, so what centres them
+       between the card's own edges is `justify-content`. Same claim — the contents sit in the
+       middle of the card — asserted on the axis that now carries it. */
     expect(b.display).toBe("flex");
-    expect(b.align).toBe("center");
-    expect(Math.abs(b.drift), `a bar's text sits ${b.drift}px off its centre`).toBeLessThanOrEqual(1);
+    expect(b.dir).toBe("column");
+    expect(b.justify).toBe("center");
+    expect(b.drift, `a card's contents escape its box by ${b.drift}px`).toBeLessThanOrEqual(1);
   }
 
   /* ⚠️ `agencyTop >= nameBottom`, never merely that the tops differ — two inline spans of
@@ -741,8 +748,8 @@ test("the rail is the page's own, and the cards carry no date row", async ({ pag
   for (const m of r.months.filter((m: any) => m.gone)) expect(m.ink).toBe("rgb(195, 179, 156)");
   for (const m of r.months.filter((m: any) => !m.gone && !m.now)) expect(m.ink).toBe("rgb(168, 146, 122)");
 
-  expect(r.chip.bg, "the today chip").toBe("rgb(124, 58, 42)");
-  expect(r.stem.colour, "the today stem").toBe("rgb(124, 58, 42)");
+  expect(r.chip.bg, "the today chip").toBe("rgb(28, 19, 15)");
+  expect(r.stem.colour, "the today stem").toBe("rgb(28, 19, 15)");
   /* ⚠️ THE USED WIDTH ROUNDS. The stylesheet declares 1.5px and Chromium reports 1px at DPR 1 —
      a browser rounding a sub-pixel border, not a value that drifted. The DECLARED 1.5px is
      asserted in `barTokens.test.ts`, where a source lock is the right instrument; here the honest
@@ -992,9 +999,9 @@ test("row height and bar height are independent, and the marker sits clear in th
 
       /* ⚠️ THE DISTINCT SET, NOT AN AVERAGE. One bar drawn at the wrong height disappears into a
          mean and is the whole of what this is looking for. */
-      expect(read.barH, `${width}px range ${r}: bar heights ${JSON.stringify(read.barH)}`).toEqual([34]);
-      expect(read.mkH, `${width}px range ${r}: marker sizes ${JSON.stringify(read.mkH)}`).toEqual([30]);
-      expect(read.rowH, `${width}px range ${r}: single-lane row heights ${JSON.stringify(read.rowH)}`).toEqual([52]);
+      expect(read.barH, `${width}px range ${r}: bar heights ${JSON.stringify(read.barH)}`).toEqual([54]);
+      expect(read.mkH, `${width}px range ${r}: marker sizes ${JSON.stringify(read.mkH)}`).toEqual([28]);
+      expect(read.rowH, `${width}px range ${r}: single-lane row heights ${JSON.stringify(read.rowH)}`).toEqual([62]);
 
       /* the marker does not fill its line: clear room above and below, inside the row */
       const tight = read.room.filter((x: any) => x.top < 4 || x.bottom < 4);
@@ -1017,7 +1024,7 @@ test("row height and bar height are independent, and the marker sits clear in th
     });
     const before = rd();
     /* move the BAR token alone */
-    board.style.setProperty("--bar-h", "20px");
+    board.style.setProperty("--bar-h", "30px");
     const barMoved = rd();
     board.style.removeProperty("--bar-h");
     /* move the ROW token alone */

@@ -80,10 +80,10 @@ describe("the calendar's bar path states no vertical literal", () => {
     expect(offenders, `a vertical literal in the bar path: ${offenders.join(" | ")}`).toEqual([]);
   });
 
-  it("the three tokens are declared once each, at the values v37 pins", () => {
+  it("the three tokens are declared once each, at the values v39 pins", () => {
     const root = src.match(/(^|\n)\.tl-board\s*\{([\s\S]*?)\}/) ?? src.match(/(^|\n):root\s*\{([\s\S]*?)\}/);
     expect(root, "no token block found").not.toBeNull();
-    for (const [tok, want] of [["--row-h", "52px"], ["--bar-h", "34px"], ["--mk", "30px"]] as const) {
+    for (const [tok, want] of [["--row-h", "62px"], ["--bar-h", "54px"], ["--mk", "28px"]] as const) {
       const hits = [...src.matchAll(new RegExp(`${tok}\\s*:\\s*([^;]+);`, "g"))].map((m) => m[1].trim());
       expect(hits, `${tok} is declared ${hits.length} times: ${JSON.stringify(hits)}`).toEqual([want]);
     }

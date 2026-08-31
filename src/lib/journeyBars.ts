@@ -257,6 +257,21 @@ export interface Segment {
    */
   abutL?: true;
   abutR?: true;
+  /**
+   * The query's own status, and whether a reminder on it has fallen due.
+   *
+   * ⚠️ THE PILL NEEDS THE STATUS AND THE SEGMENT DID NOT CARRY IT (v39). A row carries one — the
+   * most advanced of the queries it draws — but a CARD is one query's stretch, and on a row
+   * holding two the row's status is the other one's. Reading it from the row would put a true
+   * word on the wrong card, which is the all-vs-drawn fault this board has already shipped three
+   * variants of.
+   *
+   * ⚠️ AND THE NUDGE IS A DATE, NOT A STATUS, which is why it travels separately: a query out with
+   * an agency whose reminder has come round is still `Queried`, and saying otherwise would be a
+   * lie about what the record holds.
+   */
+  status: QueryStatus;
+  nudgeDue?: true;
   queryId: string;
 }
 
@@ -1138,6 +1153,8 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
        */
       tip: "",
       queryId: query.id,
+      status: query.status as QueryStatus,
+      ...(state === "nudged" ? { nudgeDue: true as const } : {}),
     });
   });
 
