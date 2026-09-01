@@ -56,6 +56,12 @@ const iso = (daysAgo) => {
 if (clean) {
   await deleteDoc(doc(db, "users", uid, "queries", QUERY));
   await deleteDoc(doc(db, "users", uid, "agents", AGENT));
+  /* ⚠️ AND THE MANUSCRIPT AN EARLY VERSION OF THIS FILE CREATED. It made its own `rej-ms` before
+     the manuscript-scope problem was understood; that manuscript then became the account's ACTIVE
+     one and silently re-scoped the whole board for every later measurement. Removed by hand, and
+     cleaned here too so a stale copy on another machine goes with the fixture. A seeder that
+     leaves a manuscript behind changes what every other check on this account is looking at. */
+  await deleteDoc(doc(db, "users", uid, "manuscripts", "rej-ms")).catch(() => {});
   console.log("removed the seeded rejection");
   process.exit(0);
 }
