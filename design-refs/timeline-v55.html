@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Calendar design ref v55 (normative)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--app:#f2ede7;--ground:#faf7f2;--ink:#1c130f;--body:#3a1c14;--muted:#8a7a6c;--label:#9c8878;--detail:#6f6055;
+--pink:#f5e2da;--pinkb:#e8c8bc;--pinkd:#efd5ca;--pinkdd:#e6c3b4;--pinktx:#7a4a35;
+--sage:#e9ede6;--sagetx:#5a6e58;--sagebd:#d6ddd2;--slate:#e3eaf0;--slatetx:#4b5f73;--slatebd:#cfdbe6;
+--grey:#efebe4;--greytx:#8a7a6c;--cardbd:#d8cbba;--hair:#efe6da;--rowline:#eee4d6;--railbd:#e0d3bf;--tick:#cdbfa8;
+--row-h:64px;--bar-h:54px;--accent:#7a4a35}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--app);font-family:Inter,sans-serif;color:var(--body);-webkit-font-smoothing:antialiased;padding:18px 20px 60px}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;color:var(--label)}
+.sw{display:flex;gap:9px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.seg{display:inline-flex;background:#fff;border:1px solid #e5d8c9;border-radius:9px;overflow:hidden}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;font-weight:500;border:none;background:transparent;color:#6a5a50;padding:8px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--hair)}
+.seg button[data-on="true"]{background:var(--pink);color:var(--ink)}
+.panel{background:var(--ground);border:1px solid #e9dfd0;border-radius:18px;box-shadow:0 2px 10px rgba(58,28,20,.05);overflow:hidden}
+.masthead{padding:22px 26px 10px}
+.crumb{display:inline-flex;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;color:var(--label);border:1px solid #e5d8c9;border-radius:999px;padding:5px 11px;background:#fff;margin-bottom:9px}
+h1{font-family:'Playfair Display',serif;font-size:34px;font-weight:500;line-height:1.2;color:var(--ink)}
+.ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:2px 26px 14px}
+.tabs{display:inline-flex;gap:2px;border-bottom:1px solid #e6dbc9}
+.tab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;font-weight:500;color:#8a7a6c;padding:8px 12px 9px;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.on{color:var(--ink);border-bottom-color:var(--ink)}
+.tab b{font-weight:500;opacity:.55;margin-left:5px}
+.dd,.btn{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.09em;font-weight:500;border-radius:6px;padding:8px 11px;background:#fff;border:1px solid #d4c3ae;color:#54402f;cursor:pointer}
+.srch{font-size:11px;border:1px solid #e5d8c9;border-radius:6px;padding:8px 12px;background:#fff;width:140px}
+.count{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--label);margin-left:auto}
+/* rows run the full width of the panel, small margin only */
+.inner{padding:0 12px 22px}
+.wrap{position:relative}
+.hrow{display:flex;height:38px;border-bottom:1px solid var(--railbd);position:sticky;top:0;z-index:40;background:var(--ground);isolation:isolate}
+.rrow{display:flex;align-items:stretch;min-height:var(--row-h);position:relative;border-bottom:1px solid var(--rowline)}
+.rrow:last-child{border-bottom:none}
+.rrow:hover{background:#f6f1e9}
+.rrow.asks::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:2px;background:var(--pinkb);z-index:3}
+.c-ag{flex:0 0 292px;display:flex;align-items:center;gap:14px;padding:0 14px 0 14px}
+.c-ag .nm{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:500;line-height:1.15;color:var(--ink)}
+.c-ag .ag{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);margin-top:3px;display:block}
+.c-tl{flex:1 1 auto;position:relative;overflow:visible;min-width:0}
+.tick{position:absolute;bottom:0;width:0;height:5px;border-left:1px solid var(--tick)}
+.dlab{position:absolute;bottom:8px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;color:var(--label);white-space:nowrap}
+.tdchip{position:absolute;bottom:6px;transform:translateX(-50%);background:var(--pinkd);border:1px solid var(--pinkdd);color:var(--pinktx);
+  font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;padding:2px 7px;border-radius:999px;z-index:2;white-space:nowrap}
+#todayline{position:absolute;top:0;bottom:0;width:0;border-left:1.5px solid var(--pinkdd);z-index:60;pointer-events:none}
+/* CARD = a frame that carries the paint, plus content that is never masked by it */
+.card{position:absolute;height:var(--bar-h);top:50%;transform:translateY(-50%);z-index:2;overflow:visible;cursor:pointer;
+  left:var(--l);width:var(--w);transition:width .15s ease,left .15s ease}
+/* too short for its text: it clips with a soft edge, and opens on hover in front of its neighbours */
+.card.tight:hover{width:var(--exp);left:var(--hx);z-index:30}
+.card.tight:hover .bg{box-shadow:0 6px 20px rgba(58,28,20,.2)}
+.card.tight:hover .bodyclip{-webkit-mask-image:none;mask-image:none}
+.bg{position:absolute;inset:0;border-radius:9px;background:#fff;border:1.5px solid var(--cardbd);box-shadow:0 1px 4px rgba(58,28,20,.08);
+  transition:box-shadow .13s;z-index:0;overflow:hidden}
+/* ————— THE OVERDUE ACCENT — spans only the days it has been owed ————— */
+.acc{position:absolute;display:none;pointer-events:none}
+.card.owed .acc{display:block}
+.card.owed .acc{}
+/* ————— ONE TINT, SIX CROSSINGS AT THE DUE DATE —————
+   every option ends at the same value at today: rgba(230,195,180,.60) */
+.acc.overdue{top:0;bottom:0;background:rgba(230,195,180,.60)}
+.acc{top:0;bottom:0;background:linear-gradient(90deg,rgba(230,195,180,0) 0%,rgba(230,195,180,.28) 22%,rgba(230,195,180,.60) 100%)}
+.card:hover{z-index:9}
+.card:hover .bg{box-shadow:0 5px 16px rgba(58,28,20,.18)}
+.card.owed .bg{border-color:var(--pinkdd);box-shadow:0 6px 16px rgba(58,28,20,.16)}
+/* owed work stirs every so often — a few degrees, then still again.
+   the base transform is repeated in every frame: dropping it would drop the card half its height. */
+@keyframes owedStir{
+  0%,86%{transform:translateY(-50%) scale(1.006) rotate(0deg)}
+  88.5%{transform:translateY(-50%) scale(1.006) rotate(-.45deg)}
+  91%{transform:translateY(-50%) scale(1.006) rotate(.42deg)}
+  93.5%{transform:translateY(-50%) scale(1.006) rotate(-.28deg)}
+  96%{transform:translateY(-50%) scale(1.006) rotate(.16deg)}
+  98%,100%{transform:translateY(-50%) scale(1.006) rotate(0deg)}
+}
+.stir .card.owed{transform-origin:50% 50%;animation:owedStir 11s ease-in-out infinite}
+.stir .card.owed:hover{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.stir .card.owed{animation:none}}
+.card.quietc .bg{background:#fbf9f5}
+.card.closedc .bg{background:transparent;border-style:dashed;box-shadow:none}
+/* fades live on the frame only — text can never be erased by a mask */
+.card.fadeL .bg{border-top-left-radius:0;border-bottom-left-radius:0;border-left:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 34px);mask-image:linear-gradient(90deg,transparent,#000 34px)}
+.card.fadeR .bg{border-top-right-radius:0;border-bottom-right-radius:0;border-right:none;
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent)}
+.card.fadeL.fadeR .bg{-webkit-mask-image:linear-gradient(90deg,transparent,#000 34px,#000 calc(100% - 34px),transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 34px,#000 calc(100% - 34px),transparent)}
+/* content sits at a fixed inset and simply spills onto the ground when the card is short */
+.bodyclip{position:absolute;top:0;bottom:0;left:13px;right:12px;overflow:hidden;display:flex;align-items:center;z-index:3}
+.card.fadeL .bodyclip{left:42px}
+.card.tight .bodyclip{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 18px),transparent);
+  mask-image:linear-gradient(90deg,#000 calc(100% - 18px),transparent)}
+.body{display:flex;flex-direction:column;gap:5px;white-space:nowrap}
+.body.drop1 .sep,.body.drop1 .dt{display:none}
+.pill{align-self:flex-start;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:500;
+  padding:3px 8px;border-radius:999px;white-space:nowrap}
+.pill.you{background:var(--pink);color:var(--pinktx);border:1px solid var(--pinkb)}
+.pill.you.ow{background:var(--pinkd);border-color:var(--pinkdd);font-weight:700}
+.pill.them{background:var(--sage);color:var(--sagetx);border:1px solid var(--sagebd)}
+.pill.wait{background:var(--slate);color:var(--slatetx);border:1px solid var(--slatebd)}
+.pill.quiet{background:var(--grey);color:var(--greytx);border:1px solid #e5dfd4}
+.pill.closed{background:transparent;color:var(--label);border:1px solid #ddd0c0}
+.line{display:flex;align-items:baseline;gap:9px}
+.hl{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.2;white-space:nowrap}
+.sep{width:1px;align-self:stretch;background:#e2d7c9;flex:0 0 auto}
+.dt{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--detail);white-space:nowrap}
+.hmk{position:absolute;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:999px;background:#fff;
+  border:1.5px solid #d3c7b6;display:flex;align-items:center;justify-content:center;z-index:3}
+.hmk svg{width:9px;height:9px}
+.hline{position:absolute;top:50%;height:0;border-top:1px dotted #d8cbb8;z-index:1}
+.ghost{position:absolute;top:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:999px;border:1.5px dotted #cdbfa8;
+  background:var(--ground);display:flex;align-items:center;justify-content:center;color:#9c8878;z-index:6}
+.ghost.yours{border-color:var(--pinkdd);color:var(--pinktx)}
+.ghost.due{border-style:solid;background:#fff;box-shadow:0 2px 6px rgba(58,28,20,.13)}
+.ghost .bdg{position:absolute;top:-4px;right:-4px;width:13px;height:13px;border-radius:999px;background:var(--pinkd);border:1px solid var(--pinkdd);
+  color:var(--pinktx);font-family:'Playfair Display',serif;font-size:9px;line-height:1;display:flex;align-items:center;justify-content:center}
+.ghost svg{width:12px;height:12px}
+.task{position:absolute;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:9px;z-index:5;white-space:nowrap}
+.task .ic{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--ink);background:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.task .ic i{width:8px;height:8px;border-radius:2px;background:var(--pink)}
+.task .t1{font-family:'Playfair Display',serif;font-size:13px;font-weight:500;color:var(--ink)}
+.task .t2{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);display:block;margin-top:2px}
+.rrow.quiet .nm,.rrow.quiet .ag{opacity:.6}
+.note{margin-top:20px;font-size:12px;color:#5c4c40;line-height:1.65;background:#fff;border:1px solid var(--hair);border-radius:10px;padding:13px 16px;max-width:1080px}
+.note b{color:var(--ink)}.note p{margin-bottom:7px}
+</style>
+</head>
+<body>
+
+<div class="sw">
+  <span class="lbl">Range</span>
+  <span class="lbl">Window</span>
+  <div class="seg" id="rng"><button data-r="m" data-on="true">MONTH</button><button data-r="q" data-on="false">3 MONTHS</button><button data-r="s" data-on="false">6 MONTHS</button></div>
+</div>
+
+<div class="panel">
+  <div class="masthead"><span class="crumb">TASKS</span><h1>Calendar</h1></div>
+  <div class="ctrl">
+    <div class="tabs">
+      <button class="tab on">ALL <b>16</b></button><button class="tab">NEEDS ME <b>5</b></button>
+      <button class="tab">WITH AGENTS <b>7</b></button><button class="tab">TASKS <b>3</b></button><button class="tab">CLOSED <b>1</b></button>
+    </div>
+    <button class="dd" style="margin-left:8px">DISPLAY ▾</button>
+    <button class="btn">‹</button><button class="btn">TODAY</button><button class="btn">›</button>
+    <input class="srch" placeholder="Search…"><span class="count">13 relationships · 3 tasks</span>
+  </div>
+  <div class="inner">
+    <div class="wrap stir" id="wrap">
+      <div class="hrow"><div class="c-ag"><span class="lbl">Agent</span></div><div class="c-tl" id="railtl"></div></div>
+      <div id="board"></div>
+      <div id="todayline"></div>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+<p><b>Why Panetta and Tan were blank.</b> The fade mask was on the card, so any text that overflowed the card was masked away with it. The mask now sits on a <b>background frame inside</b> the card; the text is a sibling of that frame and can never be erased by it. Both rows now read.</p>
+<p><b>When a card is too short for its words.</b> The text stays <b>inside</b> — no labels drifting onto the ground. The card clips it with a soft right edge, and on <b>hover the card opens</b> to exactly the width its content needs, in front of whatever sits beside it, then closes again. It opens rightwards from where it starts, so the start date stays put; if that would run off the lane it slides left by just enough to fit. Only if the content is wider than the whole lane does the detail line drop. Try <b>month</b> and hover Osei, Ellery and the long silences.</p>
+<p><b>A passed date is named — but only when it is yours.</b> Whitmore reads <i>overdue since 26 Aug · 5 days</i>, Tan <i>overdue since 30 Jul · 5 weeks</i>. Panetta was never given a date, so there is nothing to be overdue <i>since</i>: it reads <i>no date promised · owed 9 weeks</i>. Priya's 27 Aug was the agency's own estimate, so it is stated and not judged — <i>reply expected 27 Aug · none yet</i>. The unit coarsens as it grows: days under three weeks, then weeks, then months.</p>
+<p><b>The overdue tint</b> fills the card from the date the deed fell due to today at a flat <code>rgba(230,195,180,.60)</code>, with a <b>hard edge at the due date</b> — no fade, no gap. Its span is the lateness. It sits inside the card's frame, so it rounds and fades with the card.</p>
+<p><b>Owed work stirs.</b> Panetta and Tan tilt about half a degree and settle, roughly every eleven seconds, <b>staggered</b> so they never move together — the eye catches one, not a row of them. It pauses while you hover the card, and reduced-motion switches it off entirely. Toggle <b>STILL</b> to compare.</p>
+<p><b>Today sits at the halfway point</b> of whatever range is showing — equal past and future, at month, three months and six months alike. <b>Rows are full width</b> to a 12px margin, with no rounded container of their own. One pink today line, in front of everything, no wash.</p>
+</div>
+
+<script>
+var R={m:{n:30,step:5},q:{n:90,step:14},s:{n:180,step:30}},CUR='m',TP=50;
+function pos(d){return TP+(d/R[CUR].n)*100}
+function fmt(d){var x=new Date(2026,7,31);x.setDate(x.getDate()+d);
+  return x.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sept','Oct','Nov','Dec'][x.getMonth()];}
+function dot(k){
+  var s='<svg width="18" height="18" viewBox="0 0 20 20">',ring='#8a9e88';
+  if(k==='partial')s+='<circle cx="10" cy="10" r="7.6" fill="#fff" stroke="'+ring+'" stroke-width="1.8"/><path d="M10 4.4 A5.6 5.6 0 0 1 10 15.6 Z" fill="'+ring+'"/>';
+  else if(k==='full')s+='<circle cx="10" cy="10" r="7.6" fill="#fff" stroke="'+ring+'" stroke-width="1.8"/><circle cx="10" cy="10" r="5.2" fill="'+ring+'"/>';
+  else if(k==='offer')s+='<circle cx="10" cy="10" r="8.4" fill="#7a4a35"/><path d="M6.4 10.4 L8.9 13 L13.8 7.4" stroke="#fdf6f2" stroke-width="1.9" fill="none" stroke-linecap="round"/>';
+  else if(k==='closed')s+='<circle cx="10" cy="10" r="7.6" fill="#f4efe8" stroke="#b9b0a5" stroke-width="1.6"/><path d="M7 7 L13 13 M13 7 L7 13" stroke="#8a8177" stroke-width="1.5" stroke-linecap="round"/>';
+  else if(k==='task')s+='<rect x="3.5" y="3.5" width="13" height="13" rx="3.5" fill="#fff" stroke="#1c130f" stroke-width="1.8"/>';
+  else if(k==='quiet')s+='<circle cx="10" cy="10" r="7.6" fill="#fff" stroke="#bdb8b0" stroke-width="1.6"/><path d="M10 6 V10 L13 12" stroke="#8a8177" stroke-width="1.5" fill="none" stroke-linecap="round"/>';
+  else s+='<circle cx="10" cy="10" r="7.6" fill="#fff" stroke="'+ring+'" stroke-width="1.8"/>';
+  return s+'</svg>';
+}
+var MK={in:'<svg viewBox="0 0 12 12"><path d="M9.5 6 H3 M5.4 3.4 L2.8 6 L5.4 8.6" stroke="#5a6e58" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>',
+ out:'<svg viewBox="0 0 12 12"><path d="M2.5 6 H9 M6.6 3.4 L9.2 6 L6.6 8.6" stroke="#8a5a45" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>'};
+var GL={nudge:'<svg viewBox="0 0 12 12"><path d="M2.5 6 H9 M6.6 3.4 L9.2 6 L6.6 8.6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
+ half:'<svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 2 A4 4 0 0 1 6 10 Z" fill="currentColor"/></svg>',
+ answer:'<svg viewBox="0 0 12 12"><path d="M2.8 6.3 L5 8.6 L9.2 3.6" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round"/></svg>',
+ close:'<svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M4.4 4.4 L7.6 7.6 M7.6 4.4 L4.4 7.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'};
+var STIR=0;
+var ROWS=[
+ {asks:1,nm:'Greg Panetta',ag:'Panetta Literary',dk:'partial',pk:'you',ow:1,pill:'Send the partial',hl:'Partial requested',pre:'asked 28 Jun · no date promised',dt:'28 Jun · no date promised',hist:[{d:-100,k:'out'}],from:-64,to:null,due:-64,ghost:{k:'half',due:1}},
+ {asks:1,nm:'William Tan',ag:'Foxglove Literary',dk:'queried',pk:'you',ow:1,pill:'Nudge due',hl:'Queried',pre:'sent 29 Jul',dueNamed:'30 Jul',dt:'sent 29 Jul · nudge due 30 Jul',hist:[],from:-33,to:null,due:-32,ghost:{k:'nudge',due:1}},
+{asks:1,nm:'R. Whitmore',ag:'Whitmore & Bond',dk:'full',pk:'you',ow:1,pill:'Send the full',hl:'Full requested',pre:'asked 11 Aug',dueNamed:'26 Aug',dt:'asked 11 Aug · send by 26 Aug',hist:[{d:-52,k:'out'}],from:-20,to:null,due:-5,ghost:{k:'nudge',due:1}},
+ {asks:1,nm:'Tom Ellery',ag:'Curtis Vane',dk:'offer',pk:'you',pill:'Answer them',hl:'Offer',dt:'received 19 Aug · respond by 6 Sept',hist:[{d:-151,k:'out'},{d:-40,k:'in'}],from:-12,to:6,ghost:{k:'answer'}},
+ {asks:1,task:1,nm:'Draft the Ellery reply',ag:'Your task',dk:'task',at:2,due:'due 2 Sept'},
+ {asks:1,nm:'Jonathan Marsh',ag:'The Marsh Agency',dk:'partial',pk:'you',pill:'Send the partial',hl:'Partial requested',dt:'asked 21 Aug · send by 3 Oct',hist:[{d:-19,k:'out'}],from:-10,to:33,ghost:{k:'half'}},
+ {nm:'K. Osei',ag:'Osei Literary',dk:'queried',pk:'them',pill:'Queried',hl:'Queried',dt:'sent 30 Aug · reply expected 2 Sept',hist:[],from:-1,to:2,ghost:{k:'nudge'}},
+ {nm:'Sophie Dunn',ag:'Curtis Vane',dk:'full',pk:'them',pill:'Full sent',hl:'Full sent',dt:'sent 23 Jul · reply expected 3 Sept',hist:[{d:-96,k:'out'},{d:-52,k:'in'}],from:-39,to:3,ghost:{k:'nudge'}},
+ {nm:'Eleanor Whitfield',ag:'Greenfield Literary',dk:'queried',pk:'them',pill:'Queried',hl:'Queried',dt:'sent 13 Aug · reply expected 10 Sept',hist:[],from:-18,to:10,ghost:{k:'nudge'}},
+ {nm:'Harriet Vane-Coe',ag:'Stillwater Reps',dk:'queried',pk:'wait',pill:'Reminder set',hl:'Queried',dt:'nudged 25 Aug · reminder 23 Sept',hist:[{d:-70,k:'out'}],from:-6,to:23,ghost:{k:'nudge'}},
+ {nm:"Daniel O'Rourke",ag:'Inkwell & Stone',dk:'queried',pk:'wait',pill:'Reminder set',hl:'Queried',dt:'nudged 18 Aug · reminder 25 Sept',hist:[{d:-29,k:'out'}],from:-13,to:25,ghost:{k:'nudge'}},
+ {task:1,nm:'Nudge Marcus Reed',ag:'Your task',dk:'task',at:25,due:'due 25 Sept'},
+ {nm:'Priya Raman',ag:'Raman &amp; Hale',dk:'partial',pk:'them',pill:'Partial sent',hl:'Partial sent',dt:'sent 16 Jul · reply expected 27 Aug · none yet',hist:[{d:-120,k:'out'},{d:-60,k:'in'}],from:-46,to:null,ghost:{k:'nudge',due:1}},
+ {quiet:1,nm:'Penhallow Literary',ag:'Agent not specified',dk:'quiet',pk:'quiet',cls:'quietc',pill:'No response',hl:'No response yet',dt:'858 days since sending',hist:[],from:-858,to:null,ghost:{k:'close'}},
+ {quiet:1,nm:'Aisha Kapoor',ag:'The Lantern Agency',dk:'quiet',pk:'quiet',cls:'quietc',pill:'No response',hl:'No response yet',dt:'838 days since sending',hist:[],from:-838,to:null,ghost:{k:'close'}},
+ {quiet:1,nm:'D. Okafor',ag:'Castle Lane Literary',dk:'closed',pk:'closed',cls:'closedc',pill:'Rejected',hl:'Rejected',dt:'form rejection · 26 Aug',hist:[{d:-40,k:'out'}],from:-14,to:-5}
+];
+/* days → the coarsest honest unit */
+function span(d){
+  d=Math.round(d);
+  if(d<21)return d+(d===1?' day':' days');
+  if(d<84){var w=Math.round(d/7);return w+' weeks'}
+  var m=Math.round(d/30.4);return m+(m===1?' month':' months');
+}
+/* a date the writer owes, once it has passed, is named. an agency's expected date never is. */
+function detail(r){
+  if(r.due===undefined||r.due>0)return r.dt;
+  var late=span(0-r.due);
+  if(r.dueNamed)return r.pre+' · overdue since '+r.dueNamed+' · '+late;
+  return r.pre+' · owed '+late;
+}
+function railHTML(){
+  var n=R[CUR].n,st=R[CUR].step,h='';
+  for(var d=-Math.round(n*TP/100);d<=n*(100-TP)/100;d+=st){
+    if(Math.abs(d)<st*.55)continue;
+    var p=pos(d);if(p<1.5||p>98.5)continue;
+    h+='<div class="tick" style="left:'+p+'%"></div><div class="dlab" style="left:'+p+'%">'+fmt(d)+'</div>';
+  }
+  return h+'<div class="tdchip" style="left:'+TP+'%">31 Aug</div>';
+}
+function tlHTML(r){
+  var n=R[CUR].n,lo=-n*TP/100,hi=n*(100-TP)/100,h='';
+  if(r.task){
+    var p=pos(r.at);
+    if(p>=-2&&p<=102)h+='<div class="task" style="left:calc('+p+'% - 10px)"><span class="ic"><i></i></span>'
+      +'<span><span class="t1">'+r.nm+'</span><span class="t2">'+r.due+'</span></span></div>';
+    return h;
+  }
+  var to=(r.to===null)?0:r.to;
+  var fL=r.from<lo,fR=(r.to===null)||(to>hi);
+  var a=Math.max(r.from,lo),b=Math.min(to,hi);
+  var hs=(r.hist||[]).filter(function(m){return m.d>=lo&&m.d<a-1.5});
+  if(hs.length){
+    var first=Math.min.apply(null,hs.map(function(m){return m.d}));
+    h+='<div class="hline" style="left:'+pos(first)+'%;width:'+(pos(a)-pos(first))+'%"></div>';
+    hs.forEach(function(m){h+='<div class="hmk" style="left:'+pos(m.d)+'%">'+MK[m.k]+'</div>'});
+  }
+  h+='<div class="card '+(r.cls||'')+(r.ow?' owed':'')+(fL?' fadeL':'')+(fR?' fadeR':'')+'"'
+    +(r.due!==undefined?' data-a="'+a+'" data-b="'+b+'" data-due="'+r.due+'"':'')
+    +' style="--l:'+pos(a)+'%;--w:calc('+(pos(b)-pos(a))+'% + '+(fR?34:0)+'px)'+(r.ow?';animation-delay:'+(STIR++*2.6)+'s':'')+'">'
+    +'<span class="bg"><span class="acc"></span></span>'
+    +'<span class="bodyclip"><span class="body"><span class="pill '+r.pk+(r.ow?' ow':'')+'">'+r.pill+'</span>'
+    +'<span class="line"><span class="hl">'+r.hl+'</span><span class="sep"></span><span class="dt">'+detail(r)+'</span></span></span></span></div>';
+  if(r.ghost){
+    var gp=pos(r.to===null?0:Math.min(r.to,hi));
+    h+='<div class="ghost'+(r.pk==='you'?' yours':'')+(r.ghost.due?' due':'')+'" data-gp="'+gp+'" style="left:calc('+gp+'% + '+(fR?38:17)+'px)">'
+      +GL[r.ghost.k]+(r.ghost.due?'<span class="bdg">!</span>':'')+'</div>';
+  }
+  return h;
+}
+/* text always sits inside. when it will not fit, the card clips it and opens on hover. */
+function place(){
+  document.querySelectorAll('.c-tl').forEach(function(lane){
+    var card=lane.querySelector('.card');if(!card)return;
+    var body=card.querySelector('.body');
+    card.classList.remove('tight');body.classList.remove('drop1');
+    var lw=lane.clientWidth;
+    var pad=card.classList.contains('fadeR')?34:0;
+    var inset=card.classList.contains('fadeL')?42:13;
+    var cl=card.offsetLeft, cw=card.offsetWidth-pad;
+    var acc=card.querySelector('.acc');
+    if(acc&&card.dataset.due!==undefined){
+      var A=+card.dataset.a,B=+card.dataset.b,D=+card.dataset.due;
+      var f=Math.max(0,Math.min(1,(D-A)/((B-A)||1)));
+      var x=f*cw, days=Math.round(B-D);
+      acc.style.left=x+'px';acc.style.width=Math.max(0,cw-x)+'px';
+      acc.setAttribute('data-d',days+'d owed');
+    }
+    var need=function(){return Math.max(body.querySelector('.pill').scrollWidth,body.querySelector('.line').scrollWidth)};
+    if(need()+inset+12<=cw)return;                 /* it fits: nothing to do */
+    var want=need()+inset+12+pad;
+    if(want>lw-4){                                  /* wider than the lane itself: drop the detail, then re-measure */
+      body.classList.add('drop1');
+      want=Math.min(need()+inset+12+pad,lw-4);
+    }
+    /* open rightwards from where it starts; if that runs off the lane, slide it left just enough */
+    var hx=Math.max(0,Math.min(cl,lw-want));
+    card.classList.add('tight');
+    card.style.setProperty('--exp',want+'px');
+    card.style.setProperty('--hx',hx+'px');
+  });
+}
+function placeToday(){
+  var lane=document.querySelector('.rrow .c-tl')||document.getElementById('railtl');
+  var wrap=document.getElementById('wrap'),line=document.getElementById('todayline');
+  var wr=wrap.getBoundingClientRect(),lr=lane.getBoundingClientRect();
+  line.style.left=((lr.left-wr.left)+lr.width*TP/100)+'px';
+}
+function render(){
+  document.getElementById('railtl').innerHTML=railHTML();
+  STIR=0;
+  document.getElementById('board').innerHTML=ROWS.map(function(r){
+    return '<div class="rrow'+(r.asks?' asks':'')+(r.quiet?' quiet':'')+'">'
+      +'<div class="c-ag">'+dot(r.dk)+'<div><div class="nm">'+r.nm+'</div><span class="ag">'+r.ag+'</span></div></div>'
+      +'<div class="c-tl">'+tlHTML(r)+'</div></div>';
+  }).join('');
+  requestAnimationFrame(function(){place();placeToday()});
+}
+document.getElementById('rng').addEventListener('click',function(ev){
+  var b=ev.target.closest('button');if(!b)return;
+  this.querySelectorAll('button').forEach(function(x){x.dataset.on='false'});
+  b.dataset.on='true';CUR=b.dataset.r;render();
+});
+window.addEventListener('resize',function(){place();placeToday()});
+render();
+</script>
+</body>
+</html>
