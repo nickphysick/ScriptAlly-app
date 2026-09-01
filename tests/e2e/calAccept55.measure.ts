@@ -88,6 +88,21 @@ const read = (page: import("@playwright/test").Page) => page.evaluate(() => {
   };
 });
 
+/**
+ * ⚠️ THIS FILE SUPERSEDES `calAccept40.measure.ts`, WHICH WAS RETIRED RED RATHER THAN GREEN — and
+ * that is the part worth recording. Its last claim was "every card has a `data-tier`", over the
+ * v40 ladder that removed words as space ran out. v54 §4 replaced that ladder with clip-and-open
+ * and left a single `delete seg.dataset.tier` behind, so nothing has set the attribute since; the
+ * lock went red at that commit and stayed red, unnoticed, through two design rounds — because
+ * nothing in this repo's routine runs that file, and a red nobody runs is indistinguishable from
+ * a lock that does not exist.
+ *
+ * Every other claim it made is asserted here, at more widths: relationships drawn, one card per
+ * relationship, content inside its own card, today centred, no sideways scroll. Its two mark
+ * claims — a mark off its own card, content over a mark — are subsumed by "a mark sits on a card"
+ * being zero, which is the stronger statement: in v55 a mark is a LEAD-IN and never touches a
+ * card, so content cannot be painted over one.
+ */
 test("the wait, the lead-in and the text — every width, every range", async ({ page }) => {
   const seen = new Set<string>();
   const rows: string[] = [];
