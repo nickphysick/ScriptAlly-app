@@ -86,7 +86,23 @@ test("⚠️ a ghost is drawn as OVER without being drawn as CLOSED", async ({ p
   /* it has stopped being live work */
   expect(JSON.stringify(g.ghost), "a ghost is drawn exactly like a live card").not.toBe(JSON.stringify(g.live));
   expect(g.live.style, "the live comparison card is not solid — it is not representative").toBe("solid");
-  expect(g.ghost.style, "a ghost keeps a solid border, so it still reads as live work").toBe("dashed");
+  /**
+   * ⚠️ THE CLAIM IS "NOT DRAWN AS LIVE WORK", AND ITS SPELLING CHANGED IN v56 §3.
+   *
+   * This required `dashed`. Dashed is now the CLOSED state's alone — the ref carries exactly one
+   * dashed rule, `.card.closedc .bg` — and a long silence is not a closure: it is the state you can
+   * still nudge or close FROM, which is why it is the one offered a close ring. While it wore the
+   * closed frame it was indistinguishable from a recorded rejection, which the rule directly above
+   * its own stylesheet block forbids in as many words.
+   *
+   * So the law is asserted where it now lives: no fill and no shadow, against a live card that has
+   * both. That survives the next restyle; a spelling does not.
+   */
+  expect(g.ghost.bg, "a ghost is filled, so it reads as live work").toBe("rgba(0, 0, 0, 0)");
+  expect(g.ghost.shadow, "a ghost is lifted off the ground, so it reads as live work").toBe("none");
+  expect(g.live.shadow === "none" && g.live.bg === "rgba(0, 0, 0, 0)",
+    "the live comparison card has neither fill nor shadow — it cannot show the difference")
+    .toBe(false);
   /* and it is not a recorded closure */
   expect(JSON.stringify(g.ghost), "a ghost is indistinguishable from a recorded closure")
     .not.toBe(JSON.stringify(g.closed));

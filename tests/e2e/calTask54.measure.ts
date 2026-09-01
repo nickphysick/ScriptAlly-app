@@ -136,7 +136,13 @@ test("a ghost is a named date past its card, clear of it, and only inside the wi
       const clash: string[] = []; const outside: string[] = [];
       for (const g of rings) {
         const gb = g.getBoundingClientRect();
-        const lane = g.parentElement!.getBoundingClientRect();
+        /* ⚠️ THE LANE, NAMED — NOT "the ring's parent". The ring became a CHILD of its card in v56
+           §1 (so that it follows the card's painted width when a clipped card opens), and this
+           then asked whether the ring sits inside the CARD — which it deliberately never does: it
+           stands past the card's right edge, which is the whole point of it. Eleven true readings
+           of the wrong container, reported as the ring escaping the board. */
+        const laneEl = g.closest(".tl-c-tl") as HTMLElement | null;
+        const lane = (laneEl ?? g.parentElement!).getBoundingClientRect();
         if (gb.left < lane.left - 0.5 || gb.right > lane.right + 0.5) {
           outside.push(`ring ${gb.left.toFixed(0)}..${gb.right.toFixed(0)} outside lane ${lane.left.toFixed(0)}..${lane.right.toFixed(0)}`);
         }

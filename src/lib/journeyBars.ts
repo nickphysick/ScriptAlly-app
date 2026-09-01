@@ -1327,6 +1327,19 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
        */
       ...((): { ghostKind?: GhostKind; ghostDue?: boolean; ghostYours?: boolean } => {
         if (terminal || Math.abs(p.to - barStop) > 0.001) return {};
+        /**
+         * ⚠️ NO RING ON A CARD THE WINDOW CUTS OFF — it has nowhere to stand.
+         *
+         * The ring is anchored to the card's END, so on a card clipped by the right edge it is
+         * placed past the clip: measured, eleven rings sitting 26–50px OUTSIDE the lane, painting
+         * over whatever is beside it. (The ref has the same arithmetic — `Math.min(r.to, hi)` puts
+         * its ring past the edge too — and simply never draws a ghost on a clipped row.)
+         *
+         * It is not only a geometry fix. A card the window truncates does not END there; the
+         * reader cannot see where it ends. A ring "just past the end" then states a position that
+         * is not a position, which is the same objection as a date clamped to the window edge.
+         */
+        if (endsAtEdge) return {};
         /* ⚠️ A LONG SILENCE OFFERS `close`, AND IT IS AVAILABILITY RATHER THAN A DEADLINE — so it
            is never drawn `due`. A solid ring with a badge says "this is owed now"; nobody owes a
            closure, and the app reports rather than advises. */
