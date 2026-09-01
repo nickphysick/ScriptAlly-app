@@ -214,7 +214,8 @@ const Piece: React.FC<{
   /* ⚠️ THE PILL IS THE APP'S OWN VOCABULARY — see `calendarPill`. The status while the agency
      holds the move, the deed while the writer does, and nothing else is reachable. */
   const pill = pillText(sg.status, holderOf(sg), sg.nudgeDue);
-  const facts = { trueFrom: sg.trueFrom, trueTo: sg.trueTo, from: sg.from, to: sg.to, days, live: sg.live };
+  const facts = { trueFrom: sg.trueFrom, trueTo: sg.trueTo, from: sg.from, to: sg.to, days,
+    live: sg.live, namedEnd: sg.namedEndAt };
   const fade = fadesFor(facts);
   const bounds = cardBounds(facts);
   /**
@@ -309,6 +310,10 @@ const Piece: React.FC<{
          mutation that made every tint run its whole card and passed. */
       data-latefrom={sg.lateFrom != null ? sg.lateFrom.toFixed(3) : undefined}
       data-dueat={sg.dueAt != null ? sg.dueAt.toFixed(3) : undefined}
+      /* ⚠️ THE NAMED END, PUBLISHED, so the fade audit asserts the classes from the DATES rather
+         than from the classes themselves. A probe that reads `fadeR` and checks `fadeR` is one
+         reading of one fact; the claim is that the class follows the date. */
+      data-namedend={sg.namedEndAt != null ? sg.namedEndAt.toFixed(3) : "none"}
       data-from={sg.from.toFixed(3)}
       data-truefrom={bounds.start.toFixed(3)}
       data-trueto={bounds.end.toFixed(3)}

@@ -5,9 +5,22 @@
 import { describe, it, expect } from "vitest";
 import { fadesFor } from "./calendarFade";
 
-/* by default the piece IS the whole stretch, clipped to the window — the common case */
-const F = (trueFrom: number, trueTo: number, live = false) =>
-  fadesFor({ trueFrom, trueTo, days: 90, live,
+/**
+ * ⚠️ THE HELPER PASSES A NAMED END NOW, AND `live` IS NO LONGER THE QUESTION (v55).
+ *
+ * The right-hand fade asked `live` — "does this piece reach today" — which is true of every
+ * non-terminal relationship whatever date it is running to. Measured on the board: 22 of 22 cards
+ * faded at their right edge, five with named ends 1.5 to 13.5 days INSIDE the window. The ref's own
+ * predicate is `(to === null) || (to > hi)`: no date to stop at, or a date beyond the window.
+ *
+ * `live` survives on the type because the segment still publishes it and other readers use it; it
+ * is simply not what a fade is about.
+ */
+/* by default the piece IS the whole stretch, clipped to the window — the common case. `namedEnd`
+   defaults to the stretch's own end, which is the ordinary case of a wait running to a date. */
+const F = (trueFrom: number, trueTo: number, noEnd = false) =>
+  fadesFor({ trueFrom, trueTo, days: 90, live: noEnd,
+             namedEnd: noEnd ? null : trueTo,
              from: Math.max(0, trueFrom), to: Math.min(90, trueTo) });
 
 describe("a card fades only where it is cut", () => {
@@ -15,9 +28,8 @@ describe("a card fades only where it is cut", () => {
     /* starts before */            expect(F(-12, 40)).toEqual({ left: true, right: false });
     /* ends after */               expect(F(10, 120)).toEqual({ left: false, right: true });
     /* both */                     expect(F(-12, 120)).toEqual({ left: true, right: true });
-    /* neither — the case that was wrong */
-    expect(F(10, 40)).toEqual({ left: false, right: false });
-    /* still running at today */   expect(F(10, 40, true)).toEqual({ left: false, right: true });
+    /* neither */                  expect(F(10, 40)).toEqual({ left: false, right: false });
+    /* no date to stop at */       expect(F(10, 40, true)).toEqual({ left: false, right: true });
   });
 
   it("a card wholly inside the window keeps both edges, whatever its dates", () => {
@@ -35,25 +47,28 @@ describe("a card fades only where it is cut", () => {
   });
 
   it("a piece that starts at a break does not fade, however early its RUN began", () => {
-    /* ⚠️ THE FAULT THIS PREDICATE SHIPPED WITH. Every piece of a run carries the run's true bounds,
-       so an interior piece — one starting at a nudge three weeks inside the window — inherited a
-       left fade from a stretch that opened 47 days before the board. Measured on the real board. */
-    expect(fadesFor({ trueFrom: -47.5, trueTo: 22.5, days: 90, from: 12.84, to: 22.5 }))
+    /* ⚠️ THE FAULT THE LEFT-HAND PREDICATE SHIPPED WITH. Every piece of a run carries the run's
+       true bounds, so an interior piece inherited a left fade from a stretch that opened 47 days
+       before the board. That half is unchanged and still asserted. */
+    expect(fadesFor({ trueFrom: -47.5, trueTo: 22.5, days: 90, from: 12.84, to: 22.5, namedEnd: 22.5 }))
       .toEqual({ left: false, right: false });
     /* while the piece that IS on the edge still fades */
-    expect(fadesFor({ trueFrom: -47.5, trueTo: 22.5, days: 90, from: 0, to: 12.16 }))
+    expect(fadesFor({ trueFrom: -47.5, trueTo: 22.5, days: 90, from: 0, to: 12.16, namedEnd: 22.5 }))
       .toEqual({ left: true, right: false });
   });
 
-  it("a live piece fades right wherever today falls, because today is where it is cut", () => {
-    /* ⚠️ THE WINDOW IS ROLLING AND CARRIES PAST, so today sits INSIDE it rather than at its edge.
-       Requiring a live piece to reach the right-hand edge took the fade off every running card. */
-    expect(fadesFor({ trueFrom: 10, trueTo: 40, days: 90, from: 10, to: 40, live: true }).right).toBe(true);
-    expect(fadesFor({ trueFrom: 10, trueTo: 40, days: 90, from: 10, to: 40, live: false }).right).toBe(false);
+  it("⚠️ A WAIT WITH NO DATE TO STOP AT FADES; ONE WITH A DATE INSIDE THE WINDOW DOES NOT", () => {
+    /* the reversal, stated as the pair. Both reach today; only one has somewhere to stop. */
+    expect(fadesFor({ trueFrom: 10, trueTo: 40, days: 90, from: 10, to: 40, live: true, namedEnd: null }).right).toBe(true);
+    expect(fadesFor({ trueFrom: 10, trueTo: 40, days: 90, from: 10, to: 40, live: true, namedEnd: 40 }).right).toBe(false);
   });
 
-  it("live outranks the end — a running stretch fades right wherever it nominally stops", () => {
-    expect(fadesFor({ trueFrom: 10, trueTo: 11, days: 90, from: 10, to: 11, live: true }).right).toBe(true);
-    expect(fadesFor({ trueFrom: 10, trueTo: 11, days: 90, from: 10, to: 11, live: false }).right).toBe(false);
+  it("⚠️ AND IT COMPARES THE UNCLIPPED DATE, not the card's drawn end", () => {
+    /* `to` is clipped to the window, so it can never exceed `days` and a predicate reading it could
+       never fire the second term. Measured: six cards with ends 1.5 to 52.5 days past the window
+       carried no right fade at all — the opposite fault to the one above, and it would have
+       shipped beside it. */
+    expect(fadesFor({ trueFrom: 10, trueTo: 90, days: 90, from: 10, to: 90, namedEnd: 120 }).right).toBe(true);
+    expect(fadesFor({ trueFrom: 10, trueTo: 90, days: 90, from: 10, to: 90, namedEnd: 89 }).right).toBe(false);
   });
 });

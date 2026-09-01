@@ -41,6 +41,13 @@ export interface FadeFacts {
   to: number;
   /** this is the stretch that reaches today */
   live?: boolean;
+  /**
+   * The date this wait is running TO, in window day units — `null` where none is named.
+   *
+   * ⚠️ THIS IS THE FADE'S OWN QUESTION AND `live` IS NOT IT. A card can reach today AND have a
+   * named end inside the window; `live` is true of both kinds and cannot separate them.
+   */
+  namedEnd?: number | null;
 }
 
 export interface Fades { left: boolean; right: boolean }
@@ -76,15 +83,25 @@ export function fadesFor(f: FadeFacts): Fades {
   return {
     /* this CARD's true start is earlier than the window's start */
     left: cardBounds(f).start < -EPS,
-    /* still running at today, or ends past the window's right-hand edge. Nothing else earns one:
-       a card that ends at a named future date INSIDE the window keeps both corners and both
-       borders, because nothing about it is cut off. */
-    /* ⚠️ A LIVE PIECE IS CUT AT TODAY, AND TODAY IS NOT THE WINDOW'S EDGE. The window is rolling
-       and carries some past, so today sits inside it; a running stretch is the LAST piece of its
-       run and stops there. So `live` earns the fade on its own — requiring it to reach the
-       window's right edge as well took the fade off every running card on the board.
-       The other half is different in kind and does need the edge: a stretch that runs past the
-       window is only CUT on the piece that sits on that edge. */
-    right: !!f.live || cardBounds(f).end > f.days + EPS,
+/**
+     * ⚠️ NO NAMED END, OR AN END PAST THE WINDOW — and the first term is NOT "reaches today".
+     *
+     * It read `!!f.live`, and `live` means "this piece reaches today", which is true of every
+     * non-terminal relationship whatever date it is running to. So every card on the board faded
+     * at its right edge: measured, 22 of 22, including five whose named ends sat 1.5 to 13.5 days
+     * INSIDE the window. A fade says "this is cut off"; on a card terminating on a date the reader
+     * can see, it says something false about a date that is right there.
+     *
+     * The ref's own predicate is `(r.to === null) || (to > hi)` — no named end at all, or an end
+     * beyond the window. A wait with nowhere to stop genuinely runs off the edge; a wait with a
+     * date inside the window stops on it, with both corners and both borders.
+     *
+     * ⚠️ AND IT COMPARES THE UNCLIPPED DATE, NOT `cardBounds(f).end`. That value is the card's
+     * DRAWN end, clipped to the window — so it can never exceed `days` and the second term could
+     * never fire. Measured: six cards with ends 1.5 to 52.5 days PAST the window carried no right
+     * fade at all, which is the opposite fault to the one this phase started with and would have
+     * shipped beside it.
+     */
+    right: f.namedEnd == null || f.namedEnd > f.days + EPS,
   };
 }

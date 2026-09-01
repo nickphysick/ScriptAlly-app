@@ -239,6 +239,15 @@ export interface Segment {
    * than a debt; the board states it and never scores it, in colour or in words.
    */
   lateFrom?: number;
+  /**
+   * Where this wait is running TO, in window day units — `null` where no date is named.
+   *
+   * ⚠️ THIS IS WHAT THE RIGHT-HAND FADE READS, and `live` is not it. A card can reach today AND
+   * terminate on a date inside the window; `live` is true of both and cannot tell them apart,
+   * which is why every card on the board faded at its right edge — 22 of 22, five of them with
+   * ends 1.5 to 13.5 days inside it.
+   */
+  namedEndAt: number | null;
   /** the due date's own position, unclamped — what `lateFrom` is derived FROM */
   dueAt?: number;
   /**
@@ -925,12 +934,29 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
    * last change whoever it fell to.
    */
   const waitFromYmd = (() => {
-    for (let i = live.length - 1; i >= 0; i -= 1) {
+    /**
+     * ⚠️ A CLOSED RELATIONSHIP'S CARD SPANS THE WAIT THAT ENDED, NOT CLOSE-TO-CLOSE.
+     *
+     * The closing event IS a status change, so on a terminal row the walk below found it, made it
+     * the start of the wait — and `barStop` is that same event, so `from === to` and the card was
+     * exactly zero days wide. Measured: Rosalind Vale, `from = to = 4.5`, hidden by the fit pass's
+     * own sliver guard, so her row rendered an empty lane.
+     *
+     * The wait a closed row should show is the one that ENDED: from the status change BEFORE the
+     * close to the close itself, which is how long the final wait actually ran. So the closing
+     * event is skipped and the walk continues from the one before it.
+     */
+    const skipFrom = closeIdx >= 0 ? closeIdx : live.length;
+    for (let i = skipFrom - 1; i >= 0; i -= 1) {
       const ymd = win.days[Math.floor(live[i].at)];
       /* an event after today cannot be when something started — the same clamp `sinceYmd` needs */
       if (ymd > win.today) continue;
       if (statusOf(live[i].activityId)) return ymd;
     }
+    /* ⚠️ AND A CLOSE WITH NOTHING BEFORE IT IN VIEW FALLS BACK TO THE SEND, not to the close. The
+       stamped `lastStatusChange` IS the close on a terminal row, so taking it would restore the
+       zero-width card by the other route. */
+    if (closeIdx >= 0) return openedYmd;
     const stamped = isoToYmd(query.lastStatusChange as string | undefined);
     if (stamped) return stamped;
     return openedYmd;
@@ -1229,6 +1255,11 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
          be inside the window: one row read 73% at three months and 59% at six, because at six
          months a nudge was visible and the piece began there. A run is one stretch and takes one
          anchor. */
+      /* ⚠️ A DATE THAT HAS PASSED IS NOT A DATE THIS WAIT IS RUNNING TO. The card then runs on
+         to today and the wait has, in fact, nowhere to stop — which is the ref's `to === null`
+         case, and it must fade. Publishing the passed date would say the card terminates on a day
+         the reader can see it running past. */
+      namedEndAt: closeIdx >= 0 ? stopAt : (goalAt != null && goalAt >= todayAt ? goalAt : null),
       trueFrom: runFrom[runOf[i]],
       trueTo: runTo[runOf[i]],
       /**
