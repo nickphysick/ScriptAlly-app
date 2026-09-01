@@ -1570,21 +1570,38 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   }, [rows, shut, onlyAsks, tab, groupMode, cutNow, boardManuscripts]);
 
   /**
-   * Every row on one list, nearest first.
+   * Every row on one list, in the order the board was built in.
    *
-   * ⚠️ IT SORTS ON THE KEY THE ROWS CARRY, never on a second derivation of "nearest". `pressingAt`
-   * is what SOONEST already orders by and what the row publishes for the lock to read; deriving an
-   * order here would be a second answer to a settled question, free to disagree with the one the
-   * page says it is using.
+   * ⚠️ IT FLATTENS AND DOES NOT RE-SORT, AND THAT IS THE FIX. It used to sort by `pressingAt`
+   * here — which is `cmp.soonest`, so at the default it looked right and WAS right. What it also
+   * did was overwrite the order for the other two: `view.sort` is applied by the board builder
+   * (`todoTimeline`'s `cmp` table), and this re-sort threw that away. Measured: selecting
+   * "Longest waiting" set `aria-pressed` on the control and repainted **the identical order**,
+   * every row in the same place. A control that reports success and changes nothing is worse than
+   * one that is missing — the reader believes the board is now ordered the way they asked.
+   *
+   * ⚠️ IT ALSO THREW AWAY THE CLOSED RULE. The builder sinks a closed row below every live one in
+   * EVERY sort, before any key is consulted; a re-sort on `pressingAt` alone knows nothing about
+   * that, and only got away with it because a closed row happens to carry a null key today.
+   *
+   * ⚠️ SO IT RE-SORTS IN SOONEST AND ONLY IN SOONEST. The builder interleaves the pinned row and
+   * the task rows ABOVE the agent rows, each ordered among themselves — correct for a grouped
+   * board, and not a single ascending list. One list at SOONEST is exactly the claim that the top
+   * is what needs you next, so it is flattened and ordered on the one key; the other two orders
+   * are the builder's and are passed through untouched, because re-sorting them on `pressingAt`
+   * is what made the control inert.
    *
    * ⚠️ AND A ROW WITH NO KEY SINKS RATHER THAN LEADS. `null` means nothing is pressing — a closed
    * relationship, or one with no dated work — and `null` sorted as zero would put the quietest
    * rows at the top of a list whose whole claim is that the top is what needs you.
    */
   const oneList = useMemo(
-    () => board.flatMap((g) => g.rows)
-      .sort((a, b) => (a.pressingAt ?? Infinity) - (b.pressingAt ?? Infinity)),
-    [board],
+    () => (view.sort === DEFAULT_SORT
+      ? board.flatMap((g) => g.rows)
+        .slice()
+        .sort((a, b) => (a.pressingAt ?? Infinity) - (b.pressingAt ?? Infinity))
+      : board.flatMap((g) => g.rows)),
+    [board, view.sort],
   );
 
 
