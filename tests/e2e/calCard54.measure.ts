@@ -49,6 +49,7 @@ const read = (page: import("@playwright/test").Page) => page.evaluate(() => {
       onCard: on.length,
       pastEdge: line.filter((m) => box(m).r > cb.l + 0.6).length,
       contentMask: maskOf(content), cardMask: maskOf(c), frameMask: maskOf(frame),
+      tight: c.hasAttribute("data-tight"),
       contentOpacity: content ? getComputedStyle(content).opacity : null,
       hasFrame: !!frame, hasContent: !!content,
       tier: c.dataset.tier || "none",
@@ -199,8 +200,16 @@ test("⚠️ a card cut at BOTH ends still paints its words at full opacity", as
   console.log(`  driven: cut mask ${driven!.cut.slice(0, 26)}… · uncut mask ${driven!.flat}`);
   expect(driven!.cut, "a cut card carries no mask").not.toBe("none");
   expect(driven!.flat, "a card that is not cut still dissolves its own edge").toBe("none");
-  expect(rows.filter((r) => r.contentMask !== "none").map((r) => `${r.rel}: ${r.contentMask.slice(0, 40)}`),
-    "the words carry a mask").toEqual([]);
+  /* ⚠️ THE CARVE-OUT IS `tight`, AND IT IS THE ONLY ONE. The frame's fade must never reach the
+     words — that is this claim and it stands. What changed is that a card whose words overflow now
+     carries its OWN clip on `.tl-content`: v55 made the content two lines, and a clip on the line
+     alone would soften the headline while leaving the pill above it hard-cut. So a mask here is an
+     offence unless the card declares itself clipped, and an unclipped card masking its words is
+     still the fault this was written for. */
+  expect(rows.filter((r) => r.contentMask !== "none" && !r.tight).map((r) => `${r.rel}: ${r.contentMask.slice(0, 40)}`),
+    "an unclipped card masks its words").toEqual([]);
+  expect(rows.filter((r) => r.cardMask !== "none").map((r) => r.rel),
+    "the card itself carries a mask — it contains the words").toEqual([]);
   expect(rows.filter((r) => r.cardMask !== "none").map((r) => `${r.rel}: ${r.cardMask.slice(0, 40)}`),
     "the CARD carries a mask, so it reaches the words it contains").toEqual([]);
   expect([...new Set(rows.map((r) => r.contentOpacity))], "the words are not at full opacity").toEqual(["1"]);

@@ -30,8 +30,12 @@ const census = (page: Page) => page.evaluate(() => {
       c.classList.contains("fadeL") ? "--card-fade-inset" : "--tl-text-inset")) || 0;
     const fadePad = c.classList.contains("fadeR")
       ? parseFloat(cs.getPropertyValue("--card-fade")) || 0 : 0;
+    /* ⚠️ THE WIDER OF THE TWO, NOT THEIR SUM. v55 stacks the pill above the headline, so their
+       widths no longer add — the sum overstated every card by roughly a pill and reported cards
+       opening 142px past their own words. This mirrors the page's own arithmetic, which is why
+       `data-need` is published and compared against it below rather than trusted on its own. */
     const needed = pill && track
-      ? inset + pill.getBoundingClientRect().width + 10 + track.scrollWidth + 12 + fadePad : 0;
+      ? inset + Math.max(pill.getBoundingClientRect().width, track.scrollWidth) + 12 + fadePad : 0;
     return { rel: c.dataset.rel || "", tight: c.hasAttribute("data-tight"),
       noDetail: c.hasAttribute("data-nodetail"),
       w: b.width, left: b.left, right: b.right,
@@ -41,7 +45,11 @@ const census = (page: Page) => page.evaluate(() => {
          has already lost its detail, so a justified drop reads as unjustified. */
       needFull: Number(c.dataset.needfull || "NaN"),
       exp: c.style.getPropertyValue("--exp"), hx: c.style.getPropertyValue("--hx"),
-      lineMask: maskOf(line) };
+      /* ⚠️ THE CLIP IS READ WHERE IT LIVES — on `.tl-content`, not on the line. v55 moved it up a
+         level because the content is two rows now and a mask on the line alone would soften the
+         headline while leaving the pill above it hard-cut. Either element may legitimately be the
+         one carrying it; what the claim is about is whether a clipped card clips. */
+      lineMask: maskOf((c.querySelector(".tl-content") as HTMLElement | null) || line) };
   });
 });
 

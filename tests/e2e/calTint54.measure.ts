@@ -66,10 +66,16 @@ test("the tint spans the lateness, is flat, and has a hard edge at the due date"
         sy: (() => {
           const ct = c.querySelector(".tl-content") as HTMLElement | null;
           const kids = ct ? ([...ct.children] as HTMLElement[]).filter(vis) : [];
-          const inkBottom = kids.length
-            ? Math.max(...kids.map((k) => k.getBoundingClientRect().bottom)) : cb.top + cb.height / 2;
-          /* halfway between the words' bottom and the card's inner bottom edge */
-          return Math.min(cb.bottom - 4, (inkBottom + cb.bottom) / 2);
+          const inkTop = kids.length
+            ? Math.min(...kids.map((k) => k.getBoundingClientRect().top)) : cb.top + cb.height / 2;
+          /* ⚠️ THE AIR ABOVE THE WORDS, NOT BELOW THEM. Both bands are clear fill, and the lower
+             one used to be the roomier — until v55 stacked the content into two rows, which pushed
+             the ink's bottom down to within 6px of the card's own bottom edge. The sample then
+             landed in the card's border and both sides of the tint's edge read the same, reporting
+             a hard edge as soft. Above the words the band is the card's fill and the tint spans it.
+             Clamped so a card whose words fill it still samples inside the fill rather than on the
+             border, and floored at +3 so a hairline can never be what is read. */
+          return Math.max(cb.top + 3, Math.min((cb.top + inkTop) / 2, cb.top + 8));
         })(),
         tl: t.left, tr: t.right, bg: cs.backgroundColor, img: cs.backgroundImage };
     }), untinted: cards.filter((c) => !c.querySelector(".tl-late")).length };
@@ -164,8 +170,8 @@ test("the tint spans the lateness, is flat, and has a hard edge at the due date"
                the failure did not move. */
             const ctn = c.querySelector(".tl-content") as HTMLElement | null;
             const kids = ctn ? ([...ctn.children] as HTMLElement[]).filter(vis) : [];
-            const inkBottom = kids.length
-              ? Math.max(...kids.map((k) => k.getBoundingClientRect().bottom)) : cb.top + cb.height / 2;
+            const inkTop = kids.length
+              ? Math.min(...kids.map((k) => k.getBoundingClientRect().top)) : cb.top + cb.height / 2;
             const lane2 = c.parentElement!.getBoundingClientRect();
             const days2 = Number(c.dataset.days || "0");
             const dueAt2 = Number(c.dataset.dueat || "NaN");
@@ -174,7 +180,7 @@ test("the tint spans the lateness, is flat, and has a hard edge at the due date"
               dueX: days2 > 0 && Number.isFinite(dueAt2) ? lane2.left + (dueAt2 / days2) * lane2.width : null,
               lateFrom: Number(c.dataset.latefrom || "NaN"),
               from: Number(c.dataset.from || "0"), days: days2,
-              sy: Math.min(cb.bottom - 4, (inkBottom + cb.bottom) / 2),
+              sy: Math.max(cb.top + 3, Math.min((cb.top + inkTop) / 2, cb.top + 8)),
               tl: t.left, tr: t.right, bg: "", img: "" };
           });
       });
@@ -213,7 +219,12 @@ test("⚠️ only a writer-owed passed date can produce the word overdue", async
       return ([...document.querySelectorAll(".tl-p")] as HTMLElement[]).filter(vis).map((c) => ({
         rel: c.dataset.rel || "", state: c.dataset.state || "",
         text: (c.querySelector(".tl-content")?.textContent || "").trim(),
-        owed: c.classList.contains("owed") || c.classList.contains("req"),
+        /* ⚠️ WHOSE MOVE IT IS COMES FROM `holderOf`, published on the card — NEVER re-derived here
+           from the family classes. The first form read `owed || req` and reported an OFFER as the
+           agency's, because an offer's family is `decide`: `journeyBars.ts` calls that date "the
+           most writer-owed date on the board" two hundred lines from where this lock denied it.
+           A test that hand-writes an input its caller computes is testing a different function. */
+        owed: (c.dataset.holder || "") === "writer",
         tinted: !!c.querySelector(".tl-late"),
       }));
     });

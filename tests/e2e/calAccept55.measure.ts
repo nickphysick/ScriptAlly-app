@@ -25,19 +25,43 @@ const read = (page: import("@playwright/test").Page) => page.evaluate(() => {
   };
   const per = new Map<string, number>();
   const insets = new Set<string>();
+  const fadeWrong: string[] = [];
+  const insetSplit: string[] = [];
   let onCard = 0, outside = 0, maskedText = 0, tinted = 0, tight = 0, stubs = 0;
   for (const c of cards) {
     const cb = box(c);
     const rel = c.dataset.rel || "";
     if (rel) per.set(rel, (per.get(rel) ?? 0) + 1);
     const content = c.querySelector(".tl-content") as HTMLElement | null;
-    if (maskOf(content) !== "none" || maskOf(c) !== "none") maskedText += 1;
+    /* ⚠️ THE CARD MAY NEVER CARRY A MASK — it contains the words. The CONTENT may, but only when
+       the card is `tight`: that is the soft right edge on words which overflow, a different thing
+       from the frame's fade, and v55 moved it onto this wrapper because the content is two lines
+       now and a mask on the line alone would fade the headline and leave the pill hard. */
+    if (maskOf(c) !== "none") maskedText += 1;
+    if (maskOf(content) !== "none" && !c.hasAttribute("data-tight")) maskedText += 1;
     if (c.querySelector(".tl-late")) tinted += 1;
     if (c.hasAttribute("data-tight")) tight += 1;
     if (c.dataset.tier === "stub") stubs += 1;
+    /* v55: the fades against the dates, and the two lines against each other */
+    {
+      const days = Number(c.dataset.days || "0");
+      const tf = Number(c.dataset.truefrom || "NaN");
+      const ne = c.dataset.namedend === "none" ? null : Number(c.dataset.namedend);
+      const wantL = tf < -0.1, wantR = ne == null || ne > days + 0.1;
+      if (c.classList.contains("fadeL") !== wantL || c.classList.contains("fadeR") !== wantR) {
+        fadeWrong.push(`${rel}: trueFrom ${tf} namedEnd ${ne}/${days}`);
+      }
+      const pl = c.querySelector(".tl-pill") as HTMLElement | null;
+      const hl2 = c.querySelector(".tl-hl") as HTMLElement | null;
+      if (pl && hl2 && vis(pl) && vis(hl2)
+          && Math.abs(pl.getBoundingClientRect().left - hl2.getBoundingClientRect().left) > 0.6) {
+        insetSplit.push(rel);
+      }
+    }
     const kids = content ? ([...content.children] as HTMLElement[]).filter(vis) : [];
-    if (kids.length && c.dataset.tier !== "stub") {
-      insets.add(`${c.classList.contains("fadeL") ? "fadeL" : "flat"}:${Math.round((box(kids[0]).l - cb.l) * 10) / 10}`);
+    if (kids.length) {
+      const pl0 = c.querySelector(".tl-pill") as HTMLElement | null;
+      if (pl0 && vis(pl0)) insets.add(`${c.classList.contains("fadeL") ? "fadeL" : "flat"}:${Math.round((pl0.getBoundingClientRect().left - cb.l) * 10) / 10}`);
     }
     for (const k of kids) {
       const kb = box(k);
@@ -58,6 +82,7 @@ const read = (page: import("@playwright/test").Page) => page.evaluate(() => {
     marks: marks.length, onCard, outside, maskedText, tinted, tight, stubs,
     insets: [...insets].sort(),
     todayOff: lb && tb ? Math.abs((tb.left + tb.width / 2) - (lb.left + lb.width / 2)) : null,
+    fadeWrong, insetSplit,
     lineZ: line ? Number(getComputedStyle(line).zIndex) : null,
     overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
   };
@@ -84,7 +109,7 @@ test("the wait, the lead-in and the text — every width, every range", async ({
         + ` cards ${String(m.cards).padStart(2)} rels ${String(m.rels).padStart(2)} worst ${m.worst}`
         + ` · marks ${String(m.marks).padStart(2)} on-card ${m.onCard}`
         + ` · text outside ${m.outside} masked ${m.maskedText}`
-        + ` · tinted ${m.tinted} tight ${m.tight} stubs ${m.stubs}`
+        + ` · tinted ${m.tinted} tight ${m.tight} fadeBad ${m.fadeWrong.length} insetBad ${m.insetSplit.length}`
         + ` · today off ${m.todayOff?.toFixed(2)} z${m.lineZ} · page overflow ${m.overflowX}`);
 
       const at = `[${w}/${RANGE_LABELS[i]}]`;
@@ -96,6 +121,12 @@ test("the wait, the lead-in and the text — every width, every range", async ({
       expect(m.maskedText, `${at} a mask reaches the words`).toBe(0);
       /* the ground */
       expect(m.todayOff!, `${at} today is not the lane's centre`).toBeLessThan(1.1);
+      /* ⚠️ v55: no card whose named end lies inside the window may fade at its right edge, and
+         the pill and headline share one inset on every card. Both are checked in their own files;
+         they are here too because the acceptance sweep is the one place they are asserted at every
+         width AND every range together. */
+      expect(m.fadeWrong, `${at} a card's fades do not follow its dates`).toEqual([]);
+      expect(m.insetSplit, `${at} a card's pill and headline start at different x`).toEqual([]);
       expect(m.lineZ!, `${at} the today line does not clear every card`).toBeGreaterThanOrEqual(60);
       expect(m.overflowX, `${at} the page scrolls sideways`).toBeLessThan(2);
     }

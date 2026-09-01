@@ -32,7 +32,13 @@ test("a faded edge dissolves to the ground, on every colour of card", async ({ p
     const k=img.naturalWidth/window.innerWidth;
     const at=(x,y)=>{const d=ctx.getImageData(Math.round(x*k),Math.round(y*k),1,1).data;return [d[0],d[1],d[2]];};
     const vis=(s)=>[...document.querySelectorAll(s)].find(e=>e.getBoundingClientRect().height>0)||null;
+    /* ⚠️ THE CLAIM IS "NOTHING ELSE OWNS THIS PIXEL", NOT "THE CARD IS THE TOPMOST NODE". v55 lays
+       the words in an absolutely-positioned .tl-content spanning the card's full height, so the
+       topmost element inside a card is now that wrapper on nearly every point — and a strict
+       identity test rejected all 17 faded cards while reporting "0 kinds found". The card's own
+       descendant is the card; a neighbouring card or a mark is not. */
     const top=(x,y)=>{const s=document.elementsFromPoint(x,y);return s.length?s[0]:null;};
+    const owns=(x,y,c)=>{const t=top(x,y);return !!t&&(t===c||c.contains(t));};
     const out={ kinds:{}, ground:null };
     /* the ground, sampled where the lane owns it */
     const lane=vis(".tl-rrow .tl-c-tl");
@@ -49,7 +55,7 @@ test("a faded edge dissolves to the ground, on every colour of card", async ({ p
       const y=r.top+4;                        /* above the words, in the card's own fill */
       /* three points across the last 38px: deep inside, mid-fade, and at the very edge */
       const pts=[r.right-44, r.right-19, r.right-2];
-      if (pts.some(x=>top(x,y)!==c)) continue;
+      if (pts.some(x=>!owns(x,y,c))) continue;
       /* ⚠️ THE GROUND LOCAL TO THIS CARD, not the board's. The past is washed, so a card fading in
          the past dissolves toward a DARKER ground than one fading to the right of today — the first
          draft compared every card against the unwashed ground far right and reported two of three

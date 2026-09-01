@@ -147,7 +147,6 @@ const ROW_DOT = 18;
 const PILL_INSET = 13;
 
 /** the flex gap between the pill and the line it sits beside, matching `.tl-p`'s own */
-const PILL_GAP = 10;
 
 /** the mark's own width, matching `--mk` in the stylesheet */
 const MARK_W = 22;
@@ -296,6 +295,12 @@ const Piece: React.FC<{
          wherever it happened to hold one relationship. */
       data-rel={`${sg.rowKey}::${sg.lane}`}
       data-state={sg.state}
+      /* ⚠️ WHOSE MOVE IT IS, FROM THE APP'S OWN DERIVATION — `holderOf`, the same call the pill
+         already makes. It is published because a lock that re-derives it from the card's family
+         classes gets it wrong: `decide` (an offer) is the writer's move and does not carry `owed`
+         or `req`, so a hand-written pair reads the most writer-owed card on the board as the
+         agency's. A reader asking whose move it is must ask the function that decides it. */
+      data-holder={holderOf(sg)}
       /* ⚠️ WHICH QUERY THIS BAR IS, so a lock can ask whether the row's WORDS are about a query the
          row actually draws. Three variants of that bug shipped, each one a true sentence about a
          query the reader could not see, and none of them was catchable from appearance alone. */
@@ -379,7 +384,9 @@ const Piece: React.FC<{
       <span className={`tl-pill ${pill.tone}`} data-pill={pill.text}>{pill.text}</span>
       {sg.label && (
         <>
-          {/* ⚠️ THE PILL, THE HEADLINE AND THE DETAIL — three things on one line, in that order.
+          {/* ⚠️ THE HEADLINE AND THE DETAIL SHARE A LINE; THE PILL SITS ABOVE THEM. v55 stacks the
+              content, so this row is two things, not three — anything reading this as one line
+              (a width that sums the pill in, a baseline that expects the pill beside it) is wrong.
               The separator is an ELEMENT rather than a border on the detail, because the detail is
               the part that can be absent and a border would go with it, leaving the headline
               looking cut off. */}
@@ -733,13 +740,21 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
           seg.classList.contains("fadeL") ? "--card-fade-inset" : "--tl-text-inset")) || 0;
         const detail = track.querySelector<HTMLElement>(".tl-cdt");
 
-        /* what the content needs: the inset, the pill, its gap, the whole track, and the air the
+        /* what the content needs: the inset, the WIDER of the pill and the track, and the air the
            content pays on its right — plus the fade's own width where the card's right edge is
            dissolving, or the last word opens straight into the dissolve */
+        /* ⚠️ THE WIDER OF THE TWO, NEVER THEIR SUM — the pill sits ABOVE the headline now, so they
+           do not share a line and their widths do not add. The sum is what v54 needed when the two
+           sat side by side, and carrying it into a column layout overstated every card by roughly
+           a pill: measured, a tight card opened 142px past its own words, and cards whose words
+           fitted were being clipped and having their detail dropped to make room for space nothing
+           occupies. The ref computes exactly this — `Math.max(pill.scrollWidth, line.scrollWidth)`.
+           If the pill and the headline are ever put back on one line, this goes back to a sum. */
         const fadePad = seg.classList.contains("fadeR")
           ? parseFloat(getComputedStyle(seg).getPropertyValue("--card-fade")) || 0 : 0;
-        const needed = () => inset + pillEl.getBoundingClientRect().width + PILL_GAP
-          + track.scrollWidth + CONTENT_MARGIN_R + fadePad;
+        const needed = () => inset
+          + Math.max(pillEl.getBoundingClientRect().width, track.scrollWidth)
+          + CONTENT_MARGIN_R + fadePad;
 
         const laneW = lane ? lane.width : Infinity;
         let want = needed();
