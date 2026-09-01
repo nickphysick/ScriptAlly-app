@@ -19,6 +19,11 @@ const TAG = `
 
 test("every card is an object, and every pill is the app's own word", async ({ page }) => {
   const errors: string[] = [];
+  /* ⚠️ COUNTED ACROSS THE WHOLE SWEEP, NOT PER COMBINATION. A width and range where every card is
+     cut at one end is a legitimate board — at 1280/Month all 23 relationships run past the visible
+     month — so a per-combination floor fails on a correct page. The claim that has to hold is that
+     the radius was tested SOMEWHERE, which is what stops the fade predicate emptying it again. */
+  let uncutSeen = 0;
   page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
 
   /* ⚠️ THE PERMITTED WORDS COME FROM THE SOURCE, never a list typed out here. A hand-copied set
@@ -53,9 +58,13 @@ test("every card is an object, and every pill is the app's own word", async ({ p
           const p = c.querySelector(".tl-pill");
           if (p) out.pills.push({ text: p.textContent, tone: [...p.classList].filter((x) => x !== "tl-pill").join(" ") });
           const cs = getComputedStyle(c);
+          /* ⚠️ THE RADIUS IS READ OFF THE FRAME, NOT THE CARD. v54 moved the border, the shadow
+             and the corner onto .tl-frame, so .tl-p reports 0px — the same relocation that had
+             calText reading a shadow off the wrong element. Read where the value lives. */
+          const fr = c.querySelector(".tl-frame");
           out.geom.push({
             h: Math.round(cr.height),
-            radius: cs.borderTopLeftRadius,
+            radius: getComputedStyle(fr || c).borderTopLeftRadius,
             faded: c.className.includes("fade"),
           });
         }
@@ -80,7 +89,14 @@ test("every card is an object, and every pill is the app's own word", async ({ p
         .toEqual([54]);
 
       /* a card that is not cut is a 9px pill of a box; a cut one squares the faded corner */
-      const wrongRadius = read.geom.filter((g: any) => !g.faded && g.radius !== "9px");
+      /* ⚠️ THE POPULATION FIRST, AND THIS IS WHY. Until v55 fixed the fade predicate EVERY card
+         carried `fadeR`, so this filter was empty and the assertion passed over nothing — for as
+         long as the fade bug existed. It went red the moment unfaded cards appeared, which is the
+         lock working for the first time rather than a regression. A filtered claim states how many
+         subjects it found, or it is one upstream bug away from proving nothing. */
+      const unfaded = read.geom.filter((g: any) => !g.faded);
+      uncutSeen += unfaded.length;
+      const wrongRadius = unfaded.filter((g: any) => g.radius !== "9px");
       expect(wrongRadius, `${width}px r${r}: a card is not 9px round`).toEqual([]);
 
       for (const p of read.pills) {
@@ -97,5 +113,7 @@ test("every card is an object, and every pill is the app's own word", async ({ p
      perfectly while proving nothing about the vocabulary. */
   expect(seenWords.size, `only ${seenWords.size} distinct pill word(s) — the sweep is a monoculture`)
     .toBeGreaterThan(2);
+  expect(uncutSeen,
+    "no uncut card at any width or range, so the corner radius was never tested").toBeGreaterThan(0);
   expect(errors, `console errors: ${errors.join(" | ")}`).toEqual([]);
 });

@@ -1,166 +1,274 @@
-# Calendar v55 — STOPPED AT THE STOP CONDITION
+# Calendar v55 — make the board match the ref, in one pass
 
-## 1. The ref — THE RUN IS STOPPED HERE
+**Territory:** `TodoCalendarPage.tsx`, `todoTimeline.ts`, `todoCalendar.css`, the bar/segment
+module, `timelineGroups.ts`, `timelineCopy.ts`, the calendar-local modules, the calendar
+measurement files, `design-refs/timeline-v55.html`, this report.
+**View layer only.** `recomputeQuery`, `resolveExpectedDate`, `recordDays`, `waitingFrom`, the
+dedupe, `useTaskPaneSession` and `quickDone` are consumed and unaltered.
 
-**No `design-refs/timeline-v55.html` exists, in the checkout or anywhere on this
-machine.** Searched `design-refs/`, `~/Downloads`, `~/Desktop`, `~/Documents` and
-`/tmp` for any file named `*v55*`: none.
+---
 
-What is present:
+## FLAG 1 — THE REF: WHICH FILE, WHICH HASH, AND WHETHER IT IS REALLY v55
 
-| Where | File | SHA-256 (first 24) | Its own `<title>` |
-|---|---|---|---|
-| checkout | `design-refs/timeline-v40.html` | — | — |
-| `~/Downloads` | `timeline-v54-ref.html` | `a4c98ea5d469a145fbaeddd4` | ScriptAlly — Calendar design ref **v54** (normative) |
-| `~/Downloads` | `timeline-v54-ref (1).html` | `a4c98ea5d469a145fbaeddd4` | identical file, re-downloaded 07:45 today |
+**This flag is first because everything below depends on it, and because the run stopped once
+already over it.**
 
-The two Downloads copies are **byte-identical**, and the file declares itself
-**v54**, not v55.
+| | |
+|---|---|
+| File | `design-refs/timeline-v55.html` |
+| Size | 26,166 bytes |
+| SHA-256 | `6e4a047bd20525868f93369bc462e2214c91f972b4dddbda56ec08391edd4fff` |
+| Version string in the file | `v55` — the only one present |
+| Guarded by | `design-refs/.refhashes.json`, checked on every `build:dev` / `build:prod` |
 
-**I have not substituted it.** The stop condition says so in as many words — *"Do
-not fall back to an older ref... The previous run built against a ref three
-versions stale because it substituted silently."* Treating a file whose own title
-says v54 as though it were v55 is that substitution, and the fact that it is one
-version behind rather than three does not change what it is.
+**Phase 0 stopped the run rather than proceeding**, because no v55 ref existed and the pack's own
+stop condition forbids falling back to an older one or building from the pack text alone. The
+eight hypotheses were measured anyway, since measurement needs no ref. You then supplied the file.
 
-**What I need from you — one of two things:**
+**⚠️ AND HERE IS THE THING TO KNOW ABOUT IT.** The file you supplied is **byte-identical to
+`timeline-v54-ref.html` apart from the version string**. So it is not a new design — it is the
+document the v54 run never had. That explains why so much of this pass was *correcting v54's
+guesses against a ref that existed*, rather than building anything new: the pill above the
+headline, the two-row content, the `Math.max` width, the `.bodyclip` insets and the 18px tight
+mask are all in that file and all were reconstructed differently by v54 working without it.
 
-1. Drop `timeline-v55.html` into `design-refs/` (or Downloads and tell me), or
-2. Tell me explicitly that `timeline-v54-ref.html` **is** the normative ref for
-   this pack and the pack's version number is out of step. That is a one-line
-   answer and I will run the whole pack from it.
+`design-refs/timeline-v40.html` was deleted in §1 and retired from the hash manifest.
 
-⚠️ There is a real chance (2) is the case: my v54 run reported that no v54 ref was
-supplied and built from the pack prose, and this file was created at 21:33 on
-31 Aug — during that run. If so, several Phase 0 findings below are very likely
-divergences from a ref I have never seen.
+---
 
-## 2. Phase 0 — the eight hypotheses, measured on the deployed board
-
-Worktree: primary tree only, `main`, clean, level with `origin/main` at
-`57fda8df`. Local bundle `index-CzKIN5xX` matches the deployed one. Measured at
-1440×900, Month range, with the stir suppressed. **Nothing was changed.**
+## FLAG 2 — THE EIGHT PHASE 0 HYPOTHESES, EACH FOUNDED OR NOT, WITH THE MEASUREMENT
 
 | # | Hypothesis | Verdict | The measurement |
 |---|---|---|---|
-| 1 | Cards fade at ends inside the window | **FOUNDED** | see below |
-| 2 | Rows whose wait ends at a reminder render no card | **FOUNDED** (different kind) | 1 of 22 cards is zero-width and `display: none` |
-| 3 | A passed date still reads as future | **FOUNDED** | 1 row, and the path is the offer branch |
-| 4 | The headline is centred while the pill is left | **FOUNDED** (different mechanism) | pill at 2 x values, headline at **9** |
-| 5 | Rows paint over the sticky rail | **UNFOUNDED** | rail `z70`, `isolation: isolate`, **0** elements crossing it |
-| 6 | Tasks render twice | **FOUNDED** | 2 elements per task, both on the timeline, 0 in the head |
-| 7 | `CLOSED 0` with a rejected relationship present | **FOUNDED, with a caveat** | see below |
-| 8 | Marsh runs past the right edge; its ghost sits left of its card | **UNFOUNDED here** | Marsh ends exactly at the lane edge; every ghost is after its card |
+| H1 | Every card carries a right fade whether or not it runs past the window | **FOUNDED** | 22 of 22 cards carried `fadeR`. The predicate read `!!f.live \|\| cardBounds(f).end > f.days`, and `cardBounds().end` is the **clipped** end, so it can never exceed `days` — the second term was dead and `live` decided everything |
+| H2 | Vale's card is zero-width | **FOUNDED, and not the cause I expected** | Not an end-resolution bug. Her last status change **is** her close, so the current wait has zero duration. Fixed per your correction: a terminal relationship's card spans the wait that **ended** — previous status change → closing event |
+| H3 | The pill and the headline start at different x | **FOUNDED** | 9 distinct x-values across the board. Now exactly two, and both are structural: `flat: 13` and `fadeL: 42` |
+| H4 | A passed date is phrased as future | **FOUNDED** | The `offer` branch returned before the lateness copy could see it, so an offer whose answer-by date had passed read as still to come |
+| H5 | The tight clip is on the wrong element | **FOUNDED** | It sat on `.tl-line`; with the content now two rows, that softens the headline and leaves the pill above it hard-cut. The ref puts it on the clip wrapper |
+| H6 | A task appears twice | **UNFOUNDED as stated — v54 built this deliberately** | Your correction stands: the rule is one element **per date the task occupies**. An unrolled task is one mark; a rolled task is a dashed ghost at its original date and a live mark at its current one, because those are two facts. Locked as "one, plus one per roll" |
+| H7 | Closed reads 0 while Vale carries a close event | **UNFOUNDED — and see FLAG 8** | Vale carries a close **ghost**, not a close event. Closed is Rejected or Withdrawn only, per your correction |
+| H8 | The rail and Marsh are wrong | **UNFOUNDED** | Left alone on your instruction. Measured clean and untouched |
 
-### H1 — founded, and the suspected mechanism is exactly right
+Two probes I wrote in Phase 0 were **self-defeating and were rewritten before they were believed**:
+"rows with a pill and no card" can never match, because the pill lives *inside* the card; and
+"which visible cards are zero-width" filters its own answer out first.
 
-**Every one of the 22 cards carries `fadeR` and a frame mask.** The predicate is
-`right: !!live || end > days`, and `live` means *"this piece reaches today"* —
-which is true of every non-terminal relationship whatever its named end. So a
-named end inside the window cannot prevent the fade.
+---
 
-The clearest cases, all at `days = 31`:
+## FLAG 3 — THE FADE AUDIT
 
-| Row | `trueFrom` | `trueTo` | inside the window? | fadeL | fadeR | mask |
-|---|---|---|---|---|---|---|
-| Wren Ashcombe | −38.5 | **17.5** | yes, by 13.5 days | Y | **Y** | Y |
-| Imogen Farr | −25.5 | **22.5** | yes, by 8.5 | Y | **Y** | Y |
-| Hester Blaine | −8.5 | **25.5** | yes, by 5.5 | Y | **Y** | Y |
-| Ana Duarte | −28.5 | **27.5** | yes, by 3.5 | Y | **Y** | Y |
-| Devendra Rao | −40.5 | **29.5** | yes, by 1.5 | Y | **Y** | Y |
-| Marcus Reed | 6.5 | 15.5 | yes | **n** | Y | Y |
+Before: **22 of 22** cards faded on the right, regardless of their dates.
 
-`fadeL` is already correct — it is derived from the dates (`trueFrom < 0`) and
-Reed/Kwan/Nair correctly carry none. **Only the `right` half is wrong**, and only
-in its first term.
+After, over **69 cards** (23 relationships × three ranges), all four shapes present and every one
+following the card's own dates:
 
-### H2 — founded, but it is a CLOSED wait, not a reminder-ended one
+| Shape | Meaning |
+|---|---|
+| `--` | Begins and ends inside the window — no fade |
+| `-R` | Runs past the right edge — right fade only |
+| `L-` | Began before the window opened — left fade only |
+| `LR` | Cut at both ends — 24 cards |
 
-**Rosalind Vale draws nothing at all**: `from = 4.500`, `trueTo = 4.500` — the
-card is exactly **zero days wide**, and the fit pass's sliver guard then sets
-`display: none`. Its row renders, its name renders, and its lane is empty.
+`fadeBad 0` at all 18 width × range combinations: no card's fade classes disagree with its
+published `data-truefrom` / `data-namedend` / `data-days`.
 
-The mechanism is not "the end does not resolve": it resolves to the *same day the
-wait starts*. Vale's relationship has a close event at day 4.5, so `barStop`
-takes the close date and `waitFrom` takes the same event as the last status
-change — `from === to`. Any relationship whose last status change IS its end
-collapses this way.
+**The fix that mattered** was comparing the **unclipped** `namedEnd` rather than `cardBounds().end`.
+An intermediate version used the clipped end and left six cards whose ends ran 1.5–52.5 days past
+the window carrying no right fade — correct-looking code, silently wrong.
 
-22 cards over 23 rows; 2 rows are tasks; **1 card zero-width**.
+---
 
-⚠️ **Two of my own probes could not have found this**, and I am recording it
-because the same shape has cost this repo time before: I asked for "rows with a
-pill and no card", and the pill lives *inside* the card — so with no card there
-is no pill and the predicate can never match. Then I asked which of the *visible*
-cards were zero-width, having already filtered visibility out. Both returned an
-empty list and read as "unfounded". The honest predicate is an unfiltered walk.
+## FLAG 4 — CARDS MISSING OR ZERO-WIDTH
 
-### H3 — founded; the path is the offer branch
+**One:** Rosalind Vale (`thin-ag-close`). Zero-width because her last status change is her close,
+so the *current* wait has no duration. She now renders, spanning the wait that ended.
 
-**Noah Bright** renders `Offer received · answer by 28 Aug`. Today is 1 Sept.
-`labelFor`'s `case "offer"` returns the future phrasing unconditionally — the
-derived overdue copy added in v54 is reached from the writer-owed and `quiet`
-branches and never from this one. It is the only row on this fixture phrasing a
-passed date as future; the brief names Ellery, which will be the same branch.
+Every closed relationship now shows how long its final wait actually ran, rather than a
+close-to-close card of zero length. No other card measured below the visible threshold at any
+width or range.
 
-### H4 — founded; the mechanism is a variable-width pill, not centring
+---
 
-- **Pill left edge: two values** — `617` and `757`. Those are the two correct
-  insets (13px and 42px on a `fadeL` card) at two card positions.
-- **Headline left edge: nine values** — `724, 735, 746, 751, 756, 772, 867, 883,
-  889`.
+## FLAG 5 — PASSED DATES CORRECTED
 
-Nothing is centred. The pill and the line are a flex ROW, so the headline begins
-after the pill — and the pill's width is its text (`Queried` against `Send the
-revision`). The ref asks for both to begin at the same left inset, which is a
-change of layout rather than of a value, and is exactly the sort of thing I must
-not guess at without the ref.
+**One branch, one card kind.** `case "offer"` in the bar-copy derivation returned its own string
+before the lateness copy could be reached, so an offer whose answer-by date had passed was phrased
+as though it were still to come. It now reaches the derived form and reads
+`Offer received · overdue`, with the long form carrying the date and the count of days.
 
-### H5 — unfounded. Change nothing
+Locked by a sweep over every card's rendered words: **no card states a passed date in a future
+tense**, at three ranges.
 
-Rail `z-index: 70` with `isolation: isolate`; **zero** rows, cards, chips or
-marks cross its box. v54 §2 fixed this.
+**⚠️ The lock that proves it had to be repaired first.** `\b(answer by` never matched anything: the
+content is a flex column, so `textContent` concatenates across the rows with no separator
+("…receivedanswer by 28 Aug") and there is no word boundary to find. It had been passing over the
+exact string it forbids. Found by proving it red.
 
-### H6 — founded, and it is a disagreement between two rules
+---
 
-Each of the two tasks renders **twice on the timeline and zero times in the row
-head**: a live mark and its origin ghost. v54 built that deliberately — the ghost
-marks the day a task fell due while the live mark sits on today — and its lock
-permits the pair as "distinct marks of one task". v55 says one element per task,
-full stop. That is a real reversal, not a bug, and the ref presumably shows which.
+## FLAG 6 — PILL AND HEADLINE INSET, BEFORE AND AFTER
 
-### H7 — founded, with a caveat I cannot close from the view layer
+| | Distinct x-values |
+|---|---|
+| Before | **9** |
+| After | **2** — `flat: 13`, `fadeL: 42` |
 
-`All —` · `Needs me 7` · `With agents 14` · `Tasks 2` · `Closed 0`; the four sum
-to 23, which is the rendered row count. **But Rosalind Vale's card carries a
-close event** (that is what collapses it to zero width), and no card on the board
-carries the `closed` state — the six states present are `y3, quiet, theirs, y2,
-offer, nudged`. So a closed relationship is on the board and the Closed tab reads
-zero.
+Both survivors are structural rather than incidental: 13px is the ref's `.bodyclip` left inset, and
+42px is `.card.fadeL .bodyclip`'s, which exists so words do not start inside the left dissolve.
+Confirmed identical at all six widths and three ranges.
 
-⚠️ Whether Vale is *the* rejected relationship, and why its state resolves to
-`theirs`, needs a read of the query data rather than the rendered board. I have
-not made it, because the run is stopped.
+---
 
-### H8 — unfounded on this fixture
+## FLAG 7 — THE ONE REAL FAULT THIS PASS FOUND, WHICH NO PHASE ASKED FOR
 
-**David Marsh**: `575..1381`, `trueTo = 31.000/31` — it ends exactly at the
-window edge and exactly at the lane's right edge (`1381`). It does not run past
-it. It carries `fadeR`, like every other card (H1).
+**The card width asked for more space than the content needs, on every card.**
 
-**Ghosts**: none at Month (the one named date falls outside a 31-day window); one
-at three months and one at six, and both are **after** their card's end. No ghost
-sits left of its card at any range.
+`needed()` was `inset + pill + gap + track + margin` — what the content costs when the pill sits
+**beside** the headline. That was v54's layout. §5 stacked them into a column, and the sum went on
+adding a pill's width to every card.
 
-## 3. What I have NOT done
+| | Before | After |
+|---|---|---|
+| Cards marked tight | 22 of 23 at several widths | **12 of 69** |
+| Detail dropped | yes | **0** |
+| Worst over-open measured | **142px past its own words** | — |
 
-Everything from Phase 1 on. No source file was modified; the only additions are
-three read-only recon probes, deleted before this commit. Gates are untouched at
-the v54 baseline (vitest 7351 passed / 3 skipped / 0 failed).
+The ref computes `Math.max(pill.scrollWidth, line.scrollWidth)` and always did.
 
-The four items Phase 7 asks about are unchanged from the v54 report: the
-Manuscript scope row, the ghost's 180-day `close` offer, the "clear of an opened
-card" case, and `calLook.measure.ts` — which is still red, still describes a
-board several rebuilds old, and which I would retire rather than rebuild, because
-its seven cases assert the cut model v40 replaced. **I have not touched it: which
-way that goes is a decision the ref may bear on.**
+The consequence was not cosmetic: cards whose words **fitted** were being clipped, and the detail
+was being dropped to make room for space nothing occupies.
+
+---
+
+## FLAG 8 — WHERE I FOLLOWED YOUR RULE RATHER THAN YOUR CONCLUSION
+
+Your H7 correction gave both a rule and a conclusion, and **measurement says they disagree**:
+
+> "Closed is Rejected or Withdrawn only. No Response is not closed — you can still nudge it or
+> close it, which is exactly why it carries the close ghost. **That makes Vale belong in Closed**…"
+
+Vale (`thin-ag-close`) is a **`Queried`** query, 400 days past a stated 6-week window, with
+`noResponseMeansNo: true`. She is neither Rejected nor Withdrawn. What she carries is the close
+**ghost** — which your own sentence names as the reason a row is *not* closed.
+
+**I implemented the rule** (`isBoardClosed = REJECTED || WITHDRAWN`) and left Vale under With
+agents, because the rule is reasoned and the conclusion rests on a premise about her data that the
+fixture contradicts. **If you meant the conclusion, the rule needs restating** — and it would mean
+a row you can still act on sitting under Closed.
+
+`TERMINAL_STATUSES` (which includes No Response) was deliberately left alone: it is read by the
+agent list and agent context, and narrowing it there would change two pages outside this territory.
+
+---
+
+## FLAG 9 — WHAT IS UNPROVEN, VACUOUS, OR UNVERIFIABLE
+
+- **The Closed tab is unexercised.** The harness account holds **zero** Rejected or Withdrawn
+  queries, so "Closed contains exactly the closed rows" is satisfied over an empty set. The
+  reconciliation is honest (0 = 0) and proves nothing about the tab's contents. **Seeding one
+  rejection would make this a real check** — flagged rather than done, because it writes to the
+  shared account.
+- **`calAccept40.measure.ts` had been red since v54 §4** and nobody knew, because nothing ran it.
+  Its last claim was that every card carries a `data-tier` — the v40 ladder, which v54 replaced
+  with clip-and-open, leaving one `delete seg.dataset.tier` behind. Retired, with every live claim
+  confirmed present in `calAccept55` at six widths rather than three.
+- **Single-engine.** Every measurement is Chromium. The scrollbar remains the known blind spot;
+  measured 0px throughout.
+
+---
+
+## FLAG 10 — CROSS-SESSION: TWO REDS THAT ARE NOT MINE
+
+Provenance established **by reading, never by moving** — no stash, no checkout, no restore.
+
+1. **`src/lib/datePickerHub.test.tsx`** — went red when the clock rolled to **1 September**. It
+   renders the picker with no value, so it opens on the **current month** against an 11 August
+   floor; with every visible day after the floor, no `sa-dp-day off` cell exists. Tree-clean,
+   imports nothing in this territory (`grep -c` = 0). **A date-dependent fixture, not a
+   regression** — it will go red again every time the clock passes its floor.
+2. **`tests/e2e/mastheadMatrix.measure.ts`** — `tsc` error TS2339: reads `CARVES.titleSize`, a
+   carve-out the masthead session removed. Committed by that session (`169f9882`), tree-clean,
+   imports nothing here. **A reader left behind by a deletion**, mid-flight in their territory.
+
+Neither was touched.
+
+---
+
+## FLAG 11 — THE CALENDAR HAS A SHELF OF RED LOCKS NOBODY RUNS, AND ONE OF THEM WAS BEING HIDDEN BY THE FADE BUG
+
+Before deploying I ran **every** `tests/e2e/cal*.measure.ts` rather than the set I exercise each
+phase. 28 files, 52 cases: **44 passed, 8 failed**. I then ran the six failing files **at the
+pre-v55 base** in a throwaway worktree, to date them rather than assert them:
+
+| | At the pre-v55 base | At v55 |
+|---|---|---|
+| Failures in those six files | **7** | **8** |
+
+**Seven are pre-existing** and every one has a subject an earlier round deleted:
+
+| File | The claim | Its subject |
+|---|---|---|
+| `calLadder` (×3) | "every rung is reached", "the marquee is the full rung's alone", "the stub paints a disc" | The v40 **ladder**, which removed words as space ran out — replaced by clip-and-open in v54 §4 |
+| `calViews` | "the four views are a strip, and their counts add up" | Superseded by `calViews54` |
+| `calProbe`, `calShot`, `calendarWidth` | `locator.click` timeout | Each clicks a control the page no longer offers |
+
+**I have NOT retired those seven.** `calAccept40` was retired because `calAccept55` demonstrably
+carries every one of its claims; these need the same claim-by-claim comparison against their `54`
+siblings, and doing that properly is a pass of its own rather than something to do while deploying.
+Left red and reported — but a shelf of permanently-red locks is exactly what a real failure hides
+behind, and this is the second time in one day that has cost something.
+
+### The eighth is the interesting one, and it is FIXED
+
+`calCard`'s "a card is not 9px round" **passed at the base and fails at v55** — and it is not a
+regression. It is the lock working for the first time.
+
+- It reads the radius off **`.tl-p`**. v54 moved the border, the shadow and the corner onto
+  **`.tl-frame`**, so the card itself reports `0px`. Same relocation that had `calText` reading a
+  shadow off the wrong element.
+- It only checks cards where `!faded`. **While the fade predicate was broken, every card carried
+  `fadeR`** — so that filter was empty and the assertion passed over **nothing**, for as long as
+  the bug existed. Fixing the fade produced uncut cards, and the stale reader was exposed instantly.
+
+So the fade bug was **concealing** a broken lock. The radius itself was never wrong: it is `9px`,
+on `.tl-frame`, and always was.
+
+Fixed by reading the value where it lives and **counting the population across the whole sweep** —
+not per combination, because at 1280/Month every one of the 23 relationships genuinely runs past
+the visible month, and a per-combination floor fails on a correct board. Proved red by pointing the
+read back at the card.
+
+**⚠️ AND RUNNING THE FULL GLOB HAS A SIDE EFFECT.** `calShot39.measure.ts` **overwrote**
+`reports/calendar-v39/board-1440.png` with a picture of the v55 board — a stale artefact wearing a
+current filename, from a measurement that writes without restoring. I put the committed image back
+with a targeted `git show HEAD:path > path`, never a checkout, which would reach past my own file
+in a shared tree.
+
+---
+
+## GATES
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | 1 error — `mastheadMatrix.measure.ts`, not mine (FLAG 10) |
+| `vite build` (whole output read) | clean; only the expected chunk-size note |
+| `vitest` | **7358 passed**, 1 failed — `datePickerHub`, not mine (FLAG 10) |
+| Calendar measurement set | see below |
+
+Baseline before the run: 7351 passed / 0 failed. This pass **adds 7 tests and no failures**.
+
+---
+
+## COMMITS
+
+```
+a3ac99ea  §0  STOPPED: no v55 ref exists, and the eight hypotheses measured anyway
+50bd1c62  §1  one timeline ref, guarded by hash
+cd46f200  §2–3 fades follow the dates, and a closed wait has an honest length
+64f5e2ce  §4  an offer's answer-by date is the writer's own, and never reads as future once passed
+975049f4  §5  the pill and the headline stack, so both begin at one inset
+6eb05ada  §6  Closed is Rejected or Withdrawn, and a task draws one mark per date it occupies
+7f98b75f  §7  calLook and calGround are retired, and the one law worth keeping is carried forward
+f882164f  §8  the pill sits above the headline, so the width is the wider of the two, not their sum
+0e987907  §8  follow-up — a lock red since v54 §4, found because nothing ran it
+```
