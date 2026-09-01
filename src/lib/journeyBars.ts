@@ -1546,6 +1546,22 @@ export function labelFor(state: BarState, i: LabelInput): BarLabel {
         : { long: since, short: "" };
 
     case "offer":
+      /**
+       * ⚠️ AN OFFER'S ANSWER-BY DATE IS THE WRITER'S OWN, AND THIS PATH NEVER REACHED THE DERIVED
+       * COPY — so a date eighteen months gone still read "answer by 14 Apr".
+       *
+       * v54 added the lateness forms to the writer-owed and `quiet` branches and stopped there;
+       * `offer` returns before either can see it. It is the most writer-owed date on the board —
+       * an agency has made an offer and is waiting on an answer — so it takes the overdue form
+       * the moment it passes, on the same rule as every other date the writer owes.
+       */
+      if (i.expectedYmd && i.expectedPassed) {
+        return {
+          long: latenessLine({ prefix: "Offer received", owed: true, dueYmd: i.expectedYmd,
+            days: i.yoursDays, expectedYmd: i.expectedYmd }),
+          short: "Offer · overdue",
+        };
+      }
       return i.expectedYmd
         ? { long: `Offer received · answer by ${on(i.expectedYmd)}`, short: `Offer · answer by ${on(i.expectedYmd)}` }
         : { long: "Offer received", short: "Offer" };

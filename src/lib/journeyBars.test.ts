@@ -145,6 +145,49 @@ describe("⚠️ the side comes from the CTA engine, and nothing here re-lists a
 
 /* ══ v5's nine rules ══════════════════════════════════════════════════════════════════════════ */
 
+describe("⚠️ an offer's answer-by date takes the overdue form once it passes (v55)", () => {
+  /**
+   * ⚠️ THE PATH THAT MISSED IT. v54 added the lateness forms to the writer-owed and `quiet`
+   * branches; `offer` returns before either can see it, so a date eighteen months gone still read
+   * "answer by 14 Apr". It is the most writer-owed date on the board — an agency has made an offer
+   * and is waiting on an answer — so it takes the same rule as every other date the writer owes.
+   *
+   * ⚠️ AND BOTH DIRECTIONS ARE ASSERTED HERE because the rendered board cannot hold both: the one
+   * offer on the fixture has passed, so the future phrasing appears nowhere at all and a sweep
+   * requiring it would fail on a correct board.
+   */
+  const offer = (expectedYmd: string, expectedPassed: boolean, yoursDays: number) =>
+    labelFor("offer", {
+      norail: false, openEnd: false, query: q({ status: QueryStatus.OFFER }),
+      expectedYmd, expectedPassed, nudgeYmd: null, moveLabel: "", terminal: false,
+      goalYmd: null, nudgedOnYmd: null, sentYmd: null, yoursDays, quietDays: 0, closedYmd: null,
+    });
+
+  it("a date still ahead keeps the future phrasing", () => {
+    const w = offer("2026-12-01", false, 0);
+    expect(w.long).toBe("Offer received · answer by 1 Dec");
+    expect(w.long).not.toMatch(/overdue/i);
+  });
+
+  it("a date that has passed is named as overdue, with its span", () => {
+    const w = offer("2026-04-14", true, 505);
+    expect(w.long).toContain("overdue since 14 Apr");
+    expect(w.long).not.toMatch(/answer by/i);
+    /* the span coarsens — 505 days is months, never "505 days" */
+    expect(w.long).toMatch(/\d+ months?$/);
+  });
+
+  it("⚠️ AND AN OFFER WITH NO DATE STATES NEITHER", () => {
+    /* nothing was promised, so there is nothing to be late for and nothing to phrase as ahead */
+    const w = labelFor("offer", {
+      norail: false, openEnd: false, query: q({ status: QueryStatus.OFFER }),
+      expectedYmd: null, expectedPassed: false, nudgeYmd: null, moveLabel: "", terminal: false,
+      goalYmd: null, nudgedOnYmd: null, sentYmd: null, yoursDays: 0, quietDays: 0, closedYmd: null,
+    });
+    expect(w.long).toBe("Offer received");
+  });
+});
+
 describe("⚠️ a long silence is a GHOST, and the board says how long rather than what it means", () => {
   /* ⚠️ THE THRESHOLD IS ARITHMETIC AND IS LOCKED HERE, because no relationship on the harness
      account is silent for anything like half a year — the longest measured is 42 days. A
