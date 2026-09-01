@@ -154,6 +154,43 @@ const MARK_W = 22;
 /** the right margin `.tl-p > *` pays, which the content needs as surely as it needs its own width */
 const CONTENT_MARGIN_R = 12;
 
+/**
+ * ⚠️ THE FOUR GHOST GLYPHS, TRACED FROM THE REF'S `GL` TABLE — same viewBox, same paths, same
+ * stroke widths. They are drawn in `currentColor` so the ring's own tone (quiet, the writer's, or
+ * the solid due state) reaches the mark without a second colour rule to keep in step.
+ *
+ * ⚠️ THERE ARE FOUR BECAUSE THE REF DRAWS FOUR. `DEEDS.full` and `DEEDS.revision` have no glyph in
+ * it and none in the pack either, so `ghostKindFor` returns null for them and those rows render no
+ * ring — flagged with a count rather than filled in with an invented mark.
+ */
+const GHOST_GLYPH: Record<string, React.ReactNode> = {
+  nudge: (
+    <svg viewBox="0 0 12 12" aria-hidden>
+      <path d="M2.5 6 H9 M6.6 3.4 L9.2 6 L6.6 8.6" stroke="currentColor" strokeWidth="1.5"
+        fill="none" strokeLinecap="round" />
+    </svg>
+  ),
+  half: (
+    <svg viewBox="0 0 12 12" aria-hidden>
+      <circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M6 2 A4 4 0 0 1 6 10 Z" fill="currentColor" />
+    </svg>
+  ),
+  answer: (
+    <svg viewBox="0 0 12 12" aria-hidden>
+      <path d="M2.8 6.3 L5 8.6 L9.2 3.6" stroke="currentColor" strokeWidth="1.7" fill="none"
+        strokeLinecap="round" />
+    </svg>
+  ),
+  close: (
+    <svg viewBox="0 0 12 12" aria-hidden>
+      <circle cx="6" cy="6" r="4.2" fill="none" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M4.4 4.4 L7.6 7.6 M7.6 4.4 L4.4 7.6" stroke="currentColor" strokeWidth="1.3"
+        strokeLinecap="round" />
+    </svg>
+  ),
+};
+
 const pct = (n: number) => `calc(${n} / var(--tl-days) * 100cqw)`;
 
 /**
@@ -403,6 +440,22 @@ const Piece: React.FC<{
       )}
       </div>
       </div>
+      {/* ⚠️ THE GHOST IS A CHILD OF THE CARD, AND THAT IS THE WHOLE PLACEMENT RULE. As a sibling it
+          carried its own copy of `--l + --w`, which is the card's RESTING width — so the moment a
+          clipped card opened (`width: var(--exp)`) it grew straight through the ring, measured at
+          294.5px of overlap. A child at `left: calc(100% + gap)` follows whatever the card is
+          actually painted at, open or shut, because there is no second copy of the arithmetic to
+          fall out of step. Structural, not maintained. */}
+      {sg.ghostKind && (
+        <span aria-hidden
+          className={`tl-ghost${sg.ghostDue ? " due" : ""}${sg.ghostYours ? " yours" : ""}`
+            + `${fade.right ? " pastfade" : ""}`}
+          data-ghost={sg.ghostKind}
+          data-ghostrel={`${sg.rowKey}::${sg.lane}`}>
+          {GHOST_GLYPH[sg.ghostKind]}
+          {sg.ghostDue && <span className="tl-ghostbang">!</span>}
+        </span>
+      )}
     </div>
   );
 };
@@ -1676,13 +1729,6 @@ data-rowkey={r.key}
             * the dates are. A ring nudged clear of a card it overlaps would be stating a day it is
             * not drawn on.
             */}
-          {bar.segs.filter((sg) => sg.ghostAt != null).map((sg) => (
-            <div key={`gh-${sg.key}`} aria-hidden
-              className={`tl-ghost${sg.ghostDue ? " due" : ""}`}
-              style={{ left: pct(sg.ghostAt!), ...laneVar(sg.lane) }}>
-              {sg.ghostDue && <span className="tl-ghostbang">!</span>}
-            </div>
-          ))}
           {(() => {
             const cardStart = new Map<string, number>();
             for (const sg of bar.segs) {

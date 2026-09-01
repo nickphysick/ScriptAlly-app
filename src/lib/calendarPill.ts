@@ -52,6 +52,38 @@ export const DEEDS = {
 } as const;
 
 /** Every string a pill may render — the lock reads this, never a hand-written copy of it. */
+/**
+ * ⚠️ THE FOUR GHOST GLYPHS THE REF DRAWS, AND THE TWO MOVES THAT HAVE NONE.
+ *
+ * `design-refs/timeline-v55.html` carries exactly four in its `GL` table — `nudge`, `half`,
+ * `answer`, `close` — and its `MK` history table carries the same four. There is no full-disc
+ * glyph and no revision glyph anywhere in it.
+ *
+ * So `DEEDS.full` and `DEEDS.revision` are DELIBERATELY ABSENT from this map, and a row whose next
+ * move is one of them renders no ghost. The pack names a "full disc (full to send)" and the ref
+ * does not draw one; the ref wins on anything visual, and inventing an SVG for a mark nobody has
+ * drawn is how a design acquires a shape its author never chose. `revision` is named by neither.
+ * Both are reported with their row counts rather than guessed at — see reports/calendar-v56.md.
+ *
+ * ⚠️ AND THE MAP IS KEYED ON THE DEED THE PILL ALREADY CHOSE, never on a status re-read here. The
+ * pill and the ghost must name the same move — a ring saying "nudge" beside a pill saying "send
+ * the partial" is two derivations disagreeing in the space of one card.
+ */
+export type GhostKind = "nudge" | "half" | "answer" | "close";
+
+const GHOST_BY_DEED: Readonly<Record<string, GhostKind>> = {
+  [DEEDS.nudge]: "nudge",
+  [DEEDS.partial]: "half",
+  [DEEDS.offer]: "answer",
+};
+
+/** the glyph for a pill's move, or `null` where the ref draws none */
+export const ghostKindFor = (pillText: string): GhostKind | null =>
+  GHOST_BY_DEED[pillText] ?? null;
+
+/** the moves that are real and have no glyph — the flag, expressed as data so a lock can count it */
+export const UNDRAWN_MOVES: readonly string[] = [DEEDS.full, DEEDS.revision];
+
 export const PILL_WORDS: readonly string[] = [
   ...Object.values(QueryStatus),
   ...Object.values(DEEDS),

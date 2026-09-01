@@ -29,6 +29,7 @@
  * gets wrong, and the reason the no-status clause is stated first.
  */
 import { Activity, Agent, Query, QueryStatus, TaskFlag } from "../types";
+import { pillText, ghostKindFor, type GhostKind } from "./calendarPill";
 import { RecordItem, shortCalDate } from "./todoCalendar";
 import { getPrimaryAction } from "./queryPrimaryAction";
 import { resolveExpectedDate } from "./expectedDate";
@@ -257,8 +258,12 @@ export interface Segment {
    * covers it. Each of those would be a ring stating something nobody committed to.
    */
   ghostAt?: number;
+  /** which glyph the ring carries — the writer's next move, from the pill's own deed */
+  ghostKind?: GhostKind;
   /** whether that date has arrived — a due ghost is drawn solid with a badge */
   ghostDue?: boolean;
+  /** the move is the writer's, so the ring takes the writer's tone rather than the quiet one */
+  ghostYours?: boolean;
   /** this stretch ended at a real event: it is finished, and a finished stretch is full */
   historical?: true;
   /**
@@ -1287,10 +1292,45 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
        *   • it must be PAST the card's end — a date the card already covers is inside the wait,
        *     and the card is already drawing it.
        */
-      ...(goalAt != null && !terminal
-        && goalAt > p.to + 0.001 && goalAt <= span - 0.001 && goalAt >= 0.001
-        ? { ghostAt: goalAt, ghostDue: goalYmd != null && goalYmd <= win.today }
-        : {}),
+      /**
+       * ⚠️ THE GHOST: THE WRITER'S NEXT AVAILABLE MOVE, STANDING JUST PAST THE CARD'S END.
+       *
+       * ⚠️ AND THE OLD SHAPE COULD NEVER FIRE, WHICH IS WHY THIS WAS REPORTED UNBUILT TWICE.
+       * It asked for a named date PAST the card's end — while `liveStop` takes
+       * `Math.max(todayAt, goalAt, lastEventAt)`, so the card is extended TO the named end and
+       * the date can never be past it. Zero ghosts rendered at Month, one at three months, on a
+       * board with twenty-three relationships. The condition was not strict; it was empty.
+       *
+       * The ref settles the model: its rows run to a future `to` AND carry a ghost, so the ring
+       * is not the named end. It is the MOVE — nudge, send the partial, answer, close — sitting
+       * past whatever the card happens to end on. The card keeps its end; the ring is a separate
+       * fact about what the writer can do next.
+       *
+       * ⚠️ THE KIND COMES FROM `pillText`, THE SAME CALL THE PILL MAKES. A ring that said "nudge"
+       * beside a pill saying "send the partial" would be two derivations disagreeing inside one
+       * card. `ghostKindFor` returns null for the two moves the ref draws no glyph for, so those
+       * rows render no ring rather than borrowing a mark that means something else.
+       */
+      ...((): { ghostKind?: GhostKind; ghostDue?: boolean; ghostYours?: boolean } => {
+        if (terminal || Math.abs(p.to - barStop) > 0.001) return {};
+        /* ⚠️ A LONG SILENCE OFFERS `close`, AND IT IS AVAILABILITY RATHER THAN A DEADLINE — so it
+           is never drawn `due`. A solid ring with a badge says "this is owed now"; nobody owes a
+           closure, and the app reports rather than advises. */
+        if (state === "ghost") return { ghostKind: "close", ghostDue: false, ghostYours: false };
+        const kind = ghostKindFor(
+          pillText(query.status as QueryStatus, holderOf({ side }), state === "nudged").text);
+        if (!kind) return {};
+        /* the move's own date: a reminder's is the scheduled one, a deed's is when it fell due */
+        const ymd = kind === "nudge"
+          ? goalYmd
+          : (expectedPassed && expectedYmd ? expectedYmd : waitFromYmd);
+        if (!ymd) return {};
+        /* ⚠️ INSIDE THE WINDOW, OR NOTHING. A ring for a date the board is not showing states a
+           day that is not on screen, which is the same fault as clamping one to the edge. */
+        const at = daysBetween(win.days[0], ymd) + EVENT_AT;
+        if (at < 0.001 || at > span - 0.001) return {};
+        return { ghostKind: kind, ghostDue: ymd <= win.today, ghostYours: side === "yours" };
+      })(),
       ...(now === "yours" && !terminal && live_
         ? (() => {
             const dueYmd = expectedPassed && expectedYmd ? expectedYmd : waitFromYmd;

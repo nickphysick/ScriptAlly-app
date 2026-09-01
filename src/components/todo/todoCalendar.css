@@ -236,6 +236,14 @@
      contrast against exactly the thing a marker is drawn on. */
   --tl-ink: #3a1c14;
   --tl-muted: #8a7a6c;
+  /* ⚠️ THE RING'S DOTTED GREY IS THE REF'S OWN `#cdbfa8` and has no other consumer — it is a
+     shade lighter than `--tl-btn-line` and darker than `--tl-hair`, and reusing either would put
+     the ring on a value chosen for a control's edge. Its ground is the board's, so the dots read
+     as a hole in the row rather than as a filled disc. Its writer's-tone ink is the ref's
+     `--pinktx`; `--tl-ink` is four shades darker and is the board's text colour, not a mark's. */
+  --tl-ghost-bd: #cdbfa8;
+  --tl-ghost-ground: #faf7f2;
+  --tl-ghost-yours-tx: #7a4a35;
   --tl-label: #9c8878;
   /* ⚠️ THE BOARD HAS NO BURGUNDY (v39, the colour law). It was the accent for hovers, active
      segments, marker ink and an emphasis span — nine sites. Colour now appears ONLY in the pills;
@@ -587,18 +595,40 @@
    end. Dotted while the date is ahead — nothing has happened there yet — and solid with a badge
    once it has arrived, which is the moment it stops being a forecast. It is centred on its own
    date, so it clears the card by construction rather than by a tuned offset. */
+/* ⚠️ THE GHOST RING — GEOMETRY AND TONE FROM THE REF, ANCHORED TO THE CARD RATHER THAN TO A DATE.
+   `left` is 100% of the CARD's own box plus the ref's offset — the ring is a child, so it follows
+   whatever width the card is painted at, opened or shut, with no second copy of the geometry to
+   fall out of step. As a sibling reading `--l + --w` it was swallowed by 294.5px the moment a
+   clipped card opened to `var(--exp)`. The ring
+   is CENTRED on that point (the ref translates by -50%), so its near edge clears the card by
+   17 - 12 = 5px, and by 38 - 12 = 26px where the card's right edge is dissolving. */
 .tl-ghost {
-  position: absolute; top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px;
-  border-radius: 999px; border: 1.5px dotted var(--card-closed-bd);
-  background: transparent; z-index: 3; pointer-events: none;
+  position: absolute; top: 50%;
+  left: calc(100% + var(--tl-ghost-gap, 17px));
+  transform: translate(-50%, -50%);
+  width: 24px; height: 24px; border-radius: 999px;
+  border: 1.5px dotted var(--tl-ghost-bd);
+  background: var(--tl-ghost-ground);
+  color: var(--tl-label);
+  z-index: 6; pointer-events: none;
   display: flex; align-items: center; justify-content: center;
 }
-.tl-ghost.due {
-  border-style: solid; border-color: var(--owed-bd); background: #fff;
-}
+/* a card whose right edge dissolves needs the ring clear of the dissolve, not clear of the box */
+.tl-ghost.pastfade { --tl-ghost-gap: 38px; }
+.tl-ghost svg { width: 12px; height: 12px; }
+/* ⚠️ THE DUE RING IS A DIFFERENT OBJECT, NOT THE QUIET ONE COLOURED IN. Solid rather than dotted,
+   lifted off the ground with its own fill and a shadow: the one moment the ring stops forecasting
+   and starts standing for something that is owed now. */
+.tl-ghost.due { border-style: solid; background: #fff; box-shadow: 0 2px 6px rgba(58, 28, 20, .13); }
+/* the writer's own move takes the writer's tone; an agency's stays quiet */
+.tl-ghost.yours { border-color: var(--tl-pinkb); color: var(--tl-ghost-yours-tx); }
+/* ⚠️ THE BADGE SITS ON THE RING'S CORNER, NOT INSIDE IT — the ref's own geometry. Inside, it would
+   displace the glyph that says WHICH move is due; on the corner it says only that it has arrived. */
 .tl-ghostbang {
-  font-family: 'Playfair Display', Georgia, serif; font-size: 13px; font-weight: 600;
-  color: var(--pill-you-tx); line-height: 1;
+  position: absolute; top: -4px; right: -4px; width: 13px; height: 13px; border-radius: 999px;
+  background: var(--tl-pink); border: 1px solid var(--tl-pinkb); color: var(--tl-ghost-yours-tx);
+  font-family: 'Playfair Display', Georgia, serif; font-size: 9px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
 }
 .tl-leadin {
   position: absolute; top: 50%; height: 0; z-index: 1; pointer-events: none;
