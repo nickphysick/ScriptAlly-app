@@ -259,6 +259,29 @@ Baseline before the run: 7351 passed / 0 failed. This pass **adds 7 tests and no
 
 ---
 
+## DEPLOY
+
+**Deployed to dev**, hosting only, project and config named explicitly:
+
+```
+firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev
+```
+
+| | |
+|---|---|
+| Bundle | `index-C2IsMi05.js` |
+| Verified | served hash **matches** the local build — dev is running this commit, not an older one |
+| Acceptance re-run **against the deployed site** | **10 passed** |
+
+The local pass proves my bundle; only the second run proves what dev serves. Screenshots of the
+deployed board are in `reports/calendar-v55/` as `v55-{width}-{range}.png`.
+
+**Not pushed.** Nine commits sit on local `main` unpushed, so CI has not seen them. You asked for a
+commit and a conditional deploy, not a push — flagged rather than done, because it is the one step
+that puts this in front of anyone else.
+
+---
+
 ## COMMITS
 
 ```
@@ -271,4 +294,5 @@ cd46f200  §2–3 fades follow the dates, and a closed wait has an honest length
 7f98b75f  §7  calLook and calGround are retired, and the one law worth keeping is carried forward
 f882164f  §8  the pill sits above the headline, so the width is the wider of the two, not their sum
 0e987907  §8  follow-up — a lock red since v54 §4, found because nothing ran it
+95c823bb  §8  the fade bug was hiding a broken lock, and fixing it made the lock work
 ```
