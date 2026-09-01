@@ -156,10 +156,11 @@ describe("⚠️ an offer's answer-by date takes the overdue form once it passes
    * offer on the fixture has passed, so the future phrasing appears nowhere at all and a sweep
    * requiring it would fail on a correct board.
    */
+  const TODAY = "2026-09-01";
   const offer = (expectedYmd: string, expectedPassed: boolean, yoursDays: number) =>
     labelFor("offer", {
       norail: false, openEnd: false, query: q({ status: QueryStatus.OFFER }),
-      expectedYmd, expectedPassed, nudgeYmd: null, moveLabel: "", terminal: false,
+      expectedYmd, expectedPassed, nudgeYmd: null, moveLabel: "", terminal: false, today: TODAY,
       goalYmd: null, nudgedOnYmd: null, sentYmd: null, yoursDays, quietDays: 0, closedYmd: null,
     });
 
@@ -173,8 +174,28 @@ describe("⚠️ an offer's answer-by date takes the overdue form once it passes
     const w = offer("2026-04-14", true, 505);
     expect(w.long).toContain("overdue since 14 Apr");
     expect(w.long).not.toMatch(/answer by/i);
-    /* the span coarsens — 505 days is months, never "505 days" */
+    /* 14 Apr to 1 Sept coarsens to months, never a day count */
     expect(w.long).toMatch(/\d+ months?$/);
+  });
+
+  /**
+   * ⚠️ THE SPAN COMES FROM THE DATE BESIDE IT, AND `yoursDays` CANNOT MOVE IT.
+   *
+   * This is the fault stated as a test. The span used to be whatever the caller passed as `days`
+   * — always `yoursDays`, how long the row had been the writer's — while the date came from
+   * `dueYmd`, so one sentence carried two quantities that were free to disagree. On the board they
+   * did: three cards read "overdue since 20 Aug · 9 days", "since 24 Aug · 9 days" and "since 25
+   * Aug · 9 days", and a fourth read "since 15 Apr · 29 months" where 15 April was four months
+   * back. The fixture above even encoded it — 505 days handed in beside a date four months old.
+   *
+   * Passing a wildly different `yoursDays` must now change NOTHING about the sentence.
+   */
+  it("⚠️ the overdue span is today minus the due date, whatever `yoursDays` says", () => {
+    const a = offer("2026-08-20", true, 9);
+    const b = offer("2026-08-20", true, 4321);
+    expect(a.long).toBe(b.long);
+    /* 20 Aug to 1 Sept is twelve days — not the nine the old form printed */
+    expect(a.long).toBe("Offer received · overdue since 20 Aug · 12 days");
   });
 
   it("⚠️ AND AN OFFER WITH NO DATE STATES NEITHER", () => {
@@ -182,6 +203,7 @@ describe("⚠️ an offer's answer-by date takes the overdue form once it passes
     const w = labelFor("offer", {
       norail: false, openEnd: false, query: q({ status: QueryStatus.OFFER }),
       expectedYmd: null, expectedPassed: false, nudgeYmd: null, moveLabel: "", terminal: false,
+      today: TODAY,
       goalYmd: null, nudgedOnYmd: null, sentYmd: null, yoursDays: 0, quietDays: 0, closedYmd: null,
     });
     expect(w.long).toBe("Offer received");
@@ -233,7 +255,8 @@ describe("⚠️ a long silence is a GHOST, and the board says how long rather t
     const words = labelFor("ghost", {
       norail: false, openEnd: false, query: q({ status: QueryStatus.QUERIED }),
       expectedYmd: "2026-01-01", expectedPassed: true, nudgeYmd: null, moveLabel: "",
-      terminal: false, goalYmd: null, nudgedOnYmd: null, sentYmd: null, yoursDays: 0,
+      terminal: false, today: "2026-09-01",
+      goalYmd: null, nudgedOnYmd: null, sentYmd: null, yoursDays: 0,
       quietDays: 242, closedYmd: null,
     });
     expect(words.long).toBe("Quiet for 242 days");

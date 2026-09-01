@@ -338,6 +338,8 @@ const Piece: React.FC<{
          or `req`, so a hand-written pair reads the most writer-owed card on the board as the
          agency's. A reader asking whose move it is must ask the function that decides it. */
       data-holder={holderOf(sg)}
+      /* the agency's own stated date — a lock's independent source for "is this late at all" */
+      data-expected={sg.expectedYmdRaw ?? undefined}
       /* ⚠️ WHICH QUERY THIS BAR IS, so a lock can ask whether the row's WORDS are about a query the
          row actually draws. Three variants of that bug shipped, each one a true sentence about a
          query the reader could not see, and none of them was catchable from appearance alone. */

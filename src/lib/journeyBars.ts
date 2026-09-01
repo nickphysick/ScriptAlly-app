@@ -264,6 +264,17 @@ export interface Segment {
   ghostDue?: boolean;
   /** the move is the writer's, so the ring takes the writer's tone rather than the quiet one */
   ghostYours?: boolean;
+  /**
+   * The AGENCY'S OWN STATED DATE, unclamped and untouched by the tint's arithmetic.
+   *
+   * ⚠️ IT EXISTS SO A LOCK HAS A SECOND SOURCE. The tint and the card's words are both computed
+   * from `dueYmd`, so a check that compares one against the other is reading one number twice —
+   * proved, by restoring the fallback bug and watching a check written for it pass: the extra card
+   * was tinted AND said "overdue", agreeing with itself and wrong. This is the date the agency
+   * actually named; a card whose stated date is still ahead cannot be late, whatever the tint's
+   * own derivation currently believes.
+   */
+  expectedYmdRaw?: string;
   /** this stretch ended at a real event: it is finished, and a finished stretch is full */
   historical?: true;
   /**
@@ -1023,6 +1034,9 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
      the bar does; a bar that stopped short of one would leave the event floating over bare
      ground, attached to nothing. So the stop is the LAST of: today, the named end, and the final
      event — never today alone. */
+  /* ⚠️ ONE EXPRESSION FOR "THE REMINDER HAS ARRIVED", read by the pill and by the ghost's kind.
+     Two copies of this test are exactly how the pill and the group came to disagree. */
+  const nudgeArrived = nudgeYmd != null && nudgeYmd <= win.today;
   const lastEventAt = live.length ? live[live.length - 1].at : -Infinity;
   const liveStop = closeIdx >= 0
     ? stopAt
@@ -1220,7 +1234,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
         : (() => {
             const l = labelFor(state, {
               norail, openEnd, query, expectedYmd, expectedPassed, nudgeYmd, moveLabel, terminal,
-              goalYmd,
+              goalYmd, today: win.today,
               nudgedOnYmd: isoToYmd(query.lastNudgeSentDate as string | undefined),
               sentYmd: sentMs == null ? null : isoToYmd(new Date(sentMs).toISOString()),
               yoursDays,
@@ -1318,7 +1332,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
            closure, and the app reports rather than advises. */
         if (state === "ghost") return { ghostKind: "close", ghostDue: false, ghostYours: false };
         const kind = ghostKindFor(
-          pillText(query.status as QueryStatus, holderOf({ side }), state === "nudged").text);
+          pillText(query.status as QueryStatus, holderOf({ side }), nudgeArrived).text);
         if (!kind) return {};
         /* the move's own date: a reminder's is the scheduled one, a deed's is when it fell due */
         const ymd = kind === "nudge"
@@ -1333,7 +1347,17 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
       })(),
       ...(now === "yours" && !terminal && live_
         ? (() => {
-            const dueYmd = expectedPassed && expectedYmd ? expectedYmd : waitFromYmd;
+            /* ⚠️ THE STATED DATE WINS WHENEVER THERE IS ONE, PASSED OR NOT.
+               This read `expectedPassed && expectedYmd ? expectedYmd : waitFromYmd` — so a row
+               whose agency HAD named a date still in the future fell through to `waitFromYmd`,
+               the day the ask arrived, which is past by definition. Every writer-owed card was
+               therefore tinted: measured, a card reading "send by 29 Sept" was washed edge to edge
+               in the overdue tint, for a deadline four weeks away.
+               `waitFromYmd` is the right answer only where NOBODY named a date — the ask was then
+               due on receipt, which is the same rule `pressingFrom` already states for its own
+               undated case. Where a date exists it is the date, and a future one simply is not
+               late: `dueAt < todayAt` below then declines to tint, which is the whole rule. */
+            const dueYmd = expectedYmd ?? waitFromYmd;
             const dueAt = dueYmd ? daysBetween(win.days[0], dueYmd) + EVENT_AT : null;
             /* ⚠️ CLAMPED TO THE CARD'S OWN START. The due date can be older than the window —
                `waitFrom` is clipped for drawing and this is not — and an unclamped value put the
@@ -1383,7 +1407,21 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
       tip: "",
       queryId: query.id,
       status: query.status as QueryStatus,
-      ...(state === "nudged" ? { nudgeDue: true as const } : {}),
+      /**
+       * ⚠️ "DUE" MEANS THE REMINDER HAS ARRIVED, NOT THAT ONE IS SCHEDULED.
+       *
+       * This read `state === "nudged"`, which is the state for a row that HAS a reminder — coming
+       * or gone — because that is what decides how the bar is drawn. The pill then said "Nudge
+       * due" on a row whose next reminder was a week away, and `queryGroup` (which asks the honest
+       * question, `nudgeYmd <= today`) filed the same row under "soon" rather than "now". Measured:
+       * two rows saying "Nudge due" sat OUTSIDE `Needs me` with reminders on 8 and 11 September,
+       * while a third sat INSIDE it for a reminder that had arrived and called itself "Queried".
+       * Three rows disagreeing with themselves, from two derivations of one word.
+       *
+       * The group's test is the right one, so this is now the same test.
+       */
+      ...(nudgeArrived ? { nudgeDue: true as const } : {}),
+      ...(expectedYmd ? { expectedYmdRaw: expectedYmd } : {}),
     });
   });
 
@@ -1416,6 +1454,8 @@ interface LabelInput {
   openEnd: boolean;
   query: Query;
   expectedYmd: string | null;
+  /** the day the board is drawn for — the span's other end, so it is not passed in separately */
+  today: string;
   expectedPassed: boolean;
   nudgeYmd: string | null;
   /**
@@ -1490,13 +1530,29 @@ export const overdueSpan = (days: number): string => {
  * word, it takes `owed` and returns nothing without it, and a lock renders both kinds of row and
  * requires that no agency-held one can produce the string at all.
  */
+/**
+ * ⚠️ THE SPAN IS DERIVED FROM THE DATE IT STANDS BESIDE, NEVER PASSED IN SEPARATELY.
+ *
+ * It used to take `days` from the caller — every call site passed `yoursDays`, how long the row had
+ * been the writer's — while the DATE came from `dueYmd`. Two quantities, one sentence, free to
+ * disagree, and they did: three cards read "overdue since 20 Aug · 9 days", "since 24 Aug · 9
+ * days" and "since 25 Aug · 9 days" on the same board, and one read "overdue since 15 Apr · 29
+ * months" where 15 April is four months back. The tell was three different dates sharing one span.
+ *
+ * `todayYmd` is asked for instead, and the span is `today − dueYmd`. A reader can now check the
+ * sentence against itself, which is the property that was missing.
+ */
 export function latenessLine(i: {
-  prefix: string; owed: boolean; dueYmd: string | null; days: number; expectedYmd: string | null;
+  prefix: string; owed: boolean; dueYmd: string | null; todayYmd: string;
+  days: number; expectedYmd: string | null;
 }): string {
   const on = (ymd: string | null) => (ymd ? shortCalDate(ymd) : "");
   if (i.owed) {
+    /* ⚠️ `days` SURVIVES FOR THE UNDATED CASE ONLY — where nobody named a date there is nothing to
+       subtract from, and "owed N" is then a statement about how long it has been the writer's,
+       which is what `yoursDays` measures. Where a date exists it is the only source. */
     return i.dueYmd
-      ? `${i.prefix} · overdue since ${on(i.dueYmd)} · ${overdueSpan(i.days)}`
+      ? `${i.prefix} · overdue since ${on(i.dueYmd)} · ${overdueSpan(daysBetween(i.dueYmd, i.todayYmd))}`
       : `${i.prefix} · no date promised · owed ${overdueSpan(i.days)}`;
   }
   /* an agency's window that has passed: stated, never scored */
@@ -1560,7 +1616,7 @@ export function labelFor(state: BarState, i: LabelInput): BarLabel {
        * date is named and the silence reported, with no verdict attached.
        */
       if (i.expectedYmd) {
-        return { long: latenessLine({ prefix: since, owed: false, dueYmd: null, days: 0,
+        return { long: latenessLine({ prefix: since, owed: false, dueYmd: null, todayYmd: i.today, days: 0,
           expectedYmd: i.expectedYmd }), short: `${i.quietDays} days quiet` };
       }
       /* no date was ever given, so there is nothing to name — the duration alone */
@@ -1578,7 +1634,7 @@ export function labelFor(state: BarState, i: LabelInput): BarLabel {
       }
       if (i.expectedYmd && i.expectedPassed) {
         /* the window came and went and nothing arrived — reported, never scored */
-        return { long: latenessLine({ prefix: since, owed: false, dueYmd: null, days: 0,
+        return { long: latenessLine({ prefix: since, owed: false, dueYmd: null, todayYmd: i.today, days: 0,
           expectedYmd: i.expectedYmd }), short: since };
       }
       return i.expectedYmd
@@ -1597,7 +1653,7 @@ export function labelFor(state: BarState, i: LabelInput): BarLabel {
        */
       if (i.expectedYmd && i.expectedPassed) {
         return {
-          long: latenessLine({ prefix: "Offer received", owed: true, dueYmd: i.expectedYmd,
+          long: latenessLine({ prefix: "Offer received", owed: true, dueYmd: i.expectedYmd, todayYmd: i.today,
             days: i.yoursDays, expectedYmd: i.expectedYmd }),
           short: "Offer · overdue",
         };
@@ -1623,14 +1679,14 @@ export function labelFor(state: BarState, i: LabelInput): BarLabel {
        */
       if (i.expectedYmd && i.expectedPassed) {
         return {
-          long: latenessLine({ prefix: asked.long, owed: true, dueYmd: i.expectedYmd,
+          long: latenessLine({ prefix: asked.long, owed: true, dueYmd: i.expectedYmd, todayYmd: i.today,
             days: i.yoursDays, expectedYmd: i.expectedYmd }),
           short: `${asked.short} · overdue`,
         };
       }
       if (!i.expectedYmd && i.yoursDays > 0) {
         return {
-          long: latenessLine({ prefix: asked.long, owed: true, dueYmd: null,
+          long: latenessLine({ prefix: asked.long, owed: true, dueYmd: null, todayYmd: i.today,
             days: i.yoursDays, expectedYmd: null }),
           short: `${asked.short} · ${overdueSpan(i.yoursDays)}`,
         };

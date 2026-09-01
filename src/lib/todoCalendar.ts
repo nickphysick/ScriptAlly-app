@@ -693,9 +693,21 @@ export function carriedLine(rolledFrom: string, today: string, turn = "Your turn
 }
 
 /** "7 Aug" — the same shape the panel's other dates take. */
+/**
+ * ⚠️ THE YEAR APPEARS ONLY WHEN IT IS NOT THIS ONE — the house convention the query list already
+ * follows ("14 Mar", and "30 Jun 2024" when it is not the current year).
+ *
+ * Without it a 2024 date renders as "15 Apr" and reads as five months ago. Measured on the board:
+ * a card said "overdue since 15 Apr · 29 months", and the two halves looked like they disagreed by
+ * two years — the SPAN was right and the DATE was hiding its year. That sent me looking for a
+ * second span bug that did not exist, which is the more expensive half of this: a date that omits
+ * a distinguishing part does not merely under-inform, it makes correct numbers beside it look
+ * wrong.
+ */
 export function shortCalDate(ymd: string): string {
   const d = new Date(`${ymd}T12:00:00`);
-  return `${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" })}`;
+  const base = `${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" })}`;
+  return d.getFullYear() === new Date().getFullYear() ? base : `${base} ${d.getFullYear()}`;
 }
 
 /* ══ DRAGGING YOUR OWN TASKS (proposals pack, Phase 2; ref calendar-proposals-v6.html) ═════════
