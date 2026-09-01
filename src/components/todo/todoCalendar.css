@@ -369,12 +369,16 @@
 .tl-gtbtn:hover { color: var(--tl-nearblack); }
 .tl-gtbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
 
-/* ⚠️ EACH GROUP GETS ITS OWN CARD, and the heading is NOT in it. A heading inside the card reads
-   as a row of the table it names; on the ground above it, it reads as a label for the object
-   below — which is what it is. */
-.tl-tbl { border: 1px solid var(--tl-hair); border-radius: 11px;
-  overflow: hidden;
-}
+/* ⚠️ NO BORDER, NO RADIUS, NO CLIP — THE ROWS HAVE NO CONTAINER OF THEIR OWN.
+   The ref draws ONE card, its `.panel`, and says so in its own prose: "Rows are full width to a
+   12px margin, with no rounded container of their own." Our equivalent of that panel is the
+   shell's `.ws-window` (1px, 16px radius), shared by every page — so this was a SECOND rounded box
+   inside it, 1px and 11px radius, and the board sat in a card within a card.
+   The old comment here explained why each GROUP gets its own card; groups no longer draw one, so
+   it goes with the rule it described rather than being left to read as current.
+   The clip went too: with no radius to round, `overflow: hidden` had nothing left to do except cut
+   a ghost ring off at the right edge, and `.tl-zone` already contains horizontal spill above. */
+.tl-tbl { }
 
 /* ══ A ROW ═════════════════════════════════════════════════════════════════════════════════ */
 .tl-hrow, .tl-rrow, .tl-rail { display: flex; align-items: stretch; }
@@ -824,8 +828,13 @@
    while keeping quiet's own line colour, which is what it still IS. It is deliberately NOT the
    closed treatment outright: the app may say how long the silence has run and may not say what it
    means, and a card indistinguishable from a recorded rejection would say what it means. */
+/* ⚠️ SOLID. DASHED IS THE CLOSED STATE'S ALONE — the ref carries exactly one dashed rule,
+   `.card.closedc .bg`. A long silence is not a closure: it is the state you can still nudge or
+   close FROM, which is why it offers the close ring. And the comment above says this card must not
+   be indistinguishable from a recorded rejection — while both wore the same dashed frame, it was.
+   What distinguishes it is what always did: no fill, no shadow, muted ink. */
 .tl-p.ghost .tl-frame {
-  background: transparent; border-style: dashed; box-shadow: none;
+  background: transparent; border-style: solid; box-shadow: none;
 }
 .tl-p.ghost .tl-hl, .tl-p.ghost .tl-cdt { color: var(--pill-quiet-tx); }
 /* ⚠️ HOLLOW IS A STRETCH PAST THE DATE SOMEBODY NAMED, and v39 pins no treatment for it — the ref
@@ -837,9 +846,18 @@
 /* ⚠️ PINNED BY THE RULING (v39 part two, Phase 5). Part one flagged this as the one card state the
    ref did not draw and gave it only the thing quiet and closed share. It is a state of its own now:
    a stretch past the date somebody named is transparent, dashed and quieter in its words. */
-.tl-p.hollow .tl-frame  { background: transparent; border: 1px dashed var(--card-closed-bd); box-shadow: none; }
+/* ⚠️ SOLID, for the same reason. A stretch running past a date that came and went is unfinished
+   business, not a closed one — and it wore the closed frame AND the closed border colour. */
+.tl-p.hollow .tl-frame  { background: transparent; border: 1px solid var(--card-closed-bd); box-shadow: none; }
 .tl-p.hollow .tl-hl, .tl-p.hollow .tl-cdt { color: #9c8878; }
-.tl-p.closedp .tl-frame { background: transparent; border-style: dashed; border-color: var(--card-closed-bd); box-shadow: none; }
+/* ⚠️ ONE RULE FOR ONE SELECTOR. This was declared TWICE, ninety lines apart, and the later one
+   won — so this block's border-colour was dead while reading as the live value, which is the
+   duplicate-declaration fault this repo has now met in three stylesheets. The values kept are the
+   ones the browser was already painting. Closed is the ONE state that stays dashed. */
+.tl-p.closedp .tl-frame {
+  background: transparent; box-shadow: none;
+  border: 1.5px dashed var(--bar-closed-line);
+}
 
 /* ⚠️ OWED IS THE ONE STATE THAT LIFTS, and it lifts without animating. A passed date, or a
    writer-held request with none named: the card stands off the ground and its pill deepens. */
@@ -932,7 +950,6 @@
    That is the same fact the empty track states, said in the one state where the emptiness would
    otherwise read as a bar nobody had finished drawing. */
 .tl-p.quiet .tl-frame, .tl-p.ghost .tl-frame { border-color: var(--bar-quiet-line); }
-.tl-p.closedp .tl-frame { border: 1.5px dashed var(--bar-closed-line); }
 /* ⚠️ RETIRED (v39 part two, Phase 5). This set `border-style: solid` on a hollow card and sat
    LATER in the file than the rule that draws it, so the ruling's dashed border would have been
    overridden by a line written for the bar it replaced — one selector, three declarations, and the
