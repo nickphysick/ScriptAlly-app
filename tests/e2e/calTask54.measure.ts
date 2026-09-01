@@ -57,35 +57,60 @@ test("a task is a point: outlined mark, Playfair name, mono day — and no pill"
   }
 });
 
-test("⚠️ AND A TASK IS RENDERED ONCE PER ROW, at every range", async ({ page }) => {
-  /* a live chip and its origin ghost rendered identically once and read as one task drawn twice;
-     the claim is stronger than "they look different" — the same task may not appear twice on one
-     row at all, whatever it looks like. */
+test("⚠️ A TASK RENDERS ONE ELEMENT PER DATE IT OCCUPIES — one, plus one per roll", async ({ page }) => {
+  /**
+   * ⚠️ NOT "EQUALS ONE", AND NOT "ALWAYS TWO". A task that has not been rolled is one mark on its
+   * day. A task that HAS been rolled shows a dashed ghost at the date it was originally due and a
+   * live mark at the date it now falls on, because those are two facts and a reader needs both:
+   * where it started and where it stands. The count is `1 + rolls`, and what is forbidden is two
+   * marks of the SAME kind on one row — that is one task drawn twice.
+   *
+   * v54 built the pair deliberately and its lock permitting it was right; a lock demanding exactly
+   * one element would have deleted the ghost.
+   */
   await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
   await page.waitForTimeout(800);
   let checked = 0;
+  const shapes = new Map<string, number>();
   for (let i = 0; i < RANGE_LABELS.length; i++) {
     await setRangeTo(page, i);
-    const dupes = await page.evaluate(() => {
+    const got = await page.evaluate(() => {
       const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().width > 0;
-      const seen = new Map<string, number>();
+      const perTask = new Map<string, { live: number; ghost: number; dates: Set<string> }>();
       for (const row of ([...document.querySelectorAll(".tl-rrow")] as HTMLElement[]).filter(vis)) {
         const key = row.getAttribute("data-rowkey") || "";
         for (const c of ([...row.querySelectorAll(".tl-tchip")] as HTMLElement[]).filter(vis)) {
-          /* the ghost is a distinct MARK of the same task and is allowed; what is forbidden is the
-             same kind of the same task twice on one row */
-          const id = `${key}::${(c.querySelector(".tl-tname")?.textContent || "").trim()}::${c.classList.contains("ghost") ? "ghost" : "live"}`;
-          seen.set(id, (seen.get(id) ?? 0) + 1);
+          const id = `${key}::${(c.querySelector(".tl-tname")?.textContent || "").trim()}`;
+          const rec = perTask.get(id) ?? { live: 0, ghost: 0, dates: new Set<string>() };
+          if (c.classList.contains("ghost")) rec.ghost += 1; else rec.live += 1;
+          rec.dates.add((c.querySelector(".tl-tdue")?.textContent || "").trim());
+          perTask.set(id, rec);
         }
       }
-      return { total: [...seen.values()].reduce((a, b) => a + b, 0),
-        twice: [...seen.entries()].filter(([, n]) => n > 1).map(([k]) => k) };
+      return [...perTask.entries()].map(([id, r]) => ({ id, live: r.live, ghost: r.ghost, dates: r.dates.size }));
     });
-    checked += dupes.total;
-    expect(dupes.twice, `[${RANGE_LABELS[i]}] a task is drawn twice on one row`).toEqual([]);
+    for (const t of got) {
+      checked += 1;
+      const shape = `${t.live} live + ${t.ghost} ghost`;
+      shapes.set(shape, (shapes.get(shape) ?? 0) + 1);
+      /* one mark of each kind at most: a second LIVE mark is the same task drawn twice */
+      expect(t.live, `[${RANGE_LABELS[i]}] ${t.id} draws ${t.live} live marks`).toBeLessThanOrEqual(1);
+      expect(t.ghost, `[${RANGE_LABELS[i]}] ${t.id} draws ${t.ghost} origin marks`).toBeLessThanOrEqual(1);
+      expect(t.live + t.ghost, `[${RANGE_LABELS[i]}] ${t.id} draws no mark at all`).toBeGreaterThan(0);
+      /* ⚠️ AND EACH MARK IS ON ITS OWN DATE. Two marks sharing one date is one task drawn twice
+         however they are classed — which is the fault a count alone cannot see. */
+      expect(t.dates, `[${RANGE_LABELS[i]}] ${t.id} draws ${t.live + t.ghost} marks on ${t.dates} date(s)`)
+        .toBe(t.live + t.ghost);
+    }
   }
-  console.log(`task marks checked across three ranges: ${checked}`);
+  console.log(`task/range pairs checked ${checked} · shapes ${JSON.stringify([...shapes])}`);
   expect(checked, "no task marks were checked at any range").toBeGreaterThan(0);
+  /* ⚠️ THE CENSUS IS A MONOCULTURE ON THIS FIXTURE AND IS REPORTED AS ONE. Both tasks on the
+     harness account have been rolled, so every pair is "1 live + 1 ghost" and the unrolled shape —
+     one mark, no ghost — is never exercised. The rule permits it and nothing here proves it. */
+  if (shapes.size === 1) {
+    console.log(`  ⚠️ one shape only: ${[...shapes.keys()][0]} — the other is unexercised on this fixture`);
+  }
 });
 
 /**

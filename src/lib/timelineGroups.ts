@@ -128,6 +128,24 @@ export function queryGroup(f: QueryFacts, today: string): RowGroup {
  * "closed" for those would keep every closure the writer has ever had on the board forever, which
  * is what happens today; returning `null` for a LIVE row would hide work.
  */
+/**
+ * Is this query CLOSED, for the board's purposes?
+ *
+ * ⚠️ REJECTED OR WITHDRAWN, AND NOT `No Response` — which is where the app-wide
+ * `TERMINAL_STATUSES` and this board part company, deliberately.
+ *
+ * A relationship that never got a reply has not ended: the writer can still nudge it, and can
+ * still choose to close it — which is exactly why the board offers it a close. Filing it under
+ * `Closed` puts a row the writer can still act on into the one view that says there is nothing
+ * left to do, and takes it out of `With agents`, where they would look for it.
+ *
+ * ⚠️ AND `TERMINAL_STATUSES` IS LEFT ALONE. It is read by the agent list and the agent context,
+ * where "terminal" means "this query is over" and No Response belongs; redefining it there to suit
+ * a view would change a fact about the data to fix a fact about a tab.
+ */
+export const isBoardClosed = (status: QueryStatus): boolean =>
+  status === QueryStatus.REJECTED || status === QueryStatus.WITHDRAWN;
+
 export function rowGroupOf(
   live: readonly QueryFacts[],
   lastClosedYmd: string | null,

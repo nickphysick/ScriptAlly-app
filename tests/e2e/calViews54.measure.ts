@@ -80,6 +80,43 @@ test("five views, and the four counts add up to the fifth", async ({ page }) => 
   /* and `Needs me` must not be counting them as well */
   const needs = t.find((x) => x.label === "Needs me")!.count!;
   expect(needs + tasksOnBoard, "Needs me still includes the task rows").toBeLessThanOrEqual(rows);
+
+  /**
+   * ⚠️ `Closed` IS REJECTED OR WITHDRAWN, AND `No Response` IS NOT CLOSED (v55).
+   *
+   * A relationship that never got a reply has not ended: the writer can still nudge it and can
+   * still choose to close it — which is exactly why the board offers it a close. Filing it under
+   * `Closed` puts a row they can still act on into the one view that says there is nothing left to
+   * do, and takes it out of `With agents`, where they would look for it.
+   *
+   * ⚠️ THE CLAIM IS A CONDITIONAL AND IS STATED AS ONE. No relationship on this fixture is
+   * rejected or withdrawn, so `Closed` reads 0 and that is CORRECT — asserting a non-empty tab
+   * would fail on a right board. What is asserted is the implication: where such a row exists, the
+   * tab holds it; and the count of such rows is REPORTED, so a fixture that gains one is visible.
+   */
+  const terminal = await page.evaluate(() => {
+    const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().height > 0;
+    return ([...document.querySelectorAll(".tl-rrow")] as HTMLElement[]).filter(vis)
+      .filter((r) => /^(Rejected|Withdrawn)$/i.test((r.querySelector(".tl-pill")?.textContent || "").trim()))
+      .map((r) => (r.querySelector(".tl-nm2")?.textContent || "").trim());
+  });
+  const closedTab = t.find((x) => x.label === "Closed")!.count ?? 0;
+  console.log(`rejected/withdrawn rows on the board: ${terminal.length}`
+    + `${terminal.length ? " → " + terminal.join(", ") : " (so Closed 0 is correct here)"}`
+    + ` · Closed tab ${closedTab}`);
+  if (terminal.length > 0) {
+    expect(closedTab, "a rejected or withdrawn relationship exists and Closed is empty")
+      .toBeGreaterThanOrEqual(terminal.length);
+  }
+  /* ⚠️ AND NOTHING THE WRITER CAN STILL ACT ON MAY BE IN IT. `No Response` is the case that used
+     to be, and it is the one the rule turns on. */
+  const noResponse = await page.evaluate(() => {
+    const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().height > 0;
+    return ([...document.querySelectorAll(".tl-rrow")] as HTMLElement[]).filter(vis)
+      .filter((r) => /no response/i.test((r.querySelector(".tl-pill")?.textContent || "").trim())).length;
+  });
+  console.log(`no-response rows: ${noResponse} (they belong under With agents, not Closed)`);
+  expect(closedTab, "Closed counts more rows than are rejected or withdrawn").toBe(terminal.length);
 });
 
 test("each view draws exactly its own rows, and no row appears in two", async ({ page }) => {

@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
+import { TERMINAL_STATUSES } from "./agentList";
 import { QueryStatus } from "../types";
 import {
   queryGroup, rowGroupOf, GROUP_ORDER, GROUP_LABEL, CLOSED_LINGER_DAYS, COLLAPSED_BY_DEFAULT,
-  type QueryFacts, type RowGroup,
-} from "./timelineGroups";
+  type QueryFacts, type RowGroup, isBoardClosed } from "./timelineGroups";
 import { sideOf } from "./journeyBars";
 import { STATUS_ORDER } from "./statusOrder";
 
@@ -140,6 +140,46 @@ describe("the vocabulary", () => {
   it("nothing here says overdue, late or missed", () => {
     for (const label of Object.values(GROUP_LABEL)) {
       expect(label.toLowerCase(), label).not.toMatch(/overdue|late|missed|failed|behind/);
+    }
+  });
+});
+
+describe("⚠️ what the BOARD calls closed, and what it deliberately does not (v55)", () => {
+  /**
+   * ⚠️ THE ONE DIFFERENCE IS `No Response`, AND THE RENDERED BOARD CANNOT SEE IT. No relationship
+   * on the harness account is rejected, withdrawn OR unanswered, so `isBoardClosed` and
+   * `isTerminalStatus` agree on every row and a measured lock cannot tell them apart — proved: a
+   * mutation swapping one for the other left the view lock green. The distinction is a predicate,
+   * so it is asserted as one.
+   */
+  it("rejected and withdrawn are closed", () => {
+    expect(isBoardClosed(QueryStatus.REJECTED)).toBe(true);
+    expect(isBoardClosed(QueryStatus.WITHDRAWN)).toBe(true);
+  });
+
+  it("⚠️ `No Response` IS NOT CLOSED — the writer can still nudge it, and still close it", () => {
+    /* which is exactly why the board offers it a close. Filing it under `Closed` would put a row
+       they can still act on into the one view that says there is nothing left to do. */
+    expect(isBoardClosed(QueryStatus.NO_RESPONSE)).toBe(false);
+  });
+
+  it("⚠️ AND IT DIVERGES FROM `TERMINAL_STATUSES` ON EXACTLY THAT ONE", () => {
+    /* the app-wide set is left alone: it is read by the agent list and the agent context, where
+       "terminal" means "this query is over" and No Response belongs. Redefining it there to suit a
+       view would change a fact about the data to fix a fact about a tab. The divergence is stated
+       here so it reads as a decision rather than as drift. */
+    const differ = TERMINAL_STATUSES.filter((s) => !isBoardClosed(s));
+    expect(differ).toEqual([QueryStatus.NO_RESPONSE]);
+    /* and nothing the board calls closed is outside the app's terminal set */
+    for (const s of [QueryStatus.REJECTED, QueryStatus.WITHDRAWN]) {
+      expect(TERMINAL_STATUSES).toContain(s);
+    }
+  });
+
+  it("nothing live is closed", () => {
+    for (const s of [QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_SENT,
+      QueryStatus.OFFER, QueryStatus.REVISE_RESUBMIT]) {
+      expect(isBoardClosed(s), `${s} is not a closure`).toBe(false);
     }
   });
 });

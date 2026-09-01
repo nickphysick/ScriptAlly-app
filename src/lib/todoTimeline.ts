@@ -26,6 +26,7 @@ import { Agent, Query, QueryStatus } from "../types";
 import { BoardCard } from "./todoBoard";
 import { agentPrimary, agentSecondary } from "./agentDisplay";
 import { agentTurn, isTerminalStatus, matchesAgentSearch } from "./agentList";
+import { isBoardClosed } from "./timelineGroups";
 import { queryBucket } from "./queryAmbient";
 import { STATUS_ORDER } from "./statusOrder";
 import {
@@ -695,7 +696,11 @@ export function timelineWeek(
       sentence: lead ? rowSentence(copyOf(lead, agent), data.today) : "",
       order: drafts.size,
       facts: drawn
-        .filter((q) => !isTerminalStatus(q.status))
+        /* ⚠️ `isBoardClosed`, NOT `isTerminalStatus` — see its own note. A No Response query has
+           not ended: the writer can still nudge it and can still choose to close it, so it stays
+           a LIVE fact and its row keeps its place under `With agents` rather than dropping into
+           `Closed`, where nothing can be done with it. */
+        .filter((q) => !isBoardClosed(q.status as QueryStatus))
         .map((q) => ({
           status: q.status as QueryStatus,
           nudgeYmd: ymdOf(q.nudgeDate),
