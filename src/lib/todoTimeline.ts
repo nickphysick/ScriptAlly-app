@@ -27,6 +27,7 @@ import { BoardCard } from "./todoBoard";
 import { agentPrimary, agentSecondary } from "./agentDisplay";
 import { agentTurn, isTerminalStatus, matchesAgentSearch } from "./agentList";
 import { isBoardClosed } from "./timelineGroups";
+import { computeResponseDeadline } from "./responseDeadline";
 import { queryBucket } from "./queryAmbient";
 import { STATUS_ORDER } from "./statusOrder";
 import {
@@ -628,6 +629,24 @@ export function timelineWeek(
      * generic "Open the query": a dash wearing a costume. The copies travel with the row so the
      * deed can be asked of the query the group is actually about.
      */
+    /**
+     * ⚠️ THE AGENCY'S POLICY AND ITS CLOCK, READ FROM THE AGENT ON THIS ROW.
+     *
+     * `noResponseMeansNo` is the agency's published rule; the window is its stated reply time from
+     * the day the query went out, through `computeResponseDeadline` — the canonical util, so this
+     * cannot drift from the deadline the rest of the app computes. Both together are a closure;
+     * either one alone is not, which is why they travel as a pair.
+     */
+    const silenceOf = (q: { dateSent?: string | null }) =>
+      (agent?.noResponseMeansNo
+        ? {
+          statesNoMeansNo: true,
+          windowPassed: (() => {
+            const iso = q.dateSent ? computeResponseDeadline(q.dateSent, agent.responseTimeWeeks) : "";
+            return !!iso && iso.slice(0, 10) <= data.today;
+          })(),
+        }
+        : { statesNoMeansNo: false, windowPassed: false });
     const copies: { q: Query; copy: RowCopy }[] = drawn.map((q) => ({ q: q as Query, copy: copyOf(q as Query, agent) }));
     const d: Draft = {
       key,
@@ -700,7 +719,7 @@ export function timelineWeek(
            not ended: the writer can still nudge it and can still choose to close it, so it stays
            a LIVE fact and its row keeps its place under `With agents` rather than dropping into
            `Closed`, where nothing can be done with it. */
-        .filter((q) => !isBoardClosed(q.status as QueryStatus))
+        .filter((q) => !isBoardClosed(q.status as QueryStatus, silenceOf(q)))
         .map((q) => ({
           status: q.status as QueryStatus,
           nudgeYmd: ymdOf(q.nudgeDate),

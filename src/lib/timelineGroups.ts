@@ -131,8 +131,16 @@ export function queryGroup(f: QueryFacts, today: string): RowGroup {
 /**
  * Is this query CLOSED, for the board's purposes?
  *
- * ⚠️ REJECTED OR WITHDRAWN, AND NOT `No Response` — which is where the app-wide
- * `TERMINAL_STATUSES` and this board part company, deliberately.
+ * ⚠️ THREE WAYS TO BE CLOSED, AND THE THIRD IS THE AGENCY'S OWN POLICY.
+ *
+ * Rejected, or Withdrawn, or — a query whose agency states that silence means no AND whose stated
+ * window has passed. That third case is not a judgement the app is making: the agency published
+ * the rule, the clock ran out, and the answer arrived by prior arrangement. It is the same fact a
+ * rejection is, delivered differently.
+ *
+ * ⚠️ SILENCE ALONE IS STILL NOT A CLOSURE. An agency that states no such policy has simply not
+ * replied: the writer can nudge it, and can choose to close it, which is why such a row keeps its
+ * place under `With agents` and is offered a close rather than filed as one.
  *
  * A relationship that never got a reply has not ended: the writer can still nudge it, and can
  * still choose to close it — which is exactly why the board offers it a close. Filing it under
@@ -143,8 +151,35 @@ export function queryGroup(f: QueryFacts, today: string): RowGroup {
  * where "terminal" means "this query is over" and No Response belongs; redefining it there to suit
  * a view would change a fact about the data to fix a fact about a tab.
  */
-export const isBoardClosed = (status: QueryStatus): boolean =>
-  status === QueryStatus.REJECTED || status === QueryStatus.WITHDRAWN;
+export const isBoardClosed = (
+  status: QueryStatus,
+  /**
+   * The agency's own policy and its clock. Both are needed together and neither means anything
+   * alone: a stated policy with time still on it is a live query, and a passed window at an agency
+   * that states nothing is an ordinary silence.
+   *
+   * ⚠️ OPTIONAL, SO THE STATUS-ONLY CALL STILL MEANS WHAT IT SAYS. Omitting it asks only "is this
+   * recorded as ended", which is the right question in a context that has no agent to hand — and
+   * it can never widen the answer, only narrow it.
+   */
+  silence?: { statesNoMeansNo: boolean; windowPassed: boolean },
+): boolean =>
+  status === QueryStatus.REJECTED
+  || status === QueryStatus.WITHDRAWN
+  /**
+   * ⚠️ AND ONLY WHERE THERE HAS BEEN NO RESPONSE — which is what "no response means no" is ABOUT.
+   *
+   * `QUERIED` is the one status that means sent and nothing back. Every other live status exists
+   * because the agency replied: a partial request, a full request, an R&R, an offer. A policy about
+   * silence cannot speak to a conversation that has started.
+   *
+   * Measured before this clause existed: `Send the partial` — a row the writer owed work on — was
+   * swept into `Closed` because its agency happened to state the policy and the original window
+   * had lapsed. That is the worst direction for this rule to fail in: work the writer must do,
+   * filed under the one view that says there is nothing left to do.
+   */
+  || (status === QueryStatus.QUERIED
+    && !!silence && silence.statesNoMeansNo && silence.windowPassed);
 
 export function rowGroupOf(
   live: readonly QueryFacts[],
