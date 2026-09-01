@@ -645,13 +645,16 @@
    the two things a card exists to say, and v40's ladder removed both on sixteen of twenty-three
    cards at six months. */
 .tl-p[data-nodetail] .tl-cdt, .tl-p[data-nodetail] .tl-csep { display: none; }
-.tl-p[data-tight] .tl-line {
-  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 22px), transparent);
-  mask-image: linear-gradient(90deg, #000 calc(100% - 22px), transparent);
+/* ⚠️ THE SOFT EDGE IS ON THE CLIP, at the ref's 18px — it is the window onto the words, and the
+   words are now two lines rather than one, so a mask on the line would fade the headline and leave
+   the pill hard. */
+.tl-p[data-tight] .tl-content {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 18px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 18px), transparent);
 }
-.tl-p[data-tight]:hover .tl-line,
-.tl-p[data-tight]:focus-visible .tl-line,
-.tl-p[data-tight].tl-force-open .tl-line { -webkit-mask-image: none; mask-image: none; }
+.tl-p[data-tight]:hover .tl-content,
+.tl-p[data-tight]:focus-visible .tl-content,
+.tl-p[data-tight].tl-force-open .tl-content { -webkit-mask-image: none; mask-image: none; }
 @media (prefers-reduced-motion: reduce) {
   .tl-p { transition: none; }
 }
@@ -675,15 +678,30 @@
   background: rgba(230, 195, 180, .60);
   pointer-events: none;
 }
+/* ⚠️ THE CLIP IS POSITIONED AND CARRIES THE INSET (v55, the ref's `.bodyclip`). One number sets
+   where every line of every card begins; a margin on each child set it per child, and the pill's
+   own width then decided where the headline started. */
 .tl-content {
-  position: relative; z-index: 1; display: flex; align-items: center;
-  min-width: 0; width: 100%; height: 100%;
+  position: absolute; top: 0; bottom: 0; left: var(--tl-text-inset); right: 12px;
+  z-index: 1; display: flex; align-items: center; overflow: hidden;
 }
+.tl-p.fadeL .tl-content { left: var(--card-fade-inset); }
+/* ⚠️ A COLUMN, SO THE PILL AND THE HEADLINE SHARE ONE LEFT EDGE. `align-self: flex-start` keeps
+   the pill its own width without stretching it across the card. */
+/* ⚠️ `tl-cbody`, NOT `tl-body` — THE NAME WAS ALREADY TAKEN, AND THIS IS THE SECOND TIME.
+   `f12.css` declares `.tl-body` for the Query Centre's timeline, with `margin-top: 7px` and
+   `> * + * { margin-top: 9px }`. Both sheets ship in one bundle, so the calendar's new column
+   inherited 16px of vertical space it never asked for and every card's headline fell out of its
+   bottom edge. v54 hit the identical trap with `.tl-dt` and `.tl-sep` and adopted the `tl-c…`
+   prefix for it; this is that convention being used rather than rediscovered. */
+.tl-cbody { display: flex; flex-direction: column; gap: 5px; white-space: nowrap; min-width: 0; }
+.tl-pill { align-self: flex-start; }
 
 /* ⚠️ THE CONTENT'S INSET IS A PER-CARD VALUE NOW, because a card has to clear its own marks. It
    falls back to the pinned left where a card carries none, and the fallback is written at the use
    site rather than as a second token: a token would be a knob nobody sets. */
-.tl-content > * { margin-left: var(--content-left, var(--tl-text-inset)); margin-right: 12px; }
+/* ⚠️ THE PER-CHILD MARGINS ARE GONE. The clip owns the inset now, so a child cannot carry one of
+   its own — which is what let the headline start wherever the pill happened to end. */
 /* ⚠️ THE LIFT IS THE CARD'S AND THE SHADOW IS THE FRAME'S. A transform on the frame would move it
    inside a card that had not moved; a shadow on the card would fall outside the thing that draws
    the border it belongs to. */
@@ -715,8 +733,14 @@
    offset — invisible, because the card clips, and enough to make an "is anything painted outside
    this card" check report four false offenders per board. `flex` gives it the space that is
    actually left, which is what it is. */
+/* ⚠️ THE LINE IS A BASELINE ROW AND CLIPS NOTHING (v55, the ref's `.line`).
+   It was `display: block; overflow: hidden; flex: 1 1 auto` — a window onto a sliding track, from
+   the era when the content was one row and the marquee scrolled it. Inside a COLUMN, `flex: 1 1
+   auto` grows VERTICALLY: the line took the card's remaining height and pushed the headline out of
+   the bottom of every card on the board. The clip is `.tl-content`'s job now, and the line's only
+   business is holding the headline, the separator and the detail on one baseline. */
 .tl-line {
-  display: block; overflow: hidden; min-width: 0; flex: 1 1 auto; position: relative;
+  display: flex; align-items: baseline; gap: 9px; flex: 0 0 auto; min-width: 0;
 }
 /* ⚠️ THE TRACK IS `max-content` AND ITS CHILDREN DO NOT SHRINK, and both halves are needed.
    Without them the track is bounded by the line and its items — which default to `flex-shrink: 1`

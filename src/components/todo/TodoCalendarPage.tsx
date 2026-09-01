@@ -360,7 +360,22 @@ const Piece: React.FC<{
           empty label rendered a card with NO pill and NO text — a blank white box with a border and
           a shadow, eight of them on a 32-card board. The pill never depended on the label: a card
           always knows whose move it is, which is the one thing it is for. */}
+      {/**
+        * ⚠️ THE CONTENT IS A COLUMN INSIDE A POSITIONED CLIP (v55, Phase 5; the ref's own shape).
+        *
+        * It was a flex ROW — pill, then line — so the headline began after the pill and the pill's
+        * width is its text: "Queried" against "Send the revision". Measured on the board, the pill
+        * sat at two correct insets and the headline at NINE x values, and no two rows started
+        * their sentence in the same place. Nothing was centred; the eye simply had nothing to run
+        * down.
+        *
+        * The ref stacks them: `.bodyclip` is absolute at `left: 13px` (42 on a fadeL card),
+        * `right: 12px`, `overflow: hidden`; `.body` is `flex-direction: column` with the pill
+        * `align-self: flex-start`. Both lines then begin at the clip's own left edge, which is one
+        * number for the whole board.
+        */}
       <div className="tl-content">
+      <div className="tl-cbody">
       <span className={`tl-pill ${pill.tone}`} data-pill={pill.text}>{pill.text}</span>
       {sg.label && (
         <>
@@ -379,6 +394,7 @@ const Piece: React.FC<{
           </span>
         </>
       )}
+      </div>
       </div>
     </div>
   );

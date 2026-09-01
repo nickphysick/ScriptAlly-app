@@ -49,6 +49,40 @@ const isBarPath = (sel: string): boolean =>
 /** The properties that decide vertical geometry. A radius is not one; a glyph's width is not one. */
 const VERTICAL = /(^|;|\{)\s*(height|min-height|max-height|top|bottom|margin-top|margin-bottom|padding-top|padding-bottom|line-height)\s*:/;
 
+describe("⚠️ no class the calendar renders is already owned by another sheet (v55)", () => {
+  /**
+   * ⚠️ TWICE NOW, AND THE SECOND TIME COST A WHOLE LAYOUT. `f12.css` — the Query Centre's
+   * timeline — declares `.tl-dt`, `.tl-sep` and `.tl-body`, and both sheets ship in one bundle.
+   * v54 hit the first two and renamed to `tl-c…`; v55 introduced `.tl-body` for the card's column
+   * and inherited `margin-top: 7px` plus a 9px child gap, so every headline fell out of the bottom
+   * of its card — with the calendar's own rule reading perfectly correctly.
+   *
+   * The two sheets share a prefix by history and neither is going to stop, so the guard is a
+   * sweep rather than a memory: every class the calendar RENDERS is checked against every class
+   * `f12.css` DECLARES.
+   */
+  const page = readFileSync(join(process.cwd(), "src/components/todo/TodoCalendarPage.tsx"), "utf8");
+  const f12 = readFileSync(join(process.cwd(), "src/components/shell/f12.css"), "utf8");
+
+  it("every tl- class the calendar renders is its own", () => {
+    /* class names as the page writes them — literals and template pieces alike */
+    const rendered = new Set<string>();
+    for (const m of page.matchAll(/className=(?:"([^"]*)"|\{`([^`]*)`\}|\{"([^"]*)"\})/g)) {
+      const raw = (m[1] ?? m[2] ?? m[3] ?? "");
+      for (const c of raw.split(/[\s${}()?:+'"`]+/)) if (/^tl-[a-z0-9-]+$/.test(c)) rendered.add(c);
+    }
+    expect(rendered.size, "no tl- classes found in the page — the sweep read nothing")
+      .toBeGreaterThan(10);
+    const declared = new Set<string>();
+    for (const m of f12.matchAll(/\.(tl-[a-z0-9-]+)/g)) declared.add(m[1]);
+    expect(declared.size, "no tl- classes found in f12.css — the sweep read nothing")
+      .toBeGreaterThan(5);
+    const clash = [...rendered].filter((c) => declared.has(c)).sort();
+    expect(clash, `the calendar renders ${clash.length} class(es) that f12.css also styles`)
+      .toEqual([]);
+  });
+});
+
 describe("⚠️ a task is a point, and its mark is 1.5px (v54)", () => {
   /* the rendered check can say the mark is outlined and cannot say by how much: a sub-pixel
      border's used value rounds at DPR 1. Read as written here. */
