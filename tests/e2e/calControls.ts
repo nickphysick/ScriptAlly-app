@@ -72,7 +72,10 @@ export async function setRangeTo(page: Page, i: number): Promise<void> {
  * sentence", which reads like a copy bug rather than like a mode.
  */
 export async function showGrouped(page: Page): Promise<void> {
-  await pick(page, "Group", "Grouped");
+  /* ⚠️ "Grouped" IS NOT AN OPTION ANY MORE. v55 gives Group four modes — One list · Whose move ·
+     Status · Manuscript — and `Status` is what the old boolean meant: the six urgency headings.
+     The helper is the one place that has to know, which is why callers do not name the option. */
+  await pick(page, "Group", "Status");
 }
 
 export async function showOneList(page: Page): Promise<void> {

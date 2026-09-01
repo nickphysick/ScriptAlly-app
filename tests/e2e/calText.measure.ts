@@ -27,7 +27,7 @@ const TAG = `
  *
  * Where each claim went:
  *   the pinned type          → `calCard.measure.ts`, against the card's own values
- *   text stays inside its box → `calLook.measure.ts`, the containment claim
+ *   text stays inside its box → `calInset55.measure.ts` (calLook.measure.ts is retired, v55 §7)
  *   the drop order            → `calLadder.measure.ts`, which asserts the rungs instead
  *                                (`calendarMarquee.test.ts` is retired with the marquee, v40)
  *
@@ -47,6 +47,10 @@ const TAG = `
  * satisfied by a hover rule that does nothing at all; "the shadow differs" is satisfied by a bar
  * that gained a shadow on its way down.
  */
+/* ⚠️ THE SHADOW IS THE FRAME'S SINCE v54 — the card is geometry and paints nothing, so reading
+   its own `box-shadow` returns `none` in both states and the case fails saying the pointer missed.
+   The lift is still the CARD's: a transform on the frame would move it inside a card that had not
+   moved. Two elements, two properties, and the case reads each where it lives. */
 test("hovering a bar lifts it without moving it", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1440, height: HEIGHT });
   await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
@@ -62,7 +66,7 @@ test("hovering a bar lifts it without moving it", async ({ page }) => {
     b.setAttribute("data-hovertarget", "1");
     const r = b.getBoundingClientRect();
     return { cx: r.left + r.width / 2, cy: r.top + r.height / 2,
-             centre: r.top + r.height / 2, h: r.height, shadow: getComputedStyle(b).boxShadow };
+             centre: r.top + r.height / 2, h: r.height, shadow: getComputedStyle(b.querySelector(".tl-frame") ?? b).boxShadow };
   })()`) as any;
   expect(target, "no bar on screen to hover — nothing was measured").not.toBeNull();
 
@@ -73,8 +77,13 @@ test("hovering a bar lifts it without moving it", async ({ page }) => {
     const b = document.querySelector('[data-hovertarget="1"]');
     if (!b) return null;
     const r = b.getBoundingClientRect();
+    /* the shadow is the frame's and the transform is the card's — v54's split. Reading both off
+       the card returns none for the shadow in either state, which reads as the pointer never
+       landing, while the centre claim passes perfectly and says nothing.
+       NO BACKTICKS IN HERE: this is inside a page.evaluate template literal. */
     const cs = getComputedStyle(b);
-    return { centre: r.top + r.height / 2, h: r.height, shadow: cs.boxShadow, transform: cs.transform };
+    const fs = getComputedStyle(b.querySelector('.tl-frame') || b);
+    return { centre: r.top + r.height / 2, h: r.height, shadow: fs.boxShadow, transform: cs.transform };
   })()`) as any;
   expect(hovered, "the hovered bar vanished").not.toBeNull();
   console.log(`  hover — centre ${target.centre.toFixed(1)} → ${hovered.centre.toFixed(1)}`

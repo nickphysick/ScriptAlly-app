@@ -11,7 +11,7 @@
  *
  * ⚠️ THIS IS A SOURCE CLAIM AND BELONGS IN A SOURCE LOCK. "This sheet states no literal height in
  * the bar path" is a fact about a file. Where the bar ends up on screen is a different claim and is
- * measured on a rendered page (`calLook.measure.ts`) — including the independence itself, which is
+ * measured on a rendered page (the cal*55 measurement set) — including the independence itself, which is
  * proved by overriding one token and watching the other hold.
  */
 import { describe, it, expect } from "vitest";
@@ -278,7 +278,7 @@ describe("the scrawl is gone from the calendar", () => {
   });
 
   it("the earn-it predicate is orphaned nowhere — it does not exist", () => {
-    for (const f of [...CAL, "src/lib/timelineCopy.test.ts", "tests/e2e/calLook.measure.ts"]) {
+    for (const f of [...CAL, "src/lib/timelineCopy.test.ts", "tests/e2e/calFade55.measure.ts"]) {
       const src = stripAll(readFileSync(join(process.cwd(), f), "utf8"));
       expect(src, `${f} still references scrawlEarns`).not.toMatch(/scrawlEarns/);
     }

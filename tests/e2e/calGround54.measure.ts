@@ -2,7 +2,15 @@ import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 
 /**
- * ⚠️ THE GROUND AND THE TODAY LINE (v54, Phase 2).
+ * ⚠️ THE GROUND AND THE TODAY LINE (v54, Phase 2; absorbed `calGround.measure.ts` at v55).
+ *
+ * ⚠️ `calGround.measure.ts` IS RETIRED HERE, AND BOTH ITS CASES WERE ASSERTING SUPERSEDED DESIGNS:
+ *   • "one ground from the masthead to the board, and the wash STOPS AT TODAY" — the wash is
+ *     deleted (v55 §2), so it measured `NaN`. What replaces it is the stronger claim below:
+ *     nothing paints a wash left of today at all.
+ *   • "every card fades exactly where it is cut" — it asserted the `live` predicate, which v55
+ *     replaced with the ref's own "no named end, or an end past the window". `calFade55` audits
+ *     the classes against the DATES, at every range, which that case could not do.
  *
  * Four claims, each about the composed page rather than about a declaration:
  * the line is where today is; it is in front of every card; nothing tints the past; no row reaches
