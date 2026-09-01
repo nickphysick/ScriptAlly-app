@@ -34,10 +34,14 @@ const board = (page: import("@playwright/test").Page) => page.evaluate(`(() => {
   };
 })()`) as Promise<any>;
 
+/* ⚠️ A TAB'S ACCESSIBLE NAME INCLUDES ITS COUNT ("Closed 1"), so an exact-name locator matches
+   nothing and waits out the whole timeout. Matched on the label PREFIX, in the page, and built by
+   plain concatenation — an earlier version nested a template inside the evaluate string and closed
+   it early, which the backtick lock caught. */
 const openTab = (page: import("@playwright/test").Page, label: string) => page.evaluate(
-  `(() => { const b = [...document.querySelectorAll("button")]
-      .find((x) => new RegExp("^" + ${JSON.stringify(JSON.stringify("LBL"))}.slice(1, -1)).test((x.textContent || "").trim()));
-    if (b) b.click(); })()`.replace("LBL", label));
+  '(() => { const b = [...document.querySelectorAll("button")]'
+  + '.find((x) => (x.textContent || "").trim().indexOf(' + JSON.stringify(label) + ') === 0);'
+  + ' if (b) b.click(); })()');
 
 test("the tab counts reconcile, with a Closed count that is not zero", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });

@@ -15,7 +15,7 @@
  * this page's SOURCE and its stylesheet to prove things about a rendered month — cell borders,
  * fold caps, sticky offsets, panel collapse. A source lock proves a rule was written, never that
  * it reached an element, so the timeline's layout claims are measured on a rendered page
- * (`tests/e2e/calLook.measure.ts`) instead. That is the standing rule in CLAUDE.md and this is the
+ * (`tests/e2e/calRowWords55.measure.ts`) instead. That is the standing rule in CLAUDE.md and this is the
  * pack that had to act on it wholesale.
  */
 import { describe, it, expect } from "vitest";

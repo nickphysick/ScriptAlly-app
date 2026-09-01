@@ -7,7 +7,7 @@
  * ⚠️ THIS FILE IS A SOURCE LOCK AND KNOWS WHAT THAT IS WORTH. It proves a rule was WRITTEN, never
  * that it reached an element — so every claim here is about the sheet's own shape (a token exists,
  * a selector is not restated, a literal is absent) and every claim about what a bar ENDS UP
- * looking like is made in `tests/e2e/calLook.measure.ts`, against a rendered page. The two are not
+ * looking like is made in `tests/e2e/calRowWords55.measure.ts`, against a rendered page. The two are not
  * interchangeable and this repo has been caught assuming they were.
  *
  * ⚠️ COMMENTS ARE STRIPPED BEFORE ANYTHING IS ASSERTED. Every retirement in this repo is

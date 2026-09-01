@@ -1473,7 +1473,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * ⚠️ `RIGHT NOW` IS A FILTER OF THE ONE DERIVATION, NEVER A SECOND ONE. It shows every row that
    * asks something of you and nothing else — the same rows, the same bars, the same deeds, in the
    * same groups. Deriving the short board separately is how two surfaces come to disagree about
-   * what is being asked; the round-trip identity check in `calLook.measure.ts` asserts that
+   * what is being asked; the round-trip identity check in `calOrder56.measure.ts` asserts that
    * toggling out and back returns the identical set, by row key.
    */
   /* ⚠️ THE ROW ASKS BECAUSE ITS GROUP SAYS SO — never because a button happened to be buildable.

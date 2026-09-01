@@ -108,15 +108,40 @@ test("five views, and the four counts add up to the fifth", async ({ page }) => 
     expect(closedTab, "a rejected or withdrawn relationship exists and Closed is empty")
       .toBeGreaterThanOrEqual(terminal.length);
   }
-  /* ⚠️ AND NOTHING THE WRITER CAN STILL ACT ON MAY BE IN IT. `No Response` is the case that used
-     to be, and it is the one the rule turns on. */
-  const noResponse = await page.evaluate(() => {
-    const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().height > 0;
-    return ([...document.querySelectorAll(".tl-rrow")] as HTMLElement[]).filter(vis)
-      .filter((r) => /no response/i.test((r.querySelector(".tl-pill")?.textContent || "").trim())).length;
-  });
-  console.log(`no-response rows: ${noResponse} (they belong under With agents, not Closed)`);
-  expect(closedTab, "Closed counts more rows than are rejected or withdrawn").toBe(terminal.length);
+  /**
+   * ⚠️ THE EQUALITY IS GONE, AND IT WAS WRONG FROM v56 §5 ONWARD.
+   *
+   * Closed is three cases now, not two: Rejected, Withdrawn, or a query whose agency states that
+   * silence means no and whose stated window has passed. The third has no terminal STATUS at all —
+   * its query is still `Queried` — so counting Closed against the rejected-and-withdrawn rows
+   * asserts a number the rule no longer produces. It went red on a board that had just been made
+   * correct, which is the shape of a lock pinned to a value rather than to a claim.
+   *
+   * What survives is the direction that is still true: a terminal row must be in Closed, so the
+   * tab can never hold FEWER than those. The upper bound is now the writer-can-still-act rule
+   * below, which is the half that actually protects the reader.
+   */
+  /* ⚠️ AND NOTHING THE WRITER CAN STILL ACT ON MAY BE IN IT — asserted as the writer's own deeds,
+     which is what "can act on" means here. A `No Response` row belongs under With agents; so does
+     any row whose pill names something for the writer to do. */
+  /* ⚠️ THE CLAIM IS ABOUT WHAT IS IN CLOSED, SO THE BOARD MUST BE SHOWING CLOSED. Read on `All`
+     this finds every writer-owed row on the board and reports six offences against a tab holding
+     one — a true measurement of the wrong subject. */
+  await page.evaluate(`(() => { const b = [...document.querySelectorAll("button")]
+    .find((x) => /^Closed/.test((x.textContent || "").trim())); if (b) b.click(); })()`);
+  await page.waitForTimeout(500);
+  const actionable = await page.evaluate(`(() => {
+    const vis = (e) => e.getBoundingClientRect().height > 0;
+    const DEEDS = ["Send the partial", "Send the full", "Send the revision", "Answer them"];
+    return [...document.querySelectorAll(".tl-rrow")].filter(vis)
+      .filter((r) => {
+        const p = r.querySelector(".tl-pill");
+        const t = p ? p.textContent.trim() : "";
+        return DEEDS.indexOf(t) >= 0 || /no response/i.test(t);
+      }).map((r) => r.dataset.rowkey);
+  })()`) as unknown as string[];
+  console.log(`rows the writer can still act on, inside Closed: ${actionable.length}`);
+  expect(actionable, "a row the writer can still act on is filed under Closed").toEqual([]);
 });
 
 test("each view draws exactly its own rows, and no row appears in two", async ({ page }) => {
@@ -186,4 +211,85 @@ test("⚠️ GROUPING MOVES ROWS, IT NEVER REMOVES THEM", async ({ page }) => {
       .toEqual([...flat].sort());
   }
   expect(back, "the flat list did not come back the same").toEqual(flat);
+});
+
+/* ════════════════════════════════════════════════════════════════════════════════════════════
+ * CARRIED FORWARD FROM `calViews.measure.ts`, RETIRED IN v56 §6.
+ *
+ * That file's first two cases are superseded by the two above — five views rather than four, and
+ * per-row exclusivity rather than per-count. Its other two are NOT superseded and would have gone
+ * silently with it: nothing else asserts that the retired range slider stays retired, and
+ * `calContrast` measures the words on a CARD, never a control against its own selected ground.
+ *
+ * ⚠️ RETIRING A FILE MEANS AUDITING ITS CASES, NOT ITS NAME. Three of that file's four cases were
+ * passing; only the count case was red. Deleting on the strength of the red would have taken two
+ * live laws with it — which is the removal-scoped-to-one-surface fault, arriving through a
+ * cleanup rather than an edit.
+ * ════════════════════════════════════════════════════════════════════════════════════════════ */
+
+test("⚠️ every selected control is legible against its own ground", async ({ page }) => {
+  await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
+  await page.waitForTimeout(800);
+  await page.locator(".tl-menuwrap .tl-mbtn").last().click();
+  await page.waitForTimeout(300);
+  const out = await page.evaluate(() => {
+    const lum = (c: string) => {
+      const m = c.match(/[\d.]+/g); if (!m) return null;
+      const [r, g, b, a] = [Number(m[0]), Number(m[1]), Number(m[2]), m[3] == null ? 1 : Number(m[3])];
+      if (a === 0) return null;
+      const f = (v: number) => { const s = v / 255; return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; };
+      return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+    };
+    /* ⚠️ THE EFFECTIVE GROUND, WALKED UP. A transparent background is exactly what the fault
+       produced, so reading the element's own is what missed it — the walk is the check. */
+    const ground = (el: HTMLElement): number | null => {
+      let n: HTMLElement | null = el;
+      while (n) { const l = lum(getComputedStyle(n).backgroundColor); if (l != null) return l; n = n.parentElement; }
+      return null;
+    };
+    const sel = [...document.querySelectorAll('.tl-tabs button[data-on="true"], .tl-popopts button[data-on="true"]')] as HTMLElement[];
+    return sel.map((el) => {
+      const ink = lum(getComputedStyle(el).color);
+      const bg = ground(el);
+      const ratio = ink == null || bg == null ? null
+        : (Math.max(ink, bg) + 0.05) / (Math.min(ink, bg) + 0.05);
+      return { text: (el.textContent || "").trim().slice(0, 18),
+        own: getComputedStyle(el).backgroundColor,
+        ratio: ratio == null ? null : Math.round(ratio * 100) / 100 };
+    });
+  });
+  console.log("selected controls: " + out.map((o) => `${o.text} ${o.ratio}`).join(" · "));
+  /* ⚠️ POPULATION FIRST, and PER KIND — a sweep that found only the tab proves nothing about the
+     popover, which reads the same token from the same scope and would fail the same way. */
+  expect(out.length, "selected controls found").toBeGreaterThan(3);
+  const bad = out.filter((o) => o.ratio == null || o.ratio < 4.5)
+    .map((o) => `${o.text}: ratio ${o.ratio} (own background ${o.own})`);
+  expect(bad, "a selected control is not legible against its own ground").toEqual([]);
+});
+
+test("the slider is gone, and its settings are in the one popover", async ({ page }) => {
+  await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
+  await page.waitForTimeout(800);
+  /* ⚠️ THE RANGE SLIDER IS RETIRED, NOT HIDDEN. It occupied permanent width to state a setting
+     read once; a control that is merely hidden comes back as a bug the next time somebody styles
+     the row. Asserted on the rendered page, where a `display: none` copy would still be found. */
+  /* ⚠️ SCOPED TO THE CALENDAR AND TO WHAT IS PAINTED. Every workspace page stays MOUNTED, so a
+     document-wide sweep finds the dashboard's own `os-rangeslider` — zero-width, on a page nobody
+     is looking at — and reports the Calendar's retired slider as still rendered. */
+  const strays = await page.evaluate(() =>
+    [...document.querySelectorAll('.cal-timeline input[type="range"]')]
+      .filter((e) => (e as HTMLElement).getBoundingClientRect().width > 0).length);
+  expect(strays, "the range slider is still rendered").toBe(0);
+  await page.locator(".tl-menuwrap .tl-mbtn").last().click();
+  await page.waitForTimeout(300);
+  const names = await page.evaluate(() =>
+    [...document.querySelectorAll(".tl-pop .tl-popname")].map((e) => (e.textContent || "").trim()));
+  const reset = await page.locator(".tl-popreset").textContent();
+  console.log(`Display holds: ${names.join(" · ")} · reset "${reset?.trim()}"`);
+  expect(names).toContain("Group");
+  expect(names).toContain("Order");
+  expect(names).toContain("Range");
+  /* the reset names the defaults rather than clearing to nothing */
+  expect(reset).toContain("All");
+  expect(reset).toContain("One list");
 });

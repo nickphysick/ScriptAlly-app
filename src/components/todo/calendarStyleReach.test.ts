@@ -19,7 +19,7 @@
  * ⚠️ IT IS A SOURCE CLAIM AND IT IS STATED AS ONE. "A rule exists for this class" is a fact about
  * the file, which is the right thing for a file to be asked. Whether the rule REACHES the element —
  * cascade, specificity, a parent that never renders — is a question for the rendered page, and
- * `calLook.measure.ts` asks it there. This catches the regression that actually happened; it does
+ * `calRowWords55.measure.ts` asks it there. This catches the regression that actually happened; it does
  * not pretend to catch every one that could.
  */
 import { describe, it, expect } from "vitest";

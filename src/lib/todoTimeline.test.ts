@@ -752,7 +752,7 @@ describe("what is pressing is one scale, and a debt outranks an appointment", ()
        be asserted to be — the first draft of this case did exactly that and failed on LONGEST
        WAITING, reporting a defect about a contract that does not exist. The claim that IS the
        contract — group headings render in `GROUP_ORDER` under every sort — is a fact about the
-       rendered page and is asserted there, in `calLook.measure.ts`. */
+       rendered page and is asserted there, in `calRowWords55.measure.ts`. */
     const mixed = input({
       queries: [
         q({ id: "q1", agentId: "a1", status: QueryStatus.OFFER, dateSent: "2026-08-01T09:00:00Z" }),

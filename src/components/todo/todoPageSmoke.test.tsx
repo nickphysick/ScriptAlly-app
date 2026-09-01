@@ -191,7 +191,7 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     /* ⚠️ THE DATE ROW IS THE RAIL NOW (v36, Phase 4). `tl-hrow` was the in-card header, drawn once
        inside the FIRST group's card — so it scrolled away with that card and a reader four groups
        down had no dates. It is the page's own sticky rail, above every group, and its ticks are
-       proved to land on the same pixels as the lanes in `calLook.measure.ts`. */
+       proved to land on the same pixels as the lanes in `calRowWords55.measure.ts`. */
     expect(html).toContain("tl-rail");
     expect(html).toContain("tl-dt");
     expect(html).toContain("tl-tick");

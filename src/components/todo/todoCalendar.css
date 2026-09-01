@@ -199,7 +199,7 @@
  * question and the phantom-column hazard all cease to exist rather than being suppressed.
  *
  * ⚠️ EVERY VERTICAL POSITION DERIVES FROM A TOKEN. `--row-h`, `--bar-h` and `--mk` are the three
- * facts; nothing in this block writes a vertical offset as a literal. `calLook.measure.ts` greps
+ * facts; nothing in this block writes a vertical offset as a literal. `calRowWords55.measure.ts` greps
  * for exactly that, and the rule exists because a bar offset and a row height were once two
  * numbers that both read 52 and neither was the other's.
  */
@@ -560,7 +560,7 @@
  *
  * ⚠️ BARS ARE 999px, CONTROLS ARE 3px, AND THAT IS THE WHOLE RULE. A pill-shaped button beside
  * pill-shaped bars reads as another piece of data; a square-cornered one cannot. The stylesheet
- * is swept for the inverse in `calLook.measure.ts`: no control may carry a 999px radius, and no
+ * is swept for the inverse in `calRowWords55.measure.ts`: no control may carry a 999px radius, and no
  * bar may carry less.
  */
 /* ⚠️ AN UNCONDITIONAL RULE, because the only one it had was inside a max-width block. A class
