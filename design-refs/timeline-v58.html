@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Calendar v58 · design of record</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --app:#f2ede7; --panel:#fcfaf6; --ink:#1c130f; --body:#3a1c14; --muted:#8a7a6c; --label:#9c8878; --detail:#6f6055;
+  --pink:#f5e2da; --pinkb:#e8c8bc; --pinkd:#efd5ca; --pinkdd:#e6c3b4; --pinktx:#7a4a35;
+  --grey:#efebe4; --hair:#efe6da;
+  --rowline:#e8e0d2; --week:#f4eee2; --month:#e7dcc7; --tick:#c3b295;
+  --row-h:66px; --bar-h:44px; --agent-w:0px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--app);font-family:Inter,sans-serif;color:var(--body);-webkit-font-smoothing:antialiased}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;color:var(--label)}
+svg{display:block}
+
+/* ============ app shell ============ */
+.app{display:flex;height:100vh}
+.side{flex:0 0 288px;padding:18px 16px 16px;display:flex;flex-direction:column;overflow-y:auto}
+.logo{display:flex;align-items:center;gap:9px;padding:2px 6px 16px}
+.logo .wm{font-family:'Playfair Display',serif;font-weight:600;font-size:22px;color:var(--ink)}
+.mscard{background:#fff;border:1px solid #e7dccb;border-radius:14px;padding:12px 12px;display:flex;align-items:center;gap:11px;margin-bottom:16px;box-shadow:0 1px 3px rgba(58,28,20,.04)}
+.mscard .thumb{width:40px;height:44px;background:#e9ede6;border:1px solid #d6ddd2;border-radius:6px;flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+.mscard .t{font-weight:600;font-size:13.5px;color:var(--ink);line-height:1.2}
+.mscard .s{font-size:11.5px;color:var(--muted);margin-top:3px}
+.mscard .chev{margin-left:auto;display:flex;gap:2px;color:#b3a693}
+.navsec{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;color:var(--label);padding:16px 10px 7px}
+.nav a{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:10px;color:#4a3d33;font-size:13.5px;font-weight:500;text-decoration:none;cursor:pointer}
+.nav a:hover{background:rgba(255,255,255,.6)}
+.nav a.on{background:#fff;border:1px solid #e9decd;color:var(--ink);box-shadow:0 1px 3px rgba(58,28,20,.05)}
+.nav a svg{color:#7d6c5c;flex:0 0 auto}
+.nav a .bdg{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted)}
+.nav a .bdg::before{content:'';width:6px;height:6px;border-radius:99px;background:var(--pinkdd)}
+.acct{margin-top:auto;display:flex;align-items:center;gap:11px;padding:12px 10px 2px}
+.acct .av{width:36px;height:36px;border-radius:99px;background:var(--pinkd);border:1px solid var(--pinkdd);color:var(--pinktx);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.acct .n{font-weight:600;font-size:13px;color:var(--ink)}
+.acct .p{font-size:11.5px;color:var(--muted);margin-top:2px}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{flex:0 0 60px;display:flex;align-items:center;gap:14px;padding:0 20px 0 6px}
+.crumbs{display:flex;align-items:center;gap:8px;font-family:'Playfair Display',serif;font-size:17px;color:#8d7c6b}
+.crumbs b{font-weight:500;color:var(--ink)}
+.crumbs .sl{color:#c5b7a3}
+.saved{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.16em;color:var(--label);border-left:1px solid #e3d7c5;padding-left:14px;margin-left:4px}
+.tb-r{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tb-search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e5d8c9;border-radius:10px;padding:8px 12px;width:230px;color:var(--muted);font-size:12.5px}
+.kbd{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--grey);border:1px solid #e0d6c8;border-radius:5px;padding:2px 5px;color:var(--muted)}
+.tb-btn{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #e5d8c9;border-radius:10px;padding:8px 13px;font-size:12.5px;font-weight:500;color:#4a3d33;cursor:pointer}
+.tb-help{width:34px;height:34px;border-radius:99px;background:transparent;border:none;color:var(--muted);font-size:14px;cursor:pointer}
+.tb-new{display:flex;align-items:center;gap:7px;background:var(--ink);border:none;border-radius:99px;padding:10px 16px;font-size:12.5px;font-weight:600;color:#faf7f2;cursor:pointer}
+.content{flex:1;overflow-y:auto;background:var(--panel);border:1px solid #ece2d3;border-radius:20px 20px 0 0;margin:0 16px 0 0;padding:26px 30px 46px;box-shadow:0 2px 14px rgba(58,28,20,.04)}
+.crumbpill{display:inline-flex;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;color:var(--label);border:1px solid #e5d8c9;border-radius:999px;padding:5px 11px;background:#fff;margin-bottom:10px}
+h1{font-family:'Playfair Display',serif;font-size:40px;font-weight:500;line-height:1.1;color:var(--ink);margin-bottom:20px}
+.ctrl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:0 0 16px}
+.tabs{display:inline-flex;gap:1px}
+.tab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;font-weight:500;color:#8a7a6c;padding:7px 11px;
+  border:none;background:transparent;cursor:pointer;border-radius:6px;display:inline-flex;gap:7px;align-items:center}
+.tab:hover{background:#f3ece1}
+.tab.on{background:var(--ink);color:#faf7f2}
+.tab b{font-weight:500;opacity:.6}
+.seg{display:inline-flex;background:#fff;border:1px solid #e5d8c9;border-radius:8px;overflow:hidden}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;font-weight:500;border:none;background:transparent;
+  color:#6a5a50;padding:8px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--hair)}
+.seg button[data-on="true"]{background:var(--pink);color:var(--pinktx)}
+.btn{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.09em;font-weight:500;border-radius:8px;padding:8px 11px;
+  background:#fff;border:1px solid #e5d8c9;color:#6a5a50;cursor:pointer}
+.srch{font-size:11px;border:1px solid #e5d8c9;border-radius:8px;padding:8px 12px;background:#fff;width:140px;color:var(--body)}
+.count{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--label);margin-left:auto}
+.addbtn{display:flex;align-items:center;gap:8px;background:var(--pink);border:1px solid var(--pinkb);border-radius:10px;
+  padding:9px 14px;font-size:12.5px;font-weight:600;color:var(--body);cursor:pointer}
+
+/* ============ board chassis ============ */
+.board{position:relative;background:#f5f1eb;border:none;border-radius:14px;padding:0 14px 14px;margin-top:2px}
+.grid{display:flex}
+.g-agent{flex:0 0 var(--agent-w)}
+.g-lane{flex:1 1 auto;position:relative;min-width:0}
+.rail{position:sticky;top:0;z-index:50;background:#f5f1eb;isolation:isolate;border-radius:14px 14px 0 0}
+.rail .g-agent{display:none}
+.rail .g-lane{height:42px}
+.mon{position:absolute;font-family:Inter,sans-serif;font-weight:600;white-space:nowrap}
+.monline{display:none}
+.wk{position:absolute;bottom:11px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:7.5px;
+  letter-spacing:.08em;color:#a89880;white-space:nowrap}
+.wktick{position:absolute;bottom:0;width:0;border-left:1px solid #c9b998}
+.cols{position:absolute;inset:0;z-index:0;pointer-events:none}
+.col{position:absolute;top:0;bottom:0;width:0;border-left:1px solid var(--week)}
+.col.m{border-left-color:var(--month)}
+.todayband{position:absolute;top:0;bottom:0;background:#fbeee4;display:none}
+.rows{position:relative}
+.rows::before{display:none}
+/* row chassis — explicit geometry, immune to collapse */
+.row{position:relative;height:var(--row-h);border-bottom:1px solid var(--rowline)}
+.row:last-child{border-bottom:none}
+.row:hover{background:#faf6ee}
+.row.owes::after{content:'';position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:2px;background:#c98e8a;z-index:4}
+.ag{display:none}
+.ag .nm{font-family:'Playfair Display',serif;font-size:14px;font-weight:500;color:var(--ink);line-height:1.2}
+.ag .fm{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);margin-top:3px;display:block}
+.lane{position:absolute;top:0;bottom:0;right:0;left:var(--agent-w)}
+.row.hush .nm{color:#7d6f63}
+.row.hush .fm{opacity:.7}
+.today{position:absolute;top:0;bottom:0;width:0;border-left:2px solid #dca98c;z-index:40;pointer-events:none}
+.todaycap{position:absolute;transform:translateX(-50%);top:2px;background:var(--pinkd);border:1px solid var(--pinkdd);color:var(--pinktx);
+  font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;padding:2px 8px;border-radius:999px;z-index:51;white-space:nowrap}
+
+/* past track + nodes (all formats) */
+.trk{position:absolute;top:50%;height:0;border-top:1px solid #d5c7b0;z-index:1}
+.nd{position:absolute;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:999px;background:#fff;
+  border:1px solid #c6b69d;display:flex;align-items:center;justify-content:center;z-index:3}
+.nd svg{width:8px;height:8px}
+
+/* tasks */
+.task{position:absolute;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:8px;z-index:5;white-space:nowrap}
+.task .box{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--ink);background:#fff;flex:0 0 auto}
+.task.ghosted .box{border-style:dashed;border-color:#b9ab97;background:transparent}
+.task .tl{font-size:12.5px;font-weight:600;color:var(--ink)}
+.task .td{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--label);display:block;margin-top:2px}
+
+/* hover record (all formats) */
+.tip{position:absolute;left:0;bottom:calc(100% + 7px);background:#fff;border:1px solid #e3d6c3;border-radius:8px;padding:8px 12px;
+  display:none;white-space:nowrap;z-index:45;box-shadow:0 6px 18px rgba(58,28,20,.12)}
+.tip .dt{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:#6f6055}
+.tip .sep{color:#d6c8b6;margin:0 6px}
+.card:hover .tip,.fcard:hover .tip{display:block}
+
+.note{margin-top:18px;font-size:12px;color:#5c4c40;line-height:1.65;background:#fff;border:1px solid var(--hair);border-radius:10px;padding:13px 16px}
+.note b{color:var(--ink)}.note p{margin-bottom:6px}
+.dev{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:200;display:flex;gap:8px;align-items:center;
+  background:#fff;border:1px solid #ddd0bd;border-radius:999px;padding:6px 8px 6px 14px;box-shadow:0 6px 22px rgba(58,28,20,.14)}
+.dev .dl{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;color:var(--label)}
+
+/* ============ UNIFIED — spanning cards in the float language ============ */
+.gstack{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fnm{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;line-height:1.15}
+.ffx{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:#8a7a6c;white-space:nowrap}
+.fchip{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;
+  border-radius:999px;padding:4px 9px;white-space:nowrap;flex:0 0 auto}
+.fchip.you{background:#f8ece6;color:#8c4f4a}
+.fchip.them{background:#dce0d9;color:#55684b}
+.fchip.rem{background:#e2ebf2;color:#40586e}
+.fchip.quiet{background:#eee8dc;color:#8a7a6c}
+.fchip.shut{background:#efece6;color:#8a8177}
+.card.cut .frame{border-top-right-radius:0;border-bottom-right-radius:0;border-right:none}
+/* overdue: the card wobbles occasionally. Every frame restates the base translateY(-50%) literally — no var() in keyframes. */
+@keyframes wob{
+  0%,86%,100%{transform:translateY(-50%) rotate(0deg)}
+  88%{transform:translateY(-50%) rotate(0.55deg)}
+  91%{transform:translateY(-50%) rotate(-0.55deg)}
+  94%{transform:translateY(-50%) rotate(0.35deg)}
+  97%{transform:translateY(-50%) rotate(-0.18deg)}
+}
+.card.owed{animation:wob 7s ease-in-out infinite;transform-origin:50% 50%}
+.row:nth-child(odd) .card.owed{animation-delay:-3.4s}
+@media (prefers-reduced-motion:reduce){.card.owed{animation:none}}
+
+/* the action due, as a cap anchored on its date — the today-cap idiom, per bar */
+.nlab{position:absolute;top:2px;transform:translateX(-50%);z-index:6;pointer-events:none;white-space:nowrap;
+  font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;
+  background:#fff;border:1px solid #ddd1bd;border-radius:999px;padding:3px 8px;color:#8a7a6c}
+.nlab.mine{background:#f8ece6;border-color:#eccfc2;color:#8c4f4a}
+.tmark{position:absolute;top:50%;right:-4px;z-index:4}
+.tmark.you{width:9px;height:9px;background:#c98e8a;border-radius:2px;transform:translateY(-50%) rotate(45deg)}
+.tmark.est{width:9px;height:9px;border:1.5px solid #b8a889;border-radius:99px;background:#fff;transform:translateY(-50%)}
+
+
+/* ---- HEADER/CANVAS · RULER — graded ticks carry the scale, canvas clear ---- */
+body[data-style="ruler"] .rail{border-bottom:1px solid #d8cab2}
+body[data-style="ruler"] .mon{top:6px;font-size:11.5px;color:#6f6055;padding-left:8px}
+body[data-style="ruler"] .wktick{height:6px}
+body[data-style="ruler"] .wktick.m{height:13px;border-left-color:#b3a284}
+body[data-style="ruler"] .col{display:none}
+body[data-style="ruler"] .todayband{display:block;background:#f8ece6}
+
+
+/* shared card skeleton bits */
+.card{position:absolute;top:50%;transform:translateY(-50%);height:var(--bar-h);z-index:2}
+.frame{position:absolute;inset:0;border-radius:10px;background:#fff;border:1px solid #e2d4be;
+  box-shadow:0 1px 2px rgba(58,28,20,.08),0 5px 14px rgba(58,28,20,.09);overflow:hidden;z-index:0}
+.card:hover{z-index:12}
+.card:hover .frame{box-shadow:0 2px 4px rgba(58,28,20,.09),0 12px 28px rgba(58,28,20,.16)}
+.card.shut .frame{border-style:dashed;box-shadow:none;background:#fdfbf7}
+.card.hush .frame{box-shadow:none}
+.body{position:absolute;left:11px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:9px;
+  white-space:nowrap;z-index:3;max-width:calc(100% - 22px);overflow:hidden}
+.card.fadeL .body{left:34px}
+.bwrap{display:inline-flex;align-items:center;gap:9px;flex:0 0 auto;white-space:nowrap;transform:translateX(0)}
+
+.bseg{position:absolute;top:50%;transform:translateY(-50%);height:var(--bar-h);z-index:2;border-radius:0 6px 6px 0}
+.bseg .ll{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:7px;
+  letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#6e3a24;white-space:nowrap}
+.card.fadeL .frame{border-top-left-radius:0;border-bottom-left-radius:0;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 30px);mask-image:linear-gradient(90deg,transparent,#000 30px)}
+.card.fadeR .frame{border-top-right-radius:0;border-bottom-right-radius:0;
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 30px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 30px),transparent)}
+.card.fadeL.fadeR .frame{-webkit-mask-image:linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent)}
+
+.stem{position:absolute;top:50%;height:0;border-top:1.5px solid #d9cdb8;z-index:1}
+.stem.od{border-top:1.5px dashed #c98e8a}
+</style>
+</head>
+<body data-style="ruler">
+
+<div class="app">
+  <aside class="side">
+    <div class="logo">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3a1c14" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l6.4 2.6L12 20l3-5.6L21 3z"/></svg>
+      <span class="wm">ScriptAlly</span>
+    </div>
+    <div class="mscard">
+      <div class="thumb"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a6e58" stroke-width="1.5"><path d="M6 3h9l4 4v14H6z"/><path d="M9 9h7M9 13h7M9 17h4"/></svg></div>
+      <div><div class="t">Murphy's Day&nbsp;…</div><div class="s">Thriller · 50,000 words</div></div>
+      <div class="chev"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+    </div>
+    <nav class="nav">
+      <a><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a>
+      <div class="navsec">QUERIES</div>
+      <a><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l6.4 2.6L12 20l3-5.6L21 3z"/></svg>Query Centre</a>
+      <a><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Analytics</a>
+      <div class="navsec">AGENTS</div>
+      <a><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1-3.6 3.8-5.4 7-5.4s6 1.8 7 5.4"/></svg>Contact list</a>
+      <a><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Discover</a>
+      <div class="navsec">MATERIALS</div>
+      <a><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4v16M9 4v16M14 5.5l5 15"/></svg>Manuscripts</a>
+      <a><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 5h11a3 3 0 0 1 3 3v11H8a3 3 0 0 1-3-3z"/><path d="M9 9h6M9 13h6"/></svg>Comparable titles</a>
+      <a><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>Submission packages</a>
+      <div class="navsec">TASKS</div>
+      <a><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6.5 5.5 8 8 5M4 12.5 5.5 14 8 11M4 18.5 5.5 20 8 17M11 6.5h9M11 12.5h9M11 18.5h9"/></svg>To-do list<span class="bdg">19</span></a>
+      <a class="on"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M3.5 10h17M8 2.8V6M16 2.8V6"/></svg>Calendar</a>
+      <a><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6"/></svg>Noteboard</a>
+      <div class="navsec">ACCOUNT</div>
+      <a><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.2"/><path d="M19 12a7 7 0 0 0-.14-1.4l2-1.55-2-3.46-2.36.95a7 7 0 0 0-2.42-1.4L13.7 2.6h-3.4l-.38 2.54a7 7 0 0 0-2.42 1.4l-2.36-.95-2 3.46 2 1.55A7 7 0 0 0 5 12c0 .48.05.94.14 1.4l-2 1.55 2 3.46 2.36-.95a7 7 0 0 0 2.42 1.4l.38 2.54h3.4l.38-2.54a7 7 0 0 0 2.42-1.4l2.36.95 2-3.46-2-1.55c.09-.46.14-.92.14-1.4z"/></svg>Settings</a>
+    </nav>
+    <div class="acct">
+      <div class="av">BC</div>
+      <div><div class="n">Bethany Carter</div><div class="p">Pro plan</div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8a7a6c" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9.5 4v16"/></svg>
+      <div class="crumbs">ScriptAlly <span class="sl">/</span> Tasks <span class="sl">/</span> <b>Calendar</b></div>
+      <span class="saved">ALL CHANGES SAVED</span>
+      <div class="tb-r">
+        <div class="tb-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.8-3.8"/></svg>Search<span class="kbd">⌘K</span></div>
+        <button class="tb-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20l4-1L19.5 7.5a2 2 0 0 0-3-3L5 16z"/></svg>Feedback</button>
+        <button class="tb-help">?</button>
+        <button class="tb-new">＋ New</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <span class="crumbpill">TASKS</span>
+      <h1>Calendar</h1>
+
+      <div class="ctrl">
+        <div class="tabs">
+          <button class="tab on">ALL <b id="cAll">–</b></button><button class="tab">NEEDS ME <b id="cNeed">–</b></button>
+          <button class="tab">WITH AGENTS <b id="cWith">–</b></button><button class="tab">TASKS <b id="cTask">–</b></button><button class="tab">CLOSED <b id="cShut">–</b></button>
+        </div>
+        <button class="btn" id="navP">‹ WEEK</button><button class="btn" id="navT">TODAY</button><button class="btn" id="navN">WEEK ›</button>
+        <button class="btn">DISPLAY ▾</button>
+        <input class="srch" placeholder="Search…">
+        <span class="count" id="countLine">–</span>
+        <button class="addbtn">＋ Add task or note</button>
+      </div>
+
+      <div class="board">
+        <div class="rail grid">
+          <div class="g-agent"><span class="lbl" id="colhead">Group</span></div>
+          <div class="g-lane" id="rail"></div>
+        </div>
+        <div class="rows" id="rows"></div>
+        <div class="today" id="todayline"></div>
+        <div class="todaycap" id="todaycap">2 Sept</div>
+      </div>
+
+      <div class="note">
+      <p><b>Design of record — v58.</b> One white card per relationship spanning its current wait on the cream field; chip states the status (imperative only when already overdue); the bar's end wears a terminal mark (diamond = your deadline, ring = estimate or schedule) and an action cap centred on the date. Overdue cards wobble occasionally instead of carrying a pattern. Journeys are the slim track and nodes; tasks are points with rolled ghosts; text lives in the card and glides on hover when clipped; the full record is the hover tip. Fixed three-month window, today centred, scrolled by whole weeks; ruler header; counts derived from the rows.</p>
+      <p>Agency estimates are stated, never judged: only writer-owed dates count as overdue. Dashed frames mean closed, and nothing else.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+var TODAY=new Date(2026,8,2);
+var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sept','Oct','Nov','Dec'];
+var N=90, TP=50, SH=0, STYLE='ruler';
+function addD(n){var d=new Date(TODAY);d.setDate(d.getDate()+n);return d}
+function pos(d){return TP+((d-SH)/N)*100}
+function fmt(n){var d=addD(n);return d.getDate()+' '+M[d.getMonth()]}
+function span(d){d=Math.round(d);
+  if(d<21)return d+(d===1?' day':' days');
+  if(d<84)return Math.round(d/7)+' weeks';
+  return Math.round(d/30.4)+' months';}
+
+function dot(k){
+  var s='<svg width="17" height="17" viewBox="0 0 20 20">',g='#8a9e88';
+  if(k==='partial')s+='<circle cx="10" cy="10" r="7.4" fill="#fff" stroke="'+g+'" stroke-width="1.7"/><path d="M10 4.6 A5.4 5.4 0 0 1 10 15.4 Z" fill="'+g+'"/>';
+  else if(k==='full')s+='<circle cx="10" cy="10" r="7.4" fill="#fff" stroke="'+g+'" stroke-width="1.7"/><circle cx="10" cy="10" r="5" fill="'+g+'"/>';
+  else if(k==='offer')s+='<circle cx="10" cy="10" r="8.2" fill="#7a4a35"/><path d="M6.5 10.4 L8.9 12.8 L13.6 7.5" stroke="#fdf6f2" stroke-width="1.8" fill="none" stroke-linecap="round"/>';
+  else if(k==='rr')s+='<circle cx="10" cy="10" r="7.4" fill="#fff" stroke="#c57344" stroke-width="1.7"/><path d="M6.8 10 a3.2 3.2 0 1 1 1 2.3 M6.6 13.6 l1.2-1.5 -1.9-.4" stroke="#c57344" stroke-width="1.4" fill="none" stroke-linecap="round"/>';
+  else if(k==='shut')s+='<circle cx="10" cy="10" r="7.4" fill="#f4efe8" stroke="#b9b0a5" stroke-width="1.5"/><path d="M7.2 7.2 L12.8 12.8 M12.8 7.2 L7.2 12.8" stroke="#8a8177" stroke-width="1.4" stroke-linecap="round"/>';
+  else if(k==='quiet')s+='<circle cx="10" cy="10" r="7.4" fill="#fff" stroke="#c4bcb0" stroke-width="1.5"/><path d="M10 6.2 V10 L12.8 11.8" stroke="#8a8177" stroke-width="1.4" fill="none" stroke-linecap="round"/>';
+  else if(k==='task')s+='<rect x="3" y="3" width="14" height="14" rx="3.5" fill="#fff" stroke="#3a1c14" stroke-width="1.6"/>';
+  else s+='<circle cx="10" cy="10" r="7.4" fill="#fff" stroke="'+g+'" stroke-width="1.7"/>';
+  return s+'</svg>';
+}
+var MKS={in:'<svg viewBox="0 0 12 12"><path d="M9.4 6 H3 M5.3 3.4 L2.7 6 L5.3 8.6" stroke="#5a6e58" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>',
+ out:'<svg viewBox="0 0 12 12"><path d="M2.6 6 H9 M6.7 3.4 L9.3 6 L6.7 8.6" stroke="#8a5a45" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>'};
+
+var ROWS=[
+ {kind:'q',nm:'Greg Panetta',fm:'Panetta Literary',dk:'partial',pk:'you',owed:1,pill:'Send the partial',hl:'Partial requested',
+  pre:'asked 30 Jun',due:-64,from:-64,to:null,ev0:'in',hist:[{d:-101,ev:'out',s:'Queried',k:'them'}],key:-64},
+ {kind:'q',nm:'William Tan',fm:'Foxglove Literary',dk:'queried',pk:'you',owed:1,pill:'Nudge due',hl:'Queried',
+  pre:'sent 30 Jul',dueNamed:'31 Jul',due:-33,from:-34,to:null,ev0:'out',hist:[],key:-33},
+ {kind:'q',nm:'Tom Ellery',fm:'Curtis Vane',dk:'offer',pk:'you',owed:1,pill:'Answer them',hl:'Offer received',
+  pre:'offered 19 Aug',dueNamed:'26 Aug',due:-7,from:-14,to:null,ev0:'in',nxt:'notify 4 agents',
+  hist:[{d:-52,ev:'out',s:'Queried',k:'them'},{d:-30,ev:'in',s:'Preparing the full',k:'you'},{d:-21,ev:'out',s:'Full sent',k:'them'}],key:-7},
+ {kind:'q',nm:'R. Whitmore',fm:'Whitmore & Bond',dk:'full',pk:'you',owed:1,pill:'Send the full',hl:'Full requested',
+  pre:'asked 12 Aug',dueNamed:'27 Aug',due:-6,from:-21,to:null,ev0:'in',hist:[{d:-58,ev:'out',s:'Queried',k:'them'}],key:-6},
+ {kind:'t',nm:'Draft the Ellery reply',fm:'Your task',at:3,due2:'due 5 Sept',key:3},
+ {kind:'q',nm:'K. Osei',fm:'Osei Literary',dk:'queried',pk:'them',pill:'Queried',hl:'Queried',
+  pre:'sent 28 Aug',dt2:'sent 28 Aug',endl:'Reply exp 4 Sept',act:'Nudge',when:'from 4 Sept',from:-5,to:2,ev0:'out',hist:[],nxt:'nudge from 4 Sept',key:2},
+ {kind:'q',nm:'Sophie Dunn',fm:'Curtis Vane',dk:'full',pk:'them',pill:'Full sent',hl:'Full sent',
+  pre:'sent 24 Jul',dt2:'sent 24 Jul',endl:'Reply exp 8 Sept',act:'Nudge',when:'from 8 Sept',from:-40,to:6,ev0:'out',nxt:'nudge from 8 Sept',
+  hist:[{d:-95,ev:'out',s:'Queried',k:'them'},{d:-58,ev:'in',s:'Preparing the full',k:'you'}],key:6},
+ {kind:'t',nm:'Polish the synopsis',fm:'Your task',at:7,orig:-5,due2:'due 9 Sept · rolled from 28 Aug',key:7},
+ {kind:'q',nm:'Eleanor Whitfield',fm:'Greenfield Literary',dk:'queried',pk:'them',pill:'Queried',hl:'Queried',
+  pre:'sent 14 Aug',dt2:'sent 14 Aug',endl:'Reply exp 11 Sept',act:'Nudge',when:'from 11 Sept',from:-19,to:9,ev0:'out',hist:[],nxt:'nudge from 11 Sept',key:9},
+ {kind:'t',nm:'Nudge Marcus Reed',fm:'Your task',at:16,due2:'due 18 Sept',key:16},
+ {kind:'q',nm:'Harriet Vane-Coe',fm:'Stillwater Reps',dk:'queried',pk:'rem',pill:'Nudged',hl:'Nudged 26 Aug',
+  pre:'nudged 26 Aug',dt2:'nudged 26 Aug',endl:'Nudge 24 Sept',act:'Nudge again',when:'24 Sept',from:-7,to:22,ev0:'out',hist:[{d:-71,ev:'out',s:'Queried',k:'them'}],key:22},
+ {kind:'q',nm:"Daniel O'Rourke",fm:'Inkwell & Stone',dk:'queried',pk:'rem',pill:'Nudged',hl:'Nudged 19 Aug',
+  pre:'nudged 19 Aug',dt2:'nudged 19 Aug',endl:'Nudge 26 Sept',act:'Nudge again',when:'26 Sept',from:-14,to:24,ev0:'out',hist:[{d:-30,ev:'out',s:'Queried',k:'them'}],key:24},
+ {kind:'q',nm:'Jonathan Marsh',fm:'The Marsh Agency',dk:'partial',pk:'you',pill:'Partial requested',hl:'Partial requested',
+  pre:'asked 22 Aug',dt2:'5 weeks left',endl:'Send by 4 Oct',act:'Send the partial',when:'by 4 Oct',from:-11,to:32,ev0:'in',hist:[{d:-20,ev:'out',s:'Queried',k:'them'}],key:32},
+ {kind:'q',nm:'Isabel Fontaine',fm:'Fontaine & Frost',dk:'rr',pk:'you',pill:'Revise & resubmit',hl:'Revise & resubmit',
+  pre:'received 10 Aug',dt2:'6 weeks left',endl:'Resubmit by 15 Oct',act:'Resubmit',when:'by 15 Oct',from:-23,to:43,ev0:'in',
+  hist:[{d:-80,ev:'out',s:'Queried',k:'them'},{d:-55,ev:'in',s:'Preparing the full',k:'you'},{d:-48,ev:'out',s:'Full sent',k:'them'}],key:43},
+ {kind:'q',nm:'Priya Raman',fm:'Raman & Hale',dk:'partial',pk:'them',pill:'Partial sent',hl:'Partial sent',
+  pre:'sent 17 Jul',dt2:'reply expected 28 Aug · none yet',from:-47,to:null,ev0:'out',nxt:'nudge available',
+  hist:[{d:-121,ev:'out',s:'Queried',k:'them'},{d:-61,ev:'in',s:'Preparing the partial',k:'you'}],key:-5},
+ {kind:'q',hush:1,nm:'Penhallow Literary',fm:'Agent not specified',dk:'quiet',pk:'quiet',pill:'No response',hl:'No response yet',
+  pre:'sent Apr 2024',dt2:'860 days',from:-860,to:null,hist:[],nxt:'close if you wish',key:9000},
+ {kind:'q',hush:1,nm:'Aisha Kapoor',fm:'The Lantern Agency',dk:'quiet',pk:'quiet',pill:'No response',hl:'No response yet',
+  pre:'sent May 2024',dt2:'840 days',from:-860+20,to:null,hist:[],nxt:'close if you wish',key:9001},
+ {kind:'q',hush:1,shut:1,nm:'Rosalind Vale',fm:'Vale Literary',dk:'shut',pk:'shut',pill:'Closed',hl:'No response — window passed',
+  pre:'sent Feb 2025',dt2:'closed 20 Aug',from:-40,to:-13,ev0:'out',hist:[{d:-200,ev:'out',s:'Queried',k:'them'}],key:9999}
+];
+
+function counts(){
+  var task=0, shut=0, need=0, withA=0;
+  ROWS.forEach(function(r){
+    if(r.kind==='t'){task++;}
+    else if(r.shut){shut++;}
+    else if(r.pk==='you'){need++;}
+    else{withA++;}
+  });
+  var rel=ROWS.length-task;
+  document.getElementById('cAll').textContent=ROWS.length;
+  document.getElementById('cNeed').textContent=need;
+  document.getElementById('cWith').textContent=withA;
+  document.getElementById('cTask').textContent=task;
+  document.getElementById('cShut').textContent=shut;
+  document.getElementById('countLine').textContent=rel+' relationship'+(rel===1?'':'s')+' · '+task+' task'+(task===1?'':'s');
+}
+function isSplit(r){return r.due!==undefined&&r.due<0&&(r.due-r.from)>2}
+function detail(r){
+  var t;
+  if(r.kind==='t')return r.due2;
+  if(isSplit(r))t=r.pre+'<span class="sep">·</span>due '+r.dueNamed+'<span class="sep">·</span>'+span(0-r.due)+' over';
+  else if(r.due!==undefined&&r.due<0){
+    var late=span(0-r.due);
+    t=r.dueNamed
+      ? r.pre+'<span class="sep">·</span>overdue since '+r.dueNamed+'<span class="sep">·</span>'+late
+      : r.pre+'<span class="sep">·</span>no date promised<span class="sep">·</span>owed '+late;
+  }else if(r.endl)t=r.pre+'<span class="sep">·</span>'+r.endl.toLowerCase()+(r.pk==='you'?'<span class="sep">·</span>'+r.dt2:'');
+  else t=r.pre+'<span class="sep">·</span>'+r.dt2;
+  if(r.nxt)t+='<span class="sep">·</span>next: '+r.nxt;
+  return t;
+}
+function shortFact(r){
+  if(isSplit(r))return 'due '+r.dueNamed+' · '+span(0-r.due)+' over';
+  if(r.due!==undefined&&r.due<0)return r.dueNamed?'overdue since '+r.dueNamed:'owed '+span(0-r.due);
+  return r.dt2;
+}
+function tipHTML(r){return '<span class="tip"><span class="dt">'+detail(r)+'</span></span>'}
+
+function railHTML(){
+  var lo=SH-N*TP/100, hi=SH+N*(100-TP)/100, h='';
+  var bs=[], d=new Date(addD(lo).getFullYear(),addD(lo).getMonth(),1);
+  while(d<=addD(hi)){bs.push({off:Math.round((d-TODAY)/86400000),m:d.getMonth(),y:d.getFullYear()});d=new Date(d.getFullYear(),d.getMonth()+1,1);}
+  var name=function(b){return M[b.m]+(b.m===0?" '"+String(b.y).slice(2):'')};
+  if(STYLE==='banded'){
+    for(var i=0;i<bs.length;i++){
+      var A=Math.max(pos(bs[i].off),0), B=Math.min(pos(i+1<bs.length?bs[i+1].off:hi),100);
+      if(B-A<3)continue;
+      h+='<div class="mon" style="left:'+((A+B)/2)+'%">'+name(bs[i])+'</div>';
+    }
+    return h;
+  }
+  bs.forEach(function(b){
+    var p=pos(b.off);
+    if(p>-2&&p<97)h+='<div class="mon" style="left:'+Math.max(0,p)+'%">'+name(b)+'</div>';
+    if(STYLE==='ruler'&&p>0&&p<100)h+='<div class="wktick m" style="left:'+p+'%"></div>';
+  });
+  if(STYLE==='ruler'){
+    var every=N<=90?7:N<=180?14:28;
+    var first=Math.ceil(lo/7)*7;
+    for(var k=first;k<=hi;k+=every){
+      var p2=pos(k);if(p2<1||p2>99)continue;
+      if(Math.abs(k)<every*.4)continue;
+      h+='<div class="wktick" style="left:'+p2+'%"></div><div class="wk" style="left:'+p2+'%">'+fmt(k)+'</div>';
+    }
+  }
+  return h;
+}
+function colsHTML(){
+  var lo=SH-N*TP/100, hi=SH+N*(100-TP)/100, h='';
+  if(pos(0)>0&&pos(0)<100)h+='<div class="todayband" style="left:'+pos(0)+'%;width:'+Math.max(pos(1)-pos(0),0.6)+'%"></div>';
+  var bs=[], d=new Date(addD(lo).getFullYear(),addD(lo).getMonth(),1);
+  while(d<=addD(hi)){bs.push(Math.round((d-TODAY)/86400000));d=new Date(d.getFullYear(),d.getMonth()+1,1);}
+  bs.push(hi);
+  if(STYLE==='minimal'){
+    for(var i=0;i<bs.length-1;i++){
+      var p=pos(bs[i]);
+      if(p>0&&p<100)h+='<div class="col m" style="left:'+p+'%"></div>';
+    }
+  }
+  if(STYLE==='banded'){
+    for(var j=0;j<bs.length-1;j++){
+      var A=Math.max(pos(bs[j]),0), B=Math.min(pos(bs[j+1]),100);
+      if(B>A)h+='<div class="mband'+(j%2?' alt':'')+'" style="left:'+A+'%;width:'+(B-A)+'%"></div>';
+    }
+  }
+  return h;
+}
+function trackHTML(r,lo,hi,a,fL){
+  var H=r.hist||[], h='';
+  if(H.length){
+    var t0=Math.max(H[0].d,lo);
+    if(pos(a)>pos(t0))h+='<div class="trk" style="left:'+pos(t0)+'%;width:'+(pos(a)-pos(t0))+'%"></div>';
+    H.forEach(function(m){
+      if(m.d>=lo&&m.d<=hi)h+='<div class="nd" style="left:'+pos(m.d)+'%">'+MKS[m.ev]+'</div>';
+    });
+  }
+  if(r.ev0&&r.from>=lo&&!fL)h+='<div class="nd" style="left:'+pos(r.from)+'%">'+MKS[r.ev0]+'</div>';
+  return h;
+}
+function taskHTML(r){
+  var h='';
+  if(r.orig!==undefined){
+    var pg=pos(r.orig);
+    if(pg>=0&&pg<=100)h+='<div class="task ghosted" style="left:calc('+pg+'% - 8px)"><span class="box"></span></div>';
+  }
+  var p=pos(r.at);
+  if(p>=0&&p<=100)h+='<div class="task" style="left:calc('+p+'% - 8px)"><span class="box"></span>'
+    +'<span><span class="tl">'+r.nm+'</span><span class="td">'+r.due2+'</span></span></div>';
+  return h;
+}
+function geo(r){
+  var lo=SH-N*TP/100, hi=SH+N*(100-TP)/100;
+  var running=(r.to===null), to=running?0:r.to;
+  return {lo:lo,hi:hi,running:running,
+    fL:r.from<lo, fR:running||to>hi,
+    a:Math.max(r.from,lo), b:Math.min(to,hi),
+    split:isSplit(r)&&r.due>lo,
+    lateAll:!(isSplit(r)&&r.due>lo)&&r.due!==undefined&&r.due<0};
+}
+
+/* ---- format renderers ---- */
+function laneSpan(r){
+  if(r.kind==='t')return taskHTML(r);
+  var g=geo(r), h=trackHTML(r,g.lo,g.hi,g.a,g.fL);
+  var chipK=r.shut?'shut':r.pk;
+  var content='<span class="body"><span class="bwrap">'+dot(r.dk)
+    +'<span class="gstack"><span class="fnm">'+r.nm+'</span><span class="ffx">'+shortFact(r)+'</span></span>'
+    +'<span class="fchip '+chipK+'">'+r.pill+'</span></span></span>'+tipHTML(r);
+  var endBits='';
+  if(r.endl&&!g.fR&&!r.shut){
+    endBits='<span class="tmark '+(r.pk==='you'?'you':'est')+'"></span>';
+    h+='<div class="nlab'+(r.pk==='you'?' mine':'')+'" style="left:'+pos(r.to)+'%">'+r.act+'</div>';
+  }
+  var odb='';
+  h+='<div class="card'+(g.lateAll?' late':'')+(r.owed?' owed':'')+(r.hush&&!r.shut?' hush':'')+(r.shut?' shut':'')
+    +(g.fL?' fadeL':'')+(g.fR?' fadeR':'')+'" style="left:'+pos(g.a)+'%;width:calc('+w2W(g)+'% + '+(g.fR?30:0)+'px)">'
+    +'<span class="frame"></span>'+odb+content+endBits+'</div>';
+  return h;
+}
+function w2W(g){return pos(g.b)-pos(g.a)}
+function render(){
+  counts();
+  document.getElementById('rail').innerHTML=railHTML();
+
+  var rows=ROWS.slice().sort(function(x,y){return x.key-y.key});
+  var h='<div class="cols" style="left:var(--agent-w)">'+colsHTML()+'</div>';
+  var fn=laneSpan;
+  h+=rows.map(function(r){
+    return '<div class="row'+(r.owed?' owes':'')+(r.hush?' hush':'')+'">'
+      +'<div class="ag">'+dot(r.kind==='t'?'task':r.dk)+'<div><div class="nm">'+r.nm+'</div><span class="fm">'+r.fm+'</span></div></div>'
+      +'<div class="lane">'+fn(r)+'</div></div>';
+  }).join('');
+  document.getElementById('rows').innerHTML=h;
+  fitLabels();
+  placeText();
+  armScroll();
+  placeToday();
+}
+function fitLabels(){
+  document.querySelectorAll('#rows .ll').forEach(function(el){
+    var box=el.parentElement.clientWidth;
+    if(el.scrollWidth>box-14)el.style.visibility='hidden';
+  });
+}
+function placeText(){
+  document.querySelectorAll('#rows .nlab').forEach(function(el){
+    var lane=el.parentElement, w=el.offsetWidth, half=w/2;
+    var vis=el.offsetLeft-half;
+    if(vis<2)el.style.left=(half+2)+'px';
+    else if(vis+w>lane.clientWidth-2)el.style.left=(lane.clientWidth-half-2)+'px';
+  });
+}
+/* text that doesn't fit glides across on hover — transition on the inner glider only, no keyframes */
+function armScroll(){
+  document.querySelectorAll('#rows .card').forEach(function(c){
+    var b=c.querySelector('.body'), w=c.querySelector('.bwrap');
+    if(!b||!w)return;
+    c.addEventListener('mouseenter',function(){
+      var d=w.scrollWidth-b.clientWidth;
+      if(d>6){
+        w.style.transition='transform '+(0.5+d/80).toFixed(2)+'s ease';
+        w.style.transform='translateX(-'+d+'px)';
+      }
+    });
+    c.addEventListener('mouseleave',function(){
+      w.style.transform='translateX(0)';
+    });
+  });
+}
+function placeToday(){
+  var line=document.getElementById('todayline'), cap=document.getElementById('todaycap');
+  var p0=pos(0);
+  if(p0<0.5||p0>99.5){line.style.display='none';cap.style.display='none';return;}
+  line.style.display='';cap.style.display='';
+  var lane=document.querySelector('.rows .lane')||document.getElementById('rail');
+  var board=document.querySelector('.board');
+  var br=board.getBoundingClientRect(), lr=lane.getBoundingClientRect();
+  var x=(lr.left-br.left)+lr.width*p0/100;
+  line.style.left=x+'px';
+  cap.style.left=x+'px';
+}
+document.getElementById('navP').addEventListener('click',function(){SH-=7;render();});
+document.getElementById('navT').addEventListener('click',function(){SH=0;render();});
+document.getElementById('navN').addEventListener('click',function(){SH+=7;render();});
+window.addEventListener('resize',function(){placeToday()});
+render();
+</script>
+</body>
+</html>
