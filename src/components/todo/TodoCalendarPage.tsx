@@ -1601,7 +1601,21 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     () => (view.sort === DEFAULT_SORT
       ? board.flatMap((g) => g.rows)
         .slice()
-        .sort((a, b) => (a.pressingAt ?? Infinity) - (b.pressingAt ?? Infinity))
+        /* ⚠️ CLOSED SINKS BELOW EVERY LIVE ROW, BEFORE ANY KEY IS CONSULTED — the builder's own
+           rule, restated here because this re-sort would otherwise discard it. v58 orders closed
+           last, after the long silences; a closed row whose query is still `Queried` (the
+           agency-policy case) carries an ordinary finite key and floated up among live work
+           without it. Measured: a closed row at position 18, above four silences. */
+        .sort((a, b) => {
+          /* ⚠️ THE GROUP, NOT THE `closed` FLAG. `closed` means every query on the row is
+             terminal by STATUS; the board's own closed rule is wider — an agency that states
+             silence means no, with its window passed, closes a query that is still `Queried`.
+             Sorting on the flag left exactly that row above four silences. The group is what the
+             Closed tab is built from, so this and the tab cannot disagree. */
+          const ca = a.group === "closed", cb = b.group === "closed";
+          if (ca !== cb) return ca ? 1 : -1;
+          return (a.pressingAt ?? Infinity) - (b.pressingAt ?? Infinity);
+        })
       : board.flatMap((g) => g.rows)),
     [board, view.sort],
   );
@@ -1680,6 +1694,10 @@ data-rowkey={r.key}
            ordering case can pass while the live board is visibly out of order, and only comparing
            the two on one page can tell those apart. */
         data-pressing={r.pressingAt == null ? "none" : String(r.pressingAt)}
+        /* ⚠️ THE TIER, FROM THE BOARD'S OWN GROUPING — so an ordering lock reads the tier the page
+           sorted by rather than deriving a second opinion about what "closed" or "silent" means.
+           Two derivations of a tier is how a painted order and a check about it come apart. */
+        data-group={r.group ?? "none"}
         /* ⚠️ THE PAST'S WIDTH IS A ROW TOKEN, so the wash is one declaration in the sheet rather
            than an element per row. `null` where the window does not contain today — a window
            wholly ahead has no past to set back, and one wholly behind is all past, which

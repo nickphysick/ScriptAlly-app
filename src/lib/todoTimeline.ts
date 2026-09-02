@@ -918,8 +918,22 @@ export function timelineWeek(
       if (!isTerminalStatus(q.status)) {
         const named = namedEndFor(q as Query, agent ?? null, { today: data.today }).end;
         const key = (() => {
-          if (named) return new Date(`${named.ymd}T12:00:00`).getTime();
+          /**
+           * ⚠️ A NAMED END ONLY ORDERS A ROW WHILE IT IS STILL AHEAD (v58).
+           *
+           * A date that has passed is not a plan; it is a silence with a date on it. Taking it as
+           * the key sorted the longest-abandoned rows to the TOP of a board whose first claim is
+           * that the top is what needs you — measured before this change: one owed row, then SEVEN
+           * agency silences, then the rest of the owed work scattered beneath them.
+           *
+           * It stays the key where the row is the WRITER's: an overdue deed is exactly what should
+           * lead, and the further past, the higher. What sinks is a passed date with nothing being
+           * asked of the writer, which is the silence tier by the ref's own ordering.
+           */
+          const ahead = named && named.ymd > data.today;
+          if (ahead) return new Date(`${named.ymd}T12:00:00`).getTime();
           if (sideOf(q.status as QueryStatus) === "yours") {
+            if (named) return new Date(`${named.ymd}T12:00:00`).getTime();
             /* ⚠️ DUE ON RECEIPT. Nobody named a date, but the agency asked — so it was due the day
                it arrived and has been past ever since. The longer past, the more pressing, which
                falls out of the scale rather than needing a tier. */

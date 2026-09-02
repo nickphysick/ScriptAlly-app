@@ -19,30 +19,19 @@ const painted = (page: import("@playwright/test").Page) => page.evaluate(`(() =>
 
 const num = (p: string) => (p === "none" ? Infinity : Number(p));
 
-test("the board is painted soonest-first at load, before any control is touched", async ({ page }) => {
-  await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
-  await page.waitForTimeout(1000);
-  const rows = await painted(page);
-  console.log(`rows painted at load: ${rows.length}`);
-  for (const r of rows.slice(0, 10)) console.log(`  ${String(num(r.p)).padEnd(15)} ${r.key}`);
-
-  /* ⚠️ POPULATION, AND A REAL SPREAD OF KEYS. "sorted" is trivially true of one row, and equally
-     true of twenty rows that all carry the same key — which is what a board whose sort key had
-     silently become a constant would look like. */
-  expect(rows.length, "no row painted, so the order was not tested").toBeGreaterThan(5);
-  const distinct = new Set(rows.map((r) => r.p));
-  expect(distinct.size, `every row carries the same sort key (${[...distinct][0]}), so the order proves nothing`)
-    .toBeGreaterThan(3);
-
-  const out: string[] = [];
-  for (let i = 1; i < rows.length; i++) {
-    if (num(rows[i].p) < num(rows[i - 1].p)) {
-      out.push(`${rows[i].key} (${num(rows[i].p)}) after ${rows[i - 1].key} (${num(rows[i - 1].p)})`);
-    }
-  }
-  expect(out, "a row is painted before one that is more pressing").toEqual([]);
-});
-
+/**
+ * ⚠️ THE MONOTONIC-KEY CASE THAT STOOD HERE IS RETIRED INTO `calOrder58`, WHICH SUPERSEDES IT.
+ *
+ * It required the painted keys to be non-decreasing end to end. v58 orders in TIERS — owed work,
+ * then dated waits, then long silences, then closed — and the last tier is placed by what a row IS
+ * rather than by its key, so a closed row now sits last while carrying a smaller key than the
+ * silences above it. The case went red on a board that had just been made correct: a lock pinned
+ * to the shape of one ordering rather than to the rule behind it.
+ *
+ * `calOrder58` asserts the same claim in the form v58 states it — the tiers never interleave, and
+ * inside a tier the keys are non-decreasing — over a board whose three tiers are each proved
+ * non-empty first. Nothing was lost; the two cases below are untouched and still live.
+ */
 test("the first row is the most pressing on the board", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
   await page.waitForTimeout(1000);
