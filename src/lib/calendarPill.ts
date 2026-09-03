@@ -101,6 +101,9 @@ export const ghostKindFor = (pillText: string): GhostKind | null =>
 /** the moves that are real and have no glyph — the flag, expressed as data so a lock can count it */
 export const UNDRAWN_MOVES: readonly string[] = [DEEDS.full, DEEDS.revision];
 
+/** the status, as the board words it — the chip's text whenever no deed is owed */
+const statusWord = (status: QueryStatus): string => String(status);
+
 export const PILL_WORDS: readonly string[] = [
   ...Object.values(QueryStatus),
   ...Object.values(DEEDS),
@@ -112,11 +115,29 @@ export const PILL_WORDS: readonly string[] = [
  * @param nudgeDue a reminder has fallen due — a deed that comes from a DATE rather than a status,
  *   which is why it is a parameter and not another branch of the switch
  */
+/**
+ * ⚠️ v58: THE CHIP GOES IMPERATIVE ONLY ONCE THE WRITER-OWED DATE HAS PASSED.
+ *
+ * A request the writer has until 3 October to answer is a STATUS — "Partial requested" — and only
+ * becomes "Send the partial" when the third passes. Saying the deed while the date is still ahead
+ * turns a standing arrangement into a reproach, which is the appraisal this app does not do; it
+ * also leaves the board with nothing left to say when the date actually goes.
+ *
+ * `overdue` is the same flag the card wobbles on and the row draws its strip from, so the chip,
+ * the wobble and the strip cannot disagree about whether a thing is late.
+ */
 export function pillText(
   status: QueryStatus,
   holder: "agent" | "writer",
   nudgeDue = false,
+  overdue = true,
 ): Pill {
+  /* ⚠️ THE DEEDS ARE FOR OVERDUE WORK ONLY. Where the writer holds a date still ahead, the status
+     word is the honest one and the tone stays the writer's — whose move it is has not changed. */
+  if (!overdue) {
+    const tone: PillTone = nudgeDue ? "wait" : holder === "writer" ? "you" : "them";
+    return { text: statusWord(status), tone };
+  }
   /* ⚠️ THE NUDGE OUTRANKS THE STATUS, and only while the agency holds the move. A query out with
      an agency whose reminder has come round is still `Queried` — the status has not changed and
      saying it has would be a lie — but what the reader can DO about it has. Where the writer

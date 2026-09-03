@@ -1054,10 +1054,32 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
   /* ⚠️ ONE EXPRESSION FOR "THE REMINDER HAS ARRIVED", read by the pill and by the ghost's kind.
      Two copies of this test are exactly how the pill and the group came to disagree. */
   const nudgeArrived = nudgeYmd != null && nudgeYmd <= win.today;
+  /**
+   * ⚠️ v58: THE WRITER IS LATE, AND AN ARRIVED REMINDER COUNTS.
+   *
+   * A reminder the writer set for themselves, whose day has come, is a date the writer owes — so
+   * it takes the same treatment as a passed send-by: the imperative chip, the wobble, the row
+   * strip, and a card that stops at today.
+   *
+   * ⚠️ AND IT IS ONE EXPRESSION READ BY ALL FOUR. The chip, the wobble, the strip and the card's
+   * end were four separate answers to "is this late", and the board showed it: a row reading
+   * "Nudge due" whose card ran on to a ring three weeks in the future.
+   */
+  const writerLate = nudgeArrived
+    || (() => {
+      const d = expectedYmd ?? waitFromYmd;
+      return sideOf(query.status as QueryStatus) === "yours" && !!d && d < win.today;
+    })();
   const lastEventAt = live.length ? live[live.length - 1].at : -Infinity;
+  /* ⚠️ AN OVERDUE WAIT RUNS TO TODAY AND NO FURTHER. Its named end is a date it has already
+     missed, or — for an arrived reminder — a different date entirely; either way the wait it is
+     drawing ends now, not then. Reaching past today would draw a bar into a future the
+     relationship has not earned, and hang a terminal mark on it. */
   const liveStop = closeIdx >= 0
     ? stopAt
-    : Math.max(0, Math.min(span, Math.max(todayAt, goalAt ?? -Infinity, lastEventAt)));
+    : writerLate
+      ? Math.max(0, Math.min(span, Math.max(todayAt, lastEventAt)))
+      : Math.max(0, Math.min(span, Math.max(todayAt, goalAt ?? -Infinity, lastEventAt)));
   const barStop = closeIdx >= 0 ? stopAt : liveStop;
 
   /* ⚠️ THE NAMED END SPLITS THE BAR SEAMLESSLY — it is not in `breaks`. A break leaves `GAP`
@@ -1353,7 +1375,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
                for "is this actually late", which is the one thing the words and the tint used to
                share and therefore could not check. */
             return dueAt != null && dueAt < todayAt
-              ? { owed: true as const, lateFrom: Math.max(dueAt, p.from), dueAt } : {};
+              ? { lateFrom: Math.max(dueAt, p.from), dueAt } : {};
           })()
         : {}),
       /* ⚠️ A FINISHED STRETCH IS FULL, AND THERE ARE THREE WAYS TO BE FINISHED: it lies wholly
@@ -1416,7 +1438,9 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
            card past a close event takes neither cap nor mark — the same rule that stops the bar
            dead there. Measured: one row on the harness account holds a close event in its history
            while its query is still open, and it correctly draws neither. */
-        if (terminal || closeIdx >= 0) return {};
+        /* ⚠️ AND NOTHING ON AN OVERDUE CARD. It ends at today, which is not a dated future
+           moment, so there is no edge to mark and no day to name. */
+        if (terminal || closeIdx >= 0 || writerLate) return {};
         if (Math.abs(p.to - barStop) > 0.001) return {};
         const src = named.end?.source;
         if (!src || goalAt == null || goalAt < todayAt) return {};
@@ -1431,6 +1455,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
           ...(mine ? { capMine: true as const } : {}),
         };
       })(),
+      ...(writerLate ? { owed: true as const } : {}),
       ...(nudgeArrived ? { nudgeDue: true as const } : {}),
       ...(expectedYmd ? { expectedYmdRaw: expectedYmd } : {}),
     });

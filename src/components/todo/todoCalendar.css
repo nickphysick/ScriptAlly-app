@@ -206,6 +206,9 @@
 .tl-zone { overflow-x: hidden; }
 
 .tl-board {
+  /* ⚠️ THE FIELD. The board sat on nothing — `rgba(0,0,0,0)` — so the cards floated on whatever the
+     page happened to paint, and the rail had no tone to match. The ref's `.board` carries it. */
+  background: var(--tl-field);
   flex: 1; min-height: 0; display: flex; flex-direction: column;
   /* ⚠️ THE GROUND IS THE REF'S `--ground` AND THE ROWS ARE WHITE. It was a tinted `#eae2d6`,
      chosen when every bar was filled and the board needed to differ from them. Porcelain inverts
@@ -241,6 +244,14 @@
      the ring on a value chosen for a control's edge. Its ground is the board's, so the dots read
      as a hole in the row rather than as a filled disc. Its writer's-tone ink is the ref's
      `--pinktx`; `--tl-ink` is four shades darker and is the board's text colour, not a mark's. */
+  /* ⚠️ THE FIELD THE BOARD SITS ON, and the rail's own tone — the ref's `.board`/`.rail`. */
+  --tl-field: #f5f1eb;
+  /* ⚠️ THE TODAY CAP IS PINK, NOT INK. It was `--tl-nearblack` on a cream board: the one near-black
+     fill on this surface, and against the colour law outright. The ref's `.todaycap` is the pink
+     trio, which is also the only place the board uses a filled cap at all. */
+  --tl-todaycap-bg: #efd5ca;
+  --tl-todaycap-bd: #e6c3b4;
+  --tl-todaycap-tx: #7a4a35;
   --tl-ghost-bd: #cdbfa8;
   --tl-ghost-ground: #faf7f2;
   --tl-ghost-yours-tx: #7a4a35;
@@ -402,6 +413,12 @@
    reach into it however high they climb — and the rail's own z must clear the line's 60, or a rule
    drawn from the top of the board would paint across the date ruler it is measured against. */
 .tl-rail {
+  /* ⚠️ THE RAIL IS OPAQUE, AND THAT IS WHAT MAKES IT OUTRANK THE ROWS. Measured transparent: a
+     z-index and an isolation both correct, and row text reading straight through the header on
+     scroll. Stacking decides what is DRAWN ON TOP; it says nothing about what can be seen through.
+     The tone is the field's, so the rail reads as the board's own edge rather than a bar laid on
+     it. */
+  background: var(--tl-field);
   position: sticky; top: 0; z-index: 70; isolation: isolate;
   height: var(--tl-rail-h); align-items: stretch;
 
@@ -450,7 +467,7 @@
 }
 .tl-todaychip {
   position: absolute; top: 3px; transform: translateX(-50%);
-  background: var(--tl-nearblack); color: #f8f5f0;
+  background: var(--tl-todaycap-bg); color: var(--tl-todaycap-tx); border: 1px solid var(--tl-todaycap-bd);
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .1em;
   padding: 2px 6px; border-radius: 4px; white-space: nowrap;
 }

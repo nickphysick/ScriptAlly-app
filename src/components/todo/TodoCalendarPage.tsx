@@ -214,7 +214,7 @@ const Piece: React.FC<{
   const lines = barLines(sg.label);
   /* ⚠️ THE PILL IS THE APP'S OWN VOCABULARY — see `calendarPill`. The status while the agency
      holds the move, the deed while the writer does, and nothing else is reachable. */
-  const pill = pillText(sg.status, holderOf(sg), sg.nudgeDue);
+  const pill = pillText(sg.status, holderOf(sg), sg.nudgeDue, !!sg.owed);
   /**
    * ⚠️ FIVE CHIP KINDS, FROM THE REF, AND THE CLOSED ONE OUTRANKS THE REST. A closed relationship
    * is closed whoever last held it, so `shut` is tested first — reading the holder first would
@@ -1482,9 +1482,21 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
         if (!lane) continue;
         const laneW = lane.clientWidth;
         if (!laneW) continue;
-        /* the untouched position first, so a re-run does not clamp an already-clamped value */
-        cap.style.left = cap.dataset.capleft ?? "";
-        if (!cap.dataset.capleft) cap.dataset.capleft = cap.style.left;
+        /**
+         * ⚠️ RECORD THE POSITION, THEN RESTORE IT — IN THAT ORDER.
+         *
+         * This read `left = capleft ?? ""` and only THEN recorded `capleft`. On the first pass
+         * `capleft` is undefined, so the line cleared the inline `left` — the percentage the cap
+         * is positioned by — and then stored the empty string as the "original". From that moment
+         * every cap had no position at all: `offsetLeft` read ~0 and the clamp below pinned it to
+         * the lane's left edge. Measured on the deployed board: six caps, all at x 23–37 of a
+         * 1100px lane, every one of them flush left regardless of its date.
+         *
+         * The clearing itself is right — a re-run must not clamp an already-clamped value — it was
+         * only ever in the wrong order.
+         */
+        if (cap.dataset.capleft === undefined) cap.dataset.capleft = cap.style.left;
+        cap.style.left = cap.dataset.capleft;
         const half = cap.offsetWidth / 2;
         const left = cap.offsetLeft;
         if (left - half < 2) cap.style.left = `${half + 2}px`;
@@ -1801,7 +1813,15 @@ data-rowkey={r.key}
               className={`tl-cap${sg.capMine ? " mine" : ""}`}
               data-cap={sg.capSource}
               data-caprel={`${sg.rowKey}::${sg.lane}`}
-              style={{ left: pct(sg.to), ...laneVar(sg.lane) }}>
+              /* ⚠️ THE CAP IS PLACED FROM THE CARD'S OWN GEOMETRY, NOT FROM A SECOND SUM.
+                 It read `pct(sg.to)` while the card is drawn at `--l` wide `--w` — the same date
+                 by two routes, and they disagreed by a constant 362.6px (thirty days) on every cap
+                 on the board. `calc(var(--l) + var(--w))` IS the card's right edge, so the cap
+                 stands on the day the card ends however that end is computed. */
+              style={{ ...laneVar(sg.lane),
+                ["--l" as string]: barLeft(sg),
+                ["--w" as string]: barWidth(sg),
+                left: "calc(var(--l) + var(--w))" }}>
               {sg.capWord}
             </div>
           ))}
