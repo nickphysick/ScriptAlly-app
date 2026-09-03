@@ -206,6 +206,8 @@
 .tl-zone { overflow-x: hidden; }
 
 .tl-board {
+  /* the ref's `.board` — the field is a rounded object, not a bleed */
+  border-radius: 14px;
   /* ⚠️ THE FIELD. The board sat on nothing — `rgba(0,0,0,0)` — so the cards floated on whatever the
      page happened to paint, and the rail had no tone to match. The ref's `.board` carries it. */
   background: var(--tl-field);
@@ -248,6 +250,12 @@
   --tl-field: #f5f1eb;
   /* the ref's one card border, its owed variant, and the silence's faint fill */
   --tl-frame-bd: #e2d4be;
+  /* ⚠️ TWO LAYERS, FROM THE REF — a tight contact shadow and a wide lift. Ours was ONE faint layer
+     (`0 1px 3px` at .06), which is a card printed on the field rather than resting on it: measured
+     against the ref's `0 1px 2px/.08` plus `0 5px 14px/.09`. The second layer is what makes a card
+     an object, and it is the one that was missing. */
+  --tl-frame-sh: 0 1px 2px rgba(58, 28, 20, .08), 0 5px 14px rgba(58, 28, 20, .09);
+  --tl-frame-sh-hover: 0 2px 4px rgba(58, 28, 20, .09), 0 12px 28px rgba(58, 28, 20, .16);
   --tl-frame-owed-bd: #e6c3b4;
   --tl-frame-owed-sh: 0 6px 16px rgba(58, 28, 20, .16);
   --tl-frame-quiet-bg: #fbf9f5;
@@ -299,7 +307,10 @@
   --owed-sh: 0 6px 16px rgba(58, 28, 20, .16);
   --owed-pill-bg: #efd5ca; --owed-pill-bd: #e6c3b4;
   /* the fade at a cut edge, and the inset its text takes on the left */
-  --card-fade: 34px;
+  /* ⚠️ THE REF'S THIRTY, NOT OUR THIRTY-FOUR. The fade's width is what the body's clip sits inside
+     — `max-width: calc(100% - 22px)` against a 30px dissolve — so the two are one relationship and
+     a stray four pixels widens the band where words can sit over a frame that has faded out. */
+  --card-fade: 30px;
   --card-fade-inset: 42px;
   --tl-pink: #f5e2da;
   --tl-pinkb: #e8c8bc;
@@ -418,6 +429,8 @@
    reach into it however high they climb — and the rail's own z must clear the line's 60, or a rule
    drawn from the top of the board would paint across the date ruler it is measured against. */
 .tl-rail {
+  /* the ref's `.rail` — it caps the board, so only its top corners round */
+  border-radius: 14px 14px 0 0;
   /* ⚠️ THE RAIL IS OPAQUE, AND THAT IS WHAT MAKES IT OUTRANK THE ROWS. Measured transparent: a
      z-index and an isolation both correct, and row text reading straight through the header on
      scroll. Stacking decides what is DRAWN ON TOP; it says nothing about what can be seen through.
@@ -701,7 +714,7 @@
   background: var(--card-bg, #ffffff);
   border: 1px solid var(--tl-frame-bd);
   border-radius: 10px;
-  box-shadow: var(--card-sh);
+  box-shadow: var(--tl-frame-sh);
 }
 /* ⚠️ THE CONTENT IS ABOVE THE FRAME AND IS NEVER MASKED. `position: relative` is what lifts it out
    of the frame's paint order without a z-index war; the frame is `inset: 0` behind it. */
@@ -744,7 +757,8 @@
    inside a card that had not moved; a shadow on the card would fall outside the thing that draws
    the border it belongs to. */
 .tl-p:hover { transform: translateY(-50%) scale(1.004); z-index: 6; }
-.tl-p:hover .tl-frame { box-shadow: 0 5px 16px rgba(58, 28, 20, .17); }
+/* the ref's `.card:hover .frame` — the same two-layer shape, lifted */
+.tl-p:hover .tl-frame { box-shadow: var(--tl-frame-sh-hover); }
 
 /* ⚠️ THE PILL IS THE ONLY COLOUR ON THE BOARD. Its five tones are whose-move, not status: pink is
    yours, sage is theirs, slate is a reminder, grey is a silence that ran out, and closed is an
@@ -998,11 +1012,15 @@ button.tl-mk2 { cursor: pointer; }
   color: var(--tl-ink);
 }
 .tl-tmk {
-  width: 20px; height: 20px; flex: 0 0 auto; border-radius: 4px;
+  /* the ref's `.task .box` — sixteen, not twenty */
+  width: 16px; height: 16px; flex: 0 0 auto; border-radius: 4px;
   border: 1.5px solid var(--tl-nearblack); background: #fff;
 }
 .tl-twords { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.25; }
-.tl-tname { font-family: 'Playfair Display', Georgia, serif; font-size: 13px; color: var(--tl-ink); }
+/* ⚠️ NOT PLAYFAIR. The ref's `.task .tl` sets a size, a weight and a colour and NO family — so a
+   task label is the board's body face, like the name on a card. Playfair is the page's display
+   type; on a 12.5px label beside a checkbox it reads as a heading for a line of admin. */
+.tl-tname { font-size: 12.5px; font-weight: 600; color: var(--tl-nearblack); }
 /* ⚠️ THE DAY, NOT A DURATION. A task happens on a day; a span is what a card states. */
 .tl-tdue {
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8px;

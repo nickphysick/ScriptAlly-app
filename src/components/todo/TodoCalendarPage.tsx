@@ -1679,6 +1679,22 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
            agency-policy case) carries an ordinary finite key and floated up among live work
            without it. Measured: a closed row at position 18, above four silences. */
         .sort((a, b) => {
+          /**
+           * ⚠️ OWED WORK IS A TIER, AND A TASK IS NOT IN IT (v58e).
+           *
+           * The pack's order is: owed → dated waits AND TASKS by date → reminders → silences →
+           * closed. Sorting on the date alone interleaved them: a task due tomorrow sat between two
+           * relationships that are already late, so the run of overdue work at the top — the whole
+           * claim the board's first screen makes — was broken by something that is not late at all.
+           *
+           * ⚠️ IT READS THE SAME FLAG THE CHIP, THE WOBBLE AND THE STRIP READ. "Owed" is decided
+           * once, in the bar pass; a row is owed when any card on it is. A second definition here
+           * is how a board comes to say a thing is late in four places and order it as though it
+           * were not — which is exactly what "Nudge due" did until this run.
+           */
+          const oa = (barsByRow.get(a.key)?.segs ?? []).some((sg) => sg.owed);
+          const ob = (barsByRow.get(b.key)?.segs ?? []).some((sg) => sg.owed);
+          if (oa !== ob) return oa ? -1 : 1;
           /* ⚠️ THE GROUP, NOT THE `closed` FLAG. `closed` means every query on the row is
              terminal by STATUS; the board's own closed rule is wider — an agency that states
              silence means no, with its window passed, closes a query that is still `Queried`.
@@ -1943,7 +1959,10 @@ data-rowkey={r.key}
               </span>
               )}
               {/* the forward mark: this is where it fell due, and the live one is over there */}
-              {it.kind === "ghost" && <span className="fwd" aria-hidden>↦</span>}
+              {/* ⚠️ A GHOST IS A BOX AND NOTHING ELSE (v58, the ref's `taskHTML`). The arrow said
+                  "this moved" a second time — the dashed box already says it, and the live mark at
+                  the current date says where it moved TO. A third statement of one fact, and the
+                  one that made a bare ghost read as a tiny piece of text. */}
             </button>
           ))}
         </div>

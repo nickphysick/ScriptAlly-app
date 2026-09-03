@@ -930,6 +930,20 @@ export function timelineWeek(
            * lead, and the further past, the higher. What sinks is a passed date with nothing being
            * asked of the writer, which is the silence tier by the ref's own ordering.
            */
+          /**
+           * ⚠️ AN ARRIVED REMINDER IS OWED WORK, AND IT ORDERS THE ROW (v58e).
+           *
+           * `writerLate` in the bar pass already counts a reminder whose day has come as a date the
+           * writer owes — it takes the imperative chip, the wobble, the strip, and a card that
+           * stops at today. The SORT did not know: `namedEndFor` returns the next date still
+           * AHEAD, which on such a row is the agency's own window weeks away, so a row reading
+           * "Nudge due" sorted among the dated waits and below the tasks.
+           *
+           * Two derivations of "the writer is late" in two files. This is the same test, stated
+           * where the key is built, and it is tried FIRST so a future window cannot outrank it.
+           */
+          const nudge = ymdOf(q.nudgeDate);
+          if (nudge && nudge <= data.today) return new Date(`${nudge}T12:00:00`).getTime();
           const ahead = named && named.ymd > data.today;
           if (ahead) return new Date(`${named.ymd}T12:00:00`).getTime();
           if (sideOf(q.status as QueryStatus) === "yours") {

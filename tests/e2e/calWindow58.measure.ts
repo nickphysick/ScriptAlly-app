@@ -108,6 +108,15 @@ test("a long silence wears the No-response chip", async ({ page }) => {
 test("⚠️ the only rose vertical is the owed strip, on owed rows", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
   await page.waitForTimeout(1000);
+  /**
+   * ⚠️ SCROLL TO THE SUBJECTS FIRST. v58e made overdue work a TIER, so every owed row is now at
+   * the top and the first screen holds nothing else — this probe's population went to zero the
+   * moment the ordering was fixed, and its guard is the only reason that surfaced as a failure
+   * rather than as a green over an empty set.
+   */
+  await page.evaluate(`(() => { const s = document.querySelector(".wpg-scroll"); if (s) s.scrollTop = 300;
+    const z = document.querySelector(".tl-zone"); if (z) z.scrollTop = 300; })()`);
+  await page.waitForTimeout(400);
   const r = await page.evaluate(`(() => {
     const visH = (e) => e.getBoundingClientRect().height > 0;
     const vis = (e) => e.getBoundingClientRect().width > 0;
