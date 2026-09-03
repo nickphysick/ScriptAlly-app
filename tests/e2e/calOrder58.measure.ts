@@ -21,7 +21,10 @@ const painted = (page: import("@playwright/test").Page) => page.evaluate(`(() =>
   const vis = (e) => e.getBoundingClientRect().height > 0;
   return [...document.querySelectorAll(".tl-rrow")].filter(vis).map((r) => {
     const c = r.querySelector(".tl-p");
-    const pill = c ? c.querySelector(".tl-pill") : null;
+    /* ⚠️ .tl-fchip SINCE v58 — the chip moved inside the card with the rest of the identity.
+       The old .tl-pill selector matched nothing, and the population guard below is the only
+       reason that surfaced as a failure rather than as a green over an empty set. */
+    const pill = c ? c.querySelector(".tl-fchip") : null;
     return {
       key: r.dataset.rowkey || "",
       group: r.dataset.group || "none",

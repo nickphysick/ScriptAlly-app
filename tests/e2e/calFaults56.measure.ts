@@ -1,55 +1,58 @@
 import { test, expect } from "@playwright/test";
-import { openRoute } from "./measure";
+import { openRoute, liftMotionSuppression } from "./measure";
 import { setRangeTo, RANGE_LABELS } from "./calControls";
 
 /** ⚠️ EVERY CASE ASSERTS ITS POPULATION AND PRINTS IT. See `calGhost56` for why. */
 
-test("⚠️ a card with no passed due date paints no tint at all", async ({ page }) => {
+/**
+ * ⚠️ THE TINT IS GONE IN v58, AND THIS CASE ASSERTS THAT RATHER THAN LAPSING.
+ *
+ * Lateness used to be painted across the card's face from the due date to today. v58 removes it
+ * outright: the card face carries no fill or pattern for lateness at all, and lateness is said in
+ * two places instead, both from the ref and both outside the face — the card wobbles occasionally,
+ * and the row carries a strip down its left edge.
+ *
+ * The old case asserted "no card is tinted without saying it is overdue", over a population of
+ * tinted cards. That population is now zero by design, so the case would have gone vacuously green
+ * had its population guard not been there. It is replaced by the claim v58 actually makes.
+ */
+test("⚠️ no card face carries a lateness fill, and overdue is said by the wobble and the strip", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
+  /* ⚠️ THE HARNESS SUPPRESSES ANIMATION FOR STABLE GEOMETRY, so asking whether the wobble is
+     RUNNING under suppression asks a question the harness has already answered "no" to. Lifted
+     before the reading — the same trap that once reported a live takeover as a dead one. */
+  await liftMotionSuppression(page);
   await page.waitForTimeout(900);
-  let tinted = 0, plain = 0, stated = 0;
-  const wrong: string[] = [];
-  /* the board draws for the machine's own day; the cards publish dates in the same frame */
-  const today = new Date().toISOString().slice(0, 10);
+  let owedCards = 0, strips = 0, tints = 0, rows = 0;
   for (let i = 0; i < RANGE_LABELS.length; i++) {
     await setRangeTo(page, i);
     await page.waitForTimeout(400);
-    const rows = await page.evaluate(`(() => {
+    const c = await page.evaluate(`(() => {
       const vis = (e) => e.getBoundingClientRect().width > 0;
-      return [...document.querySelectorAll(".tl-p")].filter(vis).map((c) => ({
-        rel: c.dataset.rel || "",
-        tinted: !!c.querySelector(".tl-late"),
-        expected: c.dataset.expected || "",
-        words: ((c.querySelector(".tl-content") || {}).textContent || "").trim(),
-      }));
-    })()`) as unknown as { rel: string; tinted: boolean; expected: string; words: string }[];
-    for (const r of rows) {
-      if (r.tinted) tinted += 1; else plain += 1;
-      /* ⚠️ THE INK IS THE EVIDENCE. A tint says "this is late"; the card's own words are the only
-         other place the board states that, so if one says late and the other does not, one of them
-         is lying to the reader and the check cannot tell which without reading both. */
-      if (r.tinted && !/overdue/i.test(r.words)) wrong.push(`${r.rel}: tinted but says "${r.words.slice(0, 60)}"`);
-      /* ⚠️ THE INDEPENDENT SOURCE, AND THIS IS THE ASSERTION THAT ACTUALLY CATCHES THE BUG. The
-         tint and the words both come from `dueYmd`; when the fallback was restored, the extra card
-         was tinted AND said "overdue" — agreeing with itself and wrong, so the check above passed.
-         `data-expected` is the date the AGENCY named, and a date still ahead is not late. */
-      if (r.expected && r.expected > today && r.tinted) {
-        stated += 1;
-        wrong.push(`${r.rel}: tinted, but the agency's date (${r.expected}) is still ahead`);
-      } else if (r.expected && r.expected > today) { stated += 1; }
-    }
+      const cards = [...document.querySelectorAll(".tl-p")].filter(vis);
+      const owed = cards.filter((x) => x.classList.contains("owed"));
+      return {
+        rows: [...document.querySelectorAll(".tl-rrow")].filter((r) => r.getBoundingClientRect().height > 0).length,
+        owed: owed.length,
+        /* the row strip is a pseudo-element, so its presence is the class that draws it */
+        strips: [...document.querySelectorAll(".tl-rrow.owes")].filter((r) => r.getBoundingClientRect().height > 0).length,
+        tints: [...document.querySelectorAll(".tl-late")].filter(vis).length,
+        /* and every owed card must actually be running the wobble */
+        noWob: owed.filter((x) => getComputedStyle(x).animationName === "none").map((x) => x.dataset.rel || ""),
+        /* while a card that is NOT owed must not be */
+        wobNotOwed: cards.filter((x) => !x.classList.contains("owed")
+          && getComputedStyle(x).animationName !== "none").map((x) => x.dataset.rel || ""),
+      };
+    })()`) as unknown as any;
+    rows += c.rows; owedCards += c.owed; strips += c.strips; tints += c.tints;
+    expect(c.noWob, `[${RANGE_LABELS[i]}] an overdue card is not wobbling`).toEqual([]);
+    expect(c.wobNotOwed, `[${RANGE_LABELS[i]}] a card that is not overdue is wobbling`).toEqual([]);
   }
-  console.log(`cards ${tinted + plain} — tinted ${tinted} · plain ${plain}`
-    + ` · with an agency date still ahead ${stated}`);
-  /* ⚠️ AND THAT SECOND SOURCE MUST HAVE SUBJECTS. "no card with a future stated date is tinted" is
-     satisfied by a board where no agency has named a future date at all. */
-  expect(stated, "no card carries an agency date still ahead, so the independent check ran on nothing")
-    .toBeGreaterThan(0);
-  /* both branches, or the distinction is untested */
-  expect(tinted, "no card is tinted, so the tint's rule was not tested").toBeGreaterThan(0);
-  expect(plain, "every card is tinted, so 'no tint without a passed date' was not tested")
-    .toBeGreaterThan(3);
-  expect(wrong, "a card is tinted without saying it is overdue").toEqual([]);
+  console.log(`across the sweep — rows ${rows} · overdue cards ${owedCards} · owed strips ${strips} · tints ${tints}`);
+  /* ⚠️ POPULATION: with no overdue card, "only overdue cards wobble" is true of nothing. */
+  expect(owedCards, "no overdue card on the board, so the wobble rule was not tested").toBeGreaterThan(3);
+  expect(strips, "no row carries the owed strip, so the ref's row mark is not drawn").toBeGreaterThan(0);
+  expect(tints, "a lateness tint still paints on a card face — v58 removes it").toBe(0);
 });
 
 test("⚠️ the overdue span is today minus the due date", async ({ page }) => {
@@ -65,7 +68,8 @@ test("⚠️ the overdue span is today minus the due date", async ({ page }) => 
       return [...document.querySelectorAll(".tl-p")].filter(vis).map((c) => ({
         rel: c.dataset.rel || "", due: c.dataset.dueat || "",
         days: c.dataset.days || "", from: c.dataset.from || "",
-        words: ((c.querySelector(".tl-content") || {}).textContent || "").trim(),
+        /* v58: the card's words are the identity's fact line */
+        words: ((c.querySelector(".tl-ffx") || {}).textContent || "").trim(),
       }));
     })()`) as unknown as { rel: string; due: string; days: string; words: string }[];
     for (const r of rows) {

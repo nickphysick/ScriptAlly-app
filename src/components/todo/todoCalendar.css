@@ -330,14 +330,17 @@
    * changing `--row-h` cannot resize a bar. That is the property the lock proves by changing one
    * and measuring the other, rather than by reading the two declarations and believing them.
    */
-  --row-h: 64px;
-  --bar-h: 54px;
+  /* ⚠️ v58 GEOMETRY, FROM THE REF: a 66px row over a 44px bar. */
+  --row-h: 66px;
+  --bar-h: 44px;
   /* ⚠️ 16px SINCE v54: a mark is a LEAD-IN now, drawn before the card rather than riding on it.
      At 22 it was sized to be read against a card it sat on; on a dotted run it is a waypoint. */
   --mk: 16px;
   --tl-headrow-h: 26px;
   --tl-rail-h: 42px;
-  --tl-nm-w: 292px;
+  /* ⚠️ v58: THE AGENT COLUMN IS ZERO. Kept as a token rather than deleted because the rail, the
+     lane and the row all read it, and a width that exists at 0 is one edit to restore. */
+  --tl-nm-w: 0px;
   /* how far a piece stands off a marker it abuts, and off a plain neighbour */
   /* the bar text's inset — mirrored by TEXT_INSET in the page, which the fit pass subtracts */
   --tl-text-inset: 13px;
@@ -812,9 +815,11 @@
    close FROM, which is why it offers the close ring. And the comment above says this card must not
    be indistinguishable from a recorded rejection — while both wore the same dashed frame, it was.
    What distinguishes it is what always did: no fill, no shadow, muted ink. */
-.tl-p.ghost .tl-frame {
-  background: transparent; border-style: solid; box-shadow: none;
-}
+/* ⚠️ v58: A LONG SILENCE IS STILL A WHITE CARD. The ref draws one card treatment and varies only
+   the shadow (`.card.hush .frame { box-shadow: none }`) and the closed state. A transparent frame
+   was our own invention for "not live work", and on the re-cut it reads as a card that failed to
+   render — measured: two rows showing text and a chip with no card behind them. */
+.tl-p.ghost .tl-frame { box-shadow: none; }
 .tl-p.ghost .tl-hl, .tl-p.ghost .tl-cdt { color: var(--pill-quiet-tx); }
 /* ⚠️ HOLLOW IS A STRETCH PAST THE DATE SOMEBODY NAMED, and v39 pins no treatment for it — the ref
    draws `quietc` and `closedc` and nothing between. It takes the one thing quiet and closed have
@@ -827,7 +832,9 @@
    a stretch past the date somebody named is transparent, dashed and quieter in its words. */
 /* ⚠️ SOLID, for the same reason. A stretch running past a date that came and went is unfinished
    business, not a closed one — and it wore the closed frame AND the closed border colour. */
-.tl-p.hollow .tl-frame  { background: transparent; border: 1px solid var(--card-closed-bd); box-shadow: none; }
+/* ⚠️ v58: SAME FOR A STRETCH PAST ITS NAMED DATE. The ref has no `hollow` treatment at all —
+   there is one card, and what varies is the chip and the wobble. */
+.tl-p.hollow .tl-frame  { box-shadow: none; }
 .tl-p.hollow .tl-hl, .tl-p.hollow .tl-cdt { color: #9c8878; }
 /* ⚠️ ONE RULE FOR ONE SELECTOR. This was declared TWICE, ninety lines apart, and the later one
    won — so this block's border-colour was dead while reading as the live value, which is the
@@ -1339,7 +1346,9 @@ button.tl-tchip { cursor: pointer; }
    so it is the last thing to give ground — and it stops at 200 rather than continuing, because
    below that it is not a name, it is an abbreviation. */
 @media (max-width: 1000px) {
-  .tl-board { --tl-nm-w: 200px; }
+  /* ⚠️ v58: the narrow-viewport column narrowing has nothing left to narrow — the column is 0
+     everywhere now, so a second width for it would reopen it below the breakpoint. */
+  .tl-board { --tl-nm-w: 0px; }
 }
 
 /* ══ ONE FADE, BOTH ENDS (v39, Phase 4) ══════════════════════════════════════════════════════
@@ -1407,4 +1416,88 @@ button.tl-tchip { cursor: pointer; }
 .tl-tmark.est {
   width: 9px; height: 9px; border: 1.5px solid #b8a889; border-radius: 99px; background: #fff;
   transform: translateY(-50%);
+}
+
+/* ══ v58 — THE RE-CUT ═══════════════════════════════════════════════════════════════════════════
+   Every value here is from `design-refs/timeline-v58.html`. Nothing in this block was chosen.
+
+   ⚠️ THE AGENT COLUMN IS GONE (`--agent-w: 0`) and the identity travels inside the card, so a row
+   is a lane and nothing else. That is the whole shape of the re-cut: the board stops being a table
+   with a label column and becomes a field with objects on it. */
+/* ⚠️ NO HEIGHT OVERRIDE HERE. `.tl-rrow` already computes `calc(var(--row-h) * var(--lanes, 1))`,
+   so a flat height silently collapsed every two-lane row onto one line. The tokens above are the
+   only thing that needed to change. */
+
+/* the identity's stack inside the card — name over its role-worded fact */
+.tl-body {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  display: flex; align-items: center; gap: 9px;
+  white-space: nowrap; z-index: 3;
+  max-width: calc(100% - 22px); overflow: hidden;
+}
+/* a card whose left edge dissolves starts its words past the dissolve */
+.tl-p.fadeL .tl-body { left: 34px; }
+
+/* ⚠️ THE GLIDER, AND THE ONLY THING THAT MOVES. Clipped text glides on hover by a transition on
+   THIS element — never a keyframe, and never the frame or the clip, which must stay still or the
+   card appears to slide off its own dates. */
+.tl-bwrap {
+  display: inline-flex; align-items: center; gap: 9px;
+  flex: 0 0 auto; white-space: nowrap; transform: translateX(0);
+}
+.tl-gstack { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tl-fnm { font-size: 12.5px; font-weight: 600; color: var(--tl-nearblack); white-space: nowrap; line-height: 1.15; }
+.tl-ffx {
+  font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--tl-muted); white-space: nowrap;
+}
+
+/* ⚠️ FIVE CHIPS, ONE PER HOLDER — soft pink the writer, sage the agency, slate a reminder set,
+   sand a silence, muted a closure. Colour says WHOSE MOVE it is and nothing else. */
+.tl-fchip {
+  font-family: 'JetBrains Mono', monospace; font-size: 6.5px; letter-spacing: .11em;
+  text-transform: uppercase; font-weight: 700;
+  border-radius: 999px; padding: 4px 9px; white-space: nowrap; flex: 0 0 auto;
+}
+.tl-fchip.you   { background: #f8ece6; color: #8c4f4a; }
+.tl-fchip.them  { background: #dce0d9; color: #55684b; }
+.tl-fchip.rem   { background: #e2ebf2; color: #40586e; }
+.tl-fchip.quiet { background: #eee8dc; color: #8a7a6c; }
+.tl-fchip.shut  { background: #efece6; color: #8a8177; }
+
+/* the full record, on hover */
+.tl-tip {
+  position: absolute; left: 0; bottom: calc(100% + 7px);
+  background: #fff; border: 1px solid #e3d6c3; border-radius: 8px; padding: 8px 12px;
+  display: none; white-space: nowrap; z-index: 45;
+  box-shadow: 0 6px 18px rgba(58, 28, 20, .12);
+}
+.tl-tipdt {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .1em;
+  text-transform: uppercase; color: #6f6055;
+}
+.tl-p:hover .tl-tip { display: block; }
+
+/* ⚠️ THE OVERDUE WOBBLE — THE REF'S KEYFRAMES, COPIED RATHER THAN RE-DERIVED.
+   Every frame restates the literal `translateY(-50%)`: a `var()` inside `@keyframes` fails
+   silently in this setup, and omitting the base transform drops the card half its height the
+   instant the animation starts. */
+@keyframes tlWob {
+  0%, 86%, 100% { transform: translateY(-50%) rotate(0deg); }
+  88%  { transform: translateY(-50%) rotate(0.55deg); }
+  91%  { transform: translateY(-50%) rotate(-0.55deg); }
+  94%  { transform: translateY(-50%) rotate(0.35deg); }
+  97%  { transform: translateY(-50%) rotate(-0.18deg); }
+}
+.tl-p.owed { animation: tlWob 7s ease-in-out infinite; transform-origin: 50% 50%; }
+.tl-rrow:nth-child(odd) .tl-p.owed { animation-delay: -3.4s; }
+@media (prefers-reduced-motion: reduce) { .tl-p.owed { animation: none; } }
+
+/* ⚠️ THE ROW'S OWED STRIP — the ref's `.row.owes::after`, and it STANDS. An earlier pass read the
+   pack's "no accent bars" as forbidding it; that sentence scopes the CARD FACE, and the ref draws
+   this. It is the one overdue mark outside the card, and there are no fills or patterns on the
+   face itself. */
+.tl-rrow.owes::after {
+  content: ''; position: absolute; left: 0; top: 9px; bottom: 9px;
+  width: 3px; border-radius: 2px; background: #c98e8a; z-index: 4;
 }

@@ -282,6 +282,8 @@ export interface Segment {
   capSource?: CapKind;
   /** the writer owes this date, so the mark is a diamond and the cap takes the writer's tone */
   capMine?: boolean;
+  /** the writer owes this card's date and it has passed — the card wobbles, the row shows a strip */
+  owed?: true;
   /**
    * The AGENCY'S OWN STATED DATE, unclamped and untouched by the tint's arithmetic.
    *
@@ -1345,8 +1347,13 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
                where `lateFrom` put the tint is one number read twice — proved, by a mutation that
                made every tint run its whole card and passed. `dueAt` comes from the DATE and no
                clamp touches it, so a lock can compute where the edge ought to be and find out. */
+            /* ⚠️ v58: `owed` REPLACES THE TINT. The card face carries no fill or pattern for
+               lateness any more — the card wobbles and the row shows a strip, both from the ref.
+               `lateFrom`/`dueAt` survive because a lock reads `dueAt` as its INDEPENDENT source
+               for "is this actually late", which is the one thing the words and the tint used to
+               share and therefore could not check. */
             return dueAt != null && dueAt < todayAt
-              ? { lateFrom: Math.max(dueAt, p.from), dueAt } : {};
+              ? { owed: true as const, lateFrom: Math.max(dueAt, p.from), dueAt } : {};
           })()
         : {}),
       /* ⚠️ A FINISHED STRETCH IS FULL, AND THERE ARE THREE WAYS TO BE FINISHED: it lies wholly

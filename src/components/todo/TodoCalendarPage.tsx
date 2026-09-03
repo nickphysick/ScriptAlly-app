@@ -207,12 +207,25 @@ const laneVar = (lane: number): React.CSSProperties =>
  */
 const Piece: React.FC<{
   sg: Segment; days: number; lastMarkAt: number | null; selected: boolean;
+  /* v58: the identity travels with the card, so the row hands its name down */
+  name: string;
   stirIndex: number; onPick: () => void;
-}> = ({ sg, days, lastMarkAt, selected, stirIndex, onPick }) => {
+}> = ({ sg, days, lastMarkAt, selected, stirIndex, onPick, name }) => {
   const lines = barLines(sg.label);
   /* ⚠️ THE PILL IS THE APP'S OWN VOCABULARY — see `calendarPill`. The status while the agency
      holds the move, the deed while the writer does, and nothing else is reachable. */
   const pill = pillText(sg.status, holderOf(sg), sg.nudgeDue);
+  /**
+   * ⚠️ FIVE CHIP KINDS, FROM THE REF, AND THE CLOSED ONE OUTRANKS THE REST. A closed relationship
+   * is closed whoever last held it, so `shut` is tested first — reading the holder first would
+   * paint a finished row in the writer's tone and invite an action that is over.
+   */
+  const chipKind = sg.state === "closed" ? "shut"
+    : sg.state === "quiet" || sg.state === "ghost" ? "quiet"
+    : sg.state === "nudged" ? "rem"
+    : holderOf(sg) === "writer" ? "you" : "them";
+  /* the hover record: the whole line, where the card can only show what fits */
+  const record = [lines.t1, lines.t2].filter(Boolean).join(" · ");
   const facts = { trueFrom: sg.trueFrom, trueTo: sg.trueTo, from: sg.from, to: sg.to, days,
     live: sg.live, namedEnd: sg.namedEndAt };
   const fade = fadesFor(facts);
@@ -260,7 +273,7 @@ const Piece: React.FC<{
          sweep reads `className=` expressions out of this file, so a list assembled into a variable
          is invisible to it — and its report would be "this class has no rule", about a class it
          never saw. An absence that reads as a finding. */
-      className={`tl-at2 tl-p ${familyOf(sg.state)}${sg.hollow ? " hollow" : ""}`
+      className={`tl-at2 tl-p ${familyOf(sg.state)}${sg.hollow ? " hollow" : ""}${sg.owed ? " owed" : ""}`
         /* ⚠️ THE FADES ARE THE SEGMENT'S OWN FACTS. `openLeft` means the stretch began before the
            window and `openRight` that it runs past it — both already derived, both already the
            reason the old renderer squared its ends. */
@@ -348,20 +361,18 @@ const Piece: React.FC<{
         * `position: absolute; inset: 0`, so the date arithmetic still owns the geometry.
         */}
       <div className="tl-frame" aria-hidden>
-        {/**
-          * ⚠️ THE TINT IS A LAYER INSIDE THE FRAME, so it rounds and dissolves with the card. As a
-          * sibling it would have to know the card's radius and its masks — two more places for one
-          * shape — and would paint square corners over a rounded card at both ends.
-          *
-          * Its LEFT edge is the due date and its right is the card's today edge, so its span IS
-          * the lateness. Flat, one value, hard edge: a gradient would make the start of lateness a
-          * region rather than a date, and the date is the fact.
-          */}
-        {sg.lateFrom != null && (
-          <span className="tl-late" aria-hidden
-            style={{ left: `calc(${pct(sg.lateFrom - sg.from)} - ${barLeftPad(sg)})`,
-              right: 0 }} />
-        )}
+              {/**
+        * ⚠️ v58 REMOVES THE OVERDUE TINT ENTIRELY — no fill, no pattern, nothing on the card face.
+        *
+        * Lateness is said twice now, both from the ref and both OUTSIDE the face: the card wobbles
+        * occasionally, and the row carries a strip down its left edge. The tint was a third
+        * statement of one fact, and the only one that had to know where the card's masks and
+        * radius were.
+        *
+        * `lateFrom` and `dueAt` survive on the segment because a lock reads `dueAt` as its
+        * independent source for "is this actually late" — the check the tint and the words could
+        * never do for each other, being computed from the same number.
+        */}
       </div>
       {/* ⚠️ THE PILL IS NOT INSIDE THE LABEL'S CONDITIONAL, and it used to be. A segment with an
           empty label rendered a card with NO pill and NO text — a blank white box with a border and
@@ -381,30 +392,33 @@ const Piece: React.FC<{
         * `align-self: flex-start`. Both lines then begin at the clip's own left edge, which is one
         * number for the whole board.
         */}
-      <div className="tl-content">
-      <div className="tl-cbody">
-      <span className={`tl-pill ${pill.tone}`} data-pill={pill.text}>{pill.text}</span>
-      {sg.label && (
-        <>
-          {/* ⚠️ THE HEADLINE AND THE DETAIL SHARE A LINE; THE PILL SITS ABOVE THEM. v55 stacks the
-              content, so this row is two things, not three — anything reading this as one line
-              (a width that sums the pill in, a baseline that expects the pill beside it) is wrong.
-              The separator is an ELEMENT rather than a border on the detail, because the detail is
-              the part that can be absent and a border would go with it, leaving the headline
-              looking cut off. */}
-          <span className="tl-line">
-            {/* ⚠️ ONE TRACK HOLDING BOTH, so the marquee moves them together. Scrolling the
-                headline while the detail stayed put would break the line in half mid-slide. */}
-            <span className="tl-track">
-              <span className="tl-hl">{lines.t1}</span>
-              {lines.t2 && <span className="tl-csep" aria-hidden />}
-              {lines.t2 && <span className="tl-cdt">{lines.t2}</span>}
-            </span>
+      {/**
+        * ⚠️ v58: THE IDENTITY LIVES IN THE CARD. The agent column is gone (`--agent-w: 0`), so the
+        * dot, the name and the role-worded fact travel with the bar — the ref's
+        * `.body > .bwrap > dot + .gstack(name, fact) + .chip`.
+        *
+        * ⚠️ THE FRAME IS EMPTY AND THE BODY IS ITS SIBLING. The frame carries the background, the
+        * border, the radius and the fade masks; a mask must never be applied to an element holding
+        * text, so the words sit outside it entirely.
+        *
+        * ⚠️ AND THE BODY'S LEFT INSET IS FIXED — 11px, or 34 on a card whose left edge dissolves.
+        * It does not depend on what else the card carries: an inset computed from the marks riding
+        * on a bar produced twelve distinct starts across one board, and the eye had nothing to run
+        * down.
+        */}
+      <div className="tl-body">
+        {/* the glider: the ONLY thing that moves when clipped text glides on hover */}
+        <div className="tl-bwrap">
+          <StatusDot status={sg.status} overrideSize={13} />
+          <span className="tl-gstack">
+            <span className="tl-fnm">{name}</span>
+            <span className="tl-ffx">{lines.t1}{lines.t2 ? ` · ${lines.t2}` : ""}</span>
           </span>
-        </>
-      )}
+          <span className={`tl-fchip ${chipKind}`} data-pill={pill.text}>{pill.text}</span>
+        </div>
       </div>
-      </div>
+      {/* the full record, on hover — the ref's `.tip` */}
+      <span className="tl-tip"><span className="tl-tipdt">{record}</span></span>
       {/* ⚠️ THE GHOST IS A CHILD OF THE CARD, AND THAT IS THE WHOLE PLACEMENT RULE. As a sibling it
           carried its own copy of `--l + --w`, which is the card's RESTING width — so the moment a
           clipped card opened (`width: var(--exp)`) it grew straight through the ring, measured at
@@ -1423,6 +1437,42 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * a rect is the TRANSFORMED box — so measuring that and then writing `left` applies the shift
    * twice. `offsetLeft` is the layout position the transform is applied to.
    */
+  /**
+   * ⚠️ CLIPPED TEXT GLIDES ON HOVER — A TRANSITION ON THE INNER GLIDER, AND NOTHING ELSE MOVES.
+   *
+   * The ref arms this per card: on enter, if the words overflow their clip, translate the wrapper
+   * by exactly the overflow with a duration scaled to the distance; on leave, back to zero. It is
+   * a TRANSITION rather than a keyframe because a keyframe would run whether or not there is
+   * anything to reveal, and because the distance is different on every card.
+   *
+   * The frame and the clip never move: the card must stay on its own dates while its words travel.
+   */
+  React.useEffect(() => {
+    const root = pageRef.current;
+    if (!root) return;
+    const offs: (() => void)[] = [];
+    for (const card of Array.from(root.querySelectorAll<HTMLElement>(".tl-p"))) {
+      const clip = card.querySelector<HTMLElement>(".tl-body");
+      const glider = card.querySelector<HTMLElement>(".tl-bwrap");
+      if (!clip || !glider) continue;
+      const enter = () => {
+        const d = glider.scrollWidth - clip.clientWidth;
+        if (d > 6) {
+          glider.style.transition = `transform ${(0.5 + d / 80).toFixed(2)}s ease`;
+          glider.style.transform = `translateX(-${d}px)`;
+        }
+      };
+      const leave = () => { glider.style.transform = "translateX(0)"; };
+      card.addEventListener("mouseenter", enter);
+      card.addEventListener("mouseleave", leave);
+      offs.push(() => {
+        card.removeEventListener("mouseenter", enter);
+        card.removeEventListener("mouseleave", leave);
+      });
+    }
+    return () => { for (const off of offs) off(); };
+  });
+
   React.useLayoutEffect(() => {
     const root = pageRef.current;
     if (!root) return;
@@ -1680,7 +1730,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     return (
       <div
         key={r.key}
-        className={`tl-rrow${r.closed ? " closed" : ""}`}
+        className={`tl-rrow${r.closed ? " closed" : ""}`
+          /* ⚠️ THE ROW IS OWED WHEN ANY CARD ON IT IS. A row can hold two relationships; the strip
+             is a property of the ROW, so it asks whether the row has overdue work at all. */
+          + ((barsByRow.get(r.key)?.segs ?? []).some((sg) => sg.owed) ? " owes" : "")}
         /* ⚠️ THE ROW PUBLISHES ITS OWN KEY AND ITS OWN IDENTITY, so a lock can assert the PAINTED
     order against the key the board actually sorted by, and can follow the same row across a
     mode change. Reading the order alone says the rows are in some order; reading the key
@@ -1706,30 +1759,19 @@ data-rowkey={r.key}
           ["--lanes" as string]: String(lanes),
         } as React.CSSProperties}
       >
-        {/* ⚠️ THE NAME IS A CONTROL — it opens the relationship's workspace with nothing selected,
-            which is how you reach a query that has no card raised against it. */}
-        <button type="button" className="tl-c-nm tl-nmbtn"
-          onClick={() => openWork(r.key, today, null)}>
-          {/* ⚠️ THE LOCKED COMPONENT, NEVER A DRAWING OF ONE. `StatusDot` owns the ring, the
-              glyph and the palette; the pinned row keeps its square because it holds no query and
-              a dot invented for it would state a journey that does not exist. */}
-          {r.status
-            ? <StatusDot status={r.status} overrideSize={ROW_DOT} decorative />
-            : <i className="tl-sd" data-dot={r.dot} aria-hidden />}
-          <span className="tl-nmwrap">
-            <span className="tl-nm2">{r.name}</span>
-            {r.agency && <span className="tl-ag2">{r.agency}</span>}
-            {/* the books, only where the relationship spans more than one — naming the single
-                obvious one is a line that says nothing */}
-            {r.manuscripts.length > 1 && (
-              <span className="tl-ms">{r.manuscripts.map((m) => m.title).filter(Boolean).join(" · ")}</span>
-            )}
-          </span>
-        </button>
-
+        {/**
+          * ⚠️ v58: THE AGENT COLUMN IS GONE. The ref sets `--agent-w: 0` and hides `.ag` outright;
+          * the identity moved INSIDE the card, where it travels with the wait it belongs to.
+          *
+          * ⚠️ AND ITS CONTROL WENT WITH IT, WHICH IS A REAL LOSS TO REPLACE. The name was a button
+          * opening the relationship's workspace with nothing selected — the only route to a query
+          * that has no card raised against it. The card itself is still clickable (`onPick`), so a
+          * relationship WITH a card is still reachable; one with none is not. Flagged in the
+          * report rather than papered over with a control the ref does not draw.
+          */}
         <div className="tl-c-tl">
           {bar.segs.map((sg) => (
-            <Piece key={sg.key} sg={sg} days={range.days} selected={sel === sg.key}
+            <Piece key={sg.key} sg={sg} days={range.days} selected={sel === sg.key} name={r.name}
               /* ⚠️ FOUR PHASES, so no two cards on screen move together and the row does not read
                  as a wave. The index is the card's position in its row's own list. */
               stirIndex={bar.segs.indexOf(sg) % 4}
@@ -2192,7 +2234,9 @@ data-rowkey={r.key}
                     drift. The today line's own 346px error came from having a second one. */}
                 {board.length > 0 && (
                   <div className="tl-rail">
-                    <div className="tl-c-nm"><span className="tl-lbl3">Agent</span></div>
+                    {/* ⚠️ v58: NO AGENT CELL IN THE RAIL EITHER. It was the only thing still
+                        holding the column open — the rows had already lost theirs, so the lane sat
+                        293px in from the board's edge with nothing beside it. */}
                                        <div className="tl-c-tl tl-railtl">
                       {/* ══ THE MONTH SHELF, WHICH ONLY APPEARS WHERE IT SAYS SOMETHING ══════
                           ⚠️ THREE MONTHS IS THE THRESHOLD, AND IT IS COUNTED FROM THE WINDOW
