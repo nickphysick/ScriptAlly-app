@@ -173,3 +173,53 @@ pass stops dead at a closure, so the card draws neither cap nor mark — correct
 | `tsc --noEmit` | 1 error (`mastheadMatrix`) | 1 error (same, not mine) |
 | `vite build` (whole output read) | clean | clean |
 | `vitest`, machine quiet | 7359 passed · 1 failed (`datePickerHub`) | **7358 passed · 2 failed** — `datePickerHub` plus the `pageStructure` timeout above, green in isolation |
+
+---
+
+## DEPLOY AND PUSH
+
+```
+firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev
+```
+
+| | |
+|---|---|
+| Bundle | `index-Bpmzns_T.js` |
+| Verified | served hash **matches** the local build |
+| Pushed | see below |
+
+---
+
+## ⚠️ THE FULL CALENDAR SWEEP IS UNREADABLE THIS RUN, AND HERE IS THE EVIDENCE
+
+**Another session was running Playwright (`tests/e2e/headerFix`) on this machine throughout.**
+Two of its shells were still waiting when I checked at the end.
+
+| Run | Normal | This run |
+|---|---|---|
+| Full `cal*.measure.ts` sweep (62 cases) | ~9 min | **2.7 hours** — 49 passed, 13 failed |
+| My four phase files (10 cases) | ~60 s | **16.6 min** — 9 passed, 1 failed |
+
+Every failure in both runs is a **timeout or a page that never loaded** — `page.goto`,
+`page.evaluate`, `page.waitForTimeout`, `element(s) not found` — not one is an assertion about the
+board. `src/test/pageStructure.test.ts` behaved the same way: red in a full vitest run, **green
+alone, 26 passed**.
+
+**A timeout and a failure look identical in a run summary**, which is precisely why I am reporting
+the numbers and the cause rather than either claiming a green or reporting thirteen regressions.
+
+**What IS verified** — each run repeatedly, in isolation, while the machine was quiet:
+
+| File | Result |
+|---|---|
+| `calOrder58` (3 cases) | 4 passed |
+| `calCaps58` (3 cases) | 4 passed |
+| `calGhost56` (retirement) | 2 passed |
+| `calOrder56` (2 surviving cases) | passed |
+
+plus six mutation proofs, each reddening the lock written for it and restored after.
+
+**The remedy is the measurement worktree** this repo already records for exactly this: a detached
+worktree with its own `vite preview` port, so the two sessions stop fighting over one bundle and one
+server. I did not build one here — it is the right first move for whoever picks up Phases 3–7, and
+the sweep should be re-read there before anything else is concluded from it.
