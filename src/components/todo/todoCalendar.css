@@ -203,15 +203,32 @@
  * for exactly that, and the rule exists because a bar offset and a row height were once two
  * numbers that both read 52 and neither was the other's.
  */
+/* ⚠️ THE ZONE STOPS SCROLLING, AND `.tl-rows` TAKES OVER (v60, Law 4).
+   v58 had the zone as the scroller with a `position: sticky` rail inside it. v60 forbids sticky
+   anywhere on this board and states the shape instead: a STATIC rail above a rows region that
+   scrolls on its own, so nothing can ever pass above the rail — not by z-order, which decides only
+   what is drawn on top, but because the rail is not inside the thing that moves.
+   ⚠️ `.tpl-zone.tl-zone`, NOT `.tl-zone` ALONE. `.tpl-zone` (tasksLayout.css) declares
+   `overflow: auto` for three pages and is the same 0-1-0 specificity on the same element, so a bare
+   `.tl-zone` would be decided by which sheet the bundler happened to put last. Two classes is
+   0-2-0 and wins honestly in either order — the fix this repo already records for a page class and
+   a component class landing on one element. */
+.tpl-zone.tl-zone { overflow: hidden; display: flex; flex-direction: column; }
 .tl-zone { overflow-x: hidden; }
 
 .tl-board {
-  /* the ref's `.board` — the field is a rounded object, not a bleed */
-  border-radius: 14px;
-  /* ⚠️ THE FIELD. The board sat on nothing — `rgba(0,0,0,0)` — so the cards floated on whatever the
-     page happened to paint, and the rail had no tone to match. The ref's `.board` carries it. */
-  background: var(--tl-field);
+  /* ⚠️ v60 DELETES THE FIELD: `.board` is `background: transparent; border: none; border-radius: 0`.
+     The board sits on the page. What replaced it is the SECTION — six white containers with tinted
+     headers — so a field behind them would be a seventh surface behind six objects, and the tinted
+     headers would read as bands inside a tray rather than as the tops of cards.
+     ⚠️ THE RAIL KEEPS THE TONE THE FIELD USED TO CARRY. `--tl-field` is still read, by the rail
+     alone: the ref's `.rail` is `var(--panel)` — its page's content surface, which is what the rail
+     must match to read as the board's own edge rather than a bar laid on it. */
+  background: transparent;
+  border-radius: 0;
   flex: 1; min-height: 0; display: flex; flex-direction: column;
+  /* the ref's `.board` — 4px either side, and nothing top or bottom */
+  padding: 0 4px;
   /* ⚠️ THE GROUND IS THE REF'S `--ground` AND THE ROWS ARE WHITE. It was a tinted `#eae2d6`,
      chosen when every bar was filled and the board needed to differ from them. Porcelain inverts
      that: the bar is a WHITE TRACK, so a tinted board would make the tracks the lightest thing on
@@ -223,7 +240,13 @@
      tone that was neither the board's nor the panel's and the whole lane read as washed. The panel
      is the one ground from the masthead to the foot of the board; anything the calendar paints
      underneath it is a second tone by definition. */
-  overflow: hidden;
+  /* ⚠️ THE BOARD NO LONGER CLIPS, AND THAT IS LOAD-BEARING RATHER THAN TIDINESS. The badge stands
+     proud of its card's left edge by 35% of itself, and the flags fly above their marks; a clipping
+     ancestor beats every z-index, so `overflow: hidden` here would shear both. v60 states the same
+     thing from the other end — `.row,.lane,.glanes,.gwrap,.card{overflow:visible}`. What keeps the
+     badge inside its SECTION is that `.tl-glanes` reserves exactly the overhang as padding, so
+     nothing has to escape a rounded corner in order to be drawn. */
+  overflow: visible;
 
   /* ══ THE PINNED VALUES ══════════════════════════════════════════════════════════════════
    *
@@ -248,6 +271,38 @@
      `--pinktx`; `--tl-ink` is four shades darker and is the board's text colour, not a mark's. */
   /* ⚠️ THE FIELD THE BOARD SITS ON, and the rail's own tone — the ref's `.board`/`.rail`. */
   --tl-field: #f5f1eb;
+  /* ⚠️ THE SECTION SURFACE IS THE APP'S OWN PANEL, BY NAME. The ref's `.grp` is `var(--panel)`,
+     its content surface; `.t-f12` — which this page's root carries — declares `--panel: #fffdfb`.
+     Name matches name, and the page root is an ancestor, so it resolves. */
+  --tl-panel: var(--panel, #fffdfb);
+
+  /* ══ THE SIX SECTION TONES ═══════════════════════════════════════════════════════════════
+   *
+   * ⚠️ PINNED HERE RATHER THAN READ FROM THE THEME, AND THAT IS THIS FILE'S OWN CONVENTION.
+   * Three of the six accents ARE app status colours and are named as such below. What stops them
+   * being `var()` reads is scope: `--band`, `--sageC` and their neighbours are declared on the
+   * THEME classes, which sit above this page, so reading them would repaint every section header
+   * differently in Bold and Editorial — a three-theme change this pass cannot measure. The board
+   * has pinned its colours since v36 for exactly this reason, and the values below are the app's
+   * families to the shade.
+   *
+   * ⚠️ AND `--tl-g-*-tone` IS THE TRAIL'S COLOUR AS WELL AS THE HEADER'S ACCENT. One token, two
+   * readers, so a section's trail cannot come to disagree with the section it is drawn in.
+   */
+  /* Urgent — the app's requested-state rose: #c98e8a IS `STATUS_DOT_MAP[PARTIAL_REQUESTED].base`,
+     and its pale ground is the To-do blush band family (`--band` #f2ddd5). */
+  --tl-g-over-tone: #c98e8a;  --tl-g-over-tint: #f1d5cc;  --tl-g-over-ico: #8c4f4a;
+  /* Upcoming — the soft-pink CTA family (`--pink` #f5e2da / `--pink-t` #f7e3dd) */
+  --tl-g-need-tone: #d9a8a3;  --tl-g-need-tint: #f8ece6;  --tl-g-need-ico: #8c4f4a;
+  /* With agents — the app's sage: #aebe96 IS `STATUS_DOT_MAP[PARTIAL_SENT].base`, its ink is
+     `--sageD` #5a6e58, and its ground is the pale sage band (`--sageC` #e9ede6). */
+  --tl-g-with-tone: #aebe96;  --tl-g-with-tint: #e6ece2;  --tl-g-with-ico: #5a6e58;
+  /* Gone quiet — the app's faded sand: #c2b6a4 IS `STATUS_DOT_MAP[NO_RESPONSE].base` */
+  --tl-g-quiet-tone: #c2b6a4; --tl-g-quiet-tint: #efe9dc; --tl-g-quiet-ico: #8a8177;
+  /* Tasks — the field's own tone; a task is the board's neutral */
+  --tl-g-task-tone: #c9bca4;  --tl-g-task-tint: #f5f1eb;  --tl-g-task-ico: #6f6055;
+  /* Closed — warm grey, the quietest thing on the board */
+  --tl-g-shut-tone: #cfc6b8;  --tl-g-shut-tint: #efece6;  --tl-g-shut-ico: #8a8177;
   /* the ref's one card border, its owed variant, and the silence's faint fill */
   --tl-frame-bd: #e2d4be;
   /* ⚠️ TWO LAYERS, FROM THE REF — a tight contact shadow and a wide lift. Ours was ONE faint layer
@@ -357,17 +412,35 @@
    * changing `--row-h` cannot resize a bar. That is the property the lock proves by changing one
    * and measuring the other, rather than by reading the two declarations and believing them.
    */
-  /* ⚠️ v58 GEOMETRY, FROM THE REF: a 66px row over a 44px bar. */
-  --row-h: 66px;
-  --bar-h: 44px;
+  /* ⚠️ v60 GEOMETRY, FROM THE REF: an 88px row over a 62px bar. It grew from 66/44 because the
+     badge did — a 58px medallion standing proud of a 44px bar has nowhere to stand. */
+  --row-h: 88px;
+  --bar-h: 62px;
+  /* ⚠️ THE BADGE IS THE BOARD'S ONE SCALING TOKEN, and three other values are `calc()`s over it:
+     the medallion's overhang (35% of itself, leftward), the card's text inset (66% + 10px) and the
+     left column every section reserves for it. The ref states all four against `--badge`, so the
+     badge can be retuned without a second number to remember — the law this repo already records
+     as "no element's position may be a literal another element owns". */
+  --badge: 58px;
+  /* ⚠️ THE LEFT COLUMN IS THE NUMBER GUTTER PLUS THE BADGE'S OVERHANG, and it is derived rather
+     than measured. The rail reserves exactly this much before its lane; the rows reserve the same
+     as `.tl-gnums` (64px, fixed) plus `.tl-glanes`' padding (the overhang). The two agree because
+     they read one expression — which is the whole of the alignment guarantee, and the reason a
+     tick at `pct(d)` lands on the same pixel as a bar at `pct(d)`. */
+  --tl-gnum-w: 64px;
+  --tl-badge-over: calc(var(--badge) * 0.36);
   /* ⚠️ 16px SINCE v54: a mark is a LEAD-IN now, drawn before the card rather than riding on it.
      At 22 it was sized to be read against a card it sat on; on a dotted run it is a waypoint. */
   --mk: 16px;
   --tl-headrow-h: 26px;
-  --tl-rail-h: 42px;
-  /* ⚠️ v58: THE AGENT COLUMN IS ZERO. Kept as a token rather than deleted because the rail, the
-     lane and the row all read it, and a width that exists at 0 is one edit to restore. */
-  --tl-nm-w: 0px;
+  /* ⚠️ 76px BECAUSE THE RAIL IS TILES NOW (the ref's `data-rail="tiles"` → `--rail-h: 76px`).
+     A tile is a parchment card with a Playfair numeral over a mono month; 42 was the height of a
+     tick and a date label, which is a different object. */
+  --tl-rail-h: 76px;
+  /* ⚠️ v60: THE COLUMN IS BACK, AND IT IS NOT AN AGENT COLUMN. It holds the section's row
+     numbers and the badge's overhang, so the rail must reserve the same width before its lane or
+     every tick sits left of every bar. Derived, never typed: see `--tl-gnum-w` above. */
+  --tl-nm-w: calc(var(--tl-gnum-w) + var(--tl-badge-over));
   /* how far a piece stands off a marker it abuts, and off a plain neighbour */
   /* the bar text's inset — mirrored by TEXT_INSET in the page, which the fit pass subtracts */
   --tl-text-inset: 13px;
@@ -384,11 +457,84 @@
   --tl-bar-bd: 1px;
 }
 
-/* ══ A GROUP ═══════════════════════════════════════════════════════════════════════════════ */
-.tl-grp { margin-bottom: 4px; }
-.tl-gt { display: flex; align-items: baseline; gap: 9px; padding: 14px 2px 7px; }
-.tl-gt .t { font-family: 'Playfair Display', Georgia, serif; font-size: 19px; font-weight: 500; color: var(--tl-ink); }
-.tl-gt .n { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 9px; color: var(--tl-label); }
+/* ══ A SECTION ═════════════════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ v60: A GROUP IS A CONTAINER NOW, NOT A HEADING OVER LOOSE ROWS. Six white cards, each with a
+ * full-width tinted header and a mono number column down its side. The heading used to sit on the
+ * ground ABOVE its rows with nothing enclosing them, so a reader four rows down had no way of
+ * telling which section they were in; the tint runs the height of the section now and answers it
+ * without a word.
+ *
+ * ⚠️ AND THE PER-ROW ROSE RULE IS RETIRED WITH IT. `.tl-rrow.owes::after` drew a 3px rose bar
+ * inside every owed row — v58's way of marking urgency one row at a time. v60 has an Urgent
+ * SECTION whose header and number column are both rose, so the per-row rule would state the same
+ * thing a second time, inside the container that already says it. The ref emits the `owes` class
+ * and styles nothing with it, which is the same decision arrived at from the other end.
+ */
+.tl-grp {
+  /* the ref's `.grp` */
+  display: flex; flex-direction: column; position: relative;
+  background: var(--tl-panel);
+  border: 1px solid #e7e0d4; border-radius: 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 3px rgba(58, 28, 20, .04);
+  /* ⚠️ THE SECTION CLIPS AND THE BADGE STILL SURVIVES, because `.tl-glanes` reserves the badge's
+     overhang as PADDING. Nothing has to escape the rounded corner in order to be drawn — which is
+     what lets the container round its own edge at all. Take that padding away and the clip shears
+     every badge on the board. */
+  overflow: hidden;
+}
+.tl-grp:last-child { margin-bottom: 0; }
+/* the ref's `.ghead` — the tone runs the full width, icon then name, nothing else */
+.tl-gt {
+  display: flex; align-items: center; gap: 13px; padding: 12px 20px;
+  font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 500;
+  color: var(--tl-nearblack);
+  border-bottom: 1px solid rgba(58, 28, 20, .06);
+  /* ⚠️ 1.3 MINIMUM ON MIXED-CASE PLAYFAIR. "Gone quiet" and "Upcoming" both carry descenders, and
+     this repo has cropped three separate Playfair sites by taking a ref's tighter value. */
+  line-height: 1.3;
+}
+.tl-gt .gico { width: 27px; height: 27px; flex: 0 0 auto; }
+/* ⚠️ THE SECTION HEADER STATES NO COUNT, and the ref agrees twice over: its `.ghead` renders the
+   icon and the name only, and the `cnt` string its own loop computes is never used. The count is
+   the tab strip's job; a number on the header as well is two places to read one figure. */
+.tl-gt .t { font-family: inherit; font-size: inherit; font-weight: inherit; color: inherit; }
+.tl-gt .n { display: none; }
+/* the row-number column, and the lanes beside it */
+.tl-gwrap { display: flex; }
+.tl-gnums {
+  flex: 0 0 var(--tl-gnum-w); display: flex; flex-direction: column;
+  padding: 6px 0; background: transparent;
+}
+.tl-gnum { height: var(--row-h); display: flex; align-items: center; justify-content: center; }
+/* ⚠️ ZERO-PADDED MONO — the ref's `data-num="mono"`, and the app's own label idiom. */
+.tl-gnum span {
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: .16em;
+  font-weight: 600; color: #a08f7d;
+}
+/* ⚠️ THE LEFT PADDING IS THE BADGE'S OVERHANG, EXACTLY. It is what the badge is drawn into, and it
+   is why the section can clip its own corner without shearing one. */
+.tl-glanes {
+  flex: 1 1 auto; min-width: 0;
+  padding: 6px 0 6px calc(var(--tl-badge-over) + 6px);
+  background: var(--tl-panel);
+}
+
+/* ⚠️ ONE PROPERTY PER SECTION, SET ON THE CONTAINER — the tone is inherited by the header, the
+   number column and every trail inside it, so a section cannot be tinted one colour and trailed
+   another. The ref does the same with `--gtone`/`--gtint`. */
+.tl-grp[data-sec="over"]  { --gtone: var(--tl-g-over-tone);  --gtint: var(--tl-g-over-tint);  --gico: var(--tl-g-over-ico); }
+.tl-grp[data-sec="need"]  { --gtone: var(--tl-g-need-tone);  --gtint: var(--tl-g-need-tint);  --gico: var(--tl-g-need-ico); }
+.tl-grp[data-sec="with"]  { --gtone: var(--tl-g-with-tone);  --gtint: var(--tl-g-with-tint);  --gico: var(--tl-g-with-ico); }
+.tl-grp[data-sec="quiet"] { --gtone: var(--tl-g-quiet-tone); --gtint: var(--tl-g-quiet-tint); --gico: var(--tl-g-quiet-ico); }
+.tl-grp[data-sec="task"]  { --gtone: var(--tl-g-task-tone);  --gtint: var(--tl-g-task-tint);  --gico: var(--tl-g-task-ico); }
+.tl-grp[data-sec="shut"]  { --gtone: var(--tl-g-shut-tone);  --gtint: var(--tl-g-shut-tint);  --gico: var(--tl-g-shut-ico); }
+/* the tint runs the header AND the number column, so the section is legible from any row in it */
+.tl-grp[data-sec] > .tl-gt { background: var(--gtint); }
+.tl-grp[data-sec] .tl-gnums { background: var(--gtint); }
+.tl-grp[data-sec] .tl-gt .gico { color: var(--gico); }
 /* ⚠️ THE SENTENCE IS WHAT THE HEADING IS FOR. "Needs you soon" is a label a reader has to decode;
    the sentence beneath it is the thing itself. */
 .tl-gt .s { font-size: 11.5px; color: var(--tl-muted); }
@@ -437,7 +583,13 @@
      The tone is the field's, so the rail reads as the board's own edge rather than a bar laid on
      it. */
   background: var(--tl-field);
-  position: sticky; top: 0; z-index: 70; isolation: isolate;
+  /* ⚠️ `relative`, NOT `sticky` — v60 Law 4, and it is a structural claim rather than a stacking
+     one. A sticky rail is INSIDE the scroller and pins by clamping; this rail is OUTSIDE it and
+     cannot be reached at all. The z-index survives because the today line and the probe are drawn
+     across the whole board and must pass UNDER the rail (they are 40 and 39 to its 50), and the
+     opacity survives because stacking says nothing about what can be seen through. */
+  position: relative; z-index: 50; isolation: isolate;
+  flex: 0 0 auto;
   height: var(--tl-rail-h); align-items: stretch;
 
   border-bottom: 1px solid #e0d3bf;
@@ -451,6 +603,41 @@
   box-sizing: border-box;
 }
 .tl-railtl { overflow: visible; }
+
+/* ══ WEEK TILES (v60's `data-rail="tiles"`) ══════════════════════════════════════════════════
+ *
+ * ⚠️ EACH TILE IS A PARCHMENT CARD ON ITS OWN DATE, and today's week is the soft pink one — the
+ * ref's `.rtile` / `.rtile.now`. It replaces a tick with a date label beside it: a tick is a mark
+ * on the rule and a tile is an object standing on the date, which is what makes a 90-day rail
+ * readable at a glance instead of countable.
+ *
+ * ⚠️ CENTRED ON ITS DATE BY `translateX(-50%)`, which is why the page drops a tile within half a
+ * tile of either edge rather than clamping it: a clamped tile would sit off its own date, and this
+ * rail is the thing every bar is measured against.
+ */
+.tl-rtile {
+  position: absolute; bottom: 7px; transform: translateX(-50%);
+  background: #fdf9f5; border: 1px solid var(--tl-frame-bd); border-radius: 10px;
+  padding: 6px 13px; text-align: center; white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, .05);
+}
+/* ⚠️ THE PINK IS THE WEEK CONTAINING TODAY, NOT THE DAY. A 90-day rail has one tile per week, so
+   "today" on this rail is a week; marking a single day would mark a tile that is usually not
+   today's at all. */
+.tl-rtile.now { background: #f8ece6; border-color: #eccfc2; }
+.tl-rtile b {
+  display: block; font-family: 'Playfair Display', Georgia, serif; font-size: 19px;
+  font-weight: 500; color: var(--tl-nearblack);
+  /* ⚠️ 1.3 ON A PLAYFAIR NUMERAL IS NOT NEEDED AND IS STILL WRITTEN. Digits carry no descenders,
+     so the ref's `line-height: 1` is safe here — but the house floor exists because the exception
+     is invisible until somebody renders a letter in the box, and a rail is one rename from doing
+     exactly that. `1.15` costs 3px of a 76px rail and removes the trap. */
+  line-height: 1.15;
+}
+.tl-rtile i {
+  display: block; font-family: 'JetBrains Mono', ui-monospace, monospace; font-style: normal;
+  font-size: 7.5px; letter-spacing: .14em; color: var(--tl-label); margin-top: 2px;
+}
 /* the baseline the ticks stand on */
 .tl-railtl::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0;
@@ -696,16 +883,14 @@
    the two things a card exists to say, and v40's ladder removed both on sixteen of twenty-three
    cards at six months. */
 .tl-p[data-nodetail] .tl-cdt, .tl-p[data-nodetail] .tl-csep { display: none; }
-/* ⚠️ THE SOFT EDGE IS ON THE CLIP, at the ref's 18px — it is the window onto the words, and the
-   words are now two lines rather than one, so a mask on the line would fade the headline and leave
-   the pill hard. */
-.tl-p[data-tight] .tl-content {
-  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 18px), transparent);
-  mask-image: linear-gradient(90deg, #000 calc(100% - 18px), transparent);
-}
-.tl-p[data-tight]:hover .tl-content,
-.tl-p[data-tight]:focus-visible .tl-content,
-.tl-p[data-tight].tl-force-open .tl-content { -webkit-mask-image: none; mask-image: none; }
+/* ⚠️ THE SOFT EDGE ON THE WORDS IS GONE (v60, Law 2 — "a mask must never sit on a text-bearing
+   element"). v55 read that law as being about the CARD and moved the mask down to the text
+   container, which satisfied the letter and not the point: `.tl-content` holds the headline and the
+   pill, so the mask was still dissolving type. v60 states it about any text-bearing element, and
+   the clip is a hard cut — `overflow: hidden` on the container, with the overflow revealed by the
+   hover glide. Law 10 says the same thing from the other side: show what fits, CUT OFF, never blank
+   a card and never hide a fragment. */
+.tl-p[data-tight] .tl-content { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .tl-p { transition: none; }
 }
@@ -714,7 +899,13 @@
   background: var(--card-bg, #ffffff);
   border: 1px solid var(--tl-frame-bd);
   border-radius: 10px;
-  box-shadow: var(--tl-frame-sh);
+  /* ⚠️ ONE DECLARATION, AND EVERY STATE SETS THE TOKEN RATHER THAN THE PROPERTY. Four rules used
+     to write `box-shadow` on this element — resting, hover (TWICE, see below), closed and owed —
+     all at 0-2-0 or 0-3-0, so which one a card actually wore was decided by source order. The fade
+     suppression lost to `.tl-p.owed .tl-frame` that way: an owed card that faded kept a shadow
+     running into its own dissolve, from a rule that reads perfectly correctly. A token on the CARD
+     has one owner and the cascade resolves it once. */
+  box-shadow: var(--frame-sh, var(--tl-frame-sh));
 }
 /* ⚠️ THE CONTENT IS ABOVE THE FRAME AND IS NEVER MASKED. `position: relative` is what lifts it out
    of the frame's paint order without a z-index war; the frame is `inset: 0` behind it. */
@@ -739,8 +930,13 @@
 .tl-p.fadeL .tl-content { left: var(--card-fade-inset); }
 /* ⚠️ A COLUMN, SO THE PILL AND THE HEADLINE SHARE ONE LEFT EDGE. `align-self: flex-start` keeps
    the pill its own width without stretching it across the card. */
-/* ⚠️ `tl-cbody`, NOT `tl-body` — THE NAME WAS ALREADY TAKEN, AND THIS IS THE SECOND TIME.
-   `f12.css` declares `.tl-body` for the Query Centre's timeline, with `margin-top: 7px` and
+/* ⚠️ `tl-cbody`, NOT `tl-body` — THE NAME WAS ALREADY TAKEN, AND THIS IS THE THIRD TIME.
+   ⚠️ AND THIS COMMENT DID NOT STOP IT HAPPENING AGAIN, SEVEN HUNDRED LINES BELOW ITSELF. v58 named
+   the card's body `.tl-body` — the exact name forbidden here, in this file, by this paragraph — and
+   `calendarTokens.test.ts`'s class-ownership sweep went red and was left red. That is this repo's
+   own law twice over: a comment is not a guard, and a red lock is worth nothing while it is being
+   stepped over. The body is `.tl-cardbody` now; the LOCK is what keeps it that way.
+   `f12.css` declares `.tl-cardbody` for the Query Centre's timeline, with `margin-top: 7px` and
    `> * + * { margin-top: 9px }`. Both sheets ship in one bundle, so the calendar's new column
    inherited 16px of vertical space it never asked for and every card's headline fell out of its
    bottom edge. v54 hit the identical trap with `.tl-dt` and `.tl-sep` and adopted the `tl-c…`
@@ -757,8 +953,11 @@
    inside a card that had not moved; a shadow on the card would fall outside the thing that draws
    the border it belongs to. */
 .tl-p:hover { transform: translateY(-50%) scale(1.004); z-index: 6; }
-/* the ref's `.card:hover .frame` — the same two-layer shape, lifted */
-.tl-p:hover .tl-frame { box-shadow: var(--tl-frame-sh-hover); }
+/* ⚠️ THE HOVER SHADOW WAS DECLARED TWICE AND THE OTHER ONE WAS WINNING. This rule set the ref's
+   two-layer lift; a second `.tl-p:hover .tl-frame` two hundred lines below set a single flat
+   `0 3px 10px` — same specificity, later in the file, so the two-layer hover added in v58e never
+   painted at all. The duplicate is deleted and this is now the only statement of it. */
+.tl-p:hover { --frame-sh: var(--tl-frame-sh-hover); }
 
 /* ⚠️ THE PILL IS THE ONLY COLOUR ON THE BOARD. Its five tones are whose-move, not status: pink is
    yours, sage is theirs, slate is a reminder, grey is a silence that ran out, and closed is an
@@ -928,7 +1127,6 @@
   transform: translateY(-50%) scale(1.004);
   z-index: 5;
 }
-.tl-p:hover .tl-frame { box-shadow: 0 3px 10px rgba(58, 28, 20, .16); }
 /* ⚠️ THE FILL IS A CHILD, NOT A BACKGROUND, because its WIDTH is the statement. A gradient stop
    would put the number inside a colour value where nothing can read it back. */
 /* a fill that has reached the end is the bar, so it takes the bar's own corner back */
@@ -1048,7 +1246,13 @@ button.tl-tchip { cursor: pointer; }
  * ⚠️ ALL THREE ARE CHILDREN OF THE BOARD WRAP, NOT OF A LANE — because a lane clips. The wrap is
  * the only ancestor that spans every row and clips nothing.
  */
-.tl-wrap { position: relative; }
+/* ⚠️ THE WRAP IS THE BOARD'S COLUMN, AND THE TODAY FURNITURE HANGS OFF IT RATHER THAN OFF THE
+   SCROLLER. Today's line, the probe and the tooltip are children of the wrap and siblings of
+   `.tl-rows`: inside the scroller they would scroll away from the rail they are measured against,
+   and inside a lane they would be clipped, since a clipping ancestor beats any z-index. */
+.tl-wrap { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+/* the ref's `.rows` — the one thing on this board that scrolls */
+.tl-rows { position: relative; flex: 1; min-height: 0; overflow-y: auto; padding: 8px 0 24px; }
 /* ⚠️ TODAY IS A DRAWN RULE AGAIN (v54, Phase 2), AND THE SHADOW THAT REPLACED IT IS GONE.
    v37 made it a leftward shadow to avoid "a thing on the page competing with every other line on
    it" — sound while the past was also washed, because the two said one thing between them. With
@@ -1381,18 +1585,31 @@ button.tl-tchip { cursor: pointer; }
   .tl-board { --tl-nm-w: 0px; }
 }
 
-/* ══ ONE FADE, BOTH ENDS (v39, Phase 4) ══════════════════════════════════════════════════════
-   ⚠️ THE MASK IS ON THE CARD, NEVER A SIBLING LAID OVER IT. Two mechanisms drew these before — an
-   overlay for one edge and a gradient for the other — and they could never match, because one
-   composited against the ground and the other against the card. A mask on the card itself
-   dissolves the card, whatever colour the card is: white, the cream of a no-response, or the
-   deepened border of an owed one. Nothing has to know what is behind it.
-   ⚠️ AND THE BORDERED SIDE IS DROPPED AND THE CORNER SQUARED, or the card fades out and leaves a
-   1px line and a rounded corner hanging in the air at the cut. */
+/* ══ THE FADE IS AN OVERLAY AND THE SHADOW IS ITS OWN ELEMENT (v60, Law 2) ══════════════════
+ *
+ * ⚠️ THE MASK IS GONE, AND THE REASON IS THE SHADOW RATHER THAN THE FADE. v58 masked the frame,
+ * with a good argument: a mask dissolves the card whatever colour the card is, so nothing has to
+ * know what is behind it. What that argument leaves out is that a mask clips the element's
+ * box-shadow along with its paint. It cost nothing while the frame carried a single faint contact
+ * shadow. The frame carries TWO layers now — a contact shadow and a wide lift, and the lift is the
+ * one that makes a card read as an object — so masking a faded card deleted exactly the layer that
+ * was just added, at the end where the card is most in need of an edge.
+ *
+ * ⚠️ SO THE THREE PARTS FAIL TOGETHER AND ARE WRITTEN AS ONE MECHANISM: the frame drops its own
+ * shadow when it fades, a `.tl-shd` sibling carries the shadow INSET from the fade, and a
+ * `.tl-fov` gradient dissolves the card into the surface. Remove any one and the card is either
+ * flat, or shadowed into a dissolve, or sheared.
+ *
+ * ⚠️ THE OVERLAY READS THE SECTION'S SURFACE TOKEN, NOT A LITERAL. This is the cost of leaving the
+ * mask — an overlay must composite against something — and it is the ref's one weak point here,
+ * since it hardcodes its own `#fcfaf6`. `--tl-panel` is the same token `.tl-glanes` paints with,
+ * so the fade cannot come to disagree with the surface it fades into.
+ *
+ * ⚠️ AND THE BORDERED SIDE IS STILL DROPPED AND THE CORNER SQUARED, or the card dissolves and
+ * leaves a 1px line and a rounded corner hanging in the air at the cut.
+ */
 .tl-p.fadeR .tl-frame {
   border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: none;
-  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - var(--card-fade)), transparent);
-  mask-image: linear-gradient(90deg, #000 calc(100% - var(--card-fade)), transparent);
 }
 /* ⚠️ THE INSET IS ON THE CONTENTS, NOT ON THE CARD, and `box-sizing: border-box` is why.
    Border-box clamps a width UP to padding plus borders, so `padding-left: 46px` on the card gave
@@ -1402,17 +1619,34 @@ button.tl-tchip { cursor: pointer; }
    what the date arithmetic says it is; only the words move in. */
 .tl-p.fadeL .tl-frame {
   border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--card-fade));
-  mask-image: linear-gradient(90deg, transparent, #000 var(--card-fade));
 }
-/* ⚠️ BOTH ENDS IS ONE MASK WITH TWO STOPS, not the two rules above stacked — a second
-   `mask-image` REPLACES the first rather than adding to it, so a card cut at both ends would have
-   faded at whichever edge won the cascade and been sheared at the other. */
+/* a fading frame carries no shadow of its own — `.tl-shd` carries it, inset from the dissolve */
+/* ⚠️ A FADED CARD HAS NO SHADOW, AND THE PRECEDENCE IS STATED IN THE SELECTORS RATHER THAN IN THE
+   FILE ORDER. My first attempt wrote this rule and a comment claiming it came last of the states;
+   it did not — `.tl-p.owed` is declared two hundred lines below, same 0-2-0 specificity, so an
+   owed card that faded kept a shadow running into its own dissolve. The comment described an order
+   I had not established, which is this repo's own fault about prose outliving fact, committed
+   fresh. So the owed rule now says what it MEANS — an owed card takes the owed shadow only where
+   it has an edge to sit against — and moving either block cannot break it. */
+.tl-p.fadeR, .tl-p.fadeL { --frame-sh: none; }
 
-.tl-p.fadeL.fadeR .tl-frame {
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--card-fade), #000 calc(100% - var(--card-fade)), transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 var(--card-fade), #000 calc(100% - var(--card-fade)), transparent);
+/* ⚠️ A NEGATIVE `z-index` CHILD, AND ITS STACKING CONTEXT IS THE CARD'S OWN `z-index`. A negative-z
+   child paints behind the backgrounds of every ancestor up to the nearest stacking context; `.tl-p`
+   is positioned AND carries a `z-index`, so it creates one and the shadow sinks behind the frame
+   without sinking behind the section. This repo has lost a negative-z element to a parent that
+   created no context three times — here the context is the card's existing z-index rather than an
+   `isolation` added for the purpose, so there is nothing for a later edit to tidy away. */
+.tl-shd {
+  position: absolute; inset: 0; border-radius: 10px; z-index: -1; pointer-events: none;
+  box-shadow: var(--tl-frame-sh);
 }
+.tl-p.fadeR .tl-shd { right: var(--card-fade-inset); }
+.tl-p.fadeL .tl-shd { left: var(--card-fade-inset); }
+
+/* the dissolve itself — one element per faded edge, over the frame and under the words */
+.tl-fov { position: absolute; top: 0; bottom: 0; width: 46px; z-index: 4; pointer-events: none; }
+.tl-fov.r { right: 0; background: linear-gradient(90deg, rgba(255, 253, 251, 0), var(--tl-panel) 70%); }
+.tl-fov.l { left: 0; background: linear-gradient(270deg, rgba(255, 253, 251, 0), var(--tl-panel) 70%); }
 
 /* ══ THE ACTION CAP AND ITS TERMINAL MARK (v58) ═════════════════════════════════════════════════
    Geometry and colour from `design-refs/timeline-v58.html` — `.nlab` and `.tmark`.
@@ -1459,14 +1693,51 @@ button.tl-tchip { cursor: pointer; }
    only thing that needed to change. */
 
 /* the identity's stack inside the card — name over its role-worded fact */
-.tl-body {
-  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+/* ══ THE BADGE (v60) ═════════════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ NO DISC, NO BORDER, NO SHADOW OF ITS OWN — the glyph IS the badge. The ref reached this by
+ * `background: none !important; border: none !important` over its own earlier medallion, which is
+ * the ref telling you it changed its mind; `StatusDot` already draws a tinted disc and a ring in
+ * the status's own colour, so a second disc behind it would be a ring around a ring.
+ *
+ * ⚠️ THE OVERHANG IS A FRACTION OF THE BADGE, NOT A LITERAL. `-35%` leftward, and the words start
+ * at `66% + 10px` — so retuning `--badge` moves the badge, the words and the trail together. Three
+ * literals here is the fault this repo states as "no element's position may be a literal another
+ * element owns".
+ */
+.tl-medal {
+  position: absolute; left: calc(var(--badge) * -0.35); top: 50%; transform: translateY(-50%);
+  width: var(--badge); height: var(--badge);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 5; pointer-events: none;
+}
+/* ⚠️ SIZED BY `width`/`height`, AND `transform: none` IS DELIBERATE (Law 8). Some engines ignore a
+   CSS transform on an SVG element, so a badge scaled that way is right in one browser and wrong in
+   another. `overflow: visible` because the pulse ring on the four asking states draws outside the
+   glyph's own box. */
+.tl-medal svg { width: var(--badge); height: var(--badge); transform: none; overflow: visible; }
+/* a card whose left edge dissolves has no edge for the badge to burst from — it sits inside */
+.tl-p.fadeL .tl-medal { left: 8px; }
+
+.tl-cardbody {
+  position: absolute; top: 50%; transform: translateY(-50%);
   display: flex; align-items: center; gap: 9px;
   white-space: nowrap; z-index: 3;
-  max-width: calc(100% - 22px); overflow: hidden;
+  /* ⚠️ THE TEXT INSET CLEARS THE BADGE, AND BOTH TERMS ARE THE BADGE'S. It is one expression, so
+     the words cannot come to overlap the glyph the way they would if either were typed. */
+  left: calc(var(--badge) * 0.66 + 10px);
+  max-width: calc(100% - var(--badge) * 0.66 - 10px);
+  overflow: hidden;
 }
-/* a card whose left edge dissolves starts its words past the dissolve */
-.tl-p.fadeL .tl-body { left: 34px; }
+/* a card whose left edge dissolves starts its words past both the dissolve and the badge */
+.tl-p.fadeL .tl-cardbody {
+  left: calc(var(--badge) * 1.0 + 18px);
+  max-width: calc(100% - var(--badge) * 1.0 - 18px);
+}
+/* ⚠️ LINE ONE IS THE NAME AND ITS CHIP ON ONE ROW — the ref's `.trow`. The chip was a third
+   flex column beside the stack, which made it compete with the fact for the card's width and
+   pushed the fact off the end of every narrow card. */
+.tl-trow { display: flex; align-items: center; gap: 8px; }
 
 /* ⚠️ THE GLIDER, AND THE ONLY THING THAT MOVES. Clipped text glides on hover by a transition on
    THIS element — never a keyframe, and never the frame or the clip, which must stay still or the
@@ -1476,11 +1747,15 @@ button.tl-tchip { cursor: pointer; }
   flex: 0 0 auto; white-space: nowrap; transform: translateX(0);
 }
 .tl-gstack { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.tl-fnm { font-size: 12.5px; font-weight: 600; color: var(--tl-nearblack); white-space: nowrap; line-height: 1.15; }
+/* ⚠️ v60's SCALE-UP: 14.5 / 8.5, not 12.5 / 7. The card grew from 44px to 62px and its badge from
+   13px to 58; type left at the old sizes reads as a caption inside a card that is now an object. */
+.tl-fnm { font-size: 14.5px; font-weight: 600; color: var(--tl-nearblack); white-space: nowrap; line-height: 1.15; }
 .tl-ffx {
-  font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .1em;
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .1em;
   text-transform: uppercase; color: var(--tl-muted); white-space: nowrap;
 }
+/* the agency reads a shade back from the fact beside it, so line two has a near and a far half */
+.tl-ffx .agcy { color: #a89880; }
 
 /* ⚠️ FIVE CHIPS, ONE PER HOLDER — soft pink the writer, sage the agency, slate a reminder set,
    sand a silence, muted a closure. Colour says WHOSE MOVE it is and nothing else. */
@@ -1494,6 +1769,9 @@ button.tl-tchip { cursor: pointer; }
 .tl-fchip.rem   { background: #e2ebf2; color: #40586e; }
 .tl-fchip.quiet { background: #eee8dc; color: #8a7a6c; }
 .tl-fchip.shut  { background: #efece6; color: #8a8177; }
+/* ⚠️ THE CHIP GREW WITH THE CARD — the ref's `.fchip.sm` at v60's scale. `sm` is the ref's own
+   name for the in-card size, against the larger chip its control row uses. */
+.tl-fchip.sm { font-size: 8px; padding: 4px 10px; }
 
 /* the full record, on hover */
 .tl-tip {
@@ -1523,14 +1801,16 @@ button.tl-tchip { cursor: pointer; }
 .tl-rrow:nth-child(odd) .tl-p.owed { animation-delay: -3.4s; }
 @media (prefers-reduced-motion: reduce) { .tl-p.owed { animation: none; } }
 
-/* ⚠️ THE ROW'S OWED STRIP — the ref's `.row.owes::after`, and it STANDS. An earlier pass read the
-   pack's "no accent bars" as forbidding it; that sentence scopes the CARD FACE, and the ref draws
-   this. It is the one overdue mark outside the card, and there are no fills or patterns on the
-   face itself. */
-.tl-rrow.owes::after {
-  content: ''; position: absolute; left: 0; top: 9px; bottom: 9px;
-  width: 3px; border-radius: 2px; background: #c98e8a; z-index: 4;
-}
+/* ⚠️ THE ROW'S OWED STRIP IS RETIRED (v60), AND ITS CLASS IS DELIBERATELY LEFT EMITTED.
+   v58's ref drew a 3px rose bar inside every owed row and this file argued — correctly, then —
+   that the pack's "no accent bars" scoped the card face rather than the row. v60 answers it a
+   different way: there is an Urgent SECTION now, whose header and number column are both rose and
+   run the height of every row in it. A per-row bar would state the same fact a second time inside
+   the container already stating it, three inches away — the dilution this repo records against a
+   dashed border meaning three things at once.
+   ⚠️ THE `owes` CLASS STAYS ON THE ROW because the ordering lock reads it and the ref emits it
+   too, styling nothing with it. A class with no rule is a fact published for a reader; deleting it
+   would take the tier out of the DOM along with the bar. */
 
 /* ══ THE CARD FRAME IS THE REF'S, AND THERE IS ONE OF IT ═══════════════════════════════════════
    ⚠️ FIVE BORDER COLOURS WENT. `out`, `req`, `decide`, `remind` and `quiet` each tinted the frame,
@@ -1542,7 +1822,11 @@ button.tl-tchip { cursor: pointer; }
      · closed — dashed, and dashed is the closed state's alone
    Saying the same fact in the chip AND the outline is how a board comes to have two vocabularies
    for one thing, and the outline is the one nobody can read. */
-.tl-p.owed .tl-frame   { border-color: var(--tl-frame-owed-bd); box-shadow: var(--tl-frame-owed-sh); }
-.tl-p.quiet .tl-frame  { background: var(--tl-frame-quiet-bg); box-shadow: none; }
-.tl-p.ghost .tl-frame  { box-shadow: none; }
-.tl-p.hollow .tl-frame { box-shadow: none; }
+.tl-p.owed .tl-frame   { border-color: var(--tl-frame-owed-bd); }
+.tl-p.owed:not(.fadeL):not(.fadeR) { --frame-sh: var(--tl-frame-owed-sh); }
+/* ⚠️ THESE THREE SET THE TOKEN TOO, and consistency is the point rather than tidiness: they were
+   `box-shadow: none` at 0-3-0 on the frame, which happens to beat the token and happens to want
+   the same answer. Leaving them is how the next person reintroduces the conflict the token was
+   written to end — a frame with four owners, resolved by source order. */
+.tl-p.quiet .tl-frame  { background: var(--tl-frame-quiet-bg); }
+.tl-p.quiet, .tl-p.ghost, .tl-p.hollow { --frame-sh: none; }

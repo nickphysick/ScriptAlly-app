@@ -35,6 +35,10 @@ import {
   type RowGroup,
 } from "../../lib/timelineGroups";
 import { pillText } from "../../lib/calendarPill";
+import {
+  calSectionOf, CAL_SECTION_DRAW, CAL_SECTION_LABEL,
+  type CalSection, type CalSectionFacts,
+} from "../../lib/calendarSections";
 import { fadesFor, cardBounds } from "../../lib/calendarFade";
 import {
   TAB_ORDER, TAB_LABEL, rowInTab, tabOf, type TimelineTab,
@@ -61,7 +65,7 @@ import {
   type RowSort, type TimelineFilter,
 } from "../../lib/todoTimeline";
 import {
-  durationCount, barLines, familyOf, holderOf,
+  durationCount, barLines, familyOf, holderOf, sideOf,
   type Segment, type BarNode,
 } from "../../lib/journeyBars";
 import { classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
@@ -77,6 +81,19 @@ import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
 import "./tasksLayout.css";
 import "./taskChrome.css";
 import "./todoCalendar.css";
+
+/**
+ * The badge's drawn size — the ref's `--badge`, restated in the page because `StatusDot` takes a
+ * number rather than reading CSS.
+ *
+ * ⚠️ TWO STATEMENTS OF ONE VALUE, AND THE LOCK IS WHAT KEEPS THEM TOGETHER. The CSS token
+ * positions the badge and insets the words; this number draws it. They cannot be one declaration
+ * — the component's prop is a `number` — so `calSurface60.measure.ts` asserts the rendered SVG's
+ * box against the token's computed value rather than against either literal. That is the shape
+ * this repo already uses for `READING_PANE_FLOOR_PX` ≡ `--ag-pane-floor`.
+ */
+const CARD_BADGE_PX = 58;
+
 
 export interface TodoCalendarPageProps {
   onNavigate: (tab: string, sub?: string) => void;
@@ -414,15 +431,37 @@ const Piece: React.FC<{
         * on a bar produced twelve distinct starts across one board, and the eye had nothing to run
         * down.
         */}
-      <div className="tl-body">
+      {/* ══ THE BADGE (v60) ═════════════════════════════════════════════════════════════════
+          ⚠️ IT IS THE APP'S `StatusDot`, AT THE REF'S SIZE, AND IT IS NEVER REDRAWN FROM THE REF.
+          The ref's `dot()` builds its own SVGs and maps a coarse `dk` — one `partial` glyph for
+          both "partial requested" and "partial sent". The app knows the real status, so it draws
+          the real dot: the locked component, its soft fills, its inline glyphs and its pulse on the
+          four states that ask something of the writer.
+
+          ⚠️ IT BURSTS PAST THE CARD'S LEFT EDGE BY 35% OF ITSELF, and every ancestor between it
+          and the section edge is `overflow: visible` — a clipping ancestor beats any z-index.
+          What stops it escaping the SECTION is that `.tl-glanes` reserves exactly the overhang as
+          padding, so the badge is drawn into room already held for it.
+
+          ⚠️ AND ITS SIZE IS `width`/`height`, NEVER A CSS `transform` (Law 8). Some engines ignore
+          a transform on an SVG element, so a scaled badge is the right size in one browser and the
+          wrong size in another; the ref states `transform: none` on it for the same reason. */}
+      <span className="tl-medal" aria-hidden>
+        <StatusDot status={sg.status} overrideSize={CARD_BADGE_PX} />
+      </span>
+      <div className="tl-cardbody">
         {/* the glider: the ONLY thing that moves when clipped text glides on hover */}
         <div className="tl-bwrap">
-          <StatusDot status={sg.status} overrideSize={13} />
           <span className="tl-gstack">
-            <span className="tl-fnm">{name}</span>
+            {/* ⚠️ LINE ONE IS NAME + CHIP, LINE TWO IS AGENCY · FACT — the ref's `.trow` over
+                `.ffx`. The chip rode BESIDE the stack before, which made it a third column and
+                pushed the fact off the end of every narrow card. */}
+            <span className="tl-trow">
+              <span className="tl-fnm">{name}</span>
+              <span className={`tl-fchip ${chipKind} sm`} data-pill={pill.text}>{pill.text}</span>
+            </span>
             <span className="tl-ffx">{lines.t1}{lines.t2 ? ` · ${lines.t2}` : ""}</span>
           </span>
-          <span className={`tl-fchip ${chipKind}`} data-pill={pill.text}>{pill.text}</span>
         </div>
       </div>
       {/* the full record, on hover — the ref's `.tip` */}
@@ -443,6 +482,22 @@ const Piece: React.FC<{
           data-tmark={sg.capSource}
           data-caprel={`${sg.rowKey}::${sg.lane}`} />
       )}
+      {/* ══ THE DISSOLVE, AND THE SHADOW IT HANDS OFF TO (v60, Law 2) ═══════════════════════
+          ⚠️ THREE PARTS, ONE MECHANISM, AND THEY FAIL TOGETHER. The frame drops its own shadow
+          when the card fades (CSS), `.tl-shd` carries it INSET from the dissolve so the lift stops
+          before the edge does, and `.tl-fov` is the gradient that dissolves the card into the
+          section's surface. Remove any one and the card is flat, or shadowed into a dissolve, or
+          sheared off.
+
+          ⚠️ AND THE ELEMENTS ARE WHY THE MASK WENT. A mask clips an element's box-shadow along
+          with its paint — costless while the frame had one faint contact shadow, and it deleted the
+          whole lift the moment the frame gained the second layer that makes a card an object. This
+          pass wrote the CSS for both elements and rendered NEITHER for a build: the rules matched
+          nothing, faded cards were flat and unfaded at once, and it took the surface lock to say
+          so. A class the sheet selects on and the component never emits is a rule with no subject. */}
+      {(fade.left || fade.right) && <span className="tl-shd" aria-hidden />}
+      {fade.right && <span className="tl-fov r" aria-hidden />}
+      {fade.left && <span className="tl-fov l" aria-hidden />}
     </div>
   );
 };
@@ -1371,15 +1426,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * day grain, a week grain or a month grain: those were properties of a grid that had to put a
    * cell somewhere, and there is no grid. Nine labels is what a reader can scan without counting.
    */
-  const dateLabels = useMemo(() => {
-    const step = Math.max(1, Math.round(range.days / 9));
-    const out: { ymd: string; at: number; text: string }[] = [];
-    for (let d = step; d < range.days; d += step) {
-      const ymd = visible[d];
-      if (ymd) out.push({ ymd, at: d, text: shortCalDate(ymd) });
-    }
-    return out;
-  }, [range.days, visible]);
 
   /**
    * The months the window spans, for the rail's shelf.
@@ -1420,6 +1466,54 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     const i = visible.indexOf(today);
     return i < 0 ? null : i + 0.5;
   }, [visible, today]);
+
+  /* ⚠️ THE TILES ARE DECLARED BELOW `todayAt` BECAUSE THEY READ IT, and that ORDER is the fix —
+     not the shuffle that silenced TS2448. This repo has shipped the same fault twice in shapes
+     the compiler cannot see: a `const` read from a hoisted helper, and one read through an
+     IIFE, both of which typecheck clean and throw on the first render. Being caught by TS2448
+     is a reason to check every render-time read in the function, never a sign it is handled. */
+  /**
+   * The rail's week tiles (v60).
+   *
+   * ⚠️ WEEKLY, ANCHORED ON TODAY — not `days / 9`. The old step divided the window into nine
+   * arbitrary slices, so a label's date meant nothing beyond "a ninth of the way along"; the board
+   * steps by a week and the ref's rail steps by a week, so the tiles and the navigation now agree
+   * about what a stride is. Anchoring on today rather than on the window's left edge is what keeps
+   * a tile ON today: `‹ WEEK` shifts the window by seven days and every tile moves with it, so the
+   * rail reads the same at every step instead of re-slicing itself.
+   *
+   * ⚠️ AND A TILE IS DROPPED AT EITHER EXTREME RATHER THAN CLAMPED. A tile is centred on its date
+   * (`translateX(-50%)`), so one within half a tile of the edge would hang outside the lane; the
+   * ref skips anything below 1.5% or above 98.5%.
+   */
+  const dateLabels = useMemo(() => {
+    const out: { ymd: string; at: number; text: string; day: string; mon: string; now: boolean }[] = [];
+    const SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+    if (todayAt == null) return out;
+    /* ⚠️ `todayAt` IS FRACTIONAL — it is the MIDPOINT of today's day cell (`index + 0.5`), which is
+       what puts today's line half a day into the day rather than on its boundary. An array index
+       has to be a whole number, so anchoring the stride on it directly asked `visible[2.5]` and got
+       `undefined` every time: no tiles, no error, and a green build. The rail simply emptied, and
+       only the screenshot said so. `calSurface60.measure.ts` asserts the tile COUNT for exactly
+       this reason — a probe that finds no element otherwise reports no offence. */
+    const todayIdx = Math.floor(todayAt);
+    const first = todayIdx % 7;
+    for (let d = first; d < range.days; d += 7) {
+      const ymd = visible[d];
+      if (!ymd) continue;
+      const frac = d / Math.max(1, range.days - 1);
+      if (frac < 0.015 || frac > 0.985) continue;
+      const dt = new Date(`${ymd}T12:00:00`);
+      out.push({
+        ymd, at: d, text: shortCalDate(ymd),
+        day: String(dt.getDate()),
+        mon: (SHORT[dt.getMonth()] ?? "").toUpperCase(),
+        /* the tile whose week contains today — the ref's `now = (k <= 0 && 0 < k + 7)` */
+        now: d <= todayIdx && todayIdx < d + 7,
+      });
+    }
+    return out;
+  }, [range.days, visible, todayAt]);
   /**
    * ⚠️ THE TODAY LINE IS POSITIONED IN PIXELS FROM A LANE'S OWN RECT, NEVER AS A PERCENTAGE.
    *
@@ -1462,7 +1556,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     if (!root) return;
     const offs: (() => void)[] = [];
     for (const card of Array.from(root.querySelectorAll<HTMLElement>(".tl-p"))) {
-      const clip = card.querySelector<HTMLElement>(".tl-body");
+      const clip = card.querySelector<HTMLElement>(".tl-cardbody");
       const glider = card.querySelector<HTMLElement>(".tl-bwrap");
       if (!clip || !glider) continue;
       const enter = () => {
@@ -1709,6 +1803,65 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   );
 
 
+  /**
+   * ══ THE SIX SECTIONS (v60) ═══════════════════════════════════════════════════════════════
+   *
+   * ⚠️ THE FACTS ARE READ FROM THE BAR PASS, NEVER RE-DERIVED. Every one of them is a flag the
+   * chip, the wobble, the flag and the sort already read; a second opinion about whether a row is
+   * late is how a board comes to say a thing is urgent in one place and file it under "with
+   * agents" in another. `calSectionOf` is a pure cascade over these and nothing else.
+   *
+   * ⚠️ AND v60 AMENDS THE APP'S OWN LAW ABOUT WHOSE DATES CAN BE LATE. `journeyBars` states "the
+   * writer's own dates only — an agency's expected date that has passed is a silence rather than a
+   * deadline", and filed it as `state: "quiet"`: drawn, counted, and prompting nothing. The pack
+   * says both prompt (Law 9), and the ref's Priya row is exactly that case — a stated reply date
+   * five days gone, chip reading `Nudge them`, an urgent flag at today. So `quiet` is URGENT here.
+   *
+   * ⚠️ `ghost` IS THE GONE-QUIET SECTION, AND THE THRESHOLD DID NOT NEED CHOOSING. `barState`
+   * separates the two at `GHOST_AFTER_DAYS = 180`; the ref draws its `Close query?` flag at
+   * `(0 - r.from) >= 180`. The app and the design already agreed on the number — the app had
+   * simply never used it to file a row.
+   */
+  const sectioned = React.useMemo(() => {
+    const factsFor = (r: TimelineRow): CalSectionFacts => {
+      const segs = barsByRow.get(r.key)?.segs ?? [];
+      return {
+        isTask: r.group === null,
+        isClosed: r.group === "closed",
+        /* a silence long enough that the relationship has in practice ended */
+        isQuiet: segs.some((sg) => sg.state === "ghost"),
+        /* the writer's own passed date, OR an agency estimate that passed on a running wait */
+        isUrgent: segs.some((sg) => sg.owed) || segs.some((sg) => sg.state === "quiet"),
+        writerHolds: segs.some((sg) => sideOf(sg.status) === "yours"),
+        nextDatedIn: r.pressingAt ?? null,
+      };
+    };
+    const bySec = new Map<CalSection, TimelineRow[]>();
+    for (const r of oneList) {
+      const sec = calSectionOf(factsFor(r));
+      const list = bySec.get(sec);
+      if (list) list.push(r); else bySec.set(sec, [r]);
+    }
+    /* ⚠️ AN EMPTY SECTION IS OMITTED ENTIRELY, HEADER AND ALL — the ref's `if(!items.length)return`.
+       A heading over nothing teaches the shape of a board the writer does not have. */
+    return CAL_SECTION_DRAW
+      .map((sec) => ({ sec, rows: bySec.get(sec) ?? [] }))
+      .filter((g) => g.rows.length > 0);
+  }, [oneList, barsByRow]);
+
+  /**
+   * ⚠️ THE ROW NUMBERS RUN CONTINUOUSLY ACROSS SECTIONS, so the column is a census of the board
+   * rather than six restarts — `01` at the top of Urgent through to `nn` at the foot of Closed.
+   * Derived here rather than counted during the render, because a render-time counter is a
+   * side effect inside a map and reorders the moment React re-runs it.
+   */
+  const rowNumber = React.useMemo(() => {
+    const n = new Map<string, number>();
+    let i = 0;
+    for (const g of sectioned) for (const r of g.rows) n.set(r.key, ++i);
+    return n;
+  }, [sectioned]);
+
   const firstOpen = board.findIndex((g) => g.open && g.rows.length > 0);
   const asking = rows.filter(rowAsks).length;
   /* ⚠️ THE TAB COUNTS ARE TAKEN OVER THE UNFILTERED ROWS, or every tab but the current one would
@@ -1762,6 +1915,31 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * gridlines, the weekend question and the phantom-column hazard all cease to exist rather than
    * being suppressed one rule at a time.
    */
+  /**
+   * The six section marks — the ref's `ICO` table, one glyph per section.
+   *
+   * ⚠️ THESE ARE SECTION MARKS, NOT STATUS GLYPHS, and the distinction is why they may be drawn
+   * here at all. Every STATUS badge on this board is the app's `StatusDot` and is never redrawn
+   * from a ref's SVG; a section heading is chrome naming a group, which `StatusDot` has no
+   * vocabulary for. `currentColor` so each takes its own section's ink from `--gico`.
+   */
+  const SectionIcon = ({ sec }: { sec: CalSection }) => {
+    const common = {
+      className: "gico", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
+      strokeWidth: 1.7, strokeLinecap: "round" as const, strokeLinejoin: "round" as const,
+      "aria-hidden": true,
+    };
+    switch (sec) {
+      case "over": return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 7.5v5M12 16.2v.3" /></svg>;
+      case "need": return <svg {...common}><path d="M4 12h14M13 7l5 5-5 5" /></svg>;
+      case "with": return <svg {...common}><path d="M21 3 3 10.5l6.4 2.6L12 20l3-5.6L21 3z" /></svg>;
+      case "quiet": return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 7.5V12l3.2 2" /></svg>;
+      case "task": return <svg {...common}><rect x="4" y="4" width="16" height="16" rx="4" /><path d="M8.5 12.5l2.3 2.3L15.5 10" /></svg>;
+      case "shut": return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M9 9l6 6M15 9l-6 6" /></svg>;
+    }
+  };
+
+
   const row = (r: TimelineRow) => {
     const bar = barsByRow.get(r.key) ?? { segs: [], nodes: [] };
     const lanes = Math.max(1, r.lanes);
@@ -2324,11 +2502,18 @@ data-rowkey={r.key}
                         </React.Fragment>
                       ))}
                       {/* the ticks and their days */}
+                      {/* ══ WEEK TILES (v60's `data-rail="tiles"`) ═════════════════════════════
+                          ⚠️ THE TICK IS GONE WITH THEM. v60 sets `.wktick { display: none }` under
+                          tiles: a tile is already a mark standing on its own date, and a tick
+                          beneath it is a second, thinner claim about the same pixel. The date is
+                          `data-at` on the tile itself so the alignment lock still has something to
+                          read. */}
                       {dateLabels.map((d) => (
-                        <React.Fragment key={d.ymd}>
-                          <span className="tl-tick" style={{ left: pct(d.at) }} data-at={d.at} aria-hidden />
-                          <span className="tl-dt" style={{ left: pct(d.at) }}>{d.text}</span>
-                        </React.Fragment>
+                        <span key={d.ymd}
+                          className={`tl-rtile${d.now ? " now" : ""}`}
+                          style={{ left: pct(d.at) }} data-at={d.at}>
+                          <b>{d.day}</b><i>{d.mon}</i>
+                        </span>
                       ))}
                       {todayAt != null && (
                         <>
@@ -2339,37 +2524,49 @@ data-rowkey={r.key}
                     </div>
                   </div>
                 )}
-                {board.length === 0 ? sparse : !grouped ? (
-                  /* ⚠️ NO CARD, NO HEADING, NO HAIRLINE — the rows are separated by height and by
-                     hover alone. A rule between every pair of rows on a list this long is thirteen
-                     lines competing with the bars, and the bars are the data. */
-                  <div className="tl-tbl tl-one">{oneList.map(row)}</div>
-                ) : board.map((g, gi) => (
-                  <div className="tl-grp" key={g.key}>
-                    <div className="tl-gt">
-                      <span className="t">{g.title}</span>
-                      <span className="n">{g.count}</span>
-                      {g.sentence && <span className="s">{g.sentence}</span>}
-                      {g.collapsible && (
-                        <button type="button" className="tl-gtbtn"
-                          aria-expanded={g.open}
-                          onClick={() => setShut((cur) =>
-                            cur.includes(g.group!) ? cur.filter((x) => x !== g.group) : [...cur, g.group!])}>
-                          {g.open ? "hide ‹" : "show ›"}
-                        </button>
-                      )}
-                    </div>
-                    {g.open && (
-                      <div className="tl-tbl">
-                        {/* ⚠️ THE DATE ROW HAS LEFT THE CARD (v36, Phase 4). It was drawn once,
-                            inside the FIRST group's card — so it scrolled away with that card and
-                            a reader four groups down had no dates at all. It is the page's own
-                            sticky rail now, above every group. */}
-                        {g.rows.map(row)}
+                {/* ══ THE ROWS REGION — THE ONE THING ON THIS BOARD THAT SCROLLS (v60, Law 4) ══
+                    ⚠️ THE RAIL IS ITS SIBLING, NOT ITS ANCESTOR, and that is the whole of the law.
+                    v58 pinned the rail with `position: sticky` INSIDE the scroller, which pins by
+                    clamping — so on a board with nothing to scroll the clamp is the only behaviour
+                    left, and anything that changed the rail's height moved the rows under it. Here
+                    the rail is outside the scrolling box and cannot be reached by it at all. */}
+                <div className="tl-rows">
+                {board.length === 0 ? sparse : (
+                  /* ══ SIX SECTIONS, EACH A CONTAINER (v60) ═══════════════════════════════════
+                     ⚠️ THE SECTION REPLACES BOTH EARLIER SHAPES — v58's single bare list and the
+                     grouped heading-over-loose-rows before it. A heading on the ground above its
+                     rows cannot tell a reader four rows down which section they are in; a tinted
+                     container running the height of the section answers it without a word. */
+                  sectioned.map((g) => (
+                    <div className="tl-grp" key={g.sec} data-sec={g.sec}>
+                      <div className="tl-gt">
+                        <SectionIcon sec={g.sec} />
+                        <span className="t">{CAL_SECTION_LABEL[g.sec]}</span>
                       </div>
-                    )}
-                  </div>
-                ))}
+                      <div className="tl-gwrap">
+                        {/* ⚠️ THE NUMBER COLUMN IS A SIBLING OF THE LANES, NOT A CELL IN EACH ROW.
+                            One element per row, at exactly `--row-h`, so the numbers line up with
+                            the rows by sharing the row token rather than by being inside them —
+                            which is what lets a two-lane row grow without the number drifting. */}
+                        <div className="tl-gnums" aria-hidden>
+                          {g.rows.map((r) => (
+                            <div className="tl-gnum" key={r.key}
+                              style={{ ["--lanes" as string]: String(Math.max(1, r.lanes)) } as React.CSSProperties}>
+                              <span>{String(rowNumber.get(r.key) ?? 0).padStart(2, "0")}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="tl-glanes">{g.rows.map(row)}</div>
+                      </div>
+                    </div>
+                  ))
+                )}
+                </div>
+                {/* ⚠️ THE OLD GROUPED BLOCK AND THE BARE ONE LIST ARE BOTH DELETED, NOT LEFT
+                    BEHIND A FALSE GUARD. v60's sections replace them; a replacement that is
+                    ADDED leaves the original reachable, and this repo has paid for that three
+                    times in one build. `board` still feeds the tab counts and the manuscript
+                    cut, which is why the derivation survives and only its render is gone. */}
                 {/* ⚠️ TODAY, THE CROSSHAIR AND THE ONE TOOLTIP ARE ALL CHILDREN OF THE WRAP, never
                     of a lane — a lane clips, and a clipping ancestor beats any z-index. */}
                 {todayAt != null && (

@@ -20,6 +20,47 @@ import { join } from "node:path";
 
 const CSS = join(process.cwd(), "src/components/todo/todoCalendar.css");
 
+/**
+ * ⚠️ THE REF IS PARSED, NEVER TRANSCRIBED — and this file is why the rule exists.
+ *
+ * Both assertions below used to carry typed numbers, and both were wrong. `--row-h` was pinned at
+ * `64px` while the sheet said 66 and then 88; `--bar-h` was pinned at `54px` while the sheet said
+ * 44 — and NOBODY SAW the second one, because `--row-h` is checked first in the same loop and a
+ * failing assertion hides every assertion behind it. Two stale numbers, one visible. Reading the
+ * design of record on every run means a retune moves the lock with it and a REGRESSION still
+ * fails, which is the only thing a lock is for.
+ */
+const REF = join(process.cwd(), "design-refs/timeline-v60.html");
+const refSheet = (): string => {
+  const s = readFileSync(REF, "utf8");
+  const i = s.indexOf("<style>"), j = s.indexOf("</style>", i);
+  if (i < 0 || j < 0) throw new Error("the ref has no <style> block — it is not the file we think");
+  return s.slice(i + 7, j);
+};
+/** every `--token: value` on the ref's `:root` (its LAST declaration wins, as the cascade does) */
+const refRoot = (): Record<string, string> => {
+  const out: Record<string, string> = {};
+  for (const m of refSheet().matchAll(/:root\s*\{([^}]*)\}/g)) {
+    for (const d of m[1].split(";")) {
+      const k = d.indexOf(":");
+      if (k < 0) continue;
+      const name = d.slice(0, k).trim();
+      if (name.startsWith("--")) out[name] = d.slice(k + 1).trim();
+    }
+  }
+  if (!Object.keys(out).length) throw new Error("the ref's :root parsed to nothing");
+  return out;
+};
+/** one declaration out of one of the ref's rules */
+const refDecl = (selector: string, prop: string): string => {
+  const sel = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const m = new RegExp(`(?:^|\n)\\s*${sel}\\s*\\{([^}]*)\\}`).exec(refSheet());
+  if (!m) throw new Error(`the ref declares no rule for ${selector}`);
+  const d = new RegExp(`(?:^|;)\\s*${prop}\\s*:\\s*([^;]+)`).exec(m[1]);
+  if (!d) throw new Error(`the ref's ${selector} declares no ${prop}`);
+  return d[1].trim();
+};
+
 /** ⚠️ COMMENTS FIRST. This file's prose names every literal it retired, by number. */
 const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
 
@@ -86,11 +127,14 @@ describe("⚠️ no class the calendar renders is already owned by another sheet
 describe("⚠️ a task is a point, and its mark is 1.5px (v54)", () => {
   /* the rendered check can say the mark is outlined and cannot say by how much: a sub-pixel
      border's used value rounds at DPR 1. Read as written here. */
-  it("20px, ink-outlined at 1.5px", () => {
+  it("the ref's own box size, ink-outlined at 1.5px", () => {
     const src = readFileSync(CSS, "utf8");
     const m = /(?:^|\n)\s*\.tl-tmk\s*\{([^}]*)\}/.exec(src);
     expect(m, "the task mark has no rule").not.toBeNull();
-    expect(m![1]).toMatch(/width\s*:\s*20px/);
+    /* v58 drew 20; v60's `.task .box` draws 16. The lock kept asserting 20 through the change. */
+    const want = refDecl(".task .box", "width");
+    expect(m![1], `the task mark is not the ref's ${want}`)
+      .toMatch(new RegExp(`width\\s*:\\s*${want}`));
     expect(m![1]).toMatch(/border\s*:\s*1\.5px solid var\(--tl-nearblack\)/);
   });
 });
@@ -219,7 +263,19 @@ describe("the calendar's bar path states no vertical literal", () => {
        ⚠️ `--row-h` IS 64px SINCE v54 and `--bar-h` is unchanged: the card is the same height and
        the row gains two pixels of air, which is what the hairline between rows needs to read as a
        separator rather than as an edge. */
-    for (const [tok, want] of [["--row-h", "64px"], ["--bar-h", "54px"], ["--mk", "16px"]] as const) {
+    /* ⚠️ THE TWO GEOMETRY TOKENS COME FROM THE REF; `--mk` DOES NOT, AND THAT IS STATED RATHER
+       THAN QUIETLY MIXED. v60 pins `--row-h` and `--bar-h` on its `:root`, so those are read. It
+       pins nothing for the lead-in mark — the mark is this app's own device, drawn on a dotted run
+       the ref has no equivalent of — so 16px is the app's value and is asserted as a literal. A
+       lock that read the ref for a value the ref does not carry would have to invent one. */
+    const ref = refRoot();
+    const pinned: readonly (readonly [string, string])[] = [
+      ["--row-h", ref["--row-h"]],
+      ["--bar-h", ref["--bar-h"]],
+      ["--mk", "16px"],
+    ];
+    for (const [tok, want] of pinned) {
+      expect(want, `the ref pins no ${tok}`).toBeTruthy();
       const hits = [...src.matchAll(new RegExp(`${tok}\\s*:\\s*([^;]+);`, "g"))].map((m) => m[1].trim());
       expect(hits, `${tok} is declared ${hits.length} times: ${JSON.stringify(hits)}`).toEqual([want]);
     }

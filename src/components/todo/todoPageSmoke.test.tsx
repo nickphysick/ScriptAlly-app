@@ -193,9 +193,22 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        down had no dates. It is the page's own sticky rail, above every group, and its ticks are
        proved to land on the same pixels as the lanes in `calRowWords55.measure.ts`. */
     expect(html).toContain("tl-rail");
-    expect(html).toContain("tl-dt");
-    expect(html).toContain("tl-tick");
+    /* ⚠️ THE DATE LABEL IS A WEEK TILE NOW (v60's `data-rail="tiles"`), AND THE TICK WENT WITH IT.
+       A tile is a parchment card standing on its own date — Playfair numeral over a mono month —
+       so a tick beneath it would be a second, thinner claim about the same pixel; the ref states
+       `.wktick { display: none }` under tiles for exactly that reason. */
+    expect(html).toContain("tl-rtile");
+    expect(html).not.toContain("tl-tick");
     expect(html).not.toContain("tl-hrow");
+    /* the six sections, and the number column that runs down their side */
+    expect(html).toContain("tl-grp");
+    expect(html).toContain("tl-gnums");
+    /* ⚠️ THE BADGE IS NOT ASSERTED HERE, AND THAT IS THE POINT OF THE SPLIT. This fixture is a
+       dated TASK — a task carries no status, so it carries no `StatusDot` and no `.tl-medal`. An
+       assertion about the badge on this fixture would be a test handing a function an input its
+       subject cannot produce, which this repo records as testing the wrong artefact. The badge's
+       size, its overhang and its `transform: none` are measured on a real board in
+       `calSurface60.measure.ts`, where there are relationships to draw one for. */
     /**
      * ⚠️ THE GROUP HEADING IS A MODE SINCE v37, NOT THE DEFAULT. The board opens on ONE LIST, which
      * has no headings at all — so "Your tasks" and its sentence are not on the page, and this

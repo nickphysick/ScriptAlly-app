@@ -13,11 +13,21 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const REF = join(process.cwd(), "design-refs/timeline-v58.html");
+/**
+ * ⚠️ THE REF IS A PARAMETER NOW, DEFAULTING TO THE CURRENT DESIGN OF RECORD.
+ *
+ * v60 supersedes v58 entirely. Hardcoding one path meant every caller silently read the OLD design
+ * the moment a new one landed — the same fault this file exists to prevent, one level up: a copy
+ * that goes stale without saying so. Callers that want a specific vintage name it; everyone else
+ * gets the current one, and moving the default is the one edit that retargets the whole set.
+ */
+export const REF_V60 = "design-refs/timeline-v60.html";
+export const REF_V58 = "design-refs/timeline-v58.html";
+const REF = join(process.cwd(), REF_V60);
 
 /** the ref's stylesheet, once */
-const sheet = (): string => {
-  const s = readFileSync(REF, "utf8");
+const sheet = (ref: string = REF): string => {
+  const s = readFileSync(ref, "utf8");
   const i = s.indexOf("<style>");
   const j = s.indexOf("</style>", i);
   if (i < 0 || j < 0) throw new Error("the ref has no <style> block — it is not the file we think");

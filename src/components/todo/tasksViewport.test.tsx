@@ -299,9 +299,20 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
        overflow was never that claim, it was the mechanism of a different one. */
     expect(rule(calCss, ".tl-c-tl {")).toContain("overflow: visible");
 
-    /* seven columns FILL — they never earn a horizontal scrollbar, so any horizontal overflow is
-       a fault to see rather than a thing to scroll */
-    expect(rule(calCss, ".tl-zone {")).toContain("overflow-x: hidden");
+    /* ⚠️ THE ZONE NO LONGER OWNS THE VERTICAL OVERFLOW (v60, Law 4) — `.tl-rows` does. v58 had the
+       zone as the scroller with a sticky rail inside it; v60 puts a STATIC rail above a rows region
+       that scrolls on its own, so nothing can pass above the rail. The zone's job is now to hold
+       the height and clip sideways.
+
+       ⚠️ AND THE ANCHOR IS `\n.tl-zone {`, NOT `.tl-zone {`. The bare form is a substring of
+       `.tpl-zone.tl-zone {` — the two-class rule this pass added to beat `.tpl-zone`'s
+       `overflow: auto` honestly — so the slice read the WRONG BLOCK and reported that the zone had
+       stopped clipping sideways. First-match slicing on an unanchored selector, which this repo
+       records four times over and which found me again here. */
+    expect(rule(calCss, "\n.tl-zone {")).toContain("overflow-x: hidden");
+    /* the rows region is the one scroller, and it is a different element from the zone */
+    expect(rule(calCss, ".tl-rows {")).toContain("overflow-y: auto");
+    expect(rule(calCss, ".tpl-zone.tl-zone {")).toContain("overflow: hidden");
   });
 
   it("⚠️ AND A ROW'S HEIGHT COMES FROM ITS LANES, never from a floor in the stylesheet", () => {
