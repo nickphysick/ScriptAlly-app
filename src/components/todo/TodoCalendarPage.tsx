@@ -1891,6 +1891,19 @@ data-rowkey={r.key}
                 * fifth kind of card, and it carried no duration to justify one.
                 */}
               <span className="tl-tmk" aria-hidden />
+              {/**
+                * ⚠️ A ROLLED TASK'S GHOST IS A BOX AND NOTHING ELSE (v58, per the ref's `taskHTML`).
+                *
+                * It marks the date the task was ORIGINALLY due; the live mark at its current date
+                * is where the words belong. Rendering the label on both put two copies of the same
+                * sentence a few pixels apart — measured on the deployed board as
+                * "Reread the O'Rourk|ages before Thursday", which reads as garbled text rather than
+                * as two elements, and was reported as a data-mapping bug for that reason.
+                *
+                * ⚠️ THE MECHANISM WAS OVERLAP, NOT ENCODING. Both labels are correct strings; the
+                * ghost's simply sat under the live one. Nothing is wrong with the data.
+                */}
+              {it.kind !== "ghost" && (
               <span className="tl-twords">
                 <span className="tl-tname">{it.label}</span>
                 {/* ⚠️ THE DAY IT FALLS ON, FROM THE ITEM'S OWN DATE — never a duration. A task
@@ -1898,6 +1911,7 @@ data-rowkey={r.key}
                     task does not have. */}
                 <span className="tl-tdue">{shortCalDate(it.ymd)}</span>
               </span>
+              )}
               {/* the forward mark: this is where it fell due, and the live one is over there */}
               {it.kind === "ghost" && <span className="fwd" aria-hidden>↦</span>}
             </button>

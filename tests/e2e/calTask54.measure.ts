@@ -36,6 +36,18 @@ test("a task is a point: outlined mark, Playfair name, mono day — and no pill"
     + ` · name ${g.nameFont} · day "${g.due}" in ${g.dueFont}`
     + ` · chip radius ${g.chipRadius} border ${g.chipBorder} bg ${g.chipBg}`);
   expect(got.length, "no task on the board, so nothing was checked").toBeGreaterThan(0);
+  /**
+   * ⚠️ A ROLLED TASK'S GHOST CARRIES NO WORDS (v58), so the typographic half of this case has no
+   * subject on it and is skipped — but the SHAPE half is not. The ghost is still a point on the
+   * board and must still be a 20px outlined mark rather than a pill.
+   *
+   * ⚠️ AND THE WORDED POPULATION IS ASSERTED SEPARATELY, so a board that lost its task labels
+   * entirely cannot satisfy the font rules by having nothing to set.
+   */
+  const worded = got.filter((g) => (g.label || "").trim() !== "");
+  expect(worded.length, "no task carries a label, so the type rules were not tested")
+    .toBeGreaterThan(0);
+  console.log(`tasks ${got.length} — worded ${worded.length} · ghosts (box only) ${got.length - worded.length}`);
   for (const g of got) {
     /* ⚠️ NEVER A PILL — asserted on the chip's own painted shape rather than on a class name. */
     expect(parseFloat(g.chipRadius), `"${g.label}" is still drawn as a pill`).toBeLessThan(20);
@@ -48,6 +60,7 @@ test("a task is a point: outlined mark, Playfair name, mono day — and no pill"
        1.5px is asserted in `calendarTokens.test.ts` where it can be read as written. The same
        split the today line needed. */
     expect(parseFloat(g.markBorder), `"${g.label}"'s mark is not outlined`).toBeGreaterThan(0);
+    if ((g.label || "").trim() === "") continue;   /* a ghost: a box, and nothing to typeset */
     expect(g.nameFont, `"${g.label}" is not set in Playfair`).toContain("Playfair");
     expect(g.dueFont, `"${g.label}"'s day is not mono`).toContain("JetBrains");
     /* ⚠️ A DAY, NEVER A DURATION — a span is what a card states and a task does not have one. */
