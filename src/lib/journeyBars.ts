@@ -29,7 +29,7 @@
  * gets wrong, and the reason the no-status clause is stated first.
  */
 import { Activity, Agent, Query, QueryStatus, TaskFlag } from "../types";
-import { pillText, ghostKindFor, type GhostKind } from "./calendarPill";
+import { pillText, capWord, type CapKind } from "./calendarPill";
 import { RecordItem, shortCalDate } from "./todoCalendar";
 import { getPrimaryAction } from "./queryPrimaryAction";
 import { resolveExpectedDate } from "./expectedDate";
@@ -257,22 +257,37 @@ export interface Segment {
    * ⚠️ ABSENT WHERE NO DATE IS NAMED, where it falls outside the window, or where the card already
    * covers it. Each of those would be a ring stating something nobody committed to.
    */
-  ghostAt?: number;
-  /** which glyph the ring carries — the writer's next move, from the pill's own deed */
-  ghostKind?: GhostKind;
-  /** whether that date has arrived — a due ghost is drawn solid with a badge */
-  ghostDue?: boolean;
-  /** the move is the writer's, so the ring takes the writer's tone rather than the quiet one */
-  ghostYours?: boolean;
+  /**
+   * ⚠️ RETIRED WITH v58 — the ghost ring is superseded by the action cap and its terminal mark.
+   *
+   * The ring stood past the card's end carrying the next move; the cap says the same thing at the
+   * DATE the move becomes available, and the mark says it at the card's edge. Keeping the ring's
+   * fields beside them would leave two derivations of one fact, and the replacement would not have
+   * replaced anything — the shape this repo has now met three times, where a new surface is ADDED
+   * and the old one is left reachable.
+   */
+  /**
+   * ⚠️ THE ACTION CAP AND ITS TERMINAL MARK (v58) — one fact, emitted as a pair.
+   *
+   * A card that ends on a dated future moment INSIDE the window carries a mark on its end edge and
+   * a cap centred on that same date naming the deed. They come from one test, so a card can never
+   * wear one without the other: a mark with no cap names no deed, and a cap with no mark points at
+   * an edge that is not there.
+   *
+   * Absent on a running or overdue card by construction — those end at TODAY, which is not a dated
+   * future moment, so there is nothing to mark and nothing to name.
+   */
+  capWord?: string;
+  /** which kind of date the card ends on — decides the mark's shape and the cap's tone */
+  capSource?: CapKind;
+  /** the writer owes this date, so the mark is a diamond and the cap takes the writer's tone */
+  capMine?: boolean;
   /**
    * The AGENCY'S OWN STATED DATE, unclamped and untouched by the tint's arithmetic.
    *
    * ⚠️ IT EXISTS SO A LOCK HAS A SECOND SOURCE. The tint and the card's words are both computed
-   * from `dueYmd`, so a check that compares one against the other is reading one number twice —
-   * proved, by restoring the fallback bug and watching a check written for it pass: the extra card
-   * was tinted AND said "overdue", agreeing with itself and wrong. This is the date the agency
-   * actually named; a card whose stated date is still ahead cannot be late, whatever the tint's
-   * own derivation currently believes.
+   * from `dueYmd`, so a check comparing one against the other is reading one number twice —
+   * proved, by restoring the fallback bug and watching a check written for it pass.
    */
   expectedYmdRaw?: string;
   /** this stretch ended at a real event: it is finished, and a finished stretch is full */
@@ -1306,58 +1321,6 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
        *   • it must be PAST the card's end — a date the card already covers is inside the wait,
        *     and the card is already drawing it.
        */
-      /**
-       * ⚠️ THE GHOST: THE WRITER'S NEXT AVAILABLE MOVE, STANDING JUST PAST THE CARD'S END.
-       *
-       * ⚠️ AND THE OLD SHAPE COULD NEVER FIRE, WHICH IS WHY THIS WAS REPORTED UNBUILT TWICE.
-       * It asked for a named date PAST the card's end — while `liveStop` takes
-       * `Math.max(todayAt, goalAt, lastEventAt)`, so the card is extended TO the named end and
-       * the date can never be past it. Zero ghosts rendered at Month, one at three months, on a
-       * board with twenty-three relationships. The condition was not strict; it was empty.
-       *
-       * The ref settles the model: its rows run to a future `to` AND carry a ghost, so the ring
-       * is not the named end. It is the MOVE — nudge, send the partial, answer, close — sitting
-       * past whatever the card happens to end on. The card keeps its end; the ring is a separate
-       * fact about what the writer can do next.
-       *
-       * ⚠️ THE KIND COMES FROM `pillText`, THE SAME CALL THE PILL MAKES. A ring that said "nudge"
-       * beside a pill saying "send the partial" would be two derivations disagreeing inside one
-       * card. `ghostKindFor` returns null for the two moves the ref draws no glyph for, so those
-       * rows render no ring rather than borrowing a mark that means something else.
-       */
-      ...((): { ghostKind?: GhostKind; ghostDue?: boolean; ghostYours?: boolean } => {
-        if (terminal || Math.abs(p.to - barStop) > 0.001) return {};
-        /**
-         * ⚠️ NO RING ON A CARD THE WINDOW CUTS OFF — it has nowhere to stand.
-         *
-         * The ring is anchored to the card's END, so on a card clipped by the right edge it is
-         * placed past the clip: measured, eleven rings sitting 26–50px OUTSIDE the lane, painting
-         * over whatever is beside it. (The ref has the same arithmetic — `Math.min(r.to, hi)` puts
-         * its ring past the edge too — and simply never draws a ghost on a clipped row.)
-         *
-         * It is not only a geometry fix. A card the window truncates does not END there; the
-         * reader cannot see where it ends. A ring "just past the end" then states a position that
-         * is not a position, which is the same objection as a date clamped to the window edge.
-         */
-        if (endsAtEdge) return {};
-        /* ⚠️ A LONG SILENCE OFFERS `close`, AND IT IS AVAILABILITY RATHER THAN A DEADLINE — so it
-           is never drawn `due`. A solid ring with a badge says "this is owed now"; nobody owes a
-           closure, and the app reports rather than advises. */
-        if (state === "ghost") return { ghostKind: "close", ghostDue: false, ghostYours: false };
-        const kind = ghostKindFor(
-          pillText(query.status as QueryStatus, holderOf({ side }), nudgeArrived).text);
-        if (!kind) return {};
-        /* the move's own date: a reminder's is the scheduled one, a deed's is when it fell due */
-        const ymd = kind === "nudge"
-          ? goalYmd
-          : (expectedPassed && expectedYmd ? expectedYmd : waitFromYmd);
-        if (!ymd) return {};
-        /* ⚠️ INSIDE THE WINDOW, OR NOTHING. A ring for a date the board is not showing states a
-           day that is not on screen, which is the same fault as clamping one to the edge. */
-        const at = daysBetween(win.days[0], ymd) + EVENT_AT;
-        if (at < 0.001 || at > span - 0.001) return {};
-        return { ghostKind: kind, ghostDue: ymd <= win.today, ghostYours: side === "yours" };
-      })(),
       ...(now === "yours" && !terminal && live_
         ? (() => {
             /* ⚠️ THE STATED DATE WINS WHENEVER THERE IS ONE, PASSED OR NOT.
@@ -1433,6 +1396,34 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
        *
        * The group's test is the right one, so this is now the same test.
        */
+      /**
+       * ⚠️ THE CAP AND THE MARK: only where the card ends on a NAMED FUTURE DATE, in the window.
+       *
+       * `namedEndAt` is already "the end still ahead", so a running card and an overdue one are
+       * excluded by construction rather than by a second test that could disagree with the one
+       * drawing the bar. Closed is excluded too: a closed card carries no next move, and offering
+       * one would be offering to do something after the thing is over.
+       */
+      ...((): { capWord?: string; capSource?: CapKind; capMine?: boolean } => {
+        /* ⚠️ AND NOTHING AFTER A CLOSURE. A journey that has closed carries no next move, so a
+           card past a close event takes neither cap nor mark — the same rule that stops the bar
+           dead there. Measured: one row on the harness account holds a close event in its history
+           while its query is still open, and it correctly draws neither. */
+        if (terminal || closeIdx >= 0) return {};
+        if (Math.abs(p.to - barStop) > 0.001) return {};
+        const src = named.end?.source;
+        if (!src || goalAt == null || goalAt < todayAt) return {};
+        /* inside the window, or the cap would stand on a day the board is not showing */
+        if (goalAt > span - 0.001) return {};
+        const mine = src === "sendBy";
+        return {
+          capWord: capWord(src, pillText(
+            query.status as QueryStatus, holderOf({ side }), nudgeArrived).text,
+            !!query.lastNudgeSentDate),
+          capSource: src,
+          ...(mine ? { capMine: true as const } : {}),
+        };
+      })(),
       ...(nudgeArrived ? { nudgeDue: true as const } : {}),
       ...(expectedYmd ? { expectedYmdRaw: expectedYmd } : {}),
     });

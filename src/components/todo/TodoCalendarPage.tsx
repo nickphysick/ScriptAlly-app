@@ -154,43 +154,6 @@ const MARK_W = 22;
 /** the right margin `.tl-p > *` pays, which the content needs as surely as it needs its own width */
 const CONTENT_MARGIN_R = 12;
 
-/**
- * ⚠️ THE FOUR GHOST GLYPHS, TRACED FROM THE REF'S `GL` TABLE — same viewBox, same paths, same
- * stroke widths. They are drawn in `currentColor` so the ring's own tone (quiet, the writer's, or
- * the solid due state) reaches the mark without a second colour rule to keep in step.
- *
- * ⚠️ THERE ARE FOUR BECAUSE THE REF DRAWS FOUR. `DEEDS.full` and `DEEDS.revision` have no glyph in
- * it and none in the pack either, so `ghostKindFor` returns null for them and those rows render no
- * ring — flagged with a count rather than filled in with an invented mark.
- */
-const GHOST_GLYPH: Record<string, React.ReactNode> = {
-  nudge: (
-    <svg viewBox="0 0 12 12" aria-hidden>
-      <path d="M2.5 6 H9 M6.6 3.4 L9.2 6 L6.6 8.6" stroke="currentColor" strokeWidth="1.5"
-        fill="none" strokeLinecap="round" />
-    </svg>
-  ),
-  half: (
-    <svg viewBox="0 0 12 12" aria-hidden>
-      <circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M6 2 A4 4 0 0 1 6 10 Z" fill="currentColor" />
-    </svg>
-  ),
-  answer: (
-    <svg viewBox="0 0 12 12" aria-hidden>
-      <path d="M2.8 6.3 L5 8.6 L9.2 3.6" stroke="currentColor" strokeWidth="1.7" fill="none"
-        strokeLinecap="round" />
-    </svg>
-  ),
-  close: (
-    <svg viewBox="0 0 12 12" aria-hidden>
-      <circle cx="6" cy="6" r="4.2" fill="none" stroke="currentColor" strokeWidth="1.3" />
-      <path d="M4.4 4.4 L7.6 7.6 M7.6 4.4 L4.4 7.6" stroke="currentColor" strokeWidth="1.3"
-        strokeLinecap="round" />
-    </svg>
-  ),
-};
-
 const pct = (n: number) => `calc(${n} / var(--tl-days) * 100cqw)`;
 
 /**
@@ -448,15 +411,15 @@ const Piece: React.FC<{
           294.5px of overlap. A child at `left: calc(100% + gap)` follows whatever the card is
           actually painted at, open or shut, because there is no second copy of the arithmetic to
           fall out of step. Structural, not maintained. */}
-      {sg.ghostKind && (
+      {/* ⚠️ THE TERMINAL MARK SITS ON THE CARD'S END EDGE, so it is a CHILD of the card — the ref's
+          own `right: -4px`. As a sibling it would carry a second copy of the card's geometry and
+          come apart from it the moment a clipped card opens, which is exactly what happened to the
+          ring this replaces. */}
+      {sg.capSource && (
         <span aria-hidden
-          className={`tl-ghost${sg.ghostDue ? " due" : ""}${sg.ghostYours ? " yours" : ""}`
-            + `${fade.right ? " pastfade" : ""}`}
-          data-ghost={sg.ghostKind}
-          data-ghostrel={`${sg.rowKey}::${sg.lane}`}>
-          {GHOST_GLYPH[sg.ghostKind]}
-          {sg.ghostDue && <span className="tl-ghostbang">!</span>}
-        </span>
+          className={`tl-tmark ${sg.capMine ? "you" : "est"}`}
+          data-tmark={sg.capSource}
+          data-caprel={`${sg.rowKey}::${sg.lane}`} />
       )}
     </div>
   );
@@ -1447,6 +1410,43 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * there; a percentage of the wrap is therefore meaningless and the position has to be measured.
    */
   const [todayX, setTodayX] = useState<number | null>(null);
+  /**
+   * ⚠️ THE ACTION CAP CLAMPS INSIDE ITS LANE — the ref's `placeText`, and it must run after layout.
+   *
+   * A cap is centred on its own date, so one near either edge of the window hangs half its width
+   * outside the lane and paints over the row's furniture — measured before this ran, at the Month
+   * range where the window is tightest. Clamping is the ref's answer rather than hiding it: the
+   * date is still in view, so the deed should still be named; what moves is the pill, by the
+   * minimum needed to keep it whole.
+   *
+   * ⚠️ IT READS `offsetLeft`, NOT `getBoundingClientRect`. The cap carries `translateX(-50%)`, and
+   * a rect is the TRANSFORMED box — so measuring that and then writing `left` applies the shift
+   * twice. `offsetLeft` is the layout position the transform is applied to.
+   */
+  React.useLayoutEffect(() => {
+    const root = pageRef.current;
+    if (!root) return;
+    const clamp = () => {
+      for (const cap of Array.from(root.querySelectorAll<HTMLElement>(".tl-cap"))) {
+        const lane = cap.parentElement;
+        if (!lane) continue;
+        const laneW = lane.clientWidth;
+        if (!laneW) continue;
+        /* the untouched position first, so a re-run does not clamp an already-clamped value */
+        cap.style.left = cap.dataset.capleft ?? "";
+        if (!cap.dataset.capleft) cap.dataset.capleft = cap.style.left;
+        const half = cap.offsetWidth / 2;
+        const left = cap.offsetLeft;
+        if (left - half < 2) cap.style.left = `${half + 2}px`;
+        else if (left + half > laneW - 2) cap.style.left = `${laneW - half - 2}px`;
+      }
+    };
+    clamp();
+    const ro = new ResizeObserver(clamp);
+    ro.observe(root);
+    return () => ro.disconnect();
+  });
+
   React.useLayoutEffect(() => {
     const place = () => {
       const root = pageRef.current;
@@ -1742,6 +1742,26 @@ data-rowkey={r.key}
                 return on.length ? Math.max(...on.map((n) => n.at)) : null;
               })()}
               onPick={() => pickSeg(r.key, sg)} />
+          ))}
+          {/**
+            * ⚠️ THE ACTION CAP IS A LANE CHILD, CENTRED ON ITS OWN DATE — not a child of the card.
+            *
+            * It names the deed that becomes available ON that day, so it belongs at the date
+            * rather than at the card's edge: the two coincide today and would part the moment a
+            * card is clipped. The card's own end carries the terminal MARK instead, which is a
+            * child of the card for exactly the opposite reason — it is about the edge.
+            *
+            * The pair is emitted from one test in `journeyBars`, so a cap can never appear without
+            * its mark.
+            */}
+          {bar.segs.filter((sg) => sg.capWord).map((sg) => (
+            <div key={`cap-${sg.key}`}
+              className={`tl-cap${sg.capMine ? " mine" : ""}`}
+              data-cap={sg.capSource}
+              data-caprel={`${sg.rowKey}::${sg.lane}`}
+              style={{ left: pct(sg.to), ...laneVar(sg.lane) }}>
+              {sg.capWord}
+            </div>
           ))}
           {/**
             * ⚠️ THE LEAD-IN: MARKS BEFORE THE CARD, NEVER ON IT (v54, Phase 3).

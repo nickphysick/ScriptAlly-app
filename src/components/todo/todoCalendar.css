@@ -606,34 +606,13 @@
    clipped card opened to `var(--exp)`. The ring
    is CENTRED on that point (the ref translates by -50%), so its near edge clears the card by
    17 - 12 = 5px, and by 38 - 12 = 26px where the card's right edge is dissolving. */
-.tl-ghost {
-  position: absolute; top: 50%;
-  left: calc(100% + var(--tl-ghost-gap, 17px));
-  transform: translate(-50%, -50%);
-  width: 24px; height: 24px; border-radius: 999px;
-  border: 1.5px dotted var(--tl-ghost-bd);
-  background: var(--tl-ghost-ground);
-  color: var(--tl-label);
-  z-index: 6; pointer-events: none;
-  display: flex; align-items: center; justify-content: center;
-}
 /* a card whose right edge dissolves needs the ring clear of the dissolve, not clear of the box */
-.tl-ghost.pastfade { --tl-ghost-gap: 38px; }
-.tl-ghost svg { width: 12px; height: 12px; }
 /* ⚠️ THE DUE RING IS A DIFFERENT OBJECT, NOT THE QUIET ONE COLOURED IN. Solid rather than dotted,
    lifted off the ground with its own fill and a shadow: the one moment the ring stops forecasting
    and starts standing for something that is owed now. */
-.tl-ghost.due { border-style: solid; background: #fff; box-shadow: 0 2px 6px rgba(58, 28, 20, .13); }
 /* the writer's own move takes the writer's tone; an agency's stays quiet */
-.tl-ghost.yours { border-color: var(--tl-pinkb); color: var(--tl-ghost-yours-tx); }
 /* ⚠️ THE BADGE SITS ON THE RING'S CORNER, NOT INSIDE IT — the ref's own geometry. Inside, it would
    displace the glyph that says WHICH move is due; on the corner it says only that it has arrived. */
-.tl-ghostbang {
-  position: absolute; top: -4px; right: -4px; width: 13px; height: 13px; border-radius: 999px;
-  background: var(--tl-pink); border: 1px solid var(--tl-pinkb); color: var(--tl-ghost-yours-tx);
-  font-family: 'Playfair Display', Georgia, serif; font-size: 9px; line-height: 1;
-  display: flex; align-items: center; justify-content: center;
-}
 .tl-leadin {
   position: absolute; top: 50%; height: 0; z-index: 1; pointer-events: none;
   border-top: 1px dotted #d8cbba;
@@ -1394,4 +1373,38 @@ button.tl-tchip { cursor: pointer; }
 .tl-p.fadeL.fadeR .tl-frame {
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--card-fade), #000 calc(100% - var(--card-fade)), transparent);
   mask-image: linear-gradient(90deg, transparent, #000 var(--card-fade), #000 calc(100% - var(--card-fade)), transparent);
+}
+
+/* ══ THE ACTION CAP AND ITS TERMINAL MARK (v58) ═════════════════════════════════════════════════
+   Geometry and colour from `design-refs/timeline-v58.html` — `.nlab` and `.tmark`.
+
+   ⚠️ THE CAP IS THE TODAY-CAP IDIOM, ONE PER BAR. It names the deed that becomes available on the
+   day the card ends, centred on that date and standing above the row rather than inside the card:
+   a word inside the card would be a fifth thing competing for the one text inset, and it is not
+   about the card, it is about a day.
+
+   ⚠️ AND THE MARK IS A CHILD OF THE CARD, ON ITS END EDGE. `right: -4px` straddles the edge, which
+   only means anything if it moves with the card — as a sibling it would carry a second copy of the
+   geometry, which is how the ring this replaces came to be swallowed by an opening card. */
+.tl-cap {
+  position: absolute; top: 2px; transform: translateX(-50%);
+  z-index: 6; pointer-events: none; white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace; font-size: 6.5px; letter-spacing: .12em;
+  text-transform: uppercase; font-weight: 700;
+  background: #fff; border: 1px solid #ddd1bd; border-radius: 999px;
+  padding: 3px 8px; color: var(--tl-muted);
+}
+/* a date the WRITER owes takes the writer's tone; an agency's estimate stays neutral */
+.tl-cap.mine { background: #f8ece6; border-color: #eccfc2; color: #8c4f4a; }
+
+.tl-tmark { position: absolute; top: 50%; right: -4px; z-index: 4; pointer-events: none; }
+/* ⚠️ A DIAMOND FOR A DATE THE WRITER OWES, A RING FOR AN ESTIMATE — shape carries the difference,
+   so the two are distinguishable without reading the cap beside them. */
+.tl-tmark.you {
+  width: 9px; height: 9px; background: #c98e8a; border-radius: 2px;
+  transform: translateY(-50%) rotate(45deg);
+}
+.tl-tmark.est {
+  width: 9px; height: 9px; border: 1.5px solid #b8a889; border-radius: 99px; background: #fff;
+  transform: translateY(-50%);
 }

@@ -53,22 +53,39 @@ export const DEEDS = {
 
 /** Every string a pill may render — the lock reads this, never a hand-written copy of it. */
 /**
- * ⚠️ THE FOUR GHOST GLYPHS THE REF DRAWS, AND THE TWO MOVES THAT HAVE NONE.
+ * ⚠️ THE GHOST-KIND MAP WENT WITH THE RING IT FED (v58).
  *
- * `design-refs/timeline-v55.html` carries exactly four in its `GL` table — `nudge`, `half`,
- * `answer`, `close` — and its `MK` history table carries the same four. There is no full-disc
- * glyph and no revision glyph anywhere in it.
- *
- * So `DEEDS.full` and `DEEDS.revision` are DELIBERATELY ABSENT from this map, and a row whose next
- * move is one of them renders no ghost. The pack names a "full disc (full to send)" and the ref
- * does not draw one; the ref wins on anything visual, and inventing an SVG for a mark nobody has
- * drawn is how a design acquires a shape its author never chose. `revision` is named by neither.
- * Both are reported with their row counts rather than guessed at — see reports/calendar-v56.md.
- *
- * ⚠️ AND THE MAP IS KEYED ON THE DEED THE PILL ALREADY CHOSE, never on a status re-read here. The
- * pill and the ghost must name the same move — a ring saying "nudge" beside a pill saying "send
- * the partial" is two derivations disagreeing in the space of one card.
+ * It mapped a deed to one of four glyphs the ref drew, and named the two moves — `full` and
+ * `revision` — that had no glyph and therefore rendered nothing. That gap is closed rather than
+ * inherited: a cap carries a WORD, so every move can be named, and there is no drawing to invent.
  */
+/**
+ * ⚠️ THE ACTION CAP'S WORD — the deed available AT the date a card ends on (v58).
+ *
+ * It is NOT the pill. The pill says where the relationship stands right now; the cap says what
+ * becomes available on the day the bar reaches. On a row waiting for an agency they differ
+ * completely — the pill reads "Queried" and the cap reads "Nudge", because the reply window is
+ * when nudging becomes reasonable rather than when the query changes state.
+ *
+ * ⚠️ AND IT IS KEYED ON THE END'S OWN `source`, from `namedEndFor` — the derivation that CHOSE the
+ * date. Deriving the word from the status instead would let the cap name a deed belonging to a
+ * different date from the one it is standing on, which is the fault this file's ghost-kind map was
+ * written to foreclose one surface earlier.
+ */
+export type CapKind = "window" | "sendBy" | "reminder";
+
+export const capWord = (
+  source: CapKind,
+  deed: string,
+  alreadyNudged: boolean,
+): string => {
+  if (source === "sendBy") return deed;
+  /* an agency's own window: nudging becomes available when it passes */
+  if (source === "window") return "Nudge";
+  /* a reminder the writer set — "again" only once one has actually been sent */
+  return alreadyNudged ? "Nudge again" : "Nudge";
+};
+
 export type GhostKind = "nudge" | "half" | "answer" | "close";
 
 const GHOST_BY_DEED: Readonly<Record<string, GhostKind>> = {
