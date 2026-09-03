@@ -88,7 +88,8 @@ test("⚠️ an overdue wait ends at today, with no mark and no cap", async ({ p
 test("⚠️ every cap stands on its own date, inside the lane", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
   await page.waitForTimeout(900);
-  await setRangeTo(page, 1);
+  /* ⚠️ v58 has ONE window; the index that used to pick a wider range is 0 now. See `setRangeTo`. */
+  await setRangeTo(page, 0);
   await page.waitForTimeout(500);
   const r = await read(page);
   console.log(`caps ${r.caps.length} across a ${Math.round(r.laneW)}px lane`);

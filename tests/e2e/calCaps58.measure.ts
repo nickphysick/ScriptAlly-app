@@ -105,7 +105,8 @@ test("⚠️ a card that runs to today carries neither cap nor mark", async ({ p
 test("the mark's shape and the cap's tone say whose date it is", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
   await page.waitForTimeout(900);
-  await setRangeTo(page, 1);
+  /* ⚠️ v58 has ONE window; the index that used to pick a wider range is 0 now. See `setRangeTo`. */
+  await setRangeTo(page, 0);
   await page.waitForTimeout(400);
   const r = await page.evaluate(`(() => {
     const vis = (e) => e.getBoundingClientRect().width > 0;

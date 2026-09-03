@@ -154,6 +154,13 @@ const MARK_W = 22;
 /** the right margin `.tl-p > *` pays, which the content needs as surely as it needs its own width */
 const CONTENT_MARGIN_R = 12;
 
+/**
+ * ⚠️ THE WINDOW STEPS BY A WEEK (v58). The ref moves its own `SH` by seven days a click, so the
+ * board slides rather than jumping — a whole-window step leaves no overlap for the eye to carry
+ * across, which is what the ‹ WEEK / WEEK › labels promise and a page-jump does not deliver.
+ */
+const WEEK_STEP = 7;
+
 const pct = (n: number) => `calc(${n} / var(--tl-days) * 100cqw)`;
 
 /**
@@ -214,7 +221,8 @@ const Piece: React.FC<{
   const lines = barLines(sg.label);
   /* ⚠️ THE PILL IS THE APP'S OWN VOCABULARY — see `calendarPill`. The status while the agency
      holds the move, the deed while the writer does, and nothing else is reachable. */
-  const pill = pillText(sg.status, holderOf(sg), sg.nudgeDue, !!sg.owed);
+  const silent = sg.state === "quiet" || sg.state === "ghost";
+  const pill = pillText(sg.status, holderOf(sg), sg.nudgeDue, !!sg.owed, silent);
   /**
    * ⚠️ FIVE CHIP KINDS, FROM THE REF, AND THE CLOSED ONE OUTRANKS THE REST. A closed relationship
    * is closed whoever last held it, so `shut` is tested first — reading the holder first would
@@ -920,8 +928,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       const tag = el?.tagName;
       if (el?.isContentEditable || tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === "ArrowLeft") { e.preventDefault(); setWinStart((s) => shiftWindow(s, range.days, -1)); }
-      else if (e.key === "ArrowRight") { e.preventDefault(); setWinStart((s) => shiftWindow(s, range.days, 1)); }
+      /* ⚠️ A STEP IS A WEEK (v58), not a window. The ref shifts `SH` by seven and redraws; a
+         whole-window jump lands the reader somewhere with no overlap to orient by. */
+      if (e.key === "ArrowLeft") { e.preventDefault(); setWinStart((s) => shiftWindow(s, WEEK_STEP, -1)); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); setWinStart((s) => shiftWindow(s, WEEK_STEP, 1)); }
       else if (e.key === "t" || e.key === "T") { e.preventDefault(); setWinStart(today); }
     };
     window.addEventListener("keydown", onKey);
@@ -2163,13 +2173,13 @@ data-rowkey={r.key}
 
               <span className="tl-csep" aria-hidden />
               <button type="button" className="cal-nav calm-nav" aria-label="Previous window"
-                onClick={() => setWinStart((s) => shiftWindow(s, range.days, -1))}>
+                onClick={() => setWinStart((s) => shiftWindow(s, WEEK_STEP, -1))}>
                 <ChevronLeft size={14} aria-hidden />
               </button>
               <button type="button" className="cal-nav calm-nav cal-today"
                 onClick={() => setWinStart(today)}>Today</button>
               <button type="button" className="cal-nav calm-nav" aria-label="Next window"
-                onClick={() => setWinStart((s) => shiftWindow(s, range.days, 1))}>
+                onClick={() => setWinStart((s) => shiftWindow(s, WEEK_STEP, 1))}>
                 <ChevronRight size={14} aria-hidden />
               </button>
 
@@ -2196,10 +2206,14 @@ data-rowkey={r.key}
                     the same question `Group` now asks, and two controls for one choice is how they
                     come to disagree. Grouping BY manuscript is a Group mode; SCOPING to one is a
                     filter the board does not have, and is reported unbuilt rather than faked. */}
-                <PopRow name="Range" value={String(rangeIdx)}
-                  options={TIMELINE_RANGES.map((_, i) => String(i))}
-                  labels={Object.fromEntries(TIMELINE_RANGES.map((r, i) => [String(i), r.label]))}
-                  onPick={(v) => setRangeIdx(Number(v))} />
+                {/* ⚠️ v58: THE RANGE PICKER IS GONE. The window is fixed at ninety days with today
+                    at its centre, and the board moves by whole weeks instead — the ref's own model.
+                    Three stops were three different boards: a card's width, a day's distance from
+                    its neighbour and whether a label fitted all changed underneath the reader, and
+                    every measurement had to be taken three times to mean anything.
+                    ⚠️ It is REMOVED rather than left showing one option — a control offering a
+                    single choice implies others the writer cannot reach, which is the same rule
+                    the manuscript row above it was retired under. */}
                 {/* ⚠️ THE RESET NAMES THE DEFAULTS RATHER THAN CLEARING TO NOTHING. "Clear" on a
                     set of choices with no empty state would have to mean something, and every
                     meaning it could take is one of the choices. */}

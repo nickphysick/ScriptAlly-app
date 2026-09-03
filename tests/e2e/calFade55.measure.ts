@@ -80,7 +80,8 @@ test("⚠️ A CARD ENDING INSIDE THE WINDOW HAS NO MASK — the Dunn/Whitfield 
   await page.addStyleTag({ content: ".tl-p, .tl-p.owed { animation: none !important; }" });
   await page.waitForTimeout(900);
   /* the widest range gives the most named ends room to fall inside the window */
-  await setRangeTo(page, 2);
+  /* ⚠️ v58 has ONE window; the index that used to pick a wider range is 0 now. See `setRangeTo`. */
+  await setRangeTo(page, 0);
   const rows = await audit(page);
   const inside = rows.filter((r) => r.namedEnd != null && r.namedEnd <= r.days - 0.1 && r.trueFrom >= -0.1);
   const endsInside = rows.filter((r) => r.namedEnd != null && r.namedEnd <= r.days - 0.1);
@@ -141,7 +142,7 @@ test("every card's right edge is its resolved end, or the window's edge", async 
   await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
   await page.addStyleTag({ content: ".tl-p, .tl-p.owed { animation: none !important; }" });
   await page.waitForTimeout(900);
-  await setRangeTo(page, 2);
+  await setRangeTo(page, 0);
   const got = await page.evaluate(() => {
     const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().width > 0;
     return ([...document.querySelectorAll(".tl-p")] as HTMLElement[]).filter(vis).map((c) => {

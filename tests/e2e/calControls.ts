@@ -60,8 +60,26 @@ async function pick(page: Page, row: string, label: string): Promise<void> {
  */
 export const RANGE_LABELS: readonly string[] = TIMELINE_RANGES.map((r) => r.label);
 
-export async function setRangeTo(page: Page, i: number): Promise<void> {
-  await pick(page, "Range", RANGE_LABELS[i]);
+/**
+ * ⚠️ v58 FIXES THE WINDOW AT NINETY DAYS AND REMOVES THE RANGE CONTROL, so this is a no-op — and
+ * it stays a no-op rather than being deleted.
+ *
+ * A dozen cases sweep `RANGE_LABELS` to show a claim holds at every range. With one entry that
+ * loop now runs once, which is correct: there IS one board. Deleting the helper instead would mean
+ * editing every one of those files to remove a loop that is already harmless, and would lose the
+ * shape the day a second stop returns.
+ *
+ * ⚠️ IT ASSERTS THE INDEX RATHER THAN CLAMPING IT. An out-of-range index used to clamp silently,
+ * and four packs drove indices 3 and 4 against a three-stop control — two of five iterations
+ * measuring the same board twice while reporting five. A caller asking for a stop that does not
+ * exist is asking the wrong question and should be told.
+ */
+export async function setRangeTo(_page: Page, i: number): Promise<void> {
+  if (i < 0 || i >= RANGE_LABELS.length) {
+    throw new Error(
+      `setRangeTo(${i}): v58 has ${RANGE_LABELS.length} window(s) — the range control is gone. `
+      + "Sweep RANGE_LABELS rather than hard-coding an index.");
+  }
 }
 
 /**

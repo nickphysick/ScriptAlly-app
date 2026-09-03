@@ -246,6 +246,11 @@
      `--pinktx`; `--tl-ink` is four shades darker and is the board's text colour, not a mark's. */
   /* ⚠️ THE FIELD THE BOARD SITS ON, and the rail's own tone — the ref's `.board`/`.rail`. */
   --tl-field: #f5f1eb;
+  /* the ref's one card border, its owed variant, and the silence's faint fill */
+  --tl-frame-bd: #e2d4be;
+  --tl-frame-owed-bd: #e6c3b4;
+  --tl-frame-owed-sh: 0 6px 16px rgba(58, 28, 20, .16);
+  --tl-frame-quiet-bg: #fbf9f5;
   /* ⚠️ THE TODAY CAP IS PINK, NOT INK. It was `--tl-nearblack` on a cream board: the one near-black
      fill on this surface, and against the colour law outright. The ref's `.todaycap` is the pink
      trio, which is also the only place the board uses a filled cap at all. */
@@ -694,8 +699,8 @@
 .tl-frame {
   position: absolute; inset: 0; pointer-events: none;
   background: var(--card-bg, #ffffff);
-  border: 1.5px solid var(--card-bd);
-  border-radius: 9px;
+  border: 1px solid var(--tl-frame-bd);
+  border-radius: 10px;
   box-shadow: var(--card-sh);
 }
 /* ⚠️ THE CONTENT IS ABOVE THE FRAME AND IS NEVER MASKED. `position: relative` is what lifts it out
@@ -820,7 +825,6 @@
 
 /* ⚠️ QUIET AND CLOSED ARE CARD TREATMENTS, not fills. A no-response card is cream with no shadow —
    it has stopped being an object you can pick up. A closed one is a dashed outline over nothing. */
-.tl-p.quiet .tl-frame   { background: var(--card-quiet); box-shadow: none; }
 /* ⚠️ A GHOST IS A QUIET CARD THAT HAS STOPPED BEING WORK (v40, Phase 7). Half a year of silence
    with nothing scheduled is a relationship that has ended in every sense except that nobody wrote
    it down — so it takes the closed card's OUTLINE, which is what "over" reads as on this board,
@@ -836,7 +840,6 @@
    the shadow (`.card.hush .frame { box-shadow: none }`) and the closed state. A transparent frame
    was our own invention for "not live work", and on the re-cut it reads as a card that failed to
    render — measured: two rows showing text and a chip with no card behind them. */
-.tl-p.ghost .tl-frame { box-shadow: none; }
 .tl-p.ghost .tl-hl, .tl-p.ghost .tl-cdt { color: var(--pill-quiet-tx); }
 /* ⚠️ HOLLOW IS A STRETCH PAST THE DATE SOMEBODY NAMED, and v39 pins no treatment for it — the ref
    draws `quietc` and `closedc` and nothing between. It takes the one thing quiet and closed have
@@ -851,7 +854,6 @@
    business, not a closed one — and it wore the closed frame AND the closed border colour. */
 /* ⚠️ v58: SAME FOR A STRETCH PAST ITS NAMED DATE. The ref has no `hollow` treatment at all —
    there is one card, and what varies is the chip and the wobble. */
-.tl-p.hollow .tl-frame  { box-shadow: none; }
 .tl-p.hollow .tl-hl, .tl-p.hollow .tl-cdt { color: #9c8878; }
 /* ⚠️ ONE RULE FOR ONE SELECTOR. This was declared TWICE, ninety lines apart, and the later one
    won — so this block's border-colour was dead while reading as the live value, which is the
@@ -895,7 +897,6 @@
 @media (prefers-reduced-motion: reduce) {
   .tl-p.owed { animation: none; }
 }
-.tl-p.owed .tl-frame { border-color: var(--owed-bd); box-shadow: var(--owed-sh); }
 .tl-p.owed .tl-pill { background: var(--owed-pill-bg); border-color: var(--owed-pill-bd); font-weight: 700; }
 
 
@@ -944,15 +945,9 @@
    shortfall so a new one cannot hide behind it. */
 /* ⚠️ HOLLOW IS THE CONTINUATION PAST A NAMED DATE. Lateness is DRAWN — no fill, no word, no
    colour it does not already have. The label dims because the stretch is no longer the story. */
-
-.tl-p.out .tl-frame { border-color: var(--bar-out-line); }
-.tl-p.req .tl-frame { border-color: var(--bar-req-line); }
-.tl-p.decide .tl-frame { border-color: var(--bar-decide-line); }
-.tl-p.remind .tl-frame { border-color: var(--bar-remind-line); }
 /* ⚠️ QUIET IS A HATCH AND NOT A FILL, because there is no named span for a fraction to be OF.
    That is the same fact the empty track states, said in the one state where the emptiness would
    otherwise read as a bar nobody had finished drawing. */
-.tl-p.quiet .tl-frame, .tl-p.ghost .tl-frame { border-color: var(--bar-quiet-line); }
 /* ⚠️ RETIRED (v39 part two, Phase 5). This set `border-style: solid` on a hollow card and sat
    LATER in the file than the rule that draws it, so the ruling's dashed border would have been
    overridden by a line written for the bar it replaced — one selector, three declarations, and the
@@ -1518,3 +1513,18 @@ button.tl-tchip { cursor: pointer; }
   content: ''; position: absolute; left: 0; top: 9px; bottom: 9px;
   width: 3px; border-radius: 2px; background: #c98e8a; z-index: 4;
 }
+
+/* ══ THE CARD FRAME IS THE REF'S, AND THERE IS ONE OF IT ═══════════════════════════════════════
+   ⚠️ FIVE BORDER COLOURS WENT. `out`, `req`, `decide`, `remind` and `quiet` each tinted the frame,
+   so a board carried five card outlines — measured, five distinct border colours across 23 cards.
+   The ref draws ONE card: one border, one radius, one shadow. What varies is the CHIP, which is
+   where whose-move-it-is is already said, and three states the ref does name:
+     · owed   — the writer's tone and a stronger shadow, because it is the one thing that wobbles
+     · quiet  — its own faint fill, so a silence reads as paper rather than as live work
+     · closed — dashed, and dashed is the closed state's alone
+   Saying the same fact in the chip AND the outline is how a board comes to have two vocabularies
+   for one thing, and the outline is the one nobody can read. */
+.tl-p.owed .tl-frame   { border-color: var(--tl-frame-owed-bd); box-shadow: var(--tl-frame-owed-sh); }
+.tl-p.quiet .tl-frame  { background: var(--tl-frame-quiet-bg); box-shadow: none; }
+.tl-p.ghost .tl-frame  { box-shadow: none; }
+.tl-p.hollow .tl-frame { box-shadow: none; }

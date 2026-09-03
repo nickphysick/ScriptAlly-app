@@ -49,10 +49,20 @@ export interface TimelineRange {
  * much future as past. v40 centres it: today is the middle of the lane at every range, which is
  * one rule rather than three numbers, and it cannot drift apart between stops.
  */
+/**
+ * ⚠️ v58: ONE WINDOW, NINETY DAYS, AND THE PICKER IS GONE.
+ *
+ * The ref fixes `N = 90` with today at 50% and moves the board by whole weeks instead. Three stops
+ * were three different boards — a card's width, a day's distance from its neighbour and whether a
+ * label fitted all changed underneath the reader, and every measurement had to be taken three
+ * times to mean anything.
+ *
+ * ⚠️ THE LIST SURVIVES AS ONE ENTRY RATHER THAN BEING DELETED. `range.days`, `pastDaysOf` and the
+ * grain are read in a dozen places and by the measurement harness's own `setRangeTo`; collapsing
+ * the data and leaving the shape is one edit, and restoring a second stop is one line.
+ */
 export const TIMELINE_RANGES: readonly TimelineRange[] = [
-  { label: "Month",    days: 31,  grain: "day",   dense: 2 },
-  { label: "3 months", days: 91,  grain: "week",  dense: 3 },
-  { label: "6 months", days: 181, grain: "month", dense: 4 },
+  { label: "3 months", days: 90,  grain: "week",  dense: 3 },
 ];
 
 /**

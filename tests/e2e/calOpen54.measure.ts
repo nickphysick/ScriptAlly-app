@@ -148,7 +148,8 @@ test("⚠️ AND THE DETAIL DROPS ONLY WHERE THERE IS NOWHERE TO OPEN TO", async
 test("a tight card opens to what its words need, and its start does not move", async ({ page }) => {
   await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
   await page.waitForTimeout(800);
-  await setRangeTo(page, 2);
+  /* ⚠️ v58 has ONE window; the index that used to pick a wider range is 0 now. See `setRangeTo`. */
+  await setRangeTo(page, 0);
   const before = await census(page);
   const subjects = before.filter((r) => r.tight).slice(0, 5);
   expect(subjects.length, "no tight card to open").toBeGreaterThan(1);

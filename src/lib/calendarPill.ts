@@ -131,7 +131,22 @@ export function pillText(
   holder: "agent" | "writer",
   nudgeDue = false,
   overdue = true,
+  /**
+   * ⚠️ A LONG SILENCE SAYS SO (v58). The board's own silence rule — `barState`'s `quiet` and
+   * `ghost` — is what decides this; the chip does not re-derive a threshold of its own.
+   *
+   * A relationship that has heard nothing for long enough is not "Queried" any more in any useful
+   * sense: the status has not changed, but what the reader needs to know has. The ref gives it the
+   * sand chip and the words "No response", which is a statement about the RECORD — nothing came
+   * back — rather than a verdict on the agency.
+   */
+  silent = false,
 ): Pill {
+  /* ⚠️ THE APP'S OWN WORD, not a new string. `QueryStatus.NO_RESPONSE` is already in `PILL_WORDS`,
+     which `calCard`'s lock checks every chip against; a hand-typed "No response" would have been a
+     second spelling of one status and would have failed that lock for the right reason. The chip
+     renders uppercase either way. */
+  if (silent) return { text: QueryStatus.NO_RESPONSE, tone: "quiet" };
   /* ⚠️ THE DEEDS ARE FOR OVERDUE WORK ONLY. Where the writer holds a date still ahead, the status
      word is the honest one and the tone stays the writer's — whose move it is has not changed. */
   if (!overdue) {
