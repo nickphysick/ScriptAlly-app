@@ -223,3 +223,81 @@ plus six mutation proofs, each reddening the lock written for it and restored af
 worktree with its own `vite preview` port, so the two sessions stop fighting over one bundle and one
 server. I did not build one here — it is the right first move for whoever picks up Phases 3–7, and
 the sweep should be re-read there before anything else is concluded from it.
+
+---
+---
+
+# v58b — the completion pack
+
+**Ref unchanged and re-confirmed at Phase 0:** `design-refs/timeline-v58.html`, sha256 `128f1d3f…`,
+title *"ScriptAlly — Calendar v58 · design of record"*, hash-guarded.
+
+**Phase 0.5 — the measurement worktree was built and every gate ran there.** `/tmp/sa-v58`, its own
+`vite preview` on port 4460. The contention is gone: **20s for a lock that took 16.6 minutes** in the
+previous run.
+
+## Phase status
+
+| # | Phase | Status |
+|---|---|---|
+| 1 | **The re-cut** | **built · verified** — with two named gaps below |
+| 2 | Re-seat ordering + counts, caps + marks | **verified on the new chassis**; the imperative-tier lock is **unbuilt** |
+| 3 | Tasks | the **duplicate-label defect is fixed**; the full re-cut of the task point is **unbuilt** |
+| 4 | Journeys (track + nodes) | **UNBUILT** |
+| 5 | Tests + housekeeping | locks re-seated as each phase broke them; the stale `cal*` reds are **not** swept |
+
+## Phase 1 — what landed
+
+- **The agent column is gone** — `--agent-w: 0`, `--tl-nm-w: 0`, and the rail's own cell removed. That
+  cell was the last thing holding the column open: the rows had already lost theirs, so the lane sat
+  **293px in from the board's edge with nothing beside it**. Lane now 283→1381 of an 1100px board.
+- **The identity rides the card** — dot, name, role-worded fact, status chip, in the ref's
+  `.body > .bwrap > dot + .gstack + .chip`. The frame stays an **empty sibling** carrying the
+  background, border, radius and fade masks, because a mask may never touch an element holding text.
+- **66px rows over 44px bars**, from the ref's own tokens. ⚠️ I first declared *parallel* tokens and a
+  flat row height, which silently collapsed every two-lane row onto one line — `.tl-rrow` already
+  computes `calc(var(--row-h) * var(--lanes, 1))`.
+- **Five chips**, closed outranking the rest.
+- **The overdue tint is removed entirely.** Lateness is said twice instead, both outside the face: the
+  card wobbles (the ref's keyframes, copied, every frame restating the literal base transform) and the
+  row carries a strip. **Measured: 69 cards, 15 overdue, 15 strips, 0 tints.**
+- ⚠️ **The row strip stands.** The previous run flagged `.row.owes::after` as a ref/pack conflict and
+  left it unbuilt. Resolved per this pack: the ref wins, and "no accent bars" scopes the card *face*.
+- **One card treatment.** `hollow` and `ghost` lost their transparent frames — our own invention,
+  which on the re-cut read as a card that had failed to render.
+- **Glide on hover** by a transition on the inner glider alone; **hover tip** carries the full record.
+
+### Two gaps inside Phase 1, named
+
+1. **The fixed three-month window and the weekly ‹ WEEK / TODAY / WEEK › shift are unbuilt.** The board
+   still offers Month / 3 months / 6 months and shifts by its existing control. Today sits at 50% and
+   the today line/cap travel and hide correctly, but the *fixed* window and whole-week stepping are not
+   done.
+2. **A control was lost.** The agent name was a button opening the relationship's workspace with
+   nothing selected — the only route to a query with **no card** raised against it. The card is still
+   clickable, so a relationship *with* a card is reachable; one with none is not. Flagged at the code
+   rather than replaced with a control the ref does not draw.
+
+## Phase 3 — the "garbled label" was not a data bug
+
+The board read `Reread the O'Rourk|ages before Thursday`. **Both strings are correct and neither is
+garbled**: a rolled task draws a ghost at its original date and a live mark at its current one, and we
+rendered the words on **both**, so two copies of one sentence overlapped. The ref draws the ghost as a
+**box alone**. ⚠️ A search for a bad character mapping would have found nothing wrong, indefinitely.
+Measured after: 4 task elements — 2 worded, 2 box-only.
+
+## ⚠️ Three locks went red on a correct board — all three on their population guards
+
+That is the guards working. The tint case had **no tinted cards left** (its subject was deleted by
+design); two others read `.tl-pill` and `.tl-content`, selectors the re-cut moved. Without those
+guards all three would have gone **vacuously green over an empty set**. The tint case is rewritten to
+assert what v58 claims: every overdue card wobbles, no card that is not overdue does, every owed row
+carries the strip, and no tint paints anywhere.
+
+⚠️ And asserting a *running* animation needed the harness's motion suppression lifted first —
+otherwise the question has already been answered "no" by the harness.
+
+## Deploy
+
+`firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev` — bundle
+**`index-mbYBgAI-.js`**, served hash verified against the local build.
