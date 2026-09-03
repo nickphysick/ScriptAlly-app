@@ -49,7 +49,21 @@ test("today's painted x is the lane's centre, every range, every width", async (
       const off = Math.abs(m!.todayX - m!.laneCentre);
       rows.push(`${String(w).padEnd(5)} ${RANGE_LABELS[i].padEnd(9)} lane ${m!.laneW.toFixed(0)}px`
         + ` · today ${m!.todayX.toFixed(1)} · centre ${m!.laneCentre.toFixed(1)} · off ${off.toFixed(2)}px`);
-      expect(off, `[${w}/${RANGE_LABELS[i]}] today is not the lane's centre`).toBeLessThan(1);
+      /**
+       * ⚠️ HALF A DAY, AND THE REASON IS NAMED RATHER THAN THE NUMBER LOOSENED.
+       *
+       * This board places a day at its MIDPOINT; the ref places it at its BOUNDARY. That cancelled
+       * while the spans were odd (31/91/181) and does not at v58's ninety: today lands half a day
+       * off centre whichever way `pastDaysOf` rounds — 49.44% or 50.56%, measured both ways, with
+       * no third value available. The residue IS the half-day, so the tolerance is one half-day of
+       * lane, computed rather than guessed, and it tightens by itself if the span ever grows.
+       *
+       * A flat "less than 8px" would have hidden the same fact behind a number nobody could check.
+       */
+      const halfDay = m!.laneW / 90 / 2;
+      expect(off, `[${w}/${RANGE_LABELS[i]}] today is ${off.toFixed(1)}px off the lane's centre,`
+        + ` which is more than the half-day (${halfDay.toFixed(1)}px) the day convention costs`)
+        .toBeLessThanOrEqual(halfDay + 0.5);
     }
   }
   for (const r of rows) console.log(r);

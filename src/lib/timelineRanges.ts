@@ -73,6 +73,20 @@ export const TIMELINE_RANGES: readonly TimelineRange[] = [
  * reader changed range. Half is a statement about what the board is FOR — what has happened and
  * what is coming, in equal measure — and it holds at any range anyone adds later.
  */
+/**
+ * ⚠️ AND ON AN EVEN SPAN THIS CANNOT CENTRE EXACTLY — MEASURED, BOTH WAYS.
+ *
+ * This board places a day at its MIDPOINT (`+ EVENT_AT`); the ref places it at its BOUNDARY. With
+ * the ref's odd spans that difference cancelled, and at v58's ninety it does not: `(days - 1) / 2`
+ * puts today at 49.44% and `days / 2` at 50.56%, half a day either side of centre — 6.1px on a
+ * 1100px lane. There is no third value; the residue is the half-day itself.
+ *
+ * ⚠️ THE SPAN STAYS NINETY, because the ref and the pack both say ninety, and the alternative —
+ * ninety-one, where a midpoint convention centres exactly — would be changing the thing they
+ * specify to suit the thing they do not. What is stated instead is the tolerance, in
+ * `calCentre.measure.ts`, with this reason at it. Moving the whole board off midpoint days is the
+ * real fix and is not a fidelity pass's business.
+ */
 export const pastDaysOf = (r: TimelineRange): number => (r.days - 1) / 2;
 
 /** The default, and the one every earlier pack measured against. */
