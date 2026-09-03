@@ -355,3 +355,86 @@ Phases 1, 2 and 3-of-the-surface. **15 locks green** across `calSemantics58`, `c
 ## Deploy
 
 Bundle **`index-BTcPRhoD.js`**, served hash verified against the local build.
+
+---
+---
+
+# v58d — the completion pack
+
+Ref re-confirmed (title + hash). Measurement worktree `/tmp/sa-v58d` on port 4480 — the full
+32-file sweep ran in **7.2 minutes**, so every reading below is real rather than a timeout.
+
+## Phase 1 — the last semantic · **built, verified, locked**
+
+Six rows read "Queried" or "Full Sent" in the sand chip — the tone was already right, the word was
+still the status. They now read **No Response**, decided by the board's **own** silence rule
+(`barState`'s `quiet`/`ghost`); the chip re-derives no threshold.
+
+⚠️ It uses `QueryStatus.NO_RESPONSE`, the app's own word, not a hand-typed "No response" — the
+latter is a second spelling of one status and would have failed `calCard`'s vocabulary lock for
+exactly the right reason.
+
+## Phase 2 — re-measured with the instruments the pack named
+
+| Hypothesis | Instrument | Verdict |
+|---|---|---|
+| Row pitch ~97px | `offsetTop` delta between consecutive single-lane rows | **UNFOUNDED** — **one** distinct pitch, **66px**, matching the ref's token. No wrapper margin, no padding, no spacer. Nothing changed |
+| Rose rule down the left edge | `elementFromPoint(laneLeft + 1, rowCentre)` on non-owed rows + a sweep of every container's `border-left` | **UNFOUNDED** — no container draws a rose rule; the strip is a pseudo-element on owed rows only |
+| Board/rail field, card frame | computed `background-color`, `border`, `border-radius`, `box-shadow` vs the ref | **FOUNDED for the frame** — **five** distinct border colours across 23 cards (`out`, `req`, `decide`, `remind`, `quiet` each tinted it). The ref draws **one** card. Now `#e2d4be` at radius 10, with the three variants the ref names: owed, quiet, closed. (Board and rail fields were already fixed in v58c) |
+| Month names in the rail | count of month labels | **FOUNDED — 0 labels — and NOT BUILT.** Reported unbuilt |
+
+⚠️ **My earlier probe of the rose rule had four subjects, two of them below the fold** — half its
+answer was about nothing. The lock now proves its rows are on screen first.
+⚠️ **And the sweep had to be narrowed**: written as "anything rose in the board" it flagged the
+**owed card's border**, which is the ref's own colour — a true reading, an accusation about the
+wrong subject.
+
+## Phase 3 — the window · **built, verified, locked**
+
+Ninety days (the ref's own `N = 90`), today at its centre, stepped by exactly seven. Measured: span
+**90**, first rail date **31 Jul → 24 Jul** on one step, and Today returns it. The Month/3mo/6mo
+picker is **removed**, not left showing one option.
+
+⚠️ `setRangeTo` survives as a **no-op that throws on an out-of-range index**. A dozen cases sweep
+`RANGE_LABELS`; with one entry those loops run once, which is correct. Clamping is how four earlier
+packs drove indices 3 and 4 against a three-stop control and measured the same board twice while
+reporting five.
+
+### ⚠️ Today sits half a day off centre, and the reason is a convention
+
+This board places a day at its **midpoint**; the ref places it at its **boundary**. That cancelled
+while the spans were odd (31/91/181) and does not at ninety. Measured **both** ways:
+`(days − 1) / 2` → **49.44%**, `days / 2` → **50.56%**. Half a day either side, **6.1px** on an
+1100px lane, with no third value available.
+
+**The span stays ninety** — the ref and the pack both say ninety; ninety-one would centre exactly
+under our convention, and choosing it means changing the thing they specify to suit the thing they
+do not. The **tolerance is stated at the lock as one half-day of lane, computed from the lane's own
+width**, so it tightens by itself and the arithmetic is checkable. Moving the board off midpoint
+days is the real fix and touches every card end and every mark.
+
+## The sweep — 41 passed, 29 failed, and what the 29 are
+
+Run clean in the worktree, so these are **real**, not timeouts. They are overwhelmingly **stale
+cases describing the pre-re-cut board**: locks reading the agent column ("row heads measured",
+"rows carrying a status", "selected controls found"), the three-range control (`setRangeTo(2)`
+throwing by design), and the removed tint ("nothing says overdue"). One is a crash —
+`getComputedStyle` on a null, a lock dereferencing an element the re-cut deleted.
+
+**Retiring or rebuilding them is Phase 6 and is UNBUILT.** I am reporting the number and the cause
+rather than a green.
+
+## Unbuilt
+
+| Phase | Status |
+|---|---|
+| 2 · month names in the rail | **unbuilt** (measured absent) |
+| 4 · journeys — track + nodes for all rows with history | **unbuilt** |
+| 5 · restored navigation + edge tags | **unbuilt** |
+| 6 · retiring/rebuilding the 29 stale cases | **unbuilt** |
+
+**Noted, not a bug:** the two "Priya Raman" rows are two real queries on the account.
+
+## Deploy
+
+Bundle **`index-BpQYFT7j.js`**, served hash verified.
