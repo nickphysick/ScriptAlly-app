@@ -438,3 +438,96 @@ rather than a green.
 ## Deploy
 
 Bundle **`index-BpQYFT7j.js`**, served hash verified.
+
+---
+---
+
+# v58e — the finishing pack
+
+Ref re-confirmed (title + hash). Measurement worktree `/tmp/sa-v58e` on port 4490.
+
+## ⚠️ First, a correction to v58d
+
+**v58d reported "month names in the rail — FOUNDED, 0 labels, not built". That reading was wrong.**
+The rail renders **4 month labels** (Jul, Aug, Sept, Oct), **3 dividers**, **8 ticks** and **8 week
+dates**. My probe's selector missed them. Nothing was missing and nothing needed building — the
+correction is the finding, and I would not have caught it if the screenshot had not disagreed with
+my own report.
+
+## The locks now read the ref at test time
+
+`tests/e2e/refValues.ts` parses `design-refs/timeline-v58.html` on every run and returns its
+tokens, rules and colours. **Not one number in `calSurface58` is typed from the design.** A lock
+that copies the ref's values asserts what somebody once read; the day the ref moves it keeps
+passing over a board that no longer matches. `check-design-refs` guards the file, so together the
+values cannot drift and the file cannot move unnoticed.
+
+The helper **refuses a selector the ref declares twice** — where a rule is declared more than once
+the cascade takes the last and a reader takes the first, so "the rule" would be a question with two
+answers.
+
+## Phase 1 — the surface · built, verified, locked
+
+| Item | Reading | Action |
+|---|---|---|
+| Field tone | board and rail **already** `rgb(245,241,235)` = the ref's (fixed v58c) | — |
+| Field radius | **0** against the ref's **14px**, and the rail's `14px 14px 0 0` | fixed |
+| Frame border / radius / fill | already the ref's `#e2d4be` / 10px / `#fff` | — |
+| **Frame shadow** | **one layer** (`0 1px 3px` at .06) against the ref's **two** (`0 1px 2px/.08` + `0 5px 14px/.09`) | fixed, and the hover pair too |
+| Body clipping | **UNFOUNDED** — `left: 11px`, `max-width: calc(100% - 22px)`, `overflow: hidden`, matching the ref declaration for declaration; all 11 running cards carry the fade | — |
+| Fade width | 34px against the ref's **30px** — and the body's clip sits *inside* the dissolve, so the two are one relationship | fixed |
+
+A square-cornered field is a bleed rather than an object, and a single faint shadow is a card
+*printed* on the field. Those two were most of why the board read flat.
+
+## Phase 2 — tasks · built, verified, locked
+
+- The ghost carried a **`↦`**. It said "this moved" a second time — the dashed box already says it,
+  the live mark says where it moved *to* — and it was what made a bare ghost read as a scrap of
+  text. Removed.
+- The box is the ref's **16px**, not our 20.
+- The label is **off Playfair**: the ref's `.task .tl` sets a size, a weight and a colour and **no
+  family**, so a task label is the board's body face.
+- ⚠️ **The adjacent-boxes hypothesis is UNFOUNDED.** Two rolled tasks, ghosts at their **original**
+  dates, **11 days** and **4 days** from their live marks — ~134px and ~50px apart on a 1098px lane.
+  Neither is adjacent, neither ghost is misdated. The crowding was the glyph.
+
+## Phase 3 — ordering · built, verified, locked
+
+Two faults, one cause: **a second opinion about lateness**.
+
+- **The sort did not know an arrived reminder is owed.** `writerLate` has counted it since v58c —
+  imperative chip, wobble, strip, a card stopping at today — while `namedEndFor` returns the next
+  date still *ahead*, which on such a row is the agency's window weeks away. So "Nudge due" sorted
+  among the dated waits, below the tasks.
+- **A task sat inside the run of overdue work**, because the key was the date alone.
+
+Both now read the same flag the chip, the wobble and the strip read. Measured: **six overdue rows
+lead**, then the tasks, then the dated waits.
+
+⚠️ **And that change emptied another lock's population.** The rose probe reads non-owed rows on
+screen; with every owed row at the top, the first screen holds nothing else and its subject count
+went to **zero**. Its guard is the only reason that surfaced as a failure rather than a green over
+an empty set. It scrolls to its subjects now.
+
+## Locks
+
+Five new in `calSurface58` (field, frame-with-both-shadow-layers, tasks, owed tier), plus the
+repaired rose probe. Populations asserted on both sides wherever the claim is a biconditional.
+**Proved red** by flattening the shadow to one layer and by removing the tier — each with a message
+naming the offending row.
+
+## Unbuilt
+
+| Phase | Status |
+|---|---|
+| 4 · journeys — track + nodes for all rows with history | **unbuilt** |
+| 5 · restored navigation + edge tags | **unbuilt** |
+| 6 · retiring the stale pre-re-cut cases | **unbuilt** — the count stands at the 29 reported in v58d |
+
+**Deferred by decision:** the half-day today offset (midpoint vs boundary days), tolerance stated
+at the lock.
+
+## Deploy
+
+Bundle **`index-B4qLCUvt.js`**, served hash verified.
