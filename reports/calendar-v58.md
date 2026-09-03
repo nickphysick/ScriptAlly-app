@@ -301,3 +301,57 @@ otherwise the question has already been answered "no" by the harness.
 
 `firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev` — bundle
 **`index-mbYBgAI-.js`**, served hash verified against the local build.
+
+---
+---
+
+# v58c — the fidelity pack
+
+Ref re-confirmed at Phase 0 (title + hash). **Phase 0.5: measurement worktree again**, `/tmp/sa-v58c`
+on port 4470 — every gate ran there.
+
+## Every hypothesis, measured before anything changed
+
+| # | Hypothesis | Verdict | Measurement |
+|---|---|---|---|
+| 1.1 | Imperative chips on dates still ahead | **FOUNDED** | 2 rows — "Send the partial" with a send-by 41 days out, "Nudge due" 81 days out. `pillText` returned the deed whenever the writer held the move, late or not |
+| 1.2 | Owed rows extend past today with a ring | **FOUNDED** | `liveStop` took the named end even when the writer was late. ⚠️ And `owed` did not include an **arrived reminder** — a date the writer owes as surely as a passed send-by |
+| 2 | Caps flush at the lane's left edge | **FOUNDED, and the mechanism was mine** | Six caps at x 23–37 of a 1100px lane. The clamp read `left = capleft ?? ""` and only **then** recorded `capleft` — clearing the position on the first pass and storing the empty string as "the original" |
+| 2b | *(a second cap fault underneath)* | **FOUNDED** | With the clamp fixed the caps were still **362.6px off — a constant thirty days, on every one**. The cap computed `pct(sg.to)`; the card is drawn at `--l` wide `--w`. Same date, two routes |
+| 3a | Board and rail have no field | **FOUNDED** | `rgba(0,0,0,0)` on both — row text read through the header on scroll with `z-index: 70` and `isolation: isolate` **both correct**. ⚠️ Stacking decides what is drawn on top; it says nothing about what can be seen through |
+| 3b | Today cap is black | **FOUNDED** | `--tl-nearblack` (#1c130f) — the one near-black fill on this surface, against Law 1 outright. Now the ref's pink trio |
+| 3c | Rose rule down the whole left edge | **UNFOUNDED** | Strip count **equals** overdue-row count exactly (6 = 6) and no rose left border exists in the board. It reads continuous because v58 sorts all overdue work to the top, so the strips abut. **Nothing changed** |
+| 3d | Rows ~95px | **UNFOUNDED** | Measured **66**, and 132 where a row draws two lanes — the two-lane calc, correct. **Nothing changed** |
+| 3e | No month names in the rail | **FOUNDED** | 0 month labels. **Not fixed — see unbuilt** |
+
+## ⚠️ The cap lock had to be strengthened twice, and both weaknesses were mine
+
+- Written as *"the caps are not all in one place"* it **passed over the broken board**: pinned to the
+  edge they still had two distinct centres, because their widths differ. **A distinctness check is
+  not a placement check.**
+- Rewritten as *"the cap's centre equals its card's end"*, it compared against the wrong piece — a
+  card can be several pieces and they share one `data-rel`, so the first match is a true reading of
+  the wrong subject.
+
+Both fixed, both proved red by restoring the fault.
+
+## Built and verified
+
+Phases 1, 2 and 3-of-the-surface. **15 locks green** across `calSemantics58`, `calOrder58`,
+`calCaps58` and `calFaults56`, in the worktree.
+
+## Unbuilt — named, not skipped
+
+| Phase | Status |
+|---|---|
+| 3 · month names in the rail | **unbuilt** — measured absent (0 labels), not added |
+| 4 · fixed 3-month window, week stepping, removing the range control | **unbuilt** |
+| 5 · journeys (track + nodes for all rows with history) | **unbuilt** |
+| 6 · the lost control + edge tags for out-of-window relationships | **unbuilt** |
+| 7 · re-proving the whole `cal*` sweep, retiring the stale reds | **unbuilt** |
+
+**Noted, not a bug:** the two "Priya Raman" rows are two real queries on the account.
+
+## Deploy
+
+Bundle **`index-BTcPRhoD.js`**, served hash verified against the local build.
