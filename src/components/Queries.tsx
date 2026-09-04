@@ -4776,15 +4776,6 @@ export const Queries: React.FC<{
         <>
 
 
-        {/* Active filters — removable pink chips on the oat beneath the bar (panes never resize). */}
-        {activeFilterChips.length > 0 && (
-          <div className="f12-chips">
-            {activeFilterChips.map((c) => (
-              <Chip key={c.key} onRemove={c.remove}>{c.label}</Chip>
-            ))}
-            <button type="button" className="f12-clear" onClick={resetAllFilters}>CLEAR ALL</button>
-          </div>
-        )}
 
         {/* MarkSentPopover — anchored via useFixedMenu to the actions-toolbar CTA */}
         <AnimatePresence>
@@ -5053,6 +5044,17 @@ export const Queries: React.FC<{
             {/* ⚠️ THE COUNTS ARE THE WHOLE SET'S, AND THE PILLS NARROW IT. A pill that stated the
                 filtered figure would read `0` for every court you were not currently in, which
                 turns a set of counts into a set of tautologies. */}
+            {/**
+              * ⚠️ ONE STICKY WRAPPER, NOT THREE STICKY ROWS. The ref makes `.controls` a single
+              * `position: sticky` box around the quick filters, the toolbar and the active chips —
+              * so they travel as one object and cannot separate mid-scroll, which three
+              * independently-stuck rows at three `top` offsets eventually do.
+              *
+              * ⚠️ THE CHIPS ROW MOVED IN HERE from above the view split. It is the same element and
+              * the same handlers; what changed is that a filter you set no longer scrolls away
+              * from the control that set it.
+              */}
+            <div className="qcc-controls">
             <div className="qcc-quick" role="group" aria-label="Quick filters">
               {QUICK_FILTERS.map((f) => (
                 <button
@@ -5164,6 +5166,16 @@ export const Queries: React.FC<{
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
                 Log new query
               </button>
+            </div>
+
+            {activeFilterChips.length > 0 && (
+              <div className="f12-chips">
+                {activeFilterChips.map((c) => (
+                  <Chip key={c.key} onRemove={c.remove}>{c.label}</Chip>
+                ))}
+                <button type="button" className="f12-clear" onClick={resetAllFilters}>CLEAR ALL</button>
+              </div>
+            )}
             </div>
 
             {gridRows.length === 0 ? (

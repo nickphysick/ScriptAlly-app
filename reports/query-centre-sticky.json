@@ -1,0 +1,50 @@
+{
+  "rest": {
+    "controlsTop": 237,
+    "controlsBottom": 352,
+    "scrollerTop": 111,
+    "scrollTop": 0,
+    "maxScroll": 3917,
+    "cardTop": 352,
+    "bg": "rgb(254, 252, 250)",
+    "position": "sticky",
+    "pageBg": "rgb(254, 252, 250)",
+    "holds": {
+      "quick": true,
+      "toolbar": true,
+      "chipsSlotPresent": true
+    }
+  },
+  "scrolled": {
+    "controlsTop": 111,
+    "controlsBottom": 225,
+    "scrollerTop": 111,
+    "scrollTop": 400,
+    "maxScroll": 3917,
+    "cardTop": -48,
+    "bg": "rgb(254, 252, 250)",
+    "position": "sticky",
+    "pageBg": "rgb(254, 252, 250)",
+    "holds": {
+      "quick": true,
+      "toolbar": true,
+      "chipsSlotPresent": true
+    }
+  },
+  "scrolledMore": {
+    "controlsTop": 111,
+    "controlsBottom": 225,
+    "scrollerTop": 111,
+    "scrollTop": 800,
+    "maxScroll": 3917,
+    "cardTop": -448,
+    "bg": "rgb(254, 252, 250)",
+    "position": "sticky",
+    "pageBg": "rgb(254, 252, 250)",
+    "holds": {
+      "quick": true,
+      "toolbar": true,
+      "chipsSlotPresent": true
+    }
+  }
+}

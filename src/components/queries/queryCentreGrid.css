@@ -72,6 +72,38 @@
 
 @media (prefers-reduced-motion: reduce) { .qcc-tb-btn .qcc-tb-chev { transition: none; } }
 
+/* ══ THE STICKY CONTROLS ══════════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ ONE STICKY BOX AROUND ALL THREE ROWS, which is the ref's shape and not an aesthetic choice.
+ * Three rows stuck independently need three `top` offsets that must stay in step with each other's
+ * heights; the moment one wraps — the chips row does, the instant a second filter is set — they
+ * separate mid-scroll. One box cannot come apart.
+ *
+ * ⚠️ `top: 0` IS THE SCROLLPORT'S TOP, NOT THE VIEWPORT'S. `.wpg-scroll` is the scroller, and it
+ * starts below the shell's own chrome; the collapsed header bar takes its height in FLOW when the
+ * page sticks, so this lands beneath it rather than under it. Measured rather than reasoned — see
+ * `queryCentreSticky.measure.ts`.
+ *
+ * ⚠️ AND IT NEEDS AN OPAQUE GROUND. A sticky row over scrolling cards with a transparent background
+ * shows them through it. The negative margin plus matching padding is the ref's own device for
+ * letting that ground reach past the column's edge without widening the column.
+ */
+.qcc-controls {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  /**
+   * ⚠️ `--ws-window`, NOT `--desk`. Measured before this: the band painted `rgb(232, 221, 208)` —
+   * Cappuccino's desk — over a page that is `rgb(254, 252, 250)`, so a coloured strip slid over the
+   * cards instead of reading as the top of the page. `index.css` warns about exactly this pair in
+   * as many words: "`--ws-ground` IS A DIFFERENT SURFACE … Two neighbouring tokens, two grounds;
+   * the window's own fill is this one." I reached for the wrong one of the two.
+   */
+  background: var(--ws-window, #fefcfa);
+  padding: 12px 8px 2px;
+  margin: 0 -8px;
+}
+
 .qcc-stage { display: flex; flex-direction: column; gap: 26px; }
 .qcc-sec { display: flex; flex-direction: column; gap: 14px; }
 

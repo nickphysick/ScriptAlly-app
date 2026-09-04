@@ -338,7 +338,6 @@ test("pass 2 — cap, search, popovers, ladder, leaves", async ({ page }) => {
   for (const word of ["Filter", "Group", "Sort", "Log new query"]) {
     expect(tbText, `the toolbar does not say "${word}"`).toContain(word);
   }
-  /* ⚠️ THE VALUE ON THE FACE IS THE WHOLE REASON THESE ARE NOT ICONS. */
   expect(tbText, "Group does not show its current value").toMatch(/Group\s*None/i);
   expect(tbText, "Sort does not show its current value").toMatch(/Sort\s*Last activity/i);
 
