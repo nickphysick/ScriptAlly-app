@@ -705,22 +705,29 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
               */}
             {masthead}
           </div>
-          {/* ⚠️ THE CONTROL ROW FOLLOWS THE MASTHEAD, INSIDE THE SCROLLER, and it has to be here
-              rather than a grid row above it for one reason: the masthead must come FIRST. Left as
-              row 2 of the grid it would have been pinned ABOVE a masthead that had moved into the
-              scroller — the page's controls sitting on top of its own title. Being in the scroller
-              is also what lets it be `position: sticky` there (step 2), which is how it takes over
-              the anchoring job the chrome row used to do. */}
+          </div>
+          )}
+          {/**
+            * ⚠️ THE TOOLBAR IS CONTENT, NOT CHROME — A SIBLING OF THE SLAB RATHER THAN A CHILD OF IT
+            * (compact header, §3).
+            *
+            * It lived INSIDE `.wpg-chrome`, which is what made Contact list read as one 300px block:
+            * a title, a sentence, a picture and six controls sharing a box, a ground and a closing
+            * hairline. The count, the search and the filters are things you do to the page, not
+            * things the page is called — so they sit BELOW the header's bottom hairline, as the
+            * first thing the content row holds.
+            *
+            * ⚠️ IT PINS ON ITS OWN, at `top: var(--bar-h)`, so it comes to rest directly under the
+            * slim bar rather than under nothing. That is also what keeps a page's count on screen
+            * while scrolled — and the reason §2's bar carries no count of its own.
+            *
+            * ⚠️ AND ITS `z-index` IS BELOW THE BAR'S. Both are sticky in one scroller and their boxes
+            * meet exactly; the bar is the outer chrome and must be the one that wins.
+            */}
           {toolbar && (
-            /* ⚠️ THE BAND IS FULL-BLEED AND THE ROW KEEPS ITS MEASURE (header fix, §2). The slab
-               paints the masthead's wash edge to edge; without a band of its own the toolbar would
-               sit ON that wash, and painting the ROW instead would leave the wash showing in the
-               gutters either side of it. See the stylesheet. */
-            <div className="wpg-toolband">
+            <div className={`wpg-toolband${barShown ? " wpg-toolband--on" : ""}`}>
               <div ref={toolsRef} className="wpg-tools">{toolbar}</div>
             </div>
-          )}
-          </div>
           )}
           {/**
             * ⚠️ THE SETTLE'S RECLAIM, HELD OPEN IN THE FLOW (pinned chrome, §2).

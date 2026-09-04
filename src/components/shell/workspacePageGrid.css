@@ -711,11 +711,54 @@
  * draws one of each at the base of the pair. A rule here would be a second horizontal line 60px
  * above the real one, and the eye reads the nearer one as the end of the chrome.
  */
+/**
+ * ══ THE TOOLBAR IS CONTENT, NEVER CHROME (compact header, §3) ═════════════════════════════════
+ *
+ * ⚠️ IT IS A SIBLING OF THE SLAB NOW, NOT A CHILD, and the whole visual change of the pack is that
+ * difference. Inside `.wpg-chrome` it shared the header's box, ground and closing hairline, which is
+ * what made Contact list read as one 300px block. It sits below that hairline as the first content.
+ *
+ * ⚠️ IT PINS AT `top: var(--bar-h)` SO IT COMES TO REST UNDER THE BAR, not under nothing. Both are
+ * sticky in one scroller and their boxes meet exactly, which is why the `z-index` ladder matters:
+ * the bar is the outer chrome at 20 and this is content at 18.
+ *
+ * ⚠️ AND IT PAINTS THE PAGE'S OWN GROUND, which it must: content passes beneath it once it holds,
+ * and a transparent control row is the see-through-header fault one element down.
+ */
 .wpg-toolband {
   width: 100%;
+  position: sticky;
+  top: var(--bar-h);
+  z-index: 18;
   background: var(--ws-window);
-  /* `flex: none` for the reason the row states it — a fill page's slab is a flex column */
+  /* ⚠️ THE HAIRLINE ONLY WHILE IT HOLDS. At rest the header's own closing line is directly above it
+     and a second one 50px below would be two boundaries around a row that is not a band. It fades
+     in on the same signal the bar arrives on — one state, so the two cannot disagree. */
+  border-bottom: 1px solid transparent;
+  transition: border-color 200ms;
+  /* `flex: none` for the reason the row states it — a fill page's scroller is a flex column */
   flex: none;
+}
+.wpg-toolband--on { border-bottom-color: var(--ws-edge); }
+/**
+ * ⚠️ STATIC ON A FILL PAGE, AND THIS IS THE ONE THING THIS SECTION COULD HAVE BROKEN ON CALENDAR.
+ *
+ * A `fill` page's scroll row NEVER SCROLLS — the panes or the zone do. `position: sticky` there does
+ * not idle, it CLAMPS: an element with `top: 44px` on a row that cannot move is pushed DOWN by 44px
+ * and stays there. This repo has already paid for exactly that with `top: 51px` on the control row,
+ * which held a gap open for a mini bar that was not rendered.
+ *
+ * ⚠️ THE THREE PAGES IT WOULD HAVE HIT ARE THE TASKS FAMILY — To-do, Calendar and Noteboard, all
+ * `fill`, all carrying a tool row through a chassis this pack may not edit. It would have been a
+ * 44px shove on a page another session is mid-rebuild of, arriving from a shared stylesheet.
+ *
+ * ⚠️ AND `static` IS THE HONEST STATEMENT, not a smaller offset. A sticky on a row that cannot
+ * scroll claims a behaviour that cannot occur, and a dead claim is how the next reader is misled
+ * into giving it an offset.
+ */
+.wpg--fill .wpg-toolband { position: static; }
+@media (prefers-reduced-motion: reduce) {
+  .wpg-toolband { transition: none; }
 }
 .wpg-toolband > .wpg-tools {
   width: 100%;

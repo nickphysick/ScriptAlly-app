@@ -86,9 +86,29 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
      * ⚠️ AND THE ALLOWANCE IS A PATTERN, NOT A LIST. Anything else is still 0, and a `top` carrying a
      * literal fails whatever declares it.
      */
+    /**
+     * ⚠️ ONE NON-ZERO OFFSET IS ALLOWED NOW, AND ONLY ONE, AND ONLY AS THE TOKEN.
+     *
+     * The rule this protects is unchanged: no offset may RESTATE another element's height. `top:
+     * 51px` on the control row held a gap open for a mini bar that was not rendered, and that is
+     * what "nothing above the scroller may be measured into a rule" was written against. The
+     * toolbar genuinely comes to rest beneath the bar, and it says so by reading `--bar-h` — so the
+     * two cannot drift, which is the whole difference between an offset and a literal.
+     */
+    const allowed = new Set(["0", "var(--bar-h)"]);
     for (const t of tops) {
-      expect(t, `a sticky element clears \`${t}\` — nothing above the scroller may be measured into a rule`).toBe("0");
+      expect(allowed.has(t), `a sticky element clears \`${t}\` — an offset may be 0 or the bar's own token, never a number`).toBe(true);
     }
+    expect(tops.filter((t) => t !== "0"), "more than one sticky element takes an offset").toHaveLength(1);
+    /**
+     * ⚠️ AND THE OFFSET IS SUPPRESSED WHERE NOTHING SCROLLS. A `fill` page's row cannot move, so a
+     * sticky element with a `top` there does not idle — it CLAMPS, and is pushed down by its own
+     * offset permanently. That is the `top: 51px` fault exactly, and on this pack it would have
+     * shoved the whole Tasks family — To-do, Calendar and Noteboard — down 44px from a shared
+     * stylesheet. Caught by this case rather than by a screenshot.
+     */
+    expect(cssRules, "the fill-page suppression is gone — a sticky toolbar there clamps rather than idling")
+      .toMatch(/\.wpg--fill\s+\.wpg-toolband\s*\{[^}]*position:\s*static/);
     /* ⚠️ THE TAB RAIL'S OFFSET ALLOWANCE IS DELETED WITH THE RAIL. It was the one legitimate
        non-zero `top` in this sheet — a rail sitting beneath the bar, reading the bar's own token
        rather than restating 46. The rail is gone, so every `top` is 0 again and the rule is back to
@@ -113,8 +133,10 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        could settle; the rebuild's masthead LEAVES, so the slab is static and the collapsed bar is the
        only pinned thing in the scroller. Same claim as before the settle existed, different subject —
        and a second pinned element still cannot arrive unnoticed. */
+    /* ⚠️ TWO NOW — the bar, and the toolbar it comes to rest beneath (§3). A third still cannot
+       arrive unnoticed, which is what this set is for. */
     expect([...new Set(stickySubjects)].sort(), `the set of sticky elements has changed: ${stickySubjects.join(", ")}`)
-      .toEqual([".wpg-bar"]);
+      .toEqual([".wpg-bar", ".wpg-toolband"]);
   });
 
   it("the scroll row is `minmax(0, 1fr)` — a plain `1fr` grows to its content and never scrolls", () => {
