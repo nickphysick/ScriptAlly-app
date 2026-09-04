@@ -19,6 +19,7 @@ import {
   closedSentence,
   WRITER_TURN_ATTENTION_DAYS,
 } from "./queryCardFacts";
+import { queryBucket } from "./queryAmbient";
 
 const TODAY = new Date("2026-09-04T12:00:00Z");
 const ago = (days: number) => new Date(TODAY.getTime() - days * 86_400_000).toISOString();
@@ -240,5 +241,71 @@ describe("⚠️ the copy reports and never appraises", () => {
       const all = `${sentenceText(f.sentence)} ${f.caption} ${f.turnWord}`;
       expect(all, `appraises: "${all}"`).not.toMatch(banned);
     }
+  });
+});
+
+/**
+ * ⚠️ `turnFor` IS A REFINEMENT OF `queryBucket`, AND THIS IS THE LOCK THAT KEEPS IT ONE.
+ *
+ * The app already partitions statuses by whose move it is: `queryBucket` → `move | waiting |
+ * closed`, which is the CTA engine's own split and is read by `getPrimaryAction`, the Query Centre
+ * filter pills, `queriesPulse`, the To-do board and Analytics. `turnFor` is a FIFTH vocabulary over
+ * the same statuses, and a second membership table is exactly how two counts of one thing come to
+ * disagree.
+ *
+ * It is not merged, because the two answer different questions: `queryBucket` asks whose move it
+ * is, `turnFor` asks what the card should look like — which needs Queried distinguished from a
+ * partial already out, and an offer distinguished from a rejection. But the refinement must be
+ * EXACT, and these assert it over the enum rather than over a fixture.
+ *
+ * ⚠️ THE ASSERTION IS BETWEEN TWO DERIVATIONS, NEVER AGAINST A LITERAL LIST ON BOTH SIDES. A pair
+ * of hand-written tables would go green the day someone edited both in the same wrong direction.
+ */
+describe("⚠️ turnFor refines queryBucket exactly — one membership, two granularities", () => {
+  it("every status agrees, in both directions", () => {
+    const all = Object.values(QueryStatus);
+    expect(all.length).toBeGreaterThan(3);
+    for (const s of all) {
+      const turn = turnFor(s);
+      const bucket = queryBucket(s);
+      if (bucket === "move") {
+        expect(turn, `${s}: queryBucket says move, turnFor says ${turn}`).toBe("you");
+      } else if (bucket === "waiting") {
+        expect(["sand", "agent"], `${s}: queryBucket says waiting, turnFor says ${turn}`).toContain(turn);
+      } else {
+        expect(["offer", "closed"], `${s}: queryBucket says closed, turnFor says ${turn}`).toContain(turn);
+      }
+    }
+  });
+
+  it("and no court leaks across a bucket boundary", () => {
+    for (const s of Object.values(QueryStatus)) {
+      const turn = turnFor(s);
+      if (turn === "you") expect(queryBucket(s)).toBe("move");
+      if (turn === "sand" || turn === "agent") expect(queryBucket(s)).toBe("waiting");
+      if (turn === "offer" || turn === "closed") expect(queryBucket(s)).toBe("closed");
+    }
+  });
+
+  /**
+   * ⚠️ THE ONE PLACE THE GRID DELIBERATELY DEPARTS, STATED RATHER THAN LEFT TO BE NOTICED.
+   *
+   * `queryBucket` files an Offer under `closed`; the grid gives it its own court and its own quick
+   * filter, because the ref does and because an offer is the least closed thing that can happen to
+   * a query. So the grid's "Closed" pill is NOT `queryBucket("closed")` — it is that set minus the
+   * offers, and anyone reconciling a grid count against a bucket count must subtract them.
+   *
+   * The agent list already reads it this way ("terminal is exactly Rejected/Withdrawn/No Response,
+   * so Offer counts as ACTIVE"), so the grid agrees with that surface and not with `queryBucket`.
+   * Flagged in `reports/query-centre-build.md`; a decision for Nick, not a bug to fix in passing.
+   */
+  it("Offer is the documented divergence, and it is the ONLY one", () => {
+    expect(queryBucket(QueryStatus.OFFER)).toBe("closed");
+    expect(turnFor(QueryStatus.OFFER)).toBe("offer");
+
+    const divergent = Object.values(QueryStatus).filter(
+      (s) => queryBucket(s) === "closed" && turnFor(s) !== "closed",
+    );
+    expect(divergent, `unexpected divergence: ${divergent.join(", ")}`).toEqual([QueryStatus.OFFER]);
   });
 });
