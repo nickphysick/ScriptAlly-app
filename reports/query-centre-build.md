@@ -423,3 +423,37 @@ audit about, committed by me, and the Filter facets are where they belong now.
 198px narrower, because of the rail. `auto-fill` with the ref's own 340px floor fits two. Three
 would need the floor at ≤323px, i.e. overriding a value the ref states in order to compensate for
 the rail. Flagged rather than changed; one line if wanted.
+
+---
+
+## Correction pass 2 · addendum — the 320 floor, and the rulesheet audited
+
+The floor moved in the **ref** (`6f790958` — one line in 107,778 bytes, verified) and the code
+follows it. Pass 2 declined to lower it because the ref stated 340; the authority moved first, so
+this is following rather than compensating.
+
+**1280 now renders 3 columns** (≈323px cards), and 1440 / 1920 / 2560 are unchanged at 3 / 4 / 4.
+⚠️ The ref and the build now disagree at 1440 — the ref's 1368px page fits four where the app's
+1170px column fits three — and that is the rail again, not a fault.
+
+### `query-tint-ladder.md` audited: every value matches, two surfaces do not
+
+The rulesheet arrived after pass 2 had built §4 from the ref's own code. **All eight tokens, the
+mapping, the hairline, the band type and the 24px StatusDot match what shipped** — including two
+rows the ref could not have supplied (a requested-but-unsent parcel takes the step it was requested
+at; a decided offer becomes closed).
+
+Two contradictions, both on the **record view**, which this pass does not touch:
+
+- **"Detail panel header band — same token as the card that opened it" is not implemented.**
+  Measured: opening a card reaches the record view and **nothing inside it paints a ladder token**
+  (`stageTokenUsersInRecord: 0`), and no state-tinted header band exists to carry one. Phase 4
+  replaces that surface with the slide-over and should close this rather than inherit it.
+- **The record list's selected row is a pink FILL (`rgb(247, 227, 221)`) that is not a ladder
+  token.** The sheet says *"Selection is a 1.5px #e8c8bc ring, not a fill"*. The card obeys that;
+  the list row predates it. Needs Nick's ruling — item 5 only claims rows *"that encode state"*, and
+  a selection tint arguably encodes selection.
+
+Also flagged: the sheet maps **"Offer accepted or declined → closed"**, and `QueryStatus` has no
+accepted/declined member. Not a contradiction — a distinction the sheet assumes and the data does
+not carry.

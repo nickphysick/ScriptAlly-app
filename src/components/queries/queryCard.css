@@ -18,11 +18,17 @@
 /* ── the grid ───────────────────────────────────────────────────────────────────────────────── */
 .qcc-grid {
   display: grid;
-  /* ⚠️ 340, NOT 380 — the ref's, and it is what makes the count right rather than merely
-     plausible. In a 1480 cap: floor((1480 + 20) / (340 + 20)) = 4 columns of 355px. At 380 the
-     same cap yields 3, and at 1440 (a ~1100 column beside the rail) it yielded 2 where the ref
-     draws 3. The cap and the track floor decide the count together; neither alone. */
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  /**
+   * ⚠️ 320, AND THE REF MOVED FIRST. Pass 2 measured 340 fitting only TWO cards at 1280 — the app's
+   * content column is 1010px there against the ref's standalone 1208, 198px narrower because of
+   * the rail — and declined to lower it, because overriding a value the ref states is how a build
+   * and its design authority come to disagree quietly. Nick changed the ref instead (`6f790958`,
+   * one line in 107,778 bytes), so this follows it rather than compensating for it.
+   *
+   * The arithmetic, since the count is what the value is FOR: floor((col + 20) / 340) columns.
+   * 1010 → 3 · 1170 → 3 · 1480 → 4. The cap and the floor decide it together; neither alone.
+   */
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
 }
 

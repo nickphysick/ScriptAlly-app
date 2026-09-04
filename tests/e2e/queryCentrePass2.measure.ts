@@ -190,6 +190,58 @@ test("pass 2 — cap, search, popovers, ladder, leaves", async ({ page }) => {
   }
   out.popoversNarrow = narrow;
 
+  /**
+   * ⚠️ THE RULESHEET'S "WHERE THE TINT APPEARS" — AUDITED, NOT ASSERTED. Items 3 and 5 name the
+   * RECORD view's header band and its list-row tint, which this pass does not touch; reading them
+   * is how the report can say whether the built page contradicts the sheet rather than guessing.
+   * Reported so a gap is visible; not asserted, because failing a lock on a surface this commit
+   * deliberately leaves alone would be a red nobody can act on.
+   */
+  const tintAudit = await (async () => {
+    const card = page.locator(".qcc").first();
+    if (!(await card.count())) return { ran: false };
+    const stage = await card.getAttribute("class");
+    await card.click();
+    await page.waitForTimeout(1200);
+    return {
+      ran: true,
+      cardStageClass: (stage ?? "").split(" ").find((c) => c.startsWith("qcc--s-")) ?? "(none)",
+      ...(await page.evaluate(() => {
+        const vis = (s: string) =>
+          [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+        const bg = (e: HTMLElement | null) => (e ? getComputedStyle(e).backgroundColor : null);
+        const root = getComputedStyle(document.documentElement);
+        const ladder = Object.fromEntries(
+          ["out-1", "out-2", "out-3", "in-1", "in-2", "in-3", "offer", "closed"]
+            .map((k) => [k, root.getPropertyValue(`--stage-${k}`).trim()]),
+        );
+        /* the record view's identity band, whatever this page calls it */
+        const header = vis(".qc-heroband") ?? vis(".f12-hero") ?? vis(".qc-hero") ?? vis(".qc-idband");
+        const selectedRow = vis(".f12-row.is-sel") ?? vis(".f12-row[aria-selected='true']") ?? vis(".f12-row-on");
+        return {
+          recordViewReached: !!vis(".f12-body"),
+          headerFound: !!header,
+          headerBand: bg(header),
+          selectedRowFound: !!selectedRow,
+          selectedRowBand: bg(selectedRow),
+          ladder,
+          /* does ANYTHING in the record view paint a ladder token? */
+          stageTokenUsersInRecord: [...document.querySelectorAll<HTMLElement>(".f12-body *")]
+            .filter((e) => {
+              const c = getComputedStyle(e).backgroundColor;
+              return Object.values(ladder).some((hex) => {
+                if (!hex) return false;
+                const n = hex.replace("#", "");
+                const rgb = `rgb(${parseInt(n.slice(0,2),16)}, ${parseInt(n.slice(2,4),16)}, ${parseInt(n.slice(4,6),16)})`;
+                return c === rgb;
+              });
+            }).length,
+        };
+      })),
+    };
+  })();
+  out.tintAudit = tintAudit;
+
   mkdirSync("reports", { recursive: true });
   writeFileSync("reports/query-centre-pass2.json", JSON.stringify(out, null, 2));
   expect(Object.keys(out).length, "the probe recorded nothing").toBeGreaterThan(6);

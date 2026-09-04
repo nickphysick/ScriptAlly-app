@@ -297,3 +297,82 @@ One lock of mine went red and was retargeted rather than rebaselined: `QueryCard
 class. Its law — *the class comes from the derivation, never re-decided in the component* — is
 unchanged; what moved is which derivation, from the five courts to the eight rungs. Both halves are
 now asserted, since `turn` still drives the filters.
+
+---
+
+## Pass 2 · addendum — the 320 floor, and the rulesheet audited
+
+The floor moved in the REF (`6f790958`, one line in 107,778 bytes) and the code follows it. Pass 2
+declined to lower it precisely because the ref stated 340; the authority moved first.
+
+### Columns, before and after
+
+| width | content column | at 340 | at 320 | card |
+|---|---|---|---|---|
+| 1280 | 1010px | 2 cols | **3 cols** | ≈323px |
+| 1440 | 1170px | 3 cols | 3 cols — unchanged | ≈377px |
+| 1920 | — | 4 cols | 4 cols — unchanged | — |
+| 2560 | 1480px | 4 cols | 4 cols — unchanged | ≈355px |
+
+⚠️ **The ref and the build now differ at 1440, and that is the rail rather than a fault.** At 320
+the ref's 1368px page fits FOUR; the app's 1170px column fits three. Same rule, different available
+width — the same reason 340 fitted two at 1280. The brief asked for 3 at 1280 and no change at
+1440/1920/2560, and that is what shipped.
+
+### `query-tint-ladder.md` — audited against the built page
+
+The rulesheet arrived after pass 2 built §4 from the ref's code. **Every token value and the whole
+status→stage mapping in it match what shipped**, including the two the ref could not have told me:
+that `Requested but not yet sent` takes the step it was requested at, and that a decided offer
+becomes `closed`.
+
+#### "Where the tint appears" — 7 items
+
+| # | item | state |
+|---|---|---|
+| 1 | Card band | ✅ |
+| 2 | Leaf month strip, same token as its band | ✅ |
+| 3 | **Detail panel header band, same token as the card that opened it** | ❌ **contradicted** |
+| 4 | Quick-filter swatches (`in-2` / `out-2` / offer / closed) | ✅ |
+| 5 | Any list-row tint **that encodes state** | ⚠️ see below |
+| 6 | Dashboard pipeline cells / Fortnight in Focus | ➖ neither |
+| 7 | Ghost tile — dashed, no tint until saved | ➖ not built (Phase 5) |
+
+**Item 3 is a measured contradiction.** Opening a card (`qcc--s-out-1`) reaches the record
+view, and **nothing inside it paints a ladder token** — `stageTokenUsersInRecord: 0`. No element
+matching `.qc-heroband` / `.f12-hero` / `.qc-hero` / `.qc-idband` was found either, so the record
+view has no state-tinted header band to carry the card's token. The record view is the surface
+Phase 4 replaces with the slide-over, so this is **reported, not fixed here** — but it is a real
+divergence from a locked sheet and should be closed by Phase 4 rather than forgotten.
+
+**Item 5 needs Nick's ruling.** The list's selected row paints `rgb(247, 227, 221)` — a pink that is
+**not** a ladder token (`--stage-in-1` is `rgb(248, 233, 226)`). Two readings, and the sheet
+supports both: item 5 only claims rows *"that encode state"*, and a selection tint encodes
+SELECTION, so it is arguably out of scope. But "What the tint does not do" says *"Selection is a
+1.5px #e8c8bc ring, not a fill"* — and this is a fill. **The card obeys that rule** (ring, no fill);
+the list row predates it. Flagged rather than changed, since the list is Phase 4's to re-house.
+
+**Item 6 is neither followed nor contradicted.** The dashboard's charts colour by `--sd-hue`, the
+StatusDot theme accent — one hue for the whole surface, not a state palette. They do not encode
+query state by colour at all, so there is no second palette to have invented.
+
+#### "What the tint does not do" — 6 rules
+
+| rule | state |
+|---|---|
+| Never encodes time pressure; overdue is the ink `!` ring, 16px / 1.4px / JetBrains 700 | ✅ exactly that, and locked |
+| Never changes on hover; hover is shadow only | ✅ locked as an absence of `transform` |
+| Selection is a `1.5px #e8c8bc` ring, not a fill | ✅ on the card · ⚠️ the record list row fills (above) |
+| Chips parchment-lifted regardless of band — never pink, never band-tinted | ✅ locked |
+| No red; no burgundy outside StatusDot, Form 11 chrome and the inset frame | ✅ swept, both files |
+| Closed is always grey whatever the reason; the reason is stated in words | ✅ `--stage-closed` for every closed status, and `closedSentence()` states the reason |
+
+⚠️ **One thing the sheet names that the app cannot model:** `Offer accepted or declined → closed`.
+`QueryStatus` has `OFFER` and no accepted/declined member, so that row describes a distinction the
+data does not carry. Not a contradiction — a gap in the model the sheet assumes. Flagged.
+
+### Gate
+
+Isolated worktree, this pass's files on clean `HEAD`: **tsc 0 · build:dev clean · vitest 1 failed /
+7484 passed (7488)** — `datePickerHub`, another stream's. `functions/src/email.test.ts` fails to
+COLLECT in the worktree only (no `functions/node_modules`); it passes 9/9 in the primary tree.

@@ -49,7 +49,7 @@
     "grid": {
       "w": 1368,
       "left": 36,
-      "cols": 3
+      "cols": 4
     },
     "foot": {
       "w": 1368,
@@ -171,7 +171,7 @@
     "grid": {
       "w": 1010,
       "left": 247,
-      "cols": 2
+      "cols": 3
     },
     "foot": {
       "w": 1010,
@@ -378,5 +378,25 @@
       "overflowsRight": false,
       "overflowsBottom": false
     }
+  },
+  "tintAudit": {
+    "ran": true,
+    "cardStageClass": "qcc--s-out-1",
+    "recordViewReached": true,
+    "headerFound": false,
+    "headerBand": null,
+    "selectedRowFound": true,
+    "selectedRowBand": "rgb(247, 227, 221)",
+    "ladder": {
+      "out-1": "",
+      "out-2": "",
+      "out-3": "",
+      "in-1": "",
+      "in-2": "",
+      "in-3": "",
+      "offer": "",
+      "closed": ""
+    },
+    "stageTokenUsersInRecord": 0
   }
 }
