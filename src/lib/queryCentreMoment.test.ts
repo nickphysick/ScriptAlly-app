@@ -39,7 +39,24 @@ const moment = (): string => {
      strip looked like it was working and was silently doing nothing to the only part that mattered. */
   const from = css.lastIndexOf("/*", marker);
   expect(from, "the §5 block's comment opener is missing").toBeGreaterThan(-1);
-  return css.slice(from).replace(/\/\*[\s\S]*?\*\//g, "");
+  /**
+   * ⚠️ AND BOUNDED AT THE FAR END TOO — `css.slice(from)` ran to END OF FILE, so this "§5 block"
+   * was ~750 lines of unrelated rules that happened to contain no hex literal. It passed for the
+   * wrong reason until the turn tints were appended below it and the lock reported that §5 had
+   * introduced eleven colours, about a block 2,800 lines away.
+   *
+   * ⚠️ THE LAW IS UNCHANGED — "§5 reads tokens and states no colour of its own". What changed is
+   * that the slice now covers §5 and only §5, so the claim is about the block the message names.
+   * `sliceBetween` fails loudly on a missing anchor, which is the whole reason it exists.
+   */
+  /* ⚠️ THE END IS FOUND, THEN WALKED BACK TO ITS OWN `/*` — for the same reason the start is. The
+     next section's banner opens a comment too, and stopping mid-banner would leave a dangling
+     opener that swallows everything the stripper touches after it. */
+  const nextMarker = css.indexOf("* THE READING PANE", from);
+  expect(nextMarker, "the section after §5 is missing — the block is unbounded again").toBeGreaterThan(from);
+  const to = css.lastIndexOf("/*", nextMarker);
+  expect(to, "the next section's comment opener is missing").toBeGreaterThan(from);
+  return css.slice(from, to).replace(/\/\*[\s\S]*?\*\//g, "");
 };
 
 const rule = (selector: string): string => {

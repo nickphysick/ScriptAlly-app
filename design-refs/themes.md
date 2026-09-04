@@ -60,6 +60,34 @@ Declared in `:root` (`src/index.css`) and consumed by every theme. Type families
 
 **StatusDot:** never restyled by theme CSS — its palette is a component token (`--sd-hue` / `--sd-centre`, listed per theme below). Direction/stage is carried by shape, not colour. Pro pills always stay slate regardless of theme.
 
+
+### Query Centre turn tints (`--turn-*`) — theme-independent, `.t-f12`
+
+Whose court a query is in. Declared once on `.t-f12` (`src/components/shell/f12.css`), which is
+theme-independent like every other `--qc-*` token on that page.
+
+| Token | Value | Controls |
+|---|---|---|
+| `--turn-you-a` / `--turn-you-b` | `#f5e3db` / `#efd7cc` | **With you** — Partial Requested, Full Requested, R&R |
+| `--turn-agent-a` / `--turn-agent-b` | `#dce0d9` / `#d0d6cc` | **Deeper with the agent** — Partial Sent, Full Sent |
+| `--turn-offer-a` / `--turn-offer-b` | `#dde5ec` / `#d1dbe4` | **Offer**, while open |
+| `--turn-closed-a` / `--turn-closed-b` | `#e9e6e1` / `#dfdcd6` | **Closed** — closed, rejected, withdrawn, no response |
+| `--turn-sand-ground` | `#fdfaf5` | **Queried** — parchment, no tint |
+| `--turn-sand-rule` | `#e4d9cb` | The `.5px` hairline that closes a Queried band |
+| `--turn-sand-leaf` | `#f3ece2` | The calendar leaf's month strip when there is no tint |
+
+⚠️ **The band says whose move it is, never whether that is good or bad.** There is no fifth pair
+for "late" and no red anywhere: overdue is an ink `!` ring plus factual copy.
+
+⚠️ **Queried takes no tint deliberately.** The commonest state is the one that should read as
+quiet. `design-refs/query-centre.html` carries a `--t-sand-*` gradient pair reachable only under
+its own `body.fade` demo class — the rejected alternative, kept so the two could be compared.
+
+⚠️ **Bold Pastille and Editorial: `TODO`.** Both read the values above today — deliberately and
+visibly, rather than reading nothing, since a `var()` whose defining scope is not an ancestor
+paints nothing at all. If either theme wants its own tints the override site is
+`.t-bold .t-f12` / `.t-edn .t-f12`; nothing in the app declares such a selector yet.
+
 ---
 
 ## Cappuccino — `.t-capp` (default)

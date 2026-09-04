@@ -4564,3 +4564,44 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
  * control off the page; `display: none` would not, and neither would unmounting it.
  */
 .qc-addmat-quiet { visibility: hidden; position: absolute; pointer-events: none; }
+
+/* ══ THE TURN TINTS — whose court a query is in ═══════════════════════════════════════════════
+ *
+ * ⚠️ THE BAND SAYS WHOSE MOVE IT IS, NEVER WHETHER THAT IS GOOD OR BAD. Four pairs, one per turn,
+ * and there is deliberately no fifth for "late": overdue is the ink `!` ring and factual copy, so
+ * a reader never has to learn that one of these colours means trouble. There is no red on this
+ * page and there is no red to add.
+ *
+ * ⚠️ QUERIED TAKES NO TINT AT ALL — parchment plus a hairline (`.qcc--sand`). That is a decision,
+ * not a missing pair: the commonest state is the one that should read as quiet, and tinting it
+ * would leave the four that mean something competing with a fifth that means "nothing yet".
+ * `design-refs/query-centre.html` carries a `--t-sand-*` pair, reachable only under its own
+ * `body.fade` demo class — the rejected alternative, shown so the two could be compared. Do not
+ * promote it out of the ref.
+ *
+ * ⚠️ DECLARED ON `.t-f12`, WHICH IS THEME-INDEPENDENT — as every other `--qc-*` token on this page
+ * already is (see the families block above, and `.t-f12 { --qc-reclaim }`). The brief asked for a
+ * Cappuccino module with `TODO` rows for the other two themes; there is no such split to write
+ * into, because nothing in the app declares `.t-capp .t-f12`. So Bold and Editorial read these
+ * values today, deliberately and visibly, rather than reading nothing — a `var()` on a token whose
+ * defining scope is not an ancestor paints NOTHING, silently, which is the fault this file has an
+ * audit about. If either theme ever wants its own tints the override site is `.t-bold .t-f12` /
+ * `.t-edn .t-f12`, and that is recorded in `design-refs/themes.md` rather than left to be guessed.
+ */
+.t-f12 {
+  --turn-you-a: #f5e3db;     /* with you — Partial Requested, Full Requested, R&R */
+  --turn-you-b: #efd7cc;
+  --turn-agent-a: #dce0d9;   /* deeper with the agent — Partial Sent, Full Sent */
+  --turn-agent-b: #d0d6cc;
+  --turn-offer-a: #dde5ec;   /* an offer, while it is still open */
+  --turn-offer-b: #d1dbe4;
+  --turn-closed-a: #e9e6e1;  /* closed, rejected, withdrawn, no response */
+  --turn-closed-b: #dfdcd6;
+
+  /* Queried's two: the band's own ground and the rule that closes it. Named so the card reads a
+     token in every state rather than a token in four of five and a literal in the fifth. */
+  --turn-sand-ground: #fdfaf5;
+  --turn-sand-rule: #e4d9cb;
+  /* The calendar leaf's month strip when there is no tint to carry it. */
+  --turn-sand-leaf: #f3ece2;
+}
