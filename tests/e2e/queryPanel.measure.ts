@@ -61,6 +61,12 @@ test("the panel: band, stepping, rail, and what it refuses to show", async ({ pa
       barActions: acts,
       position: p.querySelector(".qpn-pos")?.textContent ?? null,
       name: p.querySelector(".qpn-nm")?.textContent ?? null,
+      /* ⚠️ THE CRUMB IS THE SHELL'S, AND IT ALREADY FOLLOWS `?q=`. `WorkspaceShell.recordCrumb`
+         resolves the open query's agent from the search param — a DIFFERENT mechanism from
+         `WorkspacePageGrid`'s `record` prop, which is what I checked when I reported that the crumb
+         never named the record. It does; I had checked the wrong one of two. */
+      crumb: [...document.querySelectorAll<HTMLElement>(".ws-crumb *")]
+        .map((x) => (x.textContent ?? "").trim()).filter(Boolean).slice(-1)[0] ?? null,
       /* the rail, as rendered */
       rungs: [...p.querySelectorAll<HTMLElement>(".qpn-rung")].map((g) => ({
         event: g.querySelector(".qpn-ev")?.textContent ?? "",
@@ -151,10 +157,19 @@ test("the panel: band, stepping, rail, and what it refuses to show", async ({ pa
     gridStillThere: !!document.querySelector(".qcc-grid"),
     /* ⚠️ THE PAGE UNDERNEATH NEVER CHANGED — that is the whole point of an overlay. */
     masthead: document.querySelector(".wsh-title")?.textContent ?? null,
+    crumb: [...document.querySelectorAll<HTMLElement>(".ws-crumb *")]
+      .map((x) => (x.textContent ?? "").trim()).filter(Boolean).slice(-1)[0] ?? null,
   }));
   const esc = out.afterEsc as Record<string, unknown>;
   expect(esc.open, "Escape did not close the panel").toBe(false);
   expect(esc.gridStillThere, "the grid went away").toBe(true);
+  /**
+   * ⚠️ THE CRUMB NAMES THE OPEN QUERY AND GIVES THE NAME BACK. The brief asks the panel to set it
+   * and restore it; the shell already does both from `?q=`, so nothing was built — but it is
+   * asserted, because "it happens to work" and "it is guaranteed" are different states.
+   */
+  expect(panel.crumb, "the crumb did not name the open query").toBe(panel.name);
+  expect(esc.crumb, "the crumb did not go back to the page name on close").not.toBe(panel.name);
 
   dump();
 });

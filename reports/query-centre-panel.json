@@ -23,6 +23,7 @@
     ],
     "position": "22 of 54",
     "name": "Elinor Hale",
+    "crumb": "Elinor Hale",
     "rungs": [
       {
         "event": "Queried",
@@ -73,6 +74,7 @@
   "afterEsc": {
     "open": false,
     "gridStillThere": true,
-    "masthead": "Query Centre"
+    "masthead": "Query Centre",
+    "crumb": "Query Centre"
   }
 }

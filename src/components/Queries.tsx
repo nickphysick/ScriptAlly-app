@@ -4572,12 +4572,16 @@ export const Queries: React.FC<{
            * with no content and no way to describe itself; deriving both from the selected query
            * means the record view cannot exist without a record in it.
            */
-          fill={!!activeQuery}
-          record={activeQuery ? {
-            backLabel: "All queries",
-            onBack: () => onSelectView?.("cards"),
-            title: agentPrimary(activeAgent ?? undefined),
-          } : undefined}
+          /**
+           * ⚠️ NEITHER PROP, SINCE §4. They belonged to the record VIEW — a second page layout with
+           * its own 46px identity bar and its own back link. There is no second layout now: the
+           * panel overlays the grid, so the page underneath has not changed and must not say it
+           * has. Measured before this: the crumb read `Queries / Elinor Hale` and an `← ALL
+           * QUERIES` bar sat behind the panel, both describing a navigation that had not happened.
+           *
+           * ⚠️ `record` STAYS ON `WorkspacePageGrid` FOR `AllManuscripts`, its other consumer. The
+           * prop is not the problem; this page having two layouts was.
+           */
           scrollLabel="Query Centre"
           /* ⚠️ THE LIST STRIP (§1c) — the three controls that act on the LIST, and only those.
              `View tasks` and `Nudge` are NOT here despite sounding page-level: both are gated on
