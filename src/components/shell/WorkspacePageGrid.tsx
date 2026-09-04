@@ -29,9 +29,8 @@
  * them is off it. Any stop between commits leaves a working app.
  */
 import React from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import "./workspacePageGrid.css";
-import { OneScreenMark, type MarkName } from "../dashboard/OneScreenMark";
 
 /**
  * ⚠️ `PlateCondensedContext` IS DELETED (in-flow masthead, step 4), AND ITS LAST READER WENT AT
@@ -215,8 +214,15 @@ export interface WorkspacePageGridProps {
  * ⚠️ TWO THRESHOLDS, NOT ONE, AND THE GAP IS THE WHOLE MECHANISM. A single threshold flips on every
  * frame that lands on it; 30px of separation is far more than any scroll step can straddle.
  */
-const BAR_SHOW = 150;
-const BAR_HIDE = 120;
+/**
+ * ⚠️ 120 IN, 90 OUT (slim bar, §2; ref `slim-header-scroll.html`). Two edges rather than one, each
+ * asserting a single direction — equal thresholds flicker at the boundary, which is what makes this
+ * a hysteresis rather than two competing triggers. It was 150/120 while the header it hands off from
+ * was 175px tall; the compact header is ~109, so the bar has to arrive sooner or there is a stretch
+ * with no page name on screen at all.
+ */
+const BAR_SHOW = 120;
+const BAR_HIDE = 90;
 
 /**
  * ⚠️ THE BAR'S IDENTITY IS READ OFF THE MASTHEAD ELEMENT, WHICH IS THE PAGE'S OWN DECLARATION.
@@ -229,10 +235,32 @@ const BAR_HIDE = 120;
  * `PageHeader` has no identity to show, and an empty 46px band that appears on scroll is worse than
  * nothing at all.
  */
-const barIdentity = (masthead: React.ReactNode): { title: string; mark?: MarkName } | null => {
+type BarPrimary = { label: string; onClick: () => void; disabled?: boolean };
+const barIdentity = (
+  masthead: React.ReactNode,
+): { title: string; icon?: string; primary?: BarPrimary } | null => {
   if (!React.isValidElement(masthead)) return null;
-  const p = masthead.props as { title?: unknown; mark?: unknown };
-  return typeof p.title === "string" && p.title ? { title: p.title, mark: p.mark as MarkName | undefined } : null;
+  const p = masthead.props as { title?: unknown; icon?: unknown; primary?: unknown };
+  if (typeof p.title !== "string" || !p.title) return null;
+  /**
+   * ⚠️ THE BAR TAKES THE HEADER'S OWN PROPS — icon, title and primary — so a page states each once.
+   * The same handler, the same label, the same asset at 22px instead of 72.
+   *
+   * ⚠️ `mark` IS NO LONGER READ. The registry's monoline glyph was the bar's icon while the masthead
+   * had one; the format's picture is a painted asset, and rendering the glyph here would put a
+   * DIFFERENT drawing in the bar from the one in the header it replaces.
+   *
+   * ⚠️ AND THERE IS NO COUNT, WHICH IS A DECISION RATHER THAN AN OMISSION. The ref draws one and the
+   * brief allows it "where the page has one" — no page supplies one to its header, and adding a prop
+   * the header accepts and does not render is the fault its own guard forbids. The pages that HAVE a
+   * count keep it in the toolbar, which §3 pins directly beneath this bar: it stays on screen, so a
+   * count here would be the same figure twice, an inch apart.
+   */
+  return {
+    title: p.title,
+    icon: typeof p.icon === "string" ? p.icon : undefined,
+    primary: (p.primary as BarPrimary | undefined) ?? undefined,
+  };
 };
 
 export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
@@ -599,7 +627,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             * avoid; and a transition needs both ends to exist to travel between them.
             */}
           {(ident || record) && (
-            <div className={`wpg-bar${barShown ? " wpg-bar--on" : ""}${record ? " wpg-bar--record" : ""}`} aria-hidden={record ? undefined : true}>
+            <div className={`wpg-bar${barShown ? " wpg-bar--on" : ""}${record ? " wpg-bar--record" : ""}`} aria-hidden={record || ident?.primary ? undefined : true}>
               <div className="wpg-barin">
                 {record ? (
                   <>
@@ -616,8 +644,26 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
                   </>
                 ) : (
                   <>
-                    {ident.mark && <span className="wpg-barmk"><OneScreenMark name={ident.mark} monoline /></span>}
+                    {ident.icon && <img className="wpg-barmk" src={ident.icon} alt="" />}
                     <b>{ident.title}</b>
+                    {/**
+                      * ⚠️ THE PRIMARY, AND IT IS WHY THE BROWSING BAR STOPS BEING `aria-hidden` WHEN
+                      * IT HAS ONE. The band is decoration while it only restates the page's name —
+                      * the breadcrumb says that already — and hiding it spares a screen reader a
+                      * duplicate. A real control in it is not decoration, and a hidden control is
+                      * no control.
+                      */}
+                    {ident.primary && (
+                      <button
+                        type="button"
+                        className="wpg-barcta"
+                        onClick={ident.primary.onClick}
+                        disabled={ident.primary.disabled}
+                      >
+                        <Plus aria-hidden="true" />
+                        {ident.primary.label}
+                      </button>
+                    )}
                   </>
                 )}
               </div>

@@ -824,7 +824,9 @@
  * ⚠️ `pointer-events: none`, because it is identity rather than a control. The ref draws it that way
  * and it matters here: the bar sits over the top of a page whose content is live underneath.
  */
-.wpg { --bar-h: 46px; }
+/* ⚠️ 44px (slim bar, §2; ref `slim-header-scroll.html`). The bar is the header's whole content in
+   44px — icon, name and the page's one action — so the number is the format's, not a leftover. */
+.wpg { --bar-h: 44px; }
 /**
  * ⚠️ 0-2-0, BECAUSE `.wpg-scroll > *` CAPS EVERY CHILD TO THE CONTENT MEASURE. The slab already
  * carries `max-width: none; width: 100%` for exactly this reason; a single-class rule on the bar
@@ -848,18 +850,28 @@
   align-items: center;
   pointer-events: none;
   opacity: 0;
-  transform: translateY(-8px);
+  /**
+   * ⚠️ IT SLIDES DOWN AS IT ARRIVES, AGAINST THE CONTENT'S MOTION. The page is travelling UP when
+   * this appears; a bar entering the same way reads as part of the content rather than as chrome
+   * settling over it. `-6px` and 220ms are the ref's, and the opacity is faster than the transform
+   * on purpose — the band is legible before it has finished moving.
+   */
+  transform: translateY(-6px);
+  border-bottom: 1px solid transparent;
   /* the shadow is on the rule so it fades with the bar rather than appearing under a transparent box */
-  box-shadow: 0 10px 16px -12px rgba(25, 18, 16, 0);
+  box-shadow: 0 8px 14px -12px rgba(25, 18, 16, 0);
   transition:
-    opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.24s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.2s;
+    opacity 160ms linear,
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 200ms,
+    box-shadow 240ms;
 }
 .wpg-bar--on {
   opacity: 1;
   transform: none;
-  box-shadow: 0 10px 16px -12px rgba(25, 18, 16, 0.32);
+  pointer-events: auto;
+  border-bottom-color: var(--ws-edge);
+  box-shadow: 0 8px 14px -12px rgba(25, 18, 16, 0.28);
 }
 /**
  * ⚠️ IN THE RECORD VIEW THE BAR IS IN FLOW, AND THE NEGATIVE MARGIN IS WRONG THERE.
@@ -893,23 +905,61 @@
   align-items: center;
   gap: 11px;
 }
-.wpg-barmk { flex: 0 0 20px; width: 20px; height: 20px; display: grid; place-items: center; }
-/* ⚠️ THE STROKE IS OVERRIDDEN IN CSS BECAUSE THE COMPONENT SETS IT AS AN ATTRIBUTE — presentational
-   attributes lose to any rule, so this wins without `!important` and without touching the shared
-   component's own colour, which is right at its own size. */
-.wpg-barmk .os-mark svg { width: 20px; height: 20px; stroke: var(--shell-ink); }
+/* ⚠️ THE SAME ASSET AS THE HEADER'S, AT 22px — the header's picture shrunk, never a second drawing.
+   `contain` for the reason the 72px one gives: there is no frame to crop against. */
+.wpg-barmk {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+}
+/**
+ * ⚠️ PLAYFAIR 600, NOT MONO CAPS — the ref's option A over its option B, and the brief names it.
+ * The bar carries the page's NAME, and the compact header sets that name in Playfair; a mono
+ * uppercase version of it in the bar is the same page announced in a different voice. Mono survives
+ * in this band for a COUNT, which is a figure rather than a name.
+ */
 .wpg-bar b {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-family: var(--font-serif);
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
   color: var(--shell-ink);
-  /* a long page name truncates rather than wrapping a 46px bar into two lines */
+  /* a long page name truncates rather than wrapping a 44px bar into two lines */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/**
+ * ⚠️ THE SAME BUTTON AS THE HEADER'S, SMALLER — same token, same handler, same label. It is what
+ * makes the handoff a handoff rather than a disappearance: the page's one action survives the
+ * masthead scrolling away, which is the whole argument for moving it out of the toolbar.
+ *
+ * ⚠️ `margin-left: auto` PUTS IT AT THE FAR END and is what stops the name reaching it — the name
+ * truncates into whatever is left, which needs the `min-width: 0` its own rule already has.
+ */
+.wpg-barcta {
+  margin-left: auto;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--btn-ink);
+  border: 1px solid var(--btn-ink);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fdfaf5;
+  cursor: pointer;
+  white-space: nowrap;
+  /* the band is `pointer-events: none` — a control inside it opts back in, as the back link does */
+  pointer-events: auto;
+}
+.wpg-barcta svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+/* ⚠️ A PLAIN CUT UNDER REDUCED MOTION — the STATE still changes, only the tween goes. */
 @media (prefers-reduced-motion: reduce) {
   .wpg-bar { transition: none; }
 }

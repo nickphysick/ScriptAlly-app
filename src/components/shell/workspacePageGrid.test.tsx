@@ -695,7 +695,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        a number a second rule had to clear; this one's is a token it negates itself, so nothing else
        ever reads it. Both halves asserted — the reservation and the negation — because a bar with
        the margin and no height, or the height and no margin, are two different broken pages. */
-    expect(liveCss, "the bar stopped declaring its own height").toMatch(/--bar-h:\s*46px/);
+    expect(liveCss, "the bar stopped declaring its own height").toMatch(/--bar-h:\s*44px/);
     expect(liveCss, "the bar reserves space — everything below it moves when it appears")
       .toContain("margin-bottom: calc(var(--bar-h) * -1)");
     /* ⚠️ READING THE BAR'S TOKEN IS ALLOWED; RESTATING ITS NUMBER IS NOT. The old bar's fault was a
@@ -833,11 +833,12 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
          tabs are buttons that navigate. Counted, so a decorative element cannot join them quietly. */
       /* ⚠️ THE BROWSING GRID'S CARDS ARE BUTTONS. Counted with the rest, so the list stays a census
          of what is pressable rather than a list of exceptions. */
-      /* ⚠️ THE TWO FOLD CONTROLS LEAVE THIS LIST WITH THE FOLD. What the case guards is unchanged
-         and is the reason it survives its own subject: a pointer cursor may appear only on
-         something that IS pressable, never on a bare surface promising something invisible —
-         which is what the retired click-to-restore band was. */
-      .toEqual([".qc-card", ".wpg-barback"]);
+      /* ⚠️ THE TWO FOLD CONTROLS LEAVE THIS LIST WITH THE FOLD, AND `.wpg-barcta` JOINS IT. What
+         the case guards is unchanged and is the reason it survives its own subject: a pointer
+         cursor may appear only on something that IS pressable, never on a bare surface promising
+         something invisible — which is what the retired click-to-restore band was. The bar's
+         primary is a real button carrying the page's one action past the masthead's departure. */
+      .toEqual([".qc-card", ".wpg-barback", ".wpg-barcta"]);
   });
 
   /**

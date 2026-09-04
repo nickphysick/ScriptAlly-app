@@ -198,19 +198,45 @@ describe("the workspace variant", () => {
    * that happened to reject that one, and the point is that the rule is about the masthead rather
    * than about any particular drawing.
    */
-  it("every mark key is accepted and none is drawn", () => {
+  /**
+   * ⚠️ `mark` NOW HAS NO READER AT ALL, AND THIS CASE INVERTS TO SAY SO RATHER THAN LAPSING.
+   *
+   * It was the registry's monoline glyph: not drawn in the masthead, drawn in the collapsed bar,
+   * and this case asserted BOTH halves precisely so the prop could not become a declaration nobody
+   * read. The slim bar draws the page's own painted ICON at 22px instead — the header's picture
+   * shrunk rather than a different drawing — so the glyph reaches nothing.
+   *
+   * ⚠️ THE PROP IS KEPT, AND ONLY BECAUSE DELETING IT REQUIRES A FILE THIS PACK MAY NOT TOUCH.
+   * `TasksPageLayout` passes `mark` for its three pages and is the Tasks family's shared chassis,
+   * which the Calendar session owns. It is the SECOND thing blocked on that one edit — Noteboard's
+   * header primary is the first — so both come off together when that session lands.
+   *
+   * ⚠️ UNTIL THEN THE CLAIM IS THAT IT DRAWS NOWHERE, asserted over the whole rendered output. A
+   * prop accepted and ignored is a fault; a prop accepted, ignored and ASSERTED to be ignored is a
+   * fault with a receipt, which is the most this pack can honestly leave behind.
+   */
+  it("every mark key is accepted and NONE is drawn — the prop has no reader left", () => {
     const KEYS = ["queries", "todo", "calendar", "contacts", "packages", "analytics",
       "noteboard", "discover", "settings"] as const;
     expect(KEYS.length, "the mark census shrank").toBeGreaterThan(8);
     for (const m of KEYS) {
       const out = renderInGrid(<PageHeader variant="workspace" title="T" mark={m} />);
       expect(out, `${m} threw or failed to render`).toContain('class="wsh"');
-      expect(sliceBetween(out, '<header class="wsh"', "</header>"),
-        `${m} is drawn in the masthead — marks belong to the collapsed bar`).not.toContain(`data-mark="${m}"`);
-      /* ⚠️ AND IT IS DRAWN IN THE BAR, which is the other half: "not in the masthead" alone passes on
-         a mark that reaches nothing at all, and the prop would then be a declaration with no reader. */
-      expect(out, `${m} is declared and drawn nowhere — the bar should carry it`).toContain(`data-mark="${m}"`);
+      expect(out, `${m} is drawn somewhere — the bar carries the page's own icon now`)
+        .not.toContain(`data-mark="${m}"`);
     }
+  });
+
+  /**
+   * ⚠️ AND THE ICON IS WHAT THE BAR CARRIES, which is the other half of the same fact: asserting
+   * only that the glyph is gone passes on a bar that draws nothing at all.
+   */
+  it("the bar carries the page's own icon, at its own size", () => {
+    const out = renderInGrid(
+      <PageHeader variant="workspace" title="Contact list" icon="/rolodex.png" />,
+    );
+    expect(out, "the header lost its icon").toContain('class="wsh-icon" src="/rolodex.png"');
+    expect(out, "the bar did not take the header's icon").toContain('class="wpg-barmk" src="/rolodex.png"');
   });
 });
 
