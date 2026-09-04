@@ -62,9 +62,11 @@ describe("/manuscripts renders", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
     expect(html).toContain("The Smoke Test");
     /* The shelf is a carousel now; the grid is retired, not hidden. */
-    expect(html).toContain("mcar-track");
-    expect(html).toContain("mcar-tile");
+    /* The shelf is a selector list now; the carousel is retired, not hidden. */
+    expect(html).toContain("msl-table");
+    expect(html).toContain("msl-title");
     expect(html, "the retired grid came back").not.toContain("mlib-grid");
+    expect(html, "the retired carousel came back").not.toContain("mcar-");
   });
 
   /**
@@ -77,10 +79,12 @@ describe("/manuscripts renders", () => {
    */
   it("…with its derived counts, and the counts are the real ones", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
-    const figs = html.slice(html.indexOf('class="mcar-figs"'), html.indexOf('class="mcar-open"'));
-    expect(figs, "the figures block moved").not.toBe("");
-    expect(figs).toContain(">Queries</span><span class=\"mcar-figv\">1<");
-    expect(figs).toContain(">Responses</span><span class=\"mcar-figv\">0<");
+    /* ⚠️ RETARGETED TO THE ROW. The claim is unchanged — the shelf states the REAL derived counts,
+       so one fed constants or the wrong manuscript's queries fails — and the markup that carries
+       them moved from a tile's figure block to a table row. Sliced on the row, which cannot nest. */
+    const row = html.slice(html.indexOf("<tbody>"), html.indexOf("</tbody>"));
+    expect(row, "the shelf has no rows").not.toBe("");
+    expect(row).toContain('<td class="msl-num">1</td><td class="msl-num">0</td>');
   });
 
   /**
@@ -92,14 +96,22 @@ describe("/manuscripts renders", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
     expect(html).not.toContain("pitch pieces written");
     expect(html).not.toContain("mlib-seg");
+    expect(html).not.toContain("mcar-pitch");
   });
 
   /**
    * ⚠️ THE ADD GHOST IS A MEMBER OF THE DECK, so it renders at every count — and at zero it IS the
    * deck. That is what makes the empty shelf and the add affordance one object.
    */
-  it("…beside the add ghost, which is a member of the deck at every count", () => {
-    expect(renderPageSeeded(page(), "/manuscripts")).toContain("mcar-ghost");
+  /**
+   * ⚠️ THE ADD ROW IS BENEATH THE TABLE, NOT A ROW IN IT. As a `<tr>` it would be announced as data
+   * — one more manuscript in a table of manuscripts — when it is an action.
+   */
+  it("…beneath the table, an add row that is not a table row", () => {
+    const html = renderPageSeeded(page(), "/manuscripts");
+    expect(html).toContain("msl-add");
+    const body = html.slice(html.indexOf("<tbody>"), html.indexOf("</tbody>"));
+    expect(body, "the add control was announced as a manuscript").not.toContain("msl-add");
   });
 
   /**

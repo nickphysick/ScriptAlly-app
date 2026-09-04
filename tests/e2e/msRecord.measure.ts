@@ -28,7 +28,10 @@ const read = (page: import("@playwright/test").Page) => page.evaluate(() => {
   };
   return {
     masthead: !!g.querySelector(".wsh"),
-    tiles: g.querySelectorAll(".mcar-tile:not(.mcar-ghost)").length,
+    /* ⚠️ RETARGETED FROM `.mcar-tile` — the shelf carousel was retired for a selector list
+       (promos pack, Phase 2). The claim is unchanged: how many BOOKS the shelf offers. The add
+       affordance is no longer a deck member, so there is nothing to exclude. */
+    tiles: g.querySelectorAll(".msl-table tbody tr").length,
     dossier: !!g.querySelector(".msv-doss"),
     back: box(".wpg-barback"),
     who: (g.querySelector(".wpg-barwho") as HTMLElement)?.innerText?.trim() ?? null,
@@ -60,7 +63,9 @@ for (const width of [1280, 1440, 1920, 2560]) {
     expect(a.dossier, "a dossier rendered on the shelf").toBe(false);
 
     /* ── a tile opens the record ── */
-    await page.locator(".mcar-tile:not(.mcar-ghost)").first().click();
+    /* ⚠️ RETARGETED: the row's control is the Open button, not the row. The list makes every row's
+       control a real button — a clickable cell is not keyboard-reachable — so the click lands on it. */
+    await page.locator(".msl-table tbody tr .msl-open").first().click();
     await page.waitForTimeout(1100);
     const b = await read(page);
     expect(b.m, "opening a book did not set ?m=").toBeTruthy();

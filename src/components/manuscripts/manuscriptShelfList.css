@@ -1,0 +1,116 @@
+/**
+ * ══ THE SHELF — a selector list ═══════════════════════════════════════════════════════════════
+ * Ref: design-refs/manuscripts-promos.html
+ *
+ * ⚠️ TOKENS, NOT LITERALS, WHEREVER ONE EXISTS. The sage pair is declared locally because the
+ * comps sheet's `--ct-*` is page-scoped and would not resolve here — a `var()` that does not
+ * resolve paints nothing, which is the fault this page's token lock exists for.
+ */
+.msl {
+  --msl-sage-a: #dce0d9;
+  --msl-sage-b: #d0d6cc;
+  background: var(--ws-window);
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.msl-cap {
+  margin: 0;
+  padding: 11px 18px;
+  background: linear-gradient(150deg, var(--msl-sage-a), var(--msl-sage-b));
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.msl-table { width: 100%; border-collapse: collapse; }
+.msl-table th {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--hair);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 400;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  text-align: left;
+}
+.msl-table td { padding: 13px 14px; border-bottom: 1px solid var(--hair); vertical-align: middle; }
+.msl-table tbody tr:last-child td { border-bottom: 0; }
+.msl-table tbody tr:hover { background: #faf7f2; }
+
+.msl-name { display: flex; align-items: center; gap: 13px; }
+/**
+ * ⚠️ DRAWN AS A BOOK. The inset shadow on the left is the spine; the asymmetric radius is the page
+ * edge. Without them it is a coloured rectangle, which reads as an image that failed to load —
+ * the defect the carousel's artwork block had.
+ */
+.msl-cover {
+  flex: none;
+  width: 38px;
+  height: 52px;
+  border-radius: 2px 5px 5px 2px;
+  background: linear-gradient(150deg, var(--msl-sage-a), var(--msl-sage-b));
+  box-shadow: inset 3px 0 0 rgba(60, 50, 40, 0.16), 0 1px 3px rgba(40, 28, 20, 0.18);
+}
+.msl-names { display: flex; flex-direction: column; min-width: 0; }
+/** ⚠️ 1.3 MINIMUM ON MIXED-CASE PLAYFAIR — the annotated exception, settled. */
+.msl-title { font-family: var(--font-serif); font-size: 17px; line-height: 1.3; }
+.msl-byline {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+}
+.msl-status { font-size: 13px; }
+.msl-num { text-align: right; font-variant-numeric: tabular-nums; }
+.msl-last { font-size: 13px; color: var(--shell-muted); }
+.msl-act { text-align: right; }
+
+/** ⚠️ THE APP'S NEAR-BLACK. No burgundy fill — the house rule, not a preference. */
+.msl-open {
+  padding: 6px 15px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fffefb;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/** Dashed means provisional — the same grammar the attachments add row uses. */
+.msl-add {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-top: 1px dashed #cbbfae;
+  background: none;
+  color: var(--burg);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.msl-add:hover { background: #faf7f2; }
+
+/** Visually hidden, still announced — the action column's header. */
+.msl-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

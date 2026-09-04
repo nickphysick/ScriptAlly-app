@@ -41,7 +41,7 @@ import { plateStats, formatPlateDate } from "../lib/manuscriptPlate";
 import { DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./manuscripts/ManuscriptTabs";
 import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
 import { AttachmentsPanel } from "./manuscripts/AttachmentsPanel";
-import { ManuscriptCarousel } from "./manuscripts/ManuscriptCarousel";
+import { ManuscriptShelfList } from "./manuscripts/ManuscriptShelfList";
 import { ManuscriptPager } from "./manuscripts/ManuscriptPager";
 import { MANUSCRIPTS_PATH } from "./shell/manuscriptScope";
 import { queryingSinceMs, profileDate } from "../lib/manuscriptProfile";
@@ -474,25 +474,21 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
               * are one object rather than two states that have to agree. `ManuscriptsEmpty` still
               * owns the zero case above; the ghost is what the carousel shows at every count.
               */}
+            {/**
+              * ⚠️ THE SHELF IS A LIST. The carousel is retired in this same commit — a deck showed
+              * one book at a time and made choosing between four of them a paging exercise, which
+              * is the opposite of what a selector is for.
+              *
+              * ⚠️ THE FIGURES COME FROM `bookFigures`, the derivation the BOOK page uses. A shelf
+              * that counted its own way would disagree with the page it links to about the same
+              * book, one click apart.
+              */}
             {!selected && (
-              <ManuscriptCarousel
+              <ManuscriptShelfList
                 manuscripts={ordered}
                 queries={queries}
                 genresOf={msGenres}
-                statusOf={(m) => ({
-                  label: isShelvedPresentation(m) ? "Shelved" : m.status,
-                  shelved: isShelvedPresentation(m),
-                })}
-                /* ⚠️ DERIVED, AND ABSENT WHEN IT IS ABSENT. A book with no sent query has no
-                   querying-since date, and `—` states that rather than inventing one.
-                   ⚠️ AND IT IS THE FULL DATE. `{ month: "short" }` alone rendered `Dec` under a
-                   `SINCE` label — a month with no day and no year, which for a shelf spanning years
-                   is not a date at all but an ambiguity wearing one's clothes. `profileDate` is the
-                   page's existing `5 Dec 2023` formatter; this was a second, worse one. */
-                sinceOf={(m) => {
-                  const ms = queryingSinceMs(queries.filter((q) => q.manuscriptId === m.id));
-                  return ms === null ? "—" : profileDate(ms);
-                }}
+                statusOf={(m) => (isShelvedPresentation(m) ? "Shelved" : m.status)}
                 onOpen={openDossier}
                 onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
               />
