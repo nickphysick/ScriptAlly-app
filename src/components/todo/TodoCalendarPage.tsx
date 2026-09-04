@@ -246,8 +246,8 @@ const Piece: React.FC<{
   sg: Segment; days: number; lastMarkAt: number | null; selected: boolean;
   /* v58: the identity travels with the card, so the row hands its name down */
   name: string;
-  stirIndex: number; onPick: () => void;
-}> = ({ sg, days, lastMarkAt, selected, stirIndex, onPick, name }) => {
+  stirIndex: number; onPick: () => void; onOpen?: () => void;
+}> = ({ sg, days, lastMarkAt, selected, stirIndex, onPick, onOpen, name }) => {
   const lines = barLines(sg.label);
   /* ⚠️ THE PILL IS THE APP'S OWN VOCABULARY — see `calendarPill`. The status while the agency
      holds the move, the deed while the writer does, and nothing else is reachable. */
@@ -490,7 +490,22 @@ const Piece: React.FC<{
                 `.ffx`. The chip rode BESIDE the stack before, which made it a third column and
                 pushed the fact off the end of every narrow card. */}
             <span className="tl-trow">
-              <span className="tl-fnm">{name}</span>
+              {/* ⚠️ THE NAME OPENS THE RELATIONSHIP, AND THE CARD KEEPS ITS OWN JOB.
+                  The pack offers "the name inside a card, or the card". The card's click already
+                  does something the calendar cannot otherwise do: where the writer owes materials
+                  it opens the WORK flow, one press from the board. Handing the whole card to
+                  navigation would delete that — a working affordance traded for a second route to
+                  a page the row already reaches from its detail panel. So the name is the link and
+                  the card is unchanged: additive, and the name is the conventional target anyway.
+                  ⚠️ `stopPropagation`, or the card's own handler fires behind it and the reader
+                  gets the work flow AND a navigation from one press. */}
+              {onOpen ? (
+                <button type="button" className="tl-fnm tl-fnmlink"
+                  onClick={(e) => { e.stopPropagation(); onOpen(); }}
+                  title={`Open ${name}`}>{name}</button>
+              ) : (
+                <span className="tl-fnm">{name}</span>
+              )}
               <span className={`tl-fchip ${chipKind} sm`} data-pill={pill.text}>{pill.text}</span>
             </span>
             <span className="tl-ffx">{lines.t1}{lines.t2 ? ` · ${lines.t2}` : ""}</span>
@@ -2066,7 +2081,10 @@ data-rowkey={r.key}
                   && n.at >= sg.from - 0.001 && n.at <= sg.to + 0.001);
                 return on.length ? Math.max(...on.map((n) => n.at)) : null;
               })()}
-              onPick={() => pickSeg(r.key, sg)} />
+              onPick={() => pickSeg(r.key, sg)}
+              onOpen={sg.queryId
+                ? () => onNavigatePath(`/queries?q=${encodeURIComponent(sg.queryId)}`)
+                : undefined} />
           ))}
           {/**
             * ⚠️ THE ACTION CAP IS A LANE CHILD, CENTRED ON ITS OWN DATE — not a child of the card.
@@ -2769,7 +2787,7 @@ data-rowkey={r.key}
                 {cross && (
                   <>
                     <div className="tl-xh" style={{ left: `${cross.x}px` }} aria-hidden />
-                    <div className="tl-xhlab" style={{ left: `${cross.x}px`, top: 0 }} aria-hidden>{cross.label}</div>
+                    <div className="tl-xhlab" style={{ left: `${cross.x}px` }} aria-hidden>{cross.label}</div>
                   </>
                 )}
                 <div ref={tipRef} className="tl-tipp" role="tooltip" aria-hidden />

@@ -435,6 +435,21 @@
      tick at `pct(d)` lands on the same pixel as a bar at `pct(d)`. */
   --tl-gnum-w: 64px;
   --tl-badge-over: calc(var(--badge) * 0.36);
+  /**
+   * ⚠️ THE LANES' LEFT OFFSET, AND THE RAIL READS THE SAME EXPRESSION. This is the whole of the
+   * alignment guarantee and v60 shipped without it: the rows gained a number column and a badge
+   * gutter, the rail was never given the matching spacer, and the two lanes ran 91px apart —
+   * measured, rail lane at x=287 width 1090 against a row's at x=378 width 999. Every bar, flag
+   * and trail on the board sat 91px right of the date the rail named.
+   *
+   * ⚠️ AND NO LOCK CAUGHT IT, because every one of them measured WITHIN a system: tiles against
+   * tiles, cards against the today line (itself placed from a row's lane), trails against today.
+   * Only the probe's cap — asserted against the RAIL's own tiles — compares the two, and it found
+   * it on the first run. A lock that never crosses a seam cannot see the seam.
+   *
+   * The padding and the spacer are one token now, so they cannot be given different values.
+   */
+  --tl-lane-inset: calc(var(--tl-gnum-w) + var(--tl-badge-over) + 6px);
   /* ⚠️ 16px SINCE v54: a mark is a LEAD-IN now, drawn before the card rather than riding on it.
      At 22 it was sized to be read against a card it sat on; on a dotted run it is a waypoint. */
   --mk: 16px;
@@ -446,7 +461,7 @@
   /* ⚠️ v60: THE COLUMN IS BACK, AND IT IS NOT AN AGENT COLUMN. It holds the section's row
      numbers and the badge's overhang, so the rail must reserve the same width before its lane or
      every tick sits left of every bar. Derived, never typed: see `--tl-gnum-w` above. */
-  --tl-nm-w: calc(var(--tl-gnum-w) + var(--tl-badge-over));
+  --tl-nm-w: var(--tl-lane-inset);
   /* how far a piece stands off a marker it abuts, and off a plain neighbour */
   /* the bar text's inset — mirrored by TEXT_INSET in the page, which the fit pass subtracts */
   --tl-text-inset: 13px;
@@ -524,7 +539,7 @@
    is why the section can clip its own corner without shearing one. */
 .tl-glanes {
   flex: 1 1 auto; min-width: 0;
-  padding: 6px 0 6px calc(var(--tl-badge-over) + 6px);
+  padding: 6px 0 6px calc(var(--tl-lane-inset) - var(--tl-gnum-w));
   background: var(--tl-panel);
 }
 
@@ -614,6 +629,12 @@
   border-right: 1px solid transparent;
   box-sizing: border-box;
 }
+/* ⚠️ THE RAIL RESERVES EXACTLY WHAT THE LANES ARE INSET BY — the alignment contract, stated once.
+   v58 removed the rail's agent cell because the rows had none either (`--tl-nm-w: 0`); v60 gave
+   the rows a number column and a badge gutter and nobody gave the rail its half back. A padding on
+   the rail rather than a spacer element, so there is no cell to forget: the offset is a property of
+   the rail, not of something inside it. */
+.tl-rail { padding-left: var(--tl-nm-w); box-sizing: border-box; }
 .tl-railtl { overflow: visible; }
 
 /* ══ WEEK TILES (v60's `data-rail="tiles"`) ══════════════════════════════════════════════════
@@ -1309,11 +1330,33 @@ button.tl-tchip { cursor: pointer; }
   top: calc(-1 * var(--tl-flag-lift));
 }
 .tl-wrap { --tl-flag-lift: 18px; padding-top: var(--tl-flag-lift); }
-.tl-xh { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px dashed rgba(58, 28, 20, .28); z-index: 6; pointer-events: none; }
+/* ══ THE PROBE (v60, the ref's `.probe` / `.probecap`) ═══════════════════════════════════════
+ *
+ * ⚠️ THE LINE PASSES UNDER THE RAIL AND THE CAP SITS ON IT, which is two z-indexes either side of
+ * one element rather than a pair of arbitrary numbers. The rail is opaque at 50: a line drawn over
+ * it would cut through the week tiles, and a cap drawn under it would be invisible exactly where
+ * it is meant to be read. The today line and its cap are the same pair one step apart — this is
+ * that idiom, borrowed rather than reinvented.
+ *
+ * ⚠️ AND THE CAP STARTS AT THE RAIL'S TOP, NOT THE WRAP'S. `top: 0` resolves against the
+ * containing block's PADDING box, and `.tl-wrap` pads its top by `--tl-flag-lift` to give the
+ * flags room — so the cap floated 18px above the rail in the gap under the controls, which is the
+ * identical fault the today line carried until v60b. Same token, so the two cannot drift apart.
+ */
+.tl-xh {
+  position: absolute; top: var(--tl-flag-lift, 0px); bottom: 0; width: 0;
+  border-left: 1px dashed #b8a889; z-index: 39; pointer-events: none;
+}
 .tl-xhlab {
-  position: absolute; transform: translateX(-50%); background: var(--tl-ink); color: #f8f5f0;
-  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .1em;
-  padding: 3px 7px; border-radius: 4px; z-index: 7; pointer-events: none; white-space: nowrap;
+  position: absolute; top: calc(var(--tl-flag-lift, 0px) + 3px);
+  transform: translateX(-50%);
+  /* ⚠️ WHITE WITH A HAIRLINE, NOT A NEAR-BLACK PILL. It was `--tl-ink` filled — the only dark fill
+     on a cream board, against the colour law, and reading as a tooltip rather than as a date on a
+     ruler. The ref's `.probecap` is the rail's own tile idiom: pale ground, warm hairline, muted
+     mono ink, so it belongs to the scale it is standing on. */
+  background: #fff; border: 1px solid #d9cdbb; color: var(--tl-detail, #6f6055);
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .1em;
+  padding: 2px 8px; border-radius: 999px; z-index: 52; pointer-events: none; white-space: nowrap;
 }
 .tl-tipp {
   position: absolute; background: #fff; border: 1px solid var(--tl-hair);
@@ -1915,6 +1958,21 @@ button.tl-tchip { cursor: pointer; }
 /* ⚠️ v60's SCALE-UP: 14.5 / 8.5, not 12.5 / 7. The card grew from 44px to 62px and its badge from
    13px to 58; type left at the old sizes reads as a caption inside a card that is now an object. */
 .tl-fnm { font-size: 14.5px; font-weight: 600; color: var(--tl-nearblack); white-space: nowrap; line-height: 1.15; }
+/* ⚠️ THE NAME AS A LINK LOOKS EXACTLY LIKE THE NAME. It is a `<button>` for the keyboard and for
+   assistive tech — a name that navigates must be reachable by Tab and announceable as an action —
+   and the button's own chrome is stripped so the card reads as the ref draws it. The affordance is
+   the underline on hover, which is the app's own idiom for a link inside prose. */
+.tl-fnmlink {
+  /* ⚠️ `font-family` ALONE, NEVER THE `font` SHORTHAND. `font: inherit` resets EVERY font longhand,
+     so it wiped `.tl-fnm`'s own 14.5px/600 and the name rendered at the page's inherited 16px/400 —
+     the same class of fault this repo records against the `background` shorthand, in a different
+     property. A button's UA style changes the family and nothing `.tl-fnm` states, so the family is
+     the only thing that needs inheriting. */
+  background: none; border: 0; padding: 0; margin: 0; cursor: pointer;
+  font-family: inherit; text-align: left; text-decoration: none;
+}
+.tl-fnmlink:hover { text-decoration: underline; text-underline-offset: 2px; }
+.tl-fnmlink:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; border-radius: 2px; }
 .tl-ffx {
   font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .1em;
   text-transform: uppercase; color: var(--tl-muted); white-space: nowrap;
