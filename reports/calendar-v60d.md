@@ -112,23 +112,38 @@ row that can actually lose its card, which is a question about the row model rat
 
 ## Phase 3 — the sweep
 
-**Not done, and nothing was retired.** The sweep ran the 33 pre-v60 `cal*` measurement files against
-the corrected board. In ~25 minutes it reached 12 of them and **all 12 failed**:
+**Run in full; nothing retired.** The sweep put all 33 pre-v60 `cal*` measurement files against the
+corrected board. It finished in 7.0 minutes of wall clock: **37 cases failed, 17 passed, 20 never
+ran** (Playwright stopped them once the failure ceiling was hit).
+
+**29 of the 33 files** carry at least one failure:
 
 `calAccept55` · `calCaps58` · `calCard` · `calCard54` · `calCentre` · `calContrast` · `calCopy55` ·
-`calDeferred` · `calFade55` · `calFaults56` · `calFrame56` · `calGhost`
+`calDeferred` · `calFade55` · `calFaults56` · `calFrame56` · `calGhost` · `calGround54` ·
+`calInset55` · `calOpen54` · `calOrder58` · `calRowHead` · `calRowWords55` · `calSemantics58` ·
+`calShot39` · `calShot54` · `calSurface58` · `calTask54` · `calText` · `calTint54` · `calTodoCheck` ·
+`calV40` · `calViews54` · `calWindow58`
 
-Twelve for twelve is a clear signal about the population, and it is **not** enough to delete
-thirty-odd lock files on. This repo's own rule about a case you are removing is that *the
-assertions it was standing in front of are unproved, not passing* — and a red file may be red for
-one stale claim while five live ones behind it have never been reached. Retiring them is a small,
+⚠️ **And 17 cases inside those same files PASSED**, which is precisely why none of them was
+deleted. This repo's own rule about a case you are removing is that *the
+assertions it was standing in front of are unproved, not passing* — and the run proves that
+concretely here: 17 live claims are spread through the same files as the 37 dead ones, and 20 more
+never ran at all, so their status is **unknown rather than stale**. Deleting by filename would take
+all three groups together. Retiring them is a small,
 self-contained task with a clear method (read each file's first failing claim, decide stale or
 regression, delete or retarget) and it should not be done at the tail of a long session on a
 partial run.
 
-**What is certain**: the 33 pre-v60 files describe boards with a field, a sticky rail, masked
-fades, one flat list and no sections. **What is unknown**: whether any of them still carries a
-claim worth keeping. That is the next task, and it is the only thing left in v60.
+**What is certain**: the 33 files describe boards with a field, a sticky rail, masked fades, one flat
+list and no sections, and 29 of them say so out loud. **What is unknown**: which of the 17 passing
+and 20 unrun cases are worth keeping. Reading them one at a time — stale claim, or a regression this
+pack introduced — is the only thing left in v60, and it wants its own short session rather than the
+tail of this one.
+
+⚠️ **`calTodoCheck` is in the failing list and it is the one to read first.** Its claim is that
+*"/todo is untouched by the calendar pass"* — a claim about a different page. If that is a real
+regression rather than a stale selector, it is the only fault in this sweep that reaches beyond the
+calendar.
 
 ---
 
