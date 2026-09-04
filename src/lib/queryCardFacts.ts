@@ -237,8 +237,22 @@ export function cardMaterials(items: Query["materialsWanted"]): {
     if (!label) continue;
     recorded = true;
     const slot = classifyQueryMaterial(item);
+    /**
+     * ⚠️ THE VALUE IS THE QUANTITY OR `Sent` — NEVER THE ROW'S OWN NAME. `formatQueryMaterial`
+     * returns the material's label, so a synopsis with no page count came back as "Synopsis" and
+     * the row rendered "Synopsis · Synopsis". A value column that repeats its own label states
+     * nothing and reads as a bug, which is what it was.
+     *
+     * ⚠️ THE TEST IS A DIGIT, and it is the honest one: a quantity is the only thing these three
+     * rows can carry beyond their own name — "First 3 chapters", "2 pages", "7,400 words". No digit
+     * means the material went with no amount recorded, and `Sent` is exactly what is known.
+     *
+     * ⚠️ `other` IS EXEMPT because its value IS free text the writer typed, which may legitimately
+     * contain no digit and is never the row's name.
+     */
+    const value = slot === "other" || /\d/.test(label) ? label : "Sent";
     /* Two items in one slot read as one parcel: "First 3 chapters · 50 pages". */
-    materials[slot] = materials[slot] ? `${materials[slot]} · ${label}` : label;
+    materials[slot] = materials[slot] ? `${materials[slot]} · ${value}` : value;
   }
   return { materials, materialsRecorded: recorded };
 }
@@ -285,10 +299,17 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
    * captioned `sent` over that date would state that something went out that day. Nothing did:
    * the whole meaning of the status is that the send was the last thing that happened.
    */
+  /**
+   * ⚠️ WHEN THE DEFINING DATE IS UNKNOWN THE LEAF SHOWS THE SEND AND SAYS `sent`. Falling back to
+   * `dateSent` while keeping the caption `closed` or `requested` puts the send date under a word
+   * that describes a different event — a true date under a false label, which is worse than either
+   * alone. The elapsed line then says nothing, because there is nothing to measure.
+   */
+  const hasDefiningDate = !!query.lastStatusChange;
   const leafIso =
-    status === QueryStatus.NO_RESPONSE
+    status === QueryStatus.NO_RESPONSE || !hasDefiningDate
       ? (sentMs != null ? new Date(sentMs).toISOString() : query.dateSent)
-      : (query.lastStatusChange ?? query.dateSent);
+      : query.lastStatusChange;
   const leafMs = leafIso ? new Date(leafIso).getTime() : NaN;
 
   const resolved = resolveExpectedDate(query, sentMs, input.agencyWeeks, input.replyStated ?? null);
@@ -305,7 +326,7 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
          * status here and not on the court: a query that was never answered ends on a send.
          */
         const caption =
-          status === QueryStatus.NO_RESPONSE
+          status === QueryStatus.NO_RESPONSE || !hasDefiningDate
             ? "sent"
             : turn === "you"
               ? "requested"
@@ -387,8 +408,7 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
      * saying; equality alone cannot tell the two apart, which is why this reads the FIELD rather
      * than comparing two numbers.
      */
-    const hasLastActivity = !!query.lastStatusChange;
-    const replied = hasLastActivity && sentMs != null && !Number.isNaN(leafMs)
+    const replied = hasDefiningDate && sentMs != null && !Number.isNaN(leafMs)
       ? Math.max(0, daysBetween(sentMs, leafMs))
       : null;
     caption = replied == null ? "" : replied === 0 ? "replied the same day" : `replied after ${spanWords(replied)}`;

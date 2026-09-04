@@ -66,9 +66,11 @@ import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
 import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
 import { QueryPanel, type PanelRung } from "./queries/QueryPanel";
+import { PortalMenu } from "./todo/PortalMenu";
+import { BrandDatePicker } from "./forms/BrandDatePicker";
 import { rungFacts, waitProgress } from "../lib/queryPanelRungs";
 import { cardFacts, cardMaterials, turnFor, MATERIAL_SLOTS, type Turn } from "../lib/queryCardFacts";
-import { MATERIAL_ROW_NAMES } from "../lib/agentMaterials";
+import { MATERIAL_ROW_NAMES, type MaterialKind } from "../lib/agentMaterials";
 import {
   QUICK_FILTERS, quickCounts, GRID_GROUPS, GRID_SORTS,
   emptyGridFilters, gridFiltersAreEmpty, gridFilterCount, matchesGridFilters, type GridFilters,
@@ -2792,9 +2794,54 @@ export const Queries: React.FC<{
     const entry = rungEntry(activityId);
     if (entry) setCorrecting({ step: "edit", entry });
   };
-  const openRungMenu = (activityId: string, _anchor: HTMLElement) => {
-    const entry = rungEntry(activityId);
-    if (entry) onEditEntry(entry);
+  const openRungMenu = (activityId: string, anchor: HTMLElement) => setRungMenu({ anchor, activityId });
+
+  /**
+   * ⚠️ ONE MATERIAL ON OR OFF, THROUGH THE ENCODER THAT OWNS THE SHAPE. `materialsWanted` is a
+   * backward-compatible union of plain strings and structured `QueryMaterial`s, and the ARRAY is
+   * the delimiter — so a toggle rewrites the list through `formatQueryMaterial`/`classifyQueryMaterial`
+   * rather than splicing strings, which is how the free-text Other survives a writer's punctuation.
+   *
+   * ⚠️ TICKING A ROW RECORDS THAT IT WENT, WITH NO QUANTITY. A quantity is a separate statement and
+   * the panel does not invent one — the row reads `Sent` until somebody says how much, which is the
+   * same rule the value column follows.
+   */
+  const toggleQueryMaterial = (kind: MaterialKind) => {
+    if (!activeQuery) return;
+    const items = (activeQuery.materialsWanted ?? []) as (string | QueryMaterial)[];
+    const has = items.some((it) => classifyQueryMaterial(it) === kind);
+    const next = has
+      ? items.filter((it) => classifyQueryMaterial(it) !== kind)
+      : [...items, MATERIAL_ROW_NAMES[kind]];
+    const id = activeQuery.id;
+    void updateQuery(id, { materialsWanted: next } as never);
+    showToast({
+      message: has ? `${MATERIAL_ROW_NAMES[kind]} removed` : `${MATERIAL_ROW_NAMES[kind]} recorded`,
+      undo: () => void updateQuery(id, { materialsWanted: items } as never),
+    });
+  };
+
+  /**
+   * ⚠️ THE METHOD CYCLES THROUGH THE FOUR THE APP KNOWS, in place — decision 4's "direct edits skip
+   * the correction fork": clicking a dotted field says "this was recorded wrong", which is one of
+   * the fork's two answers, so it goes straight through with a receipt. The fork stays reachable
+   * from ⋯ for the other answer.
+   */
+  const cycleSendMethod = () => {
+    if (!activeQuery) return;
+    /* ⚠️ THE ENUM'S OWN ORDER, TAKEN FROM THE ENUM. A hand-written list here was wrong on its first
+       run — `FORM` does not exist, the member is `ONLINE_FORM` — and a literal list would go stale
+       the day a fifth method lands. */
+    const order = Object.values(SubmissionMethod);
+    const i = order.indexOf(activeQuery.sendMethod as SubmissionMethod);
+    const next = order[(i + 1 + order.length) % order.length];
+    const prev = activeQuery.sendMethod;
+    const id = activeQuery.id;
+    void updateQuery(id, { sendMethod: next } as never);
+    showToast({
+      message: `Sent via ${sendMethodLabel(next)}`,
+      undo: () => void updateQuery(id, { sendMethod: prev } as never),
+    });
   };
   /**
    * ⚠️ THE EXPECTED DATE IS THE WRITER'S OWN FIELD, NOT AN ACTIVITY. It writes
@@ -2823,8 +2870,13 @@ export const Queries: React.FC<{
         : { [WRITER_EXPECTED_FIELD]: deleteField(), [WRITER_EXPECTED_SET_AT_FIELD]: deleteField() }) as never),
     });
   };
-  const [expectedEditOpen, setExpectedEditOpen] = useState(false);
-  const openExpectedEdit = () => setExpectedEditOpen(true);
+  /** The dotted expected-date field's own element, so the picker opens ON it. */
+  const [expectedAnchor, setExpectedAnchor] = useState<HTMLElement | null>(null);
+  /** The ⋯ menu's anchor and which rung it belongs to — `null` when closed. */
+  const [rungMenu, setRungMenu] = useState<{ anchor: HTMLElement; activityId: string } | null>(null);
+  /** The panel's materials section, in edit mode. */
+  const [panelMatsEdit, setPanelMatsEdit] = useState(false);
+  const openExpectedEdit = (anchor: HTMLElement) => setExpectedAnchor(anchor);
 
   const panelRungs: PanelRung[] = (() => {
     if (!panelRow || !activeQuery) return [];
@@ -2834,6 +2886,7 @@ export const Queries: React.FC<{
       status: r.status,
       event: r.event,
       detail: i === 0 && activeQuery.sendMethod ? `· ${sendMethodLabel(activeQuery.sendMethod)}` : undefined,
+      onEditDetail: i === 0 ? cycleSendMethod : undefined,
       dateLabel: r.ms ? fmtShortISO(new Date(r.ms).toISOString()) : "—",
       onEditDate: () => openRungDateEdit(r.id),
       onMenu: (anchorEl) => openRungMenu(r.id, anchorEl),
@@ -2860,7 +2913,7 @@ export const Queries: React.FC<{
           expectedLabel: expMs
             ? `Expected by ${fmtShortISO(new Date(expMs).toISOString())}${panelRow.facts.expectedSource === "writer" ? " · your date" : ""}`
             : "No date expected",
-          onEditExpected: () => openExpectedEdit(),
+          onEditExpected: (anchor: HTMLElement) => openExpectedEdit(anchor),
         },
       });
     }
@@ -5222,6 +5275,66 @@ export const Queries: React.FC<{
             * query filtered out of the current view has no panel — which is the same rule the
             * position counter follows, and stops `N of M` counting something you cannot step to.
             */}
+          {/**
+            * ⚠️ THE RUNG MENU IS `PortalMenu`, THE APP'S ONE MENU CHASSIS — three verbs, each with
+            * the consequence copy the build prompt specifies. A bespoke popover for three items
+            * would be a second menu implementation on a page that already has one.
+            *
+            * ⚠️ AND THE THREE ANSWER DIFFERENT QUESTIONS, which is why they are three and not a
+            * single "Edit". A mistake is corrected (the fork's own branch); a change since is
+            * RECORDED as a new event; a deletion re-derives the query and is previewed first.
+            */}
+          {rungMenu && (() => {
+            const entry = rungEntry(rungMenu.activityId);
+            if (!entry) return null;
+            return (
+              <PortalMenu
+                anchor={rungMenu.anchor}
+                ariaLabel={`Correct or delete: ${entry.label}`}
+                groups={[{ head: null, entries: [
+                  { kind: "leaf", id: "rung-correct", label: "I'm correcting a mistake" },
+                  { kind: "leaf", id: "rung-changed", label: "Something changed since" },
+                  { kind: "leaf", id: "rung-delete", label: "Delete this activity" },
+                ] }]}
+                onPick={(item) => {
+                  setRungMenu(null);
+                  if (item.id === "rung-correct") onEditEntry(entry);
+                  else if (item.id === "rung-changed") openRecord(activeQuery!);
+                  else if (item.id === "rung-delete") onDeleteEntry(entry);
+                }}
+                onClose={() => setRungMenu(null)}
+              />
+            );
+          })()}
+
+          {/**
+            * ⚠️ THE EXPECTED DATE'S PICKER — Form 11's, never a native `input[type=date]`. It writes
+            * through `commitExpectedDate`, the one writer, so the provenance argument holds: a value
+            * in `writerExpectedDate` is the writer's because there is nowhere else it comes from.
+            */}
+          {expectedAnchor && activeQuery && (() => {
+            const r = expectedAnchor.getBoundingClientRect();
+            return (
+              <>
+                <button type="button" className="qpn-pickscrim" aria-label="Close date picker"
+                  onClick={() => setExpectedAnchor(null)} />
+                <div
+                  className="qpn-pick"
+                  role="dialog"
+                  aria-label="Change the expected date"
+                  /* ⚠️ CLAMPED TO THE VIEWPORT, from the field's own rect. The dotted field sits at
+                     the RIGHT edge of a 580px panel, so a picker hung from its left runs off. */
+                  style={{ top: Math.min(r.bottom + 6, window.innerHeight - 380), left: Math.max(8, r.right - 300) }}
+                >
+                  <BrandDatePicker
+                    value={writerExpectedIso(activeQuery) ?? ""}
+                    onChange={(iso) => { commitExpectedDate(iso); setExpectedAnchor(null); }}
+                  />
+                </div>
+              </>
+            );
+          })()}
+
           {panelRow && activeQuery && (
             <QueryPanel
               open
@@ -5274,9 +5387,16 @@ export const Queries: React.FC<{
               })()}
               expectedLabel={panelRow.expectedMs ? fmtShortISO(new Date(panelRow.expectedMs).toISOString()) : "—"}
               materialsRecorded={panelRow.facts.materialsRecorded}
-              /* the existing Edit Query drawer owns materials — one editor, not a second one here */
-              onListMaterials={() => openEditQuery(activeQuery.id)}
-              onEditMaterials={() => openEditQuery(activeQuery.id)}
+              /**
+               * ⚠️ IN PLACE, NOT THE LEGACY SHEET. Both of these opened `EditQueryDrawer` — the
+               * hole-punched `EDITING QUERY` surface Phase 4 was meant to replace — so the panel
+               * quietly handed the reader back to the thing it exists instead of. Phase 6 deletes
+               * that component; nothing on this page may reach it before then.
+               */
+              matsEditing={panelMatsEdit}
+              onListMaterials={() => setPanelMatsEdit(true)}
+              onEditMaterials={() => setPanelMatsEdit((v) => !v)}
+              onToggleMaterial={(kind) => toggleQueryMaterial(kind)}
               noteCount={journalEntries.filter((j) => j.queryId === activeQuery.id).length}
             />
           )}

@@ -53,7 +53,28 @@ describe("the query's verbs live in one kebab, not a bar", () => {
   it("the ⋯ is gone, and nothing hides behind one", () => {
     expect(code, "the query-actions menu came back").not.toContain('ariaLabel="Actions for this query"');
     expect(code, "the kebab button came back").not.toContain("qc-kebab");
-    expect(code, "a second menu component arrived on this page").not.toContain("PortalMenu");
+    /**
+     * ⚠️ RETARGETED, AND THE LAW IS UNCHANGED: the QUERY'S four verbs are visible controls, not
+     * items hidden behind a kebab. This line forbade the string `PortalMenu` as a stand-in for
+     * that — a spelling standing in for a claim — and it caught a menu the design asks for.
+     *
+     * The panel's ⋯ is a PER-RUNG correction menu on the timeline: three verbs about ONE recorded
+     * activity ("I'm correcting a mistake" / "Something changed since" / "Delete this activity"),
+     * specified in the build prompt's Phase 4 and required to use `PortalMenu` because it is the
+     * app's one menu chassis. It is not the query-actions kebab this test retired, and nothing
+     * about the query's own verbs moved into it.
+     *
+     * So the original string stays exactly as it was — it names the retired control — and the new
+     * clause below says the only permitted menu is a rung's. Broadening the first into a pattern
+     * was tried and was WRONG: `ariaLabel="More query actions"` already exists in the retired
+     * record branch, so a looser regex forbade something this test never claimed anything about. `queryPanel.test.ts` holds the other half —
+     * the three verbs, and that each goes somewhere different.
+     */
+    expect(code, "the query-actions menu came back").not.toContain('ariaLabel="Actions for this query"');
+    const menus = [...code.matchAll(/<PortalMenu[\s\S]{0,400}?ariaLabel=\{?([^\n]*)/g)].map((m) => m[1]);
+    for (const a of menus) {
+      expect(a, `a PortalMenu on this page is not anchored to a rung: ${a}`).toMatch(/rung|Correct or delete/i);
+    }
   });
 
   it("the four verbs sit in the pane's control cell, and only there", () => {

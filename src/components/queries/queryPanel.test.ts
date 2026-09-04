@@ -69,3 +69,66 @@ describe("⚠️ the panel's chrome is not tinted, and the ladder starts below i
     expect(rule(".qpn-progbar"), "the progress track has no rule").toContain("7px");
   });
 });
+
+/**
+ * ⚠️ NOTHING ON `#/queries` OPENS THE LEGACY `EDITING QUERY` SHEET.
+ *
+ * The panel's materials `Edit` called `openEditQuery`, which slides in `EditQueryDrawer` — the
+ * hole-punched surface Phase 4 exists instead of. So the new page quietly handed the reader back to
+ * the old one, and it looked like a feature rather than a regression.
+ *
+ * ⚠️ ASSERTED OVER THE LIVE BRANCH ONLY. `Queries.tsx` still contains the retired record view until
+ * Phase 6 deletes it, and that branch has its own `Edit` button — unreachable, since the grid is
+ * always the page. Slicing to the live branch is what stops this passing or failing for the wrong
+ * reason; the whole-file count is reported so the dead one cannot grow.
+ */
+describe("⚠️ the legacy edit sheet is unreachable from the live page", () => {
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8");
+  const src = page.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+
+  /** The live branch: from the grid's ternary to the `) : (` that opens the retired record view. */
+  const liveBranch = (() => {
+    const from = src.indexOf("{GRID_IS_THE_PAGE ? (");
+    expect(from, "the page's view switch is gone — this slice is unanchored").toBeGreaterThan(-1);
+    const to = src.indexOf("\n        ) : (", from);
+    expect(to, "the record branch's opener is gone — the slice would run to end of file")
+      .toBeGreaterThan(from);
+    return src.slice(from, to);
+  })();
+
+  it("the live branch calls nothing that opens it", () => {
+    expect(liveBranch, "the live page still opens the legacy edit sheet").not.toContain("openEditQuery");
+  });
+
+  it("the panel's materials Edit toggles in place instead", () => {
+    expect(liveBranch).toContain("setPanelMatsEdit");
+    expect(liveBranch).toContain("onToggleMaterial");
+  });
+
+  it("⚠️ and the only surviving caller is inside the branch Phase 6 deletes", () => {
+    /* If this count grows, a new live path has appeared and the slice above may not cover it. */
+    const total = (src.match(/openEditQuery\(/g) ?? []).length;
+    expect(total, `openEditQuery is called ${total} times; expected 1 (the retired record view)`).toBe(1);
+  });
+
+  it("the four in-place editors are wired", () => {
+    for (const [what, needle] of [
+      ["the method cycle", "cycleSendMethod"],
+      ["the rung date editor", "openRungDateEdit"],
+      ["the expected-date picker", "BrandDatePicker"],
+      ["the rung menu", "PortalMenu"],
+    ] as const) {
+      expect(src, `${what} is not wired`).toContain(needle);
+    }
+  });
+
+  it("⚠️ the rung menu offers three verbs, and each goes somewhere different", () => {
+    for (const id of ["rung-correct", "rung-changed", "rung-delete"]) {
+      expect(src, `${id} is not offered`).toContain(id);
+    }
+    /* correct → the fork; changed → the record flow; delete → the consequence preview */
+    expect(src).toMatch(/rung-correct[\s\S]{0,120}onEditEntry/);
+    expect(src).toMatch(/rung-changed[\s\S]{0,120}openRecord/);
+    expect(src).toMatch(/rung-delete[\s\S]{0,120}onDeleteEntry/);
+  });
+});

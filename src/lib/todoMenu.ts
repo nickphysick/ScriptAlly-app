@@ -38,6 +38,16 @@ export type MenuItemId =
   | "view-agent"
   | "edit-task"
   | "delete-task"
+  /**
+   * ⚠️ THREE FROM THE QUERY CENTRE'S RUNG MENU, additive. `PortalMenu` is the app's one menu
+   * chassis and the panel's ⋯ is a menu; a second implementation for three items would be the
+   * duplicate-mechanism fault this repo keeps retiring. The union is the chassis's vocabulary, so
+   * a new caller extends it rather than widening the type to `string` — which would let any typo
+   * through for every existing caller.
+   */
+  | "rung-correct"   // "I'm correcting a mistake" → CorrectionFork's mistake branch
+  | "rung-changed"   // "Something changed since"  → the Record response flow
+  | "rung-delete"    // "Delete this activity"     → consequence preview, then deleteActivity
   /* ⚠️ `give-date` IS REMOVED, not deprecated (Noteboard rebuild, 22 Aug). It converted a note in
      place — one write, and the note left the board. The board PROJECTS a task now: the note stays
      and a second document appears beside it. Leaving the id in the union would leave a
