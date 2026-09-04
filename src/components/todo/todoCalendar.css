@@ -228,6 +228,11 @@
   --tl-stage-offer: #d7e0e8;   /* an offer, while it is open */
   --tl-stage-closed: #e4e1db;  /* closed, rejected, withdrawn, no response */
 
+  /* ⚠️ THE TASK BAND'S PAPER, NAMED FOR WHAT IT IS RATHER THAN FOR ITS COLOUR. A task is written
+     by the writer, so it wears the note's yellow — the same reason the Noteboard does. */
+  --tl-task-band: #f5e9bf;
+  --tl-task-ink: #8a7a3a;
+
   /* ⚠️ v60 DELETES THE FIELD: `.board` is `background: transparent; border: none; border-radius: 0`.
      The board sits on the page. What replaced it is the SECTION — six white containers with tinted
      headers — so a field behind them would be a seventh surface behind six objects, and the tinted
@@ -2176,6 +2181,25 @@ button.tl-tchip { cursor: pointer; }
   border-bottom: 1px solid rgba(58, 28, 20, .06);
   white-space: nowrap; overflow: hidden; pointer-events: none;
 }
+/* ⚠️ THE TASK BAND IS NOTE-YELLOW — the Noteboard's own paper, because a task is a thing the
+   writer wrote rather than a stage a query reached. It is deliberately outside the tint ladder: the
+   ladder's rungs mean "how far along this submission is", which is a sentence about a task's
+   nothing. The holder is the same yellow's ink so the band reads as one object. */
+.tl-sband--task { background: var(--tl-task-band); }
+/* ⚠️ THE TASK HOLDER KEEPS ITS OWN INK EVEN WHEN THE TASK IS OVERDUE, and it needs the extra class
+   to do it: `.tl-p.owed .tl-sh` is the same 0-2-0 and is declared later, so an overdue task's
+   `Overdue` came out rose against the ref's yellow-brown. The band is one object — a rose word on
+   yellow paper reads as a second treatment arguing with the first. */
+.tl-p .tl-sband--task .tl-sh { color: var(--tl-task-ink); }
+/* the name sits a shade smaller on a task — the ref's `.card.tk .fnm`; a task's text is a sentence
+   the writer typed, not a name, and it runs longer */
+.tl-p .tl-sband--task ~ .tl-cardbody .tl-fnm { font-size: 14.5px; }
+/* the checkbox glyph, at the ref's size — a task is a thing you tick */
+.tl-tbox {
+  width: 13px; height: 13px; flex: 0 0 auto;
+  border-radius: 3px; border: 1.5px solid #4a3d33;
+}
+
 /* the eight rungs of the ladder — see the tokens, and `calendarStageTints.test.ts` */
 .tl-st-out-1 { background: var(--tl-stage-out-1); }
 .tl-st-out-2 { background: var(--tl-stage-out-2); }
@@ -2221,7 +2245,12 @@ button.tl-tchip { cursor: pointer; }
   font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .16em;
   text-transform: uppercase; color: #7d6c5c;
 }
-.tl-p.owed .tl-sh, .tl-p.quiet .tl-sh { color: #8c4f4a; }
+/* ⚠️ THE ROSE HOLDER IS FOR A QUERY BAND, NOT A TASK'S. A task's band is one yellow object and
+   its holder is that yellow's own ink; `:not(.tl-sband--task)` is what keeps an overdue task from
+   taking the query treatment, and it is on THIS rule rather than fought at higher specificity in
+   the task's — the exclusion belongs where the claim is made. */
+.tl-p.owed .tl-sband:not(.tl-sband--task) .tl-sh,
+.tl-p.quiet .tl-sband:not(.tl-sband--task) .tl-sh { color: #8c4f4a; }
 
 /* ⚠️ THE BODY DROPS BELOW THE BAND — the ref's `top: calc(50% + 13px)`, the card's centre pushed
    down by half the band's height. Written against the band's own height rather than as a literal
@@ -2466,6 +2495,36 @@ button.tl-tchip { cursor: pointer; }
   border-bottom: 1px solid var(--tl-ch-line);
   display: flex; align-items: center; gap: 12px; padding: 0 16px;
 }
+/* ══ BEHAVIOURS (v63, §G) ═══════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ THE GROUP BAR STICKS TO THE TOP OF THE SCROLLER, so a reader four rows into Urgent still knows
+ * which group they are in. `top: 0` because the bar is inside the rows region and there is nothing
+ * above it to clear — and a sticky on a page that cannot scroll CLAMPS rather than idling, which is
+ * why the offset is zero rather than a guessed clearance for chrome that is not there.
+ */
+.tl-gdiv { position: sticky; top: 0; z-index: 8; cursor: pointer; }
+.tl-gdiv:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+/* the chevron states which way the group is — it is the only thing that changes when it collapses */
+.tl-gchev {
+  margin-left: 10px; flex: 0 0 auto;
+  font-size: 11px; line-height: 1; color: #a89880;
+}
+/* ⚠️ THE EMPTY LANE IS A GRAB HANDLE FOR THE WINDOW. Dragging it moves by WHOLE WEEKS: a board
+   whose columns are weeks cannot honestly stop between two of them, and a half-week offset makes
+   every column label a lie. */
+.tl-c-tl { cursor: grab; }
+.tl-c-tl:active { cursor: grabbing; }
+/* the action's receipt — it says what was pressed, never that the work is done */
+.tl-acttoast {
+  position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
+  z-index: 60; pointer-events: none;
+  padding: 9px 16px; border-radius: 10px;
+  background: var(--tl-nearblack); color: #fdfaf5;
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px;
+  letter-spacing: .14em; text-transform: uppercase; white-space: nowrap;
+  box-shadow: 0 8px 22px rgba(58, 28, 20, .18);
+}
+
 .tl-grp:first-child .tl-gdiv { border-top: none; }
 .tl-gdiv::before { display: none; }
 .tl-gdiv .gp {

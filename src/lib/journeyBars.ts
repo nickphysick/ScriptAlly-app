@@ -329,6 +329,14 @@ export interface Segment {
   /** this piece lies PAST the named end — transparent, outlined, label dimmed */
   hollow?: true;
   /** what the one portalled tooltip says for this bar: the label and the named date */
+  /**
+   * ⚠️ A TASK BAR IS A SEGMENT TOO (v63, §F), AND THIS IS WHAT THE CARD BRANCHES ON. One card
+   * component draws a query and a task — the ref uses one as well — so the band's contents differ
+   * and nothing else does. `status` is required by this type and is the one field a task cannot
+   * honestly fill; it is never read where `isTask` is set.
+   */
+  isTask?: true;
+  taskId?: string;
   tip: string;
   /**
    * The query's own status, and whether a reminder on it has fallen due.

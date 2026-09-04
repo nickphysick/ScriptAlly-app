@@ -53,6 +53,8 @@ import type { CalSection, CalSectionFacts } from "../../lib/calendarSections";
 import { stageFor, turnWordFor } from "../../lib/queryCardFacts";
 import { fadesFor, cardBounds } from "../../lib/calendarFade";
 import type { CapKind } from "../../lib/calendarPill";
+import { taskBar, taskHolder, taskTail } from "../../lib/taskBars";
+import { overdueSpan } from "../../lib/journeyBars";
 import {
   TAB_ORDER, TAB_LABEL, rowInTab, tabOf, type TimelineTab,
   GROUP_MODES, GROUP_MODE_LABEL, groupKeyOf, type GroupMode,
@@ -538,13 +540,18 @@ const Piece: React.FC<{
           ⚠️ THE BAND REPLACES THE FREE-STANDING BADGE. v61's disc burst past the card's left edge
           and every ancestor was held `overflow: visible` for it; the mark is inside the band now,
           so that overhang, its reserved padding and the whole escape route go with it. */}
-      <span className={`tl-sband tl-st-${stageFor(sg.status)}`}>
+      <span className={sg.isTask ? "tl-sband tl-sband--task" : `tl-sband tl-st-${stageFor(sg.status)}`}>
         {/* ⚠️ THE APP'S OWN `StatusDot`, AT 20px — the pack's value, and a deliberate departure
             from the ref's 14px `.sseg svg`. The ref sizes a flat glyph of its own making; this
             app's dot carries DIRECTION AND STAGE in its shape, and 14px loses that. A glyph's
             legible size is part of the glyph, which is the app's half of the authority split. */}
-        <StatusDot status={sg.status} overrideSize={STAGE_BAND_DOT_PX} />
-        <span className="tl-sw">{sg.status}</span>
+        {/* ⚠️ A TASK'S BAND CARRIES A CHECKBOX AND THE WORD "Task", NOT A `StatusDot`. A task has no
+            query status; drawing one would put a pipeline stage on something that has never been
+            sent anywhere. The ref draws the same checkbox for the same reason. */}
+        {sg.isTask
+          ? <><span className="tl-tbox" aria-hidden /><span className="tl-sw">Task</span></>
+          : <><StatusDot status={sg.status} overrideSize={STAGE_BAND_DOT_PX} />
+              <span className="tl-sw">{sg.status}</span></>}
         {/* ⚠️ THE NUDGE NOTE JOINS THE STATUS RATHER THAN REPLACING IT (v63, §D). The ref swaps its
             headline to `Nudged 26 Aug`, which on THIS board would leave the band saying "Nudged"
             while its own tint says "Queried" — the rung is named for the status, so removing the
@@ -557,7 +564,7 @@ const Piece: React.FC<{
             one's clothes. */}
         {sg.nudgedOn && <span className="tl-snote">Nudged {shortCalDate(sg.nudgedOn)}</span>}
         {/* the holder, at the band's right end — `turnWordFor`, never a second reading */}
-        <span className="tl-sh">{turnWordFor(sg.status)}</span>
+        <span className="tl-sh">{sg.isTask ? taskHolder(!!sg.owed) : turnWordFor(sg.status)}</span>
       </span>
       <div className="tl-cardbody">
         {/* the glider: the ONLY thing that moves when clipped text glides on hover */}
@@ -576,6 +583,7 @@ const Piece: React.FC<{
                   the card is unchanged: additive, and the name is the conventional target anyway.
                   ⚠️ `stopPropagation`, or the card's own handler fires behind it and the reader
                   gets the work flow AND a navigation from one press. */}
+              {/* a task's name is its own text; an agent's is a link to the relationship */}
               {onOpen ? (
                 <button type="button" className="tl-fnm tl-fnmlink"
                   onClick={(e) => { e.stopPropagation(); onOpen(); }}
@@ -708,7 +716,12 @@ const Piece: React.FC<{
           the wait continues past the window; a dot there would mark the window rather than the
           work. The open end is where a wait with no named end is still running, which is what makes
           the lateness worth a mark. */}
-      {fade.right && !fade.clipped && (sg.owed || sg.state === "quiet") && (
+      {/* ⚠️ AN OVERDUE TASK IS AN OPEN END TOO. Its bar runs to today and keeps running, which is
+          the same statement a wait with no named end makes — so it takes the same pulse. The
+          segment carries `openRight`, and reading THAT rather than the query-shaped `fade` is what
+          lets one expression serve both kinds. */}
+      {((fade.right && !fade.clipped) || (sg.isTask && sg.openRight))
+        && (sg.owed || sg.state === "quiet") && (
         <span className="tl-pulsedot" aria-hidden />
       )}
 {/* ⚠️ NO DISSOLVE ON EITHER EDGE (v63, §D correction 1). Both overlays are deleted: a
@@ -826,9 +839,12 @@ function ActionSym({ kind }: { kind: ActionGlyph }) {
   );
 }
 
-function ActionMark({ urgent, kind, label, deed, style }: {
+function ActionMark({ urgent, kind, label, deed, style, onPress }: {
   urgent?: boolean; kind: ActionGlyph; label: string; deed: string;
   lane: number; style: React.CSSProperties;
+  /* ⚠️ THE PRESS IS REPORTED, NOT PERFORMED HERE. What the deed DOES belongs to the flow it opens;
+     this hands the word back so the board can say what was pressed. */
+  onPress?: (deed: string) => void;
 }) {
   return (
     <div className={`tl-act${urgent ? " tl-act--od" : ""}`} style={style} data-act={kind}>
@@ -838,7 +854,10 @@ function ActionMark({ urgent, kind, label, deed, style }: {
       <span className="tl-actlab">{label}</span>
       {/* ⚠️ A BUTTON, NOT A TILE. It is the one thing on this row you can press, so it is an element
           the keyboard can reach and assistive tech can announce. */}
-      <button type="button" className="tl-actbtn">{deed}<span aria-hidden>&nbsp;›</span></button>
+      <button type="button" className="tl-actbtn"
+        onClick={(e) => { e.stopPropagation(); onPress?.(deed); }}>
+        {deed}<span aria-hidden>&nbsp;›</span>
+      </button>
     </div>
   );
 }
@@ -1322,8 +1341,47 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     };
     for (const sg of segments) get(sg.rowKey).segs.push(sg);
     for (const n of nodes) get(n.rowKey).nodes.push(n);
+    /* ══ TASKS ARE BARS TOO (v63, §F) ════════════════════════════════════════════════════════
+       ⚠️ BUILT HERE, WHERE THE TASK'S OWN DATES ARE, AND PUSHED INTO THE SAME MAP. A task runs
+       from the day it was written to the day it is due; that span is the point, and a point on a
+       due date says when without saying how long it has been sitting there. One card component
+       draws both kinds — the ref uses one too — so the band's contents branch and nothing else. */
+    /* today's own index in the window, in the same fractional-day scale every bar uses */
+    const todayIdx = visible.indexOf(today);
+    for (const t of userTasks) {
+      if (t.done) continue;
+      const key = `task-${t.id}`;
+      if (!rows.some((r) => r.key === key)) continue;
+      const b = taskBar({
+        createdYmd: (t.createdAt ?? "").slice(0, 10),
+        dueYmd: t.dueDate ? String(t.dueDate).slice(0, 10) : null,
+      }, { days: visible, today });
+      if (!b) continue;
+      get(key).segs.push({
+        key: `tb-${t.id}`, rowKey: key, lane: 0,
+        from: b.from, to: b.to, side: "yours",
+        openLeft: b.openLeft, openRight: b.openRight,
+        /* the same two spans every other card states, in the same vocabulary */
+        fact: `Due ${shortCalDate(String(t.dueDate).slice(0, 10))}`,
+        /* ⚠️ A MEASURED SPAN, NOT THE BAND'S WORD AGAIN — and it reads `overdueSpan`, the board's
+           one elapsed-time vocabulary, rather than a second one written for tasks. */
+        tail: taskTail(String(t.dueDate).slice(0, 10), today, overdueSpan),
+        nudgedOn: null, nudgedAt: null,
+        capLeft: false, capRight: false,
+        label: t.text, short: t.text,
+        state: b.overdue ? "y3" : "y1",
+        todayAt: todayIdx, trueFrom: b.from, trueTo: b.to,
+        namedEndAt: b.to, tip: t.text,
+        /* ⚠️ A TASK IS NOT A QUERY AND CARRIES NO QUERY. `status` is required by the type and is
+           the one field a task cannot honestly fill; `isTask` is what the card branches on, so the
+           status is never read for a task and never drawn. */
+        status: QueryStatus.QUERIED, queryId: "",
+        isTask: true, taskId: t.id,
+        ...(b.overdue ? { owed: true as const } : {}),
+      });
+    }
     return m;
-  }, [segments, nodes]);
+  }, [segments, nodes, userTasks, rows, visible, today]);
 
   /* ⚠️ THE COUNT STATES WHAT IS ON SCREEN, never a total the filters have stopped describing. */
   const shown = rows.reduce((n, r) => n + r.items.length, 0) + segments.length;
@@ -1556,6 +1614,69 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const [statusPick, setStatusPick] = useState<QueryStatus[]>([]);
   /* which toolbar menu is open — one at a time, and `null` is closed */
   const [tbOpen, setTbOpen] = useState<null | "group" | "sort" | "status">(null);
+  /* ══ BEHAVIOURS (v63, §G) ═══════════════════════════════════════════════════════════════
+     ⚠️ COLLAPSING IS SESSION-ONLY, LIKE EVERY OTHER VIEW STATE ON THIS PAGE. No route, no
+     persistence: a board that remembered a collapsed group would hide work from a writer who has
+     forgotten they collapsed it, which is the one thing a board of outstanding work must not do. */
+  const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<string>>(new Set());
+  const toggleGroup = React.useCallback((key: string) => {
+    setCollapsedGroups((cur) => {
+      const next = new Set(cur);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }, []);
+  /* ⚠️ THE TOAST SAYS WHAT WAS PRESSED AND NOTHING MORE. An action button on this board opens the
+     flow that does the work; the toast is the receipt for the press, not a claim that the work
+     happened — a toast reading "Marked done" over a flow the writer has not completed is the
+     fabricated-confirmation fault. */
+  const [actToast, setActToast] = useState<string | null>(null);
+
+  /**
+   * ⚠️ DRAGGING THE EMPTY LANE MOVES THE WINDOW BY WHOLE WEEKS (v63, §G).
+   *
+   * The board's columns are weeks, so it cannot honestly stop between two of them — a half-week
+   * offset makes every column label a lie. The drag accumulates pixels and steps the window each
+   * time it passes a week's worth, keeping the remainder so a slow drag still moves.
+   *
+   * ⚠️ AND IT IS NOT DOM-MEASURED PLACEMENT. Nothing is positioned from a measurement; the
+   * pointer's own delta is divided by the lane's width, which the browser gives for free on the
+   * event's target, to learn how many days the reader has dragged.
+   */
+  const dragRef = React.useRef<{ x: number; carry: number; w: number } | null>(null);
+  const dragWindow = {
+    onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => {
+      /* ⚠️ THE EMPTY LANE ONLY. A press that started on a card is that card's, and stealing it
+         would make every action button impossible to click. */
+      if ((e.target as HTMLElement).closest(".tl-p, .tl-act, .tl-gdiv, button")) return;
+      const lane = (e.currentTarget as HTMLElement).querySelector<HTMLElement>(".tl-c-tl");
+      const w = lane?.getBoundingClientRect().width ?? 0;
+      if (!w) return;
+      dragRef.current = { x: e.clientX, carry: 0, w };
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    },
+    onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => {
+      const d = dragRef.current;
+      if (!d) return;
+      const perDay = d.w / Math.max(1, range.days);
+      const days = (d.x - e.clientX) / perDay + d.carry;
+      const weeks = Math.trunc(days / WEEK_STEP);
+      if (!weeks) return;
+      d.x = e.clientX;
+      d.carry = days - weeks * WEEK_STEP;
+      setWinStart((sIso) => shiftWindow(sIso, WEEK_STEP, weeks));
+    },
+    onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => {
+      dragRef.current = null;
+      try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch { /* already released */ }
+    },
+    onPointerCancel: () => { dragRef.current = null; },
+  };
+  React.useEffect(() => {
+    if (!actToast) return;
+    const t = setTimeout(() => setActToast(null), 3200);
+    return () => clearTimeout(t);
+  }, [actToast]);
   /* ⚠️ DENSITY IS THE SIDEBAR'S, NOT THE TOOLBAR'S — the ref puts its `Display` menu in the axis,
      and the split is the same one the two surfaces already keep: the toolbar asks how the rows are
      ARRANGED, the sidebar carries what you are looking at and how much of it fits. Session-only,
@@ -2621,8 +2742,20 @@ data-rowkey={r.key}
               carried `min(…, calc(100% - 206px))` so one near the edge folded inward — which put it
               on a day it does not belong to, on the one axis this board asks a reader to trust. An
               action past the window's edge is CLIPPED by the board, like everything else here. */}
-          {bar.segs.filter((sg) => sg.capWord && !rowUrgent).map((sg) => (
-            <ActionMark key={`act-${sg.key}`} kind={sg.capSource ?? "window"}
+          {/* ⚠️ A TASK'S ACTION IS THE SAME MARK AS EVERY OTHER ROW'S — a flag at the bar's end,
+              revealing MARK DONE on hover. It is a `sendBy` glyph because a task IS the writer's own
+              deadline; giving tasks a fifth symbol would say they are a different kind of thing
+              from a deadline you set yourself, which is exactly what they are not. */}
+          {bar.segs.filter((sg) => sg.isTask).map((sg) => (
+            <ActionMark onPress={setActToast} key={`tact-${sg.key}`} kind="sendBy"
+              label={sg.tail} deed="Mark done" lane={sg.lane}
+              style={{ ...laneVar(sg.lane),
+                ["--l" as string]: barLeft(sg),
+                ["--w" as string]: barWidth(sg),
+                left: "calc(var(--l) + var(--w) + 14px)" }} />
+          ))}
+          {bar.segs.filter((sg) => sg.capWord && !rowUrgent && !sg.isTask).map((sg) => (
+            <ActionMark onPress={setActToast} key={`act-${sg.key}`} kind={sg.capSource ?? "window"}
               label={sg.capOn ?? ""} deed={sg.capWord ?? ""} lane={sg.lane}
               style={{ ...laneVar(sg.lane),
                 ["--l" as string]: barLeft(sg),
@@ -2648,14 +2781,18 @@ data-rowkey={r.key}
             /* ⚠️ THE URGENT ACTION STANDS ON THE DATE IT IS OWED FOR, and is hidden until the row is
                hovered — the pulse dot is the only thing an urgent row states at rest. A label and a
                button on every late row at once is twelve instructions on one screen. */
-            const late = bar.segs.find((sg) => sg.owed || sg.state === "quiet");
+            /* ⚠️ NEVER A TASK. Its deed comes from `pillText(status)`, and a task's `status` is a
+               required-field placeholder it cannot honestly fill — so an overdue task rendered a
+               button reading "Queried ›". A task's action is its own flag, above. This is the
+               placeholder leaking into visible copy, which is the fabricated-value fault. */
+            const late = bar.segs.find((sg) => !sg.isTask && (sg.owed || sg.state === "quiet"));
             if (!late) return null;
             const p = pillText(late.status, holderOf(late), late.nudgeDue, !!late.owed,
               late.state === "ghost", late.state === "quiet");
             /* the tail already says how late, in the one lateness vocabulary — never recomputed */
             if (!late.tail) return null;
             return (
-              <ActionMark key={`od-${late.key}`} urgent kind={late.capSource ?? "sendBy"}
+              <ActionMark onPress={setActToast} key={`od-${late.key}`} urgent kind={late.capSource ?? "sendBy"}
                 label={late.tail} deed={p.text} lane={late.lane}
                 style={{ ...laneVar(late.lane),
                   ["--l" as string]: barLeft(late),
@@ -2798,7 +2935,12 @@ data-rowkey={r.key}
               </>
             );
           })()}
-          {r.items.map((it) => (
+          {/* ⚠️ A TASK ROW DRAWS NO POINTS — ITS BAR IS THE TASK (v63, §F). The chip-and-checkbox
+              rendering said WHEN a task was due and nothing about how long it had been waiting,
+              which is the one question a board of dates exists to answer. The points survive on
+              AGENT rows, where they are events on a relationship rather than the relationship
+              itself; retiring the whole map would have taken those with them. */}
+          {(r.key.startsWith("task-") ? [] : r.items).map((it) => (
             <button
               key={it.key}
               type="button"
@@ -3192,6 +3334,7 @@ data-rowkey={r.key}
                 style={{ "--tl-days": range.days } as React.CSSProperties}
                 onMouseMove={onLaneMove}
                 onMouseLeave={clearCross}
+                {...dragWindow}
               >
                 {/* ══ THE RAIL ═══════════════════════════════════════════════════════════════
                     ⚠️ IT USES THE SAME THREE COLUMNS AS EVERY ROW, and that is the whole of the
@@ -3287,7 +3430,14 @@ data-rowkey={r.key}
                           reading "everything" over every row on the board is a line of chrome that
                           states nothing — the same silence-wins rule an empty section follows. */}
                       {g.label !== "" && (
-                        <div className="tl-gdiv">
+                        <div className="tl-gdiv" role="button" tabIndex={0}
+                          aria-expanded={!collapsedGroups.has(g.key)}
+                          aria-label={`${collapsedGroups.has(g.key) ? "Expand" : "Collapse"} ${g.label}`}
+                          onClick={() => toggleGroup(g.key)}
+                          onKeyDown={(e) => {
+                            if (e.key !== "Enter" && e.key !== " ") return;
+                            e.preventDefault(); toggleGroup(g.key);
+                          }}>
                           <span className="gp">
                             {/* ⚠️ THE MARK COMES FROM WHAT THE GROUP IS. A section group draws its
                                 own icon; a status group draws the app's own `StatusDot`, which is
@@ -3301,8 +3451,15 @@ data-rowkey={r.key}
                           </span>
                           {/* what the group is FOR — absent where there is nothing true to say */}
                           {g.purpose && <span className="geb">{g.purpose}</span>}
+                          {/* ⚠️ THE CHEVRON SHOWS THE STATE, and the COUNT beside it is why a
+                              collapsed group stays honest: the pill still says how many rows are
+                              folded away, so nothing disappears without saying so. */}
+                          <span className="tl-gchev" aria-hidden>
+                            {collapsedGroups.has(g.key) ? "›" : "⌄"}
+                          </span>
                         </div>
                       )}
+                      {!collapsedGroups.has(g.key) && (
                       <div className="tl-gwrap">
                         {/* ⚠️ THE NUMBER COLUMN IS A SIBLING OF THE LANES, NOT A CELL IN EACH ROW.
                             One element per row, at exactly `--row-h`, so the numbers line up with
@@ -3318,6 +3475,7 @@ data-rowkey={r.key}
                         </div>
                         <div className="tl-glanes">{g.rows.map(row)}</div>
                       </div>
+                      )}
                     </div>
                   ))
                 )}
@@ -3337,6 +3495,8 @@ data-rowkey={r.key}
                     </div>
                   </>
                 )}
+                {/* the action's receipt — what was pressed, never a claim the work is done */}
+                {actToast && <div className="tl-acttoast" role="status">{actToast}</div>}
                 {cross && (
                   <>
                     <div className="tl-xh" style={{ left: `${cross.x}px` }} aria-hidden />

@@ -66,6 +66,11 @@ async function cards(page: import("@playwright/test").Page) {
         fovR: !!c.querySelector(".tl-fov.r"), pulse: !!c.querySelector(".tl-pulsedot"),
         evn: c.querySelectorAll(".tl-evn").length,
         nudgeNote: c.querySelector(".tl-snote")?.textContent?.trim() ?? null,
+        /* ⚠️ A TASK IS A CARD ON THIS BOARD AND IS NOT A QUERY. It has no status dot, its name is a
+           sentence the writer typed rather than a person's name, and it sits a shade smaller. Three
+           claims below carve it out — each with the reason at the assertion, because a carve-out
+           that only says "except tasks" is the kind that survives long after it stopped being true. */
+        isTask: !!c.querySelector(".tl-sband--task"),
         /* ⚠️ THE TYPE, AS THE BROWSER COMPUTES IT — px, against the ref's own px. A `rem` here
            would resolve against the page root rather than against the drawing the values came
            from, and would read as correct in the source. */
@@ -195,6 +200,10 @@ test.describe("v63 · D — the bar", () => {
     };
     const seen: Record<string, number> = {};
     for (const c of cs) {
+      /* ⚠️ A TASK IS OUTSIDE THE TINT LADDER, DELIBERATELY. The rungs mean "how far along this
+         submission is", which is a sentence about a task's nothing; its band is the note's yellow.
+         `calTask63` asserts that paper against its own token, so the band is checked either way. */
+      if (c.isTask) continue;
       expect(c.rung, `a band carries no rung class (${c.status})`).not.toBeNull();
       seen[c.rung!] = (seen[c.rung!] ?? 0) + 1;
       expect(hex(c.bandBg!), `${c.status}: band is ${c.bandBg}, rung ${c.rung} is ${rung[c.rung!]}`)
@@ -217,7 +226,11 @@ test.describe("v63 · D — the bar", () => {
     console.log("statuses:", JSON.stringify([...statuses]), "| holders:", JSON.stringify([...holders]));
     /* ⚠️ THE WORDS ARE `turnWordFor`'S, which the Query Centre's own cards draw. A calendar-local
        set would let the two surfaces disagree about whose court a query is in. */
-    const LEGAL = new Set(["With the agent", "With you", "Offer", "Closed", "No response"]);
+    /* ⚠️ A TASK'S HOLDER IS ITS OWN TWO WORDS. `turnWordFor` answers "whose court is this QUERY in";
+       a task is always the writer's, so its band says `With you` or `Overdue` — the second being a
+       word the query vocabulary has no use for. Both sets are legal here and `calTask63` asserts a
+       task uses only the task pair, so neither vocabulary can leak into the other. */
+    const LEGAL = new Set(["With the agent", "With you", "Offer", "Closed", "No response", "Overdue"]);
     for (const h of holders) {
       expect(LEGAL.has(h ?? ""), `"${h}" is not one of Query Centre's holder words`).toBe(true);
     }
@@ -230,10 +243,14 @@ test.describe("v63 · D — the bar", () => {
     const late = cs.filter((c) => c.owed), calm = cs.filter((c) => !c.owed);
     expect(late.length, "no late cards — the rose branch is unexercised").toBeGreaterThan(0);
     expect(calm.length, "no calm cards — the muted branch is unexercised").toBeGreaterThan(0);
-    for (const c of late) expect(c.holderInk, `${c.status} is late and its holder is not rose`)
-      .toBe("rgb(140, 79, 74)");
-    for (const c of calm) expect(c.holderInk, `${c.status} is calm and its holder is rose`)
-      .toBe("rgb(125, 108, 92)");
+    /* ⚠️ THE ROSE HOLDER IS A QUERY BAND'S. A task's band is one yellow object and its holder is
+       that yellow's own ink even when the task is overdue — a rose word on yellow paper reads as a
+       second treatment arguing with the first. Asserted for tasks in `calTask63`, against the
+       task's own token. */
+    for (const c of late.filter((x) => !x.isTask))
+      expect(c.holderInk, `${c.status} is late and its holder is not rose`).toBe("rgb(140, 79, 74)");
+    for (const c of calm.filter((x) => !x.isTask))
+      expect(c.holderInk, `${c.status} is calm and its holder is rose`).toBe("rgb(125, 108, 92)");
   });
 
   test("⚠️ (d4) the two text lines, and the ringed ! on what is late", async ({ page }) => {
@@ -244,14 +261,16 @@ test.describe("v63 · D — the bar", () => {
     for (const c of cs) {
       /* line one: the name in the page's serif, the agency italic beside it */
       expect(c.nmFam, "the name is not Playfair").toMatch(/Playfair/);
-      expect(c.nmSize, "the name is not 15.5px").toBe("15.5px");
+      /* a task's text is a sentence rather than a name and sits at 14.5 — the ref's `.card.tk .fnm` */
+      if (!c.isTask) expect(c.nmSize, "the name is not 15.5px").toBe("15.5px");
       /* ⚠️ THE HOUSE FLOOR FOR MIXED-CASE PLAYFAIR IN A CLIPPING BOX. The ref states none, which is
          safe in a document that clips nothing; this card carries `overflow: hidden`. */
       /* ⚠️ COMPARED IN PIXELS, NOT AS A RATIO. `1.3 × 15.5` is 20.15 and the division back gives
          1.2999999999999998 — a lock that reads correct CSS as a floor violation. The claim is
          "at least the floor's worth of leading", which is a pixel comparison with a hair of slack. */
+      /* the floor is a RATIO, so it follows the type: 1.3 of whatever size this card's name is */
       expect(parseFloat(c.nmLh!), "the name's leading is below the descender floor")
-        .toBeGreaterThanOrEqual(15.5 * 1.3 - 0.01);
+        .toBeGreaterThanOrEqual(parseFloat(c.nmSize!) * 1.3 - 0.01);
       if (c.agency) expect(c.agencyStyle, "the agency is not italic").toBe("italic");
       /* line two: a sentence, not a tag */
       expect(c.factFam, "the fact is not Inter").toMatch(/Inter/);
@@ -304,7 +323,11 @@ test.describe("v63 · D — the bar", () => {
     /* ⚠️ THE PULSE DOT IS ON AN OPEN END AND ONLY WHERE SOMETHING IS LATE — three conditions, and
        a lock that checked one would pass on a board that dotted every card. */
     for (const c of cs) {
-      const want = c.fadeR && !c.clipR && c.owed;
+      /* ⚠️ AN OVERDUE TASK IS AN OPEN END TOO and takes the same pulse — its bar runs to today and
+         keeps running, which is the same statement a wait with no named end makes. Its `fadeR` is
+         not set (that is the query-shaped derivation), so the expectation reads the task's own
+         openness instead; the claim — a pulse iff an open end that is late — is unchanged. */
+      const want = c.isTask ? !!c.owed : (c.fadeR && !c.clipR && c.owed);
       expect(c.pulse, `${c.status}: pulse ${c.pulse}, expected ${want}`).toBe(want);
     }
     const dotted = cs.filter((c) => c.pulse).length;
@@ -407,6 +430,9 @@ test.describe("v63 · D — the bar", () => {
     const seen: Record<string, Set<string>> = {};
     for (const c of cs) {
       for (const [k, want] of Object.entries(WANT)) {
+        /* a task's name is 14.5 (the ref's `.card.tk .fnm`) — its text is a sentence, not a name,
+           and it runs longer; and a task carries no agency, so that size is absent rather than wrong */
+        if (c.isTask && (k === "name" || k === "agency")) continue;
         const raw = (c.px as Record<string, string | null>)[k];
         if (raw == null) continue;               // absent on this card — the note is optional
         (seen[k] ??= new Set()).add(raw);
@@ -447,6 +473,10 @@ test.describe("v63 · D — the bar", () => {
     const cs = (await cards(page))!.filter((c) => c.band);
     expect(cs.length).toBeGreaterThan(5);
     for (const c of cs) {
+      /* ⚠️ A TASK'S BAND CARRIES A CHECKBOX, NOT A DOT. It has no query status, so a `StatusDot`
+         would put a pipeline stage on something that has never been sent anywhere. `calTask63`
+         asserts the checkbox is there, so the band is not left unchecked — only differently. */
+      if (c.isTask) continue;
       expect(c.dot, `no dot in the band (${c.status})`).not.toBeNull();
       expect(c.dot!.w, `the band's dot is ${c.dot!.w}px`).toBeCloseTo(14, 0);
       /* ⚠️ THE INSET MEDALLION IS GONE. Nothing in the band's leading 40px may be wider than the
@@ -497,6 +527,10 @@ test.describe("v63 · D — the bar", () => {
       const seen: string[] = [], bad: string[] = [];
       const SMALL = new Set(["and", "of", "the", "&", "de", "van", "von"]);
       for (const c of g.querySelectorAll<HTMLElement>(".tl-p")) {
+        /* ⚠️ A TASK'S NAME IS ITS OWN TEXT — a sentence the writer typed ("Chase the Blaine
+           partial"), not a person's name. Title-casing it would shout a note back at them. The
+           claim is about AGENTS and AGENCIES, so the population is queries. */
+        if (c.querySelector(".tl-sband--task")) continue;
         for (const sel of [".tl-fnm", ".tl-fag"]) {
           const t = c.querySelector(sel)?.textContent?.trim();
           if (!t) continue;
