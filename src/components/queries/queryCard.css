@@ -77,14 +77,41 @@
   background: var(--turn-sand-ground);
   border-bottom: 0.5px solid var(--turn-sand-rule);
 }
-.qcc-word { font-family: var(--font-serif); font-size: 15px; color: var(--ink, #1c130f); }
+.qcc-word {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  color: var(--ink, #1c130f);
+  /* ⚠️ 1.35, WHICH IS THE REF'S RENDERED `normal` (1.33) STATED AS A NUMBER. `normal` is a font
+     metric, so if Playfair fails to load, Georgia's `normal` is ~1.14 — under the mixed-case
+     descender floor, on a line that reads "Partial Requested". A number cannot vary that way. */
+  line-height: 1.35;
+}
 .qcc-turn { margin-left: auto; color: #6a5a50; font-family: var(--font-mono); font-size: 9px;
-  letter-spacing: 0.1em; text-transform: uppercase; }
+  /* .13em — the ref's, measured at 1.17px against 0.9px here. */
+  letter-spacing: 0.13em; text-transform: uppercase; line-height: 1.3; }
 
 /* ── the body ───────────────────────────────────────────────────────────────────────────────── */
-.qcc-body { padding: 20px 20px 18px; }
+/**
+ * ⚠️ EVERY BOX IN THIS CARD DECLARES ITS OWN `display`, AND THE REASON IS THE ROOT ELEMENT.
+ *
+ * The card is a `<button>`, which may not contain block content, so every part of it is authored
+ * as a `<span>` — and a span's initial `display` is `inline`. The ref uses `<div>`s and gets block
+ * for free; this file has to say so. Measured on the deployed build before the fix: the name and
+ * agency shared one line (8px apart, not 27), the leaf's day rendered ABOVE its month (−15px), and
+ * `overflow: hidden` on the name applied to nothing because an inline box shrink-wraps its text —
+ * 122px wide where the ref is 279.
+ *
+ * ⚠️ AND NOTHING GLOBAL WAS INVOLVED. The cascade attribution for every one of those said
+ * "(no rule — initial/inherited default)", and not one `font-size` in the card differed from the
+ * ref. So the fix is a declaration, never a scope fight and never an `!important`.
+ *
+ * ⚠️ VERTICAL MARGIN IS INERT ON AN INLINE BOX, which is why `.qcc-ag`'s `margin-top: 4px` and
+ * `.qcc-m`'s `margin-top: 7px` did nothing at all. This repo has an audit about the same fault
+ * printing "TextIn 1 package" on the packages band.
+ */
+.qcc-body { display: block; padding: 20px 20px 18px; }
 .qcc-who { display: flex; align-items: center; gap: 15px; }
-.qcc-whotx { flex: 1; min-width: 0; }
+.qcc-whotx { display: block; flex: 1; min-width: 0; }
 /* ⚠️ PARCHMENT AND LIFTED, NEVER PINK. Pink is the app's CTA fill; a pink disc on a card reads as
    something to press. The ref carries `body.chip-band` / `body.chip-lift` demo classes showing the
    alternatives that were refused — do not promote either out of the ref. */
@@ -97,32 +124,46 @@
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em;
 }
-.qcc-nm {
+.qcc-nm { display: block;
   font-family: var(--font-serif); font-weight: 500; font-size: 20px; color: var(--ink, #1c130f);
   /* ⚠️ 1.3, NOT THE REF'S 1.15. Mixed-case Playfair below 1.3 crops its descenders, and an agent's
      name is whatever they are called — the ref only ever drew the names somebody typed into it. */
   line-height: 1.3;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.qcc-ag { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #6a5a50;
-  margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 1.3 — the floor exactly. Playfair italic, mixed case, so it may not go tighter. */
+.qcc-ag { display: block; font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #6a5a50;
+  line-height: 1.3; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ── the calendar leaf ──────────────────────────────────────────────────────────────────────── */
 .qcc-leaf {
+  display: block;
   width: 46px; border-radius: 7px; flex: none; margin-left: auto; overflow: hidden;
   text-align: center; position: relative; background: #fff; border: 0.5px solid #dccfc0;
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.06), 0 3px 8px rgba(58, 28, 20, 0.08);
 }
-.qcc-leaf-mo {
+.qcc-leaf-mo { display: block;
   font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--ink, #1c130f); padding: 4px 0 3px;
   background: linear-gradient(135deg, var(--band-a), var(--band-b));
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
 }
 .qcc--sand .qcc-leaf-mo { background: var(--turn-sand-leaf); }
-.qcc-leaf-dy { font-family: var(--font-serif); font-size: 19px; color: var(--ink, #1c130f);
-  line-height: 1.3; padding: 6px 0 5px; }
-.qcc-leaf-cap { font-family: var(--font-mono); font-size: 6.5px; letter-spacing: 0.14em;
+/**
+ * ⚠️ `line-height: 1` HERE, AND IT IS A MEASURED EXCEPTION TO THE 1.3 FLOOR — not an oversight.
+ *
+ * Playfair Display ships OLD-STYLE FIGURES, which most people assume it does not: measured at 19px
+ * with `line-height: 1`, the digits `0123456789` carry **26px of ink in a 19px box**, spilling 3px
+ * below the line box and 4px above. So this is exactly the construction the house law forbids —
+ * except that the 5px of bottom padding absorbs the 3px of spill inside the leaf, which is why the
+ * ref's value is safe at THIS size with THIS padding and would not be without it.
+ *
+ * ⚠️ SO DO NOT REMOVE THE PADDING TO TIGHTEN THE LEAF. The padding is not decoration; it is what
+ * keeps the descender off the clip. `.qcc-leaf` sets `overflow: hidden`.
+ */
+.qcc-leaf-dy { display: block; font-family: var(--font-serif); font-size: 19px; color: var(--ink, #1c130f);
+  line-height: 1; padding: 6px 0 5px; }
+.qcc-leaf-cap { display: block; font-family: var(--font-mono); font-size: 6.5px; letter-spacing: 0.14em;
   text-transform: uppercase; color: #9c8878; padding-bottom: 5px; }
 /* The two binder pins. Decorative, so pseudo-elements rather than elements. */
 .qcc-leaf::before, .qcc-leaf::after {
@@ -137,16 +178,19 @@
   margin-top: 18px; padding-top: 15px; border-top: 0.5px solid #eadfd1;
   display: flex; align-items: flex-end; gap: 14px;
 }
-.qcc-facttx { flex: 1; min-width: 0; }
+.qcc-facttx { display: block; flex: 1; min-width: 0; }
 .qcc-s {
   font-size: 12px; line-height: 1.5; display: flex; align-items: center; gap: 8px;
   white-space: nowrap; overflow: hidden; color: #3a1c14;
 }
 .qcc-s > span { overflow: hidden; text-overflow: ellipsis; }
 .qcc-s b { font-weight: 500; }
-.qcc-m {
+/* Mono, uppercased by rule — no descenders reach the line box, so 1.3 is comfortable rather than
+   a floor. It is stated so the value cannot drift with whatever the page happens to inherit. */
+.qcc-m { display: block;
   font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
-  color: #9c8878; margin-top: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  line-height: 1.3; color: #9c8878; margin-top: 7px; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis;
 }
 /* ⚠️ THE OVERDUE MARKER IS INK, AND IT IS THE ONLY THING THAT MARKS LATENESS. No red, no fifth
    band tint, no pill. `design-refs/query-overdue-marker.html` shows what was refused. */

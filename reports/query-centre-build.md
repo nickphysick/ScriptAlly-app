@@ -304,3 +304,73 @@ layout claim, and this repo has an audit about the difference. Nothing here shou
   dropdown inside the panel renders above it**.
 - ⚠️ `Queries.tsx` keeps every page mounted and three pages share `tpl-wpg`. Any new probe must
   select the VISIBLE grid by measuring height, not `.first()`.
+
+---
+
+## Correction pass 1 — spacing and sizing, measured against the ref
+
+### ⚠️ False premise in the prompt: no global rule reaches the card
+
+The prompt expected *"global type/layout rules that the ref's scoped CSS does not [inherit] —
+specifically a heading scale"*, and instructed scoping the card's type rather than editing the
+global rule. **Measured, there is nothing to scope against.**
+
+- **Not one `font-size` differed** anywhere in the probe. No `h3`/`h4`/`.playfair` rule reaches the
+  card. Step 1's item 3 had nothing to fix.
+- **Every `display` mismatch attributed to `(no rule — initial/inherited default)`** via
+  `CSS.getMatchedStylesForNode`. Nothing was overriding anything.
+
+The real cause was mine and one level simpler: **the card's root is a `<button>`, which may not
+contain block content, so every part of it is authored as a `<span>` — and `<span>`'s initial
+`display` is `inline`.** My stylesheet declared `display` on none of ten boxes. The ref uses
+`<div>`s and gets block for free. The fix is ten declarations; nothing global is touched and no
+`!important` was used.
+
+### What was actually broken, in geometry
+
+| claim | before | after | ref |
+|---|---|---|---|
+| agency below the name | **8px** — same line | 30px | 27px |
+| leaf day below the month | **−15px** — day above month | 18.9px | 18px |
+| name box width | 122px (inline shrink-wrap, so `text-overflow` applied to nothing) | 376px | 279px |
+
+### Three measurements that decided values a rule could not
+
+1. **Playfair Display has old-style figures.** `0123456789` at 19px, `line-height: 1`: 26px of ink
+   in a 19px box, **3px below**. So the ref's tight leaf-day value IS the construction the house law
+   forbids — and is nonetheless safe here, because the day's `padding: 6px 0 5px` absorbs the spill
+   inside a leaf that clips. Matched the ref, and recorded a warning against tightening that padding.
+2. **The ref's name line-height crops.** At `1.15` the ink of `Jorge Pippa Guy qy` spills **+2px
+   below** a box that clips (`overflow: hidden`, no vertical padding). At `1.3`, **0**. Kept 1.3 —
+   now on evidence rather than on citation, and locked as *the name does not crop* so a future
+   retune passes if it is safe.
+3. **`PillTrig` is icon-only by decision** (36px since v5 P1, "the word in the title, the
+   aria-label and the popover's own header"). The prompt's item 8 called the lone icon wrong, and
+   it was — but because it sat alone in a row of courts, not because it lacked a label.
+
+### Two faults in my own probe, both caught by mutation
+
+- **The chips row was reported missing on a page with no active filter** — a statement about the
+  fixture, not the page. It now sets a filter, reads, and puts it back; the row is present with 2
+  controls.
+- **The name-crop assertion measured a synthetic probe span, not `.qcc-nm`.** Reverting the card to
+  the ref's 1.15 left it **green**. That is the "test the wrong artefact" fault, and only aiming a
+  mutation at it found it. It reads the real element now.
+- Also: the first toolbar probe reported Filter/Group/Sort present at `top: 0` — the hidden-page
+  trap, since every workspace page stays mounted. Scoped to the visible `.wpg`.
+
+### Result
+
+3 property diffs remain, all three named deliberate deviations; everything else is an identical
+string or within 1px. Widths differ only by column count (2 at 1280/1440, 4 at 1920/2560), which is
+`auto-fill` working against a content column narrower than the ref's standalone page — **not** a
+fault, and `minmax` must not be widened to force three.
+
+Proved red: 4 mutations — name/agency losing `display: block`, the leaf children losing it, the
+body losing it, and the name reverted to the ref's 1.15. All caught, the last only after the probe
+was repaired.
+
+Gate (isolated worktree, this pass's files on clean `HEAD`): **tsc 0 · build:dev clean · vitest 1
+failed / 7462 passed**. The red is `datePickerHub`, another stream's, unchanged since baseline.
+`functions/src/email.test.ts` fails to COLLECT in the worktree only — it lacks
+`functions/node_modules`; it passes 9/9 in the primary tree.

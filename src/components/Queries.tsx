@@ -3499,10 +3499,28 @@ export const Queries: React.FC<{
                   open={filterPopOpen}
                   active={activeFilterCount > 0}
                   count={activeFilterCount}
-                  onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
+                  onClick={() => { setSortPopOpen(false); setGroupPopOpen(false); setFilterPopOpen(o => !o); }}
                   icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
                 />
                 {filterPopOpen && renderFilterPopover()}
+              </div>
+              {/* ⚠️ GROUP JOINS THE TRIO RATHER THAN SITTING ALONE. It was a lone icon at the end of
+                  the quick-filter row, which read as a sixth pill; measured against the ref, that
+                  row holds courts and nothing else. Filter · Group · Sort narrow-and-arrange
+                  together, and the ref draws them together.
+                  ⚠️ ONE `listHead` SERVES BOTH VIEWS, so the trio's refs are attached once — the
+                  browsing grid and the record are mutually exclusive branches, never both mounted. */}
+              <div className="f12-popwrap">
+                <PillTrig
+                  ref={groupTrigRef}
+                  label="Group"
+                  open={groupPopOpen}
+                  active={gridGroup !== "none"}
+                  value={gridGroup !== "none" ? GRID_GROUPS.find((g) => g.key === gridGroup)?.label : undefined}
+                  onClick={() => { setFilterPopOpen(false); setSortPopOpen(false); setGroupPopOpen((o) => !o); }}
+                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" /></svg>}
+                />
+                {groupPopOpen && renderGroupPopover()}
               </div>
               <div className="f12-popwrap">
                 <PillTrig
@@ -3511,7 +3529,7 @@ export const Queries: React.FC<{
                   open={sortPopOpen}
                   active={sortKey !== "last_activity"}
                   value={sortKey !== "last_activity" ? (F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || undefined) : undefined}
-                  onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
+                  onClick={() => { setFilterPopOpen(false); setGroupPopOpen(false); setSortPopOpen(o => !o); }}
                   icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
                 />
                 {sortPopOpen && renderSortPopover()}
@@ -4816,20 +4834,14 @@ export const Queries: React.FC<{
                 Past expected
               </button>
 
-              <span className="qcc-qf-sep" aria-hidden="true" />
-              <div className="f12-popwrap">
-                <PillTrig
-                  ref={groupTrigRef}
-                  label="Group"
-                  open={groupPopOpen}
-                  active={gridGroup !== "none"}
-                  value={gridGroup !== "none" ? GRID_GROUPS.find((g) => g.key === gridGroup)?.label : undefined}
-                  onClick={() => setGroupPopOpen((o) => !o)}
-                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" /></svg>}
-                />
-                {groupPopOpen && renderGroupPopover()}
-              </div>
             </div>
+
+            {/* ⚠️ THE SAME `listHead` THE RECORD VIEW RENDERS — search, Filter, Group, Sort. The
+                browsing view had none of the four: measured on the deployed build, `searchInput`,
+                `filterBtn` and `sortBtn` all came back false, and Group was a lone icon in the
+                quick row. Rendering the existing head rather than building a second one is what
+                keeps the two views' controls from drifting apart. */}
+            {listHead}
 
             {gridRows.length === 0 ? (
               /* ⚠️ THIS IS THE NO-MATCH STATE, NOT THE NO-QUERIES STATE. The page's own empty

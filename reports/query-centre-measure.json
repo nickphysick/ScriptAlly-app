@@ -1,0 +1,367 @@
+{
+  "ref": {
+    "card": {
+      "padding": "0px",
+      "borderRadius": "14px",
+      "boxShadow": "rgba(58, 28, 20, 0.05) 0px 1px 2px 0px, rgba(58, 28, 20, 0.09) 0px 8px 22px 0px",
+      "backgroundColor": "rgb(255, 255, 255)",
+      "display": "block",
+      "_box": "443x224",
+      "_top": "374"
+    },
+    "band": {
+      "padding": "13px 20px",
+      "height": "51px",
+      "display": "flex",
+      "alignItems": "center",
+      "gap": "10px",
+      "_box": "443x51",
+      "_top": "374"
+    },
+    "band.word": {
+      "fontFamily": "\"Playfair Display\", serif",
+      "fontSize": "15px",
+      "lineHeight": "normal",
+      "display": "block",
+      "_box": "55x20",
+      "_top": "389"
+    },
+    "band.turn": {
+      "fontSize": "9px",
+      "letterSpacing": "1.17px",
+      "textTransform": "uppercase",
+      "_box": "92x12",
+      "_top": "393"
+    },
+    "body": {
+      "padding": "20px 20px 18px",
+      "display": "block",
+      "_box": "443x173",
+      "_top": "425"
+    },
+    "who": {
+      "display": "flex",
+      "alignItems": "center",
+      "gap": "15px",
+      "_box": "403x64",
+      "_top": "445"
+    },
+    "whotx": {
+      "display": "block",
+      "flex": "1 1 0%",
+      "minWidth": "0px",
+      "_box": "279x44",
+      "_top": "455"
+    },
+    "nm": {
+      "fontSize": "20px",
+      "lineHeight": "23px",
+      "display": "block",
+      "whiteSpace": "nowrap",
+      "overflow": "hidden",
+      "_box": "279x23",
+      "_top": "455"
+    },
+    "ag": {
+      "fontSize": "13px",
+      "display": "block",
+      "marginTop": "4px",
+      "_box": "279x17",
+      "_top": "482"
+    },
+    "chip": {
+      "width": "48px",
+      "height": "48px",
+      "boxShadow": "rgba(58, 28, 20, 0.08) 0px 1px 2px 0px, rgba(58, 28, 20, 0.1) 0px 3px 8px 0px",
+      "backgroundColor": "rgb(253, 250, 245)",
+      "border": "1px solid rgb(230, 220, 207)",
+      "display": "flex",
+      "_box": "48x48",
+      "_top": "453"
+    },
+    "leaf": {
+      "width": "46px",
+      "display": "block",
+      "flexDirection": "row",
+      "marginLeft": "0px",
+      "_box": "46x64",
+      "_top": "445"
+    },
+    "leaf.mo": {
+      "display": "block",
+      "fontSize": "7.5px",
+      "padding": "4px 0px 3px",
+      "_box": "44x18",
+      "_top": "446"
+    },
+    "leaf.dy": {
+      "display": "block",
+      "fontSize": "19px",
+      "padding": "6px 0px 5px",
+      "_box": "44x30",
+      "_top": "464"
+    },
+    "leaf.cap": {
+      "display": "block",
+      "fontSize": "6.5px",
+      "padding": "0px 0px 5px",
+      "_box": "44x14",
+      "_top": "494"
+    },
+    "fact": {
+      "marginTop": "18px",
+      "paddingTop": "15px",
+      "borderTopWidth": "1px",
+      "borderTopStyle": "solid",
+      "display": "flex",
+      "alignItems": "flex-end",
+      "_box": "403x53",
+      "_top": "527"
+    },
+    "fact.s": {
+      "fontSize": "12px",
+      "whiteSpace": "nowrap",
+      "display": "flex",
+      "_box": "289x18",
+      "_top": "543"
+    },
+    "fact.m": {
+      "fontSize": "9px",
+      "whiteSpace": "nowrap",
+      "display": "block",
+      "marginTop": "7px",
+      "_box": "289x12",
+      "_top": "568"
+    },
+    "mats.ic": {
+      "width": "22px",
+      "height": "22px",
+      "_box": "22x22",
+      "_top": "558"
+    }
+  },
+  "built": {
+    "card": {
+      "padding": "0px",
+      "borderRadius": "14px",
+      "boxShadow": "rgba(58, 28, 20, 0.05) 0px 1px 2px 0px, rgba(58, 28, 20, 0.09) 0px 8px 22px 0px",
+      "backgroundColor": "rgb(255, 255, 255)",
+      "display": "block",
+      "_box": "540x225",
+      "_top": "335"
+    },
+    "band": {
+      "padding": "13px 20px",
+      "height": "51px",
+      "display": "flex",
+      "alignItems": "center",
+      "gap": "10px",
+      "_box": "540x51",
+      "_top": "335"
+    },
+    "band.word": {
+      "fontFamily": "\"Playfair Display\", Georgia, serif",
+      "fontSize": "15px",
+      "lineHeight": "20.25px",
+      "display": "block",
+      "_box": "55x20",
+      "_top": "350"
+    },
+    "band.turn": {
+      "fontSize": "9px",
+      "letterSpacing": "1.17px",
+      "textTransform": "uppercase",
+      "_box": "92x12",
+      "_top": "354"
+    },
+    "body": {
+      "padding": "20px 20px 18px",
+      "display": "block",
+      "_box": "540x174",
+      "_top": "386"
+    },
+    "who": {
+      "display": "flex",
+      "alignItems": "center",
+      "gap": "15px",
+      "_box": "500x65",
+      "_top": "406"
+    },
+    "whotx": {
+      "display": "block",
+      "flex": "1 1 0%",
+      "minWidth": "0px",
+      "_box": "376x44",
+      "_top": "417"
+    },
+    "nm": {
+      "fontSize": "20px",
+      "lineHeight": "23px",
+      "display": "block",
+      "whiteSpace": "nowrap",
+      "overflow": "hidden",
+      "_box": "376x23",
+      "_top": "417"
+    },
+    "ag": {
+      "fontSize": "13px",
+      "display": "block",
+      "marginTop": "4px",
+      "_box": "376x17",
+      "_top": "444"
+    },
+    "chip": {
+      "width": "48px",
+      "height": "48px",
+      "boxShadow": "rgba(58, 28, 20, 0.08) 0px 1px 2px 0px, rgba(58, 28, 20, 0.1) 0px 3px 8px 0px",
+      "backgroundColor": "rgb(253, 250, 245)",
+      "border": "1px solid rgb(230, 220, 207)",
+      "display": "flex",
+      "_box": "48x48",
+      "_top": "414"
+    },
+    "leaf": {
+      "width": "46px",
+      "display": "block",
+      "flexDirection": "row",
+      "marginLeft": "0px",
+      "_box": "46x65",
+      "_top": "406"
+    },
+    "leaf.mo": {
+      "display": "block",
+      "fontSize": "7.5px",
+      "padding": "4px 0px 3px",
+      "_box": "44x19",
+      "_top": "407"
+    },
+    "leaf.dy": {
+      "display": "block",
+      "fontSize": "19px",
+      "padding": "6px 0px 5px",
+      "_box": "44x30",
+      "_top": "426"
+    },
+    "leaf.cap": {
+      "display": "block",
+      "fontSize": "6.5px",
+      "padding": "0px 0px 5px",
+      "_box": "44x14",
+      "_top": "456"
+    },
+    "fact": {
+      "marginTop": "18px",
+      "paddingTop": "15px",
+      "borderTopWidth": "1px",
+      "borderTopStyle": "solid",
+      "display": "flex",
+      "alignItems": "flex-end",
+      "_box": "500x53",
+      "_top": "489"
+    },
+    "fact.s": {
+      "fontSize": "12px",
+      "whiteSpace": "nowrap",
+      "display": "flex",
+      "_box": "500x18",
+      "_top": "505"
+    },
+    "fact.m": {
+      "fontSize": "9px",
+      "whiteSpace": "nowrap",
+      "display": "block",
+      "marginTop": "7px",
+      "_box": "500x12",
+      "_top": "530"
+    },
+    "mats.ic": {
+      "width": "22px",
+      "height": "22px",
+      "_box": "22x22",
+      "_top": "520"
+    }
+  },
+  "refGrid": {
+    "gridTemplateColumns": "442.656px 442.672px 442.656px",
+    "gap": "20px",
+    "cards": 20
+  },
+  "builtGrid": {
+    "gridTemplateColumns": "540px 540px",
+    "gap": "20px",
+    "cards": 54
+  },
+  "refStack": {
+    "nameAboveAgency": 27,
+    "leafMonthAboveDay": 18
+  },
+  "builtStack": {
+    "nameAboveAgency": 27,
+    "leafMonthAboveDay": 18.875
+  },
+  "toolbar": {
+    "scopeFound": true,
+    "quickRowTop": 237,
+    "searchInput": true,
+    "filterBtn": true,
+    "filterTop": 285,
+    "groupBtn": true,
+    "groupTop": 285,
+    "sortBtn": true,
+    "sortTop": 285,
+    "logBtn": true,
+    "logTop": 111,
+    "activeChipsRow": false,
+    "quickRowControls": [
+      "All54@237",
+      "With you8@237",
+      "With the agent33@237",
+      "Offers1@237",
+      "Closed12@237",
+      "!Past expected@237"
+    ]
+  },
+  "chipsWhenFiltered": {
+    "ran": true,
+    "present": true,
+    "count": 2
+  },
+  "figureInk": {
+    "boxHeight": 19,
+    "inkHeight": 26,
+    "spillBelow": 3,
+    "spillAbove": 4
+  },
+  "inkChecks": [
+    {
+      "what": "0123456789 @19px lh:1",
+      "boxHeight": 19,
+      "spillBelow": 3,
+      "spillAbove": 4
+    },
+    {
+      "what": "Jorge Pippa  @20px lh:1.15",
+      "boxHeight": 23,
+      "spillBelow": 2,
+      "spillAbove": 2
+    },
+    {
+      "what": "Jorge Pippa  @20px lh:1.3",
+      "boxHeight": 26,
+      "spillBelow": 0,
+      "spillAbove": 1
+    }
+  ],
+  "nameCrop": {
+    "lineHeight": "23px",
+    "overflow": "hidden",
+    "boxHeight": 23,
+    "spillBelow": 2
+  },
+  "sources": {
+    "band.word": {
+      "fontFamily": ".qcc-word { font-family: var(--font-serif) }",
+      "lineHeight": ".qcc-word { line-height: 1.35 }"
+    }
+  }
+}
