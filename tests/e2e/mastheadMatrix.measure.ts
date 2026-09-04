@@ -326,7 +326,12 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
   for (const { name, r } of rows) {
     expect(parseFloat(String(r.slabLine)), `${name}: the chrome slab has no base hairline`).toBeGreaterThan(0);
   }
-  same("titleSize", "the title size", CARVES.titleSize);
+  /* ⚠️ NO EXEMPTION — `CARVES.titleSize` was retired when the two illustrated pages stopped drawing
+     a 47px title, and this call site kept reading it. It is a tsc error, it was committed with a
+     message claiming a clean typecheck, and it survived because a measurement file is only
+     typechecked by the ROOT `tsc` — which nothing in the local loop runs after a gate has once been
+     seen green. Every page carries the same title size now, so the comparison is over all ten. */
+  same("titleSize", "the title size");
   same("titleWeight", "the title weight");
   same("background", "the masthead's ground");
   same("radius", "the masthead's corner radius");
