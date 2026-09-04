@@ -1,0 +1,51 @@
+{
+  "w1280": {
+    "colWidth": 1010,
+    "capPx": 1360,
+    "left": 0,
+    "right": 0,
+    "columns": 3,
+    "docOverflow": 0
+  },
+  "w1440": {
+    "colWidth": 1170,
+    "capPx": 1360,
+    "left": 0,
+    "right": 0,
+    "columns": 3,
+    "docOverflow": 0
+  },
+  "w1920": {
+    "colWidth": 1360,
+    "capPx": 1360,
+    "left": 145,
+    "right": 145,
+    "columns": 3,
+    "docOverflow": 0
+  },
+  "w2560": {
+    "colWidth": 1360,
+    "capPx": 1360,
+    "left": 465,
+    "right": 465,
+    "columns": 3,
+    "docOverflow": 0
+  },
+  "scrollable": true,
+  "rest": {
+    "controlsTop": 237,
+    "scrollerTop": 111,
+    "scrollTop": 0,
+    "maxScroll": 3917,
+    "stuckH": 0,
+    "heldBelowPort": 126
+  },
+  "scrolled": {
+    "controlsTop": 155,
+    "scrollerTop": 111,
+    "scrollTop": 400,
+    "maxScroll": 3917,
+    "stuckH": 44,
+    "heldBelowPort": 44
+  }
+}
