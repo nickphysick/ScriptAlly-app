@@ -64,6 +64,25 @@ import { recordQueryResponse } from "../lib/recordResponse";
 import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitle";
 import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
+import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
+import { cardFacts, turnFor, type Turn } from "../lib/queryCardFacts";
+import {
+  QUICK_FILTERS, inQuick, quickCounts, compareGroupLabels, groupLabelFor,
+  type QuickKey, type GroupKey,
+} from "../lib/queryCentreGrid";
+import { measureFlip, playFlip, clearFlip, type FlipRects } from "../lib/flip";
+
+/**
+ * ⚠️ EVERY COURT NAMES ITSELF. This was a ternary covering two values; extending `turnFilter` to
+ * five would have left it printing "WAITING" for offers and for closed queries — a filter chip
+ * confidently stating the wrong filter, which is worse than no chip at all.
+ */
+const TURN_CHIP_LABEL: Record<"move" | "wait" | "offer" | "closed", string> = {
+  move: "YOUR MOVE",
+  wait: "WAITING",
+  offer: "OFFERS",
+  closed: "CLOSED",
+};
 /* §1 (provenance pack) — the writer's own expected date: its field name and its one accessor. */
 import { WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD, writerExpectedIso, writerExpectedWrite, resolveExpectedDate } from "../lib/expectedDate";
 /* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
@@ -1639,7 +1658,26 @@ export const Queries: React.FC<{
      statusSel — exact QueryStatus enum strings, multi-select (empty OR full set = no filter).
      needsOverdue / needsTasks — the NEEDS ATTENTION checkboxes, both derived (reply overdue
      from responseDeadline while waiting; open tasks from the derived tasks array). */
-  const [turnFilter, setTurnFilter] = useState<"all" | "move" | "wait">("all");
+  /**
+   * ⚠️ FIVE VALUES NOW, AND THE FIRST THREE ARE UNTOUCHED. The browsing grid's quick filters and
+   * the detail popover's "Whose turn" radio are ONE state, deliberately: two controls over one
+   * narrowing is how a page comes to show a set that neither control claims to have chosen.
+   *
+   * ⚠️ `offer` AND `closed` SPLIT WHAT `queryBucket` CALLS `closed`, which is the grid's one
+   * documented departure from the CTA engine's split (see `queryCardFacts.test.ts`, which locks it
+   * as exactly one divergence). An offer is the least closed thing that can happen to a query; the
+   * agent list already reads it that way. The two `queryBucket` lines below are left EXACTLY as
+   * they were — `queryBucket.test.ts` asserts them verbatim, and they are still the whole of how
+   * "move" and "wait" are decided.
+   */
+  const [turnFilter, setTurnFilter] = useState<"all" | "move" | "wait" | "offer" | "closed">("all");
+  /**
+   * ⚠️ THE GRID'S GROUPING IS LOCAL AND UNPERSISTED, and that is deliberate. It is a way of READING
+   * the set you already chose, not a filter — nothing is hidden by it, so nothing is lost by it
+   * resetting. Persisting it would mean arriving at a page arranged by a question you asked last
+   * week and cannot see you asked.
+   */
+  const [gridGroup, setGridGroup] = useState<GroupKey>("none");
   const [statusSel, setStatusSel] = useState<QueryStatus[]>([]);     // committed live (no draft/Apply)
   const [selectedManuscriptFilter, setSelectedManuscriptFilter] = useState<string>("All");
   const [needsOverdue, setNeedsOverdue] = useState(false);
@@ -2454,6 +2492,10 @@ export const Queries: React.FC<{
     const bkt = queryBucket(q.status as QueryStatus);
     if (turnFilter === "move" && bkt !== "move") return false;
     if (turnFilter === "wait" && bkt !== "waiting") return false;
+    /* The grid's two extra courts. `turnFor` refines the bucket rather than replacing it — the
+       reconciliation is locked in `queryCardFacts.test.ts`, in both directions. */
+    if (turnFilter === "offer" && turnFor(q.status as QueryStatus) !== "offer") return false;
+    if (turnFilter === "closed" && turnFor(q.status as QueryStatus) !== "closed") return false;
 
     // Status multi-select — the exact QueryStatus strings; only a partial selection filters.
     if (statusFilterActive && !statusSel.includes(q.status as QueryStatus)) return false;
@@ -2590,13 +2632,55 @@ export const Queries: React.FC<{
   };
   const sortedList = [...filteredList].sort(compareQueries);
 
+  /**
+   * ⚠️ THE GRID READS `sortedList`, THE SAME DERIVED SET THE DETAIL LIST READS. One filter
+   * pipeline, one sort, two views — so the browsing grid and the list can never show a different
+   * set of the same queries under the same controls.
+   *
+   * ⚠️ AND THE FACTS ARE DERIVED ONCE PER CARD, HERE. `cardFacts` needs the AGENCY's window, which
+   * lives on the agent record and is never stored on the query; handing it in at the one place the
+   * agent is already resolved is what stops a card reaching for it.
+   */
+  const gridRows: GridCard[] = sortedList.map((q) => {
+    const agent = agents.find((a) => a.id === q.agentId);
+    const facts = cardFacts(q as Query, new Date(), { agencyWeeks: agent?.responseTimeWeeks });
+    return {
+      id: q.id,
+      status: q.status as QueryStatus,
+      turn: facts.turn,
+      name: agentPrimary(agent),
+      agency: agentAgencyLine(agent),
+      initials: agentInitials(agent),
+      lastMs: lastActivityMs(q),
+      sentMs: toMs(q.dateSent) || null,
+      expectedMs: facts.expectedReply ? facts.expectedReply.getTime() : null,
+      facts,
+    };
+  });
+
+  /* ⚠️ COUNTED OVER THE MANUSCRIPT-SCOPED SET, NEVER THE FILTERED VIEW — the same rule the
+     masthead's own figures follow. A pill that counted what the pills had already narrowed would
+     read `0` for every court you were not currently looking at. */
+  const quickTally = quickCounts(
+    mastheadScopedQueries.map((q) => turnFor(q.status as QueryStatus)),
+  );
+
+  /** Quick filters and the popover's "Whose turn" are ONE state — see `turnFilter`. */
+  const quickKey: QuickKey =
+    turnFilter === "all" ? "all"
+      : turnFilter === "move" ? "you"
+        : turnFilter === "wait" ? "agent"
+          : turnFilter;
+  const setQuickKey = (k: QuickKey) =>
+    setTurnFilter(k === "all" ? "all" : k === "you" ? "move" : k === "agent" ? "wait" : k);
+
   // ── F12 active-filter chips + the FILTER / SORT popovers (ref queries-hub-v14.html) ──
   const resetAllFilters = () => {
     setTurnFilter("all"); setStatusSel([]); setSelectedManuscriptFilter("All");
     setNeedsOverdue(false); setNeedsTasks(false);
   };
   const activeFilterChips: { key: string; label: string; remove: () => void }[] = [
-    ...(turnFilter !== "all" ? [{ key: "turn", label: turnFilter === "move" ? "YOUR MOVE" : "WAITING", remove: () => setTurnFilter("all") }] : []),
+    ...(turnFilter !== "all" ? [{ key: "turn", label: TURN_CHIP_LABEL[turnFilter], remove: () => setTurnFilter("all") }] : []),
     ...(selectedManuscriptFilter !== "All" ? [{ key: "ms", label: (manuscriptsWithQueries.find(m => m.id === selectedManuscriptFilter)?.title || "MANUSCRIPT").toUpperCase(), remove: () => setSelectedManuscriptFilter("All") }] : []),
     ...(statusFilterActive ? statusSel.map(s => ({ key: `st:${s}`, label: (s === QueryStatus.REVISE_RESUBMIT ? "R&R" : s).toUpperCase(), remove: () => setStatusSel(prev => prev.filter(x => x !== s)) })) : []),
     ...(needsOverdue ? [{ key: "overdue", label: "OVERDUE FOR A REPLY", remove: () => setNeedsOverdue(false) }] : []),
@@ -4663,31 +4747,76 @@ export const Queries: React.FC<{
            * different sets of the same queries — which is the failure a second data path would make
            * inevitable and invisible.
            */
-          <div className="qc-cards">
-            {sortedList.map((q) => {
-              const agent = agents.find((a) => a.id === q.agentId);
-              return (
+          <>
+            {/* ⚠️ THE COUNTS ARE THE WHOLE SET'S, AND THE PILLS NARROW IT. A pill that stated the
+                filtered figure would read `0` for every court you were not currently in, which
+                turns a set of counts into a set of tautologies. */}
+            <div className="qcc-quick" role="group" aria-label="Quick filters">
+              {QUICK_FILTERS.map((f) => (
                 <button
-                  key={q.id}
+                  key={f.key}
                   type="button"
-                  className="qc-card"
-                  onClick={() => onOpenQuery?.(q.id)}
+                  className="qcc-qf"
+                  aria-pressed={quickKey === f.key}
+                  onClick={() => setQuickKey(f.key)}
                 >
-                  <span className="qc-card-top">
-                    <StatusDot status={q.status} overrideSize={17} />
-                    <span className="qc-card-id">
-                      <b>{agentPrimary(agent)}</b>
-                      <span>{agentAgencyLine(agent)}</span>
-                    </span>
-                  </span>
-                  <span className="qc-card-ft">
-                    <span>{q.status}</span>
-                    <span>{q.dateSent ? fmtShortISO(q.dateSent) : "NOT SENT"}</span>
-                  </span>
+                  {f.swatch && (
+                    <span
+                      className="qcc-qf-sw"
+                      aria-hidden="true"
+                      style={{ background: `linear-gradient(135deg, var(--turn-${f.swatch}-a), var(--turn-${f.swatch}-b))` }}
+                    />
+                  )}
+                  {f.label}
+                  <span className="qcc-qf-n">{quickTally[f.key]}</span>
                 </button>
-              );
-            })}
-          </div>
+              ))}
+              <span className="qcc-qf-sep" aria-hidden="true" />
+              {/* The same ink ring the card uses, so the toggle and the marker read as one idea. */}
+              <button
+                type="button"
+                className="qcc-qf"
+                aria-pressed={needsOverdue}
+                onClick={() => setNeedsOverdue((v) => !v)}
+              >
+                <span className="qcc-qf-mk" aria-hidden="true">!</span>
+                Past expected
+              </button>
+            </div>
+
+            {gridRows.length === 0 ? (
+              /* ⚠️ THIS IS THE NO-MATCH STATE, NOT THE NO-QUERIES STATE. The page's own empty
+                 branch already owns the latter; saying "nothing matches" to someone who has never
+                 logged a query would be the worst lie this page could tell. */
+              <p className="qcc-none">
+                Nothing matches.
+                <button type="button" className="qcc-none-btn" onClick={resetAllFilters}>
+                  Clear filters
+                </button>
+              </p>
+            ) : (
+              <QueryCentreGrid
+                rows={gridRows}
+                group={gridGroup}
+                onOpen={(id) => onOpenQuery?.(id)}
+                selectedId={selectedQueryId}
+              />
+            )}
+
+            <div className="qcc-foot">
+              <span>
+                Showing <b>{gridRows.length}</b> of <b>{mastheadScopedQueries.length}</b>
+              </span>
+              <button
+                type="button"
+                className="qcc-foot-lnk"
+                disabled={gridRows.length === 0}
+                onClick={handleExportFilteredCSV}
+              >
+                Export CSV
+              </button>
+            </div>
+          </>
         ) : (
         <div data-qc-fade={fadeIn ? "in" : undefined} className="f12-body">
           {/* ⚠️ §3 · ONE HAIRLINE UNDER THE WHOLE BAR. A grid child spanning both columns, so it
