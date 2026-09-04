@@ -686,4 +686,31 @@ if (storageLive) {
     () => uploadBytes(sref(getStorage(anonApp), apath(uid, "probe-anon.pdf")), small, { contentType: "application/pdf" }));
 }
 
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   TILE DISMISSAL — a page-scoped sub-map in `todoPrefs`, beside the Noteboard's.
+
+   ⚠️ THE COMMENT IS NOT THE CONTROL. `types.ts` says `todoPrefs` is `is map`, unconstrained, so a
+   sub-map ships with no rules change — and that is a claim about the DEPLOYED ruleset which only a
+   probe can settle. If these are denied, the dismissal needs its own allowlist entry after all.
+
+   ⚠️ AND THE WRITE IS PROBED AT THE SHAPE IT WILL ACTUALLY TAKE, nested two deep. A flat
+   `todoPrefs.foo` passing says nothing about `todoPrefs.manuscripts.dismissedTiles`.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+console.log("\ntile dismissal — a sub-map in todoPrefs (no rules change expected):");
+const UREF = doc(db, "users", uid);
+const priorPrefs = (await getDoc(UREF)).data()?.todoPrefs ?? null;
+const restorePrefs = () => updateDoc(UREF, { todoPrefs: priorPrefs ?? {} });
+
+await attempt("todoPrefs.manuscripts sub-map", "promos pack",
+  () => updateDoc(UREF, { todoPrefs: { ...(priorPrefs ?? {}), manuscripts: { dismissedTiles: ["wordcount"] } } }),
+  restorePrefs);
+await attempt("…with both tiles dismissed", "promos pack",
+  () => updateDoc(UREF, { todoPrefs: { ...(priorPrefs ?? {}), manuscripts: { dismissedTiles: ["wordcount", "packages"] } } }),
+  restorePrefs);
+/* ⚠️ THE NOTEBOARD'S OWN SUB-MAP MUST SURVIVE THE WRITE — the two share one field, so a dismissal
+   that replaced `todoPrefs` wholesale would silently delete another page's preferences. */
+await attempt("…without disturbing the Noteboard's sub-map", "promos pack",
+  () => updateDoc(UREF, { todoPrefs: { ...(priorPrefs ?? {}), noteboard: { dismissedExamples: ["x"] }, manuscripts: { dismissedTiles: [] } } }),
+  restorePrefs);
+
 process.exit(0);

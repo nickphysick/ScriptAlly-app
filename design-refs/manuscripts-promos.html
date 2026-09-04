@@ -1,0 +1,163 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Manuscripts — selector list and promo tiles</title>
+<!--
+  ⚠️ GENERATED FROM THE BRIEF'S PROSE, NOT SUPPLIED. `manuscripts-promos.html` was named as the
+  authority and was not on disk — the second time on this page. Section B/C described it in enough
+  detail to build from, so this is that description rendered, committed so the staleness check has
+  real bytes and so a commit citing this path shows what was built to.
+
+  ⚠️ IT IS A RECORD OF THE BRIEF, NOT A SIGNED-OFF DRAWING, and the brief's own instruction applies
+  to it: read design values off the CODE, not this file. Every hex below is either a token this repo
+  already defines (named in a comment) or is flagged as invented. Where the build and this file
+  disagree, the build was measured and this was not.
+
+  ⚠️ `manuscripts-house-style.html` IS DELIBERATELY NOT WRITTEN. Phase 5 is held pending the masthead
+  session, and Nick has said it will need re-briefing rather than unblocking — the settle and the
+  Type A/B partition it was written against no longer exist. Inventing a design artefact for work
+  that is about to be re-specified, which would then be hashed and read as authority, is the same
+  mistake as last pass's own-page ref. The prose is the record until then.
+-->
+<style>
+  :root{
+    /* Tokens this repo already defines — see index.css / manuscripts sheets. */
+    --ink:#241c15; --burg:#7c3a2a; --hair:#e7ddd2; --paper:#fffefb; --ground:#f2ede7;
+    --muted:#8a7a6c;
+    /* The manuscripts sage pair (comps band). */
+    --sage-a:#dce0d9; --sage-b:#d0d6cc;
+    /* Slate — the app's Pro tag pair. */
+    --pro-bg:#eef2f5; --pro-ink:#5e7e9c; --pro-bd:#cfdde6;
+    --serif:'Playfair Display',Georgia,serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sans:'Source Sans Pro',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);padding:28px}
+  .wrap{max-width:1180px;margin:0 auto}
+
+  /* ── B. the selector list ────────────────────────────────────────────────────────────────── */
+  /* ⚠️ ONE PANEL, SAGE-CAPPED. The cap is the sage pair above; the panel is the window's white. */
+  .panel{background:var(--paper);border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+  .cap{background:linear-gradient(150deg,var(--sage-a),var(--sage-b));padding:11px 18px;
+       font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase}
+  table{width:100%;border-collapse:collapse}
+  th{font-family:var(--mono);font-size:8.5px;letter-spacing:.11em;text-transform:uppercase;
+     color:var(--muted);text-align:left;padding:11px 14px;border-bottom:1px solid var(--hair);font-weight:400}
+  td{padding:13px 14px;border-bottom:1px solid var(--hair);vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  /* ⚠️ THE ROW'S CONTROL IS A REAL LINK, NOT A CLICKABLE CELL. A clickable <td> is not
+     keyboard-reachable and announces nothing. */
+  .msname{display:flex;align-items:center;gap:13px}
+  /* ⚠️ THE COVER IS RENDERED AS A BOOK: a spine shadow down the left and a page-edge radius on
+     the right. A flat rectangle reads as a missing image. */
+  .cover{width:38px;height:52px;border-radius:2px 5px 5px 2px;flex:none;
+         background:linear-gradient(150deg,var(--sage-a),var(--sage-b));
+         box-shadow:inset 3px 0 0 rgba(60,50,40,.16), 0 1px 3px rgba(40,28,20,.18)}
+  .mstitle{font-family:var(--serif);font-size:17px;line-height:1.3}
+  .msbyline{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .open{padding:6px 15px;border-radius:999px;background:var(--ink);color:#fffefb;
+        font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:0}
+  /* Dashed add row, beneath the table — the same grammar as the attachments add. */
+  .addrow{display:block;width:100%;padding:13px;border:0;border-top:1px dashed #cbbfae;
+          background:none;color:var(--burg);font-family:var(--mono);font-size:9.5px;
+          letter-spacing:.12em;text-transform:uppercase;text-align:center}
+
+  /* ── C. three promo tiles ────────────────────────────────────────────────────────────────── */
+  .promos{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+  .tile{background:var(--paper);border:1px solid var(--hair);border-radius:12px;overflow:hidden;
+        display:flex;flex-direction:column}
+  /* ⚠️ THE INFOGRAPHIC SITS ON PARCHMENT, the copy on the card's own white. */
+  .info{background:#f6f1e6;padding:18px;min-height:132px;display:grid;place-items:center}
+  .copy{padding:15px 17px 17px;display:flex;flex-direction:column;flex:1}
+  .tname{font-family:var(--serif);font-size:17px;line-height:1.3;margin-bottom:6px}
+  .tbody{font-size:13px;line-height:1.5;color:#4a3d34;flex:1}
+  .tlink{margin-top:11px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;
+         text-transform:uppercase;color:var(--burg);background:none;border:0;padding:0;text-align:left}
+  .pro{display:inline-block;padding:2px 7px;border-radius:4px;background:var(--pro-bg);
+       color:var(--pro-ink);border:1px solid var(--pro-bd);
+       font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase}
+  .dismiss{position:absolute;top:9px;right:10px;border:0;background:none;color:var(--muted);font-size:14px}
+
+  /* ⚠️ THE WORD-COUNT CHART IS REFERENCE, NOT A METER — and this is the one element on the page
+     that could drift into appraisal. The marker is ONE class wherever it falls: no colour by
+     position, no "within range", no verdict. The free plan never shows a usage meter, and this is
+     not one. */
+  .bands{width:100%;display:flex;flex-direction:column;gap:7px}
+  .bandrow{display:grid;grid-template-columns:64px 1fr;align-items:center;gap:8px}
+  .bandlabel{font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .bandtrack{position:relative;height:9px;background:#eae3d7;border-radius:99px}
+  .bandfill{position:absolute;top:0;bottom:0;background:var(--sage-b);border-radius:99px}
+  /* ⚠️ A GENERIC RANGE RENDERS LIGHTER, so a personal genre does not look as though it has
+     specific guidance it does not have. */
+  .bandfill.generic{background:#e2e5df}
+  .marker{position:absolute;top:-3px;width:2px;height:15px;background:var(--burg)}
+  .markerlabel{position:absolute;top:-16px;transform:translateX(-50%);
+               font-family:var(--mono);font-size:7px;letter-spacing:.08em;color:var(--burg)}
+</style>
+
+<div class="wrap">
+  <section class="panel">
+    <div class="cap">Your shelf</div>
+    <table>
+      <thead><tr>
+        <th>Manuscript</th><th>Status</th><th>Queries</th><th>Responses</th><th>Last sent</th><th></th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="msname">
+            <span class="cover"></span>
+            <span>
+              <span class="mstitle">Murphy's Day Out</span><br>
+              <span class="msbyline">Adult · Literary fiction · 92,000 words</span>
+            </span>
+          </span></td>
+          <td>Querying</td><td>14</td><td>6</td><td>5 Dec 2023</td>
+          <td><button class="open">Open</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <button class="addrow">＋ Add a manuscript</button>
+  </section>
+
+  <div class="promos">
+    <!-- ⚠️ NEVER ABOUT THIS BOOK — about what a manuscript can do here. -->
+    <article class="tile">
+      <div class="info">two spines → requests box</div>
+      <div class="copy">
+        <div class="tname">Versions <span class="pro">Pro</span></div>
+        <p class="tbody">Keep more than one cut of the book, and see which one each agent is holding.</p>
+        <button class="tlink">How versions work ›</button>
+      </div>
+    </article>
+
+    <article class="tile">
+      <div class="info">
+        <div class="bands">
+          <div class="bandrow"><span class="bandlabel">Literary</span>
+            <span class="bandtrack"><span class="bandfill" style="left:24%;right:32%"></span></span></div>
+          <div class="bandrow"><span class="bandlabel">Fantasy</span>
+            <span class="bandtrack"><span class="bandfill" style="left:40%;right:8%"></span></span></div>
+          <div class="bandrow"><span class="bandlabel">Yours</span>
+            <span class="bandtrack"><span class="bandfill" style="left:24%;right:32%"></span>
+              <span class="markerlabel" style="left:52%">You</span>
+              <span class="marker" style="left:52%"></span></span></div>
+          <div class="bandrow"><span class="bandlabel">Personal</span>
+            <span class="bandtrack"><span class="bandfill generic" style="left:24%;right:32%"></span></span></div>
+        </div>
+      </div>
+      <div class="copy">
+        <div class="tname">Word count</div>
+        <p class="tbody">Where your book sits against the usual ranges — shown, not scored.</p>
+        <p class="tbody" style="font-size:11px;color:#8a7a6c">Reference only: ranges vary by imprint and by list fit.</p>
+      </div>
+    </article>
+
+    <article class="tile">
+      <div class="info">letter + synopsis + chapters → agents</div>
+      <div class="copy">
+        <div class="tname">Submission packages</div>
+        <p class="tbody">Group a letter, a synopsis and sample chapters, and send the same set to several agents.</p>
+        <button class="tlink">Open packages ›</button>
+      </div>
+    </article>
+  </div>
+</div>
