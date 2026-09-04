@@ -52,6 +52,7 @@ import type { CalSection, CalSectionFacts } from "../../lib/calendarSections";
    whose court a query is in — which is a fault this board has already paid for. */
 import { stageFor, turnWordFor } from "../../lib/queryCardFacts";
 import { fadesFor, cardBounds } from "../../lib/calendarFade";
+import type { CapKind } from "../../lib/calendarPill";
 import {
   TAB_ORDER, TAB_LABEL, rowInTab, tabOf, type TimelineTab,
   GROUP_MODES, GROUP_MODE_LABEL, groupKeyOf, type GroupMode,
@@ -653,11 +654,13 @@ const Piece: React.FC<{
           data-tmark={sg.capSource}
           data-caprel={`${sg.rowKey}::${sg.lane}`} />
       )}
-      {/* ══ THE DISSOLVE (v60, Law 2 — the shadow half is retired with §D) ═══════════════
-          ⚠️ THE MASK WENT BECAUSE A MASK CLIPS A `box-shadow` ALONG WITH THE PAINT — costless while
-          the frame had one faint contact shadow, and it deleted the whole lift the moment the frame
-          gained a second layer. There is no shadow at all now, so `.tl-fov` is the whole mechanism:
-          the gradient that dissolves a clipped card into the section's surface.
+      {/* ══ NO DISSOLVE, NO SHADOW — BOTH RETIRED (v60 Law 2, closed by §D) ═══════════════
+          ⚠️ THE MASK WENT FIRST because a mask clips a `box-shadow` along with the paint, and it
+          deleted the whole lift the moment the frame gained a second layer. Then the shadow went
+          (§D: a lift under a tinted band is two treatments arguing). Then the gradient overlay went
+          (§D correction 1: it dimmed the card's own band, dot and words to state a fact about the
+          window). Nothing is painted over a card now; a cut edge is the board's clip and the
+          frame's own dropped border.
 
           ⚠️ AND THIS PASS ONCE WROTE THE CSS FOR TWO ELEMENTS AND RENDERED NEITHER: the rules
           matched nothing, faded cards were flat and unfaded at once, and only the surface lock said
@@ -708,14 +711,10 @@ const Piece: React.FC<{
       {fade.right && !fade.clipped && (sg.owed || sg.state === "quiet") && (
         <span className="tl-pulsedot" aria-hidden />
       )}
-      {/* ⚠️ THE RIGHT DISSOLVE IS FOR A CLIPPED CARD ONLY, and that is the whole distinction. An
-          ONGOING card ends open — the frame stops, no border, nothing beyond it — because nobody
-          has named an end and there is nothing past the edge to suggest. A CLIPPED card has a real
-          end the reader could page forward to, so its edge dissolves: the card continues past what
-          you are looking at, not past what is known. Drawing the dissolve on both said the second
-          thing about every card on the board. */}
-      {fade.clipped && <span className="tl-fov r" aria-hidden />}
-      {fade.left && <span className="tl-fov l" aria-hidden />}
+{/* ⚠️ NO DISSOLVE ON EITHER EDGE (v63, §D correction 1). Both overlays are deleted: a
+          gradient over a cut edge dimmed the card's OWN band, dot and words to make a statement
+          about the window. The board's clip is what cuts a card; the frame drops its border and its
+          radius on the cut side and nothing is painted over the top. */}
     </div>
   );
 };
@@ -776,6 +775,73 @@ type DrawnGroup = {
   status?: QueryStatus;
   rows: TimelineRow[];
 };
+
+/**
+ * ══ AN ACTION ON THE BOARD (v63, §E) ════════════════════════════════════════════════════════
+ *
+ * Two shapes, one component, because they answer the same question at two volumes.
+ *
+ * **Urgent** — a Caveat label in rose and an outlined button, both hidden at rest. The pulse dot is
+ * the only thing an urgent row states until you hover it: a label and a button on every late row at
+ * once is a dozen instructions on one screen, and the board's job is to say which one thing is next.
+ *
+ * **Everything else** — a 22px ring at the action's date, sand-on-nothing at rest, and the same
+ * label and button slide out beside it when the row is hovered. The ring is a WAYPOINT: it says
+ * something happens here without saying what until asked.
+ *
+ * ⚠️ THE SIDE-STRIP FLAG IS RETIRED ENTIRELY. It was a tile the width of a card standing in the
+ * lane, so a board with a dozen live rows carried a dozen paragraphs down its right-hand side.
+ *
+ * ⚠️ AND NO ANIMATION ON A LABEL. The ring's own colours transition; the label and button appear.
+ * A label that slides or fades on every pointer move is motion in the reader's peripheral vision
+ * for something they have not asked about yet.
+ */
+type ActionGlyph = CapKind | "quiet";
+
+/** the four glyphs, each drawn at an explicit size because a positioned SVG has no intrinsic one */
+function ActionSym({ kind }: { kind: ActionGlyph }) {
+  const P = { fill: "none", stroke: "currentColor", strokeWidth: 1.8,
+    strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  return (
+    <span className="tl-actsym" aria-hidden>
+      <svg viewBox="0 0 24 24" width="11" height="11" {...P}>
+        {kind === "window" && (
+          /* hourglass — waiting on the agent */
+          <><path d="M7 3h10M7 21h10M8 3v3.5L12 11l4-4.5V3M8 21v-3.5L12 13l4 4.5V21" /></>
+        )}
+        {kind === "sendBy" && (
+          /* flag — your own deadline, ahead */
+          <><path d="M6 21V4M6 4h11l-2.5 4L17 12H6" /></>
+        )}
+        {kind === "reminder" && (
+          /* bell — a reminder you set */
+          <><path d="M18 15V10a6 6 0 1 0-12 0v5l-2 3h16zM10 21h4" /></>
+        )}
+        {kind === "quiet" && (
+          /* a crossed ring — an offer to close a silence that has run out */
+          <><circle cx="12" cy="12" r="8.5" /><path d="M9 9l6 6M15 9l-6 6" /></>
+        )}
+      </svg>
+    </span>
+  );
+}
+
+function ActionMark({ urgent, kind, label, deed, style }: {
+  urgent?: boolean; kind: ActionGlyph; label: string; deed: string;
+  lane: number; style: React.CSSProperties;
+}) {
+  return (
+    <div className={`tl-act${urgent ? " tl-act--od" : ""}`} style={style} data-act={kind}>
+      {/* ⚠️ THE RING IS THE NON-URGENT SHAPE'S WHOLE RESTING STATE. An urgent row shows nothing at
+          rest but its pulse dot, so it draws no ring — the ref's `.nlab.od .sym { display: none }`. */}
+      {!urgent && <ActionSym kind={kind} />}
+      <span className="tl-actlab">{label}</span>
+      {/* ⚠️ A BUTTON, NOT A TILE. It is the one thing on this row you can press, so it is an element
+          the keyboard can reach and assistive tech can announce. */}
+      <button type="button" className="tl-actbtn">{deed}<span aria-hidden>&nbsp;›</span></button>
+    </div>
+  );
+}
 
 /**
  * ══ ONE TOOLBAR CONTROL (v63, section C) ═══════════════════════════════════════════════════
@@ -1818,41 +1884,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     return () => { for (const off of offs) off(); };
   });
 
-  React.useLayoutEffect(() => {
-    const root = pageRef.current;
-    if (!root) return;
-    const clamp = () => {
-      for (const cap of Array.from(root.querySelectorAll<HTMLElement>(".tl-cap"))) {
-        const lane = cap.parentElement;
-        if (!lane) continue;
-        const laneW = lane.clientWidth;
-        if (!laneW) continue;
-        /**
-         * ⚠️ RECORD THE POSITION, THEN RESTORE IT — IN THAT ORDER.
-         *
-         * This read `left = capleft ?? ""` and only THEN recorded `capleft`. On the first pass
-         * `capleft` is undefined, so the line cleared the inline `left` — the percentage the cap
-         * is positioned by — and then stored the empty string as the "original". From that moment
-         * every cap had no position at all: `offsetLeft` read ~0 and the clamp below pinned it to
-         * the lane's left edge. Measured on the deployed board: six caps, all at x 23–37 of a
-         * 1100px lane, every one of them flush left regardless of its date.
-         *
-         * The clearing itself is right — a re-run must not clamp an already-clamped value — it was
-         * only ever in the wrong order.
-         */
-        if (cap.dataset.capleft === undefined) cap.dataset.capleft = cap.style.left;
-        cap.style.left = cap.dataset.capleft;
-        const half = cap.offsetWidth / 2;
-        const left = cap.offsetLeft;
-        if (left - half < 2) cap.style.left = `${half + 2}px`;
-        else if (left + half > laneW - 2) cap.style.left = `${laneW - half - 2}px`;
-      }
-    };
-    clamp();
-    const ro = new ResizeObserver(clamp);
-    ro.observe(root);
-    return () => ro.disconnect();
-  });
+  /* ⚠️ THE FLAG-CLAMPING EFFECT IS DELETED (v63, §E). It measured each flag against its lane and
+     folded one near the edge inward — DOM-MEASURED PLACEMENT, which this pack's laws forbid, and
+     which put an action on a day it does not belong to. An action stands on its own date now and
+     is clipped by the board like everything else, so there is nothing to measure and nothing to
+     fold. The whole effect goes rather than being left with no subject. */
 
   React.useLayoutEffect(() => {
     const place = () => {
@@ -2575,33 +2611,27 @@ data-rowkey={r.key}
             * The pair is emitted from one test in `journeyBars`, so a cap can never appear without
             * its mark.
             */}
-          {/* ⚠️ ONE INSTRUCTION PER ROW (v60c, standing). An Urgent row shows its urgent flag and
-              nothing else: a row reading "6 weeks overdue" beside "Nudge · from 19 Sept" states
-              two moves at once, and the reader has to work out which is being asked of them —
-              which is the opposite of what a flag is for. Measured before the ruling: two rows
-              carried both. Both facts survive in the hover record, which is where a row's whole
-              story belongs; what the board states is the one thing to do next. */}
+          {/* ══ ACTIONS (v63, §E) ══════════════════════════════════════════════════════════════
+              ⚠️ ONE INSTRUCTION PER ROW (v60c, standing). An urgent row shows its urgent action and
+              nothing else: a row reading "6 weeks overdue" beside "Nudge · from 19 Sept" states two
+              moves at once and leaves the reader to work out which is being asked of them. Both
+              facts survive in the hover record; what the board states is the one thing to do next.
+
+              ⚠️ AND AN ACTION STANDS ON ITS OWN DATE, NEVER CLAMPED INTO THE LANE. The old flag
+              carried `min(…, calc(100% - 206px))` so one near the edge folded inward — which put it
+              on a day it does not belong to, on the one axis this board asks a reader to trust. An
+              action past the window's edge is CLIPPED by the board, like everything else here. */}
           {bar.segs.filter((sg) => sg.capWord && !rowUrgent).map((sg) => (
-            <div key={`cap-${sg.key}`}
-              className={`tl-cap${sg.capMine ? " mine" : ""}`}
-              data-cap={sg.capSource}
-              data-caprel={`${sg.rowKey}::${sg.lane}`}
-              /* ⚠️ THE CAP IS PLACED FROM THE CARD'S OWN GEOMETRY, NOT FROM A SECOND SUM.
-                 It read `pct(sg.to)` while the card is drawn at `--l` wide `--w` — the same date
-                 by two routes, and they disagreed by a constant 362.6px (thirty days) on every cap
-                 on the board. `calc(var(--l) + var(--w))` IS the card's right edge, so the cap
-                 stands on the day the card ends however that end is computed. */
+            <ActionMark key={`act-${sg.key}`} kind={sg.capSource ?? "window"}
+              label={sg.capOn ?? ""} deed={sg.capWord ?? ""} lane={sg.lane}
               style={{ ...laneVar(sg.lane),
                 ["--l" as string]: barLeft(sg),
                 ["--w" as string]: barWidth(sg),
-                /* ⚠️ `min()` AND NOTHING ELSE (Law 6). The flag stands to the RIGHT of the bar's
-                   end, and clamps so one near the lane's edge folds inward rather than leaving it.
-                   No element is measured: a wrong lane width once piled every flag at one x. */
-                left: "min(calc(var(--l) + var(--w) + 16px), calc(100% - 206px))" }}>
-              <span className="g" aria-hidden />
-              <span className="w">{sg.capWord}</span>
-              <span className="d">{sg.capOn}</span>
-            </div>
+                /* ⚠️ THE CARD'S OWN RIGHT EDGE PLUS A SHORT GAP — `calc(--l + --w)` IS that edge,
+                   however it was computed. Reading `pct(sg.to)` instead was the same date by a
+                   second route and they disagreed by a constant 362.6px on every flag on the
+                   board. One expression, no second arithmetic to drift. */
+                left: "calc(var(--l) + var(--w) + 14px)" }} />
           ))}
           {/**
             * ⚠️ THE URGENT FLAG STANDS AT TODAY, NOT AT THE DATE THAT PASSED.
@@ -2615,30 +2645,22 @@ data-rowkey={r.key}
             * The first owed segment carries it and the rest are silent.
             */}
           {(() => {
+            /* ⚠️ THE URGENT ACTION STANDS ON THE DATE IT IS OWED FOR, and is hidden until the row is
+               hovered — the pulse dot is the only thing an urgent row states at rest. A label and a
+               button on every late row at once is twelve instructions on one screen. */
             const late = bar.segs.find((sg) => sg.owed || sg.state === "quiet");
-            if (!late || todayAt == null) return null;
+            if (!late) return null;
             const p = pillText(late.status, holderOf(late), late.nudgeDue, !!late.owed,
               late.state === "ghost", late.state === "quiet");
-            const parts = barLines(late.label);
-            /* ⚠️ THE MONO LINE MUST NOT RESTATE THE DEED. A reminder that has come round carries no
-               date of its own, so its fact is the words "nudge due" — and the flag then read
-               "Nudge due" over "NUDGE DUE", the same sentence twice in two typefaces. Where the
-               lateness clause says nothing the deed has not already said, the flag falls back to
-               the row's own opening clause, which is a date. */
-            const same = (a: string, b: string) =>
-              a.trim().toLowerCase() === b.trim().toLowerCase();
-            const l2 = parts.t2 && !same(parts.t2, p.text) ? parts.t2 : parts.t1;
-            if (!l2) return null;
+            /* the tail already says how late, in the one lateness vocabulary — never recomputed */
+            if (!late.tail) return null;
             return (
-              <div className="tl-cap mine od" key={`od-${late.key}`} data-odflag={p.text}
+              <ActionMark key={`od-${late.key}`} urgent kind={late.capSource ?? "sendBy"}
+                label={late.tail} deed={p.text} lane={late.lane}
                 style={{ ...laneVar(late.lane),
-                  left: `min(calc(${pct(todayAt)} + 18px), calc(100% - 236px))` }}>
-                <span className="fh" aria-hidden />
-                <span className="fb">
-                  <span className="w">{p.text}</span>
-                  <span className="d">{l2}</span>
-                </span>
-              </div>
+                  ["--l" as string]: barLeft(late),
+                  ["--w" as string]: barWidth(late),
+                  left: "calc(var(--l) + var(--w) + 14px)" }} />
             );
           })()}
           {/**

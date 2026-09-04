@@ -290,11 +290,15 @@ test.describe("v63 · D — the bar", () => {
     expect(clipped.length, "no clipped cards — the dissolve is unexercised").toBeGreaterThan(0);
 
     for (const c of ongoing) {
-      expect(c.fovR, `an ongoing card dissolves — it has no end to continue to (${c.status})`).toBe(false);
+      expect(c.fovR, `an ongoing card grew a dissolve back (${c.status})`).toBe(false);
       expect(c.frameBorderR, "an ongoing card kept its right border").toBe("0px");
     }
     for (const c of clipped) {
-      expect(c.fovR, `a clipped card does not dissolve (${c.status})`).toBe(true);
+      /* ⚠️ THE DISSOLVE HALF IS RETIRED (§D correction 1) AND THE CLAIM SURVIVES AS ITS INVERSE.
+         This asserted a clipped card DOES dissolve; the overlay is deleted, so both kinds of cut
+         edge now stop the same way and nothing is painted over either. What distinguishes them is
+         the pulse dot, which rides an ongoing open end and never a clipped one — asserted below. */
+      expect(c.fovR, `a clipped card grew a dissolve back (${c.status})`).toBe(false);
       expect(c.frameBorderR, "a clipped card kept its right border").toBe("0px");
     }
     /* ⚠️ THE PULSE DOT IS ON AN OPEN END AND ONLY WHERE SOMETHING IS LATE — three conditions, and
@@ -397,7 +401,8 @@ test.describe("v63 · D — the bar", () => {
        against the drawing these values came from — and it reads as correct in the source, which is
        why this is measured rather than grepped. */
     const WANT: Record<string, number> = {
-      status: 12.5, note: 12, holder: 7, name: 15.5, agency: 12, fact: 12, tail: 7.5, bang: 13,
+      /* tail is 8, not the formatting pass's 7.5 — the difference list against the ref settled it */
+      status: 12.5, note: 12, holder: 7, name: 15.5, agency: 12, fact: 12, tail: 8, bang: 13,
     };
     const seen: Record<string, Set<string>> = {};
     for (const c of cs) {
@@ -504,5 +509,113 @@ test.describe("v63 · D — the bar", () => {
     /* the population, before the claim — a board with no names has no case to be wrong about */
     expect(r.seen, `only ${r.seen} names swept`).toBeGreaterThan(20);
     expect(r.bad, `not title case: ${JSON.stringify(r.bad)}`).toEqual([]);
+  });
+
+  test("⚠️ (d13) no dissolve anywhere — no gradient, no mask, and a cut edge is a hard edge", async ({ page }) => {
+    await openRoute(page, CAL, { width: 1440, height: 900 });
+    const r = await page.evaluate(() => {
+      const g = [...document.querySelectorAll<HTMLElement>(".tl-cal")]
+        .find((e) => e.getBoundingClientRect().height > 0)!;
+      const cards = [...g.querySelectorAll<HTMLElement>(".tl-p")];
+      const painted: string[] = [];
+      const edges: { cls: string; l: string; r: string; lrad: string; rrad: string }[] = [];
+      const dotOut: string[] = [];
+      for (const c of cards) {
+        for (const e of [c, ...c.querySelectorAll<HTMLElement>("*")]) {
+          const cs = getComputedStyle(e);
+          const mask = cs.maskImage ?? "none";
+          const wmask = (cs as unknown as Record<string, string>).webkitMaskImage ?? "none";
+          if (/gradient/.test(cs.backgroundImage) || (mask !== "none" && mask !== "")
+              || (wmask !== "none" && wmask !== "")) painted.push(e.className || e.tagName);
+        }
+        const f = c.querySelector<HTMLElement>(".tl-frame");
+        if (f && (c.classList.contains("fadeL") || c.classList.contains("clipR"))) {
+          const cs = getComputedStyle(f);
+          edges.push({ cls: [...c.classList].filter((k) => k === "fadeL" || k === "clipR").join("+"),
+            l: cs.borderLeftWidth, r: cs.borderRightWidth,
+            lrad: cs.borderTopLeftRadius, rrad: cs.borderTopRightRadius });
+        }
+        /* ⚠️ THE DOT MUST BE WHOLLY INSIDE THE CARD — one card's sat outside it before this pass */
+        const d = c.querySelector<HTMLElement>(".tl-sband svg");
+        if (d) {
+          const db = d.getBoundingClientRect(), cb = c.getBoundingClientRect();
+          if (db.left < cb.left - 0.5 || db.right > cb.right + 0.5
+              || db.top < cb.top - 0.5 || db.bottom > cb.bottom + 0.5) {
+            dotOut.push(`${c.querySelector(".tl-fnm")?.textContent?.trim()} `
+              + `(dot ${db.left.toFixed(1)}..${db.right.toFixed(1)} card ${cb.left.toFixed(1)}..${cb.right.toFixed(1)})`);
+          }
+        }
+      }
+      return { cards: cards.length, painted: [...new Set(painted)], edges, dotOut };
+    });
+    expect(r.cards, "no cards to check").toBeGreaterThan(5);
+    /* ⚠️ ABSOLUTE, NOT "no `.tl-fov`". A class-name check passes the day somebody paints a gradient
+       on a different element; this asks what is PAINTED, so there is nothing left to rename around. */
+    expect(r.painted, `cards carry a gradient or a mask: ${JSON.stringify(r.painted)}`).toEqual([]);
+    /* a cut edge drops its border and its radius — the clip is what says the card continues */
+    expect(r.edges.length, "no clipped cards — the edge claim is unexercised").toBeGreaterThan(0);
+    for (const e of r.edges) {
+      if (e.cls.includes("fadeL")) {
+        expect(e.l, `${e.cls}: left border ${e.l}`).toBe("0px");
+        expect(e.lrad, `${e.cls}: left radius ${e.lrad}`).toBe("0px");
+      }
+      if (e.cls.includes("clipR")) {
+        expect(e.r, `${e.cls}: right border ${e.r}`).toBe("0px");
+        expect(e.rrad, `${e.cls}: right radius ${e.rrad}`).toBe("0px");
+      }
+    }
+    expect(r.dotOut, `the band's dot sits outside its card: ${JSON.stringify(r.dotOut)}`).toEqual([]);
+  });
+
+  test("⚠️ (d14) nothing divides the rows — no border, no stripe, no hover ground", async ({ page }) => {
+    await openRoute(page, CAL, { width: 1440, height: 900 });
+    const r = await page.evaluate(() => {
+      const g = [...document.querySelectorAll<HTMLElement>(".tl-cal")]
+        .find((e) => e.getBoundingClientRect().height > 0)!;
+      const rows = [...g.querySelectorAll<HTMLElement>(".tl-rrow")];
+      const borders = new Set<string>(), grounds = new Set<string>();
+      for (const row of rows) {
+        const cs = getComputedStyle(row);
+        borders.add([cs.borderTopWidth, cs.borderRightWidth, cs.borderBottomWidth, cs.borderLeftWidth].join("/"));
+        grounds.add(cs.backgroundColor);
+      }
+      return { rows: rows.length, borders: [...borders], grounds: [...grounds] };
+    });
+    expect(r.rows, "no rows to check").toBeGreaterThan(5);
+    expect(r.borders, `a row carries a border: ${JSON.stringify(r.borders)}`).toEqual(["0px/0px/0px/0px"]);
+    /* transparent, or the board's own ground showing through — never a stripe of its own */
+    for (const bg of r.grounds) {
+      expect(["rgba(0, 0, 0, 0)", "transparent"], `a row paints ${bg}`).toContain(bg);
+    }
+    /* ⚠️ AND NO HOVER RULE IN THE SHEET. Measuring a resting row cannot see one; the card's own
+       forward lift is the whole hover response. */
+    const sheet = readFileSync("src/components/todo/todoCalendar.css", "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(sheet, "a row hover background came back").not.toMatch(/\.tl-rrow:hover\s*\{[^}]*background/);
+  });
+
+  test("⚠️ (d15) names render as stored — no transform, no upper-casing", async ({ page }) => {
+    await openRoute(page, CAL, { width: 1440, height: 900 });
+    const r = await page.evaluate(() => {
+      const g = [...document.querySelectorAll<HTMLElement>(".tl-cal")]
+        .find((e) => e.getBoundingClientRect().height > 0)!;
+      const names = [...g.querySelectorAll<HTMLElement>(".tl-fnm")];
+      return {
+        n: names.length,
+        transforms: [...new Set(names.map((e) => getComputedStyle(e).textTransform))],
+        variants: [...new Set(names.map((e) => getComputedStyle(e).fontVariantCaps))],
+        /* a name that is ALL CAPS and longer than an initialism is the symptom, whatever caused it */
+        shouting: names.map((e) => (e.textContent ?? "").trim())
+          .filter((t) => t.length > 3 && t === t.toUpperCase() && /[A-Z]{4}/.test(t)),
+      };
+    });
+    expect(r.n, "no names on the board").toBeGreaterThan(5);
+    expect(r.transforms, `a name element carries a text-transform: ${JSON.stringify(r.transforms)}`)
+      .toEqual(["none"]);
+    expect(r.variants, `a name element carries small-caps: ${JSON.stringify(r.variants)}`)
+      .toEqual(["normal"]);
+    /* ⚠️ AND THE RENDERED TEXT ITSELF. A transform is one way to shout; an upper-casing helper and
+       an upper-case RECORD are the other two, and neither shows in a computed style. */
+    expect(r.shouting, `names rendered upper-case: ${JSON.stringify(r.shouting)}`).toEqual([]);
   });
 });
