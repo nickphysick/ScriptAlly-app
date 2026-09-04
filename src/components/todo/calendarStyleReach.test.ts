@@ -40,6 +40,20 @@ const classesIn = (src: string): Set<string> => {
   /* every `tl-…` token inside a className, however the page builds it — a literal, a template, a
      ternary arm or an array entry. The page writes all four. */
   for (const m of src.matchAll(/\btl-[a-z0-9-]+/g)) out.add(m[0]);
+  /* ⚠️ A CLASS BUILT BY INTERPOLATION IS A FAMILY, NOT A NAME — the blind spot this repo already
+     records against dead-class scans, arriving from the other direction. `tl-st-${stage}` yields
+     the literal prefix `tl-st-`, which is not a class anybody declares, so the sweep reported it
+     as rendered-with-no-rule. Dropping any token that a `${` immediately follows is the honest
+     reading: the page never emits that string, it emits members of that family — and the members
+     ARE covered, because the eight `.tl-st-*` rungs each have a base rule and the tint lock
+     asserts all eight against `f12.css`.
+
+     ⚠️ THE DISCRIMINATOR IS THE TRAILING HYPHEN, and the first cut without it was too broad: it
+     also dropped `tl-tchip`, which is written `tl-tchip${cond ? " ghost" : ""}` — an interpolation
+     that appends a SEPARATE class after a space, so `tl-tchip` really is emitted. A family prefix
+     ends with the separator; a complete class does not. The floor case below is what caught it,
+     which is the whole reason a sweep asserts what it found before asserting what it means. */
+  for (const m of src.matchAll(/\b(tl-[a-z0-9-]*-)\$\{/g)) out.delete(m[1]);
   return out;
 };
 

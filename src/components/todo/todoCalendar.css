@@ -202,6 +202,32 @@
 .tl-zone { overflow-x: hidden; }
 
 .tl-board {
+  /* ══ THE TINT LADDER — A DOCUMENTED COPY, NEVER A `var()` REFERENCE (v63, section D) ═══════
+     ⚠️ THE LADDER IS SCOPED TO `.t-f12` AND THE CALENDAR IS NOT UNDER IT. `f12.css` declares
+     `--stage-out-1`…`--stage-closed` on the Query Centre's own theme class, and its own comment
+     records why that matters: a `var()` whose defining scope is not an ancestor paints NOTHING,
+     silently. Reading them from here would give every band no fill at all, through a clean build.
+
+     ⚠️ AND A COPY IS RIGHT RATHER THAN A CROSS-SURFACE READ, on the precedent `--mk-hero-ground`
+     already sets: one cross-tier read is what a refactor deletes without knowing another surface
+     depended on it. `calendarStageTints.test.ts` asserts these EQUAL what `f12.css` declares —
+     against that file, never a literal on both sides — so a retone there fails here.
+
+     Source: `design-refs/query-tint-ladder.md`, locked 4 Sep 2026, which supersedes the band values
+     in `query-centre.html` AND the `dk-*` families in `timeline-v63.html`. The ref's bar draws the
+     superseded scheme; colour is the app's, per the authority split.
+
+     ⚠️ CONSOLIDATION IS OWED AND IS NOT THIS PASS'S: the ladder belongs at `:root` with `.t-f12`
+     reading it, which would retire this copy. `f12.css` is another session's live file. */
+  --tl-stage-out-1: #e6eae3;   /* Queried */
+  --tl-stage-out-2: #d7ddd3;   /* Partial Sent */
+  --tl-stage-out-3: #c7d0c2;   /* Full Sent */
+  --tl-stage-in-1: #f8e9e2;    /* Partial Requested */
+  --tl-stage-in-2: #f1dbd0;    /* Full Requested */
+  --tl-stage-in-3: #e8c9bb;    /* Revise & Resubmit */
+  --tl-stage-offer: #d7e0e8;   /* an offer, while it is open */
+  --tl-stage-closed: #e4e1db;  /* closed, rejected, withdrawn, no response */
+
   /* ⚠️ v60 DELETES THE FIELD: `.board` is `background: transparent; border: none; border-radius: 0`.
      The board sits on the page. What replaced it is the SECTION — six white containers with tinted
      headers — so a field behind them would be a seventh surface behind six objects, and the tinted
@@ -473,8 +499,14 @@
   /* ⚠️ v61 TIGHTENS BOTH — the ref's second `:root`, 76/56 against v60's 88/62. The badge moved
      INSIDE the card and shrank from 58 to 40, so the row no longer has to hold a medallion standing
      proud of it; the height that bought is given back. */
-  --row-h: 76px;
-  --bar-h: 56px;
+  /* ⚠️ 106 / 86 — the ref's `data-body="airy"` AND `data-dens="regular"`, which agree. Four
+     variants set this pair (`seg=band` 92/72, `bar=qc` 88/66, then these two); all four are
+     `body[attr]` at equal specificity, so the LAST declaration wins and both of the last two say
+     106/86. Read the cascade, not the first match — this file has been caught by that twice now. */
+  --row-h: 106px;
+  --bar-h: 86px;
+  /* the band's height, read by the body's own offset so the two cannot drift */
+  --tl-sband-h: 26px;
   /* ⚠️ THE BADGE IS THE BOARD'S ONE SCALING TOKEN, and three other values are `calc()`s over it:
      the medallion's overhang (35% of itself, leftward), the card's text inset (66% + 10px) and the
      left column every section reserves for it. The ref states all four against `--badge`, so the
@@ -1841,27 +1873,16 @@ button.tl-tchip { cursor: pointer; }
 }
 .tl-p.fadeR .tl-frame, .tl-p.fadeL .tl-frame { box-shadow: none; }
 
-/* ⚠️ A NEGATIVE `z-index` CHILD, AND ITS STACKING CONTEXT IS THE CARD'S OWN `z-index`. A negative-z
-   child paints behind the backgrounds of every ancestor up to the nearest stacking context; `.tl-p`
-   is positioned AND carries a `z-index`, so it creates one and the shadow sinks behind the frame
-   without sinking behind the container. */
-.tl-shd {
-  position: absolute; inset: 0; border-radius: 10px; z-index: -1; pointer-events: none; box-shadow: var(--tl-cs-shadow);
-}
-/* the shadow takes the card's whole span and is cut to the tail's outline */
-.tl-p.fadeR .tl-shd {
-  right: 0;
-  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%);
-}
+/* ⚠️ THE CARD'S SHADOW IS RETIRED (v63, section D) — `body[data-bar="qc"] .shd { display: none }`.
+   A lift under a bar that already carries a tinted band is two treatments arguing; the QC card is
+   a flat object on a flat ground. Its negative-`z-index` note went with it: there is nothing left
+   to sink behind the frame. */
 .tl-p.fadeL .tl-shd { left: var(--card-fade-inset); }
 
 /* the chevron itself — 18px wide, one pixel proud at top and bottom so its stubs meet the frame */
-.tl-tail {
-  display: none;
-  position: absolute; right: -1px; top: -1px;
-  height: calc(100% + 2px); width: 18px; z-index: 1; pointer-events: none;
-}
-.tl-p.fadeR .tl-tail { display: block; }
+/* ⚠️ THE CHEVRON TAIL IS RETIRED (v63, section D) — the design is `data-end="open"`, and the ref
+   states `body:not([data-end="tail"]) .tailsvg { display: none !important }`. An open end IS the
+   frame's own right border removed and its corners squared, which `.tl-p.fadeR .tl-frame` does. */
 
 /* ⚠️ NO DISSOLVE ON AN ONGOING CARD — the ref's `body:not([data-end="fade"]) .fov.r{display:none}`.
    The left overlay stays: that edge really is cut. */
@@ -1939,24 +1960,9 @@ button.tl-tchip { cursor: pointer; }
  * ⚠️ AND THE TONE IS THE SECTION'S. `--gtone` is set on the section container, so a trail cannot
  * come to disagree with the section it is drawn in — one token, two readers.
  */
-.tl-ctrack, .tl-ctrail {
-  position: absolute; bottom: 6px; height: 3px; border-radius: 2px;
-  /* the SAME token the words read — three readers, one number */
-  left: var(--tl-card-inset);
-  z-index: 3; pointer-events: none;
-  /* ⚠️ A CARD NARROWER THAN ITS OWN TEXT INSET GETS NO TRACK AT ALL. `left: 62px` on a 69px card
-     puts the track's right edge past the card's end whatever width it is given, so containment has
-     to be stated as a maximum rather than left to the width alone. `max-width` is the honest form:
-     it is the space that actually remains. */
-  max-width: calc(100% - var(--tl-card-inset) - 12px);
-}
-.tl-p.fadeR .tl-ctrack, .tl-p.fadeR .tl-ctrail {
-  /* an ongoing bar keeps the chevron notch clear — 24px against 12 on a dated end */
-  max-width: calc(100% - var(--tl-card-inset) - 24px);
-}
-.tl-ctrack { background: var(--tl-cs-track); }
-.tl-ctrail { background: var(--gtone, #cdbfa8); }
-.tl-p.fadeL .tl-ctrack, .tl-p.fadeL .tl-ctrail { left: var(--tl-card-inset); }
+/* ⚠️ THE TRAIL IS RETIRED (v63, section D) — `data-trail="off"` states `.ctrack, .ctrail
+   { display: none }`, so it is a REJECTED alternative rather than a suppressed feature. Its rules
+   go with its render; a rule left behind for an element nothing emits reads as live styling. */
 
 /* ══ FLAGS (v60, the ref's `.nlab`) ════════════════════════════════════════════════════════════
  *
@@ -2077,40 +2083,77 @@ button.tl-tchip { cursor: pointer; }
  * R&R terracotta, Offer forest, No Response sand, Closed grey, each derived from the status's own
  * base. So the calendar stops having a badge of its own.
  */
-.tl-medal {
-  position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 5; pointer-events: none;
-  /* ⚠️ THE WHITE RING IS THE REF'S, and it is what lifts the disc off the card rather than letting
-     a pale tint dissolve into a white ground. `box-shadow`, so it costs no layout. */
-  border-radius: 99px; box-shadow: none;
+/* ⚠️ THE BAND IS THE CARD'S HEAD, FULL WIDTH, AT THE REF'S 26px (v63, section D). It REPLACES the
+   free-standing badge, which floated at the card's left edge bursting past it with every ancestor
+   held `overflow: visible` to let it — the overhang, its reserved padding and the whole escape
+   route go with it. `border-radius` matches the frame's top corners only, so the band reads as
+   part of the card rather than as a pill lying on it. */
+.tl-sband {
+  position: absolute; left: 0; right: 0; top: 0; height: 26px; z-index: 4;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px 0 10px;
+  border-radius: 9px 9px 0 0;
+  border-bottom: 1px solid rgba(58, 28, 20, .06);
+  white-space: nowrap; overflow: hidden; pointer-events: none;
 }
+/* the eight rungs of the ladder — see the tokens, and `calendarStageTints.test.ts` */
+.tl-st-out-1 { background: var(--tl-stage-out-1); }
+.tl-st-out-2 { background: var(--tl-stage-out-2); }
+.tl-st-out-3 { background: var(--tl-stage-out-3); }
+.tl-st-in-1  { background: var(--tl-stage-in-1); }
+.tl-st-in-2  { background: var(--tl-stage-in-2); }
+.tl-st-in-3  { background: var(--tl-stage-in-3); }
+.tl-st-offer { background: var(--tl-stage-offer); }
+.tl-st-closed { background: var(--tl-stage-closed); }
+/* ⚠️ A CARD WHOSE RIGHT EDGE DISSOLVES SQUARES THE BAND'S CORNER AND STOPS SHORT OF THE NOTCH, so
+   the band does not run out through the chevron the frame opens. */
+.tl-p.fadeR .tl-sband { right: 16px; border-top-right-radius: 0; }
+.tl-p.fadeL .tl-sband { border-top-left-radius: 0; }
 /* ⚠️ EXPLICIT WIDTH AND HEIGHT ON THE SVG — `top`/`bottom` do not size one, and a transform is
    ignored on an SVG element by some engines. The dot is drawn at the size it is asked for. */
-.tl-medal svg { width: 20px; height: 20px; transform: none; overflow: visible; }
-/* a card whose left edge dissolves keeps the badge where it is — it is inside, so nothing moves */
-.tl-p.fadeL .tl-medal { left: 9px; }
+.tl-sband svg { width: 20px; height: 20px; transform: none; overflow: visible; flex: 0 0 auto; }
+/* the status, in the page's serif — the word, not an abbreviation of it */
+.tl-sw {
+  font-family: 'Playfair Display', serif; font-size: 12.5px; font-weight: 500;
+  color: var(--tl-nearblack); min-width: 0; overflow: hidden; text-overflow: ellipsis;
+}
+/* ⚠️ THE HOLDER RIDES THE BAND'S RIGHT END and turns rose only when something is late. It is the
+   ref's `.sh`; the absolutely-positioned `.fho` the ref also carries is the NON-band alternative,
+   hidden by the band variant, so it is not built. */
+.tl-sh {
+  margin-left: auto; flex: 0 0 auto;
+  font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .16em;
+  text-transform: uppercase; color: #7d6c5c;
+}
+.tl-p.owed .tl-sh, .tl-p.quiet .tl-sh { color: #8c4f4a; }
 
+/* ⚠️ THE BODY DROPS BELOW THE BAND — the ref's `top: calc(50% + 13px)`, the card's centre pushed
+   down by half the band's height. Written against the band's own height rather than as a literal
+   13, so moving the band moves the words with it and there is no second copy to fall out of step. */
+/* ⚠️ `top: 36px`, NO TRANSFORM, AND A 44px CEILING — MEASURED OFF THE REF, NOT READ OFF IT.
+   `data-seg="band"` says `top: calc(50% + 13px)`; `data-dens="regular"` says `top: 36px;
+   max-height: 44px` four hundred lines later and wins. Rendering the ref settled it in one command
+   where reading it had already been wrong twice in this section: its own card measures body top
+   36px, `transform: none`, height 40.6 inside an 86px bar with nothing clipped. */
 .tl-cardbody {
-  position: absolute; top: 50%; transform: translateY(-50%);
+  position: absolute; top: 36px; transform: none;
   display: flex; align-items: center; gap: 9px;
   white-space: nowrap; z-index: 3;
-  left: var(--tl-card-inset);
-  max-width: calc(100% - var(--tl-card-inset));
-  overflow: hidden;
+  left: 12px; max-width: calc(100% - 24px);
+  max-height: 44px; overflow: hidden;
 }
 /* ⚠️ THE SAME INSET ON A LEFT-DISSOLVING CARD. v60 pushed the words further in because the badge
    moved; the badge no longer moves, so neither do they. */
-.tl-p.fadeL .tl-cardbody {
-  left: var(--tl-card-inset);
-  max-width: calc(100% - var(--tl-card-inset));
-}
+.tl-p.fadeL .tl-cardbody { left: 36px; max-width: calc(100% - 48px); }
 /* an ongoing card keeps its words clear of the chevron notch */
-.tl-p.fadeR .tl-cardbody { max-width: calc(100% - var(--tl-card-inset) - 20px); }
+.tl-p.fadeR .tl-cardbody { max-width: calc(100% - 24px - 20px); }
 /* ⚠️ LINE ONE IS THE NAME AND ITS CHIP ON ONE ROW — the ref's `.trow`. The chip was a third
    flex column beside the stack, which made it compete with the fact for the card's width and
    pushed the fact off the end of every narrow card. */
-.tl-trow { display: flex; align-items: center; gap: 8px; }
+/* ⚠️ LINE ONE IS THE NAME AND ITS AGENCY. The chip that used to sit here is gone: it restated the
+   status the band now says in full, three inches above it. Baseline, not centre — two serif runs at
+   different sizes align on their baselines or the italic sits visibly high. */
+.tl-trow { display: flex; align-items: baseline; gap: 0; }
 
 /* ⚠️ THE GLIDER, AND THE ONLY THING THAT MOVES. Clipped text glides on hover by a transition on
    THIS element — never a keyframe, and never the frame or the clip, which must stay still or the
@@ -2119,10 +2162,20 @@ button.tl-tchip { cursor: pointer; }
   display: inline-flex; align-items: center; gap: 9px;
   flex: 0 0 auto; white-space: nowrap; transform: translateX(0);
 }
-.tl-gstack { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tl-gstack { display: flex; flex-direction: column; gap: 0; min-width: 0; }
 /* ⚠️ v60's SCALE-UP: 14.5 / 8.5, not 12.5 / 7. The card grew from 44px to 62px and its badge from
    13px to 58; type left at the old sizes reads as a caption inside a card that is now an object. */
-.tl-fnm { font-size: 14.5px; font-weight: 600; color: var(--tl-nearblack); white-space: nowrap; line-height: 1.15; }
+/* ⚠️ `line-height: 1.3` IS THE HOUSE FLOOR FOR MIXED-CASE PLAYFAIR, and this card carries
+   `overflow: hidden` — so anything tighter crops the descenders in a real agent's name. The ref
+   states no line-height at all, which is safe in a document that clips nothing and is not here. */
+.tl-fnm {
+  font-family: 'Playfair Display', serif; font-size: 15.5px; font-weight: 500; letter-spacing: 0;
+  color: var(--tl-nearblack); white-space: nowrap; line-height: 1.3;
+}
+.tl-fag {
+  font-family: 'Playfair Display', serif; font-style: italic; font-size: 12px; font-weight: 400;
+  color: #8a7a6c; margin-left: 8px; white-space: nowrap; line-height: 1.3;
+}
 /* ⚠️ THE NAME AS A LINK LOOKS EXACTLY LIKE THE NAME. It is a `<button>` for the keyboard and for
    assistive tech — a name that navigates must be reachable by Tab and announceable as an action —
    and the button's own chrome is stripped so the card reads as the ref draws it. The affordance is
@@ -2133,35 +2186,45 @@ button.tl-tchip { cursor: pointer; }
      the same class of fault this repo records against the `background` shorthand, in a different
      property. A button's UA style changes the family and nothing `.tl-fnm` states, so the family is
      the only thing that needs inheriting. */
+  /* ⚠️ NO `font-*` OR `color` HERE AT ALL, AND THAT IS THE FIX RATHER THAN AN OMISSION. Both
+     classes land on ONE element — `<button class="tl-fnm tl-fnmlink">` — at equal specificity, so
+     the LATER rule wins, and `.tl-fnmlink` is later. `font-family: inherit` therefore beat
+     `.tl-fnm`'s Playfair and the name rendered in the page's inherited Source Sans Pro, measured.
+     A UA sheet loses to any author rule, so `.tl-fnm`'s own declarations are all a button needs;
+     restating them here — even as `inherit` — is what took them away. Same family as the `font`
+     shorthand trap this file already records, arriving from the same-element direction. */
   background: none; border: 0; padding: 0; margin: 0; cursor: pointer;
-  font-family: inherit; text-align: left; text-decoration: none;
+  text-align: left; text-decoration: none;
 }
 .tl-fnmlink:hover { text-decoration: underline; text-underline-offset: 2px; }
 .tl-fnmlink:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; border-radius: 2px; }
+/* ⚠️ LINE TWO IS A SENTENCE, NOT A LABEL. It was mono 8.5px uppercase with `.1em` tracking — the
+   register of a tag — for a line that reads "Due 28 Aug · 15 days overdue". Inter at 12px in the
+   card's own ink reads as prose, which is what it is. The `agcy` and `sepd` spans are DELETED, not
+   hidden: the agency moved to line one, so there is nothing left for them to hold. */
 .tl-ffx {
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--tl-muted); white-space: nowrap;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 12px;
+  letter-spacing: 0; text-transform: none; color: #3a1c14; white-space: nowrap;
+  margin-top: 7px; line-height: 1.3;
 }
-/* the agency reads a shade back from the fact beside it, so line two has a near and a far half */
-/* the agency reads a shade back from the fact beside it, so line two has a near and a far half */
-.tl-ffx .agcy { color: #a89880; }
-.tl-ffx .sepd { color: #d6c8b6; }
+/* ⚠️ THE RINGED `!` IS QUERY CENTRE'S URGENT MARK, and it opens the FACT rather than sitting beside
+   the name — what is late is the fact, and a mark on the name reads as a note about the agent. */
+.tl-bang {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 13px; height: 13px; border-radius: 99px;
+  border: 1.3px solid #8c4f4a; color: #8c4f4a;
+  font-family: 'Playfair Display', serif; font-size: 9px; font-weight: 700;
+  margin-right: 6px; vertical-align: -2px; flex: 0 0 auto;
+}
+/* ⚠️ NO `.tl-feb`. The ref's is an inline mono TAIL inside line two, not a third line — see the
+   note at the render, and the reason our line two stays one sentence. */
 
-/* ⚠️ FIVE CHIPS, ONE PER HOLDER — soft pink the writer, sage the agency, slate a reminder set,
-   sand a silence, muted a closure. Colour says WHOSE MOVE it is and nothing else. */
-.tl-fchip {
-  font-family: 'JetBrains Mono', monospace; font-size: 6.5px; letter-spacing: .11em;
-  text-transform: uppercase; font-weight: 700;
-  border-radius: 999px; padding: 4px 9px; white-space: nowrap; flex: 0 0 auto;
-}
-.tl-fchip.you   { background: #f8ece6; color: #8c4f4a; }
-.tl-fchip.them  { background: #dce0d9; color: #55684b; }
-.tl-fchip.rem   { background: #e2ebf2; color: #40586e; }
-.tl-fchip.quiet { background: #eee8dc; color: #8a7a6c; }
-.tl-fchip.shut  { background: #efece6; color: #8a8177; }
-/* ⚠️ THE CHIP GREW WITH THE CARD — the ref's `.fchip.sm` at v60's scale. `sm` is the ref's own
-   name for the in-card size, against the larger chip its control row uses. */
-.tl-fchip.sm { font-size: 8px; padding: 4px 10px; }
+/* ⚠️ THE FIVE HOLDER CHIPS ARE DELETED (v63, section D), NOT HIDDEN. They said whose move it was in
+   colour, beside a name — and the status band above them now says it in words, at its right end, in
+   the vocabulary Query Centre uses. Two answers to one question three inches apart is the fault this
+   board has already paid for twice; the chip's WORDS survive as the mono eyebrow on line two, which
+   is the register a tag belongs in. The ref hides them under `data-bar="qc"` because it must keep
+   every variant reachable in one document; we have chosen the variant. */
 
 /* the full record, on hover */
 .tl-tip {

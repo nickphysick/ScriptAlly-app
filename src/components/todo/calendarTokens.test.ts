@@ -30,7 +30,11 @@ const CSS = join(process.cwd(), "src/components/todo/todoCalendar.css");
  * design of record on every run means a retune moves the lock with it and a REGRESSION still
  * fails, which is the only thing a lock is for.
  */
-const REF = join(process.cwd(), "design-refs/timeline-v61.html");
+/* ⚠️ THE DESIGN OF RECORD, AND IT WAS TWO PACKS STALE. This read `timeline-v61.html` while v62 and
+   v63 had each moved the board's geometry — so a lock whose whole purpose is "the sheet agrees with
+   the ref" was agreeing with a ref nothing is built to any more, and would have gone on passing
+   forever. A ref path is an anchor like any other: it needs re-pointing when the record moves. */
+const REF = join(process.cwd(), "design-refs/timeline-v63.html");
 const refSheet = (): string => {
   const s = readFileSync(REF, "utf8");
   const i = s.indexOf("<style>"), j = s.indexOf("</style>", i);
@@ -38,17 +42,47 @@ const refSheet = (): string => {
   return s.slice(i + 7, j);
 };
 /** every `--token: value` on the ref's `:root` (its LAST declaration wins, as the cascade does) */
+/**
+ * ⚠️ THE REF'S TOKENS AS THE SELECTED DESIGN RESOLVES THEM — `:root` FIRST, THEN EVERY CHOSEN
+ * VARIANT, IN FILE ORDER.
+ *
+ * Reading `:root` alone was wrong, and it stayed wrong until a section legitimately changed a
+ * value. A ref keeps every variant reachable in one document and picks one with the `<body>`'s data
+ * attributes; `:root` therefore holds the DEFAULTS, and `body[data-dens="regular"]{--row-h:106px}`
+ * is what the chosen design actually renders. Four variants set `--row-h` in this ref — 92, 88,
+ * 106 and 106 — all `body[attr]` at equal specificity, so the LAST one wins.
+ *
+ * This is the same first-match trap the whole project keeps paying for, wearing a lock's clothes:
+ * the lock read the first declaration and reported a correct build as a regression.
+ */
+const refBodyAttrs = (): Record<string, string> => {
+  const out: Record<string, string> = {};
+  const m = readFileSync(REF, "utf8").match(/<body([^>]*)>/);
+  if (!m) throw new Error("the ref has no <body> tag — cannot know which design is selected");
+  for (const a of m[1].matchAll(/(data-[a-z-]+)="([^"]*)"/g)) out[a[1]] = a[2];
+  if (!Object.keys(out).length) throw new Error("the ref's <body> declares no design attributes");
+  return out;
+};
+
 const refRoot = (): Record<string, string> => {
   const out: Record<string, string> = {};
-  for (const m of refSheet().matchAll(/:root\s*\{([^}]*)\}/g)) {
-    for (const d of m[1].split(";")) {
+  const take = (body: string) => {
+    for (const d of body.split(";")) {
       const k = d.indexOf(":");
       if (k < 0) continue;
       const name = d.slice(0, k).trim();
       if (name.startsWith("--")) out[name] = d.slice(k + 1).trim();
     }
-  }
+  };
+  const sheet = refSheet();
+  for (const m of sheet.matchAll(/:root\s*\{([^}]*)\}/g)) take(m[1]);
   if (!Object.keys(out).length) throw new Error("the ref's :root parsed to nothing");
+  /* then every SELECTED variant, in the order the file declares them — which is how the cascade
+     resolves a set of equal-specificity `body[attr]` rules */
+  const attrs = refBodyAttrs();
+  for (const m of sheet.matchAll(/body\[(data-[a-z-]+)="([^"]*)"\]\s*\{([^}]*)\}/g)) {
+    if (attrs[m[1]] === m[2]) take(m[3]);
+  }
   return out;
 };
 /** one declaration out of one of the ref's rules */

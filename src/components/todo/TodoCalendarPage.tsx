@@ -46,6 +46,11 @@ import {
   type GroupBy, type SortBy, type ActionBucket,
 } from "../../lib/calendarToolbar";
 import type { CalSection, CalSectionFacts } from "../../lib/calendarSections";
+/* ⚠️ THE QUERY CENTRE'S OWN TWO DERIVATIONS, IMPORTED RATHER THAN RESTATED (v63, section D).
+   `stageFor` gives the tint ladder's rung and `turnWordFor` gives the holder's words; the cards on
+   that page read the same two. A calendar-local mapping is how two surfaces come to disagree about
+   whose court a query is in — which is a fault this board has already paid for. */
+import { stageFor, turnWordFor } from "../../lib/queryCardFacts";
 import { fadesFor, cardBounds } from "../../lib/calendarFade";
 import {
   TAB_ORDER, TAB_LABEL, rowInTab, tabOf, type TimelineTab,
@@ -99,6 +104,10 @@ import "./todoCalendar.css";
  * box against the token's computed value rather than against either literal. That is the shape
  * this repo already uses for `READING_PANE_FLOOR_PX` ≡ `--ag-pane-floor`.
  */
+/** ⚠️ THE BAND'S DOT — the pack's 20px, NOT the ref's 14px `.sseg svg`. The ref sizes a flat glyph
+    of its own making; this app's `StatusDot` carries direction and stage in its SHAPE, and 14px
+    loses it. A glyph's legible size is part of the glyph, which is the app's half of the split. */
+const STAGE_BAND_DOT_PX = 20;
 const CARD_BADGE_PX = 20;
 /**
  * A past stage's badge — the ref's `.jc .jmed`, at 54 against the live card's 58.
@@ -492,13 +501,28 @@ const Piece: React.FC<{
           ⚠️ AND ITS SIZE IS `width`/`height`, NEVER A CSS `transform` (Law 8). Some engines ignore
           a transform on an SVG element, so a scaled badge is the right size in one browser and the
           wrong size in another; the ref states `transform: none` on it for the same reason. */}
-      <span className="tl-medal" aria-hidden>
-        {/* ⚠️ THE SOFT-FILL VARIANT — `StatusDot`'s OWN default, with the `badge` prop dropped.
-            v60b added `badge` to give a 58px disc a white centre and a proportional ring, because a
-            58px pale tint with a 1px hairline read as a wash. At 40px the tint IS the mark, and it
-            is the same disc this app draws on every other surface — so the calendar stops having a
-            badge of its own and the seven soft fills come from the statuses themselves. */}
-        <StatusDot status={sg.status} overrideSize={CARD_BADGE_PX} />
+      {/* ══ THE STATUS BAND (v63, section D) ══════════════════════════════════════════════════
+          ⚠️ IT IS QUERY CENTRE'S LANGUAGE, READ FROM QUERY CENTRE'S OWN FUNCTIONS. `stageFor` gives
+          the tint ladder's rung and `turnWordFor` gives the holder's words — the same two the cards
+          on that page draw from. A second mapping here is how two surfaces come to disagree about
+          whose court a query is in, which is the fault this board has already paid for twice.
+
+          ⚠️ AND THE TINT COMES FROM THE CALENDAR'S OWN COPY OF THE LADDER, not from a `var()` on
+          `--stage-*`: those are declared on `.t-f12`, which is not an ancestor here, so a direct
+          read paints nothing at all through a clean build. See the note at the tokens.
+
+          ⚠️ THE BAND REPLACES THE FREE-STANDING BADGE. v61's disc burst past the card's left edge
+          and every ancestor was held `overflow: visible` for it; the mark is inside the band now,
+          so that overhang, its reserved padding and the whole escape route go with it. */}
+      <span className={`tl-sband tl-st-${stageFor(sg.status)}`}>
+        {/* ⚠️ THE APP'S OWN `StatusDot`, AT 20px — the pack's value, and a deliberate departure
+            from the ref's 14px `.sseg svg`. The ref sizes a flat glyph of its own making; this
+            app's dot carries DIRECTION AND STAGE in its shape, and 14px loses that. A glyph's
+            legible size is part of the glyph, which is the app's half of the authority split. */}
+        <StatusDot status={sg.status} overrideSize={STAGE_BAND_DOT_PX} />
+        <span className="tl-sw">{sg.status}</span>
+        {/* the holder, at the band's right end — `turnWordFor`, never a second reading */}
+        <span className="tl-sh">{turnWordFor(sg.status)}</span>
       </span>
       <div className="tl-cardbody">
         {/* the glider: the ONLY thing that moves when clipped text glides on hover */}
@@ -524,7 +548,12 @@ const Piece: React.FC<{
               ) : (
                 <span className="tl-fnm">{name}</span>
               )}
-              <span className={`tl-fchip ${chipKind} sm`} data-pill={pill.text}>{pill.text}</span>
+              {/* ⚠️ THE AGENCY JOINS THE NAME AND THE CHIP IS DELETED (v63, section D). The chip
+                  restated the status the band above it now says in full, at the moment the band
+                  arrived — two answers to one question, three inches apart. The agency moves up
+                  beside the name in Playfair italic, which is what frees line two to be the FACT
+                  alone rather than `agency · fact`. */}
+              {agency && <span className="tl-fag">{agency}</span>}
             </span>
             {/* ⚠️ LINE TWO IS AGENCY · FACT (v61, Section B). It was PREFIX · fact, where the
                 prefix is the status word or "Out since 19 Jul" — so the line repeated the status
@@ -532,10 +561,38 @@ const Piece: React.FC<{
                 agency is the one thing about this row that appears nowhere else on the card, and
                 the fact is what changes. Where a row has no agency the prefix stands in rather
                 than the line opening with a bare middot. */}
+            {/* ⚠️ LINE TWO IS THE FACT, ALONE. The agency moved to line one with the name, so the
+                `agcy` and `sepd` spans the ref hides under `data-bar="qc"` have nothing left to
+                hide — they are DELETED rather than rendered and hidden, which is what stops a
+                third pass finding two agencies on one card and wondering which is live. */}
             <span className="tl-ffx">
-              <span className="agcy">{agency || lines.t1}</span>
-              {lines.t2 ? <><span className="sepd"> · </span>{lines.t2}</> : ""}
+              {/* ⚠️ THE RINGED `!` FOLLOWS THE APP'S OWN DEFINITION OF LATE, WHICH IS `owed` OR
+                  `quiet` — `calSectionOf`'s `isUrgent`, the same expression that files a row under
+                  Urgent and the same one the holder's rose ink reads. It was gated on `owed` alone
+                  for one build: the holder went rose on a gone-quiet card and the ring beside it
+                  did not, so one card carried two definitions of late three inches apart. Found by
+                  widening the LOCK to the app's definition, not by reading the render. */}
+              {(sg.owed || sg.state === "quiet") && <span className="tl-bang" aria-hidden>!</span>}
+              {lines.t2 || lines.t1}
             </span>
+            {/* ⚠️ NO MONO EYEBROW, AND TWO SEPARATE REASONS — both recorded because each alone
+                would look like an omission.
+
+                The first: the ref's `.feb` is not an eyebrow at all. Its own card builder puts it
+                INSIDE `.ffx` holding the relative clause — `Due 15 Apr <span class="feb">29 months
+                overdue</span>` — and `body[data-seg="band"]` makes it `display: inline; margin: 0`,
+                overriding the `display: block` under `data-bar="qc"` that I read first. It is a
+                mono tail on line two, not a third line.
+
+                The second: our `latenessLine` emits ONE locked sentence with one vocabulary, so
+                splitting it on a middot to restyle half would make the typography depend on a
+                punctuation mark inside a string — silently wrong the first time the wording moves.
+                Line two therefore stays one sentence in Inter. If the two-register line is wanted,
+                the fix is for `latenessLine` to return its parts, which is a change to a locked
+                derivation and belongs in its own pass.
+
+                And the pill's words needed no home: the ACTION COLUMN beside the card already says
+                "Send the full" in Caveat with the same dates under it. */}
           </span>
         </div>
       </div>
@@ -557,81 +614,32 @@ const Piece: React.FC<{
           data-tmark={sg.capSource}
           data-caprel={`${sg.rowKey}::${sg.lane}`} />
       )}
-      {/* ══ THE DISSOLVE, AND THE SHADOW IT HANDS OFF TO (v60, Law 2) ═══════════════════════
-          ⚠️ THREE PARTS, ONE MECHANISM, AND THEY FAIL TOGETHER. The frame drops its own shadow
-          when the card fades (CSS), `.tl-shd` carries it INSET from the dissolve so the lift stops
-          before the edge does, and `.tl-fov` is the gradient that dissolves the card into the
-          section's surface. Remove any one and the card is flat, or shadowed into a dissolve, or
-          sheared off.
+      {/* ══ THE DISSOLVE (v60, Law 2 — the shadow half is retired with §D) ═══════════════
+          ⚠️ THE MASK WENT BECAUSE A MASK CLIPS A `box-shadow` ALONG WITH THE PAINT — costless while
+          the frame had one faint contact shadow, and it deleted the whole lift the moment the frame
+          gained a second layer. There is no shadow at all now, so `.tl-fov` is the whole mechanism:
+          the gradient that dissolves a clipped card into the section's surface.
 
-          ⚠️ AND THE ELEMENTS ARE WHY THE MASK WENT. A mask clips an element's box-shadow along
-          with its paint — costless while the frame had one faint contact shadow, and it deleted the
-          whole lift the moment the frame gained the second layer that makes a card an object. This
-          pass wrote the CSS for both elements and rendered NEITHER for a build: the rules matched
-          nothing, faded cards were flat and unfaded at once, and it took the surface lock to say
+          ⚠️ AND THIS PASS ONCE WROTE THE CSS FOR TWO ELEMENTS AND RENDERED NEITHER: the rules
+          matched nothing, faded cards were flat and unfaded at once, and only the surface lock said
           so. A class the sheet selects on and the component never emits is a rule with no subject. */}
-      {/* ══ THE TRAIL — elapsed against the card's own span (v60, Phase 3) ══════════════════
-          ⚠️ THE FILL'S END IS TODAY, COMPUTED FROM DATES AND NEVER FROM A MEASUREMENT. `F` is
-          today's fraction of this card's drawn span, so `100% × F` is today's x inside the card;
-          subtracting the inset from the WIDTH (with the same inset as the `left`) leaves the right
-          edge exactly there. On a closed card today is past the end, `F` clamps to 1, and the fill
-          runs to the card's end — which is the same statement, that the wait is over.
-          ⚠️ AND THE TRACK STOPS 12px SHORT of the card's end, per the ref, so it reads as a gauge
-          inside the card rather than as a second border along its foot. */}
-      {(() => {
-        const spanD = sg.to - sg.from;
-        if (spanD <= 0) return null;
-        /* ⚠️ `sg.todayAt`, THE SEGMENT'S OWN COPY — `from`, `to` and it are all fractional days
-           from the window's left edge, so the ratio is unit-free and needs no conversion. The
-           page-level `todayAt` is not in scope here and would be a second source of one number. */
-        const F = Math.min(1, Math.max(0, (sg.todayAt - sg.from) / spanD));
-        /* the one inset the words, the track and the fill all read */
-        const ins = "var(--tl-card-inset)";
-        /* ⚠️ AN ONGOING BAR LEAVES THE CHEVRON NOTCH CLEAR — 24px against 12 on a dated end. The
-           notch is 16px of the card; a track running into it would draw a flat grey line across the
-           diagonal that is meant to be the card's point. */
-        const endGap = fade.right ? 24 : 12;
-        /* ⚠️ THE TRACK IS CLAMPED TO WHAT IS LEFT OF THE CARD, NOT JUST TO ZERO. Its `left` is the
-           text inset — 62px — so on a card narrower than that the `max(0px, …)` width still put its
-           RIGHT edge at 62px, past the card's own end: measured, a 69px card leaving 7px where the
-           gap needs 12. `min()` against the card's own remaining width is what contains it, and on
-           a card too narrow for a track at all the width falls to zero and nothing is drawn. */
-        const trackW = `calc(100% - ${ins} - ${endGap}px)`;
-        return (
-          <>
-            <span className="tl-ctrack" aria-hidden
-              style={{ width: `max(0px, ${trackW})` }} />
-            {F > 0 && (
-              /* ⚠️ THE FILL IS CLAMPED BY THE TRACK, WHICH IS THE v61 CHANGE. v60's fill landed on
-                 today to the pixel and could therefore run past the card's own end once the tail
-                 shortened the frame — the trail would have crossed its own chevron. `min()` makes
-                 containment structural: the fill can reach today, or the track, whichever comes
-                 first, and it can never leave the bar. */
-              <span className="tl-ctrail" aria-hidden data-fill={F.toFixed(4)}
-                style={{ width: `max(0px, min(calc(100% * ${F.toFixed(4)} - ${ins}), ${trackW}))` }} />
-            )}
-          </>
-        );
-      })()}
-      {(fade.left || fade.right) && <span className="tl-shd" aria-hidden />}
-      {/* ══ THE CHEVRON TAIL (v61) ══════════════════════════════════════════════════════════
-          ⚠️ DRAWN, NOT CLIPPED. A `clip-path` on the frame would cut its border off along with its
-          fill and leave the diagonals bare; the shape has to be stroked. The first path is the
-          chevron — white fill, the frame's own border colour on both diagonals — and the second is
-          two one-pixel stubs at top and bottom, which is what makes the join to the frame's top and
-          bottom borders seamless rather than a shape sitting beside a rectangle.
-
-          ⚠️ `preserveAspectRatio="none"` STRETCHES THE 100-UNIT BOX TO THE BAR'S HEIGHT, and
-          `vector-effect="non-scaling-stroke"` is what stops that stretch distorting the 1.2px
-          stroke into a wedge. The two go together; neither is decoration. */}
-      {fade.right && (
-        <svg className="tl-tail" viewBox="0 0 18 100" preserveAspectRatio="none" aria-hidden>
-          <path d="M0 1 L17 50 L0 99" fill="#fff" stroke="var(--tl-frame-bd)" strokeWidth="1.2"
-            vectorEffect="non-scaling-stroke" />
-          <path d="M0 0 H1 M0 100 H1" stroke="var(--tl-frame-bd)" strokeWidth="1.2"
-            vectorEffect="non-scaling-stroke" />
-        </svg>
-      )}
+      {/* ⚠️ NO TRAIL (v63, section D). The selected design is `data-trail="off"`, which the ref
+          states as `.ctrack, .ctrail { display: none }` — so the gauge along the card's foot is a
+          REJECTED alternative, not a suppressed feature. It measured elapsed time against the
+          card's own span; the card's LENGTH already says that, and the band above it now says
+          whose move it is, so the bar was stating the same thing three ways. Retired with its
+          arithmetic rather than hidden — `F`, the track clamp and the end-gap all go, because a
+          derivation kept alive for a rule that draws nothing is exactly what a later reader
+          resurrects by accident. */}
+      {/* ⚠️ NO SHADOW (v63, section D). `body[data-bar="qc"] .shd { display: none }` — the QC card
+          is a flat object on a flat ground, and a lift under a bar that already carries a tinted
+          band reads as two treatments arguing. The rule goes with the element rather than being
+          left as a `display: none` nobody can trace. */}
+      {/* ⚠️ NO CHEVRON TAIL (v63, section D). The selected design is `data-end="open"`, not
+          `data-end="tail"` — and the ref states `body:not([data-end="tail"]) .tailsvg { display:
+          none !important }`, so the shape it draws is a REJECTED alternative. An open end is the
+          frame's own right border removed and its corners squared, which `.tl-p.fadeR .tl-frame`
+          already does; the arrow was a second statement of the same fact, in ink. */}
       {fade.left && <span className="tl-fov l" aria-hidden />}
     </div>
   );
