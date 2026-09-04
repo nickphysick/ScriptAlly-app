@@ -92,6 +92,14 @@ export interface User {
        back to createdAt for anything unlisted). Rules: `todoPrefs` is `is map`, unconstrained,
        so this ships with NO rules change — proven against the deployed ruleset before use. */
     noteboard?: { dismissedExamples?: string[]; order?: string[] };
+    /* The Manuscripts landing's promo tiles, following the Noteboard's precedent exactly:
+       `todoPrefs` is `is map` and unconstrained, so this page-scoped sub-map ships with NO rules
+       change. ⚠️ PROVED, NOT INHERITED — `rulesProbe.mjs` writes this shape against the deployed
+       ruleset, including the case that asserts the Noteboard's own sub-map survives the write,
+       since the two share one field and a wholesale write would delete another page's prefs.
+       `dismissedTiles` = promo ids sent away for good. Only `wordcount` and `packages` are
+       dismissable; the versions tile hides on its own evidence (a second version exists). */
+    manuscripts?: { dismissedTiles?: string[] };
   };
   /**
    * ⚠️ LEGACY, AND READ BY NOTHING. Superseded by `queryingGoals` below. Left in place rather

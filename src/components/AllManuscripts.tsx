@@ -42,6 +42,8 @@ import { DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./manuscripts/Manuscri
 import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
 import { AttachmentsPanel } from "./manuscripts/AttachmentsPanel";
 import { ManuscriptShelfList } from "./manuscripts/ManuscriptShelfList";
+import { ManuscriptPromos } from "./manuscripts/ManuscriptPromos";
+import { withTileDismissed } from "../lib/promoTiles";
 import { ManuscriptPager } from "./manuscripts/ManuscriptPager";
 import { MANUSCRIPTS_PATH } from "./shell/manuscriptScope";
 import { landingTarget } from "../lib/manuscriptLanding";
@@ -84,7 +86,7 @@ interface AllManuscriptsProps {
 }
 
 export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, active = true, openId = null }) => {
-  const { currentUser, manuscripts, queries, packages, versions, activities, agents, userTasks, addUserTask, taskFlags, updateManuscript, updateManuscriptQuiet, deleteManuscript, setManuscriptShelved, addPersonalGenre, attachments } =
+  const { currentUser, manuscripts, queries, packages, versions, activities, agents, userTasks, addUserTask, taskFlags, updateManuscript, updateManuscriptQuiet, deleteManuscript, setManuscriptShelved, addPersonalGenre, attachments, updateUserProfile } =
     useScriptAllyDb();
 
   /**
@@ -517,6 +519,27 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
                 statusOf={(m) => (isShelvedPresentation(m) ? "Shelved" : m.status)}
                 onOpen={openDossier}
                 onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
+              />
+            )}
+
+            {/**
+              * ⚠️ THE PROMOS ARE ABOUT WHAT A MANUSCRIPT CAN DO HERE, never about this book. They
+              * sit beneath the shelf, so the selector is what the page opens on.
+              *
+              * ⚠️ DISMISSAL IS USER STATE, THROUGH THE EXISTING WRITER. `todoPrefs` is already in
+              * the update allowlist and `updateUserProfile` already writes it, so this needed no
+              * addition to `db.tsx` and no rules change — the shape was proved against the deployed
+              * ruleset rather than assumed. A dismissal kept on the device would return on the next
+              * one, which is forgetting rather than dismissing.
+              */}
+            {!selected && (
+              <ManuscriptPromos
+                user={currentUser}
+                manuscript={ordered[0] ?? null}
+                versions={versions}
+                onDismiss={(tile) => updateUserProfile({ todoPrefs: withTileDismissed(currentUser, tile) })}
+                onVersions={() => onNavigate?.("manuscripts", "Submission packages")}
+                onPackages={() => onNavigate?.("manuscripts", "Submission packages")}
               />
             )}
           {selected ? (
