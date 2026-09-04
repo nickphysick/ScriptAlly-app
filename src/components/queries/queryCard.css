@@ -1,0 +1,213 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE QUERY CARD — one query, as an object you can scan.
+ *
+ * ⚠️ ITS OWN SHEET, NOT `workspacePageGrid.css`. The placeholder `.qc-card` this replaces lived in
+ * the GRID's stylesheet, which is shell chrome shared by ten pages; a card is Query Centre's, and a
+ * page's furniture growing inside a shared component's sheet is how a page comes to override the
+ * shell by accident. `.qcc-` is its own prefix for the same reason — `.qc-card` was one dash away
+ * from `.qc-cards`, and this repo has an audit about a lock that matched a longer class by prefix.
+ *
+ * ⚠️ EVERY COLOUR IS A TOKEN OR A LITERAL FROM THE REF — never `color-mix()`, which this app does
+ * not use, and never burgundy. Burgundy appears on this page only inside `StatusDot` and the Form
+ * 11 chrome; a burgundy anything on a card would make the card look like a control.
+ */
+
+/* ── the grid ───────────────────────────────────────────────────────────────────────────────── */
+.qcc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 20px;
+}
+
+/* ── the card ───────────────────────────────────────────────────────────────────────────────── */
+.qcc {
+  /* ⚠️ DECLARED HERE SO EVERY CARD RESOLVES THE PAIR. The leaf's month strip reads them too, and a
+     `var()` on an undefined property drops the whole declaration in silence. Queried overrides the
+     leaf directly rather than tinting these, because its BAND takes no gradient at all. */
+  --band-a: var(--turn-sand-ground);
+  --band-b: var(--turn-sand-ground);
+
+  display: block;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  background: #fff;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  position: relative;
+  font: inherit;
+  color: inherit;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 8px 22px rgba(58, 28, 20, 0.09);
+  /* ⚠️ SHADOW ONLY — NO LIFT. A `translateY` on hover fights the FLIP that re-orders this grid:
+     the inverse transform and the hover transform are the same property, and the last one written
+     wins. The shadow says the same thing and cannot collide. */
+  transition: box-shadow 0.18s;
+  will-change: transform;
+}
+.qcc:hover { box-shadow: 0 2px 4px rgba(58, 28, 20, 0.06), 0 14px 32px rgba(58, 28, 20, 0.13); }
+.qcc:focus-visible { outline: 2px solid var(--sage, #8a9e88); outline-offset: 2px; }
+/* Selected adds a ring; it never adds a fill. A filled card would compete with the band. */
+.qcc--sel {
+  box-shadow: 0 0 0 1.5px var(--pink-b, #e8c8bc), 0 2px 4px rgba(58, 28, 20, 0.06),
+    0 14px 32px rgba(58, 28, 20, 0.13);
+}
+
+.qcc--you { --band-a: var(--turn-you-a); --band-b: var(--turn-you-b); }
+.qcc--agent { --band-a: var(--turn-agent-a); --band-b: var(--turn-agent-b); }
+.qcc--offer { --band-a: var(--turn-offer-a); --band-b: var(--turn-offer-b); }
+.qcc--closed { --band-a: var(--turn-closed-a); --band-b: var(--turn-closed-b); }
+
+/* ── the band ───────────────────────────────────────────────────────────────────────────────── */
+.qcc-band {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px 14px 0 0;
+  background: linear-gradient(135deg, var(--band-a), var(--band-b));
+}
+/* ⚠️ QUERIED TAKES NO TINT — parchment and a rule. The commonest state reads as quiet, and the
+   four that mean something are not left competing with a fifth that means "nothing yet". */
+.qcc--sand .qcc-band {
+  background: var(--turn-sand-ground);
+  border-bottom: 0.5px solid var(--turn-sand-rule);
+}
+.qcc-word { font-family: var(--font-serif); font-size: 15px; color: var(--ink, #1c130f); }
+.qcc-turn { margin-left: auto; color: #6a5a50; font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* ── the body ───────────────────────────────────────────────────────────────────────────────── */
+.qcc-body { padding: 20px 20px 18px; }
+.qcc-who { display: flex; align-items: center; gap: 15px; }
+.qcc-whotx { flex: 1; min-width: 0; }
+/* ⚠️ PARCHMENT AND LIFTED, NEVER PINK. Pink is the app's CTA fill; a pink disc on a card reads as
+   something to press. The ref carries `body.chip-band` / `body.chip-lift` demo classes showing the
+   alternatives that were refused — do not promote either out of the ref. */
+.qcc-chip {
+  width: 48px; height: 48px; border-radius: 50%; flex: none;
+  background: var(--turn-sand-ground);
+  border: 0.5px solid #e6dccf;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.08), 0 3px 8px rgba(58, 28, 20, 0.1);
+  color: var(--ink, #1c130f);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em;
+}
+.qcc-nm {
+  font-family: var(--font-serif); font-weight: 500; font-size: 20px; color: var(--ink, #1c130f);
+  /* ⚠️ 1.3, NOT THE REF'S 1.15. Mixed-case Playfair below 1.3 crops its descenders, and an agent's
+     name is whatever they are called — the ref only ever drew the names somebody typed into it. */
+  line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.qcc-ag { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #6a5a50;
+  margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── the calendar leaf ──────────────────────────────────────────────────────────────────────── */
+.qcc-leaf {
+  width: 46px; border-radius: 7px; flex: none; margin-left: auto; overflow: hidden;
+  text-align: center; position: relative; background: #fff; border: 0.5px solid #dccfc0;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.06), 0 3px 8px rgba(58, 28, 20, 0.08);
+}
+.qcc-leaf-mo {
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink, #1c130f); padding: 4px 0 3px;
+  background: linear-gradient(135deg, var(--band-a), var(--band-b));
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+.qcc--sand .qcc-leaf-mo { background: var(--turn-sand-leaf); }
+.qcc-leaf-dy { font-family: var(--font-serif); font-size: 19px; color: var(--ink, #1c130f);
+  line-height: 1.3; padding: 6px 0 5px; }
+.qcc-leaf-cap { font-family: var(--font-mono); font-size: 6.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: #9c8878; padding-bottom: 5px; }
+/* The two binder pins. Decorative, so pseudo-elements rather than elements. */
+.qcc-leaf::before, .qcc-leaf::after {
+  content: ""; position: absolute; top: -2px; width: 3px; height: 6px; border-radius: 2px;
+  background: #cdbfae;
+}
+.qcc-leaf::before { left: 12px; }
+.qcc-leaf::after { right: 12px; }
+
+/* ── the fact block ─────────────────────────────────────────────────────────────────────────── */
+.qcc-fact {
+  margin-top: 18px; padding-top: 15px; border-top: 0.5px solid #eadfd1;
+  display: flex; align-items: flex-end; gap: 14px;
+}
+.qcc-facttx { flex: 1; min-width: 0; }
+.qcc-s {
+  font-size: 12px; line-height: 1.5; display: flex; align-items: center; gap: 8px;
+  white-space: nowrap; overflow: hidden; color: #3a1c14;
+}
+.qcc-s > span { overflow: hidden; text-overflow: ellipsis; }
+.qcc-s b { font-weight: 500; }
+.qcc-m {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #9c8878; margin-top: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* ⚠️ THE OVERDUE MARKER IS INK, AND IT IS THE ONLY THING THAT MARKS LATENESS. No red, no fifth
+   band tint, no pill. `design-refs/query-overdue-marker.html` shows what was refused. */
+.qcc-mk {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 16px; height: 16px; border-radius: 50%; border: 1.4px solid var(--ink, #1c130f);
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: var(--ink, #1c130f);
+  line-height: 1;
+}
+
+/* ── the materials cluster ──────────────────────────────────────────────────────────────────── */
+.qcc-mats { position: relative; display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.qcc-ic {
+  width: 22px; height: 22px; border-radius: 6px; display: inline-flex; align-items: center;
+  justify-content: center; color: #6a5a50; border: 0.5px solid #e6dccf; background: #fff;
+}
+.qcc-ic--off { opacity: 0.28; }
+.qcc-tip {
+  position: absolute; right: 0; bottom: calc(100% + 8px); width: 230px; z-index: 10;
+  background: var(--turn-sand-ground); border: 1px solid #e6dccf; border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(58, 28, 20, 0.07), 0 14px 34px rgba(58, 28, 20, 0.12);
+  padding: 10px 12px; opacity: 0; transform: translateY(4px);
+  transition: opacity 0.15s, transform 0.15s; pointer-events: none; text-align: left; cursor: default;
+}
+.qcc-mats:hover .qcc-tip, .qcc-mats:focus-within .qcc-tip {
+  opacity: 1; transform: translateY(0); pointer-events: auto;
+}
+.qcc-tip::after {
+  content: ""; position: absolute; right: 10px; top: 100%;
+  border: 6px solid transparent; border-top-color: var(--turn-sand-ground);
+}
+.qcc-tip-h { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #9c8878; margin-bottom: 6px; }
+.qcc-tip-row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px;
+  color: #3a1c14; padding: 3px 0; }
+.qcc-tip-v { color: #8a7a6c; text-align: right; white-space: nowrap; }
+.qcc-tip-row--no { color: #c0b0a0; }
+.qcc-tip-row--no .qcc-tip-v { color: #d0c4b6; }
+
+/* ── the ghost ──────────────────────────────────────────────────────────────────────────────── */
+/* ⚠️ EVERY SURFACE GOES DASHED AND TRANSPARENT TOGETHER. A ghost that kept one solid fill would
+   read as a card that had half-loaded rather than as a preview of one being made. */
+.qcc--ghost { background: transparent; border: 1.5px dashed #d2c4b4; box-shadow: none; cursor: default; }
+.qcc--ghost .qcc-band { background: transparent; border-bottom: 1px dashed #e0d4c4; }
+.qcc--ghost .qcc-word { color: #8a7a6c; }
+.qcc--ghost .qcc-chip { background: transparent; box-shadow: none; border: 1px dashed #d2c4b4; color: #b0a090; }
+.qcc--ghost .qcc-leaf { background: transparent; box-shadow: none; border-style: dashed; }
+.qcc--ghost .qcc-leaf-mo { background: transparent; }
+.qcc--ghost .qcc-ic { background: transparent; border-style: dashed; }
+.qcc-ph { color: #c0b0a0; }
+
+/* ── entering ───────────────────────────────────────────────────────────────────────────────── */
+/* ⚠️ NO `var()` INSIDE THE KEYFRAMES. A custom property in an `@keyframes` block fails silently in
+   this setup — no error, no animation. These animate opacity and transform only. */
+@keyframes qccEnter {
+  from { opacity: 0; transform: scale(0.965); }
+  to { opacity: 1; transform: none; }
+}
+.qcc--enter { animation: qccEnter 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qcc--enter { animation: none; }
+  .qcc, .qcc-tip { transition: none; }
+}
