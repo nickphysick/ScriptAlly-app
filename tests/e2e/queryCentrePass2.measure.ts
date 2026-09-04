@@ -335,9 +335,45 @@ test("pass 2 — cap, search, popovers, ladder, leaves", async ({ page }) => {
 
   /* ── 2b · the toolbar is labelled and states its current values ──────────────────────────── */
   const tbText = out.toolbarText as string;
-  for (const word of ["Filter", "Group", "Sort", "Log new query"]) {
+  for (const word of ["Filter", "Group", "Sort"]) {
     expect(tbText, `the toolbar does not say "${word}"`).toContain(word);
   }
+  /**
+   * ⚠️ AND `Log new query` IS NOT IN THIS ROW — amendment C. It lives in the hero and nowhere else;
+   * the v5 ref renders exactly one. Asserted as an ABSENCE here and a PRESENCE on the page below,
+   * because "there is one" and "there is exactly one" are different claims and only the pair
+   * catches a second creeping back in.
+   */
+  expect(tbText, "the toolbar still carries a Log new query").not.toContain("Log new query");
+  const logButtons = await page.evaluate(() => {
+    const quick = document.querySelector(".qcc-quick");
+    const scope = quick?.closest(".wpg") as HTMLElement | null;
+    const all = scope
+      ? [...scope.querySelectorAll<HTMLElement>("button, a")]
+          .filter((b) => /log new query/i.test(b.textContent ?? ""))
+          .map((b) => b.className)
+      : [];
+    return {
+      all,
+      /* the page's own controls — this is where the duplicate was */
+      inControls: [...(document.querySelector(".qcc-controls")?.querySelectorAll<HTMLElement>("button, a") ?? [])]
+        .filter((b) => /log new query/i.test(b.textContent ?? "")).map((b) => b.className),
+    };
+  });
+  out.logButtons = logButtons;
+  /**
+   * ⚠️ THE HEADER'S TWO ARE NOT A DUPLICATE, and asserting "exactly one on the page" said they
+   * were. `wsh-cta` is the masthead's primary and `wpg-barcta` is the collapsed bar's — the SAME
+   * action in the two states of one header, which is the compact-header pack's own design ("the
+   * primary comes back to the masthead"). Only one is ever on screen.
+   *
+   * ⚠️ THE REAL CLAIM IS THAT THE PAGE'S CONTROLS CARRY NONE. That is what amendment C removed and
+   * what a second one would creep back into.
+   */
+  expect(logButtons.inControls,
+    `Log new query is back in the controls: ${logButtons.inControls.join(" | ")}`).toEqual([]);
+  expect(logButtons.all, "the header lost its Log new query entirely").toContain("wsh-cta");
+  /* ⚠️ THE VALUE ON THE FACE IS THE WHOLE REASON THESE ARE NOT ICONS. */
   expect(tbText, "Group does not show its current value").toMatch(/Group\s*None/i);
   expect(tbText, "Sort does not show its current value").toMatch(/Sort\s*Last activity/i);
 

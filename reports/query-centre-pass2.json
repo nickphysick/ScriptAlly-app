@@ -414,7 +414,7 @@
     "Group": {
       "open": true,
       "right": 887,
-      "bottom": 603,
+      "bottom": 615,
       "vw": 1280,
       "vh": 900,
       "overflowsRight": false,
@@ -427,7 +427,7 @@
     "Sort": {
       "open": true,
       "right": 952,
-      "bottom": 879,
+      "bottom": 888,
       "vw": 1280,
       "vh": 900,
       "overflowsRight": false,
@@ -438,7 +438,7 @@
       "columns": "none"
     }
   },
-  "toolbarText": "/FilterGroup NoneSort Last activityLog new query",
+  "toolbarText": "/FilterGroup NoneSort Last activity",
   "filterHasAgency": false,
   "popoversNarrow": {
     "Filter": {
@@ -457,7 +457,7 @@
       "triggerLeft": 635,
       "pastMidline": true,
       "right": 771,
-      "bottom": 616,
+      "bottom": 628,
       "vw": 1024,
       "vh": 720,
       "overflowsRight": false,
@@ -494,6 +494,13 @@
       "closed": ""
     },
     "stageTokenUsersInRecord": 0
+  },
+  "logButtons": {
+    "all": [
+      "wpg-barcta",
+      "wsh-cta"
+    ],
+    "inControls": []
   },
   "cardShape": {
     "total": 54,

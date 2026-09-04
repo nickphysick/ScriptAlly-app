@@ -5158,14 +5158,16 @@ export const Queries: React.FC<{
                 {sortPopOpen && renderSortPopover()}
               </div>
 
+              {/**
+                * ⚠️ NO PRIMARY IN THIS ROW — `Log new query` lives in the HERO and nowhere else.
+                * The v5 ref renders exactly one, as `.hero-cta`, and the masthead already carries
+                * it. Two buttons with one label on one screen is the single-home fault this repo
+                * keeps retiring; Phase 5's `#/queries/new` wiring targets the hero's.
+                *
+                * ⚠️ THE SPACER STAYS. It is what holds Filter · Group · Sort to the left while the
+                * row runs full width, and removing it with the button would re-centre the trio.
+                */}
               <span className="qcc-tb-spacer" />
-              <button
-                type="button" className="qcc-tb-primary" disabled={creating}
-                onClick={() => onNavigate?.("queries", "Log a query")}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-                Log new query
-              </button>
             </div>
 
             {activeFilterChips.length > 0 && (
