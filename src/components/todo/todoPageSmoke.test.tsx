@@ -206,7 +206,12 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        A tile is a parchment card standing on its own date — Playfair numeral over a mono month —
        so a tick beneath it would be a second, thinner claim about the same pixel; the ref states
        `.wktick { display: none }` under tiles for exactly that reason. */
-    expect(html).toContain("tl-rtile");
+    /* ⚠️ THE TILE RAIL IS RETIRED (v62). It put a bordered card on every week — thirteen objects
+       competing with the cards below them on a scale that only needs to be legible. The date row is
+       two tiers of plain type: mono month caps at their boundaries, day numerals beneath, and today
+       a filled rose circle. The claim is unchanged and again names what exists. */
+    expect(html).not.toContain("tl-rtile");
+    expect(html).toContain("tl-dt");
     expect(html).not.toContain("tl-tick");
     expect(html).not.toContain("tl-hrow");
     /* the six sections, and the number column that runs down their side */

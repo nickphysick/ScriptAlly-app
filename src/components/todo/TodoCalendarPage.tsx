@@ -94,7 +94,7 @@ import "./todoCalendar.css";
  * box against the token's computed value rather than against either literal. That is the shape
  * this repo already uses for `READING_PANE_FLOOR_PX` ≡ `--ag-pane-floor`.
  */
-const CARD_BADGE_PX = 40;
+const CARD_BADGE_PX = 20;
 /**
  * A past stage's badge — the ref's `.jc .jmed`, at 54 against the live card's 58.
  *
@@ -103,7 +103,7 @@ const CARD_BADGE_PX = 40;
  * WAS while reading as history. Size here, opacity there — the sheet owns anything a theme might
  * want to retune.
  */
-const STAGE_BADGE_PX = 30;
+const STAGE_BADGE_PX = 16;
 /** the shortest stage that can hold a card — see the gate at its use site for the arithmetic */
 /**
  * ⚠️ THE REF'S TWO GATES, IN DAYS. It states them as lane fractions — skip under 3.5%, drop the
@@ -2820,9 +2820,16 @@ data-rowkey={r.key}
                           nine date labels already carry that range. `months` IS the list of
                           calendar months the window touches, so its own length is the span: no
                           second derivation, and it stays right if the ranges are ever retuned. */}
-                      {months.length >= MONTH_SHELF_FROM && months.map((m) => (
+                      {/* ⚠️ THE MONTH TIER IS UNCONDITIONAL NOW. It was gated at three months
+                          because a lone divider on a one-month window reads as a stray mark; the
+                          window is fixed at ninety days, so it always spans three or four and the
+                          gate can never fire. A condition that cannot be false is a claim nobody
+                          can check — the label is the rail's top tier and it is always drawn.
+                          ⚠️ AND THE DIVIDER ELEMENT IS GONE: the separator is a `border-left` on
+                          the LABEL, so it exists only in the rail and cannot run down through the
+                          rows. v62 states that twice — `.col.m { display: none }` as well. */}
+                      {months.map((m) => (
                         <React.Fragment key={m.key}>
-                          {m.at > 0 && <span className="tl-mdiv" style={{ left: pct(m.at) }} aria-hidden />}
                           <span
                             className={`tl-mlab${m.current ? " now" : ""}${m.past ? " gone" : ""}`}
                             style={{ left: pct(m.labelAt) }}
@@ -2837,11 +2844,15 @@ data-rowkey={r.key}
                           `data-at` on the tile itself so the alignment lock still has something to
                           read. */}
                       {dateLabels.map((d) => (
+                        /* ⚠️ A PLAIN DAY NUMERAL, AND TODAY IS A FILLED CIRCLE (v62). The tile —
+                           a bordered card on every week — put thirteen objects on a scale that only
+                           needs to be legible, competing with the cards beneath them. The numeral
+                           carries the date and the circle carries today, which is the only colour
+                           the rail is allowed. */
                         <span key={d.ymd}
-                          className={`tl-rtile${d.now ? " now" : ""}`}
+                          className={`tl-dt${d.now ? " now" : ""}`}
                           style={{ left: pct(d.at) }} data-at={d.at}>
-                          {/* one line: the day, then the month beside it — the ref's `inline` rail */}
-                          <b>{d.day}</b><i>{d.mon}</i>
+                          {d.day}
                         </span>
                       ))}
                       {todayAt != null && (

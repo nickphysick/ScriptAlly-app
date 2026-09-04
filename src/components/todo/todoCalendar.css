@@ -227,8 +227,9 @@
   background: transparent;
   border-radius: 0;
   flex: 1; min-height: 0; display: flex; flex-direction: column;
-  /* the ref's v61 `.board` — inside the container now, so it carries only its own gutters */
-  padding: 0 8px 0 4px; margin: 0;
+  /* ⚠️ NO PADDING AT ALL (v62). The date row runs the container's full width, so the board can
+     carry no side gutter — an 8px inset on the board is an 8px inset on the rail. */
+  padding: 0; margin: 0;
   /* ⚠️ THE GROUND IS THE REF'S `--ground` AND THE ROWS ARE WHITE. It was a tinted `#eae2d6`,
      chosen when every bar was filled and the board needed to differ from them. Porcelain inverts
      that: the bar is a WHITE TRACK, so a tinted board would make the tracks the lightest thing on
@@ -270,6 +271,46 @@
      as a hole in the row rather than as a filled disc. Its writer's-tone ink is the ref's
      `--pinktx`; `--tl-ink` is four shades darker and is the board's text colour, not a mark's. */
   /* ⚠️ THE FIELD THE BOARD SITS ON, and the rail's own tone — the ref's `.board`/`.rail`. */
+  /* ══ THE SCHEME — ONE TOKEN SET, READ EVERYWHERE (v62's `data-scheme="greige"`) ═════════════
+   *
+   * ⚠️ NOTHING ON THIS BOARD PAINTS ITS OWN COLOUR ANY MORE. v61 had a ground here, a card fill
+   * there, a shadow in a third place and six section tints in a fourth — so retoning the calendar
+   * meant finding every one of them, and "the shadow is tinted to the ground" was a fact nobody
+   * could check. The ref makes it a set: every element reads a `--cs-…` and the scheme is the only
+   * thing that sets one. Changing the whole board is then one block, and the tint of a shadow is a
+   * property of the scheme rather than of whoever last touched the rule.
+   *
+   * ⚠️ GREIGE IS A COOL NEUTRAL SO THE WARM PALETTE READS AS ACCENT. The three warm schemes the ref
+   * carries — cream, linen, sage — are rejected alternatives and are not built. What the choice
+   * buys is that rose is the only colour on the rail and the chips' outlines are the only colour on
+   * a card; on a warm ground both would be one step from the paper they sit on.
+   *
+   * ⚠️ AND THE SHADOWS ARE TINTED TO THE GROUND, NEVER WARM-ON-COOL. `rgba(40,36,30,…)` against the
+   * greige, where every earlier version of this board used `rgba(58,28,20,…)` — a brown shadow on a
+   * cool ground reads as dirt, which is the same law this repo already records for the sage desk.
+   */
+  --tl-cs-ground: #f2f1ee;
+  --tl-cs-rail: #faf9f7;
+  --tl-cs-frame: #e0ddd6;
+  --tl-cs-line: #e0ddd6;
+  --tl-cs-monthline: #e6e3dd;
+  --tl-cs-card: #ffffff;
+  --tl-cs-cardbd: #e2dfd8;
+  --tl-cs-cardshut: #f3f2ef;
+  --tl-cs-shadow: 0 1px 2px rgba(40, 36, 30, .07), 0 4px 12px rgba(40, 36, 30, .08);
+  --tl-cs-shadowhover: 0 2px 4px rgba(40, 36, 30, .09), 0 12px 26px rgba(40, 36, 30, .15);
+  --tl-cs-num: #807a72;
+  --tl-cs-past: transparent;
+  --tl-cs-pastbd: #cbc6bd;
+  --tl-cs-chip: #ffffff;
+  --tl-cs-chipbd: #dedbd4;
+  --tl-cs-flag: #fbfaf8;
+  --tl-cs-flagbd: #c4bfb5;
+  --tl-cs-track: rgba(40, 36, 30, .10);
+  /* ⚠️ THE ONE COLOUR ON THE RAIL, and it is the app's own requested-state rose —
+     `STATUS_DOT_MAP[PARTIAL_REQUESTED].base`. Today is the only thing the rail is allowed to
+     colour, so it borrows a hue the reader already knows rather than inventing one. */
+  --tl-cs-today: #c98e8a;
   --tl-field: #f5f1eb;
   /* ⚠️ THE SECTION SURFACE IS THE APP'S OWN PANEL, BY NAME. The ref's `.grp` is `var(--panel)`,
      its content surface; `.t-f12` — which this page's root carries — declares `--panel: #fffdfb`.
@@ -309,13 +350,17 @@
      (`0 1px 3px` at .06), which is a card printed on the field rather than resting on it: measured
      against the ref's `0 1px 2px/.08` plus `0 5px 14px/.09`. The second layer is what makes a card
      an object, and it is the one that was missing. */
-  --tl-frame-sh: 0 1px 2px rgba(58, 28, 20, .08), 0 5px 14px rgba(58, 28, 20, .09);
+  /* ⚠️ THE SHADOW IS THE SCHEME'S, NOT THE CALENDAR'S OWN. It was `rgba(58,28,20,…)` — a warm
+     brown, correct on a cream board and reading as dirt on a cool greige one, which is the same
+     law this repo records for the sage desk. Pointing the token at the scheme rather than adding
+     a second rule keeps one owner for the frame's shadow, which v61 fought to establish. */
+  --tl-frame-sh: var(--tl-cs-shadow);
   /* ⚠️ THE REF'S FOCUS SHADOW, WHICH IS DEEPER THAN ITS BASE HOVER. `.card:hover .frame` is
      `.09/.16` and `data-focus="on"` deepens it to `.10/.18`; focus is on, so this is the one that
      paints and the base hover value has no reader. One token, one value, one home. */
-  --tl-frame-sh-hover: 0 2px 4px rgba(58, 28, 20, .10), 0 14px 30px rgba(58, 28, 20, .18);
+  --tl-frame-sh-hover: var(--tl-cs-shadowhover);
   --tl-frame-owed-bd: #e6c3b4;
-  --tl-frame-owed-sh: 0 6px 16px rgba(58, 28, 20, .16);
+  --tl-frame-owed-sh: var(--tl-cs-shadowhover);
   --tl-frame-quiet-bg: #fbf9f5;
   /* ⚠️ THE TODAY CAP IS PINK, NOT INK. It was `--tl-nearblack` on a cream board: the one near-black
      fill on this surface, and against the colour law outright. The ref's `.todaycap` is the pink
@@ -430,15 +475,15 @@
   /* ⚠️ 40px AND INSIDE THE CARD (v61's `data-badge="inset"`). It bursts nothing now: the disc sits
      at the card's left with the words beside it, which is the app's own dot idiom rather than a
      medallion borrowed from a timeline. The 58px bursting badge is a rejected alternative. */
-  --badge: 40px;
+  --badge: 20px;
   /* ⚠️ THE WORDS' INSET IS THE REF'S LITERAL 62px, NOT AN EXPRESSION OVER `--badge`. Under `inset`
      the ref states `left: 62px` on the body, the track and the trail alike — 9 (the disc's left) +
      40 (the disc) + 13 (the gap) — and the three must agree exactly or the words, the gauge and the
      fill start at three different places. One token, three readers. */
-  --tl-card-inset: 62px;
+  --tl-card-inset: 44px;
   /* a past stage is shorter and its badge smaller — the ref's `.jc { height: 48px }` and 54px mark */
   --tl-jc-h: 44px;
-  --tl-jc-badge: 30px;
+  --tl-jc-badge: 16px;
   /* ⚠️ THE LEFT COLUMN IS THE NUMBER GUTTER PLUS THE BADGE'S OVERHANG, and it is derived rather
      than measured. The rail reserves exactly this much before its lane; the rows reserve the same
      as `.tl-gnums` (64px, fixed) plus `.tl-glanes`' padding (the overhang). The two agree because
@@ -470,7 +515,7 @@
      tick and a date label, which is a different object. */
   /* ⚠️ 46px — the ref's `data-rail="inline"`. One row of small tiles with the day and the month on
      ONE line and no month shelf above them; the 76px tile rail is a rejected alternative. */
-  --tl-rail-h: 46px;
+  --tl-rail-h: 54px;
   /* ⚠️ v60: THE COLUMN IS BACK, AND IT IS NOT AN AGENT COLUMN. It holds the section's row
      numbers and the badge's overhang, so the rail must reserve the same width before its lane or
      every tick sits left of every bar. Derived, never typed: see `--tl-gnum-w` above. */
@@ -503,12 +548,12 @@
    its white ground wins over the board's `transparent`. Same specificity, one element, so order is
    the rule — stated here rather than left to be discovered. */
 .tl-cal {
-  flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column;
-  background: #fff; border: 1px solid #e7e0d4; border-radius: 16px;
+  flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: var(--tl-cs-ground); border: 1px solid #e7e0d4; border-radius: 16px;
   /* ⚠️ IT CLIPS, AND THE BADGE SURVIVES BECAUSE IT IS INSIDE THE CARD NOW. v60's medallion burst
      past the card's left edge and every ancestor had to stay `overflow: visible` for it; at 40px
      and inset there is nothing to escape, so the container can round its own corner. */
   overflow: hidden; box-shadow: 0 1px 3px rgba(58, 28, 20, .04);
+  border-color: var(--tl-cs-frame);
 }
 .tl-side .slbl {
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .16em;
@@ -575,24 +620,28 @@
 }
 /* the v60 header is gone — the divider replaces it */
 .tl-gt { display: none; }
-.tl-gdiv { position: relative; height: 30px; margin: 6px 0 2px; }
+.tl-gdiv { position: relative; height: 30px; margin: 10px 0 4px; }
 /* ⚠️ THE RULE IS INSET AT BOTH ENDS so it reads as a divider within the container rather than as
    the container's own edge — a hairline running the full width is a border, not a break. */
 .tl-gdiv::before {
-  content: ""; position: absolute; left: 14px; right: 14px; top: 50%;
-  border-top: 1px solid #e7dccb;
+  content: ""; position: absolute; left: 0; right: 14px; top: 50%;
+  border-top: 1px solid var(--tl-cs-line);
 }
 .tl-gdiv .gp {
-  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 5px 12px 5px 9px; border-radius: 999px;
-  background: var(--gtint, #f5f1eb);
-  font-family: 'Playfair Display', Georgia, serif; font-size: 13.5px; font-weight: 500;
+  /* ⚠️ NOT A PILL ANY MORE (v62) — a label standing ON the rule, with the GROUND behind it rather
+     than a tint. That is also what draws the hairline "from the label to the right edge": the rule
+     runs the full width beneath and the opaque label masks the part behind itself. One element,
+     two jobs, and no second rule to keep in step with the label's width. */
+  padding: 0 12px 0 0; border-radius: 0;
+  background: var(--tl-cs-ground);
+  font-family: 'Playfair Display', Georgia, serif; font-size: 16px; font-weight: 500;
   color: var(--tl-nearblack); white-space: nowrap;
   /* mixed-case Playfair — the house floor, and "Gone quiet" carries a descender */
   line-height: 1.3;
 }
-.tl-gdiv .gp .gico { width: 15px; height: 15px; flex: 0 0 auto; color: var(--gico, #7d6c5c); }
+.tl-gdiv .gp .gico { width: 17px; height: 17px; flex: 0 0 auto; color: var(--tl-nearblack); }
 .tl-gdiv .gp b {
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .12em;
   color: #8a7a6c; font-weight: 500; margin-left: 2px;
@@ -609,7 +658,7 @@
 .tl-gnum span {
   display: flex; align-items: center; justify-content: center;
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: .16em;
-  font-weight: 600; color: #a08f7d;
+  font-weight: 600; color: var(--tl-cs-num);
 }
 .tl-glanes {
   flex: 1 1 auto; min-width: 0;
@@ -681,7 +730,7 @@
      scroll. Stacking decides what is DRAWN ON TOP; it says nothing about what can be seen through.
      The tone is the field's, so the rail reads as the board's own edge rather than a bar laid on
      it. */
-  background: var(--tl-field);
+ background: var(--tl-cs-rail);
   /* ⚠️ `relative`, NOT `sticky` — v60 Law 4, and it is a structural claim rather than a stacking
      one. A sticky rail is INSIDE the scroller and pins by clamping; this rail is OUTSIDE it and
      cannot be reached at all. The z-index survives because the today line and the probe are drawn
@@ -689,9 +738,7 @@
      opacity survives because stacking says nothing about what can be seen through. */
   position: relative; z-index: 50; isolation: isolate;
   flex: 0 0 auto;
-  height: var(--tl-rail-h); align-items: stretch;
-
-  border-bottom: 1px solid #e0d3bf;
+  height: var(--tl-rail-h); align-items: stretch; border-bottom: 1px solid var(--tl-cs-line);
   /* ⚠️ THE CARD'S OWN BORDER INSETS ITS LANES BY 1px A SIDE, and the rail is not inside a card —
      so without matching it the rail's timeline column is 2px wider than every lane and starts a
      pixel earlier. Measured: rail 742/640 against lane 743/638. The per-tick drift was only 0.8px
@@ -705,6 +752,8 @@
      when it was written. A compensation outlives the thing it compensated for as easily as a
      comment does. */
   box-sizing: border-box;
+  /* the alignment contract: the rail reserves exactly what the lanes are inset by */
+  padding-left: var(--tl-nm-w); box-sizing: border-box;
 }
 /* ⚠️ THE RAIL RESERVES EXACTLY WHAT THE LANES ARE INSET BY — the alignment contract, stated once.
    v58 removed the rail's agent cell because the rows had none either (`--tl-nm-w: 0`); v60 gave
@@ -712,7 +761,6 @@
    the rail rather than a spacer element, so there is no cell to forget: the offset is a property of
    the rail, not of something inside it. */
 /* the rail is the container's top row: white, closed by a hairline, and inset to match the lanes */
-.tl-rail { padding-left: var(--tl-nm-w); box-sizing: border-box; background: #fff; }
 .tl-railtl { overflow: visible; }
 
 /* ══ WEEK TILES (v60's `data-rail="tiles"`) ══════════════════════════════════════════════════
@@ -729,10 +777,11 @@
 /* ⚠️ INLINE (v61): the day and the month on ONE line, no month shelf, no shadow. The stacked tile
    was a 76px rail carrying two rows of type for a scale nobody reads twice; at 46px the tile is a
    date, which is all it ever needed to be. */
+/* ⚠️ THE TILE RAIL IS RETIRED (v62). It put a bordered card on every week — thirteen objects
+   competing with the cards below them, on a scale that only needs to be legible. The date row is
+   two tiers of plain type now: months as mono caps at their boundaries, day numerals beneath. */
 .tl-rtile {
-  position: absolute; bottom: 7px; transform: translateX(-50%);
-  background: #fdf9f5; border: 1px solid var(--tl-frame-bd); border-radius: 8px;
-  padding: 4px 10px; white-space: nowrap; box-shadow: none;
+  display: none;
 }
 /* ⚠️ THE PINK IS THE WEEK CONTAINING TODAY, NOT THE DAY. A 90-day rail has one tile per week, so
    "today" on this rail is a week; marking a single day would mark a tile that is usually not
@@ -766,9 +815,12 @@
 }
 /* ── the month shelf ─────────────────────────────────────────────────────────────────────── */
 .tl-mlab {
-  position: absolute; top: 5px; transform: translateX(-50%);
-  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .22em;
-  text-transform: uppercase; color: #a8927a; white-space: nowrap;
+  position: absolute; top: 8px; bottom: auto;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .18em;
+  text-transform: uppercase; color: #a89880; font-weight: 600; white-space: nowrap;
+  /* ⚠️ THE SEPARATOR IS A BORDER ON THE LABEL, so it exists in the rail and cannot run down through
+     the rows — which is what a month line drawn as its own element would do. */
+  padding-left: 8px; border-left: 1px solid var(--tl-cs-line); line-height: 1; padding-top: 0;
 }
 /* ⚠️ THE MONTH YOU ARE IN IS INK, and the ones behind you are set back — a shelf where every
    label weighs the same makes the reader find today twice. */
@@ -782,12 +834,6 @@
 .tl-todaystem {
   position: absolute; bottom: 0; height: 11px; width: 0;
   border-left: 1.5px solid var(--tl-nearblack);
-}
-.tl-todaychip {
-  position: absolute; top: 3px; transform: translateX(-50%);
-  background: var(--tl-todaycap-bg); color: var(--tl-todaycap-tx); border: 1px solid var(--tl-todaycap-bd);
-  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .1em;
-  padding: 2px 6px; border-radius: 4px; white-space: nowrap;
 }
 .tl-rrow {
   border-top: 1px solid var(--tl-rowline);
@@ -837,10 +883,19 @@
 }
 /* ⚠️ ONE COLUMN HEADER FOR THE WHOLE BOARD, above the first group only. Repeating it per group
    restated the same nine dates five times down the page. */
+/* ⚠️ TODAY IS THE ONLY COLOUR ON THE RAIL — a filled rose circle with a reversed numeral, and
+   everything else ink and grey. That is what makes a ninety-day scale readable at a glance. */
 .tl-dt {
-  position: absolute; top: 50%; transform: translate(-50%, -50%);
-  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .1em;
-  color: var(--tl-label); white-space: nowrap;
+  /* ⚠️ `position: absolute` AND THE CENTRING TRANSFORM ARE LOAD-BEARING, and rewriting this rule
+     wholesale dropped both — the numerals fell out of the rail and ran down the board's left edge
+     as a column. That is the cost of the "delete the rule and write one authoritative block"
+     practice: it is the right shape, and it requires knowing every declaration the original
+     carried, positioning included. */
+  position: absolute; transform: translateX(-50%);
+  bottom: 8px; width: 26px; height: 26px; border-radius: 99px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: inherit; font-size: 12.5px; font-weight: 500; color: #4a3d33;
+  letter-spacing: 0; text-transform: none;
 }
 
 /* ⚠️ THE NAME AND THE AGENCY STACK, AND `display` IS THE WHOLE OF IT. All three were plain
@@ -1380,7 +1435,9 @@ button.tl-tchip { cursor: pointer; }
    declarations of one selector: the cascade takes the last and a reader takes the first, and the
    viewport lock read the wrong block and reported that the rows had stopped scrolling. The padding
    is folded in here instead. */
-.tl-rows { position: relative; flex: 1; min-height: 0; overflow-y: auto; padding: 0 0 24px; }
+.tl-rows { position: relative; flex: 1; min-height: 0; overflow-y: auto; padding: 0 0 24px;
+  background: var(--tl-cs-ground);
+}
 /* ⚠️ TODAY IS A DRAWN RULE AGAIN (v54, Phase 2), AND THE SHADOW THAT REPLACED IT IS GONE.
    v37 made it a leftward shadow to avoid "a thing on the page competing with every other line on
    it" — sound while the past was also washed, because the two said one thing between them. With
@@ -1404,6 +1461,7 @@ button.tl-tchip { cursor: pointer; }
   position: absolute; top: var(--tl-flag-lift, 0px); bottom: 0; width: 0;
   border-left: 1.5px solid #e6c3b4;
   z-index: 60; pointer-events: none;
+  border-left-color: var(--tl-cs-today);
 }
 /* ⚠️ THE FLAG SITS ABOVE THE BOARD, CLEAR OF THE FIRST GROUP TITLE. It was 2px above it —
    not overlapping, and not clear either, which on a 19px Playfair title reads as a collision. It
@@ -1435,6 +1493,7 @@ button.tl-tchip { cursor: pointer; }
 .tl-xh {
   position: absolute; top: var(--tl-flag-lift, 0px); bottom: 0; width: 0;
   border-left: 1px dashed #b8a889; z-index: 39; pointer-events: none;
+  border-left-color: var(--tl-cs-line);
 }
 .tl-xhlab {
   position: absolute; top: calc(var(--tl-flag-lift, 0px) + 3px);
@@ -1780,8 +1839,7 @@ button.tl-tchip { cursor: pointer; }
    is positioned AND carries a `z-index`, so it creates one and the shadow sinks behind the frame
    without sinking behind the container. */
 .tl-shd {
-  position: absolute; inset: 0; border-radius: 10px; z-index: -1; pointer-events: none;
-  box-shadow: var(--tl-frame-sh);
+  position: absolute; inset: 0; border-radius: 10px; z-index: -1; pointer-events: none; box-shadow: var(--tl-cs-shadow);
 }
 /* the shadow takes the card's whole span and is cut to the tail's outline */
 .tl-p.fadeR .tl-shd {
@@ -1827,9 +1885,9 @@ button.tl-tchip { cursor: pointer; }
 .tl-jc {
   --tl-jc-gap: calc(var(--badge) * 0.79 + 12px);
   position: absolute; top: 50%; transform: translateY(-50%);
-  height: var(--tl-jc-h); z-index: 1; overflow: hidden;
-  background: transparent; border: 1.5px dotted var(--tl-ghost-bd); border-radius: 10px;
+  height: var(--tl-jc-h); z-index: 1; overflow: hidden; background: var(--tl-cs-past); border: 1.5px dotted var(--tl-ghost-bd); border-radius: 10px;
   box-shadow: none;
+  border-color: var(--tl-cs-pastbd);
 }
 /* ⚠️ A NARROW STAGE DROPS ITS BADGE AND STARTS ITS TEXT AT THE CARD'S OWN INSET — the ref's
    `.jc.narrow`. Below the second gate there is not room for a disc AND a sentence, and the sentence
@@ -1837,9 +1895,8 @@ button.tl-tchip { cursor: pointer; }
 .tl-jc.narrow .tl-jmed { display: none; }
 .tl-jc.narrow .tl-jbody { left: 10px; max-width: calc(100% - 20px); }
 .tl-jmed {
-  position: absolute; left: 8px; top: 50%;
-  transform: translateY(-50%);
-  width: var(--tl-jc-badge); height: var(--tl-jc-badge);
+  position: absolute; left: 10px; top: 50%;
+  transform: translateY(-50%); width: 16px; height: 16px;
   display: flex; align-items: center; justify-content: center;
   /* ⚠️ DRAINED, NOT REMOVED. The glyph still says which status the stage WAS; at 0.22 it reads as
      a watermark on the record rather than as a mark asking to be acted on. */
@@ -1890,7 +1947,7 @@ button.tl-tchip { cursor: pointer; }
   /* an ongoing bar keeps the chevron notch clear — 24px against 12 on a dated end */
   max-width: calc(100% - var(--tl-card-inset) - 24px);
 }
-.tl-ctrack { background: rgba(58, 28, 20, .09); }
+.tl-ctrack { background: var(--tl-cs-track); }
 .tl-ctrail { background: var(--gtone, #cdbfa8); }
 .tl-p.fadeL .tl-ctrack, .tl-p.fadeL .tl-ctrail { left: var(--tl-card-inset); }
 
@@ -2014,17 +2071,16 @@ button.tl-tchip { cursor: pointer; }
  * base. So the calendar stops having a badge of its own.
  */
 .tl-medal {
-  position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
-  width: var(--badge); height: var(--badge);
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px;
   display: flex; align-items: center; justify-content: center;
   z-index: 5; pointer-events: none;
   /* ⚠️ THE WHITE RING IS THE REF'S, and it is what lifts the disc off the card rather than letting
      a pale tint dissolve into a white ground. `box-shadow`, so it costs no layout. */
-  border-radius: 99px; box-shadow: 0 0 0 2px #fff;
+  border-radius: 99px; box-shadow: none;
 }
 /* ⚠️ EXPLICIT WIDTH AND HEIGHT ON THE SVG — `top`/`bottom` do not size one, and a transform is
    ignored on an SVG element by some engines. The dot is drawn at the size it is asked for. */
-.tl-medal svg { width: var(--badge); height: var(--badge); transform: none; overflow: visible; }
+.tl-medal svg { width: 20px; height: 20px; transform: none; overflow: visible; }
 /* a card whose left edge dissolves keeps the badge where it is — it is inside, so nothing moves */
 .tl-p.fadeL .tl-medal { left: 9px; }
 
@@ -2157,3 +2213,15 @@ button.tl-tchip { cursor: pointer; }
    written to end — a frame with four owners, resolved by source order. */
 .tl-p.quiet .tl-frame  { background: var(--tl-frame-quiet-bg); }
 .tl-p.quiet, .tl-p.ghost, .tl-p.hollow { --frame-sh: none; }
+
+
+
+/* the rail's today circle, the card's paint, the chips' outlines and the divider's label — each
+   read from the scheme, each stated once, in the rule that already owns the element */
+.tl-dt.now { background: var(--tl-cs-today); color: #fff; font-weight: 600; }
+.tl-glanes, .tl-gwrap, .tl-grp, .tl-gnums { background: transparent; }
+.tl-p .tl-frame { background: var(--tl-cs-card); border-color: var(--tl-cs-cardbd); }
+.tl-p.shut .tl-frame, .tl-p.closedp .tl-frame,
+.tl-p.quiet .tl-frame, .tl-p.ghost .tl-frame { background: var(--tl-cs-cardshut); }
+.tl-tail path { fill: var(--tl-cs-card); stroke: var(--tl-cs-cardbd); }
+.tl-jc .tl-jbody { left: 34px; max-width: calc(100% - 44px); }

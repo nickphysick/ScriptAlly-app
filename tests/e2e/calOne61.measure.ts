@@ -33,7 +33,12 @@ test.describe("v61 · one calendar", () => {
     expect(f!.holdsRows, "the rows are outside the container").toBe(true);
     expect(parseFloat(f!.border), "the container has no border").toBeGreaterThan(0);
     expect(parseFloat(f!.radius), "the container is not rounded").toBeGreaterThan(8);
-    expect(f!.bg, "the container is transparent").toBe("rgb(255, 255, 255)");
+    /* ⚠️ v62 GIVES THE CONTAINER THE SCHEME'S GROUND, NOT WHITE. This asserted white because v61's
+       container WAS white with transparent rows; v62 has one greige ground below the rail and the
+       cards are what is white. The claim here is that the container paints SOMETHING — the ground's
+       identity is `calScheme62`'s, which compares it against the rows and the dividers rather than
+       against a literal. */
+    expect(f!.bg, "the container is transparent").not.toBe("rgba(0, 0, 0, 0)");
     expect(f!.groups.length, "no groups on the board").toBeGreaterThan(2);
     for (const g of f!.groups) {
       /* ⚠️ v60 FRAMED EACH SECTION — six objects sharing a date scale rather than one instrument */
@@ -70,12 +75,16 @@ test.describe("v61 · one calendar", () => {
       expect(g.count, `${g.sec}'s pill says "${g.count}" over ${g.rows} rows`)
         .toBe(String(g.rows).padStart(2, "0"));
       expect(g.count.length, `${g.sec}'s count is not zero-padded`).toBeGreaterThanOrEqual(2);
-      expect(g.tint, `${g.sec}'s pill is untinted`).not.toBe("rgba(0, 0, 0, 0)");
       expect(g.onRule, `${g.sec}'s divider draws no rule`).toBe(true);
     }
-    /* every group's pill is a DISTINCT tone — six pills in one colour say nothing */
+    /* ⚠️ THE TINTED PILL IS RETIRED (v62) AND ITS ASSERTIONS WITH IT. This required a fill and six
+       DISTINCT tones; v62's divider is black Playfair on the ground with no fill at all, and the
+       hairline is drawn by the label being opaque over it. Both claims were true of v61 and are now
+       false by design, so they are replaced rather than loosened: `calScheme62` asserts the label
+       sits on the ground, is Playfair, and takes the ink token for both its name and its icon. */
     const tones = new Set(f.map((g) => g.tint));
-    expect(tones.size, `${f.length} dividers share ${tones.size} tone(s)`).toBe(f.length);
+    expect(tones.size, `${f.length} dividers paint ${tones.size} tone(s) — v62 expects one ground`)
+      .toBe(1);
   });
 
   test("⚠️ (c) the sidebar's counts sum to All, and the tab strip is gone", async ({ page }) => {
@@ -129,9 +138,11 @@ test.describe("v61 · one calendar", () => {
       };
     });
     expect(f.railH, `the rail is ${f.railH}px against the token's ${f.tok}px`).toBe(f.tok);
-    expect(f.tiles, "the rail rendered no tiles").toBeGreaterThan(8);
-    expect(f.nowTile, "today's tile is not marked").toBe(true);
-    expect(f.oneLine, "the tile stacks its day over its month — inline puts them on one line").toBe(true);
+    /* ⚠️ THE TILE RAIL IS RETIRED (v62). It put a bordered card on every week — thirteen objects
+       competing with the cards below them on a scale that only needs to be legible. The date row is
+       two tiers of plain type now, and `calScheme62` asserts it; what survives here is the rail's
+       HEIGHT and the seam, which are claims about the chassis rather than about the tiles. */
+    expect(f.tiles, "the retired tile rail is back").toBe(0);
     /* ⚠️ THE SEAM. Every other lock measures within one system; only this compares the rail's
        statement about where a date sits with a row's. It found the board 91px out in v60d. */
     expect(f.railLane, "the rail has no lane").not.toBeNull();
