@@ -238,17 +238,37 @@ const Piece: React.FC<{
   const lines = barLines(sg.label);
   /* ⚠️ THE PILL IS THE APP'S OWN VOCABULARY — see `calendarPill`. The status while the agency
      holds the move, the deed while the writer does, and nothing else is reachable. */
-  const silent = sg.state === "quiet" || sg.state === "ghost";
-  const pill = pillText(sg.status, holderOf(sg), sg.nudgeDue, !!sg.owed, silent);
+  /* ⚠️ v60 SPLITS THE TWO SILENCES, AND v58 HAD FOLDED THEM. `quiet` is a stated reply date that
+     has passed on a running wait — the ref's Priya case, which v60 says PROMPTS — and `ghost` is
+     the same absence past `GHOST_AFTER_DAYS`, which does not. Measured before the change: seven
+     Urgent rows wore the sand `No Response` chip and offered no move at all, because both states
+     reached one flag. `barState` decides which is which; nothing here re-derives a threshold. */
+  const estLate = sg.state === "quiet";
+  const silent = sg.state === "ghost";
+  const pill = pillText(sg.status, holderOf(sg), sg.nudgeDue, !!sg.owed, silent, estLate);
   /**
    * ⚠️ FIVE CHIP KINDS, FROM THE REF, AND THE CLOSED ONE OUTRANKS THE REST. A closed relationship
    * is closed whoever last held it, so `shut` is tested first — reading the holder first would
    * paint a finished row in the writer's tone and invite an action that is over.
    */
+  /**
+   * ⚠️ THE CHIP'S TONE IS THE PILL'S OWN, NEVER A SECOND DERIVATION.
+   *
+   * This used to decide the tone itself, from the bar's state, while `pillText` decided the WORDS
+   * from the status and the holder — two answers to one question, and they came apart the moment
+   * v60 gave the passed-estimate case a deed. Measured: seven Urgent rows reading the imperative
+   * `Nudge them` in the sand `quiet` tone, because the word came from the pill and the colour came
+   * from here. A chip that says "do this" in the colour reserved for "nothing is happening" is the
+   * two-surfaces-disagreeing fault this repo keeps recording, inside one element.
+   *
+   * ⚠️ `closed` AND `nudged` STAY HERE because they are facts about the BAR rather than about the
+   * status — `pillText` is not told which stretch it is describing, so it cannot know them. They
+   * are checked first, and everything else takes the pill's word for it.
+   */
   const chipKind = sg.state === "closed" ? "shut"
-    : sg.state === "quiet" || sg.state === "ghost" ? "quiet"
     : sg.state === "nudged" ? "rem"
-    : holderOf(sg) === "writer" ? "you" : "them";
+    : pill.tone === "wait" ? "you"
+    : pill.tone;
   /* the hover record: the whole line, where the card can only show what fits */
   const record = [lines.t1, lines.t2].filter(Boolean).join(" · ");
   const facts = { trueFrom: sg.trueFrom, trueTo: sg.trueTo, from: sg.from, to: sg.to, days,
@@ -447,7 +467,7 @@ const Piece: React.FC<{
           a transform on an SVG element, so a scaled badge is the right size in one browser and the
           wrong size in another; the ref states `transform: none` on it for the same reason. */}
       <span className="tl-medal" aria-hidden>
-        <StatusDot status={sg.status} overrideSize={CARD_BADGE_PX} />
+        <StatusDot status={sg.status} overrideSize={CARD_BADGE_PX} badge />
       </span>
       <div className="tl-cardbody">
         {/* the glider: the ONLY thing that moves when clipped text glides on hover */}
@@ -2025,10 +2045,53 @@ data-rowkey={r.key}
               style={{ ...laneVar(sg.lane),
                 ["--l" as string]: barLeft(sg),
                 ["--w" as string]: barWidth(sg),
-                left: "calc(var(--l) + var(--w))" }}>
-              {sg.capWord}
+                /* ⚠️ `min()` AND NOTHING ELSE (Law 6). The flag stands to the RIGHT of the bar's
+                   end, and clamps so one near the lane's edge folds inward rather than leaving it.
+                   No element is measured: a wrong lane width once piled every flag at one x. */
+                left: "min(calc(var(--l) + var(--w) + 16px), calc(100% - 206px))" }}>
+              <span className="g" aria-hidden />
+              <span className="w">{sg.capWord}</span>
+              <span className="d">{sg.capOn}</span>
             </div>
           ))}
+          {/**
+            * ⚠️ THE URGENT FLAG STANDS AT TODAY, NOT AT THE DATE THAT PASSED.
+            *
+            * The date is behind the reader; what the flag says is that the debt is live NOW, so it
+            * belongs on the day being looked at. The card's own second line still carries the date
+            * and the span, so nothing is lost by moving the flag off it.
+            *
+            * ⚠️ AND IT IS ONE PER ROW, NOT ONE PER SEGMENT. A row can hold several late stretches;
+            * three identical pink flags stacked on one column would say the same thing three times.
+            * The first owed segment carries it and the rest are silent.
+            */}
+          {(() => {
+            const late = bar.segs.find((sg) => sg.owed || sg.state === "quiet");
+            if (!late || todayAt == null) return null;
+            const p = pillText(late.status, holderOf(late), late.nudgeDue, !!late.owed,
+              late.state === "ghost", late.state === "quiet");
+            const parts = barLines(late.label);
+            /* ⚠️ THE MONO LINE MUST NOT RESTATE THE DEED. A reminder that has come round carries no
+               date of its own, so its fact is the words "nudge due" — and the flag then read
+               "Nudge due" over "NUDGE DUE", the same sentence twice in two typefaces. Where the
+               lateness clause says nothing the deed has not already said, the flag falls back to
+               the row's own opening clause, which is a date. */
+            const same = (a: string, b: string) =>
+              a.trim().toLowerCase() === b.trim().toLowerCase();
+            const l2 = parts.t2 && !same(parts.t2, p.text) ? parts.t2 : parts.t1;
+            if (!l2) return null;
+            return (
+              <div className="tl-cap mine od" key={`od-${late.key}`} data-odflag={p.text}
+                style={{ ...laneVar(late.lane),
+                  left: `min(calc(${pct(todayAt)} + 18px), calc(100% - 236px))` }}>
+                <span className="fh" aria-hidden />
+                <span className="fb">
+                  <span className="w">{p.text}</span>
+                  <span className="d">{l2}</span>
+                </span>
+              </div>
+            );
+          })()}
           {/**
             * ⚠️ THE LEAD-IN: MARKS BEFORE THE CARD, NEVER ON IT (v54, Phase 3).
             *

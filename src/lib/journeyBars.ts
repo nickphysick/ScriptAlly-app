@@ -280,6 +280,8 @@ export interface Segment {
   capWord?: string;
   /** which kind of date the card ends on — decides the mark's shape and the cap's tone */
   capSource?: CapKind;
+  /** the day the cap names, worded for its kind — "by 4 Oct" / "from 4 Sept" */
+  capOn?: string;
   /** the writer owes this date, so the mark is a diamond and the cap takes the writer's tone */
   capMine?: boolean;
   /** the writer owes this card's date and it has passed — the card wobbles, the row shows a strip */
@@ -1433,7 +1435,7 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
        * drawing the bar. Closed is excluded too: a closed card carries no next move, and offering
        * one would be offering to do something after the thing is over.
        */
-      ...((): { capWord?: string; capSource?: CapKind; capMine?: boolean } => {
+      ...((): { capWord?: string; capSource?: CapKind; capMine?: boolean; capOn?: string } => {
         /* ⚠️ AND NOTHING AFTER A CLOSURE. A journey that has closed carries no next move, so a
            card past a close event takes neither cap nor mark — the same rule that stops the bar
            dead there. Measured: one row on the harness account holds a close event in its history
@@ -1452,6 +1454,13 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
             query.status as QueryStatus, holderOf({ side }), nudgeArrived).text,
             !!query.lastNudgeSentDate),
           capSource: src,
+          /* ⚠️ THE DAY THE FLAG NAMES, WORDED FOR ITS KIND. v60's flag is two lines — the deed in
+             Caveat over the date in mono — and the date needs the preposition its kind implies: a
+             deadline the writer owes is "by 4 Oct", an agency's window or a reminder is "from
+             4 Sept", because one is a cut-off and the other is when something becomes available.
+             Derived here, beside the word it belongs to, so the two cannot disagree about which
+             date they mean. */
+          capOn: `${mine ? "by" : "from"} ${shortCalDate(goalYmd!)}`,
           ...(mine ? { capMine: true as const } : {}),
         };
       })(),
@@ -1591,8 +1600,24 @@ export function latenessLine(i: {
       ? `${i.prefix} · overdue since ${on(i.dueYmd)} · ${overdueSpan(daysBetween(i.dueYmd, i.todayYmd))}`
       : `${i.prefix} · no date promised · owed ${overdueSpan(i.days)}`;
   }
-  /* an agency's window that has passed: stated, never scored */
-  return `${i.prefix} · reply expected ${on(i.expectedYmd)} · none yet`;
+  /**
+   * An agency's window that has passed.
+   *
+   * ⚠️ v60 GIVES IT THE LATENESS VOCABULARY RATHER THAN A DESCRIPTION. It read
+   * "reply expected 27 Jul · none yet" — three clauses that state the date, then restate that
+   * nothing came, and never say how long. The ref writes `expected 27 Jul · 8 days overdue`: the
+   * same shape as every other late thing on the board, which is what "one lateness vocabulary"
+   * means. `none yet` was also doing the work the SECTION now does — the row is in Urgent, so the
+   * fact that nothing came back is the reason it is there.
+   *
+   * ⚠️ AND THE OWED BRANCH ABOVE STILL READS "overdue since 20 Aug · 15 days", WHICH IS A THIRD
+   * SHAPE. The ref writes `due 26 Aug · 7 days overdue` for that case. The pack quoted only this
+   * branch's wording, so only this one is changed — flagged rather than unified in passing,
+   * because the owed wording is on six rows and changing it is a copy decision, not a fix.
+   */
+  return i.expectedYmd
+    ? `${i.prefix} · expected ${on(i.expectedYmd)} · ${overdueSpan(daysBetween(i.expectedYmd, i.todayYmd))} overdue`
+    : `${i.prefix} · no date promised · overdue`;
 }
 
 export function labelFor(state: BarState, i: LabelInput): BarLabel {

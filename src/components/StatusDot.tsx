@@ -230,6 +230,21 @@ export interface StatusDotProps {
   /** Explicit pixel size that OVERRIDES the app-wide 30px — used only by the dense timelines,
    *  where a full-size dot would be clipped by the compact layout. Min 12. */
   overrideSize?: number;
+  /**
+   * Draw the dot as a large standalone BADGE rather than as an inline mark.
+   *
+   * ⚠️ ADDITIVE, AND EVERY EXISTING CALLER IS BYTE-IDENTICAL WITHOUT IT. The dot's ring is a
+   * constant 1px, which is right at 12–22px and a hairline at the calendar's 58: measured on the
+   * v60 board, a 58px disc in a pale tint with a 1px edge, which reads as a wash rather than as a
+   * mark. The design of record draws the same circle with a ring at ~11% of its diameter and a
+   * WHITE centre, so the glyph sits in a clear field instead of on a tint.
+   *
+   * ⚠️ IT IS A PROP RATHER THAN A SIZE THRESHOLD INSIDE THE COMPONENT. A rule like "scale the ring
+   * above 24px" would change every existing caller that ever passes a larger size, silently, and
+   * this component is locked precisely so that cannot happen. A caller that wants the badge
+   * treatment asks for it; nobody else is touched.
+   */
+  badge?: boolean;
   className?: string;
   /** Muted "would-be"/skipped treatment — the same dot, drained to neutral grey. Default false. */
   ghost?: boolean;
@@ -242,6 +257,7 @@ export interface StatusDotProps {
 export const StatusDot: React.FC<StatusDotProps> = ({
   status,
   overrideSize,
+  badge = false,
   className,
   ghost = false,
   decorative = false,
@@ -293,6 +309,13 @@ export const StatusDot: React.FC<StatusDotProps> = ({
   const pulseColor = themed ? `var(--sd-hue, ${base})` : base;
   const pulse = spec.pulse && !ghost;
   const glyphSize = Math.round(S * 0.62);
+  /* ⚠️ THE RING SCALES WITH THE DISC IN BADGE MODE, AT THE REF'S OWN PROPORTION. Its circle is
+     `r=7.4` stroked `1.7` in a 20-unit viewBox — 11.5% of the drawn diameter — so a 58px badge
+     carries a ~6px ring rather than a 1px one. Below badge mode the constant 1px stands: it is
+     what guarantees an edge on the palest fills at inline sizes, which is a different problem. */
+  const ringPx = badge ? Math.max(1, Math.round(S * 0.115)) : 1;
+  /* and the centre goes white, so the glyph reads out of a clear field rather than off a tint */
+  const discFill = badge ? "#ffffff" : fill;
 
   return (
     <span
@@ -315,8 +338,8 @@ export const StatusDot: React.FC<StatusDotProps> = ({
           position: "absolute",
           inset: 0,
           borderRadius: "50%",
-          background: fill,
-          border: `1px solid ${ringColor}`,
+          background: discFill,
+          border: `${ringPx}px solid ${ringColor}`,
           boxSizing: "border-box",
         }}
       />

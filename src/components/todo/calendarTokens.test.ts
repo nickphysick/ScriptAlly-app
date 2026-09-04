@@ -323,10 +323,33 @@ describe("the scrawl is gone from the calendar", () => {
     }
   });
 
-  it("no Caveat in the calendar path — and the app's own handwriting is untouched", () => {
-    for (const f of CAL) {
+  /**
+   * ⚠️ CAVEAT IS BACK ON THIS BOARD, IN ONE PLACE, AND THE CLAIM HAS BEEN RESTATED RATHER THAN
+   * DROPPED.
+   *
+   * This asserted that Caveat appeared nowhere in the calendar path, which was a proxy: the scrawl
+   * was a HANDWRITTEN COPY OF THE DEED RIDING THE BAR — "a second rendering of a fact the action
+   * column already states", in this block's own words — and the typeface was how you spotted it,
+   * not what was wrong with it. v60 gives the flag a deed in Caveat, and a flag is not a duplicate:
+   * it names a move that becomes available on a FUTURE date, which nothing else on the row says.
+   *
+   * ⚠️ SO THE LOCK NOW ASSERTS WHERE THE HAND MAY APPEAR, WHICH IS THE STRONGER CLAIM. `.tl-cap .w`
+   * is the only selector in the sheet permitted to set it, and the page may not set it inline at
+   * all — so a second handwritten element cannot be added without failing here, and the scrawl
+   * cannot come back wearing a new class. The `tl-scr` clause above is untouched and still forbids
+   * the original by name.
+   */
+  it("Caveat sets exactly one thing — the flag's deed — and the app's own hand is untouched", () => {
+    const css = stripAll(readFileSync(join(process.cwd(), "src/components/todo/todoCalendar.css"), "utf8"));
+    /* every rule in the calendar sheet that names the face, with its selector */
+    const setters = [...css.matchAll(/(?:^|\})\s*([^{}]+?)\s*\{([^}]*Caveat[^}]*)\}/g)]
+      .map((m) => m[1].trim().replace(/\s+/g, " "));
+    expect(setters, `the calendar sheet sets Caveat on: ${setters.join(" | ")}`)
+      .toEqual([".tl-cap .w"]);
+    /* the page and the copy module may not set it at all — a flag's deed is styled, never inlined */
+    for (const f of ["src/components/todo/TodoCalendarPage.tsx", "src/lib/timelineCopy.ts"]) {
       const src = stripAll(readFileSync(join(process.cwd(), f), "utf8"));
-      expect(src, `${f} still sets Caveat`).not.toMatch(/Caveat/i);
+      expect(src, `${f} sets Caveat inline`).not.toMatch(/Caveat/i);
     }
     /* the inverse, so this can never be "fixed" by deleting the app's hand */
     const postit = readFileSync(join(process.cwd(), "src/components/todo/todo.css"), "utf8");

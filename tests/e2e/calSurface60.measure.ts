@@ -135,9 +135,13 @@ test.describe("v60 · the sections", () => {
     const numbers: string[] = [];
     for (const s of secs) {
       expect(s.nums, `${s.sec}: ${s.nums} numbers against ${s.rows} rows`).toBe(s.rows);
-      /* the header and the number column carry the SAME tone — one token, two readers */
       expect(s.headBg, `${s.sec}'s header is untinted`).not.toBe("rgba(0, 0, 0, 0)");
-      expect(s.numsBg, `${s.sec}'s number column disagrees with its header`).toBe(s.headBg);
+      /* ⚠️ THIS ASSERTED THE OPPOSITE YESTERDAY AND WAS WRONG, WHICH IS WHY IT WENT RED. I built
+         the tint onto both the header and the number column from the ref's per-section rule, and
+         missed that its base `.gnums` carries `background: transparent !important` — which beats
+         that rule outright, since `!important` outranks specificity. The column sits on the page
+         tone. The painted-pixel check lives in `calFidelity60`; this one states the relation. */
+      expect(s.numsBg, `${s.sec}'s number column is filled`).toBe("rgba(0, 0, 0, 0)");
       expect(s.headBg, `${s.sec}'s header is the same tone as its body`).not.toBe(s.grpBg);
       expect(s.headFamily, `${s.sec}'s heading is not Playfair`).toMatch(/Playfair/);
       numbers.push(...s.numText);
@@ -156,7 +160,13 @@ test.describe("v60 · the sections", () => {
 test.describe("v60 · the card", () => {
   test("⚠️ the badge is a StatusDot at the ref's size, and it bursts past the card's left edge", async ({ page }) => {
     await openRoute(page, CAL, { width: 1440, height: 900 });
-    const want = Number((refTokens()["--badge"] ?? "58px").replace("px", ""));
+    /* ⚠️ NO FALLBACK — THIS ONE WAS PASSING ON ITS OWN. `refTokens` read only the ref's FIRST
+       `:root` and v60 declares three, so `--badge` came back undefined and `?? "58px"` asserted a
+       number typed into the test against a ref it never read. Second instance of that shape in this
+       file; the helper is fixed, and the fallback is gone so it cannot recur here. */
+    const badgeTok = refTokens()["--badge"];
+    expect(badgeTok, "the ref pins no --badge").toBeTruthy();
+    const want = Number(badgeTok.replace("px", ""));
     const cards = await page.evaluate(() => {
       const out: { badgeW: number; badgeH: number; over: number; svg: boolean; bodyLeft: number; transform: string }[] = [];
       for (const c of document.querySelectorAll<HTMLElement>(".tl-p")) {
@@ -194,7 +204,8 @@ test.describe("v60 · the card", () => {
 
   test("⚠️ the card frame carries BOTH the ref's shadow layers, and a faded one hands them to a sibling", async ({ page }) => {
     await openRoute(page, CAL, { width: 1440, height: 900 });
-    const want = refRule(".frame")["box-shadow"] ?? "";
+    const want = refRule(".frame")["box-shadow"];
+    expect(want, "the ref's .frame declares no box-shadow").toBeTruthy();
     const layers = (want.match(/rgba\(/g) ?? []).length;
     expect(layers, "the ref's frame shadow did not parse").toBe(2);
     const seen = await page.evaluate(() => {

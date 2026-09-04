@@ -36,14 +36,26 @@ const sheet = (ref: string = REF): string => {
 
 /** every `--token: value` on the ref's `:root` */
 export function refTokens(): Record<string, string> {
-  const m = /:root\{([^}]*)\}/.exec(sheet());
-  if (!m) throw new Error("the ref has no :root block");
+  /**
+   * ⚠️ EVERY `:root`, IN ORDER — v60 DECLARES THREE OF THEM AND THIS READ ONLY THE FIRST.
+   *
+   * `exec` returns one match, so `--badge`, `--agent-w` and `--rail-h` — all declared in later
+   * `:root` blocks — came back `undefined`. That failed loudly here only because this lock asks for
+   * the value with no fallback; the badge case in `calSurface60` wrote `refTokens()["--badge"] ??
+   * "58px"` and had been **passing on its own fallback**, asserting a number typed into the test
+   * against a ref it never actually read. Same fault as the `?? "10px"` fixed in this file
+   * yesterday, one function along.
+   *
+   * Later declarations overwrite earlier ones, which is what the cascade does.
+   */
   const out: Record<string, string> = {};
-  for (const d of m[1].split(";")) {
-    const k = d.indexOf(":");
-    if (k < 0) continue;
-    const name = d.slice(0, k).trim();
-    if (name.startsWith("--")) out[name] = d.slice(k + 1).trim();
+  for (const m of sheet().matchAll(/:root\s*\{([^}]*)\}/g)) {
+    for (const d of m[1].split(";")) {
+      const k = d.indexOf(":");
+      if (k < 0) continue;
+      const name = d.slice(0, k).trim();
+      if (name.startsWith("--")) out[name] = d.slice(k + 1).trim();
+    }
   }
   if (!Object.keys(out).length) throw new Error("the ref's :root parsed to nothing");
   return out;

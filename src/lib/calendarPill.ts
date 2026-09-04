@@ -49,6 +49,18 @@ export const DEEDS = {
   revision: "Send the revision",
   offer: "Answer them",
   nudge: "Nudge due",
+  /**
+   * ⚠️ `Nudge them` IS A SIXTH DEED, AND v60 IS WHAT MADE IT REACHABLE.
+   *
+   * It is the move on a wait where the AGENCY's stated reply date has passed and nothing is
+   * scheduled — the ref's Priya case. Until v60 the app filed that as a silence and offered
+   * nothing: `journeyBars` says "the writer's own dates only — an agency's expected date that has
+   * passed is a silence rather than a deadline", so the chip read `No Response` and the row sat in
+   * a section nobody was asked to act on. v60 says both prompt (Law 9), so the state needs a deed,
+   * and `Nudge due` is not it: that one is the writer's OWN reminder falling due, which is a
+   * different fact with a different origin.
+   */
+  them: "Nudge them",
 } as const;
 
 /** Every string a pill may render — the lock reads this, never a hand-written copy of it. */
@@ -140,8 +152,27 @@ export function pillText(
    * sand chip and the words "No response", which is a statement about the RECORD — nothing came
    * back — rather than a verdict on the agency.
    */
+  /**
+   * ⚠️ A LONG SILENCE SAYS SO (v58), AND v60 NARROWED WHAT COUNTS AS ONE.
+   *
+   * `barState` has always had two silences: `quiet` — a stated reply date passed, under the
+   * long-silence threshold — and `ghost`, the same absence past 180 days. v58 treated both as
+   * silent, so a wait five days past its estimate wore the same sand chip as one five hundred days
+   * past it and neither offered a move. v60 splits them: `quiet` PROMPTS (see `estLate` below) and
+   * only `ghost` is the silence this flag means. The board's own rule still decides; the chip does
+   * not re-derive a threshold of its own.
+   */
   silent = false,
+  /**
+   * The agency's stated reply date has passed on a wait that is still running — `barState`'s
+   * `quiet`. Distinct from `silent`, which is the same absence gone long enough to stop being
+   * work, and distinct from `overdue`, which is the WRITER's own date.
+   */
+  estLate = false,
 ): Pill {
+  /* ⚠️ IT OUTRANKS THE SILENCE FLAG BECAUSE IT IS THE NARROWER CASE. A caller passing both would
+     otherwise get the sand chip and no move, which is the v58 behaviour this replaces. */
+  if (estLate) return { text: DEEDS.them, tone: "you" };
   /* ⚠️ THE APP'S OWN WORD, not a new string. `QueryStatus.NO_RESPONSE` is already in `PILL_WORDS`,
      which `calCard`'s lock checks every chip against; a hand-typed "No response" would have been a
      second spelling of one status and would have failed that lock for the right reason. The chip
