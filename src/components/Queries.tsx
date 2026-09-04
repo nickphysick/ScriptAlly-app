@@ -65,6 +65,8 @@ import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitl
 import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
 import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
+import { QueryPanel, type PanelRung } from "./queries/QueryPanel";
+import { rungFacts, waitProgress } from "../lib/queryPanelRungs";
 import { cardFacts, cardMaterials, turnFor, MATERIAL_SLOTS, type Turn } from "../lib/queryCardFacts";
 import { MATERIAL_ROW_NAMES } from "../lib/agentMaterials";
 import {
@@ -79,6 +81,19 @@ import { measureFlip, playFlip, clearFlip, type FlipRects } from "../lib/flip";
  * five would have left it printing "WAITING" for offers and for closed queries — a filter chip
  * confidently stating the wrong filter, which is worse than no chip at all.
  */
+/**
+ * ⚠️ THE GRID IS THE PAGE, ALWAYS — Phase 4. Opening a query overlays the panel instead of swapping
+ * the layout, so the masthead still says Query Centre and the crumb still reads
+ * `Queries / Query Centre`: you have not gone anywhere.
+ *
+ * ⚠️ IT IS TYPED `boolean` RATHER THAN LEFT AS THE LITERAL `true`, and that is deliberate. A literal
+ * makes the record branch provably dead, at which point TypeScript stops NARROWING inside it — and
+ * 2,226 lines that had typechecked for months produced three errors about a discriminated union it
+ * had always narrowed correctly. The branch is deleted in Phase 6 with the reachability sweep that
+ * deserves; until then it stays honest to the checker.
+ */
+const GRID_IS_THE_PAGE: boolean = true;
+
 const TURN_CHIP_LABEL: Record<"move" | "wait" | "offer" | "closed", string> = {
   move: "YOUR MOVE",
   wait: "WAITING",
@@ -2735,6 +2750,123 @@ export const Queries: React.FC<{
     };
   });
 
+  /**
+   * ⚠️ THE PANEL READS THE SAME ROW THE GRID BUILT. `gridRows` is already derived from
+   * `sortedList`, so the card and the panel cannot disagree about a status, a date or a stage —
+   * and the panel's position (`N of M`) is an index into that same order, which is what makes
+   * ←/→ follow what the reader is looking at rather than some other ordering.
+   */
+  const panelIndex = activeQuery ? gridRows.findIndex((r) => r.id === activeQuery.id) : -1;
+  const panelRow = panelIndex >= 0 ? gridRows[panelIndex] : null;
+
+  /**
+   * ⚠️ THE RAIL IS THE ACTIVITY LOG, NOT A RECONSTRUCTION. `trackingEvents` is the per-query
+   * `activity` subcollection the record view has always read, in the same order — which is the
+   * parity that has to hold before that view can be deleted.
+   */
+  /**
+   * ⚠️ THE PANEL'S EDITORS CALL THE RECORD VIEW'S OWN HANDLERS. `onEditEntry` opens
+   * `CorrectionFork`; `onDeleteEntry` runs the consequence preview and the delete. Building a
+   * second correction path for the same activities is how two surfaces come to disagree about what
+   * an edit does — and the whole point of decision 4 is that they do not.
+   *
+   * ⚠️ AND A DOTTED FIELD GOES STRAIGHT TO THE MISTAKE BRANCH (decision 4): clicking a date or a
+   * method says "this was recorded wrong", which is one of the fork's two answers. The fork itself
+   * is still reachable from the ⋯ menu, for the other one.
+   */
+  const rungEntry = (activityId: string): TimelineEntryRef | null => {
+    const raw = (trackingEvents as { id: string; type?: string; resultingStatus?: string; note?: string; createdAt?: unknown }[])
+      .find((e) => e.id === activityId);
+    if (!raw || !activeQuery) return null;
+    const facts = rungFacts([raw as never]);
+    const f = facts[0];
+    return {
+      activityId,
+      status: (raw.resultingStatus as QueryStatus | undefined) ?? (activeQuery.status as QueryStatus),
+      label: f?.event ?? "",
+      dateISO: f?.ms ? new Date(f.ms).toISOString() : new Date().toISOString(),
+      note: raw.note ?? "",
+    };
+  };
+  const openRungDateEdit = (activityId: string) => {
+    const entry = rungEntry(activityId);
+    if (entry) setCorrecting({ step: "edit", entry });
+  };
+  const openRungMenu = (activityId: string, _anchor: HTMLElement) => {
+    const entry = rungEntry(activityId);
+    if (entry) onEditEntry(entry);
+  };
+  /**
+   * ⚠️ THE EXPECTED DATE IS THE WRITER'S OWN FIELD, NOT AN ACTIVITY. It writes
+   * `writerExpectedDate` through the existing override path, so `resolveExpectedDate` prefers it
+   * and the card behind the panel re-derives — which is the assertion that proves this wiring.
+   */
+  /**
+   * ⚠️ ONE WRITER FOR THE EXPECTED DATE, extracted from the record view's inline handler so the
+   * panel calls the same function rather than a second copy of it. The provenance argument it
+   * carries is structural — a value in `writerExpectedDate` is the writer's because there is
+   * nowhere else it can have come from — and a second write path is exactly what would end that.
+   *
+   * ⚠️ THE DATE AND ITS SET-AT STAMP GO IN ONE WRITE, and the undo restores BOTH columns or clears
+   * both: an undo that left a stamp behind would date a statement that no longer exists.
+   */
+  const commitExpectedDate = (iso: string) => {
+    if (!activeQuery) return;
+    const id = activeQuery.id;
+    const prev = writerExpectedIso(activeQuery);
+    const prevAt = (activeQuery as unknown as Record<string, unknown>)[WRITER_EXPECTED_SET_AT_FIELD];
+    void updateQuery(id, writerExpectedWrite(iso) as never);
+    showToast({
+      message: `Expecting a reply by ${new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`,
+      undo: () => void updateQuery(id, (prev
+        ? { [WRITER_EXPECTED_FIELD]: prev, [WRITER_EXPECTED_SET_AT_FIELD]: typeof prevAt === "string" ? prevAt : deleteField() }
+        : { [WRITER_EXPECTED_FIELD]: deleteField(), [WRITER_EXPECTED_SET_AT_FIELD]: deleteField() }) as never),
+    });
+  };
+  const [expectedEditOpen, setExpectedEditOpen] = useState(false);
+  const openExpectedEdit = () => setExpectedEditOpen(true);
+
+  const panelRungs: PanelRung[] = (() => {
+    if (!panelRow || !activeQuery) return [];
+    const facts = rungFacts(trackingEvents as never[]);
+    const out: PanelRung[] = facts.map((r, i) => ({
+      id: r.id,
+      status: r.status,
+      event: r.event,
+      detail: i === 0 && activeQuery.sendMethod ? `· ${sendMethodLabel(activeQuery.sendMethod)}` : undefined,
+      dateLabel: r.ms ? fmtShortISO(new Date(r.ms).toISOString()) : "—",
+      onEditDate: () => openRungDateEdit(r.id),
+      onMenu: (anchorEl) => openRungMenu(r.id, anchorEl),
+    }));
+
+    /* ⚠️ THE WAITING RUNG IS DERIVED AND CARRIES NO MENU. It records nothing — a rung you can
+       delete must correspond to a document. */
+    const sentMs = lastSendMs(activeQuery);
+    const expMs = panelRow.expectedMs;
+    const prog = waitProgress(sentMs, expMs, Date.now());
+    if ((panelRow.turn === "sand" || panelRow.turn === "agent") && prog) {
+      out.push({
+        id: null,
+        status: QueryStatus.NO_RESPONSE,
+        event: "Waiting to hear back",
+        detail: activeAgent?.responseTimeWeeks
+          ? `— ${agentAgencyLine(activeAgent)} advise ${activeAgent.responseTimeWeeks} weeks` : undefined,
+        dateLabel: panelRow.facts.caption.split(" · ")[0] ?? "",
+        pending: true,
+        progress: {
+          pct: prog.pct,
+          past: prog.past,
+          sentLabel: sentMs ? `Sent ${fmtShortISO(new Date(sentMs).toISOString())}` : "Sent",
+          expectedLabel: expMs
+            ? `Expected by ${fmtShortISO(new Date(expMs).toISOString())}${panelRow.facts.expectedSource === "writer" ? " · your date" : ""}`
+            : "No date expected",
+          onEditExpected: () => openExpectedEdit(),
+        },
+      });
+    }
+    return out;
+  })();
+
   /* ⚠️ COUNTED OVER THE MANUSCRIPT-SCOPED SET, NEVER THE FILTERED VIEW — the same rule the
      masthead's own figures follow. A pill that counted what the pills had already narrowed would
      read `0` for every court you were not currently looking at. */
@@ -4895,13 +5027,24 @@ export const Queries: React.FC<{
           * never read as parallel — and once the record is reached by opening a card there is nothing
           * left for a second tab to select.
           */}
-        {!activeQuery ? (
+        {/**
+          * ⚠️ THE GRID IS THE PAGE NOW, ALWAYS. Opening a query no longer swaps the layout — the
+          * panel overlays, so the masthead still says Query Centre and the crumb still reads
+          * `Queries / Query Centre`, because you have not gone anywhere. That is the whole
+          * difference from the record view this replaces.
+          *
+          * ⚠️ THE RECORD BRANCH BELOW IS UNREACHABLE FROM HERE AND IS DELETED IN PHASE 6, in one
+          * commit, with its imports swept. It is left standing for exactly one commit so the
+          * panel's parity with it can be asserted against a surface that still exists.
+          */}
+        {GRID_IS_THE_PAGE ? (
           /**
            * ⚠️ THE BROWSING GRID READS THE SAME DERIVED LIST THE ROWS DO. `sortedList` is already
            * filtered by the page's own scope, search, status and sort, so the two views cannot show
            * different sets of the same queries — which is the failure a second data path would make
            * inevitable and invisible.
            */
+          <>
           <div className="qcc-col">
             {/* ⚠️ THE COUNTS ARE THE WHOLE SET'S, AND THE PILLS NARROW IT. A pill that stated the
                 filtered figure would read `0` for every court you were not currently in, which
@@ -5052,6 +5195,74 @@ export const Queries: React.FC<{
               </button>
             </div>
           </div>
+
+          {/**
+            * ⚠️ THE PANEL IS A SIBLING OF THE COLUMN, NOT A CHILD OF THE GRID. It is `position:
+            * fixed` and must not inherit the 1360 cap or sit inside anything that clips.
+            *
+            * ⚠️ AND IT RENDERS ONLY WITH A ROW TO SHOW. `panelRow` comes from `gridRows`, so a
+            * query filtered out of the current view has no panel — which is the same rule the
+            * position counter follows, and stops `N of M` counting something you cannot step to.
+            */}
+          {panelRow && activeQuery && (
+            <QueryPanel
+              open
+              facts={panelRow.facts}
+              status={panelRow.status}
+              name={panelRow.name}
+              agency={panelRow.agency}
+              initials={panelRow.initials}
+              sentLabel={activeQuery.dateSent ? fmtShortISO(activeQuery.dateSent) : "—"}
+              viaLabel={sendMethodLabel(activeQuery.sendMethod)}
+              manuscriptTitle={manuscripts.find((m) => m.id === activeQuery.manuscriptId)?.title ?? null}
+              position={{ index: panelIndex, total: gridRows.length }}
+              /* the CTA engine's own answer — never a second table of verbs */
+              primaryLabel={
+                panelRow.facts.turn === "you" ? "Mark sent"
+                  : panelRow.facts.turn === "offer" ? "Record decision"
+                    : "Record response"
+              }
+              onPrimary={() => {
+                /* ⚠️ THE PAGE'S OWN OPENERS — `openRecord` is the single entry point the record
+                   view already funnels through, and `MarkSentPopover` is the mark-sent home. This
+                   panel decides WHICH to ask for and nothing about what either does. */
+                if (panelRow.facts.turn === "you") setIsMarkSentOpen(true);
+                else openRecord(activeQuery);
+              }}
+              onNudge={() => setIsNudgeOpen(true)}
+              onMarkClosed={() => setIsCloseMenuOpen(true)}
+              onClose={() => onSelectView?.("cards")}
+              onStep={(delta) => {
+                if (!gridRows.length) return;
+                const next = gridRows[(panelIndex + delta + gridRows.length) % gridRows.length];
+                onOpenQuery?.(next.id);
+                /* ⚠️ THE CARD BEHIND IS SCROLLED INTO VIEW, so stepping never leaves the reader
+                   looking at a panel whose card is off screen. `nearest` rather than `center`:
+                   a card already visible must not jump. */
+                requestAnimationFrame(() => {
+                  document.querySelector(`[data-qcc-id="${next.id}"]`)
+                    ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                });
+              }}
+              rungs={panelRungs}
+              elapsed={(() => {
+                const [n, u] = (panelRow.facts.caption.match(/^(\d+)\s+(\w+)/) ?? [null, "—", ""]).slice(1) as [string, string];
+                return {
+                  value: n ?? "—",
+                  unit: u ?? "",
+                  caption: panelRow.facts.turn === "you" ? "since request"
+                    : panelRow.facts.turn === "closed" ? "since close" : "waiting so far",
+                };
+              })()}
+              expectedLabel={panelRow.expectedMs ? fmtShortISO(new Date(panelRow.expectedMs).toISOString()) : "—"}
+              materialsRecorded={panelRow.facts.materialsRecorded}
+              /* the existing Edit Query drawer owns materials — one editor, not a second one here */
+              onListMaterials={() => openEditQuery(activeQuery.id)}
+              onEditMaterials={() => openEditQuery(activeQuery.id)}
+              noteCount={journalEntries.filter((j) => j.queryId === activeQuery.id).length}
+            />
+          )}
+          </>
         ) : (
         <div data-qc-fade={fadeIn ? "in" : undefined} className="f12-body">
           {/* ⚠️ §3 · ONE HAIRLINE UNDER THE WHOLE BAR. A grid child spanning both columns, so it

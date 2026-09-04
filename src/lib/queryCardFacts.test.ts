@@ -378,3 +378,63 @@ describe("⚠️ the stage ladder — eight rungs, and depth means distance trav
     expect(decls, "a retired turn token is still declared").not.toMatch(/--turn-[a-z-]+\s*:/);
   });
 });
+
+/**
+ * ⚠️ A DECIDED OFFER — and the mechanism is the one that already existed, not a new field.
+ *
+ * `offerDecision.ts` has written `OFFER_ACCEPTED` / `OFFER_DECLINED` activities since July. The
+ * brief proposed an optional `decision` field on the Offer activity, "written by the existing
+ * Record decision surface if one exists" — one does, so no field was added and the caller derives
+ * the answer from the activities it already holds.
+ */
+describe("⚠️ a decided offer reads as closed, without rewriting the record", () => {
+  const offer = () => q({ status: QueryStatus.OFFER, lastStatusChange: ago(3) });
+
+  it("undecided is slate and awaits the writer", () => {
+    const f = cardFacts(offer(), TODAY);
+    expect(f.stage).toBe("offer");
+    expect(f.turn).toBe("offer");
+    expect(f.turnWord).toBe("Offer");
+    expect(sentenceText(f.sentence)).toBe("Awaiting your decision");
+  });
+
+  it("accepted goes grey and names the decision", () => {
+    const f = cardFacts(offer(), TODAY, { offerDecision: "accepted" });
+    expect(f.stage).toBe("closed");
+    expect(f.turn).toBe("closed");
+    expect(f.turnWord).toBe("Closed");
+    expect(sentenceText(f.sentence)).toBe("Offer accepted");
+  });
+
+  it("declined goes grey and names the decision", () => {
+    const f = cardFacts(offer(), TODAY, { offerDecision: "declined" });
+    expect(f.stage).toBe("closed");
+    expect(sentenceText(f.sentence)).toBe("Offer declined");
+  });
+
+  it("⚠️ a DECLINED offer that recompute has already withdrawn still says 'Offer declined'", () => {
+    /* `offerDecision.ts` puts `resultingStatus: WITHDRAWN` on the declined activity, so the stored
+       status closes itself. Without the decision the card would say "Withdrawn by you" — true, and
+       silent about the offer, which is the more useful fact. */
+    const withdrawn = q({ status: QueryStatus.WITHDRAWN, lastStatusChange: ago(2), dateSent: ago(60) });
+    expect(sentenceText(cardFacts(withdrawn, TODAY).sentence)).toBe("Withdrawn by you");
+    expect(sentenceText(cardFacts(withdrawn, TODAY, { offerDecision: "declined" }).sentence)).toBe("Offer declined");
+  });
+
+  it("⚠️ it changes the CARD and nothing else — no status is rewritten", () => {
+    const before = offer();
+    const f = cardFacts(before, TODAY, { offerDecision: "accepted" });
+    expect(before.status, "cardFacts mutated the query").toBe(QueryStatus.OFFER);
+    expect(f.stage).toBe("closed");
+    /* and the derivation is still pure: same input, same answer */
+    expect(cardFacts(offer(), TODAY, { offerDecision: "accepted" }).stage).toBe("closed");
+  });
+
+  it("⚠️ a decision on a NON-offer is ignored — it cannot close a live query", () => {
+    /* The flag comes from the caller; a stray one must not grey out a Full Sent. */
+    const live = q({ status: QueryStatus.FULL_SENT, fullSentDate: ago(10), lastStatusChange: ago(10) });
+    const f = cardFacts(live, TODAY, { offerDecision: "accepted", agencyWeeks: 12 });
+    expect(f.stage).toBe("out-3");
+    expect(f.turn).toBe("agent");
+  });
+});

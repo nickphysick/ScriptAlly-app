@@ -1,0 +1,78 @@
+{
+  "cardBefore": {
+    "id": "cor-pair",
+    "stage": "qcc--s-out-2",
+    "band": "rgb(215, 221, 211)",
+    "leafDay": "6"
+  },
+  "panel": {
+    "stage": "out-2",
+    "stageClass": "qcc--s-out-2",
+    "band": "rgb(215, 221, 211)",
+    "width": 580,
+    "right": 1440,
+    "onScreen": true,
+    "scrimOn": true,
+    "barActions": [
+      "Previous query",
+      "Next query",
+      "Record response",
+      "Nudge",
+      "Mark closed",
+      "Close"
+    ],
+    "position": "22 of 54",
+    "name": "Elinor Hale",
+    "rungs": [
+      {
+        "event": "Queried",
+        "date": "6 Jul 2026",
+        "pending": false,
+        "hasMenu": true,
+        "editableDate": true
+      },
+      {
+        "event": "Partial Requested",
+        "date": "26 Jul 2026",
+        "pending": false,
+        "hasMenu": true,
+        "editableDate": true
+      },
+      {
+        "event": "Partial Sent",
+        "date": "31 Jul 2026",
+        "pending": false,
+        "hasMenu": true,
+        "editableDate": true
+      },
+      {
+        "event": "Waiting to hear back",
+        "date": "9 weeks waiting",
+        "pending": true,
+        "hasMenu": false,
+        "editableDate": false
+      }
+    ],
+    "materialRows": [
+      "Covering letter—",
+      "Synopsis—",
+      "Opening sample—",
+      "Other—"
+    ],
+    "sections": [
+      "Tracking",
+      "What went with this query",
+      "Notes"
+    ]
+  },
+  "afterRight": {
+    "open": true,
+    "pos": "23 of 54",
+    "name": "Noah Bright"
+  },
+  "afterEsc": {
+    "open": false,
+    "gridStillThere": true,
+    "masthead": "Query Centre"
+  }
+}

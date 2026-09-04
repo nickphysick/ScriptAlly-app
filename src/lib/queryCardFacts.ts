@@ -96,6 +96,21 @@ export interface CardFacts {
 }
 
 export interface CardFactsInput {
+  /**
+   * ⚠️ THE DECISION IS AN ACTIVITY THAT ALREADY EXISTS — no new field, and this is the correction
+   * to the brief rather than a shortcut past it.
+   *
+   * `src/lib/offerDecision.ts` has recorded offer decisions since July: `OFFER_ACCEPTED` /
+   * `OFFER_DECLINED` activities, built by `buildOfferDecisionWrites`, collected by the To-do
+   * board's `FocusFlow` and written through `db.tsx`. The brief proposed an optional `decision`
+   * field on the Offer activity "written by the existing Record decision surface IF ONE EXISTS" —
+   * one does, and it expresses the decision as the activity's TYPE. Adding the field would be a
+   * SECOND way to record one fact, which is the shape this repo has an audit about.
+   *
+   * So the caller derives it (`hasOfferDecision`, or the accepted/declined split) and hands it in.
+   * `cardFacts` stays pure and reads no store.
+   */
+  offerDecision?: "accepted" | "declined" | null;
   /** The agency's stated response window, from the AGENT record. Never stored on the query. */
   agencyWeeks?: number | null;
   /** A window the agent stated in a reply, if the caller has the events to derive one. */
@@ -233,7 +248,22 @@ export function cardMaterials(items: Query["materialsWanted"]): {
 export function cardFacts(query: Query, today: Date, input: CardFactsInput = {}): CardFacts {
   const nowMs = today.getTime();
   const status = query.status;
-  const turn = turnFor(status);
+  /**
+   * ⚠️ A DECIDED OFFER READS AS CLOSED, whatever its stored status says.
+   *
+   * `offerDecision.ts` deliberately leaves an ACCEPTED offer at status `Offer` — "the query keeps
+   * its historically-true OFFER status; the parked full Offer Decision Flow owns any closing
+   * ceremony later". That is right about the RECORD and wrong about the CARD: a slate "Offer /
+   * awaiting your decision" band on an offer you have already accepted states something untrue to
+   * the one person who knows better. Declined already closes itself, because that activity carries
+   * `resultingStatus: WITHDRAWN` and `recomputeQuery` honours it.
+   *
+   * ⚠️ IT CHANGES THE CARD AND NOTHING ELSE. The status is not rewritten, no activity is added, and
+   * `recomputeQuery` is untouched — this is a presentation rule over data that already exists,
+   * which is what lets it disagree with the stored status safely.
+   */
+  const decided = status === QueryStatus.OFFER && !!input.offerDecision;
+  const turn = decided ? "closed" : turnFor(status);
 
   /**
    * ⚠️ TWO ANCHORS, DELIBERATELY — and the ref conflates them because its fixture only carries one
@@ -334,7 +364,13 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
     ];
     caption = `${spanWords(sinceSend)} since sending`;
   } else {
-    sentence = [{ text: closedSentence(query) }];
+    /* ⚠️ THE DECISION NAMES ITSELF. "Withdrawn by you" is true of a declined offer and says nothing
+       about the offer; the writer's own act is the more useful fact on a card they are scanning. */
+    const decisionWord =
+      input.offerDecision === "accepted" ? "Offer accepted"
+        : input.offerDecision === "declined" ? "Offer declined"
+          : null;
+    sentence = [{ text: decisionWord ?? closedSentence(query) }];
     const replied = sentMs != null && !Number.isNaN(leafMs) ? Math.max(0, daysBetween(sentMs, leafMs)) : null;
     caption = replied == null ? "" : `replied after ${spanWords(replied)}`;
   }
@@ -343,8 +379,8 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
 
   return {
     turn,
-    stage: stageFor(status),
-    turnWord: turnWordFor(status),
+    stage: decided ? "closed" : stageFor(status),
+    turnWord: decided ? "Closed" : turnWordFor(status),
     leaf,
     sentence,
     caption,
