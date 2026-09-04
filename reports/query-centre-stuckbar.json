@@ -1,0 +1,140 @@
+{
+  "rest@1440": {
+    "barShown": false,
+    "bar": {
+      "top": 105,
+      "bottom": 149,
+      "h": 44
+    },
+    "controls": {
+      "top": 237.4,
+      "bottom": 351.6,
+      "h": 114
+    },
+    "stuckH": "0px",
+    "masthead": {
+      "top": 111,
+      "bottom": 220.4,
+      "h": 109
+    },
+    "mastheadShown": true,
+    "firstClearBandTop": 351.6,
+    "obscuredAtRest": 0,
+    "scrollTop": 0
+  },
+  "scrolled@1440": {
+    "barShown": true,
+    "bar": {
+      "top": 111,
+      "bottom": 155,
+      "h": 44
+    },
+    "controls": {
+      "top": 157,
+      "bottom": 271.2,
+      "h": 114
+    },
+    "stuckH": "44px",
+    "masthead": {
+      "top": -789,
+      "bottom": -679.6,
+      "h": 109
+    },
+    "mastheadShown": true,
+    "firstClearBandTop": 431.6,
+    "obscuredAtRest": 6,
+    "scrollTop": 900
+  },
+  "back@1440": {
+    "barShown": false,
+    "bar": {
+      "top": 105,
+      "bottom": 149,
+      "h": 44
+    },
+    "controls": {
+      "top": 237.4,
+      "bottom": 351.6,
+      "h": 114
+    },
+    "stuckH": "0px",
+    "masthead": {
+      "top": 111,
+      "bottom": 220.4,
+      "h": 109
+    },
+    "mastheadShown": true,
+    "firstClearBandTop": 351.6,
+    "obscuredAtRest": 0,
+    "scrollTop": 0
+  },
+  "rest@2560": {
+    "barShown": false,
+    "bar": {
+      "top": 105,
+      "bottom": 149,
+      "h": 44
+    },
+    "controls": {
+      "top": 237.4,
+      "bottom": 351.6,
+      "h": 114
+    },
+    "stuckH": "0px",
+    "masthead": {
+      "top": 111,
+      "bottom": 220.4,
+      "h": 109
+    },
+    "mastheadShown": true,
+    "firstClearBandTop": 351.6,
+    "obscuredAtRest": 0,
+    "scrollTop": 0
+  },
+  "scrolled@2560": {
+    "barShown": true,
+    "bar": {
+      "top": 111,
+      "bottom": 155,
+      "h": 44
+    },
+    "controls": {
+      "top": 157,
+      "bottom": 271.2,
+      "h": 114
+    },
+    "stuckH": "44px",
+    "masthead": {
+      "top": -789,
+      "bottom": -679.6,
+      "h": 109
+    },
+    "mastheadShown": true,
+    "firstClearBandTop": 431.6,
+    "obscuredAtRest": 6,
+    "scrollTop": 900
+  },
+  "back@2560": {
+    "barShown": false,
+    "bar": {
+      "top": 105,
+      "bottom": 149,
+      "h": 44
+    },
+    "controls": {
+      "top": 237.4,
+      "bottom": 351.6,
+      "h": 114
+    },
+    "stuckH": "0px",
+    "masthead": {
+      "top": 111,
+      "bottom": 220.4,
+      "h": 109
+    },
+    "mastheadShown": true,
+    "firstClearBandTop": 351.6,
+    "obscuredAtRest": 0,
+    "scrollTop": 0
+  }
+}
