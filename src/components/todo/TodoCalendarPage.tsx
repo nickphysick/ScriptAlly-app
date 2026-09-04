@@ -35,6 +35,8 @@ import {
   type RowGroup,
 } from "../../lib/timelineGroups";
 import { pillText } from "../../lib/calendarPill";
+import { stageSentence, type StageEnd } from "../../lib/stageSentence";
+import { QueryStatus } from "../../types";
 import {
   calSectionOf, CAL_SECTION_DRAW, CAL_SECTION_LABEL,
   type CalSection, type CalSectionFacts,
@@ -93,6 +95,17 @@ import "./todoCalendar.css";
  * this repo already uses for `READING_PANE_FLOOR_PX` ≡ `--ag-pane-floor`.
  */
 const CARD_BADGE_PX = 58;
+/**
+ * A past stage's badge — the ref's `.jc .jmed`, at 54 against the live card's 58.
+ *
+ * ⚠️ SMALLER, AND THE OPACITY IS THE SHEET'S. A past stage is settled: the ref drains its
+ * medallion to 0.22 rather than shrinking it away, so the glyph still says which status the stage
+ * WAS while reading as history. Size here, opacity there — the sheet owns anything a theme might
+ * want to retune.
+ */
+const STAGE_BADGE_PX = 54;
+/** the shortest stage that can hold a card — see the gate at its use site for the arithmetic */
+const STAGE_MIN_DAYS = 12;
 
 
 export interface TodoCalendarPageProps {
@@ -515,6 +528,35 @@ const Piece: React.FC<{
           pass wrote the CSS for both elements and rendered NEITHER for a build: the rules matched
           nothing, faded cards were flat and unfaded at once, and it took the surface lock to say
           so. A class the sheet selects on and the component never emits is a rule with no subject. */}
+      {/* ══ THE TRAIL — elapsed against the card's own span (v60, Phase 3) ══════════════════
+          ⚠️ THE FILL'S END IS TODAY, COMPUTED FROM DATES AND NEVER FROM A MEASUREMENT. `F` is
+          today's fraction of this card's drawn span, so `100% × F` is today's x inside the card;
+          subtracting the inset from the WIDTH (with the same inset as the `left`) leaves the right
+          edge exactly there. On a closed card today is past the end, `F` clamps to 1, and the fill
+          runs to the card's end — which is the same statement, that the wait is over.
+          ⚠️ AND THE TRACK STOPS 12px SHORT of the card's end, per the ref, so it reads as a gauge
+          inside the card rather than as a second border along its foot. */}
+      {(() => {
+        const spanD = sg.to - sg.from;
+        if (spanD <= 0) return null;
+        /* ⚠️ `sg.todayAt`, THE SEGMENT'S OWN COPY — `from`, `to` and it are all fractional days
+           from the window's left edge, so the ratio is unit-free and needs no conversion. The
+           page-level `todayAt` is not in scope here and would be a second source of one number. */
+        const F = Math.min(1, Math.max(0, (sg.todayAt - sg.from) / spanD));
+        const ins = fade.left
+          ? "calc(var(--badge) * 1.0 + 18px)"
+          : "calc(var(--badge) * 0.66 + 10px)";
+        return (
+          <>
+            <span className="tl-ctrack" aria-hidden
+              style={{ width: `max(0px, calc(100% - ${ins} - 12px))` }} />
+            {F > 0 && (
+              <span className="tl-ctrail" aria-hidden data-fill={F.toFixed(4)}
+                style={{ width: `max(0px, calc(100% * ${F.toFixed(4)} - ${ins}))` }} />
+            )}
+          </>
+        );
+      })()}
       {(fade.left || fade.right) && <span className="tl-shd" aria-hidden />}
       {fade.right && <span className="tl-fov r" aria-hidden />}
       {fade.left && <span className="tl-fov l" aria-hidden />}
@@ -1962,6 +2004,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
 
   const row = (r: TimelineRow) => {
     const bar = barsByRow.get(r.key) ?? { segs: [], nodes: [] };
+    /* ⚠️ THE ROW'S URGENCY, READ FROM THE SAME FLAGS THE SECTION FILED IT BY — never a second
+       opinion. `owed` is a writer-owed date that has passed and `quiet` is an agency estimate that
+       has, which are exactly the two arms of `calSectionOf`'s `isUrgent`. A row that is Urgent
+       states one instruction, so its future flags are suppressed while it is. */
+    const rowUrgent = bar.segs.some((sg) => sg.owed || sg.state === "quiet");
     const lanes = Math.max(1, r.lanes);
     return (
       <div
@@ -2032,7 +2079,13 @@ data-rowkey={r.key}
             * The pair is emitted from one test in `journeyBars`, so a cap can never appear without
             * its mark.
             */}
-          {bar.segs.filter((sg) => sg.capWord).map((sg) => (
+          {/* ⚠️ ONE INSTRUCTION PER ROW (v60c, standing). An Urgent row shows its urgent flag and
+              nothing else: a row reading "6 weeks overdue" beside "Nudge · from 19 Sept" states
+              two moves at once, and the reader has to work out which is being asked of them —
+              which is the opposite of what a flag is for. Measured before the ruling: two rows
+              carried both. Both facts survive in the hover record, which is where a row's whole
+              story belongs; what the board states is the one thing to do next. */}
+          {bar.segs.filter((sg) => sg.capWord && !rowUrgent).map((sg) => (
             <div key={`cap-${sg.key}`}
               className={`tl-cap${sg.capMine ? " mine" : ""}`}
               data-cap={sg.capSource}
@@ -2140,6 +2193,79 @@ data-rowkey={r.key}
                     style={{ left: pct(r2.first), width: pct(Math.max(0, r2.to - r2.first)),
                       ...laneVar(lane) }} />
                 ))}
+                {/* ══ PAST STAGES (v60, Phase 4) ═══════════════════════════════════════════
+                    ⚠️ ONE CARD PER PRIOR WAIT, AND A STAGE IS THE GAP BETWEEN TWO EVENTS. A node
+                    records the moment a query MOVED; what the reader wants is the stretch between
+                    two of them, and what happened at its end. So the stages are the consecutive
+                    pairs, with the last running to the current card's own start.
+
+                    ⚠️ THE ANATOMY IS THE CURRENT CARD'S, AT REDUCED SCALE AND SETTLED — a dotted
+                    outline, no lift, its own StatusDot at very low opacity. Not the live card
+                    faded: a past stage is a different KIND of thing, and drawing it as a dimmed
+                    present tense is what makes a board's history read as unfinished work.
+
+                    ⚠️ AND THE GAP AT EACH END CLEARS THE BADGE. A stage card is inset by the
+                    badge's own overhang plus a gap, so consecutive stages do not run their
+                    medallions into each other's words — the ref's `G + MED`. */}
+                {(() => {
+                  const byL = new Map<number, BarNode[]>();
+                  for (const n of lead) {
+                    const l = byL.get(n.lane);
+                    if (l) l.push(n); else byL.set(n.lane, [n]);
+                  }
+                  const out: React.ReactNode[] = [];
+                  for (const [lane, ns] of byL) {
+                    const sorted = [...ns].sort((a, b) => a.at - b.at);
+                    const stop = cardStart.get(`${sorted[0].rowKey}::${lane}`);
+                    if (stop == null) continue;
+                    for (let i = 0; i < sorted.length; i++) {
+                      const a = sorted[i];
+                      const b = sorted[i + 1];
+                      const from = a.at;
+                      const to = b ? b.at : stop;
+                      /* ⚠️ TOO NARROW TO HOLD A CARD IS NOT DRAWN, AND THE REF'S OWN THRESHOLD IS
+                         TOO LOW. It skips a stage under 1.5% of the lane — 1.35 days at this
+                         window — while subtracting a gap of `badge + clearance` from the width. A
+                         two-day stage therefore rendered as a 2px dotted sliver with a 54px badge
+                         hanging off it: measured, two of the three stages on this board.
+
+                         ⚠️ THE GATE IS IN DAYS, NOT PIXELS, BECAUSE NOTHING HERE MAY MEASURE THE
+                         LANE (Law 6). The arithmetic: the gap is `--badge * 0.79 + 12px` ≈ 58px,
+                         and at the narrowest width this board supports (1280, lane ≈ 930px over a
+                         90-day window) a day is ≈ 10.3px — so the gap alone is ≈ 5.6 days and a
+                         card needs roughly that again for its words. `STAGE_MIN_DAYS` is 12.
+
+                         ⚠️ NOTHING IS LOST BY SKIPPING ONE. The node's own marker still stands on
+                         its date and its caption still reaches the hover record; what is dropped is
+                         a CARD too small to carry either. */
+                      if (to - from < STAGE_MIN_DAYS) continue;
+                      const stage = a.status ? String(a.status) : a.caption;
+                      const end: StageEnd = !b
+                        ? "out"
+                        : b.dir === "in" ? "in" : b.dir === "close" ? "none" : "out";
+                      out.push(
+                        <div key={`js-${a.key}`} className="tl-jc" style={{
+                          left: pct(from),
+                          width: `max(0px, calc(${pct(to - from)} - var(--tl-jc-gap)))`,
+                          ...laneVar(lane),
+                        }}>
+                          <span className="tl-jmed" aria-hidden>
+                            <StatusDot status={a.status ?? QueryStatus.QUERIED}
+                              overrideSize={STAGE_BADGE_PX} badge />
+                          </span>
+                          <span className="tl-jbody">
+                            <span className="tl-js">{stage}</span>
+                            <span className="tl-jd">{stageSentence({
+                              stage, end, next: b?.status ? String(b.status) : undefined,
+                              days: Math.round(to - from),
+                            })}</span>
+                          </span>
+                        </div>,
+                      );
+                    }
+                  }
+                  return out;
+                })()}
                 {lead.map((n) => (
                   <Marker key={n.key} n={n} selected={sel === n.key}
                     onPick={() => setSel((c) => (c === n.key ? null : n.key))} />

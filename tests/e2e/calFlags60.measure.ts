@@ -94,16 +94,47 @@ test.describe("v60b · flags", () => {
     }
   });
 
+  test("⚠️ ONE INSTRUCTION PER ROW — never an urgent flag and a future one together", async ({ page }) => {
+    await openRoute(page, CAL, { width: 1440, height: 900 });
+    const rows = (await read(page)) as Flag[];
+    /* ⚠️ MEASURED BEFORE THE RULING: two rows read "6 weeks overdue" beside "Nudge · from 19
+       Sept". Both were true — a passed estimate, and the agency's next window — and side by side
+       they state two moves at once, leaving the reader to work out which is being asked of them.
+       That is the opposite of what a flag is for. Both facts survive in the hover record. */
+    const both = rows.filter((r) => r.od > 0 && r.fut > 0);
+    expect(both.map((r) => `${r.name}: ${r.odText[0]} + ${r.futText[0]}`),
+      "a row states two instructions at once").toEqual([]);
+    /* both populations, or the claim is satisfied by a board that has neither kind */
+    expect(rows.filter((r) => r.od > 0).length, "no urgent flag — untested").toBeGreaterThan(0);
+    expect(rows.filter((r) => r.fut > 0).length, "no future flag — untested").toBeGreaterThan(0);
+  });
+
   test("⚠️ an overdue card ends at today and takes no end mark", async ({ page }) => {
     await openRoute(page, CAL, { width: 1440, height: 900 });
     const rows = (await read(page)) as Flag[];
-    /* the ref's rule: a card that runs to today has no dated future moment to mark. Rows whose
-       Urgency comes from a passed ESTIMATE still have their own future window, and keep theirs —
-       so the claim is about the owed ones, which is where `mark` must be zero. */
-    const owed = rows.filter((r) => r.sec === "over" && r.fut === 0);
-    expect(owed.length, "no owed row — untested").toBeGreaterThan(2);
-    for (const r of owed) {
-      expect(r.mark, `${r.name} is overdue and still carries an end mark`).toBe(0);
+    /* ⚠️ THE DISCRIMINATOR CHANGED WITH THE ONE-INSTRUCTION RULING, AND THE CLAIM DID NOT.
+       This used to select owed rows as "Urgent with no future flag"; suppressing future flags on
+       Urgent rows made that every Urgent row, including the passed-estimate ones — which DO have a
+       dated future window and correctly keep their mark. The claim was never about the flag: a card
+       that runs to TODAY has no dated future moment to mark. So the selector is now the card's own
+       right edge, which is what the claim is about. */
+    const atToday = await page.evaluate(() => {
+      const line = document.querySelector<HTMLElement>(".tl-todayline");
+      const x = line ? line.getBoundingClientRect().left : null;
+      const out: { name: string; marks: number }[] = [];
+      for (const c of document.querySelectorAll<HTMLElement>(".tl-p")) {
+        const r = c.getBoundingClientRect();
+        if (r.height < 1 || x == null || Math.abs(r.right - x) > 6) continue;
+        out.push({
+          name: c.querySelector(".tl-fnm")?.textContent ?? "?",
+          marks: c.querySelectorAll(".tl-tmark").length,
+        });
+      }
+      return out;
+    });
+    expect(atToday.length, "no card runs to today — untested").toBeGreaterThan(2);
+    for (const c of atToday) {
+      expect(c.marks, `${c.name} runs to today and still carries an end mark`).toBe(0);
     }
   });
 

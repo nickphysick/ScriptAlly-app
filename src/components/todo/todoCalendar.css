@@ -310,7 +310,10 @@
      against the ref's `0 1px 2px/.08` plus `0 5px 14px/.09`. The second layer is what makes a card
      an object, and it is the one that was missing. */
   --tl-frame-sh: 0 1px 2px rgba(58, 28, 20, .08), 0 5px 14px rgba(58, 28, 20, .09);
-  --tl-frame-sh-hover: 0 2px 4px rgba(58, 28, 20, .09), 0 12px 28px rgba(58, 28, 20, .16);
+  /* ⚠️ THE REF'S FOCUS SHADOW, WHICH IS DEEPER THAN ITS BASE HOVER. `.card:hover .frame` is
+     `.09/.16` and `data-focus="on"` deepens it to `.10/.18`; focus is on, so this is the one that
+     paints and the base hover value has no reader. One token, one value, one home. */
+  --tl-frame-sh-hover: 0 2px 4px rgba(58, 28, 20, .10), 0 14px 30px rgba(58, 28, 20, .18);
   --tl-frame-owed-bd: #e6c3b4;
   --tl-frame-owed-sh: 0 6px 16px rgba(58, 28, 20, .16);
   --tl-frame-quiet-bg: #fbf9f5;
@@ -422,6 +425,9 @@
      badge can be retuned without a second number to remember — the law this repo already records
      as "no element's position may be a literal another element owns". */
   --badge: 58px;
+  /* a past stage is shorter and its badge smaller — the ref's `.jc { height: 48px }` and 54px mark */
+  --tl-jc-h: 48px;
+  --tl-jc-badge: 54px;
   /* ⚠️ THE LEFT COLUMN IS THE NUMBER GUTTER PLUS THE BADGE'S OVERHANG, and it is derived rather
      than measured. The rail reserves exactly this much before its lane; the rows reserve the same
      as `.tl-gnums` (64px, fixed) plus `.tl-glanes`' padding (the overhang). The two agree because
@@ -958,12 +964,22 @@
 /* ⚠️ THE LIFT IS THE CARD'S AND THE SHADOW IS THE FRAME'S. A transform on the frame would move it
    inside a card that had not moved; a shadow on the card would fall outside the thing that draws
    the border it belongs to. */
-.tl-p:hover { transform: translateY(-50%) scale(1.004); z-index: 6; }
+/* ⚠️ THE REF'S `data-focus="on"` VALUES — 1.018 and a deeper lift, not 1.004.
+   A 0.4% scale is below the threshold at which a reader registers that anything moved: on a 500px
+   card it is two pixels of growth, which reads as a rendering artefact rather than as the card
+   coming forward. The ref brings it to 1.8% and deepens the shadow with it, so the card lifts off
+   the section rather than twitching on it. Nothing else changes — the pack is explicit, and the
+   ref's own "focus quietens the others" comment describes a rule it does not ship. */
+.tl-p { transition: transform .14s ease, width .15s cubic-bezier(.22,.8,.3,1), left .15s cubic-bezier(.22,.8,.3,1); }
+.tl-p:hover { transform: translateY(-50%) scale(1.018); z-index: 12; }
+.tl-p:hover { --frame-sh: var(--tl-frame-sh-hover); }
 /* ⚠️ THE HOVER SHADOW WAS DECLARED TWICE AND THE OTHER ONE WAS WINNING. This rule set the ref's
    two-layer lift; a second `.tl-p:hover .tl-frame` two hundred lines below set a single flat
    `0 3px 10px` — same specificity, later in the file, so the two-layer hover added in v58e never
    painted at all. The duplicate is deleted and this is now the only statement of it. */
-.tl-p:hover { --frame-sh: var(--tl-frame-sh-hover); }
+/* ⚠️ SUPERSEDED BY THE FOCUS BLOCK ABOVE, WHICH SETS THE REF'S DEEPER FOCUS SHADOW. Left as a
+   comment rather than a second declaration: two rules setting one token on one element is decided
+   by source order, which is the fault the token was introduced to end. */
 
 /* ⚠️ THE PILL IS THE ONLY COLOUR ON THE BOARD. Its five tones are whose-move, not status: pink is
    yours, sage is theirs, slate is a reminder, grey is a silence that ran out, and closed is an
@@ -1671,6 +1687,72 @@ button.tl-tchip { cursor: pointer; }
    ⚠️ AND THE MARK IS A CHILD OF THE CARD, ON ITS END EDGE. `right: -4px` straddles the edge, which
    only means anything if it moves with the card — as a sibling it would carry a second copy of the
    geometry, which is how the ring this replaces came to be swallowed by an opening card. */
+/* ══ PAST STAGES (v60, the ref's `.jc`) ══════════════════════════════════════════════════════
+ *
+ * ⚠️ THE SAME ANATOMY AS A LIVE CARD, SETTLED — NOT A LIVE CARD FADED. A dotted outline, no fill,
+ * no lift, its badge drained. Drawing history as a dimmed present tense is what makes a board's
+ * past read as unfinished work; a different TREATMENT says it is done.
+ *
+ * ⚠️ AND THE GAP AT EACH END IS THE BADGE'S. `--tl-jc-gap` is the ref's `G + MED` — the clearance
+ * plus the medallion — so consecutive stages never run one's badge into the next one's words. It
+ * is a `calc()` over `--badge`, not a literal, so retuning the badge moves the gap with it.
+ */
+.tl-jc {
+  --tl-jc-gap: calc(var(--badge) * 0.79 + 12px);
+  position: absolute; top: 50%; transform: translateY(-50%);
+  height: var(--tl-jc-h); z-index: 1; overflow: hidden;
+  background: transparent; border: 1.5px dotted var(--tl-ghost-bd); border-radius: 10px;
+  box-shadow: none;
+}
+.tl-jmed {
+  position: absolute; left: calc(var(--tl-jc-badge) * -0.37); top: 50%;
+  transform: translateY(-50%);
+  width: var(--tl-jc-badge); height: var(--tl-jc-badge);
+  display: flex; align-items: center; justify-content: center;
+  /* ⚠️ DRAINED, NOT REMOVED. The glyph still says which status the stage WAS; at 0.22 it reads as
+     a watermark on the record rather than as a mark asking to be acted on. */
+  opacity: .22; pointer-events: none;
+}
+.tl-jmed svg { width: var(--tl-jc-badge); height: var(--tl-jc-badge); transform: none; overflow: visible; }
+.tl-jbody {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  left: calc(var(--tl-jc-badge) * 0.66 + 10px);
+  max-width: calc(100% - var(--tl-jc-badge) * 0.66 - 20px);
+  display: flex; flex-direction: column; gap: 2px;
+  white-space: nowrap; overflow: hidden;
+}
+.tl-js { font-size: 12.5px; font-weight: 600; color: var(--tl-detail, #6f6055); line-height: 1.15; }
+/* ⚠️ THE SENTENCE IS INTER, NOT MONO UPPERCASE — the ref's own `.jd` under `data-past="dotted"`.
+   It is prose about what happened, and mono uppercase is the board's vocabulary for labels. */
+.tl-jd { font-family: inherit; font-size: 10px; letter-spacing: 0; text-transform: none;
+  color: var(--tl-muted); line-height: 1.2; }
+
+/* ══ THE IN-CARD TRAIL (v60, the ref's `trailBits`) ══════════════════════════════════════════
+ *
+ * ⚠️ THE FILL ENDS ON TODAY, TO THE PIXEL, AND THAT IS ARITHMETIC RATHER THAN A TOLERANCE. Its
+ * left is the same inset the words take, and its width is `100% × F − inset`, so its right edge
+ * lands at `100% × F` from the card's left — and `F` is today's fraction of the card's own date
+ * span. Nothing measures anything: the fraction is computed from the dates the card is drawn at.
+ *
+ * ⚠️ THE REF SUBTRACTS A FADE EXTENSION AND WE HAVE NONE. Its card is `calc(w% + 30px)` on a
+ * running wait, so it recovers the true span as `(100% - 30px)`; ours is `var(--w)` exactly — the
+ * dissolve is an overlay sitting INSIDE the card rather than an extension past its end date. So
+ * the term is absent here, deliberately, and its absence is the reason the fill still lands on
+ * today: adding the ref's 30px to an unextended card would push every trail 30px past its date.
+ *
+ * ⚠️ AND THE TONE IS THE SECTION'S. `--gtone` is set on the section container, so a trail cannot
+ * come to disagree with the section it is drawn in — one token, two readers.
+ */
+.tl-ctrack, .tl-ctrail {
+  position: absolute; bottom: 6px; height: 3px; border-radius: 2px;
+  left: calc(var(--badge) * 0.66 + 10px);
+  z-index: 3; pointer-events: none;
+}
+.tl-ctrack { background: rgba(58, 28, 20, .07); }
+.tl-ctrail { background: var(--gtone, #cdbfa8); }
+/* a card whose left edge dissolves starts its trail past the dissolve, as its words do */
+.tl-p.fadeL .tl-ctrack, .tl-p.fadeL .tl-ctrail { left: calc(var(--badge) * 1.0 + 18px); }
+
 /* ══ FLAGS (v60, the ref's `.nlab`) ════════════════════════════════════════════════════════════
  *
  * ⚠️ TWO TREATMENTS, AND THE QUIET ONE IS NOT THE LOUD ONE FADED. A FUTURE state — a nudge that
