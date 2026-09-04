@@ -536,6 +536,10 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
               <ManuscriptPromos
                 user={currentUser}
                 manuscript={ordered[0] ?? null}
+                /* ⚠️ THE WHOLE SHELF. The versions rule asks about the WRITER here, not one book —
+                   passing a single manuscript let one book's nine versions hide the pitch for three
+                   books that had none. */
+                manuscripts={ordered}
                 versions={versions}
                 onDismiss={(tile) => updateUserProfile({ todoPrefs: withTileDismissed(currentUser, tile) })}
                 onVersions={() => onNavigate?.("manuscripts", "Submission packages")}

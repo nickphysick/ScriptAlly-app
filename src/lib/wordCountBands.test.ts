@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, it, expect, vi } from "vitest";
-import { parseRange, unparseableRanges, bandFor, markerClass, markerFraction, axisFor } from "./wordCountBands";
+import { parseRange, unparseableRanges, bandFor, markerClass, markerFraction, axisFor, rangeLabel, axisTicks } from "./wordCountBands";
 import { CANONICAL_GENRES, GENERIC_WORD_COUNT_RANGE } from "./genres";
 
 describe("the word-count ranges are parsed, not copied", () => {
@@ -113,5 +113,59 @@ describe("a stored genre resolves the way the rest of the app resolves it", () =
 
   it("reads an alias too", () => {
     expect(bandFor("litfic")).toEqual(bandFor("literary-fiction"));
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ THE CHART WAS A DECORATION WITHOUT THESE. Bands with no axis and no figures cannot be read:
+   you cannot get a number off them, which is the only thing a reference is for.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+describe("the chart states figures, not just bars", () => {
+  it("labels each band with its range in the writer's units", () => {
+    expect(rangeLabel({ label: "x", min: 55000, max: 90000, generic: false })).toBe("55–90k");
+    expect(rangeLabel({ label: "x", min: 90000, max: 120000, generic: false })).toBe("90–120k");
+  });
+
+  /** ⚠️ ROUND TICKS A READER RECOGNISES, not one per band wherever the genres happen to fall. */
+  it("puts an axis across the drawn range, on round numbers", () => {
+    const ticks = axisTicks({ min: 0, max: 150000 });
+    expect(ticks.length).toBeGreaterThanOrEqual(3);
+    for (const t of ticks) expect(t % 25000, `${t} is not a round tick`).toBe(0);
+    expect(Math.max(...ticks)).toBeLessThanOrEqual(150000);
+  });
+
+  /** ⚠️ ROUGHLY FOUR LABELS. Seven ticks across a tile a third of a page wide is a crowded ruler. */
+  it("widens the interval rather than crowding the axis", () => {
+    for (const max of [100000, 150000, 300000, 700000]) {
+      const n = axisTicks({ min: 0, max }).length;
+      expect(n, `${max} drew ${n} ticks`).toBeLessThanOrEqual(5);
+      expect(n, `${max} drew too few ticks to be a scale`).toBeGreaterThanOrEqual(3);
+    }
+    /* The scale the brief names, for the everyday case. */
+    expect(axisTicks({ min: 0, max: 150000 })).toEqual([0, 50000, 100000, 150000]);
+  });
+
+  it("returns no ticks for a degenerate axis rather than looping", () => {
+    expect(axisTicks({ min: 10, max: 10 })).toEqual([]);
+  });
+});
+
+describe("the axis starts where a reader counts from", () => {
+  /**
+   * ⚠️ FROM ZERO. Padding around the data gave 64k–128k and ticks at 75/100/125 — arithmetically
+   * fine and unreadable: a band starting two-thirds along a track that begins at 64k tells a reader
+   * the opposite of the truth about how long the book is.
+   */
+  it("begins at 0 and ends on a round tick", () => {
+    const axis = axisFor([{ label: "x", min: 70000, max: 100000, generic: false }], 92000);
+    expect(axis.min).toBe(0);
+    expect(axis.max % 25000).toBe(0);
+    expect(axis.max).toBeGreaterThanOrEqual(100000);
+  });
+
+  it("gives a readable scale rather than one tick per band", () => {
+    const ticks = axisTicks(axisFor([{ label: "x", min: 70000, max: 120000, generic: false }], 92000));
+    expect(ticks).toContain(50000);
+    expect(ticks).toContain(100000);
   });
 });

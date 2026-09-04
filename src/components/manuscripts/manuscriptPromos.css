@@ -2,7 +2,12 @@
  * ══ THE LANDING'S PROMO TILES ═════════════════════════════════════════════════════════════════
  * Ref: design-refs/manuscripts-promos.html
  */
-.mpr { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 22px; }
+/**
+ * ⚠️ THE GRID SIZES TO ITS TILES. `repeat(3, 1fr)` left a hole whenever fewer than three rendered —
+ * and for a Pro user with versions that is the PERMANENT state, two tiles and a gap for good. The
+ * count is set inline by the component, so the row fills whatever is on it.
+ */
+.mpr { display: grid; grid-template-columns: repeat(var(--mpr-count, 3), 1fr); gap: 16px; margin-top: 22px; }
 @media (max-width: 1000px) { .mpr { grid-template-columns: 1fr; } }
 
 .mpr-tile {
@@ -85,11 +90,24 @@
 
 /* ── the word-count bands ─────────────────────────────────────────────────────────────────── */
 .wcb { width: 100%; display: flex; flex-direction: column; gap: 7px; }
-.wcb-row { display: grid; grid-template-columns: 58px 1fr; align-items: center; gap: 8px; }
+/**
+ * ⚠️ THREE COLUMNS, AND THE LABEL ONE IS WIDE ENOUGH TO READ. At 58px `LITERARY F…` truncated at
+ * twelve characters, which names nothing — and the range column did not exist at all, so the chart
+ * was bars with no figures beside them.
+ */
+.wcb-row { display: grid; grid-template-columns: 84px 1fr 52px; align-items: center; gap: 7px; }
 .wcb-label {
-  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: .08em;
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: .06em;
   text-transform: uppercase; color: var(--shell-muted);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/** ⚠️ THE WRITER'S OWN ROW IS MARKED BY WEIGHT AND INK, never by renaming it "Yours". */
+.wcb-row--yours .wcb-label { color: var(--ink); font-weight: 600; }
+.wcb-row--yours .wcb-range { color: var(--ink); }
+/** The figures — the thing that makes this a reference rather than a decoration. */
+.wcb-range {
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: .04em;
+  color: var(--shell-muted); text-align: right; white-space: nowrap;
 }
 .wcb-track { position: relative; height: 9px; border-radius: 99px; background: #eae3d7; }
 .wcb-fill { position: absolute; top: 0; bottom: 0; border-radius: 99px; background: #d0d6cc; }
@@ -104,6 +122,22 @@
  * verdict, and this chart reports. `markerClass()` takes no argument for the same reason.
  */
 .wcb-marker { position: absolute; top: -3px; width: 2px; height: 15px; background: var(--burg); }
+/**
+ * ⚠️ THE AXIS SITS UNDER THE TRACKS AND SHARES THEIR COLUMN, so a tick lands on the same x as the
+ * band edge above it. Offset by the label column's width plus its gap — stated as a calc from the
+ * row's own template rather than a second copy of those numbers.
+ */
+.wcb-axis {
+  position: relative;
+  height: 12px;
+  margin: 5px 52px 0 91px;
+  border-top: 1px solid var(--hair);
+}
+.wcb-tick {
+  position: absolute; top: 2px; transform: translateX(-50%);
+  font-family: var(--font-mono); font-size: 7px; letter-spacing: .05em; color: var(--shell-muted);
+}
+
 .wcb-you {
   position: absolute; top: -16px; transform: translateX(-50%);
   font-family: var(--font-mono); font-size: 7px; letter-spacing: .08em; color: var(--burg);

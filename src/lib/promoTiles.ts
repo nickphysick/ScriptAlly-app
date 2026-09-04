@@ -58,24 +58,39 @@ export const withTileDismissed = (
  * that has never had one, on the strength of a different book entirely.
  */
 export const versionsTileShown = (
-  manuscriptId: string | null,
+  manuscripts: Pick<Manuscript, "id">[],
   versions: Pick<ManuscriptVersion, "manuscriptId">[],
+  manuscriptId?: string | null,
 ): boolean => {
-  if (!manuscriptId) return versions.length < 2;
-  return versions.filter((v) => v.manuscriptId === manuscriptId).length < 2;
+  const usesVersions = (id: string) => versions.filter((v) => v.manuscriptId === id).length >= 2;
+  /* One book in view: that book's own count, which is what "the manuscript" means there. */
+  if (manuscriptId) return !usesVersions(manuscriptId);
+  /**
+   * ⚠️ ON THE SHELF THERE IS NO "THIS MANUSCRIPT", and the first version of this read
+   * `manuscripts[0]` — so ONE book with nine versions hid the pitch for a whole shelf of books
+   * that had none. Measured on the harness account: seed-ms-1 had 9, the other three had 0, and
+   * the tile the whole redesign exists to surface was the one tile not on screen.
+   *
+   * ⚠️ SO THE SHELF ASKS ABOUT THE WRITER, NOT A BOOK: the pitch still has an audience while ANY
+   * book is not using versions. It goes when every book is — which is the point of "a Pro user
+   * with three versions doesn't need the pitch", read across a shelf rather than through one book.
+   */
+  if (!manuscripts.length) return true;
+  return manuscripts.some((m) => !usesVersions(m.id));
 };
 
 /** The tiles to render, in the ref's order, after both rules. */
 export const visibleTiles = (args: {
   user: Pick<User, "todoPrefs"> | null | undefined;
-  manuscriptId: string | null;
+  manuscripts: Pick<Manuscript, "id">[];
   versions: Pick<ManuscriptVersion, "manuscriptId">[];
+  manuscriptId?: string | null;
 }): PromoTile[] => {
   const gone = new Set(dismissedTiles(args.user));
   const order: PromoTile[] = ["versions", "wordcount", "packages"];
   return order.filter((t) =>
-    t === "versions" ? versionsTileShown(args.manuscriptId, args.versions) : !gone.has(t));
+    t === "versions"
+      ? versionsTileShown(args.manuscripts, args.versions, args.manuscriptId)
+      : !gone.has(t));
 };
 
-/** Unused today; kept so the type is exercised rather than asserted. */
-export type { Manuscript };

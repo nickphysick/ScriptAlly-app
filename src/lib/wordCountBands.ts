@@ -89,13 +89,51 @@ export const markerFraction = (wordCount: number, axisMin: number, axisMax: numb
   return Math.min(1, Math.max(0, (wordCount - axisMin) / (axisMax - axisMin)));
 };
 
-/** The shared axis: wide enough for every band drawn, plus the writer's own count. */
+/**
+ * ⚠️ THE RANGE, IN THE WRITER'S UNITS. `55–90k` beside each row is what makes the chart a
+ * REFERENCE: three bars and a stick with no figures is a decoration — you cannot read a number off
+ * it, which is the only thing anybody wants from it.
+ */
+export const rangeLabel = (band: Band): string => {
+  const k = (n: number) => (n % 1000 === 0 ? `${n / 1000}` : (n / 1000).toFixed(1));
+  return `${k(band.min)}–${k(band.max)}k`;
+};
+
+/**
+ * ⚠️ AND AN AXIS, because a band without a scale says nothing about how long a book is. Round ticks
+ * at a readable interval across the drawn range — never one per band, which would put the ticks
+ * wherever the genres happen to fall rather than where a reader counts.
+ */
+export const axisTicks = (axis: { min: number; max: number }): number[] => {
+  const span = axis.max - axis.min;
+  if (span <= 0) return [];
+  /**
+   * ⚠️ ROUGHLY FOUR LABELS, NOT AS MANY AS FIT. A 150k axis at 25k gives SEVEN ticks across a tile
+   * a third of a page wide, which is a crowded ruler rather than a scale — 0 / 50k / 100k / 150k is
+   * what a reader recognises. The step is chosen from the span rather than fixed, so a very long
+   * book widens the interval instead of adding labels.
+   */
+  const step = [25000, 50000, 100000, 200000].find((c) => span / c <= 4) ?? 200000;
+  const ticks: number[] = [];
+  for (let t = Math.ceil(axis.min / step) * step; t <= axis.max; t += step) ticks.push(t);
+  return ticks;
+};
+
+/**
+ * The shared axis.
+ *
+ * ⚠️ IT STARTS AT ZERO, AND THE FIRST VERSION DID NOT. Padding around the data gave an axis from
+ * roughly 64k to 128k and ticks at 75k / 100k / 125k — arithmetically fine and unreadable: a reader
+ * comparing book lengths counts from nothing, so a band starting two-thirds along a track that
+ * starts at 64k tells them the opposite of the truth about how long the book is.
+ *
+ * ⚠️ AND THE TOP ROUNDS UP TO A TICK, so the last label sits at the end of the axis rather than
+ * floating short of it.
+ */
 export const axisFor = (bands: Band[], wordCount?: number): { min: number; max: number } => {
-  const lows = bands.map((b) => b.min).concat(wordCount ? [wordCount] : []);
   const highs = bands.map((b) => b.max).concat(wordCount ? [wordCount] : []);
-  if (!lows.length) return { min: 0, max: 1 };
-  /* A little air at each end so a band never touches the track's edge. */
-  const min = Math.min(...lows), max = Math.max(...highs);
-  const pad = Math.max(5000, (max - min) * 0.08);
-  return { min: Math.max(0, min - pad), max: max + pad };
+  if (!highs.length) return { min: 0, max: 1 };
+  const raw = Math.max(...highs) * 1.06;
+  const step = raw > 320000 ? 100000 : raw > 160000 ? 50000 : 25000;
+  return { min: 0, max: Math.ceil(raw / step) * step };
 };

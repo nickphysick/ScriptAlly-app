@@ -849,3 +849,22 @@
   letter-spacing: 0.09em;
   color: var(--shell-muted);
 }
+
+/**
+ * ⚠️ THE UNWRITTEN SYNOPSIS IS ONE LINE. The bordered box reserved ~250px for nothing, which made
+ * the emptiest page in the app its tallest. The invitation is a control, not a placeholder.
+ */
+.msp-synempty { margin: 6px 0 0; font-size: 14.5px; font-style: italic; color: var(--shell-muted); }
+.msp-synstart {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--burg);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  font-style: normal;
+  cursor: pointer;
+}
+.msp-synstart:hover { text-decoration: underline; }

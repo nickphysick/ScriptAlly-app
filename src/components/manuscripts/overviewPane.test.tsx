@@ -165,7 +165,38 @@ describe("the synopsis", () => {
 
   it("has its own placeholder, distinct from the pitch's", () => {
     expect(SYNOPSIS_PLACEHOLDER).not.toBe(PITCH_PLACEHOLDER);
-    expect(pane({ synopsis: null, synopsisMeta: null })).toContain('aria-label="Synopsis"');
+    /* ⚠️ RETARGETED TO THE WRITTEN STATE. An UNWRITTEN synopsis no longer renders the editor at all
+       — see below — so the placeholder's home is the box a writer has opened or filled. */
+    expect(pane({ synopsis: "Once upon a time.", synopsisMeta: "4 words" }))
+      .toContain('aria-label="Synopsis"');
+  });
+
+  /**
+   * ⚠️ AN UNWRITTEN SYNOPSIS IS ONE LINE, NOT A BOX. The bordered container — 24px of padding round
+   * a four-row textarea inside a 220px clamp — reserved roughly a quarter of the screen for nothing,
+   * so the emptiest page in the app was its tallest. An empty container is not an invitation.
+   */
+  it("renders one line and an invitation when nothing is written", () => {
+    const html = pane({ synopsis: null, synopsisMeta: null });
+    expect(html).toContain("Nothing written yet.");
+    expect(html).toContain("Write it");
+    expect(html, "the empty state still draws the box").not.toContain("msp-synbox");
+    expect(html, "the empty state still mounts the editor").not.toContain('aria-label="Synopsis"');
+  });
+
+  /** ⚠️ AND THE INVITATION IS A CONTROL, so nothing about it can be saved as the field's value. */
+  it("offers the invitation as a button, never as placeholder text", () => {
+    const html = pane({ synopsis: null, synopsisMeta: null });
+    expect(html).toMatch(/<button[^>]*class="msp-synstart"/);
+    expect(html, "the prompt reached a field's value").not.toContain('value="Write it');
+  });
+
+  /** A written synopsis gets the box, the clamp and the expander — unchanged. */
+  it("draws the box once something is written", () => {
+    const html = pane({ synopsis: "Once upon a time.", synopsisMeta: "4 words" });
+    expect(html).toContain("msp-synbox");
+    expect(html).toContain("msp-synclamp");
+    expect(html).not.toContain("Nothing written yet.");
   });
 });
 

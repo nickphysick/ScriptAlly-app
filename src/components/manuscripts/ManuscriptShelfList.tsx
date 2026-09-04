@@ -17,7 +17,14 @@
 import React from "react";
 import { Manuscript, Query } from "../../types";
 import { bookFigures } from "../../lib/bookFigures";
+import manuscriptIcon from "../../assets/shell/manuscript-icon.png";
 import "./manuscriptShelfList.css";
+
+/**
+ * ⚠️ A SHELVED BOOK GETS NO DOT. `StatusDot` draws the QUERY pipeline; "Shelved" is a manuscript
+ * lifecycle state and is not in it, so a dot there would be the wrong glyph for the wrong system.
+ */
+const isShelved = (m: Manuscript): boolean => m.shelved === true || m.status === "Shelved";
 
 export interface ManuscriptShelfListProps {
   manuscripts: Manuscript[];
@@ -61,16 +68,37 @@ export const ManuscriptShelfList: React.FC<ManuscriptShelfListProps> = ({
             <tr key={m.id}>
               <td>
                 <span className="msl-name">
-                  {/* ⚠️ THE COVER IS DRAWN AS A BOOK — a spine shadow down the left edge and a
-                      page-edge radius on the right. A flat rectangle reads as a missing image. */}
-                  <span className="msl-cover" aria-hidden="true" />
+                  {/**
+                    * ⚠️ THE COVER IS DRAWN AS A BOOK — a spine shadow down the left edge and a
+                    * page-edge radius on the right — AND IT CARRIES THE GLYPH. Without it the shape
+                    * was right and the face was a blank sage rectangle, which is the same defect the
+                    * carousel's artwork block had: an empty coloured box reads as a failed image
+                    * rather than as a book awaiting a cover. Same asset the sidebar and plate use.
+                    */}
+                  <span className="msl-cover" aria-hidden="true">
+                    <img className="msl-coverglyph" src={manuscriptIcon} alt="" />
+                  </span>
                   <span className="msl-names">
                     <span className="msl-title">{m.title}</span>
                     <span className="msl-byline">{byline(genresOf(m), m.wordCount)}</span>
                   </span>
                 </span>
               </td>
-              <td className="msl-status">{statusOf(m)}</td>
+              {/**
+                * ⚠️ A PLAIN DOT, NOT `StatusDot`, AND THAT IS NOT A SHORTCUT. `StatusDot` draws the
+                * QUERY pipeline — Queried, Partial Requested, Rejected — and a manuscript's status
+                * is a different system entirely: Drafting, Revising, Querying, Shelved. Rendering a
+                * query glyph beside a manuscript state would be the right component for the wrong
+                * thing, which is worse than no glyph.
+                *
+                * ⚠️ IT MATCHES `ManuscriptPlate`'s OWN PILL, which has drawn `.msv-dt` for exactly
+                * this all along — so the shelf and the book agree about what a manuscript status
+                * looks like rather than inventing a second appearance.
+                */}
+              <td className="msl-status">
+                <span className={`msl-dot${isShelved(m) ? " msl-dot--shelved" : ""}`} aria-hidden="true" />
+                <span>{statusOf(m)}</span>
+              </td>
               <td className="msl-num">{val("sent")}</td>
               <td className="msl-num">{val("responses")}</td>
               <td className="msl-last">{val("last")}</td>

@@ -56,6 +56,8 @@ export const OverviewPane: React.FC<OverviewPaneProps> = ({
 }) => {
   /* Component state, deliberately: a clamp is a reading convenience, not a preference to persist. */
   const [synOpen, setSynOpen] = useState(false);
+  /* Component state: whether the writer has asked for the editor. Not a preference — it resets. */
+  const [writing, setWriting] = useState(false);
   return (
   <div className="msp-ovgrid">
     <div className="msp-ovmain">
@@ -79,6 +81,25 @@ export const OverviewPane: React.FC<OverviewPaneProps> = ({
 
     <div className="msp-blk">
       <SectionHeader title="The synopsis" meta={synopsisMeta ?? "Not written yet"} />
+      {/**
+        * ⚠️ AN UNWRITTEN SYNOPSIS IS ONE LINE, NOT A BOX. It used to render the full bordered
+        * container — 24px of padding round a four-row textarea inside a 220px clamp — so a book
+        * with no synopsis reserved roughly a quarter of the screen for nothing, and the emptiest
+        * page in the app was its tallest. An empty container is not an invitation; it is furniture
+        * waiting for content that may never arrive.
+        *
+        * ⚠️ AND THE INVITATION IS A CONTROL, NOT A PLACEHOLDER. `Write it` opens the editor; the
+        * prompt is never the field's value, so there is nothing here a writer could save by
+        * clicking in and out again — the fault `InlineText` exists to foreclose.
+        */}
+      {!synopsis && !writing ? (
+        <p className="msp-synempty">
+          Nothing written yet.{" "}
+          <button type="button" className="msp-synstart" onClick={() => setWriting(true)}>
+            Write it ›
+          </button>
+        </p>
+      ) : (
       <div className="msp-synbox">
         {/* ⚠️ CLAMPED WITH A MASK, NOT A CROP — the fade says there is more rather than ending the
             text at an arbitrary line. Expanding is the writer's, and it is remembered nowhere:
@@ -99,6 +120,7 @@ export const OverviewPane: React.FC<OverviewPaneProps> = ({
           </button>
         )}
       </div>
+      )}
       <p className="msp-footnote">{SYNOPSIS_NOTE}</p>
     </div>
     </div>

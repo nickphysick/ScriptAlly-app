@@ -114,3 +114,17 @@
   white-space: nowrap;
   border: 0;
 }
+
+/** The glyph inside the cover — a stand-in, muted, so the block reads as a book awaiting a cover. */
+.msl-cover { display: grid; place-items: center; }
+.msl-coverglyph { width: 22px; height: 22px; object-fit: contain; opacity: 0.42; }
+/**
+ * The dot sits with the word, not above it.
+ *
+ * ⚠️ THE MANUSCRIPT-STATUS DOT, matching `ManuscriptPlate`'s `.msv-dt`. It is deliberately NOT
+ * `StatusDot`: that glyph draws the query pipeline, and a manuscript's status is another system.
+ */
+.msl-status { display: flex; align-items: center; gap: 7px; }
+.msl-dot { flex: none; width: 7px; height: 7px; border-radius: 999px; background: var(--burg); }
+/** A shelved book is out of play, and the dot says so by going quiet rather than by disappearing. */
+.msl-dot--shelved { background: var(--shell-muted); }
