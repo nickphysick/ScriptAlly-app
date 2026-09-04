@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Date on the card</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--label:#9c8878;--hairline:#ece0d2;--pink-border:#e8c8bc;
+    --t-you-a:#f5e3db;--t-you-b:#efd7cc;--t-agent-a:#dce0d9;--t-agent-b:#d0d6cc;--t-offer-a:#dde5ec;--t-offer-b:#d1dbe4;--t-closed-a:#e9e6e1;--t-closed-b:#dfdcd6}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:#3a1c14;font-size:13px;padding:36px 44px 90px}
+  h1{font-family:'Playfair Display',serif;font-weight:500;font-size:30px;color:var(--ink)}
+  .lede{font-family:'Playfair Display',serif;font-style:italic;font-size:14.5px;color:#6a5a50;margin:6px 0 20px;max-width:760px;line-height:1.5}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  .seg{display:inline-flex;background:#fff;border:1px solid #e0d5c8;border-radius:10px;padding:3px;margin:0 0 14px}
+  .seg button{border:none;background:transparent;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#6a5a50;padding:8px 15px;border-radius:7px}
+  .seg button.on{background:#f5e2da;color:#3a1c14}
+  .desc{color:#6a5a50;max-width:760px;line-height:1.55;margin-bottom:22px;min-height:40px}
+  .desc b{font-weight:500;color:#3a1c14}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:20px}
+  .card{background:#fff;border-radius:14px;cursor:pointer;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09);--band-a:#fdfaf5;--band-b:#fdfaf5}
+  .band{display:flex;align-items:center;gap:10px;padding:13px 20px;border-bottom:.5px solid rgba(0,0,0,.06);border-radius:14px 14px 0 0;background:linear-gradient(135deg,var(--band-a),var(--band-b))}
+  .card.sand{--band-a:#fdfaf5;--band-b:#fdfaf5}.card.sand .band{border-bottom:.5px solid #e4d9cb}
+  .card.you{--band-a:var(--t-you-a);--band-b:var(--t-you-b)}
+  .card.agent{--band-a:var(--t-agent-a);--band-b:var(--t-agent-b)}
+  .card.offer{--band-a:var(--t-offer-a);--band-b:var(--t-offer-b)}
+  .card.closed{--band-a:var(--t-closed-a);--band-b:var(--t-closed-b)}
+  .band .word{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink)}
+  .band .r{margin-left:auto;color:#6a5a50}
+  .body{padding:20px 20px 18px}
+  .who{display:flex;align-items:center;gap:15px}
+  .chip{width:48px;height:48px;border-radius:50%;background:var(--parchment);box-shadow:0 1px 2px rgba(58,28,20,.08),0 3px 8px rgba(58,28,20,.10);border:.5px solid #e6dccf;color:var(--ink);flex:none;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.04em}
+  .nm{font-family:'Playfair Display',serif;font-weight:500;font-size:20px;color:var(--ink);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#6a5a50;margin-top:4px}
+  .fact{margin-top:18px;padding-top:15px;border-top:.5px solid var(--hairline);display:flex;align-items:flex-end;gap:14px}
+  .fact .txt{flex:1;min-width:0}
+  .fact .s{font-size:12px;line-height:1.5;display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden}
+  .fact .s b{font-weight:500}
+  .fact .m{color:var(--label);margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mk1{display:inline-flex;align-items:center;justify-content:center;flex:none;width:16px;height:16px;border-radius:50%;border:1.4px solid var(--ink);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--ink);line-height:1}
+  .mats{display:inline-flex;gap:4px;flex:none}
+  .mats .ic{width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;color:#6a5a50;border:.5px solid #e6dccf;background:var(--parchment)}
+  .mats .ic.off{opacity:.28}
+  .dot{flex:none}
+
+  /* calendar leaf */
+  .leaf{width:46px;border-radius:7px;background:#fff;border:.5px solid #dccfc0;box-shadow:0 1px 2px rgba(58,28,20,.06),0 3px 8px rgba(58,28,20,.08);overflow:hidden;text-align:center;flex:none;position:relative}
+  .leaf .mo{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);padding:4px 0 3px;background:linear-gradient(135deg,var(--band-a),var(--band-b));border-bottom:.5px solid rgba(0,0,0,.08)}
+  .card.sand .leaf .mo{background:#f3ece2}
+  .leaf .dy{font-family:'Playfair Display',serif;font-size:19px;color:var(--ink);line-height:1;padding:6px 0 5px}
+  .leaf .cap{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);padding-bottom:5px}
+  .leaf::before,.leaf::after{content:'';position:absolute;top:-2px;width:3px;height:6px;border-radius:2px;background:#cdbfae}
+  .leaf::before{left:12px}.leaf::after{right:12px}
+  .leaf.ghost{border-style:dashed;background:transparent;box-shadow:none}
+  .leaf.ghost .mo{background:transparent;border-bottom-style:dashed}
+  .leaf.ghost .dy{color:#6a5a50}
+  .leaf.sm{width:42px}.leaf.sm .dy{font-size:17px;padding:5px 0 4px}
+
+  /* A: leaf beside name */
+  .A .who .leaf{margin-left:auto}
+  /* B: two leaves in fact row */
+  .B .fact{align-items:center}
+  .B .leaves{display:flex;align-items:center;gap:8px;flex:none}
+  .B .leaves .arrow{color:#cdbfae;font-size:12px}
+  /* C: typographic date */
+  .C .who .tdate{margin-left:auto;text-align:right;flex:none}
+  .C .tdate .d{font-family:'Playfair Display',serif;font-size:26px;color:var(--ink);line-height:1}
+  .C .tdate .m{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);margin-top:3px}
+  /* D: leaf as the left mark, chip moves into band? no — leaf replaces chip position, chip shrinks into band right */
+  .D .band .chip{width:26px;height:26px;font-size:9px;box-shadow:none;margin-left:auto}
+  .D .band .r{margin-left:0}
+  .D .band .chip{margin-left:auto}
+  .D .who .leaf{width:52px}.D .who .leaf .dy{font-size:22px}
+
+  .rec{margin-top:36px;max-width:780px;line-height:1.6;color:#4a3a30}
+</style>
+</head>
+<body>
+<h1>Making more of the date</h1>
+<div class="lede">A calendar leaf: a tear-off page with the month in the card's own band tint, the day in Playfair, and two binder pins. Four placements.</div>
+
+<div class="seg" id="seg">
+  <button class="on" data-v="A">A · Leaf by the name</button>
+  <button data-v="B">B · Sent → expected</button>
+  <button data-v="C">C · Typographic</button>
+  <button data-v="D">D · Leaf as the mark</button>
+</div>
+<div class="desc" id="desc"></div>
+<div class="grid" id="grid"></div>
+
+<div class="rec">
+  <p><b>My pick: A.</b> One leaf, right of the name block, carrying the date that defines the card — sent for anything with the agent, requested for anything with you, received for offers, closed for closed. The month strip picks up the band tint so the leaf belongs to its card, and the fact line loses the date and gains a little room: "Reply expected by 23 Sept · 3 weeks waiting". It's a real object on the card without competing with the chip.</p>
+  <p style="margin-top:8px">B is the most informative — sent and expected as two leaves with an arrow — but it puts the calendar on the wrong side of the rule, crowds the materials cluster, and the expected date is a derivation, not an event; giving it a leaf makes it look recorded. C is quiet and cheap and would do if you find the leaf too illustrative. D is the boldest — the leaf becomes the card's mark and the monogram shrinks into the band — but that demotes the agent, and the agent is who the card is about.</p>
+</div>
+
+<script>
+const B="#7c3a2a",P="#f5e2da",SG="#8a9e88",SGD="#4c6249",SGC="#e2e7e0",G="#b8aa9a";
+function dot(status,s=24){
+  const c=s/2,r=s/2-2;
+  const ring=(col,dash)=>`<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${col}" stroke-width="1.6" ${dash?'stroke-dasharray="2.6 2.8"':''}/>`;
+  const half=col=>`<path d="M ${c} ${c-r} A ${r} ${r} 0 0 1 ${c} ${c+r}" fill="none" stroke="${col}" stroke-width="3.2"/>`;
+  const out=`<path d="M ${c-4.5} ${c} h7.5 M ${c+0.8} ${c-2.8} l2.8 2.8 -2.8 2.8" stroke="${B}" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const inn=`<path d="M ${c+4.5} ${c} h-7.5 M ${c-0.8} ${c-2.8} l-2.8 2.8 2.8 2.8" stroke="${SGD}" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const f=col=>`<circle cx="${c}" cy="${c}" r="${r}" fill="${col}"/>`;
+  const m={"Queried":f(P)+ring(B)+out,"Partial Requested":f(SGC)+ring("#c3ccbf")+half(SG)+inn,"Full Sent":f(P)+ring(B)+`<circle cx="${c}" cy="${c}" r="${r-2.6}" fill="none" stroke="${B}" stroke-width="1"/>`+out,
+    "Offer":f(B)+`<path d="M ${c-4} ${c} l2.7 2.9 5-5.6" stroke="#fdfaf5" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+    "Closed":ring(G)+`<path d="M ${c-3.2} ${c-3.2} l6.4 6.4 M ${c+3.2} ${c-3.2} l-6.4 6.4" stroke="${G}" stroke-width="1.7" stroke-linecap="round"/>`};
+  return `<svg class="dot" width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">${m[status]}</svg>`;
+}
+const ini=n=>n.split(/[\s-]+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+const Q=[
+ {name:"Harriet Vane-Coe",agency:"Stillwater Reps",status:"Queried",tone:"sand",turn:"With the agent",d:["Aug","12","sent"],e:["Sep","23"],s1:"Reply expected by <b>23 Sept</b>",s2:"Sent 12 Aug · reply expected by <b>23 Sept</b>",m:"3 weeks waiting",mats:[1,1,1,0]},
+ {name:"Jonathan Marsh",agency:"The Marsh Agency",status:"Partial Requested",tone:"you",turn:"With you",d:["Aug","22","requested"],e:null,s1:"Partial — <b>not yet sent</b>",s2:"Partial requested 22 Aug — <b>not yet sent</b>",m:"13 days since request",mats:[1,0,1,0]},
+ {name:"William Tan",agency:"Foxglove Literary",status:"Queried",tone:"sand",turn:"With the agent",od:1,d:["Jul","29","sent"],e:["Sep","9"],s1:"Reply was expected by 9 Sept — <b>12 days past</b>",s2:"Reply was expected by 9 Sept — <b>12 days past</b>",m:"8 weeks waiting · nudge available",mats:[1,1,1,1]},
+ {name:"Daniel O'Rourke",agency:"Inkwell & Stone",status:"Full Sent",tone:"agent",turn:"With the agent",d:["Aug","14","sent"],e:["Oct","9"],s1:"Reply expected by <b>9 Oct</b>",s2:"Full sent 14 Aug · reply expected by <b>9 Oct</b>",m:"3 weeks waiting",mats:[1,1,1,0]},
+ {name:"Tom Ellery",agency:"Curtis Vane",status:"Offer",tone:"offer",turn:"Offer",d:["Aug","29","received"],e:null,s1:"<b>Awaiting your decision</b>",s2:"Offer received 29 Aug — <b>awaiting your decision</b>",m:"6 days since offer",mats:[1,1,1,0]},
+ {name:"Marcus Reed",agency:"Hartley & Co",status:"Closed",tone:"closed",turn:"Closed",d:["Apr","20","closed"],e:null,s1:"Pass after full",s2:"Closed 20 Apr — pass after full",m:"replied after 11 weeks",mats:[1,0,1,0]},
+];
+const IC=[`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>`,
+ `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 10h16M4 14h10M4 18h7"/></svg>`,
+ `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>`,
+ `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12l-8.5 8.5a5 5 0 01-7-7L14 5a3.3 3.3 0 014.7 4.7L10.5 18a1.7 1.7 0 01-2.4-2.4L15 8.5"/></svg>`];
+const mats=q=>`<span class="mats">${IC.map((i,k)=>`<span class="ic ${q.mats[k]?'':'off'}">${i}</span>`).join("")}</span>`;
+const leaf=(d,cls="")=>`<div class="leaf ${cls}"><div class="mo">${d[0]}</div><div class="dy">${d[1]}</div>${d[2]?`<div class="cap">${d[2]}</div>`:""}</div>`;
+const DESC={
+ A:`<b>Leaf by the name.</b> One calendar leaf right of the name block, for the date that defines the card: sent, requested, received, or closed. The month strip takes the band tint (parchment-grey for Queried). The fact line drops the date it no longer needs.`,
+ B:`<b>Sent → expected.</b> Two smaller leaves in the fact row — sent, then the expected reply as a dashed "ghost" leaf — with the sentence to their left. Shows the window as a span.`,
+ C:`<b>Typographic.</b> No illustration: the day as a 26px Playfair numeral with a mono month beneath, right of the name. The quietest way to make the date bigger.`,
+ D:`<b>Leaf as the mark.</b> The leaf takes the chip's place on the left; the monogram shrinks to 26px and moves into the band. Date-first cards.`,
+};
+function render(v){
+  document.getElementById("desc").innerHTML=DESC[v];
+  const g=document.getElementById("grid"); g.className="grid "+v;
+  g.innerHTML=Q.map(q=>{
+    const mk=q.od?'<span class="mk1">!</span>':'';
+    const bandR=v==="D"?`<span class="r mono">${q.turn}</span><span class="chip">${ini(q.name)}</span>`:`<span class="r mono">${q.turn}</span>`;
+    const band=`<div class="band">${dot(q.status)}<span class="word">${q.status}</span>${bandR}</div>`;
+    const nameblk=`<div style="min-width:0;flex:1"><div class="nm">${q.name}</div><div class="ag">${q.agency}</div></div>`;
+    let who,fact;
+    if(v==="A"){ who=`<div class="who"><div class="chip">${ini(q.name)}</div>${nameblk}${leaf(q.d)}</div>`; fact=`<div class="fact"><div class="txt"><div class="s">${mk}<span>${q.s1}</span></div><div class="m mono">${q.m}</div></div>${mats(q)}</div>`; }
+    else if(v==="B"){ who=`<div class="who"><div class="chip">${ini(q.name)}</div>${nameblk}</div>`; fact=`<div class="fact"><div class="txt"><div class="s">${mk}<span>${q.s1}</span></div><div class="m mono">${q.m}</div></div><div class="leaves">${leaf(q.d,"sm")}${q.e?`<span class="arrow">→</span>${leaf(q.e,"sm ghost")}`:""}</div></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px">${mats(q)}</div>`; }
+    else if(v==="C"){ who=`<div class="who"><div class="chip">${ini(q.name)}</div>${nameblk}<div class="tdate"><div class="d">${q.d[1]}</div><div class="m">${q.d[0]} · ${q.d[2]}</div></div></div>`; fact=`<div class="fact"><div class="txt"><div class="s">${mk}<span>${q.s1}</span></div><div class="m mono">${q.m}</div></div>${mats(q)}</div>`; }
+    else { who=`<div class="who">${leaf(q.d)}${nameblk}</div>`; fact=`<div class="fact"><div class="txt"><div class="s">${mk}<span>${q.s1}</span></div><div class="m mono">${q.m}</div></div>${mats(q)}</div>`; }
+    return `<div class="card ${q.tone}">${band}<div class="body">${who}${fact}</div></div>`;
+  }).join("");
+}
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#seg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");render(b.dataset.v);});
+render("A");
+</script>
+</body>
+</html>

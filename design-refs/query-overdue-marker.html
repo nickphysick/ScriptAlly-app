@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Sand band + overdue marker options</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400;1,700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--label:#9c8878;--hairline:#ece0d2;--pink-border:#e8c8bc}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:#3a1c14;font-size:13px;padding:36px 44px 80px}
+  h1{font-family:'Playfair Display',serif;font-weight:500;font-size:30px;color:var(--ink)}
+  h2{font-family:'Playfair Display',serif;font-weight:500;font-size:18px;color:#2e3a2c;margin:36px 0 6px}
+  .lede{font-family:'Playfair Display',serif;font-style:italic;font-size:14.5px;color:#6a5a50;margin:6px 0 20px;max-width:760px;line-height:1.5}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  .seg{display:inline-flex;background:#fff;border:1px solid #e0d5c8;border-radius:10px;padding:3px;margin:8px 0 16px}
+  .seg button{border:none;background:transparent;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#6a5a50;padding:8px 15px;border-radius:7px}
+  .seg button.on{background:#f5e2da;color:#3a1c14}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+  .card{background:var(--parchment);border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09)}
+  .band{display:flex;align-items:center;gap:9px;padding:11px 16px;border-bottom:.5px solid rgba(0,0,0,.06)}
+  .band.you{background:linear-gradient(135deg,#f5e3db,#efd7cc)}
+  .band.agent{background:linear-gradient(135deg,#dce0d9,#d0d6cc)}
+  .band.sand{background:linear-gradient(135deg,#efe4cf,#e7d9bd)}
+  .band.sand2{background:linear-gradient(135deg,#e5e1d1,#dbd8c6)}
+  .band.offer{background:linear-gradient(135deg,#dde5ec,#d1dbe4)}
+  .band.closed{background:linear-gradient(135deg,#e9e6e1,#dfdcd6)}
+  .band .word{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink)}
+  .band .r{margin-left:auto;color:#6a5a50}
+  .body{padding:15px 16px}
+  .who{display:flex;align-items:center;gap:13px}
+  .chip{width:44px;height:44px;border-radius:50%;background:#f5e2da;flex:none;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:12px}
+  .nm{font-family:'Playfair Display',serif;font-weight:500;font-size:19px;color:var(--ink);line-height:1.1}
+  .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:#6a5a50;margin-top:2px}
+  .fact{margin-top:13px;padding-top:11px;border-top:.5px solid var(--hairline)}
+  .fact .s{font-size:12.5px;line-height:1.45;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .fact .s b{font-weight:500}
+  .fact .m{color:var(--label);margin-top:5px}
+  .dot{flex:none}
+  .tok{margin-top:10px;color:var(--label)}
+  .tok b{font-weight:500;color:#6a5a50}
+  /* markers */
+  .mk{display:inline-flex;align-items:center;justify-content:center;flex:none}
+  .mk1{width:16px;height:16px;border-radius:50%;border:1.4px solid var(--ink);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--ink);line-height:1}
+  .mk2{width:16px;height:16px;border-radius:50%;background:var(--ink);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#fdfaf5;line-height:1}
+  .mk3{font-family:'Playfair Display',serif;font-style:italic;font-weight:700;font-size:17px;color:var(--ink);line-height:1;margin-right:-2px}
+  .mk4{height:18px;padding:0 8px;border-radius:99px;background:#f5e2da;border:1px solid #e8c8bc;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--ink);letter-spacing:.06em}
+  .opt{margin-top:22px}
+  .opt .lbl{font-family:'Playfair Display',serif;font-size:14px;color:#2e3a2c;margin-bottom:8px}
+  .opt .lbl span{font-family:'Inter',sans-serif;font-size:12.5px;color:#6a5a50;margin-left:8px}
+  .rec{margin-top:40px;max-width:780px;line-height:1.6;color:#4a3a30}
+  .rec code{font-family:'JetBrains Mono',monospace;font-size:11px;color:#6a5a50}
+</style>
+</head>
+<body>
+<h1>Sand for Queried · overdue markers</h1>
+
+<h2>The band, with sand</h2>
+<div class="lede">Two readings of what sand means. Toggle between them — the difference is what Partial Sent and Full Sent do.</div>
+<div class="seg" id="seg">
+  <button class="on" data-m="a">A · Queried only</button>
+  <button data-m="b">B · Sand → sage ladder</button>
+  <button data-m="c">C · Cooler sand</button>
+</div>
+<div class="grid" id="bands"></div>
+
+<h2>The overdue marker</h2>
+<div class="lede">Same card, same sentence, five markers. All ink or brand pink — no red, no amber.</div>
+<div id="marks"></div>
+
+<div class="rec">
+  <p><b>On sand:</b> I'd take A — sand for Queried only. Queried is the majority of any live gallery, so giving it the quietest tint keeps the wall calm and lets sage mean "they've asked for more" — which is the moment a writer actually cares about. B's ladder is more systematic but Partial Sent and Full Sent as one sage lose their distinction from the requested states anyway (the dot carries that). Closed is nudged a touch greyer (<code>#e9e6e1 → #dfdcd6</code>) so it never reads as sand.</p>
+  <p style="margin-top:8px"><b>On the marker:</b> option 1, the ink ring. It's the same weight and register as the lucide line-icons already in the chrome, so it reads as part of the app rather than a badge, and it sits well beside the sentence at 16px. Option 4's pink pill is the alternative if you want overdue to shout "your move" — but the sentence already says it, and pink pills next to a pink band (with-you) would blur.</p>
+</div>
+
+<script>
+const B="#7c3a2a",P="#f5e2da",SG="#8a9e88",SGD="#4c6249",SGC="#e2e7e0",G="#b8aa9a";
+function dot(status,s=24){
+  const c=s/2,r=s/2-2;
+  const ring=(col,dash)=>`<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${col}" stroke-width="1.6" ${dash?'stroke-dasharray="2.6 2.8"':''}/>`;
+  const half=col=>`<path d="M ${c} ${c-r} A ${r} ${r} 0 0 1 ${c} ${c+r}" fill="none" stroke="${col}" stroke-width="3.2"/>`;
+  const out=`<path d="M ${c-4.5} ${c} h7.5 M ${c+0.8} ${c-2.8} l2.8 2.8 -2.8 2.8" stroke="${B}" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const inn=`<path d="M ${c+4.5} ${c} h-7.5 M ${c-0.8} ${c-2.8} l-2.8 2.8 2.8 2.8" stroke="${SGD}" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const f=col=>`<circle cx="${c}" cy="${c}" r="${r}" fill="${col}"/>`;
+  const m={
+    "Queried":f(P)+ring(B)+out,
+    "Partial Requested":f(SGC)+ring("#c3ccbf")+half(SG)+inn,
+    "Full Requested":f(SGC)+ring(SG)+inn,
+    "Partial Sent":f(P)+ring("#e4cfc4")+half(B)+out,
+    "Full Sent":f(P)+ring(B)+`<circle cx="${c}" cy="${c}" r="${r-2.6}" fill="none" stroke="${B}" stroke-width="1"/>`+out,
+    "Offer":f(B)+`<path d="M ${c-4} ${c} l2.7 2.9 5-5.6" stroke="#fdfaf5" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+    "Closed":ring(G)+`<path d="M ${c-3.2} ${c-3.2} l6.4 6.4 M ${c+3.2} ${c-3.2} l-6.4 6.4" stroke="${G}" stroke-width="1.7" stroke-linecap="round"/>`,
+  };
+  return `<svg class="dot" width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">${m[status]}</svg>`;
+}
+const card=(status,tone,turn,name,ag,tok)=>`
+  <div class="card"><div class="band ${tone}">${dot(status)}<span class="word">${status}</span><span class="r mono">${turn}</span></div>
+  <div class="body"><div class="who"><div class="chip">${name.split(/[\s-]+/).map(w=>w[0]).slice(0,2).join("")}</div><div><div class="nm">${name}</div><div class="ag">${ag}</div></div></div>
+  <div class="tok mono">${tok}</div></div></div>`;
+
+const MODES={
+ a:[["Queried","sand","With the agent","Harriet Vane-Coe","Stillwater Reps","<b>sand</b> #efe4cf → #e7d9bd"],
+    ["Partial Requested","you","With you","Jonathan Marsh","The Marsh Agency","<b>pink</b> #f5e3db → #efd7cc"],
+    ["Full Sent","agent","With the agent","Daniel O'Rourke","Inkwell & Stone","<b>sage</b> #dce0d9 → #d0d6cc"],
+    ["Offer","offer","Offer","Tom Ellery","Curtis Vane","<b>slate</b> #dde5ec → #d1dbe4"],
+    ["Closed","closed","Closed","Marcus Reed","Hartley & Co","<b>grey</b> #e9e6e1 → #dfdcd6"]],
+ b:[["Queried","sand","With the agent","Harriet Vane-Coe","Stillwater Reps","<b>sand</b> — first stage"],
+    ["Partial Sent","agent","With the agent","Priya Raman","No agency","<b>sage</b> — deeper with the agent"],
+    ["Full Sent","agent","With the agent","Daniel O'Rourke","Inkwell & Stone","<b>sage</b> — deeper with the agent"],
+    ["Partial Requested","you","With you","Jonathan Marsh","The Marsh Agency","<b>pink</b> — with you"],
+    ["Closed","closed","Closed","Marcus Reed","Hartley & Co","<b>grey</b>"]],
+ c:[["Queried","sand2","With the agent","Harriet Vane-Coe","Stillwater Reps","<b>cooler sand</b> #e5e1d1 → #dbd8c6"],
+    ["Partial Requested","you","With you","Jonathan Marsh","The Marsh Agency","<b>pink</b>"],
+    ["Full Sent","agent","With the agent","Daniel O'Rourke","Inkwell & Stone","<b>sage</b>"],
+    ["Offer","offer","Offer","Tom Ellery","Curtis Vane","<b>slate</b>"],
+    ["Closed","closed","Closed","Marcus Reed","Hartley & Co","<b>grey</b>"]],
+};
+function renderBands(m){document.getElementById("bands").innerHTML=MODES[m].map(r=>card(...r)).join("");}
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#seg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");renderBands(b.dataset.m);});
+renderBands("a");
+
+/* markers */
+const MK=[
+ ["1 · Ink ring","line-icon weight, matches lucide chrome",`<span class="mk mk1">!</span>`],
+ ["2 · Ink disc","heavier; reads as a badge",`<span class="mk mk2">!</span>`],
+ ["3 · Bare Playfair","typographic, no container — an editorial flourish",`<span class="mk mk3">!</span>`],
+ ["4 · Pink pill","carries 'your move' colour; loudest",`<span class="mk mk4">!</span>`],
+ ["5 · Hourglass","the app's own motif instead of an exclamation",`<svg class="mk" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1c130f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 21h12M8 3v4l4 5-4 5v4M16 3v4l-4 5 4 5v4"/></svg>`],
+];
+document.getElementById("marks").innerHTML=MK.map(([l,d,m])=>`
+  <div class="opt"><div class="lbl">${l}<span>${d}</span></div>
+  <div class="grid">
+    <div class="card"><div class="band sand">${dot("Queried")}<span class="word">Queried</span><span class="r mono">With the agent</span></div>
+      <div class="body"><div class="who"><div class="chip">WT</div><div><div class="nm">William Tan</div><div class="ag">Foxglove Literary</div></div></div>
+      <div class="fact"><div class="s">${m}<span>Reply was expected by 9 Sept — <b>12 days past</b></span></div><div class="m mono">Sent 29 Jul · 8 weeks waiting · nudge available</div></div></div></div>
+    <div class="card"><div class="band you">${dot("Full Requested")}<span class="word">Full Requested</span><span class="r mono">With you</span></div>
+      <div class="body"><div class="who"><div class="chip">GP</div><div><div class="nm">Greg Panetta</div><div class="ag">No agency</div></div></div>
+      <div class="fact"><div class="s">${m}<span>Full requested 18 Aug — <b>not yet sent</b></span></div><div class="m mono">17 days since request</div></div></div></div>
+    <div class="card"><div class="band sand">${dot("Queried")}<span class="word">Queried</span><span class="r mono">With the agent</span></div>
+      <div class="body"><div class="who"><div class="chip">HV</div><div><div class="nm">Harriet Vane-Coe</div><div class="ag">Stillwater Reps</div></div></div>
+      <div class="fact"><div class="s"><span>Sent 12 Aug · reply expected by <b>23 Sept</b></span></div><div class="m mono">3 weeks waiting</div></div></div></div>
+  </div></div>`).join("");
+</script>
+</body>
+</html>

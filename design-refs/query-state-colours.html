@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Query state colours</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#1c130f;--label:#9c8878}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ground);font-family:'Inter',sans-serif;color:#3a1c14;font-size:13px;padding:36px 44px 80px}
+  h1{font-family:'Playfair Display',serif;font-weight:500;font-size:30px;color:var(--ink)}
+  .lede{font-family:'Playfair Display',serif;font-style:italic;font-size:14.5px;color:#6a5a50;margin:6px 0 28px;max-width:760px;line-height:1.5}
+  h2{font-family:'Playfair Display',serif;font-weight:500;font-size:18px;color:#2e3a2c;margin:34px 0 14px}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+  .row{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+  .card{background:var(--parchment);border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 22px rgba(58,28,20,.09)}
+  .band{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:.5px solid rgba(0,0,0,.06)}
+  .band .word{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink)}
+  .band .r{margin-left:auto;color:#6a5a50}
+  .chip{display:inline-flex;align-items:center;gap:5px;background:var(--parchment);border:1px solid rgba(58,28,20,.18);border-radius:99px;padding:3px 9px;color:var(--ink)}
+  .body{padding:14px 16px 16px}
+  .body .nm{font-family:'Playfair Display',serif;font-weight:500;font-size:18px;color:var(--ink)}
+  .body .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:#6a5a50;margin-top:2px}
+  .tok{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--label)}
+  .tok b{font-weight:500;color:#6a5a50}
+  .sw{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:4px;border:.5px solid rgba(0,0,0,.1)}
+  .note{max-width:760px;line-height:1.6;color:#4a3a30;margin-top:10px}
+  table{border-collapse:collapse;margin-top:14px;max-width:820px;width:100%}
+  th,td{text-align:left;padding:9px 10px;border-bottom:.5px solid #ece0d2;vertical-align:top}
+  th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);font-weight:500}
+  td{font-size:12.5px;color:#3a1c14}
+  td code{font-family:'JetBrains Mono',monospace;font-size:11px;color:#6a5a50}
+</style>
+</head>
+<body>
+<h1>Query state colours</h1>
+<div class="lede">The band answers one question — whose court is it in — with three tints plus one for Offer. Time pressure is a chip laid over the band, not a fifth colour, so "overdue" never gets a hue of its own that could read as a verdict.</div>
+
+<h2>The four bands</h2>
+<div class="row">
+  <div class="card">
+    <div class="band" style="background:linear-gradient(135deg,#dce0d9,#d0d6cc)">
+      <span class="word">Partial Requested</span><span class="r mono">With you</span></div>
+    <div class="body"><div class="nm">Jonathan Marsh</div><div class="ag">The Marsh Agency</div>
+      <div class="tok mono"><span><b>With you</b></span><span><i class="sw" style="background:#dce0d9"></i>#dce0d9 → <i class="sw" style="background:#d0d6cc"></i>#d0d6cc</span><span>caption #5a6e58</span></div></div>
+  </div>
+  <div class="card">
+    <div class="band" style="background:linear-gradient(135deg,#f5e3db,#efd7cc)">
+      <span class="word">Queried</span><span class="r mono">With the agent</span></div>
+    <div class="body"><div class="nm">Harriet Vane-Coe</div><div class="ag">Stillwater Reps</div>
+      <div class="tok mono"><span><b>With the agent</b></span><span><i class="sw" style="background:#f5e3db"></i>#f5e3db → <i class="sw" style="background:#efd7cc"></i>#efd7cc</span><span>caption #8a6a5c</span></div></div>
+  </div>
+  <div class="card">
+    <div class="band" style="background:linear-gradient(135deg,#dde5ec,#d1dbe4)">
+      <span class="word">Offer</span><span class="r mono">Offer on the table</span></div>
+    <div class="body"><div class="nm">Tom Ellery</div><div class="ag">Curtis Vane</div>
+      <div class="tok mono"><span><b>Offer</b></span><span><i class="sw" style="background:#dde5ec"></i>#dde5ec → <i class="sw" style="background:#d1dbe4"></i>#d1dbe4</span><span>caption #4f6478</span></div></div>
+  </div>
+  <div class="card">
+    <div class="band" style="background:linear-gradient(135deg,#ebe6df,#e3ded6)">
+      <span class="word">Closed</span><span class="r mono">Closed 20 Feb 2024</span></div>
+    <div class="body"><div class="nm">Marcus Reed</div><div class="ag">Hartley &amp; Co</div>
+      <div class="tok mono"><span><b>Closed · Rejected · No response</b></span><span><i class="sw" style="background:#ebe6df"></i>#ebe6df → <i class="sw" style="background:#e3ded6"></i>#e3ded6</span><span>caption #8a7a6c</span></div></div>
+  </div>
+</div>
+
+<h2>Time pressure — a chip, not a colour</h2>
+<div class="row">
+  <div class="card">
+    <div class="band" style="background:linear-gradient(135deg,#f5e3db,#efd7cc)">
+      <span class="word">Queried</span>
+      <span class="r chip mono"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3a1c14" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>12 days past expected</span></div>
+    <div class="body"><div class="nm">Fenella Str</div><div class="ag">Brightwater Books</div>
+      <div class="tok mono"><span><b>Agent past their advised window</b></span><span>band unchanged · chip parchment/ink · nudge now offered</span></div></div>
+  </div>
+  <div class="card">
+    <div class="band" style="background:linear-gradient(135deg,#dce0d9,#d0d6cc)">
+      <span class="word">Full Requested</span>
+      <span class="r chip mono"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3a1c14" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Requested 18 days ago</span></div>
+    <div class="body"><div class="nm">Greg Panetta</div><div class="ag">No agency</div>
+      <div class="tok mono"><span><b>Your action waiting</b></span><span>band unchanged · same chip · "not sent" is a fact, not a fault</span></div></div>
+  </div>
+</div>
+<p class="note">If you decide the chip is too quiet for the agent-overdue case, the escalation is to deepen the <i>same</i> band one step (pink → <code>#eccbbf / #e6bfb1</code>) rather than introduce a new hue. Same state, louder — never a different meaning.</p>
+
+<h2>Everything else this scheme has to cover</h2>
+<table>
+  <tr><th>State</th><th>Band</th><th>Why</th></tr>
+  <tr><td>R&amp;R (revise &amp; resubmit)</td><td>With you</td><td>It's your move; the dot's pencil ✎ carries the distinction.</td></tr>
+  <tr><td>Partial / Full requested but not yet sent</td><td>With you</td><td>Identical to requested — "not sent" is the date field being empty, not a state.</td></tr>
+  <tr><td>Partial / Full sent</td><td>With the agent</td><td>Same as Queried; the dot shows the depth.</td></tr>
+  <tr><td>No response (agency window long passed)</td><td>Closed tint</td><td>Neutral family, not agent-pink — the ball is in nobody's court. Dot stays the dashed ring.</td></tr>
+  <tr><td>Withdrawn by you</td><td>Closed tint</td><td>Closed is closed. Caption says "Withdrawn 4 Mar" so the reason is a fact in words.</td></tr>
+  <tr><td>Offer declined / accepted</td><td>Closed tint</td><td>Once decided it's a closed query; Offer stays slate only while it's open.</td></tr>
+  <tr><td>Selected (panel open)</td><td>Any + 1.5px ring <code>#e8c8bc</code></td><td>Selection is a ring, not a fill, so it never collides with the band.</td></tr>
+  <tr><td>Hover</td><td>Lift only</td><td>No colour change on hover.</td></tr>
+</table>
+
+<h2>Where it applies</h2>
+<p class="note">Same four tokens drive the panel header band, the selected-row tint in any list view, the dashboard pipeline cells, and Fortnight in Focus — one vocabulary app-wide. They go in <code>design-refs/themes.md</code> as <code>--turn-you</code>, <code>--turn-agent</code>, <code>--turn-offer</code>, <code>--turn-closed</code> (each a pair, start/end) with Bold Pastille and Editorial values filled in when those themes are next touched.</p>
+</body>
+</html>
