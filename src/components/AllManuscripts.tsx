@@ -23,7 +23,7 @@
  * The lifecycle flows (reversible shelve with undo, guarded delete via the cascade manifest) and the
  * edit modal carry over unchanged; comps are deliberately absent from the modal.
  */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { deleteField } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../lib/db";
@@ -44,6 +44,7 @@ import { AttachmentsPanel } from "./manuscripts/AttachmentsPanel";
 import { ManuscriptShelfList } from "./manuscripts/ManuscriptShelfList";
 import { ManuscriptPager } from "./manuscripts/ManuscriptPager";
 import { MANUSCRIPTS_PATH } from "./shell/manuscriptScope";
+import { landingTarget } from "../lib/manuscriptLanding";
 import { queryingSinceMs, profileDate } from "../lib/manuscriptProfile";
 import { ManuscriptsEmpty } from "./manuscripts/ManuscriptsEmpty";
 import { pitchAssets, pitchMeter, PitchAssetKey, synopsisVersions } from "../lib/manuscriptPitch";
@@ -154,6 +155,31 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
    * The dossier's subject, or null for the library grid. A stale id (the manuscript was deleted
    * under us) resolves to null and returns to the shelf rather than to some other writer's book.
    */
+  /**
+   * ⚠️ ONE MANUSCRIPT LANDS ON THE BOOK. A picker with one option is what makes the landing look
+   * unfinished, whatever it looks like — the decision is `landingTarget`'s, pure and unit-locked.
+   *
+   * ⚠️ THE LATCH IS WHY `← All manuscripts` STILL WORKS. A redirect that fired whenever the param
+   * was absent would send the reader straight back to the book they just left, in the same frame:
+   * the control would look inert while working perfectly, which is the Query Centre fault this repo
+   * has already paid for once. `landedRef` is set the moment we act, so the departure is honoured
+   * for the rest of the mount.
+   *
+   * ⚠️ AND IT IS `replace`, so the shelf the reader never saw does not sit in their history waiting
+   * for the back button to bounce them forward again.
+   */
+  const landedRef = useRef(false);
+  useEffect(() => {
+    if (!active) return;
+    const target = landingTarget(
+      { count: ordered.length, param: openId, alreadyLanded: landedRef.current },
+      () => ordered[0]?.id ?? null,
+    );
+    if (!target) return;
+    landedRef.current = true;
+    navigate(manuscriptViewHref(target), { replace: true });
+  }, [active, openId, ordered.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const selected = openId ? ordered.find((m) => m.id === openId) ?? null : null;
   /**
    * ⚠️ THE PAGER READS `ordered`, WHICH IS THE SHELF'S OWN ORDER — never a second sort. A pager
