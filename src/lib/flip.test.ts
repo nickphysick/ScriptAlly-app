@@ -138,3 +138,71 @@ describe("flip · clearing up", () => {
     expect(e.style.transition).toBe("");
   });
 });
+
+/**
+ * ⚠️ THE SECOND SURFACE — added when the Query Centre grid adopted this helper rather than growing
+ * a parallel one. The `dataKey` option exists because the SELECTOR was already a parameter and the
+ * KEY was not: a caller could pick its own elements and then read `undefined` for every one of
+ * them, which returns an empty map, takes `playFlip`'s early return, and animates NOTHING with no
+ * error to find. These assert that the option works AND that the default is untouched.
+ */
+describe("flip · a second surface brings its own key and its own curve", () => {
+  const qccEl = (id: string, left: number, top: number) => {
+    const classes = new Set<string>();
+    const e = {
+      dataset: { qccId: id } as Record<string, string>,
+      classList: { add: (c: string) => classes.add(c), remove: (c: string) => classes.delete(c), has: (c: string) => classes.has(c) },
+      style: {} as Record<string, string>,
+      getBoundingClientRect: () => ({ left, top }) as DOMRect,
+    };
+    return e;
+  };
+  const box = (els: unknown[]) => ({ querySelectorAll: () => els }) as unknown as HTMLElement;
+
+  it("reads the key it is given", () => {
+    const els = [qccEl("q1", 0, 0), qccEl("q2", 100, 0)];
+    const rects = measureFlip(box(els), { selector: "[data-qcc-id]", dataKey: "qccId" });
+    expect([...rects.keys()]).toEqual(["q1", "q2"]);
+  });
+
+  it("⚠️ and settles them — the rule does not lapse for a caller that brings its own key", () => {
+    const els = [qccEl("q1", 0, 0)];
+    measureFlip(box(els), { selector: "[data-qcc-id]", dataKey: "qccId" });
+    expect(els[0].classList.has("sa-settled")).toBe(true);
+  });
+
+  it("the default key is unchanged, so the agent list is byte-identical", () => {
+    const els = [el("a", 0, 0)];
+    expect([...measureFlip(container(els)).keys()]).toEqual(["a"]);
+    /* Passing a bare selector string still works — the old signature is intact. */
+    expect([...measureFlip(container(els), "[data-agent-card]").keys()]).toEqual(["a"]);
+  });
+
+  it("⚠️ a mismatched key animates nothing, which is why the two are one option", () => {
+    const els = [qccEl("q1", 0, 0)];
+    /* The wrong key: elements found, none identified. This is the silent failure, pinned. */
+    expect(measureFlip(box(els), { selector: "[data-qcc-id]" }).size).toBe(0);
+  });
+
+  it("the caller's easing reaches the transition, and the default is left alone", () => {
+    const before = measureFlip(box([qccEl("q1", 0, 0)]), { selector: "[data-qcc-id]", dataKey: "qccId" });
+    const moved = qccEl("q1", 50, 0);
+    playFlip(box([moved]), before, {
+      selector: "[data-qcc-id]", dataKey: "qccId", easing: "cubic-bezier(.2,.7,.2,1)", durationMs: 340,
+    });
+    expect(moved.style.transition).toBe("transform 340ms cubic-bezier(.2,.7,.2,1)");
+
+    const b2 = measureFlip(container([el("a", 0, 0)]));
+    const m2 = el("a", 50, 0);
+    playFlip(container([m2]), b2);
+    expect(m2.style.transition, "the default curve moved").toContain("cubic-bezier(.4, 0, .2, 1)");
+  });
+
+  it("⚠️ still touches nothing that did not move — selectivity survives the new option", () => {
+    const before = measureFlip(box([qccEl("q1", 0, 0)]), { selector: "[data-qcc-id]", dataKey: "qccId" });
+    const same = qccEl("q1", 0, 0);
+    const n = playFlip(box([same]), before, { selector: "[data-qcc-id]", dataKey: "qccId" });
+    expect(n, "an unmoved card was given a transform").toBe(0);
+    expect(same.style.transform).toBeUndefined();
+  });
+});
