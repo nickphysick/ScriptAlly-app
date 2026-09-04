@@ -168,3 +168,102 @@ test.describe("v63 · B — the sidebar pane", () => {
     expect(need!.col, "the rose tile is not rose").not.toBe(plain[0].col);
   });
 });
+
+test.describe("v63 · run 2 — the five corrections", () => {
+  test("⚠️ the view is 'Needs me' and the group bar is 'Urgent' — one section, two names", async ({ page }) => {
+    await openRoute(page, CAL, { width: 1440, height: 900 });
+    const f = await page.evaluate(() => ({
+      views: [...document.querySelectorAll<HTMLElement>(".tl-axis .gpill")].map((v) => ({
+        sec: v.dataset.sec ?? "all",
+        name: v.querySelector("span")?.textContent ?? "",
+        col: v.querySelector("b") ? getComputedStyle(v.querySelector("b")!).color : "",
+      })),
+      bar: (() => {
+        const b = document.querySelector<HTMLElement>('.tl-grp[data-sec="over"] .tl-gdiv .gp > span');
+        return b?.textContent ?? null;
+      })(),
+    }));
+    const over = f.views.find((v) => v.sec === "over");
+    expect(over, "no Needs me view").toBeTruthy();
+    /* ⚠️ THE TWO NAMES ARE THE POINT. The bar names the STATE of the rows under it; the view names
+       what it does for the reader. The ref carries both tables and they differ on this one entry —
+       every other name is shared, which is what makes the difference legible rather than a slip. */
+    expect(over!.name, "the view is not called Needs me").toBe("Needs me");
+    expect(f.bar, "the group bar is not called Urgent").toBe("Urgent");
+    /* ⚠️ AND EXACTLY ONE COUNT IS ROSE. A second would make the colour mean "a number" rather than
+       "a number that wants you". */
+    const rose = f.views.filter((v) => v.col === over!.col);
+    expect(rose.length, `${rose.length} view counts share the rose`).toBe(1);
+    expect(f.views.length, "the views list is too short to discriminate").toBeGreaterThan(3);
+  });
+
+  test("⚠️ the pane scrolls on its own, and the fourth tile is reachable at a short viewport", async ({ page }) => {
+    /* ⚠️ MEASURED WHERE THE FAULT LIVES. At 900 the pane's content fits and there is nothing to
+       scroll — a check there passes on a board that could never have shown the fault. The ref
+       carries no `overflow` on its own sidebar at all, so this is a correction to the ref rather
+       than a reading of it, and the short viewport is the only place it can be proved. */
+    await openRoute(page, CAL, { width: 1440, height: 640 });
+    const before = await page.evaluate(() => {
+      const a = document.querySelector<HTMLElement>(".tl-axis")!;
+      const t = [...a.querySelectorAll<HTMLElement>(".st > div")];
+      return {
+        overflow: getComputedStyle(a).overflowY,
+        scrollable: a.scrollHeight - a.clientHeight,
+        tiles: t.length,
+        lastBottom: t.length ? t[t.length - 1].getBoundingClientRect().bottom : null,
+        paneBottom: a.getBoundingClientRect().bottom,
+      };
+    });
+    expect(before.tiles, "At a glance does not draw four tiles").toBe(4);
+    expect(before.overflow, "the pane does not scroll").toBe("auto");
+    /* the precondition: at this height the pane MUST overflow, or the claim tests nothing */
+    expect(before.scrollable, "the pane does not overflow at 640 — nothing is being proved")
+      .toBeGreaterThan(20);
+    expect(before.lastBottom!, "the last tile is already reachable — the fault cannot be shown")
+      .toBeGreaterThan(before.paneBottom);
+
+    await page.evaluate(() => {
+      const a = document.querySelector<HTMLElement>(".tl-axis")!;
+      a.scrollTop = a.scrollHeight;
+    });
+    await page.waitForTimeout(200);
+    const after = await page.evaluate(() => {
+      const a = document.querySelector<HTMLElement>(".tl-axis")!;
+      const t = [...a.querySelectorAll<HTMLElement>(".st > div")];
+      return {
+        lastBottom: t[t.length - 1].getBoundingClientRect().bottom,
+        paneBottom: a.getBoundingClientRect().bottom,
+        scrolled: a.scrollTop,
+      };
+    });
+    expect(after.scrolled, "the pane did not actually scroll").toBeGreaterThan(20);
+    expect(after.lastBottom, "the fourth tile is still below the pane after scrolling to its end")
+      .toBeLessThanOrEqual(after.paneBottom + 1);
+  });
+
+  test("⚠️ nothing is rendered below the numeral tier, and the search carries its glyph", async ({ page }) => {
+    await openRoute(page, CAL, { width: 1440, height: 900 });
+    const f = await page.evaluate(() => {
+      const rail = document.querySelector<HTMLElement>(".tl-rail")!;
+      const now = document.querySelector<HTMLElement>(".tl-dt.now");
+      const nr = now?.getBoundingClientRect();
+      /* everything painted inside the date bar that begins at or below the numeral's baseline */
+      const below = nr ? [...rail.querySelectorAll<HTMLElement>("*")]
+        .filter((e) => { const r = e.getBoundingClientRect(); return r.height > 0 && r.top >= nr.bottom - 0.5; })
+        .map((e) => e.className.toString().slice(0, 30)) : ["__no today circle__"];
+      const s = document.querySelector<HTMLElement>(".tl-axis .tl-search")!;
+      return {
+        below, stems: document.querySelectorAll(".tl-todaystem").length,
+        bgImage: getComputedStyle(s).backgroundImage,
+        padL: parseFloat(getComputedStyle(s).paddingLeft),
+      };
+    });
+    /* ⚠️ THE TICK IS GONE. It rose from the rail's baseline to meet a today CAP that no longer
+       exists; the filled circle IS the mark, and a tick beneath a numeral inside its own disc is a
+       second pointer at a date the disc already names. */
+    expect(f.stems, "the today stem is still rendered").toBe(0);
+    expect(f.below, `something is drawn below the numeral tier: ${f.below.join(", ")}`).toEqual([]);
+    expect(f.bgImage, "the search field carries no magnifier").toContain("svg");
+    expect(f.padL, "the search text is not cleared of its glyph").toBeGreaterThanOrEqual(28);
+  });
+});

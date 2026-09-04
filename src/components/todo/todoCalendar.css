@@ -47,112 +47,106 @@
  */
 .tpl-tools .calm-nav { width: auto; justify-content: flex-start; }
 
-/* ══ ONE CONTROL ROW (bars pack, Phase 2) ═══════════════════════════════════════════════════
+/* ══ THE OLD CONTROL ROW IS DELETED (v63, section C) ═══════════════════════════════════════
  *
- * ⚠️ THE SECOND CONTROL ROW IS GONE. The filters sat in a strip of their own directly beneath the
- * tool row — two rows of controls stacked, 42.25px of a 900px viewport spent on the fact that they
- * had been built at different times. They are one line now, and it MUST NOT WRAP: `.tpl-tools` is
- * a flex row with no `flex-wrap`, so anything too wide pushes the row's height up silently rather
- * than erroring. The count elides first and the search narrows second — a tally answers a question
- * nobody has asked yet, so it is the one thing here that can go.
+ * ⚠️ SIXTEEN SELECTORS WITH ZERO RENDERERS — `.tl-kind(s)`, `.tl-menuwrap`, `.tl-mbtn(sum)`,
+ * `.tl-menu`, `.tl-menuname`, `.tl-menuwhat`, `.tl-sep`, `.tl-tabs`, `.tl-tabn`, `.tl-pop`,
+ * `.tl-poprow`, `.tl-popname`, `.tl-popopts`, `.tl-popreset` and `.tl-count`. They dressed the
+ * `Menu`, `Popover` and `PopRow` components, all three of which had no render site either; the
+ * whole cluster had been orphaned since the controls that used it were retired, and it read as
+ * live styling to anybody opening this file. Deleted here rather than left beside the toolbar
+ * that replaces it — a replacement that is ADDED leaves the original reachable, and shipping a
+ * fourth dropdown grammar beside three dead ones is that fault with a bigger denominator.
+ *
+ * `.tl-search` SURVIVES and is folded into one authoritative rule below: it is the sidebar's
+ * field, which `.tl-axis .tl-search` then overrides at higher specificity. `--tl-nearblack`
+ * survives too — eight rules outside this block still read it.
  */
-.tl-sep {
-  width: 1px; height: 18px; background: #e6dcce; flex: none; margin: 0 3px;
-}
-.tl-kinds { display: flex; gap: 5px; flex: none; }
-.tl-kind {
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8.5px;
-  letter-spacing: 0.11em; text-transform: uppercase; white-space: nowrap;
-  padding: 0 10px; height: 26px; border-radius: 999px; cursor: pointer; flex: none;
-  border: 1px solid #e6dcce; background: #fff; color: #8a7a6c;
-}
-.tl-kind:hover { border-color: #d3c4b3; color: #6a5a50; }
-/* one selection grammar page-wide — the pink the chosen segment already wore */
-.tl-kind[data-on="true"] { background: #f5e2da; border-color: #e8c8bc; color: #1c130f; }
-.tl-kind:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
-.tl-menuwrap { position: relative; display: inline-flex; flex: none; }
-.tl-mbtn {
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8.5px;
-  letter-spacing: 0.11em; text-transform: uppercase; white-space: nowrap;
-  padding: 0 10px; height: 26px; border-radius: 8px; cursor: pointer;
-  border: 1px solid #e6dcce; background: #fff; color: #6a5a50;
-}
-.tl-mbtn:hover { border-color: #d3c4b3; color: #1c130f; }
-.tl-menu {
-  position: absolute; top: calc(100% + 6px); left: 0; z-index: 75;
-  background: #fff; border: 1px solid #ece0d2; border-radius: 10px;
-  box-shadow: 0 10px 28px rgba(58, 28, 20, 0.15);
-  padding: 5px; min-width: 168px;
-}
-.tl-menu button {
-  display: block; width: 100%; text-align: left; cursor: pointer;
-  background: none; border: 0; border-radius: 7px;
-  padding: 7px 9px; font-size: 11.5px; color: #4a3a30;
-}
-.tl-menu button:hover { background: #faf6ef; }
-/* ⚠️ THE OPTION'S NAME AND ITS DEFINITION STACK, and they are BLOCKS. Two inline spans would sit
-   on one baseline and read as one run — the same inline-vs-block fault this board has now had
-   three times (the fit pass, the bar label, the row head). Told, not assumed. */
-.tl-menu button { display: block; text-align: left; }
-.tl-menuname { display: block; }
-.tl-menuwhat {
-  display: block; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8px;
-  letter-spacing: 0.04em; color: #9c8878; margin-top: 2px; max-width: 34ch; white-space: normal;
-  line-height: 1.4;
-}
-.tl-menu button[aria-current="true"] { background: #f2ede7; font-weight: 600; color: #2b2118; }
-/* ══ the views, as tabs ═══════════════════════════════════════════════════════════════════════
-   ⚠️ THEY READ AS A STRIP, NOT AS FOUR BUTTONS. The selected one takes the near-black fill the
-   board uses for the writer's own side; the rest are bare, so the strip states which cut you are
-   in without a frame drawn round the whole thing. */
-/* ⚠️ `.tl-seg2` IS DELETED WITH THE FOUR SEGMENTED CONTROLS IT DRESSED (v40, Phase 6). Nothing in
-   `src/` rendered the class once the tabs and the `Display` popover replaced them — a stylesheet
-   rule with no subject is a rule that reads as live and governs nothing, which is how a retired
-   control comes back the next time somebody styles this row. */
-.tl-tabs { display: inline-flex; align-items: center; gap: 2px; flex: none; }
-.tl-tabs button {
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8.5px;
-  letter-spacing: 0.11em; text-transform: uppercase; white-space: nowrap;
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 0 10px; height: 26px; border-radius: 8px; cursor: pointer;
-  border: 1px solid transparent; background: none; color: #8a7a6e;
-}
-.tl-tabs button:hover { color: #1c130f; background: #f6f1ea; }
-.tl-tabs button[data-on="true"] { background: var(--tl-nearblack); color: #fdfaf5; }
-/* ⚠️ THE COUNT RIDES ITS OWN TAB and takes the tab's ink at reduced opacity rather than a second
-   colour — a tinted numeral beside a label is a second thing to read where there is one fact. */
-.tl-tabn { font-size: 8px; opacity: .62; font-variant-numeric: tabular-nums; }
-.tl-tabs button[data-on="true"] .tl-tabn { opacity: .75; }
 
-/* ══ the Display popover ══════════════════════════════════════════════════════════════════════ */
-.tl-mbtnsum { text-transform: none; letter-spacing: .02em; color: #9c8878; }
-.tl-mbtn[aria-expanded="true"] { border-color: #d3c4b3; color: #1c130f; }
-.tl-pop {
-  position: absolute; top: calc(100% + 6px); right: 0; z-index: 75;
-  background: #fff; border: 1px solid #ece0d2; border-radius: 10px;
-  box-shadow: 0 10px 28px rgba(58, 28, 20, 0.15);
-  padding: 10px; min-width: 250px;
+/* ══ THE BOARD TOOLBAR (v63, section C) ══════════════════════════════════════════════════════
+ *
+ * A row of controls between the two panes' chrome and the rail, on the chrome ground with a
+ * hairline under it. Every value here is the ref's; the colours come through the chrome tokens
+ * rather than as literals, so the row moves with the scheme like the rest of the board.
+ */
+.tl-vtool {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--tl-ch-line);
+  background: var(--tl-ch-bg);
 }
-.tl-poprow + .tl-poprow { margin-top: 10px; }
-.tl-popname {
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8px;
-  letter-spacing: 0.12em; text-transform: uppercase; color: #9c8878; margin-bottom: 5px;
+/* ⚠️ THE TRIGGER'S WRAPPER IS THE POSITIONING CONTEXT, NOT THE BUTTON. The panel is `absolute` to
+   it, so the button can be re-styled — padding, a badge, an icon — without the panel moving. */
+.tl-tb { position: relative; display: inline-flex; flex: none; }
+.tl-tbtrig {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 10px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--tl-ch-ctlbd); background: var(--tl-ch-ctl);
+  font-size: 11.5px; color: var(--tl-ch-tx); white-space: nowrap;
 }
-.tl-popopts { display: flex; flex-wrap: wrap; gap: 4px; }
-.tl-popopts button {
-  font-size: 11px; padding: 4px 9px; border-radius: 7px; cursor: pointer;
-  border: 1px solid #e6dcce; background: #fff; color: #4a3a30; white-space: nowrap;
+.tl-tbtrig:hover { border-color: #d3c4b3; }
+/* the open trigger reads as pressed — off `aria-expanded`, which is already on the element */
+.tl-tbtrig[aria-expanded="true"] { border-color: #d3c4b3; color: var(--tl-nearblack); }
+.tl-tbtrig:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+/* the control's NAME, quieter than the value it holds — "Group" beside "Urgency" */
+.tl-tbk { color: #8a7a6c; }
+.tl-tbchev { color: #a89880; font-size: 10px; }
+.tl-tbtrig svg { width: 12px; height: 12px; color: #7d6c5c; flex: none; }
+/* ⚠️ THE BADGE COUNTS WHAT IS TICKED AND IS ABSENT AT ZERO — a roundel reading `0` states that
+   nothing is filtered in the vocabulary of something being filtered. */
+.tl-tbbadge {
+  min-width: 15px; height: 15px; padding: 0 4px; border-radius: 99px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #c98e8a; color: #fff;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
 }
-.tl-popopts button:hover { border-color: #d3c4b3; }
-.tl-popopts button[data-on="true"] {
-  background: var(--tl-nearblack); border-color: var(--tl-nearblack); color: #fdfaf5;
+.tl-dd {
+  position: absolute; left: 0; top: calc(100% + 6px); z-index: 80;
+  min-width: 200px; padding: 6px;
+  background: #fff; border: 1px solid #ddd0bd; border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(58, 28, 20, 0.14);
 }
-.tl-popreset {
-  display: block; width: 100%; margin-top: 11px; padding-top: 9px; cursor: pointer;
-  border: 0; border-top: 1px solid #f0e7db; background: none; text-align: left;
-  font-size: 10.5px; color: #9c8878;
+.tl-ddopt {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 7px 10px; border-radius: 8px; cursor: pointer;
+  border: 0; background: none; text-align: left;
+  font-size: 12px; color: #3a1c14;
 }
-.tl-popreset:hover { color: #1c130f; }
+.tl-ddopt:hover { background: #f8f4ec; }
+.tl-ddopt:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+/* ⚠️ THE TICK IS ALWAYS LAID OUT AND ONLY ITS OPACITY MOVES. Rendering it conditionally would
+   shift every label sideways as the selection moved — the ref hides it with `opacity`, and that
+   is the reason rather than a preference. */
+.tl-ddname { min-width: 0; }
+.tl-ddck { margin-left: auto; opacity: 0; }
+.tl-ddopt[data-on] .tl-ddck { opacity: 1; }
+.tl-ddbox {
+  width: 13px; height: 13px; flex: none;
+  border-radius: 4px; border: 1.3px solid #b8a889;
+}
+.tl-ddopt[data-on] .tl-ddbox { background: var(--tl-nearblack); border-color: var(--tl-nearblack); }
+/* a rule between the options and whatever acts on them */
+.tl-ddfoot { border-top: 1px solid #efe6da; margin-top: 4px; padding-top: 6px; }
+.tl-ddfoot + .tl-ddfoot { border-top: 0; margin-top: 0; padding-top: 0; }
+.tl-ddlink {
+  padding: 3px 10px; cursor: pointer; border: 0; background: none;
+  font-size: 11.5px; color: #6f6055;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.tl-ddlink:hover { color: var(--tl-nearblack); }
+.tl-tbclear {
+  margin-left: 2px; cursor: pointer; border: 0; background: none; padding: 0;
+  font-size: 11.5px; color: var(--tl-ch-tx);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+/* ⚠️ THE COUNT IS HOW MANY ROWS ARE DRAWN, and it is a different number from the sidebar's census
+   on purpose — which is why it names its unit. Two unlabelled numerals answering two questions is
+   how a board comes to state a figure nobody can reconcile. */
+.tl-tbcnt {
+  margin-left: auto; flex: none; white-space: nowrap;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: #a89880;
+}
 
 .tl-search {
   flex: 0 1 190px; min-width: 90px; height: 26px; padding: 0 10px; font-size: 11.5px;
@@ -160,22 +154,13 @@
 }
 .tl-search::placeholder { color: #b3a796; }
 .tl-search:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
-/* ⚠️ THE COUNT STATES WHAT IS ON SCREEN, never a total the filters have stopped describing. */
-.tl-count {
-  flex: none; white-space: nowrap;
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8.5px;
-  letter-spacing: 0.13em; text-transform: uppercase; color: #a2937f;
-}
 
-/* ⚠️ NARROW LAST — equal specificity is decided by order, and a wider query below a narrower one
-   silently overrides it. The count goes first; the search's basis follows. */
-@media (max-width: 1360px) {
-  .tl-search { flex-basis: 150px; }
-}
-@media (max-width: 1180px) {
-  .tl-count { display: none; }
-  .tl-search { flex-basis: 120px; }
-}
+/* ⚠️ THE TWO NARROW QUERIES ARE DELETED WITH THE ROW THEY ELIDED (v63). They shrank the search's
+   flex basis and hid the count so a horizontal control row would not wrap. The search is in the
+   sidebar COLUMN now, where `.tl-axis .tl-search` sets `flex: 0 0 auto` at higher specificity and
+   the basis could never have applied; the count they hid has no renderer at all. A comment saying
+   "the count goes first, the search's basis follows" described a row that stopped existing two
+   packs ago and read as current for exactly as long as nobody checked. */
 
 /**
  * ⚠️ THE RECLAIM OPT-OUT IS DELETED WITH THE RECLAIM. This page zeroed `--wpg-reclaim-pad` on the
@@ -311,7 +296,7 @@
   /* the one bar that is not the chrome's tone — Urgent, in the app's blush, with rose numerals */
   --tl-ch-urgent: #f8ece6;
   --tl-ch-urgent-tx: #8c4f4a;
-  --tl-axis-w: 232px;
+  --tl-axis-w: 240px;
   --tl-cs-ground: #f2f1ee;
   --tl-cs-rail: #faf9f7;
   --tl-cs-frame: #e0ddd6;
@@ -854,10 +839,9 @@
   border-left: 1px solid #e5d9c6;
 }
 /* ── today, in the rail ──────────────────────────────────────────────────────────────────── */
-.tl-todaystem {
-  position: absolute; bottom: 0; height: 11px; width: 0;
-  border-left: 1.5px solid var(--tl-nearblack);
-}
+/* ⚠️ `.tl-todaystem` IS RETIRED (v63). It rose from the rail's baseline to meet a today CAP that
+   no longer exists; the filled circle is the mark. The rule goes with the element rather than being
+   left to style nothing — a selector with no subject is how a retired thing comes back. */
 .tl-rrow {
   border-top: 1px solid var(--tl-rowline);
   /* ⚠️ THE ROW GROWS TO HOLD ITS LANES AND NEVER CLIPS ONE. `--lanes` is how many lines this
@@ -2266,11 +2250,22 @@ button.tl-tchip { cursor: pointer; }
   background: var(--tl-ch-ground);
 }
 .tl-axis {
+  /* ⚠️ THE REF'S *FINISHED* SIDEBAR IS 240px, NOT 232. It declares `.axis` twice — 232 in the
+     layout block and 240 under a heading reading "SIDEBAR — finished" — and the later one wins.
+     Run 1 built the earlier value, which the pack's prose repeated. Same trap this board has been
+     caught by four times: a selector declared twice, and a reader takes the first. */
   flex: 0 0 var(--tl-axis-w);
-  display: flex; flex-direction: column; gap: 14px;
-  padding: 16px 14px; min-width: 0;
+  display: flex; flex-direction: column; gap: 0;
+  padding: 14px 12px 12px; min-width: 0;
   background: var(--tl-ch-bg);
   border-right: 1px solid var(--tl-ch-line);
+  /* ⚠️ AND IT SCROLLS ON ITS OWN — WHICH THE REF DOES NOT DO EITHER. `.axis` carries no `overflow`
+     anywhere in the ref, so its own fourth glance tile is unreachable at a short viewport; the
+     board's rows region scrolls and the pane beside it simply runs off the bottom. Two panes that
+     scroll independently is what makes a two-pane frame work at all, and it is a correction to the
+     ref rather than a reading of it. `min-height: 0` because a flex child will not shrink below
+     its content without it, and an `overflow` on a box that never shrinks does nothing. */
+  min-height: 0; overflow-y: auto;
 }
 .tl-boardpane { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 /* ⚠️ THE NUMBERS GUTTER IS GONE. It ran 01…nn down the side of a board whose rows are named by the
@@ -2340,7 +2335,13 @@ button.tl-tchip { cursor: pointer; }
    container — the controls were built for a row and are still in a column. */
 .tl-axis .tl-search {
   width: 100%; flex: 0 0 auto;
-  background: var(--tl-ch-ctl); border-color: var(--tl-ch-ctlbd);
+  /* ⚠️ THE MAGNIFIER IS A BACKGROUND IMAGE, NOT AN ELEMENT — the ref's own construction, and the
+     reason is that an icon inside a native `<input>` has to be a sibling positioned over it, which
+     then has to be told not to swallow the click. A `background` cannot intercept a pointer, so the
+     field stays one element and the padding is what keeps the text clear of the glyph. */
+  padding: 9px 12px 9px 32px; border-radius: 10px; font-size: 12px;
+  background: var(--tl-ch-ctl) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a89880' stroke-width='1.8'><circle cx='11' cy='11' r='6.5'/><path d='m20 20-3.8-3.8'/></svg>") 11px center/13px no-repeat;
+  border: 1px solid var(--tl-ch-ctlbd);
 }
 /* the window pill: two chevrons with the live range between them */
 .tl-axis .railnav {
@@ -2393,4 +2394,7 @@ button.tl-tchip { cursor: pointer; }
 .tl-axis .gpill.on {
   background: var(--tl-ch-sel); border-color: var(--tl-ch-selbd); color: var(--tl-ch-tx);
 }
+/* ⚠️ ONE COUNT IN ROSE, AND ONLY ONE. "Needs me" is the single view that is asking for something;
+   every other number on this pane is a tally. A second rose figure would make the colour mean
+   "a number" rather than "a number that wants you". */
 .tl-axis .gpill[data-sec="over"] b { color: var(--tl-ch-urgent-tx); }

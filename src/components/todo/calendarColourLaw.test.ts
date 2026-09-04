@@ -45,6 +45,8 @@ const TERRITORY = [
      why it belongs in the census: the law is that a calendar-owned module has NO burgundy and NO
      black, and a file that happens to contain none today still has to be swept tomorrow. */
   "src/lib/calendarSections.ts",
+  /* v63: the board's view options — grouping, sorting and the status filter */
+  "src/lib/calendarToolbar.ts",
   "src/lib/calendarPill.ts",
   "src/lib/cardTier.ts",
   "src/lib/timelineCopy.ts",
@@ -81,7 +83,7 @@ describe("the calendar's colour law", () => {
        goes on reading as if it covered the board — which is what happened between v39 and v40,
        from the other direction: five new modules and a list that never grew. Changing this number
        is the deliberate act of having decided what the calendar owns. */
-    expect(TERRITORY.length, "the territory changed — was that deliberate?").toBe(13);
+    expect(TERRITORY.length, "the territory changed — was that deliberate?").toBe(14);
     /* ⚠️ AND EVERY CALENDAR-OWNED MODULE THE PAGE IMPORTS IS IN IT, derived rather than trusted.
        A file added to `src/lib/` and imported by the board is inside this law whether or not
        anybody remembered to list it. */

@@ -98,14 +98,24 @@ describe("⚠️ the retired values are gone from the DECLARATIONS, not merely f
 
 describe("⚠️ the rail's pinned values, where a source lock is the right instrument", () => {
   /**
-   * ⚠️ THE STEM IS DECLARED AT 1.5px AND CHROMIUM REPORTS 1px. A sub-pixel border's USED value
-   * rounds at DPR 1, so the rendered check can only say it is painted and painted burgundy — the
-   * declared width is a fact about the sheet and belongs here. This is the one place in this pack
-   * where a source lock is stronger than a painted one, and it is stated so nobody "fixes" the
-   * rendered assertion by pinning 1px.
+   * ⚠️ THE STEM IS RETIRED, AND THE LOCK STATES THE RETIREMENT RATHER THAN LAPSING (v63, run 2).
+   *
+   * It was a 1.5px tick hanging below the today circle, and the case here pinned its declared
+   * width because a sub-pixel border's USED value rounds to 1px at DPR 1 — a real reason, for a
+   * real element. The element is gone: the date bar's numeral tier is the last thing in it, and a
+   * mark below the numerals was a second today marker beside the circle that already is one.
+   *
+   * The claim survives INVERTED. A lock whose subject has been deleted is not "passing" and is not
+   * "obsolete" — it is unproved, and the only honest thing it can assert is that the subject stayed
+   * deleted. `rulesFor` returns `""` for a selector with no rule, so the emptiness IS the check.
    */
-  it("the today stem is 1.5px in the sheet, whatever the used value rounds to", () => {
-    expect(rulesFor(".tl-todaystem")).toMatch(/border-left:\s*1\.5px solid var\(--tl-nearblack\)/);
+  it("the today stem is retired — no rule, and nothing renders the class", () => {
+    expect(rulesFor(".tl-todaystem"), "the today stem's rule came back").toBe("");
+    /* ⚠️ AND THE OTHER HALF, because a rule and a renderer die separately. A class the component
+       still emits with no rule left is invisible chrome nobody can style; a rule with no renderer
+       is the fault this file already records. Both directions, or the retirement is half done. */
+    const page = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(page, "the today stem is rendered again").not.toMatch(/["\s`]tl-todaystem["\s`]/);
   });
 
   it("the rail's height is a token, and the columns it shares with a row are the same two", () => {

@@ -67,6 +67,24 @@ export const CAL_SECTION_PURPOSE: Record<CalSection, string> = {
   shut: "For the record",
 };
 
+/**
+ * What the SIDEBAR calls each section — and it is not always what the group bar calls it.
+ *
+ * ⚠️ ONE SECTION, TWO NAMES, AND THAT IS A DECISION RATHER THAN AN INCONSISTENCY. The bar names
+ * the STATE of the rows under it — "Urgent" — because that is what a heading over a run of rows is
+ * for. The view names what it does for the READER — "Needs me" — because that is what you are
+ * choosing when you click it. The ref carries both tables and they differ on exactly this one
+ * entry; every other name is shared, which is what makes the difference legible rather than a slip.
+ */
+export const CAL_SECTION_VIEW: Record<CalSection, string> = {
+  over: "Needs me",
+  need: "Upcoming",
+  with: "With agents",
+  quiet: "Gone quiet",
+  task: "Tasks",
+  shut: "Closed",
+};
+
 /** Section headings, as the ref writes them. */
 export const CAL_SECTION_LABEL: Record<CalSection, string> = {
   over: "Urgent",

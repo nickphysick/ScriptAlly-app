@@ -38,9 +38,14 @@ import { pillText } from "../../lib/calendarPill";
 import { stageSentence, type StageEnd } from "../../lib/stageSentence";
 import { QueryStatus } from "../../types";
 import {
-  calSectionOf, CAL_SECTION_DRAW, CAL_SECTION_LABEL, CAL_SECTION_PURPOSE,
-  type CalSection, type CalSectionFacts,
+  calSectionOf, CAL_SECTION_DRAW, CAL_SECTION_LABEL, CAL_SECTION_PURPOSE, CAL_SECTION_VIEW,
 } from "../../lib/calendarSections";
+import {
+  GROUP_BY_ORDER, GROUP_BY_LABEL, ACTION_ORDER, ACTION_LABEL, actionBucketOf,
+  SORT_BY_ORDER, SORT_BY_LABEL, STATUS_LADDER, statusRank, matchesStatus, anythingApplied,
+  type GroupBy, type SortBy, type ActionBucket,
+} from "../../lib/calendarToolbar";
+import type { CalSection, CalSectionFacts } from "../../lib/calendarSections";
 import { fadesFor, cardBounds } from "../../lib/calendarFade";
 import {
   TAB_ORDER, TAB_LABEL, rowInTab, tabOf, type TimelineTab,
@@ -60,8 +65,8 @@ import {
   CalendarItem, RecordItem, GhostItem,
 } from "../../lib/todoCalendar";
 import {
-  windowDays, shiftWindow, timelineWeek, defaultView, DEFAULT_SORT,
-  FILTER_LABEL, SORT_LABEL, SORT_ORDER, SORT_MEANING,
+  windowDays, shiftWindow, timelineWeek, defaultView,
+  FILTER_LABEL,
   YOU_ROW,
   type TimelineItem, type TimelineRow, type TimelineView,
   type RowSort, type TimelineFilter,
@@ -669,118 +674,106 @@ const Marker: React.FC<{ n: BarNode; selected: boolean; onPick: () => void }> = 
   </button>
 );
 
-/** A dropdown that names its current value — the same shape for Show and for Sort. */
-function Menu<T extends string>({
-  label, value, options, labels, meanings, onPick,
-}: {
-  label: string; value: T; options: readonly T[]; labels: Record<T, string>;
-  /** what each option MEANS — a sort name is not a definition; see `SORT_MEANING` */
-  meanings?: Record<T, string>;
-  onPick: (v: T) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const wrap = React.useRef<HTMLSpanElement>(null);
-  /* ⚠️ ESCAPE IS CONSUMED ON THE CAPTURE PHASE — the house cascade law: dismissing a popover must
-     never fall through to a page-level handler that would also act on the same press. */
-  React.useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.stopImmediatePropagation();
-      setOpen(false);
-    };
-    const onDown = (e: PointerEvent) => {
-      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
-    };
-    window.addEventListener("keydown", onKey, true);
-    window.addEventListener("pointerdown", onDown, true);
-    return () => {
-      window.removeEventListener("keydown", onKey, true);
-      window.removeEventListener("pointerdown", onDown, true);
-    };
-  }, [open]);
-  return (
-    <span className="tl-menuwrap" ref={wrap}>
-      <button type="button" className="tl-mbtn" aria-haspopup="true" aria-expanded={open}
-        aria-label={label} onClick={() => setOpen((o) => !o)}>
-        {labels[value]} ▾
-      </button>
-      {open && (
-        <div className="tl-menu" aria-label={label}>
-          {options.map((o) => (
-            <button key={o} type="button" aria-current={o === value}
-              onClick={() => { onPick(o); setOpen(false); }}>
-              <span className="tl-menuname">{labels[o]}</span>
-              {meanings && <span className="tl-menuwhat">{meanings[o]}</span>}
-            </button>
-          ))}
-        </div>
-      )}
-    </span>
-  );
-}
+/**
+ * One drawn group on the board.
+ *
+ * ⚠️ `tone`, `label`, `purpose` AND `status` ARE FOUR FIELDS BECAUSE THE FOUR GROUPINGS DISAGREE
+ * ABOUT WHICH OF THEM THEY CAN HONESTLY FILL. A section group has all four but the status; a
+ * status group has only a status and a name; `No grouping` has a key and rows and nothing else.
+ * Deriving any of them from another — a tone from a label, a mark from a tone — is what would let
+ * a group state something about its rows that is not true of them.
+ */
+type DrawnGroup = {
+  key: string;
+  /** the urgency class this group IS, or `null` where the grouping has no urgency claim to make */
+  tone: CalSection | null;
+  /** the divider's name; `""` draws no divider at all */
+  label: string;
+  purpose: string | null;
+  status?: QueryStatus;
+  rows: TimelineRow[];
+};
 
 /**
- * ONE popover holding every setting that changes how the board is DRAWN (v40, Phase 6).
+ * ══ ONE TOOLBAR CONTROL (v63, section C) ═══════════════════════════════════════════════════
  *
- * ⚠️ FOUR SEGMENTED CONTROLS IN THE ROW WERE FOUR ANSWERS TO ONE QUESTION. `WHAT NEEDS YOU /
- * MANUSCRIPT`, `ONE LIST / GROUPED`, `FULL BOARD / RIGHT NOW` and a range slider each occupied
- * permanent width and each stated a setting the reader had already made. What changes often is
- * WHICH relationships you are looking at, and that is now the tab strip; how the board is arranged
- * is set once and then read off the trigger, which names the non-default choices.
+ * A trigger that names its own value, and a panel beneath it. The three controls differ only in
+ * what goes IN the panel — a radio list, a radio list with a checkbox and a reset, a checkbox
+ * list with a clear — so the shell is one component and the body is `children`. Configuring one
+ * generic list component to express all three would need three flags and a slot, which is a
+ * config soup that reads worse than the three bodies it replaces.
  *
- * ⚠️ THE DISMISSAL IDIOM IS `Menu`'S, DELIBERATELY REUSED RATHER THAN COPIED IN SPIRIT: Escape on
- * the CAPTURE phase with `stopImmediatePropagation`, pointerdown outside, and the trigger counting
- * as inside. Escape here must never fall through to the page, which would close the workspace
- * behind the popover the reader was actually dismissing.
+ * ⚠️ IT REPLACES `Menu`, `Popover` AND `PopRow`, WHICH ARE DELETED IN THE SAME EDIT. All three
+ * had ZERO render sites — a dropdown cluster left standing after the controls that used it were
+ * retired. A replacement that is ADDED leaves the original reachable, and this repo has paid for
+ * that three times in one build; shipping a fourth dropdown beside three dead ones is the same
+ * fault with a bigger denominator.
+ *
+ * ⚠️ THE DISMISSAL IDIOM IS THE HOUSE ONE, and Escape is consumed on the CAPTURE phase with
+ * `stopImmediatePropagation`: this panel sits inside a page that owns its own Escape, so a press
+ * that dismissed the panel AND reached past it would close the board behind the thing the reader
+ * was actually dismissing.
  */
-function Popover({ label, summary, children }: {
-  label: string; summary: string; children: React.ReactNode;
+function TbMenu({ open, onOpen, trigger, label, children }: {
+  open: boolean;
+  /** `true` to open this one, `false` to close it — the page holds which, so only one is ever open */
+  onOpen: (v: boolean) => void;
+  trigger: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
   const wrap = React.useRef<HTMLSpanElement>(null);
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.stopImmediatePropagation();
-      setOpen(false);
+      onOpen(false);
     };
+    /* ⚠️ THE TRIGGER COUNTS AS INSIDE. Without it the pointerdown closes the panel and the click
+       that follows reopens it, so the control reads as inert on every second press. */
     const onDown = (e: PointerEvent) => {
-      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
+      if (!wrap.current?.contains(e.target as Node)) onOpen(false);
     };
-    window.addEventListener("keydown", onKey, true);
-    window.addEventListener("pointerdown", onDown, true);
+    document.addEventListener("keydown", onKey, true);
+    document.addEventListener("pointerdown", onDown);
     return () => {
-      window.removeEventListener("keydown", onKey, true);
-      window.removeEventListener("pointerdown", onDown, true);
+      document.removeEventListener("keydown", onKey, true);
+      document.removeEventListener("pointerdown", onDown);
     };
-  }, [open]);
+  }, [open, onOpen]);
   return (
-    <span className="tl-menuwrap" ref={wrap}>
-      <button type="button" className="tl-mbtn" aria-haspopup="true" aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}>
-        {label}{summary && <span className="tl-mbtnsum"> · {summary}</span>} ▾
+    /* ⚠️ NO `--open` MODIFIER. The panel is rendered conditionally rather than shown by a class, and
+       the trigger's own open treatment hangs off `aria-expanded`, which is on the element anyway
+       and cannot fall out of step with the state the way a second class can. A modifier emitted
+       with no rule behind it is invisible chrome the stylesheet does not know exists — the reach
+       sweep is what caught it, which is the whole reason that sweep runs. */
+    <span className="tl-tb" ref={wrap}>
+      <button type="button" className="tl-tbtrig" aria-expanded={open} aria-label={label}
+        onClick={() => onOpen(!open)}>
+        {trigger}
+        <span className="tl-tbchev" aria-hidden>▾</span>
       </button>
-      {open && <div className="tl-pop" aria-label={label}>{children}</div>}
+      {open && <div className="tl-dd" role="group" aria-label={label}>{children}</div>}
     </span>
   );
 }
 
-/** one setting inside the popover: a name, and a row of choices */
-function PopRow<T extends string>({ name, value, options, labels, onPick }: {
-  name: string; value: T; options: readonly T[]; labels: Record<T, string>; onPick: (v: T) => void;
+/** one option in a toolbar panel — a name, and a tick or a box that says whether it is on */
+function TbOpt({ on, mark, onClick, children }: {
+  on: boolean; mark: "tick" | "box"; onClick: () => void; children: React.ReactNode;
 }) {
   return (
-    <div className="tl-poprow">
-      <div className="tl-popname">{name}</div>
-      <div className="tl-popopts" role="group" aria-label={name}>
-        {options.map((o) => (
-          <button key={o} type="button" data-on={o === value} aria-pressed={o === value}
-            onClick={() => onPick(o)}>{labels[o]}</button>
-        ))}
-      </div>
-    </div>
+    <button type="button" className="tl-ddopt" data-on={on || undefined}
+      role={mark === "box" ? "checkbox" : "radio"} aria-checked={on} onClick={onClick}>
+      {mark === "box" && <span className="tl-ddbox" aria-hidden />}
+      {/* ⚠️ THE LABEL IS ITS OWN NAMED SPAN. The tick is always laid out (only its opacity moves,
+          so labels do not shift as the selection does), which means the button's `textContent`
+          reads `Urgency✓` — a probe taking the button's text is reading the mark as part of the
+          name. Naming the span is what lets a lock assert the option list exactly. */}
+      <span className="tl-ddname">{children}</span>
+      {mark === "tick" && <span className="tl-ddck" aria-hidden>✓</span>}
+    </button>
   );
 }
 
@@ -1388,11 +1381,32 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     for (const r of rows) for (const m of r.manuscripts) if (m.id) seen.set(m.id, m.title);
     return [...seen].map(([id, title]) => ({ id, title }));
   }, [rows]);
-  /* ⚠️ FOUR MODES SINCE v54, AND `grouped` SURVIVES AS A DERIVED READING. The boolean was
-     `ONE LIST / GROUPED`; the mode says WHICH grouping, and every consumer that only wanted to
-     know "is this the flat list" reads the derivation rather than a second piece of state. */
+  /* ⚠️ `groupMode` IS A DEAD KNOB AND IS FLAGGED RATHER THAN QUIETLY LEFT (v63). `setGroupMode`
+     has no caller anywhere, so the state is permanently `"list"` — which makes `cutNow` constantly
+     `"needs"` and the builder's `groupMode === "move"` branch unreachable. It is NOT retired here
+     because those readers are inside the board builder and pulling them out mid-toolbar is how a
+     phase about arrangement silently changes what the board contains. Named, so the sweep has a
+     target rather than a suspicion. */
   const [groupMode, setGroupMode] = useState<GroupMode>("list");
-  const grouped = groupMode !== "list";
+  /* ══ THE BOARD'S VIEW OPTIONS (v63, section C) ═══════════════════════════════════════════
+     ⚠️ FOUR PIECES OF STATE, AND THEY ANSWER A DIFFERENT QUESTION FROM THE SIDEBAR'S VIEWS.
+     The sidebar asks WHICH rows (one class of work); the toolbar asks how the rows that survive
+     are arranged and narrowed. Keeping them apart is why both can be on screen at once without
+     either being a second copy of the other — and why the toolbar states its own row count.
+
+     ⚠️ AND THE SORT REPLACES `view.sort` RATHER THAN JOINING IT. That knob's only comparison was
+     `=== DEFAULT_SORT` and no control on the page could set it anything else, so the builder's
+     order was discarded on every render; it is gone, not pinned, because a knob nothing can turn
+     left beside one that works is how a board comes to have two sorts that disagree. The OTHER
+     dead knob, `groupMode`, still has readers inside the board builder and is flagged at its
+     declaration for the sweep — stated plainly, because a comment claiming a retirement that did
+     not happen is worse than no comment. */
+  const [groupBy, setGroupBy] = useState<GroupBy>("urgency");
+  const [sortBy, setSortBy] = useState<SortBy>("urgency");
+  const [sortRev, setSortRev] = useState(false);
+  const [statusPick, setStatusPick] = useState<QueryStatus[]>([]);
+  /* which toolbar menu is open — one at a time, and `null` is closed */
+  const [tbOpen, setTbOpen] = useState<null | "group" | "sort" | "status">(null);
 
   const cutByAvailable = boardManuscripts.length > 1;
   const [cutBy, setCutBy] = useState<"needs" | "ms">("needs");
@@ -1901,44 +1915,82 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * relationship, or one with no dated work — and `null` sorted as zero would put the quietest
    * rows at the top of a list whose whole claim is that the top is what needs you.
    */
-  const oneList = useMemo(
-    () => (view.sort === DEFAULT_SORT
-      ? board.flatMap((g) => g.rows)
-        .slice()
-        /* ⚠️ CLOSED SINKS BELOW EVERY LIVE ROW, BEFORE ANY KEY IS CONSULTED — the builder's own
-           rule, restated here because this re-sort would otherwise discard it. v58 orders closed
-           last, after the long silences; a closed row whose query is still `Queried` (the
-           agency-policy case) carries an ordinary finite key and floated up among live work
-           without it. Measured: a closed row at position 18, above four silences. */
-        .sort((a, b) => {
-          /**
-           * ⚠️ OWED WORK IS A TIER, AND A TASK IS NOT IN IT (v58e).
-           *
-           * The pack's order is: owed → dated waits AND TASKS by date → reminders → silences →
-           * closed. Sorting on the date alone interleaved them: a task due tomorrow sat between two
-           * relationships that are already late, so the run of overdue work at the top — the whole
-           * claim the board's first screen makes — was broken by something that is not late at all.
-           *
-           * ⚠️ IT READS THE SAME FLAG THE CHIP, THE WOBBLE AND THE STRIP READ. "Owed" is decided
-           * once, in the bar pass; a row is owed when any card on it is. A second definition here
-           * is how a board comes to say a thing is late in four places and order it as though it
-           * were not — which is exactly what "Nudge due" did until this run.
-           */
-          const oa = (barsByRow.get(a.key)?.segs ?? []).some((sg) => sg.owed);
-          const ob = (barsByRow.get(b.key)?.segs ?? []).some((sg) => sg.owed);
-          if (oa !== ob) return oa ? -1 : 1;
-          /* ⚠️ THE GROUP, NOT THE `closed` FLAG. `closed` means every query on the row is
-             terminal by STATUS; the board's own closed rule is wider — an agency that states
-             silence means no, with its window passed, closes a query that is still `Queried`.
-             Sorting on the flag left exactly that row above four silences. The group is what the
-             Closed tab is built from, so this and the tab cannot disagree. */
-          const ca = a.group === "closed", cb = b.group === "closed";
-          if (ca !== cb) return ca ? 1 : -1;
-          return (a.pressingAt ?? Infinity) - (b.pressingAt ?? Infinity);
-        })
-      : board.flatMap((g) => g.rows)),
-    [board, view.sort],
-  );
+  /**
+   * ══ THE ROW ORDER — ONE COMPARATOR PER SORT KEY (v63, section C) ═══════════════════════════
+   *
+   * ⚠️ THE TOOLBAR'S SORT IS THE ONLY ONE. `view.sort` used to sit here as a ternary, and its only
+   * comparison was `=== DEFAULT_SORT` — no control on the page could set it anything else, so the
+   * builder's own order was discarded on every single render and the branch beside it was dead
+   * code wearing a condition. It is gone rather than pinned: a knob nothing can turn, left in
+   * place beside a knob that works, is how a board comes to have two sorts that disagree.
+   *
+   * ⚠️ AND EVERY KEY IS READ FROM WHAT THE ROW ALREADY HOLDS — `status`, `pressingAt`, `items`,
+   * and the `owed` flag from the bar pass. Nothing here re-derives a date or a lateness; a second
+   * opinion about whether a row is late is exactly how the board came to say a thing was urgent in
+   * one place and file it under "with agents" in another.
+   */
+  const oneList = useMemo(() => {
+    const rowsAll = board.flatMap((g) => g.rows);
+    /**
+     * ⚠️ THE DATES COME FROM THE ROW, AND THE FIRST CUT DERIVED THEM FROM `items` AND WAS WRONG.
+     *
+     * `items` holds only what falls inside the DRAWN WINDOW. On a board where nothing did, every
+     * comparison returned 0, `Array.sort` is stable, and the two opposite-direction date sorts
+     * produced one identical sequence — a control that ticked, named its value and did nothing.
+     * `queriedAt` and `lastActiveAt` are the builder's own, in milliseconds, window-independent,
+     * and they are the same two figures its `waiting` and `active` orders read; so the Calendar
+     * and the builder cannot disagree about when a relationship started.
+     *
+     * ⚠️ AND A ROW WITH NO DATE SINKS IN BOTH ORDERS, which the sentinels do arithmetically:
+     * `Infinity` for never sent, `-Infinity` for nothing recorded. It is not the oldest and it is
+     * not the newest — floating it to either end would state one of those.
+     */
+    const byDate = (a: TimelineRow, b: TimelineRow, pick: "queriedAt" | "lastActiveAt") => {
+      const x = a[pick], y = b[pick];
+      if (x === y) return 0;
+      /* the sentinel sinks whichever way the key runs */
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return Number.isFinite(x) ? -1 : 1;
+      return pick === "queriedAt" ? x - y : y - x;
+    };
+    const cmp: Record<SortBy, (a: TimelineRow, b: TimelineRow) => number> = {
+      /**
+       * ⚠️ OWED WORK IS A TIER, AND A TASK IS NOT IN IT (v58e).
+       *
+       * The order is: owed → dated waits AND TASKS by date → reminders → silences → closed.
+       * Sorting on the date alone interleaved them: a task due tomorrow sat between two
+       * relationships that are already late, so the run of overdue work at the top — the whole
+       * claim the board's first screen makes — was broken by something that is not late at all.
+       *
+       * ⚠️ IT READS THE SAME FLAG THE CHIP, THE WOBBLE AND THE STRIP READ. "Owed" is decided
+       * once, in the bar pass; a row is owed when any card on it is. A second definition here is
+       * how a board comes to say a thing is late in four places and order it as though it were not.
+       */
+      urgency: (a, b) => {
+        const oa = (barsByRow.get(a.key)?.segs ?? []).some((sg) => sg.owed);
+        const ob = (barsByRow.get(b.key)?.segs ?? []).some((sg) => sg.owed);
+        if (oa !== ob) return oa ? -1 : 1;
+        /* ⚠️ THE GROUP, NOT THE `closed` FLAG. `closed` means every query on the row is terminal
+           by STATUS; the board's own closed rule is wider — an agency that states silence means
+           no, with its window passed, closes a query that is still `Queried`. Sorting on the flag
+           left exactly that row above four silences. The group is what the Closed section is
+           built from, so this and the section cannot disagree. */
+        const ca = a.group === "closed", cb = b.group === "closed";
+        if (ca !== cb) return ca ? 1 : -1;
+        return (a.pressingAt ?? Infinity) - (b.pressingAt ?? Infinity);
+      },
+      /* the pipeline's own ladder — see `STATUS_LADDER`; ties by name so the order is stable */
+      status: (a, b) =>
+        statusRank(a.status) - statusRank(b.status) || a.name.localeCompare(b.name),
+      /* oldest query first, which is what a date read ascending means */
+      sent: (a, b) => byDate(a, b, "queriedAt"),
+      /* ⚠️ THE LABEL IS THE BASE ORDER. "Most recent activity" puts the most recent at the top;
+         building it ascending and telling the reader to reverse it would make the control's own
+         name describe what it does only half the time. */
+      recent: (a, b) => byDate(a, b, "lastActiveAt"),
+    };
+    const out = rowsAll.slice().sort(cmp[sortBy]);
+    return sortRev ? out.reverse() : out;
+  }, [board, barsByRow, sortBy, sortRev]);
 
 
   /**
@@ -1987,12 +2039,129 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       .filter((g) => g.rows.length > 0);
   }, [oneList, barsByRow]);
 
+  /* ⚠️ WHICH SECTION EACH ROW FELL IN, DERIVED FROM `sectioned` RATHER THAN RE-CASCADED. The
+     action grouping needs a row's urgency class, and asking `calSectionOf` a second time would be
+     a second opinion about it — the exact shape that let the board once call a row urgent in one
+     place and file it under "with agents" in another. One partition, read two ways. */
+  const secOfRow = React.useMemo(() => {
+    const m = new Map<string, CalSection>();
+    for (const g of sectioned) for (const r of g.rows) m.set(r.key, g.sec);
+    return m;
+  }, [sectioned]);
+
   /* ⚠️ THE FILTER IS APPLIED TO THE DRAWN GROUPS AND NOWHERE ELSE. `sectioned` stays the whole
      board, so the sidebar's counts are a census however many groups are on screen — a tally that
      changed as you filtered it could not be added up. */
   const shownSections = React.useMemo(
     () => (secFilter === null ? sectioned : sectioned.filter((g) => g.sec === secFilter)),
     [sectioned, secFilter],
+  );
+
+  /**
+   * ══ THE DRAWN GROUPS (v63, section C) ══════════════════════════════════════════════════════
+   *
+   * The rows that survive the view and the status filter, arranged by whichever of the four
+   * groupings is on. A group is `{ key, tone, label, purpose, rows }` — and every field is
+   * separate BECAUSE the four groupings answer different questions:
+   *
+   * ⚠️ THE TONE IS A CLAIM, SO A GROUPING WITH NOTHING TRUE TO SAY LEAVES IT NULL. The tint means
+   * "this is that urgency class". Under `status` there is no urgency class — an Offer group tinted
+   * rose would state the offer is late — so those groups are neutral. `action` maps honestly, one
+   * bucket to one section's tone, because it IS an urgency-family question asked differently.
+   *
+   * ⚠️ AND THE PURPOSE LINE IS OMITTED RATHER THAN INVENTED. `CAL_SECTION_PURPOSE` says what a
+   * section is FOR; a status group is not for anything, it just holds the rows at that stage. The
+   * eyebrow is absent there, which is the same silence-wins rule the empty sections follow.
+   */
+  const drawnGroups = React.useMemo<DrawnGroup[]>(() => {
+    /* ⚠️ THE STATUS FILTER NARROWS WHAT IS DRAWN AND NOT WHAT IS COUNTED. `sectioned` stays the
+       whole board, so the sidebar's census still adds up; the toolbar states its own row count for
+       exactly this reason — two numbers answering two questions, with the second one named. */
+    const keep = (r: TimelineRow) => matchesStatus(statusPick, r.status);
+
+    if (groupBy === "urgency") {
+      return shownSections
+        .map((g): DrawnGroup => ({
+          key: g.sec, tone: g.sec, label: CAL_SECTION_LABEL[g.sec],
+          purpose: CAL_SECTION_PURPOSE[g.sec], rows: g.rows.filter(keep),
+        }))
+        .filter((g) => g.rows.length > 0);
+    }
+
+    /**
+     * ⚠️ THE OTHER THREE TAKE THEIR ROWS FROM `oneList`, NEVER BY FLATTENING `sectioned` — AND
+     * FLATTENING IS WHAT THEY DID UNTIL THE MEASUREMENT CAUGHT IT.
+     *
+     * `sectioned` BUCKETS the sorted list into six sections in `CAL_SECTION_DRAW` order, so
+     * flattening it hands back a sequence ordered by SECTION first and by the chosen key only
+     * within each one. Under `No grouping` that is not a subtlety: the sort key's order across
+     * section boundaries is simply gone, so three of the four keys produced the same three
+     * sequences and `Reverse order` inverted something that was not what the reader had asked for.
+     *
+     * Every part was correct — the comparator ordered, the partition partitioned, the flatten
+     * flattened — and the composition was wrong, which is why no unit lock could see it. Reading
+     * `oneList` and filtering by the row's own section preserves the sort exactly.
+     */
+    const flat = oneList.filter((r) => (secFilter === null || secOfRow.get(r.key) === secFilter))
+      .filter(keep);
+
+    if (groupBy === "none") {
+      /* ⚠️ ONE GROUP, NOT ZERO. The rows still need the container that carries the number column
+         and the lane inset; drawing them loose would put them on a different grid from every other
+         grouping, which is the misalignment v60d spent a whole phase measuring. The divider is
+         what goes — a heading over "everything" says nothing. */
+      return flat.length ? [{ key: "all", tone: null, label: "", purpose: null, rows: flat }] : [];
+    }
+
+    if (groupBy === "status") {
+      const by = new Map<QueryStatus, TimelineRow[]>();
+      const noStatus: TimelineRow[] = [];
+      for (const r of flat) {
+        if (r.status == null) { noStatus.push(r); continue; }
+        const l = by.get(r.status); if (l) l.push(r); else by.set(r.status, [r]);
+      }
+      const out: DrawnGroup[] = STATUS_LADDER
+        .filter((st) => by.has(st))
+        .map((st) => ({
+          key: `st:${st}`, tone: null, label: st, purpose: null, status: st,
+          rows: by.get(st) ?? [],
+        }));
+      /* ⚠️ A ROW WITH NO STATUS GETS ITS OWN GROUP AND IS NEVER FOLDED INTO ONE. Tasks have no
+         query status; filing them under `Queried` would state something about them that is not
+         true, and dropping them would make the groups stop summing to the board. */
+      if (noStatus.length) {
+        out.push({ key: "st:none", tone: "task", label: "Tasks and notes", purpose: null, rows: noStatus });
+      }
+      return out;
+    }
+
+    const byAct = new Map<ActionBucket, TimelineRow[]>();
+    for (const r of flat) {
+      const b = actionBucketOf(secOfRow.get(r.key) ?? "with");
+      const l = byAct.get(b); if (l) l.push(r); else byAct.set(b, [r]);
+    }
+    /* one bucket to one section's tone, so the tint keeps meaning what it means elsewhere */
+    const ACT_TONE: Record<ActionBucket, CalSection> = {
+      required: "over", upcoming: "need", nothing: "with", closed: "shut",
+    };
+    const ACT_PURPOSE: Record<ActionBucket, string> = {
+      required: "waiting on you",
+      upcoming: "coming up",
+      nothing: "nothing to do yet",
+      closed: "no longer running",
+    };
+    return ACTION_ORDER
+      .filter((b) => byAct.has(b))
+      .map((b) => ({
+        key: `ac:${b}`, tone: ACT_TONE[b], label: ACTION_LABEL[b], purpose: ACT_PURPOSE[b],
+        rows: byAct.get(b) ?? [],
+      }));
+  }, [shownSections, oneList, secFilter, groupBy, statusPick, secOfRow]);
+
+  /** how many rows are actually on the board — the toolbar's own count, and the ref's `N rows` */
+  const drawnCount = React.useMemo(
+    () => drawnGroups.reduce((n, g) => n + g.rows.length, 0),
+    [drawnGroups],
   );
 
   /**
@@ -2055,8 +2224,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   /* ⚠️ THE TRIGGER NAMES ONLY WHAT IS NOT THE DEFAULT. A summary restating every setting says the
      same thing on a board nobody has touched as on one somebody has, which is no signal at all. */
   const displaySummary = [
-    groupMode === "list" ? "" : GROUP_MODE_LABEL[groupMode],
-    view.sort === DEFAULT_SORT ? "" : SORT_LABEL[view.sort],
+    /* ⚠️ IT NAMES THE TOOLBAR'S SETTINGS, NOT THE TWO DEAD KNOBS IT USED TO. `groupMode` and
+       `view.sort` were both stuck at their defaults with no control on the page, so two of the
+       four clauses could never fire — a summary of settings nobody could change. */
+    groupBy === "urgency" ? "" : GROUP_BY_LABEL[groupBy],
+    sortBy === "urgency" ? "" : SORT_BY_LABEL[sortBy],
+    sortRev ? "Reversed" : "",
     cutNow === "ms" ? "By book" : "",
     rangeIdx === DEFAULT_RANGE_INDEX ? "" : TIMELINE_RANGES[rangeIdx].label,
   ].filter(Boolean).join(" · ");
@@ -2163,7 +2336,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
               data-sec={sec} aria-pressed={secFilter === sec}
               onClick={() => setSecFilter((c) => (c === sec ? null : sec))}>
               <SectionIcon sec={sec} />
-              <span>{CAL_SECTION_LABEL[sec]}</span>
+              {/* the VIEW's name — see `CAL_SECTION_VIEW`; the group bar uses `CAL_SECTION_LABEL` */}
+              <span>{CAL_SECTION_VIEW[sec]}</span>
               <b>{String(g.rows.length).padStart(2, "0")}</b>
             </button>
           );
@@ -2801,6 +2975,90 @@ data-rowkey={r.key}
           <div className="tl-cal tl-board">
             <aside className="tl-axis" aria-label="Calendar controls">{sidebar}</aside>
             <div className="tl-boardpane">
+            {/* ══ THE BOARD TOOLBAR (v63, section C) ═══════════════════════════════════════════
+                ⚠️ IT ASKS A DIFFERENT QUESTION FROM THE SIDEBAR AND SITS IN A DIFFERENT PANE.
+                The sidebar's views choose WHICH rows; this chooses how the survivors are grouped,
+                ordered and narrowed. Both can be set at once without either being a second copy of
+                the other — which is why this row states its OWN count: the sidebar's numbers are a
+                census of the whole board and this one is how many are actually drawn. Two numbers,
+                two questions, and the second one is named so they cannot be confused. */}
+            {board.length > 0 && (
+              <div className="tl-vtool">
+                <TbMenu label="Group rows by" open={tbOpen === "group"}
+                  onOpen={(v) => setTbOpen(v ? "group" : null)}
+                  trigger={<><span className="tl-tbk">Group</span>{GROUP_BY_LABEL[groupBy]}</>}>
+                  {GROUP_BY_ORDER.map((g) => (
+                    <TbOpt key={g} mark="tick" on={g === groupBy}
+                      onClick={() => { setGroupBy(g); setTbOpen(null); }}>{GROUP_BY_LABEL[g]}</TbOpt>
+                  ))}
+                </TbMenu>
+
+                <TbMenu label="Sort rows by" open={tbOpen === "sort"}
+                  onOpen={(v) => setTbOpen(v ? "sort" : null)}
+                  trigger={<><span className="tl-tbk">Sort</span>{SORT_BY_LABEL[sortBy]}</>}>
+                  {SORT_BY_ORDER.map((k) => (
+                    <TbOpt key={k} mark="tick" on={k === sortBy}
+                      onClick={() => { setSortBy(k); setTbOpen(null); }}>{SORT_BY_LABEL[k]}</TbOpt>
+                  ))}
+                  {/* ⚠️ THE DIRECTION IS A CHECKBOX BESIDE THE KEYS, NOT A FIFTH KEY. It applies to
+                      whichever key is on, so listing it as an option would make it exclusive with
+                      the thing it modifies. */}
+                  <div className="tl-ddfoot">
+                    <TbOpt mark="box" on={sortRev} onClick={() => setSortRev((v) => !v)}>
+                      Reverse order
+                    </TbOpt>
+                  </div>
+                  <div className="tl-ddfoot">
+                    <button type="button" className="tl-ddlink"
+                      onClick={() => { setSortBy("urgency"); setSortRev(false); setTbOpen(null); }}>
+                      Reset sort
+                    </button>
+                  </div>
+                </TbMenu>
+
+                <TbMenu label="Filter by status" open={tbOpen === "status"}
+                  onOpen={(v) => setTbOpen(v ? "status" : null)}
+                  trigger={<>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+                      strokeLinecap="round" aria-hidden><path d="M4 6h16M7 12h10M10 18h4" /></svg>
+                    Status
+                    {/* the badge counts what is TICKED, and is absent at zero rather than reading 0 */}
+                    {statusPick.length > 0 && <span className="tl-tbbadge">{statusPick.length}</span>}
+                  </>}>
+                  {/* ⚠️ TEN OPTIONS, IN THE APP'S OWN NAMES — a deviation from the ref, recorded.
+                      The ref lists nine: it abbreviates `Revise & Resubmit` to `R&R` and folds
+                      `Rejected` and `Withdrawn` into one `Closed`. Both are a mockup's convenience.
+                      Folding two statuses into one option makes them unfilterable apart, and this
+                      app's own law is that a `QueryStatus` is written and read as its exact enum
+                      string — a filter naming `R&R` names a status the data does not contain. */}
+                  {STATUS_LADDER.map((st) => (
+                    <TbOpt key={st} mark="box" on={statusPick.includes(st)}
+                      onClick={() => setStatusPick((cur) =>
+                        cur.includes(st) ? cur.filter((x) => x !== st) : [...cur, st])}>
+                      {st}
+                    </TbOpt>
+                  ))}
+                  {statusPick.length > 0 && (
+                    <div className="tl-ddfoot">
+                      <button type="button" className="tl-ddlink" onClick={() => setStatusPick([])}>
+                        Clear all
+                      </button>
+                    </div>
+                  )}
+                </TbMenu>
+
+                {/* ⚠️ `Clear all` IS PRESENT ONLY WHEN IT HAS SOMETHING TO CLEAR — the same rule
+                    `Back to today` follows. A control that is always there and usually does nothing
+                    teaches a reader to ignore it for the one moment it matters. */}
+                {anythingApplied({ view: secFilter, statuses: statusPick }) && (
+                  <button type="button" className="tl-tbclear"
+                    onClick={() => { setSecFilter(null); setStatusPick([]); }}>
+                    Clear all
+                  </button>
+                )}
+                <span className="tl-tbcnt">{drawnCount} {drawnCount === 1 ? "row" : "rows"}</span>
+              </div>
+            )}
             <TplZone className="tl-zone" hem={false} label={range.label}>
               <div
                 className="tl tl-wrap"
@@ -2868,7 +3126,11 @@ data-rowkey={r.key}
                       ))}
                       {todayAt != null && (
                         <>
-                          <span className="tl-todaystem" style={{ left: pct(todayAt) }} aria-hidden />
+                          {/* ⚠️ THE STEM UNDER THE TODAY CIRCLE IS GONE (v63). It was a tick
+                              rising from the rail's baseline to meet a today CAP that no longer
+                              exists — the filled circle IS the mark now, and a tick beneath a
+                              numeral inside its own disc is a second pointer at a date the disc
+                              already names. */}
                           <span className="tl-todaychip" style={{ left: pct(todayAt) }}>{shortCalDate(today)}</span>
                         </>
                       )}
@@ -2888,22 +3150,33 @@ data-rowkey={r.key}
                      grouped heading-over-loose-rows before it. A heading on the ground above its
                      rows cannot tell a reader four rows down which section they are in; a tinted
                      container running the height of the section answers it without a word. */
-                  shownSections.map((g) => (
-                    <div className="tl-grp" key={g.sec} data-sec={g.sec}>
+                  drawnGroups.map((g) => (
+                    <div className="tl-grp" key={g.key} data-sec={g.tone ?? undefined}>
                       {/* ⚠️ A DIVIDER, NOT A HEADER (v61). A hairline across the container with a
                           tinted pill sitting ON it — icon, name and a zero-padded count. The count
                           is here because a pill is small enough to hold one; the v60 header spanned
                           the width and could not state a number without competing with the row it
-                          introduced. */}
-                      <div className="tl-gdiv">
-                        <span className="gp">
-                          <SectionIcon sec={g.sec} />
-                          <span>{CAL_SECTION_LABEL[g.sec]}</span>
-                          <b>{String(g.rows.length).padStart(2, "0")}</b>
-                        </span>
-                        {/* what the group is FOR, at the bar's right end — see CAL_SECTION_PURPOSE */}
-                        <span className="geb">{CAL_SECTION_PURPOSE[g.sec]}</span>
-                      </div>
+                          introduced.
+                          ⚠️ AND UNDER `No grouping` THERE IS NO DIVIDER AT ALL (v63). A heading
+                          reading "everything" over every row on the board is a line of chrome that
+                          states nothing — the same silence-wins rule an empty section follows. */}
+                      {g.label !== "" && (
+                        <div className="tl-gdiv">
+                          <span className="gp">
+                            {/* ⚠️ THE MARK COMES FROM WHAT THE GROUP IS. A section group draws its
+                                own icon; a status group draws the app's own `StatusDot`, which is
+                                the one way a status is ever drawn here; a group that is neither
+                                draws nothing rather than borrowing a mark that would claim it. */}
+                            {g.status != null
+                              ? <StatusDot status={g.status} overrideSize={13} />
+                              : g.tone != null ? <SectionIcon sec={g.tone} /> : null}
+                            <span>{g.label}</span>
+                            <b>{String(g.rows.length).padStart(2, "0")}</b>
+                          </span>
+                          {/* what the group is FOR — absent where there is nothing true to say */}
+                          {g.purpose && <span className="geb">{g.purpose}</span>}
+                        </div>
+                      )}
                       <div className="tl-gwrap">
                         {/* ⚠️ THE NUMBER COLUMN IS A SIBLING OF THE LANES, NOT A CELL IN EACH ROW.
                             One element per row, at exactly `--row-h`, so the numbers line up with

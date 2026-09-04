@@ -221,6 +221,27 @@ export interface TimelineRow {
    * key the painted rows actually carry.
    */
   pressingAt: number | null;
+
+  /**
+   * ⚠️ TWO DATES THE BUILDER ALREADY DERIVES, CARRIED RATHER THAN RE-DERIVED (v63, section C).
+   *
+   * `queriedAt` is the earliest `dateSent` across the row's queries — when the relationship
+   * started. `lastActiveAt` is the newest thing on its record. Both are MILLISECONDS and both are
+   * window-independent, which is the point: the Calendar's "Queried date" and "Most recent
+   * activity" sorts read these, so a change of window cannot change the order.
+   *
+   * ⚠️ THE SENTINELS ARE DELIBERATELY ASYMMETRIC and are the builder's own. `queriedAt` is
+   * `Infinity` when nothing was ever sent and `lastActiveAt` is `-Infinity` when nothing is on the
+   * record — so an empty row sinks in BOTH orders rather than tying with every other empty one,
+   * which a shared `null` would do. A row with no date is not the oldest and is not the newest.
+   *
+   * ⚠️ AND THE ALTERNATIVE WAS MEASURED AND WRONG. The first cut derived these from `row.items`,
+   * which holds only what falls inside the drawn window — so on a fixture where nothing did, every
+   * comparison returned 0 and the two OPPOSITE-DIRECTION sorts produced one identical order.
+   * `orders seen: 3 of 4` was the only visible symptom, and it passed a `distinct > 1` assertion.
+   */
+  queriedAt: number;
+  lastActiveAt: number;
   /**
    * WHICH QUERY EACH PART OF THIS ROW IS ABOUT — the row's subject, made visible.
    *
@@ -1202,6 +1223,9 @@ export function timelineWeek(
         sort: row.pressingAt == null ? null : (row.sortQueryId ?? null),
       },
       dot: row.dot, items: row.items,
+      /* the builder's own two dates, carried so the Calendar's date sorts and the builder's
+         `waiting`/`active` orders cannot disagree about when a relationship started */
+      queriedAt: row.waitingFrom, lastActiveAt: row.lastActive,
       lanes: Math.max(1, barLanes + (row.items.length ? packed : 0)),
       manuscripts: row.manuscripts, closed: row.closed,
     });

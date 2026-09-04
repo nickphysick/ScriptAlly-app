@@ -410,9 +410,18 @@ describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local 
     /* the narrowing still reads the ONE definition — `rowInTab` over the row's own group, the same
        field the board's headings draw, so a tab and a heading cannot disagree about one row */
     expect(cal).toContain("rowInTab");
-    expect(cal).toContain("FULL BOARD");
-    expect(cal).toContain("RIGHT NOW");
-    expect(cal).not.toContain("KIND_LABEL"); // no per-page vocabulary
+    /* ⚠️ THESE TWO WERE ASSERTING PROSE, AND ONE OF THEM WENT RED WHEN AN OBITUARY WAS TIDIED
+       (v63, section C). They read `toContain("FULL BOARD")` and `toContain("RIGHT NOW")` over RAW
+       source, and both controls were retired packs ago — the strings survived only inside comments
+       explaining the retirement, so the case was green because of the eulogy rather than the code.
+       Deleting the dead control row's CSS took the last mention of `FULL BOARD` with it and the
+       lock failed over a change that removed nothing it claimed to guard: this repo's most-recorded
+       false red, from the direction where it had ALSO been a false green for two packs.
+
+       The law they were standing in for is real and is asserted below: ONE kind definition, and the
+       narrowing applied where every surface reads it. The retired controls' names are not part of
+       it. `RIGHT NOW` in particular is now `Needs me`, a sidebar view over the same derivation. */
+    expect(decomment(cal), "a per-page kind vocabulary came back").not.toContain("KIND_LABEL");
     /* and the superseded control is gone from the page, not merely unrendered */
     /* ⚠️ STRIPPED, NOT RAW — and this caught me twice in one pack. The page now carries COMMENTS
        explaining the supersession, and those comments necessarily name `TODO_FACETS`, `facetCounts`
