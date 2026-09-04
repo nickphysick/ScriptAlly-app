@@ -113,7 +113,12 @@ const DENSITY_LABEL: Record<"comfortable" | "regular" | "compact", string> = {
   comfortable: "Comfortable", regular: "Regular", compact: "Compact",
 };
 
-const STAGE_BAND_DOT_PX = 20;
+/** ⚠️ 14px — THE REF'S `.sseg svg`, AND IT SUPERSEDES §D's 20. That pass argued a glyph's legible
+    size is part of the glyph and took the pack's 20; rendered, a 20px disc in a 26px band leaves
+    three pixels of air and reads as an inset MEDALLION laid in the band rather than as the band's
+    own leading mark. The type carries the line; the dot identifies it. Recorded rather than quietly
+    changed, because the earlier reasoning is in the commit history and reads as settled. */
+const STAGE_BAND_DOT_PX = 14;
 const CARD_BADGE_PX = 20;
 /**
  * A past stage's badge — the ref's `.jc .jmed`, at 54 against the live card's 58.
@@ -594,16 +599,21 @@ const Piece: React.FC<{
                 `agcy` and `sepd` spans the ref hides under `data-bar="qc"` have nothing left to
                 hide — they are DELETED rather than rendered and hidden, which is what stops a
                 third pass finding two agencies on one card and wondering which is live. */}
+            {/* ══ LINE TWO — A FACT AND A TAIL, ALWAYS BOTH (v63, §D formatting) ═══════════════
+                ⚠️ TWO SPANS, AND THEY COME FROM `barFactLine` RATHER THAN FROM SPLITTING THE
+                LABEL. The fact is sentence case in the card's own ink; the tail is mono caps, a
+                shade back — the register a measured span belongs in. Splitting the joined label on
+                a middot would make the typography depend on a punctuation mark inside a string.
+
+                ⚠️ AND NO DEED WORDS. `nudge due`, `send by 29 Sept` and `next 8 Sept` used to reach
+                this line as the label's PREFIX, because the render fell back to it wherever there
+                was no second clause. A deed is what the action column says. */}
             <span className="tl-ffx">
-              {/* ⚠️ THE RINGED `!` FOLLOWS THE APP'S OWN DEFINITION OF LATE, WHICH IS `owed` OR
-                  `quiet` — `calSectionOf`'s `isUrgent`, the same expression that files a row under
-                  Urgent and the same one the holder's rose ink reads. It was gated on `owed` alone
-                  for one build: the holder went rose on a gone-quiet card and the ring beside it
-                  did not, so one card carried two definitions of late three inches apart. Found by
-                  widening the LOCK to the app's definition, not by reading the render. */}
+              {/* the ringed `!` — QC's own urgent mark, on the fact rather than beside the name */}
               {(sg.owed || sg.state === "quiet") && <span className="tl-bang" aria-hidden>!</span>}
-              {lines.t2 || lines.t1}
+              {sg.fact}
             </span>
+            <span className="tl-feb">{sg.tail}</span>
             {/* ⚠️ NO MONO EYEBROW, AND TWO SEPARATE REASONS — both recorded because each alone
                 would look like an omission.
 

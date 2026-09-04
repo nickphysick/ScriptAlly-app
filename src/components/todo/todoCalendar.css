@@ -1907,8 +1907,13 @@ button.tl-tchip { cursor: pointer; }
  * words centred on a `top` and a `max-height` written for a different card — which is how the
  * eyebrow came to be clipped in this section's first build. The pair travels together.
  */
+/* ⚠️ 120/100, NOT THE REF'S 116/96 — AND THE FOUR PIXELS ARE THE DESCENDER FLOOR AGAIN. Comfortable
+   STACKS the name over the agency, so its body holds four typographic lines; at `line-height: 1.3`
+   its stack measures ~73.7px against the 70 that a 96px bar leaves once the 26px band is
+   taken. The ref fits because it sets 1.15 on its own name, which this repo forbids on mixed-case
+   Playfair inside a clipping box. Eight pixels of bar is the cheapest honest way to keep both. */
 .tl-board[data-dens="comfortable"] {
-  --row-h: 116px; --bar-h: 96px;
+  --row-h: 124px; --bar-h: 104px;
 }
 /* the name and the agency stack rather than sitting on one line — the room is there for it */
 .tl-board[data-dens="comfortable"] .tl-trow { flex-direction: column; align-items: flex-start; gap: 2px; }
@@ -1918,7 +1923,7 @@ button.tl-tchip { cursor: pointer; }
    1.3`; the ref sets 1.15 on its own name, which this repo forbids on mixed-case Playfair inside a
    clipping box. Measured at 1.3 the stack is ~60.4px and 56 clipped it. The top comes in to 32 —
    6px clear of the 26px band rather than 10 — so 32 + 62 still lands inside the 96px bar. */
-.tl-board[data-dens="comfortable"] .tl-cardbody { top: 32px; max-height: 62px; }
+.tl-board[data-dens="comfortable"] .tl-cardbody { top: 27px; max-height: 75px; }
 
 .tl-board[data-dens="compact"] {
   --row-h: 76px; --bar-h: 58px;
@@ -1926,11 +1931,14 @@ button.tl-tchip { cursor: pointer; }
 /* ⚠️ AT COMPACT THE TWO LINES BECOME ONE ROW and the agency goes. 22px holds one line of type, so
    a stacked name-over-fact would clip — the ref drops the agency rather than shrinking the name,
    because a name at 11px is a caption and the row stops being scannable. */
+/* ⚠️ AT COMPACT THE TAIL JOINS THE ROW rather than sitting under it — 22px is one line of type, and
+   the whole point of compact is that a card is one line of type. */
 .tl-board[data-dens="compact"] .tl-cardbody { top: 33px; max-height: 22px; }
+.tl-board[data-dens="compact"] .tl-feb { display: inline; margin: 0 0 0 10px; }
 .tl-board[data-dens="compact"] .tl-gstack { flex-direction: row; align-items: baseline; gap: 10px; }
-.tl-board[data-dens="compact"] .tl-fag { display: none; }
-/* the fact loses its stacking margin once it is beside the name rather than under it */
+/* the fact keeps no stacking margin once the whole line is one row */
 .tl-board[data-dens="compact"] .tl-ffx { margin-top: 0; }
+.tl-board[data-dens="compact"] .tl-fag { display: none; }
 
 /* ⚠️ THE NUDGE MARKER — the ref's `.evn`: a small white disc on the bar at the date the writer
    nudged. It is centred on its date rather than starting at it (`translate(-50%, -50%)`), because a
@@ -2200,8 +2208,16 @@ button.tl-tchip { cursor: pointer; }
 .tl-p.fadeL .tl-sband { border-top-left-radius: 0; }
 /* ⚠️ EXPLICIT WIDTH AND HEIGHT ON THE SVG — `top`/`bottom` do not size one, and a transform is
    ignored on an SVG element by some engines. The dot is drawn at the size it is asked for. */
-.tl-sband svg { width: 20px; height: 20px; transform: none; overflow: visible; flex: 0 0 auto; }
+/* ⚠️ 14px AT THE BAND'S OWN 10px INSET — THE REF'S VALUE, AND IT SUPERSEDES §D's 20px. That pass
+   argued the app's `StatusDot` carries direction and stage in its shape and needed the size; at 20
+   it read as an inset medallion sitting IN the band rather than as the band's own leading mark, and
+   the band is 26px tall — a 20px disc leaves 3px of air and dominates the status word beside it.
+   The ref draws 14, the padding puts it 10 from the edge, and the type is what carries the line. */
+.tl-sband svg { width: 14px; height: 14px; transform: none; overflow: visible; flex: 0 0 auto; }
 /* the status, in the page's serif — the word, not an abbreviation of it */
+/* ⚠️ EVERY SIZE ON THIS CARD IS px, NOT rem — the ref states px and a `rem` here would resolve
+   against the page's root rather than against the drawing the values came from. Locked to the ref
+   within half a pixel by `calBar63`. */
 .tl-sw {
   font-family: 'Playfair Display', serif; font-size: 12.5px; font-weight: 500;
   color: var(--tl-nearblack); min-width: 0; overflow: hidden; text-overflow: ellipsis;
@@ -2209,12 +2225,13 @@ button.tl-tchip { cursor: pointer; }
 /* ⚠️ THE HOLDER RIDES THE BAND'S RIGHT END and turns rose only when something is late. It is the
    ref's `.sh`; the absolutely-positioned `.fho` the ref also carries is the NON-band alternative,
    hidden by the band variant, so it is not built. */
-/* ⚠️ THE NUDGE NOTE READS AS AN ASIDE, NOT AS A SECOND STATUS. Mono, a shade back, and it takes no
-   space it does not need — the status is the fact and this is a footnote to it. */
+/* ⚠️ THE NUDGE NOTE IS ITALIC AT 12px, NOT MONO CAPS. It is an aside in the same voice as the
+   agency on line one — a shade back, in the band's own serif register — where mono caps read as a
+   TAG and put a third label in a band that already carries a status and a holder. */
 .tl-snote {
   flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
-  font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .12em;
-  text-transform: uppercase; color: #a89880;
+  font-family: 'Playfair Display', serif; font-style: italic; font-size: 12px; font-weight: 400;
+  color: #8a7a6c;
 }
 .tl-sh {
   margin-left: auto; flex: 0 0 auto;
@@ -2231,12 +2248,17 @@ button.tl-tchip { cursor: pointer; }
    max-height: 44px` four hundred lines later and wins. Rendering the ref settled it in one command
    where reading it had already been wrong twice in this section: its own card measures body top
    36px, `transform: none`, height 40.6 inside an 86px bar with nothing clipped. */
+/* ⚠️ 30px / 54px — RETUNED WHEN LINE TWO BECAME TWO SPANS. The ref's 36/44 held a fact and nothing
+   after it; the tail is a third line now (fact 12 + tail 7.5 + their margins), and at the house
+   floor of `line-height: 1.3` the stack MEASURES 56.07px — name 20.26, fact 17.45, tail 11.32 and two margins. 28
+   clears the 26px band and 28 + 57 lands inside the 86px bar. Measured twice: 36/44 clipped, and so
+   did 30/54, by 0.07px. Arithmetic on paper missed it both times. */
 .tl-cardbody {
-  position: absolute; top: 36px; transform: none;
+  position: absolute; top: 28px; transform: none;
   display: flex; align-items: center; gap: 9px;
   white-space: nowrap; z-index: 3;
   left: 12px; max-width: calc(100% - 24px);
-  max-height: 44px; overflow: hidden;
+  max-height: 57px; overflow: hidden;
 }
 /* ⚠️ THE SAME INSET ON A LEFT-DISSOLVING CARD. v60 pushed the words further in because the badge
    moved; the badge no longer moves, so neither do they. */
@@ -2301,7 +2323,8 @@ button.tl-tchip { cursor: pointer; }
 .tl-ffx {
   font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 12px;
   letter-spacing: 0; text-transform: none; color: #3a1c14; white-space: nowrap;
-  margin-top: 7px; line-height: 1.3;
+  /* 4px, not the ref's 7 — the tail below needs the three pixels more than the gap above does */
+  margin-top: 4px; line-height: 1.3;
 }
 /* ⚠️ THE RINGED `!` IS QUERY CENTRE'S URGENT MARK, and it opens the FACT rather than sitting beside
    the name — what is late is the fact, and a mark on the name reads as a note about the agent. */
@@ -2312,8 +2335,15 @@ button.tl-tchip { cursor: pointer; }
   font-family: 'Playfair Display', serif; font-size: 9px; font-weight: 700;
   margin-right: 6px; vertical-align: -2px; flex: 0 0 auto;
 }
-/* ⚠️ NO `.tl-feb`. The ref's is an inline mono TAIL inside line two, not a third line — see the
-   note at the render, and the reason our line two stays one sentence. */
+/* ⚠️ THE TAIL IS A SEPARATE SPAN AT 7.5px MONO CAPS — the measured half of line two, in the
+   register a span belongs in, under the fact rather than inline with it. §D shipped line two as one
+   Inter sentence because `latenessLine` emitted one string; `barFactLine` returns the two parts
+   from the dates themselves now, so there is nothing to split and nothing to go wrong. */
+.tl-feb {
+  display: block; margin-top: 3px;
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: #a89880; white-space: nowrap;
+}
 
 /* ⚠️ THE FIVE HOLDER CHIPS ARE DELETED (v63, section D), NOT HIDDEN. They said whose move it was in
    colour, beside a name — and the status band above them now says it in words, at its right end, in

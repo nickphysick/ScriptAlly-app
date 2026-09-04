@@ -181,6 +181,10 @@ export interface Segment {
    *
    * `query.lastNudgeSentDate` is a single stored date, and it is what the ref renders too.
    */
+  /** line two's first span — sentence case, always a fact about a date */
+  fact: string;
+  /** line two's second span — mono caps, always a measured span */
+  tail: string;
   nudgedOn: string | null;
   /** where that nudge sits in the window, in the same fractional days as `from` and `to` — `null`
       when it falls outside the drawn window, so the marker is simply not placed */
@@ -1298,6 +1302,14 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
           })(),
       capLeft: !startsAtEdge,
       capRight: !endsAtEdge,
+      /* ⚠️ COMPUTED HERE, FROM THE SAME VARIABLES `labelFor` READS, so the card's two spans and the
+         label's own sentence cannot state different dates. It is unconditional — a card with no
+         label still has a place on the axis and still says where its date stands. */
+      ...barFactLine({
+        /* the bar's own named end and WHOSE it is — one source, read straight off `named.end` */
+        source: named.end ? named.end.source : null,
+        endYmd: goalYmd, todayYmd: win.today, yoursDays,
+      }),
       ...(!speaks
         ? { label: "", short: "" }
         : (() => {
@@ -1655,6 +1667,55 @@ export function latenessLine(i: {
   return i.expectedYmd
     ? `${i.prefix} · expected ${on(i.expectedYmd)} · ${overdueSpan(daysBetween(i.expectedYmd, i.todayYmd))} overdue`
     : `${i.prefix} · no date promised · overdue`;
+}
+
+/**
+ * ══ LINE TWO, AS TWO SPANS (v63, §D formatting) ══════════════════════════════════════════════
+ *
+ * The card's second line is a FACT in sentence case and a mono TAIL: `Due 14 Apr 2024` ·
+ * `29 months overdue`. Both come from here, from the dates themselves — never from splitting the
+ * joined `label` on a middot, which would make the typography depend on a punctuation mark inside
+ * a string and break silently the first time the wording moved.
+ *
+ * ⚠️ NO DEED WORDS. `Nudge due`, `Send by 29 Sept`, `Next reminder 11 Sept` used to reach line two
+ * as the label's PREFIX, because the render fell back to it when there was no second clause. A deed
+ * is what the action column says; line two states where the date stands. One place, one question.
+ *
+ * ⚠️ AND EVERY CARD GETS BOTH SPANS. A waiting relationship had a fact and no tail — `reply
+ * expected 19 Sept` and nothing after it — so the line's shape changed from row to row. The tail is
+ * `{n} days waiting` there: the same figure, in the same register, as `{span} overdue`.
+ */
+export function barFactLine(i: {
+  /** whose date the bar's end is — `sendBy`/`reminder` are the writer's, `window` the agency's */
+  source: NamedEndSource | null;
+  endYmd: string | null;
+  todayYmd: string;
+  /** how long the writer has held it, for the case where no date was ever named */
+  yoursDays: number;
+}): { fact: string; tail: string } {
+  /* ⚠️ THE DISCRIMINATOR IS THE DATE'S SOURCE, NOT WHETHER IT HAS PASSED — and getting that wrong
+     put "Due" in front of nine agency-expected dates in one build. `sendBy` and `reminder` are
+     dates the WRITER set and owes; `window` is when the AGENCY said it would reply. Saying "Due"
+     of an agency's window tells a writer they are late for something that is not theirs. */
+  if (!i.endYmd || !i.source) {
+    return { fact: "No date promised", tail: `${overdueSpan(i.yoursDays)} waiting` };
+  }
+  const on = shortCalDate(i.endYmd);
+  const d = daysBetween(i.endYmd, i.todayYmd);
+  const mine = i.source === "sendBy" || i.source === "reminder";
+  if (mine) {
+    return d > 0
+      ? { fact: `Due ${on}`, tail: `${overdueSpan(d)} overdue` }
+      /* ⚠️ THE ONE SHAPE THE PACK DID NOT NAME: the writer's own date, still ahead. `left` is a
+         fact about a commitment they made themselves, which is not the same as forecasting an
+         agency's behaviour — the thing this board refuses to do. */
+      : { fact: `Due ${on}`, tail: `${overdueSpan(Math.max(0, -d))} left` };
+  }
+  return d > 0
+    ? { fact: `Expected ${on}`, tail: `${overdueSpan(d)} overdue` }
+    /* ⚠️ `waiting`, NOT `left`. "14 days waiting" is how long it has been, which is a fact; "14
+       days left" about an agency's window is a forecast the agency never promised to keep. */
+    : { fact: `Reply expected ${on}`, tail: `${overdueSpan(Math.max(0, -d))} waiting` };
 }
 
 export function labelFor(state: BarState, i: LabelInput): BarLabel {

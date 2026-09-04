@@ -155,10 +155,10 @@ by **rendering** `timeline-v63.html`, not by reading it — see the two cascade 
 
 | # | item | state | reading |
 |---|---|---|---|
-| 1 | status band (26px, dot, status, holder) | **built · verified** | 23 of 23 cards; band 26px on the card's top edge; body always below it |
+| 1 | status band (26px, **14px** dot, status, holder) | **built · verified** | 23 of 23 cards; band 26px on the card's top edge; body always below it |
 | 2 | tint per status, from QC's ladder | **built · verified** | 7 rungs seen: `out-1`×14, `out-2`×2, `out-3`×2, `in-1`×2, `in-2`×1, `in-3`×1, `offer`×1 |
 | 3 | holder eyebrow, rose when late | **built · verified** | 3 holders (`With you`/`With the agent`/`Offer`); rose `rgb(140,79,74)` on late, muted `rgb(125,108,92)` on calm, both branches populated |
-| 4 | name + italic agency, sentence-case fact | **built · verified** | Playfair 15.5/500 (leading ≥ 1.3), agency `italic`, fact Inter 12px `text-transform: none` |
+| 4 | name + italic agency, sentence-case fact **+ mono tail** | **built · verified** | every size measured against the ref within 0.5px — see the formatting pass |
 | 5 | ringed `!` on urgent | **built · verified** | present on all 13 late cards, absent on all 10 calm |
 | 6 | **open ends** — no chevron, no right border | **built · verified** | 12 ongoing cards: `border-right: 0px`, both right radii `0px`, **0 chevrons rendered** |
 | 7 | **right-edge dissolve for window-clipped cards** | **built · verified** | 1 clipped card dissolves; **12 ongoing cards do not** — see the fault below |
@@ -222,9 +222,9 @@ Rendering the ref settled both in one command: its own card measures body top `3
 
 | ref | built | why |
 |---|---|---|
-| `.sseg svg` 14px | **20px** | the ref sizes a flat glyph of its own; this app's `StatusDot` carries direction and stage in its *shape*, and 14px loses it |
+| ~~`.sseg svg` 14px → 20px~~ | **14px, the ref's** | ⚠️ **SUPERSEDED by the formatting pass.** §D argued a glyph's legible size is part of the glyph; rendered, 20px in a 26px band read as an inset medallion. The ref's value stands |
 | `.fnm` `line-height: 1.15` | **1.3** | house floor for mixed-case Playfair inside a clipping box; the ref clips nothing |
-| Comfortable body `max-height: 56px` | **62px, top 32** | a consequence of the above — at 1.3 the stacked name/agency/fact is ~60.4px and 56 clipped it |
+| Comfortable body `max-height: 56px`, bar 96 | **top 27 / 75, bar 104** | a consequence of the above, re-measured once line two became two spans: the stack is ~73.7px against the 70 a 96px bar leaves |
 
 ### The tint ladder is a documented copy — **a debt owed to the Query Centre session**
 
@@ -249,23 +249,73 @@ recorded here so it is decided rather than inherited.
 | `calendarTokens.test.ts` | `--row-h is declared 3 times` | it demanded exactly one declaration, right at one height and wrong at three. It now asserts the BASE rule is the ref's value and every other sits inside a `[data-dens]` block |
 | `calTool63.measure.ts` | `trig[0]` became `Display` | it indexed every `.tl-tbtrig` in the document; the sidebar's new control is first in DOM order. Scoped to `.tl-vtool`, and it asserts the sidebar keeps exactly one |
 
+### The formatting pass (after §D landed)
+
+**Type, in px, measured against the ref within half a pixel** — every value on every card:
+
+```
+status 12.5 · note 12 (italic) · holder 7 · name 15.5 · agency 12 · fact 12 · tail 7.5 · ! 13
+sizes seen: {"status":["12.5px"],"note":["12px"],"holder":["7px"],"name":["15.5px"],
+             "agency":["12px"],"fact":["12px"],"tail":["7.5px"],"bang":["13px"]}
+```
+
+⚠️ **The unit is a second claim, and the value lock alone missed it.** A mutation planting `1rem`
+on the name **passed**: `1rem` is 16px, exactly the half-pixel tolerance against 15.5. The lock now
+also reads the sheet and requires every bar size to be stated in `px`, so the value cannot start
+drifting with a root font-size nothing on this page controls.
+
+**The band's dot is 14px** at the band's own 10px inset — superseding §D's 20px, which read as an
+inset medallion in a 26px band. Locked two ways: the dot measures 14, and **nothing wholly inside
+the band's leading 40px is wider than 14.5**.
+
+⚠️ **"Nothing outside the card box" needed the honest subject.** A rect-only probe reported **ten**
+elements escaping a card that spills nothing: `.tl-cardbody` and `.tl-sband` both clip, so a child's
+*rect* runs past while its *ink* stops at the clip. The probe walks to the first clipping ancestor
+now, and excludes the two deliberate edge marks (`.tl-pulsedot`, `.tl-tmark`) **by name with the
+reason at the code** — the claim is that the medallion has not returned, not that the card has no
+edge furniture.
+
+**Line two is two spans, built from the dates rather than split from the label.** `barFactLine`
+returns `{fact, tail}` in `journeyBars.ts`; every card has both.
+
+```
+Ottoline Frayn  | Due 15 Apr 2024        | 29 months overdue
+Marcus Reed     | Due 21 Aug             | 14 days overdue
+Elinor Hale     | Expected 27 Jul        | 6 weeks overdue
+Ana Duarte      | Reply expected 13 Sept | 9 days waiting
+David Marsh     | Due 29 Sept            | 4 weeks left
+fact forms: ["Due","Reply expected","Expected"]
+```
+
+⚠️ **The discriminator is whose date it is, not whether it has passed** — and getting that wrong put
+**"Due" in front of nine agency-expected dates** in one build. `NamedEnd.source` is `sendBy` /
+`reminder` (the writer's) or `window` (the agency's). Saying "Due" of an agency's window tells a
+writer they are late for something that was never theirs.
+
+⚠️ **`{span} left` is the one shape the pack did not name** — the writer's own date, still ahead. It
+is a fact about a commitment they made themselves, which is why it is allowed where a forecast about
+an agency's window would not be.
+
+**No deed words.** `Nudge due`, `send by 29 Sept`, `next 8 Sept` and `Next reminder 11 Sept` reached
+line two as the label's *prefix*, because the render fell back to it wherever there was no second
+clause. A deed belongs to the action column.
+
+⚠️ **The geometry needed retuning twice, and paper arithmetic missed it both times.** The tail is a
+third typographic line: the stack **measures 56.07px** (name 20.26 + fact 17.45 + tail 11.32 + two
+margins). `36/44` clipped; so did `30/54`, **by 0.07px**. Regular is `28/57`. Comfortable stacks the
+name over the agency — ~73.7px against the 70 a 96px bar leaves after its 26px band — so its bar is
+**104, not the ref's 96**: the ref fits at `line-height: 1.15`, which this repo forbids on
+mixed-case Playfair in a clipping box.
+
+**Fixture names:** all **46** names and agencies on the board are already title case, verified and
+now locked (d12, with the population asserted first).
+
+**Locks proved red by five mutations:** a `rem` where the ref says px, the 20px medallion returning,
+a deed word on line two, a lower-case fact, and the tail span deleted.
+
 ### Locks
 
-`calBar63.measure.ts` (9 measured) · `calendarStageTints.test.ts` (3 unit). Proved red by eight
-mutations: words under the band, one tint for every rung, a holder that never reddens, the font
-regression, a chip rendered again, the dissolve back on every ongoing card, a nudge note stating a
-count, and three densities sharing a bar height.
-
-⚠️ **A ninth mutation — the pulse dot on every open end — passed**, which is the gap above.
-⚠️ **And the FIRST attempt at the first mutation passed too**: the mutant offset still cleared the
-band. An assertion you have not seen fail is unproved, not safe.
-
-⚠️ **One lock needed re-scoping when the sidebar gained its Display control.** `calTool63` read
-every `.tl-tbtrig` in the document and indexed into it, so `trig[0]` became `Display` and the case
-reported `Group` missing. It reads `.tl-vtool .tl-tbtrig` now, and asserts the sidebar keeps exactly
-one — two surfaces, two questions.
-
-## E · Actions — **NOT BUILT.**
+`calBar63.measure.ts` (13 measured)## E · Actions — **NOT BUILT.**
 ## F · Tasks as bars — **NOT BUILT.**
 ## G · Behaviours (collapse, drag, sticky) — **NOT BUILT.**
 

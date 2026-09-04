@@ -66,6 +66,65 @@ async function cards(page: import("@playwright/test").Page) {
         fovR: !!c.querySelector(".tl-fov.r"), pulse: !!c.querySelector(".tl-pulsedot"),
         evn: c.querySelectorAll(".tl-evn").length,
         nudgeNote: c.querySelector(".tl-snote")?.textContent?.trim() ?? null,
+        /* ⚠️ THE TYPE, AS THE BROWSER COMPUTES IT — px, against the ref's own px. A `rem` here
+           would resolve against the page root rather than against the drawing the values came
+           from, and would read as correct in the source. */
+        px: {
+          status: cs(c.querySelector<HTMLElement>(".tl-sw"), "fontSize"),
+          note: cs(c.querySelector<HTMLElement>(".tl-snote"), "fontSize"),
+          noteStyle: cs(c.querySelector<HTMLElement>(".tl-snote"), "fontStyle"),
+          holder: cs(c.querySelector<HTMLElement>(".tl-sh"), "fontSize"),
+          name: cs(c.querySelector<HTMLElement>(".tl-fnm"), "fontSize"),
+          agency: cs(c.querySelector<HTMLElement>(".tl-fag"), "fontSize"),
+          fact: cs(c.querySelector<HTMLElement>(".tl-ffx"), "fontSize"),
+          tail: cs(c.querySelector<HTMLElement>(".tl-feb"), "fontSize"),
+          bang: cs(c.querySelector<HTMLElement>(".tl-bang"), "width"),
+        },
+        factText: c.querySelector(".tl-ffx")?.textContent?.replace(/^!/, "").trim() ?? null,
+        tailText: c.querySelector(".tl-feb")?.textContent?.trim() ?? null,
+        /* the band's leading 40px, and whether anything in it is wider than the dot should be */
+        bandLead: (() => {
+          const b = c.querySelector<HTMLElement>(".tl-sband");
+          if (!b) return null;
+          const bb = b.getBoundingClientRect();
+          return [...b.querySelectorAll<HTMLElement>("*")]
+            .map((e) => e.getBoundingClientRect())
+            /* ⚠️ WHOLLY INSIDE THE LEADING ZONE, not merely starting in it. The status word begins
+               at ~32px — inset 10 + dot 14 + gap 8 — so a `left < 40` filter catches an 84px run of
+               type and reports the band's own text as an oversized mark. The claim is about what
+               OCCUPIES the leading 40px, which is the dot and nothing else. */
+            .filter((r2) => r2.right <= bb.left + 40)
+            .map((r2) => +r2.width.toFixed(1));
+        })(),
+        /**
+         * ⚠️ WHAT PAINTS OUTSIDE THE CARD — NOT WHAT HAS A RECT OUTSIDE IT, WHICH IS NEARLY
+         * EVERYTHING. `.tl-cardbody` and `.tl-sband` both carry `overflow: hidden`, so a child's
+         * measured rect runs past the card while its INK stops at the clip; a probe that reads
+         * rects alone reported ten elements escaping a card that spills nothing. Walk to the first
+         * clipping ancestor and skip anything it contains.
+         *
+         * And two marks sit on the edge BY DESIGN — the pulse dot at `right: -6px` and the terminal
+         * mark on the end edge. They are named rather than silently tolerated: the claim is that
+         * the retired MEDALLION has not come back, not that the card has no edge furniture.
+         */
+        outside: (() => {
+          const cb = c.getBoundingClientRect();
+          const EDGE = ["tl-pulsedot", "tl-tmark"];
+          const clipped = (e: HTMLElement) => {
+            for (let p2 = e.parentElement; p2 && p2 !== c.parentElement; p2 = p2.parentElement) {
+              if (getComputedStyle(p2).overflow !== "visible") return true;
+            }
+            return false;
+          };
+          return [...c.querySelectorAll<HTMLElement>("*")].filter((e) => {
+            const r2 = e.getBoundingClientRect();
+            if (!r2.width && !r2.height) return false;
+            if (EDGE.some((k) => e.classList.contains(k))) return false;
+            if (clipped(e)) return false;
+            return r2.left < cb.left - 0.5 || r2.right > cb.right + 0.5
+              || r2.top < cb.top - 0.5 || r2.bottom > cb.bottom + 0.5;
+          }).map((e) => e.className || e.tagName);
+        })(),
         frameBorderR: cs(c.querySelector<HTMLElement>(".tl-frame"), "borderRightWidth"),
         /* the furniture the section retires — asserted absent on the RENDERED page */
         gone: {
@@ -328,5 +387,122 @@ test.describe("v63 · D — the bar", () => {
     const bars = new Set(Object.values(seen).map((v) => (v as { bar: string }).bar));
     /* three distinct heights, or the control is decorative */
     expect(bars.size, `the three densities share a bar height: ${[...bars].join(", ")}`).toBe(3);
+  });
+
+  test("⚠️ (d9) every size is the ref's, in px, within half a pixel", async ({ page }) => {
+    await openRoute(page, CAL, { width: 1440, height: 900 });
+    const cs = (await cards(page))!.filter((c) => c.band);
+    expect(cs.length).toBeGreaterThan(5);
+    /* ⚠️ THE REF STATES px AND SO DOES THE SHEET. A `rem` resolves against the page's root, not
+       against the drawing these values came from — and it reads as correct in the source, which is
+       why this is measured rather than grepped. */
+    const WANT: Record<string, number> = {
+      status: 12.5, note: 12, holder: 7, name: 15.5, agency: 12, fact: 12, tail: 7.5, bang: 13,
+    };
+    const seen: Record<string, Set<string>> = {};
+    for (const c of cs) {
+      for (const [k, want] of Object.entries(WANT)) {
+        const raw = (c.px as Record<string, string | null>)[k];
+        if (raw == null) continue;               // absent on this card — the note is optional
+        (seen[k] ??= new Set()).add(raw);
+        expect(Math.abs(parseFloat(raw) - want),
+          `${k}: ${raw} against the ref's ${want}px (${c.status})`).toBeLessThanOrEqual(0.5);
+      }
+    }
+    console.log("sizes seen:", JSON.stringify(Object.fromEntries(
+      Object.entries(seen).map(([k, v]) => [k, [...v]]))));
+    /* ⚠️ EVERY KEY MUST HAVE BEEN SEEN. A card missing an element leaves its size unchecked, and a
+       loop that skips absent ones passes over a card that renders nothing at all. */
+    for (const k of Object.keys(WANT)) {
+      expect(seen[k]?.size, `${k} was never measured — no card renders it`).toBeGreaterThan(0);
+    }
+    /* ⚠️ AND THE SHEET STATES px, WHICH IS A SEPARATE CLAIM FROM THE VALUE BEING RIGHT. `1rem`
+       resolves to 16px and clears a half-pixel tolerance against 15.5 — a mutation planting it
+       PASSED the loop above. The measured check says the size is the ref's; this says the unit is,
+       so the value cannot start drifting with a root font-size nothing on this page controls. */
+    const sheet = readFileSync("src/components/todo/todoCalendar.css", "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    const BAR_TYPE = [".tl-sw", ".tl-snote", ".tl-sh", ".tl-fnm", ".tl-fag", ".tl-ffx", ".tl-feb"];
+    for (const sel of BAR_TYPE) {
+      const m = sheet.match(new RegExp(`(?:^|\\n)\\s*\\${sel}\\s*\\{([^}]*)\\}`));
+      expect(m, `${sel} has no base rule to read a size from`).not.toBeNull();
+      const size = m![1].match(/font-size\s*:\s*([^;]+);/);
+      expect(size, `${sel} states no font-size`).not.toBeNull();
+      expect(size![1].trim(), `${sel} is sized in something other than px`).toMatch(/^[\d.]+px$/);
+    }
+
+    /* the nudge note is ITALIC, not mono caps — the band's own aside register */
+    const noted = cs.filter((c) => c.nudgeNote);
+    expect(noted.length, "no nudge note to check the face of").toBeGreaterThan(0);
+    for (const c of noted) expect(c.px.noteStyle, "the nudge note is not italic").toBe("italic");
+  });
+
+  test("⚠️ (d10) the band's dot is 14px at the band's inset, and nothing escapes the card", async ({ page }) => {
+    await openRoute(page, CAL, { width: 1440, height: 900 });
+    const cs = (await cards(page))!.filter((c) => c.band);
+    expect(cs.length).toBeGreaterThan(5);
+    for (const c of cs) {
+      expect(c.dot, `no dot in the band (${c.status})`).not.toBeNull();
+      expect(c.dot!.w, `the band's dot is ${c.dot!.w}px`).toBeCloseTo(14, 0);
+      /* ⚠️ THE INSET MEDALLION IS GONE. Nothing in the band's leading 40px may be wider than the
+         dot — a 20px disc read as a medallion laid IN the band rather than as its leading mark. */
+      const wide = (c.bandLead ?? []).filter((w) => w > 14.5);
+      expect(wide, `something ${JSON.stringify(wide)}px wide sits in the band's first 40px`).toEqual([]);
+    }
+    /* ⚠️ AND NOTHING UNCLIPPED PAINTS OUTSIDE THE CARD'S OWN BOX. The badge this replaced burst
+       past the card's left edge and every ancestor was held `overflow: visible` for it — which is
+       exactly the shape this catches. The two deliberate edge marks are excluded by name at the
+       probe, with the reason stated there. */
+    const escapees = cs.flatMap((c) => c.outside ?? []);
+    expect([...new Set(escapees)], `elements outside the card box: ${JSON.stringify([...new Set(escapees)])}`)
+      .toEqual([]);
+  });
+
+  test("⚠️ (d11) line two is a fact and a tail, both present, neither lower-case", async ({ page }) => {
+    await openRoute(page, CAL, { width: 1440, height: 900 });
+    const cs = (await cards(page))!.filter((c) => c.band);
+    expect(cs.length).toBeGreaterThan(5);
+    const facts = new Set<string>(), tails = new Set<string>();
+    for (const c of cs) {
+      expect(c.factText, `${c.status}: no fact on line two`).toBeTruthy();
+      expect(c.tailText, `${c.status}: no tail on line two`).toBeTruthy();
+      /* ⚠️ SENTENCE CASE. `due 15 Apr` and `nudge due` both used to reach this line — the second
+         being a DEED, which belongs to the action column and not to a statement about a date. */
+      expect(c.factText, `line two begins lower-case: "${c.factText}"`).toMatch(/^[A-Z]/);
+      /* ⚠️ NO DEED WORDS. The label's prefix used to fall through wherever there was no second
+         clause, so a card could say `Nudge due` where every other said where its date stood. */
+      expect(c.factText, `a deed word reached line two: "${c.factText}"`)
+        .not.toMatch(/^(Nudge|Send|Answer|Record|Mark|Next reminder)\b/);
+      facts.add((c.factText ?? "").replace(/\d.*$/, "").trim());
+      tails.add((c.tailText ?? "").replace(/^[\d.]+\s*/, "").trim());
+    }
+    console.log("fact forms:", JSON.stringify([...facts]), "| tail forms:", JSON.stringify([...tails]));
+    /* ⚠️ MORE THAN ONE OF EACH, or the fixture is a monoculture and the mapping is unexercised.
+       Nine agency-expected dates read `Due` in one build because the discriminator was whether the
+       date had PASSED rather than whose date it was. */
+    expect(facts.size, `every card states one fact form: ${JSON.stringify([...facts])}`).toBeGreaterThan(1);
+    expect(tails.size, `every card states one tail form: ${JSON.stringify([...tails])}`).toBeGreaterThan(1);
+  });
+
+  test("⚠️ (d12) every agent and agency on the board is title case", async ({ page }) => {
+    await openRoute(page, CAL, { width: 1440, height: 900 });
+    const r = await page.evaluate(() => {
+      const g = [...document.querySelectorAll<HTMLElement>(".tl-cal")]
+        .find((e) => e.getBoundingClientRect().height > 0)!;
+      const seen: string[] = [], bad: string[] = [];
+      const SMALL = new Set(["and", "of", "the", "&", "de", "van", "von"]);
+      for (const c of g.querySelectorAll<HTMLElement>(".tl-p")) {
+        for (const sel of [".tl-fnm", ".tl-fag"]) {
+          const t = c.querySelector(sel)?.textContent?.trim();
+          if (!t) continue;
+          seen.push(t);
+          for (const w of t.split(/\s+/)) if (/^[a-z]/.test(w) && !SMALL.has(w)) bad.push(`${t} → ${w}`);
+        }
+      }
+      return { seen: seen.length, bad: [...new Set(bad)] };
+    });
+    /* the population, before the claim — a board with no names has no case to be wrong about */
+    expect(r.seen, `only ${r.seen} names swept`).toBeGreaterThan(20);
+    expect(r.bad, `not title case: ${JSON.stringify(r.bad)}`).toEqual([]);
   });
 });
