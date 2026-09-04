@@ -116,11 +116,11 @@ describe("the workspace variant", () => {
   it("⚠️ THE MASTHEAD REFUSES EVERY CONTROL RATHER THAN IGNORING ONE — inside a grid or outside it", () => {
     const one = [{ label: "A", primary: true, onClick: () => {} }] as const satisfies PageHeaderActions;
     expect(() => renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" actions={one} />))
-      .toThrow(/holds NONE/);
+      .toThrow(/EXACTLY ONE primary action or none/);
     /* ⚠️ AND OUTSIDE A GRID TOO. The guard asks nothing of its surroundings, so the refusal cannot
        depend on where the header happens to be mounted — which the behaviour-gated form did. */
     expect(() => render(<PageHeader variant="workspace" title="T" mark="todo" actions={one} />))
-      .toThrow(/holds NONE/);
+      .toThrow(/EXACTLY ONE primary action or none/);
     /* the accepting direction, or "refuses" is indistinguishable from "refuses everything" */
     expect(() => renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" />)).not.toThrow();
   });
@@ -148,7 +148,7 @@ describe("the workspace variant", () => {
      * scroller, then the slab, then the masthead, then the controls — all inside the scrollport, none
      * of it in a chrome row above.
      */
-    const KEYS = ["wpg-scroll", "wpg-chrome", "wpg-mast", "wsh-toprule", "wsh-body"];
+    const KEYS = ["wpg-scroll", "wpg-chrome", "wpg-mast", "wsh-toprule", "wsh-row"];
     const order = KEYS.map((k) => out.indexOf(k));
     for (const [i, k] of KEYS.entries()) {
       expect(order[i], `${k} is not in the rendered output`).toBeGreaterThan(-1);

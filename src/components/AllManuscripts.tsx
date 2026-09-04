@@ -384,6 +384,11 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate, acti
              dropped once (with the grand slab) and would have gone a second time for want of a home;
              the home existed on a sibling page all along. */
           title="Manuscripts"
+          /* ⚠️ ADDITIVE HERE, NOT A REHOME — this page has no toolbar to take it from. The
+             carousel's ADD GHOST stays: a tile at the end of the deck is a member of the deck, and
+             at zero manuscripts it IS the deck. What the census forbids is a header primary beside
+             a TOOLBAR primary, which is a control row stating the page's action twice. */
+          primary={{ label: "Add manuscript", onClick: () => onNavigate?.("manuscripts", "Add a manuscript") }}
           /**
            * ⚠️ IN THE MASTHEAD, WHICH IT COULD NOT BE UNTIL THIS AMENDMENT. `variant="workspace"`
            * refused every action outright, which is what forced this page — and four others — to

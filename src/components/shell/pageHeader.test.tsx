@@ -231,13 +231,13 @@ describe("the masthead is content, not chrome", () => {
        full-width line at its base, and `workspacePageGrid.test.tsx` asserts it there. */
     expect(wsh, "the masthead drew its own hairline again — the slab's base is the only line in the chrome")
       .not.toContain("border-bottom");
-    /* ⚠️ RETARGETED: THE AIR IS ON `.wsh-body` NOW, and `.wsh` states `padding: 0` for a structural
+    /* ⚠️ RETARGETED: THE AIR IS ON `.wsh-row` NOW, and `.wsh` states `padding: 0` for a structural
        reason rather than a stylistic one — the top rule sits ABOVE the text's inset, so padding on
        the masthead itself would push the rule down with the words and it would stop reading as the
        page's top edge. The law is unchanged: ONE element states the vertical air. */
     expect(wsh, "the masthead itself pays vertical air as well as its body").toContain("padding: 0");
-    expect(decls(all(hdrCss, ".wsh-body")), "the masthead's body stopped stating its own vertical air")
-      .toContain("padding: var(--mast-pad-top) 0 var(--mast-pad-btm)");
+    expect(decls(all(hdrCss, ".wsh-row")), "the masthead's body stopped stating its own vertical air")
+      .toContain("padding: var(--mast-pad-y) 0");
     /* the 16px gap moved to the slab's base with the hairline — asserted in workspacePageGrid.test */
     expect(wsh, "the masthead kept a bottom margin — that air belongs below the whole slab now")
       .not.toContain("margin-bottom");
@@ -331,14 +331,20 @@ describe("the masthead is content, not chrome", () => {
        ever", then "none where the masthead LEAVES", then "exactly one primary" — and the CTA's
        deletion returns it to the first. Four separate messages became one because there is one rule
        again, and the message has to say WHY or it gets worked around. */
-    expect(hdrSrc, "the masthead stopped refusing controls outright").toContain("was passed a control");
+    expect(hdrSrc, "the masthead stopped refusing controls outright").toContain("EXACTLY ONE primary action or none");
     expect(hdrSrc, "the refusal lost its reason").toContain("stated it twice");
     expect(hdrSrc, "a per-shape refusal came back — there is one rule now")
       .not.toMatch(/was passed \$\{acts\.length\} actions/);
     /* the refusal names the masthead's whole contents, so a reader can see what it is refusing FROM */
-    expect(hdrSrc, "the refusal lost its account of what a masthead is").toContain("controls belong in the grid's control row");
+    /* ⚠️ THE REFUSAL STILL SAYS WHAT TO DO INSTEAD — a throw that only says "no" gets worked
+       around. The account changed with the guard's third form: the masthead holds exactly one
+       primary, and what it refuses is a PLURAL surface. */
+    expect(hdrSrc, "the refusal lost its account of what a masthead is").toContain("pass `primary`");
     const ws = sliceBetween(hdrSrc, 'if (variant === "workspace") {', "  return (\n    <header");
-    for (const gone of ["wsh-grow", "svh-btn", "wsh-acts", "wsh-mark", "wsh-cta"]) {
+    /* ⚠️ `wsh-cta` LEAVES THIS LIST — the masthead carries exactly one primary again, which is the
+       third and final form of that guard and the reason the format exists. `wsh-mark` STAYS: the
+       icon is `wsh-icon` on the page ground, not the registry's monoline glyph in a plate. */
+    for (const gone of ["wsh-grow", "svh-btn", "wsh-acts", "wsh-mark"]) {
       expect(decls(ws), `the workspace branch still renders ${gone}`).not.toContain(gone);
     }
   });
@@ -366,11 +372,11 @@ describe("the masthead is content, not chrome", () => {
        BAKED design token, and the point of pinning one is that a retune is a decision somebody makes
        rather than a number that drifts. What must stay is the pair: one size stated in the shared
        sheet, and nothing page-scoped. */
-    expect(decl).toContain("--mast-title-size: 44px");
+    expect(decl).toContain("--mast-title-size: 32px");
     /* ⚠️ THE BODY'S AIR IS ASSERTED THROUGH ITS TOKENS RATHER THAN AS A LITERAL PAIR, so a retune
        touches ONE place — the sizing block — instead of three locks. The values are pinned there. */
-    for (const [tok, val] of [["--mast-sub-size", "16px"], ["--mast-pad-top", "22px"],
-                              ["--mast-pad-btm", "24px"], ["--mast-kick-gap", "11px"]] as const) {
+    for (const [tok, val] of [["--mast-sub-size", "14.5px"], ["--mast-pad-y", "20px"],
+                              ["--mast-icon", "72px"], ["--mast-icon-gap", "18px"]] as const) {
       expect(decl, `the masthead's ${tok} moved off ${val}`).toContain(`${tok}: ${val}`);
     }
     expect(decl, "the old title token survived alongside the new one — two sizes, one masthead")

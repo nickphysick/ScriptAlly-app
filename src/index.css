@@ -59,8 +59,16 @@
    * legibility with it. `#807168` is the same hue one step darker and the first value that clears,
    * at 4.58:1.
    */
-  --mast-kick-ink: #807168;
-  --mast-kick-bd: rgba(25, 18, 16, 0.14);  /* soft-pink CTA hover */
+  /**
+   * ⚠️ RENAMED FROM `--mast-muted` WHEN THE KICKER WENT (compact header, §1). It never was the
+   * kicker's alone — the record bar's back-link and Query Centre's card foot read it too — and a
+   * token named for a deleted element is the comment-outliving-its-subject fault one level down,
+   * where nobody can even grep for the explanation.
+   *
+   * ⚠️ `--mast-kick-bd` IS DELETED OUTRIGHT. Its one reader was the kicker's border, and the
+   * comment beside it ("soft-pink CTA hover") described a third thing it had stopped being.
+   */
+  --mast-muted: #807168;
   --tl: #f6ddd3;      /* query-letter type tint */
   --ts: #e7ece4;      /* synopsis type tint */
   --tp: #f3e6cf;      /* sample-pages type tint */

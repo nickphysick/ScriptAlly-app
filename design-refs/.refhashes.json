@@ -15,6 +15,8 @@
     "design-refs/qc-flip-transition.html": "27779ab4d8ffca126b96040b299bcfa8ddb801850ac9f968e5a9f0076b5c78ba",
     "design-refs/timeline-v55.html": "6e4a047bd20525868f93369bc462e2214c91f972b4dddbda56ec08391edd4fff",
     "design-refs/timeline-v58.html": "128f1d3fed0fbecd8fe2944344ba2f761d946ba0d74f9300eba232fcf64f1218",
-    "design-refs/timeline-v60.html": "abf9bf08621295744034b9debcb00f3f778d2350825cd864fdd56c20a4a8c872"
+    "design-refs/timeline-v60.html": "abf9bf08621295744034b9debcb00f3f778d2350825cd864fdd56c20a4a8c872",
+    "design-refs/compact-headers.html": "b9552e2b4b54fa7a812aaa3cd1022b511f2464b85ea988b3bb13d6e5ce35a529",
+    "design-refs/slim-header-scroll.html": "acf0bad68f3b475420a3aa1bd40f670474f16508f6499241b3efe923fdd80819"
   }
 }

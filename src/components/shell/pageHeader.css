@@ -299,16 +299,20 @@
      divider inside the ground rather than the window's own edge */
   --mast-toprule: #e6ded3;
   /**
-   * ⚠️ EVERY DIMENSION OF THE MASTHEAD IS A TOKEN HERE, and the reason is 2c rather than tidiness:
-   * the artwork is sized at `auto 100%` of this box, so the illustration refits itself when the type
-   * moves. A hard-coded padding or a literal title size would be a second number to keep in step
-   * with a picture, and this repo already records what that costs.
+   * ⚠️ ONE ROW, ~100px (compact header, §1; ref `compact-headers.html` option B). The format was a
+   * 44px title over a 16px sentence in a 175px stack; it is a 32/14.5 pair beside a 72px mark now,
+   * and the height is the ROW rather than a column of parts.
+   *
+   * ⚠️ EVERY DIMENSION IS STILL A TOKEN, though the reason has changed. It was the banner artwork —
+   * sized `auto 100%` of this box, so a literal would have been a second number to keep in step with
+   * a picture. The banner is retired; what the tokens serve now is the height DERIVATION, which the
+   * lock computes as `padding×2 + max(icon, title + subtitle)` and cannot do against literals.
    */
-  --mast-title-size: 44px;
-  --mast-sub-size: 16px;
-  --mast-pad-top: 22px;
-  --mast-pad-btm: 24px;
-  --mast-kick-gap: 11px;
+  --mast-title-size: 32px;
+  --mast-sub-size: 14.5px;
+  --mast-pad-y: 20px;
+  --mast-icon: 72px;
+  --mast-icon-gap: 18px;
 }
 
 /**
@@ -331,42 +335,86 @@
   margin: var(--mast-toprule-y) 0 0;
 }
 
-.wsh-body { padding: var(--mast-pad-top) 0 var(--mast-pad-btm); }
-
 /**
- * ⚠️ THE KICKER IS THE SECTION NAME AND IT COMES FROM THE ROUTER, NOT A TABLE HERE. Its source is
- * `shellCrumbForPath`, the one derivation the breadcrumb and the mobile crumb already read — a
- * second list would diverge the first time a page moved section, and this app has already paid for
- * two surfaces disagreeing about what a page is called.
+ * ⚠️ THE ROW, AND THE HORIZONTAL INSET IS NOT PADDING — WHICH IS A DELIBERATE DEVIATION FROM THE
+ * BRIEF'S `padding: 20px var(--mast-gutter)`.
+ *
+ * The ref pads both axes and is right for a document with no content cap. Here the CONTENT's gutter
+ * is a `max-width` REDUCTION (padding would land on each page's own first box), and this repo
+ * already records what happens when one inset is expressed both ways: they agree until a cap binds
+ * and then diverge by the whole inset. So the row takes the vertical 20px as padding and inherits
+ * the horizontal from the shared measure rule in `workspacePageGrid.css`. One expression, one edge.
  */
-.wsh-kicker {
-  display: inline-block;
-  /**
-   * ⚠️ IT KEEPS THE PILL AND HALVES ITS PRESENCE, and the reason is a grammar rather than a taste:
-   * an OUTLINED CAPSULE IS A CONTROL SHAPE, so a label wearing one at Playfair 12.5/600 with a .28
-   * border reads as pressable. Mono not Playfair, 9px not 12.5, regular not semibold, and a border
-   * at half the weight — the shape survives because it still groups the words, and everything that
-   * made it look like a button goes.
-   *
-   * ⚠️ BOTH COLOURS ARE TOKENS. The border is an rgba the brief writes inline; inlined here it would
-   * be the only alpha literal in the sheet and the next surface needing the same hairline would
-   * write it again from memory.
-   */
-  border: 1px solid var(--mast-kick-bd);
-  border-radius: 999px;
-  padding: 4px 12px 3px;
-  font-family: var(--font-mono);
-  /* ⚠️ 10px, NOT THE REF'S 9. Mono at `.18em` tracking is small even at passing contrast, and the
-     pixel back costs nothing: the kicker's box grows by one line-box pixel and the masthead's height
-     is unchanged to the tenth. */
-  font-size: 10px;
-  font-weight: 400;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--mast-kick-ink);
-  margin-bottom: var(--mast-kick-gap);
+.wsh-row {
+  display: flex;
+  align-items: center;
+  gap: var(--mast-icon-gap);
+  padding: var(--mast-pad-y) 0;
 }
-
+/**
+ * ⚠️ NO TILE, NO BORDER, NO FILL — the mark sits on the page's own ground, and `contain` rather than
+ * `cover`. The ref draws it in a 64px rounded card with a white fill and crops to fill; the brief
+ * names 72px, bare ground and `contain`, and gives its reason. A ref wins on what it shows EXCEPT
+ * where the pack names a value and its reason — and a tile puts a second object in a row whose
+ * whole job is to be one.
+ *
+ * ⚠️ `flex: 0 0` RATHER THAN A BARE WIDTH, because the row is a flex container and a long title
+ * would otherwise shrink the picture before it truncated the words.
+ */
+.wsh-icon {
+  flex: 0 0 var(--mast-icon);
+  width: var(--mast-icon);
+  height: var(--mast-icon);
+  object-fit: contain;
+  display: block;
+}
+/* ⚠️ `min-width: 0` IS WHAT LETS THE SUBTITLE ELLIPSIS. A flex item's default minimum is its own
+   content, so without this the sentence pushes the primary off the row instead of truncating. */
+.wsh-text { flex: 1 1 auto; min-width: 0; }
+/**
+ * ⚠️ ONE BUTTON, NEAR-BLACK, FROM THE SHARED TOKEN. `--btn-ink` is the app's single near-black
+ * button fill and its other consumer is the top bar's `+ New`; before the token they were two
+ * literals one unit apart, on the two buttons whose entire justification is that they match.
+ *
+ * ⚠️ `font-family: inherit`, DELIBERATELY. The stated stack names Inter and `--font-sans` is Source
+ * Sans Pro, so naming Inter here would make this the only Inter button in the family it is joining.
+ * The two disagree app-wide; that is Nick's call and it is recorded in CLAUDE.md. Until it is
+ * settled, matching the neighbours beats matching the paper.
+ */
+.wsh-cta {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--btn-ink);
+  border: 1px solid var(--btn-ink);
+  border-radius: 999px;
+  padding: 9px 17px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fdfaf5;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.wsh-cta svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+}
+/**
+ * ⚠️ THE KICKER IS DELETED — `.wsh-kicker`, `--mast-kick-gap` and `--mast-kick-bd` with it. It was
+ * the section name in a bordered pill above the title; the crumb states the section already, and a
+ * one-row format has one place to say what the page is.
+ *
+ * ⚠️ ITS ONE DURABLE FINDING IS KEPT AT `.wsh` ABOVE, AND MUST STAY: the pill was
+ * `display: inline-block`, so what it cost the column was the block's STRUT rather than its own
+ * box — which is why `.wsh` states its own `font-size` and `line-height` against whatever a page
+ * inherits.
+ */
 .wsh-title {
   font-family: var(--font-serif);
   font-size: var(--mast-title-size);
@@ -377,7 +425,7 @@
    * drawn titles happened to have no descenders — cropped the `y` in "Query Centre" on the deployed
    * build. `line-height: 1` is only ever safe on uppercase-only text.
    */
-  line-height: 1.14;
+  line-height: 1.16;
   letter-spacing: -0.012em;
   color: var(--shell-ink);
   margin: 0;
@@ -392,13 +440,16 @@
   font-size: var(--mast-sub-size);
   font-weight: 400;
   color: #4d413a;
-  margin: 11px 0 0;
-  line-height: 1.45;
-  /* ⚠️ `ch` IS VALID HERE BECAUSE THIS ELEMENT SETS ITS OWN FONT-SIZE. The house rule is that a `ch`
-     measure only means what it looks like on the element carrying the type it is counting; a `ch` on
-     a container that inherits 16px while its child paints at 19 is 84% out. The ref draws 62ch; the
-     brief names 58 and the brief is the later instruction. */
-  max-width: 58ch;
+  margin: 4px 0 0;
+  line-height: 1.4;
+  /* ⚠️ ONE LINE, TRUNCATED — AND THE `58ch` MEASURE IS DELETED RATHER THAN SHRUNK. A `ch` measure
+     only means what it looks like on the element carrying the type it counts, and in a ROW the
+     sentence is already bounded by what the icon and the primary leave it. Two bounds on one box
+     is one of them wrong at some width; the flex row wins, and `.wsh-text`'s `min-width: 0` is what
+     lets the ellipsis happen at all. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /**

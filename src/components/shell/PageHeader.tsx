@@ -25,9 +25,8 @@
  * row does the anchoring.
  */
 import React from "react";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Plus } from "lucide-react";
 /* ⚠️ THE KICKER ARRIVES BY CONTEXT, NOT BY A ROUTER HOOK — see `mastheadSection.ts` for why. */
-import { useMastheadSection } from "./mastheadSection";
 /* ⚠️ THE TYPE ONLY — `OneScreenMark` IS NO LONGER RENDERED HERE. The masthead draws no mark at
    rest; the mark exists in the collapsed bar, which is a separate element. The `mark` prop survives
    because that bar needs to know which one to draw, so it stays a page's declaration rather than a
@@ -69,6 +68,22 @@ export interface PageHeaderOverflowItem {
 }
 
 export interface PageHeaderProps {
+  /**
+   * The page's own mark, as an imported asset URL — 72px, on the page ground, no tile.
+   *
+   * ⚠️ A URL RATHER THAN A `MarkName`. The mark registry draws monoline SVGs sized for a 20px bar
+   * glyph; these are painted illustrations at 100px, and routing them through a name would mean a
+   * second registry keyed the same way. A page imports its own asset and hands it over, which is
+   * also what lets a page have none — nine of ten do not, and `MarkName` has no absent member.
+   */
+  icon?: string;
+  /**
+   * The page's ONE call to action, or none. See the guard in the workspace branch.
+   *
+   * ⚠️ IT IS AN OBJECT RATHER THAN THE `actions` ARRAY, so "exactly one" is expressible in the type
+   * rather than only in a throw. The array stays refused.
+   */
+  primary?: { label: string; onClick: () => void; disabled?: boolean };
   /** One variant remains; the prop survives (optional) so existing `variant="full"` call
    *  sites stand unchanged. */
   /**
@@ -144,6 +159,8 @@ export interface PageHeaderProps {
 export const PageHeader: React.FC<PageHeaderProps> = ({
   variant = "full",
   title,
+  icon,
+  primary,
   description,
   mark,
   actions,
@@ -155,12 +172,15 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
   /* Whether THIS page's masthead scrolls away. Published by the grid; `true` outside one. */
   /**
-   * ⚠️ THE KICKER IS THE SECTION, AND IT COMES FROM THE APP'S OWN CRUMB DERIVATION — carried here by
-   * context rather than read from the router, so this component still renders outside one. The shell
-   * computes it from `shellCrumbForPath`, the same pure function the breadcrumb reads, so the pill
-   * and the crumb cannot come to disagree about which section a page is in.
+   * ⚠️ THE KICKER IS DELETED (compact header, §1), AND SO IS ITS SOURCE FROM THIS FILE. It was the
+   * SECTION name in a bordered pill, carried by context from `shellCrumbForPath` so the pill and
+   * the breadcrumb could not disagree. The compact format states the page once — an icon, a title
+   * and a sentence — and the section is already in the crumb three inches above it.
+   *
+   * ⚠️ `mastheadSection.ts` SURVIVES AND IS STILL PROVIDED BY THE SHELL, because it is a general
+   * seam rather than the kicker's own; nothing here reads it. If it acquires no other consumer it
+   * is the next thing to sweep.
    */
-  const kicker = useMastheadSection();
   const [moreOpen, setMoreOpen] = React.useState(false);
   const moreRef = React.useRef<HTMLDivElement>(null);
   /**
@@ -254,32 +274,29 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
    */
   if (variant === "workspace") {
     /**
-     * ⚠️ THE MASTHEAD HOLDS NO CONTROL, AND THE GUARD IS THE RULE RATHER THAN A COMMENT.
+     * ⚠️ EXACTLY ONE PRIMARY OR NONE, AND THIS IS THE THIRD AND FINAL POSITION OF THIS GUARD.
      *
-     * ⚠️ THIS IS THE THIRD FORM OF THIS REFUSAL AND IT RETURNS TO THE FIRST. It began as "no actions,
-     * ever"; became "none where the masthead LEAVES", when the two header types made anchoring the
-     * question; then "exactly one primary", when the format gained a CTA. The CTA is deleted — the
-     * toolbar beneath already carried the page's action, so the masthead stated it twice — and the
-     * original refusal is exactly right again. Recorded rather than rewritten, because a guard that
-     * has moved twice will be read as arbitrary unless the reasons are visible.
+     * The history, because a guard that has moved three times reads as arbitrary without it:
+     * (1) "no actions, ever" — the masthead scrolled out of reach and a control in it became
+     * unreachable; (2) "none where the masthead LEAVES", when two header types made anchoring the
+     * question; (3) "no control at all", when the CTA and the toolbar beneath it carried the same
+     * action and every page stated it twice. Each was right about its own design.
      *
-     * ⚠️ WHAT THIS REPLACES: a throw on ANY action, later made conditional on whether the masthead
-     * pinned. Both were answers to a design where the header either scrolled out of reach or had to
-     * be restored. It does neither now — it scrolls away as content and a separate bar takes over —
-     * so an action here is no longer a control that becomes unreachable. It is a page's one call to
-     * action, and one is the whole allowance.
+     * ⚠️ WHAT CHANGED IS THAT THE DUPLICATE IS NOW FORECLOSED RATHER THAN AVOIDED. The primary
+     * MOVES here from the toolbar rather than joining it — the census is asserted, not intended —
+     * so the reason (3) existed is gone, and the header is the one place a page's call to action
+     * lives. `toolbar`, `actionsSlot`, `overflow` and the `actions` array stay refused: those are
+     * plural surfaces, and the allowance is one.
      *
-     * ⚠️ IT STILL THROWS RATHER THAN IGNORING. Accepting a prop and rendering nothing is how a page
-     * ends up passing an action that quietly goes nowhere, which is the same fault as the deleted
-     * `count` slot. Each refusal names what to do instead, because a throw that only says "no" gets
-     * worked around.
+     * ⚠️ IT THROWS RATHER THAN IGNORING. Accepting a prop and rendering nothing is how a page ends
+     * up passing an action that quietly goes nowhere.
      */
     if (process.env.NODE_ENV !== "production" && (toolbar || actionsSlot || overflow?.length || acts.length)) {
       throw new Error(
-        `PageHeader variant="workspace" ("${title}") was passed a control. This masthead holds NONE. ` +
-        "It carried the page's primary for two passes and the toolbar beneath carried the same " +
-        "action, so every page stated it twice and paid about 30px for the duplicate. A page's " +
-        "controls belong in the grid's control row, which is where they already are.",
+        `PageHeader variant="workspace" ("${title}") was passed a plural control surface. ` +
+        "This masthead holds EXACTLY ONE primary action or none — pass `primary`. " +
+        "`toolbar`, `actionsSlot`, `overflow` and `actions` are refused: a header that can hold " +
+        "several controls becomes a second toolbar, which is what this format replaced.",
       );
     }
     return (
@@ -289,18 +306,45 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         {/* ⚠️ ARIA-HIDDEN, BECAUSE IT IS A RULE AND NOT A SEPARATOR IN THE DOCUMENT'S SENSE. An
             `<hr>` here would put a thematic break between a page's title and the page. */}
         <div className="wsh-toprule" aria-hidden="true" />
-        {/* ⚠️ NOTHING WHEN ABSENT — not an empty div, not a reserved height. See the prop's note. */}
-        <div className="wsh-body">
-          {/* ⚠️ THE SECTION, FROM THE ROUTER. Null on a route the crumb does not know, which renders
-              nothing rather than an empty pill — a bordered pill with no word in it is worse than no
-              pill at all, and it is what a fallback string would produce. */}
-          {kicker && <span className="wsh-kicker">{kicker}</span>}
-          <h1 className="wsh-title">
-            {title}{titleAdornment}
-          </h1>
-          {/* ⚠️ ABSENT DESCRIPTION RENDERS NOTHING AND RESERVES NOTHING. In flow there is no height
-              to keep, so a title-only page is simply shorter. */}
-          {description && <p className="wsh-sub">{description}</p>}
+        <div className="wsh-row">
+          {/**
+            * ⚠️ THE ICON SITS DIRECTLY ON THE PAGE GROUND — no tile, no border, no plate, no
+            * background of its own. The ref draws it in a 64px rounded card with a white fill and
+            * `object-fit: cover`; the brief names 72px, `contain`, and bare ground, and gives the
+            * reason. A ref wins on what it shows, except where the pack names a value AND its
+            * reason — and a tile would put a second object in a row whose whole job is to be one.
+            *
+            * ⚠️ ABSENT MEANS NO SLOT, NOT AN EMPTY BOX. Nine of the ten pages have no asset yet, and
+            * a reserved 72px well on each would be nine pages with a hole where a picture will go.
+            * The text starts at the gutter on those, which is asserted rather than assumed.
+            *
+            * ⚠️ `alt=""`, BECAUSE THE TITLE IS BESIDE IT. The icon names the page a second time; a
+            * screen reader hearing "Contact list, Contact list" is the mark's fault, not the
+            * heading's.
+            */}
+          {icon && <img className="wsh-icon" src={icon} alt="" />}
+          <div className="wsh-text">
+            <h1 className="wsh-title">
+              {title}{titleAdornment}
+            </h1>
+            {/* ⚠️ ABSENT DESCRIPTION RENDERS NOTHING AND RESERVES NOTHING. In flow there is no
+                height to keep, so a title-only page is simply shorter. */}
+            {description && <p className="wsh-sub">{description}</p>}
+          </div>
+          {/**
+            * ⚠️ ONE BUTTON, AND IT IS THE PAGE'S — the same handler the toolbar used to call, moved
+            * rather than copied. The slim bar renders the same `primary` at its own size, so a page
+            * states its call to action once and it survives the scroll.
+            */}
+          {primary && (
+            /* ⚠️ `disabled` IS NOT DECORATION — Query Centre's `Log new query` greys out while a
+               draft is open, and moving the button here without it was a silent behaviour
+               regression. `queryReentry` caught it, which is what that lock is for. */
+            <button type="button" className="wsh-cta" onClick={primary.onClick} disabled={primary.disabled}>
+              <Plus aria-hidden="true" />
+              {primary.label}
+            </button>
+          )}
         </div>
       </header>
     );

@@ -432,10 +432,10 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        There is no chrome boundary now. The masthead is the first thing in the scroller and states
        its own air: 24 above, 18 below, then its hairline, then 16 to whatever follows. One element
        declares all of it, so nothing can pay it twice and there is nothing to arbitrate. */
-    /* ⚠️ RETARGETED TO `.wsh-body`, AND THE LAW IS UNCHANGED: ONE element states the masthead's
+    /* ⚠️ RETARGETED TO `.wsh-row`, AND THE LAW IS UNCHANGED: ONE element states the masthead's
        vertical air, so nothing can pay it twice. The rebuild moved that declaration one level in —
        `.wsh` carries `padding: 0` because the top hairline has to sit ABOVE the text's inset, and
-       `.wsh-body` carries the 26/28 the format specifies. Both halves are asserted, because the
+       `.wsh-row` carries the 26/28 the format specifies. Both halves are asserted, because the
        failure this guards against is the air being stated in two places at once. */
     const header = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8");
     const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -443,10 +443,10 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(wsh, "the masthead has no rule at all").toBeTruthy();
     expect(strip(wsh![1]), "the masthead itself pays vertical air as well as its body — that is the double-payment this rule forbids")
       .toContain("padding: 0");
-    const bodyRule = /(?:^|\n)\.wsh-body\s*\{([^}]*)\}/.exec(header);
+    const bodyRule = /(?:^|\n)\.wsh-row\s*\{([^}]*)\}/.exec(header);
     expect(bodyRule, "the masthead's body has no rule at all").toBeTruthy();
     expect(strip(bodyRule![1]), "the masthead stopped stating its own vertical air")
-      .toContain("padding: var(--mast-pad-top) 0 var(--mast-pad-btm)");
+      .toContain("padding: var(--mast-pad-y) 0");
     /* ⚠️ THE GAP MOVED TO THE SLAB'S BASE (pinned chrome, §1) — it used to sit between the masthead
        and the control row, clearing the masthead's own hairline. Those two are one object now and
        the hairline is at the object's foot, so the air belongs below the whole of it. */

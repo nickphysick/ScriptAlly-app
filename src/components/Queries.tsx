@@ -4250,6 +4250,11 @@ export const Queries: React.FC<{
                and the page's own heading must say the same thing — a page whose sidebar entry
                and title disagree makes you check you are where you think you are. */
             title="Query Centre"
+            /* ⚠️ MOVED FROM `.qc-phead`, NOT COPIED. That row is this page's control row in all but
+               the grid's prop name — its own comment calls it "their seat" — so a header primary
+               beside it would be the page stating its one creative verb twice, which is the fault
+               this format exists to end. The button is deleted there in the same commit. */
+            primary={{ label: "Log new query", disabled: creating, onClick: () => onNavigate?.("queries", "Log a query") }}
             /**
              * ⚠️ THE DESCRIPTION IS REINSTATED (Nick's copy, supplied directly), AND §1b's
              * REASONING IS AMENDED RATHER THAN DELETED — because the objection it recorded was to a
@@ -4733,15 +4738,11 @@ export const Queries: React.FC<{
                 ⚠️ AND IT IS THE PAGE'S ONLY PINK SURFACE apart from §4's agent disc. Pink means
                 "you can make something" here, which is why the toolbar's other buttons stay white:
                 one emphasis, spent on the one verb that adds rather than ends. */}
-            <button
-              type="button"
-              className="qc-btn qc-logq"
-              disabled={creating}
-              onClick={() => onNavigate?.("queries", "Log a query")}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-              <span>Log new query</span>
-            </button>
+            {/* ⚠️ `Log new query` HAS GONE TO THE MASTHEAD (compact header, §1). The argument that
+                put it here — a creative verb belongs over the column it lengthens — was answered by
+                the masthead scrolling out of reach and taking the action with it. The slim bar
+                carries the same primary now, so it survives the scroll and this row does not have
+                to hold it. What stays here is what acts on the LIST: search, filter, sort. */}
 
             {/* ⚠️ `THIS QUERY` IS RETIRED (§3c), AND ITS OWN SENTENCE IS WHY. §3a says the label
                 "was being contradicted" by Filter and Sort sitting in this row; with them gone it

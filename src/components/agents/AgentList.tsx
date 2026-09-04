@@ -76,6 +76,9 @@ import { RAIL_GROUPS } from "../shell/railNav";
 import { countryName } from "../../lib/territory";
 import { blankDraft } from "../../lib/agentDraft";
 import { useIsMobile, useMobileChrome } from "../shell/mobileChrome";
+/* ⚠️ THE PAGE OWNS ITS OWN MARK. `PageHeader` takes a URL rather than a `MarkName` because these
+   are painted illustrations at 100px, not the registry's 20px monoline glyphs — see the prop. */
+import rolodexIcon from "../../assets/shell/agents-on-file-icon.png";
 import "./agentList.css";
 
 /**
@@ -854,8 +857,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
            <PageHeader
             variant="workspace"
             mark="contacts"
+            icon={rolodexIcon}
             title="Contact list"
             description="Everyone you're querying, watching, or saving for later."
+            /* ⚠️ MOVED FROM THE TOOLBAR, NOT COPIED INTO THE HEADER. `AgentToolbar`'s `agl-tbadd`
+               is deleted in the same commit and its `onAddAgent` prop with it, so the two cannot
+               coexist — which is the difference between a rehome and a duplicate. */
+            primary={{ label: "Add new agent", onClick: onAddAgent }}
             /* ⚠️ NO ACTIONS — `Add new agent` moved to the control row below (in-flow masthead,
                step 1), which is the row that stays on screen once the masthead has scrolled away.
                `PageHeader` throws in development if a masthead is handed one. */
@@ -887,7 +895,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             sortOptions={AGENT_SORT_OPTIONS}
             defaultSort={DEFAULT_AGENT_SORT}
             onSort={(k) => setSort(k as AgentListSort)}
-            onAddAgent={onAddAgent}
           />
          ) : undefined}
        >

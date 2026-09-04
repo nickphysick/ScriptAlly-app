@@ -953,9 +953,25 @@ describe("§5 (fp4) · what you sent — now the send event's own block", () => 
 
 describe("§1d/e/g · already landed, and still true", () => {
   it("the list's controls are in its own head, and none can go dead", () => {
-    const head = code.indexOf('className="f12-lhead"');
-    expect(head, "the list head is missing").toBeGreaterThan(-1);
-    const slice = code.slice(head, code.indexOf('className="f12-rows"', head));
+    /**
+     * ⚠️ THE SLICE IS THE `listHead` DEFINITION, NOT `f12-lhead` → `f12-rows`.
+     *
+     * The old window started at the first `f12-lhead` — which is inside `listHead`, declared near
+     * the top of the file — and ran to `f12-rows`, hundreds of lines later. It covered the masthead,
+     * the empty branch and two comments about a disabled Export, and it passed only because nothing
+     * in all of that happened to say `disabled`. The compact header's primary carries
+     * `disabled: creating` and the window swallowed it: a lock about the LIST HEAD failing over a
+     * control in the page header.
+     *
+     * ⚠️ AND IT WOULD HAVE FAILED IN THE OTHER DIRECTION TOO — a genuinely dead control in the head
+     * was only caught while nothing else in three hundred lines used the word.
+     */
+    const start = code.indexOf("const listHead = (");
+    expect(start, "`listHead` is missing").toBeGreaterThan(-1);
+    const end = code.indexOf("\n  );", start);
+    expect(end, "`listHead`'s definition does not close where expected").toBeGreaterThan(start);
+    const slice = code.slice(start, end);
+    expect(slice, "the slice missed the head itself").toContain('className="f12-lhead"');
     expect(slice, "a control in the head can be disabled").not.toContain("disabled");
     expect(code, "the page-wide toolbar row came back").not.toContain("toolbar={");
   });

@@ -44,15 +44,14 @@ const PAGES: { title: string; mark: string; section: string; description?: strin
 
 const render = (p: (typeof PAGES)[number]) =>
   renderToStaticMarkup(
-    <MastheadSectionContext.Provider value={{ section: p.section }}>
-      <PageHeader variant="workspace" title={p.title} mark={p.mark as never} description={p.description} />
-    </MastheadSectionContext.Provider>,
+    /* ⚠️ NO SECTION PROVIDER ANY MORE. The kicker is deleted, so a masthead reads nothing from
+       context; rendering bare is the honest case rather than a shortcut. */
+    <PageHeader variant="workspace" title={p.title} mark={p.mark as never} description={p.description} />,
   );
 
 /** every page-specific word removed, so what is left is the format itself */
 const skeleton = (html: string) =>
   html
-    .replace(/<span class="wsh-kicker">[^<]*<\/span>/, '<span class="wsh-kicker">§</span>')
     .replace(/<h1 class="wsh-title">[^<]*<\/h1>/, '<h1 class="wsh-title">§</h1>')
     .replace(/<p class="wsh-sub">[^<]*<\/p>/, '<p class="wsh-sub">§</p>');
 
@@ -100,11 +99,34 @@ describe("one masthead format, ten pages", () => {
     }
   });
 
-  it("⚠️ THE KICKER IS THE SECTION, AND ABSENCE RENDERS NOTHING RATHER THAN AN EMPTY PILL", () => {
-    expect(render(PAGES[0])).toContain('<span class="wsh-kicker">Querying</span>');
-    const outside = renderToStaticMarkup(<PageHeader variant="workspace" title="Somewhere" />);
-    expect(outside, "a header with no section drew an empty pill").not.toContain("wsh-kicker");
-    expect(outside, "the header did not render at all").toContain('<h1 class="wsh-title">Somewhere</h1>');
+  /**
+   * ⚠️ THE KICKER IS DELETED, AND ITS ABSENCE IS ASSERTED OVER ALL TEN. A pill is exactly the kind
+   * of thing that comes back on one page; the section is in the crumb three inches above.
+   */
+  it("⚠️ NO KICKER ANYWHERE — the section is the crumb's job", () => {
+    for (const page of PAGES) {
+      expect(render(page), `${page.title} drew a kicker`).not.toContain("wsh-kicker");
+    }
+    const bare = renderToStaticMarkup(<PageHeader variant="workspace" title="Somewhere" />);
+    expect(bare, "the header did not render at all").toContain('<h1 class="wsh-title">Somewhere</h1>');
+  });
+
+  /**
+   * ⚠️ AN ICON IS A SLOT OR NOTHING — never an empty 72px well. Nine of the ten pages have no asset
+   * yet, and a reserved box on each would be nine pages with a hole where a picture will go. The
+   * GEOMETRY of that (title at the gutter with no icon, gutter + 72 + gap with one) is measured;
+   * this is the structural half.
+   */
+  it("⚠️ NO ICON MEANS NO SLOT, NOT AN EMPTY BOX", () => {
+    const without = renderToStaticMarkup(<PageHeader variant="workspace" title="Somewhere" />);
+    expect(without, "an empty icon element was rendered").not.toContain("wsh-icon");
+    const withIcon = renderToStaticMarkup(
+      <PageHeader variant="workspace" title="Contact list" icon="/rolodex.png" />,
+    );
+    expect(withIcon).toContain('<img class="wsh-icon" src="/rolodex.png" alt=""/>');
+    /* ⚠️ `alt=""` IS THE CLAIM, not an oversight: the title names the page beside it, and a screen
+       reader hearing it twice is the mark's fault rather than the heading's. */
+    expect((withIcon.match(/alt=""/g) ?? []).length, "the icon grew an alt text").toBe(1);
   });
 
   /**
@@ -112,15 +134,33 @@ describe("one masthead format, ten pages", () => {
    * checks pass on a header that renders the CTA above the title — this repo already records that a
    * measurement of the parts is not a measurement of the whole.
    */
-  it("⚠️ TOP RULE, THEN KICKER, TITLE, SUBTITLE — in that order, and nothing after", () => {
-    const html = render({ ...PAGES[9], description: "Notes to self, undated." });
-    expect(html).toBe(
+  /**
+   * ⚠️ NO ICON IN THIS CASE, AND THAT IS DELIBERATE RATHER THAN AN OMISSION: React 19 emits a
+   * `<link rel="preload" as="image">` ahead of an `<img src>`, so an exact-markup claim carrying one
+   * is really a claim about the renderer's preload behaviour. The icon's own markup is asserted in
+   * the case above; this one is about ORDER, which is what an exact string is for.
+   */
+  it("⚠️ TOP RULE, THEN ONE ROW: TEXT THEN PRIMARY — in that order, and nothing after", () => {
+    const html = renderToStaticMarkup(
+      <PageHeader
+        variant="workspace"
+        title="Contact list"
+        description="Everyone you're querying."
+        primary={{ label: "Add new agent", onClick: () => {} }}
+      />,
+    );
+    const shape = html
+      .replace(/<svg[\s\S]*?<\/svg>/, "<svg/>")
+      .replace(/&#x27;/g, "'");
+    expect(shape).toBe(
       '<header class="wsh">'
       + '<div class="wsh-toprule" aria-hidden="true"></div>'
-      + '<div class="wsh-body">'
-      + '<span class="wsh-kicker">Tasks</span>'
-      + '<h1 class="wsh-title">Noteboard</h1>'
-      + '<p class="wsh-sub">Notes to self, undated.</p>'
+      + '<div class="wsh-row">'
+      + '<div class="wsh-text">'
+      + '<h1 class="wsh-title">Contact list</h1>'
+      + '<p class="wsh-sub">Everyone you\'re querying.</p>'
+      + "</div>"
+      + '<button type="button" class="wsh-cta"><svg/>Add new agent</button>'
       + "</div></header>",
     );
   });
@@ -144,28 +184,39 @@ describe("the masthead refuses every control", () => {
     renderToStaticMarkup(<PageHeader variant="workspace" title="Anywhere" {...props} />);
 
   it("refuses a toolbar", () => {
-    expect(boom({ toolbar: <i>t</i> })).toThrow(/holds NONE/);
+    expect(boom({ toolbar: <i>t</i> })).toThrow(/EXACTLY ONE primary action or none/);
   });
   it("refuses an actionsSlot", () => {
-    expect(boom({ actionsSlot: <i>s</i> })).toThrow(/holds NONE/);
+    expect(boom({ actionsSlot: <i>s</i> })).toThrow(/EXACTLY ONE primary action or none/);
   });
   it("refuses an overflow menu", () => {
-    expect(boom({ overflow: [{ label: "x", onClick: () => {} }] })).toThrow(/holds NONE/);
+    expect(boom({ overflow: [{ label: "x", onClick: () => {} }] })).toThrow(/EXACTLY ONE primary action or none/);
   });
   it("refuses two actions", () => {
     expect(boom({ actions: [
       { label: "a", primary: true, onClick: () => {} },
       { label: "b", primary: true, onClick: () => {} },
-    ] })).toThrow(/holds NONE/);
+    ] })).toThrow(/EXACTLY ONE primary action or none/);
   });
   it("refuses a lone non-primary action", () => {
-    expect(boom({ actions: [{ label: "a", onClick: () => {} }] })).toThrow(/holds NONE/);
+    expect(boom({ actions: [{ label: "a", onClick: () => {} }] })).toThrow(/EXACTLY ONE primary action or none/);
   });
-  /* ⚠️ THE SHAPE THAT USED TO BE THE ALLOWED ONE. A single primary was the whole of the previous
-     form's permission; asserting that it now throws is what makes the reversion a claim rather than
-     a deletion. */
-  it("refuses a single primary — the one shape the previous guard allowed", () => {
-    expect(boom({ actions: [{ label: "+ Add a comp", primary: true, onClick: () => {} }] })).toThrow(/holds NONE/);
+  /**
+   * ⚠️ THE `actions` ARRAY STAYS REFUSED EVEN AT LENGTH ONE, AND THE `primary` PROP IS THE WAY IN.
+   * The distinction is the point of the third form of this guard: a header that accepts a LIST can
+   * hold several controls and becomes a second toolbar, which is what this format replaced. One is
+   * expressible in the type, so it is expressed there.
+   */
+  it("refuses a single primary in the `actions` array — the shape the second guard allowed", () => {
+    expect(boom({ actions: [{ label: "+ Add a comp", primary: true, onClick: () => {} }] }))
+      .toThrow(/EXACTLY ONE primary action or none/);
+  });
+  it("ACCEPTS the `primary` prop — one control, named as one", () => {
+    expect(boom({ primary: { label: "+ Add a comp", onClick: () => {} } })).not.toThrow();
+    const html = renderToStaticMarkup(
+      <PageHeader variant="workspace" title="Anywhere" primary={{ label: "+ Add a comp", onClick: () => {} }} />,
+    );
+    expect((html.match(/wsh-cta/g) ?? []).length, "the masthead drew more than one control").toBe(1);
   });
   it("renders without complaint when passed none", () => {
     expect(boom({})).not.toThrow();
@@ -187,26 +238,36 @@ describe("the kicker's and the CTA's treatment", () => {
     return strip(m![1]);
   };
 
-  it("⚠️ BOTH OF THE KICKER'S COLOURS COME FROM TOKENS, never inline rgba", () => {
-    const k = rule(".wsh-kicker");
-    expect(k, "the kicker's ink is a literal").toContain("color: var(--mast-kick-ink)");
-    expect(k, "the kicker's border is a literal").toContain("border: 1px solid var(--mast-kick-bd)");
-    /* ⚠️ AND THE RULE CARRIES NO COLOUR OF ITS OWN. Asserting the two `var()`s alone passes on a rule
-       that ALSO states an rgba somewhere else — which is exactly how a second value gets in. */
-    expect(k, "the kicker states a colour literal alongside its tokens").not.toMatch(/#[0-9a-f]{3,8}|rgba?\(/i);
-    for (const [tok, val] of [["--mast-kick-ink", "#807168"], ["--mast-kick-bd", "rgba(25, 18, 16, 0.14)"]] as const) {
-      expect(strip(root), `${tok} is not declared as ${val}`).toContain(`${tok}: ${val}`);
+  /**
+   * ⚠️ THE KICKER'S TWO CASES ARE REPLACED BY THE ICON'S AND THE CTA'S, and the treatment claims
+   * invert rather than lapse: what the kicker's cases protected was that a LABEL must not look like
+   * a CONTROL. The one control in this format is a control, and what has to be protected now is the
+   * opposite — that the icon does not become an object with a frame.
+   */
+  it("⚠️ THE ICON IS ON THE PAGE GROUND — no tile, no border, no plate, no fill", () => {
+    const i = rule(".wsh-icon");
+    for (const forbidden of ["background", "border", "border-radius", "box-shadow", "padding"]) {
+      expect(i, `the icon grew a ${forbidden} — it is a picture on the ground, not an object`)
+        .not.toMatch(new RegExp(`(?:^|[;\\s])${forbidden}\\s*:`));
     }
+    /* ⚠️ `contain`, NOT THE REF'S `cover`. Cropping is right inside a frame and wrong without one:
+       with no card to crop against, `cover` silently trims a square asset in a non-square slot. */
+    expect(i, "the icon crops rather than fitting").toContain("object-fit: contain");
+    expect(i, "the icon is not the format's own size").toContain("var(--mast-icon)");
   });
 
-  it("⚠️ IT IS A LABEL, NOT A CONTROL — mono, 9px, regular, half-weight border", () => {
-    const k = rule(".wsh-kicker");
-    /* the four things that made an outlined capsule read as pressable */
-    expect(k).toContain("font-family: var(--font-mono)");
-    expect(k).toContain("font-size: 10px");
-    expect(k).toContain("font-weight: 400");
-    expect(k).toContain("letter-spacing: 0.18em");
-    expect(k, "the kicker went back to Playfair").not.toContain("--font-serif");
+  it("⚠️ THE PRIMARY READS `--btn-ink`, NEVER A LITERAL OF ITS OWN", () => {
+    const c = rule(".wsh-cta");
+    expect(c, "the masthead's primary states its own near-black").toContain("background: var(--btn-ink)");
+    /* ⚠️ THE WHOLE POINT OF THE TOKEN. Before it, this button and the top bar's `+ New` were two
+       literals ONE UNIT apart — `#1c130e` and `#1c130f` — on the two buttons whose entire
+       justification is that they match. A literal anywhere in this rule reopens that. */
+    expect(c, "the primary carries a colour literal beside its token")
+      .not.toMatch(/background:\s*#|border:[^;]*#[0-9a-f]{6}/i);
+    /* ⚠️ `inherit`, NOT `--font-sans` AND NOT INTER. The stated stack names Inter; `--font-sans` is
+       Source Sans Pro; the app's other buttons inherit. Naming either here would make this the only
+       button of its kind in the family it is joining. The disagreement is Nick's to settle. */
+    expect(c, "the primary named a face instead of inheriting one").toContain("font-family: inherit");
   });
 
   /**

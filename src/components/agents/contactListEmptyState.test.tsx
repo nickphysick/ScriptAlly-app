@@ -119,14 +119,24 @@ describe("the page mounts each state", () => {
   });
 
   /**
-   * ⚠️ THE TOOLBAR IS ABSENT, NOT DISABLED. Not one of its six controls does anything against
-   * nothing on file, and the seventh — Add new agent — is the empty state's own hero button.
+   * ⚠️ THE TOOLBAR IS ABSENT, NOT DISABLED. Not one of its controls does anything against nothing
+   * on file.
+   *
+   * ⚠️ `Add new agent` LEAVES THIS LIST AND THE CASE IS STRONGER FOR IT. The label was standing in
+   * for "the toolbar is not here", and the moment the action moved to the MASTHEAD — where it is
+   * correct, and shows on a blank account too — the proxy failed on a page that was behaving
+   * exactly as designed. A claim about a control ROW is asserted on the row.
    */
   it("…with no toolbar, because none of its controls has anything to act on", () => {
     const html = render();
-    for (const control of ["Filters", "Group", "Sort", "Add new agent"]) {
-      expect(html).not.toContain(control);
+    for (const control of ["Filters", "Group", "Sort"]) {
+      expect(html, `${control} rendered against an empty list`).not.toContain(control);
     }
+    expect(html, "the toolbar rendered against an empty list").not.toContain("agl-toolbar");
+    /* ⚠️ AND THE MASTHEAD'S PRIMARY IS PRESENT, which is the other half of the same fact: the page
+       still offers the one thing a blank account can do. Asserted here so the proxy cannot come
+       back as "no `Add new agent` anywhere". */
+    expect(html, "the blank account lost the one action it can take").toContain("Add new agent");
   });
 
   it("renders NEITHER the empty state nor the toolbar while the collections settle", () => {

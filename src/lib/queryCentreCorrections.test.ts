@@ -260,7 +260,7 @@ describe("§5 · tighten, never scroll", () => {
     expect(css, "a page-scoped masthead step came back — the acceptance matrix compares titles across pages")
       .not.toMatch(/--(wsh|mast)-title-size/);
     const shell = read("../components/shell/pageHeader.css");
-    expect(shell, "the shared sheet no longer states one masthead title size").toContain("--mast-title-size: 44px");
+    expect(shell, "the shared sheet no longer states one masthead title size").toContain("--mast-title-size: 32px");
   });
 
   /**

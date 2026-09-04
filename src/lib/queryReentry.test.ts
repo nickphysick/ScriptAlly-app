@@ -59,15 +59,19 @@ describe("re-entry is a no-op, from every entry point", () => {
        and only the empty branch's survives. The clause is unchanged: a re-entry point that is
        already drafting says so rather than looking live and doing nothing, which is now asserted
        on the toolbar's button as well. */
-    /* ⚠️ ZERO NOW, NOT ONE (in-flow masthead, step 1). The one occurrence was the MASTHEAD's
-       `Log query` action — the empty branch's re-entry point, disabled while a draft was open. The
-       masthead holds no actions at all, and that button was a duplicate of the welcome pane's
-       `Log your first query` rather than a control that needed rehoming. What the clause protects
-       is unchanged and is asserted on the survivor below: a re-entry point that is already drafting
-       says so rather than looking live and doing nothing. */
-    expect(queries.match(/disabled: creating,/g)?.length ?? 0).toBe(0);
-    expect(queries, "the toolbar's Log button stays live while a draft is open")
-      .toMatch(/className="qc-btn qc-logq"[\s\S]{0,40}disabled=\{creating\}/);
+    /**
+     * ⚠️ THE BUTTON HAS MOVED BACK TO THE MASTHEAD (compact header, §1) AND THE CLAUSE IS UNCHANGED:
+     * a re-entry point that is already drafting says so rather than looking live and doing nothing.
+     *
+     * ⚠️ AND THIS CASE CAUGHT THE MOVE DROPPING IT. `Log new query` went from `.qc-phead` to the
+     * header's `primary` and the `disabled={creating}` did not come with it — a silent behaviour
+     * regression inside a commit about layout. That is what this lock is for, and it is why the
+     * assertion follows the button rather than naming a place.
+     */
+    expect(queries, "the page's Log button stays live while a draft is open")
+      .toMatch(/primary=\{\{[^}]*disabled: creating/);
+    expect(queries, "the retired `.qc-phead` copy came back — the page would state its verb twice")
+      .not.toContain('className="qc-btn qc-logq"');
   });
 });
 

@@ -679,6 +679,12 @@ export const ComparableTitlesPage: React.FC<{
             mark="comps"
             title="Comparable titles"
             description="The books your manuscript sits beside, gathered and query-ready."
+            /* ⚠️ THE BAND'S OWN `Add a comp` STAYS, AND THAT IS A JUDGEMENT RATHER THAN AN
+               OVERSIGHT. It sits in a card head beside that card's count, acting on the list it is
+               the head of; the header's acts on the page. The census forbids a TOOLBAR duplicate —
+               a control row restating the page's action — and a band head is content. Flagged in
+               the run report as the one call in this pack that could reasonably go either way. */
+            primary={{ label: "Add a comp", onClick: () => setFormState({ index: null }) }}
           />
         )}
       >

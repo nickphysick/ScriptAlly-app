@@ -69,6 +69,8 @@ export const SubmissionPackages: React.FC = () => {
    * that it was asked for.
    */
   const [howOpen, setHowOpen] = useState(false);
+  /* the permanent composer's column — the masthead's primary scrolls to it rather than opening it */
+  const buildRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -535,6 +537,18 @@ export const SubmissionPackages: React.FC = () => {
              registry, so what rendered here was the fallback. Part of the trial's carve-out. */
           title="Submission packages"
           /**
+           * ⚠️ THIS PAGE HAS NO BUTTON TO MOVE, AND THE HANDLER IS THE HONEST READING OF THAT.
+           * `BuildPanel` is a PERMANENT composer beside the library rather than something a control
+           * opens, so "+ New package" cannot mean "open the builder" — it is already open. It means
+           * "take me to where I make one": the panel is scrolled into view and nothing is cleared.
+           *
+           * ⚠️ IT DELIBERATELY DOES NOT CALL `clearBuild`. That would read as the obvious
+           * implementation and would silently discard a part-built package — three drag-drops gone
+           * because the writer pressed a button that says NEW. A destructive act needs a control
+           * that says so, and this one does not.
+           */
+          primary={{ label: "New package", onClick: () => buildRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }) }}
+          /**
            * ⚠️ THE MASTHEAD HOLDS NO SELECTOR AND NO SCOPE INDICATOR — it holds the page's sentence.
            * `cec65b21` put `for {manuscript}` in this slot, reading `builder-refined.html` as
            * normative over `packages-tabs.html`, and it cost the page the one line that says what
@@ -786,7 +800,7 @@ export const SubmissionPackages: React.FC = () => {
                 * a 2,000px page, and the reason widening the rail looked like it had fixed
                 * something. A composer beside the library is the whole point of the split.
                 */}
-              <div className="bldr-panelcol">
+              <div className="bldr-panelcol" ref={buildRef}>
                 <BuildPanel
                   slots={slots}
                   existing={msPackages}

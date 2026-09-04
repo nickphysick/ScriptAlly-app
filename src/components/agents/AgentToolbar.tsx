@@ -19,7 +19,7 @@
  * a second grammar.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Filter, Plus, Rows3, Search, SlidersHorizontal } from "lucide-react";
+import { Check, ChevronDown, Filter, Rows3, Search, SlidersHorizontal } from "lucide-react";
 import { PageTally } from "../shell/WorkspacePageGrid";
 import {
   AgentDoor,
@@ -188,7 +188,6 @@ export interface AgentToolbarProps {
    *  The masthead holds no actions, so every button that was in one moved to its page's control
    *  row — this row. It is the rightmost thing here by the row's own grammar: tally left, verbs
    *  right, primary last. */
-  onAddAgent: () => void;
   /** Group + Sort are single-choice controls; their option lists are owned by the caller. */
   group: string;
   groupOptions: readonly { key: string; label: string }[];
@@ -203,7 +202,6 @@ export interface AgentToolbarProps {
 export const AgentToolbar: React.FC<AgentToolbarProps> = ({
   search, onSearch, filters, onFilters, counts, starCounts, locCounts,
   resultCount, total, group, groupOptions, onGroup, sort, sortOptions, defaultSort, onSort, searchRef,
-  onAddAgent,
 }) => {
   const [openPop, setOpenPop] = useState<string | null>(null);
   const nFilters = filterCount(filters);
@@ -367,12 +365,10 @@ export const AgentToolbar: React.FC<AgentToolbarProps> = ({
         ))}
       </Pop>
 
-      {/* ⚠️ `Add new agent` LANDS HERE FROM THE MASTHEAD — one home, and it is the row that stays
-          on screen while you work through the list you are adding to. */}
-      <button type="button" className="agl-tbadd" onClick={onAddAgent}>
-        <Plus width={15} height={15} aria-hidden="true" />
-        Add new agent
-      </button>
+      {/* ⚠️ `Add new agent` HAS GONE BACK TO THE MASTHEAD (compact header, §1), AND THE ARGUMENT
+          THAT BROUGHT IT HERE IS ANSWERED RATHER THAN OVERRULED. It moved down because the masthead
+          scrolled out of reach and took the page's one action with it; the slim bar carries the same
+          primary now, so the action survives the scroll without the toolbar having to hold it. */}
     </div>
   );
 };
