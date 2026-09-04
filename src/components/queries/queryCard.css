@@ -44,7 +44,25 @@
   --band-a: var(--stage-closed);
   --band-b: var(--stage-closed);
 
-  display: block;
+  /**
+   * ⚠️ A COLUMN FLEX, NOT A BLOCK — AND THE REASON IS THAT THIS CARD IS A `<button>`.
+   *
+   * A button CENTRES its content whenever it is taller than that content, whatever its `display`
+   * says: the UA gives its anonymous content box its own alignment, and `display: block` does not
+   * reach it. The grid stretches every card to the tallest in its row (`align-items: stretch`), so
+   * any card beside a taller neighbour got its spare height split top and bottom.
+   *
+   * ⚠️ MEASURED: 16.5px of spare on a 241.48px card holding 224.98px of content — 8.25px of white
+   * ABOVE the band and 8.25 below. It looked query-specific, and reported as such, because which
+   * cards are short depends on whether their fact sentence wraps. 16 of 54 at 1024.
+   *
+   * ⚠️ AND `display: block` WAS NOT WRONG SO MUCH AS UNABLE TO SAY THIS. A column flex container
+   * lays its children out from the start edge and gives the button nothing to centre.
+   */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
   width: 100%;
   padding: 0;
   text-align: left;
@@ -136,7 +154,12 @@
  * `.qcc-m`'s `margin-top: 7px` did nothing at all. This repo has an audit about the same fault
  * printing "TextIn 1 package" on the packages band.
  */
-.qcc-body { display: block; padding: 20px 20px 18px; }
+/* ⚠️ THE BODY TAKES THE SPARE HEIGHT — and this line is NOT guarded, which is worth saying rather
+   than implying. With the column flex above, the band is flush whether or not the body grows; all
+   `flex: 1` decides is whether the leftover white sits inside the body or after it, and both are
+   white. It is kept because it becomes load-bearing the day the body has a background of its own,
+   and a mutation removing it correctly stays GREEN. Unproved, not proved safe. */
+.qcc-body { display: block; flex: 1; padding: 20px 20px 18px; }
 .qcc-who { display: flex; align-items: center; gap: 15px; }
 .qcc-whotx { display: block; flex: 1; min-width: 0; }
 /* ⚠️ PARCHMENT AND LIFTED, NEVER PINK. Pink is the app's CTA fill; a pink disc on a card reads as

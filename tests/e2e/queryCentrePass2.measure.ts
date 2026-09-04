@@ -395,6 +395,57 @@ test("pass 2 — cap, search, popovers, ladder, leaves", async ({ page }) => {
      would satisfy every assertion above by skipping all of them. */
   expect(compared, "no built card shared a status with the ref — nothing was compared").toBeGreaterThan(1);
 
+  /**
+   * ── A · EVERY CARD, ONE LEAF, BAND FLUSH ────────────────────────────────────────────────────
+   *
+   * ⚠️ ASSERTED OVER THE WHOLE SET, NOT A SAMPLE. The reported fault named two cards; the useful
+   * claim is that no card can render without a leaf or with a strip above its band, whatever its
+   * data. Both readings come from the rendered box rather than from a class, because "the element
+   * exists" and "it occupies the top of the card" are different facts.
+   */
+  const cardShape = await page.evaluate(() => {
+    const cards = [...document.querySelectorAll<HTMLElement>(".qcc")];
+    return {
+      total: cards.length,
+      badLeaf: cards.filter((c) => c.querySelectorAll(".qcc-leaf").length !== 1)
+        .map((c) => c.getAttribute("data-qcc-id")),
+      /* a white strip above the band = the band's top is not the card's top */
+      stripAbove: cards.filter((c) => {
+        const b = c.querySelector(".qcc-band");
+        if (!b) return true;
+        return Math.abs(b.getBoundingClientRect().top - c.getBoundingClientRect().top) > 1;
+      }).map((c) => c.getAttribute("data-qcc-id")),
+      /* the actual gaps, so a failure says HOW FAR rather than only THAT */
+      gaps: cards.slice(0, 8).map((c) => {
+        const b = c.querySelector(".qcc-band");
+        const cr = c.getBoundingClientRect();
+        return {
+          id: c.getAttribute("data-qcc-id"),
+          gap: b ? Math.round((b.getBoundingClientRect().top - cr.top) * 100) / 100 : null,
+          cardTransform: getComputedStyle(c).transform,
+          cardAnim: getComputedStyle(c).animationName,
+          bandPos: b ? getComputedStyle(b).position : null,
+        };
+      }),
+      /* the caption is one element or none — never two, never a leftover */
+      badCaption: cards.filter((c) => c.querySelectorAll(".qcc-m").length > 1)
+        .map((c) => c.getAttribute("data-qcc-id")),
+      /* ⚠️ AND NO CARD MAY STATE A ZERO-DAY REPLY. That is the false figure two cards printed. */
+      zeroDay: cards.filter((c) => /\b0 days?\b/.test(c.querySelector(".qcc-m")?.textContent ?? ""))
+        .map((c) => c.getAttribute("data-qcc-id")),
+    };
+  });
+  out.cardShape = cardShape;
+  /* ⚠️ RE-DUMPED. The file's single `writeFileSync` sits above this block, so a reading collected
+     here never reached disk — the same write-before-collect fault the panel probe had, and it left
+     me reading `null` and guessing. Evidence is written when it is gathered. */
+  writeFileSync("reports/query-centre-pass2.json", JSON.stringify(out, null, 2));
+  expect(cardShape.total, "no cards to check").toBeGreaterThan(5);
+  expect(cardShape.badLeaf, "cards without exactly one leaf").toEqual([]);
+  expect(cardShape.stripAbove, "cards whose band is not flush with the card's top").toEqual([]);
+  expect(cardShape.badCaption, "cards with more than one caption").toEqual([]);
+  expect(cardShape.zeroDay, "cards stating a reply interval of 0 days").toEqual([]);
+
   /* ── §5 · every card has a leaf, and height does not depend on it ────────────────────────── */
   const leaves = out.leaves as { total: number; withLeaf: number; heights: number[] };
   expect(leaves.total, "no cards on the page").toBeGreaterThan(5);

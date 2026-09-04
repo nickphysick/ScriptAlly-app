@@ -438,3 +438,54 @@ describe("⚠️ a decided offer reads as closed, without rewriting the record",
     expect(f.turn).toBe("agent");
   });
 });
+
+/**
+ * ⚠️ THE CLOSED CAPTION STATES AN INTERVAL ONLY WHEN THERE IS ONE TO STATE.
+ *
+ * Found by dumping two Rejected cards that Nick reported as rendering wrong. They were not
+ * leafless and their spacing was fine — they printed "replied after 0 days", because
+ * `lastStatusChange` was absent, the leaf fell back to `dateSent`, and the interval was measured
+ * from the send to itself. A confident false figure, which is worse than a gap.
+ */
+describe("⚠️ a closed card does not invent how long the reply took", () => {
+  it("says nothing when there is no last activity to measure to", () => {
+    const f = cardFacts(q({ status: QueryStatus.REJECTED, dateSent: ago(60) }), TODAY);
+    expect(sentenceText(f.sentence)).toBe("Pass");
+    expect(f.caption, "the card invented an interval").toBe("");
+  });
+
+  it("⚠️ and NEVER says '0 days' — the exact string that reached the page", () => {
+    for (const over of [
+      { status: QueryStatus.REJECTED, dateSent: ago(60) },
+      { status: QueryStatus.WITHDRAWN, dateSent: ago(10) },
+      { status: QueryStatus.REJECTED, dateSent: ago(1) },
+    ]) {
+      const f = cardFacts(q(over), TODAY);
+      expect(f.caption, `"${f.caption}" for ${over.status}`).not.toMatch(/\b0 days?\b/);
+    }
+  });
+
+  it("a REAL same-day reply is a different fact, and is said", () => {
+    /* equality alone cannot tell "same day" from "unknown" — the FIELD can. */
+    const sameDay = q({ status: QueryStatus.REJECTED, dateSent: ago(30), lastStatusChange: ago(30) });
+    expect(cardFacts(sameDay, TODAY).caption).toBe("replied the same day");
+  });
+
+  it("a real interval is still stated", () => {
+    const f = cardFacts(q({ status: QueryStatus.REJECTED, dateSent: ago(60), lastStatusChange: ago(25) }), TODAY);
+    expect(f.caption).toBe("replied after 5 weeks");
+  });
+
+  it("⚠️ the leaf is present either way — there is no leafless variant", () => {
+    /* The reported symptom was a missing leaf. It never was one: the leaf falls back to the send
+       date, which is why the interval came out as zero rather than the card coming out empty. */
+    for (const over of [
+      { status: QueryStatus.REJECTED, dateSent: ago(60) },
+      { status: QueryStatus.REJECTED, dateSent: ago(60), lastStatusChange: ago(25) },
+    ]) {
+      const f = cardFacts(q(over), TODAY);
+      expect(f.leaf, "a closed card rendered no leaf").not.toBeNull();
+      expect(f.leaf!.caption).toBe("closed");
+    }
+  });
+});

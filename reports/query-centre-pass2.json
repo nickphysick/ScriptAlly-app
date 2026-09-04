@@ -478,11 +478,11 @@
   "tintAudit": {
     "ran": true,
     "cardStageClass": "qcc--s-out-1",
-    "recordViewReached": true,
+    "recordViewReached": false,
     "headerFound": false,
     "headerBand": null,
-    "selectedRowFound": true,
-    "selectedRowBand": "rgb(247, 227, 221)",
+    "selectedRowFound": false,
+    "selectedRowBand": null,
     "ladder": {
       "out-1": "",
       "out-2": "",
@@ -494,5 +494,70 @@
       "closed": ""
     },
     "stageTokenUsersInRecord": 0
+  },
+  "cardShape": {
+    "total": 54,
+    "badLeaf": [],
+    "stripAbove": [],
+    "gaps": [
+      {
+        "id": "seed-cal-soon-q",
+        "gap": 0,
+        "cardTransform": "none",
+        "cardAnim": "none",
+        "bandPos": "static"
+      },
+      {
+        "id": "thin-q-remind",
+        "gap": 0,
+        "cardTransform": "none",
+        "cardAnim": "none",
+        "bandPos": "static"
+      },
+      {
+        "id": "rej-query-1",
+        "gap": 0,
+        "cardTransform": "none",
+        "cardAnim": "none",
+        "bandPos": "static"
+      },
+      {
+        "id": "seed-cal-bang-q",
+        "gap": 0,
+        "cardTransform": "none",
+        "cardAnim": "none",
+        "bandPos": "static"
+      },
+      {
+        "id": "seed-pkgq-7",
+        "gap": 0,
+        "cardTransform": "none",
+        "cardAnim": "none",
+        "bandPos": "static"
+      },
+      {
+        "id": "seed-query-20",
+        "gap": 0,
+        "cardTransform": "none",
+        "cardAnim": "none",
+        "bandPos": "static"
+      },
+      {
+        "id": "seed-query-19",
+        "gap": 0,
+        "cardTransform": "none",
+        "cardAnim": "none",
+        "bandPos": "static"
+      },
+      {
+        "id": "seed-pkgq-2",
+        "gap": 0,
+        "cardTransform": "none",
+        "cardAnim": "none",
+        "bandPos": "static"
+      }
+    ],
+    "badCaption": [],
+    "zeroDay": []
   }
 }

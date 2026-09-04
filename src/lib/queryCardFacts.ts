@@ -371,8 +371,27 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
         : input.offerDecision === "declined" ? "Offer declined"
           : null;
     sentence = [{ text: decisionWord ?? closedSentence(query) }];
-    const replied = sentMs != null && !Number.isNaN(leafMs) ? Math.max(0, daysBetween(sentMs, leafMs)) : null;
-    caption = replied == null ? "" : `replied after ${spanWords(replied)}`;
+    /**
+     * ⚠️ "REPLIED AFTER 0 DAYS" WAS A FALSE FIGURE, AND IT REACHED THE PAGE. Measured on two
+     * Rejected cards: both printed it, because `lastStatusChange` was ABSENT, so the leaf fell back
+     * to `dateSent`, so the interval computed from the send to itself. The card was not broken —
+     * it was confidently reporting a number it had no basis for, which is the worse failure.
+     *
+     * ⚠️ SO THE INTERVAL IS ONLY STATED WHEN THE APP KNOWS IT. `lastStatusChange` present means a
+     * real last activity to measure to; absent means we do not know how long the reply took, and
+     * the caption says nothing rather than inventing a duration. This is the house rule that copy
+     * asserts only what the code knows.
+     *
+     * ⚠️ AND A GENUINE SAME-DAY REPLY IS A DIFFERENT FACT from an unknown one. With a real
+     * `lastStatusChange` that happens to equal the send, "replied the same day" is true and worth
+     * saying; equality alone cannot tell the two apart, which is why this reads the FIELD rather
+     * than comparing two numbers.
+     */
+    const hasLastActivity = !!query.lastStatusChange;
+    const replied = hasLastActivity && sentMs != null && !Number.isNaN(leafMs)
+      ? Math.max(0, daysBetween(sentMs, leafMs))
+      : null;
+    caption = replied == null ? "" : replied === 0 ? "replied the same day" : `replied after ${spanWords(replied)}`;
   }
 
   const { materials, materialsRecorded } = cardMaterials(query.materialsWanted);
