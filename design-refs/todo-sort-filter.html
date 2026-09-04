@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — sort, group and filter</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f7f4ee;--white:#fff;--field:#fdfbf7;--ink:#241209;--ink2:#3a1c14;--muted:#9c8878;--muted2:#8a7a6c;--hair:#e7ddd2;--hair2:#e0d5c8;--edge:#e8e0d8;--burg:#7c3a2a;--sage:#5a6e58;--pink:#f5e2da;--pink-b:#e8c8bc;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:26px 24px 80px;}
+.wrap{max-width:1180px;margin:0 auto;}
+h1{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:var(--ink2);}
+.lede{font-size:12.5px;color:#6a584a;font-weight:300;line-height:1.65;max-width:900px;margin:5px 0 14px;}
+.lede b{font-weight:500;color:var(--ink2);}
+.listcard{background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);display:flex;flex-direction:column;overflow:visible;position:relative;height:640px;}
+.lhead{display:flex;gap:8px;padding:12px 14px;border-bottom:1px solid var(--hair);align-items:center;position:relative;}
+.search{flex:1;height:34px;border:1px solid var(--edge);border-radius:9px;background:var(--field);display:flex;align-items:center;padding:0 12px;font-size:12px;color:var(--ink);}
+.search input{border:0;background:transparent;outline:none;font:inherit;width:100%;color:var(--ink);}
+.search input::placeholder{color:#b8a898;}
+.ib{position:relative;height:34px;padding:0 11px;border:1px solid var(--edge);border-radius:9px;background:var(--white);display:inline-flex;align-items:center;gap:7px;color:#57534e;font-size:11.5px;font-weight:500;cursor:pointer;flex-shrink:0;}
+.ib:hover{border-color:#c9a89e;}
+.ib.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);}
+.ib .b{font-family:'JetBrains Mono',monospace;font-size:8px;background:var(--burg);color:#fff;border-radius:999px;padding:1px 6px;}
+.ib.plus{width:34px;padding:0;justify-content:center;background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-size:16px;}
+/* active filter chips */
+.chips{display:none;gap:6px;padding:8px 14px;border-bottom:1px solid var(--hair);flex-wrap:wrap;align-items:center;}
+.chips.show{display:flex;}
+.chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:999px;background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-size:11px;font-weight:500;}
+.chip .k{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#a3785f;}
+.chip .x{cursor:pointer;font-size:12px;line-height:1;opacity:.7;}
+.chip .x:hover{opacity:1;}
+.chips .clear{margin-left:auto;font-size:10.5px;color:var(--muted2);cursor:pointer;border-bottom:1px dashed rgba(124,58,42,0.3);}
+/* rows */
+.rows{flex:1 1 auto;min-height:0;overflow-y:auto;padding:4px 0;}
+.grp{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);padding:12px 14px 6px;display:flex;align-items:center;gap:8px;font-weight:500;position:sticky;top:0;background:var(--white);z-index:2;}
+.grp i{width:6px;height:6px;border-radius:50%;background:var(--burg);display:inline-block;}
+.grp.h i{background:var(--sage);}
+.grp.y i{background:#c9b27a;}
+.grp.n i{background:#c0b0a0;}
+.grp .n{color:#c0b0a0;}
+.grp::after{content:'';flex:1;height:1px;background:var(--hair);margin-left:6px;}
+.row{display:grid;grid-template-columns:64px minmax(180px,1.4fr) minmax(150px,1fr) minmax(130px,1fr) 118px 70px;gap:14px;align-items:center;padding:10px 14px;border-bottom:1px solid #f3ece3;cursor:pointer;}
+.row:hover{background:#fbf8f3;}
+.pill{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.12em;text-transform:uppercase;border-radius:999px;padding:5px 0;text-align:center;font-weight:500;}
+.pill.send,.pill.chase{background:var(--pink);color:var(--burg);}
+.pill.close,.pill.fix{background:#e6ece4;color:#4c5f4a;}
+.pill.note{background:#f4ecd8;color:#8a7440;}
+.deed{font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cell{font-size:12px;color:var(--ink2);font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:8px;}
+.av{width:22px;height:22px;border-radius:50%;background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(124,58,42,0.18);flex-shrink:0;}
+.cell.mono{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);display:block;}
+.cell.mono b{font-family:'Playfair Display',serif;font-size:14px;color:var(--ink2);font-weight:500;letter-spacing:0;text-transform:none;margin-right:3px;}
+.actb{justify-self:end;color:#c0b0a0;font-size:14px;}
+.empty{padding:40px 20px;text-align:center;font-size:12.5px;color:var(--muted2);font-weight:300;line-height:1.6;}
+.empty a{color:var(--burg);cursor:pointer;border-bottom:1px dashed rgba(124,58,42,0.35);}
+.lfoot{display:flex;justify-content:space-between;padding:10px 14px;border-top:1px solid var(--hair);font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+.lfoot b{color:var(--ink2);}
+
+/* ═══ anchored panels ═══ */
+.panel{position:absolute;top:calc(100% + 8px);right:0;width:300px;background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 2px 6px rgba(58,28,20,0.06),0 18px 40px rgba(58,28,20,0.14);z-index:30;display:none;overflow:hidden;}
+.panel.open{display:block;animation:pop .16s ease;}
+@keyframes pop{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--hair);}
+.ph .t{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink2);font-weight:500;}
+.ph .a{font-size:10.5px;color:var(--muted2);cursor:pointer;}
+.ph .a:hover{color:var(--burg);}
+.sec{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase;color:#b3a494;padding:11px 14px 5px;}
+.opt{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;font-size:12.5px;color:var(--ink2);}
+.opt:hover{background:#fbf8f3;}
+.opt .desc{font-size:10.5px;color:var(--muted2);font-weight:300;display:block;line-height:1.3;}
+.opt .c{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#c0b0a0;}
+.radio{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--hair2);flex-shrink:0;position:relative;background:var(--field);}
+.opt.on .radio{border-color:var(--burg);}
+.opt.on .radio::after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--burg);}
+.tick{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--hair2);background:var(--field);flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:transparent;}
+.opt.on .tick{background:var(--burg);border-color:var(--burg);color:#fff;}
+.opt.on{color:var(--ink);font-weight:500;}
+.sw{display:flex;padding:0 14px 6px;}
+.sw button{flex:1;height:28px;font-size:11px;background:var(--field);border:0.5px solid var(--hair2);color:var(--ink2);cursor:pointer;}
+.sw button:first-child{border-radius:8px 0 0 8px;}
+.sw button:last-child{border-radius:0 8px 8px 0;border-left:0;}
+.sw button.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500;}
+.pf{padding:8px 14px 12px;border-top:1px solid var(--hair);font-size:10.5px;color:var(--muted2);font-weight:300;line-height:1.5;}
+.msearch{margin:4px 14px 4px;height:28px;border:1px solid var(--edge);border-radius:8px;background:var(--field);display:flex;align-items:center;padding:0 9px;}
+.msearch input{border:0;background:transparent;outline:none;font:inherit;font-size:11.5px;width:100%;}
+.notes{margin-top:22px;}
+.notes p{font-size:12px;line-height:1.66;color:#6a584a;font-weight:300;margin-bottom:9px;max-width:900px;}
+.notes b{font-weight:500;color:var(--ink2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Sort, group and filter</h1>
+<div class="lede">Two panels, both live. <b>Sort &amp; group</b> answers "in what order, and gathered how"; <b>Filter</b> answers "which ones". Active filters become chips under the header — removable individually, cleared together — and the footer always says how many you're looking at out of how many exist. Everything persists per user in the list's view preferences.</div>
+
+<div class="listcard">
+  <div class="lhead">
+    <div class="search"><input id="q" placeholder="Search your tasks…" oninput="draw()"></div>
+    <div class="ib" id="sortBtn" onclick="toggle('sort')">↕ <span id="sortLbl">Priority</span>
+      <div class="panel" id="sortPanel" onclick="event.stopPropagation()">
+        <div class="ph"><span class="t">Group &amp; order</span><span class="a" onclick="resetSort()">Reset</span></div>
+        <div class="sec">Group by</div>
+        <div id="grpOpts"></div>
+        <div class="sec">Then order each group by</div>
+        <div id="sortOpts"></div>
+        <div class="sw" style="padding-top:4px;"><button id="dirA" class="on" onclick="setDir('asc')">First → last</button><button id="dirD" onclick="setDir('desc')">Last → first</button></div>
+        <div class="pf">Grouping decides the big shape; ordering runs inside each group. Group by "None" gives one flat list.</div>
+      </div>
+    </div>
+    <div class="ib" id="filtBtn" onclick="toggle('filt')">⛛ Filter <span class="b" id="fcount" style="display:none;">0</span>
+      <div class="panel" id="filtPanel" onclick="event.stopPropagation()">
+        <div class="ph"><span class="t">Filter</span><span class="a" onclick="clearFilters()">Clear all</span></div>
+        <div class="sec">Task type</div>
+        <div id="typeOpts"></div>
+        <div class="sec">Agent</div>
+        <div class="msearch"><input placeholder="Find an agent…" oninput="agentQ=this.value;drawPanels()"></div>
+        <div id="agentOpts" style="max-height:150px;overflow-y:auto;"></div>
+        <div class="sec">Also show</div>
+        <div id="alsoOpts"></div>
+        <div class="pf">Counts show how many tasks each choice would leave, given your other filters.</div>
+      </div>
+    </div>
+    <div class="ib">▤</div>
+    <div class="ib plus">+</div>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="rows" id="rows"></div>
+  <div class="lfoot"><span id="footL"></span><span>Export CSV</span></div>
+</div>
+
+<div class="notes">
+  <p><b>Group comes first because it is the primary sort.</b> Grouping decides the big shape of the list; ordering only runs inside each group, so the panel reads top-down in the order the list is actually built. Conflating them is how most task apps end up with "sort by agent" quietly destroying the urgency groups. Here the groups stay unless you say otherwise, and sorting reorders inside them — so "longest waiting" within Needs you now is one click, and "everything by agent" is Group → Agent.</p>
+  <p><b>Group by Agent is the smart one.</b> It turns the list into "what do I owe each person" — every send, nudge and close for Jonathan Marsh under one head. Group by Manuscript does the same for Pro writers with several books; on a one-manuscript account it's hidden, not greyed.</p>
+  <p><b>Filter counts are conditional</b> — each option shows how many tasks it would leave <i>given the filters already set</i>, so a choice that would empty the list says "0" before you make it. The three "also show" toggles (snoozed, dismissed, muted) are the only ones that widen the list; everything else narrows.</p>
+  <p><b>Chips carry the facet name</b> in mono so "Jonathan Marsh" can't be mistaken for a search term, and the footer reads "6 of 18" whenever anything is hiding rows. An empty result says why and offers the one-click fix.</p>
+  <p><b>What's deliberately absent:</b> saved views (premature), a date-range picker (the wait column and sort cover it), and multi-column sort (nobody asks for it and it's unreadable). The existing <code>AnchoredPanel</code> mechanism draws both panels; the list's <code>todoPrefs.listView</code> already persists sort — group and filters join it.</p>
+</div>
+</div>
+
+<script>
+const T=[
+ {p:'send',g:'now',d:'Send your full manuscript',ag:'Jonathan Marsh',agc:'The Marsh Agency',w:0,wl:'<b>—</b>no date',act:60},
+ {p:'send',g:'now',d:'Send your partial',ag:'Daniel O\u2019Rourke',agc:'Inkwell & Stone',w:0,wl:'<b>—</b>no date',act:58},
+ {p:'send',g:'now',d:'Send your partial',ag:'Jonathan Marsh',agc:'The Marsh Agency',w:11,wl:'<b>11</b>days waiting',act:11},
+ {p:'send',g:'now',d:'Send your partial',ag:'Greg Panetta',agc:'—',w:63,wl:'<b>9</b>weeks waiting',act:63},
+ {p:'chase',g:'now',d:'Worth a nudge',ag:'Aisha Kapoor',agc:'The Lantern Agency',w:35,wl:'<b>5</b>weeks quiet',act:35},
+ {p:'close',g:'house',d:'Consider closing',ag:'Jonathan Marsh',agc:'The Marsh Agency',w:910,wl:'<b>2\u00bd</b>years quiet',act:910},
+ {p:'close',g:'house',d:'Consider closing',ag:'Marcus Reed',agc:'Bloomsbury Quill',w:820,wl:'<b>2\u00bc</b>years quiet',act:820},
+ {p:'close',g:'house',d:'Consider closing',ag:'Aisha Kapoor',agc:'The Lantern Agency',w:900,wl:'<b>2\u00bd</b>years quiet',act:900},
+ {p:'close',g:'house',d:'Consider closing',ag:'Eleanor Whitfield',agc:'Greenfield Literary',w:905,wl:'<b>2\u00bd</b>years quiet',act:905},
+ {p:'close',g:'house',d:'Consider closing',ag:'Sophie Dunn',agc:'Curtis Vane',w:35,wl:'<b>5</b>weeks quiet',act:35},
+ {p:'fix',g:'house',d:'Fill in what you sent',ag:'Priya Raman',agc:'—',w:0,wl:'<b>—</b>no date',act:400},
+ {p:'fix',g:'house',d:'Fill in what you sent',ag:'\u2014',agc:'\u2014',w:0,wl:'<b>10</b>queries',act:200},
+ {p:'note',g:'yours',d:'Nudge Marcus Reed',ag:'\u2014',agc:'\u2014',w:2,wl:'<b>2</b>days ago',act:2},
+ {p:'note',g:'yours',d:'Update comp titles list',ag:'\u2014',agc:'\u2014',w:13,wl:'<b>13</b>days ago',act:13},
+ {p:'send',g:'snoozed',d:'Send your partial',ag:'Rosalind Vale',agc:'Foxglove Literary',w:20,wl:'<b>20</b>days waiting',act:20,snoozed:true},
+ {p:'close',g:'dismissed',d:'Consider closing',ag:'William Tan',agc:'Foxglove Literary',w:800,wl:'<b>2\u00bc</b>years quiet',act:800,dismissed:true},
+];
+const GN={now:['Needs you now',''],house:['Housekeeping','h'],yours:['Your tasks','y'],snoozed:['Snoozed','n'],dismissed:['Dismissed','n']};
+const SORTS=[
+ {id:'prio',l:'Priority',desc:'Urgency groups, then longest waiting'},
+ {id:'wait',l:'Longest waiting',desc:'By how long the ball has been in someone\u2019s court'},
+ {id:'act',l:'Most recent activity',desc:'By the last thing that happened on the query'},
+ {id:'agent',l:'Agent A\u2013Z',desc:''},
+ {id:'agency',l:'Agency A\u2013Z',desc:''},
+ {id:'type',l:'Task type',desc:'Send · nudge · close · fill in · note'},
+];
+const GROUPS=[{id:'urg',l:'Urgency',desc:'Needs you now · Housekeeping · Yours'},{id:'agent',l:'Agent',desc:'What you owe each person'},{id:'type',l:'Task type',desc:''},{id:'none',l:'None',desc:'One flat list'}];
+const TYPES=[['send','Send'],['chase','Nudge'],['close','Consider closing'],['fix','Fill in'],['note','Note']];
+let sort='prio',dir='asc',group='urg',ftypes=new Set(),fagents=new Set(),also={snoozed:false,dismissed:false},agentQ='',openP=null;
+const pillName={send:'Send',chase:'Nudge',close:'Close',fix:'Fix',note:'Note'};
+
+function base(){return T.filter(t=>(!t.snoozed||also.snoozed)&&(!t.dismissed||also.dismissed));}
+function applyF(list,skip){const q=document.getElementById('q').value.trim().toLowerCase();
+  return list.filter(t=>(skip==='type'||!ftypes.size||ftypes.has(t.p))&&(skip==='agent'||!fagents.size||fagents.has(t.ag))&&(!q||(t.d+' '+t.ag+' '+t.agc).toLowerCase().includes(q)));}
+function sorted(list){const k={prio:t=>t.w,wait:t=>t.w,act:t=>t.act,agent:t=>t.ag,agency:t=>t.agc,type:t=>TYPES.findIndex(x=>x[0]===t.p)}[sort];
+  const out=[...list].sort((a,b)=>k(a)>k(b)?1:k(a)<k(b)?-1:0);if(sort==='prio'||sort==='wait')out.reverse();return dir==='asc'?out:out.reverse();}
+function draw(){
+  const all=base(),vis=applyF(all);
+  const rows=document.getElementById('rows');rows.innerHTML='';
+  if(!vis.length){rows.innerHTML='<div class="empty">Nothing matches those filters.<br><a onclick="clearFilters()">Clear them</a> to see all '+all.length+' tasks.</div>';}
+  else{
+    let buckets;
+    if(group==='urg'){buckets=Object.keys(GN).map(g=>[GN[g][0],GN[g][1],vis.filter(t=>t.g===g)]);}
+    else if(group==='agent'){const names=[...new Set(vis.map(t=>t.ag))].sort();buckets=names.map(n=>[n==='\u2014'?'No agent':n,'n',vis.filter(t=>t.ag===n)]);}
+    else if(group==='type'){buckets=TYPES.map(([id,l])=>[l,'n',vis.filter(t=>t.p===id)]);}
+    else buckets=[[null,'',vis]];
+    buckets.forEach(([name,cls,items])=>{if(!items.length)return;
+      if(name)rows.appendChild(Object.assign(document.createElement('div'),{className:'grp '+cls,innerHTML:'<i></i>'+name+' <span class="n">'+items.length+'</span>'}));
+      sorted(items).forEach(t=>{const r=document.createElement('div');r.className='row';
+        r.innerHTML='<span class="pill '+t.p+'">'+pillName[t.p]+'</span><div class="deed">'+t.d+'</div><div class="cell">'+(t.ag!=='\u2014'?'<span class="av">'+t.ag.split(' ').map(w=>w[0]).join('')+'</span>':'')+t.ag+'</div><div class="cell">'+t.agc+'</div><div class="cell mono">'+t.wl+'</div><span class="actb">\u203a</span>';
+        rows.appendChild(r);});});
+  }
+  const hiding=vis.length!==all.length||ftypes.size||fagents.size;
+  document.getElementById('footL').innerHTML=hiding?('Showing <b>'+vis.length+'</b> of '+all.length):('<b>'+all.length+'</b> tasks \u00b7 <b>'+all.filter(t=>t.g==='now').length+'</b> need you now');
+  /* chips */
+  const ch=document.getElementById('chips');const parts=[];
+  ftypes.forEach(t=>parts.push('<span class="chip"><span class="k">type</span>'+TYPES.find(x=>x[0]===t)[1]+'<span class="x" onclick="ftypes.delete(\''+t+'\');draw()">\u00d7</span></span>'));
+  fagents.forEach(a=>parts.push('<span class="chip"><span class="k">agent</span>'+a+'<span class="x" onclick="fagents.delete(\''+a.replace(/'/g,"\\'")+'\');draw()">\u00d7</span></span>'));
+  if(also.snoozed)parts.push('<span class="chip"><span class="k">also</span>Snoozed<span class="x" onclick="also.snoozed=false;draw()">\u00d7</span></span>');
+  if(also.dismissed)parts.push('<span class="chip"><span class="k">also</span>Dismissed<span class="x" onclick="also.dismissed=false;draw()">\u00d7</span></span>');
+  ch.innerHTML=parts.join('')+(parts.length?'<span class="clear" onclick="clearFilters()">Clear all</span>':'');
+  ch.classList.toggle('show',parts.length>0);
+  const n=ftypes.size+fagents.size+(also.snoozed?1:0)+(also.dismissed?1:0);
+  const fc=document.getElementById('fcount');fc.style.display=n?'':'none';fc.textContent=n;
+  document.getElementById('filtBtn').classList.toggle('on',n>0);
+  document.getElementById('sortLbl').textContent=(group!=='urg'?'By '+GROUPS.find(g=>g.id===group).l.toLowerCase()+' \u00b7 ':'')+SORTS.find(s=>s.id===sort).l;
+  document.getElementById('sortBtn').classList.toggle('on',sort!=='prio'||group!=='urg'||dir!=='asc');
+  drawPanels();
+}
+function drawPanels(){
+  document.getElementById('sortOpts').innerHTML=SORTS.map(s=>'<div class="opt'+(sort===s.id?' on':'')+'" onclick="sort=\''+s.id+'\';draw()"><span class="radio"></span><span>'+s.l+(s.desc?'<span class="desc">'+s.desc+'</span>':'')+'</span></div>').join('');
+  document.getElementById('grpOpts').innerHTML=GROUPS.map(g=>'<div class="opt'+(group===g.id?' on':'')+'" onclick="group=\''+g.id+'\';draw()"><span class="radio"></span><span>'+g.l+(g.desc?'<span class="desc">'+g.desc+'</span>':'')+'</span></div>').join('');
+  document.getElementById('dirA').classList.toggle('on',dir==='asc');document.getElementById('dirD').classList.toggle('on',dir==='desc');
+  const all=base();
+  document.getElementById('typeOpts').innerHTML=TYPES.map(([id,l])=>{const c=applyF(all,'type').filter(t=>t.p===id).length;return '<div class="opt'+(ftypes.has(id)?' on':'')+'" onclick="tog(ftypes,\''+id+'\')"><span class="tick">\u2713</span>'+l+'<span class="c">'+c+'</span></div>';}).join('');
+  const agents=[...new Set(all.map(t=>t.ag).filter(a=>a!=='\u2014'))].sort().filter(a=>a.toLowerCase().includes(agentQ.toLowerCase()));
+  document.getElementById('agentOpts').innerHTML=agents.map(a=>{const c=applyF(all,'agent').filter(t=>t.ag===a).length;return '<div class="opt'+(fagents.has(a)?' on':'')+'" onclick="tog(fagents,\''+a.replace(/'/g,"\\'")+'\')"><span class="tick">\u2713</span><span class="av" style="width:20px;height:20px;font-size:7.5px;">'+a.split(' ').map(w=>w[0]).join('')+'</span>'+a+'<span class="c">'+c+'</span></div>';}).join('');
+  document.getElementById('alsoOpts').innerHTML=[['snoozed','Snoozed tasks',T.filter(t=>t.snoozed).length],['dismissed','Dismissed tasks',T.filter(t=>t.dismissed).length]].map(([k,l,c])=>'<div class="opt'+(also[k]?' on':'')+'" onclick="also.'+k+'=!also.'+k+';draw()"><span class="tick">\u2713</span>'+l+'<span class="c">+'+c+'</span></div>').join('');
+}
+function tog(set,v){set.has(v)?set.delete(v):set.add(v);draw();}
+function setDir(d){dir=d;draw();}
+function resetSort(){sort='prio';dir='asc';group='urg';draw();}
+function clearFilters(){ftypes.clear();fagents.clear();also.snoozed=false;also.dismissed=false;document.getElementById('q').value='';draw();}
+function toggle(p){const id=p==='sort'?'sortPanel':'filtPanel';const other=p==='sort'?'filtPanel':'sortPanel';document.getElementById(other).classList.remove('open');document.getElementById(id).classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.ib'))document.querySelectorAll('.panel').forEach(p=>p.classList.remove('open'));});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.panel').forEach(p=>p.classList.remove('open'));});
+draw();
+</script>
+</body>
+</html>
