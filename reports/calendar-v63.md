@@ -54,27 +54,96 @@ container — the controls were built for a row and are still in a column.
 
 ---
 
-## ⚠️ C · The toolbar — **NOT BUILT, and the ref contradicts the pack.**
+## ⚠️ C · The toolbar — **BUILT. And my run-1 finding here was FALSE.**
 
-This is the finding of the run, and it needs a ruling rather than a guess.
+### The correction, first, because it was published
 
-1. **The ref hides its toolbar with an unscoped `!important`.** Line 1280: `.toolbar { display:
-   none !important }`, inside the "the left axis IS the sidebar" block and behind no attribute. The
-   pack's own reading rule — *"`!important` beats position"* — makes that final: under the selected
-   design there is no toolbar, because the sidebar replaced it.
-2. **And the ref's toolbar markup is not the one section C describes.** It holds the *v62* control
-   set — pager, view pills, search, `DISPLAY ▾`, count, Add. There are **no** Group / Sort / Status
-   dropdowns, no Reverse checkbox, no Reset link, no status checklist, no Clear all.
+Run 1 reported that the ref carries no Group / Sort / Status toolbar and that section C was
+"net-new work specified in prose". **That was wrong, and it was wrong because I read the first
+`class="toolbar"` in the file and stopped.**
 
-So section C is **net-new work specified in prose**, not a reading of the ref — and it partly
-duplicates the sidebar the same pack asks for (both carry search and a row count; Group/Sort would
-join the existing Display popover, which the ref keeps). Building it from the prose alone would put
-a second filter surface beside the views list, which is the two-vocabularies fault this board has
-already been through twice — the tab strip in v61 and the tinted dividers in v62.
+- The controls are in a **`.vtool`** element at ref lines 1852–1864, inside `.board` and above
+  `.rail` — `#tbG` Group ▾, `#tbS` Sort ▾ with a Reverse checkbox and a Reset link, `#tbF` Status ▾
+  with a count badge and a JS-filled checklist, `.tbclear` Clear all, and `.cnt` a row count. Its
+  CSS is at 1715–1734 and its behaviour at 2574–2584.
+- The `.toolbar { display: none !important }` at line 1280 hides a **different, v62 element** — the
+  pager / view pills / `DISPLAY ▾` row the sidebar replaced. Hiding that one says nothing about
+  `.vtool`, which is never hidden.
 
-**Recommended**: fold Group / Sort / Status into the sidebar's existing Display control rather than
-adding a toolbar above the date bar. That is one home for view options, and it is what the ref's own
-layout does. **Not taken unilaterally** — it changes the pack's shape, and it is your call.
+The recommendation that followed from it — "fold Group/Sort/Status into the sidebar" — is
+**withdrawn**. It was reasoning from a false premise, and the ref's own layout does the opposite.
+
+**The lesson is the one this repo already records and I applied to CSS but not to markup**: a
+first-match read is not a read. `grep -n 'class="toolbar\|class="vtool"'` answers it in one command.
+
+### What was built
+
+`.tl-vtool` in the board pane, above the date bar, on the chrome ground with a hairline under it.
+Three controls, each naming its own value, then `Clear all` and a row count.
+
+| control | options | measured |
+|---|---|---|
+| **Group** | Urgency · Status · Action required · No grouping | 4 group sets, 4 divider counts |
+| **Sort** | Urgency · Status · Queried date · Most recent activity, + Reverse order, + Reset sort | **4 distinct orders of 4** |
+| **Status** | the ten canonical `QueryStatus` strings, rose count badge, Clear all | `Queried` → 11 of 23 rows |
+| **Clear all** | shown only when a view or a status is applied | restores the board entire |
+| **count** | `23 rows` — the drawn rows, unit named | follows every filter |
+
+### Readings, 1440×900
+
+```
+toolbar        inside .tl-boardpane, above .tl-rail, padding 8px 14px, 1px hairline
+ground         == the sidebar pane's (identity asserted, not a hex)
+census         All 23 · Needs me 13 · Upcoming 01 · With agents 06 · Tasks 02 · Closed 01
+drawn          23 rows → 11 rows under a status filter; census UNMOVED
+orders seen    4 of 4 | [["Urgency"],["Status"],["Queried date"],["Most recent activity"]]
+```
+
+### Two faults the measurement caught that no unit lock could
+
+1. **The date sorts were reading an empty field.** They derived from `row.items`, which holds only
+   what falls inside the drawn window. On this fixture nothing did, so every comparison returned
+   `0`, `Array.sort` is stable, and the two **opposite-direction** date keys produced one identical
+   sequence. The only symptom was `orders seen: 3 of 4` printed under an assertion asking for more
+   than one. They read `queriedAt` / `lastActiveAt` now — the builder's own dates, in milliseconds,
+   window-independent. The lock asks for **four** distinct orders and names any keys that coincide.
+
+2. **The section partition was re-sequencing the sorted rows.** The three non-urgency groupings
+   flattened `sectioned`, which buckets by section before anything else — so under `No grouping` the
+   sort key's order across section boundaries was gone. Every part correct, the composition wrong.
+
+### Deviation from the ref, deliberate
+
+The ref's status list is **nine**: it shortens `Revise & Resubmit` to `R&R` and folds `Rejected` and
+`Withdrawn` into one `Closed`. Ours is **ten, in the app's own enum strings**. Folding two statuses
+into one option makes them unfilterable apart, and `R&R` names a status the data does not contain —
+this app's standing law is that a `QueryStatus` is written and read as its exact string.
+
+### Retired in the same commit
+
+`Menu`, `Popover` and `PopRow` — three dropdown components with **zero render sites** — the sixteen
+orphaned selectors that dressed them, two media queries eliding a control row that stopped existing
+two packs ago, and `view.sort`, whose only comparison was `=== DEFAULT_SORT`. `groupMode` is the
+other dead knob: it still has readers inside the board builder, so it is **flagged at its
+declaration**, not claimed as retired.
+
+### Locks, and the gap one of them had
+
+`calendarToolbar.test.ts` (6 unit) and `calTool63.measure.ts` (6 measured, each driving the control
+and reading the board). Proved red by six mutations.
+
+⚠️ **The fourth mutation landed somewhere else and nothing noticed.** Aimed at the views' pills, it
+hit the **At-a-glance tiles** — the sidebar's other census — and the case was watching only the
+pills. Both are counts of the whole board; both are asserted now. A mutation that misses its target
+is still evidence, and here it was better evidence than a hit.
+
+### Standing item for the sweep
+
+`todoCalendar.css` carries **25 duplicated base rules** (`.tl-glanes` four times, `.tl-gnums` and
+`.tl-rail` three each). Every one predates this section — the count is identical at `HEAD` minus the
+one I deleted — and they come from v63 §A/B's chrome layer restating rules the base already sets.
+The file states one-rule-per-selector as its own invariant. Phase 7's target, named rather than
+suspected.
 
 ## D · The bar in Query Centre's language — **NOT BUILT.**
 ## E · Actions — **NOT BUILT.**
