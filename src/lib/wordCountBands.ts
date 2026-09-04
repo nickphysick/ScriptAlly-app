@@ -15,7 +15,7 @@
  * ⚠️ THIS IS REFERENCE, NOT A METER. The free plan never shows a usage meter, and this is not one:
  * no colour by position, no "within range", no verdict. See `markerClass`.
  */
-import { CANONICAL_GENRES, GENERIC_WORD_COUNT_RANGE, PersonalGenre } from "./genres";
+import { CANONICAL_GENRES, GENERIC_WORD_COUNT_RANGE, PersonalGenre, normaliseStoredGenre } from "./genres";
 
 export interface Band {
   label: string;
@@ -50,15 +50,24 @@ export const unparseableRanges = (): string[] =>
  * shared fallback and is marked `generic`, so the chart can render it lighter.
  */
 export const bandFor = (genreId: string | undefined, personal: PersonalGenre[] = []): Band | null => {
-  const canonical = CANONICAL_GENRES.find((g) => g.id === genreId);
-  const label = canonical?.label ?? personal.find((p) => p.id === genreId)?.label ?? null;
+  if (!genreId) return null;
+  /**
+   * ⚠️ NORMALISED FIRST, THROUGH THE APP'S OWN RESOLVER. A stored genre is an id on new manuscripts
+   * and a legacy LABEL on older ones ("Literary Fiction"), and matching raw against `id` finds
+   * neither the label nor an alias — measured: the marker did not render at all on the harness
+   * account, because its book stores a label. `genreDisplay` normalises for exactly this reason;
+   * re-deriving it here would have been a second, worse answer to a question already answered.
+   */
+  const id = normaliseStoredGenre(genreId, personal);
+  const canonical = CANONICAL_GENRES.find((g) => g.id === id);
+  const label = canonical?.label ?? personal.find((p) => p.id === id)?.label ?? null;
   if (!label) return null;
   const raw = canonical?.wordCountRange;
   const parsed = raw ? parseRange(raw) : null;
   if (raw && !parsed) {
     /* ⚠️ REPORTED, NOT SWALLOWED. A genre whose range cannot be read must not quietly render the
        fallback: it would be indistinguishable from a genre that genuinely has generic guidance. */
-    console.error(`[wordCountBands] unreadable range for ${genreId}: ${raw}`);
+    console.error(`[wordCountBands] unreadable range for ${id}: ${raw}`);
     return null;
   }
   const fallback = parseRange(GENERIC_WORD_COUNT_RANGE);

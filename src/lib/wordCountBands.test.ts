@@ -96,3 +96,22 @@ describe("the marker carries no state — this is reference, not a meter", () =>
     expect(axis.max).toBeGreaterThanOrEqual(250000);
   });
 });
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ A STORED GENRE IS AN ID ON NEW MANUSCRIPTS AND A LEGACY LABEL ON OLDER ONES, and the first
+   version of `bandFor` matched raw against `id` — so a book storing "Literary Fiction" got no band,
+   no "Yours" row and NO MARKER AT ALL. Found by measuring the rendered page, not by reading.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+describe("a stored genre resolves the way the rest of the app resolves it", () => {
+  it("reads a legacy label, not only a canonical id", () => {
+    const byId = bandFor("literary-fiction");
+    const byLabel = bandFor("Literary Fiction");
+    expect(byId, "the canonical id stopped resolving").not.toBeNull();
+    expect(byLabel, "a legacy label yields no band — the marker will not render").not.toBeNull();
+    expect(byLabel).toEqual(byId);
+  });
+
+  it("reads an alias too", () => {
+    expect(bandFor("litfic")).toEqual(bandFor("literary-fiction"));
+  });
+});
