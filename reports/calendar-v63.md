@@ -315,9 +315,104 @@ a deed word on line two, a lower-case fact, and the tail span deleted.
 
 ### Locks
 
-`calBar63.measure.ts` (13 measured)## E · Actions — **NOT BUILT.**
-## F · Tasks as bars — **NOT BUILT.**
-## G · Behaviours (collapse, drag, sticky) — **NOT BUILT.**
+`calBar63.measure.ts` (13 measured)## E · Actions — **BUILT.** Difference list empty.
+
+The side-strip flag is retired entirely; one component at two volumes replaces it.
+
+| item | state | reading |
+|---|---|---|
+| urgent: rose Caveat label + outlined button, hidden at rest | **built · verified** | 13 urgent actions, `opacity: 0` at rest, `1` under the row's hover (both states driven) |
+| everything else: 22px ring at the action's date | **built · verified** | 6 ring actions, 22px, sand `rgb(211,200,182)` → ink-on-white on hover |
+| four glyphs | **built · verified** | hourglass `window` · flag `sendBy` · bell `reminder` · crossed ring `quiet` |
+| button: white, black text, 1.5px ink outline, mono caps, `›` | **built · verified** | `rgb(255,255,255)`, `uppercase`, 8.5px, `5px 11px`, chevron present |
+| at its true date, never clamped | **built · verified** | every action within 1.5px of `bar right + 14`; the clamp is deleted |
+| no row hover ground, no label animation | **built · verified** | no `.tl-rrow:hover` background rule; `animationName: none` on every label and button |
+
+### ⚠️ The DOM-measuring clamp effect is deleted, not just its call site
+
+35 lines read each flag's lane width and repositioned it — **DOM-measured placement**, which this
+pack's laws forbid — folding an action near the edge inward and putting it on a day it does not
+belong to. Off-window actions are clipped by the board now, like everything else.
+
+### Deviation, deliberate
+
+The ref slides its label 6px on reveal. **No animation on any label here**: motion in the corner of
+the eye about something the reader has not asked for yet. The ring's own colours transition.
+
+### ⚠️ Two of my own probes were wrong, both in the flattering direction
+
+`1.5px` computes to `1px` at DPR 1, so the outline is asserted from the **sheet** and only its
+presence from the page. And `\.tl-rrow:hover[^{]*\{[^}]*background` spanned the space in
+`.tl-rrow:hover .tl-actsym`, reporting the ring's own hover fill as a row ground.
+
+## F · Tasks as bars — **BUILT.** Difference list empty.
+
+```
+Task | Overdue · Chase the Blaine partial · Due 23 Aug · 12 DAYS OVERDUE · 269px wide
+```
+
+| item | state | reading |
+|---|---|---|
+| created → due, note-yellow band | **built · verified** | 2 task bars, band `#f5e9bf` against its own token |
+| checkbox glyph + "Task", holder eyebrow | **built · verified** | 13px box, `Overdue` / `With you`, holder ink `rgb(138,122,58)` |
+| name in Playfair, `Due 5 Sept` + eyebrow | **built · verified** | 14.5px (the ref's `.card.tk .fnm`), tail measures a span |
+| overdue runs open to today with the pulse | **built · verified** | both overdue tasks carry the pulse |
+| flag symbol revealing MARK DONE › | **built · verified** | `sendBy` glyph, `MARK DONE ›` |
+| the point-and-checkbox rendering retired | **built · verified** | `.tl-tchip` count **0** on task rows; agent-row event points survive |
+| rolled tasks: ghost + roll marker + live bar | **built (derivation) · unexercised** | `taskBars.test.ts` covers it; no rolled task on the fixture |
+
+### ⚠️ The placeholder status leaked into visible copy
+
+`Segment.status` is required and is the one field a task cannot fill. An overdue task was picked up
+by the urgent-action block and rendered a button reading **"Queried ›"**. The block excludes tasks;
+the field is never read where `isTask` is set.
+
+### ⚠️ Six D locks needed a task carve-out, each with its reason at the assertion
+
+Tasks entered populations those locks sweep: no rung class (outside the tint ladder by design), no
+status dot (a checkbox instead), a 14.5px name (a sentence, not a name), a holder outside the query
+vocabulary (`Overdue`), yellow holder ink rather than rose, and a pulse read from its own openness.
+A carve-out that only says "except tasks" is the kind that outlives its reason.
+
+## G · Behaviours — **BUILT.** Difference list empty.
+
+| item | state | reading |
+|---|---|---|
+| click a group bar to collapse | **built · verified** | rows fall, the bar and its count stay, `aria-expanded` flips, and it comes back |
+| drag the empty lane by whole weeks | **built · verified** | `"22 Jul – 19 Oct"` → `"5 Aug – 2 Nov"` — exactly two weeks |
+| sticky group bars | **built · verified** | `position: sticky`, `top: 0px` |
+| action buttons answer with a toast | **built · verified** | toast present, and forbidden from claiming completion |
+| nothing else | **verified** | no row hover ground; no animation on any label |
+
+⚠️ **The toast says what was pressed, never that the work is done.** What a deed does belongs to the
+flow it opens; "Marked done" over a flow the writer has not completed is a fabricated confirmation.
+
+⚠️ **g4 hung because the button is `pointer-events: none` at rest — by design.** `force: true` would
+dispatch at coordinates the row's hover has since moved, which this repo has paid for once. Hovering
+the row is the honest fix and exercises the reveal as well.
+
+## The sweep — **PARTIAL, and the numbers are reported rather than guessed**
+
+`calTodoCheck` read first and green: `/todo` renders its own workspace with **0 calendar rows**.
+
+**Retired as their inverse** (the rule, not deletion): `calFlags60` (5 cases → 1) measured the
+side-strip flag §E deleted; `calTrailStages60` (2 → 1) measured the trail `data-trail="off"`
+rejects. Each asserts the retirement on the rendered page with the population asserted first, and
+`calFlags60` also requires the action marks that replaced the flag — a swap, not a deletion.
+
+**⚠️ The full pre-v63 run did not finish, and why is a finding.** 108 cases over 44 files;
+**57 ran, 39 errors across 21 files**, and then it **hung** — `calOrder56` clicks
+`getByRole("button", { name: /DISPLAY/i })`, the Display popover §C retired. A suite driving a
+retired control does not fail, it **waits**, and one hang blocks the whole run.
+
+**The 21 red so far:** `calAccept55 calCaps58 calCard calCard54 calCentre calClosed56 calContrast
+calCopy55 calDeferred calFade55 calFaults56 calFidelity60 calFlags60 calFrame56 calGhost calGhost56
+calGround54 calInset55 calNarrow calOne61 calOpen54`.
+
+**Open, and deliberately not rushed.** Retiring twenty files properly — each claim read, each kept
+or inverted with its reason — is its own piece of work. Doing it at speed at the end of a long run
+is how a real regression gets absorbed into a rebaseline. Named with its count instead.
+
 
 Sections D–G are each the size of an earlier whole pack: the band with QC's tokens and the nudge
 rule, three density levels, open ends, the right dissolve, the pulse dot, ghost stages, event
