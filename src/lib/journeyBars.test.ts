@@ -172,10 +172,13 @@ describe("⚠️ an offer's answer-by date takes the overdue form once it passes
 
   it("a date that has passed is named as overdue, with its span", () => {
     const w = offer("2026-04-14", true, 505);
-    expect(w.long).toContain("overdue since 14 Apr");
+    expect(w.long).toContain("due 14 Apr");
     expect(w.long).not.toMatch(/answer by/i);
-    /* 14 Apr to 1 Sept coarsens to months, never a day count */
-    expect(w.long).toMatch(/\d+ months?$/);
+    /* ⚠️ v61 PUTS "overdue" AT THE END OF THE CLAUSE, one lateness vocabulary for all three shapes:
+       `{what the date was} · {how late} overdue`. It read `overdue since 14 Apr · 5 months` — the
+       word in front and the span bare — which is the same fact in a third order. 14 Apr to 1 Sept
+       still coarsens to months, never a day count. */
+    expect(w.long).toMatch(/\d+ months? overdue$/);
   });
 
   /**
@@ -195,7 +198,7 @@ describe("⚠️ an offer's answer-by date takes the overdue form once it passes
     const b = offer("2026-08-20", true, 4321);
     expect(a.long).toBe(b.long);
     /* 20 Aug to 1 Sept is twelve days — not the nine the old form printed */
-    expect(a.long).toBe("Offer received · overdue since 20 Aug · 12 days");
+    expect(a.long).toBe("Offer received · due 20 Aug · 12 days overdue");
   });
 
   it("⚠️ AND AN OFFER WITH NO DATE STATES NEITHER", () => {

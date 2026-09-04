@@ -400,7 +400,12 @@ describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local 
        `.tl-seg2` is deleted from the stylesheet in the same commit rather than left as a rule with
        no subject. */
     expect(calSrcNow, "the segmented controls came back").not.toMatch(/["\s`]tl-seg2["\s`]/);
-    expect(cal).toContain("tl-tabs");
+    /* ⚠️ THE TAB STRIP IS RETIRED (v61). It named four cuts of the board while the board itself is
+       divided into six groups with different names — two vocabularies for one question, and two
+       sets of numbers that did not add up. The claim survives as its inverse: the strip is gone and
+       the sidebar's group list, whose counts DO sum, is what filters now. */
+    expect(cal, "the retired tab strip is back").not.toContain("tl-tabs");
+    expect(cal, "the group list that replaced the tabs is not rendered").toContain("gpill");
     expect(cal).toContain("TAB_ORDER");
     /* the narrowing still reads the ONE definition — `rowInTab` over the row's own group, the same
        field the board's headings draw, so a tab and a heading cannot disagree about one row */

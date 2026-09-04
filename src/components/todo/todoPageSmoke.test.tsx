@@ -168,8 +168,17 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        say what the other cuts of the board even were; `Needs me` is the same filter with a home
        among its peers. The smoke's claim is unchanged — the page renders its view control — so it
        names the control that exists. */
-    expect(html).toContain("Needs me");
-    expect(html).toContain("With agents");
+    /* ⚠️ AND v61 RETIRES THE VIEW STRIP ITSELF. `Needs me` was one of four tabs naming cuts of a
+       board that is divided into SIX groups with different names — two vocabularies for one
+       question. The sidebar's group list is the view control now, and it names the groups the board
+       actually draws, so the claim is unchanged again and again names the control that exists. */
+    expect(html).not.toContain("Needs me");
+    /* ⚠️ AND ON AN EMPTY BOARD THE LIST IS `All` ALONE — the group pills name only groups that
+       exist, which is the same rule that omits a divider reading "00". Asserting a group NAME here
+       would be asserting the shape of a board this fixture does not have; the control's presence is
+       what the smoke is for. */
+    expect(html).toContain("gpill");
+    expect(html).toContain(">All<");
     /* ⚠️ AN EMPTY BOARD IS THE SPARSE PANEL, NOT AN EMPTY TABLE WITH A HEADER OVER IT. A column
        header above nothing teaches the shape of a board the writer does not have — the same rule
        that omits a group heading reading "0". The populated smoke below is where the header,

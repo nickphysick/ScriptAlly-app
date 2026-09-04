@@ -94,7 +94,7 @@ import "./todoCalendar.css";
  * box against the token's computed value rather than against either literal. That is the shape
  * this repo already uses for `READING_PANE_FLOOR_PX` ≡ `--ag-pane-floor`.
  */
-const CARD_BADGE_PX = 58;
+const CARD_BADGE_PX = 40;
 /**
  * A past stage's badge — the ref's `.jc .jmed`, at 54 against the live card's 58.
  *
@@ -103,9 +103,17 @@ const CARD_BADGE_PX = 58;
  * WAS while reading as history. Size here, opacity there — the sheet owns anything a theme might
  * want to retune.
  */
-const STAGE_BADGE_PX = 54;
+const STAGE_BADGE_PX = 30;
 /** the shortest stage that can hold a card — see the gate at its use site for the arithmetic */
-const STAGE_MIN_DAYS = 12;
+/**
+ * ⚠️ THE REF'S TWO GATES, IN DAYS. It states them as lane fractions — skip under 3.5%, drop the
+ * badge under 8% — and the standing rule is that a stage gate is a day count, never a lane
+ * fraction. The window is fixed at 90 days, so the two are the same number in different units and
+ * converting costs nothing: 3.5% is 3.15 days and 8% is 7.2. Rounded up to whole days, because a
+ * stage is measured in days and half of one is not a boundary anybody set.
+ */
+const STAGE_MIN_DAYS = 4;
+const STAGE_NARROW_DAYS = 8;
 
 
 export interface TodoCalendarPageProps {
@@ -246,8 +254,8 @@ const Piece: React.FC<{
   sg: Segment; days: number; lastMarkAt: number | null; selected: boolean;
   /* v58: the identity travels with the card, so the row hands its name down */
   name: string;
-  stirIndex: number; onPick: () => void; onOpen?: () => void;
-}> = ({ sg, days, lastMarkAt, selected, stirIndex, onPick, onOpen, name }) => {
+  stirIndex: number; onPick: () => void; onOpen?: () => void; agency?: string;
+}> = ({ sg, days, lastMarkAt, selected, stirIndex, onPick, onOpen, name, agency }) => {
   const lines = barLines(sg.label);
   /* ⚠️ THE PILL IS THE APP'S OWN VOCABULARY — see `calendarPill`. The status while the agency
      holds the move, the deed while the writer does, and nothing else is reachable. */
@@ -480,7 +488,12 @@ const Piece: React.FC<{
           a transform on an SVG element, so a scaled badge is the right size in one browser and the
           wrong size in another; the ref states `transform: none` on it for the same reason. */}
       <span className="tl-medal" aria-hidden>
-        <StatusDot status={sg.status} overrideSize={CARD_BADGE_PX} badge />
+        {/* ⚠️ THE SOFT-FILL VARIANT — `StatusDot`'s OWN default, with the `badge` prop dropped.
+            v60b added `badge` to give a 58px disc a white centre and a proportional ring, because a
+            58px pale tint with a 1px hairline read as a wash. At 40px the tint IS the mark, and it
+            is the same disc this app draws on every other surface — so the calendar stops having a
+            badge of its own and the seven soft fills come from the statuses themselves. */}
+        <StatusDot status={sg.status} overrideSize={CARD_BADGE_PX} />
       </span>
       <div className="tl-cardbody">
         {/* the glider: the ONLY thing that moves when clipped text glides on hover */}
@@ -508,7 +521,16 @@ const Piece: React.FC<{
               )}
               <span className={`tl-fchip ${chipKind} sm`} data-pill={pill.text}>{pill.text}</span>
             </span>
-            <span className="tl-ffx">{lines.t1}{lines.t2 ? ` · ${lines.t2}` : ""}</span>
+            {/* ⚠️ LINE TWO IS AGENCY · FACT (v61, Section B). It was PREFIX · fact, where the
+                prefix is the status word or "Out since 19 Jul" — so the line repeated the status
+                the chip beside it already states, or led with a date that is not the fact. The
+                agency is the one thing about this row that appears nowhere else on the card, and
+                the fact is what changes. Where a row has no agency the prefix stands in rather
+                than the line opening with a bare middot. */}
+            <span className="tl-ffx">
+              <span className="agcy">{agency || lines.t1}</span>
+              {lines.t2 ? <><span className="sepd"> · </span>{lines.t2}</> : ""}
+            </span>
           </span>
         </div>
       </div>
@@ -558,22 +580,53 @@ const Piece: React.FC<{
            from the window's left edge, so the ratio is unit-free and needs no conversion. The
            page-level `todayAt` is not in scope here and would be a second source of one number. */
         const F = Math.min(1, Math.max(0, (sg.todayAt - sg.from) / spanD));
-        const ins = fade.left
-          ? "calc(var(--badge) * 1.0 + 18px)"
-          : "calc(var(--badge) * 0.66 + 10px)";
+        /* the one inset the words, the track and the fill all read */
+        const ins = "var(--tl-card-inset)";
+        /* ⚠️ AN ONGOING BAR LEAVES THE CHEVRON NOTCH CLEAR — 24px against 12 on a dated end. The
+           notch is 16px of the card; a track running into it would draw a flat grey line across the
+           diagonal that is meant to be the card's point. */
+        const endGap = fade.right ? 24 : 12;
+        /* ⚠️ THE TRACK IS CLAMPED TO WHAT IS LEFT OF THE CARD, NOT JUST TO ZERO. Its `left` is the
+           text inset — 62px — so on a card narrower than that the `max(0px, …)` width still put its
+           RIGHT edge at 62px, past the card's own end: measured, a 69px card leaving 7px where the
+           gap needs 12. `min()` against the card's own remaining width is what contains it, and on
+           a card too narrow for a track at all the width falls to zero and nothing is drawn. */
+        const trackW = `calc(100% - ${ins} - ${endGap}px)`;
         return (
           <>
             <span className="tl-ctrack" aria-hidden
-              style={{ width: `max(0px, calc(100% - ${ins} - 12px))` }} />
+              style={{ width: `max(0px, ${trackW})` }} />
             {F > 0 && (
+              /* ⚠️ THE FILL IS CLAMPED BY THE TRACK, WHICH IS THE v61 CHANGE. v60's fill landed on
+                 today to the pixel and could therefore run past the card's own end once the tail
+                 shortened the frame — the trail would have crossed its own chevron. `min()` makes
+                 containment structural: the fill can reach today, or the track, whichever comes
+                 first, and it can never leave the bar. */
               <span className="tl-ctrail" aria-hidden data-fill={F.toFixed(4)}
-                style={{ width: `max(0px, calc(100% * ${F.toFixed(4)} - ${ins}))` }} />
+                style={{ width: `max(0px, min(calc(100% * ${F.toFixed(4)} - ${ins}), ${trackW}))` }} />
             )}
           </>
         );
       })()}
       {(fade.left || fade.right) && <span className="tl-shd" aria-hidden />}
-      {fade.right && <span className="tl-fov r" aria-hidden />}
+      {/* ══ THE CHEVRON TAIL (v61) ══════════════════════════════════════════════════════════
+          ⚠️ DRAWN, NOT CLIPPED. A `clip-path` on the frame would cut its border off along with its
+          fill and leave the diagonals bare; the shape has to be stroked. The first path is the
+          chevron — white fill, the frame's own border colour on both diagonals — and the second is
+          two one-pixel stubs at top and bottom, which is what makes the join to the frame's top and
+          bottom borders seamless rather than a shape sitting beside a rectangle.
+
+          ⚠️ `preserveAspectRatio="none"` STRETCHES THE 100-UNIT BOX TO THE BAR'S HEIGHT, and
+          `vector-effect="non-scaling-stroke"` is what stops that stretch distorting the 1.2px
+          stroke into a wedge. The two go together; neither is decoration. */}
+      {fade.right && (
+        <svg className="tl-tail" viewBox="0 0 18 100" preserveAspectRatio="none" aria-hidden>
+          <path d="M0 1 L17 50 L0 99" fill="#fff" stroke="var(--tl-frame-bd)" strokeWidth="1.2"
+            vectorEffect="non-scaling-stroke" />
+          <path d="M0 0 H1 M0 100 H1" stroke="var(--tl-frame-bd)" strokeWidth="1.2"
+            vectorEffect="non-scaling-stroke" />
+        </svg>
+      )}
       {fade.left && <span className="tl-fov l" aria-hidden />}
     </div>
   );
@@ -1382,6 +1435,14 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const wrapRef = React.useRef<HTMLDivElement | null>(null);
   const tipRef = React.useRef<HTMLDivElement | null>(null);
   const [cross, setCross] = useState<{ x: number; label: string } | null>(null);
+  /**
+   * Which group the sidebar is showing, or `null` for all.
+   *
+   * ⚠️ IT FILTERS THE DRAWN GROUPS, NEVER THE ROW SET THE COUNTS COME FROM. A sidebar whose numbers
+   * changed as you clicked them could not be added up — which is precisely the fault the retired tab
+   * strip had, where every tab but the current one reported its own view's total.
+   */
+  const [secFilter, setSecFilter] = useState<CalSection | null>(null);
 
   /**
    * The crosshair — pure geometry, and it reads the DAY rather than remembering one.
@@ -1926,6 +1987,14 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
       .filter((g) => g.rows.length > 0);
   }, [oneList, barsByRow]);
 
+  /* ⚠️ THE FILTER IS APPLIED TO THE DRAWN GROUPS AND NOWHERE ELSE. `sectioned` stays the whole
+     board, so the sidebar's counts are a census however many groups are on screen — a tally that
+     changed as you filtered it could not be added up. */
+  const shownSections = React.useMemo(
+    () => (secFilter === null ? sectioned : sectioned.filter((g) => g.sec === secFilter)),
+    [sectioned, secFilter],
+  );
+
   /**
    * ⚠️ THE ROW NUMBERS RUN CONTINUOUSLY ACROSS SECTIONS, so the column is a census of the board
    * rather than six restarts — `01` at the top of Urgent through to `nn` at the foot of Closed.
@@ -1938,6 +2007,36 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     for (const g of sectioned) for (const r of g.rows) n.set(r.key, ++i);
     return n;
   }, [sectioned]);
+
+  /* ⚠️ DECLARED ABOVE `sidebar`, WHICH READS IT. A `const` whose initialiser is JSX runs at its
+     DECLARATION, so a component referenced from it must already exist — and `tsc` passed this
+     one clean while the whole page threw on load and the harness could not find the shell. That
+     is the third shape of the TDZ this repo records: not a same-scope read TS2448 catches, but
+     a component read from an eagerly-evaluated element tree. The fix is the ORDER. */
+  /**
+   * The six section marks — the ref's `ICO` table, one glyph per section.
+   *
+   * ⚠️ THESE ARE SECTION MARKS, NOT STATUS GLYPHS, and the distinction is why they may be drawn
+   * here at all. Every STATUS badge on this board is the app's `StatusDot` and is never redrawn
+   * from a ref's SVG; a section heading is chrome naming a group, which `StatusDot` has no
+   * vocabulary for. `currentColor` so each takes its own section's ink from `--gico`.
+   */
+  const SectionIcon = ({ sec }: { sec: CalSection }) => {
+    const common = {
+      className: "gico", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
+      strokeWidth: 1.7, strokeLinecap: "round" as const, strokeLinejoin: "round" as const,
+      "aria-hidden": true,
+    };
+    switch (sec) {
+      case "over": return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 7.5v5M12 16.2v.3" /></svg>;
+      case "need": return <svg {...common}><path d="M4 12h14M13 7l5 5-5 5" /></svg>;
+      case "with": return <svg {...common}><path d="M21 3 3 10.5l6.4 2.6L12 20l3-5.6L21 3z" /></svg>;
+      case "quiet": return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 7.5V12l3.2 2" /></svg>;
+      case "task": return <svg {...common}><rect x="4" y="4" width="16" height="16" rx="4" /><path d="M8.5 12.5l2.3 2.3L15.5 10" /></svg>;
+      case "shut": return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M9 9l6 6M15 9l-6 6" /></svg>;
+    }
+  };
+
 
   const firstOpen = board.findIndex((g) => g.open && g.rows.length > 0);
   const asking = rows.filter(rowAsks).length;
@@ -1963,6 +2062,125 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   ].filter(Boolean).join(" · ");
   /* the two nouns the count uses — a task row belongs to no agent and is not a relationship */
   const taskRows = rows.filter((r) => r.group === null && r.key !== YOU_ROW).length;
+
+  /* ⚠️ DECLARED BELOW EVERY FIGURE IT READS — `agentRows`, `taskRows`, `asking`,
+     `displaySummary`, `onlyAsks`. A `const` whose initialiser is JSX is evaluated AT its
+     declaration, so each of those must already exist. TS2448 named four; the audit is the point
+     rather than the fix, because this repo has shipped the same shape twice in forms the
+     compiler cannot see. Everything the sidebar reads is above it now. */
+  /**
+   * ══ THE SIDEBAR (v61) ══════════════════════════════════════════════════════════════════════
+   *
+   * ⚠️ THE GROUP LIST IS THE FILTER, AND THE TAB STRIP IS RETIRED. The tabs named four cuts of the
+   * board — All, Needs me, With agents, Tasks, Closed — while the board itself was divided into SIX
+   * groups with different names. Two vocabularies for one question, and a reader adding up the tab
+   * counts got a different answer from the one the dividers gave. The list names the groups that
+   * exist, in the order they are drawn, with their own counts.
+   *
+   * ⚠️ AND IT LISTS ONLY NON-EMPTY GROUPS, PLUS ALL. A row offering a group with nothing in it
+   * teaches the shape of a board the writer does not have — the same rule the dividers follow.
+   */
+  const sidebar = (
+    <>
+      <div className="sblk">
+        <span className="slbl">Show</span>
+        <button type="button" className={`gpill${secFilter === null ? " on" : ""}`}
+          aria-pressed={secFilter === null} onClick={() => setSecFilter(null)}>
+          <span>All</span>
+          <b>{String(sectioned.reduce((n, g) => n + g.rows.length, 0)).padStart(2, "0")}</b>
+        </button>
+        {sectioned.map((g) => (
+          <button key={g.sec} type="button" className={`gpill${secFilter === g.sec ? " on" : ""}`}
+            data-sec={g.sec} aria-pressed={secFilter === g.sec}
+            onClick={() => setSecFilter((c) => (c === g.sec ? null : g.sec))}>
+            <SectionIcon sec={g.sec} />
+            <span>{CAL_SECTION_LABEL[g.sec]}</span>
+            <b>{String(g.rows.length).padStart(2, "0")}</b>
+          </button>
+        ))}
+      </div>
+      <div className="sblk">
+        <span className="slbl">View</span>
+                {/* ⚠️ ONE POPOVER FOR EVERYTHING THAT CHANGES HOW THE BOARD IS DRAWN. Its trigger
+                    names the non-default choices, so a reader can see what they have set without
+                    opening it — a control that hides its own state is a control that gets set once
+                    and then forgotten about. */}
+                <Popover label="Display" summary={displaySummary}>
+                  {/* ⚠️ THE SAME ROWS EITHER WAY. GROUPED does not fetch, filter or re-derive
+                      anything — it buckets the list the page already has, which is why the lock can
+                      assert the two arrangements hold the identical row set by identity. */}
+                  <PopRow name="Group" value={groupMode} options={GROUP_MODES}
+                    labels={GROUP_MODE_LABEL} onPick={setGroupMode} />
+                  {/* ⚠️ EACH OPTION CARRIES ITS OWN DEFINITION IN THE MENU IT CAME FROM. "Soonest"
+                      could mean the soonest thing you must do, the soonest reply expected, or the
+                      soonest anything happens — three different orders, and a reader has no way to
+                      tell which they got from the name. The meanings ride the option here. */}
+                  <PopRow name="Order" value={view.sort} options={SORT_ORDER}
+                    labels={SORT_LABEL} onPick={(v) => setView1("sort", v)} />
+                  {/* ⚠️ ONLY FROM THE SECOND MANUSCRIPT ON. The ref's own audit: "genuinely useful
+                      from the second manuscript onward; noise before that." A control offering one
+                      choice implies others the writer cannot reach. */}
+                  {/* ⚠️ THE MANUSCRIPT ROW IS GONE FROM HERE — it was "All books / By book", which is
+                      the same question `Group` now asks, and two controls for one choice is how they
+                      come to disagree. Grouping BY manuscript is a Group mode; SCOPING to one is a
+                      filter the board does not have, and is reported unbuilt rather than faked. */}
+                  {/* ⚠️ v58: THE RANGE PICKER IS GONE. The window is fixed at ninety days with today
+                      at its centre, and the board moves by whole weeks instead — the ref's own model.
+                      Three stops were three different boards: a card's width, a day's distance from
+                      its neighbour and whether a label fitted all changed underneath the reader, and
+                      every measurement had to be taken three times to mean anything.
+                      ⚠️ It is REMOVED rather than left showing one option — a control offering a
+                      single choice implies others the writer cannot reach, which is the same rule
+                      the manuscript row above it was retired under. */}
+                  {/* ⚠️ THE RESET NAMES THE DEFAULTS RATHER THAN CLEARING TO NOTHING. "Clear" on a
+                      set of choices with no empty state would have to mean something, and every
+                      meaning it could take is one of the choices. */}
+                  <button type="button" className="tl-popreset" onClick={() => {
+                    setTab("all"); setGroupMode("list");
+                    setView1("sort", DEFAULT_SORT); setRangeIdx(DEFAULT_RANGE_INDEX);
+                    setCutBy("needs");
+                  }}>Reset to {TAB_LABEL.all} · {GROUP_MODE_LABEL.list} · {SORT_LABEL[DEFAULT_SORT]} · {TIMELINE_RANGES[DEFAULT_RANGE_INDEX].label}</button>
+                </Popover>
+                <input
+                  className="tl-search" type="search" value={view.search}
+                  aria-label="Search agents, agencies and tasks"
+                  placeholder="Search…"
+                  onChange={(e) => setView1("search", e.target.value)}
+                />
+                {/* ⚠️ THE COUNT NAMES WHAT IS ON SCREEN, and it changes its noun with the view — a
+                    tally of "relationships" beside a board showing only what is being asked of you
+                    would be counting one thing and describing another. */}
+                <span className="tl-count">
+                  {/* ⚠️ TASK ROWS ARE NOT RELATIONSHIPS, and one noun counting both was a tally
+                      describing something other than what it counted. Two nouns, each over its own
+                      set, and the tasks clause is omitted entirely when there are none — a "0 TASKS"
+                      states an absence nobody asked about. */}
+                  {onlyAsks
+                    ? `${asking} ASKING FOR YOU`
+                    : `${agentRows} ${agentRows === 1 ? "RELATIONSHIP" : "RELATIONSHIPS"}`
+                      + (taskRows ? ` · ${taskRows} ${taskRows === 1 ? "TASK" : "TASKS"}` : "")}
+                </span>
+                {/* the pink creation action: the ONE composer lives on the To-do list page — go
+                    there and announce, never a second create surface */}
+                <button type="button" className="tdb-addb" onClick={() => {
+                  onNavigatePath("/todo");
+                  window.dispatchEvent(new CustomEvent(TODO_OPEN_COMPOSER));
+                }}>
+                  <Plus size={13} aria-hidden /> Add task or note
+                </button>
+      </div>
+      <div className="sblk">
+        <span className="slbl">Window</span>
+        <div className="navrow">
+          <button type="button" className="tl-btn" aria-label="Previous window"
+            onClick={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}>‹ Week</button>
+          <button type="button" className="tl-btn" onClick={() => setWinStart(today)}>Today</button>
+          <button type="button" className="tl-btn" aria-label="Next window"
+            onClick={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}>Week ›</button>
+        </div>
+      </div>
+    </>
+  );
 
   /**
    * ⚠️ THE EMPTY STATES ARE TWO DIFFERENT FACTS AND MUST NOT SHARE COPY. "Nothing is asking for
@@ -1992,29 +2210,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * gridlines, the weekend question and the phantom-column hazard all cease to exist rather than
    * being suppressed one rule at a time.
    */
-  /**
-   * The six section marks — the ref's `ICO` table, one glyph per section.
-   *
-   * ⚠️ THESE ARE SECTION MARKS, NOT STATUS GLYPHS, and the distinction is why they may be drawn
-   * here at all. Every STATUS badge on this board is the app's `StatusDot` and is never redrawn
-   * from a ref's SVG; a section heading is chrome naming a group, which `StatusDot` has no
-   * vocabulary for. `currentColor` so each takes its own section's ink from `--gico`.
-   */
-  const SectionIcon = ({ sec }: { sec: CalSection }) => {
-    const common = {
-      className: "gico", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
-      strokeWidth: 1.7, strokeLinecap: "round" as const, strokeLinejoin: "round" as const,
-      "aria-hidden": true,
-    };
-    switch (sec) {
-      case "over": return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 7.5v5M12 16.2v.3" /></svg>;
-      case "need": return <svg {...common}><path d="M4 12h14M13 7l5 5-5 5" /></svg>;
-      case "with": return <svg {...common}><path d="M21 3 3 10.5l6.4 2.6L12 20l3-5.6L21 3z" /></svg>;
-      case "quiet": return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 7.5V12l3.2 2" /></svg>;
-      case "task": return <svg {...common}><rect x="4" y="4" width="16" height="16" rx="4" /><path d="M8.5 12.5l2.3 2.3L15.5 10" /></svg>;
-      case "shut": return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M9 9l6 6M15 9l-6 6" /></svg>;
-    }
-  };
 
 
   const row = (r: TimelineRow) => {
@@ -2082,6 +2277,7 @@ data-rowkey={r.key}
                 return on.length ? Math.max(...on.map((n) => n.at)) : null;
               })()}
               onPick={() => pickSeg(r.key, sg)}
+              agency={r.agency}
               onOpen={sg.queryId
                 ? () => onNavigatePath(`/queries?q=${encodeURIComponent(sg.queryId)}`)
                 : undefined} />
@@ -2257,19 +2453,26 @@ data-rowkey={r.key}
                          its date and its caption still reaches the hover record; what is dropped is
                          a CARD too small to carry either. */
                       if (to - from < STAGE_MIN_DAYS) continue;
+                      /* ⚠️ A NARROW STAGE DROPS ITS BADGE RATHER THAN BEING DROPPED (v61). v60c
+                         skipped everything under twelve days because a 54px medallion could not fit
+                         beside words in a short card; the badge is 30px and INSIDE the card now, and
+                         the ref gives a second threshold below which it comes off entirely and the
+                         text starts at the card's own inset. So the gate comes down and two stages
+                         this account holds are drawn where v60c dropped them. */
+                      const narrow = to - from < STAGE_NARROW_DAYS;
                       const stage = a.status ? String(a.status) : a.caption;
                       const end: StageEnd = !b
                         ? "out"
                         : b.dir === "in" ? "in" : b.dir === "close" ? "none" : "out";
                       out.push(
-                        <div key={`js-${a.key}`} className="tl-jc" style={{
+                        <div key={`js-${a.key}`} className={`tl-jc${narrow ? " narrow" : ""}`} style={{
                           left: pct(from),
                           width: `max(0px, calc(${pct(to - from)} - var(--tl-jc-gap)))`,
                           ...laneVar(lane),
                         }}>
                           <span className="tl-jmed" aria-hidden>
                             <StatusDot status={a.status ?? QueryStatus.QUERIED}
-                              overrideSize={STAGE_BADGE_PX} badge />
+                              overrideSize={STAGE_BADGE_PX} />
                           </span>
                           <span className="tl-jbody">
                             <span className="tl-js">{stage}</span>
@@ -2546,116 +2749,13 @@ data-rowkey={r.key}
           title="Calendar"
           mark="calendar"
           tools={
-            <>
-              {/* ⚠️ THE RANGE SITS WITH THE PAGER, because they answer one question between them —
-                  the pager moves the window and this sets how much of it there is. */}
-              {/* ══ ONE CONTROL ROW ═══════════════════════════════════════════════════════
-                  ⚠️ THE KIND CHIPS ARE REMOVED, NOT HIDDEN, AND `TimelineView.kinds` WENT WITH
-                  THEM. Four toggles that each subtracted a class of thing from a board whose whole
-                  claim is that it shows you the relationship entire — and a board you have
-                  silently switched a quarter of off is a board that lies by omission. Leaving the
-                  field behind set to "all" would have left a filter nothing could reach and
-                  nothing could clear, which is how a retired control comes back as a bug. */}
-
-              {/* ⚠️ CUT BY MANUSCRIPT ONLY EXISTS FROM THE SECOND MANUSCRIPT ON. The ref's own
-                  audit: "genuinely useful from the second manuscript onward; noise before that."
-                  A control offering one choice implies others the writer cannot reach. */}
-              {/* ⚠️ THE VIEWS ARE TABS, AND THE FOURTH IS WHAT `RIGHT NOW` USED TO BE. A
-                  two-state segment could say "you are seeing only what is asked of you" and could
-                  not say what the other cuts of the board were; a strip states all four and which
-                  one you are in. They PARTITION — `timelineViews.ts` locks that — so the counts a
-                  reader adds up are the counts they get. */}
-              <span className="tl-tabs" role="tablist" aria-label="Which relationships">
-                {TAB_ORDER.map((t) => (
-                  <button key={t} type="button" role="tab" aria-selected={tab === t}
-                    data-on={tab === t} onClick={() => setTab(t)}>
-                    {TAB_LABEL[t]}
-                    {t !== "all" && <span className="tl-tabn">{tabCounts[t]}</span>}
-                  </button>
-                ))}
-              </span>
-
-              <span className="tl-csep" aria-hidden />
-              <button type="button" className="cal-nav calm-nav" aria-label="Previous window"
-                onClick={() => setWinStart((s) => shiftWindow(s, WEEK_STEP, -1))}>
-                <ChevronLeft size={14} aria-hidden />
-              </button>
-              <button type="button" className="cal-nav calm-nav cal-today"
-                onClick={() => setWinStart(today)}>Today</button>
-              <button type="button" className="cal-nav calm-nav" aria-label="Next window"
-                onClick={() => setWinStart((s) => shiftWindow(s, WEEK_STEP, 1))}>
-                <ChevronRight size={14} aria-hidden />
-              </button>
-
-              {/* ⚠️ ONE POPOVER FOR EVERYTHING THAT CHANGES HOW THE BOARD IS DRAWN. Its trigger
-                  names the non-default choices, so a reader can see what they have set without
-                  opening it — a control that hides its own state is a control that gets set once
-                  and then forgotten about. */}
-              <Popover label="Display" summary={displaySummary}>
-                {/* ⚠️ THE SAME ROWS EITHER WAY. GROUPED does not fetch, filter or re-derive
-                    anything — it buckets the list the page already has, which is why the lock can
-                    assert the two arrangements hold the identical row set by identity. */}
-                <PopRow name="Group" value={groupMode} options={GROUP_MODES}
-                  labels={GROUP_MODE_LABEL} onPick={setGroupMode} />
-                {/* ⚠️ EACH OPTION CARRIES ITS OWN DEFINITION IN THE MENU IT CAME FROM. "Soonest"
-                    could mean the soonest thing you must do, the soonest reply expected, or the
-                    soonest anything happens — three different orders, and a reader has no way to
-                    tell which they got from the name. The meanings ride the option here. */}
-                <PopRow name="Order" value={view.sort} options={SORT_ORDER}
-                  labels={SORT_LABEL} onPick={(v) => setView1("sort", v)} />
-                {/* ⚠️ ONLY FROM THE SECOND MANUSCRIPT ON. The ref's own audit: "genuinely useful
-                    from the second manuscript onward; noise before that." A control offering one
-                    choice implies others the writer cannot reach. */}
-                {/* ⚠️ THE MANUSCRIPT ROW IS GONE FROM HERE — it was "All books / By book", which is
-                    the same question `Group` now asks, and two controls for one choice is how they
-                    come to disagree. Grouping BY manuscript is a Group mode; SCOPING to one is a
-                    filter the board does not have, and is reported unbuilt rather than faked. */}
-                {/* ⚠️ v58: THE RANGE PICKER IS GONE. The window is fixed at ninety days with today
-                    at its centre, and the board moves by whole weeks instead — the ref's own model.
-                    Three stops were three different boards: a card's width, a day's distance from
-                    its neighbour and whether a label fitted all changed underneath the reader, and
-                    every measurement had to be taken three times to mean anything.
-                    ⚠️ It is REMOVED rather than left showing one option — a control offering a
-                    single choice implies others the writer cannot reach, which is the same rule
-                    the manuscript row above it was retired under. */}
-                {/* ⚠️ THE RESET NAMES THE DEFAULTS RATHER THAN CLEARING TO NOTHING. "Clear" on a
-                    set of choices with no empty state would have to mean something, and every
-                    meaning it could take is one of the choices. */}
-                <button type="button" className="tl-popreset" onClick={() => {
-                  setTab("all"); setGroupMode("list");
-                  setView1("sort", DEFAULT_SORT); setRangeIdx(DEFAULT_RANGE_INDEX);
-                  setCutBy("needs");
-                }}>Reset to {TAB_LABEL.all} · {GROUP_MODE_LABEL.list} · {SORT_LABEL[DEFAULT_SORT]} · {TIMELINE_RANGES[DEFAULT_RANGE_INDEX].label}</button>
-              </Popover>
-              <input
-                className="tl-search" type="search" value={view.search}
-                aria-label="Search agents, agencies and tasks"
-                placeholder="Search…"
-                onChange={(e) => setView1("search", e.target.value)}
-              />
-              <TplGrow />
-              {/* ⚠️ THE COUNT NAMES WHAT IS ON SCREEN, and it changes its noun with the view — a
-                  tally of "relationships" beside a board showing only what is being asked of you
-                  would be counting one thing and describing another. */}
-              <span className="tl-count">
-                {/* ⚠️ TASK ROWS ARE NOT RELATIONSHIPS, and one noun counting both was a tally
-                    describing something other than what it counted. Two nouns, each over its own
-                    set, and the tasks clause is omitted entirely when there are none — a "0 TASKS"
-                    states an absence nobody asked about. */}
-                {onlyAsks
-                  ? `${asking} ASKING FOR YOU`
-                  : `${agentRows} ${agentRows === 1 ? "RELATIONSHIP" : "RELATIONSHIPS"}`
-                    + (taskRows ? ` · ${taskRows} ${taskRows === 1 ? "TASK" : "TASKS"}` : "")}
-              </span>
-              {/* the pink creation action: the ONE composer lives on the To-do list page — go
-                  there and announce, never a second create surface */}
-              <button type="button" className="tdb-addb" onClick={() => {
-                onNavigatePath("/todo");
-                window.dispatchEvent(new CustomEvent(TODO_OPEN_COMPOSER));
-              }}>
-                <Plus size={13} aria-hidden /> Add task or note
-              </button>
-            </>
+            /* ⚠️ EMPTY (v61). Every control that lived here — the tabs, the pager, Display,
+               search, the count and Add — is in the sidebar now. A tools row above a board that
+               needs all its width was five controls competing with the thing they control, and
+               the page read as a strip of chrome over a stack of panels. `TplTools` still
+               renders the row's structure; what it holds is nothing, deliberately, rather than
+               the prop being dropped and the page's header losing its slot. */
+            <></>
           }
         >
           {/* ⚠️ ONE STATE OR THE OTHER, NEVER BOTH ON SCREEN. Acting collapses the board to a day's
@@ -2668,7 +2768,28 @@ data-rowkey={r.key}
             </div>
           ) : (
           <>
-          <div className="tl-board">
+          {/* ══ ONE CALENDAR (v61) ═══════════════════════════════════════════════════════════
+              ⚠️ THE CONTROLS SIT BESIDE THE BOARD, NOT ABOVE IT. v60's tools row put the tabs, the
+              pager, Display, search and the count on one line above six framed sections — five
+              controls competing for width with a board that needed all of it, and a page that read
+              as a stack of panels sharing a date scale. A sidebar gives the controls a column of
+              their own and lets the calendar be one object.
+
+              ⚠️ AND THE GROUP LIST IS THE FILTER. The tab strip is gone: it named four cuts of the
+              board while the board itself was divided into six groups, so a reader had two
+              vocabularies for one question. The list names the groups that exist, with their
+              counts, and All. */}
+          <div className="tl-page">
+            <aside className="tl-side" aria-label="Calendar controls">{sidebar}</aside>
+          {/* ⚠️ `tl-board` STAYS ON THE CONTAINER, AND IT IS NOT DECORATION. Every token this board
+              reads — `--row-h`, `--badge`, the six section tones, every colour — is declared on
+              `.tl-board`, scoped there deliberately so a shell refactor cannot inherit a calendar
+              colour. Replacing the element with `.tl-cal` took all of them with it: `calc()` on an
+              undefined custom property yields nothing and the whole declaration is dropped, so the
+              rows collapsed to fifteen pixels and the cards piled on each other, silently, through
+              a clean build and a clean typecheck. The container is BOTH — `tl-cal` frames it,
+              `tl-board` declares what is inside it. */}
+          <div className="tl-cal tl-board">
             <TplZone className="tl-zone" hem={false} label={range.label}>
               <div
                 className="tl tl-wrap"
@@ -2719,6 +2840,7 @@ data-rowkey={r.key}
                         <span key={d.ymd}
                           className={`tl-rtile${d.now ? " now" : ""}`}
                           style={{ left: pct(d.at) }} data-at={d.at}>
+                          {/* one line: the day, then the month beside it — the ref's `inline` rail */}
                           <b>{d.day}</b><i>{d.mon}</i>
                         </span>
                       ))}
@@ -2744,11 +2866,19 @@ data-rowkey={r.key}
                      grouped heading-over-loose-rows before it. A heading on the ground above its
                      rows cannot tell a reader four rows down which section they are in; a tinted
                      container running the height of the section answers it without a word. */
-                  sectioned.map((g) => (
+                  shownSections.map((g) => (
                     <div className="tl-grp" key={g.sec} data-sec={g.sec}>
-                      <div className="tl-gt">
-                        <SectionIcon sec={g.sec} />
-                        <span className="t">{CAL_SECTION_LABEL[g.sec]}</span>
+                      {/* ⚠️ A DIVIDER, NOT A HEADER (v61). A hairline across the container with a
+                          tinted pill sitting ON it — icon, name and a zero-padded count. The count
+                          is here because a pill is small enough to hold one; the v60 header spanned
+                          the width and could not state a number without competing with the row it
+                          introduced. */}
+                      <div className="tl-gdiv">
+                        <span className="gp">
+                          <SectionIcon sec={g.sec} />
+                          <span>{CAL_SECTION_LABEL[g.sec]}</span>
+                          <b>{String(g.rows.length).padStart(2, "0")}</b>
+                        </span>
                       </div>
                       <div className="tl-gwrap">
                         {/* ⚠️ THE NUMBER COLUMN IS A SIBLING OF THE LANES, NOT A CELL IN EACH ROW.
@@ -2793,6 +2923,7 @@ data-rowkey={r.key}
                 <div ref={tipRef} className="tl-tipp" role="tooltip" aria-hidden />
               </div>
             </TplZone>
+          </div>
           </div>
           {focusBand}
           </>

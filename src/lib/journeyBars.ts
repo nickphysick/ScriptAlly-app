@@ -1596,9 +1596,18 @@ export function latenessLine(i: {
     /* ⚠️ `days` SURVIVES FOR THE UNDATED CASE ONLY — where nobody named a date there is nothing to
        subtract from, and "owed N" is then a statement about how long it has been the writer's,
        which is what `yoursDays` measures. Where a date exists it is the only source. */
+    /* ⚠️ ONE LATENESS VOCABULARY (v61). Three shapes were live at once — "overdue since 20 Aug ·
+       15 days", "no date promised · owed 20 days" and "expected 27 Jul · 6 weeks overdue" — so the
+       same fact was worded three ways depending on which date was missing. The form is now
+       `{what the date was} · {how late}` in every case, which is what the design states and what
+       lets a reader compare two rows without re-parsing the sentence.
+
+       ⚠️ AND "since"/"owed" ARE GONE FOR A REASON BEYOND CONSISTENCY. "Overdue since" dates the
+       start of a debt and then states its length, which is the same span twice; "owed" is the
+       writer's obligation stated as a noun, which is a shade closer to a verdict than a fact. */
     return i.dueYmd
-      ? `${i.prefix} · overdue since ${on(i.dueYmd)} · ${overdueSpan(daysBetween(i.dueYmd, i.todayYmd))}`
-      : `${i.prefix} · no date promised · owed ${overdueSpan(i.days)}`;
+      ? `${i.prefix} · due ${on(i.dueYmd)} · ${overdueSpan(daysBetween(i.dueYmd, i.todayYmd))} overdue`
+      : `${i.prefix} · no date promised · ${overdueSpan(i.days)} overdue`;
   }
   /**
    * An agency's window that has passed.
@@ -1610,10 +1619,10 @@ export function latenessLine(i: {
    * means. `none yet` was also doing the work the SECTION now does — the row is in Urgent, so the
    * fact that nothing came back is the reason it is there.
    *
-   * ⚠️ AND THE OWED BRANCH ABOVE STILL READS "overdue since 20 Aug · 15 days", WHICH IS A THIRD
-   * SHAPE. The ref writes `due 26 Aug · 7 days overdue` for that case. The pack quoted only this
-   * branch's wording, so only this one is changed — flagged rather than unified in passing,
-   * because the owed wording is on six rows and changing it is a copy decision, not a fix.
+   * ⚠️ THE OWED BRANCH IS UNIFIED WITH THIS ONE NOW (v61). It read "overdue since 20 Aug · 15
+   * days" — a third shape — and v60c flagged it rather than changing it, because the wording was on
+   * six rows and unifying it was a copy decision rather than a fix. v61 made the decision: one
+   * vocabulary, `{what the date was} · {how late}`, in all three cases.
    */
   return i.expectedYmd
     ? `${i.prefix} · expected ${on(i.expectedYmd)} · ${overdueSpan(daysBetween(i.expectedYmd, i.todayYmd))} overdue`

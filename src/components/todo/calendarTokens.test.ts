@@ -30,7 +30,7 @@ const CSS = join(process.cwd(), "src/components/todo/todoCalendar.css");
  * design of record on every run means a retune moves the lock with it and a REGRESSION still
  * fails, which is the only thing a lock is for.
  */
-const REF = join(process.cwd(), "design-refs/timeline-v60.html");
+const REF = join(process.cwd(), "design-refs/timeline-v61.html");
 const refSheet = (): string => {
   const s = readFileSync(REF, "utf8");
   const i = s.indexOf("<style>"), j = s.indexOf("</style>", i);
