@@ -1,0 +1,112 @@
+{
+  "ref": {
+    "pbar": {
+      "backgroundColor": "rgb(253, 250, 245)",
+      "padding": "14px 16px",
+      "borderBottomWidth": "1px",
+      "borderBottomStyle": "solid",
+      "borderBottomColor": "rgb(236, 224, 210)",
+      "position": "sticky",
+      "height": "61px",
+      "borderRadius": "0px",
+      "overflow": "visible",
+      "_box": "580x61"
+    },
+    "pband": {
+      "padding": "14px 26px",
+      "borderBottomWidth": "1px",
+      "borderBottomColor": "rgba(0, 0, 0, 0.06)",
+      "_box": "580x57"
+    },
+    "word": {
+      "fontSize": "20px",
+      "_box": "73x27"
+    },
+    "icb": {
+      "width": "32px",
+      "height": "32px",
+      "borderWidth": "1px",
+      "borderStyle": "solid",
+      "borderColor": "rgb(224, 213, 200)",
+      "borderRadius": "8px",
+      "backgroundColor": "rgb(255, 255, 255)",
+      "_box": "32x32"
+    },
+    "act": {
+      "backgroundColor": "rgb(255, 255, 255)",
+      "borderWidth": "1px",
+      "borderColor": "rgb(224, 213, 200)",
+      "borderRadius": "8px",
+      "padding": "8px 12px",
+      "fontSize": "9.5px",
+      "letterSpacing": "0.57px",
+      "textTransform": "uppercase",
+      "_box": "57x31"
+    },
+    "actPink": {
+      "backgroundColor": "rgb(245, 226, 218)",
+      "borderColor": "rgb(232, 200, 188)",
+      "_box": "120x31"
+    }
+  },
+  "built": {
+    "pbar": {
+      "backgroundColor": "rgb(253, 250, 245)",
+      "padding": "14px 16px",
+      "borderBottomWidth": "1px",
+      "borderBottomStyle": "solid",
+      "borderBottomColor": "rgb(236, 224, 210)",
+      "position": "sticky",
+      "height": "61px",
+      "borderRadius": "0px",
+      "overflow": "visible",
+      "_box": "580x61"
+    },
+    "pband": {
+      "padding": "14px 26px",
+      "borderBottomWidth": "1px",
+      "borderBottomColor": "rgba(0, 0, 0, 0.06)",
+      "_box": "580x57"
+    },
+    "word": {
+      "fontSize": "20px",
+      "_box": "104x27"
+    },
+    "icb": {
+      "width": "32px",
+      "height": "32px",
+      "borderWidth": "1px",
+      "borderStyle": "solid",
+      "borderColor": "rgb(224, 213, 200)",
+      "borderRadius": "8px",
+      "backgroundColor": "rgb(255, 255, 255)",
+      "_box": "32x32"
+    },
+    "act": {
+      "backgroundColor": "rgb(255, 255, 255)",
+      "borderWidth": "1px",
+      "borderColor": "rgb(224, 213, 200)",
+      "borderRadius": "8px",
+      "padding": "8px 12px",
+      "fontSize": "9.5px",
+      "letterSpacing": "0.57px",
+      "textTransform": "uppercase",
+      "_box": "57x32"
+    },
+    "actPink": {
+      "backgroundColor": "rgb(245, 226, 218)",
+      "borderColor": "rgb(232, 200, 188)",
+      "_box": "120x32"
+    }
+  },
+  "sources": {},
+  "perStage": {
+    "out-2": "rgb(253, 250, 245) | band rgb(215, 221, 211)",
+    "offer": "rgb(253, 250, 245) | band rgb(215, 224, 232)",
+    "out-1": "rgb(253, 250, 245) | band rgb(230, 234, 227)",
+    "in-1": "rgb(253, 250, 245) | band rgb(248, 233, 226)",
+    "in-3": "rgb(253, 250, 245) | band rgb(232, 201, 187)",
+    "in-2": "rgb(253, 250, 245) | band rgb(241, 219, 208)",
+    "out-3": "rgb(253, 250, 245) | band rgb(199, 208, 194)"
+  }
+}

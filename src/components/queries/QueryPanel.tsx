@@ -224,7 +224,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
 
                         {r.progress && (
                           <div className="qpn-prog">
-                            <div className="qpn-bar">
+                            <div className="qpn-progbar">
                               <i className={r.progress.past ? "qpn-past" : undefined} style={{ width: `${r.progress.pct}%` }} />
                             </div>
                             <div className="qpn-lbl">
