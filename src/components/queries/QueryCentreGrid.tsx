@@ -42,10 +42,12 @@ const prefersReducedMotion = (): boolean =>
 
 export const QueryCentreGrid: React.FC<{
   rows: readonly GridCard[];
+  /** The live preview of a query being written — index 0, inert, never in `rows`. */
+  ghost?: GridCard | null;
   group: GroupKey;
   selectedId?: string | null;
   onOpen?: (id: string) => void;
-}> = ({ rows, group, selectedId, onOpen }) => {
+}> = ({ rows, ghost, group, selectedId, onOpen }) => {
   const stageRef = useRef<HTMLDivElement>(null);
   /**
    * ⚠️ RECTS ARE CAPTURED AFTER EACH COMMIT, NEVER DURING RENDER. `measureFlip` writes to the DOM
@@ -58,7 +60,7 @@ export const QueryCentreGrid: React.FC<{
   /* ⚠️ THE ORDER, NOT THE ROWS. A re-render that changed no positions must not play a FLIP — the
      key is what the arrangement IS, so an identical key means nothing moved and nothing is
      touched. `playFlip` is selective too, but not asking is cheaper than asking and being told no. */
-  const orderKey = `${group}|${rows.map((r) => r.id).join(",")}`;
+  const orderKey = `${group}|${ghost ? "ghost|" : ""}${rows.map((r) => r.id).join(",")}`;
   const lastOrder = useRef<string | null>(null);
 
   useLayoutEffect(() => {
@@ -105,10 +107,20 @@ export const QueryCentreGrid: React.FC<{
     />
   );
 
+  /* ⚠️ INDEX 0 IN BOTH ARRANGEMENTS, and outside the grouping — a preview of something not yet
+     saved belongs to no heading, and filing it under one would claim a fact about it. */
+  const ghostCard = ghost ? (
+    <QueryCard
+      key="__ghost" id="__ghost" ghost
+      status={ghost.status} name={ghost.name} agency={ghost.agency}
+      initials={ghost.initials} facts={ghost.facts}
+    />
+  ) : null;
+
   if (group === "none") {
     return (
       <div className="qcc-stage" ref={stageRef}>
-        <div className="qcc-grid">{rows.map(card)}</div>
+        <div className="qcc-grid">{ghostCard}{rows.map(card)}</div>
       </div>
     );
   }
@@ -126,6 +138,7 @@ export const QueryCentreGrid: React.FC<{
 
   return (
     <div className="qcc-stage" ref={stageRef}>
+      {ghostCard && <div className="qcc-grid">{ghostCard}</div>}
       {headings.map((h) => (
         <section className="qcc-sec" key={h}>
           <h2 className="qcc-sech">

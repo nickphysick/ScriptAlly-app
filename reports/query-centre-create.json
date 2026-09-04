@@ -1,0 +1,22 @@
+{
+  "before": {
+    "journeyOpen": false,
+    "cardCount": 54,
+    "ghostPresent": false,
+    "ghostIsFirst": false,
+    "ghostHidden": false,
+    "ghostIsButton": false,
+    "ghostFocusable": false,
+    "foot": "Showing 54 of 54Export CSV"
+  },
+  "after": {
+    "journeyOpen": true,
+    "cardCount": 55,
+    "ghostPresent": false,
+    "ghostIsFirst": false,
+    "ghostHidden": false,
+    "ghostIsButton": false,
+    "ghostFocusable": false,
+    "foot": "Showing 54 of 54Export CSV"
+  }
+}
