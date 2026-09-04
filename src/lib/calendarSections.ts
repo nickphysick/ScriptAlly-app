@@ -50,6 +50,23 @@ export const CAL_SECTION_DRAW: readonly CalSection[] = [
   "over", "need", "with", "quiet", "task", "shut",
 ];
 
+/**
+ * What each group is FOR, in a sentence — the bar's right-hand eyebrow.
+ *
+ * ⚠️ A NAME IS A LABEL A READER HAS TO DECODE; THIS IS THE THING ITSELF. "Gone quiet" tells you
+ * what the group is called and leaves you to work out what it holds; "No reply for a long while"
+ * is what it holds. The group bar is full width, so there is room for both — the name to find the
+ * group by, the sentence to know it by.
+ */
+export const CAL_SECTION_PURPOSE: Record<CalSection, string> = {
+  over: "Needs you now",
+  need: "Coming up",
+  with: "Waiting on a reply",
+  quiet: "No reply for a long while",
+  task: "Your to-dos",
+  shut: "For the record",
+};
+
 /** Section headings, as the ref writes them. */
 export const CAL_SECTION_LABEL: Record<CalSection, string> = {
   over: "Urgent",

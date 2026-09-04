@@ -289,6 +289,29 @@
    * greige, where every earlier version of this board used `rgba(58,28,20,…)` — a brown shadow on a
    * cool ground reads as dirt, which is the same law this repo already records for the sage desk.
    */
+  /* ══ THE CHROME — THE FURNITURE'S OWN TOKENS (v63) ══════════════════════════════════════
+   * ⚠️ SEPARATE FROM THE SCHEME ON PURPOSE. `--tl-cs-*` says what the BOARD is made of — cards,
+   * shadows, the ground they sit on. These say what the FURNITURE is: the sidebar pane, the date
+   * bar, the group bars and the controls on them. Keeping them apart is what lets the chrome read
+   * as one continuous surface while the board's palette changes underneath it, and it is what makes
+   * "sidebar = date bar = group bar" a claim a lock can state at all. */
+  --tl-ch-bg: #faf9f7;
+  --tl-ch-ground: #f2f1ee;
+  --tl-ch-line: #e0ddd6;
+  --tl-ch-frame: #e0ddd6;
+  --tl-ch-tx: #1c130f;
+  --tl-ch-mute: #a09a92;
+  --tl-ch-sel: #ffffff;
+  --tl-ch-selbd: #e0ddd6;
+  --tl-ch-hov: rgba(255, 255, 255, .7);
+  --tl-ch-ctl: #ffffff;
+  --tl-ch-ctlbd: #e0ddd6;
+  --tl-ch-today: #2a1f17;
+  --tl-ch-todaytx: #fdf9f5;
+  /* the one bar that is not the chrome's tone — Urgent, in the app's blush, with rose numerals */
+  --tl-ch-urgent: #f8ece6;
+  --tl-ch-urgent-tx: #8c4f4a;
+  --tl-axis-w: 232px;
   --tl-cs-ground: #f2f1ee;
   --tl-cs-rail: #faf9f7;
   --tl-cs-frame: #e0ddd6;
@@ -2225,3 +2248,149 @@ button.tl-tchip { cursor: pointer; }
 .tl-p.quiet .tl-frame, .tl-p.ghost .tl-frame { background: var(--tl-cs-cardshut); }
 .tl-tail path { fill: var(--tl-cs-card); stroke: var(--tl-cs-cardbd); }
 .tl-jc .tl-jbody { left: 34px; max-width: calc(100% - 44px); }
+
+
+/* ══ v63 · ONE CONTAINER, TWO PANES ═══════════════════════════════════════════════════════════
+ *
+ * ⚠️ THE CHROME IS ITS OWN TOKEN SET, SEPARATE FROM THE SCHEME. `--cs-*` says what the BOARD is
+ * made of — cards, shadows, the ground they sit on. `--ch-*` says what the FURNITURE is: the
+ * sidebar pane, the date bar, the group bars and the controls on them. Keeping them apart is what
+ * lets the chrome read as one continuous surface while the board's own palette changes underneath
+ * it, and it is why the identity lock can say "sidebar = date bar = group bar" at all.
+ */
+.tl-board[data-v63] { --x: 0; }
+.tl-cal {
+  /* the container is a ROW now: the axis is its left pane, the board its right */
+  flex-direction: row;
+  border-color: var(--tl-ch-frame);
+  background: var(--tl-ch-ground);
+}
+.tl-axis {
+  flex: 0 0 var(--tl-axis-w);
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 16px 14px; min-width: 0;
+  background: var(--tl-ch-bg);
+  border-right: 1px solid var(--tl-ch-line);
+}
+.tl-boardpane { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+/* ⚠️ THE NUMBERS GUTTER IS GONE. It ran 01…nn down the side of a board whose rows are named by the
+   cards on them; the axis is the vertical index now, and a second one down the lanes was a census
+   nobody was reading. */
+.tl-gnums { display: none; }
+.tl-glanes { padding: 8px 0; }
+
+/* the date bar and the group bars wear the chrome, and the ground below is one surface */
+.tl-rail { background: var(--tl-ch-bg); border-bottom-color: var(--tl-ch-line); }
+.tl-rows { background: var(--tl-ch-ground); }
+.tl-glanes { background: transparent; }
+
+/* ══ GROUP BARS — full width, in the chrome tone ══════════════════════════════════════════════
+   ⚠️ A BAR, NOT A LABEL ON A RULE. v62's divider was a name standing on a hairline, which reads as
+   a break between two runs of rows; a 40px bar in the chrome's own tone reads as a HEADING for what
+   follows, and it is what makes sticking it under the date bar meaningful. */
+.tl-gdiv {
+  height: 40px; margin: 0; position: relative;
+  background: var(--tl-ch-bg);
+  border-top: 1px solid var(--tl-ch-line);
+  border-bottom: 1px solid var(--tl-ch-line);
+  display: flex; align-items: center; gap: 12px; padding: 0 16px;
+}
+.tl-grp:first-child .tl-gdiv { border-top: none; }
+.tl-gdiv::before { display: none; }
+.tl-gdiv .gp {
+  position: static; transform: none; background: transparent; padding: 0;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'Playfair Display', Georgia, serif; font-size: 15px; font-weight: 500;
+  color: var(--tl-ch-tx); line-height: 1.3; white-space: nowrap;
+}
+.tl-gdiv .gp .gico { width: 16px; height: 16px; color: var(--tl-ch-tx); }
+.tl-gdiv .gp b {
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .14em;
+  color: var(--tl-ch-mute); font-weight: 500; margin-left: 6px;
+}
+/* ⚠️ THE EYEBROW SAYS WHAT THE GROUP IS FOR, at the bar's right end. A group NAME is a label a
+   reader has to decode — "Gone quiet" against "No reply for a long while" — and the bar is wide
+   enough to carry the sentence beside it. */
+.tl-gdiv .geb {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--tl-ch-mute); white-space: nowrap;
+}
+/* the one exception: Urgent is blush, and its count and eyebrow take the rose */
+.tl-grp[data-sec="over"] .tl-gdiv { background: var(--tl-ch-urgent); }
+.tl-grp[data-sec="over"] .tl-gdiv .gp b,
+.tl-grp[data-sec="over"] .tl-gdiv .geb { color: var(--tl-ch-urgent-tx); }
+
+
+/* ══ v63 · THE SIDEBAR PANE'S BLOCKS ══════════════════════════════════════════════════════════
+   Hairline-separated blocks down the axis: search · window · views · at a glance. */
+.tl-axis .abl {
+  padding: 10px 4px; border-bottom: 1px solid var(--tl-ch-line);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.tl-axis .abl.grow { flex: 0 0 auto; padding-top: 8px; }
+.tl-axis .abl:last-of-type { border-bottom: none; }
+.tl-axis .slbl {
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--tl-ch-mute); margin: 4px 2px 6px;
+}
+/* ⚠️ `flex: 0 0 auto` OR IT FILLS THE COLUMN. `.tl-search` carries `flex: 1` for the row it was
+   built in; in a column that makes it take every pixel the axis has spare, as one enormous empty
+   box. v61 fixed this once for the old sidebar and the rule did not follow the pane inside the
+   container — the controls were built for a row and are still in a column. */
+.tl-axis .tl-search {
+  width: 100%; flex: 0 0 auto;
+  background: var(--tl-ch-ctl); border-color: var(--tl-ch-ctlbd);
+}
+/* the window pill: two chevrons with the live range between them */
+.tl-axis .railnav {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--tl-ch-ctl); border: 1px solid var(--tl-ch-ctlbd); border-radius: 9px;
+}
+.tl-axis .railnav .tl-btn { background: transparent; border: none; color: var(--tl-ch-tx); }
+.tl-axis .railnav .wl {
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--tl-ch-tx);
+  text-align: center; padding: 0 6px; white-space: nowrap;
+}
+/* ⚠️ A TEXT LINK, NOT A BUTTON. It undoes a move rather than performing an action, and a filled
+   control for "put it back" competes with the pill it sits under. */
+.tl-axis .backtoday {
+  background: none; border: none; cursor: pointer; padding: 6px 0; margin: 6px auto 0; width: auto;
+  font-family: inherit; font-size: 12px; font-weight: 500; color: var(--tl-ch-tx);
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-color: #b8a889;
+}
+.tl-axis .backtoday:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
+/* At a glance — four tiles, two by two */
+.tl-axis .sbx {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 12px 4px 10px; border-bottom: 1px solid var(--tl-ch-line);
+}
+.tl-axis .sbx:last-of-type { border-bottom: none; }
+.tl-axis .sbh .t {
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--tl-ch-mute);
+}
+.tl-axis .st { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.tl-axis .st > div {
+  background: var(--tl-ch-ctl); border: 1px solid var(--tl-ch-ctlbd); border-radius: 10px;
+  padding: 9px 10px;
+}
+.tl-axis .st b {
+  display: block; font-family: 'Playfair Display', Georgia, serif; font-size: 20px;
+  font-weight: 500; color: var(--tl-ch-tx); line-height: 1.3;
+}
+.tl-axis .st small {
+  display: block; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 6.5px;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--tl-ch-mute); margin-top: 4px;
+}
+/* the one figure that is asking for something takes the rose */
+.tl-axis .st .r b { color: var(--tl-ch-urgent-tx); }
+/* the views list inherits the chrome's selection treatment */
+.tl-axis .gpill { color: var(--tl-ch-tx); }
+.tl-axis .gpill b { color: var(--tl-ch-mute); }
+.tl-axis .gpill:hover { background: var(--tl-ch-hov); }
+.tl-axis .gpill.on {
+  background: var(--tl-ch-sel); border-color: var(--tl-ch-selbd); color: var(--tl-ch-tx);
+}
+.tl-axis .gpill[data-sec="over"] b { color: var(--tl-ch-urgent-tx); }

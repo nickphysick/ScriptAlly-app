@@ -1,5 +1,5 @@
 {
-  "_note": "Hashes of the design refs that are ACTIVE design authorities \u2014 a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act \u2014 `--update design-refs/<file>.html` \u2014 because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
+  "_note": "Hashes of the design refs that are ACTIVE design authorities — a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act — `--update design-refs/<file>.html` — because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
   "refs": {
     "design-refs/manuscripts-scroll-page.html": "86e9eb3ce18714a43e3f3538ca8312eac7e16199ca9fc37eaf4420c1a2814aee",
     "design-refs/manuscript-identity-band.html": "45b9a7a2af4aefda90ea77332f9e60cd7770da36f2394259d4a73a3e7c8892cf",
@@ -19,6 +19,7 @@
     "design-refs/slim-header-scroll.html": "acf0bad68f3b475420a3aa1bd40f670474f16508f6499241b3efe923fdd80819",
     "design-refs/timeline-v61.html": "42ff813201d88a4a84e05ec80eade16dec0977b949c5f1c0c9659068cb7f132c",
     "design-refs/timeline-v62.html": "a8233d4ecd9c43d6f3480dee3a5432a83e8d1502d82459006953da527020ee2c",
-    "design-refs/manuscripts-promos.html": "14e7f13c459d762325697f30d4d8b819eac255623c26f6eac657e7ec3579e89b"
+    "design-refs/manuscripts-promos.html": "14e7f13c459d762325697f30d4d8b819eac255623c26f6eac657e7ec3579e89b",
+    "design-refs/timeline-v63.html": "6414dc934fde5416dbd6e7340738a68ddcb5d731baea79167a008be050697317"
   }
 }

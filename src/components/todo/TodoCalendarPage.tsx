@@ -38,7 +38,7 @@ import { pillText } from "../../lib/calendarPill";
 import { stageSentence, type StageEnd } from "../../lib/stageSentence";
 import { QueryStatus } from "../../types";
 import {
-  calSectionOf, CAL_SECTION_DRAW, CAL_SECTION_LABEL,
+  calSectionOf, CAL_SECTION_DRAW, CAL_SECTION_LABEL, CAL_SECTION_PURPOSE,
   type CalSection, type CalSectionFacts,
 } from "../../lib/calendarSections";
 import { fadesFor, cardBounds } from "../../lib/calendarFade";
@@ -2080,103 +2080,107 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
    * ⚠️ AND IT LISTS ONLY NON-EMPTY GROUPS, PLUS ALL. A row offering a group with nothing in it
    * teaches the shape of a board the writer does not have — the same rule the dividers follow.
    */
+  /**
+   * The window's own dates, and whether it has moved off today.
+   *
+   * ⚠️ THE LABEL IS THE WINDOW'S FIRST AND LAST DAY, derived from the same `visible` array every
+   * bar is placed against — so the pill cannot come to state a range the board is not drawing.
+   * `movedOffToday` asks whether today is still at the window's centre rather than comparing the
+   * start to a remembered value: the centre is what "today's window" MEANS, and a start-based
+   * check would call a window that had moved and come back a different one.
+   */
+  const windowRangeLabel = React.useMemo(() => {
+    const a = visible[0], b = visible[visible.length - 1];
+    return a && b ? `${shortCalDate(a)} – ${shortCalDate(b)}` : "";
+  }, [visible]);
+  const movedOffToday = todayAt == null
+    || Math.abs(todayAt - (range.days - 1) / 2) > 0.51;
+
+  /**
+   * ⚠️ THE FOUR FIGURES COME FROM THE SECTIONS, NOT FROM A SECOND PASS OVER THE DATA. The views
+   * list above states the same counts; deriving these separately is how a sidebar comes to hold two
+   * descriptions of one board — the fault this file has already recorded against tabs and dividers.
+   */
+  const glance = React.useMemo(() => {
+    const n = (sec: CalSection) => sectioned.find((g) => g.sec === sec)?.rows.length ?? 0;
+    return {
+      open: n("over") + n("need") + n("with") + n("quiet"),
+      urgent: n("over"),
+      withAgents: n("with"),
+      tasks: n("task"),
+    };
+  }, [sectioned]);
+
   const sidebar = (
     <>
-      <div className="sblk">
-        <span className="slbl">Show</span>
+      {/* ══ 1 · SEARCH ══════════════════════════════════════════════════════════════════════ */}
+      <div className="abl">
+        <input className="tl-search" type="search" value={view.search}
+          aria-label="Search agents or agencies"
+          placeholder="Search agents or agencies"
+          onChange={(e) => setView1("search", e.target.value)} />
+      </div>
+
+      {/* ══ 2 · WINDOW ══════════════════════════════════════════════════════════════════════
+          ⚠️ THE PILL'S CENTRE IS THE LIVE RANGE, NOT THE WORD "WINDOW". Three buttons labelled
+          ‹ TODAY › say what they do and never say where you are; the dates say both — and once
+          they stop reading as today's window, the way back has to be offered rather than
+          remembered, which is what the link below is for.
+          ⚠️ AND IT APPEARS ONLY WHEN IT HAS SOMETHING TO UNDO. A permanent "Back to today" on a
+          board already showing today is a control that does nothing, which teaches a reader to
+          ignore it for the one moment it matters. */}
+      <div className="abl">
+        <div className="railnav">
+          <button type="button" className="tl-btn" aria-label="Previous window"
+            onClick={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}>‹</button>
+          <span className="wl">{windowRangeLabel}</span>
+          <button type="button" className="tl-btn" aria-label="Next window"
+            onClick={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}>›</button>
+        </div>
+        {movedOffToday && (
+          <button type="button" className="backtoday" onClick={() => setWinStart(today)}>
+            Back to today
+          </button>
+        )}
+      </div>
+
+      {/* ══ 3 · VIEWS ═══════════════════════════════════════════════════════════════════════
+          ⚠️ ONE LIST, SINGLE-SELECT, AND ITS COUNTS ARE A CENSUS. Every row states how many rows
+          that class holds over the WHOLE board, so the numbers can be added up — a tally that
+          changed as you clicked it is the fault the retired tab strip had. */}
+      <div className="abl grow">
+        <span className="slbl">Views</span>
         <button type="button" className={`gpill${secFilter === null ? " on" : ""}`}
           aria-pressed={secFilter === null} onClick={() => setSecFilter(null)}>
           <span>All</span>
           <b>{String(sectioned.reduce((n, g) => n + g.rows.length, 0)).padStart(2, "0")}</b>
         </button>
-        {sectioned.map((g) => (
-          <button key={g.sec} type="button" className={`gpill${secFilter === g.sec ? " on" : ""}`}
-            data-sec={g.sec} aria-pressed={secFilter === g.sec}
-            onClick={() => setSecFilter((c) => (c === g.sec ? null : g.sec))}>
-            <SectionIcon sec={g.sec} />
-            <span>{CAL_SECTION_LABEL[g.sec]}</span>
-            <b>{String(g.rows.length).padStart(2, "0")}</b>
-          </button>
-        ))}
+        {CAL_SECTION_DRAW.map((sec) => {
+          const g = sectioned.find((x) => x.sec === sec);
+          if (!g) return null;
+          return (
+            <button key={sec} type="button" className={`gpill${secFilter === sec ? " on" : ""}`}
+              data-sec={sec} aria-pressed={secFilter === sec}
+              onClick={() => setSecFilter((c) => (c === sec ? null : sec))}>
+              <SectionIcon sec={sec} />
+              <span>{CAL_SECTION_LABEL[sec]}</span>
+              <b>{String(g.rows.length).padStart(2, "0")}</b>
+            </button>
+          );
+        })}
       </div>
-      <div className="sblk">
-        <span className="slbl">View</span>
-                {/* ⚠️ ONE POPOVER FOR EVERYTHING THAT CHANGES HOW THE BOARD IS DRAWN. Its trigger
-                    names the non-default choices, so a reader can see what they have set without
-                    opening it — a control that hides its own state is a control that gets set once
-                    and then forgotten about. */}
-                <Popover label="Display" summary={displaySummary}>
-                  {/* ⚠️ THE SAME ROWS EITHER WAY. GROUPED does not fetch, filter or re-derive
-                      anything — it buckets the list the page already has, which is why the lock can
-                      assert the two arrangements hold the identical row set by identity. */}
-                  <PopRow name="Group" value={groupMode} options={GROUP_MODES}
-                    labels={GROUP_MODE_LABEL} onPick={setGroupMode} />
-                  {/* ⚠️ EACH OPTION CARRIES ITS OWN DEFINITION IN THE MENU IT CAME FROM. "Soonest"
-                      could mean the soonest thing you must do, the soonest reply expected, or the
-                      soonest anything happens — three different orders, and a reader has no way to
-                      tell which they got from the name. The meanings ride the option here. */}
-                  <PopRow name="Order" value={view.sort} options={SORT_ORDER}
-                    labels={SORT_LABEL} onPick={(v) => setView1("sort", v)} />
-                  {/* ⚠️ ONLY FROM THE SECOND MANUSCRIPT ON. The ref's own audit: "genuinely useful
-                      from the second manuscript onward; noise before that." A control offering one
-                      choice implies others the writer cannot reach. */}
-                  {/* ⚠️ THE MANUSCRIPT ROW IS GONE FROM HERE — it was "All books / By book", which is
-                      the same question `Group` now asks, and two controls for one choice is how they
-                      come to disagree. Grouping BY manuscript is a Group mode; SCOPING to one is a
-                      filter the board does not have, and is reported unbuilt rather than faked. */}
-                  {/* ⚠️ v58: THE RANGE PICKER IS GONE. The window is fixed at ninety days with today
-                      at its centre, and the board moves by whole weeks instead — the ref's own model.
-                      Three stops were three different boards: a card's width, a day's distance from
-                      its neighbour and whether a label fitted all changed underneath the reader, and
-                      every measurement had to be taken three times to mean anything.
-                      ⚠️ It is REMOVED rather than left showing one option — a control offering a
-                      single choice implies others the writer cannot reach, which is the same rule
-                      the manuscript row above it was retired under. */}
-                  {/* ⚠️ THE RESET NAMES THE DEFAULTS RATHER THAN CLEARING TO NOTHING. "Clear" on a
-                      set of choices with no empty state would have to mean something, and every
-                      meaning it could take is one of the choices. */}
-                  <button type="button" className="tl-popreset" onClick={() => {
-                    setTab("all"); setGroupMode("list");
-                    setView1("sort", DEFAULT_SORT); setRangeIdx(DEFAULT_RANGE_INDEX);
-                    setCutBy("needs");
-                  }}>Reset to {TAB_LABEL.all} · {GROUP_MODE_LABEL.list} · {SORT_LABEL[DEFAULT_SORT]} · {TIMELINE_RANGES[DEFAULT_RANGE_INDEX].label}</button>
-                </Popover>
-                <input
-                  className="tl-search" type="search" value={view.search}
-                  aria-label="Search agents, agencies and tasks"
-                  placeholder="Search…"
-                  onChange={(e) => setView1("search", e.target.value)}
-                />
-                {/* ⚠️ THE COUNT NAMES WHAT IS ON SCREEN, and it changes its noun with the view — a
-                    tally of "relationships" beside a board showing only what is being asked of you
-                    would be counting one thing and describing another. */}
-                <span className="tl-count">
-                  {/* ⚠️ TASK ROWS ARE NOT RELATIONSHIPS, and one noun counting both was a tally
-                      describing something other than what it counted. Two nouns, each over its own
-                      set, and the tasks clause is omitted entirely when there are none — a "0 TASKS"
-                      states an absence nobody asked about. */}
-                  {onlyAsks
-                    ? `${asking} ASKING FOR YOU`
-                    : `${agentRows} ${agentRows === 1 ? "RELATIONSHIP" : "RELATIONSHIPS"}`
-                      + (taskRows ? ` · ${taskRows} ${taskRows === 1 ? "TASK" : "TASKS"}` : "")}
-                </span>
-                {/* the pink creation action: the ONE composer lives on the To-do list page — go
-                    there and announce, never a second create surface */}
-                <button type="button" className="tdb-addb" onClick={() => {
-                  onNavigatePath("/todo");
-                  window.dispatchEvent(new CustomEvent(TODO_OPEN_COMPOSER));
-                }}>
-                  <Plus size={13} aria-hidden /> Add task or note
-                </button>
-      </div>
-      <div className="sblk">
-        <span className="slbl">Window</span>
-        <div className="navrow">
-          <button type="button" className="tl-btn" aria-label="Previous window"
-            onClick={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, -1))}>‹ Week</button>
-          <button type="button" className="tl-btn" onClick={() => setWinStart(today)}>Today</button>
-          <button type="button" className="tl-btn" aria-label="Next window"
-            onClick={() => setWinStart((w) => shiftWindow(w, WEEK_STEP, 1))}>Week ›</button>
+
+      {/* ══ 4 · AT A GLANCE ═════════════════════════════════════════════════════════════════
+          ⚠️ FOUR FIGURES, AND ONE OF THEM IS ROSE. They are derived from the same row set the
+          views count, so the sidebar cannot state two different boards; "need you now" takes the
+          rose because it is the only one of the four that is asking for something. */}
+      <div className="sbx stats">
+        <div className="sbh"><span className="t">At a glance</span></div>
+        <div className="st">
+          <div><b>{glance.open}</b><small>Open queries</small></div>
+          <div className="r"><b>{glance.urgent}</b><small>Need you now</small></div>
+          <div><b>{glance.withAgents}</b><small>With agents</small></div>
+          <div><b>{glance.tasks}</b><small>Tasks</small></div>
         </div>
       </div>
     </>
@@ -2779,8 +2783,13 @@ data-rowkey={r.key}
               board while the board itself was divided into six groups, so a reader had two
               vocabularies for one question. The list names the groups that exist, with their
               counts, and All. */}
+          {/* ══ ONE CONTAINER, TWO PANES (v63) ═══════════════════════════════════════════════
+              ⚠️ THE SIDEBAR MOVES INSIDE THE FRAME. v61 put it beside the container as a separate
+              column on the page ground; v63 makes it the container's left PANE — the vertical axis
+              of one instrument rather than a control strip standing next to one. The chrome then
+              has something to be: the pane, the date bar and the group bars share a tone, and the
+              ground below the date bar is one surface behind everything. */}
           <div className="tl-page">
-            <aside className="tl-side" aria-label="Calendar controls">{sidebar}</aside>
           {/* ⚠️ `tl-board` STAYS ON THE CONTAINER, AND IT IS NOT DECORATION. Every token this board
               reads — `--row-h`, `--badge`, the six section tones, every colour — is declared on
               `.tl-board`, scoped there deliberately so a shell refactor cannot inherit a calendar
@@ -2790,6 +2799,8 @@ data-rowkey={r.key}
               a clean build and a clean typecheck. The container is BOTH — `tl-cal` frames it,
               `tl-board` declares what is inside it. */}
           <div className="tl-cal tl-board">
+            <aside className="tl-axis" aria-label="Calendar controls">{sidebar}</aside>
+            <div className="tl-boardpane">
             <TplZone className="tl-zone" hem={false} label={range.label}>
               <div
                 className="tl tl-wrap"
@@ -2890,6 +2901,8 @@ data-rowkey={r.key}
                           <span>{CAL_SECTION_LABEL[g.sec]}</span>
                           <b>{String(g.rows.length).padStart(2, "0")}</b>
                         </span>
+                        {/* what the group is FOR, at the bar's right end — see CAL_SECTION_PURPOSE */}
+                        <span className="geb">{CAL_SECTION_PURPOSE[g.sec]}</span>
                       </div>
                       <div className="tl-gwrap">
                         {/* ⚠️ THE NUMBER COLUMN IS A SIBLING OF THE LANES, NOT A CELL IN EACH ROW.
@@ -2934,6 +2947,7 @@ data-rowkey={r.key}
                 <div ref={tipRef} className="tl-tipp" role="tooltip" aria-hidden />
               </div>
             </TplZone>
+            </div>
           </div>
           </div>
           {focusBand}
