@@ -25,25 +25,42 @@ const F = (trueFrom: number, trueTo: number, noEnd = false) =>
 
 describe("a card fades only where it is cut", () => {
   it("the five shapes", () => {
-    /* starts before */            expect(F(-12, 40)).toEqual({ left: true, right: false });
-    /* ends after */               expect(F(10, 120)).toEqual({ left: false, right: true });
-    /* both */                     expect(F(-12, 120)).toEqual({ left: true, right: true });
-    /* neither */                  expect(F(10, 40)).toEqual({ left: false, right: false });
-    /* no date to stop at */       expect(F(10, 40, true)).toEqual({ left: false, right: true });
+    /* starts before */            expect(F(-12, 40)).toEqual({ left: true, right: false, clipped: false });
+    /* ends after */               expect(F(10, 120)).toEqual({ left: false, right: true, clipped: true });
+    /* both */                     expect(F(-12, 120)).toEqual({ left: true, right: true, clipped: true });
+    /* neither */                  expect(F(10, 40)).toEqual({ left: false, right: false, clipped: false });
+    /* no date to stop at */       /* ⚠️ ONGOING, NOT CLIPPED — the distinction §D introduced. No date to stop at means nothing
+       to continue TO, so the card ends open and does not dissolve. */
+    expect(F(10, 40, true)).toEqual({ left: false, right: true, clipped: false });
+  });
+
+  it("⚠️ ongoing and window-clipped are DIFFERENT, and `clipped` implies `right`", () => {
+    /* ⚠️ THE LAW THE THIRD MEMBER EXISTS FOR (v63, §D). `right` was one boolean folding together
+       "nobody named an end" and "the end is named and lies past the window" — so the board drew a
+       partial due on 3 November exactly as it drew a wait with no end at all. */
+    const clipped = F(10, 120);            // a named end, past the window
+    const ongoing = F(10, 40, true);       // no named end at all
+    expect(clipped.right && clipped.clipped, "a clipped card is not marked clipped").toBe(true);
+    expect(ongoing.right, "an ongoing card does not run past the window").toBe(true);
+    expect(ongoing.clipped, "an ongoing card is marked clipped — it has no end to be clipped").toBe(false);
+    /* the implication holds for every shape, which is what stops the two drifting apart again */
+    for (const f of [F(-12, 40), F(10, 120), F(-12, 120), F(10, 40), F(10, 40, true), F(0, 90)]) {
+      if (f.clipped) expect(f.right, "clipped without right — the two came apart").toBe(true);
+    }
   });
 
   it("a card wholly inside the window keeps both edges, whatever its dates", () => {
     for (const [a, b] of [[0, 90], [1, 89], [45, 46], [0.05, 89.95]]) {
-      expect(F(a, b), `${a}..${b} faded`).toEqual({ left: false, right: false });
+      expect(F(a, b), `${a}..${b} faded`).toEqual({ left: false, right: false, clipped: false });
     }
   });
 
   it("the edges themselves do not count as cuts", () => {
     /* ⚠️ A STRETCH OPENING EXACTLY AT THE WINDOW'S EDGE HAS NOT BEGUN BEFORE IT, and a date
        subtraction in fractional days makes -0.0000001 a real value rather than a hypothetical. */
-    expect(F(0, 90)).toEqual({ left: false, right: false });
-    expect(F(-0.05, 90.05)).toEqual({ left: false, right: false });
-    expect(F(-0.2, 90.2)).toEqual({ left: true, right: true });
+    expect(F(0, 90)).toEqual({ left: false, right: false, clipped: false });
+    expect(F(-0.05, 90.05)).toEqual({ left: false, right: false, clipped: false });
+    expect(F(-0.2, 90.2)).toEqual({ left: true, right: true, clipped: true });
   });
 
   it("a piece that starts at a break does not fade, however early its RUN began", () => {
@@ -51,10 +68,10 @@ describe("a card fades only where it is cut", () => {
        true bounds, so an interior piece inherited a left fade from a stretch that opened 47 days
        before the board. That half is unchanged and still asserted. */
     expect(fadesFor({ trueFrom: -47.5, trueTo: 22.5, days: 90, from: 12.84, to: 22.5, namedEnd: 22.5 }))
-      .toEqual({ left: false, right: false });
+      .toEqual({ left: false, right: false, clipped: false });
     /* while the piece that IS on the edge still fades */
     expect(fadesFor({ trueFrom: -47.5, trueTo: 22.5, days: 90, from: 0, to: 12.16, namedEnd: 22.5 }))
-      .toEqual({ left: true, right: false });
+      .toEqual({ left: true, right: false, clipped: false });
   });
 
   it("⚠️ A WAIT WITH NO DATE TO STOP AT FADES; ONE WITH A DATE INSIDE THE WINDOW DOES NOT", () => {

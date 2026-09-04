@@ -1888,6 +1888,95 @@ button.tl-tchip { cursor: pointer; }
    The left overlay stays: that edge really is cut. */
 .tl-fov { position: absolute; top: 0; bottom: 0; width: 46px; z-index: 4; pointer-events: none; }
 .tl-fov.l { left: 0; background: linear-gradient(270deg, rgba(255, 253, 251, 0), var(--tl-panel) 70%); }
+/* ⚠️ THE RIGHT DISSOLVE BELONGS TO A WINDOW-CLIPPED CARD, NEVER AN ONGOING ONE (v63, §D). The ref's
+   `.card.clipR .fov.r` — 40px, dissolving into the board's own ground, which is what says "this
+   continues past the edge of the window". An ongoing card has no end to continue TO, so it stops
+   open and draws nothing. The two were one boolean until this section. */
+.tl-fov.r { right: 0; width: 40px; background: linear-gradient(90deg, rgba(255, 253, 251, 0), var(--tl-ch-ground) 75%); }
+/* a clipped card's frame stops the same way an ongoing one's does — the dissolve is the difference */
+.tl-p.clipR .tl-frame { border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.tl-p.clipR .tl-sband { border-top-right-radius: 0; }
+
+/* ══ THE THREE DENSITIES (v63, §D) ══════════════════════════════════════════════════════════
+ *
+ * ⚠️ `regular` IS THE DESIGN AND IS DECLARED ON `.tl-board` ITSELF, not repeated here. These two
+ * blocks are its named neighbours; a third block restating the default would be a second copy of
+ * the values every other rule reads, and the first thing to drift.
+ *
+ * ⚠️ AND EACH ONE MOVES THE BODY'S CEILING WITH THE BAR'S HEIGHT. `--bar-h` alone would leave the
+ * words centred on a `top` and a `max-height` written for a different card — which is how the
+ * eyebrow came to be clipped in this section's first build. The pair travels together.
+ */
+.tl-board[data-dens="comfortable"] {
+  --row-h: 116px; --bar-h: 96px;
+}
+/* the name and the agency stack rather than sitting on one line — the room is there for it */
+.tl-board[data-dens="comfortable"] .tl-trow { flex-direction: column; align-items: flex-start; gap: 2px; }
+.tl-board[data-dens="comfortable"] .tl-fag { margin-left: 0; }
+/* ⚠️ 62px, NOT THE REF'S 56 — and the reason is the descender floor, not taste. Comfortable STACKS
+   the name over the agency, so the body holds three lines of Playfair and Inter at `line-height:
+   1.3`; the ref sets 1.15 on its own name, which this repo forbids on mixed-case Playfair inside a
+   clipping box. Measured at 1.3 the stack is ~60.4px and 56 clipped it. The top comes in to 32 —
+   6px clear of the 26px band rather than 10 — so 32 + 62 still lands inside the 96px bar. */
+.tl-board[data-dens="comfortable"] .tl-cardbody { top: 32px; max-height: 62px; }
+
+.tl-board[data-dens="compact"] {
+  --row-h: 76px; --bar-h: 58px;
+}
+/* ⚠️ AT COMPACT THE TWO LINES BECOME ONE ROW and the agency goes. 22px holds one line of type, so
+   a stacked name-over-fact would clip — the ref drops the agency rather than shrinking the name,
+   because a name at 11px is a caption and the row stops being scannable. */
+.tl-board[data-dens="compact"] .tl-cardbody { top: 33px; max-height: 22px; }
+.tl-board[data-dens="compact"] .tl-gstack { flex-direction: row; align-items: baseline; gap: 10px; }
+.tl-board[data-dens="compact"] .tl-fag { display: none; }
+/* the fact loses its stacking margin once it is beside the name rather than under it */
+.tl-board[data-dens="compact"] .tl-ffx { margin-top: 0; }
+
+/* ⚠️ THE NUDGE MARKER — the ref's `.evn`: a small white disc on the bar at the date the writer
+   nudged. It is centred on its date rather than starting at it (`translate(-50%, -50%)`), because a
+   marker is a point on an axis and anything else states a span. `pointer-events: none` so it never
+   takes a click meant for the card underneath it. */
+.tl-evn {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 22px; height: 22px; border-radius: 99px;
+  background: #fff; border: 1.2px solid #cdbfa8; color: #7d6c5c;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 5; pointer-events: none;
+}
+.tl-evn svg { width: 11px; height: 11px; }
+
+/* ⚠️ THE PULSE DOT — the ref's `.pulsedot`, on the card's open end, rose on white. It marks a wait
+   that is BOTH still running and already late, which is the one combination the card's own shape
+   cannot state: an open end says "no end named" and says nothing about whether that is a problem. */
+.tl-pulsedot {
+  position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+  width: 10px; height: 10px; border-radius: 99px;
+  background: #c98e8a; border: 2px solid #fff; z-index: 6; pointer-events: none;
+  animation: tlRipple 2.2s ease-out infinite;
+}
+@keyframes tlRipple {
+  0%   { box-shadow: 0 0 0 0 rgba(201, 142, 138, .55); }
+  70%  { box-shadow: 0 0 0 12px rgba(201, 142, 138, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(201, 142, 138, 0); }
+}
+/* ⚠️ THE OVERRIDE COMES AFTER THE RULE IT OVERRIDES. A media query confers NO specificity, so a
+   `prefers-reduced-motion` block placed above `.tl-pulsedot` would lose to it at equal weight and
+   the ripple would run under `reduce` from a declaration that reads perfectly correctly — measured
+   in this repo once already, on the founding panel's progress bar. The dot still marks the card;
+   only the motion stops. */
+@media (prefers-reduced-motion: reduce) {
+  .tl-pulsedot { animation: none; }
+}
+
+/* ⚠️ A PAST STAGE IS A GHOST — 32% until you look at it (v63, §D, the ref's `data-past="ghost"`).
+   It is history: it should be legible when asked and never compete with the live card beside it,
+   which is what a full-strength past stage was doing. `z-index` on hover so a ghost brought to
+   full strength sits above its neighbours rather than under them. */
+.tl-jc { opacity: .32; transition: opacity .15s; }
+.tl-jc:hover { opacity: 1; z-index: 12; }
+@media (prefers-reduced-motion: reduce) {
+  .tl-jc { transition: none; }
+}
 
 /* ══ THE ACTION CAP AND ITS TERMINAL MARK (v58) ═════════════════════════════════════════════════
    Geometry and colour from `design-refs/timeline-v58.html` — `.nlab` and `.tmark`.
@@ -2120,6 +2209,13 @@ button.tl-tchip { cursor: pointer; }
 /* ⚠️ THE HOLDER RIDES THE BAND'S RIGHT END and turns rose only when something is late. It is the
    ref's `.sh`; the absolutely-positioned `.fho` the ref also carries is the NON-band alternative,
    hidden by the band variant, so it is not built. */
+/* ⚠️ THE NUDGE NOTE READS AS AN ASIDE, NOT AS A SECOND STATUS. Mono, a shade back, and it takes no
+   space it does not need — the status is the fact and this is a footnote to it. */
+.tl-snote {
+  flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .12em;
+  text-transform: uppercase; color: #a89880;
+}
 .tl-sh {
   margin-left: auto; flex: 0 0 auto;
   font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .16em;

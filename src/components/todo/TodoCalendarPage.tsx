@@ -107,6 +107,12 @@ import "./todoCalendar.css";
 /** ⚠️ THE BAND'S DOT — the pack's 20px, NOT the ref's 14px `.sseg svg`. The ref sizes a flat glyph
     of its own making; this app's `StatusDot` carries direction and stage in its SHAPE, and 14px
     loses it. A glyph's legible size is part of the glyph, which is the app's half of the split. */
+/** ⚠️ THE REF'S OWN THREE WORDS. `Regular` is the default the design was drawn at; the other two
+    are its named neighbours, not invented steps. */
+const DENSITY_LABEL: Record<"comfortable" | "regular" | "compact", string> = {
+  comfortable: "Comfortable", regular: "Regular", compact: "Compact",
+};
+
 const STAGE_BAND_DOT_PX = 20;
 const CARD_BADGE_PX = 20;
 /**
@@ -347,6 +353,26 @@ const Piece: React.FC<{
    * past. `fadeL` still takes a wider inset because that card's first pixels are dissolving.
    */
   const contentLeft = inset;
+  /* ⚠️ `clipR` IS ADDITIVE TO `fadeR`, NOT AN ALTERNATIVE TO IT (v63, §D). Both share the squared
+     corner and the missing right border — the frame stops the same way — and they differ only in
+     what is drawn past it: nothing on an ongoing card, a dissolve on a clipped one. Making them
+     exclusive would mean restating the frame's treatment twice.
+
+     ⚠️ AND THE NOTE IS OUT HERE RATHER THAN INSIDE THE `className` EXPRESSION. `calendarStyleReach`
+     matches at most 900 characters of one, and two comments pushed this one past the bound — so the
+     sweep stopped seeing `tl-p` and reported the whole card as unstyled. It fails by ABSENCE, which
+     is why that file carries floor cases; they are what caught this. Keep prose out of a class list.
+     Two older notes were hoisted here for the same reason; they follow.
+
+     ⚠️ THE FADES ARE THE SEGMENT'S OWN FACTS. `openLeft` means the stretch began before the window
+     and `openRight` that it runs past it — both already derived, both already the reason the old
+     renderer squared its ends.
+
+     ⚠️ THE PREDICATES ARE THE ONLY SOURCE — see `calendarFade`. This read `openLeft` and
+     `openRight || live`, which is nearly the same and nearly is the problem: `openRight` is a
+     compound that also asks whether the journey is terminal, whether it closes, whether it is
+     open-ended and whether a reply window was given, so a card's edge dissolved because of a
+     decision about reply windows. */
   return (
     <div
       /* ⚠️ THE CLASS LIST IS WRITTEN IN THE JSX, not built into a `const` above it. The style-reach
@@ -354,15 +380,7 @@ const Piece: React.FC<{
          is invisible to it — and its report would be "this class has no rule", about a class it
          never saw. An absence that reads as a finding. */
       className={`tl-at2 tl-p ${familyOf(sg.state)}${sg.hollow ? " hollow" : ""}${sg.owed ? " owed" : ""}`
-        /* ⚠️ THE FADES ARE THE SEGMENT'S OWN FACTS. `openLeft` means the stretch began before the
-           window and `openRight` that it runs past it — both already derived, both already the
-           reason the old renderer squared its ends. */
-        /* ⚠️ THE PREDICATES ARE THE ONLY SOURCE — see `calendarFade`. This read `openLeft` and
-           `openRight || live`, which is nearly the same and nearly is the problem: `openRight` is a
-           compound that also asks whether the journey is terminal, whether it closes, whether it is
-           open-ended and whether a reply window was given, so a card's edge dissolved because of a
-           decision about reply windows. */
-        + `${fade.left ? " fadeL" : ""}${fade.right ? " fadeR" : ""}`
+        + `${fade.left ? " fadeL" : ""}${fade.right ? " fadeR" : ""}${fade.clipped ? " clipR" : ""}`
         + `${selected ? " sel" : ""}`}
       /**
        * ⚠️ THE GEOMETRY IS CUSTOM PROPERTIES, NOT `left` AND `width` (v54, Phase 4).
@@ -521,6 +539,17 @@ const Piece: React.FC<{
             legible size is part of the glyph, which is the app's half of the authority split. */}
         <StatusDot status={sg.status} overrideSize={STAGE_BAND_DOT_PX} />
         <span className="tl-sw">{sg.status}</span>
+        {/* ⚠️ THE NUDGE NOTE JOINS THE STATUS RATHER THAN REPLACING IT (v63, §D). The ref swaps its
+            headline to `Nudged 26 Aug`, which on THIS board would leave the band saying "Nudged"
+            while its own tint says "Queried" — the rung is named for the status, so removing the
+            status makes the colour unattributable. A note beside it states both.
+
+            ⚠️ AND IT IS A DATE, NOT "once/twice". A nudge count lives in the query's activity
+            subcollection and this page does not load per-query events — the same limit
+            `resolveExpectedDate` is handed `null` for. `lastNudgeSentDate` is what the data holds,
+            and a count composed from what is here would be a fabricated figure wearing a real
+            one's clothes. */}
+        {sg.nudgedOn && <span className="tl-snote">Nudged {shortCalDate(sg.nudgedOn)}</span>}
         {/* the holder, at the band's right end — `turnWordFor`, never a second reading */}
         <span className="tl-sh">{turnWordFor(sg.status)}</span>
       </span>
@@ -640,6 +669,42 @@ const Piece: React.FC<{
           none !important }`, so the shape it draws is a REJECTED alternative. An open end is the
           frame's own right border removed and its corners squared, which `.tl-p.fadeR .tl-frame`
           already does; the arrow was a second statement of the same fact, in ink. */}
+      {/* ⚠️ THE NUDGE MARKER SITS AT THE DATE IT HAPPENED, ON THE BAR (v63, §D — the ref's `.evn`).
+          A band note says a nudge HAPPENED; the marker says WHEN, against the same axis every
+          other date on this board is read on. Both, because the band is scanned and the bar is
+          measured, and neither answers the other's question.
+
+          ⚠️ ITS POSITION IS A FRACTION OF THE CARD'S OWN SPAN, so it moves with the card when a
+          clipped card opens on hover — the same reason the terminal mark is a CHILD rather than a
+          sibling. A second copy of the card's geometry is what came apart last time. */}
+      {sg.nudgedAt != null && sg.to > sg.from && (
+        <span className="tl-evn" aria-hidden
+          style={{ left: `${(((sg.nudgedAt - sg.from) / (sg.to - sg.from)) * 100).toFixed(3)}%` }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+            strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 7v5l3 2" /><circle cx="12" cy="12" r="8.5" />
+          </svg>
+        </span>
+      )}
+      {/* ⚠️ THE PULSE DOT SITS ON AN OPEN END AND ONLY WHERE SOMETHING IS LATE (v63, §D). The ref
+          draws `.pulsedot` inside its open-end branch and shows it on `.card.alert`; ours reads the
+          app's own urgency — `owed || quiet`, `calSectionOf`'s `isUrgent` — the same expression the
+          band's rose holder and the ringed `!` already read. Three marks, one definition.
+
+          ⚠️ AND IT IS ON THE OPEN END, NOT THE CLIPPED ONE. A clipped card's edge dissolves because
+          the wait continues past the window; a dot there would mark the window rather than the
+          work. The open end is where a wait with no named end is still running, which is what makes
+          the lateness worth a mark. */}
+      {fade.right && !fade.clipped && (sg.owed || sg.state === "quiet") && (
+        <span className="tl-pulsedot" aria-hidden />
+      )}
+      {/* ⚠️ THE RIGHT DISSOLVE IS FOR A CLIPPED CARD ONLY, and that is the whole distinction. An
+          ONGOING card ends open — the frame stops, no border, nothing beyond it — because nobody
+          has named an end and there is nothing past the edge to suggest. A CLIPPED card has a real
+          end the reader could page forward to, so its edge dissolves: the card continues past what
+          you are looking at, not past what is known. Drawing the dissolve on both said the second
+          thing about every card on the board. */}
+      {fade.clipped && <span className="tl-fov r" aria-hidden />}
       {fade.left && <span className="tl-fov l" aria-hidden />}
     </div>
   );
@@ -1415,6 +1480,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   const [statusPick, setStatusPick] = useState<QueryStatus[]>([]);
   /* which toolbar menu is open — one at a time, and `null` is closed */
   const [tbOpen, setTbOpen] = useState<null | "group" | "sort" | "status">(null);
+  /* ⚠️ DENSITY IS THE SIDEBAR'S, NOT THE TOOLBAR'S — the ref puts its `Display` menu in the axis,
+     and the split is the same one the two surfaces already keep: the toolbar asks how the rows are
+     ARRANGED, the sidebar carries what you are looking at and how much of it fits. Session-only,
+     like every other view state on this page: no route, no persistence, no second copy. */
+  const [density, setDensity] = useState<"comfortable" | "regular" | "compact">("regular");
+  const [densOpen, setDensOpen] = useState(false);
 
   const cutByAvailable = boardManuscripts.length > 1;
   const [cutBy, setCutBy] = useState<"needs" | "ms">("needs");
@@ -2356,6 +2427,21 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
           ⚠️ FOUR FIGURES, AND ONE OF THEM IS ROSE. They are derived from the same row set the
           views count, so the sidebar cannot state two different boards; "need you now" takes the
           rose because it is the only one of the four that is asking for something. */}
+      {/* ══ DISPLAY — three densities (v63, §D) ═══════════════════════════════════════════
+          ⚠️ IT SHIPS WITH A CONTROL OR IT DOES NOT SHIP. Three `--row-h`/`--bar-h` pairs behind no
+          control is a knob nothing can turn, which is the exact fault this session has retired
+          twice already (`groupMode`, `view.sort`). The attribute goes on `.tl-board`, which is
+          where every other token on this page is declared. */}
+      <div className="abl">
+        <TbMenu label="Display density" open={densOpen} onOpen={setDensOpen}
+          trigger={<><span className="tl-tbk">Display</span>{DENSITY_LABEL[density]}</>}>
+          {(["comfortable", "regular", "compact"] as const).map((d) => (
+            <TbOpt key={d} mark="tick" on={d === density}
+              onClick={() => { setDensity(d); setDensOpen(false); }}>{DENSITY_LABEL[d]}</TbOpt>
+          ))}
+        </TbMenu>
+      </div>
+
       <div className="sbx stats">
         <div className="sbh"><span className="t">At a glance</span></div>
         <div className="st">
@@ -2980,7 +3066,7 @@ data-rowkey={r.key}
               rows collapsed to fifteen pixels and the cards piled on each other, silently, through
               a clean build and a clean typecheck. The container is BOTH — `tl-cal` frames it,
               `tl-board` declares what is inside it. */}
-          <div className="tl-cal tl-board">
+          <div className="tl-cal tl-board" data-dens={density}>
             <aside className="tl-axis" aria-label="Calendar controls">{sidebar}</aside>
             <div className="tl-boardpane">
             {/* ══ THE BOARD TOOLBAR (v63, section C) ═══════════════════════════════════════════

@@ -37,8 +37,12 @@ async function boardNow(page: import("@playwright/test").Page) {
       rows: groups.flatMap((g) => g.rows),
       rowTotal: groups.reduce((n, g) => n + g.rows.length, 0),
       countLine: cnt,
-      /* the trigger's words with the chevron dropped — the gap between them is CSS, not text */
-      trig: [...document.querySelectorAll<HTMLElement>(".tl-tbtrig")].map((t) =>
+      /* ⚠️ SCOPED TO THE TOOLBAR, NOT THE DOCUMENT. This read every `.tl-tbtrig` and indexed into
+         it, so the moment the sidebar gained its own `Display` control — the same component, a
+         different question — `trig[0]` became Display and the case reported `Group` missing. An
+         index into an unscoped query answers about whichever element happens to come first, which
+         is the same family as a `.first()` resolving to a hidden page's copy. */
+      trig: [...document.querySelectorAll<HTMLElement>(".tl-vtool .tl-tbtrig")].map((t) =>
         [...t.childNodes].map((n) => (n as HTMLElement).classList?.contains("tl-tbchev")
           ? "" : (n.textContent ?? "")).join(" ").replace(/\s+/g, " ").trim()),
       clearShown: !!document.querySelector(".tl-tbclear"),
@@ -77,6 +81,8 @@ test.describe("v63 · C — the toolbar", () => {
         chromeBg: getComputedStyle(document.querySelector(".tl-axis")!).backgroundColor,
         borderB: cs.borderBottomWidth,
         triggers: document.querySelectorAll(".tl-vtool .tl-tbtrig").length,
+        /* and the sidebar's Display control is NOT one of them — two surfaces, two questions */
+      sidebarTriggers: document.querySelectorAll(".tl-axis .tl-tbtrig").length,
       };
     });
     expect(bar, "no toolbar").not.toBeNull();
@@ -89,6 +95,10 @@ test.describe("v63 · C — the toolbar", () => {
        survives a retone; pinning `#faf9f7` would go red on a legitimate one. */
     expect(bar!.bg, "the toolbar is not on the chrome ground").toBe(bar!.chromeBg);
     expect(bar!.triggers, "three controls: Group, Sort, Status").toBe(3);
+    /* ⚠️ DENSITY IS THE SIDEBAR'S AND MUST NOT DRIFT INTO THIS ROW. The two surfaces ask different
+       questions — how the rows are ARRANGED here, how much of them FITS there — and the ref puts
+       its `Display` menu in the axis for that reason. */
+    expect(bar!.sidebarTriggers, "the sidebar lost its Display control").toBe(1);
 
     /* each trigger states its own value, so the row can be read without opening anything */
     expect(b!.trig[0]).toMatch(/^Group Urgency/);

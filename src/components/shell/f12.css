@@ -4594,6 +4594,16 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
  * scope is not an ancestor paints NOTHING, silently. Override site: `.t-bold .t-f12`.
  */
 .t-f12 {
+  /* ⚠️ DEBT — A SECOND SURFACE NEEDS THESE AND CANNOT REACH THEM (raised by the Calendar, v63 §D).
+     `.t-f12` is the Query Centre's theme class, so the Calendar's board is not under it: a
+     `var(--stage-out-1)` there resolves to NOTHING and paints nothing, silently, through a clean
+     build — the failure the note above already warns about. `todoCalendar.css` therefore carries a
+     documented COPY of these eight, and `calendarStageTints.test.ts` asserts it against THIS FILE
+     so the two cannot drift.
+
+     THE FIX IS TO MOVE THESE EIGHT TO `:root` AND READ THEM HERE. Nothing about this page changes
+     — `:root` is an ancestor of everything — and the copy and its lock then retire. Details and
+     rationale: `design-refs/query-tint-ladder.md`, under "Debt". */
   /* out — with the agent, deepening as it travels */
   --stage-out-1: #e6eae3;   /* Queried */
   --stage-out-2: #d7ddd3;   /* Partial Sent */

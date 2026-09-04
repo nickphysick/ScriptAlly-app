@@ -61,3 +61,27 @@ Direction is "who acted last, and therefore whose court it is", not "who the wri
 ## Derivation
 
 `turn`, `step` and the caption come from `lib/queryCardFacts.ts` fed by `recomputeQuery` output. Nothing stores a tint, a step, or a turn. If a surface needs the colour, it calls `cardFacts()` and maps `{direction, step}` → token. One mapping function, exported once, used everywhere.
+
+## ⚠️ Debt: the ladder is scoped to `.t-f12`, and a second surface now copies it
+
+*(Raised by the Calendar's v63 §D, 4 Sep 2026 — for whoever owns this sheet.)*
+
+`f12.css` declares `--stage-out-1`…`--stage-closed` on **`.t-f12`**, the Query Centre's own theme
+class. The Calendar's board does not sit under it, so a `var(--stage-out-1)` on a calendar band
+resolves to **nothing** and paints nothing — silently, through a clean build. That file's own
+comment already records why the scope matters; this is the first surface outside the Query Centre to
+need the tokens.
+
+**What the Calendar did, and why it is a stopgap.** `todoCalendar.css` carries `--tl-stage-*`, an
+eight-rung **documented copy**, on the precedent `--mk-hero-ground` already sets in this repo: a
+cross-tier `var()` read is what a refactor deletes without knowing another surface depended on it.
+`src/components/todo/calendarStageTints.test.ts` asserts the copy **against `f12.css` itself** —
+never a literal on both sides — so a retone here fails there and gets re-synced deliberately. It
+also fails if the ladder ever leaves `.t-f12`.
+
+**The fix that retires the copy: move the eight tokens to `:root` and have `.t-f12` read them.**
+Nothing about the Query Centre changes — `:root` is an ancestor of everything — and the Calendar
+can then read the ladder directly, deleting its copy and that lock. It was not done from the
+Calendar's side because `f12.css` was another session's live file at the time.
+
+**Until then, the two are kept in step by the lock and not by anyone remembering.**

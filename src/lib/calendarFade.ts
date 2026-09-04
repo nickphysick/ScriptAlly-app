@@ -50,7 +50,27 @@ export interface FadeFacts {
   namedEnd?: number | null;
 }
 
-export interface Fades { left: boolean; right: boolean }
+export interface Fades {
+  left: boolean;
+  /** the card's right edge is not where its wait ends — either it is ongoing, or it is clipped */
+  right: boolean;
+  /**
+   * ⚠️ ONGOING AND WINDOW-CLIPPED ARE TWO DIFFERENT FACTS AND WERE ONE BOOLEAN (v63, §D).
+   *
+   * `right` was `namedEnd == null || namedEnd > days`, which folds together "nobody has named an
+   * end" and "the end is named and lies past what you are looking at". They are not the same
+   * statement and the ref does not treat them as one: an ongoing card gets an OPEN end — the frame
+   * simply stops with no border — while a clipped one gets a DISSOLVE, a gradient that says the
+   * card continues past the edge of the window rather than past the end of knowledge.
+   *
+   * Measured before the split: 13 of 23 cards drew an open end, including every card whose wait
+   * ends on a real date the reader could reach by paging the window forward. The board was telling
+   * a writer that a partial due on 3 November runs on indefinitely.
+   *
+   * `clipped` implies `right`; `right && !clipped` is the ongoing case.
+   */
+  clipped: boolean;
+}
 
 /**
  * ⚠️ A TOLERANCE, BECAUSE THESE ARE FRACTIONAL DAYS. A stretch that opens exactly at the window's
@@ -103,5 +123,9 @@ export function fadesFor(f: FadeFacts): Fades {
      * shipped beside it.
      */
     right: f.namedEnd == null || f.namedEnd > f.days + EPS,
+    /* ⚠️ A NAMED END IS REQUIRED — an ongoing card has nothing to be clipped. The two terms of
+       `right` are separated here rather than recomputed: `clipped` is its second term alone, so
+       the two readings cannot come apart. */
+    clipped: f.namedEnd != null && f.namedEnd > f.days + EPS,
   };
 }

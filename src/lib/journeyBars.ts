@@ -170,6 +170,21 @@ export interface Segment {
   openLeft: boolean;
   /** continues past the window — dashed right edge, squared off */
   openRight: boolean;
+  /**
+   * ⚠️ WHEN THE WRITER LAST NUDGED — A DATE, NOT A COUNT, AND THAT IS THE DATA'S LIMIT (v63, §D).
+   *
+   * The board's band states `Nudged {date}` beside the status. It does NOT state "once" or
+   * "twice": a nudge COUNT lives in the query's activity subcollection, and this page deliberately
+   * does not load per-query events — the same reason `resolveExpectedDate` is handed `null` for a
+   * reply-stated window a few hundred lines below. Composing a count from what this page holds
+   * would be inventing it, and a fabricated figure is indistinguishable from a real one.
+   *
+   * `query.lastNudgeSentDate` is a single stored date, and it is what the ref renders too.
+   */
+  nudgedOn: string | null;
+  /** where that nudge sits in the window, in the same fractional days as `from` and `to` — `null`
+      when it falls outside the drawn window, so the marker is simply not placed */
+  nudgedAt: number | null;
   /** resumed after a break — a round cap on the left */
   capLeft: boolean;
   /** stopped at a break — a round cap on the right */
@@ -1268,6 +1283,19 @@ export function laneBars(input: LaneInput, win: BarWindow): Bars {
       /* the journey began before the window unless its own send is the first thing in it */
       openLeft: startsAtEdge && !(live[0] && live[0].dir === "out" && live[0].at < 1),
       openRight: endsAtEdge && !terminal && closeIdx < 0 && !openEnd && !norail,
+      /* ⚠️ THE ONE PLACE THE STORED DATE IS READ, so the band and `labelFor`'s own `Nudged {date}`
+         cannot come apart. A terminal query carries none: a closed relationship is not waiting on
+         a follow-up, and dating one would state that it is. */
+      nudgedOn: terminal ? null : isoToYmd(query.lastNudgeSentDate as string | undefined),
+      /* ⚠️ `at()` IS THE WINDOW'S OWN CONVERSION, not a second one. It returns `null` for a date
+         outside the drawn window, which is exactly the answer the marker needs: a nudge that
+         happened before the window opened has no place on this bar, and a marker pinned to its
+         edge would claim it happened there. */
+      nudgedAt: terminal ? null
+        : (() => {
+            const y = isoToYmd(query.lastNudgeSentDate as string | undefined);
+            return y ? at(y) : null;
+          })(),
       capLeft: !startsAtEdge,
       capRight: !endsAtEdge,
       ...(!speaks

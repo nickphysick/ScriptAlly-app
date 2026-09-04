@@ -145,7 +145,126 @@ one I deleted — and they come from v63 §A/B's chrome layer restating rules th
 The file states one-rule-per-selector as its own invariant. Phase 7's target, named rather than
 suspected.
 
-## D · The bar in Query Centre's language — **NOT BUILT.**
+## D · The bar in Query Centre's language — **BUILT.** Every item, with readings.
+
+Measured at 1440×900 on the harness account (23 cards) unless stated. Every reading below comes
+from `calBar63.measure.ts` (9 cases) or `calTool63.measure.ts` (6); the ref's own values were taken
+by **rendering** `timeline-v63.html`, not by reading it — see the two cascade faults at the foot.
+
+### The item list
+
+| # | item | state | reading |
+|---|---|---|---|
+| 1 | status band (26px, dot, status, holder) | **built · verified** | 23 of 23 cards; band 26px on the card's top edge; body always below it |
+| 2 | tint per status, from QC's ladder | **built · verified** | 7 rungs seen: `out-1`×14, `out-2`×2, `out-3`×2, `in-1`×2, `in-2`×1, `in-3`×1, `offer`×1 |
+| 3 | holder eyebrow, rose when late | **built · verified** | 3 holders (`With you`/`With the agent`/`Offer`); rose `rgb(140,79,74)` on late, muted `rgb(125,108,92)` on calm, both branches populated |
+| 4 | name + italic agency, sentence-case fact | **built · verified** | Playfair 15.5/500 (leading ≥ 1.3), agency `italic`, fact Inter 12px `text-transform: none` |
+| 5 | ringed `!` on urgent | **built · verified** | present on all 13 late cards, absent on all 10 calm |
+| 6 | **open ends** — no chevron, no right border | **built · verified** | 12 ongoing cards: `border-right: 0px`, both right radii `0px`, **0 chevrons rendered** |
+| 7 | **right-edge dissolve for window-clipped cards** | **built · verified** | 1 clipped card dissolves; **12 ongoing cards do not** — see the fault below |
+| 8 | **nudge rule** — band note | **built · verified, with a data limit** | `Nudged 25 Aug` beside the status; a *count* is not derivable — see below |
+| 9 | **nudge event marker on the bar** | **built · verified** | 1 marker, at the nudge's own date; 22 cards with no nudge carry none |
+| 10 | **density levels** | **built · verified** | Comfortable 116/96 · Regular 106/86 · Compact 76/58 — three distinct bar heights, nothing clipped in any |
+| 11 | **rose pulse dot on urgent bars** | **built · partially verified** | 12 dots, all on late open ends; **the lateness gate is unexercised** — see the named gap |
+| 12 | **ghost past stages** | **built · verified** | `.tl-jc` opacity `0.32`, full strength on hover |
+| 13 | retired: chips, medals, trails, shadows, tails, Caveat flags | **verified gone** | 0 of each in the rendered DOM, across all 23 cards |
+
+### ⚠️ Item 7 was a correctness fault, not a missing feature
+
+`fadesFor` returned one boolean: `right = namedEnd == null || namedEnd > days`. That folds together
+**"nobody has named an end"** and **"the end is named and lies past the window"** — two different
+statements — and the board drew both as an open end. A partial due on 3 November, viewed in a window
+closing 19 October, was being drawn as though it ran on indefinitely.
+
+The ref does not conflate them (`clipR = !running && to > hi`). `Fades` now carries `clipped`
+alongside `right`; an ongoing card ends open, a clipped one dissolves. Measured after the split:
+**12 ongoing · 1 clipped · 23 cards.**
+
+### ⚠️ Item 8: a date, never a count
+
+The pack asks for `Nudged once/twice…`. A nudge **count** lives in the query's activity
+subcollection, and this page deliberately does not load per-query events — the same limit
+`resolveExpectedDate` is handed `null` for a reply-stated window. `nudgeCount()` exists in
+`queryAmbient.ts` and cannot be called here without loading activity for every row on the board.
+
+So the note is `Nudged {date}` from `lastNudgeSentDate` — which is also exactly what the ref renders
+(`hl: 'Nudged 26 Aug'`). A count composed from what this page holds would be a fabricated figure
+indistinguishable from a real one. The lock forbids `once|twice|N times` in the note.
+
+**And the note JOINS the status rather than replacing it.** The ref swaps its headline out; here the
+tint's rung is *named for the status*, so removing the status would leave the band saying "Nudged"
+above a colour nothing on the card explains.
+
+### ⚠️ The named gap: item 11's lateness gate is unexercised
+
+The pulse dot renders on an open end **and only where something is late**. The first two conditions
+are verified. The third is not, and the report says so rather than the assertion pretending
+otherwise: **12 late-ongoing, 0 calm-ongoing** — every ongoing relationship on the harness account
+is overdue, so a mutation dropping the `owed` condition **went green**. That is how the gap was
+found.
+
+`calBar63` prints `⚠️ LATENESS GATE UNEXERCISED ON THIS FIXTURE` on every run and asserts the branch
+the moment a calm ongoing query exists. Seeding one is a write to the shared harness account and
+belongs in a pass that can restore it in the same run.
+
+### Two cascade faults, both from reading the ref instead of rendering it
+
+1. **The body's offset.** `data-seg="band"` says `top: calc(50% + 13px)`; `data-dens="regular"` says
+   `top: 36px; max-height: 44px` four hundred lines later and wins. The first build put the words
+   under the band.
+2. **`.feb`.** `data-bar="qc"` makes it a block eyebrow; `data-seg="band"` makes it an inline mono
+   **tail inside line two**. It is not an eyebrow at all.
+
+Rendering the ref settled both in one command: its own card measures body top `36px`,
+`transform: none`, 40.6px tall inside an 86px bar with nothing clipped.
+
+### Three deviations from the ref, each with its reason
+
+| ref | built | why |
+|---|---|---|
+| `.sseg svg` 14px | **20px** | the ref sizes a flat glyph of its own; this app's `StatusDot` carries direction and stage in its *shape*, and 14px loses it |
+| `.fnm` `line-height: 1.15` | **1.3** | house floor for mixed-case Playfair inside a clipping box; the ref clips nothing |
+| Comfortable body `max-height: 56px` | **62px, top 32** | a consequence of the above — at 1.3 the stacked name/agency/fact is ~60.4px and 56 clipped it |
+
+### The tint ladder is a documented copy — **a debt owed to the Query Centre session**
+
+`--stage-out-1`…`--stage-closed` are declared on **`.t-f12`**, the Query Centre's own theme class,
+which the Calendar does not sit under. A `var(--stage-out-1)` on a calendar band paints **nothing**,
+silently, through a clean build — the failure `f12.css`'s own comment warns about.
+
+`.tl-board` therefore carries `--tl-stage-*`, an eight-rung copy, on the `--mk-hero-ground`
+precedent. `calendarStageTints.test.ts` asserts them **against `f12.css` itself**, never a literal
+on both sides, and fails if the ladder leaves `.t-f12`.
+
+**The debt: the ladder belongs at `:root`, with `.t-f12` reading it.** That retires this copy and
+its lock. It is not this pass's to do — `f12.css` is another session's live file — and it is
+recorded here so it is decided rather than inherited.
+
+### Four locks retargeted, each a real defect the section exposed
+
+| lock | what broke | why it was right to change |
+|---|---|---|
+| `calendarFade.test.ts` | 11 shape assertions read `{left, right}` | the type gained `clipped`; they now assert the LAW (`clipped` implies `right`, ongoing ≠ clipped), not just the extra key |
+| `calendarStyleReach.test.ts` | *"the sweep is not seeing the bar"* — `tl-p` missing | my `clipR` note pushed the card's `className` expression past the sweep's **900-character bound**, which fails by ABSENCE. Exactly what that file's comment warns about; its floor case caught it. Three comment blocks hoisted out of the class list — 932 → 239 chars |
+| `calendarTokens.test.ts` | `--row-h is declared 3 times` | it demanded exactly one declaration, right at one height and wrong at three. It now asserts the BASE rule is the ref's value and every other sits inside a `[data-dens]` block |
+| `calTool63.measure.ts` | `trig[0]` became `Display` | it indexed every `.tl-tbtrig` in the document; the sidebar's new control is first in DOM order. Scoped to `.tl-vtool`, and it asserts the sidebar keeps exactly one |
+
+### Locks
+
+`calBar63.measure.ts` (9 measured) · `calendarStageTints.test.ts` (3 unit). Proved red by eight
+mutations: words under the band, one tint for every rung, a holder that never reddens, the font
+regression, a chip rendered again, the dissolve back on every ongoing card, a nudge note stating a
+count, and three densities sharing a bar height.
+
+⚠️ **A ninth mutation — the pulse dot on every open end — passed**, which is the gap above.
+⚠️ **And the FIRST attempt at the first mutation passed too**: the mutant offset still cleared the
+band. An assertion you have not seen fail is unproved, not safe.
+
+⚠️ **One lock needed re-scoping when the sidebar gained its Display control.** `calTool63` read
+every `.tl-tbtrig` in the document and indexed into it, so `trig[0]` became `Display` and the case
+reported `Group` missing. It reads `.tl-vtool .tl-tbtrig` now, and asserts the sidebar keeps exactly
+one — two surfaces, two questions.
+
 ## E · Actions — **NOT BUILT.**
 ## F · Tasks as bars — **NOT BUILT.**
 ## G · Behaviours (collapse, drag, sticky) — **NOT BUILT.**

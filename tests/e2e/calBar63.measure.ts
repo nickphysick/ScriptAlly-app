@@ -61,6 +61,12 @@ async function cards(page: import("@playwright/test").Page) {
         owed: c.classList.contains("owed") || c.classList.contains("quiet"),
         /* the whole point of `overflow: hidden` on the body: does anything actually clip? */
         bodyClips: body ? body.scrollHeight > body.clientHeight + 0.5 : null,
+        /* the three end states, and the marks that ride them */
+        fadeR: c.classList.contains("fadeR"), clipR: c.classList.contains("clipR"),
+        fovR: !!c.querySelector(".tl-fov.r"), pulse: !!c.querySelector(".tl-pulsedot"),
+        evn: c.querySelectorAll(".tl-evn").length,
+        nudgeNote: c.querySelector(".tl-snote")?.textContent?.trim() ?? null,
+        frameBorderR: cs(c.querySelector<HTMLElement>(".tl-frame"), "borderRightWidth"),
         /* the furniture the section retires — asserted absent on the RENDERED page */
         gone: {
           medal: !!c.querySelector(".tl-medal"), chip: !!c.querySelector(".tl-fchip"),
@@ -211,5 +217,116 @@ test.describe("v63 · D — the bar", () => {
     const still: Record<string, number> = {};
     for (const c of cs) for (const [k, v] of Object.entries(c.gone)) if (v) still[k] = (still[k] ?? 0) + 1;
     expect(still, `retired furniture is still drawn: ${JSON.stringify(still)}`).toEqual({});
+  });
+
+  test("⚠️ (d6) ongoing and window-clipped end DIFFERENTLY, and the marks follow", async ({ page }) => {
+    await openRoute(page, CAL, { width: 1440, height: 900 });
+    const cs = (await cards(page))!;
+    const ongoing = cs.filter((c) => c.fadeR && !c.clipR);
+    const clipped = cs.filter((c) => c.clipR);
+    console.log(`ends: ${ongoing.length} ongoing · ${clipped.length} clipped · ${cs.length} cards`);
+    /* ⚠️ BOTH BRANCHES MUST BE PRESENT OR THE CASE PROVES ONE. They were ONE boolean until §D, so a
+       fixture with no clipped card would go green over exactly the fault this replaced. */
+    expect(ongoing.length, "no ongoing cards — the open end is unexercised").toBeGreaterThan(0);
+    expect(clipped.length, "no clipped cards — the dissolve is unexercised").toBeGreaterThan(0);
+
+    for (const c of ongoing) {
+      expect(c.fovR, `an ongoing card dissolves — it has no end to continue to (${c.status})`).toBe(false);
+      expect(c.frameBorderR, "an ongoing card kept its right border").toBe("0px");
+    }
+    for (const c of clipped) {
+      expect(c.fovR, `a clipped card does not dissolve (${c.status})`).toBe(true);
+      expect(c.frameBorderR, "a clipped card kept its right border").toBe("0px");
+    }
+    /* ⚠️ THE PULSE DOT IS ON AN OPEN END AND ONLY WHERE SOMETHING IS LATE — three conditions, and
+       a lock that checked one would pass on a board that dotted every card. */
+    for (const c of cs) {
+      const want = c.fadeR && !c.clipR && c.owed;
+      expect(c.pulse, `${c.status}: pulse ${c.pulse}, expected ${want}`).toBe(want);
+    }
+    const dotted = cs.filter((c) => c.pulse).length;
+    expect(dotted, "no pulse dots at all — the case proves nothing").toBeGreaterThan(0);
+    expect(dotted, "every card is dotted — the gate is inert").toBeLessThan(cs.length);
+    /* ⚠️ THE LATENESS CONDITION NEEDS AN ONGOING-AND-CALM CARD TO BE PROVED, AND THIS SAYS SO.
+       Removing `owed` from the render passed this case on a fixture where every ongoing card
+       happens to be late — a monoculture, and the assertion above is satisfied by it. The count is
+       printed and asserted so the branch is either exercised or the report says it was not. */
+    const calmOngoing = cs.filter((c) => c.fadeR && !c.clipR && !c.owed);
+    console.log(`pulse branches: ${cs.filter((c) => c.fadeR && !c.clipR && c.owed).length} late-ongoing`
+      + ` · ${calmOngoing.length} calm-ongoing`
+      + (calmOngoing.length ? "" : "  ⚠️ LATENESS GATE UNEXERCISED ON THIS FIXTURE"));
+    /* ⚠️ THE LATENESS GATE IS UNPROVED ON THIS FIXTURE AND THE OUTPUT SAYS SO RATHER THAN THE
+       ASSERTION PRETENDING OTHERWISE. Every ongoing relationship on the harness account is
+       overdue — 12 late-ongoing, 0 calm-ongoing — so removing `owed` from the render changes
+       nothing here and this case passes over it. Measured, not assumed: a mutation dropping the
+       condition went green, which is how the gap was found.
+
+       It is NOT downgraded to a floor of zero and forgotten: the line above prints the warning on
+       every run, `reports/calendar-v63.md` carries it as a named gap, and the moment the fixture
+       gains one calm ongoing query the branch below starts doing real work. Seeding one is a write
+       to the shared harness account and belongs in a pass that can restore it in the same run. */
+    if (calmOngoing.length) {
+      for (const c of calmOngoing) {
+        expect(c.pulse, `${c.status} is ongoing and calm and still carries a pulse dot`).toBe(false);
+      }
+    }
+  });
+
+  test("⚠️ (d7) a nudge is stated in the band AND marked on the bar", async ({ page }) => {
+    await openRoute(page, CAL, { width: 1440, height: 900 });
+    const cs = (await cards(page))!;
+    const nudged = cs.filter((c) => c.nudgeNote);
+    console.log("nudge notes:", JSON.stringify(nudged.map((c) => c.nudgeNote)));
+    expect(nudged.length, "no nudged card — the case is vacuous").toBeGreaterThan(0);
+    for (const c of nudged) {
+      /* ⚠️ A DATE, NEVER A COUNT. A nudge count lives in the query's activity subcollection and
+         this page does not load per-query events; "Nudged twice" here would be a figure composed
+         from data the board does not hold. */
+      expect(c.nudgeNote, "the note states a count it cannot know")
+        .not.toMatch(/once|twice|\b\d+ times?\b/i);
+      expect(c.nudgeNote, "the note is not a dated nudge").toMatch(/^Nudged \d/);
+      /* the band SAYS it happened; the bar says WHEN — both, or one question is unanswered */
+      expect(c.evn, `${c.status}: a nudge note with no marker on the bar`).toBe(1);
+      /* and the status survives beside it — the tint's rung is named for it */
+      expect(c.status, "the nudge note replaced the status").toBeTruthy();
+    }
+    /* a card with no nudge carries no marker — the mark is the nudge, not decoration */
+    for (const c of cs.filter((x) => !x.nudgeNote)) {
+      expect(c.evn, `${c.status}: a marker with no nudge behind it`).toBe(0);
+    }
+  });
+
+  test("⚠️ (d8) three densities, each moving the bar AND the body's ceiling", async ({ page }) => {
+    await openRoute(page, CAL, { width: 1440, height: 900 });
+    const read = () => page.evaluate(() => {
+      const b = document.querySelector<HTMLElement>(".tl-board")!;
+      const body = document.querySelector<HTMLElement>(".tl-cardbody");
+      const card = [...document.querySelectorAll<HTMLElement>(".tl-cal")]
+        .find((e) => e.getBoundingClientRect().height > 0)!.querySelector<HTMLElement>(".tl-p");
+      return {
+        dens: b.dataset.dens ?? null,
+        bar: getComputedStyle(b).getPropertyValue("--bar-h").trim(),
+        row: getComputedStyle(b).getPropertyValue("--row-h").trim(),
+        cardH: card ? parseFloat(getComputedStyle(card).height) : null,
+        maxH: body ? getComputedStyle(body).maxHeight : null,
+        clips: body ? body.scrollHeight > body.clientHeight + 0.5 : null,
+      };
+    });
+    const seen: Record<string, unknown> = {};
+    for (const d of ["Comfortable", "Compact", "Regular"]) {
+      await page.locator('.tl-tbtrig[aria-label="Display density"]').click();
+      await page.locator('.tl-dd[aria-label="Display density"] .tl-ddopt', { hasText: d }).click();
+      const r = await read();
+      seen[d] = r;
+      /* ⚠️ THE BAR AND THE BODY'S CEILING MOVE TOGETHER. Changing `--bar-h` alone leaves the words
+         centred on a `top` written for a different card, which is how the eyebrow was clipped in
+         this section's first build. */
+      expect(r.cardH, `${d}: the card is not the bar's height`).toBeCloseTo(parseFloat(r.bar), 0);
+      expect(r.clips, `${d}: the body clips its own words`).toBe(false);
+    }
+    console.log("densities:", JSON.stringify(seen, null, 1));
+    const bars = new Set(Object.values(seen).map((v) => (v as { bar: string }).bar));
+    /* three distinct heights, or the control is decorative */
+    expect(bars.size, `the three densities share a bar height: ${[...bars].join(", ")}`).toBe(3);
   });
 });

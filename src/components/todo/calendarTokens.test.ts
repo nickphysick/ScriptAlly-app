@@ -308,10 +308,24 @@ describe("the calendar's bar path states no vertical literal", () => {
       ["--bar-h", ref["--bar-h"]],
       ["--mk", "16px"],
     ];
+    /* ⚠️ THE DEFAULT IS DECLARED ONCE; A DENSITY VARIANT MAY RESTATE IT (v63, §D). The lock used to
+       demand exactly one declaration, which was right while the board had one height and wrong the
+       moment it gained three. The claim that survives is the one it was standing for: the FIRST
+       declaration — the base rule on `.tl-board` — is the ref's selected value, and every other is
+       inside a `[data-dens="…"]` block rather than loose in the sheet. */
+    const inDensityBlock = (at: number) => {
+      const open = src.lastIndexOf("[data-dens=", at);
+      if (open < 0) return false;
+      const close = src.indexOf("}", open);
+      return close > at;
+    };
     for (const [tok, want] of pinned) {
       expect(want, `the ref pins no ${tok}`).toBeTruthy();
-      const hits = [...src.matchAll(new RegExp(`${tok}\\s*:\\s*([^;]+);`, "g"))].map((m) => m[1].trim());
-      expect(hits, `${tok} is declared ${hits.length} times: ${JSON.stringify(hits)}`).toEqual([want]);
+      const all = [...src.matchAll(new RegExp(`${tok}\\s*:\\s*([^;]+);`, "g"))];
+      const base = all.filter((m) => !inDensityBlock(m.index ?? 0)).map((m) => m[1].trim());
+      const variants = all.filter((m) => inDensityBlock(m.index ?? 0)).map((m) => m[1].trim());
+      expect(base, `${tok}: ${base.length} base declarations ${JSON.stringify(base)}`
+        + ` (+${variants.length} in density blocks: ${JSON.stringify(variants)})`).toEqual([want]);
     }
   });
 });
