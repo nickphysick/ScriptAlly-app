@@ -67,7 +67,7 @@ import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteH
 import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
 import { cardFacts, turnFor, type Turn } from "../lib/queryCardFacts";
 import {
-  QUICK_FILTERS, inQuick, quickCounts, compareGroupLabels, groupLabelFor,
+  QUICK_FILTERS, quickCounts, GRID_GROUPS,
   type QuickKey, type GroupKey,
 } from "../lib/queryCentreGrid";
 import { measureFlip, playFlip, clearFlip, type FlipRects } from "../lib/flip";
@@ -1678,6 +1678,7 @@ export const Queries: React.FC<{
    * week and cannot see you asked.
    */
   const [gridGroup, setGridGroup] = useState<GroupKey>("none");
+  const [groupPopOpen, setGroupPopOpen] = useState(false);
   const [statusSel, setStatusSel] = useState<QueryStatus[]>([]);     // committed live (no draft/Apply)
   const [selectedManuscriptFilter, setSelectedManuscriptFilter] = useState<string>("All");
   const [needsOverdue, setNeedsOverdue] = useState(false);
@@ -1768,6 +1769,12 @@ export const Queries: React.FC<{
   );
   const { triggerRef: sortTrigRef, menuStyle: sortMenuStyle } = useFixedMenu<HTMLButtonElement>(
     sortPopOpen, { placement: "auto", align: "right", constrain: true, menuRef: sortPopRef },
+  );
+  /* The grid's Group control. Same anchoring contract as Sort — one popover mechanism on this
+     page, never a second. It aligns LEFT because it sits at the left of the quick row. */
+  const groupPopRef = useRef<HTMLElement>(null);
+  const { triggerRef: groupTrigRef, menuStyle: groupMenuStyle } = useFixedMenu<HTMLButtonElement>(
+    groupPopOpen, { placement: "auto", align: "left", constrain: true, menuRef: groupPopRef },
   );
   // 5d — reading-pane click-to-pick: send method + manuscript, constrained to valid values, written
   // straight to the query (updateQuery is a plain patch; both keys are in the query update allowlist)
@@ -2800,6 +2807,32 @@ export const Queries: React.FC<{
       { key: "agent_az", label: "Agent · A to Z" },
     ]},
   ];
+  /**
+   * ⚠️ GROUPING IS A WAY OF READING, NOT A FILTER — nothing is hidden by it. That is why it is not
+   * in the Filter popover and why it does not persist: a heading arrangement you cannot see you
+   * chose is worse than none.
+   */
+  const renderGroupPopover = () => (
+    <F12Popover
+      width={252}
+      title="Group"
+      style={groupMenuStyle}
+      panelRef={groupPopRef}
+      onClose={() => setGroupPopOpen(false)}
+      footText={(GRID_GROUPS.find((g) => g.key === gridGroup)?.label || "None").toUpperCase()}
+    >
+      {GRID_GROUPS.map((g) => (
+        <PRow
+          key={g.key}
+          kind="rad"
+          on={gridGroup === g.key}
+          label={g.label}
+          onClick={() => { setGridGroup(g.key); setGroupPopOpen(false); }}
+        />
+      ))}
+    </F12Popover>
+  );
+
   const renderSortPopover = () => (
     <F12Popover
       width={276}
@@ -4782,6 +4815,20 @@ export const Queries: React.FC<{
                 <span className="qcc-qf-mk" aria-hidden="true">!</span>
                 Past expected
               </button>
+
+              <span className="qcc-qf-sep" aria-hidden="true" />
+              <div className="f12-popwrap">
+                <PillTrig
+                  ref={groupTrigRef}
+                  label="Group"
+                  open={groupPopOpen}
+                  active={gridGroup !== "none"}
+                  value={gridGroup !== "none" ? GRID_GROUPS.find((g) => g.key === gridGroup)?.label : undefined}
+                  onClick={() => setGroupPopOpen((o) => !o)}
+                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" /></svg>}
+                />
+                {groupPopOpen && renderGroupPopover()}
+              </div>
             </div>
 
             {gridRows.length === 0 ? (

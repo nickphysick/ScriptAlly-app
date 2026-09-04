@@ -7,6 +7,8 @@
  * courts sum to All, over any set" cannot be satisfied that way.
  */
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { QueryStatus } from "../types";
 import {
   QUICK_FILTERS, inQuick, quickCounts,
@@ -187,5 +189,48 @@ describe("the declared vocabularies are complete", () => {
   });
   it("Last activity is the first sort — the page opens on what moved most recently", () => {
     expect(GRID_SORTS[0].key).toBe("activity");
+  });
+});
+
+/**
+ * ⚠️ THE BROWSING GRID'S CONTROLS EXIST AND REACH THE STATE THEY NAME. A `gridGroup` with no
+ * control that can set it is dead state — the grid would read a value nothing could change, and
+ * the feature would look built from the source and be absent from the page. Asserted against
+ * `Queries.tsx` because that is where the wiring lives.
+ */
+describe("⚠️ every declared control is mounted and wired", () => {
+  const page = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
+  const decls = page.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+
+  it("the quick pills render from the declared set and drive the page's own filter state", () => {
+    expect(decls).toContain("QUICK_FILTERS.map");
+    expect(decls).toContain("setQuickKey(f.key)");
+    /* ⚠️ ONE STATE. `setQuickKey` maps onto `turnFilter`; a `useState` of its own here would be a
+       second control over one narrowing. */
+    expect(decls).toContain("setTurnFilter(");
+    expect(decls).not.toMatch(/useState<QuickKey>/);
+  });
+
+  it("Group has a control that can actually set it — not dead state", () => {
+    expect(decls).toContain("setGridGroup(");
+    expect(decls).toContain("renderGroupPopover");
+    expect(decls).toContain("groupPopOpen && renderGroupPopover()");
+    /* Every option in the declared table is offered, not a hand-picked subset. */
+    expect(decls).toContain("GRID_GROUPS.map");
+  });
+
+  it("⚠️ the counts read the SCOPED set, never the filtered view", () => {
+    expect(decls).toContain("quickCounts(");
+    /* Counting `gridRows` or `sortedList` would print 0 beside every court not currently chosen. */
+    expect(decls).not.toContain("quickCounts(gridRows");
+    expect(decls).not.toContain("quickCounts(sortedList");
+    expect(decls).toContain("mastheadScopedQueries.map");
+  });
+
+  it("⚠️ and the removable chip names every court — a ternary covered two and lied about the rest", () => {
+    expect(decls).toContain("TURN_CHIP_LABEL[turnFilter]");
+    for (const court of ["move", "wait", "offer", "closed"]) {
+      expect(decls, `${court} has no chip label`).toMatch(new RegExp(`\\b${court}:\\s*"`));
+    }
   });
 });
