@@ -18,17 +18,21 @@
 /* ── the grid ───────────────────────────────────────────────────────────────────────────────── */
 .qcc-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  /* ⚠️ 340, NOT 380 — the ref's, and it is what makes the count right rather than merely
+     plausible. In a 1480 cap: floor((1480 + 20) / (340 + 20)) = 4 columns of 355px. At 380 the
+     same cap yields 3, and at 1440 (a ~1100 column beside the rail) it yielded 2 where the ref
+     draws 3. The cap and the track floor decide the count together; neither alone. */
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 20px;
 }
 
 /* ── the card ───────────────────────────────────────────────────────────────────────────────── */
 .qcc {
-  /* ⚠️ DECLARED HERE SO EVERY CARD RESOLVES THE PAIR. The leaf's month strip reads them too, and a
-     `var()` on an undefined property drops the whole declaration in silence. Queried overrides the
-     leaf directly rather than tinting these, because its BAND takes no gradient at all. */
-  --band-a: var(--turn-sand-ground);
-  --band-b: var(--turn-sand-ground);
+  /* ⚠️ A DEFAULT PAIR SO EVERY CARD RESOLVES IT — a `var()` on an undefined custom property drops
+     the whole declaration in silence, and a card whose stage class failed to land would otherwise
+     have a transparent band rather than a visibly wrong one. */
+  --band-a: var(--stage-closed);
+  --band-b: var(--stage-closed);
 
   display: block;
   width: 100%;
@@ -56,10 +60,21 @@
     0 14px 32px rgba(58, 28, 20, 0.13);
 }
 
-.qcc--you { --band-a: var(--turn-you-a); --band-b: var(--turn-you-b); }
-.qcc--agent { --band-a: var(--turn-agent-a); --band-b: var(--turn-agent-b); }
-.qcc--offer { --band-a: var(--turn-offer-a); --band-b: var(--turn-offer-b); }
-.qcc--closed { --band-a: var(--turn-closed-a); --band-b: var(--turn-closed-b); }
+/**
+ * ⚠️ ONE FLAT TOKEN PER RUNG. `--band-a` and `--band-b` carry the same value because the ref's
+ * `.s-*` classes do — the pair survives so a future two-tone treatment has somewhere to go, but
+ * NOTHING paints a gradient now: the band and the leaf strip each read `--band-a` as a flat
+ * `background-color`. A real gradient across a 20px band reads as a lighting effect and makes two
+ * adjacent rungs indistinguishable where they meet.
+ */
+.qcc--s-out-1 { --band-a: var(--stage-out-1); --band-b: var(--stage-out-1); }
+.qcc--s-out-2 { --band-a: var(--stage-out-2); --band-b: var(--stage-out-2); }
+.qcc--s-out-3 { --band-a: var(--stage-out-3); --band-b: var(--stage-out-3); }
+.qcc--s-in-1 { --band-a: var(--stage-in-1); --band-b: var(--stage-in-1); }
+.qcc--s-in-2 { --band-a: var(--stage-in-2); --band-b: var(--stage-in-2); }
+.qcc--s-in-3 { --band-a: var(--stage-in-3); --band-b: var(--stage-in-3); }
+.qcc--s-offer { --band-a: var(--stage-offer); --band-b: var(--stage-offer); }
+.qcc--s-closed { --band-a: var(--stage-closed); --band-b: var(--stage-closed); }
 
 /* ── the band ───────────────────────────────────────────────────────────────────────────────── */
 .qcc-band {
@@ -69,13 +84,15 @@
   padding: 13px 20px;
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
   border-radius: 14px 14px 0 0;
-  background: linear-gradient(135deg, var(--band-a), var(--band-b));
-}
-/* ⚠️ QUERIED TAKES NO TINT — parchment and a rule. The commonest state reads as quiet, and the
-   four that mean something are not left competing with a fifth that means "nothing yet". */
-.qcc--sand .qcc-band {
-  background: var(--turn-sand-ground);
-  border-bottom: 0.5px solid var(--turn-sand-rule);
+  /**
+   * ⚠️ A FLAT `background-color`, NOT A GRADIENT SHORTHAND — and this is the house law rather than
+   * a style preference. `background: linear-gradient(...)` is the SHORTHAND: it resets
+   * `background-color` to transparent, so the gradient becomes the only fill and the band is
+   * SEE-THROUGH the moment a stop fails to resolve. Measured before this change: the band's
+   * computed `background-color` was `rgba(0, 0, 0, 0)` with the whole fill living in an image.
+   * The ref measures a flat `rgb(230, 234, 227)` and `background-image: none`.
+   */
+  background-color: var(--band-a);
 }
 .qcc-word {
   font-family: var(--font-serif);
@@ -117,7 +134,7 @@
    alternatives that were refused — do not promote either out of the ref. */
 .qcc-chip {
   width: 48px; height: 48px; border-radius: 50%; flex: none;
-  background: var(--turn-sand-ground);
+  background: #fdfaf5;
   border: 0.5px solid #e6dccf;
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.08), 0 3px 8px rgba(58, 28, 20, 0.1);
   color: var(--ink, #1c130f);
@@ -145,10 +162,17 @@
 .qcc-leaf-mo { display: block;
   font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--ink, #1c130f); padding: 4px 0 3px;
-  background: linear-gradient(135deg, var(--band-a), var(--band-b));
+  /**
+   * ⚠️ A FLAT `background-color`, NOT A GRADIENT SHORTHAND — and this is the house law rather than
+   * a style preference. `background: linear-gradient(...)` is the SHORTHAND: it resets
+   * `background-color` to transparent, so the gradient becomes the only fill and the band is
+   * SEE-THROUGH the moment a stop fails to resolve. Measured before this change: the band's
+   * computed `background-color` was `rgba(0, 0, 0, 0)` with the whole fill living in an image.
+   * The ref measures a flat `rgb(230, 234, 227)` and `background-image: none`.
+   */
+  background-color: var(--band-a);
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
 }
-.qcc--sand .qcc-leaf-mo { background: var(--turn-sand-leaf); }
 /**
  * ⚠️ `line-height: 1` HERE, AND IT IS A MEASURED EXCEPTION TO THE 1.3 FLOOR — not an oversight.
  *
@@ -210,7 +234,7 @@
 .qcc-ic--off { opacity: 0.28; }
 .qcc-tip {
   position: absolute; right: 0; bottom: calc(100% + 8px); width: 230px; z-index: 10;
-  background: var(--turn-sand-ground); border: 1px solid #e6dccf; border-radius: 10px;
+  background: #fdfaf5; border: 1px solid #e6dccf; border-radius: 10px;
   box-shadow: 0 4px 10px rgba(58, 28, 20, 0.07), 0 14px 34px rgba(58, 28, 20, 0.12);
   padding: 10px 12px; opacity: 0; transform: translateY(4px);
   transition: opacity 0.15s, transform 0.15s; pointer-events: none; text-align: left; cursor: default;
@@ -220,7 +244,7 @@
 }
 .qcc-tip::after {
   content: ""; position: absolute; right: 10px; top: 100%;
-  border: 6px solid transparent; border-top-color: var(--turn-sand-ground);
+  border: 6px solid transparent; border-top-color: #fdfaf5;
 }
 .qcc-tip-h { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
   text-transform: uppercase; color: #9c8878; margin-bottom: 6px; }

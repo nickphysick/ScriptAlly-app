@@ -39,6 +39,17 @@ export const WRITER_TURN_ATTENTION_DAYS = 14;
 /** Whose court the query is in. `sand` is Queried — with the agent, but not yet deeper in. */
 export type Turn = "sand" | "you" | "agent" | "offer" | "closed";
 
+/**
+ * How far the query has travelled, and in which direction — the tint ladder's rung.
+ *
+ * ⚠️ FINER THAN `Turn`, AND BOTH ARE KEPT. `Turn` answers "whose move" in five courts and drives
+ * the quick filters, the grouping and the reconciliation against `queryBucket`. `Stage` answers
+ * "how far in" in eight rungs and drives nothing but paint. Collapsing them would either coarsen
+ * the band back to five flat tints — where Queried and Full Sent are the same colour, which is the
+ * fault the ladder exists to fix — or split the filters into eight pills nobody asked for.
+ */
+export type Stage = "out-1" | "out-2" | "out-3" | "in-1" | "in-2" | "in-3" | "offer" | "closed";
+
 /** One run of the fact sentence. Rendered as nodes — never as `innerHTML`. */
 export interface Run {
   text: string;
@@ -66,6 +77,8 @@ export type CardMaterials = Record<MaterialKind, string | null>;
 
 export interface CardFacts {
   turn: Turn;
+  /** The tint ladder's rung — the token key, and the card's `qcc--s-{stage}` class. */
+  stage: Stage;
   turnWord: string;
   leaf: CardLeaf | null;
   sentence: Run[];
@@ -128,6 +141,28 @@ export function turnFor(status: QueryStatus): Turn {
   if (AGENT.has(status)) return "agent";
   if (status === QueryStatus.OFFER) return "offer";
   return "closed";
+}
+
+/**
+ * ⚠️ THE ONE MAPPING, EXPORTED — the card, the leaf, the panel header and the quick-filter swatches
+ * all read it, and a second copy anywhere is how two surfaces come to paint one query differently.
+ * Taken from `design-refs/query-centre.html` line 618.
+ *
+ * ⚠️ EXHAUSTIVE OVER THE ENUM, and the default is the SAFE one. An unrecognised status is closed,
+ * which is the quiet grey — never a rung of a ladder it has not been placed on.
+ */
+const STAGE_OF: Partial<Record<QueryStatus, Stage>> = {
+  [QueryStatus.QUERIED]: "out-1",
+  [QueryStatus.PARTIAL_SENT]: "out-2",
+  [QueryStatus.FULL_SENT]: "out-3",
+  [QueryStatus.PARTIAL_REQUESTED]: "in-1",
+  [QueryStatus.FULL_REQUESTED]: "in-2",
+  [QueryStatus.REVISE_RESUBMIT]: "in-3",
+  [QueryStatus.OFFER]: "offer",
+};
+
+export function stageFor(status: QueryStatus): Stage {
+  return STAGE_OF[status] ?? "closed";
 }
 
 export function turnWordFor(status: QueryStatus): string {
@@ -308,6 +343,7 @@ export function cardFacts(query: Query, today: Date, input: CardFactsInput = {})
 
   return {
     turn,
+    stage: stageFor(status),
     turnWord: turnWordFor(status),
     leaf,
     sentence,

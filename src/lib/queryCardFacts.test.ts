@@ -8,6 +8,8 @@
  * actually exists.
  */
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { QueryStatus } from "../types";
 import type { Query } from "../types";
 import {
@@ -18,6 +20,7 @@ import {
   turnWordFor,
   closedSentence,
   WRITER_TURN_ATTENTION_DAYS,
+  stageFor,
 } from "./queryCardFacts";
 import { queryBucket } from "./queryAmbient";
 
@@ -307,5 +310,71 @@ describe("⚠️ turnFor refines queryBucket exactly — one membership, two gra
       (s) => queryBucket(s) === "closed" && turnFor(s) !== "closed",
     );
     expect(divergent, `unexpected divergence: ${divergent.join(", ")}`).toEqual([QueryStatus.OFFER]);
+  });
+});
+
+/**
+ * ⚠️ THE LADDER IS A PROGRESSION, AND THAT IS WHAT IS ASSERTED — not eight literals. A test that
+ * pinned the eight hex values would pass the day someone shuffled them, because each would still be
+ * "a colour". The claims worth making are that every status lands on a rung, that the two ladders
+ * run in the right direction, and that the mapping agrees with the court split it sits inside.
+ */
+describe("⚠️ the stage ladder — eight rungs, and depth means distance travelled", () => {
+  it("maps every status, and the ref's mapping exactly", () => {
+    expect(stageFor(QueryStatus.QUERIED)).toBe("out-1");
+    expect(stageFor(QueryStatus.PARTIAL_SENT)).toBe("out-2");
+    expect(stageFor(QueryStatus.FULL_SENT)).toBe("out-3");
+    expect(stageFor(QueryStatus.PARTIAL_REQUESTED)).toBe("in-1");
+    expect(stageFor(QueryStatus.FULL_REQUESTED)).toBe("in-2");
+    expect(stageFor(QueryStatus.REVISE_RESUBMIT)).toBe("in-3");
+    expect(stageFor(QueryStatus.OFFER)).toBe("offer");
+    expect(stageFor(QueryStatus.REJECTED)).toBe("closed");
+    expect(stageFor(QueryStatus.WITHDRAWN)).toBe("closed");
+    expect(stageFor(QueryStatus.NO_RESPONSE)).toBe("closed");
+  });
+
+  it("⚠️ every status reaches a rung — asserted over the ENUM, never a list", () => {
+    const rungs = ["out-1", "out-2", "out-3", "in-1", "in-2", "in-3", "offer", "closed"];
+    const all = Object.values(QueryStatus);
+    expect(all.length).toBeGreaterThan(3);
+    for (const s of all) expect(rungs, `${s} has no rung`).toContain(stageFor(s));
+  });
+
+  it("⚠️ the rung agrees with the court — the ladder refines `turnFor`, it does not contradict it", () => {
+    for (const s of Object.values(QueryStatus)) {
+      const stage = stageFor(s), turn = turnFor(s);
+      if (stage.startsWith("out-")) expect(["sand", "agent"], `${s}`).toContain(turn);
+      if (stage.startsWith("in-")) expect(turn, `${s}`).toBe("you");
+      if (stage === "offer") expect(turn).toBe("offer");
+      if (stage === "closed") expect(turn).toBe("closed");
+    }
+  });
+
+  it("the ladders run in the right direction — deeper means further along", () => {
+    /* OUT deepens as the query travels away; IN deepens as more is asked of the writer. */
+    const out = [QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT].map(stageFor);
+    const inn = [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT].map(stageFor);
+    expect(out).toEqual(["out-1", "out-2", "out-3"]);
+    expect(inn).toEqual(["in-1", "in-2", "in-3"]);
+    /* ⚠️ AND QUERIED IS RUNG ONE, NOT A TINTLESS SPECIAL CASE. The retired scheme gave it parchment
+       and no tint at all; the ladder gives it the palest sage, which is what makes Queried and Full
+       Sent distinguishable — the whole reason the ladder replaced the courts. */
+    expect(stageFor(QueryStatus.QUERIED)).not.toBe(stageFor(QueryStatus.FULL_SENT));
+  });
+
+  it("cardFacts carries the stage, and it is the same function's answer", () => {
+    for (const s of Object.values(QueryStatus)) {
+      const f = cardFacts({ ...q({}), status: s }, TODAY, { agencyWeeks: 8 });
+      expect(f.stage, `cardFacts disagrees with stageFor for ${s}`).toBe(stageFor(s));
+    }
+  });
+
+  it("⚠️ all eight rungs are declared, flat, and nothing reads a retired turn token", () => {
+    const f12 = readFileSync(resolve(__dirname, "../components/shell/f12.css"), "utf8");
+    const decls = f12.replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const k of ["out-1", "out-2", "out-3", "in-1", "in-2", "in-3", "offer", "closed"]) {
+      expect(decls, `--stage-${k} is not declared`).toMatch(new RegExp(`--stage-${k}\\s*:\\s*#[0-9a-f]{6}`, "i"));
+    }
+    expect(decls, "a retired turn token is still declared").not.toMatch(/--turn-[a-z-]+\s*:/);
   });
 });

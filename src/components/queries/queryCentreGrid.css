@@ -5,6 +5,22 @@
  * The browsing grid's stage: group headings and the quick-filter row. The CARD's own styling is
  * `queryCard.css` — one sheet per object, so a change to a heading cannot reach a card.
  */
+/**
+ * ⚠️ ONE ELEMENT DECLARES THE CAP AND EVERY ROW INHERITS IT. The ref caps `.quick`, `.toolbar`,
+ * `.active`, `.stage` and `.pfoot` at 1480 individually and centres each — five declarations that
+ * must agree. A single capped column cannot disagree with itself, which is the whole point: the
+ * toolbar's left edge IS the grid's left edge, structurally, rather than by two numbers matching.
+ *
+ * ⚠️ AND THE HERO IS OUTSIDE IT, deliberately — it keeps its own width, so the cap starts at the
+ * quick row. Measured before: at 2560 these rows ran 1660px wide, uncapped.
+ */
+.qcc-col { max-width: 1480px; margin-inline: auto; width: 100%; }
+
+/* ⚠️ SCOPED TO THE BROWSING COLUMN. `.f12-lsearch` is shared with the record view, where it is a
+   grid cell that SHOULD grow; a bare rule would shrink it there too. Measured before: 962px at
+   1440 and 1522px at 2560, because it was `flex: 1 1 0%` and took whatever was left. */
+.qcc-col .f12-lsearch { flex: 0 0 260px; }
+
 .qcc-stage { display: flex; flex-direction: column; gap: 26px; }
 .qcc-sec { display: flex; flex-direction: column; gap: 14px; }
 
@@ -28,7 +44,7 @@
 .qcc-qf-n { font-family: var(--font-mono); font-size: 10px; color: #9c8878; }
 /* ⚠️ ACTIVE IS PARCHMENT AND AN INK EDGE — never pink. Pink is the CTA fill on this page, and a
    pink pill in a filter row reads as the thing to press rather than the thing you chose. */
-.qcc-qf[aria-pressed="true"] { background: var(--turn-sand-ground); border-color: var(--ink, #1c130f); color: var(--ink, #1c130f); }
+.qcc-qf[aria-pressed="true"] { background: #fdfaf5; border-color: var(--ink, #1c130f); color: var(--ink, #1c130f); }
 .qcc-qf[aria-pressed="true"] .qcc-qf-n { color: var(--ink, #1c130f); }
 .qcc-qf-sep { width: 0.5px; height: 20px; background: #d8ccbc; margin: 0 4px; }
 /* The overdue toggle wears the card's own marker, so the two read as one idea. */

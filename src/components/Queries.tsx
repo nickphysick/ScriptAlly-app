@@ -65,9 +65,11 @@ import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitl
 import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
 import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
-import { cardFacts, turnFor, type Turn } from "../lib/queryCardFacts";
+import { cardFacts, cardMaterials, turnFor, MATERIAL_SLOTS, type Turn } from "../lib/queryCardFacts";
+import { MATERIAL_ROW_NAMES } from "../lib/agentMaterials";
 import {
-  QUICK_FILTERS, quickCounts, GRID_GROUPS,
+  QUICK_FILTERS, quickCounts, GRID_GROUPS, GRID_SORTS,
+  emptyGridFilters, gridFiltersAreEmpty, gridFilterCount, matchesGridFilters, type GridFilters,
   type QuickKey, type GroupKey,
 } from "../lib/queryCentreGrid";
 import { measureFlip, playFlip, clearFlip, type FlipRects } from "../lib/flip";
@@ -1678,6 +1680,23 @@ export const Queries: React.FC<{
    * week and cannot see you asked.
    */
   const [gridGroup, setGridGroup] = useState<GroupKey>("none");
+  /**
+   * ⚠️ THE THREE FACETS THE PAGE DID NOT HAVE — agency, how it was sent, and what went with it.
+   * `GridFilters` and `matchesGridFilters` were built and unit-locked in §3a and mounted NOWHERE,
+   * which is the "hardening something nothing renders" fault this repo has an audit about. This is
+   * the wiring; the derivation is unchanged.
+   *
+   * ⚠️ SEPARATE FROM `statusSel` AND `turnFilter` DELIBERATELY. Those are the page's own facets and
+   * the record view's popover reads them; these are the ref's, and folding them into one bag would
+   * make `resetAllFilters` a thing that clears two vocabularies at once.
+   */
+  const [gridFilters, setGridFilters] = useState<GridFilters>(emptyGridFilters);
+  const toggleFacet = (facet: keyof GridFilters, value: string) =>
+    setGridFilters((f) => {
+      const next = new Set(f[facet]);
+      if (next.has(value)) next.delete(value); else next.add(value);
+      return { ...f, [facet]: next };
+    });
   const [groupPopOpen, setGroupPopOpen] = useState(false);
   const [statusSel, setStatusSel] = useState<QueryStatus[]>([]);     // committed live (no draft/Apply)
   const [selectedManuscriptFilter, setSelectedManuscriptFilter] = useState<string>("All");
@@ -1768,13 +1787,15 @@ export const Queries: React.FC<{
     filterPopOpen, { placement: "auto", align: "right", constrain: true, menuRef: filterPopRef },
   );
   const { triggerRef: sortTrigRef, menuStyle: sortMenuStyle } = useFixedMenu<HTMLButtonElement>(
-    sortPopOpen, { placement: "auto", align: "right", constrain: true, menuRef: sortPopRef },
+    /* ⚠️ `auto` RATHER THAN A FIXED SIDE — these three sit in a row, so which of them is past the
+       midline changes with the viewport and with the cap. A hard-coded side is right at one width. */
+    sortPopOpen, { placement: "auto", align: "auto", constrain: true, menuRef: sortPopRef },
   );
   /* The grid's Group control. Same anchoring contract as Sort — one popover mechanism on this
      page, never a second. It aligns LEFT because it sits at the left of the quick row. */
   const groupPopRef = useRef<HTMLElement>(null);
   const { triggerRef: groupTrigRef, menuStyle: groupMenuStyle } = useFixedMenu<HTMLButtonElement>(
-    groupPopOpen, { placement: "auto", align: "left", constrain: true, menuRef: groupPopRef },
+    groupPopOpen, { placement: "auto", align: "auto", constrain: true, menuRef: groupPopRef },
   );
   // 5d — reading-pane click-to-pick: send method + manuscript, constrained to valid values, written
   // straight to the query (updateQuery is a plain patch; both keys are in the query update allowlist)
@@ -2504,6 +2525,24 @@ export const Queries: React.FC<{
     if (turnFilter === "offer" && turnFor(q.status as QueryStatus) !== "offer") return false;
     if (turnFilter === "closed" && turnFor(q.status as QueryStatus) !== "closed") return false;
 
+    /* The ref's four facets. Ticks WITHIN one are alternatives; the facets narrow each other. */
+    if (!gridFiltersAreEmpty(gridFilters)) {
+      const ag = agents.find((a) => a.id === q.agentId);
+      const { materials } = cardMaterials(q.materialsWanted);
+      const slots = new Set(
+        (Object.keys(materials) as (keyof typeof materials)[]).filter((k) => materials[k]),
+      );
+      if (!matchesGridFilters(
+        {
+          id: q.id, status: q.status as QueryStatus, turn: turnFor(q.status as QueryStatus),
+          agency: agentAgencyLine(ag), name: agentPrimary(ag),
+          lastMs: null, sentMs: null, expectedMs: null,
+          via: sendMethodLabel(q.sendMethod), slots,
+        },
+        gridFilters,
+      )) return false;
+    }
+
     // Status multi-select — the exact QueryStatus strings; only a partial selection filters.
     if (statusFilterActive && !statusSel.includes(q.status as QueryStatus)) return false;
 
@@ -2684,10 +2723,24 @@ export const Queries: React.FC<{
   // ── F12 active-filter chips + the FILTER / SORT popovers (ref queries-hub-v14.html) ──
   const resetAllFilters = () => {
     setTurnFilter("all"); setStatusSel([]); setSelectedManuscriptFilter("All");
+    /* ⚠️ BUILT, NEVER TYPED OUT — a hand-written literal here is how a facet added later silently
+       stops being cleared, which has happened on the agent list to the door facet. */
+    setGridFilters(emptyGridFilters());
     setNeedsOverdue(false); setNeedsTasks(false);
   };
   const activeFilterChips: { key: string; label: string; remove: () => void }[] = [
     ...(turnFilter !== "all" ? [{ key: "turn", label: TURN_CHIP_LABEL[turnFilter], remove: () => setTurnFilter("all") }] : []),
+    /* Every tick is its own removable chip — one that cleared a whole facet would take away
+       choices the writer did not make. */
+    ...(["agency", "via", "included"] as const).flatMap((facet) =>
+      [...gridFilters[facet]].map((v) => ({
+        key: `${facet}:${v}`,
+        label: (facet === "included"
+          ? `WITH ${MATERIAL_ROW_NAMES[v as keyof typeof MATERIAL_ROW_NAMES] ?? v}`
+          : v).toUpperCase(),
+        remove: () => toggleFacet(facet, v),
+      })),
+    ),
     ...(selectedManuscriptFilter !== "All" ? [{ key: "ms", label: (manuscriptsWithQueries.find(m => m.id === selectedManuscriptFilter)?.title || "MANUSCRIPT").toUpperCase(), remove: () => setSelectedManuscriptFilter("All") }] : []),
     ...(statusFilterActive ? statusSel.map(s => ({ key: `st:${s}`, label: (s === QueryStatus.REVISE_RESUBMIT ? "R&R" : s).toUpperCase(), remove: () => setStatusSel(prev => prev.filter(x => x !== s)) })) : []),
     ...(needsOverdue ? [{ key: "overdue", label: "OVERDUE FOR A REPLY", remove: () => setNeedsOverdue(false) }] : []),
@@ -2754,6 +2807,33 @@ export const Queries: React.FC<{
                 sub="Sent before you named your versions" onClick={() => setVersionFilter(UNRECORDED_VERSION)} />
         </PopSection>
       )}
+      {/* ⚠️ THREE FACETS BUILT FROM THE DATA, NOT FROM A CONSTANT. An agency list typed into the
+          source goes stale the first time a writer adds an agent; these enumerate the scoped set,
+          so an option exists exactly when a query carrying that value does. */}
+      <PopSection label="Agency">
+        {[...new Set(mastheadScopedQueries.map((q) => agentAgencyLine(agents.find((a) => a.id === q.agentId))))]
+          .filter(Boolean).sort().slice(0, 12).map((ag) => (
+            <PRow key={ag} kind="box" on={gridFilters.agency.has(ag)} label={ag}
+              onClick={() => toggleFacet("agency", ag)} />
+          ))}
+      </PopSection>
+
+      <PopSection label="Sent via">
+        {[...new Set(mastheadScopedQueries.map((q) => sendMethodLabel(q.sendMethod)))]
+          .filter(Boolean).sort().map((v) => (
+            <PRow key={v} kind="box" on={gridFilters.via.has(v)} label={v}
+              onClick={() => toggleFacet("via", v)} />
+          ))}
+      </PopSection>
+
+      {/* ⚠️ "INCLUDED" MEANS ALL OF THEM — it describes the parcel, not a shortlist. Locked. */}
+      <PopSection label="Included">
+        {MATERIAL_SLOTS.map((k) => (
+          <PRow key={k} kind="box" on={gridFilters.included.has(k)} label={MATERIAL_ROW_NAMES[k]}
+            onClick={() => toggleFacet("included", k)} />
+        ))}
+      </PopSection>
+
       <PopSection label="Manuscript">
         <PRow kind="rad" on={selectedManuscriptFilter === "All"} label="All manuscripts" onClick={() => setSelectedManuscriptFilter("All")} />
         {manuscriptsWithQueries.map(m => (
@@ -4798,7 +4878,7 @@ export const Queries: React.FC<{
            * different sets of the same queries — which is the failure a second data path would make
            * inevitable and invisible.
            */
-          <>
+          <div className="qcc-col">
             {/* ⚠️ THE COUNTS ARE THE WHOLE SET'S, AND THE PILLS NARROW IT. A pill that stated the
                 filtered figure would read `0` for every court you were not currently in, which
                 turns a set of counts into a set of tautologies. */}
@@ -4815,7 +4895,7 @@ export const Queries: React.FC<{
                     <span
                       className="qcc-qf-sw"
                       aria-hidden="true"
-                      style={{ background: `linear-gradient(135deg, var(--turn-${f.swatch}-a), var(--turn-${f.swatch}-b))` }}
+                      style={{ background: `var(--stage-${f.swatch})` }}
                     />
                   )}
                   {f.label}
@@ -4875,7 +4955,7 @@ export const Queries: React.FC<{
                 Export CSV
               </button>
             </div>
-          </>
+          </div>
         ) : (
         <div data-qc-fade={fadeIn ? "in" : undefined} className="f12-body">
           {/* ⚠️ §3 · ONE HAIRLINE UNDER THE WHOLE BAR. A grid child spanning both columns, so it

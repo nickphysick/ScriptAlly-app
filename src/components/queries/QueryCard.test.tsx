@@ -148,18 +148,36 @@ describe("⚠️ the materials cluster is absent, not empty, when nothing is rec
 });
 
 describe("the band, the leaf and the marker say what the facts say", () => {
-  it("the turn class is the derived turn — not re-derived here", () => {
-    for (const [over, turn] of [
-      [{}, "sand"],
-      [{ status: QueryStatus.FULL_REQUESTED, lastStatusChange: ago(3) }, "you"],
-      [{ status: QueryStatus.FULL_SENT, fullSentDate: ago(10), lastStatusChange: ago(10) }, "agent"],
-      [{ status: QueryStatus.OFFER, lastStatusChange: ago(1) }, "offer"],
-      [{ status: QueryStatus.REJECTED, lastStatusChange: ago(1) }, "closed"],
+  /**
+   * ⚠️ RETARGETED, AND THE LAW IS UNCHANGED: the band's class comes from the DERIVATION and is
+   * never re-decided in the component. What moved is which derivation — the band is the tint
+   * ladder's rung (`stage`, eight of them) rather than the court (`turn`, five), because Queried
+   * and Full Sent shared a colour under the courts and the ladder exists to separate them.
+   * Both halves are asserted, since `turn` still drives the filters and the grouping.
+   */
+  it("the band class is the derived STAGE — not re-derived here", () => {
+    for (const [over, stage, turn] of [
+      [{}, "out-1", "sand"],
+      [{ status: QueryStatus.PARTIAL_SENT, partialSentDate: ago(9), lastStatusChange: ago(9) }, "out-2", "agent"],
+      [{ status: QueryStatus.FULL_SENT, fullSentDate: ago(10), lastStatusChange: ago(10) }, "out-3", "agent"],
+      [{ status: QueryStatus.PARTIAL_REQUESTED, lastStatusChange: ago(3) }, "in-1", "you"],
+      [{ status: QueryStatus.FULL_REQUESTED, lastStatusChange: ago(3) }, "in-2", "you"],
+      [{ status: QueryStatus.REVISE_RESUBMIT, lastStatusChange: ago(3) }, "in-3", "you"],
+      [{ status: QueryStatus.OFFER, lastStatusChange: ago(1) }, "offer", "offer"],
+      [{ status: QueryStatus.REJECTED, lastStatusChange: ago(1) }, "closed", "closed"],
     ] as const) {
       const { html, facts } = render(over as Partial<Query>);
+      expect(facts.stage, `stage for ${JSON.stringify(over)}`).toBe(stage);
       expect(facts.turn).toBe(turn);
-      expect(html, `${turn} card lost its class`).toContain(`qcc--${turn}`);
+      expect(html, `${stage} card lost its band class`).toContain(`qcc--s-${stage}`);
       expect(html).toContain(`data-qcc-turn="${turn}"`);
+    }
+  });
+
+  it("⚠️ the retired court classes are gone from the rendered card", () => {
+    const { html } = render({});
+    for (const c of ["qcc--sand", "qcc--you", "qcc--agent"]) {
+      expect(html, `${c} is still emitted`).not.toMatch(new RegExp(`["\\s]${c}["\\s]`));
     }
   });
 
@@ -218,11 +236,21 @@ describe("⚠️ the stylesheet's own traps", () => {
     for (const f of frames) expect(f, "a keyframe block reads a token").not.toContain("var(");
   });
 
-  it("every turn token the sheet reads is one the page declares", () => {
+  it("every stage token the sheet reads is one the page declares", () => {
     const f12 = readFileSync(join(process.cwd(), "src/components/shell/f12.css"), "utf8");
-    const read = new Set((decls(css).match(/var\((--turn-[a-z-]+)/g) ?? []).map((m) => m.slice(4)));
-    expect(read.size, "the sheet reads no turn token at all").toBeGreaterThan(4);
+    const read = new Set((decls(css).match(/var\((--stage-[a-z0-9-]+)/g) ?? []).map((m) => m.slice(4)));
+    expect(read.size, "the sheet reads no stage token at all").toBeGreaterThan(6);
     for (const t of read) expect(f12, `${t} is read but never declared`).toContain(`${t}:`);
+  });
+
+  it("⚠️ the retired turn tints are GONE, not left inert", () => {
+    /* Bounded so `--turn-` cannot match some future longer token by prefix. */
+    for (const [what, src] of [["QueryCard.tsx", tsx], ["queryCard.css", css]] as const) {
+      expect(decls(src), `${what} still reads a retired turn token`).not.toMatch(/var\(--turn-/);
+      expect(decls(src), `${what} still emits a retired court class`).not.toMatch(/qcc--(sand|you|agent)\b/);
+    }
+    /* the rejected sand pair from the ref's own demo toggle */
+    expect(decls(css)).not.toMatch(/#f7ebd7|#f1e1c8/i);
   });
 
   it("⚠️ hover changes the shadow and never the transform — a lift fights the grid's FLIP", () => {

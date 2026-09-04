@@ -15,7 +15,7 @@
  * anywhere on this page is how two counts of the same thing come to disagree.
  */
 import { QueryStatus } from "../types";
-import { turnFor, turnWordFor, type Turn } from "./queryCardFacts";
+import { turnFor, turnWordFor, type Turn, type Stage } from "./queryCardFacts";
 
 /* ── quick filters ──────────────────────────────────────────────────────────────────────────── */
 
@@ -27,10 +27,16 @@ export type QuickKey = "all" | "you" | "agent" | "offer" | "closed";
  * because "with the agent" is the question being asked. Splitting them here would give a writer
  * two pills that both mean "waiting" and no pill that means "everything I am waiting on".
  */
-export const QUICK_FILTERS: readonly { key: QuickKey; label: string; swatch: Turn | null }[] = [
+/**
+ * ⚠️ THE SWATCH IS A LADDER RUNG, NOT A COURT — and the MIDDLE rung of each, deliberately. A pill
+ * standing for three statuses cannot show three tints, so it shows the one in the middle: `in-2`
+ * for With you, `out-2` for With the agent. Taking rung 1 would make both pills nearly white and
+ * indistinguishable from each other; taking rung 3 would advertise the deepest case as the norm.
+ */
+export const QUICK_FILTERS: readonly { key: QuickKey; label: string; swatch: Stage | null }[] = [
   { key: "all", label: "All", swatch: null },
-  { key: "you", label: "With you", swatch: "you" },
-  { key: "agent", label: "With the agent", swatch: "agent" },
+  { key: "you", label: "With you", swatch: "in-2" },
+  { key: "agent", label: "With the agent", swatch: "out-2" },
   { key: "offer", label: "Offers", swatch: "offer" },
   { key: "closed", label: "Closed", swatch: "closed" },
 ];
@@ -209,4 +215,4 @@ export function matchesGridFilters(
 }
 
 export { turnFor, turnWordFor };
-export type { Turn };
+export type { Turn, Stage };

@@ -374,3 +374,52 @@ Gate (isolated worktree, this pass's files on clean `HEAD`): **tsc 0 · build:de
 failed / 7462 passed**. The red is `datePickerHub`, another stream's, unchanged since baseline.
 `functions/src/email.test.ts` fails to COLLECT in the worktree only — it lacks
 `functions/node_modules`; it passes 9/9 in the primary tree.
+
+---
+
+## Correction pass 2 — the stage ladder, the 1480 cap, and a rulesheet that does not exist
+
+### ⚠️ False premises, at the top as asked
+
+1. **`design-refs/query-tint-ladder.md` is not on this machine.** Searched Downloads, Desktop,
+   Documents and `/tmp`, by name and by pattern. The brief names it as superseding every band
+   colour. §4 was built from the ref's own `:root` and its status→stage map at line 618 — the
+   project's standing authority — so the missing document cost the RATIONALE, not the values.
+   **Anything it says beyond them is unknown to this pass.** The commit is 1 file, not 2.
+2. **There is no `togglePop` in the ref, and nothing toggles `edge`.** `edge` occurs once in the
+   whole file: the CSS rule at line 66. The ref declares the treatment and never applies it.
+3. **§5's leafless cards do not exist on this build.** 54 of 54 carry a leaf; there is exactly one
+   distinct card height. `Daniel O'Rourke` and `Marcus Reed` are the REF's fixtures, and the ref
+   renders its leaf unconditionally too. Almost certainly the pre-pass-1 build, where the leaf's
+   inline children collapsed it to 28px against the ref's 64 — present in the DOM and absent to
+   look at. Fixed by pass 1; now guarded both ways.
+4. **The updated ref was in Downloads as `query-centre (1).html`.** The plain name still held the
+   pass-1 file. Hash verified before copying.
+
+### What was real, and what it cost
+
+| § | finding |
+|---|---|
+| 1 | The rows were **uncapped** — 1660px at 2560 — and the track floor was 380. Now one wrapping column at 1480 that all five rows share, and the ref's 340 floor. 3 columns at 1440, 4 at 2560. |
+| 2 | Search was `flex: 1 1 0%`, measuring **962px at 1440 and 1522px at 2560**. Now `0 0 260px`, scoped to the browsing column. |
+| 3 | Portal: **already true**, no change. Overflow: real — Group's panel at `right: 1388` against vw 1280. Filter gained the three missing facets (24 → 41 rows). |
+| 4 | Bands painted a gradient **image over a transparent colour**. Now flat `background-color`, matching the ref rung for rung. |
+| 5 | Nothing to fix; a guard added so it cannot regress. |
+
+### Two things worth carrying forward
+
+**The edge rule cannot be proved red, and that is reported as unproved rather than as safe.** §1 and
+§2 between them cured the overflow structurally — the trio now sits far enough left that no popover
+runs off the screen whatever its alignment does, even at 1024 where all three triggers cross the
+midline. The rule is correct and cheap and stays; it is simply unfalsifiable in this layout now.
+
+**Dead code from my own §3a was mounted.** `GridFilters` / `matchesGridFilters` / `emptyGridFilters`
+were written and unit-locked in `7f0d5e69` and rendered nowhere. That is the fault this repo has an
+audit about, committed by me, and the Filter facets are where they belong now.
+
+### Open for Nick
+
+**1280 renders 2 columns, not 3.** The app's content column is 1010px there against the ref's 1208 —
+198px narrower, because of the rail. `auto-fill` with the ref's own 340px floor fits two. Three
+would need the floor at ≤323px, i.e. overriding a value the ref states in order to compensate for
+the rail. Flagged rather than changed; one line if wanted.

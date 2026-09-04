@@ -30,8 +30,18 @@ export function useFixedMenu<T extends HTMLElement = HTMLDivElement>(
      * ⚠️ "left" IS THE DEFAULT AND EVERY EXISTING CALLER KEEPS IT. A right-aligned menu is what a
      * trigger near the right of its container needs — anchored left, a 288px panel hung off a 40px
      * icon reaches 248px into whatever is beside it.
+     *
+     * ⚠️ "auto" PICKS THE SIDE FROM WHERE THE TRIGGER SITS — right-aligned once its left edge is
+     * past the viewport's midline, left-aligned otherwise. It exists because the `left` branch
+     * clamps the trigger's edge and knows NOTHING of the menu's own width: a 260px panel hung off
+     * a trigger at x=1128 in a 1280 viewport computes a perfectly legal `left: 1128` and renders
+     * 108px off the screen. Measured on the Query Centre's Group popover, whose right edge came
+     * back at 1388 against a viewport of 1280.
+     *
+     * ⚠️ AND IT IS A THIRD VALUE RATHER THAN A CHANGE TO `left`. Every existing caller keeps the
+     * behaviour it was tuned with; only a caller that asks gets the new one.
      */
-    align?: "left" | "right";
+    align?: "left" | "right" | "auto";
     /**
      * Hold the menu inside the viewport, and cap its height to the room it has (§8).
      *
@@ -80,7 +90,9 @@ export function useFixedMenu<T extends HTMLElement = HTMLDivElement>(
        * the bottom. `EDGE` keeps it clear of the window's own edge.
        */
       const EDGE = 8;
-      const side = align === "right"
+      /* the midline rule — resolved per open, so a resize or a scroll re-decides it */
+      const side_ = align === "auto" ? (r.left > window.innerWidth / 2 ? "right" : "left") : align;
+      const side = side_ === "right"
         ? { right: Math.max(EDGE, window.innerWidth - r.right), left: "auto" as const }
         : { left: Math.min(r.left, window.innerWidth - EDGE), right: "auto" as const };
       const room = up ? r.top - GAP - EDGE : window.innerHeight - r.bottom - EDGE;

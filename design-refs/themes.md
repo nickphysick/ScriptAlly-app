@@ -61,13 +61,49 @@ Declared in `:root` (`src/index.css`) and consumed by every theme. Type families
 **StatusDot:** never restyled by theme CSS — its palette is a component token (`--sd-hue` / `--sd-centre`, listed per theme below). Direction/stage is carried by shape, not colour. Pro pills always stay slate regardless of theme.
 
 
-### Query Centre turn tints (`--turn-*`) — theme-independent, `.t-f12`
+### Query Centre stage ladder (`--stage-*`) — theme-independent, `.t-f12`
 
-Whose court a query is in. Declared once on `.t-f12` (`src/components/shell/f12.css`), which is
-theme-independent like every other `--qc-*` token on that page.
+How far a query has travelled, and in which direction. Eight FLAT tokens declared once on `.t-f12`
+(`src/components/shell/f12.css`). **Supersedes the four `--turn-*` pairs and the sand trio, which
+are deleted rather than left inert.**
 
-| Token | Value | Controls |
+| Token | Value | Status |
 |---|---|---|
+| `--stage-out-1` | `#e6eae3` | Queried |
+| `--stage-out-2` | `#d7ddd3` | Partial Sent |
+| `--stage-out-3` | `#c7d0c2` | Full Sent |
+| `--stage-in-1` | `#f8e9e2` | Partial Requested |
+| `--stage-in-2` | `#f1dbd0` | Full Requested |
+| `--stage-in-3` | `#e8c9bb` | Revise & Resubmit |
+| `--stage-offer` | `#d7e0e8` | Offer, while open |
+| `--stage-closed` | `#e4e1db` | Rejected · Withdrawn · No Response · anything unrecognised |
+
+⚠️ **Two ladders from the same pale first rung, and the depth is the message.** OUT deepens as the
+query travels further with the agent; IN deepens as more is asked of the writer. The five flat
+courts this replaces could not express it — Queried and Full Sent were the same colour.
+
+⚠️ **Flat, never a gradient**, and painted as `background-color` rather than the `background`
+shorthand: the shorthand resets the colour to transparent, so a gradient becomes the only fill and
+the band is see-through the moment a stop fails to resolve.
+
+⚠️ **Still whose-move, never good-or-bad.** Sage runs out, pink runs in, blue is an offer, grey is
+closed. No red, and no ninth token for "late" — overdue is the ink `!` ring on a card that keeps
+its own rung.
+
+⚠️ **One mapping, exported**: `stageFor(status)` in `src/lib/queryCardFacts.ts`, read by the card
+band, the leaf's month strip and the quick-filter swatches. The swatches take the MIDDLE rung of
+each ladder (`in-2`, `out-2`) because a pill standing for three statuses cannot show three tints.
+
+⚠️ **Bold Pastille and Editorial: `TODO`.** Both read the values above today — deliberately and
+visibly, rather than reading nothing, since a `var()` whose defining scope is not an ancestor
+paints nothing at all. Override site: `.t-bold .t-f12` / `.t-edn .t-f12`.
+
+⚠️ **`design-refs/query-tint-ladder.md` does not exist on this machine.** Every value and the whole
+mapping above came from `design-refs/query-centre.html` (its `:root`, and the status→stage map at
+line 618), which is the project's standing authority. Anything that rulesheet says beyond the
+values is unknown here.
+
+---|---|---|
 | `--turn-you-a` / `--turn-you-b` | `#f5e3db` / `#efd7cc` | **With you** — Partial Requested, Full Requested, R&R |
 | `--turn-agent-a` / `--turn-agent-b` | `#dce0d9` / `#d0d6cc` | **Deeper with the agent** — Partial Sent, Full Sent |
 | `--turn-offer-a` / `--turn-offer-b` | `#dde5ec` / `#d1dbe4` | **Offer**, while open |

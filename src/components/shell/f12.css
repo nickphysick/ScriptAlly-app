@@ -4565,43 +4565,45 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
  */
 .qc-addmat-quiet { visibility: hidden; position: absolute; pointer-events: none; }
 
-/* ══ THE TURN TINTS — whose court a query is in ═══════════════════════════════════════════════
+/* ══ THE STAGE LADDER — how far a query has travelled, in one direction or the other ══════════
  *
- * ⚠️ THE BAND SAYS WHOSE MOVE IT IS, NEVER WHETHER THAT IS GOOD OR BAD. Four pairs, one per turn,
- * and there is deliberately no fifth for "late": overdue is the ink `!` ring and factual copy, so
- * a reader never has to learn that one of these colours means trouble. There is no red on this
- * page and there is no red to add.
+ * ⚠️ EIGHT FLAT TOKENS, AND THE DEPTH IS THE MESSAGE. Two ladders run away from the same pale
+ * first rung: OUT deepens as the query goes further with the agent (Queried → Partial Sent → Full
+ * Sent) and IN deepens as more is asked of the writer (Partial Requested → Full Requested → R&R).
+ * A reader scanning the grid sees progress as saturation, which the five flat courts could not
+ * express — Queried and Full Sent were the same colour.
  *
- * ⚠️ QUERIED TAKES NO TINT AT ALL — parchment plus a hairline (`.qcc--sand`). That is a decision,
- * not a missing pair: the commonest state is the one that should read as quiet, and tinting it
- * would leave the four that mean something competing with a fifth that means "nothing yet".
- * `design-refs/query-centre.html` carries a `--t-sand-*` pair, reachable only under its own
- * `body.fade` demo class — the rejected alternative, shown so the two could be compared. Do not
- * promote it out of the ref.
+ * ⚠️ FLAT, NEVER A GRADIENT. `design-refs/query-centre.html`'s `.s-*` classes set `--band-a` and
+ * `--band-b` to the SAME token for exactly this reason: a gradient across a 20px band reads as a
+ * lighting effect, and it makes two adjacent rungs indistinguishable at the edge where they meet.
  *
- * ⚠️ DECLARED ON `.t-f12`, WHICH IS THEME-INDEPENDENT — as every other `--qc-*` token on this page
- * already is (see the families block above, and `.t-f12 { --qc-reclaim }`). The brief asked for a
- * Cappuccino module with `TODO` rows for the other two themes; there is no such split to write
- * into, because nothing in the app declares `.t-capp .t-f12`. So Bold and Editorial read these
- * values today, deliberately and visibly, rather than reading nothing — a `var()` on a token whose
- * defining scope is not an ancestor paints NOTHING, silently, which is the fault this file has an
- * audit about. If either theme ever wants its own tints the override site is `.t-bold .t-f12` /
- * `.t-edn .t-f12`, and that is recorded in `design-refs/themes.md` rather than left to be guessed.
+ * ⚠️ AND IT STILL SAYS WHOSE MOVE, NEVER WHETHER THAT IS GOOD OR BAD. Sage runs out, pink runs in,
+ * blue is an offer, grey is closed. There is no red and no fifth family for "late": overdue is the
+ * ink `!` ring on a card that keeps its own rung.
+ *
+ * ⚠️ SUPERSEDES the four `--turn-*` pairs and the sand trio entirely — they are deleted, not left
+ * inert, and `queryCardFacts.test.ts` sweeps the stylesheet to keep them gone.
+ *
+ * ⚠️ `design-refs/query-tint-ladder.md`, which the brief names as the authority for these, DOES NOT
+ * EXIST on this machine — searched by name and pattern. Every value and the whole status→stage
+ * mapping came from the ref's own code (`:root` and line 618), which is the standing rule for this
+ * project. What the rulesheet may say BEYOND the values is unknown to this pass.
+ *
+ * ⚠️ DECLARED ON `.t-f12`, which is theme-independent, as every other `--qc-*` on this page is.
+ * Bold and Editorial read these deliberately rather than reading nothing — a `var()` whose defining
+ * scope is not an ancestor paints NOTHING, silently. Override site: `.t-bold .t-f12`.
  */
 .t-f12 {
-  --turn-you-a: #f5e3db;     /* with you — Partial Requested, Full Requested, R&R */
-  --turn-you-b: #efd7cc;
-  --turn-agent-a: #dce0d9;   /* deeper with the agent — Partial Sent, Full Sent */
-  --turn-agent-b: #d0d6cc;
-  --turn-offer-a: #dde5ec;   /* an offer, while it is still open */
-  --turn-offer-b: #d1dbe4;
-  --turn-closed-a: #e9e6e1;  /* closed, rejected, withdrawn, no response */
-  --turn-closed-b: #dfdcd6;
+  /* out — with the agent, deepening as it travels */
+  --stage-out-1: #e6eae3;   /* Queried */
+  --stage-out-2: #d7ddd3;   /* Partial Sent */
+  --stage-out-3: #c7d0c2;   /* Full Sent */
+  /* in — with you, deepening as more is asked */
+  --stage-in-1: #f8e9e2;    /* Partial Requested */
+  --stage-in-2: #f1dbd0;    /* Full Requested */
+  --stage-in-3: #e8c9bb;    /* Revise & Resubmit */
 
-  /* Queried's two: the band's own ground and the rule that closes it. Named so the card reads a
-     token in every state rather than a token in four of five and a literal in the fifth. */
-  --turn-sand-ground: #fdfaf5;
-  --turn-sand-rule: #e4d9cb;
-  /* The calendar leaf's month strip when there is no tint to carry it. */
-  --turn-sand-leaf: #f3ece2;
+  --stage-offer: #d7e0e8;   /* an offer, while it is open */
+  --stage-closed: #e4e1db;  /* closed, rejected, withdrawn, no response */
 }
+
