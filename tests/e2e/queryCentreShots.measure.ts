@@ -24,16 +24,16 @@ test("the browsing grid at four widths", async ({ page }) => {
     });
     // eslint-disable-next-line no-console
     console.log(`  ${width}px → ${cols} columns`);
-    await page.screenshot({ path: `reports/query-centre-shots/pass2-${width}.png`, fullPage: false });
+    await page.screenshot({ path: `reports/query-centre-shots/pass2b-${width}.png`, fullPage: false });
   }
 
   /* ⚠️ AND ONE WITH A POPOVER OPEN, AT THE WIDTH WHERE IT USED TO RUN OFF THE SCREEN. A grid shot
      cannot show a clipped menu; this is the only frame that can. */
   await openRoute(page, "/queries", { width: 1280, height: 900 });
   await expect(page.locator(".qcc").first()).toBeVisible({ timeout: 30_000 });
-  const sort = page.locator('.f12-lhead [aria-label="Sort"]').first();
+  const sort = page.locator(".qcc-tb-btn", { hasText: /^Sort/i }).first();
   await expect(sort).toBeVisible({ timeout: 15_000 });
   await sort.click();
   await page.waitForTimeout(400);
-  await page.screenshot({ path: "reports/query-centre-shots/pass2-1280-sort-open.png", fullPage: false });
+  await page.screenshot({ path: "reports/query-centre-shots/pass2b-1280-sort-open.png", fullPage: false });
 });

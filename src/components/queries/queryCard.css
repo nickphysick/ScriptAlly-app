@@ -19,17 +19,21 @@
 .qcc-grid {
   display: grid;
   /**
-   * ⚠️ 320, AND THE REF MOVED FIRST. Pass 2 measured 340 fitting only TWO cards at 1280 — the app's
-   * content column is 1010px there against the ref's standalone 1208, 198px narrower because of
-   * the rail — and declined to lower it, because overriding a value the ref states is how a build
-   * and its design authority come to disagree quietly. Nick changed the ref instead (`6f790958`,
-   * one line in 107,778 bytes), so this follows it rather than compensating for it.
-   *
-   * The arithmetic, since the count is what the value is FOR: floor((col + 20) / 340) columns.
-   * 1010 → 3 · 1170 → 3 · 1480 → 4. The cap and the floor decide it together; neither alone.
+   * ⚠️ THREE, FIXED — AND IT ENDS TWO PASSES OF ARITHMETIC. The count was emergent from
+   * `auto-fill` plus a track floor, so it differed between the ref's standalone page and an app
+   * column beside a rail: 380 fitted two at 1440, 340 fitted two at 1280, 320 fitted three. Each
+   * fix was correct and each was chasing a number that the container width kept moving.
+   * `repeat(3, …)` cannot drift with either, and `minmax(0, 1fr)` — not `1fr` — is what stops a
+   * long unbroken agency name forcing a track wider than its share.
    */
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
+}
+
+/* ⚠️ TWO BELOW 980, STATED ONCE. The only place a count is still written down rather than derived;
+   three 320px cards plus their gaps need 1000px and the column has less than that here. */
+@media (max-width: 980px) {
+  .qcc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* ── the card ───────────────────────────────────────────────────────────────────────────────── */

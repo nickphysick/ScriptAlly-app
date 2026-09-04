@@ -20,7 +20,9 @@ const REF = "file://" + resolve(process.cwd(), "design-refs/query-centre.html");
 /** Every row that must share the cap: [role, ref selector, built selector]. */
 const ROWS: [string, string, string][] = [
   ["quick", ".quick", ".qcc-quick"],
-  ["toolbar", ".toolbar", ".f12-lhead"],
+  /* ⚠️ RETARGETED, LAW UNCHANGED: "every row shares the cap". The browsing toolbar is `.qcc-tb`
+     since 2b — the ref's labelled row — where it used to be the record view's `.f12-lhead`. */
+  ["toolbar", ".toolbar", ".qcc-tb"],
   ["stage", ".stage", ".qcc-stage"],
   ["grid", ".grid", ".qcc-grid"],
   ["foot", ".pfoot", ".qcc-foot"],
@@ -50,7 +52,7 @@ test("pass 2 — cap, search, popovers, ladder, leaves", async ({ page }) => {
   const out: Record<string, unknown> = {};
 
   /* ── the ref, at both widths ── */
-  for (const width of [1280, 1440, 2560]) {
+  for (const width of [1280, 1440, 1920, 2560]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto(REF);
     await page.waitForTimeout(500);
@@ -77,14 +79,41 @@ test("pass 2 — cap, search, popovers, ladder, leaves", async ({ page }) => {
   );
 
   /* ── the build, at both widths ── */
-  for (const width of [1280, 1440, 2560]) {
+  for (const width of [1280, 1440, 1920, 2560]) {
     await openRoute(page, "/queries", { width, height: 900 });
     await expect(page.locator(".qcc").first()).toBeVisible({ timeout: 30_000 });
     out[`built@${width}`] = await rowGeometry(page, 1);
+    /**
+     * ⚠️ CARDS PER ROW, NOT `gridTemplateColumns.split(" ").length`. The template is what the sheet
+     * ASKS for; how many cards actually share a row's top is what the reader sees, and only the
+     * second survives a card that spans or a track that collapses.
+     *
+     * ⚠️ AND THE CENTRING IS THE TWO MARGINS COMPARED, not the width against a number. A column
+     * capped correctly but pinned left measures the right width and is not centred.
+     */
+    out[`rowShape@${width}`] = await page.evaluate(() => {
+      const col = document.querySelector(".qcc-col") as HTMLElement | null;
+      const grid = document.querySelector(".qcc-grid") as HTMLElement | null;
+      const cards = [...document.querySelectorAll<HTMLElement>(".qcc")];
+      if (!grid || !col || !cards.length) return null;
+      const tops = cards.map((c) => Math.round(c.getBoundingClientRect().top));
+      const firstTop = tops[0];
+      const g = grid.getBoundingClientRect();
+      const host = col.parentElement!.getBoundingClientRect();
+      const tb = document.querySelector(".qcc-tb") as HTMLElement | null;
+      return {
+        perRow: tops.filter((t) => t === firstTop).length,
+        template: getComputedStyle(grid).gridTemplateColumns,
+        leftGap: Math.round(g.left - host.left),
+        rightGap: Math.round(host.right - g.right),
+        toolbarLeft: tb ? Math.round(tb.getBoundingClientRect().left) : null,
+        gridLeft: Math.round(g.left),
+      };
+    });
     out[`builtSearch@${width}`] = await page.evaluate(() => {
       const quick = document.querySelector(".qcc-quick") as HTMLElement | null;
       const scope = quick?.closest(".wpg") as HTMLElement | null;
-      const s = scope?.querySelector(".f12-lsearch") as HTMLElement | null;
+      const s = (scope?.querySelector(".qcc-tb-search") ?? scope?.querySelector(".f12-lsearch")) as HTMLElement | null;
       return s ? { w: Math.round(s.getBoundingClientRect().width), flex: getComputedStyle(s).flex } : null;
     });
   }
@@ -128,7 +157,10 @@ test("pass 2 — cap, search, popovers, ladder, leaves", async ({ page }) => {
   await expect(page.locator(".qcc").first()).toBeVisible({ timeout: 30_000 });
   const pops: Record<string, unknown> = {};
   for (const name of ["Filter", "Group", "Sort"]) {
-    const trig = page.locator(`.qcc-quick ~ * [aria-label="${name}"], .f12-lhead [aria-label="${name}"]`).first();
+    /* ⚠️ BY TEXT NOW — the 2b toolbar's buttons carry their label on the face, so the aria-label
+       the icon triggers needed is gone. Probing for it reported "trigger not found" about three
+       buttons that were on screen. */
+    const trig = page.locator(".qcc-tb-btn", { hasText: new RegExp(`^${name}`, "i") }).first();
     if (!(await trig.count())) { pops[name] = "trigger not found"; continue; }
     await trig.click();
     await page.waitForTimeout(350);
@@ -161,13 +193,33 @@ test("pass 2 — cap, search, popovers, ladder, leaves", async ({ page }) => {
     await page.waitForTimeout(200);
   }
   out.popovers = pops;
+  out.toolbarText = await page.evaluate(() => {
+    const tb = document.querySelector(".qcc-tb") as HTMLElement | null;
+    return tb ? (tb.textContent ?? "").replace(/\s+/g, " ").trim() : "";
+  });
+  /* ⚠️ READ WITH THE POPOVER OPEN, or "no Agency" is true of a panel that is not rendered. */
+  {
+    const trig = page.locator('.qcc-tb-btn', { hasText: "Filter" }).first();
+    if (await trig.count()) {
+      await trig.click();
+      await page.waitForTimeout(350);
+      out.filterHasAgency = await page.evaluate(() => {
+        const panel = document.querySelector(".f12-pop, [role='dialog']") as HTMLElement | null;
+        if (!panel) return "panel not found" as unknown as boolean;
+        return [...panel.querySelectorAll<HTMLElement>(".f12-lbl, .f12-sect-h")]
+          .some((h) => (h.textContent ?? "").trim().toLowerCase() === "agency");
+      });
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(200);
+    } else out.filterHasAgency = "Filter trigger not found" as unknown as boolean;
+  }
 
   /* the narrow pass — same three, plus where each trigger sits relative to the midline */
   await openRoute(page, "/queries", { width: 1024, height: 720 });
   await expect(page.locator(".qcc").first()).toBeVisible({ timeout: 30_000 });
   const narrow: Record<string, unknown> = {};
   for (const name of ["Filter", "Group", "Sort"]) {
-    const trig = page.locator(`.f12-lhead [aria-label="${name}"]`).first();
+    const trig = page.locator(".qcc-tb-btn", { hasText: new RegExp(`^${name}`, "i") }).first();
     if (!(await trig.count())) { narrow[name] = "trigger not found"; continue; }
     const tb = await trig.boundingBox();
     await trig.click();
@@ -257,12 +309,41 @@ test("pass 2 — cap, search, popovers, ladder, leaves", async ({ page }) => {
     expect(lefts.size, `rows do not share a left edge at ${w}: ${[...lefts].join(", ")}`).toBe(1);
     const widths = new Set(present.map(([, v]) => v!.w));
     expect(widths.size, `rows do not share a width at ${w}: ${[...widths].join(", ")}`).toBe(1);
-    expect(rows.grid!.w, `the cap is not honoured at ${w}`).toBeLessThanOrEqual(1480);
+    expect(rows.grid!.w, `the cap is not honoured at ${w}`).toBeLessThanOrEqual(1360);
   }
-  /* the cap must actually BITE at 2560, or the assertion above passes on an uncapped narrow page */
-  expect((out["built@2560"] as Record<string, { w: number }>).grid.w, "the 1480 cap does not bite at 2560").toBe(1480);
-  expect((out["built@1440"] as Record<string, { cols: number }>).grid.cols, "not 3 columns at 1440").toBe(3);
-  expect((out["built@2560"] as Record<string, { cols: number }>).grid.cols, "not 4 columns at 2560").toBe(4);
+  /**
+   * ⚠️ THE CAP IS 1360 NOW, AND THE COLUMN COUNT IS NO LONGER DERIVED FROM IT. Pass 2's assertions
+   * here — "4 columns at 2560", "3 at 1440" — were reading `gridTemplateColumns.split(" ").length`
+   * against an `auto-fill` track floor, so they were really asserting arithmetic between a floor
+   * and a container width. `repeat(3, …)` makes the count a constant, and the 2b block below
+   * asserts something stronger in its place: how many cards actually SHARE A ROW.
+   */
+  expect((out["built@2560"] as Record<string, { w: number }>).grid.w, "the 1360 cap does not bite at 2560").toBe(1360);
+
+  /* ── 2b · three fixed columns, centred, toolbar aligned ─────────────────────────────────── */
+  for (const w of [1280, 1440, 1920, 2560] as const) {
+    const r = out[`rowShape@${w}`] as Record<string, number | string> | null;
+    expect(r, `no grid measured at ${w}`).toBeTruthy();
+    expect(r!.perRow, `${w}: ${r!.perRow} cards in the first row, not 3`).toBe(3);
+    expect(String(r!.template).split(" ").length, `${w}: the template is not three tracks`).toBe(3);
+    /* centred: the two margins agree within a pixel of rounding */
+    expect(Math.abs((r!.leftGap as number) - (r!.rightGap as number)),
+      `${w}: not centred — left ${r!.leftGap}, right ${r!.rightGap}`).toBeLessThanOrEqual(1);
+    expect(Math.abs((r!.toolbarLeft as number) - (r!.gridLeft as number)),
+      `${w}: the toolbar does not start where the grid does`).toBeLessThanOrEqual(1);
+  }
+
+  /* ── 2b · the toolbar is labelled and states its current values ──────────────────────────── */
+  const tbText = out.toolbarText as string;
+  for (const word of ["Filter", "Group", "Sort", "Log new query"]) {
+    expect(tbText, `the toolbar does not say "${word}"`).toContain(word);
+  }
+  /* ⚠️ THE VALUE ON THE FACE IS THE WHOLE REASON THESE ARE NOT ICONS. */
+  expect(tbText, "Group does not show its current value").toMatch(/Group\s*None/i);
+  expect(tbText, "Sort does not show its current value").toMatch(/Sort\s*Last activity/i);
+
+  /* ── 2b · no Agency facet ────────────────────────────────────────────────────────────────── */
+  expect(out.filterHasAgency, "the Filter popover still offers an Agency facet").toBe(false);
 
   /* ── §2 · the search does not grow ───────────────────────────────────────────────────────── */
   for (const w of [1440, 2560] as const) {

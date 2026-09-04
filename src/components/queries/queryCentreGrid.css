@@ -14,12 +14,63 @@
  * ⚠️ AND THE HERO IS OUTSIDE IT, deliberately — it keeps its own width, so the cap starts at the
  * quick row. Measured before: at 2560 these rows ran 1660px wide, uncapped.
  */
-.qcc-col { max-width: 1480px; margin-inline: auto; width: 100%; }
+.qcc-col { max-width: 1360px; margin-inline: auto; width: 100%; }
 
-/* ⚠️ SCOPED TO THE BROWSING COLUMN. `.f12-lsearch` is shared with the record view, where it is a
-   grid cell that SHOULD grow; a bare rule would shrink it there too. Measured before: 962px at
-   1440 and 1522px at 2560, because it was `flex: 1 1 0%` and took whatever was left. */
-.qcc-col .f12-lsearch { flex: 0 0 260px; }
+/* ══ THE TOOLBAR ═════════════════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ LABELLED, NOT ICONS — and this SUPERSEDES a standing decision rather than ignoring one.
+ * `PillTrig` has been a 36px icon button since v5 P1, on the reasoning that "the word lives in the
+ * title, the aria-label and the popover's own header". That holds for a control row over a list
+ * where space is scarce; it does not hold here, where the ref draws the current VALUE on the
+ * button's face (`Group None`, `Sort Last activity`) — a thing an icon cannot say at all, and the
+ * reason a reader can tell how the grid is arranged without opening anything.
+ *
+ * ⚠️ THE POPOVERS ARE THE SAME ONES. Only the trigger's presentation differs: `renderFilterPopover`
+ * / `renderGroupPopover` / `renderSortPopover`, their refs and their state are untouched, so the
+ * record view's icon triggers and these cannot disagree about what is selected.
+ */
+.qcc-tb { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.qcc-tb-search {
+  display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #e6dccf;
+  border-radius: 9px; padding: 9px 13px;
+  /* ⚠️ FIXED. Measured before the cap: it was `flex: 1 1 0%` and took 962px at 1440, 1522 at 2560. */
+  flex: 0 0 260px;
+}
+.qcc-tb-search input {
+  flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font: inherit;
+  font-size: 13px; color: var(--ink, #1c130f);
+}
+.qcc-tb-search input::placeholder { color: #a08a78; }
+.qcc-tb-kbd {
+  font-family: var(--font-mono); font-size: 9px; color: #a08a78; border: 1px solid #e6dccf;
+  border-radius: 4px; padding: 1px 5px; flex: none;
+}
+.qcc-tb-btn {
+  display: inline-flex; align-items: center; gap: 7px; background: #fff; border: 1px solid #e6dccf;
+  border-radius: 9px; padding: 9px 14px; cursor: pointer; position: relative;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase;
+  color: #6a5a50;
+}
+.qcc-tb-btn:hover { border-color: #cdbfae; }
+.qcc-tb-btn .qcc-tb-chev { transition: transform 0.15s; }
+.qcc-tb-btn[aria-expanded="true"] .qcc-tb-chev { transform: rotate(180deg); }
+/* the chosen value, in ink — the whole reason these are not icons */
+.qcc-tb-val { color: var(--ink, #1c130f); }
+.qcc-tb-cnt {
+  font-size: 9px; background: var(--pink, #f5e2da); border: 1px solid var(--pink-b, #e8c8bc);
+  color: #3a1c14; border-radius: 99px; padding: 1px 7px;
+}
+.qcc-tb-spacer { flex: 1; }
+.qcc-tb-primary {
+  display: inline-flex; align-items: center; gap: 8px; background: var(--pink, #f5e2da);
+  border: 1px solid var(--pink-b, #e8c8bc); border-radius: 10px; padding: 11px 20px; cursor: pointer;
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #3a1c14;
+}
+.qcc-tb-primary:hover { background: var(--pink-h, #efd5ca); }
+.qcc-tb-primary[disabled] { opacity: 0.5; cursor: default; }
+
+@media (prefers-reduced-motion: reduce) { .qcc-tb-btn .qcc-tb-chev { transition: none; } }
 
 .qcc-stage { display: flex; flex-direction: column; gap: 26px; }
 .qcc-sec { display: flex; flex-direction: column; gap: 14px; }

@@ -179,6 +179,18 @@ export function compareRows(a: GridRow, b: GridRow, key: SortKey): number {
 
 export interface GridFilters {
   status: ReadonlySet<string>;
+  /**
+   * @deprecated Not a filter facet — decision 2, and the ref removed the column in `1ce96f02`.
+   *
+   * ⚠️ THE MEMBER STAYS AND THE UI GOES. Deleting it would be the tidier diff and the worse change:
+   * `emptyGridFilters` builds every facet rather than listing them, `gridFilterCount` sums them all
+   * and `matchesGridFilters` narrows on each, so an empty set here costs nothing and keeps those
+   * three honest if anything else ever reads it. What it must NOT have is a control — an option
+   * that filters is a promise, and this one is no longer offered.
+   *
+   * ⚠️ AND IT IS ALWAYS EMPTY IN PRACTICE, which `queryCentreGrid.test.ts` asserts: nothing writes
+   * it, so `matchesGridFilters` skips it, so it cannot silently narrow the grid.
+   */
   agency: ReadonlySet<string>;
   via: ReadonlySet<string>;
   /** Material slots that must ALL be present — `queryLetter`, `synopsis`, `sample`, `other`. */

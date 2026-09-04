@@ -1698,6 +1698,20 @@ export const Queries: React.FC<{
       return { ...f, [facet]: next };
     });
   const [groupPopOpen, setGroupPopOpen] = useState(false);
+
+  /**
+   * ⚠️ THE `/` HINT IS WIRED, NOT DRAWN. The ref puts a keycap inside the search field; this repo
+   * has a standing rule three files over (`SearchPalette.tsx`) that "a hint for a key that does
+   * nothing is worse than no hint: it teaches a gesture and then fails silently". So either the key
+   * works or the cap comes off.
+   *
+   * ⚠️ AND `/` IS UNOWNED, WHICH IS WHY THIS IS SAFE. `usePalette` registers ⌘K and nothing else;
+   * grepping found no other `/` handler. One registration, as the shell's rule requires.
+   *
+   * ⚠️ SKIPPED WHILE AN EDITABLE HAS FOCUS — otherwise typing a slash into any field on the page
+   * would yank the cursor into this one.
+   */
+  const browseSearchRef = useRef<HTMLInputElement>(null);
   const [statusSel, setStatusSel] = useState<QueryStatus[]>([]);     // committed live (no draft/Apply)
   const [selectedManuscriptFilter, setSelectedManuscriptFilter] = useState<string>("All");
   const [needsOverdue, setNeedsOverdue] = useState(false);
@@ -2687,6 +2701,23 @@ export const Queries: React.FC<{
    * lives on the agent record and is never stored on the query; handing it in at the one place the
    * agent is already resolved is what stops a card reaching for it.
    */
+  useEffect(() => {
+    if (!routeActive || activeQuery) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      const tag = t?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || t?.isContentEditable) return;
+      const el = browseSearchRef.current;
+      if (!el) return;
+      e.preventDefault();
+      el.focus();
+      el.select();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [routeActive, activeQuery]);
+
   const gridRows: GridCard[] = sortedList.map((q) => {
     const agent = agents.find((a) => a.id === q.agentId);
     const facts = cardFacts(q as Query, new Date(), { agencyWeeks: agent?.responseTimeWeeks });
@@ -2732,7 +2763,7 @@ export const Queries: React.FC<{
     ...(turnFilter !== "all" ? [{ key: "turn", label: TURN_CHIP_LABEL[turnFilter], remove: () => setTurnFilter("all") }] : []),
     /* Every tick is its own removable chip — one that cleared a whole facet would take away
        choices the writer did not make. */
-    ...(["agency", "via", "included"] as const).flatMap((facet) =>
+    ...(["via", "included"] as const).flatMap((facet) =>
       [...gridFilters[facet]].map((v) => ({
         key: `${facet}:${v}`,
         label: (facet === "included"
@@ -2807,17 +2838,10 @@ export const Queries: React.FC<{
                 sub="Sent before you named your versions" onClick={() => setVersionFilter(UNRECORDED_VERSION)} />
         </PopSection>
       )}
-      {/* ⚠️ THREE FACETS BUILT FROM THE DATA, NOT FROM A CONSTANT. An agency list typed into the
-          source goes stale the first time a writer adds an agent; these enumerate the scoped set,
-          so an option exists exactly when a query carrying that value does. */}
-      <PopSection label="Agency">
-        {[...new Set(mastheadScopedQueries.map((q) => agentAgencyLine(agents.find((a) => a.id === q.agentId))))]
-          .filter(Boolean).sort().slice(0, 12).map((ag) => (
-            <PRow key={ag} kind="box" on={gridFilters.agency.has(ag)} label={ag}
-              onClick={() => toggleFacet("agency", ag)} />
-          ))}
-      </PopSection>
-
+      {/* ⚠️ AGENCY IS NOT A FILTER FACET — decision 2, and the ref removed it in `1ce96f02`. It was
+          here for one pass, added when `GridFilters` was wired. Agency remains reachable under Sort
+          and Group, which is the better home for it: a facet lists every agency a writer has ever
+          queried and grows without bound, where a sort orders the same set in one row. */}
       <PopSection label="Sent via">
         {[...new Set(mastheadScopedQueries.map((q) => sendMethodLabel(q.sendMethod)))]
           .filter(Boolean).sort().map((v) => (
@@ -4916,12 +4940,84 @@ export const Queries: React.FC<{
 
             </div>
 
-            {/* ⚠️ THE SAME `listHead` THE RECORD VIEW RENDERS — search, Filter, Group, Sort. The
-                browsing view had none of the four: measured on the deployed build, `searchInput`,
-                `filterBtn` and `sortBtn` all came back false, and Group was a lone icon in the
-                quick row. Rendering the existing head rather than building a second one is what
-                keeps the two views' controls from drifting apart. */}
-            {listHead}
+            {/**
+              * ⚠️ THE REF'S TOOLBAR — LABELLED, WITH THE CURRENT VALUE ON THE BUTTON'S FACE. It
+              * replaces `{listHead}`'s icon triggers on THIS view only; the record view keeps them
+              * until Phase 6 deletes that surface. The two cannot disagree about what is selected,
+              * because the popovers, their refs and their state are the same objects — only the
+              * trigger's presentation differs.
+              *
+              * ⚠️ AND `Group None` / `Sort Last activity` IS THE POINT, not decoration. An icon
+              * cannot state how the grid is currently arranged, so a reader had to open a popover
+              * to find out. That is what earns the label its width.
+              */}
+            <div className="qcc-tb" role="group" aria-label="Query tools">
+              <div className="qcc-tb-search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a08a78" strokeWidth="2" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search agents or agencies"
+                  autoComplete="off"
+                  value={listSearch}
+                  onChange={(e) => setListSearch(e.target.value)}
+                  aria-label="Search agents or agencies"
+                  ref={browseSearchRef}
+                />
+                {/* the `/` hint the ref draws, inside the field */}
+                <span className="qcc-tb-kbd" aria-hidden="true">/</span>
+              </div>
+
+              <div className="f12-popwrap">
+                <button
+                  type="button" className="qcc-tb-btn" ref={filterTrigRef}
+                  aria-expanded={filterPopOpen} aria-haspopup="dialog"
+                  onClick={() => { setSortPopOpen(false); setGroupPopOpen(false); setFilterPopOpen((o) => !o); }}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4" /></svg>
+                  Filter
+                  {activeFilterCount > 0 && <span className="qcc-tb-cnt">{activeFilterCount}</span>}
+                  <svg className="qcc-tb-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" strokeWidth="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                </button>
+                {filterPopOpen && renderFilterPopover()}
+              </div>
+
+              <div className="f12-popwrap">
+                <button
+                  type="button" className="qcc-tb-btn" ref={groupTrigRef}
+                  aria-expanded={groupPopOpen} aria-haspopup="dialog"
+                  onClick={() => { setFilterPopOpen(false); setSortPopOpen(false); setGroupPopOpen((o) => !o); }}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5" /><rect x="3" y="14" width="18" height="6" rx="1.5" /></svg>
+                  Group <span className="qcc-tb-val">{GRID_GROUPS.find((g) => g.key === gridGroup)?.label ?? "None"}</span>
+                  <svg className="qcc-tb-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" strokeWidth="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                </button>
+                {groupPopOpen && renderGroupPopover()}
+              </div>
+
+              <div className="f12-popwrap">
+                <button
+                  type="button" className="qcc-tb-btn" ref={sortTrigRef}
+                  aria-expanded={sortPopOpen} aria-haspopup="dialog"
+                  onClick={() => { setFilterPopOpen(false); setGroupPopOpen(false); setSortPopOpen((o) => !o); }}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M7 4v13M7 17l-3-3M7 17l3-3M17 20V7M17 7l-3 3M17 7l3 3" /></svg>
+                  Sort <span className="qcc-tb-val">{F12_SORT_GROUPS.flatMap((g) => g.items).find((i) => i.key === sortKey)?.label ?? "Last activity"}</span>
+                  <svg className="qcc-tb-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" strokeWidth="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                </button>
+                {sortPopOpen && renderSortPopover()}
+              </div>
+
+              <span className="qcc-tb-spacer" />
+              <button
+                type="button" className="qcc-tb-primary" disabled={creating}
+                onClick={() => onNavigate?.("queries", "Log a query")}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                Log new query
+              </button>
+            </div>
 
             {gridRows.length === 0 ? (
               /* ⚠️ THIS IS THE NO-MATCH STATE, NOT THE NO-QUERIES STATE. The page's own empty
