@@ -173,52 +173,42 @@ describe("⚠️ a task is a point, and its mark is 1.5px (v54)", () => {
   });
 });
 
-describe("⚠️ the stir: every keyframe repeats the base transform (v54)", () => {
+describe("⚠️ the stir is RETIRED, and owed keeps only its standing (v64 — `data-anim=\"none\"`)", () => {
   /**
-   * ⚠️ `transform` IS NOT ADDITIVE, AND THIS IS THE FAULT IT CAUSES. A keyframe stating only a
-   * rotation REPLACES the whole transform, so the card loses `translateY(-50%)` and drops half its
-   * own height — silently, and only while the animation runs, which is the one moment nobody is
-   * measuring. A rendered check cannot catch it either: it would have to sample mid-animation at
-   * the right phase. The keyframes are read as written instead.
+   * ⚠️ THE RETIREMENT IS THE CLAIM NOW. The v64 ref's owed card measures a plain
+   * `translateY(-50%)`: no scale, no animation, no shadow — and the scale was arguing with two
+   * geometry locks at once (a 1.006 scale on a ~400px card moved its painted edges 1.2px each
+   * way, so a left-cut owed card showed a 4.8px lane gap against the 6px law and an ongoing one
+   * overhung the today line). The v54 keyframe lessons — every frame repeats the base transform
+   * in full, no `var()` inside keyframes — survive in the pulse dot's own frames, which the
+   * companion case below holds to them.
    */
   const src = () => readFileSync(CSS, "utf8");
-  const frames = () => {
-    const m = /@keyframes\s+tlStir\s*\{([\s\S]*?)\n\}/.exec(src());
-    expect(m, "the stir's keyframes are missing").not.toBeNull();
-    return [...m![1].matchAll(/transform\s*:\s*([^;]+);/g)].map((x) => x[1].trim());
-  };
 
-  it("every frame carries the base transform in full", () => {
-    const f = frames();
-    expect(f.length, "the stir has fewer than three frames").toBeGreaterThan(2);
-    for (const t of f) {
-      expect(t, `a keyframe drops translateY: ${t}`).toContain("translateY(-50%)");
-      expect(t, `a keyframe drops the owed scale: ${t}`).toContain("scale(1.006)");
-    }
-  });
-
-  it("⚠️ AND NO `var()` INSIDE THE KEYFRAMES — it fails silently in this setup", () => {
-    /* a custom property read from a keyframe block produces no error, no animation and nothing to
-       point at; this repo has already paid for that on the marketing pulse halo. The stagger is a
-       delay on the RULE, where a token resolves normally. */
-    const m = /@keyframes\s+tlStir\s*\{([\s\S]*?)\n\}/.exec(src());
-    expect(m![1], "a keyframe reads a custom property").not.toContain("var(");
-  });
-
-  it("the cycle, the stagger, the hover pause and reduced motion", () => {
+  it("the keyframes, the scale and the stagger are gone; the standing survives", () => {
     const body = src();
-    expect(body).toMatch(/animation:\s*tlStir\s+11s/);
-    expect(body).toMatch(/animation-delay:\s*calc\(var\(--stir-i[^)]*\)\s*\*\s*2\.6s\)/);
-    expect(body).toMatch(/\.tl-p\.owed:hover\s*\{[^}]*animation-play-state:\s*paused/);
-    /* ⚠️ THE REDUCED-MOTION OVERRIDE MUST COME AFTER THE RULE IT OVERRIDES — a media query confers
-       no specificity, so an earlier block loses to a later equal-specificity rule. */
-    const rule = body.indexOf(".tl-p.owed {");
-    const reduce = body.lastIndexOf("prefers-reduced-motion");
-    const off = body.indexOf(".tl-p.owed { animation: none; }");
-    expect(off, "no reduced-motion override for the stir").toBeGreaterThan(-1);
-    expect(off, "the reduced-motion override is declared before the rule it overrides")
-      .toBeGreaterThan(rule);
-    expect(reduce).toBeGreaterThan(-1);
+    expect(body, "the stir's keyframes are back").not.toContain("@keyframes tlStir");
+    expect(body, "the owed scale is back").not.toContain("scale(1.006)");
+    expect(body, "the stagger token is read again").not.toContain("var(--stir-i");
+    /* the replacement is PRESENT, not merely the old thing absent: owed still stands proud in
+       z-order and still deepens its pill */
+    expect(body).toMatch(/\.tl-p\.owed\s*\{[^}]*z-index:\s*4/);
+    expect(body).toMatch(/\.tl-p\.owed \.tl-pill\s*\{[^}]*font-weight:\s*700/);
+  });
+
+  it("⚠️ the pulse dot's frames keep the keyframe laws the stir taught", () => {
+    /* `transform` is not additive and a `var()` inside a keyframe block fails silently here —
+       both lessons predate this pack and outlive the stir. The pulse is the one card animation
+       left; hold it to them. */
+    const m = /@keyframes\s+tlPulse\s*\{([\s\S]*?)\n\}/.exec(src());
+    if (m) {
+      expect(m[1], "a pulse keyframe reads a custom property").not.toContain("var(");
+    } else {
+      /* the pulse may animate under another name — find every keyframe block and hold them all */
+      const blocks = [...src().matchAll(/@keyframes\s+\S+\s*\{([\s\S]*?)\n\}/g)];
+      expect(blocks.length, "no keyframes at all — the pulse lost its ripple").toBeGreaterThan(0);
+      for (const b of blocks) expect(b[1], "a keyframe reads a custom property").not.toContain("var(");
+    }
   });
 });
 

@@ -25,13 +25,14 @@ test("⚠️ a card's cut edges follow its DATES, and nothing is painted over th
     return {
       n: cards.length,
       fov: document.querySelectorAll(".tl-fov").length,
-      /* the CLAIM that survives: a cut side drops its border and its radius, an uncut side keeps both */
+      /* ⚠️ RETARGETED BY v64 §F: only the ONGOING edge (`fadeR`, at today) is borderless now.
+         A window cut (`fadeL`/`clipR`) keeps its hairline — the card is a whole object stopping
+         6px short of the lane. The fade-overlay half of the claim is unchanged. */
       wrong: cards.filter((c) => {
         const f = c.querySelector<HTMLElement>(".tl-frame"); if (!f) return true;
         const cs = getComputedStyle(f);
-        const l = c.classList.contains("fadeL");
-        const rr = c.classList.contains("fadeR") || c.classList.contains("clipR");
-        return cs.borderLeftWidth !== (l ? "0px" : "1px") || cs.borderRightWidth !== (rr ? "0px" : "1px");
+        const today = c.classList.contains("fadeR");
+        return cs.borderLeftWidth !== "1px" || cs.borderRightWidth !== (today ? "0px" : "1px");
       }).map((c) => c.querySelector(".tl-fnm")?.textContent?.trim() ?? "?"),
     };
   });

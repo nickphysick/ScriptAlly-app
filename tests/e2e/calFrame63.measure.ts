@@ -55,6 +55,7 @@ test.describe("v63 · A — the frame", () => {
         .map((b) => ({
           sec: (b.closest(".tl-grp") as HTMLElement).dataset.sec!,
           bg: getComputedStyle(b).backgroundColor,
+          rule: getComputedStyle(b).borderBottomColor,
           h: Math.round(b.getBoundingClientRect().height),
           eb: b.querySelector(".geb")?.textContent ?? null,
           ebCol: b.querySelector(".geb") ? getComputedStyle(b.querySelector(".geb")!).color : null,
@@ -68,13 +69,18 @@ test.describe("v63 · A — the frame", () => {
       };
     });
     expect(f.bars.length, "no group bars").toBeGreaterThan(2);
-    /* the chrome is one surface across three pieces of furniture */
-    expect(f.rail, "the date bar is not the sidebar's tone").toBe(f.axis);
+    /* ⚠️ RETARGETED BY v64 §A — "one ground" became THREE TONES, and the sidebar lost its pane:
+       the axis paints NOTHING (the page cream shows through), the date row and the lane share
+       #faf7f2, and the group bars carry their own #faf9f7. The blush Urgent wash is superseded by
+       a rose RULE under the bar (asserted below); the names, eyebrows and Playfair survive. */
+    expect(f.axis, "the sidebar paints a pane — v64 sits it on the page").toBe("rgba(0, 0, 0, 0)");
+    expect(f.rail, "the date row is not the lane's tone").toBe("rgb(250, 247, 242)");
     const calm = f.bars.filter((b) => b.sec !== "over");
     expect(calm.length, "no calm group bar — the identity claim is untested").toBeGreaterThan(1);
     for (const b of calm) {
-      expect(b.bg, `${b.sec}'s bar is not the chrome tone`).toBe(f.axis);
-      expect(b.h, `${b.sec}'s bar is ${b.h}px, not the ref's 40`).toBe(40);
+      expect(b.bg, `${b.sec}'s bar is not the bar tone`).toBe("rgb(250, 249, 247)");
+      /* 52 sealed — the bar carries the group's 12px top spacing inside itself (v64 §D) */
+      expect(b.h, `${b.sec}'s bar is ${b.h}px, not the sealed 52`).toBe(52);
       expect(b.fam, `${b.sec}'s name is not Playfair`).toMatch(/Playfair/);
       /* the eyebrow says what the group is FOR, and it is the app's own sentence */
       expect(b.eb, `${b.sec} has no purpose eyebrow`)
@@ -82,163 +88,134 @@ test.describe("v63 · A — the frame", () => {
       expect(b.name, `${b.sec}'s name is wrong`)
         .toBe(CAL_SECTION_LABEL[b.sec as keyof typeof CAL_SECTION_LABEL]);
     }
-    /* one ground below the date bar */
-    expect(f.rows, "the rows area is not the container's ground").toBe(f.cal);
+    /* the lane is one field below the date row; lanes paint nothing of their own */
+    expect(f.rows, "the rows area is not the lane's tone").toBe("rgb(250, 247, 242)");
     expect(f.lanes, "a lane paints its own ground").toBe("rgba(0, 0, 0, 0)");
-    expect(f.cal, "the ground and the chrome are the same tone — nothing separates them")
-      .not.toBe(f.axis);
-    /* ⚠️ THE ONE EXCEPTION, and it must be a real one: Urgent is blush with rose numerals. */
+    /* ⚠️ URGENT'S MARK IS THE RULE, NOT A WASH (v64 §D): same bar tone, rose 2px rule beneath,
+       rose eyebrow. A tinted band was two treatments arguing with the ladder on the cards. */
     const urgent = f.bars.find((b) => b.sec === "over");
     expect(urgent, "no Urgent bar on the board — the exception is untested").toBeTruthy();
-    expect(urgent!.bg, "the Urgent bar is not blush").not.toBe(f.axis);
+    expect(urgent!.bg, "the Urgent bar re-grew its blush wash").toBe("rgb(250, 249, 247)");
+    expect(urgent!.rule, "Urgent's rule is not rose").toBe("rgb(140, 79, 74)");
+    expect(calm[0].rule, "a calm rule went rose").toBe("rgb(28, 19, 15)");
     expect(urgent!.ebCol, "the Urgent eyebrow is not rose").not.toBe(calm[0].ebCol);
   });
 });
 
 test.describe("v63 · B — the sidebar pane", () => {
-  test("⚠️ the window pill states its live range, and Back to today only when it has moved", async ({ page }) => {
+  test("⚠️ the winbar's range headline, chevrons and gated Today link (v64 §B)", async ({ page }) => {
+    /* ⚠️ RETARGETED BY v64 §B — the sidebar's window pill, its chevrons and Back-to-today moved
+       into the winbar: a Playfair range headline in full months with the year once, ±7-day
+       chevrons, and a Today LINK that renders only when the window has moved. The journey is the
+       same one the pill's case drove; only the home changed. */
     await openRoute(page, CAL, { width: 1440, height: 900 });
-    const at = await page.evaluate(() => ({
-      range: document.querySelector(".tl-axis .wl")?.textContent ?? null,
-      back: !!document.querySelector(".tl-axis .backtoday"),
-      searchH: (() => { const s = document.querySelector<HTMLElement>(".tl-axis .tl-search"); return s ? Math.round(s.getBoundingClientRect().height) : null; })(),
+    const read = () => page.evaluate(() => ({
+      range: document.querySelector(".tl-rng")?.textContent?.trim() ?? null,
+      today: !!document.querySelector(".tl-todaylink"),
+      searchH: (() => { const s = document.querySelector<HTMLElement>(".tl-winbar .tl-search");
+        return s ? Math.round(s.getBoundingClientRect().height) : null; })(),
     }));
-    expect(at.range, "the window pill states no range").toMatch(/\w+.+–.+\w+/);
-    /* ⚠️ IT APPEARS ONLY WHEN IT HAS SOMETHING TO UNDO. A permanent "Back to today" on a board
-       already showing today is a control that does nothing, which teaches a reader to ignore it. */
-    expect(at.back, "Back to today is offered on a board already showing today").toBe(false);
-    /* ⚠️ AND THE CONTROLS WERE BUILT FOR A ROW. `.tl-search` carries `flex: 1`; in a column that
-       fills the pane as one enormous empty box, which is what it did until it was given a flex. */
-    expect(at.searchH, `the search field is ${at.searchH}px tall`).toBeLessThan(60);
-
-    await page.locator('.tl-axis [aria-label="Previous window"]').click();
+    const at = await read();
+    expect(at.range, "the winbar states no range").toMatch(/^\d{1,2} [A-Z][a-z]+ – \d{1,2} [A-Z][a-z]+ \d{4}$/);
+    expect(at.today, "Today is offered on a board already showing today").toBe(false);
+    expect(at.searchH, "the search did not move into the winbar").not.toBeNull();
+    await page.locator('.tl-winbar [aria-label="Back one week"]').click();
     await page.waitForTimeout(250);
-    const moved = await page.evaluate(() => ({
-      range: document.querySelector(".tl-axis .wl")?.textContent ?? null,
-      back: !!document.querySelector(".tl-axis .backtoday"),
-    }));
+    const moved = await read();
     expect(moved.range, "the range did not move with the window").not.toBe(at.range);
-    expect(moved.back, "Back to today is not offered after the window moved").toBe(true);
-    await page.locator(".tl-axis .backtoday").click();
+    expect(moved.today, "Today is not offered after the window moved").toBe(true);
+    /* ⚠️ DISPATCHED ON THE ELEMENT — the winbar's grid re-centres as the range label changes
+       width, so Playwright's stability wait can spin on a link that is perfectly clickable. The
+       house idiom for a measurement that must not depend on pointer geometry. */
+    await page.locator(".tl-todaylink").evaluate((e) => (e as HTMLElement).click());
     await page.waitForTimeout(250);
-    const home = await page.evaluate(() => ({
-      range: document.querySelector(".tl-axis .wl")?.textContent ?? null,
-      back: !!document.querySelector(".tl-axis .backtoday"),
-    }));
-    expect(home.range, "Back to today did not restore the window").toBe(at.range);
-    expect(home.back, "Back to today survives its own use").toBe(false);
+    const home = await read();
+    expect(home.range, "Today did not restore the window").toBe(at.range);
+    expect(home.today, "Today survives its own use").toBe(false);
   });
 
-  test("⚠️ the views list is a census, and At a glance agrees with it", async ({ page }) => {
+  test("⚠️ the Notion panel: Group and Sort open at rest, Filter closed reading All (v64 §E)", async ({ page }) => {
+    /* ⚠️ RETARGETED BY v64 §E — the views list and At a glance are DELETED; the sidebar is three
+       Notion rows over the facet model. The census half of the old claim survives in the facet
+       counts, asserted in the flow case below. */
     await openRoute(page, CAL, { width: 1440, height: 900 });
-    const f = await page.evaluate(() => ({
-      views: [...document.querySelectorAll<HTMLElement>(".tl-axis .gpill")].map((v) => ({
-        sec: v.dataset.sec ?? "all",
-        n: Number(v.querySelector("b")?.textContent ?? 0),
-        rose: v.querySelector("b") ? getComputedStyle(v.querySelector("b")!).color : "",
-      })),
-      tiles: [...document.querySelectorAll<HTMLElement>(".tl-axis .st > div")].map((t) => ({
-        n: Number(t.querySelector("b")?.textContent ?? 0),
-        k: t.querySelector("small")?.textContent ?? "",
-        rose: t.classList.contains("r"),
-        col: t.querySelector("b") ? getComputedStyle(t.querySelector("b")!).color : "",
-      })),
-      rows: [...document.querySelectorAll<HTMLElement>(".tl-rrow")]
-        .filter((r) => r.getBoundingClientRect().height > 0).length,
-    }));
-    const all = f.views.find((v) => v.sec === "all");
-    const groups = f.views.filter((v) => v.sec !== "all");
-    expect(all, "no All row").toBeTruthy();
-    expect(groups.length, "the views list holds no groups").toBeGreaterThan(2);
-    /* ⚠️ THE COUNTS SUM. A tally that changed as you clicked it is the fault the retired tab strip
-       had, and it is the whole reason the list replaced it. */
-    expect(groups.reduce((n, g) => n + g.n, 0), "the views do not sum to All").toBe(all!.n);
-    expect(all!.n, "All disagrees with the rows on the board").toBe(f.rows);
-
-    expect(f.tiles.length, "At a glance draws no tiles").toBe(4);
-    /* ⚠️ AND THE TILES COME FROM THE SAME SECTIONS THE VIEWS COUNT — a sidebar holding two
-       descriptions of one board is the fault this file records against tabs and dividers. */
-    const need = f.tiles.find((t) => t.rose);
-    const urgentView = groups.find((g) => g.sec === "over");
-    expect(need, "no rose tile").toBeTruthy();
-    expect(need!.n, `"need you now" says ${need!.n} against the Urgent view's ${urgentView?.n}`)
-      .toBe(urgentView?.n);
-    const plain = f.tiles.filter((t) => !t.rose);
-    expect(plain.length, "every tile is rose").toBe(3);
-    expect(need!.col, "the rose tile is not rose").not.toBe(plain[0].col);
+    const f = await page.evaluate(() => {
+      const np = document.querySelector<HTMLElement>(".tl-axis .tl-np");
+      if (!np) return null;
+      const rows = [...np.querySelectorAll<HTMLElement>(".tl-pr")].map((r) => ({
+        label: r.querySelector(".tl-prl")?.textContent?.trim() ?? r.textContent?.trim()?.slice(0, 12) ?? "",
+        open: r.classList.contains("open"),
+        value: r.querySelector(".tl-prv")?.textContent?.trim() ?? null,
+      }));
+      return {
+        rows,
+        gpills: document.querySelectorAll(".tl-axis .gpill").length,
+        tiles: document.querySelectorAll(".tl-axis .st").length,
+        groupOpts: [...np.querySelectorAll<HTMLElement>(".tl-px")][0]
+          ? [...np.querySelectorAll<HTMLElement>(".tl-px")[0].querySelectorAll(".tl-pxo")].map((o) => o.textContent?.trim() ?? "")
+          : [],
+      };
+    });
+    expect(f, "no Notion panel in the sidebar").not.toBeNull();
+    /* the retired furniture is GONE from the rendered page */
+    expect(f!.gpills, "the views list is back").toBe(0);
+    expect(f!.tiles, "At a glance is back").toBe(0);
+    const byLabel = (s: string) => f!.rows.find((r) => new RegExp(s, "i").test(r.label));
+    const grp = byLabel("group"), flt = byLabel("filter"), srt = byLabel("sort");
+    expect(grp, "no Group row").toBeTruthy();
+    expect(flt, "no Filter row").toBeTruthy();
+    expect(srt, "no Sort row").toBeTruthy();
+    expect(grp!.open, "Group is closed at rest").toBe(true);
+    expect(srt!.open, "Sort is closed at rest").toBe(true);
+    expect(flt!.open, "Filter is open at rest").toBe(false);
+    expect(flt!.value, `Filter reads "${flt!.value}" with nothing hidden`).toBe("All");
+    expect(grp!.value, "Group's resting value is not Attention").toBe("Attention");
+    expect(srt!.value, "Sort's resting value is not Urgency").toBe("Urgency");
   });
 });
 
 test.describe("v63 · run 2 — the five corrections", () => {
-  test("⚠️ the view is 'Needs me' and the group bar is 'Urgent' — one section, two names", async ({ page }) => {
+  test("⚠️ 'Attention' in the panel, 'Urgent' on the bar — one section, two names (v64 §E)", async ({ page }) => {
+    /* ⚠️ RETARGETED BY v64 §E. The 'Needs me' VIEW is deleted with the views list; the two-names
+       law survives at its new address: the panel's Group row reads ATTENTION (what the cut does
+       for the reader) while the board's first bar reads URGENT (the state of the rows under it).
+       One section, two names, each on the surface whose question it answers. */
     await openRoute(page, CAL, { width: 1440, height: 900 });
     const f = await page.evaluate(() => ({
-      views: [...document.querySelectorAll<HTMLElement>(".tl-axis .gpill")].map((v) => ({
-        sec: v.dataset.sec ?? "all",
-        name: v.querySelector("span")?.textContent ?? "",
-        col: v.querySelector("b") ? getComputedStyle(v.querySelector("b")!).color : "",
-      })),
-      bar: (() => {
-        const b = document.querySelector<HTMLElement>('.tl-grp[data-sec="over"] .tl-gdiv .gp > span');
-        return b?.textContent ?? null;
+      pills: document.querySelectorAll(".tl-axis .gpill").length,
+      groupValue: (() => {
+        const rowEls = [...document.querySelectorAll<HTMLElement>(".tl-axis .tl-pr")];
+        const g = rowEls.find((r) => /group/i.test(r.textContent ?? ""));
+        return g?.querySelector(".tl-prv")?.textContent?.trim() ?? null;
       })(),
+      bar: document.querySelector('.tl-grp[data-sec="over"] .tl-gdiv .gp > span')?.textContent ?? null,
     }));
-    const over = f.views.find((v) => v.sec === "over");
-    expect(over, "no Needs me view").toBeTruthy();
-    /* ⚠️ THE TWO NAMES ARE THE POINT. The bar names the STATE of the rows under it; the view names
-       what it does for the reader. The ref carries both tables and they differ on this one entry —
-       every other name is shared, which is what makes the difference legible rather than a slip. */
-    expect(over!.name, "the view is not called Needs me").toBe("Needs me");
+    expect(f.pills, "the views list is back").toBe(0);
+    expect(f.groupValue, "the Group row does not read Attention").toBe("Attention");
     expect(f.bar, "the group bar is not called Urgent").toBe("Urgent");
-    /* ⚠️ AND EXACTLY ONE COUNT IS ROSE. A second would make the colour mean "a number" rather than
-       "a number that wants you". */
-    const rose = f.views.filter((v) => v.col === over!.col);
-    expect(rose.length, `${rose.length} view counts share the rose`).toBe(1);
-    expect(f.views.length, "the views list is too short to discriminate").toBeGreaterThan(3);
   });
 
-  test("⚠️ the pane scrolls on its own, and the fourth tile is reachable at a short viewport", async ({ page }) => {
-    /* ⚠️ MEASURED WHERE THE FAULT LIVES. At 900 the pane's content fits and there is nothing to
-       scroll — a check there passes on a board that could never have shown the fault. The ref
-       carries no `overflow` on its own sidebar at all, so this is a correction to the ref rather
-       than a reading of it, and the short viewport is the only place it can be proved. */
+  test("⚠️ At a glance is retired, and the panel still fits a short viewport (v64 §E)", async ({ page }) => {
+    /* ⚠️ RETARGETED BY v64 §E. The four tiles are deleted, so the fourth-tile-reachable claim
+       has no subject; what survives is the pane's own scroll — the axis still scrolls itself when
+       its content overflows, and at 640 the panel with Group and Sort open must either fit or
+       scroll, never clip. */
     await openRoute(page, CAL, { width: 1440, height: 640 });
-    const before = await page.evaluate(() => {
+    const f = await page.evaluate(() => {
       const a = document.querySelector<HTMLElement>(".tl-axis")!;
-      const t = [...a.querySelectorAll<HTMLElement>(".st > div")];
       return {
+        tiles: a.querySelectorAll(".st").length,
         overflow: getComputedStyle(a).overflowY,
         scrollable: a.scrollHeight - a.clientHeight,
-        tiles: t.length,
-        lastBottom: t.length ? t[t.length - 1].getBoundingClientRect().bottom : null,
-        paneBottom: a.getBoundingClientRect().bottom,
       };
     });
-    expect(before.tiles, "At a glance does not draw four tiles").toBe(4);
-    expect(before.overflow, "the pane does not scroll").toBe("auto");
-    /* the precondition: at this height the pane MUST overflow, or the claim tests nothing */
-    expect(before.scrollable, "the pane does not overflow at 640 — nothing is being proved")
-      .toBeGreaterThan(20);
-    expect(before.lastBottom!, "the last tile is already reachable — the fault cannot be shown")
-      .toBeGreaterThan(before.paneBottom);
-
-    await page.evaluate(() => {
-      const a = document.querySelector<HTMLElement>(".tl-axis")!;
-      a.scrollTop = a.scrollHeight;
-    });
-    await page.waitForTimeout(200);
-    const after = await page.evaluate(() => {
-      const a = document.querySelector<HTMLElement>(".tl-axis")!;
-      const t = [...a.querySelectorAll<HTMLElement>(".st > div")];
-      return {
-        lastBottom: t[t.length - 1].getBoundingClientRect().bottom,
-        paneBottom: a.getBoundingClientRect().bottom,
-        scrolled: a.scrollTop,
-      };
-    });
-    expect(after.scrolled, "the pane did not actually scroll").toBeGreaterThan(20);
-    expect(after.lastBottom, "the fourth tile is still below the pane after scrolling to its end")
-      .toBeLessThanOrEqual(after.paneBottom + 1);
+    expect(f.tiles, "At a glance is back").toBe(0);
+    expect(["auto", "scroll"], `the pane's overflow is ${f.overflow}`).toContain(f.overflow);
+    if (f.scrollable > 0) {
+      await page.evaluate(() => { const a = document.querySelector<HTMLElement>(".tl-axis")!; a.scrollTop = a.scrollHeight; });
+      const reached = await page.evaluate(() => document.querySelector<HTMLElement>(".tl-axis")!.scrollTop > 0);
+      expect(reached, "the pane declares overflow it cannot scroll").toBe(true);
+    }
   });
 
   test("⚠️ nothing is rendered below the numeral tier, and the search carries its glyph", async ({ page }) => {
@@ -251,7 +228,8 @@ test.describe("v63 · run 2 — the five corrections", () => {
       const below = nr ? [...rail.querySelectorAll<HTMLElement>("*")]
         .filter((e) => { const r = e.getBoundingClientRect(); return r.height > 0 && r.top >= nr.bottom - 0.5; })
         .map((e) => e.className.toString().slice(0, 30)) : ["__no today circle__"];
-      const s = document.querySelector<HTMLElement>(".tl-axis .tl-search")!;
+      /* v64 §B: the search lives in the winbar now, not the sidebar */
+      const s = document.querySelector<HTMLElement>(".tl-winbar .tl-search")!;
       return {
         below, stems: document.querySelectorAll(".tl-todaystem").length,
         bgImage: getComputedStyle(s).backgroundImage,

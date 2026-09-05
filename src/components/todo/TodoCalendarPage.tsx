@@ -20,7 +20,8 @@
  * collapse chevron, the month jump, the `Upcoming only` mode and the event-kind vocabulary that
  * served it. A row grows to hold what it holds — there is nothing left to overflow.
  */
-import React, { useLayoutEffect, useMemo, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { useTodoToast } from "./useTodoToast";
@@ -290,8 +291,8 @@ const Piece: React.FC<{
   sg: Segment; days: number; lastMarkAt: number | null; selected: boolean;
   /* v58: the identity travels with the card, so the row hands its name down */
   name: string;
-  stirIndex: number; onPick: () => void; onOpen?: () => void; agency?: string;
-}> = ({ sg, days, lastMarkAt, selected, stirIndex, onPick, onOpen, name, agency }) => {
+  onPick: () => void; onOpen?: () => void; agency?: string;
+}> = ({ sg, days, lastMarkAt, selected, onPick, onOpen, name, agency }) => {
   const lines = barLines(sg.label);
   /* ⚠️ THE PILL IS THE APP'S OWN VOCABULARY — see `calendarPill`. The status while the agency
      holds the move, the deed while the writer does, and nothing else is reachable. */
@@ -395,8 +396,15 @@ const Piece: React.FC<{
          sweep reads `className=` expressions out of this file, so a list assembled into a variable
          is invisible to it — and its report would be "this class has no rule", about a class it
          never saw. An absence that reads as a finding. */
+      /* ⚠️ `cutR` IS GEOMETRY, `clipR` IS KNOWLEDGE — and v64 §F needed them apart. `clipR` says
+         the EXPECTATION is named beyond the window, and an overdue wait carries it while its bar
+         stops at today; `cutR` says the DRAWN box reaches the window's edge (journeyBars clamps
+         `liveStop` at `span`, so a calm wait expecting a reply beyond the board draws to the
+         edge). The window treatment — whole corners, 6px short of the lane — belongs to the
+         geometry; treating `clipR` as the cut shortened a today-terminating bar by 6px. */
       className={`tl-at2 tl-p ${familyOf(sg.state)}${sg.hollow ? " hollow" : ""}${sg.owed ? " owed" : ""}`
         + `${fade.left ? " fadeL" : ""}${fade.right ? " fadeR" : ""}${fade.clipped ? " clipR" : ""}`
+        + `${sg.to >= facts.days - 0.1 ? " cutR" : ""}`
         + `${selected ? " sel" : ""}`}
       /**
        * ⚠️ THE GEOMETRY IS CUSTOM PROPERTIES, NOT `left` AND `width` (v54, Phase 4).
@@ -407,11 +415,7 @@ const Piece: React.FC<{
        * card becomes, written by the fit pass. The rule reads whichever pair applies, and the
        * transition is on `width` and `left`, which are now stylesheet properties.
        */
-      /* ⚠️ THE STAGGER INDEX IS DATA, NOT A `var()` INSIDE THE KEYFRAMES. A custom property read
-         from a keyframe block fails silently here; read from the RULE it resolves normally, which
-         is why the delay is a `calc()` on the animation and the frames carry only literals. */
       style={{ ...laneVar(sg.lane),
-        ["--stir-i" as string]: String(stirIndex),
         ["--l" as string]: barLeft(sg),
         ["--w" as string]: barWidth(sg),
         ["--content-left" as string]: contentLeft }}
@@ -1546,7 +1550,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      RETIRED — "whose move" answers the question it approximated, from the facet the rows carry. */
   const [groupBy, setGroupBy] = useState<"urgency" | "move" | "status" | "none">("urgency");
   const [sortBy, setSortBy] = useState<SortBy>("urgency");
-  const [sortRev, setSortRev] = useState(false);
+  /* ⚠️ `sortRev` IS DELETED, NOT LEFT AS STATE (v64 §E). Its Reverse control went with the
+     toolbar, which left state no control could reach — stuck at its default, harmless today and
+     a trap the day someone re-reads it as a live setting. The panel's Sort is a radio; a reversed
+     order returns only if the design asks for it, as a control and its state together. */
   /* ⚠️ THE FILTER IS THE FACET MODEL (v64 §E): which options are OFF, per section — everything
      ticked at rest. `statusPick` is retired into it: status is one facet section of six now. */
   const [facetOff, setFacetOff] = useState<FacetOff>(emptyOff);
@@ -1621,6 +1628,90 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      ARRANGED, the sidebar carries what you are looking at and how much of it fits. Session-only,
      like every other view state on this page: no route, no persistence, no second copy. */
   const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
+  /* the tip effect binds once; its peek gate needs the LIVE density, not the mount's */
+  const densityRef = useRef<"comfortable" | "compact">("comfortable");
+  densityRef.current = density;
+
+  /* ══ THE HOVER PEEK (v64 §F — the ref's `data-grow="place"`) ══════════════════════════════════
+   *
+   * Hovering a compact BAR — never the row — opens a page-layer overlay of the COMFORTABLE card
+   * exactly over the bar. 60ms hover intent, 140ms fade (CSS), min-width 260px, 86px tall, above
+   * everything on the board, opening upward when there is no room beneath; it stays while the
+   * cursor is on it and clears on leave or scroll.
+   *
+   * ⚠️ THE PEEK IS A CLONE, NOT A SECOND RENDERING. The wrapper carries `tl-board` (the token
+   * scope) WITHOUT `data-dens="compact"`, so every compact rule stops matching and the clone
+   * renders as the comfortable card by construction — a second rendering is two cards waiting to
+   * disagree. The clone is PAPER: no listeners survive `outerHTML`, the name link and the card's
+   * click live on the real bar underneath, and `aria-hidden` says so to a screen reader, which
+   * already has the full card's text on the bar itself.
+   *
+   * ⚠️ `clone.style.animation = "none"` IS LOAD-BEARING. `.tl-p.owed` runs `tlStir`, whose
+   * keyframes bake `translateY(-50%)` — and a running animation outranks the inline transform the
+   * clone is squared up with, so a peeked owed card would sit displaced by half its own height
+   * (the `.sa-settled` motion trap, in a new coat). The children's animations (the pulse dot)
+   * deliberately survive.
+   *
+   * ⚠️ ONE HANDLER PAIR ON THE SCROLLER, NOT A PROP PER CARD. Delegation means ghosts peek by the
+   * same code path as live bars, and no card component grows a peek concern it would have to
+   * thread through three render sites. */
+  const [peek, setPeek] = useState<{ el: HTMLElement; html: string; left: number; top: number; width: number } | null>(null);
+  const peekTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const peekPendingEl = useRef<HTMLElement | null>(null);
+  const cancelPeekIntent = () => {
+    if (peekTimer.current) { clearTimeout(peekTimer.current); peekTimer.current = null; }
+    peekPendingEl.current = null;
+  };
+  const clearPeek = () => { cancelPeekIntent(); setPeek(null); };
+  /* ⚠️ A SCROLL CLEAR SUPPRESSES RE-INTENT UNTIL THE POINTER MOVES. Scrolling slides new bars
+     under a stationary cursor, and unmounting the peek makes the browser fire `mouseover` on
+     whatever is now beneath it — so without this, every scroll tick cleared the peek and a fresh
+     one opened 60ms later over a bar the reader never pointed at. `mousemove` fires only on
+     physical movement, which is exactly the signal "the reader is pointing again". */
+  const peekSuppressed = useRef(false);
+  const clearPeekForScroll = () => { peekSuppressed.current = true; clearPeek(); };
+  const openPeekFrom = (bar: HTMLElement) => {
+    const r = bar.getBoundingClientRect();
+    const PEEK_H = 86, GUTTER = 8;
+    const width = Math.max(r.width, 260);
+    /* exactly over the bar: top-aligned with it, growing downward — upward when the board's foot
+       or the viewport leaves no room beneath */
+    const up = r.top + PEEK_H > window.innerHeight - GUTTER;
+    const top = up ? r.bottom - PEEK_H : r.top;
+    const left = Math.max(GUTTER, Math.min(r.left, window.innerWidth - width - GUTTER));
+    const clone = bar.cloneNode(true) as HTMLElement;
+    clone.style.animation = "none";
+    clone.style.left = "0"; clone.style.top = "0";
+    clone.style.width = "100%"; clone.style.height = "100%";
+    clone.style.transform = "none";
+    clone.removeAttribute("data-tight");
+    setPeek({ el: bar, html: clone.outerHTML, left, top, width });
+  };
+  const findPeekBar = (from: EventTarget | null): HTMLElement | null =>
+    from instanceof Element ? (from.closest(".tl-p, .tl-jc") as HTMLElement | null) : null;
+  const onRowsMove = () => { peekSuppressed.current = false; };
+  const onRowsOver = (e: React.MouseEvent) => {
+    if (density !== "compact" || peekSuppressed.current) return;
+    const bar = findPeekBar(e.target);
+    if (!bar) { cancelPeekIntent(); return; }
+    if (peek?.el === bar || peekPendingEl.current === bar) return;
+    cancelPeekIntent();
+    peekPendingEl.current = bar;
+    peekTimer.current = setTimeout(() => {
+      peekTimer.current = null; peekPendingEl.current = null;
+      openPeekFrom(bar);
+    }, 60);
+  };
+  const onRowsOut = (e: React.MouseEvent) => {
+    if (density !== "compact") return;
+    const to = e.relatedTarget instanceof Element ? e.relatedTarget : null;
+    /* still inside the same bar, or onto the peek that covers it — no change */
+    if (to && (to.closest(".tl-peek") || findPeekBar(to) === findPeekBar(e.target))) return;
+    cancelPeekIntent();
+    if (peek) setPeek(null);
+  };
+  /* a shifted window or a density change rebuilds the rows — the peeked node is stale DOM */
+  useEffect(() => { clearPeek(); }, [density, winStart]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const cutByAvailable = boardManuscripts.length > 1;
   const [cutBy, setCutBy] = useState<"needs" | "ms">("needs");
@@ -1716,6 +1807,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     const show = (ev: MouseEvent) => {
       const t = (ev.target as HTMLElement | null)?.closest?.("[data-tip]") as HTMLElement | null;
       if (!t) { tip.classList.remove("on"); return; }
+      /* ⚠️ IN COMPACT A BAR'S REVEAL IS THE PEEK — the tip repeating the same sentence above the
+         peeked card was the fact narrated twice (v64 §F). Rail and marker tips are untouched. */
+      if (densityRef.current === "compact" && t.closest(".tl-p, .tl-jc")) {
+        tip.classList.remove("on"); return;
+      }
       const text = t.getAttribute("data-tip") ?? "";
       if (!text) { tip.classList.remove("on"); return; }
       tip.textContent = text;
@@ -2100,9 +2196,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
          name describe what it does only half the time. */
       recent: (a, b) => byDate(a, b, "lastActiveAt"),
     };
-    const out = rowsAll.slice().sort(cmp[sortBy]);
-    return sortRev ? out.reverse() : out;
-  }, [board, barsByRow, sortBy, sortRev]);
+    return rowsAll.slice().sort(cmp[sortBy]);
+  }, [board, barsByRow, sortBy]);
 
 
   /**
@@ -2359,19 +2454,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     for (const r of rows) t[tabOf(r.group, r.group === null && r.items.some((i) => i.card))] += 1;
     return t;
   }, [rows]);
-  /* ⚠️ THE TRIGGER NAMES ONLY WHAT IS NOT THE DEFAULT. A summary restating every setting says the
-     same thing on a board nobody has touched as on one somebody has, which is no signal at all. */
-  const displaySummary = [
-    /* ⚠️ IT NAMES THE TOOLBAR'S SETTINGS, NOT THE TWO DEAD KNOBS IT USED TO. `groupMode` and
-       `view.sort` were both stuck at their defaults with no control on the page, so two of the
-       four clauses could never fire — a summary of settings nobody could change. */
-    groupBy === "urgency" ? ""
-      : groupBy === "move" ? "Whose move" : groupBy === "status" ? "Status" : "No grouping",
-    sortBy === "urgency" ? "" : SORT_BY_LABEL[sortBy],
-    sortRev ? "Reversed" : "",
-    cutNow === "ms" ? "By book" : "",
-    rangeIdx === DEFAULT_RANGE_INDEX ? "" : TIMELINE_RANGES[rangeIdx].label,
-  ].filter(Boolean).join(" · ");
+  /* ⚠️ `displaySummary` IS DELETED WITH THE TRIGGER THAT WORE IT (v64 §E). It summarised the
+     toolbar's non-default settings for the toolbar's own trigger; the Notion rows each state
+     their value inline, so a summary would be a second copy of three values already on screen —
+     and it had already become the very thing its comment warned against: a summary nothing
+     rendered. */
   /* the two nouns the count uses — a task row belongs to no agent and is not a relationship */
   const taskRows = rows.filter((r) => r.group === null && r.key !== YOU_ROW).length;
 
@@ -2625,7 +2712,6 @@ data-rowkey={r.key}
             <Piece key={sg.key} sg={sg} days={range.days} selected={sel === sg.key} name={r.name}
               /* ⚠️ FOUR PHASES, so no two cards on screen move together and the row does not read
                  as a wave. The index is the card's position in its row's own list. */
-              stirIndex={bar.segs.indexOf(sg) % 4}
               /* ⚠️ THE LAST MARK ON THIS CARD, never the row's last. A row can hold two
                  relationships — two books with one agency — and each card must clear its own
                  marks and no others. */
@@ -3299,7 +3385,9 @@ data-rowkey={r.key}
                     clamping — so on a board with nothing to scroll the clamp is the only behaviour
                     left, and anything that changed the rail's height moved the rows under it. Here
                     the rail is outside the scrolling box and cannot be reached by it at all. */}
-                <div className="tl-rows">
+                <div className="tl-rows" onMouseOver={onRowsOver} onMouseOut={onRowsOut}
+                  onMouseMove={density === "compact" ? onRowsMove : undefined}
+                  onScroll={density === "compact" ? clearPeekForScroll : undefined}>
                 {/* ⚠️ `.tl-rowsin` EXISTS FOR THE TODAY LINE (v64 §C). In a scroller, an absolutely
                     positioned child's `bottom: 0` resolves against the SCROLLPORT, not the content
                     — so a line meant to run the content height needs an inner wrapper that IS the
@@ -3390,6 +3478,14 @@ data-rowkey={r.key}
                     it must span the rail and rows, which is its job. */}
                 {/* the action's receipt — what was pressed, never a claim the work is done */}
                 {actToast && <div className="tl-acttoast" role="status">{actToast}</div>}
+                {/* the peek rides document.body: the board clips at its radius and the rows clip at
+                    their scrollport, and a fixed layer inside either would be cut by both */}
+                {peek && createPortal(
+                  <div className="tl-board tl-peek" aria-hidden
+                    style={{ left: peek.left, top: peek.top, width: peek.width }}
+                    onMouseLeave={clearPeek}
+                    dangerouslySetInnerHTML={{ __html: peek.html }} />,
+                  document.body)}
                 {cross && (
                   <>
                     <div className="tl-xh" style={{ left: `${cross.x}px` }} aria-hidden />

@@ -420,7 +420,13 @@ describe("⚠️ the Calendar's tool-row filter — event kinds, calendar-local 
        sets of numbers that did not add up. The claim survives as its inverse: the strip is gone and
        the sidebar's group list, whose counts DO sum, is what filters now. */
     expect(cal, "the retired tab strip is back").not.toContain("tl-tabs");
-    expect(cal, "the group list that replaced the tabs is not rendered").toContain("gpill");
+    /* ⚠️ RETARGETED A SIXTH TIME (v64 §E): the group list is retired in its turn — the sidebar is
+       the Notion panel, whose Filter reads the FACET MODEL (`src/lib/calendarFacets.ts`), and
+       that model is now the ONE definition this case has always been about. The tab-count table
+       survives as the panel's census plumbing. */
+    expect(cal, "the group list is back").not.toContain("gpill");
+    expect(cal, "the Notion panel is not rendered").toContain("tl-np");
+    expect(cal, "the page stopped reading the facet model").toContain("calendarFacets");
     expect(cal).toContain("TAB_ORDER");
     /* the narrowing still reads the ONE definition — `rowInTab` over the row's own group, the same
        field the board's headings draw, so a tab and a heading cannot disagree about one row */

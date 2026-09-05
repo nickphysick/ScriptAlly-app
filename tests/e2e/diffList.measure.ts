@@ -13,7 +13,7 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 
-const REF = "file:///Users/nickphysick/ScriptAlly-app/design-refs/timeline-v63.html";
+const REF = "file:///Users/nickphysick/ScriptAlly-app/design-refs/timeline-v64.html";
 
 /** the readings both surfaces can answer, taken the same way from each */
 const PROBE = `(() => {

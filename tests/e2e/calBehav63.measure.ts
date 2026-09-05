@@ -15,7 +15,8 @@ const board = async (page: import("@playwright/test").Page) => page.evaluate(() 
     rows: g.querySelectorAll(".tl-rrow").length,
     chevrons: [...g.querySelectorAll<HTMLElement>(".tl-gchev")].map((c) => c.textContent?.trim()),
     expanded: [...g.querySelectorAll<HTMLElement>(".tl-gdiv")].map((d) => d.getAttribute("aria-expanded")),
-    window: document.querySelector(".tl-axis .railnav span")?.textContent?.trim()
+    /* v64 §B: the window's one label is the winbar's range headline */
+    window: document.querySelector(".tl-rng")?.textContent?.trim()
       ?? document.querySelector(".tl-axis .railnav")?.textContent?.trim() ?? null,
     toast: document.querySelector(".tl-acttoast")?.textContent?.trim() ?? null,
     sticky: (() => { const d = g.querySelector<HTMLElement>(".tl-gdiv");

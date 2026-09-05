@@ -173,12 +173,12 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        question. The sidebar's group list is the view control now, and it names the groups the board
        actually draws, so the claim is unchanged again and again names the control that exists. */
     expect(html).not.toContain("Needs me");
-    /* ⚠️ AND ON AN EMPTY BOARD THE LIST IS `All` ALONE — the group pills name only groups that
-       exist, which is the same rule that omits a divider reading "00". Asserting a group NAME here
-       would be asserting the shape of a board this fixture does not have; the control's presence is
-       what the smoke is for. */
-    expect(html).toContain("gpill");
-    expect(html).toContain(">All<");
+    /* ⚠️ AND v64 §E RETIRES THE GROUP LIST TOO — the sidebar is the Notion panel now: Group,
+       Filter and Sort rows over the facet model. The smoke's claim is what it always was — the
+       page renders its view control — so once more it names the control that exists. */
+    expect(html).not.toContain("gpill");
+    expect(html).toContain("tl-np");
+    expect(html).toContain("tl-pr");
     /* ⚠️ AN EMPTY BOARD IS THE SPARSE PANEL, NOT AN EMPTY TABLE WITH A HEADER OVER IT. A column
        header above nothing teaches the shape of a board the writer does not have — the same rule
        that omits a group heading reading "0". The populated smoke below is where the header,
@@ -193,8 +193,9 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     seed.userTasks = [{ id: "t1", userId: "u1", text: "Redraft the opening", done: false, dueDate: ymd, createdAt: "", updatedAt: "" }];
     const html = render(<TodoCalendarPage onNavigate={() => {}} />);
     expect(html).toContain("Redraft the opening");
-    /* the writer's own chip — `tl-tchip` since the rebuild; `tl-chip` was the grid-era class */
-    expect(html).toContain("tl-tchip");
+    /* ⚠️ A DATED TASK IS A BAR NOW (v63 §F, tasks-as-bars): created → due, a note-yellow band
+       with a checkbox and the word Task. The point chip survives only for the notes row. */
+    expect(html).toContain("tl-sband--task");
     /* ⚠️ AND THE POPULATED BOARD IS WHERE THE CHROME IS PROVED: one column header for the whole
        board, its ~nine dates, and the pinned group above the query groups. */
     /* ⚠️ THE DATE ROW IS THE RAIL NOW (v36, Phase 4). `tl-hrow` was the in-card header, drawn once

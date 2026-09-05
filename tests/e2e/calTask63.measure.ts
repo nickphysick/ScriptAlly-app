@@ -11,9 +11,11 @@ import { openRoute } from "./measure";
 const CAL = "/todo/calendar";
 
 async function tasksView(page: import("@playwright/test").Page) {
+  /* ⚠️ RETARGETED BY v64 §E — the sidebar's view pills are deleted (the Notion panel's Filter
+     replaced them), and no isolation is needed: every case below already collects task cards from
+     the whole board, where the Tasks group always renders them. */
   await openRoute(page, CAL, { width: 1440, height: 900 });
-  await page.locator(".tl-axis .gpill", { hasText: "Tasks" }).first().click();
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(200);
   return page.evaluate(() => {
     const g = [...document.querySelectorAll<HTMLElement>(".tl-cal")]
       .find((e) => e.getBoundingClientRect().height > 0)!;
@@ -45,8 +47,11 @@ async function tasksView(page: import("@playwright/test").Page) {
           laneW: lb ? +lb.width.toFixed(1) : null,
         };
       }),
-      /* the task's own action, and its glyph */
-      acts: [...g.querySelectorAll<HTMLElement>(".tl-act")].map((a) => ({
+      /* the task's own action, and its glyph — scoped to TASK rows, since v64 dropped the view
+         isolation and the whole board renders around them */
+      acts: [...g.querySelectorAll<HTMLElement>(".tl-rrow")]
+        .filter((r) => r.querySelector(".tl-sband--task"))
+        .flatMap((r) => [...r.querySelectorAll<HTMLElement>(".tl-act")]).map((a) => ({
         deed: a.querySelector(".tl-actbtn")?.textContent?.trim() ?? null,
         kind: a.dataset.act ?? null,
       })),

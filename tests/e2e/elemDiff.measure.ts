@@ -14,14 +14,22 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 
-const REF = "file:///Users/nickphysick/ScriptAlly-app/design-refs/timeline-v63.html";
+const REF = "file:///Users/nickphysick/ScriptAlly-app/design-refs/timeline-v64.html";
 
-/** the 21 elements, ref selector and dev selector, in the order the pack names them */
+/** the elements, ref selector and dev selector — v64: the container is the BOARD CARD (the
+    layout row is transparent), the toolbar is the winbar, and three cards are sampled by KIND
+    (uncut · left-cut · ongoing), per the pack's own gate. `kind:` selectors resolve in the probe. */
 const MAP: [string, string, string][] = [
-  ["container",      ".cal",                           ".tl-cal"],
+  ["container",      ".board",                         ".tl-boardpane"],
   ["sidebar pane",   ".axis",                          ".tl-axis"],
-  ["toolbar",        ".vtool",                         ".tl-vtool"],
+  ["winbar",         ".winbar",                        ".tl-winbar"],
+  ["range headline", ".winbar .rng",                   ".tl-winbar .tl-rng"],
   ["date bar",       ".rail",                          ".tl-rail"],
+  ["notion panel",   ".cp.notion",                     ".tl-np"],
+  ["panel row",      ".cp.notion .pr",                 ".tl-np .tl-pr"],
+  ["card (uncut)",   "kind:uncut",                     "kind:uncut"],
+  ["card (left-cut)", "kind:leftcut",                  "kind:leftcut"],
+  ["card (ongoing)", "kind:ongoing",                   "kind:ongoing"],
   ["group bar",      ".grp .gdiv",                     ".tl-gdiv"],
   ["row",            "#rows .row",                     ".tl-rrow"],
   ["card",           "#rows .card",                    ".tl-p"],
@@ -43,13 +51,24 @@ const MAP: [string, string, string][] = [
 
 const PROBE = (pairs: [string, string][]) => `(() => {
   const isRef = !!document.querySelector('#rows .card');
+  const kindPick = (kind) => {
+    const cards = [...document.querySelectorAll(isRef ? '.card' : '.tl-p')]
+      .filter(x => x.getBoundingClientRect().height > 1);
+    const has = (x, k) => x.classList.contains(k);
+    let e2 = null;
+    if (kind === 'uncut') e2 = cards.find(x => !has(x, 'fadeL') && !has(x, 'fadeR') && !has(x, 'clipR') && !has(x, 'cutR'));
+    if (kind === 'leftcut') e2 = cards.find(x => has(x, 'fadeL') && !has(x, 'fadeR'));
+    if (kind === 'ongoing') e2 = cards.find(x => has(x, 'fadeR') && !has(x, 'clipR') && !has(x, 'cutR'));
+    /* the FRAME is the ink under comparison for a kind row */
+    return e2 ? (e2.querySelector(isRef ? '.frame' : '.tl-frame') || e2) : null;
+  };
   /* SEARCH FROM THE CONTAINER ON BOTH SIDES. Rooting dev's search inside the container made the
      container itself unfindable, and it reported as absent while it was the thing being searched.
      ⚠️ AND NO BACKTICKS IN THESE COMMENTS: this whole block is a template literal, so one backtick
      ends the string and the rest of the probe becomes code — which is how a class name in a comment
      produced "ReferenceError: cal is not defined". */
-  const box = isRef ? document.querySelector('.cal')
-    : [...document.querySelectorAll('.tl-cal')].find(e => e.getBoundingClientRect().height > 0);
+  const box = isRef ? document.querySelector('.board')
+    : [...document.querySelectorAll('.tl-boardpane')].find(e => e.getBoundingClientRect().height > 0);
   const root = document;
   /* ⚠️ THE CONTAINER IS THE ORIGIN ON BOTH SIDES. The two pages sit at different offsets on the
      screen, so absolute coordinates report every element as different; measuring from the container
@@ -60,7 +79,12 @@ const PROBE = (pairs: [string, string][]) => `(() => {
   const out = {};
   for (const [name, sel] of ${JSON.stringify(pairs)}) {
     let e = null;
-    try { e = (name === 'container' ? box : (box || root).querySelector(sel)); } catch (_) { e = null; }
+    try {
+      /* the sidebar sits BESIDE the board in v64 — search from the layout row */
+      const row = box ? (box.closest(isRef ? '.cal' : '.tl-cal') || box) : root;
+      e = sel.startsWith('kind:') ? kindPick(sel.slice(5))
+        : (name === 'container' ? box : row.querySelector(sel));
+    } catch (_) { e = null; }
     if (!e) { out[name] = null; continue; }
     const b = e.getBoundingClientRect(), s = getComputedStyle(e);
     const r1 = (v) => Math.round(v * 10) / 10;
@@ -68,7 +92,10 @@ const PROBE = (pairs: [string, string][]) => `(() => {
        the screen; comparing absolute y would report every element as different. */
     out[name] = {
       x: r1(b.left - origin.x), y: r1(b.top - origin.y), w: r1(b.width), h: r1(b.height),
-      bw: s.borderTopWidth, bc: s.borderTopColor, br: s.borderTopLeftRadius,
+      bw: s.borderTopWidth,
+      /* a zero-width border's colour is currentColor noise, not paint */
+      bc: parseFloat(s.borderTopWidth) > 0 ? s.borderTopColor : '(none)',
+      br: s.borderTopLeftRadius,
       bg: s.backgroundColor,
       ff: (s.fontFamily || '').split(',')[0].replace(/["']/g, ''),
       fs: s.fontSize, fw: s.fontWeight, fst: s.fontStyle,
@@ -108,11 +135,23 @@ test("the element difference list — ref against dev", async ({ page }) => {
    * again on the next run.
    */
   const DEVIATION: Record<string, string> = {
-    "card:bg": "the dissolve is deleted (§D correction 1) — the ref still paints its fade overlay",
+    /* the v64 ref's own inconsistency: its base frame is 10px while its cut-card rule says 9px
+       !important — dev is 9 everywhere, inside the ±1 box tolerance and matching the newest
+       intent (the soft-edge block) */
+    "card (uncut):br": "ref base radius 10 vs its own cut-card 9px!important — dev is 9 everywhere",
+    "card (left-cut):br": "same 9-vs-10",
+    "card (ongoing):br": "ref base radius 10 on the uncut corners — dev is 9 everywhere",
+    "card:br": "same 9-vs-10 as the kind rows",
+    "winbar:br": "the container clips its corners (overflow hidden); the ref rounds the bar itself — same painted result",
+    "pulse dot:bg": "the app's own near-black (#1c130f) — colour is the app's per the authority split; the ref's ink is #2a1f17",
+    "range headline:x": "the headline's width follows its text; the ref draws a different range string",
+    "range headline:w": "same — fixture range string",
+    "panel row:y": "the ref draws a GROUPS|FLAT segment above the panel — it duplicates Group→None and is deliberately unbuilt (one home per control)",
+    "notion panel:h": "three fewer rows of chrome — the GROUPS|FLAT segment above it is unbuilt, and the fixtures' facet sections count different options",
   };
   /** the ref is a standalone page; dev is a pane inside the app shell, so the CONTAINER differs */
-  const CONTAINER = new Set(["container:w", "container:h", "sidebar pane:h",
-    "toolbar:w", "date bar:w", "group bar:w", "row:w", "card:w", "band:w"]);
+  const CONTAINER = new Set(["container:w", "container:h", "sidebar pane:h", "sidebar pane:w",
+    "winbar:w", "date bar:w", "group bar:w", "row:w", "card:w", "band:w", "notion panel:y"]);
   /** the house floor for mixed-case Playfair in a clipping box — 1.3, against the ref's 1.15 */
   const LEADING = new Set(["name:h", "fact:h", "action label:h", "eyebrow:h", "task card:h"]);
   /** a consequence of the dissolve's deletion: a hard cut edge needs no room made for a fade */
@@ -120,6 +159,10 @@ test("the element difference list — ref against dev", async ({ page }) => {
     "action label:x", "action button:x"]);
   /** the two fixtures hold different records, so their TEXT is different and so is its width */
   const FIXTURE = new Set(["name:w", "agency:w", "eyebrow:w", "action label:w", "action button:w",
+    "card (uncut):x", "card (uncut):y", "card (uncut):w", "card (uncut):h",
+    "card (left-cut):x", "card (left-cut):y", "card (left-cut):w", "card (left-cut):h",
+    "card (ongoing):x", "card (ongoing):y", "card (ongoing):w", "card (ongoing):h",
+    "ringed !:y",
     "band:bg", "band dot:bc", "event symbol:y", "event symbol:x", "event marker:x", "event marker:y",
     "task card:x", "task card:y", "task card:w", "ghost stage:x", "ghost stage:y", "ghost stage:w",
     "card:x", "card:y", "band:x", "band:y", "band dot:x", "band dot:y", "pulse dot:x", "pulse dot:y",
@@ -138,6 +181,10 @@ test("the element difference list — ref against dev", async ({ page }) => {
   for (const [name] of MAP) {
     const a = ref[name], b = dev[name];
     if (!a && !b) { entries.push(`${name.padEnd(15)} ABSENT on both — the probe found nothing to compare`); continue; }
+    if ((!a || !b) && name.startsWith("card (")) {
+      exceptions.push(`${name.padEnd(22)} ${!a ? "no such card in the REF fixture" : "no such card in the DEV fixture"} — the kinds live in the data; the gaps and edges are asserted against the LANE in calDens64`);
+      continue;
+    }
     if (!a) { entries.push(`${name.padEnd(15)} absent in REF, present in dev`); continue; }
     if (!b) { entries.push(`${name.padEnd(15)} present in ref, ABSENT in dev`); continue; }
     for (const k of Object.keys(a)) {

@@ -382,38 +382,46 @@ test.describe("v63 · D — the bar", () => {
     }
   });
 
-  test("⚠️ (d8) three densities, each moving the bar AND the body's ceiling", async ({ page }) => {
+  test("⚠️ (d8) TWO densities from the winbar's segment — v64 retired the third and the popover", async ({ page }) => {
+    /* ⚠️ RETARGETED BY v64 §B/§F. The Display popover is deleted (the winbar's segmented control
+       is the one home) and "Regular" is retired as a word — three steps were two extra answers to
+       a question with one good one. Comfortable is the 86px base; Compact is the 40px one-row cut,
+       whose full anatomy calDens64 owns. This case keeps d8's own claim at its new size: the
+       control changes the BAR, and each density's card is its bar's height. */
     await openRoute(page, CAL, { width: 1440, height: 900 });
     const read = () => page.evaluate(() => {
-      const b = document.querySelector<HTMLElement>(".tl-board")!;
-      const body = document.querySelector<HTMLElement>(".tl-cardbody");
-      const card = [...document.querySelectorAll<HTMLElement>(".tl-cal")]
-        .find((e) => e.getBoundingClientRect().height > 0)!.querySelector<HTMLElement>(".tl-p");
+      const g = [...document.querySelectorAll<HTMLElement>(".tl-cal")]
+        .find((e) => e.getBoundingClientRect().height > 0)!;
+      const b = g.closest<HTMLElement>(".tl-board") ?? (g as HTMLElement);
+      const card = [...g.querySelectorAll<HTMLElement>(".tl-p")]
+        .find((e) => e.getBoundingClientRect().height > 1);
       return {
         dens: b.dataset.dens ?? null,
         bar: getComputedStyle(b).getPropertyValue("--bar-h").trim(),
-        row: getComputedStyle(b).getPropertyValue("--row-h").trim(),
-        cardH: card ? parseFloat(getComputedStyle(card).height) : null,
-        maxH: body ? getComputedStyle(body).maxHeight : null,
-        clips: body ? body.scrollHeight > body.clientHeight + 0.5 : null,
+        cardH: card ? +card.getBoundingClientRect().height.toFixed(1) : null,
       };
     });
     const seen: Record<string, unknown> = {};
-    for (const d of ["Comfortable", "Compact", "Regular"]) {
-      await page.locator('.tl-tbtrig[aria-label="Display density"]').click();
-      await page.locator('.tl-dd[aria-label="Display density"] .tl-ddopt', { hasText: d }).click();
+    for (const d of ["Compact", "Comfortable"]) {
+      await page.evaluate((label) => {
+        const g = [...document.querySelectorAll<HTMLElement>(".tl-cal")]
+          .find((e) => e.getBoundingClientRect().height > 0)!;
+        const btn = [...g.querySelectorAll<HTMLElement>(".tl-dseg button")]
+          .find((x) => new RegExp(label, "i").test(x.textContent ?? ""));
+        if (!btn) throw new Error(`no ${label} segment in the winbar`);
+        btn.click();
+      }, d);
+      await page.waitForTimeout(150);
       const r = await read();
       seen[d] = r;
-      /* ⚠️ THE BAR AND THE BODY'S CEILING MOVE TOGETHER. Changing `--bar-h` alone leaves the words
-         centred on a `top` written for a different card, which is how the eyebrow was clipped in
-         this section's first build. */
       expect(r.cardH, `${d}: the card is not the bar's height`).toBeCloseTo(parseFloat(r.bar), 0);
-      expect(r.clips, `${d}: the body clips its own words`).toBe(false);
     }
-    console.log("densities:", JSON.stringify(seen, null, 1));
+    console.log("densities:", JSON.stringify(seen));
     const bars = new Set(Object.values(seen).map((v) => (v as { bar: string }).bar));
-    /* three distinct heights, or the control is decorative */
-    expect(bars.size, `the three densities share a bar height: ${[...bars].join(", ")}`).toBe(3);
+    expect(bars.size, `the two densities share a bar height: ${[...bars].join(", ")}`).toBe(2);
+    /* the retired popover must be GONE from the rendered page, not merely unclicked */
+    expect(await page.locator('.tl-tbtrig[aria-label="Display density"]').count(),
+      "the Display popover is back").toBe(0);
   });
 
   test("⚠️ (d9) every size is the ref's, in px, within half a pixel", async ({ page }) => {
@@ -563,9 +571,12 @@ test.describe("v63 · D — the bar", () => {
               || (wmask !== "none" && wmask !== "")) painted.push(e.className || e.tagName);
         }
         const f = c.querySelector<HTMLElement>(".tl-frame");
-        if (f && (c.classList.contains("fadeL") || c.classList.contains("clipR"))) {
+        if (f && (c.classList.contains("fadeL") || c.classList.contains("cutR"))) {
+          /* ⚠️ `cutR`, NOT `clipR` — clipR states an expectation named beyond the window, and an
+             overdue wait carries it while its bar stops (cut square) at TODAY. The whole-object
+             treatment belongs to the drawn window cut alone. */
           const cs = getComputedStyle(f);
-          edges.push({ cls: [...c.classList].filter((k) => k === "fadeL" || k === "clipR").join("+"),
+          edges.push({ cls: [...c.classList].filter((k) => k === "fadeL" || k === "cutR").join("+"),
             l: cs.borderLeftWidth, r: cs.borderRightWidth,
             lrad: cs.borderTopLeftRadius, rrad: cs.borderTopRightRadius });
         }
@@ -584,18 +595,25 @@ test.describe("v63 · D — the bar", () => {
     });
     expect(r.cards, "no cards to check").toBeGreaterThan(5);
     /* ⚠️ ABSOLUTE, NOT "no `.tl-fov`". A class-name check passes the day somebody paints a gradient
-       on a different element; this asks what is PAINTED, so there is nothing left to rename around. */
+       on a different element; this asks what is PAINTED, so there is nothing left to rename around.
+       ⚠️ MEASURED AT COMFORTABLE, WHICH IS WHERE IT IS ABSOLUTE. Compact (v64 §F) paints ONE
+       sanctioned gradient — the frame's 4px status edge, two identical stops, a stripe and not a
+       dissolve — and calDens64 asserts that set is exactly the frame and nothing else. */
     expect(r.painted, `cards carry a gradient or a mask: ${JSON.stringify(r.painted)}`).toEqual([]);
-    /* a cut edge drops its border and its radius — the clip is what says the card continues */
+    /* ⚠️ RETARGETED BY v64 §F — the law this stood for is INVERTED at the window's edges. v63 cut
+       them square and borderless; v64 rules that a card at the window's edge is a WHOLE OBJECT:
+       corners and hairline kept on the window side, stopping 6px short of the lane. The dissolve
+       stays dead (the painted-set check above is untouched); only the hard-cut half moves. The
+       ongoing edge (`fadeR`, at today) keeps the square cut and is asserted in calFid63 (3)/(4). */
     expect(r.edges.length, "no clipped cards — the edge claim is unexercised").toBeGreaterThan(0);
     for (const e of r.edges) {
       if (e.cls.includes("fadeL")) {
-        expect(e.l, `${e.cls}: left border ${e.l}`).toBe("0px");
-        expect(e.lrad, `${e.cls}: left radius ${e.lrad}`).toBe("0px");
+        expect(e.l, `${e.cls}: left border ${e.l}`).toBe("1px");
+        expect(e.lrad, `${e.cls}: left radius ${e.lrad}`).toBe("9px");
       }
-      if (e.cls.includes("clipR")) {
-        expect(e.r, `${e.cls}: right border ${e.r}`).toBe("0px");
-        expect(e.rrad, `${e.cls}: right radius ${e.rrad}`).toBe("0px");
+      if (e.cls.includes("cutR")) {
+        expect(e.r, `${e.cls}: right border ${e.r}`).toBe("1px");
+        expect(e.rrad, `${e.cls}: right radius ${e.rrad}`).toBe("9px");
       }
     }
     expect(r.dotOut, `the band's dot sits outside its card: ${JSON.stringify(r.dotOut)}`).toEqual([]);

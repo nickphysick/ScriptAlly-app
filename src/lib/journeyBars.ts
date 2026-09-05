@@ -1754,19 +1754,14 @@ export function labelFor(state: BarState, i: LabelInput): BarLabel {
         short: i.nudgedOnYmd ? `Nudged · remind ${on(i.nudgeYmd)}` : `Remind ${on(i.nudgeYmd)}`,
       };
 
-    case "ghost":
-      /* ⚠️ THE SAME SENTENCE AS `quiet`, AND DELIBERATELY SO. A ghost is a long silence, not a
-         different KIND of silence, and the app reports rather than appraises — "presumed
-         rejected", "gone", "dead" are all verdicts about a decision nobody made. What changes at
-         the threshold is the TREATMENT: the card stops being drawn as live work. */
     /* ⚠️ A GHOST TAKES `quiet`'S OWN SENTENCE, DELIBERATELY. It is a long silence, not a different
        KIND of silence, and the app reports rather than appraises — "presumed rejected", "gone",
        "dead" are verdicts about a decision nobody made. What changes at the threshold is the
-       TREATMENT: the card stops being drawn as live work. */
-    /* ⚠️ A GHOST KEEPS THE DURATION AND DOES NOT TAKE THE AGENCY LATENESS LINE. Both are agent-held
-       silences with a passed expectation, so they shared a case — and sharing it took the ghost's
-       one statement away: "reply expected 1 Jan · none yet" about a 242-day silence says when
-       something was due and not that half a year has gone. The ghost's whole claim is HOW LONG. */
+       TREATMENT: the card stops being drawn as live work.
+       ⚠️ AND IT KEEPS THE DURATION RATHER THAN THE AGENCY LATENESS LINE. Both are agent-held
+       silences with a passed expectation, so they once shared a case — and sharing it took the
+       ghost's one statement away: "reply expected 1 Jan · none yet" about a 242-day silence says
+       when something was due, not that half a year has gone. The ghost's whole claim is HOW LONG. */
     case "ghost":
       return i.quietDays > 0
         ? { long: `Quiet for ${plural(i.quietDays, "day")}`, short: `${i.quietDays} days quiet` }

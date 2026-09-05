@@ -82,7 +82,12 @@
 }
 .tl-wleft { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
 /* the range as a headline — the ref's Playfair 24/500, flanked by the chevrons */
-.tl-rng {
+/* ⚠️ `.tl-winbar .tl-rng`, NOT `.tl-rng` — the board's `:where()` font sweep is 0-1-0 (`:where`
+   adds nothing) and DECLARED LATER, so a bare class rule above it loses `font-family` to
+   `inherit` and the headline rendered Inter. The sweep exists to beat the app-wide ELEMENT rule
+   while losing to class rules; a class rule that precedes it in the file is the one shape that
+   slips through, and the difference list is what caught it. */
+.tl-winbar .tl-rng {
   font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 500;
   color: var(--tl-nearblack); white-space: nowrap; line-height: 1.3;
 }
@@ -127,38 +132,45 @@
  * Selection is a WHITE box with a rose tick (radios a rose dot); no filled boxes, per the ref's
  * `data-orl="essentials"`. Counts ride each option in mono, zero-padded like every count here.
  */
+/* ⚠️ NO CARD — the ref's panel is TRANSPARENT ROWS ON THE PAGE CREAM, closed by a section
+   hairline (`.axis .cp{…border-bottom}`). The first build gave it a white bordered card, which
+   the element difference list flagged on six properties at once: the ref's sidebar carries no
+   surfaces at all in v64 (§A took even its pane), and a card here would be the one box on an
+   unboxed column. Row = quiet 400 ink-brown; the VALUE is the bold ink — the ref's emphasis, and
+   the reverse of the first build's. */
 .tl-np {
-  display: flex; flex-direction: column; align-items: stretch; gap: 0;
-  background: #fff; border: 1px solid #e7e0d4; border-radius: 12px;
-  padding: 4px; overflow: hidden;
+  display: flex; flex-direction: column; align-items: stretch; gap: 8px;
+  background: transparent; border: 0; border-radius: 0;
+  padding: 10px 4px; border-bottom: 1px solid var(--tl-ch-line);
 }
 .tl-pr {
   display: flex; align-items: center; gap: 8px;
-  padding: 9px 10px; border: 0; border-radius: 8px; cursor: pointer;
+  padding: 8px 6px; border: 0; border-radius: 8px; cursor: pointer;
   background: transparent; text-align: left;
-  font-size: 12.5px; font-weight: 600; color: var(--tl-nearblack);
+  /* 15px — a 31px row like the ref's; a button's UA line box ran it to 34.8 */
+  font-size: 12.5px; font-weight: 400; color: #4a3d33; line-height: 15px;
 }
-.tl-pr:hover { background: #faf6ef; }
+.tl-pr:hover { background: rgba(255, 255, 255, .7); }
 .tl-pr:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
 .tl-prchev { color: #a89880; font-size: 12px; transition: transform .12s; }
 .tl-pr.open .tl-prchev { transform: rotate(90deg); }
 @media (prefers-reduced-motion: reduce) { .tl-prchev { transition: none; } }
-.tl-prv { margin-left: auto; font-weight: 400; font-size: 12px; color: #8a7a6c; }
+.tl-prv { margin-left: auto; font-weight: 600; font-size: 12.5px; color: var(--tl-nearblack); }
 /* the Filter row's live figure — rose only while something is hidden */
 .tl-prv.act { color: #8c4f4a; font-weight: 600; }
 .tl-prclr {
   font-size: 11px; color: #6f6055; text-decoration: underline; text-underline-offset: 2px;
   cursor: pointer;
 }
-/* the expansion — options as full-width rows, hanging from their header row */
-.tl-px { display: flex; flex-direction: column; gap: 1px; padding: 2px 0 8px 6px; }
+/* the expansion — options indented under their row, the ref's 22px hang */
+.tl-px { display: flex; flex-direction: column; gap: 1px; padding: 2px 0 8px 22px; }
 .tl-px > button {
-  display: flex; align-items: center; gap: 9px;
-  padding: 6px 10px; border: 0; border-radius: 8px; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px; border: 0; border-radius: 7px; cursor: pointer;
   background: transparent; text-align: left;
-  font-size: 12px; color: #3a2c22;
+  font-size: 12px; color: #4a3d33;
 }
-.tl-px > button:hover { background: #faf6ef; }
+.tl-px > button:hover { background: rgba(255, 255, 255, .7); }
 .tl-px > button:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
 .tl-px > button b {
   margin-left: auto;
@@ -167,9 +179,12 @@
 }
 /* ⚠️ SELECTED IS A WHITE BOX WITH A ROSE TICK — never a filled box. A wall of solid boxes reads as
    pressed buttons; the tick is the statement and the box is just its seat. */
+/* ⚠️ 12px AT 1.3 — the ref's marker geometry. The FORM deviates deliberately: the ref FILLS a
+   selected box with ink, and a wall of solid boxes on an all-ticked filter reads as pressed
+   buttons — the tick is the statement and the box is its seat. Named in the §F report. */
 .tl-bx {
-  width: 14px; height: 14px; flex: 0 0 auto;
-  border-radius: 4px; border: 1.5px solid #cdbfa8; background: #fff;
+  width: 12px; height: 12px; flex: 0 0 auto;
+  border-radius: 3px; border: 1.3px solid #b8a889; background: #fff;
   display: inline-flex; align-items: center; justify-content: center;
 }
 .tl-px > button[data-on] .tl-bx::after {
@@ -179,12 +194,12 @@
 }
 /* radios — a rose dot in a round seat */
 .tl-rad {
-  width: 14px; height: 14px; flex: 0 0 auto;
-  border-radius: 99px; border: 1.5px solid #cdbfa8; background: #fff;
+  width: 12px; height: 12px; flex: 0 0 auto;
+  border-radius: 99px; border: 1.3px solid #b8a889; background: #fff;
   display: inline-flex; align-items: center; justify-content: center;
 }
 .tl-px > button[data-on] .tl-rad::after {
-  content: ""; width: 7px; height: 7px; border-radius: 99px; background: #8c4f4a;
+  content: ""; width: 6px; height: 6px; border-radius: 99px; background: #8c4f4a;
 }
 /* a facet section's header — its name, then All · None as quiet links */
 .tl-fh2 {
@@ -556,12 +571,9 @@
   --owed-bd: #e8c8bc;
   --owed-sh: 0 6px 16px rgba(58, 28, 20, .16);
   --owed-pill-bg: #efd5ca; --owed-pill-bd: #e6c3b4;
-  /* the fade at a cut edge, and the inset its text takes on the left */
-  /* ⚠️ THE REF'S THIRTY, NOT OUR THIRTY-FOUR. The fade's width is what the body's clip sits inside
-     — `max-width: calc(100% - 22px)` against a 30px dissolve — so the two are one relationship and
-     a stray four pixels widens the band where words can sit over a frame that has faded out. */
-  --card-fade: 30px;
-  --card-fade-inset: 42px;
+  /* the dissolve's two tokens are RETIRED — the v63 §D correction deleted the fade itself, and
+     v64 §F deleted the last two rules that still read the inset (both selected elements no
+     component renders: `.tl-shd`, `.tl-content`) */
   --tl-pink: #f5e2da;
   --tl-pinkb: #e8c8bc;
   --tl-hair: #efe6da;
@@ -670,6 +682,11 @@
      and the pre-v63 sweep hung before reaching it. A lock nobody runs is a lock nobody has.
 
      Derived from the gutter rather than typed, so the two move together if the column returns. */
+  /* ⚠️ THE LANE'S OWN GROUND (v64 §A — the ref's `.board`/`.rows` #faf7f2). This token was READ
+     by four rules from the day §A landed and DEFINED by none of them — so the board's ground was
+     silently transparent through a green build, and the page cream showing through read as
+     close-enough at a glance. The `var()`-on-undefined class, again; found by the rail-tone lock. */
+  --tl-lane: #faf7f2;
   --tl-lane-inset: 0px;
   /* ⚠️ 16px SINCE v54: a mark is a LEAD-IN now, drawn before the card rather than riding on it.
      At 22 it was sized to be read against a card it sat on; on a dotted run it is a waypoint. */
@@ -680,7 +697,8 @@
      tick and a date label, which is a different object. */
   /* ⚠️ 46px — the ref's `data-rail="inline"`. One row of small tiles with the day and the month on
      ONE line and no month shelf above them; the 76px tile rail is a rejected alternative. */
-  --tl-rail-h: 54px;
+  /* 55 — the v64 ref's `.rail`; 54 was v63's */
+  --tl-rail-h: 55px;
   /* ⚠️ v60: THE COLUMN IS BACK, AND IT IS NOT AN AGENT COLUMN. It holds the section's row
      numbers and the badge's overhang, so the rail must reserve the same width before its lane or
      every tick sits left of every bar. Derived, never typed: see `--tl-gnum-w` above. */
@@ -892,6 +910,12 @@
      The tone is the field's, so the rail reads as the board's own edge rather than a bar laid on
      it. */
  background: var(--tl-cs-rail);
+  /* ⚠️ THE RAIL TAKES THE ROWS' OWN 20px LANE INSET (v64 §A — the ref's `.g-lane` is
+     `padding: 0 20px`, so its CONTENT box IS the cols box). Without it the rail's date cell is a
+     40px-wider container than a row's, and `pct()` resolves in `cqw` — so every date sat 20px
+     right of its column AND the tick pitch was subtly wrong. The seam lock (rail lane box = rows
+     lane box) is what caught it; §A's screenshot had been read as correct. */
+  padding: 0 20px;
   /* ⚠️ `relative`, NOT `sticky` — v60 Law 4, and it is a structural claim rather than a stacking
      one. A sticky rail is INSIDE the scroller and pins by clamping; this rail is OUTSIDE it and
      cannot be reached at all. The z-index survives because the today line and the probe are drawn
@@ -914,7 +938,12 @@
      comment does. */
   box-sizing: border-box;
   /* the alignment contract: the rail reserves exactly what the lanes are inset by */
-  padding-left: var(--tl-nm-w); box-sizing: border-box;
+  /* ⚠️ THE NAME-COLUMN RESERVATION IS DELETED, NOT RESTATED. `padding-left: var(--tl-nm-w)` came
+     AFTER the `padding: 0 20px` shorthand, and a later longhand quietly wins — so the rail's left
+     inset resolved to the name column's 0px while the right held 20, and every date sat 20px off
+     its column with the seam lock red. `--tl-nm-w` has been 0 everywhere since v58 retired the
+     column. */
+  box-sizing: border-box;
 }
 /* ⚠️ THE RAIL RESERVES EXACTLY WHAT THE LANES ARE INSET BY — the alignment contract, stated once.
    v58 removed the rail's agent cell because the rows had none either (`--tl-nm-w: 0`); v60 gave
@@ -1230,7 +1259,10 @@
 }
 .tl-frame {
   position: absolute; inset: 0; pointer-events: none;
-  background: var(--card-bg, #ffffff);
+  /* ⚠️ `background-color`, NOT THE SHORTHAND. Compact paints the 4px status edge as this
+     element's `background-image`; a shorthand anywhere in the frame's cascade resets that image
+     to none — which is exactly how the stripe silently vanished from every quiet card. */
+  background-color: var(--card-bg, #ffffff);
   border: 1px solid var(--tl-frame-bd);
   /* 9px — the ref's, and the band's own top corners share it so the two read as one object */
   border-radius: 9px;
@@ -1262,7 +1294,6 @@
   position: absolute; top: 0; bottom: 0; left: var(--tl-text-inset); right: 12px;
   z-index: 1; display: flex; align-items: center; overflow: hidden;
 }
-.tl-p.fadeL .tl-content { left: var(--card-fade-inset); }
 /* ⚠️ A COLUMN, SO THE PILL AND THE HEADLINE SHARE ONE LEFT EDGE. `align-self: flex-start` keeps
    the pill its own width without stretching it across the card. */
 /* ⚠️ `tl-cbody`, NOT `tl-body` — THE NAME WAS ALREADY TAKEN, AND THIS IS THE THIRD TIME.
@@ -1418,43 +1449,18 @@
    duplicate-declaration fault this repo has now met in three stylesheets. The values kept are the
    ones the browser was already painting. Closed is the ONE state that stays dashed. */
 .tl-p.closedp .tl-frame {
-  background: transparent; box-shadow: none;
+  background-color: transparent; box-shadow: none;
   border: 1.5px dashed var(--bar-closed-line);
 }
 
-/* ⚠️ OWED IS THE ONE STATE THAT LIFTS, and it lifts without animating. A passed date, or a
-   writer-held request with none named: the card stands off the ground and its pill deepens. */
-/**
- * ⚠️ THE STIR: AN OWED CARD MOVES, AND EVERY KEYFRAME REPEATS THE BASE TRANSFORM (v54, Phase 5).
- *
- * `transform` is not additive. A keyframe stating only a rotation REPLACES the whole transform,
- * so the card loses `translateY(-50%)` and drops half its own height — silently, and only while
- * the animation runs, which is the one moment nobody is measuring. Every frame therefore repeats
- * `translateY(-50%) scale(1.006)` in full.
- *
- * ⚠️ AND NO `var()` INSIDE THE KEYFRAMES. A custom property in a keyframe block fails silently in
- * this setup — no error, no animation, nothing to point at — which this repo has already paid for
- * on the marketing pulse halo. The values are literal.
- *
- * The stagger is what stops it reading as a wave: 2.6s apart on an 11s cycle, so no two cards
- * move together. It pauses on hover, because a card the reader is trying to read must hold still.
- */
-@keyframes tlStir {
-  0%   { transform: translateY(-50%) scale(1.006) rotate(0deg); }
-  25%  { transform: translateY(-50%) scale(1.006) rotate(0.45deg); }
-  50%  { transform: translateY(-50%) scale(1.006) rotate(0deg); }
-  75%  { transform: translateY(-50%) scale(1.006) rotate(-0.45deg); }
-  100% { transform: translateY(-50%) scale(1.006) rotate(0deg); }
-}
-.tl-p.owed {
-  transform: translateY(-50%) scale(1.006); z-index: 4;
-  animation: tlStir 11s ease-in-out infinite;
-  animation-delay: calc(var(--stir-i, 0) * 2.6s);
-}
-.tl-p.owed:hover { animation-play-state: paused; }
-@media (prefers-reduced-motion: reduce) {
-  .tl-p.owed { animation: none; }
-}
+/* ⚠️ THE STIR AND THE OWED SCALE ARE RETIRED (v64 — the design's own `data-anim="none"`, and the
+   ref's owed card measures a plain `translateY(-50%)`: no scale, no animation, no shadow). The
+   scale was not free: 1.006 on a ~400px card moved its painted edges 1.2px each way, so a left-cut
+   owed card showed a 4.8px lane gap against the 6px law and an ongoing one overhung the today
+   line — the treatment was arguing with two geometry locks at once. What owed keeps is STANDING:
+   z-index 4 and the deepened pill. The v54 keyframe lesson (every frame repeats the base
+   transform in full; no `var()` inside keyframes) lives on in the pulse dot's own frames. */
+.tl-p.owed { z-index: 4; }
 .tl-p.owed .tl-pill { background: var(--owed-pill-bg); border-color: var(--owed-pill-bd); font-weight: 700; }
 
 
@@ -1983,44 +1989,55 @@ button.tl-tchip { cursor: pointer; }
  * ⚠️ THE LEFT DISSOLVE SURVIVES UNCHANGED. A card whose start is before the window IS cut off, and
  * the overlay-plus-shadow mechanism v60 built for it is still the right answer there.
  */
-.tl-p.fadeR .tl-frame {
-  /* `width: auto` with `right`, so the frame stops short of the card's own right edge */
-  width: auto; right: 16px;
+.tl-p.fadeR:not(.cutR) .tl-frame {
+  /* ⚠️ `:not(.cutR)` — THE SQUARE CUT IS TODAY'S, NEVER THE WINDOW'S. A bar drawn to the window's
+     edge (`cutR`) keeps its whole frame; only a bar stopping ON the today line is cut there.
+     ⚠️ `right: 0` — THE FRAME RUNS THE CARD'S FULL WIDTH TO THE TODAY LINE (v64 §F; the ref's
+     `data-end="open"` rule is `width:auto; right:0`). The 16px stop was the v61 chevron notch's
+     reservation, and the chevron was deleted in v63 §D — so for two packs the PAINTED ongoing card
+     ended 16px short of the line its own lock said it met: the lock measured `.tl-p`'s box, not the
+     frame's ink, and the difference list never sampled an ongoing card. v64's list samples one by
+     name, which is how this was found. */
+  width: auto; right: 0;
   border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0;
 }
-.tl-p.fadeL .tl-frame {
-  border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none;
-}
-.tl-p.fadeR .tl-frame, .tl-p.fadeL .tl-frame { box-shadow: none; }
 
 /* ⚠️ THE CARD'S SHADOW IS RETIRED (v63, section D) — `body[data-bar="qc"] .shd { display: none }`.
    A lift under a bar that already carries a tinted band is two treatments arguing; the QC card is
-   a flat object on a flat ground. Its negative-`z-index` note went with it: there is nothing left
-   to sink behind the frame. */
-.tl-p.fadeL .tl-shd { left: var(--card-fade-inset); }
+   a flat object on a flat ground. The `.tl-shd` element went with it, so the fadeL inset rule it
+   carried is deleted rather than left selecting nothing. */
 
 /* the chevron itself — 18px wide, one pixel proud at top and bottom so its stubs meet the frame */
 /* ⚠️ THE CHEVRON TAIL IS RETIRED (v63, section D) — the design is `data-end="open"`, and the ref
    states `body:not([data-end="tail"]) .tailsvg { display: none !important }`. An open end IS the
    frame's own right border removed and its corners squared, which `.tl-p.fadeR .tl-frame` does. */
 
-/* ⚠️ THE DISSOLVE IS DELETED, BOTH EDGES (v63, §D correction 1). A gradient overlay said "this card
-   continues past the window" by fading its own ink out — so the band, the dot and the words at a cut
-   edge were all being dimmed to make a point about the WINDOW. A card that begins before the window
-   or ends after it is simply CUT by the board's clip: a hard edge, no border and no radius on the
-   cut side, and nothing painted over the card at all.
+/* ══ THE WINDOW'S EDGES ARE SOFT (v64 §F — supersedes v63 §D's hard cut at these two edges) ══
+   A card that BEGINS BEFORE the window (`fadeL`) or ENDS AFTER it (`clipR`) is a whole object
+   whose story continues off-screen: it keeps its rounded corners and its hairline on the window
+   side, and stops 6px short of the lane's edge — the gap is what says "there is more". v63 cut
+   these edges square and borderless, which told the reader the OBJECT was cut when only the
+   window is. No dissolve returns with this: nothing is painted over the card, the gradient/mask
+   law stands, and the change is geometry plus the ABSENCE of the stripping rules.
 
-   ⚠️ AND IT TAKES THE LAST GRADIENT AND THE LAST MASK ON A CARD WITH IT — the two overlays were
-   the only ones. The law is absolute and locked now, which is what makes it enforceable rather than
-   remembered. */
-/* ⚠️ A CUT EDGE IS A CUT EDGE, WHICHEVER REASON CUT IT (v63, §D correction 1). Ongoing and
-   window-clipped now stop the same way — no border, no radius on the cut side — and the distinction
-   survives where it belongs: the pulse dot rides an ONGOING open end and never a clipped one. The
-   dissolve that used to carry the difference is deleted. */
-.tl-p.clipR .tl-frame { border-right: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
-.tl-p.clipR .tl-sband { border-top-right-radius: 0; }
-/* the left cut, stated the same way — it had only ever been implied by the overlay */
-.tl-p.fadeL .tl-frame { border-left: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+   ⚠️ AN ONGOING END IS NOT A WINDOW CUT. `fadeR` still stops square and borderless ON the today
+   line — a live wait runs out of board at today, and rounding that edge would draw an end the
+   query has not reached. The distinction the old dissolve carried now lives entirely in the
+   geometry: a 6px gap at the window's edge, a flush cut at today's.
+
+   ⚠️ THE CUT CLASS IS `cutR`, NOT `clipR`. `clipR` states KNOWLEDGE — an expectation named
+   beyond the window — and an overdue wait carries it while its bar stops at today; shaving that
+   bar 6px put its end 6px before the today line. `cutR` states GEOMETRY: the drawn box reaches
+   the window's edge (journeyBars clamps `liveStop` at `span`). Only geometry takes the gap.
+
+   ⚠️ AND THE RULES ARE LANE-ANCHORED, NOT `--w`-ADJUSTED. Two fixture cards start 1.2px LEFT of
+   the lane (a sub-day rounding the old flush cut hid), so `left: calc(var(--l) + 6px)` gave a
+   4.8px gap — the gap is a fact about the LANE EDGE, so it is stated from it: `left: 6px`, and
+   the width gives back whatever `--l` really was. `100cqw` is the lane's own width — the same
+   container unit the geometry is written in. */
+.tl-p.fadeL { left: 6px; width: calc(var(--l) + var(--w) - 6px); }
+.tl-p.cutR { width: calc(100cqw - var(--l) - 6px); }
+.tl-p.fadeL.cutR { left: 6px; width: calc(100cqw - 12px); }
 
 /* ══ TWO DENSITIES (v64 §F) ═════════════════════════════════════════════════════════════════
  *
@@ -2029,23 +2046,113 @@ button.tl-tchip { cursor: pointer; }
  * board reads, and the first thing to drift. "Regular" is retired as a word, and the old 124/104
  * step is deleted with it — three steps were two extra answers to a question with one good one.
  *
- * Compact is re-cut by §F: one 52px row, a 40px bar, no band, a status-tinted top edge, and a
- * hover peek instead of a taller row.
+ * ⚠️ COMPACT IS ONE ROW — 52px row, 40px bar, NO BAND (v64 §F; the ref's `data-dens="compact"`
+ * with `data-orc="edge"` + `data-orl="essentials"`). The band ELEMENT stays in the DOM as an
+ * invisible full-height rail — it is what already carries the dot at the left and the holder at
+ * the right, so compact re-uses it rather than mounting a second pair of marks. The status colour
+ * survives as a 4px tinted top edge painted on the frame (a background IMAGE, not a border, so
+ * the card's box and radius are untouched), read from `--st`, which `:has()` lifts off the band's
+ * own `tl-st-*` class — one source for the tint, whichever form it wears.
+ * ⚠️ NO FACT AT REST — essentials is dot · name · agency, holder right; the fact belongs to the
+ * hover PEEK (the page-layer overlay below), never to a wider or taller bar.
  */
 .tl-board[data-dens="compact"] {
-  --row-h: 76px; --bar-h: 58px;
+  --row-h: 52px; --bar-h: 40px; --tl-jc-h: 40px;
 }
-/* ⚠️ AT COMPACT THE TWO LINES BECOME ONE ROW and the agency goes. 22px holds one line of type, so
-   a stacked name-over-fact would clip — the ref drops the agency rather than shrinking the name,
-   because a name at 11px is a caption and the row stops being scannable. */
-/* ⚠️ AT COMPACT THE TAIL JOINS THE ROW rather than sitting under it — 22px is one line of type, and
-   the whole point of compact is that a card is one line of type. */
-.tl-board[data-dens="compact"] .tl-cardbody { top: 33px; max-height: 22px; }
-.tl-board[data-dens="compact"] .tl-feb { display: inline; margin: 0 0 0 10px; }
-.tl-board[data-dens="compact"] .tl-gstack { flex-direction: row; align-items: baseline; gap: 10px; }
-/* the fact keeps no stacking margin once the whole line is one row */
-.tl-board[data-dens="compact"] .tl-ffx { margin-top: 0; }
-.tl-board[data-dens="compact"] .tl-fag { display: none; }
+/* the band becomes a transparent full-height rail for its dot and holder */
+.tl-board[data-dens="compact"] .tl-sband {
+  height: 100%; background: transparent; border-bottom: none; border-radius: 9px;
+}
+.tl-board[data-dens="compact"] .tl-sband .tl-sw,
+.tl-board[data-dens="compact"] .tl-sband .tl-snote { display: none; }
+.tl-board[data-dens="compact"] .tl-sh { font-size: 6.5px; }
+/* the 4px status edge — `--st` from the band's own class, task yellow included */
+.tl-p:has(> .tl-st-out-1) { --st: var(--tl-stage-out-1); }
+.tl-p:has(> .tl-st-out-2) { --st: var(--tl-stage-out-2); }
+.tl-p:has(> .tl-st-out-3) { --st: var(--tl-stage-out-3); }
+.tl-p:has(> .tl-st-in-1) { --st: var(--tl-stage-in-1); }
+.tl-p:has(> .tl-st-in-2) { --st: var(--tl-stage-in-2); }
+.tl-p:has(> .tl-st-in-3) { --st: var(--tl-stage-in-3); }
+.tl-p:has(> .tl-st-offer) { --st: var(--tl-stage-offer); }
+.tl-p:has(> .tl-st-closed) { --st: var(--tl-stage-closed); }
+.tl-p:has(> .tl-sband--task) { --st: var(--tl-task-band); }
+.tl-board[data-dens="compact"] .tl-frame {
+  background-image: linear-gradient(var(--st, transparent), var(--st, transparent));
+  background-size: 100% 4px; background-repeat: no-repeat; background-position: 0 0;
+}
+/* one centred line: name 13.5 Playfair · agency italic 11; the fact waits for the peek */
+.tl-board[data-dens="compact"] .tl-cardbody {
+  top: 50%; transform: translateY(-50%); left: 34px; max-width: calc(100% - 120px);
+  max-height: none;
+}
+.tl-board[data-dens="compact"] .tl-gstack { flex-direction: row; align-items: baseline; gap: 8px; }
+.tl-board[data-dens="compact"] .tl-fnm { font-size: 13.5px; }
+/* ⚠️ THE TASK NAME'S 14.5 IS COMFORTABLE'S — its selector (`.tl-p .tl-sband--task ~ …`) is 0-4-0,
+   which beats the plain compact name rule, so compact must restate it at 0-5-0 or every task bar
+   keeps the big name in the small row. The ref's compact draws ONE name size for all kinds. */
+.tl-board[data-dens="compact"] .tl-sband--task ~ .tl-cardbody .tl-fnm { font-size: 13.5px; }
+.tl-board[data-dens="compact"] .tl-fag { font-size: 11px; }
+.tl-board[data-dens="compact"] .tl-ffx { display: none; }
+/* ghosts are one-liners at the bar's own height already — only the height token moves */
+.tl-board[data-dens="compact"] .tl-js { font-size: 11.5px; }
+/* a compact ghost is ONE line — stage · sentence side by side; two stacked lines in a 40px bar
+   were clipping against each other (measured: js 511.3, jd 526.5 in one 40px box) */
+.tl-board[data-dens="compact"] .tl-jbody { flex-direction: row; align-items: baseline; gap: 8px; }
+.tl-board[data-dens="compact"] .tl-jd { font-size: 10px; }
+/* actions scale to .9 — the ref's `.nlab{transform:translateY(-50%) scale(.9)}` */
+.tl-board[data-dens="compact"] .tl-act { transform: translateY(-50%) scale(.9); }
+/* a cut compact card starts its text at 34px like every other — the base already says 34; the
+   fadeL override that put comfortable text at 14px must not drag compact's down with it */
+.tl-board[data-dens="compact"] .tl-p.fadeL .tl-cardbody { left: 34px; max-width: calc(100% - 120px); }
+/* the widen is comfortable's; compact reveals through the peek */
+.tl-board[data-dens="compact"] .tl-p[data-tight]:hover { width: var(--w); left: var(--l); }
+.tl-board[data-dens="compact"] .tl-p.fadeL[data-tight]:hover { left: 6px; width: calc(var(--l) + var(--w) - 6px); }
+.tl-board[data-dens="compact"] .tl-p.cutR[data-tight]:hover { width: calc(100cqw - var(--l) - 6px); }
+
+/* ══ THE HOVER PEEK (v64 §F — the ref's `data-grow="place"`) ═════════════════════════════════
+ *
+ * Hovering a compact BAR — never the row — opens a page-layer overlay of the COMFORTABLE card
+ * exactly over the bar: 86px tall, min-width 260px, soft shadow, 60ms hover intent, 140ms fade,
+ * above the group bars and the today line, opening upward when there is no room beneath, staying
+ * while the cursor is on it, cleared by leave or scroll.
+ *
+ * ⚠️ THE PEEK IS A CLONE OF THE CARD IT PEEKS, NOT A SECOND RENDERING. The page clones the hovered
+ * bar's DOM into a wrapper that carries `tl-board` (the token scope) WITHOUT `data-dens="compact"`
+ * — so every compact rule stops matching and the clone renders as the comfortable card by
+ * construction. A second rendering is two cards waiting to disagree; a clone cannot drift.
+ *
+ * ⚠️ AND IT IS PAPER, NOT A CONTROL. The clone carries no listeners — the name link and the card's
+ * own click live on the real bar underneath. `pointer-events: auto` on the wrapper only so that
+ * "stays while the cursor is on it" works; everything inside is inert.
+ *
+ * z-index 46: above the board's sticky group bars (25, a different stacking tree — the peek is a
+ * body-level fixed layer, so any positive index would paint over them; 46 states its place in the
+ * APP's ladder, above the timeline drawer's 45/46 band and below modals at 50). */
+.tl-peek {
+  position: fixed; z-index: 46; height: 86px; min-width: 260px;
+  display: block; flex: none; padding: 0; margin: 0;
+  pointer-events: auto;
+  border-radius: 9px;
+  box-shadow: 0 10px 26px rgba(58, 28, 20, .14);
+  animation: tlPeekIn .14s ease both;
+}
+@keyframes tlPeekIn { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .tl-peek { animation: none; }
+}
+/* the clone fills the wrapper — its own resting geometry (`--l`/`--w`, lane offset, tight-card
+   hover) is the ROW's business, and the wrapper owns the peek's box */
+.tl-peek > .tl-p, .tl-peek > .tl-jc {
+  position: absolute; inset: 0;
+  top: 0; left: 0; width: 100%; height: 100%;
+  transform: none; margin: 0; cursor: default;
+}
+/* a ghost peeks at FULL opacity — the stage, outcome and dates readable */
+.tl-peek > .tl-jc { opacity: 1; }
+/* the cut-card geometry must not re-shrink the clone (same properties, later + equal specificity) */
+.tl-peek > .tl-p.fadeL, .tl-peek > .tl-p.clipR, .tl-peek > .tl-p.fadeL.clipR {
+  left: 0; width: 100%;
+}
 
 /* ⚠️ THE NUDGE MARKER — the ref's `.evn`: a small white disc on the bar at the date the writer
    nudged. It is centred on its date rather than starting at it (`translate(-50%, -50%)`), because a
@@ -2323,8 +2430,8 @@ button.tl-tchip { cursor: pointer; }
 /* ⚠️ THE BAND SPANS THE WHOLE CARD, CUT OR NOT (fidelity 4). It stopped 16px short to clear the
    chevron notch — and the chevron was deleted in §D, so the band was being shortened for a shape
    that no longer exists. Measured: a 430.8px card carrying a 414.7px band. */
-.tl-p.fadeR .tl-sband { border-top-right-radius: 0; }
-.tl-p.fadeL .tl-sband { border-top-left-radius: 0; }
+.tl-p.fadeR:not(.cutR) .tl-sband { border-top-right-radius: 0; }
+/* fadeL's band corner is NOT squared any more — the card is whole at the window's edge (v64 §F) */
 /* ⚠️ EXPLICIT WIDTH AND HEIGHT ON THE SVG — `top`/`bottom` do not size one, and a transform is
    ignored on an SVG element by some engines. The dot is drawn at the size it is asked for. */
 /* ⚠️ 14px AT THE BAND'S OWN 10px INSET — THE REF'S VALUE, AND IT SUPERSEDES §D's 20px. That pass
@@ -2394,7 +2501,8 @@ button.tl-tchip { cursor: pointer; }
    dissolve is deleted, so the words were being pushed in to make room for nothing. */
 .tl-p.fadeL .tl-cardbody { left: 14px; max-width: calc(100% - 28px); }
 /* an ongoing card keeps its words clear of the chevron notch */
-.tl-p.fadeR .tl-cardbody { max-width: calc(100% - 24px - 20px); }
+/* the fadeR body guard (−44px) was the chevron notch's reservation — deleted with the notch; the
+   base −28px is the ref's own value on every card, cut or not */
 /* ⚠️ LINE ONE IS THE NAME AND ITS CHIP ON ONE ROW — the ref's `.trow`. The chip was a third
    flex column beside the stack, which made it compete with the fact for the card's width and
    pushed the fact off the end of every narrow card. */
@@ -2551,7 +2659,7 @@ button.tl-tchip { cursor: pointer; }
    `box-shadow: none` at 0-3-0 on the frame, which happens to beat the token and happens to want
    the same answer. Leaving them is how the next person reintroduces the conflict the token was
    written to end — a frame with four owners, resolved by source order. */
-.tl-p.quiet .tl-frame  { background: var(--tl-frame-quiet-bg); }
+.tl-p.quiet .tl-frame  { background-color: var(--tl-frame-quiet-bg); }
 .tl-p.quiet, .tl-p.ghost, .tl-p.hollow { --frame-sh: none; }
 
 
@@ -2563,9 +2671,9 @@ button.tl-tchip { cursor: pointer; }
 /* ⚠️ THE SCHEME PAINTS THE CARD'S FACE, NOT ITS EDGE. `--tl-cs-cardbd` was a second edge colour
    living beside `--tl-frame-bd`, and being declared later it won — so the token the card's own rule
    names had no effect and no card on the board wore it. One hairline token, one edge. */
-.tl-p .tl-frame { background: var(--tl-cs-card); }
+.tl-p .tl-frame { background-color: var(--tl-cs-card); }
 .tl-p.shut .tl-frame, .tl-p.closedp .tl-frame,
-.tl-p.quiet .tl-frame, .tl-p.ghost .tl-frame { background: var(--tl-cs-cardshut); }
+.tl-p.quiet .tl-frame, .tl-p.ghost .tl-frame { background-color: var(--tl-cs-cardshut); }
 .tl-tail path { fill: var(--tl-cs-card); stroke: var(--tl-cs-cardbd); }
 .tl-jc .tl-jbody { left: 34px; max-width: calc(100% - 44px); }
 
@@ -2587,6 +2695,10 @@ button.tl-tchip { cursor: pointer; }
 .tl-cal {
   /* the container is a ROW: the sidebar on the page, then 18px, then the board */
   flex-direction: row; gap: 18px;
+  /* ⚠️ 24px OF PAGE BENEATH THE BOARD — the pack names the bound ("bounded 24px above the
+     viewport bottom"); the chassis provides ~21 (its own 20px + the border), so the container
+     adds the difference itself rather than asking shared chrome to move for one page. */
+  padding-bottom: 3px;
   border-color: var(--tl-ch-frame);
   background: var(--tl-ch-ground);
 }
@@ -2600,7 +2712,9 @@ button.tl-tchip { cursor: pointer; }
   /* ⚠️ NO PANE (v64 §A). The sidebar sits on the page cream — no fill, no border, no clip. Its
      blocks are white controls and hairline-separated groups; the COLUMN itself is nothing. The
      rendered ref: `.axis` background transparent, border 0, on body cream #f2ede7. */
-  padding: 0 2px 12px; min-width: 0;
+  /* left 2 / right 0 — the ref's own asymmetry (`.axis{padding:0 0 0 2px}`); symmetric 2px cost
+     the panel 2px of width against the ref's 230 */
+  padding: 0 0 12px 2px; min-width: 0;
   background: transparent;
   border-right: 0;
   /* ⚠️ AND IT SCROLLS ON ITS OWN — WHICH THE REF DOES NOT DO EITHER. `.axis` carries no `overflow`
@@ -2628,7 +2742,8 @@ button.tl-tchip { cursor: pointer; }
 .tl-glanes { padding: 8px 0; }
 
 /* the date bar and the group bars wear the chrome, and the ground below is one surface */
-.tl-rail { background: var(--tl-ch-bg); border-bottom-color: var(--tl-ch-line); }
+/* v64 §A: the date row shares the LANE's tone (#faf7f2) — winbar white, rail+lane one field */
+.tl-rail { background: var(--tl-lane); border-bottom-color: var(--tl-ch-line); }
 .tl-rows { background: var(--tl-lane); }
 .tl-glanes { background: transparent; }
 
@@ -2728,16 +2843,14 @@ button.tl-tchip { cursor: pointer; }
 .tl-axis .abl.grow { flex: 0 0 auto; padding-top: 8px; }
 .tl-axis .abl:last-of-type { border-bottom: none; }
 
-/* ⚠️ `flex: 0 0 auto` OR IT FILLS THE COLUMN. `.tl-search` carries `flex: 1` for the row it was
-   built in; in a column that makes it take every pixel the axis has spare, as one enormous empty
-   box. v61 fixed this once for the old sidebar and the rule did not follow the pane inside the
-   container — the controls were built for a row and are still in a column. */
-.tl-axis .tl-search {
-  width: 100%; flex: 0 0 auto;
-  /* ⚠️ THE MAGNIFIER IS A BACKGROUND IMAGE, NOT AN ELEMENT — the ref's own construction, and the
-     reason is that an icon inside a native `<input>` has to be a sibling positioned over it, which
-     then has to be told not to swallow the click. A `background` cannot intercept a pointer, so the
-     field stays one element and the padding is what keeps the text clear of the glyph. */
+/* ⚠️ THE GLYPH FOLLOWED THE FIELD INTO THE WINBAR (v64 §B). This rule was `.tl-axis .tl-search`
+   — a scope the search left when §B moved it — so the magnifier and its clearing padding were
+   selecting nothing while the winbar field rendered bare. Same family as a portal outliving its
+   page: the styling stayed at the old address.
+   ⚠️ THE MAGNIFIER IS A BACKGROUND IMAGE, NOT AN ELEMENT — the ref's own construction: an icon
+   inside a native `<input>` has to be a sibling positioned over it, then told not to swallow the
+   click. A `background` cannot intercept a pointer, and the padding keeps the text clear. */
+.tl-winbar .tl-search {
   padding: 9px 12px 9px 32px; border-radius: 10px; font-size: 12px;
   background: var(--tl-ch-ctl) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a89880' stroke-width='1.8'><circle cx='11' cy='11' r='6.5'/><path d='m20 20-3.8-3.8'/></svg>") 11px center/13px no-repeat;
   border: 1px solid var(--tl-ch-ctlbd);
