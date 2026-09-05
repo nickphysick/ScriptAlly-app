@@ -117,7 +117,6 @@ import { refDate } from "../lib/responseContext";
 import { classifyQueryMaterial, parseAgentMaterials, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount } from "../lib/agentMaterials";
 import { formatQueryMaterial, materialLabel, materialToken, sampleMaterialText } from "../lib/materials";
 import { formatListRowDate } from "../lib/listRowDate";
-import { MarkSentPopover } from "./MarkSentPopover";
 import { createPortal } from "react-dom";
 import { NudgeModal } from "./NudgeModal";
 import { queryTaskBadge } from "../lib/queryTaskBadge";
@@ -146,7 +145,7 @@ import { queryPortion } from "../lib/queryPortion";
 import { PackageGroup, LooseMaterials } from "./reading-pane/PackageGroup";
 import { VersionLines } from "./reading-pane/VersionLines";
 import { bookVersionsOf } from "../lib/bookVersions";
-import { openingRead, manuscriptHeld, versionsActive, listVersion, UNRECORDED_VERSION } from "../lib/queryVersions";
+import { openingRead, manuscriptHeld, versionsActive, listVersion, UNRECORDED_VERSION, sendVersionDefault } from "../lib/queryVersions";
 import { isPackageLocked, materialsLinkWrites } from "../lib/packageMetrics";
 import { useConfirmAsk } from "./todo/ConfirmAsk";
 import { useOpenEditQuery } from "./EditQueryHost";
@@ -787,6 +786,8 @@ export const Queries: React.FC<{
         isResubmit: deskMarkTarget.resubmit,
         ...(deskMarkOverrideIso ? { writerExpectedDate: deskMarkOverrideIso } : {}),
         ...(nudgeIso ? { nudgeDate: nudgeIso } : {}),
+        /* D7, ported: an unrecorded default sends `undefined`, never "" */
+        bookVersionId: deskMark.bookVersionId || undefined,
         ...(deskMark.note.trim() ? { note: deskMark.note.trim() } : {}),
       });
       const savedStatus = deskMarkTarget.target;
@@ -1185,14 +1186,8 @@ export const Queries: React.FC<{
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isRecordResponseModalOpen, setIsRecordResponseModalOpen] = useState(false);
   const [isRecordResponseFocusFormOpen, setIsRecordResponseFocusFormOpen] = useState(false);
-  // Mark-Sent popover — anchored to the contextual CTA via useFixedMenu so the reading panel's
-  // overflow-hidden can't clip it.
-  const [isMarkSentOpen, setIsMarkSentOpen] = useState(false);
-  // The Mark-sent trigger now lives in the pane's command bar (pinned low), so the popover opens
-  // UPWARD from it (additive placement — every other useFixedMenu caller keeps the default).
-  // Desktop: anchored to the reading-pane hero button, opening downward. Mobile Pass 1: the
-  // anchor moves to the floating command bar's primary (the hero button hides <md), and the
-  // popover opens UPWARD from it — the trigger is pinned to the viewport foot.
+  /* ⚠️ THE MARK-SENT POPOVER IS RETIRED (§5, respond-nudge) — the desk hosts the verb, and the
+     popover's version-sent field moved into MarkSentDesk with its D5–D8 law intact. */
   /**
    * §1 — EVERY ANCHORED POPOVER ON THIS PAGE NOW FLIPS AND CONSTRAINS, and none of them do it
    * themselves. `useFixedMenu` owns both: `auto` measures the panel and opens upward only when
@@ -1206,11 +1201,6 @@ export const Queries: React.FC<{
    * low. A fixed popover with no flip is exactly as clipped as an absolute one, and looks correct
    * everywhere except the bottom of the window.
    */
-  const markSentPanelRef = useRef<HTMLElement>(null);
-  const { triggerRef: markSentTriggerRef, menuStyle: markSentMenuStyle } = useFixedMenu<HTMLButtonElement>(
-    isMarkSentOpen,
-    isMobile ? { placement: "up", constrain: true } : { placement: "auto", constrain: true, menuRef: markSentPanelRef },
-  );
   // Control-ribbon secondary surfaces — Nudge (modal), Close-reasons menu (anchored upward off its
   // ribbon tile), and the Delete confirmation dialog. (v3: the More ⋯ menu was removed.)
   const [isNudgeOpen, setIsNudgeOpen] = useState(false);
@@ -1525,7 +1515,7 @@ export const Queries: React.FC<{
     !!nudgeAsk, { placement: "auto", constrain: true, menuRef: nudgePanelRef },
   );
   // Close every ribbon popover/modal whenever the reader moves to a different query.
-  useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); setNudgeAsk(null); }, [selectedQueryId]);
+  useEffect(() => { setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); setNudgeAsk(null); }, [selectedQueryId]);
   // 5e — the delete is now WIRED to db.deleteQuery (cascades the per-query activity log + the
   // global-feed twins; models deleteAgent). No undo — a cascade restore isn't offered; the counted
   // confirm below is the safety. Clear the selection so the pane doesn't dangle on a deleted id.
@@ -2299,6 +2289,9 @@ export const Queries: React.FC<{
         sendMethod: (activeQuery.sendMethod as SubmissionMethod) || activeAgent.submissionMethod || ("Email" as never),
         reminder: win != null ? { kind: "preset", weeks: win } : { kind: "preset", weeks: 8 },
         qty: a2.target === QueryStatus.PARTIAL_SENT ? { amount, unit } : null,
+        /* D5, ported from the popover: seeded from what they READ — the shared `openingRead`
+           derivation through `sendVersionDefault`, and "" when nothing is known (D7). */
+        bookVersionId: sendVersionDefault(openingRead(activeQuery, packages, versions, activeBookVersions)),
         note: "",
       });
     }
@@ -5311,50 +5304,6 @@ export const Queries: React.FC<{
             ) : null}
           </QueryJourneySheet>
 
-        {/* MarkSentPopover — anchored via useFixedMenu to the actions-toolbar CTA */}
-        <AnimatePresence>
-          {isMarkSentOpen && activeQuery && activeAgent && (() => {
-            const a2 = getPrimaryAction(currentStatus as QueryStatus);
-            if (a2.kind !== "mark-sent") return null;
-            return (
-              <MarkSentPopover
-                key="mark-sent"
-                style={markSentMenuStyle}
-                panelRef={markSentPanelRef}
-                kind={a2.markKind}
-                query={activeQuery}
-                agent={activeAgent}
-                triggerRef={markSentTriggerRef}
-                onClose={() => setIsMarkSentOpen(false)}
-                onRecordResponseInstead={() => {
-                  setIsMarkSentOpen(false);
-                  setIsRecordResponseFocusFormOpen(true);
-                }}
-                /**
-                 * ⚠️ THE VERSIONS AND THE PRE-FILL COME FROM THE SAME DERIVATIONS THE PANE READS
-                 * (Part E, D5). `openingRead` reaches the version THROUGH the package's sample, so
-                 * the field's default and the "Opening read" line beneath the strip cannot disagree
-                 * — they are one derivation with two readers.
-                 */
-                bookVersions={activeBookVersions}
-                readVersion={openingRead(activeQuery, packages, versions, activeBookVersions)}
-                onSave={async ({ sentDate, writerExpectedDate, nudgeDate, bookVersionId }) => {
-                  await recordMaterialsSent({
-                    queryId: activeQuery.id,
-                    targetStatus: a2.target as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT,
-                    sentDate,
-                    isResubmit: a2.markKind === "resubmit",
-                    writerExpectedDate,
-                    nudgeDate,
-                    /* undefined where nothing was chosen — the write path omits the key (D7) */
-                    bookVersionId,
-                  });
-                }}
-              />
-            );
-          })()}
-        </AnimatePresence>
-
         {/* Close-reasons menu — anchored upward off the Close ribbon tile */}
         {/**
           * ⚠️ THE CORRECTION SURFACES — fork, then edit, then the consequence sheet. One scrim, one
@@ -5381,6 +5330,9 @@ export const Queries: React.FC<{
                     : (deskMarkTarget.resubmit ? "Mark the resubmission sent" : "Mark the full sent")}
                   subject={`${agentPrimary(activeAgent)} · ${activeAgent.agency || ""}`}
                   askedLabel={deskMark.qty ? "as asked" : null}
+                  bookVersions={activeBookVersions}
+                  readVersion={openingRead(activeQuery, packages, versions, activeBookVersions)}
+                  agentName={agentPrimary(activeAgent) || undefined}
                   draft={deskMark}
                   onDraft={setDeskMark}
                   windowWeeks={typeof activeAgent.responseTimeWeeks === "number" && activeAgent.responseTimeWeeks > 0 ? activeAgent.responseTimeWeeks : null}
@@ -6079,7 +6031,10 @@ export const Queries: React.FC<{
                       setCorrecting({ step: "fork", entry });
                     }}
                     highlightId={correcting?.entry.activityId ?? null}
-                    onNudge={() => setIsNudgeOpen(true)}
+                    /* §5 — the closure offer's "Nudge now" opens the DESK, notched to the button
+                       that asked (the same anchor contract as the fork's ⋯). The modal it used to
+                       open survives only as the mobile surface below. */
+                    onNudge={(anchor) => openDeskVerb("nudge", anchor)}
                     onSetExpectedDate={(iso) => commitExpectedDate(iso)}
                     onMarkClosed={() => setIsCloseMenuOpen(true)}
                     onEditSendMethod={sentActivity ? (anchor) => {
@@ -6251,7 +6206,6 @@ export const Queries: React.FC<{
                     /* Mobile Pass 1: below md the floating command bar's primary carries the
                        Mark-sent anchor instead (this row is display:none there, and a hidden
                        anchor positions a popover at 0,0). */
-                    ref={verbIsMark && !isMobile ? markSentTriggerRef : undefined}
                     type="button"
                     className="qc-btn qc-btn-fwd"
                     onClick={() => openRecord(activeQuery)}
@@ -7968,7 +7922,6 @@ export const Queries: React.FC<{
             <>
               <div className="qh-mcmd">
                 <button
-                  ref={isMark ? markSentTriggerRef : undefined}
                   type="button"
                   className="f12-btn-pri"
                   onClick={() => openRecord(activeQuery)}
@@ -8250,9 +8203,11 @@ export const Queries: React.FC<{
       document.body,
     )}
 
-    {/* Nudge — the ribbon's Nudge tile (writer waiting on the agent). Mirrors the dashboard mount:
-        NudgeModal collects the check-back + note and logs via the isolated logNudge path. */}
-    {isNudgeOpen && activeQuery && activeAgent && (
+    {/* Nudge — MOBILE ONLY since §5 (respond-nudge): the desk has no mobile geometry (fixed
+        right-inset card), so the more-sheet's "Nudge the agent" keeps the modal below md while
+        every desktop route opens the desk. Mirrors the dashboard mount otherwise: NudgeModal
+        collects the check-back + note and logs via the isolated logNudge path. */}
+    {isMobile && isNudgeOpen && activeQuery && activeAgent && (
       <NudgeModal
         agentName={agentPrimary(activeAgent) || null}
         agency={activeAgent.name?.trim() ? activeAgent.agency || "" : ""}

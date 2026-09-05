@@ -11,14 +11,14 @@
  * taxonomy changes (and QueryStatus strings are already a recurring regression source).
  *
  * DELIBERATELY PURE: it maps a status to an action descriptor and nothing else — no popover/menu
- * wiring, no React, no Firebase. Consumers own the wiring (Queries anchors MarkSentPopover to its
+ * wiring, no React, no Firebase. Consumers own the wiring (Queries opens MarkSentDesk from its
  * command bar; the focus flow anchors it to the "Do it" button). Locked in queryPrimaryAction.test.ts.
  */
 
 import { QueryStatus } from "../types";
 
 export type PrimaryBallHolder = "writer" | "agent";
-/** Structurally identical to MarkSentPopover's MarkSentKind — kept here so the map has no component dep. */
+/** Structurally identical to the mark-sent flow's MarkSentKind (MarkSentDesk since the popover retired) — kept here so the map has no component dep. */
 export type PrimaryMarkKind = "partial" | "full" | "resubmit";
 
 export type PrimaryAction =

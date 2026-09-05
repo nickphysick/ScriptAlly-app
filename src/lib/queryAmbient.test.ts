@@ -103,16 +103,15 @@ describe("Queries.tsx artefacts — one home for actions + regressions", () => {
     expect(src.includes("Actions toolbar")).toBe(false);
   });
 
-  it("the mark-sent popover is anchored to the contextual primary (single home per breakpoint)", () => {
-    // Shell rollout Phase 6: the contextual primary moved from the control bar to the reading
-    // pane's record header; it routes markSentTriggerRef only on the writer's turn. Mobile
-    // Pass 1: below md the floating command bar's primary carries the anchor instead (the hero
-    // button is display:none there, and a hidden anchor positions a popover at 0,0) — still
-    // exactly ONE live anchor at any breakpoint.
-    // §1 moved that button to the pane's control cell and renamed the derivation with it.
-    expect(src).toContain("ref={verbIsMark && !isMobile ? markSentTriggerRef : undefined}");
-    expect(src).toContain("ref={isMark ? markSentTriggerRef : undefined}"); // the mobile bar's
-    expect(src).toContain("triggerRef={markSentTriggerRef}"); // the popover consumes the same ref
+  it("the mark-sent popover is RETIRED — the desk notches to the clicked verb, no standing anchor", () => {
+    /* ⚠️ RETARGETED (§5, respond-nudge). The law this case held was "single anchor home per
+       breakpoint" for a popover that kept ONE standing ref; the popover is gone and its successor
+       (MarkSentDesk inside the correction-desk host) takes its anchor PER CALL — the clicked
+       button travels with openDeskVerb — so there is no standing ref to have two homes. The
+       assertable form of the law now is the mechanism's absence plus the per-call contract. */
+    expect(src).not.toContain("markSentTriggerRef");
+    expect(src).not.toContain("MarkSentPopover");
+    expect(src).toContain('openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor)');
   });
 
   it("the ?q= deep-link scroll-into-view is untouched (regression)", () => {

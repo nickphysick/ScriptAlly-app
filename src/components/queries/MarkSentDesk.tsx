@@ -26,6 +26,9 @@ export interface MarkSentDraft {
   sendMethod: SubmissionMethod;
   reminder: ReminderChoice;
   qty: { amount: string; unit: SampleUnit } | null;  /* null = a full/R&R send — no portion */
+  /** which BOOK VERSION went — `""` = not recorded (the popover's D7 convention, ported with the
+   *  field when MarkSentPopover retired into this desk). */
+  bookVersionId: string;
   note: string;
 }
 
@@ -36,6 +39,12 @@ export interface MarkSentDeskProps {
   draft: MarkSentDraft;
   onDraft: (d: MarkSentDraft) => void;
   windowWeeks: number | null;  /* the agency's stated window */
+  /** VERSION SENT (ported from MarkSentPopover on its retirement — D5–D8 keep their law here).
+   *  The field renders only at two or more versions; `readVersion` is the shared `openingRead`
+   *  derivation, pre-selected and SAID rather than guessed. */
+  bookVersions?: { id: string; name: string }[];
+  readVersion?: { id: string; name: string } | null;
+  agentName?: string;
   derivedLine: React.ReactNode;
   saving?: boolean;
   onMark: () => void;
@@ -51,7 +60,7 @@ const pop = (style: React.CSSProperties, ref: React.RefObject<HTMLElement>, labe
   );
 
 export const MarkSentDesk: React.FC<MarkSentDeskProps> = ({
-  title, subject, askedLabel, draft, onDraft, windowWeeks, derivedLine, saving, onMark, onCancel,
+  title, subject, askedLabel, draft, onDraft, windowWeeks, bookVersions = [], readVersion = null, agentName, derivedLine, saving, onMark, onCancel,
 }) => {
   const [dateOpen, setDateOpen] = React.useState(false);
   const datePanelRef = React.useRef<HTMLElement>(null);
@@ -121,6 +130,29 @@ export const MarkSentDesk: React.FC<MarkSentDeskProps> = ({
           </div>
         </>
       )}
+
+      {(() => {
+        /* D8 — gated on there being a choice to make: one version needs no field. */
+        const showVersionField = bookVersions.length >= 2;
+        if (!showVersionField) return null;
+        return (
+          <>
+            <label className="qrd-l" htmlFor="qrd-bookversion">Version sent</label>
+            {readVersion ? (
+              <div className="qrd-vnote">{agentName || "The agent"} read <b>{readVersion.name}</b> in the sample you queried with. That&rsquo;s pre-selected below.</div>
+            ) : (
+              /* ⚠️ SAID, NOT GUESSED — silence here would let the empty option read as a choice. */
+              <div className="qrd-vnote">No version is recorded for the sample you queried with.</div>
+            )}
+            <select id="qrd-bookversion" className="qrd-fld qrd-vsel" value={draft.bookVersionId}
+              onChange={(e) => onDraft({ ...draft, bookVersionId: e.target.value })}>
+              <option value="">— not recorded —</option>
+              {bookVersions.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
+            </select>
+            <div className="qrd-vfoot">Which version you actually sent. Change it if you sent something else — that&rsquo;s a fact worth recording, not a mistake.</div>
+          </>
+        );
+      })()}
 
       <label className="qrd-l">Nudge me after</label>
       <div className="qrd-chips">

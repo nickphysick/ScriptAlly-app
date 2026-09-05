@@ -162,7 +162,8 @@ export interface QueryTimelineProps {
   onEditEntry?: (entry: TimelineEntryRef) => void;
   onDeleteEntry?: (entry: TimelineEntryRef) => void;
   /** Open the Nudge flow (now the fork's nudge chip; kept for the fork wiring). */
-  onNudge?: () => void;
+  /** §5 (respond-nudge): carries the clicked control so the page can notch the desk to it. */
+  onNudge?: (anchor: HTMLElement) => void;
   /**
    * §3 (drawer cut 2) — OPEN THE DESK AT THE FORK, DIRECTLY. When present, the row's ⋯ hands the
    * entry and its trigger straight out instead of opening the internal Edit/Delete menu — the
@@ -1059,7 +1060,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
                 <div className="tl-offer">
                   <div className="tl-offer-f">{next.facts}</div>
                   <div className="tl-offer-a">
-                    {onNudge && <button type="button" className="tl-offer-go" onClick={onNudge}>Nudge now</button>}
+                    {onNudge && <button type="button" className="tl-offer-go" onClick={(e) => onNudge(e.currentTarget)}>Nudge now</button>}
                     {onRemindLater && <button type="button" className="tl-offer-keep" onClick={onRemindLater}>Remind me later</button>}
                     {onMarkClosed && <button type="button" className="tl-offer-keep" onClick={onMarkClosed}>Mark closed</button>}
                   </div>

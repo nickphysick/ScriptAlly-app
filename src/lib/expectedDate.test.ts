@@ -278,7 +278,7 @@ describe("F2 · resolveExpectedDate", () => {
   /**
    * ⚠️ `responseDeadline` IS NOT READ, AND THAT IS PROVENANCE-PACK §1 HOLDING. `addQuery` used to
    * seed that field from the AGENCY's window, so a value in it is not evidence the writer stated
-   * anything. Two live controls still write it (MarkSentPopover's opt-in reminder, EditQueryDrawer)
+   * anything. Two live controls still write it (MarkSentDesk's opt-in reminder, EditQueryDrawer)
    * — a decision for Nick, reported rather than papered over here.
    */
   it("the legacy stored field is ignored, so a seeded date cannot pose as the writer's", () => {

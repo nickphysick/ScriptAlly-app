@@ -15,6 +15,8 @@ import { deriveQueryFields } from "../../lib/queryDerivation";
 import { OUTCOME_STATUS } from "../../lib/responseDraft";
 import { QueryStatus } from "../../types";
 import { NudgeDesk } from "./NudgeDesk";
+import { MarkSentDesk } from "./MarkSentDesk";
+import { existsSync } from "node:fs";
 
 const q = { id: "q1", status: QueryStatus.QUERIED, dateSent: "2026-08-12T12:00:00.000Z" } as never;
 const sent = { id: "a1", type: QueryStatus.QUERIED, createdAt: "2026-08-12T12:00:00.000Z" };
@@ -215,5 +217,54 @@ describe("§4 · the NudgeDesk renders the ref's anatomy", () => {
     const html = render({ toEmail: null });
     expect(html).not.toContain(">To <");
     expect(html).toContain("from your own mail client");
+  });
+});
+
+/* ══ §5 — the viewport surfaces retire ════════════════════════════════════════════════════════ */
+describe("§5 · the popover is gone, the modal is mobile-only, the desk took their work", () => {
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  it("MarkSentPopover: no file, no import, no mount — the desk carries the verb AND the version field", () => {
+    expect(existsSync(join(process.cwd(), "src/components/MarkSentPopover.tsx"))).toBe(false);
+    expect(page).not.toContain("MarkSentPopover");
+    expect(page).not.toContain("isMarkSentOpen");
+  });
+
+  it("NudgeModal mounts behind the mobile gate only — the desk has no mobile geometry, the modal is its stand-in below md", () => {
+    expect(page).toContain("{isMobile && isNudgeOpen && activeQuery && activeAgent && (");
+    /* exactly one mount, and no other <NudgeModal on the page */
+    expect((page.match(/<NudgeModal/g) ?? []).length).toBe(1);
+  });
+
+  it("the closure offer's Nudge now opens the DESK, notched to the button that asked", () => {
+    /* sliced to the drawer's Tracking mount — the page-wide string would also match the top-bar
+       wiring, and a lock either caller satisfies distinguishes nothing (proved by mutation) */
+    const at = page.indexOf('ghostId={proposedAny ? "__ghost" : null}');
+    expect(at, "the Tracking mount has moved").toBeGreaterThan(-1);
+    const end = page.indexOf("onSetExpectedDate", at);
+    expect(end, "the mount's far anchor is missing").toBeGreaterThan(at);
+    const mount = page.slice(at, end);
+    expect(mount).toContain('onNudge={(anchor) => openDeskVerb("nudge", anchor)}');
+    expect(mount).not.toContain("setIsNudgeOpen");
+    const timeline = readFileSync(join(process.cwd(), "src/components/reading-pane/QueryTimeline.tsx"), "utf8");
+    expect(timeline).toContain("onClick={(e) => onNudge(e.currentTarget)}");
+  });
+
+  it("the version field renders at two versions and not at one — D8, behaviourally", () => {
+    const render = (n: number) => renderToStaticMarkup(
+      React.createElement(MarkSentDesk, {
+        title: "Mark the partial sent", subject: "s", askedLabel: null,
+        draft: { dateSent: "2026-09-05", sendMethod: "Email" as never, reminder: { kind: "none" }, qty: null, bookVersionId: "", note: "" },
+        onDraft: () => {}, windowWeeks: 6,
+        bookVersions: Array.from({ length: n }, (_, i) => ({ id: `v${i}`, name: `Draft ${i + 1}` })),
+        readVersion: null, derivedLine: "d", onMark: () => {}, onCancel: () => {},
+      }),
+    );
+    const two = render(2);
+    expect(two).toContain("Version sent");
+    expect(two).toContain("— not recorded —");
+    expect(two).toContain("No version is recorded for the sample you queried with.");
+    expect(render(1)).not.toContain("Version sent");
   });
 });

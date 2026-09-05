@@ -148,7 +148,7 @@ export interface ResolvedExpected {
  * ⚠️ AND `responseDeadline` IS DELIBERATELY NOT READ. That is provenance-pack §1 and reversing it
  * here would undo the whole point: `addQuery` used to seed that field from the AGENCY's window, so
  * a value in it is not evidence the writer stated anything. It still has two live writers
- * (MarkSentPopover's opt-in reminder, EditQueryDrawer) — see the report; that is a decision about
+ * (MarkSentDesk's opt-in reminder — the popover's successor — and EditQueryDrawer) — see the report; that is a decision about
  * which control writes which field, not something to paper over inside the resolver.
  *
  * ⚠️ D4's RECENCY CLAUSE CANNOT BE IMPLEMENTED YET, AND THE REASON IS A SCHEMA GAP RATHER THAN A

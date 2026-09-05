@@ -205,7 +205,12 @@ describe("D1 — editActivity accepts the version, and clears by DELETING", () =
 // ─────────────────────────────────────────────────────────────────────────────
 describe("D4 — the field reaches exactly two activity types, enumerated", () => {
   const db = readFileSync(join(root, "src/lib/db.tsx"), "utf8");
-  const pop = readFileSync(join(root, "src/components/MarkSentPopover.tsx"), "utf8")
+  /* ⚠️ RETARGETED (§5, respond-nudge): MarkSentPopover retired and its version field moved into
+     MarkSentDesk, with the seed and the save now split between the desk (render) and Queries.tsx
+     (draft + payload). Each case below states the law it asserts; every law survives the move. */
+  const desk = readFileSync(join(root, "src/components/queries/MarkSentDesk.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const page = readFileSync(join(root, "src/components/Queries.tsx"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
   /**
@@ -233,26 +238,28 @@ describe("D4 — the field reaches exactly two activity types, enumerated", () =
     expect(VERSIONED_SENDS).toHaveLength(2);
   });
 
-  it("D8 — the field is gated on two versions, once, in the form", () => {
-    expect(pop).toContain("const showVersionField = bookVersions.length >= 2");
-    expect(pop).toContain("{showVersionField && (");
+  it("D8 — the field is gated on two versions, once, in the form (law: one version needs no field)", () => {
+    expect(desk).toContain("const showVersionField = bookVersions.length >= 2");
+    expect((desk.match(/showVersionField/g) ?? []).length, "the gate is consulted once").toBe(2);
   });
 
   it("⚠️ D7 — an unrecorded default sends `undefined`, never `\"\"`", () => {
     /* The fault this forecloses: an empty select silently becoming a recorded value on save. */
-    expect(pop).toContain("bookVersionId: bookVersionId || undefined");
+    expect(page).toContain("bookVersionId: deskMark.bookVersionId || undefined");
     expect(db).toContain("...(bookVersionId ? { bookVersionId } : {})");
   });
 
   it("D5 — the pre-fill is the shared derivation, not a local fallback", () => {
-    expect(pop).toContain("useState(sendVersionDefault(readVersion))");
-    expect(pop).not.toMatch(/useState\(readVersion\?\.id/);
+    /* the draft seeds through sendVersionDefault over openingRead — the exact pair the popover
+       used, and the same derivation the pane's own version line reads */
+    expect(page).toContain("bookVersionId: sendVersionDefault(openingRead(activeQuery, packages, versions, activeBookVersions))");
+    expect(page).not.toMatch(/bookVersionId:\s*openingRead\(/);
   });
 
   it("⚠️ D6 — no warning, no confirmation, no verdict on changing it", () => {
-    const i = pop.indexOf("showVersionField && (");
+    const i = desk.indexOf("const showVersionField");
     expect(i, "the version block has moved").toBeGreaterThan(-1);
-    const block = pop.slice(i, pop.indexOf("{requestedMaterial", i));
+    const block = desk.slice(i, desk.indexOf("Nudge me after", i));
     expect(block.length, "the slice found no block").toBeGreaterThan(200);
     for (const w of ["confirm", "are you sure", "warning", "careful", "check that", "double-check"]) {
       expect(block.toLowerCase(), `the field warns: "${w}"`).not.toContain(w);

@@ -103,3 +103,9 @@ input.qrd-fld { cursor: text; }
   100% { box-shadow: 0 0 0 0 rgba(232, 200, 188, 0); }
 }
 @media (prefers-reduced-motion: reduce) { .qpn .tl-ev--fresh .tl-rowbody { animation: none; } }
+
+/* §5 — the version-sent field, ported from MarkSentPopover on its retirement */
+.qrd-vnote { font-size: 11px; line-height: 1.45; color: #6a5a50; margin-bottom: 6px; }
+.qrd-vnote b { color: #7c3a2a; font-weight: 600; }
+.qrd-vsel { width: 100%; appearance: auto; margin-bottom: 4px; }
+.qrd-vfoot { font-size: 10px; line-height: 1.4; color: #9c8878; margin-bottom: 12px; }

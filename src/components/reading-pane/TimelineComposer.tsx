@@ -10,7 +10,8 @@
  *    call returns (deletes the record — never a compensating append).
  *  - Offer · Revise & Resubmit (detail IS the point) → open the rich RecordResponseFocusForm via
  *    onOpenRichForm (the additive initialResponseType seam). Never crammed inline.
- *  - Mark-sent (writer owes materials) → onMarkSent opens the existing MarkSentPopover.
+ *  - Mark-sent (writer owes materials) → onMarkSent opens the page's mark-sent flow (the desk's
+ *    MarkSentDesk since MarkSentPopover retired, §5 respond-nudge).
  *  - Every inline row keeps an "Add more detail" link → the same rich form, pre-filled with what
  *    was just captured. Nothing recordable is ever lost.
  *
@@ -88,7 +89,7 @@ export interface TimelineComposerProps {
   manuscript: { title: string };
   /** Open the rich form pre-set to a response type (Offer / R&R, and "Add more detail"). */
   onOpenRichForm: (responseType: QueryStatus, draft?: { dateReceived?: string; note?: string }) => void;
-  /** Open the existing MarkSentPopover (writer's-turn mark-sent chips). */
+  /** Open the page's mark-sent flow (writer's-turn mark-sent chips). */
   onMarkSent: () => void;
   /** TWS P3 — fire the nudge + reminder flow (the nudge fork chip; not a status change). */
   onNudge?: () => void;

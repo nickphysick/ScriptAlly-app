@@ -10,7 +10,8 @@
  * the same source and cannot disagree (locked by composerChips.test.ts + verified in the sweep).
  *
  * Each chip carries the ACTION it records, routed to the existing canonical paths — response chips
- * → recordQueryResponse (responseType), mark-sent chips → the MarkSentPopover flow (markKind),
+ * → recordQueryResponse (responseType), mark-sent chips → the mark-sent flow (markKind — the
+ * desk's MarkSentDesk since the popover retired, §5 respond-nudge),
  * reopen → recordQueryResponse "queried". This module invents no writer; it only decides which
  * chips a status offers. Pure, no React/Firebase.
  */
