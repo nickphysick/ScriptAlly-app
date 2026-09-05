@@ -520,7 +520,8 @@
   /* ⚠️ THE REF'S FOCUS SHADOW, WHICH IS DEEPER THAN ITS BASE HOVER. `.card:hover .frame` is
      `.09/.16` and `data-focus="on"` deepens it to `.10/.18`; focus is on, so this is the one that
      paints and the base hover value has no reader. One token, one value, one home. */
-  --tl-frame-sh-hover: var(--tl-cs-shadowhover);
+  /* --tl-frame-sh-hover retired with the hover shadow (v65 §B) — hover changes only the
+     transform, the action and the symbol */
   --tl-frame-owed-bd: #e6c3b4;
   --tl-frame-owed-sh: var(--tl-cs-shadowhover);
   --tl-frame-quiet-bg: #fbf9f5;
@@ -1298,8 +1299,19 @@
    the section rather than twitching on it. Nothing else changes — the pack is explicit, and the
    ref's own "focus quietens the others" comment describes a rule it does not ship. */
 .tl-p { transition: transform .14s ease, width .15s cubic-bezier(.22,.8,.3,1), left .15s cubic-bezier(.22,.8,.3,1); }
-.tl-p:hover { transform: translateY(-50%) scale(1.018); z-index: 12; }
-.tl-p:hover { --frame-sh: var(--tl-frame-sh-hover); }
+/* ══ HOVER (v65 §B; ref bar-hover-states.html) — LIFT + REVEAL, NOTHING ELSE ══════════════════
+   The bar lifts 2px up-right; the paired action fades in (the `on` class, set by the page — CSS
+   cannot match one sibling's attribute to another's); the symbol wakes; a ghost goes to full
+   opacity. Identical in both densities; hover never writes, never navigates, never mounts.
+   ⚠️ THE BASE TRANSFORM IS RESTATED IN FULL — `.tl-at2` centres with translateY(-50%), and a
+   hover rule stating only the lift would REPLACE it and drop the bar half a row. The keyframe
+   law, applied to a pseudo-class. */
+/* ⚠️ ONE HOVER RULE, AND THIS IS IT. Three `.tl-p:hover` declarations accumulated here and at the
+   v37 lift block below — the last silently won, and §B's own 2px lift rendered as scale(1.004)
+   through a clean build. The pass owns every declaration of the selector: the v37 scales and the
+   shadow-hover are deleted (a hover shadow is "something else changing", which §B's lock forbids);
+   the base transform is restated in full or the bar drops half a row. */
+.tl-p:hover { transform: translateY(-50%) translate(2px, -2px); z-index: 5; }
 /* ⚠️ THE HOVER SHADOW WAS DECLARED TWICE AND THE OTHER ONE WAS WINNING. This rule set the ref's
    two-layer lift; a second `.tl-p:hover .tl-frame` two hundred lines below set a single flat
    `0 3px 10px` — same specificity, later in the file, so the two-layer hover added in v58e never
@@ -1438,20 +1450,7 @@
 .tl-p.owed .tl-pill { background: var(--owed-pill-bg); border-color: var(--owed-pill-bd); font-weight: 700; }
 
 
-/* ══ THE HOVER LIFT (v37, Phase 7) ═══════════════════════════════════════════════════════════
-   ⚠️ `translateY(-50%)` MUST BE REPEATED HERE, and it is the whole reason this rule is dangerous.
-   `transform` is not additive: a hover transform of `scale(1.004)` alone REPLACES the centring the
-   bar is placed by, and the bar drops half its own height — silently, only while the pointer is on
-   it, which is the one moment nobody is looking at a measurement. The lock asserts the painted
-   CENTRE is unchanged between rest and hover while the shadow differs, because either half alone
-   passes on a bar that moved. */
-/* ⚠️ TWO `.tl-p:hover` RULES EXIST AND THE LATER ONE WINS — this is the second, and it is what
-   the page actually renders. Both were found and both are split the same way: the lift stays on
-   the card, the shadow goes to the frame that draws the border it belongs to. */
-.tl-p:hover {
-  transform: translateY(-50%) scale(1.004);
-  z-index: 5;
-}
+/* the v37 hover lift's two rules are consolidated into §B's single hover rule above */
 /* ⚠️ THE FILL IS A CHILD, NOT A BACKGROUND, because its WIDTH is the statement. A gradient stop
    would put the number inside a colour value where nothing can read it back. */
 /* a fill that has reached the end is the bar, so it takes the bar's own corner back */
@@ -1929,50 +1928,9 @@ button.tl-tchip { cursor: pointer; }
 .tl-board[data-dens="compact"] .tl-p.fadeL .tl-cardbody { left: 34px; max-width: calc(100% - 120px); }
 /* the compact widen-neutralisers went with the widen itself (v65 §A) */
 
-/* ══ THE HOVER PEEK (v64 §F — the ref's `data-grow="place"`) ═════════════════════════════════
- *
- * Hovering a compact BAR — never the row — opens a page-layer overlay of the COMFORTABLE card
- * exactly over the bar: 86px tall, min-width 260px, soft shadow, 60ms hover intent, 140ms fade,
- * above the group bars and the today line, opening upward when there is no room beneath, staying
- * while the cursor is on it, cleared by leave or scroll.
- *
- * ⚠️ THE PEEK IS A CLONE OF THE CARD IT PEEKS, NOT A SECOND RENDERING. The page clones the hovered
- * bar's DOM into a wrapper that carries `tl-board` (the token scope) WITHOUT `data-dens="compact"`
- * — so every compact rule stops matching and the clone renders as the comfortable card by
- * construction. A second rendering is two cards waiting to disagree; a clone cannot drift.
- *
- * ⚠️ AND IT IS PAPER, NOT A CONTROL. The clone carries no listeners — the name link and the card's
- * own click live on the real bar underneath. `pointer-events: auto` on the wrapper only so that
- * "stays while the cursor is on it" works; everything inside is inert.
- *
- * z-index 46: above the board's sticky group bars (25, a different stacking tree — the peek is a
- * body-level fixed layer, so any positive index would paint over them; 46 states its place in the
- * APP's ladder, above the timeline drawer's 45/46 band and below modals at 50). */
-.tl-peek {
-  position: fixed; z-index: 46; height: 86px; min-width: 260px;
-  display: block; flex: none; padding: 0; margin: 0;
-  pointer-events: auto;
-  border-radius: 9px;
-  box-shadow: 0 10px 26px rgba(58, 28, 20, .14);
-  animation: tlPeekIn .14s ease both;
-}
-@keyframes tlPeekIn { from { opacity: 0; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) {
-  .tl-peek { animation: none; }
-}
-/* the clone fills the wrapper — its own resting geometry (`--l`/`--w`, lane offset, tight-card
-   hover) is the ROW's business, and the wrapper owns the peek's box */
-.tl-peek > .tl-p, .tl-peek > .tl-jc {
-  position: absolute; inset: 0;
-  top: 0; left: 0; width: 100%; height: 100%;
-  transform: none; margin: 0; cursor: default;
-}
-/* a ghost peeks at FULL opacity — the stage, outcome and dates readable */
-.tl-peek > .tl-jc { opacity: 1; }
-/* the cut-card geometry must not re-shrink the clone (same properties, later + equal specificity) */
-.tl-peek > .tl-p.fadeL, .tl-peek > .tl-p.clipR, .tl-peek > .tl-p.fadeL.clipR {
-  left: 0; width: 100%;
-}
+/* ⚠️ THE PEEK'S CSS IS RETIRED WITH THE PEEK (v65 §B). The page-layer overlay idea survives in
+   §C's CLICK card, which has its own rules — reusing the peek's would dress a different object
+   in a retired one's clothes. */
 
 /* ⚠️ THE NUDGE MARKER — the ref's `.evn`: a small white disc on the bar at the date the writer
    nudged. It is centred on its date rather than starting at it (`translate(-50%, -50%)`), because a
@@ -2133,18 +2091,18 @@ button.tl-tchip { cursor: pointer; }
   border: 1px solid #d3c8b6; color: #b3a48f; background: transparent;
   transition: border-color .16s, color .16s, background .16s;
 }
-.tl-rrow:hover .tl-actsym { border-color: #2a1f17; color: var(--tl-nearblack); background: #fff; }
+.tl-act.on .tl-actsym { border-color: #2a1f17; color: var(--tl-nearblack); background: #fff; }
 @media (prefers-reduced-motion: reduce) { .tl-actsym { transition: none; } }
 
 /* ⚠️ THE LABEL AND THE BUTTON ARE ABSENT UNTIL THE ROW IS HOVERED, AND THEY DO NOT MOVE WHEN THEY
    ARRIVE. The ref slides them 6px; a label sliding in the corner of the eye on every pointer move is
    motion about something the reader has not asked for yet. They appear, and that is all. */
 .tl-act .tl-actlab, .tl-act .tl-actbtn { opacity: 0; pointer-events: none; }
-.tl-rrow:hover .tl-act .tl-actlab, .tl-rrow:hover .tl-act .tl-actbtn { opacity: 1; pointer-events: auto; }
+.tl-act.on .tl-actlab, .tl-act.on .tl-actbtn { opacity: 1; pointer-events: auto; }
 /* ⚠️ AN URGENT ACTION HIDES ENTIRELY AT REST — ring included, because it draws none. The pulse dot
    on its open end is the only thing an urgent row says until you look at it. */
 .tl-act--od { opacity: 0; }
-.tl-rrow:hover .tl-act--od { opacity: 1; }
+.tl-act--od.on { opacity: 1; }
 
 .tl-actlab {
   font-family: Caveat, cursive; font-size: 17px; font-weight: 600;

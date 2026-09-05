@@ -408,6 +408,8 @@ const Piece: React.FC<{
        * card becomes, written by the fit pass. The rule reads whichever pair applies, and the
        * transition is on `width` and `left`, which are now stylesheet properties.
        */
+      /* v65 §B — the bar names its segment so the hover pairing and the locks can follow it */
+      data-seg={sg.key}
       style={{ ...laneVar(sg.lane),
         ["--l" as string]: barLeft(sg),
         ["--w" as string]: barWidth(sg),
@@ -846,15 +848,20 @@ function ActionSym({ kind }: { kind: ActionGlyph }) {
   );
 }
 
-function ActionMark({ urgent, kind, label, deed, style, onPress }: {
+function ActionMark({ urgent, kind, label, deed, style, onPress, on, forSeg }: {
   urgent?: boolean; kind: ActionGlyph; label: string; deed: string;
   lane: number; style: React.CSSProperties;
   /* ⚠️ THE PRESS IS REPORTED, NOT PERFORMED HERE. What the deed DOES belongs to the flow it opens;
      this hands the word back so the board can say what was pressed. */
   onPress?: (deed: string) => void;
+  /** v65 §B — the reveal follows the BAR's hover, not the row's: the page pairs bar and action by
+   *  segment key and hands the pairing down, because CSS cannot match one sibling's attribute to
+   *  another's. `forSeg` is published for the locks, which assert the pairing from outside. */
+  on?: boolean; forSeg?: string;
 }) {
   return (
-    <div className={`tl-act${urgent ? " tl-act--od" : ""}`} style={style} data-act={kind}>
+    <div className={`tl-act${urgent ? " tl-act--od" : ""}${on ? " on" : ""}`} style={style}
+      data-act={kind} data-for={forSeg}>
       {/* ⚠️ THE RING IS THE NON-URGENT SHAPE'S WHOLE RESTING STATE. An urgent row shows nothing at
           rest but its pulse dot, so it draws no ring — the ref's `.nlab.od .sym { display: none }`. */}
       {!urgent && <ActionSym kind={kind} />}
@@ -1218,6 +1225,27 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
 
   
   
+  /* ══ HOVER — LIFT AND REVEAL, NOTHING ELSE (v65 §B; ref bar-hover-states.html) ══════════════
+     ⚠️ THE TARGET IS THE BAR, NEVER THE ROW. One delegated pair on the scroller: entering a bar's
+     box names its segment; leaving it (to anywhere that is not the same bar) clears. The action
+     and its symbol follow the named segment through the `on` class; the lift itself is pure CSS
+     `:hover` on the bar. Comfortable and Compact behave identically — the v64 peek is retired,
+     and the reveal that replaced it is §C's CLICK card. Hover never writes or navigates. */
+  const [hoverSeg, setHoverSeg] = useState<string | null>(null);
+  const segOf = (t: EventTarget | null): string | null => {
+    const bar = t instanceof Element ? (t.closest(".tl-p, .tl-jc") as HTMLElement | null) : null;
+    return bar?.dataset.seg ?? null;
+  };
+  const onRowsOver = (e: React.MouseEvent) => {
+    const k = segOf(e.target);
+    if (k !== hoverSeg) setHoverSeg(k);
+  };
+  const onRowsOut = (e: React.MouseEvent) => {
+    const from = segOf(e.target);
+    const to = segOf(e.relatedTarget);
+    if (from && from !== to) setHoverSeg(to);
+  };
+
   /* ⚠️ THE CLICK'S WORK-FLOW BRANCH IS RETIRED (v65 §A) — a click is a READ gesture now, and §C
      gives it the card. Until the card lands, a click selects; the branch that opened the legacy
      task pane is gone rather than dormant. */
@@ -1304,7 +1332,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      fabricated-confirmation fault. */
   const [actToast, setActToast] = useState<string | null>(null);
 
-  /**
+    /**
    * ⚠️ DRAGGING THE EMPTY LANE MOVES THE WINDOW BY WHOLE WEEKS (v63, §G).
    *
    * The board's columns are weeks, so it cannot honestly stop between two of them — a half-week
@@ -1355,86 +1383,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
      like every other view state on this page: no route, no persistence, no second copy. */
   const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
 
-  /* ══ THE HOVER PEEK (v64 §F — the ref's `data-grow="place"`) ══════════════════════════════════
-   *
-   * Hovering a compact BAR — never the row — opens a page-layer overlay of the COMFORTABLE card
-   * exactly over the bar. 60ms hover intent, 140ms fade (CSS), min-width 260px, 86px tall, above
-   * everything on the board, opening upward when there is no room beneath; it stays while the
-   * cursor is on it and clears on leave or scroll.
-   *
-   * ⚠️ THE PEEK IS A CLONE, NOT A SECOND RENDERING. The wrapper carries `tl-board` (the token
-   * scope) WITHOUT `data-dens="compact"`, so every compact rule stops matching and the clone
-   * renders as the comfortable card by construction — a second rendering is two cards waiting to
-   * disagree. The clone is PAPER: no listeners survive `outerHTML`, the name link and the card's
-   * click live on the real bar underneath, and `aria-hidden` says so to a screen reader, which
-   * already has the full card's text on the bar itself.
-   *
-   * ⚠️ `clone.style.animation = "none"` IS LOAD-BEARING. `.tl-p.owed` runs `tlStir`, whose
-   * keyframes bake `translateY(-50%)` — and a running animation outranks the inline transform the
-   * clone is squared up with, so a peeked owed card would sit displaced by half its own height
-   * (the `.sa-settled` motion trap, in a new coat). The children's animations (the pulse dot)
-   * deliberately survive.
-   *
-   * ⚠️ ONE HANDLER PAIR ON THE SCROLLER, NOT A PROP PER CARD. Delegation means ghosts peek by the
-   * same code path as live bars, and no card component grows a peek concern it would have to
-   * thread through three render sites. */
-  const [peek, setPeek] = useState<{ el: HTMLElement; html: string; left: number; top: number; width: number } | null>(null);
-  const peekTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const peekPendingEl = useRef<HTMLElement | null>(null);
-  const cancelPeekIntent = () => {
-    if (peekTimer.current) { clearTimeout(peekTimer.current); peekTimer.current = null; }
-    peekPendingEl.current = null;
-  };
-  const clearPeek = () => { cancelPeekIntent(); setPeek(null); };
-  /* ⚠️ A SCROLL CLEAR SUPPRESSES RE-INTENT UNTIL THE POINTER MOVES. Scrolling slides new bars
-     under a stationary cursor, and unmounting the peek makes the browser fire `mouseover` on
-     whatever is now beneath it — so without this, every scroll tick cleared the peek and a fresh
-     one opened 60ms later over a bar the reader never pointed at. `mousemove` fires only on
-     physical movement, which is exactly the signal "the reader is pointing again". */
-  const peekSuppressed = useRef(false);
-  const clearPeekForScroll = () => { peekSuppressed.current = true; clearPeek(); };
-  const openPeekFrom = (bar: HTMLElement) => {
-    const r = bar.getBoundingClientRect();
-    const PEEK_H = 86, GUTTER = 8;
-    const width = Math.max(r.width, 260);
-    /* exactly over the bar: top-aligned with it, growing downward — upward when the board's foot
-       or the viewport leaves no room beneath */
-    const up = r.top + PEEK_H > window.innerHeight - GUTTER;
-    const top = up ? r.bottom - PEEK_H : r.top;
-    const left = Math.max(GUTTER, Math.min(r.left, window.innerWidth - width - GUTTER));
-    const clone = bar.cloneNode(true) as HTMLElement;
-    clone.style.animation = "none";
-    clone.style.left = "0"; clone.style.top = "0";
-    clone.style.width = "100%"; clone.style.height = "100%";
-    clone.style.transform = "none";
-    clone.removeAttribute("data-tight");
-    setPeek({ el: bar, html: clone.outerHTML, left, top, width });
-  };
-  const findPeekBar = (from: EventTarget | null): HTMLElement | null =>
-    from instanceof Element ? (from.closest(".tl-p, .tl-jc") as HTMLElement | null) : null;
-  const onRowsMove = () => { peekSuppressed.current = false; };
-  const onRowsOver = (e: React.MouseEvent) => {
-    if (density !== "compact" || peekSuppressed.current) return;
-    const bar = findPeekBar(e.target);
-    if (!bar) { cancelPeekIntent(); return; }
-    if (peek?.el === bar || peekPendingEl.current === bar) return;
-    cancelPeekIntent();
-    peekPendingEl.current = bar;
-    peekTimer.current = setTimeout(() => {
-      peekTimer.current = null; peekPendingEl.current = null;
-      openPeekFrom(bar);
-    }, 60);
-  };
-  const onRowsOut = (e: React.MouseEvent) => {
-    if (density !== "compact") return;
-    const to = e.relatedTarget instanceof Element ? e.relatedTarget : null;
-    /* still inside the same bar, or onto the peek that covers it — no change */
-    if (to && (to.closest(".tl-peek") || findPeekBar(to) === findPeekBar(e.target))) return;
-    cancelPeekIntent();
-    if (peek) setPeek(null);
-  };
-  /* a shifted window or a density change rebuilds the rows — the peeked node is stale DOM */
-  useEffect(() => { clearPeek(); }, [density, winStart]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* ⚠️ THE COMPACT PEEK IS RETIRED (v65 §B) — hover changes nothing but the bar's transform, the
+     action and the symbol, in BOTH densities; the overlay's job moved to the CLICK card (§C). */
 
   const cutByAvailable = boardManuscripts.length > 1;
   const [cutBy, setCutBy] = useState<"needs" | "ms">("needs");
@@ -2430,6 +2380,7 @@ data-rowkey={r.key}
               from a deadline you set yourself, which is exactly what they are not. */}
           {bar.segs.filter((sg) => sg.isTask).map((sg) => (
             <ActionMark onPress={setActToast} key={`tact-${sg.key}`} kind="sendBy"
+              on={hoverSeg === sg.key} forSeg={sg.key}
               label={sg.tail} deed="Mark done" lane={sg.lane}
               style={{ ...laneVar(sg.lane),
                 ["--l" as string]: barLeft(sg),
@@ -2438,6 +2389,7 @@ data-rowkey={r.key}
           ))}
           {bar.segs.filter((sg) => sg.capWord && !rowUrgent && !sg.isTask).map((sg) => (
             <ActionMark onPress={setActToast} key={`act-${sg.key}`} kind={sg.capSource ?? "window"}
+              on={hoverSeg === sg.key} forSeg={sg.key}
               label={sg.capOn ?? ""} deed={sg.capWord ?? ""} lane={sg.lane}
               style={{ ...laneVar(sg.lane),
                 ["--l" as string]: barLeft(sg),
@@ -2475,6 +2427,7 @@ data-rowkey={r.key}
             if (!late.tail) return null;
             return (
               <ActionMark onPress={setActToast} key={`od-${late.key}`} urgent kind={late.capSource ?? "sendBy"}
+                on={hoverSeg === late.key} forSeg={late.key}
                 label={late.tail} deed={p.text} lane={late.lane}
                 style={{ ...laneVar(late.lane),
                   ["--l" as string]: barLeft(late),
@@ -2588,7 +2541,7 @@ data-rowkey={r.key}
                         ? "out"
                         : b.dir === "in" ? "in" : b.dir === "close" ? "none" : "out";
                       out.push(
-                        <div key={`js-${a.key}`} className={`tl-jc${narrow ? " narrow" : ""}`} style={{
+                        <div key={`js-${a.key}`} className={`tl-jc${narrow ? " narrow" : ""}`} data-seg={`js-${a.key}`} style={{
                           left: pct(from),
                           width: `max(0px, calc(${pct(to - from)} - var(--tl-jc-gap)))`,
                           ...laneVar(lane),
@@ -2941,9 +2894,7 @@ data-rowkey={r.key}
                     clamping — so on a board with nothing to scroll the clamp is the only behaviour
                     left, and anything that changed the rail's height moved the rows under it. Here
                     the rail is outside the scrolling box and cannot be reached by it at all. */}
-                <div className="tl-rows" onMouseOver={onRowsOver} onMouseOut={onRowsOut}
-                  onMouseMove={density === "compact" ? onRowsMove : undefined}
-                  onScroll={density === "compact" ? clearPeekForScroll : undefined}>
+                <div className="tl-rows" onMouseOver={onRowsOver} onMouseOut={onRowsOut}>
                 {/* ⚠️ `.tl-rowsin` EXISTS FOR THE TODAY LINE (v64 §C). In a scroller, an absolutely
                     positioned child's `bottom: 0` resolves against the SCROLLPORT, not the content
                     — so a line meant to run the content height needs an inner wrapper that IS the
@@ -3034,14 +2985,7 @@ data-rowkey={r.key}
                     it must span the rail and rows, which is its job. */}
                 {/* the action's receipt — what was pressed, never a claim the work is done */}
                 {actToast && <div className="tl-acttoast" role="status">{actToast}</div>}
-                {/* the peek rides document.body: the board clips at its radius and the rows clip at
-                    their scrollport, and a fixed layer inside either would be cut by both */}
-                {peek && createPortal(
-                  <div className="tl-board tl-peek" aria-hidden
-                    style={{ left: peek.left, top: peek.top, width: peek.width }}
-                    onMouseLeave={clearPeek}
-                    dangerouslySetInnerHTML={{ __html: peek.html }} />,
-                  document.body)}
+                
                 {cross && (
                   <>
                     <div className="tl-xh" style={{ left: `${cross.x}px` }} aria-hidden />
