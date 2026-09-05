@@ -10,6 +10,16 @@
  * letter concrete ("I queried you … regarding THE BOOK OF …, and you kindly requested the full…").
  * Pure + unit-tested.
  */
+import { QueryStatus } from "../types";
+
+/** What the agent asked for, in prose, for the draft's "you kindly requested…" clause.
+ *  Moved here from FocusFlow (respond-nudge §4) so the desk and the To-do walkthrough share
+ *  the ONE mapping — a second copy is how the two letters come to disagree about a request. */
+export function requestedProse(status?: QueryStatus): string | undefined {
+  if (status === QueryStatus.FULL_SENT || status === QueryStatus.FULL_REQUESTED) return "the full manuscript";
+  if (status === QueryStatus.PARTIAL_SENT || status === QueryStatus.PARTIAL_REQUESTED) return "the partial";
+  return undefined;
+}
 
 export interface NudgeDraftInput {
   agentName?: string | null;

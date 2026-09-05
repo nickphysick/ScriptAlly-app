@@ -39,7 +39,7 @@ import { useOverlay } from "../shell/useOverlay";
 import { reviewWeek, weekReviewStats, reviewSeedCandidates, reviewCompletionSnooze, SeedCandidate } from "../../lib/todoBoard";
 import { clampSnoozeDays } from "../../lib/todoActions";
 import { agentPrimary } from "../../lib/agentDisplay";
-import { nudgeDraft } from "../../lib/nudgeDraft";
+import { nudgeDraft, requestedProse } from "../../lib/nudgeDraft";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import { journeyMaterials, synopsisStateFor, journeySummary } from "../../lib/journeyMaterials";
 import { RecordingCalendar } from "./RecordingCalendar";
@@ -118,12 +118,6 @@ export interface JourneySpec {
   lede?: React.ReactNode;
   /** A secondary footer action, beside Cancel. Only the note journey uses it — see `noteSheet`. */
   extraFoot?: React.ReactNode;
-}
-/** What the agent asked for, in prose, for the nudge draft. */
-function requestedProse(status?: QueryStatus): string | undefined {
-  if (status === QueryStatus.FULL_SENT || status === QueryStatus.FULL_REQUESTED) return "the full manuscript";
-  if (status === QueryStatus.PARTIAL_SENT || status === QueryStatus.PARTIAL_REQUESTED) return "the partial";
-  return undefined;
 }
 
 export interface FocusFlowProps {

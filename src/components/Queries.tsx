@@ -67,6 +67,9 @@ import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
 import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
 import { RespondDesk } from "./queries/RespondDesk";
+import { MarkSentDesk, type MarkSentDraft } from "./queries/MarkSentDesk";
+import { NudgeDesk, type NudgeDeskDraft } from "./queries/NudgeDesk";
+import { nudgeDraft, requestedProse } from "../lib/nudgeDraft";
 import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
 import { QueryLogSheet } from "./queries/QueryLogSheet";
 import { queriesForAgent } from "../lib/agentList";
@@ -382,6 +385,7 @@ export const Queries: React.FC<{
     updateQuery,
     deleteQuery,
     recordMaterialsSent,
+    markSentWithReceipt,
     recordHoldingReply,
     deleteJournalEntry,
     updateJournalEntry,
@@ -759,10 +763,104 @@ export const Queries: React.FC<{
       setRespSaving(false);
     }
   };
+  /**
+   * §3 — MARK SENT'S SAVE: one send activity through the receipt-bearing face of the one
+   * primitive, the override only when the writer chose past the window (the log sheet's rule),
+   * the nudge as `nudgeDate`, and an Undo that deletes the rung and puts the prior expectation
+   * back — both halves, together.
+   */
+  const saveDeskMarkSent = async () => {
+    if (!deskMark || !deskMarkTarget || !activeQuery || respSaving) return;
+    setRespSaving(true);
+    try {
+      const nudgeIso = (() => {
+        const r = deskMark.reminder;
+        if (r.kind === "none") return undefined;
+        if (r.kind === "custom") return new Date(`${r.date}T12:00:00`).toISOString();
+        const d = new Date(`${deskMark.dateSent}T12:00:00`); d.setDate(d.getDate() + r.weeks * 7);
+        return d.toISOString();
+      })();
+      const res = await markSentWithReceipt({
+        queryId: activeQuery.id,
+        targetStatus: deskMarkTarget.target,
+        sentDate: new Date(`${deskMark.dateSent}T12:00:00`).toISOString(),
+        isResubmit: deskMarkTarget.resubmit,
+        ...(deskMarkOverrideIso ? { writerExpectedDate: deskMarkOverrideIso } : {}),
+        ...(nudgeIso ? { nudgeDate: nudgeIso } : {}),
+        ...(deskMark.note.trim() ? { note: deskMark.note.trim() } : {}),
+      });
+      const savedStatus = deskMarkTarget.target;
+      setDeskVerb(null);
+      setDeskFreshStatus({ toStatus: savedStatus, at: Date.now() });
+      showToast({
+        message: `${savedStatus} recorded — ${agentPrimary(activeAgent ?? ({} as never)) || "the agent"}`,
+        /* the Undo: delete the rung (both stores + recompute) and put the prior expectation
+           back — both halves together, or the record and the card disagree about one send */
+        undo: res ? async () => {
+          await deleteActivities([res.activityId]);
+          await updateQuery(activeQuery.id, {
+            writerExpectedDate: res.prior.writerExpectedDate ?? deleteField(),
+            writerExpectedSetAt: res.prior.writerExpectedSetAt ?? deleteField(),
+            nudgeDate: res.prior.nudgeDate ?? deleteField(),
+          } as never);
+        } : undefined,
+      });
+    } catch {
+      showToast({ message: "Couldn't mark that sent — please try again." });
+    } finally {
+      setRespSaving(false);
+    }
+  };
+
+  /**
+   * §4 — NUDGE'S SAVE: the draft to the clipboard FIRST (inside the click's gesture — clipboard
+   * access outside one is refused, and a refusal is best-effort: the record still stands), then
+   * ONE nudge activity through `logNudge`. The Undo deletes the rung — `deleteActivity`'s own
+   * nudge path re-derives nudgeDate/lastNudgeSentDate via `reconcileNudge` and releases the
+   * snoozed task when no nudges remain — and then puts the PRIOR reminder back explicitly,
+   * because a reminder set at mark-sent time is not backed by any nudge activity and the
+   * re-derivation alone would clear it.
+   */
+  const saveDeskNudge = async () => {
+    if (!deskNudge || !activeQuery || !activeAgent || respSaving) return;
+    const q = activeQuery;
+    setRespSaving(true);
+    try {
+      try { await navigator.clipboard?.writeText(deskNudgeDraftText); } catch { /* copy best-effort */ }
+      const checkBackDate = deskNudge.again.kind === "weeks"
+        ? (() => { const d = new Date(`${deskNudge.nudgeDate}T12:00:00`); d.setDate(d.getDate() + deskNudge.again.weeks * 7); return d.toISOString(); })()
+        : deskNudge.again.kind === "custom" ? new Date(`${deskNudge.again.date}T12:00:00`).toISOString()
+        : undefined;
+      const res = await logNudge(q.id, {
+        ...(checkBackDate ? { checkBackDate } : {}),
+        eventDate: new Date(`${deskNudge.nudgeDate}T12:00:00`).toISOString(),
+      });
+      if (!res.success) { showToast({ message: res.error || "Couldn't record that nudge — please try again." }); return; }
+      const agency = activeAgent.agency?.trim() || agentPrimary(activeAgent) || "the agency";
+      setDeskVerb(null);
+      setDeskFreshStatus({ toStatus: NUDGE_NESTED_TYPE, at: Date.now() });
+      showToast({
+        message: `Nudged ${agency} — draft copied${checkBackDate ? ` · next nudge ${fmtShortISO(checkBackDate)}` : ""}`,
+        undo: res.activityId ? async () => {
+          await deleteActivities([res.activityId!]);
+          await updateQuery(q.id, {
+            nudgeDate: res.prior?.nudgeDate ?? deleteField(),
+            lastNudgeSentDate: res.prior?.lastNudgeSentDate ?? deleteField(),
+          } as never);
+        } : undefined,
+      });
+    } catch {
+      showToast({ message: "Couldn't record that nudge — please try again." });
+    } finally {
+      setRespSaving(false);
+    }
+  };
+
   /* the fresh-rung TARGET; its resolver effect lives below trackingEvents' own declaration —
      an effect here would read the subscription state through the temporal dead zone, the exact
      shape this repo's TDZ law records (tsc catches this one because the scopes meet). */
-  const [deskFreshStatus, setDeskFreshStatus] = useState<{ toStatus: QueryStatus; at: number } | null>(null);
+  /* widened for §4: a nudge's rung matches on its row TYPE ("Nudge sent"), not a status */
+  const [deskFreshStatus, setDeskFreshStatus] = useState<{ toStatus: string; at: number } | null>(null);
 
   /** The picker's inline quick-add — lifted verbatim from the retired popup, so a brand-new agent
    *  is born with exactly the defaults (and schema-valid shape) it always was. */
@@ -1185,60 +1283,7 @@ export const Queries: React.FC<{
     correctingTriggerRef.current = anchor;
     setDeskVerb((cur) => (cur === verb ? null : verb));
   };
-  /* §2 — the respond desk's draft: the record journey's OWN shape, seeded fresh per opening. */
-  const [deskResp, setDeskResp] = useState<ResponseDraft | null>(null);
-  const [deskQty, setDeskQty] = useState<{ amount: string; unit: SampleUnit }>({ amount: "50", unit: "Pages" });
-  const [deskCloseReason, setDeskCloseReason] = useState<"noresponse" | "withdrew">("noresponse");
-  /* the just-saved rung's pulse target — cleared by its own timeout */
-  const [deskFreshId, setDeskFreshId] = useState<string | null>(null);
-  useEffect(() => {
-    if (deskVerb === "respond" && !deskResp) setDeskResp(emptyResponseDraft(todayInputDate()));
-    if (deskVerb !== "respond" && deskResp) { setDeskResp(null); setDeskQty({ amount: "50", unit: "Pages" }); setDeskCloseReason("noresponse"); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deskVerb]);
 
-  /**
-   * §2 — THE PROPOSED ACTIVITY, built once and read three times: the ghost rung (through
-   * buildTimelineRows — the same renderer, decision 2), the derived line, and the save's payload
-   * overlay. One object, three readers, so the preview and the record cannot disagree.
-   */
-  const deskProposed = (() => {
-    if (deskVerb !== "respond" || !deskResp?.outcome || deskResp.outcome === "holding") return null;
-    const st = OUTCOME_STATUS[deskResp.outcome];
-    return {
-      id: "__ghost",
-      type: st,
-      resultingStatus: st,
-      createdAt: new Date(`${deskResp.dateArrived}T12:00:00`).toISOString(),
-      note: deskResp.theirWords || undefined,
-      ...(deskResp.outcome === "partial" ? {
-        materialsType: deskQty.unit.toLowerCase(),
-        materialsQuantity: deskQty.amount,
-      } : {}),
-    };
-  })();
-
-  /**
-   * §2 — THE DERIVED LINE, in plain words from the proposed activity: the status word is
-   * `OUTCOME_STATUS`'s own member (the exact string the save writes), the court comes from
-   * `getPrimaryAction` (the same table every surface reads), and the nudge-retired clause renders
-   * only when a future reminder actually exists to retire.
-   */
-  const deskDerived = (() => {
-    if (!deskProposed || !activeQuery) return null;
-    const st = deskProposed.resultingStatus as QueryStatus;
-    const holder = getPrimaryAction(st).ballHolder;
-    const court = holder === "writer" ? "with you" : holder === "agent" ? "with the agent" : "closed";
-    const firstName = activeAgent ? (agentPrimary(activeAgent).split(/\s+/).pop() ?? "the agent") : "the agent";
-    const nudgeIso = activeQuery.nudgeDate && new Date(activeQuery.nudgeDate).getTime() > Date.now()
-      ? fmtShortISO(activeQuery.nudgeDate) : null;
-    return (
-      <>Status becomes <b>{st}</b> — {court}.{" "}
-        {holder === "writer" && <>The waiting bar stops here; nothing is owed by {firstName} until you send.{" "}</>}
-        {holder === null && <>The waiting bar stops here.{" "}</>}
-        {nudgeIso && <>The nudge for {nudgeIso} is retired.</>}</>
-    );
-  })();
   /* ruling 2 — the send rung's materials, editing INSIDE the fork's mistake branch. Seeded from
      the query when the edit step opens on the send entry; null everywhere else. */
   const [deskMats, setDeskMats] = useState<MaterialRow[] | null>(null);
@@ -2196,6 +2241,157 @@ export const Queries: React.FC<{
    * reach four surfaces raw.
    */
   const activeBookVersions = bookVersionsOf(activeMs ?? null);
+
+  /* §2 — the respond desk's draft: the record journey's OWN shape, seeded fresh per opening. */
+  const [deskResp, setDeskResp] = useState<ResponseDraft | null>(null);
+  const [deskQty, setDeskQty] = useState<{ amount: string; unit: SampleUnit }>({ amount: "50", unit: "Pages" });
+  const [deskCloseReason, setDeskCloseReason] = useState<"noresponse" | "withdrew">("noresponse");
+  /* the just-saved rung's pulse target — cleared by its own timeout */
+  const [deskFreshId, setDeskFreshId] = useState<string | null>(null);
+  useEffect(() => {
+    if (deskVerb === "respond" && !deskResp) setDeskResp(emptyResponseDraft(todayInputDate()));
+    if (deskVerb !== "respond" && deskResp) { setDeskResp(null); setDeskQty({ amount: "50", unit: "Pages" }); setDeskCloseReason("noresponse"); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deskVerb]);
+
+  /**
+   * §2 — THE PROPOSED ACTIVITY, built once and read three times: the ghost rung (through
+   * buildTimelineRows — the same renderer, decision 2), the derived line, and the save's payload
+   * overlay. One object, three readers, so the preview and the record cannot disagree.
+   */
+  const deskProposed = (() => {
+    if (deskVerb !== "respond" || !deskResp?.outcome || deskResp.outcome === "holding") return null;
+    const st = OUTCOME_STATUS[deskResp.outcome];
+    return {
+      id: "__ghost",
+      type: st,
+      resultingStatus: st,
+      createdAt: new Date(`${deskResp.dateArrived}T12:00:00`).toISOString(),
+      note: deskResp.theirWords || undefined,
+      ...(deskResp.outcome === "partial" ? {
+        materialsType: deskQty.unit.toLowerCase(),
+        materialsQuantity: deskQty.amount,
+      } : {}),
+    };
+  })();
+
+  /**
+   * §2 — THE DERIVED LINE, in plain words from the proposed activity: the status word is
+   * `OUTCOME_STATUS`'s own member (the exact string the save writes), the court comes from
+   * `getPrimaryAction` (the same table every surface reads), and the nudge-retired clause renders
+   * only when a future reminder actually exists to retire.
+   */
+  /* §3 — the mark-sent draft, seeded from the REQUEST when the desk opens */
+  const [deskMark, setDeskMark] = useState<MarkSentDraft | null>(null);
+  useEffect(() => {
+    if (deskVerb === "marksent" && !deskMark && activeQuery && activeAgent) {
+      const a2 = getPrimaryAction(activeQuery.status as QueryStatus);
+      if (a2.kind !== "mark-sent") { setDeskVerb(null); return; }
+      /* the request's own recorded figure — "as asked" is a PRE-FILL, never a claim */
+      const req = [...trackingEvents].reverse().find((e: any) =>
+        (e.resultingStatus ?? e.type) === QueryStatus.PARTIAL_REQUESTED);
+      const unit: SampleUnit = req?.materialsType === "chapters" ? "Chapters" : req?.materialsType === "words" ? "Words" : "Pages";
+      const amount = req?.materialsQuantity ? String(parseQty(String(req.materialsQuantity))) : snapToUnit(unit);
+      const win = typeof activeAgent.responseTimeWeeks === "number" && activeAgent.responseTimeWeeks > 0
+        ? activeAgent.responseTimeWeeks : null;
+      setDeskMark({
+        dateSent: todayInputDate(),
+        sendMethod: (activeQuery.sendMethod as SubmissionMethod) || activeAgent.submissionMethod || ("Email" as never),
+        reminder: win != null ? { kind: "preset", weeks: win } : { kind: "preset", weeks: 8 },
+        qty: a2.target === QueryStatus.PARTIAL_SENT ? { amount, unit } : null,
+        note: "",
+      });
+    }
+    if (deskVerb !== "marksent" && deskMark) setDeskMark(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deskVerb, activeQuery?.id]);
+
+  /* §3 — mark-sent's proposed activity + expected derivation, the same three-reader shape */
+  const deskMarkTarget = (() => {
+    if (deskVerb !== "marksent" || !activeQuery) return null;
+    const a2 = getPrimaryAction(activeQuery.status as QueryStatus);
+    return a2.kind === "mark-sent" ? { target: a2.target as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT, resubmit: a2.markKind === "resubmit" } : null;
+  })();
+  const deskMarkProposed = deskMark && deskMarkTarget ? {
+    id: "__ghost",
+    type: deskMarkTarget.target,
+    resultingStatus: deskMarkTarget.target,
+    createdAt: new Date(`${deskMark.dateSent}T12:00:00`).toISOString(),
+    ...(deskMark.qty ? { materialsType: deskMark.qty.unit.toLowerCase(), materialsQuantity: deskMark.qty.amount } : {}),
+  } : null;
+  /* the log sheet's exact override rule, fed the same shape it already decides */
+  const deskMarkOverrideIso = deskMark && activeAgent
+    ? draftExpectedOverrideIso({ reminder: deskMark.reminder, dateSent: deskMark.dateSent } as never, activeAgent)
+    : null;
+  const deskMarkExpected = (() => {
+    if (!deskMark || !activeAgent) return null;
+    if (deskMarkOverrideIso) return deskMarkOverrideIso;
+    const win = typeof activeAgent.responseTimeWeeks === "number" && activeAgent.responseTimeWeeks > 0 ? activeAgent.responseTimeWeeks : null;
+    if (win == null) return null;
+    const d = new Date(`${deskMark.dateSent}T12:00:00`); d.setDate(d.getDate() + win * 7);
+    return d.toISOString();
+  })();
+  const deskMarkDerived = deskMark && deskMarkTarget ? (
+    <>Status becomes <b>{deskMarkTarget.target}</b> — with the agent.{" "}
+      {deskMarkExpected && <>Reply expected by <b>{fmtShortISO(deskMarkExpected)}</b>.</>}</>
+  ) : null;
+
+  const deskDerived = (() => {
+    if (!deskProposed || !activeQuery) return null;
+    const st = deskProposed.resultingStatus as QueryStatus;
+    const holder = getPrimaryAction(st).ballHolder;
+    const court = holder === "writer" ? "with you" : holder === "agent" ? "with the agent" : "closed";
+    const firstName = activeAgent ? (agentPrimary(activeAgent).split(/\s+/).pop() ?? "the agent") : "the agent";
+    const nudgeIso = activeQuery.nudgeDate && new Date(activeQuery.nudgeDate).getTime() > Date.now()
+      ? fmtShortISO(activeQuery.nudgeDate) : null;
+    return (
+      <>Status becomes <b>{st}</b> — {court}.{" "}
+        {holder === "writer" && <>The waiting bar stops here; nothing is owed by {firstName} until you send.{" "}</>}
+        {holder === null && <>The waiting bar stops here.{" "}</>}
+        {nudgeIso && <>The nudge for {nudgeIso} is retired.</>}</>
+    );
+  })();
+
+  /**
+   * §4 — THE NUDGE DESK. The draft is `nudgeDraft`'s — the template the modal and the To-do
+   * walkthrough already share (decision 4's first branch: one exists, so it is used). Copied,
+   * never sent. The "again after" default is the existing reminder's own interval — nudgeDate
+   * minus its anchor (the last nudge, else the send), in whole weeks — else 4.
+   */
+  const [deskNudge, setDeskNudge] = useState<NudgeDeskDraft | null>(null);
+  const deskNudgeDefaultWeeks = (() => {
+    if (!activeQuery?.nudgeDate) return 4;
+    const anchorIso = activeQuery.lastNudgeSentDate || activeQuery.dateSent;
+    if (!anchorIso) return 4;
+    const wks = Math.round((new Date(activeQuery.nudgeDate).getTime() - new Date(anchorIso).getTime()) / (7 * 86400000));
+    return wks >= 1 && wks <= 52 ? wks : 4;
+  })();
+  useEffect(() => {
+    if (deskVerb === "nudge" && !deskNudge && activeQuery) {
+      setDeskNudge({ nudgeDate: todayInputDate(), again: { kind: "weeks", weeks: deskNudgeDefaultWeeks } });
+    }
+    if (deskVerb !== "nudge" && deskNudge) setDeskNudge(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deskVerb, activeQuery?.id]);
+  const deskNudgeDraftText = deskVerb === "nudge" && activeQuery && activeAgent
+    ? nudgeDraft({
+        agentName: agentPrimary(activeAgent) || null,
+        dateSent: activeQuery.dateSent,
+        msTitle: manuscripts.find((m) => m.id === activeQuery.manuscriptId)?.title,
+        requested: requestedProse(activeQuery.status as QueryStatus),
+      })
+    : "";
+  const deskNudgeSubject = (() => {
+    if (deskVerb !== "nudge" || !activeQuery?.dateSent) return "";
+    const days = Math.max(0, Math.floor((Date.now() - new Date(activeQuery.dateSent).getTime()) / 86400000));
+    const win = typeof activeAgent?.responseTimeWeeks === "number" && activeAgent.responseTimeWeeks > 0
+      ? ` · window ${activeAgent.responseTimeWeeks} weeks` : "";
+    return `Query sent ${fmtShortISO(activeQuery.dateSent)} · ${days} ${days === 1 ? "day" : "days"} ago${win}`;
+  })();
+  const deskNudgeDerived = activeQuery ? (
+    <>Records a <b>Nudged</b> rung on the timeline. Status stays <b>{activeQuery.status}</b>. The
+      draft is copied for your mail client — ScriptAlly never sends.</>
+  ) : null;
   // 5d — click-to-pick writers (constrained values, plain updateQuery + undo). No cascade needed:
   // sendMethod is a display field; manuscriptId reassignment is a plain patch (historical activities
   // keep their own manuscriptId — the same derived-over-stored limitation the drawer has).
@@ -5177,6 +5373,39 @@ export const Queries: React.FC<{
             returnTo={correctingTriggerRef.current}
             onClose={() => setDeskVerb(null)}
           >
+            {deskVerb === "marksent" && deskMark && deskMarkTarget && (
+              <div className="qcd-verb">
+                <MarkSentDesk
+                  title={deskMarkTarget.target === QueryStatus.PARTIAL_SENT
+                    ? (deskMarkTarget.resubmit ? "Mark the resubmission sent" : "Mark the partial sent")
+                    : (deskMarkTarget.resubmit ? "Mark the resubmission sent" : "Mark the full sent")}
+                  subject={`${agentPrimary(activeAgent)} · ${activeAgent.agency || ""}`}
+                  askedLabel={deskMark.qty ? "as asked" : null}
+                  draft={deskMark}
+                  onDraft={setDeskMark}
+                  windowWeeks={typeof activeAgent.responseTimeWeeks === "number" && activeAgent.responseTimeWeeks > 0 ? activeAgent.responseTimeWeeks : null}
+                  derivedLine={deskMarkDerived}
+                  saving={respSaving}
+                  onCancel={() => setDeskVerb(null)}
+                  onMark={() => void saveDeskMarkSent()}
+                />
+              </div>
+            )}
+            {deskVerb === "nudge" && deskNudge && (
+              <NudgeDesk
+                agencyName={activeAgent.agency?.trim() || agentPrimary(activeAgent) || "the agent"}
+                subject={deskNudgeSubject}
+                toEmail={activeAgent.email?.trim() || null}
+                draftText={deskNudgeDraftText}
+                defaultWeeks={deskNudgeDefaultWeeks}
+                draft={deskNudge}
+                onDraft={setDeskNudge}
+                derivedLine={deskNudgeDerived}
+                saving={respSaving}
+                onRecord={() => void saveDeskNudge()}
+                onCancel={() => setDeskVerb(null)}
+              />
+            )}
             {deskVerb === "respond" && deskResp && (
               <div className="qcd-verb">
                 <RespondDesk
@@ -5796,8 +6025,9 @@ export const Queries: React.FC<{
                    PROPOSED world: the ghost activity appended to the real events (same builder,
                    same renderer — decision 2), and the open-state block derived from the proposed
                    status, which is what makes the waiting rung disappear when the ghost moots it. */
-                const eventsForRail = deskProposed ? [...trackingEvents, deskProposed] : trackingEvents;
-                const railStatus = (deskProposed?.resultingStatus ?? activeQuery.status) as QueryStatus;
+                const proposedAny = deskProposed ?? deskMarkProposed;
+                const eventsForRail = proposedAny ? [...trackingEvents, proposedAny] : trackingEvents;
+                const railStatus = (proposedAny?.resultingStatus ?? activeQuery.status) as QueryStatus;
                 const ta = getPrimaryAction(railStatus);
                 /**
                  * §2 — THE SEND'S MATERIALS, READ-ONLY UNDER THE SEND RUNG. The same three states
@@ -5837,7 +6067,7 @@ export const Queries: React.FC<{
                     agent={activeAgent}
                     events={eventsForRail}
                     primaryAction={{ ballHolder: ta.ballHolder, markKind: ta.kind === "mark-sent" ? ta.markKind : undefined }}
-                    ghostId={deskProposed ? "__ghost" : null}
+                    ghostId={proposedAny ? "__ghost" : null}
                     freshId={deskFreshId}
                     /* §3 — the ⋯ opens the DESK at the fork, directly: the fork subsumes the old
                        Edit/Delete menu (append is its second branch, remove lives on the edit

@@ -362,6 +362,29 @@ interface DbContextType {
      */
     bookVersionId?: string;
   }) => Promise<void>;
+  /** §3 (respond-nudge) — the SAME write, with the undo's receipt. `recordMaterialsSent` keeps its
+   void signature for the To-do flows' handler table; this name is for callers that offer Undo. */
+  markSentWithReceipt: (args: {
+    queryId: string;
+    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT;
+    sentDate: string; // ISO
+    isResubmit?: boolean;
+    writerExpectedDate?: string; // ISO — optional; §2: the writer stating when they expect a reply
+    nudgeDate?: string; // ISO — optional, set when a nudge reminder is chosen
+    /**
+     * Which BOOK version this send carried (Part E, D6). Optional, and absent means NOT RECORDED.
+     *
+     * ⚠️ THE TWO-ACTIVITY-TYPE RULE IS ENFORCED BY `targetStatus`'S TYPE, not by a check. That
+     * parameter is already `PARTIAL_SENT | FULL_SENT` and nothing else, so this seam cannot put a
+     * version on any other kind of event — the strongest form the restriction can take, and it was
+     * here before the feature was.
+     *
+     * ⚠️ AND IT IS PAYLOAD. `recomputeQuery` does not read it, so a version can never move a
+     * status, a count or a date.
+     */
+    note?: string;
+    bookVersionId?: string;
+  }) => Promise<{ activityId: string; prior: { writerExpectedDate?: string; writerExpectedSetAt?: string; nudgeDate?: string } } | void>;
   /** Phase 3 — a reply that decides nothing. Non-status by construction; see lib/holdingReply.ts. */
   recordHoldingReply: (
     queryId: string,
@@ -443,7 +466,7 @@ interface DbContextType {
    */
   /* ⚠️ `checkBackDate` IS OPTIONAL — absent is "Don't ask again" (journey round, Phase 5): the nudge
      is recorded, no `nudgeDate` is written, and the dismissal is PERMANENT rather than dated. */
-  logNudge: (queryId: string, args: { checkBackDate?: string; note?: string; eventDate?: string }) => Promise<{ success: boolean; error?: string }>;
+  logNudge: (queryId: string, args: { checkBackDate?: string; note?: string; eventDate?: string }) => Promise<{ success: boolean; error?: string; activityId?: string; prior?: { nudgeDate?: string; lastNudgeSentDate?: string } }>;
   recordOfferDecision: (queryId: string, decision: OfferDecision) => Promise<{ success: boolean; error?: string }>;
 
   // ⚠️ NO cleanDuplicates / wipeAndResetDatabase / seedUserDatabase. They backed two panels on the
@@ -2670,6 +2693,15 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        * (query, status, nearest time) fallback. This stops the divergence being CREATED; it does not
        * retro-pair what is already on the account.
        */
+      /* §3 (respond-nudge) — the undo's raw material, captured BEFORE any write: the receipt
+         returns the activity id and the fields this save may replace, so the caller's Undo can
+         delete the rung and put the prior expectation back. ADDITIVE — every existing caller
+         ignores the return and is byte-identical. */
+      const prior = {
+        ...(typeof (targetQ as unknown as Record<string, unknown>).writerExpectedDate === "string" ? { writerExpectedDate: (targetQ as unknown as Record<string, string>).writerExpectedDate } : {}),
+        ...(typeof (targetQ as unknown as Record<string, unknown>).writerExpectedSetAt === "string" ? { writerExpectedSetAt: (targetQ as unknown as Record<string, string>).writerExpectedSetAt } : {}),
+        ...(typeof (targetQ as unknown as Record<string, unknown>).nudgeDate === "string" ? { nudgeDate: (targetQ as unknown as Record<string, string>).nudgeDate } : {}),
+      };
       const actId = "act-" + Math.random().toString(36).substr(2, 9);
       const subRef = doc(db, "users", currentUser.id, "queries", queryId, "activity", actId);
       await setDoc(subRef, {
@@ -2683,6 +2715,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       });
       await setDoc(doc(db, "users", currentUser.id, "activities", actId), { ...activity, id: actId });
       await recompute(queryId);
+      return { activityId: actId, prior };
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
     }
@@ -3590,13 +3623,19 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const logNudge = async (
     queryId: string,
     args: { checkBackDate?: string; note?: string; eventDate?: string }
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<{ success: boolean; error?: string; activityId?: string; prior?: { nudgeDate?: string; lastNudgeSentDate?: string } }> => {
     if (!currentUser) return { success: false, error: "Session required." };
     const q = queries.find(item => item.id === queryId);
     if (!q) return { success: false, error: "Query not found." };
     const agent = agents.find(a => a.id === q.agentId) || null;
 
     const writes = buildNudgeWrites(q, agent, args, new Date());
+    /* §4 (respond-nudge) — the undo's raw material, captured BEFORE any write. Additive: the
+       return gains optional receipt members every existing caller ignores. */
+    const prior = {
+      ...(typeof (q as unknown as Record<string, unknown>).nudgeDate === "string" ? { nudgeDate: (q as unknown as Record<string, string>).nudgeDate } : {}),
+      ...(typeof (q as unknown as Record<string, unknown>).lastNudgeSentDate === "string" ? { lastNudgeSentDate: (q as unknown as Record<string, string>).lastNudgeSentDate } : {}),
+    };
 
     // 1) ONE event id for both stores (the saveQueryEdits same-id-twin convention).
     //    1a — AUTHORITATIVE: the per-query subcollection the Tracking timeline reads. A failure
@@ -3628,7 +3667,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           ? writes.dismissal.resurfaceDate
           : MUTED_UNTIL,
       });
-      return { success: true };
+      return { success: true, activityId: actId, prior };
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId} [logNudge]`);
       return { success: false, error: "Failed to log nudge." };
@@ -3769,7 +3808,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setAgentSetAside,
         addQuery,
         updateQueryStatus,
-        recordMaterialsSent,
+        /* the void face for the To-do handler table; the receipt face for Undo-offering callers.
+           One implementation — the wrapper exists only because Promise<receipt> is not assignable
+           to the interface's Promise<void>. */
+        recordMaterialsSent: async (a) => { await recordMaterialsSent(a); },
+        markSentWithReceipt: recordMaterialsSent,
         recordHoldingReply,
         undoQueryStatus,
         updateQuery,
