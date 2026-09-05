@@ -36,6 +36,20 @@ describe("§2 · the ghost rung IS the saved rung — one builder, one renderer"
     expect(strip(ghostRows)).toBe(strip(savedRows));
   });
 
+  it("a ghost renders NO ⋯ — a proposal cannot be 'corrected', and the fork it would open has no document", () => {
+    /* found on a live snapshot: `activityId: "__ghost"` is truthy, so the menu gate rendered
+       "Correct this entry" on the proposal; clicking it opens the fork on a doc that does not
+       exist AND closes the verb desk mid-compose (one desk at a time). */
+    const rows = buildTimelineRows([sent, proposal()], q, null);
+    const html = renderToStaticMarkup(
+      React.createElement(TimelineRows, { rows, ghostId: "__ghost", onMenuOpen: () => {} } as never),
+    );
+    expect(html.indexOf("tl-ev--ghost")).toBeGreaterThan(-1);
+    /* COUNTED, not sliced — a slice bounded on a class prefix cut before the menu region and
+       passed in both directions (proved on its own first draft). One real row → one menu. */
+    expect((html.match(/aria-label="Correct this entry"/g) ?? []).length).toBe(1);
+  });
+
   it("the ghost wears the dashed skin and the saved rung the pulse — skin only, additive", () => {
     const rows = buildTimelineRows([sent, proposal()], q, null);
     const ghostHtml = renderToStaticMarkup(React.createElement(TimelineRows, { rows, ghostId: "__ghost" }));

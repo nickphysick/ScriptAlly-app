@@ -47,7 +47,7 @@ describe("B2 — the sheet renders the HUB'S timeline (reuse, not imitation)", (
        byte-identical to before, which is the equivalence this case is named for. */
     expect(hub).toContain("onMenuOpen={onEntryFork ?? (onEditEntry || onDeleteEntry ? (entry, trigger) => {");
     expect(hub).toContain("setMenu({ entry });");
-    expect(hub).toContain("row.activityId && onMenuOpen"); // the ⋯ condition, equivalence preserved
+    expect(hub).toContain("row.activityId && row.activityId !== ghostId && onMenuOpen"); // the ⋯ condition, equivalence preserved
     /* ⚠️ `TL_MARK` SINCE §6 — and this lock is the reason the token behind it sits at `:root`.
        To-do renders these rows inside `.tdb-ffhubtl`, nowhere near `.t-f12`, so a page-scoped
        `--tl-mark` would have left THIS host's markers unsized with nothing to point at. */

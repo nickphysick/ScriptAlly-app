@@ -462,7 +462,7 @@ export const TimelineRows: React.FC<{
                 <span className="tl-ttl tl-ttl--quiet">{row.title}</span>
                 <span className="tl-meta">
                   {row.date && <span>{row.date}</span>}
-                  {row.activityId && onMenuOpen && (
+                  {row.activityId && row.activityId !== ghostId && onMenuOpen && (
                     <span className="f12-popwrap" style={{ display: "inline-flex" }}>
                       <button
                         type="button"
@@ -507,7 +507,7 @@ export const TimelineRows: React.FC<{
               )}
               <span className="tl-meta">
                 {row.date && <span>{row.date}</span>}
-                {row.activityId && onMenuOpen && (
+                {row.activityId && row.activityId !== ghostId && onMenuOpen && (
                   <span className="f12-popwrap" style={{ display: "inline-flex" }}>
                     <button
                       type="button"
