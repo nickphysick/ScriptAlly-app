@@ -6,7 +6,7 @@
 `check-design-refs.mjs`'s watchlist** (20 → 22 guarded), so a later edit to either fails the build
 rather than silently changing what this round's assertions cite.
 
-**Where I stopped:** end of Phase 5. Recon is `run-artifacts/drawer-recon.md`.
+**Where I stopped:** end of Phase 6. Recon is `run-artifacts/drawer-recon.md`.
 
 ---
 
@@ -615,6 +615,106 @@ row held in **Needs you now**, selected, with the crossed close sheet reading "C
 
 ---
 
+## Phase 6 — `todo: group & order, and filter` · content in `c131e8a3`, story in `0672a5c0`
+
+⚠️ **THE PHASE'S SHA IS SHARED, AND NOT BY CHOICE — the concurrency incident of the round.** The
+query-drawer session's broad commit (`c131e8a3`, "log sheet §5") landed in the shared checkout
+**between my `git add` and my `git commit --only`**, sweeping all nine staged Phase-6 files into a
+commit whose message says nothing about them — the third shape of the concurrent-stream hazard,
+exactly as `CLAUDE.md` records it, met live. Nothing is lost: every file verified landed,
+byte-for-byte mine. Per the house rule (the `--amend` incident), the fix is **never a rewrite**:
+`0672a5c0` is a deliberately empty commit carrying Phase 6's full story immediately on top, so
+`git log` finds it. The defence the rule prescribes — commit each unit as its gates go green,
+keeping the staged window short — was in use; the window this time was the minutes between the
+gates and the message being written.
+
+### What Phase 6 is
+
+`todoListView` **extended, not siblinged**: grouping 2 → 5, order 5 → 6 (the `manuscript` order
+retired — a stored one falls back through `parseView` as every unrecognised value always has),
+direction, and agent ticks (**ids, never names** — two agents can share a name). Persistence was
+already live through `todoPrefs.listView` — a prior round built the seam after the recon, which is
+why the recon said it did not exist; the new fields ride it with **no rules change**.
+**16/16 measured, twice; 10 unit laws, five proved red.**
+
+- **Group first, order second, direction beneath** — the panel reads top-down in the order the
+  list is built. Regrouping partitions the already-filtered, already-ordered cards; heads
+  generated A–Z with the placeless head **last** ("No agent" alphabetised into the Ns reads as a
+  person).
+- **Conditional counts through one derivation** — `viewLeaving`, the view re-run with the option's
+  own facet lifted. Proved with two facets set, in the unit suite and on the page (P6.8: the
+  panel's number equals the rows the choice is leaving). A ticked agent never vanishes from the
+  panel: an active filter must stay removable where it was set.
+- **Chips = the active set** (facet names in mono), the badge counts **choices**, the trigger reads
+  the contract's sentence, and the footer switches to "Showing n of N" exactly when the view hides
+  rows — N from the same pipeline with the narrowing facets lifted, never a raw store count.
+- **The panels' geometry is fixed from the start** — the recon's AnchoredPanel finding: 300px,
+  a 440px cap, the agent list scrolling internally, a reserved count column. Every minted name
+  grepped first; `l-lbl`, `l-badge` and `vrow` found taken by the calendar sheet and avoided;
+  the panels live under a fresh `.tdvp` namespace.
+
+### ⚠️ The render smoke caught a real TDZ tsc cannot see
+
+`railGroups()` — a hoisted function — now passes `viewFacts`, and its first render-time caller sits
+four hundred lines above where the memo was declared: every render threw
+`Cannot access 'viewFacts' before initialization`. **The old inline closure survived in the same
+position only because the default sort never invoked it** — a latent crash for every non-default
+sort, shipped green. Both declarations moved above the board derivations, per the order rule. The
+smoke — built for exactly this class — is what caught it.
+
+### ⚠️ The probe's own stale-closure batch
+
+Five unticks in one synchronous `evaluate` all read the **same render's** view, so each computed
+"all minus that one" and the last write won — the probe left five types on while believing it left
+one, and P6.8 went red over a fixture fault. One press per tick with a render between, as a hand
+would; and P6.9 tightened from "some chips exist" to "the chips ARE the active set", which the
+batch had been slipping past.
+
+### ⚠️ P6.3 flaked on somebody else's write
+
+The dev account is shared; a row arrived between two snapshots and failed a count-to-count equality
+about rows this page never dropped. The conservation claim is over **keys** captured immediately
+either side of the switch — everything present before is present after; arrivals are reported, not
+failed on.
+
+### Mutations
+
+| mutation | result |
+|---|---|
+| order crosses group boundaries (pool re-chunked by size) | red |
+| direction flips a comparator, not the result | red |
+| "No agent" alphabetised into the Ns | red |
+| the counts go unconditional | red (unit AND e2e) |
+| the badge counts rows, not choices | red |
+| N becomes n — the footer never switches | 2 red |
+| the agent chip vanishes from the set | red |
+| the panel's box moves with the ticks (4c) | **P6.6 red** |
+| the agent list stops scrolling internally (4) | could not redden |
+| a count-coupled offset (4b) | could not redden |
+
+**The two that could not be made red are over-defence, not vacuity, and the report says why**: the
+geometry claim is held independently by the outer 440px cap, by down-placement (the anchor is near
+the page top, so the panel never flips), and by the reserved count column — 4 and 4b each broke one
+string of a three-string bow. 4c — coupling the panel's own margin to the tick count — moved the
+box and **P6.6 went red**, which proves the probe sees movement; the pair above are defence in
+depth doing its job. (4b was also defeated by the conditionality itself: the send count is computed
+with types lifted, so type unticks cannot move it — the mutation was eaten by the design under
+test.)
+
+### Also recorded, per the brief
+
+`todoPrefs` is validated as **`is map` with no key-level check** — the convenience this phase rode
+(no rules deploy for five new fields) and a standing liability: any key, any shape, any size,
+server-silent. **Noted for a schema decision; deliberately not added now.**
+
+### Gates
+
+Build clean · zero tsc errors in this change set · 308 of my suite cases pass (the one red is the
+calendar stream's tool-row case against their own uncommitted WIP). The measurement's teardown
+returns the persisted view to rest through the page's own controls and asserts the resting footer.
+
+---
+
 ## What worked — and the one finding the round is really about
 
 ### The resting state had never existed, and nothing had ever asked for it
@@ -669,7 +769,7 @@ changing.
 
 ## Next
 
-**Phase 6 — group & order, and filter.** The `todoListView` extension, both panels through
-`AnchoredPanel` with fixed max-height and stable option rows, chips, the footer's two forms,
-persistence through `todoPrefs`. Then Phase 7 (the re-prove sweep over ~8 suites, `qcPanel` to be
-confirmed as a false positive first).
+**Phase 7 — the re-prove sweep** over the ~8 suites that predate the round's DOM (`contract`,
+`finishRound`, `paneRecon`, `steerRound`, `workspaceRound`, `journeyRound`, `paneMounts` — already
+retargeted and green — and `qcPanel` after confirming its `.ws` match is the suspected false
+positive).

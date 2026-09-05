@@ -1,0 +1,32 @@
+green  · P6.0 · the board is populated and at the default view
+           rows 30 · heads ["Needs you now","Housekeeping","Your tasks"] · label "By urgency · Priority"
+green  · P6.1 · the trigger reads the contract's two-part label at rest
+           label = "By urgency · Priority"
+green  · P6.2 · the Group & order panel opens through AnchoredPanel
+           {"x":975,"y":372,"w":300,"h":440}
+green  · P6.3 · group-by-agent changes the HEADS to names, A to Z, without dropping a row
+           heads ["Alasdair Crewe","Ana Duarte","Cormac Bligh","David Marsh"]… · every pre-switch key kept = true (30 → 31)
+green  · P6.4 · the trigger's label follows — the contract's sentence
+           label = "By agent · Priority"
+green  · P6.5 · the order changes and the heads do not — ordering runs inside the groups
+           heads unchanged = true
+green  · P6.6 · GEOMETRY — the panel's top-left does not move as counts change under the pointer
+           {"x":831.3,"y":372.5} → {"x":831.3,"y":372.5} after 5 unticks
+green  · P6.7 · an agent with surviving rows can be ticked given the type filter
+           ticked "Ana Duarte"
+green  · P6.8 · the Send option's count EQUALS the rows it is leaving, given the agent tick
+           panel says 1 · the list shows 1
+green  · P6.9 · the chips ARE the active set — the one kept type, and the ticked agent
+           chips = ["typeSend","agentAna Duarte"]
+green  · P6.10 · the Filter button carries the badge count
+           badge = "6"
+green  · P6.11 · the footer switches to Showing n of N exactly while rows are hiding
+           footer = "Showing 1 of 30"
+green  · P6.12 · every preference survives a reload — the chips and the footer come back as left
+           chips after reload = ["typeSend","agentAna Duarte"] · footer "Showing 1 of 30"
+green  · P6.13 · the empty state says WHY and offers the one-click clear
+           "Nothing matches “zzz-no-such-task”Clear it to see all 0.Clear search"
+green  · P6.14 · the clear restores rows
+           rows after clear = 1
+green  · teardown · the view is back at rest — no chips, no badge, the one-number footer
+           chips [] · footer "30 tasks · 18 need you now"
