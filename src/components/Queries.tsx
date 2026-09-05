@@ -2273,6 +2273,10 @@ export const Queries: React.FC<{
    */
   /* §3 — the mark-sent draft, seeded from the REQUEST when the desk opens */
   const [deskMark, setDeskMark] = useState<MarkSentDraft | null>(null);
+  /* the request's RECORDED figure, when it recorded one — "as asked" renders only while the
+     draft still equals this, and never when the request stated no figure at all (a label
+     claiming an ask the data does not carry is the fabricated-value family). */
+  const [deskMarkAsk, setDeskMarkAsk] = useState<{ amount: string; unit: SampleUnit } | null>(null);
   useEffect(() => {
     if (deskVerb === "marksent" && !deskMark && activeQuery && activeAgent) {
       const a2 = getPrimaryAction(activeQuery.status as QueryStatus);
@@ -2282,6 +2286,7 @@ export const Queries: React.FC<{
         (e.resultingStatus ?? e.type) === QueryStatus.PARTIAL_REQUESTED);
       const unit: SampleUnit = req?.materialsType === "chapters" ? "Chapters" : req?.materialsType === "words" ? "Words" : "Pages";
       const amount = req?.materialsQuantity ? String(parseQty(String(req.materialsQuantity))) : snapToUnit(unit);
+      setDeskMarkAsk(req?.materialsQuantity ? { amount, unit } : null);
       const win = typeof activeAgent.responseTimeWeeks === "number" && activeAgent.responseTimeWeeks > 0
         ? activeAgent.responseTimeWeeks : null;
       setDeskMark({
@@ -2295,7 +2300,7 @@ export const Queries: React.FC<{
         note: "",
       });
     }
-    if (deskVerb !== "marksent" && deskMark) setDeskMark(null);
+    if (deskVerb !== "marksent" && deskMark) { setDeskMark(null); setDeskMarkAsk(null); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deskVerb, activeQuery?.id]);
 
@@ -5329,7 +5334,7 @@ export const Queries: React.FC<{
                     ? (deskMarkTarget.resubmit ? "Mark the resubmission sent" : "Mark the partial sent")
                     : (deskMarkTarget.resubmit ? "Mark the resubmission sent" : "Mark the full sent")}
                   subject={`${agentPrimary(activeAgent)} · ${activeAgent.agency || ""}`}
-                  askedLabel={deskMark.qty ? "as asked" : null}
+                  askedLabel={deskMark.qty && deskMarkAsk && deskMark.qty.amount === deskMarkAsk.amount && deskMark.qty.unit === deskMarkAsk.unit ? "as asked" : null}
                   bookVersions={activeBookVersions}
                   readVersion={openingRead(activeQuery, packages, versions, activeBookVersions)}
                   agentName={agentPrimary(activeAgent) || undefined}

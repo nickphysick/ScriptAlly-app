@@ -121,6 +121,10 @@ describe("§3 · the window rule is the log sheet's, verbatim", () => {
     expect(page).toContain('req?.materialsQuantity ? String(parseQty(String(req.materialsQuantity))) : snapToUnit(unit)');
     const desk = readFileSync(join(process.cwd(), "src/components/queries/MarkSentDesk.tsx"), "utf8");
     expect(desk, "the qty is display-only — 'editable' is the brief's word").toContain('onChange={(e) => onDraft({ ...draft, qty: { ...qty, amount: String(parseQty(e.target.value)) } })}');
+    /* and the label is HONEST: only while the draft still equals a figure the request RECORDED —
+       never on a default, never after an edit (the fabricated-value family) */
+    expect(page).toContain('askedLabel={deskMark.qty && deskMarkAsk && deskMark.qty.amount === deskMarkAsk.amount && deskMark.qty.unit === deskMarkAsk.unit ? "as asked" : null}');
+    expect(page).toContain('setDeskMarkAsk(req?.materialsQuantity ? { amount, unit } : null);');
   });
 });
 
