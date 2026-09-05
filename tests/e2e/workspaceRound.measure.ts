@@ -35,6 +35,18 @@ const OPEN = (kind: string) => `(() => {
 })()`;
 
 /** both Fix rows wear the same pill; the cohort is known by its own sub-line */
+/* ⚠️ THE FORK IS ANSWERED BEFORE THE LEDGER IS MEASURED (drawer round, Phase 7). This file
+   predates the journey round's fork, so every ledger probe ran against a pane still SHOWING the
+   fork — rows=0, and seventeen assertions red off one missing step. The helper is steerRound's,
+   the suite that survived the same change. */
+const ANSWER_FORK = `(() => {
+  const vis = ${VIS};
+  const fk = [...document.querySelectorAll(".tpn .fk")].filter(vis)[0];
+  if (!fk) return false;
+  fk.click();
+  return true;
+})()`;
+
 const OPEN_BULK = `(() => {
   const vis = ${VIS};
   const row = [...document.querySelectorAll(".tlc .row")].filter(vis)
@@ -115,122 +127,17 @@ test("workspace round", async ({ page }) => {
   const note = await geometryOf("Note");
   const bulk = await geometryOf("__bulk");
 
-  add("P1.1 · two columns at 1440, the record at 288",
-      !!send && /288px$/.test(send.cols.trim()) && !send.solo && !!send.rec && send.rec.w === 288,
-      send ? "grid-template-columns=" + send.cols + " · record w=" + (send.rec ? send.rec.w : "-") : "-");
-  add("P1.2 · the tiles are in the record card and nowhere else",
-      !!send && send.tilesInBand === 0 && send.tilesInRecord > 0,
-      send ? "band=" + send.tilesInBand + " record=" + send.tilesInRecord : "-");
-  add("P1.3 · the record head reads 'The record' and carries the query's status word",
-      !!send && send.recHead === "The record" && send.statusWord.length > 0,
-      send ? "head=" + JSON.stringify(send.recHead) + " status=" + JSON.stringify(send.statusWord) : "-");
-  add("P1.4 · bulk renders ONE column and no record card",
-      !!bulk && bulk.solo && bulk.rec === null,
-      bulk ? "solo=" + bulk.solo + " rec=" + (bulk.rec ? "present" : "absent") : "-");
-
-  /**
-   * ⚠️ READ FROM THE SEND CAPTURE, NOT FROM THE PAGE AS IT STANDS. The first version of this case
-   * queried `.rhead .stat` live — AFTER the cohort had been opened, which has no record card at
-   * all — so it read "" and reported the status word missing on a journey that shows it correctly.
-   * The precondition (a record on screen) was never asserted. It is the capture's own reading now.
-   */
-  {
-    const label: string = send ? send.statusWord : "";
-    add("P1.5 · the status word is a real status label, not an enum string",
-        !!send && /^[A-Z][a-z]/.test(label) && !/_/.test(label),
-        "statusWord=" + JSON.stringify(label) + " (from the send capture, which has a record)");
-  }
-
-  /* ══ PHASE 2 · the fixed-zone pane ════════════════════════════════════════════════════════ */
-  for (const [name, g] of [["send", send], ["close", close], ["note", note], ["bulk", bulk]] as [string, any][]) {
-    if (!g) { notes.push(name + ": journey not present on this account"); continue; }
-    notes.push([
-      "  " + name.padEnd(6),
-      "ws " + JSON.stringify(g.ws),
-      "col " + JSON.stringify(g.col),
-      "work " + JSON.stringify(g.work),
-      "bar " + JSON.stringify(g.bar),
-      "rec " + JSON.stringify(g.rec),
-      "barVsRec " + g.barVsRec,
-      "workScroll " + JSON.stringify(g.workScroll),
-      "recScroll " + JSON.stringify(g.recScroll),
-      "page " + JSON.stringify(g.page),
-    ].join("\n           "));
-  }
-
-  add("P2.1 · the bar's bottom edge lands on the record card's, within 1px",
-      !!close && close.barVsRec !== null && Math.abs(close.barVsRec) <= 1,
-      close ? "close journey (short work, tall record): barVsRec=" + close.barVsRec : "-");
-  add("P2.2 · and on every journey that has a record",
-      [send, close].filter(Boolean).every((g: any) => g.barVsRec !== null && Math.abs(g.barVsRec) <= 1),
-      [send, close].filter(Boolean).map((g: any, i: number) => ["send", "close"][i] + "=" + g.barVsRec).join(" · "));
-  add("P2.3 · the row stretches — the columns are the same height",
-      !!send && send.align === "stretch" && !!send.rec && !!send.col && Math.abs(send.rec.h - send.col.h) <= 1,
-      send ? "align-items=" + send.align + " col.h=" + (send.col ? send.col.h : "-") + " rec.h=" + (send.rec ? send.rec.h : "-") : "-");
-  add("P2.4 · the worksheet scrolls INSIDE its rim, and the rim clips",
-      !!send && send.workScroll !== null && send.workScroll.overflowY === "auto" && send.workRimOverflow === "hidden",
-      send ? "overflow-y=" + (send.workScroll ? send.workScroll.overflowY : "-") + " rim overflow=" + send.workRimOverflow : "-");
-  add("P2.5 · the record scrolls its own middle the same way",
-      !!send && send.recScroll !== null && send.recScroll.overflowY === "auto",
-      send ? "overflow-y=" + (send.recScroll ? send.recScroll.overflowY : "-") : "-");
-  add("P2.6 · nothing in the pane is sticky, on any journey",
-      [send, close, note, bulk].filter(Boolean).every((g: any) => g.sticky.length === 0),
-      [send, close, note, bulk].filter(Boolean).map((g: any) => JSON.stringify(g.sticky)).join(" "));
-  add("P2.7 · the page itself never scrolls at 1440",
-      [send, close, note, bulk].filter(Boolean).every((g: any) => g.page.scrollH <= g.page.clientH),
-      [send, close, note, bulk].filter(Boolean).map((g: any) => g.page.scrollH + "/" + g.page.clientH).join(" · "));
-
-  /* ⚠️ THE LONG CASE IS FORCED, because whether this account happens to hold a journey taller than
-     the pane is a fact about the FIXTURE, not about the law. Content is injected into the form and
-     the scroller driven to its end; the claim is that nothing rendered inside it lands below the
-     worksheet card's bottom edge. */
-  await page.evaluate(OPEN("Send"));
-  await page.waitForTimeout(1000);
-  const longCase = await page.evaluate(`(() => {
-    const vis = ${VIS};
-    const all = (s) => [...document.querySelectorAll(s)].filter(vis);
-    const form = all(".tpn .form")[0];
-    const scroll = all(".tpn .workscroll")[0];
-    const work = all(".tpn .work")[0];
-    const bar = all(".tpn .actbar")[0];
-    if (!form || !scroll || !work || !bar) return null;
-    const filler = document.createElement("div");
-    filler.id = "sa-wr-filler";
-    filler.style.cssText = "height:900px";
-    filler.textContent = "long journey stand-in";
-    form.appendChild(filler);
-    const before = scroll.scrollHeight - scroll.clientHeight;
-    scroll.scrollTop = scroll.scrollHeight;
-    const r = (n) => Math.round(n * 10) / 10;
-    const workBottom = work.getBoundingClientRect().bottom;
-    /* every rendered leaf inside the scroller, at the scroller's end */
-    const spill = [...scroll.querySelectorAll("*")]
-      .filter(vis)
-      .map((e) => ({ cls: (e.className || "").toString().split(" ")[0], b: r(e.getBoundingClientRect().bottom) }))
-      .filter((x) => x.b > workBottom + 1);
-    const out = {
-      over: before,
-      scrolled: scroll.scrollTop,
-      workBottom: r(workBottom),
-      barTop: r(bar.getBoundingClientRect().top),
-      spill: spill.slice(0, 6),
-      spillCount: spill.length,
-      pageScroll: document.scrollingElement.scrollHeight - document.scrollingElement.clientHeight,
-      /* the bar's own edge must still meet the record's with the work overflowing */
-      barVsRec: (() => { const rec = all(".tpn .rec")[0];
-        return rec ? r(bar.getBoundingClientRect().bottom - rec.getBoundingClientRect().bottom) : null; })(),
-    };
-    filler.remove();
-    return out;
-  })()`) as any;
-  add("P2.8 · with a long journey, no work renders below the worksheet card's bottom edge",
-      !!longCase && longCase.over > 0 && longCase.spillCount === 0,
-      longCase ? "overflow=" + longCase.over + " scrolled to " + longCase.scrolled
-        + " · workBottom=" + longCase.workBottom + " barTop=" + longCase.barTop
-        + " · spill=" + JSON.stringify(longCase.spill) : "-");
-  add("P2.9 · and the page still does not scroll, and the bar still meets the record",
-      !!longCase && longCase.pageScroll <= 0 && longCase.barVsRec !== null && Math.abs(longCase.barVsRec) <= 1,
-      longCase ? "pageScroll=" + longCase.pageScroll + " barVsRec=" + longCase.barVsRec : "-");
+  /* ⚠️ PHASES 1 AND 2 ARE DELETED, NOT RETARGETED (drawer round, Phase 7) — nine cases whose
+     subject was the retired workspace split: the 288px record column, "The record" head, the bar's
+     bottom landing on the record's, the stretching row. Phase 3 of the drawer round replaced all
+     of it with the sheet and the Quick reference slip. Where each law lives now:
+       · one framed object, its rim, its foot          → tests/e2e/sheetSlip.measure.ts (P3.1)
+       · the record's tiles, stacked in the slip        → sheetSlip (the slip's anatomy)
+       · the head reads "Quick reference" + the status  → the slip's rhead (sheetSlip P3.9 sweeps it)
+       · the sheet hugs, capped at the drawer           → sheetSlip P3.2/P3.3 (the height rule)
+       · the foot rides the content                     → finishRound P2.4, inverted by design
+       · bulk takes the full width, no slip             → taskPanePort ("no record, no slip, no slot")
+       · the worksheet scrolls inside the rim           → finishRound P2.1 + sheetSlip P3.3 */
 
   /* ══ PHASE 3 · one question at a time ═════════════════════════════════════════════════════ */
   await page.goto("/todo");
@@ -238,6 +145,8 @@ test("workspace round", async ({ page }) => {
   await liftMotionSuppression(page);
   await page.evaluate(OPEN("Send"));
   await page.waitForTimeout(1200);
+  await page.evaluate(ANSWER_FORK);
+  await page.waitForTimeout(900);
 
   const ledger = () => page.evaluate(`(() => {
     const vis = ${VIS};
@@ -248,6 +157,7 @@ test("workspace round", async ({ page }) => {
       open: q.classList.contains("open"),
       done: q.classList.contains("done"),
       headH: r(q.querySelector(".head").getBoundingClientRect().height),
+      ansH: q.querySelector(".ans") ? r(q.querySelector(".ans").getBoundingClientRect().height) : 0,
       label: (q.querySelector(".ql") || {}).textContent || "",
       ans: q.querySelector(".ans") ? q.querySelector(".ans").textContent.replace(/\\u2713|Edit/g, "").trim() : null,
       edit: !!q.querySelector(".edit"),
@@ -311,11 +221,25 @@ test("workspace round", async ({ page }) => {
 
   /* ⚠️ THE HEIGHT CLAIM IS ANSWERED-vs-UNANSWERED, both CLOSED. An open row is head plus body by
      design; the claim is that answering a question does not change its ROW. */
-  const closedHeads = L1.rows.filter((x: any) => !x.open).map((x: any) => x.headH);
-  add("P3.6 · an answered row's head is the same height as an unanswered one's",
-      closedHeads.length > 1 && Math.max(...closedHeads) - Math.min(...closedHeads) <= 0.5,
-      "closed head heights " + JSON.stringify(closedHeads)
-        + " (answered=" + JSON.stringify(L1.rows.filter((x: any) => x.done && !x.open).map((x: any) => x.headH)) + ")");
+  /* ⚠️ THE WRAP CARVE-OUT (drawer round, Phase 7): beside the slip the sheet is ~280px, and a long
+     recorded answer legitimately WRAPS — its head grows by the extra line, which is the design
+     accepting the narrow column rather than truncating a record. The law survives as the floor:
+     every closed head shares the uniform minimum, and a taller one must be CARRYING a multi-line
+     answer (ansH says so) — a padding or min-height regression still reds, because it moves the
+     MINIMUM, and a tall head with a one-line answer still reds too. */
+  const closed = L1.rows.filter((x: any) => !x.open);
+  const baseH = Math.min(...closed.map((x: any) => x.headH));
+  /* ⚠️ THE FLOOR IS ABSOLUTE, AND THE FIRST FORM OF THIS CARVE-OUT DID NOT HAVE ONE — proved by
+     its own mutation: shrinking min-height 44 → 30 in the served CSS reddened NOTHING, because a
+     UNIFORM regression moves every head down together and a min-of-the-set comparison follows
+     them. The relational half (heads agree, wraps excepted) and the anchored half (the agreed
+     height IS the contract's 44) are different claims; only together do they say what the case
+     says. This is the circular-assertion family again — the expected value must not be derived
+     from the thing under test. */
+  add("P3.6 · closed heads share the contract's 44, except where a wrapped answer honestly grows one",
+      closed.length > 1 && Math.abs(baseH - 44) <= 0.5
+        && closed.every((x: any) => Math.abs(x.headH - baseH) <= 0.5 || x.ansH > 24),
+      "base " + baseH + " (contract 44) · heads " + JSON.stringify(closed.map((x: any) => [x.headH, x.ansH])));
 
   /* Edit reopens the row it belongs to, and no other */
   const editTarget = L1.rows.find((x: any) => x.edit)?.id;
@@ -338,6 +262,8 @@ test("workspace round", async ({ page }) => {
   await liftMotionSuppression(page);
   await page.evaluate(OPEN("Send"));
   await page.waitForTimeout(1200);
+  await page.evaluate(ANSWER_FORK);
+  await page.waitForTimeout(900);
   const beforeGate = await ledger();
   await page.evaluate(`(() => {
     const vis = ${VIS};
@@ -358,8 +284,10 @@ test("workspace round", async ({ page }) => {
       line: miss ? miss.textContent.trim() : "",
       links: miss ? [...miss.querySelectorAll("a")].map((x) => x.textContent.trim()) : [],
       tookOver: !!document.querySelector(".ff-wrap, .focusflow, [data-focusflow]"),
-      chip: (() => { const go = all(".tpn .actbar .ab.go")[0];
-        return go ? ((go.querySelector(".n") || {}).textContent || "").trim() : ""; })(),
+      /* the count sits OUTSIDE the primary since the pane's own Phase 7 — .tpn .count is its home,
+         the same selector unitNext reads ("N still to answer") */
+      chip: (() => { const c = all(".tpn .count")[0];
+        return c ? (c.textContent || "").trim() : ""; })(),
     };
   })()`) as any;
   const firstUnanswered = beforeGate.rows.find((x: any) => !x.done)?.id;
@@ -549,11 +477,18 @@ test("workspace round", async ({ page }) => {
       navCheck ? "clicked " + JSON.stringify(navCheck.clicked)
         + " -> manuscriptReveal=" + navCheck.ms + " agentReveal=" + navCheck.ag : "-");
   await page.waitForTimeout(1500);
-  const landed = await page.evaluate(`(() => ({ path: location.pathname,
-    dossier: !!document.querySelector(".msv-wrap--doss") }))()`) as any;
-  add("P5.6 · and the page it lands on opens that record rather than the shelf",
-      landed.path === "/manuscripts" && landed.dossier,
-      "path=" + landed.path + " dossier open=" + landed.dossier);
+  /* ⚠️ RE-POINTED TWICE OVER (drawer round, Phase 7). The deed's FIRST link is whichever the
+     sentence puts first — the agent on most journeys — so pinning "/manuscripts" asserted the
+     link ORDER, not the landing; and `.msv-wrap--doss` was retired by the manuscripts re-cut, so
+     the dossier check was a selector for a dead class. The claim that survives: the landing path
+     is the one the reveal that was set points at, and P5.7's consumed check is what says the page
+     actually read it on arrival. */
+  const landed = await page.evaluate(`(() => ({ path: location.pathname }))()`) as any;
+  const expectedPath = navCheck?.ag ? "/agents" : "/manuscripts";
+  add("P5.6 · and it lands on the page the reveal points at",
+      landed.path === expectedPath,
+      "clicked " + JSON.stringify(navCheck?.clicked) + " · reveal " + (navCheck?.ag ? "agent" : "manuscript")
+        + " · path=" + landed.path);
   /* ⚠️ AND THE KEY MUST BE CONSUMED. A reveal left in sessionStorage is one that fired on a page
      that was already mounted and never noticed — the exact fault this round found. */
   const leftover = await page.evaluate(`(() => sessionStorage.getItem("sa.manuscriptReveal"))()`) as string | null;
@@ -566,6 +501,8 @@ test("workspace round", async ({ page }) => {
   await liftMotionSuppression(page);
   await page.evaluate(OPEN("Send"));
   await page.waitForTimeout(1200);
+  await page.evaluate(ANSWER_FORK);
+  await page.waitForTimeout(900);
   const agentClick = await page.evaluate(`(() => {
     const vis = ${VIS};
     const d = [...document.querySelectorAll(".tpn .deed")].filter(vis)[0];
@@ -591,6 +528,8 @@ test("workspace round", async ({ page }) => {
   await liftMotionSuppression(page);
   await page.evaluate(OPEN("Send"));
   await page.waitForTimeout(1200);
+  await page.evaluate(ANSWER_FORK);
+  await page.waitForTimeout(900);
   const empty = await ledger();
   add("P6.1 · nothing answered, the strip is an em-dash",
       /^[\u2014-]$/.test(empty.strip.trim()), "strip=" + JSON.stringify(empty.strip));
@@ -675,6 +614,8 @@ test("workspace round", async ({ page }) => {
   await liftMotionSuppression(page);
   await page.evaluate(OPEN("Close"));
   await page.waitForTimeout(1200);
+  await page.evaluate(ANSWER_FORK);
+  await page.waitForTimeout(900);
   await answerOpen("Today");
   const closeStrip = (await ledger()).strip;
   add("P6.5 · the close journey keeps its own grammar",
@@ -682,6 +623,8 @@ test("workspace round", async ({ page }) => {
       "strip=" + JSON.stringify(closeStrip));
   await page.evaluate(OPEN("Note"));
   await page.waitForTimeout(1200);
+  await page.evaluate(ANSWER_FORK);
+  await page.waitForTimeout(900);
   const noteStrip = (await ledger()).strip;
   add("P6.6 · the note journey keeps its own",
       /Your note, ticked off today\./.test(noteStrip), "strip=" + JSON.stringify(noteStrip));

@@ -6,7 +6,7 @@
 `check-design-refs.mjs`'s watchlist** (20 → 22 guarded), so a later edit to either fails the build
 rather than silently changing what this round's assertions cite.
 
-**Where I stopped:** inside Phase 7 — five of eight suites settled; workspaceRound and journeyRound in triage. Recon is `run-artifacts/drawer-recon.md`.
+**Where I stopped:** end of Phase 7 — all eight suites dispositioned; two deliberate reds stand, each named with its owner. Recon is `run-artifacts/drawer-recon.md`.
 
 ---
 
@@ -727,8 +727,28 @@ Every `/todo` measurement predating the round, presumed vacuous, each proved red
 | `contract` | the CSS cases kept: the split-grid case retargeted to the two-shape law (rest `100% minmax(0,1fr)` · open `520px minmax(0,1fr)`, content-sizing forbidden by name) and **proved red** with an `auto` track in the served CSS. The D9 tile case and the whole `.tdg-row` journey walk **deleted, not bent** — their subjects are two panes gone, and each law's new home is named in the file (paneMounts · sheetSlip · taskPanePort). Deleting the walk exposed a `const red` declared inside it — the summary line threw `ReferenceError` — which is the deletion-takes-a-second-thing fault at file scope, caught by running it. |
 | `steerRound` | 2 red → retargeted → **21/21**. P4.1's coverage scan was sweeping zero elements (`.fc.work` retired) and its own population floor said so — the floor doing precisely its job. P3.3 has come **full circle**: the caret half was retired when advance-on-commit unmounted the input; Phase 4 split commit from advance ON PURPOSE, so the original, stronger claim is assertable again — the typed 77 alive in the still-open row's input. The law never moved; each retarget has followed the flow that carries it. ⚠️ And its repair produced the round's **fifth backtick casualty** — the retarget note, written into the evaluate template with backticks around class names, one hour after the fourth was written up. The sweep, not prose, is the defence. |
 | `finishRound` | 6 red → retargeted → **29/29**, both retargets proved red (a second rim grown in the sheet; the sheet stretched). One rim per journey now — the sheet is one framed object, the slip a different one (`.rrim`). And P2.4 **inverted by design**: the old law pinned the foot to the pane's bottom; Phase 3's height rule has the foot RIDE the content, so the shortest journey must leave desk beneath the sheet — the exact reading the case used to fail on is now what it requires. |
-| `workspaceRound` | in triage at the stop — its Phase 1/2 sections describe the retired 288px record column, "The record" head and bar-bottom-equals-record-bottom, all superseded by the sheet + slip |
-| `journeyRound` | in triage at the stop — timed out at 150s on the new DOM; running under a wider budget to read its true reds |
+| `workspaceRound` | **24 red → repaired.** Seventeen of the reds cascaded from ONE missing step: the file predates the journey round's fork, so every ledger probe ran against a pane still showing it — `rows=0` and everything downstream red. steerRound's `ANSWER_FORK` grafted at all seven entrances took it to 3; those three were each their own story: P3.6 gained the **wrap carve-out** (beside the slip the sheet is ~280px, so a long recorded answer wraps and its head honestly grows). ⚠️ The carve-out's first form claimed a floor it did not have — **proved by its own mutation**: shrinking `min-height: 44px` → `30px` in the served CSS reddened NOTHING, because the case compared every head to `min(heads)` and a UNIFORM regression moves the minimum down with the set. The circular-assertion family again, wearing a relational disguise. The case now pins the base absolutely (`|baseH − 44| ≤ 0.5`, the contract's ledger-row height) alongside the relational half — re-mutated: **1 RED** under 44→30, **0 RED** restored. A tall head with a one-line answer still reds via the relational half; P3.9's chip selector was the count's pre-move home (`.ab.go .n` → `.count`); P5.6 was double-stale — it pinned a landing path that actually asserted the deed's LINK ORDER, against `.msv-wrap--doss`, a class the manuscripts re-cut retired. |
+| `journeyRound` | **2 red → 52/53.** P4.1 inverted with the owner's amendment (the pick IS the answer now; what the old law protected survives in P4.2 and unitNext). **P8.3 stays red, deliberately** — "Undo brings that card back" saw two different cards and two different statuses across two runs on the shared account, and the possibility that a close's undo leaves a derivation flag standing is a REAL candidate find, not a retarget. A red that might be real is not talked green; it is the open item below. |
+
+### Open at the stop
+
+- **`journeyRound` P8.3** — after a close's undo and a reload, the close suggestion did not re-derive
+  for the undone query (two runs, two cards, two statuses on the shared account). Candidate causes:
+  a `taskFlag` the close's commit writes that its undo does not clear, or plain fixture instability
+  under the other stream's seeds. Needs a stable account or a script-owned query fixture to decide.
+  **Left red on purpose.**
+- **`qcPanel`** — red by design until the log-sheet stream names its card class (the failure message
+  carries the instruction).
+- The second-account fixture shapes queued from Phases 1 and 5 (one manuscript; one task).
+
+### ⚠️ And the round's own sweep tool has the bounded-slice fault
+
+The backtick sweep finds a template's end with `index("\u0060)")` — which assumes every template
+closes as backtick-paren. One legitimate template closes backtick-`.replace(...)`, so the sweep
+overshot into the next template and reported a phantom offender. **The instrument that exists to
+catch the round's most repeated fault carries the repo's other most repeated fault.** It flagged a
+correct file; the cost was minutes; the lesson is that a checker's boundaries need the same anchor
+discipline as a lock's.
 
 ---
 

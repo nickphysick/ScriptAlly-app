@@ -449,8 +449,15 @@ test("journey round", async ({ page }) => {
   const unitRowBefore = (beforeUnit?.rows ?? []).find((r: any) => r.id.indexOf("s-unit") >= 0);
   /* ⚠️ THE PRECONDITION FIRST: the row must start UNANSWERED, or the claim is unaskable here. */
   const canAskUnit = !!openedPartial && !!unitRowBefore && !unitRowBefore.done;
-  add("P4.1 · choosing a unit does NOT mark the parcel answered",
-      !canAskUnit || (!!pressedUnit && !!unitRowAfter && !unitRowAfter.done),
+  /* ⚠️ INVERTED BY THE OWNER'S AMENDMENT (drawer round Phase 4, in the brief in as many words:
+     "the question counts as answered from the moment a unit is chosen"). The old law guarded the
+     seed's DIVERGENCE — a local draft could show 7 while the record kept 3, so answered-ness had
+     to wait for a commit. The picker writes through on every keystroke now, so there is no second
+     copy to diverge and the pick IS the answer; what the old law protected survives in P4.2 (the
+     seed focused AND selected, so typing replaces it) and in unitNext.measure.ts (the flow moves
+     only on Enter or Next). Each side of the reversal is the same law following its flow. */
+  add("P4.1 · choosing a unit MARKS the parcel answered — the pick is the answer now",
+      !canAskUnit || (!!pressedUnit && !!unitRowAfter && unitRowAfter.done === true),
       !openedPartial ? "UNMEASURED — no partial send card on this account, so no unit to pick"
         : !canAskUnit ? "UNMEASURED — this card's parcel is a whole manuscript, which has no unit"
         : "pressed=" + !!pressedUnit + " row.done after pressing a unit = " + unitRowAfter?.done);
