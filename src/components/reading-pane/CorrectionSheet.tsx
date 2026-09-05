@@ -97,6 +97,17 @@ export interface CorrectionEditProps {
   removable?: boolean;
   /** The reason removal is unavailable, when it is — never a disabled control with no explanation. */
   removeBlockedReason?: string;
+  /**
+   * ⚠️ THE ONE SANCTIONED ADDITIVE TOUCH (log-sheet run, ruling 2). A render slot between the
+   * note and the actions, for host-owned fields that must SAVE WITH this form — the correction
+   * desk puts a send's materials here. The host owns the fields' state and their write; this form
+   * owes them exactly two things: a place in its body, and a Save that enables when THEY are
+   * dirty too (`extraDirty`), because a materials-only edit changes no date and no note and a
+   * Save that stayed grey would say the form cannot do what it visibly offers. Both default off:
+   * every existing caller is byte-identical.
+   */
+  extraFields?: React.ReactNode;
+  extraDirty?: boolean;
 }
 
 /** ⚠️ TODAY, IN THE INPUT'S OWN FORMAT — the timeline records what happened, so tomorrow is refused. */
@@ -107,6 +118,7 @@ const todayInput = (): string => {
 
 export const CorrectionEdit: React.FC<CorrectionEditProps> = ({
   subject, initial, onSave, onRemove, onCancel, removable = true, removeBlockedReason,
+  extraFields, extraDirty = false,
 }) => {
   const [draft, setDraft] = useState<CorrectionDraft>(initial);
   const firstRef = useRef<HTMLInputElement | null>(null);
@@ -161,6 +173,8 @@ export const CorrectionEdit: React.FC<CorrectionEditProps> = ({
           onChange={(e) => setDraft({ ...draft, note: e.target.value })}
         />
 
+        {extraFields}
+
         <div className="cor-acts">
           {onRemove && removable && (
             <button type="button" className="cor-remove" onClick={onRemove}>Remove this entry…</button>
@@ -170,8 +184,8 @@ export const CorrectionEdit: React.FC<CorrectionEditProps> = ({
           <button type="button" className="cor-cancel-inline" onClick={onCancel}>Cancel</button>
           <button
             type="button"
-            className={`cor-save${dirty && !future ? "" : " cor-save--off"}`}
-            disabled={!dirty || future}
+            className={`cor-save${(dirty || extraDirty) && !future ? "" : " cor-save--off"}`}
+            disabled={(!dirty && !extraDirty) || future}
             onClick={() => onSave(draft)}
           >Save</button>
         </div>

@@ -14,6 +14,8 @@
  */
 import { SubmissionMethod, type Agent, type QueryMaterial } from "../types";
 import {
+  MATERIAL_ROW_NAMES,
+  classifyQueryMaterial,
   materialRowsFromAgent,
   parseAmount,
   snapToUnit,
@@ -269,4 +271,36 @@ export function draftToPayload(d: QueryDraft, agent: Agent | null | undefined) {
     dateSent: new Date(d.dateSent).toISOString(),
     ...(reminder ? { nudgeDate: new Date(reminder).toISOString() } : {}),
   };
+}
+
+/**
+ * A query's stored `materialsWanted` → editor rows — the INVERSE of `draftMaterialsToQuery`,
+ * added for the correction desk's materials fields (rulings commit, log-sheet run) and shared
+ * with the log sheet's step 3. One model both directions, so the desk's fields and the sheet's
+ * rows cannot mean different things by the same names.
+ *
+ * ⚠️ CLASSIFIED BY THE ONE CLASSIFIER (`classifyQueryMaterial`), never by string equality — the
+ * stored list mixes bare strings and structured QueryMaterials, and a whole-string match is the
+ * known limit this repo already documents on the agent-side parser.
+ */
+export function queryMaterialsToRows(stored: readonly (string | QueryMaterial)[] | undefined): MaterialRow[] {
+  const items = stored ?? [];
+  const kinds = items.map((it) => classifyQueryMaterial(it));
+  const sampleAt = kinds.indexOf("sample");
+  const sample = sampleAt >= 0 ? items[sampleAt] : null;
+  const sampleUnit: SampleUnit =
+    sample && typeof sample !== "string" && sample.type === "chapters" ? "Chapters"
+      : sample && typeof sample !== "string" && sample.type === "words" ? "Words" : "Pages";
+  const sampleAmt = sample && typeof sample !== "string" && sample.quantity != null ? String(sample.quantity) : "";
+  const otherAt = kinds.indexOf("other");
+  const other = otherAt >= 0 ? items[otherAt] : null;
+  const otherText = other == null ? "" : typeof other === "string" ? "" : String(other.quantity ?? "");
+  return [
+    { key: "queryLetter", kind: "binary", name: MATERIAL_ROW_NAMES.queryLetter, on: kinds.includes("queryLetter") },
+    { key: "synopsis", kind: "binary", name: MATERIAL_ROW_NAMES.synopsis, on: kinds.includes("synopsis"), pages: "" },
+    { key: "sample", kind: "qty", name: MATERIAL_ROW_NAMES.sample, on: sampleAt >= 0, unit: sampleUnit, amount: sampleAmt },
+    /* a legacy bare "Other" string reads back ON with empty text — reading it as off would
+       silently drop a recorded material on the next unrelated save */
+    { key: "other", kind: "text", name: MATERIAL_ROW_NAMES.other, on: otherAt >= 0, text: otherText },
+  ];
 }

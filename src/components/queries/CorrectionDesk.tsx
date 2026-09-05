@@ -101,3 +101,64 @@ export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ stage, anchor, r
     </div>
   );
 };
+
+/* ── the send rung's materials, as fields on the edit form (ruling 2) ─────────────────────────
+   Host-owned: rendered into CorrectionEdit's sanctioned `extraFields` slot. The rows are the
+   draft model's own `MaterialRow` (queryMaterialsToRows ⇄ draftMaterialsToQuery), so the desk's
+   fields and the log sheet's step 3 cannot mean different things by the same names. */
+import { CREATE_QTY, formatQty, parseQty, stepLabel, stepQty } from "../../lib/createQty";
+import { snapToUnit, SAMPLE_UNITS, type MaterialRow, type SampleUnit } from "../../lib/agentMaterials";
+
+export const MaterialsFields: React.FC<{
+  rows: MaterialRow[];
+  onChange: (rows: MaterialRow[]) => void;
+}> = ({ rows, onChange }) => {
+  const set = (key: MaterialRow["key"], patch: Partial<MaterialRow>) =>
+    onChange(rows.map((r) => (r.key === key ? ({ ...r, ...patch } as MaterialRow) : r)));
+  const sample = rows.find((r) => r.key === "sample");
+  const other = rows.find((r) => r.key === "other");
+  return (
+    <div className="qcd-mats">
+      <div className="qcd-matl">What went with it</div>
+      {rows.map((r) => (
+        <div key={r.key} className={`qcd-doc${r.on ? "" : " qcd-doc--off"}`}>
+          <button
+            type="button"
+            className="qcd-cb"
+            role="checkbox"
+            aria-checked={r.on}
+            aria-label={r.name}
+            onClick={() => set(r.key, { on: !r.on, ...(r.key === "sample" && !r.on && !(r as { amount?: string }).amount ? { amount: snapToUnit((r as { unit: SampleUnit }).unit) } : {}) })}
+          >
+            {r.on && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fdfaf5" strokeWidth="3.4" aria-hidden="true"><path d="M4 12l5 5L20 7" /></svg>}
+          </button>
+          <span className="qcd-docnm">{r.name}</span>
+          {r.key === "sample" && r.on && sample && "unit" in sample && (
+            <span className="qcd-qty">
+              <button type="button" aria-label="Less" onClick={() => set("sample", { amount: String(stepQty(sample.amount, sample.unit, -1)) })}>−</button>
+              <input
+                value={formatQty(sample.amount)}
+                inputMode="numeric"
+                aria-label={`Amount in ${sample.unit.toLowerCase()}`}
+                onChange={(e) => set("sample", { amount: String(parseQty(e.target.value)) })}
+              />
+              <button type="button" aria-label="More" onClick={() => set("sample", { amount: String(stepQty(sample.amount, sample.unit, 1)) })}>+</button>
+              <span className="qcd-pm">{stepLabel(sample.unit)}</span>
+              <span className="qcd-useg">
+                {SAMPLE_UNITS.map((u) => (
+                  <button key={u} type="button" className={sample.unit === u ? "on" : undefined}
+                    onClick={() => set("sample", { unit: u, amount: snapToUnit(u) })}>{u}</button>
+                ))}
+              </span>
+            </span>
+          )}
+          {r.key === "other" && r.on && other && "text" in other && (
+            <input className="qcd-free" placeholder="e.g. author bio, portal upload" value={other.text}
+              onChange={(e) => set("other", { text: e.target.value })} aria-label="Other material" />
+          )}
+          {!r.on && <span className="qcd-notsent">NOT SENT</span>}
+        </div>
+      ))}
+    </div>
+  );
+};

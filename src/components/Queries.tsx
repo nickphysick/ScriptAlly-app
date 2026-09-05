@@ -67,13 +67,14 @@ import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteH
 import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
 import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
-import { CorrectionDesk } from "./queries/CorrectionDesk";
+import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
 import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
 import { queriesForAgent } from "../lib/agentList";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { rungFacts } from "../lib/queryPanelRungs";
+import { queryMaterialsToRows, draftMaterialsToQuery } from "../lib/queryDraft";
 import { cardFacts, cardMaterials, turnFor, MATERIAL_SLOTS, type Turn } from "../lib/queryCardFacts";
-import { MATERIAL_ROW_NAMES } from "../lib/agentMaterials";
+import { MATERIAL_ROW_NAMES, type MaterialRow } from "../lib/agentMaterials";
 import {
   QUICK_FILTERS, quickCounts, GRID_GROUPS, GRID_SORTS,
   emptyGridFilters, gridFiltersAreEmpty, gridFilterCount, matchesGridFilters, type GridFilters,
@@ -1137,6 +1138,18 @@ export const Queries: React.FC<{
   /* §3 — the ⋯ (or dotted field) that opened the desk: the notch's anchor and the focus home.
      A ref, not state — it must survive every step transition without re-rendering anything. */
   const correctingTriggerRef = useRef<HTMLElement | null>(null);
+  /* ruling 2 — the send rung's materials, editing INSIDE the fork's mistake branch. Seeded from
+     the query when the edit step opens on the send entry; null everywhere else. */
+  const [deskMats, setDeskMats] = useState<MaterialRow[] | null>(null);
+  const sentActivityId = trackingEvents.find((e: any) => (e.type as QueryStatus) === QueryStatus.QUERIED)?.id ?? null;
+  const editingSend = correcting?.step === "edit" && !!sentActivityId && correcting.entry.activityId === sentActivityId;
+  useEffect(() => {
+    if (editingSend && activeQuery) setDeskMats(queryMaterialsToRows(activeQuery.materialsWanted as never));
+    else setDeskMats(null);
+    /* seeded on ENTERING the step — activeQuery in deps would reseed under the writer's hands
+       when the listener echoes the very write they are making */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingSend]);
 
   /** The log as raw docs, the shape the engine reads. */
   const asRawDocs = (evts: any[]) => evts.map((e) => ({ id: e.id, data: e as Record<string, unknown> }));
@@ -4842,11 +4855,20 @@ export const Queries: React.FC<{
                   /* ⚠️ BRANCH TWO ROUTES — the record is true, so the answer is to append, and the
                      flow that appends already exists. No third way to record a response. */
                   onAppend={() => { setCorrecting(null); setIsRecordResponseFocusFormOpen(true); }}
-                  /* ⚠️ TWO BRANCHES, VERBATIM (decision 5). Move is BUILT — MovePicker, MoveSheet
-                     and correctionMove all stand, tested — and the desk deliberately does not
-                     offer it: no onMove means the fork renders correct/append only. Reinstating it
-                     is one prop; an open question in the run report records that this run made a
-                     live flow unreachable by instruction. */
+                  /* ⚠️ MOVE IS RESTORED (log-sheet run, ruling 1 — reversing decision 5). It sits
+                     ON the correction branch, as before: filing an event under the wrong agent IS
+                     the record being wrong. The pick and move steps already rendered inside the
+                     desk; this prop is what makes them reachable again. */
+                  onMove={moveTargetsFor().length ? () => {
+                    const evts = guardEvents();
+                    const me = evts.find((e) => e.activityId === correcting.entry.activityId);
+                    const guard = me ? moveGuard(me, evts) : { kind: "allow" as const };
+                    if (guard.kind === "route") {
+                      showConfirm({ title: "This entry cannot move", body: <p style={{ margin: 0 }}>{guard.message}</p>, confirmLabel: "Close", onConfirm: async () => {} });
+                      return;
+                    }
+                    setCorrecting({ step: "pick", entry: correcting.entry });
+                  } : undefined}
                   onCancel={() => setCorrecting(null)}
                 />
               )}
@@ -4871,6 +4893,14 @@ export const Queries: React.FC<{
                     removeBlockedReason={root.kind === "route" ? root.message : undefined}
                     onRemove={() => onDeleteEntry(correcting.entry)}
                     onCancel={() => setCorrecting(null)}
+                    /* ruling 2 — the send's materials as fields ON this form, through the
+                       sanctioned slot. Host-owned state; Save carries them with the same
+                       previewed commit, and the undo restores both halves together. */
+                    extraFields={editingSend && deskMats ? (
+                      <MaterialsFields rows={deskMats} onChange={setDeskMats} />
+                    ) : undefined}
+                    extraDirty={!!(editingSend && deskMats && activeQuery
+                      && JSON.stringify(draftMaterialsToQuery(deskMats)) !== JSON.stringify((activeQuery.materialsWanted ?? [])))}
                     /**
                      * ⚠️ THE PREVIEW IS COMPUTED ON SAVE, NOT ON KEYSTROKE — a date mid-typing reads
                      * "2" of "22 August", and a sheet recomputing under the writer's hands would show
@@ -4898,14 +4928,29 @@ export const Queries: React.FC<{
                          than an `undo:` key. */
                       const wasDate = new Date(`${correcting.entry.dateISO}T12:00:00`).toISOString();
                       const wasNote = correcting.entry.note;
+                      /* ruling 2 — the materials half. Captured HERE, before any write; travels
+                         inside the same previewed commit; the one undo restores both stores. The
+                         model keeps materials on the QUERY, so this half writes updateQuery — the
+                         funnel (preview first, one commit, one undo) is what the ruling's
+                         "through editActivity" is actually asking for, and the date/note half
+                         still goes through editActivity itself. */
+                      const nextMats = editingSend && deskMats ? draftMaterialsToQuery(deskMats) : null;
+                      const wasMats = (activeQuery.materialsWanted ?? []) as (string | QueryMaterial)[];
+                      const matsChanged = nextMats != null && JSON.stringify(nextMats) !== JSON.stringify(wasMats);
                       const commit = async () => {
                         await editActivity(activeQuery.id, correcting.entry.activityId, {
                           ...(dateChanged ? { date: nextIso } : {}),
                           details: d.note,
                         });
+                        if (matsChanged) await updateQuery(activeQuery.id, { materialsWanted: nextMats } as never);
                         await finishCorrection(
                           `${correcting.entry.label} corrected`,
-                          async () => { await editActivity(activeQuery.id, correcting.entry.activityId, { ...(dateChanged ? { date: wasDate } : {}), details: wasNote }); },
+                          async () => {
+                            await editActivity(activeQuery.id, correcting.entry.activityId, { ...(dateChanged ? { date: wasDate } : {}), details: wasNote });
+                            /* both halves travel together — a one-sided undo would leave the
+                               record and the strip disagreeing about one send */
+                            if (matsChanged) await updateQuery(activeQuery.id, { materialsWanted: wasMats } as never);
+                          },
                           activeQuery.id,
                         );
                       };

@@ -36,9 +36,34 @@ describe("§3 · the desk hosts the existing components", () => {
     expect(page, "cor-scrim survives — two hosts for one flow").not.toContain("cor-scrim");
   });
 
-  it("the fork offers two branches — no onMove reaches it (decision 5)", () => {
+  it("Move mounts from the desk (ruling 1 — reversing decision 5)", () => {
     const fork = host.slice(host.indexOf("<CorrectionFork"), host.indexOf("/>", host.indexOf("<CorrectionFork")));
-    expect(fork, "onMove is wired — the fork has grown a third branch").not.toContain("onMove");
+    expect(fork, "onMove is unwired — Move unreachable again").toContain("onMove={moveTargetsFor().length");
+    /* and its two steps render INSIDE the desk, not in some second host */
+    expect(host).toContain("<MovePicker");
+    expect(host).toContain("<MoveSheet");
+  });
+
+  it("ruling 2 — the send's materials save through the previewed commit, never directly", () => {
+    /* the slot is passed only on the send entry, and the fields component is PURE — it owns no
+       write: a live write from a field would be the withdrawn direct-edit shortcut back under the
+       desk's roof. */
+    expect(host).toContain("extraFields={editingSend && deskMats");
+    const fields = read("src/components/queries/CorrectionDesk.tsx");
+    const mf = fields.slice(fields.indexOf("export const MaterialsFields"));
+    for (const w of ["updateQuery", "editActivity", "addDoc", "setDoc"]) {
+      expect(mf, `MaterialsFields performs its own write (${w})`).not.toContain(w);
+    }
+    /* the write sits inside `commit` — the closure the preview sanctions — and the undo restores
+       BOTH halves. ⚠️ SLICED PER CLOSURE, because a lazy [\s\S]*? from `commit` ran straight into
+       the UNDO's own restore line and matched there — a mutation that moved the write OUT of the
+       commit (a live write at Save-press) passed green. Proved, then bounded. */
+    const before = host.slice(host.indexOf("const nextMats"), host.indexOf("const commit = async"));
+    expect(before, "a materials write escapes the previewed commit — live at Save-press").not.toContain("updateQuery(");
+    const commitBody = host.slice(host.indexOf("const commit = async"), host.indexOf("await finishCorrection("));
+    expect(commitBody, "the commit closure does not carry the materials half").toContain("if (matsChanged) await updateQuery");
+    const undoBody = host.slice(host.indexOf("await finishCorrection("), host.indexOf("if (diff.empty)"));
+    expect(undoBody, "the undo does not restore the materials half").toContain("materialsWanted: wasMats");
   });
 
   it("the collapsed fork sits above the edit form, and 'change' reopens the fork", () => {
