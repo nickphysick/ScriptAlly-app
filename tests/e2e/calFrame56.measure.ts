@@ -45,7 +45,7 @@ test("⚠️ nothing between the panel and the rows draws a box", async ({ page 
     const panel = document.querySelector(".ws-window");
     if (!row || !panel) return null;
     const chain = []; let n = row.parentElement;
-    while (n && n !== panel && chain.length < 14) {
+    while (n && n !== panel && chain.length < 20) {
       const cs = getComputedStyle(n);
       chain.push({
         cls: String(n.className).slice(0, 34),
@@ -68,8 +68,13 @@ test("⚠️ nothing between the panel and the rows draws a box", async ({ page 
   console.log(`between the row and the panel: ${r.chain.length} elements`);
   for (const c of r.chain) console.log(`  ${c.cls.padEnd(34)} bd ${c.bw} ${c.bs} · radius ${c.r} · ${c.sh}`);
   console.log(`row x${r.row.x} w${r.row.w} · panel x${r.panel.x} w${r.panel.w}`);
+  /* ⚠️ RETARGETED BY v64 §A: the BOARDPANE is a box BY DESIGN — the page's one rounded card —
+     so "nothing draws a box" became "exactly ONE thing does, and it is the boardpane". A second
+     box in the chain is still the fault this case has always guarded. */
   const boxes = r.chain.filter((c: any) =>
     (c.bw !== "0px" && c.bs !== "none") || (c.r !== "0px" && c.r !== ""));
-  expect(boxes.map((c: any) => `${c.cls} [bd ${c.bw} ${c.bs}, radius ${c.r}]`),
-    "an element between the panel and the rows draws a border or a radius").toEqual([]);
+  expect(boxes.map((c: any) => String(c.cls)),
+    "the chain's one box is the boardpane, and nothing else draws one")
+    .toEqual(boxes.length ? ["tl-boardpane"] : []);
+  expect(boxes.length, "the boardpane lost its own frame").toBe(1);
 });

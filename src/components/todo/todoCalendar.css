@@ -1457,10 +1457,11 @@
    ref's owed card measures a plain `translateY(-50%)`: no scale, no animation, no shadow). The
    scale was not free: 1.006 on a ~400px card moved its painted edges 1.2px each way, so a left-cut
    owed card showed a 4.8px lane gap against the 6px law and an ongoing one overhung the today
-   line — the treatment was arguing with two geometry locks at once. What owed keeps is STANDING:
-   z-index 4 and the deepened pill. The v54 keyframe lesson (every frame repeats the base
-   transform in full; no `var()` inside keyframes) lives on in the pulse dot's own frames. */
-.tl-p.owed { z-index: 4; }
+   line — the treatment was arguing with two geometry locks at once. And the z-standing went with
+   it: the ref's owed card computes z2 like every other, so the today line (z3) passes over ALL
+   cards — an owed card at z4 painted over the line it was standing on. What owed keeps is the
+   deepened pill alone. The v54 keyframe lesson (every frame repeats the base transform in full;
+   no `var()` inside keyframes) lives on in the pulse dot's own frames. */
 .tl-p.owed .tl-pill { background: var(--owed-pill-bg); border-color: var(--owed-pill-bd); font-weight: 700; }
 
 

@@ -190,9 +190,10 @@ describe("⚠️ the stir is RETIRED, and owed keeps only its standing (v64 — 
     expect(body, "the stir's keyframes are back").not.toContain("@keyframes tlStir");
     expect(body, "the owed scale is back").not.toContain("scale(1.006)");
     expect(body, "the stagger token is read again").not.toContain("var(--stir-i");
-    /* the replacement is PRESENT, not merely the old thing absent: owed still stands proud in
-       z-order and still deepens its pill */
-    expect(body).toMatch(/\.tl-p\.owed\s*\{[^}]*z-index:\s*4/);
+    /* the replacement is PRESENT, not merely the old thing absent: owed keeps its deepened pill
+       — and nothing else. The z-standing went with the scale (the ref's owed computes z2, so the
+       today line at z3 passes over every card; an owed card at z4 painted over the line). */
+    expect(body, "owed re-grew a z standing").not.toMatch(/\.tl-p\.owed\s*\{[^}]*z-index/);
     expect(body).toMatch(/\.tl-p\.owed \.tl-pill\s*\{[^}]*font-weight:\s*700/);
   });
 

@@ -103,62 +103,58 @@ const read = (page: import("@playwright/test").Page) => page.evaluate(() => {
  * being zero, which is the stronger statement: in v55 a mark is a LEAD-IN and never touches a
  * card, so content cannot be painted over one.
  */
-test("the wait, the lead-in and the text — every width, every range", async ({ page }) => {
-  const seen = new Set<string>();
-  const rows: string[] = [];
-  const allInsets = new Set<string>();
-  let totalCards = 0, totalMarks = 0, totalTinted = 0, totalTight = 0;
+test("the acceptance sweep — one card per relationship, nothing outside its card, at every width", async ({ page }) => {
+  /* ⚠️ RETARGETED WHOLESALE BY v64. The v55 anatomy this swept — pills, insets, the overdue tint,
+     the dissolve's fade classes — is owned by its successors now (calBar63 d9/d11/d13, calFid63
+     (4), calDens64). What this file KEEPS is what nothing else sweeps at every width together:
+     ONE CARD PER RELATIONSHIP, no content outside its card, today at the lane's centre, no
+     sideways scroll, and a console with no errors. */
   const errors: string[] = [];
   page.on("console", (m) => { if (m.type() === "error") errors.push(m.text().slice(0, 120)); });
-
+  const rows: string[] = [];
   for (const w of WIDTHS) {
     await openRoute(page, "/todo/calendar", { width: w, height: 900 });
     await page.waitForTimeout(700);
-    for (let i = 0; i < RANGE_LABELS.length; i++) {
-      await setRangeTo(page, i);
-      const m = await read(page);
-      seen.add(`${w}:${i}`);
-      totalCards += m.cards; totalMarks += m.marks; totalTinted += m.tinted; totalTight += m.tight;
-      for (const k of m.insets) allInsets.add(k);
-      rows.push(`${String(w).padEnd(5)} ${RANGE_LABELS[i].padEnd(9)}`
-        + ` cards ${String(m.cards).padStart(2)} rels ${String(m.rels).padStart(2)} worst ${m.worst}`
-        + ` · marks ${String(m.marks).padStart(2)} on-card ${m.onCard}`
-        + ` · text outside ${m.outside} masked ${m.maskedText}`
-        + ` · tinted ${m.tinted} tight ${m.tight} fadeBad ${m.fadeWrong.length} insetBad ${m.insetSplit.length}`
-        + ` · today off ${m.todayOff?.toFixed(2)} z${m.lineZ} · page overflow ${m.overflowX}`);
-
-      const at = `[${w}/${RANGE_LABELS[i]}]`;
-      expect(m.rels, `${at} no relationships drawn`).toBeGreaterThan(5);
-      /* the sentence */
-      expect(m.worst, `${at} a relationship drawn as more than one card`).toBe(1);
-      expect(m.onCard, `${at} a mark sits on a card`).toBe(0);
-      expect(m.outside, `${at} content drawn outside its card`).toBe(0);
-      expect(m.maskedText, `${at} a mask reaches the words`).toBe(0);
-      /* the ground */
-      expect(m.todayOff!, `${at} today is not the lane's centre`).toBeLessThan(1.1);
-      /* ⚠️ v55: no card whose named end lies inside the window may fade at its right edge, and
-         the pill and headline share one inset on every card. Both are checked in their own files;
-         they are here too because the acceptance sweep is the one place they are asserted at every
-         width AND every range together. */
-      expect(m.fadeWrong, `${at} a card's fades do not follow its dates`).toEqual([]);
-      expect(m.insetSplit, `${at} a card's pill and headline start at different x`).toEqual([]);
-      expect(m.lineZ!, `${at} the today line does not clear every card`).toBeGreaterThanOrEqual(60);
-      expect(m.overflowX, `${at} the page scrolls sideways`).toBeLessThan(2);
-    }
+    const m = await page.evaluate(() => {
+      const g = [...document.querySelectorAll<HTMLElement>(".tl-cal")].find((e) => e.getBoundingClientRect().height > 0)!;
+      const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().height > 1;
+      const byRel = new Map<string, number>();
+      let outside = 0;
+      for (const c of [...g.querySelectorAll<HTMLElement>(".tl-p")].filter(vis)) {
+        const rel = (c as HTMLElement).dataset.rel || "";
+        /* pieces of one run share a rel; a RELATIONSHIP is one card per its live run */
+        if (rel) byRel.set(rel, (byRel.get(rel) ?? 0) + 1);
+        const cb = c.getBoundingClientRect();
+        for (const e of [...c.querySelectorAll<HTMLElement>(".tl-cardbody, .tl-sband")]) {
+          const b = e.getBoundingClientRect();
+          if (b.height < 1) continue;
+          if (b.left < cb.left - 1 || b.right > cb.right + 1) outside += 1;
+        }
+      }
+      const lane = [...g.querySelectorAll<HTMLElement>(".tl-c-tl")].find(vis)!;
+      const line = g.querySelector<HTMLElement>(".tl-todayline");
+      const lb = lane.getBoundingClientRect();
+      const tb = line?.getBoundingClientRect() ?? null;
+      return {
+        rels: byRel.size,
+        worst: Math.max(0, ...byRel.values()),
+        outside,
+        laneW: lb.width,
+        todayOff: tb ? Math.abs((tb.left + tb.width / 2) - (lb.left + lb.width / 2)) : null,
+        overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    rows.push(`${String(w).padEnd(5)} rels ${m.rels} worst ${m.worst} outside ${m.outside}`
+      + ` todayOff ${m.todayOff?.toFixed(1)} overflowX ${m.overflowX}`);
+    expect(m.rels, `[${w}] no relationships drawn`).toBeGreaterThan(5);
+    expect(m.worst, `[${w}] a relationship drawn as more than one card`).toBe(1);
+    expect(m.outside, `[${w}] content drawn outside its card`).toBe(0);
+    /* the half-day the day convention costs, plus the line's own -1px stroke-centring shift —
+       both terms named (see calCentre) */
+    expect(m.todayOff!, `[${w}] today is ${m.todayOff?.toFixed(1)}px off the lane's centre`)
+      .toBeLessThanOrEqual(m.laneW / 90 / 2 + 1);
+    expect(m.overflowX, `[${w}] the page scrolls sideways`).toBeLessThan(2);
   }
   for (const r of rows) console.log(r);
-  console.log(`insets across the whole sweep: ${[...allInsets].sort().join(" · ")}`);
-  console.log(`totals — cards ${totalCards} · lead-in marks ${totalMarks} · tinted ${totalTinted} · tight ${totalTight}`);
-  console.log(`console errors: ${errors.length}${errors.length ? " → " + errors.slice(0, 3).join(" | ") : ""}`);
-
-  expect(seen.size, "width × range combinations visited").toBe(WIDTHS.length * RANGE_LABELS.length);
-  /* ⚠️ ONE ASSERTION OVER THE WHOLE SWEEP: the board draws its text at the two pinned insets and
-     nowhere else. Before v54 it drew at twelve. */
-  expect([...allInsets].sort(), "the board draws text at other than the two pinned insets")
-    .toEqual(["fadeL:42", "flat:13"]);
-  /* populations, so no claim above passed over an empty set */
-  expect(totalMarks, "no lead-in mark anywhere in the sweep").toBeGreaterThan(10);
-  expect(totalTinted, "no overdue tint anywhere in the sweep").toBeGreaterThan(5);
-  expect(totalTight, "no clipped card anywhere in the sweep").toBeGreaterThan(5);
   expect(errors, "the console reported errors").toEqual([]);
 });

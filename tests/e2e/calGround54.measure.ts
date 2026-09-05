@@ -122,14 +122,19 @@ test("today's line is where today is, and in front of every card", async ({ page
   console.log(`today line: ${g.ink.w} ${g.ink.colour} z${g.ink.z} · cards ${g.cards} · crossing today ${g.crossing}`);
   console.log(`  viewport h ${g.vh} · line x ${g.lineX.toFixed(0)} · crossing card mid-ys ${g.ys.join(",")}`);
   console.log(`  stacked: ${g.beaten.filter((b) => b.onScreen).map((b) => `${b.rel}=${b.top}`).join(" · ")}`);
-  expect(g.ink.colour, "the today line is not the pinned tone").toBe("rgb(230, 195, 180)");
+  /* ⚠️ RETARGETED BY v64 §C: the line is a 1.5px DASHED INK rule in the rows (the ref's
+     `data-tl="dash"`); the rose solid was v54's. calendarTokens pins the declaration; this
+     asserts the paint. */
+  expect(g.ink.colour, "the today line is not the ink").toBe("rgb(28, 19, 15)");
   /* ⚠️ THE WIDTH IS NOT ASSERTED HERE, AND THAT IS THE DOCUMENTED LIMIT OF THE INSTRUMENT. A
      sub-pixel border's USED value rounds at DPR 1: declared 1.5px, Chromium reports 1px. What a
      rendered page can say is that the line is PAINTED and painted in the pinned tone; the 1.5px
      is a fact about the stylesheet and is locked in `calendarTokens.test.ts`, where it can be
      read as written. Asserting it here would fail on a correct board forever. */
   expect(parseFloat(g.ink.w), "the today line paints no border at all").toBeGreaterThan(0.5);
-  expect(Number(g.ink.z), "the line does not clear a hovered card's z").toBeGreaterThanOrEqual(60);
+  /* v64: the line is z3 over cards at z2 — owed included, whose z4 standing retired with the
+     scale. The elementsFromPoint sweep above is the paint-order proof; this pins the margin. */
+  expect(Number(g.ink.z), "the line does not clear the cards' z").toBeGreaterThanOrEqual(3);
 
   /* ⚠️ POPULATION FIRST — "no card beats the line" is satisfied by a board where none crosses it. */
   const tested = g.beaten.filter((b) => b.onScreen);
@@ -167,6 +172,8 @@ test("nothing tints the past, and no row reaches into the rail", async ({ page }
            task mark arrived in Phase 7 and was reported as one. The exclusion is by what an
            element IS, not by a width threshold, so a wider mark later cannot slip through. */
         if (painted && !el.closest(".tl-p") && !el.closest(".tl-tchip")
+            /* a ghost stage is a card-family OBJECT, not a wash — same exclusion as `.tl-p` */
+            && !el.closest(".tl-jc") && !el.closest(".tl-evn")
             && !el.classList.contains("tl-mk2") && !el.classList.contains("tl-ghost")) {
           washes.push(`${el.className || el.tagName} ${cs.backgroundColor} / ${cs.backgroundImage.slice(0, 30)}`);
         }

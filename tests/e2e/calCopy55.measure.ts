@@ -25,11 +25,14 @@ test("no rendered row phrases a passed date as future", async ({ page }) => {
     await setRangeTo(page, i);
     const rows = await page.evaluate(() => {
       const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().width > 0;
+      /* ⚠️ v63 §D's grammar: the FACT names the date, the TAIL measures it. The offence this
+         case exists for is a PASSED date beside a tail still claiming "left". */
       return ([...document.querySelectorAll(".tl-p")] as HTMLElement[]).filter(vis).map((c) => {
-        const row = c.closest(".tl-rrow") as HTMLElement | null;
-        return { name: (row?.querySelector(".tl-nm2")?.textContent || "").trim().slice(0, 18),
-          text: (c.querySelector(".tl-content")?.textContent || "").trim(),
-          owed: c.classList.contains("owed") || c.classList.contains("req") || c.classList.contains("decide") };
+        const feb = (c.querySelector(".tl-feb")?.textContent || "").trim();
+        const full = (c.querySelector(".tl-ffx")?.textContent || "").trim();
+        return { name: (c.querySelector(".tl-fnm")?.textContent || "").trim().slice(0, 18),
+          fact: full.replace(feb, "").trim(), tail: feb,
+          owed: c.classList.contains("owed") };
       });
     });
     for (const r of rows) {
@@ -48,19 +51,25 @@ test("no rendered row phrases a passed date as future", async ({ page }) => {
        * and "answer", so `\b(answer by)` matched nothing — the sweep reported zero phrases and
        * went green over the exact string it exists to forbid.
        */
-      for (const m of r.text.matchAll(/(answer by|send by)\s+(\d{1,2})\s+([A-Z][a-z]{2,4})\b/gi)) {
-        futurePhrases += 1;
+      const claimsFuture = /\b(day|week|month)s?\s+left$/i.test(r.tail);
+      const m = /(Due|Reply expected|Expected|Answer by)\s+(\d{1,2})\s+([A-Z][a-z]{2,8})/i.exec(r.fact);
+      if (claimsFuture) futurePhrases += 1;
+      if (claimsFuture && m) {
         const day = Number(m[2]);
-        const mon = MONTHS.findIndex((x) => x.toLowerCase() === m[3].toLowerCase());
-        if (mon < 0) continue;
-        const now = new Date();
-        /* the nearest reading of that day/month — the board never states a year */
-        let d = new Date(now.getFullYear(), mon, day);
-        if (d.getTime() - now.getTime() > 200 * 864e5) d = new Date(now.getFullYear() - 1, mon, day);
-        if (now.getTime() - d.getTime() > 200 * 864e5) d = new Date(now.getFullYear() + 1, mon, day);
-        const daysAgo = Math.round((now.getTime() - d.getTime()) / 864e5);
-        if (daysAgo > 1) {
-          offences.push(`${RANGE_LABELS[i]} ${r.name}: "${m[0]}" — ${daysAgo} days ago | ${r.text.slice(0, 60)}`);
+        const mon = MONTHS.findIndex((x) => m[3].toLowerCase().startsWith(x.toLowerCase().slice(0, 3)));
+        if (mon >= 0) {
+          const now = new Date();
+          /* the nearest reading of that day/month — a fact may carry a year, in which case use it */
+          const yr = /\b(20\d\d)\b/.exec(r.fact);
+          let d = yr ? new Date(Number(yr[1]), mon, day) : new Date(now.getFullYear(), mon, day);
+          if (!yr) {
+            if (d.getTime() - now.getTime() > 200 * 864e5) d = new Date(now.getFullYear() - 1, mon, day);
+            if (now.getTime() - d.getTime() > 200 * 864e5) d = new Date(now.getFullYear() + 1, mon, day);
+          }
+          const daysAgo = Math.round((now.getTime() - d.getTime()) / 864e5);
+          if (daysAgo > 1) {
+            offences.push(`${RANGE_LABELS[i]} ${r.name}: "${r.fact}" + "${r.tail}" — ${daysAgo} days ago`);
+          }
         }
       }
     }
@@ -85,15 +94,17 @@ test("⚠️ AND THE OFFER'S OWN DATE TAKES THE OVERDUE FORM — the path that m
   await page.waitForTimeout(900);
   const offers = await page.evaluate(() => {
     const vis = (e: Element) => (e as HTMLElement).getBoundingClientRect().width > 0;
+    /* an offer is named by its own band now */
     return ([...document.querySelectorAll(".tl-p")] as HTMLElement[]).filter(vis)
-      .filter((c) => /offer/i.test(c.querySelector(".tl-content")?.textContent || ""))
+      .filter((c) => /^offer$/i.test((c.querySelector(".tl-sw")?.textContent || "").trim())
+        || /^offer$/i.test((c.querySelector(".tl-sh")?.textContent || "").trim()))
       .map((c) => ({ state: c.dataset.state || "",
-        text: (c.querySelector(".tl-content")?.textContent || "").trim() }));
+        text: (c.querySelector(".tl-cardbody")?.textContent || "").trim() }));
   });
   console.log(`offer cards: ${offers.length}`);
   for (const o of offers) console.log(`  [${o.state}] "${o.text}"`);
   expect(offers.length, "no offer on the board, so the branch is untested").toBeGreaterThan(0);
   /* an offer whose answer-by date has gone says so; one still ahead keeps the future phrasing */
-  expect(offers.filter((o) => /answer by/i.test(o.text) && /overdue/i.test(o.text)),
+  expect(offers.filter((o) => /left\b/i.test(o.text) && /overdue/i.test(o.text)),
     "an offer states both a future phrasing and an overdue one").toEqual([]);
 });

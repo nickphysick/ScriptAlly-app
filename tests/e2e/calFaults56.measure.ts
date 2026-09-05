@@ -68,14 +68,15 @@ test("⚠️ the overdue span is today minus the due date", async ({ page }) => 
       return [...document.querySelectorAll(".tl-p")].filter(vis).map((c) => ({
         rel: c.dataset.rel || "", due: c.dataset.dueat || "",
         days: c.dataset.days || "", from: c.dataset.from || "",
-        /* v58: the card's words are the identity's fact line */
-        words: ((c.querySelector(".tl-ffx") || {}).textContent || "").trim(),
+        /* v63 §D: the fact and its measuring tail are TWO spans — read the tail alone, or the
+           date's own digits concatenate into the span ("…Apr 2024" + "29 months" = "202429") */
+        words: ((c.querySelector(".tl-feb") || {}).textContent || "").trim(),
       }));
     })()`) as unknown as { rel: string; due: string; days: string; words: string }[];
     for (const r of rows) {
       /* the sentence carries the date and the span; `dueAt` is the unclamped day the tint uses.
          Today sits at the window's own centre, so the span in days is `todayAt - dueAt`. */
-      const m = /overdue since [^·]+·\s*([0-9]+)\s*(day|days|week|weeks|month|months)/i.exec(r.words);
+      const m = /^(\d+)\s*(day|days|week|weeks|month|months)\s+overdue$/i.exec(r.words);
       if (!m || !r.due || !r.days) continue;
       const todayAt = Number(r.days) / 2;
       const late = todayAt - Number(r.due);
@@ -107,7 +108,9 @@ test("⚠️ a card with no future named end terminates at today", async ({ page
       const vis = (e) => e.getBoundingClientRect().width > 0;
       const lane = [...document.querySelectorAll(".tl-c-tl")].filter(vis)[0];
       const lb = lane.getBoundingClientRect();
-      const out = { noEnd: [], withEnd: 0, laneW: Math.round(lb.width), laneX: Math.round(lb.left) };
+      const lineEl = document.querySelector(".tl-todayline");
+      const out = { noEnd: [], withEnd: 0, laneW: Math.round(lb.width), laneX: Math.round(lb.left),
+        todayX: lineEl ? Math.round(lineEl.getBoundingClientRect().left - lb.left) : null };
       for (const c of [...document.querySelectorAll(".tl-p")].filter(vis)) {
         const ne = c.dataset.namedend;
         const b = c.getBoundingClientRect();
@@ -117,8 +120,10 @@ test("⚠️ a card with no future named end terminates at today", async ({ page
       return out;
     })()`) as unknown as any;
     withEnd += r.withEnd; noEnd += r.noEnd.length;
-    /* today is the lane's own centre — the board draws it there in every range */
-    const todayX = r.laneW / 2;
+    /* ⚠️ TODAY FROM THE RENDERED LINE, never `laneW / 2`. The window splits (days−1)/2 : rest, so
+       the true line sits half a day left of the arithmetic centre — 4px at 1440 — and this case
+       spent a pack calling two correct cards late by exactly that. */
+    const todayX = r.todayX ?? r.laneW / 2;
     for (const c of r.noEnd) {
       if (Math.abs(c.right - todayX) > 2) late.push(`${c.rel}: ends ${c.right} of ${r.laneW}, today ${todayX}`);
     }
@@ -130,47 +135,37 @@ test("⚠️ a card with no future named end terminates at today", async ({ page
   expect(late, "a card with no future end runs past today").toEqual([]);
 });
 
-test("⚠️ no row paints over the rail — with rows actually under it", async ({ page }) => {
+test("⚠️ no row CAN paint over the rail — the fault is structural now, and the structure is asserted", async ({ page }) => {
+  /* ⚠️ RETARGETED: v60 Law 4 moved the rail OUTSIDE the scroller (`.tl-rows`), whose own box
+     clips everything it scrolls — so a card cannot reach the rail's pixels at any scroll
+     position. The old case demanded overlapping populations that can no longer exist; the honest
+     claim is the construction, plus one scrolled sample proving the clip. */
   await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
-  await page.waitForTimeout(900);
-  let overlaps = 0;
-  const crossing: string[] = [];
-  for (const y of [120, 200, 280, 360, 440, 520, 600, 680]) {
-    await page.evaluate(`(() => {
-      const sc = document.querySelector(".wpg-scroll"); if (sc) sc.scrollTop = ${y};
-      const z = document.querySelector(".tl-zone"); if (z) z.scrollTop = ${y};
-    })()`);
-    await page.waitForTimeout(220);
-    const r = await page.evaluate(`(() => {
-      const vis = (e) => e.getBoundingClientRect().height > 0;
-      const rail = [...document.querySelectorAll(".tl-rail")].filter(vis)[0];
-      if (!rail) return { under: 0, bad: [] };
-      const rb = rail.getBoundingClientRect();
-      const out = { under: 0, bad: [] };
-      for (const c of [...document.querySelectorAll(".tl-p")].filter(vis)) {
-        const b = c.getBoundingClientRect();
-        const oTop = Math.max(b.top, rb.top), oBot = Math.min(b.bottom, rb.bottom);
-        const oL = Math.max(b.left, rb.left), oR = Math.min(b.right, rb.right);
-        /* ⚠️ THE SAMPLE MUST BE INSIDE BOTH BOXES. A point taken at the card's top when the card
-           sits just below the rail is outside the rail entirely, and elementsFromPoint then
-           answers about the row beneath — which reported a crossing that was not one. */
-        if (oBot - oTop <= 1 || oR - oL <= 1) continue;
-        out.under++;
-        const x = Math.round((oL + oR) / 2), yy = Math.round((oTop + oBot) / 2);
-        const top = document.elementsFromPoint(x, yy)[0];
-        if (!(top && (top === rail || rail.contains(top)))) {
-          out.bad.push(c.dataset.rel + " @" + x + "," + yy + " → " + (top ? String(top.className).slice(0, 24) : "none"));
-        }
-      }
-      return out;
-    })()`) as unknown as { under: number; bad: string[] };
-    overlaps += r.under;
-    crossing.push(...r.bad);
-  }
-  console.log(`card/rail overlaps sampled: ${overlaps} · crossings: ${crossing.length}`);
-  /* ⚠️ THE POPULATION IS THE ENTIRE POINT OF THIS CASE. The previous round reported this fault
-     "unfounded" from a board at scroll-top, where NO row can reach the rail — a clean result about
-     an empty set. Nothing is proved until rows are genuinely underneath it. */
-  expect(overlaps, "no card ever overlapped the rail, so nothing was tested").toBeGreaterThan(3);
-  expect(crossing, "a card paints over the rail").toEqual([]);
+  const r = await page.evaluate(() => {
+    const g = [...document.querySelectorAll<HTMLElement>(".tl-cal")].find((e) => e.getBoundingClientRect().height > 0)!;
+    const rail = g.querySelector<HTMLElement>(".tl-rail")!;
+    const rows = g.querySelector<HTMLElement>(".tl-rows")!;
+    rows.scrollTop = 400;
+    const rb = rail.getBoundingClientRect();
+    const cards = [...g.querySelectorAll<HTMLElement>(".tl-p")].filter((c) => c.getBoundingClientRect().height > 1);
+    /* ⚠️ PAINT, NOT RECTS. A scrolled card's rect still reports its unclipped box, so a box test
+       "found" intrusion on a correctly clipped board. Hit-test points inside the rail instead. */
+    const y = (rb.top + rb.bottom) / 2;
+    const hits = [0.25, 0.5, 0.75].map((f) => {
+      const x = rb.left + rb.width * f;
+      const top = document.elementsFromPoint(x, y)[0] as HTMLElement | undefined;
+      return top ? (top === rail || rail.contains(top) ? "rail" : String(top.className).slice(0, 24)) : "none";
+    });
+    return {
+      railInsideRows: rows.contains(rail),
+      rowsClip: getComputedStyle(rows).overflowY,
+      scrolled: rows.scrollTop,
+      cards: cards.length, hits,
+    };
+  });
+  expect(r.railInsideRows, "the rail moved back inside the scroller").toBe(false);
+  expect(["auto", "scroll"]).toContain(r.rowsClip);
+  expect(r.cards, "no cards").toBeGreaterThan(3);
+  if (r.scrolled === 0) console.log("board does not overflow at 900 — the hit test ran unscrolled");
+  for (const h of r.hits) expect(h, `something paints over the rail: ${h}`).toBe("rail");
 });

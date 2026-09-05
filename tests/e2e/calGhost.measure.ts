@@ -98,7 +98,12 @@ test("⚠️ a ghost is drawn as OVER without being drawn as CLOSED", async ({ p
    * So the law is asserted where it now lives: no fill and no shadow, against a live card that has
    * both. That survives the next restyle; a spelling does not.
    */
-  expect(g.ghost.bg, "a ghost is filled, so it reads as live work").toBe("rgba(0, 0, 0, 0)");
+  /* ⚠️ RETARGETED (v63 §F): a ghost shares the QUIET paper — the shut tint on a solid hairline —
+     and the claim is the COMPARISON, not a value: it is neither the live card's white nor the
+     closed card's transparent-dashed. Pinning transparent was v5x's spelling of it. */
+  expect(g.ghost.bg, "a ghost is drawn on the live card's own paper").not.toBe(g.live.bg);
+  expect(`${g.ghost.bg}|${g.ghost.style}`, "a ghost is drawn exactly like a closed card")
+    .not.toBe(`${g.closed.bg}|${g.closed.style}`);
   expect(g.ghost.shadow, "a ghost is lifted off the ground, so it reads as live work").toBe("none");
   expect(g.live.shadow === "none" && g.live.bg === "rgba(0, 0, 0, 0)",
     "the live comparison card has neither fill nor shadow — it cannot show the difference")
