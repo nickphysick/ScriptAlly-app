@@ -6,7 +6,7 @@
 `check-design-refs.mjs`'s watchlist** (20 → 22 guarded), so a later edit to either fails the build
 rather than silently changing what this round's assertions cite.
 
-**Where I stopped:** end of Phase 6. Recon is `run-artifacts/drawer-recon.md`.
+**Where I stopped:** inside Phase 7 — five of eight suites settled; workspaceRound and journeyRound in triage. Recon is `run-artifacts/drawer-recon.md`.
 
 ---
 
@@ -712,6 +712,23 @@ server-silent. **Noted for a schema decision; deliberately not added now.**
 Build clean · zero tsc errors in this change set · 308 of my suite cases pass (the one red is the
 calendar stream's tool-row case against their own uncommitted WIP). The measurement's teardown
 returns the persisted view to rest through the page's own controls and asserts the resting footer.
+
+---
+
+## Phase 7 — the re-prove sweep (in progress at the stop)
+
+Every `/todo` measurement predating the round, presumed vacuous, each proved red or retired.
+
+| suite | disposition |
+|---|---|
+| `paneMounts` | retargeted in Phases 2–3 (the wait/claim predicate split); **14/14**, the standing canary |
+| `qcPanel` | **was vacuously green as `null === null`** — `.f12-card` retired by the log-sheet stream, `.tdk-w` retired rounds ago, and the equality held over nothing. The recon's `.ws` suspicion confirmed (no such match) but the vacuity was the real finding. De-vacuated: populations asserted, the To-do half re-anchored to `.tlc` (32px, live); **red by design** on the Query Centre half with the owner named in the failure message, until the log-sheet stream's card class lands. A parity claim with one leg is not a claim, and the silent form of that is what the repair replaces. |
+| `paneRecon` | **retired (deleted)** — a recon instrument, not a lock: zero assertions, photographs the `.tdk-*` pane two generations gone, and crashes on its own null derefs now. A recon script for a dead pane misleads more than it measures. |
+| `contract` | the CSS cases kept: the split-grid case retargeted to the two-shape law (rest `100% minmax(0,1fr)` · open `520px minmax(0,1fr)`, content-sizing forbidden by name) and **proved red** with an `auto` track in the served CSS. The D9 tile case and the whole `.tdg-row` journey walk **deleted, not bent** — their subjects are two panes gone, and each law's new home is named in the file (paneMounts · sheetSlip · taskPanePort). Deleting the walk exposed a `const red` declared inside it — the summary line threw `ReferenceError` — which is the deletion-takes-a-second-thing fault at file scope, caught by running it. |
+| `steerRound` | 2 red → retargeted → **21/21**. P4.1's coverage scan was sweeping zero elements (`.fc.work` retired) and its own population floor said so — the floor doing precisely its job. P3.3 has come **full circle**: the caret half was retired when advance-on-commit unmounted the input; Phase 4 split commit from advance ON PURPOSE, so the original, stronger claim is assertable again — the typed 77 alive in the still-open row's input. The law never moved; each retarget has followed the flow that carries it. ⚠️ And its repair produced the round's **fifth backtick casualty** — the retarget note, written into the evaluate template with backticks around class names, one hour after the fourth was written up. The sweep, not prose, is the defence. |
+| `finishRound` | 6 red → retargeted → **29/29**, both retargets proved red (a second rim grown in the sheet; the sheet stretched). One rim per journey now — the sheet is one framed object, the slip a different one (`.rrim`). And P2.4 **inverted by design**: the old law pinned the foot to the pane's bottom; Phase 3's height rule has the foot RIDE the content, so the shortest journey must leave desk beneath the sheet — the exact reading the case used to fail on is now what it requires. |
+| `workspaceRound` | in triage at the stop — its Phase 1/2 sections describe the retired 288px record column, "The record" head and bar-bottom-equals-record-bottom, all superseded by the sheet + slip |
+| `journeyRound` | in triage at the stop — timed out at 150s on the new DOM; running under a wider budget to read its true reds |
 
 ---
 
