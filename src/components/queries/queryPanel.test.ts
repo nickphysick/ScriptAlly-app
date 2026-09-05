@@ -247,3 +247,81 @@ describe("§1 · the tabbed body", () => {
     expect(draw(QueryStatus.QUERIED, { noteCount: 3 })).toContain(">3</span>");
   });
 });
+
+/* ══ log-sheet run · §1 — form mode ═══════════════════════════════════════════════════════════ */
+describe("§1 (log sheet) · form mode replaces the body, not the drawer", () => {
+  const drawForm = (over: Partial<React.ComponentProps<typeof QueryPanel>["form"]> = {}) =>
+    renderToStaticMarkup(
+      React.createElement(QueryPanel, {
+        open: true,
+        mode: "form",
+        form: {
+          nth: 3, manuscriptTitle: "Murphy's Day Out",
+          ticks: { agent: true, date: false, materials: false },
+          sentence: React.createElement("span", null, "the sentence"),
+          canSave: true,
+          onCancel: () => {}, onSave: () => {}, onSaveAnother: () => {},
+          body: React.createElement("div", { className: "fixture-sheet" }, "the sheet"),
+          ...over,
+        },
+        facts: cardFacts({ id: "g", status: QueryStatus.QUERIED, dateSent: "2026-09-01" } as never, new Date("2026-09-05")),
+        status: QueryStatus.QUERIED,
+        name: "", agency: "", initials: "", sentLabel: "", viaLabel: "",
+        position: null, primaryLabel: "", onClose: () => {}, onStep: () => {},
+        elapsed: { value: "", unit: "", caption: "" }, expectedLabel: "",
+        tracking: null, noteCount: 0,
+      }),
+    );
+
+  it("the drawer widens to 660 — the class is on, and the class is the width", () => {
+    expect(drawForm()).toMatch(/["\s]qpn--wide["\s]/);
+    const css = readFileSync(join(process.cwd(), "src/components/queries/queryPanel.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toMatch(/\.qpn--wide\s*\{\s*width:\s*660px/);
+  });
+
+  it("the top bar carries the sheet's chrome and NONE of the detail actions", () => {
+    const html = drawForm();
+    expect(html).toContain("Logging new query");
+    expect(html).toContain("Your 3rd query for Murphy");
+    for (const verb of ["Mark sent", "Nudge", "Mark closed", "Previous query", "Next query"]) {
+      expect(html, `${verb} leaked into form mode`).not.toContain(verb);
+    }
+    /* no band, no identity, no tabs — the body IS the sheet */
+    for (const cls of ["qpn-band", "qpn-head", "qpn-tabs", "qpn-ms"]) {
+      expect(html, `${cls} renders in form mode`).not.toMatch(new RegExp(`["\\s]${cls}["\\s]`));
+    }
+    expect(html).toContain("fixture-sheet");
+  });
+
+  it("the ticks and the footer are the contract — save gated on the agent", () => {
+    const html = drawForm();
+    expect(html).toMatch(/Agent[\s\S]*Date[\s\S]*Materials/);
+    expect(html).toContain("Save query");
+    expect(html).toContain("Save &amp; log another");
+    const off = drawForm({ canSave: false });
+    expect(off).toMatch(/disabled[^>]*>Save query|Save query<\/button>/);
+    expect((off.match(/disabled=""/g) ?? []).length, "the two saves do not gate together").toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe("§1 (log sheet) · the routes open the right step", () => {
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+
+  it("#/queries/new is consumed into openCreate, agent param and all", () => {
+    expect(page).toContain('h.startsWith("#/queries/new")');
+    expect(page).toMatch(/get\("agent"\)[\s\S]{0,220}openCreate\(\{ agentId: agentId \|\| null \}\)/);
+  });
+
+  it("a seeded agent lands at step 2; a bare open at step 1", () => {
+    expect(page).toContain("setCreateStep(seedAgent ? 2 : 1)");
+  });
+
+  it("nothing opens the old journey sheet — the mount is gated dead until §4 deletes it", () => {
+    const at = page.indexOf("<QueryJourneySheet");
+    expect(at).toBeGreaterThan(-1);
+    const before = page.slice(Math.max(0, at - 400), at);
+    expect(before, "the journey mount is reachable again").toContain("{false && (");
+  });
+});

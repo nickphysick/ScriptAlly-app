@@ -448,6 +448,9 @@ export const Queries: React.FC<{
   const [createSaving, setCreateSaving] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const creating = createDraft !== null;
+  /* §1 (log-sheet) — which section is open. Component state would die with the sheet's node on
+     every drawer re-render branch; the page owns it like it owns the draft. */
+  const [createStep, setCreateStep] = useState<1 | 2 | 3 | 4>(1);
 
   /* ── CHOREOGRAPHY STATE ────────────────────────────────────────────────────────────────────
      `stashedSelection` is whatever was open when create mode started: entry clears the selected
@@ -559,6 +562,9 @@ export const Queries: React.FC<{
     // else is "the query you're looking at". Discard puts it back.
     setStashedSelection(selectedQueryId);
     setSelectedQueryId(null);
+    /* seeded entry (#/queries/new?agent=…, the Contact list's Log query) lands at step 2 with the
+       agent already pinned; a bare open starts at Who. */
+    setCreateStep(seedAgent ? 2 : 1);
     setCreateBase(base);
     setCreateDraft(base);
     setCreateError(null);
@@ -1039,6 +1045,27 @@ export const Queries: React.FC<{
     onCreateSeedConsumed?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createSeed]);
+
+  /**
+   * §1 (log-sheet) — THE HASH ROUTES. `#/queries/new` opens the form at step 1;
+   * `#/queries/new?agent=:id` at step 2 with that agent pinned. Hash, not pathname — the app's
+   * BrowserRouter owns the path, and the pre-auth/dev-lab hashes already establish that the two
+   * coexist. The hash is consumed (replaced away) once acted on, so Esc needs no hash bookkeeping
+   * and a reload does not reopen a form the writer closed.
+   */
+  useEffect(() => {
+    const act = () => {
+      const h = window.location.hash;
+      if (!h.startsWith("#/queries/new")) return;
+      const agentId = new URLSearchParams(h.split("?")[1] ?? "").get("agent");
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      openCreate({ agentId: agentId || null });
+    };
+    act();
+    window.addEventListener("hashchange", act);
+    return () => window.removeEventListener("hashchange", act);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   
   // Refs for State and Listener Management
@@ -2806,6 +2833,39 @@ export const Queries: React.FC<{
       lastMs: null, sentMs: null, expectedMs: facts.expectedReply?.getTime() ?? null,
       facts,
     };
+  })();
+
+  /**
+   * §1 (log-sheet) — THE READ-BACK SENTENCE, built where the draft lives. Playfair prose stating
+   * exactly what Save will write; before an agent it is the placeholder, because a sentence about
+   * nobody would be a fabricated value wearing the footer's voice.
+   */
+  const formNudgeIso = (() => {
+    if (!createDraft) return null;
+    const r = createDraft.reminder;
+    if (r.kind === "none") return null;
+    if (r.kind === "custom") return r.date;
+    const d = new Date(`${createDraft.dateSent}T12:00:00`);
+    d.setDate(d.getDate() + r.weeks * 7);
+    return d.toISOString().slice(0, 10);
+  })();
+  const formSentence = (() => {
+    if (!createDraft) return null;
+    const agent = agents.find((a) => a.id === createDraft.agentId) ?? null;
+    if (!agent) return <span className="qpn-ph">Choose an agent and this will read back what you&rsquo;re saving.</span>;
+    const mats = createDraft.materials.filter((r) => r.on).map((r) => {
+      if (r.key === "sample" && "amount" in r && r.amount.trim()) return `first ${Number(r.amount).toLocaleString("en-GB")} ${r.unit.toLowerCase()}`;
+      if (r.key === "other" && "text" in r && r.text.trim()) return r.text.trim();
+      return r.name.toLowerCase();
+    });
+    const matStr = mats.length === 0 ? "nothing marked as sent"
+      : mats.length === 1 ? mats[0]
+        : `${mats.slice(0, -1).join(", ")} and ${mats[mats.length - 1]}`;
+    const when = fmtShortISO(createDraft.dateSent);
+    return (
+      <>Queried <i>{agentPrimary(agent)}</i> at {agent.agency || "their agency"}, {when} by {createDraft.sendMethod.toLowerCase()} — {matStr}.{" "}
+        {formNudgeIso ? <>We&rsquo;ll nudge you on {fmtShortISO(formNudgeIso)} if it&rsquo;s gone quiet.</> : <>No nudge set.</>}</>
+    );
   })();
 
   const panelIndex = activeQuery ? gridRows.findIndex((r) => r.id === activeQuery.id) : -1;
@@ -5302,6 +5362,14 @@ export const Queries: React.FC<{
               * `animationend` inside the portal still reaches this pane — leaving a copy on the
               * pane as well would run every teardown twice.
               */}
+            {/**
+              * ⚠️ §1 (log-sheet run) — THE JOURNEY SHEET NO LONGER OPENS. Form mode in the drawer is
+              * the create surface now; this mount is gated dead so nothing on #/queries reaches the
+              * old takeover, and §4 deletes the component, this block, and the locks that read them
+              * TOGETHER — a dead-but-locked transition held for exactly this run, stated rather than
+              * discovered (the overnight §6 lesson).
+              */}
+            {false && (<>
             <QueryJourneySheet
               open={creating || recording}
               register={recording ? "record" : "create"}
@@ -5651,8 +5719,47 @@ export const Queries: React.FC<{
               </div>
             ) : null}
             </QueryJourneySheet>
+            </>)}
 
 
+
+          {/* §1 (log-sheet) — FORM MODE: the same drawer, widened, wearing the sheet's chrome.
+              The modes are exclusive by construction: openCreate stashes and clears the
+              selection, so activeQuery is null the whole time the form is up. */}
+          {creating && createDraft && ghostRow && (
+            <QueryPanel
+              open
+              mode="form"
+              form={{
+                nth: queries.filter((q2) => q2.manuscriptId === createDraft.manuscriptId).length + 1,
+                manuscriptTitle: manuscripts.find((m) => m.id === createDraft.manuscriptId)?.title ?? "your manuscript",
+                ticks: {
+                  agent: !!createDraft.agentId,
+                  date: createStep > 2,
+                  materials: createStep > 3 && createDraft.materials.some((r) => r.on),
+                },
+                sentence: formSentence,
+                canSave: !!createDraft.agentId && !createSaving,
+                saving: createSaving,
+                onCancel: () => closeCreate(),
+                onSave: () => void saveCreate(false),
+                onSaveAnother: () => void saveCreate(true),
+                body: null /* §2 — the four steps land here */,
+              }}
+              facts={ghostRow.facts}
+              status={QueryStatus.QUERIED}
+              name="" agency="" initials=""
+              sentLabel="" viaLabel=""
+              position={null}
+              primaryLabel=""
+              onClose={() => closeCreate()}
+              onStep={() => {}}
+              elapsed={{ value: "", unit: "", caption: "" }}
+              expectedLabel=""
+              tracking={null}
+              noteCount={0}
+            />
+          )}
 
           {panelRow && activeQuery && (
             <QueryPanel

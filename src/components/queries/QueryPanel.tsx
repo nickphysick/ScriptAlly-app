@@ -39,8 +39,34 @@ const readTab = (): PanelTab => {
 };
 
 
+/** Form mode's whole contract — the page owns every fact; the drawer owns none of them. */
+export interface PanelFormProps {
+  /** `Your {nth} query for {manuscript}` — N = existing count + 1, counted by the page. */
+  nth: number;
+  manuscriptTitle: string;
+  /** The three tick marks: Agent · Date · Materials. */
+  ticks: { agent: boolean; date: boolean; materials: boolean };
+  /** The Playfair read-back sentence (or its placeholder) — built by the page. */
+  sentence: React.ReactNode;
+  canSave: boolean;
+  saving?: boolean;
+  onCancel: () => void;
+  onSave: () => void;
+  onSaveAnother: () => void;
+  body: React.ReactNode;
+}
+
 export interface QueryPanelProps {
   open: boolean;
+  /**
+   * ⚠️ FORM MODE REPLACES THE BODY, NOT THE DRAWER (log-sheet run, §1). One aside, two modes:
+   * `detail` is everything below; `form` widens to 660px, swaps the top bar for the sheet's title
+   * + tick progress, drops the band/identity/tabs entirely, and pins the read-back footer. A
+   * second drawer component would be a second Escape, a second scrim and a second width to keep
+   * in step — the exact drift the tabs rebuild just removed.
+   */
+  mode?: "detail" | "form";
+  form?: PanelFormProps;
   facts: CardFacts;
   status: QueryStatus;
   name: string;
@@ -88,7 +114,8 @@ const Icon: React.FC<{ d: string; size?: number; stroke?: string; width?: number
 );
 
 export const QueryPanel: React.FC<QueryPanelProps> = ({
-  open, facts, status, name, agency, initials, sentLabel, viaLabel,
+  open, mode = "detail", form,
+  facts, status, name, agency, initials, sentLabel, viaLabel,
   manuscriptTitle, manuscriptMeta, versionLabel,
   position, primaryLabel, onPrimary, onNudge, onMarkClosed, onClose, onStep,
   elapsed, expectedLabel, tracking, agentTab, notesTab, noteCount,
@@ -112,6 +139,9 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
       const typing = t?.tagName === "INPUT" || t?.tagName === "TEXTAREA" || t?.isContentEditable;
       if (typing) return;
       if (e.key === "Escape") { e.stopPropagation(); onClose(); return; }
+      /* stepping between queries is a DETAIL gesture — mid-form it would discard nothing and
+         confuse everything, so the arrows are simply not bound there */
+      if (mode === "form") return;
       if (e.key === "ArrowRight") { e.preventDefault(); onStep(1); }
       if (e.key === "ArrowLeft") { e.preventDefault(); onStep(-1); }
     };
@@ -134,12 +164,51 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
         ref={panelRef}
         /* ⚠️ THE LADDER CLASS IS THE CARD'S — same class, same `--band-a`, so the two cannot
            disagree about the colour of one query. */
-        className={`qpn qcc--s-${facts.stage}`}
+        className={`qpn qcc--s-${facts.stage}${mode === "form" ? " qpn--wide qpn--form" : ""}`}
         data-on={open}
+        data-qpn-mode={mode}
         data-qpn-stage={facts.stage}
         aria-hidden={!open}
-        aria-label={`${name}, ${agency}`}
+        aria-label={mode === "form" ? "Logging new query" : `${name}, ${agency}`}
       >
+        {mode === "form" && form ? (
+          <>
+            {/* ══ FORM MODE — the sheet's own chrome; NONE of the detail actions ══ */}
+            <div className="qpn-bar qpn-fbar">
+              <span className="qpn-quill" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2e3a2c" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 4c-6 0-11 4-13 10l-3 6 6-3c6-2 10-7 10-13z" /><path d="M7 14l-3 6" /></svg>
+              </span>
+              <div className="qpn-ftt">
+                <h2>Logging new query</h2>
+                <div className="qpn-fnth">Your {form.nth}{form.nth % 10 === 1 && form.nth !== 11 ? "st" : form.nth % 10 === 2 && form.nth !== 12 ? "nd" : form.nth % 10 === 3 && form.nth !== 13 ? "rd" : "th"} query for {form.manuscriptTitle}</div>
+              </div>
+              <span className="qpn-spacer" />
+              <div className="qpn-ticks" aria-label="Progress">
+                {([["agent", "Agent"], ["date", "Date"], ["materials", "Materials"]] as const).map(([k, l]) => (
+                  <span key={k} className={form.ticks[k] ? "qpn-tick qpn-tick--ok" : "qpn-tick"}>
+                    <i aria-hidden="true">{form.ticks[k] ? "✓" : ""}</i>{l}
+                  </span>
+                ))}
+              </div>
+              <button type="button" className="qpn-icb" aria-label="Close" onClick={form.onCancel}>
+                <Icon d="M18 6L6 18M6 6l12 12" size={14} width={2.2} />
+              </button>
+            </div>
+            <div className="qpn-inner">
+              <div className="qpn-body qpn-fbody">{form.body}</div>
+            </div>
+            <div className="qpn-ffoot">
+              <div className="qpn-fsent">{form.sentence}</div>
+              <div className="qpn-fbtns">
+                <span className="qpn-esc" aria-hidden="true">esc</span>
+                <button type="button" className="qpn-fb qpn-fb--ghost" onClick={form.onCancel}>Cancel</button>
+                <button type="button" className="qpn-fb qpn-fb--text" disabled={!form.canSave || form.saving} onClick={form.onSaveAnother}>Save &amp; log another</button>
+                <button type="button" className="qpn-fb qpn-fb--go" disabled={!form.canSave || form.saving} onClick={form.onSave}>Save query</button>
+              </div>
+            </div>
+          </>
+        ) : (
+        <>
         <div className="qpn-bar">
           {stepper(-1, "M15 6l-6 6 6 6", "Previous query")}
           {stepper(1, "M9 6l6 6-6 6", "Next query")}
@@ -236,6 +305,8 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
             {tab === "notes" && <div className="qpn-notes">{notesTab}</div>}
           </div>
         </div>
+        </>
+        )}
       </aside>
     </>
   );
