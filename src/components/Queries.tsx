@@ -5379,6 +5379,7 @@ export const Queries: React.FC<{
             stage={panelRow.facts.stage}
             anchor={correctingTriggerRef.current}
             returnTo={correctingTriggerRef.current}
+            spot={deskVerb === "closed" ? "close" : deskVerb}
             onClose={() => setDeskVerb(null)}
           >
             {deskVerb === "marksent" && deskMark && deskMarkTarget && (
@@ -5469,6 +5470,7 @@ export const Queries: React.FC<{
             stage={panelRow?.facts.stage ?? "closed"}
             anchor={correctingTriggerRef.current?.closest?.(".tl-ev") as HTMLElement | null}
             returnTo={correctingTriggerRef.current}
+            spot="correct"
             onClose={() => setCorrecting(null)}
           >
             <>

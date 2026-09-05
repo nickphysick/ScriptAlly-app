@@ -21,6 +21,8 @@
  * drawer behind it — the country-picker precedent, applied one layer up.
  */
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { IlloSlot } from "./IlloSlot";
 import "./correctionDesk.css";
 
 export interface CorrectionDeskProps {
@@ -30,37 +32,40 @@ export interface CorrectionDeskProps {
   anchor: HTMLElement | null;
   /** The ⋯ (or dotted field) that opened the desk — focus returns here on close. */
   returnTo: HTMLElement | null;
+  /** §3 (drawer-3): the 56px round spot-illustration key — one per verb (respond / marksent /
+   *  nudge / close / correct). SPOT_ART holds the artwork when it exists. */
+  spot?: string;
   onClose: () => void;
   children: React.ReactNode;
 }
 
-export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ stage, anchor, returnTo, onClose, children }) => {
+/** One artwork per verb. EMPTY until the illustrator delivers — one entry per line, and the slot
+ *  drops its placeholder chrome by itself. */
+const SPOT_ART: Partial<Record<string, React.ReactNode>> = {};
+
+export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ stage, anchor, returnTo, onClose, children, spot }) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ top: number; arrow: number | null }>({ top: 92, arrow: null });
+  const [pos, setPos] = useState<{ top: number; maxH: number | null; arrow: number | null }>({ top: 92, maxH: null, arrow: null });
 
   /**
-   * The ref's placement maths — card top = rung centre − 42 — clamped to the CONTENT WINDOW's
-   * extent, not the viewport's (correction pass 3 §1). The drawer is a full-height takeover
-   * (`.qpn` is `top: 0`), so "the drawer's top" is 0 and a viewport clamp let the desk sit over
-   * the app masthead beside it; the region the desk actually lives in is the window below that
-   * chrome. `.ws-window` is measured at place time (its top moves when the beta strip is
-   * dismissed), with the viewport as the fallback so a windowless host keeps the old bound.
-   * The notch keeps pointing at the anchor, clamped along the card's own edge — a bar anchor
-   * above the card's reachable top gets the nearest point, not a notch off the card.
+   * GEOMETRY 1, locked (v9, drawer-3 §2): the card is TOP-ANCHORED inside the content window —
+   * top = window.top + 12, never taller than window.height − 24, internal scroll when its content
+   * is — and the NOTCH alone tracks the anchor, clamped along the card's own right edge. The
+   * anchor never moves the card. `.ws-window` is measured at place time (its top moves when the
+   * beta strip is dismissed); the viewport stands in for a windowless host.
    */
   const place = useCallback(() => {
     const card = cardRef.current;
     if (!card) return;
-    const vh = window.innerHeight;
-    const h = card.offsetHeight;
-    const winTop = document.querySelector(".ws-window")?.getBoundingClientRect().top ?? 0;
-    const minTop = winTop + 12;
-    const maxTop = Math.max(minTop, vh - h - 12);
-    if (!anchor) { setPos({ top: Math.max(minTop, Math.min(92, maxTop)), arrow: null }); return; }
+    const win = document.querySelector(".ws-window")?.getBoundingClientRect()
+      ?? { top: 0, bottom: window.innerHeight, height: window.innerHeight };
+    const top = win.top + 12;
+    const maxH = win.height - 24;
+    const h = Math.min(card.offsetHeight, maxH);
+    if (!anchor) { setPos({ top, maxH, arrow: null }); return; }
     const r = anchor.getBoundingClientRect();
     const centre = r.top + r.height / 2;
-    const top = Math.max(minTop, Math.min(centre - 42, maxTop));
-    setPos({ top, arrow: Math.max(10, Math.min(centre - top - 8, h - 26)) });
+    setPos({ top, maxH, arrow: Math.max(10, Math.min(centre - top - 8, h - 26)) });
   }, [anchor]);
 
   /* placed before paint, and re-placed when the card's own height changes (the steps differ),
@@ -93,7 +98,15 @@ export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ stage, anchor, r
   /* focus home on unmount — the ⋯ the writer came from, never the page body */
   useEffect(() => () => { returnTo?.focus(); }, [returnTo]);
 
-  return (
+  /**
+   * ⚠️ PORTALLED TO document.body (drawer-3 §2). The desk used to mount inside the page's scroll
+   * containers — .wpg-scroll, .qc-wpg[overflow:hidden], .ws-window — where `position: fixed` is
+   * one ancestor transform away from being CONTAINED and clipped (the StagePage enter animation
+   * is exactly such a transform; the pass-3 screenshot's clipped top strip is that state). On the
+   * body there is no ancestor to clip it, structurally. The stage class rides the portal root, so
+   * `--stage-accent` still resolves.
+   */
+  return createPortal(
     <div className={`qcd qcc--s-${stage}`} role="presentation">
       <div
         ref={cardRef}
@@ -101,11 +114,18 @@ export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ stage, anchor, r
         role="dialog"
         aria-label="Correct this entry"
         data-notch={pos.arrow != null ? "on" : "off"}
-        style={{ top: pos.top, "--arrow": pos.arrow != null ? `${pos.arrow}px` : undefined } as React.CSSProperties}
+        style={{ top: pos.top, maxHeight: pos.maxH ?? undefined, "--arrow": pos.arrow != null ? `${pos.arrow}px` : undefined } as React.CSSProperties}
       >
-        {children}
+        {spot && (
+          <IlloSlot className="qcd-spot" name={`spot · ${spot}`} width={56} height={56} round
+            art={SPOT_ART[spot]} />
+        )}
+        <div className="qcd-scroll" data-spot={spot ? "on" : undefined}>
+          {children}
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 

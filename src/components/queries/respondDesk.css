@@ -114,3 +114,18 @@ input.qrd-fld { cursor: text; }
    the chip-selection pink, and the note reuses the respond desk's textarea look */
 .qrd-kinds--closed { grid-template-columns: 1fr; }
 .qrd-kind--on { background: #f5e2da; border-color: #e8c8bc; }
+
+/* §3 (drawer-3) — the illustration slots' shared chrome: the ref's hatch, dashed rim, mono label.
+   The art variant drops ALL placeholder chrome (rim, hatch, label) — finished work never ships
+   inside placeholder dressing. */
+.qi-slot {
+  display: flex; align-items: center; justify-content: center; text-align: center; flex: none;
+  background: repeating-linear-gradient(135deg, rgba(58, 28, 20, 0.05) 0 6px, transparent 6px 12px);
+  border: 1px dashed rgba(58, 28, 20, 0.22); border-radius: 10px;
+}
+.qi-slot--round { border-radius: 50%; }
+.qi-slot--art { background: none; border: none; }
+.qi-ph {
+  color: #8a7a6c; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8px;
+  letter-spacing: 0.12em; text-transform: uppercase; line-height: 1.5;
+}

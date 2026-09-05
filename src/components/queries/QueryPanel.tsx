@@ -20,6 +20,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./queryCard.css";
 import "./queryPanel.css";
 import { StatusDot } from "../StatusDot";
+import { IlloSlot } from "./IlloSlot";
 import type { CardFacts } from "../../lib/queryCardFacts";
 import type { QueryStatus } from "../../types";
 
@@ -55,6 +56,14 @@ export interface PanelFormProps {
   onSaveAnother: () => void;
   body: React.ReactNode;
 }
+
+/** the stage FAMILY — the illustration key: out / in / offer / closed (drawer-3 §3) */
+export const stageFamily = (stage: string): "out" | "in" | "offer" | "closed" =>
+  stage.startsWith("out") ? "out" : stage.startsWith("in") ? "in" : stage === "offer" ? "offer" : "closed";
+
+/** One artwork per stage family. EMPTY until the illustrator delivers — adding an entry here is
+ *  the whole change (`out: <PlaneArt />`); the slot drops its placeholder chrome by itself. */
+const STAGE_ART: Partial<Record<ReturnType<typeof stageFamily>, React.ReactNode>> = {};
 
 export interface QueryPanelProps {
   open: boolean;
@@ -252,6 +261,12 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
               <div className="qpn-nm">{name}</div>
               <div className="qpn-ag">{agency}</div>
             </div>
+            {/* §3 (drawer-3) — the stage-family illustration slot: one image per FAMILY (out / in /
+                offer / closed), keyed off the same stage the band wears. STAGE_ART holds the
+                artwork when it exists; until then the slot renders the ref's named placeholder.
+                The Sent/via caption sits beneath it, absolute in the same reserved column. */}
+            <IlloSlot className="qpn-illo" name={`stage-specific · ${stageFamily(facts.stage)}`}
+              width={130} height={78} art={STAGE_ART[stageFamily(facts.stage)]} />
             <div className="qpn-snt">Sent {sentLabel}<br />via {viaLabel}</div>
           </div>
 

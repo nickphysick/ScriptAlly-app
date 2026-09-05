@@ -16,6 +16,7 @@ import { OUTCOME_STATUS } from "../../lib/responseDraft";
 import { QueryStatus } from "../../types";
 import { NudgeDesk } from "./NudgeDesk";
 import { MarkSentDesk } from "./MarkSentDesk";
+import { IlloSlot } from "./IlloSlot";
 import { existsSync } from "node:fs";
 
 const q = { id: "q1", status: QueryStatus.QUERIED, dateSent: "2026-08-12T12:00:00.000Z" } as never;
@@ -336,5 +337,73 @@ describe("§2 (pass 3) · the close menu is retired; closed is the desk's fourth
 
   it("below md, the modal's 'close instead' hands over to the sheet that has the close rows", () => {
     expect(page).toContain("onCloseInstead={() => { setIsNudgeOpen(false); setMobileMoreOpen(true); }}");
+  });
+});
+
+/* ══ drawer-3 · §3 — the illustration slots ═══════════════════════════════════════════════════ */
+describe("§3 (drawer-3) · two slots, placeholder until art exists, one-line swap", () => {
+  it("the placeholder admits itself: hatched chrome, the slot's name and size, hidden from AT", () => {
+    const html = renderToStaticMarkup(React.createElement(IlloSlot, { name: "spot · nudge", width: 56, height: 56, round: true }));
+    expect(html).toContain('aria-hidden="true"');
+    expect(html).toContain("spot · nudge");
+    expect(html).toContain("qi-slot--round");
+    expect(html).not.toContain("qi-slot--art");
+  });
+
+  it("art REPLACES the placeholder chrome in the same box — rim, hatch and label all leave together", () => {
+    const html = renderToStaticMarkup(React.createElement(IlloSlot, {
+      name: "spot · nudge", width: 56, height: 56, round: true,
+      art: React.createElement("svg", { "data-art": "x" }),
+    }));
+    expect(html).toContain("qi-slot--art");
+    expect(html).toContain('data-art="x"');
+    expect(html, "the label survives beside finished art").not.toContain("spot · nudge");
+  });
+
+  it("the header slot is keyed by stage FAMILY off the same stage the band wears; the desk's by verb", () => {
+    const panel = readFileSync(join(process.cwd(), "src/components/queries/QueryPanel.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(panel).toContain("stage-specific · ${stageFamily(facts.stage)}");
+    expect(panel).toContain("art={STAGE_ART[stageFamily(facts.stage)]}");
+    const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8");
+    expect(page).toContain('spot={deskVerb === "closed" ? "close" : deskVerb}');
+    expect(page).toContain('spot="correct"');
+    const desk = readFileSync(join(process.cwd(), "src/components/queries/CorrectionDesk.tsx"), "utf8");
+    expect(desk).toContain("art={SPOT_ART[spot]}");
+  });
+
+  it("both ART tables are EMPTY today — the slots render placeholders, and an entry is the whole swap", () => {
+    const panel = readFileSync(join(process.cwd(), "src/components/queries/QueryPanel.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(panel).toMatch(/const STAGE_ART[^=]*= \{\};/);
+    const desk = readFileSync(join(process.cwd(), "src/components/queries/CorrectionDesk.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(desk).toMatch(/const SPOT_ART[^=]*= \{\};/);
+  });
+});
+
+/* ══ drawer-3 · §2 — the desk's structural immunity ═══════════════════════════════════════════ */
+describe("§2 (drawer-3) · the desk mounts on the BODY; the card scrolls inside its own wrapper", () => {
+  const desk = readFileSync(join(process.cwd(), "src/components/queries/CorrectionDesk.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  it("portalled to document.body — no page ancestor can contain or clip a fixed desk", () => {
+    expect(desk).toContain("return createPortal(");
+    expect(desk).toContain("document.body,");
+  });
+
+  it("the scroller is INSIDE the card — the notch and the accent strip sit on a box that never scrolls", () => {
+    expect(desk).toContain('className="qcd-scroll"');
+    const css = readFileSync(join(process.cwd(), "src/components/queries/correctionDesk.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toMatch(/\.qcd-scroll \{[^}]*overflow-y: auto/);
+    expect(css, "the card grew its own overflow — the notch will clip").not.toMatch(/\.qcd-card \{[^}]*overflow/);
+  });
+
+  it("geometry 1: top-anchored to the window; the anchor moves only the notch", () => {
+    expect(desk).toContain("const top = win.top + 12;");
+    expect(desk).toContain("const maxH = win.height - 24;");
+    /* the anchor's centre reaches ONLY the arrow expression, never the top */
+    expect(desk).toMatch(/setPos\(\{ top, maxH, arrow: Math\.max\(10, Math\.min\(centre - top - 8, h - 26\)\) \}\)/);
   });
 });

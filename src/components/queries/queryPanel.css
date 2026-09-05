@@ -81,7 +81,12 @@
  * is satisfied structurally: a rail outside the scroller cannot leave. `position: sticky` on the
  * rail would be a dead claim on a box that cannot move, which this repo has an audit about.
  */
-.qpn-body { overflow-y: auto; flex: 1; min-height: 0; padding: 18px 26px 40px; }
+.qpn-body { overflow-y: auto; flex: 1; min-height: 0; padding: 18px 26px 40px; background: #fff; }
+/* the create sheet keeps its parchment — the v9 chrome is the RECORD drawer's; the log sheet was
+   authored on parchment and is out of this pack's scope */
+.qpn--form .qpn-body { background: #fdfaf5; }
+/* white body ⇒ the rungs' nodes fill white, so the connector passes UNDER the mark */
+.qpn .tl-evmark { background: #fff; border-radius: 50%; }
 
 /* the stage accent map lives in queryCard.css, on the bare stage classes — the drawer AND the
    correction desk both carry `qcc--s-{stage}` and read the one map. See decision 3 there. */
@@ -92,8 +97,10 @@
 
 /* ── the header's manuscript line ─────────────────────────────────────────────────────────────── */
 .qpn-ms {
-  display: flex; align-items: center; gap: 9px; padding: 12px 26px 4px;
+  display: flex; align-items: center; gap: 9px; padding: 12px 26px 16px;
   font-family: var(--font-serif); font-size: 14.5px; color: #1c130f;
+  background-color: var(--band-a, var(--stage-closed));
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
 }
 .qpn-ms svg { flex: none; }
 .qpn-mst { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -109,7 +116,7 @@
 /* ── the tab rail ─────────────────────────────────────────────────────────────────────────────── */
 .qpn-tabs {
   display: flex; gap: 2px; padding: 14px 26px 0; border-bottom: 0.5px solid #ece0d2;
-  background: #fdfaf5; flex: none;
+  background: #fff; flex: none;
 }
 .qpn-tab {
   padding: 10px 14px 12px; font-family: var(--font-serif); font-size: 15px; color: #8a7a6c;
@@ -117,7 +124,9 @@
   border-bottom: 2px solid transparent; margin-bottom: -0.5px;
   display: flex; align-items: center; gap: 7px;
 }
-.qpn-tab--on { color: #1c130f; border-bottom-color: var(--stage-accent, #e0d5c8); }
+/* §1 (drawer-3): the active underline is INK — the accent now belongs to the desk's strip, the
+   target rung's ring and the live verb button; the tab rail reads as chrome, not as state. */
+.qpn-tab--on { color: #1c130f; border-bottom-color: var(--ink, #1c130f); }
 .qpn-tabn {
   font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; color: #9c8878;
   background: #fff; border: 0.5px solid #e0d5c8; border-radius: 99px; padding: 1px 7px;
@@ -179,8 +188,10 @@
    type with it; the ref gives the panel a wider gutter and a larger word because it is read at
    arm's length rather than scanned in a grid. */
 .qpn-band {
-  display: flex; align-items: center; gap: 10px; padding: 14px 26px;
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+  /* §1 (drawer-3, chrome D): the band is the TOP of one stage block — no hairline of its own
+     (the block closes after the manuscript line), and its right edge stops short of the header
+     illustration column rising from the row beneath. */
+  display: flex; align-items: center; gap: 10px; padding: 14px 170px 8px 26px;
   /**
    * ⚠️ THE FALLBACK IS AT THE USE SITE, NOT A DEFAULT ON `.qpn` — and the difference was measured.
    *
@@ -197,10 +208,16 @@
   margin-left: auto; color: #6a5a50; font-family: var(--font-mono); font-size: 9px;
   letter-spacing: 0.13em; text-transform: uppercase; line-height: 1.3;
 }
-.qpn-head { padding: 22px 26px 20px; display: flex; align-items: center; gap: 16px; }
+.qpn-head {
+  padding: 16px 170px 6px 26px; display: flex; align-items: center; gap: 16px;
+  position: relative;
+  background-color: var(--band-a, var(--stage-closed));
+}
+/* the stage-family slot floats in the reserved column, rising into the band — one tint, one block */
+.qpn-illo { position: absolute; right: 26px; top: -34px; background-color: rgba(255, 255, 255, 0.35); }
 /* parchment-lifted, never pink — the rulesheet's rule, and the card obeys it too */
 .qpn-avatar {
-  width: 58px; height: 58px; border-radius: 50%; flex: none; background: #fdfaf5;
+  width: 58px; height: 58px; border-radius: 50%; flex: none; background: #fff;
   border: 0.5px solid #e6dccf;
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.08), 0 3px 8px rgba(58, 28, 20, 0.1);
   display: flex; align-items: center; justify-content: center;
@@ -210,9 +227,8 @@
 .qpn-nm { font-family: var(--font-serif); font-weight: 500; font-size: 27px; line-height: 1.3; color: var(--ink, #1c130f); }
 .qpn-ag { font-family: var(--font-serif); font-style: italic; font-size: 14px; line-height: 1.3; color: #6a5a50; margin-top: 5px; }
 .qpn-snt {
-  margin-left: auto; text-align: right; color: #9c8878;
+  position: absolute; right: 26px; bottom: 8px; text-align: right; color: #9c8878;
   font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.08em; line-height: 1.6;
-  flex: none;
 }
 
 /* ── sections ───────────────────────────────────────────────────────────────────────────────── */

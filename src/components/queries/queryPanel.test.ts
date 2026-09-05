@@ -59,13 +59,14 @@ describe("⚠️ the panel's chrome is not tinted, and the ladder starts below i
     expect(bar, "the top bar reads the ladder token").not.toContain("--band-a");
   });
 
-  it("the ladder paints only SEMANTIC state surfaces — the band, and the Agent tab's swatch", () => {
-    /* §4 widened this from [.qpn-band]: the history row's swatch IS the query's band tint by
-       design (the brief's "state swatch"), so it is a second legitimate reader. The law is
-       unchanged — no CHROME (bar, tabs, buttons) reads a ladder token; the readers are named
-       exactly so a third one fails here and states its case. */
+  it("the ladder paints the STAGE BLOCK (band + head + ms) and the Agent tab's swatch — nothing else", () => {
+    /* ⚠️ RETARGETED for v9 chrome D (drawer-3 §1): the law WIDENED by the ref — band, identity
+       row and manuscript line are ONE header block on the stage tint, so .qpn-head and .qpn-ms
+       are legitimate readers now. What survives unchanged is the enumeration itself: no OTHER
+       chrome (bar, tabs, buttons, body) reads a ladder token, and a fifth reader fails here and
+       states its case. Source order in the sheet: ms, band, head. */
     const readers = [...css.matchAll(/^\s*(\.[a-zA-Z0-9_.\s-]+?)\s*\{[^}]*var\(--band-a/gm)].map((m) => m[1].trim());
-    expect(readers, `--band-a is read by ${readers.join(", ")}`).toEqual([".qpn-band", ".qat-sw"]);
+    expect(readers, `--band-a is read by ${readers.join(", ")}`).toEqual([".qpn-ms", ".qpn-band", ".qpn-head", ".qat-sw"]);
   });
 
   it("⚠️ the progress track has its own name, and it is not the bar's", () => {
@@ -228,8 +229,12 @@ describe("§1 · the tabbed body", () => {
    * offer, closed; never a new token). Three stages then agree by construction: the rendered root
    * carries the stage class, the class sets the var, the underline reads the var.
    */
-  it("the active tab underline reads --stage-accent, mapped to the deepest step per family", () => {
-    expect(decls).toMatch(/\.qpn-tab--on[^{]*\{[^}]*border-bottom-color:\s*var\(--stage-accent/);
+  it("the active tab underline is INK; the accent map still holds, deepest step per family", () => {
+    /* ⚠️ RETARGETED for v9 chrome D (drawer-3 §1): the underline leaves the accent — the tab rail
+       reads as chrome against the white body, and the accent's remaining readers are the desk's
+       strip, the target rung's ring and the live verb button. The MAP below is unchanged law. */
+    expect(decls).toMatch(/\.qpn-tab--on[^{]*\{[^}]*border-bottom-color:\s*var\(--ink/);
+    expect(decls).not.toMatch(/\.qpn-tab--on[^{]*\{[^}]*--stage-accent/);
     /* §3 moved the map to queryCard.css, folded into each stage class's ONE rule — the card, the
        drawer and the correction desk all wear `qcc--s-*`, so the map has one home and the house
        one-rule-per-selector invariant holds. Same law: accent = the family's deepest step. */
