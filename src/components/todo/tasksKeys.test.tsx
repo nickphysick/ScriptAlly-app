@@ -23,29 +23,27 @@ const lib = readFileSync(join(here, "..", "..", "lib", "taskShortcuts.ts"), "utf
 const K = (key: string, m: Partial<ShortcutKey> = {}): ShortcutKey => ({ key, ...m });
 
 describe("⚠️ EVERY LIST KEY IS A BARE KEY — so the typing guard is the whole point", () => {
-  it("the map, exactly", () => {
+  it("the map, exactly — the tightened round's wired set, nothing more", () => {
+    /* ⚠️ TRIMMED WITH THE WIRING (tightened round, Phase 2). The page CALLS listKey now, so a
+       member decided here and wired nowhere would be a key that does nothing. The retired
+       cluster keys — space, x, ., o, e, ? — return null; `d` is the contract's dismiss, printed
+       in the list footer; the arrows share j/k's answer. */
     expect(listKey(K("j"), false)).toBe("down");
     expect(listKey(K("K"), false)).toBe("up");
-    expect(listKey(K(" "), false)).toBe("tick");
+    expect(listKey(K("ArrowDown"), false)).toBe("down");
+    expect(listKey(K("ArrowUp"), false)).toBe("up");
     expect(listKey(K("Enter"), false)).toBe("primary");
     expect(listKey(K("s"), false)).toBe("snooze");
-    expect(listKey(K("e"), false)).toBe("edit");
-    /* ⚠️ THE CLUSTER'S THREE NEW KEYS (icon-cluster P3) — one per icon, so the tooltip that
-       prints a key and the handler that answers it cannot come apart. */
-    expect(listKey(K("x"), false)).toBe("dismiss");
-    expect(listKey(K("X"), false)).toBe("dismiss");
-    expect(listKey(K("."), false)).toBe("more");
-    expect(listKey(K("o"), false)).toBe("open");
-    /* ⚠️ ESCAPE IS `close` NOW, BECAUSE `x` TOOK THE WORD `dismiss`. Shutting a surface and
-       putting a card away are different acts, and one name for both is how a handler comes to
-       close a menu when it meant to dismiss a task. */
+    expect(listKey(K("d"), false)).toBe("dismiss");
+    expect(listKey(K("D"), false)).toBe("dismiss");
     expect(listKey(K("Escape"), false)).toBe("close");
-    expect(listKey(K("?"), false)).toBe("help");
-    expect(listKey(K("q"), false)).toBeNull();
+    for (const gone of [" ", "x", "X", ".", "o", "e", "?", "q", "w"]) {
+      expect(listKey(K(gone), false), gone + " should be unbound").toBeNull();
+    }
   });
 
   it("⚠️ EVERY ONE STANDS DOWN WHILE TYPING — j, k, s, e and a space are all characters", () => {
-    for (const k of ["j", "k", " ", "s", "e", "?"]) {
+    for (const k of ["j", "k", "s", "d"]) {
       expect(listKey(K(k), true), k).toBeNull();
     }
     /* Enter and Escape too: inside the composer they belong to the composer. */
@@ -61,10 +59,11 @@ describe("⚠️ EVERY LIST KEY IS A BARE KEY — so the typing guard is the who
     expect(focusesSearch(K("k", { metaKey: true }), false)).toBe(true);
   });
 
-  it("`W` is a PAGE key, not a row key — it acts on the list, not on what happens to be focused", () => {
+  it("`W` stays claimed by its retired predicate, and the list does not take it", () => {
+    /* the predicate survives unreferenced so the key stays claimed rather than falling through
+       to the browser — its own docstring says so; deleting it is a follow-up */
     expect(worksTheList(K("w"), false)).toBe(true);
     expect(worksTheList(K("w"), true)).toBe(false);
-    expect(worksTheList(K("w", { metaKey: true }), false)).toBe(false);
     expect(listKey(K("w"), false), "…so the list must not also claim it").toBeNull();
   });
 });
@@ -98,9 +97,13 @@ describe("⚠️ THE FOCUSED ROW IS THE BROWSER'S OWN FOCUS", () => {
        the dock IS the right-hand pane now, so the key entered a mode you were already in. Leaving
        it on the sheet would be the exact fault this case exists for: an overlay advertising a key
        that does nothing. `.` went with the ⋯ in the same pass. */
-    for (const k of ["J / K", "Space", "Enter", "S", "X", "O", "E", "/", "Esc", "?"]) {
+    /* ⚠️ THE MAP IS THE FOOTER'S SET NOW (tightened round, Phase 2) — the six the page answers,
+       and NOT ONE MORE: an entry for a retired key would advertise a key that does nothing,
+       which is the fault this case exists for. Asserted as an exact census, both directions. */
+    for (const k of ["J / K", "Enter", "S", "D", "/", "Esc"]) {
       expect(KEY_MAP.some((m) => m.key === k), k).toBe(true);
     }
+    expect(KEY_MAP, "the map grew an entry no handler answers").toHaveLength(6);
     /* and every key the map advertises is one the handlers actually answer */
     const asKey = (label: string): string =>
       label === "Space" ? " " : label === "Esc" ? "Escape" : label === "Enter" ? "Enter" : label.toLowerCase();
@@ -149,19 +152,22 @@ describe("⚠️ EACH CLUSTER KEY CALLS WHAT ITS ICON CALLS", () => {
     expect(list, "the cluster keys came back to the row").not.toContain('cardMenu(c, column-query")) fire(c, column, "open-query");');
   });
 
-  it("⚠️ EVERY KEY A TOOLTIP PRINTS IS ANSWERED, AND EVERY ONE IS IN THE MAP", () => {
-    /* The four the cluster advertises on its icons. `↵` is Enter; the rest are bare letters. */
+  it("⚠️ EVERY KEY THE STRIP PRINTS IS ANSWERED, AND EVERY ONE IS IN THE MAP", () => {
+    /* ⚠️ THE TEACHING SURFACE IS THE STRIP NOW (tightened round, Phase 2) — its three buttons
+       print ↵, s and d; the footer prints the four list keys. Every printed key is answered by
+       listKey and present in the map, so the chrome cannot advertise a dead key. */
     expect(listKey(K("Enter"), false)).toBe("primary");
-    for (const [key, action] of [["s", "snooze"], ["x", "dismiss"], [".", "more"]] as const) {
+    for (const [key, action] of [["s", "snooze"], ["d", "dismiss"]] as const) {
       expect(listKey(K(key), false)).toBe(action);
     }
-    for (const k of ["Enter", "S", "X", "."]) {
-      expect(KEY_MAP.some((m) => m.key === k), `${k} is on an icon but not in the map`).toBe(true);
+    const strip = list.slice(list.indexOf('className={`actrow'), list.indexOf("</React.Fragment>"));
+    for (const kbd of ["<kbd>↵</kbd>", "<kbd>s</kbd>", "<kbd>d</kbd>"]) {
+      expect(strip, kbd + " left the strip").toContain(kbd);
     }
   });
 });
 
-describe("⚠️ SELECTION IS STILL NOT BUILT — and `x` is no longer free for it", () => {
+describe("⚠️ SELECTION IS STILL NOT BUILT — and `x` is free for it again", () => {
   /**
    * Sheet 7 says "selection borrows the batch model wholesale". THERE IS NO BATCH MODEL — the
    * ledger's machinery retired with the run sheet, `todoLedger`'s `batch*` helpers are the
@@ -181,17 +187,23 @@ describe("⚠️ SELECTION IS STILL NOT BUILT — and `x` is no longer free for 
     expect(code(list)).not.toContain("SELECTED ·");
   });
 
-  it("⚠️ `x` DISMISSES NOW, and the map says so — an unadvertised destructive key is a trap", () => {
-    expect(listKey(K("x"), false)).toBe("dismiss");
-    const entry = KEY_MAP.find((m) => m.key === "X");
-    expect(entry, "X must be in the map").toBeTruthy();
+  it("⚠️ `d` DISMISSES NOW AND `x` IS UNBOUND — a destructive key nothing teaches is a trap", () => {
+    /* the inversion of the case this replaces: the icon cluster whose tooltip taught `x` is
+       gone, the footer teaches `d`, and an untaught destructive binding must not survive its
+       teacher. The map still states the way back. */
+    expect(listKey(K("x"), false)).toBeNull();
+    expect(listKey(K("d"), false)).toBe("dismiss");
+    const entry = KEY_MAP.find((m) => m.key === "D");
+    expect(entry, "D must be in the map").toBeTruthy();
     expect(entry!.does).toMatch(/undo/i);          // …and the map states the way back
   });
 
   it("…and the reason the absence stands is still written where the next reader will look", () => {
-    expect(lib).toContain("THERE IS NO BATCH MODEL");
+    /* the note moved with the key: selection is still unbuilt, and `x` is AVAILABLE again —
+       a note claiming it was taken would be a comment outliving what it described */
     expect(lib).toContain("SELECTION_STILL_NOT_BUILT");
-    expect(lib).toContain("`x` is taken");
+    expect(lib).toContain("AVAILABLE again");
+    expect(lib, "the stale claim that x is taken").not.toContain("`x` is taken");
   });
 
   /**

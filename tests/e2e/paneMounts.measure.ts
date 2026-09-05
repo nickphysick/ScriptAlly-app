@@ -82,7 +82,18 @@ test("every journey type mounts its pane with a clean console", async ({ page })
         .find((r) => (((r.querySelector(".pill") || {}).textContent) || "").trim() === ${JSON.stringify(kind)});
       if (!row) return false;
       row.click();
-      return true;
+      return row.getAttribute("data-rowkey") || true;
+    })()`);
+    /* ⚠️ TWO CLICKS, A RENDER APART (tightened round, Phase 2): the first FOCUSES the row and
+       drops its action strip; the second opens. Two clicks in ONE evaluate read one render's
+       closure — the stale-closure batching fault — so the second waits for the strip to paint,
+       which is the state change the first click made. The claim this file makes — the pane
+       MOUNTS — is unchanged; the gesture grew a step, per the contract's own click grammar. */
+    await page.waitForFunction(
+      "!!document.querySelector('.tlc .actrow.show')", null, { timeout: 5_000 }).catch(() => {});
+    await page.evaluate(`(() => {
+      const focused = document.querySelector(".tlc .row.focus");
+      if (focused) focused.click();
     })()`);
     /* the pane is React state, so wait for it rather than for the clock — and a crash means it
        never comes, which is what the timeout then reports */

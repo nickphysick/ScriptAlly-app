@@ -23,8 +23,8 @@ import { BoardCard } from "../../lib/todoBoard";
 import { TaskGroup } from "../../lib/todoGroups";
 import { BUCKET_LABEL, cardBucket } from "../../lib/todoBuckets";
 import {
-  listAgency, listAgent, listAvatarInitials, listDeed, listFragment, listManuscript,
-  listMeta, RowInputs,
+  listAgency, listAgent, listAvatarInitials, listDeed, listFragment,
+  RowInputs,
 } from "../../lib/taskListRow";
 import "./taskList.css";
 
@@ -57,11 +57,36 @@ export interface TaskListProps {
   onAside: (anchor: HTMLElement) => void;
   asideMenu?: React.ReactNode;
   /**
-   * ⚠️ THE MANUSCRIPT COLUMN IS THE ACCOUNT'S DECISION, PASSED IN — the rule lives in
-   * `showsManuscriptColumn` and the page reads the manuscripts. The list is handed the answer
-   * rather than the collection, so it has no second way to reach a different one.
+   * ⚠️ THE MANUSCRIPT COLUMN IS RETIRED (tightened round, Phase 2) — the 44px row has no room
+   * for a cell most accounts leave blank, and the contract moves the name into the ACTION
+   * STRIP's right meta, where it rides the selected row instead of every row. The strip shows
+   * it whenever the card carries one; `showsManuscriptColumn`'s one-book rule retired with the
+   * column it governed.
    */
-  showManuscript?: boolean;
+  /**
+   * ⚠️ THE FOCUSED ROW — the keyboard's row and the strip's host. Focus is the PAGE's state
+   * (j/k live in the page's key effect, beside Escape's chain), handed down like selection so
+   * the list cannot hold a second opinion about which row the keys act on.
+   */
+  focusedKey?: string;
+  onFocusRow: (card: BoardCard) => void;
+  /**
+   * ⚠️ THE ACTION STRIP'S VERBS GO THROUGH THE PAGE — the same writers the sheet uses (the
+   * snooze panel, the dismiss confirm), never a second path. The strip renders under the
+   * focused row (or the selected one while the sheet is open); exactly one exists at a time
+   * because focus and selection are each single-valued and selection wins.
+   */
+  onStripSnooze: (anchor: HTMLElement, card: BoardCard) => void;
+  onStripDismiss: (card: BoardCard) => void;
+  /** the strip's quiet right meta — the manuscript name, derived by the page's own inputs */
+  stripMeta: (card: BoardCard) => string | null;
+  /**
+   * ⚠️ COLLAPSE IS THE PAGE'S STATE TOO, for the same reason focus is: j/k must skip the rows a
+   * closed section does not render, and only the page can hand the key effect the same visible
+   * set the list draws. Session-local — a preference would make a hidden group a stored fact.
+   */
+  collapsedGroups: string[];
+  onToggleGroup: (id: string) => void;
   /**
    * ⚠️ FOLDED IS THE DRAWER'S STATE, NOT THE LIST'S. When a task is open the card is 520px and
    * the row drops to three columns; the flag comes from the page because the page owns whether
@@ -134,7 +159,9 @@ const SortIcon = () => (
 export const TaskList: React.FC<TaskListProps> = ({
   groups, selectedKey, onOpen, rowInputs, search, onSearch, toolbar, onExport,
   filterActive, onFilter, filterMenu, sortActive, onSort, sortMenu,
-  asideActive, asideCount, onAside, asideMenu, showManuscript, folded, leaving,
+  asideActive, asideCount, onAside, asideMenu, folded, leaving,
+  focusedKey, onFocusRow, onStripSnooze, onStripDismiss, stripMeta,
+  collapsedGroups, onToggleGroup,
   chips, onClearFilters, filterCount, sortLabel, totalUnfiltered,
 }) => {
   /**
@@ -220,7 +247,7 @@ export const TaskList: React.FC<TaskListProps> = ({
        own name for this element. The pane port kept the mockup's class names verbatim and put the
        scope on the RULE; the same principle applies here, and the card is the one element where
        the two coincide — so it carries both rather than losing the contract's word. */
-    <div className={`tlc listcard${folded ? " folded" : ""}${showManuscript ? " hasms" : ""}`}>
+    <div className={`tlc listcard${folded ? " folded" : ""}`}>
       {/* ⚠️ THE TOOLBAR IS THE CARD'S FIRST CHILD (tightened round, Phase 1) — the meter and the
           three actions on one 32px row, ABOVE the search row. It is a slot: the page supplies the
           handlers, and the masthead keeps the page's one title element (the header stream's). */}
@@ -288,77 +315,102 @@ export const TaskList: React.FC<TaskListProps> = ({
                 anything selecting on `.grp.house` — the command bar's meter compares itself against
                 the three families, and a fourth head wearing one of their classes made the two
                 disagree. A group the map does not know renders a head with no tint. */}
-            <div className={GRP_CLASS[g.id] ? `grp ${GRP_CLASS[g.id]}` : "grp"}>
+            {/* ⚠️ THE HEAD IS A DISCLOSURE NOW (tightened round, Phase 2) — click collapses the
+                section, the chevron says which way, the COUNT STAYS so a closed group still
+                states its size. aria-expanded carries the state for the same reader the
+                role does. */}
+            <div
+              className={`${GRP_CLASS[g.id] ? `grp ${GRP_CLASS[g.id]}` : "grp"}${collapsedGroups.includes(g.id) ? " closed" : ""}`}
+              role="button"
+              tabIndex={0}
+              aria-expanded={!collapsedGroups.includes(g.id)}
+              onClick={() => onToggleGroup(g.id)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggleGroup(g.id); } }}
+            >
               <span className="g-dot" />
               <span className="g-lbl">{GRP_LABEL[g.id] ?? g.label}</span>
               <span className="g-n">{g.cards.length}</span>
+              <span className="g-cv" aria-hidden="true">⌄</span>
             </div>
-            {g.cards.map((c) => {
+            {!collapsedGroups.includes(g.id) && g.cards.map((c) => {
               const inputs: RowInputs = { card: c, ...rowInputs(c) };
               const bucket = cardBucket(c);
               const frag = listFragment(inputs);
-              const meta = listMeta(inputs);
               const avatarInitials = listAvatarInitials(c);
+              const agent = listAgent(inputs);
+              const agency = listAgency(inputs);
+              /* ⚠️ THE STRIP'S HOST: the selected row while the sheet is open, else the focused
+                 row. ONE expression, so "exactly one strip" is structural — selection and focus
+                 are each single-valued and selection wins.
+                 ⚠️ AND IT IS THE ONLY CONDITION ON THE STRIP. It first rendered as
+                 `hostsStrip && stripOn`, where the second term is implied by the first: a
+                 redundant guard, which a mutation aimed at the host then could not redden —
+                 the strip stayed correct for the wrong reason and the probe proved nothing.
+                 `stripOn` survives for the row's CLICK GRAMMAR, which is a different question
+                 (has this row been reached at all), not as a second gate on the strip. */
+              const hostsStrip = selectedKey ? c.key === selectedKey : c.key === focusedKey;
+              const stripOn = c.key === selectedKey || c.key === focusedKey;
               return (
-                /* ⚠️ THE ROW IS THE CONTROL. A div with an onClick and a keyboard equivalent —
-                   there is nothing interactive inside it, at rest or on hover. */
+                <React.Fragment key={c.key}>
+                {/* ⚠️ THE ROW IS THE CONTROL — a div with an onClick and the page's key
+                    equivalents; nothing interactive inside it. First activation FOCUSES (the
+                    strip drops beneath); the second — or a double-click, or the row while the
+                    sheet is already open — OPENS. The contract's own click grammar. */}
                 <div
-                  key={c.key}
-                  /* ⚠️ THE KEY IS ON THE ELEMENT because the fold's anchor has to find this exact
-                     row again after every row's height has changed. React's `key` is not in the
-                     DOM, and matching on text would break on the one thing that differs between
-                     the two widths — the meta line the fold reveals. */
+                  /* ⚠️ THE KEY IS ON THE ELEMENT because the completion hold's placement has to
+                     find this exact row again; matching on text would break on a copy change. */
                   data-rowkey={c.key}
-                  className={`row${c.key === selectedKey ? " sel" : ""}${leaving?.key === c.key ? (leaving.fading ? " held leaving" : " held") : ""}`}
+                  className={`row${c.key === selectedKey ? " sel" : ""}${c.key === focusedKey ? " focus" : ""}${leaving?.key === c.key ? (leaving.fading ? " held leaving" : " held") : ""}`}
                   role="button"
                   tabIndex={-1}
                   aria-current={c.key === selectedKey}
-                  onClick={() => onOpen(c)}
+                  onClick={() => { if (folded || stripOn) onOpen(c); else onFocusRow(c); }}
+                  onDoubleClick={() => onOpen(c)}
                 >
                   <span className={`pill ${bucket}`}>{BUCKET_LABEL[bucket]}</span>
-                  <div className="r-said">
-                    {bucket === "note"
-                      ? <div className="r-note">{c.title}</div>
-                      : <>
-                          <div className="r-deed">{listDeed(inputs)}</div>
-                          {meta.length > 0 && (
-                            <div className="r-meta">
-                              {meta.map((part, n) => (
-                                <React.Fragment key={n}>
-                                  {n > 0 && <span className="dot"> · </span>}
-                                  {part}
-                                </React.Fragment>
-                              ))}
-                            </div>
-                          )}
-                        </>}
+                  {/* ⚠️ ONE LINE: the deed with the agent INLINE and muted — the contract's
+                      `.deed span`. The two-line meta is retired with the row's height. */}
+                  <div className="r-deed">
+                    {bucket === "note" ? c.title : listDeed(inputs)}
+                    {(agent || agency) && (
+                      <span className="r-who">{[agent, agency].filter(Boolean).join(" · ")}</span>
+                    )}
                   </div>
-                  {/* ⚠️ THE THREE WIDE CELLS RENDER ALWAYS AND HIDE IN CSS — never conditionally
-                      mounted on `folded`. Unmounting them would make folding a DOM change, so
-                      every open and close would rebuild a third of the list; and a measurement
-                      could not then tell "the drawer is open" from "this row has no agency". */}
+                  {/* ⚠️ THE AGENT CELL RENDERS ALWAYS AND HIDES IN CSS when the drawer folds the
+                      row — never conditionally mounted, so folding cannot rebuild the list and a
+                      measurement can tell "folded" from "no agent". */}
                   <div className="cell r-ag">
                     {avatarInitials && (
                       <span className="av s" aria-hidden="true">{avatarInitials}</span>
                     )}
-                    <span className="r-agname">{listAgent(inputs)}</span>
+                    <span className="r-agname">{agent}</span>
                   </div>
-                  <div className="cell r-agc">{listAgency(inputs)}</div>
-                  <div className="cell r-ms">{listManuscript(inputs) ?? ""}</div>
                   <div className={`cell keep r-fig${frag.hot ? " hot" : ""}${frag.absent ? " absent" : ""}`}>
                     {frag.absent
                       ? frag.lead
                       : <>{frag.lead}{frag.lead && <br />}<b>{frag.figure}</b> {frag.tail}</>}
                   </div>
-                  {/* ⚠️ A SPAN, NOT THE CONTRACT'S `<button>` — and this is the one place the port
-                      diverges from the markup on purpose. The ROW is `role="button"`, and the
-                      mockup's `.actb` carries no handler of its own: its click works because the
-                      row's does. A real button inside a button is invalid, unreachable to a
-                      screen reader as anything separate, and would put a second tab stop on
-                      every row for a control that does exactly what the row already does. The
-                      treatment is the contract's to the pixel; only the element is honest. */}
-                  <span className="actb" aria-hidden="true"><span className="w">Action </span>›</span>
                 </div>
+                {/* ⚠️ THE ACTION STRIP — a SIBLING beneath the row, never an overlay: nothing may
+                    cover the row's content, and the strip staying under the selected row while
+                    the sheet is open is what anchors the sheet to its row. Its verbs go through
+                    the page's own doors (the snooze panel, the dismiss confirm) — the same
+                    writers as the sheet's, so there is no second path to a write. */}
+                {hostsStrip && (
+                  <div className={`actrow show${c.key === selectedKey ? " onsel" : ""}`}>
+                    <button type="button" className="go" onClick={() => onOpen(c)}>
+                      Open <kbd>↵</kbd>
+                    </button>
+                    <button type="button" data-act="snooze" onClick={(e) => onStripSnooze(e.currentTarget, c)}>
+                      Snooze <kbd>s</kbd>
+                    </button>
+                    <button type="button" data-act="dismiss" onClick={() => onStripDismiss(c)}>
+                      Dismiss <kbd>d</kbd>
+                    </button>
+                    {stripMeta(c) && <span className="meta">{stripMeta(c)}</span>}
+                  </div>
+                )}
+                </React.Fragment>
               );
             })}
           </React.Fragment>
@@ -372,6 +424,13 @@ export const TaskList: React.FC<TaskListProps> = ({
           ? <span className="c">Showing <b>{total}</b> of {totalUnfiltered}</span>
           : <span className="c"><b>{total}</b> tasks · {needsYouNow} need you now</span>}
         <a href="#" onClick={(e) => { e.preventDefault(); onExport(); }}>Export CSV</a>
+        {/* ⚠️ THE FOUR LIST KEYS, TAUGHT WHERE THEY WORK — the contract's footer. Each strip
+            control prints its own key beside its word; this line is the standing copy. Export
+            stays beside it: not in the contract's foot, but a live feature is not removed by a
+            mockup's silence — recorded in the round report. */}
+        <span className="keys" aria-hidden="true">
+          <kbd>j</kbd><kbd>k</kbd> move <kbd>↵</kbd> open <kbd>s</kbd> snooze <kbd>d</kbd> dismiss
+        </span>
       </div>
     </div>
   );

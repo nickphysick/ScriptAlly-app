@@ -282,6 +282,29 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav, 
    */
   const ready = d.fill?.ready ?? true;
   const [nudge, setNudge] = React.useState(false);
+  /* ⚠️ THE FORK'S DIGIT KEYS (tightened round, Phase 2) — while the sheet is AT ITS FORK, a bare
+     digit picks the option in that position. A crossover is deliberately NOT key-reachable: it
+     swaps the whole journey, and a swap should be a read-and-click, never a stray keystroke —
+     the contract prints keycaps only on the options that stay. Nothing fires inside an editable,
+     and the listener exists only while the fork does. */
+  const forkRef = React.useRef(d.fork);
+  forkRef.current = d.fork;
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const fork = forkRef.current;
+      if (!fork) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (!/^[1-9]$/.test(e.key)) return;
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest("input, textarea, select, [contenteditable]")) return;
+      const o = fork.options[Number(e.key) - 1];
+      if (!o || o.crossesTo) return;
+      e.preventDefault();
+      fork.onChoose(o.id);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const wasReady = React.useRef<boolean | null>(null);
   React.useEffect(() => {
     const first = wasReady.current === null;

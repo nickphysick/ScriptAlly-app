@@ -66,22 +66,16 @@ export function isTypingTarget(target: EventTarget | null): boolean {
  * or to the OS, and a page that swallows them takes a tool the writer already had.
  */
 export type ListAction =
-  | "down" | "up"        // j / k — move the focused row
-  | "tick"               // space — complete, or open the flow where the tick is not the act
-  /* ⚠️ THE NAME IS HISTORICAL AND THE DEED IS NOT (rail + workspace, P3). This was icon 1's deed
-     exactly, back when every row had one. Icon 1 is gone from the three KIND groups, so the key
-     OPENS the row in the workspace pane instead — the one deed that is true on all five groups.
-     The union member keeps its name because renaming it would touch four call sites to say the
-     same thing; what it MEANS is stated here and in the map below, which is what the overlay
-     prints. */
+  /* ⚠️ TRIMMED TO THE WIRED SET (tightened round, Phase 2) — the page now CALLS this function,
+     which changes what membership means: an action decided here and wired nowhere is a key that
+     does nothing, the exact fault the old docstring warned the overlay against. The retired
+     members — "tick" (space), "more" (.), "open" (o), "edit" (e) — belonged to the icon cluster,
+     which is gone; if a future round wires one, it re-enters HERE first, with its key. */
+  | "down" | "up"        // j / k and the arrows — move the focused row
   | "primary"            // enter — open the focused row in the workspace pane
-  | "snooze"             // s — open the dial on the focused row (icon 1 of the three)
-  | "dismiss"            // x — dismiss the row (icon 2); reversible from its receipt
-  | "more"               // . — open the row's menu (icon 3)
-  | "open"               // o — open the query
-  | "edit"               // e — the writer's own items only; the row decides, not this
-  | "close"              // esc — close the dial, then the menu (the row decides the order)
-  | "help";              // ? — the map, over the page
+  | "snooze"             // s — open the snooze panel on the focused row
+  | "dismiss"            // d — open the dismiss confirm on the focused row
+  | "close";             // esc — close the sheet (the page chains it last, after search)
 
 /**
  * ⚠️ FOUR OF THESE ARE THE CLUSTER'S ICONS, ONE KEY EACH, AND THAT PAIRING IS THE POINT (icon
@@ -95,17 +89,17 @@ export type ListAction =
 export function listKey(e: ShortcutKey, typing: boolean): ListAction | null {
   if (typing || e.metaKey || e.ctrlKey || e.altKey) return null;
   switch (e.key) {
-    case "j": case "J": return "down";
-    case "k": case "K": return "up";
-    case " ": return "tick";
+    case "j": case "J": case "ArrowDown": return "down";
+    case "k": case "K": case "ArrowUp": return "up";
     case "Enter": return "primary";
     case "s": case "S": return "snooze";
-    case "x": case "X": return "dismiss";
-    case ".": return "more";
-    case "o": case "O": return "open";
-    case "e": case "E": return "edit";
+    /* ⚠️ `d` DISMISSES NOW (tightened round, Phase 2) — the contract's key, printed in the list
+       footer. `x` is UNBOUND again: its claim to the key was the icon cluster's tooltip, the
+       cluster is gone, and a destructive key nothing on the page teaches is a stumble hazard.
+       The SELECTION note below is amended in the same commit — the mail-client convention is
+       available again. */
+    case "d": case "D": return "dismiss";
     case "Escape": return "close";
-    case "?": return "help";
     default: return null;
   }
 }
@@ -129,23 +123,11 @@ export function worksTheList(e: ShortcutKey, typing: boolean): boolean {
 }
 
 /**
- * ⚠️ `X` NOW DISMISSES, AND THAT FORECLOSES THE SELECTION CONVENTION — recorded here, where the
- * absence used to be, because a note that quietly changed its meaning would be worse than none.
- *
- * This constant used to say: `x` is unbound because sheet 7's "selection borrows the batch model
- * wholesale" is written against something that does not exist — THERE IS NO BATCH MODEL. (The
- * ledger's machinery went with the run sheet,
- * `todoLedger`'s `batch*` helpers are the housekeeping COHORT rather than a selection, and
- * board-optimise's Phase 8 was left unbuilt for exactly that reason, with Nick's call still open).
- *
- * THAT IS STILL TRUE — nothing selection-shaped exists. What changed is that the icon cluster
- * needed a key for its third icon, and `x` is the obvious one for a cross. So if selection is ever
- * built, `x` is taken, and the usual mail-client convention (`x` selects) is no longer available
- * on this page. That is a real cost and it is Nick's to weigh; it is flagged in the report rather
- * than discovered later by someone wondering why `x` deletes their row.
- *
- * The mitigations: dismiss is reversible from its own Undo receipt, and the icon's tooltip prints
- * the key, so the binding is taught rather than stumbled into.
+ * ⚠️ `X` IS UNBOUND AGAIN (tightened round, Phase 2) — dismiss moved to `d`, the contract's key.
+ * The icon cluster whose tooltip taught `x` is long gone, and a destructive key nothing on the
+ * page advertises is a stumble hazard rather than a shortcut. Consequence for the still-unbuilt
+ * selection model: the mail-client convention (`x` selects) is AVAILABLE again, should selection
+ * ever be built. Nothing selection-shaped exists today — that half of the old note stands.
  */
 export const SELECTION_STILL_NOT_BUILT = true;
 
@@ -158,14 +140,9 @@ export const SELECTION_STILL_NOT_BUILT = true;
  */
 export const KEY_MAP: { key: string; does: string }[] = [
   { key: "J / K", does: "Move down and up the rows" },
-  { key: "Space", does: "Tick the focused row — or open its flow, where the tick is not the act" },
   { key: "Enter", does: "Open the focused row in the workspace" },
-  { key: "S", does: "Open the snooze dial on the focused row" },
-  { key: "X", does: "Dismiss the focused row — undo from the receipt" },
-  { key: ".", does: "Open the row's menu" },
-  { key: "O", does: "Open the query behind the row" },
-  { key: "E", does: "Edit — your tasks and notes only" },
+  { key: "S", does: "Open the snooze panel on the focused row" },
+  { key: "D", does: "Dismiss the focused row — a confirm first, undo from the receipt" },
   { key: "/", does: "Jump to search" },
-  { key: "Esc", does: "Close the dial, then the menu" },
-  { key: "?", does: "This map" },
+  { key: "Esc", does: "Close the sheet" },
 ];

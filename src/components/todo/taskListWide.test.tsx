@@ -2,23 +2,21 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE WIDE ROW — the drawer round's Phase 1, locked where each half can be locked.
+ * THE DENSE ROW — the tightened round's Phase 2, locked where each half can be locked.
+ * (Supersedes the drawer round's wide-row suite in place: the manuscript COLUMN this file used
+ * to guard is retired — the name rides the ACTION STRIP's meta now — and the two-line meta went
+ * with the 44px height. What survives unchanged: the avatar-is-an-agent's law, the
+ * always-rendered-cells law, and the one-base-rule stylesheet discipline.)
  *
- * ⚠️ THREE LINKS, AND THEY ARE PROVED IN THREE PLACES BECAUSE ONE ARTEFACT CANNOT CARRY THEM ALL.
- *   1 · the RULE       — `showsManuscriptColumn(n)`, pure, both branches, here.
- *   2 · the WIRING     — the flag reaching the card's class and the cell's markup: RENDERED here,
- *                        not read out of the source, because "the prop is passed" and "the class
- *                        lands" are different claims and only the second is the one that matters.
- *   3 · the GEOMETRY   — the track's width and the cell's visibility on a real page:
- *                        `tests/e2e/listWide.measure.ts`. A stylesheet cannot be asked what a
- *                        browser did with it.
- *
- * ⚠️ AND THE ONE-MANUSCRIPT ACCOUNT IS NOT MEASURABLE ON THE HARNESS ACCOUNT, WHICH HAS FOUR. The
- * brief asks for "absent on one, present on two"; the fixture that carries the board's two shapes
- * is about materials gaps, and a one-manuscript variant would mean deleting three manuscripts —
- * which cascades their queries. So the ABSENT half is proved at links 1 and 2 (the rule says
- * false; the card renders without `hasms` and the cell without its text) and at link 3 by the
- * class, not by a second account. Stated rather than skipped: this is what the check has.
+ * ⚠️ THREE LINKS, PROVED IN THREE PLACES BECAUSE ONE ARTEFACT CANNOT CARRY THEM ALL.
+ *   1 · the RULE       — `showsManuscriptColumn(n)`, pure, both branches, here. Its consumer is
+ *                        the SORT MENU's manuscript-grouping gate now, not a column.
+ *   2 · the WIRING     — the strip under the focused row, the inline agent, the disclosure
+ *                        heads: RENDERED here, because "the prop is passed" and "the markup
+ *                        lands" are different claims and only the second matters.
+ *   3 · the GEOMETRY   — 44px in both states, the strip below the row covering nothing:
+ *                        `tests/e2e/tightened.measure.ts` Phase 2. A stylesheet cannot be asked
+ *                        what a browser did with it.
  */
 import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -40,16 +38,21 @@ const groups = (c: BoardCard): TaskGroup[] => [
   { id: "urgent", label: "Needs you now", description: "", cards: [c] },
 ];
 
-const render = (c: BoardCard, showManuscript: boolean) => renderToStaticMarkup(
+const render = (c: BoardCard, opts: {
+  focusedKey?: string; selectedKey?: string; collapsed?: string[];
+} = {}) => renderToStaticMarkup(
   <TaskList
     groups={groups(c)} onOpen={() => {}} rowInputs={() => ({ agency: "The Marsh Agency" })}
     search="" onSearch={() => {}} onExport={() => {}}
     onFilter={() => {}} onSort={() => {}} onAside={() => {}}
-    showManuscript={showManuscript}
+    focusedKey={opts.focusedKey} selectedKey={opts.selectedKey}
+    onFocusRow={() => {}} onStripSnooze={() => {}} onStripDismiss={() => {}}
+    stripMeta={(x) => listManuscript({ card: x })}
+    collapsedGroups={opts.collapsed ?? []} onToggleGroup={() => {}}
   />,
 );
 
-describe("1 · the rule — the manuscript column is a property of the account", () => {
+describe("1 · the rule — manuscript grouping is a property of the account", () => {
   it("more than one book to tell apart, and zero falls on the hidden side with one", () => {
     expect(showsManuscriptColumn(0)).toBe(false);
     expect(showsManuscriptColumn(1)).toBe(false);
@@ -58,41 +61,66 @@ describe("1 · the rule — the manuscript column is a property of the account",
   });
 });
 
-describe("2 · the wiring — RENDERED, so the claim is about the class and not the prop", () => {
-  it("the flag reaches the card's class in both positions", () => {
-    expect(render(card(), true), "the column is on and the card does not say so").toContain("hasms");
-    /* ⚠️ BOUNDED. `hasms` is a whole class name and the card's class list is built by template, so
-       the token is delimited by a space or a quote on both sides — the house rule about a
-       forbidden token being a PREFIX of a live one, applied before it can bite. */
-    expect(render(card(), false)).not.toMatch(/["\s]hasms["\s]/);
-  });
-
-  it("the cell is ALWAYS rendered — hiding it is CSS's job, never the tree's", () => {
-    /* ⚠️ THE CLAIM IS THAT FOLDING AND HIDING COST NO DOM. A conditionally-mounted cell would make
-       every open and close rebuild a third of the list, and would make "the drawer is open"
-       indistinguishable from "this row has no agency" to anything measuring the row. */
-    for (const on of [true, false]) {
-      const html = render(card(), on);
-      for (const cls of ["r-ag", "r-agc", "r-ms", "r-fig", "actb"]) {
-        expect(html, `${cls} is not in the row at showManuscript=${on}`).toContain(cls);
-      }
+describe("2 · the wiring — RENDERED, so the claims are about the markup and not the props", () => {
+  it("the retired cells are gone, bounded: no ms column, no agency column, no action chip", () => {
+    const html = render(card(), { focusedKey: "k1" });
+    for (const cls of ["r-ms", "r-agc", "actb", "r-meta", "hasms"]) {
+      expect(html, `${cls} came back`).not.toMatch(new RegExp('["\\s]' + cls + '["\\s]'));
     }
   });
 
-  it("the manuscript's own words are in the cell when the account has more than one book", () => {
-    expect(render(card(), true)).toContain("Murphy’s Day Out");
+  it("the agent rides the deed inline and the agent cell is ALWAYS rendered", () => {
+    /* ⚠️ hiding the cell when the drawer folds the row is CSS's job, never the tree's — a
+       conditionally-mounted cell would rebuild the list on every open and make "folded"
+       indistinguishable from "no agent" to anything measuring the row. */
+    const html = render(card());
+    expect(html).toContain("r-who");
+    expect(html).toContain("Jonathan Marsh · The Marsh Agency");
+    for (const cls of ["r-ag", "r-fig", "r-deed"]) {
+      expect(html, `${cls} left the row`).toContain(cls);
+    }
   });
 
-  it("the action control is not a second tab stop", () => {
-    /* ⚠️ THE ROW IS THE CONTROL. The contract draws `.actb` as a `<button>` and gives it no
-       handler of its own; a real button inside a `role="button"` row is invalid, and it would put
-       a tab stop on every row for something the row already does. The treatment is the contract's;
-       the element is honest. */
-    const html = render(card(), true);
-    const at = html.indexOf("actb");
-    const el = html.lastIndexOf("<", at);
-    expect(html.slice(el, at), "the action control became a real button again").toContain("<span");
-    expect(html).toContain('aria-hidden="true"><span class="w">Action </span>');
+  it("the strip renders under the FOCUSED row — three verbs, each teaching its key, the ms on the right", () => {
+    const html = render(card(), { focusedKey: "k1" });
+    expect(html).toContain("actrow show");
+    for (const verb of ["Open", "Snooze", "Dismiss"]) expect(html).toContain(verb);
+    for (const k of ["↵", "s", "d"]) expect(html).toContain("<kbd>" + k + "</kbd>");
+    expect(html, "the manuscript left the strip's meta").toContain("Murphy’s Day Out");
+    /* and with nothing focused there is NO strip at all */
+    expect(render(card()), "a strip with no host").not.toContain("actrow");
+  });
+
+  it("selection wins the strip — sel hosts it even when focus is elsewhere", () => {
+    /* one strip, structurally: selection and focus are each single-valued and selection wins. */
+    const two = renderToStaticMarkup(
+      <TaskList
+        groups={[{ id: "urgent", label: "Needs you now", description: "", cards: [card(), card({ key: "k2", who: "Aisha Kapoor", initials: "AK" })] }]}
+        onOpen={() => {}} rowInputs={() => ({ agency: "A" })}
+        search="" onSearch={() => {}} onExport={() => {}}
+        onFilter={() => {}} onSort={() => {}} onAside={() => {}}
+        focusedKey="k2" selectedKey="k1"
+        onFocusRow={() => {}} onStripSnooze={() => {}} onStripDismiss={() => {}}
+        stripMeta={() => null}
+        collapsedGroups={[]} onToggleGroup={() => {}}
+      />,
+    );
+    expect(two.match(/actrow show/g), "two strips at once").toHaveLength(1);
+    expect(two).toContain("actrow show onsel");
+  });
+
+  it("the head is a disclosure — collapsed keeps the count and renders no rows", () => {
+    const open = render(card());
+    expect(open).toContain('aria-expanded="true"');
+    const closed = render(card(), { collapsed: ["urgent"] });
+    expect(closed).toContain('aria-expanded="false"');
+    expect(closed, "a closed group hid its size").toContain('g-n">1<');
+    expect(closed, "a closed group still drew its rows").not.toContain("data-rowkey");
+  });
+
+  it("the footer teaches the four list keys", () => {
+    const html = render(card());
+    for (const k of ["j", "k", "s", "d"]) expect(html).toContain("<kbd>" + k + "</kbd>");
   });
 });
 
@@ -104,20 +132,21 @@ describe("2b · the avatar is an agent's, so a row without one has none", () => 
        it is not. */
     expect(listAvatarInitials(card({ userTaskId: "t1", initials: "✎", who: "" }))).toBeNull();
     expect(listAvatarInitials(card({ who: "", initials: "•" }))).toBeNull();
-    expect(render(card({ who: "", initials: "•", agentId: undefined }), true))
+    expect(render(card({ who: "", initials: "•", agentId: undefined })))
       .not.toMatch(/class="av s"/);
   });
 
-  it("a row with no manuscript prints nothing, never a placeholder", () => {
-    /* An empty cell in a column that only exists on a multi-book account reads correctly; a dash
-       is a statement about nothing. */
+  it("a row with no manuscript prints nothing in the strip, never a placeholder", () => {
     expect(listManuscript({ card: card({ msTitle: undefined }) })).toBeNull();
     expect(listManuscript({ card: card({ msTitle: "  " }) })).toBeNull();
+    const html = render(card({ msTitle: undefined }), { focusedKey: "k1" });
+    expect(html).toContain("actrow show");
+    expect(html, "an empty meta rendered anyway").not.toContain('class="meta"');
   });
 });
 
-describe("3 · the stylesheet states both shapes, and neither is sized by its content", () => {
-  it("the row's track list is a token with three values and the row reads only the token", () => {
+describe("3 · the stylesheet states both shapes, and the row is 44 in each", () => {
+  it("one base rule, the height stated on it, and a track list per state", () => {
     /* ⚠️ ONE BASE RULE FOR THE ROW. A `.folded` copy of the whole rule is how two rows drift; the
        modifier states ONLY the columns, which is what actually differs. */
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -127,8 +156,10 @@ describe("3 · the stylesheet states both shapes, and neither is sized by its co
       .toHaveLength(1);
     const row = css.slice(css.indexOf(".tlc .row {"), css.indexOf("}", css.indexOf(".tlc .row {")));
     expect(row).toContain("grid-template-columns:var(--row-cols)");
-    for (const sel of [".tlc            {", ".tlc.hasms      {", ".tlc.folded     {"]) {
+    expect(row, "the 44px height left the base rule").toContain("height:44px");
+    for (const sel of [".tlc            {", ".tlc.folded     {"]) {
       expect(css, `${sel} does not state a track list`).toContain(sel);
     }
+    expect(css, "the hasms track list survived its column").not.toContain(".tlc.hasms");
   });
 });

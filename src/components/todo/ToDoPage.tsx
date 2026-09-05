@@ -86,7 +86,7 @@ import {
 } from "../../lib/todoListView";
 import { useNavigate, useLocation } from "react-router-dom";
 import { groupColumn, TaskGroup } from "../../lib/todoGroups";
-import { paneCopy, showsManuscriptColumn } from "../../lib/taskListRow";
+import { paneCopy, listManuscript, showsManuscriptColumn } from "../../lib/taskListRow";
 import { daysBetween, elapsedParts } from "../../lib/elapsed";
 import { materialRows, materialName, anchorNoun, bandForward, holderRows } from "../../lib/todoHandoff";
 import { notifyGroups, reminderFields } from "../../lib/offerNotify";
@@ -121,7 +121,7 @@ import { CLOSE_REASONS } from "../../lib/todoJourneys";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
 import { clampSnooze, snoozeVia, completionVia, snoozeDateLabel } from "../../lib/todoActions";
-import { focusesSearch, isTypingTarget } from "../../lib/taskShortcuts";
+import { focusesSearch, isTypingTarget, listKey } from "../../lib/taskShortcuts";
 import { activityEventLabel } from "../../lib/activityEvent";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import {
@@ -461,12 +461,39 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   /* the two menus and the snooze panel, each anchored to the control that opened it */
   const [snoozeAnchor, setSnoozeAnchor] = useState<HTMLElement | null>(null);
+  /* ⚠️ THE STRIP'S DOORS (tightened round, Phase 2) — the row strip's Snooze and Dismiss open
+     the SAME panel and confirm the sheet's doors open, aimed at the strip's own card rather
+     than the docked one. Separate state from `snoozeAnchor`/`dismissOpen` because those read
+     `docked.card`, and the strip's row may not be docked. */
+  const [stripSnooze, setStripSnooze] = useState<{ anchor: HTMLElement; card: BoardCard } | null>(null);
+  const [stripDismiss, setStripDismiss] = useState<BoardCard | null>(null);
+  /* the rows the list is actually drawing — the key effect's j/k universe. Assigned each render
+     just before the return, AFTER everything `groupsForList` reads is declared (the TDZ rule). */
+  const visibleFlatRef = useRef<BoardCard[]>([]);
+  /* ⚠️ THE KEY EFFECT CALLS THIS THROUGH A REF, AND THAT IS NOT A STYLE CHOICE (tightened round,
+     Phase 2). The listener mounts once (`[]` deps — one listener for the page's life, which is
+     what stops two of them racing on one key), so it captures the FIRST render's `openDock`,
+     whose `dockable` was EMPTY while the board's data loaded. Enter therefore hit that
+     function's own "nothing to work through" guard and flashed, silently, for ever — measured:
+     the pointer path opened the sheet and the keyboard path did not, on the same row. Every
+     other value the effect reads already travels by ref for the same reason. */
+  const openDockRef = useRef<(key?: string) => void>(() => {});
   /* Phase 7 owns the dialog; Phase 2 only opens the state so the button is wired to something
      honest rather than to a write with no confirmation. */
   const [dismissOpen, setDismissOpen] = useState(false);
   const filterAnchor = React.useRef<HTMLElement | null>(null);
   const asideAnchor = React.useRef<HTMLElement | null>(null);
   const sortAnchor = React.useRef<HTMLElement | null>(null);
+  /* ⚠️ THE FOCUSED ROW AND THE COLLAPSED SECTIONS (tightened round, Phase 2) — both the PAGE's
+     state, because the key effect and the list must read one truth: j/k walk exactly the rows a
+     closed section does not render, and the strip's host is the same expression the list uses.
+     Session-local, deliberately — a stored collapse would make a hidden group a preference. */
+  const [focusKey, setFocusKey] = useState<string | null>(null);
+  const focusKeyRef = useRef<string | null>(null);
+  focusKeyRef.current = focusKey;
+  const [collapsedGroups, setCollapsedGroups] = useState<string[]>([]);
+  const collapsedRef = useRef<string[]>([]);
+  collapsedRef.current = collapsedGroups;
   // Drawer filters (Phase 4) — session-only; all-visible defaults (hiding is the writer's act).
   const [filters, setFilters] = useState<TodoFilterState>(DEFAULT_FILTERS);
   const filtersRef = useRef<TodoFilterState>(DEFAULT_FILTERS);
@@ -1248,26 +1275,71 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * Escape — a popover, a composer, a confirm — and swallowing the key at page level would reach
    * past their business. The same reasoning as the shell's New popover.
    */
+  /* ⚠️ THE LIST'S KEYS (tightened round, Phase 2) — the drawer pair grows into the contract's
+     grammar, DECIDED by `listKey` (lib/taskShortcuts) and only performed here. j/k and the
+     arrows move the focused row through the rows the list actually renders (a collapsed
+     section's rows are skipped because they are not in the visible set); with the sheet open
+     the same keys walk the docked task, which is the drawer round's ↑↓ behaviour under two more
+     names. Enter opens the focused row; s and d go through the SAME DOORS the strip's buttons
+     open — the snooze panel and the dismiss confirm — never a second writer. Escape keeps its
+     chain (search clears first, then the sheet), and nothing fires inside an editable: `j` typed
+     into the search box is a letter, which `listKey`'s own typing guard decides. */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape" && e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (!wrapRef.current || wrapRef.current.offsetParent === null) return; // page not visible
       const t = e.target as HTMLElement | null;
-      if (t && t.closest("input, textarea, select, [contenteditable]")) return;
-      if (!dockKeyRef.current) return;               // nothing open — nothing to close or walk
-      if (e.key === "Escape") {
+      const typing = !!(t && t.closest("input, textarea, select, [contenteditable]"));
+      const act = listKey(e, typing);
+      if (!act) return;
+      if (act === "close") {
+        if (!dockKeyRef.current) return;
         if (searchRef2.current) return;              // the search clears first (the chain above)
         closeDock();
         return;
       }
-      const list = dockableRef.current;
-      const i = list.findIndex((c) => c.key === dockKeyRef.current);
-      if (i < 0) return;
-      const j = e.key === "ArrowUp" ? i - 1 : i + 1;
-      if (j < 0 || j >= list.length) return;         // the ends do not wrap — see `step` below
-      e.preventDefault();                            // ...or the page scrolls under the pane
-      dockPos.current = j;
-      setDockKey(list[j].key);
+      if (act === "down" || act === "up") {
+        e.preventDefault();                          // ...or the page scrolls under the pane
+        if (dockKeyRef.current) {
+          const list = dockableRef.current;
+          const i = list.findIndex((c) => c.key === dockKeyRef.current);
+          if (i < 0) return;
+          const j = act === "up" ? i - 1 : i + 1;
+          if (j < 0 || j >= list.length) return;     // the ends do not wrap — see `step` below
+          dockPos.current = j;
+          setDockKey(list[j].key);
+          setFocusKey(list[j].key);
+          return;
+        }
+        const flat = visibleFlatRef.current;
+        if (flat.length === 0) return;
+        const i = flat.findIndex((c) => c.key === focusKeyRef.current);
+        const j = i < 0 ? (act === "up" ? flat.length - 1 : 0) : i + (act === "up" ? -1 : 1);
+        if (j < 0 || j >= flat.length) return;
+        setFocusKey(flat[j].key);
+        requestAnimationFrame(() => {
+          document.querySelector(".tlc .row.focus")?.scrollIntoView({ block: "nearest" });
+        });
+        return;
+      }
+      if (act === "primary") {
+        if (dockKeyRef.current || !focusKeyRef.current) return;
+        e.preventDefault();
+        openDockRef.current(focusKeyRef.current);
+        return;
+      }
+      /* s / d — the strip's card: the open task while the sheet is up, else the focused row.
+         The anchor is the strip's own button, so the panel hangs where the pointer path's
+         would; the row is the fallback if the strip has not painted yet. */
+      const key = dockKeyRef.current ?? focusKeyRef.current;
+      if (!key) return;
+      const card = dockableRef.current.find((c) => c.key === key)
+        ?? visibleFlatRef.current.find((c) => c.key === key);
+      if (!card) return;
+      e.preventDefault();
+      const anchor = (document.querySelector(".tlc .actrow.show [data-act=" + (act === "snooze" ? "snooze" : "dismiss") + "]")
+        ?? document.querySelector(".tlc .row[data-rowkey=\"" + card.key + "\"]")) as HTMLElement | null;
+      if (act === "snooze") { if (anchor) setStripSnooze({ anchor, card }); return; }
+      setStripDismiss(card);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -1608,6 +1680,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      groups the rail actually draws, so the message and the list cannot disagree. */
   const railEmpty = railGroups().length === 0;
 
+  /* ⚠️ ASSIGNED HERE, LAST — after every declaration `groupsForList` transitively reads (the
+     hoisted-helper TDZ rule: a render-time read is declared above its reader, and this is the
+     reader). The same visible set the list draws: collapsed sections contribute nothing. */
+  visibleFlatRef.current = groupsForList()
+    .filter((g) => !collapsedGroups.includes(g.id))
+    .flatMap((g) => g.cards);
+  openDockRef.current = openDock;
+
   return (
     <div className="t-f12 spine-root">
       <div className="tdb-wrap today-off" ref={wrapRef}>
@@ -1761,6 +1841,29 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               to the `s` key and the pane; this panel puts it back on a surface that says what it will do
               before it does it — the deed named, the return date stated, and the note that nothing is
               lost. It writes through `snoozeCard`, the existing primitive: one choke point, three doors. */}
+          {/* ⚠️ THE STRIP'S DOORS — the same SnoozePanel and TaskDismissDialog the sheet opens,
+              aimed at the STRIP's card. Two mounts, one panel each open at a time; both write
+              through the same primitives (snoozeCard / dismissCard), so the strip cannot grow a
+              second path to a write. */}
+          {stripSnooze && (
+            <AnchoredPanel anchor={stripSnooze.anchor} ariaLabel="Snooze this task" variant="panel"
+              onClose={(back) => { const a = stripSnooze.anchor; setStripSnooze(null); if (back) a?.focus(); }}>
+              <SnoozePanel
+                deed={taskDeed(stripSnooze.card)}
+                onCancel={() => { const a = stripSnooze.anchor; setStripSnooze(null); a?.focus(); }}
+                onConfirm={(days, when) => { snoozeCard(stripSnooze.card, days, when); setStripSnooze(null); }}
+              />
+            </AnchoredPanel>
+          )}
+          {stripDismiss && (
+            <TaskDismissDialog
+              deed={taskDeed(stripDismiss)}
+              hasQuery={!!stripDismiss.relatedRecordId && !stripDismiss.userTaskId}
+              agent={stripDismiss.who}
+              onKeep={() => setStripDismiss(null)}
+              onDismiss={() => { dismissCard(stripDismiss); setStripDismiss(null); }}
+            />
+          )}
           {snoozeAnchor && docked.card && (
             <AnchoredPanel anchor={snoozeAnchor} ariaLabel="Snooze this task" variant="panel"
               onClose={(back) => { const a = snoozeAnchor; setSnoozeAnchor(null); if (back) a?.focus(); }}>
@@ -2471,6 +2574,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const start = activeKey ?? dockable[0].key;
     dockPos.current = dockable.findIndex((c) => c.key === start);
     setDockKey(start);
+    /* selection implies focus — the contract's openRow sets both, so the strip stays under the
+       open row and j/k continue from it after a close */
+    setFocusKey(start);
   }
 
   function closeDock() {
@@ -2940,13 +3046,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         onOpen={(c) => openDock(c.key)}
         selectedKey={docked.card?.key}
         rowInputs={listRowInputs}
-        /* ⚠️ THE ACCOUNT DECIDES THE COLUMN, THROUGH THE ONE PREDICATE. `showsManuscriptColumn`
-           holds the rule (more than one book to tell apart); the page holds the manuscripts. The
-           list is handed the answer so it has no second route to a different one. */
-        showManuscript={showsManuscriptColumn(manuscripts.length)}
         /* ⚠️ THE SAME EXPRESSION THE SPLIT'S OWN CLASS READS — `!!paneCard`. Two derivations of
            "is a task open" is how a folded row ends up in a full-width card. */
         folded={!!paneCard}
+        /* ⚠️ FOCUS, COLLAPSE AND THE STRIP'S DOORS (tightened round, Phase 2) — all the page's
+           state, all one truth with the key effect. The strip's meta is the manuscript name,
+           derived by the SAME row inputs the cells use. */
+        focusedKey={focusKey ?? undefined}
+        onFocusRow={(c) => setFocusKey(c.key)}
+        onStripSnooze={(anchor, card) => setStripSnooze({ anchor, card })}
+        onStripDismiss={(card) => setStripDismiss(card)}
+        stripMeta={(c) => listManuscript({ card: c, ...listRowInputs(c) })}
+        collapsedGroups={collapsedGroups}
+        onToggleGroup={(id) => setCollapsedGroups((xs) =>
+          xs.includes(id) ? xs.filter((x) => x !== id) : [...xs, id])}
         /* ⚠️ THE CHIPS ARE DERIVED FROM THE SAME VIEW THE PANEL EDITS — remove one and you have
            edited the view, exactly as unticking it in the panel would. Facet names in mono per the
            contract; group heads use the family's own labels. */

@@ -68,8 +68,12 @@
 .tlc .l-body { overflow-y:auto;flex:1 1 auto;min-height:0;padding-bottom:4px; }
 .tlc .l-body::-webkit-scrollbar { width:9px; }
 .tlc .l-body::-webkit-scrollbar-thumb { background:#e2d6c8;border-radius:5px;border:2px solid var(--white); }
-.tlc .grp { position:sticky;top:0;z-index:3;display:flex;align-items:baseline;gap:9px; padding:15px 16px 8px;background:var(--white); }
+/* the head is a DISCLOSURE now (tightened round, Phase 2): click folds the section, the chevron
+   says which way, the count stays on the closed head */
+.tlc .grp { position:sticky;top:0;z-index:3;display:flex;align-items:baseline;gap:9px; padding:15px 16px 8px;background:var(--white);cursor:pointer;user-select:none;border:0;width:100%;text-align:left; }
 .tlc .grp::after { content:'';height:1px;background:var(--hair);flex:1;transform:translateY(-3px); }
+.tlc .grp .g-cv { font-size:10px;color:#c0b0a0;transition:transform .2s;transform-origin:center;align-self:center; }
+.tlc .grp.closed .g-cv { transform:rotate(-90deg); }
 .tlc .grp .g-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0;transform:translateY(-1px); }
 .tlc .grp.now .g-dot { background:#c96f52; }
 .tlc .grp.house .g-dot { background:#7e937c; }
@@ -77,26 +81,18 @@
 .tlc .grp .g-lbl { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink2);font-weight:500;white-space:nowrap; }
 .tlc .grp .g-n { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;color:#c0b0a0; }
 /* ⚠️ ONE BASE RULE FOR `.tlc .row`, AND THE COLUMNS ARE THE ONLY THING THE TWO WIDTHS ARGUE
-   ABOUT. The wide grid is the drawer contract's own track list (`todo-fullscreen-final.html`);
-   the folded one is its `.stage.open .row`. Everything else — the padding, the selection
-   border, the hover — is shared, so a change to the row's feel cannot land in one width and
-   not the other. Restating the whole rule under `.folded` is what produced two rows that
-   drifted; the modifier below states ONLY the columns. */
-.tlc .row { display:grid;grid-template-columns:var(--row-cols);gap:14px;align-items:center; padding:11px 16px 11px 13px;cursor:pointer;border-left:3px solid transparent;transition:background .13s;position:relative; }
+   ABOUT (tightened round, Phase 2 — the contract's 44px SINGLE-LINE row, both states). The rest
+   grid is `todo-belongs.html`'s own track list; folded is its `.stage.open .row`, which drops
+   the agent cell. Everything else — the height, the selection border, the hover — is shared, so
+   a change to the row's feel cannot land in one width and not the other. The HEIGHT is stated,
+   not inherited from padding: a 44px row in both states is the whole density claim, and the
+   fold no longer changes any row's height (the drawer round's row-anchor restore now restores
+   an unchanged position — harmless, and its comment says so). */
+.tlc .row { display:grid;grid-template-columns:var(--row-cols);gap:10px;align-items:center; height:44px;padding:0 16px 0 13px;cursor:pointer;border-left:3px solid transparent; border-bottom:1px solid #f3ece3;transition:background .13s;position:relative;box-sizing:border-box; }
 
-/* ⚠️ THE TRACK LIST IS A TOKEN ON THE CARD, NOT A DECLARATION ON THE ROW — three widths, one
-   property, and the row never learns which of them it is in. The manuscript track is dropped
-   rather than zeroed: a `0px` track still takes the row's `gap` on both sides, so a hidden
-   column would leave 28px of hole that nothing accounts for. */
-.tlc            { --row-cols: 64px minmax(180px,1.4fr) minmax(130px,1fr) minmax(130px,1fr) 0px 118px 96px; }
-.tlc.hasms      { --row-cols: 64px minmax(180px,1.4fr) minmax(130px,1fr) minmax(130px,1fr) minmax(120px,.9fr) 118px 96px; }
-.tlc.folded     { --row-cols: 64px minmax(0,1fr) 118px; }
-.tlc.folded.hasms { --row-cols: 64px minmax(0,1fr) 118px; }
-
-/* ⚠️ THE MANUSCRIPT CELL IS EMPTIED, NOT UNMOUNTED (see the component's note). `display:none` on
-   a grid child removes it from placement, which would shift every cell after it into the wrong
-   track — so it keeps its (zero-width) track and hides its ink. */
-.tlc:not(.hasms) .r-ms { visibility:hidden; }
+/* the track lists — a token on the card, so the row never learns which state it is in */
+.tlc            { --row-cols: 56px minmax(0,1fr) auto 96px; }
+.tlc.folded     { --row-cols: 56px minmax(0,1fr) 96px; }
 
 /* ── the wide row's three cells ─────────────────────────────────────────────────────────── */
 .tlc .cell { font-size:12px;color:var(--ink2);font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0; }
@@ -106,19 +102,20 @@
 .tlc .av { display:inline-flex;align-items:center;justify-content:center;border-radius:50%; background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-weight:500; letter-spacing:0.02em;flex-shrink:0;border:1px solid rgba(124,58,42,0.18);overflow:hidden; }
 .tlc .av.s { width:22px;height:22px;font-size:8px; }
 
-/* ⚠️ QUIET AT REST, PINK ON THE ROW'S HOVER — and the hover is the ROW's, not the control's, so
-   the whole row lights one affordance rather than the pointer having to find it. Transparent is
-   stated rather than omitted: an unstated background is `rgba(0,0,0,0)` too, but a measurement
-   asking what this control looks like at rest deserves a declaration to read. */
-.tlc .actb { justify-self:end;height:28px;padding:0 12px;border-radius:999px; border:1px solid transparent;background:transparent;font-size:11px;font-weight:500;color:#c0b0a0; display:inline-flex;align-items:center;transition:background .12s,border-color .12s,color .12s; }
-/* ⚠️ THE COMPUTED VALUE OF THE SHOWN STATE IS `block`, NOT `inline`, AND NOTHING IS WRONG. `.actb`
-   is an inline-flex container, so a direct child is BLOCKIFIED — the browser rewrites `inline` to
-   `block` before anything can read it. The declaration is the contract's word and the layout is
-   identical either way; a measurement asking whether the word shows must therefore ask "not
-   none", never "inline". Recorded here because the first reading of it looked like a lost rule. */
-.tlc .actb .w { display:none; }
-.tlc .row:hover .actb { border-color:var(--pink-b);background:var(--pink);color:var(--burg); }
-.tlc .row:hover .actb .w { display:inline; }
+/* ── the action strip — a SIBLING beneath its row, never an overlay (tightened round, Phase 2;
+   contract .actrow). It joins the row it serves: the row's border-bottom goes transparent when
+   focused or selected, so the strip's own bottom rule closes the pair as one object. The
+   selected variant carries the selection's tint and inset bar. `.actb` (the hover chip) is
+   retired with its rules — the strip is the one action surface on a row. ── */
+.tlc .actrow { display:none;align-items:center;gap:6px;padding:0 12px 8px 79px;background:#fbf8f3; border-bottom:1px solid #f3ece3;animation:tlDropIn .16s ease; }
+.tlc .actrow.show { display:flex; }
+.tlc .actrow.onsel { background:#f5e6df;box-shadow:inset 3px 0 0 var(--burg); }
+@keyframes tlDropIn { from { opacity:0;transform:translateY(-3px); } to { opacity:1;transform:none; } }
+.tlc .actrow button { cursor:pointer;height:26px;padding:0 10px;border-radius:7px;font-size:11px;color:#57534e; display:inline-flex;align-items:center;gap:6px;border:1px solid var(--edge);background:var(--white); }
+.tlc .actrow button kbd { font-family:'JetBrains Mono',monospace;font-size:8px;color:#b3a494; }
+.tlc .actrow button.go { background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500; }
+.tlc .actrow button:hover { border-color:#c9a89e; }
+.tlc .actrow .meta { margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.08em;text-transform:uppercase;color:#b3a494;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 
 /* ── the view's chrome — the badge, the label, the chips (drawer round, Phase 6) ────────── */
 /* every name minted here was grepped first (the `.unitrow` lesson): l-fbadge, l-slbl, l-wide,
@@ -137,29 +134,21 @@
 .tlc .fchip .x:hover { opacity:1; }
 .tlc .l-clear { margin-left:auto;font-size:10.5px;color:var(--muted2);cursor:pointer;background:none;border:0;padding:0; border-bottom:1px dashed rgba(124,58,42,0.3); }
 
-/* ── the receipt window's row (drawer round, Phase 5) ───────────────────────────────────── */
-/* ⚠️ `held` GIVES THE TRANSITION A FROM-VALUE; `leaving` IS THE FADE. `max-height` cannot animate
-   from `auto`, so the held row states a ceiling comfortably above any row (the tallest folded row
-   measures ~58px) and the fade takes it to zero with the paddings and the border — collapse and
-   opacity in one 300ms move, which is what stops the list snapping shut under the reader. Applied
-   only to the ONE held row, never to rows at large: a standing max-height on every row is a crop
-   waiting for a taller row. */
-.tlc .row.held { max-height:120px;transition:opacity .3s ease,max-height .3s ease,padding .3s ease,border-width .3s ease; }
-.tlc .row.held.leaving { opacity:0;max-height:0;padding-top:0;padding-bottom:0;border-width:0;overflow:hidden;pointer-events:none; }
+/* ── the receipt window's row (drawer round, Phase 5; retimed for the 44px row) ─────────── */
+/* ⚠️ THE ROW STATES ITS HEIGHT NOW, so the fade animates the real property — 44 to 0 — instead
+   of the max-height stand-in the auto-height row needed. `held` gives the transition its
+   from-value; `leaving` is the fade. Applied only to the ONE held row, never rows at large. */
+.tlc .row.held { transition:opacity .3s ease,height .3s ease,padding .3s ease,border-width .3s ease; }
+.tlc .row.held.leaving { opacity:0;height:0;padding-top:0;padding-bottom:0;border-width:0;overflow:hidden;pointer-events:none; }
 
-/* ── folded: the drawer is open and the card is 520px ───────────────────────────────────── */
-/* ⚠️ THE META LINE AND THE COLUMNS ARE THE SAME FACTS, SO EXACTLY ONE OF THEM SHOWS. Wide, the
-   agent, agency and manuscript have columns and the meta sentence is redundant; folded, the
-   columns are gone and the sentence is the only place those facts survive. Showing both was the
-   rail's state and it printed the agent twice. */
+/* ── folded: the drawer is open and the card is 520px — SAME 44px single-line row, minus the
+   agent cell (the deed's inline `.r-who` still names them). The contract's .stage.open .row. ── */
 .tlc.folded .cell:not(.keep) { display:none; }
-.tlc.folded .actb { display:none; }
-.tlc.folded .r-deed { white-space:normal; }
 .tlc.folded .keep { text-align:right; }
-.tlc .row:hover { background:#fbf7f2; }
-.tlc .row.sel { background:#f6efe7;border-left-color:var(--burg); }
-.tlc .row+.row::before { content:'';position:absolute;top:0;left:16px;right:16px;height:1px;background:#f3ece3; }
-.tlc .row.sel::before, .tlc .row.sel+.row::before { display:none; }
+.tlc .row:hover, .tlc .row.focus { background:#fbf8f3; }
+.tlc .row.sel { background:#f5e6df;border-left-color:var(--burg); }
+/* the strip joins its row: the host row's own rule goes transparent so the pair reads as one */
+.tlc .row.focus, .tlc .row.sel { border-bottom-color:transparent; }
 .tlc .pill { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;border-radius:6px; padding:4.5px 0;text-align:center;font-weight:500;text-transform:uppercase; }
 .tlc .pill.send { background:#fbeee7;border:0.5px solid #f2dccf;color:#a05a42; }
 .tlc .pill.decide { background:#f6e3da;border:0.5px solid #e8c8bc;color:#7c3a2a; }
@@ -167,11 +156,10 @@
 .tlc .pill.close { background:#eef1ec;border:0.5px solid #dfe5dc;color:#5a6e58; }
 .tlc .pill.fix { background:#eceef2;border:0.5px solid #dde1e8;color:#5c6a80; }
 .tlc .pill.note { background:#faf4e8;border:0.5px solid #efe4cc;color:#a08a58; }
-.tlc .r-deed { font-size:13px;font-weight:600;color:var(--ink);line-height:1.3;letter-spacing:0.001em; white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-.tlc .r-meta { display:none;font-size:11px;color:var(--muted2);font-weight:300;margin-top:2.5px; white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-.tlc.folded .r-meta { display:block; }
-.tlc .r-meta .dot { color:#d8ccbe;padding:0 1px; }
-.tlc .r-note { font-family:'Caveat',cursive;font-size:17.5px;color:#6a5a48;font-weight:500;line-height:1.1; }
+/* one line, both states — the deed with the agent INLINE and muted (the contract's .deed span) */
+.tlc .r-deed { font-size:12.5px;font-weight:500;color:var(--ink);line-height:1.3; white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0; }
+.tlc .r-deed .r-who { font-weight:300;color:var(--muted2);margin-left:6px; }
+
 .tlc .r-fig { text-align:right;min-width:0;white-space:normal;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.07em;line-height:1.55;color:var(--muted2);text-transform:uppercase; }
 .tlc .r-fig b { font-family:'Playfair Display',serif;font-size:15px;letter-spacing:0;text-transform:none;font-weight:500;color:var(--ink2);padding-right:1px;font-variant-numeric:lining-nums; }
 .tlc .r-fig.hot b { color:var(--burg); }
