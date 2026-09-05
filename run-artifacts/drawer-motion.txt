@@ -1,0 +1,50 @@
+green  · P2.0 @1440 · rows on the board, and the page arrives closed
+           rows = 30 · split.open = false
+green  · P2.1 @1440 · the list, the drawer and the gap all first move on the SAME frame
+           list 1 · drawer 1 · gap 1 · from 1100/0/0 to 520/562/18
+green  · P2.2 @1440 · list + gap + drawer IS the split, on every frame of the motion
+           worst frame is out by 0.02px across 40 frames
+green  · P2.3 @1440 · no dim, no backdrop, nothing laid over the page
+           no full-viewport painted layer
+green  · P2.4 @1440 · the list stays live and scrollable beside the drawer
+           scrolled to 120 of 1439 · pointer-events auto
+green  · P2.5 @1440 · the selected row keeps its mark and stays in view
+           in view = true · marker rgb(124, 58, 42)
+green  · P2.6 @1440 · the band's › moves to another task without closing
+           from "DecideReply to the offerNoah Bright offe" to "SendSend your full manuscriptOttoline Fr" · still open = true
+green  · P2.7 @1440 · ↑ walks back to the previous task, still without closing
+           back to "DecideReply to the offerNoah Bright offe" · still open = true
+green  · P2.8 @1440 · the band's Close returns the list to full width
+           open = false · card 1100px
+green  · P2.9 @1440 · the reader keeps their place — the same row is still at the top
+           top row "SendSend your full manuscriptOttoline Fr" → "SendSend your full manuscriptOttoline Fr" · scrollTop 140 → 132 (anchoring, against a row height of 57.9)
+green  · P2.10 @1440 · Escape closes it too
+           open = false · card 1100px
+green  · P2.11 @1440 · the sidebar does not move with the drawer (skipped, and checked)
+           sidebar 224px before · 224px after
+green  · P2.0 @1920 · rows on the board, and the page arrives closed
+           rows = 30 · split.open = false
+green  · P2.1 @1920 · the list, the drawer and the gap all first move on the SAME frame
+           list 1 · drawer 1 · gap 1 · from 1412.64/164.53/2.84 to 520/1042/18
+green  · P2.2 @1920 · list + gap + drawer IS the split, on every frame of the motion
+           worst frame is out by 0.02px across 40 frames
+green  · P2.3 @1920 · no dim, no backdrop, nothing laid over the page
+           no full-viewport painted layer
+green  · P2.4 @1920 · the list stays live and scrollable beside the drawer
+           scrolled to 120 of 1439 · pointer-events auto
+green  · P2.5 @1920 · the selected row keeps its mark and stays in view
+           in view = true · marker rgb(124, 58, 42)
+green  · P2.6 @1920 · the band's › moves to another task without closing
+           from "DecideReply to the offerNoah Bright offe" to "SendSend your full manuscriptOttoline Fr" · still open = true
+green  · P2.7 @1920 · ↑ walks back to the previous task, still without closing
+           back to "DecideReply to the offerNoah Bright offe" · still open = true
+green  · P2.8 @1920 · the band's Close returns the list to full width
+           open = false · card 1580px
+green  · P2.9 @1920 · the reader keeps their place — the same row is still at the top
+           top row "SendSend your full manuscriptOttoline Fr" → "SendSend your full manuscriptOttoline Fr" · scrollTop 140 → 132 (anchoring, against a row height of 57.9)
+green  · P2.10 @1920 · Escape closes it too
+           open = false · card 1580px
+green  · P2.11 @1920 · the sidebar does not move with the drawer (skipped, and checked)
+           sidebar 224px before · 224px after
+green  · P2.12 · the motion is 380ms, and reduced motion makes it a swap
+           no-preference 0.38s, 0.38s · reduce 1e-05s (0.01ms)

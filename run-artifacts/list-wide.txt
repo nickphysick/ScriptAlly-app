@@ -1,0 +1,56 @@
+green  · P1.0 @1440 · the board rendered, so there is something to measure
+           rows = 30
+green  · P1.1 @1440 · the page ARRIVES at rest — nothing docked, nothing folded
+           split.open=false card.folded=false selected rows=0
+green  · P1.2 @1440 · the list card's width IS the content area's
+           card 1100 / area 1100 · gaps L0 R0
+green  · P1.3 @1440 · the resting split resolves to ONE track
+           grid-template-columns = 1100px
+green  · P1.4 @1440 · the wide row is a SEVEN-track grid
+           tracks = [NaN, NaN, NaN, NaN, NaN, NaN, NaN]
+green  · P1.5 @1440 · the manuscript column is present and carries ink (4 manuscripts)
+           hasms=true width=147.3 visibility=visible text="The Smoke Test"
+green  · P1.6 @1440 · without the class the manuscript track is ZERO and its ink is hidden
+           track = NaN · cell width 0 · visibility hidden
+green  · P1.7 @1440 · the action control is transparent at rest
+           background rgba(0, 0, 0, 0) · border rgba(0, 0, 0, 0) · the word is none
+green  · P1.8 @1440 · under the row's hover it is --pink and says the word
+           background rgb(245, 226, 218) · border rgb(232, 200, 188) · colour rgb(124, 58, 42) · the word is block
+green  · P1.9 @1440 · the row holds no focusable child
+           the control is a <span> · focusable children = false
+green  · P1.10 @1440 · the agent's disc is 22px, blush, with a burgundy hairline
+           22x22 · rgb(239, 228, 220) · 1px rgba(124, 58, 42, 0.18) · "NB"
+green  · P1.11 @1440 · the meta sentence is hidden while the columns carry its facts
+           display = none
+green  · P1.12 @1440 · opening a task folds the card to 520 and the row to three tracks
+           open=true folded=true card=520px tracks=3
+green  · P1.13 @1440 · folded, the meta sentence comes back and the action control goes
+           meta block · action none
+green  · P1.0 @1920 · the board rendered, so there is something to measure
+           rows = 30
+green  · P1.1 @1920 · the page ARRIVES at rest — nothing docked, nothing folded
+           split.open=false card.folded=false selected rows=0
+green  · P1.2 @1920 · the list card's width IS the content area's
+           card 1580 / area 1580 · gaps L0 R0
+green  · P1.3 @1920 · the resting split resolves to ONE track
+           grid-template-columns = 1580px
+green  · P1.4 @1920 · the wide row is a SEVEN-track grid
+           tracks = [NaN, NaN, NaN, NaN, NaN, NaN, NaN]
+green  · P1.5 @1920 · the manuscript column is present and carries ink (4 manuscripts)
+           hasms=true width=247.8 visibility=visible text="The Smoke Test"
+green  · P1.6 @1920 · without the class the manuscript track is ZERO and its ink is hidden
+           track = NaN · cell width 0 · visibility hidden
+green  · P1.7 @1920 · the action control is transparent at rest
+           background rgba(0, 0, 0, 0) · border rgba(0, 0, 0, 0) · the word is none
+green  · P1.8 @1920 · under the row's hover it is --pink and says the word
+           background rgb(245, 226, 218) · border rgb(232, 200, 188) · colour rgb(124, 58, 42) · the word is block
+green  · P1.9 @1920 · the row holds no focusable child
+           the control is a <span> · focusable children = false
+green  · P1.10 @1920 · the agent's disc is 22px, blush, with a burgundy hairline
+           22x22 · rgb(239, 228, 220) · 1px rgba(124, 58, 42, 0.18) · "NB"
+green  · P1.11 @1920 · the meta sentence is hidden while the columns carry its facts
+           display = none
+green  · P1.12 @1920 · opening a task folds the card to 520 and the row to three tracks
+           open=true folded=true card=520px tracks=3
+green  · P1.13 @1920 · folded, the meta sentence comes back and the action control goes
+           meta block · action none
