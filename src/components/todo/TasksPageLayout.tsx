@@ -65,6 +65,10 @@ export interface TasksPageLayoutProps {
      they are one contract shared with every band-tier page. */
   /** The page's controls — the ONLY place they may live. Right slot = the pink creation action. */
   tools?: React.ReactNode;
+  /** The page's ONE call to action, forwarded to the masthead's CTA slot (the header session's
+   *  `PageHeader primary` — Query Centre's `Log new query` is the reference). Optional and
+   *  additive: the To-do list and the Noteboard pass nothing and render byte-identically. */
+  primary?: { label: string; onClick: () => void; disabled?: boolean };
   /** The shared side container. Absent = the body takes the full width (the Noteboard). */
   sidebar?: React.ReactNode;
   children: React.ReactNode;
@@ -108,7 +112,7 @@ export const TplZone: React.FC<TplZoneProps> = ({ children, hem = true, classNam
 );
 
 export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({
-  title, mark, subtitle, eyebrow, tools, sidebar, children,
+  title, mark, subtitle, eyebrow, tools, primary, sidebar, children,
 }) => (
   /* `.tdb-col` is the SINGLE geometry owner (max-width, gutters, and the top token) — the layout
      wears it rather than restating its numbers. `.tpl` adds only what the contract needs. */
@@ -152,7 +156,7 @@ export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({
        */
       scroller=".tpl-zone, .l-body, .cal-fpbody"
       scrollLabel={title}
-      masthead={<PageHeader variant="workspace" mark={mark} title={title} description={subtitle} />}
+      masthead={<PageHeader variant="workspace" mark={mark} title={title} description={subtitle} primary={primary} />}
       /* ⚠️ THE EYEBROW RIDES THE TOOL ROW. Mono context — a date, a week count — and the rule is
          that the plate carries identity while the tool row carries tallies and context. Absent
          both, the grid renders no row and no hairline rather than a bare rule. */

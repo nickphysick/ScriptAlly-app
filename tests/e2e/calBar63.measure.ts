@@ -544,6 +544,13 @@ test.describe("v63 · D — the bar", () => {
           if (!t) continue;
           seen.push(t);
           for (const w of t.split(/\s+/)) if (/^[a-z]/.test(w) && !SMALL.has(w)) bad.push(`${t} → ${w}`);
+          /* ⚠️ AND THE SHOUTED FORM (v64 addendum §3). `/^[a-z]/` catches a lower-case start and
+             cannot see "PRIYA RAMAN" at all — every word starts upper — so the one fault this
+             case was written against sailed through it. A whole string in caps across two or
+             more words is a fixture fault (agents are people; nobody stores their own name
+             shouted); a single-word initialism agency ("PFD") stays legitimate. */
+          if (t === t.toUpperCase() && /[A-Z]{3}/.test(t) && t.split(/\s+/).length >= 2)
+            bad.push(`${t} → SHOUTED`);
         }
       }
       return { seen: seen.length, bad: [...new Set(bad)] };

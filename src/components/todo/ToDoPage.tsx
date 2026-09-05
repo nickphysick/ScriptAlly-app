@@ -84,7 +84,7 @@ import {
   typeCounts as viewTypeCounts, viewTotal, VIEW_DEFAULT,
   viewLeaving, viewButtonLabel, filterBadge, TYPE_ORDER, TYPE_LABEL, GROUP_IDS,
 } from "../../lib/todoListView";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { groupColumn, TaskGroup } from "../../lib/todoGroups";
 import { paneCopy, showsManuscriptColumn } from "../../lib/taskListRow";
 import { daysBetween, elapsedParts } from "../../lib/elapsed";
@@ -1444,6 +1444,30 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        an unrelated stretch of work under it. One frame later, so the card is in the DOM first. */
     requestAnimationFrame(() => { if (zoneRef.current) zoneRef.current.scrollTop = 0; });
   };
+
+  /**
+   * ⚠️ THE ONE-SHOT COMPOSER OPEN — the sibling of `sa.agentReveal` and `sa.manuscriptReveal`,
+   * and deliberately the same idiom rather than a third mechanism. The Calendar's `New task` CTA
+   * sets the key and navigates here; a gesture, not an address — it must not survive the tab,
+   * must not enter history, and fires exactly once.
+   *
+   * ⚠️ KEYED ON `pathname`, NOT ON MOUNT — this page is ALWAYS mounted (`StagePage` toggles
+   * display), so a mount effect fires once at app load with no key to read and never again: the
+   * exact trap AllManuscripts measured and documented. Arrival is what changes the pathname.
+   *
+   * ⚠️ DECLARED BELOW `openComposer`, WHICH IT CALLS. An effect closing over a later `const` is
+   * legal and is the shape this repo has been bitten by; the order makes the read obvious.
+   */
+  const { pathname } = useLocation();
+  React.useEffect(() => {
+    if (pathname !== "/todo") return;
+    let want: string | null = null;
+    try { want = sessionStorage.getItem("sa.todoCompose"); } catch { /* private mode */ }
+    if (want !== "task" && want !== "note") return;
+    try { sessionStorage.removeItem("sa.todoCompose"); } catch { /* private mode */ }
+    openComposer(want);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
   /* board fixes II P1 — the ⋯ menu's Edit: the same composer, seeded from the card. The nature
      follows the card's own (a dated task edits as a task); clearing the date on save DOWNGRADES
      it to a note through the same update, which is the two-natures law applied to editing. */

@@ -3196,32 +3196,24 @@ data-rowkey={r.key}
   return (
     <div className="t-f12 spine-root cal-timeline" ref={pageRef}>
       <div className="tdb-wrap today-off">
+        {/* ⚠️ THE ACTION STRIP IS GONE (v64 addendum §1) AND THE CTA TOOK ITS JOB. The three-door
+            row lasted one section: "Add a note" and "Go to to-do list" are not carried, and the
+            page's one creative verb — New task — moves to the masthead's CTA slot, the same slot
+            and style Query Centre's `Log new query` uses. The board takes the strip's height; its
+            24px bottom bound is unchanged.
+
+            ⚠️ THE CTA OPENS THE TO-DO LIST'S OWN COMPOSER, NOT A COPY. The composer is that page's
+            local state, so the press travels as `sa.todoCompose` — the one-shot sessionStorage
+            idiom `sa.agentReveal` established (a gesture, not an address: it must not survive the
+            tab, must not enter history, and fires exactly once) — and ToDoPage consumes it on
+            arrival. A second composer here would be two surfaces waiting to disagree. */}
         <TasksPageLayout
           title="Calendar"
           mark="calendar"
-          tools={
-            /* ⚠️ THE PAGE'S ACTION STRIP (v64 §A1) — three actions, in the masthead's own slot,
-               which the header session owns; this page only fills it. v61 emptied this row because
-               it held five VIEW controls competing with the board; these three are DOORS, not view
-               state, which is why the row comes back for them and for nothing else.
-
-               ⚠️ ALL THREE NAVIGATE. The task and note composers are page-local state on /todo and
-               the Noteboard — no route opens them, and those files are another session's to change.
-               So "Add a task" lands on the To-do list (its composer is the first control on it) and
-               "Add a note" on the Noteboard's. A deep-open is a one-line follow-up WHEN a route
-               exists; inventing one here would be a second entry to another page's state. */
-            <>
-              <button type="button" className="tl-btn" onClick={() => onNavigatePath("/todo")}>
-                ＋ Add a task
-              </button>
-              <button type="button" className="tl-btn" onClick={() => onNavigatePath("/todo/noteboard")}>
-                ＋ Add a note
-              </button>
-              <button type="button" className="tl-btn" onClick={() => onNavigatePath("/todo")}>
-                Go to to-do list ›
-              </button>
-            </>
-          }
+          primary={{ label: "New task", onClick: () => {
+            try { sessionStorage.setItem("sa.todoCompose", "task"); } catch { /* private mode */ }
+            onNavigatePath("/todo");
+          } }}
         >
           {/* ⚠️ ONE STATE OR THE OTHER, NEVER BOTH ON SCREEN. Acting collapses the board to a day's
               column and gives the rest of the page to the work; the full board and its focus band
