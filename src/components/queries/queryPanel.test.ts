@@ -69,8 +69,11 @@ describe("⚠️ the panel's chrome is not tinted, and the ladder starts below i
   });
 
   it("⚠️ the progress track has its own name, and it is not the bar's", () => {
+    /* §5 retired the drawer's own track — QueryTimeline's `.tl-wbar` draws the wait now — so the
+       surviving law is the original one: the TOP BAR never wears a track's rules, and the retired
+       class does not come back under the bar's name. The 7px assertion followed its subject out. */
     expect(css, "the progress track is back on the top bar's class").not.toMatch(/(?:^|\n)\s*\.qpn-bar\s*\{[^}]*height:\s*7px/);
-    expect(rule(".qpn-progbar"), "the progress track has no rule").toContain("7px");
+    expect(css, "the retired track class has returned").not.toMatch(/\.qpn-progbar\s*\{/);
   });
 });
 
@@ -131,25 +134,31 @@ describe("⚠️ the legacy edit sheet is unreachable from the live page", () =>
     expect(total, `openEditQuery is called ${total} times; expected 1 (the retired record view)`).toBe(1);
   });
 
-  it("the four in-place editors are wired", () => {
-    for (const [what, needle] of [
-      ["the method cycle", "cycleSendMethod"],
-      ["the rung date editor", "openRungDateEdit"],
-      ["the expected-date picker", "BrandDatePicker"],
-      ["the rung menu", "PortalMenu"],
-    ] as const) {
-      expect(src, `${what} is not wired`).toContain(needle);
-    }
+  /**
+   * RETARGETED (drawer cut 2, §5) — the in-place editors these two cases pinned are WITHDRAWN by
+   * decision 1: every timeline edit goes ⋯ → CorrectionFork → edit form → consequence preview.
+   * The three verbs survive with new homes — correct is the fork's first branch, "something
+   * changed" its second (routing to Record response), delete is the edit form's Remove — and the
+   * law worth keeping is the FUNNEL: no editActivity call is reachable from the drawer except
+   * through the fork's branch.
+   */
+  it("every timeline edit funnels through the fork — no direct editActivity survives", () => {
+    const calls = [...src.matchAll(/editActivity\(/g)].length;
+    /* exactly two: the desk's commit, and its undo closure — both inside CorrectionEdit's onSave */
+    expect(calls, `editActivity is called ${calls} times; expected 2 (commit + undo)`).toBe(2);
+    const at = src.indexOf("<CorrectionDesk");
+    const end = src.indexOf("</CorrectionDesk>");
+    const desk = src.slice(at, end);
+    expect([...desk.matchAll(/editActivity\(/g)].length, "an editActivity call escaped the desk").toBe(2);
   });
 
-  it("⚠️ the rung menu offers three verbs, and each goes somewhere different", () => {
-    for (const id of ["rung-correct", "rung-changed", "rung-delete"]) {
-      expect(src, `${id} is not offered`).toContain(id);
+  it("the ⋯ and the dotted method both open the desk at the fork", () => {
+    expect(src).toMatch(/onEntryFork=\{\(entry, trigger\)[\s\S]{0,220}step: "fork"/);
+    expect(src).toMatch(/onEditSendMethod=\{sentActivity[\s\S]{0,320}step: "fork"/);
+    /* the withdrawn shortcuts are GONE, not merely unwired */
+    for (const dead of ["cycleSendMethod", "openRungDateEdit", "toggleQueryMaterial", "setPanelMatsEdit"]) {
+      expect(src, `${dead} survives — a second editing route beside the fork`).not.toContain(dead);
     }
-    /* correct → the fork; changed → the record flow; delete → the consequence preview */
-    expect(src).toMatch(/rung-correct[\s\S]{0,120}onEditEntry/);
-    expect(src).toMatch(/rung-changed[\s\S]{0,120}openRecord/);
-    expect(src).toMatch(/rung-delete[\s\S]{0,120}onDeleteEntry/);
   });
 });
 

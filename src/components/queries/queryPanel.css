@@ -172,25 +172,6 @@
 }
 
 /* ── sections ───────────────────────────────────────────────────────────────────────────────── */
-.qpn-sect {
-  margin: 0 20px 18px; background: #fdfaf5; border-radius: 14px; padding: 6px;
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 6px 18px rgba(58, 28, 20, 0.07);
-}
-.qpn-frame { border: 1px solid rgba(124, 58, 42, 0.28); border-radius: 10px; overflow: hidden; }
-.qpn-sband {
-  background: linear-gradient(135deg, #dce0d9, #d0d6cc); border-bottom: 0.5px solid #c4ccc0;
-  padding: 12px 16px; display: flex; align-items: center; gap: 9px;
-}
-.qpn-ttl { font-family: var(--font-serif); font-weight: 500; font-size: 15px; line-height: 1.35; color: #2e3a2c; }
-.qpn-tag {
-  margin-left: auto; color: #5a6e58; font-family: var(--font-mono); font-size: 9px;
-  letter-spacing: 0.1em; text-transform: uppercase;
-}
-.qpn-edit {
-  margin-left: 10px; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: #5a6e58; cursor: pointer; border: 0; background: none;
-  border-bottom: 0.5px solid #a8b5a5; padding: 0;
-}
 .qpn-sbody { padding: 16px; }
 
 /* ── the two trays ──────────────────────────────────────────────────────────────────────────── */
@@ -205,45 +186,11 @@
   color: #9c8878; margin-top: 5px; font-family: var(--font-mono); font-size: 9px;
   letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.3;
 }
-.qpn-msline {
-  display: flex; align-items: center; gap: 8px; margin: 12px 2px 0;
-  font-family: var(--font-serif); font-size: 14.5px; line-height: 1.3; color: var(--ink, #1c130f);
-}
 
 /* ── the rail ───────────────────────────────────────────────────────────────────────────────── */
-.qpn-rail { margin-top: 16px; position: relative; padding-left: 26px; }
-.qpn-rail::before {
-  content: ""; position: absolute; left: 9px; top: 10px; bottom: 10px; width: 1.5px; background: #e8dcd0;
-}
-.qpn-rung { position: relative; margin-bottom: 12px; }
-.qpn-rung:last-child { margin-bottom: 0; }
-.qpn-node { position: absolute; left: -26px; top: 8px; }
-.qpn-rcard {
-  background: #fffdf9; border: 0.5px solid #ece0d2; border-radius: 9px; padding: 11px 13px;
-  position: relative;
-}
-.qpn-rcard--pend { border-style: dashed; border-color: #ddd0c0; background: transparent; }
-.qpn-rline { display: flex; align-items: baseline; gap: 9px; }
-.qpn-ev { font-family: var(--font-serif); font-size: 15px; line-height: 1.3; color: var(--ink, #1c130f); }
-.qpn-via { font-size: 11px; color: #8a7a6c; }
-.qpn-when {
-  margin-left: auto; color: #9c8878; font-family: var(--font-mono); font-size: 9px;
-  letter-spacing: 0.08em; flex: none;
-}
 /* ⚠️ A DASHED UNDERLINE MEANS EDITABLE IN PLACE — the pane's own long-standing use of the device,
    and deliberately not the timeline's "provisional" meaning, which lives on a different surface. */
-.qpn-ed { cursor: pointer; border: 0; background: none; padding: 0; font: inherit; color: inherit;
-  border-bottom: 1px dashed #cdbfae; }
-.qpn-ed:hover { color: var(--ink, #1c130f); }
-.qpn-more {
-  position: absolute; right: 8px; top: 8px; width: 22px; height: 22px; border-radius: 6px;
-  border: none; background: transparent; color: #c0b0a0; cursor: pointer;
-  opacity: 0; transition: opacity 0.15s;
-}
-.qpn-rung:hover .qpn-more, .qpn-more:focus-visible { opacity: 1; }
-.qpn-more:hover { background: #fff; color: var(--ink, #1c130f); }
 
-.qpn-prog { margin-top: 10px; }
 /**
  * ⚠️ `.qpn-progbar`, NOT `.qpn-bar` — AND THE OLD NAME IS WHY THE PANEL'S TOP BAR WAS WRONG.
  *
@@ -260,69 +207,27 @@
  * ⚠️ AND THE SHEET IS SWEPT FOR THIS NOW, not just fixed: `queryPanel.test.ts` fails on ANY base
  * selector declared twice in the file. One name, one rule.
  */
-.qpn-progbar { height: 7px; border-radius: 99px; background: #efe5d8; overflow: hidden; }
-.qpn-progbar i { display: block; height: 100%; background: #c9d1c5; border-radius: 99px; }
 /* ⚠️ PAST EXPECTED IS A WARMER SAGE, NEVER RED. The ladder's rule reaches the bar too. */
-.qpn-progbar i.qpn-past { background: #e6bfb1; }
-.qpn-lbl {
-  display: flex; justify-content: space-between; margin-top: 5px; color: #9c8878; gap: 10px;
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em;
-}
 
 /* the dashed prompt when nothing is recorded */
 .qpn-whatwent {
   margin-top: 10px; border: 1.5px dashed #e0cfc4; border-radius: 10px; padding: 10px 12px;
   display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: #6a5a50; flex-wrap: wrap;
 }
-.qpn-b {
-  border: 1px solid #e6dccf; background: #fff; border-radius: 8px; padding: 6px 11px; cursor: pointer;
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
-  color: #6a5a50;
-}
-.qpn-b--slate { background: #dde5ec; border-color: #c9d6e1; color: #33506b; }
 
 /* ── materials + notes ──────────────────────────────────────────────────────────────────────── */
-.qpn-row {
-  display: flex; justify-content: space-between; gap: 10px; padding: 8px 0;
-  border-bottom: 0.5px solid #ece0d2; font-size: 12.5px; color: #3a1c14;
-}
-.qpn-row:last-child { border-bottom: none; }
-.qpn-row .qpn-v { color: #8a7a6c; text-align: right; }
-.qpn-row--no { color: #c0b0a0; }
-.qpn-row--no .qpn-v { color: #d0c4b6; }
-.qpn-nempty { color: #8a7a6c; font-style: italic; font-family: var(--font-serif); font-size: 14px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .qpn, .qpn-scrim, .qpn-more { transition: none; }
+  /* the drawer's slide and the scrim's fade hold still; the retired .qpn-more left this list */
+  .qpn, .qpn-scrim { transition: none; }
 }
 
 /* ── the materials editor's four toggle rows ────────────────────────────────────────────────── */
 /* ⚠️ THE SAME FOUR ROWS AS THE READ VIEW, one tick apart — not a second list. */
-.qpn-doc {
-  display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 0;
-  border: 0; border-bottom: 0.5px solid #ece0d2; background: none; cursor: pointer;
-  font: inherit; font-size: 12.5px; color: #3a1c14; text-align: left;
-}
-.qpn-doc:last-child { border-bottom: none; }
-.qpn-cb {
-  width: 18px; height: 18px; border-radius: 5px; flex: none;
-  border: 1px solid #e0d5c8; background: #fff;
-  display: inline-flex; align-items: center; justify-content: center;
-}
-.qpn-doc--on .qpn-cb { background: var(--ink, #1c130f); border-color: var(--ink, #1c130f); }
-.qpn-docnm { flex: 1; min-width: 0; }
-.qpn-doc:not(.qpn-doc--on) { color: #c0b0a0; }
-.qpn-doc:not(.qpn-doc--on) .qpn-v { color: #d0c4b6; }
 
 /* ── the expected-date picker, anchored to its dotted field ─────────────────────────────────── */
 /* ⚠️ ABOVE THE PANEL (z 70) BUT BELOW NOTHING ELSE — it is opened from inside the panel and must
    not be clipped by it, which is why it is fixed rather than a child of the scrolling inner. */
-.qpn-pickscrim { position: fixed; inset: 0; z-index: 80; background: transparent; border: 0; padding: 0; cursor: default; }
-.qpn-pick {
-  position: fixed; z-index: 81; width: 300px;
-  background: #fdfaf5; border: 1px solid #e0d5c8; border-radius: 12px; padding: 10px;
-  box-shadow: 0 4px 10px rgba(58, 28, 20, 0.07), 0 14px 34px rgba(58, 28, 20, 0.12);
-}
 
 /* ══ §4 · THE AGENT TAB — layout A ═══════════════════════════════════════════════════════════════
    A view of the agent document; the two links at the foot are the only route to change anything. */

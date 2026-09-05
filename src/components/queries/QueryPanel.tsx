@@ -38,24 +38,6 @@ const readTab = (): PanelTab => {
   } catch { return "tracking"; }
 };
 
-export interface PanelRung {
-  /** Stable id — the activity's, where there is one. `null` for the derived waiting rung. */
-  id: string | null;
-  status: QueryStatus;
-  /** `Query sent`, `Full Requested`, `Closed`… */
-  event: string;
-  /** `· Email`, `— Pass after full`. Rendered muted beside the event. */
-  detail?: string;
-  dateLabel: string;
-  /** Dotted-underline editors. Absent = not editable in place. */
-  onEditDetail?: () => void;
-  onEditDate?: () => void;
-  /** The ⋯ menu. Absent on a rung that records nothing (the waiting rung). */
-  onMenu?: (anchor: HTMLElement) => void;
-  /** The waiting rung's dashed treatment and its bar. */
-  pending?: boolean;
-  progress?: { pct: number; past: boolean; sentLabel: string; expectedLabel: string; onEditExpected?: (anchor: HTMLElement) => void };
-}
 
 export interface QueryPanelProps {
   open: boolean;
