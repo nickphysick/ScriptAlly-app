@@ -7,7 +7,9 @@
  */
 
 .qcd {
-  position: fixed; top: 0; bottom: 0; right: 592px; width: 440px; z-index: 71;
+  /* 460 since the respond-nudge run — ONE host for corrections and the three verbs, so the ref's
+     wider card becomes everyone's width rather than a per-tenant fork. */
+  position: fixed; top: 0; bottom: 0; right: 592px; width: 460px; z-index: 71;
   pointer-events: none;
 }
 .qcd-card {

@@ -66,12 +66,14 @@ import { QueryCentreGrid, type GridCard } from "./queries/QueryCentreGrid";
 import { QueryPanel } from "./queries/QueryPanel";
 import { SentMaterials } from "./queries/SentMaterials";
 import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
+import { RespondDesk } from "./queries/RespondDesk";
 import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
 import { QueryLogSheet } from "./queries/QueryLogSheet";
 import { queriesForAgent } from "../lib/agentList";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
+import { parseQty } from "../lib/createQty";
 import { cardFacts, cardMaterials, turnFor, MATERIAL_SLOTS, type Turn } from "../lib/queryCardFacts";
 import { MATERIAL_ROW_NAMES, type MaterialRow } from "../lib/agentMaterials";
 import {
@@ -715,6 +717,53 @@ export const Queries: React.FC<{
     }
   };
 
+  /**
+   * §2 (respond-nudge) — THE DESK'S SAVE: the same primitive, the same deps, one activity. The
+   * payload is `responseDraftToPayload` OVERLAID with what the desk collected and the shared
+   * builder states empty — the partial's quantity/unit and noreply's close reason — so the ghost,
+   * the derived line and the record all read the one proposed object.
+   */
+  const saveDeskResponse = async () => {
+    if (!deskResp?.outcome || deskResp.outcome === "holding" || !activeQuery || !currentUser || respSaving) return;
+    const q = activeQuery;
+    setRespSaving(true);
+    try {
+      const agent = agents.find((a) => a.id === q.agentId) ?? null;
+      const payload = {
+        ...responseDraftToPayload(deskResp),
+        ...(deskResp.outcome === "partial" ? {
+          materialsType: deskQty.unit,
+          materialsQuantity: parseQty(deskQty.amount),
+        } : {}),
+        ...(deskResp.outcome === "noreply" ? {
+          closingReason: deskCloseReason === "withdrew" ? "Withdrew my submission" as const : "No response after expected window" as const,
+        } : {}),
+      };
+      const res = await recordQueryResponse(
+        { userId: currentUser.id, query: q, agent, manuscript: { title: activeMs?.title } },
+        payload as never,
+      );
+      const savedStatus = OUTCOME_STATUS[deskResp.outcome];
+      setDeskVerb(null);
+      /* the ghost becomes the real rung in place — pulse the newest activity of the saved status
+         once the subscription delivers it (the effect below resolves the id) */
+      setDeskFreshStatus({ toStatus: savedStatus, at: Date.now() });
+      showToast({
+        replaces: RESPONSE_RECEIPT_CHANNEL,
+        message: `${OUTCOME_LABEL[deskResp.outcome]} recorded — ${agentPrimary(activeAgent ?? ({} as never)) || "the agent"}`,
+        undo: () => res.undo(),
+      });
+    } catch {
+      showToast({ message: "Couldn't save that response — please try again." });
+    } finally {
+      setRespSaving(false);
+    }
+  };
+  /* the fresh-rung TARGET; its resolver effect lives below trackingEvents' own declaration —
+     an effect here would read the subscription state through the temporal dead zone, the exact
+     shape this repo's TDZ law records (tsc catches this one because the scopes meet). */
+  const [deskFreshStatus, setDeskFreshStatus] = useState<{ toStatus: QueryStatus; at: number } | null>(null);
+
   /** The picker's inline quick-add — lifted verbatim from the retired popup, so a brand-new agent
    *  is born with exactly the defaults (and schema-valid shape) it always was. */
   const handleCreateAgentInline = async (d: { name: string; agency: string; email: string; responseTimeWeeks?: number; starRating?: number }) => {
@@ -1023,6 +1072,17 @@ export const Queries: React.FC<{
   // Reverts the most recent recorded response (status, activity docs, agent pref). Set by recordQueryResponse().
   const undoFnRef = useRef<(() => Promise<void>) | null>(null);
   const [trackingEvents, setTrackingEvents] = useState<any[]>([]);
+  /* §2 (respond-nudge) — when the saved activity lands, pulse it once, then forget */
+  useEffect(() => {
+    if (!deskFreshStatus) return;
+    const hit = [...trackingEvents].reverse().find((e: any) =>
+      (e.resultingStatus ?? e.type) === deskFreshStatus.toStatus);
+    if (!hit) return;
+    setDeskFreshId(hit.id);
+    const t = setTimeout(() => { setDeskFreshId(null); setDeskFreshStatus(null); }, 1800);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deskFreshStatus, trackingEvents]);
 
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isRecordResponseModalOpen, setIsRecordResponseModalOpen] = useState(false);
@@ -1113,6 +1173,72 @@ export const Queries: React.FC<{
   /* §3 — the ⋯ (or dotted field) that opened the desk: the notch's anchor and the focus home.
      A ref, not state — it must survive every step transition without re-rendering anything. */
   const correctingTriggerRef = useRef<HTMLElement | null>(null);
+  /**
+   * §1 (respond-nudge) — WHICH VERB THE DESK IS OPEN ON. One desk at a time: opening a verb
+   * closes a correction and vice versa (both go through the same host, so two states pointing at
+   * one card would be two tenants in one room). The trigger ref is shared with corrections — the
+   * desk notches to whatever element opened it.
+   */
+  const [deskVerb, setDeskVerb] = useState<"respond" | "marksent" | "nudge" | null>(null);
+  const openDeskVerb = (verb: "respond" | "marksent" | "nudge", anchor: HTMLElement) => {
+    setCorrecting(null);
+    correctingTriggerRef.current = anchor;
+    setDeskVerb((cur) => (cur === verb ? null : verb));
+  };
+  /* §2 — the respond desk's draft: the record journey's OWN shape, seeded fresh per opening. */
+  const [deskResp, setDeskResp] = useState<ResponseDraft | null>(null);
+  const [deskQty, setDeskQty] = useState<{ amount: string; unit: SampleUnit }>({ amount: "50", unit: "Pages" });
+  const [deskCloseReason, setDeskCloseReason] = useState<"noresponse" | "withdrew">("noresponse");
+  /* the just-saved rung's pulse target — cleared by its own timeout */
+  const [deskFreshId, setDeskFreshId] = useState<string | null>(null);
+  useEffect(() => {
+    if (deskVerb === "respond" && !deskResp) setDeskResp(emptyResponseDraft(todayInputDate()));
+    if (deskVerb !== "respond" && deskResp) { setDeskResp(null); setDeskQty({ amount: "50", unit: "Pages" }); setDeskCloseReason("noresponse"); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deskVerb]);
+
+  /**
+   * §2 — THE PROPOSED ACTIVITY, built once and read three times: the ghost rung (through
+   * buildTimelineRows — the same renderer, decision 2), the derived line, and the save's payload
+   * overlay. One object, three readers, so the preview and the record cannot disagree.
+   */
+  const deskProposed = (() => {
+    if (deskVerb !== "respond" || !deskResp?.outcome || deskResp.outcome === "holding") return null;
+    const st = OUTCOME_STATUS[deskResp.outcome];
+    return {
+      id: "__ghost",
+      type: st,
+      resultingStatus: st,
+      createdAt: new Date(`${deskResp.dateArrived}T12:00:00`).toISOString(),
+      note: deskResp.theirWords || undefined,
+      ...(deskResp.outcome === "partial" ? {
+        materialsType: deskQty.unit.toLowerCase(),
+        materialsQuantity: deskQty.amount,
+      } : {}),
+    };
+  })();
+
+  /**
+   * §2 — THE DERIVED LINE, in plain words from the proposed activity: the status word is
+   * `OUTCOME_STATUS`'s own member (the exact string the save writes), the court comes from
+   * `getPrimaryAction` (the same table every surface reads), and the nudge-retired clause renders
+   * only when a future reminder actually exists to retire.
+   */
+  const deskDerived = (() => {
+    if (!deskProposed || !activeQuery) return null;
+    const st = deskProposed.resultingStatus as QueryStatus;
+    const holder = getPrimaryAction(st).ballHolder;
+    const court = holder === "writer" ? "with you" : holder === "agent" ? "with the agent" : "closed";
+    const firstName = activeAgent ? (agentPrimary(activeAgent).split(/\s+/).pop() ?? "the agent") : "the agent";
+    const nudgeIso = activeQuery.nudgeDate && new Date(activeQuery.nudgeDate).getTime() > Date.now()
+      ? fmtShortISO(activeQuery.nudgeDate) : null;
+    return (
+      <>Status becomes <b>{st}</b> — {court}.{" "}
+        {holder === "writer" && <>The waiting bar stops here; nothing is owed by {firstName} until you send.{" "}</>}
+        {holder === null && <>The waiting bar stops here.{" "}</>}
+        {nudgeIso && <>The nudge for {nudgeIso} is retired.</>}</>
+    );
+  })();
   /* ruling 2 — the send rung's materials, editing INSIDE the fork's mistake branch. Seeded from
      the query when the edit step opens on the send entry; null everywhere else. */
   const [deskMats, setDeskMats] = useState<MaterialRow[] | null>(null);
@@ -5039,6 +5165,44 @@ export const Queries: React.FC<{
           * chassis, and Escape at every step returns to where the writer was rather than dumping
           * them on the page.
           */}
+        {/**
+          * ══ §1/§2 (respond-nudge) · THE VERB DESK — the same host as corrections, one at a time.
+          * Notched to the top-bar button that opened it (the button wears the accent ring); Escape
+          * captured, focus returned — all the host's own behaviour, inherited.
+          */}
+        {deskVerb && activeQuery && activeAgent && panelRow && (
+          <CorrectionDesk
+            stage={panelRow.facts.stage}
+            anchor={correctingTriggerRef.current}
+            returnTo={correctingTriggerRef.current}
+            onClose={() => setDeskVerb(null)}
+          >
+            {deskVerb === "respond" && deskResp && (
+              <div className="qcd-verb">
+                <RespondDesk
+                  agentName={agentPrimary(activeAgent)}
+                  agency={activeAgent.agency || ""}
+                  manuscriptTitle={activeMs?.title ?? ""}
+                  draft={deskResp}
+                  onDraft={setDeskResp}
+                  qty={deskQty}
+                  onQty={setDeskQty}
+                  closeReason={deskCloseReason}
+                  onCloseReason={setDeskCloseReason}
+                  derivedLine={deskDerived}
+                  saving={respSaving}
+                  onCancel={() => setDeskVerb(null)}
+                  /* "Offered representation" → the EXISTING offer journey, per §2 — the desk does
+                     not collect terms and a reply-by, and duplicating that stack would be the
+                     second-editor drift */
+                  onOffer={() => { setDeskVerb(null); openRecord(activeQuery); }}
+                  onRecord={() => void saveDeskResponse()}
+                />
+              </div>
+            )}
+          </CorrectionDesk>
+        )}
+
         {correcting && activeQuery && (
           /**
            * ══ §3 · THE DESK — the correction flow beside the drawer, not over the page ═════════
@@ -5586,14 +5750,17 @@ export const Queries: React.FC<{
                   : panelRow.facts.turn === "offer" ? "Record decision"
                     : "Record response"
               }
-              onPrimary={() => {
-                /* ⚠️ THE PAGE'S OWN OPENERS — `openRecord` is the single entry point the record
-                   view already funnels through, and `MarkSentPopover` is the mark-sent home. This
-                   panel decides WHICH to ask for and nothing about what either does. */
-                if (panelRow.facts.turn === "you") setIsMarkSentOpen(true);
-                else openRecord(activeQuery);
+              onPrimary={(anchor) => {
+                /**
+                 * §1 (respond-nudge) — THE DESK IS THE HOME for Record response and Mark sent;
+                 * `Record decision` (an open offer) keeps the existing journey, per decision 5 —
+                 * the desk hosts the three verbs and the offer flow is not one of them.
+                 */
+                if (panelRow.facts.turn === "offer") { openRecord(activeQuery); return; }
+                openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor);
               }}
-              onNudge={() => setIsNudgeOpen(true)}
+              onNudge={(anchor) => openDeskVerb("nudge", anchor)}
+              liveAction={deskVerb === "nudge" ? "nudge" : deskVerb ? "primary" : null}
               onMarkClosed={() => setIsCloseMenuOpen(true)}
               onClose={() => onSelectView?.("cards")}
               onStep={(delta) => {
@@ -5625,7 +5792,13 @@ export const Queries: React.FC<{
                * §2 wires the send-rung extras; this mount is the chassis.
                */
               tracking={(() => {
-                const ta = getPrimaryAction(activeQuery.status as QueryStatus);
+                /* §2 (respond-nudge) — while a response is being drafted the timeline shows the
+                   PROPOSED world: the ghost activity appended to the real events (same builder,
+                   same renderer — decision 2), and the open-state block derived from the proposed
+                   status, which is what makes the waiting rung disappear when the ghost moots it. */
+                const eventsForRail = deskProposed ? [...trackingEvents, deskProposed] : trackingEvents;
+                const railStatus = (deskProposed?.resultingStatus ?? activeQuery.status) as QueryStatus;
+                const ta = getPrimaryAction(railStatus);
                 /**
                  * §2 — THE SEND'S MATERIALS, READ-ONLY UNDER THE SEND RUNG. The same three states
                  * the retired record view drew, from the same derivations: a PACKAGED send is the
@@ -5662,13 +5835,16 @@ export const Queries: React.FC<{
                   <QueryTimeline
                     query={activeQuery}
                     agent={activeAgent}
-                    events={trackingEvents}
+                    events={eventsForRail}
                     primaryAction={{ ballHolder: ta.ballHolder, markKind: ta.kind === "mark-sent" ? ta.markKind : undefined }}
+                    ghostId={deskProposed ? "__ghost" : null}
+                    freshId={deskFreshId}
                     /* §3 — the ⋯ opens the DESK at the fork, directly: the fork subsumes the old
                        Edit/Delete menu (append is its second branch, remove lives on the edit
                        form), so the two-item hop is gone. The trigger rides a ref for the notch
                        and the focus return. */
                     onEntryFork={(entry, trigger) => {
+                      setDeskVerb(null); /* one desk at a time */
                       correctingTriggerRef.current = trigger;
                       setCorrecting({ step: "fork", entry });
                     }}

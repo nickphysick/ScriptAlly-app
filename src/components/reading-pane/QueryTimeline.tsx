@@ -173,6 +173,9 @@ export interface QueryTimelineProps {
   onEntryFork?: (entry: TimelineEntryRef, trigger: HTMLElement) => void;
   /** §3 — the rung the desk is open on; threaded to TimelineRows' highlight. */
   highlightId?: string | null;
+  /** §2 (respond-nudge) — the drafted rung's dashed skin + the saved rung's pulse. */
+  ghostId?: string | null;
+  freshId?: string | null;
   /**
    * §2 (whose-window pack) — SET THE EXPECTED DATE IN PLACE. It used to open the Edit Query
    * overlay: a whole modal, most of it about something else, to answer one question the card had
@@ -366,8 +369,8 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
  * never a recreation — and they differ only in its props (`ghost` for a projection). Taking the
  * dot as a child keeps that difference at the call site where it is legible.
  */
-const TlEvent: React.FC<{ last?: boolean; minor?: boolean; target?: boolean; mark: React.ReactNode; children: React.ReactNode }> = ({ last = false, minor = false, target = false, mark, children }) => (
-  <div className={`tl-ev${last ? " tl-ev--last" : ""}${minor ? " tl-ev--minor" : ""}${target ? " tl-ev--target" : ""}`}>
+const TlEvent: React.FC<{ last?: boolean; minor?: boolean; target?: boolean; ghost?: boolean; fresh?: boolean; mark: React.ReactNode; children: React.ReactNode }> = ({ last = false, minor = false, target = false, ghost = false, fresh = false, mark, children }) => (
+  <div className={`tl-ev${last ? " tl-ev--last" : ""}${minor ? " tl-ev--minor" : ""}${target ? " tl-ev--target" : ""}${ghost ? " tl-ev--ghost" : ""}${fresh ? " tl-ev--fresh" : ""}`}>
     <div className="tl-evmark">{mark}</div>
     {/* the connector, drawn by the CONTAINER behind the locked StatusDot — never by editing it.
         It runs marker-bottom to next-marker-top, and `.tl-ev--last` hides it, so a single-event
@@ -419,7 +422,15 @@ export const TimelineRows: React.FC<{
    * drawer's accent, styled by the drawer's own sheet), and nothing else changes.
    */
   highlightId?: string | null;
-}> = ({ rows, onMenuOpen, continues = false, onEditSendMethod, sentExtra, chaptered = false, highlightId = null }) => {
+  /**
+   * §2 (respond-nudge) — the PROPOSED rung the desk is drafting: dashed skin, same renderer. The
+   * row itself is built by `buildTimelineRows` from a proposed activity — this flag is skin only,
+   * which is what "never a second renderer" means in practice.
+   */
+  ghostId?: string | null;
+  /** §2 — the just-saved rung's one pulse, additive like the rest. */
+  freshId?: string | null;
+}> = ({ rows, onMenuOpen, continues = false, onEditSendMethod, sentExtra, chaptered = false, highlightId = null, ghostId = null, freshId = null }) => {
   /* ⚠️ THE GROUPING IS THE PURE `chapterise`, INCLUDING ITS THRESHOLD. Nothing here decides when a
      heading is worth drawing — `labelled` is the derivation's own answer, so a second surface
      cannot apply a different figure. */
@@ -439,7 +450,9 @@ export const TimelineRows: React.FC<{
        */
       if (row.kind) {
         return (
-          <TlEvent key={row.key} last={isLast} minor target={!!highlightId && row.activityId === highlightId} mark={<span className="tl-minormark" aria-hidden="true" />}>
+          <TlEvent key={row.key} last={isLast} minor target={!!highlightId && row.activityId === highlightId}
+            ghost={!!ghostId && row.activityId === ghostId} fresh={!!freshId && row.activityId === freshId}
+            mark={<span className="tl-minormark" aria-hidden="true" />}>
             {/* ⚠️ §1 · THE SAME ROW 1 AS EVERY OTHER EVENT. A minor row drew its own arrangement —
                 12px Inter, its own flex, its own 9px date — which is the whole fault the grammar
                 removes. Its quietness stays where it already was: a 9px hollow ring and muted ink. */}
@@ -471,7 +484,9 @@ export const TimelineRows: React.FC<{
         );
       }
       return (
-        <TlEvent key={row.key} last={isLast} target={!!highlightId && row.activityId === highlightId} mark={<StatusDot status={row.status} overrideSize={TL_MARK} />}>
+        <TlEvent key={row.key} last={isLast} target={!!highlightId && row.activityId === highlightId}
+          ghost={!!ghostId && row.activityId === ghostId} fresh={!!freshId && row.activityId === freshId}
+          mark={<StatusDot status={row.status} overrideSize={TL_MARK} />}>
           <div className="tl-rowbody">
             <div className="tl-r1">
               {/* ⚠️ §1 · THE TITLE IS PLAYFAIR AT `--tl-title`, THE ONE SIZE EVERY EVENT USES. It was
@@ -722,7 +737,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
   onOpenReminder?: () => void;
   /** §6c — create the reminder task through the existing task-creation path. */
   onRemindLater?: () => void;
-}> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onEntryFork, highlightId = null, onNudge, onSetExpectedDate, onEditSendMethod, onSetSendDate, sentExtra, onMarkClosed, onKeepTracking, reminder = null, onOpenReminder, onRemindLater }) => {
+}> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onEntryFork, highlightId = null, ghostId = null, freshId = null, onNudge, onSetExpectedDate, onEditSendMethod, onSetSendDate, sentExtra, onMarkClosed, onKeepTracking, reminder = null, onOpenReminder, onRemindLater }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef } | null>(null);
   /* §1 — anchored, flipping and constrained like every other popover on this page. The trigger is
      assigned on open (the rows are many; a ref per row would be a ref per rung). */
@@ -797,6 +812,8 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
           setMenu({ entry });
         } : undefined)}
         highlightId={highlightId}
+        ghostId={ghostId}
+        freshId={freshId}
         continues={ballHolder === "agent" && !!waiting}
         sentExtra={sentExtra}
       />

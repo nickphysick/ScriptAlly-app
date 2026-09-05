@@ -1,0 +1,105 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE DESK'S THREE VERBS — respond, mark sent, nudge (respond-nudge run). Shared field grammar,
+ * geometry from query-panel-v6-record-response-desk.html. The host card is `.qcd`.
+ */
+.qrd h3 { font-family: var(--font-serif); font-weight: 500; font-size: 20px; color: #1c130f; line-height: 1.2; margin: 0; }
+.qrd-subj {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9.5px; letter-spacing: 0.09em;
+  text-transform: uppercase; color: #9c8878; margin: 7px 0 14px;
+}
+.qrd-kinds { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.qrd-kind {
+  display: flex; gap: 10px; align-items: flex-start; padding: 10px 11px; border-radius: 10px;
+  background: #fff; border: 0.5px solid #ece0d2; cursor: pointer; text-align: left; font: inherit;
+}
+.qrd-kind:hover { border-color: #cdbfae; }
+.qrd-kn {
+  width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center;
+  justify-content: center; flex: none; background: #fdfaf5;
+}
+.qrd-ktx u { text-decoration: none; font-family: var(--font-serif); font-size: 14.5px; color: #1c130f; display: block; }
+.qrd-ktx s { text-decoration: none; display: block; font-size: 11.5px; color: #8a7a6c; margin-top: 2px; line-height: 1.35; }
+.qrd-cancel {
+  display: block; margin: 12px auto 0; background: none; border: none; cursor: pointer;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #a08a78;
+}
+.qrd-step {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: #fff;
+  border: 0.5px solid #ece0d2; margin-bottom: 10px; font-size: 12.5px; color: #6a5a50;
+}
+.qrd-step b { font-family: var(--font-serif); font-weight: 500; color: #1c130f; }
+.qrd-chg {
+  margin-left: auto; background: none; border: none; padding: 0; cursor: pointer;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #a08a78; border-bottom: 0.5px solid #cdbfae;
+}
+.qrd-l {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #9c8878; display: block; margin-bottom: 5px;
+}
+.qrd-opt { color: #c8b8a8; text-transform: none; letter-spacing: 0; }
+.qrd-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.qrd-fld {
+  width: 100%; background: #fff; border: 0.5px solid #e0d5c8; border-radius: 9px; padding: 9px 12px;
+  font: inherit; font-size: 13px; color: #3a1c14; display: flex; align-items: center; gap: 8px;
+  text-align: left; cursor: pointer; outline: none;
+}
+.qrd-fld:focus, .qrd-fld:focus-within { border-color: #8a9e88; box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.12); }
+input.qrd-fld { cursor: text; }
+.qrd-sub { margin-left: auto; color: #9c8878; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; }
+.qrd-qc { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.qrd-stepc { display: inline-flex; align-items: stretch; border: 0.5px solid #e0d5c8; border-radius: 9px; overflow: hidden; background: #fff; }
+.qrd-stepc > button { border: none; background: transparent; width: 32px; cursor: pointer; color: #7c3a2a; font-size: 15px; }
+.qrd-stepc input { width: 66px; border: none; border-left: 0.5px solid #e0d5c8; border-right: 0.5px solid #e0d5c8; text-align: center; font: inherit; font-size: 13px; font-weight: 500; color: #1c130f; padding: 7px 0; outline: none; }
+.qrd-pm { font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8px; color: #c0b0a0; align-self: center; padding: 0 7px; }
+.qrd-useg { display: inline-flex; background: #fff; border: 0.5px solid #e0d5c8; border-radius: 9px; padding: 2px; }
+.qrd-useg button { border: none; background: transparent; border-radius: 7px; padding: 6px 10px; cursor: pointer; font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #6a5a50; }
+.qrd-useg button.on { box-shadow: inset 0 0 0 1.2px #1c130f; color: #1c130f; }
+.qrd-seg { display: flex; background: #fff; border: 0.5px solid #e0d5c8; border-radius: 9px; padding: 3px; margin-bottom: 10px; }
+.qrd-seg button { flex: 1; border: none; background: transparent; border-radius: 7px; padding: 8px 4px; cursor: pointer; font: inherit; font-size: 12.5px; color: #6a5a50; }
+.qrd-seg button.on { background: #f5e2da; color: #3a1c14; }
+.qrd-ta {
+  width: 100%; resize: none; height: 54px; border: 0.5px solid #e0d5c8; border-radius: 9px; background: #fff;
+  font-family: "Caveat", cursive; font-size: 18px; padding: 8px 12px; color: #3a1c14; margin-bottom: 6px; outline: none;
+}
+.qrd-derived { font-size: 12.5px; color: #6a5a50; line-height: 1.5; margin-top: 6px; }
+.qrd-derived b { color: #3a1c14; font-weight: 500; }
+.qrd-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.qrd-b {
+  border-radius: 9px; padding: 9px 16px; cursor: pointer;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.qrd-b--c { background: #fff; border: 1px solid #e0d5c8; color: #6a5a50; }
+.qrd-b--s { background: #f5e2da; border: 1px solid #e8c8bc; color: #3a1c14; }
+.qrd-b--s:disabled { opacity: 0.4; cursor: not-allowed; }
+.qrd-pop { position: fixed; z-index: 90; }
+/* the nudge's mail draft */
+.qrd-mail { background: #fff; border: 0.5px solid #ece0d2; border-radius: 10px; padding: 12px 14px; font-size: 12.5px; line-height: 1.55; color: #3a1c14; }
+.qrd-mail .qrd-mh {
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #9c8878; margin-bottom: 6px;
+}
+.qrd-mail .qrd-mh b { color: #3a1c14; font-weight: 500; letter-spacing: 0; font-family: inherit; font-size: 12px; text-transform: none; }
+/* the nudge chips */
+.qrd-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.qrd-chips button { border: 1px solid #e0d5c8; background: #fff; border-radius: 99px; padding: 7px 13px; cursor: pointer; font: inherit; font-size: 12.5px; color: #6a5a50; display: inline-flex; align-items: center; gap: 6px; }
+.qrd-chips button.on { background: #f5e2da; border-color: #e8c8bc; color: #3a1c14; }
+.qrd-chips button.qrd-win { border-color: #8a9e88; background: #eef1ec; color: #2e3a2c; }
+.qrd-chips button.qrd-win.on { background: #f5e2da; border-color: #e8c8bc; color: #3a1c14; }
+.qrd-mono8 { font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 8px; opacity: 0.7; letter-spacing: 0.08em; text-transform: uppercase; }
+/* the ghost rung's skin — the timeline row the desk is drafting */
+.qpn .tl-ev--ghost .tl-rowbody { opacity: 0.75; }
+.qpn .tl-ev--ghost { border: 1.5px dashed #d2c4b4; border-radius: 10px; padding: 4px 6px 8px 40px; margin-left: -6px; background: transparent; }
+.qpn .tl-ev--ghost .tl-ttl { color: #8a7a6c; }
+/* the saved rung's one pulse — the ghost became real in place */
+.qpn .tl-ev--fresh .tl-rowbody { animation: tlFresh 1.6s ease-out 1; border-radius: 10px; }
+@keyframes tlFresh {
+  0% { box-shadow: 0 0 0 0 rgba(232, 200, 188, 0); }
+  25% { box-shadow: 0 0 0 6px rgba(232, 200, 188, 0.55); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 200, 188, 0); }
+}
+@media (prefers-reduced-motion: reduce) { .qpn .tl-ev--fresh .tl-rowbody { animation: none; } }

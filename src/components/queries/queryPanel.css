@@ -356,3 +356,6 @@
   text-transform: uppercase; color: #6a5a50; border-bottom: 0.5px solid #cdbfae;
 }
 .qat-lnk:hover { color: #1c130f; }
+
+/* §1 (respond-nudge) — the top-bar button the desk is open on wears the accent ring */
+.qpn-act--live { box-shadow: 0 0 0 1.5px var(--stage-accent, #c7d0c2); }

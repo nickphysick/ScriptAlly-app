@@ -146,8 +146,11 @@ describe("⚠️ the legacy edit sheet is unreachable from the live page", () =>
     const calls = [...src.matchAll(/editActivity\(/g)].length;
     /* exactly two: the desk's commit, and its undo closure — both inside CorrectionEdit's onSave */
     expect(calls, `editActivity is called ${calls} times; expected 2 (commit + undo)`).toBe(2);
-    const at = src.indexOf("<CorrectionDesk");
-    const end = src.indexOf("</CorrectionDesk>");
+    /* the correcting host's OWN desk — the verb desk (respond-nudge) shares the component and
+       carries no editActivity, so a first-match slice reported an escape that never happened */
+    const guard = src.indexOf("{correcting && activeQuery && (");
+    const at = src.indexOf("<CorrectionDesk", guard);
+    const end = src.indexOf("</CorrectionDesk>", at);
     const desk = src.slice(at, end);
     expect([...desk.matchAll(/editActivity\(/g)].length, "an editActivity call escaped the desk").toBe(2);
   });

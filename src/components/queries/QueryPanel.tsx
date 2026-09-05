@@ -86,8 +86,14 @@ export interface QueryPanelProps {
   /** `3 OF 44` — position in the CURRENT filtered/sorted order. */
   position: { index: number; total: number } | null;
   primaryLabel: string;
-  onPrimary?: () => void;
-  onNudge?: () => void;
+  /**
+   * §1 (respond-nudge run) — the handlers receive their BUTTON, because the desk notches to it.
+   * `liveAction` marks which button the desk is currently open on: it wears the accent ring, the
+   * same `--stage-accent` every desk surface reads.
+   */
+  onPrimary?: (anchor: HTMLElement) => void;
+  onNudge?: (anchor: HTMLElement) => void;
+  liveAction?: "primary" | "nudge" | null;
   onMarkClosed?: () => void;
   onClose: () => void;
   onStep: (delta: 1 | -1) => void;
@@ -117,7 +123,7 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
   open, mode = "detail", form,
   facts, status, name, agency, initials, sentLabel, viaLabel,
   manuscriptTitle, manuscriptMeta, versionLabel,
-  position, primaryLabel, onPrimary, onNudge, onMarkClosed, onClose, onStep,
+  position, primaryLabel, onPrimary, onNudge, liveAction = null, onMarkClosed, onClose, onStep,
   elapsed, expectedLabel, tracking, agentTab, notesTab, noteCount,
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -215,11 +221,13 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
           {position && <span className="qpn-pos">{position.index + 1} of {position.total}</span>}
           <span className="qpn-spacer" />
           {onPrimary && (
-            <button type="button" className="qpn-act qpn-act--pink" onClick={onPrimary}>{primaryLabel}</button>
+            <button type="button" className={`qpn-act qpn-act--pink${liveAction === "primary" ? " qpn-act--live" : ""}`}
+              onClick={(e) => onPrimary(e.currentTarget)}>{primaryLabel}</button>
           )}
           {/* ⚠️ NUDGE IS AGENT-SIDE ONLY. There is nobody to chase about a parcel you have not sent. */}
           {onNudge && (facts.turn === "sand" || facts.turn === "agent") && (
-            <button type="button" className="qpn-act" onClick={onNudge}>Nudge</button>
+            <button type="button" className={`qpn-act${liveAction === "nudge" ? " qpn-act--live" : ""}`}
+              onClick={(e) => onNudge(e.currentTarget)}>Nudge</button>
           )}
           {onMarkClosed && facts.turn !== "closed" && (
             <button type="button" className="qpn-act" onClick={onMarkClosed}>Mark closed</button>

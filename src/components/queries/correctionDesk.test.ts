@@ -19,7 +19,12 @@ const read = (p: string) =>
 describe("§3 · the desk hosts the existing components", () => {
   const page = read("src/components/Queries.tsx");
   const host = (() => {
-    const at = page.indexOf("<CorrectionDesk");
+    /* ⚠️ ANCHORED ON THE CORRECTING GUARD, not the first <CorrectionDesk — the respond-nudge run
+       gave the host a second tenant (the verb desk), and a first-match slice read that one:
+       four assertions about the fork failing over a mount that never carried it. */
+    const guard = page.indexOf("{correcting && activeQuery && (");
+    expect(guard, "the correcting host is missing").toBeGreaterThan(-1);
+    const at = page.indexOf("<CorrectionDesk", guard);
     expect(at, "the desk host is missing from the page").toBeGreaterThan(-1);
     const end = page.indexOf("</CorrectionDesk>", at);
     expect(end, "the desk host is unterminated").toBeGreaterThan(at);
