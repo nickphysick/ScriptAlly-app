@@ -109,3 +109,8 @@ input.qrd-fld { cursor: text; }
 .qrd-vnote b { color: #7c3a2a; font-weight: 600; }
 .qrd-vsel { width: 100%; appearance: auto; margin-bottom: 4px; }
 .qrd-vfoot { font-size: 10px; line-height: 1.4; color: #9c8878; margin-bottom: 12px; }
+
+/* §2 (correction pass 3) — the closed desk: one column of reason cards, a chosen card keeps
+   the chip-selection pink, and the note reuses the respond desk's textarea look */
+.qrd-kinds--closed { grid-template-columns: 1fr; }
+.qrd-kind--on { background: #f5e2da; border-color: #e8c8bc; }

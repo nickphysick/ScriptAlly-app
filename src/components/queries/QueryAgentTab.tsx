@@ -46,8 +46,6 @@ export interface QueryAgentTabProps {
   onEditAgent?: () => void;
 }
 
-const monogram = (name: string) =>
-  name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
 
 export const QueryAgentTab: React.FC<QueryAgentTabProps> = ({ agent, history, onOpenContactList, onEditAgent }) => {
   const open = agent.submissionStatus === "Open";
@@ -68,19 +66,21 @@ export const QueryAgentTab: React.FC<QueryAgentTabProps> = ({ agent, history, on
 
   return (
     <div className="qat">
-      <div className="qat-hero">
-        <span className="qat-av" aria-hidden="true">{monogram(agent.name || agent.agency)}</span>
-        <div className="qat-herotx">
-          <div className="qat-nm">{agent.name || agent.agency}</div>
-          {agent.name && agent.agency && <div className="qat-ag">{agent.agency}</div>}
-          {(place || flag) && (
-            <div className="qat-loc">
-              {flag && <span className={flag} aria-hidden="true" />}
-              {place && <span>{place}</span>}
-            </div>
-          )}
-        </div>
-        {/* the door, in the two-systems vocabulary — never a bare "Closed" */}
+      {/**
+        * ⚠️ THE TAB HAS NO HERO (v7, correction pass 3 §4). The drawer's header directly above is
+        * the identity — monogram, name, agency — and the tab repeated all three two inches below
+        * it. The tab is the PROFILE: it opens on a mono facts line built from what the record
+        * holds. The ref also draws a role and an est. year on this line; `Agent` has no such
+        * fields, so those segments are ABSENT rather than invented (the shell renders what
+        * exists). The door pill keeps the two-systems vocabulary — never a bare "Closed".
+        */}
+      <div className="qat-facts">
+        {(place || flag) && (
+          <span className="qat-fseg">
+            {flag && <span className={flag} aria-hidden="true" />}
+            {place && <span>{place}</span>}
+          </span>
+        )}
         <span className="qat-open">{open ? "Open to submissions" : "Closed for submissions"}</span>
       </div>
 

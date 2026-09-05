@@ -69,6 +69,7 @@ import { CorrectionDesk, MaterialsFields } from "./queries/CorrectionDesk";
 import { RespondDesk } from "./queries/RespondDesk";
 import { MarkSentDesk, type MarkSentDraft } from "./queries/MarkSentDesk";
 import { NudgeDesk, type NudgeDeskDraft } from "./queries/NudgeDesk";
+import { MarkClosedDesk, type MarkClosedDraft } from "./queries/MarkClosedDesk";
 import { nudgeDraft, requestedProse } from "../lib/nudgeDraft";
 import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
 import { QueryLogSheet } from "./queries/QueryLogSheet";
@@ -292,30 +293,6 @@ const CmdBtn = React.forwardRef<HTMLButtonElement, {
 ));
 CmdBtn.displayName = "CmdBtn";
 
-/* ── Overflow-menu row (Close reasons + More). Left-aligned icon + label; greyed when a feature is
-   stubbed this pass; destructive tint for Delete. ── */
-const RibbonMenuItem: React.FC<{
-  icon?: React.ReactNode; label: string; onClick?: () => void; disabled?: boolean; destructive?: boolean; title?: string;
-}> = ({ icon, label, onClick, disabled, destructive, title }) => (
-  <button
-    type="button"
-    title={title}
-    onClick={disabled ? undefined : onClick}
-    disabled={disabled}
-    className="qp-menuitem"
-    style={{
-      display: "flex", alignItems: "center", gap: 9, width: "100%", textAlign: "left",
-      background: "transparent", border: "none", borderRadius: 7, padding: "8px 10px",
-      fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500,
-      color: disabled ? "#b7ab99" : (destructive ? "#9a3b2a" : "#2c2017"),
-      cursor: disabled ? "default" : "pointer", opacity: disabled ? 0.7 : 1, whiteSpace: "nowrap",
-    }}
-  >
-    {icon && <span aria-hidden="true" style={{ display: "flex", flexShrink: 0 }}>{icon}</span>}
-    <span>{label}</span>
-  </button>
-);
-RibbonMenuItem.displayName = "RibbonMenuItem";
 
 /**
  * ⚠️ THE LAST-VIEWED STORE IS DELETED, WRITER AND KEY, because its only reader was the auto-select
@@ -857,6 +834,45 @@ export const Queries: React.FC<{
     }
   };
 
+  /**
+   * §2 — CLOSED'S SAVE: the same primitive the respond desk uses, with the reason mapped the way
+   * `recordQueryResponse` already maps it (rejected → rejected; withdrawn/no-response → the close
+   * path + its closingReason). One activity, receipt with Undo — the old menu's bare status write
+   * is retired with it.
+   */
+  const saveDeskClosed = async () => {
+    if (!deskClosed?.reason || !activeQuery || !currentUser || respSaving) return;
+    const q = activeQuery;
+    const reason = deskClosed.reason;
+    setRespSaving(true);
+    try {
+      const agent = agents.find((a) => a.id === q.agentId) ?? null;
+      const base = emptyResponseDraft(deskClosed.date);
+      const draft: ResponseDraft = { ...base, outcome: reason === QueryStatus.REJECTED ? "rejected" : "noreply", dateArrived: deskClosed.date, notes: deskClosed.note };
+      const payload = {
+        ...responseDraftToPayload(draft),
+        ...(reason !== QueryStatus.REJECTED ? {
+          closingReason: reason === QueryStatus.WITHDRAWN ? "Withdrew my submission" as const : "No response after expected window" as const,
+        } : {}),
+      };
+      const res = await recordQueryResponse(
+        { userId: currentUser.id, query: q, agent, manuscript: { title: activeMs?.title } },
+        payload as never,
+      );
+      setDeskVerb(null);
+      setDeskFreshStatus({ toStatus: reason, at: Date.now() });
+      showToast({
+        replaces: RESPONSE_RECEIPT_CHANNEL,
+        message: `Closed — ${reason} · ${agentPrimary(activeAgent ?? ({} as never)) || "the agent"}`,
+        undo: () => res.undo(),
+      });
+    } catch {
+      showToast({ message: "Couldn't close that query — please try again." });
+    } finally {
+      setRespSaving(false);
+    }
+  };
+
   /* the fresh-rung TARGET; its resolver effect lives below trackingEvents' own declaration —
      an effect here would read the subscription state through the temporal dead zone, the exact
      shape this repo's TDZ law records (tsc catches this one because the scopes meet). */
@@ -1204,7 +1220,6 @@ export const Queries: React.FC<{
   // Control-ribbon secondary surfaces — Nudge (modal), Close-reasons menu (anchored upward off its
   // ribbon tile), and the Delete confirmation dialog. (v3: the More ⋯ menu was removed.)
   const [isNudgeOpen, setIsNudgeOpen] = useState(false);
-  const [isCloseMenuOpen, setIsCloseMenuOpen] = useState(false);
   /* §5 — the CLOSED group's fold. Session-only and deliberately not persisted: it is a "let me look
      at that for a moment" gesture, not a preference, and a fold that survived a reload would leave
      the writer's own history hidden by a decision they made a week ago. Closed by default, and only
@@ -1267,8 +1282,8 @@ export const Queries: React.FC<{
    * one card would be two tenants in one room). The trigger ref is shared with corrections — the
    * desk notches to whatever element opened it.
    */
-  const [deskVerb, setDeskVerb] = useState<"respond" | "marksent" | "nudge" | null>(null);
-  const openDeskVerb = (verb: "respond" | "marksent" | "nudge", anchor: HTMLElement) => {
+  const [deskVerb, setDeskVerb] = useState<"respond" | "marksent" | "nudge" | "closed" | null>(null);
+  const openDeskVerb = (verb: "respond" | "marksent" | "nudge" | "closed", anchor: HTMLElement) => {
     setCorrecting(null);
     correctingTriggerRef.current = anchor;
     setDeskVerb((cur) => (cur === verb ? null : verb));
@@ -1483,10 +1498,11 @@ export const Queries: React.FC<{
     });
   };
 
-  const closePanelRef = useRef<HTMLElement>(null);
-  const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(
-    isCloseMenuOpen, { placement: "auto", constrain: true, menuRef: closePanelRef },
-  );
+  /* ⚠️ THE ANCHORED CLOSE MENU IS RETIRED (§2, correction pass 3). Its trigger ref lived only in
+     the dead browsing branch, so the live drawer opened it with an EMPTY menuStyle and the
+     "popover" rendered in normal flow under the hero — the inline "Close this query as…" block.
+     Mark closed is the desk's fourth verb now, through the one response primitive (the old menu
+     wrote status directly via updateQueryStatus). */
   /* §4c — the confirm hangs off the Nudge button itself; the control row sits at the top of the
      pane, so it opens downward like every other menu in that row. */
   /**
@@ -1515,7 +1531,7 @@ export const Queries: React.FC<{
     !!nudgeAsk, { placement: "auto", constrain: true, menuRef: nudgePanelRef },
   );
   // Close every ribbon popover/modal whenever the reader moves to a different query.
-  useEffect(() => { setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); setNudgeAsk(null); }, [selectedQueryId]);
+  useEffect(() => { setIsNudgeOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); setNudgeAsk(null); }, [selectedQueryId]);
   // 5e — the delete is now WIRED to db.deleteQuery (cascades the per-query activity log + the
   // global-feed twins; models deleteAgent). No undo — a cascade restore isn't offered; the counted
   // confirm below is the safety. Clear the selection so the pane doesn't dangle on a deleted id.
@@ -2285,8 +2301,13 @@ export const Queries: React.FC<{
       const req = [...trackingEvents].reverse().find((e: any) =>
         (e.resultingStatus ?? e.type) === QueryStatus.PARTIAL_REQUESTED);
       const unit: SampleUnit = req?.materialsType === "chapters" ? "Chapters" : req?.materialsType === "words" ? "Words" : "Pages";
-      const amount = req?.materialsQuantity ? String(parseQty(String(req.materialsQuantity))) : snapToUnit(unit);
-      setDeskMarkAsk(req?.materialsQuantity ? { amount, unit } : null);
+      /* §3 (correction pass 3): a recorded value that PARSES TO ZERO is not a usable ask — the
+         journey's own payload stamps "0" on request rungs, parseQty of prose is 0 too, and
+         formatQty(0) renders "" — a blank stepper wearing an "as asked" label. Zero and absent
+         take the same honest branch: the unit's default, no label. */
+      const askedN = req?.materialsQuantity ? parseQty(String(req.materialsQuantity)) : 0;
+      const amount = askedN > 0 ? String(askedN) : snapToUnit(unit);
+      setDeskMarkAsk(askedN > 0 ? { amount, unit } : null);
       const win = typeof activeAgent.responseTimeWeeks === "number" && activeAgent.responseTimeWeeks > 0
         ? activeAgent.responseTimeWeeks : null;
       setDeskMark({
@@ -2390,6 +2411,39 @@ export const Queries: React.FC<{
     <>Records a <b>Nudged</b> rung on the timeline. Status stays <b>{activeQuery.status}</b>. The
       draft is copied for your mail client — ScriptAlly never sends.</>
   ) : null;
+
+  /**
+   * §2 (correction pass 3) — MARK CLOSED IN THE DESK, the fourth verb. Replaces the anchored
+   * close menu whose trigger retired with the browsing chrome (it was rendering in flow under
+   * the hero) — and unlike that menu's direct `updateQueryStatus`, this goes through the ONE
+   * response primitive: Rejected → the rejected path; Withdrawn / No response → the close path
+   * with its reason, exactly the mapping `recordQueryResponse` already owns.
+   */
+  const [deskClosed, setDeskClosed] = useState<MarkClosedDraft | null>(null);
+  useEffect(() => {
+    if (deskVerb === "closed" && !deskClosed && activeQuery) {
+      setDeskClosed({ reason: null, date: todayInputDate(), note: "" });
+    }
+    if (deskVerb !== "closed" && deskClosed) setDeskClosed(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deskVerb, activeQuery?.id]);
+  const deskClosedProposed = deskClosed?.reason ? {
+    id: "__ghost",
+    type: deskClosed.reason,
+    resultingStatus: deskClosed.reason,
+    createdAt: new Date(`${deskClosed.date}T12:00:00`).toISOString(),
+    note: deskClosed.note || undefined,
+  } : null;
+  const deskClosedDerived = (() => {
+    if (deskVerb !== "closed" || !activeQuery) return null;
+    if (!deskClosed?.reason) return <>Choose how this query closed.</>;
+    const nudgeIso = activeQuery.nudgeDate && new Date(activeQuery.nudgeDate).getTime() > Date.now()
+      ? fmtShortISO(activeQuery.nudgeDate) : null;
+    return (
+      <>Status becomes <b>Closed</b> — {deskClosed.reason}.{" "}
+        {nudgeIso && <>The nudge for {nudgeIso} is retired.</>}</>
+    );
+  })();
   // 5d — click-to-pick writers (constrained values, plain updateQuery + undo). No cascade needed:
   // sendMethod is a display field; manuscriptId reassignment is a plain patch (historical activities
   // keep their own manuscriptId — the same derived-over-stored limitation the drawer has).
@@ -5348,6 +5402,18 @@ export const Queries: React.FC<{
                 />
               </div>
             )}
+            {deskVerb === "closed" && deskClosed && (
+              <MarkClosedDesk
+                agencyName={activeAgent.agency?.trim() || agentPrimary(activeAgent) || "the agent"}
+                subject={`${agentPrimary(activeAgent) || "The agent"} · ${activeQuery.status}`}
+                draft={deskClosed}
+                onDraft={setDeskClosed}
+                derivedLine={deskClosedDerived}
+                saving={respSaving}
+                onRecord={() => void saveDeskClosed()}
+                onCancel={() => setDeskVerb(null)}
+              />
+            )}
             {deskVerb === "nudge" && deskNudge && (
               <NudgeDesk
                 agencyName={activeAgent.agency?.trim() || agentPrimary(activeAgent) || "the agent"}
@@ -5588,22 +5654,6 @@ export const Queries: React.FC<{
           </CorrectionDesk>
         )}
 
-        {isCloseMenuOpen && activeQuery && (
-          <>
-            <div onClick={() => setIsCloseMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 59 }} aria-hidden="true" />
-            <div ref={closePanelRef as React.RefObject<HTMLDivElement>} style={{ ...closeMenuStyle, zIndex: 60, display: "flex", flexDirection: "column", minHeight: 0, overflowY: "auto", background: "#fffefb", border: "1px solid var(--bd)", borderRadius: 12, boxShadow: "0 12px 34px rgba(58,44,31,.18)", padding: 6, minWidth: 198 }}>
-              <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".12em", textTransform: "uppercase", color: "#b7ab99", padding: "6px 10px 5px" }}>Close this query as…</div>
-              {[QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE].map((reason) => (
-                <RibbonMenuItem
-                  key={reason}
-                  icon={<StatusDot status={reason} overrideSize={15} decorative />}
-                  label={reason}
-                  onClick={() => { setIsCloseMenuOpen(false); updateQueryStatus(activeQuery.id, reason); }}
-                />
-              ))}
-            </div>
-          </>
-        )}
 
         {/* Delete confirmation — destructive, no undo. v3 promoted Delete to the bar (the ⋯ More menu
             was removed). The final deletion is a flagged STUB (no deleteQuery handler yet — see the
@@ -5946,8 +5996,8 @@ export const Queries: React.FC<{
                 openDeskVerb(panelRow.facts.turn === "you" ? "marksent" : "respond", anchor);
               }}
               onNudge={(anchor) => openDeskVerb("nudge", anchor)}
-              liveAction={deskVerb === "nudge" ? "nudge" : deskVerb ? "primary" : null}
-              onMarkClosed={() => setIsCloseMenuOpen(true)}
+              liveAction={deskVerb === "nudge" ? "nudge" : deskVerb === "closed" ? "closed" : deskVerb ? "primary" : null}
+              onMarkClosed={(anchor) => openDeskVerb("closed", anchor)}
               onClose={() => onSelectView?.("cards")}
               onStep={(delta) => {
                 if (!gridRows.length) return;
@@ -5982,7 +6032,7 @@ export const Queries: React.FC<{
                    PROPOSED world: the ghost activity appended to the real events (same builder,
                    same renderer — decision 2), and the open-state block derived from the proposed
                    status, which is what makes the waiting rung disappear when the ghost moots it. */
-                const proposedAny = deskProposed ?? deskMarkProposed;
+                const proposedAny = deskProposed ?? deskMarkProposed ?? deskClosedProposed;
                 const eventsForRail = proposedAny ? [...trackingEvents, proposedAny] : trackingEvents;
                 const railStatus = (proposedAny?.resultingStatus ?? activeQuery.status) as QueryStatus;
                 const ta = getPrimaryAction(railStatus);
@@ -6041,7 +6091,9 @@ export const Queries: React.FC<{
                        open survives only as the mobile surface below. */
                     onNudge={(anchor) => openDeskVerb("nudge", anchor)}
                     onSetExpectedDate={(iso) => commitExpectedDate(iso)}
-                    onMarkClosed={() => setIsCloseMenuOpen(true)}
+                    /* §2 (correction pass 3) — the offer's "Mark closed" opens the DESK, same
+                       anchor contract as its "Nudge now" neighbour */
+                    onMarkClosed={(anchor) => openDeskVerb("closed", anchor)}
                     onEditSendMethod={sentActivity ? (anchor) => {
                       const entry = rungEntry(sentActivity.id);
                       if (entry) { correctingTriggerRef.current = anchor; setCorrecting({ step: "fork", entry }); }
@@ -6298,13 +6350,11 @@ export const Queries: React.FC<{
                       chrome inside a row that is otherwise all verbs. */}
                   <span className="qc-gap" />
                   <button
-                    ref={closeTriggerRef}
                     type="button"
                     className="qc-btn qc-btn-shrink"
                     aria-haspopup="menu"
-                    aria-expanded={isCloseMenuOpen}
                     title="Mark this query closed"
-                    onClick={() => setIsCloseMenuOpen((o) => !o)}
+                    onClick={() => {}}
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3 8-8M21 12a9 9 0 1 1-6.2-8.5" /></svg>
                     <span>Mark closed</span>
@@ -7644,7 +7694,7 @@ export const Queries: React.FC<{
                               onNudge={() => setIsNudgeOpen(true)}
                               /* §4c — the offer beneath a no-reply event opens the same close flow
                                  the bar's `Mark closed` does. One home for the act. */
-                              onMarkClosed={() => setIsCloseMenuOpen(true)}
+                              onMarkClosed={() => {}}
                               /**
                                * §5d — "Keep tracking" is a DECISION, so it is the one thing in §5
                                * that is stored: `closureOfferDismissed` on the query, in the update
@@ -8223,7 +8273,8 @@ export const Queries: React.FC<{
           await logNudge(activeQuery.id, { checkBackDate, note });
           setIsNudgeOpen(false);
         }}
-        onCloseInstead={() => { setIsNudgeOpen(false); setIsCloseMenuOpen(true); }}
+        /* §2 — the close menu is gone; below md the more-sheet already carries the close rows */
+        onCloseInstead={() => { setIsNudgeOpen(false); setMobileMoreOpen(true); }}
       />
     )}
 

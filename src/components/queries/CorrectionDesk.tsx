@@ -39,21 +39,28 @@ export const CorrectionDesk: React.FC<CorrectionDeskProps> = ({ stage, anchor, r
   const [pos, setPos] = useState<{ top: number; arrow: number | null }>({ top: 92, arrow: null });
 
   /**
-   * The ref's own placement maths, verbatim: card top = rung centre − 42, clamped inside the
-   * viewport with a 12px margin; the notch at rung centre − top − 8, so it keeps pointing at the
-   * rung even while the clamp holds the card still.
+   * The ref's placement maths — card top = rung centre − 42 — clamped to the CONTENT WINDOW's
+   * extent, not the viewport's (correction pass 3 §1). The drawer is a full-height takeover
+   * (`.qpn` is `top: 0`), so "the drawer's top" is 0 and a viewport clamp let the desk sit over
+   * the app masthead beside it; the region the desk actually lives in is the window below that
+   * chrome. `.ws-window` is measured at place time (its top moves when the beta strip is
+   * dismissed), with the viewport as the fallback so a windowless host keeps the old bound.
+   * The notch keeps pointing at the anchor, clamped along the card's own edge — a bar anchor
+   * above the card's reachable top gets the nearest point, not a notch off the card.
    */
   const place = useCallback(() => {
     const card = cardRef.current;
     if (!card) return;
     const vh = window.innerHeight;
     const h = card.offsetHeight;
-    if (!anchor) { setPos({ top: Math.max(12, Math.min(92, vh - h - 12)), arrow: null }); return; }
+    const winTop = document.querySelector(".ws-window")?.getBoundingClientRect().top ?? 0;
+    const minTop = winTop + 12;
+    const maxTop = Math.max(minTop, vh - h - 12);
+    if (!anchor) { setPos({ top: Math.max(minTop, Math.min(92, maxTop)), arrow: null }); return; }
     const r = anchor.getBoundingClientRect();
     const centre = r.top + r.height / 2;
-    const maxTop = Math.max(12, vh - h - 12);
-    const top = Math.max(12, Math.min(centre - 42, maxTop));
-    setPos({ top, arrow: centre - top - 8 });
+    const top = Math.max(minTop, Math.min(centre - 42, maxTop));
+    setPos({ top, arrow: Math.max(10, Math.min(centre - top - 8, h - 26)) });
   }, [anchor]);
 
   /* placed before paint, and re-placed when the card's own height changes (the steps differ),

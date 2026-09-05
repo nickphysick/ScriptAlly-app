@@ -93,8 +93,9 @@ export interface QueryPanelProps {
    */
   onPrimary?: (anchor: HTMLElement) => void;
   onNudge?: (anchor: HTMLElement) => void;
-  liveAction?: "primary" | "nudge" | null;
-  onMarkClosed?: () => void;
+  liveAction?: "primary" | "nudge" | "closed" | null;
+  /** §2 (correction pass 3): carries the clicked control so the desk can notch to it. */
+  onMarkClosed?: (anchor: HTMLElement) => void;
   onClose: () => void;
   onStep: (delta: 1 | -1) => void;
   /** The two trays: elapsed, and the expected reply. */
@@ -230,7 +231,8 @@ export const QueryPanel: React.FC<QueryPanelProps> = ({
               onClick={(e) => onNudge(e.currentTarget)}>Nudge</button>
           )}
           {onMarkClosed && facts.turn !== "closed" && (
-            <button type="button" className="qpn-act" onClick={onMarkClosed}>Mark closed</button>
+            <button type="button" className={`qpn-act${liveAction === "closed" ? " qpn-act--live" : ""}`}
+              onClick={(e) => onMarkClosed(e.currentTarget)}>Mark closed</button>
           )}
           <button type="button" className="qpn-icb" aria-label="Close" onClick={onClose}>
             <Icon d="M18 6L6 18M6 6l12 12" size={14} width={2.2} />

@@ -88,7 +88,9 @@ describe("§2 · one activity per save, through the one primitive", () => {
       .replace(/\/\*[\s\S]*?\*\//g, "");
     const at = page.indexOf("const saveDeskResponse = async");
     expect(at).toBeGreaterThan(-1);
-    const body = page.slice(at, page.indexOf("const [deskFreshStatus", at));
+    /* bounded on the NEXT save — saveDeskClosed (§2, correction pass 3) is a second legitimate
+       caller of the primitive further down, and the old wide bound counted it */
+    const body = page.slice(at, page.indexOf("const saveDeskMarkSent", at));
     expect((body.match(/recordQueryResponse\(/g) ?? []).length).toBe(1);
     expect(body).toContain("...responseDraftToPayload(deskResp)");
     expect(body, "the quantity does not reach the payload").toContain("materialsQuantity: parseQty(deskQty.amount)");
@@ -132,13 +134,19 @@ describe("§3 · the window rule is the log sheet's, verbatim", () => {
   });
 
   it("'as asked' is a pre-fill from the request's own figure — and stays editable", () => {
-    expect(page).toContain('req?.materialsQuantity ? String(parseQty(String(req.materialsQuantity))) : snapToUnit(unit)');
+    /* §3 of correction pass 3: recorded-but-zero (the journey's own "0" stamp, or prose parseQty
+       reads as 0) takes the SAME branch as absent — formatQty(0) is "" and a blank field wearing
+       "as asked" is the fabricated-value family with a new face. Both halves of the brief's
+       assert: absent/zero → unit default + no label; a real figure → that figure + the label. */
+    expect(page).toContain("const askedN = req?.materialsQuantity ? parseQty(String(req.materialsQuantity)) : 0;");
+    expect(page).toContain('const amount = askedN > 0 ? String(askedN) : snapToUnit(unit);');
+    expect(page).toContain("setDeskMarkAsk(askedN > 0 ? { amount, unit } : null);");
     const desk = readFileSync(join(process.cwd(), "src/components/queries/MarkSentDesk.tsx"), "utf8");
     expect(desk, "the qty is display-only — 'editable' is the brief's word").toContain('onChange={(e) => onDraft({ ...draft, qty: { ...qty, amount: String(parseQty(e.target.value)) } })}');
     /* and the label is HONEST: only while the draft still equals a figure the request RECORDED —
        never on a default, never after an edit (the fabricated-value family) */
     expect(page).toContain('askedLabel={deskMark.qty && deskMarkAsk && deskMark.qty.amount === deskMarkAsk.amount && deskMark.qty.unit === deskMarkAsk.unit ? "as asked" : null}');
-    expect(page).toContain('setDeskMarkAsk(req?.materialsQuantity ? { amount, unit } : null);');
+    expect(page).toContain('setDeskMarkAsk(askedN > 0 ? { amount, unit } : null);');
   });
 });
 
@@ -284,5 +292,49 @@ describe("§5 · the popover is gone, the modal is mobile-only, the desk took th
     expect(two).toContain("— not recorded —");
     expect(two).toContain("No version is recorded for the sample you queried with.");
     expect(render(1)).not.toContain("Version sent");
+  });
+});
+
+/* ══ correction pass 3 · §2 — Mark closed moves into the desk ═════════════════════════════════ */
+describe("§2 (pass 3) · the close menu is retired; closed is the desk's fourth verb, one primitive", () => {
+  const page = readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
+  it("the in-flow menu is GONE — no state, no trigger, no 'Close this query as…' on the page", () => {
+    expect(page).not.toContain("isCloseMenuOpen");
+    expect(page).not.toContain("closeTriggerRef");
+    /* the mobile sheet's own heading survives — the desktop popover's is gone with it */
+    expect((page.match(/Close this query as/g) ?? []).length).toBe(1);
+  });
+
+  it("both live Mark-closed controls open the DESK with their own anchor", () => {
+    expect((page.match(/openDeskVerb\("closed", anchor\)/g) ?? []).length).toBe(2);
+  });
+
+  it("closed's save is ONE recordQueryResponse — the old menu's bare updateQueryStatus is retired from this act", () => {
+    const at = page.indexOf("const saveDeskClosed");
+    expect(at).toBeGreaterThan(-1);
+    const body = page.slice(at, page.indexOf("const pickSendMethod", at));
+    expect((body.match(/recordQueryResponse\(/g) ?? []).length).toBe(1);
+    expect(body).not.toContain("updateQueryStatus");
+    /* the reason maps the way the primitive already maps it */
+    expect(body).toContain('"Withdrew my submission"');
+    expect(body).toContain('"No response after expected window"');
+    expect(body).toContain("undo: () => res.undo()");
+  });
+
+  it("the derived line is the brief's copy, nudge clause only when a future nudge exists", () => {
+    expect(page).toContain("Status becomes <b>Closed</b> — {deskClosed.reason}.");
+    const at = page.indexOf("const deskClosedDerived");
+    const body = page.slice(at, page.indexOf("const saveDeskResponse", at) > -1 ? page.indexOf("const saveDeskResponse", at) : at + 1200);
+    expect(body).toContain("new Date(activeQuery.nudgeDate).getTime() > Date.now()");
+  });
+
+  it("the closed proposal joins the one ghost channel", () => {
+    expect(page).toContain("const proposedAny = deskProposed ?? deskMarkProposed ?? deskClosedProposed;");
+  });
+
+  it("below md, the modal's 'close instead' hands over to the sheet that has the close rows", () => {
+    expect(page).toContain("onCloseInstead={() => { setIsNudgeOpen(false); setMobileMoreOpen(true); }}");
   });
 });

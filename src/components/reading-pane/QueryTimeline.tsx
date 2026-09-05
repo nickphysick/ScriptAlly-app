@@ -729,7 +729,8 @@ const SetWindow: React.FC<{ anchorMs: number; onSave: (iso: string) => void }> =
 
 export const QueryTimeline: React.FC<QueryTimelineProps & {
   sentExtra?: React.ReactNode;
-  onMarkClosed?: () => void;
+  /** §2 (correction pass 3): carries the clicked control so the desk can notch to it. */
+  onMarkClosed?: (anchor: HTMLElement) => void;
   /** §5d — "Keep tracking". Absent ⇒ the offer renders no dismissal, never a dead button. */
   onKeepTracking?: () => void;
   /** §6b — the scheduled reminder this query is waiting on, derived by the caller. */
@@ -1031,7 +1032,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
               <div className="tl-offer">
                 <div className="tl-offer-f">{offer.facts}</div>
                 <div className="tl-offer-a">
-                  {onMarkClosed && <button type="button" className="tl-offer-go" onClick={onMarkClosed}>Mark closed</button>}
+                  {onMarkClosed && <button type="button" className="tl-offer-go" onClick={(e) => onMarkClosed?.(e.currentTarget)}>Mark closed</button>}
                   {onKeepTracking && <button type="button" className="tl-offer-keep" onClick={onKeepTracking}>Keep tracking</button>}
                 </div>
               </div>
@@ -1062,7 +1063,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
                   <div className="tl-offer-a">
                     {onNudge && <button type="button" className="tl-offer-go" onClick={(e) => onNudge(e.currentTarget)}>Nudge now</button>}
                     {onRemindLater && <button type="button" className="tl-offer-keep" onClick={onRemindLater}>Remind me later</button>}
-                    {onMarkClosed && <button type="button" className="tl-offer-keep" onClick={onMarkClosed}>Mark closed</button>}
+                    {onMarkClosed && <button type="button" className="tl-offer-keep" onClick={(e) => onMarkClosed?.(e.currentTarget)}>Mark closed</button>}
                   </div>
                 </div>
               );

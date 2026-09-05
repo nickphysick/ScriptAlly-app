@@ -100,3 +100,30 @@ describe("§4 · history rows across manuscripts", () => {
     expect(draw(agent({ submissionStatus: SubmissionStatus.CLOSED }))).toContain("Closed for submissions");
   });
 });
+
+/* ══ correction pass 3 · §4 — the tab has NO hero (v7) ════════════════════════════════════════ */
+describe("§4 (pass 3) · the drawer header is the identity; the tab is the profile", () => {
+  it("the tab's own markup never states the full name — no hero, no monogram, no name node", () => {
+    const html = draw();
+    expect(html).not.toContain("Priya Raman");
+    expect(html).not.toContain("qat-hero");
+    expect(html).not.toContain("qat-av");
+    /* the kickers keep their first-name form — a name-PART is not the identity row */
+    expect(html).toContain("Priya asks for");
+  });
+
+  it("the facts line opens the tab: flag + place, the door pill right — and absent facts leave nothing", () => {
+    const html = draw();
+    const facts = html.slice(html.indexOf('class="qat-facts"'), html.indexOf("qat-acts"));
+    expect(facts).toContain("fi fi-gb");
+    expect(facts).toContain("London");
+    expect(facts).toContain("Open to submissions");
+    /* the ref draws a role and an est. year; Agent has no such fields, so the line must not
+       invent them — nothing but the location segment and the pill */
+    expect(facts).not.toMatch(/est\.|Senior|agent,/);
+    const bare = draw(agent({ country: undefined, city: undefined }));
+    const bfacts = bare.slice(bare.indexOf('class="qat-facts"'), bare.indexOf("qat-acts"));
+    expect(bfacts, "an empty location leaves no segment").not.toContain("qat-fseg");
+    expect(bfacts).toContain("Open to submissions");
+  });
+});
