@@ -164,7 +164,15 @@ export interface TaskPaneProps {
   journey: TaskPaneJourney;
   onPrimary: () => void;
   /** carried behaviour: where you are in the queue, and how to move */
-  nav?: { index: number; total: number; label: string; onPrev: () => void; onNext: () => void };
+  /**
+   * ⚠️ `onClose` IS OPTIONAL AND IT IS THE PANE'S FIRST WAY OUT (drawer round, Phase 2). Until
+   * this round the pane could not be closed by ANY route — `closeDock` had no caller, this
+   * component rendered no Close, and no key reached the dock. Optional rather than required
+   * because a host that mounts the pane with nowhere to go back to is a legitimate shape and
+   * should not be forced to pass a no-op; a no-op close is worse than no close, per the house
+   * rule on dead controls.
+   */
+  nav?: { index: number; total: number; label: string; onPrev: () => void; onNext: () => void; onClose?: () => void };
 }
 
 /* (`entryCount` is deleted with the count it fed — workspace round, Phase 1. The story header
@@ -297,6 +305,13 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
               <div className="b-nav">
                 <button type="button" onClick={nav.onPrev} aria-label="Previous task">‹</button>
                 <button type="button" onClick={nav.onNext} aria-label="Next task">›</button>
+                {/* ⚠️ THE CONTRACT'S OWN CHIP, BESIDE THE ARROWS — the two verbs that move you
+                    between tasks and the one that leaves. It reads the word rather than an ✕
+                    because this is not a dialogue being dismissed: the list is still there and
+                    still live, and "Close" says which of the two things on screen is going. */}
+                {nav.onClose && (
+                  <button type="button" className="b-close" onClick={nav.onClose}>Close</button>
+                )}
               </div>
             )}
           </div>

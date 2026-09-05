@@ -86,8 +86,15 @@ test("every journey type mounts its pane with a clean console", async ({ page })
     })()`);
     /* the pane is React state, so wait for it rather than for the clock — and a crash means it
        never comes, which is what the timeout then reports */
+    /* ⚠️ THE WAIT AND THE CLAIM MUST BE THE SAME PREDICATE (drawer round, Phase 2). This waited on
+       HEIGHT and then asserted `VIS`, which is width AND height. That was indistinguishable while
+       the pane appeared at full width in one frame; with the drawer's 380ms motion the pane has
+       height immediately and width only as the track opens, so the wait was satisfied at the first
+       frame of the transition and the assertion read a 0-wide pane. Five of six journeys reported
+       `pane=false` with their content demonstrably present (`workChars` 164–523) — a green canary
+       turning red on a working page, which is the most expensive kind of false alarm there is. */
     await page.waitForFunction(
-      "[...document.querySelectorAll('.tpn .pane')].some((e) => e.getBoundingClientRect().height > 0)",
+      "[...document.querySelectorAll('.tpn .pane')].some((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; })",
       null, { timeout: 8_000 }).catch(() => {});
     const state = await page.evaluate(`(() => {
       const vis = ${VIS};

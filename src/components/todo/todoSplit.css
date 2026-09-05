@@ -70,13 +70,25 @@
      when nothing is open — the contract's `.stage` — and the 392px rail is retired with the
      always-two-columns shape it belonged to. The declaration below is the RESTING one; `.open`
      states the pair, so a reader of this rule sees the ordinary page rather than the exception.
-     ⚠️ THE PANE'S TRACK IS NOT A ZERO-WIDTH SECOND COLUMN AT REST. A `0px` track still takes the
-     18px gap on both sides, which would leave the list 36px short of the width it is supposed to
-     fill and nothing in the rule to point at. */
-  grid-template-columns: minmax(0, 1fr);
+     ⚠️ AND THE TWO SHAPES ARE THE SAME TRACK LIST WITH DIFFERENT NUMBERS, WHICH IS WHAT MAKES THE
+     MOTION ONE MOTION (Phase 2). `grid-template-columns` interpolates only between lists of the
+     same length whose differences are lengths — so `100% minmax(0, 1fr)` → `520px minmax(0, 1fr)`
+     animates (a length-percentage becoming a length, with an identical second track) while
+     `minmax(0, 1fr)` → `520px minmax(0, 1fr)` would be a track-COUNT change and would snap.
+
+     ⚠️ THE GAP TRAVELS WITH IT, AND IT HAS TO. At rest the second track is `1fr` of nothing, so a
+     standing 18px gap would leave the list 18px short of the width it is supposed to fill, at
+     rest, forever — with nothing in the rule to point at. `gap` is interpolable, so the two are
+     one transition rather than a width that moves and a hole that appears. */
+  grid-template-columns: 100% minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
-  gap: 18px;
+  /* ⚠️ ONE `gap` DECLARATION IN THIS RULE, AND IT IS THE RESTING ONE. The first form of this had
+     `gap: 0px` above and the old `gap: 18px` three lines below it, so the resting split kept an
+     18px gap beside a zero-width track and overflowed its own content box by exactly that — the
+     later declaration wins, silently, and the rule reads correctly top-down. The same shape this
+     repo records for two base rules of one selector, arriving inside a single rule instead. */
+  gap: 0px;
   /* ⚠️ ONE RHYTHM ON ALL FOUR SIDES, NOW THE BAR IS NOT ABOVE IT. This was `0 22px 20px` — no top
      at all, because the command bar's own `margin-bottom` was standing in for it, and 20 at the
      foot. With the bar gone the top would have collapsed to nothing and the page would sit hard
@@ -98,8 +110,27 @@
 
 /* ⚠️ 520px IS THE CONTRACT'S FOLDED WIDTH, AND IT LIVES HERE RATHER THAN ON THE CARD — the card
    fills what the column gives it (the same argument that kept 392 out of `.tlc`), so there is one
-   number rather than two that have to agree. Phase 2 gives this its 380ms; today it is a swap. */
-.tdw-split.open { grid-template-columns: 520px minmax(0, 1fr); }
+   number rather than two that have to agree. */
+.tdw-split.open { grid-template-columns: 520px minmax(0, 1fr); gap: 18px; }
+
+/* ⚠️ ONE MOTION, ON THE CONTAINER, BECAUSE THE TWO WIDTHS ARE ONE FACT. The list narrowing and
+   the drawer arriving are not two animations that have to be kept in step — they are the same
+   track list interpolating, so the drawer's width IS what the list gave up, every frame, by
+   construction. Two transitions on two elements would be a synchronisation problem; this cannot
+   drift because there is nothing to drift from.
+   ⚠️ AND THE DRAWER'S FADE IS SHORTER THAN THE WIDTH (the contract's .26s against .38s), so the
+   pane is legible before it stops moving rather than arriving blank and then appearing. */
+.tdw-split { transition: grid-template-columns var(--tdw-motion, 380ms) cubic-bezier(.22,.8,.3,1), gap var(--tdw-motion, 380ms) cubic-bezier(.22,.8,.3,1); }
+
+/* ⚠️ THERE IS NO `prefers-reduced-motion` BLOCK HERE, AND WRITING ONE WAS THE MISTAKE (Phase 2).
+   `workspaceShell.css` already ends with `.ws-app *, ::before, ::after { transition-duration:
+   0.01ms !important }` under that query — app-wide, `!important`, and deliberately last in its
+   file. A block here would be a rule the cascade discards: it would read as the drawer taking
+   care of its own reduced-motion path while doing nothing at all, which is the "rule with no
+   subject" family, and it would go on looking correct forever.
+   ⚠️ SO THE MEASUREMENT ASSERTS THE OUTCOME, NOT THE MECHANISM (`drawerMotion.measure.ts` P2.12):
+   0.38s under no-preference and effectively nothing under reduce. If the shell's block ever goes,
+   that reddens — which a lock on a rule in this file could not do. */
 
 /**
  * ⚠️ THE RAIL REPOINTS `--ws-window` AND EVERYTHING INSIDE IT FOLLOWS. The sticky group heading
@@ -166,6 +197,12 @@
    `flex: 1; min-height: 0` chain needs a flex parent, and a block parent silently drops both
    declarations — the page then still works, sized by content, which is exactly the failure that
    is hardest to see. */
+/* ⚠️ THE DRAWER IS PUSHED ASIDE, NOT LAID OVER — no scrim, no dim, no backdrop element, and the
+   list stays live and scrollable underneath nothing. It is `opacity: 0` and `pointer-events: none`
+   at rest rather than `display: none`, because a display swap cannot be transitioned and because
+   the pane must keep its DOM (and therefore its state) across an open and close. Its TRACK is
+   zero, so it costs no width; the opacity is only so the contents do not flicker in a 0px box
+   during the first frames of the motion. */
 .tdw-work {
   min-height: 0;
   min-width: 0;
@@ -173,7 +210,11 @@
   flex-direction: column;
   overflow: hidden;
   background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 260ms ease;
 }
+.tdw-split.open > .tdw-work { opacity: 1; pointer-events: auto; }
 
 /* ⚠️ THE RAIL'S INSTRUMENTS DO NOT SCROLL WITH THE LIST THEY NARROW. `flex: none` above the
    scroller: a search that scrolls away is gone exactly when a long list makes you want it.

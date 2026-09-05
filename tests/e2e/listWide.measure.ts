@@ -69,9 +69,9 @@ test("the list at full width, the columns, and the action control", async ({ pag
         card: Math.round(c.width * 10) / 10, split: Math.round(s.width * 10) / 10,
         left: Math.round((c.left - s.left) * 10) / 10,
         right: Math.round((s.right - c.right) * 10) / 10,
-        tracks: cs.gridTemplateColumns,
+        tracks: cs.gridTemplateColumns, gap: cs.columnGap,
       };
-    })()`) as { card: number; split: number; left: number; right: number; tracks: string } | null;
+    })()`) as { card: number; split: number; left: number; right: number; tracks: string; gap: string } | null;
 
     /* ⚠️ THE CONTENT AREA IS THE SPLIT, NOT THE VIEWPORT. The split IS the page's body inside the
        grid's scroll row; measuring against the window would fold in the sidebar, the gutter and
@@ -81,9 +81,16 @@ test("the list at full width, the columns, and the action control", async ({ pag
     add("P1.2 @" + w + " · the list card's width IS the content area's",
         !!fill && Math.abs(fill.card - fill.split) < 0.5 && Math.abs(fill.left) < 0.5 && Math.abs(fill.right) < 0.5,
         fill ? "card " + fill.card + " / area " + fill.split + " · gaps L" + fill.left + " R" + fill.right : "not found");
-    add("P1.3 @" + w + " · the resting split resolves to ONE track",
-        !!fill && fill.tracks.trim().split(/\s+/).length === 1,
-        fill ? "grid-template-columns = " + fill.tracks : "not found");
+    /* ⚠️ RE-POINTED WITH THE MOTION (Phase 2). The resting split is TWO tracks now — the drawer's
+       is zero — because `grid-template-columns` only interpolates between lists of the same
+       length, so a one-track rest state would have made opening a snap rather than a move. The
+       claim is unchanged and is stated directly: the list gets the whole width, which means the
+       second track is zero AND the gap is zero. A zero track with a standing 18px gap would leave
+       the list 18px short at rest, forever, and P1.2 above is what would catch it. */
+    const restTracks = (fill?.tracks ?? "").trim().split(/\s+/);
+    add("P1.3 @" + w + " · at rest the drawer's track is zero and so is the gap",
+        !!fill && restTracks.length === 2 && parseFloat(restTracks[1]) === 0 && parseFloat(fill.gap) === 0,
+        fill ? "grid-template-columns = " + fill.tracks + " · gap " + fill.gap : "not found");
 
     /* ── the row's seven columns ─────────────────────────────────────────────────────────── */
     const row = await page.evaluate(`(() => {
@@ -193,7 +200,13 @@ test("the list at full width, the columns, and the action control", async ({ pag
 
     /* ── the folded geometry, which Phase 2 will animate ─────────────────────────────────── */
     await page.locator(".tlc .row").first().click();
-    await page.waitForTimeout(320);
+    /* ⚠️ WAIT FOR THE MOTION, NEVER FOR A NUMBER OF MILLISECONDS. A fixed 320ms against a 380ms
+       transition read the card at 523px and 525px — a true measurement of a box still moving,
+       reported as a 3px design error. `getAnimations()` includes CSS transitions, so an empty list
+       is the browser saying the interpolation is over; the timeout is a bound, not a guess. */
+    await page.waitForFunction(
+      "document.querySelector('.tdw-split').getAnimations().length === 0", null, { timeout: 5_000 })
+      .catch(() => {});
     const folded = await page.evaluate(`(() => {
       const card = document.querySelector(".tlc");
       const split = document.querySelector(".tdw-split");

@@ -345,6 +345,14 @@
 .tpn .b-nav { display:flex;gap:6px;flex-shrink:0; }
 .tpn .b-nav button { cursor:pointer;width:28px;height:28px;border-radius:8px;background:rgba(255,253,250,0.8);border:0.5px solid rgba(58,28,20,0.13);color:var(--ink2);display:flex;align-items:center;justify-content:center; }
 .tpn .b-nav button:hover { background:#fffdfa; }
+/* ⚠️ THE CONTRACT'S `.bnav .chip` — a WORD, so it needs a width the two arrows do not. It shares
+   their fill and hairline deliberately: Close is the same kind of thing as ‹ and › (a way of
+   moving out of this task), not a primary and not a dismissal, so it must not out-weigh them. */
+.tpn .b-nav .b-close {
+  width: auto; padding: 0 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; margin-left: 4px;
+}
 /* (`.tiles`/`.tile` are retired with the band's tile row — workspace round, Phase 1. The facts are
    `.rtiles`/`.rtile` inside the record card now, stacked rather than in a row of thirds, and their
    rules are in the record-card block at the foot of this file. A rule for an element nothing

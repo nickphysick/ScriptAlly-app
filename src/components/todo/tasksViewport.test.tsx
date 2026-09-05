@@ -883,7 +883,13 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
        ⚠️ AND BOTH HALVES ARE ASSERTED, because either alone passes on a page with one state
        missing: a rest declaration with no `.open` rule is a page that never opens, and an `.open`
        rule with no base is a page with no resting shape. */
-    expect(split, "the resting split is not one full-width track").toContain("grid-template-columns: minmax(0, 1fr)");
+    /* ⚠️ RE-POINTED WITH THE MOTION (drawer round, Phase 2). The resting shape is `100% minmax(0,
+       1fr)` — two tracks, the drawer's at zero — because `grid-template-columns` interpolates only
+       between lists of the SAME LENGTH, so a one-track rest state would have made opening a snap
+       rather than a move. The claim below is untouched by that: neither shape may be sized by its
+       content, and both are still asserted. */
+    expect(split, "the resting split does not give the list the whole width")
+      .toContain("grid-template-columns: 100% minmax(0, 1fr)");
     const openRule = rule(splitCss, ".tdw-split.open {");
     expect(openRule, "the open split does not state a two-track shape").toContain("grid-template-columns: 520px minmax(0, 1fr)");
     /* ⚠️ CONTENT SIZING IS FORBIDDEN BY NAME IN BOTH, which is the case's actual title. `auto`,
@@ -917,7 +923,17 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     void ("re-pointed, not deleted");
     /* the panes are objects on a ground now, not two halves of a sheet — so the split carries the
        gap and the ground, and the rail no longer carries a divider */
-    expect(split).toContain("gap: 18px");
+    /* ⚠️ THE RESTING GAP IS ZERO AND THE OPEN ONE IS 18 (drawer round, Phase 2) — and both are
+       asserted, because either alone permits the other's fault. A standing 18px beside a
+       zero-width track would leave the list 18px short of the width it is supposed to fill, at
+       rest, forever; a gap that never opened would butt the drawer against the list.
+       ⚠️ AND IT IS DECLARED ONCE PER RULE. The first form had `gap: 0px` above the surviving
+       `gap: 18px` in the SAME rule, so the later declaration won and the resting split overflowed
+       its own content box by exactly 18px — the two-base-rules fault arriving inside one rule. */
+    expect(split, "the resting split holds a gap open beside a zero-width track").toContain("gap: 0px");
+    expect((split.match(/(?:^|[;{])\s*gap\s*:/g) ?? []), "`gap` is declared twice in one rule")
+      .toHaveLength(1);
+    expect(rule(splitCss, ".tdw-split.open {"), "the gap never opens").toContain("gap: 18px");
   });
 
   /**
@@ -1277,7 +1293,17 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
     }
     /* …and the card is its border: no fill, no lift */
     expect(rule(splitCss, ".tdw-rail {")).not.toContain("box-shadow");
-    expect(split).toContain("gap: 18px");
+    /* ⚠️ THE RESTING GAP IS ZERO AND THE OPEN ONE IS 18 (drawer round, Phase 2) — and both are
+       asserted, because either alone permits the other's fault. A standing 18px beside a
+       zero-width track would leave the list 18px short of the width it is supposed to fill, at
+       rest, forever; a gap that never opened would butt the drawer against the list.
+       ⚠️ AND IT IS DECLARED ONCE PER RULE. The first form had `gap: 0px` above the surviving
+       `gap: 18px` in the SAME rule, so the later declaration won and the resting split overflowed
+       its own content box by exactly 18px — the two-base-rules fault arriving inside one rule. */
+    expect(split, "the resting split holds a gap open beside a zero-width track").toContain("gap: 0px");
+    expect((split.match(/(?:^|[;{])\s*gap\s*:/g) ?? []), "`gap` is declared twice in one rule")
+      .toHaveLength(1);
+    expect(rule(splitCss, ".tdw-split.open {"), "the gap never opens").toContain("gap: 18px");
     /* ⚠️ ONE RHYTHM ON ALL FOUR SIDES NOW THE BAR IS NOT ABOVE IT. This was `0 22px 20px` — no top at
        all, because the bar's own `margin-bottom` stood in for it. With the bar gone that top would
        have collapsed to nothing and the split would sit hard against the header. */

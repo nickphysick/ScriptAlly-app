@@ -118,6 +118,76 @@ export const TaskList: React.FC<TaskListProps> = ({
   const total = groups.reduce((n, g) => n + g.cards.length, 0);
   const needsYouNow = groups.find((g) => g.id === "urgent")?.cards.length ?? 0;
 
+  /**
+   * ⚠️ THE SELECTED ROW IS BROUGHT INTO VIEW, AND `nearest` IS THE WHOLE OF IT (drawer round,
+   * Phase 2). The list stays live and scrollable while the drawer is open — walking with ↑ and ↓
+   * would otherwise leave the highlight somewhere off screen, which is the one thing that makes a
+   * push layout worse than an overlay. `nearest` does NOTHING when the row is already visible, so
+   * it cannot fight a reader who has scrolled somewhere deliberately, and it cannot move the list
+   * on an open that did not need it.
+   *
+   * ⚠️ SCOPED TO THIS CARD'S OWN SCROLLER, NOT THE DOCUMENT. Every workspace page stays MOUNTED
+   * under this shell, so a bare `document.querySelector(".row.sel")` returns whichever copy comes
+   * first in the tree — and three pages render a `.wpg`. The ref is the only address that cannot
+   * be somebody else's row.
+   */
+  const bodyRef = React.useRef<HTMLDivElement>(null);
+
+  /**
+   * ⚠️ FOLDING CHANGES EVERY ROW'S HEIGHT, SO A PRESERVED `scrollTop` IS NOT A PRESERVED PLACE —
+   * and the difference is invisible in pixels, which is how it nearly shipped. Rows are 57.9px
+   * folded (two lines) and 50px open (one), so the same `scrollTop` lands further down the list
+   * after unfolding: measured, `scrollTop` moved 140 → 138 while the row at the top of the port
+   * went from Ottoline Frayn's to Marcus Reed's. **A two-pixel drift and a whole row of movement,
+   * at a shallow scroll** — deeper in the list it is a row per eight pixels of row above you.
+   *
+   * ⚠️ THE BROWSER'S SCROLL ANCHORING CANNOT DO THIS ONE. It nudges for content arriving or
+   * leaving; here every row in the list changes size at once, and it compensated 2px of a ~60px
+   * shift. `overflow-anchor: none` is the wrong lever in the other direction and this repo already
+   * records why — the fix is to hold the anchor ourselves, over the one state change that causes
+   * it, and to leave anchoring alone everywhere else.
+   *
+   * The anchor is the row at the top of the port and its offset within it, remembered on scroll
+   * and restored in a LAYOUT effect — before paint, so nothing is ever drawn in the wrong place.
+   * `useLayoutEffect` also runs before the passive effect below, which is the order that matters:
+   * on open the place is restored and then the selected row is brought into view (a no-op if it
+   * already is); on close there is no selection, so the restore stands alone.
+   */
+  const anchor = React.useRef<{ key: string; delta: number } | null>(null);
+  const readAnchor = React.useCallback(() => {
+    const b = bodyRef.current;
+    if (!b) return;
+    if (b.scrollTop <= 0) { anchor.current = null; return; }
+    const top = b.getBoundingClientRect().top;
+    for (const r of Array.from(b.querySelectorAll<HTMLElement>(".row"))) {
+      const box = r.getBoundingClientRect();
+      if (box.bottom > top + 1) {
+        anchor.current = { key: r.dataset.rowkey ?? "", delta: box.top - top };
+        return;
+      }
+    }
+    anchor.current = null;
+  }, []);
+
+  const foldedAt = React.useRef(folded);
+  React.useLayoutEffect(() => {
+    const was = foldedAt.current;
+    foldedAt.current = folded;
+    if (was === folded) return;                       // only the fold moves every row at once
+    const b = bodyRef.current;
+    const a = anchor.current;
+    if (!b || !a || !a.key) return;
+    const el = b.querySelector<HTMLElement>('[data-rowkey="' + CSS.escape(a.key) + '"]');
+    if (!el) return;
+    b.scrollTop += el.getBoundingClientRect().top - b.getBoundingClientRect().top - a.delta;
+  }, [folded]);
+
+  React.useEffect(() => {
+    if (!selectedKey) return;
+    const el = bodyRef.current?.querySelector(".row.sel");
+    if (el) (el as HTMLElement).scrollIntoView({ block: "nearest" });
+  }, [selectedKey]);
+
   return (
     /* ⚠️ BOTH WORDS: `tlc` is the scope every ported rule hangs off, `listcard` is the CONTRACT'S
        own name for this element. The pane port kept the mockup's class names verbatim and put the
@@ -164,7 +234,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         </button>
       </div>
 
-      <div className="l-body">
+      <div className="l-body" ref={bodyRef} onScroll={readAnchor}>
         {groups.map((g) => (
           <React.Fragment key={g.id}>
             {/* ⚠️ AN UNKNOWN GROUP TAKES NO FAMILY CLASS. The fallback was `?? "house"`, which gave the
@@ -188,6 +258,11 @@ export const TaskList: React.FC<TaskListProps> = ({
                    there is nothing interactive inside it, at rest or on hover. */
                 <div
                   key={c.key}
+                  /* ⚠️ THE KEY IS ON THE ELEMENT because the fold's anchor has to find this exact
+                     row again after every row's height has changed. React's `key` is not in the
+                     DOM, and matching on text would break on the one thing that differs between
+                     the two widths — the meta line the fold reveals. */
+                  data-rowkey={c.key}
                   className={`row${c.key === selectedKey ? " sel" : ""}`}
                   role="button"
                   tabIndex={-1}

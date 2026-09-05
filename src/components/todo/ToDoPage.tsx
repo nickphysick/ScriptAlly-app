@@ -814,6 +814,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    */
   const paneCard = docked.card ?? (dockKey && allDockable.length > 0 ? heldCard.current : null);
 
+  /* ⚠️ THE DRAWER'S KEY HANDLER READS THROUGH REFS, and it is bound ONCE. A handler in a
+     dependency array over `dockKey` and `dockable` would rebind on every card change and on every
+     narrowing — a listener churn the page does not need — and the values it wants are the LIVE
+     ones at the moment of the press, never the ones captured when it was attached. Written during
+     render, which is safe because each is a pure function of this render's own inputs (the
+     `filtersRef` idiom this file already runs on, twenty lines above). */
+  const dockKeyRef = useRef<string | null>(null);
+  dockKeyRef.current = dockKey;
+  const dockableRef = useRef<BoardCard[]>([]);
+  dockableRef.current = dockable;
+  const searchRef2 = useRef<string>("");
+  searchRef2.current = search;
+
   /**
    * ⚠️ THE PANE'S SESSION, AND THE SEVEN THINGS THE PAGE STILL OWNS. Everything the form holds —
    * its four states, the facts, the will-record line, the timeline, the gate and the primary — now
@@ -1091,6 +1104,50 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [search]);
+
+  /**
+   * ⚠️ THE DRAWER'S KEYS (drawer round, Phase 2) — Escape closes it, ↑ and ↓ walk it. Until this
+   * round the pane could not be closed by ANY route: `closeDock` had no caller, `TaskPane` drew no
+   * Close, and nothing here listened. The band's chip and these two are the ways out and along.
+   *
+   * ⚠️ ESCAPE IS LAST IN THE CHAIN, DELIBERATELY. The effect above clears the search, then the
+   * narrowing; a writer who has just typed into the search box means that, not the drawer three
+   * gestures ago. So this one refuses while either is active rather than racing it — two listeners
+   * on one key, each with its own guard, is how a key comes to do two things at once.
+   *
+   * ⚠️ AND NEITHER KEY FIRES INSIDE AN EDITABLE. ↑ and ↓ are cursor keys in a field and in a
+   * stepper, and the pane is full of both; stealing them to change task while somebody is typing
+   * an answer would lose the answer AND move the page. The same guard the Escape chain uses.
+   *
+   * ⚠️ NOT CAPTURED, NOT STOPPED. This is permanent chrome beside surfaces that own their own
+   * Escape — a popover, a composer, a confirm — and swallowing the key at page level would reach
+   * past their business. The same reasoning as the shell's New popover.
+   */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" && e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest("input, textarea, select, [contenteditable]")) return;
+      if (!dockKeyRef.current) return;               // nothing open — nothing to close or walk
+      if (e.key === "Escape") {
+        if (searchRef2.current) return;              // the search clears first (the chain above)
+        closeDock();
+        return;
+      }
+      const list = dockableRef.current;
+      const i = list.findIndex((c) => c.key === dockKeyRef.current);
+      if (i < 0) return;
+      const j = e.key === "ArrowUp" ? i - 1 : i + 1;
+      if (j < 0 || j >= list.length) return;         // the ends do not wrap — see `step` below
+      e.preventDefault();                            // ...or the page scrolls under the pane
+      dockPos.current = j;
+      setDockKey(list[j].key);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── first-visit spotlight tour (Act 1). Auto-runs ONCE: `tourSeenAt` absent ∧ not the new desk;
   // the flag is stamped on Done AND on skip/Esc (never localStorage — it follows the user). The
@@ -1652,6 +1709,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     label: liveFamily(paneCard) === "urgent" ? "Urgent" : liveFamily(paneCard) === "housekeeping" ? "Housekeeping" : "Your tasks",
                     onPrev: () => { const i = dockable.findIndex((c) => c.key === paneCard.key); if (i > 0) setDockKey(dockable[i - 1].key); },
                     onNext: () => { const i = dockable.findIndex((c) => c.key === paneCard.key); if (i < dockable.length - 1) setDockKey(dockable[i + 1].key); },
+                    onClose: closeDock,
                   }}
                 />
               ) : null}
