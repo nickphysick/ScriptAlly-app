@@ -391,38 +391,92 @@ flow it opens; "Marked done" over a flow the writer has not completed is a fabri
 dispatch at coordinates the row's hover has since moved, which this repo has paid for once. Hovering
 the row is the honest fix and exercises the reveal as well.
 
-## The sweep — **PARTIAL, and the numbers are reported rather than guessed**
+## The fidelity pass — **element difference list: 0 entries**
+
+```
+══ ELEMENT DIFFERENCE LIST ══ (0 entries)
+(empty)
+
+══ NAMED DEVIATIONS ══
+(none currently triggered)
+```
+
+21 elements, each compared on box · border · background · font · line count. Opened at **100
+entries**, closes at **0**. Served `4a75dc9d` — `index--KVnGDn0.js` / `index-BDOzTKDO.css`,
+**✓ SERVED == BUILT**. Screenshot: `dev-fidelity-1440.png`.
+
+| # | item | state | reading |
+|---|---|---|---|
+| 1 | one chrome block on the container's top | **built · verified** | toolbar top = container interior = sidebar top; toolbar 44px content (45 box); date bar at 45, 54px, radius 0; one ground |
+| 2 | container bounded to the page | **verified — already true** | bottom 879 in a 900 viewport; four edges painted; 16px radius; rows `overflow-y: auto`; 0 unclipped spill |
+| 3 | ongoing bars meet the today line | **built · verified** | line 943.7 · 12 ongoing · **worst delta 0.78px** · pulse 0.8px · **seam 0/0** |
+| 4 | the card is the ref's card | **built · verified** | one hairline token on every card; 9px radius; band spans the card; body 14px; **2 lines**; eyebrow on the fact's line |
+
+### ⚠️ Four things the corrected gate found that the locks could not
+
+**`.axis` is declared FOUR times in the ref — 232, 240, 264, 232 last.** Run 2 read the first two
+and took 240. The rendered ref is 232. Third time this file has caught a cascade read instead of a
+render.
+
+**The date bar had been 66px out of line with its own bars since §A.** The rail reserved the numbers
+gutter's width; §A hid the gutter and the rows went to zero while the rail kept reserving `58 + 8`.
+Every date stood 66px right of the column its bars sit in. Measured: rail lane 581, rows' lane 515.
+**It went unseen because `calProbe60` — the lock that watches that exact seam — never ran**: the
+pre-v63 sweep hung before reaching it.
+
+**§D's "no shadow" was half done.** The shadow *element* went; the frame's own `box-shadow` stayed
+on every uncut card, with a deeper one on owed cards — two card treatments on one board. The
+difference list could not see it **because the card it samples is cut**. Sampling one element of
+each kind is its real limit, and this is the entry that shows it.
+
+**The font was a real difference, not cosmetic.** 63 text leaves in Source Sans Pro where the ref
+draws Inter — the sidebar's view names, the toolbar's labels. The cause is an app-wide **element**
+rule (`p, span, div, button…`) that overrides inheritance everywhere, which is why setting the
+family on the board alone changed nothing below its own box. Closed with `:where()`, which
+contributes **no** specificity: enough to beat an element rule, not enough to beat any class naming
+its own face. A descendant combinator would have weighed 0-1-1 and clobbered Playfair and the mono.
+**Scoped to the calendar, reversible in one line — the app-wide stack stays Nick's call.**
+
+Also, measured not assumed: `display: inline` on a flex child is blockified (the eyebrow stayed on a
+third line while the rule read correctly, and it now sits *inside* `.tl-ffx` as the ref has it); the
+Urgent bar is `#f1d5cc` on `#e3bcb0` and is the **only** tinted group (tinting all six makes the one
+that matters stop standing out); a closed card is `#f1eee8` — the ref tints it too, so "cards are
+white" is a claim about a **live** card; the past stage is a white 9px card at 32%, not a dotted
+outline; the event marker is 24px; the 18px gap above the date bar was `--tl-flag-lift`, room held
+for a `.tl-todayflag` that has been `display: none` for two packs.
+
+v63 locks: **45 / 45**, after retargeting `calTool63`'s toolbar assertion, which pinned the old
+padding spelling and failed over an edit that made its own claim truer.
+
+## The sweep — **partial, and the numbers are the report**
 
 `calTodoCheck` read first and green: `/todo` renders its own workspace with **0 calendar rows**.
 
-**Retired as their inverse** (the rule, not deletion): `calFlags60` (5 cases → 1) measured the
-side-strip flag §E deleted; `calTrailStages60` (2 → 1) measured the trail `data-trail="off"`
-rejects. Each asserts the retirement on the rendered page with the population asserted first, and
-`calFlags60` also requires the action marks that replaced the flag — a swap, not a deletion.
+**⚠️ TWO HANGS, AND THAT IS THE FINDING.** The nineteen named suites ran **27 of 50 cases with 23
+failures** and then stopped: `calFidelity60`'s "every Urgent row states a move" waited ten minutes
+on an element §E retired. The previous run stopped the same way on `calOrder56`, which clicks the
+Display popover §C retired. **A suite driving or waiting on a retired control does not fail, it
+waits — and one hang blocks every file behind it.** That is why a 66px seam survived three sections.
 
-**⚠️ The full pre-v63 run did not finish, and why is a finding.** 108 cases over 44 files;
-**57 ran, 39 errors across 21 files**, and then it **hung** — `calOrder56` clicks
-`getByRole("button", { name: /DISPLAY/i })`, the Display popover §C retired. A suite driving a
-retired control does not fail, it **waits**, and one hang blocks the whole run.
+**Retired as their inverse** (five suites now): `calFlags60`, `calTrailStages60`, `calDeferred`,
+`calCaps58`, and three of `calFade55`'s four cases. Each asserts the retirement on the rendered
+page, asserts its population first, and **requires the replacement to be present** — asserting only
+an absence would pass on a board that had lost both.
 
-**The 21 red so far:** `calAccept55 calCaps58 calCard calCard54 calCentre calClosed56 calContrast
-calCopy55 calDeferred calFade55 calFaults56 calFidelity60 calFlags60 calFrame56 calGhost calGhost56
-calGround54 calInset55 calNarrow calOne61 calOpen54`.
+**⚠️ One case kept verbatim in claim**, and it is the reason not to delete files wholesale:
+`calFade55`'s *"no relationship row is missing its card, and none is zero-width"* is about the
+BOARD, not the fade. Retiring the file whole is how a live claim disappears inside a dead one.
 
-**Open, and deliberately not rushed.** Retiring twenty files properly — each claim read, each kept
-or inverted with its reason — is its own piece of work. Doing it at speed at the end of a long run
-is how a real regression gets absorbed into a rebaseline. Named with its count instead.
+**The sixteen still open, deliberately untouched.** Their failures include claims that are still
+live and worth having — `calContrast`'s 4.5:1 on every word, `calCopy55`'s *"no row phrases a passed
+date as future"*, `calCentre`'s today-is-the-lane's-centre, `calFaults56`'s overdue span,
+`calCard`/`calCard54`'s one-card-per-relationship. Retiring those to clear a red count would remove
+real coverage under cover of a sweep. They need reading one claim at a time:
 
+`calAccept55 calCard calCard54 calCentre calClosed56 calContrast calCopy55 calFaults56 calFidelity60
+calFrame56 calGhost calGhost56 calGround54 calInset55 calNarrow calOne61 calOpen54` — plus
+`calOrder56`, which hangs.
 
-Sections D–G are each the size of an earlier whole pack: the band with QC's tokens and the nudge
-rule, three density levels, open ends, the right dissolve, the pulse dot, ghost stages, event
-markers, hover-revealed actions at true dates, and tasks re-rendered as spans. They are reported
-unbuilt rather than half-landed — this run put the frame and the pane in, measured both, and stopped
-where the next section would have been rushed.
-
-**The sweep and edge tags remain open**, as they have since v60d.
-
----
 
 ## Gates
 
