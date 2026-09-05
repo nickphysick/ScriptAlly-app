@@ -1,136 +1,44 @@
 /**
- * @license
- * SPDX-License-Identifier: Apache-2.0
+ * v39 — the faded edge. ⚠️ RETIRED BY v63 §D CORRECTION 1, AS ITS INVERSE.
  *
- * THE THREE MEASUREMENTS DEFERRED FROM PART ONE (v39 part two, Phase 8).
+ * It asserted that a dissolving edge fades to the board's own ground on every colour of card, and
+ * it was right about the surface it was written for. The dissolve is DELETED: a gradient over a cut
+ * edge was dimming the card's own band, dot and words in order to state a fact about the WINDOW. A
+ * card that begins before the window or ends after it is cut by the board's clip — no border and no
+ * radius on the cut side, and nothing painted over the top.
+ *
+ * ⚠️ A LOCK WHOSE SUBJECT HAS BEEN DELETED IS UNPROVED, NOT PASSING. Deleting the file leaves
+ * nothing to notice the overlay coming back; keeping the original case leaves a probe that finds no
+ * element and reports no offence. The honest form asserts the retirement, on the rendered page,
+ * with the population asserted first.
  */
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
-import { setRangeTo } from "./calControls";
 
-const TAG = `const vis=(s)=>[...document.querySelectorAll(s)].find(e=>e.getBoundingClientRect().height>0)||null;`;
-
-/**
- * ⚠️ THE FADE IS PROVED BY PIXELS, ON EVERY COLOUR OF CARD.
- *
- * A mask is the one treatment whose whole claim is about compositing, and a computed style cannot
- * see compositing at all — it returns the DECLARED colour whatever the mask does to it. So the
- * browser decodes a screenshot and the card's own colour is sampled at three points across its
- * faded edge: the paint must move monotonically from the card toward the ground.
- */
-test("a faded edge dissolves to the ground, on every colour of card", async ({ page }) => {
-  await openRoute(page, "/todo/calendar", { width: 1920, height: 900 });
-  await page.waitForFunction("document.querySelectorAll('.tl-rrow').length > 3", null, { timeout: 20000 });
-  await page.waitForTimeout(800);
-  const shot = (await page.screenshot()).toString("base64");
-
-  const read = await page.evaluate(`(async (b64) => {
-    const img=new Image();
-    await new Promise((ok,no)=>{img.onload=ok;img.onerror=no;img.src="data:image/png;base64,"+b64;});
-    const cv=document.createElement("canvas"); cv.width=img.naturalWidth; cv.height=img.naturalHeight;
-    cv.getContext("2d").drawImage(img,0,0); const ctx=cv.getContext("2d");
-    const k=img.naturalWidth/window.innerWidth;
-    const at=(x,y)=>{const d=ctx.getImageData(Math.round(x*k),Math.round(y*k),1,1).data;return [d[0],d[1],d[2]];};
-    const vis=(s)=>[...document.querySelectorAll(s)].find(e=>e.getBoundingClientRect().height>0)||null;
-    /* ⚠️ THE CLAIM IS "NOTHING ELSE OWNS THIS PIXEL", NOT "THE CARD IS THE TOPMOST NODE". v55 lays
-       the words in an absolutely-positioned .tl-content spanning the card's full height, so the
-       topmost element inside a card is now that wrapper on nearly every point — and a strict
-       identity test rejected all 17 faded cards while reporting "0 kinds found". The card's own
-       descendant is the card; a neighbouring card or a mark is not. */
-    const top=(x,y)=>{const s=document.elementsFromPoint(x,y);return s.length?s[0]:null;};
-    const owns=(x,y,c)=>{const t=top(x,y);return !!t&&(t===c||c.contains(t));};
-    const out={ kinds:{}, ground:null };
-    /* the ground, sampled where the lane owns it */
-    const lane=vis(".tl-rrow .tl-c-tl");
-    const lb=lane.getBoundingClientRect();
-    out.ground=at(lb.right-14, lb.top+lb.height/2);
-
-    for (const c of document.querySelectorAll(".tl-p.fadeR")) {
-      const r=c.getBoundingClientRect();
-      if (r.width<60 || r.top<90 || r.bottom>window.innerHeight-40) continue;
-      const kind = c.classList.contains("hollow") ? "hollow"
-                 : c.classList.contains("quiet") ? "quiet"
-                 : c.classList.contains("owed") ? "owed" : "white";
-      if (out.kinds[kind]) continue;
-      const y=r.top+4;                        /* above the words, in the card's own fill */
-      /* three points across the last 38px: deep inside, mid-fade, and at the very edge */
-      const pts=[r.right-44, r.right-19, r.right-2];
-      if (pts.some(x=>!owns(x,y,c))) continue;
-      /* ⚠️ THE GROUND LOCAL TO THIS CARD, not the board's. The past is washed, so a card fading in
-         the past dissolves toward a DARKER ground than one fading to the right of today — the first
-         draft compared every card against the unwashed ground far right and reported two of three
-         kinds as moving away from it, which was true and about the wrong ground. Sampled just past
-         the card's own edge, at its own height, and only where the lane owns that pixel. */
-      /* ⚠️ THE GROUND AT THE SAME X, FROM A ROW WHERE NOTHING COVERS IT. Two earlier attempts
-         compared against the wrong ground and both were true about it: the board's ground far
-         right is UNWASHED while the fade sits in the washed past, and the ground 6px past a live
-         card's edge is right of today and unwashed too. The ground beneath a fade is the lane at
-         THAT x, which only a different row can supply. */
-      const groundAt=(gx)=>{
-        for (const row of document.querySelectorAll(".tl-rrow")) {
-          const l=row.querySelector(".tl-c-tl"); if(!l) continue;
-          const b=l.getBoundingClientRect();
-          if (b.height<=0||b.top<90||b.bottom>window.innerHeight-40) continue;
-          const gy=b.top+b.height/2;
-          if (top(gx,gy)===l) return at(gx,gy);
-        }
-        return null;
-      };
-      const grounds=pts.map(groundAt);
-      if (grounds.some(g=>!g)) continue;
-      out.kinds[kind]={ w:Math.round(r.width), grounds, samples: pts.map(x=>at(x,y)) };
+test("⚠️ no card carries a fade overlay, a gradient or a mask (v39 → v63 §D)", async ({ page }) => {
+  await openRoute(page, "/todo/calendar", { width: 1440, height: 900 });
+  const r = await page.evaluate(() => {
+    const g = [...document.querySelectorAll<HTMLElement>(".tl-cal")]
+      .find((e) => e.getBoundingClientRect().height > 0);
+    if (!g) return null;
+    const cards = [...g.querySelectorAll<HTMLElement>(".tl-p")];
+    const painted: string[] = [];
+    for (const c of cards) {
+      for (const e of [c, ...c.querySelectorAll<HTMLElement>("*")]) {
+        const cs = getComputedStyle(e);
+        const m = cs.maskImage ?? "none";
+        const wm = (cs as unknown as Record<string, string>).webkitMaskImage ?? "none";
+        if (/gradient/.test(cs.backgroundImage) || (m !== "none" && m !== "") || (wm !== "none" && wm !== ""))
+          painted.push(e.className || e.tagName);
+      }
     }
-    return out;
-  })(${JSON.stringify(shot)})`) as any;
-
-  const d = (a: number[], b: number[]) => Math.abs(a[0]-b[0]) + Math.abs(a[1]-b[1]) + Math.abs(a[2]-b[2]);
-  console.log(`board ground (right of today) = rgb(${read.ground.join(", ")})`);
-  const kinds = Object.keys(read.kinds);
-  let opaqueSeen = 0;
-  for (const k of kinds) {
-    const s = read.kinds[k];
-    console.log(`  ${k.padEnd(7)} w=${String(s.w).padStart(4)}  ` +
-      s.samples.map((p: number[], i: number) => `rgb(${p.join(",")})/gnd rgb(${s.grounds[i].join(",")})→${d(p, s.grounds[i])}`).join("  "));
-  }
-  /* ⚠️ POPULATION FIRST, and by KIND: one colour of card proves nothing about a mask that has to
-     work whatever is behind it. */
-  expect(kinds.length, `only ${kinds.length} kind(s) of faded card found: ${kinds.join(", ")}`)
-    .toBeGreaterThan(1);
-  for (const k of kinds) {
-    const s = read.kinds[k];
-    const dist = s.samples.map((p: number[], i: number) => d(p, s.grounds[i]));
-    /**
-     * ⚠️ EVERY KIND REACHES THE GROUND; ONLY AN OPAQUE ONE HAS A JOURNEY TO IT.
-     *
-     * A hollow card is `background: transparent` — it IS the ground at every point across its
-     * fade, and its distances read 1 → 0 → 3, which is sub-pixel noise from the wash gradient
-     * rather than a dissolve. Asserting a monotonic approach there demands movement from a card
-     * that has nowhere to move: the claim would be about the wrong kind of object, and it failed
-     * on correct output. What every card must do is END at the ground.
-     */
-    expect(dist[2], `${k}: the edge does not reach the ground — ${dist.join(" → ")}`).toBeLessThanOrEqual(6);
-    if (dist[0] > 8) {
-      expect(dist[1], `${k}: mid-fade is no closer to the ground than the card's fill — ${dist.join(" → ")}`)
-        .toBeLessThan(dist[0]);
-      expect(dist[2], `${k}: the edge is no closer to the ground than mid-fade — ${dist.join(" → ")}`)
-        .toBeLessThan(dist[1]);
-    }
-    /* ⚠️ AND AT LEAST ONE KIND MUST HAVE HAD A JOURNEY, or this is three transparent cards
-       reporting that they are already the ground. */
-    if (dist[0] > 8) opaqueSeen += 1;
-  }
-  /* ⚠️ AT LEAST ONE KIND MUST HAVE HAD A JOURNEY TO MAKE, or this is three transparent cards
-     reporting that they are already the ground — a clean table over nothing. */
-  expect(opaqueSeen, "no card with an opaque fill was measured — every sample was already the ground")
-    .toBeGreaterThan(0);
+    return { cards: cards.length, fov: document.querySelectorAll(".tl-fov").length, painted: [...new Set(painted)] };
+  });
+  expect(r, "the calendar did not render").not.toBeNull();
+  /* ⚠️ THE POPULATION FIRST — "no fades" is trivially true of a board that drew no cards. */
+  expect(r!.cards, "no cards, so the absence below proves nothing").toBeGreaterThan(4);
+  expect(r!.fov, "the fade overlay came back").toBe(0);
+  /* ⚠️ ASKED OF WHAT IS PAINTED, NOT OF A CLASS NAME. A class check passes the day somebody paints
+     a gradient on a different element; this leaves nothing to rename around. */
+  expect(r!.painted, `a card carries a gradient or a mask: ${JSON.stringify(r!.painted)}`).toEqual([]);
 });
-
-/** How much text does not fit, per range — the census part one deferred. */
-/* ⚠️ THE MARQUEE CENSUS IS RETIRED WITH THE MARQUEE (v40, Phase 6). It counted how many cards
- * overflowed and by how much, and its own floor — "the census must find something, or it is a
- * table of zeroes reported as a clean result" — is what proved the mechanism dead: 0 overflowing
- * cards at every range. The content ladder answers "the words do not fit" by dropping the detail
- * rather than by sliding the line, so `full` is chosen precisely when the content fits and nothing
- * can overflow. `calLadder.measure.ts` is where that claim now lives, and it asserts the rungs are
- * REACHED rather than that an animation has something to do.
- */
