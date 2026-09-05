@@ -1929,8 +1929,96 @@ button.tl-tchip { cursor: pointer; }
 /* the compact widen-neutralisers went with the widen itself (v65 §A) */
 
 /* ⚠️ THE PEEK'S CSS IS RETIRED WITH THE PEEK (v65 §B). The page-layer overlay idea survives in
-   §C's CLICK card, which has its own rules — reusing the peek's would dress a different object
-   in a retired one's clothes. */
+   §C's CLICK card below, which has its own rules — reusing the peek's would dress a different
+   object in a retired one's clothes. */
+
+/* ══ CARD C (v65 §C; ref hover-card-by-type.html — its own px, to the letter) ═════════════════
+   White on a 1px hairline, 9px radius, the ref's soft shadow; the band shares the ladder's own
+   `tl-st-*` fills; the gauge is a 6px track whose two ends the model chooses per type. The card
+   is a READ surface — its one live control beyond ✕ is the action, which opens the sheet. */
+.tl-cc {
+  position: fixed; z-index: 46; width: 320px;
+  background: #fff; border: 1px solid #e3d9cb; border-radius: 9px;
+  box-shadow: 0 10px 28px rgba(58, 28, 20, .14);
+  overflow: hidden; font-family: Inter, ui-sans-serif, sans-serif;
+}
+.tl-ccband {
+  height: 26px; display: flex; align-items: center; gap: 8px; padding: 0 10px 0 10px;
+  border-bottom: 1px solid rgba(58, 28, 20, .06);
+  font-family: 'Playfair Display', serif; font-size: 12.5px; color: var(--tl-nearblack);
+}
+.tl-ccsw { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-ccopen {
+  margin-left: 6px; padding: 2px 7px; border-radius: 7px; border: 1.5px solid #2a1f17;
+  background: #fff; cursor: pointer; color: var(--tl-nearblack);
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; flex: 0 0 auto;
+}
+.tl-ccsh {
+  margin-left: auto; flex: 0 0 auto;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7px; letter-spacing: .16em;
+  text-transform: uppercase; color: #7d6c5c;
+}
+.tl-ccx {
+  margin-left: 6px; width: 18px; height: 18px; border-radius: 5px; border: 1px solid #e3d9cb;
+  background: #fff; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #6f6055; cursor: pointer; flex: 0 0 auto; padding: 0;
+}
+.tl-ccbody { padding: 10px 12px 12px; }
+.tl-ccl1 { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.tl-ccnm { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 500; line-height: 1.3; }
+.tl-ccag { font-family: 'Playfair Display', serif; font-style: italic; font-size: 12px; color: #8a7a6c; }
+.tl-ccl2 { display: flex; align-items: baseline; gap: 8px; margin-top: 6px; font-size: 12px; flex-wrap: wrap; }
+/* the gauge — the ref's 6px track, #f1e9de, with the today dot 14px ink in a 2px white ring */
+.tl-ccgauge { margin-top: 14px; height: 6px; border-radius: 3px; background: #f1e9de; position: relative; }
+.tl-ccgauge i { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+.tl-ccgauge i.fill { left: 0; background: var(--cc-fill, #e6eae3); }
+.tl-ccgauge i.over.rose { background: #c98e8a; }
+.tl-ccgauge i.over.sand { background: #e0d4bb; }
+.tl-ccgauge b {
+  position: absolute; top: -4px; width: 14px; height: 14px; border-radius: 99px;
+  background: #2a1f17; border: 2px solid #fff; transform: translateX(-50%);
+}
+.tl-ccgauge .lab {
+  position: absolute; top: 10px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 6.5px; letter-spacing: .12em;
+  text-transform: uppercase; color: #a89880; white-space: nowrap;
+}
+.tl-ccgauge .lab.r { right: 0; }
+.tl-ccgauge .lab.ov { color: #8c4f4a; }
+/* the counters — three hairline cells, Playfair 16 numerals, rose where the model says so */
+.tl-ccmeta { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.tl-ccmeta div { border: 1px solid #f1e9de; border-radius: 8px; padding: 7px 8px; }
+.tl-ccmeta b { display: block; font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 500; }
+.tl-ccmeta b.r { color: #8c4f4a; }
+.tl-ccmeta small {
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 6.5px; letter-spacing: .12em;
+  text-transform: uppercase; color: #a89880;
+}
+.tl-ccnote {
+  margin-top: 10px; font-size: 11.5px; color: #8a7a6c;
+  border-top: 1px solid #f1e9de; padding-top: 8px; font-style: italic;
+}
+.tl-ccact { margin-top: 10px; display: flex; justify-content: flex-end; gap: 8px; align-items: center; }
+.tl-cccv { font-family: Caveat, cursive; font-size: 15px; color: #6f6055; }
+.tl-cccv.od { color: #8c4f4a; }
+.tl-ccbtn {
+  padding: 5px 10px; border-radius: 9px; border: 1.5px solid #2a1f17; background: #fff;
+  cursor: pointer; color: var(--tl-nearblack);
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+}
+/* ⚠️ THE FILL IS THE HOLDER'S TONE, CHOSEN PER KIND BY THE MODEL — never derived from the band's
+   rung: a quiet card keeps its status band and still fills SAND (the ref's own sample). The
+   hexes are the ref card's own (:root of hover-card-by-type.html); the band above stays on the
+   app's ladder per the identity law — two vocabularies, one object each. */
+.tl-ccgauge[data-tone="sage"] .fill { --cc-fill: #d3dccd; }
+.tl-ccgauge[data-tone="blush"] .fill { --cc-fill: #eed6cc; }
+.tl-ccgauge[data-tone="slate"] .fill { --cc-fill: #d3dae2; }
+.tl-ccgauge[data-tone="sand"] .fill { --cc-fill: #ece5d8; }
+.tl-ccgauge[data-tone="cream"] .fill { --cc-fill: #f1e9df; }
+.tl-ccgauge[data-tone="grey"] .fill { --cc-fill: #e9e5dd; }
+.tl-ccgauge[data-tone="note"] .fill { --cc-fill: #f5e9bf; }
 
 /* ⚠️ THE NUDGE MARKER — the ref's `.evn`: a small white disc on the bar at the date the writer
    nudged. It is centred on its date rather than starting at it (`translate(-50%, -50%)`), because a

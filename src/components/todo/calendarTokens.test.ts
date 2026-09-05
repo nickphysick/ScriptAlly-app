@@ -380,16 +380,16 @@ describe("the scrawl is gone from the calendar", () => {
    * cannot come back wearing a new class. The `tl-scr` clause above is untouched and still forbids
    * the original by name.
    */
-  it("Caveat sets exactly one thing — the flag's deed — and the app's own hand is untouched", () => {
+  it("Caveat sets exactly TWO things — the flag's deed and the card's lateness — both the action's hand", () => {
     const css = stripAll(readFileSync(join(process.cwd(), "src/components/todo/todoCalendar.css"), "utf8"));
     /* every rule in the calendar sheet that names the face, with its selector */
     const setters = [...css.matchAll(/(?:^|\})\s*([^{}]+?)\s*\{([^}]*Caveat[^}]*)\}/g)]
       .map((m) => m[1].trim().replace(/\s+/g, " "));
-    expect(setters, `the calendar sheet sets Caveat on: ${setters.join(" | ")}`)
+    expect([...setters].sort(), `the calendar sheet sets Caveat on: ${setters.join(" | ")}`)
       /* ⚠️ RETARGETED TWICE, AND THE LAW HELD BOTH TIMES: Caveat is the ACTION's hand and nothing
          else's. v60's flag (`.tl-cap .w`) carried it; §E's action label (`.tl-actlab`) inherits the
          role with the element. One selector, the action's, and the app's own hand untouched. */
-      .toEqual([".tl-actlab"]);
+      .toEqual([".tl-cccv", ".tl-actlab"].sort());
     /* the page and the copy module may not set it at all — a flag's deed is styled, never inlined */
     for (const f of ["src/components/todo/TodoCalendarPage.tsx", "src/lib/timelineCopy.ts"]) {
       const src = stripAll(readFileSync(join(process.cwd(), f), "utf8"));

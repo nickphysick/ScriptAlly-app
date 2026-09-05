@@ -32,8 +32,9 @@ import {
   type RowGroup,
 } from "../../lib/timelineGroups";
 import { pillText } from "../../lib/calendarPill";
+import { cardCFor, CardCFacts, CardKind } from "../../lib/cardC";
 import { stageSentence, type StageEnd } from "../../lib/stageSentence";
-import { QueryStatus } from "../../types";
+import { QueryStatus, ActivityType } from "../../types";
 import {
   calSectionOf, CAL_SECTION_DRAW, CAL_SECTION_LABEL, CAL_SECTION_PURPOSE,
 } from "../../lib/calendarSections";
@@ -284,7 +285,7 @@ const Piece: React.FC<{
   sg: Segment; days: number; lastMarkAt: number | null; selected: boolean;
   /* v58: the identity travels with the card, so the row hands its name down */
   name: string;
-  onPick: () => void; onOpen?: () => void; agency?: string;
+  onPick: (el?: HTMLElement) => void; onOpen?: () => void; agency?: string;
 }> = ({ sg, days, lastMarkAt, selected, onPick, onOpen, name, agency }) => {
   const lines = barLines(sg.label);
   /* ⚠️ THE PILL IS THE APP'S OWN VOCABULARY — see `calendarPill`. The status while the agency
@@ -452,7 +453,7 @@ const Piece: React.FC<{
       data-trueto={bounds.end.toFixed(3)}
       data-days={String(days)}
       data-live={sg.live ? "1" : undefined}
-      onClick={onPick}
+      onClick={(e) => onPick(e.currentTarget as HTMLElement)}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(); } }}
@@ -1246,11 +1247,143 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
     if (from && from !== to) setHoverSeg(to);
   };
 
-  /* ⚠️ THE CLICK'S WORK-FLOW BRANCH IS RETIRED (v65 §A) — a click is a READ gesture now, and §C
-     gives it the card. Until the card lands, a click selects; the branch that opened the legacy
-     task pane is gone rather than dormant. */
-  const pickSeg = (_rowKey: string, sg: Segment) => {
+  /* ══ THE CLICK CARD (v65 §C; ref hover-card-by-type.html) ═══════════════════════════════════
+     The payload is ASSEMBLED AT CLICK TIME from the same derivations the bar was painted from —
+     seg day-floats, `pillText`, `turnWordFor`, the ladder's own band class — and the arithmetic
+     goes through `cardCFor`, which is unit-locked against the ref's eight worked examples. */
+  type CardPayload = {
+    key: string; isTask: boolean;
+    bandClass: string; bandStatus: string; holder: string; dotStatus: QueryStatus | null;
+    name: string; agency?: string;
+    fact: string; tail: string; bang: boolean;
+    model: ReturnType<typeof cardCFor>;
+    fillTone: "sage" | "blush" | "slate" | "sand" | "cream" | "grey" | "note";
+    note: string;
+    action: { cv: string; deed: string; urgent: boolean } | null;
+    queryId?: string;
+  };
+  const dayDate = (d: number) => shortCalDate(shiftWindow(winFrom, Math.round(d), 1));
+  const cardKindFor = (sg: Segment): CardKind =>
+    sg.isTask ? "task"
+      : sg.state === "closed" ? "closed"
+      : sg.state === "quiet" || sg.state === "ghost" ? "quiet"
+      : sg.state === "offer" ? "offer"
+      : sg.side === "yours" ? (sg.namedEndAt != null ? "moveDated" : "moveUndated")
+      : sg.namedEndAt != null && sg.todayAt > sg.namedEndAt ? "passed" : "waiting";
+  const nudgeCountFor = (queryId?: string): number =>
+    queryId ? activities.filter((a) => a.queryId === queryId && a.activityType === ActivityType.NUDGE_SENT).length : 0;
+  const payloadForSeg = (sg: Segment, rowName: string, agency?: string): CardPayload => {
+    const kind = cardKindFor(sg);
+    const end = sg.namedEndAt;
+    const today = sg.todayAt;
+    const days = (a: number, b: number) => Math.max(0, Math.round(b - a));
+    /* ⚠️ THE TRUE START, NEVER THE DRAWN ONE. `sg.from` is clamped by the window, so a request
+       from last year read "45 days since request" beside a 29-month tail — the gauge is its own
+       axis and owes the window nothing. */
+    const start = Math.min(sg.trueFrom, sg.from);
+    const totalDays = days(start, today);
+    const startLab =
+      kind === "task" ? `created ${dayDate(start)}`
+        : kind === "moveDated" || kind === "moveUndated" ? `requested ${dayDate(start)}`
+        : kind === "offer" ? `offered ${dayDate(start)}`
+        : `sent ${dayDate(start)}`;
+    const endWord = kind === "task" || kind === "moveDated" ? "due" : kind === "offer" ? "decide by" : "expected";
+    const over = end != null && today > end ? days(end, today) : 0;
+    const endLab =
+      /* no named end: the right label states the elapsed truth — the tail's own words — because
+         an empty label under a full bar says nothing about why the bar is full */
+      end == null ? (kind === "moveUndated" ? `no date · ${sg.tail}` : sg.tail)
+        : over > 0
+          ? (kind === "quiet" ? `${endWord} ${dayDate(end)} · long passed` : `${endWord} ${dayDate(end)} · ${over} over`)
+          : `${endWord} ${dayDate(end)}`;
+    const eyebrowDays =
+      kind === "waiting" ? days(start, today)
+        : kind === "passed" ? over
+        : kind === "moveDated" ? (over > 0 ? over : days(today, end ?? today))
+        : kind === "moveUndated" ? days(start, today)
+        : kind === "offer" ? days(today, end ?? today)
+        : kind === "quiet" ? days(start, today)
+        : kind === "task" ? (over > 0 ? over : days(today, end ?? today))
+        : totalDays;
+    const openStatuses = new Set([QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
+      QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT]);
+    const facts: CardCFacts = {
+      kind, start, end, today, startLab, endLab,
+      eyebrowDays,
+      nudges: sg.isTask ? null : nudgeCountFor(sg.queryId),
+      totalDays,
+      windowDays: end != null ? days(sg.from, end) : null,
+      othersToNudge: kind === "offer"
+        ? queries.filter((q) => q.id !== sg.queryId && openStatuses.has(q.status as QueryStatus)).length
+        : null,
+      rolled: sg.isTask ? 0 : null,
+      daysOpen: sg.isTask ? days(sg.from, today) : null,
+      outcome: kind === "closed" ? String(sg.status) : undefined,
+    };
+    const urgent = !!sg.owed || sg.state === "quiet";
+    const deed = sg.isTask ? "Mark done"
+      : urgent ? pillText(sg.status, holderOf(sg), sg.nudgeDue, !!sg.owed, sg.state === "ghost", sg.state === "quiet").text
+      : sg.capWord ?? null;
+    const agent = agents.find((a) => a.id === rows.find((r) => r.key === sg.rowKey)?.agentId);
+    return {
+      key: sg.key, isTask: !!sg.isTask,
+      bandClass: sg.isTask ? "tl-sband--task" : `tl-st-${stageFor(sg.status)}`,
+      bandStatus: sg.isTask ? "Task" : String(sg.status),
+      holder: sg.isTask ? taskHolder(!!sg.owed) : turnWordFor(sg.status),
+      dotStatus: sg.isTask ? null : sg.status,
+      name: rowName, agency,
+      fact: sg.fact, tail: sg.tail, bang: urgent,
+      model: cardCFor(facts),
+      fillTone: sg.isTask ? "note"
+        : kind === "quiet" ? "sand"
+        : kind === "closed" ? "grey"
+        : kind === "offer" ? "slate"
+        : sg.side === "yours" ? "blush" : "sage",
+      note: sg.isTask ? "—" : (agent?.notePreview?.trim() || "—"),
+      action: kind === "closed" ? null : deed ? { cv: sg.tail, deed, urgent } : null,
+      queryId: sg.queryId,
+    };
+  };
+  const [cardPayload, setCardPayload] = useState<CardPayload | null>(null);
+
+  /* ⚠️ ONE CARD AT A TIME, AND THE CLICK IS A TOGGLE. The card is a page-layer overlay anchored
+     over the clicked bar — a READ surface: the model comes from `cardCFor` (unit-locked against
+     the ref's own eight examples), the writes stay with the sheet. Same bar again, elsewhere,
+     Escape, or a scroll closes it; the drawer (§D) closes it on open. */
+  const [cardAt, setCardAt] = useState<{ seg: string; left: number; top: number; up: boolean } | null>(null);
+  const closeCard = () => { setCardAt(null); setCardPayload(null); };
+  const openCardOver = (payload: CardPayload, el: HTMLElement) => {
+    const r = el.getBoundingClientRect();
+    const W = 320, H = 300, GUT = 8;
+    const left = Math.max(GUT, Math.min(r.left, window.innerWidth - W - GUT));
+    const up = r.top + H > window.innerHeight - GUT;
+    const top = up ? Math.max(GUT, r.bottom - H) : r.top;
+    setCardAt((cur) => (cur?.seg === payload.key ? null : { seg: payload.key, left, top, up }));
+    setCardPayload((cur) => (cur?.key === payload.key ? null : payload));
+  };
+  React.useEffect(() => {
+    if (!cardAt) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); closeCard(); } };
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t?.closest(".tl-cc")) return;               /* on the card — stays */
+      if (t?.closest(`.tl-p[data-seg="${cardAt.seg}"]`)) return; /* the toggle handles it */
+      closeCard();
+    };
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("pointerdown", onDown, true);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("pointerdown", onDown, true);
+    };
+  }, [cardAt]);
+
+  /* ⚠️ THE CLICK OPENS CARD C (v65 §C) — a read gesture. Selection follows the card's subject so
+     the focus band below stays in step with what is open. */
+  const pickSeg = (rowKey: string, sg: Segment, el?: HTMLElement) => {
     setSel((c) => (c === sg.key ? null : sg.key));
+    const row = rows.find((r) => r.key === rowKey);
+    if (el && row) openCardOver(payloadForSeg(sg, row.name, row.agency), el);
   };
   const pick = (_rowKey: string, it: TimelineItem) => {
     setSel((c) => (c === it.key ? null : it.key));
@@ -2347,7 +2480,7 @@ data-rowkey={r.key}
                   && n.at >= sg.from - 0.001 && n.at <= sg.to + 0.001);
                 return on.length ? Math.max(...on.map((n) => n.at)) : null;
               })()}
-              onPick={() => pickSeg(r.key, sg)}
+              onPick={(el) => pickSeg(r.key, sg, el)}
               agency={r.agency}
               onOpen={sg.queryId
                 ? () => onNavigatePath(`/queries?q=${encodeURIComponent(sg.queryId)}`)
@@ -2541,7 +2674,32 @@ data-rowkey={r.key}
                         ? "out"
                         : b.dir === "in" ? "in" : b.dir === "close" ? "none" : "out";
                       out.push(
-                        <div key={`js-${a.key}`} className={`tl-jc${narrow ? " narrow" : ""}`} data-seg={`js-${a.key}`} style={{
+                        <div key={`js-${a.key}`} className={`tl-jc${narrow ? " narrow" : ""}`} data-seg={`js-${a.key}`}
+                          /* v65 §C — clicking a ghost opens ITS card: the finished-stage form
+                             (full gauge, no today, stage counters, no action). The facts are the
+                             loop's own — the same numbers this stage is painted from. */
+                          onClick={(e) => {
+                            const rowName = rows.find((r2) => r2.key === a.rowKey)?.name ?? "";
+                            const stageDays = Math.round(to - from);
+                            openCardOver({
+                              key: `js-${a.key}`, isTask: false,
+                              bandClass: `tl-st-${stageFor(a.status ?? QueryStatus.QUERIED)}`,
+                              bandStatus: stage, holder: "", dotStatus: a.status ?? QueryStatus.QUERIED,
+                              name: stageSentence({ stage, end, next: b?.status ? String(b.status) : undefined,
+                                days: stageDays }),
+                              agency: rowName,
+                              fact: "", tail: `${dayDate(from)} – ${dayDate(to)}`, bang: false,
+                              model: cardCFor({
+                                kind: "ghost", start: from, end: to, today: from + (to - from),
+                                startLab: dayDate(from), endLab: `${dayDate(to)}${b?.status ? ` · ${String(b.status).toLowerCase()}` : ""}`,
+                                eyebrowDays: stageDays, nudges: nudgeCountFor(sorted[0]?.queryId),
+                                totalDays: null, stageIdx: i + 1, stageCount: sorted.length,
+                              }),
+                              fillTone: "cream",
+                              note: "—", action: null, queryId: sorted[0]?.queryId,
+                            }, e.currentTarget as HTMLElement);
+                          }}
+                          style={{
                           left: pct(from),
                           width: `max(0px, calc(${pct(to - from)} - var(--tl-jc-gap)))`,
                           ...laneVar(lane),
@@ -2894,7 +3052,8 @@ data-rowkey={r.key}
                     clamping — so on a board with nothing to scroll the clamp is the only behaviour
                     left, and anything that changed the rail's height moved the rows under it. Here
                     the rail is outside the scrolling box and cannot be reached by it at all. */}
-                <div className="tl-rows" onMouseOver={onRowsOver} onMouseOut={onRowsOut}>
+                <div className="tl-rows" onMouseOver={onRowsOver} onMouseOut={onRowsOut}
+                  onScroll={cardAt ? closeCard : undefined}>
                 {/* ⚠️ `.tl-rowsin` EXISTS FOR THE TODAY LINE (v64 §C). In a scroller, an absolutely
                     positioned child's `bottom: 0` resolves against the SCROLLPORT, not the content
                     — so a line meant to run the content height needs an inner wrapper that IS the
@@ -3014,6 +3173,67 @@ data-rowkey={r.key}
       )}
 
       {confirmAskNode}
+
+      {/* ══ CARD C (v65 §C) — the click card, a page-layer READ overlay ═══════════════════════
+          ⚠️ PORTALLED TO BODY: the board clips at its radius and the rows clip at their
+          scrollport; a fixed layer inside either would be cut by both. The wrapper carries
+          `tl-board` for the token scope. z46 — above the sticky group bars (25) and the today
+          line (3), below the app's modals (50). */}
+      {cardAt && cardPayload && createPortal(
+        <div className="tl-board tl-cc" role="dialog" aria-label={`${cardPayload.name} — details`}
+          style={{ left: cardAt.left, top: cardAt.top }}>
+          <div className={`tl-ccband ${cardPayload.bandClass}`}>
+            {cardPayload.dotStatus
+              ? <StatusDot status={cardPayload.dotStatus} overrideSize={14} />
+              : <span className="tl-tbox" aria-hidden />}
+            <span className="tl-ccsw">{cardPayload.bandStatus}</span>
+            {cardPayload.queryId && (
+              <button type="button" className="tl-ccopen"
+                onClick={() => setActToast("Open")}>Open ›</button>
+            )}
+            {cardPayload.holder && <span className="tl-ccsh">{cardPayload.holder}</span>}
+            <button type="button" className="tl-ccx" aria-label="Close" onClick={closeCard}>✕</button>
+          </div>
+          <div className="tl-ccbody">
+            <div className="tl-ccl1">
+              <span className="tl-ccnm">{cardPayload.name}</span>
+              {cardPayload.agency && <span className="tl-ccag">{cardPayload.agency}</span>}
+            </div>
+            {(cardPayload.fact || cardPayload.tail) && (
+              <div className="tl-ccl2">
+                {cardPayload.bang && <span className="tl-bang" aria-hidden>!</span>}
+                <span>{cardPayload.fact}</span>
+                <span className="tl-feb">{cardPayload.tail}</span>
+              </div>
+            )}
+            <div className="tl-ccgauge" data-tone={cardPayload.fillTone}>
+              <i className="fill" style={{ width: `${Math.min(100, cardPayload.model.gauge.fillPct)}%` }} />
+              {cardPayload.model.gauge.overPct > 0 && (
+                <i className={`over ${cardPayload.model.gauge.overTone ?? ""}`}
+                  style={{ left: `${cardPayload.model.gauge.fillPct}%`, width: `${cardPayload.model.gauge.overPct}%` }} />
+              )}
+              {cardPayload.model.gauge.todayPct != null && (
+                <b style={{ left: `${cardPayload.model.gauge.todayPct}%` }} />
+              )}
+              <span className="lab">{cardPayload.model.gauge.startLab}</span>
+              <span className={`lab r${cardPayload.model.gauge.endOver ? " ov" : ""}`}>{cardPayload.model.gauge.endLab}</span>
+            </div>
+            <div className="tl-ccmeta">
+              {cardPayload.model.counters.map((k, i) => (
+                <div key={i}><b className={k.rose ? "r" : undefined}>{k.v}</b><small>{k.label}</small></div>
+              ))}
+            </div>
+            <div className="tl-ccnote">{cardPayload.note}</div>
+            {cardPayload.action && (
+              <div className="tl-ccact">
+                <span className={`tl-cccv${cardPayload.action.urgent ? " od" : ""}`}>{cardPayload.action.cv}</span>
+                <button type="button" className="tl-ccbtn"
+                  onClick={() => setActToast(cardPayload.action!.deed)}>{cardPayload.action.deed} ›</button>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body)}
 
       {/* ⚠️ FocusFlow LEFT WITH THE PANE (v65 §A) — the Action sheet (§E) is the one write
           surface this page mounts. */}
