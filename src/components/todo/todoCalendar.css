@@ -2008,6 +2008,83 @@ button.tl-tchip { cursor: pointer; }
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; font-weight: 700;
   letter-spacing: .14em; text-transform: uppercase;
 }
+
+/* ══ THE DRAWER (v65 §D; ref timeline-v65.html `.drawer` — its own px) ════════════════════════
+   420px from the right, no scrim (click-away closes); View / Actions tabs; the action rows are
+   the sheet's doors. z48 — above the card (46), below the app's modals (50). */
+.tl-dw {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 420px; z-index: 48;
+  background: #fff; border-left: 1px solid #e3d9ca;
+  box-shadow: -12px 0 40px rgba(58, 28, 20, .14);
+  display: flex; flex-direction: column; font-family: Inter, ui-sans-serif, sans-serif;
+}
+.tl-dwh {
+  padding: 14px 18px; display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(58, 28, 20, .06); flex: 0 0 auto;
+}
+.tl-dwsw { font-family: 'Playfair Display', serif; font-size: 14px; color: var(--tl-nearblack); }
+.tl-dwsh {
+  margin-left: auto; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px;
+  letter-spacing: .16em; text-transform: uppercase; color: #7d6c5c;
+}
+.tl-dwx {
+  margin-left: 10px; width: 26px; height: 26px; border-radius: 7px; border: 1px solid #e3d9ca;
+  background: #fff; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #6f6055; flex: 0 0 auto; padding: 0;
+}
+.tl-dwtabs { display: flex; gap: 4px; padding: 10px 18px 0; border-bottom: 1px solid #f1e9de; flex: 0 0 auto; }
+.tl-dwtabs button {
+  padding: 8px 12px; font-size: 12.5px; font-weight: 600; color: #8a7a6c;
+  border: 0; background: transparent; border-bottom: 2px solid transparent;
+  cursor: pointer; margin-bottom: -1px; font-family: inherit;
+}
+.tl-dwtabs button.on { color: var(--tl-nearblack); border-bottom-color: #2a1f17; }
+.tl-dwtabs button b {
+  margin-left: 6px; min-width: 16px; height: 16px; border-radius: 99px; background: #c98e8a;
+  color: #fff; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px;
+  display: inline-flex; align-items: center; justify-content: center; padding: 0 4px; vertical-align: 1px;
+}
+.tl-dwb { padding: 18px; overflow: auto; flex: 1; }
+.tl-dwnm { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500; color: var(--tl-nearblack); }
+.tl-dwag { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: #8a7a6c; margin-top: 2px; }
+.tl-dwfact { margin-top: 14px; font-size: 13px; color: #3a1c14; display: flex; align-items: baseline; gap: 10px; }
+.tl-dwsec { margin-top: 22px; }
+.tl-dwsec h5 {
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .16em;
+  text-transform: uppercase; color: #a89880; margin: 0 0 10px; font-weight: 500;
+}
+.tl-dwjr { display: grid; grid-template-columns: 18px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f1e9de; }
+.tl-dwjr .d { width: 10px; height: 10px; border-radius: 99px; border: 1.5px solid #cdbfa8; margin-top: 4px; justify-self: center; }
+.tl-dwjr.now .d { background: #2a1f17; border-color: #2a1f17; }
+.tl-dwjr .t { font-size: 12.5px; color: #3a1c14; display: block; }
+.tl-dwjr .s {
+  font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: #a89880; margin-top: 2px; display: block;
+}
+.tl-dwnote {
+  margin-top: 18px; border: 1px dashed #d3c6b2; border-radius: 10px; padding: 12px;
+  font-size: 12.5px; color: #8a7a6c;
+}
+.tl-dwar {
+  display: flex; align-items: center; gap: 12px; padding: 12px; width: 100%; text-align: left;
+  border: 1px solid #e3d9cb; border-radius: 11px; margin-bottom: 8px; cursor: pointer;
+  background: #fff; font-family: inherit;
+}
+.tl-dwar:hover { border-color: #2a1f17; }
+.tl-dwar.pri { border: 1.5px solid #2a1f17; background: #fdf9f5; }
+.tl-dwar .ai {
+  width: 32px; height: 32px; border-radius: 9px; border: 1px solid #e3d9cb;
+  display: flex; align-items: center; justify-content: center; flex: 0 0 auto; color: #6f6055;
+}
+.tl-dwar.pri .ai { background: #2a1f17; border-color: #2a1f17; color: #fdf9f5; }
+.tl-dwar .at { font-size: 13px; font-weight: 600; color: var(--tl-nearblack); display: block; }
+.tl-dwar .ad { font-size: 11.5px; color: #8a7a6c; margin-top: 2px; display: block; }
+.tl-dwar .cv { margin-left: auto; font-family: Caveat, cursive; font-size: 15px; color: #8c4f4a; white-space: nowrap; }
+.tl-dwf {
+  padding: 12px 18px; border-top: 1px solid #f1e9de; display: flex; justify-content: space-between;
+  align-items: center; font-size: 12px; flex: 0 0 auto;
+}
+.tl-dwf a { color: var(--tl-nearblack); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 /* ⚠️ THE FILL IS THE HOLDER'S TONE, CHOSEN PER KIND BY THE MODEL — never derived from the band's
    rung: a quiet card keeps its status band and still fills SAND (the ref's own sample). The
    hexes are the ref card's own (:root of hover-card-by-type.html); the band above stays on the
@@ -2600,6 +2677,11 @@ button.tl-tchip { cursor: pointer; }
   border: 1px solid #e3d9ca; border-radius: 16px;
   box-shadow: 0 1px 2px rgba(58, 28, 20, .04), 0 6px 18px rgba(58, 28, 20, .05);
   overflow: hidden;
+  /* ⚠️ `isolation: isolate` — THE BOARD'S OWN Z LADDER STAYS INSIDE THE BOARD (v65 §D). The
+     rail's z50 (which must outrank the rows and the today line) was escaping to page level and
+     painting OVER the drawer's z48 and any flipped-up card near the top. An isolated context
+     makes the internal ladder internal; body-level overlays then win at any positive z. */
+  isolation: isolate;
 }
 /* ⚠️ THE NUMBERS GUTTER IS GONE. It ran 01…nn down the side of a board whose rows are named by the
    cards on them; the axis is the vertical index now, and a second one down the lanes was a census

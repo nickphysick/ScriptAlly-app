@@ -1346,6 +1346,79 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, 
   };
   const [cardPayload, setCardPayload] = useState<CardPayload | null>(null);
 
+  /* ══ THE DRAWER (v65 §D; ref timeline-v65.html's `.drawer`) ═══════════════════════════════════
+     420px from the right; View / Actions tabs; lands on ACTIONS when the row is urgent (the rose
+     "1" on the tab), View otherwise. Esc or click-away closes; OPENING IT CLOSES THE CARD — one
+     read surface at a time. Its action rows call `requestAction`, the one seam §E's sheet fills;
+     until the sheet lands they answer with the press-receipt toast, never a fake write. */
+  type DrawerData = {
+    rowKey: string; queryId?: string; taskId?: string; isTask: boolean;
+    status: string; dotStatus: QueryStatus | null; holder: string; urgent: boolean;
+    name: string; agency?: string; fact: string; tail: string;
+    journey: { t: string; s: string; now?: boolean }[];
+    note: string;
+    primaryDeed: string | null; primaryCv: string | null;
+  };
+  const [drawer, setDrawer] = useState<DrawerData | null>(null);
+  const [drawerTab, setDrawerTab] = useState<"view" | "actions">("view");
+  const closeDrawer = () => setDrawer(null);
+  const requestAction = (kind: string, d: DrawerData) => {
+    /* §E replaces this body with openAction(kind, subject, prefill) — the seam is the point */
+    setActToast(`${kind} — ${d.name}`);
+  };
+  const openDrawerFor = (rowKey: string) => {
+    const row = rows.find((r) => r.key === rowKey);
+    const bar = barsByRow.get(rowKey);
+    if (!row || !bar) return;
+    const live = bar.segs.find((sg) => !sg.isTask) ?? bar.segs[0];
+    if (!live) return;
+    const urgent = bar.segs.some((sg) => sg.owed || sg.state === "quiet");
+    /* the journey: the run's stages in time order, ending at "now" — the same nodes the board's
+       ghosts are drawn from (any node BEFORE its lane's live card), so the two cannot disagree */
+    const liveStarts = new Map<number, number>();
+    for (const sg of bar.segs) {
+      liveStarts.set(sg.lane, Math.min(liveStarts.get(sg.lane) ?? Infinity, sg.from));
+    }
+    const stages = bar.nodes
+      .filter((n) => n.at < (liveStarts.get(n.lane) ?? Infinity) - 0.001)
+      .sort((a, b) => a.at - b.at)
+      .map((n) => ({ t: n.status ? String(n.status) : n.caption, s: dayDate(n.at) }));
+    const journey = [...stages, { t: String(live.status), s: "now", now: true }];
+    const agent = agents.find((a) => a.id === row.agentId);
+    const deed = live.isTask ? "Mark done"
+      : urgent ? pillText(live.status, holderOf(live), live.nudgeDue, !!live.owed,
+          live.state === "ghost", live.state === "quiet").text
+      : live.capWord ?? null;
+    setCardAt(null); setCardPayload(null);
+    setDrawerTab(urgent ? "actions" : "view");
+    setDrawer({
+      rowKey, queryId: live.queryId, taskId: live.taskId, isTask: !!live.isTask,
+      status: live.isTask ? "Task" : String(live.status),
+      dotStatus: live.isTask ? null : live.status,
+      holder: live.isTask ? taskHolder(!!live.owed) : turnWordFor(live.status),
+      urgent,
+      name: row.name, agency: row.agency,
+      fact: live.fact, tail: live.tail,
+      journey, note: agent?.notePreview?.trim() || "—",
+      primaryDeed: deed, primaryCv: urgent ? live.tail : null,
+    });
+  };
+  React.useEffect(() => {
+    if (!drawer) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); closeDrawer(); } };
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t?.closest(".tl-dw")) return;
+      closeDrawer();
+    };
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("pointerdown", onDown, true);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("pointerdown", onDown, true);
+    };
+  }, [drawer]);
+
   /* ⚠️ ONE CARD AT A TIME, AND THE CLICK IS A TOGGLE. The card is a page-layer overlay anchored
      over the clicked bar — a READ surface: the model comes from `cardCFor` (unit-locked against
      the ref's own eight examples), the writes stay with the sheet. Same bar again, elsewhere,
@@ -3187,9 +3260,15 @@ data-rowkey={r.key}
               ? <StatusDot status={cardPayload.dotStatus} overrideSize={14} />
               : <span className="tl-tbox" aria-hidden />}
             <span className="tl-ccsw">{cardPayload.bandStatus}</span>
-            {cardPayload.queryId && (
+            {(cardPayload.queryId || cardPayload.isTask) && (
               <button type="button" className="tl-ccopen"
-                onClick={() => setActToast("Open")}>Open ›</button>
+                onClick={() => {
+                  const seg = cardAt?.seg ?? "";
+                  const rowKey = [...barsByRow.keys()].find((k) =>
+                    (barsByRow.get(k)?.segs ?? []).some((s2) => s2.key === seg))
+                    ?? rows.find((r2) => r2.name === cardPayload.name)?.key;
+                  if (rowKey) openDrawerFor(rowKey);
+                }}>Open ›</button>
             )}
             {cardPayload.holder && <span className="tl-ccsh">{cardPayload.holder}</span>}
             <button type="button" className="tl-ccx" aria-label="Close" onClick={closeCard}>✕</button>
@@ -3231,6 +3310,84 @@ data-rowkey={r.key}
                   onClick={() => setActToast(cardPayload.action!.deed)}>{cardPayload.action.deed} ›</button>
               </div>
             )}
+          </div>
+        </div>,
+        document.body)}
+
+      {/* ══ THE DRAWER (v65 §D) ═══════════════════════════════════════════════════════════════ */}
+      {drawer && createPortal(
+        <div className="tl-board tl-dw" role="dialog" aria-label={`${drawer.name} — record`}>
+          <div className="tl-dwh">
+            {drawer.dotStatus
+              ? <StatusDot status={drawer.dotStatus} overrideSize={16} />
+              : <span className="tl-tbox" aria-hidden />}
+            <span className="tl-dwsw">{drawer.status}</span>
+            <span className="tl-dwsh">{drawer.holder}</span>
+            <button type="button" className="tl-dwx" aria-label="Close" onClick={closeDrawer}>✕</button>
+          </div>
+          <div className="tl-dwtabs" role="tablist">
+            {(["view", "actions"] as const).map((t) => (
+              <button key={t} type="button" role="tab" aria-selected={drawerTab === t}
+                className={drawerTab === t ? "on" : undefined}
+                onClick={() => setDrawerTab(t)}>
+                {t === "view" ? "View" : "Actions"}
+                {t === "actions" && drawer.urgent && <b>1</b>}
+              </button>
+            ))}
+          </div>
+          <div className="tl-dwb">
+            {drawerTab === "view" ? (
+              <>
+                <div className="tl-dwnm">{drawer.name}</div>
+                {drawer.agency && <div className="tl-dwag">{drawer.agency}</div>}
+                {(drawer.fact || drawer.tail) && (
+                  <div className="tl-dwfact">{drawer.fact}<span className="tl-feb">{drawer.tail}</span></div>
+                )}
+                <div className="tl-dwsec">
+                  <h5>Journey</h5>
+                  {drawer.journey.map((j, i) => (
+                    <div key={i} className={`tl-dwjr${j.now ? " now" : ""}`}>
+                      <span className="d" aria-hidden />
+                      <span><span className="t">{j.t}</span><span className="s">{j.s}</span></span>
+                    </div>
+                  ))}
+                </div>
+                <div className="tl-dwnote">{drawer.note}</div>
+              </>
+            ) : (
+              <>
+                {drawer.primaryDeed && (
+                  <button type="button" className="tl-dwar pri" onClick={() => requestAction(drawer.primaryDeed!, drawer)}>
+                    <span className="ai" aria-hidden>›</span>
+                    <span><span className="at">{drawer.primaryDeed}</span>
+                      <span className="ad">The one thing this row asks next</span></span>
+                    {drawer.urgent && drawer.primaryCv && <span className="cv">{drawer.primaryCv}</span>}
+                  </button>
+                )}
+                {(drawer.isTask
+                  ? [["Mark done", "Complete this task"], ["Change date", "Move its due date"], ["Add note", "A note on your file"]]
+                  : [["Log a nudge", "You chased; the record should say so"],
+                     ["Record a response", "They replied — what did they say?"],
+                     ["Log sent materials", "You sent something they asked for"],
+                     ["Change date", "Correct a date on the record"],
+                     ["Add note", "A note on this relationship"],
+                     ["Close query", "No response · rejected · withdrawn"]])
+                  .filter(([t2]) => t2 !== drawer.primaryDeed)
+                  .map(([t2, d2]) => (
+                    <button key={t2} type="button" className="tl-dwar" onClick={() => requestAction(t2, drawer)}>
+                      <span className="ai" aria-hidden>·</span>
+                      <span><span className="at">{t2}</span><span className="ad">{d2}</span></span>
+                    </button>
+                  ))}
+              </>
+            )}
+          </div>
+          <div className="tl-dwf">
+            {drawer.queryId
+              ? <a role="button" tabIndex={0}
+                  onClick={() => onNavigatePath(`/queries?q=${encodeURIComponent(drawer.queryId!)}`)}>
+                  Open in Query Centre ›</a>
+              : <span />}
           </div>
         </div>,
         document.body)}
