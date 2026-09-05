@@ -335,6 +335,58 @@ them this commit's.
 
 ---
 
+## What worked — and the one finding the round is really about
+
+### The resting state had never existed, and nothing had ever asked for it
+
+**The first time anyone tried to render "no task open", it turned out to be unreachable.** Three
+mechanisms, each individually reasonable, together guaranteed that `/todo` could not show its own
+list:
+
+1. **The auto-dock** opened the first card on the first render that had one.
+2. **The held-card fallback** kept it on screen when the key was cleared.
+3. **There was no Close** — no caller for `closeDock`, no control in the pane, no key.
+
+Any one of them alone would have been survivable. Together they closed every route: you could not
+arrive at rest, you could not be returned to rest, and you could not ask to be. The page had a
+resting state in its markup and none in its behaviour, for as long as the split has existed.
+
+⚠️ **`restedOnce` was the code admitting it.** The ref exists because *"closing the pane
+deliberately would re-open it on the next frame"* — the effect was already known to fight the
+writer, and the ref was a way to let it win exactly once. That comment had been sitting in the file
+describing the bug in plain words, and nothing acted on it, because nothing needed to.
+
+**And no assertion had ever asked for the state, because no design had ever needed it.** That is
+the honest reason it survived — not an oversight in the checks, but a state with no consumer. It
+became reachable and testable in the same hour it became required. **Which is the argument for
+measurement over reading in its purest form:** every one of the three was visible in the source,
+none of them was wrong on its own, and no amount of reading would have produced the sentence "so
+the resting list cannot be shown".
+
+### The rail-as-second-card is the kind of thing only pixels find
+
+Two hairlines a pixel apart, `#ece5d8` outside `#e6dccd` — colours nobody would distinguish, reading
+as one slightly heavy edge, surviving every review — while quietly clipping the inner card's lift
+away. It was found by an assertion that asked for equality to a tenth of a pixel and got 1098
+against 1100.
+
+### The `scrollTop` catch is the round's methodological lesson
+
+**A preserved number is not a preserved place.** Two pixels of drift and a whole row of movement; a
+tolerance would have called it green. It is now a standing rule in `CLAUDE.md`, beside the two
+coverage-assertion entries, because it is the same family one level up: there the fault hides under
+a first-level scan, here under a tolerance.
+
+### The reduced-motion block that could never win
+
+Third instance in this sequence of **a rule that reads perfectly and reaches nothing** — after the
+`.wpg--record` class no component emitted, and the `var()` on a retired token that silently fell
+back. Asserting the *outcome* rather than the presence of one's own block is the correct response:
+if the shell's `!important` ever goes, the measurement reddens instead of the behaviour silently
+changing.
+
+---
+
 ## Next
 
 **Phase 3 — the sheet and the Quick reference slip.** The three floating cards visible in
