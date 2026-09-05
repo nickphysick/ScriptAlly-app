@@ -105,3 +105,28 @@ named in the tolerance.
 - `calendarToolbar.ts` still exports the dead GROUP_BY_*/ACTION_* set (last reader pruned);
   flagged for a cleanup commit.
 - `datePickerHub`'s red is the header session's (date-pinned).
+
+## Addendum — masthead CTA, no action strip (`e504358c`, deployed, hash `index-8TKDLCdT.js`)
+
+- **§1** The strip (Add a task · Add a note · Go to to-do list) is deleted; the container starts
+  at the chassis's one gap — measured EQUAL to the To-do list's own masthead gap (17px both,
+  `calMast64`) with the grid's reclaim spacer named as the gap's element form — and the board
+  takes the height (an extra row above the fold; the 24px bottom bound unchanged).
+- **§2** `New task` occupies the masthead CTA slot via a `primary` pass-through on
+  TasksPageLayout; its computed set is measured equal to Query Centre's `Log new query` (never
+  restated as literals). The press writes the `sa.todoCompose` one-shot (the `sa.agentReveal`
+  idiom) and ToDoPage consumes it on ARRIVAL — keyed on `pathname`, because the page is always
+  mounted. Driven end to end: press → `/todo` → the list's own task composer open → key spent.
+  The header session's masthead unit suite runs unchanged; their `mastheadMatrix` QC height
+  derivation is red on main untouched by this change (it does not count the CTA pill) — theirs.
+- **§3** PRIYA RAMAN does not reproduce: 25 rendered names title case at `text-transform: none`,
+  22 stored agents + 54 queries scanned clean — the record no longer exists on the harness
+  account, so there was nothing to correct. What the lock was missing is the CLASS: d12's
+  `/^[a-z]/` cannot see an all-caps name at all. It now flags a whole string in caps across two
+  or more words (single-word initialism agencies stay legitimate) — proved red on an injected
+  PRIYA RAMAN.
+- **The masthead difference list** (calendar vs the To-do list page, same elements, same
+  readings): zero entries; named — the CTA's presence, the 3.2px row growth (the 40.3px pill
+  exceeds the 37.1px title line on a description-less masthead; described rows absorb it —
+  Manuscripts with and without a CTA measure identically), and the title's flex width.
+  All three §1/§2 locks proved red against the pre-addendum deploy before being believed.
