@@ -517,7 +517,11 @@ service cloud.firestore {
       return data.keys().hasOnly([
           'type', 'resultingStatus', 'createdAt', 'note',
           'queryId', 'agentName', 'manuscriptTitle',
-          'dateProvisional', 'reminderDate', 'replyWeeks'
+          'dateProvisional', 'reminderDate', 'replyWeeks',
+          // correction pass 3 · finding 1: the four fields recordQueryResponse writes onto a
+          // partial/full/rejected rung — absent since this list landed (26 Aug), so every such
+          // record was denied while R&R/offer/no-reply passed. See reports/query-respond-nudge.md.
+          'materialsType', 'materialsQuantity', 'fullVersionSent', 'feedbackType'
         ])
         && data.type is string && data.type.size() <= 128
         && (data.createdAt is timestamp || data.createdAt is string)
@@ -539,7 +543,11 @@ service cloud.firestore {
         && (!data.keys().hasAny(['manuscriptTitle']) || (data.manuscriptTitle is string && data.manuscriptTitle.size() <= 512))
         && (!data.keys().hasAny(['dateProvisional']) || data.dateProvisional is bool)
         && (!data.keys().hasAny(['reminderDate']) || (data.reminderDate is string && data.reminderDate.size() <= 64))
-        && (!data.keys().hasAny(['replyWeeks']) || (data.replyWeeks is number && data.replyWeeks >= 0 && data.replyWeeks <= 520));
+        && (!data.keys().hasAny(['replyWeeks']) || (data.replyWeeks is number && data.replyWeeks >= 0 && data.replyWeeks <= 520))
+        && (!data.keys().hasAny(['materialsType']) || (data.materialsType is string && data.materialsType.size() <= 64))
+        && (!data.keys().hasAny(['materialsQuantity']) || (data.materialsQuantity is string && data.materialsQuantity.size() <= 64))
+        && (!data.keys().hasAny(['fullVersionSent']) || (data.fullVersionSent is string && data.fullVersionSent.size() <= 128))
+        && (!data.keys().hasAny(['feedbackType']) || (data.feedbackType is string && data.feedbackType.size() <= 64));
     }
 
     // (isValidTopLevelActivity is gone with the RETIRED users/{uid}/activity store — Tier 3 ·
