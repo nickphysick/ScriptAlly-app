@@ -1,0 +1,75 @@
+{
+  "kinds-1440": {
+    "deskW": 460,
+    "kinds": 6,
+    "liveRing": true,
+    "ghosts": 0
+  },
+  "notch-1440": {
+    "missing": false,
+    "notchCentre": 29.99219,
+    "btnCentre": 29.9921875,
+    "notchShown": true
+  },
+  "ghost-1440": {
+    "ghosts": 1,
+    "ghostText": "Partial requested5 SEPTPriya asked for a partial",
+    "derived": "Status becomes Partial Requested — with you. The waiting bar stops here; nothing is owed by Nair until you send. "
+  },
+  "nudge-1440": {
+    "chips": [
+      "4 wks · 3 Oct",
+      "6 wks",
+      "8 wks",
+      "Pick a date",
+      "No more nudges"
+    ],
+    "firstIsDefault": true
+  },
+  "marksent-1440": {
+    "title": "Mark the partial sent",
+    "qty": "10",
+    "askedLabel": false,
+    "winChip": "8 wks · their window",
+    "derived": "Status becomes Partial Sent — with the agent. Reply expected by 31 Oct 2026."
+  },
+  "kinds-1920": {
+    "deskW": 460,
+    "kinds": 6,
+    "liveRing": true,
+    "ghosts": 0
+  },
+  "notch-1920": {
+    "missing": false,
+    "notchCentre": 29.99219,
+    "btnCentre": 29.9921875,
+    "notchShown": true
+  },
+  "ghost-1920": {
+    "ghosts": 1,
+    "ghostText": "Partial requested5 SEPTPriya asked for a partial",
+    "derived": "Status becomes Partial Requested — with you. The waiting bar stops here; nothing is owed by Nair until you send. "
+  },
+  "nudge-1920": {
+    "chips": [
+      "4 wks · 3 Oct",
+      "6 wks",
+      "8 wks",
+      "Pick a date",
+      "No more nudges"
+    ],
+    "firstIsDefault": true
+  },
+  "marksent-1920": {
+    "title": "Mark the partial sent",
+    "qty": "10",
+    "askedLabel": false,
+    "winChip": "8 wks · their window",
+    "derived": "Status becomes Partial Sent — with the agent. Reply expected by 31 Oct 2026."
+  },
+  "postSave": {
+    "before": 1,
+    "fresh": 1,
+    "after": 2
+  }
+}

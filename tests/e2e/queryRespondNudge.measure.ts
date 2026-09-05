@@ -24,7 +24,10 @@ async function openDrawerOn(page: import("@playwright/test").Page, queryId: stri
   await card.click();
   await expect(page.locator(".qpn[data-on='true']")).toBeVisible();
   await page.locator(".qpn-tab", { hasText: "Tracking" }).click();
-  await expect(page.locator(".qpn .tl-ev").first()).toBeVisible({ timeout: 20_000 });
+  /* ⚠️ WAIT FOR THE FIRST ⋯, not the first row — the rows render instantly from the synthesised
+     root while the real docs arrive by subscription, and every count taken before they land is a
+     count of nothing (run 3's before=0). Same precondition queryDrawerDesk states. */
+  await expect(page.locator(".qpn .tl-more").first()).toBeVisible({ timeout: 20_000 });
 }
 
 /** The notch, measured AGAINST THE BUTTON'S OWN CENTRE — never the arrow's derivation re-run
@@ -155,25 +158,31 @@ for (const width of [1440, 1920] as const) {
 test("post-save: one rung lands with the pulse, the toast's Undo takes it back — 1440", async ({ page }) => {
   mkdirSync(SHOTS, { recursive: true });
   await openDrawerOn(page, "cor-move-b", 1440);
-  const before = await page.locator(".qpn .tl-ev").count();
+  /* ⚠️ COUNT REAL RUNGS (their ⋯), NEVER `.tl-ev` — the waiting rung is a `.tl-ev` too, and it
+     LEAVES as the real rung arrives, so the raw row count is flat across a successful save (the
+     composed-count trap; it cost run 2 an un-pressed Undo). The ghost carries no ⋯ since
+     f2c5eb55, so this counts exactly the recorded activities. */
+  const reals = () => page.locator(".qpn .tl-more").count();
+  const before = await reals();
 
   await page.locator(".qpn-act", { hasText: "Record response" }).first().click();
   await page.locator(".qrd-kind", { hasText: "Asked for revisions" }).click();
   await page.locator(".qrd-b--s", { hasText: "Record it" }).click();
 
-  /* the receipt IS the undo — nothing navigates between here and the press */
+  /* the receipt IS the undo — capture, press IMMEDIATELY, and only then assert. An assertion
+     between the commit and the press is a changed account whenever it throws (run 2 proved it). */
   const undo = page.locator(".sa-toast-undo:visible, button:visible:has-text('Undo')").first();
   await expect(undo, "no receipt — the save may not have landed (the account has been changed)").toBeVisible({ timeout: 20_000 });
-
-  /* the fresh pulse resolves onto the NEW rung before its own 1.8s timeout clears it */
   const fresh = await page.evaluate(() => document.querySelectorAll(".tl-ev--fresh").length);
-  out.postSave = { before, fresh, after: await page.locator(".qpn .tl-ev").count() };
+  const after = await reals();
   await page.screenshot({ path: `${SHOTS}/respond-post-save-1440.png` });
-  expect((out.postSave as { after: number }).after, "exactly one rung landed").toBe(before + 1);
-
   await undo.click();
+
   await expect
-    .poll(async () => page.locator(".qpn .tl-ev").count(), { timeout: 15_000 })
+    .poll(async () => reals(), { timeout: 15_000 })
     .toBe(before);
+  out.postSave = { before, fresh, after };
+  expect(after, "exactly one rung landed").toBe(before + 1);
+  expect(fresh, "the fresh pulse resolved onto the new rung").toBe(1);
   writeFileSync("reports/query-respond-nudge.json", JSON.stringify(out, null, 2));
 });
